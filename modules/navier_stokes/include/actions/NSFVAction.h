@@ -19,7 +19,7 @@
  * following which automatically adds variables, kernels, aux kernels, bcs
  * for setting up the incompressible/weakly-compressible Navier-Stokes equations.
  * Create it using the following input syntax:
- * [Modeles]
+ * [Modules]
  *   [NavierStokesFV]
  *     param_1 = value_1
  *     param_2 = value_2
@@ -44,19 +44,19 @@ protected:
   /// selected by the user
   void addINSVariables();
 
-  /// Function which adds the RhieChow interpolator user objects
+  /// Function which adds the RhieChow interpolator user objects for weakly and incompressible formulations
   void addRhieChowUserObjects();
 
-  /// Functions that add the initial conditions for the variables
+  /// Function that add the initial conditions for the variables
   void addINSInitialConditions();
 
-  /// Fnction adding kernels for the incompressible continuity equation
+  /// Function adding kernels for the incompressible continuity equation
   void addINSMassKernels();
 
   /**
    * Functions adding kernels for the incompressible momentum equation
    * If the material properties are not constant, these can be used for
-   * weakly-compressible simulations as well.
+   * weakly-compressible simulations (except the Boussinesq kernel) as well.
    */
   void addINSMomentumTimeKernels();
   void addINSMomentumViscousDiscipationKernels();
@@ -92,7 +92,7 @@ protected:
   /// Add weakly compressible mixing length kernels in case of turbulent flows
   void addWCNSEnergyMixingLengthKernels();
 
-  /// Add Enthalpy material for incompressible simulations
+  /// Add material to define an enthalpy functor material property for incompressible simulations
   void addEnthalpyMaterial();
 
   /// Add mixing length material for turbulence handling
@@ -116,7 +116,7 @@ protected:
   /// Equation type, transient or steady-state
   MooseEnum _type;
   /// Compressibility type, can be compressible, incompressible
-  /// or weakly-incompressible
+  /// or weakly-compressible
   MooseEnum _compressibility;
   // Switch that can be used to create an integrated energy equation for
   /// incompressible/weakly compressible simulations.
@@ -127,7 +127,7 @@ protected:
   /// Turbulent diffusivity handling type (mixing-length, etc.)
   MooseEnum _turbulence_handling;
 
-  /// Swich dedicated to show if porous medium treatment is requested or not
+  /// Switch dedicated to show if porous medium treatment is requested or not
   bool _porous_medium_treatment;
   /// The name of the auxiliary variable for the porosity field
   AuxVariableName _porosity_name;
@@ -167,12 +167,12 @@ protected:
 
   /// Subdomains where we want to have ambient convection
   std::vector<SubdomainName> _ambient_convection_blocks;
-  /// The heat exchange coefficients for ampient convection
+  /// The heat exchange coefficients for ambient convection
   std::vector<MaterialPropertyName> _ambient_convection_alpha;
   /// The ambient temperature
   std::vector<MooseFunctorName> _ambient_temperature;
 
-  /// Subdomains where we want to have ambient convection
+  /// Subdomains where we want to have volumetric friction
   std::vector<SubdomainName> _friction_blocks;
   /// The friction correlation types used for each block
   std::vector<std::vector<std::string>> _friction_types;

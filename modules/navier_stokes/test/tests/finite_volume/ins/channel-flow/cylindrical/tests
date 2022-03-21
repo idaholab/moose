@@ -44,7 +44,7 @@
     input = no-slip-tris-action.i
     exodiff = 'no-slip-tris-action_out.e'
     cli_args = "-pc_type lu -pc_factor_shift_type NONZERO"
-    requirement = 'The system shall be able to solve a straight channel problem in cylindrical coordinates using triangular elements with no slip boundary conditions and the INSFV action syntax.'
+    requirement = 'The system shall be able to solve a straight channel problem in cylindrical coordinates using triangular elements with no slip boundary conditions and the NSFV action syntax.'
     ad_indexing_type = 'global'
   []
   [rz-diverging-free-slip]

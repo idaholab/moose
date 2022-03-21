@@ -37,13 +37,13 @@ NSFVAction::validParams()
   InputParameters params = Action::validParams();
   params.addClassDescription("This class allows us to set up Navier-Stokes equations for porous "
                              "medium or clean fluid flows using incompressible or weakly "
-                             "compressible approximations and finite volume discretization.");
+                             "compressible approximations with a finite volume discretization.");
 
   /**
    * General parameters used to set up the simulation.
    */
   params.addParam<std::vector<SubdomainName>>(
-      "block", "The list of block ids (SubdomainID) on which NS equation is defined on");
+      "block", "The list of blocks on which NS equations is defined on");
 
   MooseEnum sim_type("steady-state transient", "steady-state");
   params.addParam<MooseEnum>("simulation_type", sim_type, "Navier-Stokes equation type");
@@ -108,7 +108,7 @@ NSFVAction::validParams()
                                    RealVectorValue(1e-15, 1e-15, 1e-15),
                                    "The initial velocity, assumed constant everywhere");
 
-  params.addParam<Real>("initial_pressure", 0, "The initial pressure, assumed constant everywhere");
+  params.addParam<Real>("initial_pressure", 1e5, "The initial pressure, assumed constant everywhere");
 
   params.addParam<MaterialPropertyName>(
       "dynamic_viscosity", NS::mu, "The name of the dynamic viscosity");
@@ -121,7 +121,7 @@ NSFVAction::validParams()
   MultiMooseEnum mom_inlet_types("fixed-velocity", "fixed-velocity");
   params.addParam<MultiMooseEnum>("momentum_inlet_types",
                                   mom_inlet_types,
-                                  "Types of inlet boundaries for them omentum equation");
+                                  "Types of inlet boundaries for the momentum equation");
 
   params.addParam<std::vector<FunctionName>>("momentum_inlet_function",
                                              std::vector<FunctionName>(),
@@ -131,14 +131,14 @@ NSFVAction::validParams()
                                   "fixed-pressure");
   params.addParam<MultiMooseEnum>("momentum_outlet_types",
                                   mom_outlet_types,
-                                  "Types of outlet boundaries for them momentum equation");
+                                  "Types of outlet boundaries for the momentum equation");
   params.addParam<std::vector<FunctionName>>("pressure_function",
                                              std::vector<FunctionName>(),
                                              "Functions for boundary pressures at outlets.");
 
   MultiMooseEnum mom_wall_types("symmetry noslip slip wallfunction", "noslip");
   params.addParam<MultiMooseEnum>(
-      "momentum_wall_types", mom_wall_types, "Types of wall boundaries for them momentum equation");
+      "momentum_wall_types", mom_wall_types, "Types of wall boundaries for the momentum equation");
 
   params.addParam<bool>(
       "pin_pressure", false, "Switch to enable pressure shifting for incompressible simulations.");
@@ -155,8 +155,8 @@ NSFVAction::validParams()
       "The XYZ coordinates where pressure needs to be pinned for incompressible simulations.");
 
   params.addParam<Real>("pinned_pressure_value",
-                        0.0,
-                        "The value used for pinning the pressure (point value/average).");
+                        1e5,
+                        "The value used for pinning the pressure (point value/domain average).");
 
   params.addParam<bool>("boussinesq_approximation", false, "True to have Boussinesq approximation");
 
@@ -175,10 +175,10 @@ NSFVAction::validParams()
    */
 
   params.addParam<Real>(
-      "initial_temperature", 0, "The initial temperature, assumed constant everywhere");
+      "initial_temperature", 300, "The initial temperature, assumed constant everywhere");
 
   params.addParam<MaterialPropertyName>(
-      "thermal_conductivity", NS::k, "The name of the thermal conductivity");
+      "thermal_conductivity", NS::k, "The name of the fluid thermal conductivity");
 
   params.addParam<MaterialPropertyName>("specific_heat", NS::cp, "The name of the specific heat");
 
@@ -226,7 +226,7 @@ NSFVAction::validParams()
 
   params.addParam<std::vector<SubdomainName>>(
       "friction_blocks",
-      "The blocks where the friciton factors are applied to emulate flow resistances.");
+      "The blocks where the friction factors are applied to emulate flow resistances.");
 
   params.addParam<std::vector<std::vector<std::string>>>(
       "friction_types", "The types of friction forces for every block in 'friction_blocks'.");
@@ -243,6 +243,10 @@ NSFVAction::validParams()
    */
 
   MooseEnum adv_interpol_types("average upwind skewness-corrected", "average");
+   params.addParam<MooseEnum>("mass_advection_interpolation",
+                             adv_interpol_types,
+                             "The numerical scheme to use for interpolating density, "
+                             "as an advected quantity, to the face.");
   params.addParam<MooseEnum>("momentum_advection_interpolation",
                              adv_interpol_types,
                              "The numerical scheme to use for interpolating momentum/velocity, "
@@ -250,10 +254,6 @@ NSFVAction::validParams()
   params.addParam<MooseEnum>("energy_advection_interpolation",
                              adv_interpol_types,
                              "The numerical scheme to use for interpolating energy/temperature, "
-                             "as an advected quantity, to the face.");
-  params.addParam<MooseEnum>("mass_advection_interpolation",
-                             adv_interpol_types,
-                             "The numerical scheme to use for interpolating density, "
                              "as an advected quantity, to the face.");
 
   MooseEnum face_interpol_types("average skewness-corrected", "average");
@@ -816,7 +816,7 @@ NSFVAction::addINSMomentumAdvectionKernels()
 }
 
 void
-NSFVAction::addINSMomentumViscousDiscipationKernels()
+NSFVAction::addINSMomentumViscousDissipationKernels()
 {
   if (_porous_medium_treatment)
   {
@@ -1860,7 +1860,7 @@ NSFVAction::checkGeneralControErrors()
 void
 NSFVAction::checkBoundaryParameterErrors()
 {
-  unsigned int no_pressure_outlets = 0;
+  unsigned int num_pressure_outlets = 0;
   for (unsigned int enum_ind = 0; enum_ind < _outlet_boundaries.size(); ++enum_ind)
     if (_momentum_outlet_types[enum_ind] == "fixed-pressure" ||
         _momentum_outlet_types[enum_ind] == "fixed-pressure-zero-gradient")
@@ -1889,7 +1889,7 @@ NSFVAction::checkBoundaryParameterErrors()
       paramError("energy_inlet_function",
                  "Size is not the same as the number of boundaries in 'energy_inlet_types'");
 
-    unsigned int no_fixed_energy_walls = 0;
+    unsigned int num_fixed_energy_walls = 0;
     for (unsigned int enum_ind = 0; enum_ind < _energy_wall_types.size(); ++enum_ind)
       if (_energy_wall_types[enum_ind] == "fixed-temperature" ||
           _energy_wall_types[enum_ind] == "heatflux")

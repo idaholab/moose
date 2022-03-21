@@ -47,7 +47,7 @@ private:
   /// The point where the constraint should be enforced
   const Point _point;
 
-  /// We use a point locator in case the contraint is a point value
+  /// We use a point locator in case the constraint is a point value
   std::unique_ptr<PointLocatorBase> _point_locator;
 
   /// Pointer to the element in case we have a point constraint

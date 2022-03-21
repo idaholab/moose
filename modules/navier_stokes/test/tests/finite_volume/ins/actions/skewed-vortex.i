@@ -95,10 +95,6 @@ rho=1.0
   nl_rel_tol = 1e-8
 []
 
-[Debug]
-show_actions = true
-[]
-
 [Outputs]
   exodus = true
   csv = true

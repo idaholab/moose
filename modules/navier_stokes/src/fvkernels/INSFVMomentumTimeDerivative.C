@@ -19,7 +19,7 @@ INSFVMomentumTimeDerivative::validParams()
   InputParameters params = INSFVTimeKernel::validParams();
   params.addClassDescription(
       "Adds the time derivative term to the incompressible Navier-Stokes momentum equation.");
-  params.addRequiredParam<MooseFunctorName>(NS::density, "The the density");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "The density functor");
   return params;
 }
 
