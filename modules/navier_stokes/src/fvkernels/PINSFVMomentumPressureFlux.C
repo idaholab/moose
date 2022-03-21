@@ -22,7 +22,7 @@ PINSFVMomentumPressureFlux::validParams()
                              "using the divergence theoreom, in the porous media "
                              "incompressible Navier-Stokes momentum equation. This kernel "
                              "is also executed on boundaries.");
-  params.addRequiredCoupledVar(NS::porosity, "Porosity auxiliary variable");
+  params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity functor");
   params.addRequiredCoupledVar(NS::pressure, "Pressure variable");
   params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   MooseEnum momentum_component("x=0 y=1 z=2");
@@ -37,8 +37,7 @@ PINSFVMomentumPressureFlux::validParams()
 PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & params)
   : FVFluxKernel(params),
     INSFVMomentumResidualObject(*this),
-    _eps(coupledValue(NS::porosity)),
-    _eps_neighbor(coupledNeighborValue(NS::porosity)),
+    _eps(getFunctor<ADReal>(NS::porosity)),
     _p_elem(adCoupledValue(NS::pressure)),
     _p_neighbor(adCoupledNeighborValue(NS::pressure)),
     _index(getParam<MooseEnum>("momentum_component"))
@@ -57,11 +56,25 @@ ADReal
 PINSFVMomentumPressureFlux::computeQpResidual()
 {
   ADReal eps_p_interface;
+  // Momentum and porosity domains should match
+  const auto & face_type = _face_info->faceType(_var.name());
+  const bool use_elem = (face_type == FaceInfo::VarFaceNeighbors::ELEM) ||
+                        (face_type == FaceInfo::VarFaceNeighbors::BOTH);
+  const auto * const elem_ptr = use_elem ? &_face_info->elem() : _face_info->neighborPtr();
+  const auto * neighbor_ptr = use_elem ? _face_info->neighborPtr() : &_face_info->elem();
 
+  // At an external boundary, use the element where porosity is defined
+  if (!neighbor_ptr)
+    neighbor_ptr = elem_ptr;
+  // At a block restriction boundary for porosity, use porosity where it's defined
+  else if (face_type == FaceInfo::VarFaceNeighbors::ELEM)
+    neighbor_ptr = elem_ptr;
+
+  // This could be simplified if eps * P was a functor, or if we returned eps(face) * P(face)
   Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
                          eps_p_interface,
-                         _eps[_qp] * _p_elem[_qp],
-                         _eps_neighbor[_qp] * _p_neighbor[_qp],
+                         _eps(makeElemArg(elem_ptr)) * _p_elem[_qp],
+                         _eps(makeElemArg(neighbor_ptr)) * _p_neighbor[_qp],
                          *_face_info,
                          true);
   return eps_p_interface * _normal(_index);
