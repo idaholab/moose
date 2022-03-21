@@ -47,6 +47,8 @@ T_inlet=200
     ref_temperature = 150
 
     initial_velocity = '1e-6 ${v_inlet} 0'
+    initial_pressure = 0.0
+    initial_temperature = 0.0
 
     inlet_boundaries = 'bottom'
     momentum_inlet_types = 'fixed-velocity'

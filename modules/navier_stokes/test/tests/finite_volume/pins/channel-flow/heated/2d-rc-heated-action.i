@@ -44,6 +44,8 @@ T_inlet=200
     porosity = 'porosity'
 
     initial_velocity = '${u_inlet} 1e-6 0'
+    initial_pressure = 0.0
+    initial_temperature = 0.0
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'

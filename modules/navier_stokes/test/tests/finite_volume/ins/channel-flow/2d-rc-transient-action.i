@@ -36,6 +36,7 @@ h_fs = 0.01
     specific_heat = 'cp'
 
     initial_velocity = '${u_inlet} 1e-12 0'
+    initial_pressure = 0.0
     initial_temperature = '${T_inlet}'
 
     inlet_boundaries = 'left'

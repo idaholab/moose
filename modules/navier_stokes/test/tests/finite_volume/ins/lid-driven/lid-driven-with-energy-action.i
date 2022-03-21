@@ -28,6 +28,9 @@ cp = 1
     thermal_conductivity = 'k'
     specific_heat = 'cp'
 
+    initial_pressure = 0.0
+    initial_temperature = 0.0
+
     inlet_boundaries = 'top'
     momentum_inlet_types = 'fixed-velocity'
     momentum_inlet_function = 'lid_function 0'

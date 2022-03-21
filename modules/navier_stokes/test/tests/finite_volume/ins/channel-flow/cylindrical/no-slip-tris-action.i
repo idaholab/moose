@@ -25,6 +25,7 @@ rho=1
     porosity = 'porosity'
 
     initial_velocity = '1e-15 1e-15 0'
+    initial_pressure = 0.0
 
     inlet_boundaries = 'bottom'
     momentum_inlet_types = 'fixed-velocity'

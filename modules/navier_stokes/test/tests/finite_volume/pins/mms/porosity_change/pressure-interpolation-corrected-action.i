@@ -49,6 +49,7 @@ forch=1.1
     dynamic_viscosity = 'mu'
 
     initial_velocity = '1 1 0'
+    initial_pressure = 0.0
 
     inlet_boundaries = 'left top bottom'
     momentum_inlet_types = 'fixed-velocity fixed-velocity fixed-velocity'

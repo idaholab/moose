@@ -108,7 +108,8 @@ NSFVAction::validParams()
                                    RealVectorValue(1e-15, 1e-15, 1e-15),
                                    "The initial velocity, assumed constant everywhere");
 
-  params.addParam<Real>("initial_pressure", 1e5, "The initial pressure, assumed constant everywhere");
+  params.addParam<Real>(
+      "initial_pressure", 1e5, "The initial pressure, assumed constant everywhere");
 
   params.addParam<MaterialPropertyName>(
       "dynamic_viscosity", NS::mu, "The name of the dynamic viscosity");
@@ -243,7 +244,7 @@ NSFVAction::validParams()
    */
 
   MooseEnum adv_interpol_types("average upwind skewness-corrected", "average");
-   params.addParam<MooseEnum>("mass_advection_interpolation",
+  params.addParam<MooseEnum>("mass_advection_interpolation",
                              adv_interpol_types,
                              "The numerical scheme to use for interpolating density, "
                              "as an advected quantity, to the face.");

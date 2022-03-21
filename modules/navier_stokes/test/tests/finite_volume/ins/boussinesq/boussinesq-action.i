@@ -37,6 +37,9 @@ temp_ref=${fparse hot_temp / 2.}
     gravity = '0 -1 0'
     ref_temperature = ${temp_ref}
 
+    initial_pressure = 0.0
+    initial_temperature = 0.0
+
     inlet_boundaries = 'top'
     momentum_inlet_types = 'fixed-velocity'
     momentum_inlet_function = 'lid_function 0'

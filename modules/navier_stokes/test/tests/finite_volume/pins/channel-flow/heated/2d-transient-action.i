@@ -58,6 +58,7 @@ top_side_temperature = 150
 
     initial_velocity = '${u_inlet} 1e-6 0'
     initial_pressure = ${p_outlet}
+    initial_temperature = 0.0
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'

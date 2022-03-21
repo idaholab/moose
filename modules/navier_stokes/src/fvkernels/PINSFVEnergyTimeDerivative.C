@@ -66,7 +66,7 @@ PINSFVEnergyTimeDerivative::computeQpResidual()
     if (_rho_dot)
       time_derivative += (*_rho_dot)(elem_arg)*_cp(elem_arg) * _var(elem_arg);
     if (_cp_dot)
-      time_derivative += _rho(elem_arg) * (*_cp_dot)(elem_arg) * _var(elem_arg);
+      time_derivative += _rho(elem_arg) * (*_cp_dot)(elem_arg)*_var(elem_arg);
 
     return _scaling * (_is_solid ? 1 - _eps(elem_arg) : _eps(elem_arg)) * time_derivative;
   }

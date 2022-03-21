@@ -23,6 +23,8 @@ rho=1
     density = 'rho'
     dynamic_viscosity = 'mu'
 
+    initial_pressure = 0.0
+
     inlet_boundaries = 'top'
     momentum_inlet_types = 'fixed-velocity'
     momentum_inlet_function = '1 0'

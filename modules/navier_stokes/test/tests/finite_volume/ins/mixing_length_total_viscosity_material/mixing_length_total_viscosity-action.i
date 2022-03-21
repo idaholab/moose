@@ -30,6 +30,7 @@ mu = ${fparse rho * bulk_u * 2 * H / Re}
     dynamic_viscosity = 'mu'
 
     initial_velocity = '1e-6 1e-6 0'
+    initial_pressure = 0.0
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
