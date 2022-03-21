@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#13754 #19451'
+  design = 'MultiAppNearestNodeTransfer.md'
+
+  [from_sub_to_sub]
+    type = Exodiff
+    input = main_between_multiapp.i
+    exodiff = 'main_between_multiapp_out_ma10.e main_between_multiapp_out_ma20.e'
+    requirement = "The system shall support nearest transfer between mulitApps"
+  []
+[]
