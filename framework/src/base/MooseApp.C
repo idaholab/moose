@@ -74,7 +74,6 @@
 #include <cstdlib> // for system()
 #include <chrono>
 #include <thread>
-#include <filesystem>
 
 #define QUOTE(macro) stringifyName(macro)
 
@@ -1474,14 +1473,7 @@ MooseApp::runInputs()
     }
 
     auto cmd = MooseUtils::runTestsExecutable() + test_args;
-    std::filesystem::path working_dir;
-    try
-    {
-      working_dir = std::filesystem::current_path();
-    }
-    catch (...)
-    {
-    }
+    auto working_dir = MooseUtils::getCurrentWorkingDir();
 
     if (MooseUtils::findTestRoot() == "")
     {
