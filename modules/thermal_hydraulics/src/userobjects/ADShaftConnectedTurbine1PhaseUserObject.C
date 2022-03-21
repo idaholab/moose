@@ -15,7 +15,10 @@
 #include "THMIndices3Eqn.h"
 #include "Function.h"
 #include "Numerics.h"
-
+#include "metaphysicl/parallel_numberarray.h"
+#include "metaphysicl/parallel_dualnumber.h"
+#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
+#include "libmesh/parallel_algebra.h"
 #include "libmesh/utility.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADShaftConnectedTurbine1PhaseUserObject);
@@ -78,7 +81,7 @@ ADShaftConnectedTurbine1PhaseUserObject::ADShaftConnectedTurbine1PhaseUserObject
 void
 ADShaftConnectedTurbine1PhaseUserObject::initialSetup()
 {
-  ADVolumeJunctionBaseUserObject::initialSetup();
+  ADVolumeJunction1PhaseUserObject::initialSetup();
 
   ADShaftConnectableUserObjectInterface::setupConnections(
       ADVolumeJunctionBaseUserObject::_n_connections, ADVolumeJunctionBaseUserObject::_n_flux_eq);
@@ -87,7 +90,7 @@ ADShaftConnectedTurbine1PhaseUserObject::initialSetup()
 void
 ADShaftConnectedTurbine1PhaseUserObject::initialize()
 {
-  ADVolumeJunctionBaseUserObject::initialize();
+  ADVolumeJunction1PhaseUserObject::initialize();
   ADShaftConnectableUserObjectInterface::initialize();
 
   _driving_torque = 0;
@@ -211,17 +214,24 @@ ADShaftConnectedTurbine1PhaseUserObject::getTurbinePower() const
 void
 ADShaftConnectedTurbine1PhaseUserObject::finalize()
 {
-  ADVolumeJunctionBaseUserObject::finalize();
+  ADVolumeJunction1PhaseUserObject::finalize();
+  ADShaftConnectableUserObjectInterface::finalize();
 
   ADShaftConnectableUserObjectInterface::setupJunctionData(
       ADVolumeJunctionBaseUserObject::_scalar_dofs);
   ADShaftConnectableUserObjectInterface::setOmegaDofs(getScalarVar("omega", 0));
+
+  comm().sum(_driving_torque);
+  comm().sum(_friction_torque);
+  comm().sum(_flow_coeff);
+  comm().sum(_delta_p);
+  comm().sum(_power);
 }
 
 void
 ADShaftConnectedTurbine1PhaseUserObject::threadJoin(const UserObject & uo)
 {
-  ADVolumeJunctionBaseUserObject::threadJoin(uo);
+  ADVolumeJunction1PhaseUserObject::threadJoin(uo);
   ADShaftConnectableUserObjectInterface::threadJoin(uo);
 
   const ADShaftConnectedTurbine1PhaseUserObject & scpuo =
