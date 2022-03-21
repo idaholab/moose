@@ -11,29 +11,40 @@
 
 #include "FVScalarLagrangeMultiplierConstraint.h"
 
+#include "libmesh/enum_point_locator_type.h"
+
 /**
  * This Kernel implements the residuals that enforce the constraint
  *
- * \int \phi = \int \phi_0
+ * \phi(element E containing point P) = phi_0
  *
- * using a Lagrange multiplier approach. E.g. this kernel enforces the constraint that the average
- * value of \phi matches \phi_0
+ * using a Lagrange multiplier approach. E.g. this kernel enforces the constraint that the
+ * elemental value of \phi, in the element containing P, matches \phi_0
  *
  * In particular, this Kernel implements the residual contribution for
  * the lambda term in Eq. (5), and both terms in Eq. (6) where \int \phi_0 = V_0
  *
  * [0]: https://github.com/idaholab/large_media/blob/master/framework/scalar_constraint_kernel.pdf
  */
-class FVIntegralValueConstraint : public FVScalarLagrangeMultiplierConstraint
+class FVPointValueConstraint : public FVScalarLagrangeMultiplierConstraint
 {
 public:
   static InputParameters validParams();
 
-  FVIntegralValueConstraint(const InputParameters & parameters);
+  FVPointValueConstraint(const InputParameters & parameters);
 
 private:
   ADReal computeQpResidual() override final;
 
-  /// The value that we want the average of the primal variable to be equal to
+  /// The value that we want the elemental value of the primal variable to be equal to
   const Real _phi0;
+
+  /// The point where the constraint should be enforced
+  const Point _point;
+
+  /// We use a point locator in case the constraint is a point value
+  std::unique_ptr<PointLocatorBase> _point_locator;
+
+  /// Pointer to the element in case we have a point constraint
+  const Elem * _my_elem;
 };
