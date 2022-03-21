@@ -29,10 +29,8 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  /// the current element porosity
-  const VariableValue & _eps;
-  /// the neighbor element porosity
-  const VariableValue & _eps_neighbor;
+  /// the porosity as a functor
+  const Moose::Functor<ADReal> & _eps;
   /// the current element pressure
   const ADVariableValue & _p_elem;
   /// the neighbor element pressure
