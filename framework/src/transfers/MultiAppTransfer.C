@@ -192,35 +192,30 @@ MultiAppTransfer::getAppInfo()
   // Otherwise, this will cause two issues: 1) increasing memory usage
   // for a simulation that requires many transfers, 2) producing wrong results
   // when we do collective communication on this vector.
-  _local2global_map.clear();
+  _to_local2global_map.clear();
+  _from_local2global_map.clear();
 
   // Build the vectors for to problems, from problems, and subapps positions.
-  if (_current_direction == FROM_MULTIAPP || _current_direction == BETWEEN_MULTIAPP)
+  if (_current_direction == FROM_MULTIAPP)
   {
     _to_problems.push_back(&_from_multi_app->problemBase());
     _to_positions.push_back(Point(0., 0., 0.));
-    for (unsigned int i_app = 0; i_app < _from_multi_app->numGlobalApps(); i_app++)
-    {
-      if (!_from_multi_app->hasLocalApp(i_app))
-        continue;
-      _local2global_map.push_back(i_app);
-      _from_problems.push_back(&_from_multi_app->appProblemBase(i_app));
-      _from_positions.push_back(_from_multi_app->position(i_app));
-    }
+
+    getFromMultiAppInfo();
   }
 
-  if (_current_direction == TO_MULTIAPP || _current_direction == BETWEEN_MULTIAPP)
+  if (_current_direction == TO_MULTIAPP)
   {
     _from_problems.push_back(&_to_multi_app->problemBase());
     _from_positions.push_back(Point(0., 0., 0.));
-    for (unsigned int i_app = 0; i_app < _to_multi_app->numGlobalApps(); i_app++)
-    {
-      if (!_to_multi_app->hasLocalApp(i_app))
-        continue;
-      _local2global_map.push_back(i_app);
-      _to_problems.push_back(&_to_multi_app->appProblemBase(i_app));
-      _to_positions.push_back(_to_multi_app->position(i_app));
-    }
+
+    getToMultiAppInfo();
+  }
+
+  if (_current_direction == BETWEEN_MULTIAPP)
+  {
+    getToMultiAppInfo();
+    getFromMultiAppInfo();
   }
 
   // Build the from and to equation systems and mesh vectors.
@@ -233,6 +228,7 @@ MultiAppTransfer::getAppInfo()
     else
       _to_meshes.push_back(&_to_problems[i]->mesh());
   }
+
   for (unsigned int i = 0; i < _from_problems.size(); i++)
   {
     _from_es.push_back(&_from_problems[i]->es());
@@ -240,6 +236,40 @@ MultiAppTransfer::getAppInfo()
       _from_meshes.push_back(&_from_problems[i]->getDisplacedProblem()->mesh());
     else
       _from_meshes.push_back(&_from_problems[i]->mesh());
+  }
+}
+
+void
+MultiAppTransfer::getToMultiAppInfo()
+{
+  if (!_to_multi_app)
+    mooseError("There is no to_multiapp to get info from");
+
+  for (unsigned int i_app = 0; i_app < _to_multi_app->numGlobalApps(); i_app++)
+  {
+    if (!_to_multi_app->hasLocalApp(i_app))
+      continue;
+
+    _to_local2global_map.push_back(i_app);
+    _to_problems.push_back(&_to_multi_app->appProblemBase(i_app));
+    _to_positions.push_back(_to_multi_app->position(i_app));
+  }
+}
+
+void
+MultiAppTransfer::getFromMultiAppInfo()
+{
+  if (!_from_multi_app)
+    mooseError("There is no from_multiapp to get info from");
+
+  for (unsigned int i_app = 0; i_app < _from_multi_app->numGlobalApps(); i_app++)
+  {
+    if (!_from_multi_app->hasLocalApp(i_app))
+      continue;
+
+    _from_local2global_map.push_back(i_app);
+    _from_problems.push_back(&_from_multi_app->appProblemBase(i_app));
+    _from_positions.push_back(_from_multi_app->position(i_app));
   }
 }
 
@@ -349,7 +379,7 @@ MultiAppTransfer::getTransferVector(unsigned int i_local, std::string var_name)
 {
   mooseAssert(_to_multi_app, "getTransferVector only works for transfers to multiapps");
 
-  return _to_multi_app->appTransferVector(_local2global_map[i_local], var_name);
+  return _to_multi_app->appTransferVector(_to_local2global_map[i_local], var_name);
 }
 
 void

@@ -102,8 +102,10 @@ protected:
    */
   NumericVector<Real> & getTransferVector(unsigned int i_local, std::string var_name);
 
-  // Given local app index, returns global app index.
-  std::vector<unsigned int> _local2global_map;
+  /// Given local app index, returns global app index.
+  std::vector<unsigned int> _to_local2global_map;
+  /// Given local app index, returns global app index.
+  std::vector<unsigned int> _from_local2global_map;
 
   /**
    * Helper method for checking the 'check_multiapp_execute_on' flag.
@@ -124,4 +126,8 @@ protected:
   void checkVariable(const FEProblemBase & fe_problem,
                      const VariableName & var_name,
                      const std::string & param_name = "") const;
+
+private:
+  void getFromMultiAppInfo();
+  void getToMultiAppInfo();
 };
