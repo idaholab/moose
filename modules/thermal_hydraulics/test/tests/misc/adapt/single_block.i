@@ -86,6 +86,9 @@
   l_tol = 1e-3
   l_max_its = 100
 
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = ' lu'
+
   [Adaptivity]
     initial_adaptivity = 0 # There seems to be a bug with non-zero initial adaptivity
     refine_fraction = 0.60

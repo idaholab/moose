@@ -4,26 +4,26 @@
     input = 'phy.conservation.i'
     csvdiff = 'phy.conservation_csv.csv'
     override_columns = 'energy_diff mass_diff momentum_diff'
-    override_abs_zero = '1e-7 1e-7 1e-4'
+    override_abs_zero = '1e-6 1e-7 1e-4'
     override_rel_err = '0 0 0'
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [phy:test]
     type = 'Exodiff'
     input = 'phy.test.i'
     exodiff = 'phy.test_out.e'
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [clg:test]
     type = 'CSVDiff'
     input = 'clg.test.i'
     csvdiff = 'clg.test_csv.csv'
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [jacobian]

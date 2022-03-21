@@ -4,5 +4,6 @@
     input = 'freefall.i'
     csvdiff = 'freefall_out.csv'
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 []
