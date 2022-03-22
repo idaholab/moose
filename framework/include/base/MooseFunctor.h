@@ -270,14 +270,14 @@ public:
   using DotType = ValueType;
 
   virtual ~FunctorBase() = default;
-  FunctorBase() : _clearance_schedule({EXEC_ALWAYS}) {}
-  FunctorBase(const std::set<ExecFlagType> & clearance_schedule, const MooseFunctorName & name)
+  FunctorBase(const MooseFunctorName & name,
+              const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS})
     : _clearance_schedule(clearance_schedule), _functor_name(name)
   {
   }
 
   /// Return the functor name
-  const MooseFunctorName & fname() const { return _functor_name; }
+  const MooseFunctorName & functorName() const { return _functor_name; }
 
   ///@{
   /**
@@ -385,7 +385,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const ElemArg &, unsigned int) const
   {
-    mooseError("Element gradient not implemented for functor " + fname());
+    mooseError("Element gradient not implemented for functor " + functorName());
   }
 
   /**
@@ -396,7 +396,8 @@ protected:
    */
   virtual GradientType evaluateGradient(const ElemFromFaceArg &, unsigned int) const
   {
-    mooseError("Element (obtained from a face) gradient not implemented for functor " + fname());
+    mooseError("Element (obtained from a face) gradient not implemented for functor " +
+               functorName());
   }
 
   /**
@@ -407,7 +408,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const FaceArg &, unsigned int) const
   {
-    mooseError("Face gradient not implemented for functor " + fname());
+    mooseError("Face gradient not implemented for functor " + functorName());
   }
 
   /**
@@ -418,7 +419,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const SingleSidedFaceArg &, unsigned int) const
   {
-    mooseError("One-sided face gradient not implemented for functor " + fname());
+    mooseError("One-sided face gradient not implemented for functor " + functorName());
   }
 
   /**
@@ -429,7 +430,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const ElemQpArg &, unsigned int) const
   {
-    mooseError("Element quadrature point gradient not implemented for functor " + fname());
+    mooseError("Element quadrature point gradient not implemented for functor " + functorName());
   }
 
   /**
@@ -440,7 +441,8 @@ protected:
    */
   virtual GradientType evaluateGradient(const ElemSideQpArg &, unsigned int) const
   {
-    mooseError("Element side quadrature point gradient not implemented for functor " + fname());
+    mooseError("Element side quadrature point gradient not implemented for functor " +
+               functorName());
   }
 
   /**
@@ -449,7 +451,7 @@ protected:
    */
   virtual DotType evaluateDot(const ElemArg &, unsigned int) const
   {
-    mooseError("Element time derivative not implemented for functor " + fname());
+    mooseError("Element time derivative not implemented for functor " + functorName());
   }
 
   /**
@@ -461,7 +463,7 @@ protected:
   virtual DotType evaluateDot(const ElemFromFaceArg &, unsigned int) const
   {
     mooseError("Element (obtained from a face) time derivative not implemented for functor " +
-               fname());
+               functorName());
   }
 
   /**
@@ -472,7 +474,7 @@ protected:
    */
   virtual DotType evaluateDot(const FaceArg &, unsigned int) const
   {
-    mooseError("Face time derivative not implemented for functor " + fname());
+    mooseError("Face time derivative not implemented for functor " + functorName());
   }
 
   /**
@@ -483,7 +485,7 @@ protected:
    */
   virtual DotType evaluateDot(const SingleSidedFaceArg &, unsigned int) const
   {
-    mooseError("One-sided face time derivative not implemented for functor " + fname());
+    mooseError("One-sided face time derivative not implemented for functor " + functorName());
   }
 
   /**
@@ -494,7 +496,8 @@ protected:
    */
   virtual DotType evaluateDot(const ElemQpArg &, unsigned int) const
   {
-    mooseError("Element quadrature point time derivative not implemented for functor " + fname());
+    mooseError("Element quadrature point time derivative not implemented for functor " +
+               functorName());
   }
 
   /**
@@ -506,7 +509,7 @@ protected:
   virtual DotType evaluateDot(const ElemSideQpArg &, unsigned int) const
   {
     mooseError("Element side quadrature point time derivative not implemented for functor " +
-               fname());
+               functorName());
   }
 
 private:
@@ -917,7 +920,10 @@ public:
   /**
    * @param wrapped The functor to wrap. We will *not* not own the wrapped object
    */
-  FunctorEnvelope(const FunctorBase<T> & wrapped) : FunctorEnvelopeBase(), _wrapped(&wrapped) {}
+  FunctorEnvelope(const FunctorBase<T> & wrapped)
+    : FunctorBase<T>("wraps_" + wrapped.functorName()), FunctorEnvelopeBase(), _wrapped(&wrapped)
+  {
+  }
 
   /**
    * @param wrapped A unique pointer around the functor to wrap. We *will* own the wrapped object,
@@ -925,7 +931,10 @@ public:
    * will be destructed
    */
   FunctorEnvelope(std::unique_ptr<FunctorBase<T>> && wrapped)
-    : FunctorEnvelopeBase(), _owned(std::move(wrapped)), _wrapped(_owned.get())
+    : FunctorBase<T>("wraps_" + wrapped->functorName()),
+      FunctorEnvelopeBase(),
+      _owned(std::move(wrapped)),
+      _wrapped(_owned.get())
   {
   }
 
@@ -1107,8 +1116,14 @@ public:
   using typename FunctorBase<T>::GradientType;
   using typename FunctorBase<T>::DotType;
 
-  ConstantFunctor(const ValueType & value) : _value(value) {}
-  ConstantFunctor(ValueType && value) : _value(value) {}
+  ConstantFunctor(const ValueType & value)
+    : FunctorBase<T>("constant_" + std::to_string(value)), _value(value)
+  {
+  }
+  ConstantFunctor(ValueType && value)
+    : FunctorBase<T>("constant_" + std::to_string(MetaPhysicL::raw_value(value))), _value(value)
+  {
+  }
 
 private:
   ValueType evaluate(const ElemArg &, unsigned int) const override { return _value; }
@@ -1152,6 +1167,8 @@ public:
   using typename FunctorBase<T>::ValueType;
   using typename FunctorBase<T>::GradientType;
   using typename FunctorBase<T>::DotType;
+
+  NullFunctor() : FunctorBase<T>("null") {}
 
 private:
   ValueType evaluate(const ElemArg &, unsigned int) const override

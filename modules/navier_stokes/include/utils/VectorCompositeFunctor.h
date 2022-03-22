@@ -32,10 +32,11 @@ public:
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
 
-  VectorCompositeFunctor(const FunctorBase<T> & x_comp,
+  VectorCompositeFunctor(const MooseFunctorName & name,
+                         const FunctorBase<T> & x_comp,
                          const FunctorBase<T> & y_comp,
                          const FunctorBase<T> & z_comp)
-    : _x_comp(x_comp), _y_comp(y_comp), _z_comp(z_comp)
+    : Moose::FunctorBase<VectorValue<T>>(name), _x_comp(x_comp), _y_comp(y_comp), _z_comp(z_comp)
   {
   }
 

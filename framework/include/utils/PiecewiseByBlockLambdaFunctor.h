@@ -115,7 +115,7 @@ PiecewiseByBlockLambdaFunctor<T>::PiecewiseByBlockLambdaFunctor(
     const std::set<ExecFlagType> & clearance_schedule,
     const MooseMesh & mesh,
     const std::set<SubdomainID> & block_ids)
-  : Moose::FunctorBase<T>(clearance_schedule, name), _mesh(mesh)
+  : Moose::FunctorBase<T>(name, clearance_schedule), _mesh(mesh)
 {
   setFunctor(mesh, block_ids, my_lammy);
 }
@@ -136,7 +136,7 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
     auto pr = _elem_functor.emplace(block_id, my_lammy);
     if (!pr.second)
       mooseError("No insertion for the functor material property '",
-                 this->fname(),
+                 this->functorName(),
                  "' for block id ",
                  block_id,
                  ". Another material must already declare this property on that block.");
@@ -177,7 +177,7 @@ PiecewiseByBlockLambdaFunctor<T>::subdomainErrorMessage(const SubdomainID sub_id
   mooseError("The provided subdomain ID ",
              std::to_string(sub_id),
              " doesn't exist in the map for lambda functor '",
-             this->fname(),
+             this->functorName(),
              "'! This is likely because you did not provide a functor material "
              "definition on that subdomain");
 }
