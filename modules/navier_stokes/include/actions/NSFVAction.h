@@ -219,7 +219,6 @@ protected:
   /// The scaling factor for the energy variables
   const Real _energy_scaling;
 
-
 private:
   /// Process the mesh data and convert block names to block IDs
   void processBlocks();
