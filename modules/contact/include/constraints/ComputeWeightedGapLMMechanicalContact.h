@@ -97,6 +97,13 @@ protected:
   /// Whether the dof objects are nodal; if they're not, then they're elemental
   const bool _nodal;
 
+  /// The x displacement variable
+  const MooseVariable * const _disp_x_var;
+  /// The y displacement variable
+  const MooseVariable * const _disp_y_var;
+  /// The z displacement variable
+  const MooseVariable * const _disp_z_var;
+
   /// Vector for computation of weighted gap with nodal normals
   ADRealVectorValue _qp_gap_nodal;
 

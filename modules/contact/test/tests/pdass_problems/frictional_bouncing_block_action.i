@@ -72,8 +72,8 @@ offset = 1e-2
     formulation = mortar
     model = coulomb
     friction_coefficient = 0.4
-    c_normal = 1.0e3
-    c_tangential = 5.0e1
+    c_normal = 1.0e1
+    c_tangential = 1.0e1
   []
 []
 
@@ -119,7 +119,7 @@ offset = 1e-2
   petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
   l_max_its = 30
   nl_max_its = 40
-  line_search = 'none'
+  line_search = 'basic'
   snesmf_reuse_base = false
   nl_abs_tol = 1e-9
   nl_rel_tol = 1e-9

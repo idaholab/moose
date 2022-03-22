@@ -10,6 +10,7 @@
     map = False
     requirement = 'We shall be able to produce the expected result for a gap conductance test case '
                   'using the mortar method.'
+    ad_indexing_type = 'global'
   []
   [modular]
     type = Exodiff
@@ -30,6 +31,7 @@
     requirement = 'We shall be able to produce the expected result for a combined gap conductance '
                   'and radiative heat transfer test case using the mortar method using the modular '
                   'gap flux system'
+    ad_indexing_type = 'global'
   []
 
   [displaced]
@@ -41,6 +43,7 @@
     map = False
     requirement = 'We shall be able to run the mortar method on a displaced mesh, supplying the '
                   'displacements with **constant** auxiliary variables'
+    ad_indexing_type = 'global'
   []
   [modular_displaced]
     type = Exodiff
@@ -60,6 +63,7 @@
     cli_args = 'Outputs/file_base=gap_heat_transfer_mortar_displaced_rz_out Problem/coord_type=RZ'
     requirement = 'The system shall accurately calculate axisymmetric coordinates on mortar finite '
                   'element segments'
+    ad_indexing_type = 'global'
   []
   [bc_gap_heat_transfer_displaced_radiation]
     type = CSVDiff
@@ -209,6 +213,7 @@
     requirement = 'We shall be able to generate node-to-segment numerical results for conduction and '
                   'radiation between two blocks in 3D and use it as a reference for mortar-based '
                   'constraints.'
+   ad_indexing_type = 'global'
   []
   [gap_heat_transfer_3d_hex20]
     input = 'gap_heat_transfer_3D.i'
@@ -222,6 +227,7 @@
     requirement = 'We shall be able to generate node-to-segment numerical results for conduction and '
                   'radiation between two blocks in 3D using HEX20 elements and use it as a reference '
                   'for mortar-based constraints.'
+    ad_indexing_type = 'global'
   []
   [gap_heat_transfer_3d_mortar]
     input = 'gap_heat_transfer_3D_mortar.i'
@@ -230,11 +236,11 @@
     rel_err = 4e-2
     abs_zero = 1e-8
     min_ad_size = 100
-    ad_indexing_type = 'global'
     mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to generate mortar numerical results for conduction and '
                   'radiation between two blocks in 3D and match reasonably well with the '
                   'node-to-segment approach with a refined mesh.'
+    ad_indexing_type = 'global'
   []
   [gap_heat_transfer_3d_mortar_hex20]
     input = 'gap_heat_transfer_3d_mortar.i'
@@ -245,11 +251,11 @@
     rel_err = 4e-2
     abs_zero = 1e-8
     min_ad_size = 100
-    ad_indexing_type = 'global'
     mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to generate mortar numerical results for conduction and '
                   'radiation between two blocks in 3D using HEX20 elements and match reasonably well '
                   'with the node-to-segment approach with a refined mesh.'
+    ad_indexing_type = 'global'
   []
   [gap_heat_transfer_sphere3d]
     input = 'gap_heat_transfer_sphere3D.i'

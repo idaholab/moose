@@ -78,8 +78,8 @@ offset = 1e-2
     use_displaced_mesh = true
     friction_lm = frictional_tangential_lm
     mu = 0.4
-    c = 1.0e3
-    c_t = 5.0e1
+    c = 1.0e1
+    c_t = 1.0e1
   []
   [normal_x]
     type = NormalMortarMechanicalContact

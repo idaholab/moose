@@ -18,6 +18,9 @@ public:
 
   GapHeatConductanceTest(const InputParameters & parameters);
 
+  using ADMortarConstraint::computeJacobian;
+  void computeJacobian(Moose::MortarType mortar_type) override;
+
 protected:
   ADReal computeQpResidual(Moose::MortarType mortar_type) final;
 
