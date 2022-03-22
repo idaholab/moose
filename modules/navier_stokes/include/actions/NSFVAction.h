@@ -130,7 +130,7 @@ protected:
   /// Switch dedicated to show if porous medium treatment is requested or not
   const bool _porous_medium_treatment;
   /// The name of the auxiliary variable for the porosity field
-  const AuxVariableName _porosity_name;
+  const MooseFunctorName _porosity_name;
   /// Switch to enable friction correction for the porous medium momentum
   /// equations
   const bool _use_friction_correction;
@@ -166,7 +166,7 @@ protected:
   /// Subdomains where we want to have ambient convection
   const std::vector<SubdomainName> _ambient_convection_blocks;
   /// The heat exchange coefficients for ambient convection
-  const std::vector<MaterialPropertyName> _ambient_convection_alpha;
+  const std::vector<MooseFunctorName> _ambient_convection_alpha;
   /// The ambient temperature
   const std::vector<MooseFunctorName> _ambient_temperature;
 
@@ -178,46 +178,47 @@ protected:
   const std::vector<std::vector<std::string>> _friction_coeffs;
 
   /// Name of the density material property
-  const MaterialPropertyName _density_name;
+  const MooseFunctorName _density_name;
   /// Name of the dynamic viscosity material property
-  const MaterialPropertyName _dynamic_viscosity_name;
+  const MooseFunctorName _dynamic_viscosity_name;
   /// Name of the specific heat material property
-  const MaterialPropertyName _specific_heat_name;
+  const MooseFunctorName _specific_heat_name;
   /// Name of the thermal conductivity material property
-  const MaterialPropertyName _thermal_conductivity_name;
+  const MooseFunctorName _thermal_conductivity_name;
   /// Name of the thermal expansion material property
-  const MaterialPropertyName _thermal_expansion_name;
+  const MooseFunctorName _thermal_expansion_name;
 
+  /// The type of the advected quantity interpolation method for continuity equation
+  const MooseEnum _mass_advection_interpolation;
   /// The type of the advected quantity interpolation method for momentum/velocity
   const MooseEnum _momentum_advection_interpolation;
   /// The type of the advected quantity interpolation method for energy/temperature
   const MooseEnum _energy_advection_interpolation;
-  /// The type of the advected quantity interpolation method for continuity equation
-  const MooseEnum _mass_advection_interpolation;
 
+  /// The type of the pressure interpolation method
+  const MooseEnum _pressure_face_interpolation;
   /// The type of the face interpolation method for the velocity/momentum
   const MooseEnum _momentum_face_interpolation;
   /// The type of the face interpolation method for the temperature/energy
   const MooseEnum _energy_face_interpolation;
-  /// The type of the pressure interpolation method
-  const MooseEnum _pressure_face_interpolation;
 
+  /// If a two-term Taylor expansion is needed for the determination of the boundary values
+  /// of the pressure
+  const bool _pressure_two_term_bc_expansion;
   /// If a two-term Taylor expansion is needed for the determination of the boundary values
   /// of the velocity/momentum
   const bool _momentum_two_term_bc_expansion;
   /// If a two-term Taylor expansion is needed for the determination of the boundary values
   /// of the temperature/energy
   const bool _energy_two_term_bc_expansion;
-  /// If a two-term Taylor expansion is needed for the determination of the boundary values
-  /// of the pressure
-  const bool _pressure_two_term_bc_expansion;
 
+  /// The scaling factor for the mass variables (for incompressible simulation this is pressure scaling)
+  const Real _mass_scaling;
   /// The scaling factor for the momentum variables
   const Real _momentum_scaling;
   /// The scaling factor for the energy variables
   const Real _energy_scaling;
-  /// The scaling factor for the mass variables (for incompressible simulation this is pressure scaling)
-  const Real _mass_scaling;
+
 
 private:
   /// Process the mesh data and convert block names to block IDs

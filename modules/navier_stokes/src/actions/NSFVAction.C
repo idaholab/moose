@@ -9,20 +9,13 @@
 
 // Navier-Stokes includes
 #include "NSFVAction.h"
-
 #include "NS.h"
-#include "AddVariableAction.h"
-#include "MooseObject.h"
-#include "INSADObjectTracker.h"
-#include "NonlinearSystemBase.h"
-#include "RelationshipManager.h"
 
 // MOOSE includes
 #include "FEProblem.h"
-
-#include "libmesh/fe.h"
-#include "libmesh/vector_value.h"
-#include "libmesh/string_to_enum.h"
+#include "MooseObject.h"
+#include "NonlinearSystemBase.h"
+#include "RelationshipManager.h"
 
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_variables");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_user_objects");
@@ -111,10 +104,10 @@ NSFVAction::validParams()
   params.addParam<Real>(
       "initial_pressure", 1e5, "The initial pressure, assumed constant everywhere");
 
-  params.addParam<MaterialPropertyName>(
+  params.addParam<MooseFunctorName>(
       "dynamic_viscosity", NS::mu, "The name of the dynamic viscosity");
 
-  params.addParam<MaterialPropertyName>("density", NS::density, "The name of the density");
+  params.addParam<MooseFunctorName>("density", NS::density, "The name of the density");
 
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, 0), "The gravitational acceleration vector.");
@@ -161,10 +154,12 @@ NSFVAction::validParams()
 
   params.addParam<bool>("boussinesq_approximation", false, "True to have Boussinesq approximation");
 
-  params.addParam<Real>("ref_temperature",
-                        273.15,
-                        "Value for reference temperature in case of Boussinesq approximation");
-  params.addParam<MaterialPropertyName>(
+  params.addRangeCheckedParam<Real>(
+      "ref_temperature",
+      273.15,
+      "ref_temperature > 0.0",
+      "Value for reference temperature in case of Boussinesq approximation");
+  params.addParam<MooseFunctorName>(
       "thermal_expansion", NS::alpha, "The name of the thermal expansion");
 
   params.addParamNamesToGroup("pinned_pressure_type pinned_pressure_point pinned_pressure_value "
@@ -178,12 +173,12 @@ NSFVAction::validParams()
   params.addParam<Real>(
       "initial_temperature", 300, "The initial temperature, assumed constant everywhere");
 
-  params.addParam<MaterialPropertyName>(
+  params.addParam<MooseFunctorName>(
       "thermal_conductivity", NS::k, "The name of the fluid thermal conductivity");
 
-  params.addParam<MaterialPropertyName>("specific_heat", NS::cp, "The name of the specific heat");
+  params.addParam<MooseFunctorName>("specific_heat", NS::cp, "The name of the specific heat");
 
-  MultiMooseEnum en_inlet_types("fixed-temperature heatflux", "fixed-temperature");
+  MultiMooseEnum en_inlet_types("fixed-temperature heatflux", "heatflux");
   params.addParam<MultiMooseEnum>("energy_inlet_types",
                                   en_inlet_types,
                                   "Types for the inlet boundaries for the energy equation.");
@@ -207,9 +202,9 @@ NSFVAction::validParams()
       std::vector<SubdomainName>(),
       "The blocks where the ambient convection is present.");
 
-  params.addParam<std::vector<MaterialPropertyName>>(
+  params.addParam<std::vector<MooseFunctorName>>(
       "ambient_convection_alpha",
-      std::vector<MaterialPropertyName>(),
+      std::vector<MooseFunctorName>(),
       "The heat exchange coefficients for each block in 'ambient_convection_blocks'.");
 
   params.addParam<std::vector<MooseFunctorName>>(
@@ -220,6 +215,8 @@ NSFVAction::validParams()
   params.addParam<CoupledName>(
       "external_heat_source",
       "The name of a functor which contains the external heat source for the energy equation.");
+  params.addParam<Real>(
+      "external_heat_source_coeff", 1.0, "Multiplier for the coupled heat source term.");
 
   /**
    * Parameters controlling the friction terms in case of porous medium simulations.
@@ -258,6 +255,10 @@ NSFVAction::validParams()
                              "as an advected quantity, to the face.");
 
   MooseEnum face_interpol_types("average skewness-corrected", "average");
+  params.addParam<MooseEnum>("pressure_face_interpolation",
+                             face_interpol_types,
+                             "The numerical scheme to interpolate the pressure to the "
+                             "face (separate from the advected quantity interpolation).");
   params.addParam<MooseEnum>("momentum_face_interpolation",
                              face_interpol_types,
                              "The numerical scheme to interpolate the velocity/momentum to the "
@@ -266,11 +267,12 @@ NSFVAction::validParams()
                              face_interpol_types,
                              "The numerical scheme to interpolate the temperature/energy to the "
                              "face (separate from the advected quantity interpolation).");
-  params.addParam<MooseEnum>("pressure_face_interpolation",
-                             face_interpol_types,
-                             "The numerical scheme to interpolate the pressure to the "
-                             "face (separate from the advected quantity interpolation).");
 
+  params.addParam<bool>(
+      "pressure_two_term_bc_expansion",
+      true,
+      "If a two-term Taylor expansion is needed for the determination of the boundary values"
+      "of the pressure.");
   params.addParam<bool>(
       "momentum_two_term_bc_expansion",
       true,
@@ -281,18 +283,21 @@ NSFVAction::validParams()
       true,
       "If a two-term Taylor expansion is needed for the determination of the boundary values"
       "of the temperature/energy.");
-  params.addParam<bool>(
-      "pressure_two_term_bc_expansion",
-      true,
-      "If a two-term Taylor expansion is needed for the determination of the boundary values"
-      "of the pressure.");
 
-  params.addParam<Real>("momentum_scaling", 1.0, "The scaling factor for the momentum variables.");
-  params.addParam<Real>("energy_scaling", 1.0, "The scaling factor for the energy variables.");
-  params.addParam<Real>("mass_scaling",
-                        1.0,
-                        "The scaling factor for the mass variables (for incompressible simulation "
-                        "this is pressure scaling).");
+  params.addRangeCheckedParam<Real>(
+      "mass_scaling",
+      1.0,
+      "mass_scaling > 0.0",
+      "The scaling factor for the mass variables (for incompressible simulation "
+      "this is pressure scaling).");
+  params.addRangeCheckedParam<Real>("momentum_scaling",
+                                    1.0,
+                                    "momentum_scaling > 0.0",
+                                    "The scaling factor for the momentum variables.");
+  params.addRangeCheckedParam<Real>("energy_scaling",
+                                    1.0,
+                                    "energy_scaling > 0.0",
+                                    "The scaling factor for the energy variables.");
 
   params.addParamNamesToGroup(
       "momentum_advection_interpolation energy_advection_interpolation "
@@ -314,12 +319,16 @@ NSFVAction::validParams()
                                 exec_enum,
                                 "When the mixing length aux kernels should be executed.");
 
-  params.addParam<Real>(
-      "von_karman_const", 0.41, "Von Karman parameter for the mixing length model");
-  params.addParam<Real>("von_karman_const_0", 0.09, "Escudier' model parameter");
-  params.addParam<Real>(
+  params.addRangeCheckedParam<Real>("von_karman_const",
+                                    0.41,
+                                    "von_karman_const > 0.0",
+                                    "Von Karman parameter for the mixing length model");
+  params.addRangeCheckedParam<Real>(
+      "von_karman_const_0", 0.09, "von_karman_const_0 > 0.0", "'Escudier' model parameter");
+  params.addRangeCheckedParam<Real>(
       "mixing_length_delta",
       1.0,
+      "mixing_length_delta > 0.0",
       "Tunable parameter related to the thickness of the boundary layer."
       "When it is not specified, Prandtl's original mixing length model is retrieved.");
 
@@ -331,7 +340,7 @@ NSFVAction::validParams()
 
   params.addParamNamesToGroup(
       "dynamic_viscosity density thermal_expansion thermal_conductivity specific_heat",
-      "Materials");
+      "Material property names");
 
   params.addParamNamesToGroup(
       "inlet_boundaries momentum_inlet_types momentum_inlet_function energy_inlet_types "
@@ -371,8 +380,7 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _energy_wall_function(getParam<std::vector<FunctionName>>("energy_wall_function")),
     _pressure_function(getParam<std::vector<FunctionName>>("pressure_function")),
     _ambient_convection_blocks(getParam<std::vector<SubdomainName>>("ambient_convection_blocks")),
-    _ambient_convection_alpha(
-        getParam<std::vector<MaterialPropertyName>>("ambient_convection_alpha")),
+    _ambient_convection_alpha(getParam<std::vector<MooseFunctorName>>("ambient_convection_alpha")),
     _ambient_temperature(getParam<std::vector<MooseFunctorName>>("ambient_temperature")),
     _friction_blocks(isParamValid("friction_blocks")
                          ? getParam<std::vector<SubdomainName>>("friction_blocks")
@@ -383,23 +391,23 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _friction_coeffs(isParamValid("friction_coeffs")
                          ? getParam<std::vector<std::vector<std::string>>>("friction_coeffs")
                          : std::vector<std::vector<std::string>>()),
-    _density_name(getParam<MaterialPropertyName>("density")),
-    _dynamic_viscosity_name(getParam<MaterialPropertyName>("dynamic_viscosity")),
-    _specific_heat_name(getParam<MaterialPropertyName>("specific_heat")),
-    _thermal_conductivity_name(getParam<MaterialPropertyName>("thermal_conductivity")),
-    _thermal_expansion_name(getParam<MaterialPropertyName>("thermal_expansion")),
+    _density_name(getParam<MooseFunctorName>("density")),
+    _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
+    _specific_heat_name(getParam<MooseFunctorName>("specific_heat")),
+    _thermal_conductivity_name(getParam<MooseFunctorName>("thermal_conductivity")),
+    _thermal_expansion_name(getParam<MooseFunctorName>("thermal_expansion")),
+    _mass_advection_interpolation(getParam<MooseEnum>("mass_advection_interpolation")),
     _momentum_advection_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
     _energy_advection_interpolation(getParam<MooseEnum>("energy_advection_interpolation")),
-    _mass_advection_interpolation(getParam<MooseEnum>("mass_advection_interpolation")),
+    _pressure_face_interpolation(getParam<MooseEnum>("pressure_face_interpolation")),
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),
     _energy_face_interpolation(getParam<MooseEnum>("energy_face_interpolation")),
-    _pressure_face_interpolation(getParam<MooseEnum>("pressure_face_interpolation")),
+    _pressure_two_term_bc_expansion(getParam<bool>("pressure_two_term_bc_expansion")),
     _momentum_two_term_bc_expansion(getParam<bool>("momentum_two_term_bc_expansion")),
     _energy_two_term_bc_expansion(getParam<bool>("energy_two_term_bc_expansion")),
-    _pressure_two_term_bc_expansion(getParam<bool>("pressure_two_term_bc_expansion")),
+    _mass_scaling(getParam<Real>("mass_scaling")),
     _momentum_scaling(getParam<Real>("momentum_scaling")),
-    _energy_scaling(getParam<Real>("energy_scaling")),
-    _mass_scaling(getParam<Real>("mass_scaling"))
+    _energy_scaling(getParam<Real>("energy_scaling"))
 {
   // Running the general checks, the rest are run after we already know some
   // geometry-related parameters.
@@ -1277,6 +1285,7 @@ NSFVAction::addINSEnergyExternalHeatSource()
   params.set<NonlinearVariableName>("variable") = NS::T_fluid;
   params.set<std::vector<SubdomainName>>("block") = _blocks;
   params.set<CoupledName>("v") = getParam<CoupledName>("external_heat_source");
+  params.set<Real>("coef") = getParam<Real>("external_heat_source_coeff");
 
   _problem->addFVKernel(kernel_type, "external_heat_source", params);
 }
