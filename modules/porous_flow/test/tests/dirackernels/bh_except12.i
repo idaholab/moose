@@ -80,6 +80,10 @@
     type = PorousFlowPorosityConst
     porosity = 0.1
   []
+  [permeability]
+    type = PorousFlowPermeabilityConst
+    permeability = '1E-12 0 0 0 1E-12 0 0 0 1E-12'
+  []
 []
 
 [DiracKernels]

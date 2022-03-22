@@ -29,6 +29,8 @@ public:
 
   PorousFlowPeacemanBorehole(const InputParameters & parameters);
 
+  void virtual initialSetup() override;
+
 protected:
   /**
    * If positive then the borehole acts as a sink (producion well) for porepressure > borehole
