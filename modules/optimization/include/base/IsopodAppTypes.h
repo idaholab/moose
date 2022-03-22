@@ -3,4 +3,4 @@
 
 extern const ExecFlagType EXEC_FORWARD;
 extern const ExecFlagType EXEC_ADJOINT;
-extern const ExecFlagType EXEC_HOMOGENOUS_FORWARD;
+extern const ExecFlagType EXEC_HOMOGENEOUS_FORWARD;

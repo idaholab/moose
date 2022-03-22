@@ -53,11 +53,11 @@
     execute_on = "ADJOINT"
     clone_master_mesh = true
   []
-  # the forward problem has homogenous boundary conditions so it can be reused here.
-  [homogenousForward]
+  # the forward problem has homogeneous boundary conditions so it can be reused here.
+  [homogeneousForward]
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
-    execute_on = "HOMOGENOUS_FORWARD"
+    execute_on = "HOMOGENEOUS_FORWARD"
     clone_master_mesh = true
   []
 []
@@ -99,23 +99,23 @@
     direction = from_multiapp
   []
 
-  [toHomogenousForward]
+  [toHomogeneousForward]
     type = OptimizationParameterTransfer
-    multi_app = homogenousForward
+    multi_app = homogeneousForward
     value_names = 'fy_right'
     parameters = 'BCs/right_fy/value'
     to_control = parameterReceiver
   []
-  [toHomogenousForward_measument]
+  [toHomogeneousForward_measument]
     type = MultiAppReporterTransfer
-    multi_app = homogenousForward
+    multi_app = homogeneousForward
     direction = to_multiapp
     from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
     to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
   []
-  [fromHomogenousForward]
+  [fromHomogeneousForward]
     type = MultiAppReporterTransfer
-    multi_app = homogenousForward
+    multi_app = homogeneousForward
     from_reporters = 'data_pt/disp_y'
     to_reporters = 'OptimizationReporter/simulation_values'
     direction = from_multiapp

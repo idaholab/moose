@@ -67,10 +67,10 @@
     execute_on = "ADJOINT"
     clone_master_mesh = true
   []
-  [homogenousForward]
+  [homogeneousForward]
     type = OptimizeFullSolveMultiApp
-    input_files = homogenous_forward.i
-    execute_on = "HOMOGENOUS_FORWARD"
+    input_files = homogeneous_forward.i
+    execute_on = "HOMOGENEOUS_FORWARD"
     clone_master_mesh = true
   []
 []
@@ -115,23 +115,23 @@
   []
 
   # HESSIAN transfers.  Same as forward.
-  [fromHomogenousForward]
+  [fromHomogeneousForward]
     type = MultiAppReporterTransfer
-    multi_app = homogenousForward
+    multi_app = homogeneousForward
     direction = from_multiapp
     from_reporters = 'data_pt/temperature data_pt/temperature'
     to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
   []
-  [toHomogenousForward]
+  [toHomogeneousForward]
     type = OptimizationParameterTransfer
-    multi_app = homogenousForward
+    multi_app = homogeneousForward
     value_names = 'p1 p2'
     parameters = 'Postprocessors/p1/value Postprocessors/p2/value'
     to_control = parameterReceiver
   []
-  [toHomogenousForward_measument]
+  [toHomogeneousForward_measument]
     type = MultiAppReporterTransfer
-    multi_app = homogenousForward
+    multi_app = homogeneousForward
     direction = to_multiapp
     from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
     to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'

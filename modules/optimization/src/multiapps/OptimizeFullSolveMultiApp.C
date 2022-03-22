@@ -13,7 +13,7 @@ OptimizeFullSolveMultiApp::validParams()
   InputParameters params = FullSolveMultiApp::validParams();
   params.addClassDescription("This is FullSolveMultiApp with some extra flags registered.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
-  exec_enum.addAvailableFlags(EXEC_NONE, EXEC_FORWARD, EXEC_ADJOINT, EXEC_HOMOGENOUS_FORWARD);
+  exec_enum.addAvailableFlags(EXEC_NONE, EXEC_FORWARD, EXEC_ADJOINT, EXEC_HOMOGENEOUS_FORWARD);
   params.addParam<ExecFlagEnum>(
       "execute_on", exec_enum, "List of flags indicating when this multiapp should solve.");
 
