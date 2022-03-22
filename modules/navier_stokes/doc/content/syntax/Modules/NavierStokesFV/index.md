@@ -40,6 +40,14 @@ input file readability:
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/lid-driven/lid-driven-with-energy-action.i
 
+It is visible that in this case we defined the [!param](/Modules/NavierStokesFV/compressibility)
+parameter to be `incompressible`.
+Furthermore, the energy (enthalpy) equation is solved as well. The user can
+request this by setting [!param](/Modules/NavierStokesFV/add_energy_equation)
+to `true`. The boundary types are groupped into +wall+, +inlet+ and +otlet+ types.
+For more information on the available boundary types, see the
++Example Input File Syntax+ below.
+
 ### Incompressible fluid flow in porous medium
 
 The following input file sets up a simulation of an incompressible fluid flow
@@ -56,6 +64,15 @@ The same simulation can also be set up using the NavierStokesFV action syntax:
 
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/heated/2d-rc-heated-action.i
 
+Compared to the previous example, we see that in this case the porous medium
+treatment is enabled by setting [!param](/Modules/NavierStokesFV/porous_medium_treatment)
+to `true`. The corresponding porosity can be supplied through the
+[!param](/Modules/NavierStokesFV/porosity) parameter. Furthermore, the heat excange
+between the fluid and the homogenized structure is enabled using the
+[!param](/Modules/NavierStokesFV/ambient_temperature) and
+[!param](/Modules/NavierStokesFV/ambient_convection_alpha) paramters.
+
+
 ### Weakly-compressible fluid flow
 
 The last example is dedicated to demonstrate a transient flow in a channel
@@ -69,6 +86,15 @@ the [Weakly-compressible Navier Stokes](modules/navier_stokes/wcnsfv.md) page.
 The same simulation can be set up using the action syntax as folows:
 
 !listing modules/navier_stokes/test/tests/finite_volume/wcns/channel-flow/2d-transient-action.i
+
+We note that the weakly-compressible handling can be enabled by setting
+[!param](/Modules/NavierStokesFV/compressibility) to `weakly-compressible`.
+Furthermore, if a transient analysis is requested, the user needs to request
+the addition of time derivatives. This is done by setting [!param](/Modules/NavierStokesFV/simulation_type) to `transient`.
+As shown in the example, an arbitrary
+energy source function can also be supplied to the incorporated
+energy equation using the [!param](/Modules/NavierStokesFV/external_heat_source) parameter.
+
 
 ## Example Input File Syntax
 
