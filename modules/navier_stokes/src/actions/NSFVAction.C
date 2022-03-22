@@ -723,12 +723,9 @@ NSFVAction::addINSEnergyTimeKernels()
     InputParameters params = _factory.getValidParams(en_kernel_type);
     params.set<std::vector<SubdomainName>>("block") = _blocks;
     params.set<NonlinearVariableName>("variable") = NS::T_fluid;
-    params.set<MaterialPropertyName>(NS::density) = _density_name;
-    params.set<MaterialPropertyName>(NS::cp) = _specific_heat_name;
-    if (_problem->hasFunctor(NS::time_deriv(_specific_heat_name),
-                             _problem->parameters().get<THREAD_ID>("_tid")))
-      params.set<MaterialPropertyName>(NS::time_deriv(NS::cp)) =
-          NS::time_deriv(_specific_heat_name);
+    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+    params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
 
     _problem->addFVKernel(en_kernel_type, "ins_energy_time", params);
   }
@@ -1722,10 +1719,10 @@ NSFVAction::addWCNSEnergyTimeKernels()
     InputParameters params = _factory.getValidParams(en_kernel_type);
     params.set<std::vector<SubdomainName>>("block") = _blocks;
     params.set<NonlinearVariableName>("variable") = NS::T_fluid;
-    params.set<MaterialPropertyName>(NS::density) = _density_name;
-    params.set<MaterialPropertyName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-    params.set<MaterialPropertyName>(NS::cp) = _specific_heat_name;
-    params.set<MaterialPropertyName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
+    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
+    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+    params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
 
     _problem->addFVKernel(en_kernel_type, "wcns_energy_time", params);
   }

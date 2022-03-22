@@ -154,6 +154,7 @@ advected_interp_method = 'average'
     variable = T
     rho = ${rho}
     cp = 'cp'
+    dcp_dt = 0.0
   []
   [temp_conduction]
     type = FVDiffusion

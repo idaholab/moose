@@ -20,25 +20,21 @@ WCNSFVEnergyTimeDerivative::validParams()
   params.addClassDescription(
       "Adds the time derivative term to the incompressible Navier-Stokes momentum equation.");
 
-  params.addRequiredParam<MaterialPropertyName>(
-      NS::time_deriv(NS::density), "The time derivative of the density material property");
+  params.addRequiredParam<MooseFunctorName>(NS::time_deriv(NS::density),
+                                            "The time derivative of the density material property");
   return params;
 }
 
 WCNSFVEnergyTimeDerivative::WCNSFVEnergyTimeDerivative(const InputParameters & params)
   : INSFVEnergyTimeDerivative(params),
-    _rho_dot(getFunctor<ADReal>(getParam<MaterialPropertyName>(NS::time_deriv(NS::density))))
+    _rho_dot(getFunctor<ADReal>(getParam<MooseFunctorName>(NS::time_deriv(NS::density))))
 {
-  if (!_cp_dot)
-    paramError(NS::time_deriv(NS::cp),
-               "The time derivative of the specific heat must be specified for weakly-compressible "
-               "simulations!");
 }
 
 ADReal
 WCNSFVEnergyTimeDerivative::computeQpResidual()
 {
-  auto elem_arg = makeElemArg(_current_elem);
+  const auto & elem_arg = makeElemArg(_current_elem);
   return INSFVEnergyTimeDerivative::computeQpResidual() +
          _rho_dot(elem_arg) * _cp(elem_arg) * _var(elem_arg);
 }

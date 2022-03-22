@@ -19,20 +19,18 @@ INSFVEnergyTimeDerivative::validParams()
   InputParameters params = FVTimeKernel::validParams();
   params.addClassDescription(
       "Adds the time derivative term to the incompressible Navier-Stokes energy equation.");
-  params.addRequiredParam<MaterialPropertyName>(NS::density, "Density");
-  params.addRequiredParam<MaterialPropertyName>(NS::cp, "Specific heat capacity");
-  params.addParam<MaterialPropertyName>(NS::time_deriv(NS::cp),
-                                        "Specific heat capacity time derivative functor");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
+  params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific heat capacity");
+  params.addRequiredParam<MooseFunctorName>(NS::time_deriv(NS::cp),
+                                            "Specific heat capacity time derivative functor");
   return params;
 }
 
 INSFVEnergyTimeDerivative::INSFVEnergyTimeDerivative(const InputParameters & params)
   : FVTimeKernel(params),
-    _rho(getFunctor<ADReal>(getParam<MaterialPropertyName>(NS::density))),
-    _cp(getFunctor<ADReal>(getParam<MaterialPropertyName>(NS::cp))),
-    _cp_dot(isParamValid(NS::time_deriv(NS::cp))
-                ? &getFunctor<ADReal>(getParam<MaterialPropertyName>(NS::time_deriv(NS::cp)))
-                : nullptr)
+    _rho(getFunctor<ADReal>(getParam<MooseFunctorName>(NS::density))),
+    _cp(getFunctor<ADReal>(getParam<MooseFunctorName>(NS::cp))),
+    _cp_dot(getFunctor<ADReal>(getParam<MooseFunctorName>(NS::time_deriv(NS::cp))))
 {
 }
 
@@ -40,10 +38,6 @@ ADReal
 INSFVEnergyTimeDerivative::computeQpResidual()
 {
   const auto & elem_arg = makeElemArg(_current_elem);
-  auto time_derivative = _rho(elem_arg) * _cp(elem_arg) * FVTimeKernel::computeQpResidual();
-
-  if (_cp_dot)
-    time_derivative += _rho(elem_arg) * (*_cp_dot)(elem_arg)*_var(elem_arg);
-
-  return time_derivative;
+  return _rho(elem_arg) * _cp(elem_arg) * FVTimeKernel::computeQpResidual() +
+         _rho(elem_arg) * _cp_dot(elem_arg) * _var(elem_arg);
 }
