@@ -19,9 +19,8 @@ INSFVOutletPressureBC::validParams()
   params += INSFVFullyDevelopedFlowBC::validParams();
 
   // Value may be specified by a functor (function) or a postprocessor
-  params.addDeprecatedParam<FunctionName>("function",
-                                          "The pressure as a function.",
-                                          "Use functor instead");
+  params.addDeprecatedParam<FunctionName>(
+      "function", "The pressure as a function.", "Use functor instead");
   params.addParam<MooseFunctorName>("functor",
                                     "The boundary pressure as a functor (most often a function)");
   params.addParam<PostprocessorName>("postprocessor", "The boundary pressure as a postprocessor");
@@ -31,15 +30,11 @@ INSFVOutletPressureBC::validParams()
 
 INSFVOutletPressureBC::INSFVOutletPressureBC(const InputParameters & params)
   : FVDirichletBCBase(params),
-  INSFVFullyDevelopedFlowBC(params),
-  _functor(isParamValid("functor") ?
-           &getFunctor<ADReal>("functor") :
-           isParamValid("function") ?
-           &getFunctor<ADReal>("function") :
-           nullptr),
-  _pp_value(isParamValid("postprocessor") ?
-            &getPostprocessorValue("postprocessor") :
-            nullptr)
+    INSFVFullyDevelopedFlowBC(params),
+    _functor(isParamValid("functor")    ? &getFunctor<ADReal>("functor")
+             : isParamValid("function") ? &getFunctor<ADReal>("function")
+                                        : nullptr),
+    _pp_value(isParamValid("postprocessor") ? &getPostprocessorValue("postprocessor") : nullptr)
 {
   if (!dynamic_cast<INSFVPressureVariable *>(&_var))
     paramError(
@@ -48,8 +43,8 @@ INSFVOutletPressureBC::INSFVOutletPressureBC(const InputParameters & params)
 
   // Check parameters
   if ((_functor && _pp_value) || (!_functor && !_pp_value))
-    mooseError(
-        "One and only one of function/functor/postprocessor may be specified for the outlet pressure");
+    mooseError("One and only one of function/functor/postprocessor may be specified for the outlet "
+               "pressure");
 }
 
 Real
