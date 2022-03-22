@@ -3166,9 +3166,9 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
 
       // Check for lagrange multiplier
       if (dynamic_cast<FVScalarLagrangeMultiplierConstraint *>(fv_kernel))
-        kernel_variables.insert(
-            dynamic_cast<FVScalarLagrangeMultiplierConstraint *>(
-              fv_kernel)->lambdaVariable().name());
+        kernel_variables.insert(dynamic_cast<FVScalarLagrangeMultiplierConstraint *>(fv_kernel)
+                                    ->lambdaVariable()
+                                    .name());
     }
 
     std::vector<FVFluxKernel *> fv_flux_kernels;

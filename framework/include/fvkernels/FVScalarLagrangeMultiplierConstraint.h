@@ -28,7 +28,7 @@ private:
   void computeResidual() override final;
   void computeJacobian() override final;
   void computeOffDiagJacobian() override final;
-  ADReal computeQpResidual() override;
+  ADReal computeQpResidual() override = 0;
 
   /// The Lagrange Multiplier variable
   const MooseVariableScalar & _lambda_var;

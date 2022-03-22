@@ -11,11 +11,11 @@
 
 #include "FVScalarLagrangeMultiplierConstraint.h"
 
-/// What type of extreme value we are going to compute
+/// What type of constraint we are going to enforce
 enum BoundType
 {
-  MAX,
-  MIN
+  LOWER_THAN,
+  HIGHER_THAN
 };
 
 /**

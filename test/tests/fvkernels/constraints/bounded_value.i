@@ -1,7 +1,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 4
+  nx = 20
 []
 
 [Variables]
@@ -30,7 +30,7 @@
     variable = v
     phi0 = 0
     lambda = lambda
-    bound_type = 'min'
+    bound_type = 'HIGHER_THAN'
   []
 []
 
@@ -59,7 +59,7 @@
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = 'Newton'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
 

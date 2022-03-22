@@ -30,8 +30,7 @@ FVIntegralValueConstraint::validParams()
 }
 
 FVIntegralValueConstraint::FVIntegralValueConstraint(const InputParameters & parameters)
-  : FVScalarLagrangeMultiplierConstraint(parameters),
-    _phi0(getParam<Real>("phi0"))
+  : FVScalarLagrangeMultiplierConstraint(parameters), _phi0(getParam<Real>("phi0"))
 {
 }
 

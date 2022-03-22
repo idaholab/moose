@@ -19,11 +19,13 @@ InputParameters
 FVBoundedValueConstraint::validParams()
 {
   InputParameters params = FVScalarLagrangeMultiplierConstraint::validParams();
-  params.addClassDescription("This class is used to enforce a min or max value for a finite volume variable");
+  params.addClassDescription(
+      "This class is used to enforce a min or max value for a finite volume variable");
   params.addRequiredParam<Real>("phi0", "The min or max bound");
   // Define the min/max enumeration
-  MooseEnum type_options("max=0 min=1");
-  params.addRequiredParam<MooseEnum>("bound_type", type_options, "Whether a minimum or a maximum bound");
+  MooseEnum type_options("lower_than=0 higher_than=1");
+  params.addRequiredParam<MooseEnum>(
+      "bound_type", type_options, "Whether a minimum or a maximum bound");
   return params;
 }
 
@@ -37,9 +39,9 @@ FVBoundedValueConstraint::FVBoundedValueConstraint(const InputParameters & param
 ADReal
 FVBoundedValueConstraint::computeQpResidual()
 {
-  if (_bound_type == BoundType::MAX && _u[_qp] > _phi0)
+  if (_bound_type == BoundType::LOWER_THAN && _u[_qp] > _phi0)
     return _u[_qp] - _phi0;
-  else if (_bound_type == BoundType::MIN && _u[_qp] < _phi0)
+  else if (_bound_type == BoundType::HIGHER_THAN && _u[_qp] < _phi0)
     return _phi0 - _u[_qp];
   else
     return 0;

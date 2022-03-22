@@ -3,12 +3,12 @@
 This object implements the residuals that enforce the constraint
 
 !equation
-\phi (point P) > \phi_0
+\phi > \phi_0 \in \Omega
 
 or
 
 !equation
-\phi (point P) < \phi_0
+\phi < \phi_0 \in \Omega
 
 using a Lagrange multiplier approach. E.g. this object enforces the constraint
 that the value of $\phi$ in the domain has to be above or below a certain value.

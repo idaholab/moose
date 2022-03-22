@@ -17,27 +17,24 @@ InputParameters
 FVScalarLagrangeMultiplierConstraint::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
-  params.addClassDescription("Base class for imposing constraints using scalar Lagrange multipliers");
+  params.addClassDescription(
+      "Base class for imposing constraints using scalar Lagrange multipliers");
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier variable");
   return params;
 }
 
-FVScalarLagrangeMultiplierConstraint::FVScalarLagrangeMultiplierConstraint(const InputParameters & parameters)
+FVScalarLagrangeMultiplierConstraint::FVScalarLagrangeMultiplierConstraint(
+    const InputParameters & parameters)
   : FVElementalKernel(parameters),
     _lambda_var(*getScalarVar("lambda", 0)),
     _lambda(adCoupledScalarValue("lambda"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("FVScalarLagrangeMultiplierConstraint is not supported by local AD indexing. In order to use "
-             "FVScalarLagrangeMultiplierConstraint, please run the configure script in the root MOOSE "
-             "directory with the configure option '--with-ad-indexing-type=global'");
+  mooseError(
+      "FVScalarLagrangeMultiplierConstraint is not supported by local AD indexing. In order to use "
+      "FVScalarLagrangeMultiplierConstraint, please run the configure script in the root MOOSE "
+      "directory with the configure option '--with-ad-indexing-type=global'");
 #endif
-}
-
-ADReal
-FVScalarLagrangeMultiplierConstraint::computeQpResidual()
-{
-  mooseError("computeQpResidual is missing. Implement your constraint there");
 }
 
 void
