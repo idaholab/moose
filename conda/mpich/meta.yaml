@@ -46,7 +46,7 @@ test:
 about:
   home: https://mooseframework.org/
   license: LGPL 2.1
-  summary: 'Top Level packages designed to control environment variables for conda-forge mpich'
+  summary: 'A top-level package designed to control environment variables related to conda-forge provided MPICH'
   description: |
     MPICH is a high performance and widely portable implementation of the
     Message Passing Interface (MPI) standard.

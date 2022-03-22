@@ -18,6 +18,8 @@ build:
   number: {{ build }}
   string: {{ strbuild }}
   skip: true  # [win]
+  script_env:
+    - MOOSE_JOBS
   run_exports:
     - {{ pin_subpackage('moose-petsc', max_pin='x.x')}}
 

@@ -31,19 +31,25 @@ function configure_petsc()
     SHARED=1
   fi
 
+  # Use --with-make-np if MOOSE_JOBS is given
+  MAKE_NP_STR=""
+  if [ ! -z "$MOOSE_JOBS" ]; then
+    MAKE_NP_STR="--with-make-np=$MOOSE_JOBS"
+  fi
+
   # Check to see if HDF5 exists using environment variables and expected locations.
   # If it does, use it.
   echo "INFO: Checking for HDF5..."
 
   # Prioritize user-set environment variables HDF5_DIR, HDF5DIR, and HDF5_ROOT,
   # with the first taking the greatest priority
-  if [ ! -z "$HDF5_DIR" ]; then
+  if [ -n "$HDF5_DIR" ]; then
     echo "INFO: HDF5 installation location was set using HDF5_DIR=$HDF5_DIR"
     HDF5_STR="--with-hdf5-dir=$HDF5_DIR"
-  elif [ ! -z "$HDF5DIR" ]; then
+  elif [ -n "$HDF5DIR" ]; then
     echo "INFO: HDF5 installation location was set using HDF5DIR=$HDF5DIR"
     HDF5_STR="--with-hdf5-dir=$HDF5DIR"
-  elif [ ! -z "$HDF5_ROOT" ]; then
+  elif [ -n "$HDF5_ROOT" ]; then
     echo "INFO: HDF5 installation location was set using HDF5_ROOT=$HDF5_ROOT"
     HDF5_STR="--with-hdf5-dir=$HDF5_ROOT"
   fi
@@ -88,6 +94,7 @@ function configure_petsc()
   python ./configure --download-hypre=1 \
       --with-shared-libraries=$SHARED \
       "$HDF5_STR" \
+      "$MAKE_NP_STR" \
       --with-debugging=no \
       --download-fblaslapack=1 \
       --download-metis=1 \
