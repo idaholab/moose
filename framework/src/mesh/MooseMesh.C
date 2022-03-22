@@ -3209,7 +3209,7 @@ MooseMesh::buildFaceInfo() const
       //
       //  * when the following two (CURRENTLY ONE ACTUALLY) conditions are met:
       //
-      //     - WE AREN'T ACTULLY DOING THIS CHECK RIGHT NOW. SHOULD WE BE? WE DON'T
+      //     - WE AREN'T ACTUALLY DOING THIS CHECK RIGHT NOW. SHOULD WE BE? WE DON'T
       //       DO IT FOR DGKERNELS OR INTERFACE KERNELS
       //       the neighbor is active - this means we aren't looking at a face
       //       between an active element and an inactive (pre-refined version)

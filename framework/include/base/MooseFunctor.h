@@ -586,7 +586,7 @@ private:
   mutable std::map<SingleSidedFaceArg, ValueType> _ssf_arg_to_value;
 
   /// name of the functor
-  const MooseFunctorName _functor_name;
+  MooseFunctorName _functor_name;
 };
 
 template <typename T>
