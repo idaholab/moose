@@ -1812,17 +1812,10 @@ NSFVAction::processBlocks()
   _dim = _mesh->dimension();
   _problem->needFV();
 
-  if (_blocks.size())
-    for (const auto & subdomain_name : _blocks)
-    {
-      SubdomainID id = _mesh->getSubdomainID(subdomain_name);
-      _block_ids.insert(id);
-    }
-  else
+  if (!_blocks.size())
   {
     for (const auto & id : _mesh->meshSubdomains())
     {
-      _block_ids.insert(id);
       if (_mesh->getSubdomainName(id) == "")
         _blocks.push_back(std::to_string(id));
       else

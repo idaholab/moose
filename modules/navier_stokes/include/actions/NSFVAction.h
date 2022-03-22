@@ -109,119 +109,115 @@ protected:
 
   /// Subdomains Navier-Stokes equation is defined on
   std::vector<SubdomainName> _blocks;
-  /// Subdomain IDs
-  std::set<SubdomainID> _block_ids;
 
   /// Mesh dimension
   unsigned int _dim;
 
   /// Equation type, transient or steady-state
-  MooseEnum _type;
+  const MooseEnum _type;
   /// Compressibility type, can be compressible, incompressible
   /// or weakly-compressible
-  MooseEnum _compressibility;
+  const MooseEnum _compressibility;
   // Switch that can be used to create an integrated energy equation for
   /// incompressible/weakly compressible simulations.
-  bool _has_energy_equation;
+  const bool _has_energy_equation;
   /// Switch to use to enable the Boussinesq approximation for incompressible
   /// fluid simulations
-  bool _boussinesq_approximation;
+  const bool _boussinesq_approximation;
   /// Turbulent diffusivity handling type (mixing-length, etc.)
-  MooseEnum _turbulence_handling;
+  const MooseEnum _turbulence_handling;
 
   /// Switch dedicated to show if porous medium treatment is requested or not
-  bool _porous_medium_treatment;
+  const bool _porous_medium_treatment;
   /// The name of the auxiliary variable for the porosity field
-  AuxVariableName _porosity_name;
+  const AuxVariableName _porosity_name;
   /// Switch to enable friction correction for the porous medium momentum
   /// equations
-  bool _use_friction_correction;
-  /// The number of smoothing layers necessary for the simulation.
-  unsigned short _smoothing_layers;
+  const bool _use_friction_correction;
 
   /// Boundaries with a flow inlet specified on them
-  std::vector<BoundaryName> _inlet_boundaries;
+  const std::vector<BoundaryName> _inlet_boundaries;
   /// Boundaries with a flow outlet specified on them
-  std::vector<BoundaryName> _outlet_boundaries;
+  const std::vector<BoundaryName> _outlet_boundaries;
   /// Boundaries which define a wall (slip/noslip/etc.)
-  std::vector<BoundaryName> _wall_boundaries;
+  const std::vector<BoundaryName> _wall_boundaries;
 
   /// Velocity intlet types (fixed-velocity/mass-flow/momentum-inflow)
-  MultiMooseEnum _momentum_inlet_types;
+  const MultiMooseEnum _momentum_inlet_types;
   /// Velocity function names at velocity inlet boundaries
-  std::vector<FunctionName> _momentum_inlet_function;
+  const std::vector<FunctionName> _momentum_inlet_function;
   /// Velocity outlet types (pressure/mass-outflow/momentum-outflow)
-  MultiMooseEnum _momentum_outlet_types;
+  const MultiMooseEnum _momentum_outlet_types;
   /// Velocity wall types (symmetry/noslip/slip/wallfunction)
-  MultiMooseEnum _momentum_wall_types;
+  const MultiMooseEnum _momentum_wall_types;
 
   /// Energy intlet types (fixed-velocity/mass-flow/momentum-inflow)
-  MultiMooseEnum _energy_inlet_types;
+  const MultiMooseEnum _energy_inlet_types;
   /// Energy function names at inlet boundaries
-  std::vector<FunctionName> _energy_inlet_function;
+  const std::vector<FunctionName> _energy_inlet_function;
   /// Energy wall types (symmetry/heatflux/fixed-temperature)
-  MultiMooseEnum _energy_wall_types;
+  const MultiMooseEnum _energy_wall_types;
   /// Energy function names at wall boundaries
-  std::vector<FunctionName> _energy_wall_function;
+  const std::vector<FunctionName> _energy_wall_function;
 
   /// Pressure function names at pressure boundaries
-  std::vector<FunctionName> _pressure_function;
+  const std::vector<FunctionName> _pressure_function;
 
   /// Subdomains where we want to have ambient convection
-  std::vector<SubdomainName> _ambient_convection_blocks;
+  const std::vector<SubdomainName> _ambient_convection_blocks;
   /// The heat exchange coefficients for ambient convection
-  std::vector<MaterialPropertyName> _ambient_convection_alpha;
+  const std::vector<MaterialPropertyName> _ambient_convection_alpha;
   /// The ambient temperature
-  std::vector<MooseFunctorName> _ambient_temperature;
+  const std::vector<MooseFunctorName> _ambient_temperature;
 
   /// Subdomains where we want to have volumetric friction
-  std::vector<SubdomainName> _friction_blocks;
+  const std::vector<SubdomainName> _friction_blocks;
   /// The friction correlation types used for each block
-  std::vector<std::vector<std::string>> _friction_types;
+  const std::vector<std::vector<std::string>> _friction_types;
   /// The coefficients used for each item if friction type
-  std::vector<std::vector<std::string>> _friction_coeffs;
+  const std::vector<std::vector<std::string>> _friction_coeffs;
 
   /// Name of the density material property
-  MaterialPropertyName _density_name;
+  const MaterialPropertyName _density_name;
   /// Name of the dynamic viscosity material property
-  MaterialPropertyName _dynamic_viscosity_name;
+  const MaterialPropertyName _dynamic_viscosity_name;
   /// Name of the specific heat material property
-  MaterialPropertyName _specific_heat_name;
+  const MaterialPropertyName _specific_heat_name;
   /// Name of the thermal conductivity material property
-  MaterialPropertyName _thermal_conductivity_name;
+  const MaterialPropertyName _thermal_conductivity_name;
   /// Name of the thermal expansion material property
-  MaterialPropertyName _thermal_expansion_name;
+  const MaterialPropertyName _thermal_expansion_name;
 
   /// The type of the advected quantity interpolation method for momentum/velocity
-  MooseEnum _momentum_advection_interpolation;
+  const MooseEnum _momentum_advection_interpolation;
   /// The type of the advected quantity interpolation method for energy/temperature
-  MooseEnum _energy_advection_interpolation;
+  const MooseEnum _energy_advection_interpolation;
   /// The type of the advected quantity interpolation method for continuity equation
-  MooseEnum _mass_advection_interpolation;
+  const MooseEnum _mass_advection_interpolation;
 
   /// The type of the face interpolation method for the velocity/momentum
-  MooseEnum _momentum_face_interpolation;
+  const MooseEnum _momentum_face_interpolation;
   /// The type of the face interpolation method for the temperature/energy
-  MooseEnum _energy_face_interpolation;
+  const MooseEnum _energy_face_interpolation;
   /// The type of the pressure interpolation method
-  MooseEnum _pressure_face_interpolation;
+  const MooseEnum _pressure_face_interpolation;
 
   /// If a two-term Taylor expansion is needed for the determination of the boundary values
   /// of the velocity/momentum
-  bool _momentum_two_term_bc_expansion;
+  const bool _momentum_two_term_bc_expansion;
   /// If a two-term Taylor expansion is needed for the determination of the boundary values
   /// of the temperature/energy
-  bool _energy_two_term_bc_expansion;
+  const bool _energy_two_term_bc_expansion;
   /// If a two-term Taylor expansion is needed for the determination of the boundary values
   /// of the pressure
-  bool _pressure_two_term_bc_expansion;
+  const bool _pressure_two_term_bc_expansion;
 
   /// The scaling factor for the momentum variables
-  Real _momentum_scaling;
+  const Real _momentum_scaling;
   /// The scaling factor for the energy variables
-  Real _energy_scaling;
+  const Real _energy_scaling;
   /// The scaling factor for the mass variables (for incompressible simulation this is pressure scaling)
-  Real _mass_scaling;
+  const Real _mass_scaling;
 
 private:
   /// Process the mesh data and convert block names to block IDs
