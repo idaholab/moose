@@ -37,7 +37,8 @@ public:
   virtual void act() override;
 
 protected:
-  /// Type that we use in Actions for declaring coupling
+  /// Type that we use in Actions for declaring coupling between the solutions
+  /// of different physics components
   typedef std::vector<VariableName> CoupledName;
 
   /// Functions for defining the variables depending on the compressibility option
@@ -89,7 +90,8 @@ protected:
   void addWCNSMomentumTimeKernels();
   void addWCNSEnergyTimeKernels();
 
-  /// Add weakly compressible mixing length kernels in case of turbulent flows
+  /// Add weakly compressible mixing length kernels to the energy equation
+  /// in case of turbulent flows
   void addWCNSEnergyMixingLengthKernels();
 
   /// Add material to define an enthalpy functor material property for incompressible simulations
