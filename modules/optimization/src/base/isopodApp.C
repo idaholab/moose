@@ -36,7 +36,7 @@ isopodApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   // Optimization execution flags
   registerExecFlag(EXEC_FORWARD);
   registerExecFlag(EXEC_ADJOINT);
-  registerExecFlag(EXEC_HESSIAN);
+  registerExecFlag(EXEC_HOMOGENOUS_FORWARD);
 
   // Form Function actions
   registerSyntaxTask("AddOptimizationReporterAction", "OptimizationReporter", "add_reporter");

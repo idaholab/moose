@@ -13,8 +13,7 @@
     recover = false
   []
   [par]
-    requirement = "Make sure everything is working in parallel, like the constantvectorpostprocessor"
-                  " and the vectorpostprocessor dirac kernel"
+    requirement = "Make sure everything is working in parallel"
     type = CSVDiff
     max_threads = 1
     rel_err = 0.01

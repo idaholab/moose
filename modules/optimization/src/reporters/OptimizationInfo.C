@@ -32,6 +32,10 @@ OptimizationInfo::OptimizationInfo(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _optimization_executioner(dynamic_cast<Optimize *>(_app.getExecutioner())),
     _items(getParam<MultiMooseEnum>("items")),
+    _functionValue(declareHelper<std::vector<double>>("function_value", REPORTER_MODE_REPLICATED)),
+    _gnorm(declareHelper<std::vector<double>>("gnorm", REPORTER_MODE_REPLICATED)),
+    _cnorm(declareHelper<std::vector<double>>("cnorm", REPORTER_MODE_REPLICATED)),
+    _xdiff(declareHelper<std::vector<double>>("xdiff", REPORTER_MODE_REPLICATED)),
     _currentIterate(declareHelper<std::vector<int>>("current_iterate", REPORTER_MODE_REPLICATED)),
     _objectiveIterate(
         (!_items.isValid() || _items.contains("current_iterate"))
@@ -44,11 +48,7 @@ OptimizationInfo::OptimizationInfo(const InputParameters & parameters)
     _hessianIterate(
         (!_items.isValid() || _items.contains("current_iterate"))
             ? declareValueByName<std::vector<int>>("hessian_iterate", REPORTER_MODE_REPLICATED)
-            : declareUnusedValue<std::vector<int>>()),
-    _functionValue(declareHelper<std::vector<double>>("function_value", REPORTER_MODE_REPLICATED)),
-    _gnorm(declareHelper<std::vector<double>>("gnorm", REPORTER_MODE_REPLICATED)),
-    _cnorm(declareHelper<std::vector<double>>("cnorm", REPORTER_MODE_REPLICATED)),
-    _xdiff(declareHelper<std::vector<double>>("xdiff", REPORTER_MODE_REPLICATED))
+            : declareUnusedValue<std::vector<int>>())
 {
   if (!_optimization_executioner)
     mooseError("The OptimizationInfo Reporter can only be used with a Optimize Executioner");

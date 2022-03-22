@@ -16,10 +16,10 @@
 # Look at default values including the preconditioner
 [Executioner]
   type = Optimize
-  tao_solver = taonls
-  petsc_options_iname = '-tao_gttol -tao_max_it -tao_nls_pc_type -tao_nls_ksp_type'
-  petsc_options_value = '1e-5 50 none cg'
-  verbose = true
+  tao_solver = taobncg
+  petsc_options_iname = '-tao_gatol -tao_max_it'
+  petsc_options_value = '1e-1 50'
+  verbose = false
 []
 
 [MultiApps]
@@ -32,6 +32,12 @@
     type = OptimizeFullSolveMultiApp
     input_files = adjoint.i
     execute_on = "ADJOINT"
+  []
+  # the forward problem has homogenous boundary conditions so it can be reused here.
+  [homogenousForward]
+    type = OptimizeFullSolveMultiApp
+    input_files = forward.i
+    execute_on = "HOMOGENOUS_FORWARD"
   []
 []
 
@@ -70,6 +76,29 @@
     from_multi_app = adjoint
     from_reporters = 'data_pt/temperature'
     to_reporters = 'OptimizationReporter/adjoint'
+  []
+
+  # HESSIAN transfers.  Same as forward.
+  [fromHomoForward]
+    type = MultiAppReporterTransfer
+    multi_app = homogenousForward
+    direction = from_multiapp
+    from_reporters = 'data_pt/temperature data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+  []
+  [toHomoForward_measument]
+    type = MultiAppReporterTransfer
+    multi_app = homogenousForward
+    direction = to_multiapp
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
+    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
+  []
+  [toHomoForward]
+    type = MultiAppReporterTransfer
+    multi_app = homogenousForward
+    direction = to_multiapp
+    from_reporters = 'OptimizationReporter/parameter_results'
+    to_reporters = 'point_source/value'
   []
 []
 

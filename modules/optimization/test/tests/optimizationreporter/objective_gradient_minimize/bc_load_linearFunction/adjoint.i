@@ -108,7 +108,7 @@
 []
 
 [Outputs]
-  console = true
+  console = false
   #exodus = true
   file_base = 'adjoint'
 []
