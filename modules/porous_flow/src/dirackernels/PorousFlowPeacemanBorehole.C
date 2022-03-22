@@ -94,7 +94,12 @@ PorousFlowPeacemanBorehole::PorousFlowPeacemanBorehole(const InputParameters & p
   if (_p_or_t == PorTchoice::temperature && !_has_thermal_conductivity)
     mooseError("PorousFlowPeacemanBorehole: You have specified function_of=temperature, but you do "
                "not have a quadpoint thermal_conductivity material");
+}
 
+void
+PorousFlowPeacemanBorehole::initialSetup()
+{
+  PorousFlowLineGeometry::initialSetup();
   // construct the rotation matrix needed to rotate the permeability
   const unsigned int num_pts = _zs.size();
   _rot_matrix.resize(std::max(num_pts - 1, (unsigned)1));

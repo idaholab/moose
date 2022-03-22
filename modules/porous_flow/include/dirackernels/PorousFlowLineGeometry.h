@@ -29,6 +29,8 @@ public:
 
   PorousFlowLineGeometry(const InputParameters & parameters);
 
+  void virtual initialSetup() override;
+
 protected:
   /// Line length.  This is only used if there is only one borehole point
   const Real _line_length;
