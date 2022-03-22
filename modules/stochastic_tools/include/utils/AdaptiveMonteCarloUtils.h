@@ -9,8 +9,7 @@
 
 #pragma once
 
-#include "libmesh/utility.h"
-#include "DataIO.h"
+#include "MooseUtils.h"
 
 namespace AdaptiveMonteCarloUtils
 {
@@ -34,5 +33,49 @@ Real computeSTD(const std::vector<Real> & data, const unsigned int & start_index
  * @param the starting index
  */
 Real computeMean(const std::vector<Real> & data, const unsigned int & start_index);
+
+/**
+ * return input values corresponding to the largest po percentile output values.
+ *
+ ****** FOR PARALLEL SUBSET SIMULATION SAMPLER ********
+ *
+ * @param the input vector
+ * @param the output vector
+ * @param the number of samples per subset
+ * @param the subset index
+ * @param the subset intermediate failure probability
+ */
+std::vector<std::vector<Real>> sortInput(const std::vector<std::vector<Real>> & inputs,
+                                         const std::vector<Real> & outputs,
+                                         const unsigned int samplessub,
+                                         const Real subset_prob);
+
+/**
+ * return the largest po percentile output values.
+ *
+ ****** FOR PARALLEL SUBSET SIMULATION SAMPLER ********
+ *
+ * @param the output vector
+ * @param the number of samples per subset
+ * @param the subset index
+ * @param the subset intermediate failure probability
+ */
+std::vector<Real> sortOutput(const std::vector<Real> & outputs,
+                             const unsigned int samplessub,
+                             const Real subset_prob);
+
+/**
+ * return the minimum value in a vector.
+ *
+ * @param the data vector
+ */
+Real computeMin(const std::vector<Real> & data);
+
+/**
+ * return the absolute values in a vector.
+ *
+ * @param the data vector
+ */
+std::vector<Real> computeVectorABS(const std::vector<Real> & data);
 
 } // namespace AdaptiveMonteCarloUtils

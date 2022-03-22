@@ -67,7 +67,7 @@ private:
   const int & _step;
 
   /// Storage for the inputs vector obtained from the reporter
-  const std::vector<Real> & _inputs;
+  const std::vector<std::vector<Real>> & _inputs;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;
