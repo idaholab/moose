@@ -250,6 +250,62 @@ greenGaussGradient(const ElemArg & elem_arg,
   }
 }
 
+/**
+ * Compute a face gradient from Green-Gauss cell gradients, with orthogonality correction
+ * On the boundaries, the boundary element value is used
+ * @param face_arg A face argument specifying the current faceand whether to perform skew
+ * corrections
+ * @param functor The functor that will provide information such as cell and face value evaluations
+ * necessary to construct the cell gradient
+ * @param two_term_boundary_expansion Whether to perform a two-term expansion to compute
+ * extrapolated boundary face values. If this is true, then an implicit system has to be solved. If
+ * false, then the cell center value will be used as the extrapolated boundary face value
+ * @param mesh The mesh on which we are computing the gradient
+ * @param face_to_value_cache An optional parameter. If provided, we will add face to
+ * face-evaluations computed in this function to the map
+ * @return The computed cell gradient
+ */
+template <typename T>
+VectorValue<T>
+greenGaussGradient(const FaceArg & face_arg,
+                   const FunctorBase<T> & functor,
+                   const bool two_term_boundary_expansion,
+                   const MooseMesh & mesh,
+                   std::unordered_map<const FaceInfo *, T> * const face_to_value_cache = nullptr)
+{
+  mooseAssert(face_arg.fi, "We should have a face info to compute a face gradient");
+  const auto & fi = *(face_arg.fi);
+  const auto & elem_arg = face_arg.makeElem();
+  const auto & neighbor_arg = face_arg.makeNeighbor();
+
+  if (!functor.isExtrapolatedBoundaryFace(fi))
+  {
+    // Compute the gradients in the two cells on both sides of the face
+    const auto & grad_elem = greenGaussGradient(
+        elem_arg, functor, two_term_boundary_expansion, mesh, face_to_value_cache);
+    const auto & grad_neighbor = greenGaussGradient(
+        neighbor_arg, functor, two_term_boundary_expansion, mesh, face_to_value_cache);
+
+    VectorValue<T> face_gradient;
+    Moose::FV::interpolate(
+        Moose::FV::InterpMethod::Average, face_gradient, grad_elem, grad_neighbor, fi, true);
+
+    // Perform orthogonality correction
+    const auto & value_elem = functor(elem_arg);
+    const auto & value_neighbor = functor(neighbor_arg);
+
+    face_gradient += outer_product(
+        fi.eCF(), (value_neighbor - value_elem) / fi.dCFMag() - face_gradient * fi.eCF());
+    return face_gradient;
+  }
+
+  // One term expansion
+  if (!fi.neighborPtr())
+    return functor.gradient(elem_arg);
+  else
+    return functor.gradient(neighbor_arg);
+}
+
 template <typename T>
 TensorValue<T>
 greenGaussGradient(const ElemArg & elem_arg,
@@ -264,6 +320,27 @@ greenGaussGradient(const ElemArg & elem_arg,
     VectorComponentFunctor<T> scalar_functor(functor, i);
     const auto row_gradient = greenGaussGradient(
         elem_arg, scalar_functor, two_term_boundary_expansion, mesh, face_to_value_cache);
+    for (const auto j : make_range(unsigned(LIBMESH_DIM)))
+      ret(i, j) = row_gradient(j);
+  }
+
+  return ret;
+}
+
+template <typename T>
+TensorValue<T>
+greenGaussGradient(const FaceArg & face_arg,
+                   const Moose::FunctorBase<VectorValue<T>> & functor,
+                   const bool two_term_boundary_expansion,
+                   const MooseMesh & mesh,
+                   std::unordered_map<const FaceInfo *, T> * const face_to_value_cache = nullptr)
+{
+  TensorValue<T> ret;
+  for (const auto i : make_range(unsigned(LIBMESH_DIM)))
+  {
+    VectorComponentFunctor<T> scalar_functor(functor, i);
+    const auto row_gradient = greenGaussGradient(
+        face_arg, scalar_functor, two_term_boundary_expansion, mesh, face_to_value_cache);
     for (const auto j : make_range(unsigned(LIBMESH_DIM)))
       ret(i, j) = row_gradient(j);
   }

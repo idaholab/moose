@@ -77,6 +77,7 @@ protected:
 
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const Moose::ElemArg & elem_arg, unsigned int) const override;
+  GradientType evaluateGradient(const Moose::FaceArg & face_arg, unsigned int) const override;
 
 private:
   /**
@@ -294,4 +295,12 @@ PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::ElemArg & elem_a
                                                    unsigned int) const
 {
   return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
+}
+
+template <typename T>
+typename PiecewiseByBlockLambdaFunctor<T>::GradientType
+PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::FaceArg & face_arg,
+                                                   unsigned int) const
+{
+  return Moose::FV::greenGaussGradient(face_arg, *this, true, _mesh);
 }
