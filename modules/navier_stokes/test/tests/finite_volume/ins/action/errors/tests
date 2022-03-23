@@ -1,0 +1,60 @@
+[Tests]
+  issues = '#19472'
+  design = 'NSFVAction.md'
+  [momentum-inlet-error]
+    type = 'RunException'
+    input = 2d-rc-ambient-convection-action.i
+    requirement = 'The system shall throw an error if the number of momentum inlet types does not match the number of inlet boundaries.'
+    cli_args = "Modules/NavierStokesFV/momentum_inlet_types=''"
+    expect_err = "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'"
+    ad_indexing_type = 'global'
+  []
+  [momentum-outlet-error]
+    type = 'RunException'
+    input = 2d-rc-ambient-convection-action.i
+    requirement = 'The system shall throw an error if the number of momentum outlet types does not match the number of outlet boundaries.'
+    cli_args = "Modules/NavierStokesFV/momentum_outlet_types=''"
+    expect_err = "Size is not the same as the number of outlet boundaries in 'outlet_boundaries'"
+    ad_indexing_type = 'global'
+  []
+  [pressure-outlet-function-error]
+    type = 'RunException'
+    input = 2d-rc-ambient-convection-action.i
+    requirement = 'The system shall throw an error if the number of momentum outlet types does not match the number of outlet boundaries.'
+    cli_args = "Modules/NavierStokesFV/pressure_function=''"
+    expect_err = "Size is not the same as the number of pressure outlet boundaries!"
+    ad_indexing_type = 'global'
+  []
+  [momentum-wall-error]
+    type = 'RunException'
+    input = 2d-rc-ambient-convection-action.i
+    requirement = 'The system shall throw an error if the number of momentum wall types does not match the number of wall boundaries.'
+    cli_args = "Modules/NavierStokesFV/momentum_wall_types=''"
+    expect_err = "Size is not the same as the number of wall boundaries in 'wall_boundaries'"
+    ad_indexing_type = 'global'
+  []
+  [energy-inlet-error]
+    type = 'RunException'
+    input = 2d-rc-ambient-convection-action.i
+    requirement = 'The system shall throw an error if the number of energy inlet types does not match the number of inlet boundaries.'
+    cli_args = "Modules/NavierStokesFV/energy_inlet_types=''"
+    expect_err = "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'"
+    ad_indexing_type = 'global'
+  []
+  [energy-wall-error]
+    type = 'RunException'
+    input = 2d-rc-ambient-convection-action.i
+    requirement = 'The system shall throw an error if the number of energy wall types does not match the number of wall boundaries.'
+    cli_args = "Modules/NavierStokesFV/energy_wall_types=''"
+    expect_err = "Size is not the same as the number of wall boundaries in 'wall_boundaries'"
+    ad_indexing_type = 'global'
+  []
+  [energy-wall-function-error]
+    type = 'RunException'
+    input = 2d-rc-ambient-convection-action.i
+    requirement = 'The system shall throw an error if the number of energy wall functions does not match the number of energy wall types.'
+    cli_args = "Modules/NavierStokesFV/energy_wall_function=''"
+    expect_err = "Size 0 is not the same as the number of Dirichlet/Neumann conditions in 'energy_wall_types' \(2\)"
+    ad_indexing_type = 'global'
+  []
+[]

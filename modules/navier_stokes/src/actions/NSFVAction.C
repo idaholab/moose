@@ -1844,6 +1844,23 @@ NSFVAction::checkGeneralControErrors()
 void
 NSFVAction::checkBoundaryParameterErrors()
 {
+  if (_outlet_boundaries.size() > 0 && (_outlet_boundaries.size() != _momentum_outlet_types.size()))
+    paramError("momentum_outlet_types",
+               "Size is not the same as the number of outlet boundaries in 'outlet_boundaries'");
+
+  if (_wall_boundaries.size() > 0 && (_wall_boundaries.size() != _momentum_wall_types.size()))
+    paramError("momentum_wall_types",
+               "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
+
+  if (_inlet_boundaries.size() > 0 && (_inlet_boundaries.size() != _momentum_inlet_types.size()))
+    paramError("momentum_inlet_types",
+               "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
+
+  if (_momentum_inlet_function.size() != _inlet_boundaries.size() * _dim)
+    paramError("momentum_inlet_function",
+               "Size is not the same as the number of boundaries in 'inlet_boundaries' times "
+               "the mesh dimension");
+
   unsigned int num_pressure_outlets = 0;
   for (unsigned int enum_ind = 0; enum_ind < _outlet_boundaries.size(); ++enum_ind)
     if (_momentum_outlet_types[enum_ind] == "fixed-pressure" ||
@@ -1859,24 +1876,19 @@ NSFVAction::checkBoundaryParameterErrors()
       mooseError("The pressure must be fixed for an incompressible simulation! Try setting "
                  "pin_pressure or change the compressibility settings!");
 
-  if (_outlet_boundaries.size() > 0 && _outlet_boundaries.size() != _momentum_outlet_types.size())
-    paramError("velocity_outlet_types",
-               "Size is not the same as the number of outlet boundaries in 'outlet_boundaries'");
-
-  if (_wall_boundaries.size() > 0 && _wall_boundaries.size() != _momentum_wall_types.size())
-    paramError("velocity_wall_types",
-               "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
-
-  if (_momentum_inlet_function.size() != _inlet_boundaries.size() * _dim)
-    paramError("momentum_inlet_function",
-               "Size is not the same as the number of boundaries in 'inlet_boundaries' times "
-               "the mesh dimension");
-
   if (_has_energy_equation)
   {
+    if (_inlet_boundaries.size() > 0 && (_inlet_boundaries.size() != _energy_inlet_types.size()))
+      paramError("energy_inlet_types",
+                 "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
+
     if (_inlet_boundaries.size() > 0 && _energy_inlet_types.size() != _energy_inlet_function.size())
       paramError("energy_inlet_function",
                  "Size is not the same as the number of boundaries in 'energy_inlet_types'");
+
+    if (_wall_boundaries.size() > 0 && (_wall_boundaries.size() != _energy_wall_types.size()))
+      paramError("energy_wall_types",
+                 "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
 
     unsigned int num_fixed_energy_walls = 0;
     for (unsigned int enum_ind = 0; enum_ind < _energy_wall_types.size(); ++enum_ind)
@@ -1884,20 +1896,12 @@ NSFVAction::checkBoundaryParameterErrors()
           _energy_wall_types[enum_ind] == "heatflux")
         num_fixed_energy_walls += 1;
 
-    if (_wall_boundaries.size() > 0 && _energy_wall_function.size() != num_fixed_energy_walls)
+    if (_wall_boundaries.size() > 0 && (_energy_wall_function.size() != num_fixed_energy_walls))
       paramError("energy_wall_function",
                  "Size " + std::to_string(_energy_wall_function.size()) +
                      " is not the same as the number of Dirichlet/Neumann conditions in "
                      "'energy_wall_types' (" +
                      std::to_string(num_fixed_energy_walls) + ")");
-
-    if (_inlet_boundaries.size() > 0 && _inlet_boundaries.size() != _energy_inlet_types.size())
-      paramError("energy_inlet_types",
-                 "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
-
-    if (_wall_boundaries.size() > 0 && _wall_boundaries.size() != _energy_wall_types.size())
-      paramError("energy_wall_types",
-                 "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
   }
 }
 
