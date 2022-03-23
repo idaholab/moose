@@ -1,0 +1,15 @@
+#!/bin/bash
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
+# Docker autobuild will initialize submodules; we don't want
+# them in the final image because we end up cloing libmesh
+# and PETSc seperately, and large_media can be cloned
+# later if desired
+git submodule deinit -f large_media libmesh petsc
