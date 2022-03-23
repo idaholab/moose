@@ -14,7 +14,7 @@
     input = 2d-rc-ambient-convection-action.i
     requirement = 'The system shall throw an error if the number of momentum inlet functions does not match the number of inlet boundaries times the dimension of the mesh.'
     cli_args = "Modules/NavierStokesFV/momentum_inlet_function='1'"
-    expect_err = "Size is not the same as the number of boundaries in 'inlet_boundaries' times the mesh dimension"
+    expect_err = "Size is not the same as the number of direction dependent boundaries in 'inlet_boundaries' times the mesh dimension"
     ad_indexing_type = 'global'
   []
   [momentum-outlet-error]

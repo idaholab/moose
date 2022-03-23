@@ -112,14 +112,21 @@ NSFVAction::validParams()
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, 0), "The gravitational acceleration vector.");
 
-  MultiMooseEnum mom_inlet_types("fixed-velocity", "fixed-velocity");
-  params.addParam<MultiMooseEnum>("momentum_inlet_types",
-                                  mom_inlet_types,
-                                  "Types of inlet boundaries for the momentum equation");
+  MultiMooseEnum mom_inlet_types("fixed-velocity flux-velocity flux-mass", "fixed-velocity");
+  params.addParam<MultiMooseEnum>(
+      "momentum_inlet_types",
+      mom_inlet_types,
+      "Types of inlet boundaries for the momentum equation. Flux boundary conditions are dedicated "
+      "for application coupling purposes.");
 
   params.addParam<std::vector<FunctionName>>("momentum_inlet_function",
                                              std::vector<FunctionName>(),
                                              "Functions for inlet boundary velocities");
+  params.addParam<std::vector<PostprocessorName>>(
+      "flux_inlet_pps",
+      std::vector<PostprocessorName>(),
+      "The name of the postprocessors which compute the mass flow/normal velocity magnitude. "
+      "Mainly used for coupling between different applications.");
 
   MultiMooseEnum mom_outlet_types("fixed-pressure zero-gradient fixed-pressure-zero-gradient",
                                   "fixed-pressure");
@@ -178,14 +185,16 @@ NSFVAction::validParams()
 
   params.addParam<MooseFunctorName>("specific_heat", NS::cp, "The name of the specific heat");
 
-  MultiMooseEnum en_inlet_types("fixed-temperature heatflux", "heatflux");
-  params.addParam<MultiMooseEnum>("energy_inlet_types",
-                                  en_inlet_types,
-                                  "Types for the inlet boundaries for the energy equation.");
+  MultiMooseEnum en_inlet_types("fixed-temperature flux-mass flux-velocity heatflux", "heatflux");
+  params.addParam<MultiMooseEnum>(
+      "energy_inlet_types",
+      en_inlet_types,
+      "Types for the inlet boundaries for the energy equation. Flux boundary conditions are "
+      "dedicated for application coupling purposes.");
 
-  params.addParam<std::vector<FunctionName>>(
+  params.addParam<std::vector<std::string>>(
       "energy_inlet_function",
-      std::vector<FunctionName>(),
+      std::vector<std::string>(),
       "Functions for fixed-value boundaries in the energy equation.");
 
   MultiMooseEnum en_wall_types("fixed-temperature heatflux symmetry", "symmetry");
@@ -374,11 +383,12 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
     _momentum_inlet_types(getParam<MultiMooseEnum>("momentum_inlet_types")),
+    _flux_inlet_pps(getParam<std::vector<PostprocessorName>>("flux_inlet_pps")),
     _momentum_inlet_function(getParam<std::vector<FunctionName>>("momentum_inlet_function")),
     _momentum_outlet_types(getParam<MultiMooseEnum>("momentum_outlet_types")),
     _momentum_wall_types(getParam<MultiMooseEnum>("momentum_wall_types")),
     _energy_inlet_types(getParam<MultiMooseEnum>("energy_inlet_types")),
-    _energy_inlet_function(getParam<std::vector<FunctionName>>("energy_inlet_function")),
+    _energy_inlet_function(getParam<std::vector<std::string>>("energy_inlet_function")),
     _energy_wall_types(getParam<MultiMooseEnum>("energy_wall_types")),
     _energy_wall_function(getParam<std::vector<FunctionName>>("energy_wall_function")),
     _pressure_function(getParam<std::vector<FunctionName>>("pressure_function")),
@@ -1283,6 +1293,7 @@ NSFVAction::addINSEnergyExternalHeatSource()
 void
 NSFVAction::addINSInletBC()
 {
+  unsigned int flux_bc_counter = 0;
   for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
   {
     if (_momentum_inlet_types[bc_ind] == "fixed-velocity")
@@ -1305,12 +1316,61 @@ NSFVAction::addINSInletBC()
         _problem->addFVBC(bc_type, vname + "_" + _inlet_boundaries[bc_ind], params);
       }
     }
+    else if (_momentum_inlet_types[bc_ind] == "flux-mass" ||
+             _momentum_inlet_types[bc_ind] == "flux-velocity")
+    {
+      {
+        const std::string bc_type = "WCNSFVMomentumFluxBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+        params.set<PostprocessorName>(NS::density) = _density_name;
+        params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+
+        if (_energy_inlet_types[bc_ind] == "flux-mass")
+        {
+          params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
+          params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
+        }
+        else
+          params.set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
+
+        for (unsigned int d = 0; d < _dim; ++d)
+        {
+          NonlinearVariableName vname;
+          if (_porous_medium_treatment)
+            vname = NS::superficial_velocity_vector[d];
+          else
+            vname = NS::velocity_vector[d];
+
+          params.set<NonlinearVariableName>("variable") = vname;
+
+          _problem->addFVBC(bc_type, vname + "_" + _inlet_boundaries[bc_ind], params);
+        }
+      }
+      {
+        const std::string bc_type = "WCNSFVMassFluxBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+        params.set<PostprocessorName>(NS::density) = _density_name;
+        params.set<NonlinearVariableName>("variable") = NS::pressure;
+        params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+
+        if (_energy_inlet_types[bc_ind] == "flux-mass")
+        {
+          params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
+          params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
+        }
+        else
+          params.set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
+
+        _problem->addFVBC(bc_type, NS::pressure + "_" + _inlet_boundaries[bc_ind], params);
+      }
+    }
   }
 }
 
 void
 NSFVAction::addINSEnergyInletBC()
 {
+  unsigned int flux_bc_counter = 0;
   for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
   {
     if (_energy_inlet_types[bc_ind] == "fixed-temperature")
@@ -1332,6 +1392,29 @@ NSFVAction::addINSEnergyInletBC()
       params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
 
       _problem->addFVBC(bc_type, NS::T_fluid + "_" + _inlet_boundaries[bc_ind], params);
+    }
+    else if (_energy_inlet_types[bc_ind] == "flux-mass" ||
+             _energy_inlet_types[bc_ind] == "flux-velocity")
+    {
+      const std::string bc_type = "WCNSFVEnergyFluxBC";
+      InputParameters params = _factory.getValidParams(bc_type);
+      params.set<NonlinearVariableName>("variable") = NS::T_fluid;
+      if (_energy_inlet_types[bc_ind] == "flux-mass")
+      {
+        params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
+        params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
+      }
+      else
+        params.set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
+
+      params.set<PostprocessorName>("temperature_pp") = _energy_wall_function[bc_ind];
+      params.set<PostprocessorName>(NS::density) = _density_name;
+      params.set<PostprocessorName>(NS::cp) = _specific_heat_name;
+
+      params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+
+      _problem->addFVBC(bc_type, NS::T_fluid + "_" + _inlet_boundaries[bc_ind], params);
+      flux_bc_counter += 1;
     }
   }
 }
@@ -1830,10 +1913,25 @@ NSFVAction::checkBoundaryParameterErrors()
     paramError("momentum_inlet_types",
                "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
 
-  if (_momentum_inlet_function.size() != _inlet_boundaries.size() * _dim)
+  unsigned int num_dir_dependent_bcs = 0;
+  unsigned int num_flux_bc_postprocessors = 0;
+  for (const auto & type : _momentum_inlet_types)
+  {
+    if (type == "fixed-velocity")
+      num_dir_dependent_bcs += 1;
+    else if (type == "flux-velocity" || type == "flux-mass")
+      num_flux_bc_postprocessors += 1;
+  }
+
+  if (_momentum_inlet_function.size() != num_dir_dependent_bcs * _dim)
     paramError("momentum_inlet_function",
-               "Size is not the same as the number of boundaries in 'inlet_boundaries' times "
-               "the mesh dimension");
+               "Size is not the same as the number of direction dependent boundaries in "
+               "'inlet_boundaries' times the mesh dimension");
+
+  if (_flux_inlet_pps.size() != num_flux_bc_postprocessors)
+    paramError("flux_inlet_pps",
+               "The number of flux postprocessors is not equal to the number of flux types in "
+               "'inlet_boundaries'!");
 
   unsigned int num_pressure_outlets = 0;
   for (unsigned int enum_ind = 0; enum_ind < _outlet_boundaries.size(); ++enum_ind)

@@ -147,6 +147,8 @@ protected:
 
   /// Velocity intlet types (fixed-velocity/mass-flow/momentum-inflow)
   const MultiMooseEnum _momentum_inlet_types;
+  /// Momentum/mass inlet flux postprocessors for potential coupling between applications
+  const std::vector<PostprocessorName> _flux_inlet_pps;
   /// Velocity function names at velocity inlet boundaries
   const std::vector<FunctionName> _momentum_inlet_function;
   /// Velocity outlet types (pressure/mass-outflow/momentum-outflow)
@@ -157,7 +159,7 @@ protected:
   /// Energy intlet types (fixed-velocity/mass-flow/momentum-inflow)
   const MultiMooseEnum _energy_inlet_types;
   /// Energy function names at inlet boundaries
-  const std::vector<FunctionName> _energy_inlet_function;
+  const std::vector<std::string> _energy_inlet_function;
   /// Energy wall types (symmetry/heatflux/fixed-temperature)
   const MultiMooseEnum _energy_wall_types;
   /// Energy function names at wall boundaries
