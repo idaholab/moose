@@ -17,8 +17,19 @@
 
 template <class T, class charT = char, class traits = std::char_traits<charT>>
 class infix_ostream_iterator
+/**
+ * GCC9 currently hits a "no type named 'value_type'" error during build if this
+ * is removed and iterator traits are listed within the class corresponding to the
+ * C++17 standard. This preserves use of std::iterator for GCC9 and earlier.
+ */
+#if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ <= 9)
   : public std::iterator<std::output_iterator_tag, void, void, void, void>
+#endif
 {
+#if defined(__clang__) || (__GNUC__ > 9)
+  using iterator_category = std::output_iterator_tag;
+#endif
+
   std::basic_ostream<charT, traits> * os;
   charT const * delimiter;
   bool first_elem;

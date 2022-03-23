@@ -30,15 +30,14 @@ cmake .. -G "Ninja" \
     -DVTK_GROUP_ENABLE_Web:STRING=NO \
     -DCMAKE_OSX_SYSROOT=${CONDA_BUILD_SYSROOT}
 
-CORES=$(echo "${CPU_COUNT:-2} / 2" | bc)
-ninja install -v -j $CORES
+ninja install -v -j ${MOOSE_JOBS:-2}
 
 # VTK 9.1 now places libs in lib64 when installed on linux, linking to the "expected" location of lib
 if [[ $(uname) == Linux ]]; then
     ln -s ${VTK_PREFIX}/lib64 ${VTK_PREFIX}/lib
 fi
 
-# Set LIBMESH_DIR environment variable for those that need it
+# Set VTK environment variables for those that need it
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
 export VTKLIB_DIR=${VTK_PREFIX}/lib

@@ -527,13 +527,15 @@ PeridynamicsMesh::checkPointInsideRectangle(
     Real a = rec_p2(1) - rec_p1(1);
     Real b = rec_p1(0) - rec_p2(0);
     Real c = rec_p2(0) * rec_p1(1) - rec_p2(1) * rec_p1(0);
-    inside *= std::abs(a * point(0) + b * point(1) + c) / crack_length < rec_height / 2.0;
+    inside =
+        inside && (std::abs(a * point(0) + b * point(1) + c) / crack_length < rec_height / 2.0);
 
     a = rec_p2(0) - rec_p1(0);
     b = rec_p2(1) - rec_p1(1);
     c = 0.5 * (rec_p1(1) * rec_p1(1) - rec_p2(1) * rec_p2(1) - rec_p2(0) * rec_p2(0) +
                rec_p1(0) * rec_p1(0));
-    inside *= std::abs(a * point(0) + b * point(1) + c) / crack_length < (tol + crack_length) / 2.0;
+    inside = inside && (std::abs(a * point(0) + b * point(1) + c) / crack_length <
+                        (tol + crack_length) / 2.0);
   }
 
   return inside;
