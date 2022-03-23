@@ -71,7 +71,7 @@
 #include "ConsoleStream.h"
 #include "MooseError.h"
 #include "FVElementalKernel.h"
-#include "FVScalarLagrangeMultiplier.h"
+#include "FVScalarLagrangeMultiplierConstraint.h"
 #include "FVFluxKernel.h"
 #include "UserObject.h"
 #include "OffDiagonalScalingMatrix.h"
@@ -3165,9 +3165,10 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
       kernel_variables.insert(fv_kernel->variable().name());
 
       // Check for lagrange multiplier
-      if (dynamic_cast<FVScalarLagrangeMultiplier *>(fv_kernel))
-        kernel_variables.insert(
-            dynamic_cast<FVScalarLagrangeMultiplier *>(fv_kernel)->lambdaVariable().name());
+      if (dynamic_cast<FVScalarLagrangeMultiplierConstraint *>(fv_kernel))
+        kernel_variables.insert(dynamic_cast<FVScalarLagrangeMultiplierConstraint *>(fv_kernel)
+                                    ->lambdaVariable()
+                                    .name());
     }
 
     std::vector<FVFluxKernel *> fv_flux_kernels;
