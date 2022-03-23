@@ -85,6 +85,9 @@ protected:
   void addINSOutletBC();
   void addINSWallBC();
 
+  void addINSEnergyInletBC();
+  void addINSEnergyWallBC();
+
   /// Functions which add time kernels for transient, weakly-compressible simulations.
   void addWCNSMassTimeKernels();
   void addWCNSMomentumTimeKernels();
