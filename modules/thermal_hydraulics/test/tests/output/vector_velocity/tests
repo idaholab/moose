@@ -3,7 +3,8 @@
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
-    max_parallel = 1
     ad_indexing_type = 'global'
+    recover = false
+    mesh_mode = 'replicated'
   []
 []

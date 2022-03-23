@@ -156,6 +156,9 @@
   l_max_its = 100
 
   automatic_scaling = true
+
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = ' lu'
 []
 
 [Outputs]

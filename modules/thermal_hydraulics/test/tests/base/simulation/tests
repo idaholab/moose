@@ -17,8 +17,8 @@
 \s+hx:secondary
 \s+inlet
 \s+outlet"
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [err.no_smp]

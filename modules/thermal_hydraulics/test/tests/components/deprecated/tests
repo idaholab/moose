@@ -40,7 +40,6 @@
     type = 'RunException'
     input = 'heat_generation.i'
     expect_err = "'HeatGeneration' component is deprecated, use 'HeatSourceFromTotalPower' or 'HeatSourceFromPowerDensity' instead."
-    max_parallel = 1
     ad_indexing_type = 'global'
     design = 'HeatGeneration.md'
     requirement = 'The system shall report an error if the HeatGeneration component is used.'

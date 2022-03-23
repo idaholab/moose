@@ -11,8 +11,8 @@
 \s+hx/secondary
 \s+sec_inlet
 \s+sec_outlet"
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
 
     requirement = 'The system shall allow nesting components into groups in input files'
     design = 'ComponentGroup.md'
