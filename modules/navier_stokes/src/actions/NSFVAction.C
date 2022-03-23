@@ -230,7 +230,10 @@ NSFVAction::validParams()
       "friction_types", "The types of friction forces for every block in 'friction_blocks'.");
 
   params.addParam<std::vector<std::vector<std::string>>>(
-      "friction_coeffs", "The firction coefficients for every item in 'friction_types'.");
+      "friction_coeffs",
+      "The firction coefficients for every item in 'friction_types'. Note that if "
+      "'porous_medium_treatment' is enabled, the coefficients already contain a velocity "
+      "multiplier but they are not multiplied with density yet!");
 
   params.addParamNamesToGroup("friction_blocks friction_types friction_coeffs",
                               "Friction controls");
@@ -480,7 +483,7 @@ NSFVAction::act()
       addINSMomentumViscousDissipationKernels();
       addINSMomentumPressureKernels();
       addINSMomentumGravityKernels();
-      if (_porous_medium_treatment)
+      if (_friction_types.size())
         addINSMomentumFrictionKernels();
 
       if (_turbulence_handling == "mixing-length")
@@ -490,7 +493,8 @@ NSFVAction::act()
       {
         addINSEnergyAdvectionKernels();
         addINSEnergyHeatConductionKernels();
-        addINSEnergyAmbientConvection();
+        if (_ambient_temperature.size())
+          addINSEnergyAmbientConvection();
         if (isParamValid("external_heat_source"))
           addINSEnergyExternalHeatSource();
 
@@ -1061,20 +1065,30 @@ NSFVAction::addINSMomentumBoussinesqKernels()
 void
 NSFVAction::addINSMomentumFrictionKernels()
 {
-  if (_friction_blocks.size())
+  unsigned int num_friction_blocks = _friction_blocks.size();
+  unsigned int num_used_blocks = num_friction_blocks ? num_friction_blocks : 1;
+
+  if (_porous_medium_treatment)
   {
     const std::string kernel_type = "PINSFVMomentumFriction";
     InputParameters params = _factory.getValidParams(kernel_type);
+    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
+    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
 
-    for (unsigned int block_i = 0; block_i < _friction_blocks.size(); ++block_i)
+    for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
     {
-      params.set<std::vector<SubdomainName>>("block") = {_friction_blocks[block_i]};
-      params.set<MooseFunctorName>(NS::density) = _density_name;
+      std::string block_name = "";
+      if (num_friction_blocks)
+      {
+        params.set<std::vector<SubdomainName>>("block") = {_friction_blocks[block_i]};
+        block_name = _friction_blocks[block_i];
+      }
+      else
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
 
       for (unsigned int d = 0; d < _dim; ++d)
       {
-        params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-        params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
         params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
         params.set<MooseEnum>("momentum_component") = NS::directions[d];
         for (unsigned int type_i = 0; type_i < _friction_types[block_i].size(); ++type_i)
@@ -1086,17 +1100,18 @@ NSFVAction::addINSMomentumFrictionKernels()
             params.set<MooseFunctorName>("Forchheimer_name") = _friction_coeffs[block_i][type_i];
         }
 
-        _problem->addFVKernel(kernel_type,
-                              "momentum_friction_" + _friction_blocks[block_i] + " " +
-                                  NS::directions[d],
-                              params);
+        _problem->addFVKernel(
+            kernel_type, "momentum_friction_" + block_name + "_" + NS::directions[d], params);
       }
 
       if (_use_friction_correction)
       {
         const std::string correction_kernel_type = "PINSFVMomentumFrictionCorrection";
         InputParameters corr_params = _factory.getValidParams(correction_kernel_type);
-        corr_params.set<std::vector<SubdomainName>>("block") = {_friction_blocks[block_i]};
+        if (num_friction_blocks)
+          corr_params.set<std::vector<SubdomainName>>("block") = {_friction_blocks[block_i]};
+        else
+          corr_params.set<std::vector<SubdomainName>>("block") = _blocks;
         corr_params.set<MooseFunctorName>(NS::density) = _density_name;
         corr_params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
         corr_params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
@@ -1116,7 +1131,7 @@ NSFVAction::addINSMomentumFrictionKernels()
           }
 
           _problem->addFVKernel(correction_kernel_type,
-                                "momentum_friction_correction_" + _friction_blocks[block_i] + " " +
+                                "pins_momentum_friction_correction_" + block_name + "_" +
                                     NS::directions[d],
                                 corr_params);
         }
@@ -1125,57 +1140,36 @@ NSFVAction::addINSMomentumFrictionKernels()
   }
   else
   {
-    if (_friction_types.size())
+    const std::string kernel_type = "INSFVMomentumFriction";
+    InputParameters params = _factory.getValidParams(kernel_type);
+    params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
+
+    for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
     {
-      const std::string kernel_type = "PINSFVMomentumFriction";
-      InputParameters params = _factory.getValidParams(kernel_type);
-      params.set<std::vector<SubdomainName>>("block") = _blocks;
-      params.set<MooseFunctorName>(NS::density) = _density_name;
+      std::string block_name = "";
+      if (num_friction_blocks)
+      {
+        params.set<std::vector<SubdomainName>>("block") = {_friction_blocks[block_i]};
+        block_name = _friction_blocks[block_i];
+      }
+      else
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
 
       for (unsigned int d = 0; d < _dim; ++d)
       {
-        params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-        params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-        params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
+        params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
         params.set<MooseEnum>("momentum_component") = NS::directions[d];
-        for (unsigned int type_i = 0; type_i < _friction_types[0].size(); ++type_i)
+        for (unsigned int type_i = 0; type_i < _friction_types[block_i].size(); ++type_i)
         {
-          const auto upper_name = MooseUtils::toUpper(_friction_types[0][type_i]);
+          const auto upper_name = MooseUtils::toUpper(_friction_types[block_i][type_i]);
           if (upper_name == "DARCY")
-            params.set<MooseFunctorName>("Darcy_name") = _friction_coeffs[0][type_i];
+            params.set<MooseFunctorName>("linear_coef_name") = _friction_coeffs[block_i][type_i];
           else if (upper_name == "FORCHHEIMER")
-            params.set<MooseFunctorName>("Forchheimer_name") = _friction_coeffs[0][type_i];
+            params.set<MooseFunctorName>("quadratic_coef_name") = _friction_coeffs[block_i][type_i];
         }
 
-        _problem->addFVKernel(kernel_type, "momentum_friction_" + NS::directions[d], params);
-      }
-
-      if (_use_friction_correction)
-      {
-        const std::string correction_kernel_type = "PINSFVMomentumFrictionCorrection";
-        InputParameters corr_params = _factory.getValidParams(correction_kernel_type);
-        corr_params.set<std::vector<SubdomainName>>("block") = _blocks;
-        corr_params.set<MooseFunctorName>(NS::density) = _density_name;
-        corr_params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-        corr_params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-        corr_params.set<Real>("consistent_scaling") = getParam<Real>("consistent_scaling");
-        for (unsigned int d = 0; d < _dim; ++d)
-        {
-          corr_params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
-          corr_params.set<MooseEnum>("momentum_component") = NS::directions[d];
-          for (unsigned int type_i = 0; type_i < _friction_types[0].size(); ++type_i)
-          {
-            const auto upper_name = MooseUtils::toUpper(_friction_types[0][type_i]);
-            if (upper_name == "DARCY")
-              corr_params.set<MooseFunctorName>("Darcy_name") = _friction_coeffs[0][type_i];
-            else if (upper_name == "FORCHHEIMER")
-              corr_params.set<MooseFunctorName>("Forchheimer_name") = _friction_coeffs[0][type_i];
-          }
-
-          _problem->addFVKernel(correction_kernel_type,
-                                "momentum_friction_correction_" + NS::directions[d],
-                                corr_params);
-        }
+        _problem->addFVKernel(
+            kernel_type, "ins_momentum_friction_" + block_name + "_" + NS::directions[d], params);
       }
     }
   }
@@ -1239,38 +1233,30 @@ NSFVAction::addINSEnergyHeatConductionKernels()
 void
 NSFVAction::addINSEnergyAmbientConvection()
 {
-  if (_ambient_convection_blocks.size())
+  unsigned int num_convection_blocks = _ambient_convection_blocks.size();
+  unsigned int num_used_blocks = num_convection_blocks ? num_convection_blocks : 1;
+
+  const std::string kernel_type = "PINSFVEnergyAmbientConvection";
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<NonlinearVariableName>("variable") = NS::T_fluid;
+  params.set<MooseFunctorName>(NS::T_fluid) = NS::T_fluid;
+  params.set<bool>("is_solid") = false;
+
+  for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
   {
-    for (unsigned int block_i = 0; block_i < _ambient_convection_blocks.size(); ++block_i)
+    std::string block_name = "";
+    if (num_convection_blocks)
     {
-      const std::string kernel_type = "PINSFVEnergyAmbientConvection";
-      InputParameters params = _factory.getValidParams(kernel_type);
-      params.set<NonlinearVariableName>("variable") = NS::T_fluid;
       params.set<std::vector<SubdomainName>>("block") = {_ambient_convection_blocks[block_i]};
-      params.set<MooseFunctorName>("h_solid_fluid") = _ambient_convection_alpha[block_i];
-      params.set<MooseFunctorName>(NS::T_solid) = _ambient_temperature[block_i];
-      params.set<MooseFunctorName>(NS::T_fluid) = NS::T_fluid;
-      params.set<bool>("is_solid") = false;
-
-      _problem->addFVKernel(
-          kernel_type, "ambient_convection_" + _ambient_convection_blocks[block_i], params);
+      block_name = _ambient_convection_blocks[block_i];
     }
-  }
-  else
-  {
-    if (_ambient_convection_alpha.size())
-    {
-      const std::string kernel_type = "PINSFVEnergyAmbientConvection";
-      InputParameters params = _factory.getValidParams(kernel_type);
-      params.set<NonlinearVariableName>("variable") = NS::T_fluid;
+    else
       params.set<std::vector<SubdomainName>>("block") = _blocks;
-      params.set<MooseFunctorName>("h_solid_fluid") = _ambient_convection_alpha[0];
-      params.set<MooseFunctorName>(NS::T_solid) = _ambient_temperature[0];
-      params.set<MooseFunctorName>(NS::T_fluid) = NS::T_fluid;
-      params.set<bool>("is_solid") = false;
 
-      _problem->addFVKernel(kernel_type, "ambient_convection", params);
-    }
+    params.set<MooseFunctorName>("h_solid_fluid") = _ambient_convection_alpha[block_i];
+    params.set<MooseFunctorName>(NS::T_solid) = _ambient_temperature[block_i];
+
+    _problem->addFVKernel(kernel_type, "ambient_convection_" + block_name, params);
   }
 }
 
@@ -1956,16 +1942,6 @@ NSFVAction::checkAmbientConvectionParameterErrors()
 void
 NSFVAction::checkFrictionParameterErrors()
 {
-  if (!_porous_medium_treatment)
-  {
-    if (isParamValid("friction_blocks"))
-      paramError("friction_blocks", "Friction is only supported for porous medium treatment!");
-    if (isParamValid("friction_types"))
-      paramError("friction_types", "Friction is only supported for porous medium treatment!");
-    if (isParamValid("friction_coeffs"))
-      paramError("friction_coeffs", "Friction is only supported for porous medium treatment!");
-  }
-
   if (_friction_blocks.size() && _blocks.size())
   {
     for (auto const & block : _friction_blocks)

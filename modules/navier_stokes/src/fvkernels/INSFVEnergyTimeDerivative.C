@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVEnergyTimeDerivative.h"
+#include "INSFVEnergyVariable.h"
 
 #include "NS.h"
 
@@ -32,6 +33,8 @@ INSFVEnergyTimeDerivative::INSFVEnergyTimeDerivative(const InputParameters & par
     _cp(getFunctor<ADReal>(getParam<MooseFunctorName>(NS::cp))),
     _cp_dot(getFunctor<ADReal>(getParam<MooseFunctorName>(NS::time_deriv(NS::cp))))
 {
+  if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
+    paramError("variable", "The supplied variable should be of INSFVEnergyVariable type.");
 }
 
 ADReal

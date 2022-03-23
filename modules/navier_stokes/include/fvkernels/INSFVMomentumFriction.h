@@ -30,6 +30,4 @@ protected:
   const Moose::Functor<ADReal> * const _linear_friction;
   /// The quadratic friction factor, for turbulent flow
   const Moose::Functor<ADReal> * const _quadratic_friction;
-  /// Boolean to select the right model
-  const bool _use_linear_friction;
 };
