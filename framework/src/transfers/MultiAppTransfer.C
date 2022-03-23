@@ -58,9 +58,15 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   if (!isParamValid("multi_app"))
   {
     if (isParamValid("from_multi_app"))
+    {
       _from_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("from_multi_app"));
+      _multi_app = _from_multi_app;
+    }
     if (isParamValid("to_multi_app"))
+    {
       _to_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("to_multi_app"));
+      _multi_app = _to_multi_app;
+    }
   }
   else
   {
@@ -68,9 +74,15 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
     for (const auto & dir : _directions)
     {
       if (dir == FROM_MULTIAPP)
+      {
         _from_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
+        _multi_app = _from_multi_app;
+      }
       else if (dir == TO_MULTIAPP)
+      {
         _to_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
+        _multi_app = _to_multi_app;
+      }
       else
         paramError("direction",
                    "BETWEN_MULTIAPP transfers should be specified using to/from_multi_app");

@@ -48,6 +48,8 @@ public:
       return _from_multi_app;
     else if (_to_multi_app)
       return _to_multi_app;
+    else if (_multi_app)
+      return _multi_app;
     else
       mooseError("Should not get here, there should be a multiapp");
   }
@@ -59,6 +61,9 @@ protected:
   /// The MultiApps this Transfer is transferring data to or from
   std::shared_ptr<MultiApp> _from_multi_app;
   std::shared_ptr<MultiApp> _to_multi_app;
+
+  /// Deprecated class attribute for compatibility with the apps
+  std::shared_ptr<MultiApp> _multi_app;
 
   /**
    * This method will fill information into the convenience member variables
