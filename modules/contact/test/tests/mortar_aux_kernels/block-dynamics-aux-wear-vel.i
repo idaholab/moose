@@ -289,7 +289,7 @@ offset = -0.05
   solve_type = 'NEWTON'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
                   '-snes_linesearch_monitor -snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15'
   nl_max_its = 40
   nl_abs_tol = 1.0e-11
