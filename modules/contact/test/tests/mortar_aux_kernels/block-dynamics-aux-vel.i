@@ -240,8 +240,8 @@ offset = -0.19
   solve_type = 'PJFNK'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
                   '-snes_linesearch_monitor -snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err '
-  petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err '
+  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15                   1e-5'
   nl_max_its = 20
   line_search = 'none'
   snesmf_reuse_base = false

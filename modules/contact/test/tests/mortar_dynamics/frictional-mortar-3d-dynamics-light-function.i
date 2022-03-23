@@ -495,34 +495,34 @@ offset = 0.00
     block = secondary_lower
     variable = mortar_normal_lm
     sort_by = 'id'
-    execute_on = NONLINEAR
+    execute_on = TIMESTEP_END
   []
   [frictional-pressure]
     type = NodalValueSampler
     block = secondary_lower
     variable = mortar_tangential_lm
     sort_by = 'id'
-    execute_on = NONLINEAR
+    execute_on = TIMESTEP_END
   []
   [frictional-pressure-3d]
     type = NodalValueSampler
     block = secondary_lower
     variable = mortar_tangential_3d_lm
     sort_by = 'id'
-    execute_on = NONLINEAR
+    execute_on = TIMESTEP_END
   []
   [tangent_x]
     type = NodalValueSampler
     block = secondary_lower
     variable = mortar_tangent_x
     sort_by = 'id'
-    execute_on = NONLINEAR
+    execute_on = TIMESTEP_END
   []
   [tangent_y]
     type = NodalValueSampler
     block = secondary_lower
     variable = mortar_tangent_y
     sort_by = 'id'
-    execute_on = NONLINEAR
+    execute_on = TIMESTEP_END
   []
 []
