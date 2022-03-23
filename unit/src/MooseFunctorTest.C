@@ -60,25 +60,7 @@ private:
 
   GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final
   {
-    const auto & fi = *face.fi;
-    if (!isExtrapolatedBoundaryFace(fi))
-    {
-      const auto elem_arg = face.makeElem();
-      const auto elem_gradient = this->gradient(elem_arg);
-      const auto neighbor_arg = face.makeNeighbor();
-      const auto linear_interp_gradient =
-          fi.gC() * elem_gradient + (1 - fi.gC()) * this->gradient(neighbor_arg);
-      return linear_interp_gradient +
-             outer_product(((*this)(neighbor_arg) - (*this)(elem_arg)) / fi.dCFMag() -
-                               linear_interp_gradient * fi.eCF(),
-                           fi.eCF());
-    }
-
-    // One term expansion
-    if (!fi.neighborPtr())
-      return this->gradient(face.makeElem());
-    else
-      return this->gradient(face.makeNeighbor());
+    return greenGaussGradient(face, *this, true, _mesh);
   }
 
   const MooseMesh & _mesh;
