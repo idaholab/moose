@@ -26,5 +26,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// the mesh that is passed from the meshgen executed before this meshgen
   std::unique_ptr<MeshBase> & _input;
 };

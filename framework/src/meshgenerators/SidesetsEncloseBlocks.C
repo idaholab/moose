@@ -46,11 +46,7 @@ SidesetsEncloseBlocks::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
-  // Get a reference to our BoundaryInfo object for later use
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
-
-  // get a list of all sides; vector of tuples (elem, loc_side, side_set)
-  auto side_list = boundary_info.build_active_side_list();
 
   // error on finding a side that is not covered
   bool error_out = !isParamValid("new_boundary");
@@ -64,20 +60,18 @@ SidesetsEncloseBlocks::generate()
     if (ss.fail())
       new_sideset_id = boundary_info.get_id_by_name(new_boundary);
 
-    // make sure that _sideset exists
     if (new_sideset_id == BoundaryInfo::invalid_id)
       paramError("new_boundary", "Not a valid boundary");
   }
 
-  // get blocks
   std::vector<subdomain_id_type> vec_block_ids =
       MooseMeshUtils::getSubdomainIDs(*mesh, getParam<std::vector<SubdomainName>>("block"));
   std::set<subdomain_id_type> blk_ids(vec_block_ids.begin(), vec_block_ids.end());
 
   // get boundaries
   // check if the provided sideset name is actually a sideset id
-  // if _sideset_name can be converted to integer it's interpreted
-  // as sideset id
+  // if it can be converted to integer it's interpreted
+  // as a sideset id
   auto boundary_name_vec = getParam<std::vector<BoundaryName>>("boundary");
   std::vector<boundary_id_type> bnd_ids_vec;
   bnd_ids_vec.reserve(boundary_name_vec.size());
@@ -91,7 +85,6 @@ SidesetsEncloseBlocks::generate()
     if (ss.fail())
       sideset_id = boundary_info.get_id_by_name(bnd_name);
 
-    // make sure that _sideset exists
     if (sideset_id == BoundaryInfo::invalid_id)
       paramError("boundary", "Not a valid boundary");
     bnd_ids_vec.push_back(sideset_id);
@@ -105,7 +98,6 @@ SidesetsEncloseBlocks::generate()
     for (const Elem * elem : as_range(mesh->active_local_subdomain_elements_begin(block_id),
                                       mesh->active_local_subdomain_elements_end(block_id)))
     {
-      // loop through sides
       for (unsigned int j = 0; j < elem->n_sides(); ++j)
       {
         const Elem * neigh = elem->neighbor_ptr(j);
@@ -127,7 +119,7 @@ SidesetsEncloseBlocks::generate()
                                 bnd_ids_vec.begin(),
                                 bnd_ids_vec.end(),
                                 std::inserter(intersection, intersection.end()));
-          // is intersection emtpy?
+
           if (intersection.size() == 0)
           {
             if (error_out)
