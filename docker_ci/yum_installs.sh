@@ -60,7 +60,8 @@ yum install -y \
   emacs \
   gtest \
   sudo \
-  file
+  file \
+  zlib-devel
 
 # Clear cache
 yum clean all
