@@ -4,14 +4,13 @@
 
   [sidesets_enclosed_blocks]
     requirement = 'The system shall be able to check of a set of blocks is enclosed by a set of sidesets'
-    recover = false
-
     [check_no_error]
       type = 'Exodiff'
       input = 'sideset_enclose_blocks.i'
       exodiff = 'check_no_error.e'
       detail = '.'
       cli_args = '--mesh-only check_no_error.e'
+      recover = false
     []
 
     [check_error]
@@ -20,6 +19,7 @@
       expect_err = "Element id 5 side 0 is external and not covered by specified boundaries."
       cli_args = 'Mesh/add_sides/paired_block="1" --mesh-only'
       detail = ' and error out if this condition is not met.'
+      recover = false
     []
 
     [add_new_boundary]
@@ -29,6 +29,7 @@
       max_parallel = 1
       cli_args = 'Mesh/add_sides/paired_block="1" Mesh/enclosed/new_boundary=12 --mesh-only add_new_boundary.e'
       detail = ' and upon user request add missing sides into a specified input.'
+      recover = false
     []
   []
 []
