@@ -198,10 +198,10 @@ AutomaticMortarGeneration::getNodalTangents(const Elem & secondary_elem) const
 
   for (const auto n : make_range(secondary_elem.n_nodes()))
   {
-    nodal_tangents_one[n] =
-        libmesh_map_find(_secondary_node_to_hh_nodal_tangents, secondary_elem.node_ptr(n))[0];
-    nodal_tangents_two[n] =
-        libmesh_map_find(_secondary_node_to_hh_nodal_tangents, secondary_elem.node_ptr(n))[1];
+    const auto & tangent_vectors =
+        libmesh_map_find(_secondary_node_to_hh_nodal_tangents, secondary_elem.node_ptr(n));
+    nodal_tangents_one[n] = tangent_vectors[0];
+    nodal_tangents_two[n] = tangent_vectors[1];
   }
 
   return {{nodal_tangents_one, nodal_tangents_two}};
