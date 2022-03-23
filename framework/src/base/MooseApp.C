@@ -1419,8 +1419,8 @@ MooseApp::copyInputs()
     if (binname == "")
       mooseError("could not locate installed tests to run (unresolved binary/app name)");
 
-    auto src_dir = MooseUtils::installedInputsDir(binname, dir_to_copy);
-    auto dst_dir = binname + "_" + dir_to_copy;
+    auto src_dir = MooseUtils::installedInputsDir(binname, dir_to_copy) + "/";
+    auto dst_dir = binname + "/" + dir_to_copy;
     auto cmdname = Moose::getExecutableName();
     if (cmdname.find_first_of("/") != std::string::npos)
       cmdname = cmdname.substr(cmdname.find_first_of("/") + 1, std::string::npos);
@@ -1439,7 +1439,7 @@ MooseApp::copyInputs()
           dir_to_copy,
           "\".");
 
-    std::string cmd = "cp -R " + src_dir + " " + dst_dir;
+    std::string cmd = "mkdir -p " + dst_dir + "; cp -R " + src_dir + " " + dst_dir;
 
     // Only perform the copy on the root processor
     int return_value = 0;
