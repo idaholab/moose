@@ -230,4 +230,59 @@ private:
   void checkAmbientConvectionParameterErrors();
   /// Check errors regarding the friction parameters
   void checkFrictionParameterErrors();
+  /// Check if the user commited errors during the definition of block-wise
+  /// parameters
+  template <typename T>
+  void checkBlockwiseConsistency(const std::string block_param_name,
+                                 const std::vector<std::string> parameter_names);
 };
+
+template <typename T>
+void
+NSFVAction::checkBlockwiseConsistency(const std::string block_param_name,
+                                      const std::vector<std::string> parameter_names)
+{
+  const std::vector<SubdomainName> & block_names =
+      _pars.get<std::vector<SubdomainName>>(block_param_name);
+
+  if (block_names.size())
+  {
+    for (const auto & block : block_names)
+      if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
+        paramError(block_param_name,
+                   "Block '" + block + "' is not present in the block IDs of the module!");
+
+    for (const auto & param_name : parameter_names)
+    {
+      const std::vector<T> & param_vector = _pars.get<std::vector<T>>(param_name);
+      if (block_names.size() != param_vector.size())
+        paramError(param_name,
+                   "The number of entries in '" + param_name +
+                       "' is not the same as the number of blocks in '" + block_param_name + "'!");
+    }
+  }
+  else
+  {
+    unsigned int previous_size = 0;
+    for (unsigned int param_i = 0; param_i < parameter_names.size(); ++param_i)
+    {
+      const std::vector<T> & param_vector = _pars.get<std::vector<T>>(parameter_names[param_i]);
+      if (param_i == 0)
+      {
+        if (param_vector.size() > 1)
+          paramError(parameter_names[param_i],
+                     "The user should only use one or zero entries in " + parameter_names[param_i] +
+                         " if " + block_param_name + " not defined!");
+        previous_size = param_vector.size();
+      }
+      else
+      {
+        if (previous_size != param_vector.size())
+          paramError("ambient_temperature",
+                     "The number of entries in '" + parameter_names[param_i] +
+                         "' is not the same as the number of entries in '" +
+                         parameter_names[param_i - 1] + "'!");
+      }
+    }
+  }
+}

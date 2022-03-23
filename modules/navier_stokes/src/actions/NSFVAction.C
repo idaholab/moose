@@ -415,7 +415,6 @@ NSFVAction::NSFVAction(InputParameters parameters)
   // Running the general checks, the rest are run after we already know some
   // geometry-related parameters.
   checkGeneralControErrors();
-  checkBoundaryParameterErrors();
 }
 
 void
@@ -425,6 +424,9 @@ NSFVAction::act()
   {
     // We process parameters necesary to handle block-restriction
     processBlocks();
+
+    // Check if the user defined the boundary conditions in a sensible way
+    checkBoundaryParameterErrors();
 
     // Check if the user made mistakes in the definition of friction parameters
     checkFrictionParameterErrors();
@@ -1814,10 +1816,6 @@ NSFVAction::processBlocks()
         _blocks.push_back(_mesh->getSubdomainName(id));
     }
   }
-  if (_momentum_inlet_function.size() != _inlet_boundaries.size() * _dim)
-    paramError("momentum_inlet_function",
-               "Size is not the same as the number of boundaries in 'inlet_boundaries' times "
-               "the mesh dimension");
 }
 
 void
@@ -1869,6 +1867,11 @@ NSFVAction::checkBoundaryParameterErrors()
     paramError("velocity_wall_types",
                "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
 
+  if (_momentum_inlet_function.size() != _inlet_boundaries.size() * _dim)
+    paramError("momentum_inlet_function",
+               "Size is not the same as the number of boundaries in 'inlet_boundaries' times "
+               "the mesh dimension");
+
   if (_has_energy_equation)
   {
     if (_inlet_boundaries.size() > 0 && _energy_inlet_types.size() != _energy_inlet_function.size())
@@ -1903,78 +1906,18 @@ NSFVAction::checkAmbientConvectionParameterErrors()
 {
   if (_has_energy_equation)
   {
-    if (_ambient_convection_blocks.size() && _blocks.size())
-    {
-      for (auto const & block : _ambient_convection_blocks)
-        if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
-          paramError("ambient_convection_blocks",
-                     "Block '" + block + "' is not present in the block IDs of the module!");
-
-      if (_ambient_convection_blocks.size() != _ambient_convection_alpha.size())
-        paramError("ambient_convection_alpha",
-                   "The number of heat exchange coefficients is not the same as the number of "
-                   "ambient convection blocks!");
-
-      if (_ambient_convection_blocks.size() != _ambient_temperature.size())
-        paramError("ambient_temperature",
-                   "The number of ambient temperatures is not the same as the number of "
-                   "ambient convection blocks!");
-    }
-    else if ((!_ambient_convection_blocks.size() && !_blocks.size()) ||
-             (!_ambient_convection_blocks.size() && _blocks.size()))
-    {
-      if (_ambient_convection_alpha.size() > 1)
-        paramError("ambient_convection_alpha",
-                   "The user should only use one or zero heat exchange coefficient if the ambient "
-                   "convection blocks are not defined!");
-      if (_ambient_convection_alpha.size() != _ambient_temperature.size())
-        paramError("ambient_temperature",
-                   "The number of ambient temperatures is not the same as the number of "
-                   "heat exchange coefficients!");
-    }
-    else if (_ambient_convection_blocks.size() && !_blocks.size())
-      paramError("ambient_convection_blocks",
-                 "If there are no subdomains defined in 'blocks', ambient convection blocks should "
-                 "not be defined either!");
+    checkBlockwiseConsistency<MooseFunctorName>(
+        "ambient_convection_blocks", {"ambient_convection_alpha", "ambient_temperature"});
   }
 }
 
 void
 NSFVAction::checkFrictionParameterErrors()
 {
-  if (_friction_blocks.size() && _blocks.size())
-  {
-    for (auto const & block : _friction_blocks)
-      if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
-        paramError("friction_blocks",
-                   "Block '" + block + "' is not present in the block IDs of the module!");
+  checkBlockwiseConsistency<std::vector<std::string>>("friction_blocks",
+                                                      {"friction_types", "friction_coeffs"});
 
-    if (_friction_blocks.size() != _friction_types.size())
-      paramError("friction_types",
-                 "The number of zones defined is not equal with the number of zones in "
-                 "'friction_blocks'!");
-
-    if (_friction_blocks.size() != _friction_coeffs.size())
-      paramError("friction_coeffs",
-                 "The number of zones defined is not equal with the number of zones in "
-                 "'friction_blocks'!");
-  }
-  else if ((!_friction_blocks.size() && !_blocks.size()) ||
-           (!_friction_blocks.size() && _blocks.size()))
-  {
-    if (_friction_types.size() > 1)
-      paramError("friction_types",
-                 "The user should only use one or zero zones in the friction type definition!");
-    if (_friction_coeffs.size() != _friction_types.size())
-      paramError("friction_coeffs",
-                 "The number of zones for the friction coefficients should also be one or zero!");
-  }
-  else if (_friction_blocks.size() && !_blocks.size())
-    paramError("friction_blocks",
-               "If there are no subdomains defined in 'blocks', friction blocks should "
-               "not be defined either!");
-
-  for (unsigned int block_i = 0; block_i < _friction_blocks.size(); ++block_i)
+  for (unsigned int block_i = 0; block_i < _friction_types.size(); ++block_i)
     if (_friction_types[block_i].size() != _friction_coeffs[block_i].size())
     {
       paramError("friction_coeffs",
