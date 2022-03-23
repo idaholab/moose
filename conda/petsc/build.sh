@@ -16,7 +16,6 @@ export CXXFLAGS=$(echo ${CXXFLAGS:-} | sed -E 's@\-fdebug\-prefix\-map[^ ]*@@g')
 export FFLAGS=$(echo ${FFLAGS:-} | sed -E 's@\-fdebug\-prefix\-map[^ ]*@@g')
 export FCFLAGS="$FFLAGS"
 export HYDRA_LAUNCHER=fork
-export LIBS="-lmpifort -lgfortran"
 
 if [[ $(uname) == Darwin ]]; then
     if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
@@ -36,6 +35,14 @@ else
     FFLAGS="${FFLAGS} -I$PREFIX/include"
     FCFLAGS="${FCFLAGS} -I$PREFIX/include"
 fi
+
+# Set empty HDF5 variables for the configure PETSc script, since we want to use
+# the downloaded PETSc HDF5. This is to avoid an "unbound variable" error in
+# scripts/configure_petsc.sh
+HDF5_DIR=""
+HDF5DIR=""
+HDF5_ROOT=""
+HDF5_STR=""
 
 source $PETSC_DIR/configure_petsc.sh
 configure_petsc \
@@ -57,7 +64,6 @@ configure_petsc \
     FFLAGS="$FFLAGS" \
     FCFLAGS="$FCFLAGS" \
     LDFLAGS="$LDFLAGS" \
-    LIBS="$LIBS" \
     --prefix=$PREFIX || (cat configure.log && exit 1)
 
 # Verify that gcc_ext isn't linked

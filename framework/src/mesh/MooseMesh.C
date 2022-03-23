@@ -2688,8 +2688,11 @@ namespace // Anonymous namespace for helpers
 // iterator_traits will work.
 // This object specifically is used to insert extra ghost elems into the mesh
 template <typename T>
-struct extra_ghost_elem_inserter : std::iterator<std::output_iterator_tag, T>
+struct extra_ghost_elem_inserter
 {
+  using iterator_category = std::output_iterator_tag;
+  using value_type = T;
+
   extra_ghost_elem_inserter(DistributedMesh & m) : mesh(m) {}
 
   void operator=(const Elem * e) { mesh.add_extra_ghost_elem(const_cast<Elem *>(e)); }
