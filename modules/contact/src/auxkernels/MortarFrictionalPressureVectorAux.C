@@ -16,7 +16,7 @@ InputParameters
 MortarFrictionalPressureVectorAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;
+  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
 
   params.addClassDescription("This class creates an auxiliary vector for outputting the mortar "
                              "frictional pressure vector.");
