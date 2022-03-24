@@ -31,6 +31,7 @@ private:
   /// Tangent along the second direction
   const MooseArray<Real> * const _tangent_two;
 
+  /// Fe problem to obtain primary/secondary ids
   const FEProblemBase & _fe_problem;
 
   /// Boundary ID for the primary surface

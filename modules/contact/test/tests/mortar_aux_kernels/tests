@@ -54,8 +54,6 @@
     input = 'frictional-mortar-3d-status.i'
     rel_err = 1.0e-3
     abs_zero = 1.0e-4
-    min_parallel = 1
-    max_parallel = 2
     min_ad_size = '100'
     ad_indexing_type = 'global'
     cli_args = 'AuxKernels/frictional_state/tangent_two=mortar_tangential_3d_lm'

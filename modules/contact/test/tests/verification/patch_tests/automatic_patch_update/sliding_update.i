@@ -57,7 +57,7 @@
    nl_abs_tol = 1e-4
    dt = 2.0
    line_search = 'none'
-   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
    petsc_options_value = 'lu superlu_dist'
    timestep_tolerance = 1e-1
 []

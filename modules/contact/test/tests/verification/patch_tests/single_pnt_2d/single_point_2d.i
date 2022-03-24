@@ -200,7 +200,7 @@
   type = Transient
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_superlu_dist_iterrefine'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -mat_superlu_dist_iterrefine'
   petsc_options_value = 'lu    superlu_dist 1'
 
   line_search = 'none'
