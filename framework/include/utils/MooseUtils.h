@@ -241,6 +241,13 @@ std::string stripExtension(const std::string & s);
 std::pair<std::string, std::string> splitFileName(std::string full_file);
 
 /**
+ * Returns the current working directory as a string. If there's a problem
+ * obtaining the current working directory, this function just returns an
+ * empty string. It doesn't not throw.
+ */
+std::string getCurrentWorkingDir();
+
+/**
  * Recursively make directories
  * @param dir_name A complete path
  * @param throw_on_failure True to throw instead of error out when creating a directory is failed.
