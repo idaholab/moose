@@ -483,7 +483,8 @@ interpCoeffs(const Limiter<T> & limiter,
              const T & phi_downwind,
              const VectorValue<T> * const grad_phi_upwind,
              const FaceInfo & fi,
-             const bool fi_elem_is_upwind)
+             const bool fi_elem_is_upwind,
+             const bool correct_skewness = false)
 {
   // Using beta, w_f, g nomenclature from Greenshields
   const auto beta = limiter(phi_upwind,
@@ -491,7 +492,9 @@ interpCoeffs(const Limiter<T> & limiter,
                             grad_phi_upwind,
                             fi_elem_is_upwind ? fi.dCF() : RealVectorValue(-fi.dCF()));
 
-  const auto w_f = fi_elem_is_upwind ? fi.gC() : (1. - fi.gC());
+  const auto gC = correct_skewness ? fi.gCSkewed() : fi.gC();
+
+  const auto w_f = fi_elem_is_upwind ? gC : (1. - gC);
 
   const auto g = beta * (1. - w_f);
 
@@ -634,13 +637,23 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face)
   std::pair<T, T> interp_coeffs;
   if (face.limiter_type == LimiterType::Upwind ||
       face.limiter_type == LimiterType::CentralDifference)
-    interp_coeffs =
-        interpCoeffs(*limiter, phi_upwind, phi_downwind, &zero, *face.fi, face.elem_is_upwind);
+    interp_coeffs = interpCoeffs(*limiter,
+                                 phi_upwind,
+                                 phi_downwind,
+                                 &zero,
+                                 *face.fi,
+                                 face.elem_is_upwind,
+                                 face.correct_skewness);
   else
   {
     const auto grad_phi_upwind = functor.gradient(upwind_arg);
-    interp_coeffs = interpCoeffs(
-        *limiter, phi_upwind, phi_downwind, &grad_phi_upwind, *face.fi, face.elem_is_upwind);
+    interp_coeffs = interpCoeffs(*limiter,
+                                 phi_upwind,
+                                 phi_downwind,
+                                 &grad_phi_upwind,
+                                 *face.fi,
+                                 face.elem_is_upwind,
+                                 face.correct_skewness);
   }
 
   if (face.elem_is_upwind)

@@ -61,6 +61,7 @@ limiterType(const InterpMethod interp_method)
   switch (interp_method)
   {
     case InterpMethod::Average:
+    case InterpMethod::SkewCorrectedAverage:
       return LimiterType::CentralDifference;
 
     case InterpMethod::Upwind:

@@ -47,13 +47,16 @@ INSFVMomentumAdvection::computeQpResidual()
 {
   using namespace Moose::FV;
 
+  const bool correct_skewness = _advected_interp_method == InterpMethod::SkewCorrectedAverage;
   const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
   const auto [interp_coeffs, advected] =
       interpCoeffsAndAdvected(_rho_u,
                               makeFace(*_face_info,
                                        limiterType(_advected_interp_method),
                                        MetaPhysicL::raw_value(v) * _normal > 0,
-                                       faceArgSubdomains()));
+                                       faceArgSubdomains(),
+                                       correct_skewness,
+                                       correct_skewness));
 
   const auto elem_face = elemFromFace();
   const auto neighbor_face = neighborFromFace();
