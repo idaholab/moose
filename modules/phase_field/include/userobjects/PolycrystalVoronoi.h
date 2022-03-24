@@ -71,4 +71,6 @@ private:
   bool _use_kdtree;
   /// The number of nearest points
   unsigned int _patch_size;
+  /// The number of neighboring grains
+  unsigned int _grain_patch_size;
 };

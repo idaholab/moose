@@ -30,7 +30,12 @@ PolycrystalVoronoi::validParams()
       "columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
   params.addParam<bool>(
       "use_kdtree", true, "Whether or not to use a KD tree to speedup grain search");
-  params.addParam<unsigned int>("patch_size", 1, "How many nearest points KDTree should return");
+  params.addRangeCheckedParam<unsigned int>(
+      "patch_size", 1, "patch_size > 0", "How many nearest points KDTree should return");
+  params.addRangeCheckedParam<unsigned int>("grain_patch_size",
+                                            10,
+                                            "grain_patch_size > 0",
+                                            "How many nearest grains KDTree should return");
   params.addParam<FileName>(
       "file_name",
       "",
@@ -49,7 +54,8 @@ PolycrystalVoronoi::PolycrystalVoronoi(const InputParameters & parameters)
     _file_name(getParam<FileName>("file_name")),
     _kd_tree(nullptr),
     _use_kdtree(getParam<bool>("use_kdtree")),
-    _patch_size(getParam<unsigned int>("patch_size"))
+    _patch_size(getParam<unsigned int>("patch_size")),
+    _grain_patch_size(getParam<unsigned int>("grain_patch_size"))
 {
   if (_file_name == "" && _grain_num == 0)
     mooseError("grain_num must be provided if the grain centroids are not read from a file");
@@ -73,7 +79,6 @@ PolycrystalVoronoi::getGrainsBasedOnPoint(const Point & point,
     mooseAssert(_kd_tree, "KD tree is not constructed yet");
     mooseAssert(_grain_gtl_ids.size() == _new_points.size(),
                 "The number of grain global IDs does not match that of new center points");
-    mooseAssert(_patch_size > 0, "Patch size should be at least one ");
 
     std::vector<std::size_t> return_index(_patch_size);
     std::vector<Real> return_dist_sqr(_patch_size);
@@ -120,16 +125,45 @@ PolycrystalVoronoi::getGrainsBasedOnPoint(const Point & point,
   grains.push_back(min_index); // closest centerpoint always gets included
 
   if (_int_width > 0.0)
-    for (MooseIndex(_centerpoints) grain = 0; grain < n_grains; ++grain)
-      if (grain != min_index)
-      {
-        Point next_grain = _centerpoints[grain];
-        Point N = findNormalVector(point, current_grain, next_grain);
-        Point cntr = findCenterPoint(point, current_grain, next_grain);
-        distance = N * (cntr - point);
-        if (distance < _int_width)
-          grains.push_back(grain); // also include all grains with nearby boundaries
-      }
+  {
+    if (_use_kdtree)
+    {
+      mooseAssert(_grain_patch_size < _grain_gtl_ids.size(),
+                  "Number of neighboring grains should not exceed number of global grains");
+
+      std::vector<std::size_t> return_index(_grain_patch_size);
+      _kd_tree->neighborSearch(current_grain, _grain_patch_size, return_index);
+
+      std::set<dof_id_type> neighbor_grains;
+      for (unsigned int i = 0; i < _grain_patch_size; i++)
+        if (_grain_gtl_ids[return_index[i]] != min_index)
+          neighbor_grains.insert(_grain_gtl_ids[return_index[i]]);
+
+      for (auto it = neighbor_grains.begin(); it != neighbor_grains.end(); ++it)
+        if ((*it) != min_index)
+        {
+          Point next_grain = _centerpoints[*it];
+          Point N = findNormalVector(point, current_grain, next_grain);
+          Point cntr = findCenterPoint(point, current_grain, next_grain);
+          distance = N * (cntr - point);
+          if (distance < _int_width)
+            grains.push_back(*it); // also include all grains with nearby boundaries
+        }
+    }
+    else
+    {
+      for (MooseIndex(_centerpoints) grain = 0; grain < n_grains; ++grain)
+        if (grain != min_index)
+        {
+          Point next_grain = _centerpoints[grain];
+          Point N = findNormalVector(point, current_grain, next_grain);
+          Point cntr = findCenterPoint(point, current_grain, next_grain);
+          distance = N * (cntr - point);
+          if (distance < _int_width)
+            grains.push_back(grain); // also include all grains with nearby boundaries
+        }
+    }
+  }
 }
 
 Real
@@ -221,7 +255,7 @@ PolycrystalVoronoi::buildSearchTree()
     return;
 
   auto midplane = _bottom_left + _range / 2.0;
-  dof_id_type lgrianid = 0;
+  dof_id_type local_grain_id = 0;
   _grain_gtl_ids.clear();
   _grain_gtl_ids.reserve(_centerpoints.size() * std::pow(2.0, _mesh.dimension()));
   _new_points.clear();
@@ -229,15 +263,15 @@ PolycrystalVoronoi::buildSearchTree()
   _new_points.reserve(_centerpoints.size() * std::pow(2.0, _mesh.dimension()));
   // Domain will be extended along the periodic directions
   // For each direction, a half domain is constructed
-  std::vector<std::vector<Real>> xyzs(3);
+  std::vector<std::vector<Real>> xyzs(LIBMESH_DIM);
   for (auto & point : _centerpoints)
   {
     // Cear up
-    for (unsigned int i = 0; i < 3; i++)
+    for (unsigned int i = 0; i < LIBMESH_DIM; i++)
       xyzs[i].clear();
 
     // Have at least the original point
-    for (unsigned int i = 0; i < 3; i++)
+    for (unsigned int i = 0; i < LIBMESH_DIM; i++)
       xyzs[i].push_back(point(i));
 
     // Add new coords when there exists periodic boundary conditions
@@ -252,16 +286,16 @@ PolycrystalVoronoi::buildSearchTree()
         for (auto z : xyzs[2])
         {
           _new_points.push_back(Point(x, y, z));
-          _grain_gtl_ids.push_back(lgrianid);
+          _grain_gtl_ids.push_back(local_grain_id);
         }
 
-    lgrianid++;
+    local_grain_id++;
   }
 
   // Build a KDTree that is used to speedup point search
   // We should not destroy _new_points after the tree is contributed
   // KDTree use a reference to "_new_points"
-  _kd_tree = libmesh_make_unique<KDTree>(_new_points, _mesh.getMaxLeafSize());
+  _kd_tree = std::make_unique<KDTree>(_new_points, _mesh.getMaxLeafSize());
 }
 
 Real
