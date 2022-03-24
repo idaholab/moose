@@ -251,3 +251,4 @@ public:
   Function(const InputParameters & params) : FunctionTempl<Real>(params) {}
 };
 
+typedef FunctionTempl<ADReal> ADFunction;
