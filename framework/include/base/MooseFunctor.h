@@ -172,15 +172,33 @@ struct FaceArg
                                                                 r.elem_sub_id,
                                                                 l.neighbor_sub_id);
   }
+
+  std::pair<bool, SubdomainID> isConsumerBoundaryFace() const
+  {
+    mooseAssert(fi, "This must be non-null");
+    SubdomainID sub_id = fi->elem().subdomain_id();
+    bool is_boundary_face = false;
+    if (sub_id != elem_sub_id)
+    {
+      mooseAssert(fi->neighborPtr() && fi->neighbor().subdomain_id() == neighbor_sub_id,
+                  "If the element subdomain ID doesn't match, then the neighbor must.");
+      sub_id = fi->neighbor().subdomain_id();
+      is_boundary_face = true;
+    }
+    else if (!fi->neighborPtr() || fi->neighbor().subdomain_id() != neighbor_sub_id)
+      is_boundary_face = true;
+
+    return std::make_pair(is_boundary_face, sub_id);
+  }
 };
 
 /**
  * A structure defining a "single-sided face" evaluation argument for Moose functors. This is
- * identical to the \p FaceArg argument with the exception that a single SubdomainID is given as the
- * last argument to the tuple. This allows disambiguation, in \p FunctorMaterialProperty contexts,
- * of which property definition to use at a face on which there may be different property
- * definitions on either side of the face. Additionally this overload can be useful when on an
- * external boundary face when we want to avoid using ghost information
+ * identical to the \p FaceArg argument with the exception that a single SubdomainID is given as
+ * the last argument to the tuple. This allows disambiguation, in \p FunctorMaterialProperty
+ * contexts, of which property definition to use at a face on which there may be different
+ * property definitions on either side of the face. Additionally this overload can be useful when
+ * on an external boundary face when we want to avoid using ghost information
  */
 struct SingleSidedFaceArg
 {
@@ -937,8 +955,8 @@ public:
 
   /**
    * @param wrapped A unique pointer around the functor to wrap. We *will* own the wrapped object,
-   * e.g. if we are ever destructed or we are reassigned to wrap another functor, then this functor
-   * will be destructed
+   * e.g. if we are ever destructed or we are reassigned to wrap another functor, then this
+   * functor will be destructed
    */
   FunctorEnvelope(std::unique_ptr<FunctorBase<T>> && wrapped)
     : FunctorBase<T>("wraps_" + wrapped->functorName()),
@@ -949,14 +967,14 @@ public:
   }
 
   /**
-   * Prevent wrapping of a temporary object. If we are to own a functor, the unique_ptr constructor
-   * overload should be used
+   * Prevent wrapping of a temporary object. If we are to own a functor, the unique_ptr
+   * constructor overload should be used
    */
   FunctorEnvelope(FunctorBase<T> &&) = delete;
 
   /**
-   * @param wrapped The functor to wrap. We will *not* not own the wrapped object. If we previously
-   * owned a functor, it will be destructed
+   * @param wrapped The functor to wrap. We will *not* not own the wrapped object. If we
+   * previously owned a functor, it will be destructed
    */
   void assign(const FunctorBase<T> & wrapped)
   {
