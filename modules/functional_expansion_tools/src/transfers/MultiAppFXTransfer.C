@@ -45,14 +45,14 @@ MultiAppFXTransfer::MultiAppFXTransfer(const InputParameters & parameters)
 {
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
-  if (_to_multi_app && _from_multi_app)
+  if (hasToMultiApp() && hasFromMultiApp())
     mooseError("This transfer does not currently support between_multiapp transfer");
 }
 
 void
 MultiAppFXTransfer::initialSetup()
 {
-  const auto multi_app = _from_multi_app ? _from_multi_app : _to_multi_app;
+  const auto multi_app = hasFromMultiApp() ? getFromMultiApp() : getToMultiApp();
 
   // Search for the _this_app_object_name in the LocalApp
   getMultiAppObject =
@@ -168,16 +168,16 @@ MultiAppFXTransfer::execute()
     {
       // Get a reference to the object in the LocalApp
       const MutableCoefficientsInterface & from_object =
-          (this->*getMultiAppObject)(_to_multi_app->problemBase(), _this_app_object_name, 0);
+          (this->*getMultiAppObject)(getToMultiApp()->problemBase(), _this_app_object_name, 0);
 
-      for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); ++i)
+      for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); ++i)
       {
-        if (_to_multi_app->hasLocalApp(i))
+        if (getToMultiApp()->hasLocalApp(i))
           for (THREAD_ID t = 0; t < libMesh::n_threads(); ++t)
           {
             // Get a reference to the object in each MultiApp
             MutableCoefficientsInterface & to_object = (this->*getSubAppObject)(
-                _to_multi_app->appProblemBase(i), _multi_app_object_name, t);
+                getToMultiApp()->appProblemBase(i), _multi_app_object_name, t);
 
             if (to_object.isCompatibleWith(from_object))
               to_object.importCoefficients(from_object);
@@ -200,17 +200,17 @@ MultiAppFXTransfer::execute()
        * among all instances, thus we only need to grab the set of coefficients from the first
        * SubApp.
        */
-      if (_from_multi_app->hasLocalApp(0))
+      if (getFromMultiApp()->hasLocalApp(0))
       {
         // Get a reference to the first thread object in the first MultiApp
-        const MutableCoefficientsInterface & from_object =
-            (this->*getSubAppObject)(_from_multi_app->appProblemBase(0), _multi_app_object_name, 0);
+        const MutableCoefficientsInterface & from_object = (this->*getSubAppObject)(
+            getFromMultiApp()->appProblemBase(0), _multi_app_object_name, 0);
 
         for (THREAD_ID t = 0; t < libMesh::n_threads(); ++t)
         {
           // Get a reference to the object in each LocalApp instance
-          MutableCoefficientsInterface & to_object =
-              (this->*getMultiAppObject)(_from_multi_app->problemBase(), _this_app_object_name, t);
+          MutableCoefficientsInterface & to_object = (this->*getMultiAppObject)(
+              getFromMultiApp()->problemBase(), _this_app_object_name, t);
 
           if (to_object.isCompatibleWith(from_object))
             to_object.importCoefficients(from_object);

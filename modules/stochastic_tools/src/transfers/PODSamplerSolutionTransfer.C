@@ -29,9 +29,9 @@ PODSamplerSolutionTransfer::validParams()
 PODSamplerSolutionTransfer::PODSamplerSolutionTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters),
     SurrogateModelInterface(this),
-    _pod_multi_app(_from_multi_app
-                       ? std::dynamic_pointer_cast<PODFullSolveMultiApp>(_from_multi_app)
-                       : std::dynamic_pointer_cast<PODFullSolveMultiApp>(_to_multi_app)),
+    _pod_multi_app(hasFromMultiApp()
+                       ? std::dynamic_pointer_cast<PODFullSolveMultiApp>(getFromMultiApp())
+                       : std::dynamic_pointer_cast<PODFullSolveMultiApp>(getToMultiApp())),
     _trainer(getSurrogateTrainer<PODReducedBasisTrainer>("trainer_name"))
 {
   if (!_pod_multi_app)
@@ -41,7 +41,7 @@ PODSamplerSolutionTransfer::PODSamplerSolutionTransfer(const InputParameters & p
 void
 PODSamplerSolutionTransfer::initialSetup()
 {
-  const auto multi_app = _from_multi_app ? _from_multi_app : _to_multi_app;
+  const auto multi_app = hasFromMultiApp() ? getFromMultiApp() : getToMultiApp();
 
   // Checking if the subapplication has the requested variables
   const std::vector<std::string> & var_names = _trainer.getVarNames();
@@ -71,7 +71,7 @@ PODSamplerSolutionTransfer::execute()
            ++i)
       {
         // Getting reference to the  solution vector of the sub-app.
-        FEProblemBase & app_problem = _from_multi_app->appProblemBase(i);
+        FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
         NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
         NumericVector<Number> & solution = nl.solution();
 
@@ -105,10 +105,10 @@ PODSamplerSolutionTransfer::execute()
         unsigned int var_base_num = _trainer.getBaseSize(var_i);
         for (unsigned int base_i = 0; base_i < var_base_num; ++base_i)
         {
-          if (_to_multi_app->hasLocalApp(counter))
+          if (getToMultiApp()->hasLocalApp(counter))
           {
             // Getting the reference to the solution vector in the subapp.
-            FEProblemBase & app_problem = _to_multi_app->appProblemBase(counter);
+            FEProblemBase & app_problem = getToMultiApp()->appProblemBase(counter);
             NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
             NumericVector<Number> & solution = nl.solution();
 
@@ -148,14 +148,14 @@ PODSamplerSolutionTransfer::executeFromMultiapp()
   {
     const std::vector<std::string> & var_names = _trainer.getVarNames();
 
-    const dof_id_type n = _from_multi_app->numGlobalApps();
+    const dof_id_type n = getFromMultiApp()->numGlobalApps();
 
     for (MooseIndex(n) i = 0; i < n; i++)
     {
-      if (_from_multi_app->hasLocalApp(i))
+      if (getFromMultiApp()->hasLocalApp(i))
       {
         // Getting reference to the  solution vector of the sub-app.
-        FEProblemBase & app_problem = _from_multi_app->appProblemBase(i);
+        FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
         NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
         NumericVector<Number> & solution = nl.solution();
 
@@ -198,7 +198,7 @@ PODSamplerSolutionTransfer::executeToMultiapp()
     dof_id_type var_i = _trainer.getVariableIndex(_global_index);
 
     // Getting the reference to the solution vector in the subapp.
-    FEProblemBase & app_problem = _to_multi_app->appProblemBase(processor_id());
+    FEProblemBase & app_problem = getToMultiApp()->appProblemBase(processor_id());
     NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
     NumericVector<Number> & solution = nl.solution();
 

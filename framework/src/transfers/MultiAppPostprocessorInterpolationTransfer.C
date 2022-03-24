@@ -114,12 +114,10 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       {
         for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
         {
-          if (getFromMultiApp()->hasLocalApp(i) &&
-              getFromMultiApp()->isRootProcessor())
+          if (getFromMultiApp()->hasLocalApp(i) && getFromMultiApp()->isRootProcessor())
           {
             src_pts.push_back(getFromMultiApp()->position(i));
-            src_vals.push_back(
-                getFromMultiApp()->appPostprocessorValue(i, _postprocessor));
+            src_vals.push_back(getFromMultiApp()->appPostprocessorValue(i, _postprocessor));
           }
         }
       }

@@ -410,8 +410,8 @@ MultiAppInterpolationTransfer::execute()
 {
   _console << "Beginning InterpolationTransfer " << name() << std::endl;
 
-  const FEProblemBase & fe_problem = hasFromMultiApp() ? getFromMultiApp()->problemBase()
-                                                       : getToMultiApp()->problemBase();
+  const FEProblemBase & fe_problem =
+      hasFromMultiApp() ? getFromMultiApp()->problemBase() : getToMultiApp()->problemBase();
   std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> idi;
   switch (_interp_type)
   {

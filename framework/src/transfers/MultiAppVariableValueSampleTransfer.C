@@ -55,15 +55,11 @@ MultiAppVariableValueSampleTransfer::initialSetup()
   variableIntegrityCheck(_to_var_name);
 
   if (isParamValid("from_multi_app"))
-    getFromMultiApp()
-        ->problemBase()
-        .mesh()
-        .errorIfDistributedMesh("MultiAppVariableValueSampleTransfer");
+    getFromMultiApp()->problemBase().mesh().errorIfDistributedMesh(
+        "MultiAppVariableValueSampleTransfer");
   if (isParamValid("to_multi_app"))
-    getToMultiApp()
-        ->problemBase()
-        .mesh()
-        .errorIfDistributedMesh("MultiAppVariableValueSampleTransfer");
+    getToMultiApp()->problemBase().mesh().errorIfDistributedMesh(
+        "MultiAppVariableValueSampleTransfer");
 }
 
 void
@@ -118,14 +114,12 @@ MultiAppVariableValueSampleTransfer::execute()
           Moose::ScopedCommSwapper swapper(getToMultiApp()->comm());
 
           // Loop over the master nodes and set the value of the variable
-          System * to_sys =
-              find_sys(getToMultiApp()->appProblemBase(i).es(), _to_var_name);
+          System * to_sys = find_sys(getToMultiApp()->appProblemBase(i).es(), _to_var_name);
 
           unsigned int sys_num = to_sys->number();
           unsigned int var_num = to_sys->variable_number(_to_var_name);
 
-          NumericVector<Real> & solution =
-              getToMultiApp()->appTransferVector(i, _to_var_name);
+          NumericVector<Real> & solution = getToMultiApp()->appTransferVector(i, _to_var_name);
 
           MooseMesh & mesh = getToMultiApp()->appProblemBase(i).mesh();
 

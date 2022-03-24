@@ -68,8 +68,7 @@ MultiAppCopyTransfer::execute()
       {
         if (getToMultiApp()->hasLocalApp(i))
         {
-          transfer(getToMultiApp()->appProblemBase(i),
-                   getFromMultiApp()->appProblemBase(i));
+          transfer(getToMultiApp()->appProblemBase(i), getFromMultiApp()->appProblemBase(i));
           transfers_done++;
         }
       }

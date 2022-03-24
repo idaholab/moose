@@ -77,9 +77,7 @@ MultiAppPostprocessorTransfer::execute()
           const Real & pp_value = from_problem.getPostprocessorValueByName(_from_pp_name);
 
           if (getToMultiApp()->hasLocalApp(i))
-            getToMultiApp()
-                ->appProblemBase(i)
-                .setPostprocessorValueByName(_to_pp_name, pp_value);
+            getToMultiApp()->appProblemBase(i).setPostprocessorValueByName(_to_pp_name, pp_value);
         }
       }
       break;
@@ -91,9 +89,7 @@ MultiAppPostprocessorTransfer::execute()
 
       for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
         if (getToMultiApp()->hasLocalApp(i))
-          getToMultiApp()
-              ->appProblemBase(i)
-              .setPostprocessorValueByName(_to_pp_name, pp_value);
+          getToMultiApp()->appProblemBase(i).setPostprocessorValueByName(_to_pp_name, pp_value);
       break;
     }
     case FROM_MULTIAPP:
@@ -118,8 +114,7 @@ MultiAppPostprocessorTransfer::execute()
               "Can't get here unless someone adds a new enum and fails to add it to this switch");
       }
 
-      const auto multi_app =
-          getFromMultiApp() ? getFromMultiApp() : getToMultiApp();
+      const auto multi_app = getFromMultiApp() ? getFromMultiApp() : getToMultiApp();
 
       for (unsigned int i = 0; i < multi_app->numGlobalApps(); i++)
       {

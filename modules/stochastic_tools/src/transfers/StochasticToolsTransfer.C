@@ -25,10 +25,10 @@ StochasticToolsTransfer::StochasticToolsTransfer(const InputParameters & paramet
   : MultiAppTransfer(parameters), SamplerInterface(this)
 {
   // Since sampler lives in the main app, it's unclear what sibling transfer should look like
-  if (_from_multi_app && _to_multi_app)
+  if (hasFromMultiApp() && hasToMultiApp())
     mooseError("Transfers between multiapp are not currently supported for this transfer type");
 
-  const auto multi_app = _from_multi_app ? _from_multi_app : _to_multi_app;
+  const auto multi_app = hasFromMultiApp() ? getFromMultiApp() : getToMultiApp();
 
   // When the MultiApp is running in batch mode the execute flags for the transfer object must
   // be removed. If not the 'regular' transfer that occurs will potentially destroy data

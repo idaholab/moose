@@ -107,8 +107,7 @@ MultiAppScalarToAuxScalarTransfer::execute()
       // Loop over each sub-app and populate the AuxVariable values
       for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
       {
-        if (getFromMultiApp()->hasLocalApp(i) &&
-            getFromMultiApp()->isRootProcessor())
+        if (getFromMultiApp()->hasLocalApp(i) && getFromMultiApp()->isRootProcessor())
         {
           // Extract the scalar variable that is being transferred
           FEProblemBase & from_problem = getFromMultiApp()->appProblemBase(i);
@@ -141,9 +140,8 @@ MultiAppScalarToAuxScalarTransfer::execute()
         if (getFromMultiApp()->hasLocalApp(i))
         {
           // The AuxVariable that will be modified with data from the subapp
-          MooseVariableScalar * from_variable = &getFromMultiApp()
-                                                     ->appProblemBase(i)
-                                                     .getScalarVariable(_tid, _from_variable_name);
+          MooseVariableScalar * from_variable =
+              &getFromMultiApp()->appProblemBase(i).getScalarVariable(_tid, _from_variable_name);
 
           // Ensure that the variable is up to date
           from_variable->reinit();

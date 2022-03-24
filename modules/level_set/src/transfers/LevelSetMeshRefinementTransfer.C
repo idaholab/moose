@@ -39,22 +39,18 @@ LevelSetMeshRefinementTransfer::validParams()
 LevelSetMeshRefinementTransfer::LevelSetMeshRefinementTransfer(const InputParameters & parameters)
   : MultiAppCopyTransfer(parameters)
 {
-  // Handle deprecated parameter
-  if (isParamValid("multi_app"))
-    _to_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
-
-  if (_from_multi_app)
+  if (hasFromMultiApp())
     paramError("from_multi_app", "from_multiapp or between_multiapp transfers are not supported");
 }
 
 void
 LevelSetMeshRefinementTransfer::initialSetup()
 {
-  FEProblemBase & from_problem = _to_multi_app->problemBase();
-  for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); i++)
-    if (_to_multi_app->hasLocalApp(i))
+  FEProblemBase & from_problem = getToMultiApp()->problemBase();
+  for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
+    if (getToMultiApp()->hasLocalApp(i))
     {
-      FEProblemBase & to_problem = _to_multi_app->appProblemBase(i);
+      FEProblemBase & to_problem = getToMultiApp()->appProblemBase(i);
       MooseVariable & to_var = to_problem.getStandardVariable(0, _to_var_name);
       Adaptivity & adapt = to_problem.adaptivity();
       adapt.setMarkerVariableName(to_var.name());
@@ -74,10 +70,10 @@ LevelSetMeshRefinementTransfer::execute()
 
   else if (_current_execute_flag == LevelSet::EXEC_ADAPT_MESH)
   {
-    for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); i++)
-      if (_to_multi_app->hasLocalApp(i))
+    for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
+      if (getToMultiApp()->hasLocalApp(i))
       {
-        FEProblemBase & to_problem = _to_multi_app->appProblemBase(i);
+        FEProblemBase & to_problem = getToMultiApp()->appProblemBase(i);
         Adaptivity & adapt = to_problem.adaptivity();
         adapt.setAdaptivityOn(true);
         to_problem.adaptMesh();

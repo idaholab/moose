@@ -136,14 +136,12 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
 
       // Loop over each sub-app and populate the AuxVariable values from the postprocessors
       for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
-        if (getFromMultiApp()->hasLocalApp(i) &&
-            getFromMultiApp()->isRootProcessor())
+        if (getFromMultiApp()->hasLocalApp(i) && getFromMultiApp()->isRootProcessor())
           // Note: This can't be done using MooseScalarVariable::insert() because different
           // processors will be setting dofs separately.
-          scalar.sys().solution().set(dof[i],
-                                      getFromMultiApp()
-                                          ->appProblemBase(i)
-                                          .getPostprocessorValueByName(_from_pp_name));
+          scalar.sys().solution().set(
+              dof[i],
+              getFromMultiApp()->appProblemBase(i).getPostprocessorValueByName(_from_pp_name));
 
       scalar.sys().solution().close();
 

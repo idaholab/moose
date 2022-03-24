@@ -111,19 +111,16 @@ MultiAppUserObjectTransfer::execute()
           Moose::ScopedCommSwapper swapper(getToMultiApp()->comm());
 
           // Loop over the master nodes and set the value of the variable
-          System * to_sys =
-              find_sys(getToMultiApp()->appProblemBase(i).es(), _to_var_name);
+          System * to_sys = find_sys(getToMultiApp()->appProblemBase(i).es(), _to_var_name);
 
           unsigned int sys_num = to_sys->number();
           unsigned int var_num = to_sys->variable_number(_to_var_name);
 
-          NumericVector<Real> & solution =
-              getToMultiApp()->appTransferVector(i, _to_var_name);
+          NumericVector<Real> & solution = getToMultiApp()->appTransferVector(i, _to_var_name);
 
           MooseMesh * mesh = NULL;
 
-          if (_displaced_target_mesh &&
-              getToMultiApp()->appProblemBase(i).getDisplacedProblem())
+          if (_displaced_target_mesh && getToMultiApp()->appProblemBase(i).getDisplacedProblem())
             mesh = &getToMultiApp()->appProblemBase(i).getDisplacedProblem()->mesh();
           else
             mesh = &getToMultiApp()->appProblemBase(i).mesh();
@@ -171,8 +168,7 @@ MultiAppUserObjectTransfer::execute()
                 dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
                 swapper.forceSwap();
-                Real from_value =
-                    user_object.spatialValue(*node + getToMultiApp()->position(i));
+                Real from_value = user_object.spatialValue(*node + getToMultiApp()->position(i));
                 swapper.forceSwap();
 
                 solution.set(dof, from_value);
@@ -221,8 +217,7 @@ MultiAppUserObjectTransfer::execute()
                 dof_id_type dof = elem->dof_number(sys_num, var_num, offset++);
 
                 swapper.forceSwap();
-                Real from_value =
-                    user_object.spatialValue(point + getToMultiApp()->position(i));
+                Real from_value = user_object.spatialValue(point + getToMultiApp()->position(i));
                 swapper.forceSwap();
 
                 solution.set(dof, from_value);
@@ -313,8 +308,7 @@ MultiAppUserObjectTransfer::execute()
                 if (!getFromMultiApp()->hasLocalApp(i))
                   continue;
 
-                BoundingBox app_box =
-                    getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh);
+                BoundingBox app_box = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh);
 
                 if (app_box.contains_point(*node))
                   ++node_found_in_sub_app;
@@ -382,8 +376,7 @@ MultiAppUserObjectTransfer::execute()
                 if (!getFromMultiApp()->hasLocalApp(i))
                   continue;
 
-                BoundingBox app_box =
-                    getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh);
+                BoundingBox app_box = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh);
 
                 if (app_box.contains_point(point))
                   ++elem_found_in_sub_app;
@@ -493,7 +486,8 @@ MultiAppUserObjectTransfer::execute()
               continue;
 
             const auto & app_position = getFromMultiApp()->position(sub_app);
-            const auto & user_object = getFromMultiApp()->appUserObjectBase(sub_app, _user_object_name);
+            const auto & user_object =
+                getFromMultiApp()->appUserObjectBase(sub_app, _user_object_name);
 
             dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, offset++);
 
