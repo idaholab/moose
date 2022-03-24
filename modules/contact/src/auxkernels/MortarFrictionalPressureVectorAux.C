@@ -16,7 +16,7 @@ InputParameters
 MortarFrictionalPressureVectorAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;
+  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
 
   params.addClassDescription("This class creates an auxiliary vector for outputting the mortar "
                              "frictional pressure vector.");
@@ -109,8 +109,7 @@ MortarFrictionalPressureVectorAux::computeValue()
 
   for (const auto lowerd_node : make_range(lower_dimensional_element->n_nodes()))
   {
-    if (_fe_problem.mesh().getMesh().node_ptr(_current_node->id()) ==
-        _fe_problem.mesh().getMesh().node_ptr(lower_dimensional_element->node_id(lowerd_node)))
+    if (_current_node->id() == lower_dimensional_element->node_id(lowerd_node))
     {
       tangent_one_component = nodal_tangents[0][lowerd_node](_component);
       tangent_two_component = nodal_tangents[1][lowerd_node](_component);

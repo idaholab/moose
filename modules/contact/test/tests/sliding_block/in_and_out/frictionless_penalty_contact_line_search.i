@@ -160,7 +160,7 @@
   solve_type = 'PJFNK'
 
   petsc_options = '-ksp_monitor_true_residual'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
   petsc_options_value = 'lu     superlu_dist'
 
   line_search = 'contact'
