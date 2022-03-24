@@ -11,7 +11,7 @@ The output to CSV is **by default** ordered as follows:
 
 - rows are ordered by point sampled along the line
 
-- columns are ordered by alphabetical order of the properties sampled. The distance along the sampled line, and the x, y and z coordinates of the sampled points are added to the output as additional columns.
+- columns are ordered by alphabetical order of the properties sampled. The distance along the sampled line and the x, y and z coordinates of the sampled points are added to the output as additional columns.
 
 
 ## Example Input File Syntax

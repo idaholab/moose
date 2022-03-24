@@ -7,5 +7,9 @@ an element. This may be useful in automatic differentiation calculations to
 limit the number of derivative calculations that have to be carried out.
 
 !alert note
-This postprocessor is a MOOSE test object. Pass `--allow-test-objects` to a `MooseTestApp`
-to be able to use it, or migrate it from the MOOSE `test/src` directory to your source directory.
+This postprocessor is a MOOSE test object. Pass `--allow-test-objects` to your MOOSE or
+MOOSE-based app executable to be able to use it in a simulation. If this object is needed often, 
+it is recommended that the developer [reach out to the MOOSE development team](https://github.com/idaholab/moose/discussions) 
+so that the object can be moved from `test/src` or create a new Pull Request (with contribution 
+guidelines found [here](https://mooseframework.inl.gov/framework/contributing.html))
+containing the move.

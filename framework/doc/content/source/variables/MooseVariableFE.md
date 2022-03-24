@@ -2,7 +2,7 @@
 
 !syntax description /Variables/MooseVariable
 
-!! MOOSE Documentation Stub: Remove this line when content is added.
+!alert construction title=Undocumented
 
 !syntax parameters /Variables/MooseVariable
 
