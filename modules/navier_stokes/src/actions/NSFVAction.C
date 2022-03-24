@@ -23,6 +23,7 @@ registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_ics");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_kernels");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_bcs");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_material");
+registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_pps");
 
 InputParameters
 NSFVAction::validParams()
@@ -248,6 +249,46 @@ NSFVAction::validParams()
                               "Friction controls");
 
   /**
+   * Parameters describing the handling of advected scalar fields
+   */
+
+  params.addParam<std::vector<NonlinearVariableName>>(
+      "passive_scalar_names",
+      std::vector<NonlinearVariableName>(),
+      "Vector containing the names of the advected scalar variables.");
+
+  params.addParam<std::vector<bool>>(
+      "create_scalar_variable",
+      std::vector<bool>(),
+      "Switch to indicate that the input nonlinear variables don't need to be "
+      "generated within this action.");
+
+  params.addParam<std::vector<Real>>("initial_scalar_variables",
+                                     "Initial values of the passive scalar variables.");
+
+  params.addParam<std::vector<MooseFunctorName>>(
+      "passive_scalar_diffusivity",
+      std::vector<MooseFunctorName>(),
+      "Functor names for the diffusivities used for the passive scalar fields.");
+
+  params.addParam<std::vector<MooseFunctorName>>(
+      "passive_scalar_source",
+      std::vector<MooseFunctorName>(),
+      "Functor names for the sources used for the passive scalar fields.");
+
+  MultiMooseEnum ps_inlet_types("fixed-value flux-mass flux-velocity", "fixed-value");
+  params.addParam<MultiMooseEnum>("passive_scalar_inlet_types",
+                                  ps_inlet_types,
+                                  "Types for the inlet boundaries for the passive scalar equation. "
+                                  "Flux boundary conditions are "
+                                  "dedicated for application coupling purposes.");
+
+  params.addParam<std::vector<std::vector<std::string>>>(
+      "passive_scalar_inlet_function",
+      std::vector<std::vector<std::string>>(),
+      "Functions for inlet boundaries in the passive scalar equations.");
+
+  /**
    * Parameters allowing the control over numerical schemes for different terms in the
    * Navier-Stokes + energy equations.
    */
@@ -265,6 +306,10 @@ NSFVAction::validParams()
                              adv_interpol_types,
                              "The numerical scheme to use for interpolating energy/temperature, "
                              "as an advected quantity, to the face.");
+  params.addParam<MooseEnum>("passive_scalar_advection_interpolation",
+                             adv_interpol_types,
+                             "The numerical scheme to use for interpolating paasive scalar field, "
+                             "as an advected quantity, to the face.");
 
   MooseEnum face_interpol_types("average skewness-corrected", "average");
   params.addParam<MooseEnum>("pressure_face_interpolation",
@@ -279,6 +324,11 @@ NSFVAction::validParams()
                              face_interpol_types,
                              "The numerical scheme to interpolate the temperature/energy to the "
                              "face (separate from the advected quantity interpolation).");
+  params.addParam<MooseEnum>(
+      "passive_scalar_face_interpolation",
+      face_interpol_types,
+      "The numerical scheme to interpolate the passive scalar field variable to the "
+      "face (separate from the advected quantity interpolation).");
 
   params.addParam<bool>(
       "pressure_two_term_bc_expansion",
@@ -295,6 +345,11 @@ NSFVAction::validParams()
       true,
       "If a two-term Taylor expansion is needed for the determination of the boundary values"
       "of the temperature/energy.");
+  params.addParam<bool>(
+      "passive_scalar_two_term_bc_expansion",
+      true,
+      "If a two-term Taylor expansion is needed for the determination of the boundary values"
+      "of the advected passive scalar field.");
 
   params.addRangeCheckedParam<Real>(
       "mass_scaling",
@@ -310,12 +365,19 @@ NSFVAction::validParams()
                                     1.0,
                                     "energy_scaling > 0.0",
                                     "The scaling factor for the energy variables.");
+  params.addRangeCheckedParam<Real>("passive_scalar_scaling",
+                                    1.0,
+                                    "passive_scalar_scaling > 0.0",
+                                    "The scaling factor for the passive scalar field variables.");
 
   params.addParamNamesToGroup(
       "momentum_advection_interpolation energy_advection_interpolation "
-      "mass_advection_interpolation momentum_face_interpolation energy_face_interpolation "
-      "pressure_face_interpolation momentum_two_term_bc_expansion energy_two_term_bc_expansion "
-      "pressure_two_term_bc_expansion momentum_scaling energy_scaling mass_scaling",
+      "passive_scalar_advection_interpolation mass_advection_interpolation "
+      "momentum_face_interpolation energy_face_interpolation passive_scalar_face_interpolation "
+      "pressure_face_interpolation momentum_two_term_bc_expansion "
+      "energy_two_term_bc_expansion passive_scalar_two_term_bc_expansion "
+      "pressure_two_term_bc_expansion momentum_scaling energy_scaling "
+      "mass_scaling passive_scalar_scaling",
       "Numerical control");
 
   /**
@@ -409,22 +471,35 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _specific_heat_name(getParam<MooseFunctorName>("specific_heat")),
     _thermal_conductivity_name(getParam<MooseFunctorName>("thermal_conductivity")),
     _thermal_expansion_name(getParam<MooseFunctorName>("thermal_expansion")),
+    _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
+    _create_scalar_variable(getParam<std::vector<bool>>("create_scalar_variable")),
+    _passive_scalar_diffusivity(
+        getParam<std::vector<MooseFunctorName>>("passive_scalar_diffusivity")),
+    _passive_scalar_source(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
+    _passive_scalar_inlet_types(getParam<MultiMooseEnum>("passive_scalar_inlet_types")),
+    _passive_scalar_inlet_function(
+        getParam<std::vector<std::vector<std::string>>>("passive_scalar_inlet_function")),
     _mass_advection_interpolation(getParam<MooseEnum>("mass_advection_interpolation")),
     _momentum_advection_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
     _energy_advection_interpolation(getParam<MooseEnum>("energy_advection_interpolation")),
+    _passive_scalar_advection_interpolation(
+        getParam<MooseEnum>("passive_scalar_advection_interpolation")),
     _pressure_face_interpolation(getParam<MooseEnum>("pressure_face_interpolation")),
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),
     _energy_face_interpolation(getParam<MooseEnum>("energy_face_interpolation")),
+    _passive_scalar_face_interpolation(getParam<MooseEnum>("passive_scalar_face_interpolation")),
     _pressure_two_term_bc_expansion(getParam<bool>("pressure_two_term_bc_expansion")),
     _momentum_two_term_bc_expansion(getParam<bool>("momentum_two_term_bc_expansion")),
     _energy_two_term_bc_expansion(getParam<bool>("energy_two_term_bc_expansion")),
+    _passive_scalar_two_term_bc_expansion(getParam<bool>("passive_scalar_two_term_bc_expansion")),
     _mass_scaling(getParam<Real>("mass_scaling")),
     _momentum_scaling(getParam<Real>("momentum_scaling")),
-    _energy_scaling(getParam<Real>("energy_scaling"))
+    _energy_scaling(getParam<Real>("energy_scaling")),
+    _passive_scalar_scaling(getParam<Real>("passive_scalar_scaling"))
 {
   // Running the general checks, the rest are run after we already know some
   // geometry-related parameters.
-  checkGeneralControErrors();
+  checkGeneralControlErrors();
 }
 
 void
@@ -513,6 +588,15 @@ NSFVAction::act()
         if (_turbulence_handling == "mixing-length")
           addWCNSEnergyMixingLengthKernels();
       }
+      if (_passive_scalar_names.size())
+      {
+        if (_type == "transient")
+          addScalarTimeKernels();
+
+        addScalarAdvectionKernels();
+        addScalarDiffusionKernels();
+        addScalarSourceKernels();
+      }
     }
   }
 
@@ -528,6 +612,9 @@ NSFVAction::act()
         addINSEnergyInletBC();
         addINSEnergyWallBC();
       }
+
+      if (_passive_scalar_names.size())
+        addScalarInletBC();
     }
   }
 
@@ -540,6 +627,11 @@ NSFVAction::act()
       if (_turbulence_handling == "mixing-length")
         addMixingLengthMaterial();
     }
+  }
+
+  if (_current_task == "add_navier_stokes_pps")
+  {
+    addBoundaryPostprocessors();
   }
 }
 
@@ -604,6 +696,26 @@ NSFVAction::addINSVariables()
     params.set<bool>("two_term_boundary_expansion") = _energy_two_term_bc_expansion;
 
     _problem->addVariable("INSFVEnergyVariable", NS::T_fluid, params);
+  }
+
+  if (_passive_scalar_names.size())
+  {
+    auto params = _factory.getValidParams("MooseVariableFVReal");
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
+    params.set<std::vector<Real>>("scaling") = {_passive_scalar_scaling};
+    params.set<MooseEnum>("face_interp_method") = _passive_scalar_face_interpolation;
+    params.set<bool>("two_term_boundary_expansion") = _passive_scalar_two_term_bc_expansion;
+
+    for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
+    {
+      bool create_me = true;
+      if (_create_scalar_variable.size())
+        if (!_create_scalar_variable[name_i])
+          create_me = false;
+
+      if (create_me)
+        _problem->addVariable("MooseVariableFVReal", _passive_scalar_names[name_i], params);
+    }
   }
 }
 
@@ -675,6 +787,29 @@ NSFVAction::addINSInitialConditions()
     params.set<Real>("value") = getParam<Real>("initial_temperature");
 
     _problem->addInitialCondition("ConstantIC", NS::T_fluid + "_ic", params);
+  }
+
+  if (_passive_scalar_names.size())
+  {
+    for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
+    {
+      bool initialize_me = true;
+      if (_create_scalar_variable.size())
+        if (!_create_scalar_variable[name_i])
+          initialize_me = false;
+
+      if (initialize_me)
+      {
+        params.set<VariableName>("variable") = _passive_scalar_names[name_i];
+        if (isParamValid("initial_scalar_variables"))
+          params.set<Real>("value") =
+              getParam<std::vector<Real>>("initial_scalar_variables")[name_i];
+        else
+          params.set<Real>("value") = 0.0;
+
+        _problem->addInitialCondition("ConstantIC", _passive_scalar_names[name_i] + "_ic", params);
+      }
+    }
   }
 }
 
@@ -749,6 +884,20 @@ NSFVAction::addINSEnergyTimeKernels()
     params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
 
     _problem->addFVKernel(en_kernel_type, "ins_energy_time", params);
+  }
+}
+
+void
+NSFVAction::addScalarTimeKernels()
+{
+  for (const auto & vname : _passive_scalar_names)
+  {
+    const std::string en_kernel_type = "FVTimeKernel";
+    InputParameters params = _factory.getValidParams(en_kernel_type);
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
+    params.set<NonlinearVariableName>("variable") = vname;
+
+    _problem->addFVKernel(en_kernel_type, "ins_" + vname + "_time", params);
   }
 }
 
@@ -1291,6 +1440,57 @@ NSFVAction::addINSEnergyExternalHeatSource()
 }
 
 void
+NSFVAction::addScalarAdvectionKernels()
+{
+  for (const auto & vname : _passive_scalar_names)
+  {
+    const std::string kernel_type = "INSFVScalarFieldAdvection";
+    InputParameters params = _factory.getValidParams(kernel_type);
+    params.set<NonlinearVariableName>("variable") = vname;
+    params.set<MooseEnum>("velocity_interp_method") = "rc";
+    params.set<MooseEnum>("advected_interp_method") = _passive_scalar_advection_interpolation;
+
+    if (_porous_medium_treatment)
+      params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
+    else
+      params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
+
+    _problem->addFVKernel(kernel_type, "ins_" + vname + "_advection", params);
+  }
+}
+
+void
+NSFVAction::addScalarDiffusionKernels()
+{
+  for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
+  {
+    const std::string kernel_type = "FVDiffusion";
+    InputParameters params = _factory.getValidParams(kernel_type);
+    params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
+    params.set<MooseFunctorName>("coeff") = _passive_scalar_diffusivity[name_i];
+
+    _problem->addFVKernel(
+        kernel_type, "ins_" + _passive_scalar_names[name_i] + "_diffusion", params);
+  }
+}
+
+void
+NSFVAction::addScalarSourceKernels()
+{
+  for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
+  {
+    const std::string kernel_type = "FVBodyForce";
+    InputParameters params = _factory.getValidParams(kernel_type);
+    params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
+    params.set<FunctionName>("function") = _passive_scalar_source[name_i];
+
+    _problem->addFVKernel(kernel_type, "ins_" + _passive_scalar_names[name_i] + "_source", params);
+  }
+}
+
+void
 NSFVAction::addINSInletBC()
 {
   unsigned int flux_bc_counter = 0;
@@ -1322,10 +1522,14 @@ NSFVAction::addINSInletBC()
       {
         const std::string bc_type = "WCNSFVMomentumFluxBC";
         InputParameters params = _factory.getValidParams(bc_type);
-        params.set<PostprocessorName>(NS::density) = _density_name;
+        params.set<MooseFunctorName>(NS::density) = _density_name;
         params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+        if (_porous_medium_treatment)
+          params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
+        else
+          params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
 
-        if (_energy_inlet_types[bc_ind] == "flux-mass")
+        if (_momentum_inlet_types[bc_ind] == "flux-mass")
         {
           params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
           params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
@@ -1341,6 +1545,7 @@ NSFVAction::addINSInletBC()
           else
             vname = NS::velocity_vector[d];
 
+          params.set<MooseEnum>("momentum_component") = NS::directions[d];
           params.set<NonlinearVariableName>("variable") = vname;
 
           _problem->addFVBC(bc_type, vname + "_" + _inlet_boundaries[bc_ind], params);
@@ -1349,11 +1554,11 @@ NSFVAction::addINSInletBC()
       {
         const std::string bc_type = "WCNSFVMassFluxBC";
         InputParameters params = _factory.getValidParams(bc_type);
-        params.set<PostprocessorName>(NS::density) = _density_name;
+        params.set<MooseFunctorName>(NS::density) = _density_name;
         params.set<NonlinearVariableName>("variable") = NS::pressure;
         params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
 
-        if (_energy_inlet_types[bc_ind] == "flux-mass")
+        if (_momentum_inlet_types[bc_ind] == "flux-mass")
         {
           params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
           params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
@@ -1407,14 +1612,60 @@ NSFVAction::addINSEnergyInletBC()
       else
         params.set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
 
-      params.set<PostprocessorName>("temperature_pp") = _energy_wall_function[bc_ind];
-      params.set<PostprocessorName>(NS::density) = _density_name;
-      params.set<PostprocessorName>(NS::cp) = _specific_heat_name;
+      params.set<PostprocessorName>("temperature_pp") = _energy_inlet_function[bc_ind];
+      params.set<MooseFunctorName>(NS::density) = _density_name;
+      params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
 
       params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
 
       _problem->addFVBC(bc_type, NS::T_fluid + "_" + _inlet_boundaries[bc_ind], params);
       flux_bc_counter += 1;
+    }
+  }
+}
+
+void
+NSFVAction::addScalarInletBC()
+{
+  for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
+  {
+    unsigned int flux_bc_counter = 0;
+    for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
+    {
+      if (_energy_inlet_types[bc_ind] == "fixed-value")
+      {
+        const std::string bc_type = "FVFunctionDirichletBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+        params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
+        params.set<FunctionName>("function") = _passive_scalar_inlet_function[name_i][bc_ind];
+        params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+
+        _problem->addFVBC(
+            bc_type, _passive_scalar_names[name_i] + "_" + _inlet_boundaries[bc_ind], params);
+      }
+      else if (_energy_inlet_types[bc_ind] == "flux-mass" ||
+               _energy_inlet_types[bc_ind] == "flux-velocity")
+      {
+        const std::string bc_type = "WCNSFVScalarFluxBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+        params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
+        if (_energy_inlet_types[bc_ind] == "flux-mass")
+        {
+          params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
+          params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
+          params.set<MooseFunctorName>(NS::density) = _density_name;
+        }
+        else
+          params.set<PostprocessorName>("velocity_pp") = _flux_inlet_pps[flux_bc_counter];
+
+        params.set<PostprocessorName>("scalar_value_pp") =
+            _passive_scalar_inlet_function[name_i][bc_ind];
+        params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+
+        _problem->addFVBC(
+            bc_type, _passive_scalar_names[name_i] + "_" + _inlet_boundaries[bc_ind], params);
+        flux_bc_counter += 1;
+      }
     }
   }
 }
@@ -1836,6 +2087,21 @@ NSFVAction::addMixingLengthMaterial()
 }
 
 void
+NSFVAction::addBoundaryPostprocessors()
+{
+  for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
+    if (_energy_inlet_types[bc_ind] == "flux-mass")
+    {
+      const std::string pp_type = "AreaPostprocessor";
+      InputParameters params = _factory.getValidParams(pp_type);
+      params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+      params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
+
+      _problem->addPostprocessor(pp_type, "area_pp_" + _inlet_boundaries[bc_ind], params);
+    }
+}
+
+void
 NSFVAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
   unsigned short necessary_layers = 2;
@@ -1876,7 +2142,7 @@ NSFVAction::processBlocks()
 }
 
 void
-NSFVAction::checkGeneralControErrors()
+NSFVAction::checkGeneralControlErrors()
 {
   if (_compressibility == "weakly-compressible" && _boussinesq_approximation == true)
     paramError("boussinesq_approximation",

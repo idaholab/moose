@@ -79,6 +79,15 @@ protected:
   void addINSEnergyAmbientConvection();
   void addINSEnergyExternalHeatSource();
 
+  /**
+   * Functions adding kernels for scalar transport equations in an incompressible
+   * fluid.
+   */
+  void addScalarTimeKernels();
+  void addScalarAdvectionKernels();
+  void addScalarDiffusionKernels();
+  void addScalarSourceKernels();
+
   /// Functions adding boundary conditions for the incompressible simulation.
   /// These are used for weakly-compressible simulations as well.
   void addINSInletBC();
@@ -87,6 +96,8 @@ protected:
 
   void addINSEnergyInletBC();
   void addINSEnergyWallBC();
+
+  void addScalarInletBC();
 
   /// Functions which add time kernels for transient, weakly-compressible simulations.
   void addWCNSMassTimeKernels();
@@ -102,6 +113,9 @@ protected:
 
   /// Add mixing length material for turbulence handling
   void addMixingLengthMaterial();
+
+  /// Add boundary postprocessors for flux BCs
+  void addBoundaryPostprocessors();
 
   /**
    * Add relationship manager to extend the number of ghosted layers if necessary.
@@ -193,12 +207,31 @@ protected:
   /// Name of the thermal expansion material property
   const MooseFunctorName _thermal_expansion_name;
 
+  /// List of the names of the scalar variables which are transported using this
+  /// action
+  const std::vector<NonlinearVariableName> _passive_scalar_names;
+  /// List to show which advected scalar field variable needs to be created within
+  /// this action
+  const std::vector<bool> _create_scalar_variable;
+  /// Initial values for the passive scalar fields
+  const std::vector<Real> _initial_scalar_variable;
+  /// Passive scalar diffusivities
+  const std::vector<MooseFunctorName> _passive_scalar_diffusivity;
+  /// Passive scalar diffusivities
+  const std::vector<MooseFunctorName> _passive_scalar_source;
+  /// Passive scalar intlet types (fixed-value/mass-flow/momentum-inflow)
+  const MultiMooseEnum _passive_scalar_inlet_types;
+  /// Passive scalar function names at inlet boundaries
+  const std::vector<std::vector<std::string>> _passive_scalar_inlet_function;
+
   /// The type of the advected quantity interpolation method for continuity equation
   const MooseEnum _mass_advection_interpolation;
   /// The type of the advected quantity interpolation method for momentum/velocity
   const MooseEnum _momentum_advection_interpolation;
   /// The type of the advected quantity interpolation method for energy/temperature
   const MooseEnum _energy_advection_interpolation;
+  /// The type of the advected quantity interpolation method for passive scalars
+  const MooseEnum _passive_scalar_advection_interpolation;
 
   /// The type of the pressure interpolation method
   const MooseEnum _pressure_face_interpolation;
@@ -206,6 +239,8 @@ protected:
   const MooseEnum _momentum_face_interpolation;
   /// The type of the face interpolation method for the temperature/energy
   const MooseEnum _energy_face_interpolation;
+  /// The type of the face interpolation method for the passive scalar fields
+  const MooseEnum _passive_scalar_face_interpolation;
 
   /// If a two-term Taylor expansion is needed for the determination of the boundary values
   /// of the pressure
@@ -216,6 +251,9 @@ protected:
   /// If a two-term Taylor expansion is needed for the determination of the boundary values
   /// of the temperature/energy
   const bool _energy_two_term_bc_expansion;
+  /// If a two-term Taylor expansion is needed for the determination of the boundary values
+  /// of the passive scalar fields
+  const bool _passive_scalar_two_term_bc_expansion;
 
   /// The scaling factor for the mass variables (for incompressible simulation this is pressure scaling)
   const Real _mass_scaling;
@@ -223,18 +261,22 @@ protected:
   const Real _momentum_scaling;
   /// The scaling factor for the energy variables
   const Real _energy_scaling;
+  /// The scaling factor for the passive scalar variables
+  const Real _passive_scalar_scaling;
 
 private:
   /// Process the mesh data and convert block names to block IDs
   void processBlocks();
   /// Check for general user errors in the parameters
-  void checkGeneralControErrors();
+  void checkGeneralControlErrors();
   /// Check errors regarding the user defined boundary treatments
   void checkBoundaryParameterErrors();
   /// Check errors regarding the user defined ambient convection parameters
   void checkAmbientConvectionParameterErrors();
   /// Check errors regarding the friction parameters
   void checkFrictionParameterErrors();
+  /// Check errors regarding the passive scalars
+  void checkPassiveScalarParameterErrors();
   /// Check if the user commited errors during the definition of block-wise
   /// parameters
   template <typename T>

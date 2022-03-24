@@ -73,6 +73,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // register attributes
   registerTask("ns_meta_action", /*is_required=*/true);
   addTaskDependency("ns_meta_action", "meta_action");
+
+  // register attributes
+  registerTask("add_navier_stokes_pps", /*is_required=*/false);
+  addTaskDependency("add_navier_stokes_pps", "add_postprocessor");
 }
 
 void
