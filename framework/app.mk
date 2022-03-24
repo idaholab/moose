@@ -7,7 +7,7 @@
 GEN_REVISION ?= yes
 
 # Set a default to install the main application's tests if one isn't set in the Makefile
-ifeq ($(INSTALLABLE_DIRS),)
+ifndef INSTALLABLE_DIRS
   ifneq ($(wildcard $(APPLICATION_DIR)/test/.),)
     INSTALLABLE_DIRS := test/tests
   else
@@ -28,7 +28,6 @@ $APPLICATION_NAME$(STACK) := $(APPLICATION_NAME)
 $DEPEND_MODULES$(STACK) := $(DEPEND_MODULES)
 $GEN_REVISION$(STACK) := $(GEN_REVISION)
 $BUILD_EXEC$(STACK) := $(BUILD_EXEC)
-$INSTALLABLE_DIRS$(STACK) := $(INSTALLABLE_DIRS)
 
 -include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
 
@@ -44,7 +43,6 @@ APPLICATION_NAME := $($APPLICATION_NAME$(STACK))
 DEPEND_MODULES := $($DEPEND_MODULES$(STACK))
 GEN_REVISION := $($GEN_REVISION$(STACK))
 BUILD_EXEC := $($BUILD_EXEC$(STACK))
-INSTALLABLE_DIRS := $($INSTALLABLE_DIRS$(STACK))
 STACK := $(basename $(STACK))
 
 ifneq ($(SUFFIX),)

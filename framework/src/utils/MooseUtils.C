@@ -434,6 +434,19 @@ splitFileName(std::string full_file)
   return std::pair<std::string, std::string>(path, file);
 }
 
+std::string
+getCurrentWorkingDir()
+{
+  // Note: At the time of creating this method, our minimum compiler still
+  // does not support <filesystem>. Additionally, the inclusion of that header
+  // requires an additional library to be linked so for now, we'll just
+  // use the Unix standard library to get us the cwd().
+  constexpr unsigned int BUF_SIZE = 1024;
+  char buffer[BUF_SIZE];
+
+  return getcwd(buffer, BUF_SIZE) != nullptr ? buffer : "";
+}
+
 void
 makedirs(const std::string & dir_name, bool throw_on_failure)
 {
