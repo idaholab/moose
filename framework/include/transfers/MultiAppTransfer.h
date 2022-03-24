@@ -39,11 +39,13 @@ public:
    */
   void variableIntegrityCheck(const AuxVariableName & var_name) const;
 
-  /// Return the MultiApp that this transfer belongs to
+  /**
+   * Use this getter to obtain the MultiApp for transfers with a single direction
+   */
   const std::shared_ptr<MultiApp> getMultiApp() const
   {
     if (_from_multi_app && _to_multi_app)
-      mooseError("Unclear which app you want from Transfer ", name());
+      mooseError("Unclear which app you want to retrieve from Transfer ", name());
     else if (_from_multi_app)
       return _from_multi_app;
     else if (_to_multi_app)
@@ -54,14 +56,36 @@ public:
       mooseError("Should not get here, there should be a multiapp");
   }
 
+  /// Get the MultiApp to transfer data from
+  const std::shared_ptr<MultiApp> getFromMultiApp()
+  {
+    if (!_from_multi_app)
+      mooseError(
+          "A from_multiapp was requested but is unavailable. Check the from_multi_app parameter");
+    else
+      return _from_multi_app;
+  }
+
+  /// Get the MultiApp to transfer data to
+  const std::shared_ptr<MultiApp> getToMultiApp()
+  {
+    if (!_to_multi_app)
+      mooseError(
+          "A from_multiapp was requested but is unavailable. Check the from_multi_app parameter");
+    else
+      return _to_multi_app;
+  }
+
+  /// Whether the transfer owns a non-null from_multi_app
+  bool hasFromMultiApp() const { return !(!_from_multi_app); }
+
+  /// Whether the transfer owns a non-null to_multi_app
+  bool hasToMultiApp() const { return !(!_to_multi_app); }
+
   /// Return the execution flags, handling "same_as_multiapp"
   virtual const std::vector<ExecFlagType> & execFlags() const;
 
 protected:
-  /// The MultiApps this Transfer is transferring data to or from
-  std::shared_ptr<MultiApp> _from_multi_app;
-  std::shared_ptr<MultiApp> _to_multi_app;
-
   /// Deprecated class attribute for compatibility with the apps
   std::shared_ptr<MultiApp> _multi_app;
 
@@ -133,6 +157,10 @@ protected:
                      const std::string & param_name = "") const;
 
 private:
+  /// The MultiApps this Transfer is transferring data to or from
+  std::shared_ptr<MultiApp> _from_multi_app;
+  std::shared_ptr<MultiApp> _to_multi_app;
+
   void getFromMultiAppInfo();
   void getToMultiAppInfo();
 };

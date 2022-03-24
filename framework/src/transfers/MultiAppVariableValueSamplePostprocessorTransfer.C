@@ -46,7 +46,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
 
-  if (_from_multi_app)
+  if (isParamValid("from_multi_app"))
     paramError("from_multi_app", "This transfer direction has not been implemented");
 }
 
@@ -59,7 +59,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      FEProblemBase & from_problem = _to_multi_app->problemBase();
+      FEProblemBase & from_problem = getToMultiApp()->problemBase();
       MooseVariableField<Real> & from_var = static_cast<MooseVariableField<Real> &>(
           from_problem.getActualFieldVariable(0, _from_var_name));
       SystemBase & from_system_base = from_var.sys();
@@ -71,13 +71,13 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
 
       pl->enable_out_of_mesh_mode();
 
-      for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
       {
         Real value = -std::numeric_limits<Real>::max();
 
         { // Get the value of the variable at the point where this multiapp is in the master domain
 
-          Point multi_app_position = _to_multi_app->position(i);
+          Point multi_app_position = getToMultiApp()->position(i);
 
           std::vector<Point> point_vec(1, multi_app_position);
 
@@ -96,8 +96,10 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
           _communicator.max(value);
         }
 
-        if (_to_multi_app->hasLocalApp(i))
-          _to_multi_app->appProblemBase(i).setPostprocessorValueByName(_postprocessor_name, value);
+        if (getToMultiApp()->hasLocalApp(i))
+          getToMultiApp()
+              ->appProblemBase(i)
+              .setPostprocessorValueByName(_postprocessor_name, value);
       }
 
       break;

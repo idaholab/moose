@@ -47,21 +47,35 @@ MultiAppReporterTransfer::MultiAppReporterTransfer(const InputParameters & param
   if (_directions.size() > 1)
     paramError("direction", "This transfer only supports a single direction.");
 
-  if (_to_multi_app && _from_multi_app && _subapp_index != std::numeric_limits<unsigned int>::max())
+  if (isParamValid("to_multi_app") && isParamValid("from_multi_app") &&
+      _subapp_index != std::numeric_limits<unsigned int>::max())
     paramError("subapp_index",
                "The subapp_index parameter is not supported for transfers between two multiapps");
 
-  const auto multi_app = _from_multi_app ? _from_multi_app : _to_multi_app;
-  // Errors for sub app index.
-  if (_subapp_index != std::numeric_limits<unsigned int>::max() &&
-      _subapp_index >= multi_app->numGlobalApps())
-    paramError(
-        "subapp_index",
-        "The supplied sub-application index is greater than the number of sub-applications.");
-  else if (_directions.contains(FROM_MULTIAPP) &&
-           _subapp_index == std::numeric_limits<unsigned int>::max() &&
-           _from_multi_app->numGlobalApps() > 1)
-    paramError("multi_app", "subapp_index must be provided when more than one subapp is present.");
+  if (hasFromMultiApp())
+  {
+    const auto multi_app = getFromMultiApp();
+    // Errors for sub app index.
+    if (_subapp_index != std::numeric_limits<unsigned int>::max() &&
+        _subapp_index >= multi_app->numGlobalApps())
+      paramError(
+          "subapp_index",
+          "The supplied sub-application index is greater than the number of sub-applications.");
+    else if (_directions.contains(FROM_MULTIAPP) &&
+             _subapp_index == std::numeric_limits<unsigned int>::max() &&
+             multi_app->numGlobalApps() > 1)
+      paramError("from_multi_app",
+                 "subapp_index must be provided when more than one subapp is present.");
+  }
+  else if (hasToMultiApp())
+  {
+    // Errors for sub app index.
+    if (_subapp_index != std::numeric_limits<unsigned int>::max() &&
+        _subapp_index >= getToMultiApp()->numGlobalApps())
+      paramError(
+          "subapp_index",
+          "The supplied sub-application index is greater than the number of sub-applications.");
+  }
 }
 
 void
@@ -72,12 +86,12 @@ MultiAppReporterTransfer::initialSetup()
   // Find proper FEProblem
   FEProblemBase * problem_ptr = nullptr;
   if (_directions.contains(TO_MULTIAPP))
-    problem_ptr = &_to_multi_app->problemBase();
+    problem_ptr = &getToMultiApp()->problemBase();
   else if (_subapp_index == std::numeric_limits<unsigned int>::max() &&
-           _from_multi_app->hasLocalApp(0))
-    problem_ptr = &_from_multi_app->appProblemBase(0);
-  else if (_from_multi_app->hasLocalApp(_subapp_index))
-    problem_ptr = &_from_multi_app->appProblemBase(_subapp_index);
+           getFromMultiApp()->hasLocalApp(0))
+    problem_ptr = &getFromMultiApp()->appProblemBase(0);
+  else if (getFromMultiApp()->hasLocalApp(_subapp_index))
+    problem_ptr = &getFromMultiApp()->appProblemBase(_subapp_index);
 
   // Tell ReporterData to consume with replicated
   if (problem_ptr)
@@ -88,36 +102,44 @@ MultiAppReporterTransfer::initialSetup()
 void
 MultiAppReporterTransfer::executeToMultiapp()
 {
+  if (!hasToMultiApp())
+    return;
+
   std::vector<unsigned int> indices;
   if (_subapp_index == std::numeric_limits<unsigned int>::max())
   {
-    indices.resize(_to_multi_app->numGlobalApps());
+    indices.resize(getToMultiApp()->numGlobalApps());
     std::iota(indices.begin(), indices.end(), 0);
   }
   else
     indices = {_subapp_index};
 
   for (const auto & ind : indices)
-    if (_to_multi_app->hasLocalApp(ind) && (!_from_multi_app || _from_multi_app->hasLocalApp(ind)))
+    if (getToMultiApp()->hasLocalApp(ind) &&
+        (!hasFromMultiApp() || getFromMultiApp()->hasLocalApp(ind)))
       for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
         transferReporter(_from_reporter_names[n],
                          _to_reporter_names[n],
-                         _from_multi_app ? _from_multi_app->appProblemBase(ind)
-                                         : _to_multi_app->problemBase(),
-                         _to_multi_app->appProblemBase(ind));
+                         hasFromMultiApp() ? getFromMultiApp()->appProblemBase(ind)
+                                           : getToMultiApp()->problemBase(),
+                         getToMultiApp()->appProblemBase(ind));
 }
 
 void
 MultiAppReporterTransfer::executeFromMultiapp()
 {
+  if (!hasFromMultiApp())
+    return;
+
   unsigned int ind = _subapp_index != std::numeric_limits<unsigned int>::max() ? _subapp_index : 0;
-  if (_from_multi_app->hasLocalApp(ind) && (!_to_multi_app || _to_multi_app->hasLocalApp(ind)))
+  if (getFromMultiApp()->hasLocalApp(ind) &&
+      (!hasToMultiApp() || getToMultiApp()->hasLocalApp(ind)))
     for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
       transferReporter(_from_reporter_names[n],
                        _to_reporter_names[n],
-                       _from_multi_app->appProblemBase(ind),
-                       _to_multi_app ? _to_multi_app->appProblemBase(ind)
-                                     : _from_multi_app->problemBase());
+                       getFromMultiApp()->appProblemBase(ind),
+                       hasToMultiApp() ? getToMultiApp()->appProblemBase(ind)
+                                       : getFromMultiApp()->problemBase());
 }
 
 void

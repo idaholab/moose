@@ -55,7 +55,8 @@ MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParamete
       mooseError("In MultiAppPostprocessorTransfer, must specify 'reduction_type' if direction = "
                  "from_multiapp");
 
-  if (_to_multi_app && _from_multi_app && isParamValid("reduction_type"))
+  if (isParamValid("to_multi_app") && isParamValid("from_multi_app") &&
+      isParamValid("reduction_type"))
     mooseError("Reductions are not supported for multiapp sibling transfers");
 }
 
@@ -67,33 +68,37 @@ MultiAppPostprocessorTransfer::execute()
   switch (_current_direction)
   {
     case BETWEEN_MULTIAPP:
-      for (unsigned int i = 0; i < _from_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
       {
-        if (_from_multi_app->hasLocalApp(i))
+        if (getFromMultiApp()->hasLocalApp(i))
         {
           // Get source postprocessor value
-          FEProblemBase & from_problem = _from_multi_app->appProblemBase(i);
+          FEProblemBase & from_problem = getFromMultiApp()->appProblemBase(i);
           const Real & pp_value = from_problem.getPostprocessorValueByName(_from_pp_name);
 
-          if (_to_multi_app->hasLocalApp(i))
-            _to_multi_app->appProblemBase(i).setPostprocessorValueByName(_to_pp_name, pp_value);
+          if (getToMultiApp()->hasLocalApp(i))
+            getToMultiApp()
+                ->appProblemBase(i)
+                .setPostprocessorValueByName(_to_pp_name, pp_value);
         }
       }
       break;
     case TO_MULTIAPP:
     {
-      FEProblemBase & from_problem = _to_multi_app->problemBase();
+      FEProblemBase & from_problem = getToMultiApp()->problemBase();
 
       const Real & pp_value = from_problem.getPostprocessorValueByName(_from_pp_name);
 
-      for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); i++)
-        if (_to_multi_app->hasLocalApp(i))
-          _to_multi_app->appProblemBase(i).setPostprocessorValueByName(_to_pp_name, pp_value);
+      for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
+        if (getToMultiApp()->hasLocalApp(i))
+          getToMultiApp()
+              ->appProblemBase(i)
+              .setPostprocessorValueByName(_to_pp_name, pp_value);
       break;
     }
     case FROM_MULTIAPP:
     {
-      FEProblemBase & to_problem = _from_multi_app->problemBase();
+      FEProblemBase & to_problem = getFromMultiApp()->problemBase();
 
       Real reduced_pp_value;
       switch (_reduction_type)
@@ -113,7 +118,8 @@ MultiAppPostprocessorTransfer::execute()
               "Can't get here unless someone adds a new enum and fails to add it to this switch");
       }
 
-      const auto multi_app = _from_multi_app ? _from_multi_app : _to_multi_app;
+      const auto multi_app =
+          getFromMultiApp() ? getFromMultiApp() : getToMultiApp();
 
       for (unsigned int i = 0; i < multi_app->numGlobalApps(); i++)
       {

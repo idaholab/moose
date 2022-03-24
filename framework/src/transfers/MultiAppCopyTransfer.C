@@ -45,30 +45,31 @@ MultiAppCopyTransfer::execute()
 
   if (_current_direction == TO_MULTIAPP)
   {
-    FEProblemBase & from_problem = _to_multi_app->problemBase();
-    for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); i++)
-      if (_to_multi_app->hasLocalApp(i))
-        transfer(_to_multi_app->appProblemBase(i), from_problem);
+    FEProblemBase & from_problem = getToMultiApp()->problemBase();
+    for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
+      if (getToMultiApp()->hasLocalApp(i))
+        transfer(getToMultiApp()->appProblemBase(i), from_problem);
   }
 
   else if (_current_direction == FROM_MULTIAPP)
   {
-    FEProblemBase & to_problem = _from_multi_app->problemBase();
-    for (unsigned int i = 0; i < _from_multi_app->numGlobalApps(); i++)
-      if (_from_multi_app->hasLocalApp(i))
-        transfer(to_problem, _from_multi_app->appProblemBase(i));
+    FEProblemBase & to_problem = getFromMultiApp()->problemBase();
+    for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
+      if (getFromMultiApp()->hasLocalApp(i))
+        transfer(to_problem, getFromMultiApp()->appProblemBase(i));
   }
 
   else if (_current_direction == BETWEEN_MULTIAPP)
   {
     int transfers_done = 0;
-    for (unsigned int i = 0; i < _from_multi_app->numGlobalApps(); i++)
+    for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
     {
-      if (_from_multi_app->hasLocalApp(i))
+      if (getFromMultiApp()->hasLocalApp(i))
       {
-        if (_to_multi_app->hasLocalApp(i))
+        if (getToMultiApp()->hasLocalApp(i))
         {
-          transfer(_to_multi_app->appProblemBase(i), _from_multi_app->appProblemBase(i));
+          transfer(getToMultiApp()->appProblemBase(i),
+                   getFromMultiApp()->appProblemBase(i));
           transfers_done++;
         }
       }

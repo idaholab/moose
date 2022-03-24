@@ -66,12 +66,14 @@ MultiAppCloneReporterTransfer::MultiAppCloneReporterTransfer(const InputParamete
 void
 MultiAppCloneReporterTransfer::initialSetup()
 {
-  if (_to_multi_app && !_to_multi_app->hasApp() && !isParamValid("reporter_type"))
+  if (isParamValid("to_multi_app") && !getToMultiApp()->hasApp() &&
+      !isParamValid("reporter_type"))
     mooseError("For a direct reporter clone, all processors must be associated with a "
                "sub-application. If you know the type of reporter being transferred, please "
                "consider using the 'reporter_type' parameter for an indirect clone.");
 
-  if (_from_multi_app && !_from_multi_app->hasApp() && !isParamValid("reporter_type"))
+  if (isParamValid("from_multi_app") && !getFromMultiApp()->hasApp() &&
+      !isParamValid("reporter_type"))
     mooseError("For a direct reporter clone, all processors must be associated with a "
                "sub-application. If you know the type of reporter being transferred, please "
                "consider using the 'reporter_type' parameter for an indirect clone.");
@@ -80,7 +82,7 @@ MultiAppCloneReporterTransfer::initialSetup()
   if (!dynamic_cast<const Reporter *>(&uo))
     paramError("to_reporter", "This object must be a Reporter object.");
 
-  const auto multi_app = _from_multi_app ? _from_multi_app : _to_multi_app;
+  const auto multi_app = getMultiApp();
   const dof_id_type n = multi_app->numGlobalApps();
 
   for (unsigned int r = 0; r < _from_reporter_names.size(); ++r)
@@ -138,26 +140,26 @@ MultiAppCloneReporterTransfer::executeToMultiapp()
 void
 MultiAppCloneReporterTransfer::executeFromMultiapp()
 {
-  if (!_from_multi_app->isRootProcessor())
+  if (!getFromMultiApp()->isRootProcessor())
     return;
 
-  const dof_id_type begin = _from_multi_app->firstLocalApp();
-  const dof_id_type end = begin + _from_multi_app->numLocalApps();
+  const dof_id_type begin = getFromMultiApp()->firstLocalApp();
+  const dof_id_type end = begin + getFromMultiApp()->numLocalApps();
 
   for (unsigned int r = 0; r < _from_reporter_names.size(); ++r)
     for (dof_id_type i = begin; i < end; ++i)
     {
-      if (_from_multi_app->numGlobalApps() > 1)
+      if (getFromMultiApp()->numGlobalApps() > 1)
         transferToVectorReporter(_from_reporter_names[r],
                                  _to_reporter_names[r],
-                                 _from_multi_app->appProblemBase(i),
-                                 _from_multi_app->problemBase(),
+                                 getFromMultiApp()->appProblemBase(i),
+                                 getFromMultiApp()->problemBase(),
                                  i - begin);
       else
         transferReporter(_from_reporter_names[r],
                          _to_reporter_names[r],
-                         _from_multi_app->appProblemBase(i),
-                         _from_multi_app->problemBase());
+                         getFromMultiApp()->appProblemBase(i),
+                         getFromMultiApp()->problemBase());
     }
 }
 

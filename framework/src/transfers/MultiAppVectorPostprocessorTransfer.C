@@ -55,47 +55,51 @@ void
 MultiAppVectorPostprocessorTransfer::executeToMultiapp()
 {
   const VectorPostprocessorValue & vpp =
-      _to_multi_app->problemBase().getVectorPostprocessorValueByName(_master_vpp_name,
-                                                                     _vector_name);
+      getToMultiApp()
+          ->problemBase()
+          .getVectorPostprocessorValueByName(_master_vpp_name, _vector_name);
 
-  if (vpp.size() != _to_multi_app->numGlobalApps())
+  if (vpp.size() != getToMultiApp()->numGlobalApps())
     mooseError("VectorPostprocessor ",
                _master_vpp_name,
                " and number of sub-apps do not match: ",
                vpp.size(),
                "/",
-               _to_multi_app->numGlobalApps());
+               getToMultiApp()->numGlobalApps());
 
-  for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); ++i)
-    if (_to_multi_app->hasLocalApp(i))
-      _to_multi_app->appProblemBase(i).setPostprocessorValueByName(_sub_pp_name, vpp[i]);
+  for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); ++i)
+    if (getToMultiApp()->hasLocalApp(i))
+      getToMultiApp()->appProblemBase(i).setPostprocessorValueByName(_sub_pp_name, vpp[i]);
 }
 
 void
 MultiAppVectorPostprocessorTransfer::executeFromMultiapp()
 {
   const VectorPostprocessorValue & vpp =
-      _from_multi_app->problemBase().getVectorPostprocessorValueByName(_master_vpp_name,
-                                                                       _vector_name);
+      getFromMultiApp()
+          ->problemBase()
+          .getVectorPostprocessorValueByName(_master_vpp_name, _vector_name);
 
-  if (vpp.size() != _from_multi_app->numGlobalApps())
+  if (vpp.size() != getFromMultiApp()->numGlobalApps())
     mooseError("VectorPostprocessor ",
                _master_vpp_name,
                " and number of sub-apps do not match: ",
                vpp.size(),
                "/",
-               _from_multi_app->numGlobalApps());
+               getFromMultiApp()->numGlobalApps());
 
-  VectorPostprocessorValue value(_from_multi_app->numGlobalApps(), 0.0);
-  for (unsigned int i = 0; i < _from_multi_app->numGlobalApps(); ++i)
-    if (_from_multi_app->hasLocalApp(i))
-      value[i] = _from_multi_app->appProblemBase(i).getPostprocessorValueByName(_sub_pp_name);
+  VectorPostprocessorValue value(getFromMultiApp()->numGlobalApps(), 0.0);
+  for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); ++i)
+    if (getFromMultiApp()->hasLocalApp(i))
+      value[i] =
+          getFromMultiApp()->appProblemBase(i).getPostprocessorValueByName(_sub_pp_name);
 
   for (auto & v : value)
     _communicator.sum(v);
 
-  _from_multi_app->problemBase().setVectorPostprocessorValueByName(
-      _master_vpp_name, _vector_name, value);
+  getFromMultiApp()
+      ->problemBase()
+      .setVectorPostprocessorValueByName(_master_vpp_name, _vector_name, value);
 }
 
 void
