@@ -86,6 +86,7 @@
   [voronoi]
     type = PolycrystalVoronoi
     rand_seed = 1268
+    use_kdtree = false
   []
 []
 
