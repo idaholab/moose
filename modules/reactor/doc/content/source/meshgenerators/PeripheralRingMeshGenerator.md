@@ -21,11 +21,11 @@ Optionally, users can preserve the volume of the peripheral ring region by setti
       id=pattern_hex
       caption=The peripheral block (in teal) created by this mesh generator using the input shown in Example Syntax section.
 
-In addition, the radial meshing density of the peripheral ring region can be biased by setting the corresponding parameter, which are [!param](/Mesh/PeripheralRingMeshGenerator/peripheral_radial_bias). The bias value should be a positive `Real` type parameter, which is the radial dimension ratio between two radially-neighboring elements (outer to inner).
+In addition, the radial meshing density of the peripheral ring region can be biased by setting the [!param](/Mesh/PeripheralRingMeshGenerator/peripheral_radial_bias) parameter. The bias value should be a positive `Real` type parameter, which is the radial dimension ratio between two radially-neighboring elements (outer to inner).
 
 Aside from the general mesh radial biasing options described above, users can also define boundary layers within the peripheral ring region. Both inner and outer boundary layers are supported. Each boundary layer has three key parameters that need to be provided:
 
-- [!param](/Mesh/PeripheralRingMeshGenerator/peripheral_inner_boundary_layer_width)/[!param](/Mesh/PeripheralRingMeshGenerator/peripheral_outer_boundary_layer_width): the radiation width of the boundary layer within the region. Note that the summation of the inner and outer boundary layers width must be smaller the thinnest part of the peripheral ring.
+- [!param](/Mesh/PeripheralRingMeshGenerator/peripheral_inner_boundary_layer_width)/[!param](/Mesh/PeripheralRingMeshGenerator/peripheral_outer_boundary_layer_width): the radiation width of the boundary layer within the region. Note that the summation of the inner and outer boundary layers width must be smaller than the thinnest part of the peripheral ring.
 - [!param](/Mesh/PeripheralRingMeshGenerator/peripheral_inner_boundary_layer_intervals)/[!param](/Mesh/PeripheralRingMeshGenerator/peripheral_outer_boundary_layer_intervals): the number of radial mesh discretization of the boundary layer.
 - [!param](/Mesh/PeripheralRingMeshGenerator/peripheral_inner_boundary_layer_bias)/[!param](/Mesh/PeripheralRingMeshGenerator/peripheral_outer_boundary_layer_bias): the growth factor used for radial mesh biasing for the boundary layer.
 
