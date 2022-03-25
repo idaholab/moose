@@ -49,7 +49,10 @@ public:
 
   WithGradientTestFunctor(const MooseMesh & mesh) : _mesh(mesh) {}
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const override { return !fi.neighborPtr(); }
+  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override
+  {
+    return std::make_pair(!fi.neighborPtr(), &fi.elem());
+  }
 
 private:
   using TestFunctor<T>::evaluateGradient;
@@ -320,7 +323,7 @@ TEST(MooseFunctorTest, testArgs)
       }
 
       for (const auto & mesh_fi : all_fi)
-        EXPECT_TRUE(zero.isExtrapolatedBoundaryFace(mesh_fi) == !(mesh_fi.neighborPtr()));
+        EXPECT_TRUE(zero.isExtrapolatedBoundaryFace(mesh_fi).first == !(mesh_fi.neighborPtr()));
     }
   }
 }

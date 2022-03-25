@@ -28,7 +28,7 @@ public:
   {
   }
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const override
+  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override
   {
     return _array.isExtrapolatedBoundaryFace(fi);
   }

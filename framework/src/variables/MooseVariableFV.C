@@ -696,10 +696,23 @@ MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(const FaceInfo & fi) 
 }
 
 template <typename OutputType>
-bool
+std::pair<bool, const Elem *>
 MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
 {
-  return !isDirichletBoundaryFace(fi) && !isInternalFace(fi);
+  const bool extrapolated = !isDirichletBoundaryFace(fi) && !isInternalFace(fi);
+
+  if (!fi.neighborPtr())
+    return std::make_pair(extrapolated, &fi.elem());
+
+  const bool defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
+#ifndef NDEBUG
+  const bool defined_on_neighbor = this->hasBlocks(fi.neighbor().subdomain_id());
+
+  mooseAssert(defined_on_elem || defined_on_neighbor,
+              "This shouldn't be called if we aren't defined on either side.");
+#endif
+  const Elem * const ret_elem = defined_on_elem ? &fi.elem() : fi.neighborPtr();
+  return std::make_pair(extrapolated, ret_elem);
 }
 
 template <typename OutputType>
@@ -711,7 +724,7 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
       "MooseVariableFV::getExtrapolatedBoundaryFaceValue only supported for global AD indexing");
 #endif
 
-  mooseAssert(isExtrapolatedBoundaryFace(fi),
+  mooseAssert(isExtrapolatedBoundaryFace(fi).first,
               "This function should only be called on extrapolated boundary faces");
 
   auto it = _face_to_value.find(&fi);
@@ -770,7 +783,7 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 
   if (isDirichletBoundaryFace(fi))
     return getDirichletBoundaryFaceValue(fi);
-  else if (isExtrapolatedBoundaryFace(fi))
+  else if (isExtrapolatedBoundaryFace(fi).first)
     return getExtrapolatedBoundaryFaceValue(fi);
 
   mooseError("Unknown boundary face type!");

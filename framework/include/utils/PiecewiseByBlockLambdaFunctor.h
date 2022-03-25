@@ -52,7 +52,7 @@ public:
 
   virtual ~PiecewiseByBlockLambdaFunctor() = default;
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
+  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
 
   using typename Moose::FunctorBase<T>::FunctorType;
   using typename Moose::FunctorBase<T>::ValueType;
@@ -163,14 +163,20 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
 }
 
 template <typename T>
-bool
+std::pair<bool, const Elem *>
 PiecewiseByBlockLambdaFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
 {
   if (!fi.neighborPtr())
-    return true;
+    return std::make_pair(true, &fi.elem());
 
-  return (_elem_functor.count(fi.elem().subdomain_id()) +
-          _elem_functor.count(fi.neighbor().subdomain_id())) == 1;
+  const bool defined_on_elem = _elem_functor.count(fi.elem().subdomain_id());
+  const bool defined_on_neighbor = _elem_functor.count(fi.neighbor().subdomain_id());
+  const bool extrapolated = (defined_on_elem + defined_on_neighbor) == 1;
+
+  mooseAssert(defined_on_elem || defined_on_neighbor,
+              "This shouldn't be called if we aren't defined on either side.");
+  const Elem * const ret_elem = defined_on_elem ? &fi.elem() : fi.neighborPtr();
+  return std::make_pair(extrapolated, ret_elem);
 }
 
 template <typename T>

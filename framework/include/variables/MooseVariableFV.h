@@ -516,7 +516,7 @@ protected:
    * boundary face for which is not a corresponding Dirichlet condition, e.g. we need to compute
    * some approximation for the boundary face value using the adjacent cell centroid information
    */
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
+  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
 
 private:
   using MooseVariableField<OutputType>::evaluate;
@@ -742,7 +742,7 @@ MooseVariableFV<OutputType>::evaluateFaceHelper(const FaceCallingArg & face) con
 {
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
-  if (isExtrapolatedBoundaryFace(*fi))
+  if (isExtrapolatedBoundaryFace(*fi).first)
     return getExtrapolatedBoundaryFaceValue(*fi);
   else if (isInternalFace(*fi))
     return getInternalFaceValue(face);

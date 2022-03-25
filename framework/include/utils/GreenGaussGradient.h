@@ -109,7 +109,7 @@ greenGaussGradient(const ElemArg & elem_arg,
       mooseAssert(elem_arg.elem == &functor_elem,
                   "Just a sanity check that the element being passed in is the one we passed out.");
 
-      if (functor.isExtrapolatedBoundaryFace(*fi))
+      if (functor.isExtrapolatedBoundaryFace(*fi).first)
       {
         if (two_term_boundary_expansion)
         {
@@ -278,8 +278,9 @@ greenGaussGradient(const FaceArg & face_arg,
   const auto & fi = *(face_arg.fi);
   const auto & elem_arg = face_arg.makeElem();
   const auto & neighbor_arg = face_arg.makeNeighbor();
+  const auto [is_extrapolated, defined_elem] = functor.isExtrapolatedBoundaryFace(fi);
 
-  if (!functor.isExtrapolatedBoundaryFace(fi))
+  if (!is_extrapolated)
   {
     // Compute the gradients in the two cells on both sides of the face
     const auto & grad_elem = greenGaussGradient(
@@ -301,7 +302,7 @@ greenGaussGradient(const FaceArg & face_arg,
   }
 
   // One term expansion
-  if (!fi.neighborPtr())
+  if (&fi.elem() == defined_elem)
     return functor.gradient(elem_arg);
   else
     return functor.gradient(neighbor_arg);

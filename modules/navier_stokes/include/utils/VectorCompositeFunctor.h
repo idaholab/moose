@@ -40,8 +40,6 @@ public:
   {
   }
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
-
 private:
   ValueType evaluate(const ElemArg & elem_arg, unsigned int state) const override final
   {
@@ -83,10 +81,3 @@ private:
   /// The z-component functor
   const FunctorBase<T> & _z_comp;
 };
-
-template <typename T>
-bool
-VectorCompositeFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo &) const
-{
-  mooseError("not implemented");
-}

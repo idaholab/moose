@@ -350,9 +350,15 @@ public:
   void setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule);
 
   /**
-   * Returns whether this face is an extrapolated boundary face for this functor
+   * Returns a pair where the first member is whether this face is an extrapolated boundary face for
+   * this functor. The second member is the element on which this functor is defined if this is an
+   * extrapolated boundary face (if it is not an extrapolated boundary face, then we just return the
+   * face information \p &elem())
    */
-  virtual bool isExtrapolatedBoundaryFace(const FaceInfo &) const { mooseError("not implemented"); }
+  virtual std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo &) const
+  {
+    mooseError("not implemented");
+  }
 
   /**
    * Returns true if this functor is a constant

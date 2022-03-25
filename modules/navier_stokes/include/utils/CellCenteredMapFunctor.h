@@ -71,7 +71,7 @@ public:
   {
   }
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
+  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
 
 private:
   /// The mesh that this functor lives on
@@ -143,7 +143,7 @@ private:
     mooseAssert(face.limiter_type == Moose::FV::LimiterType::CentralDifference,
                 "this implementation currently only supports linear interpolations");
 
-    if (!isExtrapolatedBoundaryFace(fi))
+    if (!isExtrapolatedBoundaryFace(fi).first)
       return Moose::FV::linearInterpolation(*this, face);
 
     if (!fi.neighborPtr() || _sub_ids.count(fi.elem().subdomain_id()))
@@ -173,7 +173,7 @@ private:
   GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final
   {
     const auto & fi = *face.fi;
-    if (!isExtrapolatedBoundaryFace(fi))
+    if (!isExtrapolatedBoundaryFace(fi).first)
     {
       const auto elem_arg = face.makeElem();
       const auto elem_gradient = this->gradient(elem_arg);
@@ -210,8 +210,18 @@ private:
 };
 
 template <typename T, typename Map>
-bool
+std::pair<bool, const Elem *>
 CellCenteredMapFunctor<T, Map>::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
 {
-  return Moose::FV::onBoundary(_sub_ids, fi);
+  if (!fi.neighborPtr())
+    return std::make_pair(true, &fi.elem());
+
+  const bool defined_on_elem = _sub_ids.empty() || _sub_ids.count(fi.elem().subdomain_id());
+  const bool defined_on_neighbor = _sub_ids.empty() || _sub_ids.count(fi.neighbor().subdomain_id());
+  const bool extrapolated = (defined_on_elem + defined_on_neighbor) == 1;
+
+  mooseAssert(defined_on_elem || defined_on_neighbor,
+              "This shouldn't be called if we aren't defined on either side.");
+  const Elem * const ret_elem = defined_on_elem ? &fi.elem() : fi.neighborPtr();
+  return std::make_pair(extrapolated, ret_elem);
 }
