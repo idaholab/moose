@@ -999,34 +999,32 @@ buildRequiredMaterials(const Consumers & mat_consumers,
  * Utility class template for a semidynamic vector with a maximum size N
  * and a chosen dynamic size. This container avoids heap allocation and
  * is meant as a replacement for small local std::vector variables.
- * Note: this class uses default initialization, which will not initialize built-in types.
- * Note: due to an assertion bug in DynamicStdArrayWrapper we have to allocate one element more
- * until https://github.com/libMesh/MetaPhysicL/pull/8 in MetaPhysicL is available in MOOSE.
+ * By default this class uses `value initialization`. This can be disabled
+ * using the third template parameter if uninitialized storage is acceptable,
  */
-template <typename T, std::size_t N, bool zero_init = true>
-class SemidynamicVector
-  : public MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N + 1>>
+template <typename T, std::size_t N, bool value_init = true>
+class SemidynamicVector : public MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N>>
 {
-  typedef MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N + 1>> Parent;
+  typedef MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N>> Parent;
 
 public:
   SemidynamicVector(std::size_t size) : Parent()
   {
     Parent::resize(size);
-    if constexpr (zero_init)
+    if constexpr (value_init)
       for (const auto i : make_range(size))
-        _data[i] = {};
+        _data[i] = T{};
   }
 
   void resize(std::size_t new_size)
   {
-    const auto old_dynamic_n = Parent::size();
+    [[maybe_unused]] const auto old_dynamic_n = Parent::size();
 
     Parent::resize(new_size);
 
-    if constexpr (zero_init)
+    if constexpr (value_init)
       for (const auto i : make_range(old_dynamic_n, _dynamic_n))
-        _data[i] = {};
+        _data[i] = T{};
   }
 
   void push_back(const T & v)
