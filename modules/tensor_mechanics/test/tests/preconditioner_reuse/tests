@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#21868'
+  design = 'NonlinearSystem.md'
+  [without_reuse]
+    type = CSVDiff
+    input = convergence.i
+    csvdiff = base_case.csv
+    requirement = 'Convergence matches previous version of MOOSE without the '
+                  'preconditioner reuse system'
+  []
+  [with_reuse]
+    type = CSVDiff
+    input = convergence.i
+    cli_args = "Executioner/reuse_preconditioner=true Outputs/csv/file_base=reuse_case"
+    csvdiff = reuse_case.csv
+    requirement = 'Preconditioner is reused until the linear iterations exceed '
+                  'the value of reuse_preconditioner_max_its upon which the '
+                  'system recalculates the preconditioner'
+  []
+[]

@@ -365,3 +365,70 @@ which there are quite a few nonlinear iterations per timestep, for which the
 cost of an additional Jacobian evaluation during the final residual evaluation
 is amortized. Also, simulations in which material property calculations are very
 expensive may be good candidates for computing the residual and Jacobian together.
+
+## Reusing preconditioners id=reuse_preconditioners
+
+The simple version of GRMES and other iterative methods converge only very
+slowly.  To improve convergence PETSc and other iterative solver packages
+apply a [preconditioner](https://en.wikipedia.org/wiki/Preconditioner) to the
+system of equations/sparse matrix before applying the iterative solver.
+
+A great number of preconditioners exist, but 
+[multigrid](https://en.wikipedia.org/wiki/Multigrid_method)
+methods are often among the best choices.  
+The [HYPRE](application_development/hypre.md optional=true) package, 
+specifically the 
+BoomerAMG preconditioner, is often a good choice for a preconditioner to
+condition the system of equations resulting from the MOOSE simulation.
+
+A direct factorization of the sparse system of equations is a *very*
+good preconditioner.  An iterative method using the factorized matrix
+as a preconditioner will typically converge to machine precision in a single
+iteration.  However, as noted above, factorizing the sparse system of equations
+for a large simulation is numerically expensive.
+
+One option is to reuse a preconditioner for many iterations of the 
+linear iterative solver.  The preconditioner can be carried over
+through nonlinear iterations and even across load steps.  MOOSE
+allows the user to do this with the `reuse_preconditioner` flag.
+Setting
+
+```
+  reuse_preconditioner = true
+  reuse_preconditioner_max_its = 20
+```
+
+in the `[Executioner]` block will reuse the same preconditioner until
+the number of linear iterations required to solve the linearized system of
+equations exceeds 20.  At that time the solution algorithm will reform
+the preconditioner and repeat the process.
+
+Using these parameters in combination with a direct factorization of the
+system can be very efficient.  The following is an example of how to
+configure PETSc and MOOSE to solve the equations with this combination:
+
+```
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -ksp_type'
+  petsc_options_value = 'lu superlu_dist gmres'
+  l_tol = 1e-8
+  l_max_its = 100
+
+  reuse_preconditioner = true
+  reuse_preconditioner_max_its = 20
+
+  nl_max_its = 10
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-10
+```
+
+This solver strategy can be very efficient when solving a problem on a 
+desktop or workstation computer (i.e. not on a cluster).  However, it
+is a heuristic -- the efficiency of the approach and the optimal value
+of `reuse_preconditioner_max_its` will vary greatly depending on the type of
+physics you are solving and on how quickly the structure of the problem
+changes from load step to load step.
+
+On larger machines reusing the AMG preconditioner provided by BoomerAMG
+may be a way to increase the efficiency of the overall simulation.  Again,
+this is a heuristic and the effectiveness of the approach and good values
+of `reuse_preconditioner_max_its` are going to vary.
