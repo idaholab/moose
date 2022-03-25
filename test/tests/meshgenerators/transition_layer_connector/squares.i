@@ -34,5 +34,6 @@
     mesh_1_shift = '-1.5 0.5 0.0'
     mesh_2_shift = '0.8 -0.3 0.0'
     num_layers = 3
+    keep_inputs = false
   []
 []

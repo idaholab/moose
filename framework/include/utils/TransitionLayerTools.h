@@ -11,6 +11,7 @@
 #include "LinearInterpolation.h"
 #include "SplineInterpolation.h"
 #include "libmesh/replicated_mesh.h"
+#include "libmesh/mesh_modification.h"
 
 namespace TransitionLayerTools
 {
@@ -29,8 +30,8 @@ namespace TransitionLayerTools
  * first Points of the two input Point vectors
  * @param end_side_boundary_id id of the generated mesh's external boundary that connects the last
  * Points of the two input Point vectors
- * @param type type of the MOOSE object that calls this method
- * @param name name of the MOOSE object that calls this method
+ * @param type type of the MOOSE object that calls this method for error messages
+ * @param name name of the MOOSE object that calls this method for error messages
  * @param quad_elem whether the QUAD4 elements are used to construct the mesh
  * @param bias_parameter a parameter to control bias options (1) >0, biasing factor (2) <=0
  * automatic biasing
@@ -174,11 +175,36 @@ void surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
 bool isXYPlane(const std::vector<Point> vec_pts);
 
 /**
- * Decide whether one of the input vector of Points needs to be flip to ensure correct transition
+ * Decide whether one of the input vector of Points needs to be flipped to ensure correct transition
  * layer shape
  * @param vec_pts_1 first vector of points to be examined
  * @param vec_pts_2 second vector of points to be examined
  * @return whether one of the vectors needs to be flipped to ensure correct transition layer shape
  */
 bool needFlip(const std::vector<Point> vec_pts_1, const std::vector<Point> vec_pts_2);
+
+/**
+ * Decides whether a boundary of a given mesh works with the algorithm used in this class.
+ * @param mesh input mesh that contains the boundary to be examined
+ * @param max_node_radius the maximum radius of the nodes on the
+ * boundary
+ * @param invalid_type help distinguish different types of invalid boundaries
+ * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
+ * @param bid ID of the boundary to be examined
+ * @return whether the boundary works with the algorithm
+ */
+bool isBoundaryValid(ReplicatedMesh & mesh,
+                     Real & max_node_radius,
+                     unsigned short & invalid_type,
+                     std::vector<dof_id_type> & boundary_ordered_node_list,
+                     const Point origin_pt,
+                     const boundary_id_type bid);
+
+/**
+ * Decides whether a boundary of a given mesh works is an external boundary.
+ * @param mesh input mesh that contains the boundary to be examined
+ * @param bid ID of the boundary to be examined
+ * @return whether the boundary is the external boundary of the given mesh
+ */
+bool isExternalBoundary(ReplicatedMesh & mesh, const boundary_id_type bid);
 }
