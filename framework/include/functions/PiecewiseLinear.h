@@ -15,10 +15,26 @@
  * Function which provides a piecewise continuous linear interpolation
  * of a provided (x,y) point data set.
  */
-class PiecewiseLinear : public PiecewiseLinearBase
+template <typename BaseClass>
+class PiecewiseLinearTempl : public BaseClass
 {
 public:
   static InputParameters validParams();
 
-  PiecewiseLinear(const InputParameters & parameters);
+  PiecewiseLinearTempl(const InputParameters & parameters);
 };
+
+class PiecewiseLinear : public PiecewiseLinearTempl<PiecewiseLinearBase>
+{
+public:
+  PiecewiseLinear(const InputParameters & params)
+    : PiecewiseLinearTempl<PiecewiseLinearBase>(params)
+  {
+  }
+  static InputParameters validParams()
+  {
+    return PiecewiseLinearTempl<PiecewiseLinearBase>::validParams();
+  }
+};
+
+typedef PiecewiseLinearTempl<ADPiecewiseLinearBase> ADPiecewiseLinear;

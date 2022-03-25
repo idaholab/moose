@@ -10,10 +10,11 @@
 #include "PiecewiseTabularBase.h"
 #include "DelimitedFileReader.h"
 
+template <typename BaseClass>
 InputParameters
-PiecewiseTabularBase::validParams()
+PiecewiseTabularBaseTempl<BaseClass>::validParams()
 {
-  InputParameters params = PiecewiseBase::validParams();
+  InputParameters params = BaseClass::validParams();
 
   MooseEnum axis("x=0 y=1 z=2");
   params.addParam<MooseEnum>(
@@ -36,14 +37,15 @@ PiecewiseTabularBase::validParams()
   return params;
 }
 
-PiecewiseTabularBase::PiecewiseTabularBase(const InputParameters & parameters)
-  : PiecewiseBase(parameters),
-    _scale_factor(getParam<Real>("scale_factor")),
+template <typename BaseClass>
+PiecewiseTabularBaseTempl<BaseClass>::PiecewiseTabularBaseTempl(const InputParameters & parameters)
+  : BaseClass(parameters),
+    _scale_factor(this->template getParam<Real>("scale_factor")),
     _has_axis(isParamValid("axis"))
 {
   // determine function argument
   if (_has_axis)
-    _axis = getParam<MooseEnum>("axis");
+    _axis = this->template getParam<MooseEnum>("axis");
 
   // determine data source and check parameter consistency
   if (isParamValid("data_file") && !isParamValid("x") && !isParamValid("y") &&
@@ -61,15 +63,16 @@ PiecewiseTabularBase::PiecewiseTabularBase(const InputParameters & parameters)
                ": Either 'data_file', 'x' and 'y', or 'xy_data' must be specified exclusively.");
 }
 
+template <typename BaseClass>
 void
-PiecewiseTabularBase::buildFromFile()
+PiecewiseTabularBaseTempl<BaseClass>::buildFromFile()
 {
   // Input parameters
-  const FileName & data_file_name = getParam<FileName>("data_file");
-  const MooseEnum & format = getParam<MooseEnum>("format");
-  unsigned int x_index = getParam<unsigned int>("x_index_in_file");
-  unsigned int y_index = getParam<unsigned int>("y_index_in_file");
-  bool xy_only = getParam<bool>("xy_in_file_only");
+  const FileName & data_file_name = this->template getParam<FileName>("data_file");
+  const MooseEnum & format = this->template getParam<MooseEnum>("format");
+  unsigned int x_index = this->template getParam<unsigned int>("x_index_in_file");
+  unsigned int y_index = this->template getParam<unsigned int>("y_index_in_file");
+  bool xy_only = this->template getParam<bool>("xy_in_file_only");
 
   if (x_index == y_index)
     mooseError(
@@ -125,17 +128,19 @@ PiecewiseTabularBase::buildFromFile()
     mooseError("In ", _name, ": Lengths of x and y data do not match.");
 }
 
+template <typename BaseClass>
 void
-PiecewiseTabularBase::buildFromXandY()
+PiecewiseTabularBaseTempl<BaseClass>::buildFromXandY()
 {
-  _raw_x = getParam<std::vector<Real>>("x");
-  _raw_y = getParam<std::vector<Real>>("y");
+  _raw_x = this->template getParam<std::vector<Real>>("x");
+  _raw_y = this->template getParam<std::vector<Real>>("y");
 }
 
+template <typename BaseClass>
 void
-PiecewiseTabularBase::buildFromXY()
+PiecewiseTabularBaseTempl<BaseClass>::buildFromXY()
 {
-  std::vector<Real> xy = getParam<std::vector<Real>>("xy_data");
+  std::vector<Real> xy = this->template getParam<std::vector<Real>>("xy_data");
   unsigned int xy_size = xy.size();
   if (xy_size % 2 != 0)
     mooseError("In ", _name, ": Length of data provided in 'xy_data' must be a multiple of 2.");
@@ -149,3 +154,6 @@ PiecewiseTabularBase::buildFromXY()
     _raw_y.push_back(xy[i + 1]);
   }
 }
+
+template class PiecewiseTabularBaseTempl<PiecewiseBase>;
+template class PiecewiseTabularBaseTempl<ADPiecewiseBase>;

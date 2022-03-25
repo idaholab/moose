@@ -9,28 +9,32 @@
 
 #include "PiecewiseLinearBase.h"
 
+template <typename BaseClass>
 InputParameters
-PiecewiseLinearBase::validParams()
+PiecewiseLinearBaseTempl<BaseClass>::validParams()
 {
-  InputParameters params = PiecewiseTabularBase::validParams();
+  InputParameters params = BaseClass::validParams();
   params.addClassDescription("Linearly interpolates between pairs of x-y data");
   return params;
 }
 
-PiecewiseLinearBase::PiecewiseLinearBase(const InputParameters & parameters)
-  : PiecewiseTabularBase(parameters), _linear_interp(nullptr)
+template <typename BaseClass>
+PiecewiseLinearBaseTempl<BaseClass>::PiecewiseLinearBaseTempl(const InputParameters & parameters)
+  : BaseClass(parameters), _linear_interp(nullptr)
 {
 }
 
+template <typename BaseClass>
 void
-PiecewiseLinearBase::initialSetup()
+PiecewiseLinearBaseTempl<BaseClass>::initialSetup()
 {
   if (!_linear_interp)
     mooseError("Classes derived from PiecewiseLinearBase need to call buildInterpolation()");
 }
 
+template <typename BaseClass>
 void
-PiecewiseLinearBase::buildInterpolation(const bool extrap)
+PiecewiseLinearBaseTempl<BaseClass>::buildInterpolation(const bool extrap)
 {
   // try building a linear interpolation object
   try
@@ -43,28 +47,32 @@ PiecewiseLinearBase::buildInterpolation(const bool extrap)
   }
 }
 
+template <typename BaseClass>
 Real
-PiecewiseLinearBase::value(Real t, const Point & p) const
+PiecewiseLinearBaseTempl<BaseClass>::value(Real t, const Point & p) const
 {
   const auto x = _has_axis ? p(_axis) : t;
   return _scale_factor * _linear_interp->sample(x);
 }
 
+template <typename BaseClass>
 ADReal
-PiecewiseLinearBase::value(const ADReal & t, const ADPoint & p) const
+PiecewiseLinearBaseTempl<BaseClass>::value(const ADReal & t, const ADPoint & p) const
 {
   const auto x = _has_axis ? p(_axis) : t;
   return _scale_factor * _linear_interp->sample(x);
 }
 
+template <typename BaseClass>
 Real
-PiecewiseLinearBase::timeDerivative(Real t, const Point &) const
+PiecewiseLinearBaseTempl<BaseClass>::timeDerivative(Real t, const Point &) const
 {
   return _has_axis ? 0.0 : _scale_factor * _linear_interp->sampleDerivative(t);
 }
 
+template <typename BaseClass>
 RealGradient
-PiecewiseLinearBase::gradient(Real, const Point & p) const
+PiecewiseLinearBaseTempl<BaseClass>::gradient(Real, const Point & p) const
 {
   RealGradient ret;
   if (_has_axis)
@@ -72,22 +80,29 @@ PiecewiseLinearBase::gradient(Real, const Point & p) const
   return ret;
 }
 
+template <typename BaseClass>
 Real
-PiecewiseLinearBase::integral() const
+PiecewiseLinearBaseTempl<BaseClass>::integral() const
 {
   return _scale_factor * _linear_interp->integrate();
 }
 
+template <typename BaseClass>
 Real
-PiecewiseLinearBase::average() const
+PiecewiseLinearBaseTempl<BaseClass>::average() const
 {
   return integral() /
          (_linear_interp->domain(_linear_interp->getSampleSize() - 1) - _linear_interp->domain(0));
 }
 
+template <typename BaseClass>
 void
-PiecewiseLinearBase::setData(const std::vector<Real> & x, const std::vector<Real> & y)
+PiecewiseLinearBaseTempl<BaseClass>::setData(const std::vector<Real> & x,
+                                             const std::vector<Real> & y)
 {
-  PiecewiseTabularBase::setData(x, y);
+  BaseClass::setData(x, y);
   buildInterpolation();
 }
+
+template class PiecewiseLinearBaseTempl<PiecewiseTabularBase>;
+template class PiecewiseLinearBaseTempl<ADPiecewiseTabularBase>;
