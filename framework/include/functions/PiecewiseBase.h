@@ -17,12 +17,13 @@
  * Derived classes can either directly implement the x/y data, or provide input parameter mechanisms
  * for such data formulation.
  */
-class PiecewiseBase : public Function
+template <typename BaseClass>
+class PiecewiseBaseTempl : public BaseClass
 {
 public:
   static InputParameters validParams();
 
-  PiecewiseBase(const InputParameters & parameters);
+  PiecewiseBaseTempl(const InputParameters & parameters);
 
   virtual Real functionSize() const;
   virtual Real domain(const int i) const;
@@ -39,4 +40,15 @@ protected:
   std::vector<Real> _raw_x;
   std::vector<Real> _raw_y;
   ///@}
+
+  using BaseClass::_name;
 };
+
+class PiecewiseBase : public PiecewiseBaseTempl<Function>
+{
+public:
+  PiecewiseBase(const InputParameters & params) : PiecewiseBaseTempl<Function>(params) {}
+  static InputParameters validParams() { return PiecewiseBaseTempl<Function>::validParams(); }
+};
+
+typedef PiecewiseBaseTempl<ADFunction> ADPiecewiseBase;
