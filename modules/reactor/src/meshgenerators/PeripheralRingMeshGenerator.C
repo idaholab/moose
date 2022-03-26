@@ -371,8 +371,6 @@ PeripheralRingMeshGenerator::generate()
         points_array[total_peripheral_layer_num - j][i] =
             points_array[total_peripheral_layer_num][i] +
             outer_boundary_shift * outer_peripheral_bias_terms[j - 1];
-      // Update outer boundary points locations
-      points_array[total_peripheral_layer_num][i] = std::get<2>(azi_points[i]) * correction_factor;
     }
     // Use interpolation to get main region
     if (MooseUtils::absoluteFuzzyGreaterEqual(
