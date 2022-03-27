@@ -332,6 +332,11 @@ public:
    */
   virtual bool isExtrapolatedBoundaryFace(const FaceInfo &) const { mooseError("not implemented"); }
 
+  /**
+   * Returns true if this functor is a constant
+   */
+  virtual bool isConstant() const { return false; }
+
 protected:
   /**
    * Evaluate the functor with a given element. Some example implementations of this method
@@ -901,6 +906,7 @@ public:
   virtual void jacobianSetup() = 0;
   virtual bool wrapsNull() const = 0;
   virtual std::string returnType() const = 0;
+  virtual bool isConstant() const = 0;
   ///@}
 };
 
@@ -1011,6 +1017,8 @@ public:
     if (_owned)
       _owned->jacobianSetup();
   }
+
+  virtual bool isConstant() const override { return _wrapped->isConstant(); }
 
 protected:
   ///@{
@@ -1124,6 +1132,8 @@ public:
     : FunctorBase<T>("constant_" + std::to_string(MetaPhysicL::raw_value(value))), _value(value)
   {
   }
+
+  virtual bool isConstant() const override { return true; }
 
 private:
   ValueType evaluate(const ElemArg &, unsigned int) const override { return _value; }

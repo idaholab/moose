@@ -48,6 +48,16 @@
     ad_indexing_type = 'global'
     issues = '#19742'
   []
+  [rho-error]
+    type = RunException
+    input = boussinesq-action.i
+    cli_args = "Materials/const_functor/prop_values='x'"
+    expect_err = 'rho: The density in the boussinesq term is not constant!'
+    requirement = 'The system should throw an error if the density is not a constant functor in case of Boussinesq treatment.'
+    valgrind = 'none'
+    ad_indexing_type = 'global'
+    issues = '#19742'
+  []
   [wcnsfv]
     type = Exodiff
     input = wcnsfv.i

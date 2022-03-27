@@ -82,7 +82,8 @@ GenericFunctorMaterialTempl<is_ad>::GenericFunctorMaterialTempl(const InputParam
         [this, i](const auto & r, const auto & t) -> GenericReal<is_ad> {
           return (*_functors[i])(r, t);
         },
-        clearance_schedule);
+        clearance_schedule,
+        _functors[i]->isConstant());
 }
 
 template class GenericFunctorMaterialTempl<false>;

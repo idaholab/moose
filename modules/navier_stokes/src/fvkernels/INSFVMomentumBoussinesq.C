@@ -44,6 +44,9 @@ INSFVMomentumBoussinesq::INSFVMomentumBoussinesq(const InputParameters & params)
              "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
+
+  if (!_rho.isConstant())
+    paramError(NS::density, "The density in the boussinesq term is not constant!");
 }
 
 ADReal

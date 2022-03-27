@@ -77,6 +77,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // register attributes
   registerTask("add_navier_stokes_pps", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_pps", "add_postprocessor");
+
+  // register attributes
+  registerTask("add_navier_stokes_materials", /*is_required=*/false);
+  addTaskDependency("add_navier_stokes_materials", "add_material");
 }
 
 void

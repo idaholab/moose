@@ -24,6 +24,7 @@ registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_kernels");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_bcs");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_material");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_pps");
+registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_materials");
 
 InputParameters
 NSFVAction::validParams()
@@ -618,7 +619,7 @@ NSFVAction::act()
     }
   }
 
-  if (_current_task == "add_material")
+  if (_current_task == "add_navier_stokes_materials")
   {
     if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
     {
@@ -2060,6 +2061,7 @@ NSFVAction::addEnthalpyMaterial()
   params.set<std::vector<SubdomainName>>("block") = _blocks;
 
   params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
   params.set<MooseFunctorName>("temperature") = NS::T_fluid;
 
   _problem->addMaterial("INSFVEnthalpyMaterial", "ins_enthalpy_material", params);

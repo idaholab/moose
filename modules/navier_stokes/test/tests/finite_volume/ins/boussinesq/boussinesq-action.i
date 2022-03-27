@@ -29,10 +29,10 @@ temp_ref=${fparse hot_temp / 2.}
     boussinesq_approximation = true
 
     density = 'rho'
-    dynamic_viscosity = 'mu'
-    thermal_conductivity = 'k'
-    specific_heat = 'cp'
-    thermal_expansion = 'alpha_b'
+    dynamic_viscosity = ${mu}
+    thermal_conductivity = ${k}
+    specific_heat = ${cp}
+    thermal_expansion = ${alpha}
 
     gravity = '0 -1 0'
     ref_temperature = ${temp_ref}
@@ -66,8 +66,8 @@ temp_ref=${fparse hot_temp / 2.}
 [Materials]
   [const_functor]
     type = ADGenericFunctorMaterial
-    prop_names = 'alpha_b rho cp k mu'
-    prop_values = '${alpha} ${rho} ${cp} ${k} ${mu}'
+    prop_names = 'rho'
+    prop_values = '${rho}'
   []
 []
 

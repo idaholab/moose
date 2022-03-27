@@ -32,7 +32,8 @@ protected:
   const Moose::Functor<T> &
   addFunctorProperty(const std::string & name,
                      PolymorphicLambda my_lammy,
-                     const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS});
+                     const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS},
+                     const bool is_const = false);
 
   /**
    * Declare a functor material property with specified subdomain ids
@@ -42,16 +43,18 @@ protected:
   addFunctorPropertyByBlocks(const std::string & name,
                              PolymorphicLambda my_lammy,
                              const std::set<SubdomainID> & sub_ids,
-                             const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS});
+                             const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS},
+                             const bool is_const = false);
 };
 
 template <typename T, typename PolymorphicLambda>
 const Moose::Functor<T> &
 FunctorMaterial::addFunctorProperty(const std::string & name,
                                     PolymorphicLambda my_lammy,
-                                    const std::set<ExecFlagType> & clearance_schedule)
+                                    const std::set<ExecFlagType> & clearance_schedule,
+                                    const bool is_const)
 {
-  return addFunctorPropertyByBlocks<T>(name, my_lammy, blockIDs(), clearance_schedule);
+  return addFunctorPropertyByBlocks<T>(name, my_lammy, blockIDs(), clearance_schedule, is_const);
 }
 
 template <typename T, typename PolymorphicLambda>
@@ -59,7 +62,8 @@ const Moose::Functor<T> &
 FunctorMaterial::addFunctorPropertyByBlocks(const std::string & name,
                                             PolymorphicLambda my_lammy,
                                             const std::set<SubdomainID> & sub_ids,
-                                            const std::set<ExecFlagType> & clearance_schedule)
+                                            const std::set<ExecFlagType> & clearance_schedule,
+                                            const bool is_const)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = name;
@@ -72,5 +76,5 @@ FunctorMaterial::addFunctorPropertyByBlocks(const std::string & name,
   }
 
   return _subproblem.addPiecewiseByBlockLambdaFunctor<T>(
-      prop_name, my_lammy, clearance_schedule, _mesh, sub_ids, _tid);
+      prop_name, my_lammy, clearance_schedule, _mesh, sub_ids, _tid, is_const);
 }
