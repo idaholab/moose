@@ -27,19 +27,28 @@ INSFVMomentumAdvection::validParams()
 INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   : INSFVAdvectionKernel(params),
     INSFVMomentumResidualObject(*this),
-    _rho(getFunctor<ADReal>(NS::density)),
-    _rho_u(
-        "rho_u",
-        [this](const auto & r, const auto & t) -> ADReal { return _rho(r, t) * _var(r, t); },
-        std::set<ExecFlagType>({EXEC_ALWAYS}),
-        _mesh,
-        this->blockIDs())
+    _rho(getFunctor<ADReal>(NS::density))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
              "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
+}
+
+void
+INSFVMomentumAdvection::initialSetup()
+{
+  INSFVAdvectionKernel::initialSetup();
+
+  _rho_u = std::make_unique<PiecewiseByBlockLambdaFunctor<ADReal>>(
+      "rho_u",
+      [this](const auto & r, const auto & t) -> ADReal {
+        return _rho(r, t) * _var(r, t) / epsilon()(r, t);
+      },
+      std::set<ExecFlagType>({EXEC_ALWAYS}),
+      _mesh,
+      this->blockIDs());
 }
 
 ADReal
@@ -49,8 +58,9 @@ INSFVMomentumAdvection::computeQpResidual()
 
   const bool correct_skewness = _advected_interp_method == InterpMethod::SkewCorrectedAverage;
   const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
+
   const auto [interp_coeffs, advected] =
-      interpCoeffsAndAdvected(_rho_u,
+      interpCoeffsAndAdvected(*_rho_u,
                               makeFace(*_face_info,
                                        limiterType(_advected_interp_method),
                                        MetaPhysicL::raw_value(v) * _normal > 0,
@@ -62,11 +72,13 @@ INSFVMomentumAdvection::computeQpResidual()
   const auto neighbor_face = neighborFromFace();
 
   const auto rho_elem = _rho(elem_face), rho_neighbor = _rho(neighbor_face);
-  const auto var_elem = advected.first / rho_elem, var_neighbor = advected.second / rho_neighbor;
+  const auto eps_elem = epsilon()(elem_face), eps_neighbor = epsilon()(neighbor_face);
+  const auto var_elem = advected.first / rho_elem * eps_elem,
+             var_neighbor = advected.second / rho_neighbor * eps_neighbor;
 
-  _ae = _normal * v * rho_elem * interp_coeffs.first;
+  _ae = _normal * v * rho_elem / eps_elem * interp_coeffs.first;
   // Minus sign because we apply a minus sign to the residual in computeResidual
-  _an = -_normal * v * rho_neighbor * interp_coeffs.second;
+  _an = -_normal * v * rho_neighbor / eps_neighbor * interp_coeffs.second;
 
   return _ae * var_elem - _an * var_neighbor;
 }

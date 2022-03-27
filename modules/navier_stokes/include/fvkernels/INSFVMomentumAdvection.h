@@ -24,19 +24,28 @@ public:
   INSFVMomentumAdvection(const InputParameters & params);
   void gatherRCData(const Elem &) override final {}
   void gatherRCData(const FaceInfo & fi) override final;
+  void initialSetup() override;
 
 protected:
   virtual ADReal computeQpResidual() override;
+
+  /**
+   * A virtual method that allows us to reuse all the code from free-flow for porous
+   */
+  virtual const Moose::FunctorBase<ADReal> & epsilon() const { return _unity_functor; }
 
   /// Density
   const Moose::Functor<ADReal> & _rho;
 
   /// Our local momentum functor
-  const PiecewiseByBlockLambdaFunctor<ADReal> _rho_u;
+  std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADReal>> _rho_u;
 
   /// The a coefficient for the element
   ADReal _ae = 0;
 
   /// The a coefficient for the neighbor
   ADReal _an = 0;
+
+  /// A unity functor used in the epsilon virtual method
+  const Moose::ConstantFunctor<ADReal> _unity_functor{1};
 };

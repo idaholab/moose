@@ -9,20 +9,14 @@
 
 #pragma once
 
-#include "INSFVAdvectionKernel.h"
+#include "INSFVMassAdvection.h"
 
 /**
  * A flux kernel transporting mass in porous media across cell faces
  */
-class PINSFVMassAdvection : public INSFVAdvectionKernel
+class PINSFVMassAdvection : public INSFVMassAdvection
 {
 public:
   static InputParameters validParams();
   PINSFVMassAdvection(const InputParameters & params);
-
-protected:
-  ADReal computeQpResidual() override;
-
-  /// Density
-  const Moose::Functor<ADReal> & _rho;
 };
