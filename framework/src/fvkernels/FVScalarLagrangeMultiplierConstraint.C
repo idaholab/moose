@@ -35,36 +35,6 @@ FVScalarLagrangeMultiplierConstraint::FVScalarLagrangeMultiplierConstraint(
       "FVScalarLagrangeMultiplierConstraint, please run the configure script in the root MOOSE "
       "directory with the configure option '--with-ad-indexing-type=global'");
 #endif
-
-  // If we have a point value constraint, we look for the mesh cell with the
-  // constraint. For this, we use a point_locator (adapted from the DiracKernels)
-  // that builds a tree to scan the mesh
-  if (_constraint_type == "point-value")
-  {
-    if (_point_locator.get() == NULL)
-    {
-      _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, _mesh);
-      _point_locator->enable_out_of_mesh_mode();
-    }
-
-    // We only check in the restricted blocks, if needed
-    const bool block_restricted = blockIDs().find(Moose::ANY_BLOCK_ID) == blockIDs().end();
-    const Elem * elem =
-        block_restricted ? (*_point_locator)(_point, &blockIDs()) : (*_point_locator)(_point);
-
-    // We communicate the results and if there is conflict between processes,
-    // the minimum cell ID is chosen
-    dof_id_type elem_id = elem ? elem->id() : DofObject::invalid_id;
-    dof_id_type min_elem_id = elem_id;
-    _mesh.comm().min(min_elem_id);
-
-    if (min_elem_id == DofObject::invalid_id)
-      mooseError("The specified point for the point-constraint Lagrange Multiplier is not in the "
-                 "domain! Try alleviating block restrictions or "
-                 "using another point!");
-
-    _my_elem = min_elem_id == elem_id ? elem : NULL;
-  }
 }
 
 void
@@ -82,27 +52,12 @@ FVScalarLagrangeMultiplierConstraint::computeResidual()
   // make sure the scalar residuals get cached for later addition
   const auto lm_r = MetaPhysicL::raw_value(computeQpResidual()) * _assembly.elemVolume();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have a single dof");
-
-  if (_constraint_type == "point-value")
-  {
-    // If _my_elem is still null on this process, we don't add anything
-    if (_my_elem == _current_elem)
-    {
-      const auto lm_r = MetaPhysicL::raw_value(_u[_qp]) - _phi0;
-      _assembly.processResidual(lm_r, _lambda_var.dofIndices()[0], _vector_tags);
-    }
-  }
-  else
-  {
-    const auto lm_r = (MetaPhysicL::raw_value(_u[_qp]) - _phi0) * _assembly.elemVolume();
-    _assembly.processResidual(lm_r, _lambda_var.dofIndices()[0], _vector_tags);
-  }
+  _assembly.processResidual(lm_r, _lambda_var.dofIndices()[0], _vector_tags);
 }
 
 void
 FVScalarLagrangeMultiplierConstraint::computeJacobian()
 {
-  mooseError("There is no need for me.");
 }
 
 void
@@ -118,18 +73,5 @@ FVScalarLagrangeMultiplierConstraint::computeOffDiagJacobian()
   // LM
   const auto lm_r = computeQpResidual() * _assembly.elemVolume();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
-  if (_constraint_type == "point-value")
-  {
-    // If _my_elem is still null on this process, we don't add anything
-    if (_my_elem == _current_elem)
-    {
-      const auto lm_r = _u[_qp] - _phi0;
-      _assembly.processDerivatives(lm_r, _lambda_var.dofIndices()[0], _matrix_tags);
-    }
-  }
-  else
-  {
-    const auto lm_r = (_u[_qp] - _phi0) * _assembly.elemVolume();
-    _assembly.processDerivatives(lm_r, _lambda_var.dofIndices()[0], _matrix_tags);
-  }
+  _assembly.processDerivatives(lm_r, _lambda_var.dofIndices()[0], _matrix_tags);
 }

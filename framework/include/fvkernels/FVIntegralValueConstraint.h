@@ -16,12 +16,8 @@
  *
  * \int \phi = \int \phi_0
  *
- * or
- *
- * \phi(r_0) = \phi_0
- *
- * using a Lagrange multiplier approach. E.g. this kernel enforces the constraint that
- * the average or point value of \phi matches \phi_0
+ * using a Lagrange multiplier approach. E.g. this kernel enforces the constraint that the average
+ * value of \phi matches \phi_0
  *
  * In particular, this Kernel implements the residual contribution for
  * the lambda term in Eq. (5), and both terms in Eq. (6) where \int \phi_0 = V_0
@@ -40,16 +36,4 @@ private:
 
   /// The value that we want the average of the primal variable to be equal to
   const Real _phi0;
-
-  /// Constraint type
-  const MooseEnum _constraint_type;
-
-  /// The point where the constraint should be enforced
-  const Point _point;
-
-  /// We use a point locator in case the constraint is a point value
-  std::unique_ptr<PointLocatorBase> _point_locator;
-
-  /// Pointer to the element in case we have a point constraint
-  const Elem * _my_elem;
 };

@@ -934,13 +934,16 @@ NSFVAction::addINSMassKernels()
 
   if (getParam<bool>("pin_pressure"))
   {
-    const std::string kernel_type = "FVScalarLagrangeMultiplier";
+    MooseEnum pin_type = getParam<MooseEnum>("pinned_pressure_type");
+    std::string kernel_type;
+    if (pin_type == "point-value")
+      kernel_type = "FVPointValueConstraint";
+    else
+      kernel_type = "FVIntegralValueConstraint";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<CoupledName>("lambda") = {"lambda"};
     params.set<Real>("phi0") = getParam<Real>("pinned_pressure_value");
     params.set<NonlinearVariableName>("variable") = NS::pressure;
-    MooseEnum pin_type = getParam<MooseEnum>("pinned_pressure_type");
-    params.set<MooseEnum>("constraint_type") = pin_type;
     if (pin_type == "point-value")
       params.set<Point>("point") = getParam<Point>("pinned_pressure_point");
 
