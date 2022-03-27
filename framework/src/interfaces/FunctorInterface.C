@@ -110,5 +110,5 @@ FunctorInterface::isFunctor(const std::string & name) const
 Moose::ElemArg
 FunctorInterface::makeElemArg(const Elem * const elem, const bool correct_skewness) const
 {
-  return {elem, correct_skewness, /*apply_gradient_to_skewness=*/correct_skewness};
+  return {elem, correct_skewness};
 }

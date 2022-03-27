@@ -338,3 +338,16 @@ FVFluxKernel::faceArgSubdomains(const FaceInfo * face_info) const
 
   return Moose::FV::faceArgSubdomains(*this, *face_info);
 }
+
+Moose::SingleSidedFaceArg
+FVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
+                                 const Moose::FV::LimiterType limiter_type,
+                                 const bool correct_skewness) const
+{
+  if (!fi)
+    fi = _face_info;
+  const bool use_elem = fi->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
+  const auto sub_id = use_elem ? fi->elem().subdomain_id() : fi->neighborPtr()->subdomain_id();
+
+  return {fi, limiter_type, true, correct_skewness, sub_id};
+}

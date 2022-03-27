@@ -1,30 +1,44 @@
 [Tests]
   issues = '#18666 #19472'
-  design = 'navier_stokes/fv.md'
+  design = 'rans_theory.md MixingLengthTurbulentViscosityMaterial.md NSFVAction.md'
   [capped_mixing_length]
-    type = 'Exodiff'
-    input = mixing_length_total_viscosity.i
-    exodiff = mixing_length_total_viscosity_out.e
-    method = "!dbg"
-    requirement = 'The system shall be able to calculate the material property comprising the total turbulent viscosity, based on the capped mixing length model.'
-    ad_indexing_type = 'global'
-    issues = '#18666'
-    design = 'rans_theory.md MixingLengthTurbulentViscosityMaterial.md'
-    mesh_mode = REPLICATED
-    valgrind = 'none'
-    recover = false
-  []
-  [mixing_length_action]
-    type = 'Exodiff'
-    input = mixing_length_total_viscosity-action.i
-    exodiff = mixing_length_total_viscosity-action_out.e
-    method = "!dbg"
-    requirement = 'The system shall be able to simulate mixing-length-based turbulent systems using the NSFV action input syntax.'
-    ad_indexing_type = 'global'
-    issues = '#19472'
-    design = 'NSFVAction.md'
-    mesh_mode = REPLICATED
-    valgrind = 'none'
-    recover = false
+    requirement = 'The system shall be able to calculate the material property comprising the total turbulent viscosity, based on the capped mixing length model when performing'
+    [transient]
+      type = 'Exodiff'
+      input = mixing_length_total_viscosity.i
+      exodiff = mixing_length_total_viscosity_out.e
+      method = "!dbg"
+      ad_indexing_type = 'global'
+      mesh_mode = REPLICATED
+      valgrind = 'none'
+      recover = false
+      heavy = true
+      detail = 'transient simulations'
+      abs_zero = 3e-10
+    []
+    [steady]
+      type = 'Exodiff'
+      input = steady.i
+      exodiff = steady_out.e
+      method = "!dbg"
+      ad_indexing_type = 'global'
+      mesh_mode = REPLICATED
+      valgrind = 'none'
+      recover = false
+      detail = 'steady simulations'
+      abs_zero = 3e-10
+    []
+    [steady_action]
+      type = 'Exodiff'
+      input = steady-action.i
+      exodiff = steady-action_out.e
+      method = "!dbg"
+      detail = 'steady simulations with action syntax'
+      ad_indexing_type = 'global'
+      mesh_mode = REPLICATED
+      valgrind = 'none'
+      recover = false
+      abs_zero = 3e-10
+    []
   []
 []

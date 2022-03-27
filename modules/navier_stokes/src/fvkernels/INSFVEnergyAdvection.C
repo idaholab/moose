@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVEnergyAdvection.h"
+#include "INSFVEnergyVariable.h"
 
 registerMooseObject("NavierStokesApp", INSFVEnergyAdvection);
 
@@ -25,6 +26,10 @@ INSFVEnergyAdvection::validParams()
 INSFVEnergyAdvection::INSFVEnergyAdvection(const InputParameters & params)
   : INSFVAdvectionKernel(params), _adv_quant(getFunctor<ADReal>("advected_quantity"))
 {
+  if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
+    mooseError("PINSFVEnergyAdvection may only be used with a fluid temperature variable, "
+               "of variable type INSFVEnergyVariable.");
+
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
              "configure script in the root MOOSE directory with the configure option "
@@ -36,11 +41,12 @@ ADReal
 INSFVEnergyAdvection::computeQpResidual()
 {
   const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
-  const auto adv_quant_interface =
-      Moose::FV::interpolate(_adv_quant,
-                             Moose::FV::makeFace(*_face_info,
-                                                 limiterType(_advected_interp_method),
-                                                 MetaPhysicL::raw_value(v) * _normal > 0,
-                                                 faceArgSubdomains()));
-  return _normal * v * adv_quant_interface;
+  const auto adv_quant_face =
+      onBoundary(*_face_info)
+          ? _adv_quant(singleSidedFaceArg())
+          : _adv_quant(Moose::FV::makeFace(*_face_info,
+                                           limiterType(_advected_interp_method),
+                                           MetaPhysicL::raw_value(v) * _normal > 0,
+                                           faceArgSubdomains()));
+  return _normal * v * adv_quant_face;
 }

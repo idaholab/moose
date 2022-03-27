@@ -20,7 +20,7 @@ class TestCompactADR(unittest.TestCase):
 
 class TestExtendedADR(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('extended-adr.i', 7, mpi=2)
+        df1 = mms.run_spatial('extended-adr.i', 7, "--error-unused", mpi=2)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,

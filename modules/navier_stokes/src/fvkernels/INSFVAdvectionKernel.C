@@ -11,24 +11,13 @@
 #include "NS.h"
 #include "MooseVariableFV.h"
 #include "RelationshipManager.h"
+#include "NSFVUtils.h"
 
 InputParameters
 INSFVAdvectionKernel::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
-  MooseEnum advected_interp_method("average upwind sou min_mod vanLeer quick skewness-corrected",
-                                   "upwind");
-  params.addParam<MooseEnum>(
-      "advected_interp_method",
-      advected_interp_method,
-      "The interpolation to use for the advected quantity. Options are "
-      "'upwind', 'average', and 'skewness-corrected' with the default being 'upwind'.");
-  MooseEnum velocity_interp_method("average rc", "rc");
-  params.addParam<MooseEnum>(
-      "velocity_interp_method",
-      velocity_interp_method,
-      "The interpolation to use for the velocity. Options are "
-      "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
+  params += Moose::FV::interpolationParameters();
   params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
   // We need 2 ghost layers for the Rhie-Chow interpolation
   params.set<unsigned short>("ghost_layers") = 2;
@@ -45,65 +34,38 @@ INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
              "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
-  using namespace Moose::FV;
-
-  const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
-  if (advected_interp_method == "average")
-    _advected_interp_method = InterpMethod::Average;
-  else if (advected_interp_method == "skewness-corrected")
-    _advected_interp_method = Moose::FV::InterpMethod::SkewCorrectedAverage;
-  else if (advected_interp_method == "upwind")
-    _advected_interp_method = InterpMethod::Upwind;
-  else
+  const bool need_more_ghosting =
+      Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
+  if (need_more_ghosting && _tid == 0)
   {
-    if (advected_interp_method == "sou")
-      _advected_interp_method = InterpMethod::SOU;
-    else if (advected_interp_method == "min_mod")
-      _advected_interp_method = InterpMethod::MinMod;
-    else if (advected_interp_method == "vanLeer")
-      _advected_interp_method = InterpMethod::VanLeer;
-    else if (advected_interp_method == "quick")
-      _advected_interp_method = InterpMethod::QUICK;
-    else
-      mooseError("Unrecognized interpolation type ",
-                 static_cast<std::string>(advected_interp_method));
+    auto & factory = _app.getFactory();
 
-    if (_tid == 0)
-    {
-      auto & factory = _app.getFactory();
+    auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
 
-      auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
+    rm_params.set<std::string>("for_whom") = name();
+    rm_params.set<MooseMesh *>("mesh") = &const_cast<MooseMesh &>(_mesh);
+    rm_params.set<Moose::RelationshipManagerType>("rm_type") =
+        Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+        Moose::RelationshipManagerType::COUPLING;
+    FVKernel::setRMParams(
+        _pars, rm_params, std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
+    mooseAssert(rm_params.areAllRequiredParamsValid(),
+                "All relationship manager parameters should be valid.");
 
-      rm_params.set<std::string>("for_whom") = name();
-      rm_params.set<MooseMesh *>("mesh") = &const_cast<MooseMesh &>(_mesh);
-      rm_params.set<Moose::RelationshipManagerType>("rm_type") =
-          Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-          Moose::RelationshipManagerType::COUPLING;
-      FVKernel::setRMParams(
-          _pars,
-          rm_params,
-          std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
-      mooseAssert(rm_params.areAllRequiredParamsValid(),
-                  "All relationship manager parameters should be valid.");
+    auto rm_obj = factory.create<RelationshipManager>(
+        "ElementSideNeighborLayers", name() + "_skew_correction", rm_params);
 
-      auto rm_obj = factory.create<RelationshipManager>(
-          "ElementSideNeighborLayers", name() + "_skew_correction", rm_params);
+    // Delete the resources created on behalf of the RM if it ends up not being added to the
+    // App.
+    if (!_app.addRelationshipManager(rm_obj))
+      factory.releaseSharedObjects(*rm_obj);
 
-      // Delete the resources created on behalf of the RM if it ends up not being added to the
-      // App.
-      if (!_app.addRelationshipManager(rm_obj))
-        factory.releaseSharedObjects(*rm_obj);
-    }
+    // If we need more ghosting, then we are a second-order nonlinear limiting scheme whose stencil
+    // is liable to change upon wind-direction change. Consequently we need to tell our problem that
+    // it's ok to have new nonzeros which may crop-up after PETSc has shrunk the matrix memory
+    getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
+        ->setErrorOnJacobianNonzeroReallocation(false);
   }
-
-  const auto & velocity_interp_method = getParam<MooseEnum>("velocity_interp_method");
-  if (velocity_interp_method == "average")
-    _velocity_interp_method = InterpMethod::Average;
-  else if (velocity_interp_method == "rc")
-    _velocity_interp_method = InterpMethod::RhieChow;
-  else
-    mooseError("Unrecognized interpolation type ",
-               static_cast<std::string>(velocity_interp_method));
 
   auto param_check = [&params, this](const auto & param_name)
   {

@@ -88,17 +88,12 @@ TEST(MooseFunctorTest, testArgs)
   FaceInfo fi(elem.get(), 1, neighbor.get());
   QGauss qrule(1, CONSTANT);
 
-  auto elem_arg = ElemArg{elem.get(), false, false};
-  auto face = FaceArg({&fi,
-                       LimiterType::CentralDifference,
-                       true,
-                       false,
-                       false,
-                       INVALID_BLOCK_ID,
-                       INVALID_BLOCK_ID});
-  auto single_face = SingleSidedFaceArg(
-      {&fi, LimiterType::CentralDifference, true, false, false, INVALID_BLOCK_ID});
-  auto elem_from_face = ElemFromFaceArg({elem.get(), &fi, false, false, INVALID_BLOCK_ID});
+  auto elem_arg = ElemArg{elem.get(), false};
+  auto face = FaceArg(
+      {&fi, LimiterType::CentralDifference, true, false, INVALID_BLOCK_ID, INVALID_BLOCK_ID});
+  auto single_face =
+      SingleSidedFaceArg({&fi, LimiterType::CentralDifference, true, false, INVALID_BLOCK_ID});
+  auto elem_from_face = ElemFromFaceArg({elem.get(), &fi, false, INVALID_BLOCK_ID});
   auto elem_qp = std::make_tuple(elem.get(), 0, &qrule);
   auto elem_side_qp = std::make_tuple(elem.get(), 0, 0, &qrule);
 
@@ -238,7 +233,6 @@ TEST(MooseFunctorTest, testArgs)
                    LimiterType::CentralDifference,
                    true,
                    false,
-                   false,
                    mesh_fi.elem().subdomain_id(),
                    mesh_fi.neighborPtr() ? mesh_fi.neighbor().subdomain_id() : INVALID_BLOCK_ID});
       const auto vec_elem_arg = vec_face_arg.makeElem();
@@ -318,7 +312,7 @@ TEST(MooseFunctorTest, testArgs)
 
       for (const auto & mesh_elem : mesh->getMesh().active_element_ptr_range())
       {
-        const auto mesh_elem_arg = ElemArg{mesh_elem, false, false};
+        const auto mesh_elem_arg = ElemArg{mesh_elem, false};
         zero_gradient_test(zero, mesh_elem_arg);
       }
 

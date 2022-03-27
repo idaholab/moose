@@ -38,12 +38,11 @@ struct ElemArg
 {
   const libMesh::Elem * elem;
   bool correct_skewness;
-  bool apply_gradient_to_skewness;
 
   friend bool operator<(const ElemArg & l, const ElemArg & r)
   {
-    return std::make_tuple(l.elem, l.correct_skewness, l.apply_gradient_to_skewness) <
-           std::make_tuple(r.elem, r.correct_skewness, r.apply_gradient_to_skewness);
+    return std::make_tuple(l.elem, l.correct_skewness) <
+           std::make_tuple(r.elem, r.correct_skewness);
   }
 };
 
@@ -64,13 +63,8 @@ struct ElemFromFaceArg
   /// information object will be used to help construct a ghost value evaluation
   const FaceInfo * fi;
 
-  /// Whether to apply skew correction weights
+  /// Whether to perform skew correction
   bool correct_skewness;
-
-  /// Whether to apply the face gradient when computing a skew corrected face value. A true value
-  /// for this data member in conjunction with a false value for \p correct_skewness does not make
-  /// sense
-  bool apply_gradient_to_skewness;
 
   /// a subdomain ID. This is useful when the functor is a material property and the user wants
   /// to indicate which material property definition should be used to evaluate the functor. For
@@ -81,14 +75,12 @@ struct ElemFromFaceArg
   /**
    * Make a \p ElemArg from our data
    */
-  ElemArg makeElem() const { return {elem, correct_skewness, apply_gradient_to_skewness}; }
+  ElemArg makeElem() const { return {elem, correct_skewness}; }
 
   friend bool operator<(const ElemFromFaceArg & l, const ElemFromFaceArg & r)
   {
-    return std::make_tuple(
-               l.elem, l.fi, l.correct_skewness, l.apply_gradient_to_skewness, l.sub_id) <
-           std::make_tuple(
-               r.elem, r.fi, r.correct_skewness, r.apply_gradient_to_skewness, r.sub_id);
+    return std::make_tuple(l.elem, l.fi, l.correct_skewness, l.sub_id) <
+           std::make_tuple(r.elem, r.fi, r.correct_skewness, r.sub_id);
   }
 };
 
@@ -107,13 +99,8 @@ struct FaceArg
   /// a boolean which states whether the face information element is upwind of the face
   bool elem_is_upwind;
 
-  /// Whether to apply skew correction weights
+  /// Whether to perform skew correction
   bool correct_skewness;
-
-  /// Whether to apply the face gradient when computing a skew corrected face value. A true value
-  /// for this data member in conjunction with a false value for \p correct_skewness does not make
-  /// sense
-  bool apply_gradient_to_skewness;
 
   ///@{
   /**
@@ -130,30 +117,24 @@ struct FaceArg
   /**
    * Make a \p ElemArg from our data using the face information element
    */
-  ElemArg makeElem() const { return {&fi->elem(), correct_skewness, apply_gradient_to_skewness}; }
+  ElemArg makeElem() const { return {&fi->elem(), correct_skewness}; }
 
   /**
    * Make a \p ElemArg from our data using the face information neighbor
    */
-  ElemArg makeNeighbor() const
-  {
-    return {fi->neighborPtr(), correct_skewness, apply_gradient_to_skewness};
-  }
+  ElemArg makeNeighbor() const { return {fi->neighborPtr(), correct_skewness}; }
 
   /**
    * Make a \p ElemFromFaceArg from our data using the face information element
    */
-  ElemFromFaceArg elemFromFace() const
-  {
-    return {&fi->elem(), fi, correct_skewness, apply_gradient_to_skewness, elem_sub_id};
-  }
+  ElemFromFaceArg elemFromFace() const { return {&fi->elem(), fi, correct_skewness, elem_sub_id}; }
 
   /**
    * Make a \p ElemFromFaceArg from our data using the face information neighbor
    */
   ElemFromFaceArg neighborFromFace() const
   {
-    return {fi->neighborPtr(), fi, correct_skewness, apply_gradient_to_skewness, neighbor_sub_id};
+    return {fi->neighborPtr(), fi, correct_skewness, neighbor_sub_id};
   }
 
   friend bool operator<(const FaceArg & l, const FaceArg & r)
@@ -162,13 +143,11 @@ struct FaceArg
                            l.limiter_type,
                            l.elem_is_upwind,
                            l.correct_skewness,
-                           l.apply_gradient_to_skewness,
                            l.elem_sub_id,
                            l.neighbor_sub_id) < std::make_tuple(r.fi,
                                                                 r.limiter_type,
                                                                 r.elem_is_upwind,
                                                                 r.correct_skewness,
-                                                                r.apply_gradient_to_skewness,
                                                                 r.elem_sub_id,
                                                                 l.neighbor_sub_id);
   }
@@ -194,43 +173,45 @@ struct SingleSidedFaceArg
   /// a boolean which states whether the face information element is upwind of the face
   bool elem_is_upwind;
 
-  /// Whether to apply skew correction weights
+  /// Whether to perform skew correction
   bool correct_skewness;
-
-  /// Whether to apply the face gradient when computing a skew corrected face value. A true value
-  /// for this data member in conjunction with a false value for \p correct_skewness does not make
-  /// sense
-  bool apply_gradient_to_skewness;
 
   /// The subdomain ID which denotes the side of the face information we are evaluating on
   SubdomainID sub_id;
 
   /**
+   * Make an element argument corresponding to the subdomain ID on which we are defined
+   */
+  ElemArg makeSidedElem() const
+  {
+    mooseAssert(fi, "The face must be non-null");
+#ifndef NDEBUG
+    const unsigned short matches = (sub_id == fi->elem().subdomain_id()) +
+                                   (fi->neighborPtr() && (sub_id == fi->neighbor().subdomain_id()));
+    mooseAssert(matches == 1,
+                "We should only have one match. If we have more or less, then this is not an "
+                "appropriate use of SingleSidedFaceArg");
+#endif
+
+    const Elem * const ret_elem =
+        sub_id == fi->elem().subdomain_id() ? &fi->elem() : fi->neighborPtr();
+    return {ret_elem, correct_skewness};
+  }
+
+  /**
    * Make a \p ElemArg from our data using the face information element
    */
-  ElemArg makeElem() const { return {&fi->elem(), correct_skewness, apply_gradient_to_skewness}; }
+  ElemArg makeElem() const { return {&fi->elem(), correct_skewness}; }
 
   /**
    * Make a \p ElemArg from our data using the face information neighbor
    */
-  ElemArg makeNeighbor() const
-  {
-    return {fi->neighborPtr(), correct_skewness, apply_gradient_to_skewness};
-  }
+  ElemArg makeNeighbor() const { return {fi->neighborPtr(), correct_skewness}; }
 
   friend bool operator<(const SingleSidedFaceArg & l, const SingleSidedFaceArg & r)
   {
-    return std::make_tuple(l.fi,
-                           l.limiter_type,
-                           l.elem_is_upwind,
-                           l.correct_skewness,
-                           l.apply_gradient_to_skewness,
-                           l.sub_id) < std::make_tuple(r.fi,
-                                                       r.limiter_type,
-                                                       r.elem_is_upwind,
-                                                       r.correct_skewness,
-                                                       r.apply_gradient_to_skewness,
-                                                       r.sub_id);
+    return std::make_tuple(l.fi, l.limiter_type, l.elem_is_upwind, l.correct_skewness, l.sub_id) <
+           std::make_tuple(r.fi, r.limiter_type, r.elem_is_upwind, r.correct_skewness, r.sub_id);
   }
 };
 
@@ -268,6 +249,13 @@ public:
   using FunctorType = FunctorBase<T>;
   using FunctorReturnType = T;
   using ValueType = T;
+  /// This rigmarole makes it so that a user can create functors that return containers (std::vector,
+  /// std::array). This logic will make it such that if a user requests a functor type T that is a
+  /// container of algebraic types, for example Reals, then the GradientType will be a container of
+  /// the gradients of those algebraic types, in this example VectorValue<Reals>. So if T is
+  /// std::vector<Real>, then GradientType will be std::vector<VectorValue<Real>>. As another
+  /// example: T = std::array<VectorValue<Real>, 1> -> GradientType = std::array<TensorValue<Real>,
+  /// 1>
   using GradientType = typename MetaPhysicL::ReplaceAlgebraicType<
       T,
       typename TensorTools::IncrementRank<typename MetaPhysicL::ValueType<T>::type>::type>::type;

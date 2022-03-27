@@ -41,7 +41,6 @@ FVGradAndDotFunctorFluxKernel::computeQpResidual()
                                 Moose::FV::LimiterType::CentralDifference,
                                 true,
                                 false,
-                                false,
                                 _face_info->elem().subdomain_id()};
   return sign * (_value(ssf) + _gradient(ssf)(0) + _dot(ssf));
 }

@@ -11,6 +11,7 @@
 #include "NS.h"
 #include "FVUtils.h"
 #include "INSFVRhieChowInterpolator.h"
+#include "SystemBase.h"
 
 registerMooseObject("NavierStokesApp", INSFVMomentumAdvection);
 
@@ -43,9 +44,8 @@ INSFVMomentumAdvection::initialSetup()
 
   _rho_u = std::make_unique<PiecewiseByBlockLambdaFunctor<ADReal>>(
       "rho_u",
-      [this](const auto & r, const auto & t) -> ADReal {
-        return _rho(r, t) * _var(r, t) / epsilon()(r, t);
-      },
+      [this](const auto & r, const auto & t) -> ADReal
+      { return _rho(r, t) * _var(r, t) / epsilon()(r, t); },
       std::set<ExecFlagType>({EXEC_ALWAYS}),
       _mesh,
       this->blockIDs());
@@ -59,28 +59,47 @@ INSFVMomentumAdvection::computeQpResidual()
   const bool correct_skewness = _advected_interp_method == InterpMethod::SkewCorrectedAverage;
   const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
 
-  const auto [interp_coeffs, advected] =
-      interpCoeffsAndAdvected(*_rho_u,
-                              makeFace(*_face_info,
-                                       limiterType(_advected_interp_method),
-                                       MetaPhysicL::raw_value(v) * _normal > 0,
-                                       faceArgSubdomains(),
-                                       correct_skewness,
-                                       correct_skewness));
+  if (onBoundary(*_face_info))
+  {
+    const auto ssf = singleSidedFaceArg();
+    const Elem * const sided_elem = ssf.makeSidedElem().elem;
+    const auto dof_number = sided_elem->dof_number(_sys.number(), _var.number(), 0);
+    const auto rhof = _rho(ssf);
+    const auto epsf = epsilon()(ssf);
+    const auto uf = _var(ssf);
+    const Real duf_du = uf.derivatives()[dof_number];
+    const auto coeff = _normal * v * rhof / epsf;
+    if (sided_elem == &_face_info->elem())
+      _ae = coeff * duf_du;
+    else
+      _an = -coeff * duf_du;
 
-  const auto elem_face = elemFromFace();
-  const auto neighbor_face = neighborFromFace();
+    return coeff * uf;
+  }
+  else
+  {
+    const auto [interp_coeffs, advected] =
+        interpCoeffsAndAdvected(*_rho_u,
+                                makeFace(*_face_info,
+                                         limiterType(_advected_interp_method),
+                                         MetaPhysicL::raw_value(v) * _normal > 0,
+                                         faceArgSubdomains(),
+                                         correct_skewness));
 
-  const auto rho_elem = _rho(elem_face), rho_neighbor = _rho(neighbor_face);
-  const auto eps_elem = epsilon()(elem_face), eps_neighbor = epsilon()(neighbor_face);
-  const auto var_elem = advected.first / rho_elem * eps_elem,
-             var_neighbor = advected.second / rho_neighbor * eps_neighbor;
+    const auto elem_face = elemFromFace();
+    const auto neighbor_face = neighborFromFace();
 
-  _ae = _normal * v * rho_elem / eps_elem * interp_coeffs.first;
-  // Minus sign because we apply a minus sign to the residual in computeResidual
-  _an = -_normal * v * rho_neighbor / eps_neighbor * interp_coeffs.second;
+    const auto rho_elem = _rho(elem_face), rho_neighbor = _rho(neighbor_face);
+    const auto eps_elem = epsilon()(elem_face), eps_neighbor = epsilon()(neighbor_face);
+    const auto var_elem = advected.first / rho_elem * eps_elem,
+               var_neighbor = advected.second / rho_neighbor * eps_neighbor;
 
-  return _ae * var_elem - _an * var_neighbor;
+    _ae = _normal * v * rho_elem / eps_elem * interp_coeffs.first;
+    // Minus sign because we apply a minus sign to the residual in computeResidual
+    _an = -_normal * v * rho_neighbor / eps_neighbor * interp_coeffs.second;
+
+    return _ae * var_elem - _an * var_neighbor;
+  }
 }
 
 void

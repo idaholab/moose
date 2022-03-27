@@ -9,20 +9,14 @@
 
 #pragma once
 
-#include "INSFVAdvectionKernel.h"
+#include "INSFVEnergyAdvection.h"
 
 /**
  * A flux kernel transporting energy in porous media across cell faces
  */
-class PINSFVEnergyAdvection : public INSFVAdvectionKernel
+class PINSFVEnergyAdvection : public INSFVEnergyAdvection
 {
 public:
   static InputParameters validParams();
   PINSFVEnergyAdvection(const InputParameters & params);
-
-protected:
-  ADReal computeQpResidual() override;
-
-  /// The advected heat quantity
-  const Moose::Functor<ADReal> & _adv_quant;
 };

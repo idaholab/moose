@@ -273,27 +273,30 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemSideQpArg & elem_sid
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::GradientType
 PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::ElemArg & elem_arg,
-                                                   unsigned int) const
+                                                   unsigned int libmesh_dbg_var(state)) const
 {
+  mooseAssert(state == 0, "Only current time state supported.");
   return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
 }
 
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::GradientType
 PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::FaceArg & face_arg,
-                                                   unsigned int) const
+                                                   unsigned int libmesh_dbg_var(state)) const
 {
+  mooseAssert(state == 0, "Only current time state supported.");
   return Moose::FV::greenGaussGradient(face_arg, *this, true, _mesh);
 }
 
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::GradientType
 PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(
-    const Moose::ElemFromFaceArg & elem_from_face_arg, unsigned int) const
+    const Moose::ElemFromFaceArg & elem_from_face_arg, unsigned int libmesh_dbg_var(state)) const
 {
+  mooseAssert(state == 0, "Only current time state supported.");
   const auto elem_arg = elem_from_face_arg.makeElem();
   if (elem_arg.elem)
     return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
   else
-    return GradientType(0);
+    return GradientType();
 }

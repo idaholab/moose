@@ -24,7 +24,9 @@ public:
   using typename Moose::FunctorBase<T>::DotType;
 
   ArrayComponentFunctor(const ArrayTypeFunctor & array, const unsigned int component)
-    : _array(array), _component(component)
+    : Moose::FunctorBase<T>(array.functorName() + "_" + std::to_string(component)),
+      _array(array),
+      _component(component)
   {
   }
 
@@ -72,5 +74,12 @@ private:
                      const unsigned int state) const override final
   {
     return _array(elem_side_qp, state)[_component];
+  }
+
+  using Moose::FunctorBase<T>::evaluateGradient;
+  GradientType evaluateGradient(const Moose::ElemArg & elem,
+                                const unsigned int state) const override final
+  {
+    return _array.gradient(elem, state)[_component];
   }
 };

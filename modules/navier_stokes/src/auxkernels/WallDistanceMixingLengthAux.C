@@ -40,21 +40,27 @@ WallDistanceMixingLengthAux::WallDistanceMixingLengthAux(const InputParameters &
   const MeshBase & mesh = _subproblem.mesh().getMesh();
   if (!mesh.is_replicated())
     mooseError("WallDistanceMixingLengthAux only supports replicated meshes");
+  if (!dynamic_cast<MooseVariableFV<Real> *>(&_var))
+    paramError("variable",
+               "'",
+               name(),
+               "' is currently programmed to use finite volume machinery, so make sure that '",
+               _var.name(),
+               "' is a finite volume variable.");
 }
 
 Real
 WallDistanceMixingLengthAux::computeValue()
 {
-  // Get references to the Moose and libMesh mesh objects
-  const MooseMesh & m_mesh = _subproblem.mesh();
-  const MeshBase & l_mesh = m_mesh.getMesh();
+  // Get reference to the libMesh mesh object
+  const MeshBase & l_mesh = _mesh.getMesh();
 
   // Get the ids of the wall boundaries
-  std::vector<BoundaryID> vec_ids = m_mesh.getBoundaryIDs(_wall_boundary_names, true);
+  std::vector<BoundaryID> vec_ids = _mesh.getBoundaryIDs(_wall_boundary_names, true);
 
   // Loop over all boundaries
-  Real min_sq_dist = 1e9;
-  const auto & bnd_to_elem_map = m_mesh.getBoundariesToElems();
+  Real min_dist2 = 1e9;
+  const auto & bnd_to_elem_map = _mesh.getBoundariesToElems();
   for (BoundaryID bid : vec_ids)
   {
     // Get the set of elements on this boundary
@@ -67,18 +73,30 @@ WallDistanceMixingLengthAux::computeValue()
     for (dof_id_type elem_id : bnd_elems)
     {
       const Elem & elem{l_mesh.elem_ref(elem_id)};
-      Point bnd_pos = elem.vertex_average();
-      Real sq_dist = (bnd_pos - _q_point[_qp]).norm_sq();
-      min_sq_dist = std::min(min_sq_dist, sq_dist);
+      const auto side = _mesh.sideWithBoundaryID(&elem, bid);
+      const FaceInfo * fi = _mesh.faceInfo(&elem, side);
+      // It's possible that we are on an internal boundary
+      if (!fi)
+      {
+        const Elem * const neigh = elem.neighbor_ptr(side);
+        mooseAssert(
+            neigh,
+            "In WallDistanceMixingLengthAux, we could not find a face information object with elem "
+            "and side, and we are on an external boundary. This shouldn't happen.");
+        const auto neigh_side = neigh->which_neighbor_am_i(&elem);
+        fi = _mesh.faceInfo(neigh, neigh_side);
+        mooseAssert(fi, "We should have a face info for either the elem or neigh side");
+      }
+      Point bnd_pos = fi->faceCentroid();
+      const auto distance = bnd_pos - _q_point[_qp];
+      const auto dist2 = distance * distance;
+      mooseAssert(dist2 != 0, "This distance should never be 0");
+      min_dist2 = std::min(min_dist2, dist2);
     }
   }
 
-  if (std::sqrt(min_sq_dist) / _delta <= _von_karman_const_0 / _von_karman_const)
-  {
-    return _von_karman_const * std::sqrt(min_sq_dist);
-  }
+  if (std::sqrt(min_dist2) / _delta <= _von_karman_const_0 / _von_karman_const)
+    return _von_karman_const * std::sqrt(min_dist2);
   else
-  {
     return _von_karman_const_0 * _delta;
-  }
 }
