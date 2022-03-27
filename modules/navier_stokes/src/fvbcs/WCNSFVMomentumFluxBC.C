@@ -74,7 +74,8 @@ WCNSFVMomentumFluxBC::computeQpResidual()
   const Real contrib = abs(_face_info->normal()(_index));
 
   if (_velocity_pp)
-    return -_scaling_factor * std::pow((*_velocity_pp), 2) * contrib * (*_rho)(singleSidedFaceArg());
+    return -_scaling_factor * std::pow((*_velocity_pp), 2) * contrib *
+           (*_rho)(singleSidedFaceArg());
   else
     return -_scaling_factor * std::pow((*_mdot_pp), 2) * contrib / (*_rho)(singleSidedFaceArg()) /
            (*_area_pp);
