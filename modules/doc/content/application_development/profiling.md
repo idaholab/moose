@@ -7,6 +7,33 @@ installation process.  Although it works best on Linux platforms, it also
 works reasonably well on Mac OS.  Instruments also works well for profiling
 applications on Mac systems.
 
+## Install Google's gperftools
+
+If your environment package from the MOOSE installation process has included Google's gperftools,
+you can skip this step.
+To install Google's gperftools on your own, our recommended procedure is
+
+```
+cd $HOME
+git clone git@github.com:gperftools/gperftools.git
+cd gperftools
+./configure --prefix=$PWD/installed --enable-frame-pointers
+make -j8
+make install
+```
+
+The configuration option +--enable-frame-pointers+ is important for not degrading the performance when \emph{gperftools} is linked and profiling is turned on in calculations.
+[This page](https://github.com/gperftools/gperftools/blob/master/INSTALL) has more explanations about this option.
+After this, gperftools is installed under +$HOME/gperftools/installed+ that you can let the environmental variable +GPERF_DIR+ point to.
+You could install gperftools in a different folder if desired.
+When compiling PETSc and libMesh, you will need to add two configuration options to make use of this
+
+```
+cd moose
+./scripts/update_and_rebuild_petsc.sh --CFLAGS=-fno-omit-frame-pointer --CXX_CXXFLAGS=-fno-omit-frame-pointer
+./scripts/update_and_rebuild_libmesh.sh CXXFLAGS='-fno-omit-frame-pointer' CFLAGS='-fno-omit-frame-pointer'
+```
+
 ## Google Performance Tools (Linux, Mac)
 
 MOOSE has support for profiling with
