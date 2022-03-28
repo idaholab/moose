@@ -2095,7 +2095,7 @@ void
 NSFVAction::addBoundaryPostprocessors()
 {
   for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
-    if (_energy_inlet_types[bc_ind] == "flux-mass")
+    if (_momentum_inlet_types[bc_ind] == "flux-mass")
     {
       const std::string pp_type = "AreaPostprocessor";
       InputParameters params = _factory.getValidParams(pp_type);
