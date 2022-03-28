@@ -59,8 +59,11 @@
   [results]
     type = StochasticResults
   []
+[]
+
+[Reporters]
   [stats]
-    type = Statistics
+    type = StatisticsReporter
     vectorpostprocessors = results
     compute = 'mean stddev'
     ci_method = 'percentile'

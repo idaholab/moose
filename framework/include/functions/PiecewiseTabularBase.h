@@ -17,12 +17,13 @@
  * input parameter specifications. Derived classes, which control the order (constant, linear) of
  * the approximation and how the (x,y) data set is generated, should be used directly.
  */
-class PiecewiseTabularBase : public PiecewiseBase
+template <typename BaseClass>
+class PiecewiseTabularBaseTempl : public BaseClass
 {
 public:
   static InputParameters validParams();
 
-  PiecewiseTabularBase(const InputParameters & parameters);
+  PiecewiseTabularBaseTempl(const InputParameters & parameters);
 
 protected:
   /// function value scale factor
@@ -32,6 +33,12 @@ protected:
   int _axis;
   const bool _has_axis;
   ///@}
+
+  using BaseClass::_communicator;
+  using BaseClass::_name;
+  using BaseClass::_raw_x;
+  using BaseClass::_raw_y;
+  using BaseClass::isParamValid;
 
 private:
   /// Reads data from supplied CSV file.
@@ -43,3 +50,18 @@ private:
   /// Builds data from 'xy_data' parameter.
   void buildFromXY();
 };
+
+class PiecewiseTabularBase : public PiecewiseTabularBaseTempl<PiecewiseBase>
+{
+public:
+  PiecewiseTabularBase(const InputParameters & params)
+    : PiecewiseTabularBaseTempl<PiecewiseBase>(params)
+  {
+  }
+  static InputParameters validParams()
+  {
+    return PiecewiseTabularBaseTempl<PiecewiseBase>::validParams();
+  }
+};
+
+typedef PiecewiseTabularBaseTempl<ADPiecewiseBase> ADPiecewiseTabularBase;

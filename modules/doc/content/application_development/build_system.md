@@ -214,9 +214,10 @@ when building MOOSE or a MOOSE-based application.
 MOOSE's build system has the ability to create installed binaries suitable for use with the conda package manager, or installation on a shared computing resource such as Sawtooth. The `install` target will copy binary and required libraries to a file tree based on the prefix you configured with (set by the variable `PREFIX` or the `--prefix` argument.
 
 ```
-$ cd moose/framework
+$ cd moose
 $ ./configure --prefix=<installation path>
-$ make
+$ cd <application_dir>
+$ make [make options]
 $ make install
 ```
 
@@ -241,13 +242,13 @@ Example:
 $ cd <user writable location>
 $ export PATH=$PATH:<prefix>/bin  # See instructions for HPC computers below
 $ bison-opt --copy-inputs <installable input type>  # e.g. tests, examples, etc.
-$ bison-opt --run <installable input type>
+$ bison-opt --run
 
 ```
 
 Where `<installable input type>` is one of the installable directories as defined by the application developers (i.e. `tests`, `examples`, `tutorials`, etc.)
 
-When using INL HPC systems to run your input, you will load a module that will set your path correctly
+When using INL HPC systems to run your input, you will load a module that will set your path correctly.
 
 Example:
 

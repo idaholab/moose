@@ -31,11 +31,6 @@ interface will be named `wood_Block2`.
 
 !listing test/tests/meshgenerators/break_mesh_by_block_generator/break_mesh_2DJunction_splittrue.i block=Mesh
 
-!syntax parameters /Mesh/BreakMeshByBlockGenerator
-
-!syntax inputs /Mesh/BreakMeshByBlockGenerator
-
-
 ### block_pair option
 
 For `block_pair` option, only the nodes that are shared by specific block pairs will be newly created. In the example below, three different cases are shown, where one, two and three new nodes are created, respectively.
@@ -44,3 +39,11 @@ For `block_pair` option, only the nodes that are shared by specific block pairs 
 
 !listing test/tests/meshgenerators/break_mesh_by_block_generator/break_mesh_block_pairs_restricted_3blocks.i
          block=Mesh
+
+!syntax parameters /Mesh/BreakMeshByBlockGenerator
+
+!syntax inputs /Mesh/BreakMeshByBlockGenerator
+
+!syntax children /Mesh/BreakMeshByBlockGenerator
+
+!bibtex bibliography

@@ -6,10 +6,10 @@ from regular DirichletBC. EigenArrayDirichletBC will always return 0
 regardless of the residual. The corresponding rows of the matrix are zeroed
 out without adding ones to the diagonal.
 
-!syntax description /BCs/EigenDirichletBC
+!syntax description /BCs/EigenArrayDirichletBC
 
-!syntax parameters /BCs/DirichletBC
+!syntax parameters /BCs/EigenArrayDirichletBC
 
-!syntax inputs /BCs/DirichletBC
+!syntax inputs /BCs/EigenArrayDirichletBC
 
-!syntax children /BCs/DirichletBC
+!syntax children /BCs/EigenArrayDirichletBC

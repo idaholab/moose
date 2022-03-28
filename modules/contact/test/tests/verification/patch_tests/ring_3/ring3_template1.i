@@ -231,7 +231,6 @@
     type = Pressure
     variable = disp_y
     boundary = 5
-    component = 1
     factor = 109.89
   [../]
 []
@@ -271,7 +270,7 @@
   type = Transient
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
   petsc_options_value = 'lu     superlu_dist'
   petsc_options = '-mat_superlu_dist_iterrefine -mat_superlu_dist_replacetinypivot'
 

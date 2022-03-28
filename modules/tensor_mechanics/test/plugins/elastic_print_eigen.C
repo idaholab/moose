@@ -2,7 +2,10 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <stdio.h>
+// Ignore warnings from Eigen related to deprecated declarations (C++17)
+#include "libmesh/ignore_warnings.h"
 #include <Eigen/Eigen>
+#include "libmesh/restore_warnings.h"
 
 #include "MooseError.h"
 

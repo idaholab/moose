@@ -14,5 +14,3 @@ defined function, such as
 !syntax inputs /VectorPostprocessors/PiecewiseFunctionTabulate
 
 !syntax children /VectorPostprocessors/PiecewiseFunctionTabulate
-
-!bibtex bibliography

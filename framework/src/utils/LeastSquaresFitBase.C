@@ -11,7 +11,10 @@
 #include "MooseError.h"
 
 #include "libmesh/int_range.h"
+// Ignore warnings from Eigen related to deprecated declarations (C++17)
+#include "libmesh/ignore_warnings.h"
 #include <Eigen/Dense>
+#include "libmesh/restore_warnings.h"
 
 LeastSquaresFitBase::LeastSquaresFitBase() {}
 

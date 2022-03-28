@@ -60,5 +60,3 @@ figure.savefig("output.pdf")
 !syntax inputs /VectorPostprocessors/HistogramVectorPostprocessor
 
 !syntax children /VectorPostprocessors/HistogramVectorPostprocessor
-
-!bibtex bibliography

@@ -45,8 +45,12 @@ Sampler1DRealTempl<is_ad>::Sampler1DRealTempl(const InputParameters & parameters
 {
   std::vector<std::string> material_property_names = getParam<std::vector<std::string>>("property");
   for (unsigned int i = 0; i < material_property_names.size(); ++i)
+  {
+    if (!hasGenericMaterialProperty<Real, is_ad>(material_property_names[i]))
+      mooseError("The material property '" + material_property_names[i] + "' does not exist.");
     _material_properties.push_back(
         &getGenericMaterialProperty<Real, is_ad>(material_property_names[i]));
+  }
 
   SamplerBase::setupVariables(material_property_names);
 }

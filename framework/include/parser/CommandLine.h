@@ -93,6 +93,18 @@ public:
   bool search(const std::string & option_name, std::vector<T> & argument);
 
   /**
+   * Returns an iterator to the underlying argument vector to the position of the option or
+   * end if the option is not on the command line.
+   */
+  std::vector<std::string>::const_iterator find(const std::string & option_name) const;
+
+  // Return an iterator to the beginning of the container of CLI options
+  std::vector<std::string>::const_iterator begin() const;
+
+  // Return an iterator to the beginning of the container of CLI options
+  std::vector<std::string>::const_iterator end() const;
+
+  /**
    * Print the usage info for this command line
    */
   void printUsage() const;

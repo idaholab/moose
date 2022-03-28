@@ -10,7 +10,7 @@ The `MaterialVectorPostprocessor` output to CSV is sorted as follows:
 
 
 !alert note
-Only scalar variables (floating point and integer-valued) are supported by the vector postprocessor. Vector-valued material properties are not currently supported, though this addition would not be difficult and would be a welcome contribution.
+Only scalar-valued (floating point and integer-valued) material properties are supported by the vector postprocessor. Vector-valued material properties are not currently supported, though this addition would not be difficult and would be a welcome contribution.
 
 ## Example input syntax
 

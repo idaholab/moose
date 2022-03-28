@@ -1,13 +1,28 @@
 [Tests]
+  design = 'Sampler1DReal.md'
+  issues = '#19819 #20612'
+
   [non_ad]
     type = 'CSVDiff'
     input = 'sampler_1d_real.i'
     csvdiff = 'out_test_property_vpp_0001.csv'
+
+    requirement = 'The system shall provide a vector post-processor to sample regular material properties in one or more blocks.'
   []
   [ad]
     type = 'CSVDiff'
     input = 'ad_sampler_1d_real.i'
     csvdiff = 'ad_sampler_1d_real_out_test_vpp_0000.csv'
     recover = False
+
+    requirement = 'The system shall provide a vector post-processor to sample AD material properties in one or more blocks.'
+  []
+  [error_on_nonexistent_matprop]
+    type = RunException
+    input = 'sampler_1d_real.i'
+    cli_args = "VectorPostprocessors/test_property_vpp/property=nonexistent_matprop"
+    expect_err = "The material property 'nonexistent_matprop' does not exist."
+
+    requirement = 'The system shall report an error if a non-existent material property is requested for the block material property sampler vector post-processor.'
   []
 []

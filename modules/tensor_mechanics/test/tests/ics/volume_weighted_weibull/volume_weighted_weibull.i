@@ -34,7 +34,7 @@
 
 [VectorPostprocessors]
   [./histo]
-    type = VolumeHistogram
+    type = VariableValueVolumeHistogram
     variable = u_vww
     min_value = 0
     max_value = 2

@@ -10,7 +10,7 @@ every element intersected by a plane. The IDs are provided in a vector named `el
 The user defines the plane using a combination of a point on the plane and a normal to
 the plane, and the plane extends infinitely.
 
-The IDs output from this class use the MOOSE interal numbering scheme, which starts
+The IDs output from this class use the MOOSE internal numbering scheme, which starts
 with 0, so 1 should be added to them to translate them to the equivalent numbering in
 formats such as Exodus that start with 1.
 
@@ -19,5 +19,3 @@ formats such as Exodus that start with 1.
 !syntax inputs /VectorPostprocessors/ElementsAlongPlane
 
 !syntax children /VectorPostprocessors/ElementsAlongPlane
-
-!bibtex bibliography

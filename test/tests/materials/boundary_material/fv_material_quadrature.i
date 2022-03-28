@@ -18,6 +18,12 @@
     type = ADParsedFunction
     value = 'x'
   []
+  [piecewise_linear_x]
+    type = ADPiecewiseLinear
+    x = '-1 2'
+    y = '-1 2'
+    axis = 'x'
+  []
 []
 
 [Variables]
@@ -51,10 +57,17 @@
 []
 
 [Materials]
+  active = 'k1'
   [k1]
     type = ADGenericFunctorMaterial
     prop_names = 'k1'
     prop_values = linear_x
+    block = 0
+  []
+  [k1_piecewise]
+    type = ADGenericFunctorMaterial
+    prop_names = 'k1'
+    prop_values = piecewise_linear_x
     block = 0
   []
 []

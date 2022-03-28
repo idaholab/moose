@@ -4,7 +4,7 @@
 
 This postprocessor can find the maximum of the difference or the absolute difference if the
 [!param](/VectorPostprocessors/ElementVariablesDifferenceMax/furthest_from_zero) parameter is set to `true`.
-This vector postprocessor output to CSV has the following columns, in this order:
+This vector postprocessor output to CSV has the following columns, in this order by default:
 
 - the maximum difference between the two variables
 

@@ -24,8 +24,8 @@
   [pin_dummy]
     type = RenameBlockGenerator
     input = 'pin1'
-    old_block_id = '1 2 3'
-    new_block_id = '9999 9999 9999'
+    old_block = '1 2 3'
+    new_block = '9999 9999 9999'
   []
 
   [assembly1]
