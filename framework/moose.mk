@@ -39,7 +39,6 @@ pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
 # hit (new getpot parser)
 #
 HIT_DIR ?= $(MOOSE_DIR)/framework/contrib/hit
-#$(info Using HIT from $(HIT_DIR))
 hit_CONTENT   := $(shell ls $(HIT_DIR) 2> /dev/null)
 ifeq ($(hit_CONTENT),)
   $(error The HIT input file parser does not seem to be available. If set, make sure the HIT_DIR environment variable is set to the correct location of your HIT parser.)

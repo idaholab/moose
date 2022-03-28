@@ -259,6 +259,14 @@ $ cd <directory>
 $ bison-opt --run -j8 # Note: Command line parameters appearing after --run are passed to the TestHarness
 ```
 
+For a complete list of the directories that may be copied use the `--show-copyable-inputs` flag.
+
+Example:
+
+```
+$ bison-opt --show-copyable-inputs
+```
+
 When using INL HPC systems to run your input, you will load a module that will set your path correctly.
 
 Example:

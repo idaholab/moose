@@ -10,6 +10,15 @@
   issues = '#19022'
   design = 'MooseApp.md'
 
+  [show_copyable_inputs]
+    type = 'RunApp'
+    cli_args = "--show-copyable-inputs"
+    no_additional_cli_args = True
+    expect_out = 'The following directories are installable.*tests'
+
+    requirement = 'The system shall support the ability to report installable inputs on the command line.'
+  []
+
   [test_copy_install]
     requirement = 'The system shall support the ability to "install" inputs:'
     [setup_fake_test_structure]

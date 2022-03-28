@@ -1216,19 +1216,30 @@ private:
   PerfGraph & createRecoverablePerfGraph();
 
   /**
+   * Prints a message showing the installable inputs for a given application (if
+   * getInstallableInputs has been overridden for an application).
+   */
+  bool showInputs() const;
+
+  /**
+   * Method to retrieve the installable inputs from a given applications <app>Revision.h file.
+   */
+  virtual std::string getInstallableInputs() const;
+
+  /**
    * Handles the copy_inputs input parameter logic: Checks to see whether the passed argument is
-   * valid (a readable installed directory) and recursively copies those files into a read/writable
-   * location for the user.
+   * valid (a readable installed directory) and recursively copies those files into a
+   * read/writable location for the user.
    * @return a Boolean value used to indicate whether the application should exit early
    */
-  bool copyInputs();
+  bool copyInputs() const;
 
   /**
    * Handles the run input parameter logic: Checks to see whether a directory exists in user space
    * and launches the TestHarness to process the given directory.
    * @return a Boolean value used to indicate whether the application should exit early
    */
-  bool runInputs();
+  bool runInputs() const;
 
   /// General storage for custom RestartableData that can be added to from outside applications
   std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>

@@ -688,9 +688,12 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
 }
 
 std::vector<std::string>
-InputParameters::getSyntax(const std::string & name)
+InputParameters::getSyntax(const std::string & name) const
 {
-  return _params[name]._cli_flag_names;
+  auto it = _params.find(name);
+  if (it == _params.end())
+    mooseError("No parameter exists with the name ", name);
+  return it->second._cli_flag_names;
 }
 
 std::string
@@ -855,11 +858,12 @@ InputParameters::isParamSetByUser(const std::string & name) const
 }
 
 const std::string &
-InputParameters::getDescription(const std::string & name)
+InputParameters::getDescription(const std::string & name) const
 {
-  if (_params.count(name) == 0)
+  auto it = _params.find(name);
+  if (it == _params.end())
     mooseError("No parameter exists with the name ", name);
-  return _params[name]._doc_string;
+  return it->second._doc_string;
 }
 
 template <>

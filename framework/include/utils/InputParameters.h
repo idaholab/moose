@@ -264,12 +264,12 @@ public:
   /**
    * Get the syntax for a command-line parameter
    */
-  std::vector<std::string> getSyntax(const std::string & name);
+  std::vector<std::string> getSyntax(const std::string & name) const;
 
   /**
    * Get the documentation string for a parameter
    */
-  const std::string & getDescription(const std::string & name);
+  const std::string & getDescription(const std::string & name) const;
 
   /**
    * This method takes a space delimited list of parameter names and adds them to the specified
