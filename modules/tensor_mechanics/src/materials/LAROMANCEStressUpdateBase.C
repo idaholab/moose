@@ -338,6 +338,13 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::initialSetup()
 
   // start loop over partitions to perform sanity checks, set global limits,
   // and print global configurations
+  if (_transform.size() != _num_partitions || _transform_coefs.size() != _num_partitions ||
+      _input_limits.size() != _num_partitions || _normalization_limits.size() != _num_partitions ||
+      _coefs.size() != _num_partitions || _tiling.size() != _num_partitions ||
+      _cutoff.size() != _num_partitions)
+    mooseError(
+        "In ", _name, ": one of the ROM inputs does not have the correct number of partitions");
+
   for (unsigned int p = 0; p < _num_partitions; ++p)
   {
     _num_tiles[p] = _transform[p].size();
@@ -381,7 +388,10 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::initialSetup()
     if (!_degree[p] || _degree[p] > 4)
       mooseError("In ", _name, ": degree must be 1, 2, 3 or 4.");
 
-    // Check input limits and find global limits of all partitions
+    // Check input limits and find global limits of all partitions. Note that this will return the
+    // extremes of the model! If the model is not flat along one input limit, then global limits
+    // will not truely capture the mutli-dimensionality of the problem. Consequently, the user may
+    // find input values that result in errors in the partition weight computation.
     for (unsigned int i = 0; i < _num_inputs; ++i)
     {
       for (unsigned int t = 0; t < _num_tiles[p]; ++t)
@@ -532,13 +542,8 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeStressInitialize(
   for (unsigned int p = 0; p < _num_partitions; ++p)
     std::fill(_non_stress_weights[p].begin(), _non_stress_weights[p].end(), 1.0);
   for (unsigned int i = 0; i < _num_inputs; i++)
-  {
     if (i != _stress_input_index)
-    {
       computeTileWeight(_non_stress_weights, _input_values[i], i);
-      checkInputWindow(_input_values[i], _window_failure[i], _global_limits[i]);
-    }
-  }
 
   // Precompute transformed input and prebuild polynomials for inputs other than strain
   precomputeROM(_strain_output_index);
@@ -626,17 +631,30 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
           if (_window_failure[in_index][0] == WindowFailure::EXTRAPOLATE)
           {
             if (derivative)
-              weights[p][t] *= -sigmoid(0.0, _global_limits[in_index][0], input, derivative);
+              weights[p][t] *= -sigmoid(0.0, _input_limits[p][t][in_index][0], input, derivative);
             else
-              weights[p][t] *= (1.0 - sigmoid(0.0, _global_limits[in_index][0], input));
-            input = _global_limits[in_index][0];
+              weights[p][t] *= (1.0 - sigmoid(0.0, _input_limits[p][t][in_index][0], input));
+            input = _input_limits[p][t][in_index][0];
           }
-          else if (_window_failure[in_index][0] == WindowFailure::DONOTHING)
-            weights[p][t] = 0.0;
           else if (_window_failure[in_index][0] == WindowFailure::USELIMIT)
-            input = _global_limits[in_index][0];
+            input = _input_limits[p][t][in_index][0];
           else
+          {
+            input = _input_limits[p][t][in_index][0];
             weights[p][t] = 0.0;
+            std::stringstream msg;
+            msg << "In " << _name << ": input parameter with value ("
+                << MetaPhysicL::raw_value(input) << ") is out of lower global range ("
+                << _input_limits[p][t][in_index][0] << ")";
+
+            if (_window_failure[in_index][0] == WindowFailure::WARN)
+              mooseWarning(msg.str());
+            else if (_window_failure[in_index][0] == WindowFailure::ERROR)
+              mooseError(msg.str());
+            else if (_window_failure[in_index][0] == WindowFailure::EXCEPTION)
+              mooseException(msg.str());
+            // else if (_window_failure[in_index][0] == WindowFailure::DONOTHING) <- nothing is done
+          }
         }
         // if input below tile limit, update weight of tile to be zero
         else
@@ -649,12 +667,25 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
         {
           if (_window_failure[in_index][1] == WindowFailure::EXTRAPOLATE)
             mooseError("Internal error. Extrapolate not appropriate for upper bound");
-          else if (_window_failure[in_index][1] == WindowFailure::DONOTHING)
-            weights[p][t] = 0.0;
           else if (_window_failure[in_index][1] == WindowFailure::USELIMIT)
-            input = _global_limits[in_index][1];
+            input = _input_limits[p][t][in_index][1];
           else
+          {
+            input = _input_limits[p][t][in_index][0];
             weights[p][t] = 0.0;
+            std::stringstream msg;
+            msg << "In " << _name << ": input parameter with value ("
+                << MetaPhysicL::raw_value(input) << ") is out of upper global range ("
+                << _input_limits[p][t][in_index][1] << ")";
+
+            if (_window_failure[in_index][0] == WindowFailure::WARN)
+              mooseWarning(msg.str());
+            else if (_window_failure[in_index][0] == WindowFailure::ERROR)
+              mooseError(msg.str());
+            else if (_window_failure[in_index][0] == WindowFailure::EXCEPTION)
+              mooseException(msg.str());
+            // else if (_window_failure[in_index][1] == WindowFailure::DONOTHING) <- nothing is done
+          }
         }
         // if input above tile limit, update weight of tile to be zero
         else
@@ -692,43 +723,6 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::areTilesNotIdentical(const unsigned int p
 }
 
 template <bool is_ad>
-void
-LAROMANCEStressUpdateBaseTempl<is_ad>::checkInputWindow(const GenericReal<is_ad> & input,
-                                                        const std::vector<WindowFailure> behavior,
-                                                        const std::vector<Real> & global_limits)
-{
-  // checkInputWindow assumes rectangular tile-sets and the extreme global limits thereof. This is
-  // not a generic implementation, so use with caution in case of non-rectangular tile-sets.
-  if (input < global_limits[0])
-  {
-    std::stringstream msg;
-    msg << "In " << _name << ": input parameter with value (" << MetaPhysicL::raw_value(input)
-        << ") is out of lower global range (" << global_limits[0] << ")";
-
-    if (behavior[0] == WindowFailure::WARN)
-      mooseWarning(msg.str());
-    else if (behavior[0] == WindowFailure::ERROR)
-      mooseError(msg.str());
-    else if (behavior[0] == WindowFailure::EXCEPTION)
-      mooseException(msg.str());
-  }
-
-  if (input > global_limits[1])
-  {
-    std::stringstream msg;
-    msg << "In " << _name << ": input parameter with value (" << MetaPhysicL::raw_value(input)
-        << ") is out of upper global range (" << global_limits[1] << ")";
-
-    if (behavior[1] == WindowFailure::WARN)
-      mooseWarning(msg.str());
-    else if (behavior[1] == WindowFailure::ERROR)
-      mooseError(msg.str());
-    else if (behavior[1] == WindowFailure::EXCEPTION)
-      mooseException(msg.str());
-  }
-}
-
-template <bool is_ad>
 GenericReal<is_ad>
 LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
     const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
@@ -758,11 +752,6 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
   auto dweights_dstress = _non_stress_weights;
   computeTileWeight(
       dweights_dstress, _input_values[_stress_input_index], _stress_input_index, true);
-
-  // Check window with new stress
-  checkInputWindow(_input_values[_stress_input_index],
-                   _window_failure[_stress_input_index],
-                   _global_limits[_stress_input_index]);
 
   computePartitionWeights(_partition_weights, _dpartition_weight_dstress);
 
@@ -867,6 +856,26 @@ void
 LAROMANCEStressUpdateBaseTempl<is_ad>::computePartitionWeights(
     std::vector<GenericReal<is_ad>> & weights, std::vector<GenericReal<is_ad>> & dweights_dstress)
 {
+  std::vector<bool> in_partition(_num_partitions, false);
+  unsigned int num_partitions_active = 0;
+  for (unsigned int p = 0; p < _num_partitions; ++p)
+  {
+    for (unsigned int t = 0; t < _num_tiles[p]; ++t)
+      if (!in_partition[p] && checkInTile(p, t))
+        in_partition[p] = true;
+
+    num_partitions_active += in_partition[p];
+  }
+  mooseAssert(num_partitions_active <= _num_partitions,
+              "Number of paritions active must be less than total number of paritions");
+  if (!num_partitions_active)
+    mooseException("Number of active partitions (",
+                   num_partitions_active,
+                   ") out of total number of partitions (",
+                   _num_partitions,
+                   ") is zero. This may be because you are trying to sample outside the total "
+                   "applicability of the model");
+
   if (_num_partitions == 1) // If only one parition present, all weights are one
   {
     weights[0] = 1.0;
@@ -874,13 +883,6 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computePartitionWeights(
   }
   else if (_num_partitions == 2)
   {
-    std::vector<bool> in_partition(_num_partitions, false);
-    for (unsigned int p = 0; p < _num_partitions; ++p)
-      for (unsigned int t = 0; t < _num_tiles[p]; ++t)
-        if (!in_partition[p] && checkInTile(p, t))
-          in_partition[p] = true;
-
-    const unsigned int num_partitions_active = in_partition[0] + in_partition[1];
     if (num_partitions_active == 1) // If only present in one partition, math is easy
     {
       std::fill(dweights_dstress.begin(), dweights_dstress.end(), 0.0);
@@ -896,17 +898,9 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computePartitionWeights(
     else if (num_partitions_active == 2) // If present in two partitions, compute weights
     {
       weights[1] = computeSecondPartitionWeight();
-
       computeDSecondPartitionWeightDStress(dweights_dstress[1]);
       dweights_dstress[0] = -dweights_dstress[1];
     }
-    else
-      mooseError("Internal error: Number of active partitions (",
-                 num_partitions_active,
-                 ") out of total number of partitions (",
-                 _num_partitions,
-                 ") is not one or two");
-
     weights[0] = 1.0 - weights[1];
   }
   else
