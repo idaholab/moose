@@ -134,7 +134,7 @@ protected:
   /// Do the block numbers start with zero or one?
   bool _block_zero;
 
-  /// Legacy attribute to keep Blackbear functional, see moose#19109
+  /// Legacy attribute to keep Grizzly functional, see idaholab/moose#19109, idaholab/Grizzly#182
   const unsigned int _ngrain;
 
   MooseMesh & _mesh;

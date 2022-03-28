@@ -66,7 +66,7 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
     _rve_type(getParam<MooseEnum>("rve_type")),
     _block_zero(getParam<bool>("use_zero_based_block_indexing")),
     _ngrain(isParamValid("ngrain") ? getParam<unsigned int>("ngrain")
-                                     : getParam<unsigned int>("nvoronoi")),
+                                   : getParam<unsigned int>("nvoronoi")),
     _mesh(_fe_problem.mesh()),
     _nelem(_mesh.nElem()),
     _nprop(getParam<unsigned int>("nprop")),
@@ -212,7 +212,11 @@ PropertyReadFile::getElementData(const Elem * elem, unsigned int prop_num) const
 {
   unsigned int jelem = elem->id();
   if (jelem >= _nelem)
-    mooseError("Element ID ", jelem, " greater than than total number of element in mesh ", _nelem);
+    mooseError("Element ID ",
+               jelem,
+               " greater than than total number of element in mesh: ",
+               _nelem,
+               ". Elements should be numbered consecutively.");
   return _reader.getData(jelem)[prop_num];
 }
 
@@ -221,7 +225,11 @@ PropertyReadFile::getNodeData(const Node * const node, const unsigned int prop_n
 {
   unsigned int jnode = node->id();
   if (jnode >= _nnode)
-    mooseError("Node ID ", jnode, " greater than than total number of nodes in mesh ", _nnode);
+    mooseError("Node ID ",
+               jnode,
+               " greater than than total number of nodes in mesh: ",
+               _nnode,
+               ". Nodes should be numbered consecutively.");
   return _reader.getData(jnode)[prop_num];
 }
 
@@ -237,8 +245,9 @@ PropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) const
     paramError("nblock",
                "Element block id ",
                elem_subdomain_id,
-               " greater than than total number of blocks in mesh ",
-               _nblock);
+               " greater than than total number of blocks in mesh: ",
+               _nblock,
+               ". Blocks should be numbered consecutively.");
   return _reader.getData(elem_subdomain_id - offset)[prop_num];
 }
 
