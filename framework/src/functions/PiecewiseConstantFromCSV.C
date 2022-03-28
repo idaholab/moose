@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", PiecewiseConstantFromCSV);
 
-using namespace PropertyReadFileEnums;
-
 InputParameters
 PiecewiseConstantFromCSV::validParams()
 {
@@ -45,10 +43,11 @@ PiecewiseConstantFromCSV::PiecewiseConstantFromCSV(const InputParameters & param
   : Function(parameters),
     _read_prop_user_object(nullptr),
     _column_number(getParam<unsigned int>("column_number")),
-    _read_type(getParam<MooseEnum>("read_type").getEnum<ReadTypeEnum>()),
+    _read_type(getParam<MooseEnum>("read_type").getEnum<PropertyReadFile::ReadTypeEnum>()),
     _point_locator(_ti_feproblem.mesh().getPointLocator())
 {
-  if (_column_number < _ti_feproblem.mesh().dimension() && _read_type == ReadTypeEnum::VORONOI)
+  if (_column_number < _ti_feproblem.mesh().dimension() &&
+      _read_type == PropertyReadFile::ReadTypeEnum::VORONOI)
     mooseWarning(
         "The column requested in the function is likely to just be containing point coordinates");
 }
@@ -67,7 +66,8 @@ PiecewiseConstantFromCSV::initialSetup()
 Real
 PiecewiseConstantFromCSV::value(Real, const Point & p) const
 {
-  if (_read_type == ReadTypeEnum::ELEMENT || _read_type == ReadTypeEnum::BLOCK)
+  if (_read_type == PropertyReadFile::ReadTypeEnum::ELEMENT ||
+      _read_type == PropertyReadFile::ReadTypeEnum::BLOCK)
   {
     // This is somewhat inefficient, but it allows us to retrieve the data in the
     // CSV by element or by block.
@@ -88,7 +88,7 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
 
     return _read_prop_user_object->getData(min_id_elem, _column_number);
   }
-  else if (_read_type == ReadTypeEnum::NODE)
+  else if (_read_type == PropertyReadFile::ReadTypeEnum::NODE)
   {
     // Get the node id
     const auto node = _point_locator->locate_node(p);
@@ -98,7 +98,7 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
 
     return _read_prop_user_object->getNodeData(node, _column_number);
   }
-  else if (_read_type == ReadTypeEnum::VORONOI)
+  else if (_read_type == PropertyReadFile::ReadTypeEnum::VORONOI)
     // No need to search for the element if we're just looking at nearest neighbors
     return _read_prop_user_object->getVoronoiData(p, _column_number);
   else

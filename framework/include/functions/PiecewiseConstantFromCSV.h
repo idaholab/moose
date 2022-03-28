@@ -42,7 +42,7 @@ protected:
   const unsigned int _column_number;
 
   /// Type of read - element, grain, or block
-  const PropertyReadFileEnums::ReadTypeEnum _read_type;
+  const PropertyReadFile::ReadTypeEnum _read_type;
 
   /// The point locator is used when values are sorted by elements or blocks in the CSV
   std::unique_ptr<PointLocatorBase> _point_locator;

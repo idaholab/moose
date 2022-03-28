@@ -19,8 +19,6 @@ registerMooseObjectRenamed("MooseApp",
                            "06/30/2021 24:00",
                            PropertyReadFile);
 
-using namespace PropertyReadFileEnums;
-
 InputParameters
 PropertyReadFile::validParams()
 {

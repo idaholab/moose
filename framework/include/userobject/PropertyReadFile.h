@@ -13,21 +13,6 @@
 #include "MooseEnum.h"
 #include "DelimitedFileReader.h"
 
-namespace PropertyReadFileEnums
-{
-/**
- * How data is organized in the CSV file
- */
-enum class ReadTypeEnum
-{
-  ELEMENT = 0,
-  VORONOI = 1,
-  BLOCK = 2,
-  NODE = 3,
-  GRAIN = 4
-};
-}
-
 /**
  * Read properties from file - grain, element, node or block
  * Input file syntax: prop1 prop2 etc. See test.
@@ -111,9 +96,21 @@ public:
   Real minPeriodicDistance(const Point &, const Point &) const;
 
   /**
+   * How data is organized in the CSV file
+   */
+  enum class ReadTypeEnum
+  {
+    ELEMENT = 0,
+    VORONOI = 1,
+    BLOCK = 2,
+    NODE = 3,
+    GRAIN = 4
+  };
+
+  /**
    * Returns the ordering of data expected in the CSV file
    */
-  PropertyReadFileEnums::ReadTypeEnum getReadType() const { return _read_type; }
+  ReadTypeEnum getReadType() const { return _read_type; }
 
 protected:
   /// Name of file containing property values
@@ -122,7 +119,7 @@ protected:
   MooseUtils::DelimitedFileReader _reader;
 
   /// Type of read - element, grain, or block
-  const PropertyReadFileEnums::ReadTypeEnum _read_type;
+  const ReadTypeEnum _read_type;
 
   /// Parameters for the nearest neighbor / grain interpolation
   /// Whether to use a random tesselation for the Voronoi/grain type
