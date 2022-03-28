@@ -59,23 +59,25 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _prop_file_name(getParam<FileName>("prop_file_name")),
     _reader(_prop_file_name),
-    _nprop(getParam<unsigned int>("nprop")),
-    _nvoronoi(isParamValid("ngrain") ? getParam<unsigned int>("ngrain")
-                                     : getParam<unsigned int>("nvoronoi")),
-    _nblock(getParam<unsigned int>("nblock")),
+
     _read_type(getParam<MooseEnum>("read_type").getEnum<ReadTypeEnum>()),
     _use_random_tesselation(getParam<bool>("use_random_voronoi")),
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _rve_type(getParam<MooseEnum>("rve_type")),
     _block_zero(getParam<bool>("use_zero_based_block_indexing")),
-    _ngrain(_nvoronoi),
-    _mesh(_fe_problem.mesh())
+    _ngrain(isParamValid("ngrain") ? getParam<unsigned int>("ngrain")
+                                     : getParam<unsigned int>("nvoronoi")),
+    _mesh(_fe_problem.mesh()),
+    _nelem(_mesh.nElem()),
+    _nprop(getParam<unsigned int>("nprop")),
+    _nvoronoi(isParamValid("ngrain") ? getParam<unsigned int>("ngrain")
+                                     : getParam<unsigned int>("nvoronoi")),
+    _nblock(getParam<unsigned int>("nblock")),
+    _nnode(_mesh.nNodes())
 {
   if (!_use_random_tesselation && parameters.isParamSetByUser("rand_seed"))
     paramError("rand_seed",
                "Random seeds should only be provided if random tesselation is desired");
-  _nelem = _mesh.nElem();
-  _nnodes = _mesh.nNodes();
 
   Point mesh_min, mesh_max;
   for (unsigned int i : make_range(LIBMESH_DIM))
@@ -218,8 +220,8 @@ Real
 PropertyReadFile::getNodeData(const Node * const node, const unsigned int prop_num) const
 {
   unsigned int jnode = node->id();
-  if (jnode >= _nnodes)
-    mooseError("Node ID ", jnode, " greater than than total number of nodes in mesh ", _nnodes);
+  if (jnode >= _nnode)
+    mooseError("Node ID ", jnode, " greater than than total number of nodes in mesh ", _nnode);
   return _reader.getData(jnode)[prop_num];
 }
 

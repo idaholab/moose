@@ -8,6 +8,7 @@ This user object has two modes to operate in, which are toggled using the
 - In +element+ mode a file is read in that contains `nprop` values for each element in the mesh. The element IDs are expected to be consecutive numbers starting at zero.
 - In +grain+ mode a Voronoi tessellation with `ngrain` random centers is created assuming an orthogonal rectangular periodic mesh. A file is read in that contains `nprop` values for each grain.
 - In +block+ mode a file is read in that contains `nprop` values for each block in the mesh. `nblock` is the number of blocks in the mesh.
+- In +node+ mode a file is read in that contains `nprop` values for each node in the mesh. The node IDs are expected to be consecutive numbers starting at zero.
 
 Values can be queried from the object by passing in a property ID and an element
 pointer. In +element+ mode a direct lookup from the data table based on

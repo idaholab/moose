@@ -120,12 +120,7 @@ protected:
   const std::string _prop_file_name;
   /// Use DelimitedFileReader to read and store data from file
   MooseUtils::DelimitedFileReader _reader;
-  /// Number of properties in a row
-  const unsigned int _nprop;
-  /// Number of grains (for property read based on grains)
-  const unsigned int _nvoronoi;
-  /// Number of blocks (for property read based on blocks)
-  const unsigned int _nblock;
+
   /// Type of read - element, grain, or block
   const PropertyReadFileEnums::ReadTypeEnum _read_type;
 
@@ -139,7 +134,7 @@ protected:
   /// Do the block numbers start with zero or one?
   bool _block_zero;
 
-  /// To pass CI TODO: delete
+  /// Legacy attribute to keep Blackbear functional, see moose#19109
   const unsigned int _ngrain;
 
   MooseMesh & _mesh;
@@ -148,4 +143,16 @@ protected:
 private:
   /// Bounding box for the mesh
   BoundingBox _bounding_box;
+
+  /// Class attributes useful for range-checking
+  /// Number of elements (for reading a CSV file with properties ordered by elements)
+  const unsigned int _nelem;
+  /// Number of properties in a row
+  const unsigned int _nprop;
+  /// Number of grains (for reading a CSV file with properties ordered by grains)
+  const unsigned int _nvoronoi;
+  /// Number of blocks (for reading a CSV file with properties ordered by blocks)
+  const unsigned int _nblock;
+  /// Number of nodes (for reading a CSV file with properties ordered by nodes)
+  const unsigned int _nnode;
 };
