@@ -81,6 +81,10 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
         min_id_elem = elem;
     if (!min_id_elem)
       mooseError("No element located at ", p, " to search in element or block sorted CSV values");
+    if (candidate_elements.size() > 1)
+      mooseWarning("Multiple elements have been found for Point ",
+                   p,
+                   ". Lowest ID element will be used for reading CSV data.");
 
     return _read_prop_user_object->getData(min_id_elem, _column_number);
   }
