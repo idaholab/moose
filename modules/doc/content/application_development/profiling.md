@@ -18,8 +18,9 @@ first install `libunwind`:
 cd $HOME
 git clone git@github.com:libunwind/libunwind.git
 cd libunwind
+autoreconf -i
 ./configure --prefix=$PWD/installed
-make -j<num_procs>
+make -j$MOOSE_JOBS
 make install
 ```
 
@@ -29,10 +30,11 @@ and then the `gperftools` library:
 cd $HOME
 git clone git@github.com:gperftools/gperftools.git
 cd gperftools
+./autogen.sh
 CPPFLAGS=-I$HOME/libunwind/installed/include \
 LDFLAGS="-L$HOME/libunwind/installed/lib -Wl,-rpath,$HOME/libunwind/installed/lib" \
 ./configure --prefix=$PWD/installed --enable-frame-pointers
-make -j<num_procs>
+make -j$MOOSE_JOBS
 make install
 ```
 
