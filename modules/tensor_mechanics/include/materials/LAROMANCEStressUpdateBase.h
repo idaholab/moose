@@ -126,16 +126,6 @@ protected:
                             const unsigned int t,
                             const unsigned int tt,
                             const unsigned int in_index);
-  /**
-   * Method to check input values against applicability windows set by ROM data set.
-   * @param input Input value
-   * @param vector for upper and lower WindowFailure enums indicating what to do if input is outside
-   * of limits
-   * @param global_limits Vector of lower and upper global limits of the input
-   */
-  void checkInputWindow(const GenericReal<is_ad> & input,
-                        const std::vector<WindowFailure> behavior,
-                        const std::vector<Real> & global_limits);
 
   /**
    * Convert the input variables into the form expected by the ROM Legendre polynomials to have a
@@ -419,8 +409,8 @@ protected:
 
   /*
    * Material specific orientations of tiling
-   * variables
-   * @return Vector declaring tiling orientation
+   * variables. Indexing is partition, then input
+   * @return Vector of a vector declaring tiling orientation
    */
   virtual std::vector<std::vector<unsigned int>> getTilings()
   {
@@ -431,8 +421,8 @@ protected:
 
   /*
    * Minimum strain value allowed by the ROM. This is material specific, and needs to be overwritten
-   * by individual roms.
-   * @return Material specific ROM low strain value for each partition
+   * by individual roms and each partition
+   * @return Vector of material specific ROM low strain value for each partition
    */
   virtual std::vector<Real> getStrainCutoff() = 0;
 
