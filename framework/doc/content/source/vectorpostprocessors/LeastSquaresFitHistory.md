@@ -4,7 +4,7 @@
 
 ## Description
 
-`LeastSquaresFitHistory` is used perform a polynomial least squares fit of data provided through another VectorPostprocessor. It computes the coefficients for a polynomial of arbitrary, user-specified order that minimize the error using a standard least-squares procedure.This object stores the polynomial coefficients in a set of vectors that contain the full history of those values for a transient analysis. 
+`LeastSquaresFitHistory` is used perform a polynomial least squares fit of data provided through another VectorPostprocessor. It computes the coefficients for a polynomial of arbitrary, user-specified order that minimize the error using a standard least-squares procedure.This object stores the polynomial coefficients in a set of vectors that contain the full history of those values for a transient analysis.
 
 This VectorPostprocessor is closely related to the [LeastSquaresFit](/LeastSquaresFit.md) VectorPostprocessor, which performs the same type of least squares fit, but stores the results in a single vector, the history of which is not stored.
 
@@ -19,5 +19,3 @@ By default, if an insufficient number of points is provided in these data vector
 !syntax inputs /VectorPostprocessors/LeastSquaresFitHistory
 
 !syntax children /VectorPostprocessors/LeastSquaresFitHistory
-
-!bibtex bibliography

@@ -76,19 +76,25 @@ the same time, the user has to selectively activate the desired one. We list the
 for the first component of the superficial velocity:
 
 - no slip walls
+
   !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/no-slip-u
 
 - free slip walls
+
   !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/free-slip-u
 
 - symmetry axis. This symmetry condition should also be indicated for the pressure variable.
+
   !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/symmetry-u
+
   !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/symmetry-p
 
 - inlet velocity, to specify mass flux given that density is constant
+
   !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/inlet-u
 
 - momentum advection outflow (only for a mean-pressure approach, equivalent to executing the momentum advection kernel on the boundary)
+
   !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/outlet-u
 
 
@@ -97,10 +103,12 @@ If the PINSFV version of a boundary condition does not exist, it may be because 
 replacing velocity by superficial velocity.
 
 The pressure boundary condition is usually only set at the outlet:
+
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/outlet-p
 
 For a mean-pressure approach, usually for cavity problems, the user may specify a mass advection boundary condition. This
 is equivalent to executing the mass advection kernel on boundaries.
+
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/outlet-p-novalue
 
 ## Example inputs : heated straight channel

@@ -16,3 +16,6 @@ cd ..
 # and PETSc seperately, and large_media can be cloned
 # later if desired
 git submodule deinit -f large_media libmesh petsc
+# The cache still exists from the checkout... and this
+# is the only way to get rid of it
+rm -rf .git/modules

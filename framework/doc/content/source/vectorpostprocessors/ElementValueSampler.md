@@ -12,5 +12,3 @@ element.
 !syntax inputs /VectorPostprocessors/ElementValueSampler
 
 !syntax children /VectorPostprocessors/ElementValueSampler
-
-!bibtex bibliography

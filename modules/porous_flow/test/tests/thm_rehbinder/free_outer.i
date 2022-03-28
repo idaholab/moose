@@ -76,7 +76,6 @@
   []
   [cavity_zero_effective_stress_x]
     type = Pressure
-    component = 0
     variable = disp_x
     function = 1E6
     boundary = rmin
@@ -84,7 +83,6 @@
   []
   [cavity_zero_effective_stress_y]
     type = Pressure
-    component = 1
     variable = disp_y
     function = 1E6
     boundary = rmin

@@ -19,6 +19,7 @@ OutputInterface::validParams()
 {
 
   InputParameters params = emptyInputParameters();
+  params.addClassDescription("Interface to handle the restriction of outputs from objects");
   params.addParam<std::vector<OutputName>>("outputs",
                                            "Vector of output names were you would like "
                                            "to restrict the output of variables(s) "
@@ -43,12 +44,10 @@ OutputInterface::OutputInterface(const InputParameters & parameters, bool build_
   // Postprocessors.
   // However, for Materials this is not the case, so the call to buildOutputHideVariableList must be
   // disabled, the build_list allows for this behavior. The hide lists are handled by
-  // MaterialOutputAction
-  // in this case.
+  // MaterialOutputAction in this case.
   //
   // Variables/AuxVariables also call the buildOutputHideVariableList method later, because when
-  // their actions
-  // are called the Output objects do not exist. This case is handled by the
+  // their actions are called the Output objects do not exist. This case is handled by the
   // CheckOutputAction::checkVariableOutput.
   if (build_list)
   {

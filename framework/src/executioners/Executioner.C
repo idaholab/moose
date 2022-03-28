@@ -44,6 +44,7 @@ Executioner::validParams()
 
   params.registerBase("Executioner");
 
+  params.addParamNamesToGroup("fixed_point_algorithm", "Fixed point iterations");
   params.addParamNamesToGroup("restart_file_base", "Restart");
 
   return params;

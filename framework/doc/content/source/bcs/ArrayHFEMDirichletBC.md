@@ -10,8 +10,8 @@ Different boundary values for components can be assigned.
 
 !listing test/tests/kernels/hfem/array_dirichlet.i start=[all] end=[] include-end=true
 
-!syntax parameters /BCs/ArrayDirichletBC
+!syntax parameters /BCs/ArrayHFEMDirichletBC
 
-!syntax inputs /BCs/ArrayDirichletBC
+!syntax inputs /BCs/ArrayHFEMDirichletBC
 
-!syntax children /BCs/ArrayDirichletBC
+!syntax children /BCs/ArrayHFEMDirichletBC

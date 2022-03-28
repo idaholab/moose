@@ -6,7 +6,12 @@ converts each column into a VectorPostprocessor vector. This object uses the
 
 ## Example Input Syntax
 
+In this example, the `example.csv` file containing data for year/month/day is being read by
+the `CSVReader`.
+
 !listing test/tests/vectorpostprocessors/csv_reader/read.i block=VectorPostprocessors
+
+!listing test/tests/vectorpostprocessors/csv_reader/example.csv
 
 !syntax parameters /VectorPostprocessors/CSVReader
 

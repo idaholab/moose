@@ -48,5 +48,3 @@ AuxKernel.
 !syntax inputs /VectorPostprocessors/VectorMemoryUsage
 
 !syntax children /VectorPostprocessors/VectorMemoryUsage
-
-!bibtex bibliography

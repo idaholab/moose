@@ -88,3 +88,9 @@ These packages can be accessed via an unified interface in MOOSE, `PetscExternal
 By default, all element and face weights are uniform. This can be modified by implementing `computeElementWeight`
 and `computeSideWeight` in a derived class of `PetscExternalPartitioner`. For example, the [BlockWeightedPartitioner.md]
 returns different weights for all elements in a block.
+
+!syntax parameters /Mesh/Partitioner/PetscExternalPartitioner
+
+!syntax inputs /Mesh/Partitioner/PetscExternalPartitioner
+
+!syntax children /Mesh/Partitioner/PetscExternalPartitioner
