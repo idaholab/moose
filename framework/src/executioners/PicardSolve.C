@@ -23,47 +23,46 @@ PicardSolve::validParams()
   params.addDeprecatedParam<unsigned int>(
       "picard_max_its",
       1,
-      "Deprecated, use fixed_point_max_its",
       "Specifies the maximum number of Picard iterations. "
       "Mainly used when  wanting to do Picard iterations with MultiApps "
       "that are set to execute_on timestep_end or timestep_begin. "
-      "Setting this parameter to 1 turns off the Picard iterations.");
+      "Setting this parameter to 1 turns off the Picard iterations.",
+      "Deprecated, use fixed_point_max_its");
   params.addDeprecatedParam<bool>(
       "accept_on_max_picard_iteration",
       false,
-      "Deprecated, use accept_on_max_fixed_point_iteration",
-      "True to treat reaching the maximum number of Picard iterations as converged.");
+      "True to treat reaching the maximum number of Picard iterations as converged.",
+      "Deprecated, use accept_on_max_fixed_point_iteration");
   params.addDeprecatedParam<bool>(
       "disable_picard_residual_norm_check",
       false,
-      "Deprecated, use disable_fixed_point_residual_norm_check",
       "Disable the Picard residual norm evaluation thus the three parameters "
-      "picard_rel_tol, picard_abs_tol and picard_force_norms.");
+      "picard_rel_tol, picard_abs_tol and picard_force_norms.",
+      "Deprecated, use disable_fixed_point_residual_norm_check");
   params.addDeprecatedParam<Real>("picard_rel_tol",
                                   1e-8,
-                                  "Deprecated, use fixed_point_rel_tol",
                                   "The relative nonlinear residual drop to shoot for "
                                   "during Picard iterations. This check is "
                                   "performed based on the Master app's nonlinear "
-                                  "residual.");
+                                  "residual.",
+                                  "Deprecated, use fixed_point_rel_tol");
   params.addDeprecatedParam<Real>("picard_abs_tol",
                                   1e-50,
-                                  "Deprecated, use fixed_point_abs_tol",
                                   "The absolute nonlinear residual to shoot for "
                                   "during Picard iterations. This check is "
                                   "performed based on the Master app's nonlinear "
-                                  "residual.");
-  params.addDeprecatedParam<PostprocessorName>(
-      "picard_custom_pp",
-      "Deprecated, use custom_pp",
-      "Postprocessor for custom picard convergence check.");
+                                  "residual.",
+                                  "Deprecated, use fixed_point_abs_tol");
+  params.addDeprecatedParam<PostprocessorName>("picard_custom_pp",
+                                               "Postprocessor for custom picard convergence check.",
+                                               "Deprecated, use custom_pp");
 
   params.addDeprecatedParam<bool>(
       "picard_force_norms",
       false,
-      "Deprecated, use fixed_point_force_norms",
       "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
-      "existence of active MultiApps with those execute_on flags, default: false.");
+      "existence of active MultiApps with those execute_on flags, default: false.",
+      "Deprecated, use fixed_point_force_norms");
 
   return params;
 }

@@ -101,6 +101,13 @@
     vars = 'a theta'
     vals = 'stretch angles'
   []
+
+  [dts]
+    type = PiecewiseConstant
+    x = '0 1 2'
+    y = '0.1 0.001 0.001'
+    direction = 'LEFT_INCLUSIVE'
+  []
 []
 
 [BCs]
@@ -264,8 +271,7 @@
   end_time = 2.0
   [TimeStepper]
     type = FunctionDT
-    time_t = '0 1 2'
-    time_dt = '0.1 0.001 0.001'
+    function = dts
     interpolate = False
   []
 []

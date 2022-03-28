@@ -37,7 +37,6 @@
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
-  file_base = 'out'
 []
 
 [Outputs]

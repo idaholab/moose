@@ -198,6 +198,12 @@ MultiApp::validParams()
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
   params.registerBase("MultiApp");
 
+  params.addParamNamesToGroup("reset_time reset_apps", "Reset MultiApp parameters");
+  params.addParamNamesToGroup("move_time move_apps move_positions",
+                              "Timed move of MultiApps parameters");
+  params.addParamNamesToGroup("relaxation_factor transformed_variables transformed_postprocessors",
+                              "Fixed point acceleration of MultiApp quantities");
+
   return params;
 }
 
@@ -246,6 +252,10 @@ MultiApp::MultiApp(const InputParameters & parameters)
       parameters.isParamValid("cli_args_files"))
     paramError("cli_args",
                "'cli_args' and 'cli_args_files' cannot be specified simultaneously in MultiApp ");
+
+  if ((_reset_apps.size() > 0 && _reset_time == std::numeric_limits<Real>::max()) ||
+      (_reset_apps.size() == 0 && _reset_time < std::numeric_limits<Real>::max()))
+    mooseError("reset_time and reset_apps may only be specified together");
 }
 
 void

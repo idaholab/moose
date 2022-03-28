@@ -106,7 +106,8 @@ FixedPointSolve::validParams()
       "fixed_point_min_its fixed_point_max_its accept_on_max_fixed_point_iteration "
       "disable_fixed_point_residual_norm_check fixed_point_rel_tol fixed_point_abs_tol "
       "fixed_point_force_norms custom_pp fixed_point_rel_tol fixed_point_abs_tol direct_pp_value "
-      "relaxation_factor transformed_variables transformed_postprocessors auto_advance",
+      "relaxation_factor transformed_variables transformed_postprocessors auto_advance "
+      "custom_abs_tol custom_rel_tol",
       "Fixed point iterations");
 
   params.addParam<unsigned int>(

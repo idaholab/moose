@@ -119,7 +119,7 @@ it. However, if the `MooseObjectAction` is not adding the `MooseObject` , and
 the `MooseObject` is being added through a custom `action`, then that custom
 action has to be responsible for detecting and adding the associated
 relationship managers. The method that the custom `Action` should override to
-add relationsip managers is
+add relationship managers is
 `addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)`. Both
 the `ContactAction` in the contact module, and `PorousFlowActionBase` in the
 porous flow module provide examples of overriding this method.

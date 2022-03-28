@@ -130,7 +130,6 @@
 
 [Contact]
   [leftright]
-    mesh = combined_mesh
     secondary = '11'
     primary = '23'
     formulation = mortar

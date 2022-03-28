@@ -244,7 +244,6 @@
     type = Pressure
     variable = disp_y
     boundary = 5
-    component = 1
     factor = 109.89
   [../]
 []

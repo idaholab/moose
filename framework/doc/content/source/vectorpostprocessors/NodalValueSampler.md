@@ -10,5 +10,3 @@ in the domain, selection of blocks, or selection of boundaries.
 !syntax inputs /VectorPostprocessors/NodalValueSampler
 
 !syntax children /VectorPostprocessors/NodalValueSampler
-
-!bibtex bibliography

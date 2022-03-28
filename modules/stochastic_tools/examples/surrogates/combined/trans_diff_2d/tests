@@ -12,7 +12,7 @@
                   runner:Mesh/msh/nx=10
                   runner:Mesh/msh/ny=10
                   runner:Executioner/num_steps=2"
-      csvdiff = 'trans_diff_main_out_results_0001.csv trans_diff_main_out_stats_0001.csv'
+      csvdiff = 'trans_diff_main_out_results_0001.csv'
       abs_zero = 1e-5
 
       detail = "with computing reference solutions "

@@ -25,6 +25,7 @@ FileOutput::validParams()
 {
   // Create InputParameters object for this stand-alone object
   InputParameters params = PetscOutput::validParams();
+  params.addClassDescription("Base class for all file-based output");
   params.addRequiredParam<std::string>(
       "file_base",
       "The desired solution output name without an extension. If not provided, MOOSE sets it "
@@ -38,7 +39,7 @@ FileOutput::validParams()
                                "is used (see http://www.cplusplus.com/reference/ctime/strftime).");
   // Add the padding option and list it as 'Advanced'
   params.addParam<unsigned int>(
-      "padding", 4, "The number of for extension suffix (e.g., out.e-s002)");
+      "padding", 4, "The number of digits for the extension suffix (e.g., out.e-s002)");
   params.addParam<std::vector<std::string>>("output_if_base_contains",
                                             std::vector<std::string>(),
                                             "If this is supplied then output will only be done in "

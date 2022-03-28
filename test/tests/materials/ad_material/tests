@@ -1,5 +1,5 @@
 [Tests]
-  design = 'ADMaterial.md'
+  design = 'syntax/Materials/index.md'
   [./test_adad]
     type = 'Exodiff'
     input = 'ad_material.i'
