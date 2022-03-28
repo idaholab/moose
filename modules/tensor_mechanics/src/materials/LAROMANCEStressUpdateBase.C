@@ -789,7 +789,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
 
           total_rom_effective_strain_inc += _partition_weights[p] * _weights[p][t] * rom;
 
-          dtotal_rom_effective_strain_inc_dstress =
+          dtotal_rom_effective_strain_inc_dstress +=
               _partition_weights[p] * _weights[p][t] * computeROM(t, p, _strain_output_index, true);
           if (_dpartition_weight_dstress[p])
             dtotal_rom_effective_strain_inc_dstress +=
