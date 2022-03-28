@@ -28,7 +28,7 @@
   [pressure-outlet-function-error]
     type = 'RunException'
     input = 2d-rc-ambient-convection-action.i
-    requirement = 'The system shall throw an error if the number of momentum outlet types does not match the number of outlet boundaries.'
+    requirement = 'The system shall throw an error if the number of pressure outlet functions is not the same the pressure outlet boundaries.'
     cli_args = "Modules/NavierStokesFV/pressure_function=''"
     expect_err = "Size is not the same as the number of pressure outlet boundaries!"
     ad_indexing_type = 'global'

@@ -26,7 +26,7 @@
   []
   [flux]
     issues = '#19543 #19472'
-    design = 'WCNSFVMassFluxBC.md WCNSFVMomentumFluxBC.md WCNSFVEnergyFluxBC.md WCNSFVScalarFluxBC.md NSFFVaction.md'
+    design = 'WCNSFVMassFluxBC.md WCNSFVMomentumFluxBC.md WCNSFVEnergyFluxBC.md WCNSFVScalarFluxBC.md NSFVAction.md'
     requirement = 'The system shall be able to use flux boundary conditions for specifying inlet conditions in a weakly compressible fluid flow simulation'
     [direct]
       type = 'Exodiff'
