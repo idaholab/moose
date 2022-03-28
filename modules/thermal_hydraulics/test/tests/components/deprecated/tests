@@ -5,7 +5,6 @@
     input = 'free_boundary.i'
     expect_err = "Deprecated component. Use FreeBoundary1Phase or FreeBoundary2Phase instead."
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
     design = 'FreeBoundary.md'
     requirement = 'The system shall report an error if the FreeBoundary component is used.'
   []
@@ -14,7 +13,6 @@
     input = 'gate_valve.i'
     expect_err = "Deprecated component. Use GateValve1Phase or GateValve2Phase instead."
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
     design = 'GateValve.md'
     requirement = 'The system shall report an error if the GateValve component is used.'
   []
@@ -23,7 +21,6 @@
     input = 'solid_wall.i'
     expect_err = "Deprecated component. Use SolidWall1Phase or SolidWall2Phase instead."
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
     design = 'SolidWall.md'
     requirement = 'The system shall report an error if the SolidWall component is used.'
   []
@@ -32,7 +29,6 @@
     input = 'junction_one_to_one.i'
     expect_err = "Deprecated component. Use JunctionOneToOne1Phase or JunctionOneToOne2Phase instead."
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
     design = 'JunctionOneToOne.md'
     requirement = 'The system shall report an error if the JunctionOneToOne component is used.'
   []
@@ -49,14 +45,12 @@
     input = 'heat_source_volumetric.i'
     expect_err = "Deprecated component. Use HeatSourceVolumetric1Phase or HeatSourceVolumetric2Phase instead."
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
     design = 'HeatSourceVolumetric.md'
     requirement = 'The system shall report an error if the HeatSourceVolumetric component is used.'
   []
   [prescribed_reactor_power]
     type = 'RunException'
     input = 'prescribed_reactor_power.i'
-    mesh_mode = 'replicated'
     expect_err = "total_power: Deprecated component, use 'type = TotalPower' instead."
     design = 'PrescribedReactorPower.md'
     requirement = 'The system shall report an error if the PrescribedReactorPower component is used.'

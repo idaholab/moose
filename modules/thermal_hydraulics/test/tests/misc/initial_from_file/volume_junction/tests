@@ -5,7 +5,6 @@
     exodiff = 'steady_state_out.e'
     recover = false
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
 
     requirement = 'The system shall be able to produce an exodus file for setting initial conditions in volume junctions'
     design = 'flow_junction.md'
@@ -19,7 +18,6 @@
     prereq = steady_state
     recover = false
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
 
     requirement = 'The system shall be able to use an exodus file for setting initial conditions in volume junctions'
     design = 'flow_junction.md ScalarSolutionInitialCondition.md'

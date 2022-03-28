@@ -74,7 +74,11 @@ FlowJunction::initSecondary()
 {
   for (auto & eid : _connected_elems)
   {
-    const Elem * elem = _mesh.elemPtr(eid);
-    _proc_ids.push_back(elem->processor_id());
+    const Elem * elem = _mesh.queryElemPtr(eid);
+    if (elem != nullptr && elem->processor_id() == processor_id())
+      _proc_ids.push_back(elem->processor_id());
+    else
+      _proc_ids.push_back(0);
   }
+  comm().sum(_proc_ids);
 }

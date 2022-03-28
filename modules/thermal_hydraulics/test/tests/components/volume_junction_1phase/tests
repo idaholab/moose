@@ -7,7 +7,6 @@
     # then renamed to equal_area_with_junction_out.csv.
     csvdiff = 'equal_area_with_junction_out.csv'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
   [equal_area_not_x_direction]
     type = 'CSVDiff'
@@ -25,7 +24,6 @@
     csvdiff = 'equal_area_with_junction_out.csv'
     prereq = 'equal_area_x_direction'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [phy:unequal_area]
@@ -36,7 +34,6 @@
     rel_err = 0
     recover = false
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [phy:deadend]
@@ -46,7 +43,6 @@
     abs_zero = 1e-5
     rel_err = 0
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
 
@@ -56,7 +52,6 @@
     check_input = true
     recover = false
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [phy:shower]
@@ -67,7 +62,6 @@
     rel_err = 0
     heavy = true
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   # Tests conservation of mass and energy for 1-phase flow.
@@ -77,7 +71,6 @@
     csvdiff = 't_junction_1phase_out.csv'
     abs_zero = 1e-10
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [phy.form_loss]
@@ -88,7 +81,6 @@
     rel_err = 2e-4
     recover = false
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [phy.form_loss_Aref]
@@ -99,7 +91,6 @@
     rel_err = 2e-4
     recover = false
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   # error checking
@@ -107,7 +98,6 @@
     type = 'RunException'
     input = 'err.missing_ics.i'
     expect_err = "junction: The following initial condition parameters are missing: initial_p initial_T initial_vel_x initial_vel_y initial_vel_z"
-    mesh_mode = 'replicated'
   []
 
   [err.missing_K]
@@ -115,6 +105,5 @@
     input = 'phy.form_loss.i'
     cli_args = '--error Components/junction/A_ref=1'
     expect_err = "junction: Parameter 'A_ref' is specified, but 'K' is not specified, so the junction will behave as if there were no form loss."
-    mesh_mode = 'replicated'
   []
 []

@@ -6,7 +6,6 @@
     csvdiff = 'pump_mass_energy_conservation_out.csv'
     group = 'pump1phase'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
   [phy:pump_mass_energy_conservation_orientation]
     type = 'CSVDiff'
@@ -18,7 +17,6 @@
     csvdiff = 'pump_mass_energy_conservation_out_orientation.csv'
     group = 'pump1phase'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   # physics
@@ -29,7 +27,6 @@
     abs_zero = 5e-7
     group = 'pump1phase'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
   [phy:pressure_check_orientation]
     type = 'CSVDiff'
@@ -41,7 +38,6 @@
     abs_zero = 5e-7
     group = 'pump1phase'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
   [phy:pipe_friction_pump_head_balance_x_direction]
     type = 'Exodiff'
@@ -49,7 +45,6 @@
     exodiff = 'pipe_friction_pump_head_balance_out_x.e'
     group = 'pump1phase'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
   [phy:pipe_friction_pump_head_balance_y_direction]
     type = 'Exodiff'
@@ -61,7 +56,6 @@
     exodiff = 'pipe_friction_pump_head_balance_out_y.e'
     group = 'pump1phase'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [phy:pump_loop]
@@ -72,7 +66,6 @@
     abs_zero = 1e-9
     group = 'pump1phase'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   # controls
@@ -85,7 +78,6 @@
     design = 'Pump1Phase.md'
     issues = '#684'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [jacobian]

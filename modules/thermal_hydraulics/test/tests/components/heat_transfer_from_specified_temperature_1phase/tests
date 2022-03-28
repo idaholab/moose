@@ -26,6 +26,5 @@
     type = RunException
     input = 'err.no_phf.i'
     expect_err = "hx\: Invalid side \'START\'\. This side does not have unit perimeter\. You probably want to use \'INNER\' or \'OUTER\' side instead\."
-    mesh_mode = 'replicated'
   []
 []

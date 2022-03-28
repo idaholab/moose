@@ -6,6 +6,5 @@
     custom_cmp = 'displaced_components.exodiff'
     ad_indexing_type = 'global'
     recover = false
-    mesh_mode = 'replicated'
   []
 []

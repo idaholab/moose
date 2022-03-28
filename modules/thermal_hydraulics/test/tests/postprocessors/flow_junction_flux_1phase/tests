@@ -6,6 +6,5 @@
     recover = false
     abs_zero = 2e-8
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 []

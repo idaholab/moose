@@ -9,7 +9,6 @@
       Postprocessors/rhouA_right/execute_on='initial timestep_end'"
     csvdiff = 'junction_one_to_one_1phase_out.csv'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [phy:no_junction_equivalency_1phase_flipped]
@@ -32,7 +31,6 @@
       Postprocessors/rhoEA_right/boundary=right_channel:out"
     csvdiff = 'junction_one_to_one_1phase_out.csv'
     prereq = 'phy:no_junction_equivalency_1phase_normal'
-    mesh_mode = 'replicated'
   []
 
   [phy:unequal_area_1phase]
@@ -40,7 +38,6 @@
     input = 'constriction_1phase.i'
     exodiff = 'constriction_1phase_out.e'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [phy:no_junction_1phase_check]
@@ -48,7 +45,6 @@
     input = 'no_junction_1phase.i'
     check_input = true
     recover = false
-    mesh_mode = 'replicated'
   []
 
   [err:not_parallel]
@@ -59,7 +55,6 @@
       Outputs/show=''"
     expect_err = "The connected channels must be parallel at the junction"
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [warn:slope_reconstruction_used]
@@ -67,6 +62,5 @@
     input = 'junction_one_to_one_1phase.i'
     cli_args = 'GlobalParams/rdg_slope_reconstruction=minmod'
     expect_err = "JunctionOneToOne1Phase cannot perform slope reconstruction"
-    mesh_mode = 'replicated'
   []
 []

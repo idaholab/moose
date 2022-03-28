@@ -6,7 +6,6 @@
     # then renamed to equal_area_with_junction_out.csv.
     csvdiff = 'equal_area_with_junction_out.csv'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [phy:unequal_area]
@@ -17,7 +16,6 @@
     rel_err = 0
     recover = false
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [phy:shower_syntax]
@@ -27,7 +25,6 @@
     recover = false
     max_threads = 1
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [phy:shower]
@@ -38,7 +35,6 @@
     rel_err = 0
     heavy = true
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   # Tests conservation of mass and energy for 1-phase flow.
@@ -48,7 +44,6 @@
     csvdiff = 'conservation_out.csv'
     abs_zero = 2e-8
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   # error checking
@@ -56,7 +51,6 @@
     type = 'RunException'
     input = 'err.missing_ics.i'
     expect_err = "junction: The following initial condition parameters are missing: initial_p initial_T initial_vel_x initial_vel_y initial_vel_z"
-    mesh_mode = 'replicated'
   []
 
   [err.non_parallel_channels]
@@ -66,7 +60,6 @@
     expect_err = "junction: Connected flow channels are not parallel, use "
     "VolumeJunction1Phase component instead."
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   # jacobian test

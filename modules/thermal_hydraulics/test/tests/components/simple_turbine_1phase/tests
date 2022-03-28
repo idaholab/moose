@@ -7,7 +7,6 @@
     override_abs_zero = '1e-6 1e-7 1e-4'
     override_rel_err = '0 0 0'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [phy:test]
@@ -15,7 +14,6 @@
     input = 'phy.test.i'
     exodiff = 'phy.test_out.e'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [clg:test]
@@ -23,7 +21,6 @@
     input = 'clg.test.i'
     csvdiff = 'clg.test_csv.csv'
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
   []
 
   [jacobian]

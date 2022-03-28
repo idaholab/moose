@@ -5,6 +5,5 @@
     exodiff = 'test_out.e'
     ad_indexing_type = 'global'
     recover = false
-    mesh_mode = 'replicated'
   []
 []

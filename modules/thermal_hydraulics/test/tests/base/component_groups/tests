@@ -12,7 +12,6 @@
 \s+sec_inlet
 \s+sec_outlet"
     ad_indexing_type = 'global'
-    mesh_mode = 'replicated'
 
     requirement = 'The system shall allow nesting components into groups in input files'
     design = 'ComponentGroup.md'

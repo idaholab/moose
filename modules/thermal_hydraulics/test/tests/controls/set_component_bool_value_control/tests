@@ -6,6 +6,5 @@
     allow_test_objects = true
     ad_indexing_type = 'global'
     recover = false
-    mesh_mode = 'replicated'
   []
 []

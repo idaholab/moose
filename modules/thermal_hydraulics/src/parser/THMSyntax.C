@@ -88,8 +88,8 @@ registerActions(Syntax & syntax)
     syntax.addDependency("add_periodic_bc", "THM:add_variables");
     syntax.addDependency("THM:print_component_loops", "THM:control_data_integrity_check");
     syntax.addDependency("THM:preconditioning_integrity_check", "check_integrity");
-    syntax.addDependency("THM:add_relationship_managers", "attach_algebraic_rm");
-    syntax.addDependency("coupling_functor_check", "THM:add_relationship_managers");
+    syntax.addDependency("THM:add_relationship_managers", "add_geometric_rm");
+    syntax.addDependency("THM:output_vector_velocity", "THM:add_relationship_managers");
   }
   catch (CyclicDependencyException<std::string> & e)
   {

@@ -16,7 +16,6 @@
       Outputs/checkpoint=true
       Outputs/file_base=part1_out'
     recover = false
-    mesh_mode = 'replicated'
     abs_zero = 1e-7
     ad_indexing_type = 'global'
   []
@@ -32,7 +31,6 @@
     abs_zero = 1e-7
     prereq = 'part1'
     recover = false
-    mesh_mode = 'replicated'
   []
 
   [part2_ics]
@@ -56,6 +54,5 @@
     prereq = 'part1'
     recover = false
     abs_zero = 1e-7
-    mesh_mode = 'replicated'
   []
 []
