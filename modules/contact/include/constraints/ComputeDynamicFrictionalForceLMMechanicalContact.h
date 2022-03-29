@@ -120,7 +120,4 @@ protected:
 
   /// Automatic flag to determine whether we are doing three-dimensional work
   bool _3d;
-
-  /// Nodal tangent vectors on the secondary faces (householder from normal vectors)
-  std::array<std::vector<Point>, 2> _nodal_tangents;
 };

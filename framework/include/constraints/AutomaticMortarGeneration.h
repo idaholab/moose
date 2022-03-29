@@ -13,6 +13,7 @@
 #include "MooseHashing.h"
 #include "ConsoleStreamInterface.h"
 #include "MooseError.h"
+#include "MooseUtils.h"
 
 // libMesh includes
 #include "libmesh/id_types.h"
@@ -182,7 +183,8 @@ public:
    * Compute the two nodal tangents, which are built on-the-fly.
    * @return The nodal tangents associated with the provided \p secondary_elem
    */
-  std::array<std::vector<Point>, 2> getNodalTangents(const Elem & secondary_elem) const;
+  std::array<MooseUtils::SemidynamicVector<Point, 10>, 2>
+  getNodalTangents(const Elem & secondary_elem) const;
 
   /**
    * Compute on-the-fly mapping from secondary interior parent nodes to lower dimensional nodes

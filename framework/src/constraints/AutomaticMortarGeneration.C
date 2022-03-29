@@ -190,18 +190,19 @@ AutomaticMortarGeneration::getPrimaryIpToLowerElementMap(
   return primary_ip_i_to_lower_primary_i;
 }
 
-std::array<std::vector<Point>, 2>
+std::array<MooseUtils::SemidynamicVector<Point, 10>, 2>
 AutomaticMortarGeneration::getNodalTangents(const Elem & secondary_elem) const
 {
-  std::vector<Point> nodal_tangents_one(secondary_elem.n_nodes());
-  std::vector<Point> nodal_tangents_two(secondary_elem.n_nodes());
+  // MetaPhysicL will check if we ran out of allocated space.
+  MooseUtils::SemidynamicVector<Point, 10> nodal_tangents_one(0);
+  MooseUtils::SemidynamicVector<Point, 10> nodal_tangents_two(0);
 
   for (const auto n : make_range(secondary_elem.n_nodes()))
   {
     const auto & tangent_vectors =
         libmesh_map_find(_secondary_node_to_hh_nodal_tangents, secondary_elem.node_ptr(n));
-    nodal_tangents_one[n] = tangent_vectors[0];
-    nodal_tangents_two[n] = tangent_vectors[1];
+    nodal_tangents_one.push_back(tangent_vectors[0]);
+    nodal_tangents_two.push_back(tangent_vectors[1]);
   }
 
   return {{nodal_tangents_one, nodal_tangents_two}};

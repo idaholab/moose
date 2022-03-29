@@ -43,7 +43,7 @@ TangentialMortarMechanicalContact::TangentialMortarMechanicalContact(
 ADReal
 TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
-  _nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+  const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
 
   switch (type)
   {
@@ -64,8 +64,8 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       {
         const unsigned int tangent_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
         return _test_secondary[_i][_qp] * _lambda[_qp] *
-               _nodal_tangents[_direction][tangent_index](_component) /
-               _nodal_tangents[_direction][tangent_index].norm();
+               nodal_tangents[_direction][tangent_index](_component) /
+               nodal_tangents[_direction][tangent_index].norm();
       }
     case Moose::MortarType::Primary:
 
@@ -77,8 +77,8 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       {
         const unsigned int tangent_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
         return -_test_primary[_i][_qp] * _lambda[_qp] *
-               _nodal_tangents[_direction][tangent_index](_component) /
-               _nodal_tangents[_direction][tangent_index].norm();
+               nodal_tangents[_direction][tangent_index](_component) /
+               nodal_tangents[_direction][tangent_index].norm();
       }
 
     default:

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADMortarLagrangeConstraint.h"
+#include "MooseUtils.h"
 
 class TangentialMortarMechanicalContact : public ADMortarLagrangeConstraint
 {
@@ -27,7 +28,4 @@ protected:
   /// Tangent direction used for computing the residual. In three-dimensions,
   /// there will be two tangent vectors.
   const MooseEnum _direction;
-
-  /// Nodal tangent vectors on the secondary faces (householder from normal vectors)
-  std::array<std::vector<Point>, 2> _nodal_tangents;
 };
