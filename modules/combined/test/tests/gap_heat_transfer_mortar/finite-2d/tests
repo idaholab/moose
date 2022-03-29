@@ -44,4 +44,17 @@
       ad_indexing_type = 'global'
     []
   []
+
+  [closed_gap_thermomechanical_mortar_contact]
+    design = 'GapFluxModelPressureDependentConduction.md'
+    issues = '#20658'
+    type = CSVDiff
+    input = 'closed_gap_thermomechanical_mortar_contact.i'
+    csvdiff = 'closed_gap_thermomechanical_mortar_contact_out.csv'
+    heavy = true
+    ad_indexing_type = 'global'
+    requirement = 'The system shall solve a 2D thermomechanical contact problem, '
+                  'accounting for mechanical pressure-dependent thermal contact, '
+                  'frictionaless contact, finite strain, and thermal expansion.'
+  []
 []
