@@ -99,4 +99,23 @@ computeFaceInfoFaceCoord(FaceInfo & fi,
 {
   coordTransformFactor(fi.faceCentroid(), fi.faceCoord(), coord_type, rz_radial_coord);
 }
+
+/**
+ * Crate a new set of element-wise IDs by finding unique combinations of existing extra ID values
+ *
+ * This function finds the unique combinations by recursively calling itself for extra ID inputs. In
+ * the recursive calling, the new unique combitnations is determined by combining the extra ID value
+ * of current level and the unique combination determined in the previous level in recursion. In the
+ * lowest level of recursion, the base combination is set by the unqiue ID values of the
+ * corresponding extra ID.
+ *
+ * @param mesh input mesh
+ * @param block_ids block ids
+ * @param extra_ids extra ids
+ * @return map of element id to new extra id
+ **/
+std::map<dof_id_type, dof_id_type>
+getExtraIDUniqueCombinationMap(const MeshBase & mesh,
+                               const std::set<SubdomainID> & block_ids,
+                               std::vector<ExtraElementIDName> extra_ids);
 }
