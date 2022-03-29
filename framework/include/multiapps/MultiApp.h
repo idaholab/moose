@@ -292,7 +292,7 @@ public:
    * @param app The global app number you want the position for.
    * @return the position
    */
-  Point position(unsigned int app) { return _positions[app]; }
+  const Point & position(unsigned int app) { return _positions[app]; }
 
   /**
    * "Reset" the App corresponding to the global App number
