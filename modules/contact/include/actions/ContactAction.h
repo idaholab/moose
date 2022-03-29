@@ -101,6 +101,9 @@ protected:
   /// Whether to use correct edge dropping treatment
   const bool _correct_edge_dropping;
 
+  /// Whether to generate the mortar mesh (useful in a restart simulation e.g.).
+  const bool _generate_mortar_mesh;
+
 private:
   /**
    * Generate mesh and other Moose objects for Mortar contact

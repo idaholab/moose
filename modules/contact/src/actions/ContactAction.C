@@ -154,6 +154,12 @@ ContactAction::validParams()
       "Whether to enable correct edge dropping treatment for mortar constraints. When disabled "
       "any Lagrange Multiplier degree of freedom on a secondary element without full primary "
       "contributions will be set (strongly) to 0.");
+  params.addParam<bool>(
+      "generate_mortar_mesh",
+      true,
+      "Whether to generate the mortar mesh from the action. Typically this will be the case, but "
+      "one may also want to reuse an existing lower-dimensional mesh prior to a restart.");
+
   return params;
 }
 
@@ -163,7 +169,8 @@ ContactAction::ContactAction(const InputParameters & params)
     _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
     _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
     _mortar_approach(getParam<MooseEnum>("mortar_approach").getEnum<MortarApproach>()),
-    _correct_edge_dropping(getParam<bool>("correct_edge_dropping"))
+    _correct_edge_dropping(getParam<bool>("correct_edge_dropping")),
+    _generate_mortar_mesh(getParam<bool>("generate_mortar_mesh"))
 {
 
   if (_boundary_pairs.size() != 1 && _formulation == ContactFormulation::MORTAR)
@@ -471,8 +478,10 @@ ContactAction::addMortarContact()
 
   if (_current_task == "append_mesh_generator")
   {
-    // Don't do mesh generators when recovering.
-    if (!(_app.isRecovering() && _app.isUltimateMaster()) && !_app.masterMesh())
+    // Don't do mesh generators when  or just don't want it to be generated because the mesh is
+    // already in the system (e.g. restart).
+    if (!(_app.isRecovering() && _app.isUltimateMaster()) && !_app.masterMesh() &&
+        _generate_mortar_mesh)
     {
       const MeshGeneratorName primary_name = primary_subdomain_name + "_generator";
       const MeshGeneratorName secondary_name = secondary_subdomain_name + "_generator";
