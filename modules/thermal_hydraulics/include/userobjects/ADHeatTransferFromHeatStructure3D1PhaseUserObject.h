@@ -44,6 +44,11 @@ public:
   }
 
 protected:
+  /**
+   * Parallel gather of all local contributions into one global map
+   */
+  void allGatherMap(std::map<dof_id_type, std::vector<ADReal>> & data);
+
   /// Flow channel alignment object
   const FlowChannel3DAlignment & _fch_alignment;
   /// Coupled heated perimeter variable
