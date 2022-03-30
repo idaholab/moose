@@ -28,6 +28,7 @@ public:
 
   void computeResidual() override final {}
   void computeJacobian() override final {}
+  using FVTimeKernel::computeOffDiagJacobian;
   void computeOffDiagJacobian() override final {}
   void computeResidualAndJacobian() override final {}
 

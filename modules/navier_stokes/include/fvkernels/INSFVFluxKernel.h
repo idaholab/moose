@@ -27,8 +27,11 @@ public:
 
   virtual ~INSFVFluxKernel() = default;
 
+  using FVFluxKernel::computeResidual;
   void computeResidual(const FaceInfo &) override final {}
+  using FVFluxKernel::computeJacobian;
   void computeJacobian(const FaceInfo &) override final {}
+  using FVFluxKernel::computeResidualAndJacobian;
   void computeResidualAndJacobian(const FaceInfo &) override final {}
 
 protected:

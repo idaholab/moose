@@ -142,3 +142,9 @@ FVElementalKernel::computeOffDiagJacobian()
 
   _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
 }
+
+void
+FVElementalKernel::computeOffDiagJacobian(unsigned int)
+{
+  mooseError("FVElementalKernel::computeOffDiagJacobian should be called with no arguments");
+}
