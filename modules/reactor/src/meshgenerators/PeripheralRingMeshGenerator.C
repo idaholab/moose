@@ -299,6 +299,20 @@ PeripheralRingMeshGenerator::generate()
     // Mark the to-be-deleted elements
     for (unsigned int i = 0; i < input_ext_node_num; ++i)
     {
+      // For a zig-zag external boundary, when we add a conformal layer onto it by translating the
+      // nodes in the surface normal direction, it is possible that the azimuthal order is flipped.
+      // As shown below, o's are the original boundary nodes, and *'s are the nodes after
+      // translation by the boundary layer thickness.
+      //                         *  *
+      // |               |       | /
+      // o               o-------/--*
+      // |               |     / |
+      // | outside  -->  |   /   |
+      // |               | /     |
+      // o--------o--    o--------o--
+      // To mitigate this flipping issue, we check the node flipping here using the cross product of
+      // neighboring node-to-origin vectors. Flipped nodes are marked and excluded during the
+      // follow-up interpolation.
       if (!MooseUtils::absoluteFuzzyEqual(input_bdry_angles[i], M_PI / 2.0))
       {
         if (((ref_inner_bdry_surf[(i - 1) % input_ext_node_num] - origin_pt)
@@ -310,6 +324,8 @@ PeripheralRingMeshGenerator::generate()
       }
     }
     // Create vectors for interpolation
+    // Due to the flip issue, linear interpolation is used here to mark the location of the boundary
+    // layer's outer boundary.
     for (unsigned int i = 0; i < input_ext_node_num; ++i)
     {
       if (!delete_mark[i])
@@ -345,6 +361,7 @@ PeripheralRingMeshGenerator::generate()
     for (unsigned int i = 0; i < input_ext_node_num; ++i)
     {
       // Outside point of the inner boundary layer
+      // Using interpolation, the azimuthal angles do not need to be changed.
       const Point inner_boundary_shift = Point(linterp_x->sample(azi_array[i] / 180.0 * M_PI),
                                                linterp_y->sample(azi_array[i] / 180.0 * M_PI),
                                                origin_z) -
