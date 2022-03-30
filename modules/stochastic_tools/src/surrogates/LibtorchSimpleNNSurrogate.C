@@ -22,8 +22,8 @@ LibtorchSimpleNNSurrogate::validParams()
 
 LibtorchSimpleNNSurrogate::LibtorchSimpleNNSurrogate(const InputParameters & parameters)
   : SurrogateModel(parameters),
-    _no_hidden_layers(getModelData<unsigned int>("no_hidden_layers")),
-    _no_neurons_per_layer(getModelData<std::vector<unsigned int>>("no_neurons_per_layer"))
+    _num_hidden_layers(getModelData<unsigned int>("num_hidden_layers")),
+    _num_neurons_per_layer(getModelData<std::vector<unsigned int>>("num_neurons_per_layer"))
 #ifdef TORCH_ENABLED
     ,
     _nn(getModelData<std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet>>("nn"))
@@ -43,7 +43,7 @@ LibtorchSimpleNNSurrogate::evaluate(const std::vector<Real> &
 #ifdef TORCH_ENABLED
 
   // Check whether input point has same dimensionality as training data
-  mooseAssert(_nn->noInputs() == x.size(),
+  mooseAssert(_nn->numInputs() == x.size(),
               "Input point does not match dimensionality of training data.");
 
   torch::Tensor x_tf = torch::tensor(torch::ArrayRef<Real>(x.data(), x.size())).to(at::kDouble);

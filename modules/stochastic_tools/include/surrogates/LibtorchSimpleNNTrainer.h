@@ -67,17 +67,17 @@ private:
   std::vector<Real> _flattened_response;
 
   /// Number of batches we want to prepare
-  unsigned int _no_batches;
+  unsigned int _num_batches;
 
   /// Number of epochs for the training
-  unsigned int _no_epocs;
+  unsigned int _num_epocs;
 
   /// Number of hidden layers in the neural net
-  unsigned int & _no_hidden_layers;
+  unsigned int & _num_hidden_layers;
 
   /// Number of neurons within the hidden layers (the length of this vector
-  /// should be the same as _no_hidden_layers)
-  std::vector<unsigned int> & _no_neurons_per_layer;
+  /// should be the same as _num_hidden_layers)
+  std::vector<unsigned int> & _num_neurons_per_layer;
 
   /// Name of the pytorch output file. This is used for loading and storing
   /// already existing data.
@@ -90,6 +90,9 @@ private:
 
   /// The learning rate for the optimization algorithm
   Real _learning_rate;
+
+  /// Print the training loss value every given epoch
+  unsigned int _print_epoch_loss;
 
 #ifdef TORCH_ENABLED
   /// Pointer to the neural net object (initialized as null)

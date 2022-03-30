@@ -15,15 +15,15 @@ namespace StochasticTools
 {
 
 LibtorchSimpleNeuralNet::LibtorchSimpleNeuralNet(std::string name,
-                                                 unsigned int no_inputs,
-                                                 unsigned int no_hidden_layers,
-                                                 std::vector<unsigned int> no_neurons_per_layer,
-                                                 unsigned int no_outputs)
+                                                 unsigned int num_inputs,
+                                                 unsigned int num_hidden_layers,
+                                                 std::vector<unsigned int> num_neurons_per_layer,
+                                                 unsigned int num_outputs)
   : _name(name),
-    _no_inputs(no_inputs),
-    _no_hidden_layers(no_hidden_layers),
-    _no_neurons_per_layer(no_neurons_per_layer),
-    _no_outputs(no_outputs)
+    _num_inputs(num_inputs),
+    _num_hidden_layers(num_hidden_layers),
+    _num_neurons_per_layer(num_neurons_per_layer),
+    _num_outputs(num_outputs)
 {
   constructNeuralNetwork();
 }
@@ -32,20 +32,20 @@ void
 LibtorchSimpleNeuralNet::constructNeuralNetwork()
 {
   // Adding hidden layers
-  unsigned int inp_neurons = _no_inputs;
-  for (unsigned int i = 0; i < _no_hidden_layers; ++i)
+  unsigned int inp_neurons = _num_inputs;
+  for (unsigned int i = 0; i < _num_hidden_layers; ++i)
   {
     std::unordered_map<std::string, unsigned int> parameters = {
-        {"inp_neurons", inp_neurons}, {"out_neurons", _no_neurons_per_layer[i]}};
+        {"inp_neurons", inp_neurons}, {"out_neurons", _num_neurons_per_layer[i]}};
     addLayer("HL" + std::to_string(i + 1), parameters);
 
     // Necessary to retain double precision (and error-free runs)
     _weights[i]->to(at::kDouble);
-    inp_neurons = _no_neurons_per_layer[i];
+    inp_neurons = _num_neurons_per_layer[i];
   }
   // Adding output layer
   std::unordered_map<std::string, unsigned int> parameters = {{"inp_neurons", inp_neurons},
-                                                              {"out_neurons", _no_outputs}};
+                                                              {"out_neurons", _num_outputs}};
   addLayer("OL", parameters);
   _weights.back()->to(at::kDouble);
 }

@@ -25,42 +25,45 @@ public:
 
   // Constructing using input parameters
   LibtorchSimpleNeuralNet(std::string name,
-                          unsigned int no_inputs,
-                          unsigned int no_hidden_layers,
-                          std::vector<unsigned int> no_neurons_per_layer,
-                          unsigned int no_outputs);
+                          unsigned int num_inputs,
+                          unsigned int num_hidden_layers,
+                          std::vector<unsigned int> num_neurons_per_layer,
+                          unsigned int num_outputs);
   // Virtual destructor
   virtual ~LibtorchSimpleNeuralNet() {}
 
   // Overriding the function from NeuralNetBase
-  virtual void addLayer(std::string layer_name,
-                        std::unordered_map<std::string, unsigned int> parameters) override;
+  virtual void addLayer(const std::string layer_name,
+                        const std::unordered_map<std::string, unsigned int> parameters) override;
 
   // Overriding the forward sustitution function
   torch::Tensor forward(torch::Tensor x);
 
-  std::string name() { return _name; }
+  const std::string & name() { return _name; }
 
-  unsigned int noInputs() { return _no_inputs; }
+  const unsigned int & numInputs() { return _num_inputs; }
 
-  unsigned int noHiddenLayers() { return _no_hidden_layers; }
+  const unsigned int & numHiddenLayers() { return _num_hidden_layers; }
 
-  std::vector<unsigned int> noNeuronsPerLayer() { return _no_neurons_per_layer; }
+  const std::vector<unsigned int> & numNeuronsPerLayer() { return _num_neurons_per_layer; }
 
-  unsigned int noOutputs() { return _no_outputs; }
+  const unsigned int & numOutputs() { return _num_outputs; }
 
   void setName(std::string name) { _name = name; }
 
-  void setNoInputs(unsigned int no_inputs) { _no_inputs = no_inputs; }
+  void setNumInputs(unsigned int num_inputs) { _num_inputs = num_inputs; }
 
-  void setNoHiddenLayers(unsigned int no_hidden_layers) { _no_hidden_layers = no_hidden_layers; }
-
-  void setNoNeuronsPerLayer(std::vector<unsigned int> no_neurons_per_layer)
+  void setNumHiddenLayers(unsigned int num_hidden_layers)
   {
-    _no_neurons_per_layer = no_neurons_per_layer;
+    _num_hidden_layers = num_hidden_layers;
   }
 
-  void setNoOutputs(unsigned int no_outputs) { _no_outputs = no_outputs; }
+  void setNumNeuronsPerLayer(std::vector<unsigned int> num_neurons_per_layer)
+  {
+    _num_neurons_per_layer = num_neurons_per_layer;
+  }
+
+  void setNumOutputs(unsigned int num_outputs) { _num_outputs = num_outputs; }
 
   void constructNeuralNetwork();
 
@@ -71,13 +74,13 @@ protected:
   // weights and biases (y = W * x + b)
   std::vector<torch::nn::Linear> _weights;
 
-  unsigned int _no_inputs;
+  unsigned int _num_inputs;
 
-  unsigned int _no_hidden_layers;
+  unsigned int _num_hidden_layers;
 
-  std::vector<unsigned int> _no_neurons_per_layer;
+  std::vector<unsigned int> _num_neurons_per_layer;
 
-  unsigned int _no_outputs;
+  unsigned int _num_outputs;
 };
 
 }

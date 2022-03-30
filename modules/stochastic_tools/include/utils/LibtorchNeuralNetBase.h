@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include "NeuralNetBase.h"
-
 #ifdef TORCH_ENABLED
 #include <torch/torch.h>
 #include "MooseError.h"
@@ -21,7 +19,7 @@ namespace StochasticTools
 // This base class is meant to gather the functions and members common in
 // every libtorch-based class. Note, it already inherits from the torch::nn::Module
 // so this will manage the layers (submodules) of the derived classes as well.
-class LibtorchNeuralNetBase : public NeuralNetBase, public torch::nn::Module
+class LibtorchNeuralNetBase : public torch::nn::Module
 {
 public:
   // Generic constructor
@@ -31,8 +29,8 @@ public:
   virtual ~LibtorchNeuralNetBase() {}
 
   // Overriding the function from NeuralNetBase
-  virtual void addLayer(std::string /*layer_name*/,
-                        std::unordered_map<std::string, unsigned int> /*parameters*/) override
+  virtual void addLayer(const std::string /*layer_name*/,
+                        const std::unordered_map<std::string, unsigned int> /*parameters*/)
   {
     ::mooseError("You are calling the addLayer function of an unfunctional base class!");
   }

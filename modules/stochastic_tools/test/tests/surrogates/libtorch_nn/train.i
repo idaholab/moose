@@ -25,13 +25,14 @@
     type = LibtorchSimpleNNTrainer
     sampler = sample
     response = values/g_values
-    no_epochs = 40
-    no_batches = 10
-    no_hidden_layers = 2
-    no_neurons_per_layer = '64 32'
+    num_epochs = 40
+    num_batches = 10
+    num_hidden_layers = 2
+    num_neurons_per_layer = '64 32'
     learning_rate = 0.001
     filename = mynet.pt
     read_from_file = false
+    print_epoch_loss = 10
   []
 []
 
