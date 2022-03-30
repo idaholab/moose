@@ -2,7 +2,7 @@ app_non_unity_dirs = %src/surrogates %src/utils
 
 # Looking for the installation (maybe it is in the default location)
 ifeq ($(TORCH_DIR),)
-  TORCH_DIR ?= $(APPLICATION_DIR)/libtorch
+  TORCH_DIR ?= $(MOOSE_DIR)/framework/contrib/libtorch
 endif
 
 ifneq ($(TORCH_DIR),)
