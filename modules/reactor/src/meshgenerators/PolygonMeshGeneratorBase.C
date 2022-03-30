@@ -68,10 +68,12 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
   // background region needs to be split into three parts
   const auto main_background_bias_terms =
       biasTermsCalculator(background_radial_bias, background_intervals);
-  const auto inner_background_bias_terms = biasTermsCalculator(
-      background_inner_boundary_layer_params.bias, background_inner_boundary_layer_params.intervals);
-  const auto outer_background_bias_terms = biasTermsCalculator(
-      background_outer_boundary_layer_params.bias, background_outer_boundary_layer_params.intervals);
+  const auto inner_background_bias_terms =
+      biasTermsCalculator(background_inner_boundary_layer_params.bias,
+                          background_inner_boundary_layer_params.intervals);
+  const auto outer_background_bias_terms =
+      biasTermsCalculator(background_outer_boundary_layer_params.bias,
+                          background_outer_boundary_layer_params.intervals);
   auto rings_bias_terms = biasTermsCalculator(ring_radial_biases,
                                               rings,
                                               ring_inner_boundary_layer_params.fractions,
@@ -108,7 +110,8 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
     total_ducts_layers.push_back(background_outer_boundary_layer_params.intervals);
     duct_bias_terms.insert(duct_bias_terms.begin(), outer_background_bias_terms);
     ducts_center_dist.insert(ducts_center_dist.begin(),
-                             ducts_center_dist.front() - background_outer_boundary_layer_params.width);
+                             ducts_center_dist.front() -
+                                 background_outer_boundary_layer_params.width);
     has_ducts = true;
   }
   for (unsigned int i = 0; i < ducts_layers.size(); i++)
@@ -242,7 +245,8 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
           background_inner_boundary_layer_params.intervals + background_intervals +
           background_outer_boundary_layer_params.intervals; // add the background region
     else
-      subdomain_rings.push_back(background_inner_boundary_layer_params.intervals + background_intervals +
+      subdomain_rings.push_back(background_inner_boundary_layer_params.intervals +
+                                background_intervals +
                                 background_outer_boundary_layer_params.intervals);
   }
   else
@@ -250,7 +254,7 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
     subdomain_rings.push_back(
         background_inner_boundary_layer_params.intervals + background_intervals +
         background_outer_boundary_layer_params.intervals); // add the background region
-    subdomain_rings[0] = subdomain_rings[0] - 1;    // remove the inner TRI mesh subdomain
+    subdomain_rings[0] = subdomain_rings[0] - 1;           // remove the inner TRI mesh subdomain
   }
 
   if (has_ducts)

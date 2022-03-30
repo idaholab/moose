@@ -397,7 +397,7 @@ PeripheralRingMeshGenerator::generate()
                 .norm()))
       paramError("peripheral_inner_boundary_layer_width",
                  "The summation of peripheral_inner_boundary_layer_width and "
-                 "peripheral_outer_boundary_layer_width must be smaller the thickness of "
+                 "peripheral_outer_boundary_layer_width must be smaller than the thickness of "
                  "peripheral ring region.");
     for (unsigned int j = 1; j < _peripheral_layer_num; ++j)
       points_array[j + _peripheral_inner_boundary_layer_intervals][i] =

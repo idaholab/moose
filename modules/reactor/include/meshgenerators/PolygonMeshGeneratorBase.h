@@ -289,7 +289,7 @@ protected:
 
   /**
    * Makes radial correction to preserve ring area.
-   * @param azimuthal_list azimuthal angles of all the nodes on the circle
+   * @param azimuthal_list azimuthal angles (in degrees) of all the nodes on the circle
    * @return a correction factor to preserve the area of the circle after polygonization during
    * meshing
    */

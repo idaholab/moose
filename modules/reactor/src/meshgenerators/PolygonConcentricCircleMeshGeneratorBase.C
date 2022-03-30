@@ -27,7 +27,7 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       1,
       "background_intervals>0",
       "Number of radial meshing intervals in background region excluding boundary layers (area "
-      "between rings and ducts).");
+      "between rings and ducts) excluding boundary layers.");
   params.addRangeCheckedParam<Real>(
       "background_radial_bias",
       1.0,
@@ -437,8 +437,8 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
               _ring_outer_boundary_layer_params.fractions[i] >=
           1.0)
         paramError("ring_inner_boundary_layer_widths",
-                   "Summation of ring_inner_boundary_layer_fractions and "
-                   "ring_outer_boundary_layer_fractions cannot exceeds the ring layer width.");
+                   "Summation of ring_inner_boundary_layer_widths and "
+                   "ring_outer_boundary_layer_widths cannot exceeds the ring layer width.");
     }
   }
   if (_has_ducts)
@@ -521,8 +521,8 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
               _duct_outer_boundary_layer_params.fractions[i] >=
           1.0)
         paramError("duct_inner_boundary_layer_widths",
-                   "Summation of duct_inner_boundary_layer_fractions and "
-                   "duct_outer_boundary_layer_fractions cannot exceeds the duct layer width.");
+                   "Summation of duct_inner_boundary_layer_widths and "
+                   "duct_outer_boundary_layer_widths cannot exceeds the duct layer width.");
     }
   }
   if (MooseUtils::absoluteFuzzyGreaterThan(_background_inner_boundary_layer_params.width +

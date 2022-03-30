@@ -52,8 +52,8 @@
     cli_args = 'Mesh/pr/peripheral_inner_boundary_layer_width=3
                 Mesh/pr/peripheral_outer_boundary_layer_width=3
                 --mesh-only'
-    expect_err = 'must be smaller the thickness of'
-    requirement ='The system shall throw an error if the speficied inner and outer boundary layers are overlapped.'
+    expect_err = 'must be smaller than the thickness of'
+    requirement ='The system shall throw an error if the specified inner and outer boundary layers are overlapped.'
     mesh_mode = 'REPLICATED'
   []
   [err_non_2d_mesh]
