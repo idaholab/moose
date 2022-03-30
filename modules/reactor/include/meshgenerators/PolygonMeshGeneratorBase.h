@@ -86,7 +86,7 @@ protected:
    * Creates a mesh of a slice that corresponds to a single side of the polygon to be generated.
    * @param mesh input mesh to build the slice mesh onto
    * @param ring_radii radii of the ring regions
-   * @param rings numbers of radial intervals of the ring regions
+   * @param ring_layers numbers of radial intervals of the ring regions
    * @param ring_radial_biases values used for radial meshing biasing in ring regions
    * @param ring_inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
    * factors of the inner boundary layer of the ring regions
@@ -120,7 +120,7 @@ protected:
    */
   std::unique_ptr<ReplicatedMesh>
   buildSimpleSlice(const std::vector<Real> ring_radii,
-                   const std::vector<unsigned int> rings,
+                   const std::vector<unsigned int> ring_layers,
                    const std::vector<Real> ring_radial_biases,
                    const multiBdryLayerParams & ring_inner_boundary_layer_params,
                    const multiBdryLayerParams & ring_outer_boundary_layer_params,
@@ -164,7 +164,7 @@ protected:
    * Creates nodes for the ring-geometry region of a single slice.
    * @param mesh input mesh to add the nodes onto
    * @param ring_radii radii of the ring regions
-   * @param rings numbers of radial intervals of the ring regions
+   * @param ring_layers numbers of radial intervals of the ring regions
    * @param biased_terms normalized spacing values used for radial meshing biasing in ring regions
    * @param num_sectors_per_side number of azimuthal intervals
    * @param corner_p[2][2] array contains the coordinates of the corner positions
@@ -174,7 +174,7 @@ protected:
    */
   void ringNodes(ReplicatedMesh & mesh,
                  const std::vector<Real> ring_radii,
-                 const std::vector<unsigned int> rings,
+                 const std::vector<unsigned int> ring_layers,
                  const std::vector<std::vector<Real>> biased_terms,
                  const unsigned int num_sectors_per_side,
                  const Real corner_p[2][2],

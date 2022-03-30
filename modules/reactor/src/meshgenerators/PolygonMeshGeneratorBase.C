@@ -37,7 +37,7 @@ PolygonMeshGeneratorBase::generate()
 std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::buildSimpleSlice(
     std::vector<Real> ring_radii,
-    const std::vector<unsigned int> rings,
+    const std::vector<unsigned int> ring_layers,
     const std::vector<Real> ring_radial_biases,
     const multiBdryLayerParams & ring_inner_boundary_layer_params,
     const multiBdryLayerParams & ring_outer_boundary_layer_params,
@@ -75,7 +75,7 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
       biasTermsCalculator(background_outer_boundary_layer_params.bias,
                           background_outer_boundary_layer_params.intervals);
   auto rings_bias_terms = biasTermsCalculator(ring_radial_biases,
-                                              rings,
+                                              ring_layers,
                                               ring_inner_boundary_layer_params.fractions,
                                               ring_inner_boundary_layer_params.intervals,
                                               ring_inner_boundary_layer_params.biases,
@@ -91,14 +91,14 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
                                              duct_outer_boundary_layer_params.intervals,
                                              duct_outer_boundary_layer_params.biases);
 
-  std::vector<unsigned int> total_rings;
-  for (unsigned int i = 0; i < rings.size(); i++)
-    total_rings.push_back(rings[i] + ring_inner_boundary_layer_params.intervals[i] +
-                          ring_outer_boundary_layer_params.intervals[i]);
+  std::vector<unsigned int> total_ring_layers;
+  for (unsigned int i = 0; i < ring_layers.size(); i++)
+    total_ring_layers.push_back(ring_layers[i] + ring_inner_boundary_layer_params.intervals[i] +
+                                ring_outer_boundary_layer_params.intervals[i]);
 
   if (background_inner_boundary_layer_params.intervals)
   {
-    total_rings.push_back(background_inner_boundary_layer_params.intervals);
+    total_ring_layers.push_back(background_inner_boundary_layer_params.intervals);
     rings_bias_terms.push_back(inner_background_bias_terms);
     ring_radii.push_back(ring_radii.back() + background_inner_boundary_layer_params.width);
     has_rings = true;
@@ -151,7 +151,7 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
   if (has_rings)
     ringNodes(*mesh,
               ring_radii,
-              total_rings,
+              total_ring_layers,
               rings_bias_terms,
               num_sectors_per_side,
               corner_p,
@@ -238,7 +238,7 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
 
   if (has_rings) //  define the rings in each subdomain
   {
-    subdomain_rings = total_rings;
+    subdomain_rings = total_ring_layers;
     subdomain_rings.front() = subdomain_rings.front() - 1; // remove the inner TRI mesh subdomain
     if (background_inner_boundary_layer_params.intervals)
       subdomain_rings.back() =
@@ -356,7 +356,7 @@ PolygonMeshGeneratorBase::centerNodes(ReplicatedMesh & mesh,
 void
 PolygonMeshGeneratorBase::ringNodes(ReplicatedMesh & mesh,
                                     const std::vector<Real> ring_radii,
-                                    const std::vector<unsigned int> rings,
+                                    const std::vector<unsigned int> ring_layers,
                                     const std::vector<std::vector<Real>> biased_terms,
                                     const unsigned int num_sectors_per_side,
                                     const Real corner_p[2][2],
@@ -367,20 +367,22 @@ PolygonMeshGeneratorBase::ringNodes(ReplicatedMesh & mesh,
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
 
   // Add nodes in pins regions
-  for (unsigned int l = 0; l < rings.size(); l++)
+  for (unsigned int l = 0; l < ring_layers.size(); l++)
   {
     // the pin radius interval for each ring_radii/subdomain
     const Real pin_radius_interval_length =
-        l == 0 ? ring_radii[l] / rings[l] : (ring_radii[l] - ring_radii[l - 1]) / rings[l];
+        l == 0 ? ring_radii[l] / ring_layers[l]
+               : (ring_radii[l] - ring_radii[l - 1]) / ring_layers[l];
 
     // add rings in each pin subdomain
-    for (unsigned int k = 0; k < rings[l]; k++)
+    for (unsigned int k = 0; k < ring_layers[l]; k++)
     {
       const Real bin_radial_distance =
-          l == 0 ? (biased_terms[l][k] * rings[l] *
+          l == 0 ? (biased_terms[l][k] * ring_layers[l] *
                     pin_radius_interval_length) // this is from the cell/pin center to
                                                 // the first circle
-                 : (ring_radii[l - 1] + biased_terms[l][k] * rings[l] * pin_radius_interval_length);
+                 : (ring_radii[l - 1] +
+                    biased_terms[l][k] * ring_layers[l] * pin_radius_interval_length);
       const Real pin_corner_p_x = corner_p[0][0] * bin_radial_distance / (0.5 * corner_to_corner);
       const Real pin_corner_p_y = corner_p[0][1] * bin_radial_distance / (0.5 * corner_to_corner);
 
