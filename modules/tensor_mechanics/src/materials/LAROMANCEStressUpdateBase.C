@@ -218,36 +218,33 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
     _number_of_substeps(
         this->template declareProperty<Real>(this->_base_name + "number_of_substeps"))
 {
-  this->_check_range = true; // todo, this may not be necessary?
+  this->_check_range = true; // this may not be necessary?
 
-  for (unsigned int i = 0; i < _window_failure.size(); ++i)
-    _window_failure[i].resize(2);
-
-  _window_failure[_cell_input_index][0] =
+  _window_failure[_cell_input_index].first =
       parameters.get<MooseEnum>("cell_input_window_low_failure").getEnum<WindowFailure>();
-  _window_failure[_cell_input_index][1] =
+  _window_failure[_cell_input_index].second =
       parameters.get<MooseEnum>("cell_input_window_high_failure").getEnum<WindowFailure>();
-  _window_failure[_wall_input_index][0] =
+  _window_failure[_wall_input_index].first =
       parameters.get<MooseEnum>("wall_input_window_low_failure").getEnum<WindowFailure>();
-  _window_failure[_wall_input_index][1] =
+  _window_failure[_wall_input_index].second =
       parameters.get<MooseEnum>("wall_input_window_high_failure").getEnum<WindowFailure>();
-  _window_failure[_stress_input_index][0] =
+  _window_failure[_stress_input_index].first =
       parameters.get<MooseEnum>("stress_input_window_low_failure").getEnum<WindowFailure>();
-  _window_failure[_stress_input_index][1] =
+  _window_failure[_stress_input_index].second =
       parameters.get<MooseEnum>("stress_input_window_high_failure").getEnum<WindowFailure>();
-  _window_failure[_old_strain_input_index][0] =
+  _window_failure[_old_strain_input_index].first =
       parameters.get<MooseEnum>("old_strain_input_window_low_failure").getEnum<WindowFailure>();
-  _window_failure[_old_strain_input_index][1] =
+  _window_failure[_old_strain_input_index].second =
       parameters.get<MooseEnum>("old_strain_input_window_high_failure").getEnum<WindowFailure>();
-  _window_failure[_temperature_input_index][0] =
+  _window_failure[_temperature_input_index].first =
       parameters.get<MooseEnum>("temperature_input_window_low_failure").getEnum<WindowFailure>();
-  _window_failure[_temperature_input_index][1] =
+  _window_failure[_temperature_input_index].second =
       parameters.get<MooseEnum>("temperature_input_window_high_failure").getEnum<WindowFailure>();
   if (_environmental)
   {
-    _window_failure[_environmental_input_index][0] =
+    _window_failure[_environmental_input_index].first =
         parameters.get<MooseEnum>("environment_input_window_low_failure").getEnum<WindowFailure>();
-    _window_failure[_environmental_input_index][1] =
+    _window_failure[_environmental_input_index].second =
         parameters.get<MooseEnum>("environment_input_window_high_failure").getEnum<WindowFailure>();
   }
 
@@ -328,12 +325,12 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::initialSetup()
   _dpartition_weight_dstress.resize(_num_partitions);
   _transformed_normalization_limits.resize(_num_partitions);
   _makeframe_helper.resize(_num_partitions);
-  _global_limits.resize(_num_inputs, std::vector<Real>(2));
+  _global_limits.resize(_num_inputs);
   // temporarily fill global limits with extreme numerical values, to later update
   for (unsigned int i = 0; i < _num_inputs; ++i)
   {
-    _global_limits[i][0] = std::numeric_limits<Real>::max();
-    _global_limits[i][1] = 0.0;
+    _global_limits[i].first = std::numeric_limits<Real>::max();
+    _global_limits[i].second = 0.0;
   }
 
   // start loop over partitions to perform sanity checks, set global limits,
@@ -398,8 +395,8 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::initialSetup()
       {
         if (_input_limits[p][t][i][0] >= _input_limits[p][t][i][1])
           mooseError("In ", _name, ": Input limits are ordered incorrectly");
-        _global_limits[i][0] = std::min(_global_limits[i][0], _input_limits[p][t][i][0]);
-        _global_limits[i][1] = std::max(_global_limits[i][1], _input_limits[p][t][i][1]);
+        _global_limits[i].first = std::min(_global_limits[i].first, _input_limits[p][t][i][0]);
+        _global_limits[i].second = std::max(_global_limits[i].second, _input_limits[p][t][i][1]);
       }
     }
 
@@ -433,19 +430,20 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::initialSetup()
     Moose::err << " number of coefficients, partition 1: " << _num_coefs[0] << "\n";
     if (_num_partitions > 1)
       Moose::err << " number of coefficients, partition 2: " << _num_coefs[1] << "\n";
-    Moose::err << " Global limits:\n  cell dislocations (" << _global_limits[_cell_input_index][0]
-               << " - " << _global_limits[_cell_input_index][1] << ")\n";
-    Moose::err << "  wall dislocations (" << _global_limits[_wall_input_index][0] << " - "
-               << _global_limits[_wall_input_index][1] << ")\n";
-    Moose::err << "  Stress (" << _global_limits[_stress_input_index][0] << " - "
-               << _global_limits[_stress_input_index][1] << ")\n";
-    Moose::err << "  Old strain (" << _global_limits[_old_strain_input_index][0] << " - "
-               << _global_limits[_old_strain_input_index][1] << ")\n";
-    Moose::err << "  Temperature (" << _global_limits[_temperature_input_index][0] << " - "
-               << _global_limits[_temperature_input_index][1] << ")\n";
+    Moose::err << " Global limits:\n  cell dislocations ("
+               << _global_limits[_cell_input_index].first << " - "
+               << _global_limits[_cell_input_index].second << ")\n";
+    Moose::err << "  wall dislocations (" << _global_limits[_wall_input_index].first << " - "
+               << _global_limits[_wall_input_index].second << ")\n";
+    Moose::err << "  Stress (" << _global_limits[_stress_input_index].first << " - "
+               << _global_limits[_stress_input_index].second << ")\n";
+    Moose::err << "  Old strain (" << _global_limits[_old_strain_input_index].first << " - "
+               << _global_limits[_old_strain_input_index].second << ")\n";
+    Moose::err << "  Temperature (" << _global_limits[_temperature_input_index].first << " - "
+               << _global_limits[_temperature_input_index].second << ")\n";
     if (_environmental)
-      Moose::err << "  Environmental factor (" << _global_limits[_environmental_input_index][0]
-                 << " - " << _global_limits[_environmental_input_index][1] << ")\n";
+      Moose::err << "  Environmental factor (" << _global_limits[_environmental_input_index].first
+                 << " - " << _global_limits[_environmental_input_index].second << ")\n";
     Moose::err << std::endl;
   }
 }
@@ -626,9 +624,9 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
       else if (input < _input_limits[p][t][in_index][0])
       {
         // If the lower tile limit equals the lower global limit
-        if (_input_limits[p][t][in_index][0] == _global_limits[in_index][0])
+        if (_input_limits[p][t][in_index][0] == _global_limits[in_index].first)
         {
-          if (_window_failure[in_index][0] == WindowFailure::EXTRAPOLATE)
+          if (_window_failure[in_index].first == WindowFailure::EXTRAPOLATE)
           {
             if (derivative)
               weights[p][t] *= -sigmoid(0.0, _input_limits[p][t][in_index][0], input, derivative);
@@ -636,10 +634,11 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
               weights[p][t] *= (1.0 - sigmoid(0.0, _input_limits[p][t][in_index][0], input));
             input = _input_limits[p][t][in_index][0];
           }
-          else if (_window_failure[in_index][0] == WindowFailure::USELIMIT)
+          else if (_window_failure[in_index].first == WindowFailure::USELIMIT)
             input = _input_limits[p][t][in_index][0];
           else
           {
+            // Set input to edge of limit so it is found later in computePartitionWeights
             input = _input_limits[p][t][in_index][0];
             weights[p][t] = 0.0;
             std::stringstream msg;
@@ -647,13 +646,13 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
                 << MetaPhysicL::raw_value(input) << ") is out of lower global range ("
                 << _input_limits[p][t][in_index][0] << ")";
 
-            if (_window_failure[in_index][0] == WindowFailure::WARN)
+            if (_window_failure[in_index].first == WindowFailure::WARN)
               mooseWarning(msg.str());
-            else if (_window_failure[in_index][0] == WindowFailure::ERROR)
+            else if (_window_failure[in_index].first == WindowFailure::ERROR)
               mooseError(msg.str());
-            else if (_window_failure[in_index][0] == WindowFailure::EXCEPTION)
+            else if (_window_failure[in_index].first == WindowFailure::EXCEPTION)
               mooseException(msg.str());
-            // else if (_window_failure[in_index][0] == WindowFailure::DONOTHING) <- nothing is done
+            // if (_window_failure[in_index].first == WindowFailure::DONOTHING) <- nothing is done
           }
         }
         // if input below tile limit, update weight of tile to be zero
@@ -663,14 +662,15 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
       // If input is above the upper tile limit
       else if (input > _input_limits[p][t][in_index][1])
       {
-        if (_input_limits[p][t][in_index][1] == _global_limits[in_index][1])
+        if (_input_limits[p][t][in_index][1] == _global_limits[in_index].second)
         {
-          if (_window_failure[in_index][1] == WindowFailure::EXTRAPOLATE)
+          if (_window_failure[in_index].second == WindowFailure::EXTRAPOLATE)
             mooseError("Internal error. Extrapolate not appropriate for upper bound");
-          else if (_window_failure[in_index][1] == WindowFailure::USELIMIT)
+          else if (_window_failure[in_index].second == WindowFailure::USELIMIT)
             input = _input_limits[p][t][in_index][1];
           else
           {
+            // Set input to edge of limit so it is found later in computePartitionWeights
             input = _input_limits[p][t][in_index][0];
             weights[p][t] = 0.0;
             std::stringstream msg;
@@ -678,13 +678,13 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
                 << MetaPhysicL::raw_value(input) << ") is out of upper global range ("
                 << _input_limits[p][t][in_index][1] << ")";
 
-            if (_window_failure[in_index][0] == WindowFailure::WARN)
+            if (_window_failure[in_index].first == WindowFailure::WARN)
               mooseWarning(msg.str());
-            else if (_window_failure[in_index][0] == WindowFailure::ERROR)
+            else if (_window_failure[in_index].first == WindowFailure::ERROR)
               mooseError(msg.str());
-            else if (_window_failure[in_index][0] == WindowFailure::EXCEPTION)
+            else if (_window_failure[in_index].first == WindowFailure::EXCEPTION)
               mooseException(msg.str());
-            // else if (_window_failure[in_index][1] == WindowFailure::DONOTHING) <- nothing is done
+            // if (_window_failure[in_index].second == WindowFailure::DONOTHING) <- nothing is done
           }
         }
         // if input above tile limit, update weight of tile to be zero
@@ -702,11 +702,11 @@ template <bool is_ad>
 bool
 LAROMANCEStressUpdateBaseTempl<is_ad>::checkInTile(const unsigned int p, const unsigned int t) const
 {
-  bool check = true;
   for (unsigned int i = 0; i < _num_inputs; ++i)
-    check *= (_input_values[i] >= _input_limits[p][t][i][0] &&
-              _input_values[i] <= _input_limits[p][t][i][1]);
-  return check;
+    if (_input_values[i] < _input_limits[p][t][i][0] ||
+        _input_values[i] > _input_limits[p][t][i][1])
+      return false;
+  return true;
 }
 
 template <bool is_ad>
@@ -716,10 +716,11 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::areTilesNotIdentical(const unsigned int p
                                                             const unsigned int tt,
                                                             const unsigned int in_index)
 {
-  bool check = true;
-  check *= (_input_limits[p][t][in_index][0] != _input_limits[p][tt][in_index][0] ||
-            _input_limits[p][t][in_index][1] != _input_limits[p][tt][in_index][1]);
-  return check;
+  if (_input_limits[p][t][in_index][0] != _input_limits[p][tt][in_index][0] &&
+      _input_limits[p][t][in_index][1] != _input_limits[p][tt][in_index][1])
+    return true;
+  else
+    return false;
 }
 
 template <bool is_ad>

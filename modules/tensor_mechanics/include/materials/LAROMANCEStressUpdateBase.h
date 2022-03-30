@@ -436,7 +436,7 @@ protected:
    * Vector of vectors WindowFailure enum that informs how to handle input that is outside of the
    * limits. Shape is number of inputs by 2 (lower and upper window enum)
    */
-  std::vector<std::vector<WindowFailure>> _window_failure;
+  std::vector<std::pair<WindowFailure, WindowFailure>> _window_failure;
 
   /// Flag to output verbose infromation
   const bool _verbose;
@@ -576,7 +576,7 @@ protected:
   std::vector<std::vector<std::vector<GenericReal<is_ad>>>> _precomputed_vals;
 
   /// Container for global limits
-  std::vector<std::vector<Real>> _global_limits;
+  std::vector<std::pair<Real, Real>> _global_limits;
 
   /// Container for weights for each tile as computed for all input values beside stress
   std::vector<std::vector<GenericReal<is_ad>>> _non_stress_weights;
