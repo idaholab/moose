@@ -1739,7 +1739,10 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             // on the interface start off being perfectly aligned. In this situation, we need to
             // associate the secondary node with two different elements (and two corresponding
             // xi^(2) values.
-            if (std::abs(std::abs(xi2) - 1.) < _xi_tolerance)
+
+            // Increasing the tolerance 5 times in this if statement to avoid missing nodes due to the
+            // mismatch between sizes of primary and secondary surfaces. Still, it can happen.
+            if (std::abs(std::abs(xi2) - 1.) < _xi_tolerance * 5.0)
             {
               const Node * primary_node = (xi2 < 0) ? primary_elem_candidate->node_ptr(0)
                                                     : primary_elem_candidate->node_ptr(1);
@@ -1809,6 +1812,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
                     // Also map in the other direction.
                     Real xi1 =
                         (secondary_node == secondary_node_neighbors[snn]->node_ptr(0)) ? -1 : +1;
+
                     auto primary_key = std::make_tuple(
                         primary_node->id(), primary_node, primary_node_neighbors[mnn]);
                     auto secondary_val = std::make_pair(xi1, secondary_node_neighbors[snn]);
@@ -2033,8 +2037,13 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
               // Special case: xi1=+/-1.
               // We shouldn't get here, because this primary node should already
               // have been mapped during the project_secondary_nodes() routine.
-              throw MooseException("We should never get here, aligned primary nodes should already "
-                                   "have been mapped.");
+              // I think there is a chance we get here since the tolerances are applied to
+              // the xi coordinate and that value may be different on a primary element and a
+              // secondary element since they may have different sizes.
+
+              throw MooseException("Nodes on primary and secondary surfaces are aligned. This is "
+                                   "causing trouble when identifying projections from secondary "
+                                   "nodes when performing primary node projections.");
             }
             else // somewhere in the middle of the Elem
             {
