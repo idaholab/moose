@@ -355,8 +355,8 @@ PeripheralRingMeshGenerator::generate()
       interp_y_data.push_back(interp_y0);
     }
     // Establish interpolation
-    linterp_x = libmesh_make_unique<LinearInterpolation>(interp_azi_data, interp_x_data);
-    linterp_y = libmesh_make_unique<LinearInterpolation>(interp_azi_data, interp_y_data);
+    linterp_x = std::make_unique<LinearInterpolation>(interp_azi_data, interp_x_data);
+    linterp_y = std::make_unique<LinearInterpolation>(interp_azi_data, interp_y_data);
     //  Loop to handle inner boundary layer
     for (unsigned int i = 0; i < input_ext_node_num; ++i)
     {
