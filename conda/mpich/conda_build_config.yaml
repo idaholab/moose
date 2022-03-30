@@ -11,7 +11,7 @@ vtk_version:
   - 9.1.0
 
 moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.1.0 build_5
+  - moose-libmesh-vtk 9.1.0 build_6
 
 moose_petsc:
   - moose-petsc 3.16.5 build_1
