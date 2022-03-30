@@ -155,9 +155,6 @@ PeripheralRingMeshGenerator::generate()
 
   // Use CoM of the input mesh as its origin for azimuthal calculation
   const Point origin_pt = MooseMeshUtils::meshCentroidCalculator(*input_mesh);
-  const Real origin_x = origin_pt(0);
-  const Real origin_y = origin_pt(1);
-  const Real origin_z = origin_pt(2);
   // Vessel for containing maximum radius of the boundary nodes
   Real max_input_mesh_node_radius;
   unsigned short invalid_boundary_type;
@@ -219,10 +216,11 @@ PeripheralRingMeshGenerator::generate()
       input_ext_node_num++;
       // Define nodes on the inner and outer boundaries of the peripheral region.
       input_ext_bd_pts.push_back(input_mesh->point(std::get<0>(node_list[i])));
-      tmp_azi = atan2(input_ext_bd_pts.back()(1) - origin_y, input_ext_bd_pts.back()(0) - origin_x);
+      tmp_azi = atan2(input_ext_bd_pts.back()(1) - origin_pt(1),
+                      input_ext_bd_pts.back()(0) - origin_pt(0));
       output_ext_bd_pts.push_back(Point(_peripheral_ring_radius * std::cos(tmp_azi),
                                         _peripheral_ring_radius * std::sin(tmp_azi),
-                                        origin_z));
+                                        origin_pt(2)));
       // a vector of tuples using azimuthal angle as the key to facilitate sorting
       azi_points.push_back(
           std::make_tuple(tmp_azi, input_ext_bd_pts.back(), output_ext_bd_pts.back()));
@@ -232,7 +230,7 @@ PeripheralRingMeshGenerator::generate()
   std::sort(azi_points.begin(), azi_points.end());
   std::sort(azi_array.begin(), azi_array.end());
 
-  // Angles of input boundary nodes
+  // Angles defined by three neighboring nodes on input mesh's external boundary
   std::vector<Real> input_bdry_angles;
   // Normal directions of input boundary nodes
   std::vector<Point> input_bdry_nd;
@@ -271,7 +269,7 @@ PeripheralRingMeshGenerator::generate()
   // 2D vector containing all the node ids of the peripheral region
   std::vector<std::vector<dof_id_type>> node_id_array(total_peripheral_layer_num + 1,
                                                       std::vector<dof_id_type>(input_ext_node_num));
-  // Reference outer layer of inner boundary layer
+  // Reference outmost layer of inner boundary layer
   std::vector<Point> ref_inner_bdry_surf;
   // Azimuthal angles of the surface points of the reference inner boundary layer
   std::vector<Real> ref_inner_bdry_azi;
@@ -287,91 +285,20 @@ PeripheralRingMeshGenerator::generate()
       const Point ref_inner_boundary_shift =
           (_peripheral_inner_boundary_layer_width / sin(input_bdry_angles[i])) * input_bdry_nd[i];
       ref_inner_bdry_surf.push_back(points_array[0][i] + ref_inner_boundary_shift);
-      ref_inner_bdry_azi.push_back(atan2(ref_inner_bdry_surf.back()(1) - origin_y,
-                                         ref_inner_bdry_surf.back()(0) - origin_x));
+      ref_inner_bdry_azi.push_back(atan2(ref_inner_bdry_surf.back()(1) - origin_pt(1),
+                                         ref_inner_bdry_surf.back()(0) - origin_pt(0)));
     }
   }
-  // Check if any azimuthal angles are messed after inner boundary layer addition
-  std::vector<bool> delete_mark(input_ext_node_num, false);
-  std::vector<Real> interp_azi_data, interp_x_data, interp_y_data;
-  std::unique_ptr<LinearInterpolation> linterp_x, linterp_y;
+
   if (_peripheral_inner_boundary_layer_intervals)
-  {
-    // Mark the to-be-deleted elements
-    for (unsigned int i = 0; i < input_ext_node_num; ++i)
-    {
-      // For a zig-zag external boundary, when we add a conformal layer onto it by translating the
-      // nodes in the surface normal direction, it is possible that the azimuthal order is flipped.
-      // As shown below, o's are the original boundary nodes, and *'s are the nodes after
-      // translation by the boundary layer thickness.
-      //                         *  *
-      // |               |       | /
-      // o               o-------/--*
-      // |               |     / |
-      // | outside  -->  |   /   |
-      // |               | /     |
-      // o--------o--    o--------o--
-      // To mitigate this flipping issue, we check the node flipping here using the cross product of
-      // neighboring node-to-origin vectors. Flipped nodes are marked and excluded during the
-      // follow-up interpolation.
-      if (!MooseUtils::absoluteFuzzyEqual(input_bdry_angles[i], M_PI / 2.0))
-      {
-        if (((ref_inner_bdry_surf[(i - 1) % input_ext_node_num] - origin_pt)
-                 .cross(ref_inner_bdry_surf[i] - origin_pt))(2) <= 0.0)
-          delete_mark[(i - 1) % input_ext_node_num] = true;
-        if (((ref_inner_bdry_surf[(i + 1) % input_ext_node_num] - origin_pt)
-                 .cross(ref_inner_bdry_surf[i] - origin_pt))(2) >= 0.0)
-          delete_mark[(i + 1) % input_ext_node_num] = true;
-      }
-    }
-    // Create vectors for interpolation
-    // Due to the flip issue, linear interpolation is used here to mark the location of the boundary
-    // layer's outer boundary.
-    for (unsigned int i = 0; i < input_ext_node_num; ++i)
-    {
-      if (!delete_mark[i])
-      {
-        interp_azi_data.push_back(ref_inner_bdry_azi[i]);
-        interp_x_data.push_back(ref_inner_bdry_surf[i](0));
-        interp_y_data.push_back(ref_inner_bdry_surf[i](1));
-        if (interp_azi_data.size() > 1)
-          if (interp_azi_data.back() < interp_azi_data[interp_azi_data.size() - 2])
-            interp_azi_data.back() += 2 * M_PI;
-      }
-    }
-    const Real interp_x0 = interp_x_data.front();
-    const Real interp_xt = interp_x_data.back();
-    const Real interp_y0 = interp_y_data.front();
-    const Real interp_yt = interp_y_data.back();
-    if (interp_azi_data.front() > -M_PI)
-    {
-      interp_azi_data.insert(interp_azi_data.begin(), -M_PI);
-      interp_x_data.insert(interp_x_data.begin(), interp_xt);
-      interp_y_data.insert(interp_y_data.begin(), interp_yt);
-    }
-    if (interp_azi_data.back() < M_PI)
-    {
-      interp_azi_data.push_back(M_PI);
-      interp_x_data.push_back(interp_x0);
-      interp_y_data.push_back(interp_y0);
-    }
-    // Establish interpolation
-    linterp_x = std::make_unique<LinearInterpolation>(interp_azi_data, interp_x_data);
-    linterp_y = std::make_unique<LinearInterpolation>(interp_azi_data, interp_y_data);
-    //  Loop to handle inner boundary layer
-    for (unsigned int i = 0; i < input_ext_node_num; ++i)
-    {
-      // Outside point of the inner boundary layer
-      // Using interpolation, the azimuthal angles do not need to be changed.
-      const Point inner_boundary_shift = Point(linterp_x->sample(azi_array[i] / 180.0 * M_PI),
-                                               linterp_y->sample(azi_array[i] / 180.0 * M_PI),
-                                               origin_z) -
-                                         points_array[0][i];
-      for (unsigned int j = 1; j < _peripheral_inner_boundary_layer_intervals + 1; j++)
-        points_array[j][i] =
-            points_array[0][i] + inner_boundary_shift * inner_peripheral_bias_terms[j - 1];
-    }
-  }
+    innerBdryLayerNodesDefiner(input_ext_node_num,
+                               input_bdry_angles,
+                               ref_inner_bdry_surf,
+                               ref_inner_bdry_azi,
+                               inner_peripheral_bias_terms,
+                               azi_array,
+                               origin_pt,
+                               points_array);
   const Real correction_factor = _preserve_volumes ? radiusCorrectionFactor(azi_array) : 1.0;
   // Loop to handle outer boundary layer and main region
   for (unsigned int i = 0; i < input_ext_node_num; ++i)
@@ -379,7 +306,7 @@ PeripheralRingMeshGenerator::generate()
     // Outer boundary nodes of the peripheral region
     points_array[total_peripheral_layer_num][i] = std::get<2>(azi_points[i]) * correction_factor;
     // Outer boundary layer points
-    if (_peripheral_inner_boundary_layer_intervals)
+    if (_peripheral_outer_boundary_layer_intervals)
     {
       // Inner point of the outer boundary layer
       const Point outer_boundary_shift =
@@ -607,4 +534,95 @@ PeripheralRingMeshGenerator::isExternalBoundary(ReplicatedMesh & mesh,
         return false;
   }
   return true;
+}
+
+void
+PeripheralRingMeshGenerator::innerBdryLayerNodesDefiner(
+    const unsigned int input_ext_node_num,
+    const std::vector<Real> input_bdry_angles,
+    const std::vector<Point> ref_inner_bdry_surf,
+    const std::vector<Real> ref_inner_bdry_azi,
+    const std::vector<Real> inner_peripheral_bias_terms,
+    const std::vector<Real> azi_array,
+    const Point origin_pt,
+    std::vector<std::vector<Point>> & points_array) const
+{
+  // Check if any azimuthal angles are messed after inner boundary layer addition
+  std::vector<bool> delete_mark(input_ext_node_num, false);
+  std::vector<Real> interp_azi_data, interp_x_data, interp_y_data;
+  std::unique_ptr<LinearInterpolation> linterp_x, linterp_y;
+  // Mark the to-be-deleted elements
+  for (unsigned int i = 0; i < input_ext_node_num; ++i)
+  {
+    // For a zig-zag external boundary, when we add a conformal layer onto it by translating the
+    // nodes in the surface normal direction, it is possible that the azimuthal order is flipped.
+    // As shown below, o's are the original boundary nodes, and *'s are the nodes after
+    // translation by the boundary layer thickness.
+    //                         *  *
+    // |               |       | /
+    // o               o-------/--*
+    // |               |     / |
+    // | outside  -->  |   /   |
+    // |               | /     |
+    // o--------o--    o-------o--
+    // To mitigate this flipping issue, we check the node flipping here using the cross product of
+    // neighboring node-to-origin vectors. Flipped nodes are marked and excluded during the
+    // follow-up interpolation.
+    if (!MooseUtils::absoluteFuzzyEqual(input_bdry_angles[i], M_PI / 2.0))
+    {
+      if (((ref_inner_bdry_surf[(i - 1) % input_ext_node_num] - origin_pt)
+               .cross(ref_inner_bdry_surf[i] - origin_pt))(2) <= 0.0)
+        delete_mark[(i - 1) % input_ext_node_num] = true;
+      if (((ref_inner_bdry_surf[(i + 1) % input_ext_node_num] - origin_pt)
+               .cross(ref_inner_bdry_surf[i] - origin_pt))(2) >= 0.0)
+        delete_mark[(i + 1) % input_ext_node_num] = true;
+    }
+  }
+  // Create vectors for interpolation
+  // Due to the flip issue, linear interpolation is used here to mark the location of the boundary
+  // layer's outer boundary.
+  for (unsigned int i = 0; i < input_ext_node_num; ++i)
+  {
+    if (!delete_mark[i])
+    {
+      interp_azi_data.push_back(ref_inner_bdry_azi[i]);
+      interp_x_data.push_back(ref_inner_bdry_surf[i](0));
+      interp_y_data.push_back(ref_inner_bdry_surf[i](1));
+      if (interp_azi_data.size() > 1)
+        if (interp_azi_data.back() < interp_azi_data[interp_azi_data.size() - 2])
+          interp_azi_data.back() += 2 * M_PI;
+    }
+  }
+  const Real interp_x0 = interp_x_data.front();
+  const Real interp_xt = interp_x_data.back();
+  const Real interp_y0 = interp_y_data.front();
+  const Real interp_yt = interp_y_data.back();
+  if (interp_azi_data.front() > -M_PI)
+  {
+    interp_azi_data.insert(interp_azi_data.begin(), -M_PI);
+    interp_x_data.insert(interp_x_data.begin(), interp_xt);
+    interp_y_data.insert(interp_y_data.begin(), interp_yt);
+  }
+  if (interp_azi_data.back() < M_PI)
+  {
+    interp_azi_data.push_back(M_PI);
+    interp_x_data.push_back(interp_x0);
+    interp_y_data.push_back(interp_y0);
+  }
+  // Establish interpolation
+  linterp_x = std::make_unique<LinearInterpolation>(interp_azi_data, interp_x_data);
+  linterp_y = std::make_unique<LinearInterpolation>(interp_azi_data, interp_y_data);
+  //  Loop to handle inner boundary layer
+  for (unsigned int i = 0; i < input_ext_node_num; ++i)
+  {
+    // Outside point of the inner boundary layer
+    // Using interpolation, the azimuthal angles do not need to be changed.
+    const Point inner_boundary_shift = Point(linterp_x->sample(azi_array[i] / 180.0 * M_PI),
+                                             linterp_y->sample(azi_array[i] / 180.0 * M_PI),
+                                             origin_pt(2)) -
+                                       points_array[0][i];
+    for (unsigned int j = 1; j < _peripheral_inner_boundary_layer_intervals + 1; j++)
+      points_array[j][i] =
+          points_array[0][i] + inner_boundary_shift * inner_peripheral_bias_terms[j - 1];
+  }
 }

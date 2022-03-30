@@ -169,7 +169,7 @@
       cli_args = 'Mesh/gen/background_block_ids="20"
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'This parameter must be either unset or have a length of two when ring_radii is not provided and background_intervals is not unity.'
-      detail = "background_block_ids has a length other than zero or two when the mesh does not have rings and background_intervals equals one."
+      detail = "background_block_ids has a length other than zero or two when the mesh does not have rings and background_intervals does not equal one."
     []
     [err_background_block_names_2]
       type = 'RunException'
@@ -177,7 +177,7 @@
       cli_args = 'Mesh/gen/background_block_names="back1"
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'This parameter must be either unset or have a length of two when ring_radii is not provided and background_intervals is not unity.'
-      detail = "background_block_names has a length other than zero or two when the mesh does not have rings and background_intervals equals one."
+      detail = "background_block_names has a length other than zero or two when the mesh does not have rings and background_intervals does not equal one."
     []
     [err_block_ids_with_one_name]
       type = 'RunException'
@@ -197,7 +197,7 @@
     [err_odd_num_sectors_per_side]
       type = 'RunException'
       input = 'poly_2d.i'
-      cli_args = 'Mesh/gen/num_sectors_per_side="3 3 3 3 3"
+      cli_args = 'Mesh/gen/num_sectors_per_side="2 2 2 2 3"
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'This parameter must be even.'
       detail = "num_sectors_per_side elements are not all even."
@@ -275,7 +275,7 @@
                   Mesh/gen/duct_block_ids="20"
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'This parameter must have the same length as duct_intervals if set.'
-      detail = "duct_block_ids size is not consistent with number of ducts in the mesh."
+      detail = "duct_block_ids size is not consistent with the number of ducts in the mesh."
     []
     [err_duct_block_names]
       type = 'RunException'
@@ -284,7 +284,7 @@
                   Mesh/gen/duct_block_names="duct1"
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'This parameter must have the same length as duct_intervals if set.'
-      detail = "duct_block_names size is not consistent with number of ducts in the mesh."
+      detail = "duct_block_names size is not consistent with the number of ducts in the mesh."
     []
     [err_descend_duct_sizes]
       type = 'RunException'
@@ -317,7 +317,7 @@
       cli_args = 'Mesh/gen/background_inner_boundary_layer_width=5.0
                   Mesh/gen/background_outer_boundary_layer_width=5.0
                   --mesh-only "poly_2d_err.e"'
-      expect_err = 'must be less then the minimum thickness of the background region.'
+      expect_err = 'must be less than the minimum thickness of the background region.'
       detail = "boundary layers in background region of a hexagonal cell are overlapped."
     []
     [err_ring_boundary_layer_param_size]

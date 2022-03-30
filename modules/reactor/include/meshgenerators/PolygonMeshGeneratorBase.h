@@ -65,7 +65,7 @@ public:
     HEXAGON_NUM_SIDES = 6
   };
 
-  /// A struct type used to contain multiple blocks's boundary layer related parameters
+  /// Contains multiple blocks's boundary layer related parameters
   struct multiBdryLayerParams
   {
     std::vector<Real> widths;
@@ -73,7 +73,7 @@ public:
     std::vector<unsigned int> intervals;
     std::vector<Real> biases;
   };
-  /// A struct type used to contain a single block's boundary layer related parameters
+  /// Contains a single block's boundary layer related parameters
   struct singleBdryLayerParams
   {
     Real width;

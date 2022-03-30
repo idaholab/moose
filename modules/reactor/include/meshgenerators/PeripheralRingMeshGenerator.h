@@ -96,4 +96,28 @@ protected:
    * @return whether the boundary is the external boundary of the given mesh
    */
   bool isExternalBoundary(ReplicatedMesh & mesh, const boundary_id_type bid) const;
+
+  /**
+   * Define node positions of the inner boundary layer that is conformal to the input mesh's
+   * external boundary.
+   * @param input_ext_node_num number of nodes on the external boundary of the input mesh
+   * @param input_bdry_angles list of angles (in rad) formed by three neighboring nodes on the
+   * external boundary of the input mesh
+   * @param ref_inner_bdry_surf Reference outmost layer (surface) points of the inner boundary layer
+   * @param ref_inner_bdry_azi azimuthal angles of the surface points of the reference inner
+   * boundary layer
+   * @param inner_peripheral_bias_terms terms describing the cumulative radial fractions of the
+   * nodes within the inner boundary layer
+   * @param azi_array list of azimuthal angles (in degrees) for radius correction purpose
+   * @param origin_pt centroid of the input mesh, which is used as the origin
+   * @param points_array container to store all nodes' positions of the peripheral ring region
+   */
+  void innerBdryLayerNodesDefiner(const unsigned int input_ext_node_num,
+                                  const std::vector<Real> input_bdry_angles,
+                                  const std::vector<Point> ref_inner_bdry_surf,
+                                  const std::vector<Real> ref_inner_bdry_azi,
+                                  const std::vector<Real> inner_peripheral_bias_terms,
+                                  const std::vector<Real> azi_array,
+                                  const Point origin_pt,
+                                  std::vector<std::vector<Point>> & points_array) const;
 };

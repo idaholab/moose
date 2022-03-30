@@ -539,7 +539,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
         min_background_thickness)
       paramError("background_inner_boundary_layer_width",
                  "The summation of background_inner_boundary_layer_width and "
-                 "background_outer_boundary_layer_width must be less then the minimum thickness of "
+                 "background_outer_boundary_layer_width must be less than the minimum thickness of "
                  "the background region.");
     if (_duct_sizes_style == DuctStyle::apothem)
       _background_outer_boundary_layer_params.width /= std::cos(M_PI / Real(_num_sides));
