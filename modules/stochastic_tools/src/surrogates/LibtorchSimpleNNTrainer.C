@@ -70,6 +70,11 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
   // Fixing the RNG seed to make sure every experiment is the same.
   // Otherwise sampling / stochastic gradient descent would be different.
   torch::manual_seed(getParam<unsigned int>("seed"));
+#else
+  mooseError("PyTorch C++ API (libtorch) must be installed to use ",
+             type(),
+             ", see https://mooseframework.inl.gov/modules/stochastic_tools/install_pytorch.html "
+             "for instruction.");
 #endif
 }
 
