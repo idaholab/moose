@@ -14,10 +14,10 @@ moose_libmesh_vtk:
   - moose-libmesh-vtk 9.1.0 build_5
 
 moose_petsc:
-  - moose-petsc 3.16.5 build_0
+  - moose-petsc 3.16.5 build_1
 
 moose_mpich:
-  - moose-mpich 4.0.1 build_0
+  - moose-mpich 4.0.1 build_1
 
 #### MOOSE_TOOLS stuff (order is important, must match python version order)
 moose_python:
