@@ -135,7 +135,8 @@ PeripheralRingMeshGenerator::generate()
       biasTermsCalculator(_peripheral_radial_bias, _peripheral_layer_num);
   const auto inner_peripheral_bias_terms = biasTermsCalculator(
       _peripheral_inner_boundary_layer_bias, _peripheral_inner_boundary_layer_intervals);
-  // Outer layer bias is inverse
+  // It is easier to create outer boundary layer inversely (inwards). Thus, 1.0 / bias is used here.
+  // However, the input parameter definition is not affected.
   const auto outer_peripheral_bias_terms = biasTermsCalculator(
       1.0 / _peripheral_outer_boundary_layer_bias, _peripheral_outer_boundary_layer_intervals);
 
