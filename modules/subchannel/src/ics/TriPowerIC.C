@@ -137,7 +137,6 @@ TriPowerIC::value(const Point & p)
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
   Point p1(0, 0, unheated_length_entry);
-  Point P = p - p1;
 
   // if we are adjacent to the heated part of the fuel rod
   if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
