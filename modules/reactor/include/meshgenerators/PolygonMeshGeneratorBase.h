@@ -465,7 +465,8 @@ protected:
    * the boundary layers near the outer boundaries
    * @param outer_boundary_layer_biases bias growth factors of the elements within the blocks to be
    * defined as the boundary layers near the outer boundaries
-   * @return bias terms describing radial node positions of multiple blocks
+   * @return bias list of terms describing the cumulative radial fractions of the nodes within
+   * multiple blocks
    */
   std::vector<std::vector<Real>>
   biasTermsCalculator(const std::vector<Real> radial_biases,
@@ -493,7 +494,8 @@ protected:
    * the boundary layer near the outer boundary
    * @param outer_boundary_layer_bias bias growth factor of the elements within the block to be
    * defined as the boundary layer near the outer boundary
-   * @return bias terms describing radial node positions of a single block
+   * @return bias terms describing the cumulative radial fractions of the nodes within a single
+   * block
    */
   std::vector<Real> biasTermsCalculator(const Real radial_bias,
                                         const unsigned int intervals,
