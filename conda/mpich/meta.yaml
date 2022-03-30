@@ -37,8 +37,7 @@ requirements:
     - automake                  # [osx]
     - libtool                   # [osx]
     - make                      # [osx]
-    - {{ pin_compatible('openssl', lower_bound='1', upper_bound='3') }}
-    - {{ pin_compatible('setuptools', lower_bound='58', upper_bound='60') }}
+    - openssl <3
     - mpi 1.0 mpich
 test:
   commands:
