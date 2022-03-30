@@ -1,6 +1,6 @@
 [Tests]
   design = 'constraints/ComputeFrictionalForceLMMechanicalContact.md '
-  issues = '#19671'
+  issues = '#17495'
   [frictional_bouncing_block_action_restart_1]
     type = 'Exodiff'
     input = 'frictional_bouncing_block_action_restart_1.i'
@@ -16,7 +16,7 @@
     exodiff = 'frictional_bouncing_block_action_restart_2_out.e'
     recover = false
     abs_zero = 1.0e-4
-    rel_err = 1.0e-4    
+    rel_err = 1.0e-4
     requirement = 'The system shall be able to restart a mortar mechanical contact simulation via '
                   'the action without generating additional lower dimensional subdomains which may '
                   'be unused'

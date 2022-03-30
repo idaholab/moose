@@ -159,7 +159,10 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
       _i = index;
       residuals_lower[index_lower] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
-      // Get rid of derivatives that we assume won't count (tolerance prescribed by user)
+      // TODO: Get rid of derivatives that we assume won't count (tolerance prescribed by user)
+      // This can cause zero diagonal terms with the variable condensation preconditioner when the
+      // no adaptivity option is used (dofs are not checked).
+
       // residuals_lower[index_lower].derivatives().sparsity_trim(_ad_derivative_threshold);
       index_lower++;
     }

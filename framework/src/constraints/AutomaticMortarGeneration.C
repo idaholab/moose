@@ -1740,8 +1740,8 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             // associate the secondary node with two different elements (and two corresponding
             // xi^(2) values.
 
-            // Increasing the tolerance 5 times in this if statement to avoid missing nodes due to the
-            // mismatch between sizes of primary and secondary surfaces. Still, it can happen.
+            // Increasing the tolerance 5 times in this if statement to avoid missing nodes due to
+            // the mismatch between sizes of primary and secondary surfaces. Still, it can happen.
             if (std::abs(std::abs(xi2) - 1.) < _xi_tolerance * 5.0)
             {
               const Node * primary_node = (xi2 < 0) ? primary_elem_candidate->node_ptr(0)
