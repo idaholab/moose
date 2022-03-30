@@ -65,6 +65,22 @@ public:
     HEXAGON_NUM_SIDES = 6
   };
 
+  /// A struct type used to contain multiple blocks's boundary layer related parameters
+  struct multiBdryLayerParams
+  {
+    std::vector<Real> widths;
+    std::vector<Real> fractions;
+    std::vector<unsigned int> intervals;
+    std::vector<Real> biases;
+  };
+  /// A struct type used to contain a single block's boundary layer related parameters
+  struct singleBdryLayerParams
+  {
+    Real width;
+    unsigned int intervals;
+    Real bias;
+  };
+
 protected:
   /**
    * Creates a mesh of a slice that corresponds to a single side of the polygon to be generated.
@@ -72,49 +88,25 @@ protected:
    * @param ring_radii radii of the ring regions
    * @param rings numbers of radial intervals of the ring regions
    * @param ring_radial_biases values used for radial meshing biasing in ring regions
-   * @param ring_inner_boundary_layer_fractions fraction of the ring regions to be used as inner
-   * boundary layers
-   * @param ring_inner_boundary_layer_intervals number of radial sectors of the inner boundary
-   * layers meshes of the ring regions
-   * @param ring_inner_boundary_layer_biases growth factors used to bias radial meshing of the inner
-   * boundary layers of the ring region
-   * @param ring_outer_boundary_layer_fractions fraction of the ring regions to be used as outer
-   * boundary layers
-   * @param ring_outer_boundary_layer_intervals number of radial sectors of the outer boundary
-   * layers meshes of the ring regions
-   * @param ring_outer_boundary_layer_biases growth factors used to bias radial meshing of the outer
-   * boundary layers of the ring region
+   * @param ring_inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the inner boundary layer of the ring regions
+   * @param ring_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the outer boundary layer of the ring regions
    * @param ducts_center_dist distance parameters of the duct regions
    * @param ducts_layers numbers of radial intervals of the duct regions
    * @param duct_radial_biases values used for radial meshing biasing in duct regions
-   * @param duct_inner_boundary_layer_fractions fraction of the duct regions to be used as inner
-   * boundary layers
-   * @param duct_inner_boundary_layer_intervals number of radial sectors of the inner boundary
-   * layers meshes of the duct regions
-   * @param duct_inner_boundary_layer_biases growth factors used to bias radial meshing of the inner
-   * boundary layers of the duct region
-   * @param duct_outer_boundary_layer_fractions fraction of the duct regions to be used as outer
-   * boundary layers
-   * @param duct_outer_boundary_layer_intervals number of radial sectors of the outer boundary
-   * layers meshes of the duct regions
-   * @param duct_outer_boundary_layer_biases growth factors used to bias radial meshing of the outer
-   * boundary layers of the duct region
+   * @param duct_inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the inner boundary layer of the duct regions
+   * @param duct_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the outer boundary layer of the duct regions
    * @param has_rings whether the slice contains ring regions or not
    * @param has_ducts whether the slice contains duct regions or not
    * @param num_sectors_per_side number of azimuthal intervals
    * @param background_intervals number of radial intervals of the background region
    * @param background_radial_bias value used for radial meshing biasing in background region
-   * @param background_inner_boundary_layer_width width of the background region to be used as
-   * inner boundary layer
-   * @param background_inner_boundary_layer_intervals number of radial sectors of the inner boundary
-   * layer mesh of the background region
-   * @param background_inner_boundary_layer_bias growth factor used to bias radial meshing of the
+   * @param background_inner_boundary_layer_params width, radial sectors, and growth factor of the
    * inner boundary layer of the background region
-   * @param background_outer_boundary_layer_width width of the background region to be used as
-   * outer boundary layer
-   * @param background_outer_boundary_layer_intervals number of radial sectors of the outer boundary
-   * layer mesh of the background region
-   * @param background_outer_boundary_layer_bias growth factor used to bias radial meshing of the
+   * @param background_outer_boundary_layer_params width, radial sectors, and growth factor of the
    * outer boundary layer of the background region
    * @param node_id_background_meta pointer to the first node's id of the background region
    * @param side_number number of sides of the polygon
@@ -130,33 +122,21 @@ protected:
   buildSimpleSlice(const std::vector<Real> ring_radii,
                    const std::vector<unsigned int> rings,
                    const std::vector<Real> ring_radial_biases,
-                   const std::vector<Real> ring_inner_boundary_layer_fractions,
-                   const std::vector<unsigned int> ring_inner_boundary_layer_intervals,
-                   const std::vector<Real> ring_inner_boundary_layer_biases,
-                   const std::vector<Real> ring_outer_boundary_layer_fractions,
-                   const std::vector<unsigned int> ring_outer_boundary_layer_intervals,
-                   const std::vector<Real> ring_outer_boundary_layer_biases,
+                   const multiBdryLayerParams & ring_inner_boundary_layer_params,
+                   const multiBdryLayerParams & ring_outer_boundary_layer_params,
                    std::vector<Real> ducts_center_dist,
                    const std::vector<unsigned int> ducts_layers,
                    const std::vector<Real> duct_radial_biases,
-                   const std::vector<Real> duct_inner_boundary_layer_fractions,
-                   const std::vector<unsigned int> duct_inner_boundary_layer_intervals,
-                   const std::vector<Real> duct_inner_boundary_layer_biases,
-                   const std::vector<Real> duct_outer_boundary_layer_fractions,
-                   const std::vector<unsigned int> duct_outer_boundary_layer_intervals,
-                   const std::vector<Real> duct_outer_boundary_layer_biases,
-                   const bool has_rings,
-                   const bool has_ducts,
+                   const multiBdryLayerParams & duct_inner_boundary_layer_params,
+                   const multiBdryLayerParams & duct_outer_boundary_layer_params,
+                   bool has_rings,
+                   bool has_ducts,
                    const Real pitch,
                    const unsigned int num_sectors_per_side,
                    const unsigned int background_intervals,
                    const Real background_radial_bias,
-                   const Real background_inner_boundary_layer_width,
-                   const unsigned int background_inner_boundary_layer_intervals,
-                   const Real background_inner_boundary_layer_bias,
-                   const Real background_outer_boundary_layer_width,
-                   const unsigned int background_outer_boundary_layer_intervals,
-                   const Real background_outer_boundary_layer_bias,
+                   const singleBdryLayerParams & background_inner_boundary_layer_params,
+                   const singleBdryLayerParams & background_outer_boundary_layer_params,
                    dof_id_type & node_id_background_meta,
                    const unsigned int side_number,
                    const unsigned int side_index,

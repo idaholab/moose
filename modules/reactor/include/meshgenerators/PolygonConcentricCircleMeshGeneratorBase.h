@@ -33,22 +33,10 @@ protected:
   const std::vector<unsigned int> _ring_intervals;
   /// Bias values used to induce biasing to radial meshing in ring regions
   const std::vector<Real> _ring_radial_biases;
-  /// Width of the ring regions to be used as inner boundary layers
-  const std::vector<Real> _ring_inner_boundary_layer_widths;
-  /// Fractions of the ring regions to be used as inner boundary layers
-  std::vector<Real> _ring_inner_boundary_layer_fractions;
-  /// Number of radial sectors of the inner boundary layers mesh of the ring regions
-  const std::vector<unsigned int> _ring_inner_boundary_layer_intervals;
-  /// Growth factors used to bias radial meshing of the inner boundary layers of the ring regions
-  const std::vector<Real> _ring_inner_boundary_layer_biases;
-  /// Widths of the ring regions to be used as outer boundary layers
-  const std::vector<Real> _ring_outer_boundary_layer_widths;
-  /// Fractions of the ring regions to be used as outer boundary layers
-  std::vector<Real> _ring_outer_boundary_layer_fractions;
-  /// Number of radial sectors of the outer boundary layers mesh of the ring region
-  const std::vector<unsigned int> _ring_outer_boundary_layer_intervals;
-  /// Growth factors used to bias radial meshing of the outer boundary layers of the ring regions
-  const std::vector<Real> _ring_outer_boundary_layer_biases;
+  /// Widths, fractions, radial sectors and growth factors of the inner boundary layers of the ring regions
+  multiBdryLayerParams _ring_inner_boundary_layer_params;
+  /// Widths, fractions, radial sectors and growth factors of the outer boundary layers of the ring regions
+  multiBdryLayerParams _ring_outer_boundary_layer_params;
   /// Subdomain IDs of the ring regions
   const std::vector<subdomain_id_type> _ring_block_ids;
   /// Subdomain Names of the ting regions
@@ -61,22 +49,10 @@ protected:
   const std::vector<unsigned int> _duct_intervals;
   /// Bias values used to induce biasing to radial meshing in duct regions
   const std::vector<Real> _duct_radial_biases;
-  /// Widths of the duct regions to be used as inner boundary layers
-  std::vector<Real> _duct_inner_boundary_layer_widths;
-  /// Fractions of the duct regions to be used as inner boundary layers
-  std::vector<Real> _duct_inner_boundary_layer_fractions;
-  /// Number of radial sectors of the inner boundary layers mesh of the duct regions
-  const std::vector<unsigned int> _duct_inner_boundary_layer_intervals;
-  /// Growth factors used to bias radial meshing of the inner boundary layers of the duct regions
-  const std::vector<Real> _duct_inner_boundary_layer_biases;
-  /// Widths of the duct regions to be used as outer boundary layers
-  std::vector<Real> _duct_outer_boundary_layer_widths;
-  /// Fractions of the duct regions to be used as outer boundary layers
-  std::vector<Real> _duct_outer_boundary_layer_fractions;
-  /// Number of radial sectors of the outer boundary layers mesh of the duct region
-  const std::vector<unsigned int> _duct_outer_boundary_layer_intervals;
-  /// Growth factors used to bias radial meshing of the outer boundary layers of the duct regions
-  const std::vector<Real> _duct_outer_boundary_layer_biases;
+  /// Widths, fractions, radial sectors and growth factors of the inner boundary layers of the duct regions
+  multiBdryLayerParams _duct_inner_boundary_layer_params;
+  /// Widths, fractions, radial sectors and growth factors of the inner boundary layers of the duct regions
+  multiBdryLayerParams _duct_outer_boundary_layer_params;
   /// Subdomain IDs of the duct regions
   const std::vector<subdomain_id_type> _duct_block_ids;
   /// Subdomain Names of the duct regions
@@ -95,18 +71,10 @@ protected:
   const unsigned int _background_intervals;
   /// Bias value used to induce biasing to radial meshing in background region
   const Real _background_radial_bias;
-  /// Width of the background region to be used as inner boundary layer
-  const Real _background_inner_boundary_layer_width;
-  /// Number of radial sectors of the inner boundary layer mesh of the background region
-  const unsigned int _background_inner_boundary_layer_intervals;
-  /// Growth factor used to bias radial meshing of the inner boundary layer of the background region
-  const Real _background_inner_boundary_layer_bias;
-  /// Width of the background region to be used as outer boundary layer
-  Real _background_outer_boundary_layer_width;
-  /// Number of radial sectors of the outer boundary layer mesh of the background region
-  const unsigned int _background_outer_boundary_layer_intervals;
-  /// Growth factor used to bias radial meshing of the outer boundary layer of the background region
-  const Real _background_outer_boundary_layer_bias;
+  /// Width, radiation sectors and growth factor of the inner boundary layer of the background region
+  singleBdryLayerParams _background_inner_boundary_layer_params;
+  /// Width, radiation sectors and growth factor of the outer boundary layer of the background region
+  singleBdryLayerParams _background_outer_boundary_layer_params;
   /// Subdomain IDs of the background regions
   const std::vector<subdomain_id_type> _background_block_ids;
   /// Subdomain Names of the background regions

@@ -39,33 +39,21 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
     std::vector<Real> ring_radii,
     const std::vector<unsigned int> rings,
     const std::vector<Real> ring_radial_biases,
-    const std::vector<Real> ring_inner_boundary_layer_fractions,
-    const std::vector<unsigned int> ring_inner_boundary_layer_intervals,
-    const std::vector<Real> ring_inner_boundary_layer_biases,
-    const std::vector<Real> ring_outer_boundary_layer_fractions,
-    const std::vector<unsigned int> ring_outer_boundary_layer_intervals,
-    const std::vector<Real> ring_outer_boundary_layer_biases,
+    const multiBdryLayerParams & ring_inner_boundary_layer_params,
+    const multiBdryLayerParams & ring_outer_boundary_layer_params,
     std::vector<Real> ducts_center_dist,
     const std::vector<unsigned int> ducts_layers,
     const std::vector<Real> duct_radial_biases,
-    const std::vector<Real> duct_inner_boundary_layer_fractions,
-    const std::vector<unsigned int> duct_inner_boundary_layer_intervals,
-    const std::vector<Real> duct_inner_boundary_layer_biases,
-    const std::vector<Real> duct_outer_boundary_layer_fractions,
-    const std::vector<unsigned int> duct_outer_boundary_layer_intervals,
-    const std::vector<Real> duct_outer_boundary_layer_biases,
+    const multiBdryLayerParams & duct_inner_boundary_layer_params,
+    const multiBdryLayerParams & duct_outer_boundary_layer_params,
     bool has_rings,
     bool has_ducts,
     const Real pitch,
     const unsigned int num_sectors_per_side,
     const unsigned int background_intervals,
     const Real background_radial_bias,
-    const Real background_inner_boundary_layer_width,
-    const unsigned int background_inner_boundary_layer_intervals,
-    const Real background_inner_boundary_layer_bias,
-    const Real background_outer_boundary_layer_width,
-    const unsigned int background_outer_boundary_layer_intervals,
-    const Real background_outer_boundary_layer_bias,
+    const singleBdryLayerParams & background_inner_boundary_layer_params,
+    const singleBdryLayerParams & background_outer_boundary_layer_params,
     dof_id_type & node_id_background_meta,
     const unsigned int side_number,
     const unsigned int side_index,
@@ -81,51 +69,51 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
   const auto main_background_bias_terms =
       biasTermsCalculator(background_radial_bias, background_intervals);
   const auto inner_background_bias_terms = biasTermsCalculator(
-      background_inner_boundary_layer_bias, background_inner_boundary_layer_intervals);
+      background_inner_boundary_layer_params.bias, background_inner_boundary_layer_params.intervals);
   const auto outer_background_bias_terms = biasTermsCalculator(
-      background_outer_boundary_layer_bias, background_outer_boundary_layer_intervals);
+      background_outer_boundary_layer_params.bias, background_outer_boundary_layer_params.intervals);
   auto rings_bias_terms = biasTermsCalculator(ring_radial_biases,
                                               rings,
-                                              ring_inner_boundary_layer_fractions,
-                                              ring_inner_boundary_layer_intervals,
-                                              ring_inner_boundary_layer_biases,
-                                              ring_outer_boundary_layer_fractions,
-                                              ring_outer_boundary_layer_intervals,
-                                              ring_outer_boundary_layer_biases);
+                                              ring_inner_boundary_layer_params.fractions,
+                                              ring_inner_boundary_layer_params.intervals,
+                                              ring_inner_boundary_layer_params.biases,
+                                              ring_outer_boundary_layer_params.fractions,
+                                              ring_outer_boundary_layer_params.intervals,
+                                              ring_outer_boundary_layer_params.biases);
   auto duct_bias_terms = biasTermsCalculator(duct_radial_biases,
                                              ducts_layers,
-                                             duct_inner_boundary_layer_fractions,
-                                             duct_inner_boundary_layer_intervals,
-                                             duct_inner_boundary_layer_biases,
-                                             duct_outer_boundary_layer_fractions,
-                                             duct_outer_boundary_layer_intervals,
-                                             duct_outer_boundary_layer_biases);
+                                             duct_inner_boundary_layer_params.fractions,
+                                             duct_inner_boundary_layer_params.intervals,
+                                             duct_inner_boundary_layer_params.biases,
+                                             duct_outer_boundary_layer_params.fractions,
+                                             duct_outer_boundary_layer_params.intervals,
+                                             duct_outer_boundary_layer_params.biases);
 
   std::vector<unsigned int> total_rings;
   for (unsigned int i = 0; i < rings.size(); i++)
-    total_rings.push_back(rings[i] + ring_inner_boundary_layer_intervals[i] +
-                          ring_outer_boundary_layer_intervals[i]);
+    total_rings.push_back(rings[i] + ring_inner_boundary_layer_params.intervals[i] +
+                          ring_outer_boundary_layer_params.intervals[i]);
 
-  if (background_inner_boundary_layer_intervals)
+  if (background_inner_boundary_layer_params.intervals)
   {
-    total_rings.push_back(background_inner_boundary_layer_intervals);
+    total_rings.push_back(background_inner_boundary_layer_params.intervals);
     rings_bias_terms.push_back(inner_background_bias_terms);
-    ring_radii.push_back(ring_radii.back() + background_inner_boundary_layer_width);
+    ring_radii.push_back(ring_radii.back() + background_inner_boundary_layer_params.width);
     has_rings = true;
   }
 
   std::vector<unsigned int> total_ducts_layers;
-  if (background_outer_boundary_layer_intervals)
+  if (background_outer_boundary_layer_params.intervals)
   {
-    total_ducts_layers.push_back(background_outer_boundary_layer_intervals);
+    total_ducts_layers.push_back(background_outer_boundary_layer_params.intervals);
     duct_bias_terms.insert(duct_bias_terms.begin(), outer_background_bias_terms);
     ducts_center_dist.insert(ducts_center_dist.begin(),
-                             ducts_center_dist.front() - background_outer_boundary_layer_width);
+                             ducts_center_dist.front() - background_outer_boundary_layer_params.width);
     has_ducts = true;
   }
   for (unsigned int i = 0; i < ducts_layers.size(); i++)
-    total_ducts_layers.push_back(ducts_layers[i] + duct_inner_boundary_layer_intervals[i] +
-                                 duct_outer_boundary_layer_intervals[i]);
+    total_ducts_layers.push_back(ducts_layers[i] + duct_inner_boundary_layer_params.intervals[i] +
+                                 duct_outer_boundary_layer_params.intervals[i]);
 
   unsigned int angle_number =
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
@@ -249,24 +237,24 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
   {
     subdomain_rings = total_rings;
     subdomain_rings.front() = subdomain_rings.front() - 1; // remove the inner TRI mesh subdomain
-    if (background_inner_boundary_layer_intervals)
+    if (background_inner_boundary_layer_params.intervals)
       subdomain_rings.back() =
-          background_inner_boundary_layer_intervals + background_intervals +
-          background_outer_boundary_layer_intervals; // add the background region
+          background_inner_boundary_layer_params.intervals + background_intervals +
+          background_outer_boundary_layer_params.intervals; // add the background region
     else
-      subdomain_rings.push_back(background_inner_boundary_layer_intervals + background_intervals +
-                                background_outer_boundary_layer_intervals);
+      subdomain_rings.push_back(background_inner_boundary_layer_params.intervals + background_intervals +
+                                background_outer_boundary_layer_params.intervals);
   }
   else
   {
     subdomain_rings.push_back(
-        background_inner_boundary_layer_intervals + background_intervals +
-        background_outer_boundary_layer_intervals); // add the background region
+        background_inner_boundary_layer_params.intervals + background_intervals +
+        background_outer_boundary_layer_params.intervals); // add the background region
     subdomain_rings[0] = subdomain_rings[0] - 1;    // remove the inner TRI mesh subdomain
   }
 
   if (has_ducts)
-    for (unsigned int i = (background_outer_boundary_layer_intervals > 0);
+    for (unsigned int i = (background_outer_boundary_layer_params.intervals > 0);
          i < total_ducts_layers.size();
          i++)
       subdomain_rings.push_back(total_ducts_layers[i]);

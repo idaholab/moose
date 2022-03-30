@@ -213,30 +213,28 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _ring_radial_biases(isParamValid("ring_radial_biases")
                             ? getParam<std::vector<Real>>("ring_radial_biases")
                             : std::vector<Real>(_ring_intervals.size(), 1.0)),
-    _ring_inner_boundary_layer_widths(
-        isParamValid("ring_inner_boundary_layer_widths")
-            ? getParam<std::vector<Real>>("ring_inner_boundary_layer_widths")
-            : std::vector<Real>(_ring_intervals.size(), 0.0)),
-    _ring_inner_boundary_layer_intervals(
-        isParamValid("ring_inner_boundary_layer_intervals")
-            ? getParam<std::vector<unsigned int>>("ring_inner_boundary_layer_intervals")
-            : std::vector<unsigned int>(_ring_intervals.size(), 0)),
-    _ring_inner_boundary_layer_biases(
-        isParamValid("ring_inner_boundary_layer_biases")
-            ? getParam<std::vector<Real>>("ring_inner_boundary_layer_biases")
-            : std::vector<Real>(_ring_intervals.size(), 0.0)),
-    _ring_outer_boundary_layer_widths(
-        isParamValid("ring_outer_boundary_layer_widths")
-            ? getParam<std::vector<Real>>("ring_outer_boundary_layer_widths")
-            : std::vector<Real>(_ring_intervals.size(), 0.0)),
-    _ring_outer_boundary_layer_intervals(
-        isParamValid("ring_outer_boundary_layer_intervals")
-            ? getParam<std::vector<unsigned int>>("ring_outer_boundary_layer_intervals")
-            : std::vector<unsigned int>(_ring_intervals.size(), 0)),
-    _ring_outer_boundary_layer_biases(
-        isParamValid("ring_outer_boundary_layer_biases")
-            ? getParam<std::vector<Real>>("ring_outer_boundary_layer_biases")
-            : std::vector<Real>(_ring_intervals.size(), 0.0)),
+    _ring_inner_boundary_layer_params(
+        {isParamValid("ring_inner_boundary_layer_widths")
+             ? getParam<std::vector<Real>>("ring_inner_boundary_layer_widths")
+             : std::vector<Real>(_ring_intervals.size(), 0.0),
+         std::vector<Real>(),
+         isParamValid("ring_inner_boundary_layer_intervals")
+             ? getParam<std::vector<unsigned int>>("ring_inner_boundary_layer_intervals")
+             : std::vector<unsigned int>(_ring_intervals.size(), 0),
+         isParamValid("ring_inner_boundary_layer_biases")
+             ? getParam<std::vector<Real>>("ring_inner_boundary_layer_biases")
+             : std::vector<Real>(_ring_intervals.size(), 0.0)}),
+    _ring_outer_boundary_layer_params(
+        {isParamValid("ring_outer_boundary_layer_widths")
+             ? getParam<std::vector<Real>>("ring_outer_boundary_layer_widths")
+             : std::vector<Real>(_ring_intervals.size(), 0.0),
+         std::vector<Real>(),
+         isParamValid("ring_outer_boundary_layer_intervals")
+             ? getParam<std::vector<unsigned int>>("ring_outer_boundary_layer_intervals")
+             : std::vector<unsigned int>(_ring_intervals.size(), 0),
+         isParamValid("ring_outer_boundary_layer_biases")
+             ? getParam<std::vector<Real>>("ring_outer_boundary_layer_biases")
+             : std::vector<Real>(_ring_intervals.size(), 0.0)}),
     _ring_block_ids(isParamValid("ring_block_ids")
                         ? getParam<std::vector<subdomain_id_type>>("ring_block_ids")
                         : std::vector<subdomain_id_type>()),
@@ -252,30 +250,28 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _duct_radial_biases(isParamValid("duct_radial_biases")
                             ? getParam<std::vector<Real>>("duct_radial_biases")
                             : std::vector<Real>(_duct_intervals.size(), 1.0)),
-    _duct_inner_boundary_layer_widths(
-        isParamValid("duct_inner_boundary_layer_widths")
-            ? getParam<std::vector<Real>>("duct_inner_boundary_layer_widths")
-            : std::vector<Real>(_duct_intervals.size(), 0.0)),
-    _duct_inner_boundary_layer_intervals(
-        isParamValid("duct_inner_boundary_layer_intervals")
-            ? getParam<std::vector<unsigned int>>("duct_inner_boundary_layer_intervals")
-            : std::vector<unsigned int>(_duct_intervals.size(), 0)),
-    _duct_inner_boundary_layer_biases(
-        isParamValid("duct_inner_boundary_layer_biases")
-            ? getParam<std::vector<Real>>("duct_inner_boundary_layer_biases")
-            : std::vector<Real>(_duct_intervals.size(), 0.0)),
-    _duct_outer_boundary_layer_widths(
-        isParamValid("duct_outer_boundary_layer_widths")
-            ? getParam<std::vector<Real>>("duct_outer_boundary_layer_widths")
-            : std::vector<Real>(_duct_intervals.size(), 0.0)),
-    _duct_outer_boundary_layer_intervals(
-        isParamValid("duct_outer_boundary_layer_intervals")
-            ? getParam<std::vector<unsigned int>>("duct_outer_boundary_layer_intervals")
-            : std::vector<unsigned int>(_duct_intervals.size(), 0)),
-    _duct_outer_boundary_layer_biases(
-        isParamValid("duct_outer_boundary_layer_biases")
-            ? getParam<std::vector<Real>>("duct_outer_boundary_layer_biases")
-            : std::vector<Real>(_duct_intervals.size(), 0.0)),
+    _duct_inner_boundary_layer_params(
+        {isParamValid("duct_inner_boundary_layer_widths")
+             ? getParam<std::vector<Real>>("duct_inner_boundary_layer_widths")
+             : std::vector<Real>(_duct_intervals.size(), 0.0),
+         std::vector<Real>(),
+         isParamValid("duct_inner_boundary_layer_intervals")
+             ? getParam<std::vector<unsigned int>>("duct_inner_boundary_layer_intervals")
+             : std::vector<unsigned int>(_duct_intervals.size(), 0),
+         isParamValid("duct_inner_boundary_layer_biases")
+             ? getParam<std::vector<Real>>("duct_inner_boundary_layer_biases")
+             : std::vector<Real>(_duct_intervals.size(), 0.0)}),
+    _duct_outer_boundary_layer_params(
+        {isParamValid("duct_outer_boundary_layer_widths")
+             ? getParam<std::vector<Real>>("duct_outer_boundary_layer_widths")
+             : std::vector<Real>(_duct_intervals.size(), 0.0),
+         std::vector<Real>(),
+         isParamValid("duct_outer_boundary_layer_intervals")
+             ? getParam<std::vector<unsigned int>>("duct_outer_boundary_layer_intervals")
+             : std::vector<unsigned int>(_duct_intervals.size(), 0),
+         isParamValid("duct_outer_boundary_layer_biases")
+             ? getParam<std::vector<Real>>("duct_outer_boundary_layer_biases")
+             : std::vector<Real>(_duct_intervals.size(), 0.0)}),
     _duct_block_ids(isParamValid("duct_block_ids")
                         ? getParam<std::vector<subdomain_id_type>>("duct_block_ids")
                         : std::vector<subdomain_id_type>()),
@@ -295,18 +291,18 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     // background is usually a single block; however, when there are no rings, background has two
     // blocks.
     _background_radial_bias(getParam<Real>("background_radial_bias")),
-    _background_inner_boundary_layer_width(getParam<Real>("background_inner_boundary_layer_width")),
-    _background_inner_boundary_layer_intervals(
-        _background_inner_boundary_layer_width > 0.0
-            ? getParam<unsigned int>("background_inner_boundary_layer_intervals")
-            : 0),
-    _background_inner_boundary_layer_bias(getParam<Real>("background_inner_boundary_layer_bias")),
-    _background_outer_boundary_layer_width(getParam<Real>("background_outer_boundary_layer_width")),
-    _background_outer_boundary_layer_intervals(
-        _background_outer_boundary_layer_width > 0.0
-            ? getParam<unsigned int>("background_outer_boundary_layer_intervals")
-            : 0),
-    _background_outer_boundary_layer_bias(getParam<Real>("background_outer_boundary_layer_bias")),
+    _background_inner_boundary_layer_params(
+        {getParam<Real>("background_inner_boundary_layer_width"),
+         getParam<Real>("background_inner_boundary_layer_width") > 0.0
+             ? getParam<unsigned int>("background_inner_boundary_layer_intervals")
+             : 0,
+         getParam<Real>("background_inner_boundary_layer_bias")}),
+    _background_outer_boundary_layer_params(
+        {getParam<Real>("background_outer_boundary_layer_width"),
+         getParam<Real>("background_outer_boundary_layer_width") > 0.0
+             ? getParam<unsigned int>("background_outer_boundary_layer_intervals")
+             : 0,
+         getParam<Real>("background_outer_boundary_layer_bias")}),
     _background_block_ids(isParamValid("background_block_ids")
                               ? getParam<std::vector<subdomain_id_type>>("background_block_ids")
                               : std::vector<subdomain_id_type>()),
@@ -397,45 +393,49 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     for (unsigned int i = 1; i < _ring_intervals.size(); i++)
       if (_ring_radii[i] <= _ring_radii[i - 1])
         paramError("ring_radii", "This parameter must be strictly ascending.");
-    if (_ring_radii.size() != _ring_inner_boundary_layer_widths.size() ||
-        _ring_radii.size() != _ring_inner_boundary_layer_intervals.size() ||
-        _ring_radii.size() != _ring_inner_boundary_layer_biases.size() ||
-        _ring_radii.size() != _ring_outer_boundary_layer_widths.size() ||
-        _ring_radii.size() != _ring_outer_boundary_layer_intervals.size() ||
-        _ring_radii.size() != _ring_outer_boundary_layer_biases.size())
+    if (_ring_radii.size() != _ring_inner_boundary_layer_params.widths.size() ||
+        _ring_radii.size() != _ring_inner_boundary_layer_params.intervals.size() ||
+        _ring_radii.size() != _ring_inner_boundary_layer_params.biases.size() ||
+        _ring_radii.size() != _ring_outer_boundary_layer_params.widths.size() ||
+        _ring_radii.size() != _ring_outer_boundary_layer_params.intervals.size() ||
+        _ring_radii.size() != _ring_outer_boundary_layer_params.biases.size())
       paramError("ring_radii",
                  "The inner and outer ring boundary layer parameters must have the same sizes as "
                  "ring_radii.");
     for (unsigned int i = 0; i < _ring_radii.size(); i++)
     {
       const Real layer_width = _ring_radii[i] - (i == 0 ? 0.0 : _ring_radii[i - 1]);
-      _ring_inner_boundary_layer_fractions.push_back(_ring_inner_boundary_layer_widths[i] /
-                                                     layer_width);
-      _ring_outer_boundary_layer_fractions.push_back(_ring_outer_boundary_layer_widths[i] /
-                                                     layer_width);
+      _ring_inner_boundary_layer_params.fractions.push_back(
+          _ring_inner_boundary_layer_params.widths[i] / layer_width);
+      _ring_outer_boundary_layer_params.fractions.push_back(
+          _ring_outer_boundary_layer_params.widths[i] / layer_width);
     }
-    for (unsigned int i = 0; i < _ring_inner_boundary_layer_fractions.size(); i++)
-      if (MooseUtils::absoluteFuzzyEqual(_ring_inner_boundary_layer_fractions[i], 0.0) &&
-          _ring_inner_boundary_layer_intervals[i] > 0)
+    for (unsigned int i = 0; i < _ring_inner_boundary_layer_params.fractions.size(); i++)
+      if (MooseUtils::absoluteFuzzyEqual(_ring_inner_boundary_layer_params.fractions[i], 0.0) &&
+          _ring_inner_boundary_layer_params.intervals[i] > 0)
         paramError("ring_inner_boundary_layer_intervals",
                    "Ring inner boundary layer must have zero interval if its thickness is zero.");
-      else if (MooseUtils::absoluteFuzzyGreaterThan(_ring_inner_boundary_layer_fractions[i], 0.0) &&
-               _ring_inner_boundary_layer_intervals[i] == 0)
+      else if (MooseUtils::absoluteFuzzyGreaterThan(_ring_inner_boundary_layer_params.fractions[i],
+                                                    0.0) &&
+               _ring_inner_boundary_layer_params.intervals[i] == 0)
         paramError(
             "ring_inner_boundary_layer_intervals",
             "Ring inner boundary layer must have non-zero interval if its thickness is not zero.");
-    for (unsigned int i = 0; i < _ring_outer_boundary_layer_fractions.size(); i++)
+    for (unsigned int i = 0; i < _ring_outer_boundary_layer_params.fractions.size(); i++)
     {
-      if (MooseUtils::absoluteFuzzyEqual(_ring_outer_boundary_layer_fractions[i], 0.0) &&
-          _ring_outer_boundary_layer_intervals[i] > 0)
+      if (MooseUtils::absoluteFuzzyEqual(_ring_outer_boundary_layer_params.fractions[i], 0.0) &&
+          _ring_outer_boundary_layer_params.intervals[i] > 0)
         paramError("ring_outer_boundary_layer_intervals",
                    "Ring outer boundary layer must have zero interval if its thickness is zero.");
-      else if (MooseUtils::absoluteFuzzyGreaterThan(_ring_outer_boundary_layer_fractions[i], 0.0) &&
-               _ring_outer_boundary_layer_intervals[i] == 0)
+      else if (MooseUtils::absoluteFuzzyGreaterThan(_ring_outer_boundary_layer_params.fractions[i],
+                                                    0.0) &&
+               _ring_outer_boundary_layer_params.intervals[i] == 0)
         paramError(
             "ring_outer_boundary_layer_intervals",
             "Ring outer boundary layer must have non-zero interval if its thickness is not zero.");
-      if (_ring_inner_boundary_layer_fractions[i] + _ring_outer_boundary_layer_fractions[i] >= 1.0)
+      if (_ring_inner_boundary_layer_params.fractions[i] +
+              _ring_outer_boundary_layer_params.fractions[i] >=
+          1.0)
         paramError("ring_inner_boundary_layer_widths",
                    "Summation of ring_inner_boundary_layer_fractions and "
                    "ring_outer_boundary_layer_fractions cannot exceeds the ring layer width.");
@@ -468,20 +468,20 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
                  "This parameter must ensure that ducts are smaller than the polygon size.");
     if (*std::min_element(_duct_intervals.begin(), _duct_intervals.end()) <= 0)
       paramError("duct_intervals", "Elements of this parameter must be positive.");
-    if (_duct_sizes.size() != _duct_inner_boundary_layer_widths.size() ||
-        _duct_sizes.size() != _duct_inner_boundary_layer_intervals.size() ||
-        _duct_sizes.size() != _duct_inner_boundary_layer_biases.size() ||
-        _duct_sizes.size() != _duct_outer_boundary_layer_widths.size() ||
-        _duct_sizes.size() != _duct_outer_boundary_layer_intervals.size() ||
-        _duct_sizes.size() != _duct_outer_boundary_layer_biases.size())
+    if (_duct_sizes.size() != _duct_inner_boundary_layer_params.widths.size() ||
+        _duct_sizes.size() != _duct_inner_boundary_layer_params.intervals.size() ||
+        _duct_sizes.size() != _duct_inner_boundary_layer_params.biases.size() ||
+        _duct_sizes.size() != _duct_outer_boundary_layer_params.widths.size() ||
+        _duct_sizes.size() != _duct_outer_boundary_layer_params.intervals.size() ||
+        _duct_sizes.size() != _duct_outer_boundary_layer_params.biases.size())
       paramError("duct_sizes",
                  "The inner and outer duct boundary layer parameters must have the same sizes as "
                  "duct_sizes.");
     if (_duct_sizes_style == DuctStyle::apothem)
       for (unsigned int i = 0; i < _duct_sizes.size(); i++)
       {
-        _duct_inner_boundary_layer_widths[i] /= std::cos(M_PI / Real(_num_sides));
-        _duct_outer_boundary_layer_widths[i] /= std::cos(M_PI / Real(_num_sides));
+        _duct_inner_boundary_layer_params.widths[i] /= std::cos(M_PI / Real(_num_sides));
+        _duct_outer_boundary_layer_params.widths[i] /= std::cos(M_PI / Real(_num_sides));
       }
     for (unsigned int i = 0; i < _duct_sizes.size(); i++)
     {
@@ -489,55 +489,60 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
           (i == _duct_sizes.size() - 1 ? _pitch / 2.0 / std::cos(M_PI / Real(_num_sides))
                                        : _duct_sizes[i + 1]) -
           _duct_sizes[i];
-      _duct_inner_boundary_layer_fractions.push_back(_duct_inner_boundary_layer_widths[i] /
-                                                     layer_width);
-      _duct_outer_boundary_layer_fractions.push_back(_duct_outer_boundary_layer_widths[i] /
-                                                     layer_width);
+      _duct_inner_boundary_layer_params.fractions.push_back(
+          _duct_inner_boundary_layer_params.widths[i] / layer_width);
+      _duct_outer_boundary_layer_params.fractions.push_back(
+          _duct_outer_boundary_layer_params.widths[i] / layer_width);
     }
-    for (unsigned int i = 0; i < _duct_inner_boundary_layer_fractions.size(); i++)
-      if (MooseUtils::absoluteFuzzyEqual(_duct_inner_boundary_layer_fractions[i], 0.0) &&
-          _duct_inner_boundary_layer_intervals[i] > 0)
+    for (unsigned int i = 0; i < _duct_inner_boundary_layer_params.fractions.size(); i++)
+      if (MooseUtils::absoluteFuzzyEqual(_duct_inner_boundary_layer_params.fractions[i], 0.0) &&
+          _duct_inner_boundary_layer_params.intervals[i] > 0)
         paramError("duct_inner_boundary_layer_intervals",
                    "Duct inner boundary layer must have zero interval if its thickness is zero.");
-      else if (MooseUtils::absoluteFuzzyGreaterThan(_duct_inner_boundary_layer_fractions[i], 0.0) &&
-               _duct_inner_boundary_layer_intervals[i] == 0)
+      else if (MooseUtils::absoluteFuzzyGreaterThan(_duct_inner_boundary_layer_params.fractions[i],
+                                                    0.0) &&
+               _duct_inner_boundary_layer_params.intervals[i] == 0)
         paramError(
             "duct_inner_boundary_layer_intervals",
             "Duct inner boundary layer must have non-zero interval if its thickness is not zero.");
-    for (unsigned int i = 0; i < _duct_outer_boundary_layer_fractions.size(); i++)
+    for (unsigned int i = 0; i < _duct_outer_boundary_layer_params.fractions.size(); i++)
     {
-      if (MooseUtils::absoluteFuzzyEqual(_duct_outer_boundary_layer_fractions[i], 0.0) &&
-          _duct_outer_boundary_layer_intervals[i] > 0)
+      if (MooseUtils::absoluteFuzzyEqual(_duct_outer_boundary_layer_params.fractions[i], 0.0) &&
+          _duct_outer_boundary_layer_params.intervals[i] > 0)
         paramError("duct_outer_boundary_layer_intervals",
                    "Duct outer boundary layer must have zero interval if its thickness is zero.");
-      else if (MooseUtils::absoluteFuzzyGreaterThan(_duct_outer_boundary_layer_fractions[i], 0.0) &&
-               _duct_outer_boundary_layer_intervals[i] == 0)
+      else if (MooseUtils::absoluteFuzzyGreaterThan(_duct_outer_boundary_layer_params.fractions[i],
+                                                    0.0) &&
+               _duct_outer_boundary_layer_params.intervals[i] == 0)
         paramError(
             "duct_outer_boundary_layer_intervals",
             "Duct outer boundary layer must have non-zero interval if its thickness is not zero.");
-      if (_duct_inner_boundary_layer_fractions[i] + _duct_outer_boundary_layer_fractions[i] >= 1.0)
+      if (_duct_inner_boundary_layer_params.fractions[i] +
+              _duct_outer_boundary_layer_params.fractions[i] >=
+          1.0)
         paramError("duct_inner_boundary_layer_widths",
                    "Summation of duct_inner_boundary_layer_fractions and "
                    "duct_outer_boundary_layer_fractions cannot exceeds the duct layer width.");
     }
   }
-  if (MooseUtils::absoluteFuzzyGreaterThan(
-          _background_inner_boundary_layer_width + _background_outer_boundary_layer_width, 0.0))
+  if (MooseUtils::absoluteFuzzyGreaterThan(_background_inner_boundary_layer_params.width +
+                                               _background_outer_boundary_layer_params.width,
+                                           0.0))
   {
     const Real min_background_thickness =
         (_has_ducts ? (_duct_sizes.front() * std::cos(M_PI / Real(_num_sides))) : (_pitch / 2.0)) -
         (_has_rings ? _ring_radii.back() : 0.0);
-    if (_background_inner_boundary_layer_width +
-            _background_outer_boundary_layer_width * (_duct_sizes_style == DuctStyle::apothem
-                                                          ? 1.0
-                                                          : std::cos(M_PI / Real(_num_sides))) >=
+    if (_background_inner_boundary_layer_params.width +
+            _background_outer_boundary_layer_params.width *
+                (_duct_sizes_style == DuctStyle::apothem ? 1.0
+                                                         : std::cos(M_PI / Real(_num_sides))) >=
         min_background_thickness)
       paramError("background_inner_boundary_layer_width",
                  "The summation of background_inner_boundary_layer_width and "
                  "background_outer_boundary_layer_width must be less then the minimum thickness of "
                  "the background region.");
     if (_duct_sizes_style == DuctStyle::apothem)
-      _background_outer_boundary_layer_width /= std::cos(M_PI / Real(_num_sides));
+      _background_outer_boundary_layer_params.width /= std::cos(M_PI / Real(_num_sides));
   }
 }
 
@@ -616,33 +621,21 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   auto mesh0 = buildSimpleSlice(ring_radii_corr,
                                 _ring_intervals,
                                 _ring_radial_biases,
-                                _ring_inner_boundary_layer_fractions,
-                                _ring_inner_boundary_layer_intervals,
-                                _ring_inner_boundary_layer_biases,
-                                _ring_outer_boundary_layer_fractions,
-                                _ring_outer_boundary_layer_intervals,
-                                _ring_outer_boundary_layer_biases,
+                                _ring_inner_boundary_layer_params,
+                                _ring_outer_boundary_layer_params,
                                 _duct_sizes,
                                 _duct_intervals,
                                 _duct_radial_biases,
-                                _duct_inner_boundary_layer_fractions,
-                                _duct_inner_boundary_layer_intervals,
-                                _duct_inner_boundary_layer_biases,
-                                _duct_outer_boundary_layer_fractions,
-                                _duct_outer_boundary_layer_intervals,
-                                _duct_outer_boundary_layer_biases,
+                                _duct_inner_boundary_layer_params,
+                                _duct_outer_boundary_layer_params,
                                 _has_rings,
                                 _has_ducts,
                                 _pitch,
                                 _num_sectors_per_side[0],
                                 _background_intervals,
                                 _background_radial_bias,
-                                _background_inner_boundary_layer_width,
-                                _background_inner_boundary_layer_intervals,
-                                _background_inner_boundary_layer_bias,
-                                _background_outer_boundary_layer_width,
-                                _background_outer_boundary_layer_intervals,
-                                _background_outer_boundary_layer_bias,
+                                _background_inner_boundary_layer_params,
+                                _background_outer_boundary_layer_params,
                                 _node_id_background_meta,
                                 _num_sides,
                                 1,
@@ -656,33 +649,21 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     auto mesh_tmp = buildSimpleSlice(ring_radii_corr,
                                      _ring_intervals,
                                      _ring_radial_biases,
-                                     _ring_inner_boundary_layer_fractions,
-                                     _ring_inner_boundary_layer_intervals,
-                                     _ring_inner_boundary_layer_biases,
-                                     _ring_outer_boundary_layer_fractions,
-                                     _ring_outer_boundary_layer_intervals,
-                                     _ring_outer_boundary_layer_biases,
+                                     _ring_inner_boundary_layer_params,
+                                     _ring_outer_boundary_layer_params,
                                      _duct_sizes,
                                      _duct_intervals,
                                      _duct_radial_biases,
-                                     _duct_inner_boundary_layer_fractions,
-                                     _duct_inner_boundary_layer_intervals,
-                                     _duct_inner_boundary_layer_biases,
-                                     _duct_outer_boundary_layer_fractions,
-                                     _duct_outer_boundary_layer_intervals,
-                                     _duct_outer_boundary_layer_biases,
+                                     _duct_inner_boundary_layer_params,
+                                     _duct_outer_boundary_layer_params,
                                      _has_rings,
                                      _has_ducts,
                                      _pitch,
                                      _num_sectors_per_side[mesh_index],
                                      _background_intervals,
                                      _background_radial_bias,
-                                     _background_inner_boundary_layer_width,
-                                     _background_inner_boundary_layer_intervals,
-                                     _background_inner_boundary_layer_bias,
-                                     _background_outer_boundary_layer_width,
-                                     _background_outer_boundary_layer_intervals,
-                                     _background_outer_boundary_layer_bias,
+                                     _background_inner_boundary_layer_params,
+                                     _background_outer_boundary_layer_params,
                                      _node_id_background_meta,
                                      _num_sides,
                                      mesh_index + 1,
