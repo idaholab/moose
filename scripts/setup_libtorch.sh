@@ -14,7 +14,7 @@ IGNORE_CERT=""
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TORCH_DESTINATION=$SCRIPT_DIR/../framework/contrib
-TORCH_DIR=$TORCH_DESTINATION/libtorch
+export TORCH_DIR=$TORCH_DESTINATION/libtorch
 
 # Parse the input arguments
 for i in "$@"
