@@ -29,80 +29,91 @@ LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::LAROMANCEPartitionStressUpdateBa
 }
 
 template <bool is_ad>
+void
+LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::initialSetup()
+{
+  LAROMANCEStressUpdateBaseTempl<is_ad>::initialSetup();
+  _partition_Mmean = getClassificationMmean();
+  _partition_Mscale = getClassificationMscale();
+  _partition_Xu = getClassificationXu();
+  _partition_Ell = getClassificationEll();
+  _partition_Eta = getClassificationEta();
+  _partition_Luu = getClassificationLuu();
+  _partition_Vind = getClassificationVind();
+  _partition_difference.resize(_partition_Xu[0].size(),
+                               std::vector<GenericReal<is_ad>>(_partition_Xu.size()));
+  _partition_distance.resize(_partition_difference.size());
+  _partition_covariance.resize(_partition_distance.size());
+  _partition_b.resize(_partition_covariance.size());
+  _partition_A.resize(_partition_Luu[0].size(), _partition_Luu.size());
+}
+
+template <bool is_ad>
 GenericReal<is_ad>
 LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::computeSecondPartitionWeight()
 {
   // extract and scale only the relevant inputs on which the GPR was trained (ignore
   // _old_strain_input_index)
-  std::vector<GenericReal<is_ad>> scaled_input_values(_input_values.size() - 1);
+  std::vector<GenericReal<is_ad>> scaled_input_values(_num_inputs - 1);
   unsigned int inc = 0;
-  for (unsigned int i = 0; i < _input_values.size(); i++)
+  for (const auto i : index_range(_input_values))
   {
     if (i != _old_strain_input_index)
     {
       scaled_input_values[inc] =
-          (_input_values[i] - getClassificationMmean()[inc]) / getClassificationMscale()[inc];
+          (_input_values[i] - _partition_Mmean[inc]) / _partition_Mscale[inc];
       inc++;
     }
   }
 
   // compute the distance of the new point to ALL training points and sum the distance over all
   // input variables first compute difference between points.
-  std::vector<std::vector<GenericReal<is_ad>>> difference(
-      getClassificationXu()[0].size(),
-      std::vector<GenericReal<is_ad>>(getClassificationXu().size()));
   // for-loop to compute difference
-  for (unsigned int i = 0; i < getClassificationXu().size(); i++)
-    for (unsigned int j = 0; j < getClassificationXu()[0].size(); j++)
-      difference[j][i] = Utility::pow<2>((getClassificationXu()[i][j] - scaled_input_values[i]) /
-                                         getClassificationEll());
+  for (const auto i : index_range(_partition_Xu))
+    for (const auto j : index_range(_partition_Xu[0]))
+      _partition_difference[j][i] =
+          Utility::pow<2>((_partition_Xu[i][j] - scaled_input_values[i]) / _partition_Ell);
 
   // sum difference over input dimension and take square root
-  std::vector<GenericReal<is_ad>> distance(difference.size());
-  for (unsigned int i = 0; i < difference.size(); i++)
+  std::fill(_partition_distance.begin(), _partition_distance.end(), 0.0);
+  for (const auto i : index_range(_partition_difference))
   {
-    for (unsigned int j = 0; j < difference[0].size(); j++)
-      distance[i] += difference[i][j];
-    distance[i] = std::sqrt(distance[i]);
+    for (const auto j : index_range(_partition_difference[0]))
+      _partition_distance[i] += _partition_difference[i][j];
+    _partition_distance[i] = std::sqrt(_partition_distance[i]);
   }
 
   // compute the covariance wrt ALL training points: the larger the distance, the smaller the
   // covariance
-  std::vector<GenericReal<is_ad>> covariance(distance.size());
-  for (unsigned int i = 0; i < covariance.size(); i++)
-    covariance[i] = Utility::pow<2>(getClassificationEta()) * std::exp(-0.5 * distance[i]);
+  for (const auto i : index_range(_partition_covariance))
+    _partition_covariance[i] =
+        Utility::pow<2>(_partition_Eta) * std::exp(-0.5 * _partition_distance[i]);
 
-  // solve the system of equations:
-  // convert covariance to libMesh::DenseVector
-  DenseVector<GenericReal<is_ad>> b(covariance.size());
-  std::vector<GenericReal<is_ad>> covariancet(b.size());
-  for (unsigned int i = 0; i < covariance.size(); i++)
-    b(i) = covariance[i];
+  // solve the system of equations: convert covariance to libMesh::DenseVector
+  for (const auto i : index_range(_partition_covariance))
+    _partition_b(i) = _partition_covariance[i];
 
-  // convert Luu to libMesh::DenseMatrix
-  auto Luu = getClassificationLuu();
-  DenseMatrix<GenericReal<is_ad>> A(Luu[0].size(), Luu.size());
-  // fill values of A with Luu-values
-  for (unsigned int i = 0; i < Luu[0].size(); i++)
-    for (unsigned int j = 0; j < Luu.size(); j++)
-      A(i, j) = Luu[j][i];
+  // convert Luu to libMesh::DenseMatrix, first fill values of A with Luu-values
+  for (const auto i : index_range(_partition_Luu[0]))
+    for (const auto j : index_range(_partition_Luu))
+      _partition_A(i, j) = _partition_Luu[j][i];
 
   // solve the linear system of equations (lu_solve)
-  DenseVector<GenericReal<is_ad>> ma(b.size());
-  A.lu_solve(b, ma);
+  DenseVector<GenericReal<is_ad>> ma(_partition_b.size());
+  _partition_A.lu_solve(_partition_b, ma);
 
   // convert inducing points Vinduced to libMesh::DenseVector
-  DenseVector<GenericReal<is_ad>> Vind(getClassificationVind().size());
-  for (unsigned int i = 0; i < Vind.size(); i++)
-    Vind(i) = getClassificationVind()[i];
+  DenseVector<GenericReal<is_ad>> Vind(_partition_Vind.size());
+  for (const auto i : index_range(Vind))
+    Vind(i) = _partition_Vind[i];
 
   // induce full array through sparse grid and summarize into mu
-  GenericReal<is_ad> mu = 0.0;
-  for (unsigned int i = 0; i < ma.size(); i++)
-    mu += ma(i) * Vind(i);
+  GenericReal<is_ad> partition_weight = 0.0;
+  for (const auto i : index_range(ma))
+    partition_weight += ma(i) * Vind(i);
 
   // scale mu between 0 and 1: the weight of partition 2
-  GenericReal<is_ad> partition_weight = -mu + 1.0;
+  partition_weight = -partition_weight + 1.0;
   partition_weight = std::min(partition_weight, 1.0);
   partition_weight = std::max(partition_weight, 0.0);
   return partition_weight;

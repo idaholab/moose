@@ -19,36 +19,60 @@ public:
   LAROMANCEPartitionStressUpdateBaseTempl(const InputParameters & parameters);
 
 protected:
+  virtual void initialSetup() override;
   virtual GenericReal<is_ad> computeSecondPartitionWeight() override;
   virtual void computeDSecondPartitionWeightDStress(
       GenericReal<is_ad> & dsecond_partition_weight_dstress) override;
 
-  /// get the Gaussian Process Regression lower triangular covariance matrix
+  ///@{ Method and container for the Gaussian Process Regression lower triangular covariance matrix
   virtual std::vector<std::vector<Real>> getClassificationLuu() = 0;
+  std::vector<std::vector<Real>> _partition_Luu;
+  ///@}
 
-  /// get the Gaussian Process Regression model training points
+  ///@{ Method and container for the Gaussian Process Regression model training points
   virtual std::vector<std::vector<Real>> getClassificationXu() = 0;
+  std::vector<std::vector<Real>> _partition_Xu;
+  ///@}
 
-  /// get the inducing points of the Gaussian Process Regression model
+  ///@{ Method and container for the inducing points of the Gaussian Process Regression model
   virtual std::vector<Real> getClassificationVind() = 0;
+  std::vector<Real> _partition_Vind;
+  ///@}
 
-  /// get the mean values of the training input
+  ///@{ Method and container for the mean values of the training input
   virtual std::vector<Real> getClassificationMmean() = 0;
+  std::vector<Real> _partition_Mmean;
+  ///@}
 
-  /// get the scale factor of the training input points to normalize all input parameters to equivalent values
+  ///@{ Method and container for the scale factor of the training input points to normalize all input parameters to equivalent values
   virtual std::vector<Real> getClassificationMscale() = 0;
+  std::vector<Real> _partition_Mscale;
+  ///@}
 
-  /// get the calibrated Gaussian Regression Model hyperparameter "Ell", which controls the decay of the covariance as a function of distance
+  ///@{ Method and container for the calibrated Gaussian Regression Model hyperparameter "Ell", which controls the decay of the covariance as a function of distance
   virtual Real getClassificationEll() = 0;
+  Real _partition_Ell;
+  ///@}
 
-  /// get the calibrated Gaussian Regression Model hyperparameter "Eta", which is a scale factor that controls the amplitude of the mean
+  ///@{ Method and container for the calibrated Gaussian Regression Model hyperparameter "Eta", which is a scale factor that controls the amplitude of the mean
   virtual Real getClassificationEta() = 0;
+  Real _partition_Eta;
+  ///@}
+
+  ///@{ Containers for parition math
+  std::vector<std::vector<GenericReal<is_ad>>> _partition_difference;
+  std::vector<GenericReal<is_ad>> _partition_distance;
+  std::vector<GenericReal<is_ad>> _partition_covariance;
+  DenseVector<GenericReal<is_ad>> _partition_b;
+  DenseMatrix<GenericReal<is_ad>> _partition_A;
+  ///@}
 
   using LAROMANCEStressUpdateBaseTempl<is_ad>::_input_values;
   using LAROMANCEStressUpdateBaseTempl<is_ad>::_second_partition_weight;
   using LAROMANCEStressUpdateBaseTempl<is_ad>::_stress_input_index;
   using LAROMANCEStressUpdateBaseTempl<is_ad>::_qp;
   using LAROMANCEStressUpdateBaseTempl<is_ad>::_old_strain_input_index;
+  using LAROMANCEStressUpdateBaseTempl<is_ad>::_num_inputs;
 };
 
 typedef LAROMANCEPartitionStressUpdateBaseTempl<false> LAROMANCEPartitionStressUpdateBase;

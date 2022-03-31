@@ -83,7 +83,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
   params.addParam<MooseEnum>(
       "environment_input_window_high_failure",
       extrapolated_upper_limit_behavior,
-      "What to do if environmental factor is outside the global window of applicability.");
+      "What to do if environmental factor is outside the upper global window of applicability.");
 
   params.addRequiredRangeCheckedParam<Real>(
       "initial_cell_dislocation_density",
@@ -328,10 +328,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::initialSetup()
   _global_limits.resize(_num_inputs);
   // temporarily fill global limits with extreme numerical values, to later update
   for (unsigned int i = 0; i < _num_inputs; ++i)
-  {
-    _global_limits[i].first = std::numeric_limits<Real>::max();
-    _global_limits[i].second = 0.0;
-  }
+    _global_limits[i] = {std::numeric_limits<Real>::max(), 0.0};
 
   // start loop over partitions to perform sanity checks, set global limits,
   // and print global configurations
