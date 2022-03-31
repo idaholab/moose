@@ -217,7 +217,17 @@ offset = -0.19
 []
 
 [Outputs]
-  exodus = true
+  csv = true
+[]
+
+[VectorPostprocessors]
+  [mechanical_tangential_lm]
+    type = NodalValueSampler
+    block = 'mechanical_secondary_subdomain'
+    variable = mechanical_tangential_lm
+    sort_by = 'x'
+    execute_on = TIMESTEP_END
+  []
 []
 
 [Preconditioning]

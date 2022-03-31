@@ -687,6 +687,7 @@ ContactAction::addMortarContact()
         {
           params.set<Real>("newmark_beta") = getParam<Real>("newmark_beta");
           params.set<Real>("newmark_gamma") = getParam<Real>("newmark_gamma");
+          params.set<Real>("capture_tolerance") = getParam<Real>("capture_tolerance");
         }
         params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
 
