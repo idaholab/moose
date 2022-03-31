@@ -214,6 +214,10 @@ base_mpifort:
   - mpich-mpifort 4.0.1 hbb4e6a2_100                       # [not arm64 and osx]
   - mpich-mpifort 4.0.1 h3e96240_100                       # [arm64]
 
+moose_ld64:                                                 # [osx]
+  - ld64 609 h4dfd969_10                                    # [not arm64 and osx]
+  - ld64_osx-arm64 609 h7c97014_10                          # [arm64]
+
 #### Support Libraries (libMesh and VTK)
 moose_libglu:                                               # [linux]
   - libglu 9.0.0 hf484d3e_1000                              # [linux]
