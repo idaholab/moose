@@ -44,3 +44,7 @@
   solve_type = NEWTON
   dtmin = 1
 []
+
+[Outputs]
+  vtk = true
+[]

@@ -44,3 +44,7 @@
 [Executioner]
   type = Steady
 []
+
+[Outputs]
+  vtk = true
+[]
