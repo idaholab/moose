@@ -44,9 +44,9 @@ It is visible that in this case we defined the [!param](/Modules/NavierStokesFV/
 parameter to be `incompressible`.
 Furthermore, the energy (enthalpy) equation is solved as well. The user can
 request this by setting [!param](/Modules/NavierStokesFV/add_energy_equation)
-to `true`. The boundary types are groupped into +wall+, +inlet+ and +otlet+ types.
+to `true`. The boundary types are grouped into +wall+, +inlet+ and +outlet+ types.
 For more information on the available boundary types, see the
-+Example Input File Syntax+ below.
+list of parameters at the bottom of the page.
 
 ### Incompressible fluid flow in porous medium
 
@@ -67,15 +67,15 @@ The same simulation can also be set up using the NavierStokesFV action syntax:
 Compared to the previous example, we see that in this case the porous medium
 treatment is enabled by setting [!param](/Modules/NavierStokesFV/porous_medium_treatment)
 to `true`. The corresponding porosity can be supplied through the
-[!param](/Modules/NavierStokesFV/porosity) parameter. Furthermore, the heat excange
+[!param](/Modules/NavierStokesFV/porosity) parameter. Furthermore, the heat exchange
 between the fluid and the homogenized structure is enabled using the
 [!param](/Modules/NavierStokesFV/ambient_temperature) and
-[!param](/Modules/NavierStokesFV/ambient_convection_alpha) paramters.
+[!param](/Modules/NavierStokesFV/ambient_convection_alpha) parameters.
 
 
 ### Weakly-compressible fluid flow
 
-The last example is dedicated to demonstrate a transient flow in a channel
+The last example is dedicated to demonstrating a transient flow in a channel
 using a weakly-compressible approximation. The following examples shows how
 this simulation is set up by manually defining the kernels and boundary conditions.
 For more information on the weakly-compressible treatment, visit
@@ -96,7 +96,6 @@ energy source function can also be supplied to the incorporated
 energy equation using the [!param](/Modules/NavierStokesFV/external_heat_source) parameter.
 
 
-## Example Input File Syntax
 
 !syntax list /Modules/NavierStokesFV objects=True actions=False subsystems=False
 

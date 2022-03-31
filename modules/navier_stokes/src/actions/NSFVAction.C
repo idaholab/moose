@@ -38,7 +38,7 @@ NSFVAction::validParams()
    * General parameters used to set up the simulation.
    */
   params.addParam<std::vector<SubdomainName>>(
-      "block", "The list of blocks on which NS equations is defined on");
+      "block", "The list of blocks on which NS equations are defined on");
 
   MooseEnum sim_type("steady-state transient", "steady-state");
   params.addParam<MooseEnum>("simulation_type", sim_type, "Navier-Stokes equation type");
@@ -48,7 +48,7 @@ NSFVAction::validParams()
       "compressibility", comp_type, "Compressibility constraint for the Navier-Stokes equations.");
 
   params.addParam<bool>(
-      "porous_medium_treatment", false, "Whether to use porous medium solvers or not.");
+      "porous_medium_treatment", false, "Whether to use porous medium kernels or not.");
 
   MooseEnum turbulence_type("mixing-length none", "none");
   params.addParam<MooseEnum>(
@@ -242,7 +242,7 @@ NSFVAction::validParams()
 
   params.addParam<std::vector<std::vector<std::string>>>(
       "friction_coeffs",
-      "The firction coefficients for every item in 'friction_types'. Note that if "
+      "The friction coefficients for every item in 'friction_types'. Note that if "
       "'porous_medium_treatment' is enabled, the coefficients already contain a velocity "
       "multiplier but they are not multiplied with density yet!");
 
@@ -405,7 +405,7 @@ NSFVAction::validParams()
       1.0,
       "mixing_length_delta > 0.0",
       "Tunable parameter related to the thickness of the boundary layer."
-      "When it is not specified, Prandtl's original mixing length model is retrieved.");
+      "When it is not specified, Prandtl's original unbounded wall distance mixing length model is retrieved.");
 
   params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
                               "von_karman_const_0 mixing_length_delta",

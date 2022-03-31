@@ -80,7 +80,7 @@ protected:
   void addINSEnergyExternalHeatSource();
 
   /**
-   * Functions adding kernels for scalar transport equations in an incompressible
+   * Functions adding kernels for scalar transport equations in a weakly or in-compressible
    * fluid.
    */
   void addScalarTimeKernels();
@@ -144,7 +144,7 @@ protected:
   /// Turbulent diffusivity handling type (mixing-length, etc.)
   const MooseEnum _turbulence_handling;
 
-  /// Switch dedicated to show if porous medium treatment is requested or not
+  /// Switch to show if porous medium treatment is requested or not
   const bool _porous_medium_treatment;
   /// The name of the auxiliary variable for the porosity field
   const MooseFunctorName _porosity_name;
@@ -159,7 +159,7 @@ protected:
   /// Boundaries which define a wall (slip/noslip/etc.)
   const std::vector<BoundaryName> _wall_boundaries;
 
-  /// Velocity intlet types (fixed-velocity/mass-flow/momentum-inflow)
+  /// Velocity inlet types (fixed-velocity/mass-flow/momentum-inflow)
   const MultiMooseEnum _momentum_inlet_types;
   /// Momentum/mass inlet flux postprocessors for potential coupling between applications
   const std::vector<PostprocessorName> _flux_inlet_pps;
@@ -217,9 +217,9 @@ protected:
   const std::vector<Real> _initial_scalar_variable;
   /// Passive scalar diffusivities
   const std::vector<MooseFunctorName> _passive_scalar_diffusivity;
-  /// Passive scalar diffusivities
+  /// Passive scalar source terms
   const std::vector<MooseFunctorName> _passive_scalar_source;
-  /// Passive scalar intlet types (fixed-value/mass-flow/momentum-inflow)
+  /// Passive scalar inlet types (fixed-value/mass-flow)
   const MultiMooseEnum _passive_scalar_inlet_types;
   /// Passive scalar function names at inlet boundaries
   const std::vector<std::vector<std::string>> _passive_scalar_inlet_function;

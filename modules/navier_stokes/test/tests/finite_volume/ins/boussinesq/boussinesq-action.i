@@ -78,7 +78,6 @@ temp_ref=${fparse hot_temp / 2.}
   []
 []
 
-
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
