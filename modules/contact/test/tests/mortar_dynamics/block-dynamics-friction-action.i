@@ -217,7 +217,7 @@ offset = -0.19
 []
 
 [Outputs]
-  csv = true
+  exodus = true
 []
 
 [VectorPostprocessors]
