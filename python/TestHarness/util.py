@@ -587,7 +587,7 @@ def getIfAsioExists(moose_dir):
 
 def getIfLibtorchExists(moose_dir):
     option_set = set(['ALL'])
-    if os.path.exists(f'{moose_dir}/modules/stochastic_tools/libtorch'):
+    if os.path.exists(f'{moose_dir}/framework/contrib/libtorch'):
         option_set.add('TRUE')
     else:
         option_set.add('FALSE')
