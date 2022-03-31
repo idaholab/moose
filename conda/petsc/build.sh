@@ -64,7 +64,7 @@ configure_petsc \
     FFLAGS="$FFLAGS" \
     FCFLAGS="$FCFLAGS" \
     LDFLAGS="$LDFLAGS" \
-    --prefix=$PREFIX/petsc || (cat configure.log && exit 1)
+    --prefix=$PREFIX || (cat configure.log && exit 1)
 
 # Verify that gcc_ext isn't linked
 for f in $PETSC_ARCH/lib/petsc/conf/petscvariables $PETSC_ARCH/lib/pkgconfig/PETSc.pc; do
@@ -91,7 +91,7 @@ sedinplace "s%${BUILD_PREFIX}/bin/python%/usr/bin/env python%g" $PETSC_ARCH/lib/
 for path in $PETSC_DIR $BUILD_PREFIX; do
     for f in $(grep -l "${path}" $PETSC_ARCH/include/petsc*.h); do
         echo "Fixing ${path} in $f"
-        sedinplace s%$path%\${PREFIX}/petsc%g $f
+        sedinplace s%$path%\${PREFIX}%g $f
     done
 done
 
@@ -105,40 +105,28 @@ make check MPIEXEC="${RECIPE_DIR}/mpiexec.sh"
 make install
 
 # Remove unneeded files
-rm -f ${PREFIX}/petsc/lib/petsc/conf/configure-hash
-find $PREFIX/petsc/lib/petsc -name '*.pyc' -delete
+rm -f ${PREFIX}/lib/petsc/conf/configure-hash
+find $PREFIX/lib/petsc -name '*.pyc' -delete
 
 # Replace ${BUILD_PREFIX} after installation,
 # otherwise 'make install' above may fail
-for f in $(grep -l "${BUILD_PREFIX}" -R "${PREFIX}/petsc/lib/petsc"); do
+for f in $(grep -l "${BUILD_PREFIX}" -R "${PREFIX}/lib/petsc"); do
   echo "Fixing ${BUILD_PREFIX} in $f"
-  sedinplace s%${BUILD_PREFIX}%${PREFIX}/petsc%g $f
+  sedinplace s%${BUILD_PREFIX}%${PREFIX}%g $f
 done
 
 echo "Removing example files"
-du -hs $PREFIX/petsc/share/petsc/examples/src
-rm -fr $PREFIX/petsc/share/petsc/examples/src
+du -hs $PREFIX/share/petsc/examples/src
+rm -fr $PREFIX/share/petsc/examples/src
 echo "Removing data files"
-du -hs $PREFIX/petsc/share/petsc/datafiles/*
-rm -fr $PREFIX/petsc/share/petsc/datafiles
+du -hs $PREFIX/share/petsc/datafiles/*
+rm -fr $PREFIX/share/petsc/datafiles
 
 # Set PETSC_DIR environment variable for those that need it
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
-if [ "x\$PKG_CONFIG_PATH" != "x" ]; then
-  export petsc_pkg_config_path=\$PKG_CONFIG_PATH
-  export PKG_CONFIG_PATH=${PREFIX}/petsc/lib/pkgconfig:\$PKG_CONFIG_PATH
-else
-  export PKG_CONFIG_PATH=${PREFIX}/petsc/lib/pkgconfig
-fi
-export PETSC_DIR=${PREFIX}/petsc
+export PETSC_DIR=${PREFIX}
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
-if [ "x\$petsc_pkg_config_path" != "x" ]; then
-  export PKG_CONFIG_PATH=\$petsc_pkg_config_path
-  unset petsc_pkg_config_path
-else
-  unset PKG_CONFIG_PATH
-fi
 unset PETSC_DIR
 EOF
