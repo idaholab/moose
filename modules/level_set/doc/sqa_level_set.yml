@@ -1,0 +1,8 @@
+directories:
+    - ${MOOSE_DIR}/modules/level_set/test/tests
+specs:
+    - tests
+dependencies:
+    - framework
+repo: moose
+reports: !include ${MOOSE_DIR}/modules/level_set/doc/sqa_reports.yml

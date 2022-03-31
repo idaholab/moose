@@ -23,4 +23,9 @@ Extensions:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
-    MooseDocs.extensions.sqa: disable
+    MooseDocs.extensions.sqa:
+        active: True
+        reports: !include modules/level_set/doc/sqa_reports.yml
+        categories:
+            framework: !include framework/doc/sqa_framework.yml
+            level_set: !include modules/level_set/doc/sqa_level_set.yml
