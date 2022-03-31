@@ -40,6 +40,7 @@ requirements:
     - libtool                   # [osx]
     - make                      # [osx]
     - openssl <3
+    - setuptools <60
     - mpi 1.0 mpich
 test:
   commands:

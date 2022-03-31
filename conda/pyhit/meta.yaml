@@ -25,6 +25,7 @@ requirements:
 
   run:
     - openssl <3
+    - setuptools <60
     - python
 
 test:

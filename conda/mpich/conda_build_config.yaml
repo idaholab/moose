@@ -195,24 +195,24 @@ zip_keys:
 
 #### Compilers
 base_mpich:
-  - mpich 4.0.1 h846660c_100                               # [linux]
-  - mpich 4.0.1 hd33e60e_100                               # [not arm64 and osx]
-  - mpich 4.0.1 hd4b5bf3_100                               # [arm64]
+  - mpich 4.0.1 h846660c_100                                # [linux]
+  - mpich 4.0.1 hd33e60e_100                                # [not arm64 and osx]
+  - mpich 4.0.1 hd4b5bf3_100                                # [arm64]
 
 base_mpicc:
-  - mpich-mpicc 4.0.1 hb600da9_100                         # [linux]
-  - mpich-mpicc 4.0.1 h4fd26ce_100                         # [not arm64 and osx]
-  - mpich-mpicc 4.0.1 haad7f49_100                         # [arm64]
+  - mpich-mpicc 4.0.1 hb600da9_100                          # [linux]
+  - mpich-mpicc 4.0.1 h4fd26ce_100                          # [not arm64 and osx]
+  - mpich-mpicc 4.0.1 haad7f49_100                          # [arm64]
 
 base_mpicxx:
-  - mpich-mpicxx 4.0.1 h166bdaf_100                        # [linux]
-  - mpich-mpicxx 4.0.1 h5eb16cf_100                        # [not arm64 and osx]
-  - mpich-mpicxx 4.0.1 h1c322ee_100                        # [arm64]
+  - mpich-mpicxx 4.0.1 h166bdaf_100                         # [linux]
+  - mpich-mpicxx 4.0.1 h5eb16cf_100                         # [not arm64 and osx]
+  - mpich-mpicxx 4.0.1 h1c322ee_100                         # [arm64]
 
 base_mpifort:
-  - mpich-mpifort 4.0.1 h924138e_100                       # [linux]
-  - mpich-mpifort 4.0.1 hbb4e6a2_100                       # [not arm64 and osx]
-  - mpich-mpifort 4.0.1 h3e96240_100                       # [arm64]
+  - mpich-mpifort 4.0.1 h924138e_100                        # [linux]
+  - mpich-mpifort 4.0.1 hbb4e6a2_100                        # [not arm64 and osx]
+  - mpich-mpifort 4.0.1 h3e96240_100                        # [arm64]
 
 moose_ld64:                                                 # [osx]
   - ld64 609 h4dfd969_10                                    # [not arm64 and osx]

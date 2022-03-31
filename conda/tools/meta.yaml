@@ -36,6 +36,7 @@ requirements:
     - {{ moose_sympy }}
     - {{ moose_deepdiff }}
     - openssl <3
+    - setuptools <60
     - clang-tools
     - python
 
