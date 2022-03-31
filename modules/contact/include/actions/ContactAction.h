@@ -104,6 +104,9 @@ protected:
   /// Whether to generate the mortar mesh (useful in a restart simulation e.g.).
   const bool _generate_mortar_mesh;
 
+  /// Whether mortar dynamic contact constraints are to be used
+  const bool _mortar_dynamics;
+
 private:
   /**
    * Generate mesh and other Moose objects for Mortar contact

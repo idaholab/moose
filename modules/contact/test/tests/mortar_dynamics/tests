@@ -30,6 +30,20 @@
     requirement = 'The system shall solve mortar frictional contact between two blocks with '
                   'weighted gap time stabilization using mortar nodal geometry.'
   []
+  [block-dynamics-friction-action]
+    type = 'Exodiff'
+    exodiff = 'block-dynamics-friction-action_out.e'
+    input = 'block-dynamics-friction-action.i'
+    rel_err = 5.0e-4
+    abs_zero = 1.0e-5
+    min_parallel = 1
+    max_parallel = 4
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.4'
+    requirement = 'The system shall solve mortar frictional contact between two blocks with '
+                  'weighted gap time stabilization using mortar nodal geometry via the contact action.'
+  []
   [block-dynamics-friction-creep]
     type = 'Exodiff'
     exodiff = 'block-dynamics-friction-creep_out.e'

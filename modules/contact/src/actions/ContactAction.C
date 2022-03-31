@@ -76,8 +76,10 @@ ContactAction::validParams()
   params.addParam<MooseEnum>("model", ContactAction::getModelEnum(), "The contact model to use");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
-  params.addParam<Real>(
-      "capture_tolerance", 0.0, "Normal distance from surface within which nodes are captured");
+  params.addParam<Real>("capture_tolerance",
+                        0.0,
+                        "Normal distance from surface within which nodes are captured. This "
+                        "parameter is used for node-face and mortar formulations.");
   params.addParam<Real>(
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
@@ -159,6 +161,20 @@ ContactAction::validParams()
       true,
       "Whether to generate the mortar mesh from the action. Typically this will be the case, but "
       "one may also want to reuse an existing lower-dimensional mesh prior to a restart.");
+  params.addParam<bool>(
+      "mortar_dynamics",
+      false,
+      "Whether to use constraints that account for the persistency condition, giving rise to "
+      "smoother normal contact pressure evolution. This flag should only be set to yes for dynamic "
+      "simulations using the Newmark-beta numerical integrator");
+  params.addParam<Real>(
+      "newmark_beta",
+      0.25,
+      "Newmark-beta beta parameter for its inclusion in the weighted gap update formula");
+  params.addParam<Real>(
+      "newmark_gamma",
+      0.5,
+      "Newmark-beta gamma parameter for its inclusion in the weighted gap update formula");
 
   return params;
 }
@@ -170,7 +186,8 @@ ContactAction::ContactAction(const InputParameters & params)
     _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
     _mortar_approach(getParam<MooseEnum>("mortar_approach").getEnum<MortarApproach>()),
     _correct_edge_dropping(getParam<bool>("correct_edge_dropping")),
-    _generate_mortar_mesh(getParam<bool>("generate_mortar_mesh"))
+    _generate_mortar_mesh(getParam<bool>("generate_mortar_mesh")),
+    _mortar_dynamics(getParam<bool>("mortar_dynamics"))
 {
 
   if (_boundary_pairs.size() != 1 && _formulation == ContactFormulation::MORTAR)
@@ -188,8 +205,8 @@ ContactAction::ContactAction(const InputParameters & params)
     if (_mortar_approach == MortarApproach::Legacy)
     {
       mooseDeprecated(
-          "Use of legacy mortar contact approach is deprecated and will be removed by December "
-          "2021. Instead, select the default option based on weighted quantities and dual bases");
+          "Use of legacy mortar contact approach is deprecated and will be removed by September "
+          "2022. Instead, select the default option based on weighted quantities and dual bases");
     }
 
     // use dual basis function for Lagrange multipliers?
@@ -201,6 +218,16 @@ ContactAction::ContactAction(const InputParameters & params)
         _use_dual = true;
       else
         _use_dual = false;
+    }
+
+    if (!params.isParamSetByUser("mortar_dynamics"))
+    {
+      if (params.isParamSetByUser("newmark_beta"))
+        paramError("newmark_beta", "newmark_beta can only be used with the mortar_dynamics option");
+
+      if (params.isParamSetByUser("newmark_gamma"))
+        paramError("newmark_gamma",
+                   "newmark_gamma can only be used with the mortar_dynamics option");
     }
   }
   else
@@ -222,6 +249,10 @@ ContactAction::ContactAction(const InputParameters & params)
     else if (params.isParamSetByUser("c_tangential"))
       paramError("c_tangential",
                  "The 'c_tangential' option can only be used with the 'mortar' formulation");
+    else if (params.isParamSetByUser("mortar_dynamics"))
+      paramError("mortar_dynamics",
+                 "The 'mortar_dynamics' constraint option can only be used with the 'mortar' "
+                 "formulation and in dynamic simulations using Newmark-beta");
   }
 
   if (_formulation == ContactFormulation::RANFS)
@@ -579,9 +610,22 @@ ContactAction::addMortarContact()
     {
       if (_mortar_approach == MortarApproach::Weighted)
       {
-        InputParameters params = _factory.getValidParams("ComputeWeightedGapLMMechanicalContact");
-        params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
+        std::string mortar_constraint_name;
 
+        if (!_mortar_dynamics)
+          mortar_constraint_name = "ComputeWeightedGapLMMechanicalContact";
+        else
+          mortar_constraint_name = "ComputeDynamicWeightedGapLMMechanicalContact";
+
+        InputParameters params = _factory.getValidParams(mortar_constraint_name);
+        if (_mortar_dynamics)
+        {
+          params.set<Real>("newmark_beta") = getParam<Real>("newmark_beta");
+          params.set<Real>("newmark_gamma") = getParam<Real>("newmark_gamma");
+          params.set<Real>("capture_tolerance") = getParam<Real>("capture_tolerance");
+        }
+
+        params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
         params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
         params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
         params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
@@ -590,7 +634,6 @@ ContactAction::addMortarContact()
         params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
         params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
         params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
-
         params.set<Real>("c") = getParam<Real>("c_normal");
 
         if (ndisp > 1)
@@ -600,9 +643,8 @@ ContactAction::addMortarContact()
 
         params.set<bool>("use_displaced_mesh") = true;
 
-        _problem->addConstraint("ComputeWeightedGapLMMechanicalContact",
-                                action_name + "_normal_lm_weighted_gap",
-                                params);
+        _problem->addConstraint(
+            mortar_constraint_name, action_name + "_normal_lm_weighted_gap", params);
         _problem->haveADObjects(true);
       }
       else if (_mortar_approach == MortarApproach::Legacy)
@@ -633,8 +675,19 @@ ContactAction::addMortarContact()
     {
       if (_mortar_approach == MortarApproach::Weighted)
       {
-        InputParameters params =
-            _factory.getValidParams("ComputeFrictionalForceLMMechanicalContact");
+        std::string mortar_constraint_name;
+
+        if (!_mortar_dynamics)
+          mortar_constraint_name = "ComputeFrictionalForceLMMechanicalContact";
+        else
+          mortar_constraint_name = "ComputeDynamicFrictionalForceLMMechanicalContact";
+
+        InputParameters params = _factory.getValidParams(mortar_constraint_name);
+        if (_mortar_dynamics)
+        {
+          params.set<Real>("newmark_beta") = getParam<Real>("newmark_beta");
+          params.set<Real>("newmark_gamma") = getParam<Real>("newmark_gamma");
+        }
         params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
 
         params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
@@ -665,8 +718,7 @@ ContactAction::addMortarContact()
 
         params.set<Real>("mu") = getParam<Real>("friction_coefficient");
 
-        _problem->addConstraint(
-            "ComputeFrictionalForceLMMechanicalContact", action_name + "_tangential_lm", params);
+        _problem->addConstraint(mortar_constraint_name, action_name + "_tangential_lm", params);
         _problem->haveADObjects(true);
       }
       else if (_mortar_approach == MortarApproach::Legacy)
