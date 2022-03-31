@@ -35,6 +35,11 @@ FileMeshGenerator::validParams()
                         false,
                         "True to skip partitioning, only after this mesh generator, "
                         "because the mesh was pre-split for example.");
+  params.addParam<bool>("allow_renumbering",
+                        true,
+                        "Whether to allow the mesh to renumber nodes and elements. Note that this "
+                        "parameter is only relevant for non-exodus files, e.g. if reading from "
+                        "checkpoint for example. For exodus we always disallow renumbering.");
   params.addClassDescription("Read a mesh from a file.");
   return params;
 }
@@ -42,7 +47,8 @@ FileMeshGenerator::validParams()
 FileMeshGenerator::FileMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _file_name(getParam<MeshFileName>("file")),
-    _skip_partitioning(getParam<bool>("skip_partitioning"))
+    _skip_partitioning(getParam<bool>("skip_partitioning")),
+    _allow_renumbering(getParam<bool>("allow_renumbering"))
 {
 }
 
@@ -91,6 +97,8 @@ FileMeshGenerator::generate()
     // to support LATEST word for loading checkpoint files
     std::string file_name = MooseUtils::convertLatestCheckpoint(_file_name, false);
 
+    mesh->skip_partitioning(_skip_partitioning);
+    mesh->allow_renumbering(_allow_renumbering);
     mesh->read(file_name);
 
     // we also read declared mesh meta data here if there is meta data file
