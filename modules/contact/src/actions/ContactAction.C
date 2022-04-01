@@ -220,7 +220,7 @@ ContactAction::ContactAction(const InputParameters & params)
         _use_dual = false;
     }
 
-    if (!params.isParamSetByUser("mortar_dynamics"))
+    if (!getParam<bool>("mortar_dynamics"))
     {
       if (params.isParamSetByUser("newmark_beta"))
         paramError("newmark_beta", "newmark_beta can only be used with the mortar_dynamics option");

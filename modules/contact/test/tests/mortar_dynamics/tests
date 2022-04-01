@@ -16,6 +16,45 @@
     requirement = 'The system shall solve mortar frictionless contact between two blocks with '
                   'weighted gap time stabilization using mortar nodal geometry.'
   []
+  [block-dynamics-action]
+    type = 'Exodiff'
+    exodiff = 'block-dynamics-action_out.e'
+    input = 'block-dynamics-action.i'
+    rel_err = 5.0e-4
+    abs_zero = 1.0e-5
+    min_parallel = 1
+    max_parallel = 4
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    cli_args = 'Contact/mechanical/mortar_dynamics=true Contact/mechanical/newmark_beta=0.25  '
+               'Contact/mechanical/newmark_gamma=0.5 Executioner/dt=0.05 Executioner/end_time=0.3'
+    requirement = 'The system shall solve mortar frictionless contact between two blocks with '
+                  'weighted gap time stabilization using mortar nodal geometry via the contact '
+                  'mechanics action.'
+  []
+  [block-dynamics-action-beta-error]
+    type = RunException
+    input = 'block-dynamics-action.i'
+    expect_err = 'newmark_beta can only be used with the mortar_dynamics option'
+    cli_args = 'Contact/mechanical/mortar_dynamics=false Contact/mechanical/newmark_beta=0.25 '
+               'Executioner/end_time=0.3'
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall generate an error if dynamics is not specifically requested '
+                  'and Newmark-beta integration parameter beta is provided.'
+  []
+  [block-dynamics-action-gamma-error]
+    type = RunException
+    input = 'block-dynamics-action.i'
+    expect_err = 'newmark_gamma can only be used with the mortar_dynamics option'
+    cli_args = 'Contact/mechanical/mortar_dynamics=false Contact/mechanical/newmark_gamma=0.5 '
+               'Executioner/end_time=0.3'
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall generate an error if dynamics is not specifically requested '
+                  'and Newmark-beta integration parameter gamma is provided.'
+
+  []
   [block-dynamics-friction]
     type = 'Exodiff'
     exodiff = 'block-dynamics-friction_out.e'
@@ -27,8 +66,8 @@
     min_ad_size = '50'
     ad_indexing_type = 'global'
     cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3'
-    requirement = 'The system shall solve mortar frictional contact between two blocks with '
-                  'weighted gap time stabilization using mortar nodal geometry.'
+    requirement = 'The system shall solve mortar frictional contact between two blocks with weighted '
+                  'gap time stabilization using mortar nodal geometry.'
   []
   [block-dynamics-friction-action]
     type = 'Exodiff'
@@ -39,8 +78,8 @@
     min_ad_size = '50'
     ad_indexing_type = 'global'
     cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3'
-    requirement = 'The system shall solve mortar frictional contact between two blocks with '
-                  'weighted gap time stabilization using mortar nodal geometry via the contact action.'
+    requirement = 'The system shall solve mortar frictional contact between two blocks with weighted '
+                  'gap time stabilization using mortar nodal geometry via the contact action.'
   []
   [block-dynamics-friction-creep]
     type = 'Exodiff'
@@ -78,9 +117,9 @@
     abs_zero = 1.0e-5
     min_ad_size = 100
     ad_indexing_type = 'global'
-    requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem with '
-                  'mortar constraint using nodal-attached geometry and the correct edge dropping '
-                  'setting'
+    requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem '
+                  'with mortar constraint using nodal-attached geometry and the correct edge '
+                  'dropping setting'
   []
   [frictional-mortar-3d-dynamics-light-miss-dropping]
     type = 'Exodiff'
@@ -90,10 +129,19 @@
     abs_zero = 1.0e-5
     min_ad_size = 100
     ad_indexing_type = 'global'
-    cli_args = 'Constraints/friction/correct_edge_dropping=false Constraints/normal_x/correct_edge_dropping=false Constraints/normal_y/correct_edge_dropping=false Constraints/normal_z/correct_edge_dropping=false Constraints/tangential_x/correct_edge_dropping=false Constraints/tangential_y/correct_edge_dropping=false Constraints/tangential_z/correct_edge_dropping=false Constraints/tangential_dir_x/correct_edge_dropping=false Constraints/tangential_dir_y/correct_edge_dropping=false Constraints/tangential_dir_z/correct_edge_dropping=false'
-    requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem with '
-                  'mortar constraint using nodal-attached geometry and the incorrect edge dropping '
-                  'setting'
+    cli_args = 'Constraints/friction/correct_edge_dropping=false '
+               'Constraints/normal_x/correct_edge_dropping=false '
+               'Constraints/normal_y/correct_edge_dropping=false '
+               'Constraints/normal_z/correct_edge_dropping=false '
+               'Constraints/tangential_x/correct_edge_dropping=false '
+               'Constraints/tangential_y/correct_edge_dropping=false '
+               'Constraints/tangential_z/correct_edge_dropping=false '
+               'Constraints/tangential_dir_x/correct_edge_dropping=false '
+               'Constraints/tangential_dir_y/correct_edge_dropping=false '
+               'Constraints/tangential_dir_z/correct_edge_dropping=false'
+    requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem '
+                  'with mortar constraint using nodal-attached geometry and the incorrect edge '
+                  'dropping setting'
   []
   [frictional-mortar-3d-dynamics-light-function]
     type = 'Exodiff'
@@ -104,6 +152,8 @@
     min_ad_size = 100
     ad_indexing_type = 'global'
     max_parallel = '2'
-    requirement = 'MOOSE shall solve a dynamic 3D frictional one-element bouncing block problem with mortar constraint using nodal-attached geometry and a friction coefficient that depends on the normal contact pressure and the relative tangential velocity'
+    requirement = 'MOOSE shall solve a dynamic 3D frictional one-element bouncing block problem with '
+                  'mortar constraint using nodal-attached geometry and a friction coefficient that '
+                  'depends on the normal contact pressure and the relative tangential velocity'
   []
 []
