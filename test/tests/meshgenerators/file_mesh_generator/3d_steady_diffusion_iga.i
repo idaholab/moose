@@ -4,6 +4,7 @@
     file = Cube_With_Sidesets.e
   []
   allow_renumbering = false
+  parallel_type = replicated
 []
 
 [Variables]

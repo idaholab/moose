@@ -5,6 +5,7 @@
     clear_spline_nodes = true
   []
   allow_renumbering = false
+  parallel_type = replicated
 []
 
 [Variables]

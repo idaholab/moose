@@ -4,6 +4,7 @@
     file = PressurizedCyl_Patch6_4Elem.e
   []
   allow_renumbering = false
+  parallel_type = replicated
 []
 
 [Variables]
