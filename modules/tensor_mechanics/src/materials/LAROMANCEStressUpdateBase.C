@@ -635,13 +635,14 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
             input = _input_limits[p][t][in_index][0];
           else
           {
-            // Set input to edge of limit so it is found later in computePartitionWeights
-            input = _input_limits[p][t][in_index][0];
             weights[p][t] = 0.0;
             std::stringstream msg;
             msg << "In " << _name << ": input parameter with value ("
                 << MetaPhysicL::raw_value(input) << ") is out of lower global range ("
                 << _input_limits[p][t][in_index][0] << ")";
+
+            // Set input to edge of limit so it is found later in computePartitionWeights
+            input = _input_limits[p][t][in_index][0];
 
             if (_window_failure[in_index].first == WindowFailure::WARN)
               mooseWarning(msg.str());
@@ -667,19 +668,20 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
             input = _input_limits[p][t][in_index][1];
           else
           {
-            // Set input to edge of limit so it is found later in computePartitionWeights
-            input = _input_limits[p][t][in_index][0];
             weights[p][t] = 0.0;
             std::stringstream msg;
             msg << "In " << _name << ": input parameter with value ("
                 << MetaPhysicL::raw_value(input) << ") is out of upper global range ("
                 << _input_limits[p][t][in_index][1] << ")";
 
-            if (_window_failure[in_index].first == WindowFailure::WARN)
+            // Set input to edge of limit so it is found later in computePartitionWeights
+            input = _input_limits[p][t][in_index][1];
+
+            if (_window_failure[in_index].second == WindowFailure::WARN)
               mooseWarning(msg.str());
-            else if (_window_failure[in_index].first == WindowFailure::ERROR)
+            else if (_window_failure[in_index].second == WindowFailure::ERROR)
               mooseError(msg.str());
-            else if (_window_failure[in_index].first == WindowFailure::EXCEPTION)
+            else if (_window_failure[in_index].second == WindowFailure::EXCEPTION)
               mooseException(msg.str());
             // if (_window_failure[in_index].second == WindowFailure::DONOTHING) <- nothing is done
           }
@@ -847,74 +849,6 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
     return 0.0;
   }
   return total_rom_effective_strain_inc - scalar;
-}
-
-template <bool is_ad>
-void
-LAROMANCEStressUpdateBaseTempl<is_ad>::computePartitionWeights(
-    std::vector<GenericReal<is_ad>> & weights, std::vector<GenericReal<is_ad>> & dweights_dstress)
-{
-  std::vector<bool> in_partition(_num_partitions, false);
-  unsigned int num_partitions_active = 0;
-  for (unsigned int p = 0; p < _num_partitions; ++p)
-  {
-    for (unsigned int t = 0; t < _num_tiles[p]; ++t)
-      if (!in_partition[p] && checkInTile(p, t))
-        in_partition[p] = true;
-
-    num_partitions_active += in_partition[p];
-  }
-  mooseAssert(num_partitions_active <= _num_partitions,
-              "Number of paritions active must be less than total number of paritions");
-  if (!num_partitions_active)
-    mooseException("Number of active partitions (",
-                   num_partitions_active,
-                   ") out of total number of partitions (",
-                   _num_partitions,
-                   ") is zero. This may be because you are trying to sample outside the total "
-                   "applicability of the model");
-
-  if (_num_partitions == 1) // If only one parition present, all weights are one
-  {
-    weights[0] = 1.0;
-    dweights_dstress[0] = 0.0;
-  }
-  else if (_num_partitions == 2)
-  {
-    if (num_partitions_active == 1) // If only present in one partition, math is easy
-    {
-      std::fill(dweights_dstress.begin(), dweights_dstress.end(), 0.0);
-
-      if (in_partition[0])
-        weights[1] = 0.0;
-      else if (in_partition[1])
-        weights[1] = 1.0;
-      else
-        mooseError("Internal error: Parition weight calculation incorrect when only one "
-                   "partition is applicable");
-    }
-    else if (num_partitions_active == 2) // If present in two partitions, compute weights
-    {
-      weights[1] = computeSecondPartitionWeight();
-      computeDSecondPartitionWeightDStress(dweights_dstress[1]);
-      dweights_dstress[0] = -dweights_dstress[1];
-    }
-    weights[0] = 1.0 - weights[1];
-  }
-  else
-    mooseError("Internal error: number of partitions can only be 1 or 2");
-
-  if (_num_partitions == 2)
-    _second_partition_weight[_qp] = _partition_weights[1];
-  else
-    _second_partition_weight[_qp] = 0.0;
-
-  // Given the weight, compute the sigmoid transformed value to smoothly transition
-  for (unsigned int p = 0; p < _num_partitions; ++p)
-  {
-    weights[p] = (1.0 - sigmoid(0.0, 1.0, weights[p]));
-    dweights_dstress[p] *= -sigmoid(0.0, 1.0, weights[p], true);
-  }
 }
 
 template <bool is_ad>

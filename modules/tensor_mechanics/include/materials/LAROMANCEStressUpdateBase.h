@@ -251,21 +251,14 @@ protected:
    * @param weights Weights for each partition
    * @param derivative Optional flag to return derivative of the sigmoid w.r.t. the input
    */
-  void computePartitionWeights(std::vector<GenericReal<is_ad>> & weights,
-                               std::vector<GenericReal<is_ad>> & dweights_dstress);
-
-  /**
-   * Compute the partition weight on the location in input-space,
-   * based on a calibrated Gaussian Process Regression model
-   */
-  virtual GenericReal<is_ad> computeSecondPartitionWeight() { return 0.0; };
-
-  /**
-   * Compute the derivative of the partition weight of the second partition w.r.t. stress
-   */
-  virtual void
-  computeDSecondPartitionWeightDStress(GenericReal<is_ad> & /*dsecond_partition_weight_dstress*/)
+  virtual void computePartitionWeights(std::vector<GenericReal<is_ad>> & weights,
+                                       std::vector<GenericReal<is_ad>> & dweights_dstress)
   {
+    if (_num_partitions != 1)
+      mooseError("Internal error: If number of partitions is not one, then computePartitionWeights "
+                 "must be defined");
+    weights[0] = 1.0;
+    dweights_dstress[0] = 0.0;
   }
 
   /**

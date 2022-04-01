@@ -20,9 +20,20 @@ public:
 
 protected:
   virtual void initialSetup() override;
-  virtual GenericReal<is_ad> computeSecondPartitionWeight() override;
-  virtual void computeDSecondPartitionWeightDStress(
-      GenericReal<is_ad> & dsecond_partition_weight_dstress) override;
+  virtual void computePartitionWeights(std::vector<GenericReal<is_ad>> & weights,
+                                       std::vector<GenericReal<is_ad>> & dweights_dstress) override;
+
+  /**
+   * Compute the partition weight on the location in input-space,
+   * based on a calibrated Gaussian Process Regression model
+   */
+  virtual GenericReal<is_ad> computeSecondPartitionWeight();
+
+  /**
+   * Compute the derivative of the partition weight of the second partition w.r.t. stress
+   */
+  virtual void
+  computeDSecondPartitionWeightDStress(GenericReal<is_ad> & dsecond_partition_weight_dstress);
 
   ///@{ Method and container for the Gaussian Process Regression lower triangular covariance matrix
   virtual std::vector<std::vector<Real>> getClassificationLuu() = 0;
@@ -35,8 +46,8 @@ protected:
   ///@}
 
   ///@{ Method and container for the inducing points of the Gaussian Process Regression model
-  virtual std::vector<Real> getClassificationVind() = 0;
-  std::vector<Real> _partition_Vind;
+  virtual DenseVector<Real> getClassificationVind() = 0;
+  DenseVector<Real> _partition_Vind;
   ///@}
 
   ///@{ Method and container for the mean values of the training input
@@ -73,6 +84,8 @@ protected:
   using LAROMANCEStressUpdateBaseTempl<is_ad>::_qp;
   using LAROMANCEStressUpdateBaseTempl<is_ad>::_old_strain_input_index;
   using LAROMANCEStressUpdateBaseTempl<is_ad>::_num_inputs;
+  using LAROMANCEStressUpdateBaseTempl<is_ad>::_num_partitions;
+  using LAROMANCEStressUpdateBaseTempl<is_ad>::sigmoid;
 };
 
 typedef LAROMANCEPartitionStressUpdateBaseTempl<false> LAROMANCEPartitionStressUpdateBase;

@@ -49,6 +49,74 @@ LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::initialSetup()
 }
 
 template <bool is_ad>
+void
+LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::computePartitionWeights(
+    std::vector<GenericReal<is_ad>> & weights, std::vector<GenericReal<is_ad>> & dweights_dstress)
+{
+  std::vector<bool> in_partition(_num_partitions, false);
+  unsigned int num_partitions_active = 0;
+  for (unsigned int p = 0; p < _num_partitions; ++p)
+  {
+    for (unsigned int t = 0; t < this->_num_tiles[p]; ++t)
+      if (!in_partition[p] && this->checkInTile(p, t))
+        in_partition[p] = true;
+
+    num_partitions_active += in_partition[p];
+  }
+  mooseAssert(num_partitions_active <= _num_partitions,
+              "Number of paritions active must be less than total number of paritions");
+  if (!num_partitions_active)
+    mooseException("Number of active partitions (",
+                   num_partitions_active,
+                   ") out of total number of partitions (",
+                   _num_partitions,
+                   ") is zero. This may be because you are trying to sample outside the total "
+                   "applicability of the model");
+
+  if (_num_partitions == 1) // If only one parition present, all weights are one
+  {
+    weights[0] = 1.0;
+    dweights_dstress[0] = 0.0;
+  }
+  else if (_num_partitions == 2)
+  {
+    if (num_partitions_active == 1) // If only present in one partition, math is easy
+    {
+      std::fill(dweights_dstress.begin(), dweights_dstress.end(), 0.0);
+
+      if (in_partition[0])
+        weights[1] = 0.0;
+      else if (in_partition[1])
+        weights[1] = 1.0;
+      else
+        mooseError("Internal error: Parition weight calculation incorrect when only one "
+                   "partition is applicable");
+    }
+    else if (num_partitions_active == 2) // If present in two partitions, compute weights
+    {
+      weights[1] = computeSecondPartitionWeight();
+      computeDSecondPartitionWeightDStress(dweights_dstress[1]);
+      dweights_dstress[0] = -dweights_dstress[1];
+    }
+    weights[0] = 1.0 - weights[1];
+  }
+  else
+    mooseError("Internal error: number of partitions can only be 1 or 2");
+
+  if (_num_partitions == 2)
+    _second_partition_weight[_qp] = this->_partition_weights[1];
+  else
+    _second_partition_weight[_qp] = 0.0;
+
+  // Given the weight, compute the sigmoid transformed value to smoothly transition
+  for (unsigned int p = 0; p < _num_partitions; ++p)
+  {
+    weights[p] = (1.0 - sigmoid(0.0, 1.0, weights[p]));
+    dweights_dstress[p] *= -sigmoid(0.0, 1.0, weights[p], true);
+  }
+}
+
+template <bool is_ad>
 GenericReal<is_ad>
 LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::computeSecondPartitionWeight()
 {
@@ -102,15 +170,10 @@ LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::computeSecondPartitionWeight()
   DenseVector<GenericReal<is_ad>> ma(_partition_b.size());
   _partition_A.lu_solve(_partition_b, ma);
 
-  // convert inducing points Vinduced to libMesh::DenseVector
-  DenseVector<GenericReal<is_ad>> Vind(_partition_Vind.size());
-  for (const auto i : index_range(Vind))
-    Vind(i) = _partition_Vind[i];
-
   // induce full array through sparse grid and summarize into mu
   GenericReal<is_ad> partition_weight = 0.0;
   for (const auto i : index_range(ma))
-    partition_weight += ma(i) * Vind(i);
+    partition_weight += ma(i) * _partition_Vind(i);
 
   // scale mu between 0 and 1: the weight of partition 2
   partition_weight = -partition_weight + 1.0;
