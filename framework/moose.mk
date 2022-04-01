@@ -66,17 +66,13 @@ pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HI
 # Conditional parts if the user wants to compile MOOSE with torchlib
 #
 ifeq ($(ENABLE_LIBTORCH),true)
-  ifeq ($(TORCH_DIR),)
-    TORCH_DIR ?= $(MOOSE_DIR)/framework/contrib/libtorch
-  endif
-endif
-ifneq ($(TORCH_DIR),)
-	UNAME_S := $(shell uname -s)
+  UNAME_S := $(shell uname -s)
 	LIBTORCH_LIB := libtorch.so
   ifeq ($(UNAME_S),Darwin)
     LIBTORCH_LIB := libtorch.dylib
   endif
 
+  $(info $(TORCH_DIR))
   ifneq ($(wildcard $(TORCH_DIR)/lib/$(LIBTORCH_LIB)),)
     # Enabling parts that have pytorch dependencies
     libmesh_CXXFLAGS += -DTORCH_ENABLED

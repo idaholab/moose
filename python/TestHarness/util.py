@@ -43,7 +43,15 @@ MOOSE_OPTIONS = {
                     { 'TRUE'    : '1',
                       'FALSE'   : '0'
                     }
-                  }
+    },
+
+    'libtorch' :    { 're_option' : r'#define\s+MOOSE_TORCH_ENABLED\s+(\d+)',
+                    'default'   : 'FALSE',
+                    'options'   :
+                    { 'TRUE'    : '1',
+                      'FALSE'   : '0'
+                    }
+    }
 }
 
 
@@ -580,14 +588,6 @@ def checkVTKVersion(checks, test):
 def getIfAsioExists(moose_dir):
     option_set = set(['ALL'])
     if os.path.exists(moose_dir+"/framework/contrib/asio/include/asio.hpp"):
-        option_set.add('TRUE')
-    else:
-        option_set.add('FALSE')
-    return option_set
-
-def getIfLibtorchExists(moose_dir):
-    option_set = set(['ALL'])
-    if os.path.exists(f'{moose_dir}/framework/contrib/libtorch'):
         option_set.add('TRUE')
     else:
         option_set.add('FALSE')

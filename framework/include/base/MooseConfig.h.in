@@ -29,3 +29,6 @@
 
 /* Whether to use a sparse derivative type */
 #undef SPARSE_AD
+
+/* Whether to use libtorch-related code or not */
+#undef TORCH_ENABLED

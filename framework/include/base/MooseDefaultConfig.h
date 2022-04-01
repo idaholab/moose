@@ -60,3 +60,8 @@
 #ifndef MOOSE_SPARSE_AD
 #define MOOSE_SPARSE_AD 1
 #endif
+
+/* Whether to use libtorch-related code or not */
+#ifndef TORCH_ENABLED
+#define TORCH_ENABLED 0
+#endif

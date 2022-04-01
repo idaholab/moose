@@ -323,7 +323,7 @@ class TestHarness:
             checks['boost'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'boost')
             checks['fparser_jit'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'fparser_jit')
             checks['libpng'] = util.getMooseConfigOption(self.moose_dir, 'libpng')
-            checks['libtorch'] = util.getIfLibtorchExists(self.moose_dir)
+            checks['libtorch'] = util.getMooseConfigOption(self.moose_dir, 'libtorch')
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
