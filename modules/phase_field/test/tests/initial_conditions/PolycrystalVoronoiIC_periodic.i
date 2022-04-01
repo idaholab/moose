@@ -45,6 +45,9 @@
   [./voronoi]
     type = PolycrystalVoronoi
     rand_seed = 10
+    use_kdtree = true
+    point_patch_size = 1
+    grain_patch_size = 10
   [../]
 []
 

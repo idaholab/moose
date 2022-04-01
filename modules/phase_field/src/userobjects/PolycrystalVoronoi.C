@@ -29,9 +29,11 @@ PolycrystalVoronoi::validParams()
   params.addParam<bool>(
       "columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
   params.addParam<bool>(
-      "use_kdtree", true, "Whether or not to use a KD tree to speedup grain search");
-  params.addRangeCheckedParam<unsigned int>(
-      "patch_size", 1, "patch_size > 0", "How many nearest points KDTree should return");
+      "use_kdtree", false, "Whether or not to use a KD tree to speedup grain search");
+  params.addRangeCheckedParam<unsigned int>("point_patch_size",
+                                            1,
+                                            "point_patch_size > 0",
+                                            "How many nearest points KDTree should return");
   params.addRangeCheckedParam<unsigned int>("grain_patch_size",
                                             10,
                                             "grain_patch_size > 0",
@@ -54,7 +56,7 @@ PolycrystalVoronoi::PolycrystalVoronoi(const InputParameters & parameters)
     _file_name(getParam<FileName>("file_name")),
     _kd_tree(nullptr),
     _use_kdtree(getParam<bool>("use_kdtree")),
-    _patch_size(getParam<unsigned int>("patch_size")),
+    _point_patch_size(getParam<unsigned int>("point_patch_size")),
     _grain_patch_size(getParam<unsigned int>("grain_patch_size"))
 {
   if (_file_name == "" && _grain_num == 0)
@@ -80,19 +82,19 @@ PolycrystalVoronoi::getGrainsBasedOnPoint(const Point & point,
     mooseAssert(_grain_gtl_ids.size() == _new_points.size(),
                 "The number of grain global IDs does not match that of new center points");
 
-    std::vector<std::size_t> return_index(_patch_size);
-    std::vector<Real> return_dist_sqr(_patch_size);
+    std::vector<std::size_t> return_index(_point_patch_size);
+    std::vector<Real> return_dist_sqr(_point_patch_size);
 
-    _kd_tree->neighborSearch(point, _patch_size, return_index, return_dist_sqr);
+    _kd_tree->neighborSearch(point, _point_patch_size, return_index, return_dist_sqr);
 
     min_index = _grain_gtl_ids[return_index[0]];
 
     d_min = return_dist_sqr[0];
 
-    // By default, _patch_size is one. A larger _patch_size
+    // By default, _point_patch_size is one. A larger _point_patch_size
     // may be useful if nearest nodes are not unique, and
     // we want to select the node that has the smallest ID
-    for (unsigned int i = 1; i < _patch_size; i++)
+    for (unsigned int i = 1; i < _point_patch_size; i++)
     {
       if (d_min > return_dist_sqr[i])
       {

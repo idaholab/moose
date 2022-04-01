@@ -29,7 +29,6 @@
     coloring_algorithm = bt
     x_offset = .5
     grain_num = 4
-    patch_size = 4
   [../]
 []
 

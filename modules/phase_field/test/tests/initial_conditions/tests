@@ -94,17 +94,17 @@
       type = 'Exodiff'
       input = 'PolycrystalVoronoiIC_periodic.i'
       exodiff = 'PolycrystalVoronoiIC_periodic_out.e'
+      cli_args = 'UserObjects/voronoi/use_kdtree=false'
 
-      detail = 'polycrystal structure with diffued interface and periodic BC,'
+      detail = 'polycrystal structure with diffused interface and periodic BC,'
     []
 
-    [PolycrystalVoronoiIC_periodic_nokdtree]
+    [PolycrystalVoronoiIC_periodic_kdtree]
       type = 'Exodiff'
       input = 'PolycrystalVoronoiIC_periodic.i'
       exodiff = 'PolycrystalVoronoiIC_periodic_out.e'
-      cli_args = 'UserObjects/voronoi/use_kdtree=false'
 
-      detail = 'polycrystal structure with diffued interface and periodic BC without using KDTree,'
+      detail = 'polycrystal structure with diffused interface and periodic BC using KDTree,'
     []
 
     [PolycrystalVoronoiVoidIC_moregrains]

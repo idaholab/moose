@@ -70,7 +70,7 @@ private:
   /// Whether or not to use a KD tree to speedup grain search
   bool _use_kdtree;
   /// The number of nearest points
-  unsigned int _patch_size;
+  unsigned int _point_patch_size;
   /// The number of neighboring grains
   unsigned int _grain_patch_size;
 };
