@@ -156,7 +156,6 @@
     secondary = fixed_block_left
     model = frictionless
     formulation = mortar
-    use_dual = true
     correct_edge_dropping = true
   []
 []
@@ -270,11 +269,10 @@
 
   # mortar contact solver options
   petsc_options = '-snes_converged_reason -pc_svd_monitor'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = ' lu       superlu_dist                  1e-5          NONZERO               1e-15'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+  petsc_options_value = ' lu       superlu_dist'
   snesmf_reuse_base = false
 
-  nl_forced_its = 1
   nl_rel_tol = 1e-10
   nl_max_its = 20
   l_max_its = 50

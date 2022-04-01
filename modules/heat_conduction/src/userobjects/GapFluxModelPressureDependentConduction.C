@@ -18,7 +18,7 @@ GapFluxModelPressureDependentConduction::validParams()
 
   params.addClassDescription("Heat flux model across a closed gap to calculate the conductance "
                              "between two solid materials");
-  params.addCoupledVar("temperature", "The name of the temperature variable");
+  params.addRequiredCoupledVar("temperature", "The name of the temperature variable");
   params.addParam<Real>(
       "scaling_coefficient",
       1.0,
@@ -66,6 +66,6 @@ GapFluxModelPressureDependentConduction::computeFlux() const
   const ADReal h_sum = _primary_hardness[_qp] + _secondary_hardness[_qp];
   const ADReal h_harmonic = 2 * _primary_hardness[_qp] * _secondary_hardness[_qp] / h_sum;
 
-  return _scaling * k_harmonic * (_primary_T[_qp] - _secondary_T[_qp]) * _normal_pressure[0] /
+  return _scaling * k_harmonic * (_primary_T[_qp] - _secondary_T[_qp]) * _normal_pressure[_qp] /
          h_harmonic;
 }

@@ -7,8 +7,8 @@
 `GapFluxModelPressureDependentConduction` computes a conductive heat flux across
 a closed gap between two solid bodies as a function of the normal mechanical pressure
 at the interface. The normal contact pressure is included in this calculation as
-a lower-dimensional Lagrange Multiplier variable. This class requires the use of
-[ModularGapConductanceConstraint.md](ModularGapConductanceConstraint.md).
+a Lagrange multiplier associated with a lower-dimensional domain. This class
+requires the use of [ModularGapConductanceConstraint](ModularGapConductanceConstraint.md).
 
 The thermal conductance of the interface is calculated as
 \begin{equation}
@@ -27,7 +27,7 @@ where k$_1$ and k$_2$ are the thermal conductivities of the two materials on eit
 side of the closed gap interface. The harmonic mean of the hardness values is
 calculated in a similar fashion.
 
-#### Analytical Solution
+### Analytical Solution
 
 Using this heat flux object alone, the temperature of the hotter material at the
 interface, T$^h_{int}$, is given by the analytical expression
@@ -43,7 +43,7 @@ conditions, respectively, k$_h$ and k$_c$ are the thermal conductivities of the
 materials associated with the hot and cool temperatures, and C$_T$ is the thermal
 conduction at the interface as given by [eq:pressureDepConductivity].
 Note that these expressions were derived assuming no deformation and unit thickness
-of both materials in the direction of the temperature gradient
+of both materials in the direction of the temperature gradient.
 
 !syntax parameters /UserObjects/GapFluxModelPressureDependentConduction
 

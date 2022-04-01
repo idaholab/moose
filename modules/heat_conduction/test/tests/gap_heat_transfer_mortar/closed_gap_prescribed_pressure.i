@@ -180,7 +180,6 @@
   solve_type = NEWTON
   automatic_scaling = false
 
-  nl_forced_its = 1
   nl_rel_tol = 1e-10
   nl_max_its = 20
 []

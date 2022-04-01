@@ -142,7 +142,6 @@
     secondary = fixed_block_left
     model = frictionless
     formulation = mortar
-    use_dual = true
     correct_edge_dropping = true
   []
 []
