@@ -5,6 +5,7 @@ Content:
   - ${MOOSE_DIR}/modules/heat_conduction/doc/content
   - ${MOOSE_DIR}/modules/stochastic_tools/doc/content
   - ${MOOSE_DIR}/modules/ray_tracing/doc/content
+  - ${MOOSE_DIR}/modules/tensor_mechanics/doc/content
 Renderer:
   type: MooseDocs.base.MaterializeRenderer
 
@@ -40,4 +41,5 @@ Extensions:
           framework: !include ${MOOSE_DIR}/framework/doc/sqa_framework.yml
           stochastic_tools: !include ${MOOSE_DIR}/modules/stochastic_tools/doc/sqa_stochastic_tools.yml
           heat_conduction: !include ${MOOSE_DIR}/modules/heat_conduction/doc/sqa_heat_conduction.yml
+          tensor_mechanics: !include ${MOOSE_DIR}/modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
           isopod: !include ${ROOT_DIR}/doc/sqa_isopod.yml

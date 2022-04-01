@@ -1,4 +1,10 @@
 specs:
     - tests
 directories:
-    - ${ISOPOD_DIR}/test/tests
+    - test/tests
+dependencies:
+    - framework
+    - heat_conduction
+    - tensor_mechanics
+    - stochastic_tools
+reports: !include doc/sqa_reports.yml
