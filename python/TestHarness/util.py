@@ -124,6 +124,15 @@ LIBMESH_OPTIONS = {
   'exodus_minor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_EXODUS_VERSION_MINOR\s+(\d+)',
                      'default'   : '1'
                    },
+  'vtk_major' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_VTK_VERSION_MAJOR\s+(\d+)',
+                   'default'   : '1'
+                 },
+  'vtk_minor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_VTK_VERSION_MINOR\s+(\d+)',
+                   'default'   : '1'
+                 },
+  'vtk_subminor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_VTK_VERSION_SUBMINOR\s+(\d+)',
+                      'default'   : '1'
+                    },
   'dof_id_bytes' : { 're_option' : r'#define\s+LIBMESH_DOF_ID_BYTES\s+(\d+)',
                      'default'   : '4'
                    },
@@ -463,6 +472,15 @@ def getExodusVersion(libmesh_dir):
 
     return major_version.pop() + '.' + minor_version.pop()
 
+def getVTKVersion(libmesh_dir):
+    major_version = getLibMeshConfigOption(libmesh_dir, 'vtk_major')
+    minor_version = getLibMeshConfigOption(libmesh_dir, 'vtk_minor')
+    subminor_version = getLibMeshConfigOption(libmesh_dir, 'vtk_subminor')
+    if len(major_version) != 1 or len(minor_version) != 1 or len(major_version) != 1:
+      return None
+
+    return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
+
 
 def checkLogicVersionSingle(checks, iversion, package):
     logic, version = re.search(r'(.*?)(\d\S+)', iversion).groups()
@@ -542,6 +560,21 @@ def checkExodusVersion(checks, test):
        return (False, version_string)
 
     return (checkVersion(checks, version_string, 'exodus_version'), version_string)
+
+
+# Break down VTKversion logic in a new define
+def checkVTKVersion(checks, test):
+    version_string = ' '.join(test['vtk_version'])
+
+    # If any version of VTK works, return true immediately
+    if 'ALL' in set(test['vtk_version']):
+        return (True, version_string)
+
+    # VTK not installed or version could not be detected (e.g. old libMesh)
+    if checks['vtk_version'] == None:
+       return (False, version_string)
+
+    return (checkVersion(checks, version_string, 'vtk_version'), version_string)
 
 
 def getIfAsioExists(moose_dir):
