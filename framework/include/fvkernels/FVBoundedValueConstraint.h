@@ -11,13 +11,6 @@
 
 #include "FVScalarLagrangeMultiplierConstraint.h"
 
-/// What type of constraint we are going to enforce
-enum BoundType
-{
-  LOWER_THAN,
-  HIGHER_THAN
-};
-
 /**
  * This Kernel implements the residuals that enforce the constraint
  *
@@ -46,4 +39,12 @@ private:
 
   /// What type of bound (min or max) this kernel intends to apply
   const MooseEnum _bound_type;
+
+  /// What type of constraint we are going to enforce
+  enum BoundType
+  {
+    LOWER_THAN,
+    HIGHER_THAN
+  };
+
 };
