@@ -184,4 +184,69 @@ meshCentroidCalculator(const MeshBase & mesh)
   centroid_pt /= vol_tmp;
   return centroid_pt;
 }
+
+std::map<dof_id_type, dof_id_type>
+getExtraIDUniqueCombinationMap(const MeshBase & mesh,
+                               const std::set<SubdomainID> & block_ids,
+                               std::vector<ExtraElementIDName> extra_ids)
+{
+  // check block restriction
+  const bool block_restricted = block_ids.find(Moose::ANY_BLOCK_ID) == block_ids.end();
+  // get element id name of interest in recursive parsing algorithm
+  ExtraElementIDName id_name = extra_ids.back();
+  extra_ids.pop_back();
+  const auto id_index = mesh.get_elem_integer_index(id_name);
+  // create base parsed id set
+  if (extra_ids.empty())
+  {
+    // get set of extra id values;
+    std::set<dof_id_type> ids;
+    for (const auto & elem : mesh.active_local_element_ptr_range())
+    {
+      if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
+        continue;
+      auto id = elem->get_extra_integer(id_index);
+      ids.insert(id);
+    }
+    mesh.comm().set_union(ids);
+    // determine new extra id values;
+    std::map<dof_id_type, dof_id_type> parsed_ids;
+    for (auto & elem : mesh.active_local_element_ptr_range())
+    {
+      if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
+        continue;
+      parsed_ids[elem->id()] = std::distance(
+          ids.begin(), std::find(ids.begin(), ids.end(), elem->get_extra_integer(id_index)));
+    }
+    return parsed_ids;
+  }
+  // if extra_ids is not empty, recursively call getExtraIDUniqueCombinationMap
+  std::map<dof_id_type, dof_id_type> base_parsed_ids =
+      MooseMeshUtils::getExtraIDUniqueCombinationMap(mesh, block_ids, extra_ids);
+  // parsing extra ids based on ref_parsed_ids
+  std::set<std::pair<dof_id_type, dof_id_type>> unique_ids;
+  for (const auto & elem : mesh.active_local_element_ptr_range())
+  {
+    if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
+      continue;
+    const dof_id_type id1 = base_parsed_ids[elem->id()];
+    const dof_id_type id2 = elem->get_extra_integer(id_index);
+    if (!unique_ids.count(std::pair<dof_id_type, dof_id_type>(id1, id2)))
+      unique_ids.insert(std::pair<dof_id_type, dof_id_type>(id1, id2));
+  }
+  mesh.comm().set_union(unique_ids);
+  std::map<dof_id_type, dof_id_type> parsed_ids;
+  for (const auto & elem : mesh.active_local_element_ptr_range())
+  {
+    if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
+      continue;
+    const dof_id_type id1 = base_parsed_ids[elem->id()];
+    const dof_id_type id2 = elem->get_extra_integer(id_index);
+    parsed_ids[elem->id()] = std::distance(
+        unique_ids.begin(),
+        std::find(
+            unique_ids.begin(), unique_ids.end(), std::pair<dof_id_type, dof_id_type>(id1, id2)));
+  }
+  return parsed_ids;
+}
 }
