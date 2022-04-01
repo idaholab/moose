@@ -19,3 +19,7 @@ git submodule deinit -f large_media libmesh petsc
 # The cache still exists from the checkout... and this
 # is the only way to get rid of it
 rm -rf .git/modules
+# Docker autobuild will do the fetch with SSH; change
+# the remote so that the user can fetch within
+# moose without the need for keys (see #20688)
+git remote set-url origin https://github.com/idaholab/moose.git
