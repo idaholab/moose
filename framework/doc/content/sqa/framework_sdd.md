@@ -1,6 +1,7 @@
 !template load file=sdd.md.template category=framework project=Framework
 
 !template! item key=introduction
+!! introduction-begin
 Frameworks are a software development construct aiming to simplify the creation of specific classes
 of applications through abstraction of low-level details. The main object of creating a framework is
 to provide an interface to application developers that saves time and provides advanced capabilities
@@ -55,9 +56,11 @@ input files for driving a simulation, run the application, and analyze the resul
 through MOOSE are primarily through the command-line interface and through a customizable block-based
 input file.
 
+!! introduction-finish
 !template-end!
 
 !template! item key=system-purpose
+!! system-purpose-begin
 The Software Design Description provided here is description of each object in the system. The pluggable
 architecture of the framework makes [!ac](MOOSE) and [!ac](MOOSE)-based applications straightforward
 to develop as each piece of end-user (developer) code that goes into the system follows a well-defined
@@ -65,9 +68,11 @@ interface for the underlying systems that those object plug into. These descript
 through developer-supplied "markdown" files that are required for all new objects that are developed
 as part of the framework, modules and derivative applications. More information about the design
 documentation can be found in [framework/documenting.md].
+!! system-purpose-finish
 !template-end!
 
 !template! item key=system-scope
+!! system-scope-begin
 The purpose of this software is to provide several libraries that can be used to build an application
 based upon the framework. Additionally, several utilities are provided
 for assisting developers and users in end-to-end [!ac](FEM) analysis. A brief overview of the major
@@ -86,9 +91,11 @@ components are listed here:
 | tutorials | Step by step guides to building up an application using [!ac](MOOSE)'s pluggable systems |
 | unit | An application for unit testing individual classes or methods of C++ code |
 
+!! system-scope-finish
 !template-end!
 
 !template! item key=dependencies-and-limitations
+!! dependencies-and-limitations-begin
 The [!ac](MOOSE) platform has several dependencies on other software packages and has scope that
 is constantly evolving based upon funding, resources, priorities, and lab direction. However, the
 software is open-source and many features and even bugs can be offloaded to developers with appropriate
@@ -109,13 +116,16 @@ specific packages to be installed prior to using MOOSE, which can be found on th
        caption=A diagram of the MOOSE code platform.
        style=width=50%;
 
+!! dependencies-and-limitations-finish
 !template-end!
 
 !template! item key=definitions
+!! definitions-begin
 - +Pull (Merge) Request+: A proposed change to the software (e.g. usually a code change, but may also include documentation, requirements, design, and/or testing).
 - +Baseline+: A specification or product (e.g., project plan, maintenance and operations (M&O) plan, requirements, or design) that has been formally reviewed and agreed upon, that thereafter serves as the basis for use and further development, and that can be changed only by using an approved change control process (NQA-1, 2009).
 - +Validation+: Confirmation, through the provision of objective evidence (e.g., acceptance test), that the requirements for a specific intended use or application have been fulfilled (24765:2010(E), 2010).
 - +Verification+: (1) The process of: evaluating a system or component to determine whether the products of a given development phase satisfy the conditions imposed at the start of that phase. (2) Formal proof of program correctness (e.g., requirements, design, implementation reviews, system tests) (24765:2010(E), 2010).
+!! definitions-finish
 !template-end!
 
 !template! item key=acronyms
@@ -123,13 +133,16 @@ specific packages to be installed prior to using MOOSE, which can be found on th
 !template-end!
 
 !template! item key=design-stakeholders
+!! design-stakeholders-begin
 Stakeholders for [!ac](MOOSE) include several of the funding sources including [!ac](DOE-NE)
 and the [!ac](INL). However, Since [!ac](MOOSE) is an open-source project, several universities,
 companies, and foreign governments have an interest in the development and maintenance of the
 [!ac](MOOSE) project.
+!! design-stakeholders-finish
 !template-end!
 
 !template! item key=stakeholder-design-concerns
+!! stakeholder-design-concerns-begin
 Concerns from many of the stakeholders are similar. These concerns include correctness, stability,
 and performance. The mitigation plan for each of these can be addressed. For correctness, [!ac](MOOSE)
 development requires either regression or unit testing for all new code added to the repository.
@@ -138,9 +151,11 @@ other verification methods such as [MMS](python/mms.md optional=True). For stabi
 multiple branches to incorporate several layers of testing both internally and for dependent
 applications. Finally, performance tests are also performed as part of the the normal testing suite
 to monitor code change impacts to performance.
+!! stakeholder-design-concerns-finish
 !template-end!
 
 !template! item key=system-design
+!! system-design-begin
 The MOOSE framework itself is composed of a wide range of pluggable systems. Each system is generally
 composed of a single or small set of C++ objects intended to be specialized by a Developer to solve a
 specific problem. To accomplish this design goal, MOOSE uses several modern object-oriented design
@@ -151,15 +166,17 @@ section. Additionally, up-to-date documentation extracted from the source is mai
 mooseframework.org documentation site after every successful merge to MOOSE's stable branch. After
 these objects are created, the can be registered with the framework and used immediately in a MOOSE
 input file.
+!! system-design-finish
 !template-end!
 
 !template! item key=system-structure
+!! system-structure-begin
 The MOOSE framework architecture consists of a core and several pluggable systems. The core of MOOSE
 consists of a number of key objects responsible for setting up and managing the user-defined objects
 of a finite element simulation. This core set of objects has limited extendability and exist for
 every simulation configuration that the framework is capable of running.
 
-!syntax list subsystems=True actions=False objects=False
+!syntax complete subsystems=False actions=False objects=False
 
 The MooseApp is the top-level object used to hold all of the other objects in a simulation. In a
 normal simulation a single MooseApp object is created and "run()". This object uses it's Factory
@@ -172,36 +189,45 @@ MOOSE's pluggable systems are documented on the mooseframework.org wiki. Each of
 set of defined polymorphic interfaces and are designed to accomplish a specific task within the
 simulation. The design of these systems is fluid and is managed through agile methods and ticket
 request system on the Github.org website.
+!! system-structure-finish
 !template-end!
 
 !template! item key=data-design-and-control
+!! data-design-and-control-begin
 At a high level, the system is designed to process [!ac](HIT) input files to construct several
 objects that will constitute an [!ac](FE) simulation. Some of the objects in the simulation may
 in turn load other file-based resources to complete the simulation. Examples include meshes
 or data files. The system will then assemble systems of equations and solve them using the
 libraries of the [Code Platform](#dependencies-and-limitations). The system can then output the
 solution in one or more supported output formats commonly used for visualization.
+!! data-design-and-control-finish
 !template-end!
 
 !template! item key=human-machine-interface-design
+!! human-machine-interface-design-begin
 MOOSE is a command-line driven program. All interaction with MOOSE and MOOSE-based codes is
 ultimately done through the command line. This is typical for [!ac](HPC) applications that use
 the [!ac](MPI) interface for running on super computing clusters. Optional GUIs may be used
 to assist in creating input files and launching executables on the command line.
+!! human-machine-interface-design-finish
 !template-end!
 
 !template! item key=system-design-interface
+!! system-design-interface-begin
 All external system interaction is performed either through file [!ac](I/O) or through local
 [!ac](API) calls. Neither the framework, nor the modules are designed to interact
 with any external system directly through remote procedure calls. Any code to code coupling
 performed using the framework are done directly through API calls either in
 a static binary or after loading shared libraries.
+!! system-design-interface-finish
 !template-end!
 
 !template! item key=security-structure
+!! security-structure-begin
 The framework does not require any elevated privileges to operate and does not
 run any stateful services, daemons or other network programs. Distributed runs rely on the
 [!ac](MPI) library.
+!! security-structure-finish
 !template-end!
 
 !template! item key=requirements-cross-reference
