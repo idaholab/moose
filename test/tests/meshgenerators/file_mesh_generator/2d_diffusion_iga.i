@@ -3,6 +3,7 @@
     type = FileMeshGenerator
     file = PressurizedCyl_Patch6_4Elem.e
   []
+  allow_renumbering = false
 []
 
 [Variables]

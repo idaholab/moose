@@ -4,6 +4,7 @@
     file = PressurizedCyl_Patch6_4Elem.e
     clear_spline_nodes = true
   []
+  allow_renumbering = false
 []
 
 [Variables]

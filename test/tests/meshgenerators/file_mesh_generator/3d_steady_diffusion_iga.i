@@ -3,6 +3,7 @@
     type = FileMeshGenerator
     file = Cube_With_Sidesets.e
   []
+  allow_renumbering = false
 []
 
 [Variables]
