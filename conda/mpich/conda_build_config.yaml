@@ -2,7 +2,7 @@
 ## Any changes made will require additional changes to any item above that.
 
 moose_libmesh:
-  - moose-libmesh 2022.03.28 build_0
+  - moose-libmesh 2022.03.28 build_1
 
 SHORT_VTK_NAME:
   - 9.1
@@ -11,13 +11,13 @@ vtk_version:
   - 9.1.0
 
 moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.1.0 build_5
+  - moose-libmesh-vtk 9.1.0 build_6
 
 moose_petsc:
-  - moose-petsc 3.16.5 build_0
+  - moose-petsc 3.16.5 build_1
 
 moose_mpich:
-  - moose-mpich 4.0.1 build_0
+  - moose-mpich 4.0.1 build_1
 
 #### MOOSE_TOOLS stuff (order is important, must match python version order)
 moose_python:
@@ -195,24 +195,28 @@ zip_keys:
 
 #### Compilers
 base_mpich:
-  - mpich 4.0.1 h846660c_100                               # [linux]
-  - mpich 4.0.1 hd33e60e_100                               # [not arm64 and osx]
-  - mpich 4.0.1 hd4b5bf3_100                               # [arm64]
+  - mpich 4.0.1 h846660c_100                                # [linux]
+  - mpich 4.0.1 hd33e60e_100                                # [not arm64 and osx]
+  - mpich 4.0.1 hd4b5bf3_100                                # [arm64]
 
 base_mpicc:
-  - mpich-mpicc 4.0.1 hb600da9_100                         # [linux]
-  - mpich-mpicc 4.0.1 h4fd26ce_100                         # [not arm64 and osx]
-  - mpich-mpicc 4.0.1 haad7f49_100                         # [arm64]
+  - mpich-mpicc 4.0.1 hb600da9_100                          # [linux]
+  - mpich-mpicc 4.0.1 h4fd26ce_100                          # [not arm64 and osx]
+  - mpich-mpicc 4.0.1 haad7f49_100                          # [arm64]
 
 base_mpicxx:
-  - mpich-mpicxx 4.0.1 h166bdaf_100                        # [linux]
-  - mpich-mpicxx 4.0.1 h5eb16cf_100                        # [not arm64 and osx]
-  - mpich-mpicxx 4.0.1 h1c322ee_100                        # [arm64]
+  - mpich-mpicxx 4.0.1 h166bdaf_100                         # [linux]
+  - mpich-mpicxx 4.0.1 h5eb16cf_100                         # [not arm64 and osx]
+  - mpich-mpicxx 4.0.1 h1c322ee_100                         # [arm64]
 
 base_mpifort:
-  - mpich-mpifort 4.0.1 h924138e_100                       # [linux]
-  - mpich-mpifort 4.0.1 hbb4e6a2_100                       # [not arm64 and osx]
-  - mpich-mpifort 4.0.1 h3e96240_100                       # [arm64]
+  - mpich-mpifort 4.0.1 h924138e_100                        # [linux]
+  - mpich-mpifort 4.0.1 hbb4e6a2_100                        # [not arm64 and osx]
+  - mpich-mpifort 4.0.1 h3e96240_100                        # [arm64]
+
+moose_ld64:                                                 # [osx]
+  - ld64 609 h4dfd969_10                                    # [not arm64 and osx]
+  - ld64_osx-arm64 609 h7c97014_10                          # [arm64]
 
 #### Support Libraries (libMesh and VTK)
 moose_libglu:                                               # [linux]
@@ -262,11 +266,11 @@ pin_run_as_build:
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
-  - /opt/MacOSX10.11.sdk                                    # [not arm64 and osx]
+  - /opt/MacOSX10.12.sdk                                    # [not arm64 and osx]
   - /opt/MacOSX11.3.sdk                                     # [arm64]
 
 macos_min_version:                                          # [osx]
-  - 10.11                                                   # [not arm64 and osx]
+  - 10.12                                                   # [not arm64 and osx]
   - 11.3                                                    # [arm64]
 
 macos_machine:                                              # [osx]
@@ -274,5 +278,5 @@ macos_machine:                                              # [osx]
   - arm64-apple-darwin20.0.0                                # [arm64]
 
 MACOSX_DEPLOYMENT_TARGET:                                   # [osx]
-  - 10.11                                                   # [not arm64 and osx]
+  - 10.12                                                   # [not arm64 and osx]
   - 11.3                                                    # [arm64]
