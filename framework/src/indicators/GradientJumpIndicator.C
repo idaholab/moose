@@ -23,12 +23,25 @@ GradientJumpIndicator::validParams()
 GradientJumpIndicator::GradientJumpIndicator(const InputParameters & parameters)
   : InternalSideIndicator(parameters)
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  if (_var.isFV())
+    mooseError("Use of GradientJumpIndicator with finite volume variables is currently only "
+               "supported with a global AD indexing configuration.");
+#endif
 }
 
 Real
 GradientJumpIndicator::computeQpIntegral()
 {
-  Real jump = (_grad_u[_qp] - _grad_u_neighbor[_qp]) * _normals[_qp];
+  Real jump = 0;
+  if (_var.isFV())
+  {
+    jump = (MetaPhysicL::raw_value(_var.gradient(Moose::ElemArg{_current_elem, false, false})) -
+            MetaPhysicL::raw_value(_var.gradient(Moose::ElemArg{_neighbor_elem, false, false}))) *
+           _normals[_qp];
+  }
+  else
+    jump = (_grad_u[_qp] - _grad_u_neighbor[_qp]) * _normals[_qp];
 
   return jump * jump;
 }
