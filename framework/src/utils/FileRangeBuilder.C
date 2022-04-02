@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "InputParameters.h"
 
+#include "libmesh/int_range.h"
 #include "pcrecpp.h"
 #include "tinydir.h"
 
@@ -128,7 +129,7 @@ FileRangeBuilder::FileRangeBuilder(const InputParameters & params) : _status(0)
     pcrecpp::RE file_base_and_num_regex(oss.str());
 
     // Loop through the files in the directory
-    for (int i = 0; i < dir.n_files; i++)
+    for (const auto i : make_range(dir.n_files))
     {
       // Update the current file
       tinydir_file file;
