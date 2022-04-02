@@ -228,7 +228,6 @@ FVInterfaceKernel::neighborFromFace(const bool correct_skewness) const
           _face_info->neighborPtr()->subdomain_id()};
 }
 
-
 Moose::SingleSidedFaceArg
 FVInterfaceKernel::singleSidedFaceArg(const MooseVariableFV<Real> & variable,
                                       const FaceInfo * fi,

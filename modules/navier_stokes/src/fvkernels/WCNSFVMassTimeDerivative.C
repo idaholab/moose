@@ -17,8 +17,8 @@ InputParameters
 WCNSFVMassTimeDerivative::validParams()
 {
   InputParameters params = FVTimeKernel::validParams();
-  params.addClassDescription(
-      "Adds the time derivative term to the weakly-compressible Navier-Stokes continuity equation.");
+  params.addClassDescription("Adds the time derivative term to the weakly-compressible "
+                             "Navier-Stokes continuity equation.");
   params.addRequiredParam<MaterialPropertyName>(
       NS::time_deriv(NS::density), "The time derivative of the density material property");
   return params;

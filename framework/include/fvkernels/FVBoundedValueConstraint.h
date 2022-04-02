@@ -46,5 +46,4 @@ private:
     LOWER_THAN,
     HIGHER_THAN
   };
-
 };
