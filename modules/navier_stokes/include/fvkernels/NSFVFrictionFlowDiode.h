@@ -12,7 +12,7 @@
 #include "INSFVElementalKernel.h"
 
 /**
- * This kernels adds a linear friction penalty if the velocity is in the halfplane opposite the
+ * This kernel adds a linear friction penalty if the velocity is in the halfplane opposite the
  * normal of the diode.
  */
 class NSFVFrictionFlowDiode : public INSFVElementalKernel
