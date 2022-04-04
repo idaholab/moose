@@ -83,7 +83,7 @@ rho = 1
     pressure = pressure
   []
   [diodes_against_flow]
-    type = NSFVFrictionFlowDiode
+    type = INSFVFrictionFlowDiode
     resistance = 100
     variable = vel_x
     direction = '-1 0 0'
@@ -91,7 +91,7 @@ rho = 1
     momentum_component = 'x'
   []
   [diode_free_flow]
-    type = NSFVFrictionFlowDiode
+    type = INSFVFrictionFlowDiode
     resistance = 100
     variable = vel_x
     direction = '1 0 0'

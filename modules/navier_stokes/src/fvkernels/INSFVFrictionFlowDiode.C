@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVFrictionFlowDiode.h"
+#include "INSFVFrictionFlowDiode.h"
 #include "NS.h"
 #include "SystemBase.h"
 #include "MooseVariableFV.h"
 
-registerMooseObject("NavierStokesApp", NSFVFrictionFlowDiode);
+registerMooseObject("NavierStokesApp", INSFVFrictionFlowDiode);
 
 InputParameters
-NSFVFrictionFlowDiode::validParams()
+INSFVFrictionFlowDiode::validParams()
 {
   InputParameters params = INSFVElementalKernel::validParams();
   params.addClassDescription("Adds a linear friction term, -K vel_i * |d(i)|, i being the momentum"
@@ -31,7 +31,7 @@ NSFVFrictionFlowDiode::validParams()
   return params;
 }
 
-NSFVFrictionFlowDiode::NSFVFrictionFlowDiode(const InputParameters & params)
+INSFVFrictionFlowDiode::INSFVFrictionFlowDiode(const InputParameters & params)
   : INSFVElementalKernel(params),
     _direction(getParam<RealVectorValue>("direction")),
     _resistance(getParam<Real>("resistance"))
@@ -39,7 +39,7 @@ NSFVFrictionFlowDiode::NSFVFrictionFlowDiode(const InputParameters & params)
 }
 
 void
-NSFVFrictionFlowDiode::gatherRCData(const Elem & elem)
+INSFVFrictionFlowDiode::gatherRCData(const Elem & elem)
 {
   const auto elem_arg = makeElemArg(&elem);
   const auto vel_comp = _var(elem_arg);
@@ -52,6 +52,6 @@ NSFVFrictionFlowDiode::gatherRCData(const Elem & elem)
     _rc_uo.addToA(&elem, _index, coefficient);
 
     const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
-    processResidual(coefficient * _u_functor(elem_arg), dof_number);
+    processResidual(coefficient * vel_comp, dof_number);
   }
 }

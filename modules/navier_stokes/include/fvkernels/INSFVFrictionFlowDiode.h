@@ -15,12 +15,12 @@
  * This kernel adds a linear friction penalty if the velocity is in the halfplane opposite the
  * normal of the diode.
  */
-class NSFVFrictionFlowDiode : public INSFVElementalKernel
+class INSFVFrictionFlowDiode : public INSFVElementalKernel
 {
 public:
   static InputParameters validParams();
 
-  NSFVFrictionFlowDiode(const InputParameters & parameters);
+  INSFVFrictionFlowDiode(const InputParameters & parameters);
 
   using INSFVElementalKernel::gatherRCData;
   void gatherRCData(const Elem &) override;
