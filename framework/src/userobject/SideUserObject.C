@@ -56,7 +56,7 @@ SideUserObject::singleSidedFaceArg(const MooseFunctorName & functor_name,
   const bool use_elem = fi.faceType(functor_name) == FaceInfo::VarFaceNeighbors::ELEM;
 
   if (use_elem)
-    return {&fi, limiter_type, true, correct_skewness, correct_skewness, fi.elem().subdomain_id()};
+    return {fi, limiter_type, true, correct_skewness, correct_skewness, fi.elem().subdomain_id()};
   else
     return {&fi,
             limiter_type,

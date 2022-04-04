@@ -40,16 +40,37 @@ template <bool is_ad>
 Real
 SideIntegralFunctorPostprocessorTempl<is_ad>::computeQpIntegral()
 {
-  // const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
-  // mooseAssert(fi, "We should have an fi");
-  // const Moose::SingleSidedFaceArg ssf = {fi,
-  //                                        Moose::FV::LimiterType::CentralDifference,
-  //                                        true,
-  //                                        false,
-  //                                        false,
-  //                                        _current_elem->subdomain_id()};
+  const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
+  mooseAssert(fi, "We should have an fi");
 
-  const auto ssf = singleSidedFaceArg(_functor.functorName(), *(_mesh.faceInfo(_current_elem, _current_side)));
+  auto aa = _functor.blockIDs();
+
+  // Functor may not be defined on that side of the boundary
+  bool use_elem;
+  if (_functor.hasBlocks(_current_elem->subdomain_id()))
+    use_elem = true;
+  else
+  {
+    mooseAssert(_functor.hasBlocks(fi->neighborPtr()->subdomain_id()),
+                "Functor should be defined on one side of the boundary");
+    use_elem = false;
+  }
+
+  Moose::SingleSidedFaceArg ssf;
+  if (use_elem)
+    ssf = {*fi,
+           Moose::FV::LimiterType::CentralDifference,
+           true,
+           false,
+           false,
+           _current_elem->subdomain_id()};
+  else
+    ssf = {*fi,
+           Moose::FV::LimiterType::CentralDifference,
+           true,
+           false,
+           false,
+           fi->neighborPtr()->subdomain_id()};
 
   return MetaPhysicL::raw_value(_prefactor(ssf) * _functor(ssf));
 }
