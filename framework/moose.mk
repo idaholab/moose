@@ -86,7 +86,7 @@ ifeq ($(ENABLE_LIBTORCH),true)
     libmesh_LDFLAGS += -Wl,-rpath,$(TORCH_DIR)/lib
     libmesh_LDFLAGS += -L$(TORCH_DIR)/lib -ltorch
   else
-    $(error ERROR! Could not find any dynamic libraries of libtorch. Please check the following directory $(TORCH_DIR)/lib. Make sure you installed libtorch manually or using ./scripts/setup_libtorch.sh!)
+    $(error ERROR! Cannot locate any dynamic libraries of libtorch. Make sure to install libtorch (manually or using scripts/setup_libtorch.sh) and to run the configure --with-libtorch before compiling moose!)
   endif
 endif
 
