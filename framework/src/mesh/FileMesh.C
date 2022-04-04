@@ -15,6 +15,7 @@
 #include "RestartableDataIO.h"
 
 #include "libmesh/exodusII_io.h"
+#include "libmesh/mesh_tools.h"
 #include "libmesh/nemesis_io.h"
 #include "libmesh/parallel_mesh.h"
 
@@ -25,6 +26,11 @@ FileMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
   params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
+  params.addParam<bool>("clear_spline_nodes",
+                        false,
+                        "If clear_spline_nodes=true, IsoGeometric Analyis spline nodes "
+                        "and constraints are removed from an IGA mesh, after which only "
+                        "C^0 Rational-Bernstein-Bezier elements will remain.");
   params.addClassDescription("Read a mesh from a file.");
   return params;
 }
@@ -111,6 +117,9 @@ FileMesh::buildMesh()
 
       MooseUtils::checkFileReadable(_file_name);
       getMesh().read(_file_name);
+
+      if (getParam<bool>("clear_spline_nodes"))
+        MeshTools::clear_spline_nodes(getMesh());
 
       // we also read declared mesh meta data here if there is meta data file
       RestartableDataIO restartable(_app);

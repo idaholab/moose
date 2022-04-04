@@ -15,6 +15,7 @@
 #include "libmesh/face_quad4.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/mesh_communication.h"
+#include "libmesh/mesh_tools.h"
 
 registerMooseObject("MooseApp", FileMeshGenerator);
 
@@ -35,6 +36,11 @@ FileMeshGenerator::validParams()
                         false,
                         "True to skip partitioning, only after this mesh generator, "
                         "because the mesh was pre-split for example.");
+  params.addParam<bool>("clear_spline_nodes",
+                        false,
+                        "If clear_spline_nodes=true, IsoGeometric Analyis spline nodes "
+                        "and constraints are removed from an IGA mesh, after which only "
+                        "C^0 Rational-Bernstein-Bezier elements will remain.");
   params.addClassDescription("Read a mesh from a file.");
   return params;
 }
@@ -72,7 +78,12 @@ FileMeshGenerator::generate()
     else
     {
       if (mesh->processor_id() == 0)
+      {
         exreader->read(_file_name);
+
+        if (getParam<bool>("clear_spline_nodes"))
+          MeshTools::clear_spline_nodes(*mesh);
+      }
       MeshCommunication().broadcast(*mesh);
     }
     // Skip partitioning if the user requested it
