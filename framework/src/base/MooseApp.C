@@ -1490,7 +1490,7 @@ MooseApp::copyInputs() const
           dir_to_copy,
           "\".");
 
-    std::string cmd = "mkdir -p " + dst_dir + "; cp -R " + src_dir + " " + dst_dir;
+    std::string cmd = "mkdir -p " + dst_dir + "; rsync -av " + src_dir + " " + dst_dir;
 
     TIME_SECTION("copy_inputs", 2, "Copying Inputs");
 
