@@ -20,6 +20,7 @@
 #include "INSFVPressureVariable.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "VectorCompositeFunctor.h"
+#include "FVElementalKernel.h"
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
@@ -272,11 +273,23 @@ INSFVRhieChowInterpolator::initialSetup()
         .template condition<AttribSysNum>(_u->sys().number())
         .queryInto(var_objects);
     for (auto * const var_object : var_objects)
-      if (!dynamic_cast<INSFVMomentumResidualObject *>(var_object))
+    {
+      // Allow FVElementalKernel that are not INSFVMomentumResidualObject for now, refs #20695
+      if (!dynamic_cast<INSFVMomentumResidualObject *>(var_object) &&
+          !dynamic_cast<FVElementalKernel *>(var_object))
         mooseError("Object ",
                    var_object->name(),
                    " is not a INSFVMomentumResidualObject. Make sure that all the objects applied "
                    "to the momentum equation are INSFV or derived objects.");
+      else if (!dynamic_cast<INSFVMomentumResidualObject *>(var_object) &&
+               dynamic_cast<FVElementalKernel *>(var_object))
+        mooseWarning(
+            "Elemental kernel ",
+            var_object->name(),
+            " is not a INSFVMomentumResidualObject. Make sure that all the objects applied "
+            "to the momentum equation are INSFV or derived objects.");
+    }
+
     if (var_objects.size() == 0 && !_a_data_provided)
       mooseError(
           "No INSFVKernels detected for the velocity variables. "
