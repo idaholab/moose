@@ -27,8 +27,8 @@ LibtorchSimpleNNTrainer::validParams()
   params.addParam<MooseEnum>("response_type", data_type, "Response data type.");
   params.addParam<unsigned int>("num_batches", 1, "Number of batches.");
   params.addParam<unsigned int>("num_epochs", 1, "Number of epochs.");
-  params.addParam<unsigned int>("num_hidden_layers", 0, "Number of hidden layers.");
-  params.addParam<std::vector<unsigned int>>(
+  params.addRequiredParam<unsigned int>("num_hidden_layers", "Number of hidden layers.");
+  params.addRequiredParam<std::vector<unsigned int>>(
       "num_neurons_per_layer", std::vector<unsigned int>(), "Number of neurons per layer.");
   params.addParam<std::string>(
       "filename", "net.pt", "Filename used to output the neural net parameters.");

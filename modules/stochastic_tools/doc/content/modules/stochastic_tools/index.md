@@ -20,12 +20,10 @@ matrix. For further details refer to the following:
 ## Linking MOOSE with external Machine Learning libraries
 
 The stochastic tools module provides neural network-based surrogate modeling capabilities
-as well. However, to enable it one needs to compile MOOSE with the C++ APIs of either
-[pytorch](https://pytorch.org/) or [tensorflow](https://www.tensorflow.org/). For this,
-follow the appropriate installation guide below:
+as well. However, to enable it one needs to compile MOOSE with the C++ APIs of
+[pytorch](https://pytorch.org/). For this, follow the appropriate installation guide below:
 
 - [install_pytorch.md]
-- [install_tensorflow.md]
 
 ## Objects, Actions, and Syntax
 
