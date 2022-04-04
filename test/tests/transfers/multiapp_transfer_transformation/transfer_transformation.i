@@ -131,8 +131,7 @@
 [Transfers]
   [from_sub]
     type = MultiAppInterpolationTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     num_points = 1
     shrink_gap_width = 0.2
     shrink_mesh = 'source'
@@ -143,8 +142,7 @@
 
   [from_sub_elem]
     type = MultiAppInterpolationTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     num_points = 4
     shrink_gap_width = 0.2
     shrink_mesh = 'source'
@@ -155,8 +153,7 @@
 
   [from_master]
     type = MultiAppInterpolationTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     num_points = 1
     shrink_gap_width = 0.2
     shrink_mesh = 'target'
@@ -167,8 +164,7 @@
 
   [from_master_elem]
     type = MultiAppInterpolationTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     num_points = 4
     shrink_gap_width = 0.2
     shrink_mesh = 'target'

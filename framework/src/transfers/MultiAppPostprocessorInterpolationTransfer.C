@@ -61,9 +61,13 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
     _nodal(false)
 {
   if (_directions.contains(TO_MULTIAPP))
-    paramError("Can't interpolate to a MultiApp!");
+    mooseError("Can't interpolate to a MultiApp!");
 
-  auto & to_fe_type = _multi_app->problemBase().getStandardVariable(0, _to_var_name).feType();
+  if (isParamValid("to_multi_app"))
+    mooseError("Bi-directional or MultiApp-to-MultiApp transfers are not implemented");
+
+  auto & to_fe_type =
+      getFromMultiApp()->problemBase().getStandardVariable(0, _to_var_name).feType();
   if ((to_fe_type.order != CONSTANT || to_fe_type.family != MONOMIAL) &&
       (to_fe_type.order != FIRST || to_fe_type.family != LAGRANGE))
     paramError("variable", "Must be either CONSTANT MONOMIAL or FIRST LAGRANGE");
@@ -80,7 +84,8 @@ MultiAppPostprocessorInterpolationTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      mooseError("Can't interpolate to a MultiApp!!");
+      mooseError("Interpolation from a variable to a MultiApp postprocessors has not been "
+                 "implemented. Use MultiAppVariableValueSamplePostprocessorTransfer!");
       break;
     }
     case FROM_MULTIAPP:
@@ -107,12 +112,12 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       idi->set_field_variables(field_vars);
 
       {
-        for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+        for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
         {
-          if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
+          if (getFromMultiApp()->hasLocalApp(i) && getFromMultiApp()->isRootProcessor())
           {
-            src_pts.push_back(_multi_app->position(i));
-            src_vals.push_back(_multi_app->appPostprocessorValue(i, _postprocessor));
+            src_pts.push_back(getFromMultiApp()->position(i));
+            src_vals.push_back(getFromMultiApp()->appPostprocessorValue(i, _postprocessor));
           }
         }
       }
@@ -122,14 +127,14 @@ MultiAppPostprocessorInterpolationTransfer::execute()
 
       // Loop over the master nodes and set the value of the variable
       {
-        System * to_sys = find_sys(_multi_app->problemBase().es(), _to_var_name);
+        System * to_sys = find_sys(getFromMultiApp()->problemBase().es(), _to_var_name);
 
         unsigned int sys_num = to_sys->number();
         unsigned int var_num = to_sys->variable_number(_to_var_name);
 
         NumericVector<Real> & solution = *to_sys->solution;
 
-        MooseMesh & mesh = _multi_app->problemBase().mesh();
+        MooseMesh & mesh = getFromMultiApp()->problemBase().mesh();
 
         std::vector<std::string> vars;
 
@@ -187,7 +192,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
         solution.close();
       }
 
-      _multi_app->problemBase().es().update();
+      getFromMultiApp()->problemBase().es().update();
 
       delete idi;
 

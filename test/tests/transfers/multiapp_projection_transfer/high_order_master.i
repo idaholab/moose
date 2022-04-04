@@ -77,17 +77,15 @@
 [Transfers]
   [./from]
     type = MultiAppProjectionTransfer
-    direction = from_multiapp
     execute_on = same_as_multiapp
-    multi_app = sub
+    from_multi_app = sub
     source_variable = test_var
     variable = from_sub
   [../]
   [./to]
     type = MultiAppProjectionTransfer
-    direction = to_multiapp
     execute_on = same_as_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = test_var
     variable = from_master
   [../]

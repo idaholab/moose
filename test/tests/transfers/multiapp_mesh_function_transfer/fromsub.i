@@ -68,9 +68,8 @@
 [Transfers]
   [from_sub]
     source_variable = 'sub_u sub_u'
-    direction = from_multiapp
     variable = 'transferred_u elemental_transferred_u'
     type = MultiAppMeshFunctionTransfer
-    multi_app = sub
+    from_multi_app = sub
   []
 []

@@ -36,12 +36,14 @@ Transfer::validParams()
   params += SetupInterface::validParams();
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_BEGIN;
 
+  params.set<bool>("_called_legacy_params") = true;
   MultiMooseEnum possible_directions(Transfer::possibleDirections());
-  params.addRequiredParam<MultiMooseEnum>(
+  params.addDeprecatedParam<MultiMooseEnum>(
       "direction",
       possible_directions,
       "Whether this Transfer will be 'to' or 'from' a MultiApp, or "
-      "bidirectional, by providing both FROM_MULTIAPP and TO_MULTIAPP.");
+      "bidirectional, by providing both FROM_MULTIAPP and TO_MULTIAPP.",
+      "Specifying direction+multiapp is deprecated. Specify the to_multi_app and from_multi_app");
   params.registerBase("Transfer");
 
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
@@ -60,9 +62,10 @@ Transfer::Transfer(const InputParameters & parameters)
     _tid(parameters.get<THREAD_ID>("_tid")),
     _direction(possibleDirections()),
     _current_direction(possibleDirections()),
-    _directions(getParam<MultiMooseEnum>("direction"))
+    _directions(isParamValid("direction") ? getParam<MultiMooseEnum>("direction")
+                                          : possibleDirections())
 {
-  if (_directions.size() == 0)
+  if (parameters.isParamSetByUser("direction") && _directions.size() == 0)
     paramError("direction", "At least one direction is required");
 
   // If we have just one direction in _directions, set it now so that it can be used in the

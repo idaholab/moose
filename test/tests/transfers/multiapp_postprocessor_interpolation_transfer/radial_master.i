@@ -63,11 +63,10 @@
 
 [Transfers]
   [./pp_transfer]
-    direction = from_multiapp
     postprocessor = average
     variable = from_sub
     type = MultiAppPostprocessorInterpolationTransfer
-    multi_app = sub
+    from_multi_app = sub
     interp_type = radial_basis
     radius = 1.5
   [../]

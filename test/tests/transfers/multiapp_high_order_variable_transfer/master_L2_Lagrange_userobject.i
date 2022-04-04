@@ -89,10 +89,9 @@
 [Transfers]
   [p_to_sub]
     type = MultiAppUserObjectTransfer
-    direction = to_multiapp
     user_object = multi_layered_average
     variable = power_density
-    multi_app = sub
+    to_multi_app = sub
     execute_on = 'timestep_end'
   []
 []

@@ -44,8 +44,7 @@
 [Transfers]
   [./transfer]
     type = MultiAppUserObjectTransfer
-    multi_app = master
-    direction = to_multiapp
+    to_multi_app = master
     user_object = data
     variable = aux
   [../]

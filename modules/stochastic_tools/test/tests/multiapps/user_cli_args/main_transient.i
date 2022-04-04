@@ -19,14 +19,14 @@
   inactive = 'param'
   [param]
     type = SamplerParameterTransfer
-    multi_app = sub
+    to_multi_app = sub
     sampler = sample
     parameters = 'Functions/fun/value Postprocessors/function_val/scale_factor'
     to_control = receiver
   []
   [data]
     type = SamplerReporterTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     from_reporter = 'size/value function_val/value'
     stochastic_reporter = 'storage'

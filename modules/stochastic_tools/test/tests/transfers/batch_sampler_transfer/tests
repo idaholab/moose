@@ -96,9 +96,17 @@
     type = RunException
     input = master.i
     cli_args = "Transfers/data/execute_on=INITIAL MultiApps/runner/mode=normal"
-    expect_err = "MultiAppTransfer execute_on flags do not match associated Multiapp execute_on "
+    expect_err = "MultiAppTransfer execute_on flags do not match associated from_multi_app execute_on "
                  "flags"
     requirement = "The 'StochasticToolsTransfer' object shall error if the 'execute_on' parameter "
                   "does not match the corresponding MultiApp object is running in normal mode."
+  []
+
+  [direction_error]
+    type = RunException
+    input = master.i
+    cli_args = 'Transfers/data/to_multi_app=runner'
+    expect_err = 'Transfers between multiapp are not currently supported for this transfer type'
+    requirement = 'The system shall report a reasonable error if parameters for a trasnfer between multiapps are provided to stochastics transfer, which do not support this currently'
   []
 []

@@ -63,10 +63,9 @@
 [Transfers]
   [p_to_sub]
     type = MultiAppMeshFunctionTransfer
-    direction = to_multiapp
     source_variable = power_density
     variable = power_density
-    multi_app = sub
+    to_multi_app = sub
     execute_on = 'timestep_end'
   []
 []

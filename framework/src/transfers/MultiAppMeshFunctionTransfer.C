@@ -287,7 +287,17 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
           vals_ids_for_incoming_points[i_pt].first =
               (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
           // Record problem ID as well
-          vals_ids_for_incoming_points[i_pt].second = _local2global_map[i_from];
+          switch (_current_direction)
+          {
+            case FROM_MULTIAPP:
+              vals_ids_for_incoming_points[i_pt].second = _from_local2global_map[i_from];
+              break;
+            case TO_MULTIAPP:
+              vals_ids_for_incoming_points[i_pt].second = _to_local2global_map[i_from];
+              break;
+            default:
+              mooseError("Unsupported direction");
+          }
         }
       }
     }

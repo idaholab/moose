@@ -81,7 +81,7 @@
 [Transfers]
   [./marker_to_sub]
     type = LevelSetMeshRefinementTransfer
-    multi_app = sub
+    to_multi_app = sub
     source_variable = marker
     variable = marker
     check_multiapp_execute_on = false

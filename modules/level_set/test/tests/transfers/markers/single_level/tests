@@ -1,10 +1,18 @@
 [Tests]
-  issues = '#8465'
   design = 'level_set/index.md LevelSetMeshRefinementTransfer.md'
-  [./test]
+  [test]
     type = Exodiff
     input = master.i
     exodiff = 'master_out.e master_out_sub0_out.e'
     requirement = "The level set module shall include the ability to transfer refinement patterns, with a single level of refinement, to a sub-application."
-  [../]
+    issues = '#8465'
+  []
+  [parameter_error]
+    type = RunException
+    input = master.i
+    expect_err = 'from_multiapp or between_multiapp transfers are not supported'
+    cli_args = 'Transfers/marker_to_sub/from_multi_app=sub'
+    requirement = "The system shall return an error if parameters for an unsupported direction are passed to a transfer"
+    issues = '#19451'
+  []
 []

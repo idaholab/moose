@@ -87,8 +87,7 @@
 [Transfers]
   [q_to_thm]
     type = MultiAppNearestNodeTransfer
-    multi_app = thm
-    direction = to_multiapp
+    to_multi_app = thm
     source_variable = q_wall
     variable = q_wall
   []

@@ -1081,16 +1081,14 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
 [Transfers]
   [changes_due_to_flow]
     type = MultiAppCopyTransfer
-    direction = to_multiapp
     source_variable = 'rate_H rate_Cl rate_SO4 rate_HCO3 rate_SiO2aq rate_Al rate_Ca rate_Mg rate_Fe rate_K rate_Na rate_Sr rate_F rate_BOH rate_Br rate_Ba rate_Li rate_NO3 rate_O2aq rate_H2O temperature'
     variable = 'pf_rate_H pf_rate_Cl pf_rate_SO4 pf_rate_HCO3 pf_rate_SiO2aq pf_rate_Al pf_rate_Ca pf_rate_Mg pf_rate_Fe pf_rate_K pf_rate_Na pf_rate_Sr pf_rate_F pf_rate_BOH pf_rate_Br pf_rate_Ba pf_rate_Li pf_rate_NO3 pf_rate_O2aq pf_rate_H2O temperature'
-    multi_app = react
+    to_multi_app = react
   []
   [massfrac_from_geochem]
     type = MultiAppCopyTransfer
-    direction = from_multiapp
     source_variable = 'massfrac_H massfrac_Cl massfrac_SO4 massfrac_HCO3 massfrac_SiO2aq massfrac_Al massfrac_Ca massfrac_Mg massfrac_Fe massfrac_K massfrac_Na massfrac_Sr massfrac_F massfrac_BOH massfrac_Br massfrac_Ba massfrac_Li massfrac_NO3 massfrac_O2aq '
     variable = 'f_H f_Cl f_SO4 f_HCO3 f_SiO2aq f_Al f_Ca f_Mg f_Fe f_K f_Na f_Sr f_F f_BOH f_Br f_Ba f_Li f_NO3 f_O2aq '
-    multi_app = react
+    from_multi_app = react
   []
 []

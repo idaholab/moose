@@ -61,15 +61,13 @@
     type = MultiAppReporterTransfer
     to_reporters = 'to_sub_vpp/a to_sub_vpp/b'
     from_reporters = 'from_main_vpp/a from_main_vpp/b'
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
   []
   [vpp_from_vpp]
     type = MultiAppReporterTransfer
     to_reporters = 'to_main_vpp/a to_main_vpp/b'
     from_reporters = 'from_sub_vpp/a from_sub_vpp/b'
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     subapp_index = 0
   []
 
@@ -78,16 +76,14 @@
     type = MultiAppReporterTransfer
     to_reporters = 'to_sub_vpp/a'
     from_reporters = 'from_main_rep/vec'
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     subapp_index = 0
   []
   [vector_from_vpp]
     type = MultiAppReporterTransfer
     to_reporters = 'to_main_rep/vec'
     from_reporters = 'from_sub_vpp/a'
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     subapp_index = 0
   []
 
@@ -96,16 +92,14 @@
     type = MultiAppReporterTransfer
     to_reporters = 'to_sub_pp/value'
     from_reporters = 'from_main_rep/num'
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     subapp_index = 0
   []
   [real_from_pp]
     type = MultiAppReporterTransfer
     to_reporters = 'to_main_rep/num'
     from_reporters = 'from_sub_pp/value'
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     subapp_index = 0
   []
 
@@ -114,16 +108,14 @@
     type = MultiAppReporterTransfer
     to_reporters = 'to_sub_rep/int'
     from_reporters = 'from_main_rep/int'
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     subapp_index = 0
   []
   [int_from_int]
     type = MultiAppReporterTransfer
     to_reporters = 'to_main_rep/int'
     from_reporters = 'from_sub_rep/int'
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     subapp_index = 0
   []
 
@@ -132,16 +124,14 @@
     type = MultiAppReporterTransfer
     to_reporters = 'to_sub_rep/str'
     from_reporters = 'from_main_rep/str'
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     subapp_index = 0
   []
   [string_from_string]
     type = MultiAppReporterTransfer
     to_reporters = 'to_main_rep/str'
     from_reporters = 'from_sub_rep/str'
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     subapp_index = 0
   []
 []

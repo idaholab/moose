@@ -48,7 +48,7 @@
 [Transfers]
   [results]
     type = SamplerReporterTransfer
-    multi_app = runner
+    from_multi_app = runner
     sampler = sample
     stochastic_reporter = trainer_results
     from_reporter = 'time_max/value time_min/value'
