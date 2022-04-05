@@ -270,6 +270,8 @@ private:
   /// Check for general user errors in the parameters
   void checkGeneralControlErrors();
   /// Check errors regarding the user defined boundary treatments
+  void checkICParameterErrors();
+  /// Check errors regarding the user defined boundary treatments
   void checkBoundaryParameterErrors();
   /// Check errors regarding the user defined ambient convection parameters
   void checkAmbientConvectionParameterErrors();
@@ -325,7 +327,7 @@ NSFVAction::checkBlockwiseConsistency(const std::string block_param_name,
       else
       {
         if (previous_size != param_vector.size())
-          paramError("ambient_temperature",
+          paramError(parameter_names[param_i],
                      "The number of entries in '" + parameter_names[param_i] +
                          "' is not the same as the number of entries in '" +
                          parameter_names[param_i - 1] + "'!");

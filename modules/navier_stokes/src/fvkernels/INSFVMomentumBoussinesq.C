@@ -26,7 +26,6 @@ INSFVMomentumBoussinesq::validParams()
                                     "this is of the form rho = rho*(1-alpha (T-T_ref))");
   params.addRequiredParam<Real>("ref_temperature", "The value for the reference temperature.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The value for the density");
-  params.declareControllable(NS::density);
   return params;
 }
 

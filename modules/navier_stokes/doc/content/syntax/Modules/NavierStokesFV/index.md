@@ -12,6 +12,15 @@ is capable of setting up:
 The action handles boundary conditions, necessary materials for fluid properties,
 variables, variable initialization and various objects for turbulence modeling.
 
+!alert! note
+
+This action only supports Rhie-Chow interpolation for the determination
+of face velocities in the advection terms. The face interpolation of the
+advected quantities (e.g. upwind, average) can be controlled through the
+`*_advection_interpolation` action parameters. 
+
+!alert-end!
+
 ## Automatically defined variables
 
 The NavierStokesFV action automatically sets up the variables which are

@@ -98,13 +98,13 @@ NSFVAction::validParams()
   /**
    * Parameters used to define the handling of the momentum-mass equations.
    */
+  std::vector<FunctionName> default_initial_velocity = {"1e-15", "1e-15", "1e-15"};
+  params.addParam<std::vector<FunctionName>>("initial_velocity",
+                                             default_initial_velocity,
+                                             "The initial velocity, assumed constant everywhere");
 
-  params.addParam<RealVectorValue>("initial_velocity",
-                                   RealVectorValue(1e-15, 1e-15, 1e-15),
-                                   "The initial velocity, assumed constant everywhere");
-
-  params.addParam<Real>(
-      "initial_pressure", 1e5, "The initial pressure, assumed constant everywhere");
+  params.addParam<FunctionName>(
+      "initial_pressure", "1e5", "The initial pressure, assumed constant everywhere");
 
   params.addParam<MooseFunctorName>(
       "dynamic_viscosity", NS::mu, "The name of the dynamic viscosity");
@@ -115,11 +115,9 @@ NSFVAction::validParams()
       "gravity", RealVectorValue(0, 0, 0), "The gravitational acceleration vector.");
 
   MultiMooseEnum mom_inlet_types("fixed-velocity flux-velocity flux-mass", "fixed-velocity");
-  params.addParam<MultiMooseEnum>(
-      "momentum_inlet_types",
-      mom_inlet_types,
-      "Types of inlet boundaries for the momentum equation. Flux boundary conditions are dedicated "
-      "for application coupling purposes.");
+  params.addParam<MultiMooseEnum>("momentum_inlet_types",
+                                  mom_inlet_types,
+                                  "Types of inlet boundaries for the momentum equation.");
 
   params.addParam<std::vector<FunctionName>>("momentum_inlet_function",
                                              std::vector<FunctionName>(),
@@ -179,8 +177,8 @@ NSFVAction::validParams()
    * Equations used to set up the energy equation/enthalpy equation if it is required.
    */
 
-  params.addParam<Real>(
-      "initial_temperature", 300, "The initial temperature, assumed constant everywhere");
+  params.addParam<FunctionName>(
+      "initial_temperature", "300", "The initial temperature, assumed constant everywhere");
 
   params.addParam<MooseFunctorName>(
       "thermal_conductivity", NS::k, "The name of the fluid thermal conductivity");
@@ -188,11 +186,9 @@ NSFVAction::validParams()
   params.addParam<MooseFunctorName>("specific_heat", NS::cp, "The name of the specific heat");
 
   MultiMooseEnum en_inlet_types("fixed-temperature flux-mass flux-velocity heatflux", "heatflux");
-  params.addParam<MultiMooseEnum>(
-      "energy_inlet_types",
-      en_inlet_types,
-      "Types for the inlet boundaries for the energy equation. Flux boundary conditions are "
-      "dedicated for application coupling purposes.");
+  params.addParam<MultiMooseEnum>("energy_inlet_types",
+                                  en_inlet_types,
+                                  "Types for the inlet boundaries for the energy equation.");
 
   params.addParam<std::vector<std::string>>(
       "energy_inlet_function",
@@ -264,8 +260,8 @@ NSFVAction::validParams()
       "Switch to indicate that the input nonlinear variables don't need to be "
       "generated within this action.");
 
-  params.addParam<std::vector<Real>>("initial_scalar_variables",
-                                     "Initial values of the passive scalar variables.");
+  params.addParam<std::vector<FunctionName>>("initial_scalar_variables",
+                                             "Initial values of the passive scalar variables.");
 
   params.addParam<std::vector<MooseFunctorName>>(
       "passive_scalar_diffusivity",
@@ -278,11 +274,10 @@ NSFVAction::validParams()
       "Functor names for the sources used for the passive scalar fields.");
 
   MultiMooseEnum ps_inlet_types("fixed-value flux-mass flux-velocity", "fixed-value");
-  params.addParam<MultiMooseEnum>("passive_scalar_inlet_types",
-                                  ps_inlet_types,
-                                  "Types for the inlet boundaries for the passive scalar equation. "
-                                  "Flux boundary conditions are "
-                                  "dedicated for application coupling purposes.");
+  params.addParam<MultiMooseEnum>(
+      "passive_scalar_inlet_types",
+      ps_inlet_types,
+      "Types for the inlet boundaries for the passive scalar equation.");
 
   params.addParam<std::vector<std::vector<std::string>>>(
       "passive_scalar_inlet_function",
@@ -377,9 +372,11 @@ NSFVAction::validParams()
       "momentum_face_interpolation energy_face_interpolation passive_scalar_face_interpolation "
       "pressure_face_interpolation momentum_two_term_bc_expansion "
       "energy_two_term_bc_expansion passive_scalar_two_term_bc_expansion "
-      "pressure_two_term_bc_expansion momentum_scaling energy_scaling "
-      "mass_scaling passive_scalar_scaling",
-      "Numerical control");
+      "pressure_two_term_bc_expansion",
+      "Numerical scheme parameters");
+
+  params.addParamNamesToGroup("momentum_scaling energy_scaling mass_scaling passive_scalar_scaling",
+                              "Scaling parameters");
 
   /**
    * Parameter controlling the turbulence handling used for the equations.
@@ -757,42 +754,36 @@ NSFVAction::addRhieChowUserObjects()
 void
 NSFVAction::addINSInitialConditions()
 {
-  InputParameters params = _factory.getValidParams("ConstantIC");
-  auto vvalue = getParam<RealVectorValue>("initial_velocity");
-
+  InputParameters params = _factory.getValidParams("FunctionIC");
+  auto vvalue = getParam<std::vector<FunctionName>>("initial_velocity");
+  const std::string * velocity_vector_name = NS::velocity_vector;
   if (_porous_medium_treatment)
-    for (unsigned int d = 0; d < _dim; ++d)
-    {
-      params.set<VariableName>("variable") = NS::superficial_velocity_vector[d];
-      params.set<Real>("value") = vvalue(d);
+    velocity_vector_name = NS::superficial_velocity_vector;
 
-      _problem->addInitialCondition(
-          "ConstantIC", NS::superficial_velocity_vector[d] + "_ic", params);
-    }
-  else
-    for (unsigned int d = 0; d < _dim; ++d)
-    {
-      params.set<VariableName>("variable") = NS::velocity_vector[d];
-      params.set<Real>("value") = vvalue(d);
+  for (unsigned int d = 0; d < _dim; ++d)
+  {
+    params.set<VariableName>("variable") = velocity_vector_name[d];
+    params.set<FunctionName>("function") = vvalue[d];
 
-      _problem->addInitialCondition("ConstantIC", NS::velocity_vector[d] + "_ic", params);
-    }
+    _problem->addInitialCondition("FunctionIC", velocity_vector_name[d] + "_ic", params);
+  }
 
   params.set<VariableName>("variable") = NS::pressure;
-  params.set<Real>("value") = getParam<Real>("initial_pressure");
+  params.set<FunctionName>("function") = getParam<FunctionName>("initial_pressure");
 
-  _problem->addInitialCondition("ConstantIC", "pressure_ic", params);
+  _problem->addInitialCondition("FunctionIC", "pressure_ic", params);
 
   if (_has_energy_equation)
   {
     params.set<VariableName>("variable") = NS::T_fluid;
-    params.set<Real>("value") = getParam<Real>("initial_temperature");
+    params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
 
-    _problem->addInitialCondition("ConstantIC", NS::T_fluid + "_ic", params);
+    _problem->addInitialCondition("FunctionIC", NS::T_fluid + "_ic", params);
   }
 
   if (_passive_scalar_names.size())
   {
+    unsigned int ic_counter = 0;
     for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
     {
       bool initialize_me = true;
@@ -804,12 +795,13 @@ NSFVAction::addINSInitialConditions()
       {
         params.set<VariableName>("variable") = _passive_scalar_names[name_i];
         if (isParamValid("initial_scalar_variables"))
-          params.set<Real>("value") =
-              getParam<std::vector<Real>>("initial_scalar_variables")[name_i];
+          params.set<FunctionName>("function") =
+              getParam<std::vector<FunctionName>>("initial_scalar_variables")[ic_counter];
         else
-          params.set<Real>("value") = 0.0;
+          params.set<FunctionName>("function") = "0.0";
 
-        _problem->addInitialCondition("ConstantIC", _passive_scalar_names[name_i] + "_ic", params);
+        _problem->addInitialCondition("FunctionIC", _passive_scalar_names[name_i] + "_ic", params);
+        ic_counter += 1;
       }
     }
   }
@@ -2080,6 +2072,29 @@ NSFVAction::checkGeneralControlErrors()
   if (isParamValid("consistent_scaling") && !(getParam<bool>("use_friction_correction")))
     paramError("consistent_scaling",
                "Consistent scaling should not be defined if friction correction is disabled!");
+}
+
+void
+NSFVAction::checkICParameterErrors()
+{
+  if (_create_scalar_variable.size())
+  {
+    unsigned int num_created_variables = 0;
+    for (const auto & it : _create_scalar_variable)
+      if (it == true)
+        num_created_variables += 1;
+    auto num_init_conditions =
+        getParam<std::vector<FunctionName>>("initial_scalar_variables").size();
+    if (num_created_variables != num_init_conditions)
+      paramError("initial_scalar_variables",
+                 "The number of initial conditions (" + std::to_string(num_init_conditions) +
+                     ") is not equal to the number of self-generated variables (" +
+                     std::to_string(num_created_variables) + ") !");
+  }
+
+  auto vvalue = getParam<std::vector<FunctionName>>("initial_velocity");
+  if (vvalue.size() != 3)
+    mooseError("The number of velocity components in the NSFVAction initial condition is not 3!");
 }
 
 void
