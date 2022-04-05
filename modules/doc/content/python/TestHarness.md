@@ -141,7 +141,7 @@ The "prereq" parameter is still honored when using "parallel_scheduling = True".
 
 #### PYTHONPATH
 
-PYTHONPATH instructs python to include the designated paths while attempting to import python modules. +While normally not needing to be set+, sometimes it is necessary. For example, when testing the TestHarness (unittests). Another use-case, is when a developer wants to utilize the moosedocs system for creating [moose documentation](MooseDocs/index.md) (the website you are using right now).
+PYTHONPATH instructs python to include the designated paths while attempting to import python modules. +While normally not needing to be set+, sometimes it is necessary. For example, when testing the TestHarness (unittests). Another use-case, is when a developer wants to utilize the moosedocs system for creating [moose documentation](MooseDocs/index.md optional=True) (the website you are using right now).
 
 In either case, when you need to modify PYTHONPATH for MOOSE related development, you will almost always want to point it at `moose/python`.
 

@@ -1,1 +1,1 @@
-!template load file=sqa/app_sll.md.template app=ThermalHydraulicsApp category=thermal_hydraulics
+!template load file=sqa/app_sll.md.template app=Thermal Hydraulics category=thermal_hydraulics

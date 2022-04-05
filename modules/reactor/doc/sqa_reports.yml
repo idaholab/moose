@@ -18,17 +18,17 @@ Documents:
     configuration_management_plan: sqa/inl_records.md#configuration_management_plan
     asset_management_plan: sqa/inl_records.md#asset_management_plan
     verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
-    log_software_requirements_specification: WARNING
-    log_software_design_description: WARNING
-    log_software_test_plan: WARNING
-    log_requirements_traceablity_matrix: WARNING
-    log_verification_validation_report: WARNING
-    log_failure_analysis_report: WARNING
+    software_requirements_specification: sqa/reactor_srs.md
+    software_design_description: sqa/reactor_sdd.md
+    software_test_plan: sqa/reactor_stp.md
+    requirements_traceablity_matrix: sqa/reactor_rtm.md
+    verification_validation_report: sqa/reactor_vvr.md
+    failure_analysis_report: sqa/reactor_far.md
+    software_library_list: sqa/reactor_sll.md
     communication_and_contact_information: sqa/framework_cci.md
     software_coding_standards: sqa/framework_scs.md
     log_user_manual: WARNING
     log_theory_manual: WARNING
-    log_software_library_list: WARNING
 
 Requirements:
     reactor:

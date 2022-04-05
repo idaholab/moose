@@ -5,6 +5,6 @@
     type = Exodiff
     input = olsson_plane.i
     exodiff = olsson_plane_out.e
-    requirement = "The level set module shall include the plane function defined in [cite!olsson2005conservative]."
+    requirement = "The level set module shall include the plane function defined in [!cite](olsson2005conservative)."
   []
 []

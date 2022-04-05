@@ -2,7 +2,10 @@ Content:
     - framework/doc/content
     - modules/contact/doc/content
     - modules/tensor_mechanics/doc/content
-
+    - utility:
+        root_dir: ${MOOSE_DIR}/modules/doc/content
+        content:
+            - help/finite_element_concepts/nodal_patch_recovery.md            
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 

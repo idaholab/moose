@@ -142,6 +142,8 @@ Extensions:
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
             fsi: !include modules/fsi/doc/sqa_fsi.yml
             thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thermal_hydraulics.yml
+            porous_flow: !include modules/porous_flow/doc/sqa_porous_flow.yml
+            level_set: !include modules/level_set/doc/sqa_level_set.yml
 
         requirement-groups:
             dgkernels: DGKernel Objects

@@ -1,4 +1,4 @@
-!template load file=framework_srs.md project={{app}}
+!template load file=srs.md.template project={{app}}
 
 !template! item key=pre-intro
 !alert! note
@@ -9,6 +9,78 @@ This document serves as an addendum to [framework_srs.md] and captures informati
 !alert-end!
 !template-end!
 
+!template item key=system-purpose
+!include sqa/system_purpose.md
+
+!template item key=system-scope
+!include sqa/system_scope.md
+
+!template item key=system-context
+!include sqa/framework_srs.md start=system-context-begin end=system-context-finish
+
+!template item key=system-functions
+!include sqa/framework_srs.md start=system-functions-begin end=system-functions-finish
+
+!template item key=user-characteristics
+!include sqa/framework_srs.md start=user-characteristics-begin end=user-characteristics-finish
+
 !template item key=assumptions-and-dependencies
 The {{app}} application is developed using MOOSE and is based on various modules, as such
 the [!ac](SRS) for {{app}} is dependent upon the files listed at the beginning of this document.
+
+!template item key=definitions
+!include sqa/framework_srs.md start=definitions-begin end=definitions-finish
+
+!template item key=acronyms
+!acronym list
+
+!template item key=minimum-requirements
+!include sqa/framework_srs.md start=minimum-requirements-begin end=minimum-requirements-finish
+
+!template item key=functional-requirements
+!sqa requirements link=False collections=FUNCTIONAL category={{category}}
+
+!template item key=usability-requirements
+!sqa requirements link=False collections=USABILITY category={{category}}
+
+!template item key=performance-requirements
+!sqa requirements link=False collections=PERFORMANCE category={{category}}
+
+!template item key=system-interfaces-requirements
+!sqa requirements link=False collections=SYSTEM category={{category}}
+
+!template item key=human-system-integration
+!include sqa/framework_srs.md start=human-system-integration-begin end=human-system-integration-finish
+
+!template item key=maintainability
+!include sqa/framework_srs.md start=maintainability-begin end=maintainability-finish
+
+!template item key=reliability
+!include sqa/framework_srs.md start=reliability-begin end=reliability-finish
+
+!template item key=information-management
+!include sqa/framework_srs.md start=information-management-begin end=information-management-finish
+
+!template item key=verification
+!include sqa/framework_srs.md start=verification-begin end=verification-finish
+
+!template item key=system-modes
+!include sqa/framework_srs.md start=system-modes-begin end=system-modes-finish
+
+!template item key=physical-characteristics
+!include sqa/framework_srs.md start=physical-characteristics-begin end=physical-characteristics-finish
+
+!template item key=environmental-conditions
+!include sqa/framework_srs.md start=environmental-conditions-begin end=environmental-conditions-finish
+
+!template item key=system-security
+!include sqa/framework_srs.md start=system-security-begin end=system-security-finish
+
+!template item key=policies-and-regulations
+!include sqa/framework_srs.md start=policies-and-regulations-begin end=policies-and-regulations-finish
+
+!template item key=system-life-cycle
+!include sqa/framework_srs.md start=system-life-cycle-begin end=system-life-cycle-finish
+
+!template item key=packaging
+!include sqa/framework_srs.md start=packaging-begin end=packaging-finish

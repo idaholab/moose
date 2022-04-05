@@ -5,7 +5,7 @@
     type = Exodiff
     input = olsson_1d.i
     exodiff = olsson_1d_out.e
-    requirement = "The level set module shall include the reinitialization scheme presented by [cite!olsson2005conservative]."
+    requirement = "The level set module shall include the reinitialization scheme presented by [!cite](olsson2005conservative)."
     valgrind = HEAVY
   [../]
 []
