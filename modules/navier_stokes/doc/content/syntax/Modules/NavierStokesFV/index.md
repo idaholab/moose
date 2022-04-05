@@ -9,8 +9,8 @@ is capable of setting up:
 - +Incompressible+ and +weakly-compressible+ simulations for
 - +Clean fluids+ and flows in +porous media+
 
-The action handles boundary conditions, necessary materials and objects for
-different, finite volume discretization approaches.
+The action handles boundary conditions, necessary materials for fluid properties,
+variables, variable initialization and various objects for turbulence modeling.
 
 ## Automatically defined variables
 

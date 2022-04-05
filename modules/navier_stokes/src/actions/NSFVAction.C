@@ -422,7 +422,7 @@ NSFVAction::validParams()
       "inlet_boundaries momentum_inlet_types momentum_inlet_function energy_inlet_types "
       "energy_inlet_function wall_boundaries momentum_wall_types energy_wall_types "
       "energy_wall_function outlet_boundaries momentum_outlet_types pressure_function",
-      "Boundary control");
+      "Boundary condition parameters");
 
   params.addParamNamesToGroup("initial_pressure initial_velocity initial_temperature",
                               "Initial conditions");
@@ -818,75 +818,66 @@ NSFVAction::addINSInitialConditions()
 void
 NSFVAction::addINSMomentumTimeKernels()
 {
+  std::string kernel_type = "INSFVMomentumTimeDerivative";
+  std::string kernel_name = "ins_momentum_time_";
+  std::string rhie_chow_name = "ins_rhie_chow_interpolator";
+  const std::string * velocity_vector_name = NS::velocity_vector;
+
   if (_porous_medium_treatment)
   {
-    const std::string mom_kernel_type = "PINSFVMomentumTimeDerivative";
-    InputParameters params = _factory.getValidParams(mom_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-
-    for (unsigned int d = 0; d < _dim; ++d)
-    {
-      params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-
-      _problem->addFVKernel(
-          mom_kernel_type, "pins_momentum_" + NS::directions[d] + "_time", params);
-    }
+    kernel_type = "PINSFVMomentumTimeDerivative";
+    kernel_name = "pins_momentum_time_";
+    rhie_chow_name = "pins_rhie_chow_interpolator";
+    velocity_vector_name = NS::superficial_velocity_vector;
   }
-  else
+
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+
+  for (unsigned int d = 0; d < _dim; ++d)
   {
-    const std::string mom_kernel_type = "INSFVMomentumTimeDerivative";
-    InputParameters params = _factory.getValidParams(mom_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
+    params.set<NonlinearVariableName>("variable") = velocity_vector_name[d];
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
-    for (unsigned int d = 0; d < _dim; ++d)
-    {
-      params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-
-      _problem->addFVKernel(mom_kernel_type, "ins_momentum_" + NS::directions[d] + "_time", params);
-    }
+    _problem->addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
   }
 }
 
 void
 NSFVAction::addINSEnergyTimeKernels()
 {
+  std::string kernel_type = "INSFVEnergyTimeDerivative";
+  std::string kernel_name = "ins_energy_time";
+
   if (_porous_medium_treatment)
   {
-    const std::string en_kernel_type = "PINSFVEnergyTimeDerivative";
-    InputParameters params = _factory.getValidParams(en_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<NonlinearVariableName>("variable") = NS::T_fluid;
+    kernel_type = "PINSFVEnergyTimeDerivative";
+    kernel_name = "pins_energy_time";
+  }
+
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+  params.set<NonlinearVariableName>("variable") = NS::T_fluid;
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+
+  if (_porous_medium_treatment)
+  {
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-    params.set<MooseFunctorName>(NS::density) = _density_name;
     if (_problem->hasFunctor(NS::time_deriv(NS::density),
                              _problem->parameters().get<THREAD_ID>("_tid")))
       params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
     if (_problem->hasFunctor(NS::time_deriv(_specific_heat_name),
                              _problem->parameters().get<THREAD_ID>("_tid")))
       params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
     params.set<bool>("is_solid") = false;
-
-    _problem->addFVKernel(en_kernel_type, "pins_energy_time", params);
   }
   else
-  {
-    const std::string en_kernel_type = "INSFVEnergyTimeDerivative";
-    InputParameters params = _factory.getValidParams(en_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<NonlinearVariableName>("variable") = NS::T_fluid;
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
     params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
 
-    _problem->addFVKernel(en_kernel_type, "ins_energy_time", params);
-  }
+  _problem->addFVKernel(kernel_type, kernel_name, params);
 }
 
 void
@@ -894,44 +885,38 @@ NSFVAction::addScalarTimeKernels()
 {
   for (const auto & vname : _passive_scalar_names)
   {
-    const std::string en_kernel_type = "FVTimeKernel";
-    InputParameters params = _factory.getValidParams(en_kernel_type);
+    const std::string kernel_type = "FVTimeKernel";
+    InputParameters params = _factory.getValidParams(kernel_type);
     params.set<std::vector<SubdomainName>>("block") = _blocks;
     params.set<NonlinearVariableName>("variable") = vname;
 
-    _problem->addFVKernel(en_kernel_type, "ins_" + vname + "_time", params);
+    _problem->addFVKernel(kernel_type, "ins_" + vname + "_time", params);
   }
 }
 
 void
 NSFVAction::addINSMassKernels()
 {
+  std::string kernel_type = "INSFVMassAdvection";
+  std::string kernel_name = "ins_mass_advection";
+  std::string rhie_chow_name = "ins_rhie_chow_interpolator";
+
   if (_porous_medium_treatment)
   {
-    const std::string kernel_type = "PINSFVMassAdvection";
-    InputParameters params = _factory.getValidParams(kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<NonlinearVariableName>("variable") = NS::pressure;
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseEnum>("velocity_interp_method") = "rc";
-    params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-    params.set<MooseEnum>("advected_interp_method") = _mass_advection_interpolation;
-
-    _problem->addFVKernel(kernel_type, "pins_mass_advection", params);
+    kernel_type = "PINSFVMassAdvection";
+    kernel_name = "pins_mass_advection";
+    rhie_chow_name = "pins_rhie_chow_interpolator";
   }
-  else
-  {
-    const std::string kernel_type = "INSFVMassAdvection";
-    InputParameters params = _factory.getValidParams(kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<NonlinearVariableName>("variable") = NS::pressure;
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseEnum>("velocity_interp_method") = "rc";
-    params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
-    params.set<MooseEnum>("advected_interp_method") = _mass_advection_interpolation;
 
-    _problem->addFVKernel(kernel_type, "ins_mass_advection", params);
-  }
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+  params.set<NonlinearVariableName>("variable") = NS::pressure;
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseEnum>("velocity_interp_method") = "rc";
+  params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+  params.set<MooseEnum>("advected_interp_method") = _mass_advection_interpolation;
+
+  _problem->addFVKernel(kernel_type, kernel_name, params);
 
   if (getParam<bool>("pin_pressure"))
   {
@@ -955,84 +940,67 @@ NSFVAction::addINSMassKernels()
 void
 NSFVAction::addINSMomentumAdvectionKernels()
 {
+  std::string kernel_type = "INSFVMomentumAdvection";
+  std::string kernel_name = "ins_momentum_advection_";
+  std::string rhie_chow_name = "ins_rhie_chow_interpolator";
+  const std::string * velocity_vector_name = NS::velocity_vector;
+
   if (_porous_medium_treatment)
   {
-    const std::string adv_kernel_type = "PINSFVMomentumAdvection";
-    InputParameters params = _factory.getValidParams(adv_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-    params.set<MooseEnum>("velocity_interp_method") = "rc";
-    params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-    params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
-
-    for (unsigned int d = 0; d < _dim; ++d)
-    {
-      params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-
-      _problem->addFVKernel(
-          adv_kernel_type, "pins_momentum_" + NS::directions[d] + "_advection", params);
-    }
+    kernel_type = "PINSFVMomentumAdvection";
+    kernel_name = "pins_momentum_advection_";
+    rhie_chow_name = "pins_rhie_chow_interpolator";
+    velocity_vector_name = NS::superficial_velocity_vector;
   }
-  else
+
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseEnum>("velocity_interp_method") = "rc";
+  params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+  params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
+  if (_porous_medium_treatment)
+    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+
+  for (unsigned int d = 0; d < _dim; ++d)
   {
-    const std::string adv_kernel_type = "INSFVMomentumAdvection";
-    InputParameters params = _factory.getValidParams(adv_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseEnum>("velocity_interp_method") = "rc";
-    params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
-    params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
+    params.set<NonlinearVariableName>("variable") = velocity_vector_name[d];
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
-    for (unsigned int d = 0; d < _dim; ++d)
-    {
-      params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-
-      _problem->addFVKernel(
-          adv_kernel_type, "ins_momentum_" + NS::directions[d] + "_advection", params);
-    }
+    _problem->addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
   }
 }
 
 void
 NSFVAction::addINSMomentumViscousDissipationKernels()
 {
+  std::string kernel_type = "INSFVMomentumDiffusion";
+  std::string kernel_name = "ins_momentum_diffusion_";
+  std::string rhie_chow_name = "ins_rhie_chow_interpolator";
+  const std::string * velocity_vector_name = NS::velocity_vector;
+
   if (_porous_medium_treatment)
   {
-    const std::string diff_kernel_type = "PINSFVMomentumDiffusion";
-    InputParameters params = _factory.getValidParams(diff_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-    params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+    kernel_type = "PINSFVMomentumDiffusion";
+    kernel_name = "pins_momentum_diffusion_";
+    rhie_chow_name = "pins_rhie_chow_interpolator";
+    velocity_vector_name = NS::superficial_velocity_vector;
+  }
+
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+  params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+  params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+
+  if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
 
-    for (unsigned int d = 0; d < _dim; ++d)
-    {
-      params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-
-      _problem->addFVKernel(
-          diff_kernel_type, "pins_momentum_" + NS::directions[d] + "_diffusion", params);
-    }
-  }
-  else
+  for (unsigned int d = 0; d < _dim; ++d)
   {
-    const std::string diff_kernel_type = "INSFVMomentumDiffusion";
-    InputParameters params = _factory.getValidParams(diff_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
-    params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+    params.set<NonlinearVariableName>("variable") = velocity_vector_name[d];
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
-    for (unsigned int d = 0; d < _dim; ++d)
-    {
-      params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-
-      _problem->addFVKernel(
-          diff_kernel_type, "ins_momentum_" + NS::directions[d] + "_diffusion", params);
-    }
+    _problem->addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
   }
 }
 
@@ -1046,39 +1014,27 @@ NSFVAction::addINSMomentumMixingLengthKernels()
   params.set<MooseFunctorName>(NS::density) = NS::density;
   params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
 
+  std::string kernel_name = "ins_momentum_mixing_length_reynolds_stress_";
+  std::string rhie_chow_name = "ins_rhie_chow_interpolator";
+  const std::string * velocity_vector_name = NS::velocity_vector;
+
   if (_porous_medium_treatment)
   {
-    params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-
-    for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
-      params.set<CoupledName>(u_names[dim_i]) = {NS::superficial_velocity_vector[dim_i]};
-
-    for (unsigned int d = 0; d < _dim; ++d)
-    {
-      params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-
-      _problem->addFVKernel(kernel_type,
-                            "pins_momentum_" + NS::directions[d] + "_mixing_length_reynolds_stress",
-                            params);
-    }
+    kernel_name = "pins_momentum_mixing_length_reynolds_stress_";
+    rhie_chow_name = "pins_rhie_chow_interpolator";
+    velocity_vector_name = NS::superficial_velocity_vector;
   }
-  else
+
+  params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+  for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
+    params.set<CoupledName>(u_names[dim_i]) = {velocity_vector_name[dim_i]};
+
+  for (unsigned int d = 0; d < _dim; ++d)
   {
-    params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
+    params.set<NonlinearVariableName>("variable") = velocity_vector_name[d];
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
-    for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
-      params.set<CoupledName>(u_names[dim_i]) = {NS::velocity_vector[dim_i]};
-
-    for (unsigned int d = 0; d < _dim; ++d)
-    {
-      params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-
-      _problem->addFVKernel(kernel_type,
-                            "ins_momentum_" + NS::directions[d] + "_mixing_length_reynolds_stress",
-                            params);
-    }
+    _problem->addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
   }
 
   const std::string ml_kernel_type = "WallDistanceMixingLengthAux";
@@ -1100,40 +1056,31 @@ NSFVAction::addINSMomentumMixingLengthKernels()
 void
 NSFVAction::addINSMomentumPressureKernels()
 {
+  std::string kernel_type = "INSFVMomentumPressure";
+  std::string kernel_name = "ins_momentum_pressure_";
+  std::string rhie_chow_name = "ins_rhie_chow_interpolator";
+  const std::string * velocity_vector_name = NS::velocity_vector;
+
   if (_porous_medium_treatment)
   {
-    const std::string press_kernel_type = "PINSFVMomentumPressure";
-    InputParameters params = _factory.getValidParams(press_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-    params.set<CoupledName>("pressure") = {NS::pressure};
-
-    for (unsigned int d = 0; d < _dim; ++d)
-    {
-      params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-
-      _problem->addFVKernel(
-          press_kernel_type, "pins_momentum_" + NS::directions[d] + "_pressure", params);
-    }
+    kernel_type = "PINSFVMomentumPressure";
+    kernel_name = "pins_momentum_pressure_";
+    rhie_chow_name = "pins_rhie_chow_interpolator";
+    velocity_vector_name = NS::superficial_velocity_vector;
   }
-  else
+
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+  params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+  params.set<CoupledName>("pressure") = {NS::pressure};
+  if (_porous_medium_treatment)
+    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+
+  for (unsigned int d = 0; d < _dim; ++d)
   {
-    const std::string press_kernel_type = "INSFVMomentumPressure";
-    InputParameters params = _factory.getValidParams(press_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
-    params.set<CoupledName>("pressure") = {NS::pressure};
-
-    for (unsigned int d = 0; d < _dim; ++d)
-    {
-      params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-
-      _problem->addFVKernel(
-          press_kernel_type, "ins_momentum_" + NS::directions[d] + "_pressure", params);
-    }
+    params.set<MooseEnum>("momentum_component") = NS::directions[d];
+    params.set<NonlinearVariableName>("variable") = velocity_vector_name[d];
+    _problem->addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
   }
 }
 
@@ -1142,42 +1089,33 @@ NSFVAction::addINSMomentumGravityKernels()
 {
   if (isParamValid("gravity"))
   {
+    std::string kernel_type = "INSFVMomentumGravity";
+    std::string kernel_name = "ins_momentum_gravity_";
+    std::string rhie_chow_name = "ins_rhie_chow_interpolator";
+    const std::string * velocity_vector_name = NS::velocity_vector;
+
     if (_porous_medium_treatment)
     {
-      const std::string grav_kernel_type = "PINSFVMomentumGravity";
-      InputParameters params = _factory.getValidParams(grav_kernel_type);
-      params.set<std::vector<SubdomainName>>("block") = _blocks;
-      params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-      params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-      params.set<MooseFunctorName>(NS::density) = _density_name;
-      params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
-
-      for (unsigned int d = 0; d < _dim; ++d)
-      {
-        params.set<MooseEnum>("momentum_component") = NS::directions[d];
-        params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
-
-        _problem->addFVKernel(
-            grav_kernel_type, "pins_momentum_" + NS::directions[d] + "_gravity", params);
-      }
+      kernel_type = "PINSFVMomentumGravity";
+      kernel_name = "pins_momentum_gravity_";
+      rhie_chow_name = "pins_rhie_chow_interpolator";
+      velocity_vector_name = NS::superficial_velocity_vector;
     }
-    else
+
+    InputParameters params = _factory.getValidParams(kernel_type);
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
+    params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
+    if (_porous_medium_treatment)
+      params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+
+    for (unsigned int d = 0; d < _dim; ++d)
     {
-      const std::string grav_kernel_type = "INSFVMomentumGravity";
-      InputParameters params = _factory.getValidParams(grav_kernel_type);
-      params.set<std::vector<SubdomainName>>("block") = _blocks;
-      params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
-      params.set<MooseFunctorName>(NS::density) = _density_name;
-      params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
+      params.set<MooseEnum>("momentum_component") = NS::directions[d];
+      params.set<NonlinearVariableName>("variable") = velocity_vector_name[d];
 
-      for (unsigned int d = 0; d < _dim; ++d)
-      {
-        params.set<MooseEnum>("momentum_component") = NS::directions[d];
-        params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
-
-        _problem->addFVKernel(
-            grav_kernel_type, "ins_momentum_" + NS::directions[d] + "_gravity", params);
-      }
+      _problem->addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
     }
   }
 }
@@ -1187,48 +1125,36 @@ NSFVAction::addINSMomentumBoussinesqKernels()
 {
   if (isParamValid("gravity"))
   {
+    std::string kernel_type = "INSFVMomentumBoussinesq";
+    std::string kernel_name = "ins_momentum_boussinesq_";
+    std::string rhie_chow_name = "ins_rhie_chow_interpolator";
+    const std::string * velocity_vector_name = NS::velocity_vector;
+
     if (_porous_medium_treatment)
     {
-      const std::string boussinesq_kernel_type = "PINSFVMomentumBoussinesq";
-      InputParameters params = _factory.getValidParams(boussinesq_kernel_type);
-      params.set<std::vector<SubdomainName>>("block") = _blocks;
-      params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-      params.set<MooseFunctorName>(NS::T_fluid) = NS::T_fluid;
-      params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-      params.set<MooseFunctorName>(NS::density) = _density_name;
-      params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
-      params.set<Real>("ref_temperature") = getParam<Real>("ref_temperature");
-      params.set<MooseFunctorName>("alpha_name") = _thermal_expansion_name;
-
-      for (unsigned int d = 0; d < _dim; ++d)
-      {
-        params.set<MooseEnum>("momentum_component") = NS::directions[d];
-        params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
-
-        _problem->addFVKernel(
-            boussinesq_kernel_type, "pins_momentum_" + NS::directions[d] + "_boussinesq", params);
-      }
+      kernel_type = "PINSFVMomentumBoussinesq";
+      kernel_name = "pins_momentum_boussinesq_";
+      rhie_chow_name = "pins_rhie_chow_interpolator";
+      velocity_vector_name = NS::superficial_velocity_vector;
     }
-    else
+
+    InputParameters params = _factory.getValidParams(kernel_type);
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
+    params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+    params.set<MooseFunctorName>(NS::T_fluid) = NS::T_fluid;
+    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
+    params.set<Real>("ref_temperature") = getParam<Real>("ref_temperature");
+    params.set<MooseFunctorName>("alpha_name") = _thermal_expansion_name;
+    if (_porous_medium_treatment)
+      params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+
+    for (unsigned int d = 0; d < _dim; ++d)
     {
-      const std::string boussinesq_kernel_type = "INSFVMomentumBoussinesq";
-      InputParameters params = _factory.getValidParams(boussinesq_kernel_type);
-      params.set<std::vector<SubdomainName>>("block") = _blocks;
-      params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
-      params.set<MooseFunctorName>(NS::density) = _density_name;
-      params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
-      params.set<Real>("ref_temperature") = getParam<Real>("ref_temperature");
-      params.set<MooseFunctorName>(NS::T_fluid) = NS::T_fluid;
-      params.set<MooseFunctorName>("alpha_name") = _thermal_expansion_name;
+      params.set<MooseEnum>("momentum_component") = NS::directions[d];
+      params.set<NonlinearVariableName>("variable") = velocity_vector_name[d];
 
-      for (unsigned int d = 0; d < _dim; ++d)
-      {
-        params.set<MooseEnum>("momentum_component") = NS::directions[d];
-        params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
-
-        _problem->addFVKernel(
-            boussinesq_kernel_type, "ins_momentum_" + NS::directions[d] + "_boussinesq", params);
-      }
+      _problem->addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
     }
   }
 }
@@ -1349,30 +1275,24 @@ NSFVAction::addINSMomentumFrictionKernels()
 void
 NSFVAction::addINSEnergyAdvectionKernels()
 {
+  std::string kernel_type = "INSFVEnergyAdvection";
+  std::string kernel_name = "ins_energy_advection";
+  std::string rhie_chow_name = "ins_rhie_chow_interpolator";
   if (_porous_medium_treatment)
   {
-    const std::string kernel_type = "PINSFVEnergyAdvection";
-    InputParameters params = _factory.getValidParams(kernel_type);
-    params.set<NonlinearVariableName>("variable") = NS::T_fluid;
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<MooseEnum>("velocity_interp_method") = "rc";
-    params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-    params.set<MooseEnum>("advected_interp_method") = _energy_advection_interpolation;
-
-    _problem->addFVKernel(kernel_type, "pins_energy_advection", params);
+    kernel_type = "PINSFVEnergyAdvection";
+    kernel_name = "pins_energy_advection";
+    rhie_chow_name = "pins_rhie_chow_interpolator";
   }
-  else
-  {
-    const std::string kernel_type = "INSFVEnergyAdvection";
-    InputParameters params = _factory.getValidParams(kernel_type);
-    params.set<NonlinearVariableName>("variable") = NS::T_fluid;
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<MooseEnum>("velocity_interp_method") = "rc";
-    params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
-    params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
 
-    _problem->addFVKernel(kernel_type, "ins_energy_convection", params);
-  }
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<NonlinearVariableName>("variable") = NS::T_fluid;
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+  params.set<MooseEnum>("velocity_interp_method") = "rc";
+  params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
+  params.set<MooseEnum>("advected_interp_method") = _energy_advection_interpolation;
+
+  _problem->addFVKernel(kernel_type, kernel_name, params);
 }
 
 void
@@ -1941,27 +1861,23 @@ NSFVAction::addINSEnergyWallBC()
 void
 NSFVAction::addWCNSMassTimeKernels()
 {
+  std::string mass_kernel_type = "WCNSFVMassTimeDerivative";
+  std::string kernel_name = "wcns_mass_time";
+
   if (_porous_medium_treatment)
   {
-    const std::string mass_kernel_type = "PWCNSFVMassTimeDerivative";
-    InputParameters params = _factory.getValidParams(mass_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<NonlinearVariableName>("variable") = NS::pressure;
+    mass_kernel_type = "PWCNSFVMassTimeDerivative";
+    kernel_name = "pwcns_mass_time";
+  }
+
+  InputParameters params = _factory.getValidParams(mass_kernel_type);
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+  params.set<NonlinearVariableName>("variable") = NS::pressure;
+  params.set<MaterialPropertyName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
+  if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-    params.set<MaterialPropertyName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
 
-    _problem->addFVKernel(mass_kernel_type, "pwcns_mass_time", params);
-  }
-  else
-  {
-    const std::string mass_kernel_type = "WCNSFVMassTimeDerivative";
-    InputParameters params = _factory.getValidParams(mass_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<NonlinearVariableName>("variable") = NS::pressure;
-    params.set<MaterialPropertyName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-
-    _problem->addFVKernel(mass_kernel_type, "wcns_mass_time", params);
-  }
+  _problem->addFVKernel(mass_kernel_type, kernel_name, params);
 }
 
 void
@@ -1999,34 +1915,30 @@ NSFVAction::addWCNSMomentumTimeKernels()
 void
 NSFVAction::addWCNSEnergyTimeKernels()
 {
+  std::string en_kernel_type = "WCNSFVEnergyTimeDerivative";
+  std::string kernel_name = "wcns_energy_time";
+
   if (_porous_medium_treatment)
   {
-    const std::string en_kernel_type = "PINSFVEnergyTimeDerivative";
-    InputParameters params = _factory.getValidParams(en_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<NonlinearVariableName>("variable") = NS::T_fluid;
-    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-    params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
-    params.set<bool>("is_solid") = false;
-
-    _problem->addFVKernel(en_kernel_type, "pwcns_energy_time", params);
+    en_kernel_type = "PINSFVEnergyTimeDerivative";
+    kernel_name = "pwcns_energy_time";
   }
-  else
+
+  InputParameters params = _factory.getValidParams(en_kernel_type);
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+  params.set<NonlinearVariableName>("variable") = NS::T_fluid;
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
+  params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+  params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
+
+  if (_porous_medium_treatment)
   {
-    const std::string en_kernel_type = "WCNSFVEnergyTimeDerivative";
-    InputParameters params = _factory.getValidParams(en_kernel_type);
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<NonlinearVariableName>("variable") = NS::T_fluid;
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-    params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
-
-    _problem->addFVKernel(en_kernel_type, "wcns_energy_time", params);
+    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+    params.set<bool>("is_solid") = false;
   }
+
+  _problem->addFVKernel(en_kernel_type, kernel_name, params);
 }
 
 void
