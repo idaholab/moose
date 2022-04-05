@@ -24,9 +24,9 @@ public:
   virtual void finalize();
   virtual void execute();
 
-  Real k(Real temp) const;
-  Real cp(Real temp) const;
-  Real rho(Real temp) const;
+  ADReal k(const ADReal & temp) const;
+  ADReal cp(const ADReal & temp) const;
+  ADReal rho(const ADReal & temp) const;
 
   const Function & getKFunction() const { return _k; }
   const Function & getCpFunction() const { return _cp; }

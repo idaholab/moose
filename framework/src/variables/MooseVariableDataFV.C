@@ -1020,6 +1020,20 @@ MooseVariableDataFV<OutputType>::insert(NumericVector<Number> & residual)
 }
 
 template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::add(NumericVector<Number> & residual)
+{
+  initDofIndices();
+  if (_dof_indices.size())
+  {
+    mooseAssert(
+        _dof_indices.size() == 1,
+        "Finite volume variables should be constant monomial and have only one dof per element.");
+    residual.add_vector(&_dof_values[0], _dof_indices);
+  }
+}
+
+template <typename OutputType>
 const typename MooseVariableDataFV<OutputType>::DoFValue &
 MooseVariableDataFV<OutputType>::dofValues() const
 {
