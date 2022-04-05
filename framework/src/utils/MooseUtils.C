@@ -1368,3 +1368,14 @@ removeSubstring(std::string & main, const std::string & sub)
   for (std::string::size_type i = main.find(sub); i != std::string::npos; i = main.find(sub))
     main.erase(i, n);
 }
+
+std::string
+removeSubstring(const std::string & main, const std::string & sub)
+{
+  std::string copy_main = main;
+  std::string::size_type n = sub.length();
+  for (std::string::size_type i = copy_main.find(sub); i != std::string::npos;
+       i = copy_main.find(sub))
+    copy_main.erase(i, n);
+  return copy_main;
+}
