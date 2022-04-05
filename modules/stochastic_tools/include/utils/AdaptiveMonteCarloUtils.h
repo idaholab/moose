@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseUtils.h"
+#include "Distribution.h"
 
 namespace AdaptiveMonteCarloUtils
 {
@@ -20,8 +21,8 @@ namespace AdaptiveMonteCarloUtils
  * compute the standard deviation of a data vector by only considering values from
  * a specific index.
  *
- * @param the data vector
- * @param the starting index
+ * @param data the data vector
+ * @param start_index the starting index
  */
 Real computeSTD(const std::vector<Real> & data, const unsigned int & start_index);
 
@@ -29,8 +30,8 @@ Real computeSTD(const std::vector<Real> & data, const unsigned int & start_index
  * compute the mean of a data vector by only considering values from
  * a specific index.
  *
- * @param the data vector
- * @param the starting index
+ * @param data the data vector
+ * @param start_index the starting index
  */
 Real computeMean(const std::vector<Real> & data, const unsigned int & start_index);
 
@@ -39,11 +40,10 @@ Real computeMean(const std::vector<Real> & data, const unsigned int & start_inde
  *
  ****** FOR PARALLEL SUBSET SIMULATION SAMPLER ********
  *
- * @param the input vector
- * @param the output vector
- * @param the number of samples per subset
- * @param the subset index
- * @param the subset intermediate failure probability
+ * @param inputs the input vector
+ * @param outputs the output vector
+ * @param samplesub the number of samples per subset
+ * @param subset_prob  the subset intermediate failure probability
  */
 std::vector<std::vector<Real>> sortInput(const std::vector<std::vector<Real>> & inputs,
                                          const std::vector<Real> & outputs,
@@ -55,10 +55,9 @@ std::vector<std::vector<Real>> sortInput(const std::vector<std::vector<Real>> & 
  *
  ****** FOR PARALLEL SUBSET SIMULATION SAMPLER ********
  *
- * @param the output vector
- * @param the number of samples per subset
- * @param the subset index
- * @param the subset intermediate failure probability
+ * @param outputs the output vector
+ * @param samplessub the number of samples per subset
+ * @param subset_prob the subset intermediate failure probability
  */
 std::vector<Real> sortOutput(const std::vector<Real> & outputs,
                              const unsigned int samplessub,
@@ -67,15 +66,37 @@ std::vector<Real> sortOutput(const std::vector<Real> & outputs,
 /**
  * return the minimum value in a vector.
  *
- * @param the data vector
+ * @param data the data vector
  */
 Real computeMin(const std::vector<Real> & data);
 
 /**
  * return the absolute values in a vector.
  *
- * @param the data vector
+ * @param data the data vector
  */
 std::vector<Real> computeVectorABS(const std::vector<Real> & data);
+
+/**
+ * propose a new sample using ComponentWise-MH.
+ *
+ * @param x the current sample
+ * @param rnd1 the first random seed
+ * @param rnd2 the second random seed
+ */
+Real proposeNewSampleComponentWiseMH(const Real x, const Real rnd1, const Real rnd2);
+
+/**
+ * propose a new sample w/ regular MH. (AdaptiveImportanceSampler)
+ *
+ * @param distributions the input distributions
+ * @param rnd the random seed
+ * @param inputs the input vector from the reporter
+ * @param inputs_sto the previously accepted samples
+ */
+std::vector<Real> proposeNewSampleMH(const std::vector<const Distribution *> & distributions,
+                                     const Real rnd,
+                                     const std::vector<std::vector<Real>> & inputs,
+                                     const std::vector<std::vector<Real>> & _inputs_sto);
 
 } // namespace AdaptiveMonteCarloUtils

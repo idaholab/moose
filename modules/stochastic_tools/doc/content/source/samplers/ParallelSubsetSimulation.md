@@ -49,8 +49,7 @@ are all fixed to 0.1, then the first intermediate failure threshold ${F}_1$
 is estimated as the $90^{\textrm{th}}$ percentile value of all the $M$ numerical model outputs.
 The outputs that do not exceed $\mathcal{F}_1$ constitute Subset 1. To determine
 the next failure threshold $\mathcal{F}_2$, conditional samples should be generated
-such that the numerical model outputs always exceed $\mathcal{F}_1$. An MCMC method---in particular,
-a component-wise Metropolis method---is used to estimate $\mathcal{F}_2$ by simulating
+such that the numerical model outputs always exceed $\mathcal{F}_1$. An MCMC method (currently, available options are (1) regular Metropolis method, and (2) component-wise Metropolis method) can be used to estimate $\mathcal{F}_2$ by simulating
 numerous Markov chains. From the $M$ MCS samples in the first subset, those that exceeded
 the threshold $\mathcal{F}_1$ are used as seeds (or starting values) for these Markov chains.
 If $M$ samples need to be simulated such that the outputs exceed $\mathcal{F}_1$,

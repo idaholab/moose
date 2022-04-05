@@ -133,22 +133,10 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
        formation of the importance distribution. */
     if (sample)
     {
-      for (dof_id_type j = 0; j < _distributions.size(); ++j)
-        _prev_value[j] = Normal::quantile(_distributions[j]->cdf(_inputs[j][0]), 0, 1);
-      Real acceptance_ratio = 0.0;
+      std::vector<Real> new_sample = AdaptiveMonteCarloUtils::proposeNewSampleMH(
+          _distributions, getRand(_step), _inputs, _inputs_sto);
       for (dof_id_type i = 0; i < _distributions.size(); ++i)
-        acceptance_ratio += std::log(Normal::pdf(_prev_value[i], 0, 1)) -
-                            std::log(Normal::pdf(_inputs_sto[i].back(), 0, 1));
-      if (acceptance_ratio > std::log(getRand(_step)))
-      {
-        for (dof_id_type i = 0; i < _distributions.size(); ++i)
-          _inputs_sto[i].push_back(_prev_value[i]);
-      }
-      else
-      {
-        for (dof_id_type i = 0; i < _distributions.size(); ++i)
-          _inputs_sto[i].push_back(_inputs_sto[i].back());
-      }
+        _inputs_sto[i].push_back(new_sample[i]);
     }
     _prev_value[col_index] =
         Normal::quantile(getRand(_step), _inputs_sto[col_index].back(), _proposal_std[col_index]);

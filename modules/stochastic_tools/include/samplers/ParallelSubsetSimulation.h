@@ -47,6 +47,8 @@ protected:
   /// Initialize a certain number of random seeds. Change from the default only if you have to.
   const unsigned int & _num_random_seeds;
 
+  /// The sampling method to call
+  const MooseEnum & _sampling_method;
   /// Reporter value containing calculated outputs
   const std::vector<Real> & _outputs;
 

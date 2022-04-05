@@ -10,6 +10,7 @@
 #include "AdaptiveMonteCarloUtils.h"
 #include "IndirectSort.h"
 #include "libmesh/int_range.h"
+#include "Normal.h"
 
 /* AdaptiveMonteCarloUtils contains functions that are used across the Adaptive Monte
  Carlo set of algorithms.*/
@@ -89,6 +90,42 @@ computeVectorABS(const std::vector<Real> & data)
   for (unsigned int i = 0; i < data.size(); ++i)
     data_abs[i] = std::abs(data[i]);
   return data_abs;
+}
+
+Real
+proposeNewSampleComponentWiseMH(const Real x, const Real rnd1, const Real rnd2)
+{
+  const Real x_new = Normal::quantile(rnd1, x, 1.0);
+  const Real acceptance_ratio = std::log(Normal::pdf(x_new, 0, 1)) - std::log(Normal::pdf(x, 0, 1));
+  const Real new_sample = acceptance_ratio > std::log(rnd2) ? x_new : x;
+  Real val = Normal::cdf(new_sample, 0, 1);
+  return val;
+}
+
+std::vector<Real>
+proposeNewSampleMH(std::vector<const Distribution *> & distributions,
+                   const Real rnd,
+                   const std::vector<std::vector<Real>> & inputs,
+                   std::vector<std::vector<Real>> & inputs_sto)
+{
+  mooseAssert(distributions.size() == inputs.size() && distributions.size() == inputs_sto.size(),
+              "Number of inputs inconsistent with number of distributions.");
+  Real acceptance_ratio = 0.0;
+  unsigned int d = distributions.size();
+  std::vector<Real> prev_value(d);
+  std::vector<Real> new_proposal(d);
+
+  for (dof_id_type i = 0; i < d; ++i)
+  {
+    prev_value[i] = Normal::quantile(distributions[i]->cdf(inputs[i][0]), 0, 1);
+    acceptance_ratio += std::log(Normal::pdf(prev_value[i], 0, 1)) -
+                        std::log(Normal::pdf(inputs_sto[i].back(), 0, 1));
+  }
+
+  const bool accept = acceptance_ratio > std::log(rnd);
+  for (const auto i : make_range(d))
+    new_proposal[i] = accept ? prev_value[i] : inputs_sto[i].back();
+  return new_proposal;
 }
 
 } // namespace AdaptiveMonteCarloUtils
