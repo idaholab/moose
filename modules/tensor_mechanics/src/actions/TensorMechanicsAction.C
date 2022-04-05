@@ -1074,6 +1074,8 @@ TensorMechanicsAction::getKernelType()
     {
       if (_lk_formulation == LKFormulation::Total)
         return "TotalLagrangianRZStressDivergence";
+      else if (_lk_formulation == LKFormulation::Updated)
+        return "UpdatedLagrangianRZStressDivergence";
       // TODO: add support for other fomulations
     }
     mooseError("Unsupported formulation type in coordinate system ", _coord_system);

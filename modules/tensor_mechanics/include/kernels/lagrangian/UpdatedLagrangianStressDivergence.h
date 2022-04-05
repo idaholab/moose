@@ -45,38 +45,36 @@ protected:
   virtual void precalculateJacobian() override;
 
   /// Stabilize a generic gradient tensor
-  RankTwoTensor stabilizeGrad(const RankTwoTensor & Gb, const RankTwoTensor & Ga) override;
+  virtual RankTwoTensor stabilizeGrad(const RankTwoTensor & Gb, const RankTwoTensor & Ga) override;
 
   /// Calculate the full test gradient (could later be modified for stabilization)
-  RankTwoTensor testGrad(unsigned int i);
+  virtual RankTwoTensor testGrad(unsigned int i);
 
   /// Calculate the modified trial function gradient for stabilization
-  RankTwoTensor trialGrad(unsigned int m, bool stabilize);
+  virtual RankTwoTensor trialGrad(unsigned int m, bool stabilize);
 
-private:
   /// A component of the material Jacobian
-  Real matJacobianComponent(const RankFourTensor & C,
-                            const RankTwoTensor & grad_test,
-                            const RankTwoTensor & grad_trial,
-                            const RankTwoTensor & df);
+  virtual Real matJacobianComponent(const RankFourTensor & C,
+                                    const RankTwoTensor & grad_test,
+                                    const RankTwoTensor & grad_trial,
+                                    const RankTwoTensor & df);
   /// A component of the geometric Jacobian
-  Real geomJacobianComponent(const RankTwoTensor & grad_test,
-                             const RankTwoTensor & grad_trial,
-                             const RankTwoTensor & stress);
+  virtual Real geomJacobianComponent(const RankTwoTensor & grad_test,
+                                     const RankTwoTensor & grad_trial,
+                                     const RankTwoTensor & stress);
 
   /// Off diagonal Jacobian coming through eigenstrain
-  Real eigenstrainJacobianComponent(unsigned int cvar,
-                                    const RankFourTensor & C,
-                                    const RankTwoTensor & grad_test,
-                                    const Real & phi);
+  virtual Real eigenstrainJacobianComponent(unsigned int cvar,
+                                            const RankFourTensor & C,
+                                            const RankTwoTensor & grad_test,
+                                            const Real & phi);
 
   /// Compute the average trial function gradient
-  void computeAverageGradTrial();
+  virtual void computeAverageGradTrial();
 
   /// Calculate the average gradient of some type (test or trial)
-  void avgGrad(const VariablePhiGradient & grads, std::vector<RealVectorValue> & res);
+  virtual void avgGrad(const VariablePhiGradient & grads, std::vector<RealVectorValue> & res);
 
-protected:
   /// Averaged trial function gradients
   std::vector<RealVectorValue> _avg_grad_trial;
 

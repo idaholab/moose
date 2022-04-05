@@ -9,18 +9,18 @@
 
 #pragma once
 
-#include "TotalLagrangianStressDivergence.h"
+#include "UpdatedLagrangianStressDivergence.h"
 
-/// Enforce equilibrium with a total Lagrangian formulation in RZ coordinates
-class TotalLagrangianRZStressDivergence : public TotalLagrangianStressDivergence
+/// Enforce equilibrium with an updated Lagrangian formulation in RZ coordinates
+class UpdatedLagrangianRZStressDivergence : public UpdatedLagrangianStressDivergence
 {
 public:
   static InputParameters validParams();
-  TotalLagrangianRZStressDivergence(const InputParameters & parameters);
+  UpdatedLagrangianRZStressDivergence(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 
 protected:
   virtual RankTwoTensor testGrad(unsigned int i) override;
-  virtual RankTwoTensor trialGrad(unsigned int k) override;
+  virtual RankTwoTensor trialGrad(unsigned int k, bool stabilize) override;
 };

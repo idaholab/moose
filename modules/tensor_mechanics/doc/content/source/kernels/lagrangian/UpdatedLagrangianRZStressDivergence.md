@@ -1,10 +1,10 @@
-# TotalLagrangianRZStressDivergence
+# UpdatedLagrangianRZStressDivergence
 
-!syntax description /Kernels/TotalLagrangianRZStressDivergence
+!syntax description /Kernels/UpdatedLagrangianRZStressDivergence
 
 ## Description
 
-The `TotalLagrangianRZStressDivergence` derives from `TotalLagrangianStressDivergence`
+The `UpdatedLagrangianRZStressDivergence` derives from `UpdatedLagrangianStressDivergence`
 and redefines the gradient operator in axisymmetric RZ coordinates.
 
 In cylindrical coordinates, the gradient operator (with respect to the reference coordinates) is given as
@@ -33,8 +33,8 @@ and similarly the trial strain is
   \end{aligned}
 \end{equation}
 
-!syntax parameters /Kernels/TotalLagrangianRZStressDivergence
+!syntax parameters /Kernels/UpdatedLagrangianRZStressDivergence
 
-!syntax inputs /Kernels/TotalLagrangianRZStressDivergence
+!syntax inputs /Kernels/UpdatedLagrangianRZStressDivergence
 
-!syntax children /Kernels/TotalLagrangianRZStressDivergence
+!syntax children /Kernels/UpdatedLagrangianRZStressDivergence

@@ -20,12 +20,22 @@
 # stress is largest at the inner wall and, from the above equation, has a value
 # of -271429.
 
+# Whether to use large deformation kinematics
+ld = false
+
+# Total Lagrangian or updated Lagrangian
+formulation = 'TOTAL'
+
+# Small strain or finite strain
+strain = 'SMALL'
+
 [Mesh]
   file = 2D-RZ_mesh.e
 []
 
 [GlobalParams]
   displacements = 'disp_r disp_z'
+  large_kinematics = ${ld}
 []
 
 [Problem]
@@ -34,7 +44,8 @@
 
 [Modules/TensorMechanics/Master]
   [all]
-    strain = SMALL
+    strain = ${strain}
+    formulation = ${formulation}
     add_variables = true
     generate_output = 'cauchy_stress_zz'
     new_system = true
@@ -70,25 +81,25 @@
     type = Pressure
     variable = disp_r
     boundary = outer
-    factor = 200000
+    function = '200000*t'
   []
   [exterior_pressure_z]
     type = Pressure
     variable = disp_z
     boundary = outer
-    factor = 200000
+    function = '200000*t'
   []
   [interior_pressure_r]
     type = Pressure
     variable = disp_r
     boundary = inner
-    factor = 100000
+    function = '100000*t'
   []
   [interior_pressure_z]
     type = Pressure
     variable = disp_z
     boundary = inner
-    factor = 100000
+    function = '100000*t'
   []
 []
 
@@ -106,7 +117,8 @@
   nl_abs_tol = 1e-10
   nl_max_its = 15
 
-  num_steps = 1
+  dt = 0.1
+  end_time = 1
 []
 
 [Outputs]
