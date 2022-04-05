@@ -799,9 +799,7 @@ TensorMechanicsAction::actOutputMatProp()
       InputParameters params = emptyInputParameters();
 
       // RankTwoCartesianComponent
-      if (
-          [&]()
-          {
+      if ([&]() {
             for (const auto & r2q : _rank_two_cartesian_component_table)
               for (unsigned int a = 0; a < 3; ++a)
                 for (unsigned int b = 0; b < 3; ++b)
@@ -825,8 +823,7 @@ TensorMechanicsAction::actOutputMatProp()
       // RankTwoDirectionalComponent
       if (setupOutput(out,
                       _rank_two_directional_component_table,
-                      [&](std::string prop_name, std::string invariant)
-                      {
+                      [&](std::string prop_name, std::string invariant) {
                         auto type = ad_prepend + "RankTwoDirectionalComponent";
                         params = _factory.getValidParams(type);
                         params.set<MaterialPropertyName>("rank_two_tensor") =
@@ -839,27 +836,23 @@ TensorMechanicsAction::actOutputMatProp()
         continue;
 
       // RankTwoInvariant
-      if (setupOutput(out,
-                      _rank_two_invariant_table,
-                      [&](std::string prop_name, std::string invariant)
-                      {
-                        auto type = ad_prepend + "RankTwoInvariant";
-                        params = _factory.getValidParams(type);
-                        params.set<MaterialPropertyName>("rank_two_tensor") =
-                            _base_name + prop_name;
-                        params.set<MooseEnum>("invariant") = invariant;
-                        params.applyParameters(parameters());
-                        params.set<MaterialPropertyName>("property_name") = _base_name + out;
-                        _problem->addMaterial(type, _base_name + out + '_' + name(), params);
-                      }))
+      if (setupOutput(
+              out, _rank_two_invariant_table, [&](std::string prop_name, std::string invariant) {
+                auto type = ad_prepend + "RankTwoInvariant";
+                params = _factory.getValidParams(type);
+                params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + prop_name;
+                params.set<MooseEnum>("invariant") = invariant;
+                params.applyParameters(parameters());
+                params.set<MaterialPropertyName>("property_name") = _base_name + out;
+                _problem->addMaterial(type, _base_name + out + '_' + name(), params);
+              }))
         continue;
 
       // RankTwoCylindricalComponent
       if (setupOutput(
               out,
               _rank_two_cylindrical_component_table,
-              [&](std::string prop_name, std::string component)
-              {
+              [&](std::string prop_name, std::string component) {
                 if (_coord_system == Moose::COORD_RSPHERICAL)
                   mooseError(
                       "Cannot use cylindrical component output in a spherical coordinate system.");
@@ -876,8 +869,7 @@ TensorMechanicsAction::actOutputMatProp()
       // RankTwoSphericalComponent
       if (setupOutput(out,
                       _rank_two_spherical_component_table,
-                      [&](std::string prop_name, std::string component)
-                      {
+                      [&](std::string prop_name, std::string component) {
                         auto type = ad_prepend + "RankTwoSphericalComponent";
                         params = _factory.getValidParams(type);
                         params.set<MaterialPropertyName>("rank_two_tensor") =
@@ -922,7 +914,14 @@ TensorMechanicsAction::actGatherActionParameters()
 void
 TensorMechanicsAction::actLagrangianKernelStrain()
 {
-  std::string type = "ComputeLagrangianStrain";
+  std::string type;
+  if (_coord_system == Moose::COORD_XYZ)
+    type = "ComputeLagrangianStrain";
+  else if (_coord_system == Moose::COORD_RZ)
+    type = "ComputeLagrangianAxisymmetricRZStrain";
+  else
+    mooseError("Unsupported coordinate system type ", _coord_system);
+
   auto params = _factory.getValidParams(type);
 
   if (isParamValid("strain_base_name"))
@@ -1054,17 +1053,22 @@ TensorMechanicsAction::getKernelType()
 {
   if (_lagrangian_kernels)
   {
-    if (_coord_system != Moose::COORD_XYZ)
-      mooseError("Lagrangian kernel system can only be used in Cartesian "
-                 "coordinates");
-    if (_lk_homogenization)
-      return "HomogenizedTotalLagrangianStressDivergence";
-    else if (_lk_formulation == LKFormulation::Total)
-      return "TotalLagrangianStressDivergence";
-    else if (_lk_formulation == LKFormulation::Updated)
-      return "UpdatedLagrangianStressDivergence";
-    else
-      mooseError("Unknown formulation type");
+    if (_coord_system == Moose::COORD_XYZ)
+    {
+      if (_lk_homogenization)
+        return "HomogenizedTotalLagrangianStressDivergence";
+      else if (_lk_formulation == LKFormulation::Total)
+        return "TotalLagrangianStressDivergence";
+      else if (_lk_formulation == LKFormulation::Updated)
+        return "UpdatedLagrangianStressDivergence";
+    }
+    else if (_coord_system == Moose::COORD_RZ)
+    {
+      if (_lk_formulation == LKFormulation::Total)
+        return "TotalLagrangianRZStressDivergence";
+      // TODO: add support for other fomulations
+    }
+    mooseError("Unsupported formulation type in coordinate system ", _coord_system);
   }
   else
   {

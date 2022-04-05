@@ -50,15 +50,14 @@ protected:
   /// Update all the kinematic quantities
   virtual void computeQpProperties() override;
 
-private:
-  /// Calculate the strains based on the spatial velocity gradient
-  void calculateIncrementalStrains(const RankTwoTensor & L);
-  /// Subtract the eigenstrain increment to subtract from the total strain
-  void subtractEigenstrainIncrement(RankTwoTensor & strain);
-  /// Calculate the unstabilized and stabilized deformation gradients
-  void calculateDeformationGradient();
-
 protected:
+  /// Calculate the strains based on the spatial velocity gradient
+  virtual void calculateIncrementalStrains(const RankTwoTensor & L);
+  /// Subtract the eigenstrain increment to subtract from the total strain
+  virtual void subtractEigenstrainIncrement(RankTwoTensor & strain);
+  /// Calculate the unstabilized and stabilized deformation gradients
+  virtual void calculateDeformationGradient();
+
   // Displacements and displacement gradients
   const unsigned int _ndisp;
   std::vector<const VariableValue *> _disp;

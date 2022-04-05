@@ -40,31 +40,29 @@ protected:
   virtual void precalculateJacobian() override;
 
   /// Stabilize a generic gradient tensor
-  RankTwoTensor stabilizeGrad(const RankTwoTensor & Gb, const RankTwoTensor & Ga) override;
+  virtual RankTwoTensor stabilizeGrad(const RankTwoTensor & Gb, const RankTwoTensor & Ga) override;
 
   /// Calculate the full test gradient (could later be modified for stabilization)
-  RankTwoTensor testGrad(unsigned int i);
+  virtual RankTwoTensor testGrad(unsigned int i);
 
   /// Compute the stabilized trial function gradient tensor
-  RankTwoTensor trialGrad(unsigned int k);
+  virtual RankTwoTensor trialGrad(unsigned int k);
 
-private:
   /// The material part of the Jacobian
-  Real materialJacobian(const RankTwoTensor & grad_test, const RankTwoTensor & grad_trial);
+  virtual Real materialJacobian(const RankTwoTensor & grad_test, const RankTwoTensor & grad_trial);
 
   /// Off diagonal Jacobian coming through eigenstrain
-  Real eigenstrainJacobianComponent(unsigned int cvar,
-                                    const RankFourTensor & C,
-                                    const RankTwoTensor & grad_test,
-                                    const Real & phi);
+  virtual Real eigenstrainJacobianComponent(unsigned int cvar,
+                                            const RankFourTensor & C,
+                                            const RankTwoTensor & grad_test,
+                                            const Real & phi);
 
   /// Calculate the average gradient of some type (test or trial)
-  void avgGrad(const VariablePhiGradient & grads, std::vector<RealVectorValue> & res);
+  virtual void avgGrad(const VariablePhiGradient & grads, std::vector<RealVectorValue> & res);
 
   /// Compute the average trial function gradient
-  void computeAverageGradPhi();
+  virtual void computeAverageGradPhi();
 
-protected:
   /// The 1st Piola-Kirchhoff stress
   const MaterialProperty<RankTwoTensor> & _pk1;
   /// The derivative of the PK1 stress with respect to the
