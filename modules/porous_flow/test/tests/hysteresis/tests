@@ -28,7 +28,7 @@
     input = 'except04.i'
     expect_err = 'Each previous_turning_point must lie in the range [0.0, 1.0]'
     match_literal = true
-    requirement = 'An error shall be thrown if the hysteretic turning points do not lie in the range [0, 1]'
+    requirement = 'An error shall be thrown if the hysteretic turning points do not lie in the range \[0, 1\]'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]
@@ -37,7 +37,7 @@
     input = 'except05.i'
     expect_err = 'Each previous_turning_point must lie in the range [0.0, 1.0]'
     match_literal = true
-    requirement = 'An error shall be thrown if the hysteretic turning points do not lie in the range [0, 1]'
+    requirement = 'An error shall be thrown if the hysteretic turning points do not lie in the range \[0, 1\]'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]

@@ -29,4 +29,9 @@ Extensions:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
-    MooseDocs.extensions.sqa: disable
+    MooseDocs.extensions.sqa:
+        active: True
+        reports: !include modules/porous_flow/doc/sqa_reports.yml
+        categories:
+            framework: !include framework/doc/sqa_framework.yml
+            porous_flow: !include modules/porous_flow/doc/sqa_porous_flow.yml

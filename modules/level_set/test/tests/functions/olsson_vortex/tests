@@ -5,13 +5,13 @@
     type = Exodiff
     input = olsson_vortex.i
     exodiff = olsson_vortex_out.e
-    requirement = "The level set module shall include the vortex function defined in [cite!olsson2005conservative] with an instantaneous reverse feature."
+    requirement = "The level set module shall include the vortex function defined in [!cite](olsson2005conservative) with an instantaneous reverse feature."
   [../]
   [./cosine]
     type = Exodiff
     input = olsson_vortex.i
     cli_args = "Functions/velocity_func/reverse_type=cosine Outputs/file_base=olsson_vortex_cosine_out"
     exodiff = olsson_vortex_cosine_out.e
-    requirement = "The level set module shall include the vortex function defined in [cite!olsson2005conservative] with an cosine reverse feature."
+    requirement = "The level set module shall include the vortex function defined in [!cite](olsson2005conservative) with an cosine reverse feature."
   [../]
 []

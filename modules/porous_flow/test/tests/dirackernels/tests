@@ -5,7 +5,7 @@
     csvdiff = 'squarepulse1.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point source/sink between two specified times'
-    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
     issues = '#6990'
   [../]
   [./frompps]
@@ -14,7 +14,7 @@
     csvdiff = 'frompps.csv'
     threading = '!pthreads'
     requirement = 'The system shall provide a mass point source/sink computed by a postprocessor'
-    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPointSourceFromPostprocessor'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPointSourceFromPostprocessor.md'
     issues = '#15132'
   [../]
   [./hfrompps]
@@ -23,7 +23,7 @@
     csvdiff = 'hfrompps.csv'
     threading = '!pthreads'
     requirement = 'The system shall provide an enthalphy point source computed by a postprocessor'
-    design = 'porous_flow/sinks.md PorousFlowPointEnthalpySourceFromPostprocessor'
+    design = 'porous_flow/sinks.md PorousFlowPointEnthalpySourceFromPostprocessor.md'
     issues = '#15742'
   [../]
   [./theis1]
@@ -42,7 +42,7 @@
     threading = '!pthreads'
     requirement = 'PorousFlow shall be able to accurately simulate drawdown in 2D groundwater systems, to agree with the Theis solution'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
-    issues = '#6990 13155'
+    issues = '#6990 #13155'
   [../]
   [./theis2]
     type = 'CSVDiff'
