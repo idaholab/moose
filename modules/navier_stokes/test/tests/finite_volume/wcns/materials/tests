@@ -8,7 +8,7 @@
     method = "!dbg"
     requirement = 'The system shall be able to use realistic fluid properties in a weakly compressible flow simulation'
     ad_indexing_type = 'global'
-    rel_err = 5e-5
+    rel_err = 7e-5
     # The non-linear tolerance is actually fairly tight, but the variable values
     # are small at the no-slip boundary conditions, and this leads to absolute diffs of around 1e-15,
     # triggering the default relative tolerance error criterion
