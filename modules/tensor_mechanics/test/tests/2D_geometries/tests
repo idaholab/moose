@@ -137,49 +137,49 @@
                   'a side postprocessor applied to the axis of rotation in an axisymmetric '
                   'simulation.'
   []
-  [total_lagrangian_axisym_small_deformation]
+  [total_lagrangian_rz_small_deformation]
     type = Exodiff
     input = '2D-RZ_test_lagrangian.i'
     exodiff = '2D-RZ_total_lagrangian_small_deformation_out.e'
     cli_args = 'ld=false strain=SMALL formulation=TOTAL '
                'Materials/stress/type=ComputeLagrangianLinearElasticStress '
-               'Outputs/file_base=2D-RZ_total_lagrangian_axisym_small_deformation_out'
+               'Outputs/file_base=2D-RZ_total_lagrangian_small_deformation_out'
     design = 'source/materials/lagrangian/ComputeLagrangianAxisymmetricRZStrain.md '
              'source/kernels/lagrangian/TotalLagrangianRZStressDivergence.md'
     requirement = 'The total Lagrangian formulation shall support small deformation models defined '
                   'in axisymmetric RZ coordinates.'
   []
-  [total_lagrangian_axisym_large_deformation]
+  [total_lagrangian_rz_large_deformation]
     type = Exodiff
     input = '2D-RZ_test_lagrangian.i'
     exodiff = '2D-RZ_total_lagrangian_large_deformation_out.e'
     cli_args = 'ld=true strain=FINITE formulation=TOTAL '
                'Materials/stress/type=ComputeLagrangianLinearElasticStress '
-               'Outputs/file_base=2D-RZ_total_lagrangian_axisym_large_deformation_out'
+               'Outputs/file_base=2D-RZ_total_lagrangian_large_deformation_out'
     design = 'source/materials/lagrangian/ComputeLagrangianAxisymmetricRZStrain.md '
              'source/kernels/lagrangian/TotalLagrangianRZStressDivergence.md'
     requirement = 'The total Lagrangian formulation shall support large deformation models defined '
                   'in axisymmetric RZ coordinates.'
   []
-  [updated_lagrangian_axisym_small_deformation]
+  [updated_lagrangian_rz_small_deformation]
     type = Exodiff
     input = '2D-RZ_test_lagrangian.i'
     exodiff = '2D-RZ_updated_lagrangian_small_deformation_out.e'
     cli_args = 'ld=false strain=SMALL formulation=UPDATED '
                'Materials/stress/type=ComputeLagrangianLinearElasticStress '
-               'Outputs/file_base=2D-RZ_updated_lagrangian_axisym_small_deformation_out'
+               'Outputs/file_base=2D-RZ_updated_lagrangian_small_deformation_out'
     design = 'source/materials/lagrangian/ComputeLagrangianAxisymmetricRZStrain.md '
              'source/kernels/lagrangian/UpdatedLagrangianRZStressDivergence.md'
     requirement = 'The updated Lagrangian formulation shall support small deformation models defined '
                   'in axisymmetric RZ coordinates.'
   []
-  [updated_lagrangian_axisym_large_deformation]
+  [updated_lagrangian_rz_large_deformation]
     type = Exodiff
     input = '2D-RZ_test_lagrangian.i'
     exodiff = '2D-RZ_updated_lagrangian_large_deformation_out.e'
     cli_args = 'ld=true strain=FINITE formulation=UPDATED '
                'Materials/stress/type=ComputeLagrangianLinearElasticStress '
-               'Outputs/file_base=2D-RZ_updated_lagrangian_axisym_large_deformation_out'
+               'Outputs/file_base=2D-RZ_updated_lagrangian_large_deformation_out'
     design = 'source/materials/lagrangian/ComputeLagrangianAxisymmetricRZStrain.md '
              'source/kernels/lagrangian/UpdatedLagrangianRZStressDivergence.md'
     requirement = 'The updated Lagrangian formulation shall support large deformation models defined '
