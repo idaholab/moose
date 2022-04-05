@@ -28,6 +28,8 @@ public:
   MooseCoordTransform(const InputParameters & params);
   ~MooseCoordTransform();
 
+  static InputParameters validParams();
+
   libMesh::Point operator()(const libMesh::Point & point) const;
 
   /**

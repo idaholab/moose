@@ -143,6 +143,57 @@ MooseCoordTransform::setCoordinateSystem(const Moose::CoordinateSystemType coord
   _coord_type = coord_type;
 }
 
+InputParameters
+MooseCoordTransform::validParams()
+{
+  auto params = emptyInputParameters();
+  /// One entry of coord system per block, the size of _blocks and _coord_sys has to match, except:
+  /// 1. _blocks.size() == 0, then there needs to be just one entry in _coord_sys, which will
+  ///    be set for the whole domain
+  /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
+  /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
+  params.addParam<std::vector<SubdomainName>>("block", "Block IDs for the coordinate systems");
+  MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
+  MooseEnum rz_coord_axis("X=0 Y=1", "Y");
+  params.addParam<MultiMooseEnum>(
+      "coord_type", coord_types, "Type of the coordinate system per block param");
+  params.addParam<MooseEnum>(
+      "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
+  params.addParam<Real>("length_units_per_meter",
+                        "How many mesh length units are in a meter, e.g. if your mesh units are "
+                        "centimeters, then this parameter value should be 100.");
+  params.addRangeCheckedParam<Real>(
+      "alpha_rotation",
+      "-180<alpha_rotation<=180",
+      "The number of degrees that the domain should be alpha-rotated using the Euler "
+      "angle ZXZ convention from https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix in "
+      "order to align with a canonical physical space of your choosing.");
+  params.addRangeCheckedParam<Real>(
+      "beta_rotation",
+      "-180<beta_rotation<=180",
+      "The number of degrees that the domain should be beta-rotated using the Euler "
+      "angle ZXZ convention from https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix in "
+      "order to align with a canonical physical space of your choosing.");
+  params.addRangeCheckedParam<Real>(
+      "gamma_rotation",
+      "-180<gamma_rotation<=180",
+      "The number of degrees that the domain should be gamma-rotated using the Euler "
+      "angle ZXZ convention from https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix in "
+      "order to align with a canonical physical space of your choosing.");
+  MooseEnum up_direction("X=0 Y=1 Z=2");
+  params.addParam<MooseEnum>(
+      "up_direction",
+      up_direction,
+      "Specify what axis corresponds to the up direction in physical space (the opposite of the "
+      "gravity vector if you will). If this parameter is provided, we will perform a single 90 "
+      "degree rotation of the domain--if the provided axis is 'x' or 'z', we will not rotate if "
+      "the axis is 'y'--such that a point which was on the provided axis will now lie on the "
+      "y-axis, e.g. the y-axis is our canonical up direction. If you want finer grained control "
+      "than this, please use the 'alpha_rotation', 'beta_rotation', and 'gamma_rotation' "
+      "parameters.");
+  return params;
+}
+
 MooseCoordTransform::MooseCoordTransform(const InputParameters & params)
 {
   //
