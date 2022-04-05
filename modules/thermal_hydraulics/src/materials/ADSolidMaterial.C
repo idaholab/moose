@@ -37,7 +37,7 @@ ADSolidMaterial::ADSolidMaterial(const InputParameters & parameters)
 void
 ADSolidMaterial::computeQpProperties()
 {
-  _thermal_conductivity[_qp] = _props.k(MetaPhysicL::raw_value(_temp[_qp]));
-  _specific_heat[_qp] = _props.cp(MetaPhysicL::raw_value(_temp[_qp]));
-  _density[_qp] = _props.rho(MetaPhysicL::raw_value(_temp[_qp]));
+  _thermal_conductivity[_qp] = _props.k(_temp[_qp]);
+  _specific_heat[_qp] = _props.cp(_temp[_qp]);
+  _density[_qp] = _props.rho(_temp[_qp]);
 }
