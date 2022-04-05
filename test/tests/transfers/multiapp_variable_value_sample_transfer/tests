@@ -49,4 +49,19 @@
     requirement = "The system shall support the ability to disable the use of parallel barriers when "
                   "streaming text to the screen."
   []
+
+  [error_direction]
+    type = RunException
+    input = master.i
+    expect_err = "This transfer direction has not been implemented"
+    cli_args = 'Transfers/sample_transfer_bad/type=MultiAppVariableValueSampleTransfer Transfers/sample_transfer_bad/source_variable=u Transfers/sample_transfer_bad/variable=from_master Transfers/sample_transfer_bad/from_multi_app=sub'
+    requirement = 'The system shall report a reasonable error if parameters for an unsupported transfer of variable values from multiapp to the main app are provided'
+  []
+  [error_direction_pp]
+    type = RunException
+    input = pp_master.i
+    expect_err = "This transfer direction has not been implemented"
+    cli_args = 'Transfers/sample_pp_transfer/from_multi_app=pp_sub'
+    requirement = 'The system shall report a reasonable error if parameters for an unsupported transfer of variable values to postprocessor values from multiapp to main app are provided'
+  []
 []

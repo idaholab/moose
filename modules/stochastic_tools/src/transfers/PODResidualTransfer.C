@@ -19,7 +19,6 @@ PODResidualTransfer::validParams()
   InputParameters params = PODSamplerSolutionTransfer::validParams();
   params.addClassDescription("Transfers residual vectors from the sub-application to a "
                              "a container in the Trainer object.");
-  params.set<MultiMooseEnum>("direction") = "from_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   return params;
 }
@@ -27,6 +26,8 @@ PODResidualTransfer::validParams()
 PODResidualTransfer::PODResidualTransfer(const InputParameters & parameters)
   : PODSamplerSolutionTransfer(parameters)
 {
+  if (hasToMultiApp())
+    paramError("to_multi_app", "To and between multiapp directions are not implemented");
 }
 
 void
@@ -36,7 +37,7 @@ PODResidualTransfer::execute()
 
   // Looping over sub-apps
   for (unsigned int base_i = 0; base_i < total_base_num; ++base_i)
-    if (_multi_app->hasLocalApp(base_i))
+    if (getFromMultiApp()->hasLocalApp(base_i))
       transferResidual(base_i, base_i);
 }
 
@@ -54,7 +55,7 @@ PODResidualTransfer::transferResidual(dof_id_type base_i, dof_id_type multi_app_
   const std::vector<std::string> & tag_types = _trainer.getTagTypes();
 
   // Getting reference to the non-linear system
-  FEProblemBase & app_problem = _multi_app->appProblemBase(multi_app_i);
+  FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(multi_app_i);
   NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
 
   // Looping over the residual tags and extracting the corresponding vector.

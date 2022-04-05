@@ -2083,6 +2083,9 @@ protected:
   /// Transfers executed just after MultiApps to transfer data from them
   ExecuteMooseObjectWarehouse<Transfer> _from_multi_app_transfers;
 
+  /// Transfers executed just before MultiApps to transfer data between them
+  ExecuteMooseObjectWarehouse<Transfer> _between_multi_app_transfers;
+
   /// A map of objects that consume random numbers
   std::map<std::string, std::unique_ptr<RandomData>> _random_data_objects;
 

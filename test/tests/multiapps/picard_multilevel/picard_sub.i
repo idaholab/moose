@@ -88,8 +88,7 @@
 [Transfers]
   [./v2]
     type = MultiAppNearestNodeTransfer
-    direction = from_multiapp
-    multi_app = sub2
+    from_multi_app = sub2
     source_variable = v
     variable = v2
   [../]

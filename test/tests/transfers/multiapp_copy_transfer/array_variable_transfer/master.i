@@ -39,10 +39,9 @@
   # Transfers all components together on the same mesh.
   [./from_sub]
     type = MultiAppCopyTransfer
-    direction = from_multiapp
     source_variable = u
     variable = v
-    multi_app = sub
+    from_multi_app = sub
   [../]
 []
 

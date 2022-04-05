@@ -81,8 +81,7 @@
 [Transfers]
   [T_to_slave]
     type = MultiAppUserObjectTransfer
-    multi_app = thm
-    direction = to_multiapp
+    to_multi_app = thm
     user_object = T_avg_uo
     variable = T_wall
   []

@@ -41,14 +41,14 @@
 [Transfers]
   [quad]
     type = SamplerParameterTransfer
-    multi_app = quad_sub
+    to_multi_app = quad_sub
     sampler = quadrature
     parameters = 'Materials/diffusivity/prop_values Materials/xs/prop_values'
     to_control = 'stochastic'
   []
   [data]
     type = SamplerReporterTransfer
-    multi_app = quad_sub
+    from_multi_app = quad_sub
     sampler = quadrature
     stochastic_reporter = storage
     from_reporter = avg/value

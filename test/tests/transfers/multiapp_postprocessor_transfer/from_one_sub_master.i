@@ -80,32 +80,28 @@
   [./pp_transfer_ave]
     type = MultiAppPostprocessorTransfer
     reduction_type = average
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     from_postprocessor = average
     to_postprocessor = sub_average
   [../]
   [./pp_transfer_sum]
     type = MultiAppPostprocessorTransfer
     reduction_type = sum
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     from_postprocessor = average
     to_postprocessor = sub_sum
   [../]
   [./pp_transfer_min]
     type = MultiAppPostprocessorTransfer
     reduction_type = minimum
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     from_postprocessor = average
     to_postprocessor = sub_minimum
   [../]
   [./pp_transfer_max]
     type = MultiAppPostprocessorTransfer
     reduction_type = maximum
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     from_postprocessor = average
     to_postprocessor = sub_maximum
   [../]

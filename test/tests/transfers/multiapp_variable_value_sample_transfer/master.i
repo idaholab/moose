@@ -64,10 +64,9 @@
 [Transfers]
   [sample_transfer]
     source_variable = u
-    direction = to_multiapp
     variable = from_master
     type = MultiAppVariableValueSampleTransfer
-    multi_app = sub
+    to_multi_app = sub
   []
 []
 

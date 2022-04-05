@@ -48,10 +48,9 @@
 [Transfers]
   [to_sub]
     type = MultiAppScalarToAuxScalarTransfer
-    multi_app = sub
+    to_multi_app = sub
     source_variable = 'a'
     to_aux_scalar = 'b'
-    direction = to_multiapp
   []
 []
 

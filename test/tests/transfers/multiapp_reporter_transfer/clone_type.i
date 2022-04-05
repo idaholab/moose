@@ -35,7 +35,7 @@
     type = MultiAppCloneReporterTransfer
     from_reporters = 'from_sub_pp/value from_sub_rep/int from_sub_rep/str'
     to_reporter = receiver
-    multi_app = multi_reporter
+    from_multi_app = multi_reporter
     reporter_type = 'real integer string'
   []
 []

@@ -85,8 +85,7 @@
 [Transfers]
   [./master_to_sub]
     type = MultiAppVariableValueSamplePostprocessorTransfer
-    direction = to_multiapp
-    multi_app = quad
+    to_multi_app = quad
     source_variable = master_aux
     postprocessor = pp
   [../]

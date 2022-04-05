@@ -67,7 +67,7 @@
       type = RunException
       input = main.i
       match_literal = True
-      cli_args = "Transfers/vpp_to_vpp/direction=from_multiapp"
+      cli_args = "Transfers/vpp_to_vpp_bad/type=MultiAppReporterTransfer Transfers/vpp_to_vpp_bad/to_reporters='to_sub_vpp/a to_sub_vpp/b' Transfers/vpp_to_vpp_bad/from_reporters='from_main_vpp/a from_main_vpp/b' Transfers/vpp_to_vpp_bad/from_multi_app=sub"
       expect_err = "subapp_index must be provided when more than one subapp is present."
 
       detail = "from multiple sub-applications."

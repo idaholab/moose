@@ -76,8 +76,7 @@
 [Transfers]
   [./subsub_average]
     type = MultiAppPostprocessorInterpolationTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     variable = subsub_average
     postprocessor = subsub_average
   [../]

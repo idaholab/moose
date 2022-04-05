@@ -208,9 +208,8 @@
 [Transfers]
   [./fromsub]
     type = MultiAppUserObjectTransfer
-    direction = from_multiapp
     user_object = axial_str
-    multi_app = sub
+    from_multi_app = sub
     variable = to_var
     all_master_nodes_contained_in_sub_app = true
   [../]

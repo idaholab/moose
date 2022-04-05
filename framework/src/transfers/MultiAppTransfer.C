@@ -23,7 +23,11 @@ InputParameters
 MultiAppTransfer::validParams()
 {
   InputParameters params = Transfer::validParams();
-  params.addRequiredParam<MultiAppName>("multi_app", "The name of the MultiApp to use.");
+  params.addDeprecatedParam<MultiAppName>("multi_app",
+                                          "The name of the MultiApp to transfer data with",
+                                          "Use to_multiapp & from_multiapp parameters now");
+  params.addParam<MultiAppName>("from_multi_app", "The name of the MultiApp to receive data from");
+  params.addParam<MultiAppName>("to_multi_app", "The name of the MultiApp to transfer the data to");
 
   // MultiAppTransfers by default will execute with their associated MultiApp. These flags will be
   // added by FEProblemBase when the transfer is added.
@@ -47,49 +51,136 @@ MultiAppTransfer::validParams()
 
 MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   : Transfer(parameters),
-    _multi_app(_fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"))),
     _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
     _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
 {
+  // Get the multiapps from their names
+  if (!isParamValid("multi_app"))
+  {
+    if (isParamValid("from_multi_app"))
+    {
+      _from_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("from_multi_app"));
+      _multi_app = _from_multi_app;
+    }
+    if (isParamValid("to_multi_app"))
+    {
+      _to_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("to_multi_app"));
+      _multi_app = _to_multi_app;
+    }
+  }
+  else
+  {
+    // Check deprecated direction parameter
+    for (const auto & dir : _directions)
+    {
+      if (dir == FROM_MULTIAPP)
+      {
+        _from_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
+        _multi_app = _from_multi_app;
+      }
+      else if (dir == TO_MULTIAPP)
+      {
+        _to_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
+        _multi_app = _to_multi_app;
+      }
+      else
+        paramError("direction",
+                   "BETWEN_MULTIAPP transfers should be specified using to/from_multi_app");
+    }
+  }
+
   if (getParam<bool>("check_multiapp_execute_on"))
     checkMultiAppExecuteOn();
 
-  if (_directions.size() == 0)
-    paramError("direction", "At least one direction is required");
-
-  // If we have just one direction in _directions, set it now so that it can be used in the
-  // constructor
-  if (_directions.size() == 1)
+  // Fill direction attributes, for backward compatibility but also convenience
+  if (!isParamValid("direction"))
   {
-    int only_direction = _directions.get(0);
-    _current_direction = only_direction;
-    _direction = only_direction;
+    if (_from_multi_app && (!_to_multi_app || _from_multi_app == _to_multi_app))
+      _directions.push_back("from_multiapp");
+    else if (_to_multi_app && (!_from_multi_app || _from_multi_app == _to_multi_app))
+      _directions.push_back("to_multiapp");
+    else
+      _directions.push_back("between_multiapp");
+
+    // So it's available in the next constructors
+    _direction = _directions[0];
+    _current_direction = _directions[0];
+  }
+
+  // Check for different number of subapps
+  if (_to_multi_app && _from_multi_app &&
+      _from_multi_app->numGlobalApps() != _to_multi_app->numGlobalApps())
+    mooseError(
+        "Between multiapp transfer is only supported with the same number of subapps per MultiApp");
+
+  // Handle deprecated parameters
+  if (parameters.isParamSetByUser("directions"))
+  {
+    if (!isParamValid("multi_app"))
+      paramError("directions",
+                 "The deprecated directions parameter is meant to be used in conjunction with the "
+                 "multi_app parameter");
+    if (isParamValid("to_multi_app") || isParamValid("from_multi_app"))
+      paramError("directions",
+                 "The deprecated directions parameter is not meant to be used in conjunction with "
+                 "the from_multi_app or to_multi_app parameters");
   }
 }
 
 void
 MultiAppTransfer::checkMultiAppExecuteOn()
 {
-  if (getExecuteOnEnum() != _multi_app->getExecuteOnEnum())
-    mooseDoOnce(mooseWarning("MultiAppTransfer execute_on flags do not match associated Multiapp "
-                             "execute_on flags"));
+  if (_from_multi_app)
+    if (getExecuteOnEnum() != _from_multi_app->getExecuteOnEnum())
+      mooseDoOnce(
+          mooseWarning("MultiAppTransfer execute_on flags do not match associated from_multi_app "
+                       "execute_on flags"));
+
+  if (_to_multi_app)
+    if (getExecuteOnEnum() != _to_multi_app->getExecuteOnEnum())
+      mooseDoOnce(
+          mooseWarning("MultiAppTransfer execute_on flags do not match associated to_multi_app "
+                       "execute_on flags"));
 }
 
 void
 MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 {
-  for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-    if (_multi_app->hasLocalApp(i) && !_multi_app->appProblemBase(i).hasVariable(var_name))
-      mooseError("Cannot find variable ", var_name, " for ", name(), " Transfer");
+  bool variable_found = false;
+  bool has_an_app = false;
+
+  // Check the from_multi_app for the variable
+  if (_from_multi_app)
+    for (unsigned int i = 0; i < _from_multi_app->numGlobalApps(); i++)
+      if (_from_multi_app->hasLocalApp(i))
+      {
+        has_an_app = true;
+        if (_from_multi_app->appProblemBase(i).hasVariable(var_name))
+          variable_found = true;
+      }
+
+  // Check the to_multi_app for the variable
+  if (_to_multi_app)
+    for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); i++)
+      if (_to_multi_app->hasLocalApp(i))
+      {
+        has_an_app = true;
+        if (_to_multi_app->appProblemBase(i).hasVariable(var_name))
+          variable_found = true;
+      }
+
+  if (!variable_found && has_an_app)
+    mooseError("Cannot find variable ", var_name, " for ", name(), " Transfer");
 }
 
 const std::vector<ExecFlagType> &
 MultiAppTransfer::execFlags() const
 {
-  mooseDeprecated("The execFlags() methos is being removed because MOOSE has been updated to use a "
-                  "ExecFlagEnum for execute flags. The current flags should be retrieved from "
-                  "the \"exeucte_on\" parameters of your object or by using the \"_execute_enum\" "
-                  "reference to the parameter or the getExecuteOnEnum() method.");
+  mooseDeprecated(
+      "The execFlags() methods is being removed because MOOSE has been updated to use a "
+      "ExecFlagEnum for execute flags. The current flags should be retrieved from "
+      "the \"exeucte_on\" parameters of your object or by using the \"_execute_enum\" "
+      "reference to the parameter or the getExecuteOnEnum() method.");
   return _exec_flags;
 }
 
@@ -113,36 +204,30 @@ MultiAppTransfer::getAppInfo()
   // Otherwise, this will cause two issues: 1) increasing memory usage
   // for a simulation that requires many transfers, 2) producing wrong results
   // when we do collective communication on this vector.
-  _local2global_map.clear();
+  _to_local2global_map.clear();
+  _from_local2global_map.clear();
 
   // Build the vectors for to problems, from problems, and subapps positions.
-  switch (_direction)
+  if (_current_direction == FROM_MULTIAPP)
   {
-    case TO_MULTIAPP:
-      _from_problems.push_back(&_multi_app->problemBase());
-      _from_positions.push_back(Point(0., 0., 0.));
-      for (unsigned int i_app = 0; i_app < _multi_app->numGlobalApps(); i_app++)
-      {
-        if (!_multi_app->hasLocalApp(i_app))
-          continue;
-        _local2global_map.push_back(i_app);
-        _to_problems.push_back(&_multi_app->appProblemBase(i_app));
-        _to_positions.push_back(_multi_app->position(i_app));
-      }
-      break;
+    _to_problems.push_back(&_from_multi_app->problemBase());
+    _to_positions.push_back(Point(0., 0., 0.));
 
-    case FROM_MULTIAPP:
-      _to_problems.push_back(&_multi_app->problemBase());
-      _to_positions.push_back(Point(0., 0., 0.));
-      for (unsigned int i_app = 0; i_app < _multi_app->numGlobalApps(); i_app++)
-      {
-        if (!_multi_app->hasLocalApp(i_app))
-          continue;
-        _local2global_map.push_back(i_app);
-        _from_problems.push_back(&_multi_app->appProblemBase(i_app));
-        _from_positions.push_back(_multi_app->position(i_app));
-      }
-      break;
+    getFromMultiAppInfo();
+  }
+
+  if (_current_direction == TO_MULTIAPP)
+  {
+    _from_problems.push_back(&_to_multi_app->problemBase());
+    _from_positions.push_back(Point(0., 0., 0.));
+
+    getToMultiAppInfo();
+  }
+
+  if (_current_direction == BETWEEN_MULTIAPP)
+  {
+    getToMultiAppInfo();
+    getFromMultiAppInfo();
   }
 
   // Build the from and to equation systems and mesh vectors.
@@ -155,6 +240,7 @@ MultiAppTransfer::getAppInfo()
     else
       _to_meshes.push_back(&_to_problems[i]->mesh());
   }
+
   for (unsigned int i = 0; i < _from_problems.size(); i++)
   {
     _from_es.push_back(&_from_problems[i]->es());
@@ -162,6 +248,40 @@ MultiAppTransfer::getAppInfo()
       _from_meshes.push_back(&_from_problems[i]->getDisplacedProblem()->mesh());
     else
       _from_meshes.push_back(&_from_problems[i]->mesh());
+  }
+}
+
+void
+MultiAppTransfer::getToMultiAppInfo()
+{
+  if (!_to_multi_app)
+    mooseError("There is no to_multiapp to get info from");
+
+  for (unsigned int i_app = 0; i_app < _to_multi_app->numGlobalApps(); i_app++)
+  {
+    if (!_to_multi_app->hasLocalApp(i_app))
+      continue;
+
+    _to_local2global_map.push_back(i_app);
+    _to_problems.push_back(&_to_multi_app->appProblemBase(i_app));
+    _to_positions.push_back(_to_multi_app->position(i_app));
+  }
+}
+
+void
+MultiAppTransfer::getFromMultiAppInfo()
+{
+  if (!_from_multi_app)
+    mooseError("There is no from_multiapp to get info from");
+
+  for (unsigned int i_app = 0; i_app < _from_multi_app->numGlobalApps(); i_app++)
+  {
+    if (!_from_multi_app->hasLocalApp(i_app))
+      continue;
+
+    _from_local2global_map.push_back(i_app);
+    _from_problems.push_back(&_from_multi_app->appProblemBase(i_app));
+    _from_positions.push_back(_from_multi_app->position(i_app));
   }
 }
 
@@ -256,15 +376,12 @@ std::vector<unsigned int>
 MultiAppTransfer::getFromsPerProc()
 {
   std::vector<unsigned int> froms_per_proc;
-  switch (_direction)
+  if (_to_multi_app)
+    froms_per_proc.resize(n_processors(), 1);
+  if (_from_multi_app)
   {
-    case TO_MULTIAPP:
-      froms_per_proc.resize(n_processors(), 1);
-      break;
-    case FROM_MULTIAPP:
-      froms_per_proc.resize(n_processors());
-      _communicator.allgather(_multi_app->numLocalApps(), froms_per_proc);
-      break;
+    froms_per_proc.resize(n_processors());
+    _communicator.allgather(_from_multi_app->numLocalApps(), froms_per_proc);
   }
   return froms_per_proc;
 }
@@ -272,9 +389,9 @@ MultiAppTransfer::getFromsPerProc()
 NumericVector<Real> &
 MultiAppTransfer::getTransferVector(unsigned int i_local, std::string var_name)
 {
-  mooseAssert(_direction == TO_MULTIAPP, "getTransferVector only works for transfers to multiapps");
+  mooseAssert(_to_multi_app, "getTransferVector only works for transfers to multiapps");
 
-  return _multi_app->appTransferVector(_local2global_map[i_local], var_name);
+  return _to_multi_app->appTransferVector(_to_local2global_map[i_local], var_name);
 }
 
 void

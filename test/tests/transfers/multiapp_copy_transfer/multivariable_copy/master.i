@@ -38,10 +38,9 @@
   # Transfer both variables by inputting a vector of their names
   [./from_sub]
     type = MultiAppCopyTransfer
-    direction = from_multiapp
     source_variable = 'u v'
     variable = 'u v'
-    multi_app = sub
+    from_multi_app = sub
   [../]
 []
 

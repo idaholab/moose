@@ -73,7 +73,7 @@
 [Transfers]
   [param]
     type = SamplerParameterTransfer
-    multi_app = sub
+    to_multi_app = sub
     sampler = sample
     parameters = 'Materials/D0/prop_values
                   Materials/D1/prop_values
@@ -92,25 +92,23 @@
   []
   [data]
     type = PODSamplerSolutionTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     trainer_name = 'pod_rb'
-    direction = 'from_multiapp'
     execute_on = 'timestep_begin'
     check_multiapp_execute_on = false
   []
   [mode]
     type = PODSamplerSolutionTransfer
-    multi_app = sub
+    to_multi_app = sub
     sampler = sample
     trainer_name = 'pod_rb'
-    direction = 'to_multiapp'
     execute_on = 'final'
     check_multiapp_execute_on = false
   []
   [res]
     type = PODResidualTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     trainer_name = 'pod_rb'
     execute_on = 'final'

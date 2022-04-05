@@ -70,19 +70,17 @@
 [Transfers]
   [./to_sub]
     source_variable = u
-    direction = to_multiapp
     variable = transferred_u
     type = MultiAppMeshFunctionTransfer
-    multi_app = sub
+    to_multi_app = sub
     #displaced_source_mesh = true
   [../]
 
   [./elemental_to_sub]
     source_variable = u
-    direction = to_multiapp
     variable = elemental_transferred_u
     type = MultiAppMeshFunctionTransfer
-    multi_app = sub
+    to_multi_app = sub
     #displaced_source_mesh = true
   [../]
 []

@@ -47,28 +47,28 @@
 [Transfers]
   [runner0]
     type = SamplerParameterTransfer
-    multi_app = runner0
+    to_multi_app = runner0
     sampler = mc0
     parameters = 'BCs/left/value'
     to_control = 'stochastic'
   []
   [runner1]
     type = SamplerParameterTransfer
-    multi_app = runner1
+    to_multi_app = runner1
     sampler = mc1
     parameters = 'BCs/right/value'
     to_control = 'stochastic'
   []
   [data0]
     type = SamplerPostprocessorTransfer
-    multi_app = runner0
+    from_multi_app = runner0
     sampler = mc0
     to_vector_postprocessor = storage0
     from_postprocessor = average
   []
   [data1]
     type = SamplerPostprocessorTransfer
-    multi_app = runner1
+    from_multi_app = runner1
     sampler = mc1
     to_vector_postprocessor = storage1
     from_postprocessor = average

@@ -69,15 +69,13 @@
 [Transfers]
   [elemental_fromsub]
     type = MultiAppInterpolationTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     source_variable = elemental
     variable = elemental_from_sub
   []
   [nodal_fromsub]
     type = MultiAppInterpolationTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     source_variable = nodal
     variable = nodal_from_sub
   []
