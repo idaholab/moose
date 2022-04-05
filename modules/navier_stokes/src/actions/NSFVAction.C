@@ -405,7 +405,8 @@ NSFVAction::validParams()
       1.0,
       "mixing_length_delta > 0.0",
       "Tunable parameter related to the thickness of the boundary layer."
-      "When it is not specified, Prandtl's original unbounded wall distance mixing length model is retrieved.");
+      "When it is not specified, Prandtl's original unbounded wall distance mixing length model is "
+      "retrieved.");
 
   params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
                               "von_karman_const_0 mixing_length_delta",
