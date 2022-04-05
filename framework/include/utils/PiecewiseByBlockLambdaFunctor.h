@@ -126,7 +126,7 @@ PiecewiseByBlockLambdaFunctor<T>::PiecewiseByBlockLambdaFunctor(
     const MooseMesh & mesh,
     const std::set<SubdomainID> & block_ids,
     const bool is_const)
-  : Moose::FunctorBase<T>(name, clearance_schedule), _mesh(mesh)
+  : Moose::FunctorBase<T>(name, clearance_schedule), _is_constant(is_const), _mesh(mesh)
 {
   setFunctor(mesh, block_ids, my_lammy);
 }
