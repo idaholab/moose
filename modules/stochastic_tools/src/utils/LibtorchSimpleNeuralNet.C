@@ -82,4 +82,58 @@ LibtorchSimpleNeuralNet::addLayer(std::string layer_name,
 
 }
 
+template <>
+void
+dataStore<StochasticTools::LibtorchSimpleNeuralNet>(
+    std::ostream & stream,
+    std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & nn,
+    void * context)
+{
+  std::string n(nn->name());
+  dataStore(stream, n, context);
+
+  unsigned int ni(nn->numInputs());
+  dataStore(stream, ni, context);
+
+  unsigned int nhl(nn->numHiddenLayers());
+  dataStore(stream, nhl, context);
+
+  std::vector<unsigned int> nnpl(nn->numNeuronsPerLayer());
+  dataStore(stream, nnpl, context);
+
+  unsigned int no(nn->numOutputs());
+  dataStore(stream, no, context);
+
+  torch::save(nn, nn->name());
+}
+
+template <>
+void
+dataLoad<StochasticTools::LibtorchSimpleNeuralNet>(
+    std::istream & stream,
+    std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & nn,
+    void * context)
+{
+  std::string name;
+  dataLoad(stream, name, context);
+
+  unsigned int num_inputs;
+  dataLoad(stream, num_inputs, context);
+
+  unsigned int num_hidden_layers;
+  dataLoad(stream, num_hidden_layers, context);
+
+  std::vector<unsigned int> num_neurons_per_layer;
+  num_neurons_per_layer.resize(num_hidden_layers);
+  dataLoad(stream, num_neurons_per_layer, context);
+
+  unsigned int num_outputs;
+  dataLoad(stream, num_outputs, context);
+
+  nn = std::make_shared<StochasticTools::LibtorchSimpleNeuralNet>(
+      name, num_inputs, num_hidden_layers, num_neurons_per_layer, num_outputs);
+
+  torch::load(nn, name);
+}
+
 #endif

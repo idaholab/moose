@@ -13,6 +13,8 @@
 
 #ifdef TORCH_ENABLED
 
+#include "DataIO.h"
+
 namespace StochasticTools
 {
 
@@ -84,5 +86,17 @@ protected:
 };
 
 }
+
+template <>
+void dataStore<StochasticTools::LibtorchSimpleNeuralNet>(
+    std::ostream & stream,
+    std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & nn,
+    void * context);
+
+template <>
+void dataLoad<StochasticTools::LibtorchSimpleNeuralNet>(
+    std::istream & stream,
+    std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & nn,
+    void * context);
 
 #endif
