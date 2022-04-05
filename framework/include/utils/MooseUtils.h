@@ -226,7 +226,7 @@ void serialEnd(const libMesh::Parallel::Communicator & comm, bool warn = true);
 bool hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ext = false);
 
 /**
- * Removes any file extension from the fiven string s (i.e. any ".[extension]" suffix of s) and
+ * Removes any file extension from the given string s (i.e. any ".[extension]" suffix of s) and
  * returns the result.
  */
 std::string stripExtension(const std::string & s);
@@ -1054,3 +1054,8 @@ public:
  * find, erase, length algorithm for removing a substring from a string
  */
 void removeSubstring(std::string & main, const std::string & sub);
+
+/**
+ * find, erase, length algorithm for removing a substring from a copy of a string
+ */
+std::string removeSubstring(const std::string & main, const std::string & sub);
