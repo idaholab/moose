@@ -17,7 +17,7 @@ variables, variable initialization and various objects for turbulence modeling.
 This action only supports Rhie-Chow interpolation for the determination
 of face velocities in the advection terms. The face interpolation of the
 advected quantities (e.g. upwind, average) can be controlled through the
-`*_advection_interpolation` action parameters. 
+`*_advection_interpolation` action parameters.
 
 !alert-end!
 
@@ -28,7 +28,21 @@ necessary for the solution of a given problem. These variables can then be used
 to couple fluid flow simulations with other physics. The list of variable names
 commonly used in the action syntax is presented below:
 
-!listing include/base/NS.h
+- Velocities for non-porous-medium simulations:
+
+  !listing include/base/NS.h start=std::string velocity_x end=std::string velocity_z include-end=true
+
+- Velocities for porous medium simulations:
+
+  !listing include/base/NS.h start=std::string superficial_velocity_x end=std::string superficial_velocity_z include-end=true
+
+- Pressure and temperature:
+
+  !listing include/base/NS.h line=pressure
+
+  !listing include/base/NS.h line=std::string T_fluid
+
+For the default names of other variables used in this action, visit [this site](include/base/NS.h).  
 
 ## Examples
 
@@ -43,6 +57,15 @@ the simulation is set up manually, by defining every kernel, boundary condition 
 material explicitly.
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/lid-driven/lid-driven-with-energy.i
+
+!alert! note
+
+Careful! The utilization of central difference (`average`) advected interpolation
+may lead to oscillatory behavior in certain scenarios. Even though it is not the case
+for this example, if this phenomenon arises,
+we recommend using first order `upwind` or second order TVD chemes.
+
+!alert-end!
 
 The same simulation can be set up using the action syntax which improves
 input file readability:
@@ -69,6 +92,15 @@ is presented:
 
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/heated/2d-rc-heated.i
 
+!alert! note
+
+Careful! The utilization of central difference (`average`) advected interpolation
+may lead to oscillatory behavior in certain scenarios. Even though it is not the case
+for this example, if this phenomenon arises,
+we recommend using first order `upwind` or second order TVD chemes.
+
+!alert-end!
+
 The same simulation can also be set up using the NavierStokesFV action syntax:
 
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/heated/2d-rc-heated-action.i
@@ -91,6 +123,15 @@ For more information on the weakly-compressible treatment, visit
 the [Weakly-compressible Navier Stokes](modules/navier_stokes/wcnsfv.md) page.
 
 !listing modules/navier_stokes/test/tests/finite_volume/wcns/channel-flow/2d-transient.i
+
+!alert! note
+
+Careful! The utilization of central difference (`average`) advected interpolation
+may lead to oscillatory behavior in certain scenarios. Even though it is not the case
+for this example, if this phenomenon arises,
+we recommend using first order `upwind` or second order TVD chemes.
+
+!alert-end!
 
 The same simulation can be set up using the action syntax as folows:
 
