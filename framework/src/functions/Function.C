@@ -30,7 +30,8 @@ FunctionTempl<T>::FunctionTempl(const InputParameters & parameters)
     UserObjectInterface(this),
     Restartable(this, "Functions"),
     MeshChangedInterface(parameters),
-    ScalarCoupleable(this)
+    ScalarCoupleable(this),
+    Moose::FunctorBase<T>(name())
 {
 }
 

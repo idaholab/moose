@@ -68,16 +68,14 @@
 [Transfers]
   [./from_sub]
     type = MultiAppNearestNodeTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     source_variable = u
     variable = from_sub
     displaced_source_mesh = true
   [../]
   [./elemental_from_sub]
     type = MultiAppNearestNodeTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     source_variable = u
     variable = elemental_from_sub
     displaced_source_mesh = true

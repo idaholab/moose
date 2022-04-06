@@ -73,8 +73,7 @@
 [Transfers]
   [pp_transfer]
     type = MultiAppPostprocessorTransfer
-    direction = to_multiapp
-    multi_app = pp_sub
+    to_multi_app = pp_sub
     from_postprocessor = average
     to_postprocessor = from_master
   []

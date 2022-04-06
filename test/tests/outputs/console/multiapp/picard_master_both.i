@@ -92,29 +92,25 @@
 [Transfers]
   [./v_from_sub_begin]
     type = MultiAppNearestNodeTransfer
-    direction = from_multiapp
-    multi_app = sub_begin
+    from_multi_app = sub_begin
     source_variable = v
     variable = v_begin
   [../]
   [./u_to_sub_begin]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub_begin
+    to_multi_app = sub_begin
     source_variable = u
     variable = u
   [../]
   [./v_from_sub_end]
     type = MultiAppNearestNodeTransfer
-    direction = from_multiapp
-    multi_app = sub_end
+    from_multi_app = sub_end
     source_variable = v
     variable = v_end
   [../]
   [./u_to_sub_end]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub_end
+    to_multi_app = sub_end
     source_variable = u
     variable = u
   [../]

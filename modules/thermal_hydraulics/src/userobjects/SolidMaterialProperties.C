@@ -56,20 +56,20 @@ SolidMaterialProperties::finalize()
 {
 }
 
-Real
-SolidMaterialProperties::k(Real temp) const
+ADReal
+SolidMaterialProperties::k(const ADReal & temp) const
 {
-  return _k.value(temp, Point());
+  return _k.value(temp, ADPoint());
 }
 
-Real
-SolidMaterialProperties::cp(Real temp) const
+ADReal
+SolidMaterialProperties::cp(const ADReal & temp) const
 {
-  return _cp.value(temp, Point());
+  return _cp.value(temp, ADPoint());
 }
 
-Real
-SolidMaterialProperties::rho(Real temp) const
+ADReal
+SolidMaterialProperties::rho(const ADReal & temp) const
 {
-  return _rho.value(temp, Point());
+  return _rho.value(temp, ADPoint());
 }

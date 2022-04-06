@@ -70,7 +70,7 @@
 [Transfers]
   [sub]
     type = SamplerParameterTransfer
-    multi_app = sub
+    to_multi_app = sub
     sampler = sample
     parameters = 'Materials/cond_inner/prop_values Materials/cond_outer/prop_values
                   Postprocessors/heat_source/scale_factor
@@ -82,7 +82,7 @@
   []
   [data]
     type = SamplerReporterTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     stochastic_reporter = storage
     from_reporter = 'temp_center_inner/value  temp_center_outer/value  temp_end_inner/value  temp_end_outer/value

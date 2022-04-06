@@ -2,3 +2,7 @@ directories:
     - ${MOOSE_DIR}/modules/reactor/test/tests
 specs:
     - tests
+dependencies:
+    - framework
+repo: moose
+reports: !include ${MOOSE_DIR}/modules/reactor/doc/sqa_reports.yml

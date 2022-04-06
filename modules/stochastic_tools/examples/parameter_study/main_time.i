@@ -45,22 +45,21 @@
 [Transfers]
   [parameters]
     type = SamplerParameterTransfer
-    multi_app = runner
+    to_multi_app = runner
     sampler = hypercube
     parameters = 'Materials/constant/prop_values Kernels/source/value BCs/right/value BCs/left/value'
     to_control = 'stochastic'
   []
   [results]
     type = SamplerReporterTransfer
-    multi_app = runner
+    from_multi_app = runner
     sampler = hypercube
     stochastic_reporter = results
     from_reporter = 'T_avg/value q_left/value T_vec/T'
   []
   [x_transfer]
     type = MultiAppReporterTransfer
-    multi_app = runner
-    direction = from_multiapp
+    from_multi_app = runner
     subapp_index = 0
     from_reporters = T_vec/x
     to_reporters = const/x

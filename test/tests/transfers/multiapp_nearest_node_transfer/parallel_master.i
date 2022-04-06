@@ -72,8 +72,7 @@
 # Surface to volume data transfer
   [./from_sub]
     type = MultiAppNearestNodeTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     source_variable = u
     variable = from_sub
     execute_on = 'timestep_end'

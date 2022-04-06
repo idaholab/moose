@@ -10,7 +10,7 @@ A constant vector postprocessor is not generally used for output or postprocessi
 
 In this example, two `ConstantVectorPostprocessor` are used to specify three vectors `a b c`. They are tied to each vector postprocessor, so the two do not conflict despite their similar name.
 
-!listing test/tests/transfers/reporter_transfer/main.i block=VectorPostprocessors
+!listing test/tests/transfers/multiapp_reporter_transfer/main.i block=VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/ConstantVectorPostprocessor
 

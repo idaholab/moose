@@ -161,40 +161,35 @@ rho=1
     source_variable = ax_out
     variable = ax
     execute_on = 'timestep_end'
-    direction = to_multiapp
-    multi_app = 'scalar'
+    to_multi_app = 'scalar'
   []
   [ay]
     type = MultiAppCopyTransfer
     source_variable = ay_out
     variable = ay
     execute_on = 'timestep_end'
-    direction = to_multiapp
-    multi_app = 'scalar'
+    to_multi_app = 'scalar'
   []
   [u]
     type = MultiAppCopyTransfer
     source_variable = u
     variable = u
     execute_on = 'timestep_end'
-    direction = to_multiapp
-    multi_app = 'scalar'
+    to_multi_app = 'scalar'
   []
   [v]
     type = MultiAppCopyTransfer
     source_variable = v
     variable = v
     execute_on = 'timestep_end'
-    direction = to_multiapp
-    multi_app = 'scalar'
+    to_multi_app = 'scalar'
   []
   [pressure]
     type = MultiAppCopyTransfer
     source_variable = pressure
     variable = pressure
     execute_on = 'timestep_end'
-    direction = to_multiapp
-    multi_app = 'scalar'
+    to_multi_app = 'scalar'
   []
 []
 

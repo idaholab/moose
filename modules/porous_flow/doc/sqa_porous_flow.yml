@@ -1,0 +1,8 @@
+directories:
+    - ${MOOSE_DIR}/modules/porous_flow/test/tests
+specs:
+    - tests
+dependencies:
+    - framework
+repo: moose
+reports: !include ${MOOSE_DIR}/modules/porous_flow/doc/sqa_reports.yml

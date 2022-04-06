@@ -37,7 +37,7 @@
 [Transfers]
   [data]
     type = SamplerReporterTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = grid
     stochastic_reporter = results
     from_reporter = 'avg/value max/value'

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<VTKFile type="PUnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <PUnstructuredGrid GhostLevel="1">
+    <PPointData RationalWeights="RationalWeights">
+      <PDataArray type="Float64" Name="RationalWeights"/>
+      <PDataArray type="Float64" Name="u"/>
+    </PPointData>
+    <PCellData>
+      <PDataArray type="Int32" Name="libmesh_elem_id"/>
+      <PDataArray type="Int32" Name="subdomain_id"/>
+      <PDataArray type="Int32" Name="processor_id"/>
+    </PCellData>
+    <PPoints>
+      <PDataArray type="Float64" Name="Points" NumberOfComponents="3"/>
+    </PPoints>
+    <Piece Source="2d_diffusion_iga_out_002_0.vtu"/>
+  </PUnstructuredGrid>
+</VTKFile>

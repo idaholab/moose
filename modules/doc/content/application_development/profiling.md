@@ -7,6 +7,66 @@ installation process.  Although it works best on Linux platforms, it also
 works reasonably well on Mac OS.  Instruments also works well for profiling
 applications on Mac systems.
 
+## Install Google's gperftools
+
+If your environment package from the MOOSE installation process has included Google's gperftools,
+you can skip this step.
+To install Google's gperftools on your own, our recommended procedure is to
+first install `libunwind`:
+
+```
+cd $HOME
+git clone git@github.com:libunwind/libunwind.git
+cd libunwind
+autoreconf -i
+./configure --prefix=$PWD/installed
+make -j$MOOSE_JOBS
+make install
+```
+
+and then the `gperftools` library:
+
+```
+cd $HOME
+git clone git@github.com:gperftools/gperftools.git
+cd gperftools
+./autogen.sh
+CPPFLAGS=-I$HOME/libunwind/installed/include \
+LDFLAGS="-L$HOME/libunwind/installed/lib -Wl,-rpath,$HOME/libunwind/installed/lib" \
+./configure --prefix=$PWD/installed --enable-frame-pointers
+make -j$MOOSE_JOBS
+make install
+```
+
+The configuration option +--enable-frame-pointers+ is important for not degrading the performance when \emph{gperftools} is linked and profiling is turned on in calculations.
+[This page](https://github.com/gperftools/gperftools/blob/master/INSTALL) has more explanations about this option.
+After this, gperftools is installed under +$HOME/gperftools/installed+ that you can let the environmental variable +GPERF_DIR+ point to.
+You could install gperftools in a different folder if desired.
+When compiling PETSc, you will need to add two configuration options to make use of this
+
+```
+cd moose
+./scripts/update_and_rebuild_petsc.sh --CFLAGS=-fno-omit-frame-pointer --CXX_CXXFLAGS=-fno-omit-frame-pointer
+```
+
+libMesh automatically adds `-fno-omit-frame-pointer` to `METHOD=oprof` builds. However, if you want
+to do profiling with other methods, both libMesh and MOOSE should be built with
+`CXXFLAGS=-fno-omit-frame-pointer`. (On a related node, MOOSE will error if the user attempts to
+compile with either `METHOD=devel` or `METHOD=dbg` and with a non-empty `GPERF_DIR` as those methods
+add assertions that will make the resulting profiles misleading)
+
+The `gperftools` library comes with a `pprof` binary. However, it is not maintained. A maintained
+version of `pprof` is located at [the google repository](https://github.com/google/pprof/). To use
+the maintained `pprof`, first install `go` using the instructions
+[here](https://go.dev/doc/install). Once `go` is installed, follow the installation instructions for
+`pprof` [here](https://github.com/google/pprof/). In short, execute the command
+
+```
+go install github.com/google/pprof@latest
+```
+
+and then ensure that `$GOPATH/bin` (by default `$HOME/go/bin`) is in your `PATH` variable.
+
 ## Google Performance Tools (Linux, Mac)
 
 MOOSE has support for profiling with
@@ -102,6 +162,14 @@ or `help <cmd|option>` in interactive mode or by running `pprof --help` on the
 command line.  The following sections assume you are running in pprof's
 interactive mode. We demonstrate the usage of `pprof` for CPU profiling as follows,
 and the exact same command lines can applied to heap files as well.
+
+!alert warning
+GNU binutils version 2.37 introduced orders of magnitude slowdown in `pprof` symbolization. The
+interested reader can see
+[this thread](https://sourceware.org/pipermail/binutils/2022-February/119701.html). It is not likely
+that this performance regression will be fixed any time soon. If using `gperftools` and `pprof` we
+*strongly* recommend using a GNU binutils version less than 2.37, otherwise the performance tools
+will simply be unusable. You can check your binutils version by running `ld --version`.
 
 ### top N
 

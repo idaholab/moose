@@ -41,7 +41,7 @@
 [Transfers]
   [param]
     type = SamplerParameterTransfer
-    multi_app = sub
+    to_multi_app = sub
     sampler = sample
     parameters = 'Materials/k/prop_values Materials/alpha/prop_values Kernels/source/value'
     to_control = 'stochastic'
@@ -50,25 +50,23 @@
   []
   [snapshots]
     type = PODSamplerSolutionTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     trainer_name = 'pod_rb'
-    direction = 'from_multiapp'
     execute_on = 'timestep_begin'
     check_multiapp_execute_on = false
   []
   [pod_modes]
     type = PODSamplerSolutionTransfer
-    multi_app = sub
+    to_multi_app = sub
     sampler = sample
     trainer_name = 'pod_rb'
-    direction = 'to_multiapp'
     execute_on = 'final'
     check_multiapp_execute_on = false
   []
   [res]
     type = PODResidualTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     trainer_name = "pod_rb"
     execute_on = 'final'

@@ -270,11 +270,14 @@ public:
   using DotType = ValueType;
 
   virtual ~FunctorBase() = default;
-  FunctorBase() : _clearance_schedule({EXEC_ALWAYS}) {}
-  FunctorBase(const std::set<ExecFlagType> & clearance_schedule)
-    : _clearance_schedule(clearance_schedule)
+  FunctorBase(const MooseFunctorName & name,
+              const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS})
+    : _clearance_schedule(clearance_schedule), _functor_name(name)
   {
   }
+
+  /// Return the functor name
+  const MooseFunctorName & functorName() const { return _functor_name; }
 
   ///@{
   /**
@@ -382,7 +385,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const ElemArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element gradient not implemented for functor " + functorName());
   }
 
   /**
@@ -393,7 +396,8 @@ protected:
    */
   virtual GradientType evaluateGradient(const ElemFromFaceArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element (obtained from a face) gradient not implemented for functor " +
+               functorName());
   }
 
   /**
@@ -404,7 +408,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const FaceArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Face gradient not implemented for functor " + functorName());
   }
 
   /**
@@ -415,7 +419,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const SingleSidedFaceArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("One-sided face gradient not implemented for functor " + functorName());
   }
 
   /**
@@ -426,7 +430,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const ElemQpArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element quadrature point gradient not implemented for functor " + functorName());
   }
 
   /**
@@ -437,7 +441,8 @@ protected:
    */
   virtual GradientType evaluateGradient(const ElemSideQpArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element side quadrature point gradient not implemented for functor " +
+               functorName());
   }
 
   /**
@@ -446,7 +451,7 @@ protected:
    */
   virtual DotType evaluateDot(const ElemArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element time derivative not implemented for functor " + functorName());
   }
 
   /**
@@ -457,7 +462,8 @@ protected:
    */
   virtual DotType evaluateDot(const ElemFromFaceArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element (obtained from a face) time derivative not implemented for functor " +
+               functorName());
   }
 
   /**
@@ -468,7 +474,7 @@ protected:
    */
   virtual DotType evaluateDot(const FaceArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Face time derivative not implemented for functor " + functorName());
   }
 
   /**
@@ -479,7 +485,7 @@ protected:
    */
   virtual DotType evaluateDot(const SingleSidedFaceArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("One-sided face time derivative not implemented for functor " + functorName());
   }
 
   /**
@@ -490,7 +496,8 @@ protected:
    */
   virtual DotType evaluateDot(const ElemQpArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element quadrature point time derivative not implemented for functor " +
+               functorName());
   }
 
   /**
@@ -501,7 +508,8 @@ protected:
    */
   virtual DotType evaluateDot(const ElemSideQpArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element side quadrature point time derivative not implemented for functor " +
+               functorName());
   }
 
 private:
@@ -576,6 +584,9 @@ private:
 
   /// Map from single-sided-face arguments to their cached evaluations
   mutable std::map<SingleSidedFaceArg, ValueType> _ssf_arg_to_value;
+
+  /// name of the functor
+  MooseFunctorName _functor_name;
 };
 
 template <typename T>
@@ -909,7 +920,10 @@ public:
   /**
    * @param wrapped The functor to wrap. We will *not* not own the wrapped object
    */
-  FunctorEnvelope(const FunctorBase<T> & wrapped) : FunctorEnvelopeBase(), _wrapped(&wrapped) {}
+  FunctorEnvelope(const FunctorBase<T> & wrapped)
+    : FunctorBase<T>("wraps_" + wrapped.functorName()), FunctorEnvelopeBase(), _wrapped(&wrapped)
+  {
+  }
 
   /**
    * @param wrapped A unique pointer around the functor to wrap. We *will* own the wrapped object,
@@ -917,7 +931,10 @@ public:
    * will be destructed
    */
   FunctorEnvelope(std::unique_ptr<FunctorBase<T>> && wrapped)
-    : FunctorEnvelopeBase(), _owned(std::move(wrapped)), _wrapped(_owned.get())
+    : FunctorBase<T>("wraps_" + wrapped->functorName()),
+      FunctorEnvelopeBase(),
+      _owned(std::move(wrapped)),
+      _wrapped(_owned.get())
   {
   }
 
@@ -1099,8 +1116,14 @@ public:
   using typename FunctorBase<T>::GradientType;
   using typename FunctorBase<T>::DotType;
 
-  ConstantFunctor(const ValueType & value) : _value(value) {}
-  ConstantFunctor(ValueType && value) : _value(value) {}
+  ConstantFunctor(const ValueType & value)
+    : FunctorBase<T>("constant_" + std::to_string(value)), _value(value)
+  {
+  }
+  ConstantFunctor(ValueType && value)
+    : FunctorBase<T>("constant_" + std::to_string(MetaPhysicL::raw_value(value))), _value(value)
+  {
+  }
 
 private:
   ValueType evaluate(const ElemArg &, unsigned int) const override { return _value; }
@@ -1144,6 +1167,8 @@ public:
   using typename FunctorBase<T>::ValueType;
   using typename FunctorBase<T>::GradientType;
   using typename FunctorBase<T>::DotType;
+
+  NullFunctor() : FunctorBase<T>("null") {}
 
 private:
   ValueType evaluate(const ElemArg &, unsigned int) const override

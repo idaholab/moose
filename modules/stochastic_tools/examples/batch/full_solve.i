@@ -29,14 +29,14 @@
 [Transfers]
   [runner]
     type = SamplerParameterTransfer
-    multi_app = runner
+    to_multi_app = runner
     parameters = 'BCs/left/value BCs/right/value'
     to_control = receiver
     sampler = mc
   []
   [data]
     type = SamplerPostprocessorTransfer
-    multi_app = runner
+    from_multi_app = runner
     to_vector_postprocessor = storage
     from_postprocessor = average
     sampler = mc

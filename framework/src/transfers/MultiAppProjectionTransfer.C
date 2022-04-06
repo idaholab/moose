@@ -380,7 +380,7 @@ MultiAppProjectionTransfer::execute()
           outgoing_evals_ids[pid][qp].first =
               (*local_meshfuns[i_from])(qpt - _from_positions[i_from]);
           if (_current_direction == FROM_MULTIAPP)
-            outgoing_evals_ids[pid][qp].second = _local2global_map[i_from];
+            outgoing_evals_ids[pid][qp].second = _from_local2global_map[i_from];
         }
       }
     }

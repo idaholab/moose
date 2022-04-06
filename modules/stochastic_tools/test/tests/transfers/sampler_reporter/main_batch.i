@@ -20,14 +20,14 @@
 [Transfers]
   [data]
     type = SamplerReporterTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     stochastic_reporter = storage
     from_reporter = 'pp/value constant/str'
   []
   [runner]
     type = SamplerParameterTransfer
-    multi_app = sub
+    to_multi_app = sub
     sampler = sample
     parameters = 'BCs/left/value'
     to_control = stm

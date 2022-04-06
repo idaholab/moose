@@ -19,6 +19,7 @@
 #include "Assembly.h"
 #include "MooseObjectName.h"
 #include "RelationshipManager.h"
+#include "MooseUtils.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/system.h"
@@ -1031,7 +1032,7 @@ SubProblem::initialSetup()
     for (const auto & pr : functors)
       if (pr.second->wrapsNull())
         mooseError("No functor ever provided with name '",
-                   pr.first,
+                   removeSubstring(pr.first, "wraps_"),
                    "', which was requested by '",
                    MooseUtils::join(libmesh_map_find(_functor_to_requestors, pr.first), ","),
                    "'.");
@@ -1042,7 +1043,7 @@ SubProblem::hasFunctor(const std::string & name, const THREAD_ID tid) const
 {
   mooseAssert(tid < _functors.size(), "Too large a thread ID");
   auto & functors = _functors[tid];
-  return (functors.find(name) != functors.end());
+  return (functors.find("wraps_" + name) != functors.end());
 }
 
 Moose::CoordinateSystemType

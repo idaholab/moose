@@ -26,7 +26,9 @@ public:
   using VectorFunctor = Moose::FunctorBase<VectorArg>;
 
   VectorComponentFunctor(const VectorFunctor & vector, const unsigned int component)
-    : _vector(vector), _component(component)
+    : Moose::FunctorBase<T>(vector.functorName() + "_" + std::to_string(component)),
+      _vector(vector),
+      _component(component)
   {
   }
 

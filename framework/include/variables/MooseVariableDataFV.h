@@ -228,6 +228,11 @@ public:
    */
   void insert(NumericVector<Number> & residual);
 
+  /**
+   * Add the current local DOF values to the input vector
+   */
+  void add(NumericVector<Number> & residual);
+
   /////////////////////////// DoF value getters /////////////////////////////////////
 
   const DoFValue & dofValues() const;

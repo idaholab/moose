@@ -96,8 +96,7 @@
 [Transfers]
   [./pp_transfer]
     type = MultiAppPostprocessorToAuxScalarTransfer
-    direction = from_multiapp
-    multi_app = pp_sub
+    from_multi_app = pp_sub
     from_postprocessor = point_value
     to_aux_scalar = from_sub_app
   [../]

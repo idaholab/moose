@@ -89,8 +89,7 @@
 [Transfers]
   [K_to_s]
     type = MultiAppNearestNodeTransfer
-    multi_app = slave
-    direction = to_multiapp
+    to_multi_app = slave
     source_variable = K_prime
     variable = K_prime
   []

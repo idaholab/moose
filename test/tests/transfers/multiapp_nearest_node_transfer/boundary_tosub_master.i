@@ -70,32 +70,28 @@
 [Transfers]
   [./to_sub_1]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     source_boundary = 1
     variable = from_master_1
   [../]
   [./to_sub_2]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     source_boundary = 2
     variable = from_master_2
   [../]
   [./to_sub_3]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     source_boundary = 3
     variable = from_master_3
   [../]
   [./to_sub_4]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     source_boundary = 4
     variable = from_master_4

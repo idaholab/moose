@@ -30,7 +30,7 @@ class TestFunctor : public FunctorBase<T>
 public:
   using typename FunctorBase<T>::ValueType;
 
-  TestFunctor() = default;
+  TestFunctor() : FunctorBase<T>("test"){};
 
 private:
   ValueType evaluate(const ElemArg &, unsigned int) const override final { return 0; }

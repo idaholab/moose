@@ -35,11 +35,13 @@ class HeadingExtension(Extension):
 
     def postTokenize(self, page, ast):
         func = lambda n: (n.name == 'Heading')
+        level = 100
         for node in moosetree.iterate(ast.root, func):
             id_ = node.get('id') or node.text('-').lower()
             node['id'] = id_
-            if page['title'] is None:
+            if page['title'] is None or node['level'] < level:
                 page['title'] = node.copy()
+                level = node['level']
             if id_ not in page['headings']:
                 page['headings'][id_] = node.copy()
 

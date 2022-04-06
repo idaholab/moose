@@ -34,7 +34,6 @@ SamplerReporterTransfer::validParams()
                                "Use the supplied string as the prefix for reporter "
                                "name rather than the transfer name.");
 
-  params.set<MultiMooseEnum>("direction") = "from_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   return params;
 }
@@ -44,6 +43,8 @@ SamplerReporterTransfer::SamplerReporterTransfer(const InputParameters & paramet
     ReporterTransferInterface(this),
     _sub_reporter_names(getParam<std::vector<ReporterName>>("from_reporter"))
 {
+  if (hasToMultiApp())
+    paramError("to_multi_app", "To and between multiapp directions are not implemented");
 }
 
 void
@@ -66,9 +67,9 @@ SamplerReporterTransfer::initializeFromMultiapp()
 void
 SamplerReporterTransfer::executeFromMultiapp()
 {
-  if (_multi_app->isRootProcessor())
+  if (getFromMultiApp()->isRootProcessor())
   {
-    const dof_id_type n = _multi_app->numGlobalApps();
+    const dof_id_type n = getFromMultiApp()->numGlobalApps();
     for (MooseIndex(n) i = 0; i < n; i++)
       transferStochasticReporters(_global_index, i);
   }
@@ -89,19 +90,20 @@ SamplerReporterTransfer::execute()
 void
 SamplerReporterTransfer::intitializeStochasticReporters()
 {
-  const dof_id_type n = _multi_app->numGlobalApps();
+  const dof_id_type n = getFromMultiApp()->numGlobalApps();
 
   for (const auto & sub_rname : _sub_reporter_names)
     for (MooseIndex(n) i = 0; i < n; i++)
-      if (_multi_app->hasLocalApp(i))
-        addReporterTransferMode(sub_rname, REPORTER_MODE_ROOT, _multi_app->appProblemBase(i));
+      if (getFromMultiApp()->hasLocalApp(i))
+        addReporterTransferMode(
+            sub_rname, REPORTER_MODE_ROOT, getFromMultiApp()->appProblemBase(i));
 
   const std::string prefix = isParamValid("prefix") ? getParam<std::string>("prefix") : name();
   for (const auto & sub_rname : _sub_reporter_names)
     for (MooseIndex(n) i = 0; i < n; i++)
-      if (_multi_app->hasLocalApp(i))
+      if (getFromMultiApp()->hasLocalApp(i))
       {
-        const ReporterData & rdata = _multi_app->appProblemBase(i).getReporterData();
+        const ReporterData & rdata = getFromMultiApp()->appProblemBase(i).getReporterData();
         ReporterName rname =
             _results->declareStochasticReporterClone(*_sampler_ptr, rdata, sub_rname, prefix);
         if (rname.empty())
@@ -122,16 +124,16 @@ void
 SamplerReporterTransfer::transferStochasticReporters(dof_id_type global_index,
                                                      dof_id_type app_index)
 {
-  if (_multi_app->hasLocalApp(app_index))
+  if (getFromMultiApp()->hasLocalApp(app_index))
   {
     const dof_id_type local_index = global_index - _sampler_ptr->getLocalRowBegin();
     for (unsigned int r = 0; r < _sub_reporter_names.size(); ++r)
       transferToVectorReporter(_sub_reporter_names[r],
                                _reporter_names[r],
-                               _multi_app->appProblemBase(app_index),
-                               _multi_app->problemBase(),
+                               getFromMultiApp()->appProblemBase(app_index),
+                               getFromMultiApp()->problemBase(),
                                local_index);
 
-    (*_converged)[local_index] = _multi_app->appProblemBase(app_index).converged();
+    (*_converged)[local_index] = getFromMultiApp()->appProblemBase(app_index).converged();
   }
 }

@@ -68,16 +68,14 @@
 [Transfers]
   [to_sub]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     target_boundary = 'left bottom'
     variable = from_master
   []
   [from_sub]
     type = MultiAppNearestNodeTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     source_variable = v
     target_boundary = 'right top'
     variable = from_sub

@@ -23,4 +23,9 @@ Extensions:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
-    MooseDocs.extensions.sqa: disable
+    MooseDocs.extensions.sqa:
+        active: True
+        reports: !include modules/ray_tracing/doc/sqa_reports.yml
+        categories:
+            framework: !include framework/doc/sqa_framework.yml
+            ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml

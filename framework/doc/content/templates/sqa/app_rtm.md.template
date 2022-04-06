@@ -1,4 +1,4 @@
-!template load file=framework_rtm.md project={{app}}
+!template load file=rtm.md.template project={{app}}
 
 !template! item key=pre-intro
 !alert! note
@@ -9,9 +9,21 @@ This document serves as an addendum to [framework_rtm.md] and captures informati
 !alert-end!
 !template-end!
 
+!template item key=minimum_requirements
+!include sqa/minimum_requirements.md
+
+!template item key=system-purpose
+!include sqa/system_purpose.md
+
+!template item key=system-scope
+!include sqa/system_scope.md
+
 !template item key=assumptions-and-dependencies
 The {{app}} application is developed using MOOSE and is based on various modules, as such
 the [!ac](RTM) for {{app}} is dependent upon the files listed at the beginning of this document.
+
+!template item key=pre-test
+!include framework_rtm.md start=pre-test-begin end=pre-test-finish
 
 !template! item key=functional-requirements
 !sqa requirements link=True collections=FUNCTIONAL category={{category}}

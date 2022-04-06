@@ -128,6 +128,7 @@ namespace moose
 
 namespace internal
 {
+inline Threads::spin_mutex moose_stream_lock;
 
 /// Builds and returns a string of the form:
 ///
@@ -170,7 +171,10 @@ mooseWarningStream(S & oss, Args &&... args)
   if (Moose::_throw_on_error)
     throw std::runtime_error(msg);
 
-  oss << msg << std::flush;
+  {
+    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+    oss << msg << std::flush;
+  }
 }
 
 template <typename S, typename... Args>
@@ -183,7 +187,10 @@ mooseUnusedStream(S & oss, Args &&... args)
   if (Moose::_throw_on_error)
     throw std::runtime_error(msg);
 
-  oss << msg << std::flush;
+  {
+    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+    oss << msg << std::flush;
+  }
 }
 
 template <typename S, typename... Args>
@@ -195,7 +202,10 @@ mooseInfoStream(S & oss, Args &&... args)
         std::ostringstream ss;
         mooseStreamAll(ss, args...);
         std::string msg = mooseMsgFmt(ss.str(), "*** Info ***", COLOR_CYAN);
-        oss << msg << std::flush;
+        {
+          Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+          oss << msg << std::flush;
+        }
       });
 }
 
@@ -219,8 +229,10 @@ mooseDeprecatedStream(S & oss, bool expired, Args &&... args)
                   print_trace(ss);
                 else
                   libMesh::write_traceout();
-                oss << ss.str() << std::endl;
-                ;
+                {
+                  Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+                  oss << ss.str() << std::endl;
+                };
               });
 }
 /**

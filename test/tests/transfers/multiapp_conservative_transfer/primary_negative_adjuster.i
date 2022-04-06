@@ -72,10 +72,9 @@
 [Transfers]
   [to_sub]
     type = MultiAppMeshFunctionTransfer
-    direction = to_multiapp
     source_variable = var
     variable = var
-    multi_app = sub
+    to_multi_app = sub
     from_postprocessors_to_be_preserved  = 'from_postprocessor'
     to_postprocessors_to_be_preserved  = 'to_postprocessor'
   []

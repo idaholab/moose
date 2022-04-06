@@ -40,8 +40,7 @@
     type = MultiAppCopyTransfer
     variable = u
     source_variable = u
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     execute_on = timestep_end
     check_multiapp_execute_on = false
   [../]

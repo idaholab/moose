@@ -33,7 +33,7 @@
 [Transfers]
   [param]
     type = SamplerParameterTransfer
-    multi_app = sub
+    to_multi_app = sub
     sampler = sample
     parameters = 'BCs/left/value BCs/right/value'
     to_control = 'stochastic'
@@ -42,7 +42,7 @@
     type = SamplerReporterTransfer
     from_reporter = 'average/value'
     stochastic_reporter = 'constant'
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
   []
 []

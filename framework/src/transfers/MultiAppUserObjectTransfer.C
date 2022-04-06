@@ -88,6 +88,11 @@ MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & p
 
   if (isParamValid("block") && isParamValid("boundary"))
     mooseError(name(), ": Transfer can be either block- or boundary-restricted. Not both.");
+
+  if (isParamValid("to_multi_app") && isParamValid("from_multi_app") &&
+      getToMultiApp() != getFromMultiApp())
+    paramError("to_multi_app",
+               "Sibling multiapp transfer has not been implemented for this transfer.");
 }
 
 void
@@ -99,26 +104,26 @@ MultiAppUserObjectTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
       {
-        if (_multi_app->hasLocalApp(i))
+        if (getToMultiApp()->hasLocalApp(i))
         {
-          Moose::ScopedCommSwapper swapper(_multi_app->comm());
+          Moose::ScopedCommSwapper swapper(getToMultiApp()->comm());
 
           // Loop over the master nodes and set the value of the variable
-          System * to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name);
+          System * to_sys = find_sys(getToMultiApp()->appProblemBase(i).es(), _to_var_name);
 
           unsigned int sys_num = to_sys->number();
           unsigned int var_num = to_sys->variable_number(_to_var_name);
 
-          NumericVector<Real> & solution = _multi_app->appTransferVector(i, _to_var_name);
+          NumericVector<Real> & solution = getToMultiApp()->appTransferVector(i, _to_var_name);
 
           MooseMesh * mesh = NULL;
 
-          if (_displaced_target_mesh && _multi_app->appProblemBase(i).getDisplacedProblem())
-            mesh = &_multi_app->appProblemBase(i).getDisplacedProblem()->mesh();
+          if (_displaced_target_mesh && getToMultiApp()->appProblemBase(i).getDisplacedProblem())
+            mesh = &getToMultiApp()->appProblemBase(i).getDisplacedProblem()->mesh();
           else
-            mesh = &_multi_app->appProblemBase(i).mesh();
+            mesh = &getToMultiApp()->appProblemBase(i).mesh();
 
           _blk_ids.clear();
           _bnd_ids.clear();
@@ -145,7 +150,7 @@ MultiAppUserObjectTransfer::execute()
             mooseError("We don't currently support second order or higher elemental variable ");
 
           const UserObject & user_object =
-              _multi_app->problemBase().getUserObjectBase(_user_object_name);
+              getToMultiApp()->problemBase().getUserObjectBase(_user_object_name);
 
           if (is_nodal)
           {
@@ -163,7 +168,7 @@ MultiAppUserObjectTransfer::execute()
                 dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
                 swapper.forceSwap();
-                Real from_value = user_object.spatialValue(*node + _multi_app->position(i));
+                Real from_value = user_object.spatialValue(*node + getToMultiApp()->position(i));
                 swapper.forceSwap();
 
                 solution.set(dof, from_value);
@@ -212,7 +217,7 @@ MultiAppUserObjectTransfer::execute()
                 dof_id_type dof = elem->dof_number(sys_num, var_num, offset++);
 
                 swapper.forceSwap();
-                Real from_value = user_object.spatialValue(point + _multi_app->position(i));
+                Real from_value = user_object.spatialValue(point + getToMultiApp()->position(i));
                 swapper.forceSwap();
 
                 solution.set(dof, from_value);
@@ -229,7 +234,7 @@ MultiAppUserObjectTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      FEProblemBase & to_problem = _multi_app->problemBase();
+      FEProblemBase & to_problem = getFromMultiApp()->problemBase();
       MooseVariableFEBase & to_var = to_problem.getVariable(
           0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
       SystemBase & to_system_base = to_var.sys();
@@ -298,12 +303,12 @@ MultiAppUserObjectTransfer::execute()
             if (node->n_dofs(to_sys_num, to_var_num) > 0)
             {
               unsigned int node_found_in_sub_app = 0;
-              for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+              for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
               {
-                if (!_multi_app->hasLocalApp(i))
+                if (!getFromMultiApp()->hasLocalApp(i))
                   continue;
 
-                BoundingBox app_box = _multi_app->getBoundingBox(i, _displaced_source_mesh);
+                BoundingBox app_box = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh);
 
                 if (app_box.contains_point(*node))
                   ++node_found_in_sub_app;
@@ -366,12 +371,12 @@ MultiAppUserObjectTransfer::execute()
             {
               unsigned int elem_found_in_sub_app = 0;
 
-              for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+              for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
               {
-                if (!_multi_app->hasLocalApp(i))
+                if (!getFromMultiApp()->hasLocalApp(i))
                   continue;
 
-                BoundingBox app_box = _multi_app->getBoundingBox(i, _displaced_source_mesh);
+                BoundingBox app_box = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh);
 
                 if (app_box.contains_point(point))
                   ++elem_found_in_sub_app;
@@ -420,7 +425,7 @@ MultiAppUserObjectTransfer::execute()
 
             Real from_value = 0;
             {
-              Moose::ScopedCommSwapper swapper(_multi_app->comm());
+              Moose::ScopedCommSwapper swapper(getFromMultiApp()->comm());
               from_value = user_object.spatialValue(*node - app_position);
             }
 
@@ -480,14 +485,15 @@ MultiAppUserObjectTransfer::execute()
             if (sub_app == static_cast<unsigned int>(-1))
               continue;
 
-            const auto & app_position = _multi_app->position(sub_app);
-            const auto & user_object = _multi_app->appUserObjectBase(sub_app, _user_object_name);
+            const auto & app_position = getFromMultiApp()->position(sub_app);
+            const auto & user_object =
+                getFromMultiApp()->appUserObjectBase(sub_app, _user_object_name);
 
             dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, offset++);
 
             Real from_value = 0;
             {
-              Moose::ScopedCommSwapper swapper(_multi_app->comm());
+              Moose::ScopedCommSwapper swapper(getFromMultiApp()->comm());
               from_value = user_object.spatialValue(point - app_position);
             }
 

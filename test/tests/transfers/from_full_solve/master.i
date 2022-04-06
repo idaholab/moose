@@ -67,8 +67,7 @@
 [Transfers]
   [./from_full]
     type = MultiAppNearestNodeTransfer
-    direction = from_multiapp
-    multi_app = full_solve
+    from_multi_app = full_solve
     source_variable = u
     variable = from_full
   [../]

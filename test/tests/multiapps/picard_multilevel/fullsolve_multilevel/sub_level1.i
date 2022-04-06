@@ -95,18 +95,16 @@
 [Transfers]
   [v_to_sub]
     type = MultiAppMeshFunctionTransfer
-    direction = to_multiapp
     source_variable = v
     variable = v
-    multi_app = level2-
+    to_multi_app = level2-
     execute_on = 'timestep_end'
   []
   [w_from_sub]
     type = MultiAppMeshFunctionTransfer
-    direction = from_multiapp
     source_variable = w
     variable = w
-    multi_app = level2-
+    from_multi_app = level2-
     execute_on = 'timestep_end'
   []
 []

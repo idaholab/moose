@@ -47,7 +47,7 @@
 [Transfers]
   [data]
     type = SamplerReporterTransfer
-    multi_app = sub
+    from_multi_app = sub
     stochastic_reporter = results
     from_reporter = 'T_vec/T T_vec/x'
   []

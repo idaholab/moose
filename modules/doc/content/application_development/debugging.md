@@ -4,7 +4,7 @@ At some point while developing a MOOSE-based application you will probably need 
 
 In particular, if you ever see a "Segfault" or a "Signal 11" that means it's time to pull out the debugger.  Any debugger will automatically stop once a segfault is reached, showing you exactly where the invalid memory access occurred.
 
-For a good tutorial on debugging [see Example 21](/ex21_debugging.md)
+For a good tutorial on debugging [see Example 21](/ex21_debugging.md optional=True)
 
 ## Debug Executable
 

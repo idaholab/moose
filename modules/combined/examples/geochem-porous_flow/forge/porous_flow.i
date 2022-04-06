@@ -527,16 +527,14 @@
 [Transfers]
   [changes_due_to_flow]
     type = MultiAppCopyTransfer
-    direction = to_multiapp
     source_variable = 'rate_H rate_Na rate_K rate_Ca rate_Mg rate_SiO2 rate_Al rate_Cl rate_SO4 rate_HCO3 rate_H2O temperature'
     variable = 'pf_rate_H pf_rate_Na pf_rate_K pf_rate_Ca pf_rate_Mg pf_rate_SiO2 pf_rate_Al pf_rate_Cl pf_rate_SO4 pf_rate_HCO3 pf_rate_H2O temperature'
-    multi_app = react
+    to_multi_app = react
   []
   [massfrac_from_geochem]
     type = MultiAppCopyTransfer
-    direction = from_multiapp
     source_variable = 'massfrac_H massfrac_Na massfrac_K massfrac_Ca massfrac_Mg massfrac_SiO2 massfrac_Al massfrac_Cl massfrac_SO4 massfrac_HCO3'
     variable = 'f_H f_Na f_K f_Ca f_Mg f_SiO2 f_Al f_Cl f_SO4 f_HCO3'
-    multi_app = react
+    from_multi_app = react
   []
 []
