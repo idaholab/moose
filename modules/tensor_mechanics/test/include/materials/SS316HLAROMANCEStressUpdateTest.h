@@ -20,13 +20,13 @@ public:
   SS316HLAROMANCEStressUpdateTestTempl(const InputParameters & parameters);
 
 protected:
-  virtual std::vector<std::vector<std::vector<ROMInputTransform>>> getTransform() override;
-  virtual std::vector<std::vector<std::vector<Real>>> getTransformCoefs() override;
-  virtual std::vector<std::vector<std::vector<Real>>> getInputLimits() override;
-  virtual std::vector<std::vector<std::vector<Real>>> getCoefs() override;
-
-  virtual bool substeppingCapabilityEnabled() override;
-  virtual Real romStrainCutoff() override { return 1.0e-10; }
+  virtual std::vector<
+      std::vector<std::vector<std::vector<typename LAROMANCEStressUpdateBaseTempl<is_ad>::ROMInputTransform>>>>
+  getTransform() override;
+  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getTransformCoefs() override;
+  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getInputLimits() override;
+  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getCoefs() override;
+  virtual std::vector<Real> getStrainCutoff() override { return {1.0e-10}; }
 };
 
 typedef SS316HLAROMANCEStressUpdateTestTempl<false> SS316HLAROMANCEStressUpdateTest;

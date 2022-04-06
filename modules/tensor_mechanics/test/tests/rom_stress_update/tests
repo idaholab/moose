@@ -31,28 +31,28 @@
       allow_test_objects = true
     []
 
-    [verification]
+    [nonad_verification]
       type = 'CSVDiff'
-      input = 'verification.i'
-      csvdiff = 'verification_1e-3_out.csv'
+      input = 'nonad_verification.i'
+      csvdiff = 'nonad_verification_out.csv'
       petsc_version = '>=3.9.0'
-      cli_args = 'Executioner/dt=1e-3 Outputs/file_base=verification_1e-3_out'
       max_parallel = 1
       allow_test_objects = true
       detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code '
-               'comparison with a small set of input parameters.'
+               'comparison with a small set of input parameters not using AD.'
     []
-    [verification_heavy]
+    [nonad_verification_heavy]
       type = 'CSVDiff'
-      input = 'verification.i'
-      csvdiff = 'verification_1e-5_out.csv'
+      input = 'nonad_verification.i'
+      csvdiff = 'nonad_verification_heavy_out.csv'
       heavy = true
+      max_time = 500
       petsc_version = '>=3.9.0'
-      cli_args = 'Executioner/dt=1e-5 Outputs/file_base=verification_1e-5_out'
+      cli_args = 'Executioner/dt=1e-5 Outputs/file_base=nonad_verification_heavy_out Outputs/interval=100'
       max_parallel = 1
       allow_test_objects = true
       detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code '
-               'comparison with a large set of input parameters.'
+               'comparison with a large set of input parameters not using AD.'
     []
 
     [lower_limit]
@@ -164,28 +164,28 @@
       allow_test_objects = true
     []
 
-    [verification]
+    [ad_verification]
       type = 'CSVDiff'
-      input = 'ADverification.i'
-      csvdiff = 'verification_1e-3_out.csv'
+      input = 'ad_verification.i'
+      csvdiff = 'ad_verification_out.csv'
       petsc_version = '>=3.9.0'
-      cli_args = 'Executioner/dt=1e-3 Outputs/file_base=verification_1e-3_out'
       max_parallel = 1
       allow_test_objects = true
       detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code '
-               'comparison with a small set of input parameters.'
+               'comparison with a small set of input parameters using AD.'
     []
-    [verification_heavy]
+    [ad_verification_heavy]
       type = 'CSVDiff'
-      input = 'ADverification.i'
-      csvdiff = 'verification_1e-5_out.csv'
+      input = 'ad_verification.i'
+      csvdiff = 'ad_verification_heavy_out.csv'
       heavy = true
+      max_time = 500
       petsc_version = '>=3.9.0'
-      cli_args = 'Executioner/dt=1e-5 Outputs/file_base=verification_1e-5_out'
+      cli_args = 'Executioner/dt=1e-5 Outputs/file_base=ad_verification_heavy_out Outputs/interval=100'
       max_parallel = 1
       allow_test_objects = true
       detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code '
-               'comparison with a large set of input parameters.'
+               'comparison with a large set of input parameters using AD.'
     []
 
     [lower_limit]
