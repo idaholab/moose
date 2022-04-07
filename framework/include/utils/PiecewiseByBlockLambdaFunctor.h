@@ -104,9 +104,6 @@ private:
   /// Functors that will evaluate elements at side quadrature points
   std::unordered_map<SubdomainID, ElemSideQpFn> _elem_side_qp_functor;
 
-  /// The name of this object
-  std::string _name;
-
   /// The mesh that this functor operates on
   const MooseMesh & _mesh;
 };

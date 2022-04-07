@@ -3,7 +3,7 @@
   design = 'NSFVAction.md'
   [momentum-inlet-error]
     type = 'RunException'
-    input = 2d-rc-ambient-convection-action.i
+    input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of momentum inlet types does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/momentum_inlet_types=''"
     expect_err = "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'"
@@ -11,7 +11,7 @@
   []
   [momentum-inlet-function-error]
     type = 'RunException'
-    input = 2d-rc-ambient-convection-action.i
+    input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of momentum inlet functions does not match the number of inlet boundaries times the dimension of the mesh.'
     cli_args = "Modules/NavierStokesFV/momentum_inlet_function='1'"
     expect_err = "Size is not the same as the number of direction dependent boundaries in 'inlet_boundaries' times the mesh dimension"
@@ -19,7 +19,7 @@
   []
   [momentum-outlet-error]
     type = 'RunException'
-    input = 2d-rc-ambient-convection-action.i
+    input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of momentum outlet types does not match the number of outlet boundaries.'
     cli_args = "Modules/NavierStokesFV/momentum_outlet_types=''"
     expect_err = "Size is not the same as the number of outlet boundaries in 'outlet_boundaries'"
@@ -27,7 +27,7 @@
   []
   [pressure-outlet-function-error]
     type = 'RunException'
-    input = 2d-rc-ambient-convection-action.i
+    input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of pressure outlet functions is not the same the pressure outlet boundaries.'
     cli_args = "Modules/NavierStokesFV/pressure_function=''"
     expect_err = "Size is not the same as the number of pressure outlet boundaries!"
@@ -35,7 +35,7 @@
   []
   [momentum-wall-error]
     type = 'RunException'
-    input = 2d-rc-ambient-convection-action.i
+    input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of momentum wall types does not match the number of wall boundaries.'
     cli_args = "Modules/NavierStokesFV/momentum_wall_types=''"
     expect_err = "Size is not the same as the number of wall boundaries in 'wall_boundaries'"
@@ -43,26 +43,106 @@
   []
   [energy-inlet-error]
     type = 'RunException'
-    input = 2d-rc-ambient-convection-action.i
+    input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of energy inlet types does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/energy_inlet_types=''"
     expect_err = "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'"
     ad_indexing_type = 'global'
   []
+  [passive-scalar-inlet-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the number of passive scalar inlet types does not match the number of inlet boundaries.'
+    cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_types=''"
+    expect_err = "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'"
+    ad_indexing_type = 'global'
+  []
+  [passive-scalar-inlet-function-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the number of passive scalar inlet functions does not match the number of inlet boundaries.'
+    cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_function=''"
+    expect_err = "Size is not the same as the number of boundaries in 'passive_scalar_inlet_types'"
+    ad_indexing_type = 'global'
+  []
   [energy-wall-error]
     type = 'RunException'
-    input = 2d-rc-ambient-convection-action.i
+    input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of energy wall types does not match the number of wall boundaries.'
     cli_args = "Modules/NavierStokesFV/energy_wall_types=''"
     expect_err = "Size is not the same as the number of wall boundaries in 'wall_boundaries'"
     ad_indexing_type = 'global'
   []
-  [energy-wall-function-error]
+  [energy-wall-function-action-error]
     type = 'RunException'
-    input = 2d-rc-ambient-convection-action.i
+    input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of energy wall functions does not match the number of energy wall types.'
     cli_args = "Modules/NavierStokesFV/energy_wall_function=''"
     expect_err = "Size 0 is not the same as the number of Dirichlet/Neumann conditions in 'energy_wall_types' \(2\)"
+    ad_indexing_type = 'global'
+  []
+  [energy-wall-function-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the number of energy wall functions does not match the number of energy wall types.'
+    cli_args = "Modules/NavierStokesFV/energy_wall_function=''"
+    expect_err = "Size 0 is not the same as the number of Dirichlet/Neumann conditions in 'energy_wall_types' \(2\)"
+    ad_indexing_type = 'global'
+  []
+  [scalar-ic-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the number of defined initial conditions is different than the number of created scalar variables.'
+    cli_args = "Modules/NavierStokesFV/passive_scalar_names='scalar1 scalar2' Modules/NavierStokesFV/initial_scalar_variables='0'"
+    expect_err = "The number of initial conditions \(1\) is not equal to the number of self-generated variables \(2\) !"
+    ad_indexing_type = 'global'
+  []
+  [velocity-ic-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the number of components for the initial velocity is not 3.'
+    cli_args = "Modules/NavierStokesFV/initial_velocity='0 0'"
+    expect_err = "The number of velocity components in the NSFVAction initial condition is not 3!"
+    ad_indexing_type = 'global'
+  []
+  [porosity-correction-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if friction correction is requested with no porous medium treatment.'
+    cli_args = "Modules/NavierStokesFV/use_friction_correction='true'"
+    expect_err = "This parameter should not be defined if the porous medium treatment is disabled!"
+    ad_indexing_type = 'global'
+  []
+  [porosity-scaling-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if consistent scaling is defined without using friction correction'
+    cli_args = "Modules/NavierStokesFV/consistent_scaling='true'"
+    expect_err = "Consistent scaling should not be defined if friction correction is disabled!"
+    ad_indexing_type = 'global'
+  []
+  [porosity-smoothing-layer-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if porosity smoothing is requested without porous medium treatment.'
+    cli_args = "Modules/NavierStokesFV/porosity_smoothing_layers=4"
+    expect_err = "This parameter should not be defined if the porous medium treatment is disabled!"
+    ad_indexing_type = 'global'
+  []
+  [passive-scalar-diffusivity-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar diffusivities'
+    cli_args = "Modules/NavierStokesFV/passive_scalar_diffusivity='0.5 0.6'"
+    expect_err = "The number of diffusivities defined is not equal to the number of passive scalar fields!"
+    ad_indexing_type = 'global'
+  []
+  [passive-scalar-source-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar source functions'
+    cli_args = "Modules/NavierStokesFV/passive_scalar_source='0.5 0.6'"
+    expect_err = "The number of external sources defined is not equal to the number of passive scalar fields!"
     ad_indexing_type = 'global'
   []
 []

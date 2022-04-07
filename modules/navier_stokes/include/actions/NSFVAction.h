@@ -210,9 +210,6 @@ protected:
   /// List of the names of the scalar variables which are transported using this
   /// action
   const std::vector<NonlinearVariableName> _passive_scalar_names;
-  /// List to show which advected scalar field variable needs to be created within
-  /// this action
-  const std::vector<bool> _create_scalar_variable;
   /// Initial values for the passive scalar fields
   const std::vector<Real> _initial_scalar_variable;
   /// Passive scalar diffusivities
@@ -264,9 +261,15 @@ protected:
   /// The scaling factor for the passive scalar variables
   const Real _passive_scalar_scaling;
 
+  /// List to show which advected scalar field variable needs to be created within
+  /// this action
+  std::vector<bool> _create_scalar_variable;
+
 private:
   /// Process the mesh data and convert block names to block IDs
   void processBlocks();
+  /// Process the supplied variable names and if they are not available, create them
+  void processVariables();
   /// Check for general user errors in the parameters
   void checkGeneralControlErrors();
   /// Check errors regarding the user defined boundary treatments

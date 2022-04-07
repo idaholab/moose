@@ -1018,7 +1018,7 @@ public:
       _owned->jacobianSetup();
   }
 
-  virtual bool isConstant() const override { return _wrapped->isConstant(); }
+  bool isConstant() const override { return _wrapped->isConstant(); }
 
 protected:
   ///@{

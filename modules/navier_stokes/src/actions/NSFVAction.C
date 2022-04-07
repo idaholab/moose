@@ -254,12 +254,6 @@ NSFVAction::validParams()
       std::vector<NonlinearVariableName>(),
       "Vector containing the names of the advected scalar variables.");
 
-  params.addParam<std::vector<bool>>(
-      "create_scalar_variable",
-      std::vector<bool>(),
-      "Switch to indicate that the input nonlinear variables don't need to be "
-      "generated within this action.");
-
   params.addParam<std::vector<FunctionName>>("initial_scalar_variables",
                                              "Initial values of the passive scalar variables.");
 
@@ -421,8 +415,9 @@ NSFVAction::validParams()
       "energy_wall_function outlet_boundaries momentum_outlet_types pressure_function",
       "Boundary condition parameters");
 
-  params.addParamNamesToGroup("initial_pressure initial_velocity initial_temperature",
-                              "Initial conditions");
+  params.addParamNamesToGroup(
+      "initial_pressure initial_velocity initial_temperature initial_scalar_variables",
+      "Initial conditions");
 
   return params;
 }
@@ -471,7 +466,6 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _thermal_conductivity_name(getParam<MooseFunctorName>("thermal_conductivity")),
     _thermal_expansion_name(getParam<MooseFunctorName>("thermal_expansion")),
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
-    _create_scalar_variable(getParam<std::vector<bool>>("create_scalar_variable")),
     _passive_scalar_diffusivity(
         getParam<std::vector<MooseFunctorName>>("passive_scalar_diffusivity")),
     _passive_scalar_source(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
@@ -509,14 +503,8 @@ NSFVAction::act()
     // We process parameters necesary to handle block-restriction
     processBlocks();
 
-    // Check if the user defined the boundary conditions in a sensible way
-    checkBoundaryParameterErrors();
-
-    // Check if the user made mistakes in the definition of friction parameters
-    checkFrictionParameterErrors();
-
-    // Check if the user made mistakes in the definition of ambient convection parameters
-    checkAmbientConvectionParameterErrors();
+    // We check if we need to create variables
+    processVariables();
 
     // The condition is used because this action will incorporate compressible simulations in the
     // future. The same applied to the other conditions below.
@@ -532,12 +520,24 @@ NSFVAction::act()
 
   if (_current_task == "add_navier_stokes_ics")
   {
+    // Check initial condition related user input errors
+    checkICParameterErrors();
+
     if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
       addINSInitialConditions();
   }
 
   if (_current_task == "add_navier_stokes_kernels")
   {
+    // Check if the user made mistakes in the definition of friction parameters
+    checkFrictionParameterErrors();
+
+    // Check if the user made mistakes in the definition of ambient convection parameters
+    checkAmbientConvectionParameterErrors();
+
+    // Check if the user made mistakes in the definition of scalar kernel parameters
+    checkPassiveScalarParameterErrors();
+
     if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
     {
       if (_compressibility == "incompressible")
@@ -593,8 +593,10 @@ NSFVAction::act()
           addScalarTimeKernels();
 
         addScalarAdvectionKernels();
-        addScalarDiffusionKernels();
-        addScalarSourceKernels();
+        if (_passive_scalar_diffusivity.size())
+          addScalarDiffusionKernels();
+        if (_passive_scalar_source.size())
+          addScalarSourceKernels();
       }
     }
   }
@@ -630,6 +632,9 @@ NSFVAction::act()
 
   if (_current_task == "add_navier_stokes_pps")
   {
+    // Check if the user defined the boundary conditions in a sensible way
+    checkBoundaryParameterErrors();
+
     addBoundaryPostprocessors();
   }
 }
@@ -1549,7 +1554,7 @@ NSFVAction::addScalarInletBC()
     unsigned int flux_bc_counter = 0;
     for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
     {
-      if (_energy_inlet_types[bc_ind] == "fixed-value")
+      if (_passive_scalar_inlet_types[bc_ind] == "fixed-value")
       {
         const std::string bc_type = "FVFunctionDirichletBC";
         InputParameters params = _factory.getValidParams(bc_type);
@@ -1560,8 +1565,8 @@ NSFVAction::addScalarInletBC()
         _problem->addFVBC(
             bc_type, _passive_scalar_names[name_i] + "_" + _inlet_boundaries[bc_ind], params);
       }
-      else if (_energy_inlet_types[bc_ind] == "flux-mass" ||
-               _energy_inlet_types[bc_ind] == "flux-velocity")
+      else if (_passive_scalar_inlet_types[bc_ind] == "flux-mass" ||
+               _passive_scalar_inlet_types[bc_ind] == "flux-velocity")
       {
         const std::string bc_type = "WCNSFVScalarFluxBC";
         InputParameters params = _factory.getValidParams(bc_type);
@@ -2052,24 +2057,32 @@ NSFVAction::processBlocks()
 }
 
 void
+NSFVAction::processVariables()
+{
+  _create_scalar_variable.clear();
+  for (const auto & it : _passive_scalar_names)
+    if (_problem->hasVariable(it))
+      _create_scalar_variable.push_back(false);
+    else
+      _create_scalar_variable.push_back(true);
+}
+
+void
 NSFVAction::checkGeneralControlErrors()
 {
   if (_compressibility == "weakly-compressible" && _boussinesq_approximation == true)
     paramError("boussinesq_approximation",
                "We cannot use boussinesq approximation while running in weakly-compressible mode!");
 
-  if (_porous_medium_treatment && !isParamValid("porosity"))
-    paramError("porosity", "Porosity should be defined if porous medium treatment is required!");
-
   if (!_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
     paramError("porosity_smoothing_layers",
                "This parameter should not be defined if the porous medium treatment is disabled!");
 
-  if (!_porous_medium_treatment && isParamValid("use_friction_correction"))
+  if (!_porous_medium_treatment && _use_friction_correction)
     paramError("use_friction_correction",
                "This parameter should not be defined if the porous medium treatment is disabled!");
 
-  if (isParamValid("consistent_scaling") && !(getParam<bool>("use_friction_correction")))
+  if (isParamValid("consistent_scaling") && !_use_friction_correction)
     paramError("consistent_scaling",
                "Consistent scaling should not be defined if friction correction is disabled!");
 }
@@ -2077,7 +2090,7 @@ NSFVAction::checkGeneralControlErrors()
 void
 NSFVAction::checkICParameterErrors()
 {
-  if (_create_scalar_variable.size())
+  if (isParamValid("initial_scalar_variables"))
   {
     unsigned int num_created_variables = 0;
     for (const auto & it : _create_scalar_variable)
@@ -2174,6 +2187,19 @@ NSFVAction::checkBoundaryParameterErrors()
                      "'energy_wall_types' (" +
                      std::to_string(num_fixed_energy_walls) + ")");
   }
+  if (_passive_scalar_names.size())
+  {
+    if (_inlet_boundaries.size() > 0 &&
+        (_inlet_boundaries.size() != _passive_scalar_inlet_types.size()))
+      paramError("passive_scalar_inlet_types",
+                 "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
+
+    if (_inlet_boundaries.size() > 0 &&
+        _passive_scalar_inlet_types.size() != _passive_scalar_inlet_function.size())
+      paramError(
+          "passive_scalar_inlet_function",
+          "Size is not the same as the number of boundaries in 'passive_scalar_inlet_types'");
+  }
 }
 
 void
@@ -2214,4 +2240,20 @@ NSFVAction::checkFrictionParameterErrors()
                        std::to_string(block_i) + " of 'friction_types'.");
     }
   }
+}
+
+void
+NSFVAction::checkPassiveScalarParameterErrors()
+{
+  if (_passive_scalar_diffusivity.size())
+    if (_passive_scalar_diffusivity.size() != _passive_scalar_names.size())
+      paramError("passive_scalar_diffusivity",
+                 "The number of diffusivities defined is not equal to the number of passive scalar "
+                 "fields!");
+
+  if (_passive_scalar_source.size())
+    if (_passive_scalar_source.size() != _passive_scalar_names.size())
+      paramError("passive_scalar_source",
+                 "The number of external sources defined is not equal to the number of passive "
+                 "scalar fields!");
 }

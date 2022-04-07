@@ -1,19 +1,27 @@
 mu=1
 rho=1
 k=1e-3
+diff=1e-3
 cp=1
-alpha=1
 
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 5
+    xmax = 10
     ymin = -1
     ymax = 1
-    nx = 10
-    ny = 4
+    nx = 100
+    ny = 20
+  []
+[]
+
+[Variables]
+  inactive = 'scalar'
+  [scalar]
+    type = MooseVariableFVReal
+    initial_condition = 0.0
   []
 []
 
@@ -21,13 +29,16 @@ alpha=1
   [NavierStokesFV]
     simulation_type = 'steady-state'
     compressibility = 'incompressible'
-    porous_medium_treatment = false
     add_energy_equation = true
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
-    thermal_conductivity = 'k'
-    specific_heat = 'cp'
+    passive_scalar_names = 'scalar'
+
+    density = ${rho}
+    dynamic_viscosity = ${mu}
+    thermal_conductivity = ${k}
+    specific_heat = ${cp}
+    passive_scalar_diffusivity = ${diff}
+    passive_scalar_source = 0.1
 
     initial_velocity = '1 1 0'
     initial_pressure = 0.0
@@ -38,6 +49,8 @@ alpha=1
     momentum_inlet_function = '1 0'
     energy_inlet_types = 'fixed-temperature'
     energy_inlet_function = '1'
+    passive_scalar_inlet_types = 'fixed-value'
+    passive_scalar_inlet_function = '1'
 
     wall_boundaries = 'top bottom'
     momentum_wall_types = 'noslip noslip'
@@ -47,24 +60,6 @@ alpha=1
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
     pressure_function = '0'
-
-    ambient_convection_alpha = 'alpha'
-    ambient_temperature = '100'
-  []
-[]
-
-[Materials]
-  [const_functor]
-    type = ADGenericFunctorMaterial
-    prop_names = 'cp k rho mu alpha'
-    prop_values = '${cp} ${k} ${rho} ${mu} ${alpha}'
-  []
-[]
-
-[Postprocessors]
-  [temp]
-    type = ElementAverageValue
-    variable = T_fluid
   []
 []
 
