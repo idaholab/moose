@@ -81,14 +81,6 @@
     expect_err = "Size 0 is not the same as the number of Dirichlet/Neumann conditions in 'energy_wall_types' \(2\)"
     ad_indexing_type = 'global'
   []
-  [energy-wall-function-error]
-    type = 'RunException'
-    input = 2d-rc-error-action.i
-    requirement = 'The system shall throw an error if the number of energy wall functions does not match the number of energy wall types.'
-    cli_args = "Modules/NavierStokesFV/energy_wall_function=''"
-    expect_err = "Size 0 is not the same as the number of Dirichlet/Neumann conditions in 'energy_wall_types' \(2\)"
-    ad_indexing_type = 'global'
-  []
   [scalar-ic-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
