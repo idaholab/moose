@@ -293,12 +293,14 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _background_radial_bias(getParam<Real>("background_radial_bias")),
     _background_inner_boundary_layer_params(
         {getParam<Real>("background_inner_boundary_layer_width"),
+        0.0,
          getParam<Real>("background_inner_boundary_layer_width") > 0.0
              ? getParam<unsigned int>("background_inner_boundary_layer_intervals")
              : 0,
          getParam<Real>("background_inner_boundary_layer_bias")}),
     _background_outer_boundary_layer_params(
         {getParam<Real>("background_outer_boundary_layer_width"),
+        0.0,
          getParam<Real>("background_outer_boundary_layer_width") > 0.0
              ? getParam<unsigned int>("background_outer_boundary_layer_intervals")
              : 0,

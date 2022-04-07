@@ -77,6 +77,7 @@ public:
   struct singleBdryLayerParams
   {
     Real width;
+    Real fraction;
     unsigned int intervals;
     Real bias;
   };
@@ -453,56 +454,33 @@ protected:
    * Creates bias terms for multiple blocks.
    * @param radial_biases bias growth factors of the elements within the main regions of the blocks
    * @param intervals radial interval numbers of the main regions of the blocks
-   * @param inner_boundary_layer_fractions radial fractions of the blocks to be defined as the
-   * boundary layers near the inner boundaries
-   * @param inner_boundary_layer_intervals radial interval numbers of the blocks to be defined as
-   * the boundary layers near the inner boundaries
-   * @param inner_boundary_layer_biases bias growth factors of the elements within the blocks to be
-   * defined as the boundary layers near the inner boundaries
-   * @param outer_boundary_layer_fractions radial fractions of the blocks to be defined as the
-   * boundary layers near the outer boundaries
-   * @param outer_boundary_layer_intervals radial interval numbers of the blocks to be defined as
-   * the boundary layers near the outer boundaries
-   * @param outer_boundary_layer_biases bias growth factors of the elements within the blocks to be
-   * defined as the boundary layers near the outer boundaries
+   * @ param inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the inner boundary layers
+   * @ param outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the outer boundary layers
    * @return bias list of terms describing the cumulative radial fractions of the nodes within
    * multiple blocks
    */
   std::vector<std::vector<Real>>
   biasTermsCalculator(const std::vector<Real> radial_biases,
                       const std::vector<unsigned int> intervals,
-                      const std::vector<Real> inner_boundary_layer_fractions,
-                      const std::vector<unsigned int> inner_boundary_layer_intervals,
-                      const std::vector<Real> inner_boundary_layer_biases,
-                      const std::vector<Real> outer_boundary_layer_fractions,
-                      const std::vector<unsigned int> outer_boundary_layer_intervals,
-                      const std::vector<Real> outer_boundary_layer_biases) const;
+                      const multiBdryLayerParams inner_boundary_layer_params,
+                      const multiBdryLayerParams outer_boundary_layer_params) const;
 
   /**
    * Creates bias terms for a single block.
    * @param radial_bias bias growth factor of the elements within the main region of the block
    * @param intervals radial interval number of the main region of the block
-   * @param inner_boundary_layer_fraction radial fraction of the block to be defined as the
-   * boundary layer near the inner boundary
-   * @param inner_boundary_layer_intervals radial interval number of the block to be defined as
-   * the boundary layer near the inner boundary
-   * @param inner_boundary_layer_bias bias growth factor of the elements within the block to be
-   * defined as the boundary layer near the inner boundary
-   * @param outer_boundary_layer_fraction radial fraction of the block to be defined as the
-   * boundary layer near the outer boundary
-   * @param outer_boundary_layer_intervals radial interval number of the block to be defined as
-   * the boundary layer near the outer boundary
-   * @param outer_boundary_layer_bias bias growth factor of the elements within the block to be
-   * defined as the boundary layer near the outer boundary
+   * @ param inner_boundary_layer_params width, radial fraction, radial sector, and growth
+   * factor of the inner boundary layer
+   * @ param outer_boundary_layer_params width, radial fraction, radial sector, and growth
+   * factor of the outer boundary layer
    * @return bias terms describing the cumulative radial fractions of the nodes within a single
    * block
    */
-  std::vector<Real> biasTermsCalculator(const Real radial_bias,
-                                        const unsigned int intervals,
-                                        const Real inner_boundary_layer_fraction = 0.0,
-                                        const unsigned int inner_boundary_layer_intervals = 0,
-                                        const Real inner_boundary_layer_bias = 1.0,
-                                        const Real outer_boundary_layer_fraction = 0.0,
-                                        const unsigned int outer_boundary_layer_intervals = 0,
-                                        const Real outer_boundary_layer_bias = 1.0) const;
+  std::vector<Real> biasTermsCalculator(
+      const Real radial_bias,
+      const unsigned int intervals,
+      const singleBdryLayerParams inner_boundary_layer_params = {0.0, 0.0, 0, 1.0},
+      const singleBdryLayerParams outer_boundary_layer_params = {0.0, 0.0, 0, 1.0}) const;
 };

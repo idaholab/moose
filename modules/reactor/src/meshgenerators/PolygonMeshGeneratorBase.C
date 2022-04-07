@@ -76,20 +76,12 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
                           background_outer_boundary_layer_params.intervals);
   auto rings_bias_terms = biasTermsCalculator(ring_radial_biases,
                                               ring_layers,
-                                              ring_inner_boundary_layer_params.fractions,
-                                              ring_inner_boundary_layer_params.intervals,
-                                              ring_inner_boundary_layer_params.biases,
-                                              ring_outer_boundary_layer_params.fractions,
-                                              ring_outer_boundary_layer_params.intervals,
-                                              ring_outer_boundary_layer_params.biases);
+                                              ring_inner_boundary_layer_params,
+                                              ring_outer_boundary_layer_params);
   auto duct_bias_terms = biasTermsCalculator(duct_radial_biases,
                                              ducts_layers,
-                                             duct_inner_boundary_layer_params.fractions,
-                                             duct_inner_boundary_layer_params.intervals,
-                                             duct_inner_boundary_layer_params.biases,
-                                             duct_outer_boundary_layer_params.fractions,
-                                             duct_outer_boundary_layer_params.intervals,
-                                             duct_outer_boundary_layer_params.biases);
+                                             duct_inner_boundary_layer_params,
+                                             duct_outer_boundary_layer_params);
 
   std::vector<unsigned int> total_ring_layers;
   for (unsigned int i = 0; i < ring_layers.size(); i++)
@@ -1168,35 +1160,30 @@ std::vector<std::vector<Real>>
 PolygonMeshGeneratorBase::biasTermsCalculator(
     const std::vector<Real> radial_biases,
     const std::vector<unsigned int> intervals,
-    const std::vector<Real> inner_boundary_layer_fractions,
-    const std::vector<unsigned int> inner_boundary_layer_intervals,
-    const std::vector<Real> inner_boundary_layer_biases,
-    const std::vector<Real> outer_boundary_layer_fractions,
-    const std::vector<unsigned int> outer_boundary_layer_intervals,
-    const std::vector<Real> outer_boundary_layer_biases) const
+    const multiBdryLayerParams inner_boundary_layer_params,
+    const multiBdryLayerParams outer_boundary_layer_params) const
 {
   std::vector<std::vector<Real>> bias_terms_vec;
   for (unsigned int i = 0; i < radial_biases.size(); i++)
     bias_terms_vec.push_back(biasTermsCalculator(radial_biases[i],
                                                  intervals[i],
-                                                 inner_boundary_layer_fractions[i],
-                                                 inner_boundary_layer_intervals[i],
-                                                 inner_boundary_layer_biases[i],
-                                                 outer_boundary_layer_fractions[i],
-                                                 outer_boundary_layer_intervals[i],
-                                                 outer_boundary_layer_biases[i]));
+                                                 {0.0,
+                                                  inner_boundary_layer_params.fractions[i],
+                                                  inner_boundary_layer_params.intervals[i],
+                                                  inner_boundary_layer_params.biases[i]},
+                                                 {0.0,
+                                                  outer_boundary_layer_params.fractions[i],
+                                                  outer_boundary_layer_params.intervals[i],
+                                                  outer_boundary_layer_params.biases[i]}));
   return bias_terms_vec;
 }
 
 std::vector<Real>
-PolygonMeshGeneratorBase::biasTermsCalculator(const Real radial_bias,
-                                              const unsigned int intervals,
-                                              const Real inner_boundary_layer_fraction,
-                                              const unsigned int inner_boundary_layer_intervals,
-                                              const Real inner_boundary_layer_bias,
-                                              const Real outer_boundary_layer_fraction,
-                                              const unsigned int outer_boundary_layer_intervals,
-                                              const Real outer_boundary_layer_bias) const
+PolygonMeshGeneratorBase::biasTermsCalculator(
+    const Real radial_bias,
+    const unsigned int intervals,
+    const singleBdryLayerParams inner_boundary_layer_params,
+    const singleBdryLayerParams outer_boundary_layer_params) const
 {
   // To get biased indices:
   // If no bias is involved, namely bias factor = 1.0, the increment in indices is uniform.
@@ -1211,31 +1198,35 @@ PolygonMeshGeneratorBase::biasTermsCalculator(const Real radial_bias,
   // This approach is used by inner boundary layer, main region, outer boundary layer separately.
 
   std::vector<Real> biased_terms;
-  for (unsigned int i = 0; i < inner_boundary_layer_intervals; i++)
+  for (unsigned int i = 0; i < inner_boundary_layer_params.intervals; i++)
     biased_terms.push_back(
-        MooseUtils::absoluteFuzzyEqual(inner_boundary_layer_bias, 1.0)
-            ? ((Real)(i + 1) * inner_boundary_layer_fraction / (Real)inner_boundary_layer_intervals)
-            : ((1.0 - std::pow(inner_boundary_layer_bias, (Real)(i + 1))) /
-               (1.0 - std::pow(inner_boundary_layer_bias, (Real)(inner_boundary_layer_intervals))) *
-               inner_boundary_layer_fraction));
+        MooseUtils::absoluteFuzzyEqual(inner_boundary_layer_params.bias, 1.0)
+            ? ((Real)(i + 1) * inner_boundary_layer_params.fraction /
+               (Real)inner_boundary_layer_params.intervals)
+            : ((1.0 - std::pow(inner_boundary_layer_params.bias, (Real)(i + 1))) /
+               (1.0 - std::pow(inner_boundary_layer_params.bias,
+                               (Real)(inner_boundary_layer_params.intervals))) *
+               inner_boundary_layer_params.fraction));
   for (unsigned int i = 0; i < intervals; i++)
+    biased_terms.push_back(inner_boundary_layer_params.fraction +
+                           (MooseUtils::absoluteFuzzyEqual(radial_bias, 1.0)
+                                ? ((Real)(i + 1) *
+                                   (1.0 - inner_boundary_layer_params.fraction -
+                                    outer_boundary_layer_params.fraction) /
+                                   (Real)intervals)
+                                : ((1.0 - std::pow(radial_bias, (Real)(i + 1))) /
+                                   (1.0 - std::pow(radial_bias, (Real)(intervals))) *
+                                   (1.0 - inner_boundary_layer_params.fraction -
+                                    outer_boundary_layer_params.fraction))));
+  for (unsigned int i = 0; i < outer_boundary_layer_params.intervals; i++)
     biased_terms.push_back(
-        inner_boundary_layer_fraction +
-        (MooseUtils::absoluteFuzzyEqual(radial_bias, 1.0)
-             ? ((Real)(i + 1) *
-                (1.0 - inner_boundary_layer_fraction - outer_boundary_layer_fraction) /
-                (Real)intervals)
-             : ((1.0 - std::pow(radial_bias, (Real)(i + 1))) /
-                (1.0 - std::pow(radial_bias, (Real)(intervals))) *
-                (1.0 - inner_boundary_layer_fraction - outer_boundary_layer_fraction))));
-  for (unsigned int i = 0; i < outer_boundary_layer_intervals; i++)
-    biased_terms.push_back(1.0 - outer_boundary_layer_fraction +
-                           (MooseUtils::absoluteFuzzyEqual(outer_boundary_layer_bias, 1.0)
-                                ? ((Real)(i + 1) * outer_boundary_layer_fraction /
-                                   (Real)outer_boundary_layer_intervals)
-                                : ((1.0 - std::pow(outer_boundary_layer_bias, (Real)(i + 1))) /
-                                   (1.0 - std::pow(outer_boundary_layer_bias,
-                                                   (Real)(outer_boundary_layer_intervals))) *
-                                   outer_boundary_layer_fraction)));
+        1.0 - outer_boundary_layer_params.fraction +
+        (MooseUtils::absoluteFuzzyEqual(outer_boundary_layer_params.bias, 1.0)
+             ? ((Real)(i + 1) * outer_boundary_layer_params.fraction /
+                (Real)outer_boundary_layer_params.intervals)
+             : ((1.0 - std::pow(outer_boundary_layer_params.bias, (Real)(i + 1))) /
+                (1.0 - std::pow(outer_boundary_layer_params.bias,
+                                (Real)(outer_boundary_layer_params.intervals))) *
+                outer_boundary_layer_params.fraction)));
   return biased_terms;
 }
