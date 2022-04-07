@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#20712'
+  design = 'source/kernels/lagrangian/TotalLagrangianStressDivergenceAxisymmetricCylindrical.md'
+  [small]
+    type = Exodiff
+    input = 'small.i'
+    exodiff = 'small_out.e'
+    requirement = "Small strain solution in 2D axisymmetric RZ coordinates matches analytical "
+                  "solution"
+    abs_zero = 1e-6
+  []
+[]

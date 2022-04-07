@@ -69,16 +69,16 @@ populate this list manually if these components need to be included.
 
 ### New Kernel System
 
-The following example sets up the new *Lagrangian* kernel system with a total Lagrangian formulation for a 
+The following example sets up the new *Lagrangian* kernel system with a total Lagrangian formulation for a
 large displacement kinematics problem.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/total/action/action_L.i block=Modules/TensorMechanics/Master
+!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/action/action_L.i block=Modules/TensorMechanics/Master
 
 ### New Kernel System, with Homogenization Constraints
 
 The following uses the action to setup homogenization constraints in a problem using the new kernel system.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/total/homogenization/action/action_3d.i block=Modules/TensorMechanics/Master
+!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/action/action_3d.i block=Modules/TensorMechanics/Master
 
 ### Subblocks
 

@@ -4,12 +4,12 @@
 
 ## Overview
 
-The `ComputeLagrangianStrain` class calculates the basic kinematic quantities used by 
+The `ComputeLagrangianStrain` class calculates the basic kinematic quantities used by
 the [new mechanics kernels](LagrangianKernelTheory.md) mechanics kernels.  
 [The theory](NewMaterialSystem.md) section on the new material system describes this
 class's role in greater detail, the following gives a brief description.
 
-The class calculates the strain measures available for the constitutive models to 
+The class calculates the strain measures available for the constitutive models to
 use to define the stress update and the kinematic tenors required to setup
 the stress equilibrium problem for large deformation simulations.
 The `stabilize_strain` averages the volumetric/dilatational part
@@ -49,7 +49,7 @@ The calculator requires `use_displaced_mesh=false` and enforces this with an err
 The following example sets up the `ComputeLagrangianStrain` object for a large deformation problem without stabilization.
 For small deformations the only change would be `large_kinematics=false`.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/updated/patch/large_patch.i
+!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/updated/patch/large_patch.i
          block=Materials
 
 !syntax parameters /Materials/ComputeLagrangianStrain

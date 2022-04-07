@@ -9,80 +9,25 @@
 
 #pragma once
 
-#include "LagrangianStressDivergenceBase.h"
+#include "TotalLagrangianStressDivergenceBase.h"
 
-/// Enforce equilibrium with a total Lagrangian formulation
-///
-/// This class enforces equilibrium when used in conjunction with
-/// the corresponding strain calculator (CalculateStrainLagrangianKernel)
-/// and with either a stress calculator that provides the
-/// 1st PK stress ("pk1_stress") and the derivative of the 1st PK stress
-/// with respect to the deformation gradient ("pk1_jacobian")
-///
-/// This kernel should be used with the new "ComputeLagrangianStressBase"
-/// stress update system and the "ComputeLagrangianStrain" system for strains.
-///
-class TotalLagrangianStressDivergence : public LagrangianStressDivergenceBase
+template <>
+inline InputParameters
+TotalLagrangianStressDivergenceBase<GradientOperatorCartesian>::validParams()
 {
-public:
-  static InputParameters validParams();
-  TotalLagrangianStressDivergence(const InputParameters & parameters);
+  InputParameters params = TotalLagrangianStressDivergenceBase::baseParams();
+  params.addClassDescription(
+      "Enforce equilibrium with a total Lagrangian formulation in Cartesian coordinates.");
+  return params;
+}
 
-protected:
-  /// Implement the R^{\alpha}=\int_{V}J\sigma_{ij}\phi_{i,K}^{\alpha}F_{Kj}^{-1}dV residual
-  virtual Real computeQpResidual() override;
-  /// On diagonal Jacobian, only involves the solid mechanics kernel
-  virtual Real computeQpJacobian() override;
-  /// Off diagonal Jacobian, solid mechanics + homogenization constraint
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+template <>
+inline void
+TotalLagrangianStressDivergenceBase<GradientOperatorCartesian>::initialSetup()
+{
+  if (getBlockCoordSystem() != Moose::COORD_XYZ)
+    mooseError("This kernel should only act in Cartesian coordinates.");
+}
 
-  /// Trial gradient averaging
-  virtual void precalculateJacobian() override;
-
-  /// Stabilize a generic gradient tensor
-  RankTwoTensor stabilizeGrad(const RankTwoTensor & Gb, const RankTwoTensor & Ga) override;
-
-  /// Calculate the full test gradient (could later be modified for stabilization)
-  RankTwoTensor testGrad(unsigned int i);
-
-  /// Compute the stabilized trial function gradient tensor
-  RankTwoTensor trialGrad(unsigned int k);
-
-private:
-  /// The material part of the Jacobian
-  Real materialJacobian(const RankTwoTensor & grad_test, const RankTwoTensor & grad_trial);
-
-  /// Off diagonal Jacobian coming through eigenstrain
-  Real eigenstrainJacobianComponent(unsigned int cvar,
-                                    const RankFourTensor & C,
-                                    const RankTwoTensor & grad_test,
-                                    const Real & phi);
-
-  /// Calculate the average gradient of some type (test or trial)
-  void avgGrad(const VariablePhiGradient & grads, std::vector<RealVectorValue> & res);
-
-  /// Compute the average trial function gradient
-  void computeAverageGradPhi();
-
-protected:
-  /// The 1st Piola-Kirchhoff stress
-  const MaterialProperty<RankTwoTensor> & _pk1;
-  /// The derivative of the PK1 stress with respect to the
-  /// deformation gradient
-  const MaterialProperty<RankFourTensor> & _dpk1;
-
-  /// Averaged trial function gradients
-  std::vector<RealVectorValue> _avg_grad_trial;
-
-  /// The unmodified deformation gradient
-  const MaterialProperty<RankTwoTensor> & _unstabilized_def_grad;
-
-  /// The element-average deformation gradient
-  const MaterialProperty<RankTwoTensor> & _aF;
-
-  /// The inverse increment deformation gradient
-  const MaterialProperty<RankTwoTensor> & _inv_inc_def_grad;
-
-  /// The actual (stabilized) deformation gradient
-  const MaterialProperty<RankTwoTensor> & _def_grad;
-};
+typedef TotalLagrangianStressDivergenceBase<GradientOperatorCartesian>
+    TotalLagrangianStressDivergence;
