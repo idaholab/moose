@@ -774,12 +774,12 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
       unsigned int number_of_active_tiles = 0;
       for (unsigned int t = 0; t < _num_tiles[p]; ++t)
       {
+        // count number of active tiles
+        number_of_active_tiles += checkInTile(p, t);
         if (_weights[p][t])
         {
           // tile normalization factor (sum of tile weights)
           weight_normalizer += _weights[p][t];
-          // count number of active tiles
-          number_of_active_tiles++;
         }
       }
 
