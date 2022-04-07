@@ -48,7 +48,7 @@
 [Transfers]
   [results]
     type = SamplerPostprocessorTransfer
-    multi_app = runner
+    from_multi_app = runner
     sampler = hypercube
     to_vector_postprocessor = results
     from_postprocessor = 'time_max time_min'
@@ -59,8 +59,11 @@
   [results]
     type = StochasticResults
   []
+[]
+
+[Reporters]
   [stats]
-    type = Statistics
+    type = StatisticsReporter
     vectorpostprocessors = results
     compute = 'mean stddev'
     ci_method = 'percentile'

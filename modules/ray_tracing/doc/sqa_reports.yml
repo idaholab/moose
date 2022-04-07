@@ -8,17 +8,24 @@ Applications:
             - ${MOOSE_DIR}/framework/doc/remove.yml
 
 Documents:
+    software_quality_plan: sqa/inl_records.md#software_quality_plan
+    enterprise_architecture_entry: sqa/inl_records.md#enterprise_architecture_entry
+    safety_software_determination: sqa/inl_records.md#safety_software_determination
+    quality_level_determination: sqa/inl_records.md#quality_level_determination
+    configuration_management_plan: sqa/inl_records.md#configuration_management_plan
+    asset_management_plan: sqa/inl_records.md#asset_management_plan
+    verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
     software_requirements_specification: sqa/ray_tracing_srs.md
     software_design_description: sqa/ray_tracing_sdd.md
     software_test_plan: sqa/ray_tracing_stp.md
     requirements_traceablity_matrix: sqa/ray_tracing_rtm.md
-    verification_validation_plan: sqa/ray_tracing_vvr.md
+    verification_validation_report: sqa/ray_tracing_vvr.md
     failure_analysis_report: sqa/ray_tracing_far.md
     software_library_list: sqa/ray_tracing_sll.md
     communication_and_contact_information: sqa/framework_cci.md
     software_coding_standards: sqa/framework_scs.md
-    log_default: WARNING
-    show_warning: false
+    log_user_manual: WARNING
+    log_theory_manual: WARNING
 
 Requirements:
     ray_tracing:

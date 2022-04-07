@@ -130,4 +130,14 @@
                   "in conjunction with the power law creep deformation with "
                   "automatic differentiation."
   []
+  [multiple_inelastic_bad_damage_model]
+    type = RunException
+    input = ad_scalar_material_damage_creep_power.i
+    expect_err = "Damage Model.*damage_index.*is not compatible with ADComputeMultipleInelasticStress"
+    requirement = "The system shall provide a meaningful error if the user selects a material model that "
+                  "is not recognized by the automatic differentiation multiple stress object."
+    issues = '#20722'
+    cli_args = 'Materials/stress/damage_model=damage_index'
+    allow_warnings = True
+  []
 []

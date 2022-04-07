@@ -78,29 +78,25 @@
 [Transfers]
   [to_sub_nodal_to_nodal]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     variable = nodal_source_from_master_nodal
   []
   [to_sub_nodal_to_elemental]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     variable = nodal_source_from_master_elemental
   []
   [to_sub_elemental_to_nodal]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u_elemental
     variable = elemental_source_from_master_nodal
   []
   [to_sub_elemental_to_elemental]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u_elemental
     variable = elemental_source_from_master_elemental
   []

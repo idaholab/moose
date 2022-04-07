@@ -30,35 +30,35 @@
 [Transfers]
   [data]
     type = SamplerPostprocessorTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     to_vector_postprocessor = storage
     from_postprocessor = size
   []
   [prop_A]
     type = SamplerPostprocessorTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     to_vector_postprocessor = prop_A
     from_postprocessor = prop_A
   []
   [prop_B]
     type = SamplerPostprocessorTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     to_vector_postprocessor = prop_B
     from_postprocessor = prop_B
   []
   [prop_C]
     type = SamplerPostprocessorTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     to_vector_postprocessor = prop_C
     from_postprocessor = prop_C
   []
   [prop_D]
     type = SamplerPostprocessorTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     to_vector_postprocessor = prop_D
     from_postprocessor = prop_D

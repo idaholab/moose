@@ -25,6 +25,7 @@ MooseVariableField<OutputType>::validParams()
 template <typename OutputType>
 MooseVariableField<OutputType>::MooseVariableField(const InputParameters & parameters)
   : MooseVariableFieldBase(parameters),
+    Moose::FunctorBase<typename Moose::ADType<OutputType>::type>(name()),
     MeshChangedInterface(parameters),
     _time_integrator(_sys.getTimeIntegrator())
 {

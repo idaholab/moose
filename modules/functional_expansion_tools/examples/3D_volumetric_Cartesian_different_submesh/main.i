@@ -145,15 +145,13 @@
 [Transfers]
   [./ValueToSub]
     type = MultiAppFXTransfer
-    direction = to_multiapp
-    multi_app = FXTransferApp
+    to_multi_app = FXTransferApp
     this_app_object_name = FX_Value_UserObject_Main
     multi_app_object_name = FX_Basis_Value_Sub
   [../]
   [./ValueToMe]
     type = MultiAppFXTransfer
-    direction = from_multiapp
-    multi_app = FXTransferApp
+    from_multi_app = FXTransferApp
     this_app_object_name = FX_Basis_Value_Main
     multi_app_object_name = FX_Value_UserObject_Sub
   [../]

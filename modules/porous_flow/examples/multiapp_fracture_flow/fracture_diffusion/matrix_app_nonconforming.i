@@ -84,15 +84,13 @@
 [Transfers]
   [T_to_fracture]
     type = MultiAppInterpolationTransfer
-    direction = to_multiapp
-    multi_app = fracture_app
+    to_multi_app = fracture_app
     source_variable = matrix_T
     variable = transferred_matrix_T
   []
   [heat_from_fracture]
     type = MultiAppReporterTransfer
-    direction = from_multiapp
-    multi_app = fracture_app
+    from_multi_app = fracture_app
     from_reporters = 'heat_transfer_rate/joules_per_s heat_transfer_rate/x heat_transfer_rate/y heat_transfer_rate/z'
     to_reporters = 'heat_transfer_rate/transferred_joules_per_s heat_transfer_rate/x heat_transfer_rate/y heat_transfer_rate/z'
   []

@@ -1,13 +1,13 @@
 # MooseException
 
 MooseException is a normal C++ derived "exception" object. It's purpose is to give developers
-an oppurtunity to terminate a solve, while informing MOOSE that it should perform the
+an opportunity to terminate a solve, while informing MOOSE that it should perform the
 necessary steps to clean up the current stack, notify other threads/processors of the error
 and communicate with the solver that the current solve has failed. When applicable and possible,
 the solver will allow MOOSE to cut the time step and make another attempt at a solve.
 
 This exception should be used directly in user code when non-fatal situations are encountered
-such as the inability to converge a local netwon solve in a material, or if a interpolated value
+such as the inability to converge a local Newton solve in a material, or if a interpolated value
 from a variable or lookup table ends up out-of-range.
 
 MOOSE is setup to catch MooseExceptions inside of several user defined callbacks that occur during

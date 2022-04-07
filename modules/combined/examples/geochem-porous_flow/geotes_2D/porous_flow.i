@@ -368,16 +368,14 @@ production_rate = 1.0 # kg/s/m
 [Transfers]
   [changes_due_to_flow]
     type = MultiAppCopyTransfer
-    direction = to_multiapp
     source_variable = 'rate_H2O rate_Na rate_Cl rate_SiO2 temperature'
     variable = 'pf_rate_H2O pf_rate_Na pf_rate_Cl pf_rate_SiO2 temperature'
-    multi_app = react
+    to_multi_app = react
   []
   [massfrac_from_geochem]
     type = MultiAppCopyTransfer
-    direction = from_multiapp
     source_variable = 'massfrac_Na massfrac_Cl massfrac_SiO2'
     variable = 'f0 f1 f2'
-    multi_app = react
+    from_multi_app = react
   []
 []

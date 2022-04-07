@@ -24,7 +24,7 @@
                 MultiApps/active='diff_sub'
                 diff_sub:Mesh/ymin=0.1
                 diff_sub:Mesh/ymax=1.1
-                Transfers/p_to_sub/multi_app=diff_sub"
+                Transfers/p_to_sub/to_multi_app=diff_sub"
     requirement = "The system shall support mesh to mesh interpolation with the first order elemental variable when a different mesh is used in sub"
   []
 
@@ -39,7 +39,7 @@
                 MultiApps/nearest_node_sub/input_files=sub_L2_Lagrange.i
                 MultiApps/nearest_node_sub/execute_on='timestep_end'
                 MultiApps/active='nearest_node_sub'
-                Transfers/p_to_sub/multi_app=nearest_node_sub"
+                Transfers/p_to_sub/to_multi_app=nearest_node_sub"
     # It is well-known that MultiAppNearestNodeTransfer could generate different results with different numbers of cores
     max_parallel = 1
     requirement = "The system shall support nearest node transfer with the first order elemental variable"
@@ -56,7 +56,7 @@
                 MultiApps/interpolation_sub/input_files=sub_L2_Lagrange.i
                 MultiApps/interpolation_sub/execute_on='timestep_end'
                 MultiApps/active='interpolation_sub'
-                Transfers/p_to_sub/multi_app=interpolation_sub"
+                Transfers/p_to_sub/to_multi_app=interpolation_sub"
     requirement = "The system shall support interpolation transfer with the first order elemental variable"
   []
 

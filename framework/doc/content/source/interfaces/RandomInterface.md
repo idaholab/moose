@@ -3,7 +3,7 @@
 MOOSE currently distributes a high-quality efficient Pseudo Random Number Generator package (mtwist)
 that is stable across different machine architectures. This random number generator is tied into
 MOOSE's random number generator system that can generate consistent spatial random number fields as
-parallel discritization changes (e.g. the number of threads/processors does not impact generated
+parallel discretization changes (e.g. the number of threads/processors does not impact generated
 fields). The random number interface is very straightforward to use.
 
 !alert note

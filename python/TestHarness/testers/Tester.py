@@ -54,6 +54,7 @@ class Tester(MooseObject):
         params.addParam('petsc_version_release', ['ALL'], "A test that runs against PETSc master if FALSE ('ALL', 'TRUE', 'FALSE')")
         params.addParam('slepc_version', [], "A list of slepc versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('exodus_version', ['ALL'], "A list of Exodus versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
+        params.addParam('vtk_version', ['ALL'], "A list of VTK versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('mesh_mode',     ['ALL'], "A list of mesh modes for which this test will run ('DISTRIBUTED', 'REPLICATED')")
         params.addParam('min_ad_size',   None, "A minimum AD size for which this test will run")
         params.addParam('ad_mode',       ['ALL'], "A list of AD modes for which this test will run ('SPARSE', 'NONSPARSE')")
@@ -538,6 +539,14 @@ class Tester(MooseObject):
                 reasons['exodus_version'] = 'using ExodusII ' + str(checks['exodus_version']) + ' REQ: ' + exodus_version
             else:
                 reasons['exodus_version'] = 'Exodus version not detected. REQ: ' + exodus_version
+
+        # Check for VTK versions
+        (vtk_status, vtk_version) = util.checkVTKVersion(checks, self.specs)
+        if not vtk_status:
+            if checks['vtk_version'] != None:
+                reasons['vtk_version'] = 'using VTK ' + str(checks['vtk_version']) + ' REQ: ' + vtk_version
+            else:
+                reasons['vtk_version'] = 'VTK version not detected. REQ: ' + vtk_version
 
         # PETSc and SLEPc is being explicitly checked above
         local_checks = ['platform', 'compiler', 'mesh_mode', 'ad_mode', 'ad_indexing_type', 'method', 'library_mode', 'dtk', 'unique_ids', 'vtk', 'tecplot',

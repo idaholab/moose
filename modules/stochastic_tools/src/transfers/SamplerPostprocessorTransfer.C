@@ -55,7 +55,6 @@ SamplerPostprocessorTransfer::validParams()
                         "If true, whatever the value the sub app has upon exitting is used. "
                         "If false, NaN will be transferred.");
 
-  params.set<MultiMooseEnum>("direction") = "from_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   return params;
 }
@@ -69,6 +68,8 @@ SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters
                    : getVectorNamesHelper(_name, _sub_pp_names)),
     _keep_diverge(getParam<bool>("keep_solve_fail_value"))
 {
+  if (hasToMultiApp())
+    paramError("to_multi_app", "To and between multiapp directions are not implemented");
 }
 
 const std::vector<VectorPostprocessorName> &
@@ -87,18 +88,18 @@ SamplerPostprocessorTransfer::initialSetup()
     mooseError("The 'results' object must be a 'StochasticResults' object.");
 
   // Check that postprocessor on sub-application exists and create vectors on results VPP
-  const dof_id_type n = _multi_app->numGlobalApps();
+  const dof_id_type n = getFromMultiApp()->numGlobalApps();
   for (MooseIndex(n) i = 0; i < n; i++)
   {
-    if (_multi_app->hasLocalApp(i))
+    if (getFromMultiApp()->hasLocalApp(i))
     {
-      FEProblemBase & app_problem = _multi_app->appProblemBase(i);
+      FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
       for (const auto & sub_pp_name : _sub_pp_names)
         if (!app_problem.hasPostprocessorValueByName(sub_pp_name))
           mooseError("Unknown postprocesssor name '",
                      sub_pp_name,
                      "' on sub-application '",
-                     _multi_app->name(),
+                     getFromMultiApp()->name(),
                      "'");
     }
   }
@@ -120,14 +121,14 @@ SamplerPostprocessorTransfer::initializeFromMultiapp()
 void
 SamplerPostprocessorTransfer::executeFromMultiapp()
 {
-  if (_multi_app->isRootProcessor())
+  if (getFromMultiApp()->isRootProcessor())
   {
-    const dof_id_type n = _multi_app->numGlobalApps();
+    const dof_id_type n = getFromMultiApp()->numGlobalApps();
     for (MooseIndex(n) i = 0; i < n; i++)
     {
-      if (_multi_app->hasLocalApp(i))
+      if (getFromMultiApp()->hasLocalApp(i))
       {
-        FEProblemBase & app_problem = _multi_app->appProblemBase(i);
+        FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
         if (app_problem.converged() || _keep_diverge)
           for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
             _current_data[j].emplace_back(
@@ -159,7 +160,7 @@ SamplerPostprocessorTransfer::execute()
     current.reserve(_sampler_ptr->getNumberOfLocalRows());
     for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
     {
-      FEProblemBase & app_problem = _multi_app->appProblemBase(i);
+      FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(i);
       if (app_problem.converged() || _keep_diverge)
         current.emplace_back(app_problem.getPostprocessorValueByName(_sub_pp_names[j]));
       else

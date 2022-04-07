@@ -963,14 +963,14 @@ SubProblem::getFunctor(const std::string & name,
   mooseAssert(tid < _functors.size(), "Too large a thread ID");
 
   // Log the requestor
-  _functor_to_requestors[name].insert(requestor_name);
+  _functor_to_requestors["wraps_" + name].insert(requestor_name);
 
   // Get the requested functor if we already have it
   auto & functors = _functors[tid];
-  auto find_ret = functors.find(name);
+  auto find_ret = functors.find("wraps_" + name);
   if (find_ret != functors.end())
   {
-    if (functors.count(name) > 1)
+    if (functors.count("wraps_" + name) > 1)
       mooseError("Attempted to get a functor with the name '",
                  name,
                  "' but multiple functors match. Make sure that you do not have functor material "
@@ -991,7 +991,9 @@ SubProblem::getFunctor(const std::string & name,
   // We don't have the functor yet but we could have it in the future. We'll create a null-functor
   // for now
   auto emplace_ret = functors.emplace(std::make_pair(
-      name, std::make_unique<Moose::Functor<T>>(std::make_unique<Moose::NullFunctor<T>>())));
+      "wraps_" + name,
+      std::make_unique<Moose::Functor<T>>(std::make_unique<Moose::NullFunctor<T>>())));
+
   return static_cast<Moose::Functor<T> &>(*emplace_ret->second);
 }
 
@@ -1024,7 +1026,6 @@ SubProblem::addPiecewiseByBlockLambdaFunctor(const std::string & name,
                name,
                "' but another functor of different type has that name. Make sure that you do not "
                "have functor material properties, functions, and variables with the same names");
-
   return wrapper;
 }
 
@@ -1037,7 +1038,7 @@ SubProblem::addFunctor(const std::string & name,
   mooseAssert(tid < _functors.size(), "Too large a thread ID");
 
   auto & functors = _functors[tid];
-  auto it = functors.find(name);
+  auto it = functors.find("wraps_" + name);
   if (it != functors.end())
   {
     // We have this functor already. If it's a null functor, we want to replace it with the valid
@@ -1052,7 +1053,7 @@ SubProblem::addFunctor(const std::string & name,
   }
 
   auto new_wrapper = std::make_unique<Moose::Functor<T>>(functor);
-  _functors[tid].emplace(std::make_pair(name, std::move(new_wrapper)));
+  _functors[tid].emplace(std::make_pair("wraps_" + name, std::move(new_wrapper)));
 }
 
 namespace Moose

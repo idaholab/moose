@@ -8,8 +8,18 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# Move to root of the repo; we start in docker_ci
+cd ..
+
 # Docker autobuild will initialize submodules; we don't want
 # them in the final image because we end up cloing libmesh
 # and PETSc seperately, and large_media can be cloned
 # later if desired
 git submodule deinit -f large_media libmesh petsc
+# The cache still exists from the checkout... and this
+# is the only way to get rid of it
+rm -rf .git/modules
+# Docker autobuild will do the fetch with SSH; change
+# the remote so that the user can fetch within
+# moose without the need for keys (see #20688)
+git remote set-url origin https://github.com/idaholab/moose.git

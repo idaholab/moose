@@ -103,6 +103,11 @@ ADComputeMultipleInelasticStress::initialSetup()
                       ? dynamic_cast<DamageBaseTempl<true> *>(&getMaterial("damage_model"))
                       : nullptr;
 
+  if (isParamValid("damage_model") && !_damage_model)
+    paramError("damage_model",
+               "Damage Model " + getMaterial("damage_model").name() +
+                   " is not compatible with ADComputeMultipleInelasticStress");
+
   _is_elasticity_tensor_guaranteed_isotropic =
       this->hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC);
 
@@ -124,11 +129,6 @@ ADComputeMultipleInelasticStress::initialSetup()
     else
       mooseError("Model " + models[i] + " is not compatible with ADComputeMultipleInelasticStress");
   }
-
-  if (isParamValid("damage_model") && !_damage_model)
-    paramError("damage_model",
-               "Damage Model " + _damage_model->name() +
-                   " is not compatible with ADComputeMultipleInelasticStress");
 }
 
 void

@@ -24,19 +24,7 @@
 
 // External includes
 #include "pcrecpp.h"
-/**
- * Ignore GCC warnings from tinydir corresponding to memory overlap and possible
- * uninitialized variables
- */
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wrestrict"
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
 #include "tinydir.h"
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
 
 // C++ includes
 #include <iostream>
@@ -1379,4 +1367,15 @@ removeSubstring(std::string & main, const std::string & sub)
   std::string::size_type n = sub.length();
   for (std::string::size_type i = main.find(sub); i != std::string::npos; i = main.find(sub))
     main.erase(i, n);
+}
+
+std::string
+removeSubstring(const std::string & main, const std::string & sub)
+{
+  std::string copy_main = main;
+  std::string::size_type n = sub.length();
+  for (std::string::size_type i = copy_main.find(sub); i != std::string::npos;
+       i = copy_main.find(sub))
+    copy_main.erase(i, n);
+  return copy_main;
 }

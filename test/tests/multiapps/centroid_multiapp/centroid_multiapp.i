@@ -80,15 +80,13 @@
   [./incoming_x]
     type = MultiAppVariableValueSamplePostprocessorTransfer
     source_variable = x
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     postprocessor = incoming_x
   [../]
   [./incoming_y]
     type = MultiAppVariableValueSamplePostprocessorTransfer
     source_variable = y
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     postprocessor = incoming_y
   [../]
 []

@@ -105,10 +105,9 @@
 [Transfers]
   [to_sub]
     type = MultiAppMeshFunctionTransfer
-    direction = to_multiapp
     source_variable = power_density
     variable = from_master
-    multi_app = sub
+    to_multi_app = sub
     execute_on = timestep_end
 
     # The following inputs specify what postprocessors should be conserved
@@ -120,10 +119,9 @@
 
   [from_sub]
     type = MultiAppMeshFunctionTransfer
-    direction = from_multiapp
     source_variable = sink
     variable = from_sub
-    multi_app = sub
+    from_multi_app = sub
     execute_on = timestep_end
 
     # The following inputs specify what postprocessors should be conserved

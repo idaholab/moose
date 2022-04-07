@@ -33,7 +33,7 @@ MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters)
     _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
     _to_var_names(getParam<std::vector<AuxVariableName>>("variable"))
 {
-  /* Right now, most of transfers support one variable only */
+  /* Right now, most of derived transfers support one variable only */
   _to_var_name = _to_var_names[0];
   _from_var_name = _from_var_names[0];
 }
@@ -45,18 +45,37 @@ MultiAppCopyTransfer::execute()
 
   if (_current_direction == TO_MULTIAPP)
   {
-    FEProblemBase & from_problem = _multi_app->problemBase();
-    for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-      if (_multi_app->hasLocalApp(i))
-        transfer(_multi_app->appProblemBase(i), from_problem);
+    FEProblemBase & from_problem = getToMultiApp()->problemBase();
+    for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
+      if (getToMultiApp()->hasLocalApp(i))
+        transfer(getToMultiApp()->appProblemBase(i), from_problem);
   }
 
   else if (_current_direction == FROM_MULTIAPP)
   {
-    FEProblemBase & to_problem = _multi_app->problemBase();
-    for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-      if (_multi_app->hasLocalApp(i))
-        transfer(to_problem, _multi_app->appProblemBase(i));
+    FEProblemBase & to_problem = getFromMultiApp()->problemBase();
+    for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
+      if (getFromMultiApp()->hasLocalApp(i))
+        transfer(to_problem, getFromMultiApp()->appProblemBase(i));
+  }
+
+  else if (_current_direction == BETWEEN_MULTIAPP)
+  {
+    int transfers_done = 0;
+    for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
+    {
+      if (getFromMultiApp()->hasLocalApp(i))
+      {
+        if (getToMultiApp()->hasLocalApp(i))
+        {
+          transfer(getToMultiApp()->appProblemBase(i), getFromMultiApp()->appProblemBase(i));
+          transfers_done++;
+        }
+      }
+    }
+    if (!transfers_done)
+      mooseError("BETWEEN_MULTIAPP transfer not supported if there is not at least one subapp "
+                 "per multiapp involved on each rank");
   }
 
   _console << "Finished MultiAppCopyTransfer " << name() << std::endl;

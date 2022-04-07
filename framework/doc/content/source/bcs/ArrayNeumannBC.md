@@ -8,8 +8,8 @@ Different current values for components can be assigned.
 
 ## Example Input Syntax
 
-!syntax parameters /BCs/ArrayDirichletBC
+!syntax parameters /BCs/ArrayNeumannBC
 
-!syntax inputs /BCs/ArrayDirichletBC
+!syntax inputs /BCs/ArrayNeumannBC
 
-!syntax children /BCs/ArrayDirichletBC
+!syntax children /BCs/ArrayNeumannBC

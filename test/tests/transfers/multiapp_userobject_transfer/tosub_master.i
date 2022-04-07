@@ -87,17 +87,15 @@
 
 [Transfers]
   [./layered_transfer]
-    direction = to_multiapp
     user_object = layered_average
     variable = multi_layered_average
     type = MultiAppUserObjectTransfer
-    multi_app = sub_app
+    to_multi_app = sub_app
   [../]
   [./element_layered_transfer]
-    direction = to_multiapp
     user_object = layered_average
     variable = element_multi_layered_average
     type = MultiAppUserObjectTransfer
-    multi_app = sub_app
+    to_multi_app = sub_app
   [../]
 []

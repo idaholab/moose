@@ -10,37 +10,49 @@
 #include "PiecewiseBase.h"
 #include "DelimitedFileReader.h"
 
+template <typename BaseClass>
 InputParameters
-PiecewiseBase::validParams()
+PiecewiseBaseTempl<BaseClass>::validParams()
 {
-  return Function::validParams();
+  return BaseClass::validParams();
 }
 
-PiecewiseBase::PiecewiseBase(const InputParameters & parameters) : Function(parameters) {}
+template <typename BaseClass>
+PiecewiseBaseTempl<BaseClass>::PiecewiseBaseTempl(const InputParameters & parameters)
+  : BaseClass(parameters)
+{
+}
 
+template <typename BaseClass>
 Real
-PiecewiseBase::functionSize() const
+PiecewiseBaseTempl<BaseClass>::functionSize() const
 {
   return _raw_x.size();
 }
 
+template <typename BaseClass>
 Real
-PiecewiseBase::domain(const int i) const
+PiecewiseBaseTempl<BaseClass>::domain(const int i) const
 {
   return _raw_x[i];
 }
 
+template <typename BaseClass>
 Real
-PiecewiseBase::range(const int i) const
+PiecewiseBaseTempl<BaseClass>::range(const int i) const
 {
   return _raw_y[i];
 }
 
+template <typename BaseClass>
 void
-PiecewiseBase::setData(const std::vector<Real> & x, const std::vector<Real> & y)
+PiecewiseBaseTempl<BaseClass>::setData(const std::vector<Real> & x, const std::vector<Real> & y)
 {
   _raw_x = x;
   _raw_y = y;
   if (_raw_x.size() != _raw_y.size())
     mooseError("In PiecewiseBase ", _name, ": Lengths of x and y data do not match.");
 }
+
+template class PiecewiseBaseTempl<Function>;
+template class PiecewiseBaseTempl<ADFunction>;

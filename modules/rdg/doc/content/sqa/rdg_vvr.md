@@ -1,1 +1,1 @@
-!template load file=sqa/app_vvr.md.template app=RdgApp category=rdg
+!template load file=sqa/app_vvr.md.template app=Reconstructed Discontinuous Galerkin category=rdg

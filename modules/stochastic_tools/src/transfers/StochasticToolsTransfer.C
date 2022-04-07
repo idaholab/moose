@@ -24,21 +24,27 @@ StochasticToolsTransfer::validParams()
 StochasticToolsTransfer::StochasticToolsTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters), SamplerInterface(this)
 {
+  // Since sampler lives in the main app, it's unclear what sibling transfer should look like
+  if (hasFromMultiApp() && hasToMultiApp())
+    mooseError("Transfers between multiapp are not currently supported for this transfer type");
+
+  const auto multi_app = hasFromMultiApp() ? getFromMultiApp() : getToMultiApp();
+
   // When the MultiApp is running in batch mode the execute flags for the transfer object must
   // be removed. If not the 'regular' transfer that occurs will potentially destroy data
   // populated during the calls from the MultiApp in batch mode. To prevent the Transfer from
   // running the execute flags must be removed. This is done automatically here, unless
   // 'execute_on' was modified by the user, which an error is produced.
-  if (_multi_app->isParamValid("mode") &&
-      (_multi_app->getParam<MooseEnum>("mode") == "batch-reset" ||
-       _multi_app->getParam<MooseEnum>("mode") == "batch-restore"))
+  if (multi_app->isParamValid("mode") &&
+      (multi_app->getParam<MooseEnum>("mode") == "batch-reset" ||
+       multi_app->getParam<MooseEnum>("mode") == "batch-restore"))
   {
     if (parameters.isParamSetByUser("execute_on"))
       paramError("execute_on",
                  "The 'execute_on' parameter for the '",
                  name(),
                  "' transfer was set, but the parent MultiApp object (",
-                 _multi_app->name(),
+                 multi_app->name(),
                  ") is running in 'batch' mode. For this case the 'execute_on' parameter must not "
                  "be set by the user or set to NONE.");
     else
@@ -66,9 +72,9 @@ StochasticToolsTransfer::StochasticToolsTransfer(const InputParameters & paramet
     _sampler_ptr = &(getSampler("sampler"));
 
     SamplerTransientMultiApp * ptr_transient =
-        dynamic_cast<SamplerTransientMultiApp *>(_multi_app.get());
+        dynamic_cast<SamplerTransientMultiApp *>(multi_app.get());
     SamplerFullSolveMultiApp * ptr_fullsolve =
-        dynamic_cast<SamplerFullSolveMultiApp *>(_multi_app.get());
+        dynamic_cast<SamplerFullSolveMultiApp *>(multi_app.get());
 
     if (!ptr_transient && !ptr_fullsolve)
       mooseError("The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "
@@ -86,9 +92,9 @@ StochasticToolsTransfer::StochasticToolsTransfer(const InputParameters & paramet
                  "parameter is being removed, please update your input file(s).");
 
     std::shared_ptr<SamplerTransientMultiApp> ptr_transient =
-        std::dynamic_pointer_cast<SamplerTransientMultiApp>(_multi_app);
+        std::dynamic_pointer_cast<SamplerTransientMultiApp>(multi_app);
     std::shared_ptr<SamplerFullSolveMultiApp> ptr_fullsolve =
-        std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app);
+        std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(multi_app);
 
     if (!ptr_transient && !ptr_fullsolve)
       mooseError("The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "

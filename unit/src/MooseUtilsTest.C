@@ -436,7 +436,8 @@ TEST(MooseUtils, globCompare)
 
 TEST(MooseUtils, SemidynamicVector)
 {
-  MooseUtils::SemidynamicVector<int, 10> test(4);
+  // uninitialized storage
+  MooseUtils::SemidynamicVector<int, 10, false> test(4);
   EXPECT_EQ(test.size(), 4);
   EXPECT_EQ(test.max_size(), 10);
 
@@ -459,4 +460,36 @@ TEST(MooseUtils, SemidynamicVector)
   for (auto & i : ctest)
     count += i;
   EXPECT_EQ(count, 1 + 2 + 3 + 4 + 5 + 6);
+
+  // test push back
+  test.push_back(100);
+  count = 0;
+  for (auto & i : ctest)
+    count += i;
+  EXPECT_EQ(count, 1 + 2 + 3 + 4 + 5 + 6 + 100);
+
+  // test emplace_back
+  test.emplace_back(200);
+  count = 0;
+  for (auto & i : ctest)
+    count += i;
+  EXPECT_EQ(count, 1 + 2 + 3 + 4 + 5 + 6 + 100 + 200);
+}
+
+struct Custom
+{
+  Custom() : _data(333) {}
+  int _data;
+};
+
+TEST(MooseUtils, SemidynamicVectorInit)
+{
+  // value initialized storage (default equivalent to ...<int, 1000>)
+  MooseUtils::SemidynamicVector<int, 1000, true> test(1000);
+  for (auto & i : test)
+    EXPECT_EQ(i, 0);
+
+  MooseUtils::SemidynamicVector<Custom, 100, true> test2(100);
+  for (auto & i : test2)
+    EXPECT_EQ(i._data, 333);
 }

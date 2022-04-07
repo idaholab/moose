@@ -36,13 +36,16 @@ class IncludeCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings.update(common.extractContentSettings())
+        settings['optional'] = (False, "Toggle the include as optional when the file doesn't exist.")
         return settings
 
     def createToken(self, parent, info, page, settings):
         """
         Tokenize the included content and create dependency between pages.
         """
-        include_page = self.translator.findPage(info['subcommand'])
+        include_page = self.translator.findPage(info['subcommand'], throw_on_zero=not settings['optional'])
+        if include_page is None and settings['optional']:
+            return parent
         content, line = common.extractContent(self.reader.read(include_page), settings)
 
         self.reader.tokenize(parent, content, page, line=line)

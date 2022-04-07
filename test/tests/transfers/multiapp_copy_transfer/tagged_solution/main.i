@@ -16,8 +16,7 @@
 
 [Transfers/to_sub]
   type = MultiAppCopyTransfer
-  direction = to_multiapp
-  multi_app = sub
+  to_multi_app = sub
   source_variable = x
   to_solution_tag = tagged_aux_sol
   variable = force

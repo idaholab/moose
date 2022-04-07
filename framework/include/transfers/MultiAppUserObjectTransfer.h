@@ -78,6 +78,13 @@ protected:
    */
   bool isBoundaryElem(const MooseMesh * mesh, const Elem * elem) const;
 
+  /**
+   * Gets the UserObject to transfer from when transferring from_multiapp
+   * @param p The point in the parent app that is being transferred to
+   * @return the subapp index, will return static_cast<unsigned int>(-1) if none is found
+   */
+  unsigned int findSubAppToTransferFrom(const Point & p);
+
   std::string _user_object_name;
 
   /**
@@ -88,6 +95,9 @@ protected:
 
   /// whether to check the bounding box check or not
   const bool _skip_bbox_check;
+
+  /// Whether to utilize the nearest sub-app to transfer from
+  const bool & _nearest_sub_app;
 
 private:
   /// Set of block ids this transfer is restricted to

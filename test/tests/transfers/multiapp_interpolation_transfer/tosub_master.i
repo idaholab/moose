@@ -103,61 +103,53 @@
 [Transfers]
   [./tosub]
     type = MultiAppInterpolationTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     variable = from_master
   [../]
   [./elemental_tosub]
     type = MultiAppInterpolationTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     variable = elemental_from_master
   [../]
   [./radial_tosub]
     type = MultiAppInterpolationTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     variable = radial_from_master
     interp_type = radial_basis
   [../]
   [./radial_elemental_tosub]
     type = MultiAppInterpolationTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     variable = radial_elemental_from_master
     interp_type = radial_basis
   [../]
   [./displaced_target_tosub]
     type = MultiAppInterpolationTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     variable = displaced_target_from_master
     displaced_target_mesh = true
   [../]
   [./displaced_source_tosub]
     type = MultiAppInterpolationTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     variable = displaced_source_from_master
     displaced_source_mesh = true
   [../]
   [./elemental_to_sub_elemental]
     type = MultiAppInterpolationTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = elemental
     variable = elemental_from_master_elemental
   [../]
   [./elemental_to_sub_nodal]
     type = MultiAppInterpolationTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = elemental
     variable = nodal_from_master_elemental
   [../]

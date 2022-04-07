@@ -226,7 +226,7 @@ void serialEnd(const libMesh::Parallel::Communicator & comm, bool warn = true);
 bool hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ext = false);
 
 /**
- * Removes any file extension from the fiven string s (i.e. any ".[extension]" suffix of s) and
+ * Removes any file extension from the given string s (i.e. any ".[extension]" suffix of s) and
  * returns the result.
  */
 std::string stripExtension(const std::string & s);
@@ -999,37 +999,53 @@ buildRequiredMaterials(const Consumers & mat_consumers,
  * Utility class template for a semidynamic vector with a maximum size N
  * and a chosen dynamic size. This container avoids heap allocation and
  * is meant as a replacement for small local std::vector variables.
- * Note: this class uses default initialization, which will not initialize built-in types.
- * Note: due to an assertion bug in DynamicStdArrayWrapper we have to allocate one element more
- * until https://github.com/libMesh/MetaPhysicL/pull/8 in MetaPhysicL is available in MOOSE.
+ * By default this class uses `value initialization`. This can be disabled
+ * using the third template parameter if uninitialized storage is acceptable,
  */
-template <typename T, std::size_t N>
-class SemidynamicVector
-  : public MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N + 1>>
+template <typename T, std::size_t N, bool value_init = true>
+class SemidynamicVector : public MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N>>
 {
-  typedef MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N + 1>> Parent;
+  typedef MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N>> Parent;
 
 public:
   SemidynamicVector(std::size_t size) : Parent()
   {
     Parent::resize(size);
-    // TODO: uncomment this once https://github.com/libMesh/MetaPhysicL/pull/8
-    //       makes it all the way into MOOSE.
-    // for (const auto i : make_range(size))
-    //   _data[i] = {};
+    if constexpr (value_init)
+      for (const auto i : make_range(size))
+        _data[i] = T{};
   }
 
   void resize(std::size_t new_size)
   {
-    // const auto old_dynamic_n = Parent::size();
+    [[maybe_unused]] const auto old_dynamic_n = Parent::size();
+
     Parent::resize(new_size);
-    // TODO: uncomment this once https://github.com/libMesh/MetaPhysicL/pull/8
-    //       makes it all the way into MOOSE.
-    // for (const auto i : make_range(old_dynamic_n, _dynamic_n))
-    //   _data[i] = {};
+
+    if constexpr (value_init)
+      for (const auto i : make_range(old_dynamic_n, _dynamic_n))
+        _data[i] = T{};
+  }
+
+  void push_back(const T & v)
+  {
+    const auto old_dynamic_n = Parent::size();
+    Parent::resize(old_dynamic_n + 1);
+    _data[old_dynamic_n] = v;
+  }
+
+  template <typename... Args>
+  void emplace_back(Args &&... args)
+  {
+    const auto old_dynamic_n = Parent::size();
+    Parent::resize(old_dynamic_n + 1);
+    (::new (&_data[old_dynamic_n]) T(std::forward<Args>(args)...));
   }
 
   std::size_t max_size() const { return N; }
+
+  using Parent::_data;
+  using Parent::_dynamic_n;
 };
 
 } // MooseUtils namespace
@@ -1038,3 +1054,8 @@ public:
  * find, erase, length algorithm for removing a substring from a string
  */
 void removeSubstring(std::string & main, const std::string & sub);
+
+/**
+ * find, erase, length algorithm for removing a substring from a copy of a string
+ */
+std::string removeSubstring(const std::string & main, const std::string & sub);

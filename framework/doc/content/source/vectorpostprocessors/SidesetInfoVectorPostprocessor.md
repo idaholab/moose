@@ -15,5 +15,3 @@ is not guaranteed to be a point contained in the sideset.
 !syntax inputs /VectorPostprocessors/SidesetInfoVectorPostprocessor
 
 !syntax children /VectorPostprocessors/SidesetInfoVectorPostprocessor
-
-!bibtex bibliography

@@ -10,6 +10,7 @@
 #include "GatherRCDataElementThread.h"
 #include "INSFVAttributes.h"
 #include "INSFVMomentumResidualObject.h"
+#include "FVElementalKernel.h"
 
 GatherRCDataElementThread::GatherRCDataElementThread(FEProblemBase & fe_problem,
                                                      const std::vector<unsigned int> & vars)
@@ -43,10 +44,11 @@ GatherRCDataElementThread::subdomainChanged()
     // any results out of the query (e.g. an object cannot have a variable that simultaneously has
     // both var number 0 and 1)
     auto copied_queries = queries;
-    std::vector<INSFVMomentumResidualObject *> var_eks;
+    std::vector<FVElementalKernel *> var_eks;
     copied_queries.template condition<AttribVar>(static_cast<int>(var_num)).queryInto(var_eks);
-    for (auto * const var_ek : var_eks)
-      _insfv_elemental_kernels.push_back(var_ek);
+    for (auto var_ek : var_eks)
+      if (auto insfv_ek = dynamic_cast<INSFVMomentumResidualObject *>(var_ek))
+        _insfv_elemental_kernels.push_back(insfv_ek);
   }
 }
 

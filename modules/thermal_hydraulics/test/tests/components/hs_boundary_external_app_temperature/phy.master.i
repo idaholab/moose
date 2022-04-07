@@ -80,8 +80,7 @@
 [Transfers]
   [T_to_thm]
     type = MultiAppNearestNodeTransfer
-    multi_app = thm
-    direction = to_multiapp
+    to_multi_app = thm
     source_variable = T
     variable = T_ext
     target_boundary = 'hs:outer'
