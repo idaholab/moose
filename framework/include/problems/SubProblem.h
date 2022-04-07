@@ -799,7 +799,6 @@ public:
    * @param mesh The mesh on which this functor operates
    * @param block_ids The blocks on which the lambda expression is defined
    * @param tid The thread on which the functor we are adding will run
-   * @param is_const Bool to signal if my_lammy wraps a constant functor
    * @return The added functor
    */
   template <typename T, typename PolymorphicLambda>
@@ -809,8 +808,7 @@ public:
                                    const std::set<ExecFlagType> & clearance_schedule,
                                    const MooseMesh & mesh,
                                    const std::set<SubdomainID> & block_ids,
-                                   THREAD_ID tid,
-                                   const bool is_const = false);
+                                   THREAD_ID tid);
 
   virtual void initialSetup();
   virtual void timestepSetup();
@@ -1004,13 +1002,12 @@ SubProblem::addPiecewiseByBlockLambdaFunctor(const std::string & name,
                                              const std::set<ExecFlagType> & clearance_schedule,
                                              const MooseMesh & mesh,
                                              const std::set<SubdomainID> & block_ids,
-                                             const THREAD_ID tid,
-                                             const bool is_const)
+                                             const THREAD_ID tid)
 {
   auto & wrapper = const_cast<Moose::Functor<T> &>(getFunctor<T>(name, tid, "subproblem"));
   if (wrapper.template wrapsType<Moose::NullFunctor<T>>())
     wrapper.assign(std::make_unique<PiecewiseByBlockLambdaFunctor<T>>(
-        name, my_lammy, clearance_schedule, mesh, block_ids, is_const));
+        name, my_lammy, clearance_schedule, mesh, block_ids));
   else if (wrapper.template wrapsType<PiecewiseByBlockLambdaFunctor<T>>())
   {
     mooseAssert(wrapper._owned,

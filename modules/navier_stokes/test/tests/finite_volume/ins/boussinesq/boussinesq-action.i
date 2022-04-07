@@ -28,7 +28,7 @@ temp_ref=${fparse hot_temp / 2.}
     add_energy_equation = true
     boussinesq_approximation = true
 
-    density = 'rho'
+    density = ${rho}
     dynamic_viscosity = ${mu}
     thermal_conductivity = ${k}
     specific_heat = ${cp}
@@ -60,14 +60,6 @@ temp_ref=${fparse hot_temp / 2.}
     energy_advection_interpolation = 'upwind'
 
     energy_scaling = 1e-4
-  []
-[]
-
-[Materials]
-  [const_functor]
-    type = ADGenericFunctorMaterial
-    prop_names = 'rho'
-    prop_values = '${rho}'
   []
 []
 

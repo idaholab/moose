@@ -37,8 +37,7 @@ public:
                                 PolymorphicLambda my_lammy,
                                 const std::set<ExecFlagType> & clearance_schedule,
                                 const MooseMesh & mesh,
-                                const std::set<SubdomainID> & block_ids,
-                                const bool is_const = false);
+                                const std::set<SubdomainID> & block_ids);
 
   /**
    * Set the functor that will be used in calls to \p evaluate overloads
@@ -60,8 +59,6 @@ public:
   using typename Moose::FunctorBase<T>::DotType;
   using typename Moose::FunctorBase<T>::GradientType;
   using typename Moose::FunctorBase<T>::FunctorReturnType;
-
-  virtual bool isConstant() const override { return _is_constant; }
 
 protected:
   using ElemFn = std::function<T(const Moose::ElemArg &, const unsigned int &)>;
@@ -110,9 +107,6 @@ private:
   /// The name of this object
   std::string _name;
 
-  /// Is constant
-  bool _is_constant;
-
   /// The mesh that this functor operates on
   const MooseMesh & _mesh;
 };
@@ -124,9 +118,8 @@ PiecewiseByBlockLambdaFunctor<T>::PiecewiseByBlockLambdaFunctor(
     PolymorphicLambda my_lammy,
     const std::set<ExecFlagType> & clearance_schedule,
     const MooseMesh & mesh,
-    const std::set<SubdomainID> & block_ids,
-    const bool is_const)
-  : Moose::FunctorBase<T>(name, clearance_schedule), _is_constant(is_const), _mesh(mesh)
+    const std::set<SubdomainID> & block_ids)
+  : Moose::FunctorBase<T>(name, clearance_schedule), _mesh(mesh)
 {
   setFunctor(mesh, block_ids, my_lammy);
 }

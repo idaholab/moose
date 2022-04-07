@@ -37,12 +37,12 @@ T_inlet=200
     add_energy_equation = true
     boussinesq_approximation = true
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
-    thermal_conductivity = 'k'
-    specific_heat = 'cp'
+    density = ${rho}
+    dynamic_viscosity = ${mu}
+    thermal_conductivity = ${k}
+    specific_heat = ${cp}
     porosity = 'porosity'
-    thermal_expansion = 'alpha_b'
+    thermal_expansion = 8e-4
     gravity = '0 -9.81 0'
     ref_temperature = 150
 
@@ -65,16 +65,8 @@ T_inlet=200
     momentum_outlet_types = 'fixed-pressure'
     pressure_function = '0'
 
-    ambient_convection_alpha = 'h_cv'
+    ambient_convection_alpha = 1e-3
     ambient_temperature = 'T_solid'
-  []
-[]
-
-[Materials]
-  [constants]
-    type = ADGenericFunctorMaterial
-    prop_names = 'h_cv alpha_b cp k rho mu'
-    prop_values = '1e-3 8e-4 ${cp} ${k} ${rho} ${mu}'
   []
 []
 
