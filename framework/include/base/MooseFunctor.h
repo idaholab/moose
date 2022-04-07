@@ -319,6 +319,14 @@ public:
    */
   void setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule);
 
+ /**
+  * Returns whether the functor is defined on this block
+  */
+ virtual bool hasBlocks(const SubdomainID & /* id */) const
+ {
+   mooseError("Block restriction has not been implemented for functor " + functorName());
+ }
+
   /**
    * Returns a pair where the first member is whether this face is an extrapolated boundary face for
    * this functor. The second member is the element on which this functor is defined if this is an
@@ -1018,6 +1026,8 @@ public:
 
   bool isConstant() const override { return _wrapped->isConstant(); }
 
+  bool hasBlocks(const SubdomainID & id) const override { return _wrapped->hasBlocks(id); }
+
 protected:
   ///@{
   /**
@@ -1132,6 +1142,8 @@ public:
   }
 
   virtual bool isConstant() const override { return true; }
+
+  bool hasBlocks(const SubdomainID & /* id */) const override { return true; }
 
 private:
   ValueType evaluate(const ElemArg &, unsigned int) const override { return _value; }

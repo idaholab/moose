@@ -43,36 +43,42 @@ SideIntegralFunctorPostprocessorTempl<is_ad>::computeQpIntegral()
   const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
   mooseAssert(fi, "We should have an fi");
 
-  auto aa = _functor.blockIDs();
-
   // Functor may not be defined on that side of the boundary
   bool use_elem;
-  if (_functor.hasBlocks(_current_elem->subdomain_id()))
+  if (_functor.hasBlocks(_current_elem->subdomain_id()) &&
+      _prefactor.hasBlocks(_current_elem->subdomain_id()))
     use_elem = true;
   else
   {
-    mooseAssert(_functor.hasBlocks(fi->neighborPtr()->subdomain_id()),
-                "Functor should be defined on one side of the boundary");
+    mooseAssert(_functor.hasBlocks(_current_elem->subdomain_id()) ||
+                _functor.hasBlocks(fi->neighborPtr()->subdomain_id()),
+                "Functor should be defined on at least one side of the boundary");
+    mooseAssert(_prefactor.hasBlocks(_current_elem->subdomain_id()) ||
+                _prefactor.hasBlocks(fi->neighborPtr()->subdomain_id()),
+                "Prefactor should be defined on at least one side of the boundary");
+
     use_elem = false;
   }
 
-  Moose::SingleSidedFaceArg ssf;
   if (use_elem)
-    ssf = {*fi,
+  {
+    Moose::SingleSidedFaceArg ssf = {fi,
            Moose::FV::LimiterType::CentralDifference,
            true,
            false,
            false,
            _current_elem->subdomain_id()};
+   return MetaPhysicL::raw_value(_prefactor(ssf) * _functor(ssf));
+  }
   else
-    ssf = {*fi,
-           Moose::FV::LimiterType::CentralDifference,
-           true,
-           false,
-           false,
-           fi->neighborPtr()->subdomain_id()};
-
-  return MetaPhysicL::raw_value(_prefactor(ssf) * _functor(ssf));
+    paramError("boundary",
+               "Functor " +
+                _functor.functorName() +
+               " (or prefactor " +
+               _prefactor.functorName() +
+               ") is not defined on block " +
+               _mesh.getSubdomainName(_current_elem->subdomain_id()) +
+               ". Are the sidesets in boundary all oriented correctly?");
 }
 
 template class SideIntegralFunctorPostprocessorTempl<false>;
