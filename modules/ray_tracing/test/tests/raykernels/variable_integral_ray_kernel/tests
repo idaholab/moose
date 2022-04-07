@@ -8,6 +8,16 @@
     design = 'VariableIntegralRayKernel.md'
     requirement = 'The system shall provide the ability to compute the integral of a variable along a line.'
   []
+  [average]
+    type = 'CSVDiff'
+    input = 'variable_integral_ray_kernel.i'
+    csvdiff = 'variable_integral_ray_kernel_average.csv'
+    cli_args = 'Outputs/file_base=variable_integral_ray_kernel_average
+                RayKernels/variable_integral/average=true
+                RayKernels/aux_variable_integral/average=true'
+    design = 'VariableIntegralRayKernel.md'
+    requirement = 'The system shall provide the ability to compute the average value of a variable along a line.'
+  []
   [simple_diffusion_rays]
     type = 'Exodiff'
     input = 'simple_diffusion_line_integral.i'

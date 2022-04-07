@@ -1,10 +1,19 @@
 [Tests]
+  design = 'FunctionIntegralRayKernel.md'
+  issues = '#16028'
+
   [test]
     type = 'CSVDiff'
     input = 'function_integral_ray_kernel.i'
     csvdiff = 'function_integral_ray_kernel_out.csv'
     requirement = 'The system shall provide the ability to compute the integral of a Function along a line.'
-    design = 'FunctionIntegralRayKernel.md'
-    issues = '#16028'
+  []
+  [average]
+    type = 'CSVDiff'
+    input = 'function_integral_ray_kernel.i'
+    csvdiff = 'function_integral_ray_kernel_average.csv'
+    cli_args = 'Outputs/file_base=function_integral_ray_kernel_average
+                RayKernels/function_integral/average=true'
+    requirement = 'The system shall provide the ability to compute the average value of a Function along a line.'
   []
 []
