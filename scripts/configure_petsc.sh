@@ -74,11 +74,11 @@ function configure_petsc()
     unset IFS
   fi
 
-  # If HDF5 is not found locally, download it via PETSc (except for Darwin)
+  # If HDF5 is not found locally, download it via PETSc (except on Apple Silicon)
   if [ -z "$HDF5_STR" ]; then
-    if [[ $(uname) == Darwin ]]; then
-      # HDF5 currently doesn't configure properly on macOS due to a gfortran io
-      # buffer bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=102992
+    if [[ `uname -p` == "arm" ]] && [[ $(uname) == Darwin ]]; then
+      # HDF5 currently doesn't build properly via PETSc download on macOS Apple
+      # Silicon machines due to a build system reconfiguration that is needed.
       # So, we won't be downloading it by default for now if it isn't found.
       # Instead, if a user has it installed somewhere, we'll note the variable
       # they need to set.
@@ -86,6 +86,7 @@ function configure_petsc()
       echo "INFO: Set HDF5_DIR to the location of HDF5 and re-run this script, if desired."
     else
       HDF5_STR="--download-hdf5=1"
+      HDF5_FORTRAN_STR="--download-hdf5-fortran-bindings=0"
       echo "INFO: HDF5 library not detected, opting to download via PETSc..."
     fi
   fi
@@ -94,6 +95,7 @@ function configure_petsc()
   python ./configure --download-hypre=1 \
       --with-shared-libraries=$SHARED \
       "$HDF5_STR" \
+      "$HDF5_FORTRAN_STR" \
       "$MAKE_NP_STR" \
       --with-debugging=no \
       --download-fblaslapack=1 \
