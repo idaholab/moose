@@ -29,6 +29,7 @@ public:
    * \return The value of the function
    */
   virtual Real value(Real t, const Point & pt) const override;
+  using Function::value;
 
   virtual Real timeDerivative(Real, const Point &) const override { return 0; };
 
