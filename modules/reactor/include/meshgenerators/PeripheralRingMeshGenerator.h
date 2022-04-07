@@ -32,18 +32,10 @@ protected:
   const unsigned int _peripheral_layer_num;
   /// Bias value used to induce biasing to radial meshing in peripheral ring region
   const Real _peripheral_radial_bias;
-  /// Width of the peripheral ring region to be used as inner boundary layer
-  const Real _peripheral_inner_boundary_layer_width;
-  /// Number of radial sectors of the inner boundary layer mesh of the peripheral ring region
-  const unsigned int _peripheral_inner_boundary_layer_intervals;
-  /// Growth factor used to bias radial meshing of the inner boundary layer of the peripheral ring region
-  const Real _peripheral_inner_boundary_layer_bias;
-  /// Width of the peripheral ring region to be used as outer boundary layer
-  const Real _peripheral_outer_boundary_layer_width;
-  /// Number of radial sectors of the outer boundary layer mesh of the peripheral ring region
-  const unsigned int _peripheral_outer_boundary_layer_intervals;
-  /// Growth factor used to bias radial meshing of the outer boundary layer of the peripheral ring region
-  const Real _peripheral_outer_boundary_layer_bias;
+  /// Width, fraction, radiation sectors and growth factor of the inner boundary layer of the peripheral region
+  singleBdryLayerParams _peripheral_inner_boundary_layer_params;
+  /// Width, fraction, radiation sectors and growth factor of the outer boundary layer of the peripheral region
+  singleBdryLayerParams _peripheral_outer_boundary_layer_params;
   /// Radius of the peripheral region's outer circular boundary
   const Real _peripheral_ring_radius;
   /// Volume preserving function is optional
@@ -103,19 +95,17 @@ protected:
    * @param input_ext_node_num number of nodes on the external boundary of the input mesh
    * @param input_bdry_angles list of angles (in rad) formed by three neighboring nodes on the
    * external boundary of the input mesh
-   * @param ref_inner_bdry_surf Reference outmost layer (surface) points of the inner boundary layer
-   * @param ref_inner_bdry_azi azimuthal angles of the surface points of the reference inner
-   * boundary layer
+   * @param ref_inner_bdry_surf reference outmost layer (surface) points of the inner boundary layer
    * @param inner_peripheral_bias_terms terms describing the cumulative radial fractions of the
    * nodes within the inner boundary layer
-   * @param azi_array list of azimuthal angles (in degrees) for radius correction purpose
+   * @param azi_array list of azimuthal angles (in degrees) of the nodes on the input mesh's
+   * external boundary for radius correction purpose
    * @param origin_pt centroid of the input mesh, which is used as the origin
    * @param points_array container to store all nodes' positions of the peripheral ring region
    */
   void innerBdryLayerNodesDefiner(const unsigned int input_ext_node_num,
                                   const std::vector<Real> input_bdry_angles,
                                   const std::vector<Point> ref_inner_bdry_surf,
-                                  const std::vector<Real> ref_inner_bdry_azi,
                                   const std::vector<Real> inner_peripheral_bias_terms,
                                   const std::vector<Real> azi_array,
                                   const Point origin_pt,

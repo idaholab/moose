@@ -86,7 +86,7 @@ PeripheralRingMeshGenerator::validParams()
       "peripheral_inner_boundary_layer_intervals peripheral_inner_boundary_layer_bias "
       "peripheral_outer_boundary_layer_width peripheral_outer_boundary_layer_intervals "
       "peripheral_outer_boundary_layer_bias",
-      "Mesh Biasing Options");
+      "Mesh Boundary Layer and Biasing Options");
   params.addClassDescription("This PeripheralRingMeshGenerator object adds a circular peripheral "
                              "region to the input mesh.");
 
@@ -98,18 +98,20 @@ PeripheralRingMeshGenerator::PeripheralRingMeshGenerator(const InputParameters &
     _input_name(getParam<MeshGeneratorName>("input")),
     _peripheral_layer_num(getParam<unsigned int>("peripheral_layer_num")),
     _peripheral_radial_bias(getParam<Real>("peripheral_radial_bias")),
-    _peripheral_inner_boundary_layer_width(getParam<Real>("peripheral_inner_boundary_layer_width")),
-    _peripheral_inner_boundary_layer_intervals(
-        _peripheral_inner_boundary_layer_width > 0.0
-            ? getParam<unsigned int>("peripheral_inner_boundary_layer_intervals")
-            : 0),
-    _peripheral_inner_boundary_layer_bias(getParam<Real>("peripheral_inner_boundary_layer_bias")),
-    _peripheral_outer_boundary_layer_width(getParam<Real>("peripheral_outer_boundary_layer_width")),
-    _peripheral_outer_boundary_layer_intervals(
-        _peripheral_outer_boundary_layer_width > 0.0
-            ? getParam<unsigned int>("peripheral_outer_boundary_layer_intervals")
-            : 0),
-    _peripheral_outer_boundary_layer_bias(getParam<Real>("peripheral_outer_boundary_layer_bias")),
+    _peripheral_inner_boundary_layer_params(
+        {getParam<Real>("peripheral_inner_boundary_layer_width"),
+         0.0,
+         getParam<Real>("peripheral_inner_boundary_layer_width") > 0.0
+             ? getParam<unsigned int>("peripheral_inner_boundary_layer_intervals")
+             : 0,
+         getParam<Real>("peripheral_inner_boundary_layer_bias")}),
+    _peripheral_outer_boundary_layer_params(
+        {getParam<Real>("peripheral_outer_boundary_layer_width"),
+         0.0,
+         getParam<Real>("peripheral_outer_boundary_layer_width") > 0.0
+             ? getParam<unsigned int>("peripheral_outer_boundary_layer_intervals")
+             : 0,
+         getParam<Real>("peripheral_outer_boundary_layer_bias")}),
     _peripheral_ring_radius(getParam<Real>("peripheral_ring_radius")),
     _preserve_volumes(getParam<bool>("preserve_volumes")),
     _input_mesh_external_boundary(getParam<BoundaryName>("input_mesh_external_boundary")),
@@ -133,16 +135,18 @@ PeripheralRingMeshGenerator::generate()
   // Calculate biasing terms
   const auto main_peripheral_bias_terms =
       biasTermsCalculator(_peripheral_radial_bias, _peripheral_layer_num);
-  const auto inner_peripheral_bias_terms = biasTermsCalculator(
-      _peripheral_inner_boundary_layer_bias, _peripheral_inner_boundary_layer_intervals);
+  const auto inner_peripheral_bias_terms =
+      biasTermsCalculator(_peripheral_inner_boundary_layer_params.bias,
+                          _peripheral_inner_boundary_layer_params.intervals);
   // It is easier to create outer boundary layer inversely (inwards). Thus, 1.0 / bias is used here.
   // However, the input parameter definition is not affected.
-  const auto outer_peripheral_bias_terms = biasTermsCalculator(
-      1.0 / _peripheral_outer_boundary_layer_bias, _peripheral_outer_boundary_layer_intervals);
+  const auto outer_peripheral_bias_terms =
+      biasTermsCalculator(1.0 / _peripheral_outer_boundary_layer_params.bias,
+                          _peripheral_outer_boundary_layer_params.intervals);
 
-  const unsigned int total_peripheral_layer_num = _peripheral_inner_boundary_layer_intervals +
-                                                  _peripheral_layer_num +
-                                                  _peripheral_outer_boundary_layer_intervals;
+  const unsigned int total_peripheral_layer_num =
+      _peripheral_inner_boundary_layer_params.intervals + _peripheral_layer_num +
+      _peripheral_outer_boundary_layer_params.intervals;
   // Need ReplicatedMesh for stitching
   auto input_mesh = dynamic_cast<ReplicatedMesh *>(_input.get());
   if (!input_mesh)
@@ -271,30 +275,26 @@ PeripheralRingMeshGenerator::generate()
                                                       std::vector<dof_id_type>(input_ext_node_num));
   // Reference outmost layer of inner boundary layer
   std::vector<Point> ref_inner_bdry_surf;
-  // Azimuthal angles of the surface points of the reference inner boundary layer
-  std::vector<Real> ref_inner_bdry_azi;
   // First loop
   for (unsigned int i = 0; i < input_ext_node_num; ++i)
   {
     // Inner boundary nodes of the peripheral region
     points_array[0][i] = std::get<1>(azi_points[i]);
     // Define outer layer of inner boundary layer
-    if (_peripheral_inner_boundary_layer_intervals)
+    if (_peripheral_inner_boundary_layer_params.intervals)
     {
       // Outside point of the inner boundary layer
       const Point ref_inner_boundary_shift =
-          (_peripheral_inner_boundary_layer_width / sin(input_bdry_angles[i])) * input_bdry_nd[i];
+          (_peripheral_inner_boundary_layer_params.width / sin(input_bdry_angles[i])) *
+          input_bdry_nd[i];
       ref_inner_bdry_surf.push_back(points_array[0][i] + ref_inner_boundary_shift);
-      ref_inner_bdry_azi.push_back(atan2(ref_inner_bdry_surf.back()(1) - origin_pt(1),
-                                         ref_inner_bdry_surf.back()(0) - origin_pt(0)));
     }
   }
 
-  if (_peripheral_inner_boundary_layer_intervals)
+  if (_peripheral_inner_boundary_layer_params.intervals)
     innerBdryLayerNodesDefiner(input_ext_node_num,
                                input_bdry_angles,
                                ref_inner_bdry_surf,
-                               ref_inner_bdry_azi,
                                inner_peripheral_bias_terms,
                                azi_array,
                                origin_pt,
@@ -306,21 +306,22 @@ PeripheralRingMeshGenerator::generate()
     // Outer boundary nodes of the peripheral region
     points_array[total_peripheral_layer_num][i] = std::get<2>(azi_points[i]) * correction_factor;
     // Outer boundary layer points
-    if (_peripheral_outer_boundary_layer_intervals)
+    if (_peripheral_outer_boundary_layer_params.intervals)
     {
       // Inner point of the outer boundary layer
       const Point outer_boundary_shift =
           -Point(std::cos(std::get<0>(azi_points[i])), std::sin(std::get<0>(azi_points[i])), 0.0) *
-          _peripheral_outer_boundary_layer_width;
-      for (unsigned int j = 1; j < _peripheral_outer_boundary_layer_intervals + 1; j++)
+          _peripheral_outer_boundary_layer_params.width;
+      for (unsigned int j = 1; j < _peripheral_outer_boundary_layer_params.intervals + 1; j++)
         points_array[total_peripheral_layer_num - j][i] =
             points_array[total_peripheral_layer_num][i] +
             outer_boundary_shift * outer_peripheral_bias_terms[j - 1];
     }
     // Use interpolation to get main region
     if (MooseUtils::absoluteFuzzyGreaterEqual(
-            (points_array[_peripheral_inner_boundary_layer_intervals][i] - origin_pt).norm(),
-            (points_array[_peripheral_inner_boundary_layer_intervals + _peripheral_layer_num][i] -
+            (points_array[_peripheral_inner_boundary_layer_params.intervals][i] - origin_pt).norm(),
+            (points_array[_peripheral_inner_boundary_layer_params.intervals + _peripheral_layer_num]
+                         [i] -
              origin_pt)
                 .norm()))
       paramError("peripheral_inner_boundary_layer_width",
@@ -328,10 +329,11 @@ PeripheralRingMeshGenerator::generate()
                  "peripheral_outer_boundary_layer_width must be smaller than the thickness of "
                  "peripheral ring region.");
     for (unsigned int j = 1; j < _peripheral_layer_num; ++j)
-      points_array[j + _peripheral_inner_boundary_layer_intervals][i] =
-          points_array[_peripheral_inner_boundary_layer_intervals][i] *
+      points_array[j + _peripheral_inner_boundary_layer_params.intervals][i] =
+          points_array[_peripheral_inner_boundary_layer_params.intervals][i] *
               (1.0 - main_peripheral_bias_terms[j - 1]) +
-          points_array[_peripheral_inner_boundary_layer_intervals + _peripheral_layer_num][i] *
+          points_array[_peripheral_inner_boundary_layer_params.intervals + _peripheral_layer_num]
+                      [i] *
               main_peripheral_bias_terms[j - 1];
   }
   unsigned int num_total_nodes = (total_peripheral_layer_num + 1) * input_ext_node_num;
@@ -541,7 +543,6 @@ PeripheralRingMeshGenerator::innerBdryLayerNodesDefiner(
     const unsigned int input_ext_node_num,
     const std::vector<Real> input_bdry_angles,
     const std::vector<Point> ref_inner_bdry_surf,
-    const std::vector<Real> ref_inner_bdry_azi,
     const std::vector<Real> inner_peripheral_bias_terms,
     const std::vector<Real> azi_array,
     const Point origin_pt,
@@ -585,7 +586,8 @@ PeripheralRingMeshGenerator::innerBdryLayerNodesDefiner(
   {
     if (!delete_mark[i])
     {
-      interp_azi_data.push_back(ref_inner_bdry_azi[i]);
+      interp_azi_data.push_back(atan2(ref_inner_bdry_surf[i](1) - origin_pt(1),
+                                      ref_inner_bdry_surf[i](0) - origin_pt(0)));
       interp_x_data.push_back(ref_inner_bdry_surf[i](0));
       interp_y_data.push_back(ref_inner_bdry_surf[i](1));
       if (interp_azi_data.size() > 1)
@@ -621,7 +623,7 @@ PeripheralRingMeshGenerator::innerBdryLayerNodesDefiner(
                                              linterp_y->sample(azi_array[i] / 180.0 * M_PI),
                                              origin_pt(2)) -
                                        points_array[0][i];
-    for (unsigned int j = 1; j < _peripheral_inner_boundary_layer_intervals + 1; j++)
+    for (unsigned int j = 1; j < _peripheral_inner_boundary_layer_params.intervals + 1; j++)
       points_array[j][i] =
           points_array[0][i] + inner_boundary_shift * inner_peripheral_bias_terms[j - 1];
   }

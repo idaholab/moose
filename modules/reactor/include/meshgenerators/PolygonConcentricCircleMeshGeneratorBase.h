@@ -71,9 +71,9 @@ protected:
   const unsigned int _background_intervals;
   /// Bias value used to induce biasing to radial meshing in background region
   const Real _background_radial_bias;
-  /// Width, radiation sectors and growth factor of the inner boundary layer of the background region
+  /// Width, fraction, radiation sectors and growth factor of the inner boundary layer of the background region
   singleBdryLayerParams _background_inner_boundary_layer_params;
-  /// Width, radiation sectors and growth factor of the outer boundary layer of the background region
+  /// Width, fraction, radiation sectors and growth factor of the outer boundary layer of the background region
   singleBdryLayerParams _background_outer_boundary_layer_params;
   /// Subdomain IDs of the background regions
   const std::vector<subdomain_id_type> _background_block_ids;

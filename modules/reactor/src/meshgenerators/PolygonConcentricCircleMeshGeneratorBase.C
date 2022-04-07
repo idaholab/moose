@@ -26,8 +26,8 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       "background_intervals",
       1,
       "background_intervals>0",
-      "Number of radial meshing intervals in background region excluding boundary layers (area "
-      "between rings and ducts) excluding boundary layers.");
+      "Number of radial meshing intervals in background region (area "
+      "between rings and ducts) excluding the background's boundary layers.");
   params.addRangeCheckedParam<Real>(
       "background_radial_bias",
       1.0,
@@ -79,7 +79,7 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
   params.addRangeCheckedParam<std::vector<unsigned int>>(
       "duct_intervals",
       "duct_intervals>0",
-      "Number of meshing intervals in each enclosing duct excluding boundary layers.");
+      "Number of meshing intervals in each enclosing duct excluding duct boundary layers.");
   params.addRangeCheckedParam<std::vector<Real>>(
       "duct_radial_biases",
       "duct_radial_biases>0",
@@ -115,7 +115,8 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
   params.addRangeCheckedParam<std::vector<unsigned int>>(
       "ring_intervals",
       "ring_intervals>0",
-      "Number of radial mesh intervals within each major concentric circle excluding boundary "
+      "Number of radial mesh intervals within each major concentric circle excluding their "
+      "boundary "
       "layers.");
   params.addRangeCheckedParam<std::vector<Real>>(
       "ring_radial_biases",
@@ -124,25 +125,25 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
   params.addRangeCheckedParam<std::vector<Real>>(
       "ring_inner_boundary_layer_widths",
       "ring_inner_boundary_layer_widths>=0",
-      "Widths of ring regions that are assigned to be the inner boundary layers.");
+      "Widths of each ring regions that are assigned to be each ring's inner boundary layers.");
   params.addParam<std::vector<unsigned int>>(
       "ring_inner_boundary_layer_intervals",
-      "Number of radial intervals of the ring inner boundary layers");
+      "Number of radial intervals of the rings' inner boundary layers");
   params.addRangeCheckedParam<std::vector<Real>>(
       "ring_inner_boundary_layer_biases",
       "ring_inner_boundary_layer_biases>0",
-      "Growth factors used for mesh biasing of the ring inner boundary layers.");
+      "Growth factors used for mesh biasing of the rings' inner boundary layers.");
   params.addRangeCheckedParam<std::vector<Real>>(
       "ring_outer_boundary_layer_widths",
       "ring_outer_boundary_layer_widths>=0",
-      "Widths of ring regions that are assigned to be the outer boundary layers.");
+      "Widths of each ring regions that are assigned to be each ring's outer boundary layers.");
   params.addParam<std::vector<unsigned int>>(
       "ring_outer_boundary_layer_intervals",
-      "Number of radial intervals of the ring outer boundary layers");
+      "Number of radial intervals of the rings' outer boundary layers");
   params.addRangeCheckedParam<std::vector<Real>>(
       "ring_outer_boundary_layer_biases",
       "ring_outer_boundary_layer_biases>0",
-      "Growth factors used for mesh biasing of the ring outer boundary layers.");
+      "Growth factors used for mesh biasing of the rings' outer boundary layers.");
   params.addParam<std::vector<subdomain_id_type>>(
       "ring_block_ids", "Optional customized block ids for each ring geometry block.");
   params.addParam<std::vector<SubdomainName>>(
@@ -193,7 +194,7 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       "duct_inner_boundary_layer_biases duct_inner_boundary_layer_widths "
       "duct_inner_boundary_layer_intervals duct_outer_boundary_layer_biases "
       "duct_outer_boundary_layer_widths duct_outer_boundary_layer_intervals",
-      "Mesh Biasing Options");
+      "Mesh Boundary Layers and Biasing Options");
   params.addClassDescription("This PolygonConcentricCircleMeshGeneratorBase object is a base class "
                              "to be inherited for polygon mesh generators.");
 
@@ -293,14 +294,14 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _background_radial_bias(getParam<Real>("background_radial_bias")),
     _background_inner_boundary_layer_params(
         {getParam<Real>("background_inner_boundary_layer_width"),
-        0.0,
+         0.0,
          getParam<Real>("background_inner_boundary_layer_width") > 0.0
              ? getParam<unsigned int>("background_inner_boundary_layer_intervals")
              : 0,
          getParam<Real>("background_inner_boundary_layer_bias")}),
     _background_outer_boundary_layer_params(
         {getParam<Real>("background_outer_boundary_layer_width"),
-        0.0,
+         0.0,
          getParam<Real>("background_outer_boundary_layer_width") > 0.0
              ? getParam<unsigned int>("background_outer_boundary_layer_intervals")
              : 0,

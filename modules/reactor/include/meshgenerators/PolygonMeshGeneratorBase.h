@@ -454,9 +454,9 @@ protected:
    * Creates bias terms for multiple blocks.
    * @param radial_biases bias growth factors of the elements within the main regions of the blocks
    * @param intervals radial interval numbers of the main regions of the blocks
-   * @ param inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * @param inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
    * factors of the inner boundary layers
-   * @ param outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * @param outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
    * factors of the outer boundary layers
    * @return bias list of terms describing the cumulative radial fractions of the nodes within
    * multiple blocks
@@ -471,9 +471,9 @@ protected:
    * Creates bias terms for a single block.
    * @param radial_bias bias growth factor of the elements within the main region of the block
    * @param intervals radial interval number of the main region of the block
-   * @ param inner_boundary_layer_params width, radial fraction, radial sector, and growth
+   * @param inner_boundary_layer_params width, radial fraction, radial sector, and growth
    * factor of the inner boundary layer
-   * @ param outer_boundary_layer_params width, radial fraction, radial sector, and growth
+   * @param outer_boundary_layer_params width, radial fraction, radial sector, and growth
    * factor of the outer boundary layer
    * @return bias terms describing the cumulative radial fractions of the nodes within a single
    * block
