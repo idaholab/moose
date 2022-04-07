@@ -43,6 +43,7 @@ HDF5_DIR=""
 HDF5DIR=""
 HDF5_ROOT=""
 HDF5_STR=""
+HDF5_FORTRAN_STR=""
 
 source $PETSC_DIR/configure_petsc.sh
 configure_petsc \
