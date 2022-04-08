@@ -15,12 +15,18 @@
 InputParameters
 IntegralRayKernel::validParams()
 {
-  return IntegralRayKernelBase::validParams();
+  auto params = IntegralRayKernelBase::validParams();
+  params.addParam<bool>(
+      "average",
+      false,
+      "Whether or not to compute the average value (divides by the segment length)");
+  return params;
 }
 
 IntegralRayKernel::IntegralRayKernel(const InputParameters & params)
   : IntegralRayKernelBase(params),
-    _integral_data_index(_study.registerRayData(integralRayDataName()))
+    _integral_data_index(_study.registerRayData(integralRayDataName())),
+    _average(getParam<bool>("average"))
 {
 }
 
@@ -33,7 +39,14 @@ IntegralRayKernel::onSegment()
   // an integration that contributes to the residual/Jacobian. Hence: it is something like
   // a line integral. In RZ and RSPHERICAL, we want line integrals to still be line integrals.
   // Therefore, it does not make sense to multiply by the coordinate transformation.
-  auto & value = currentRay()->data(_integral_data_index);
+  Real integral = 0;
   for (_qp = 0; _qp < _q_point.size(); ++_qp)
-    value += _JxW[_qp] * computeQpIntegral();
+    integral += _JxW[_qp] * computeQpIntegral();
+
+  // If we're computing the average, divide by the length
+  if (_average)
+    integral /= _current_segment_length;
+
+  // Accumulate the integral into the Ray
+  currentRay()->data(_integral_data_index) += integral;
 }

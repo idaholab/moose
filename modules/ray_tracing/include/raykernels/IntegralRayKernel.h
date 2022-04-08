@@ -34,4 +34,7 @@ protected:
 
   /// The index into the data on the Ray that this integral accumulates into
   const RayDataIndex _integral_data_index;
+
+  /// Whether or not to compute the average (divide by the length)
+  const bool _average;
 };
