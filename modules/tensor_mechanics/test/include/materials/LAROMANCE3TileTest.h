@@ -43,7 +43,6 @@ protected:
   virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getCoefs() override;
   virtual std::vector<std::vector<unsigned int>> getTilings() override;
   virtual std::vector<Real> getStrainCutoff() override { return {1.0e-17, 1.0e-17}; }
-
   virtual std::vector<std::vector<Real>> getClassificationLuu() override;
   virtual std::vector<std::vector<Real>> getClassificationXu() override;
   virtual DenseVector<Real> getClassificationVind() override;

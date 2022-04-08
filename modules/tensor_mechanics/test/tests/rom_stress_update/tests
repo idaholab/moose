@@ -111,7 +111,7 @@
       type = 'CSVDiff'
       input = '3tile.i'
       csvdiff = '3tile_out.csv'
-      detail = 'where 3 tiles overlap.'
+      detail = 'for a variety of overlapping tiles.'
       petsc_version = '>=3.9.0'
       allow_test_objects = true
     []

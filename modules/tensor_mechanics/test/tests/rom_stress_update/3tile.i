@@ -26,55 +26,30 @@ endtime = 1.8
 [Functions]
   [rhom_fcn]
     type = PiecewiseConstant
-    # data_file = ${csvname}
-    # x_index_in_file = 0
-    # y_index_in_file = 1
-    # format = columns
-    # xy_in_file_only = false
     x = '0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8'
     y = '5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12 5.7e12'
     direction = LEFT_INCLUSIVE
   []
   [rhoi_fcn]
     type = PiecewiseConstant
-    # data_file = ${csvname}
-    # x_index_in_file = 0
-    # y_index_in_file = 2
-    # format = columns
-    # xy_in_file_only = false
     x = '0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8'
     y = '4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11 4.83e11'
     direction = LEFT_INCLUSIVE
   []
   [vmJ2_fcn]
     type = PiecewiseConstant
-    # data_file = ${csvname}
-    # x_index_in_file = 0
-    # y_index_in_file = 3
-    # format = columns
-    # xy_in_file_only = false
     x = '0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8'
     y = '25.68 25.68 45.0 55.28 60.0 67.12 75.0 75.0 75.0 75.0 75.0 75.0 55.28 60.0 67.12 60.0 60.0 55.28 96.72'
     direction = LEFT_INCLUSIVE
   []
   [evm_fcn]
     type = PiecewiseConstant
-    # data_file = ${csvname}
-    # x_index_in_file = 0
-    # y_index_in_file = 4
-    # format = columns
-    # xy_in_file_only = false
     x = '0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8'
     y = '0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01 0.01'
     direction = LEFT_INCLUSIVE
   []
   [temp_fcn]
     type = PiecewiseConstant
-    # data_file = ${csvname}
-    # x_index_in_file = 0
-    # y_index_in_file = 5
-    # format = columns
-    # xy_in_file_only = false
     x = '0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8'
     y = '930.0 930.0 930.0 930.0 930.0 930.0 930.0 905.0 895.0 881.0 860.0 821.0 860.0 881.0 895.0 895.0 905.0 895.0 860.0'
     direction = LEFT_INCLUSIVE
