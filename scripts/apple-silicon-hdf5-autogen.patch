@@ -1,0 +1,14 @@
+diff --git a/config/BuildSystem/config/packages/hdf5.py b/config/BuildSystem/config/packages/hdf5.py
+index f218d22bea..53451365aa 100644
+--- a/config/BuildSystem/config/packages/hdf5.py
++++ b/config/BuildSystem/config/packages/hdf5.py
+@@ -85,6 +85,9 @@ class Configure(config.package.GNUPackage):
+     self.addToArgs(args,'LIBS',self.libraries.toStringNoDupes(self.dlib))
+     return args
+
++  def preInstall(self):
++    self.executeShellCommand('HDF5_ACLOCAL=$(which aclocal) HDF5_AUTOHEADER=$(which autoheader) HDF5_AUTOMAKE=$(which automake) HDF5_AUTOCONF=$(which autoconf) HDF5_LIBTOOL=$(which libtool) HDF5_M4=$(which m4) ./autogen.sh',cwd=self.packageDir,log=self.log)
++
+   def configureLibrary(self):
+     if hasattr(self.compilers, 'FC') and self.argDB['download-hdf5-fortran-bindings']:
+       # PETSc does not need the Fortran interface, but some users will call the Fortran interface
