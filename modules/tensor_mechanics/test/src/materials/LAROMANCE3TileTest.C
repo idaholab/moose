@@ -1,17 +1,11 @@
-/************************************************************************************/
-/*                        © 2021 Triad National Security, LLC                       */
-/*                                ALL RIGHTS RESERVED                               */
-/*                                                                                  */
-/* This software was produced under U.S. Government contract 89233218CNA000001 for  */
-/* Los Alamos National Laboratory (LANL), which is operated by Triad National       */
-/* Security, LLC for the U.S. Department of Energy/National Nuclear Security        */
-/* Administration. The U.S. Government has rights to use, reproduce, and distribute */
-/* this software. NEITHER THE GOVERNMENT NOR TRIAD NATIONAL SECURITY, LLC MAKES ANY */
-/* WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS       */
-/* SOFTWARE. If software is modified to produce derivative works, such modified     */
-/* software should be clearly marked, so as not to confuse it with the version      */
-/* available from LANL.                                                             */
-/************************************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LAROMANCE3TileTest.h"
 
