@@ -3211,7 +3211,7 @@ MooseMesh::buildFaceInfo() const
       //
       //     - the neighbor has a higher ID than the element - this ensures
       //       that when we revisit the same face when the neighbor is the
-      //       element and vise versa, we only create a face info object once
+      //       element and vice versa, we only create a face info object once
       //       instead of twice.
       //
       //  * when the following two (CURRENTLY ONE ACTUALLY) conditions are met:
