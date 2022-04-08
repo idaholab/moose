@@ -124,10 +124,14 @@ protected:
       Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
       bool correct_skewness = false) const;
 
+  /// Whether to force execution on boundaries
   const bool _force_boundary_execution;
 
+  /// Which boundaries/sidesets to force the execution of flux kernels on
   std::unordered_set<BoundaryID> _boundaries_to_force;
-  std::unordered_set<BoundaryID> _boundaries_to_not_force;
+
+  /// Which boundaries/sidesets to prevent the execution of flux kernels on
+  std::unordered_set<BoundaryID> _boundaries_to_avoid;
 
 private:
   /// Computes the Jacobian contribution for every coupled variable.
