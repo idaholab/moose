@@ -22,7 +22,6 @@ VolumetricFlowRate::validParams()
   InputParameters params = SideIntegralPostprocessor::validParams();
   params.addClassDescription(
       "Computes the volumetric flow rate of an advected quantity through an external boundary.");
-  params.addParam<bool>("fv", false, "Whether finite volume variables are used");
   params.addRequiredCoupledVar("vel_x", "The x-axis velocity");
   params.addCoupledVar("vel_y", 0, "The y-axis velocity");
   params.addCoupledVar("vel_z", 0, "The z-axis velocity");
@@ -44,7 +43,7 @@ VolumetricFlowRate::validParams()
 
 VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
-    _fv(getParam<bool>("fv")),
+    _fv(getFieldVar("vel_x", 0)->isFV()),
     _vel_x(coupledValue("vel_x")),
     _vel_y(coupledValue("vel_y")),
     _vel_z(coupledValue("vel_z")),
@@ -88,8 +87,8 @@ VolumetricFlowRate::computeQpIntegral()
   if (_fv)
   {
     // We should be at the edge of the domain
-    const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
-    mooseAssert(fi, "We should have a face info");
+    const FaceInfo * const fi = getFaceInfo();
+    mooseAssert(fi, "We should have a face info in " + name());
 
     // Get face value for velocity
     const auto vel =

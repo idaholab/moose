@@ -21,7 +21,6 @@ InternalVolumetricFlowRate::validParams()
   InputParameters params = InterfaceIntegralPostprocessor::validParams();
   params.addClassDescription(
       "Computes the volumetric flow rate of an advected quantity through an internal boundary.");
-  params.addParam<bool>("fv", false, "Whether finite volume variables are used");
   params.addRequiredCoupledVar("vel_x", "The x-axis velocity");
   params.addCoupledVar("vel_y", 0, "The y-axis velocity");
   params.addCoupledVar("vel_z", 0, "The z-axis velocity");
@@ -43,7 +42,7 @@ InternalVolumetricFlowRate::validParams()
 
 InternalVolumetricFlowRate::InternalVolumetricFlowRate(const InputParameters & parameters)
   : InterfaceIntegralPostprocessor(parameters),
-    _fv(getParam<bool>("fv")),
+    _fv(getFieldVar("vel_x", 0)->isFV()),
     _vel_x(coupledValue("vel_x")),
     _vel_y(coupledValue("vel_y")),
     _vel_z(coupledValue("vel_z")),
