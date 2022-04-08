@@ -87,6 +87,12 @@ INSFVAdvectionKernel::initialSetup()
 bool
 INSFVAdvectionKernel::skipForBoundary(const FaceInfo & fi) const
 {
+  for (const auto bnd_id : fi.boundaryIDs())
+    if (_boundaries_to_avoid.find(bnd_id) != _boundaries_to_avoid.end())
+    {
+      return true;
+    }
+
   if (!onBoundary(fi))
     return false;
 
