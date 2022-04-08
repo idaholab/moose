@@ -39,4 +39,7 @@ protected:
 
   /// Factor multiplying the functor being integrated
   const Moose::Functor<GenericReal<is_ad>> & _prefactor;
+
+  /// Whether to skip integrating where the functors are not both defined
+  const bool _partial_integral;
 };

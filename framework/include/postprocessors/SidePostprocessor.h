@@ -12,6 +12,9 @@
 #include "SideUserObject.h"
 #include "Postprocessor.h"
 
+/**
+ * Base class for postprocessors executed on one or more sidesets
+ */
 class SidePostprocessor : public SideUserObject, public Postprocessor
 {
 public:

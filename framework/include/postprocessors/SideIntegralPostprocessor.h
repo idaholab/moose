@@ -12,8 +12,8 @@
 #include "SidePostprocessor.h"
 
 /**
- * This postprocessor computes a volume integral of the specified variable.
- *
+ * This postprocessor computes a surface integral of the specified variable on
+ * a sideset on the boundary of the mesh.
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */

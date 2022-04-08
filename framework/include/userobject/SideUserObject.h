@@ -18,6 +18,10 @@
 #include "TransientInterface.h"
 #include "ElementIDInterface.h"
 
+/**
+ * Base class for user objects executed one or more sidesets, which may be
+ * on the outer boundary of the mesh, or be internal to mesh, blocks etc
+ */
 class SideUserObject : public UserObject,
                        public BoundaryRestrictableRequired,
                        public MaterialPropertyInterface,
@@ -48,4 +52,28 @@ protected:
   const Real & _current_side_volume;
 
   const BoundaryID & _current_boundary_id;
+
+  /**
+   * Returns the local FaceInfo to use in functor arguments and interpolations.
+   * Note this face info could hold the element from the other side of the
+   * sideset. Sidesets are oriented!
+   */
+  const FaceInfo * getFaceInfo() {
+
+    // Either the element or the neighbor is a valid argument to get a face info
+    const Elem * neighbor = _current_elem->neighbor_ptr(_current_side);
+    const Elem * element = _current_elem;
+    int side = _current_side;
+
+    // No neighbor means we are at a boundary, a FaceInfo exists in the mesh
+    if (neighbor)
+    {
+      if (_current_elem->id() > neighbor->id())
+      {
+        element = neighbor;
+        side = neighbor->which_side_am_i(_current_elem);
+      }
+    }
+    return _mesh.faceInfo(element, side);
+  }
 };
