@@ -71,9 +71,10 @@ protected:
       if (_current_elem->id() > neighbor->id())
       {
         element = neighbor;
-        side = neighbor->which_side_am_i(_current_elem);
+        side = neighbor->which_neighbor_am_i(_current_elem);
       }
     }
+
     return _mesh.faceInfo(element, side);
   }
 };

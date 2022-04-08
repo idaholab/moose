@@ -76,9 +76,9 @@
       type = 'CSVDiff'
       input = 'side_integral_functor.i'
       csvdiff = 'internal_side_integral_functor_out.csv'
-      cli_args = "Postprocessors/active='int_s1_u int_s1_v1 int_s1_v2 int_s1_m1 int_s1_m2
-                                         int_s2_u int_s2_v1 int_s2_v2 int_s2_m1 int_s2_m2'
-                  Outputs/file_base=internal_side_integral_functor_out"
+    #  cli_args = "Postprocessors/active='int_s1_u int_s1_v1 int_s1_m1 int_s1_m2'
+                                  #       int_s2_u int_s2_v1 int_s2_v2 int_s2_m1 int_s2_m2'
+    #              Outputs/file_base=internal_side_integral_functor_out"
 
       requirement = 'The system shall support computing the integral of a functor '
                     'over a functor domain boundary inside a mesh.'

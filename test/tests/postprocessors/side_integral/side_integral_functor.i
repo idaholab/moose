@@ -114,26 +114,36 @@
     type = SideIntegralADFunctorPostprocessor
     boundary = 'left top right'
     functor = u
+    restrict_to_functors_domain = true
   []
   [ext_v1]
     type = SideIntegralADFunctorPostprocessor
-    boundary = 'left top right'
+    boundary = 'left right'
     functor = v1
   []
   [ext_v2]
     type = SideIntegralADFunctorPostprocessor
-    boundary = 'left top right'
+    boundary = 'top'
     functor = v2
+    restrict_to_functors_domain = true
+  []
+  [ext_f1]
+    type = SideIntegralADFunctorPostprocessor
+    boundary = 'left top right'
+    functor = f1
+    prefactor = f1
   []
   [ext_m1]
     type = SideIntegralADFunctorPostprocessor
     boundary = 'left top right'
     functor = m1
+    restrict_to_functors_domain = true
   []
   [ext_m2]
     type = SideIntegralADFunctorPostprocessor
     boundary = 'left top right'
     functor = m2
+    restrict_to_functors_domain = true
   []
 
   # Internal to the mesh, but a side to the variables
@@ -148,10 +158,10 @@
     boundary = inside_1
     functor = v1
   []
-  [int_s1_v2]
+  [int_s1_f1]
     type = SideIntegralADFunctorPostprocessor
     boundary = inside_1
-    functor = v2
+    functor = f1
   []
   [int_s1_m1]
     type = SideIntegralADFunctorPostprocessor
@@ -164,20 +174,15 @@
     functor = m2
   []
   # With orientation of normal 2->1
-  [int_s2_u]
-    type = SideIntegralADFunctorPostprocessor
-    boundary = inside_2
-    functor = u
-  []
-  [int_s2_v1]
-    type = SideIntegralADFunctorPostprocessor
-    boundary = inside_2
-    functor = v1
-  []
   [int_s2_v2]
     type = SideIntegralADFunctorPostprocessor
     boundary = inside_2
     functor = v2
+  []
+  [int_s2_f1]
+    type = SideIntegralADFunctorPostprocessor
+    boundary = inside_2
+    functor = f1
   []
   [int_s2_m1]
     type = SideIntegralADFunctorPostprocessor
@@ -193,6 +198,7 @@
 
 [Outputs]
   csv = true
+  exodus = true
 []
 
 [Problem]
