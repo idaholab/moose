@@ -421,6 +421,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
   registerSyntaxTask("AddKernelAction", "Bounds/*", "add_aux_kernel");
 
+  registerSyntax("AddAuxKernelAction", "AuxVariables/*/AuxKernel");
+
   registerSyntaxTask("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
   registerSyntaxTask("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
 

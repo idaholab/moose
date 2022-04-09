@@ -27,6 +27,10 @@
     family = MONOMIAL
     order = SIXTH
     components = 3
+    [AuxKernel]
+      type = FunctionArrayAux
+      functions = 'func1 func2 func3'
+    []
   []
 []
 
@@ -57,11 +61,6 @@
     type = FunctionArrayAux
     variable = y
     functions = 'func1 func2'
-  []
-  [z]
-    type = FunctionArrayAux
-    variable = z
-    functions = 'func1 func2 func3'
   []
 []
 
