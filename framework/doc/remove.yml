@@ -1,2 +1,3 @@
 - /Variables/InitialCondition
 - /AuxVariables/InitialCondition
+- /AuxVariables/AuxKernel
