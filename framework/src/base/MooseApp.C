@@ -153,6 +153,11 @@ MooseApp::validParams()
                                    "--check-input",
                                    false,
                                    "Check the input file (i.e. requires -i <filename>) and quit.");
+  params.addCommandLineParam<std::string>(
+      "show_inputs",
+      "--show-copyable-inputs",
+      "Shows the directories able to be installed (copied) into a user-writable location");
+
   params.addCommandLineParam<std::string>("copy_inputs",
                                           "--copy-inputs <dir>",
                                           "Copies installed inputs (e.g. tests, examples, etc.) to "
@@ -1377,7 +1382,7 @@ MooseApp::run()
     return;
   }
 
-  if (copyInputs() || runInputs())
+  if (showInputs() || copyInputs() || runInputs())
   {
     _ready_to_exit = true;
     return;
@@ -1408,19 +1413,65 @@ MooseApp::run()
 }
 
 bool
-MooseApp::copyInputs()
+MooseApp::showInputs() const
+{
+  if (isParamValid("show_inputs"))
+  {
+    auto copy_syntax = _pars.getSyntax("copy_inputs");
+    std::vector<std::string> dirs;
+    const auto installable_inputs = getInstallableInputs();
+
+    if (installable_inputs == "")
+    {
+      Moose::out
+          << "Show inputs has not been overriden in this application.\nContact the developers of "
+             "this appication and request that they override \"MooseApp::getInstallableInputs\".\n";
+    }
+    else
+    {
+      mooseAssert(!copy_syntax.empty(), "copy_inputs sytnax should not be empty");
+
+      MooseUtils::tokenize(installable_inputs, dirs, 1, " ");
+      Moose::out << "The following directories are installable into a user-writeable directory:\n\n"
+                 << installable_inputs << '\n'
+                 << "\nTo install one or more directories of inputs, execute the binary with the \""
+                 << copy_syntax[0] << "\" flag. e.g.:\n$ " << _command_line->getExecutableName()
+                 << ' ' << copy_syntax[0] << ' ' << dirs[0] << '\n';
+    }
+    return true;
+  }
+  return false;
+}
+
+std::string
+MooseApp::getInstallableInputs() const
+{
+  return "";
+}
+
+bool
+MooseApp::copyInputs() const
 {
   if (isParamValid("copy_inputs"))
   {
     // Get command line argument following --copy-inputs on command line
     auto dir_to_copy = getParam<std::string>("copy_inputs");
 
+    if (dir_to_copy.empty())
+      mooseError("Error retrieving directory to copy");
+    if (dir_to_copy.back() != '/')
+      dir_to_copy += '/';
+
     auto binname = appBinaryName();
     if (binname == "")
       mooseError("could not locate installed tests to run (unresolved binary/app name)");
 
-    auto src_dir = MooseUtils::installedInputsDir(binname, dir_to_copy);
-    auto dst_dir = binname + "_" + dir_to_copy;
+    auto src_dir =
+        MooseUtils::installedInputsDir(binname,
+                                       dir_to_copy,
+                                       "Rerun binary with " + _pars.getSyntax("show_inputs")[0] +
+                                           " to get a list of installable directories.");
+    auto dst_dir = binname + "/" + dir_to_copy;
     auto cmdname = Moose::getExecutableName();
     if (cmdname.find_first_of("/") != std::string::npos)
       cmdname = cmdname.substr(cmdname.find_first_of("/") + 1, std::string::npos);
@@ -1439,7 +1490,9 @@ MooseApp::copyInputs()
           dir_to_copy,
           "\".");
 
-    std::string cmd = "cp -R " + src_dir + " " + dst_dir;
+    std::string cmd = "mkdir -p " + dst_dir + "; rsync -av " + src_dir + " " + dst_dir;
+
+    TIME_SECTION("copy_inputs", 2, "Copying Inputs");
 
     // Only perform the copy on the root processor
     int return_value = 0;
@@ -1456,7 +1509,7 @@ MooseApp::copyInputs()
 }
 
 bool
-MooseApp::runInputs()
+MooseApp::runInputs() const
 {
   if (isParamValid("run"))
   {

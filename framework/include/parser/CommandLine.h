@@ -105,6 +105,11 @@ public:
   std::vector<std::string>::const_iterator end() const;
 
   /**
+   * Get the executable name.
+   */
+  std::string getExecutableName() const;
+
+  /**
    * Print the usage info for this command line
    */
   void printUsage() const;

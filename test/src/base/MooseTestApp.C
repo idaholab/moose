@@ -18,6 +18,7 @@
 #include "EigenProblem.h"
 
 #include "MooseTestApp.h"
+#include "MooseRevision.h"
 
 InputParameters
 MooseTestApp::validParams()
@@ -81,6 +82,12 @@ MooseTestApp::executeExecutioner()
 #endif
 
   MooseApp::executeExecutioner();
+}
+
+std::string
+MooseTestApp::getInstallableInputs() const
+{
+  return MOOSE_INSTALLABLE_DIRS;
 }
 
 void
