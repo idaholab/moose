@@ -1,0 +1,8 @@
+[Tests]
+  [action]
+    type = Exodiff
+    input = 'master.i'
+    exodiff = 'master_out.e master_out_thm0_out.e'
+    ad_indexing_type = 'global'
+  []
+[]
