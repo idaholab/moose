@@ -27,7 +27,6 @@
     response = values/g_values
     num_epochs = 40
     num_batches = 10
-    num_hidden_layers = 2
     num_neurons_per_layer = '64 32'
     learning_rate = 0.001
     filename = mynet.pt

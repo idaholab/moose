@@ -21,9 +21,7 @@ LibtorchSimpleNNSurrogate::validParams()
 }
 
 LibtorchSimpleNNSurrogate::LibtorchSimpleNNSurrogate(const InputParameters & parameters)
-  : SurrogateModel(parameters),
-    _num_hidden_layers(getModelData<unsigned int>("num_hidden_layers")),
-    _num_neurons_per_layer(getModelData<std::vector<unsigned int>>("num_neurons_per_layer"))
+  : SurrogateModel(parameters)
 #ifdef TORCH_ENABLED
     ,
     _nn(getModelData<std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet>>("nn"))

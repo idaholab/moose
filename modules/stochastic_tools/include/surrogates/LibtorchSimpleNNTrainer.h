@@ -30,29 +30,6 @@ public:
 
   virtual void postTrain() override;
 
-protected:
-#ifdef TORCH_ENABLED
-
-  // A custom strcuture which is used to organize data foor the training of
-  // torch-based neural nets.
-  struct MyData : torch::data::datasets::Dataset<MyData>
-  {
-  public:
-    MyData(torch::Tensor dt, torch::Tensor rt) : _data_tensor(dt), _response_tensor(rt) {}
-    torch::data::Example<> get(size_t index) override
-    {
-      return {_data_tensor[index], _response_tensor[index]};
-    }
-
-    torch::optional<size_t> size() const override { return _response_tensor.sizes()[0]; }
-
-  private:
-    torch::Tensor _data_tensor;
-    torch::Tensor _response_tensor;
-  };
-
-#endif
-
 private:
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
@@ -67,32 +44,32 @@ private:
   std::vector<Real> _flattened_response;
 
   /// Number of batches we want to prepare
-  unsigned int _num_batches;
+  const unsigned int _num_batches;
 
   /// Number of epochs for the training
-  unsigned int _num_epocs;
-
-  /// Number of hidden layers in the neural net
-  unsigned int & _num_hidden_layers;
+  const unsigned int _num_epocs;
 
   /// Number of neurons within the hidden layers (the length of this vector
   /// should be the same as _num_hidden_layers)
   std::vector<unsigned int> & _num_neurons_per_layer;
 
+  /// Number of hidden layers in the neural net
+  unsigned int & _num_hidden_layers;
+
   /// Name of the pytorch output file. This is used for loading and storing
   /// already existing data.
-  std::string _filename;
+  const std::string _filename;
 
   /// Switch indicating if an already existing neural net should be read from a
   /// file or not. This can be used to load existing torch files (from previous
   /// MOOSE or python runs for retraining and further manipulation)
-  bool _read_from_file;
+  const bool _read_from_file;
 
   /// The learning rate for the optimization algorithm
-  Real _learning_rate;
+  const Real _learning_rate;
 
   /// Print the training loss value every given epoch
-  unsigned int _print_epoch_loss;
+  const unsigned int _print_epoch_loss;
 
 #ifdef TORCH_ENABLED
   /// Pointer to the neural net object (initialized as null)

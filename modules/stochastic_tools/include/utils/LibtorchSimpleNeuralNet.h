@@ -22,13 +22,9 @@ namespace StochasticTools
 class LibtorchSimpleNeuralNet : public LibtorchNeuralNetBase
 {
 public:
-  // Generic constructor
-  LibtorchSimpleNeuralNet() {}
-
   // Constructing using input parameters
   LibtorchSimpleNeuralNet(std::string name,
                           unsigned int num_inputs,
-                          unsigned int num_hidden_layers,
                           std::vector<unsigned int> num_neurons_per_layer,
                           unsigned int num_outputs);
   // Virtual destructor
@@ -51,38 +47,34 @@ public:
 
   const unsigned int & numOutputs() { return _num_outputs; }
 
-  void setName(std::string name) { _name = name; }
-
-  void setNumInputs(unsigned int num_inputs) { _num_inputs = num_inputs; }
-
-  void setNumHiddenLayers(unsigned int num_hidden_layers)
-  {
-    _num_hidden_layers = num_hidden_layers;
-  }
-
-  void setNumNeuronsPerLayer(std::vector<unsigned int> num_neurons_per_layer)
-  {
-    _num_neurons_per_layer = num_neurons_per_layer;
-  }
-
-  void setNumOutputs(unsigned int num_outputs) { _num_outputs = num_outputs; }
+  // void setName(std::string name) { _name = name; }
+  //
+  // void setNumInputs(unsigned int num_inputs) { _num_inputs = num_inputs; }
+  //
+  // void setNumNeuronsPerLayer(std::vector<unsigned int> num_neurons_per_layer)
+  // {
+  //   _num_neurons_per_layer = num_neurons_per_layer;
+  //   _num_hidden_layers = num_neurons_per_layer.size();
+  // }
+  //
+  // void setNumOutputs(unsigned int num_outputs) { _num_outputs = num_outputs; }
 
   void constructNeuralNetwork();
 
 protected:
-  std::string _name;
+  const std::string _name;
 
   // Submodules that hold linear operations and the corresponding
   // weights and biases (y = W * x + b)
   std::vector<torch::nn::Linear> _weights;
 
-  unsigned int _num_inputs;
+  const unsigned int _num_inputs;
 
-  unsigned int _num_hidden_layers;
+  const std::vector<unsigned int> _num_neurons_per_layer;
 
-  std::vector<unsigned int> _num_neurons_per_layer;
+  const unsigned int _num_hidden_layers;
 
-  unsigned int _num_outputs;
+  const unsigned int _num_outputs;
 };
 
 }

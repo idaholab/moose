@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LibtorchSimpleNNTrainer.h"
+#include "LibtorchDataset.h"
 #include "Sampler.h"
 
 registerMooseObject("StochasticToolsApp", LibtorchSimpleNNTrainer);
@@ -52,10 +53,10 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
     _response(getTrainingData<Real>(getParam<ReporterName>("response"))),
     _num_batches(getParam<unsigned int>("num_batches")),
     _num_epocs(getParam<unsigned int>("num_epochs")),
-    _num_hidden_layers(declareModelData<unsigned int>("num_hidden_layers",
-                                                      getParam<unsigned int>("num_hidden_layers"))),
     _num_neurons_per_layer(declareModelData<std::vector<unsigned int>>(
         "num_neurons_per_layer", getParam<std::vector<unsigned int>>("num_neurons_per_layer"))),
+    _num_hidden_layers(
+        declareModelData<unsigned int>("num_hidden_layers", _num_neurons_per_layer.size())),
     _filename(getParam<std::string>("filename")),
     _read_from_file(getParam<bool>("read_from_file")),
     _learning_rate(getParam<Real>("learning_rate")),
@@ -119,7 +120,7 @@ LibtorchSimpleNNTrainer::postTrain()
 
   // We create a custom data loader which can be used to select samples for the in
   // the training process. See the header file for the definition of this structure.
-  MyData my_data(data_tensor, response_tensor);
+  StochasticTools::LibtorchDataset my_data(data_tensor, response_tensor);
 
   // We initialize a data_loader for the training part.
   unsigned int sample_per_batch = n_rows > _num_batches ? n_rows / _num_batches : 1;
@@ -130,7 +131,7 @@ LibtorchSimpleNNTrainer::postTrain()
 
   // We create a neural net (for the definition of the net see the header file)
   _nn = std::make_shared<StochasticTools::LibtorchSimpleNeuralNet>(
-      _filename, n_cols, _num_hidden_layers, _num_neurons_per_layer, 1);
+      _filename, n_cols, _num_neurons_per_layer, 1);
 
   // Initialize the optimizer
   torch::optim::Adam optimizer(_nn->parameters(), torch::optim::AdamOptions(_learning_rate));

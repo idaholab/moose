@@ -16,13 +16,12 @@ namespace StochasticTools
 
 LibtorchSimpleNeuralNet::LibtorchSimpleNeuralNet(std::string name,
                                                  unsigned int num_inputs,
-                                                 unsigned int num_hidden_layers,
                                                  std::vector<unsigned int> num_neurons_per_layer,
                                                  unsigned int num_outputs)
   : _name(name),
     _num_inputs(num_inputs),
-    _num_hidden_layers(num_hidden_layers),
     _num_neurons_per_layer(num_neurons_per_layer),
+    _num_hidden_layers(num_neurons_per_layer.size()),
     _num_outputs(num_outputs)
 {
   constructNeuralNetwork();
@@ -37,7 +36,7 @@ LibtorchSimpleNeuralNet::constructNeuralNetwork()
   {
     std::unordered_map<std::string, unsigned int> parameters = {
         {"inp_neurons", inp_neurons}, {"out_neurons", _num_neurons_per_layer[i]}};
-    addLayer("HL" + std::to_string(i + 1), parameters);
+    addLayer("hidden_layer_" + std::to_string(i + 1), parameters);
 
     // Necessary to retain double precision (and error-free runs)
     _weights[i]->to(at::kDouble);
@@ -46,7 +45,7 @@ LibtorchSimpleNeuralNet::constructNeuralNetwork()
   // Adding output layer
   std::unordered_map<std::string, unsigned int> parameters = {{"inp_neurons", inp_neurons},
                                                               {"out_neurons", _num_outputs}};
-  addLayer("OL", parameters);
+  addLayer("output_layer_", parameters);
   _weights.back()->to(at::kDouble);
 }
 
@@ -131,7 +130,7 @@ dataLoad<StochasticTools::LibtorchSimpleNeuralNet>(
   dataLoad(stream, num_outputs, context);
 
   nn = std::make_shared<StochasticTools::LibtorchSimpleNeuralNet>(
-      name, num_inputs, num_hidden_layers, num_neurons_per_layer, num_outputs);
+      name, num_inputs, num_neurons_per_layer, num_outputs);
 
   torch::load(nn, name);
 }

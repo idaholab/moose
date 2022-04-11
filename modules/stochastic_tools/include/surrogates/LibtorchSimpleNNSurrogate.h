@@ -26,13 +26,6 @@ public:
   virtual Real evaluate(const std::vector<Real> & x) const override;
 
 protected:
-  /// Number of hidden layers in the neural net
-  const unsigned int & _num_hidden_layers;
-
-  /// Number of neurons within the hidden layers (the length of this vector
-  /// should be the same as _num_hidden_layers)
-  const std::vector<unsigned int> & _num_neurons_per_layer;
-
 #ifdef TORCH_ENABLED
   /// Pointer to the neural net object (initialized as null)
   const std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & _nn;
