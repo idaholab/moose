@@ -509,8 +509,9 @@ ContactAction::addMortarContact()
 
   if (_current_task == "append_mesh_generator")
   {
-    // Don't do mesh generators when  or just don't want it to be generated because the mesh is
-    // already in the system (e.g. restart).
+    // Don't do mesh generators when recovering or when the user has requested for us not to
+    // (presumably because the lower-dimensional blocks are already in the mesh due to manual
+    // addition or because we are restarting)
     if (!(_app.isRecovering() && _app.isUltimateMaster()) && !_app.masterMesh() &&
         _generate_mortar_mesh)
     {

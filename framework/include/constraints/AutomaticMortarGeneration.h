@@ -183,7 +183,7 @@ public:
    * Compute the two nodal tangents, which are built on-the-fly.
    * @return The nodal tangents associated with the provided \p secondary_elem
    */
-  std::array<MooseUtils::SemidynamicVector<Point, 10>, 2>
+  std::array<MooseUtils::SemidynamicVector<Point, 9>, 2>
   getNodalTangents(const Elem & secondary_elem) const;
 
   /**

@@ -190,12 +190,12 @@ AutomaticMortarGeneration::getPrimaryIpToLowerElementMap(
   return primary_ip_i_to_lower_primary_i;
 }
 
-std::array<MooseUtils::SemidynamicVector<Point, 10>, 2>
+std::array<MooseUtils::SemidynamicVector<Point, 9>, 2>
 AutomaticMortarGeneration::getNodalTangents(const Elem & secondary_elem) const
 {
   // MetaPhysicL will check if we ran out of allocated space.
-  MooseUtils::SemidynamicVector<Point, 10> nodal_tangents_one(0);
-  MooseUtils::SemidynamicVector<Point, 10> nodal_tangents_two(0);
+  MooseUtils::SemidynamicVector<Point, 9> nodal_tangents_one(0);
+  MooseUtils::SemidynamicVector<Point, 9> nodal_tangents_two(0);
 
   for (const auto n : make_range(secondary_elem.n_nodes()))
   {
@@ -1741,8 +1741,14 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             // associate the secondary node with two different elements (and two corresponding
             // xi^(2) values.
 
-            // Increasing the tolerance 5 times in this if statement to avoid missing nodes due to
-            // the mismatch between sizes of primary and secondary surfaces. Still, it can happen.
+            // We are projecting on one side first and the other side second. If we make the
+            // tolerance bigger and remove the (5) factor we are going to continue to miss the
+            // second projection and fall into the exception message in
+            // projectPrimaryNodesSinglePair. What makes this modification to not fall in the
+            // exception is that we are projecting on one side more xi than in the other. There
+            // should be a better way of doing this by using actual distances and not parametric
+            // coordinates. But I believe making the tolerance uniformly larger or smaller won't do
+            // the trick here.
             if (std::abs(std::abs(xi2) - 1.) < _xi_tolerance * 5.0)
             {
               const Node * primary_node = (xi2 < 0) ? primary_elem_candidate->node_ptr(0)
@@ -2036,12 +2042,11 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
             if (std::abs(std::abs(xi1) - 1.) < _xi_tolerance)
             {
               // Special case: xi1=+/-1.
-              // We shouldn't get here, because this primary node should already
-              // have been mapped during the project_secondary_nodes() routine.
-              // I think there is a chance we get here since the tolerances are applied to
+              // It is unlikely that we get here, because this primary node should already
+              // have been mapped during the project_secondary_nodes() routine, but
+              // there is still a chance since the tolerances are applied to
               // the xi coordinate and that value may be different on a primary element and a
               // secondary element since they may have different sizes.
-
               throw MooseException("Nodes on primary and secondary surfaces are aligned. This is "
                                    "causing trouble when identifying projections from secondary "
                                    "nodes when performing primary node projections.");

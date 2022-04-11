@@ -10,7 +10,6 @@
 #pragma once
 
 #include "ADMortarLagrangeConstraint.h"
-#include "MooseUtils.h"
 
 class TangentialMortarMechanicalContact : public ADMortarLagrangeConstraint
 {
