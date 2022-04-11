@@ -3214,11 +3214,9 @@ MooseMesh::buildFaceInfo() const
       //       element and vice versa, we only create a face info object once
       //       instead of twice.
       //
-      //  * when the following two (CURRENTLY ONE ACTUALLY) conditions are met:
+      //  * when the following two conditions are met:
       //
-      //     - WE AREN'T ACTUALLY DOING THIS CHECK RIGHT NOW. SHOULD WE BE? WE DON'T
-      //       DO IT FOR DGKERNELS OR INTERFACE KERNELS
-      //       the neighbor is active - this means we aren't looking at a face
+      //     - the neighbor is active - this means we aren't looking at a face
       //       between an active element and an inactive (pre-refined version)
       //       of a neighbor
       //
@@ -3232,7 +3230,7 @@ MooseMesh::buildFaceInfo() const
       if (!neighbor ||
           (neighbor->active() && (neighbor->level() == elem->level()) &&
            (elem_id < neighbor->id())) ||
-          (neighbor->level() < elem->level()))
+          (neighbor->active() && neighbor->level() < elem->level()))
       {
         _all_face_info.emplace_back(elem, side, neighbor);
 

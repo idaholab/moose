@@ -46,22 +46,3 @@ SideUserObject::SideUserObject(const InputParameters & parameters)
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 }
-
-Moose::SingleSidedFaceArg
-SideUserObject::singleSidedFaceArg(const MooseFunctorName & functor_name,
-                                   const FaceInfo & fi,
-                                   const Moose::FV::LimiterType limiter_type,
-                                   const bool correct_skewness) const
-{
-  const bool use_elem = fi.faceType(functor_name) == FaceInfo::VarFaceNeighbors::ELEM;
-
-  if (use_elem)
-    return {fi, limiter_type, true, correct_skewness, correct_skewness, fi.elem().subdomain_id()};
-  else
-    return {&fi,
-            limiter_type,
-            true,
-            correct_skewness,
-            correct_skewness,
-            fi.neighborPtr()->subdomain_id()};
-}

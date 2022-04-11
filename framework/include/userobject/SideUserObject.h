@@ -58,17 +58,35 @@ protected:
    * Note this face info could hold the element from the other side of the
    * sideset. Sidesets are oriented!
    */
-  const FaceInfo * getFaceInfo() {
+  const FaceInfo * getFaceInfo()
+  {
 
     // Either the element or the neighbor is a valid argument to get a face info
     const Elem * neighbor = _current_elem->neighbor_ptr(_current_side);
     const Elem * element = _current_elem;
     int side = _current_side;
 
+    mooseAssert(_current_elem, "We should have an element");
+    mooseAssert(_current_elem->active(), "The current element should be active");
+
     // No neighbor means we are at a boundary, a FaceInfo exists in the mesh
+    // If a neighbor exists, the face info may only be defined on that side
     if (neighbor)
     {
-      if (_current_elem->id() > neighbor->id())
+      // neighbor is not active and we cant just pick an arbitrary refined element in neighbor
+      // no FaceInfo in mesh will satisfy us, let's error out
+      if (!neighbor->active())
+        mooseError("Inactive neighbor found in SideUO loop. Uneven refinement across sidesets "
+                   "is not supported by the faceInfo system in user objects");
+
+      // First check refinement level
+      if (_current_elem->level() < neighbor->level())
+      {
+        element = neighbor;
+        side = neighbor->which_neighbor_am_i(_current_elem);
+      }
+      // Then check ids
+      else if (_current_elem->id() > neighbor->id())
       {
         element = neighbor;
         side = neighbor->which_neighbor_am_i(_current_elem);
