@@ -1,0 +1,7 @@
+[Tests]
+  [./cframe]
+    type = RunApp
+    input = 'cframe_iga.i'
+    check_input = True
+  [../]
+[]
