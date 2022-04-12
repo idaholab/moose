@@ -57,8 +57,8 @@ LAROMANCE3TileTestTempl<is_ad>::getTilings()
 }
 
 template <bool is_ad>
-std::vector<std::vector<
-    std::vector<std::vector<typename LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform>>>>
+std::vector<std::vector<std::vector<
+    std::vector<typename LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform>>>>
 LAROMANCE3TileTestTempl<is_ad>::getTransform()
 {
   return {{{{LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform::LINEAR,
@@ -172,27 +172,13 @@ template <bool is_ad>
 std::vector<std::vector<std::vector<std::vector<Real>>>>
 LAROMANCE3TileTestTempl<is_ad>::getTransformCoefs()
 {
-  return {{{{1.0e10, 1.0e10, 1.0e-2, 4.0e-5, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-3, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-4, 0.0}},
-           {{1.0e10, 1.0e10, 1.0e-2, 4.0e-5, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-3, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-4, 0.0}},
-           {{1.0e10, 1.0e10, 1.0e-2, 4.0e-5, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-3, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-4, 0.0}},
-           {{1.0e10, 1.0e10, 1.0e-2, 4.0e-5, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-3, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-4, 0.0}}},
-          {{{1.0e10, 1.0e10, 1.0e-2, 4.0e-5, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-3, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-4, 0.0}},
-           {{1.0e10, 1.0e10, 1.0e-2, 4.0e-5, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-3, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-4, 0.0}},
-           {{1.0e10, 1.0e10, 1.0e-2, 4.0e-5, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-3, 0.0},
-            {1.0e10, 1.0e10, 1.0e-1, 1.0e-4, 0.0}}}};
+  return {{{{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}},
+           {{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}},
+           {{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}},
+           {{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}}},
+          {{{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}},
+           {{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}},
+           {{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}}}};
 }
 
 template <bool is_ad>
