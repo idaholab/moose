@@ -34,7 +34,5 @@ VolumeAux::computeValue()
 void
 VolumeAux::compute()
 {
-  // Skip the integration in AuxKernel and just set the value directly;
-  // we enforce CONSTANT MONOMIAL here so this is valid
-  _var.setNodalValue(computeValue());
+  _var.setDofValue(computeValue(), 0);
 }
