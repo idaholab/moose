@@ -67,6 +67,5 @@ public:
   bool containsNode(const EFANode * node) const;
   void removeEmbeddedNodes();
   void removeEmbeddedNode(EFANode * node);
-
   bool hasNode(EFANode * node);
 };
