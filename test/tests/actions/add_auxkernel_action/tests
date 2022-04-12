@@ -1,6 +1,6 @@
 [Tests]
   [syntax]
-    design = 'AuxVariables/AuxKernel/index.md'
+    design = 'AddAuxKernelAction.md'
     issues = '#20753'
     requirement = "The system shall allow the shortcut syntax specifying an AuxKernel"
     [nested]
