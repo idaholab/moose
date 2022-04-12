@@ -49,6 +49,9 @@ private:
   /// Number of epochs for the training
   const unsigned int _num_epocs;
 
+  /// The relative loss value where the trainer should stop
+  const Real _rel_loss_tol;
+
   /// Number of neurons within the hidden layers (the length of this vector
   /// should be the same as _num_hidden_layers)
   std::vector<unsigned int> & _num_neurons_per_layer;

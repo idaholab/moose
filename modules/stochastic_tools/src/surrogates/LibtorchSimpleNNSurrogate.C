@@ -27,12 +27,8 @@ LibtorchSimpleNNSurrogate::LibtorchSimpleNNSurrogate(const InputParameters & par
     _nn(getModelData<std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet>>("nn"))
 #endif
 {
-#ifndef TORCH_ENABLED
-  mooseError("PyTorch C++ API (libtorch) must be installed to use ",
-             type(),
-             ", see https://mooseframework.inl.gov/modules/stochastic_tools/install_pytorch.html "
-             "for instruction.");
-#endif
+  // We check if MOOSE is compiled with torch, if not this throws an error
+  StochasticToolsApp::requiresTorch(*this);
 }
 
 Real

@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "LibtorchNeuralNetBase.h"
-
 #ifdef TORCH_ENABLED
+
+#include "LibtorchNeuralNetBase.h"
 
 #include "DataIO.h"
 

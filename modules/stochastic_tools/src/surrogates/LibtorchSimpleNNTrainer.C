@@ -26,9 +26,15 @@ LibtorchSimpleNNTrainer::validParams()
       "Reporter value of response results, can be vpp with <vpp_name>/<vector_name> or sampler "
       "column with 'sampler/col_<index>'.");
   params.addParam<MooseEnum>("response_type", data_type, "Response data type.");
-  params.addParam<unsigned int>("num_batches", 1, "Number of batches.");
-  params.addParam<unsigned int>("num_epochs", 1, "Number of epochs.");
-  params.addParam<unsigned int>("num_hidden_layers", 0, "Number of hidden layers.");
+  params.addRangeCheckedParam<unsigned int>(
+      "num_batches", 1, "1<=num_batches", "Number of batches.");
+  params.addRangeCheckedParam<unsigned int>(
+      "num_epochs", 1, "0<num_epochs", "Number of training epochs.");
+  params.addRangeCheckedParam<Real>(
+      "rel_loss_tol",
+      0,
+      "0<=rel_loss_tol<=1",
+      "The relative loss where we stop the training of the neural net.");
   params.addParam<std::vector<unsigned int>>(
       "num_neurons_per_layer", std::vector<unsigned int>(), "Number of neurons per layer.");
   params.addParam<std::string>(
@@ -37,9 +43,10 @@ LibtorchSimpleNNTrainer::validParams()
                         false,
                         "Switch to allow reading old trained neural nets for further training.");
   params.addParam<Real>("learning_rate", 0.001, "Learning rate (relaxation).");
-  params.addParam<unsigned int>(
+  params.addRangeCheckedParam<unsigned int>(
       "print_epoch_loss",
       0,
+      "0<=print_epoch_loss",
       "Epoch training loss printing. 0 - no printing, 1 - every epoch, 10 - every 10th epoch.");
   params.addParam<unsigned int>(
       "seed", 11, "Random number generator seed for stochastic optimizers.");
@@ -53,6 +60,7 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
     _response(getTrainingData<Real>(getParam<ReporterName>("response"))),
     _num_batches(getParam<unsigned int>("num_batches")),
     _num_epocs(getParam<unsigned int>("num_epochs")),
+    _rel_loss_tol(getParam<Real>("rel_loss_tol")),
     _num_neurons_per_layer(declareModelData<std::vector<unsigned int>>(
         "num_neurons_per_layer", getParam<std::vector<unsigned int>>("num_neurons_per_layer"))),
     _num_hidden_layers(
@@ -66,16 +74,13 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
     _nn(declareModelData<std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet>>("nn"))
 #endif
 {
+  // We check if MOOSE is compiled with torch, if not this throws an error
+  StochasticToolsApp::requiresTorch(*this);
 
 #ifdef TORCH_ENABLED
   // Fixing the RNG seed to make sure every experiment is the same.
   // Otherwise sampling / stochastic gradient descent would be different.
   torch::manual_seed(getParam<unsigned int>("seed"));
-#else
-  mooseError("PyTorch C++ API (libtorch) must be installed to use ",
-             type(),
-             ", see https://mooseframework.inl.gov/modules/stochastic_tools/install_pytorch.html "
-             "for instruction.");
 #endif
 }
 
@@ -147,10 +152,15 @@ LibtorchSimpleNNTrainer::postTrain()
       mooseError("The requested pytorch file could not be loaded.");
     }
 
+  Real rel_loss = 1.0;
+  Real initial_loss;
+  Real epoch_loss = 0.0;
+
   // Begin training loop
-  for (unsigned int epoch = 1; epoch <= _num_epocs; ++epoch)
+  unsigned int epoch = 1;
+  while (epoch <= _num_epocs && rel_loss > _rel_loss_tol)
   {
-    Real epoch_error = 0.0;
+    epoch_loss = 0.0;
     for (auto & batch : *data_loader)
     {
       // Reset gradients
@@ -168,15 +178,21 @@ LibtorchSimpleNNTrainer::postTrain()
       // Use new gradients to update the parameters
       optimizer.step();
 
-      epoch_error += loss.item<double>();
+      epoch_loss += loss.item<double>();
     }
 
-    epoch_error = epoch_error / _num_batches;
+    epoch_loss = epoch_loss / _num_batches;
+
+    if (epoch == 1)
+      initial_loss = epoch_loss;
+
+    rel_loss = epoch_loss / initial_loss;
 
     if (_print_epoch_loss)
-      if (epoch % _print_epoch_loss == 0)
-        _console << "Epoch: " << epoch << " | Loss: " << COLOR_GREEN << epoch_error << COLOR_DEFAULT
-                 << std::endl;
+      if (epoch % _print_epoch_loss == 0 || epoch == 1)
+        _console << "Epoch: " << epoch << " | Loss: " << COLOR_GREEN << epoch_loss << COLOR_DEFAULT
+                 << " | Rel. loss: " << COLOR_GREEN << rel_loss << COLOR_DEFAULT << std::endl;
+    epoch += 1;
   }
 
 #endif
