@@ -19,6 +19,8 @@
 #include "EFAError.h"
 #include "XFEMFuncs.h"
 
+#include <iostream>
+
 EFAFragment2D::EFAFragment2D(EFAElement2D * host,
                              bool create_boundary_edges,
                              const EFAElement2D * from_host,
@@ -621,61 +623,59 @@ EFAFragment2D::split(std::map<unsigned int, EFANode *> & EmbeddedNodes,
 
   std::vector<EFAFragment2D *> final_fragments; // final fragments for return
 
-  // only make new fragments if all the chosen nodes were found
-  if ((edge_cut_count + node_cut_count) == chosen_cut_plane_pair.size())
-  {
-    // add nodes to fragments
-    if ((edge_cut_count + node_cut_count) > 1) // any two cuts case
-    {
-      for (unsigned int frag_idx = 0; frag_idx < 2; ++frag_idx) // Create 2 fragments
-      {
-        auto & this_frag_nodes = fragment_nodes[frag_idx];
-        // check to make sure an edge wasn't cut
-        if (this_frag_nodes.size() >= 3)
-        {
-          EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
-          for (unsigned int inode = 0; inode < this_frag_nodes.size() - 1; inode++)
-            new_frag->addEdge(new EFAEdge(this_frag_nodes[inode], this_frag_nodes[inode + 1]));
-
-          new_frag->addEdge(
-              new EFAEdge(this_frag_nodes[this_frag_nodes.size() - 1], this_frag_nodes[0]));
-
-          new_fragments.push_back(new_frag);
-        }
-      }
-    }
-    else if (edge_cut_count == 1) // single edge cut case
-    {
-      EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
-      for (unsigned int inode = 0; inode < fragment_nodes[0].size() - 1;
-           inode++) // assemble fragment part 1
-        new_frag->addEdge(new EFAEdge(fragment_nodes[0][inode], fragment_nodes[0][inode + 1]));
-
-      for (unsigned int inode = 0; inode < fragment_nodes[1].size() - 1;
-           inode++) // assemble fragment part 2
-        new_frag->addEdge(new EFAEdge(fragment_nodes[1][inode], fragment_nodes[1][inode + 1]));
-
-      new_frag->addEdge(
-          new EFAEdge(fragment_nodes[1][fragment_nodes[1].size() - 1], fragment_nodes[0][0]));
-
-      new_fragments.push_back(new_frag);
-    }
-    else if (node_cut_count == 1) // single node cut case
-    {
-      EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
-      for (unsigned int iedge = 0; iedge < _boundary_edges.size(); ++iedge)
-      {
-        EFANode * first_node_on_edge = _boundary_edges[iedge]->getNode(0);
-        EFANode * second_node_on_edge = _boundary_edges[iedge]->getNode(1);
-        new_frag->addEdge(new EFAEdge(first_node_on_edge, second_node_on_edge));
-      }
-
-      new_fragments.push_back(new_frag);
-    }
-  }
-  else // if the correct number of chosen nodes were not found call again lookin for other nodes
+  // only make new fragments if all the chosen nodes were found otherwise call again looking for
+  // other nodes
+  if ((edge_cut_count + node_cut_count) != chosen_cut_plane_pair.size())
   {
     return this->split(EmbeddedNodes, all_cut_plane_idx, all_cut_plane_nodes);
+  }
+  // add nodes to fragments
+  if ((edge_cut_count + node_cut_count) > 1) // any two cuts case
+  {
+    for (unsigned int frag_idx = 0; frag_idx < 2; ++frag_idx) // Create 2 fragments
+    {
+      auto & this_frag_nodes = fragment_nodes[frag_idx];
+      // check to make sure an edge wasn't cut
+      if (this_frag_nodes.size() >= 3)
+      {
+        EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
+        for (unsigned int inode = 0; inode < this_frag_nodes.size() - 1; inode++)
+          new_frag->addEdge(new EFAEdge(this_frag_nodes[inode], this_frag_nodes[inode + 1]));
+
+        new_frag->addEdge(
+            new EFAEdge(this_frag_nodes[this_frag_nodes.size() - 1], this_frag_nodes[0]));
+
+        new_fragments.push_back(new_frag);
+      }
+    }
+  }
+  else if (edge_cut_count == 1) // single edge cut case
+  {
+    EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
+    for (unsigned int inode = 0; inode < fragment_nodes[0].size() - 1;
+         inode++) // assemble fragment part 1
+      new_frag->addEdge(new EFAEdge(fragment_nodes[0][inode], fragment_nodes[0][inode + 1]));
+
+    for (unsigned int inode = 0; inode < fragment_nodes[1].size() - 1;
+         inode++) // assemble fragment part 2
+      new_frag->addEdge(new EFAEdge(fragment_nodes[1][inode], fragment_nodes[1][inode + 1]));
+
+    new_frag->addEdge(
+        new EFAEdge(fragment_nodes[1][fragment_nodes[1].size() - 1], fragment_nodes[0][0]));
+
+    new_fragments.push_back(new_frag);
+  }
+  else if (node_cut_count == 1) // single node cut case
+  {
+    EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
+    for (unsigned int iedge = 0; iedge < _boundary_edges.size(); ++iedge)
+    {
+      EFANode * first_node_on_edge = _boundary_edges[iedge]->getNode(0);
+      EFANode * second_node_on_edge = _boundary_edges[iedge]->getNode(1);
+      new_frag->addEdge(new EFAEdge(first_node_on_edge, second_node_on_edge));
+    }
+
+    new_fragments.push_back(new_frag);
   }
 
   for (unsigned int frag_idx = 0; frag_idx < new_fragments.size();
@@ -864,5 +864,95 @@ EFAFragment2D::split()
     new_fragments.push_back(new_frag);
   }
 
+  return new_fragments;
+}
+
+std::vector<EFAFragment2D *>
+EFAFragment2D::branchingSplit(std::map<unsigned int, EFANode *> & EmbeddedNodes)
+{
+  // collect all emb nodes counterclockwise
+  std::vector<EFANode *> three_nodes;
+  for (unsigned int i = 0; i < _boundary_edges.size(); ++i)
+  {
+    EFANode * node1 = _boundary_edges[i]->getNode(0);
+    if (_boundary_edges[i]->numEmbeddedNodes() == 1)
+      three_nodes.push_back(_boundary_edges[i]->getEmbeddedNode(0));
+    else if (_boundary_edges[i]->numEmbeddedNodes() == 2)
+    {
+      unsigned int id0(_boundary_edges[i]->getIntersection(0, node1) <
+                               _boundary_edges[i]->getIntersection(1, node1)
+                           ? 0
+                           : 1);
+      unsigned int id1 = 1 - id0;
+      three_nodes.push_back(_boundary_edges[i]->getEmbeddedNode(id0));
+      three_nodes.push_back(_boundary_edges[i]->getEmbeddedNode(id1));
+    }
+  }
+  if (three_nodes.size() != 3)
+    EFAError("three_nodes.size() != 3, size is ", three_nodes.size());
+
+  // get the parent coords of the braycenter of the three nodes
+  // TODO: may need a better way to compute this "branching point"
+  std::vector<double> center_xi(2, 0.0);
+  for (unsigned int i = 0; i < 3; ++i)
+  {
+    std::vector<double> xi_2d(2, 0.0);
+    _host_elem->getEdgeNodeParametricCoordinate(three_nodes[i], xi_2d);
+    center_xi[0] += xi_2d[0];
+    center_xi[1] += xi_2d[1];
+  }
+  center_xi[0] /= 3.0;
+  center_xi[1] /= 3.0;
+
+  // create a new interior node for current element
+  unsigned int new_node_id = Efa::getNewID(EmbeddedNodes);
+  EFANode * new_emb = new EFANode(new_node_id, EFANode::N_CATEGORY_EMBEDDED);
+  EmbeddedNodes.insert(std::make_pair(new_node_id, new_emb));
+  _host_elem->addInteriorNode(new EFAFaceNode(new_emb, center_xi[0], center_xi[1]));
+
+  // generate the three fragments
+  std::vector<EFAFragment2D *> new_fragments;
+  for (unsigned int i = 0; i < 3; ++i) // loop over 3 sectors
+  {
+    EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
+    unsigned int iplus1(i < 2 ? i + 1 : 0);
+    new_frag->addEdge(new EFAEdge(three_nodes[iplus1], new_emb));
+    new_frag->addEdge(new EFAEdge(new_emb, three_nodes[i]));
+
+    unsigned int iedge = 0;
+    bool add_more_edges = true;
+    for (unsigned int j = 0; j < _boundary_edges.size(); ++j)
+    {
+      if (_boundary_edges[j]->containsNode(three_nodes[i]))
+      {
+        if (_boundary_edges[j]->containsNode(three_nodes[iplus1]))
+        {
+          new_frag->addEdge(new EFAEdge(three_nodes[i], three_nodes[iplus1]));
+          add_more_edges = false;
+        }
+        else
+        {
+          new_frag->addEdge(new EFAEdge(three_nodes[i], _boundary_edges[j]->getNode(1)));
+        }
+        iedge = j;
+        break;
+      }
+    } // j
+    while (add_more_edges)
+    {
+      iedge += 1;
+      if (iedge == _boundary_edges.size())
+        iedge = 0;
+      if (_boundary_edges[iedge]->containsNode(three_nodes[iplus1]))
+      {
+        new_frag->addEdge(new EFAEdge(_boundary_edges[iedge]->getNode(0), three_nodes[iplus1]));
+        add_more_edges = false;
+      }
+      else
+        new_frag->addEdge(
+            new EFAEdge(_boundary_edges[iedge]->getNode(0), _boundary_edges[iedge]->getNode(1)));
+    }
+    new_fragments.push_back(new_frag);
+  } // i
   return new_fragments;
 }

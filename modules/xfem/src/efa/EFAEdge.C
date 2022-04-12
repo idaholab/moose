@@ -420,17 +420,5 @@ EFAEdge::hasNode(EFANode * node)
   if (node == _edge_node2)
     hasNode = true;
 
-  //  //check embedded nodes for node
-  //  for (unsigned int inode = 0; inode < _embedded_nodes.size(); ++inode)
-  //    if (node == _embedded_nodes[inode])
-  //    {
-  //      hasNode = true;
-  //      break;
-  //    }
-  //
-  //  //check interior node for node
-  //  if (node == _edge_interior_node)
-  //    hasNode = true;
-
   return hasNode;
 }

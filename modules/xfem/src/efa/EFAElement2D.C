@@ -7,8 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include <iostream>
-
 #include "EFAElement2D.h"
 
 #include <iomanip>
@@ -571,16 +569,17 @@ EFAElement2D::initCrackTip(std::set<EFAElement *> & CrackTipElements)
             _edge_neighbors[edge_iter][1]->overlaysElement(this))
           EFAError("Element has a neighbor that overlays itself");
 
-        // Make sure the current elment hasn't been flagged as a tip element
-        if (_crack_tip_split_element)
-          EFAError("crack_tip_split_element already flagged.  In elem: ",
-                   _id,
-                   " flags: ",
-                   _crack_tip_split_element,
-                   " ",
-                   _edge_neighbors[edge_iter][0]->isCrackTipSplit(),
-                   " ",
-                   _edge_neighbors[edge_iter][1]->isCrackTipSplit());
+        // Make sure the current elment hasn't been flagged as a tip element, commented out to allow
+        // branching from a single element
+        //        if (_crack_tip_split_element)
+        //          EFAError("crack_tip_split_element already flagged.  In elem: ",
+        //                   _id,
+        //                   " flags: ",
+        //                   _crack_tip_split_element,
+        //                   " ",
+        //                   _edge_neighbors[edge_iter][0]->isCrackTipSplit(),
+        //                   " ",
+        //                   _edge_neighbors[edge_iter][1]->isCrackTipSplit());
 
         _edge_neighbors[edge_iter][0]->setCrackTipSplit();
         _edge_neighbors[edge_iter][1]->setCrackTipSplit();
@@ -599,7 +598,7 @@ EFAElement2D::getCrackTipSplitElementID() const
   {
     for (unsigned int edge_iter = 0; edge_iter < _num_edges; ++edge_iter)
     {
-      if ((_edge_neighbors[edge_iter].size() == 2) && (_edges[edge_iter]->hasIntersection()))
+      if ((_edge_neighbors[edge_iter].size() >= 2) && (_edges[edge_iter]->hasIntersection()))
       {
         if (_edge_neighbors[edge_iter][0] != NULL &&
             _edge_neighbors[edge_iter][0]->isCrackTipSplit())
@@ -838,11 +837,14 @@ EFAElement2D::updateFragments(const std::set<EFAElement *> & CrackTipElements,
   // count fragment's cut edges
   unsigned int num_cut_frag_edges = _fragments[0]->getNumCuts();
   unsigned int num_cut_nodes = _fragments[0]->getNumCutNodes();
-  unsigned int num_frag_edges = _fragments[0]->numEdges();
-  //  if (num_cut_frag_edges > 3)
-  //    EFAError("In element ", _id, " there are more than 2 cut fragment edges");
 
-  if (num_cut_frag_edges == 0 && num_cut_nodes == 0)
+  unsigned int num_cuts_from_idx = 0;
+  for (unsigned cut_idx = 0; cut_idx < _cut_plane_nodes.size(); ++cut_idx)
+    num_cuts_from_idx += _cut_plane_nodes[cut_idx].size();
+
+  unsigned int num_frag_edges = _fragments[0]->numEdges();
+
+  if (num_cut_frag_edges == 0)
   {
     if (!isPartial()) // delete the temp frag for an uncut elem
     {
@@ -862,17 +864,36 @@ EFAElement2D::updateFragments(const std::set<EFAElement *> & CrackTipElements,
 
   // split one fragment into one, two or three new fragments
   std::vector<EFAFragment2D *> new_frags;
-  if (num_cut_frag_edges == 3)
-    new_frags = branchingSplit(EmbeddedNodes);
+  if (num_cut_frag_edges == 3 && num_cut_nodes == 0)
+  {
+    if (isPartial())
+      EFAError("branching is only allowed for an uncut element");
+    new_frags = _fragments[0]->branchingSplit(EmbeddedNodes);
+
+    delete _fragments[0]; // delete old fragment
+    _fragments.clear();
+    _cut_plane_idx.clear();
+    _cut_plane_nodes.clear();
+    for (unsigned int i = 0; i < new_frags.size(); ++i)
+      _fragments.push_back(new_frags[i]);
+
+    fragmentSanityCheck(num_frag_edges, num_cut_frag_edges);
+  }
+  // else if (num_cut_frag_edges == 1 && num_cut_nodes == 0)
+  //   new_frags = _fragments[0]->split();
   else
+  {
     new_frags = _fragments[0]->split(EmbeddedNodes);
 
-  delete _fragments[0]; // delete the old fragment
-  _fragments.clear();
-  for (unsigned int i = 0; i < new_frags.size(); ++i)
-    _fragments.push_back(new_frags[i]);
+    delete _fragments[0]; // delete the old fragment
+    _fragments.clear();
+    _cut_plane_idx.clear();
+    _cut_plane_nodes.clear();
+    for (unsigned int i = 0; i < new_frags.size(); ++i)
+      _fragments.push_back(new_frags[i]);
 
-  fragmentSanityCheck(num_frag_edges, num_cut_frag_edges);
+    fragmentSanityCheck(num_frag_edges, num_cuts_from_idx);
+  }
 }
 
 void
@@ -915,10 +936,6 @@ EFAElement2D::fragmentSanityCheck(unsigned int n_old_frag_edges, unsigned int n_
     if (num_emb_perm[i] != 0)
       return;
 
-  //  unsigned int n_interior_nodes = numInteriorNodes();
-  //  if (n_interior_nodes > 0 && n_interior_nodes != 1)
-  //    EFAError("After update_fragments this element has ", n_interior_nodes, " interior nodes");
-
   if (n_old_frag_cuts == 0)
   {
     if (_fragments.size() != 1 || _fragments[0]->numEdges() != n_old_frag_edges)
@@ -927,30 +944,28 @@ EFAElement2D::fragmentSanityCheck(unsigned int n_old_frag_edges, unsigned int n_
   else if (n_old_frag_cuts == 1) // crack tip case
   {
     if (_fragments.size() != 1 || _fragments[0]->numEdges() != n_old_frag_edges + 1)
-      EFAError("Incorrect link size for element with 1 cut");
+      EFAError("Incorrect link size for element with 1 cut. _fragments.size() is ",
+               _fragments.size(),
+               " should be 1. _fragments[0]->numEdges() is ",
+               _fragments[0]->numEdges(),
+               " should be equal to n_old_frag_edges+1 which is ",
+               n_old_frag_edges + 1);
   }
-  else if (n_old_frag_cuts == 2)
-  {
-    if (_fragments.size() != 2 ||
-        (_fragments[0]->numEdges() + _fragments[1]->numEdges()) != n_old_frag_edges + 4)
-      EFAError("Incorrect link size for element with 2 cuts");
-  }
-  else if (n_old_frag_cuts == 3)
-  {
-    if (_fragments.size() != 3 || (_fragments[0]->numEdges() + _fragments[1]->numEdges() +
-                                   _fragments[2]->numEdges()) != n_old_frag_edges + 9)
-      EFAError("Incorrect link size for element with 3 cuts");
-  }
+  //  else if (n_old_frag_cuts == 2)
+  //  {
+  //    if (_fragments.size() != 2 ||
+  //        (_fragments[0]->numEdges() + _fragments[1]->numEdges()) != n_old_frag_edges + 4)
+  //      EFAError("Incorrect link size for element with 2 cuts");
+  //  }
+  //  else if (n_old_frag_cuts == 3)
+  //  {
+  //    if (_fragments.size() != 3 || (_fragments[0]->numEdges() + _fragments[1]->numEdges() +
+  //                                   _fragments[2]->numEdges()) != n_old_frag_edges + 9)
+  //      EFAError("Incorrect link size for element with 3 cuts");
+  //  }
   else
   {
     // TODO: fix this to check any size frag
-    //    unsigned int frag_sum = 0;
-    //    for (unsigned int ifrag = 0; ifrag < _fragments.size(); ++ifrag)
-    //      frag_sum += _fragments[ifrag]->numEdges();
-    //    if (_fragments.size() != n_old_frag_cuts || (frag_sum != n_old_frag_edges +
-    //    (n_old_frag_cuts * n_old_frag_cuts)))
-    //        EFAError("Unexpected number of old fragment cuts for size ", n_old_frag_cuts);
-    //     EFAError("Unexpected number of old fragment cuts");
   }
 }
 
@@ -1016,9 +1031,6 @@ EFAElement2D::createChild(const std::set<EFAElement *> & CrackTipElements,
   if (_fragments.size() > 1 || shouldDuplicateForCrackTip(CrackTipElements) ||
       shouldDuplicateForCutNodeElement)
   {
-    //    if (_fragments.size() > 3)
-    //      EFAError("More than 3 fragments not yet supported");
-
     // set up the children
     ParentElements.push_back(this);
     for (unsigned int ichild = 0; ichild < _fragments.size(); ++ichild)
@@ -1607,8 +1619,7 @@ EFAElement2D::fragmentHasTipEdges() const
           if (_edges[i]->containsEdge(*_fragments[0]->getEdge(j)))
             num_frag_edges += 1;
         } // j
-        if (num_frag_edges ==
-            2) // TODO: need to update this since multiple cuts could terminate in the a single edge
+        if (num_frag_edges == 2)
         {
           has_tip_edges = true;
           break;
@@ -1783,8 +1794,8 @@ EFAElement2D::addEdgeCut(unsigned int edge_id,
       }
       else
       {
-        EFAWarning("attempting to add new cut to a cut fragment edge");
-        add2elem = false; // DO NOT ADD INTERSECT IN THIS CASE
+        // EFAWarning("attempting to add new cut to a cut fragment edge");
+        add2elem = true; // Add anyway since multiple cuts are allowed
       }
     }
 
@@ -1906,14 +1917,6 @@ EFAElement2D::addFragmentEdgeCut(unsigned int frag_edge_id,
     }
     else // blank edge - in fact, it can only be a blank element interior edge
     {
-      // Removed this since we can now create additional interior edges and nodes in split
-      //      if (!_fragments[0]->isEdgeInterior(frag_edge_id) ||
-      //          _fragments[0]->isSecondaryInteriorEdge(frag_edge_id))
-      //        EFAError("Attempting to add intersection to an invalid fragment edge. Element: ",
-      //                 _id,
-      //                 " fragment_edge: ",
-      //                 frag_edge_id);
-
       // create the embedded node and add it to the fragment's boundary edge
       unsigned int new_node_id = Efa::getNewID(EmbeddedNodes);
       local_embedded = new EFANode(new_node_id, EFANode::N_CATEGORY_EMBEDDED);
@@ -1967,7 +1970,12 @@ EFAElement2D::branchingSplit(std::map<unsigned int, EFANode *> & EmbeddedNodes)
     }
   }
   if (three_nodes.size() != 3)
-    EFAError("three_nodes.size() != 3");
+    EFAError("three_nodes.size() != 3, size is ",
+             three_nodes.size(),
+             " num cuts size is ",
+             _fragments[0]->getNumCuts(),
+             " element num cuts is ",
+             getNumCuts());
 
   // get the parent coords of the braycenter of the three nodes
   // TODO: may need a better way to compute this "branching point"

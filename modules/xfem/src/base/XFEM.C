@@ -111,11 +111,7 @@ XFEM::addStateMarkedElem(unsigned int elem_id, std::vector<RealVectorValue> & no
 {
   Elem * elem = _mesh->elem_ptr(elem_id);
   std::map<const Elem *, RealVectorValue>::iterator mit;
-  //  mit = _state_marked_elems.find(elem);
-  //  if (mit != _state_marked_elems.end())
-  //    mooseError(" ERROR: element ", elem->id(), " already marked for crack growth.");
   _state_marked_elems[elem] = normal;
-  //  _state_marked_elems.insert(std::pair<const Elem *, RealVectorValue>(elem, normal));
 }
 
 void
@@ -593,8 +589,8 @@ XFEM::markCutEdgesByState(Real time)
         continue;
 
       // continue if elem is already cut twice - IMPORTANT
-      if (CEMElem->isFinalCut())
-        continue;
+      //      if (CEMElem->isFinalCut())
+      //        continue;
 
       // find the first cut edge
       unsigned int nsides = CEMElem->numEdges();
@@ -636,8 +632,7 @@ XFEM::markCutEdgesByState(Real time)
         std::set<const Elem *>::iterator mit2;
         mit2 = _state_marked_frags.find(elem);
 
-        while (mit1 == _state_marked_elem_sides.find(elem) &&
-               mit1 != _state_marked_elem_sides.end()) // specified boundary crack initiation
+        if (mit1 != _state_marked_elem_sides.end()) // specified boundary crack initiation
         {
           orig_cut_side_id = mit1->second;
           if (!CEMElem->isEdgePhantom(orig_cut_side_id) &&
@@ -665,11 +660,8 @@ XFEM::markCutEdgesByState(Real time)
           }
           else
             continue; // skip this elem if specified boundary edge is phantom
-
-          ++mit1;
         }
-        while (mit2 == _state_marked_frags.find(elem) &&
-               mit2 != _state_marked_frags.end()) // cut-surface secondary crack initiation
+        else if (mit2 != _state_marked_frags.end()) // cut-surface secondary crack initiation
         {
           if (CEMElem->numFragments() != 1)
             mooseError("element ",
@@ -704,10 +696,8 @@ XFEM::markCutEdgesByState(Real time)
           crack_tip_origin = edge_center;
           crack_tip_direction = elem_center - edge_center;
           crack_tip_direction /= pow(crack_tip_direction.norm_sq(), 0.5);
-
-          ++mit2;
         }
-        if (mit1 == _state_marked_elem_sides.end() && mit2 == _state_marked_frags.end())
+        else
           mooseError("element ",
                      elem->id(),
                      " flagged for state-based growth, but has no edge intersections");
@@ -840,9 +830,9 @@ XFEM::markCutEdgesByState(Real time)
         }
       }
 
-      marked_edges = true;
       CEMElem->getNewCutPlaneIdx();
     }
+    marked_edges = true;
   } // loop over all state_marked_elems
 
   return marked_edges;
@@ -926,11 +916,6 @@ XFEM::healMesh()
   std::set<unsigned int> cutelems_to_delete;
   unsigned int deleted_elem_count = 0;
   std::vector<std::string> healed_geometric_cuts;
-
-  // clear stored material properties
-  _healed_elems.clear();
-  _healed_material_properties_used.clear();
-  _healed_cuts.clear();
 
   for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
   {

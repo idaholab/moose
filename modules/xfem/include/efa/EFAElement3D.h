@@ -156,8 +156,7 @@ public:
                           bool add_to_adjacent);
   std::vector<EFANode *> getCommonNodes(const EFAElement3D * other_elem) const;
   /**
-   * Return unsigned int for the current element
-   * @param node   The EFANode object to be compared against the vector of interior nodes
+   * Return unsigned int for the current cut plane index
    */
   unsigned int getNewCutPlaneIdx();
 

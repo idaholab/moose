@@ -126,6 +126,7 @@
     type = Exodiff
     input = square_branch_quad_2d_simultaneously.i
     exodiff = 'square_branch_quad_2d_simultaneously_out.e square_branch_quad_2d_simultaneously_out.e-s002'
+    abs_zero = 1e-9
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
