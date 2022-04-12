@@ -22,6 +22,12 @@ INSFVAdvectionKernel::validParams()
   // We need 2 ghost layers for the Rhie-Chow interpolation
   params.set<unsigned short>("ghost_layers") = 2;
   params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
+
+  // We currently do not have a need for this, boundary conditions tell us where to execute
+  // advection kernels
+  params.suppressParameter<bool>("force_boundary_execution");
+  params.suppressParameter<std::vector<BoundaryName>>("boundaries_to_force");
+
   return params;
 }
 
@@ -87,12 +93,11 @@ INSFVAdvectionKernel::initialSetup()
 bool
 INSFVAdvectionKernel::skipForBoundary(const FaceInfo & fi) const
 {
-  for (const auto bnd_id : fi.boundaryIDs())
-    if (_boundaries_to_avoid.find(bnd_id) != _boundaries_to_avoid.end())
-    {
-      return true;
-    }
+  // Boundaries to avoid come first, since they are always obeyed
+  if (avoidBoundary())
+    return true;
 
+  // We're not on a boundary, so technically we're not skipping a boundary
   if (!onBoundary(fi))
     return false;
 
