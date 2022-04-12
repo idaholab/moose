@@ -37,6 +37,16 @@
     issues = '#8810'
   [../]
 
+  [./hex_kdtree]
+    type = 'Exodiff'
+    input = 'hex.i'
+    exodiff = 'hex_out.e'
+    cli_args = 'UserObjects/hex_ic/use_kdtree=true UserObjects/hex_ic/point_patch_size=4'
+    requirement = 'A hexagonal grain structure IC shall be provided using KDTree'
+    design = 'PolycrystalHex.md'
+    issues = '#8810'
+  [../]
+
   [./boundingbox]
     type = 'Exodiff'
     input = 'boundingbox.i'

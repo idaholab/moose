@@ -23,16 +23,16 @@ public:
 
   virtual ~KDTree() = default;
 
-  void neighborSearch(Point & query_point,
+  void neighborSearch(const Point & query_point,
                       unsigned int patch_size,
                       std::vector<std::size_t> & return_index);
 
-  void neighborSearch(Point & query_point,
+  void neighborSearch(const Point & query_point,
                       unsigned int patch_size,
                       std::vector<std::size_t> & return_index,
                       std::vector<Real> & return_dist_sqr);
 
-  void radiusSearch(Point & query_point,
+  void radiusSearch(const Point & query_point,
                     Real radius,
                     std::vector<std::pair<std::size_t, Real>> & indices_dist);
 
