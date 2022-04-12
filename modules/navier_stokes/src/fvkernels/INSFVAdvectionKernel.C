@@ -21,7 +21,6 @@ INSFVAdvectionKernel::validParams()
   params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
   // We need 2 ghost layers for the Rhie-Chow interpolation
   params.set<unsigned short>("ghost_layers") = 2;
-  params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
 
   // We currently do not have a need for this, boundary conditions tell us where to execute
   // advection kernels
