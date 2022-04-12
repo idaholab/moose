@@ -6,12 +6,14 @@
     [nested]
       type = Exodiff
       input = 'diffusion.i'
+      cli_args = "AuxKernels/inactive='v'"
       exodiff = 'out.e'
       detail = "nested under an AuxVariable, and"
     []
     [standard]
       type = Exodiff
       input = 'diffusion.i'
+      cli_args = "AuxVariables/v/inactive='AuxKernel'"
       exodiff = 'out.e'
       detail = "it shall produce the same output as with the standard syntax."
     []

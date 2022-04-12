@@ -12,6 +12,11 @@
   [v]
     order = SECOND
     family = MONOMIAL
+    [AuxKernel]
+      type = ParsedAux
+      function = '3*x^2*y'
+      use_xyzt = true
+    []
   []
 []
 
