@@ -147,7 +147,15 @@ public:
   ///@{ Optional material property getters
   template <typename T, bool is_ad>
   const GenericOptionalMaterialProperty<T, is_ad> &
-  getGenericOptionalMaterialProperty(const std::string & name);
+  genericOptionalMaterialPropertyHelper(const std::string & name, MaterialPropState state);
+
+  template <typename T, bool is_ad>
+  const GenericOptionalMaterialProperty<T, is_ad> &
+  getGenericOptionalMaterialProperty(const std::string & name)
+  {
+    return genericOptionalMaterialPropertyHelper<T, is_ad>(name, MaterialPropState::CURRENT);
+  }
+
   template <typename T>
   const OptionalMaterialProperty<T> & getOptionalMaterialProperty(const std::string & name)
   {
@@ -157,6 +165,17 @@ public:
   const OptionalADMaterialProperty<T> & getOptionalADMaterialProperty(const std::string & name)
   {
     return getGenericOptionalMaterialProperty<T, true>(name);
+  }
+
+  template <typename T>
+  const OptionalMaterialProperty<T> & getOptionalMaterialPropertyOld(const std::string & name)
+  {
+    return genericOptionalMaterialPropertyHelper<T, false>(name, MaterialPropState::OLD);
+  }
+  template <typename T>
+  const OptionalMaterialProperty<T> & getOptionalMaterialPropertyOlder(const std::string & name)
+  {
+    return genericOptionalMaterialPropertyHelper<T, false>(name, MaterialPropState::OLDER);
   }
   ///@}
 
@@ -294,7 +313,7 @@ Material::getMaterialPropertyByName(const std::string & prop_name_in)
           ? prop_name_in
           : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
   _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, MaterialBase::CURRENT);
+  registerPropName(prop_name, true, MaterialPropState::CURRENT);
   return MaterialPropertyInterface::getMaterialPropertyByName<T>(prop_name_in);
 }
 
@@ -310,7 +329,7 @@ Material::getADMaterialPropertyByName(const std::string & prop_name_in)
           ? prop_name_in
           : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
   _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, MaterialBase::CURRENT);
+  registerPropName(prop_name, true, MaterialPropState::CURRENT);
   return MaterialPropertyInterface::getADMaterialPropertyByName<T>(prop_name_in);
 }
 
@@ -322,7 +341,7 @@ Material::getMaterialPropertyOldByName(const std::string & prop_name_in)
       _get_suffix.empty()
           ? prop_name_in
           : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
-  registerPropName(prop_name, true, MaterialBase::OLD);
+  registerPropName(prop_name, true, MaterialPropState::OLD);
   return MaterialPropertyInterface::getMaterialPropertyOldByName<T>(prop_name_in);
 }
 
@@ -334,15 +353,15 @@ Material::getMaterialPropertyOlderByName(const std::string & prop_name_in)
       _get_suffix.empty()
           ? prop_name_in
           : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
-  registerPropName(prop_name, true, Material::OLDER);
+  registerPropName(prop_name, true, MaterialPropState::OLDER);
   return MaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name_in);
 }
 
 template <typename T, bool is_ad>
 const GenericOptionalMaterialProperty<T, is_ad> &
-Material::getGenericOptionalMaterialProperty(const std::string & name)
+Material::genericOptionalMaterialPropertyHelper(const std::string & name, MaterialPropState state)
 {
-  auto proxy = std::make_unique<OptionalMaterialPropertyProxy<Material, T, is_ad>>(name);
+  auto proxy = std::make_unique<OptionalMaterialPropertyProxy<Material, T, is_ad>>(name, state);
   auto & optional_property = proxy->value();
   _optional_property_proxies.push_back(std::move(proxy));
   return optional_property;

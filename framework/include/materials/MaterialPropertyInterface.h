@@ -34,12 +34,16 @@ template <class M>
 class OptionalMaterialPropertyProxyBase
 {
 public:
-  OptionalMaterialPropertyProxyBase(const std::string & name) : _name(name) {}
+  OptionalMaterialPropertyProxyBase(const std::string & name, MaterialPropState state)
+    : _name(name), _state(state)
+  {
+  }
   virtual ~OptionalMaterialPropertyProxyBase() {}
   virtual void resolve(M & material) = 0;
 
 protected:
   const std::string _name;
+  const MaterialPropState _state;
 };
 
 /**
@@ -120,7 +124,15 @@ public:
   ///@{ Optional material property getters
   template <typename T, bool is_ad>
   const GenericOptionalMaterialProperty<T, is_ad> &
-  getGenericOptionalMaterialProperty(const std::string & name);
+  genericOptionalMaterialPropertyHelper(const std::string & name, MaterialPropState state);
+
+  template <typename T, bool is_ad>
+  const GenericOptionalMaterialProperty<T, is_ad> &
+  getGenericOptionalMaterialProperty(const std::string & name)
+  {
+    return genericOptionalMaterialPropertyHelper<T, is_ad>(name, MaterialPropState::CURRENT);
+  }
+
   template <typename T>
   const OptionalMaterialProperty<T> & getOptionalMaterialProperty(const std::string & name)
   {
@@ -130,6 +142,17 @@ public:
   const OptionalADMaterialProperty<T> & getOptionalADMaterialProperty(const std::string & name)
   {
     return getGenericOptionalMaterialProperty<T, true>(name);
+  }
+
+  template <typename T>
+  const OptionalMaterialProperty<T> & getOptionalMaterialPropertyOld(const std::string & name)
+  {
+    return genericOptionalMaterialPropertyHelper<T, false>(name, MaterialPropState::OLD);
+  }
+  template <typename T>
+  const OptionalMaterialProperty<T> & getOptionalMaterialPropertyOlder(const std::string & name)
+  {
+    return genericOptionalMaterialPropertyHelper<T, false>(name, MaterialPropState::OLDER);
   }
   ///@}
 
@@ -414,15 +437,34 @@ template <class M, typename T, bool is_ad>
 class OptionalMaterialPropertyProxy : public OptionalMaterialPropertyProxyBase<M>
 {
 public:
-  OptionalMaterialPropertyProxy(const std::string & name)
-    : OptionalMaterialPropertyProxyBase<M>(name)
+  OptionalMaterialPropertyProxy(const std::string & name, MaterialPropState state)
+    : OptionalMaterialPropertyProxyBase<M>(name, state)
   {
   }
   const GenericOptionalMaterialProperty<T, is_ad> & value() const { return _value; }
   void resolve(M & mpi) override
   {
     if (mpi.template hasGenericMaterialProperty<T, is_ad>(this->_name))
-      _value.set(&mpi.template getGenericMaterialProperty<T, is_ad>(this->_name));
+      switch (this->_state)
+      {
+        case MaterialPropState::CURRENT:
+          _value.set(&mpi.template getGenericMaterialProperty<T, is_ad>(this->_name));
+          break;
+
+        case MaterialPropState::OLD:
+          if constexpr (is_ad)
+            mooseError("Old material properties are not available as AD");
+          else
+            _value.set(&mpi.template getMaterialPropertyOld<T>(this->_name));
+          break;
+
+        case MaterialPropState::OLDER:
+          if constexpr (is_ad)
+            mooseError("Older material properties are not available as AD");
+          else
+            _value.set(&mpi.template getMaterialPropertyOlder<T>(this->_name));
+          break;
+      }
   }
 
 private:
@@ -742,10 +784,11 @@ MaterialPropertyInterface::hasADMaterialPropertyByName(const std::string & name_
 
 template <typename T, bool is_ad>
 const GenericOptionalMaterialProperty<T, is_ad> &
-MaterialPropertyInterface::getGenericOptionalMaterialProperty(const std::string & name)
+MaterialPropertyInterface::genericOptionalMaterialPropertyHelper(const std::string & name,
+                                                                 MaterialPropState state)
 {
-  auto proxy =
-      std::make_unique<OptionalMaterialPropertyProxy<MaterialPropertyInterface, T, is_ad>>(name);
+  auto proxy = std::make_unique<OptionalMaterialPropertyProxy<MaterialPropertyInterface, T, is_ad>>(
+      name, state);
   auto & optional_property = proxy->value();
   _optional_property_proxies.push_back(std::move(proxy));
   return optional_property;

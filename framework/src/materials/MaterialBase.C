@@ -141,7 +141,7 @@ MaterialBase::checkStatefulSanity() const
 }
 
 void
-MaterialBase::registerPropName(std::string prop_name, bool is_get, Prop_State state)
+MaterialBase::registerPropName(std::string prop_name, bool is_get, MaterialPropState state)
 {
   if (!is_get)
   {
@@ -149,7 +149,7 @@ MaterialBase::registerPropName(std::string prop_name, bool is_get, Prop_State st
     const auto & property_id = materialData().getPropertyId(prop_name);
     _supplied_prop_ids.insert(property_id);
 
-    _props_to_flags[prop_name] |= static_cast<int>(state);
+    _props_to_flags[prop_name] |= static_cast<MaterialPropStateInt>(state);
 
     // Store material properties for block ids
     for (const auto & block_id : blockIDs())
@@ -160,7 +160,7 @@ MaterialBase::registerPropName(std::string prop_name, bool is_get, Prop_State st
       _fe_problem.storeBoundaryMatPropName(boundary_id, prop_name);
   }
 
-  if (static_cast<int>(state) % 2 == 0)
+  if (static_cast<MaterialPropStateInt>(state) % 2 == 0)
     _has_stateful_property = true;
 }
 
