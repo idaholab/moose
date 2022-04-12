@@ -89,9 +89,8 @@ bool
 FVFluxKernel::skipForBoundary(const FaceInfo & fi) const
 {
   // Boundaries to avoid come first, since they are always obeyed
-  for (const auto bnd_id : fi.boundaryIDs())
-    if (_boundaries_to_avoid.find(bnd_id) != _boundaries_to_avoid.end())
-      return true;
+  if (avoidBoundary(fi))
+    return true;
 
   // Blanket forcing on boundary
   if (_force_boundary_execution)
@@ -349,4 +348,13 @@ FVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
   const auto sub_id = use_elem ? fi->elem().subdomain_id() : fi->neighborPtr()->subdomain_id();
 
   return {fi, limiter_type, true, correct_skewness, sub_id};
+}
+
+bool
+FVFluxKernel::avoidBoundary(const FaceInfo & fi) const
+{
+  for (const auto bnd_id : fi.boundaryIDs())
+    if (_boundaries_to_avoid.count(bnd_id))
+      return true;
+  return false;
 }

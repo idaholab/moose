@@ -94,7 +94,7 @@ bool
 INSFVAdvectionKernel::skipForBoundary(const FaceInfo & fi) const
 {
   // Boundaries to avoid come first, since they are always obeyed
-  if (avoidBoundary())
+  if (avoidBoundary(fi))
     return true;
 
   // We're not on a boundary, so technically we're not skipping a boundary
