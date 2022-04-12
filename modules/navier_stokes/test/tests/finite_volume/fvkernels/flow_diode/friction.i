@@ -82,22 +82,6 @@ rho = 1
     momentum_component = 'x'
     pressure = pressure
   []
-  [diodes_against_flow]
-    type = INSFVFrictionFlowDiode
-    resistance = 100
-    variable = vel_x
-    direction = '-1 0 0'
-    block = 1
-    momentum_component = 'x'
-  []
-  [diode_free_flow]
-    type = INSFVFrictionFlowDiode
-    resistance = 100
-    variable = vel_x
-    direction = '1 0 0'
-    block = 2
-    momentum_component = 'y'
-  []
 
   [v_advection]
     type = INSFVMomentumAdvection
@@ -116,6 +100,40 @@ rho = 1
     variable = vel_y
     momentum_component = 'y'
     pressure = pressure
+  []
+
+  [diodes_against_flow_x]
+    type = INSFVFrictionFlowDiode
+    resistance = 100
+    variable = vel_x
+    direction = '-1 0 0'
+    block = 1
+    momentum_component = 'x'
+  []
+  [diodes_against_flow_y]
+    type = INSFVFrictionFlowDiode
+    resistance = 100
+    variable = vel_y
+    direction = '-1 0 0'
+    block = 1
+    momentum_component = 'y'
+  []
+
+  [diode_free_flow_x]
+    type = INSFVFrictionFlowDiode
+    resistance = 100
+    variable = vel_x
+    direction = '1 0 0'
+    block = 2
+    momentum_component = 'x'
+  []
+  [diode_free_flow_y]
+    type = INSFVFrictionFlowDiode
+    resistance = 100
+    variable = vel_y
+    direction = '1 0 0'
+    block = 2
+    momentum_component = 'y'
   []
 []
 
@@ -157,8 +175,8 @@ rho = 1
 [Executioner]
   type = Steady
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -ksp_gmres_restart'
-  petsc_options_value = 'asm      lu           NONZERO                   200'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -ksp_gmres_restart'
+  petsc_options_value = 'lu       NONZERO               200'
   line_search = 'none'
 
   nl_abs_tol = 1e-14
