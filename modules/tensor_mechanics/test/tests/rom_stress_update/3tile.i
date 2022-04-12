@@ -1,3 +1,7 @@
+# Tests the tile and partition assembly for overlapping partitions and
+# a variety of different overlapping tile conditions.
+# Creep_rate should always be 2.718281828459
+
 endtime = 1.8
 
 [Mesh]
