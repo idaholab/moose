@@ -33,11 +33,11 @@ private:
   std::vector<std::vector<EFAElement2D *>> _edge_neighbors;
   std::vector<EFAFragment2D *> _fragments;
   std::vector<EFAPoint> _local_node_coor;
-  // Index of the current cut plane
+  /// Index of the current cut plane
   unsigned int _current_cut_plane_idx = 0;
-  // Vector of cut plane indices
+  /// Vector of cut plane indices
   std::vector<unsigned int> _cut_plane_idx;
-  // Vector of vectors tracking nodes cut by each cut index referenced against _cut_plane_idx
+  /// Vector of vectors tracking nodes cut by each cut index referenced against _cut_plane_idx
   std::vector<std::vector<EFANode *>> _cut_plane_nodes;
 
 public:
@@ -141,37 +141,86 @@ public:
   void addInteriorNode(EFAFaceNode * faceNode);
 
   /**
-   * Return boolean answer for if the input node is on the interior of the current element
+   * Determine if the input node is on the interior of the current element
    * @param node   The EFANode object to be compared against the vector of interior nodes
+   * @return bool indicating whether it is in the interior
    */
   bool isInteriorNode(EFANode * node) const;
   /**
-   * Return the faceNode object containing the input EFANode
-   * @param node   The EFANode object to be compared against the vector of interior nodes, then
-   * returning the faceNode containing the input node
+   * Determine the faceNode object containing the input EFANode
+   * @param node   The EFANode object to be compared against the vector of interior nodes
+   * @return EFAFaceNode faceNode containing the input node
    */
   EFAFaceNode * getFaceNode(EFANode * node) const;
   /**
-   * Return boolean answer for if the input node's coordinates are found
+   * Determine if the input node's coordinates are found
    * @param node   The EFANode object to be checked against interior nodes and then edge nodes to
    * find its parametric coordinates
    * @param para_coor   The vector of doubles, initially empty but parametric coordinates are added
    * once found in either interior node or edge node
+   * @return bool indicating if input node's coordinates were found
    */
   bool getNodeParametricCoordinate(EFANode * node, std::vector<double> & para_coor) const;
-
+  /// change cut plane idx to next int
   void getNewCutPlaneIdx();
+  /**
+   * Determine current cut plane index
+   * @return unsigned int of current cut plane index
+   */
   unsigned int getCurrentCutPlaneIdx();
+  /**
+   * Add Node to cut plane index
+   * @param node to be added to input cut plane index number
+   * @param unsigned int cut indicates what cut plane the node is interacting with
+   */
   void addNodeToCutPlaneIdx(EFANode * node, unsigned int cut);
+  /**
+   * Reassign input node to a different cut plane index
+   * @param node   The EFANode to be reassigned
+   * @param unsigned int of cut plane index that node is to be reassigned to
+   */
   void reassignNodeToCutPlaneIdx(EFANode * node, unsigned int cut);
+  /**
+   * Get all cut plane nodes in a vector of vector
+   * @return vector of vectors containing all cut nodes binned by cut plane index
+   */
   std::vector<std::vector<EFANode *>> getCutPlaneNodes();
+  /**
+   * Get vector of cut plane indices
+   * @return vector of all cut plane indices
+   */
   std::vector<unsigned int> getCutPlaneIndices();
+  /**
+   * Remove input node from cut plane index
+   * @param node   The EFANode to be released
+   * @param unsigned int of cut plane index that node is to be released from
+   */
   void removeCutPlaneNode(EFANode * node, unsigned int cut);
+  /**
+   * Delete cut plane index for vector of indices
+   * @param unsigned int cut is the cut plane index to be deleted
+   */
   void removeCutPlane(unsigned int cut);
+  /**
+   * Compares input node against all nodes of element to determine if they have the same cut
+   * @param otherNode is an EFANode to check against all element nodes
+   * @param unsigned int of cut plane to check for in nodes
+   * @return bool indicating if nodes have the same cut plane
+   */
   bool hasSameCut(EFANode * otherNode, unsigned int cut);
+  /**
+   * Determines the number of solo or unpaired nodes
+   * @return unsigned int of number of nodes
+   */
   unsigned int numSoloNodes();
+  /**
+   * Pairs solo nodes in an element by giving them the same cut plane index
+   */
   void pairSoloNodes();
-
+  /**
+   * Adds an cut EFANode to all neighbor elements that share common nodes on the cut edge
+   * @param cut_node is an EFANode to be added to element neighbor
+   */
   void addNodeCutToNeighbors(EFANode * cut_node);
 
 private:
