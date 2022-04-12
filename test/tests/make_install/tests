@@ -10,6 +10,18 @@
   issues = '#19022'
   design = 'MooseApp.md'
 
+  [show_copyable_inputs]
+    type = 'RunApp'
+    cli_args = "--show-copyable-inputs"
+    no_additional_cli_args = True
+    expect_out = 'The following directories are installable.*tests'
+    # no_additional_cli_args strips all other options, including valgrind...
+    # so we can't actually test this with valgrind
+    valgrind = none
+
+    requirement = 'The system shall support the ability to report installable inputs on the command line.'
+  []
+
   [test_copy_install]
     requirement = 'The system shall support the ability to "install" inputs:'
     [setup_fake_test_structure]
@@ -42,7 +54,7 @@
       working_directory = '../../../make_install_test'
       input = 'DUMMY'
       should_execute = False
-      check_files = 'moose_test_tests/testroot moose_test_tests/version/tests'
+      check_files = 'moose_test/tests/testroot moose_test/tests/version/tests'
       installed = False
       prereq = 'test_copy_install/copy_tests'
 
@@ -63,11 +75,11 @@
 
     [link_exec_installed]
       type = 'RunCommand'
-      command = 'for bin in `ls ../../test/moose_test-*`
+      command = 'for bin in `ls ../../../test/moose_test-*`
                  do
                  ln -sf $bin .
                  done'
-      working_directory = '../../../make_install_test/moose_test_tests'
+      working_directory = '../../../make_install_test/moose_test/tests'
       installed = False
       prereq = 'test_copy_install/copy_warn_overwrite'
 
@@ -77,7 +89,7 @@
     [run]
       type = 'RunApp'
       cli_args = "--run"
-      working_directory = "../../../make_install_test/moose_test_tests"
+      working_directory = "../../../make_install_test/moose_test/tests"
       no_additional_cli_args = True
       installed = False
       prereq = 'test_copy_install/link_exec_installed'

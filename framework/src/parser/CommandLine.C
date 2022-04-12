@@ -247,14 +247,19 @@ CommandLine::search(const std::string & option_name)
   mooseError("Unrecognized option name: ", option_name);
 }
 
-void
-CommandLine::printUsage() const
+std::string
+CommandLine::getExecutableName() const
 {
   // Grab the first item out of argv
   std::string command(_args[0]);
   command.substr(command.find_last_of("/\\") + 1);
+  return command;
+}
 
-  Moose::out << "Usage: " << command << " [<options>]\n\n"
+void
+CommandLine::printUsage() const
+{
+  Moose::out << "Usage: " << getExecutableName() << " [<options>]\n\n"
              << "Options:\n"
              << std::left;
 
