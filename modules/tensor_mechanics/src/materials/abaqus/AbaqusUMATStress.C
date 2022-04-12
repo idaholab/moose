@@ -58,18 +58,20 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _aqPROPS(getParam<std::vector<Real>>("constant_properties")),
     _aqNPROPS(_aqPROPS.size()),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
+    _total_strain(getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
     _total_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
-    _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
+    _strain_increment(getOptionalMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
-    _Fbar(getMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _Fbar_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _Fbar(getOptionalMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _Fbar_old(getOptionalMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
     _state_var(declareProperty<std::vector<Real>>(_base_name + "state_var")),
     _state_var_old(getMaterialPropertyOld<std::vector<Real>>(_base_name + "state_var")),
     _elastic_strain_energy(declareProperty<Real>(_base_name + "elastic_strain_energy")),
     _plastic_dissipation(declareProperty<Real>(_base_name + "plastic_dissipation")),
     _creep_dissipation(declareProperty<Real>(_base_name + "creep_dissipation")),
     _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit")),
-    _rotation_increment(getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
+    _rotation_increment(
+        getOptionalMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _temperature(coupledValue("temperature")),
     _temperature_old(coupledValueOld("temperature")),
     _external_fields(coupledValues("external_fields")),
@@ -79,7 +81,8 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _number_external_properties(_external_property_names.size()),
     _external_properties(_number_external_properties),
     _external_properties_old(_number_external_properties),
-    _use_one_based_indexing(getParam<bool>("use_one_based_indexing"))
+    _use_one_based_indexing(getParam<bool>("use_one_based_indexing")),
+    _nan_buf(9, NAN)
 {
   if (!_use_one_based_indexing)
     mooseDeprecated(
@@ -114,13 +117,21 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
 }
 
 void
+AbaqusUMATStress::initialSetup()
+{
+  // if any of these optional properties are not available, we need to check the
+  // UMAT results for NaNs
+  _check_nan = !_strain_increment || !_Fbar || !_Fbar_old || !_rotation_increment;
+}
+
+void
 AbaqusUMATStress::initQpStatefulProperties()
 {
   ComputeStressBase::initQpStatefulProperties();
 
   // Initialize state variable vector
   _state_var[_qp].resize(_aqNSTATV);
-  for (int i = 0; i < _aqNSTATV; ++i)
+  for (const auto i : make_range(_aqNSTATV))
     _state_var[_qp][i] = 0.0;
 }
 
@@ -152,12 +163,12 @@ AbaqusUMATStress::computeProperties()
 void
 AbaqusUMATStress::computeQpStress()
 {
-  const Real * myDFGRD0 = &(_Fbar_old[_qp](0, 0));
-  const Real * myDFGRD1 = &(_Fbar[_qp](0, 0));
-  const Real * myDROT = &(_rotation_increment[_qp](0, 0));
+  const Real * myDFGRD0 = _Fbar_old ? &(_Fbar_old[_qp](0, 0)) : _nan_buf.data();
+  const Real * myDFGRD1 = _Fbar ? &(_Fbar[_qp](0, 0)) : _nan_buf.data();
+  const Real * myDROT = _rotation_increment ? &(_rotation_increment[_qp](0, 0)) : _nan_buf.data();
 
   // copy because UMAT does not guarantee constness
-  for (unsigned int i = 0; i < 9; ++i)
+  for (const auto i : make_range(9))
   {
     _aqDFGRD0[i] = myDFGRD0[i];
     _aqDFGRD1[i] = myDFGRD1[i];
@@ -165,7 +176,7 @@ AbaqusUMATStress::computeQpStress()
   }
 
   // Recover "old" state variables
-  for (int i = 0; i < _aqNSTATV; ++i)
+  for (const auto i : make_range(_aqNSTATV))
     _aqSTATEV[i] = _state_var_old[_qp][i];
 
   // Pass through updated stress, total strain, and strain increment arrays
@@ -175,13 +186,16 @@ AbaqusUMATStress::computeQpStress()
   static const std::array<std::pair<unsigned int, unsigned int>, 6> component{
       {{0, 0}, {1, 1}, {2, 2}, {0, 1}, {0, 2}, {1, 2}}};
 
-  for (int i = 0; i < _aqNTENS; ++i)
+  for (const auto i : make_range(_aqNTENS))
   {
-    _aqSTRESS[i] = _stress_old[_qp](component[i].first, component[i].second);
-    _aqSTRAN[i] =
-        _total_strain_old[_qp](component[i].first, component[i].second) * strain_factor[i];
-    _aqDSTRAN[i] =
-        _strain_increment[_qp](component[i].first, component[i].second) * strain_factor[i];
+    const auto a = component[i].first;
+    const auto b = component[i].second;
+    _aqSTRESS[i] = _stress_old[_qp](a, b);
+    _aqSTRAN[i] = _total_strain_old[_qp](a, b) * strain_factor[i];
+    _aqDSTRAN[i] = _strain_increment
+                       ? _strain_increment[_qp](a, b)
+                       : (_total_strain[_qp](a, b) - _total_strain_old[_qp](a, b)); // or NAN
+    _aqDSTRAN[i] *= strain_factor[i];
   }
 
   // current coordinates
@@ -287,18 +301,30 @@ AbaqusUMATStress::computeQpStress()
   _stress[_qp] = RankTwoTensor(
       _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[5], _aqSTRESS[4], _aqSTRESS[3]);
 
+  // check entries for NaN
+  if (_check_nan)
+    for (const auto i : make_range(6))
+      if (std::isnan(_aqSTRESS[i]))
+        mooseError(
+            "The UMAT plugin in AbaqusUMATStress '",
+            name(),
+            "' returned NaNs in the computed stress and the MOOSE simulation is not using an "
+            "incremental/finite strain formulation. This likely means that the used UMAT plugin is "
+            "incompatible with a small strain formulation and relies on incremental quantities.");
+
   // Rotate the stress state to the current configuration
-  _stress[_qp].rotate(_rotation_increment[_qp]);
+  if (_rotation_increment)
+    _stress[_qp].rotate(_rotation_increment[_qp]);
 
   // Build Jacobian matrix from UMAT's Voigt non-standard order to fourth order tensor.
   const unsigned int N = LIBMESH_DIM;
   const unsigned int ntens = N * (N + 1) / 2;
   const int nskip = N - 1;
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
+        for (const auto l : make_range(N))
         {
           if (i == j)
             _jacobian_mult[_qp](i, j, k, l) =
