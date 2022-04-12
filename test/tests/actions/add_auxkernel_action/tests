@@ -1,0 +1,19 @@
+[Tests]
+  [syntax]
+    design = 'AuxVariables/AuxKernel/index.md'
+    issues = '#20753'
+    requirement = "The system shall allow the shortcut syntax specifying an AuxKernel"
+    [nested]
+      type = Exodiff
+      input = 'diffusion.i'
+      exodiff = 'out.e'
+      detail = "nested under an AuxVariable, and"
+    []
+    [standard]
+      type = Exodiff
+      input = 'diffusion.i'
+      exodiff = 'out.e'
+      detail = "it shall produce the same output as with the standard syntax."
+    []
+  []
+[]

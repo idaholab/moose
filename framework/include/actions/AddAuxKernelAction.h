@@ -11,6 +11,10 @@
 
 #include "MooseObjectAction.h"
 
+/**
+ * Action to add AuxKernel nested within an AuxVariable. The variable parameter is deduced from the
+ * hit path.
+ */
 class AddAuxKernelAction : public MooseObjectAction
 {
 public:
