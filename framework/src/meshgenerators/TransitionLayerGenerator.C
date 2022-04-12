@@ -10,10 +10,6 @@
 #include "TransitionLayerGenerator.h"
 #include "TransitionLayerTools.h"
 
-// C++ includes
-#include <cmath>
-#include <iostream>
-
 registerMooseObject("MooseApp", TransitionLayerGenerator);
 
 InputParameters

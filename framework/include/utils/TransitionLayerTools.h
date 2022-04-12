@@ -201,7 +201,7 @@ bool isBoundaryValid(ReplicatedMesh & mesh,
                      const boundary_id_type bid);
 
 /**
- * Decides whether a boundary of a given mesh works is an external boundary.
+ * Decides whether a boundary of a given mesh is an external boundary.
  * @param mesh input mesh that contains the boundary to be examined
  * @param bid ID of the boundary to be examined
  * @return whether the boundary is the external boundary of the given mesh

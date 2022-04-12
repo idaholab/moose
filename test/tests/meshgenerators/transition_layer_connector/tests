@@ -46,7 +46,7 @@
     cli_args = '--mesh-only squares_err.e
                Mesh/tlc/boundary_1="top bottom"'
     expect_err = 'The provided boundary is not a single-segment boundary.'
-    requirement ="The system shall throw an error if the input boundary has multiple segments."
+    requirement = "The system shall throw an error if one of the input boundary to generate a mesh in-between has multiple segments."
     mesh_mode = 'REPLICATED'
   []
 []

@@ -14,9 +14,6 @@
 #include "CastUniquePointer.h"
 #include "libmesh/node.h"
 
-// C++ includes
-#include <cmath>
-
 registerMooseObject("MooseApp", TransitionLayerConnector);
 
 InputParameters
@@ -28,15 +25,15 @@ TransitionLayerConnector::validParams()
   params.addRequiredParam<MeshGeneratorName>("input_mesh_2",
                                              "The input mesh that contains boundary_2");
   params.addRequiredParam<std::vector<BoundaryName>>(
-      "boundary_1", "the first boundary that need to be connected.");
+      "boundary_1", "the first boundary that needs to be connected.");
   params.addRequiredParam<std::vector<BoundaryName>>(
-      "boundary_2", "the second boundary that need to be connected.");
+      "boundary_2", "the second boundary that needs to be connected.");
   params.addParam<Point>(
       "mesh_1_shift", Point(0.0, 0.0, 0.0), "The translate vector to be applied to input_mesh_1");
   params.addParam<Point>(
       "mesh_2_shift", Point(0.0, 0.0, 0.0), "The translate vector to be applied to input_mesh_2");
   params.addRequiredRangeCheckedParam<unsigned int>(
-      "num_layers", "num_layers>0", "Layers of elements for transition.");
+      "num_layers", "num_layers>0", "Number of layers of elements created between the boundaries.");
   params.addParam<subdomain_id_type>("block_id", 1, "ID to be assigned to the transition layer.");
   params.addParam<boundary_id_type>(
       "input_boundary_1_id",

@@ -436,8 +436,8 @@ protected:
    * @param lower_azi lower boundary of the azimuthal angles to be collected
    * @param upper_azi upper boundary of the azimuthal angles to be collected
    * @param return_type whether angle values or tangent values are returned
-   * @param calculate_origin whether the mesh origin is calculated based on the centroid position
    * @param bid id of the boundary of which the nodes' azimuthal angles are collected
+   * @param calculate_origin whether the mesh origin is calculated based on the centroid position
    * @param input_origin_x precalculated mesh origin coordinate x
    * @param input_origin_y precalculated mesh origin coordinate y
    * @param tol tolerence that the minimum azimuthal angle is

@@ -12,9 +12,6 @@
 #include "MooseMeshUtils.h"
 #include "TransitionLayerTools.h"
 
-// C++ includes
-#include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
-
 registerMooseObject("ReactorApp", PatternedHexPeripheralModifier);
 
 InputParameters

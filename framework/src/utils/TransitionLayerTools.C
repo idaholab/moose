@@ -22,9 +22,6 @@
 #include "libmesh/face_tri3.h"
 #include "libmesh/face_quad4.h"
 
-// C++ includes
-#include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
-
 namespace TransitionLayerTools
 {
 void
@@ -127,8 +124,8 @@ transitionLayerGenerator(ReplicatedMesh & mesh, // an empty mesh is expected
   for (unsigned int i = 0; i < num_layers + 1; i++)
   {
     // calculate number of nodes in each sublayer
-    node_number_vec.push_back(vec_1_node_num +
-                              (unsigned int)(increment * i + 0.5 - (increment < 0)));
+    node_number_vec.push_back(
+        (unsigned int)(vec_1_node_num + (long)(increment * i + 0.5 - (increment < 0))));
     // Reserve memory for new nodes
     nodes[i] = std::vector<Node *>(node_number_vec[i]);
 
