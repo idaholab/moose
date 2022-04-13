@@ -107,6 +107,5 @@ private:
   /// Cached contact pressure for use by UserObjects
   ADReal _normal_pressure;
 
-
   friend class GapFluxModelBase;
 };

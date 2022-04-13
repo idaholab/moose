@@ -112,13 +112,13 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     // Check that, if a user object is of type that requires the use of the
     // contact pressure, the user supplies the contact pressure
     const auto * pressure_dep_model =
-        dynamic_cast<const GapFluxModelPressureDependentConduction *>(& gap_model);
-            // &getUserObjectByName<GapFluxModelPressureDependentConduction>(name));
+        dynamic_cast<const GapFluxModelPressureDependentConduction *>(&gap_model);
+    // &getUserObjectByName<GapFluxModelPressureDependentConduction>(name));
 
     if (pressure_dep_model && !(parameters.isParamSetByUser("contact_pressure")))
       paramError("contact_pressure",
-                   "You have elected to use a pressure-dependent gap flux UserObject model but "
-                   "have not specified a contact pressure variable.");
+                 "You have elected to use a pressure-dependent gap flux UserObject model but "
+                 "have not specified a contact pressure variable.");
   }
 }
 
