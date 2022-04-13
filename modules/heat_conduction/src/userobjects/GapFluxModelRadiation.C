@@ -16,8 +16,9 @@ InputParameters
 GapFluxModelRadiation::validParams()
 {
   InputParameters params = GapFluxModelBase::validParams();
-  params.addClassDescription("Gap flux model with a constant conductance");
-  params.addCoupledVar("T", "Temperature");
+  params.addClassDescription("Gap flux model for heat conduction across a gap due to radiation, "
+                             "based on the diffusion approximation.");
+  params.addCoupledVar("temperature", "The name of the temperature variable");
   params.addParam<Real>("stefan_boltzmann", 5.670373e-8, "Stefan-Boltzmann constant");
   params.addRangeCheckedParam<Real>("primary_emissivity",
                                     1,
@@ -32,8 +33,8 @@ GapFluxModelRadiation::validParams()
 
 GapFluxModelRadiation::GapFluxModelRadiation(const InputParameters & parameters)
   : GapFluxModelBase(parameters),
-    _primary_T(adCoupledNeighborValue("T")),
-    _secondary_T(adCoupledValue("T")),
+    _primary_T(adCoupledNeighborValue("temperature")),
+    _secondary_T(adCoupledValue("temperature")),
     _stefan_boltzmann(getParam<Real>("stefan_boltzmann"))
 {
   const auto emissivity_primary = getParam<Real>("primary_emissivity");
@@ -47,24 +48,6 @@ GapFluxModelRadiation::GapFluxModelRadiation(const InputParameters & parameters)
 ADReal
 GapFluxModelRadiation::computeFlux() const
 {
-  /*
-   Gap conductance due to radiation is based on the diffusion approximation:
-
-      qr = sigma*Fe*(Tf^4 - Tc^4) ~ hr(Tf - Tc)
-         where sigma is the Stefan-Boltzmann constant, Fe is an emissivity function, Tf and Tc
-         are the fuel and clad absolute temperatures, respectively, and hr is the radiant gap
-         conductance. Solving for hr,
-
-      hr = sigma*Fe*(Tf^4 - Tc^4) / (Tf - Tc)
-         which can be factored to give:
-
-      hr = sigma*Fe*(Tf^2 + Tc^2) * (Tf + Tc)
-
-   Approximating the fuel-clad gap as infinite parallel planes, the emissivity function is given by:
-
-      Fe = 1 / (1/ef + 1/ec - 1)
-  */
-
   if (_emissivity == 0.0)
     return 0.0;
 

@@ -96,7 +96,7 @@
 [UserObjects]
   [radiation]
     type = GapFluxModelRadiation
-    T = temp
+    temperature = temp
     boundary = 100
     primary_emissivity = 1.0
     secondary_emissivity = 1.0

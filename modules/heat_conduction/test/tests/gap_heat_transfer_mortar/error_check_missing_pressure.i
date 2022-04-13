@@ -116,7 +116,6 @@
     primary_subdomain = interface_primary_subdomain
     secondary_boundary = fixed_block_left
     secondary_subdomain = interface_secondary_subdomain
-    contact_pressure = ''
     gap_flux_models = 'closed'
   []
 []
@@ -149,32 +148,6 @@
   []
 []
 
-[Postprocessors]
-  [steel_pt_interface_temperature]
-    type = NodalVariableValue
-    nodeid = 245
-    variable = temperature
-  []
-  [aluminum_pt_interface_temperature]
-    type = NodalVariableValue
-    nodeid = 657
-    variable = temperature
-  []
-  [interface_heat_flux_steel]
-    type = ADSideDiffusiveFluxAverage
-    variable = temperature
-    boundary = moving_block_right
-    diffusivity = steel_thermal_conductivity
-  []
-  [interface_heat_flux_aluminum]
-    type = ADSideDiffusiveFluxAverage
-    variable = temperature
-    boundary = fixed_block_left
-    diffusivity = aluminum_thermal_conductivity
-  []
-[]
-
-
 [Executioner]
   type = Steady
   solve_type = NEWTON
@@ -182,9 +155,4 @@
 
   nl_rel_tol = 1e-10
   nl_max_its = 20
-[]
-
-[Outputs]
-  csv = true
-  perf_graph = true
 []

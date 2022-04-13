@@ -16,7 +16,7 @@ InputParameters
 GapFluxModelRadiative::validParams()
 {
   InputParameters params = GapFluxModelBase::validParams();
-  params.addClassDescription("Gap flux model with a constant conductance");
+  params.addClassDescription("Gap flux demonstration model for radiative heat conductance");
   params.addCoupledVar("T", "Temperature");
   params.addParam<Real>("sigma", 5.670373e-8, "Stefan-Boltzmann constant");
   params.addRequiredRangeCheckedParam<MaterialPropertyName>(

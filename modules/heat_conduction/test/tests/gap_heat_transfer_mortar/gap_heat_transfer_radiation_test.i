@@ -83,7 +83,7 @@
   [simple]
     type = GapFluxModelSimple
     k = 0.09187557
-    T = temp
+    temperature = temp
     boundary = 3
   []
 []
