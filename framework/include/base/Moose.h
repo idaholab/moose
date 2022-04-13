@@ -13,6 +13,7 @@
 #include "libmesh/libmesh_common.h"
 #include "XTermConstants.h"
 
+#include <memory>
 #include <set>
 #include <string>
 
@@ -22,6 +23,13 @@ template <typename>
 class NumericVector;
 template <typename>
 class SparseMatrix;
+
+// This was deprecated in libMesh a year ago!  It was obsolete 5 years
+// ago!  How are 6 apps in CI still using it!?
+#ifdef LIBMESH_ENABLE_DEPRECATED
+template <typename T>
+using UniquePtr = std::unique_ptr<T>;
+#endif
 }
 
 using namespace libMesh;
