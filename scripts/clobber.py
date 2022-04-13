@@ -80,6 +80,7 @@ class Clobber(object):
                 ".gcno",
                 ".gcov",
                 ".gch",
+                ".so",
                 )
 
         for root, subdirs, files in os.walk(self.top_dir, topdown=True):
@@ -91,7 +92,7 @@ class Clobber(object):
             self.remove_dir(root, subdirs, ".jitcache")
 
             for f in files:
-                if f.endswith(remove_file_ext) or ".so" in f:
+                if f.endswith(remove_file_ext):
                     fpath = os.path.join(root, f)
                     self.message("Removing file %s" % fpath)
                     if not self.dry_run:
