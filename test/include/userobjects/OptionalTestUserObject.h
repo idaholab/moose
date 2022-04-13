@@ -34,8 +34,11 @@ public:
 private:
   const OptionalMaterialProperty<Real> & _prop;
   const OptionalADMaterialProperty<Real> & _adprop;
+  const OptionalMaterialProperty<Real> & _prop_old;
+  const OptionalMaterialProperty<Real> & _prop_older;
   const bool _expect;
   const bool _adexpect;
+  const bool _expect_old;
   const Function & _func;
   const Function & _adfunc;
 };
