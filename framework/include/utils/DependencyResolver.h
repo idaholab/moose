@@ -13,6 +13,8 @@
 #include "Moose.h"
 #include "MooseError.h"
 
+#include "libmesh/utility.h"
+
 // C++ includes
 #include <map>
 #include <set>
@@ -132,7 +134,17 @@ public:
 
   bool operator()(const T & a, const T & b);
 
+  enum Color
+  {
+    BLACK,
+    WHITE,
+    GRAY
+  };
+
 private:
+  bool isCyclic();
+  bool depthFirstSearch(const T & node);
+
   /**
    * Helper classes for returning only keys or values in an iterator format
    */
@@ -155,6 +167,8 @@ private:
   // resolver, to disambiguate ordering of items with no
   // mutual interdependencies
   std::vector<T> _ordering_vector;
+
+  std::map<T, Color> _colors;
 
   /// The sorted vector of sets
   std::vector<std::vector<T>> _ordered_items;
@@ -226,23 +240,65 @@ DependencyResolver<T>::insertDependency(const T & key, const T & value)
   if (_unique_deps.count(k) > 0)
     return;
   _unique_deps.insert(k);
+  auto insert_it = _depends.insert(k);
 
-  if (dependsOn(value, key))
+  for (auto & pr : _colors)
+    pr.second = WHITE;
+  _colors.emplace(key, WHITE);
+  _colors.emplace(value, WHITE);
+  if (depthFirstSearch(key))
   {
     decltype(_depends) depends_copy(_depends);
-
-    // Insert the breaking dependency here so it will reflect properly in the exception
-    depends_copy.insert(k);
+    _depends.erase(insert_it);
 
     throw CyclicDependencyException<T>(
         "DependencyResolver: attempt to insert dependency will result in cyclic graph",
         depends_copy);
   }
-  _depends.insert(k);
   if (std::find(_ordering_vector.begin(), _ordering_vector.end(), key) == _ordering_vector.end())
     _ordering_vector.push_back(key);
   if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) == _ordering_vector.end())
     _ordering_vector.push_back(value);
+}
+
+template <typename T>
+bool
+DependencyResolver<T>::depthFirstSearch(const T & root)
+{
+  auto root_color_it = _colors.find(root);
+  mooseAssert(root_color_it != _colors.end(), "The color should already exist");
+  root_color_it->second = GRAY;
+
+  auto [first, last] = _depends.equal_range(root);
+  for (auto it = first; it != last; ++it)
+  {
+    const auto & adj = it->second;
+    const auto color_adj = libmesh_map_find(_colors, adj);
+
+    if (color_adj == GRAY)
+      return true;
+
+    if (color_adj == WHITE && depthFirstSearch(adj))
+      return true;
+  }
+
+  root_color_it->second = BLACK;
+
+  return false;
+}
+
+template <typename T>
+bool
+DependencyResolver<T>::isCyclic()
+{
+  for (auto & pr : _colors)
+    pr.second = WHITE;
+
+  for (auto & [key, color] : _colors)
+    if (color == WHITE && depthFirstSearch(key))
+      return true;
+
+  return false;
 }
 
 template <typename T>
