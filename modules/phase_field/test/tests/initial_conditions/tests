@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6858 #5816 #7358 #8721 #12000 #6655 #9174'
+  issues = '#6858 #5816 #7358 #8721 #12000 #6655 #9174 #17731'
   design = 'PolycrystalICs.md'
 
   [RampIC]
@@ -89,6 +89,23 @@
 
   [polycrystal]
     requirement = 'The system shall support polycrystal phase-field initial conditions:'
+
+    [PolycrystalVoronoiIC_periodic]
+      type = 'Exodiff'
+      input = 'PolycrystalVoronoiIC_periodic.i'
+      exodiff = 'PolycrystalVoronoiIC_periodic_out.e'
+      cli_args = 'UserObjects/voronoi/use_kdtree=false'
+
+      detail = 'polycrystal structure with diffused interface and periodic BC,'
+    []
+
+    [PolycrystalVoronoiIC_periodic_kdtree]
+      type = 'Exodiff'
+      input = 'PolycrystalVoronoiIC_periodic.i'
+      exodiff = 'PolycrystalVoronoiIC_periodic_out.e'
+
+      detail = 'polycrystal structure with diffused interface and periodic BC using KDTree,'
+    []
 
     [PolycrystalVoronoiVoidIC_moregrains]
       type = 'Exodiff'

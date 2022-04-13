@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "KDTree.h"
 #include "PolycrystalUserObjectBase.h"
 
 // Forward Declarations
@@ -27,6 +28,9 @@ public:
 
   virtual unsigned int getNumGrains() const override { return _grain_num; }
   virtual std::vector<Point> getGrainCenters() const { return _centerpoints; }
+
+  // Build a KD tree
+  void buildSearchTree();
 
 protected:
   /// The number of grains to create
@@ -55,4 +59,18 @@ private:
                      const Point & N,
                      const Point & cntr,
                      const unsigned int dim) const;
+
+  /// KD tree that is used to speedup grain search
+  std::unique_ptr<KDTree> _kd_tree;
+  /// The domain is extended to consider periodic boundary conditions.
+  /// Grains are duplicated. This stores a map from global grain id to local grain id
+  std::vector<dof_id_type> _grain_gtl_ids;
+  /// Original grain center points and duplicated grain center points
+  std::vector<Point> _new_points;
+  /// Whether or not to use a KD tree to speedup grain search
+  bool _use_kdtree;
+  /// The number of nearest points
+  unsigned int _point_patch_size;
+  /// The number of neighboring grains
+  unsigned int _grain_patch_size;
 };

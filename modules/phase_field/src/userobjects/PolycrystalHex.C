@@ -100,4 +100,6 @@ PolycrystalHex::precomputeGrainStructure()
       if (_centerpoints[grain](i) < _bottom_left(i))
         _centerpoints[grain](i) = _bottom_left(i);
     }
+
+  buildSearchTree();
 }
