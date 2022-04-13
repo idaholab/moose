@@ -28,6 +28,11 @@ CheckLegacyParamsAction::CheckLegacyParamsAction(InputParameters params) : Actio
 void
 CheckLegacyParamsAction::act()
 {
+  // no need to do the check for sub-apps other than the zero-th of a MultiApp
+  // which helps when a MultiApp spawns lots of sub-apps.
+  if (_app.multiAppNumber() > 0)
+    return;
+
   // Not a big fan of testing objects within the object itself... but this is a temp object
   // and this is the easiest way to do it. MooseTestApp uses this parameter for the test
   const bool for_test = _app.parameters().have_parameter<bool>("test_check_legacy_params") &&
