@@ -37,7 +37,8 @@ FVFluxKernel::validParams()
       std::vector<BoundaryName>(),
       "The set of sidesets to not execute this FVFluxKernel on. "
       "This takes precedence over force_boundary_execution to restrict to less external boundaries."
-      " By defauly flux kernels are executed on all internal boundaries, and no external ones.");
+      " By default flux kernels are executed on all internal boundaries and Dirichlet boundary "
+      "conditions.");
 
   params.addParamNamesToGroup("force_boundary_execution boundaries_to_force boundaries_to_avoid",
                               "Boundary execution modification parameters");
@@ -92,18 +93,18 @@ FVFluxKernel::skipForBoundary(const FaceInfo & fi) const
   if (avoidBoundary(fi))
     return true;
 
+  // We're not on a boundary, so in practice we're not 'skipping'
+  if (!onBoundary(fi))
+    return false;
+
   // Blanket forcing on boundary
   if (_force_boundary_execution)
     return false;
 
   // Selected boundaries to force
   for (const auto bnd_to_force : _boundaries_to_force)
-    if (fi.boundaryIDs().find(bnd_to_force) != fi.boundaryIDs().end())
+    if (fi.boundaryIDs().count(bnd_to_force))
       return false;
-
-  // We're not on a boundary, so in practice we're not 'skipping'
-  if (!onBoundary(fi))
-    return false;
 
   // If we have flux bcs then we do skip
   const auto & flux_pr = _var.getFluxBCs(fi);
