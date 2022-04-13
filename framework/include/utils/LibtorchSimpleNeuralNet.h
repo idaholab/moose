@@ -22,7 +22,13 @@ namespace StochasticTools
 class LibtorchSimpleNeuralNet : public LibtorchNeuralNetBase
 {
 public:
-  /// Construct using input parameters
+  /**
+   * Construct using input parameters
+   * @param name Name of the neural network
+   * @param num_inputs The number of input neurons/parameters
+   * @param num_neurons_per_layer Number of neurons per hidden layer
+   * @param num_outputs The number of output neurons
+   */
   LibtorchSimpleNeuralNet(const std::string name,
                           const unsigned int num_inputs,
                           const std::vector<unsigned int> num_neurons_per_layer,
@@ -37,27 +43,31 @@ public:
   virtual void addLayer(const std::string layer_name,
                         const std::unordered_map<std::string, unsigned int> parameters) override;
 
-  // Overriding the forward sustitution function
+  /**
+   * Overriding the forward substitution function for the neural network, unfortunately
+   * thic cannot be const since it creates a graph in the background
+   * @param x Input tensor for the evaluation
+   */
   torch::Tensor forward(torch::Tensor x);
 
   /// Return the name of the neural network
   const std::string & name() const { return _name; }
   /// Return the number of neurons on the input layer
-  unsigned int numInputs() { return _num_inputs; }
+  unsigned int numInputs() const { return _num_inputs; }
   /// Return the number of hidden layers
-  unsigned int numHiddenLayers() { return _num_hidden_layers; }
+  unsigned int numHiddenLayers() const { return _num_hidden_layers; }
   /// Return the hidden layer architecture
   const std::vector<unsigned int> & numNeuronsPerLayer() const { return _num_neurons_per_layer; }
   /// Return the number of neurons on the output layer
-  unsigned int numOutputs() { return _num_outputs; }
+  unsigned int numOutputs() const { return _num_outputs; }
   /// Construct the neural network
   void constructNeuralNetwork();
 
 protected:
   const std::string _name;
 
-  // Submodules that hold linear operations and the corresponding
-  // weights and biases (y = W * x + b)
+  /// Submodules that hold linear operations and the corresponding
+  /// weights and biases (y = W * x + b)
   std::vector<torch::nn::Linear> _weights;
 
   const unsigned int _num_inputs;

@@ -23,7 +23,7 @@ The stochastic tools module provides neural network-based surrogate modeling cap
 as well. However, to enable it one needs to compile MOOSE with the C++ APIs of
 [pytorch](https://pytorch.org/). For this, follow the appropriate installation guide below:
 
-- [install_pytorch.md]
+- [enable_pytorch.md]
 
 ## Objects, Actions, and Syntax
 
