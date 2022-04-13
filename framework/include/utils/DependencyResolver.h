@@ -14,6 +14,7 @@
 #include "MooseError.h"
 
 #include "libmesh/utility.h"
+#include "libmesh/simple_range.h"
 
 // C++ includes
 #include <map>
@@ -134,6 +135,18 @@ public:
 
   bool operator()(const T & a, const T & b);
 
+  /**
+   * Enumeration used to implement the coloring-based depth-first search (DFS) algorithm described
+   * in https://www.geeksforgeeks.org/detect-cycle-direct-graph-using-colors/. The algorithm
+   * searches for back-edges. A back-edge is an edge that points from a node to itself or from one
+   * of a node's descendents (determined through DFS) to itself. The meaning of the colors used in
+   * this algorithm are:
+   * WHITE : Node is not processed yet. Initially, all nodes are WHITE.
+   * GRAY: Node is being processed (DFS for this node has started, but not finished which means that
+   * all descendants (in DFS tree) of this node are not processed yet (or this node is in the
+   * function call stack)
+   * BLACK : Node and all its descendants are processed.
+   */
   enum Color
   {
     BLACK,
@@ -142,7 +155,14 @@ public:
   };
 
 private:
-  bool depthFirstSearch(const T & node);
+  /**
+   * Indicates whether any cyclic dependency is detected when descending a directed graph from this
+   * node. This is a depth-first search (DFS) algorithm based on
+   * https://www.geeksforgeeks.org/detect-cycle-direct-graph-using-colors/
+   * @param node The node in the directed graph from which to begin descent
+   * @return whether any cyclic dependency was discovered while descending from the node
+   */
+  bool hasCycle(const T & node);
 
   /**
    * Helper classes for returning only keys or values in an iterator format
@@ -167,6 +187,9 @@ private:
   // mutual interdependencies
   std::vector<T> _ordering_vector;
 
+  /// A map used to implement the depth-first search algorithm, based on
+  /// https://www.geeksforgeeks.org/detect-cycle-direct-graph-using-colors/, for use in detecting
+  /// cyclic dependencies
   std::map<T, Color> _colors;
 
   /// The sorted vector of sets
@@ -245,7 +268,7 @@ DependencyResolver<T>::insertDependency(const T & key, const T & value)
     pr.second = WHITE;
   _colors.emplace(key, WHITE);
   _colors.emplace(value, WHITE);
-  if (depthFirstSearch(key))
+  if (hasCycle(key))
   {
     decltype(_depends) depends_copy(_depends);
     _depends.erase(insert_it);
@@ -262,26 +285,32 @@ DependencyResolver<T>::insertDependency(const T & key, const T & value)
 
 template <typename T>
 bool
-DependencyResolver<T>::depthFirstSearch(const T & root)
+DependencyResolver<T>::hasCycle(const T & root)
 {
-  auto root_color_it = _colors.find(root);
-  mooseAssert(root_color_it != _colors.end(), "The color should already exist");
-  root_color_it->second = GRAY;
+  // Catch as reference since we'll modify this value
+  auto & root_color = libmesh_map_find(_colors, root);
+  root_color = GRAY;
 
   auto [first, last] = _depends.equal_range(root);
-  for (auto it = first; it != last; ++it)
+  for (auto & val : as_range(first, last))
   {
-    const auto & adj = it->second;
+    const auto & adj = val.second;
+    // We'll copy since its a builtin and we don't need to modify this value
     const auto color_adj = libmesh_map_find(_colors, adj);
 
     if (color_adj == GRAY)
+      // We're in the act of processing this node which means that we've now encountered this node
+      // twice during descent and we have a cycle
       return true;
 
-    if (color_adj == WHITE && depthFirstSearch(adj))
+    // We are not currently processing (GRAY) nor have we already processed (BLACK) the adjacent
+    // node, so we continue to descend
+    if (color_adj == WHITE && hasCycle(adj))
       return true;
   }
 
-  root_color_it->second = BLACK;
+  // We did not encounter any cycles while descending from this node
+  root_color = BLACK;
 
   return false;
 }
