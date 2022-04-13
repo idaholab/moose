@@ -116,7 +116,7 @@
     primary_subdomain = interface_primary_subdomain
     secondary_boundary = fixed_block_left
     secondary_subdomain = interface_secondary_subdomain
-    contact_pressure = ''
+    contact_pressure = 'interface_normal_lm'
     gap_flux_models = 'closed'
   []
 []
