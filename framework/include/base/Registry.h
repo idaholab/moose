@@ -163,7 +163,7 @@ public:
   {
     RegistryEntry copy = info;
     copy._build_ptr = &build<T, MooseObject>;
-    copy._params_ptr = &moose::internal::callValidParams<T>;
+    copy._params_ptr = &T::validParams;
     addInner(copy);
     return 0;
   }
@@ -176,7 +176,7 @@ public:
   {
     RegistryEntry copy = info;
     copy._build_action_ptr = &build<T, Action>;
-    copy._params_ptr = &moose::internal::callValidParams<T>;
+    copy._params_ptr = &T::validParams;
     addActionInner(copy);
     return 0;
   }

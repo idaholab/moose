@@ -141,5 +141,5 @@ AppFactory::reg(const std::string & name)
     return;
 
   _name_to_build_pointer[name] = &buildApp<T>;
-  _name_to_params_pointer[name] = &moose::internal::callValidParams<T>;
+  _name_to_params_pointer[name] = &T::validParams;
 }

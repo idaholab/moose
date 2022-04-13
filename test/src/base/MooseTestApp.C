@@ -46,12 +46,6 @@ MooseTestApp::validParams()
                                    false,
                                    "Don't register test objects and syntax");
 
-  params.addCommandLineParam<bool>(
-      "test_check_legacy_params",
-      "--test-check-legacy-params",
-      false,
-      "True to test checking for legacy parameter construction with CheckLegacyParamsAction");
-
   params.set<bool>("automatic_automatic_scaling") = false;
   params.set<bool>("use_legacy_material_output") = false;
 

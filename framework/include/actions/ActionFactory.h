@@ -66,7 +66,7 @@ public:
            const std::string & file = "",
            int line = -1)
   {
-    reg(name, task, &buildAction<T>, &moose::internal::callValidParams<T>, file, line);
+    reg(name, task, &buildAction<T>, &T::validParams, file, line);
   }
 
   void reg(const std::string & name,

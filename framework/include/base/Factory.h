@@ -151,7 +151,7 @@ public:
   template <typename T>
   void reg(const std::string & obj_name, const std::string & file = "", int line = -1)
   {
-    reg("", obj_name, &buildObject<T>, &moose::internal::callValidParams<T>, "", "", file, line);
+    reg("", obj_name, &buildObject<T>, &T::validParams, "", "", file, line);
   }
 
   void reg(const std::string & label,
@@ -198,7 +198,7 @@ public:
                      const std::string & file,
                      int line)
   {
-    reg("", obj_name, &buildObject<T>, &moose::internal::callValidParams<T>, t_str, "", file, line);
+    reg("", obj_name, &buildObject<T>, &T::validParams, t_str, "", file, line);
   }
 
   /**
@@ -217,14 +217,7 @@ public:
                    const std::string & file,
                    int line)
   {
-    reg("",
-        dep_obj,
-        &buildObject<T>,
-        &moose::internal::callValidParams<T>,
-        time_str,
-        replacement_name,
-        file,
-        line);
+    reg("", dep_obj, &buildObject<T>, &T::validParams, time_str, replacement_name, file, line);
   }
 
   /**
