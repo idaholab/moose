@@ -95,8 +95,8 @@ FixedPointSolve::validParams()
   params.addDeprecatedParam<std::vector<std::string>>(
       "relaxed_variables",
       std::vector<std::string>(),
-      "Relaxed variables is deprecated, use transformed_variables instead.",
-      "List of main app variables to relax during fixed point iterations");
+      "List of main app variables to relax during fixed point iterations",
+      "Relaxed variables is deprecated, use transformed_variables instead.");
 
   params.addParam<bool>("auto_advance",
                         "Whether to automatically advance sub-applications regardless of whether "
