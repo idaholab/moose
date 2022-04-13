@@ -14,10 +14,10 @@
 namespace StochasticTools
 {
 
-LibtorchSimpleNeuralNet::LibtorchSimpleNeuralNet(std::string name,
-                                                 unsigned int num_inputs,
-                                                 std::vector<unsigned int> num_neurons_per_layer,
-                                                 unsigned int num_outputs)
+LibtorchSimpleNeuralNet::LibtorchSimpleNeuralNet(const std::string name,
+                                                 const unsigned int num_inputs,
+                                                 const std::vector<unsigned int> num_neurons_per_layer,
+                                                 const unsigned int num_outputs)
   : _name(name),
     _num_inputs(num_inputs),
     _num_neurons_per_layer(num_neurons_per_layer),

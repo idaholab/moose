@@ -22,43 +22,35 @@ namespace StochasticTools
 class LibtorchSimpleNeuralNet : public LibtorchNeuralNetBase
 {
 public:
-  // Constructing using input parameters
-  LibtorchSimpleNeuralNet(std::string name,
-                          unsigned int num_inputs,
-                          std::vector<unsigned int> num_neurons_per_layer,
-                          unsigned int num_outputs);
-  // Virtual destructor
-  virtual ~LibtorchSimpleNeuralNet() {}
+  /// Construct using input parameters
+  LibtorchSimpleNeuralNet(const std::string name,
+                          const unsigned int num_inputs,
+                          const std::vector<unsigned int> num_neurons_per_layer,
+                          const unsigned int num_outputs);
 
-  // Overriding the function from NeuralNetBase
+  /**
+   * Add layers to the neural network
+   * @param layer_name The name of the layer to be added
+   * @param parameters A map of parameter names and the corresponding values which
+   *                   describe the neural net layer architecture
+   */
   virtual void addLayer(const std::string layer_name,
                         const std::unordered_map<std::string, unsigned int> parameters) override;
 
   // Overriding the forward sustitution function
   torch::Tensor forward(torch::Tensor x);
 
-  const std::string & name() { return _name; }
-
-  const unsigned int & numInputs() { return _num_inputs; }
-
-  const unsigned int & numHiddenLayers() { return _num_hidden_layers; }
-
-  const std::vector<unsigned int> & numNeuronsPerLayer() { return _num_neurons_per_layer; }
-
-  const unsigned int & numOutputs() { return _num_outputs; }
-
-  // void setName(std::string name) { _name = name; }
-  //
-  // void setNumInputs(unsigned int num_inputs) { _num_inputs = num_inputs; }
-  //
-  // void setNumNeuronsPerLayer(std::vector<unsigned int> num_neurons_per_layer)
-  // {
-  //   _num_neurons_per_layer = num_neurons_per_layer;
-  //   _num_hidden_layers = num_neurons_per_layer.size();
-  // }
-  //
-  // void setNumOutputs(unsigned int num_outputs) { _num_outputs = num_outputs; }
-
+  /// Return the name of the neural network
+  const std::string & name() const { return _name; }
+  /// Return the number of neurons on the input layer
+  unsigned int numInputs() { return _num_inputs; }
+  /// Return the number of hidden layers
+  unsigned int numHiddenLayers() { return _num_hidden_layers; }
+  /// Return the hidden layer architecture
+  const std::vector<unsigned int> & numNeuronsPerLayer() const { return _num_neurons_per_layer; }
+  /// Return the number of neurons on the output layer
+  unsigned int numOutputs() { return _num_outputs; }
+  /// Construct the neural network
   void constructNeuralNetwork();
 
 protected:

@@ -52,8 +52,7 @@ the weights:
 !listing libtorch_nn/train.i block=Trainers
 
 We note that the user can set the architecture of the neural net using the
-[!param](/Trainers/LibtorchSimpleNNTrainer/num_hidden_layers) and
-[!param](/Trainers/LibtorchSimpleNNTrainer/num_neurons_per_layer) parameters.
+[!param](/Trainers/LibtorchSimpleNNTrainer/num_neurons_per_layer) parameter.
 The optimization algorithm depends on several parameters.
 [!param](/Trainers/LibtorchSimpleNNTrainer/num_batches) defines how many batches the
 training samples should be separated into, while [!param](/Trainers/LibtorchSimpleNNTrainer/num_epochs)

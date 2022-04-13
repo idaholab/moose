@@ -72,19 +72,19 @@ ifeq ($(ENABLE_LIBTORCH),true)
     LIBTORCH_LIB := libtorch.dylib
   endif
 
-  $(info $(TORCH_DIR))
-  ifneq ($(wildcard $(TORCH_DIR)/lib/$(LIBTORCH_LIB)),)
+  $(info $(LIBTORCH_DIR))
+  ifneq ($(wildcard $(LIBTORCH_DIR)/lib/$(LIBTORCH_LIB)),)
     # Enabling parts that have pytorch dependencies
     libmesh_CXXFLAGS += -DTORCH_ENABLED
 
     # Adding the include directories, we use -isystem to silence the warning coming from
 		# libtorch (which would cause errors in the testing phase)
-    libmesh_CXXFLAGS += -isystem $(TORCH_DIR)/include/torch/csrc/api/include
-    libmesh_CXXFLAGS += -isystem $(TORCH_DIR)/include
+    libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include/torch/csrc/api/include
+    libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include
 
     # Dynamically linking with the available pytorch library
-    libmesh_LDFLAGS += -Wl,-rpath,$(TORCH_DIR)/lib
-    libmesh_LDFLAGS += -L$(TORCH_DIR)/lib -ltorch
+    libmesh_LDFLAGS += -Wl,-rpath,$(LIBTORCH_DIR)/lib
+    libmesh_LDFLAGS += -L$(LIBTORCH_DIR)/lib -ltorch
   else
     $(error ERROR! Cannot locate any dynamic libraries of libtorch. Make sure to install libtorch (manually or using scripts/setup_libtorch.sh) and to run the configure --with-libtorch before compiling moose!)
   endif

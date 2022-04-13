@@ -22,9 +22,6 @@ namespace StochasticTools
 class LibtorchNeuralNetBase : public torch::nn::Module
 {
 public:
-  // Generic constructor
-  LibtorchNeuralNetBase() {}
-
   // Virtual destructor
   virtual ~LibtorchNeuralNetBase() {}
 
