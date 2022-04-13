@@ -12,6 +12,16 @@
                   'constitutive models, with support for stateful properties'
   []
 
+  [total_strain_error]
+    type = 'RunException'
+    input = 'linear_strain_hardening.i'
+    library_mode = 'DYNAMIC'
+    expect_err = 'The UMAT plugin in AbaqusUMATStress \'constant\' returned NaNs in the computed stress and the MOOSE simulation is not using an incremental\/finite strain formulation.'
+    cli_args = 'Modules/TensorMechanics/Master/all/strain=SMALL'
+    valgrind = 'NONE'
+    requirement = 'The system shall raise an error if a UMAT that requires incremental quantities is being used with a total strain formulation'
+  []
+
   [elastic]
     type = 'Exodiff'
     input = 'elastic.i'
@@ -32,7 +42,7 @@
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in '
-                  'Fortran77 as constitutive models, with support for finite strain elastic material '
+                  'Fortran77 as constitutive models, with support for small strain elastic material '
                   'models'
   []
 
@@ -62,7 +72,7 @@
     cli_args = "Materials/active='elastic stress' Materials/stress/type=ComputeLinearElasticStress Modules/TensorMechanics/Master/all/strain=SMALL Outputs/file_base=elastic_small"
     exodiff = 'elastic_small.e'
     requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE '
-                  'material models for finite strain elasticity'
+                  'material models for small strain elasticity'
   []
 
   [elastic_incremental]

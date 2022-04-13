@@ -145,10 +145,12 @@ public:
   getMaterialByName(const std::string & name, bool no_warn = false, bool no_dep = false);
 
   ///@{ Optional material property getters
+private:
   template <typename T, bool is_ad>
   const GenericOptionalMaterialProperty<T, is_ad> &
   genericOptionalMaterialPropertyHelper(const std::string & name, MaterialPropState state);
 
+public:
   template <typename T, bool is_ad>
   const GenericOptionalMaterialProperty<T, is_ad> &
   getGenericOptionalMaterialProperty(const std::string & name)
