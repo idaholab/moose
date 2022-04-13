@@ -13,7 +13,7 @@ The heat flux across the gap is given by the classical expression
   \label{eqn:radiationHeatFlux}
   q_r = \sigma F_e \left( T_s^4 - T_f^4 \right) \sim h_r \left(T_s - T_f \right)
 \end{equation}
-where $\sigma$ is the Stephan-Boltzmann constant, $F_e4 is an emissivity function,
+where $\sigma$ is the Stephan-Boltzmann constant, $F_e$ is an emissivity function,
 $T_s$ is the surface temperature, $T_f$ is the farfield temperature, and $h_r$
 is the radiant gap conductance. This expression can be rearranged to solve for $h_r$:
 \begin{equation}

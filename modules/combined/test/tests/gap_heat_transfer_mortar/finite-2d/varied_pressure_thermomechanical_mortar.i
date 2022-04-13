@@ -276,12 +276,12 @@
   petsc_options_value = ' lu       superlu_dist'
   snesmf_reuse_base = false
 
-  nl_rel_tol = 1e-6
+  nl_rel_tol = 1e-7
   nl_max_its = 20
   l_max_its = 50
 
-  dt = 0.25
-  end_time = 2
+  dt = 0.125
+  end_time = 1
 []
 
 [Outputs]

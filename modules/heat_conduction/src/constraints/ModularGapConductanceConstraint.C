@@ -65,7 +65,7 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     _disp_x_var(getVar("displacements", 0)),
     _disp_y_var(getVar("displacements", 1)),
     _disp_z_var(_n_disp == 3 ? getVar("displacements", 2) : nullptr),
-    _contact_pressure(coupledValueLower("contact_pressure")),
+    _contact_pressure(adCoupledLowerValue("contact_pressure")),
     _normal_pressure(0.0)
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -113,7 +113,6 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     // contact pressure, the user supplies the contact pressure
     const auto * pressure_dep_model =
         dynamic_cast<const GapFluxModelPressureDependentConduction *>(&gap_model);
-    // &getUserObjectByName<GapFluxModelPressureDependentConduction>(name));
 
     if (pressure_dep_model && !(parameters.isParamSetByUser("contact_pressure")))
       paramError("contact_pressure",

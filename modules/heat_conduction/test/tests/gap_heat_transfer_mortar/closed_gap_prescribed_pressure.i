@@ -150,15 +150,15 @@
 []
 
 [Postprocessors]
-  [steel_pt_interface_temperature]
-    type = NodalVariableValue
-    nodeid = 245
+  [steel_interface_temperature]
+    type = AverageNodalVariableValue
     variable = temperature
+    block = interface_primary_subdomain
   []
-  [aluminum_pt_interface_temperature]
-    type = NodalVariableValue
-    nodeid = 657
+  [aluminum_interface_temperature]
+    type = AverageNodalVariableValue
     variable = temperature
+    block = interface_secondary_subdomain
   []
   [interface_heat_flux_steel]
     type = ADSideDiffusiveFluxAverage
@@ -180,7 +180,7 @@
   solve_type = NEWTON
   automatic_scaling = false
 
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-14
   nl_max_its = 20
 []
 
