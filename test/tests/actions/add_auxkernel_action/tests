@@ -5,16 +5,16 @@
     requirement = "The system shall allow the shortcut syntax specifying an AuxKernel"
     [nested]
       type = Exodiff
-      input = 'diffusion.i'
-      cli_args = "AuxKernels/inactive='v'"
-      exodiff = 'out.e'
+      input = 'flux_average.i'
+      cli_args = "AuxKernels/inactive='flux_average'"
+      exodiff = 'flux_average_out.e'
       detail = "nested under an AuxVariable, and"
     []
     [standard]
       type = Exodiff
-      input = 'diffusion.i'
-      cli_args = "AuxVariables/v/inactive='AuxKernel'"
-      exodiff = 'out.e'
+      input = 'flux_average.i'
+      cli_args = "AuxVariables/flux/inactive='AuxKernel'"
+      exodiff = 'flux_average_out.e'
       detail = "it shall produce the same output as with the standard syntax."
     []
   []
