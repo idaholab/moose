@@ -40,9 +40,6 @@ protected:
   const ADMaterialProperty<Real> & _secondary_conductivity;
   ///@}
 
-  /// Mortar normal contact pressure
-  const VariableValue & _normal_pressure;
-
   ///@{Material hardness value of the two solid materials at the interface
   const ADMaterialProperty<Real> & _primary_hardness;
   const ADMaterialProperty<Real> & _secondary_hardness;

@@ -170,6 +170,7 @@
     secondary_boundary = fixed_block_left
     secondary_subdomain = interface_secondary_subdomain
     gap_flux_models = 'radiation closed'
+    contact_pressure = interface_normal_lm
     use_displaced_mesh = true
   []
 []
@@ -215,7 +216,7 @@
     type = GapFluxModelRadiation
     secondary_emissivity = 0.25
     primary_emissivity = 0.6
-    T = temperature
+    temperature = temperature
     boundary = moving_block_right
   []
   [closed]
@@ -223,7 +224,6 @@
     primary_conductivity = steel_thermal_conductivity
     secondary_conductivity = aluminum_thermal_conductivity
     temperature = temperature
-    normal_pressure = interface_normal_lm
     primary_hardness = 1.0
     secondary_hardness = 1.0
     boundary = moving_block_right

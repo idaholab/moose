@@ -9,6 +9,8 @@
 
 #include "ModularGapConductanceConstraint.h"
 #include "GapFluxModelBase.h"
+#include "GapFluxModelPressureDependentConduction.h"
+
 #include "MooseError.h"
 
 registerMooseObject("HeatConductionApp", ModularGapConductanceConstraint);
@@ -36,6 +38,10 @@ ModularGapConductanceConstraint::validParams()
   params.addParam<RealVectorValue>("cylinder_axis_point_2",
                                    "End point for line defining cylindrical axis");
   params.addParam<RealVectorValue>("sphere_origin", "Origin for sphere geometry");
+  params.addCoupledVar("contact_pressure",
+                       0.0,
+                       "The name of the Lagrange multiplier that holds the normal contact "
+                       "pressure in mortar formulations");
 
   return params;
 }
@@ -58,7 +64,9 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     _adjusted_length(0.0),
     _disp_x_var(getVar("displacements", 0)),
     _disp_y_var(getVar("displacements", 1)),
-    _disp_z_var(_n_disp == 3 ? getVar("displacements", 2) : nullptr)
+    _disp_z_var(_n_disp == 3 ? getVar("displacements", 2) : nullptr),
+    _contact_pressure(coupledValueLower("contact_pressure")),
+    _normal_pressure(0.0)
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("ModularGapConductanceConstraint relies on use of the global indexing container "
@@ -100,6 +108,17 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
 
     // add gap model to list
     _gap_flux_models.push_back(&gap_model);
+
+    // Check that, if a user object is of type that requires the use of the
+    // contact pressure, the user supplies the contact pressure
+    const auto * pressure_dep_model =
+        dynamic_cast<const GapFluxModelPressureDependentConduction *>(& gap_model);
+            // &getUserObjectByName<GapFluxModelPressureDependentConduction>(name));
+
+    if (pressure_dep_model && !(parameters.isParamSetByUser("contact_pressure")))
+      paramError("contact_pressure",
+                   "You have elected to use a pressure-dependent gap flux UserObject model but "
+                   "have not specified a contact pressure variable.");
   }
 }
 
@@ -369,6 +388,9 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType
 
       // Ensure energy balance for non-flat (non-PLATE) general geometries when using radiation
       _surface_integration_factor = computeSurfaceIntegrationFactor();
+
+      // Set the value of the normal contact pressure for the user objects that require it
+      _normal_pressure = _contact_pressure[_qp];
 
       // Sum up all flux contributions from all supplied gap flux models
       ADReal flux = 0.0;

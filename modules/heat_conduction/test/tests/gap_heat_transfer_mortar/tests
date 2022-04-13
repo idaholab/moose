@@ -285,16 +285,29 @@
                   'refined mesh.'
   []
 
-  [closed_gap_prescribed_pressure]
+  [pressure_dependent_conductance]
     design = 'GapFluxModelPressureDependentConduction.md'
     issues = '#20658'
-    input = 'closed_gap_prescribed_pressure.i'
-    type = CSVDiff
-    csvdiff = 'closed_gap_prescribed_pressure_out.csv'
-    ad_indexing_type = 'global'
-    cli_args = "Mesh/allow_renumbering=false"
     requirement = 'We shall be able to compute the thermal contact across a closed gap as a function '
-                  'of contact pressure, and the material thermal conductivities and hardness values '
-                  'consistent with an analytical solution for the temperatures at the interface.'
+                  'of contact pressure,'
+    [closed_gap_prescribed_pressure]
+      input = 'closed_gap_prescribed_pressure.i'
+      type = CSVDiff
+      csvdiff = 'closed_gap_prescribed_pressure_out.csv'
+      ad_indexing_type = 'global'
+      cli_args = "Mesh/allow_renumbering=false"
+       detail = 'and the material thermal conductivities and hardness values '
+                'consistent with an analytical solution for the temperatures at '
+                'the interface.'
+    []
+    [error_check_missing_pressure]
+      type = RunException
+      input = error_check_missing_pressure.i
+      expect_err = 'You have elected to use a pressure-dependent gap flux UserObject model but have not specified a contact pressure variable.'
+      ad_indexing_type = 'global'
+      detail = 'and shall prevent the user from running a simulation with a '
+               'pressure-dependent heat transfer UserObject without also specifying '
+               'the contact pressure variable.'
+    []
   []
 []

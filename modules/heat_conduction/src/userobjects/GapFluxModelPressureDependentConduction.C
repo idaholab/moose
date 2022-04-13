@@ -27,9 +27,6 @@ GapFluxModelPressureDependentConduction::validParams()
       "primary_conductivity", "The thermal conductivity of the primary surface solid material");
   params.addRequiredParam<MaterialPropertyName>(
       "secondary_conductivity", "The thermal conductivity of the secondary surface solid material");
-  params.addRequiredCoupledVar("normal_pressure",
-                               "The name of the Lagrange multiplier that holds the normal contact "
-                               "pressure in mortar formulations");
   params.addRequiredParam<MaterialPropertyName>(
       "primary_hardness", "The hardness value of the primary surface material");
   params.addRequiredParam<MaterialPropertyName>("secondary_hardness",
@@ -46,7 +43,6 @@ GapFluxModelPressureDependentConduction::GapFluxModelPressureDependentConduction
     _scaling(getParam<Real>("scaling_coefficient")),
     _primary_conductivity(getNeighborADMaterialProperty<Real>("primary_conductivity")),
     _secondary_conductivity(getADMaterialProperty<Real>("secondary_conductivity")),
-    _normal_pressure(coupledValueLower("normal_pressure")),
     _primary_hardness(getNeighborADMaterialProperty<Real>("primary_hardness")),
     _secondary_hardness(getADMaterialProperty<Real>("secondary_hardness"))
 {
@@ -56,7 +52,7 @@ ADReal
 GapFluxModelPressureDependentConduction::computeFlux() const
 {
   // Check that the surfaces are in actual contact with the pressure:
-  if (_normal_pressure[0] <= 0.0)
+  if (_normal_pressure <= 0.0)
     return 0.0;
 
   // calculate the harmonic means of the two material properties
@@ -66,6 +62,6 @@ GapFluxModelPressureDependentConduction::computeFlux() const
   const ADReal h_sum = _primary_hardness[_qp] + _secondary_hardness[_qp];
   const ADReal h_harmonic = 2 * _primary_hardness[_qp] * _secondary_hardness[_qp] / h_sum;
 
-  return _scaling * k_harmonic * (_primary_T[_qp] - _secondary_T[_qp]) * _normal_pressure[_qp] /
+  return _scaling * k_harmonic * (_primary_T[_qp] - _secondary_T[_qp]) * _normal_pressure /
          h_harmonic;
 }

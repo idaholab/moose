@@ -7,7 +7,7 @@ gap.  The flux is computed by user objects derived from `GapFluxModelBase`. Such
 
 - [GapFluxModelSimple](GapFluxModelSimple.md)
 - [GapFluxModelConduction](GapFluxModelConduction.md)
-- [GapFluxModelRadiative](GapFluxModelRadiative.md)
+- [GapFluxModelRadiation](GapFluxModelRadiation.md)
 - [GapFluxModelPressureDependentConduction](GapFluxModelPressureDependentConduction.md)
 
 Multiple models can be specified with their contributions getting summed up.
