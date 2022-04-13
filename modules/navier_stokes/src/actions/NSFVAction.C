@@ -167,7 +167,7 @@ NSFVAction::validParams()
       "ref_temperature > 0.0",
       "Value for reference temperature in case of Boussinesq approximation");
   params.addParam<MooseFunctorName>(
-      "thermal_expansion", NS::alpha, "The name of the thermal expansion");
+      "thermal_expansion", NS::alpha, "The name of the thermal expansion coefficient in the Boussinesq approximation");
 
   params.addParamNamesToGroup("pinned_pressure_type pinned_pressure_point pinned_pressure_value "
                               "ref_temperature boussinesq_approximation",
@@ -298,7 +298,7 @@ NSFVAction::validParams()
                              "as an advected quantity, to the face.");
   params.addParam<MooseEnum>("passive_scalar_advection_interpolation",
                              adv_interpol_types,
-                             "The numerical scheme to use for interpolating paasive scalar field, "
+                             "The numerical scheme to use for interpolating passive scalar field, "
                              "as an advected quantity, to the face.");
 
   MooseEnum face_interpol_types("average skewness-corrected", "average");
@@ -317,7 +317,7 @@ NSFVAction::validParams()
   params.addParam<MooseEnum>(
       "passive_scalar_face_interpolation",
       face_interpol_types,
-      "The numerical scheme to interpolate the passive scalar field variable to the "
+      "The numerical scheme to interpolate the passive scalar field variables to the "
       "face (separate from the advected quantity interpolation).");
 
   params.addParam<bool>(
@@ -354,7 +354,7 @@ NSFVAction::validParams()
   params.addRangeCheckedParam<Real>("energy_scaling",
                                     1.0,
                                     "energy_scaling > 0.0",
-                                    "The scaling factor for the energy variables.");
+                                    "The scaling factor for the energy variable.");
   params.addRangeCheckedParam<Real>("passive_scalar_scaling",
                                     1.0,
                                     "passive_scalar_scaling > 0.0",

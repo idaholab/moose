@@ -146,7 +146,7 @@ protected:
 
   /// Switch to show if porous medium treatment is requested or not
   const bool _porous_medium_treatment;
-  /// The name of the auxiliary variable for the porosity field
+  /// The name of the functor for the porosity field
   const MooseFunctorName _porosity_name;
   /// Switch to enable friction correction for the porous medium momentum
   /// equations
@@ -252,11 +252,11 @@ protected:
   /// of the passive scalar fields
   const bool _passive_scalar_two_term_bc_expansion;
 
-  /// The scaling factor for the mass variables (for incompressible simulation this is pressure scaling)
+  /// The scaling factor for the mass equation variable (for incompressible simulations this is pressure scaling)
   const Real _mass_scaling;
   /// The scaling factor for the momentum variables
   const Real _momentum_scaling;
-  /// The scaling factor for the energy variables
+  /// The scaling factor for the energy variable (for incompressible simulations, temperature)
   const Real _energy_scaling;
   /// The scaling factor for the passive scalar variables
   const Real _passive_scalar_scaling;

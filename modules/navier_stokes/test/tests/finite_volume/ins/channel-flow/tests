@@ -66,7 +66,7 @@
     input = 2d-scalar-transport-action.i
     exodiff = 2d-scalar-transport-action_out.e
     method = "!dbg"
-    requirement = 'The system shall be able to transport a self-generated scalar field variables in a fluid flow field using the NSFVAction syntax.'
+    requirement = 'The system shall be able to create and transport scalar field variables in a fluid flow field using the NSFVAction syntax.'
     ad_indexing_type = 'global'
     design = 'NSFVAction.md'
     issues = '#19472'
