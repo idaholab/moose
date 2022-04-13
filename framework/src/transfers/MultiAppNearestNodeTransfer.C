@@ -90,11 +90,11 @@ MultiAppNearestNodeTransfer::execute()
 
     for (auto * const from_transform : _from_transforms)
       from_transform->setDestinationCoordinateSystem(
-          ex_to_transform.coordinateSystem(), ex_to_transform.rzRAxis(), ex_to_transform.rzZAxis());
+          ex_to_transform.coordinateSystem(), ex_to_transform.rAxis(), ex_to_transform.zAxis());
     for (auto * const to_transform : _to_transforms)
       to_transform->setDestinationCoordinateSystem(ex_from_transform.coordinateSystem(),
-                                                   ex_from_transform.rzRAxis(),
-                                                   ex_from_transform.rzZAxis());
+                                                   ex_from_transform.rAxis(),
+                                                   ex_from_transform.zAxis());
   }
 
   // Get the bounding boxes for the "from" domains.

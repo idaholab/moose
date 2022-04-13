@@ -92,14 +92,14 @@ public:
    * to XYZ, e.g. a single RZ point could correspond to any point in a 2pi rotation around the
    * symmetry axis
    * @param destination_coord_type The destination coordinate system, e.g XYZ, RZ, RSPHERICAL
-   * @param rz_r_axis If the destination coordinate system is RZ, then this parameter tells us the
-   * Cartesian axis that corresponds to the radial coordinate
-   * @param rz_z_axis If the destination coordinate system is RZ, then this parameter tells us the
+   * @param r_axis If the destination coordinate system is RZ or RSPHERICAL, then this parameter
+   * tells us the Cartesian axis that corresponds to the radial coordinate
+   * @param z_axis If the destination coordinate system is RZ, then this parameter tells us the
    * Cartesian axis that corresponds to the axial (axis-of-symmetry) coordinate
    */
   void setDestinationCoordinateSystem(Moose::CoordinateSystemType destination_coord_type,
-                                      Direction rz_r_axis = INVALID,
-                                      Direction rz_z_axis = INVALID);
+                                      Direction r_axis = INVALID,
+                                      Direction z_axis = INVALID);
 
   /**
    * @return our coordinate system
@@ -107,16 +107,16 @@ public:
   Moose::CoordinateSystemType coordinateSystem() const { return _coord_type; }
 
   /**
-   * @return What Cartesian axis corresponds to the radial coordinate if we are a RZ coordinate
-   * system
+   * @return What Cartesian axis corresponds to the radial coordinate if we are a RZ or RSPHERICAL
+   * coordinate system
    */
-  Direction rzRAxis() const { return _rz_r_axis; }
+  Direction rAxis() const { return _r_axis; }
 
   /**
    * @return What Cartesian axis corresponds to the axial/axis-of-symmetry coordinate if we are a RZ
    * coordinate system
    */
-  Direction rzZAxis() const { return _rz_z_axis; }
+  Direction zAxis() const { return _z_axis; }
 
   /**
    * Will setup a rotation transformation. The rotation transformation will be a single 90-degree
@@ -124,11 +124,11 @@ public:
    * Y-axis, which is our canonical/reference-frame up-direction
    * @param up_direction What direction corresponds to "up" (e.g. the opposite direction of gravity)
    * in our moose mesh
-   * @param rz_z_axis This parameter should be specified if our coordinate system is RZ because it
-   * will allow us to determine what axes correspond to radial and axis-of-symmetry coordinates
-   * post-rotation
+   * @param r_axis This parameter should be specified if our coordinate system is RZ or RSPHERICAL
+   * because it will allow us to determine what axes correspond to radial and axis-of-symmetry
+   * coordinates post-rotation
    */
-  void setRotation(Direction up_direction, Direction rz_z_axis = Y);
+  void setRotation(Direction up_direction, Direction r_axis = X);
 
   /**
    * Setup an \emph extrinsic rotation defined in the following way:
@@ -146,10 +146,10 @@ public:
 
   /**
    * The same as above \p setRotation, however, we only allow certain combinations of alpha, beta,
-   * and gamma such that the provided \p rz_z_axis is rotated onto a Cartesian axis and the
+   * and gamma such that the provided \p r_axis is rotated onto a Cartesian axis and the
    * resulting radial coordinate is non-negative
    */
-  void setRotation(Real alpha, Real beta, Real gamma, Direction rz_z_axis);
+  void setRotation(Real alpha, Real beta, Real gamma, Direction r_axis);
 
   /**
    * Set the scaling transformation which will be the reciprocal of the provided \p
@@ -180,19 +180,19 @@ private:
 
   /// Our coordinate system
   Moose::CoordinateSystemType _coord_type = Moose::COORD_XYZ;
-  /// If we are RZ, the Cartesian axis corresponding to the radial coordinate
-  Direction _rz_r_axis = INVALID;
+  /// If we are RZ or RSPHERICAL, the Cartesian axis corresponding to the radial coordinate
+  Direction _r_axis = INVALID;
   /// If we are RZ, the Cartesian axis corresponding to the axial/axis-of-symmetry coordinate
-  Direction _rz_z_axis = INVALID;
+  Direction _z_axis = INVALID;
 
   /// The destination coordinate system
   Moose::CoordinateSystemType _destination_coord_type = Moose::COORD_XYZ;
-  /// If the destination coordinate system is RZ, the Cartesian axis corresponding to the radial
-  /// coordinate
-  Direction _destination_rz_r_axis = INVALID;
+  /// If the destination coordinate system is RZ or RSPHERICAL, the Cartesian axis corresponding to
+  /// the radial coordinate
+  Direction _destination_r_axis = INVALID;
   /// If the destination coordinate system is RZ, the Cartesian axis corresponding to the
   /// axial/axis-of-symmetry coordinate
-  Direction _destination_rz_z_axis = INVALID;
+  Direction _destination_z_axis = INVALID;
 
   /// Whether we have different coordinate systems within our single domain. If we do, this will be
   /// problematic if we need to collapse from our space into an RZ or RSPHERICAL space because we

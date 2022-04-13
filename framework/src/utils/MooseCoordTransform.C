@@ -22,15 +22,15 @@ MooseCoordTransform::MooseCoordTransform() {}
 MooseCoordTransform::~MooseCoordTransform() {}
 
 void
-MooseCoordTransform::setRotation(const Direction up_direction, const Direction rz_z_axis /*=Y*/)
+MooseCoordTransform::setRotation(const Direction up_direction, const Direction r_axis /*=X*/)
 {
   Real alpha = 0, beta = 0, gamma = 0;
-  if (rz_z_axis == Z)
-    mooseError("Invalid rz_coord_axis option of 'Z'");
-  else if (rz_z_axis == INVALID)
-    mooseError("Called MooseCoordTransform::setRotation with INVALID 'rz_z_axis'");
+  if (r_axis == Z)
+    mooseError("Invalid r_axis option of 'Z'");
+  else if (r_axis == INVALID)
+    mooseError("Called MooseCoordTransform::setRotation with INVALID 'r_axis'");
 
-  const Direction rz_r_axis = rz_z_axis == X ? Y : X;
+  const Direction z_axis = r_axis == X ? Y : X;
 
   // Don't error immediately for unit testing purposes
   bool bad_rz_rotation = false;
@@ -38,16 +38,16 @@ MooseCoordTransform::setRotation(const Direction up_direction, const Direction r
   if (up_direction == X)
   {
     alpha = 90, beta = 0, gamma = 0;
-    if (rz_r_axis == X)
+    if (r_axis == X)
     {
-      _rz_r_axis = Y;
-      _rz_z_axis = X;
+      _r_axis = Y;
+      _z_axis = X;
     }
-    else if (rz_r_axis == Y)
+    else if (r_axis == Y)
     {
       bad_rz_rotation = true;
-      _rz_r_axis = X;
-      _rz_z_axis = Y;
+      _r_axis = X;
+      _z_axis = Y;
     }
     else
       mooseAssert(false, "we should never get here");
@@ -55,22 +55,22 @@ MooseCoordTransform::setRotation(const Direction up_direction, const Direction r
   else if (up_direction == Y)
   {
     alpha = 0, beta = 0, gamma = 0;
-    _rz_r_axis = rz_r_axis;
-    _rz_z_axis = rz_z_axis;
+    _r_axis = r_axis;
+    _z_axis = z_axis;
   }
   else if (up_direction == Z)
   {
     alpha = 0, beta = -90, gamma = 0;
-    if (rz_r_axis == X)
+    if (r_axis == X)
     {
-      _rz_r_axis = X;
-      _rz_z_axis = Z;
+      _r_axis = X;
+      _z_axis = Z;
     }
-    else if (rz_r_axis == Y)
+    else if (r_axis == Y)
     {
       bad_rz_rotation = true;
-      _rz_r_axis = Z;
-      _rz_z_axis = X;
+      _r_axis = Z;
+      _z_axis = X;
     }
     else
       mooseAssert(false, "we should never get here");
@@ -80,7 +80,7 @@ MooseCoordTransform::setRotation(const Direction up_direction, const Direction r
 
   setRotation(alpha, beta, gamma);
 
-  if (bad_rz_rotation)
+  if (bad_rz_rotation && _coord_type == Moose::COORD_RZ)
     mooseError("Rotation yields negative radial values");
 }
 
@@ -95,28 +95,26 @@ void
 MooseCoordTransform::setRotation(const Real alpha,
                                  const Real beta,
                                  const Real gamma,
-                                 const Direction rz_z_axis)
+                                 const Direction r_axis)
 {
-  if (rz_z_axis == Z)
-    mooseError("Invalid rz_coord_axis option of 'Z'");
-  else if (rz_z_axis == INVALID)
-    mooseError("Called MooseCoordTransform::setRotation with INVALID 'rz_z_axis'");
-
-  const Direction rz_r_axis = rz_z_axis == X ? Y : X;
+  if (r_axis == Z)
+    mooseError("Invalid r_axis option of 'Z'");
+  else if (r_axis == INVALID)
+    mooseError("Called MooseCoordTransform::setRotation with INVALID 'z_axis'");
 
   bool supported_manual_rz_rotation = false;
   const auto angles = std::make_tuple(alpha, beta, gamma);
   if (angles == std::make_tuple(0, 90, 0))
   {
-    if (rz_r_axis == X)
+    if (r_axis == X)
     {
-      _rz_r_axis = X;
-      _rz_z_axis = Z;
+      _r_axis = X;
+      _z_axis = Z;
     }
-    else if (rz_r_axis == Y)
+    else if (r_axis == Y)
     {
-      _rz_r_axis = Z;
-      _rz_z_axis = X;
+      _r_axis = Z;
+      _z_axis = X;
     }
     supported_manual_rz_rotation = true;
   }
@@ -223,10 +221,14 @@ MooseCoordTransform::MooseCoordTransform(const InputParameters & params)
   const bool has_gamma = params.isParamValid("gamma_rotation");
   const auto & up_direction = params.get<MooseEnum>("up_direction");
 
-  const Direction rz_z_axis =
-      (_coord_type == Moose::COORD_RZ)
-          ? Direction(static_cast<unsigned int>(int(params.get<MooseEnum>("rz_coord_axis"))))
-          : Y;
+  Direction r_axis = X;
+  if (_coord_type == Moose::COORD_RZ)
+  {
+    const auto z_axis =
+        Direction(static_cast<unsigned int>(int(params.get<MooseEnum>("rz_coord_axis"))));
+    if (z_axis == X)
+      r_axis = Y;
+  }
 
   if (has_alpha || has_beta || has_gamma)
   {
@@ -237,13 +239,13 @@ MooseCoordTransform::MooseCoordTransform(const InputParameters & params)
     const auto beta = (has_beta ? params.get<Real>("beta_rotation") : Real(0));
     const auto gamma = (has_gamma ? params.get<Real>("gamma_rotation") : Real(0));
 
-    if (_coord_type == Moose::COORD_RZ)
-      setRotation(alpha, beta, gamma, rz_z_axis);
+    if (_coord_type != Moose::COORD_XYZ)
+      setRotation(alpha, beta, gamma, r_axis);
     else
       setRotation(alpha, beta, gamma);
   }
   else if (up_direction.isValid())
-    setRotation(Direction(static_cast<unsigned int>(int(up_direction))), rz_z_axis);
+    setRotation(Direction(static_cast<unsigned int>(int(up_direction))), r_axis);
 
   //
   // Scale
@@ -269,14 +271,39 @@ MooseCoordTransform::operator()(const Point & point) const
   {
     Real r_squared = 0;
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-      if (i != _destination_rz_z_axis)
+      if (i != _destination_z_axis)
         r_squared += ret(i) * ret(i);
 
     const auto r = std::sqrt(r_squared);
-    const auto z = ret(_destination_rz_z_axis);
+    const auto z = ret(_destination_z_axis);
     ret = 0;
-    ret(_destination_rz_r_axis) = r;
-    ret(_destination_rz_z_axis) = z;
+    ret(_destination_r_axis) = r;
+    ret(_destination_z_axis) = z;
+  }
+  else if (_coord_type == Moose::COORD_XYZ && _destination_coord_type == Moose::COORD_RSPHERICAL)
+  {
+    Real r_squared = 0;
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      r_squared += ret(i) * ret(i);
+
+    const auto r = std::sqrt(r_squared);
+    ret = 0;
+    ret(_destination_r_axis) = r;
+  }
+  else if (_coord_type == Moose::COORD_RZ && _destination_coord_type == Moose::COORD_RSPHERICAL)
+  {
+    Real r_squared = 0;
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    {
+      mooseAssert(
+          i == _r_axis || i == _z_axis || MooseUtils::absoluteFuzzyEqual(ret(i), 0),
+          "Our point should be 0 if we are evaluating at an index that is neither our r or z-axis");
+      r_squared += ret(i) * ret(i);
+    }
+
+    const auto r = std::sqrt(r_squared);
+    ret = 0;
+    ret(_destination_r_axis) = r;
   }
 
   return ret;
@@ -291,31 +318,36 @@ MooseCoordTransform::setTranslationVector(const Point & translation)
 void
 MooseCoordTransform::setDestinationCoordinateSystem(
     const Moose::CoordinateSystemType destination_coord_type,
-    const Direction rz_r_axis,
-    const Direction rz_z_axis)
+    const Direction r_axis,
+    const Direction z_axis)
 {
   _destination_coord_type = destination_coord_type;
-  if (_destination_coord_type == Moose::COORD_RZ)
+
+  auto check_axes = [](const auto & axis, const auto & axis_string)
   {
-    auto check_axes = [](const auto & axis, const auto & axis_string)
-    {
-      if (axis == INVALID)
-        mooseError("If the destination coordinate system type is RZ, then a valid '",
-                   axis_string,
-                   "' must be provided to 'MooseCoordTransform::setDestinationCoordinateSystem'");
-    };
+    if (axis == INVALID)
+      mooseError("If the destination coordinate system type is RZ, then a valid '",
+                 axis_string,
+                 "' must be provided to 'MooseCoordTransform::setDestinationCoordinateSystem'");
+  };
 
-    check_axes(rz_r_axis, "rz_r_axis");
-    check_axes(rz_z_axis, "rz_z_axis");
-
+  if (_destination_coord_type == Moose::COORD_RZ ||
+      _destination_coord_type == Moose::COORD_RSPHERICAL)
+  {
     if (_has_different_coord_sys)
-      mooseError("When the destination coordinate system is RZ, we may have to perform "
-                 "transformations based on *our* coordinate system. However, we have multiple "
-                 "coordinate systems, and since when evaluating transformations, we are only "
-                 "called with a Point argument, we do not know what subdomain we are on and "
-                 "consequently we do not know what transformation to apply.");
+      mooseError(
+          "When the destination coordinate system is RZ or RSPHERICAL, we have to perform "
+          "coordinate collapsing based on *our* coordinate system. However, we have multiple "
+          "coordinate systems, and since when evaluating transformations, we are only "
+          "called with a Point argument, we do not know what subdomain we are on and "
+          "consequently we do not know what transformation to apply.");
+
+    check_axes(r_axis, "r_axis");
   }
 
-  _destination_rz_r_axis = rz_r_axis;
-  _destination_rz_z_axis = rz_z_axis;
+  if (_destination_coord_type == Moose::COORD_RZ)
+    check_axes(z_axis, "z_axis");
+
+  _destination_r_axis = r_axis;
+  _destination_z_axis = z_axis;
 }
