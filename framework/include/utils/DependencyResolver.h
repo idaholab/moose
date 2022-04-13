@@ -142,7 +142,6 @@ public:
   };
 
 private:
-  bool isCyclic();
   bool depthFirstSearch(const T & node);
 
   /**
@@ -283,20 +282,6 @@ DependencyResolver<T>::depthFirstSearch(const T & root)
   }
 
   root_color_it->second = BLACK;
-
-  return false;
-}
-
-template <typename T>
-bool
-DependencyResolver<T>::isCyclic()
-{
-  for (auto & pr : _colors)
-    pr.second = WHITE;
-
-  for (auto & [key, color] : _colors)
-    if (color == WHITE && depthFirstSearch(key))
-      return true;
 
   return false;
 }
