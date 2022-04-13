@@ -10,7 +10,10 @@
 #include "gtest/gtest.h"
 
 #include "MooseCoordTransform.h"
+#include "MooseUtils.h"
 #include "libmesh/point.h"
+
+using namespace MooseUtils;
 
 TEST(MooseCoordTest, testRotations)
 {
@@ -94,11 +97,37 @@ TEST(MooseCoordTest, testRotations)
   compare_points(transform(xpt), xpt);
 }
 
-// TEST(MooseCoordTest, testCoordCollapse)
-// {
-//   const auto x = MooseCoordTransform::X;
-//   const auto y = MooseCoordTransform::Y;
-//   const auto z = MooseCoordTransform::Z;
-
-//   MooseCoordTransform xyz{};
-// }
+TEST(MooseCoordTest, testCoordCollapse)
+{
+  MooseCoordTransform xyz{};
+  xyz.setCoordinateSystem(Moose::COORD_XYZ);
+  MooseCoordTransform rz{};
+  rz.setCoordinateSystem(Moose::COORD_RZ, MooseCoordTransform::Y);
+  MooseCoordTransform rsph{};
+  rsph.setCoordinateSystem(Moose::COORD_RSPHERICAL);
+  const Real sqrt2 = std::sqrt(2.);
+  const Real sqrt3 = std::sqrt(3.);
+  const Point xyz_pt(1, 1, 1);
+  const Point rz_pt(1, 1, 0);
+  {
+    xyz.setDestinationCoordinateSystem(rz);
+    const auto pt = xyz(xyz_pt);
+    EXPECT_TRUE(absoluteFuzzyEqual(pt(0), sqrt2));
+    EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 1.));
+    EXPECT_TRUE(absoluteFuzzyEqual(pt(2), 0.));
+  }
+  {
+    xyz.setDestinationCoordinateSystem(rsph);
+    const auto pt = xyz(xyz_pt);
+    EXPECT_TRUE(absoluteFuzzyEqual(pt(0), sqrt3));
+    EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 0.));
+    EXPECT_TRUE(absoluteFuzzyEqual(pt(2), 0.));
+  }
+  {
+    rz.setDestinationCoordinateSystem(rsph);
+    const auto pt = rz(rz_pt);
+    EXPECT_TRUE(absoluteFuzzyEqual(pt(0), sqrt2));
+    EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 0.));
+    EXPECT_TRUE(absoluteFuzzyEqual(pt(2), 0.));
+  }
+}
