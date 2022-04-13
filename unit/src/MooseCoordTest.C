@@ -12,14 +12,12 @@
 #include "MooseCoordTransform.h"
 #include "libmesh/point.h"
 
-TEST(MooseCoordTest, test)
+TEST(MooseCoordTest, testRotations)
 {
   MooseCoordTransform transform{};
-  transform.setCoordinateSystem(Moose::COORD_RZ);
   const auto x = MooseCoordTransform::X;
   const auto y = MooseCoordTransform::Y;
   const auto z = MooseCoordTransform::Z;
-  const auto invalid = MooseCoordTransform::INVALID;
   const Point xpt(1, 0, 0);
   const Point ypt(0, 1, 0);
   const Point zpt(0, 0, 1);
@@ -27,12 +25,11 @@ TEST(MooseCoordTest, test)
   const Point minus_ypt(0, -1, 0);
   const Point minus_zpt(0, 0, -1);
 
-  auto error_checking =
-      [&transform](const auto up_direction, const auto r_axis, const auto & error_string)
+  auto error_checking = [&transform](const auto up_direction, const auto & error_string)
   {
     try
     {
-      transform.setRotation(up_direction, r_axis);
+      transform.setUpDirection(up_direction);
       EXPECT_TRUE(false);
     }
     catch (std::runtime_error & e)
@@ -48,43 +45,37 @@ TEST(MooseCoordTest, test)
       EXPECT_NEAR(pt1(i), pt2(i), TOLERANCE * TOLERANCE);
   };
 
-  error_checking(x, z, "Invalid r_axis option");
-  error_checking(x, invalid, "Called MooseCoordTransform::setRotation with INVALID");
-
-  // xx
-  transform.setRotation(x, x);
+  transform.setCoordinateSystem(Moose::COORD_RZ, y);
+  transform.setUpDirection(x);
   compare_points(transform(xpt), ypt);
 
-  // yx
-  transform.setRotation(y, x);
+  transform.setCoordinateSystem(Moose::COORD_RZ, y);
+  transform.setUpDirection(y);
   compare_points(transform(xpt), xpt);
 
-  // zx
-  transform.setRotation(z, x);
+  transform.setCoordinateSystem(Moose::COORD_RZ, y);
+  transform.setUpDirection(z);
   compare_points(transform(xpt), xpt);
   compare_points(transform(ypt), minus_zpt);
 
-  // xy
-  error_checking(x, y, "Rotation yields negative radial values");
+  transform.setCoordinateSystem(Moose::COORD_RZ, x);
+  error_checking(x, "Rotation yields negative radial values");
   compare_points(transform(ypt), minus_xpt);
 
-  // yy
-  transform.setRotation(y, y);
+  transform.setCoordinateSystem(Moose::COORD_RZ, x);
+  transform.setUpDirection(y);
   compare_points(transform(xpt), xpt);
 
-  // zy
-  error_checking(z, y, "Rotation yields negative radial values");
+  transform.setCoordinateSystem(Moose::COORD_RZ, x);
+  error_checking(z, "Rotation yields negative radial values");
   compare_points(transform(ypt), minus_zpt);
 
-  auto error_angles_checking = [&transform](const auto alpha,
-                                            const auto beta,
-                                            const auto gamma,
-                                            const auto r_axis,
-                                            const auto & error_string)
+  auto error_angles_checking =
+      [&transform](const auto alpha, const auto beta, const auto gamma, const auto & error_string)
   {
     try
     {
-      transform.setRotation(alpha, beta, gamma, r_axis);
+      transform.setRotation(alpha, beta, gamma);
       EXPECT_TRUE(false);
     }
     catch (std::runtime_error & e)
@@ -94,11 +85,20 @@ TEST(MooseCoordTest, test)
     }
   };
 
-  error_angles_checking(0, 0, 0, z, "Invalid r_axis option");
-  error_angles_checking(0, 0, 0, invalid, "Called MooseCoordTransform::setRotation with INVALID");
-  error_angles_checking(0, 0, 0, y, "Unsupported manual angle prescription");
+  transform.setCoordinateSystem(Moose::COORD_RZ, x);
+  error_angles_checking(0, 0, 0, "Unsupported manual angle prescription");
 
-  transform.setRotation(0, 90, 0, y);
+  transform.setCoordinateSystem(Moose::COORD_RZ, x);
+  transform.setRotation(0, 90, 0);
   compare_points(transform(ypt), zpt);
   compare_points(transform(xpt), xpt);
 }
+
+// TEST(MooseCoordTest, testCoordCollapse)
+// {
+//   const auto x = MooseCoordTransform::X;
+//   const auto y = MooseCoordTransform::Y;
+//   const auto z = MooseCoordTransform::Z;
+
+//   MooseCoordTransform xyz{};
+// }

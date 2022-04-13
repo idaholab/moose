@@ -124,11 +124,8 @@ public:
    * Y-axis, which is our canonical/reference-frame up-direction
    * @param up_direction What direction corresponds to "up" (e.g. the opposite direction of gravity)
    * in our moose mesh
-   * @param r_axis This parameter should be specified if our coordinate system is RZ or RSPHERICAL
-   * because it will allow us to determine what axes correspond to radial and axis-of-symmetry
-   * coordinates post-rotation
    */
-  void setRotation(Direction up_direction, Direction r_axis = X);
+  void setUpDirection(Direction up_direction);
 
   /**
    * Setup an \emph extrinsic rotation defined in the following way:
@@ -141,15 +138,12 @@ public:
    * frame. For instance, in 2D your mesh may appear 90 degrees rotated (around the z-axis) with
    * respect to the reference frame. In such a case, the angle set you should provide to this
    * function is {90, 0, 0}
-   */
-  void setRotation(Real alpha, Real beta, Real gamma);
-
-  /**
-   * The same as above \p setRotation, however, we only allow certain combinations of alpha, beta,
-   * and gamma such that the provided \p r_axis is rotated onto a Cartesian axis and the
+   *
+   * If our coordinate system is RZ, then only certain values of alpha, beta, and gamma will be
+   * accepted such that the radial and axial coordinates are rotated onto Cartesian axes and the
    * resulting radial coordinate is non-negative
    */
-  void setRotation(Real alpha, Real beta, Real gamma, Direction r_axis);
+  void setRotation(Real alpha, Real beta, Real gamma);
 
   /**
    * Set the scaling transformation which will be the reciprocal of the provided \p
@@ -164,10 +158,19 @@ public:
 
   /**
    * Set our coordinate system
+   * @param system_type the coordinate system type
+   * @param rz_symmetry_axis the axial coordinate, e.g. the axis of symmetry
    */
-  void setCoordinateSystem(Moose::CoordinateSystemType);
+  void setCoordinateSystem(Moose::CoordinateSystemType system_type,
+                           Direction rz_symmetry_axis = INVALID);
 
 private:
+  /**
+   * If the coordinate system type is RZ, then we return the provided argument. Otherwise we return
+   * INVALID
+   */
+  Direction processZAxis(Direction z_axis);
+
   /// Represents a forward scaling transformation from our units to reference frame units of meters. This
   /// matrix will be diagonal
   std::unique_ptr<libMesh::RealTensorValue> _scale;

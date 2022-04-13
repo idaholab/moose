@@ -21,108 +21,109 @@ using namespace libMesh;
 MooseCoordTransform::MooseCoordTransform() {}
 MooseCoordTransform::~MooseCoordTransform() {}
 
+MooseCoordTransform::Direction
+MooseCoordTransform::processZAxis(const Direction z_axis)
+{
+  return _coord_type == Moose::COORD_RZ ? z_axis : INVALID;
+}
+
 void
-MooseCoordTransform::setRotation(const Direction up_direction, const Direction r_axis /*=X*/)
+MooseCoordTransform::setUpDirection(const Direction up_direction)
 {
   Real alpha = 0, beta = 0, gamma = 0;
-  if (r_axis == Z)
-    mooseError("Invalid r_axis option of 'Z'");
-  else if (r_axis == INVALID)
-    mooseError("Called MooseCoordTransform::setRotation with INVALID 'r_axis'");
 
-  const Direction z_axis = r_axis == X ? Y : X;
-
+  const bool must_rotate_axes =
+      _coord_type == Moose::COORD_RZ || _coord_type == Moose::COORD_RSPHERICAL;
   // Don't error immediately for unit testing purposes
-  bool bad_rz_rotation = false;
+  bool negative_radii = false;
 
   if (up_direction == X)
   {
     alpha = 90, beta = 0, gamma = 0;
-    if (r_axis == X)
+    if (must_rotate_axes)
     {
-      _r_axis = Y;
-      _z_axis = X;
+      if (_r_axis == X)
+      {
+        _r_axis = Y;
+        _z_axis = processZAxis(X);
+      }
+      else if (_r_axis == Y)
+      {
+        negative_radii = true;
+        _r_axis = X;
+        _z_axis = processZAxis(Y);
+      }
+      else
+        mooseAssert(false, "we should never get here");
     }
-    else if (r_axis == Y)
-    {
-      bad_rz_rotation = true;
-      _r_axis = X;
-      _z_axis = Y;
-    }
-    else
-      mooseAssert(false, "we should never get here");
   }
   else if (up_direction == Y)
-  {
     alpha = 0, beta = 0, gamma = 0;
-    _r_axis = r_axis;
-    _z_axis = z_axis;
-  }
   else if (up_direction == Z)
   {
     alpha = 0, beta = -90, gamma = 0;
-    if (r_axis == X)
+    if (must_rotate_axes)
     {
-      _r_axis = X;
-      _z_axis = Z;
+      if (_r_axis == X)
+      {
+        _r_axis = X;
+        _z_axis = processZAxis(Z);
+      }
+      else if (_r_axis == Y)
+      {
+        negative_radii = true;
+        _r_axis = Z;
+        _z_axis = processZAxis(X);
+      }
+      else
+        mooseAssert(false, "we should never get here");
     }
-    else if (r_axis == Y)
-    {
-      bad_rz_rotation = true;
-      _r_axis = Z;
-      _z_axis = X;
-    }
-    else
-      mooseAssert(false, "we should never get here");
   }
   else
     mooseAssert(false, "we should never get here");
 
-  setRotation(alpha, beta, gamma);
+  _rotate = std::make_unique<RealTensorValue>(
+      RealTensorValue::extrinsic_rotation_matrix(alpha, beta, gamma));
 
-  if (bad_rz_rotation && _coord_type == Moose::COORD_RZ)
+  if (negative_radii)
     mooseError("Rotation yields negative radial values");
 }
 
 void
 MooseCoordTransform::setRotation(const Real alpha, const Real beta, const Real gamma)
 {
-  _rotate = std::make_unique<RealTensorValue>(
-      RealTensorValue::extrinsic_rotation_matrix(alpha, beta, gamma));
-}
-
-void
-MooseCoordTransform::setRotation(const Real alpha,
-                                 const Real beta,
-                                 const Real gamma,
-                                 const Direction r_axis)
-{
-  if (r_axis == Z)
-    mooseError("Invalid r_axis option of 'Z'");
-  else if (r_axis == INVALID)
-    mooseError("Called MooseCoordTransform::setRotation with INVALID 'z_axis'");
-
-  bool supported_manual_rz_rotation = false;
-  const auto angles = std::make_tuple(alpha, beta, gamma);
-  if (angles == std::make_tuple(0, 90, 0))
+  const bool must_rotate_axes =
+      _coord_type == Moose::COORD_RZ || _coord_type == Moose::COORD_RSPHERICAL;
+  bool axes_rotated = false;
+  if (must_rotate_axes)
   {
-    if (r_axis == X)
+    const auto angles = std::make_tuple(alpha, beta, gamma);
+    if (angles == std::make_tuple(0, 90, 0))
     {
-      _r_axis = X;
-      _z_axis = Z;
+      if (_r_axis == X)
+      {
+        mooseAssert((_coord_type == Moose::COORD_RZ && _z_axis == Y) ||
+                        (_coord_type == Moose::COORD_RSPHERICAL && _z_axis == INVALID),
+                    "'_z_axis' is not an expected value");
+        _r_axis = X;
+        _z_axis = _coord_type == Moose::COORD_RZ ? Z : INVALID;
+      }
+      else if (_r_axis == Y)
+      {
+        mooseAssert((_coord_type == Moose::COORD_RZ && _z_axis == X) ||
+                        (_coord_type == Moose::COORD_RSPHERICAL && _z_axis == INVALID),
+                    "'_z_axis' is not an expected value");
+        _r_axis = Z;
+        _z_axis = _coord_type == Moose::COORD_RZ ? X : INVALID;
+      }
+      axes_rotated = true;
     }
-    else if (r_axis == Y)
-    {
-      _r_axis = Z;
-      _z_axis = X;
-    }
-    supported_manual_rz_rotation = true;
   }
 
   _rotate = std::make_unique<RealTensorValue>(
       RealTensorValue::extrinsic_rotation_matrix(alpha, beta, gamma));
 
-  if (!supported_manual_rz_rotation)
+  if (must_rotate_axes && !axes_rotated)
     mooseError("Unsupported manual angle prescription in 'MooseCoordTransform::setRotation'");
 }
 
@@ -136,9 +137,22 @@ MooseCoordTransform::setLengthUnitsPerMeter(const Real length_units_per_meter)
 }
 
 void
-MooseCoordTransform::setCoordinateSystem(const Moose::CoordinateSystemType coord_type)
+MooseCoordTransform::setCoordinateSystem(const Moose::CoordinateSystemType coord_type,
+                                         const Direction rz_symmetry_axis)
 {
   _coord_type = coord_type;
+
+  if (_coord_type == Moose::COORD_RZ)
+  {
+    if (rz_symmetry_axis == INVALID)
+      mooseError("For RZ coordinate systems, the 'rz_symmetry_axis' parameter must be provided to "
+                 "'MooseCoordTransform::setCoordinateSystem'");
+
+    _z_axis = rz_symmetry_axis;
+    _r_axis = _z_axis == X ? Y : X;
+  }
+  else if (_coord_type == Moose::COORD_RSPHERICAL)
+    _r_axis = X;
 }
 
 InputParameters
@@ -207,7 +221,9 @@ MooseCoordTransform::MooseCoordTransform(const InputParameters & params)
   if (map_it == coord_sys.end())
     setCoordinateSystem(Moose::COORD_XYZ);
   else
-    setCoordinateSystem(map_it->second);
+    setCoordinateSystem(
+        map_it->second,
+        Direction(static_cast<unsigned int>(int(params.get<MooseEnum>("rz_coord_axis")))));
   for (; map_it != coord_sys.end(); ++map_it)
     coord_types.insert(map_it->second);
 
@@ -221,15 +237,6 @@ MooseCoordTransform::MooseCoordTransform(const InputParameters & params)
   const bool has_gamma = params.isParamValid("gamma_rotation");
   const auto & up_direction = params.get<MooseEnum>("up_direction");
 
-  Direction r_axis = X;
-  if (_coord_type == Moose::COORD_RZ)
-  {
-    const auto z_axis =
-        Direction(static_cast<unsigned int>(int(params.get<MooseEnum>("rz_coord_axis"))));
-    if (z_axis == X)
-      r_axis = Y;
-  }
-
   if (has_alpha || has_beta || has_gamma)
   {
     if (up_direction.isValid())
@@ -239,13 +246,10 @@ MooseCoordTransform::MooseCoordTransform(const InputParameters & params)
     const auto beta = (has_beta ? params.get<Real>("beta_rotation") : Real(0));
     const auto gamma = (has_gamma ? params.get<Real>("gamma_rotation") : Real(0));
 
-    if (_coord_type != Moose::COORD_XYZ)
-      setRotation(alpha, beta, gamma, r_axis);
-    else
-      setRotation(alpha, beta, gamma);
+    setRotation(alpha, beta, gamma);
   }
   else if (up_direction.isValid())
-    setRotation(Direction(static_cast<unsigned int>(int(up_direction))), r_axis);
+    setUpDirection(Direction(static_cast<unsigned int>(int(up_direction))));
 
   //
   // Scale
