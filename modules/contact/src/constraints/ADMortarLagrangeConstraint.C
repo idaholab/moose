@@ -179,10 +179,12 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
       // Get rid of derivatives that we assume won't count (tolerance prescribed by user)
       // This can cause zero diagonal terms with the variable condensation preconditioner when the
       // no adaptivity option is used (dofs are not checked).
-#ifdef MOOSE_SPARSE_AD
-      if (_apply_derivative_threshold)
-        residuals_lower[index_lower].derivatives().sparsity_trim(_ad_derivative_threshold);
-#endif
+      // Uncomment when https://github.com/libMesh/MetaPhysicL/pull/18 makes it to MOOSE
+
+      //#ifdef MOOSE_SPARSE_AD
+      //      if (_apply_derivative_threshold)
+      //        residuals_lower[index_lower].derivatives().sparsity_trim(_ad_derivative_threshold);
+      //#endif
 
       index_lower++;
     }
