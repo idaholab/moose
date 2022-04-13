@@ -1,7 +1,9 @@
 [Tests]
-  [./cframe]
-    type = RunApp
+  [cframe]
+    type = XMLDiff
     input = 'cframe_iga.i'
-    check_input = True
-  [../]
+    exodus_version = '>=8.0'
+    vtk_version = '>=9.0'
+    xmldiff = 'cframe_iga_out_001.pvtu cframe_iga_out_001_0.vtu'
+  []
 []

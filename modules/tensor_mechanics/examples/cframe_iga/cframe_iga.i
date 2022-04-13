@@ -1,7 +1,4 @@
-#
 [GlobalParams]
-  order = SECOND
-  family = RATIONAL_BERNSTEIN
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -15,16 +12,22 @@
 
 [Variables]
   [disp_x]
+    order = SECOND
+    family = RATIONAL_BERNSTEIN
   []
   [disp_y]
+    order = SECOND
+    family = RATIONAL_BERNSTEIN
   []
   [disp_z]
+    order = SECOND
+    family = RATIONAL_BERNSTEIN
   []
 []
 
 [Kernels]
   [TensorMechanics]
-    #Stress divergence kernels
+#Stress divergence kernels
     displacements = 'disp_x disp_y disp_z'
    []
 []
@@ -32,13 +35,13 @@
 [AuxVariables]
     [von_mises]
         #Dependent variable used to visualize the von Mises stress
-        order = SECOND
-        family = MONOMIAL
+       order = SECOND
+       family = MONOMIAL
     []
     [Max_Princ]
-        #Dependent variable used to visualize the Hoop stress
-        order = SECOND
-        family = MONOMIAL
+       #Dependent variable used to visualize the Hoop stress
+       order = SECOND
+       family = MONOMIAL
     []
     [stress_xx]
         order = SECOND
@@ -123,7 +126,6 @@
 []
 
 [Materials]
-  active = 'density_AL stress strain elasticity_tensor_AL'
   [elasticity_tensor_AL]
     #Creates the elasticity tensor using concrete parameters
     youngs_modulus = 24e6 #psi
@@ -138,12 +140,6 @@
   [stress]
     #Computes the stress, using linear elasticity
     type = ComputeLinearElasticStress
-  []
-  [hoop_stress_clad]
-    type = RankTwoCylindricalComponent
-    rank_two_tensor = stress
-    cylindrical_component = HoopStress
-    property_name = Hoop_Stress
   []
   [density_AL]
     #Defines the density of steel
@@ -161,7 +157,6 @@
   []
 []
 
-
 [Postprocessors]
   [max_principal_stress]
     type = PointValue
@@ -175,20 +170,8 @@
   []
 []
 
-#[VectorPostprocessors]
-#  [axial_stress_base_0_0]
-#    type = LineValueSampler
-#    num_points = 20
-#    outputs = vpp
-#    sort_by = id
-#    start_point = '0 0.5 0'
-#    end_point = '0 -0.5 0'
-#    variable = stress_yy
-#  []
-#[]
-
 [Executioner]
-  #We solve a steady state problem using Newton's iteration
+  # We solve a steady state problem using Newton's iteration
   type = Steady
   solve_type = NEWTON
   nl_rel_tol = 1e-9
@@ -199,29 +182,6 @@
   petsc_options_value = 'hypre boomeramg 31'
 []
 
-[Reporters]
-  [constrainedDOF]
-    type=MeshInfo
-    items="num_dofs_constrained num_dofs_nonlinear"
-    []
-[]
-
 [Outputs]
   vtk = true
-  exodus = true
-  perf_graph = true
- # [vpp]
- #   type = CSV
- #   file_base = 'csv/out'
- #   execute_on = timestep_end
- # []
-   [probe]
-    type = CSV
-    execute_on = 'final'
-    file_base = 'probe_data'
-  []
 []
-
-#[Debug]
-#show_material_props = true
-#[]
