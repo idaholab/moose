@@ -613,6 +613,11 @@ Console::outputScalarVariables()
 void
 Console::outputSystemInformation()
 {
+  // skip system information output for sub-apps other than the zero-th of a MultiApp
+  // because they are using the same inputs and are most likely having the same information.
+  if (_app.multiAppNumber() > 0)
+    return;
+
   if (_system_info_flags.contains("framework"))
     _console << ConsoleUtils::outputFrameworkInformation(_app);
 
