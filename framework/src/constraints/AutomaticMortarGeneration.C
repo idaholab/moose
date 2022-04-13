@@ -190,18 +190,19 @@ AutomaticMortarGeneration::getPrimaryIpToLowerElementMap(
   return primary_ip_i_to_lower_primary_i;
 }
 
-std::array<std::vector<Point>, 2>
+std::array<MooseUtils::SemidynamicVector<Point, 9>, 2>
 AutomaticMortarGeneration::getNodalTangents(const Elem & secondary_elem) const
 {
-  std::vector<Point> nodal_tangents_one(secondary_elem.n_nodes());
-  std::vector<Point> nodal_tangents_two(secondary_elem.n_nodes());
+  // MetaPhysicL will check if we ran out of allocated space.
+  MooseUtils::SemidynamicVector<Point, 9> nodal_tangents_one(0);
+  MooseUtils::SemidynamicVector<Point, 9> nodal_tangents_two(0);
 
   for (const auto n : make_range(secondary_elem.n_nodes()))
   {
     const auto & tangent_vectors =
         libmesh_map_find(_secondary_node_to_hh_nodal_tangents, secondary_elem.node_ptr(n));
-    nodal_tangents_one[n] = tangent_vectors[0];
-    nodal_tangents_two[n] = tangent_vectors[1];
+    nodal_tangents_one.push_back(tangent_vectors[0]);
+    nodal_tangents_two.push_back(tangent_vectors[1]);
   }
 
   return {{nodal_tangents_one, nodal_tangents_two}};
@@ -1739,7 +1740,16 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             // on the interface start off being perfectly aligned. In this situation, we need to
             // associate the secondary node with two different elements (and two corresponding
             // xi^(2) values.
-            if (std::abs(std::abs(xi2) - 1.) < _xi_tolerance)
+
+            // We are projecting on one side first and the other side second. If we make the
+            // tolerance bigger and remove the (5) factor we are going to continue to miss the
+            // second projection and fall into the exception message in
+            // projectPrimaryNodesSinglePair. What makes this modification to not fall in the
+            // exception is that we are projecting on one side more xi than in the other. There
+            // should be a better way of doing this by using actual distances and not parametric
+            // coordinates. But I believe making the tolerance uniformly larger or smaller won't do
+            // the trick here.
+            if (std::abs(std::abs(xi2) - 1.) < _xi_tolerance * 5.0)
             {
               const Node * primary_node = (xi2 < 0) ? primary_elem_candidate->node_ptr(0)
                                                     : primary_elem_candidate->node_ptr(1);
@@ -1809,6 +1819,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
                     // Also map in the other direction.
                     Real xi1 =
                         (secondary_node == secondary_node_neighbors[snn]->node_ptr(0)) ? -1 : +1;
+
                     auto primary_key = std::make_tuple(
                         primary_node->id(), primary_node, primary_node_neighbors[mnn]);
                     auto secondary_val = std::make_pair(xi1, secondary_node_neighbors[snn]);
@@ -2031,10 +2042,14 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
             if (std::abs(std::abs(xi1) - 1.) < _xi_tolerance)
             {
               // Special case: xi1=+/-1.
-              // We shouldn't get here, because this primary node should already
-              // have been mapped during the project_secondary_nodes() routine.
-              throw MooseException("We should never get here, aligned primary nodes should already "
-                                   "have been mapped.");
+              // It is unlikely that we get here, because this primary node should already
+              // have been mapped during the project_secondary_nodes() routine, but
+              // there is still a chance since the tolerances are applied to
+              // the xi coordinate and that value may be different on a primary element and a
+              // secondary element since they may have different sizes.
+              throw MooseException("Nodes on primary and secondary surfaces are aligned. This is "
+                                   "causing trouble when identifying projections from secondary "
+                                   "nodes when performing primary node projections.");
             }
             else // somewhere in the middle of the Elem
             {

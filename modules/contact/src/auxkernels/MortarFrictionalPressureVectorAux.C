@@ -101,7 +101,7 @@ MortarFrictionalPressureVectorAux::computeValue()
       libmesh_map_find(_mortar_generation_object->nodesToSecondaryElem(), _current_node->id())[0];
 
   // Get nodal tangents for this element
-  std::array<std::vector<Point>, 2> nodal_tangents =
+  const auto & nodal_tangents =
       _mortar_generation_object->getNodalTangents(*lower_dimensional_element);
 
   Real tangent_one_component = 0;

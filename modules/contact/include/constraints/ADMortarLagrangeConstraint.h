@@ -23,6 +23,8 @@ public:
 
   ADMortarLagrangeConstraint(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   using ADMortarConstraint::computeResidual;
   /**
@@ -46,4 +48,10 @@ protected:
   /// This may help for multiphysics, three-dimensional mortar problems where,
   /// otherwise, the size of the AD derivative container would be prohibitive.
   const Real _ad_derivative_threshold;
+
+private:
+  /// Whether to apply derivative trimming. Automatically disabled for the variable
+  /// condensation preconditioner (VCP) since the removal of lower-d-related dofs appear
+  /// to be causing misbehavior when the no-adaptivity option is employed.
+  bool _apply_derivative_threshold;
 };
