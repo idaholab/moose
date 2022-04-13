@@ -85,38 +85,20 @@ public:
   };
 
   /**
-   * Set the destination coordinate system. Depending on the \p destination_coord_type we may
-   * perform additional transformations. For instance if the destination coordinate system is RZ and
-   * we are XYZ, we will translate our xyz points into RZ points, e.g. we will collapse from three
-   * dimensions into two. The transformation would be non-unique if we were to attempt to go from RZ
-   * to XYZ, e.g. a single RZ point could correspond to any point in a 2pi rotation around the
-   * symmetry axis
-   * @param destination_coord_type The destination coordinate system, e.g XYZ, RZ, RSPHERICAL
-   * @param r_axis If the destination coordinate system is RZ or RSPHERICAL, then this parameter
-   * tells us the Cartesian axis that corresponds to the radial coordinate
-   * @param z_axis If the destination coordinate system is RZ, then this parameter tells us the
-   * Cartesian axis that corresponds to the axial (axis-of-symmetry) coordinate
+   * Set the destination coordinate system and destination radial and symmetry axes as appropriate
+   * for RZ or RSPHERICAL simulations. Depending on the coordinate system type of the provided
+   * coordinate transform we may perform additional transformations. For instance if the destination
+   * coordinate system is RZ and we are XYZ, we will translate our xyz points into RZ points, e.g.
+   * we will collapse from three dimensions into two. The transformation would be non-unique if we
+   * were to attempt to go from RZ to XYZ, e.g. a single RZ point could correspond to any point in a
+   * 2pi rotation around the symmetry axis
    */
-  void setDestinationCoordinateSystem(Moose::CoordinateSystemType destination_coord_type,
-                                      Direction r_axis = INVALID,
-                                      Direction z_axis = INVALID);
+  void setDestinationCoordinateSystem(const MooseCoordTransform & destination_coord_transform);
 
   /**
    * @return our coordinate system
    */
   Moose::CoordinateSystemType coordinateSystem() const { return _coord_type; }
-
-  /**
-   * @return What Cartesian axis corresponds to the radial coordinate if we are a RZ or RSPHERICAL
-   * coordinate system
-   */
-  Direction rAxis() const { return _r_axis; }
-
-  /**
-   * @return What Cartesian axis corresponds to the axial/axis-of-symmetry coordinate if we are a RZ
-   * coordinate system
-   */
-  Direction zAxis() const { return _z_axis; }
 
   /**
    * Will setup a rotation transformation. The rotation transformation will be a single 90-degree

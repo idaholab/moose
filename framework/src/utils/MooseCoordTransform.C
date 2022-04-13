@@ -321,37 +321,18 @@ MooseCoordTransform::setTranslationVector(const Point & translation)
 
 void
 MooseCoordTransform::setDestinationCoordinateSystem(
-    const Moose::CoordinateSystemType destination_coord_type,
-    const Direction r_axis,
-    const Direction z_axis)
+    const MooseCoordTransform & destination_coord_transform)
 {
-  _destination_coord_type = destination_coord_type;
+  _destination_coord_type = destination_coord_transform._coord_type;
+  _destination_r_axis = destination_coord_transform._r_axis;
+  _destination_z_axis = destination_coord_transform._z_axis;
 
-  auto check_axes = [](const auto & axis, const auto & axis_string)
-  {
-    if (axis == INVALID)
-      mooseError("If the destination coordinate system type is RZ, then a valid '",
-                 axis_string,
-                 "' must be provided to 'MooseCoordTransform::setDestinationCoordinateSystem'");
-  };
-
-  if (_destination_coord_type == Moose::COORD_RZ ||
-      _destination_coord_type == Moose::COORD_RSPHERICAL)
-  {
-    if (_has_different_coord_sys)
-      mooseError(
-          "When the destination coordinate system is RZ or RSPHERICAL, we have to perform "
-          "coordinate collapsing based on *our* coordinate system. However, we have multiple "
-          "coordinate systems, and since when evaluating transformations, we are only "
-          "called with a Point argument, we do not know what subdomain we are on and "
-          "consequently we do not know what transformation to apply.");
-
-    check_axes(r_axis, "r_axis");
-  }
-
-  if (_destination_coord_type == Moose::COORD_RZ)
-    check_axes(z_axis, "z_axis");
-
-  _destination_r_axis = r_axis;
-  _destination_z_axis = z_axis;
+  if ((_destination_coord_type == Moose::COORD_RZ ||
+       _destination_coord_type == Moose::COORD_RSPHERICAL) &&
+      _has_different_coord_sys)
+    mooseError("When the destination coordinate system is RZ or RSPHERICAL, we have to perform "
+               "coordinate collapsing based on *our* coordinate system. However, we have multiple "
+               "coordinate systems, and since when evaluating transformations, we are only "
+               "called with a Point argument, we do not know what subdomain we are on and "
+               "consequently we do not know what transformation to apply.");
 }
