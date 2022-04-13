@@ -49,15 +49,6 @@ and `NPT` (integration point number), while MOOSE uses 0-based indexing
 internally. We therefore add one to the element and integration point numbers
 from MOOSE before passing them to the UMAT.
 
-## Small and total strain formulations
-
-If material properties provided by an incremental strain formulation do not
-exist they will be filled with NaN (not a number) values. If in this case the
-UMAT returns a stress tensor containing NaN, an error is printed advising the
-user that the supplied UMAT plugin likely requires the use of an incremental
-formulation. A missing strain increment will always be constructed from the
-difference of current and old strain.
-
 ## UMAT Time step control
 
 Time step control within the UMAT subroutine is used together with MOOSE's

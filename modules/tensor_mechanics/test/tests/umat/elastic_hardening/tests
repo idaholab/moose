@@ -16,7 +16,7 @@
     type = 'RunException'
     input = 'linear_strain_hardening.i'
     library_mode = 'DYNAMIC'
-    expect_err = 'The UMAT plugin in AbaqusUMATStress \'constant\' returned NaNs in the computed stress and the MOOSE simulation is not using an incremental\/finite strain formulation.'
+    expect_err = 'AbaqusUMATStress \'constant\': Incremental strain quantities are not available'
     cli_args = 'Modules/TensorMechanics/Master/all/strain=SMALL'
     valgrind = 'NONE'
     requirement = 'The system shall raise an error if a UMAT that requires incremental quantities is being used with a total strain formulation'
@@ -37,7 +37,7 @@
   [elastic_small]
     type = 'Exodiff'
     input = 'elastic.i'
-    cli_args = "Materials/active='umat' Modules/TensorMechanics/Master/all/strain=SMALL Outputs/file_base=elastic_small"
+    cli_args = "Materials/active='umat' Modules/TensorMechanics/Master/all/strain=SMALL Modules/TensorMechanics/Master/all/incremental=true Outputs/file_base=elastic_small"
     exodiff = 'elastic_small.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'

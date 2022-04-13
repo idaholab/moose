@@ -198,7 +198,6 @@ protected:
   void computeQpStress() override;
 
   const MaterialProperty<RankTwoTensor> & _stress_old;
-  const MaterialProperty<RankTwoTensor> & _total_strain;
   const MaterialProperty<RankTwoTensor> & _total_strain_old;
   const OptionalMaterialProperty<RankTwoTensor> & _strain_increment;
 
@@ -242,10 +241,4 @@ protected:
 
   /// parameter to assist with the transition to 1-based indexing
   const bool _use_one_based_indexing;
-
-  /// check the results for nan
-  bool _check_nan;
-
-  /// buffer full of NaNs
-  const std::vector<Real> _nan_buf;
 };

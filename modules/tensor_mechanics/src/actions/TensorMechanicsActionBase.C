@@ -141,7 +141,9 @@ TensorMechanicsActionBase::validParams()
 
   MooseEnum strainType("SMALL FINITE", "SMALL");
   params.addParam<MooseEnum>("strain", strainType, "Strain formulation");
-  params.addParam<bool>("incremental", "Use incremental or total strain");
+  params.addParam<bool>("incremental",
+                        "Use incremental or total strain (if not explicitly specified this "
+                        "defaults to incremental for finite strain and total for small strain)");
 
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<bool>(

@@ -58,7 +58,6 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _aqPROPS(getParam<std::vector<Real>>("constant_properties")),
     _aqNPROPS(_aqPROPS.size()),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
-    _total_strain(getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
     _total_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
     _strain_increment(getOptionalMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
@@ -81,8 +80,7 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _number_external_properties(_external_property_names.size()),
     _external_properties(_number_external_properties),
     _external_properties_old(_number_external_properties),
-    _use_one_based_indexing(getParam<bool>("use_one_based_indexing")),
-    _nan_buf(9, NAN)
+    _use_one_based_indexing(getParam<bool>("use_one_based_indexing"))
 {
   if (!_use_one_based_indexing)
     mooseDeprecated(
@@ -119,9 +117,15 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
 void
 AbaqusUMATStress::initialSetup()
 {
-  // if any of these optional properties are not available, we need to check the
-  // UMAT results for NaNs
-  _check_nan = !_strain_increment || !_Fbar || !_Fbar_old || !_rotation_increment;
+  // The _Fbar, _Fbar_old, and _rotation_increment optional properties are only available when an
+  // incremental strain formulation is used. If they are not avaliable we advide the user to
+  // select an incremental formulation.
+  if (!_strain_increment || !_Fbar || !_Fbar_old || !_rotation_increment)
+    mooseError("AbaqusUMATStress '",
+               name(),
+               "': Incremental strain quantities are not available. You likely are using a total "
+               "strain formulation. Specify `incremental = true` in the tensor mechanics action, "
+               "or use ComputeIncrementalSmallStrain in your input file.");
 }
 
 void
@@ -163,9 +167,9 @@ AbaqusUMATStress::computeProperties()
 void
 AbaqusUMATStress::computeQpStress()
 {
-  const Real * myDFGRD0 = _Fbar_old ? &(_Fbar_old[_qp](0, 0)) : _nan_buf.data();
-  const Real * myDFGRD1 = _Fbar ? &(_Fbar[_qp](0, 0)) : _nan_buf.data();
-  const Real * myDROT = _rotation_increment ? &(_rotation_increment[_qp](0, 0)) : _nan_buf.data();
+  const Real * myDFGRD0 = &(_Fbar_old[_qp](0, 0));
+  const Real * myDFGRD1 = &(_Fbar[_qp](0, 0));
+  const Real * myDROT = &(_rotation_increment[_qp](0, 0));
 
   // copy because UMAT does not guarantee constness
   for (const auto i : make_range(9))
@@ -192,18 +196,15 @@ AbaqusUMATStress::computeQpStress()
     const auto b = component[i].second;
     _aqSTRESS[i] = _stress_old[_qp](a, b);
     _aqSTRAN[i] = _total_strain_old[_qp](a, b) * strain_factor[i];
-    _aqDSTRAN[i] = _strain_increment
-                       ? _strain_increment[_qp](a, b)
-                       : (_total_strain[_qp](a, b) - _total_strain_old[_qp](a, b)); // or NAN
-    _aqDSTRAN[i] *= strain_factor[i];
+    _aqDSTRAN[i] = _strain_increment[_qp](a, b) * strain_factor[i];
   }
 
   // current coordinates
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(LIBMESH_DIM))
     _aqCOORDS[i] = _q_point[_qp](i);
 
   // zero out Jacobian contribution
-  for (int i = 0; i < _aqNTENS * _aqNTENS; ++i)
+  for (const auto i : make_range(_aqNTENS * _aqNTENS))
     _aqDDSDDE[i] = 0.0;
 
   // Set PNEWDT initially to a large value
@@ -301,20 +302,8 @@ AbaqusUMATStress::computeQpStress()
   _stress[_qp] = RankTwoTensor(
       _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[5], _aqSTRESS[4], _aqSTRESS[3]);
 
-  // check entries for NaN
-  if (_check_nan)
-    for (const auto i : make_range(6))
-      if (std::isnan(_aqSTRESS[i]))
-        mooseError(
-            "The UMAT plugin in AbaqusUMATStress '",
-            name(),
-            "' returned NaNs in the computed stress and the MOOSE simulation is not using an "
-            "incremental/finite strain formulation. This likely means that the used UMAT plugin is "
-            "incompatible with a small strain formulation and relies on incremental quantities.");
-
   // Rotate the stress state to the current configuration
-  if (_rotation_increment)
-    _stress[_qp].rotate(_rotation_increment[_qp]);
+  _stress[_qp].rotate(_rotation_increment[_qp]);
 
   // Build Jacobian matrix from UMAT's Voigt non-standard order to fourth order tensor.
   const unsigned int N = LIBMESH_DIM;

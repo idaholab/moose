@@ -170,9 +170,16 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   else
   {
     if (_strain == Strain::Small)
+    {
       _strain_and_increment = StrainAndIncrement::SmallTotal;
+      mooseInfo("TensorMechanics Action: selecting 'total small strain' formulation. Use "
+                "`incremental = true` to select 'incremental small strain' instead.");
+    }
     else if (_strain == Strain::Finite)
+    {
       _strain_and_increment = StrainAndIncrement::FiniteIncremental;
+      mooseInfo("TensorMechanics Action: selecting 'incremental finite strain' formulation.");
+    }
     else
       mooseError("Internal error");
   }
