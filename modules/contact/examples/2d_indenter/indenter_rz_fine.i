@@ -20,24 +20,9 @@
     type = FileMeshGenerator
     file = indenter_rz_fine_bigsideset.e
   []
-  [secondary]
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = '4'
-    new_block_id = '10001'
-    new_block_name = 'secondary_lower'
-    input = simple_mesh
-  []
-  [primary]
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = '6'
-    new_block_id = '10000'
-    new_block_name = 'primary_lower'
-    input = secondary
-  []
-
   # For NodalVariableValue to work with distributed mesh
   allow_renumbering = false
-[../]
+[]
 
 [Functions]
   [disp_y]
@@ -58,10 +43,6 @@
     order = FIRST
     family = LAGRANGE
     block = '1 2'
-  []
-
-  [frictionless_normal_lm]
-    block = 'secondary_lower'
   []
 []
 
@@ -116,43 +97,17 @@
   []
 []
 
-[Constraints]
-  # All constraints below for mechanical contact (Mortar)
-  [lm]
-    type = NormalNodalLMMechanicalContact
-    secondary = '4'
+[Contact]
+  [contact]
+    secondary = 4
     primary = 6
-    variable = frictionless_normal_lm
-    primary_variable = disp_x
-    disp_y = disp_y
-    use_displaced_mesh = true
-    tangential_tolerance = 0.01
+    model = frictionless
+    # Investigate von Mises stress at the edge
+    correct_edge_dropping = true
+    formulation = mortar
+    c_normal = 1e+2
   []
-  [x]
-    type = NormalMortarMechanicalContact
-    primary_boundary = '6'
-    secondary_boundary = '4'
-    primary_subdomain = '10000'
-    secondary_subdomain = '10001'
-    variable = frictionless_normal_lm
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = true
-  []
-  [y]
-    type = NormalMortarMechanicalContact
-    primary_boundary = '6'
-    secondary_boundary = '4'
-    primary_subdomain = '10000'
-    secondary_subdomain = '10001'
-    variable = frictionless_normal_lm
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = true
-  []
-[../]
+[]
 
 [UserObjects]
   [slip_rate_gss]
@@ -238,8 +193,8 @@
   petsc_options_value = 'lu       basic                 NONZERO               1e-15'
   line_search = 'none'
   automatic_scaling = true
-  nl_abs_tol = 1.5e-07
-  nl_rel_tol = 1.5e-07
+  nl_abs_tol = 2.0e-07
+  nl_rel_tol = 2.0e-07
   l_max_its = 40
   l_abs_tol = 1e-08
   l_tol = 1e-08

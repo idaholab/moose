@@ -17,15 +17,6 @@
     requirement = 'The node-face discretization with a kinematic formulation for frictionless mechanical contact shall be susceptible to ping-ponging, specifically in this case to a secondary node oscillating back and forth between different primary faces'
     heavy = True
   []
-  [mortar-no-ping-pong]
-    type = 'Exodiff'
-    input = 'mortar-no-ping-pong.i'
-    exodiff = 'mortar-no-ping-pong_exo.e'
-    requirement = 'A hybrid discretization using node-face for LM residuals and mortar for primal residuals for a Lagrange Multiplier formulation for frictionless mechanical contact shall not show any ping-ponging behavior'
-    heavy = True
-    rel_err = 6e-5 # For different arch's
-    abs_zero = 5e-9
-  []
   [mortar-no-ping-pong_weighted]
     type = 'Exodiff'
     input = 'mortar-no-ping-pong_weighted.i'

@@ -96,7 +96,6 @@ refine = 1
     model = coulomb
     formulation = mortar
     friction_coefficient = 0.2
-    mortar_approach = legacy
     c_normal = 1e0
   []
 []

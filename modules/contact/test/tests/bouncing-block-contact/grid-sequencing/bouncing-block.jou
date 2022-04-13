@@ -16,9 +16,9 @@ sideset 20 curve 1
 block 1 surface 1
 block 2 surface 2
 # secondary face
-block 3 curve 7
+# block 3 curve 7
 # primary face
-block 4 curve 1
+# block 4 curve 1
 
 # rotate surface 1 2 about z angle 315
 
@@ -32,6 +32,6 @@ sideset 40 curve 3
 sideset 50 curve 6
 
 block 1 2 element type QUAD4
-block 3 4 element type BAR2
+# block 3 4 element type BAR2
 
-export mesh "level0.e" overwrite
+export mesh "/Users/marta3/projects3/moose/modules/contact/test/tests/bouncing-block-contact/grid-sequencing/level0.e" overwrite
