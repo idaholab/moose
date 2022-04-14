@@ -69,7 +69,7 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
     _read_from_file(getParam<bool>("read_from_file")),
     _learning_rate(getParam<Real>("learning_rate")),
     _print_epoch_loss(getParam<unsigned int>("print_epoch_loss"))
-#ifdef TORCH_ENABLED
+#ifdef LIBTORCH_ENABLED
     ,
     _nn(declareModelData<std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet>>("nn"))
 #endif
@@ -77,7 +77,7 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
   // We check if MOOSE is compiled with torch, if not this throws an error
   StochasticToolsApp::requiresTorch(*this);
 
-#ifdef TORCH_ENABLED
+#ifdef LIBTORCH_ENABLED
   // Fixing the RNG seed to make sure every experiment is the same.
   // Otherwise sampling / stochastic gradient descent would be different.
   torch::manual_seed(getParam<unsigned int>("seed"));
@@ -109,7 +109,7 @@ LibtorchSimpleNNTrainer::postTrain()
   _communicator.allgather(_flattened_data);
   _communicator.allgather(_flattened_response);
 
-#ifdef TORCH_ENABLED
+#ifdef LIBTORCH_ENABLED
 
   // Then, we create and load our Tensors
   unsigned int n_rows = _flattened_response.size();
@@ -153,7 +153,7 @@ LibtorchSimpleNNTrainer::postTrain()
     }
 
   Real rel_loss = 1.0;
-  Real initial_loss;
+  Real initial_loss = 1.0;
   Real epoch_loss = 0.0;
 
   // Begin training loop

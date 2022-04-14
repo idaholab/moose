@@ -22,7 +22,7 @@ LibtorchSimpleNNSurrogate::validParams()
 
 LibtorchSimpleNNSurrogate::LibtorchSimpleNNSurrogate(const InputParameters & parameters)
   : SurrogateModel(parameters)
-#ifdef TORCH_ENABLED
+#ifdef LIBTORCH_ENABLED
     ,
     _nn(getModelData<std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet>>("nn"))
 #endif
@@ -33,14 +33,14 @@ LibtorchSimpleNNSurrogate::LibtorchSimpleNNSurrogate(const InputParameters & par
 
 Real
 LibtorchSimpleNNSurrogate::evaluate(const std::vector<Real> &
-#ifdef TORCH_ENABLED
+#ifdef LIBTORCH_ENABLED
                                         x
 #endif
 ) const
 {
   Real val(0.0);
 
-#ifdef TORCH_ENABLED
+#ifdef LIBTORCH_ENABLED
 
   // Check whether input point has same dimensionality as training data
   mooseAssert(_nn->numInputs() == x.size(),

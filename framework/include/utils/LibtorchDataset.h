@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef TORCH_ENABLED
+#ifdef LIBTORCH_ENABLED
 
 #include <torch/torch.h>
 

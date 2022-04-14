@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef TORCH_ENABLED
+#ifdef LIBTORCH_ENABLED
 #include "LibtorchSimpleNeuralNet.h"
 #include "MooseError.h"
 

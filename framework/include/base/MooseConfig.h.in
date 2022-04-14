@@ -31,4 +31,7 @@
 #undef SPARSE_AD
 
 /* Whether to use libtorch-related code or not */
-#undef TORCH_ENABLED
+#undef LIBTORCH_ENABLED
+
+/* The directory where libtorch is installed in */
+#undef LIBTORCH_DIR

@@ -94,12 +94,12 @@ StochasticToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_
 
 void
 StochasticToolsApp::requiresTorch(const MooseObject &
-#ifndef TORCH_ENABLED
+#ifndef LIBTORCH_ENABLED
                                       obj
 #endif
 )
 {
-#ifndef TORCH_ENABLED
+#ifndef LIBTORCH_ENABLED
   obj.mooseError("PyTorch C++ API (libtorch) must be installed to use this object, see "
                  "https://mooseframework.inl.gov/modules/stochastic_tools/install_pytorch.html for "
                  "instruction.");

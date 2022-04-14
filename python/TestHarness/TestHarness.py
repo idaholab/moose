@@ -290,6 +290,7 @@ class TestHarness:
             checks['fparser_jit'] = set(['ALL'])
             checks['libpng'] = set(['ALL'])
             checks['liborch'] = set(['ALL'])
+            checks['libtorch_version'] = 'N/A'
         else:
             checks['compiler'] = util.getCompilers(self.libmesh_dir)
             checks['petsc_version'] = util.getPetscVersion(self.libmesh_dir)
@@ -324,6 +325,7 @@ class TestHarness:
             checks['fparser_jit'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'fparser_jit')
             checks['libpng'] = util.getMooseConfigOption(self.moose_dir, 'libpng')
             checks['libtorch'] = util.getMooseConfigOption(self.moose_dir, 'libtorch')
+            checks['libtorch_version'] = util.getLibtorchVersion(self.moose_dir)
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.

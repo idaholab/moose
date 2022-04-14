@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef TORCH_ENABLED
+#ifdef LIBTORCH_ENABLED
 #include <torch/torch.h>
 #include "LibtorchSimpleNeuralNet.h"
 #endif
@@ -74,7 +74,7 @@ private:
   /// Print the training loss value every given epoch
   const unsigned int _print_epoch_loss;
 
-#ifdef TORCH_ENABLED
+#ifdef LIBTORCH_ENABLED
   /// Pointer to the neural net object (initialized as null)
   std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & _nn;
 #endif

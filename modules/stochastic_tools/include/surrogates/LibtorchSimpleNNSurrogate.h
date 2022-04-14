@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef TORCH_ENABLED
+#ifdef LIBTORCH_ENABLED
 #include <torch/torch.h>
 #include "LibtorchSimpleNeuralNet.h"
 #endif
@@ -26,7 +26,7 @@ public:
   virtual Real evaluate(const std::vector<Real> & x) const override;
 
 protected:
-#ifdef TORCH_ENABLED
+#ifdef LIBTORCH_ENABLED
   /// Pointer to the neural net object (initialized as null)
   const std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & _nn;
 #endif
