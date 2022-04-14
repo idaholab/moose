@@ -40,9 +40,9 @@ LinearInterpolationMaterial::LinearInterpolationMaterial(const InputParameters &
 {
   if (_use_poly_fit)
   {
-    _poly_fit = libmesh_make_unique<PolynomialFit>(getParam<std::vector<Real>>("independent_vals"),
-                                                   getParam<std::vector<Real>>("dependent_vals"),
-                                                   4);
+    _poly_fit = std::make_unique<PolynomialFit>(getParam<std::vector<Real>>("independent_vals"),
+                                                getParam<std::vector<Real>>("dependent_vals"),
+                                                4);
 
     _poly_fit->generate();
   }
@@ -52,8 +52,8 @@ LinearInterpolationMaterial::LinearInterpolationMaterial(const InputParameters &
     {
 
       _linear_interp =
-          libmesh_make_unique<LinearInterpolation>(getParam<std::vector<Real>>("independent_vals"),
-                                                   getParam<std::vector<Real>>("dependent_vals"));
+          std::make_unique<LinearInterpolation>(getParam<std::vector<Real>>("independent_vals"),
+                                                getParam<std::vector<Real>>("dependent_vals"));
     }
     catch (std::domain_error & e)
     {
