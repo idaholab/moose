@@ -12,8 +12,8 @@
 #ifdef LIBTORCH_ENABLED
 
 #include "LibtorchNeuralNetBase.h"
-
 #include "DataIO.h"
+#include "MultiMooseEnum.h"
 
 namespace Moose
 {
@@ -31,8 +31,9 @@ public:
    */
   LibtorchSimpleNeuralNet(const std::string name,
                           const unsigned int num_inputs,
-                          const std::vector<unsigned int> num_neurons_per_layer,
-                          const unsigned int num_outputs);
+                          const unsigned int num_outputs,
+                          const std::vector<unsigned int> & num_neurons_per_layer,
+                          const std::vector<std::string> activation_function = {"relu"});
 
   /**
    * Add layers to the neural network
@@ -41,11 +42,11 @@ public:
    *                   describe the neural net layer architecture
    */
   virtual void addLayer(const std::string layer_name,
-                        const std::unordered_map<std::string, unsigned int> parameters) override;
+                        const std::unordered_map<std::string, unsigned int> & parameters) override;
 
   /**
    * Overriding the forward substitution function for the neural network, unfortunately
-   * thic cannot be const since it creates a graph in the background
+   * this cannot be const since it creates a graph in the background
    * @param x Input tensor for the evaluation
    */
   torch::Tensor forward(torch::Tensor x);
@@ -54,43 +55,47 @@ public:
   const std::string & name() const { return _name; }
   /// Return the number of neurons on the input layer
   unsigned int numInputs() const { return _num_inputs; }
+  /// Return the number of neurons on the output layer
+  unsigned int numOutputs() const { return _num_outputs; }
   /// Return the number of hidden layers
   unsigned int numHiddenLayers() const { return _num_hidden_layers; }
   /// Return the hidden layer architecture
   const std::vector<unsigned int> & numNeuronsPerLayer() const { return _num_neurons_per_layer; }
-  /// Return the number of neurons on the output layer
-  unsigned int numOutputs() const { return _num_outputs; }
+  /// Return the multi enum containing the activation functions
+  const MultiMooseEnum & activationFunctions() const { return _activation_function; }
+
   /// Construct the neural network
   void constructNeuralNetwork();
 
 protected:
+  /// Name of the neural network
   const std::string _name;
-
   /// Submodules that hold linear operations and the corresponding
   /// weights and biases (y = W * x + b)
   std::vector<torch::nn::Linear> _weights;
-
+  // Number of neurons on the input layer
   const unsigned int _num_inputs;
-
-  const std::vector<unsigned int> _num_neurons_per_layer;
-
-  const unsigned int _num_hidden_layers;
-
+  /// Number of neurons on the output layer
   const unsigned int _num_outputs;
+  /// Hidden layer architecture
+  const std::vector<unsigned int> _num_neurons_per_layer;
+  /// Number of hidden layers in the neural network
+  const unsigned int _num_hidden_layers;
+  /// Activation functions (either one for all hidden layers or one for every layer
+  /// separately)
+  MultiMooseEnum _activation_function = MultiMooseEnum("relu sigmoid elu gelu linear", "relu");
 };
 
 }
 
 template <>
-void dataStore<Moose::LibtorchSimpleNeuralNet>(
-    std::ostream & stream,
-    std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & nn,
-    void * context);
+void dataStore<Moose::LibtorchSimpleNeuralNet>(std::ostream & stream,
+                                               std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & nn,
+                                               void * context);
 
 template <>
-void dataLoad<Moose::LibtorchSimpleNeuralNet>(
-    std::istream & stream,
-    std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & nn,
-    void * context);
+void dataLoad<Moose::LibtorchSimpleNeuralNet>(std::istream & stream,
+                                              std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & nn,
+                                              void * context);
 
 #endif

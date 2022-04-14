@@ -14,7 +14,7 @@ IGNORE_CERT=""
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TORCH_DESTINATION=$SCRIPT_DIR/../framework/contrib
-export TORCH_DIR=$TORCH_DESTINATION/libtorch
+TORCH_DIR=$TORCH_DESTINATION/libtorch
 
 # Parse the input arguments
 for i in "$@"
@@ -50,6 +50,11 @@ SUBVERSION=${VERSION##*.}
 if (( $MAINVERSION < 1  || ( $MAINVERSION == 1  &&  $SUBVERSION < 4 ) )); then
   echo "The current implementation does not support libtorch versions below 1.4!"
   exit 1
+fi
+
+if [ -d $TORCH_DIR ]; then
+  echo "Cleaning up previous libtorch installation"
+  rm -rf $TORCH_DIR
 fi
 
 # Checking the operating system

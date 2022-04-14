@@ -14,7 +14,7 @@ and use the following command to test the implementation:
 
 ```bash
 cd test/tests/surrogates/libtorch_nn/
-./../../../../run_tests -j 8
+../../../../run_tests -j 8
 ```
 
 The expected output should look like this:

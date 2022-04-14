@@ -37,6 +37,11 @@ LibtorchSimpleNNTrainer::validParams()
       "The relative loss where we stop the training of the neural net.");
   params.addParam<std::vector<unsigned int>>(
       "num_neurons_per_layer", std::vector<unsigned int>(), "Number of neurons per layer.");
+  params.addParam<std::vector<std::string>>(
+      "activation_function",
+      std::vector<std::string>({"relu"}),
+      "The type of activation functions to use. It is either one value "
+      "or one value per hidden layer.");
   params.addParam<std::string>(
       "filename", "net.pt", "Filename used to output the neural net parameters.");
   params.addParam<bool>("read_from_file",
@@ -65,6 +70,8 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
         "num_neurons_per_layer", getParam<std::vector<unsigned int>>("num_neurons_per_layer"))),
     _num_hidden_layers(
         declareModelData<unsigned int>("num_hidden_layers", _num_neurons_per_layer.size())),
+    _activation_function(declareModelData<std::vector<std::string>>(
+        "activation_function", getParam<std::vector<std::string>>("activation_function"))),
     _filename(getParam<std::string>("filename")),
     _read_from_file(getParam<bool>("read_from_file")),
     _learning_rate(getParam<Real>("learning_rate")),
@@ -136,7 +143,7 @@ LibtorchSimpleNNTrainer::postTrain()
 
   // We create a neural net (for the definition of the net see the header file)
   _nn = std::make_shared<Moose::LibtorchSimpleNeuralNet>(
-      _filename, n_cols, _num_neurons_per_layer, 1);
+      _filename, n_cols, 1, _num_neurons_per_layer, _activation_function);
 
   // Initialize the optimizer
   torch::optim::Adam optimizer(_nn->parameters(), torch::optim::AdamOptions(_learning_rate));

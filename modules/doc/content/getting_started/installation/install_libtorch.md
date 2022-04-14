@@ -5,10 +5,10 @@ the operating system (Linux or Mac) and if we use HPC or just a local workstatio
 
 !alert! note
 Before we review the main approaches, it is important to emphasize that
-linking MOOSE with libtorch on Linux machines is not supported if the compiler stack has been built
+linking MOOSE with libtorch on +Linux machines+ is not supported if the compiler stack has been built
 using a `libc` version below 2.27 (for `libtorch v 1.8+`)
 or 2.23 (for `libtorch v1.4-1.8`). Furthermore, we do not support `libtorch` versions below
-v1.4. To check your currently used libc version use the following command:
+v1.4. To check your currently used libc version on +Linux machine+, use the following command:
 
 ```bash
 ldd --version
@@ -52,7 +52,8 @@ The user can choose from two alternatives when it comes to installing `libtorch`
   ./scripts/setup_libtorch.sh --version=1.8
   ```
 
-  Note that we do not support `libtorch` below a version
+  Note that we do not support `libtorch` below a version of 1.4. The default
+  version downloaded by the script is 1.10.
 
   !alert-end!
 

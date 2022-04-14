@@ -28,7 +28,7 @@ Following this, we load the surrogate from a file saved by the trainer:
 
 !listing libtorch_nn/evaluate.i block=Surrogates
 
-And evaluate it using a a reporter which uses the samples and the surrogate
+And evaluate it using a reporter which uses the samples and the surrogate
 to compute the approximate values of the target function at the new sample points:
 
 !listing libtorch_nn/evaluate.i block=Reporters

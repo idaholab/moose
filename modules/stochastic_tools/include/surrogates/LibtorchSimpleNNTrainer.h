@@ -17,17 +17,22 @@
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
 
+/// Trainer responsible of fitting a neural network on predefined data
 class LibtorchSimpleNNTrainer : public SurrogateTrainer
 {
 public:
   static InputParameters validParams();
 
+  /// Construct using input parameters
   LibtorchSimpleNNTrainer(const InputParameters & parameters);
 
+  /// Contains processes which are executed before the training loop
   virtual void preTrain() override;
 
+  /// Contains processes which are executed for every sample in the training loop
   virtual void train() override;
 
+  /// Contains processes which are executed after the training loop
   virtual void postTrain() override;
 
 private:
@@ -58,6 +63,9 @@ private:
 
   /// Number of hidden layers in the neural net
   unsigned int & _num_hidden_layers;
+
+  /// Activation functions for each hidden layer
+  std::vector<std::string> & _activation_function;
 
   /// Name of the pytorch output file. This is used for loading and storing
   /// already existing data.

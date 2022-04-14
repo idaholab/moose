@@ -55,7 +55,6 @@
     cli_args = "Trainers/train/read_from_file=false Trainers/train/rel_loss_tol=0.1"
     allow_test_objects = true
     libtorch = true
-    libtorch_version = '1.10'
     prereq = retrain
   []
 []
