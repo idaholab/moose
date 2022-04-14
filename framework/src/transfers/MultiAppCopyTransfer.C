@@ -41,7 +41,6 @@ MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters)
 void
 MultiAppCopyTransfer::execute()
 {
-  _console << "Beginning MultiAppCopyTransfer " << name() << std::endl;
 
   if (_current_direction == TO_MULTIAPP)
   {
@@ -78,5 +77,4 @@ MultiAppCopyTransfer::execute()
                  "per multiapp involved on each rank");
   }
 
-  _console << "Finished MultiAppCopyTransfer " << name() << std::endl;
 }

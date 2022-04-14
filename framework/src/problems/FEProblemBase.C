@@ -4231,7 +4231,7 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION dire
   else if (from_multiapp)
     string_direction = " From ";
   else
-    string_direction = " between ";
+    string_direction = " Between ";
 
   const MooseObjectWarehouse<Transfer> & wh = to_multiapp     ? _to_multi_app_transfers[type]
                                               : from_multiapp ? _from_multi_app_transfers[type]
@@ -4245,6 +4245,77 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION dire
 
     _console << COLOR_CYAN << "\nStarting Transfers on " << Moose::stringify(type)
              << string_direction << "MultiApps" << COLOR_DEFAULT << std::endl;
+
+    // output transfer information
+    unsigned int max_name_length = 4;
+    unsigned int max_type_length = 4;
+    unsigned int max_multiapp_name_length = 13;
+    for (const auto & transfer : transfers)
+    {
+      if (transfer->name().length() > max_name_length)
+        max_name_length = transfer->name().length();
+      if (transfer->type().length() > max_type_length)
+        max_type_length = transfer->type().length();
+      auto multiapp_transfer = dynamic_cast<MultiAppTransfer *>(transfer.get());
+      if (multiapp_transfer)
+      {
+        if (direction == MultiAppTransfer::TO_MULTIAPP)
+        {
+          unsigned int l = multiapp_transfer->getToMultiApp()->name().length();
+          if (l > max_multiapp_name_length)
+            max_multiapp_name_length = l;
+        }
+        else if (direction == MultiAppTransfer::FROM_MULTIAPP)
+        {
+          unsigned int l = multiapp_transfer->getFromMultiApp()->name().length();
+          if (l > max_multiapp_name_length)
+            max_multiapp_name_length = l;
+        }
+        else
+        {
+          unsigned int l1 = multiapp_transfer->getFromMultiApp()->name().length();
+          unsigned int l2 = multiapp_transfer->getToMultiApp()->name().length();
+          if (l1 + l2 + 2 > max_multiapp_name_length)
+            max_multiapp_name_length = l1 + l2 + 2;
+        }
+      }
+    }
+    const unsigned int space = 2;
+    _console << std::left << std::setw(max_name_length + space) << "Name";
+    _console << std::left << std::setw(max_type_length + space) << "Type";
+    _console << std::left << std::setw(max_multiapp_name_length) << "MultiApp name\n";
+    const unsigned int total_length =
+        max_name_length + max_type_length + max_multiapp_name_length + space * 2;
+    for (unsigned int i = 0; i < total_length; ++i)
+      _console << '-';
+    _console << '\n';
+
+    for (const auto & transfer : transfers)
+    {
+      _console << std::left << std::setw(max_name_length + space) << transfer->name();
+      _console << std::left << std::setw(max_type_length + space) << transfer->type();
+      auto multiapp_transfer = dynamic_cast<MultiAppTransfer *>(transfer.get());
+      if (multiapp_transfer)
+      {
+        std::string name;
+        if (direction == MultiAppTransfer::TO_MULTIAPP)
+          name = multiapp_transfer->getToMultiApp()->name();
+        else if (direction == MultiAppTransfer::FROM_MULTIAPP)
+          name = multiapp_transfer->getFromMultiApp()->name();
+        else
+        {
+          name += multiapp_transfer->getFromMultiApp()->name();
+          name += "=>";
+          name += multiapp_transfer->getToMultiApp()->name();
+        }
+        _console << std::left << std::setw(max_multiapp_name_length) << name;
+      }
+      _console << "\n";
+    }
+    for (unsigned int i = 0; i < total_length; ++i)
+      _console << '-';
+    _console << std::endl;
+
     for (const auto & transfer : transfers)
     {
       transfer->setCurrentDirection(direction);
@@ -4257,7 +4328,8 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION dire
              << COLOR_DEFAULT << std::endl;
   }
   else if (_multi_apps[type].getActiveObjects().size())
-    _console << COLOR_CYAN << "\nNo Transfers on " << Moose::stringify(type) << " To MultiApps\n"
+    _console << COLOR_CYAN << "\nNo Transfers on " << Moose::stringify(type) << string_direction
+             << "MultiApps\n"
              << COLOR_DEFAULT << std::endl;
 }
 
@@ -4462,6 +4534,7 @@ FEProblemBase::execTransfers(ExecFlagType type)
     TIME_SECTION("execTransfers", 3, "Executing Transfers");
 
     const auto & transfers = _transfers[type].getActiveObjects();
+
     for (const auto & transfer : transfers)
       transfer->execute();
   }

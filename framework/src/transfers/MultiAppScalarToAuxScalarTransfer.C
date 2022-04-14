@@ -50,7 +50,6 @@ MultiAppScalarToAuxScalarTransfer::MultiAppScalarToAuxScalarTransfer(
 void
 MultiAppScalarToAuxScalarTransfer::execute()
 {
-  _console << "Beginning ScalarToAuxScalarTransfer " << name() << std::endl;
 
   // Perform action based on the transfer direction
   switch (_current_direction)
@@ -175,5 +174,4 @@ MultiAppScalarToAuxScalarTransfer::execute()
     }
   }
 
-  _console << "Finished ScalarToAuxScalarTransfer " << name() << std::endl;
 }

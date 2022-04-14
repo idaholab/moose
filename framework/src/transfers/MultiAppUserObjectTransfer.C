@@ -98,7 +98,6 @@ MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & p
 void
 MultiAppUserObjectTransfer::execute()
 {
-  _console << "Beginning MultiAppUserObjectTransfer " << name() << std::endl;
 
   switch (_current_direction)
   {
@@ -249,7 +248,6 @@ MultiAppUserObjectTransfer::execute()
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 
-      _console << "Transferring to: " << to_var.name() << std::endl;
 
       // EquationSystems & to_es = to_sys.get_equation_systems();
 
@@ -514,7 +512,6 @@ MultiAppUserObjectTransfer::execute()
     }
   }
 
-  _console << "Finished MultiAppUserObjectTransfer " << name() << std::endl;
 
   postExecute();
 }

@@ -165,10 +165,8 @@ MultiAppCloneReporterTransfer::executeFromMultiapp()
 void
 MultiAppCloneReporterTransfer::execute()
 {
-  _console << "Beginning " << type() << " " << name() << std::endl;
   if (_current_direction == FROM_MULTIAPP)
     executeFromMultiapp();
   else
     executeToMultiapp();
-  _console << "Finished " << type() << " " << name() << std::endl;
 }

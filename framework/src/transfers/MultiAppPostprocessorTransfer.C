@@ -63,7 +63,6 @@ MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParamete
 void
 MultiAppPostprocessorTransfer::execute()
 {
-  _console << "Beginning PostprocessorTransfer " << name() << std::endl;
 
   switch (_current_direction)
   {
@@ -166,5 +165,4 @@ MultiAppPostprocessorTransfer::execute()
     }
   }
 
-  _console << "Finished PostprocessorTransfer " << name() << std::endl;
 }
