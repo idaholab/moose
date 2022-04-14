@@ -1,0 +1,33 @@
+[Tests]
+  [adapt]
+    requirement = 'The system shall have the ability to read isogeometric analysis meshes with adaptivity for'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+
+    [two_element]
+      type = XMLDiff
+      input = plate_with_hole_iga.i      
+      cli_args = "Mesh/igafile/file=two_element_in.e Outputs/file_base/two_element_out"
+      recover = false
+      exodus_version = '>=8.0'
+      vtk_version = '>=9.0'
+      max_parallel = 1
+      vtk = true
+      xmldiff = 'two_element_iga_out_001.pvtu two_element_iga_out_001_0.vtu'
+
+      detail = "a simple two element mesh with a single adapted element;"
+    []    
+    [plate_with_hole]
+      type = XMLDiff
+      input = plate_with_hole_iga.i      
+      recover = false
+      exodus_version = '>=8.0'
+      vtk_version = '>=9.0'
+      max_parallel = 1
+      vtk = true
+      xmldiff = 'plate_with_hole_iga_out_001.pvtu plate_with_hole_iga_out_001_0.vtu'
+
+      detail = "a mesh with multiple adapted elements."
+    []
+  []
+[]
