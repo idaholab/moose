@@ -540,7 +540,7 @@ FEProblemBase::getEvaluableElementRange()
       const auto & sys = _eq.get_system(i);
       dof_maps[i] = &sys.get_dof_map();
     }
-    _evaluable_local_elem_range = libmesh_make_unique<ConstElemRange>(
+    _evaluable_local_elem_range = std::make_unique<ConstElemRange>(
         _mesh.getMesh().multi_evaluable_elements_begin(dof_maps),
         _mesh.getMesh().multi_evaluable_elements_end(dof_maps));
   }
@@ -552,8 +552,8 @@ FEProblemBase::getNonlinearEvaluableElementRange()
 {
   if (!_nl_evaluable_local_elem_range)
     _nl_evaluable_local_elem_range =
-        libmesh_make_unique<ConstElemRange>(_mesh.getMesh().evaluable_elements_begin(_nl->dofMap()),
-                                            _mesh.getMesh().evaluable_elements_end(_nl->dofMap()));
+        std::make_unique<ConstElemRange>(_mesh.getMesh().evaluable_elements_begin(_nl->dofMap()),
+                                         _mesh.getMesh().evaluable_elements_end(_nl->dofMap()));
   return *_nl_evaluable_local_elem_range;
 }
 

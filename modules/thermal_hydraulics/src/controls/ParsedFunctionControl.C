@@ -40,7 +40,7 @@ ParsedFunctionControl::buildFunction()
     if (isParamValid("_tid"))
       tid = getParam<THREAD_ID>("_tid");
 
-    _function_ptr = libmesh_make_unique<THMParsedFunctionWrapper>(
+    _function_ptr = std::make_unique<THMParsedFunctionWrapper>(
         *_sim, _pfb_feproblem, _function, _vars, _vals, tid);
   }
 }

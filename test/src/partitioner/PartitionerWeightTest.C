@@ -31,7 +31,7 @@ PartitionerWeightTest::PartitionerWeightTest(const InputParameters & params)
 std::unique_ptr<Partitioner>
 PartitionerWeightTest::clone() const
 {
-  return libmesh_make_unique<PartitionerWeightTest>(_pars);
+  return std::make_unique<PartitionerWeightTest>(_pars);
 }
 
 dof_id_type

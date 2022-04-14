@@ -1214,7 +1214,7 @@ MooseApp::addExecutorParams(const std::string & type,
                             const std::string & name,
                             const InputParameters & params)
 {
-  _executor_params[name] = std::make_pair(type, libmesh_make_unique<InputParameters>(params));
+  _executor_params[name] = std::make_pair(type, std::make_unique<InputParameters>(params));
 }
 
 void

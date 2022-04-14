@@ -62,7 +62,7 @@ THMMesh::effectiveSpatialDimension() const
 std::unique_ptr<MooseMesh>
 THMMesh::safeClone() const
 {
-  return libmesh_make_unique<THMMesh>(*this);
+  return std::make_unique<THMMesh>(*this);
 }
 
 void

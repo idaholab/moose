@@ -29,7 +29,7 @@ THMParsedFunctionWrapper::THMParsedFunctionWrapper(Simulation & sim,
 {
   initialize();
 
-  _function_ptr = libmesh_make_unique<ParsedFunction<Real, RealGradient>>(
+  _function_ptr = std::make_unique<ParsedFunction<Real, RealGradient>>(
       _function_str, &_vars, &_initial_vals);
 
   for (auto & v : _vars)
