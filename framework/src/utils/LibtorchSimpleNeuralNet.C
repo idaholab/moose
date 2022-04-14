@@ -11,7 +11,7 @@
 #include "LibtorchSimpleNeuralNet.h"
 #include "MooseError.h"
 
-namespace StochasticTools
+namespace Moose
 {
 
 LibtorchSimpleNeuralNet::LibtorchSimpleNeuralNet(
@@ -84,9 +84,9 @@ LibtorchSimpleNeuralNet::addLayer(std::string layer_name,
 
 template <>
 void
-dataStore<StochasticTools::LibtorchSimpleNeuralNet>(
+dataStore<Moose::LibtorchSimpleNeuralNet>(
     std::ostream & stream,
-    std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & nn,
+    std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & nn,
     void * context)
 {
   std::string n(nn->name());
@@ -109,9 +109,9 @@ dataStore<StochasticTools::LibtorchSimpleNeuralNet>(
 
 template <>
 void
-dataLoad<StochasticTools::LibtorchSimpleNeuralNet>(
+dataLoad<Moose::LibtorchSimpleNeuralNet>(
     std::istream & stream,
-    std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & nn,
+    std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & nn,
     void * context)
 {
   std::string name;
@@ -130,7 +130,7 @@ dataLoad<StochasticTools::LibtorchSimpleNeuralNet>(
   unsigned int num_outputs;
   dataLoad(stream, num_outputs, context);
 
-  nn = std::make_shared<StochasticTools::LibtorchSimpleNeuralNet>(
+  nn = std::make_shared<Moose::LibtorchSimpleNeuralNet>(
       name, num_inputs, num_neurons_per_layer, num_outputs);
 
   torch::load(nn, name);

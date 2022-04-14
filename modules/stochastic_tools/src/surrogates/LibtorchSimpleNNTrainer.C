@@ -71,7 +71,7 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
     _print_epoch_loss(getParam<unsigned int>("print_epoch_loss"))
 #ifdef LIBTORCH_ENABLED
     ,
-    _nn(declareModelData<std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet>>("nn"))
+    _nn(declareModelData<std::shared_ptr<Moose::LibtorchSimpleNeuralNet>>("nn"))
 #endif
 {
   // We check if MOOSE is compiled with torch, if not this throws an error
@@ -125,7 +125,7 @@ LibtorchSimpleNNTrainer::postTrain()
 
   // We create a custom data loader which can be used to select samples for the in
   // the training process. See the header file for the definition of this structure.
-  StochasticTools::LibtorchDataset my_data(data_tensor, response_tensor);
+  Moose::LibtorchDataset my_data(data_tensor, response_tensor);
 
   // We initialize a data_loader for the training part.
   unsigned int sample_per_batch = n_rows > _num_batches ? n_rows / _num_batches : 1;
@@ -135,7 +135,7 @@ LibtorchSimpleNNTrainer::postTrain()
       std::move(data_set), sample_per_batch);
 
   // We create a neural net (for the definition of the net see the header file)
-  _nn = std::make_shared<StochasticTools::LibtorchSimpleNeuralNet>(
+  _nn = std::make_shared<Moose::LibtorchSimpleNeuralNet>(
       _filename, n_cols, _num_neurons_per_layer, 1);
 
   // Initialize the optimizer

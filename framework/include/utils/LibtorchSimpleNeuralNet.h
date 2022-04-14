@@ -15,7 +15,7 @@
 
 #include "DataIO.h"
 
-namespace StochasticTools
+namespace Moose
 {
 
 // A class that describes a simple feed-forward neural net.
@@ -82,15 +82,15 @@ protected:
 }
 
 template <>
-void dataStore<StochasticTools::LibtorchSimpleNeuralNet>(
+void dataStore<Moose::LibtorchSimpleNeuralNet>(
     std::ostream & stream,
-    std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & nn,
+    std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & nn,
     void * context);
 
 template <>
-void dataLoad<StochasticTools::LibtorchSimpleNeuralNet>(
+void dataLoad<Moose::LibtorchSimpleNeuralNet>(
     std::istream & stream,
-    std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & nn,
+    std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & nn,
     void * context);
 
 #endif

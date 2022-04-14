@@ -13,7 +13,7 @@
 
 #include <torch/torch.h>
 
-namespace StochasticTools
+namespace Moose
 {
 
 class LibtorchDataset : public torch::data::datasets::Dataset<LibtorchDataset>

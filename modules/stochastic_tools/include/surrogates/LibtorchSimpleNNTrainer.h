@@ -76,6 +76,6 @@ private:
 
 #ifdef LIBTORCH_ENABLED
   /// Pointer to the neural net object (initialized as null)
-  std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & _nn;
+  std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & _nn;
 #endif
 };

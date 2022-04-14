@@ -24,7 +24,7 @@ LibtorchSimpleNNSurrogate::LibtorchSimpleNNSurrogate(const InputParameters & par
   : SurrogateModel(parameters)
 #ifdef LIBTORCH_ENABLED
     ,
-    _nn(getModelData<std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet>>("nn"))
+    _nn(getModelData<std::shared_ptr<Moose::LibtorchSimpleNeuralNet>>("nn"))
 #endif
 {
   // We check if MOOSE is compiled with torch, if not this throws an error

@@ -1813,13 +1813,18 @@ $as_echo "configuring with libtorch support: $libtorch_support" >&6; }
 if test "$libtorch_support" = yes; then :
 
 
-$as_echo "#define TORCH_ENABLED 1" >>confdefs.h
+$as_echo "#define LIBTORCH_ENABLED 1" >>confdefs.h
 
         libtorch_support=true
 
         if test "$libtorch_library" = yes; then :
   libtorch_library="$ac_pwd/framework/contrib/libtorch"
 fi
+
+cat >>confdefs.h <<_ACEOF
+#define LIBTORCH_DIR $libtorch_library
+_ACEOF
+
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: Libtorch library path: $libtorch_library" >&5
 $as_echo "Libtorch library path: $libtorch_library" >&6; }

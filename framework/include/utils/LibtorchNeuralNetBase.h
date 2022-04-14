@@ -13,7 +13,7 @@
 #include <torch/torch.h>
 #include "MooseError.h"
 
-namespace StochasticTools
+namespace Moose
 {
 
 // This base class is meant to gather the functions and members common in
