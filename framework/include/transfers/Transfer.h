@@ -77,8 +77,8 @@ public:
   ///@{
   /// The current direction that this Transfer is going in.
   /// direction() is to be deprecated for currentDirection()
-  int direction() { return _direction; }
-  int currentDirection() { return _current_direction; }
+  MooseEnum direction() { return _direction; }
+  MooseEnum currentDirection() { return _current_direction; }
   ///@}
 
   /// Set this Transfer to be executed in a given direction
