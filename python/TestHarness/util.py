@@ -506,8 +506,7 @@ def getLibtorchVersion(moose_dir):
     libtorch_dir = getMooseConfigOption(moose_dir, 'libtorch_dir')
 
     if len(libtorch_dir) != 1:
-        print("Error determining Libtorch directory!")
-        exit(1)
+      return None
 
     filenames = [libtorch_dir.pop()+'/include/torch/csrc/api/include/torch/version.h']
     major_version = getConfigOption(filenames, 'libtorch_major', LIBTORCH_OPTIONS)

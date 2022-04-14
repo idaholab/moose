@@ -2,13 +2,13 @@
 []
 
 [Samplers]
-  [sample]
+  [train_sample]
     type = CartesianProduct
     linear_space_items = '0 0.0125 5
                           0 0.0125 5
                           0 0.0125 5'
   []
-  [test]
+  [test_sample]
     type = CartesianProduct
     linear_space_items = '0 0.05 2
                           0 0.05 2
@@ -19,7 +19,7 @@
 [VectorPostprocessors]
   [values]
     type = GFunction
-    sampler = sample
+    sampler = train_sample
     q_vector = '0 0 0'
     execute_on = INITIAL
     outputs = none
@@ -29,7 +29,7 @@
 [Trainers]
   [train]
     type = LibtorchSimpleNNTrainer
-    sampler = sample
+    sampler = train_sample
     response = values/g_values
     num_epochs = 40
     num_batches = 10
@@ -52,7 +52,7 @@
   [results]
     type = EvaluateSurrogate
     model = surr
-    sampler = test
+    sampler = test_sample
     execute_on = FINAL
     parallel_type = ROOT
   []

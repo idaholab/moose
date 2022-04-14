@@ -119,23 +119,23 @@ LibtorchSimpleNNTrainer::postTrain()
 #ifdef LIBTORCH_ENABLED
 
   // Then, we create and load our Tensors
-  unsigned int n_rows = _flattened_response.size();
-  unsigned int n_cols = _sampler.getNumberOfCols();
+  unsigned int num_samples = _flattened_response.size();
+  unsigned int num_inputs = _sampler.getNumberOfCols();
 
   // The default data type in pytorch is float, while we use double in MOOSE.
   // Therefore, in some cases we have to convert Tensors to double.
   auto options = torch::TensorOptions().dtype(at::kDouble);
   torch::Tensor data_tensor =
-      torch::from_blob(_flattened_data.data(), {n_rows, n_cols}, options).to(at::kDouble);
+      torch::from_blob(_flattened_data.data(), {num_samples, num_inputs}, options).to(at::kDouble);
   torch::Tensor response_tensor =
-      torch::from_blob(_flattened_response.data(), {n_rows}, options).to(at::kDouble);
+      torch::from_blob(_flattened_response.data(), {num_samples}, options).to(at::kDouble);
 
   // We create a custom data loader which can be used to select samples for the in
   // the training process. See the header file for the definition of this structure.
   Moose::LibtorchDataset my_data(data_tensor, response_tensor);
 
   // We initialize a data_loader for the training part.
-  unsigned int sample_per_batch = n_rows > _num_batches ? n_rows / _num_batches : 1;
+  unsigned int sample_per_batch = num_samples > _num_batches ? num_samples / _num_batches : 1;
 
   auto data_set = my_data.map(torch::data::transforms::Stack<>());
   auto data_loader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler>(
@@ -143,7 +143,7 @@ LibtorchSimpleNNTrainer::postTrain()
 
   // We create a neural net (for the definition of the net see the header file)
   _nn = std::make_shared<Moose::LibtorchSimpleNeuralNet>(
-      _filename, n_cols, 1, _num_neurons_per_layer, _activation_function);
+      _filename, num_inputs, 1, _num_neurons_per_layer, _activation_function);
 
   // Initialize the optimizer
   torch::optim::Adam optimizer(_nn->parameters(), torch::optim::AdamOptions(_learning_rate));
