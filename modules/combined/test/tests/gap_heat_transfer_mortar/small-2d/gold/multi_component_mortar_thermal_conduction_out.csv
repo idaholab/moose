@@ -1,0 +1,4 @@
+time,aluminum_element_interface_stress,aluminum_pt_interface_temperature,interface_heat_flux_aluminum,interface_heat_flux_steel,steel_pt_interface_temperature
+0,0,0,0,0,0
+60,9999.871014699,317.04887710428,-9598.474784959,9323.7354623109,317.07656362266
+120,4.9895816820472e-36,258.10672126142,-871.51702738013,1008.2858387973,521.07360956997

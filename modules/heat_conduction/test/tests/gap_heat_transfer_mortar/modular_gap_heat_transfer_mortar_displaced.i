@@ -97,7 +97,7 @@
   [simple]
     type = GapFluxModelSimple
     k = 100
-    T = temp
+    temperature = temp
     boundary = 100
   []
 []

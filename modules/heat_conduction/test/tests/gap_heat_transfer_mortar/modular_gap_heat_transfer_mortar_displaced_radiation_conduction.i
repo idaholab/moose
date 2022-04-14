@@ -96,7 +96,7 @@
 [UserObjects]
   [radiation]
     type = GapFluxModelRadiation
-    T = temp
+    temperature = temp
     boundary = 100
     primary_emissivity = 1.0
     secondary_emissivity = 1.0
@@ -104,7 +104,7 @@
   []
   [conduction]
     type = GapFluxModelConduction
-    T = temp
+    temperature = temp
     boundary = 100
     gap_conductivity = 0.02
     use_displaced_mesh = true

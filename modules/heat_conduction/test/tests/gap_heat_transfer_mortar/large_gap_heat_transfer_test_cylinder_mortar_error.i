@@ -93,14 +93,14 @@ rpv_blocks = '3'
 [UserObjects]
   [radiation]
     type = GapFluxModelRadiation
-    T = Tsolid
+    temperature = Tsolid
     boundary = 'rpv_inner'
     primary_emissivity = 0.8
     secondary_emissivity = 0.8
   []
   [conduction]
     type = GapFluxModelConduction
-    T = Tsolid
+    temperature = Tsolid
     boundary = 'rpv_inner'
     gap_conductivity = 0.1
   []

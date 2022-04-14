@@ -41,4 +41,5 @@ protected:
   mutable ADReal _gap_width;
   mutable ADReal _surface_integration_factor;
   mutable ADReal _adjusted_length;
+  mutable ADReal _normal_pressure;
 };
