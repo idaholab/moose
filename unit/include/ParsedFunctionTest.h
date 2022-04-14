@@ -38,7 +38,7 @@ protected:
     mesh_params.set<unsigned int>("nz") = 2;
     mesh_params.set<MooseEnum>("parallel_type") = "REPLICATED";
 
-    _mesh = libmesh_make_unique<GeneratedMesh>(mesh_params);
+    _mesh = std::make_unique<GeneratedMesh>(mesh_params);
     _mesh->setMeshBase(_mesh->buildMeshBaseObject());
     _mesh->buildMesh();
 
@@ -46,7 +46,7 @@ protected:
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
     problem_params.set<std::string>("_object_name") = "FEProblem";
     problem_params.set<std::string>("_type") = "FEProblem";
-    _fe_problem = libmesh_make_unique<FEProblem>(problem_params);
+    _fe_problem = std::make_unique<FEProblem>(problem_params);
   }
 
   ParsedFunction<Real> * fptr(MooseParsedFunction & f)
