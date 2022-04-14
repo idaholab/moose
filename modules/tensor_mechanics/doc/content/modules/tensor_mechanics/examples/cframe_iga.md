@@ -5,7 +5,7 @@ loads applied to a "c-frame" to determine the maximum principal stress.
 
 ## Creating IGA Mesh
 
-To create the mesh file included int this example a Coreform Cubit license is needed.
+To create the mesh file included in this example a Coreform Cubit license is needed.
 Coreform Cubit is a product released and maintained by Coreform, LLC. 
 A free to use [Cubit Learn license](https://coreform.com/products/coreform-cubit/free-meshing-software/) can be acquired.
 
