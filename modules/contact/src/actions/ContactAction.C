@@ -528,15 +528,10 @@ ContactAction::addMortarContact()
                   "Displacement variable is missing");
       const auto primal_type =
           _problem->systemBaseNonlinear().system().variable_type(displacements[0]);
-      // Order of LM is independent of whether it enforces normal contact or frictional contact.
+
       const int lm_order = primal_type.order.get_order();
 
-      if (primal_type.family == LAGRANGE && lm_order < 1)
-      {
-        params.set<MooseEnum>("family") = "MONOMIAL";
-        params.set<MooseEnum>("order") = "CONSTANT";
-      }
-      else if (primal_type.family == LAGRANGE)
+      if (primal_type.family == LAGRANGE)
       {
         params.set<MooseEnum>("family") = Utility::enum_to_string<FEFamily>(primal_type.family);
         params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{lm_order});
