@@ -29,4 +29,7 @@ protected:
 
   /// whether to skip partitioning after loading the mesh
   const bool _skip_partitioning;
+
+  /// Whether to allow renumbering (for non-exodus files) when the mesh is read and prepared for use
+  const bool _allow_renumbering;
 };

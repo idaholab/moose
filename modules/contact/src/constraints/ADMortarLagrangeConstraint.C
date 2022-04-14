@@ -11,6 +11,9 @@
 
 // MOOSE includes
 #include "MooseVariable.h"
+#include "MoosePreconditioner.h"
+#include "VariableCondensationPreconditioner.h"
+#include "NonlinearSystemBase.h"
 #include "Assembly.h"
 #include "SystemBase.h"
 #include "ADUtils.h"
@@ -32,8 +35,22 @@ ADMortarLagrangeConstraint::validParams()
 }
 
 ADMortarLagrangeConstraint::ADMortarLagrangeConstraint(const InputParameters & parameters)
-  : ADMortarConstraint(parameters), _ad_derivative_threshold(getParam<Real>("derivative_threshold"))
+  : ADMortarConstraint(parameters),
+    _ad_derivative_threshold(getParam<Real>("derivative_threshold")),
+    _apply_derivative_threshold(true)
 {
+}
+
+void
+ADMortarLagrangeConstraint::initialSetup()
+{
+  SetupInterface::initialSetup();
+
+  // Detect if preconditioner is VCP. If so, disable automatic derivative trimming.
+  auto const * mpc = feProblem().getNonlinearSystemBase().getPreconditioner();
+
+  if (auto * const is_vcp = dynamic_cast<const VariableCondensationPreconditioner *>(mpc))
+    _apply_derivative_threshold = false;
 }
 
 void
@@ -160,7 +177,15 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
       residuals_lower[index_lower] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
       // Get rid of derivatives that we assume won't count (tolerance prescribed by user)
-      // residuals_lower[index_lower].derivatives().sparsity_trim(_ad_derivative_threshold);
+      // This can cause zero diagonal terms with the variable condensation preconditioner when the
+      // no adaptivity option is used (dofs are not checked).
+      // Uncomment when https://github.com/libMesh/MetaPhysicL/pull/18 makes it to MOOSE
+
+      //#ifdef MOOSE_SPARSE_AD
+      //      if (_apply_derivative_threshold)
+      //        residuals_lower[index_lower].derivatives().sparsity_trim(_ad_derivative_threshold);
+      //#endif
+
       index_lower++;
     }
   }

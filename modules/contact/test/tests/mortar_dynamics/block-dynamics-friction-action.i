@@ -6,8 +6,10 @@ offset = -0.19
 []
 
 [Mesh]
-  file = long-bottom-block-1elem-blocks.e
-  allow_renumbering = false
+  [file]
+    type = FileMeshGenerator
+    file = long-bottom-block-no-lower-d.e
+  []
 []
 
 [Variables]
@@ -16,14 +18,6 @@ offset = -0.19
   []
   [disp_y]
     block = '1 2'
-  []
-  [mechanical_normal_lm]
-    block = 3
-    use_dual = true
-  []
-  [mechanical_tangential_lm]
-    block = 3
-    use_dual = true
   []
 []
 
@@ -42,8 +36,8 @@ offset = -0.19
     generate_output = 'stress_xx stress_yy'
     strain = FINITE
     block = '1 2'
-    stiffness_damping_coefficient = 0.05
-    hht_alpha = 0.0
+    zeta = 0.05
+    alpha = 0.0
   []
   [inertia_x]
     type = InertialForce
@@ -117,21 +111,9 @@ offset = -0.19
   [accel_z]
     block = '1 2'
   []
-  [gap]
-    block = 3
-  []
 []
 
 [AuxKernels]
-  [gap]
-    type = WeightedGapAux
-    variable = gap
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
-    use_displaced_mesh = true
-  []
   [accel_x]
     type = NewmarkAccelAux
     variable = accel_x
@@ -164,77 +146,20 @@ offset = -0.19
   []
 []
 
-[Constraints]
-  [weighted_gap_lm]
-    type = ComputeDynamicFrictionalForceLMMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
-    variable = mechanical_normal_lm
-    friction_lm = mechanical_tangential_lm
-    disp_x = disp_x
-    disp_y = disp_y
-    use_displaced_mesh = true
-    c = 1e4
-    c_t = 1e4
-    mu = 0.5
+[Contact]
+  [mechanical]
+    formulation = mortar
+    model = coulomb
+    primary = 20
+    secondary = 10
+    friction_coefficient = 0.5
+    c_normal = 1.0e4
+    c_tangential = 1.0e4
     interpolate_normals = false
+    mortar_dynamics = true
     newmark_beta = 0.25
     newmark_gamma = 0.5
     capture_tolerance = 1.0e-3
-  []
-  [normal_x]
-    type = NormalMortarMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
-    variable = mechanical_normal_lm
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
-  []
-  [normal_y]
-    type = NormalMortarMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
-    variable = mechanical_normal_lm
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
-  []
-  [tangential_x]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
-    variable = mechanical_tangential_lm
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
-  []
-  [tangential_y]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
-    variable = mechanical_tangential_lm
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
   []
 []
 
@@ -292,23 +217,21 @@ offset = -0.19
 
 [Outputs]
   exodus = true
-  csv = true
-  checkpoint = true
+[]
+
+[VectorPostprocessors]
+  [mechanical_tangential_lm]
+    type = NodalValueSampler
+    block = 'mechanical_secondary_subdomain'
+    variable = mechanical_tangential_lm
+    sort_by = 'x'
+    execute_on = TIMESTEP_END
+  []
 []
 
 [Preconditioning]
   [smp]
     type = SMP
     full = true
-  []
-[]
-
-[VectorPostprocessors]
-  [mechanical_tangential_lm]
-    type = NodalValueSampler
-    block = '3'
-    variable = mechanical_tangential_lm
-    sort_by = 'x'
-    execute_on = TIMESTEP_END
   []
 []
