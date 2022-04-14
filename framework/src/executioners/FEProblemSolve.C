@@ -182,8 +182,6 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   _nl._compute_initial_residual_before_preset_bcs =
       getParam<bool>("compute_initial_residual_before_preset_bcs");
 
-  _nl.setVerboseFlag(getParam<bool>("verbose"));
-
   _problem.setSNESMFReuseBase(getParam<bool>("snesmf_reuse_base"),
                               _pars.isParamSetByUser("snesmf_reuse_base"));
 
@@ -254,8 +252,18 @@ FEProblemSolve::solve()
   {
     _problem.solve();
 
-    if (!_problem.converged())
-      return false;
+    if (_problem.shouldSolve())
+    {
+      if (_problem.converged())
+        _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
+      else
+      {
+        _console << COLOR_RED << " Solve Did NOT Converge!" << COLOR_DEFAULT << std::endl;
+        return false;
+      }
+    }
+    else
+      _console << COLOR_GREEN << " Solve Skipped!" << COLOR_DEFAULT << std::endl;
 
     if (grid_step != _num_grid_steps)
       _problem.uniformRefine();
