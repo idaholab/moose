@@ -1,7 +1,6 @@
 [Tests]
   design = 'Constraints/index.md'
-  issues = '#13080'
-  ad_indexing_type = 'global'
+  issues = '#13080 #20773'
   [soft]
     requirement = 'The system shall be able to use automatic differntiation to compute a soft block '
                   'bouncing on a soft plank problem on a first order 2DRz mesh using tensor '
@@ -12,6 +11,7 @@
       input = 'small.i'
       csvdiff = 'small.csv'
       heavy = true
+      ad_indexing_type = 'global'
     []
     [finite]
       detail = 'using the finite strain formulation.'
@@ -19,6 +19,7 @@
       input = 'finite.i'
       csvdiff = 'finite.csv'
       heavy = true
+      ad_indexing_type = 'global'
     []
     [finite_scaling]
       detail = 'using the finite strain formulation with automatic scaling.'
@@ -28,6 +29,7 @@
                  'name=finite_scaling'
       csvdiff = 'finite_scaling.csv'
       heavy = true
+      ad_indexing_type = 'global'
     []
     [finite_rr]
       detail = 'using the finite strain formulation and reference residual.'
@@ -35,6 +37,7 @@
       input = 'finite_rr.i'
       csvdiff = 'finite_rr.csv'
       heavy = true
+      ad_indexing_type = 'global'
     []
     [small-jac]
       type = 'PetscJacobianTester'
@@ -45,6 +48,7 @@
       cli_args = 'Executioner/num_steps=3 -snes_test_err 1e-9'
       run_sim = true
       heavy = true
+      ad_indexing_type = 'global'
       detail = 'using the small strain formulation and calculate a perfect Jacobian.'
     []
     [finite-jac]
@@ -56,6 +60,7 @@
       cli_args = 'Executioner/num_steps=3 -snes_test_err 1e-9'
       run_sim = true
       heavy = true
+      ad_indexing_type = 'global'
       detail = 'using the finite strain formulation and calculate a perfect Jacobian.'
     []
   []
@@ -70,6 +75,7 @@
       csvdiff = 'stiff_stiff.csv'
       cli_args = 'E_block=1e9 E_plank=1e9 name=stiff_stiff'
       heavy = true
+      ad_indexing_type = 'global'
     []
     [soft_stiff]
       detail = 'using with a soft block and a stiff plank.'
@@ -78,6 +84,7 @@
       csvdiff = 'soft_stiff.csv'
       cli_args = 'E_block=1e7 E_plank=1e9 name=soft_stiff'
       heavy = true
+      ad_indexing_type = 'global'
     []
   []
 []
