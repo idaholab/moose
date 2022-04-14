@@ -101,5 +101,11 @@ private:
   /// z-displacement variable
   const MooseVariable * const _disp_z_var;
 
+  /// Mortar normal contact pressure variable
+  const ADVariableValue & _contact_pressure;
+
+  /// Cached contact pressure for use by UserObjects
+  ADReal _normal_pressure;
+
   friend class GapFluxModelBase;
 };

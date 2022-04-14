@@ -17,8 +17,8 @@ InputParameters
 GapFluxModelConduction::validParams()
 {
   InputParameters params = GapFluxModelBase::validParams();
-  params.addClassDescription("Gap flux model with a constant conductance");
-  params.addCoupledVar("T", "Temperature");
+  params.addClassDescription("Gap flux model for varying gap conductance");
+  params.addCoupledVar("temperature", "The name of the temperature variable");
   params.addRequiredParam<Real>("gap_conductivity", "Gap conductivity value");
   params.addParam<FunctionName>(
       "gap_conductivity_function",
@@ -39,8 +39,8 @@ GapFluxModelConduction::validParams()
 
 GapFluxModelConduction::GapFluxModelConduction(const InputParameters & parameters)
   : GapFluxModelBase(parameters),
-    _primary_T(adCoupledNeighborValue("T")),
-    _secondary_T(adCoupledValue("T")),
+    _primary_T(adCoupledNeighborValue("temperature")),
+    _secondary_T(adCoupledValue("temperature")),
     _gap_conductivity(getParam<Real>("gap_conductivity")),
     _gap_conductivity_function(isParamValid("gap_conductivity_function")
                                    ? &getFunction("gap_conductivity_function")

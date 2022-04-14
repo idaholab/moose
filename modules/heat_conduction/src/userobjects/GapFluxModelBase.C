@@ -34,6 +34,7 @@ GapFluxModelBase::computeFluxInternal(
   _gap_width = mortar_constraint._gap_width;
   _surface_integration_factor = mortar_constraint._surface_integration_factor;
   _adjusted_length = mortar_constraint._adjusted_length;
+  _normal_pressure = mortar_constraint._normal_pressure;
 
   return computeFlux();
 }

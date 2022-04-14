@@ -6,7 +6,9 @@ The `ModularGapConductanceConstraint` class is used specify a heat flux across a
 gap.  The flux is computed by user objects derived from `GapFluxModelBase`. Such as
 
 - [GapFluxModelSimple](GapFluxModelSimple.md)
-- [GapFluxModelRadiative](GapFluxModelRadiative.md)
+- [GapFluxModelConduction](GapFluxModelConduction.md)
+- [GapFluxModelRadiation](GapFluxModelRadiation.md)
+- [GapFluxModelPressureDependentConduction](GapFluxModelPressureDependentConduction.md)
 
 Multiple models can be specified with their contributions getting summed up.
 

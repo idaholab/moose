@@ -42,4 +42,36 @@
       ad_indexing_type = 'global'
     []
   []
+
+  [pressure_dependent_thermal_mortar]
+    design = 'GapFluxModelPressureDependentConduction.md'
+    issues = '#20658'
+    requirement = 'The system shall solve the 2D thermomechanical contact using small strain and a pressure dependent thermal conductivity'
+    [closed_gap_pressure_dependent_thermal_contact]
+      type = CSVDiff
+      input = 'closed_gap_pressure_dependent_thermal_contact.i'
+      csvdiff = 'closed_gap_pressure_dependent_thermal_contact_out.csv'
+      detail = 'to compute temperatures at the interface that converge to the analytical '
+               'solution for a steady state heat transfer problem with a mechanical '
+               'contact pressure of approximately unity.'
+      ad_indexing_type = 'global'
+    []
+    [open_gap_pressure_dependent]
+      type = CSVDiff
+      input = 'open_gap_pressure_dependent.i'
+      csvdiff = 'open_gap_pressure_dependent_out.csv'
+      detail = 'in an open gap geometry such that no heat transfer occurs between the two blocks.'
+      ad_indexing_type = 'global'
+    []
+    [multi_component_mortar_thermal_conduction]
+      type = CSVDiff
+      input = 'multi_component_mortar_thermal_conduction.i'
+      csvdiff = 'multi_component_mortar_thermal_conduction_out.csv'
+      detail = 'combined with radition heat transfer such that the conductivity '
+               'dominates the heat flux when the blocks are in contact (and the '
+               'contact pressure is nonzero) and the heat radition dominates when '
+               'the blocks move out of contact.'
+      ad_indexing_type = 'global'
+    []
+  []
 []
