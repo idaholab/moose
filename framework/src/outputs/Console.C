@@ -263,10 +263,6 @@ Console::initialSetup()
       _app.getExecutioner()->getParam<bool>("verbose"))
     _verbose = true;
 
-  // Display a message to indicate the application is running (useful for MultiApps)
-  if (_problem_ptr->hasMultiApps() || _app.multiAppLevel() > 0)
-    write(std::string("\nRunning App: ") + _app.name() + "\n");
-
   // If the user adds "final" to the execute on, append this to the postprocessors, scalars, etc.,
   // but only
   // if the parameter (e.g., postprocessor_execute_on) has not been modified by the user.
