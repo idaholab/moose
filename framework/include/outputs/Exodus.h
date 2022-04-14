@@ -191,4 +191,7 @@ private:
 
   /// Flag to output discontinuous format in Exodus
   bool _discontinuous;
+
+  /// Flag to output HDF5 format (when available) in Exodus
+  bool _write_hdf5;
 };

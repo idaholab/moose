@@ -723,6 +723,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   if (_debug)
   {
     ExodusII_IO mortar_segment_mesh_writer(*_mortar_segment_mesh);
+
+    // Default to non-HDF5 output for wider compatibility
+    mortar_segment_mesh_writer.set_hdf5_writing(false);
+
     mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
   }
 
@@ -1140,6 +1144,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         msm_el->subdomain_id()++;
 
     ExodusII_IO mortar_segment_mesh_writer(*_mortar_segment_mesh);
+
+    // Default to non-HDF5 output for wider compatibility
+    mortar_segment_mesh_writer.set_hdf5_writing(false);
+
     mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
 
     // Undo increment
@@ -2192,8 +2200,15 @@ AutomaticMortarGeneration::writeGeometryToFile()
   _nodal_normals_system->solution->close();
 
   std::set<std::string> sys_names = {"nodal_geometry"};
+
   // Write the nodal normals to file
-  ExodusII_IO(_mesh).write_equation_systems("nodal_geometry_only.e", nodal_normals_es, &sys_names);
+  ExodusII_IO nodal_normals_writer(_mesh);
+
+  // Default to non-HDF5 output for wider compatibility
+  nodal_normals_writer.set_hdf5_writing(false);
+
+  nodal_normals_writer.write_equation_systems(
+      "nodal_geometry_only.e", nodal_normals_es, &sys_names);
 }
 
 std::vector<AutomaticMortarGeneration::MortarFilterIter>
