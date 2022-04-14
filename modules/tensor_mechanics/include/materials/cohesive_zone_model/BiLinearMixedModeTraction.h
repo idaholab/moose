@@ -25,19 +25,19 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
 
-  void computeInterfaceTractionAndDerivatives() override;
+  virtual void computeInterfaceTractionAndDerivatives() override;
 
-  /// method computing the total traction
-  RealVectorValue computeTraction();
+  /// The traction-separation law
+  virtual RealVectorValue computeTraction();
 
-  /// method computing the total traction derivatives w.r.t. the interface displacement jump
-  RankTwoTensor computeTractionDerivatives();
+  /// Compute the total traction derivatives w.r.t. the interface displacement jump
+  virtual RankTwoTensor computeTractionDerivatives();
 
-  /// scale factor to vary normal_strength
-  const VariableValue & _scale_factor;
+  // The damage evolution law
+  virtual void computeDamage();
 
-  /// penalty elastic stiffness
-  const Real _stiffness;
+  /// Penalty elastic stiffness
+  const Real _K;
 
   ///@{
   /// damage variable
@@ -48,53 +48,33 @@ protected:
   /// old interface displacement jump value
   const MaterialProperty<RealVectorValue> & _interface_displacement_jump_old;
 
-  /// viscous regularization
-  const Real _viscosity;
+  // @{
+  // The parameters in the damage evolution law
+  MaterialProperty<Real> & _delta_init;
+  MaterialProperty<Real> & _delta_final;
+  MaterialProperty<Real> & _delta_m;
+  // @}
 
-  ///@{
-  /// critical Mode I and II fracture toughness
-  const Real _GI_C;
-  const Real _GII_C;
-  ///@}
+  /// Mode I critical fracture toughness
+  const MaterialProperty<Real> & _GI_c;
 
-  ///@{
-  /// onset normal seperation and shear seperation
-  const Real _delta_normal0;
-  const Real _delta_shear0;
-  ///@}
+  /// Mode II critical fracture toughness
+  const MaterialProperty<Real> & _GII_c;
 
-  ///@{
-  /// effective displacement at damage initiation
-  MaterialProperty<Real> & _eff_disp_damage_init;
-  const MaterialProperty<Real> & _eff_disp_damage_init_old;
-  ///@}
+  /// The normal strength
+  const MaterialProperty<Real> & _N;
 
-  ///@{
-  /// effective displacement at full degradation
-  MaterialProperty<Real> & _eff_disp_full_degradation;
-  const MaterialProperty<Real> & _eff_disp_full_degradation_old;
-  ///@}
+  /// The shear strength
+  const MaterialProperty<Real> & _S;
 
   /// The B-K power law parameter
   const Real _eta;
 
-  ///@{
-  /// maximum mixed mode relative displacement
-  MaterialProperty<Real> & _maximum_mixed_mode_relative_displacement;
-  const MaterialProperty<Real> & _maximum_mixed_mode_relative_displacement_old;
-  ///@}
-
-  /// square of mode_mixity_ratio
-  Real _beta_sq;
-
-  /// local derivative of traction w.r.t. interface jump
-  RankTwoTensor _D;
-
-  /// local derivative of stiffness w.r.t. interface jump
-  RankTwoTensor _dDdu;
-
-  /// mode_mixity_ratio
+  /// The mode mixity ratio
   MaterialProperty<Real> & _beta;
+
+  /// The viscosity
+  const Real _viscosity;
 
   /// mixed mode propagation criterion
   enum class MixedModeCriterion
@@ -103,9 +83,33 @@ protected:
     BK
   } _criterion;
 
-  /// Lag seperation state
-  const bool _lag_seperation_state;
+private:
+  // Compute mode mixity ratio
+  void computeModeMixity();
 
-  /// interpenetration regularization parameter
+  // Compute relative displacement jump at damage initiation
+  void computeCriticalDisplacementJump();
+
+  // Compute relative displacement jump at full degradation
+  void computeFinalDisplacementJump();
+
+  // Compute mixed mode relative displacement
+  void computeEffectiveDisplacementJump();
+
+  // @{
+  // Parameters to improve numerical convergence
+  const bool _lag_mode_mixity;
+  const bool _lag_disp_jump;
   const Real _alpha;
+  // @}
+
+  // @{
+  // Intermediate derivatives used in the chain rule for computing the derivative of damage w.r.t.
+  // displacement jumps
+  RealVectorValue _dbeta_ddelta;
+  RealVectorValue _ddelta_init_ddelta;
+  RealVectorValue _ddelta_final_ddelta;
+  RealVectorValue _ddelta_m_ddelta;
+  RealVectorValue _dd_ddelta;
+  // @}
 };

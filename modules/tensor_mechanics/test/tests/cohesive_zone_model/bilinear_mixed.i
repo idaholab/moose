@@ -54,7 +54,6 @@
         add_variables = true
         use_automatic_differentiation = true
         decomposition_method = TaylorExpansion
-        save_in = 'resid_x resid_y'
       []
     []
   []
@@ -120,8 +119,8 @@
     type = BiLinearMixedModeTraction
     boundary = 'interface'
     penalty_stiffness = 1e6
-    GI_C = 1e3
-    GII_C = 1e2
+    GI_c = 1e3
+    GII_c = 1e2
     normal_strength = 1e4
     shear_strength = 1e3
     displacements = 'disp_x disp_y'
@@ -131,16 +130,6 @@
 []
 
 [Postprocessors]
-  [resid_x]
-    type = NodalSum
-    variable = resid_x
-    boundary = top
-  []
-  [resid_y]
-    type = NodalSum
-    variable = resid_y
-    boundary = top
-  []
   [disp_y]
     type = SideAverageValue
     variable = disp_y
@@ -174,8 +163,8 @@
   l_max_its = 2
   l_tol = 1e-14
   nl_max_its = 30
-  nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-50
+  nl_abs_tol = 1e-15
   start_time = 0.0
   dt = 0.1
   end_time = 1.0
