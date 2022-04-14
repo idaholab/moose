@@ -636,10 +636,13 @@ MooseApp::setupOptions()
     Moose::registerExecFlags(_factory);
 
   // Print the header, this is as early as possible
-  std::string hdr(header() + "\n");
-  if (multiAppLevel() > 0)
-    MooseUtils::indentMessage(_name, hdr);
-  Moose::out << hdr << std::flush;
+  auto hdr = header();
+  if (hdr.length() != 0)
+  {
+    if (multiAppLevel() > 0)
+      MooseUtils::indentMessage(_name, hdr);
+    Moose::out << hdr << std::endl;
+  }
 
   if (getParam<bool>("error_unused"))
     setCheckUnusedFlag(true);
