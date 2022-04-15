@@ -1,0 +1,34 @@
+import step "c-frame.step" heal
+remove surface 15 17 21 19 22 23 16 25 18 20 24 26 14 35 38 33 34 36 37 7 8 4 5 6 1 2 10 12 3 9 13 11 80 77 81 88 79 86 90 78 76 89 87 75 91 85 29 28 30 27 31 32 62 60 57 58 48 45 47 50 49 46 54 53 51 56 52 55 41 39 42 43 40 44 68 66  extend 
+remove surface 93  extend 
+remove surface 94  extend 
+webcut volume 1  with sheet extended from surface 99 98 96  preview 
+webcut volume 1  with sheet extended from surface 99 98 96  
+webcut volume all with sheet extended from surface 92 59  
+webcut volume 6 4 3 5 1 2  with sheet extended from surface 67 61  
+webcut volume 1 16 2 15  with plane vertex 52  vertex 215  vertex 10  preview 
+webcut volume 1 16 2 15  with plane vertex 52  vertex 215  vertex 10  
+create vertex on curve 14  fraction 0.5 from start 
+create vertex on curve 77  fraction 0.5 from start 
+create vertex on curve 32  fraction 0.5 from start 
+webcut volume 16 2 15  with plane vertex 270  vertex 269  vertex 271  
+webcut volume 1  with plane vertex 270  vertex 269  vertex 271  preview 
+webcut volume 1  with plane vertex 270  vertex 269  vertex 271  
+delete Vertex 271 269 270
+imprint all 
+merge all
+volume all redistribute nodes off 
+volume all scheme Sweep Vector 1 0 0 
+volume all scheme Sweep Vector 1 0 0 sweep transform least squares 
+volume all autosmooth target on  fixed imprints off  smart smooth off 
+volume all size 0.5
+mesh volume all
+block 1 vol all
+sideset 2 surf 194 203 196 
+sideset 3 Surface 146 155 148 
+block 1 element type hex27 #Quadratic FEA elements
+export mesh "CFrame_FEA_05_deg2.e"  overwrite #FEA Export
+set uspline vol all deg 2 cont 1
+build uspline vol all as 1
+fit uspline 1
+export uspline 1 exodus "CFrame_IGA_05"
