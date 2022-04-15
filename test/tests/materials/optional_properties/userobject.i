@@ -38,5 +38,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 2
+  num_steps = 4
+  # the timestep has to be 1 (this is hardcoded in the OptionalTestUserObject to validate the old and older properties)
+  dt = 1
 []

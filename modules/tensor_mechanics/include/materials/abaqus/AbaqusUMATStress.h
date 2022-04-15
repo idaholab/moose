@@ -22,6 +22,9 @@ public:
 
   AbaqusUMATStress(const InputParameters & parameters);
 
+  /// check optional material properties for consistency
+  void initialSetup() override;
+
   /// perform per-element computation/initialization
   void computeProperties() override;
 
@@ -196,13 +199,13 @@ protected:
 
   const MaterialProperty<RankTwoTensor> & _stress_old;
   const MaterialProperty<RankTwoTensor> & _total_strain_old;
-  const MaterialProperty<RankTwoTensor> & _strain_increment;
+  const OptionalMaterialProperty<RankTwoTensor> & _strain_increment;
 
   /// Jacobian multiplier
   MaterialProperty<RankFourTensor> & _jacobian_mult;
 
-  const MaterialProperty<RankTwoTensor> & _Fbar;
-  const MaterialProperty<RankTwoTensor> & _Fbar_old;
+  const OptionalMaterialProperty<RankTwoTensor> & _Fbar;
+  const OptionalMaterialProperty<RankTwoTensor> & _Fbar_old;
 
   MaterialProperty<std::vector<Real>> & _state_var;
   const MaterialProperty<std::vector<Real>> & _state_var_old;
@@ -215,7 +218,7 @@ protected:
   MaterialProperty<Real> & _material_timestep;
 
   // Time step rotation increment
-  const MaterialProperty<RankTwoTensor> & _rotation_increment;
+  const OptionalMaterialProperty<RankTwoTensor> & _rotation_increment;
 
   // Coupled temperature field
   const VariableValue & _temperature;

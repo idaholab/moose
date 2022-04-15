@@ -33,6 +33,13 @@
     []
   []
 
+  [material_missing]
+    type = RunApp
+    input = material.i
+    cli_args = "Materials/active='before' Materials/before/expect=false Materials/before/adexpect=false"
+    requirement = "Optional material property objects that cannot be resolved shall evaluate to false"
+  []
+
   [material_error]
     requirement = "The optional material property system use from a material object shall return"
     [ad_expected]

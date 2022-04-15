@@ -26,8 +26,11 @@ OptionalTestMaterial::OptionalTestMaterial(const InputParameters & parameters)
   : Material(parameters),
     _prop(getOptionalMaterialProperty<Real>("prop")),
     _adprop(getOptionalADMaterialProperty<Real>("adprop")),
+    _prop_old(getOptionalMaterialPropertyOld<Real>("prop")),
+    _prop_older(getOptionalMaterialPropertyOlder<Real>("prop")),
     _expect(getParam<bool>("expect")),
     _adexpect(getParam<bool>("adexpect")),
+    _expect_old(_expect || _adexpect),
     _mirror(declareProperty<Real>("mirror"))
 {
 }
@@ -45,6 +48,17 @@ OptionalTestMaterial::computeQpProperties()
   if (!_adexpect && _adprop)
     mooseError("AD property not expected but found");
 
-  _mirror[_qp] =
-      (_prop ? _prop[_qp] : 0.0) + (_adprop ? MetaPhysicL::raw_value(_adprop[_qp]) : 0.0);
+  if (_expect_old && !_prop_old)
+    mooseError("Old property expected but not found");
+  if (!_expect_old && _prop_old)
+    mooseError("Old property not expected but found");
+
+  if (_expect_old && !_prop_older)
+    mooseError("Old property expected but not found");
+  if (!_expect_old && _prop_older)
+    mooseError("Old property not expected but found");
+
+  _mirror[_qp] = (_prop ? _prop[_qp] : 0.0) + (_prop_old ? _prop_old[_qp] : 0.0) +
+                 (_prop_older ? _prop_older[_qp] : 0.0) +
+                 (_adprop ? MetaPhysicL::raw_value(_adprop[_qp]) : 0.0);
 }

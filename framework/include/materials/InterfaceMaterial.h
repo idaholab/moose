@@ -187,7 +187,7 @@ InterfaceMaterial::getMaterialPropertyByName(const std::string & prop_name)
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the
   // same memory)
   _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, MaterialBase::CURRENT);
+  registerPropName(prop_name, true, MaterialPropState::CURRENT);
   return TwoMaterialPropertyInterface::getMaterialPropertyByName<T>(prop_name);
 }
 
@@ -199,7 +199,7 @@ InterfaceMaterial::getADMaterialPropertyByName(const std::string & prop_name)
   // The property may not exist yet, so declare it (declare/getADMaterialProperty are referencing
   // the same memory)
   _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, MaterialBase::CURRENT);
+  registerPropName(prop_name, true, MaterialPropState::CURRENT);
   return TwoMaterialPropertyInterface::getADMaterialPropertyByName<T>(prop_name);
 }
 
@@ -207,7 +207,7 @@ template <typename T>
 const MaterialProperty<T> &
 InterfaceMaterial::getMaterialPropertyOldByName(const std::string & prop_name)
 {
-  registerPropName(prop_name, true, MaterialBase::OLD);
+  registerPropName(prop_name, true, MaterialPropState::OLD);
   return TwoMaterialPropertyInterface::getMaterialPropertyOldByName<T>(prop_name);
 }
 
@@ -215,7 +215,7 @@ template <typename T>
 const MaterialProperty<T> &
 InterfaceMaterial::getMaterialPropertyOlderByName(const std::string & prop_name)
 {
-  registerPropName(prop_name, true, MaterialBase::OLDER);
+  registerPropName(prop_name, true, MaterialPropState::OLDER);
   return TwoMaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name);
 }
 
@@ -244,7 +244,7 @@ InterfaceMaterial::getNeighborMaterialPropertyByName(const std::string & prop_na
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the
   // same memory)
   _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, MaterialBase::CURRENT);
+  registerPropName(prop_name, true, MaterialPropState::CURRENT);
   return TwoMaterialPropertyInterface::getNeighborMaterialPropertyByName<T>(prop_name);
 }
 

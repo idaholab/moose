@@ -301,16 +301,10 @@ protected:
     PREV
   };
 
-  enum Prop_State
-  {
-    CURRENT = 0x1,
-    OLD = 0x2,
-    OLDER = 0x4
-  };
-  std::map<std::string, int> _props_to_flags;
+  std::map<std::string, MaterialPropStateInt> _props_to_flags;
 
   /// Small helper function to call store{Subdomain,Boundary}MatPropName
-  void registerPropName(std::string prop_name, bool is_get, Prop_State state);
+  void registerPropName(std::string prop_name, bool is_get, MaterialPropState state);
 
   /// Check and throw an error if the execution has progerssed past the construction stage
   void checkExecutionStage();
@@ -348,7 +342,7 @@ MaterialBase::declarePropertyByName(const std::string & prop_name_in)
       _declare_suffix.empty()
           ? prop_name_in
           : MooseUtils::join(std::vector<std::string>({prop_name_in, _declare_suffix}), "_");
-  registerPropName(prop_name, false, MaterialBase::CURRENT);
+  registerPropName(prop_name, false, MaterialPropState::CURRENT);
   return materialData().declareProperty<T>(prop_name);
 }
 
@@ -359,7 +353,7 @@ MaterialBase::declarePropertyOld(const std::string & prop_name)
   mooseDoOnce(
       mooseDeprecated("declarePropertyOld is deprecated and not needed anymore.\nUse "
                       "getMaterialPropertyOld (only) if a reference is required in this class."));
-  registerPropName(prop_name, false, MaterialBase::OLD);
+  registerPropName(prop_name, false, MaterialPropState::OLD);
   return materialData().declarePropertyOld<T>(prop_name);
 }
 
@@ -370,7 +364,7 @@ MaterialBase::declarePropertyOlder(const std::string & prop_name)
   mooseDoOnce(
       mooseDeprecated("declarePropertyOlder is deprecated and not needed anymore.  Use "
                       "getMaterialPropertyOlder (only) if a reference is required in this class."));
-  registerPropName(prop_name, false, MaterialBase::OLDER);
+  registerPropName(prop_name, false, MaterialPropState::OLDER);
   return materialData().declarePropertyOlder<T>(prop_name);
 }
 
@@ -394,7 +388,7 @@ MaterialBase::getGenericZeroMaterialPropertyByName(const std::string & prop_name
   auto & preload_with_zero = materialData().getGenericProperty<T, is_ad>(prop_name);
 
   _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, MaterialBase::CURRENT);
+  registerPropName(prop_name, true, MaterialPropState::CURRENT);
   _fe_problem.markMatPropRequested(prop_name);
 
   // Register this material on these blocks and boundaries as a zero property with relaxed
@@ -456,6 +450,6 @@ MaterialBase::declareADPropertyByName(const std::string & prop_name_in)
       _declare_suffix.empty()
           ? prop_name_in
           : MooseUtils::join(std::vector<std::string>({prop_name_in, _declare_suffix}), "_");
-  registerPropName(prop_name, false, MaterialBase::CURRENT);
+  registerPropName(prop_name, false, MaterialPropState::CURRENT);
   return materialData().declareADProperty<T>(prop_name);
 }
