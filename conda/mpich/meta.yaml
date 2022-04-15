@@ -22,6 +22,7 @@ requirements:
     - {{ base_mpicc }}
     - {{ base_mpicxx }}
     - {{ base_mpifort }}
+    - {{ moose_hdf5 }}
     - {{ moose_ld64 }}          # [osx]
     - autoconf                  # [unix]
     - automake                  # [unix]
@@ -34,6 +35,7 @@ requirements:
     - {{ base_mpicc }}
     - {{ base_mpicxx }}
     - {{ base_mpifort }}
+    - {{ moose_hdf5 }}
     - {{ moose_ld64 }}          # [osx]
     - autoconf                  # [osx]
     - automake                  # [osx]

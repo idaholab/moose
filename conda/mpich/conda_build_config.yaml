@@ -228,6 +228,11 @@ moose_mesa_libgl:                                           # [linux]
 moose_xorg_x11:                                             # [linux]
   - xorg-x11-proto-devel-cos7-x86_64 2018.4 h9b0a68f_1105   # [linux]
 
+moose_hdf5:
+  - hdf5 1.12.1 mpi_mpich_hfd824e9_4                        # [not arm64 and osx]
+  - hdf5 1.12.1 mpi_mpich_h08b82f9_4                        # [linux]
+  - hdf5 1.12.1 mpi_mpich_hfc22502_3                        # [arm64]
+
 #### build/run pining
 mpi:
   - moose-mpich

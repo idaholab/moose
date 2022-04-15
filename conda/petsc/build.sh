@@ -36,15 +36,6 @@ else
     FCFLAGS="${FCFLAGS} -I$PREFIX/include"
 fi
 
-# Set empty HDF5 variables for the configure PETSc script, since we want to use
-# the downloaded PETSc HDF5. This is to avoid an "unbound variable" error in
-# scripts/configure_petsc.sh
-HDF5_DIR=""
-HDF5DIR=""
-HDF5_ROOT=""
-HDF5_STR=""
-HDF5_FORTRAN_STR=""
-
 source $PETSC_DIR/configure_petsc.sh
 configure_petsc \
     --COPTFLAGS=-O3 \
