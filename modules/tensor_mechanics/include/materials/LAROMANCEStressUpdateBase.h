@@ -292,7 +292,7 @@ protected:
     }
     else if (transform == ROMInputTransform::LINEAR)
     {
-      mooseAssert(coef == 0, "Coefficient cannot be supplied with linear transformation");
+      mooseAssert(coef == 0.0, "Coefficient cannot be supplied with linear transformation");
       if (derivative)
         x = 1.0;
     }
