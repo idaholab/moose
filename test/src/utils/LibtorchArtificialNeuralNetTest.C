@@ -18,7 +18,7 @@
 registerMooseObject("MooseTestApp", LibtorchArtificialNeuralNetTest);
 
 InputParameters
-LibtorchSimpleNeuralNetTest::validParams()
+LibtorchArtificialNeuralNetTest::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
 
@@ -28,7 +28,7 @@ LibtorchSimpleNeuralNetTest::validParams()
   return params;
 }
 
-LibtorchSimpleNeuralNetTest::LibtorchSimpleNeuralNetTest(const InputParameters & params)
+LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputParameters & params)
   : GeneralUserObject(params)
 {
 #ifdef LIBTORCH_ENABLED

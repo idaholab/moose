@@ -14,7 +14,7 @@
 /**
  * A UserObject that tests the LibtorchArtificialNeuralNet.
  */
-class LibtorchSimpleNeuralNetTest : public GeneralUserObject
+class LibtorchArtificialNeuralNetTest : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
