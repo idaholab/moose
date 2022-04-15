@@ -768,8 +768,30 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
   for (unsigned int p = 0; p < _num_partitions; p++)
   {
     if (_partition_weights[p])
+    {
+      // compute weight normalizing factor
+      GenericReal<is_ad> weight_normalizer = 0;
+      unsigned int number_of_active_tiles = 0;
       for (unsigned int t = 0; t < _num_tiles[p]; ++t)
       {
+        // count number of active tiles
+        number_of_active_tiles += checkInTile(p, t);
+        if (_weights[p][t])
+        {
+          // tile normalization factor (sum of tile weights)
+          weight_normalizer += _weights[p][t];
+        }
+      }
+
+      // normalize weights only when 3 tiles overlap
+      if (number_of_active_tiles == 3)
+        for (unsigned int t = 0; t < _num_tiles[p]; ++t)
+        {
+          _weights[p][t] /= weight_normalizer;
+          dweights_dstress[p][t] /= weight_normalizer;
+        }
+
+      for (unsigned int t = 0; t < _num_tiles[p]; ++t)
         if (_weights[p][t])
         {
           const GenericReal<is_ad> rom = computeROM(t, p, _strain_output_index);
@@ -787,7 +809,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
             dtotal_rom_effective_strain_inc_dstress +=
                 _partition_weights[p] * dweights_dstress[p][t] * rom;
         }
-      }
+    }
   }
 
   if (_verbose)

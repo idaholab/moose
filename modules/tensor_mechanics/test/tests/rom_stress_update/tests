@@ -106,6 +106,15 @@
                'cut because the computed number of substeps exceeds the maximum_number_substeps '
                'parameter.'
     []
+
+    [3tile]
+      type = 'CSVDiff'
+      input = '3tile.i'
+      csvdiff = '3tile_out.csv'
+      detail = 'for a variety of overlapping tiles and two overlapping partitions.'
+      petsc_version = '>=3.9.0'
+      allow_test_objects = true
+    []
   []
   [ADrom]
     issues = '#14046'
