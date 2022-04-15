@@ -7,7 +7,7 @@
 
 [UserObjects]
   [test]
-    type = LibtorchSimpleNeuralNetTest
+    type = LibtorchArtificialNeuralNetTest
     activation_functions = 'relu relu'
   []
 []

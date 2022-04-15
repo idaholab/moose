@@ -15,8 +15,7 @@ InputParameters
 LibtorchANNSurrogate::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
-  params.addClassDescription("Surrogate that evaluates a simple feedforward neural net. "
-                             "See [LibtorchSimpleNNTrainer.md]");
+  params.addClassDescription("Surrogate that evaluates a feedforward artificial neural net. ");
   return params;
 }
 

@@ -32,12 +32,13 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
   : GeneralUserObject(params)
 {
 #ifdef LIBTORCH_ENABLED
-  std::vector<unsigned int> num_neurons_per_layer({4, 4});
-  torch::Tensor input = at::ones({1, 3}, at::kDouble);
-  torch::Tensor output = at::ones({1}, at::kDouble);
 
   torch::manual_seed(11);
 
+  // Define neurons per hidden layer: we will have two hidden layers with 4 neurons each
+  std::vector<unsigned int> num_neurons_per_layer({4, 4});
+  // Create the neural network with name "test", number of input neurons = 3,
+  // number of output neurons = 1, and activation functions from the input file.
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> nn =
       std::make_shared<Moose::LibtorchArtificialNeuralNet>(
           "test",
@@ -46,13 +47,21 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
           num_neurons_per_layer,
           getParam<std::vector<std::string>>("activation_functions"));
 
+  // Create an Adam optimizer
   torch::optim::Adam optimizer(nn->parameters(), torch::optim::AdamOptions(0.02));
-
+  // reset the gradients
   optimizer.zero_grad();
+  // This is our test input
+  torch::Tensor input = at::ones({1, 3}, at::kDouble);
+  // This is our test output (we know the result)
+  torch::Tensor output = at::ones({1}, at::kDouble);
+  // This is our prediction for the test input
   torch::Tensor prediction = nn->forward(input);
+  // We compute the loss
   torch::Tensor loss = torch::mse_loss(prediction.reshape({prediction.size(0)}), output);
-
+  // We propagate the error back to compute gradient
   loss.backward();
+  // We update the weights using teh computed gradients
   optimizer.step();
 
   optimizer.zero_grad();

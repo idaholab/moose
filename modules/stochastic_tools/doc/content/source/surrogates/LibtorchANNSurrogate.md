@@ -4,7 +4,7 @@
 
 ## Overview
 
-The details of a simple feedforward neural network is discussed in [LibtorchANNTrainer.md].
+The details of a simple feedforward neural network is discussed in [utils/LibtorchArtificialNeuralNet.md].
 This class is dedicated to evaluating the following function:
 
 !equation id=nn-explicit

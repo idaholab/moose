@@ -12,6 +12,7 @@
       expect_err = 'Invalid option \"sad\" in MultiMooseEnum.  Valid options \(not case-sensitive\) are \"relu sigmoid elu gelu linear\".'
       detail = 'when encountering an unsupported activation function for the neural network.'
       libtorch = true
+      allow_test_objects = True
     []
     [wrong-activation-number]
       type = RunException
@@ -20,6 +21,7 @@
       expect_err = 'The number of activation functions should be either one or the same as the number of hidden layers'
       detail = 'when encountering the wrong number of activation functions.'
       libtorch = true
+      allow_test_objects = True
     []
   []
   [libtorch-nn-activation]
@@ -30,6 +32,7 @@
       expect_out = 'My prediction\: -0\.1977'
       detail = 'relu activation functions.'
       libtorch = true
+      allow_test_objects = True
     []
     [sigmoid]
       type = RunApp
@@ -38,6 +41,7 @@
       detail = 'sigmoid activation functions.'
       cli_args = "UserObjects/test/activation_functions='sigmoid sigmoid'"
       libtorch = true
+      allow_test_objects = True
     []
     [gelu]
       type = RunApp
@@ -46,6 +50,7 @@
       detail = 'gelu activation functions.'
       cli_args = "UserObjects/test/activation_functions='gelu gelu'"
       libtorch = true
+      allow_test_objects = True
     []
     [elu]
       type = RunApp
@@ -54,6 +59,7 @@
       detail = 'elu activation functions.'
       cli_args = "UserObjects/test/activation_functions='elu elu'"
       libtorch = true
+      allow_test_objects = True
     []
     [linear]
       type = RunApp
@@ -62,6 +68,7 @@
       detail = 'linear activation functions.'
       cli_args = "UserObjects/test/activation_functions='linear linear'"
       libtorch = true
+      allow_test_objects = True
     []
   []
 []

@@ -1,4 +1,4 @@
-# LibtorchSimpleNeuralNet
+# LibtorchArtificialNeuralNet
 
 ## Overview
 
@@ -22,7 +22,9 @@ in the following nested form:
 !equation id=nn-explicit
 \textbf{y} = \sigma(\textbf{W}^{(3)}\sigma(\textbf{W}^{(2)}\sigma(\textbf{W}^{(1)}\textbf{x}+\textbf{b}^{(1)})+\textbf{b}^{(2)})+\textbf{b}^{(3)}),
 
-where $\sigma$ denotes the activation function. In this class, no activation function is applied on the
+where $\sigma$ denotes the activation function. At the moment, the Moose implementation
+supports `relu`, `elu`, `gelu`, `sigmoid` and `linear` activation functions.
+ In this class, no activation function is applied on the
 output layer. It is apparent that the real functional dependence between the inputs and outputs
 is approximated by the function in [nn-explicit]. As in most cases, the error in this approximation depends on the
 smoothness of the function and the values of the model parameters. The weights and
@@ -32,15 +34,12 @@ over a training set.
 
 ## Example usage
 
-To be able to use this neural network, the after including the header one can
-define the input layers, output layers, hidden layers and the activation function
-as follows:
+To be able to use this neural network, we have to construct one using a name,
+the number of expected inputs and outputs, an expected hideen-layer-structure and
+the activation functions for the layers. If no activation function is given,
+`relu` is used for every hidden neuron:
 
-!listing test/src/utils/LibtorchSimpleNeuralNet.C line=LibtorchSimpleNeuralNet
-
-Once these are supplied, we can create a neural network as follows:
-
-!listing test/src/utils/LibtorchSimpleNeuralNet.C line=LibtorchSimpleNeuralNet
+!listing test/src/utils/LibtorchArtificialNeuralNetTest.C start=Define neurons end=activation_functions include-end=true
 
 For training a neural network, we need to initialize an optimizer (ADAM in this case),
 then supply a known input-output combinations for the function-to-be-approximated
@@ -48,7 +47,7 @@ and let the optimizer set the parameters of the neural network to ensure that th
 answer supplied by the neural network is as close to the supplied values as possible.
 Once step in this optimization process is shown below:
 
-!listing test/src/utils/LibtorchSimpleNeuralNet.C line=ADAM
+!listing test/src/utils/LibtorchArtificialNeuralNetTest.C start=Create an Adam optimizer end=optimizer.step(); include-end=true
 
 
 For more detailed instructions on training a neural network, visit the Stochastic Tools module!
