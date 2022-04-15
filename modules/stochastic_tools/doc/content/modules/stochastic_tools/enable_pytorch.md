@@ -1,7 +1,8 @@
 # Install Stochastic Tools Module with libtorch support
 
-To be able to use the stochastic tools module with libtorch, one needs to compile
-with the proper dependencies. For instuctions, see: [installation/install_libtorch.md]
+To be able to use the stochastic tools module with `libtorch`, one needs to compile
+with the proper dependencies. For instructions see the installation guide on the
+website.
 
 ## Testing the installation
 
