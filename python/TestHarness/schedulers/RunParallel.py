@@ -51,8 +51,13 @@ class RunParallel(Scheduler):
             job_output = job.getOutput()
             output = tester.processResults(tester.getMooseDir(), self.options, job_output)
 
+            # If the tester requested to be skipped at the last minute, report that.
+            if tester.isSkip():
+                output += '\n' + "#"*80 + '\nTester skipped, reason: ' + tester.getStatusMessage() + '\n'
+            elif tester.isFail():
+                output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
             # If the tester has not yet failed, append additional information to output
-            if not tester.isFail():
+            else:
                 # Read the output either from the temporary file or redirected files
                 if tester.hasRedirectedOutput(self.options):
                     redirected_output = util.getOutputFromFiles(tester, self.options)
@@ -64,8 +69,6 @@ class RunParallel(Scheduler):
                         output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
 
                 self.setSuccessfulMessage(tester)
-            else:
-                output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
         except Exception as e:
             output += 'Python exception encountered:\n\n' + traceback.format_exc()
             tester.setStatus(tester.error, 'PYTHON EXCEPTION')

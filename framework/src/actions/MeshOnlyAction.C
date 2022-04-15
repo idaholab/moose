@@ -71,6 +71,9 @@ MeshOnlyAction::act()
 
     Exodus::setOutputDimensionInExodusWriter(exio, *mesh_ptr);
 
+    // Default to non-HDF5 output for wider compatibility
+    exio.set_hdf5_writing(false);
+
     exio.write(mesh_file);
   }
   else if (mesh_file.find(".cpr") + 4 == mesh_file.size())
