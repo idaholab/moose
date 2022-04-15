@@ -431,7 +431,7 @@ endif
 
 install_libs: $(lib_install_targets)
 
-$(copy_input_targets): all
+$(copy_input_targets):
 	@$(eval kv := $(subst ->, ,$(subst target_$(APPLICATION_NAME)_,,$@)))
 	@$(eval source_dir := $(word 1, $(kv)))
 	@$(eval dest_dir := $(if $(word 2, $(kv)),$(word 2, $(kv)),$(source_dir)))
@@ -472,7 +472,7 @@ install_lib_%: % all
 $(binlink): all $(copy_input_targets)
 	ln -sf ../../bin/$(notdir $(app_EXEC)) $@
 
-install_$(APPLICATION_NAME)_docs:
+install_$(APPLICATION_NAME)_docs: all
 ifeq ($(MOOSE_SKIP_DOCS),)
 	@echo "Installing docs"
 	@mkdir -p $(docs_install_dir)
