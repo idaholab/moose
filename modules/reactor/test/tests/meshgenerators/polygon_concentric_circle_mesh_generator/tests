@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PolygonConcentricCircleMeshGenerator.md'
-  issues = '#18628 #20514'
+  issues = '#18628 #20514 #20637'
   [back_only]
     type = 'Exodiff'
     input = 'poly_2d.i'
@@ -71,6 +71,47 @@
     requirement ='The system shall generate a hexagon mesh with rings and ducts.'
     recover = false
   []
+  [full_biasing]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_full_biasing.e'
+    cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2" Mesh/gen/ring_radial_biases="0.5 2.0"
+                Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
+                Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2" Mesh/gen/duct_radial_biases="0.5 2.0"
+                Mesh/gen/duct_block_ids="1500 1600" Mesh/gen/duct_block_names="inner_duct outer_duct"
+                Mesh/gen/duct_sizes_style="apothem"
+                Mesh/gen/background_radial_bias=0.5
+                --mesh-only "poly_2d_full_biasing.e"'
+    requirement ='The system shall generate a radially biased hexagon mesh with rings and ducts.'
+    recover = false
+  []
+  [full_boundary_layers]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_full_boundary_layers.e'
+    cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                Mesh/gen/ring_inner_boundary_layer_widths="0.0 0.3" Mesh/gen/ring_inner_boundary_layer_intervals="0 3"
+                Mesh/gen/ring_inner_boundary_layer_biases="1.0 2.0"
+                Mesh/gen/ring_outer_boundary_layer_widths="1.0 0.3" Mesh/gen/ring_outer_boundary_layer_intervals="3 3"
+                Mesh/gen/ring_outer_boundary_layer_biases="0.5 0.5"
+                Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
+                Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
+                Mesh/gen/duct_inner_boundary_layer_widths="0.15 0.3" Mesh/gen/duct_inner_boundary_layer_intervals="3 3"
+                Mesh/gen/duct_inner_boundary_layer_biases="2.0 2.0"
+                Mesh/gen/duct_outer_boundary_layer_widths="0.15 0.3" Mesh/gen/duct_outer_boundary_layer_intervals="3 3"
+                Mesh/gen/duct_outer_boundary_layer_biases="0.5 0.5"
+                Mesh/gen/duct_block_ids="1500 1600" Mesh/gen/duct_block_names="inner_duct outer_duct"
+                Mesh/gen/duct_sizes_style="apothem"
+                Mesh/gen/background_inner_boundary_layer_width=0.15 Mesh/gen/background_inner_boundary_layer_intervals=3
+                Mesh/gen/background_inner_boundary_layer_bias=2.0
+                Mesh/gen/background_outer_boundary_layer_width=0.15 Mesh/gen/background_outer_boundary_layer_intervals=3
+                Mesh/gen/background_outer_boundary_layer_bias=0.5
+                --mesh-only "poly_2d_full_boundary_layers.e"'
+    requirement ='The system shall generate a hexagon mesh with rings and ducts including boundary layers.'
+    recover = false
+  []
   [full_quad]
     type = 'Exodiff'
     input = 'poly_2d.i'
@@ -85,171 +126,319 @@
     requirement ='The system shall generate a hexagon mesh with rings, ducts and quad central elements.'
     recover = false
   []
-  [err_quad_diff_sector_nums]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/background_block_ids="30 35" Mesh/gen/background_block_names="back_in back_out"
-                Mesh/gen/num_sectors_per_side="4 4 4 4 6" Mesh/gen/quad_center_elements=true
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must be false if different side sector numbers are set.'
-    requirement ="The system shall throw an error if num_sectors_per_side and quad_center_elements are not compatible."
-  []
-  [err_interface_ids_length]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/interface_boundary_names="int1"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'If provided, the length of this parameter must be identical to the total number of interfaces.'
-    requirement ="The system shall throw an error if interface_boundary_names has an incorrect length."
-  []
-  [err_background_block_ids_1]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/background_block_ids="20 30"
-                Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must be either unset or have a unity length when ring_radii is provided or background_intervals is unity.'
-    requirement ="The system shall throw an error if background_block_ids has more than one element when the mesh has ring(s)."
-  []
-  [err_background_block_names_1]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/background_block_names="back1 back2"
-                Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must be either unset or have a unity length when ring_radii is provided or background_intervals is unity.'
-    requirement ="The system shall throw an error if background_block_names has more than one element when the mesh has ring(s)."
-  []
-  [err_background_block_ids_2]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/background_block_ids="20"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must be either unset or have a length of two when ring_radii is not provided and background_intervals is not unity.'
-    requirement ="The system shall throw an error if background_block_ids has a length other than zero or two when the mesh does not have rings and background_intervals equals one."
-  []
-  [err_background_block_names_2]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/background_block_names="back1"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must be either unset or have a length of two when ring_radii is not provided and background_intervals is not unity.'
-    requirement ="The system shall throw an error if background_block_names has a length other than zero or two when the mesh does not have rings and background_intervals equals one."
-  []
-  [err_block_ids_with_one_name]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/background_block_names="back back" --mesh-only "poly_2d_err.e"'
-    expect_err = 'blocks with different ids cannot have the same block name.'
-    requirement ='The system shall throw an error of multiple block ids share a single block name.'
-  []
-  [err_num_sectors_per_side_size]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/num_sectors_per_side="4 4"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must have a length that is consistent with num_sides.'
-    requirement ="The system shall throw an error if size of num_sectors_per_side is not num_sides."
-  []
-  [err_odd_num_sectors_per_side]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/num_sectors_per_side="3 3 3 3 3"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must be even.'
-    requirement ="The system shall throw an error if num_sectors_per_side elements are not all even."
-  []
-  [err_ring_radii_length]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter and ring_intervals must have the same length.'
-    requirement ="The system shall throw an error if ring_radii and ring_intervals have different sizes."
-  []
-  [err_ring_block_ids]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
-                Mesh/gen/ring_block_ids="20"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must have the appropriate size if it is provided.'
-    requirement ="The system shall throw an error if ring_block_ids size is not consistent with number of rings in the mesh."
-  []
-  [err_ring_block_names]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
-                Mesh/gen/ring_block_names="ring1"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must have the appropriate size if it is set.'
-    requirement ="The system shall throw an error if ring_block_names size is not consistent with number of rings in the mesh."
-  []
-  [err_descend_ring_radii]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/ring_radii="2 1" Mesh/gen/ring_intervals="2 2"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must be strictly ascending.'
-    requirement ="The system shall throw an error if ring_radii is not strictly ascending."
-  []
-  [err_oversize_ring_radii]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/ring_radii="1 6" Mesh/gen/ring_intervals="2 2"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'Elements of this parameter must be smaller than polygon apothem'
-    requirement ="The system shall throw an error if rings are bigger than the polygon."
-  []
-  [err_duct_sizes_length]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter and duct_intervals must have the same length.'
-    requirement ="The system shall throw an error if duct_sizes and duct_intervals have different sizes."
-  []
-  [err_duct_block_ids]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
-                Mesh/gen/duct_block_ids="20"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must have the same length as duct_intervals if set.'
-    requirement ="The system shall throw an error if duct_block_ids size is not consistent with number of ducts in the mesh."
-  []
-  [err_duct_block_names]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
-                Mesh/gen/duct_block_names="duct1"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must have the same length as duct_intervals if set.'
-    requirement ="The system shall throw an error if duct_block_names size is not consistent with number of ducts in the mesh."
-  []
-  [err_descend_duct_sizes]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/duct_sizes="3.5 3.4" Mesh/gen/duct_intervals="2 2"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must be strictly ascending.'
-    requirement ="The system shall throw an error if duct_sizes is not strictly ascending."
-  []
-  [err_undersize_duct_sizes]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
-                Mesh/gen/duct_sizes="2.5 4.0" Mesh/gen/duct_intervals="2 2"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must be positive and ensures no overlapping with rings.'
-    requirement ="The system shall throw an error if duct_sizes is non-positive or is low enough to be overlapped with rings."
-  []
-  [err_oversize_duct_sizes]
-    type = 'RunException'
-    input = 'poly_2d.i'
-    cli_args = 'Mesh/gen/duct_sizes="3.5 8.0" Mesh/gen/duct_intervals="2 2"
-                --mesh-only "poly_2d_err.e"'
-    expect_err = 'This parameter must ensure that ducts are smaller than the polygon size.'
-    requirement ="The system shall throw an error if duct_sizes is bigger than the polygon."
+  [exceptions]
+    requirement = "The system shall throw an error if "
+    [err_quad_diff_sector_nums]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_ids="30 35" Mesh/gen/background_block_names="back_in back_out"
+                  Mesh/gen/num_sectors_per_side="4 4 4 4 6" Mesh/gen/quad_center_elements=true
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must be false if different side sector numbers are set.'
+      detail = "num_sectors_per_side and quad_center_elements are not compatible."
+    []
+    [err_interface_ids_length]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/interface_boundary_names="int1"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'If provided, the length of this parameter must be identical to the total number of interfaces.'
+      detail = "interface_boundary_names has an incorrect length."
+    []
+    [err_background_block_ids_1]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_ids="20 30"
+                  Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must be either unset or have a unity length when ring_radii is provided or background_intervals is unity.'
+      detail = "background_block_ids has more than one element when the mesh has ring(s)."
+    []
+    [err_background_block_names_1]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_names="back1 back2"
+                  Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must be either unset or have a unity length when ring_radii is provided or background_intervals is unity.'
+      detail = "background_block_names has more than one element when the mesh has ring(s)."
+    []
+    [err_background_block_ids_2]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_ids="20"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must be either unset or have a length of two when ring_radii is not provided and background_intervals is not unity.'
+      detail = "background_block_ids has a length other than zero or two when the mesh does not have rings and background_intervals does not equal one."
+    []
+    [err_background_block_names_2]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_names="back1"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must be either unset or have a length of two when ring_radii is not provided and background_intervals is not unity.'
+      detail = "background_block_names has a length other than zero or two when the mesh does not have rings and background_intervals does not equal one."
+    []
+    [err_block_ids_with_one_name]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_names="back back" --mesh-only "poly_2d_err.e"'
+      expect_err = 'blocks with different ids cannot have the same block name.'
+      detail = 'multiple block ids share a single block name.'
+    []
+    [err_num_sectors_per_side_size]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/num_sectors_per_side="4 4"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must have a length that is consistent with num_sides.'
+      detail = "size of num_sectors_per_side is not num_sides."
+    []
+    [err_odd_num_sectors_per_side]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/num_sectors_per_side="2 2 2 2 3"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must be even.'
+      detail = "num_sectors_per_side elements are not all even."
+    []
+    [err_ring_radii_length_1]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter and ring_intervals must have the same length.'
+      detail = "ring_radii and ring_intervals have different sizes."
+    []
+    [err_ring_radii_length_2]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2" Mesh/gen/ring_radial_biases="2"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter and ring_radial_biases must have the same length.'
+      detail = "ring_radii and ring_radial_biases have different sizes."
+    []
+    [err_ring_block_ids]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_block_ids="20"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must have the appropriate size if it is provided.'
+      detail = "ring_block_ids size is not consistent with number of rings in the mesh."
+    []
+    [err_ring_block_names]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_block_names="ring1"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must have the appropriate size if it is set.'
+      detail = "ring_block_names size is not consistent with number of rings in the mesh."
+    []
+    [err_descend_ring_radii]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/ring_radii="2 1" Mesh/gen/ring_intervals="2 2"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must be strictly ascending.'
+      detail = "ring_radii is not strictly ascending."
+    []
+    [err_oversize_ring_radii]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/ring_radii="1 6" Mesh/gen/ring_intervals="2 2"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'Elements of this parameter must be smaller than polygon apothem'
+      detail = "rings are bigger than the polygon."
+    []
+    [err_duct_sizes_length_1]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter and duct_intervals must have the same length.'
+      detail = "duct_sizes and duct_intervals have different sizes."
+    []
+    [err_duct_sizes_length_2]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2" Mesh/gen/duct_radial_biases="2"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter and duct_radial_biases must have the same length.'
+      detail = "duct_sizes and duct_radial_biases have different sizes."
+    []
+    [err_duct_block_ids]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
+                  Mesh/gen/duct_block_ids="20"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must have the same length as duct_intervals if set.'
+      detail = "duct_block_ids size is not consistent with the number of ducts in the mesh."
+    []
+    [err_duct_block_names]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
+                  Mesh/gen/duct_block_names="duct1"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must have the same length as duct_intervals if set.'
+      detail = "duct_block_names size is not consistent with the number of ducts in the mesh."
+    []
+    [err_descend_duct_sizes]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/duct_sizes="3.5 3.4" Mesh/gen/duct_intervals="2 2"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must be strictly ascending.'
+      detail = "duct_sizes is not strictly ascending."
+    []
+    [err_undersize_duct_sizes]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/duct_sizes="2.5 4.0" Mesh/gen/duct_intervals="2 2"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must be positive and ensures no overlapping with rings.'
+      detail = "duct_sizes is non-positive or is low enough to be overlapped with rings."
+    []
+    [err_oversize_duct_sizes]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/duct_sizes="3.5 8.0" Mesh/gen/duct_intervals="2 2"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'This parameter must ensure that ducts are smaller than the polygon size.'
+      detail = "duct_sizes is bigger than the polygon."
+    []
+    [err_overlapped_background_boundary]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_inner_boundary_layer_width=5.0
+                  Mesh/gen/background_outer_boundary_layer_width=5.0
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'must be less than the minimum thickness of the background region.'
+      detail = "boundary layers in background region of a hexagonal cell are overlapped."
+    []
+    [err_ring_boundary_layer_param_size]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                  Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_inner_boundary_layer_widths="0.6"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'The inner and outer ring boundary layer parameters must have the same sizes as ring_radii.'
+      detail = "inner and outer ring boundary layer parameters have inconsistent size."
+    []
+    [err_ring_inner_boundary_layer_zero_interval]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                  Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_inner_boundary_layer_widths="0.0 0.3"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'Ring inner boundary layer must have non-zero interval if its thickness is not zero.'
+      detail = "ring's inner boundary layer has zero interval but non-zero thickness."
+    []
+    [err_ring_inner_boundary_layer_nonzero_interval]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                  Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_inner_boundary_layer_widths="0.0 0.0"
+                  Mesh/gen/ring_inner_boundary_layer_intervals="1 1"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'Ring inner boundary layer must have zero interval if its thickness is zero.'
+      detail = "ring's inner boundary layer has nonzero intervals but zero thickness."
+    []
+    [err_ring_outer_boundary_layer_zero_interval]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                  Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_outer_boundary_layer_widths="0.0 0.3"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'Ring outer boundary layer must have non-zero interval if its thickness is not zero.'
+      detail = "ring's outer boundary layer has zero interval but non-zero thickness."
+    []
+    [err_ring_outer_boundary_layer_nonzero_interval]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                  Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_outer_boundary_layer_widths="0.0 0.0"
+                  Mesh/gen/ring_outer_boundary_layer_intervals="1 1"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'Ring outer boundary layer must have zero interval if its thickness is zero.'
+      detail = "ring's outer boundary layer has nonzero intervals but zero thickness."
+    []
+    [err_ring_boundary_layers_oversize]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                  Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_outer_boundary_layer_widths="2.5 0.5"
+                  Mesh/gen/ring_outer_boundary_layer_intervals="1 1"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'cannot exceeds the ring layer width.'
+      detail = "ring's boundary layers are thicker than the ring itself."
+    []
+    [err_duct_boundary_layer_param_size]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
+                  Mesh/gen/duct_inner_boundary_layer_widths="0.3"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'The inner and outer duct boundary layer parameters must have the same sizes as duct_sizes.'
+      detail = "inner and outer duct boundary layer parameters have inconsistent size."
+    []
+    [err_duct_inner_boundary_layer_zero_interval]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
+                  Mesh/gen/duct_inner_boundary_layer_widths="0.0 0.3"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'Duct inner boundary layer must have non-zero interval if its thickness is not zero.'
+      detail = "duct's inner boundary layer has zero interval but non-zero thickness."
+    []
+    [err_duct_inner_boundary_layer_nonzero_interval]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
+                  Mesh/gen/duct_inner_boundary_layer_widths="0.0 0.0"
+                  Mesh/gen/duct_inner_boundary_layer_intervals="1 1"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'Duct inner boundary layer must have zero interval if its thickness is zero.'
+      detail = "duct's inner boundary layer has nonzero intervals but zero thickness."
+    []
+    [err_duct_outer_boundary_layer_zero_interval]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
+                  Mesh/gen/duct_outer_boundary_layer_widths="0.0 0.3"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'Duct outer boundary layer must have non-zero interval if its thickness is not zero.'
+      detail = "duct's outer boundary layer has zero interval but non-zero thickness."
+    []
+    [err_duct_outer_boundary_layer_nonzero_interval]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
+                  Mesh/gen/duct_outer_boundary_layer_widths="0.0 0.0"
+                  Mesh/gen/duct_outer_boundary_layer_intervals="1 1"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'Duct outer boundary layer must have zero interval if its thickness is zero.'
+      detail = "duct's outer boundary layer has nonzero intervals but zero thickness."
+    []
+    [err_duct_boundary_layers_oversize]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
+                  Mesh/gen/duct_outer_boundary_layer_widths="1.0 1.0"
+                  Mesh/gen/duct_outer_boundary_layer_intervals="1 1"
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'cannot exceeds the duct layer width.'
+      detail = "duct's boundary layers are thicker than the ring itself."
+    []
   []
 []

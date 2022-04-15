@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PolygonMeshGeneratorBase.h"
+#include "MooseUtils.h"
 
 #include <cmath>
 
@@ -34,24 +35,80 @@ PolygonMeshGeneratorBase::generate()
 }
 
 std::unique_ptr<ReplicatedMesh>
-PolygonMeshGeneratorBase::buildSimpleSlice(const std::vector<Real> ring_radii,
-                                           const std::vector<unsigned int> rings,
-                                           std::vector<Real> ducts_center_dist,
-                                           const std::vector<unsigned int> ducts_layers,
-                                           const bool has_rings,
-                                           const bool has_ducts,
-                                           const Real pitch,
-                                           const unsigned int num_sectors_per_side,
-                                           const unsigned int background_intervals,
-                                           dof_id_type & node_id_background_meta,
-                                           const unsigned int side_number,
-                                           const unsigned int side_index,
-                                           const std::vector<Real> azimuthal_tangent,
-                                           const subdomain_id_type block_id_shift,
-                                           const bool quad_center_elements,
-                                           const boundary_id_type boundary_id_shift)
+PolygonMeshGeneratorBase::buildSimpleSlice(
+    std::vector<Real> ring_radii,
+    const std::vector<unsigned int> ring_layers,
+    const std::vector<Real> ring_radial_biases,
+    const multiBdryLayerParams & ring_inner_boundary_layer_params,
+    const multiBdryLayerParams & ring_outer_boundary_layer_params,
+    std::vector<Real> ducts_center_dist,
+    const std::vector<unsigned int> ducts_layers,
+    const std::vector<Real> duct_radial_biases,
+    const multiBdryLayerParams & duct_inner_boundary_layer_params,
+    const multiBdryLayerParams & duct_outer_boundary_layer_params,
+    bool has_rings,
+    bool has_ducts,
+    const Real pitch,
+    const unsigned int num_sectors_per_side,
+    const unsigned int background_intervals,
+    const Real background_radial_bias,
+    const singleBdryLayerParams & background_inner_boundary_layer_params,
+    const singleBdryLayerParams & background_outer_boundary_layer_params,
+    dof_id_type & node_id_background_meta,
+    const unsigned int side_number,
+    const unsigned int side_index,
+    const std::vector<Real> azimuthal_tangent,
+    const subdomain_id_type block_id_shift,
+    const bool quad_center_elements,
+    const boundary_id_type boundary_id_shift)
 {
   auto mesh = buildReplicatedMesh(2);
+
+  // Calculate biasing terms
+  // background region needs to be split into three parts
+  const auto main_background_bias_terms =
+      biasTermsCalculator(background_radial_bias, background_intervals);
+  const auto inner_background_bias_terms =
+      biasTermsCalculator(background_inner_boundary_layer_params.bias,
+                          background_inner_boundary_layer_params.intervals);
+  const auto outer_background_bias_terms =
+      biasTermsCalculator(background_outer_boundary_layer_params.bias,
+                          background_outer_boundary_layer_params.intervals);
+  auto rings_bias_terms = biasTermsCalculator(ring_radial_biases,
+                                              ring_layers,
+                                              ring_inner_boundary_layer_params,
+                                              ring_outer_boundary_layer_params);
+  auto duct_bias_terms = biasTermsCalculator(duct_radial_biases,
+                                             ducts_layers,
+                                             duct_inner_boundary_layer_params,
+                                             duct_outer_boundary_layer_params);
+
+  std::vector<unsigned int> total_ring_layers;
+  for (unsigned int i = 0; i < ring_layers.size(); i++)
+    total_ring_layers.push_back(ring_layers[i] + ring_inner_boundary_layer_params.intervals[i] +
+                                ring_outer_boundary_layer_params.intervals[i]);
+
+  if (background_inner_boundary_layer_params.intervals)
+  {
+    total_ring_layers.push_back(background_inner_boundary_layer_params.intervals);
+    rings_bias_terms.push_back(inner_background_bias_terms);
+    ring_radii.push_back(ring_radii.back() + background_inner_boundary_layer_params.width);
+    has_rings = true;
+  }
+
+  std::vector<unsigned int> total_ducts_layers;
+  if (background_outer_boundary_layer_params.intervals)
+  {
+    total_ducts_layers.push_back(background_outer_boundary_layer_params.intervals);
+    duct_bias_terms.insert(duct_bias_terms.begin(), outer_background_bias_terms);
+    ducts_center_dist.insert(ducts_center_dist.begin(),
+                             ducts_center_dist.front() -
+                                 background_outer_boundary_layer_params.width);
+    has_ducts = true;
+  }
+  for (unsigned int i = 0; i < ducts_layers.size(); i++)
+    total_ducts_layers.push_back(ducts_layers[i] + duct_inner_boundary_layer_params.intervals[i] +
+                                 duct_outer_boundary_layer_params.intervals[i]);
 
   unsigned int angle_number =
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
@@ -69,12 +126,12 @@ PolygonMeshGeneratorBase::buildSimpleSlice(const std::vector<Real> ring_radii,
     Real ring_radii_0;
 
     if (has_rings)
-      ring_radii_0 = ring_radii.front() / (Real)rings.front();
+      ring_radii_0 = ring_radii.front() * rings_bias_terms.front().front();
     else if (has_ducts)
-      ring_radii_0 =
-          ducts_center_dist.front() * std::cos(M_PI / side_number) / (Real)background_intervals;
+      ring_radii_0 = ducts_center_dist.front() * std::cos(M_PI / side_number) *
+                     main_background_bias_terms.front();
     else
-      ring_radii_0 = pitch / 2.0 / (Real)background_intervals;
+      ring_radii_0 = pitch / 2.0 * main_background_bias_terms.front();
     ring_radii_0 = ring_radii_0 / div_num * (div_num - 1);
 
     centerNodes(*mesh, side_number, div_num, ring_radii_0, nodes);
@@ -86,7 +143,8 @@ PolygonMeshGeneratorBase::buildSimpleSlice(const std::vector<Real> ring_radii,
   if (has_rings)
     ringNodes(*mesh,
               ring_radii,
-              rings,
+              total_ring_layers,
+              rings_bias_terms,
               num_sectors_per_side,
               corner_p,
               corner_to_corner,
@@ -125,6 +183,7 @@ PolygonMeshGeneratorBase::buildSimpleSlice(const std::vector<Real> ring_radii,
   backgroundNodes(*mesh,
                   num_sectors_per_side,
                   background_intervals,
+                  main_background_bias_terms,
                   background_corner_distance,
                   background_corner_radial_interval_length,
                   corner_p,
@@ -136,7 +195,8 @@ PolygonMeshGeneratorBase::buildSimpleSlice(const std::vector<Real> ring_radii,
   if (has_ducts)
     ductNodes(*mesh,
               &ducts_center_dist,
-              ducts_layers,
+              total_ducts_layers,
+              duct_bias_terms,
               num_sectors_per_side,
               corner_p,
               corner_to_corner,
@@ -170,19 +230,30 @@ PolygonMeshGeneratorBase::buildSimpleSlice(const std::vector<Real> ring_radii,
 
   if (has_rings) //  define the rings in each subdomain
   {
-    subdomain_rings = rings;
-    subdomain_rings[0] = subdomain_rings[0] - 1;     // remove the inner TRI mesh subdomain
-    subdomain_rings.push_back(background_intervals); // add the background region
+    subdomain_rings = total_ring_layers;
+    subdomain_rings.front() = subdomain_rings.front() - 1; // remove the inner TRI mesh subdomain
+    if (background_inner_boundary_layer_params.intervals)
+      subdomain_rings.back() =
+          background_inner_boundary_layer_params.intervals + background_intervals +
+          background_outer_boundary_layer_params.intervals; // add the background region
+    else
+      subdomain_rings.push_back(background_inner_boundary_layer_params.intervals +
+                                background_intervals +
+                                background_outer_boundary_layer_params.intervals);
   }
   else
   {
-    subdomain_rings.push_back(background_intervals); // add the background region
-    subdomain_rings[0] = subdomain_rings[0] - 1;     // remove the inner TRI mesh subdomain
+    subdomain_rings.push_back(
+        background_inner_boundary_layer_params.intervals + background_intervals +
+        background_outer_boundary_layer_params.intervals); // add the background region
+    subdomain_rings[0] = subdomain_rings[0] - 1;           // remove the inner TRI mesh subdomain
   }
 
   if (has_ducts)
-    for (unsigned int i = 0; i < ducts_layers.size(); i++)
-      subdomain_rings.push_back(ducts_layers[i]);
+    for (unsigned int i = (background_outer_boundary_layer_params.intervals > 0);
+         i < total_ducts_layers.size();
+         i++)
+      subdomain_rings.push_back(total_ducts_layers[i]);
 
   quadElemDef(*mesh,
               num_sectors_per_side,
@@ -277,7 +348,8 @@ PolygonMeshGeneratorBase::centerNodes(ReplicatedMesh & mesh,
 void
 PolygonMeshGeneratorBase::ringNodes(ReplicatedMesh & mesh,
                                     const std::vector<Real> ring_radii,
-                                    const std::vector<unsigned int> rings,
+                                    const std::vector<unsigned int> ring_layers,
+                                    const std::vector<std::vector<Real>> biased_terms,
                                     const unsigned int num_sectors_per_side,
                                     const Real corner_p[2][2],
                                     const Real corner_to_corner,
@@ -287,19 +359,22 @@ PolygonMeshGeneratorBase::ringNodes(ReplicatedMesh & mesh,
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
 
   // Add nodes in pins regions
-  for (unsigned int l = 0; l < rings.size(); l++)
+  for (unsigned int l = 0; l < ring_layers.size(); l++)
   {
     // the pin radius interval for each ring_radii/subdomain
     const Real pin_radius_interval_length =
-        l == 0 ? ring_radii[l] / rings[l] : (ring_radii[l] - ring_radii[l - 1]) / rings[l];
+        l == 0 ? ring_radii[l] / ring_layers[l]
+               : (ring_radii[l] - ring_radii[l - 1]) / ring_layers[l];
 
     // add rings in each pin subdomain
-    for (unsigned int k = 0; k < rings[l]; k++)
+    for (unsigned int k = 0; k < ring_layers[l]; k++)
     {
       const Real bin_radial_distance =
-          l == 0 ? ((k + 1) * pin_radius_interval_length) // this is from the cell/pin center to
-                                                          // the first circle
-                 : (ring_radii[l - 1] + (k + 1) * pin_radius_interval_length);
+          l == 0 ? (biased_terms[l][k] * ring_layers[l] *
+                    pin_radius_interval_length) // this is from the cell/pin center to
+                                                // the first circle
+                 : (ring_radii[l - 1] +
+                    biased_terms[l][k] * ring_layers[l] * pin_radius_interval_length);
       const Real pin_corner_p_x = corner_p[0][0] * bin_radial_distance / (0.5 * corner_to_corner);
       const Real pin_corner_p_y = corner_p[0][1] * bin_radial_distance / (0.5 * corner_to_corner);
 
@@ -338,6 +413,7 @@ void
 PolygonMeshGeneratorBase::backgroundNodes(ReplicatedMesh & mesh,
                                           const unsigned int num_sectors_per_side,
                                           const unsigned int background_intervals,
+                                          const std::vector<Real> biased_terms,
                                           const Real background_corner_distance,
                                           const Real background_corner_radial_interval_length,
                                           const Real corner_p[2][2],
@@ -351,11 +427,13 @@ PolygonMeshGeneratorBase::backgroundNodes(ReplicatedMesh & mesh,
   {
     const Real background_corner_p_x =
         background_corner_distance / (0.5 * corner_to_corner) * corner_p[0][0] *
-        (background_in + (k + 1) * background_corner_radial_interval_length) /
+        (background_in +
+         biased_terms[k] * background_intervals * background_corner_radial_interval_length) /
         background_corner_distance;
     const Real background_corner_p_y =
         background_corner_distance / (0.5 * corner_to_corner) * corner_p[0][1] *
-        (background_in + (k + 1) * background_corner_radial_interval_length) /
+        (background_in +
+         biased_terms[k] * background_intervals * background_corner_radial_interval_length) /
         background_corner_distance;
 
     // background_corner_p(s) are the points in the background region, on the bins towards the six
@@ -389,10 +467,12 @@ PolygonMeshGeneratorBase::backgroundNodes(ReplicatedMesh & mesh,
                     Utility::pow<2>(cell_boundary_p_y - pin_boundary_p_y)) /
           background_intervals;
       const Real background_azimuthal_p_x =
-          cell_boundary_p_x * (background_in + (k + 1) * background_radial_interval) /
+          cell_boundary_p_x *
+          (background_in + biased_terms[k] * background_intervals * background_radial_interval) /
           std::sqrt(Utility::pow<2>(cell_boundary_p_x) + Utility::pow<2>(cell_boundary_p_y));
       const Real background_azimuthal_p_y =
-          cell_boundary_p_y * (background_in + (k + 1) * background_radial_interval) /
+          cell_boundary_p_y *
+          (background_in + biased_terms[k] * background_intervals * background_radial_interval) /
           std::sqrt(Utility::pow<2>(cell_boundary_p_x) + Utility::pow<2>(cell_boundary_p_y));
       // background_azimuthal_p are the points on the bins towards different azimuthal angles, at
       // different intervals; excluding the ones produced by background_corner_p
@@ -405,6 +485,7 @@ void
 PolygonMeshGeneratorBase::ductNodes(ReplicatedMesh & mesh,
                                     std::vector<Real> * const ducts_center_dist,
                                     const std::vector<unsigned int> ducts_layers,
+                                    const std::vector<std::vector<Real>> biased_terms,
                                     const unsigned int num_sectors_per_side,
                                     const Real corner_p[2][2],
                                     const Real corner_to_corner,
@@ -427,7 +508,8 @@ PolygonMeshGeneratorBase::ductNodes(ReplicatedMesh & mesh,
     // add rings in each pin subdomain
     for (unsigned int k = 0; k < ducts_layers[l]; k++)
     {
-      bin_radial_distance = ((*ducts_center_dist)[l] + (k + 1) * duct_radius_interval_length[l]);
+      bin_radial_distance = ((*ducts_center_dist)[l] +
+                             biased_terms[l][k] * ducts_layers[l] * duct_radius_interval_length[l]);
       const Real pin_corner_p_x = corner_p[0][0] * bin_radial_distance / (0.5 * corner_to_corner);
       const Real pin_corner_p_y = corner_p[0][1] * bin_radial_distance / (0.5 * corner_to_corner);
 
@@ -1072,4 +1154,79 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
   std::sort(azimuthal_output.begin(), azimuthal_output.end());
 
   return azimuthal_output;
+}
+
+std::vector<std::vector<Real>>
+PolygonMeshGeneratorBase::biasTermsCalculator(
+    const std::vector<Real> radial_biases,
+    const std::vector<unsigned int> intervals,
+    const multiBdryLayerParams inner_boundary_layer_params,
+    const multiBdryLayerParams outer_boundary_layer_params) const
+{
+  std::vector<std::vector<Real>> bias_terms_vec;
+  for (unsigned int i = 0; i < radial_biases.size(); i++)
+    bias_terms_vec.push_back(biasTermsCalculator(radial_biases[i],
+                                                 intervals[i],
+                                                 {0.0,
+                                                  inner_boundary_layer_params.fractions[i],
+                                                  inner_boundary_layer_params.intervals[i],
+                                                  inner_boundary_layer_params.biases[i]},
+                                                 {0.0,
+                                                  outer_boundary_layer_params.fractions[i],
+                                                  outer_boundary_layer_params.intervals[i],
+                                                  outer_boundary_layer_params.biases[i]}));
+  return bias_terms_vec;
+}
+
+std::vector<Real>
+PolygonMeshGeneratorBase::biasTermsCalculator(
+    const Real radial_bias,
+    const unsigned int intervals,
+    const singleBdryLayerParams inner_boundary_layer_params,
+    const singleBdryLayerParams outer_boundary_layer_params) const
+{
+  // To get biased indices:
+  // If no bias is involved, namely bias factor = 1.0, the increment in indices is uniform.
+  // Thus, (i + 1) is used to get such linearly increasing indices.
+  // If a non-trivial bias factor q is used, the increment in the indices is geometric
+  // progression. So, if first (i = 0) increment is 1.0, second (i = 1) is q, third (i = 2) is
+  // q^2,..., last or n_interval'th is q^(n_interval - 1). Then, the summation of the first (i +
+  // 1) increments over the summation of all n_interval increments is the (i + 1)th index The
+  // summation of the first (i + 1) increments is (1.0 - q^(i + 1)) / (1 - q); The summation of
+  // all n_interval increments is (1.0 - q^n_interval) / (1 - q); Thus, the index is (1.0 - q^(i +
+  // 1)) / (1.0 - q^n_interval)
+  // This approach is used by inner boundary layer, main region, outer boundary layer separately.
+
+  std::vector<Real> biased_terms;
+  for (unsigned int i = 0; i < inner_boundary_layer_params.intervals; i++)
+    biased_terms.push_back(
+        MooseUtils::absoluteFuzzyEqual(inner_boundary_layer_params.bias, 1.0)
+            ? ((Real)(i + 1) * inner_boundary_layer_params.fraction /
+               (Real)inner_boundary_layer_params.intervals)
+            : ((1.0 - std::pow(inner_boundary_layer_params.bias, (Real)(i + 1))) /
+               (1.0 - std::pow(inner_boundary_layer_params.bias,
+                               (Real)(inner_boundary_layer_params.intervals))) *
+               inner_boundary_layer_params.fraction));
+  for (unsigned int i = 0; i < intervals; i++)
+    biased_terms.push_back(inner_boundary_layer_params.fraction +
+                           (MooseUtils::absoluteFuzzyEqual(radial_bias, 1.0)
+                                ? ((Real)(i + 1) *
+                                   (1.0 - inner_boundary_layer_params.fraction -
+                                    outer_boundary_layer_params.fraction) /
+                                   (Real)intervals)
+                                : ((1.0 - std::pow(radial_bias, (Real)(i + 1))) /
+                                   (1.0 - std::pow(radial_bias, (Real)(intervals))) *
+                                   (1.0 - inner_boundary_layer_params.fraction -
+                                    outer_boundary_layer_params.fraction))));
+  for (unsigned int i = 0; i < outer_boundary_layer_params.intervals; i++)
+    biased_terms.push_back(
+        1.0 - outer_boundary_layer_params.fraction +
+        (MooseUtils::absoluteFuzzyEqual(outer_boundary_layer_params.bias, 1.0)
+             ? ((Real)(i + 1) * outer_boundary_layer_params.fraction /
+                (Real)outer_boundary_layer_params.intervals)
+             : ((1.0 - std::pow(outer_boundary_layer_params.bias, (Real)(i + 1))) /
+                (1.0 - std::pow(outer_boundary_layer_params.bias,
+                                (Real)(outer_boundary_layer_params.intervals))) *
+                outer_boundary_layer_params.fraction)));
+  return biased_terms;
 }

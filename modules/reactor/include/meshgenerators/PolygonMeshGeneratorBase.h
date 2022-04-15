@@ -65,18 +65,50 @@ public:
     HEXAGON_NUM_SIDES = 6
   };
 
+  /// Contains multiple blocks's boundary layer related parameters
+  struct multiBdryLayerParams
+  {
+    std::vector<Real> widths;
+    std::vector<Real> fractions;
+    std::vector<unsigned int> intervals;
+    std::vector<Real> biases;
+  };
+  /// Contains a single block's boundary layer related parameters
+  struct singleBdryLayerParams
+  {
+    Real width;
+    Real fraction;
+    unsigned int intervals;
+    Real bias;
+  };
+
 protected:
   /**
    * Creates a mesh of a slice that corresponds to a single side of the polygon to be generated.
    * @param mesh input mesh to build the slice mesh onto
    * @param ring_radii radii of the ring regions
-   * @param rings numbers of radial intervals of the ring regions
+   * @param ring_layers numbers of radial intervals of the ring regions
+   * @param ring_radial_biases values used for radial meshing biasing in ring regions
+   * @param ring_inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the inner boundary layer of the ring regions
+   * @param ring_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the outer boundary layer of the ring regions
    * @param ducts_center_dist distance parameters of the duct regions
    * @param ducts_layers numbers of radial intervals of the duct regions
+   * @param duct_radial_biases values used for radial meshing biasing in duct regions
+   * @param duct_inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the inner boundary layer of the duct regions
+   * @param duct_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the outer boundary layer of the duct regions
    * @param has_rings whether the slice contains ring regions or not
    * @param has_ducts whether the slice contains duct regions or not
    * @param num_sectors_per_side number of azimuthal intervals
    * @param background_intervals number of radial intervals of the background region
+   * @param background_radial_bias value used for radial meshing biasing in background region
+   * @param background_inner_boundary_layer_params width, radial sectors, and growth factor of the
+   * inner boundary layer of the background region
+   * @param background_outer_boundary_layer_params width, radial sectors, and growth factor of the
+   * outer boundary layer of the background region
    * @param node_id_background_meta pointer to the first node's id of the background region
    * @param side_number number of sides of the polygon
    * @param side_index index of the polygon side
@@ -89,14 +121,23 @@ protected:
    */
   std::unique_ptr<ReplicatedMesh>
   buildSimpleSlice(const std::vector<Real> ring_radii,
-                   const std::vector<unsigned int> rings,
+                   const std::vector<unsigned int> ring_layers,
+                   const std::vector<Real> ring_radial_biases,
+                   const multiBdryLayerParams & ring_inner_boundary_layer_params,
+                   const multiBdryLayerParams & ring_outer_boundary_layer_params,
                    std::vector<Real> ducts_center_dist,
                    const std::vector<unsigned int> ducts_layers,
-                   const bool has_rings,
-                   const bool has_ducts,
+                   const std::vector<Real> duct_radial_biases,
+                   const multiBdryLayerParams & duct_inner_boundary_layer_params,
+                   const multiBdryLayerParams & duct_outer_boundary_layer_params,
+                   bool has_rings,
+                   bool has_ducts,
                    const Real pitch,
                    const unsigned int num_sectors_per_side,
                    const unsigned int background_intervals,
+                   const Real background_radial_bias,
+                   const singleBdryLayerParams & background_inner_boundary_layer_params,
+                   const singleBdryLayerParams & background_outer_boundary_layer_params,
                    dof_id_type & node_id_background_meta,
                    const unsigned int side_number,
                    const unsigned int side_index,
@@ -124,7 +165,8 @@ protected:
    * Creates nodes for the ring-geometry region of a single slice.
    * @param mesh input mesh to add the nodes onto
    * @param ring_radii radii of the ring regions
-   * @param rings numbers of radial intervals of the ring regions
+   * @param ring_layers numbers of radial intervals of the ring regions
+   * @param biased_terms normalized spacing values used for radial meshing biasing in ring regions
    * @param num_sectors_per_side number of azimuthal intervals
    * @param corner_p[2][2] array contains the coordinates of the corner positions
    * @param corner_to_corner diameter of the circumscribed circle of the polygon
@@ -133,7 +175,8 @@ protected:
    */
   void ringNodes(ReplicatedMesh & mesh,
                  const std::vector<Real> ring_radii,
-                 const std::vector<unsigned int> rings,
+                 const std::vector<unsigned int> ring_layers,
+                 const std::vector<std::vector<Real>> biased_terms,
                  const unsigned int num_sectors_per_side,
                  const Real corner_p[2][2],
                  const Real corner_to_corner,
@@ -144,6 +187,8 @@ protected:
    * @param mesh input mesh to add the nodes onto
    * @param num_sectors_per_side number of azimuthal intervals
    * @param background_intervals number of radial intervals of the background region
+   * @param biased_terms normalized spacing values used for radial meshing biasing in background
+   * region
    * @param background_corner_distance center to duct (innermost duct) corner distance
    * @param background_corner_radial_interval_length radial interval distance
    * @param corner_p[2][2] array contains the coordinates of the corner positions
@@ -156,6 +201,7 @@ protected:
   void backgroundNodes(ReplicatedMesh & mesh,
                        const unsigned int num_sectors_per_side,
                        const unsigned int background_intervals,
+                       const std::vector<Real> biased_terms,
                        const Real background_corner_distance,
                        const Real background_corner_radial_interval_length,
                        const Real corner_p[2][2],
@@ -168,6 +214,7 @@ protected:
    * @param mesh input mesh to add the nodes onto
    * @param ducts_center_dist distance parameters of the duct regions
    * @param ducts_layers numbers of radial intervals of the duct regions
+   * @param biased_terms normalized spacing values used for radial meshing biasing in duct region
    * @param num_sectors_per_side number of azimuthal intervals
    * @param corner_p[2][2] array contains the coordinates of the corner positions
    * @param corner_to_corner diameter of the circumscribed circle of the polygon
@@ -177,6 +224,7 @@ protected:
   void ductNodes(ReplicatedMesh & mesh,
                  std::vector<Real> * const ducts_center_dist,
                  const std::vector<unsigned int> ducts_layers,
+                 const std::vector<std::vector<Real>> biased_terms,
                  const unsigned int num_sectors_per_side,
                  const Real corner_p[2][2],
                  const Real corner_to_corner,
@@ -242,7 +290,7 @@ protected:
 
   /**
    * Makes radial correction to preserve ring area.
-   * @param azimuthal_list azimuthal angles of all the nodes on the circle
+   * @param azimuthal_list azimuthal angles (in degrees) of all the nodes on the circle
    * @return a correction factor to preserve the area of the circle after polygonization during
    * meshing
    */
@@ -401,4 +449,38 @@ protected:
                                              const Real input_origin_x = 0.0,
                                              const Real input_origin_y = 0.0,
                                              const Real tol = 1.0E-10) const;
+
+  /**
+   * Creates bias terms for multiple blocks.
+   * @param radial_biases bias growth factors of the elements within the main regions of the blocks
+   * @param intervals radial interval numbers of the main regions of the blocks
+   * @param inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the inner boundary layers
+   * @param outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the outer boundary layers
+   * @return bias list of terms describing the cumulative radial fractions of the nodes within
+   * multiple blocks
+   */
+  std::vector<std::vector<Real>>
+  biasTermsCalculator(const std::vector<Real> radial_biases,
+                      const std::vector<unsigned int> intervals,
+                      const multiBdryLayerParams inner_boundary_layer_params,
+                      const multiBdryLayerParams outer_boundary_layer_params) const;
+
+  /**
+   * Creates bias terms for a single block.
+   * @param radial_bias bias growth factor of the elements within the main region of the block
+   * @param intervals radial interval number of the main region of the block
+   * @param inner_boundary_layer_params width, radial fraction, radial sector, and growth
+   * factor of the inner boundary layer
+   * @param outer_boundary_layer_params width, radial fraction, radial sector, and growth
+   * factor of the outer boundary layer
+   * @return bias terms describing the cumulative radial fractions of the nodes within a single
+   * block
+   */
+  std::vector<Real> biasTermsCalculator(
+      const Real radial_bias,
+      const unsigned int intervals,
+      const singleBdryLayerParams inner_boundary_layer_params = {0.0, 0.0, 0, 1.0},
+      const singleBdryLayerParams outer_boundary_layer_params = {0.0, 0.0, 0, 1.0}) const;
 };
