@@ -4508,9 +4508,11 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
       multiapp = getMultiApp(parameters.get<MultiAppName>("from_multi_app"));
     else if (parameters.isParamValid("to_multi_app"))
       multiapp = getMultiApp(parameters.get<MultiAppName>("to_multi_app"));
-    else
-      mooseError("Should not reach here");
-    exec_enum = multiapp->getParam<ExecFlagEnum>("execute_on");
+    // else do nothing because the user has provided invalid input. They should get a nice error
+    // about this during transfer construction. This necessitates checking for null in this next
+    // line, however
+    if (multiapp)
+      exec_enum = multiapp->getParam<ExecFlagEnum>("execute_on");
   }
 
   // Create the Transfer objects
