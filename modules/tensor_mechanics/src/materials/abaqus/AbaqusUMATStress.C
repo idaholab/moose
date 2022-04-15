@@ -59,17 +59,18 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _aqNPROPS(_aqPROPS.size()),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _total_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
-    _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
+    _strain_increment(getOptionalMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
-    _Fbar(getMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _Fbar_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _Fbar(getOptionalMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _Fbar_old(getOptionalMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
     _state_var(declareProperty<std::vector<Real>>(_base_name + "state_var")),
     _state_var_old(getMaterialPropertyOld<std::vector<Real>>(_base_name + "state_var")),
     _elastic_strain_energy(declareProperty<Real>(_base_name + "elastic_strain_energy")),
     _plastic_dissipation(declareProperty<Real>(_base_name + "plastic_dissipation")),
     _creep_dissipation(declareProperty<Real>(_base_name + "creep_dissipation")),
     _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit")),
-    _rotation_increment(getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
+    _rotation_increment(
+        getOptionalMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _temperature(coupledValue("temperature")),
     _temperature_old(coupledValueOld("temperature")),
     _external_fields(coupledValues("external_fields")),
@@ -114,13 +115,27 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
 }
 
 void
+AbaqusUMATStress::initialSetup()
+{
+  // The _Fbar, _Fbar_old, and _rotation_increment optional properties are only available when an
+  // incremental strain formulation is used. If they are not avaliable we advide the user to
+  // select an incremental formulation.
+  if (!_strain_increment || !_Fbar || !_Fbar_old || !_rotation_increment)
+    mooseError("AbaqusUMATStress '",
+               name(),
+               "': Incremental strain quantities are not available. You likely are using a total "
+               "strain formulation. Specify `incremental = true` in the tensor mechanics action, "
+               "or use ComputeIncrementalSmallStrain in your input file.");
+}
+
+void
 AbaqusUMATStress::initQpStatefulProperties()
 {
   ComputeStressBase::initQpStatefulProperties();
 
   // Initialize state variable vector
   _state_var[_qp].resize(_aqNSTATV);
-  for (int i = 0; i < _aqNSTATV; ++i)
+  for (const auto i : make_range(_aqNSTATV))
     _state_var[_qp][i] = 0.0;
 }
 
@@ -157,7 +172,7 @@ AbaqusUMATStress::computeQpStress()
   const Real * myDROT = &(_rotation_increment[_qp](0, 0));
 
   // copy because UMAT does not guarantee constness
-  for (unsigned int i = 0; i < 9; ++i)
+  for (const auto i : make_range(9))
   {
     _aqDFGRD0[i] = myDFGRD0[i];
     _aqDFGRD1[i] = myDFGRD1[i];
@@ -165,7 +180,7 @@ AbaqusUMATStress::computeQpStress()
   }
 
   // Recover "old" state variables
-  for (int i = 0; i < _aqNSTATV; ++i)
+  for (const auto i : make_range(_aqNSTATV))
     _aqSTATEV[i] = _state_var_old[_qp][i];
 
   // Pass through updated stress, total strain, and strain increment arrays
@@ -175,21 +190,21 @@ AbaqusUMATStress::computeQpStress()
   static const std::array<std::pair<unsigned int, unsigned int>, 6> component{
       {{0, 0}, {1, 1}, {2, 2}, {0, 1}, {0, 2}, {1, 2}}};
 
-  for (int i = 0; i < _aqNTENS; ++i)
+  for (const auto i : make_range(_aqNTENS))
   {
-    _aqSTRESS[i] = _stress_old[_qp](component[i].first, component[i].second);
-    _aqSTRAN[i] =
-        _total_strain_old[_qp](component[i].first, component[i].second) * strain_factor[i];
-    _aqDSTRAN[i] =
-        _strain_increment[_qp](component[i].first, component[i].second) * strain_factor[i];
+    const auto a = component[i].first;
+    const auto b = component[i].second;
+    _aqSTRESS[i] = _stress_old[_qp](a, b);
+    _aqSTRAN[i] = _total_strain_old[_qp](a, b) * strain_factor[i];
+    _aqDSTRAN[i] = _strain_increment[_qp](a, b) * strain_factor[i];
   }
 
   // current coordinates
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(LIBMESH_DIM))
     _aqCOORDS[i] = _q_point[_qp](i);
 
   // zero out Jacobian contribution
-  for (int i = 0; i < _aqNTENS * _aqNTENS; ++i)
+  for (const auto i : make_range(_aqNTENS * _aqNTENS))
     _aqDDSDDE[i] = 0.0;
 
   // Set PNEWDT initially to a large value
@@ -295,10 +310,10 @@ AbaqusUMATStress::computeQpStress()
   const unsigned int ntens = N * (N + 1) / 2;
   const int nskip = N - 1;
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
+        for (const auto l : make_range(N))
         {
           if (i == j)
             _jacobian_mult[_qp](i, j, k, l) =
