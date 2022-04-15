@@ -98,7 +98,9 @@ The [!ac](MOOSE) development team at [!ac](INL) occasionally hosts live training
 
 MOOSE training events will typically be announced on the [home page](index.md exact=true), but be sure to join the [mailing list](help/contact_us.md) for further updates!
 
+## Isogeometric Analysis
 
+[tensor_mechanics/examples/cframe_iga.md]
 
 ## C++ Programming References id=programming
 
