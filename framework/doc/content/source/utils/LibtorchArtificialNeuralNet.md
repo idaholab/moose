@@ -3,8 +3,9 @@
 ## Overview
 
 This class can be used to generate a simple, feedworward artificial neural network (ANN)
-using the underlying objects imported from `libtorch` (C++ API of `pytorch`). For
-the instructions on how to enable `libtorch` support in MOOSE, visit [installation/install_libtorch.md].
+using the underlying objects imported from `libtorch` (C++ API of `pytorch`). +Note:
+to be able to use these capabilities, MOOSE needs to be installed with libtorch support.+ For
+more information, visit the installation instuctions on the MOOSE website.
 For a more detailed introduction to neural networks, we refer the reader to [!cite](muller1995neural).
 The architecture of a simple feedforward neural network is presented below. The first layer
 from the left the right are referred to as input and output layers,
