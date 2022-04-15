@@ -8,13 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef LIBTORCH_ENABLED
-#include "LibtorchSimpleNeuralNet.h"
+#include "LibtorchArtificialNeuralNet.h"
 #include "MooseError.h"
 
 namespace Moose
 {
 
-LibtorchSimpleNeuralNet::LibtorchSimpleNeuralNet(
+LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     const std::string name,
     const unsigned int num_inputs,
     const unsigned int num_outputs,
@@ -36,7 +36,7 @@ LibtorchSimpleNeuralNet::LibtorchSimpleNeuralNet(
 }
 
 void
-LibtorchSimpleNeuralNet::constructNeuralNetwork()
+LibtorchArtificialNeuralNet::constructNeuralNetwork()
 {
   // Adding hidden layers
   unsigned int inp_neurons = _num_inputs;
@@ -58,7 +58,7 @@ LibtorchSimpleNeuralNet::constructNeuralNetwork()
 }
 
 torch::Tensor
-LibtorchSimpleNeuralNet::forward(torch::Tensor x)
+LibtorchArtificialNeuralNet::forward(torch::Tensor x)
 {
   for (unsigned int i = 0; i < _weights.size() - 1; ++i)
   {
@@ -82,19 +82,19 @@ LibtorchSimpleNeuralNet::forward(torch::Tensor x)
 }
 
 void
-LibtorchSimpleNeuralNet::addLayer(const std::string layer_name,
-                                  const std::unordered_map<std::string, unsigned int> & parameters)
+LibtorchArtificialNeuralNet::addLayer(
+    const std::string layer_name, const std::unordered_map<std::string, unsigned int> & parameters)
 {
   auto it = parameters.find("inp_neurons");
   if (it == parameters.end())
-    ::mooseError(
-        "Number of input neurons not found during the construction of LibtorchSimpleNeuralNet!");
+    ::mooseError("Number of input neurons not found during the construction of "
+                 "LibtorchArtificialNeuralNet!");
   unsigned int inp_neurons = it->second;
 
   it = parameters.find("out_neurons");
   if (it == parameters.end())
-    ::mooseError(
-        "Number of output neurons not found during the construction of LibtorchSimpleNeuralNet!");
+    ::mooseError("Number of output neurons not found during the construction of "
+                 "LibtorchArtificialNeuralNet!");
   unsigned int out_neurons = it->second;
 
   _weights.push_back(register_module(layer_name, torch::nn::Linear(inp_neurons, out_neurons)));
@@ -103,9 +103,8 @@ LibtorchSimpleNeuralNet::addLayer(const std::string layer_name,
 
 template <>
 void
-dataStore<Moose::LibtorchSimpleNeuralNet>(std::ostream & stream,
-                                          std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & nn,
-                                          void * context)
+dataStore<Moose::LibtorchArtificialNeuralNet>(
+    std::ostream & stream, std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn, void * context)
 {
   std::string n(nn->name());
   dataStore(stream, n, context);
@@ -136,9 +135,8 @@ dataStore<Moose::LibtorchSimpleNeuralNet>(std::ostream & stream,
 
 template <>
 void
-dataLoad<Moose::LibtorchSimpleNeuralNet>(std::istream & stream,
-                                         std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & nn,
-                                         void * context)
+dataLoad<Moose::LibtorchArtificialNeuralNet>(
+    std::istream & stream, std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn, void * context)
 {
   std::string name;
   dataLoad(stream, name, context);
@@ -163,7 +161,7 @@ dataLoad<Moose::LibtorchSimpleNeuralNet>(std::istream & stream,
   activation_functions.resize(num_activation_items);
   dataLoad(stream, activation_functions, context);
 
-  nn = std::make_shared<Moose::LibtorchSimpleNeuralNet>(
+  nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
       name, num_inputs, num_outputs, num_neurons_per_layer, activation_functions);
 
   torch::load(nn, name);

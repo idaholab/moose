@@ -8,14 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef LIBTORCH_ENABLED
-#include "LibtorchSimpleNeuralNet.h"
+#include "LibtorchArtificialNeuralNet.h"
 #include <torch/torch.h>
 #endif
 
-#include "LibtorchSimpleNeuralNetTest.h"
+#include "LibtorchArtificialNeuralNetTest.h"
 #include "ThreadedGeneralUserObject.h"
 
-registerMooseObject("MooseTestApp", LibtorchSimpleNeuralNetTest);
+registerMooseObject("MooseTestApp", LibtorchArtificialNeuralNetTest);
 
 InputParameters
 LibtorchSimpleNeuralNetTest::validParams()
@@ -38,8 +38,8 @@ LibtorchSimpleNeuralNetTest::LibtorchSimpleNeuralNetTest(const InputParameters &
 
   torch::manual_seed(11);
 
-  std::shared_ptr<Moose::LibtorchSimpleNeuralNet> nn =
-      std::make_shared<Moose::LibtorchSimpleNeuralNet>(
+  std::shared_ptr<Moose::LibtorchArtificialNeuralNet> nn =
+      std::make_shared<Moose::LibtorchArtificialNeuralNet>(
           "test",
           3,
           1,

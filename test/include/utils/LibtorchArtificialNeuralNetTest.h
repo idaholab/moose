@@ -12,14 +12,14 @@
 #include "GeneralUserObject.h"
 
 /**
- * A UserObject that tests the LibtorchSimpleNeuralNet.
+ * A UserObject that tests the LibtorchArtificialNeuralNet.
  */
 class LibtorchSimpleNeuralNetTest : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  LibtorchSimpleNeuralNetTest(const InputParameters & params);
+  LibtorchArtificialNeuralNetTest(const InputParameters & params);
 
   virtual void initialize(){};
   virtual void execute(){};

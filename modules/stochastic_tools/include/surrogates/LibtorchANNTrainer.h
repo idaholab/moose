@@ -11,20 +11,20 @@
 
 #ifdef LIBTORCH_ENABLED
 #include <torch/torch.h>
-#include "LibtorchSimpleNeuralNet.h"
+#include "LibtorchArtificialNeuralNet.h"
 #endif
 
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
 
 /// Trainer responsible of fitting a neural network on predefined data
-class LibtorchSimpleNNTrainer : public SurrogateTrainer
+class LibtorchANNTrainer : public SurrogateTrainer
 {
 public:
   static InputParameters validParams();
 
   /// Construct using input parameters
-  LibtorchSimpleNNTrainer(const InputParameters & parameters);
+  LibtorchANNTrainer(const InputParameters & parameters);
 
   /// Contains processes which are executed before the training loop
   virtual void preTrain() override;
@@ -84,6 +84,6 @@ private:
 
 #ifdef LIBTORCH_ENABLED
   /// Pointer to the neural net object (initialized as null)
-  std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & _nn;
+  std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & _nn;
 #endif
 };

@@ -1,6 +1,6 @@
-# LibtorchSimpleNNTrainer
+# LibtorchANNTrainer
 
-!syntax description /Trainers/LibtorchSimpleNNTrainer
+!syntax description /Trainers/LibtorchANNTrainer
 
 ## Overview
 
@@ -52,16 +52,16 @@ the weights:
 !listing libtorch_nn/train.i block=Trainers
 
 We note that the user can set the architecture of the neural net using the
-[!param](/Trainers/LibtorchSimpleNNTrainer/num_neurons_per_layer) parameter.
+[!param](/Trainers/LibtorchANNTrainer/num_neurons_per_layer) parameter.
 The optimization algorithm depends on several parameters.
-[!param](/Trainers/LibtorchSimpleNNTrainer/num_batches) defines how many batches the
-training samples should be separated into, while [!param](/Trainers/LibtorchSimpleNNTrainer/num_epochs)
+[!param](/Trainers/LibtorchANNTrainer/num_batches) defines how many batches the
+training samples should be separated into, while [!param](/Trainers/LibtorchANNTrainer/num_epochs)
 limits how many time we iterate over the batches.
 
-The trained neural network can then be evaluated using [LibtorchSimpleNNSurrogate.md].
+The trained neural network can then be evaluated using [LibtorchANNSurrogate.md].
 
-!syntax parameters /Trainers/LibtorchSimpleNNTrainer
+!syntax parameters /Trainers/LibtorchANNTrainer
 
-!syntax inputs /Trainers/LibtorchSimpleNNTrainer
+!syntax inputs /Trainers/LibtorchANNTrainer
 
-!syntax children /Trainers/LibtorchSimpleNNTrainer
+!syntax children /Trainers/LibtorchANNTrainer

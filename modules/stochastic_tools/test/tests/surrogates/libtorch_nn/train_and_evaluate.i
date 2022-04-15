@@ -28,7 +28,7 @@
 
 [Trainers]
   [train]
-    type = LibtorchSimpleNNTrainer
+    type = LibtorchANNTrainer
     sampler = sample
     response = values/g_values
     num_epochs = 40
@@ -43,7 +43,7 @@
 
 [Surrogates]
   [surr]
-    type = LibtorchSimpleNNSurrogate
+    type = LibtorchANNSurrogate
     trainer = train
   []
 []

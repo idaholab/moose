@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LibtorchSimpleNNTrainer.h"
+#include "LibtorchANNTrainer.h"
 #include "LibtorchDataset.h"
 #include "Sampler.h"
 
-registerMooseObject("StochasticToolsApp", LibtorchSimpleNNTrainer);
+registerMooseObject("StochasticToolsApp", LibtorchANNTrainer);
 
 InputParameters
-LibtorchSimpleNNTrainer::validParams()
+LibtorchANNTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
 
@@ -59,7 +59,7 @@ LibtorchSimpleNNTrainer::validParams()
   return params;
 }
 
-LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & parameters)
+LibtorchANNTrainer::LibtorchANNTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
     _sampler_row(getSamplerData()),
     _response(getTrainingData<Real>(getParam<ReporterName>("response"))),
@@ -78,7 +78,7 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
     _print_epoch_loss(getParam<unsigned int>("print_epoch_loss"))
 #ifdef LIBTORCH_ENABLED
     ,
-    _nn(declareModelData<std::shared_ptr<Moose::LibtorchSimpleNeuralNet>>("nn"))
+    _nn(declareModelData<std::shared_ptr<Moose::LibtorchArtificialNeuralNet>>("nn"))
 #endif
 {
   // We check if MOOSE is compiled with torch, if not this throws an error
@@ -92,7 +92,7 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
 }
 
 void
-LibtorchSimpleNNTrainer::preTrain()
+LibtorchANNTrainer::preTrain()
 {
   // Resize to number of sample points
   _flattened_data.resize(_sampler.getNumberOfLocalRows() * _sampler.getNumberOfCols());
@@ -100,7 +100,7 @@ LibtorchSimpleNNTrainer::preTrain()
 }
 
 void
-LibtorchSimpleNNTrainer::train()
+LibtorchANNTrainer::train()
 {
   unsigned int num_parameters = _sampler.getNumberOfCols();
 
@@ -111,7 +111,7 @@ LibtorchSimpleNNTrainer::train()
 }
 
 void
-LibtorchSimpleNNTrainer::postTrain()
+LibtorchANNTrainer::postTrain()
 {
   _communicator.allgather(_flattened_data);
   _communicator.allgather(_flattened_response);
@@ -142,7 +142,7 @@ LibtorchSimpleNNTrainer::postTrain()
       std::move(data_set), sample_per_batch);
 
   // We create a neural net (for the definition of the net see the header file)
-  _nn = std::make_shared<Moose::LibtorchSimpleNeuralNet>(
+  _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
       _filename, num_inputs, 1, _num_neurons_per_layer, _activation_function);
 
   // Initialize the optimizer

@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LibtorchSimpleNNSurrogate.h"
+#include "LibtorchANNSurrogate.h"
 
-registerMooseObject("StochasticToolsApp", LibtorchSimpleNNSurrogate);
+registerMooseObject("StochasticToolsApp", LibtorchANNSurrogate);
 
 InputParameters
-LibtorchSimpleNNSurrogate::validParams()
+LibtorchANNSurrogate::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
   params.addClassDescription("Surrogate that evaluates a simple feedforward neural net. "
@@ -20,11 +20,11 @@ LibtorchSimpleNNSurrogate::validParams()
   return params;
 }
 
-LibtorchSimpleNNSurrogate::LibtorchSimpleNNSurrogate(const InputParameters & parameters)
+LibtorchANNSurrogate::LibtorchANNSurrogate(const InputParameters & parameters)
   : SurrogateModel(parameters)
 #ifdef LIBTORCH_ENABLED
     ,
-    _nn(getModelData<std::shared_ptr<Moose::LibtorchSimpleNeuralNet>>("nn"))
+    _nn(getModelData<std::shared_ptr<Moose::LibtorchArtificialNeuralNet>>("nn"))
 #endif
 {
   // We check if MOOSE is compiled with torch, if not this throws an error
@@ -32,9 +32,9 @@ LibtorchSimpleNNSurrogate::LibtorchSimpleNNSurrogate(const InputParameters & par
 }
 
 Real
-LibtorchSimpleNNSurrogate::evaluate(const std::vector<Real> &
+LibtorchANNSurrogate::evaluate(const std::vector<Real> &
 #ifdef LIBTORCH_ENABLED
-                                        x
+                                   x
 #endif
 ) const
 {

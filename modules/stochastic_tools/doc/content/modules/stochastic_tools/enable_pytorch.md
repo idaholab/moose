@@ -5,9 +5,9 @@ with the proper dependencies. For instuctions, see: [installation/install_libtor
 
 ## Testing the installation
 
-Basic neural network trainer and surrogate classes have been implemented in the stochastic tools
+Basic artificial neural network trainer and surrogate classes have been implemented in the stochastic tools
 module for testing purposes. For their documentation, see
-[surrogates/LibtorchSimpleNNTrainer.md] and [LibtorchSimpleNNTrainer.md].
+[surrogates/LibtorchANNTrainer.md] and [surrogates/LibtorchANNSurrogate.md].
 If MOOSE compiled without error messages, we can
 navigate to the testing folder within the stochastic tools root
 and use the following command to test the implementation:

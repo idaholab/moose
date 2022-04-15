@@ -1,10 +1,10 @@
-# LibtorchSimpleNNSurrogate
+# LibtorchANNSurrogate
 
-!syntax description /Surrogates/LibtorchSimpleNNSurrogate
+!syntax description /Surrogates/LibtorchANNSurrogate
 
 ## Overview
 
-The details of a simple feedforward neural network is discussed in [LibtorchSimpleNNTrainer.md].
+The details of a simple feedforward neural network is discussed in [LibtorchANNTrainer.md].
 This class is dedicated to evaluating the following function:
 
 !equation id=nn-explicit
@@ -14,12 +14,12 @@ This class is dedicated to evaluating the following function:
 which describes a neural network of $n$ layers. In this context, $\sigma$ denotes
 an activation function, while $\textbf{x}$ and $\textbf{y}$ are the input and
 output arguments. respectively. The weight matrices ($\textbf{W}$) and bias vectors
-($\textbf{b}$) are optimized by [LibtorchSimpleNNTrainer.md] and are fixed in the evaluation phase.
+($\textbf{b}$) are optimized by [LibtorchANNTrainer.md] and are fixed in the evaluation phase.
 
 ## Example Input File Syntax
 
 Let us consider an example where we evaluate the neural network trained
-[here](LibtorchSimpleNNTrainer.md). For this, prepare another set of samples of
+[here](LibtorchANNTrainer.md). For this, prepare another set of samples of
 from the same parameter space:
 
 !listing libtorch_nn/evaluate.i block=Samplers
@@ -33,8 +33,8 @@ to compute the approximate values of the target function at the new sample point
 
 !listing libtorch_nn/evaluate.i block=Reporters
 
-!syntax parameters /Surrogates/LibtorchSimpleNNSurrogate
+!syntax parameters /Surrogates/LibtorchANNSurrogate
 
-!syntax inputs /Surrogates/LibtorchSimpleNNSurrogate
+!syntax inputs /Surrogates/LibtorchANNSurrogate
 
-!syntax children /Surrogates/LibtorchSimpleNNSurrogate
+!syntax children /Surrogates/LibtorchANNSurrogate

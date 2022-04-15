@@ -11,16 +11,16 @@
 
 #ifdef LIBTORCH_ENABLED
 #include <torch/torch.h>
-#include "LibtorchSimpleNeuralNet.h"
+#include "LibtorchArtificialNeuralNet.h"
 #endif
 
 #include "SurrogateModel.h"
 
-class LibtorchSimpleNNSurrogate : public SurrogateModel
+class LibtorchANNSurrogate : public SurrogateModel
 {
 public:
   static InputParameters validParams();
-  LibtorchSimpleNNSurrogate(const InputParameters & parameters);
+  LibtorchANNSurrogate(const InputParameters & parameters);
 
   using SurrogateModel::evaluate;
   virtual Real evaluate(const std::vector<Real> & x) const override;
@@ -28,6 +28,6 @@ public:
 protected:
 #ifdef LIBTORCH_ENABLED
   /// Pointer to the neural net object (initialized as null)
-  const std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & _nn;
+  const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & _nn;
 #endif
 };

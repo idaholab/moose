@@ -1,5 +1,5 @@
 [Tests]
-  design = 'LibtorchSimpleNeuralNet.md'
+  design = 'LibtorchArtificialNeuralNet.md'
   issues = '#19571'
 
   [libtorch-nn-errors]

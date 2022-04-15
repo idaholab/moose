@@ -19,7 +19,7 @@ namespace Moose
 {
 
 // A class that describes a simple feed-forward neural net.
-class LibtorchSimpleNeuralNet : public LibtorchNeuralNetBase
+class LibtorchArtificialNeuralNet : public LibtorchNeuralNetBase
 {
 public:
   /**
@@ -29,11 +29,11 @@ public:
    * @param num_neurons_per_layer Number of neurons per hidden layer
    * @param num_outputs The number of output neurons
    */
-  LibtorchSimpleNeuralNet(const std::string name,
-                          const unsigned int num_inputs,
-                          const unsigned int num_outputs,
-                          const std::vector<unsigned int> & num_neurons_per_layer,
-                          const std::vector<std::string> activation_function = {"relu"});
+  LibtorchArtificialNeuralNet(const std::string name,
+                              const unsigned int num_inputs,
+                              const unsigned int num_outputs,
+                              const std::vector<unsigned int> & num_neurons_per_layer,
+                              const std::vector<std::string> activation_function = {"relu"});
 
   /**
    * Add layers to the neural network
@@ -89,13 +89,15 @@ protected:
 }
 
 template <>
-void dataStore<Moose::LibtorchSimpleNeuralNet>(std::ostream & stream,
-                                               std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & nn,
-                                               void * context);
+void dataStore<Moose::LibtorchArtificialNeuralNet>(
+    std::ostream & stream,
+    std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
+    void * context);
 
 template <>
-void dataLoad<Moose::LibtorchSimpleNeuralNet>(std::istream & stream,
-                                              std::shared_ptr<Moose::LibtorchSimpleNeuralNet> & nn,
-                                              void * context);
+void dataLoad<Moose::LibtorchArtificialNeuralNet>(
+    std::istream & stream,
+    std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
+    void * context);
 
 #endif

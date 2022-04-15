@@ -12,7 +12,7 @@
 
 [Surrogates]
   [surr]
-    type = LibtorchSimpleNNSurrogate
+    type = LibtorchANNSurrogate
     filename = 'train_out_train.rd'
   []
 []
