@@ -1,17 +1,17 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  xmin = -100
+  xmin = -5
   xmax = 0
   ymin = 0
-  ymax = 200
+  ymax = 10
   nx = 10
   ny = 20
 []
 
 [Problem]
   alpha_rotation = -90
-  length_units_per_meter = 100
+  length_units_per_meter = 5
 []
 
 [Variables]

@@ -66,8 +66,7 @@
 [Transfers]
   [from_sub]
     type = MultiAppNearestNodeTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     source_variable = v
     variable = v
     execute_on = 'timestep_begin'
