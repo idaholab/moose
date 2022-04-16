@@ -40,7 +40,10 @@ transitionLayerGenerator(ReplicatedMesh & mesh, // an empty mesh is expected
                          const Real bias_parameter,
                          const Real sigma)
 {
-  if (!isXYPlane(boundary_points_vec_1) || !isXYPlane(boundary_points_vec_2))
+  if (!MooseMeshUtils::isCoPlanar(
+          boundary_points_vec_1, Point(0.0, 0.0, 1.0), Point(0.0, 0.0, 0.0)) ||
+      !MooseMeshUtils::isCoPlanar(
+          boundary_points_vec_2, Point(0.0, 0.0, 1.0), Point(0.0, 0.0, 0.0)))
     mooseError("In ",
                type,
                " ",
@@ -442,15 +445,6 @@ surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
         weighted_surrogate_index[j] += wt[it_start + k - 1] / ((Real)boundary_node_num - 1.0);
     }
   }
-}
-
-bool
-isXYPlane(const std::vector<Point> vec_pts)
-{
-  for (auto it = vec_pts.begin(); it != vec_pts.end(); it++)
-    if (!MooseUtils::absoluteFuzzyEqual((*it)(2), 0.0))
-      return false;
-  return true;
 }
 
 bool

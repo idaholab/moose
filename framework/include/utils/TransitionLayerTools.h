@@ -76,7 +76,7 @@ void transitionLayerGenerator(ReplicatedMesh & mesh,
                               const bool quad_elem = false);
 
 /**
- * Generates a 2D mesh based on a 2D vector of Nodes using QUAD4 elements
+ * Generates a 2D mesh based on a 2D vector of Nodes using QUAD4 elements in the xy-plane
  * @param mesh a reference ReplicatedMesh to contain the generated mesh
  * @param nodes a 2D vector of nodes based on which the mesh is built
  * @param num_layers number of sublayers of elements
@@ -102,7 +102,7 @@ void elementsCreationFromNodesVectorsQuad(ReplicatedMesh & mesh,
                                           const boundary_id_type end_side_boundary_id);
 
 /**
- * Generates a 2D mesh based on a 2D vector of Nodes using TRI3 elements
+ * Generates a 2D mesh based on a 2D vector of Nodes using TRI3 elements in the xy-plane
  * @param mesh a reference ReplicatedMesh to contain the generated mesh
  * @param nodes a 2D vector of nodes based on which the mesh is built
  * @param num_layers number of sublayers of elements
@@ -166,13 +166,6 @@ void surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
                         const std::vector<Real> wt,
                         const unsigned int boundary_node_num,
                         const unsigned int i);
-
-/**
- * Decides whether all the Points of a vector of Points are on the XY plane
- * @param vec_pts vector of points to be examined
- * @return whether all the Points are on the XY plane
- */
-bool isXYPlane(const std::vector<Point> vec_pts);
 
 /**
  * Decide whether one of the input vector of Points needs to be flipped to ensure correct transition

@@ -249,4 +249,46 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
   }
   return parsed_ids;
 }
+
+bool
+isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec, const Point fixed_pt)
+{
+  for (const auto & pt : vec_pts)
+    if (!MooseUtils::absoluteFuzzyEqual((pt - fixed_pt) * plane_nvec, 0.0))
+      return false;
+  return true;
+}
+
+bool
+isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec)
+{
+  return isCoPlanar(vec_pts, plane_nvec, vec_pts.front());
+}
+
+bool
+isCoPlanar(const std::vector<Point> vec_pts)
+{
+  // Assuming that overlapped Points are allowed, the Points that are overlapped with vec_pts[0] are
+  // removed before further calculation.
+  std::vector<Point> vec_pts_nonzero{vec_pts[0]};
+  for (unsigned int i = 1; i < vec_pts.size(); i++)
+    if (!MooseUtils::absoluteFuzzyEqual((vec_pts[i] - vec_pts[0]).norm(), 0.0))
+      vec_pts_nonzero.push_back(vec_pts[i]);
+  // 3 or fewer points are always coplanar
+  if (vec_pts_nonzero.size() <= 3)
+    return true;
+  else
+  {
+    for (unsigned int i = 1; i < vec_pts_nonzero.size() - 1; i++)
+    {
+      const Point tmp_pt = (vec_pts_nonzero[i] - vec_pts_nonzero[0])
+                               .cross(vec_pts_nonzero[i + 1] - vec_pts_nonzero[0]);
+      // if the three points are not collinear, use cross product as the normal vector of the plane
+      if (!MooseUtils::absoluteFuzzyEqual(tmp_pt.norm(), 0.0))
+        return isCoPlanar(vec_pts_nonzero, tmp_pt.unit());
+    }
+  }
+  // If all the points are collinear, they are also coplanar
+  return true;
+}
 }
