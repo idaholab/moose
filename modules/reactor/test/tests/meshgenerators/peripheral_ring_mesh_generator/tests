@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PeripheralRingMeshGenerator.md'
-  issues = '#19978'
+  issues = '#19978 #20637'
   [core_peripheral_ring_nonpreserved]
     type = 'Exodiff'
     input = 'core_ring.i'
@@ -18,6 +18,42 @@
     cli_args = '--mesh-only core_ring_preserved_in.e'
     requirement ='The system shall be able to add a peripheral ring to the input mesh and preserve volumes even with polygonization.'
     recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [core_peripheral_ring_biased]
+    type = 'Exodiff'
+    input = 'core_ring.i'
+    exodiff = 'core_ring_bias_in.e'
+    cli_args = 'Mesh/pr/peripheral_radial_bias=0.5
+                --mesh-only core_ring_bias_in.e'
+    requirement ='The system shall be able to add a peripheral ring with radial biasing to the input mesh and preserve volumes even with polygonization.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [core_peripheral_ring_boundary_layers]
+    type = 'Exodiff'
+    input = 'core_ring.i'
+    exodiff = 'core_ring_boundary_layers_in.e'
+    cli_args = 'Mesh/pr/peripheral_inner_boundary_layer_width=3
+                Mesh/pr/peripheral_inner_boundary_layer_intervals=4
+                Mesh/pr/peripheral_inner_boundary_layer_bias=2
+                Mesh/pr/peripheral_outer_boundary_layer_width=3
+                Mesh/pr/peripheral_outer_boundary_layer_intervals=4
+                Mesh/pr/peripheral_outer_boundary_layer_bias=0.5
+                Mesh/pr/peripheral_ring_radius=85
+                --mesh-only core_ring_boundary_layers_in.e'
+    requirement ='The system shall be able to add a peripheral ring with boundary layers to the input mesh and preserve volumes even with polygonization.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [err_overlapped_boundary_layers]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/pr/peripheral_inner_boundary_layer_width=3
+                Mesh/pr/peripheral_outer_boundary_layer_width=3
+                --mesh-only'
+    expect_err = 'must be smaller than the thickness of'
+    requirement ='The system shall throw an error if the specified inner and outer boundary layers are overlapped.'
     mesh_mode = 'REPLICATED'
   []
   [err_non_2d_mesh]

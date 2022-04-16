@@ -30,6 +30,12 @@ protected:
   const MeshGeneratorName _input_name;
   /// Number of layers of elements of the peripheral region in radial direction
   const unsigned int _peripheral_layer_num;
+  /// Bias value used to induce biasing to radial meshing in peripheral ring region
+  const Real _peripheral_radial_bias;
+  /// Width, fraction, radiation sectors and growth factor of the inner boundary layer of the peripheral region
+  singleBdryLayerParams _peripheral_inner_boundary_layer_params;
+  /// Width, fraction, radiation sectors and growth factor of the outer boundary layer of the peripheral region
+  singleBdryLayerParams _peripheral_outer_boundary_layer_params;
   /// Radius of the peripheral region's outer circular boundary
   const Real _peripheral_ring_radius;
   /// Volume preserving function is optional
@@ -82,4 +88,26 @@ protected:
    * @return whether the boundary is the external boundary of the given mesh
    */
   bool isExternalBoundary(ReplicatedMesh & mesh, const boundary_id_type bid) const;
+
+  /**
+   * Define node positions of the inner boundary layer that is conformal to the input mesh's
+   * external boundary.
+   * @param input_ext_node_num number of nodes on the external boundary of the input mesh
+   * @param input_bdry_angles list of angles (in rad) formed by three neighboring nodes on the
+   * external boundary of the input mesh
+   * @param ref_inner_bdry_surf reference outmost layer (surface) points of the inner boundary layer
+   * @param inner_peripheral_bias_terms terms describing the cumulative radial fractions of the
+   * nodes within the inner boundary layer
+   * @param azi_array list of azimuthal angles (in degrees) of the nodes on the input mesh's
+   * external boundary for radius correction purpose
+   * @param origin_pt centroid of the input mesh, which is used as the origin
+   * @param points_array container to store all nodes' positions of the peripheral ring region
+   */
+  void innerBdryLayerNodesDefiner(const unsigned int input_ext_node_num,
+                                  const std::vector<Real> input_bdry_angles,
+                                  const std::vector<Point> ref_inner_bdry_surf,
+                                  const std::vector<Real> inner_peripheral_bias_terms,
+                                  const std::vector<Real> azi_array,
+                                  const Point origin_pt,
+                                  std::vector<std::vector<Point>> & points_array) const;
 };

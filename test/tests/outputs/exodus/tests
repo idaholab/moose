@@ -9,6 +9,16 @@
     requirement = "The system shall support ExodusII output."
   [../]
 
+  [./hdf5]
+    type = 'RunCommand'
+    prereq = 'basic'
+    command = 'if ! type h5dump >/dev/null 2>&1; then echo "Could not run h5dump to test for HDF5"; exit 77; fi;
+               if h5dump exodus_out.e >/dev/null 2>&1; then echo "h5dump found HDF5 where it should not be"; exit 1; fi;
+               exit 0'
+
+    requirement = "The system ExodusII output shall not use HDF5 unless requested."
+  [../]
+
   [./input]
     # Moose runs with the output_input = true
     # \TODO Find a method for comparing files with and without information records

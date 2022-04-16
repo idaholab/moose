@@ -10,6 +10,8 @@
 #include "PeripheralRingMeshGenerator.h"
 
 #include "MooseMeshUtils.h"
+#include "MooseUtils.h"
+#include "LinearInterpolation.h"
 
 // C++ includes
 #include <cmath> // for atan2
@@ -26,6 +28,41 @@ PeripheralRingMeshGenerator::validParams()
       3,
       "peripheral_layer_num>0",
       "The radial layers of the peripheral ring to be added.");
+  params.addRangeCheckedParam<Real>(
+      "peripheral_radial_bias",
+      1.0,
+      "peripheral_radial_bias>0",
+      "Value used to create biasing in radial meshing for peripheral ring region.");
+  params.addRangeCheckedParam<Real>(
+      "peripheral_inner_boundary_layer_width",
+      0.0,
+      "peripheral_inner_boundary_layer_width>=0",
+      "Width of peripheral ring region that is assigned to be the inner boundary layer.");
+  params.addRangeCheckedParam<unsigned int>(
+      "peripheral_inner_boundary_layer_intervals",
+      1,
+      "peripheral_inner_boundary_layer_intervals>0",
+      "Number of radial intervals of the peripheral ring inner boundary layer");
+  params.addRangeCheckedParam<Real>(
+      "peripheral_inner_boundary_layer_bias",
+      1.0,
+      "peripheral_inner_boundary_layer_bias>0",
+      "Growth factor used for mesh biasing of the peripheral ring inner boundary layer.");
+  params.addRangeCheckedParam<Real>(
+      "peripheral_outer_boundary_layer_width",
+      0.0,
+      "peripheral_outer_boundary_layer_width>=0",
+      "Width of peripheral ring region that is assigned to be the outer boundary layer.");
+  params.addRangeCheckedParam<unsigned int>(
+      "peripheral_outer_boundary_layer_intervals",
+      1,
+      "peripheral_outer_boundary_layer_intervals>0",
+      "Number of radial intervals of the peripheral ring outer boundary layer");
+  params.addRangeCheckedParam<Real>(
+      "peripheral_outer_boundary_layer_bias",
+      1.0,
+      "peripheral_outer_boundary_layer_bias>0",
+      "Growth factor used for mesh biasing of the peripheral ring outer boundary layer.");
   params.addRequiredRangeCheckedParam<Real>("peripheral_ring_radius",
                                             "peripheral_ring_radius>0",
                                             "Radius of the peripheral ring to be added.");
@@ -44,6 +81,12 @@ PeripheralRingMeshGenerator::validParams()
                                                 "Optional customized external boundary id.");
   params.addParam<std::string>("external_boundary_name",
                                "Optional customized external boundary name.");
+  params.addParamNamesToGroup(
+      "peripheral_radial_bias peripheral_inner_boundary_layer_width "
+      "peripheral_inner_boundary_layer_intervals peripheral_inner_boundary_layer_bias "
+      "peripheral_outer_boundary_layer_width peripheral_outer_boundary_layer_intervals "
+      "peripheral_outer_boundary_layer_bias",
+      "Mesh Boundary Layer and Biasing Options");
   params.addClassDescription("This PeripheralRingMeshGenerator object adds a circular peripheral "
                              "region to the input mesh.");
 
@@ -54,6 +97,21 @@ PeripheralRingMeshGenerator::PeripheralRingMeshGenerator(const InputParameters &
   : PolygonMeshGeneratorBase(parameters),
     _input_name(getParam<MeshGeneratorName>("input")),
     _peripheral_layer_num(getParam<unsigned int>("peripheral_layer_num")),
+    _peripheral_radial_bias(getParam<Real>("peripheral_radial_bias")),
+    _peripheral_inner_boundary_layer_params(
+        {getParam<Real>("peripheral_inner_boundary_layer_width"),
+         0.0,
+         getParam<Real>("peripheral_inner_boundary_layer_width") > 0.0
+             ? getParam<unsigned int>("peripheral_inner_boundary_layer_intervals")
+             : 0,
+         getParam<Real>("peripheral_inner_boundary_layer_bias")}),
+    _peripheral_outer_boundary_layer_params(
+        {getParam<Real>("peripheral_outer_boundary_layer_width"),
+         0.0,
+         getParam<Real>("peripheral_outer_boundary_layer_width") > 0.0
+             ? getParam<unsigned int>("peripheral_outer_boundary_layer_intervals")
+             : 0,
+         getParam<Real>("peripheral_outer_boundary_layer_bias")}),
     _peripheral_ring_radius(getParam<Real>("peripheral_ring_radius")),
     _preserve_volumes(getParam<bool>("preserve_volumes")),
     _input_mesh_external_boundary(getParam<BoundaryName>("input_mesh_external_boundary")),
@@ -74,6 +132,21 @@ PeripheralRingMeshGenerator::PeripheralRingMeshGenerator(const InputParameters &
 std::unique_ptr<MeshBase>
 PeripheralRingMeshGenerator::generate()
 {
+  // Calculate biasing terms
+  const auto main_peripheral_bias_terms =
+      biasTermsCalculator(_peripheral_radial_bias, _peripheral_layer_num);
+  const auto inner_peripheral_bias_terms =
+      biasTermsCalculator(_peripheral_inner_boundary_layer_params.bias,
+                          _peripheral_inner_boundary_layer_params.intervals);
+  // It is easier to create outer boundary layer inversely (inwards). Thus, 1.0 / bias is used here.
+  // However, the input parameter definition is not affected.
+  const auto outer_peripheral_bias_terms =
+      biasTermsCalculator(1.0 / _peripheral_outer_boundary_layer_params.bias,
+                          _peripheral_outer_boundary_layer_params.intervals);
+
+  const unsigned int total_peripheral_layer_num =
+      _peripheral_inner_boundary_layer_params.intervals + _peripheral_layer_num +
+      _peripheral_outer_boundary_layer_params.intervals;
   // Need ReplicatedMesh for stitching
   auto input_mesh = dynamic_cast<ReplicatedMesh *>(_input.get());
   if (!input_mesh)
@@ -86,9 +159,6 @@ PeripheralRingMeshGenerator::generate()
 
   // Use CoM of the input mesh as its origin for azimuthal calculation
   const Point origin_pt = MooseMeshUtils::meshCentroidCalculator(*input_mesh);
-  const Real origin_x = origin_pt(0);
-  const Real origin_y = origin_pt(1);
-  const Real origin_z = origin_pt(2);
   // Vessel for containing maximum radius of the boundary nodes
   Real max_input_mesh_node_radius;
   unsigned short invalid_boundary_type;
@@ -150,10 +220,11 @@ PeripheralRingMeshGenerator::generate()
       input_ext_node_num++;
       // Define nodes on the inner and outer boundaries of the peripheral region.
       input_ext_bd_pts.push_back(input_mesh->point(std::get<0>(node_list[i])));
-      tmp_azi = atan2(input_ext_bd_pts.back()(1) - origin_y, input_ext_bd_pts.back()(0) - origin_x);
+      tmp_azi = atan2(input_ext_bd_pts.back()(1) - origin_pt(1),
+                      input_ext_bd_pts.back()(0) - origin_pt(0));
       output_ext_bd_pts.push_back(Point(_peripheral_ring_radius * std::cos(tmp_azi),
                                         _peripheral_ring_radius * std::sin(tmp_azi),
-                                        origin_z));
+                                        origin_pt(2)));
       // a vector of tuples using azimuthal angle as the key to facilitate sorting
       azi_points.push_back(
           std::make_tuple(tmp_azi, input_ext_bd_pts.back(), output_ext_bd_pts.back()));
@@ -162,31 +233,115 @@ PeripheralRingMeshGenerator::generate()
     }
   std::sort(azi_points.begin(), azi_points.end());
   std::sort(azi_array.begin(), azi_array.end());
-  const Real correction_factor = _preserve_volumes ? radiusCorrectionFactor(azi_array) : 1.0;
+
+  // Angles defined by three neighboring nodes on input mesh's external boundary
+  std::vector<Real> input_bdry_angles;
+  // Normal directions of input boundary nodes
+  std::vector<Point> input_bdry_nd;
+  for (unsigned int i = 0; i < azi_points.size(); i++)
+  {
+    Point p1, p2;
+    const Point pn = Point(0.0, 0.0, 1.0);
+    if (i == 0)
+    {
+      p1 = std::get<1>(azi_points[i + 1]) - std::get<1>(azi_points[i]);
+      p2 = std::get<1>(azi_points.back()) - std::get<1>(azi_points[i]);
+    }
+    else if (i == azi_points.size() - 1)
+    {
+      p1 = std::get<1>(azi_points.front()) - std::get<1>(azi_points.back());
+      p2 = std::get<1>(azi_points[i - 1]) - std::get<1>(azi_points.back());
+    }
+    else
+    {
+      p1 = std::get<1>(azi_points[i + 1]) - std::get<1>(azi_points[i]);
+      p2 = std::get<1>(azi_points[i - 1]) - std::get<1>(azi_points[i]);
+    }
+    // Use cross point to get perpendicular direction
+    const Point p1n = (p1.cross(pn)).unit();
+    const Point p2n = -(p2.cross(pn)).unit();
+    Real tmp = p1 * p2 / p1.norm() / p2.norm();
+    // Make sure acos() gets valid input
+    tmp = tmp > 1.0 ? 1.0 : (tmp < -1.0 ? -1.0 : tmp);
+    input_bdry_angles.push_back(acos(tmp) / 2.0);
+    input_bdry_nd.push_back((p1n + p2n).unit());
+  }
+
   // 2D vector containing all the node positions of the peripheral region
-  std::vector<std::vector<Point>> points_array(_peripheral_layer_num + 1,
+  std::vector<std::vector<Point>> points_array(total_peripheral_layer_num + 1,
                                                std::vector<Point>(input_ext_node_num));
   // 2D vector containing all the node ids of the peripheral region
-  std::vector<std::vector<dof_id_type>> node_id_array(_peripheral_layer_num + 1,
+  std::vector<std::vector<dof_id_type>> node_id_array(total_peripheral_layer_num + 1,
                                                       std::vector<dof_id_type>(input_ext_node_num));
+  // Reference outmost layer of inner boundary layer
+  std::vector<Point> ref_inner_bdry_surf;
+  // First loop
   for (unsigned int i = 0; i < input_ext_node_num; ++i)
   {
     // Inner boundary nodes of the peripheral region
     points_array[0][i] = std::get<1>(azi_points[i]);
-    // Outer boundary nodes of the peripheral region
-    points_array[_peripheral_layer_num][i] = std::get<2>(azi_points[i]) * correction_factor;
-    // Use interpolation to get intermediate layers nodes
-    for (unsigned int j = 1; j < _peripheral_layer_num; ++j)
-      points_array[j][i] = (points_array[0][i] * ((Real)_peripheral_layer_num - (Real)j) +
-                            points_array[_peripheral_layer_num][i] * (Real)j) /
-                           (Real)_peripheral_layer_num;
+    // Define outer layer of inner boundary layer
+    if (_peripheral_inner_boundary_layer_params.intervals)
+    {
+      // Outside point of the inner boundary layer
+      const Point ref_inner_boundary_shift =
+          (_peripheral_inner_boundary_layer_params.width / sin(input_bdry_angles[i])) *
+          input_bdry_nd[i];
+      ref_inner_bdry_surf.push_back(points_array[0][i] + ref_inner_boundary_shift);
+    }
   }
-  unsigned int num_total_nodes = (_peripheral_layer_num + 1) * input_ext_node_num;
+
+  if (_peripheral_inner_boundary_layer_params.intervals)
+    innerBdryLayerNodesDefiner(input_ext_node_num,
+                               input_bdry_angles,
+                               ref_inner_bdry_surf,
+                               inner_peripheral_bias_terms,
+                               azi_array,
+                               origin_pt,
+                               points_array);
+  const Real correction_factor = _preserve_volumes ? radiusCorrectionFactor(azi_array) : 1.0;
+  // Loop to handle outer boundary layer and main region
+  for (unsigned int i = 0; i < input_ext_node_num; ++i)
+  {
+    // Outer boundary nodes of the peripheral region
+    points_array[total_peripheral_layer_num][i] = std::get<2>(azi_points[i]) * correction_factor;
+    // Outer boundary layer points
+    if (_peripheral_outer_boundary_layer_params.intervals)
+    {
+      // Inner point of the outer boundary layer
+      const Point outer_boundary_shift =
+          -Point(std::cos(std::get<0>(azi_points[i])), std::sin(std::get<0>(azi_points[i])), 0.0) *
+          _peripheral_outer_boundary_layer_params.width;
+      for (unsigned int j = 1; j < _peripheral_outer_boundary_layer_params.intervals + 1; j++)
+        points_array[total_peripheral_layer_num - j][i] =
+            points_array[total_peripheral_layer_num][i] +
+            outer_boundary_shift * outer_peripheral_bias_terms[j - 1];
+    }
+    // Use interpolation to get main region
+    if (MooseUtils::absoluteFuzzyGreaterEqual(
+            (points_array[_peripheral_inner_boundary_layer_params.intervals][i] - origin_pt).norm(),
+            (points_array[_peripheral_inner_boundary_layer_params.intervals + _peripheral_layer_num]
+                         [i] -
+             origin_pt)
+                .norm()))
+      paramError("peripheral_inner_boundary_layer_width",
+                 "The summation of peripheral_inner_boundary_layer_width and "
+                 "peripheral_outer_boundary_layer_width must be smaller than the thickness of "
+                 "peripheral ring region.");
+    for (unsigned int j = 1; j < _peripheral_layer_num; ++j)
+      points_array[j + _peripheral_inner_boundary_layer_params.intervals][i] =
+          points_array[_peripheral_inner_boundary_layer_params.intervals][i] *
+              (1.0 - main_peripheral_bias_terms[j - 1]) +
+          points_array[_peripheral_inner_boundary_layer_params.intervals + _peripheral_layer_num]
+                      [i] *
+              main_peripheral_bias_terms[j - 1];
+  }
+  unsigned int num_total_nodes = (total_peripheral_layer_num + 1) * input_ext_node_num;
   std::vector<Node *> nodes(num_total_nodes); // reserve nodes pointers
   dof_id_type node_id = 0;
 
   // Add nodes to the new mesh
-  for (unsigned int i = 0; i <= _peripheral_layer_num; ++i)
+  for (unsigned int i = 0; i <= total_peripheral_layer_num; ++i)
     for (unsigned int j = 0; j < input_ext_node_num; ++j)
     {
       nodes[node_id] = mesh->add_point(points_array[i][j], node_id);
@@ -195,7 +350,7 @@ PeripheralRingMeshGenerator::generate()
     }
   // Add elements to the new mesh
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
-  for (unsigned int i = 0; i < _peripheral_layer_num; ++i)
+  for (unsigned int i = 0; i < total_peripheral_layer_num; ++i)
     for (unsigned int j = 0; j < input_ext_node_num; ++j)
     {
       Elem * elem_Quad4 = mesh->add_elem(new Quad4);
@@ -207,7 +362,7 @@ PeripheralRingMeshGenerator::generate()
 
       if (i == 0)
         boundary_info.add_side(elem_Quad4, 3, OUTER_SIDESET_ID_ALT);
-      if (i == _peripheral_layer_num - 1)
+      if (i == total_peripheral_layer_num - 1)
         boundary_info.add_side(elem_Quad4, 1, OUTER_SIDESET_ID);
     }
 
@@ -381,4 +536,95 @@ PeripheralRingMeshGenerator::isExternalBoundary(ReplicatedMesh & mesh,
         return false;
   }
   return true;
+}
+
+void
+PeripheralRingMeshGenerator::innerBdryLayerNodesDefiner(
+    const unsigned int input_ext_node_num,
+    const std::vector<Real> input_bdry_angles,
+    const std::vector<Point> ref_inner_bdry_surf,
+    const std::vector<Real> inner_peripheral_bias_terms,
+    const std::vector<Real> azi_array,
+    const Point origin_pt,
+    std::vector<std::vector<Point>> & points_array) const
+{
+  // Check if any azimuthal angles are messed after inner boundary layer addition
+  std::vector<bool> delete_mark(input_ext_node_num, false);
+  std::vector<Real> interp_azi_data, interp_x_data, interp_y_data;
+  std::unique_ptr<LinearInterpolation> linterp_x, linterp_y;
+  // Mark the to-be-deleted elements
+  for (unsigned int i = 0; i < input_ext_node_num; ++i)
+  {
+    // For a zig-zag external boundary, when we add a conformal layer onto it by translating the
+    // nodes in the surface normal direction, it is possible that the azimuthal order is flipped.
+    // As shown below, o's are the original boundary nodes, and *'s are the nodes after
+    // translation by the boundary layer thickness.
+    //                         *  *
+    // |               |       | /
+    // o               o-------/--*
+    // |               |     / |
+    // | outside  -->  |   /   |
+    // |               | /     |
+    // o--------o--    o-------o--
+    // To mitigate this flipping issue, we check the node flipping here using the cross product of
+    // neighboring node-to-origin vectors. Flipped nodes are marked and excluded during the
+    // follow-up interpolation.
+    if (!MooseUtils::absoluteFuzzyEqual(input_bdry_angles[i], M_PI / 2.0))
+    {
+      if (((ref_inner_bdry_surf[(i - 1) % input_ext_node_num] - origin_pt)
+               .cross(ref_inner_bdry_surf[i] - origin_pt))(2) <= 0.0)
+        delete_mark[(i - 1) % input_ext_node_num] = true;
+      if (((ref_inner_bdry_surf[(i + 1) % input_ext_node_num] - origin_pt)
+               .cross(ref_inner_bdry_surf[i] - origin_pt))(2) >= 0.0)
+        delete_mark[(i + 1) % input_ext_node_num] = true;
+    }
+  }
+  // Create vectors for interpolation
+  // Due to the flip issue, linear interpolation is used here to mark the location of the boundary
+  // layer's outer boundary.
+  for (unsigned int i = 0; i < input_ext_node_num; ++i)
+  {
+    if (!delete_mark[i])
+    {
+      interp_azi_data.push_back(atan2(ref_inner_bdry_surf[i](1) - origin_pt(1),
+                                      ref_inner_bdry_surf[i](0) - origin_pt(0)));
+      interp_x_data.push_back(ref_inner_bdry_surf[i](0));
+      interp_y_data.push_back(ref_inner_bdry_surf[i](1));
+      if (interp_azi_data.size() > 1)
+        if (interp_azi_data.back() < interp_azi_data[interp_azi_data.size() - 2])
+          interp_azi_data.back() += 2 * M_PI;
+    }
+  }
+  const Real interp_x0 = interp_x_data.front();
+  const Real interp_xt = interp_x_data.back();
+  const Real interp_y0 = interp_y_data.front();
+  const Real interp_yt = interp_y_data.back();
+  if (interp_azi_data.front() > -M_PI)
+  {
+    interp_azi_data.insert(interp_azi_data.begin(), -M_PI);
+    interp_x_data.insert(interp_x_data.begin(), interp_xt);
+    interp_y_data.insert(interp_y_data.begin(), interp_yt);
+  }
+  if (interp_azi_data.back() < M_PI)
+  {
+    interp_azi_data.push_back(M_PI);
+    interp_x_data.push_back(interp_x0);
+    interp_y_data.push_back(interp_y0);
+  }
+  // Establish interpolation
+  linterp_x = std::make_unique<LinearInterpolation>(interp_azi_data, interp_x_data);
+  linterp_y = std::make_unique<LinearInterpolation>(interp_azi_data, interp_y_data);
+  //  Loop to handle inner boundary layer
+  for (unsigned int i = 0; i < input_ext_node_num; ++i)
+  {
+    // Outside point of the inner boundary layer
+    // Using interpolation, the azimuthal angles do not need to be changed.
+    const Point inner_boundary_shift = Point(linterp_x->sample(azi_array[i] / 180.0 * M_PI),
+                                             linterp_y->sample(azi_array[i] / 180.0 * M_PI),
+                                             origin_pt(2)) -
+                                       points_array[0][i];
+    for (unsigned int j = 1; j < _peripheral_inner_boundary_layer_params.intervals + 1; j++)
+      points_array[j][i] =
+          points_array[0][i] + inner_boundary_shift * inner_peripheral_bias_terms[j - 1];
+  }
 }
