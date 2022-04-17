@@ -176,14 +176,22 @@ TransitionLayerConnector::generate()
   for (auto & boundary_2_node_id : boundary_2_ordered_nodes)
     positions_vector_2.push_back(*input_mesh_2->node_ptr(boundary_2_node_id));
 
+  const boundary_id_type input_boundary_1_id = _keep_inputs ? (std::max({_input_boundary_1_id,
+                                                                         _input_boundary_2_id,
+                                                                         _begin_side_boundary_id,
+                                                                         _end_side_boundary_id}) +
+                                                               1)
+                                                            : _input_boundary_1_id;
+  const boundary_id_type input_boundary_2_id =
+      _keep_inputs ? (input_boundary_1_id + 1) : _input_boundary_2_id;
   auto mesh = buildReplicatedMesh(2);
   TransitionLayerTools::transitionLayerGenerator(*mesh,
-                                                 positions_vector_2,
                                                  positions_vector_1,
+                                                 positions_vector_2,
                                                  _num_layers,
                                                  _block_id,
-                                                 _input_boundary_1_id,
-                                                 _input_boundary_2_id,
+                                                 input_boundary_1_id,
+                                                 input_boundary_2_id,
                                                  _begin_side_boundary_id,
                                                  _end_side_boundary_id,
                                                  _type,
@@ -196,7 +204,7 @@ TransitionLayerConnector::generate()
   {
     mesh->prepare_for_use();
     mesh->stitch_meshes(*input_mesh_1,
-                        _input_boundary_1_id,
+                        input_boundary_1_id,
                         input_mesh_1_external_bids.front(),
                         TOLERANCE,
                         true,
@@ -204,7 +212,7 @@ TransitionLayerConnector::generate()
                         true,
                         true);
     mesh->stitch_meshes(*input_mesh_2,
-                        _input_boundary_2_id,
+                        input_boundary_2_id,
                         input_mesh_2_external_bids.front(),
                         TOLERANCE,
                         true,
@@ -212,6 +220,5 @@ TransitionLayerConnector::generate()
                         true,
                         true);
   }
-
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
