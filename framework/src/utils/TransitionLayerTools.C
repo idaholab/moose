@@ -587,6 +587,26 @@ isBoundaryValid(ReplicatedMesh & mesh,
 }
 
 bool
+isBoundaryValid(ReplicatedMesh & mesh,
+                Real & max_node_radius,
+                unsigned short & invalid_type,
+                const Point origin_pt,
+                const boundary_id_type bid)
+{
+  std::vector<dof_id_type> dummy_boundary_ordered_node_list;
+  return isBoundaryValid(
+      mesh, max_node_radius, invalid_type, dummy_boundary_ordered_node_list, origin_pt, bid);
+}
+
+bool
+isBoundaryValid(ReplicatedMesh & mesh, const Point origin_pt, const boundary_id_type bid)
+{
+  Real dummy_max_node_radius;
+  unsigned short dummy_invalid_type;
+  return isBoundaryValid(mesh, dummy_max_node_radius, dummy_invalid_type, origin_pt, bid);
+}
+
+bool
 isExternalBoundary(ReplicatedMesh & mesh, const boundary_id_type bid)
 {
   if (!mesh.is_prepared())

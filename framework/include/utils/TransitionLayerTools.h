@@ -194,6 +194,31 @@ bool isBoundaryValid(ReplicatedMesh & mesh,
                      const boundary_id_type bid);
 
 /**
+ * Decides whether a boundary of a given mesh works with the algorithm used in this class.
+ * @param mesh input mesh that contains the boundary to be examined
+ * @param max_node_radius the maximum radius of the nodes on the
+ * boundary
+ * @param invalid_type help distinguish different types of invalid boundaries
+ * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
+ * @param bid ID of the boundary to be examined
+ * @return whether the boundary works with the algorithm
+ */
+bool isBoundaryValid(ReplicatedMesh & mesh,
+                     Real & max_node_radius,
+                     unsigned short & invalid_type,
+                     const Point origin_pt,
+                     const boundary_id_type bid);
+
+/**
+ * Decides whether a boundary of a given mesh works with the algorithm used in this class.
+ * @param mesh input mesh that contains the boundary to be examined
+ * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
+ * @param bid ID of the boundary to be examined
+ * @return whether the boundary works with the algorithm
+ */
+bool isBoundaryValid(ReplicatedMesh & mesh, const Point origin_pt, const boundary_id_type bid);
+
+/**
  * Decides whether a boundary of a given mesh is an external boundary.
  * @param mesh input mesh that contains the boundary to be examined
  * @param bid ID of the boundary to be examined

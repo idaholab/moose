@@ -120,7 +120,8 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
                                std::vector<ExtraElementIDName> extra_ids);
 
 /**
- * Decides whether all the Points of a vector of Points are in a plane that is defined by a normal vector and an inplane Point
+ * Decides whether all the Points of a vector of Points are in a plane that is defined by a normal
+ * vector and an inplane Point
  * @param vec_pts vector of points to be examined
  * @param plane_nvec normal vector of the plane
  * @param fixed_pt a Point in the plane
