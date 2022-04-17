@@ -301,7 +301,7 @@ RayTracingMeshOutput::buildSegmentMesh()
     // Add the start point
     Node * last_node =
         _segment_mesh->add_point(trace_data._point_data[0]._point, node_id, processor_id());
-    last_node->set_unique_id() = node_id++;
+    last_node->set_unique_id(node_id++);
 
     // Add a point and element for each segment
     for (std::size_t i = 1; i < trace_data._point_data.size(); ++i)
@@ -311,13 +311,13 @@ RayTracingMeshOutput::buildSegmentMesh()
       // Add next point on the trace
       mooseAssert(!_segment_mesh->query_node_ptr(node_id), "Node already exists");
       Node * node = _segment_mesh->add_point(point, node_id, processor_id());
-      node->set_unique_id() = node_id++;
+      node->set_unique_id(node_id++);
 
       // Build a segment from this point to the last
       mooseAssert(!_segment_mesh->query_elem_ptr(elem_id), "Elem already exists");
       Elem * elem = _segment_mesh->add_elem(Elem::build_with_id(EDGE2, elem_id));
       elem->processor_id(processor_id());
-      elem->set_unique_id() = _max_node_id + elem_id++;
+      elem->set_unique_id(_max_node_id + elem_id++);
       elem->set_node(0) = last_node;
       elem->set_node(1) = node;
 
