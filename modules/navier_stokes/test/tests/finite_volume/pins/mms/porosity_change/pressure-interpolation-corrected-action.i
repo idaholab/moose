@@ -33,7 +33,6 @@ forch=1.1
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'steady-state'
     compressibility = 'incompressible'
 
     porous_medium_treatment = true

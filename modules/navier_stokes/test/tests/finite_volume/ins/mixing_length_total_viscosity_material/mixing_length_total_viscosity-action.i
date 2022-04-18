@@ -22,7 +22,6 @@ mu = ${fparse rho * bulk_u * 2 * H / Re}
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'steady-state'
     compressibility = 'incompressible'
     turbulence_handling = 'mixing-length'
 

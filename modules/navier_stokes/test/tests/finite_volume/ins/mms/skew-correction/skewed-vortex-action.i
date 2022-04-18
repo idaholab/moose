@@ -10,7 +10,6 @@ rho=1.0
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'steady-state'
     compressibility = 'incompressible'
 
     density = 'rho'

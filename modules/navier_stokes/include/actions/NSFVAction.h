@@ -130,8 +130,6 @@ protected:
   /// Mesh dimension
   unsigned int _dim;
 
-  /// Equation type, transient or steady-state
-  const MooseEnum _type;
   /// Compressibility type, can be compressible, incompressible
   /// or weakly-compressible
   const MooseEnum _compressibility;

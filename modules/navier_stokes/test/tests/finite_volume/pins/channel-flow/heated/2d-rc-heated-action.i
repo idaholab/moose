@@ -32,7 +32,6 @@ T_inlet=200
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'steady-state'
     compressibility = 'incompressible'
     porous_medium_treatment = true
     add_energy_equation = true

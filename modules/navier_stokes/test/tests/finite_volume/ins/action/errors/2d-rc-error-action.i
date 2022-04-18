@@ -19,7 +19,6 @@ alpha=1
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'steady-state'
     compressibility = 'incompressible'
     porous_medium_treatment = false
     add_energy_equation = true

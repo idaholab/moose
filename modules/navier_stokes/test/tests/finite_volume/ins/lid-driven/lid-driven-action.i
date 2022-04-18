@@ -16,9 +16,7 @@ rho=1
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'steady-state'
     compressibility = 'incompressible'
-    porous_medium_treatment = false
 
     density = 'rho'
     dynamic_viscosity = 'mu'

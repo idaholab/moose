@@ -40,9 +40,6 @@ NSFVAction::validParams()
   params.addParam<std::vector<SubdomainName>>(
       "block", "The list of blocks on which NS equations are defined on");
 
-  MooseEnum sim_type("steady-state transient", "steady-state");
-  params.addParam<MooseEnum>("simulation_type", sim_type, "Navier-Stokes equation type");
-
   MooseEnum comp_type("incompressible weakly-compressible", "incompressible");
   params.addParam<MooseEnum>(
       "compressibility", comp_type, "Compressibility constraint for the Navier-Stokes equations.");
@@ -58,9 +55,15 @@ NSFVAction::validParams()
 
   params.addParam<bool>("add_energy_equation", false, "True to add energy equation");
 
-  params.addParamNamesToGroup("simulation_type compressibility porous_medium_treatment "
+  params.addParamNamesToGroup("compressibility porous_medium_treatment "
                               "turbulence_handling add_energy_equation",
                               "General control");
+
+  // params.addParam<std::vector<NonlinearVariableName>>(
+  //     "velocity_variables",
+  //     NS::velocity_vector,
+  //     "If supplied, the system checks for available velocity variables. Otherwise, these
+  //     variables " "are created within the action.");
 
   /**
    * Parameters influencing the porous medium treatment.
@@ -404,7 +407,7 @@ NSFVAction::validParams()
       1.0,
       "mixing_length_delta > 0.0",
       "Tunable parameter related to the thickness of the boundary layer."
-      "When it is not specified, Prandtl's original unbounded wall distance mixing length model is "
+      "When it is not specified, Prandtl's original unbounded wall distance mixing length model is"
       "retrieved.");
 
   params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
@@ -420,8 +423,8 @@ NSFVAction::validParams()
   params.addParamNamesToGroup(
       "inlet_boundaries momentum_inlet_types momentum_inlet_function energy_inlet_types "
       "energy_inlet_function wall_boundaries momentum_wall_types energy_wall_types "
-      "energy_wall_function outlet_boundaries momentum_outlet_types pressure_function
-      passive_scalar_inlet_types passive_scalar_inlet_function flux_inlet_pps ",
+      "energy_wall_function outlet_boundaries momentum_outlet_types pressure_function "
+      "passive_scalar_inlet_types passive_scalar_inlet_function flux_inlet_pps",
       "Boundary condition");
 
   params.addParamNamesToGroup(
@@ -434,7 +437,6 @@ NSFVAction::validParams()
 NSFVAction::NSFVAction(InputParameters parameters)
   : Action(parameters),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
-    _type(getParam<MooseEnum>("simulation_type")),
     _compressibility(getParam<MooseEnum>("compressibility")),
     _has_energy_equation(getParam<bool>("add_energy_equation")),
     _boussinesq_approximation(getParam<bool>("boussinesq_approximation")),
@@ -551,7 +553,7 @@ NSFVAction::act()
     {
       if (_compressibility == "incompressible")
       {
-        if (_type == "transient")
+        if (_problem->isTransient())
         {
           addINSMomentumTimeKernels();
           if (_has_energy_equation)
@@ -562,7 +564,7 @@ NSFVAction::act()
       }
       else
       {
-        if (_type == "transient")
+        if (_problem->isTransient())
         {
           addWCNSMassTimeKernels();
           addWCNSMomentumTimeKernels();
@@ -598,7 +600,7 @@ NSFVAction::act()
       }
       if (_passive_scalar_names.size())
       {
-        if (_type == "transient")
+        if (_problem->isTransient())
           addScalarTimeKernels();
 
         addScalarAdvectionKernels();

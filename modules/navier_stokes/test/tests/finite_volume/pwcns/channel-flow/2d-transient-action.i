@@ -42,7 +42,6 @@ top_side_temperature = 150
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'transient'
     compressibility = 'weakly-compressible'
     add_energy_equation = true
     porous_medium_treatment = true

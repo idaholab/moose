@@ -22,7 +22,6 @@ temp_ref=${fparse hot_temp / 2.}
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'steady-state'
     compressibility = 'incompressible'
     porous_medium_treatment = false
     add_energy_equation = true

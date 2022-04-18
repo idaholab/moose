@@ -18,7 +18,6 @@ cp = 1
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'steady-state'
     compressibility = 'incompressible'
     add_energy_equation = true
 

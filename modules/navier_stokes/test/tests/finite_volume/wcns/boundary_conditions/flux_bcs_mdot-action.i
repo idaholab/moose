@@ -28,7 +28,6 @@ inlet_velocity = 0.001
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'transient'
     compressibility = 'weakly-compressible'
     add_energy_equation = true
     passive_scalar_names = 'scalar'

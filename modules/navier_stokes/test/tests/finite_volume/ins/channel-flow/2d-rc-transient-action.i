@@ -26,7 +26,6 @@ h_fs = 0.01
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'transient'
     compressibility = 'incompressible'
     add_energy_equation = true
 
