@@ -137,4 +137,12 @@
     expect_err = "The number of external sources defined is not equal to the number of passive scalar fields!"
     ad_indexing_type = 'global'
   []
+  [passive-scalar-schmidt-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar Schmidt numbers'
+    cli_args = "Modules/NavierStokesFV/passive_scalar_schmidt_number='0.5 0.6'"
+    expect_err = "The number of Schmidt numbers defined is not equal to the number of passive scalar fields!"
+    ad_indexing_type = 'global'
+  []
 []

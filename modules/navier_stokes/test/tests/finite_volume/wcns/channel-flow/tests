@@ -51,7 +51,7 @@
     type = 'Exodiff'
     input = 2d-transient-action.i
     exodiff = 2d-turbulent-action.e
-    cli_args = "Modules/NavierStokesFV/turbulence_handling='mixing-length' Modules/NavierStokesFV/mixing_length_delta='0.5' Modules/NavierStokesFV/mixing_length_walls='top' Modules/NavierStokesFV/mixing_length_aux_execute_on='initial' Outputs/file_base='2d-turbulent-action'"
+    cli_args = "Modules/NavierStokesFV/turbulence_handling='mixing-length' Modules/NavierStokesFV/mixing_length_delta='0.5' Modules/NavierStokesFV/mixing_length_walls='top' Modules/NavierStokesFV/mixing_length_aux_execute_on='initial' Modules/NavierStokesFV/mixing_length_two_term_bc_expansion=true Outputs/file_base='2d-turbulent-action'"
     method = "!dbg"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model using the NSFV action syntax.'
     ad_indexing_type = 'global'

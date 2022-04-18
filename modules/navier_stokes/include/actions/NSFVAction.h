@@ -86,6 +86,7 @@ protected:
   void addScalarTimeKernels();
   void addScalarAdvectionKernels();
   void addScalarDiffusionKernels();
+  void addScalarMixingLengthKernels();
   void addScalarSourceKernels();
 
   /// Functions adding boundary conditions for the incompressible simulation.
@@ -212,6 +213,8 @@ protected:
   const std::vector<Real> _initial_scalar_variable;
   /// Passive scalar diffusivities
   const std::vector<MooseFunctorName> _passive_scalar_diffusivity;
+  /// Passive scalar Schmidt numbers
+  const std::vector<Real> _passive_scalar_schmidt_number;
   /// Passive scalar source terms
   const std::vector<MooseFunctorName> _passive_scalar_source;
   /// Passive scalar inlet types (fixed-value/mass-flow)

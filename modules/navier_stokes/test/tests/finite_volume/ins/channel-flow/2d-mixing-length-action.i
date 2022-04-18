@@ -1,22 +1,24 @@
-von_karman_const = 0.41
+Re = 1e4
+von_karman_const = 0.2
 
-H = 1 #halfwidth of the channel
-L = 150
-
-Re = 13700
-
+D = 1
 rho = 1
 bulk_u = 1
-mu = ${fparse rho * bulk_u * 2 * H / Re}
+mu = ${fparse rho * bulk_u * D / Re}
+
+advected_interp_method='upwind'
 
 [Mesh]
   [gen]
-    type = CartesianMeshGenerator
+    type = GeneratedMeshGenerator
     dim = 2
-    dx = '${L}'
-    dy = '0.667 0.333'
-    ix = '200'
-    iy = '10  1'
+    xmin = 0
+    xmax = 5
+    ymin = 0
+    ymax = ${fparse 0.5 * D}
+    nx = 20
+    ny = 10
+    bias_y = ${fparse 1 / 1.2}
   []
 []
 
@@ -25,30 +27,37 @@ mu = ${fparse rho * bulk_u * 2 * H / Re}
     compressibility = 'incompressible'
     turbulence_handling = 'mixing-length'
 
+    passive_scalar_names = 'scalar'
+
     density = ${rho}
     dynamic_viscosity = ${mu}
+    passive_scalar_source = 0.1
+    passive_scalar_schmidt_number = 1.0
 
-    initial_velocity = '1e-6 1e-6 0'
+    initial_velocity = '1 1 0'
     initial_pressure = 0.0
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
     momentum_inlet_function = '1 0'
+    passive_scalar_inlet_types = 'fixed-value'
+    passive_scalar_inlet_function = '1'
 
     wall_boundaries = 'top bottom'
-    momentum_wall_types = 'wallfunction symmetry'
+    momentum_wall_types = 'noslip symmetry'
 
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
     pressure_function = '0'
 
     von_karman_const = ${von_karman_const}
-    mixing_length_delta = 0.5
-    mixing_length_walls = 'top'
+    mixing_length_delta = 1e9
+    mixing_length_walls = 'top bottom'
     mixing_length_aux_execute_on ='initial'
 
-    momentum_advection_interpolation = 'upwind'
-    mass_advection_interpolation = 'upwind'
+    momentum_advection_interpolation = ${advected_interp_method}
+    mass_advection_interpolation = ${advected_interp_method}
+    passive_scalar_advection_interpolation = ${advected_interp_method}
   []
 []
 

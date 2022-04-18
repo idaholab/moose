@@ -117,6 +117,15 @@
     issues = '#16794 #16937'
     mesh_mode = REPLICATED
   []
+  [mixing-length-action]
+    type = 'Exodiff'
+    input = 2d-mixing-length-action.i
+    exodiff = 2d-mixing-length-action_out.e
+    requirement = 'The system shall be able to model the effect of Reynolds-averaged parameters on the momentum and passive scalar advection equations using a mixing length model and the NSFVAction syntax'
+    ad_indexing_type = 'global'
+    issues = '#19472'
+    mesh_mode = REPLICATED
+  []
   [mixing-length-jac]
     type = 'PetscJacobianTester'
     input = 2d-mixing-length.i

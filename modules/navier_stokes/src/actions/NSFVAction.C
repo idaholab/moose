@@ -271,6 +271,10 @@ NSFVAction::validParams()
       std::vector<MooseFunctorName>(),
       "Functor names for the diffusivities used for the passive scalar fields.");
 
+  params.addParam<std::vector<Real>>("passive_scalar_schmidt_number",
+                                     std::vector<Real>(),
+                                     "Schmidt numbers used for the passive scalar fields.");
+
   params.addParam<std::vector<MooseFunctorName>>(
       "passive_scalar_source",
       std::vector<MooseFunctorName>(),
@@ -287,9 +291,9 @@ NSFVAction::validParams()
       std::vector<std::vector<std::string>>(),
       "Functions for inlet boundaries in the passive scalar equations.");
 
-  params.addParamNamesToGroup(
-      "passive_scalar_names passive_scalar_diffusivity passive_scalar_source",
-      "Passive scalar control");
+  params.addParamNamesToGroup("passive_scalar_names passive_scalar_diffusivity "
+                              "passive_scalar_schmidt_number passive_scalar_source",
+                              "Passive scalar control");
 
   /**
    * Parameters allowing the control over numerical schemes for different terms in the
@@ -353,6 +357,11 @@ NSFVAction::validParams()
       true,
       "If a two-term Taylor expansion is needed for the determination of the boundary values"
       "of the advected passive scalar field.");
+  params.addParam<bool>(
+      "mixing_length_two_term_bc_expansion",
+      false,
+      "If a two-term Taylor expansion is needed for the determination of the boundary values"
+      "of the mixing length field.");
 
   params.addRangeCheckedParam<Real>(
       "mass_scaling",
@@ -377,7 +386,7 @@ NSFVAction::validParams()
       "momentum_face_interpolation energy_face_interpolation passive_scalar_face_interpolation "
       "pressure_face_interpolation momentum_two_term_bc_expansion "
       "energy_two_term_bc_expansion passive_scalar_two_term_bc_expansion "
-      "pressure_two_term_bc_expansion",
+      "mixing_length_two_term_bc_expansion pressure_two_term_bc_expansion",
       "Numerical scheme");
 
   params.addParamNamesToGroup("momentum_scaling energy_scaling mass_scaling passive_scalar_scaling",
@@ -479,6 +488,7 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
     _passive_scalar_diffusivity(
         getParam<std::vector<MooseFunctorName>>("passive_scalar_diffusivity")),
+    _passive_scalar_schmidt_number(getParam<std::vector<Real>>("passive_scalar_schmidt_number")),
     _passive_scalar_source(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
     _passive_scalar_inlet_types(getParam<MultiMooseEnum>("passive_scalar_inlet_types")),
     _passive_scalar_inlet_function(
@@ -606,6 +616,8 @@ NSFVAction::act()
         addScalarAdvectionKernels();
         if (_passive_scalar_diffusivity.size())
           addScalarDiffusionKernels();
+        if (_turbulence_handling == "mixing-length")
+          addScalarMixingLengthKernels();
         if (_passive_scalar_source.size())
           addScalarSourceKernels();
       }
@@ -671,7 +683,7 @@ NSFVAction::addINSVariables()
     _problem->addVariable(variable_type, velocity_vector_name[d], params);
 
   // Add velocity variable
-  auto params = _factory.getValidParams("INSFVPressureVariable");
+  params = _factory.getValidParams("INSFVPressureVariable");
   params.set<std::vector<SubdomainName>>("block") = _blocks;
   params.set<std::vector<Real>>("scaling") = {_mass_scaling};
   params.set<MooseEnum>("face_interp_method") = _pressure_face_interpolation;
@@ -694,6 +706,8 @@ NSFVAction::addINSVariables()
   {
     auto params = _factory.getValidParams("MooseVariableFVReal");
     params.set<std::vector<SubdomainName>>("block") = _blocks;
+    params.set<bool>("two_term_boundary_expansion") =
+        getParam<bool>("mixing_length_two_term_bc_expansion");
 
     _problem->addAuxVariable("MooseVariableFVReal", NS::mixing_length, params);
   }
@@ -1017,7 +1031,7 @@ NSFVAction::addINSMomentumMixingLengthKernels()
   const std::string kernel_type = "INSFVMixingLengthReynoldsStress";
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<std::vector<SubdomainName>>("block") = _blocks;
-  params.set<MooseFunctorName>(NS::density) = NS::density;
+  params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
 
   std::string kernel_name = "ins_momentum_mixing_length_reynolds_stress_";
@@ -1389,6 +1403,34 @@ NSFVAction::addScalarAdvectionKernels()
       params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
 
     _problem->addFVKernel(kernel_type, "ins_" + vname + "_advection", params);
+  }
+}
+
+void
+NSFVAction::addScalarMixingLengthKernels()
+{
+  const std::string u_names[3] = {"u", "v", "w"};
+  const std::string kernel_type = "INSFVMixingLengthScalarDiffusion";
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+  params.set<CoupledName>(NS::mixing_length) = {NS::mixing_length};
+
+  const std::string * velocity_vector_name = NS::velocity_vector;
+  if (_porous_medium_treatment)
+    velocity_vector_name = NS::superficial_velocity_vector;
+
+  for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
+    params.set<CoupledName>(u_names[dim_i]) = {velocity_vector_name[dim_i]};
+
+  for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
+  {
+    params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
+    if (_passive_scalar_schmidt_number.size())
+      params.set<Real>("schmidt_number") = _passive_scalar_schmidt_number[name_i];
+    else
+      params.set<Real>("schmidt_number") = 1.0;
+
+    _problem->addFVKernel(kernel_type, _passive_scalar_names[name_i] + "_mixing_length", params);
   }
 }
 
@@ -2261,6 +2303,13 @@ NSFVAction::checkPassiveScalarParameterErrors()
       paramError("passive_scalar_diffusivity",
                  "The number of diffusivities defined is not equal to the number of passive scalar "
                  "fields!");
+
+  if (_passive_scalar_schmidt_number.size())
+    if (_passive_scalar_schmidt_number.size() != _passive_scalar_names.size())
+      paramError(
+          "passive_scalar_schmidt_number",
+          "The number of Schmidt numbers defined is not equal to the number of passive scalar "
+          "fields!");
 
   if (_passive_scalar_source.size())
     if (_passive_scalar_source.size() != _passive_scalar_names.size())
