@@ -60,7 +60,7 @@ NSFVAction::validParams()
 
   params.addParamNamesToGroup("simulation_type compressibility porous_medium_treatment "
                               "turbulence_handling add_energy_equation",
-                              "General controls");
+                              "General control");
 
   /**
    * Parameters influencing the porous medium treatment.
@@ -167,11 +167,14 @@ NSFVAction::validParams()
       "ref_temperature > 0.0",
       "Value for reference temperature in case of Boussinesq approximation");
   params.addParam<MooseFunctorName>(
-      "thermal_expansion", NS::alpha, "The name of the thermal expansion coefficient in the Boussinesq approximation");
+      "thermal_expansion",
+      NS::alpha,
+      "The name of the thermal expansion coefficient in the Boussinesq approximation");
 
-  params.addParamNamesToGroup("pinned_pressure_type pinned_pressure_point pinned_pressure_value "
-                              "ref_temperature boussinesq_approximation",
-                              "Momentum controls");
+  params.addParamNamesToGroup(
+      "pin_pressure pinned_pressure_type pinned_pressure_point pinned_pressure_value "
+      "ref_temperature boussinesq_approximation gravity",
+      "Momentum equation");
 
   /**
    * Equations used to set up the energy equation/enthalpy equation if it is required.
@@ -225,6 +228,10 @@ NSFVAction::validParams()
   params.addParam<Real>(
       "external_heat_source_coeff", 1.0, "Multiplier for the coupled heat source term.");
 
+  params.addParamNamesToGroup("ambient_convection_alpha ambient_convection_blocks "
+                              "ambient_temperature external_heat_source external_heat_source_coeff",
+                              "Energy equation");
+
   /**
    * Parameters controlling the friction terms in case of porous medium simulations.
    */
@@ -242,8 +249,7 @@ NSFVAction::validParams()
       "'porous_medium_treatment' is enabled, the coefficients already contain a velocity "
       "multiplier but they are not multiplied with density yet!");
 
-  params.addParamNamesToGroup("friction_blocks friction_types friction_coeffs",
-                              "Friction controls");
+  params.addParamNamesToGroup("friction_blocks friction_types friction_coeffs", "Friction control");
 
   /**
    * Parameters describing the handling of advected scalar fields
@@ -277,6 +283,10 @@ NSFVAction::validParams()
       "passive_scalar_inlet_function",
       std::vector<std::vector<std::string>>(),
       "Functions for inlet boundaries in the passive scalar equations.");
+
+  params.addParamNamesToGroup(
+      "passive_scalar_names passive_scalar_diffusivity passive_scalar_source",
+      "Passive scalar control");
 
   /**
    * Parameters allowing the control over numerical schemes for different terms in the
@@ -351,10 +361,8 @@ NSFVAction::validParams()
                                     1.0,
                                     "momentum_scaling > 0.0",
                                     "The scaling factor for the momentum variables.");
-  params.addRangeCheckedParam<Real>("energy_scaling",
-                                    1.0,
-                                    "energy_scaling > 0.0",
-                                    "The scaling factor for the energy variable.");
+  params.addRangeCheckedParam<Real>(
+      "energy_scaling", 1.0, "energy_scaling > 0.0", "The scaling factor for the energy variable.");
   params.addRangeCheckedParam<Real>("passive_scalar_scaling",
                                     1.0,
                                     "passive_scalar_scaling > 0.0",
@@ -367,10 +375,10 @@ NSFVAction::validParams()
       "pressure_face_interpolation momentum_two_term_bc_expansion "
       "energy_two_term_bc_expansion passive_scalar_two_term_bc_expansion "
       "pressure_two_term_bc_expansion",
-      "Numerical scheme parameters");
+      "Numerical scheme");
 
   params.addParamNamesToGroup("momentum_scaling energy_scaling mass_scaling passive_scalar_scaling",
-                              "Scaling parameters");
+                              "Scaling");
 
   /**
    * Parameter controlling the turbulence handling used for the equations.
@@ -407,17 +415,18 @@ NSFVAction::validParams()
 
   params.addParamNamesToGroup(
       "dynamic_viscosity density thermal_expansion thermal_conductivity specific_heat",
-      "Material property names");
+      "Material property");
 
   params.addParamNamesToGroup(
       "inlet_boundaries momentum_inlet_types momentum_inlet_function energy_inlet_types "
       "energy_inlet_function wall_boundaries momentum_wall_types energy_wall_types "
-      "energy_wall_function outlet_boundaries momentum_outlet_types pressure_function",
-      "Boundary condition parameters");
+      "energy_wall_function outlet_boundaries momentum_outlet_types pressure_function
+      passive_scalar_inlet_types passive_scalar_inlet_function flux_inlet_pps ",
+      "Boundary condition");
 
   params.addParamNamesToGroup(
       "initial_pressure initial_velocity initial_temperature initial_scalar_variables",
-      "Initial conditions");
+      "Initial condition");
 
   return params;
 }
