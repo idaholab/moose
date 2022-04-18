@@ -1830,10 +1830,10 @@ NSFVAction::addINSWallBC()
         InputParameters params = _factory.getValidParams(bc_type);
         params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
 
-        MaterialPropertyName viscosity_name = _dynamic_viscosity_name;
+        MooseFunctorName viscosity_name = _dynamic_viscosity_name;
         if (_turbulence_handling != "none")
           viscosity_name = NS::total_viscosity;
-        params.set<MaterialPropertyName>(NS::mu) = viscosity_name;
+        params.set<MooseFunctorName>(NS::mu) = viscosity_name;
 
         for (unsigned int d = 0; d < _dim; ++d)
         {
@@ -1923,7 +1923,7 @@ NSFVAction::addWCNSMassTimeKernels()
   InputParameters params = _factory.getValidParams(mass_kernel_type);
   params.set<std::vector<SubdomainName>>("block") = _blocks;
   params.set<NonlinearVariableName>("variable") = NS::pressure;
-  params.set<MaterialPropertyName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
+  params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
   if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
 
@@ -1936,8 +1936,8 @@ NSFVAction::addWCNSMomentumTimeKernels()
   const std::string mom_kernel_type = "WCNSFVMomentumTimeDerivative";
   InputParameters params = _factory.getValidParams(mom_kernel_type);
   params.set<std::vector<SubdomainName>>("block") = _blocks;
-  params.set<MaterialPropertyName>(NS::density) = _density_name;
-  params.set<MaterialPropertyName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
 
   for (unsigned int d = 0; d < _dim; ++d)
   {
@@ -2048,8 +2048,8 @@ NSFVAction::addMixingLengthMaterial()
       params.set<CoupledName>(u_names[d]) = {NS::velocity_vector[d]};
   params.set<CoupledName>(NS::mixing_length) = {NS::mixing_length};
 
-  params.set<MaterialPropertyName>(NS::density) = _density_name;
-  params.set<MaterialPropertyName>(NS::mu) = _dynamic_viscosity_name;
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
 
   _problem->addMaterial("MixingLengthTurbulentViscosityMaterial", "mixing_length_material", params);
 }
@@ -2078,7 +2078,7 @@ NSFVAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type
       _pressure_face_interpolation == "skewness-corrected")
     necessary_layers = 3;
 
-  if (_turbulence_handling != "none")
+  if (_turbulence_handling == "mixing-length")
     necessary_layers = 3;
 
   if (_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
