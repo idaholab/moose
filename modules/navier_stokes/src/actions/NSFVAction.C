@@ -653,30 +653,24 @@ NSFVAction::act()
 void
 NSFVAction::addINSVariables()
 {
+  // Add velocity variable
+  std::string variable_type = "INSFVVelocityVariable";
+  const std::string * velocity_vector_name = NS::velocity_vector;
   if (_porous_medium_treatment)
   {
-    auto params = _factory.getValidParams("PINSFVSuperficialVelocityVariable");
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
-    params.set<MooseEnum>("face_interp_method") = _momentum_face_interpolation;
-    params.set<bool>("two_term_boundary_expansion") = _momentum_two_term_bc_expansion;
-
-    for (unsigned int d = 0; d < _dim; ++d)
-      _problem->addVariable(
-          "PINSFVSuperficialVelocityVariable", NS::superficial_velocity_vector[d], params);
+    variable_type = "PINSFVSuperficialVelocityVariable";
+    velocity_vector_name = NS::superficial_velocity_vector;
   }
-  else
-  {
-    auto params = _factory.getValidParams("INSFVVelocityVariable");
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
-    params.set<MooseEnum>("face_interp_method") = _momentum_face_interpolation;
-    params.set<bool>("two_term_boundary_expansion") = _momentum_two_term_bc_expansion;
+  auto params = _factory.getValidParams(variable_type);
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+  params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
+  params.set<MooseEnum>("face_interp_method") = _momentum_face_interpolation;
+  params.set<bool>("two_term_boundary_expansion") = _momentum_two_term_bc_expansion;
 
-    for (unsigned int d = 0; d < _dim; ++d)
-      _problem->addVariable("INSFVVelocityVariable", NS::velocity_vector[d], params);
-  }
+  for (unsigned int d = 0; d < _dim; ++d)
+    _problem->addVariable(variable_type, velocity_vector_name[d], params);
 
+  // Add velocity variable
   auto params = _factory.getValidParams("INSFVPressureVariable");
   params.set<std::vector<SubdomainName>>("block") = _blocks;
   params.set<std::vector<Real>>("scaling") = {_mass_scaling};
@@ -685,6 +679,7 @@ NSFVAction::addINSVariables()
 
   _problem->addVariable("INSFVPressureVariable", NS::pressure, params);
 
+  // Add lagrange multiplier for pinning pressure, if needed
   if (getParam<bool>("pin_pressure"))
   {
     auto lm_params = _factory.getValidParams("MooseVariableScalar");
@@ -694,6 +689,7 @@ NSFVAction::addINSVariables()
     _problem->addVariable("MooseVariableScalar", "lambda", lm_params);
   }
 
+  // Add turbulence-related variables
   if (_turbulence_handling == "mixing-length")
   {
     auto params = _factory.getValidParams("MooseVariableFVReal");
@@ -702,6 +698,7 @@ NSFVAction::addINSVariables()
     _problem->addAuxVariable("MooseVariableFVReal", NS::mixing_length, params);
   }
 
+  // Add energy variables if needed
   if (_has_energy_equation)
   {
     auto params = _factory.getValidParams("INSFVEnergyVariable");
@@ -713,6 +710,7 @@ NSFVAction::addINSVariables()
     _problem->addVariable("INSFVEnergyVariable", NS::T_fluid, params);
   }
 
+  // Add passive scalar variables is needed
   if (_passive_scalar_names.size())
   {
     auto params = _factory.getValidParams("MooseVariableFVReal");
@@ -1054,6 +1052,8 @@ NSFVAction::addINSMomentumMixingLengthKernels()
   if (isParamValid("mixing_length_aux_execute_on"))
     ml_params.set<ExecFlagEnum>("execute_on") =
         getParam<ExecFlagEnum>("mixing_length_aux_execute_on");
+  else
+    ml_params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   ml_params.set<Real>("von_karman_const") = getParam<Real>("von_karman_const");
   ml_params.set<Real>("von_karman_const_0") = getParam<Real>("von_karman_const_0");
   ml_params.set<Real>("delta") = getParam<Real>("mixing_length_delta");
