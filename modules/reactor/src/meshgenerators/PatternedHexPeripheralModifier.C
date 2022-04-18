@@ -96,7 +96,7 @@ PatternedHexPeripheralModifier::generate()
       input_mesh->get_boundary_info().build_node_list();
   // Find neighbors
   input_mesh->find_neighbors();
-  // Load all the extra integer indexing infirmation from the input mesh
+  // Load all the extra integer indexing information from the input mesh
   const unsigned int n_extra_integer_input = input_mesh->n_elem_integers();
   std::vector<std::string> extra_integer_names;
   for (unsigned int i = 0; i < n_extra_integer_input; i++)
@@ -137,7 +137,7 @@ PatternedHexPeripheralModifier::generate()
                                       ->id());
     }
   }
-  // This eliminate the duplicate elements, which happen at the vertices.
+  // This eliminates the duplicate elements, which happen at the vertices.
   auto bid_elem_list_it = std::unique(bid_elem_list.begin(), bid_elem_list.end());
   auto new_bid_elem_list_it = std::unique(new_bid_elem_list.begin(), new_bid_elem_list.end());
   bid_elem_list.resize(std::distance(bid_elem_list.begin(), bid_elem_list_it));
@@ -166,7 +166,7 @@ PatternedHexPeripheralModifier::generate()
         std::make_pair(Point(0.0, 0.0, 0.0), _new_extra_id_values_to_assign));
   // As some elements are deleted, update the neighbor list
   input_mesh->find_neighbors();
-  // Identidy the new external boundary
+  // Identify the new external boundary
   for (unsigned int i = 0; i < new_bid_elem_list.size(); i++)
   {
     // Assign default external Sideset ID to the new boundary
@@ -177,7 +177,7 @@ PatternedHexPeripheralModifier::generate()
     }
   }
 
-  // Refresh the mesh as it lost some stuffs.
+  // Refresh the mesh as it lost some elements
   input_mesh->contract();
   input_mesh->prepare_for_use();
 
@@ -187,7 +187,7 @@ PatternedHexPeripheralModifier::generate()
   // Make six meshes of new outer layer for six sides.
   for (unsigned i_side = 0; i_side < 6; i_side++)
   {
-    // Us azimuthalAnglesCollector to assign biundary Points to a reference vector
+    // Use azimuthalAnglesCollector to assign boundary Points to a reference vector
     std::vector<Point> inner_pts;
     std::vector<Real> new_bdry_azi =
         azimuthalAnglesCollector(*input_mesh_origin, inner_pts, -30.0, 30.0, ANGLE_DEGREE);
@@ -209,7 +209,7 @@ PatternedHexPeripheralModifier::generate()
     std::unique_ptr<LinearInterpolation> linear_outer_y =
         libmesh_make_unique<LinearInterpolation>(input_arg, input_y);
 
-    // Uniform spaced nodes on the outer boundary to faciliate stitching
+    // Uniformly spaced nodes on the outer boundary to facilitate stitching
     for (unsigned int i = 0; i < _new_num_sector + 1; i++)
     {
       outer_pts.push_back(Point(linear_outer_x->sample((Real)i / (Real)_new_num_sector),

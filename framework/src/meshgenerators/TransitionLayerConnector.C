@@ -29,9 +29,9 @@ TransitionLayerConnector::validParams()
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary_2", "the second boundary that needs to be connected.");
   params.addParam<Point>(
-      "mesh_1_shift", Point(0.0, 0.0, 0.0), "The translate vector to be applied to input_mesh_1");
+      "mesh_1_shift", Point(0.0, 0.0, 0.0), "Translation vector to be applied to input_mesh_1");
   params.addParam<Point>(
-      "mesh_2_shift", Point(0.0, 0.0, 0.0), "The translate vector to be applied to input_mesh_2");
+      "mesh_2_shift", Point(0.0, 0.0, 0.0), "Translation vector to be applied to input_mesh_2");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "num_layers", "num_layers>0", "Number of layers of elements created between the boundaries.");
   params.addParam<subdomain_id_type>("block_id", 1, "ID to be assigned to the transition layer.");

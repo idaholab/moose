@@ -20,7 +20,7 @@ The most straightforward solution is to create a single layer of triangular elem
       id=single_layer
       caption=A schematic drawing showing the principle of single-layer transition layer meshing algorithm.
 
-Starting from the first nodes of the two given boundaries, the first side is trivially created by connect the first nodes of the two boundaries. Then, the two possible options of the next side of the triangle are examined, and the shorter length segment between the two boundaries is selected. This kind of selection is repeated until reaching the other side of the two boundaries.
+Starting from the first nodes of the two given boundaries, the first side is trivially created by connecting the first nodes of the two boundaries. Then, the two possible options of the next side of the triangle are examined, and the shorter length segment between the two boundaries is selected. This kind of selection is repeated until reaching the other side of the two boundaries.
 
 ## Multi-Layer Transition Layer Meshing
 
@@ -28,13 +28,13 @@ In many cases, more than one layer of triangular elements is desired to improve 
 
 ### Surrogate Node Interpolation Algorithm
 
-Surrogate node interpolation algorithm is the most fundamental method used in this tool set for intermediate node generation. For simplicity, assume a case were all the nodes on each boundary are uniformly distributed. (Namely, the distance between neighboring nodes within a boundary is equal.) Assume that the two boundaries have $M$ nodes (Side 1) and $N$ nodes (Side 2), respectively, and that there are $K$ sublayers of elements in between. From Side 1 to Side 2, using arithmetic progression, the $k$th layer of intermediate nodes have $S=\lceil M+k(N-M)/K \rfloor$ nodes. To get the positions of these nodes, surrogate nodes are first calculated on the two input boundaries using interpolation leveraging MOOSE's [`LinearInterpolation`](framework/src/utils/LinearInterpolation.C) utility.
+Surrogate node interpolation algorithm is the most fundamental method used in this tool set for intermediate node generation. For simplicity, assume a case where all the nodes on each boundary are uniformly distributed. (Namely, the distance between neighboring nodes within a boundary is equal.) Assume that the two boundaries have $M$ nodes (Side 1) and $N$ nodes (Side 2), respectively, and that there are $K$ sublayers of elements in between. From Side 1 to Side 2, using arithmetic progression, the $k$th layer of intermediate nodes have $S=\lceil M+k(N-M)/K \rfloor$ nodes. To get the positions of these nodes, surrogate nodes are first calculated on the two input boundaries using interpolation leveraging MOOSE's [`LinearInterpolation`](framework/src/utils/LinearInterpolation.C) utility.
 
 !listing /LinearInterpolation.h
          start= LinearInterpolationTempl(const std::vector<Real> & X,
          end= LinearInterpolationTempl() : _x(std::vector<Real>()), _y(std::vector<Real>()), _extrap(false) {}
 
-Here, take Side 1 as an example. As mentioned above, Side 1 has $M$ nodes, the coordinates of which are $(x_0,y_0,z_0)$, $(x_1,y_1,z_1)$, ..., $(x_{M-1},y_{M-1},z_{M-1})$. To get interpolated coordinates of the nodes on Side 1, the coordinate parameters $\{x_i\}$ and $\{y_i\}$ will be the dependent variables of interpolation (i.e., $Y$ in the [`LinearInterpolation`](framework/src/utils/LinearInterpolation.C) of MOOSE), while the $X$ was set as {$0$, $1/(M-1)$, $2/(M-1)$,...,$(M-2)/(M-1)$, $1$} (equal intervals). Note that $\{z_i\}$ does not need interpolation as we are working in the XY plane. For an intermediate layer with $S$, $S$ surrogate nodes are created on Side 1 using the aforementioned interpolation data and the following $X$ values {$0$, $1/(S-1)$, $2/(S-1)$,...,$(S-2)/(S-1)$, $1$}. Meanwhile, another $S$ surrogate nodes are created on Side 2 using similar approach. Finally, the positions of the $S$ intermediate nodes can be calculated by further interpolating the surrogate nodes created on the two boundaries. In [Figure 3](#multi_layer_uniform), an example of applying surrogate node interpolation algorithm to a boundary with 9 uniformly distributed nodes and a boundary with 4 uniformly distributed nodes to generate an intermediate node layer with six nodes is illustrated.
+Here, take Side 1 as an example. As mentioned above, Side 1 has $M$ nodes, the coordinates of which are $(x_0,y_0,z_0)$, $(x_1,y_1,z_1)$, ..., $(x_{M-1},y_{M-1},z_{M-1})$. To get interpolated coordinates of the nodes on Side 1, the coordinate parameters $\{x_i\}$ and $\{y_i\}$ will be the dependent variables of interpolation (i.e., $Y$ in the [`LinearInterpolation`](framework/src/utils/LinearInterpolation.C) of MOOSE), while the $X$ was set as {$0$, $1/(M-1)$, $2/(M-1)$,...,$(M-2)/(M-1)$, $1$} (equal intervals). Note that $\{z_i\}$ does not need interpolation as we are working in the XY plane. For an intermediate layer with $S$, $S$ surrogate nodes are created on Side 1 using the aforementioned interpolation data and the following $X$ values {$0$, $1/(S-1)$, $2/(S-1)$,...,$(S-2)/(S-1)$, $1$}. Meanwhile, another $S$ surrogate nodes are created on Side 2 using a similar approach. Finally, the positions of the $S$ intermediate nodes can be calculated by further interpolating the surrogate nodes created on the two boundaries. In [Figure 3](#multi_layer_uniform), an example of applying surrogate node interpolation algorithm to a boundary with 9 uniformly distributed nodes and a boundary with 4 uniformly distributed nodes to generate an intermediate node layer with six nodes is illustrated.
 
 !media framework/utils/multi_layer_uniform.png
       style=display: block;margin-left:auto;margin-right:auto;width:50%;
@@ -52,7 +52,7 @@ A more general scenario is that the nodes on the two original boundaries are not
 
 ### Quadrilateral Element Transition Layer in a Special Case
 
-`TransitionLayerTools` is generally designed for the meshing with triangular elements because of their flexibility in accommodating complex node distribution. However, if Side 1 and Side 2 boundaries have the same number of nodes, then the transition layer can be meshed using quadrilateral elements straightforwardly. `TransitionLayerTools` is equipped with this special quadrilateral meshing capability.
+`TransitionLayerTools` is generally designed for meshing with triangular elements because of their flexibility in accommodating complex node distribution. However, if Side 1 and Side 2 boundaries have the same number of nodes, then the transition layer can be meshed using quadrilateral elements straightforwardly. `TransitionLayerTools` is equipped with this special quadrilateral meshing capability.
 
 ## Applications
 
@@ -69,4 +69,4 @@ Here, `mesh` is a reference `ReplicatedMesh` to contain the generated transition
       id=examples
       caption=Some representative meshes generated by `TransitionLayerTools`: (left) a transition layer mesh defined by two opposite oriented arc; (middle) a transition layer mesh defined by one arc and a complex curve; (right) a half-circle mesh.
 
-One application of this tool is to generate a mesh with two curves and two straight lines as its external boundaries. As shown in [Figure 5](#examples), a series of simple and complex shapes can be meshed. Users can leverage [`TransitionLayerGenerator`](/TransitionLayerGenerator.md) and [`TransitionLayerConnector`](/TransitionLayerConnector.md) as testing tools.
+One application of this tool is to generate a mesh with two curves and two straight lines as its external boundaries. As shown in [Figure 5](#examples), a series of simple and complex shapes can be meshed. Users can leverage [`StandaloneTransitionLayerGenerator`](/StandaloneTransitionLayerGenerator.md) and [`TransitionLayerConnector`](/TransitionLayerConnector.md) as testing tools.

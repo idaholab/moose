@@ -440,7 +440,7 @@ protected:
    * @param calculate_origin whether the mesh origin is calculated based on the centroid position
    * @param input_origin_x precalculated mesh origin coordinate x
    * @param input_origin_y precalculated mesh origin coordinate y
-   * @param tol tolerence that the minimum azimuthal angle is
+   * @param tol tolerance that the minimum azimuthal angle is
    * @return the list of azimuthal angles of all the nodes on the external grain boundary within the
    * given range
    */

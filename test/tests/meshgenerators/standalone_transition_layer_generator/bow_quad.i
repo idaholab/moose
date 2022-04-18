@@ -18,7 +18,7 @@ z = 0.0
 
 [Mesh]
   [tlmg]
-    type = TransitionLayerGenerator
+    type = StandaloneTransitionLayerGenerator
     positions_vector_1 = '${fparse r1*cos(th1_1/180.0*pi)} ${fparse r1*sin(th1_1/180.0*pi)} ${fparse z}
                           ${fparse r1*cos(th1_2/180.0*pi)} ${fparse r1*sin(th1_2/180.0*pi)} 0.0
                           ${fparse r1*cos(th1_3/180.0*pi)} ${fparse r1*sin(th1_3/180.0*pi)} 0.0

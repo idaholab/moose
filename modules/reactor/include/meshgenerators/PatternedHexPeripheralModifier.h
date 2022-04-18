@@ -53,10 +53,10 @@ protected:
   boundary_id_type _input_mesh_external_bid;
 
   /**
-   * Assign extra element intergers to the newly generated transition layer mesh based on the
+   * Assign extra element integers to the newly generated transition layer mesh based on the
    * nearest element of the deleted original mesh
    * @param mesh the mesh that will be modified to add extra element integer values
-   * @param ref_extra_ids a data structure containing the extra element interger information of the
+   * @param ref_extra_ids a data structure containing the extra element integer information of the
    * deleted original mesh
    */
   void

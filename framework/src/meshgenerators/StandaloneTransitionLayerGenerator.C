@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TransitionLayerGenerator.h"
+#include "StandaloneTransitionLayerGenerator.h"
 #include "TransitionLayerTools.h"
 
-registerMooseObject("MooseApp", TransitionLayerGenerator);
+registerMooseObject("MooseApp", StandaloneTransitionLayerGenerator);
 
 InputParameters
-TransitionLayerGenerator::validParams()
+StandaloneTransitionLayerGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<std::vector<Point>>("positions_vector_1",
@@ -57,12 +57,13 @@ TransitionLayerGenerator::validParams()
       "Gaussian parameter used to smoothen local node density for automatic biasing; this "
       "parameter is not used if other biasing option is selected.");
   params.addClassDescription(
-      "This TransitionLayerGenerator object is designed to generate a "
+      "This StandaloneTransitionLayerGenerator object is designed to generate a "
       "transition layer with two sides containing different numbers of nodes.");
   return params;
 }
 
-TransitionLayerGenerator::TransitionLayerGenerator(const InputParameters & parameters)
+StandaloneTransitionLayerGenerator::StandaloneTransitionLayerGenerator(
+    const InputParameters & parameters)
   : MeshGenerator(parameters),
     _positions_vector_1(getParam<std::vector<Point>>("positions_vector_1")),
     _positions_vector_2(getParam<std::vector<Point>>("positions_vector_2")),
@@ -79,7 +80,7 @@ TransitionLayerGenerator::TransitionLayerGenerator(const InputParameters & param
 }
 
 std::unique_ptr<MeshBase>
-TransitionLayerGenerator::generate()
+StandaloneTransitionLayerGenerator::generate()
 {
   auto mesh = buildReplicatedMesh(2);
   TransitionLayerTools::transitionLayerGenerator(*mesh,
