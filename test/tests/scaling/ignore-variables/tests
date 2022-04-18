@@ -1,0 +1,11 @@
+[Tests]
+  design = 'NonlinearSystem.md'
+  issues = '#19573'
+  [ignore]
+    type = Exodiff
+    input = ignore.i
+    exodiff = ignore_out.e
+    expect_out = 'Automatic scaling factors:\s+u:\s+0\.160714\s+v:\s+1'
+    requirement = 'The system shall ignore particular variable automatic scaling factors'
+  []
+[]

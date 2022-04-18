@@ -647,6 +647,12 @@ public:
     _scaling_group_variables = scaling_group_variables;
   }
 
+  void
+  ignoreVariablesForAutoscaling(const std::vector<std::string> & ignore_variables_for_autoscaling)
+  {
+    _ignore_variables_for_autoscaling = ignore_variables_for_autoscaling;
+  }
+
   bool offDiagonalsInAutoScaling() const { return _off_diagonals_in_auto_scaling; }
   void offDiagonalsInAutoScaling(bool off_diagonals_in_auto_scaling)
   {
@@ -926,6 +932,9 @@ protected:
   /// for simulations in which vector-like variables are split into invidual scalar-field components
   /// like for solid/fluid mechanics
   std::vector<std::vector<std::string>> _scaling_group_variables;
+
+  /// A container for variables that do not partipate in autoscaling
+  std::vector<std::string> _ignore_variables_for_autoscaling;
 
   /// Whether to include off diagonals when determining automatic scaling factors
   bool _off_diagonals_in_auto_scaling;

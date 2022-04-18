@@ -3355,6 +3355,13 @@ NonlinearSystemBase::setupScalingGrouping()
          ++group_index)
       for (const auto & var_name : _scaling_group_variables[group_index])
       {
+        if (find(_ignore_variables_for_autoscaling.begin(),
+                 _ignore_variables_for_autoscaling.end(),
+                 var_name) != _ignore_variables_for_autoscaling.end())
+          mooseError("Variable ",
+                     var_name,
+                     " cannot be in a scaling grouping and be also ignored via "
+                     "'ignore_variables_for_autoscaling'");
         auto & fe_var = getVariable(/*tid=*/0, var_name);
         auto map_pair = _var_to_group_var.insert(std::make_pair(fe_var.number(), group_index));
         if (!map_pair.second)
@@ -3396,7 +3403,24 @@ NonlinearSystemBase::computeScaling()
     setupScalingGrouping();
 
   auto & field_variables = _vars[0].fieldVariables();
+  std::vector<bool> field_variable_autoscaled(field_variables.size(), true);
+
   auto & scalar_variables = _vars[0].scalars();
+  std::vector<bool> scalar_variable_autoscaled(scalar_variables.size(), true);
+
+  if (_ignore_variables_for_autoscaling.size())
+  {
+    for (MooseIndex(field_variable_autoscaled) i = 0; i < field_variable_autoscaled.size(); ++i)
+      if (find(_ignore_variables_for_autoscaling.begin(),
+               _ignore_variables_for_autoscaling.end(),
+               (*field_variables[i]).name()) != _ignore_variables_for_autoscaling.end())
+        field_variable_autoscaled[i] = false;
+    for (MooseIndex(scalar_variable_autoscaled) i = 0; i < scalar_variable_autoscaled.size(); ++i)
+      if (find(_ignore_variables_for_autoscaling.begin(),
+               _ignore_variables_for_autoscaling.end(),
+               (*scalar_variables[i]).name()) != _ignore_variables_for_autoscaling.end())
+        scalar_variable_autoscaled[i] = false;
+  }
 
   std::vector<Real> inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
   std::vector<Real> resid_inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
@@ -3444,10 +3468,38 @@ NonlinearSystemBase::computeScaling()
   // Compute our scaling factors for the spatial field variables
   for (const auto & elem : *mesh().getActiveLocalElementRange())
     for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
+      if (field_variable_autoscaled[i])
+      {
+        auto & field_variable = *field_variables[i];
+        auto var_number = field_variable.number();
+        dof_map.dof_indices(elem, dof_indices, var_number);
+        for (auto dof_index : dof_indices)
+          if (dof_map.local_index(dof_index))
+          {
+            if (jac_scaling)
+            {
+              // For now we will use the diagonal for determining scaling
+              auto mat_value = (*_scaling_matrix)(dof_index, dof_index);
+              auto & factor = jac_inverse_scaling_factors[_var_to_group_var[var_number]];
+              factor = std::max(factor, std::abs(mat_value));
+            }
+            if (resid_scaling)
+            {
+              auto vec_value = scaling_residual(dof_index);
+              auto & factor = resid_inverse_scaling_factors[_var_to_group_var[var_number]];
+              factor = std::max(factor, std::abs(vec_value));
+            }
+          }
+      }
+
+  auto offset = _num_scaling_groups;
+
+  // Compute scalar factors for scalar variables
+  for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
+    if (scalar_variable_autoscaled[i])
     {
-      auto & field_variable = *field_variables[i];
-      auto var_number = field_variable.number();
-      dof_map.dof_indices(elem, dof_indices, var_number);
+      auto & scalar_variable = *scalar_variables[i];
+      dof_map.SCALAR_dof_indices(dof_indices, scalar_variable.number());
       for (auto dof_index : dof_indices)
         if (dof_map.local_index(dof_index))
         {
@@ -3455,43 +3507,17 @@ NonlinearSystemBase::computeScaling()
           {
             // For now we will use the diagonal for determining scaling
             auto mat_value = (*_scaling_matrix)(dof_index, dof_index);
-            auto & factor = jac_inverse_scaling_factors[_var_to_group_var[var_number]];
-            factor = std::max(factor, std::abs(mat_value));
+            jac_inverse_scaling_factors[offset + i] =
+                std::max(jac_inverse_scaling_factors[offset + i], std::abs(mat_value));
           }
           if (resid_scaling)
           {
             auto vec_value = scaling_residual(dof_index);
-            auto & factor = resid_inverse_scaling_factors[_var_to_group_var[var_number]];
-            factor = std::max(factor, std::abs(vec_value));
+            resid_inverse_scaling_factors[offset + i] =
+                std::max(resid_inverse_scaling_factors[offset + i], std::abs(vec_value));
           }
         }
     }
-
-  auto offset = _num_scaling_groups;
-
-  // Compute scalar factors for scalar variables
-  for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
-  {
-    auto & scalar_variable = *scalar_variables[i];
-    dof_map.SCALAR_dof_indices(dof_indices, scalar_variable.number());
-    for (auto dof_index : dof_indices)
-      if (dof_map.local_index(dof_index))
-      {
-        if (jac_scaling)
-        {
-          // For now we will use the diagonal for determining scaling
-          auto mat_value = (*_scaling_matrix)(dof_index, dof_index);
-          jac_inverse_scaling_factors[offset + i] =
-              std::max(jac_inverse_scaling_factors[offset + i], std::abs(mat_value));
-        }
-        if (resid_scaling)
-        {
-          auto vec_value = scaling_residual(dof_index);
-          resid_inverse_scaling_factors[offset + i] =
-              std::max(resid_inverse_scaling_factors[offset + i], std::abs(vec_value));
-        }
-      }
-  }
 
   if (resid_scaling)
     _communicator.max(resid_inverse_scaling_factors);

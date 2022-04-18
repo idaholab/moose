@@ -113,6 +113,9 @@ FEProblemSolve::validParams()
       "scaling_group_variables",
       "Name of variables that are grouped together for determining scale factors. (Multiple "
       "groups can be provided, separated by semicolon)");
+  params.addParam<std::vector<std::string>>(
+      "ignore_variables_for_autoscaling",
+      "List of variables that do not participate in autoscaling.");
   params.addRangeCheckedParam<unsigned int>(
       "num_grids",
       1,
@@ -127,7 +130,7 @@ FEProblemSolve::validParams()
                               "Solver");
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
-      "scaling_group_variables resid_vs_jac_scaling_param",
+      "scaling_group_variables resid_vs_jac_scaling_param ignore_variables_for_autoscaling",
       "Solver variable scaling parameters");
   params.addParamNamesToGroup("line_search line_search_package contact_line_search_ltol "
                               "contact_line_search_allowed_lambda_cuts",
@@ -218,6 +221,9 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   if (isParamValid("scaling_group_variables"))
     _nl.scalingGroupVariables(
         getParam<std::vector<std::vector<std::string>>>("scaling_group_variables"));
+  if (isParamValid("ignore_variables_for_autoscaling"))
+    _nl.ignoreVariablesForAutoscaling(
+        getParam<std::vector<std::string>>("ignore_variables_for_autoscaling"));
 
   _problem.numGridSteps(_num_grid_steps);
 }
