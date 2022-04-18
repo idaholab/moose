@@ -45,8 +45,8 @@ h_fs = 0.01
     energy_inlet_function = '${fparse u_inlet * rho * cp * T_inlet}'
     wall_boundaries = 'bottom top'
     momentum_wall_types = 'symmetry noslip'
-    energy_wall_types = 'symmetry heatflux'
-    energy_wall_function = '0'
+    energy_wall_types = 'heatflux heatflux'
+    energy_wall_function = '0 0'
 
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure-zero-gradient'

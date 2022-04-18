@@ -19,9 +19,9 @@ WCNSFVMomentumTimeDerivative::validParams()
   InputParameters params = INSFVTimeKernel::validParams();
   params.addClassDescription(
       "Adds the time derivative term to the incompressible Navier-Stokes momentum equation.");
-  params.addRequiredParam<MaterialPropertyName>(NS::density, "The density material property");
-  params.addRequiredParam<MaterialPropertyName>(
-      NS::time_deriv(NS::density), "The time derivative of the density material property");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "The density material property");
+  params.addRequiredParam<MooseFunctorName>(NS::time_deriv(NS::density),
+                                            "The time derivative of the density material property");
   return params;
 }
 

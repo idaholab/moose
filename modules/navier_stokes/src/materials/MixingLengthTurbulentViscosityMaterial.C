@@ -23,8 +23,8 @@ MixingLengthTurbulentViscosityMaterial::validParams()
   params.addCoupledVar("v", 0, "y-velocity"); // only required in 2D and 3D
   params.addCoupledVar("w", 0, "z-velocity"); // only required in 3D
   params.addRequiredCoupledVar("mixing_length", "Turbulent eddy mixing length.");
-  params.addRequiredParam<MaterialPropertyName>("mu", "The viscosity");
-  params.addRequiredParam<MaterialPropertyName>("rho", "The value for the density");
+  params.addRequiredParam<MooseFunctorName>("mu", "The viscosity");
+  params.addRequiredParam<MooseFunctorName>("rho", "The value for the density");
   return params;
 }
 

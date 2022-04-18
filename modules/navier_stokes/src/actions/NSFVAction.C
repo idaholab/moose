@@ -201,7 +201,7 @@ NSFVAction::validParams()
       std::vector<std::string>(),
       "Functions for fixed-value boundaries in the energy equation.");
 
-  MultiMooseEnum en_wall_types("fixed-temperature heatflux symmetry", "symmetry");
+  MultiMooseEnum en_wall_types("fixed-temperature heatflux", "heatflux");
   params.addParam<MultiMooseEnum>(
       "energy_wall_types", en_wall_types, "Types for the wall boundaries for the energy equation.");
 
@@ -1761,8 +1761,8 @@ NSFVAction::addINSWallBC()
     {
       const std::string bc_type = "INSFVWallFunctionBC";
       InputParameters params = _factory.getValidParams(bc_type);
-      params.set<MaterialPropertyName>(NS::mu) = _dynamic_viscosity_name;
-      params.set<MaterialPropertyName>(NS::density) = _density_name;
+      params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+      params.set<MooseFunctorName>(NS::density) = _density_name;
       params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
 
       if (_porous_medium_treatment)
@@ -1874,8 +1874,6 @@ NSFVAction::addINSWallBC()
 void
 NSFVAction::addINSEnergyWallBC()
 {
-  unsigned int skipped_energy_bc = 0;
-
   for (unsigned int bc_ind = 0; bc_ind < _wall_boundaries.size(); ++bc_ind)
   {
     if (_energy_wall_types[bc_ind] == "fixed-temperature")
@@ -1888,19 +1886,12 @@ NSFVAction::addINSEnergyWallBC()
 
       _problem->addFVBC(bc_type, NS::T_fluid + "_" + _wall_boundaries[bc_ind], params);
     }
-    else if (_energy_wall_types[bc_ind] == "heatflux" || _energy_wall_types[bc_ind] == "symmetry")
+    else if (_energy_wall_types[bc_ind] == "heatflux")
     {
       const std::string bc_type = "FVFunctionNeumannBC";
       InputParameters params = _factory.getValidParams(bc_type);
       params.set<NonlinearVariableName>("variable") = NS::T_fluid;
-      if (_energy_wall_types[bc_ind] == "symmetry")
-      {
-        params.set<FunctionName>("function") = "0.0";
-        skipped_energy_bc += 1;
-      }
-      else
-        params.set<FunctionName>("function") = _energy_wall_function[bc_ind - skipped_energy_bc];
-
+      params.set<FunctionName>("function") = _energy_wall_function[bc_ind];
       params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
 
       _problem->addFVBC(bc_type, NS::T_fluid + "_" + _wall_boundaries[bc_ind], params);
