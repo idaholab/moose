@@ -17,9 +17,7 @@ requirements:
 
   run:
     - {{ moose_mpich }}
-    - {{ moose_vtk }}
     - {{ moose_numpy }}
-    - {{ moose_pyqt }}           # [not arm64]
     - {{ moose_matplotlib }}
     - {{ moose_pandas }}
     - {{ moose_livereload }}
@@ -43,7 +41,6 @@ requirements:
 test:
   imports:
     - numpy
-    - PyQt5                      # [not arm64]
     - matplotlib
     - pandas
     - livereload
@@ -54,7 +51,6 @@ test:
     - lxml
     - skimage
     - sympy
-    - vtk
     - pylatexenc
     - jinja2
     - deepdiff

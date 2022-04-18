@@ -11,7 +11,7 @@ vtk_version:
   - 9.1.0
 
 moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.1.0 build_6
+  - moose-libmesh-vtk 9.1.0
 
 moose_petsc:
   - moose-petsc 3.16.5 build_2
@@ -24,16 +24,6 @@ moose_python:
   - python 3.9
   - python 3.8
   - python 3.7                                             # [not arm64]
-
-moose_vtk:
-  - vtk 9.1.0 qt_py39h5247bde_203                          # [not arm64 and osx]
-  - vtk 9.1.0 qt_py38hf8e4d4e_203                          # [not arm64 and osx]
-  - vtk 9.1.0 qt_py37hd791b3b_203                          # [not arm64 and osx]
-  - vtk 9.0.3 no_osmesa_py39h801044d_100                   # [linux]
-  - vtk 9.0.3 no_osmesa_py38h3850a3d_100                   # [linux]
-  - vtk 9.0.3 no_osmesa_py37h7b56ff3_100                   # [linux]
-  - vtk 9.0.3 no_osmesa_py39h8e4790f_105                   # [arm64]
-  - vtk 9.0.3 no_osmesa_py38hb8cbb7a_105                   # [arm64]
 
 moose_numpy:
   - numpy 1.22.1 py39h9d9ce41_0                            # [not arm64 and osx]
@@ -158,7 +148,6 @@ moose_yaml:
 
 zip_keys:
   - moose_python
-  - moose_vtk
   - moose_numpy
   - moose_pyqt                                              # [not arm64]
   - moose_matplotlib
