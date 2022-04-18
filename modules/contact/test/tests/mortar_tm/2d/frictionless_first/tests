@@ -1,18 +1,9 @@
 [Tests]
   design = 'Constraints/index.md'
-  issues = '#13080'
+  issues = '#13080 #20773'
   [soft]
-    no_error_deprecated = true
     requirement = 'The system shall be able to compute a soft block bouncing on a soft plank problem '
                   'on a first order 2D mesh using tensor mechanics and mortar contact'
-    [finite_noaction]
-      detail = 'using the finite strain formulation without the contact action.'
-      type = 'CSVDiff'
-      input = 'finite_noaction.i'
-      csvdiff = 'finite_noaction.csv'
-      heavy = true
-      ad_indexing_type = 'global'
-    []
     [small]
       detail = 'using the small strain formulation.'
       type = 'CSVDiff'
@@ -49,7 +40,6 @@
     []
   []
   [stiff]
-    no_error_deprecated = true
     requirement = 'The system shall be able to compute a block bouncing on a plank problem on a '
                   'first order 2D mesh using tensor mechanics and mortar contact and finite strain'
     [stiff_stiff]

@@ -1,19 +1,21 @@
 [Tests]
   issues = '#7485 #14791'
-  design = 'FieldSplitPreconditioner.md NormalNodalLMMechanicalContact.md TangentialMortarLMMechanicalContact.md'
-  [./2block-3D]
+  design = 'FieldSplitPreconditioner.md NormalNodalLMMechanicalContact.md '
+           'TangentialMortarLMMechanicalContact.md'
+  [2block-3D]
     type = 'Exodiff'
     input = '2blocks3d.i'
     exodiff = '2blocks3d_out.e'
     max_parallel = 4
     requirement = 'The system shall allow for split preconditioning based on contact surfaces.'
-  [../]
-  [./mortar-FS]
+  []
+  [mortar-FS]
     type = 'Exodiff'
     input = 'frictional_mortar_FS.i'
     exodiff = 'frictional_mortar_FS_out.e'
     abs_zero = 1e-8
     mesh_mode = REPLICATED
+    skip = 'Weighted mortar'
     requirement = 'The system shall allow split preconditioning of frictional mortar contact.'
-  [../]
+  []
 []

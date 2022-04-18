@@ -55,7 +55,7 @@
 []
 
 [Constraints]
-  [frictional_normal_lm]
+  [frictionless_normal_lm]
     type = NormalNodalLMMechanicalContact
     secondary = 101
     primary = 100

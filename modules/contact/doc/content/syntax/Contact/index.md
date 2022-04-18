@@ -113,11 +113,11 @@ Node/face frictional contact:
 
 Normal (frictionless) mortar contact:
 
-!listing test/tests/mechanical-small-problem/frictionless-nodal-lm-mortar-disp-action.i block=Contact
+!listing test/tests/bouncing-block-contact/ping-ponging/mortar-no-ping-pong_weighted.i block=Contact
 
 Normal and tangential (frictional) mortar contact:
 
-!listing test/tests/bouncing-block-contact/frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-action.i block=Contact
+!listing test/tests/3d-mortar-contact/frictional-mortar-3d-action.i block=Contact
 
 Gap offset:
 
