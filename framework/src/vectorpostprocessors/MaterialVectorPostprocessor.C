@@ -79,6 +79,18 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
 }
 
 void
+MaterialVectorPostprocessor::initialize()
+{
+  if (!containsCompleteHistory())
+  {
+    _elem_ids.clear();
+    _qp_ids.clear();
+    for (auto vec : _prop_vecs)
+      vec->clear();
+  }
+}
+
+void
 MaterialVectorPostprocessor::execute()
 {
   unsigned int elem_id = _current_elem->id();
