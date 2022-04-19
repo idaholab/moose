@@ -34,6 +34,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::validParams()
       "The name of the postprocessor in the MultiApp to transfer the value to.  "
       "This should most likely be a Reciever Postprocessor.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
+  params.addParam<unsigned int>("source_variable_component", 0, "The component of source variable");
   return params;
 }
 
@@ -41,7 +42,8 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
     const InputParameters & parameters)
   : MultiAppTransfer(parameters),
     _postprocessor_name(getParam<PostprocessorName>("postprocessor")),
-    _from_var_name(getParam<VariableName>("source_variable"))
+    _from_var_name(getParam<VariableName>("source_variable")),
+    _comp(getParam<unsigned int>("source_variable_component"))
 {
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
@@ -60,10 +62,19 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
     case TO_MULTIAPP:
     {
       FEProblemBase & from_problem = getToMultiApp()->problemBase();
-      MooseVariableField<Real> & from_var = static_cast<MooseVariableField<Real> &>(
-          from_problem.getActualFieldVariable(0, _from_var_name));
+      auto & from_var = from_problem.getVariable(0, _from_var_name);
       SystemBase & from_system_base = from_var.sys();
       SubProblem & from_sub_problem = from_system_base.subproblem();
+
+      const ArrayMooseVariable * array_var = nullptr;
+      const MooseVariableField<Real> * standard_var = nullptr;
+      if (from_var.isArray())
+        array_var = &from_problem.getArrayVariable(0, _from_var_name);
+      else if (!from_var.isVector())
+        standard_var = static_cast<MooseVariableField<Real> *>(&from_var);
+      else
+        mooseError("MultiAppVariableValueSamplePostprocessorTransfer does not support transfer of "
+                   "vector variables");
 
       MooseMesh & from_mesh = from_problem.mesh();
 
@@ -89,8 +100,19 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
             from_sub_problem.setCurrentSubdomainID(elem, 0);
             from_sub_problem.reinitElemPhys(elem, point_vec, 0);
 
-            mooseAssert(from_var.sln().size() == 1, "No values in u!");
-            value = from_var.sln()[0];
+            if (array_var)
+            {
+              value = array_var->sln()[0](_comp);
+              mooseAssert(
+                  _comp < array_var->count(),
+                  "Component must be smaller than the number of components of array variable!");
+              mooseAssert(array_var->sln().size() == 1, "No values in u!");
+            }
+            else
+            {
+              value = standard_var->sln()[0];
+              mooseAssert(standard_var->sln().size() == 1, "No values in u!");
+            }
           }
 
           _communicator.max(value);

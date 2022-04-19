@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#1737 #16099'
+  issues = '#1737 #16099 #20816'
   design = 'MultiAppVariableValueSampleTransfer.md'
 
   [test]
@@ -10,6 +10,15 @@
     requirement = "The system shall include the ability to transfer a field variable sampled at a "
                   "point to populate a field variable on the sub-application with the supplied "
                   "value."
+  []
+
+  [array_test]
+    type = 'Exodiff'
+    input = 'master_array.i'
+    exodiff = 'master_array_out_pp_sub00.e master_array_out_pp_sub01.e master_array_out_pp_sub10.e master_array_out_pp_sub11.e'
+
+    requirement = "The system shall include the ability to transfer a component of an array field variable sampled at a "
+                  "point to post processing variable on the sub-application."
   []
 
   [pp]
