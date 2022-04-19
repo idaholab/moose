@@ -72,7 +72,6 @@ ifeq ($(ENABLE_LIBTORCH),true)
     LIBTORCH_LIB := libtorch.dylib
   endif
 
-  $(info $(LIBTORCH_DIR))
   ifneq ($(wildcard $(LIBTORCH_DIR)/lib/$(LIBTORCH_LIB)),)
     # Enabling parts that have pytorch dependencies
     libmesh_CXXFLAGS += -DLIBTORCH_ENABLED

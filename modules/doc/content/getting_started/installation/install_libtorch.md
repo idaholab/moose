@@ -91,7 +91,7 @@ The last step is to compile MOOSE with libtorch support:
 make -j 8
 ```
 
-The same procedure is expected to work with every other module and the framework itself.
+After configured, compile MOOSE as normal.
 
 !alert! note
 Due to namespace conflicts between MOOSE and `libtorch`, the folders of source files

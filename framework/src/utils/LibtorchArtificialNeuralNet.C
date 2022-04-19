@@ -24,7 +24,8 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     _num_inputs(num_inputs),
     _num_outputs(num_outputs),
     _num_neurons_per_layer(num_neurons_per_layer),
-    _num_hidden_layers(num_neurons_per_layer.size())
+    _num_hidden_layers(num_neurons_per_layer.size()),
+    _activation_function(MultiMooseEnum("relu sigmoid elu gelu linear", "relu"))
 {
   _activation_function = activation_function;
 

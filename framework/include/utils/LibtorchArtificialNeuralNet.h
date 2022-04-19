@@ -83,7 +83,7 @@ protected:
   const unsigned int _num_hidden_layers;
   /// Activation functions (either one for all hidden layers or one for every layer
   /// separately)
-  MultiMooseEnum _activation_function = MultiMooseEnum("relu sigmoid elu gelu linear", "relu");
+  MultiMooseEnum _activation_function;
 };
 
 }
