@@ -227,21 +227,17 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
     // scaling_group_variables
     if (isParamValid("scaling_group_variables"))
     {
-      const auto ignore_variables_for_autoscaling =
+      const auto & ignore_variables_for_autoscaling =
           getParam<std::vector<std::string>>("ignore_variables_for_autoscaling");
-      const auto scaling_group_variables =
+      const auto & scaling_group_variables =
           getParam<std::vector<std::vector<std::string>>>("scaling_group_variables");
-      for (MooseIndex(scaling_group_variables) group_index = 0;
-           group_index < scaling_group_variables.size();
-           ++group_index)
-        for (const auto & var_name : scaling_group_variables[group_index])
-        {
+      for (const auto & group : scaling_group_variables)
+        for (const auto & var_name : group)
           if (std::find(ignore_variables_for_autoscaling.begin(),
                         ignore_variables_for_autoscaling.end(),
                         var_name) != ignore_variables_for_autoscaling.end())
-            paramError(" ignore_variables_for_autoscaling",
+            paramError("ignore_variables_for_autoscaling",
                        "Variables cannot be in a scaling grouping and also be ignored");
-        }
     }
     _nl.ignoreVariablesForAutoscaling(
         getParam<std::vector<std::string>>("ignore_variables_for_autoscaling"));

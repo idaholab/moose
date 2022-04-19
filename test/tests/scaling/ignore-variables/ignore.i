@@ -5,9 +5,14 @@
 []
 
 [Variables]
-  [u]
+  [u][]
+  [v][]
+  [x]
+    family = SCALAR
+    type = MooseVariableBase
   []
-  [v]
+  [y]
+    family = SCALAR
   []
 []
 
@@ -31,13 +36,35 @@
   []
 []
 
+[ScalarKernels]
+  [dt_x]
+    type = ODETimeDerivative
+    variable = x
+  []
+  [ode_x]
+    type = ParsedODEKernel
+    variable = x
+    args = y
+    function = '-3*x - 2*y'
+  []
+  [dt_y]
+    type = ODETimeDerivative
+    variable = y
+  []
+  [ode_y ]
+    type = ParsedODEKernel
+    variable = y
+    function = '10*y'
+  []
+[]
+
 
 [Executioner]
   type = Transient
   num_steps = 2
   automatic_scaling = true
   compute_scaling_once = false
-  ignore_variables_for_autoscaling = 'v'
+  ignore_variables_for_autoscaling = 'v y'
   solve_type = NEWTON
   verbose = true
 []
