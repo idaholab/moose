@@ -191,6 +191,8 @@ MultiAppProjectionTransfer::assembleL2(EquationSystems & es, const std::string &
 void
 MultiAppProjectionTransfer::execute()
 {
+  TIME_SECTION(
+      "MultiAppProjectionTransfer::execute()", 5, "Transferring variables through projection");
 
   getAppInfo();
 

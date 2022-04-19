@@ -55,6 +55,9 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
 void
 MultiAppVariableValueSamplePostprocessorTransfer::execute()
 {
+  TIME_SECTION("MultiAppVariableValueSamplePostprocessorTransfer::execute()",
+               5,
+               "Transferring a variable to a postprocessor through sampling");
 
   switch (_current_direction)
   {

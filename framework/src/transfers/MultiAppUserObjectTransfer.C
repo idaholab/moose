@@ -98,6 +98,8 @@ MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & p
 void
 MultiAppUserObjectTransfer::execute()
 {
+  TIME_SECTION(
+      "MultiAppUserObjectTransfer::execute()", 5, "Performing transfer with a user object");
 
   switch (_current_direction)
   {
@@ -511,7 +513,6 @@ MultiAppUserObjectTransfer::execute()
       break;
     }
   }
-
 
   postExecute();
 }

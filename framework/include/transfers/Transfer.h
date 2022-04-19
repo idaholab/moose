@@ -14,6 +14,7 @@
 #include "MooseTypes.h"
 #include "SetupInterface.h"
 #include "Restartable.h"
+#include "PerfGraphInterface.h"
 
 class SubProblem;
 class FEProblemBase;
@@ -32,7 +33,10 @@ class EquationSystems;
  * Transfers are objects that take values from one Application
  * or System and put them in another Application or System.
  */
-class Transfer : public MooseObject, public SetupInterface, public Restartable
+class Transfer : public MooseObject,
+                 public SetupInterface,
+                 public Restartable,
+                 public PerfGraphInterface
 {
 public:
   Transfer(const InputParameters & parameters);

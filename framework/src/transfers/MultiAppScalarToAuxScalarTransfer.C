@@ -50,6 +50,8 @@ MultiAppScalarToAuxScalarTransfer::MultiAppScalarToAuxScalarTransfer(
 void
 MultiAppScalarToAuxScalarTransfer::execute()
 {
+  TIME_SECTION(
+      "MultiAppScalarToAuxScalarTransfer::execute()", 5, "Performing a scalar variable transfer");
 
   // Perform action based on the transfer direction
   switch (_current_direction)
@@ -173,5 +175,4 @@ MultiAppScalarToAuxScalarTransfer::execute()
       break;
     }
   }
-
 }

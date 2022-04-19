@@ -47,6 +47,9 @@ MultiAppPostprocessorToAuxScalarTransfer::MultiAppPostprocessorToAuxScalarTransf
 void
 MultiAppPostprocessorToAuxScalarTransfer::execute()
 {
+  TIME_SECTION("MultiAppPostprocessorToAuxScalarTransfer::execute()",
+               5,
+               "Performing transfer between a scalar variable and a postprocessor");
 
   // Perform action based on the transfer direction
   switch (_current_direction)

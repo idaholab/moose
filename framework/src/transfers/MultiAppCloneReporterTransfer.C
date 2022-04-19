@@ -165,6 +165,8 @@ MultiAppCloneReporterTransfer::executeFromMultiapp()
 void
 MultiAppCloneReporterTransfer::execute()
 {
+  TIME_SECTION("MultiAppCloneReporterTransfer::execute()", 5, "Transferring reporters");
+
   if (_current_direction == FROM_MULTIAPP)
     executeFromMultiapp();
   else

@@ -55,6 +55,8 @@ MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const InputParameters
 void
 MultiAppMeshFunctionTransfer::execute()
 {
+  TIME_SECTION(
+      "MultiAppMeshFunctionTransfer::execute()", 5, "Transferring variables via a mesh function");
 
   getAppInfo();
 

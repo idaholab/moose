@@ -63,6 +63,7 @@ MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParamete
 void
 MultiAppPostprocessorTransfer::execute()
 {
+  TIME_SECTION("MultiAppPostprocessorTransfer::execute()", 5, "Transferring a postprocessor");
 
   switch (_current_direction)
   {
@@ -164,5 +165,4 @@ MultiAppPostprocessorTransfer::execute()
       break;
     }
   }
-
 }

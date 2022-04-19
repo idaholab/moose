@@ -65,6 +65,8 @@ MultiAppVariableValueSampleTransfer::initialSetup()
 void
 MultiAppVariableValueSampleTransfer::execute()
 {
+  TIME_SECTION(
+      "MultiAppVariableValueSampleTransfer::execute()", 5, "Sampling a variable for transfer");
 
   switch (_current_direction)
   {
@@ -145,5 +147,4 @@ MultiAppVariableValueSampleTransfer::execute()
       break;
     }
   }
-
 }

@@ -1154,6 +1154,8 @@ MooseApp::registerRestartableNameWithFilter(const std::string & name,
 std::shared_ptr<Backup>
 MooseApp::backup()
 {
+  TIME_SECTION("backup", 2, "Backing Up Application");
+
   mooseAssert(_executioner, "Executioner is nullptr");
   FEProblemBase & fe_problem = feProblem();
 

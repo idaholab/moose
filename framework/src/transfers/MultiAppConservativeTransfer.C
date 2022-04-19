@@ -200,6 +200,9 @@ MultiAppConservativeTransfer::postExecute()
 {
   if (_preserve_transfer)
   {
+    TIME_SECTION("MultiAppConservativeTransfer::execute()",
+                 5,
+                 "Post transfer to preserve postprocessor values");
 
     if (_current_direction == TO_MULTIAPP)
     {
@@ -254,7 +257,6 @@ MultiAppConservativeTransfer::postExecute()
         to_problem.computeUserObjectByName(
             EXEC_TRANSFER, Moose::POST_AUX, _to_postprocessors_to_be_preserved[0]);
     }
-
   }
 }
 

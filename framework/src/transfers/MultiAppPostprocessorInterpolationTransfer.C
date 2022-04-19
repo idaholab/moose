@@ -78,6 +78,9 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
 void
 MultiAppPostprocessorInterpolationTransfer::execute()
 {
+  TIME_SECTION("MultiAppPostprocessorInterpolationTransfer::execute()",
+               5,
+               "Transferring/interpolating postprocessors");
 
   switch (_current_direction)
   {

@@ -77,6 +77,8 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters &
 void
 MultiAppNearestNodeTransfer::execute()
 {
+  TIME_SECTION(
+      "MultiAppNearestNodeTransfer::execute()", 5, "Transferring variables based on nearest nodes");
 
   getAppInfo();
 
