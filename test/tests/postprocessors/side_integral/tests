@@ -76,12 +76,31 @@
       type = 'CSVDiff'
       input = 'side_integral_functor.i'
       csvdiff = 'internal_side_integral_functor_out.csv'
-    #  cli_args = "Postprocessors/active='int_s1_u int_s1_v1 int_s1_m1 int_s1_m2'
-                                  #       int_s2_u int_s2_v1 int_s2_v2 int_s2_m1 int_s2_m2'
-    #              Outputs/file_base=internal_side_integral_functor_out"
+      cli_args = "Postprocessors/active='int_s1_u int_s1_v1 int_s1_f1 int_s1_m1 int_s1_m2
+                                         int_s2_v2 int_s2_f1 int_s2_m1 int_s2_m2'
+                  Outputs/file_base=internal_side_integral_functor_out"
 
       requirement = 'The system shall support computing the integral of a functor '
                     'over a functor domain boundary inside a mesh.'
+      ad_indexing_type = 'global'
+    []
+    [mesh_side_refined]
+      type = 'CSVDiff'
+      input = 'side_integral_functor.i'
+      csvdiff = 'side_integral_functor_refined_out.csv'
+      cli_args = "Mesh/inactive='' Outputs/file_base=side_integral_functor_refined_out"
+
+      requirement = 'The system shall support computing the integral of a functor '
+                    'over one or more evenly refined sides on the mesh.'
+      ad_indexing_type = 'global'
+    []
+    [mesh_side_uneven_refined]
+      type = 'RunException'
+      input = 'side_integral_functor.i'
+      expect_err = 'Inactive neighbor found in SideUO loop'
+      cli_args = "Mesh/inactive='' Mesh/refine/refinement='2 1'"
+
+      requirement = 'The system shall error when attempting to use functors in side user objects across an interface that is evenly refined on both sides.'
       ad_indexing_type = 'global'
     []
   []

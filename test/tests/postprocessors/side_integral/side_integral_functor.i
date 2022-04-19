@@ -1,4 +1,5 @@
 [Mesh]
+  inactive = 'refine'
   # U-shaped domains to have internal boundaries in
   # a variety of directions
   [cmg]
@@ -11,11 +12,6 @@
      subdomain_id = '1 2 1
                      1 1 1'
   []
-  # [refine_2]
-  #   type = RefineBlockGenerator
-  #   block = 1 2
-  #   refinement = '1 2'
-  # []
   [internal_boundary_dir1]
      type = SideSetsBetweenSubdomainsGenerator
      input = cmg
@@ -29,6 +25,12 @@
      primary_block = 2
      paired_block = 1
      new_boundary = 'inside_2'
+  []
+  [refine]
+    type = RefineBlockGenerator
+    input = internal_boundary_dir2
+    block = '1 2'
+    refinement = '2 1'
   []
 []
 
