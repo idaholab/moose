@@ -1,85 +1,90 @@
 [Tests]
   design = 'Constraints/index.md'
   issues = '#13080'
-  [./soft]
-    no_error_deprecated = true
-    requirement = 'The system shall be able to use automatic differntiation to compute a soft block bouncing on a soft plank problem on a second order 2DRz mesh using tensor mechanics and mortar contact'
-    [./small]
+  [soft]
+    requirement = 'The system shall be able to use automatic differentiation to compute a soft block '
+                  'bouncing on a soft plank problem on a second order 2DRz mesh using tensor '
+                  'mechanics and mortar contact'
+    [small]
       detail = 'using the small strain formulation.'
       type = 'CSVDiff'
       input = 'small.i'
       csvdiff = 'small.csv'
       heavy = true
-      ad_mode = sparse
-    [../]
-    [./finite]
+      ad_indexing_type = 'global'
+    []
+    [finite]
       detail = 'using the finite strain formulation.'
       type = 'CSVDiff'
       input = 'finite.i'
       csvdiff = 'finite.csv'
       heavy = true
-      ad_mode = sparse
-    [../]
-    [./finite_scaling]
+      ad_indexing_type = 'global'
+    []
+    [finite_scaling]
       detail = 'using the finite strain formulation with automatic scaling.'
       type = 'CSVDiff'
       input = 'finite.i'
-      cli_args = 'Executioner/automatic_scaling=true Executioner/compute_scaling_once=false name=finite_scaling'
+      cli_args = 'Executioner/automatic_scaling=true Executioner/compute_scaling_once=false '
+                 'name=finite_scaling'
       csvdiff = 'finite_scaling.csv'
       heavy = true
-      ad_mode = sparse
-    [../]
-    [./finite_rr]
+      ad_indexing_type = 'global'
+    []
+    [finite_rr]
       detail = 'using the finite strain formulation and reference residual.'
       type = 'CSVDiff'
       input = 'finite_rr.i'
       csvdiff = 'finite_rr.csv'
       heavy = true
-      ad_mode = sparse
-    [../]
-    [./small-jac]
+      ad_indexing_type = 'global'
+    []
+    [small-jac]
       type = 'PetscJacobianTester'
       prereq = soft/small
       input = 'small.i'
-      ratio_tol = 1e-3
+      ratio_tol = 2e-3
       difference_tol = 1
       cli_args = 'Executioner/num_steps=3 -snes_test_err 1e-9'
       run_sim = true
       heavy = true
       detail = 'using the small strain formulation and calculate a perfect Jacobian.'
-    [../]
-    [./finite-jac]
+      ad_indexing_type = 'global'
+    []
+    [finite-jac]
       type = 'PetscJacobianTester'
       prereq = soft/finite
       input = 'finite.i'
-      ratio_tol = 1e-3
+      ratio_tol = 2e-3
       difference_tol = 1
       cli_args = 'Executioner/num_steps=3 -snes_test_err 1e-9'
       run_sim = true
       heavy = true
       detail = 'using the finite strain formulation and calculate a perfect Jacobian.'
-    [../]
-  [../]
-  [./stiff]
-    no_error_deprecated = true
-    requirement = 'The system shall be able to use automatic differntiation to compute a block bouncing on a plank problem on a second order 2DRz mesh using tensor mechanics and mortar contact and finite strain'
-    [./stiff_stiff]
+      ad_indexing_type = 'global'
+    []
+  []
+  [stiff]
+    requirement = 'The system shall be able to use automatic differntiation to compute a block '
+                  'bouncing on a plank problem on a second order 2DRz mesh using tensor mechanics '
+                  'and mortar contact and finite strain'
+    [stiff_stiff]
       detail = 'using with a stiff block and a stiff plank.'
       type = 'CSVDiff'
       input = 'finite.i'
       csvdiff = 'stiff_stiff.csv'
       cli_args = 'E_block=1e9 E_plank=1e9 name=stiff_stiff'
       heavy = true
-      ad_mode = sparse
-    [../]
-    [./soft_stiff]
+      ad_indexing_type = 'global'
+    []
+    [soft_stiff]
       detail = 'using with a soft block and a stiff plank.'
       type = 'CSVDiff'
       input = 'finite.i'
       csvdiff = 'soft_stiff.csv'
       cli_args = 'E_block=1e7 E_plank=1e9 name=soft_stiff'
       heavy = true
-      ad_mode = sparse
-    [../]
-  [../]
+      ad_indexing_type = 'global'
+    []
+  []
 []

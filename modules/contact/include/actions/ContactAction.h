@@ -53,12 +53,6 @@ public:
   static MooseEnum getModelEnum();
 
   /**
-   * Get mortar approach
-   * @return enum
-   */
-  static MooseEnum getMortarApproach();
-
-  /**
    * Get contact formulation
    * @return enum
    */
@@ -91,9 +85,6 @@ protected:
 
   /// Contact formulation
   const ContactFormulation _formulation;
-
-  /// Mortar approach (weighted --variationally consistent-- or legacy)
-  const enum class MortarApproach { Weighted, Legacy } _mortar_approach;
 
   /// Whether to use the dual Mortar approach
   bool _use_dual;

@@ -6,9 +6,10 @@
     heavy = true
     abs_zero = 1e-6
     design = 'Constraints/index.md'
-    issues = '#13080'
+    issues = '#13080 #20773'
     requirement = 'We shall be able to run our canonical frictional sliding block problem with lagrange multipliers and the mortar method'
     mesh_mode = 'replicated'
+    ad_indexing_type = 'global'
     cli_args = "Outputs/active='out'"
   []
   [./frictional_02_penalty]
