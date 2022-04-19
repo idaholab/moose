@@ -88,6 +88,7 @@ protected:
   void addScalarDiffusionKernels();
   void addScalarMixingLengthKernels();
   void addScalarSourceKernels();
+  void addScalarCoupledSourceKernels();
 
   /// Functions adding boundary conditions for the incompressible simulation.
   /// These are used for weakly-compressible simulations as well.
@@ -150,6 +151,14 @@ protected:
   /// Switch to enable friction correction for the porous medium momentum
   /// equations
   const bool _use_friction_correction;
+
+  /// Velocity names in case they are defined externally. For example in a situation when
+  /// we need to restart a simulation
+  const std::vector<std::string> _velocity_name;
+  /// Pressure name in case we want to define it externally
+  const NonlinearVariableName _pressure_name;
+  /// Fluid temperature name in case we want to define it externally
+  const NonlinearVariableName _fluid_temperature_name;
 
   /// Boundaries with a flow inlet specified on them
   const std::vector<BoundaryName> _inlet_boundaries;
@@ -215,8 +224,12 @@ protected:
   const std::vector<MooseFunctorName> _passive_scalar_diffusivity;
   /// Passive scalar Schmidt numbers
   const std::vector<Real> _passive_scalar_schmidt_number;
-  /// Passive scalar source terms
+  /// Passive scalar external source terms
   const std::vector<MooseFunctorName> _passive_scalar_source;
+  /// Passive scalar coupled source terms
+  const CoupledName _passive_scalar_coupled_source;
+  /// Passive scalar coupled source term coeffs
+  const std::vector<Real> _passive_scalar_coupled_source_coeff;
   /// Passive scalar inlet types (fixed-value/mass-flow)
   const MultiMooseEnum _passive_scalar_inlet_types;
   /// Passive scalar function names at inlet boundaries

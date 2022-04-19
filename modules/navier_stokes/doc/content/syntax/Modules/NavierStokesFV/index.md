@@ -139,8 +139,6 @@ The same simulation can be set up using the action syntax as folows:
 
 We note that the weakly-compressible handling can be enabled by setting
 [!param](/Modules/NavierStokesFV/compressibility) to `weakly-compressible`.
-Furthermore, if a transient analysis is requested, the user needs to request
-the addition of time derivatives. This is done by setting [!param](/Modules/NavierStokesFV/simulation_type) to `transient`.
 As shown in the example, an arbitrary
 energy source function can also be supplied to the incorporated
 energy equation using the [!param](/Modules/NavierStokesFV/external_heat_source) parameter.

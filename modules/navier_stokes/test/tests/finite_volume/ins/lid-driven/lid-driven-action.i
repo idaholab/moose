@@ -18,8 +18,8 @@ rho=1
   [NavierStokesFV]
     compressibility = 'incompressible'
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
+    density = ${rho}
+    dynamic_viscosity = ${mu}
 
     initial_pressure = 0.0
 
@@ -50,14 +50,6 @@ rho=1
     variable = U
     x = vel_x
     y = vel_y
-  []
-[]
-
-[Materials]
-  [const]
-    type = ADGenericFunctorMaterial
-    prop_names = 'rho mu'
-    prop_values = '${rho} ${mu}'
   []
 []
 
