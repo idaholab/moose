@@ -1,0 +1,17 @@
+[Tests]
+  design = 'NonlinearSystem.md'
+  issues = '#19573'
+  [ignore]
+    type = RunApp
+    input = ignore.i
+    expect_out = 'Automatic scaling factors:\s+u:\s+0\.160714\s+v:\s+1\s+x:\s+0.5\s+y:\s+1'
+    requirement = 'The system shall ignore particular variable automatic scaling factors'
+  []
+  [fail_with_group]
+    type = RunException
+    input = ignore.i
+    cli_args = 'Executioner/scaling_group_variables="u v"'
+    expect_err = 'Variables cannot be in a scaling grouping and also be ignored'
+    requirement = 'The system shall not allow ignoring of particular variable automatic scaling factors if they are grouped with other variables for scaling'
+  []
+[]
