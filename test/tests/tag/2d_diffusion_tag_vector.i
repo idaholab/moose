@@ -56,6 +56,7 @@
     variable = u
     boundary = 3
     value = 0
+    preset = false
     extra_vector_tags = vec_tag1
   [../]
 
@@ -64,6 +65,7 @@
     variable = u
     boundary = 1
     value = 1
+    preset = false
     extra_vector_tags = vec_tag2
   [../]
 []
@@ -75,7 +77,6 @@
 
 [Executioner]
   type = Steady
-
   solve_type = 'NEWTON'
 []
 

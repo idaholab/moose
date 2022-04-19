@@ -14,12 +14,30 @@
       detail = 'numeric vector,'
     []
 
+    [tag_vector_no_scale]
+      type = 'Exodiff'
+      input = '2d_diffusion_tag_vector.i'
+      exodiff = 'tag_vector_out.e'
+      cli_args = 'Executioner/automatic_scaling=true AuxKernels/TagVectorAux1/scaled=false AuxKernels/TagVectorAux2/scaled=false'
+
+      detail = 'numeric vector (without the variable scaling),'
+    []
+
     [tag_matrix]
       type = 'Exodiff'
       input = '2d_diffusion_tag_matrix.i'
       exodiff = 'tag_matrix_out.e'
 
       detail = 'numeric matrix,'
+    []
+
+    [tag_matrix_no_scale]
+      type = 'Exodiff'
+      input = '2d_diffusion_tag_matrix.i'
+      exodiff = 'tag_matrix_no_scale_out.e'
+      cli_args = 'Outputs/file_base=tag_matrix_no_scale_out Variables/u/scaling=10 AuxKernels/TagMatrixAux1/scaled=false AuxKernels/TagMatrixAux2/scaled=false'
+
+      detail = 'numeric matrix (without the variable scaling),'
     []
 
     [tag_multiple_vectors]
@@ -61,6 +79,21 @@
       max_parallel = 1
 
       detail = 'the scalar kernel system,'
+    []
+
+    [test_tag_scalar_kernels_no_scale]
+      type = 'CSVDiff'
+      input = 'scalar_tag_vector.i'
+      csvdiff = 'scalar_tag_vector_out.csv'
+      cli_args = 'Variables/n/scaling=10 AuxScalarKernels/TagVectorAux/scaled=false AuxScalarKernels/TagVectorAux2/scaled=false AuxScalarKernels/TagMatrixAux2/scaled=false'
+      # System of equations has one dof only
+      # so that we do not need to run the test
+      # in parallel
+      max_parallel = 1
+      # csv file contains more rows 
+      recover = false
+
+      detail = 'the scalar kernel system (without the variable scaling),'
     []
 
     [test_tag_DG_kernels]

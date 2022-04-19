@@ -14,25 +14,25 @@ registerMooseObject("MooseApp", ScalarTagMatrixAux);
 InputParameters
 ScalarTagMatrixAux::validParams()
 {
-  InputParameters params = AuxScalarKernel::validParams();
+  InputParameters params = TagAuxBase<AuxScalarKernel>::validParams();
 
   params.addParam<std::string>("matrix_tag", "TagName", "Tag Name this Aux works on");
   params.addRequiredCoupledVar("v",
                                "The coupled variable whose components are coupled to AuxVariable");
-
   params.addClassDescription("Couple a tag matrix, and return its nodal value");
   return params;
 }
 
 ScalarTagMatrixAux::ScalarTagMatrixAux(const InputParameters & parameters)
-  : AuxScalarKernel(parameters),
+  : TagAuxBase<AuxScalarKernel>(parameters),
     _tag_id(_subproblem.getMatrixTagID(getParam<std::string>("matrix_tag"))),
-    _v(coupledMatrixTagScalarValue("v", _tag_id))
+    _v(coupledMatrixTagScalarValue("v", _tag_id)),
+    _v_var(*getScalarVar("v", 0))
 {
 }
 
 Real
 ScalarTagMatrixAux::computeValue()
 {
-  return _v[0];
+  return _scaled ? _v[0] : _v[0] / _v_var.scalingFactor();
 }

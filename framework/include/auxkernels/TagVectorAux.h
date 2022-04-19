@@ -10,12 +10,13 @@
 #pragma once
 
 #include "AuxKernel.h"
+#include "TagAuxBase.h"
 
 /**
  * The value of a tagged vector for a given node and a given variable is coupled to
  * the current AuxVariable. TagVectorAux returns the coupled nodal value.
  */
-class TagVectorAux : public AuxKernel
+class TagVectorAux : public TagAuxBase<AuxKernel>
 {
 public:
   static InputParameters validParams();
@@ -26,4 +27,5 @@ protected:
   virtual Real computeValue() override;
 
   const VariableValue & _v;
+  const MooseVariableBase & _v_var;
 };

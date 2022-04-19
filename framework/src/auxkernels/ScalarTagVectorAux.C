@@ -14,25 +14,22 @@ registerMooseObject("MooseApp", ScalarTagVectorAux);
 InputParameters
 ScalarTagVectorAux::validParams()
 {
-  InputParameters params = AuxScalarKernel::validParams();
-
+  InputParameters params = TagAuxBase<AuxScalarKernel>::validParams();
   params.addParam<std::string>("vector_tag", "TagName", "Tag Name this Aux works on");
-  params.addRequiredCoupledVar("v",
-                               "The coupled variable whose components are coupled to AuxVariable");
-
   params.addClassDescription("Couple a tag vector, and return its value");
   return params;
 }
 
 ScalarTagVectorAux::ScalarTagVectorAux(const InputParameters & parameters)
-  : AuxScalarKernel(parameters),
+  : TagAuxBase<AuxScalarKernel>(parameters),
     _tag_id(_subproblem.getVectorTagID(getParam<std::string>("vector_tag"))),
-    _v(coupledVectorTagScalarValue("v", _tag_id))
+    _v(coupledVectorTagScalarValue("v", _tag_id)),
+    _v_var(*getScalarVar("v", 0))
 {
 }
 
 Real
 ScalarTagVectorAux::computeValue()
 {
-  return _v[0];
+  return _scaled ? _v[0] : _v[0] / _v_var.scalingFactor();
 }
