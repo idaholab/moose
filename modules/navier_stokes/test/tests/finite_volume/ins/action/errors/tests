@@ -137,12 +137,60 @@
     expect_err = "The number of external sources defined is not equal to the number of passive scalar fields!"
     ad_indexing_type = 'global'
   []
+  [passive-scalar-coupled-source-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar coupled source functions'
+    cli_args = "Modules/NavierStokesFV/passive_scalar_coupled_source='v w'"
+    expect_err = "The number of coupled sources defined is not equal to the number of passive scalar fields!"
+    ad_indexing_type = 'global'
+  []
+  [passive-scalar-coupled-source-coeff-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar coupled source coefficients'
+    cli_args = "Modules/NavierStokesFV/passive_scalar_coupled_source='v' Modules/NavierStokesFV/passive_scalar_coupled_source_coeff='0.1 0.2'"
+    expect_err = "The number of coupled sources coefficients defined is not equal to the number of passive scalar fields!"
+    ad_indexing_type = 'global'
+  []
   [passive-scalar-schmidt-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar Schmidt numbers'
     cli_args = "Modules/NavierStokesFV/passive_scalar_schmidt_number='0.5 0.6'"
     expect_err = "The number of Schmidt numbers defined is not equal to the number of passive scalar fields!"
+    ad_indexing_type = 'global'
+  []
+  [velocity-variable-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user supplies a velocity variable which does not exist'
+    cli_args = "Modules/NavierStokesFV/velocity_variable='vel_x vely' Variables/inactive='pressure T_fluid scalar'"
+    expect_err = "Variable \(vely\) supplied to the NavierStokesFV action does not exist!"
+    ad_indexing_type = 'global'
+  []
+  [velocity-component-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user supplies an inappropriate number of externally created velocity components'
+    cli_args = "Modules/NavierStokesFV/velocity_variable='vel_x vel_y vel_z vel_q' Variables/inactive='pressure T_fluid scalar'"
+    expect_err = "The number of velocity variable names supplied to the NSFVAction is not 2 \(mesh dimension\) or 3!"
+    ad_indexing_type = 'global'
+  []
+  [pressure-variable-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user supplies a pressure variable which does not exist'
+    cli_args = "Modules/NavierStokesFV/pressure_variable='pessure' Variables/inactive='vel_x vel_y T_fluid scalar'"
+    expect_err = "Variable \(pessure\) supplied to the NavierStokesFV action does not exist!"
+    ad_indexing_type = 'global'
+  []
+  [fluid-temperature-variable-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user supplies a fluid temperature variable which does not exist'
+    cli_args = "Modules/NavierStokesFV/pressure_variable='T_fuid' Variables/inactive='vel_x vel_y pressure scalar'"
+    expect_err = "Variable \(T_fuid\) supplied to the NavierStokesFV action does not exist!"
     ad_indexing_type = 'global'
   []
 []
