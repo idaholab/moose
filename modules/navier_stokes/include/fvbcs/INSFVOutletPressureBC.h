@@ -14,7 +14,7 @@
 
 /**
  * A class for setting the value of the pressure at an outlet of the system.
- * It may not be used with a mean-pressure approach
+ * It may not be used with a mean/pinned-pressure approach
  */
 class INSFVOutletPressureBC : public FVDirichletBCBase, public INSFVFullyDevelopedFlowBC
 {
@@ -25,8 +25,11 @@ public:
   Real boundaryValue(const FaceInfo & /* fi */) const override;
 
 private:
-  /// Functor that gives the distribution of pressure on the boundary
+  /// AD Functor that gives the distribution of pressure on the boundary
   const Moose::Functor<ADReal> * const _functor;
+
+  /// Regular function that gives the distribution of pressure on the boundary
+  const Function * const _function;
 
   /// Postprocessor that gives the uniform value of pressure on the boundary
   const PostprocessorValue * const _pp_value;

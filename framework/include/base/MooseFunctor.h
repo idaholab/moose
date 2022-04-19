@@ -325,6 +325,7 @@ public:
  virtual bool hasBlocks(const SubdomainID & /* id */) const
  {
    mooseError("Block restriction has not been implemented for functor " + functorName());
+   return false;
  }
 
   /**

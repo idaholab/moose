@@ -9,6 +9,7 @@
 
 #include "INSFVOutletPressureBC.h"
 #include "INSFVPressureVariable.h"
+#include "Function.h"
 
 registerMooseObject("NavierStokesApp", INSFVOutletPressureBC);
 
@@ -18,11 +19,9 @@ INSFVOutletPressureBC::validParams()
   InputParameters params = FVDirichletBCBase::validParams();
   params += INSFVFullyDevelopedFlowBC::validParams();
 
-  // Value may be specified by a functor (function) or a postprocessor
-  params.addDeprecatedParam<FunctionName>(
-      "function", "The pressure as a function.", "Use functor instead");
-  params.addParam<MooseFunctorName>("functor",
-                                    "The boundary pressure as a functor (most often a function)");
+  // Value may be specified by a AD functor (typically a variable), a function or a postprocessor
+  params.addParam<FunctionName>("function", "The boundary pressure as a regular function");
+  params.addParam<MooseFunctorName>("functor", "The boundary pressure as an AD functor");
   params.addParam<PostprocessorName>("postprocessor", "The boundary pressure as a postprocessor");
 
   return params;
@@ -31,9 +30,8 @@ INSFVOutletPressureBC::validParams()
 INSFVOutletPressureBC::INSFVOutletPressureBC(const InputParameters & params)
   : FVDirichletBCBase(params),
     INSFVFullyDevelopedFlowBC(params),
-    _functor(isParamValid("functor")    ? &getFunctor<ADReal>("functor")
-             : isParamValid("function") ? &getFunctor<ADReal>("function")
-                                        : nullptr),
+    _functor(isParamValid("functor") ? &getFunctor<ADReal>("functor") : nullptr),
+    _function(isParamValid("function") ? &getFunction("function") : nullptr),
     _pp_value(isParamValid("postprocessor") ? &getPostprocessorValue("postprocessor") : nullptr)
 {
   if (!dynamic_cast<INSFVPressureVariable *>(&_var))
@@ -42,7 +40,8 @@ INSFVOutletPressureBC::INSFVOutletPressureBC(const InputParameters & params)
         "The variable argument to INSFVOutletPressureBC must be of type INSFVPressureVariable");
 
   // Check parameters
-  if ((_functor && _pp_value) || (!_functor && !_pp_value))
+  if ((_functor && (_pp_value || _function)) || (_function && _pp_value) ||
+      (!_functor && !_pp_value && !_function))
     mooseError("One and only one of function/functor/postprocessor may be specified for the outlet "
                "pressure");
 }
@@ -52,6 +51,8 @@ INSFVOutletPressureBC::boundaryValue(const FaceInfo & fi) const
 {
   if (_functor)
     return (*_functor)(singleSidedFaceArg(&fi)).value();
+  else if (_function)
+    return _function->value(_t, fi.faceCentroid());
   else
     return *_pp_value;
 }

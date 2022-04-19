@@ -266,6 +266,7 @@ cp = 1
     boundary = 'top_to_0'
     vel_x = u
     vel_y = v
+    advected_quantity = ${rho}
   []
 []
 
