@@ -933,6 +933,12 @@ protected:
   /// like for solid/fluid mechanics
   std::vector<std::vector<std::string>> _scaling_group_variables;
 
+  /// Container to hold flag if field variable is to partipate in autoscaling
+  std::vector<bool> _field_variable_autoscaled;
+
+  /// Container to hold flag if scalar variable is to partipate in autoscaling
+  std::vector<bool> _scalar_variable_autoscaled;
+
   /// A container for variables that do not partipate in autoscaling
   std::vector<std::string> _ignore_variables_for_autoscaling;
 
@@ -953,7 +959,7 @@ private:
   /**
    * Setup group scaling containers
    */
-  void setupScalingGrouping();
+  void setupScalingData();
 
   /// Functors for computing undisplaced mortar constraints
   std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>

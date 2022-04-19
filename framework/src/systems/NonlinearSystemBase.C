@@ -3327,7 +3327,7 @@ NonlinearSystemBase::mortarConstraints()
 }
 
 void
-NonlinearSystemBase::setupScalingGrouping()
+NonlinearSystemBase::setupScalingData()
 {
   if (_auto_scaling_initd)
     return;
@@ -3355,13 +3355,6 @@ NonlinearSystemBase::setupScalingGrouping()
          ++group_index)
       for (const auto & var_name : _scaling_group_variables[group_index])
       {
-        if (find(_ignore_variables_for_autoscaling.begin(),
-                 _ignore_variables_for_autoscaling.end(),
-                 var_name) != _ignore_variables_for_autoscaling.end())
-          mooseError("Variable ",
-                     var_name,
-                     " cannot be in a scaling grouping and be also ignored via "
-                     "'ignore_variables_for_autoscaling'");
         auto & fe_var = getVariable(/*tid=*/0, var_name);
         auto map_pair = _var_to_group_var.insert(std::make_pair(fe_var.number(), group_index));
         if (!map_pair.second)
@@ -3380,6 +3373,24 @@ NonlinearSystemBase::setupScalingGrouping()
     auto index = static_cast<unsigned int>(_scaling_group_variables.size());
     for (auto var_number : var_numbers_not_covered)
       _var_to_group_var.insert(std::make_pair(var_number, index++));
+  }
+
+  const auto & scalar_variables = _vars[0].scalars();
+  _field_variable_autoscaled.resize(field_variables.size(), true);
+  _scalar_variable_autoscaled.resize(scalar_variables.size(), true);
+
+  if (_ignore_variables_for_autoscaling.size())
+  {
+    for (MooseIndex(_field_variable_autoscaled) i = 0; i < _field_variable_autoscaled.size(); ++i)
+      if (std::find(_ignore_variables_for_autoscaling.begin(),
+                    _ignore_variables_for_autoscaling.end(),
+                    (*field_variables[i]).name()) != _ignore_variables_for_autoscaling.end())
+        _field_variable_autoscaled[i] = false;
+    for (MooseIndex(_scalar_variable_autoscaled) i = 0; i < _scalar_variable_autoscaled.size(); ++i)
+      if (std::find(_ignore_variables_for_autoscaling.begin(),
+                    _ignore_variables_for_autoscaling.end(),
+                    (*scalar_variables[i]).name()) != _ignore_variables_for_autoscaling.end())
+        _scalar_variable_autoscaled[i] = false;
   }
 }
 
@@ -3400,27 +3411,10 @@ NonlinearSystemBase::computeScaling()
   std::vector<dof_id_type> dof_indices;
 
   if (!_auto_scaling_initd)
-    setupScalingGrouping();
+    setupScalingData();
 
   auto & field_variables = _vars[0].fieldVariables();
-  std::vector<bool> field_variable_autoscaled(field_variables.size(), true);
-
   auto & scalar_variables = _vars[0].scalars();
-  std::vector<bool> scalar_variable_autoscaled(scalar_variables.size(), true);
-
-  if (_ignore_variables_for_autoscaling.size())
-  {
-    for (MooseIndex(field_variable_autoscaled) i = 0; i < field_variable_autoscaled.size(); ++i)
-      if (find(_ignore_variables_for_autoscaling.begin(),
-               _ignore_variables_for_autoscaling.end(),
-               (*field_variables[i]).name()) != _ignore_variables_for_autoscaling.end())
-        field_variable_autoscaled[i] = false;
-    for (MooseIndex(scalar_variable_autoscaled) i = 0; i < scalar_variable_autoscaled.size(); ++i)
-      if (find(_ignore_variables_for_autoscaling.begin(),
-               _ignore_variables_for_autoscaling.end(),
-               (*scalar_variables[i]).name()) != _ignore_variables_for_autoscaling.end())
-        scalar_variable_autoscaled[i] = false;
-  }
 
   std::vector<Real> inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
   std::vector<Real> resid_inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
@@ -3468,7 +3462,7 @@ NonlinearSystemBase::computeScaling()
   // Compute our scaling factors for the spatial field variables
   for (const auto & elem : *mesh().getActiveLocalElementRange())
     for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
-      if (field_variable_autoscaled[i])
+      if (_field_variable_autoscaled[i])
       {
         auto & field_variable = *field_variables[i];
         auto var_number = field_variable.number();
@@ -3496,7 +3490,7 @@ NonlinearSystemBase::computeScaling()
 
   // Compute scalar factors for scalar variables
   for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
-    if (scalar_variable_autoscaled[i])
+    if (_scalar_variable_autoscaled[i])
     {
       auto & scalar_variable = *scalar_variables[i];
       dof_map.SCALAR_dof_indices(dof_indices, scalar_variable.number());
