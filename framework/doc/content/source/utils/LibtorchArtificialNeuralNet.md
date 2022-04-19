@@ -25,7 +25,7 @@ in the following nested form:
 
 where $\sigma$ denotes the activation function. At the moment, the Moose implementation
 supports `relu`, `elu`, `gelu`, `sigmoid` and `linear` activation functions.
- In this class, no activation function is applied on the
+In this class, no activation function is applied on the
 output layer. It is apparent that the real functional dependence between the inputs and outputs
 is approximated by the function in [nn-explicit]. As in most cases, the error in this approximation depends on the
 smoothness of the function and the values of the model parameters. The weights and

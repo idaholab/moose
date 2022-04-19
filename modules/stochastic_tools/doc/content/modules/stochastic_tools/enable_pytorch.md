@@ -11,11 +11,10 @@ module for testing purposes. For their documentation, see
 [surrogates/LibtorchANNTrainer.md] and [surrogates/LibtorchANNSurrogate.md].
 If MOOSE compiled without error messages, we can
 navigate to the testing folder within the stochastic tools root
-and use the following command to test the implementation:
+and use the following command to test the implementation (in `modules/stochastic_tools`):
 
 ```bash
-cd test/tests/surrogates/libtorch_nn/
-../../../../run_tests -j 8
+./run_tests -j 8 --re libtorch_nn
 ```
 
 The expected output should look like this:

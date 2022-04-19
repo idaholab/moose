@@ -62,9 +62,9 @@ The user can choose from two alternatives when it comes to installing `libtorch`
   [official website](https://github.com/pytorch/pytorch/blob/master/docs/libtorch.rst).
 
 
-## Configure and compile  MOOSE with libtorch
+## Configure and compile MOOSE with libtorch
 
-To achieve this, first call the configure script the following way:
+To achieve this, first configure MOOSE with `libtorch` support (along with any other desired configure options)
 
 ```bash
 ./configure --with-libtorch
