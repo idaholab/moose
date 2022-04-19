@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#16756'
+  design = 'PINSFVSpeedFunctorMaterial.md'
+  [check_material]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = 2d-rc_out.e
+    requirement = 'The system shall be able to compute the speed, eg the norm of the interstitial velocity, in a porous media incompressible flow problem.'
+    ad_indexing_type = 'global'
+  []
+[]
