@@ -209,6 +209,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 
       params.set<MooseEnum>("polygon_size_style") = "apothem";
       params.set<Real>("polygon_size") = _pitch / 2.0;
+      params.set<bool>("flat_side_up") = true;
       params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
       params.set<boundary_id_type>("interface_boundary_id_shift") =
           30000; // need to shift interface boundaries to avoid clashing
@@ -217,23 +218,12 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       addMeshSubgenerator("PolygonConcentricCircleMeshGenerator", name() + "_circle", params);
     }
 
-    // Rotate pin to be square rather than diamond, like what is generated using
-    // ConcentricCircleMeshGenerator
-    {
-      auto params = _app.getFactory().getValidParams("TransformGenerator");
-      params.set<MeshGeneratorName>("input") = name() + "_circle";
-      params.set<MooseEnum>("transform") = 4;
-      params.set<RealVectorValue>("vector_value") = RealVectorValue(0, 0, 45);
-
-      addMeshSubgenerator("TransformGenerator", name() + "trans", params);
-    }
-
     // Define boundary IDs so that there are unified boundaries for use in patterned MeshGenerator
     // if this pin is to be used in an AssemblyMeshGenerator
     {
       auto params = _app.getFactory().getValidParams("SideSetsFromNormalsGenerator");
 
-      params.set<MeshGeneratorName>("input") = name() + "trans";
+      params.set<MeshGeneratorName>("input") = name() + "_circle";
       params.set<std::vector<Point>>("normals") = {
           {1, 0, 0},
           {-1, 0, 0},

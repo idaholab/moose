@@ -355,12 +355,10 @@ CoreMeshGenerator::generate()
 {
   // This generate() method will be called once the subgenerators that we depend on are
   // called. This is where we set the region ids and element integers.
-
   if (_extrude)
   {
     // swap the region ids on the subdomain ids to the correct ones
     // for their axial layer
-    _mesh_name = name() + "_extrudedIDs";
     std::string plane_id_name = "plane_id";
     std::string pin_type_id_name = "pin_type_id";
     std::string assembly_type_id_name = "assembly_type_id";
@@ -405,10 +403,6 @@ CoreMeshGenerator::generate()
       }
     }
   }
-  else
-  {
-    _mesh_name = _empty_pos ? name() + "_deleted" : name() + "_pattern";
-  }
 
   std::string region_id_name = "region_id";
   if (!(*_build_mesh)->has_elem_integer(region_id_name))
@@ -429,6 +423,35 @@ CoreMeshGenerator::generate()
   }
 
   (*_build_mesh)->set_subdomain_name_map() = subdomain_name_map;
+
+  // Sideset 10000 does not get stitched properly when BlockDeletionGenerator
+  // is used for deleting dummy assemblies. This block copies missing sides
+  // into sideset 10000 from sideset "outer_core"
+  BoundaryInfo & boundary_info = (*_build_mesh)->get_boundary_info();
+  boundary_id_type source_id = MooseMeshUtils::getBoundaryIDs(**_build_mesh, {"outer_core"}, true)[0];
+  boundary_id_type target_id = 10000;
+  const auto sideset_map = boundary_info.get_sideset_map();
+
+  for (const auto & [elem, id_pair] : sideset_map) {
+    const auto side_id = id_pair.first;
+    const auto sideset_id = id_pair.second;
+
+    // Filter all sides that belong to "outer_core" sideset
+    if (sideset_id == source_id)
+    {
+      auto mm_it = sideset_map.equal_range(elem);
+      bool found = false;
+      // Check if side is defined in sideset 10000
+      for (auto it = mm_it.first; it != mm_it.second; it++)
+      {
+        if (it->second.first == side_id && it->second.second == target_id)
+          found = true;
+      }
+      // Add side if not found in sideset 10000
+      if (!found)
+        boundary_info.add_side(elem, side_id, target_id);
+    }
+  }
 
   return std::move(*_build_mesh);
 }
