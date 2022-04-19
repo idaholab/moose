@@ -18,10 +18,29 @@ cp=1
 []
 
 [Variables]
-  inactive = 'scalar'
+  inactive = 'vel_x vel_y pressure T_fluid scalar'
+  [vel_x]
+    type = 'INSFVVelocityVariable'
+    initial_condition = 1
+    block=0
+  []
+  [vel_y]
+    type = 'INSFVVelocityVariable'
+    initial_condition = 1
+    block=0
+  []
+  [pressure]
+    type = 'INSFVPressureVariable'
+    initial_condition = 0
+    block=0
+  []
+  [T_fluid]
+    type = 'INSFVEnergyVariable'
+    initial_condition = 0
+  []
   [scalar]
     type = MooseVariableFVReal
-    initial_condition = 0.0
+    initial_condition = 0
   []
 []
 
@@ -38,6 +57,8 @@ cp=1
     specific_heat = ${cp}
     passive_scalar_diffusivity = ${diff}
     passive_scalar_source = 0.1
+    passive_scalar_coupled_source = U
+    passive_scalar_coupled_source_coeff = 0.1
 
     initial_velocity = '1 1 0'
     initial_pressure = 0.0
@@ -59,6 +80,23 @@ cp=1
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
     pressure_function = '0'
+  []
+[]
+
+[AuxVariables]
+  [U]
+    order = CONSTANT
+    family = MONOMIAL
+    fv = true
+  []
+[]
+
+[AuxKernels]
+  [mag]
+    type = VectorMagnitudeAux
+    variable = U
+    x = vel_x
+    y = vel_y
   []
 []
 

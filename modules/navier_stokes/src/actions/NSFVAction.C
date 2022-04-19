@@ -546,7 +546,10 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _mass_scaling(getParam<Real>("mass_scaling")),
     _momentum_scaling(getParam<Real>("momentum_scaling")),
     _energy_scaling(getParam<Real>("energy_scaling")),
-    _passive_scalar_scaling(getParam<Real>("passive_scalar_scaling"))
+    _passive_scalar_scaling(getParam<Real>("passive_scalar_scaling")),
+    _create_velocity(!isParamValid("velocity_variable")),
+    _create_pressure(!isParamValid("pressure_variable")),
+    _create_fluid_temperature(!isParamValid("fluid_temperature_variable"))
 {
   // Running the general checks, the rest are run after we already know some
   // geometry-related parameters.
@@ -705,24 +708,26 @@ void
 NSFVAction::addINSVariables()
 {
   // Add velocity variable
-  std::string variable_type = "INSFVVelocityVariable";
-  if (_porous_medium_treatment)
-    variable_type = "PINSFVSuperficialVelocityVariable";
+  if (_create_velocity)
+  {
+    std::string variable_type = "INSFVVelocityVariable";
+    if (_porous_medium_treatment)
+      variable_type = "PINSFVSuperficialVelocityVariable";
 
-  auto params = _factory.getValidParams(variable_type);
-  params.set<std::vector<SubdomainName>>("block") = _blocks;
-  params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
-  params.set<MooseEnum>("face_interp_method") = _momentum_face_interpolation;
-  params.set<bool>("two_term_boundary_expansion") = _momentum_two_term_bc_expansion;
+    auto params = _factory.getValidParams(variable_type);
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
+    params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
+    params.set<MooseEnum>("face_interp_method") = _momentum_face_interpolation;
+    params.set<bool>("two_term_boundary_expansion") = _momentum_two_term_bc_expansion;
 
-  for (unsigned int d = 0; d < _dim; ++d)
-    if (!(_problem->hasVariable(_velocity_name[d])))
+    for (unsigned int d = 0; d < _dim; ++d)
       _problem->addVariable(variable_type, _velocity_name[d], params);
+  }
 
   // Add pressure variable
-  if (!(_problem->hasVariable(_pressure_name)))
+  if (_create_pressure)
   {
-    params = _factory.getValidParams("INSFVPressureVariable");
+    auto params = _factory.getValidParams("INSFVPressureVariable");
     params.set<std::vector<SubdomainName>>("block") = _blocks;
     params.set<std::vector<Real>>("scaling") = {_mass_scaling};
     params.set<MooseEnum>("face_interp_method") = _pressure_face_interpolation;
@@ -755,7 +760,7 @@ NSFVAction::addINSVariables()
   // Add energy variables if needed
   if (_has_energy_equation)
   {
-    if (!(_problem->hasVariable(_fluid_temperature_name)))
+    if (_create_fluid_temperature)
     {
       auto params = _factory.getValidParams("INSFVEnergyVariable");
       params.set<std::vector<SubdomainName>>("block") = _blocks;
@@ -828,25 +833,31 @@ NSFVAction::addINSInitialConditions()
   InputParameters params = _factory.getValidParams("FunctionIC");
   auto vvalue = getParam<std::vector<FunctionName>>("initial_velocity");
 
-  for (unsigned int d = 0; d < _dim; ++d)
+  if (_create_velocity)
+    for (unsigned int d = 0; d < _dim; ++d)
+    {
+      params.set<VariableName>("variable") = _velocity_name[d];
+      params.set<FunctionName>("function") = vvalue[d];
+
+      _problem->addInitialCondition("FunctionIC", _velocity_name[d] + "_ic", params);
+    }
+
+  if (_create_pressure)
   {
-    params.set<VariableName>("variable") = _velocity_name[d];
-    params.set<FunctionName>("function") = vvalue[d];
+    params.set<VariableName>("variable") = _pressure_name;
+    params.set<FunctionName>("function") = getParam<FunctionName>("initial_pressure");
 
-    _problem->addInitialCondition("FunctionIC", _velocity_name[d] + "_ic", params);
+    _problem->addInitialCondition("FunctionIC", _pressure_name + "_ic", params);
   }
-
-  params.set<VariableName>("variable") = _pressure_name;
-  params.set<FunctionName>("function") = getParam<FunctionName>("initial_pressure");
-
-  _problem->addInitialCondition("FunctionIC", _pressure_name + "_ic", params);
-
   if (_has_energy_equation)
   {
-    params.set<VariableName>("variable") = _fluid_temperature_name;
-    params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
+    if (_create_fluid_temperature)
+    {
+      params.set<VariableName>("variable") = _fluid_temperature_name;
+      params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
 
-    _problem->addInitialCondition("FunctionIC", _fluid_temperature_name + "_ic", params);
+      _problem->addInitialCondition("FunctionIC", _fluid_temperature_name + "_ic", params);
+    }
   }
 
   if (_passive_scalar_names.size())
@@ -1504,7 +1515,7 @@ NSFVAction::addScalarCoupledSourceKernels()
     params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
     params.set<std::vector<SubdomainName>>("block") = _blocks;
     params.set<CoupledName>("v") = {_passive_scalar_coupled_source[name_i]};
-    params.set<Real>("coeff") = _passive_scalar_coupled_source_coeff[name_i];
+    params.set<Real>("coef") = _passive_scalar_coupled_source_coeff[name_i];
 
     _problem->addFVKernel(
         kernel_type, "ins_" + _passive_scalar_names[name_i] + "_coupled_source", params);
@@ -2091,6 +2102,29 @@ NSFVAction::processVariables()
       _create_scalar_variable.push_back(false);
     else
       _create_scalar_variable.push_back(true);
+
+  if ((_velocity_name.size() != _dim) && (_velocity_name.size() != 3))
+    mooseError("The number of velocity variable names supplied to the NSFVAction is not " +
+               std::to_string(_dim) + " (mesh dimension) or 3!");
+
+  if (!_create_velocity)
+    for (const auto & vname : _velocity_name)
+      if (!(_problem->hasVariable(vname)))
+        paramError("velocity_variable",
+                   "Variable (" + vname +
+                       ") supplied to the NavierStokesFV action does not exist!");
+
+  if (!_create_pressure)
+    if (!(_problem->hasVariable(_pressure_name)))
+      paramError("pressure_variable",
+                 "Variable (" + _pressure_name +
+                     ") supplied to the NavierStokesFV action does not exist!");
+
+  if (!_create_fluid_temperature)
+    if (!(_problem->hasVariable(_fluid_temperature_name)))
+      paramError("pressure_variable",
+                 "Variable (" + _fluid_temperature_name +
+                     ") supplied to the NavierStokesFV action does not exist!");
 }
 
 void
@@ -2111,9 +2145,6 @@ NSFVAction::checkGeneralControlErrors()
   if (isParamValid("consistent_scaling") && !_use_friction_correction)
     paramError("consistent_scaling",
                "Consistent scaling should not be defined if friction correction is disabled!");
-
-  if (_velocity_name.size() != 3)
-    mooseError("The number of velocity variable names supplied to the NSFVAction is not 3!");
 }
 
 void

@@ -275,10 +275,6 @@ protected:
   /// The scaling factor for the passive scalar variables
   const Real _passive_scalar_scaling;
 
-  /// List to show which advected scalar field variable needs to be created within
-  /// this action
-  std::vector<bool> _create_scalar_variable;
-
 private:
   /// Process the mesh data and convert block names to block IDs
   void processBlocks();
@@ -301,6 +297,16 @@ private:
   template <typename T>
   void checkBlockwiseConsistency(const std::string block_param_name,
                                  const std::vector<std::string> parameter_names);
+
+  /// List to show which advected scalar field variable needs to be created within
+  /// this action
+  std::vector<bool> _create_scalar_variable;
+  /// Boolean showing if the velocity is created within the action or outside the action
+  bool _create_velocity;
+  /// Boolean showing if the pressure is created in the action or not
+  bool _create_pressure;
+  /// Boolean showing if the fludi tempreture is created in the action or not
+  bool _create_fluid_temperature;
 };
 
 template <typename T>

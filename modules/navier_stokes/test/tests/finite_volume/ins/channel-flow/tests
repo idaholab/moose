@@ -79,7 +79,7 @@
     method = "!dbg"
     requirement = 'The system shall be able to transport an externally-generated scalar field variables in a fluid flow field using the NSFVAction syntax.'
     ad_indexing_type = 'global'
-    cli_args = "Variables/inactive=''"
+    cli_args = "Variables/inactive='' Modules/NavierStokesFV/velocity_variable='vel_x vel_y' Modules/NavierStokesFV/pressure_variable='pressure' Modules/NavierStokesFV/fluid_temperature_variable='T_fluid'"
     design = 'NSFVAction.md'
     issues = '#19472'
     valgrind = HEAVY

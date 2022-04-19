@@ -32,6 +32,23 @@ velocity_interp_method='rc'
   []
 []
 
+[AuxVariables]
+  [U]
+    order = CONSTANT
+    family = MONOMIAL
+    fv = true
+  []
+[]
+
+[AuxKernels]
+  [mag]
+    type = VectorMagnitudeAux
+    variable = U
+    x = vel_x
+    y = vel_y
+  []
+[]
+
 [Problem]
   fv_bcs_integrity_check = true
 []
@@ -134,6 +151,12 @@ velocity_interp_method='rc'
     type = FVBodyForce
     variable = scalar
     value = 0.1
+  []
+  [scalar_coupled_source]
+    type = FVCoupledForce
+    variable = scalar
+    v = U
+    coef = 0.1
   []
 []
 
