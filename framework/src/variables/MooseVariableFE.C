@@ -77,19 +77,6 @@ MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
 }
 
 template <typename OutputType>
-std::string
-MooseVariableFE<OutputType>::componentName(const unsigned int comp) const
-{
-  if (comp >= _count)
-    mooseError("Component index must be less than the number of components of variable ",
-               _var_name);
-  if (std::is_same<OutputType, RealEigenVector>::value)
-    return this->_subproblem.arrayVariableComponent(_var_name, comp);
-  else
-    return _var_name;
-}
-
-template <typename OutputType>
 const std::set<SubdomainID> &
 MooseVariableFE<OutputType>::activeSubdomains() const
 {

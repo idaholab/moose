@@ -140,11 +140,6 @@ public:
    */
   bool computingCurl() const override final;
 
-  /**
-   * Get the variable name of a component in libMesh
-   */
-  std::string componentName(const unsigned int comp) const;
-
   const std::set<SubdomainID> & activeSubdomains() const override;
   bool activeOnSubdomain(SubdomainID subdomain) const override;
 

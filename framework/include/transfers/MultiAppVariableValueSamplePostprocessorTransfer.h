@@ -28,4 +28,5 @@ public:
 protected:
   AuxVariableName _postprocessor_name;
   PostprocessorName _from_var_name;
+  unsigned int _comp;
 };

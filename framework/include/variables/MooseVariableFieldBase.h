@@ -75,6 +75,11 @@ public:
   virtual bool isArray() const = 0;
 
   /**
+   * Get the variable name of a component in libMesh
+   */
+  std::string componentName(const unsigned int comp) const;
+
+  /**
    * @returns true if this is a vector-valued element, false otherwise.
    */
   virtual bool isVector() const = 0;
