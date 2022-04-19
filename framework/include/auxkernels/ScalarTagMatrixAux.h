@@ -10,12 +10,13 @@
 #pragma once
 
 #include "AuxScalarKernel.h"
+#include "TagAuxBase.h"
 
 /**
  * The value of a tagged matrix for a given node and a given variable is coupled to
  * the current AuxVariable. ScalarTagMatrixAux returns the coupled nodal value.
  */
-class ScalarTagMatrixAux : public AuxScalarKernel
+class ScalarTagMatrixAux : public TagAuxBase<AuxScalarKernel>
 {
 public:
   static InputParameters validParams();
@@ -27,4 +28,5 @@ protected:
 
   TagID _tag_id;
   const VariableValue & _v;
+  const MooseVariableScalar & _v_var;
 };
