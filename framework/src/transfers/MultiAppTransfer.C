@@ -114,16 +114,16 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
         "Between multiapp transfer is only supported with the same number of subapps per MultiApp");
 
   // Handle deprecated parameters
-  if (parameters.isParamSetByUser("directions"))
+  if (parameters.isParamSetByUser("direction"))
   {
     if (!isParamValid("multi_app"))
-      paramError("directions",
-                 "The deprecated directions parameter is meant to be used in conjunction with the "
-                 "multi_app parameter");
+      paramError("direction",
+                 "The deprecated 'direction' parameter is meant to be used in conjunction with the "
+                 "'multi_app' parameter");
     if (isParamValid("to_multi_app") || isParamValid("from_multi_app"))
-      paramError("directions",
-                 "The deprecated directions parameter is not meant to be used in conjunction with "
-                 "the from_multi_app or to_multi_app parameters");
+      paramError("direction",
+                 "The deprecated 'direction' parameter is not meant to be used in conjunction with "
+                 "the 'from_multi_app' or 'to_multi_app' parameters");
   }
 }
 
