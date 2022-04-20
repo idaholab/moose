@@ -26,6 +26,8 @@ class ADVolumeJunction1PhaseUserObject : public ADVolumeJunctionBaseUserObject
 public:
   ADVolumeJunction1PhaseUserObject(const InputParameters & params);
 
+  virtual void finalize() override;
+
 protected:
   virtual void computeFluxesAndResiduals(const unsigned int & c) override;
 

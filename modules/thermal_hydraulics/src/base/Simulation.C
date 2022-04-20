@@ -559,11 +559,28 @@ Simulation::setupInitialConditionObjects()
 }
 
 void
-Simulation::addComponentPhysics()
+Simulation::addMooseObjects()
 {
-  // let all components add their own
   for (auto && comp : _components)
     comp->addMooseObjects();
+}
+
+void
+Simulation::addRelationshipManagers()
+{
+  {
+    const std::string class_name = "AugmentSparsityBetweenElements";
+    auto params = _factory.getValidParams(class_name);
+    params.set<Moose::RelationshipManagerType>("rm_type") =
+        Moose::RelationshipManagerType::ALGEBRAIC | Moose::RelationshipManagerType::GEOMETRIC;
+    params.set<std::string>("for_whom") = _fe_problem.name();
+    params.set<MooseMesh *>("mesh") = &_mesh;
+    params.set<std::map<dof_id_type, std::vector<dof_id_type>> *>("_elem_map") =
+        &_sparsity_elem_augmentation;
+    auto rm = _factory.create<RelationshipManager>(class_name, "thm:sparsity_btw_elems", params);
+    if (!_app.addRelationshipManager(rm))
+      _factory.releaseSharedObjects(*rm);
+  }
 }
 
 void
@@ -598,10 +615,6 @@ Simulation::setupCoordinateSystem()
 void
 Simulation::setupMesh()
 {
-  // _fe_problem = dynamic_cast<FEProblem *>(_action_warehouse.problemBase().get());
-  // if (_fe_problem == nullptr)
-  //   mooseError("You need to be running with FEProblem derived class.");
-
   if (_components.size() == 0)
     return;
 

@@ -160,6 +160,8 @@
 
   solve_type = 'newton'
   line_search = 'basic'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = ' lu'
 
   nl_rel_tol = 1e-7
   nl_abs_tol = 2e-6

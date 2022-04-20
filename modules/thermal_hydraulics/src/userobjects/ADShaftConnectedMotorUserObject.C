@@ -66,4 +66,5 @@ ADShaftConnectedMotorUserObject::execute()
 void
 ADShaftConnectedMotorUserObject::finalize()
 {
+  ADShaftConnectableUserObjectInterface::finalize();
 }

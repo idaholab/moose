@@ -10,7 +10,6 @@
     cli_args = "Outputs/out/type=CSV Outputs/out/execute_on=final Outputs/out/show='mass_conservation energy_conservation'"
     abs_zero = 1e-5
     rel_err = 0
-    max_parallel = 1
     ad_indexing_type = 'global'
 
     requirement = 'The system shall conserve mass and energy when using ShaftConnectedTurbine1Phase.'
@@ -21,9 +20,8 @@
     input = 'shaft_motor_turbine.i'
     exodiff = 'shaft_motor_turbine_out.e'
     rel_err = 1.1
-    abs_zero = 1e-9
+    abs_zero = 1e-7
     cli_args = 'Outputs/exodus=true'
-    max_parallel = 1
     ad_indexing_type = 'global'
 
     requirement = 'The system shall be able to model a turbine with ShaftConnectedTurbine1Phase.'
@@ -36,7 +34,6 @@
     rel_err = 4e-3
     abs_zero = 1e-9
     cli_args = 'Outputs/exodus=true Outputs/velocity_as_vector=false'
-    max_parallel = 1
     ad_indexing_type = 'global'
     heavy = true
 

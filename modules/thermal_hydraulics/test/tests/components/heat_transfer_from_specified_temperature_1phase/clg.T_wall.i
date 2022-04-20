@@ -73,8 +73,10 @@
   num_steps = 20
   abort_on_solve_fail = true
 
-  solve_type = 'PJFNK'
+  solve_type = 'newton'
   line_search = 'basic'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = ' lu'
   nl_rel_tol = 1e-9
   nl_abs_tol = 1e-8
   nl_max_its = 10

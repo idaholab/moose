@@ -10,6 +10,10 @@
 #include "ADShaftConnectableUserObjectInterface.h"
 #include "MooseVariableScalar.h"
 #include "UserObject.h"
+#include "metaphysicl/parallel_numberarray.h"
+#include "metaphysicl/parallel_dualnumber.h"
+#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
+#include "libmesh/parallel_algebra.h"
 
 InputParameters
 ADShaftConnectableUserObjectInterface::validParams()
@@ -19,8 +23,8 @@ ADShaftConnectableUserObjectInterface::validParams()
 }
 
 ADShaftConnectableUserObjectInterface::ADShaftConnectableUserObjectInterface(
-    const MooseObject * /*moose_object*/)
-  : _n_shaft_eq(1)
+    const MooseObject * moose_object)
+  : _moose_object(moose_object), _n_shaft_eq(1)
 {
   _omega_dof.resize(_n_shaft_eq);
 }
@@ -83,6 +87,8 @@ ADShaftConnectableUserObjectInterface::setupJunctionData(std::vector<dof_id_type
 void
 ADShaftConnectableUserObjectInterface::finalize()
 {
+  _moose_object->comm().sum(_torque);
+  _moose_object->comm().sum(_moment_of_inertia);
 }
 
 void

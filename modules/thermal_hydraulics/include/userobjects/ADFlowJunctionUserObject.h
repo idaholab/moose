@@ -63,6 +63,8 @@ protected:
   const MaterialProperty<RealVectorValue> & _dir;
   /// Number of connected flow channels
   const unsigned int _n_connections;
+  /// Owners of each side of the junction
+  std::vector<unsigned int> _processor_ids;
 
 public:
   static InputParameters validParams();

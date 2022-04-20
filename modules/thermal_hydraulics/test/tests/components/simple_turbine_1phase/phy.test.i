@@ -83,15 +83,17 @@
 
   start_time = 0
   dt = 1
-  num_steps = 30
+  num_steps = 10
 
   abort_on_solve_fail = true
 
   solve_type = 'newton'
   line_search = 'basic'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = ' lu'
 
   nl_rel_tol = 1e-6
-  nl_abs_tol = 1e-4
+  nl_abs_tol = 1e-5
 
   nl_max_its = 5
   l_tol = 1e-4
@@ -101,4 +103,5 @@
   exodus = true
   show = 'p T vel'
   velocity_as_vector = false
+  interval = 5
 []

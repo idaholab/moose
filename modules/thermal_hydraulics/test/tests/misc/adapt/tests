@@ -5,8 +5,8 @@
     exodiff = 'single_block_out.e-s005'
     abs_zero = 1e-7
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [multiple_blocks]
@@ -16,7 +16,6 @@
     recover = false
     method = 'opt'
     skip = '#709'
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 []

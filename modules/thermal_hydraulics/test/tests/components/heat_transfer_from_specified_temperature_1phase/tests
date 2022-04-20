@@ -4,7 +4,6 @@
     input = 'phy.energy_walltemperature_ss_1phase.i'
     csvdiff = 'phy.energy_walltemperature_ss_1phase_out.csv'
     abs_zero = 1e-9
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -13,7 +12,6 @@
     type = 'CSVDiff'
     input = 'clg.Hw.i'
     csvdiff = 'clg.Hw_out.csv'
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -21,7 +19,6 @@
     type = 'CSVDiff'
     input = 'clg.T_wall.i'
     csvdiff = 'clg.T_wall_out.csv'
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -29,6 +26,5 @@
     type = RunException
     input = 'err.no_phf.i'
     expect_err = "hx\: Invalid side \'START\'\. This side does not have unit perimeter\. You probably want to use \'INNER\' or \'OUTER\' side instead\."
-    max_parallel = 1
   []
 []

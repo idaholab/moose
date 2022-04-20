@@ -4,7 +4,6 @@
     input = 'steady_state.i'
     exodiff = 'steady_state_out.e'
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
 
     requirement = 'The system shall be able to produce an exodus file for setting initial conditions in shaft'
@@ -18,7 +17,6 @@
     csvdiff = 'test_out.csv'
     prereq = steady_state
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
 
     requirement = 'The system shall be able to use an exodus file for setting initial conditions in shaft'

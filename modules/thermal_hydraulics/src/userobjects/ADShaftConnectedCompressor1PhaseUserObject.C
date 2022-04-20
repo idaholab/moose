@@ -14,6 +14,10 @@
 #include "THMIndices3Eqn.h"
 #include "Function.h"
 #include "Numerics.h"
+#include "metaphysicl/parallel_numberarray.h"
+#include "metaphysicl/parallel_dualnumber.h"
+#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
+#include "libmesh/parallel_algebra.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADShaftConnectedCompressor1PhaseUserObject);
 
@@ -112,7 +116,7 @@ ADShaftConnectedCompressor1PhaseUserObject::ADShaftConnectedCompressor1PhaseUser
 void
 ADShaftConnectedCompressor1PhaseUserObject::initialSetup()
 {
-  ADVolumeJunctionBaseUserObject::initialSetup();
+  ADVolumeJunction1PhaseUserObject::initialSetup();
 
   ADShaftConnectableUserObjectInterface::setupConnections(
       ADVolumeJunctionBaseUserObject::_n_connections, ADVolumeJunctionBaseUserObject::_n_flux_eq);
@@ -121,7 +125,7 @@ ADShaftConnectedCompressor1PhaseUserObject::initialSetup()
 void
 ADShaftConnectedCompressor1PhaseUserObject::initialize()
 {
-  ADVolumeJunctionBaseUserObject::initialize();
+  ADVolumeJunction1PhaseUserObject::initialize();
   ADShaftConnectableUserObjectInterface::initialize();
 
   _isentropic_torque = 0;
@@ -349,17 +353,25 @@ ADShaftConnectedCompressor1PhaseUserObject::getEfficiency() const
 void
 ADShaftConnectedCompressor1PhaseUserObject::finalize()
 {
-  ADVolumeJunctionBaseUserObject::finalize();
+  ADVolumeJunction1PhaseUserObject::finalize();
+  ADShaftConnectableUserObjectInterface::finalize();
 
   ADShaftConnectableUserObjectInterface::setupJunctionData(
       ADVolumeJunctionBaseUserObject::_scalar_dofs);
   ADShaftConnectableUserObjectInterface::setOmegaDofs(getScalarVar("omega", 0));
+
+  comm().sum(_isentropic_torque);
+  comm().sum(_dissipation_torque);
+  comm().sum(_friction_torque);
+  comm().sum(_delta_p);
+  comm().sum(_Rp);
+  comm().sum(_eff);
 }
 
 void
 ADShaftConnectedCompressor1PhaseUserObject::threadJoin(const UserObject & uo)
 {
-  ADVolumeJunctionBaseUserObject::threadJoin(uo);
+  ADVolumeJunction1PhaseUserObject::threadJoin(uo);
   ADShaftConnectableUserObjectInterface::threadJoin(uo);
 
   const ADShaftConnectedCompressor1PhaseUserObject & scpuo =

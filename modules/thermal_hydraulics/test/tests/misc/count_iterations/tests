@@ -3,6 +3,5 @@
     type = 'CSVDiff'
     input = 'count_iterations.i'
     csvdiff = 'count_iterations_out.csv'
-    max_parallel = 1 # LU is used
   []
 []

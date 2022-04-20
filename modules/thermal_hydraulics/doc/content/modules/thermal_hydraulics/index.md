@@ -52,6 +52,14 @@ Use the modeling guide to explore how to piece your models together:
 
 ## Announcements and News
 
+#### April 20, 2022
+
+The [Thermal hydraulics module](modules/thermal_hydraulics/index.md) can now run with distributed memory parallelism (MPI).
+Note that [HeatTransferFromHeatStructure1Phase.md] currently requires a replicated mesh; see [issue](https://github.com/idaholab/moose/issues/20798).
+
+[Benchmarks](https://thm-benchmarks.readthedocs.io/en/latest/index.html) are available.
+
+
 #### December 7, 2021
 
 Closures objects are now created in the input file, allowing for greater flexibility,

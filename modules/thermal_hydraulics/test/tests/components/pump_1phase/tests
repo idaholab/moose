@@ -4,7 +4,6 @@
     type = 'CSVDiff'
     input = 'pump_mass_energy_conservation.i'
     csvdiff = 'pump_mass_energy_conservation_out.csv'
-    max_parallel = 1
     group = 'pump1phase'
     ad_indexing_type = 'global'
   []
@@ -16,7 +15,6 @@
                 Outputs/out/show='E_change'"
     # csvdiff made with Components/pipe1/orientation='1 0 0'
     csvdiff = 'pump_mass_energy_conservation_out_orientation.csv'
-    max_parallel = 1
     group = 'pump1phase'
     ad_indexing_type = 'global'
   []
@@ -27,7 +25,6 @@
     input = 'pump_pressure_check.i'
     csvdiff = 'pump_pressure_check_out.csv'
     abs_zero = 5e-7
-    max_parallel = 1
     group = 'pump1phase'
     ad_indexing_type = 'global'
   []
@@ -39,7 +36,6 @@
     # csvdiff made with Components/pipe1/orientation='1 0 0'
     csvdiff = 'pump_pressure_check_out_orientation.csv'
     abs_zero = 5e-7
-    max_parallel = 1
     group = 'pump1phase'
     ad_indexing_type = 'global'
   []
@@ -47,7 +43,6 @@
     type = 'Exodiff'
     input = 'pipe_friction_pump_head_balance.i'
     exodiff = 'pipe_friction_pump_head_balance_out_x.e'
-    max_parallel = 1
     group = 'pump1phase'
     ad_indexing_type = 'global'
   []
@@ -59,7 +54,6 @@
                 Components/pump/initial_vel_y=1
                 Outputs/file_base=pipe_friction_pump_head_balance_out_y"
     exodiff = 'pipe_friction_pump_head_balance_out_y.e'
-    max_parallel = 1
     group = 'pump1phase'
     ad_indexing_type = 'global'
   []
@@ -70,7 +64,6 @@
     exodiff = 'pump_loop_out.e'
     rel_err = 8e-5
     abs_zero = 1e-9
-    max_parallel = 1
     group = 'pump1phase'
     ad_indexing_type = 'global'
   []
@@ -80,7 +73,6 @@
     type = 'CSVDiff'
     input = 'clg.head.i'
     csvdiff = 'clg.head_out.csv'
-    max_parallel = 1
     group = 'pump1phase'
     requirement = 'The system shall allow for controlling the pump head'
     design = 'Pump1Phase.md'

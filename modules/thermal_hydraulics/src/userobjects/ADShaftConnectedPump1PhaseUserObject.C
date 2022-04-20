@@ -12,6 +12,10 @@
 #include "MooseVariableScalar.h"
 #include "THMIndices3Eqn.h"
 #include "Function.h"
+#include "metaphysicl/parallel_numberarray.h"
+#include "metaphysicl/parallel_dualnumber.h"
+#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
+#include "libmesh/parallel_algebra.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADShaftConnectedPump1PhaseUserObject);
 
@@ -83,7 +87,7 @@ ADShaftConnectedPump1PhaseUserObject::ADShaftConnectedPump1PhaseUserObject(
 void
 ADShaftConnectedPump1PhaseUserObject::initialSetup()
 {
-  ADVolumeJunctionBaseUserObject::initialSetup();
+  ADVolumeJunction1PhaseUserObject::initialSetup();
 
   ADShaftConnectableUserObjectInterface::setupConnections(
       ADVolumeJunctionBaseUserObject::_n_connections, ADVolumeJunctionBaseUserObject::_n_flux_eq);
@@ -92,7 +96,7 @@ ADShaftConnectedPump1PhaseUserObject::initialSetup()
 void
 ADShaftConnectedPump1PhaseUserObject::initialize()
 {
-  ADVolumeJunctionBaseUserObject::initialize();
+  ADVolumeJunction1PhaseUserObject::initialize();
   ADShaftConnectableUserObjectInterface::initialize();
 
   _hydraulic_torque = 0;
@@ -215,17 +219,22 @@ ADShaftConnectedPump1PhaseUserObject::getPumpHead() const
 void
 ADShaftConnectedPump1PhaseUserObject::finalize()
 {
-  ADVolumeJunctionBaseUserObject::finalize();
+  ADVolumeJunction1PhaseUserObject::finalize();
+  ADShaftConnectableUserObjectInterface::finalize();
 
   ADShaftConnectableUserObjectInterface::setupJunctionData(
       ADVolumeJunctionBaseUserObject::_scalar_dofs);
   ADShaftConnectableUserObjectInterface::setOmegaDofs(getScalarVar("omega", 0));
+
+  comm().sum(_hydraulic_torque);
+  comm().sum(_friction_torque);
+  comm().sum(_pump_head);
 }
 
 void
 ADShaftConnectedPump1PhaseUserObject::threadJoin(const UserObject & uo)
 {
-  ADVolumeJunctionBaseUserObject::threadJoin(uo);
+  ADVolumeJunction1PhaseUserObject::threadJoin(uo);
   ADShaftConnectableUserObjectInterface::threadJoin(uo);
 
   const ADShaftConnectedPump1PhaseUserObject & scpuo =

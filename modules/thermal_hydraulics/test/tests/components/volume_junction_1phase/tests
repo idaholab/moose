@@ -6,7 +6,6 @@
     # The gold file was actually produced with equal_area_no_junction.i and
     # then renamed to equal_area_with_junction_out.csv.
     csvdiff = 'equal_area_with_junction_out.csv'
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
   [equal_area_not_x_direction]
@@ -24,7 +23,6 @@
       Postprocessors/junction_rhou/variable=junction:rhovV'
     csvdiff = 'equal_area_with_junction_out.csv'
     prereq = 'equal_area_x_direction'
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -35,7 +33,6 @@
     abs_zero = 5e-5
     rel_err = 0
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -45,7 +42,6 @@
     csvdiff = 'phy.deadend_out.csv'
     abs_zero = 1e-5
     rel_err = 0
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -55,7 +51,6 @@
     input = 'phy.shower.i'
     check_input = true
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -66,7 +61,6 @@
     abs_zero = 2e-10
     rel_err = 0
     heavy = true
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -76,7 +70,6 @@
     input = 't_junction_1phase.i'
     csvdiff = 't_junction_1phase_out.csv'
     abs_zero = 1e-10
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -87,7 +80,6 @@
     cli_args = 'Components/junction/K=1 Outputs/file_base=phy.form_loss'
     rel_err = 2e-4
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -98,7 +90,6 @@
     cli_args = 'Components/junction/K=1 Components/junction/A_ref=0.2 Outputs/file_base=phy.form_loss_Aref'
     rel_err = 2e-4
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 

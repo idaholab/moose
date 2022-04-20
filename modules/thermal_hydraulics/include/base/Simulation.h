@@ -188,9 +188,9 @@ public:
   virtual void addVariables();
 
   /**
-   * Add components based physics
+   * Add component MOOSE objects
    */
-  virtual void addComponentPhysics();
+  virtual void addMooseObjects();
 
   /**
    * Perform mesh setup actions such as setting up the coordinate system(s) and
@@ -321,6 +321,11 @@ public:
    * Set if velocity is being output as a vector-valued field
    */
   void setVectorValuedVelocity(bool vector_velocity) { _output_vector_velocity = vector_velocity; }
+
+  /**
+   * Add additional relationship managers to run the simulation
+   */
+  void addRelationshipManagers();
 
 protected:
   struct VariableInfo
