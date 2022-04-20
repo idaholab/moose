@@ -262,7 +262,8 @@ FixedPointSolve::solve()
       }
 
       _console << COLOR_MAGENTA << "Beginning fixed point iteration " << _fixed_point_it
-               << COLOR_DEFAULT << std::endl;
+               << COLOR_DEFAULT << std::endl
+               << std::endl;
     }
 
     // Save last postprocessor value as value before solve
