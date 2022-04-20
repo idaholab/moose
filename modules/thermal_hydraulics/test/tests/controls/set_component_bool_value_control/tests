@@ -4,7 +4,7 @@
     input = 'test.i'
     csvdiff = 'test_out.csv'
     allow_test_objects = true
-    max_parallel = 1
     ad_indexing_type = 'global'
+    recover = false
   []
 []

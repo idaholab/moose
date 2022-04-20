@@ -12,6 +12,9 @@
 #include "MooseMesh.h"
 #include "KDTree.h"
 #include "Assembly.h"
+#include "metaphysicl/parallel_dualnumber.h"
+#include "metaphysicl/parallel_numberarray.h"
+#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADHeatTransferFromHeatStructure3D1PhaseUserObject);
 
@@ -52,33 +55,27 @@ ADHeatTransferFromHeatStructure3D1PhaseUserObject::
     auto elem_id = std::get<0>(t);
     auto side_id = std::get<1>(t);
     const Elem * elem = _mesh.elemPtr(elem_id);
-    if (elem->processor_id() == _subproblem.processor_id())
-    {
-      // 2D elements
-      _assembly.setCurrentSubdomainID(elem->subdomain_id());
-      _assembly.reinit(elem, side_id);
-      const MooseArray<Point> & q_points = _assembly.qPointsFace();
-      if (q_points.size() == 0)
-        mooseError(name(), ": No quadrature points found for element ", elem_id);
-      for (std::size_t i = 0; i < q_points.size(); i++)
-        hs_elem_qps[elem_id].push_back(q_points[i]);
-    }
+    // 2D elements
+    _assembly.setCurrentSubdomainID(elem->subdomain_id());
+    _assembly.reinit(elem, side_id);
+    const MooseArray<Point> & q_points = _assembly.qPointsFace();
+    if (q_points.size() == 0)
+      mooseError(name(), ": No quadrature points found for element ", elem_id);
+    for (std::size_t i = 0; i < q_points.size(); i++)
+      hs_elem_qps[elem_id].push_back(q_points[i]);
   }
 
   for (const auto & elem_id : fch_elem_ids)
   {
     const Elem * elem = _mesh.elemPtr(elem_id);
-    if (elem->processor_id() == _subproblem.processor_id())
-    {
-      // 1D elements
-      _assembly.setCurrentSubdomainID(elem->subdomain_id());
-      _assembly.reinit(elem);
-      const MooseArray<Point> & q_points = _assembly.qPoints();
-      if (q_points.size() == 0)
-        mooseError("No quadrature points found for element ", elem_id);
-      for (std::size_t i = 0; i < q_points.size(); i++)
-        fch_elem_qps[elem_id].push_back(q_points[i]);
-    }
+    // 1D elements
+    _assembly.setCurrentSubdomainID(elem->subdomain_id());
+    _assembly.reinit(elem);
+    const MooseArray<Point> & q_points = _assembly.qPoints();
+    if (q_points.size() == 0)
+      mooseError("No quadrature points found for element ", elem_id);
+    for (std::size_t i = 0; i < q_points.size(); i++)
+      fch_elem_qps[elem_id].push_back(q_points[i]);
   }
 
   // now find out how q-points correspond to each other on the (hs, fch) pair of elements
@@ -102,39 +99,45 @@ ADHeatTransferFromHeatStructure3D1PhaseUserObject::
 void
 ADHeatTransferFromHeatStructure3D1PhaseUserObject::initialize()
 {
+  _heated_perimeter.clear();
+  _T_fluid.clear();
+  _htc.clear();
 }
 
 void
 ADHeatTransferFromHeatStructure3D1PhaseUserObject::execute()
 {
-  unsigned int n_qpts_fch = _qrule->n_points();
-  for (auto elem_id : _hs_elem_ids)
+  if (_current_elem->processor_id() == this->processor_id())
   {
-    unsigned int n_qpts_hs = _elem_qp_map[elem_id].size();
-    const dof_id_type & nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
-    if (nearest_elem_id == _current_elem->id())
+    unsigned int n_qpts_fch = _qrule->n_points();
+    for (auto elem_id : _hs_elem_ids)
     {
-      _heated_perimeter[_current_elem->id()].resize(n_qpts_fch);
-      _heated_perimeter[elem_id].resize(n_qpts_hs);
-
-      _T_fluid[_current_elem->id()].resize(n_qpts_fch);
-      _T_fluid[elem_id].resize(n_qpts_hs);
-
-      _htc[_current_elem->id()].resize(n_qpts_fch);
-      _htc[elem_id].resize(n_qpts_hs);
-
-      for (unsigned int qp_hs = 0; qp_hs < n_qpts_hs; qp_hs++)
+      unsigned int n_qpts_hs = _elem_qp_map[elem_id].size();
+      const dof_id_type & nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
+      if (nearest_elem_id == _current_elem->id())
       {
-        unsigned int nearest_qp = _elem_qp_map[elem_id][qp_hs];
+        _heated_perimeter[_current_elem->id()].resize(n_qpts_fch);
+        _heated_perimeter[elem_id].resize(n_qpts_hs);
 
-        _T_fluid[_current_elem->id()][nearest_qp] = _T[nearest_qp];
-        _T_fluid[elem_id][qp_hs] = _T[nearest_qp];
+        _T_fluid[_current_elem->id()].resize(n_qpts_fch);
+        _T_fluid[elem_id].resize(n_qpts_hs);
 
-        _htc[_current_elem->id()][nearest_qp] = _Hw[nearest_qp];
-        _htc[elem_id][qp_hs] = _Hw[nearest_qp];
+        _htc[_current_elem->id()].resize(n_qpts_fch);
+        _htc[elem_id].resize(n_qpts_hs);
 
-        _heated_perimeter[_current_elem->id()][nearest_qp] = _P_hf[nearest_qp];
-        _heated_perimeter[elem_id][qp_hs] = _P_hf[nearest_qp];
+        for (unsigned int qp_hs = 0; qp_hs < n_qpts_hs; qp_hs++)
+        {
+          unsigned int nearest_qp = _elem_qp_map[elem_id][qp_hs];
+
+          _T_fluid[_current_elem->id()][nearest_qp] = _T[nearest_qp];
+          _T_fluid[elem_id][qp_hs] = _T[nearest_qp];
+
+          _htc[_current_elem->id()][nearest_qp] = _Hw[nearest_qp];
+          _htc[elem_id][qp_hs] = _Hw[nearest_qp];
+
+          _heated_perimeter[_current_elem->id()][nearest_qp] = _P_hf[nearest_qp];
+          _heated_perimeter[elem_id][qp_hs] = _P_hf[nearest_qp];
+        }
       }
     }
   }
@@ -143,6 +146,9 @@ ADHeatTransferFromHeatStructure3D1PhaseUserObject::execute()
 void
 ADHeatTransferFromHeatStructure3D1PhaseUserObject::finalize()
 {
+  allGatherMap(_heated_perimeter);
+  allGatherMap(_T_fluid);
+  allGatherMap(_htc);
 }
 
 void
@@ -195,4 +201,15 @@ ADHeatTransferFromHeatStructure3D1PhaseUserObject::getTfluid(dof_id_type element
   else
     mooseError(
         name(), ": Requested fluid temperature for element ", element_id, " was not computed.");
+}
+
+void
+ADHeatTransferFromHeatStructure3D1PhaseUserObject::allGatherMap(
+    std::map<dof_id_type, std::vector<ADReal>> & data)
+{
+  std::vector<std::map<dof_id_type, std::vector<ADReal>>> all;
+  comm().allgather(data, all);
+  for (auto & hfs : all)
+    for (auto & it : hfs)
+      data[it.first] = it.second;
 }

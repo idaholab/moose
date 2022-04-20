@@ -3,7 +3,6 @@
     type = JSONDiff
     input = 'test.i'
     jsondiff = 'test_map.json'
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 []

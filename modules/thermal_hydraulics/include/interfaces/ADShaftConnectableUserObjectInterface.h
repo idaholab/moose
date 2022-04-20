@@ -44,6 +44,8 @@ protected:
    */
   virtual void setupJunctionData(std::vector<dof_id_type> & scalar_dofs);
 
+  /// Associated MOOSE object
+  const MooseObject * _moose_object;
   /// Number of equation in the shaft component
   unsigned int _n_shaft_eq;
   /// Number of flow channels the shaft connected component is attached to

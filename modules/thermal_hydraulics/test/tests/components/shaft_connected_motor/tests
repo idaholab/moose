@@ -34,7 +34,6 @@
       Outputs/checkpoint=true
       Outputs/file_base=part1_out'
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
 
     requirement = 'The system shall be able to model a motor connected to a shaft.'
@@ -51,7 +50,6 @@
       Outputs/file_base=part2_out'
     prereq = 'restart_part1'
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
 
     requirement = 'The system shall be able to execute a restart a simulation involving a shaft-connected motor.'
@@ -62,7 +60,6 @@
     csvdiff = clg.test.torque.csv
     input = 'clg.test.i'
     cli_args = 'ControlLogic/motor_ctrl/parameter=torque ControlLogic/motor_ctrl/function=torque_fn Postprocessors/test/parameter=torque Outputs/file_base=clg.test.torque'
-    max_parallel = 1
     ad_indexing_type = 'global'
 
     requirement = 'The system shall allow the torque of a shaft-connected motor to be controlled.'
@@ -73,7 +70,6 @@
     csvdiff = clg.test.inertia.csv
     input = 'clg.test.i'
     cli_args = 'ControlLogic/motor_ctrl/parameter=inertia ControlLogic/motor_ctrl/function=inertia_fn Postprocessors/test/parameter=inertia Outputs/file_base=clg.test.inertia'
-    max_parallel = 1
     ad_indexing_type = 'global'
 
     requirement = 'The system shall allow the inertia of a shaft-connected motor to be controlled.'

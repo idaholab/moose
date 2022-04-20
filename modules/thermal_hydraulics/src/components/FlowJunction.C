@@ -55,4 +55,30 @@ FlowJunction::setupMesh()
 
   // name the nodeset/sideset corresponding to the nodes of all connected flow channel ends
   _mesh.setBoundaryName(boundary_id, name());
+
+  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = _mesh.nodeToElemMap();
+  for (auto & nid : _nodes)
+  {
+    const auto & it = node_to_elem.find(nid);
+    if (it == node_to_elem.end())
+      mooseError(name(), ": failed to find node ", nid, "in the mesh!");
+
+    const std::vector<dof_id_type> & elems = it->second;
+    for (const auto & e : elems)
+      _connected_elems.push_back(e);
+  }
+}
+
+void
+FlowJunction::initSecondary()
+{
+  for (auto & eid : _connected_elems)
+  {
+    const Elem * elem = _mesh.queryElemPtr(eid);
+    if (elem != nullptr && elem->processor_id() == processor_id())
+      _proc_ids.push_back(elem->processor_id());
+    else
+      _proc_ids.push_back(0);
+  }
+  comm().sum(_proc_ids);
 }

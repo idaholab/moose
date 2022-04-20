@@ -14,6 +14,10 @@
 #include "NumericalFlux3EqnBase.h"
 #include "Numerics.h"
 #include "LoggingInterface.h"
+#include "metaphysicl/parallel_numberarray.h"
+#include "metaphysicl/parallel_dualnumber.h"
+#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
+#include "libmesh/parallel_algebra.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADJunctionParallelChannels1PhaseUserObject);
 
@@ -40,9 +44,7 @@ ADJunctionParallelChannels1PhaseUserObject::ADJunctionParallelChannels1PhaseUser
 
     _stored_pA(_n_connections),
     _areas(_n_connections),
-    _directions(_n_connections),
     _is_inlet(_n_connections),
-    _connection_indices(_n_connections),
 
     _component_name(getParam<std::string>("component_name"))
 {
@@ -51,28 +53,10 @@ ADJunctionParallelChannels1PhaseUserObject::ADJunctionParallelChannels1PhaseUser
 void
 ADJunctionParallelChannels1PhaseUserObject::initialize()
 {
-  ADVolumeJunctionBaseUserObject::initialize();
+  ADVolumeJunction1PhaseUserObject::initialize();
 
-  _connection_indices.clear();
-}
-
-void
-ADJunctionParallelChannels1PhaseUserObject::storeConnectionData()
-{
-  ADVolumeJunctionBaseUserObject::storeConnectionData();
-
-  const unsigned int c = getBoundaryIDIndex();
-  _connection_indices.push_back(c);
-}
-
-void
-ADJunctionParallelChannels1PhaseUserObject::execute()
-{
-  storeConnectionData();
-
-  const unsigned int c = getBoundaryIDIndex();
-
-  computeFluxesAndResiduals(c);
+  _c_in.clear();
+  _c_out.clear();
 }
 
 void
@@ -99,7 +83,10 @@ ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(const unsi
     if (MooseUtils::absoluteFuzzyEqual(_rhouA[0], 0))
       _d_flow = _dir[0];
     else
-      _d_flow = _dir[0] * _rhouA[0] / std::abs(_rhouA[0]);
+      // FIXME: _d_flow should be again ADRealVectorValue when we have parallel comm on
+      // ADRealVectorValue
+      _d_flow =
+          _dir[0] * MetaPhysicL::raw_value(_rhouA[0]) / std::abs(MetaPhysicL::raw_value(_rhouA[0]));
   }
 
   if (!THM::areParallelVectors(_dir_c0, _dir[0]))
@@ -108,7 +95,6 @@ ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(const unsi
                "component instead.");
 
   _areas[c] = _A[0];
-  _directions[c] = _dir[0];
   _is_inlet[c] = THM::isOutlet(_rhouA[0], _normal[c]);
   _stored_pA[c] = _p[0] * _A[0];
 }
@@ -116,7 +102,7 @@ ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(const unsi
 void
 ADJunctionParallelChannels1PhaseUserObject::threadJoin(const UserObject & uo)
 {
-  ADVolumeJunctionBaseUserObject::threadJoin(uo);
+  ADVolumeJunction1PhaseUserObject::threadJoin(uo);
 
   const ADJunctionParallelChannels1PhaseUserObject & jpc_uo =
       dynamic_cast<const ADJunctionParallelChannels1PhaseUserObject &>(uo);
@@ -127,7 +113,6 @@ ADJunctionParallelChannels1PhaseUserObject::threadJoin(const UserObject & uo)
     const unsigned int c = jpc_uo._connection_indices[i];
 
     _areas[c] = jpc_uo._areas[c];
-    _directions[c] = jpc_uo._directions[c];
     _is_inlet[c] = jpc_uo._is_inlet[c];
     _stored_pA[c] = jpc_uo._stored_pA[c];
     if (c == 0)
@@ -138,14 +123,22 @@ ADJunctionParallelChannels1PhaseUserObject::threadJoin(const UserObject & uo)
 void
 ADJunctionParallelChannels1PhaseUserObject::finalize()
 {
-  ADVolumeJunctionBaseUserObject::finalize();
+  for (unsigned int i = 0; i < _n_connections; i++)
+  {
+    processor_id_type owner_proc = _processor_ids[i];
+    comm().broadcast(_areas[i], owner_proc, true);
+    comm().broadcast(_stored_pA[i], owner_proc, true);
+    // because std::vector<bool> is very special
+    bool b = _is_inlet[i];
+    comm().broadcast(b, owner_proc, true);
+    _is_inlet[i] = b;
+  }
+  comm().broadcast(_d_flow, _processor_ids[0], true);
 
   ADReal Ain_total = 0;
   ADReal pAin_total = 0;
   ADReal pAout_total = 0;
   ADReal Aout_total = 0;
-  _c_in.clear();
-  _c_out.clear();
   for (unsigned int c = 0; c < _n_connections; c++)
   {
     if (_is_inlet[c] == true)
@@ -164,7 +157,7 @@ ADJunctionParallelChannels1PhaseUserObject::finalize()
 
   ADReal p_wall = 0;
   ADReal A_wall = 0;
-  ADRealVectorValue d_wall;
+  RealVectorValue d_wall;
 
   if (Aout_total > Ain_total)
   {
@@ -195,10 +188,10 @@ ADJunctionParallelChannels1PhaseUserObject::finalize()
     d_wall = -_d_flow;
   }
 
-  ADVolumeJunctionBaseUserObject::_residual[VolumeJunction1Phase::RHOUV_INDEX] -=
-      d_wall(0) * p_wall * A_wall;
-  ADVolumeJunctionBaseUserObject::_residual[VolumeJunction1Phase::RHOVV_INDEX] -=
-      d_wall(1) * p_wall * A_wall;
-  ADVolumeJunctionBaseUserObject::_residual[VolumeJunction1Phase::RHOWV_INDEX] -=
-      d_wall(2) * p_wall * A_wall;
+  for (unsigned int i = 0; i < _n_scalar_eq; i++)
+    comm().sum(_residual[i]);
+
+  _residual[VolumeJunction1Phase::RHOUV_INDEX] -= d_wall(0) * p_wall * A_wall;
+  _residual[VolumeJunction1Phase::RHOVV_INDEX] -= d_wall(1) * p_wall * A_wall;
+  _residual[VolumeJunction1Phase::RHOWV_INDEX] -= d_wall(2) * p_wall * A_wall;
 }

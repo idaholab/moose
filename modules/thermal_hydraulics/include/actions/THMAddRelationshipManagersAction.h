@@ -11,10 +11,10 @@
 
 #include "Action.h"
 
-class AddComponentPhysicsAction : public Action
+class THMAddRelationshipManagersAction : public Action
 {
 public:
-  AddComponentPhysicsAction(InputParameters params);
+  THMAddRelationshipManagersAction(InputParameters params);
 
   virtual void act();
 

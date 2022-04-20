@@ -3,7 +3,6 @@
     type = Exodiff
     input = 'phy.q_wall_transfer_3eqn.master.i'
     exodiff = 'phy.q_wall_transfer_3eqn.master_out.e phy.q_wall_transfer_3eqn.master_out_thm0.e'
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -12,7 +11,6 @@
     input = 'phy.T_wall_transfer_3eqn.master.i'
     exodiff = 'phy.T_wall_transfer_3eqn.master_out.e phy.T_wall_transfer_3eqn.master_out_thm0_out.e'
     cli_args = 'thm:Components/hxconn/initial_T_wall=300'
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -21,7 +19,6 @@
     input = 'phy.T_wall_transfer_3eqn.master.i'
     exodiff = 'phy.T_wall_transfer_ext_3eqn.e phy.T_wall_transfer_ext_3eqn_thm0_out.e'
     cli_args = "Outputs/file_base=phy.T_wall_transfer_ext_3eqn Transfers/T_to_slave/variable=T_ext thm:AuxVariables/T_ext thm:AuxVariables/T_ext/initial_condition=300 thm:Components/hxconn/T_ext=T_ext thm:Outputs/out/show='T_ext'"
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -29,7 +26,6 @@
     type = Exodiff
     input = 'phy.T_wall_transfer_elem_3eqn.master.i'
     exodiff = 'phy.T_wall_transfer_elem_3eqn.master_out.e phy.T_wall_transfer_elem_3eqn.master_out_thm0_out.e'
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 []

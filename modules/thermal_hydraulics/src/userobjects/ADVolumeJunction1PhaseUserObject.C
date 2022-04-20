@@ -13,6 +13,10 @@
 #include "VolumeJunction1Phase.h"
 #include "ADNumericalFlux3EqnBase.h"
 #include "Numerics.h"
+#include "metaphysicl/parallel_numberarray.h"
+#include "metaphysicl/parallel_dualnumber.h"
+#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
+#include "libmesh/parallel_algebra.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADVolumeJunction1PhaseUserObject);
 
@@ -159,4 +163,12 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   _residual[VolumeJunction1Phase::RHOWV_INDEX] -=
       di(2) * din * _flux[c][THM3Eqn::CONS_VAR_RHOUA] - pJ * ni(2) * _A[0];
   _residual[VolumeJunction1Phase::RHOEV_INDEX] -= din * _flux[c][THM3Eqn::CONS_VAR_RHOEA];
+}
+
+void
+ADVolumeJunction1PhaseUserObject::finalize()
+{
+  ADVolumeJunctionBaseUserObject::finalize();
+  for (unsigned int i = 0; i < _n_scalar_eq; i++)
+    comm().sum(_residual[i]);
 }

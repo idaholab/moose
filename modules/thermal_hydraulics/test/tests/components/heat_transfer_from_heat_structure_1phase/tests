@@ -4,25 +4,25 @@
     type = Exodiff
     input = 'phy.T_wall_transfer_3eqn_x.i'
     exodiff = 'phy.T_wall_transfer_3eqn_x_out.e'
-    max_parallel = 1
     recover = false
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
   [phy:T_wall_transfer_3eqn_y]
     type = Exodiff
     input = 'phy.T_wall_transfer_3eqn_y.i'
     exodiff = 'phy.T_wall_transfer_3eqn_y_out.e'
-    max_parallel = 1
     recover = false
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
   [phy:T_wall_transfer_3eqn_z]
     type = Exodiff
     input = 'phy.T_wall_transfer_3eqn_z.i'
     exodiff = 'phy.T_wall_transfer_3eqn_z_out.e'
-    max_parallel = 1
     recover = false
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
   [phy:conservation_1phase_plate]
     type = CSVDiff
@@ -36,10 +36,10 @@
       Postprocessors/E_heat_structure/type=ADHeatStructureEnergy
       Postprocessors/E_heat_structure/plate_depth=2
       Outputs/file_base=phy.conservation_1phase_plate_rdg"
-    max_parallel = 1
     # because of output has execute_on = 'initial final'
     recover = false
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
   [phy:conservation_1phase_cylinder]
     type = CSVDiff
@@ -56,10 +56,10 @@
       Postprocessors/E_heat_structure/axis_dir='1 0 0'
       Postprocessors/E_heat_structure/offset=1.0
       Outputs/file_base=phy.conservation_1phase_cylinder_rdg"
-    max_parallel = 1
     # because of output has execute_on = 'initial final'
     recover = false
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
   [phy:heat_structure_multiple_3eqn]
     type = 'CSVDiff'
@@ -69,17 +69,19 @@
       Outputs/file_base=phy.heat_structure_multiple_3eqn_rdg_out"
     abs_zero = 1e-5
     rel_err = 0
-    max_parallel = 1
     max_time = 6000
     ad_indexing_type = 'global'
+    recover = false
+    mesh_mode = 'replicated'
   []
   [phy.energy_heatstructure_ss_1phase]
     type = 'CSVDiff'
     input = 'phy.energy_heatstructure_ss_1phase.i'
     csvdiff = 'phy.energy_heatstructure_ss_1phase_out.csv'
     abs_zero = 5e-7
-    max_parallel = 1
     ad_indexing_type = 'global'
+    recover = false
+    mesh_mode = 'replicated'
   []
 
   # Error checking

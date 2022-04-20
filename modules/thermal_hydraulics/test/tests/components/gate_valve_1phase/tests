@@ -18,7 +18,6 @@
     exodiff = 'gate_valve_1phase_light.e'
     rel_err = 1e-5
     abs_zero = 1e-8
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -35,7 +34,6 @@
     exodiff = 'gate_valve_1phase_light_flipped.e'
     rel_err = 1e-5
     abs_zero = 1e-8
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -52,7 +50,6 @@
     input = 'gate_valve_1phase.i'
     cli_args = "Components/pipe3B/orientation='1 1 1'"
     expect_err = "The connected channels must be parallel at the junction"
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 

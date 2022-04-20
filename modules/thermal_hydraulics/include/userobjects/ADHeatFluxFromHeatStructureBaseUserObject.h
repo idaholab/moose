@@ -52,6 +52,11 @@ public:
 protected:
   virtual ADReal computeQpHeatFlux() = 0;
 
+  /**
+   * Parallel gather of all local contributions into one global map
+   */
+  void allGatherMap(std::map<dof_id_type, std::vector<ADReal>> & data);
+
   /// Flow channel alignment object
   const FlowChannelAlignment & _fch_alignment;
   /// Quadrature point index
