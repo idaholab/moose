@@ -690,6 +690,8 @@ NSFVAction::act()
     {
       if (_has_energy_equation)
         addEnthalpyMaterial();
+      if (_porous_medium_treatment)
+        addPorousMediumSpeedMaterial();
       if (_turbulence_handling == "mixing-length")
         addMixingLengthMaterial();
     }
@@ -2018,6 +2020,19 @@ NSFVAction::addEnthalpyMaterial()
   params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
 
   _problem->addMaterial("INSFVEnthalpyMaterial", "ins_enthalpy_material", params);
+}
+
+void
+NSFVAction::addPorousMediumSpeedMaterial()
+{
+  InputParameters params = _factory.getValidParams("PINSFVSpeedFunctorMaterial");
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+
+  for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
+    params.set<MooseFunctorName>(NS::superficial_velocity_vector[dim_i]) = _velocity_name[dim_i];
+  params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+
+  _problem->addMaterial("PINSFVSpeedFunctorMaterial", "pins_speed_material", params);
 }
 
 void

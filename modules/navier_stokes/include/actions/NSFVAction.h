@@ -109,10 +109,10 @@ protected:
   /// Add weakly compressible mixing length kernels to the energy equation
   /// in case of turbulent flows
   void addWCNSEnergyMixingLengthKernels();
-
   /// Add material to define an enthalpy functor material property for incompressible simulations
   void addEnthalpyMaterial();
-
+  /// Add material to define the local speed in porous medium flows
+  void addPorousMediumSpeedMaterial();
   /// Add mixing length material for turbulence handling
   void addMixingLengthMaterial();
 
