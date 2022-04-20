@@ -59,7 +59,7 @@ protected:
    * @param ref_extra_ids a data structure containing the extra element integer information of the
    * deleted original mesh
    */
-  void
-  addExtraElemIntegers(ReplicatedMesh & mesh,
-                       const std::vector<std::pair<Point, std::vector<dof_id_type>>> ref_extra_ids);
+  void transferExtraElemIntegers(
+      ReplicatedMesh & mesh,
+      const std::vector<std::pair<Point, std::vector<dof_id_type>>> ref_extra_ids);
 };

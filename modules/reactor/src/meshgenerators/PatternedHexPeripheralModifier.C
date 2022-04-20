@@ -230,7 +230,7 @@ PatternedHexPeripheralModifier::generate()
     MeshTools::Modification::rotate(*mesh, (Real)i_side * 60.0, 0, 0);
     // Assign extra element id based on the nearest deleted element
     mesh->add_elem_integers(extra_integer_names, true);
-    addExtraElemIntegers(*mesh, del_elem_extra_ids);
+    transferExtraElemIntegers(*mesh, del_elem_extra_ids);
     mesh->prepare_for_use();
     input_mesh->stitch_meshes(*mesh, OUTER_SIDESET_ID, OUTER_SIDESET_ID, TOLERANCE, true);
     mesh->clear();
@@ -240,17 +240,18 @@ PatternedHexPeripheralModifier::generate()
 }
 
 void
-PatternedHexPeripheralModifier::addExtraElemIntegers(
+PatternedHexPeripheralModifier::transferExtraElemIntegers(
     ReplicatedMesh & mesh,
     const std::vector<std::pair<Point, std::vector<dof_id_type>>> ref_extra_ids)
 {
+  std::vector<Real> tmp_dist;
   // Sorry it's O(MN) :-(
   for (const auto & elem : as_range(mesh.active_elements_begin(), mesh.active_elements_end()))
   {
-    std::vector<Real> tmp_dist;
+    const Point elem_centroid = elem->true_centroid();
     for (auto & pt_extra_id : ref_extra_ids)
     {
-      tmp_dist.push_back((pt_extra_id.first - elem->true_centroid()).norm());
+      tmp_dist.push_back((pt_extra_id.first - elem_centroid).norm());
     }
     unsigned int nearest_elem_index =
         std::distance(tmp_dist.begin(), std::min_element(tmp_dist.begin(), tmp_dist.end()));
@@ -258,5 +259,6 @@ PatternedHexPeripheralModifier::addExtraElemIntegers(
     {
       elem->set_extra_integer(i, ref_extra_ids[nearest_elem_index].second[i]);
     }
+    tmp_dist.resize(0);
   }
 }
