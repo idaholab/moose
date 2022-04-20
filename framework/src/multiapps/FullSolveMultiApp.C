@@ -127,10 +127,11 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
     if (!ex->lastSolveConverged())
     {
       last_solve_converged = false;
-      _console << COLOR_RED << "Subapp " << _apps[i]->name() << " solve Did NOT Converge!"
-               << COLOR_DEFAULT << std::endl;
+      if (_fe_problem.showMultiappActions())
+        _console << COLOR_RED << "Subapp " << _apps[i]->name() << " solve Did NOT Converge!"
+                 << COLOR_DEFAULT << std::endl;
     }
-    else
+    else if (_fe_problem.showMultiappActions())
       _console << COLOR_GREEN << "Subapp " << _apps[i]->name() << " solve converged!"
                << COLOR_DEFAULT << std::endl;
   }

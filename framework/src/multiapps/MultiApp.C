@@ -554,10 +554,14 @@ MultiApp::backup()
 {
   TIME_SECTION(_backup_timer);
 
-  _console << "Backed up MultiApp ... ";
+  if (_fe_problem.showMultiappActions())
+    _console << "Backed up MultiApp ... ";
+
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups[i] = _apps[i]->backup();
-  _console << name() << std::endl;
+
+  if (_fe_problem.showMultiappActions())
+    _console << name() << std::endl;
 }
 
 void
@@ -592,10 +596,14 @@ MultiApp::restore(bool force)
       }
     }
 
-    _console << "Restored MultiApp ... ";
+    if (_fe_problem.showMultiappActions())
+      _console << "Restored MultiApp ... ";
+
     for (unsigned int i = 0; i < _my_num_apps; i++)
       _apps[i]->restore(_backups[i]);
-    _console << name() << std::endl;
+
+    if (_fe_problem.showMultiappActions())
+      _console << name() << std::endl;
 
     // Now copy the latest solutions back for each subapp
     if (_keep_solution_during_restore)
@@ -842,16 +850,18 @@ MultiApp::createApp(unsigned int i, Real start_time)
     }
   }
 
-  _console << COLOR_CYAN << "Creating MultiApp " << name() << " of type " << _app_type
-           << " of level " << _app.multiAppLevel() + 1 << " and number " << _first_local_app + i
-           << " on processor " << processor_id() << " with full name " << full_name << COLOR_DEFAULT
-           << std::endl;
+  if (_fe_problem.showMultiappActions())
+    _console << COLOR_CYAN << "Creating MultiApp " << name() << " of type " << _app_type
+             << " of level " << _app.multiAppLevel() + 1 << " and number " << _first_local_app + i
+             << " on processor " << processor_id() << " with full name " << full_name
+             << COLOR_DEFAULT << std::endl;
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
   if (getParam<bool>("clone_master_mesh"))
   {
-    _console << COLOR_CYAN << "Cloned master mesh will be used for MultiApp " << name()
-             << COLOR_DEFAULT << std::endl;
+    if (_fe_problem.showMultiappActions())
+      _console << COLOR_CYAN << "Cloned master mesh will be used for MultiApp " << name()
+               << COLOR_DEFAULT << std::endl;
     app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
     auto displaced_problem = _fe_problem.getDisplacedProblem();
     if (displaced_problem)
