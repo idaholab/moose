@@ -5,7 +5,7 @@
   [basic]
     type = 'CSVDiff'
     input = 'basic.i'
-    csvdiff = 'basic_out_vpp_0001.csv'
+    csvdiff = 'basic_out_vpp_0001.csv basic_out_vpp_0002.csv'
 
     requirement = 'The system shall be able to output material properties calculated at quadrature '
                   'points on user-defined elements in a comma separated format.'
