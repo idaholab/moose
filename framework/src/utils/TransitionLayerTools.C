@@ -472,13 +472,11 @@ needFlip(const std::vector<Point> vec_pts_1, const std::vector<Point> vec_pts_2)
 bool
 isBoundaryValid(ReplicatedMesh & mesh,
                 Real & max_node_radius,
-                unsigned short & invalid_type,
                 std::vector<dof_id_type> & boundary_ordered_node_list,
                 const Point origin_pt,
                 const boundary_id_type bid)
 {
   max_node_radius = 0.0;
-  invalid_type = 0;
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   auto side_list_tmp = boundary_info.build_side_list();
   unsigned int elem_counter = 0;
@@ -539,7 +537,7 @@ isBoundaryValid(ReplicatedMesh & mesh,
       {
         // Flipped twice; this means the boundary has at least two segments.
         // This is invalid type #1
-        invalid_type = 1;
+        throw(unsigned short) 1;
         return false;
       }
       // mark the first flip event.
@@ -555,7 +553,7 @@ isBoundaryValid(ReplicatedMesh & mesh,
   if (boundary_ordered_node_list.front() != boundary_ordered_node_list.back())
   {
     // This is invalid type #2
-    invalid_type = 2;
+    throw(unsigned short) 2;
     return false;
   }
   // It the boundary is a loop, check if azimuthal angles change monotonically
@@ -578,7 +576,7 @@ isBoundaryValid(ReplicatedMesh & mesh,
     if (ordered_node_azi_list.front() * ordered_node_azi_list.back() < 0.0)
     {
       // This is invalid type #3
-      invalid_type = 3;
+      throw(unsigned short) 3;
       return false;
     }
     else
@@ -589,21 +587,18 @@ isBoundaryValid(ReplicatedMesh & mesh,
 bool
 isBoundaryValid(ReplicatedMesh & mesh,
                 Real & max_node_radius,
-                unsigned short & invalid_type,
                 const Point origin_pt,
                 const boundary_id_type bid)
 {
   std::vector<dof_id_type> dummy_boundary_ordered_node_list;
-  return isBoundaryValid(
-      mesh, max_node_radius, invalid_type, dummy_boundary_ordered_node_list, origin_pt, bid);
+  return isBoundaryValid(mesh, max_node_radius, dummy_boundary_ordered_node_list, origin_pt, bid);
 }
 
 bool
 isBoundaryValid(ReplicatedMesh & mesh, const Point origin_pt, const boundary_id_type bid)
 {
   Real dummy_max_node_radius;
-  unsigned short dummy_invalid_type;
-  return isBoundaryValid(mesh, dummy_max_node_radius, dummy_invalid_type, origin_pt, bid);
+  return isBoundaryValid(mesh, dummy_max_node_radius, origin_pt, bid);
 }
 
 bool

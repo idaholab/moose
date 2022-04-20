@@ -98,6 +98,8 @@ TransitionLayerConnector::TransitionLayerConnector(const InputParameters & param
     _input_1(getMeshByName(_input_name_1)),
     _input_2(getMeshByName(_input_name_2))
 {
+  if (_input_name_1.compare(_input_name_2) == 0)
+    paramError("input_mesh_2", "This parameter must be different from input_mesh_1.");
 }
 
 std::unique_ptr<MeshBase>
@@ -143,29 +145,36 @@ TransitionLayerConnector::generate()
     paramError("boundary_2", "The boundary provided is not an external boundary.");
 
   Real max_input_mesh_1_node_radius;
-  unsigned short invalid_boundary_type_1;
   Real max_input_mesh_2_node_radius;
-  unsigned short invalid_boundary_type_2;
   std::vector<dof_id_type> boundary_1_ordered_nodes;
   std::vector<dof_id_type> boundary_2_ordered_nodes;
 
-  TransitionLayerTools::isBoundaryValid(*input_mesh_1,
-                                        max_input_mesh_1_node_radius,
-                                        invalid_boundary_type_1,
-                                        boundary_1_ordered_nodes,
-                                        _mesh_1_shift,
-                                        input_mesh_1_external_bids.front());
-  TransitionLayerTools::isBoundaryValid(*input_mesh_2,
-                                        max_input_mesh_2_node_radius,
-                                        invalid_boundary_type_2,
-                                        boundary_2_ordered_nodes,
-                                        _mesh_2_shift,
-                                        input_mesh_2_external_bids.front());
-
-  if (invalid_boundary_type_1 != 2)
-    paramError("boundary_1", "The provided boundary is not a single-segment boundary.");
-  if (invalid_boundary_type_2 != 2)
-    paramError("boundary_2", "The provided boundary is not a single-segment boundary.");
+  try
+  {
+    TransitionLayerTools::isBoundaryValid(*input_mesh_1,
+                                          max_input_mesh_1_node_radius,
+                                          boundary_1_ordered_nodes,
+                                          _mesh_1_shift,
+                                          input_mesh_1_external_bids.front());
+  }
+  catch (unsigned short invalid_boundary_type)
+  {
+    if (invalid_boundary_type != 2)
+      paramError("boundary_1", "The provided boundary is not a single-segment boundary.");
+  }
+  try
+  {
+    TransitionLayerTools::isBoundaryValid(*input_mesh_2,
+                                          max_input_mesh_2_node_radius,
+                                          boundary_2_ordered_nodes,
+                                          _mesh_2_shift,
+                                          input_mesh_2_external_bids.front());
+  }
+  catch (unsigned short invalid_boundary_type)
+  {
+    if (invalid_boundary_type != 2)
+      paramError("boundary_2", "The provided boundary is not a single-segment boundary.");
+  }
 
   std::vector<Point> positions_vector_1;
   std::vector<Point> positions_vector_2;
@@ -208,7 +217,7 @@ TransitionLayerConnector::generate()
                         input_mesh_1_external_bids.front(),
                         TOLERANCE,
                         true,
-                        true,
+                        false,
                         true,
                         true);
     mesh->stitch_meshes(*input_mesh_2,
@@ -216,7 +225,7 @@ TransitionLayerConnector::generate()
                         input_mesh_2_external_bids.front(),
                         TOLERANCE,
                         true,
-                        true,
+                        false,
                         true,
                         true);
   }

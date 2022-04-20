@@ -181,14 +181,12 @@ bool needFlip(const std::vector<Point> vec_pts_1, const std::vector<Point> vec_p
  * @param mesh input mesh that contains the boundary to be examined
  * @param max_node_radius the maximum radius of the nodes on the
  * boundary
- * @param invalid_type help distinguish different types of invalid boundaries
  * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
  * @param bid ID of the boundary to be examined
  * @return whether the boundary works with the algorithm
  */
 bool isBoundaryValid(ReplicatedMesh & mesh,
                      Real & max_node_radius,
-                     unsigned short & invalid_type,
                      std::vector<dof_id_type> & boundary_ordered_node_list,
                      const Point origin_pt,
                      const boundary_id_type bid);
@@ -198,14 +196,12 @@ bool isBoundaryValid(ReplicatedMesh & mesh,
  * @param mesh input mesh that contains the boundary to be examined
  * @param max_node_radius the maximum radius of the nodes on the
  * boundary
- * @param invalid_type help distinguish different types of invalid boundaries
  * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
  * @param bid ID of the boundary to be examined
  * @return whether the boundary works with the algorithm
  */
 bool isBoundaryValid(ReplicatedMesh & mesh,
                      Real & max_node_radius,
-                     unsigned short & invalid_type,
                      const Point origin_pt,
                      const boundary_id_type bid);
 

@@ -40,6 +40,15 @@
     recover = false
     mesh_mode = 'REPLICATED'
   []
+  [err_same_inputs]
+    type = 'RunException'
+    input = 'squares.i'
+    cli_args = '--mesh-only squares_err.e
+               Mesh/tlc/input_mesh_2="rotate_1"'
+    expect_err = 'This parameter must be different from input_mesh_1.'
+    requirement = "The system shall throw an error if the two input meshes are the same."
+    mesh_mode = 'REPLICATED'
+  []
   [err_multiseg_boundary]
     type = 'RunException'
     input = 'squares.i'

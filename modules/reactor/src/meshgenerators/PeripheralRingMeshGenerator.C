@@ -162,13 +162,13 @@ PeripheralRingMeshGenerator::generate()
   const Point origin_pt = MooseMeshUtils::meshCentroidCalculator(*input_mesh);
   // Vessel for containing maximum radius of the boundary nodes
   Real max_input_mesh_node_radius;
-  unsigned short invalid_boundary_type;
 
-  if (!TransitionLayerTools::isBoundaryValid(*input_mesh,
-                                             max_input_mesh_node_radius,
-                                             invalid_boundary_type,
-                                             origin_pt,
-                                             _input_mesh_external_bid))
+  try
+  {
+    TransitionLayerTools::isBoundaryValid(
+        *input_mesh, max_input_mesh_node_radius, origin_pt, _input_mesh_external_bid);
+  }
+  catch (unsigned short invalid_boundary_type)
   {
     switch (invalid_boundary_type)
     {
