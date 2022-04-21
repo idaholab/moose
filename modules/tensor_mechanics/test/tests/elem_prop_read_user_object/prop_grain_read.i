@@ -42,12 +42,13 @@
 
 [UserObjects]
   [./prop_read]
-    type = ElementPropertyReadFile
+    type = PropertyReadFile
     prop_file_name = 'input_file.txt'
     # Enter file data as prop#1, prop#2, .., prop#nprop
     nprop = 4
-    read_type = grain
-    ngrain = 3
+    read_type = voronoi
+    nvoronoi = 3
+    use_random_voronoi = true
     rand_seed = 25346
     rve_type = periodic
   [../]

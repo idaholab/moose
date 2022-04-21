@@ -12,8 +12,7 @@
 #include "PiecewiseTabularBase.h"
 
 /**
- * Function which provides a piecewise continuous constant interpolation
- * of a provided (x,y) point data set.
+ * Function which provides a piecewise constant interpolation of a provided (x,y) point data set.
  */
 class PiecewiseConstant : public PiecewiseTabularBase
 {

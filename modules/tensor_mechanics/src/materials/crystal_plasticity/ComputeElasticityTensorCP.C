@@ -27,7 +27,7 @@ ComputeElasticityTensorCP::validParams()
 ComputeElasticityTensorCP::ComputeElasticityTensorCP(const InputParameters & parameters)
   : ComputeElasticityTensor(parameters),
     _read_prop_user_object(isParamValid("read_prop_user_object")
-                               ? &getUserObject<ElementPropertyReadFile>("read_prop_user_object")
+                               ? &getUserObject<PropertyReadFile>("read_prop_user_object")
                                : nullptr),
     _Euler_angles_mat_prop(declareProperty<RealVectorValue>("Euler_angles")),
     _crysrot(declareProperty<RankTwoTensor>("crysrot")),

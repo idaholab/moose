@@ -1,0 +1,114 @@
+[Tests]
+  issues = '#19109'
+  design = 'PiecewiseConstantFromCSV.md'
+  [csv_read]
+    requirement = 'The Function system shall include a function that can obtain data from a CSV file'
+    [element]
+      type = 'Exodiff'
+      input = 'piecewise_constant.i'
+      exodiff = 'piecewise_constant_element.e'
+      cli_args = 'Outputs/file_base=piecewise_constant_element'
+      detail = 'with data sorted by element ids'
+      recover = false
+      # Function used at nodes
+      allow_warnings = true
+    []
+    [node]
+      type = 'Exodiff'
+      input = 'piecewise_constant.i'
+      exodiff = 'piecewise_constant_node.e'
+      cli_args = 'ICs/active=node Outputs/file_base=piecewise_constant_node'
+      detail = 'with data sorted by node ids'
+      recover = false
+    []
+    [voronoi]
+      type = 'Exodiff'
+      input = 'piecewise_constant.i'
+      exodiff = 'piecewise_constant_voronoi.e'
+      cli_args = 'ICs/active=nearest Outputs/file_base=piecewise_constant_voronoi'
+      detail = 'with data at given locations and using nearest neighbor interpolation between those data points'
+      recover = false
+    []
+    [random_voronoi]
+      type = 'Exodiff'
+      input = 'piecewise_constant.i'
+      exodiff = 'piecewise_constant_voronoi_random.e'
+      cli_args = 'ICs/active=nearest UserObjects/reader_nearest/use_random_voronoi=true Outputs/file_base=piecewise_constant_voronoi_random'
+      detail = 'using nearest neighbor interpolation with a random tesselation'
+      recover = false
+    []
+    [periodic_voronoi]
+      type = 'Exodiff'
+      input = 'piecewise_constant.i'
+      exodiff = 'piecewise_constant_voronoi_periodic.e'
+      cli_args = 'ICs/active=nearest UserObjects/reader_nearest/rve_type=periodic Outputs/file_base=piecewise_constant_voronoi_periodic'
+      detail = 'with data at given locations and using nearest neighbor interpolation between those data points, with periodic boundaries'
+      recover = false
+    []
+    [block]
+      type = 'Exodiff'
+      input = 'piecewise_constant.i'
+      exodiff = 'piecewise_constant_block.e'
+      cli_args = 'ICs/active=block Outputs/file_base=piecewise_constant_block'
+      detail = 'with data sorted by blocks and with constant values on each block.'
+      recover = false
+      # Function used at nodes
+      allow_warnings = true
+    []
+  []
+  [errors]
+    requirement = 'The system shall error out if'
+    [read_type]
+      type = RunException
+      input = 'piecewise_constant.i'
+      cli_args = 'Functions/element/read_type=voronoi'
+      expect_err = 'The PropertyReadFile UO should have the same read_type parameter'
+      detail = 'if the CSV reader object and the function expect the CSV data to be ordered differently'
+    []
+    [num_columns]
+      type = RunException
+      input = 'piecewise_constant.i'
+      cli_args = 'Functions/element/column_number=26'
+      expect_err = 'Property number 26 greater than total number of properties 3'
+      detail = 'if the desired column number in the CSV file is higher than the number of columns in the file'
+    []
+    [num_rows]
+      type = RunException
+      input = 'piecewise_constant.i'
+      cli_args = 'UserObjects/reader_element/prop_file_name=data_nearest.csv'
+      expect_err = 'does not have enough rows for*'
+      detail = 'if the data saught exceeds the row number in the CSV file'
+    []
+    [zero_blocks]
+      type = RunException
+      input = 'piecewise_constant.i'
+      cli_args = 'ICs/active=block UserObjects/reader_block/nblock=0'
+      expect_err = 'Provide non-zero number of blocks.'
+      detail = 'if the number of blocks specified to a CSV reader reading block-data is 0'
+    []
+    [zero_voronoi]
+      type = RunException
+      input = 'piecewise_constant.i'
+      cli_args = 'ICs/active=nearest UserObjects/reader_nearest/nvoronoi=0'
+      expect_err = 'Provide non-zero number of voronoi tesselations/grains.'
+      detail = 'if the number of nearest-neighbor regions specified to a CSV reader reading nearest-neighbor-region-data is 0'
+    []
+  []
+  [warnings]
+    requirement = 'The system shall issue a warning if'
+    [num_columns]
+      type = RunException
+      input = 'piecewise_constant.i'
+      cli_args = 'Functions/nearest/column_number=0'
+      expect_err = 'The column requested in the function is likely to just be containing point coordinates'
+      detail = 'if the desired column number in the CSV file is known to be a column holding point coordinates'
+    []
+    [too_much_data_in_file]
+      type = RunException
+      input = 'piecewise_constant.i'
+      cli_args = 'ICs/active=block UserObjects/reader_block/prop_file_name=data_element.csv'
+      expect_err = ", some data will not be used."
+      detail = 'if the data file contains more points/rows than the reader needs'
+    []
+  []
+[]

@@ -97,7 +97,8 @@
     exodiff = 'prop_block_read_out.e'
     issues = '#4066'
     requirement = 'The system shall provide an object to read values from a file and map them onto a mesh besed on mesh block IDs'
-    design = 'ElementPropertyReadFile.md'
+    design = 'PropertyReadFile.md'
+    allow_warnings = true # number of blocks is smaller than number of data points in CSV file
   [../]
   [./use_substep_dt]
     type = 'CSVDiff'
