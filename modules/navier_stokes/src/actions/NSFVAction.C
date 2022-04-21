@@ -439,9 +439,13 @@ NSFVAction::validParams()
       "Tunable parameter related to the thickness of the boundary layer."
       "When it is not specified, Prandtl's original unbounded wall distance mixing length model is"
       "retrieved.");
+  params.addRangeCheckedParam<Real>("turbulent_prandtl",
+                                    1,
+                                    "turbulent_prandtl > 0",
+                                    "Turbulent Prandtl number for energy turbulent diffusion");
 
   params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
-                              "von_karman_const_0 mixing_length_delta",
+                              "von_karman_const_0 mixing_length_delta turbulent_prandtl",
                               "Turbulence");
 
   // Create input parameter groups
@@ -1999,7 +2003,7 @@ NSFVAction::addWCNSEnergyMixingLengthKernels()
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
   params.set<CoupledName>(NS::mixing_length) = {NS::mixing_length};
-  params.set<Real>("schmidt_number") = 1.0;
+  params.set<Real>("schmidt_number") = getParam<Real>("turbulent_prandtl");
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
 
   for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
