@@ -1,6 +1,6 @@
 [Tests]
   [heated]
-    issues = '#16756'
+    issues = '#16756 #19472'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel'
     design = 'PINSFVEnergyAdvection.md'
     [fluid_only]
@@ -48,7 +48,46 @@
     ad_indexing_type = 'global'
     valgrind = HEAVY
     design = 'PINSFVEnergyAmbientConvection.md'
-    cli_args = "Variables/inactive='' AuxVariables/inactive='temp_solid' FVKernels/inactive='' FVBCs/inactive='' Outputs/file_base='rc-heated-solid-fluid'"
+    cli_args = "Variables/inactive='' AuxVariables/inactive='T_solid' FVKernels/inactive='' FVBCs/inactive='' Outputs/file_base='rc-heated-solid-fluid'"
+  []
+  [solid-fluid-action]
+    type = 'Exodiff'
+    input = 2d-rc-heated-action.i
+    exodiff = rc-heated-solid-fluid-action.e
+    method = "!dbg"
+    abs_zero = 1e-9
+    issues = '#19472'
+    design = 'NSFVAction.md'
+    requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel using the NSFV action syntax.'
+    ad_indexing_type = 'global'
+    valgrind = HEAVY
+    cli_args = "Outputs/file_base='rc-heated-solid-fluid-action'"
+  []
+  [solid-fluid-block]
+    type = 'Exodiff'
+    input = 2d-rc-heated.i
+    exodiff = rc-heated-solid-fluid-block.e
+    method = "!dbg"
+    abs_zero = 1e-9
+    issues = '#16756'
+    requirement = 'The system shall be able to solve for fluid energy diffusion, advection and block-restricted convection.'
+    ad_indexing_type = 'global'
+    valgrind = HEAVY
+    design = 'PINSFVEnergyAmbientConvection.md'
+    cli_args = "Variables/inactive='' AuxVariables/inactive='T_solid' FVKernels/inactive='' FVKernels/energy_convection/block='2' FVKernels/solid_energy_convection/block='2' FVKernels/energy_advection/advected_interp_method='upwind' FVBCs/inactive='' Outputs/file_base='rc-heated-solid-fluid-block'"
+  []
+  [solid-fluid-block-action]
+    type = 'Exodiff'
+    input = 2d-rc-heated-action.i
+    exodiff = rc-heated-solid-fluid-block-action.e
+    method = "!dbg"
+    abs_zero = 1e-9
+    issues = '#19472'
+    design = 'NSFVAction.md'
+    requirement = 'The system shall be able to solve for fluid energy diffusion, advection and block-restricted convection with the solid phase in a 2D channel using the NSFV action syntax.'
+    ad_indexing_type = 'global'
+    valgrind = HEAVY
+    cli_args = "Outputs/file_base='rc-heated-solid-fluid-block-action' Modules/NavierStokesFV/ambient_convection_blocks='2' Modules/NavierStokesFV/energy_advection_interpolation='upwind' FVKernels/solid_energy_convection/block='2'"
   []
   [transient]
     type = 'Exodiff'
@@ -62,6 +101,18 @@
     valgrind = 'none'
     design = 'PINSFVEnergyTimeDerivative.md INSFVMomentumTimeDerivative.md'
   []
+  [transient-action]
+    type = 'Exodiff'
+    input = 2d-transient-action.i
+    exodiff = 2d-transient-action_out.e
+    method = "!dbg"
+    abs_zero = 1e-9
+    issues = '#19472'
+    design = 'NSFVAction.md'
+    requirement = 'The system shall be able to run transient simulations with fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature using the NSFV action syntax.'
+    ad_indexing_type = 'global'
+    valgrind = 'none'
+  []
   [boussinesq]
     type = 'Exodiff'
     input = 2d-rc-heated-boussinesq.i
@@ -73,5 +124,17 @@
     valgrind = HEAVY
     design = 'PINSFVMomentumBoussinesq.md'
     cli_args = "Outputs/file_base='rc-heated-boussinesq'"
+  []
+  [boussinesq-action]
+    type = 'Exodiff'
+    input = 2d-rc-heated-boussinesq-action.i
+    exodiff = rc-heated-boussinesq-action.e
+    method = "!dbg"
+    issues = '#19472'
+    design = 'NSFVAction.md'
+    requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel with a Boussinesq approximation using the NSFV action syntax.'
+    ad_indexing_type = 'global'
+    valgrind = HEAVY
+    cli_args = "Outputs/file_base='rc-heated-boussinesq-action'"
   []
 []

@@ -37,5 +37,5 @@ protected:
   /// Reference temperature at which the value of _rho was measured
   const Real _ref_temperature;
   /// the density
-  const Real & _rho;
+  const Moose::Functor<ADReal> & _rho;
 };

@@ -975,7 +975,6 @@ SubProblem::getFunctor(const std::string & name,
                  name,
                  "' but multiple functors match. Make sure that you do not have functor material "
                  "properties, functions, and variables with the same names");
-
     auto * const functor = dynamic_cast<Moose::Functor<T> *>(find_ret->second.get());
     if (!functor)
       mooseError("A call to SubProblem::getFunctor requested a functor named '",
@@ -987,7 +986,6 @@ SubProblem::getFunctor(const std::string & name,
                  "'");
     return *functor;
   }
-
   // We don't have the functor yet but we could have it in the future. We'll create a null-functor
   // for now
   auto emplace_ret = functors.emplace(std::make_pair(

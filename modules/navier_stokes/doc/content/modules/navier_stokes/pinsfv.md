@@ -148,6 +148,12 @@ both internal and external boundaries. The geometry can be switched using the `i
 
 !listing modules/navier_stokes/test/tests/postprocessors/flow_rates/conservation_PINSFV.i
 
+## Action syntax
+
+To ease the burden of preparing long input files, the
+[NavierStokesFV](/Modules/NavierStokesFV/index.md)
+action syntax can also be used to set up porous medium INSFV simulations.
+
 ## Pronghorn
 
 Predefined temperature and pressure dependent material properties, closure relations for

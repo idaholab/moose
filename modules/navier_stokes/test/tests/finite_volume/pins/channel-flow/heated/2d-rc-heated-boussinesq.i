@@ -27,32 +27,32 @@ velocity_interp_method='rc'
 [UserObjects]
   [rc]
     type = PINSFVRhieChowInterpolator
-    u = u
-    v = v
+    u = superficial_vel_x
+    v = superficial_vel_y
     pressure = pressure
     porosity = porosity
   []
 []
 
 [Variables]
-  [u]
+  [superficial_vel_x]
     type = PINSFVSuperficialVelocityVariable
     initial_condition = 1e-6
   []
-  [v]
+  [superficial_vel_y]
     type = PINSFVSuperficialVelocityVariable
     initial_condition = ${v_inlet}
   []
   [pressure]
     type = INSFVPressureVariable
   []
-  [temperature]
+  [T_fluid]
     type = INSFVEnergyVariable
   []
 []
 
 [AuxVariables]
-  [temp_solid]
+  [T_solid]
     family = 'MONOMIAL'
     order = 'CONSTANT'
     fv = true
@@ -77,7 +77,7 @@ velocity_interp_method='rc'
 
   [u_advection]
     type = PINSFVMomentumAdvection
-    variable = u
+    variable = superficial_vel_x
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -86,21 +86,21 @@ velocity_interp_method='rc'
   []
   [u_viscosity]
     type = PINSFVMomentumDiffusion
-    variable = u
+    variable = superficial_vel_x
     mu = ${mu}
     porosity = porosity
     momentum_component = 'x'
   []
   [u_pressure]
     type = PINSFVMomentumPressure
-    variable = u
+    variable = superficial_vel_x
     momentum_component = 'x'
     pressure = pressure
     porosity = porosity
   []
   [u_gravity]
     type = PINSFVMomentumGravity
-    variable = u
+    variable = superficial_vel_x
     rho = ${rho}
     gravity = '0 -9.81 0'
     momentum_component = 'x'
@@ -108,8 +108,8 @@ velocity_interp_method='rc'
   []
   [u_boussinesq]
     type = PINSFVMomentumBoussinesq
-    variable = u
-    T_fluid = 'temperature'
+    variable = superficial_vel_x
+    T_fluid = 'T_fluid'
     rho = ${rho}
     ref_temperature = 150
     gravity = '0 -9.81 0'
@@ -120,7 +120,7 @@ velocity_interp_method='rc'
 
   [v_advection]
     type = PINSFVMomentumAdvection
-    variable = v
+    variable = superficial_vel_y
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -129,21 +129,21 @@ velocity_interp_method='rc'
   []
   [v_viscosity]
     type = PINSFVMomentumDiffusion
-    variable = v
+    variable = superficial_vel_y
     mu = ${mu}
     porosity = porosity
     momentum_component = 'y'
   []
   [v_pressure]
     type = PINSFVMomentumPressure
-    variable = v
+    variable = superficial_vel_y
     momentum_component = 'y'
     pressure = pressure
     porosity = porosity
   []
   [v_gravity]
     type = PINSFVMomentumGravity
-    variable = v
+    variable = superficial_vel_y
     rho = ${rho}
     gravity = '-0 -9.81 0'
     momentum_component = 'y'
@@ -151,8 +151,8 @@ velocity_interp_method='rc'
   []
   [v_boussinesq]
     type = PINSFVMomentumBoussinesq
-    variable = v
-    T_fluid = 'temperature'
+    variable = superficial_vel_y
+    T_fluid = 'T_fluid'
     rho = ${rho}
     ref_temperature = 150
     gravity = '0 -9.81 0'
@@ -163,22 +163,22 @@ velocity_interp_method='rc'
 
   [energy_advection]
     type = PINSFVEnergyAdvection
-    variable = temperature
+    variable = T_fluid
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
   []
   [energy_diffusion]
     type = PINSFVEnergyDiffusion
     k = ${k}
-    variable = temperature
+    variable = T_fluid
     porosity = porosity
   []
   [energy_convection]
     type = PINSFVEnergyAmbientConvection
-    variable = temperature
+    variable = T_fluid
     is_solid = false
-    T_fluid = temperature
-    T_solid = temp_solid
+    T_fluid = T_fluid
+    T_solid = T_solid
     h_solid_fluid = 'h_cv'
   []
 []
@@ -187,18 +187,18 @@ velocity_interp_method='rc'
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'bottom'
-    variable = u
+    variable = superficial_vel_x
     function = 0
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'bottom'
-    variable = v
+    variable = superficial_vel_y
     function = ${v_inlet}
   []
   [inlet-T]
     type = FVNeumannBC
-    variable = temperature
+    variable = T_fluid
     value = ${fparse v_inlet * rho * cp * T_inlet}
     boundary = 'bottom'
   []
@@ -206,31 +206,31 @@ velocity_interp_method='rc'
   [no-slip-u]
     type = INSFVNoSlipWallBC
     boundary = 'right'
-    variable = u
+    variable = superficial_vel_x
     function = 0
   []
   [no-slip-v]
     type = INSFVNoSlipWallBC
     boundary = 'right'
-    variable = v
+    variable = superficial_vel_y
     function = 0
   []
 
   [symmetry-u]
     type = PINSFVSymmetryVelocityBC
     boundary = 'left'
-    variable = u
-    u = u
-    v = v
+    variable = superficial_vel_x
+    u = superficial_vel_x
+    v = superficial_vel_y
     mu = ${mu}
     momentum_component = 'x'
   []
   [symmetry-v]
     type = PINSFVSymmetryVelocityBC
     boundary = 'left'
-    variable = v
-    u = u
-    v = v
+    variable = superficial_vel_y
+    u = superficial_vel_x
+    v = superficial_vel_y
     mu = ${mu}
     momentum_component = 'y'
   []
@@ -263,7 +263,7 @@ velocity_interp_method='rc'
   [ins_fv]
     type = INSFVEnthalpyMaterial
     rho = ${rho}
-    temperature = 'temperature'
+    temperature = 'T_fluid'
   []
 []
 
@@ -285,12 +285,12 @@ velocity_interp_method='rc'
   []
   [outlet-v]
     type = SideAverageValue
-    variable = v
+    variable = superficial_vel_y
     boundary = 'top'
   []
   [outlet-temp]
     type = SideAverageValue
-    variable = temperature
+    variable = T_fluid
     boundary = 'top'
   []
 []

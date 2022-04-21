@@ -22,7 +22,7 @@ FVPointValueConstraint::validParams()
   params.addClassDescription("This class is used to enforce integral of phi = volume * phi_0 "
                              "with a Lagrange multiplier approach.");
   params.addRequiredParam<Real>("phi0",
-                                "What we want the average value of the primal variable to be.");
+                                "What we want the point value of the primal variable to be.");
   params.addRequiredParam<Point>(
       "point", "The XYZ coordinates of the points where the value shall be enforced.");
   return params;

@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#15640'
-  design = 'navier_stokes/insfv.md'
+  issues = '#15640 #19472'
+  design = 'navier_stokes/insfv.md NSFVAction.md'
   [1d-rc]
     type = 'Exodiff'
     input = 1d-rc.i
@@ -18,6 +18,15 @@
     ad_indexing_type = 'global'
     valgrind = HEAVY
   []
+  [free-slip-action]
+    type = 'Exodiff'
+    input = 2d-rc-action.i
+    exodiff = 2d-rc-action_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model free-slip conditions in a channel using the NSFV action.'
+    ad_indexing_type = 'global'
+    valgrind = HEAVY
+  []
   [no-slip]
     type = 'Exodiff'
     input = 2d-rc-no-slip.i
@@ -26,6 +35,18 @@
     requirement = 'The system shall be able to model no-slip conditions in a channel; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
     ad_indexing_type = 'global'
+    cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
+    valgrind = HEAVY
+  []
+  [no-slip-action]
+    type = 'Exodiff'
+    input = 2d-rc-no-slip-action.i
+    exodiff = 2d-rc-no-slip-action_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a channel using incompressible Navier Stokes action.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    issues = '#19472'
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
     valgrind = HEAVY
   []
@@ -38,6 +59,29 @@
     ad_indexing_type = 'global'
     design = 'INSFVScalarFieldAdvection.md'
     issues = '#16732'
+    valgrind = HEAVY
+  []
+  [scalar-transport-action]
+    type = 'Exodiff'
+    input = 2d-scalar-transport-action.i
+    exodiff = 2d-scalar-transport-action_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to create and transport scalar field variables in a fluid flow field using the NSFVAction syntax.'
+    ad_indexing_type = 'global'
+    design = 'NSFVAction.md'
+    issues = '#19472'
+    valgrind = HEAVY
+  []
+  [external-scalar-transport-action]
+    type = 'Exodiff'
+    input = 2d-scalar-transport-action.i
+    exodiff = 2d-scalar-transport-action_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to transport an externally-generated scalar field variables in a fluid flow field using the NSFVAction syntax.'
+    ad_indexing_type = 'global'
+    cli_args = "Variables/inactive='' Modules/NavierStokesFV/velocity_variable='vel_x vel_y' Modules/NavierStokesFV/pressure_variable='pressure' Modules/NavierStokesFV/fluid_temperature_variable='T_fluid'"
+    design = 'NSFVAction.md'
+    issues = '#19472'
     valgrind = HEAVY
   []
   [momentum-outflow-bcs]
@@ -73,6 +117,15 @@
     issues = '#16794 #16937'
     mesh_mode = REPLICATED
   []
+  [mixing-length-action]
+    type = 'Exodiff'
+    input = 2d-mixing-length-action.i
+    exodiff = 2d-mixing-length-action_out.e
+    requirement = 'The system shall be able to model the effect of Reynolds-averaged parameters on the momentum and passive scalar advection equations using a mixing length model and the NSFVAction syntax'
+    ad_indexing_type = 'global'
+    issues = '#19472'
+    mesh_mode = REPLICATED
+  []
   [mixing-length-jac]
     type = 'PetscJacobianTester'
     input = 2d-mixing-length.i
@@ -104,12 +157,38 @@
     cli_args = "Outputs/file_base='2d-rc-friction-quad_out' FVKernels/inactive='u_friction_linear v_friction_linear'"
     design = 'INSFVMomentumFriction.md'
   []
+  [linear-friction-action]
+    type = 'Exodiff'
+    input = 2d-rc-friction-action.i
+    exodiff = 2d-rc-friction-action_out.e
+    requirement = 'The system shall be able to model linear volumetric friction in a channel using NSFVAction syntax.'
+    issues = '#19472'
+    ad_indexing_type = 'global'
+  []
+  [quadratic-friction-action]
+    type = 'Exodiff'
+    input = 2d-rc-friction-action.i
+    exodiff = 2d-rc-friction-action-quad_out.e
+    requirement = 'The system shall be able to model quadratic volumetric friction in a channel using NSFVAction syntax.'
+    issues = '#19472'
+    ad_indexing_type = 'global'
+    cli_args = "Modules/NavierStokesFV/friction_types='forchheimer' Outputs/file_base='2d-rc-friction-action-quad_out'"
+  []
   [ambient-convection]
     type = 'CSVDiff'
     input = 2d-rc-ambient-convection.i
     csvdiff = 2d-rc-ambient-convection_out.csv
     requirement = 'The system shall be able to model ambient volumetric convection in a channel.'
     issues = '#16948'
+    ad_indexing_type = 'global'
+    design = 'NSFVEnergyAmbientConvection.md'
+  []
+  [ambient-convection-action]
+    type = 'CSVDiff'
+    input = 2d-rc-ambient-convection-action.i
+    csvdiff = 2d-rc-ambient-convection-action_out.csv
+    requirement = 'The system shall be able to model ambient volumetric convection in a channel using the Navier-Stokes action.'
+    issues = '#19472'
     ad_indexing_type = 'global'
     design = 'NSFVEnergyAmbientConvection.md'
   []
@@ -162,5 +241,25 @@
     exodiff = discontinuous-body-forces_out.e
     design = INSFVRhieChowInterpolator.md
     requirement = 'The system shall show a monotone pressure profile in the presence of discontinuous body forces, in this case a transient from free flow to linear drag.'
+  []
+  [transient]
+    type = 'Exodiff'
+    input = 2d-rc-transient.i
+    exodiff = 2d-rc-transient_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to simulate a transient flow in a channel with enthalpy as an advected quantity.'
+    ad_indexing_type = 'global'
+    abs_zero = 6e-9
+    valgrind = HEAVY
+  []
+  [transient-action]
+    type = 'Exodiff'
+    input = 2d-rc-transient-action.i
+    exodiff = 2d-rc-transient-action_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to simulate a transient flow in a channel with enthalpy as an advected quantity using the NSFV action syntax.'
+    ad_indexing_type = 'global'
+    abs_zero = 6e-9
+    valgrind = HEAVY
   []
 []

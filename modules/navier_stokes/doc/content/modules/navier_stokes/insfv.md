@@ -3,7 +3,9 @@
 MOOSE's Incompressible Navier Stokes Finite Volume (INSFV) implementation uses a
 colocated grid. To suppress the checkerboard pattern in the pressure field,
 `INSFV` objects support a Rhie-Chow interpolation for the velocity. Users can get
-a feel for INSFV by looking at some tests.
+a feel for INSFV by looking at some tests. In addition, to ease the burden of
+preparing long input files, the [NavierStokesFV](/Modules/NavierStokesFV/index.md)
+action syntax can also be used to set up INSFV simulations.
 
 ## Lid Driven Cavity Flow
 

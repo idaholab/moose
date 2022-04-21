@@ -13,6 +13,8 @@ the density time derivative.
 
 - [WCNSFVEnergyTimeDerivative.md]
 
+In addition, the [NavierStokesFV](/Modules/NavierStokesFV/index.md)
+action syntax can also be used to set up weakly-compressible simulations.
 
 ## Lid Driven Cavity Heated Flow
 

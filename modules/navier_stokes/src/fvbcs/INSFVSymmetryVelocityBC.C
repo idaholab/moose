@@ -20,7 +20,7 @@ INSFVSymmetryVelocityBC::validParams()
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", 0, "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", 0, "The velocity in the z direction.");
-  params.addRequiredParam<MaterialPropertyName>("mu", "The viscosity");
+  params.addRequiredParam<MooseFunctorName>("mu", "The viscosity");
   return params;
 }
 
