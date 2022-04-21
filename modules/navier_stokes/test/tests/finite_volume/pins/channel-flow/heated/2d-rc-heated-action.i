@@ -4,6 +4,7 @@ k=1e-3
 cp=1
 u_inlet=1
 T_inlet=200
+h_cv = 1.0
 
 [Mesh]
   [mesh]
@@ -36,10 +37,10 @@ T_inlet=200
     porous_medium_treatment = true
     add_energy_equation = true
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
-    thermal_conductivity = 'k'
-    specific_heat = 'cp'
+    density = ${rho}
+    dynamic_viscosity = ${mu}
+    thermal_conductivity = ${k}
+    specific_heat = ${cp}
     porosity = 'porosity'
 
     initial_velocity = '${u_inlet} 1e-6 0'
@@ -61,7 +62,7 @@ T_inlet=200
     momentum_outlet_types = 'fixed-pressure'
     pressure_function = '0.1'
 
-    ambient_convection_alpha = 'h_cv'
+    ambient_convection_alpha = ${h_cv}
     ambient_temperature = 'T_solid'
   []
 []
@@ -78,7 +79,7 @@ T_inlet=200
     is_solid = true
     T_fluid = 'T_fluid'
     T_solid = 'T_solid'
-    h_solid_fluid = 'h_cv'
+    h_solid_fluid = ${h_cv}
   []
 []
 
@@ -88,14 +89,6 @@ T_inlet=200
     boundary = 'top'
     variable = 'T_solid'
     value = 150
-  []
-[]
-
-[Materials]
-  [constants]
-    type = ADGenericFunctorMaterial
-    prop_names = 'h_cv cp rho mu k'
-    prop_values = '1 ${cp} ${rho} ${mu} ${k}'
   []
 []
 

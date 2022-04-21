@@ -297,6 +297,10 @@ private:
   template <typename T>
   void checkBlockwiseConsistency(const std::string block_param_name,
                                  const std::vector<std::string> parameter_names);
+  /// Throws an error if any of the parameters are defined from a vector while the
+  /// the corresponding main parameter is disabled
+  void checkDependentParameterError(const std::string main_parameter,
+                                    const std::vector<std::string> dependent_parameters);
 
   /// List to show which advected scalar field variable needs to be created within
   /// this action

@@ -937,7 +937,7 @@ NSFVAction::addINSEnergyTimeKernels()
   if (_porous_medium_treatment)
   {
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-    if (_problem->hasFunctor(NS::time_deriv(NS::density),
+    if (_problem->hasFunctor(NS::time_deriv(_density_name),
                              _problem->parameters().get<THREAD_ID>("_tid")))
       params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
     if (_problem->hasFunctor(NS::time_deriv(_specific_heat_name),
@@ -947,9 +947,11 @@ NSFVAction::addINSEnergyTimeKernels()
   }
   else
   {
-    if ((_problem->getFunctor<ADReal>(
-             _specific_heat_name, _problem->parameters().get<THREAD_ID>("_tid"), _problem->name()))
-            .isConstant())
+    // check if the name of the specific heat is just a constant, if it is,
+    // we automatically assign a zero timederivative
+    std::istringstream ss(_specific_heat_name);
+    Real real_value;
+    if (ss >> real_value && ss.eof())
       params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = "0";
     else
       params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
@@ -2160,6 +2162,45 @@ NSFVAction::checkGeneralControlErrors()
   if (isParamValid("consistent_scaling") && !_use_friction_correction)
     paramError("consistent_scaling",
                "Consistent scaling should not be defined if friction correction is disabled!");
+
+  if (!_has_energy_equation)
+    checkDependentParameterError("add_energy_equation",
+                                 {"energy_inlet_types",
+                                  "energy_scaling",
+                                  "energy_inlet_function",
+                                  "energy_face_interpolation",
+                                  "energy_two_term_bc_expansion",
+                                  "energy_wall_function",
+                                  "energy_wall_types",
+                                  "energy_advection_interpolation",
+                                  "specific_heat",
+                                  "thermal_conductivity"});
+  if (!_porous_medium_treatment)
+    checkDependentParameterError(
+        "porous_medium_treatment",
+        {"porosity_smoothing_layers", "use_friction_correction", "consistent_scaling"});
+
+  if (_turbulence_handling != "mixing-length")
+    checkDependentParameterError("turbulence_handling",
+                                 {"mixing_length_delta",
+                                  "mixing_length_aux_execute_on",
+                                  "mixing_length_walls",
+                                  "von_karman_const",
+                                  "von_karman_const_0"});
+
+  if (!_passive_scalar_names.size())
+    checkDependentParameterError("passive_scalar_names",
+                                 {"passive_scalar_source",
+                                  "passive_scalar_scaling",
+                                  "passive_scalar_diffusivity",
+                                  "passive_scalar_inlet_types",
+                                  "passive_scalar_coupled_source",
+                                  "passive_scalar_inlet_function",
+                                  "passive_scalar_schmidt_number",
+                                  "passive_scalar_face_interpolation",
+                                  "passive_scalar_coupled_source_coeff",
+                                  "passive_scalar_two_term_bc_expansion",
+                                  "passive_scalar_advection_interpolation"});
 }
 
 void
@@ -2351,4 +2392,15 @@ NSFVAction::checkPassiveScalarParameterErrors()
                  "The number of coupled sources coefficients defined is not equal to the number of "
                  "passive scalar fields!");
   }
+}
+
+void
+NSFVAction::checkDependentParameterError(const std::string main_parameter,
+                                         const std::vector<std::string> dependent_parameters)
+{
+  for (const auto & param : dependent_parameters)
+    if (_pars.isParamSetByUser(param))
+      paramError(param,
+                 "This parameter should not be given by the user with the corresponding " +
+                     main_parameter + " setting!");
 }
