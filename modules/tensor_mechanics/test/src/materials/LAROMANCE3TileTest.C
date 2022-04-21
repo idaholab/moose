@@ -61,12 +61,12 @@ std::vector<std::vector<std::vector<
     std::vector<typename LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform>>>>
 LAROMANCE3TileTestTempl<is_ad>::getTransform()
 {
-  const auto transforms = {
-      LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform::LINEAR,
-      LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform::LINEAR,
-      LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform::LINEAR,
-      LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform::LINEAR,
-      LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform::LINEAR};
+  const std::vector<typename LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform>
+      transforms = {LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform::LINEAR,
+                    LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform::LINEAR,
+                    LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform::LINEAR,
+                    LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform::LINEAR,
+                    LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::ROMInputTransform::LINEAR};
 
   return {{{transforms, transforms, transforms},
            {transforms, transforms, transforms},
