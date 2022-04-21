@@ -90,7 +90,7 @@
       # so that we do not need to run the test
       # in parallel
       max_parallel = 1
-      # csv file contains more rows 
+      # csv file contains more rows
       recover = false
 
       detail = 'the scalar kernel system (without the variable scaling),'
@@ -152,5 +152,13 @@
     requirement = 'Cached Active object state will be maintained correctly even when objects\' '
                   'active state changes during runtime.'
     issues = '#15515'
+  []
+  [array]
+    type = 'Exodiff'
+    input = 'tag-array-var.i'
+    issues = '#20586'
+    requirement = 'The system shall be able to populate auxiliary variables using the residual components of nonlinear array variables.'
+    exodiff = 'tag-array-var_out.e'
+    design = 'TagVectorArrayAux.md'
   []
 []

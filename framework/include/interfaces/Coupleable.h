@@ -256,6 +256,19 @@ protected:
                                                       unsigned int comp = 0) const;
 
   /**
+   * Returns value of a coupled variable for a given tag
+   * @param var_name Name of coupled variable
+   * @param tag vector tag ID
+   * @return Reference to a VariableValue for the coupled variable
+   * @see Kernel::_u
+   */
+  const ArrayVariableValue & coupledVectorTagArrayValue(const std::string & var_name,
+                                                        TagID tag) const;
+
+  const ArrayVariableValue & coupledVectorTagArrayValue(const std::string & var_name,
+                                                        const std::string & tag_name) const;
+
+  /**
    * Returns the values for all of a coupled variable's components for a given tag
    * @param var_name Name of coupled variable
    * @param tag vector tag ID
@@ -1257,6 +1270,21 @@ protected:
   checkVar(const std::string & var_name, unsigned int comp = 0, unsigned int comp_bound = 0) const;
 
 private:
+  /**
+   * Generic helper method to get vector tag values based on tag ID
+   */
+  template <typename T>
+  const typename OutputTools<T>::VariableValue &
+  vectorTagValueHelper(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
+
+  /**
+   * Generic helper method to get vector tag values based on tag name
+   */
+  template <typename T>
+  const typename OutputTools<T>::VariableValue & vectorTagValueHelper(const std::string & var_name,
+                                                                      const std::string & tag_name,
+                                                                      unsigned int comp = 0) const;
+
   enum class FuncAge
   {
     Curr,

@@ -450,27 +450,11 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp) const
   }
 }
 
-const VariableValue &
-Coupleable::coupledValueLower(const std::string & var_name, unsigned int comp) const
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+Coupleable::vectorTagValueHelper(const std::string & var_name, TagID tag, unsigned int comp) const
 {
-  const auto * var = getVar(var_name, comp);
-  if (!var)
-    return *getDefaultValue(var_name, comp);
-  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
-
-  if (_coupleable_neighbor)
-    mooseError("coupledValueLower cannot be called in a coupleable neighbor object");
-
-  if (_c_nodal)
-    return (_c_is_implicit) ? var->dofValues() : var->dofValuesOld();
-  else
-    return (_c_is_implicit) ? var->slnLower() : var->slnLowerOld();
-}
-
-const VariableValue &
-Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp) const
-{
-  const auto * const var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+  const auto * const var = getVarHelper<MooseVariableField<T>>(var_name, comp);
   if (!var)
     mooseError(var_name, ": invalid variable name for coupledVectorTagValue");
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -490,10 +474,11 @@ Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsig
     return var->vectorTagValue(tag);
 }
 
-const VariableValue &
-Coupleable::coupledVectorTagValue(const std::string & var_name,
-                                  const std::string & tag_name,
-                                  unsigned int comp) const
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+Coupleable::vectorTagValueHelper(const std::string & var_name,
+                                 const std::string & tag_name,
+                                 const unsigned int comp) const
 {
   if (!_c_parameters.isParamValid(tag_name))
     mooseError("Tag name parameter '", tag_name, "' is invalid");
@@ -503,7 +488,51 @@ Coupleable::coupledVectorTagValue(const std::string & var_name,
     mooseError("Tagged vector with tag name '", tagname, "' does not exist");
 
   TagID tag = _c_fe_problem.getVectorTagID(tagname);
-  return coupledVectorTagValue(var_name, tag, comp);
+  return vectorTagValueHelper<T>(var_name, tag, comp);
+}
+
+const VariableValue &
+Coupleable::coupledValueLower(const std::string & var_name, const unsigned int comp) const
+{
+  const auto * var = getVar(var_name, comp);
+  if (!var)
+    return *getDefaultValue(var_name, comp);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (_coupleable_neighbor)
+    mooseError("coupledValueLower cannot be called in a coupleable neighbor object");
+
+  if (_c_nodal)
+    return (_c_is_implicit) ? var->dofValues() : var->dofValuesOld();
+  else
+    return (_c_is_implicit) ? var->slnLower() : var->slnLowerOld();
+}
+
+const VariableValue &
+Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp) const
+{
+  return vectorTagValueHelper<Real>(var_name, tag, comp);
+}
+
+const VariableValue &
+Coupleable::coupledVectorTagValue(const std::string & var_name,
+                                  const std::string & tag_name,
+                                  unsigned int comp) const
+{
+  return vectorTagValueHelper<Real>(var_name, tag_name, comp);
+}
+
+const ArrayVariableValue &
+Coupleable::coupledVectorTagArrayValue(const std::string & var_name, TagID tag) const
+{
+  return vectorTagValueHelper<RealEigenVector>(var_name, tag);
+}
+
+const ArrayVariableValue &
+Coupleable::coupledVectorTagArrayValue(const std::string & var_name,
+                                       const std::string & tag_name) const
+{
+  return vectorTagValueHelper<RealEigenVector>(var_name, tag_name);
 }
 
 const VariableGradient &

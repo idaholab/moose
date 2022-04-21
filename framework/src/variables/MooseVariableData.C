@@ -108,7 +108,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
 
   _is_nodal = (_continuity == C_ZERO || _continuity == C_ONE);
 
-  auto num_vector_tags = _sys.subproblem().numVectorTags();
+  auto num_vector_tags = _subproblem.numVectorTags();
 
   _vector_tags_dof_u.resize(num_vector_tags);
   _need_vector_tag_dof_u.resize(num_vector_tags);
@@ -119,7 +119,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
   _need_vector_tag_grad.resize(num_vector_tags);
   _vector_tag_grad.resize(num_vector_tags);
 
-  auto num_matrix_tags = _sys.subproblem().numMatrixTags();
+  auto num_matrix_tags = _subproblem.numMatrixTags();
 
   _matrix_tags_dof_u.resize(num_matrix_tags);
   _need_matrix_tag_dof_u.resize(num_matrix_tags);
@@ -506,10 +506,8 @@ MooseVariableData<OutputType>::computeValues()
 
   bool is_transient = _subproblem.isTransient();
   unsigned int nqp = _current_qrule->n_points();
-  auto && active_coupleable_vector_tags =
-      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
-  auto && active_coupleable_matrix_tags =
-      _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+  auto && active_coupleable_vector_tags = _subproblem.getActiveFEVariableCoupleableVectorTags(_tid);
+  auto && active_coupleable_matrix_tags = _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
 
   _u.resize(nqp);
   _grad_u.resize(nqp);
@@ -800,10 +798,8 @@ MooseVariableData<RealEigenVector>::computeValues()
 
   bool is_transient = _subproblem.isTransient();
   unsigned int nqp = _current_qrule->n_points();
-  auto && active_coupleable_vector_tags =
-      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
-  auto && active_coupleable_matrix_tags =
-      _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+  auto && active_coupleable_vector_tags = _subproblem.getActiveFEVariableCoupleableVectorTags(_tid);
+  auto && active_coupleable_matrix_tags = _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
 
   // Map grad_phi using Eigen so that we can perform array operations easier
   if (_qrule == _current_qrule)
@@ -1325,17 +1321,15 @@ MooseVariableData<OutputType>::computeMonomialValues()
     }
   }
 
-  auto && active_coupleable_vector_tags =
-      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
-  auto && active_coupleable_matrix_tags =
-      _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+  auto && active_coupleable_vector_tags = _subproblem.getActiveFEVariableCoupleableVectorTags(_tid);
+  auto && active_coupleable_matrix_tags = _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
 
   for (auto tag : active_coupleable_vector_tags)
   {
     if (_need_vector_tag_u[tag] || _need_vector_tag_grad[tag] || _need_vector_tag_dof_u[tag])
-      if ((_sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
-           _sys.subproblem().safeAccessTaggedVectors()) ||
-          _sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
+      if ((_subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
+           _subproblem.safeAccessTaggedVectors()) ||
+          _subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
         // tag is defined on problem but may not be used by a system
         if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
         {
@@ -1355,10 +1349,10 @@ MooseVariableData<OutputType>::computeMonomialValues()
       _vector_tag_grad[tag].resize(nqp);
   }
 
-  if (_sys.subproblem().safeAccessTaggedMatrices())
+  if (_subproblem.safeAccessTaggedMatrices())
   {
     auto & active_coupleable_matrix_tags =
-        _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+        _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
     for (auto tag : active_coupleable_matrix_tags)
     {
       _matrix_tags_dof_u[tag].resize(1);
@@ -2274,7 +2268,7 @@ MooseVariableData<OutputType>::nodalVectorTagValue(TagID tag) const
       if (_sys.hasVector(tag) && tag < _vector_tags_dof_u.size())
         return _vector_tags_dof_u[tag];
       else
-        mooseError("Tag is not associated with any vector or there is no any data for tag ",
+        mooseError("Tag is not associated with any vector or there is not any data for tag ",
                    tag,
                    " for nodal variable ",
                    _var.name());
@@ -2329,7 +2323,7 @@ MooseVariableData<OutputType>::vectorTagValue(TagID tag) const
     if (_sys.hasVector(tag) && tag < _vector_tag_u.size())
       return _vector_tag_u[tag];
     else
-      mooseError("Tag is not associated with any vector or there is no any data for tag ",
+      mooseError("Tag is not associated with any vector or there is not any data for tag ",
                  tag,
                  " for variable ",
                  _var.name());
@@ -2357,7 +2351,7 @@ MooseVariableData<OutputType>::vectorTagGradient(TagID tag) const
     if (_sys.hasVector(tag) && tag < _vector_tag_grad.size())
       return _vector_tag_grad[tag];
     else
-      mooseError("Tag is not associated with any vector or there is no any data for tag ",
+      mooseError("Tag is not associated with any vector or there is not any data for tag ",
                  tag,
                  " for variable ",
                  _var.name());
@@ -2436,13 +2430,12 @@ MooseVariableData<OutputType>::fetchDoFValues()
     _sys.solutionPreviousNewton()->get(_dof_indices, &_dof_values_previous_nl[0]);
   }
 
-  auto & active_coupleable_vector_tags =
-      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+  auto & active_coupleable_vector_tags = _subproblem.getActiveFEVariableCoupleableVectorTags(_tid);
   for (auto tag : active_coupleable_vector_tags)
     if (_need_vector_tag_u[tag] || _need_vector_tag_grad[tag] || _need_vector_tag_dof_u[tag])
-      if ((_sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
-           _sys.subproblem().safeAccessTaggedVectors()) ||
-          _sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
+      if ((_subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
+           _subproblem.safeAccessTaggedVectors()) ||
+          _subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
         // tag is defined on problem but may not be used by a system
         if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
         {
@@ -2451,10 +2444,10 @@ MooseVariableData<OutputType>::fetchDoFValues()
           vec.get(_dof_indices, &_vector_tags_dof_u[tag][0]);
         }
 
-  if (_sys.subproblem().safeAccessTaggedMatrices())
+  if (_subproblem.safeAccessTaggedMatrices())
   {
     auto & active_coupleable_matrix_tags =
-        _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+        _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
     for (auto tag : active_coupleable_matrix_tags)
     {
       _matrix_tags_dof_u[tag].resize(n);
@@ -2533,20 +2526,19 @@ MooseVariableData<RealEigenVector>::fetchDoFValues()
       _need_dof_values_previous_nl)
     getArrayDoFValues(*_sys.solutionPreviousNewton(), n, _dof_values_previous_nl);
 
-  auto & active_coupleable_vector_tags =
-      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+  auto & active_coupleable_vector_tags = _subproblem.getActiveFEVariableCoupleableVectorTags(_tid);
   for (auto tag : active_coupleable_vector_tags)
-    if ((_sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
-         _sys.subproblem().safeAccessTaggedVectors()) ||
-        _sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
+    if ((_subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
+         _subproblem.safeAccessTaggedVectors()) ||
+        _subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
       // tag is defined on problem but may not be used by a system
       if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
         getArrayDoFValues(_sys.getVector(tag), n, _vector_tags_dof_u[tag]);
 
-  if (_sys.subproblem().safeAccessTaggedMatrices())
+  if (_subproblem.safeAccessTaggedMatrices())
   {
     auto & active_coupleable_matrix_tags =
-        _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+        _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
     for (auto tag : active_coupleable_matrix_tags)
     {
       _matrix_tags_dof_u[tag].resize(n);
