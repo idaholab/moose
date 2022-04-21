@@ -18,6 +18,8 @@ namespace NS
 {
 using namespace HeatConduction;
 
+static const std::string directions[3] = {"x", "y", "z"};
+
 // geometric quantities
 static const std::string infinite_porosity = "infinite_porosity";
 static const std::string axis = "axis";
@@ -31,18 +33,24 @@ static const std::string superficial_density = "superficial_rho";
 static const std::string momentum_x = "rhou";
 static const std::string momentum_y = "rhov";
 static const std::string momentum_z = "rhow";
+static const std::string momentum_vector[3] = {momentum_x, momentum_y, momentum_z};
 static const std::string superficial_momentum_x = "superficial_rhou";
 static const std::string superficial_momentum_y = "superficial_rhov";
 static const std::string superficial_momentum_z = "superficial_rhow";
+static const std::string superficial_momentum_vector[3] = {
+    superficial_momentum_x, superficial_momentum_y, superficial_momentum_z};
 
 static const std::string velocity = "velocity";
 static const std::string velocity_x = "vel_x";
 static const std::string velocity_y = "vel_y";
 static const std::string velocity_z = "vel_z";
+const std::string velocity_vector[3] = {velocity_x, velocity_y, velocity_z};
 static const std::string superficial_velocity_x = "superficial_vel_x";
 static const std::string superficial_velocity_y = "superficial_vel_y";
 static const std::string superficial_velocity_z = "superficial_vel_z";
 static const std::string superficial_velocity = "superficial_velocity";
+static const std::string superficial_velocity_vector[3] = {
+    superficial_velocity_x, superficial_velocity_y, superficial_velocity_z};
 static const std::string pressure = "pressure";
 static const std::string temperature = "temperature";
 
@@ -58,6 +66,12 @@ static const std::string specific_total_enthalpy = "ht";
 static const std::string enthalpy_density = "rho_h";
 static const std::string total_enthalpy_density = "rho_ht";
 static const std::string superficial_total_enthalpy_density = "superficial_rho_ht";
+
+static const std::string mixing_length = "mixing_length";
+static const std::string wall_shear_stress = "wall_shear_stress";
+static const std::string wall_yplus = "wall_yplus";
+static const std::string eddy_viscosity = "eddy_viscosity";
+static const std::string total_viscosity = "total_viscosity";
 
 static const std::string mach_number = "Mach";
 static const std::string specific_volume = "specific_volume";

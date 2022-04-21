@@ -21,10 +21,10 @@ rho=1
 []
 
 [Variables]
-  [u]
+  [vel_x]
     type = INSFVVelocityVariable
   []
-  [v]
+  [vel_y]
     type = INSFVVelocityVariable
   []
   [pressure]
@@ -48,16 +48,16 @@ rho=1
   [mag]
     type = VectorMagnitudeAux
     variable = U
-    x = u
-    y = v
+    x = vel_x
+    y = vel_y
   []
 []
 
 [UserObjects]
   [rc]
     type = INSFVRhieChowInterpolator
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     pressure = pressure
   []
 []
@@ -69,49 +69,50 @@ rho=1
     rho = ${rho}
   []
   [mean_zero_pressure]
-    type = FVScalarLagrangeMultiplier
+    type = FVIntegralValueConstraint
     variable = pressure
     lambda = lambda
+    phi0 = 0.0
   []
 
   [u_advection]
     type = INSFVMomentumAdvection
-    variable = u
+    variable = vel_x
     rho = ${rho}
     momentum_component = 'x'
   []
 
   [u_viscosity]
     type = INSFVMomentumDiffusion
-    variable = u
+    variable = vel_x
     mu = 'mu'
     momentum_component = 'x'
   []
 
   [u_pressure]
     type = INSFVMomentumPressure
-    variable = u
+    variable = vel_x
     momentum_component = 'x'
     pressure = pressure
   []
 
   [v_advection]
     type = INSFVMomentumAdvection
-    variable = v
+    variable = vel_y
     rho = ${rho}
     momentum_component = 'y'
   []
 
   [v_viscosity]
     type = INSFVMomentumDiffusion
-    variable = v
+    variable = vel_y
     mu = 'mu'
     momentum_component = 'y'
   []
 
   [v_pressure]
     type = INSFVMomentumPressure
-    variable = v
+    variable = vel_y
     momentum_component = 'y'
     pressure = pressure
   []
@@ -120,21 +121,21 @@ rho=1
 [FVBCs]
   [top_x]
     type = INSFVNoSlipWallBC
-    variable = u
+    variable = vel_x
     boundary = 'top'
     function = 1
   []
 
   [no_slip_x]
     type = INSFVNoSlipWallBC
-    variable = u
+    variable = vel_x
     boundary = 'left right bottom'
     function = 0
   []
 
   [no_slip_y]
     type = INSFVNoSlipWallBC
-    variable = v
+    variable = vel_y
     boundary = 'left right top bottom'
     function = 0
   []

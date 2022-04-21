@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#16756'
-  design = 'navier_stokes/pinsfv.md'
+  issues = '#16756 #19472'
+  design = 'navier_stokes/pinsfv.md NSFVAction.md'
   [1D_continuous_porosity]
     type = PythonUnitTest
     input = test.py
@@ -26,6 +26,16 @@
     input = test.py
     test_case = TestPressureCorrected
     requirement = 'The system shall show second order convergence for all variables when the porosity is interpolated and reconstructed multiple times and when a correction is applied to the pressure interpolation.'
+    method = '!dbg'
+    min_parallel = 8
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [pressure-corrected-action]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestPressureCorrectedAction
+    requirement = 'The system shall show second order convergence for all variables when using porosity reconstructions and friction corrections together with NSFV action syntax.'
     method = '!dbg'
     min_parallel = 8
     ad_indexing_type = 'global'

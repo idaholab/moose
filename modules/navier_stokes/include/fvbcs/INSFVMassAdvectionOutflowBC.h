@@ -29,7 +29,7 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   /// Density
-  const Real & _rho;
+  const Moose::Functor<ADReal> & _rho;
 
   /// x-velocity
   const INSFVVelocityVariable * const _u_var;

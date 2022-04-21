@@ -396,6 +396,10 @@ MooseMesh::buildLowerDMesh()
         "does not support mesh re-partitioning and a debug assertion being hit related with "
         "neighbors of lower-dimensional element, with distributed mesh.");
 
+  // Lower-D element build requires neighboring element information
+  if (!mesh.is_prepared())
+    mesh.find_neighbors();
+
   // maximum number of sides of all elements
   unsigned int max_n_sides = 0;
 

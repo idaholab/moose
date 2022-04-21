@@ -17,7 +17,7 @@ protected:
   ADReal computeQpResidual() override;
 
   /// the convective heat transfer coefficient
-  const ADMaterialProperty<Real> & _alpha;
+  const Moose::Functor<ADReal> & _alpha;
   /// the ambient temperature of the medium with which the fluid exchanges heat
-  const ADVariableValue & _temp_ambient;
+  const Moose::Functor<ADReal> & _temp_ambient;
 };

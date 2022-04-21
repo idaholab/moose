@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "FVTimeKernel.h"
+#include "INSFVEnergyTimeDerivative.h"
 
 /**
  * Computes the energy time derivative for the weakly compressible formulation of the energy
  * equation, using functor material properties
  */
-class WCNSFVEnergyTimeDerivative : public FVTimeKernel
+class WCNSFVEnergyTimeDerivative : public INSFVEnergyTimeDerivative
 {
 public:
   static InputParameters validParams();
@@ -24,15 +24,6 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  /// Density functor, material property or variable
-  const Moose::Functor<ADReal> & _rho;
-
-  /// Specific heat functor, material property or variable
-  const Moose::Functor<ADReal> & _cp;
-
   /// Functor for the time derivative of density, material property or variable
   const Moose::Functor<ADReal> & _rho_dot;
-
-  /// Functor for the time derivative of the specific heat, material property or variable
-  const Moose::Functor<ADReal> & _cp_dot;
 };

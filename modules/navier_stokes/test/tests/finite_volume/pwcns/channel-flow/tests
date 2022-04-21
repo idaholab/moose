@@ -14,6 +14,18 @@
     design = 'PINSFVEnergyTimeDerivative.md'
     recover = false # see #19126
   []
+  [transient-action]
+    type = 'Exodiff'
+    input = 2d-transient-action.i
+    exodiff = 2d-transient-action_out.e
+    method = "!dbg"
+    abs_zero = 1e-9
+    issues = '#19472'
+    requirement = 'The system shall be able to solve weakly compressible transient problems with the NSFV action syntax.'
+    ad_indexing_type = 'global'
+    valgrind = HEAVY
+    recover = false # see #19126
+  []
   [transient-jac]
     type = 'PetscJacobianTester'
     input = 2d-transient.i

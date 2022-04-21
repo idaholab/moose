@@ -13,8 +13,8 @@ velocity_interp_method='rc'
 [UserObjects]
   [rc]
     type = INSFVRhieChowInterpolator
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     pressure = pressure
   []
 []
@@ -32,23 +32,40 @@ velocity_interp_method='rc'
   []
 []
 
+[AuxVariables]
+  [U]
+    order = CONSTANT
+    family = MONOMIAL
+    fv = true
+  []
+[]
+
+[AuxKernels]
+  [mag]
+    type = VectorMagnitudeAux
+    variable = U
+    x = vel_x
+    y = vel_y
+  []
+[]
+
 [Problem]
   fv_bcs_integrity_check = true
 []
 
 [Variables]
-  [u]
+  [vel_x]
     type = INSFVVelocityVariable
     initial_condition = 1
   []
-  [v]
+  [vel_y]
     type = INSFVVelocityVariable
     initial_condition = 1
   []
   [pressure]
     type = INSFVPressureVariable
   []
-  [temperature]
+  [T_fluid]
     type = INSFVEnergyVariable
   []
   [scalar]
@@ -67,7 +84,7 @@ velocity_interp_method='rc'
 
   [u_advection]
     type = INSFVMomentumAdvection
-    variable = u
+    variable = vel_x
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -75,20 +92,20 @@ velocity_interp_method='rc'
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
-    variable = u
+    variable = vel_x
     mu = ${mu}
     momentum_component = 'x'
   []
   [u_pressure]
     type = INSFVMomentumPressure
-    variable = u
+    variable = vel_x
     momentum_component = 'x'
     pressure = pressure
   []
 
   [v_advection]
     type = INSFVMomentumAdvection
-    variable = v
+    variable = vel_y
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -96,27 +113,27 @@ velocity_interp_method='rc'
   []
   [v_viscosity]
     type = INSFVMomentumDiffusion
-    variable = v
+    variable = vel_y
     mu = ${mu}
     momentum_component = 'y'
   []
   [v_pressure]
     type = INSFVMomentumPressure
-    variable = v
+    variable = vel_y
     momentum_component = 'y'
     pressure = pressure
   []
 
   [energy_advection]
     type = INSFVEnergyAdvection
-    variable = temperature
+    variable = T_fluid
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
   []
   [energy_diffusion]
     type = FVDiffusion
     coeff = ${k}
-    variable = temperature
+    variable = T_fluid
   []
 
   [scalar_advection]
@@ -135,31 +152,37 @@ velocity_interp_method='rc'
     variable = scalar
     value = 0.1
   []
+  [scalar_coupled_source]
+    type = FVCoupledForce
+    variable = scalar
+    v = U
+    coef = 0.1
+  []
 []
 
 [FVBCs]
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'left'
-    variable = u
+    variable = vel_x
     function = '1'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
-    variable = v
+    variable = vel_y
     function = 0
   []
   [walls-u]
     type = INSFVNoSlipWallBC
     boundary = 'top bottom'
-    variable = u
+    variable = vel_x
     function = 0
   []
   [walls-v]
     type = INSFVNoSlipWallBC
     boundary = 'top bottom'
-    variable = v
+    variable = vel_y
     function = 0
   []
   [outlet_p]
@@ -171,7 +194,7 @@ velocity_interp_method='rc'
   [inlet_t]
     type = FVDirichletBC
     boundary = 'left'
-    variable = temperature
+    variable = T_fluid
     value = 1
   []
   [inlet_scalar]
@@ -191,7 +214,7 @@ velocity_interp_method='rc'
   [ins_fv]
     type = INSFVEnthalpyMaterial
     rho = ${rho}
-    temperature = 'temperature'
+    temperature = 'T_fluid'
   []
 []
 

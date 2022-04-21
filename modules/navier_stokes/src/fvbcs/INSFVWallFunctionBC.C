@@ -22,8 +22,8 @@ INSFVWallFunctionBC::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addRequiredParam<MaterialPropertyName>(NS::density, "fluid density");
-  params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
+  params.addRequiredParam<MooseFunctorName>("mu", "Dynamic viscosity");
   return params;
 }
 

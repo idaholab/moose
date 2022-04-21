@@ -16,8 +16,8 @@ temp_ref=${fparse hot_temp / 2.}
 [UserObjects]
   [rc]
     type = INSFVRhieChowInterpolator
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     pressure = pressure
   []
 []
@@ -36,73 +36,22 @@ temp_ref=${fparse hot_temp / 2.}
 []
 
 [Variables]
-  [u]
+  [vel_x]
     type = INSFVVelocityVariable
   []
-  [v]
+  [vel_y]
     type = INSFVVelocityVariable
   []
   [pressure]
     type = INSFVPressureVariable
   []
-  [T]
+  [T_fluid]
     type = INSFVEnergyVariable
     scaling = 1e-4
   []
   [lambda]
     family = SCALAR
     order = FIRST
-  []
-[]
-
-[AuxVariables]
-  [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-  []
-  [vel_x]
-    order = FIRST
-    family = MONOMIAL
-  []
-  [vel_y]
-    order = FIRST
-    family = MONOMIAL
-  []
-  [viz_T]
-    order = FIRST
-    family = MONOMIAL
-  []
-[]
-
-[AuxKernels]
-  [mag]
-    type = VectorMagnitudeAux
-    variable = U
-    x = u
-    y = v
-    execute_on = 'initial timestep_end'
-  []
-  [vel_x]
-    type = ParsedAux
-    variable = vel_x
-    function = 'u'
-    execute_on = 'initial timestep_end'
-    args = 'u'
-  []
-  [vel_y]
-    type = ParsedAux
-    variable = vel_y
-    function = 'v'
-    execute_on = 'initial timestep_end'
-    args = 'v'
-  []
-  [viz_T]
-    type = ParsedAux
-    variable = viz_T
-    function = 'T'
-    execute_on = 'initial timestep_end'
-    args = 'T'
   []
 []
 
@@ -122,7 +71,7 @@ temp_ref=${fparse hot_temp / 2.}
 
   [u_advection]
     type = INSFVMomentumAdvection
-    variable = u
+    variable = vel_x
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
     rho = ${rho}
@@ -130,20 +79,20 @@ temp_ref=${fparse hot_temp / 2.}
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
-    variable = u
+    variable = vel_x
     mu = ${mu}
     momentum_component = 'x'
   []
   [u_pressure]
     type = INSFVMomentumPressure
-    variable = u
+    variable = vel_x
     momentum_component = 'x'
     pressure = pressure
   []
   [u_buoyancy]
     type = INSFVMomentumBoussinesq
-    variable = u
-    T_fluid = T
+    variable = vel_x
+    T_fluid = T_fluid
     gravity = '0 -1 0'
     rho = ${rho}
     ref_temperature = ${temp_ref}
@@ -151,7 +100,7 @@ temp_ref=${fparse hot_temp / 2.}
   []
   [u_gravity]
     type = INSFVMomentumGravity
-    variable = u
+    variable = vel_x
     gravity = '0 -1 0'
     rho = ${rho}
     momentum_component = 'x'
@@ -159,7 +108,7 @@ temp_ref=${fparse hot_temp / 2.}
 
   [v_advection]
     type = INSFVMomentumAdvection
-    variable = v
+    variable = vel_y
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
     rho = ${rho}
@@ -167,20 +116,20 @@ temp_ref=${fparse hot_temp / 2.}
   []
   [v_viscosity]
     type = INSFVMomentumDiffusion
-    variable = v
+    variable = vel_y
     mu = ${mu}
     momentum_component = 'y'
   []
   [v_pressure]
     type = INSFVMomentumPressure
-    variable = v
+    variable = vel_y
     momentum_component = 'y'
     pressure = pressure
   []
   [v_buoyancy]
     type = INSFVMomentumBoussinesq
-    variable = v
-    T_fluid = T
+    variable = vel_y
+    T_fluid = T_fluid
     gravity = '0 -1 0'
     rho = ${rho}
     ref_temperature = ${temp_ref}
@@ -188,7 +137,7 @@ temp_ref=${fparse hot_temp / 2.}
   []
   [v_gravity]
     type = INSFVMomentumGravity
-    variable = v
+    variable = vel_y
     gravity = '0 -1 0'
     rho = ${rho}
     momentum_component = 'y'
@@ -197,11 +146,11 @@ temp_ref=${fparse hot_temp / 2.}
   [temp_conduction]
     type = FVDiffusion
     coeff = 'k'
-    variable = T
+    variable = T_fluid
   []
   [temp_advection]
     type = INSFVEnergyAdvection
-    variable = T
+    variable = T_fluid
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
   []
@@ -210,35 +159,35 @@ temp_ref=${fparse hot_temp / 2.}
 [FVBCs]
   [top_x]
     type = INSFVNoSlipWallBC
-    variable = u
+    variable = vel_x
     boundary = 'top'
     function = 'lid_function'
   []
 
   [no_slip_x]
     type = INSFVNoSlipWallBC
-    variable = u
+    variable = vel_x
     boundary = 'left right bottom'
     function = 0
   []
 
   [no_slip_y]
     type = INSFVNoSlipWallBC
-    variable = v
+    variable = vel_y
     boundary = 'left right top bottom'
     function = 0
   []
 
   [T_hot]
     type = FVDirichletBC
-    variable = T
+    variable = T_fluid
     boundary = left
     value = ${hot_temp}
   []
 
   [T_cold]
     type = FVDirichletBC
-    variable = T
+    variable = T_fluid
     boundary = right
     value = 0
   []
@@ -252,7 +201,7 @@ temp_ref=${fparse hot_temp / 2.}
   []
   [ins_fv]
     type = INSFVEnthalpyMaterial
-    temperature = 'T'
+    temperature = 'T_fluid'
     rho = ${rho}
   []
 []

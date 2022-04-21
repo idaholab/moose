@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#16239'
+  issues = '#16239 #19472'
   design = 'navier_stokes/insfv.md'
   [vortex-skewness-corrected]
     type = PythonUnitTest
@@ -12,7 +12,18 @@
     required_python_packages = 'pandas matplotlib'
     heavy = true
   []
-  [exo]
+  [vortex-skewness-corrected-action]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestVortexSkewCorrectedAction
+    method = '!dbg'
+    min_parallel = 2
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations on triangular meshes using skewness-correction and the NSFV action syntax.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+    heavy = true
+  []
+  [run]
     type = RunApp
     input = skewed-vortex.i
     ad_indexing_type = 'global'

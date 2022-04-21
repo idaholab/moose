@@ -19,8 +19,8 @@ velocity_interp_method='rc'
 [UserObjects]
   [rc]
     type = INSFVRhieChowInterpolator
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     pressure = pressure
   []
 []
@@ -41,11 +41,11 @@ velocity_interp_method='rc'
 []
 
 [Variables]
-  [u]
+  [vel_x]
     type = INSFVVelocityVariable
     initial_condition = 1e-6
   []
-  [v]
+  [vel_y]
     type = INSFVVelocityVariable
     initial_condition = 1e-6
   []
@@ -55,17 +55,7 @@ velocity_interp_method='rc'
 []
 
 [AuxVariables]
-  [mixing_len]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-  []
-  [wall_shear_stress]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-  []
-  [wall_yplus]
+  [mixing_length]
     order = CONSTANT
     family = MONOMIAL
     fv = true
@@ -83,7 +73,7 @@ velocity_interp_method='rc'
 
   [u_advection]
     type = INSFVMomentumAdvection
-    variable = u
+    variable = vel_x
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -91,29 +81,29 @@ velocity_interp_method='rc'
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
-    variable = u
+    variable = vel_x
     mu = ${mu}
     momentum_component = 'x'
   []
   [u_viscosity_rans]
     type = INSFVMixingLengthReynoldsStress
-    variable = u
+    variable = vel_x
     rho = ${rho}
-    mixing_length = mixing_len
+    mixing_length = mixing_length
     momentum_component = 'x'
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
   []
   [u_pressure]
     type = INSFVMomentumPressure
-    variable = u
+    variable = vel_x
     momentum_component = 'x'
     pressure = pressure
   []
 
   [v_advection]
     type = INSFVMomentumAdvection
-    variable = v
+    variable = vel_y
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -121,22 +111,22 @@ velocity_interp_method='rc'
   []
   [v_viscosity]
     type = INSFVMomentumDiffusion
-    variable = v
+    variable = vel_y
     mu = ${mu}
     momentum_component = 'y'
   []
   [v_viscosity_rans]
     type = INSFVMixingLengthReynoldsStress
-    variable = v
+    variable = vel_y
     rho = ${rho}
-    mixing_length = mixing_len
+    mixing_length = mixing_length
     momentum_component = 'y'
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
   []
   [v_pressure]
     type = INSFVMomentumPressure
-    variable = v
+    variable = vel_y
     momentum_component = 'y'
     pressure = pressure
   []
@@ -146,7 +136,7 @@ velocity_interp_method='rc'
   [mixing_len]
     type = WallDistanceMixingLengthAux
     walls = 'top'
-    variable = mixing_len
+    variable = mixing_length
     execute_on = 'initial'
     von_karman_const = ${von_karman_const}
     delta = 0.5
@@ -157,31 +147,31 @@ velocity_interp_method='rc'
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'left'
-    variable = u
+    variable = vel_x
     function = '1'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
-    variable = v
+    variable = vel_y
     function = '0'
   []
   [wall-u]
     type = INSFVWallFunctionBC
-    variable = u
+    variable = vel_x
     boundary = 'top'
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     mu = ${mu}
     rho = ${rho}
     momentum_component = x
   []
   [wall-v]
     type = INSFVWallFunctionBC
-    variable = v
+    variable = vel_y
     boundary = 'top'
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     mu = ${mu}
     rho = ${rho}
     momentum_component = y
@@ -189,18 +179,18 @@ velocity_interp_method='rc'
   [sym-u]
     type = INSFVSymmetryVelocityBC
     boundary = 'bottom'
-    variable = u
-    u = u
-    v = v
+    variable = vel_x
+    u = vel_x
+    v = vel_y
     mu = total_viscosity
     momentum_component = x
   []
   [sym-v]
     type = INSFVSymmetryVelocityBC
     boundary = 'bottom'
-    variable = v
-    u = u
-    v = v
+    variable = vel_y
+    u = vel_x
+    v = vel_y
     mu = total_viscosity
     momentum_component = y
   []
@@ -220,9 +210,9 @@ velocity_interp_method='rc'
 [Materials]
   [total_viscosity]
     type = MixingLengthTurbulentViscosityMaterial
-    u = 'u'                             #computes total viscosity = mu_t + mu
-    v = 'v'                             #property is called total_viscosity
-    mixing_length = mixing_len
+    u = 'vel_x'                             #computes total viscosity = mu_t + mu
+    v = 'vel_y'                             #property is called total_viscosity
+    mixing_length = mixing_length
     mu = ${mu}
     rho = ${rho}
   []
