@@ -21,8 +21,6 @@ OptimizationParameterTransfer::validParams()
   params.addRequiredParam<std::string>("to_control",
                                        "The name of the 'ControlsReceiver' on the sub application "
                                        "to which the optimization parameters will be transferred.");
-  params.set<MultiMooseEnum>("direction") = "to_multiapp";
-  params.suppressParameter<MultiMooseEnum>("direction");
   params.suppressParameter<MultiAppName>("from_multi_app");
 
   return params;

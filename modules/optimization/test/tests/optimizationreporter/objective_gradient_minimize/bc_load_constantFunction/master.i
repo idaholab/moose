@@ -80,7 +80,7 @@
     #NOTE:  the adjoint variable we are transferring is actually the gradient
   [toforward]
     type = OptimizationParameterTransfer
-    multi_app = forward
+    to_multi_app = forward
     value_names = 'p1 p2'
     parameters = 'Postprocessors/p1/value Postprocessors/p2/value'
     to_control = parameterReceiver

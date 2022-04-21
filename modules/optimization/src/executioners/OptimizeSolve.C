@@ -26,7 +26,7 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     _solve_on(getParam<ExecFlagEnum>("solve_on")),
     _verbose(getParam<bool>("verbose")),
     _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
-    _parameters(libmesh_make_unique<libMesh::PetscVector<Number>>(_my_comm)),
+    _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm)),
     _hessian(_my_comm)
 {
   if (libMesh::n_threads() > 1)

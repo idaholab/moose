@@ -47,7 +47,7 @@
   #This depends on parameter being optimized
   [toforward]
     type = OptimizationParameterTransfer
-    multi_app = forward
+    to_multi_app = forward
     to_control = parameterReceiver
     value_names = 'parameter_results'
     parameters = 'Postprocessors/p1/value'

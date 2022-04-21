@@ -74,7 +74,7 @@
 
   [toForward]
     type = OptimizationParameterTransfer
-    multi_app = forward
+    to_multi_app = forward
     value_names = 'bc_left bc_right'
     parameters = 'BCs/left/value BCs/right/value'
     to_control = parameterReceiver

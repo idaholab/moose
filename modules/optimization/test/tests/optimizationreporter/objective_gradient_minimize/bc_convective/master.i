@@ -123,7 +123,7 @@
   #NOTE:  the adjoint variable we are transferring is actually the gradient
   [toForward]
     type = OptimizationParameterTransfer
-    multi_app = forward
+    to_multi_app = forward
     value_names = 'p1'
     parameters = 'Postprocessors/p1/value'
     to_control = parameterReceiver
@@ -155,7 +155,7 @@
   #This is to get the parameter used in the forward problem onto the adjoint problem
   [toAdjoint_param]
     type = OptimizationParameterTransfer
-    multi_app = adjoint
+    to_multi_app = adjoint
     value_names = 'p1'
     parameters = 'Postprocessors/p1/value'
     to_control = adjointReceiver
