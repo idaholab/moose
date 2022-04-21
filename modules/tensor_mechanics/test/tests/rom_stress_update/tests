@@ -50,6 +50,15 @@
       allow_test_objects = true
     []
 
+    [2drz_json]
+      type = 'CSVDiff'
+      input = '2drz_json.i'
+      csvdiff = '2drz_json_out.csv'
+      detail = 'in 2DRz with a model loaded from a JSON data file.'
+      petsc_version = '>=3.9.0'
+      allow_test_objects = true
+    []
+
     [nonad_verification]
       type = 'CSVDiff'
       input = 'nonad_verification.i'
