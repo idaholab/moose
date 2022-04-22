@@ -77,7 +77,7 @@
     type = GapFluxModelRadiative
     secondary_emissivity = 0.5
     primary_emissivity = 0.5
-    T = temp
+    temperature = temp
     boundary = 3
   []
   [simple]

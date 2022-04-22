@@ -18,7 +18,7 @@ GapFluxModelRadiation::validParams()
   InputParameters params = GapFluxModelBase::validParams();
   params.addClassDescription("Gap flux model for heat conduction across a gap due to radiation, "
                              "based on the diffusion approximation.");
-  params.addCoupledVar("temperature", "The name of the temperature variable");
+  params.addRequiredCoupledVar("temperature", "The name of the temperature variable");
   params.addParam<Real>("stefan_boltzmann", 5.670373e-8, "Stefan-Boltzmann constant");
   params.addRangeCheckedParam<Real>("primary_emissivity",
                                     1,

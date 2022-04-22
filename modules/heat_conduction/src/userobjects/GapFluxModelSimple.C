@@ -16,7 +16,7 @@ GapFluxModelSimple::validParams()
 {
   InputParameters params = GapFluxModelBase::validParams();
   params.addClassDescription("Gap flux model with a constant conductance");
-  params.addCoupledVar("temperature", "The name of the temperature variable");
+  params.addRequiredCoupledVar("temperature", "The name of the temperature variable");
   params.addRequiredParam<Real>("k", "Gap conductance");
   params.addParam<Real>("min_gap",
                         1e-6,
