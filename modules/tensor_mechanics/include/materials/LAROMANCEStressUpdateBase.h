@@ -26,7 +26,7 @@ public:
   storeIncrementalMaterialProperties(const unsigned int total_number_substeps) override;
 
 protected:
-  void exportJSON();
+  virtual void exportJSON();
 
   virtual bool substeppingCapabilityEnabled() override;
 
