@@ -185,12 +185,12 @@ PropertyReadFile::getData(const Elem * const elem, const unsigned int prop_num) 
       break;
 
     case ReadTypeEnum::VORONOI:
-      data = getVoronoiData(elem->centroid(), prop_num);
+      data = getVoronoiData(elem->vertex_average(), prop_num);
       break;
 
     // TODO: Delete after Grizzly update
     case ReadTypeEnum::GRAIN:
-      data = getVoronoiData(elem->centroid(), prop_num);
+      data = getVoronoiData(elem->vertex_average(), prop_num);
       break;
 
     case ReadTypeEnum::BLOCK:
