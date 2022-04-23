@@ -350,7 +350,7 @@ protected:
   {
     checkJSONKey("transform");
     return _json["transform"]
-        .get<std::vector<std::vector<std::vector<std::vector<ROMInputTransform>>>>>();
+        .template get<std::vector<std::vector<std::vector<std::vector<ROMInputTransform>>>>>();
   }
 
   /*
@@ -372,7 +372,8 @@ protected:
   virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getTransformCoefs()
   {
     checkJSONKey("transform_coefs");
-    return _json["transform_coefs"].get<std::vector<std::vector<std::vector<std::vector<Real>>>>>();
+    return _json["transform_coefs"]
+        .template get<std::vector<std::vector<std::vector<std::vector<Real>>>>>();
   }
 
   /* Optional method that returns human-readable limits used for normalization. Default is to just
@@ -391,7 +392,7 @@ protected:
   {
     if (_json.contains("normalization_limits"))
       return _json["normalization_limits"]
-          .get<std::vector<std::vector<std::vector<std::vector<Real>>>>>();
+          .template get<std::vector<std::vector<std::vector<std::vector<Real>>>>>();
 
     return getInputLimits();
   }
@@ -410,7 +411,8 @@ protected:
   virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getInputLimits()
   {
     checkJSONKey("input_limits");
-    return _json["input_limits"].get<std::vector<std::vector<std::vector<std::vector<Real>>>>>();
+    return _json["input_limits"]
+        .template get<std::vector<std::vector<std::vector<std::vector<Real>>>>>();
   }
 
   /*
@@ -421,7 +423,7 @@ protected:
   virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getCoefs()
   {
     checkJSONKey("coefs");
-    return _json["coefs"].get<std::vector<std::vector<std::vector<std::vector<Real>>>>>();
+    return _json["coefs"].template get<std::vector<std::vector<std::vector<std::vector<Real>>>>>();
   }
 
   /*
@@ -432,7 +434,7 @@ protected:
   virtual std::vector<std::vector<unsigned int>> getTilings()
   {
     if (_json.contains("tiling"))
-      return _json["tiling"].get<std::vector<std::vector<unsigned int>>>();
+      return _json["tiling"].template get<std::vector<std::vector<unsigned int>>>();
 
     if (_environmental)
       return {{1, 1, 1, 1, 1, 1}};
@@ -447,7 +449,7 @@ protected:
   virtual std::vector<Real> getStrainCutoff()
   {
     checkJSONKey("cutoff");
-    return _json["cutoff"].get<std::vector<Real>>();
+    return _json["cutoff"].template get<std::vector<Real>>();
   }
 
   /// Coupled temperature variable
