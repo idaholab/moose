@@ -16,7 +16,8 @@
 class INSFVRhieChowInterpolator;
 
 /**
- * This postprocessor computes the volumetric flow rate through a boundary.
+ * This postprocessor computes the volumetric flow rate through a boundary, internal or external to
+ * the flow domain.
  */
 class VolumetricFlowRate : public SideIntegralPostprocessor
 {
@@ -26,10 +27,9 @@ public:
   VolumetricFlowRate(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpIntegral() override;
+  Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 
-  /// Whether FV variables are used, for all variables
-  const bool _fv;
+  Real computeQpIntegral() override;
 
   /// Velocity components
   const VariableValue & _vel_x;

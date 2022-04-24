@@ -100,20 +100,20 @@
     advected_mat_prop = 'rho_ad'
   []
   [mid1_mass]
-    type = InternalVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = internal_bot
     vel_x = vel_x
     vel_y = vel_y
   []
   [other_mid1_mass]
-    type = InternalVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = internal_bot
     vel_x = vel_x
     vel_y = vel_y
     advected_mat_prop = 'rho_ad'
   []
   [mid2_mass]
-    type = InternalVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = internal_top
     vel_x = vel_x
     vel_y = vel_y
@@ -133,14 +133,14 @@
     advected_variable = vel_x
   []
   [mid1_momentum_x]
-    type = InternalVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = internal_bot
     vel_x = vel_x
     vel_y = vel_y
     advected_variable = vel_x
   []
   [mid2_momentum_x]
-    type = InternalVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = internal_top
     vel_x = vel_x
     vel_y = vel_y
@@ -162,14 +162,14 @@
     advected_variable = vel_y
   []
   [mid1_momentum_y]
-    type = InternalVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = internal_bot
     vel_x = vel_x
     vel_y = vel_y
     advected_variable = vel_y
   []
   [mid2_momentum_y]
-    type = InternalVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = internal_top
     vel_x = vel_x
     vel_y = vel_y

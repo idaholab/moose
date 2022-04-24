@@ -32,13 +32,12 @@ public:
   SideIntegralFunctorPostprocessorTempl(const InputParameters & parameters);
 
 protected:
-  using SideIntegralPostprocessor::_qp_integration;
   /**
    * Compute contribution from an element face, either on a boundary or between two active elements
    * @param fi the FaceInfo, containing the geometric information of the face
    * @ return the integral for this element (_current_elem) and side (_current_side)
    */
-  virtual Real computeFaceInfoIntegral(const FaceInfo * fi);
+  virtual Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 
   /// Quadrature point integration of functors is not implemented
   Real computeQpIntegral() override

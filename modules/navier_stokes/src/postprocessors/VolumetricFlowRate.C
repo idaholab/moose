@@ -43,7 +43,6 @@ VolumetricFlowRate::validParams()
 
 VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
-    _fv(getFieldVar("vel_x", 0)->isFV()),
     _vel_x(coupledValue("vel_x")),
     _vel_y(coupledValue("vel_y")),
     _vel_z(coupledValue("vel_z")),
@@ -67,7 +66,8 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
     mooseWarning("Advected quantity interpolation methods are currently unavailable for "
                  "advected material properties.");
 
-  if (_fv)
+  _qp_integration = !getFieldVar("vel_x", 0)->isFV();
+  if (!_qp_integration)
   {
     if (!_rc_uo)
       mooseError("We were instructed to use finite volume, but no Rhie-Chow user object is "
@@ -81,40 +81,39 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
 }
 
 Real
-VolumetricFlowRate::computeQpIntegral()
+VolumetricFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi)
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  if (_fv)
-  {
-    // We should be at the edge of the domain
-    const FaceInfo * const fi = getFaceInfo();
-    mooseAssert(fi, "We should have a face info in " + name());
+  mooseAssert(fi, "We should have a face info in " + name());
 
-    // Get face value for velocity
-    const auto vel =
-        MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, _tid));
-    const bool correct_skewness =
-        _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
+  // Get face value for velocity
+  const auto vel =
+      MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, _tid));
+  const bool correct_skewness =
+      _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
 
-    const auto ssf = Moose::SingleSidedFaceArg({fi,
-                                                Moose::FV::LimiterType::CentralDifference,
-                                                true,
-                                                correct_skewness,
-                                                _current_elem->subdomain_id()});
+  const auto ssf = Moose::SingleSidedFaceArg({fi,
+                                              Moose::FV::LimiterType::CentralDifference,
+                                              true,
+                                              correct_skewness,
+                                              _current_elem->subdomain_id()});
 
-    return fi->normal() * MetaPhysicL::raw_value((*_adv_quant)(ssf)) * vel;
-  }
-  else
+  return fi->normal() * MetaPhysicL::raw_value((*_adv_quant)(ssf)) * vel;
+#else
+    mooseError("FaceInfo integration is not defined for local AD indexing");
 #endif
-  {
-    if (_advected_variable_supplied)
-      return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
-             _normals[_qp];
-    else if (_advected_mat_prop_supplied)
-      return MetaPhysicL::raw_value(
-                 _advected_material_property(std::make_tuple(_current_elem, _qp, _qrule))) *
-             RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
-    else
-      return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
-  }
+}
+
+Real
+VolumetricFlowRate::computeQpIntegral()
+{
+  if (_advected_variable_supplied)
+    return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
+           _normals[_qp];
+  else if (_advected_mat_prop_supplied)
+    return MetaPhysicL::raw_value(
+               _advected_material_property(std::make_tuple(_current_elem, _qp, _qrule))) *
+           RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
+  else
+    return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
 }
