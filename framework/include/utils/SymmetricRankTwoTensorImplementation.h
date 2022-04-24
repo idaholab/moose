@@ -769,7 +769,7 @@ SymmetricRankTwoTensorTempl<T>::genRandomSymmTensor(T scale, T offset)
 
 template <typename T>
 SymmetricRankTwoTensorTempl<T>
-SymmetricRankTwoTensorTempl<T>::vectorSelfOuterProduct(const TypeVector<T> & v)
+SymmetricRankTwoTensorTempl<T>::selfOuterProduct(const TypeVector<T> & v)
 {
   return SymmetricRankTwoTensorTempl<T>(
       v(0) * v(0), v(1) * v(1), v(2) * v(2), v(1) * v(2), v(0) * v(2), v(0) * v(1));

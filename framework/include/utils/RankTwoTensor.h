@@ -120,18 +120,18 @@ public:
    * used as row and column vectors to construct two tensors respectively, that
    * are averaged to create a symmetric tensor.
    */
-  static RankTwoTensorTempl
+  [[nodiscard]] static RankTwoTensorTempl
   initializeSymmetric(const TypeVector<T> & v0, const TypeVector<T> & v1, const TypeVector<T> & v2);
 
   /// Named constructor for initializing from row vectors
-  static RankTwoTensorTempl initializeFromRows(const TypeVector<T> & row0,
-                                               const TypeVector<T> & row1,
-                                               const TypeVector<T> & row2);
+  [[nodiscard]] static RankTwoTensorTempl initializeFromRows(const TypeVector<T> & row0,
+                                                             const TypeVector<T> & row1,
+                                                             const TypeVector<T> & row2);
 
   /// Named constructor for initializing from column vectors
-  static RankTwoTensorTempl initializeFromColumns(const TypeVector<T> & col0,
-                                                  const TypeVector<T> & col1,
-                                                  const TypeVector<T> & col2);
+  [[nodiscard]] static RankTwoTensorTempl initializeFromColumns(const TypeVector<T> & col0,
+                                                                const TypeVector<T> & col1,
+                                                                const TypeVector<T> & col2);
 
   /// Constructor that proxies the fillFromInputVector method
   RankTwoTensorTempl(const std::vector<T> & input) { this->fillFromInputVector(input); };
@@ -179,10 +179,10 @@ public:
   }
 
   // Named constructors
-  static RankTwoTensorTempl Identity() { return RankTwoTensorTempl(initIdentity); }
+  [[nodiscard]] static RankTwoTensorTempl Identity() { return RankTwoTensorTempl(initIdentity); }
 
   /// Static method for use in validParams for getting the "fill_method"
-  static MooseEnum fillMethodEnum();
+  [[nodiscard]] static MooseEnum fillMethodEnum();
 
   /**
    * fillFromInputVector takes 6 or 9 inputs to fill in the Rank-2 tensor.
@@ -207,13 +207,13 @@ public:
   VectorValue<T> column(const unsigned int c) const;
 
   /// return the matrix multiplied with its transpose A*A^T (guaranteed symmetric)
-  static RankTwoTensorTempl<T> timesTranspose(const RankTwoTensorTempl<T> &);
+  [[nodiscard]] static RankTwoTensorTempl<T> timesTranspose(const RankTwoTensorTempl<T> &);
 
   /// return the matrix multiplied with its transpose A^T*A (guaranteed symmetric)
-  static RankTwoTensorTempl<T> transposeTimes(const RankTwoTensorTempl<T> &);
+  [[nodiscard]] static RankTwoTensorTempl<T> transposeTimes(const RankTwoTensorTempl<T> &);
 
   /// return the matrix plus its transpose A+A^T (guaranteed symmetric)
-  static RankTwoTensorTempl<T> plusTranspose(const RankTwoTensorTempl<T> &);
+  [[nodiscard]] static RankTwoTensorTempl<T> plusTranspose(const RankTwoTensorTempl<T> &);
 
   /**
    * Returns the matrix squared
@@ -526,21 +526,24 @@ public:
    * The first real scales the random number.
    * The second real offsets the uniform random number
    */
-  static RankTwoTensorTempl<T> genRandomTensor(T, T);
+  [[nodiscard]] static RankTwoTensorTempl<T> genRandomTensor(T, T);
 
   /**
    * This function generates a random symmetric rank two tensor.
    * The first real scales the random number.
    * The second real offsets the uniform random number
    */
-  static RankTwoTensorTempl<T> genRandomSymmTensor(T, T);
+  [[nodiscard]] static RankTwoTensorTempl<T> genRandomSymmTensor(T, T);
+
+  /// RankTwoTensorTempl<T> from outer product of vectors (sets the current tensor and should be deprecated)
+  void vectorOuterProduct(const TypeVector<T> &, const TypeVector<T> &);
 
   /// RankTwoTensorTempl<T> from outer product of vectors
-  [[nodiscard]] static RankTwoTensorTempl<T> vectorOuterProduct(const TypeVector<T> &,
-                                                                const TypeVector<T> &);
+  [[nodiscard]] static RankTwoTensorTempl<T> outerProduct(const TypeVector<T> &,
+                                                          const TypeVector<T> &);
 
   /// RankTwoTensorTempl<T> from outer product of a vector with itself
-  static RankTwoTensorTempl<T> vectorSelfOuterProduct(const TypeVector<T> &);
+  [[nodiscard]] static RankTwoTensorTempl<T> selfOuterProduct(const TypeVector<T> &);
 
   /// Return real tensor of a rank two tensor
   void fillRealTensor(TensorValue<T> &);
@@ -679,15 +682,15 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
 
   for (auto a : make_range(N))
   {
-    const auto Ma = RankTwoTensorTempl<T>::vectorSelfOuterProduct(eigvec.column(a));
+    const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
     proj_pos += d[a] * Ma.outerProduct(Ma);
   }
 
   for (auto a : make_range(N))
     for (auto b : make_range(a))
     {
-      const auto Ma = RankTwoTensorTempl<T>::vectorSelfOuterProduct(eigvec.column(a));
-      const auto Mb = RankTwoTensorTempl<T>::vectorSelfOuterProduct(eigvec.column(b));
+      const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
+      const auto Mb = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
 
       Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);
       Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);

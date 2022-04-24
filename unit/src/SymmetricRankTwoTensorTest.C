@@ -187,10 +187,10 @@ TEST_F(SymmetricRankTwoTensorTest, square)
   EXPECT_NEAR((RankTwoTensor(A) - B).L2norm(), 0, 1e-9);
 }
 
-TEST_F(SymmetricRankTwoTensorTest, vectorSelfOuterProduct)
+TEST_F(SymmetricRankTwoTensorTest, selfOuterProduct)
 {
-  auto A = SymmetricRankTwoTensor::vectorSelfOuterProduct(_v);
-  auto B = RankTwoTensor::vectorSelfOuterProduct(_v);
+  auto A = SymmetricRankTwoTensor::selfOuterProduct(_v);
+  auto B = RankTwoTensor::selfOuterProduct(_v);
   EXPECT_NEAR((RankTwoTensor(A) - B).L2norm(), 0, 1e-9);
 }
 

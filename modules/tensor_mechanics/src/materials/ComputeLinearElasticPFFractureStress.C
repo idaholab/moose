@@ -65,7 +65,7 @@ ComputeLinearElasticPFFractureStress::computeStrainSpectral(Real & F_pos, Real &
   std::vector<RankTwoTensor> etens(LIBMESH_DIM);
 
   for (const auto i : make_range(Moose::dim))
-    etens[i] = RankTwoTensor::vectorSelfOuterProduct(eigvec.column(i));
+    etens[i] = RankTwoTensor::selfOuterProduct(eigvec.column(i));
 
   // Separate out positive and negative eigen values
   std::vector<Real> epos(LIBMESH_DIM), eneg(LIBMESH_DIM);

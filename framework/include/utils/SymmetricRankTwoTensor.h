@@ -183,16 +183,19 @@ public:
   VectorValue<T> column(const unsigned int n) const { return row(n); }
 
   /// return the matrix multiplied with its transpose A*A^T (guaranteed symmetric)
-  static SymmetricRankTwoTensorTempl<T> timesTranspose(const RankTwoTensorTempl<T> &);
-  static SymmetricRankTwoTensorTempl<T> timesTranspose(const SymmetricRankTwoTensorTempl<T> &);
+  [[nodiscard]] static SymmetricRankTwoTensorTempl<T> timesTranspose(const RankTwoTensorTempl<T> &);
+  [[nodiscard]] static SymmetricRankTwoTensorTempl<T>
+  timesTranspose(const SymmetricRankTwoTensorTempl<T> &);
 
   /// return the matrix multiplied with its transpose A^T*A (guaranteed symmetric)
-  static SymmetricRankTwoTensorTempl<T> transposeTimes(const RankTwoTensorTempl<T> &);
-  static SymmetricRankTwoTensorTempl<T> transposeTimes(const SymmetricRankTwoTensorTempl<T> &);
+  [[nodiscard]] static SymmetricRankTwoTensorTempl<T> transposeTimes(const RankTwoTensorTempl<T> &);
+  [[nodiscard]] static SymmetricRankTwoTensorTempl<T>
+  transposeTimes(const SymmetricRankTwoTensorTempl<T> &);
 
   /// return the matrix plus its transpose A-A^T (guaranteed symmetric)
-  static SymmetricRankTwoTensorTempl<T> plusTranspose(const RankTwoTensorTempl<T> &);
-  static SymmetricRankTwoTensorTempl<T> plusTranspose(const SymmetricRankTwoTensorTempl<T> &);
+  [[nodiscard]] static SymmetricRankTwoTensorTempl<T> plusTranspose(const RankTwoTensorTempl<T> &);
+  [[nodiscard]] static SymmetricRankTwoTensorTempl<T>
+  plusTranspose(const SymmetricRankTwoTensorTempl<T> &);
 
   /// Returns the matrix squared
   SymmetricRankTwoTensorTempl<T> square() const;
@@ -443,10 +446,10 @@ public:
    * The first real scales the random number.
    * The second real offsets the uniform random number
    */
-  static SymmetricRankTwoTensorTempl<T> genRandomSymmTensor(T, T);
+  [[nodiscard]] static SymmetricRankTwoTensorTempl<T> genRandomSymmTensor(T, T);
 
   /// SymmetricRankTwoTensorTempl<T> from outer product of a vector with itself
-  static SymmetricRankTwoTensorTempl<T> vectorSelfOuterProduct(const TypeVector<T> &);
+  [[nodiscard]] static SymmetricRankTwoTensorTempl<T> selfOuterProduct(const TypeVector<T> &);
 
   /// returns this_ij * b_ijkl
   SymmetricRankTwoTensorTempl<T>
@@ -565,15 +568,15 @@ SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(
 
   for (unsigned int a = 0; a < N; ++a)
   {
-    const auto Ma = SymmetricRankTwoTensorTempl<T>::vectorSelfOuterProduct(eigvec.column(a));
+    const auto Ma = SymmetricRankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
     proj_pos += d[a] * Ma.outerProduct(Ma);
   }
 
   for (unsigned int a = 0; a < N; ++a)
     for (unsigned int b = 0; b < a; ++b)
     {
-      const auto Ma = SymmetricRankTwoTensorTempl<T>::vectorSelfOuterProduct(eigvec.column(a));
-      const auto Mb = SymmetricRankTwoTensorTempl<T>::vectorSelfOuterProduct(eigvec.column(b));
+      const auto Ma = SymmetricRankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
+      const auto Mb = SymmetricRankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
 
       Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);
       Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);

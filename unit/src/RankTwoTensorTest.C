@@ -640,14 +640,22 @@ TEST_F(RankTwoTensorTest, sqr)
 TEST_F(RankTwoTensorTest, vectorOuterProduct)
 {
   RealVectorValue v2(5, -4, 7);
-  auto A = RankTwoTensor::vectorOuterProduct(v2, _v);
+  auto A = RankTwoTensor::outerProduct(v2, _v);
   auto B = RankTwoTensor(5, -4, 7, 10, -8, 14, 15, -12, 21);
   EXPECT_EQ((A - B).L2norm(), 0);
 }
 
-TEST_F(RankTwoTensorTest, vectorSelfOuterProduct)
+TEST_F(RankTwoTensorTest, outerProduct)
 {
-  auto A = RankTwoTensor::vectorSelfOuterProduct(_v);
+  RealVectorValue v2(5, -4, 7);
+  auto A = RankTwoTensor::outerProduct(v2, _v);
+  auto B = RankTwoTensor(5, -4, 7, 10, -8, 14, 15, -12, 21);
+  EXPECT_EQ((A - B).L2norm(), 0);
+}
+
+TEST_F(RankTwoTensorTest, selfOuterProduct)
+{
+  auto A = RankTwoTensor::selfOuterProduct(_v);
   auto B = RankTwoTensor(1, 2, 3, 2, 4, 6, 3, 6, 9);
   EXPECT_EQ((A - B).L2norm(), 0);
 }

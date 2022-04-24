@@ -271,7 +271,7 @@ template <typename T>
 VectorValue<T>
 RankTwoTensorTempl<T>::column(const unsigned int c) const
 {
-  return VectorValue<T>(_coords[c], _coords[c + N], _coords[c + 2 * N]);
+  return VectorValue<T>((*this)(0, c), (*this)(1, c), (*this)(2, c));
 }
 
 template <typename T>
@@ -1151,8 +1151,18 @@ RankTwoTensorTempl<T>::genRandomSymmTensor(T scale, T offset)
 }
 
 template <typename T>
-RankTwoTensorTempl<T>
+void
 RankTwoTensorTempl<T>::vectorOuterProduct(const TypeVector<T> & v1, const TypeVector<T> & v2)
+{
+  RankTwoTensorTempl<T> & a = *this;
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      a(i, j) = v1(i) * v2(j);
+}
+
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::outerProduct(const TypeVector<T> & v1, const TypeVector<T> & v2)
 {
   RankTwoTensorTempl<T> result;
   for (const auto i : make_range(N))
@@ -1163,7 +1173,7 @@ RankTwoTensorTempl<T>::vectorOuterProduct(const TypeVector<T> & v1, const TypeVe
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::vectorSelfOuterProduct(const TypeVector<T> & v)
+RankTwoTensorTempl<T>::selfOuterProduct(const TypeVector<T> & v)
 {
   RankTwoTensorTempl<T> result(RankTwoTensorTempl<T>::initNone);
   for (unsigned int i = 0; i < N; ++i)

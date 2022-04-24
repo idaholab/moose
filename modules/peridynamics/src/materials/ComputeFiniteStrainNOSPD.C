@@ -182,9 +182,9 @@ ComputeFiniteStrainNOSPD::computeQpStrainRotationIncrements(RankTwoTensor & tota
       const Real lambda2 = std::sqrt(e_value[1]);
       const Real lambda3 = std::sqrt(e_value[2]);
 
-      const auto N1 = RankTwoTensor::vectorSelfOuterProduct(e_vector.column(0));
-      const auto N2 = RankTwoTensor::vectorSelfOuterProduct(e_vector.column(1));
-      const auto N3 = RankTwoTensor::vectorSelfOuterProduct(e_vector.column(2));
+      const auto N1 = RankTwoTensor::selfOuterProduct(e_vector.column(0));
+      const auto N2 = RankTwoTensor::selfOuterProduct(e_vector.column(1));
+      const auto N3 = RankTwoTensor::selfOuterProduct(e_vector.column(2));
 
       RankTwoTensor Uhat = N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
       RankTwoTensor invUhat(Uhat.inverse());

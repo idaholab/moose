@@ -220,9 +220,9 @@ ADComputeFiniteStrainTempl<R2, R4>::computeQpIncrements(ADR2 & total_strain_incr
       const auto lambda3 = std::sqrt(e_value[2]);
 
       // outer product of a vector with itself is guaranteed to be symmetric
-      const auto N1 = ADR2::vectorSelfOuterProduct(e_vector.column(0));
-      const auto N2 = ADR2::vectorSelfOuterProduct(e_vector.column(1));
-      const auto N3 = ADR2::vectorSelfOuterProduct(e_vector.column(2));
+      const auto N1 = ADR2::selfOuterProduct(e_vector.column(0));
+      const auto N2 = ADR2::selfOuterProduct(e_vector.column(1));
+      const auto N3 = ADR2::selfOuterProduct(e_vector.column(2));
 
       const ADRankTwoTensor Uhat(N1 * lambda1 + N2 * lambda2 + N3 * lambda3);
       const ADRankTwoTensor invUhat(Uhat.inverse());

@@ -101,7 +101,7 @@ HyperElasticPhaseFieldIsoDamage::computeDamageStress()
   _ee.symmetricEigenvaluesEigenvectors(eigval, evec);
 
   for (const auto i : make_range(Moose::dim))
-    _etens[i] = RankTwoTensor::vectorSelfOuterProduct(evec.column(i));
+    _etens[i] = RankTwoTensor::selfOuterProduct(evec.column(i));
 
   Real etr = 0.0;
   for (const auto i : make_range(Moose::dim))
