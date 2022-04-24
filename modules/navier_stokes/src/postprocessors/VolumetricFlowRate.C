@@ -21,7 +21,7 @@ VolumetricFlowRate::validParams()
 {
   InputParameters params = SideIntegralPostprocessor::validParams();
   params.addClassDescription(
-      "Computes the volumetric flow rate of an advected quantity through an external boundary.");
+      "Computes the volumetric flow rate of an advected quantity through a sideset.");
   params.addRequiredCoupledVar("vel_x", "The x-axis velocity");
   params.addCoupledVar("vel_y", 0, "The y-axis velocity");
   params.addCoupledVar("vel_z", 0, "The z-axis velocity");
