@@ -17,7 +17,7 @@ GapFluxModelRadiative::validParams()
 {
   InputParameters params = GapFluxModelBase::validParams();
   params.addClassDescription("Gap flux demonstration model for radiative heat conductance");
-  params.addCoupledVar("T", "Temperature");
+  params.addRequiredCoupledVar("temperature", "The name of the temperature variable");
   params.addParam<Real>("sigma", 5.670373e-8, "Stefan-Boltzmann constant");
   params.addRequiredRangeCheckedParam<MaterialPropertyName>(
       "primary_emissivity",
@@ -32,8 +32,8 @@ GapFluxModelRadiative::validParams()
 
 GapFluxModelRadiative::GapFluxModelRadiative(const InputParameters & parameters)
   : GapFluxModelBase(parameters),
-    _primary_T(adCoupledNeighborValue("T")),
-    _secondary_T(adCoupledValue("T")),
+    _primary_T(adCoupledNeighborValue("temperature")),
+    _secondary_T(adCoupledValue("temperature")),
     _sigma(getParam<Real>("sigma")),
     _primary_emissivity(getNeighborADMaterialProperty<Real>("primary_emissivity")),
     _secondary_emissivity(getADMaterialProperty<Real>("secondary_emissivity"))

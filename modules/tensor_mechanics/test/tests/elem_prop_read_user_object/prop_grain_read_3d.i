@@ -42,7 +42,7 @@
 
 [UserObjects]
   [./prop_read]
-    type = ElementPropertyReadFile
+    type = PropertyReadFile
     prop_file_name = 'input_file.txt'
     nprop = 4
     read_type = grain

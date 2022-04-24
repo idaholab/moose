@@ -75,8 +75,8 @@ LinearInterpolation::sample(const T & x) const
     if (x >= _x[i] && x < _x[i + 1])
       return _y[i] + (_y[i + 1] - _y[i]) * (x - _x[i]) / (_x[i + 1] - _x[i]);
 
-  mooseError("Unreachable!");
-  throw std::out_of_range("Unreachable");
+  // If this point is reached, x must be a NaN.
+  mooseException("Sample point in LinearInterpolation is a NaN.");
   return 0;
 }
 
@@ -107,7 +107,8 @@ LinearInterpolation::sampleDerivative(const T & x) const
     if (x >= _x[i] && x < _x[i + 1])
       return (_y[i + 1] - _y[i]) / (_x[i + 1] - _x[i]);
 
-  throw std::out_of_range("Unreachable");
+  // If this point is reached, x must be a NaN.
+  mooseException("Sample point in LinearInterpolation is a NaN.");
   return 0;
 }
 

@@ -5,14 +5,16 @@
     type = 'Exodiff'
     input = 'prop_elem_read.i'
     exodiff = 'prop_elem_read_out.e'
-    design = 'ElementPropertyReadFile.md'
-    requirement = 'The system shall provide an object to read values from a file and map them onto a mesh besed on mesh element IDs'
+    design = 'PropertyReadFile.md'
+    requirement = 'The system shall provide an object to read values from a file and map them onto a mesh based on mesh element IDs'
+    allow_warnings = true # CSV file has more rows than number of elements
   [../]
   [./test_grain]
     type = 'Exodiff'
     input = 'prop_grain_read.i'
     exodiff = 'prop_grain_read_out.e'
-    design = 'ElementPropertyReadFile.md'
-    requirement = 'The system shall provide an object to read values from a file and map them onto a mesh besed on grain IDs determined by a random Voronoi tessellation'
+    design = 'PropertyReadFile.md'
+    requirement = 'The system shall provide an object to read values from a file and map them onto a mesh based on grain IDs determined by a random Voronoi tessellation'
+    allow_warnings = true # CSV has more rows than number of grains
   [../]
 []
