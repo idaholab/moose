@@ -31,9 +31,18 @@ public:
 
 protected:
   virtual Real computeQpIntegral() = 0;
+  virtual Real computeFaceInfoIntegral(const FaceInfo * /* fi */)
+  {
+    mooseError("Integral over faces have not been implemented for this postprocessor");
+  };
   virtual Real computeIntegral();
 
+  /// The local quadrature point index when computing an integral over quadrature points
   unsigned int _qp;
 
+  /// Holds the postprocessor result, the integral
   Real _integral_value;
+
+  /// Whether to integrate over quadrature points or FaceInfos
+  bool _qp_integration;
 };

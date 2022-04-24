@@ -44,15 +44,15 @@ SideIntegralFunctorPostprocessorTempl<is_ad>::SideIntegralFunctorPostprocessorTe
     _prefactor(getFunctor<GenericReal<is_ad>>("prefactor")),
     _partial_integral(getParam<bool>("restrict_to_functors_domain"))
 {
+  // Only support face info integration for now
+  _qp_integration = false;
 }
 
 template <bool is_ad>
 Real
-SideIntegralFunctorPostprocessorTempl<is_ad>::computeQpIntegral()
+SideIntegralFunctorPostprocessorTempl<is_ad>::computeFaceInfoIntegral(const FaceInfo * fi)
 {
-  const FaceInfo * const fi = getFaceInfo();
-  mooseAssert(fi, "We should have a face info");
-
+  mooseAssert(fi, "We should have a FaceInfo");
   // It's possible the functor is not defined on that side of the boundary
   // We wont allow that case, unless explicitly requested by the user,
   // as this means the sideset is reversed, but we will allow the case where
