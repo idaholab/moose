@@ -12,7 +12,7 @@ trainer, however the optimization algorithm is hardcoded to be Adam.
 ## Example Input File Syntax
 
 Let us try to approximate the following function: $y = \Pi_{i=1}^3|4x_i-2|$ over
-the $[0,0.05]^3$ domain. For this, we select 125 points using a tensor product grid
+the $[0,0.05]^3$ domain. For this, we select $125 (5 \times 5 \times 5)$ points using a tensor product grid
 as follows:
 
 !listing libtorch_nn/train.i block=Samplers
@@ -30,7 +30,7 @@ the weights:
 We note that the user can set the architecture of the neural net using the
 [!param](/Trainers/LibtorchANNTrainer/num_neurons_per_layer) and
 [!param](/Trainers/LibtorchANNTrainer/activation_function) parameters.
-The optimization algorithm depends on several parameters: 
+The optimization algorithm depends on several parameters:
 [!param](/Trainers/LibtorchANNTrainer/num_batches) defines how many batches the
 training samples should be separated into, while [!param](/Trainers/LibtorchANNTrainer/num_epochs)
 limits how many time we iterate over the batches.
