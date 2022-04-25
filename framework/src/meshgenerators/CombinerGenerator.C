@@ -120,7 +120,6 @@ CombinerGenerator::generate()
   // Two cases:
   // 1. Multiple input meshes and optional positions
   // 2. One input mesh and multiple positions
-
   fillPositions();
 
   // Case 1
@@ -128,7 +127,6 @@ CombinerGenerator::generate()
   {
     // merge all meshes into the first one
     auto mesh = dynamic_pointer_cast<UnstructuredMesh>(*_meshes[0]);
-
     if (!mesh)
       paramError("inputs", _input_names[0], " is not a valid unstructured mesh");
 
@@ -149,7 +147,6 @@ CombinerGenerator::generate()
 
       copyIntoMesh(*mesh, *other_mesh);
     }
-
     return dynamic_pointer_cast<MeshBase>(mesh);
   }
   else // Case 2
@@ -206,7 +203,6 @@ CombinerGenerator::generate()
           translated_node(i) = input_node(i);
       }
     }
-
     return dynamic_pointer_cast<MeshBase>(final_mesh);
   }
 }
@@ -241,7 +237,6 @@ CombinerGenerator::copyIntoMesh(UnstructuredMesh & destination, const Unstructur
   // list APIs rather than element-by-element for speed.
   BoundaryInfo & boundary = destination.get_boundary_info();
   const BoundaryInfo & other_boundary = source.get_boundary_info();
-
   for (const auto & t : other_boundary.build_node_list())
     boundary.add_node(std::get<0>(t) + node_delta, std::get<1>(t));
 
@@ -253,4 +248,7 @@ CombinerGenerator::copyIntoMesh(UnstructuredMesh & destination, const Unstructur
 
   for (const auto & t : other_boundary.build_shellface_list())
     boundary.add_shellface(std::get<0>(t) + elem_delta, std::get<1>(t), std::get<2>(t));
+
+  for (auto elem: other_boundary.get_sideset_name_map())
+    boundary.set_sideset_name_map().insert(elem);
 }
