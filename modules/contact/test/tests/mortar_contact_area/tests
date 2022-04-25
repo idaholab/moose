@@ -1,10 +1,18 @@
 [Tests]
   design = 'MortarContactAreaPostprocessor.md '
   issues = '#20860'
-  [finite]
+  [2d]
     type = 'CSVDiff'
-    input = 'finite.i'
-    csvdiff = 'finite_out.csv'
-    requirement = 'The system shall be able compute the contact area for mortar contact problems'
+    input = '2d.i'
+    csvdiff = '2d_out.csv'
+    requirement = 'The system shall be able compute the contact area for 2D mortar contact problems'
+    ad_indexing_type = 'global'
+  []
+  [2drz]
+    type = 'CSVDiff'
+    input = '2drz.i'
+    csvdiff = '2drz_out.csv'
+    requirement = 'The system shall be able compute the contact area for 2DRz mortar contact problems'
+    ad_indexing_type = 'global'
   []
 []

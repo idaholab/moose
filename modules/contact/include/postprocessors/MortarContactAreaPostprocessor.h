@@ -24,9 +24,9 @@ public:
 protected:
   virtual Real computeQpIntegral() override;
 
-  // Coupled Latrange Multiplier
+  /// Coupled Latrange Multiplier
   const ADVariableValue & _u;
 
-  //   Threshold Lagrange Multiplier above which contact is assumed to occur
-  const Real _threshold;
+  /// The tolerance used to decide whether the variable indicates contact
+  const Real _tolerance;
 };

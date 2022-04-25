@@ -21,9 +21,7 @@ MortarContactAreaPostprocessor::validParams()
       "on contact area that have a non-zero Lagrange Multiplier");
   params.addRequiredCoupledVar("variable", "Coupled Lagrange Multiplier");
   params.addParam<Real>(
-      "threshold",
-      1.0,
-      "Threshold Lagrange Multiplier value above which contact is assumed to occur");
+      "tolerance", TOLERANCE, "The tolerance for accepting that the variable indicates contact");
 
   return params;
 }
@@ -31,14 +29,14 @@ MortarContactAreaPostprocessor::validParams()
 MortarContactAreaPostprocessor::MortarContactAreaPostprocessor(const InputParameters & parameters)
   : VolumePostprocessor(parameters),
     _u(adCoupledValue("variable")),
-    _threshold(getParam<Real>("threshold"))
+    _tolerance(getParam<Real>("tolerance"))
 {
 }
 
 Real
 MortarContactAreaPostprocessor::computeQpIntegral()
 {
-  if (_u[_qp] > 1.0)
+  if (_u[_qp] > _tolerance)
     return 1.0;
   else
     return 0.0;

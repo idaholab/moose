@@ -1,5 +1,14 @@
-E_block = 1e7
+# This tests the MortarContactAreaPostprocessor to ensure that the correct contact
+# surface area is calculated. Between 0 - 0.2 seconds and 1.4-1.5 seconds, zero contact
+# area should be calulated. Otherwise, the area is:
+# 2 * Pi * radius * height = 2 * Pi * 0.61 * (10.0 - 9.2) = 3.066194
+
 E_plank = 1e7
+E_block = 1e7
+
+[Problem]
+  coord_type = RZ
+[]
 
 [Mesh]
   patch_size = 80
@@ -7,8 +16,8 @@ E_plank = 1e7
   [plank]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = -0.3
-    xmax = 0.3
+    xmin = 0
+    xmax = 0.6
     ymin = -10
     ymax = 10
     nx = 2
@@ -24,10 +33,10 @@ E_plank = 1e7
   [block]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = 0.31
-    xmax = 0.91
-    ymin = 7.7
-    ymax = 8.5
+    xmin = 0.61
+    xmax = 1.21
+    ymin = 9.2
+    ymax = 10.0
     nx = 3
     ny = 4
     boundary_name_prefix = block
@@ -67,11 +76,18 @@ E_plank = 1e7
 []
 
 [Modules/TensorMechanics/Master]
-  [action]
+  [block]
     strain = FINITE
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx '
                       'strain_yy strain_zz'
-    block = 'plank block'
+    block = 'block'
+  []
+  [plank]
+    strain = FINITE
+    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx '
+                      'strain_yy strain_zz'
+    block = 'plank'
+    eigenstrain_names = 'swell'
   []
 []
 
@@ -88,23 +104,20 @@ E_plank = 1e7
   [left_x]
     type = DirichletBC
     variable = disp_x
-    preset = false
     boundary = plank_left
     value = 0.0
   []
   [left_y]
     type = DirichletBC
     variable = disp_y
-    preset = false
     boundary = plank_bottom
     value = 0.0
   []
   [right_x]
-    type = FunctionDirichletBC
+    type = DirichletBC
     variable = disp_x
-    preset = false
     boundary = block_right
-    function = '-0.04*sin(4*(t+1.5))+0.02'
+    value = 0
   []
   [right_y]
     type = FunctionDirichletBC
@@ -132,6 +145,19 @@ E_plank = 1e7
     type = ComputeFiniteStrainElasticStress
     block = 'plank block'
   []
+  [swell]
+    type = ComputeEigenstrain
+    block = 'plank'
+    eigenstrain_name = swell
+    eigen_base = '1 0 0 0 0 0 0 0 0'
+    prefactor = swell_mat
+  []
+  [swell_mat]
+    type = GenericFunctionMaterial
+    prop_names = 'swell_mat'
+    prop_values = '7e-2*(1-cos(4*t))'
+    block = 'plank'
+  []
 []
 
 [Preconditioning]
@@ -147,7 +173,7 @@ E_plank = 1e7
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
   petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       1e-5          NONZERO               1e-15'
-  end_time = 1
+  end_time = 1.5
   dt = 0.1
   dtmin = 0.1
   timestep_tolerance = 1e-6
