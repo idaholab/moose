@@ -3,6 +3,7 @@
 #include "SystemBase.h"
 #include "libmesh/system.h"
 #include "libmesh/enum_norm_type.h"
+#include "libmesh/petsc_vector.h"
 
 /**
  * Provide a simple RAII interface for linear lagrange solution variables.

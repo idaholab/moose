@@ -8,7 +8,7 @@ P_out = 4.923e6 # Pa
     type = QuadSubChannelMeshGenerator
     nx = 6
     ny = 6
-    n_cells = 20
+    n_cells = 2
     pitch = 0.0126
     rod_diameter = 0.00950
     gap = 0.00095 # the half gap between sub-channel assemblies
@@ -31,11 +31,17 @@ P_out = 4.923e6 # Pa
   fp = water
   n_blocks = 1
   beta = 0.006
-  CT = 2.0
+  CT = 1.0 #2.0
   compute_density = true
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
+  implicit = true
+  segregated = false
+  staggered_pressure = false
+  monolithic_thermal = false
+  discretization = "central_difference"
+  P_tol = 1e-11
 []
 
 [ICs]
@@ -153,3 +159,25 @@ P_out = 4.923e6 # Pa
   nl_rel_tol = 0.9
   l_tol = 0.9
 []
+
+################################################################################
+# A multiapp that projects data to a detailed mesh
+################################################################################
+
+[MultiApps]
+  [viz]
+    type = FullSolveMultiApp
+    input_files = "3d.i"
+    execute_on = "timestep_end"
+  []
+[]
+
+[Transfers]
+  [xfer]
+    type = MultiAppDetailedSolutionTransfer
+    multi_app = viz
+    direction = to_multiapp
+    variable = 'mdot SumWij P DP h T rho mu q_prime S'
+  []
+[]
+
