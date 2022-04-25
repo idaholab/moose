@@ -1,0 +1,10 @@
+[Tests]
+  design = 'MortarContactAreaPostprocessor.md '
+  issues = '#20860'
+  [finite]
+    type = 'CSVDiff'
+    input = 'finite.i'
+    csvdiff = 'finite_out.csv'
+    requirement = 'The system shall be able compute the contact area for mortar contact problems'
+  []
+[]
