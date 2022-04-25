@@ -15,6 +15,11 @@ P_out = 2.0e5 # Pa
     hwire = 0.0833
     spacer_z = '0 0.2 0.4 0.6 0.8'
     spacer_k = '0.1 0.1 0.1 0.1 0.10'
+    implicit = false
+    segregated = true
+    staggered_pressure = false
+    monolithic_thermal = false
+    discretization = "central_difference"
   []
 []
 
