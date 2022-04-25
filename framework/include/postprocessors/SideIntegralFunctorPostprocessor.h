@@ -15,7 +15,7 @@
 template <bool>
 class SideIntegralFunctorPostprocessorTempl;
 typedef SideIntegralFunctorPostprocessorTempl<false> SideIntegralFunctorPostprocessor;
-typedef SideIntegralFunctorPostprocessorTempl<true> SideIntegralADFunctorPostprocessor;
+typedef SideIntegralFunctorPostprocessorTempl<true> ADSideIntegralFunctorPostprocessor;
 
 /**
  * This postprocessor computes a surface integral of the specified functor
@@ -35,7 +35,7 @@ protected:
   /**
    * Compute contribution from an element face, either on a boundary or between two active elements
    * @param fi the FaceInfo, containing the geometric information of the face
-   * @ return the integral for this element (_current_elem) and side (_current_side)
+   * @return the integral for this element (_current_elem) and side (_current_side)
    */
   virtual Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 

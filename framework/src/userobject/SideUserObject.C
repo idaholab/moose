@@ -53,19 +53,19 @@ SideUserObject::getFaceInfos()
   _face_infos.clear();
 
   // Either the element or the (active) neighbor is a valid argument to get a face info
-  const Elem * equal_level_neighbor = _current_elem->neighbor_ptr(_current_side);
+  const Elem * side_neighbor = _current_elem->neighbor_ptr(_current_side);
 
   mooseAssert(_current_elem, "We should have an element");
   mooseAssert(_current_elem->active(), "The current element should be active");
 
   // No neighbor means we are at a boundary, a FaceInfo exists in the mesh
-  if (equal_level_neighbor)
+  if (side_neighbor)
   {
-    std::vector<const Elem *> candidate_neighbors = {equal_level_neighbor};
+    std::vector<const Elem *> candidate_neighbors = {side_neighbor};
 
     // neighbor is not active, we have to seek its refined children to get a FaceInfo
-    if (!equal_level_neighbor->active())
-      equal_level_neighbor->active_family_tree_by_neighbor(candidate_neighbors, _current_elem);
+    if (!side_neighbor->active())
+      side_neighbor->active_family_tree_by_neighbor(candidate_neighbors, _current_elem);
 
     for (const Elem * neighbor : candidate_neighbors)
     {

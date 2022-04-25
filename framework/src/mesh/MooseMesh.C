@@ -3230,8 +3230,11 @@ MooseMesh::buildFaceInfo() const
       if (!neighbor ||
           (neighbor->active() && (neighbor->level() == elem->level()) &&
            (elem_id < neighbor->id())) ||
-          (neighbor->active() && neighbor->level() < elem->level()))
+          (neighbor->level() < elem->level()))
       {
+        mooseAssert(!neighbor || (neighbor->level() < elem->level() ? neighbor->active() : true),
+                    "If the neighbor is coarser than the element, we expect that the neighbor must "
+                    "be active.");
         _all_face_info.emplace_back(elem, side, neighbor);
 
         auto & fi = _all_face_info.back();

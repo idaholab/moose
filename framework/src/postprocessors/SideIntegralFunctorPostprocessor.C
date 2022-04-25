@@ -12,7 +12,7 @@
 #include "metaphysicl/raw_type.h"
 
 registerMooseObject("MooseApp", SideIntegralFunctorPostprocessor);
-registerMooseObject("MooseApp", SideIntegralADFunctorPostprocessor);
+registerMooseObject("MooseApp", ADSideIntegralFunctorPostprocessor);
 
 template <bool is_ad>
 InputParameters
@@ -63,6 +63,7 @@ SideIntegralFunctorPostprocessorTempl<is_ad>::computeFaceInfoIntegral(const Face
     has_elem = true;
   else
   {
+#ifndef NDEBUG
     if (fi->neighborPtr())
     {
       mooseAssert(_functor.hasBlocks(_current_elem->subdomain_id()) ||
@@ -72,6 +73,7 @@ SideIntegralFunctorPostprocessorTempl<is_ad>::computeFaceInfoIntegral(const Face
                       _prefactor.hasBlocks(fi->neighborPtr()->subdomain_id()),
                   "Prefactor should be defined on at least one side of the boundary");
     }
+#endif
     has_elem = false;
   }
 

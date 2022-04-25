@@ -62,7 +62,7 @@ SideIntegralPostprocessor::computeIntegral()
     getFaceInfos();
 
     for (auto & fi : _face_infos)
-      sum += _JxW[0] * _coord[0] * computeFaceInfoIntegral(fi);
+      sum += fi->faceArea() * fi->faceCoord() * computeFaceInfoIntegral(fi);
   }
   return sum;
 }

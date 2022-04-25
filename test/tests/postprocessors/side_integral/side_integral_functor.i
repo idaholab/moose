@@ -113,36 +113,36 @@
 [Postprocessors]
   # Mesh external boundaries integration
   [ext_u]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = 'left top right'
     functor = u
     restrict_to_functors_domain = true
   []
   [ext_v1]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = 'left right'
     functor = v1
   []
   [ext_v2]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = 'top'
     functor = v2
     restrict_to_functors_domain = true
   []
   [ext_f1]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = 'left top right'
     functor = f1
     prefactor = f1
   []
   [ext_m1]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = 'left top right'
     functor = m1
     restrict_to_functors_domain = true
   []
   [ext_m2]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = 'left top right'
     functor = m2
     restrict_to_functors_domain = true
@@ -151,48 +151,48 @@
   # Internal to the mesh, but a side to the variables
   # With orientation of normal 1->2
   [int_s1_u]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = inside_1
     functor = u
   []
   [int_s1_v1]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = inside_1
     functor = v1
   []
   [int_s1_f1]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = inside_1
     functor = f1
   []
   [int_s1_m1]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = inside_1
     functor = m1
   []
   [int_s1_m2]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = inside_1
     functor = m2
   []
   # With orientation of normal 2->1
   [int_s2_v2]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = inside_2
     functor = v2
   []
   [int_s2_f1]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = inside_2
     functor = f1
   []
   [int_s2_m1]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = inside_2
     functor = m1
   []
   [int_s2_m2]
-    type = SideIntegralADFunctorPostprocessor
+    type = ADSideIntegralFunctorPostprocessor
     boundary = inside_2
     functor = m2
   []
