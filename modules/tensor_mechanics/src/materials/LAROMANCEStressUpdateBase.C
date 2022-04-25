@@ -580,7 +580,9 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
               // If input is within another tile's window of applicability, check to see if inputs
               // place us in that tile and ensure the two tiles are different in the dimension of
               // interest
-              if (areTilesNotIdentical(p, t, tt, in_index) && checkInTile(p, tt))
+              if (areTilesNotIdentical(p, t, tt, in_index) &&
+                  input >= _input_limits[p][tt][in_index][0] &&
+                  input <= _input_limits[p][tt][in_index][1])
               {
                 overlap = true;
 

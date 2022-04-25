@@ -29,6 +29,9 @@ protected:
    */
   virtual GenericReal<is_ad> computeSecondPartitionWeight();
 
+  /// Width to determine the finite difference derivative for the partition weight
+  const Real _finite_difference_width;
+
   /**
    * Compute the derivative of the partition weight of the second partition w.r.t. stress
    */

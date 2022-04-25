@@ -17,6 +17,12 @@ LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::validParams()
 {
   InputParameters params = LAROMANCEStressUpdateBaseTempl<is_ad>::validParams();
   params.addClassDescription("LAROMANCE base class for partitioned reduced order models");
+  params.addRangeCheckedParam<Real>(
+      "finite_difference_width",
+      1.0e-2,
+      "finite_difference_width > 0",
+      "Factor multiplied against the input stress to compute the finite "
+      "difference derivative of the parition weights.");
 
   return params;
 }
@@ -24,7 +30,8 @@ LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::validParams()
 template <bool is_ad>
 LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::LAROMANCEPartitionStressUpdateBaseTempl(
     const InputParameters & parameters)
-  : LAROMANCEStressUpdateBaseTempl<is_ad>(parameters)
+  : LAROMANCEStressUpdateBaseTempl<is_ad>(parameters),
+    _finite_difference_width(this->template getParam<Real>("finite_difference_width"))
 {
 }
 
@@ -187,7 +194,8 @@ void
 LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::computeDSecondPartitionWeightDStress(
     GenericReal<is_ad> & dsecond_partition_weight_dstress)
 {
-  const Real fd_tol = 1.0e-6; // Finite difference width
+  const auto fd_tol =
+      _input_values[_stress_input_index] * _finite_difference_width; // Finite difference width
   _input_values[_stress_input_index] += fd_tol;
   dsecond_partition_weight_dstress =
       (computeSecondPartitionWeight() - _second_partition_weight[_qp]) / fd_tol;
