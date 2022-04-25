@@ -127,6 +127,7 @@ CombinerGenerator::generate()
   {
     // merge all meshes into the first one
     auto mesh = dynamic_pointer_cast<UnstructuredMesh>(*_meshes[0]);
+
     if (!mesh)
       paramError("inputs", _input_names[0], " is not a valid unstructured mesh");
 
@@ -147,6 +148,7 @@ CombinerGenerator::generate()
 
       copyIntoMesh(*mesh, *other_mesh);
     }
+
     return dynamic_pointer_cast<MeshBase>(mesh);
   }
   else // Case 2
@@ -203,6 +205,7 @@ CombinerGenerator::generate()
           translated_node(i) = input_node(i);
       }
     }
+    
     return dynamic_pointer_cast<MeshBase>(final_mesh);
   }
 }
