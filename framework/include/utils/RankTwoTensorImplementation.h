@@ -969,7 +969,7 @@ void
 ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<ADReal> & eigvals,
                                                   ADRankTwoTensor & eigvecs) const
 {
-  typedef Eigen::Matrix<ADReal, N, N, Eigen::DontAlign> RankTwoMatrix;
+  typedef Eigen::Matrix<ADReal, N, N> RankTwoMatrix;
   RankTwoMatrix self;
   for (auto i : make_range(N))
     for (unsigned int j = i; j < N; ++j)
