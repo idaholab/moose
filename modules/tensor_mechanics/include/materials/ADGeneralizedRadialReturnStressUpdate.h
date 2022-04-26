@@ -34,10 +34,10 @@ struct cast_impl<ADReal, int>
 
 // Instantiation of ADReal will be enabled shortly, once
 // https://github.com/roystgnr/MetaPhysicL/issues/70 makes it to MOOSE
-// typedef Eigen::Matrix<ADReal, 6, 6, Eigen::DontAlign> AnisotropyMatrix;
+// typedef Eigen::Matrix<ADReal, 6, 6> AnisotropyMatrix;
 
-typedef Eigen::Matrix<Real, 6, 6, Eigen::DontAlign> AnisotropyMatrixReal;
-typedef Eigen::Matrix<Real, 3, 3, Eigen::DontAlign> AnisotropyMatrixRealBlock;
+typedef Eigen::Matrix<Real, 6, 6> AnisotropyMatrixReal;
+typedef Eigen::Matrix<Real, 3, 3> AnisotropyMatrixRealBlock;
 
 /**
  * ADGeneralizedRadialReturnStressUpdate computes the generalized radial return stress increment for
