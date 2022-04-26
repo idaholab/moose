@@ -14,25 +14,17 @@ registerMooseObject("MooseApp", TagVectorArrayAux);
 InputParameters
 TagVectorArrayAux::validParams()
 {
-  InputParameters params = AuxKernel::validParams();
+  InputParameters params = TagAuxBase<ArrayAuxKernel>::validParams();
 
   params.addRequiredParam<TagName>("vector_tag", "Tag Name this Aux works on");
-  params.addRequiredCoupledVar("v",
-                               "The coupled variable whose components are coupled to AuxVariable");
-  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_TIMESTEP_END};
-  params.addRequiredParam<unsigned int>(
-      "component",
-      "What component to index the variable at. This is a relevant "
-      "parameter in the context of array variables.");
-
-  params.addClassDescription("Couple a tag vector, and return its nodal value");
+  params.addClassDescription(
+      "Couple a tagged vector, and return its evaluations at degree of freedom "
+      "indices corresponding to the coupled array variable.");
   return params;
 }
 
 TagVectorArrayAux::TagVectorArrayAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
-    _v(coupledVectorTagArrayValue("v", "vector_tag")),
-    _component(getParam<unsigned int>("component"))
+  : TagAuxBase<ArrayAuxKernel>(parameters), _v(coupledVectorTagArrayValue("v", "vector_tag"))
 {
   if (getArrayVar("v", 0)->feType() != _var.feType())
     paramError("variable",
@@ -40,8 +32,8 @@ TagVectorArrayAux::TagVectorArrayAux(const InputParameters & parameters)
                "as the variable 'v'");
 }
 
-Real
+RealEigenVector
 TagVectorArrayAux::computeValue()
 {
-  return _v[_qp](_component);
+  return _v[_qp];
 }

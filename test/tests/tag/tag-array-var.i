@@ -6,25 +6,16 @@
 []
 
 [AuxVariables]
-  [u0][]
-  [u1][]
+  [u_tag]
+    components = 2
+  []
 []
 
 [AuxKernels]
-  [u0]
+  [u_tag]
     type = TagVectorArrayAux
-    variable = u0
+    variable = u_tag
     v = u
-    component = 0
-    execute_on = 'timestep_end'
-    vector_tag = 'nontime'
-  []
-  [u1]
-    type = TagVectorArrayAux
-    variable = u1
-    v = u
-    component = 1
-    execute_on = 'timestep_end'
     vector_tag = 'nontime'
   []
 []

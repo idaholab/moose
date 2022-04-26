@@ -9,14 +9,14 @@
 
 #pragma once
 
+#include "TagAuxBase.h"
 #include "AuxKernel.h"
 
 /**
- * The value of a tagged vector for a given node and a given variable is coupled to
- * the current AuxVariable. TagVectorArrayAux returns the coupled nodal value for the user-supplied
- * array variable component
+ * Couple a tagged vector, and return its evaluations at degree of freedom indices corresponding to
+ * the coupled array variable
  */
-class TagVectorArrayAux : public AuxKernel
+class TagVectorArrayAux : public TagAuxBase<ArrayAuxKernel>
 {
 public:
   static InputParameters validParams();
@@ -24,12 +24,12 @@ public:
   TagVectorArrayAux(const InputParameters & parameters);
 
 protected:
-  Real computeValue() override;
+  RealEigenVector computeValue() override;
 
   /// The result of evaluating the supplied tagged vector at the degrees of freedom corresponding to
   /// the provided array variable
   const ArrayVariableValue & _v;
 
-  /// The array variable component for correctly indexing \p _v
-  const unsigned int _component;
+  using TagAuxBase<ArrayAuxKernel>::coupledVectorTagArrayValue;
+  using TagAuxBase<ArrayAuxKernel>::getArrayVar;
 };
