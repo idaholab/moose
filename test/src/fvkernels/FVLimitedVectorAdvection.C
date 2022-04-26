@@ -27,6 +27,7 @@ FVLimitedVectorAdvection::validParams()
   params.addRequiredParam<unsigned int>(
       "component",
       "The component at which we will index the evaluated vector functor to populate our residual");
+  params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
