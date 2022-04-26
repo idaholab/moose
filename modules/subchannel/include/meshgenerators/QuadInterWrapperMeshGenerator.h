@@ -7,10 +7,10 @@
 /**
  * Class for Subchannel mesh generation in the square lattice geometry
  */
-class QuadSubChannelMeshGenerator : public MeshGenerator
+class QuadInterWrapperMeshGenerator : public MeshGenerator
 {
 public:
-  QuadSubChannelMeshGenerator(const InputParameters & parameters);
+  QuadInterWrapperMeshGenerator(const InputParameters & parameters);
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
@@ -74,5 +74,5 @@ protected:
 public:
   static InputParameters validParams();
 
-  friend class QuadPinMeshGenerator;
+  friend class PinMeshGenerator;
 };

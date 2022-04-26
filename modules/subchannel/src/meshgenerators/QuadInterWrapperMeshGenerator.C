@@ -81,12 +81,12 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
 
   // Defining the total length from 3 axial sections
   Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
-  
+
   // Defining the dz based in the total length and the specified number of axial cells
   Real dz = L / _n_cells;
   for (unsigned int i = 0; i < _n_cells + 1; i++)
     _z_grid.push_back(dz * i);
-  
+
   // Defining the position of the spacer grid in the numerical solution array
   std::vector<int> spacer_cell;
   for (const auto & elem : _spacer_z)
