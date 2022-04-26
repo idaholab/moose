@@ -85,6 +85,10 @@ P_out = 14.72e6 # Pa
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
+  implicit = true
+  segregated = false
+  staggered_pressure = false
+  monolithic_thermal = false
 []
 
 [ICs]

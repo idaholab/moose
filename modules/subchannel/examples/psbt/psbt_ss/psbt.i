@@ -41,7 +41,7 @@ P_out = 4.923e6 # Pa
   staggered_pressure = false
   monolithic_thermal = false
   discretization = "central_difference"
-  P_tol = 1e-11
+  # P_tol = 1e-11
 []
 
 [ICs]
