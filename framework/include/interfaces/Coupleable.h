@@ -258,13 +258,10 @@ protected:
   /**
    * Returns value of a coupled variable for a given tag
    * @param var_name Name of coupled variable
-   * @param tag vector tag ID
+   * @param tag_name vector tag name
    * @return Reference to a VariableValue for the coupled variable
    * @see Kernel::_u
    */
-  const ArrayVariableValue & coupledVectorTagArrayValue(const std::string & var_name,
-                                                        TagID tag) const;
-
   const ArrayVariableValue & coupledVectorTagArrayValue(const std::string & var_name,
                                                         const std::string & tag_name) const;
 

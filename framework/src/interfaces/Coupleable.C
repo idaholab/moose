@@ -523,12 +523,6 @@ Coupleable::coupledVectorTagValue(const std::string & var_name,
 }
 
 const ArrayVariableValue &
-Coupleable::coupledVectorTagArrayValue(const std::string & var_name, TagID tag) const
-{
-  return vectorTagValueHelper<RealEigenVector>(var_name, tag);
-}
-
-const ArrayVariableValue &
 Coupleable::coupledVectorTagArrayValue(const std::string & var_name,
                                        const std::string & tag_name) const
 {

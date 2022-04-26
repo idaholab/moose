@@ -161,4 +161,11 @@
     exodiff = 'tag-array-var_out.e'
     design = 'TagVectorArrayAux.md'
   []
+  [multiple_component_tag_interface]
+    type = 'Exodiff'
+    input = 2d_diffusion_tag_vector.i
+    exodiff = multiple_component_tag_interface.e
+    requirement = 'The system shall be able to retrieve tagged vector values for multiple coupled variables using a single interface.'
+    cli_args = "AuxKernels/active='on_the_fly TagVectorAux2' Outputs/file_base=multiple_component_tag_interface"
+  []
 []
