@@ -12,7 +12,7 @@
 #include "AuxKernel.h"
 
 /**
- * Time derivative of a variable or a functor
+ * Time derivative of a functor, which can be a variable, function, functor material property
  */
 template <bool is_ad>
 class TimeDerivativeAuxTempl : public AuxKernel
@@ -25,11 +25,8 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  /// Variable time derivative TODO: remove once FE support functors at same level as FV
-  const VariableValue * _v_dot;
-
   /// Functor to take the time derivative of
-  const Moose::Functor<GenericReal<is_ad>> * _functor;
+  const Moose::Functor<GenericReal<is_ad>> & _functor;
 
   /// Factor to multiply the time derivative with
   const Moose::Functor<GenericReal<is_ad>> & _factor;
