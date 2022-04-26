@@ -33,7 +33,7 @@ public:
                               const unsigned int num_inputs,
                               const unsigned int num_outputs,
                               const std::vector<unsigned int> & num_neurons_per_layer,
-                              const std::vector<std::string> activation_function = {"relu"});
+                              const std::vector<std::string> & activation_function = {"relu"});
 
   /**
    * Add layers to the neural network
@@ -41,7 +41,7 @@ public:
    * @param parameters A map of parameter names and the corresponding values which
    *                   describe the neural net layer architecture
    */
-  virtual void addLayer(const std::string layer_name,
+  virtual void addLayer(const std::string & layer_name,
                         const std::unordered_map<std::string, unsigned int> & parameters) override;
 
   /**

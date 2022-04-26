@@ -19,7 +19,7 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     const unsigned int num_inputs,
     const unsigned int num_outputs,
     const std::vector<unsigned int> & num_neurons_per_layer,
-    const std::vector<std::string> activation_function)
+    const std::vector<std::string> & activation_function)
   : _name(name),
     _num_inputs(num_inputs),
     _num_outputs(num_outputs),
@@ -84,7 +84,8 @@ LibtorchArtificialNeuralNet::forward(torch::Tensor x)
 
 void
 LibtorchArtificialNeuralNet::addLayer(
-    const std::string layer_name, const std::unordered_map<std::string, unsigned int> & parameters)
+    const std::string & layer_name,
+    const std::unordered_map<std::string, unsigned int> & parameters)
 {
   auto it = parameters.find("inp_neurons");
   if (it == parameters.end())

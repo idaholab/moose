@@ -26,7 +26,7 @@ public:
   virtual ~LibtorchNeuralNetBase() {}
 
   // Overriding the function from NeuralNetBase
-  virtual void addLayer(const std::string /*layer_name*/,
+  virtual void addLayer(const std::string & /*layer_name*/,
                         const std::unordered_map<std::string, unsigned int> & /*parameters*/)
   {
     ::mooseError("You are calling the addLayer function of an unfunctional base class!");
