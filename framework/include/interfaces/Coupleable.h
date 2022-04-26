@@ -1504,6 +1504,10 @@ Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
       if (var->name() == name_to_use)
         mooseError("The named variable is an array variable, try a "
                    "'coupledArray[Value/Gradient/Dot/etc]...' function instead");
+    for (auto & var : _coupled_standard_fv_moose_vars)
+      if (var->name() == name_to_use)
+        mooseError("The named variable is a finite volume variable, which the coupled[...] routine "
+                   "used does not support. Try using the functor system routines instead.");
     mooseError(
         "Variable '", name_to_use, "' is of a different C++ type than you tried to fetch it as.");
   }
