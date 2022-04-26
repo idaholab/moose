@@ -19,7 +19,7 @@
       input = 2d-rc-heated.i
       exodiff = rc-heated-rz.e
       method = "!dbg"
-      abs_zero = 1e-9
+      abs_zero = 2e-9
       detail = 'in rz geometry,'
       ad_indexing_type = 'global'
       valgrind = HEAVY

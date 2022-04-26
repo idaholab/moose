@@ -32,18 +32,12 @@ INSFVScalarFieldAdvection::INSFVScalarFieldAdvection(const InputParameters & par
 ADReal
 INSFVScalarFieldAdvection::computeQpResidual()
 {
-  ADReal var_interface;
-
-  const auto elem_face = elemFromFace();
-  const auto neighbor_face = neighborFromFace();
-
   const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
-  Moose::FV::interpolate(_advected_interp_method,
-                         var_interface,
-                         _var(elem_face),
-                         _var(neighbor_face),
-                         v,
-                         *_face_info,
-                         true);
-  return _normal * v * var_interface;
+  const auto var_face = onBoundary(*_face_info)
+                            ? _var(singleSidedFaceArg())
+                            : _var(Moose::FV::makeFace(*_face_info,
+                                                       limiterType(_advected_interp_method),
+                                                       MetaPhysicL::raw_value(v) * _normal > 0,
+                                                       faceArgSubdomains()));
+  return _normal * v * var_face;
 }

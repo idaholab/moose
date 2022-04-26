@@ -1,17 +1,32 @@
 [Tests]
   issues = '#18666'
-  design = 'navier_stokes/fv.md'
+  design = 'rans_theory.md INSFVMixingLengthTurbulentViscosityAux.md'
   [capped_mixing_length]
-    type = 'Exodiff'
-    input = mixing_length_eddy_viscosity.i
-    exodiff = mixing_length_eddy_viscosity_out.e
-    method = "!dbg"
-    requirement = 'The system shall be able to compute the turbulent viscosity based on the capped mixing length model and store it in a variable.'
-    ad_indexing_type = 'global'
-    issues = '#18666'
-    design = 'rans_theory.md INSFVMixingLengthTurbulentViscosityAux.md'
-    mesh_mode = REPLICATED
-    valgrind = 'none'
-    recover = false
+    requirement = 'The system shall be able to compute the turbulent viscosity based on the capped mixing length model and store it in a variable when performing'
+    [transient]
+      type = 'Exodiff'
+      input = mixing_length_eddy_viscosity.i
+      exodiff = mixing_length_eddy_viscosity_out.e
+      method = "!dbg"
+      ad_indexing_type = 'global'
+      mesh_mode = REPLICATED
+      valgrind = 'none'
+      recover = false
+      abs_zero = 3e-10
+      heavy = true
+      detail = 'transient simulations'
+    []
+    [steady]
+      type = 'Exodiff'
+      input = steady.i
+      exodiff = steady_out.e
+      method = "!dbg"
+      ad_indexing_type = 'global'
+      mesh_mode = REPLICATED
+      valgrind = 'none'
+      recover = false
+      abs_zero = 6e-10
+      detail = 'steady simulations'
+    []
   []
 []

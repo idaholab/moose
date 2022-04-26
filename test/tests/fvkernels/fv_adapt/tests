@@ -29,7 +29,7 @@
     test_case = TestSteadyAdapt
     requirement = 'The system shall display first order convergence when there is significant skewness in the mesh due to mismatch between cell levels.'
     method = '!dbg'
-    min_parallel = 8
+    min_parallel = 16
     required_python_packages = 'pandas matplotlib'
     heavy = true
     ad_indexing_type = 'global'

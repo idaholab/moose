@@ -1,0 +1,83 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "NSFVUtils.h"
+#include "MooseObject.h"
+#include "InputParameters.h"
+#include "MooseEnum.h"
+
+namespace Moose
+{
+namespace FV
+{
+bool
+setInterpolationMethods(const MooseObject & obj,
+                        Moose::FV::InterpMethod & advected_interp_method,
+                        Moose::FV::InterpMethod & velocity_interp_method)
+{
+  bool need_more_ghosting = false;
+
+  const auto & advected_interp_method_in = obj.getParam<MooseEnum>("advected_interp_method");
+  if (advected_interp_method_in == "average")
+    advected_interp_method = InterpMethod::Average;
+  else if (advected_interp_method_in == "skewness-corrected")
+    advected_interp_method = Moose::FV::InterpMethod::SkewCorrectedAverage;
+  else if (advected_interp_method_in == "upwind")
+    advected_interp_method = InterpMethod::Upwind;
+  else
+  {
+    if (advected_interp_method_in == "sou")
+      advected_interp_method = InterpMethod::SOU;
+    else if (advected_interp_method_in == "min_mod")
+      advected_interp_method = InterpMethod::MinMod;
+    else if (advected_interp_method_in == "vanLeer")
+      advected_interp_method = InterpMethod::VanLeer;
+    else if (advected_interp_method_in == "quick")
+      advected_interp_method = InterpMethod::QUICK;
+    else
+      obj.mooseError("Unrecognized interpolation type ",
+                     static_cast<std::string>(advected_interp_method_in));
+
+    need_more_ghosting = true;
+  }
+
+  const auto & velocity_interp_method_in = obj.getParam<MooseEnum>("velocity_interp_method");
+  if (velocity_interp_method_in == "average")
+    velocity_interp_method = InterpMethod::Average;
+  else if (velocity_interp_method_in == "rc")
+    velocity_interp_method = InterpMethod::RhieChow;
+  else
+    obj.mooseError("Unrecognized interpolation type ",
+                   static_cast<std::string>(velocity_interp_method_in));
+
+  return need_more_ghosting;
+}
+
+InputParameters
+interpolationParameters()
+{
+  auto params = emptyInputParameters();
+  MooseEnum advected_interp_method("average upwind sou min_mod vanLeer quick skewness-corrected",
+                                   "upwind");
+  params.addParam<MooseEnum>(
+      "advected_interp_method",
+      advected_interp_method,
+      "The interpolation to use for the advected quantity. Options are "
+      "'upwind', 'average', 'sou' (for second-order upwind), 'min_mod', 'vanLeer', 'quick', and "
+      "'skewness-corrected' with the default being 'upwind'.");
+  MooseEnum velocity_interp_method("average rc", "rc");
+  params.addParam<MooseEnum>(
+      "velocity_interp_method",
+      velocity_interp_method,
+      "The interpolation to use for the velocity. Options are "
+      "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
+  return params;
+}
+}
+}

@@ -135,8 +135,10 @@
     design = 'navier_stokes/rans_theory.md'
     issues = '#16794 #16937'
     mesh_mode = REPLICATED
-    difference_tol = 1e-7
+    ratio_tol = 3e-8
+    difference_tol = 1e-6
     cli_args = "Mesh/gen/nx=2 Mesh/gen/ny=2"
+    only_final_jacobian = True
   []
   [linear-friction]
     type = 'Exodiff'

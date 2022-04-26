@@ -3,7 +3,7 @@ von_karman_const = 0.41
 H = 1 #halfwidth of the channel
 L = 150
 
-Re = 13700
+Re = 100
 
 rho = 1
 bulk_u = 1

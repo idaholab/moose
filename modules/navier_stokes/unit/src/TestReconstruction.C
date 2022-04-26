@@ -143,7 +143,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
     for (auto * const elem : lm_mesh.active_element_ptr_range())
     {
       const auto elem_id = elem->id();
-      auto elem_arg = Moose::ElemArg{elem, false, false};
+      auto elem_arg = Moose::ElemArg{elem, false};
       const RealVectorValue analytic(u(elem_arg));
 
       auto compute_elem_error = [elem_id, current_h, &analytic](auto & container, auto & error)
@@ -172,7 +172,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
     for (auto * const elem : lm_mesh.active_element_ptr_range())
     {
       const auto elem_id = elem->id();
-      const auto elem_arg = Moose::ElemArg{elem, false, false};
+      const auto elem_arg = Moose::ElemArg{elem, false};
       const RealVectorValue analytic(u(elem_arg));
 
       auto compute_elem_error = [elem_id, current_h, &analytic](auto & container, auto & error)
@@ -190,7 +190,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
         *mesh, "not_restricted");
     try
     {
-      unrestricted_error_test(Moose::ElemArg({lm_mesh.elem_ptr(0), false, false}));
+      unrestricted_error_test(Moose::ElemArg({lm_mesh.elem_ptr(0), false}));
       EXPECT_TRUE(false);
     }
     catch (std::runtime_error & e)
@@ -203,7 +203,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
         *mesh, {1}, "is_restricted");
     try
     {
-      restricted_error_test(Moose::ElemArg({lm_mesh.elem_ptr(0), false, false}));
+      restricted_error_test(Moose::ElemArg({lm_mesh.elem_ptr(0), false}));
       EXPECT_TRUE(false);
     }
     catch (std::runtime_error & e)

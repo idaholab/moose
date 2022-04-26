@@ -516,7 +516,7 @@ protected:
    * boundary face for which is not a corresponding Dirichlet condition, e.g. we need to compute
    * some approximation for the boundary face value using the adjacent cell centroid information
    */
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
+  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
 
 private:
   using MooseVariableField<OutputType>::evaluate;
@@ -688,13 +688,6 @@ protected:
 
 private:
   /**
-   * A helper function for evaluating this variable with face arguments. This is leveraged by both
-   * \p FaceArg and \p SingleSidedFaceArg evaluate overloads
-   */
-  template <typename FaceCallingArg>
-  ValueType evaluateFaceHelper(const FaceCallingArg & face) const;
-
-  /**
    * A helper function for evaluating this variable's time derivative with face arguments. This is
    * leveraged by both \p FaceArg and \p SingleSidedFaceArg evaluateDot overloads
    */
@@ -732,25 +725,7 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceCallingArg & face) c
   mooseAssert(face.limiter_type == Moose::FV::LimiterType::CentralDifference,
               "This method currently only supports central differencing.");
 
-  return getInternalFaceValue(*fi, face.apply_gradient_to_skewness);
-}
-
-template <typename OutputType>
-template <typename FaceCallingArg>
-typename MooseVariableFV<OutputType>::ValueType
-MooseVariableFV<OutputType>::evaluateFaceHelper(const FaceCallingArg & face) const
-{
-  const FaceInfo * const fi = face.fi;
-  mooseAssert(fi, "The face information must be non-null");
-  if (isExtrapolatedBoundaryFace(*fi))
-    return getExtrapolatedBoundaryFaceValue(*fi);
-  else if (isInternalFace(*fi))
-    return getInternalFaceValue(face);
-  else
-  {
-    mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
-    return getDirichletBoundaryFaceValue(*fi);
-  }
+  return getInternalFaceValue(*fi, face.correct_skewness);
 }
 
 template <typename OutputType>
@@ -793,7 +768,7 @@ template <typename OutputType>
 typename MooseVariableFV<OutputType>::GradientType
 MooseVariableFV<OutputType>::evaluateGradient(const ElemArg & elem_arg, unsigned int) const
 {
-  return adGradSln(elem_arg.elem, elem_arg.apply_gradient_to_skewness);
+  return adGradSln(elem_arg.elem, elem_arg.correct_skewness);
 }
 
 template <typename OutputType>
@@ -801,7 +776,7 @@ typename MooseVariableFV<OutputType>::GradientType
 MooseVariableFV<OutputType>::evaluateGradient(const FaceArg & face, unsigned int) const
 {
   mooseAssert(face.fi, "We must have a non-null face information");
-  return adGradSln(*face.fi, face.apply_gradient_to_skewness);
+  return adGradSln(*face.fi, face.correct_skewness);
 }
 
 template <typename OutputType>
@@ -810,7 +785,7 @@ MooseVariableFV<OutputType>::evaluateGradient(const SingleSidedFaceArg & face, u
 {
   const auto * const fi = face.fi;
   mooseAssert(fi, "We must have a non-null face information");
-  return adGradSln(*fi, face.apply_gradient_to_skewness);
+  return adGradSln(*fi, face.correct_skewness);
 }
 
 template <typename OutputType>
