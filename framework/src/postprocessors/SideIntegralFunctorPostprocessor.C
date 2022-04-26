@@ -79,12 +79,8 @@ SideIntegralFunctorPostprocessorTempl<is_ad>::computeFaceInfoIntegral(const Face
 
   if (has_elem)
   {
-    Moose::SingleSidedFaceArg ssf = {fi,
-                                     Moose::FV::LimiterType::CentralDifference,
-                                     true,
-                                     false,
-                                     false,
-                                     _current_elem->subdomain_id()};
+    Moose::SingleSidedFaceArg ssf = {
+        fi, Moose::FV::LimiterType::CentralDifference, true, false, _current_elem->subdomain_id()};
     return MetaPhysicL::raw_value(_prefactor(ssf) * _functor(ssf));
   }
   else

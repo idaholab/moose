@@ -319,14 +319,14 @@ public:
    */
   void setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule);
 
- /**
-  * Returns whether the functor is defined on this block
-  */
- virtual bool hasBlocks(const SubdomainID & /* id */) const
- {
-   mooseError("Block restriction has not been implemented for functor " + functorName());
-   return false;
- }
+  /**
+   * Returns whether the functor is defined on this block
+   */
+  virtual bool hasBlocks(const SubdomainID & /* id */) const
+  {
+    mooseError("Block restriction has not been implemented for functor " + functorName());
+    return false;
+  }
 
   /**
    * Returns a pair where the first member is whether this face is an extrapolated boundary face for
