@@ -1,6 +1,5 @@
 # Do not use jinja templating (A physical change to this file is required to trigger a build)
-{% set build = 6 %}
-{% set strbuild = "build_" + build|string %}
+{% set build = 7 %}
 {% set vtk_version = "9.1.0" %}
 {% set friendly_version = "9.1" %}
 {% set sha256 = "8fed42f4f8f1eb8083107b68eaa9ad71da07110161a3116ad807f43e5ca5ce96" %}
@@ -15,7 +14,6 @@ source:
 
 build:
   number: {{ build }}
-  string: {{ strbuild }}
   skip: true  # [win]
   script_env:
     - MOOSE_JOBS
@@ -23,6 +21,8 @@ build:
 requirements:
   build:
     - {{ moose_mpich }}
+    - {{ moose_python }}
+    - {{ moose_pyqt }}         # [not arm64]
     - cmake
     - ninja
     - {{ moose_libglu }}       # [linux]
@@ -37,6 +37,8 @@ requirements:
 
   run:
     - {{ moose_mpich }}
+    - {{ moose_python }}
+    - {{ moose_pyqt }}         # [not arm64]
     - {{ moose_libglu }}       # [linux]
     - {{ moose_mesalib }}      # [linux]
     - {{ moose_libxt }}        # [linux]
@@ -51,6 +53,9 @@ test:
   commands:
     - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ friendly_version }}.dylib # [osx]
     - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ friendly_version }}.so    # [linux]
+  imports:
+    - PyQt5  # [not arm64]
+    - vtk
 
 about:
   home: http://www.vtk.org/

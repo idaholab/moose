@@ -78,7 +78,7 @@ behaviors of each user-defined object.
 - 4 GB of RAM for optimized compilation (8 GB for debug compilation), 2 GB per core execution
 - 100 GB disk space
 - C++17 compatible compiler (GCC, Clang)
-- Python 3.6+
+- Python 3.7+
 - Git
 !! minimum-requirements-finish
 !template-end!
