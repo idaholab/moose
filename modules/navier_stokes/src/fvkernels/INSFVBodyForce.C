@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVBodyForce.h"
-#include "Function.h"
 
 registerMooseObject("NavierStokesApp", INSFVBodyForce);
 

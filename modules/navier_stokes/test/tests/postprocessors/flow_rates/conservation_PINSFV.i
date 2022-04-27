@@ -258,7 +258,6 @@ velocity_interp_method='rc'
     vel_x = u
     vel_y = v
     advected_quantity = advected_density
-    fv = true
   []
   [inlet_mass_constant]
     type = VolumetricFlowRate
@@ -266,7 +265,6 @@ velocity_interp_method='rc'
     vel_x = u
     vel_y = v
     advected_quantity = ${rho}
-    fv = true
   []
   [inlet_mass_matprop]
     type = VolumetricFlowRate
@@ -274,22 +272,19 @@ velocity_interp_method='rc'
     vel_x = u
     vel_y = v
     advected_quantity = 'advected_rho'
-    fv = true
   []
   [mid1_mass]
-    type = InternalVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = internal_bot
     vel_x = u
     vel_y = v
-    fv = true
     advected_quantity = ${rho}
   []
   [mid2_mass]
-    type = InternalVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = internal_top
     vel_x = u
     vel_y = v
-    fv = true
     advected_quantity = ${rho}
   []
   [outlet_mass]
@@ -297,7 +292,6 @@ velocity_interp_method='rc'
     boundary = top
     vel_x = u
     vel_y = v
-    fv = true
     advected_quantity = ${rho}
   []
 
@@ -307,7 +301,6 @@ velocity_interp_method='rc'
     vel_x = u
     vel_y = v
     advected_quantity = u
-    fv = true
   []
 
   [inlet_momentum_y]
@@ -316,25 +309,22 @@ velocity_interp_method='rc'
     vel_x = u
     vel_y = v
     advected_quantity = v
-    fv = true
   []
 
   [mid1_advected_energy]
-    type = InternalVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = internal_bot
     vel_x = u
     vel_y = v
     advected_quantity = 'rho_cp_temp'
-    fv = true
     advected_interp_method = 'upwind'
   []
   [mid2_advected_energy]
-    type = InternalVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = internal_top
     vel_x = u
     vel_y = v
     advected_quantity = 'rho_cp_temp'
-    fv = true
     advected_interp_method = 'upwind'
   []
   [outlet_advected_energy]
@@ -343,7 +333,6 @@ velocity_interp_method='rc'
     vel_x = u
     vel_y = v
     advected_quantity = 'rho_cp_temp'
-    fv = true
     advected_interp_method = 'upwind'
   []
 []

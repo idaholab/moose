@@ -135,6 +135,8 @@ public:
   void residualSetup() override;
   void jacobianSetup() override;
 
+  bool hasBlocks(const SubdomainID &) const override { return true; }
+
 private:
   using typename Moose::FunctorBase<T>::ValueType;
   using typename Moose::FunctorBase<T>::GradientType;
