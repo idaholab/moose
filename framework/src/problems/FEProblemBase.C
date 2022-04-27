@@ -98,6 +98,7 @@
 #include "Reporter.h"
 #include "ADUtils.h"
 #include "Executioner.h"
+#include "VariadicTable.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -196,9 +197,9 @@ FEProblemBase::validParams()
                         "or transferring to/from Multiapps "
                         "(default: false)");
 
-  params.addParam<bool>("show_multiapp_actions",
-                        true,
-                        "Set to false to disable screen printouts on multiapp actions");
+  params.addParam<bool>("verbose_multiapps",
+                        false,
+                        "Set to True to enable verbose screen printing related to MultiApps");
 
   params.addParam<FileNameNoExtension>("restart_file_base",
                                        "File base name used for restart (e.g. "
@@ -295,7 +296,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_time_integrator(false),
     _has_exception(false),
     _parallel_barrier_messaging(getParam<bool>("parallel_barrier_messaging")),
-    _show_multiapp_actions(getParam<bool>("show_multiapp_actions")),
+    _verbose_multiapps(getParam<bool>("verbose_multiapps")),
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
     _is_petsc_options_inserted(false),
@@ -4248,80 +4249,27 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION dire
 
     const auto & transfers = wh.getActiveObjects();
 
-    if (_show_multiapp_actions)
+    if (_verbose_multiapps)
     {
-      _console << COLOR_CYAN << "\nStarting Transfers on " << Moose::stringify(type)
-               << string_direction << "MultiApps" << COLOR_DEFAULT << std::endl;
+      _console << COLOR_CYAN << "\nTransfers on " << Moose::stringify(type) << string_direction
+               << "MultiApps" << COLOR_DEFAULT << ":" << std::endl;
 
-      // output transfer information
-      unsigned int max_name_length = 4;
-      unsigned int max_type_length = 4;
-      unsigned int max_multiapp_name_length = 13;
+      VariadicTable<std::string, std::string, std::string, std::string> table(
+          {"Name", "Type", "From", "To"});
+
+      // Build Table of Transfer Info
       for (const auto & transfer : transfers)
       {
-        if (transfer->name().length() > max_name_length)
-          max_name_length = transfer->name().length();
-        if (transfer->type().length() > max_type_length)
-          max_type_length = transfer->type().length();
         auto multiapp_transfer = dynamic_cast<MultiAppTransfer *>(transfer.get());
-        if (multiapp_transfer)
-        {
-          if (direction == MultiAppTransfer::TO_MULTIAPP)
-          {
-            unsigned int l = multiapp_transfer->getToMultiApp()->name().length();
-            if (l > max_multiapp_name_length)
-              max_multiapp_name_length = l;
-          }
-          else if (direction == MultiAppTransfer::FROM_MULTIAPP)
-          {
-            unsigned int l = multiapp_transfer->getFromMultiApp()->name().length();
-            if (l > max_multiapp_name_length)
-              max_multiapp_name_length = l;
-          }
-          else
-          {
-            unsigned int l1 = multiapp_transfer->getFromMultiApp()->name().length();
-            unsigned int l2 = multiapp_transfer->getToMultiApp()->name().length();
-            if (l1 + l2 + 2 > max_multiapp_name_length)
-              max_multiapp_name_length = l1 + l2 + 2;
-          }
-        }
-      }
-      const unsigned int space = 2;
-      _console << std::left << std::setw(max_name_length + space) << "Name";
-      _console << std::left << std::setw(max_type_length + space) << "Type";
-      _console << std::left << std::setw(max_multiapp_name_length) << "MultiApp name\n";
-      const unsigned int total_length =
-          max_name_length + max_type_length + max_multiapp_name_length + space * 2;
-      for (unsigned int i = 0; i < total_length; ++i)
-        _console << '-';
-      _console << '\n';
 
-      for (const auto & transfer : transfers)
-      {
-        _console << std::left << std::setw(max_name_length + space) << transfer->name();
-        _console << std::left << std::setw(max_type_length + space) << transfer->type();
-        auto multiapp_transfer = dynamic_cast<MultiAppTransfer *>(transfer.get());
-        if (multiapp_transfer)
-        {
-          std::string name;
-          if (direction == MultiAppTransfer::TO_MULTIAPP)
-            name = multiapp_transfer->getToMultiApp()->name();
-          else if (direction == MultiAppTransfer::FROM_MULTIAPP)
-            name = multiapp_transfer->getFromMultiApp()->name();
-          else
-          {
-            name += multiapp_transfer->getFromMultiApp()->name();
-            name += "=>";
-            name += multiapp_transfer->getToMultiApp()->name();
-          }
-          _console << std::left << std::setw(max_multiapp_name_length) << name;
-        }
-        _console << "\n";
+        table.addRow(multiapp_transfer->name(),
+                     multiapp_transfer->type(),
+                     multiapp_transfer->getFromName(),
+                     multiapp_transfer->getToName());
       }
-      for (unsigned int i = 0; i < total_length; ++i)
-        _console << '-';
-      _console << std::endl;
+
+      // Print it
+      table.print(_console);
     }
 
     for (const auto & transfer : transfers)
@@ -4332,13 +4280,13 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION dire
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
-    if (_show_multiapp_actions)
+    if (_verbose_multiapps)
       _console << COLOR_CYAN << "Transfers on " << Moose::stringify(type) << " Are Finished\n"
                << COLOR_DEFAULT << std::endl;
   }
   else if (_multi_apps[type].getActiveObjects().size())
   {
-    if (_show_multiapp_actions)
+    if (_verbose_multiapps)
       _console << COLOR_CYAN << "\nNo Transfers on " << Moose::stringify(type) << string_direction
                << "MultiApps\n"
                << COLOR_DEFAULT << std::endl;
@@ -4400,7 +4348,7 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
   {
     TIME_SECTION("execMultiApps", 1, "Executing MultiApps", false);
 
-    if (_show_multiapp_actions)
+    if (_verbose_multiapps)
       _console << COLOR_CYAN << "\nExecuting MultiApps on " << Moose::stringify(type)
                << COLOR_DEFAULT << std::endl;
 
@@ -4421,7 +4369,7 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
     if (!success)
       return false;
 
-    if (_show_multiapp_actions)
+    if (_verbose_multiapps)
       _console << COLOR_CYAN << "Finished Executing MultiApps on " << Moose::stringify(type) << "\n"
                << COLOR_DEFAULT << std::endl;
   }
@@ -4468,7 +4416,7 @@ FEProblemBase::finishMultiAppStep(ExecFlagType type, bool recurse_through_multia
 
   if (multi_apps.size())
   {
-    if (_show_multiapp_actions)
+    if (_verbose_multiapps)
       _console << COLOR_CYAN << "\nAdvancing MultiApps on " << type.name() << COLOR_DEFAULT
                << std::endl;
 
@@ -4477,7 +4425,7 @@ FEProblemBase::finishMultiAppStep(ExecFlagType type, bool recurse_through_multia
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
-    if (_show_multiapp_actions)
+    if (_verbose_multiapps)
       _console << COLOR_CYAN << "Finished Advancing MultiApps on " << type.name() << "\n"
                << COLOR_DEFAULT << std::endl;
   }
@@ -4492,7 +4440,7 @@ FEProblemBase::backupMultiApps(ExecFlagType type)
   {
     TIME_SECTION("backupMultiApps", 5, "Backing Up MultiApp");
 
-    if (_show_multiapp_actions)
+    if (_verbose_multiapps)
       _console << COLOR_CYAN << "\nBacking Up MultiApps on " << type.name() << COLOR_DEFAULT
                << std::endl;
 
@@ -4501,7 +4449,7 @@ FEProblemBase::backupMultiApps(ExecFlagType type)
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
-    if (_show_multiapp_actions)
+    if (_verbose_multiapps)
       _console << COLOR_CYAN << "Finished Backing Up MultiApps on " << type.name() << "\n"
                << COLOR_DEFAULT << std::endl;
   }
@@ -4514,7 +4462,7 @@ FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
 
   if (multi_apps.size())
   {
-    if (_show_multiapp_actions)
+    if (_verbose_multiapps)
     {
       if (force)
         _console << COLOR_CYAN << "\nRestoring Multiapps on " << type.name()
@@ -4529,7 +4477,7 @@ FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
-    if (_show_multiapp_actions)
+    if (_verbose_multiapps)
       _console << COLOR_CYAN << "Finished Restoring MultiApps on " << type.name() << "\n"
                << COLOR_DEFAULT << std::endl;
   }

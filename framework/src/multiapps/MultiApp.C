@@ -554,13 +554,13 @@ MultiApp::backup()
 {
   TIME_SECTION(_backup_timer);
 
-  if (_fe_problem.showMultiappActions())
+  if (_fe_problem.verboseMultiApps())
     _console << "Backed up MultiApp ... ";
 
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups[i] = _apps[i]->backup();
 
-  if (_fe_problem.showMultiappActions())
+  if (_fe_problem.verboseMultiApps())
     _console << name() << std::endl;
 }
 
@@ -596,13 +596,13 @@ MultiApp::restore(bool force)
       }
     }
 
-    if (_fe_problem.showMultiappActions())
-      _console << "Restored MultiApp ... ";
+    if (_fe_problem.verboseMultiApps())
+      _console << "Restoring MultiApp ... ";
 
     for (unsigned int i = 0; i < _my_num_apps; i++)
       _apps[i]->restore(_backups[i]);
 
-    if (_fe_problem.showMultiappActions())
+    if (_fe_problem.verboseMultiApps())
       _console << name() << std::endl;
 
     // Now copy the latest solutions back for each subapp
@@ -850,7 +850,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
     }
   }
 
-  if (_fe_problem.showMultiappActions())
+  if (_fe_problem.verboseMultiApps())
     _console << COLOR_CYAN << "Creating MultiApp " << name() << " of type " << _app_type
              << " of level " << _app.multiAppLevel() + 1 << " and number " << _first_local_app + i
              << " on processor " << processor_id() << " with full name " << full_name
@@ -859,7 +859,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
   if (getParam<bool>("clone_master_mesh"))
   {
-    if (_fe_problem.showMultiappActions())
+    if (_fe_problem.verboseMultiApps())
       _console << COLOR_CYAN << "Cloned master mesh will be used for MultiApp " << name()
                << COLOR_DEFAULT << std::endl;
     app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();

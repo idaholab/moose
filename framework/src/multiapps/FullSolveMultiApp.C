@@ -123,7 +123,7 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
     if (!getParam<bool>("keep_full_output_history"))
       _apps[i]->getOutputWarehouse().reset();
 
-    bool show = (_fe_problem.showMultiappActions() ||
+    bool show = (_fe_problem.verboseMultiApps() ||
                  _apps[i]->getOutputWarehouse().getOutputs<Console>().size() == 0);
 
     Executioner * ex = _executioners[i];
