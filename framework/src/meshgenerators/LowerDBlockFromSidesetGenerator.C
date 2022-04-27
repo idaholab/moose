@@ -15,6 +15,12 @@
 
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/elem.h"
+#include "libmesh/parallel_elem.h"
+#include "libmesh/parallel_node.h"
+#include "libmesh/compare_elems_by_level.h"
+#include "libmesh/mesh_communication.h"
+
+#include "timpi/parallel_sync.h"
 
 #include <set>
 #include <typeinfo>
@@ -80,51 +86,101 @@ LowerDBlockFromSidesetGenerator::generate()
     }
   }
 
-  auto side_list = mesh->get_boundary_info().build_side_list();
-  std::sort(side_list.begin(),
-            side_list.end(),
-            [](std::tuple<dof_id_type, unsigned short int, boundary_id_type> a,
-               std::tuple<dof_id_type, unsigned short int, boundary_id_type> b)
-            {
-              auto a_elem_id = std::get<0>(a);
-              auto b_elem_id = std::get<0>(b);
-              if (a_elem_id == b_elem_id)
-              {
-                auto a_side_id = std::get<1>(a);
-                auto b_side_id = std::get<1>(b);
-                if (a_side_id == b_side_id)
-                  return std::get<2>(a) < std::get<2>(b);
-                else
-                  return a_side_id < b_side_id;
-              }
-              else
-                return a_elem_id < b_elem_id;
-            });
+  // Make sure our boundary info and parallel counts are setup
+  if (!mesh->is_prepared())
+  {
+    const bool allow_remote_element_removal = mesh->allow_remote_element_removal();
+    // We want all of our boundary elements available, so avoid removing them if they haven't
+    // already been so
+    mesh->allow_remote_element_removal(false);
+    mesh->prepare_for_use();
+    mesh->allow_remote_element_removal(allow_remote_element_removal);
+  }
 
   auto sideset_ids = MooseMeshUtils::getBoundaryIDs(*mesh, _sideset_names, true);
   std::set<boundary_id_type> sidesets(sideset_ids.begin(), sideset_ids.end());
 
-  std::vector<ElemSideDouble> element_sides_on_boundary;
+  auto side_list = mesh->get_boundary_info().build_side_list();
+  if (!mesh->is_serial() && mesh->comm().size() > 1)
+  {
+    std::vector<Elem *> elements_to_send;
+    for (const auto & [elem_id, side, bc_id] : side_list)
+    {
+      libmesh_ignore(side);
+      if (sidesets.count(bc_id))
+      {
+        auto * elem = mesh->elem_ptr(elem_id);
+        if (elem->processor_id() == mesh->processor_id())
+          elements_to_send.push_back(elem);
+      }
+    }
+
+    std::set<const Elem *, CompareElemIdsByLevel> connected_elements(elements_to_send.begin(),
+                                                                     elements_to_send.end());
+    std::set<const Node *> connected_nodes;
+    reconnect_nodes(connected_elements, connected_nodes);
+    std::set<dof_id_type> connected_node_ids;
+    for (auto * nd : connected_nodes)
+      connected_node_ids.insert(nd->id());
+
+    std::vector<std::size_t> need_boundary_elems(mesh->comm().size());
+    mesh->comm().allgather(elements_to_send.size(), need_boundary_elems);
+    std::unordered_map<processor_id_type, decltype(elements_to_send)> push_element_data;
+    std::unordered_map<processor_id_type, decltype(connected_nodes)> push_node_data;
+
+    for (const auto pid : make_range(mesh->comm().size()))
+      // Don't need to send to self
+      if (pid != mesh->processor_id() && need_boundary_elems[pid])
+      {
+        push_element_data[pid] = elements_to_send;
+        push_node_data[pid] = connected_nodes;
+      }
+
+    auto node_action_functor =
+        [&mesh](processor_id_type libmesh_dbg_var(pid), auto & incoming_nodes)
+    {
+      mooseAssert(pid != mesh->processor_id(), "We should not be sending to self");
+      for (auto nd : incoming_nodes)
+        mesh->add_node(const_cast<Node *>(nd));
+    };
+    Parallel::push_parallel_packed_range(
+        mesh->comm(), push_node_data, mesh.get(), node_action_functor);
+    auto elem_action_functor =
+        [&mesh](processor_id_type libmesh_dbg_var(pid), decltype(elements_to_send) & incoming_elems)
+    {
+      mooseAssert(pid != mesh->processor_id(), "We should not be sending to self");
+      for (auto elem : incoming_elems)
+        mesh->add_elem(elem);
+    };
+    TIMPI::push_parallel_packed_range(
+        mesh->comm(), push_element_data, mesh.get(), elem_action_functor);
+
+    // now that we've gathered everything, we need to rebuild the side list
+    side_list = mesh->get_boundary_info().build_side_list();
+  }
+
+  std::vector<std::pair<dof_id_type, ElemSideDouble>> element_sides_on_boundary;
+  dof_id_type counter = 0;
   for (const auto & triple : side_list)
     if (sidesets.count(std::get<2>(triple)))
-      element_sides_on_boundary.push_back(
-          ElemSideDouble(mesh->elem_ptr(std::get<0>(triple)), std::get<1>(triple)));
+    {
+      if (auto elem = mesh->query_elem_ptr(std::get<0>(triple)))
+        element_sides_on_boundary.push_back(
+            std::make_pair(counter, ElemSideDouble(elem, std::get<1>(triple))));
+      ++counter;
+    }
 
-  // max_elem_id should be consistent across procs assuming we've prepared our mesh previously
-  mooseAssert(mesh->is_prepared(),
-              "We are assuming that the mesh has been prepared previously in order to avoid a "
-              "communication to determine the max elem id");
   dof_id_type max_elem_id = mesh->max_elem_id();
   unique_id_type max_unique_id = mesh->parallel_max_unique_id();
 
   // Making an important assumption that at least our boundary elements are the same on all
   // processes even in distributed mesh mode (this is reliant on the correct ghosting functors
   // existing on the mesh)
-  for (MooseIndex(element_sides_on_boundary) i = 0; i < element_sides_on_boundary.size(); ++i)
+  for (auto & [i, elem_side] : element_sides_on_boundary)
   {
-    Elem * elem = element_sides_on_boundary[i].elem;
+    Elem * elem = elem_side.elem;
 
-    unsigned int side = element_sides_on_boundary[i].side;
+    const auto side = elem_side.side;
 
     // Build a non-proxy element from this side.
     std::unique_ptr<Elem> side_elem(elem->build_side_ptr(side, /*proxy=*/false));
