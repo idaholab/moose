@@ -378,33 +378,34 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       paramError("num_sectors_per_side", "This parameter must be even.");
   _num_sectors_per_side_meta =
       declareMeshProperty("num_sectors_per_side_meta", _num_sectors_per_side);
+  // Rings related error messages
+  if (_ring_radii.size() != _ring_intervals.size())
+    paramError("ring_radii", "This parameter and ring_intervals must have the same length.");
+  if (_ring_radii.size() != _ring_radial_biases.size())
+    paramError("ring_radii", "This parameter and ring_radial_biases must have the same length.");
+  if (!_ring_block_ids.empty() &&
+      _ring_block_ids.size() !=
+          (_ring_intervals.size() + (unsigned int)(_ring_intervals.front() != 1)))
+    paramError("ring_block_ids",
+               "This parameter must have the appropriate size if it is provided.");
+  if (!_ring_block_names.empty() &&
+      _ring_block_names.size() !=
+          (_ring_intervals.size() + (unsigned int)(_ring_intervals.front() != 1)))
+    paramError("ring_block_names", "This parameter must have the appropriate size if it is set.");
+  for (unsigned int i = 1; i < _ring_intervals.size(); i++)
+    if (_ring_radii[i] <= _ring_radii[i - 1])
+      paramError("ring_radii", "This parameter must be strictly ascending.");
+  if (_ring_radii.size() != _ring_inner_boundary_layer_params.widths.size() ||
+      _ring_radii.size() != _ring_inner_boundary_layer_params.intervals.size() ||
+      _ring_radii.size() != _ring_inner_boundary_layer_params.biases.size() ||
+      _ring_radii.size() != _ring_outer_boundary_layer_params.widths.size() ||
+      _ring_radii.size() != _ring_outer_boundary_layer_params.intervals.size() ||
+      _ring_radii.size() != _ring_outer_boundary_layer_params.biases.size())
+    paramError("ring_radii",
+               "The inner and outer ring boundary layer parameters must have the same sizes as "
+               "ring_radii.");
   if (_has_rings)
   {
-    if (_ring_radii.size() != _ring_intervals.size())
-      paramError("ring_radii", "This parameter and ring_intervals must have the same length.");
-    if (_ring_radii.size() != _ring_radial_biases.size())
-      paramError("ring_radii", "This parameter and ring_radial_biases must have the same length.");
-    if (!_ring_block_ids.empty() &&
-        _ring_block_ids.size() !=
-            (_ring_intervals.size() + (unsigned int)(_ring_intervals.front() != 1)))
-      paramError("ring_block_ids",
-                 "This parameter must have the appropriate size if it is provided.");
-    if (!_ring_block_names.empty() &&
-        _ring_block_names.size() !=
-            (_ring_intervals.size() + (unsigned int)(_ring_intervals.front() != 1)))
-      paramError("ring_block_names", "This parameter must have the appropriate size if it is set.");
-    for (unsigned int i = 1; i < _ring_intervals.size(); i++)
-      if (_ring_radii[i] <= _ring_radii[i - 1])
-        paramError("ring_radii", "This parameter must be strictly ascending.");
-    if (_ring_radii.size() != _ring_inner_boundary_layer_params.widths.size() ||
-        _ring_radii.size() != _ring_inner_boundary_layer_params.intervals.size() ||
-        _ring_radii.size() != _ring_inner_boundary_layer_params.biases.size() ||
-        _ring_radii.size() != _ring_outer_boundary_layer_params.widths.size() ||
-        _ring_radii.size() != _ring_outer_boundary_layer_params.intervals.size() ||
-        _ring_radii.size() != _ring_outer_boundary_layer_params.biases.size())
-      paramError("ring_radii",
-                 "The inner and outer ring boundary layer parameters must have the same sizes as "
-                 "ring_radii.");
     for (unsigned int i = 0; i < _ring_radii.size(); i++)
     {
       const Real layer_width = _ring_radii[i] - (i == 0 ? 0.0 : _ring_radii[i - 1]);
@@ -444,18 +445,28 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
                    "ring_outer_boundary_layer_widths cannot exceeds the ring layer width.");
     }
   }
+  // Ducts related error messages
+  if (_duct_sizes.size() != _duct_intervals.size())
+    paramError("duct_sizes", "This parameter and duct_intervals must have the same length.");
+  if (_duct_sizes.size() != _duct_radial_biases.size())
+    paramError("duct_sizes", "This parameter and duct_radial_biases must have the same length.");
+  if (!_duct_block_ids.empty() && _duct_block_ids.size() != _duct_intervals.size())
+    paramError("duct_block_ids",
+               "This parameter must have the same length as duct_intervals if set.");
+  if (!_duct_block_names.empty() && _duct_block_names.size() != _duct_intervals.size())
+    paramError("duct_block_names",
+               "This parameter must have the same length as duct_intervals if set.");
+  if (_duct_sizes.size() != _duct_inner_boundary_layer_params.widths.size() ||
+      _duct_sizes.size() != _duct_inner_boundary_layer_params.intervals.size() ||
+      _duct_sizes.size() != _duct_inner_boundary_layer_params.biases.size() ||
+      _duct_sizes.size() != _duct_outer_boundary_layer_params.widths.size() ||
+      _duct_sizes.size() != _duct_outer_boundary_layer_params.intervals.size() ||
+      _duct_sizes.size() != _duct_outer_boundary_layer_params.biases.size())
+    paramError("duct_sizes",
+               "The inner and outer duct boundary layer parameters must have the same sizes as "
+               "duct_sizes.");
   if (_has_ducts)
   {
-    if (_duct_sizes.size() != _duct_intervals.size())
-      paramError("duct_sizes", "This parameter and duct_intervals must have the same length.");
-    if (_duct_sizes.size() != _duct_radial_biases.size())
-      paramError("duct_sizes", "This parameter and duct_radial_biases must have the same length.");
-    if (!_duct_block_ids.empty() && _duct_block_ids.size() != _duct_intervals.size())
-      paramError("duct_block_ids",
-                 "This parameter must have the same length as duct_intervals if set.");
-    if (!_duct_block_names.empty() && _duct_block_names.size() != _duct_intervals.size())
-      paramError("duct_block_names",
-                 "This parameter must have the same length as duct_intervals if set.");
     if (_duct_sizes_style == DuctStyle::apothem)
       for (unsigned int i = 0; i < _duct_sizes.size(); i++)
         _duct_sizes[i] /= std::cos(M_PI / Real(_num_sides));
@@ -471,15 +482,6 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
                  "This parameter must ensure that ducts are smaller than the polygon size.");
     if (*std::min_element(_duct_intervals.begin(), _duct_intervals.end()) <= 0)
       paramError("duct_intervals", "Elements of this parameter must be positive.");
-    if (_duct_sizes.size() != _duct_inner_boundary_layer_params.widths.size() ||
-        _duct_sizes.size() != _duct_inner_boundary_layer_params.intervals.size() ||
-        _duct_sizes.size() != _duct_inner_boundary_layer_params.biases.size() ||
-        _duct_sizes.size() != _duct_outer_boundary_layer_params.widths.size() ||
-        _duct_sizes.size() != _duct_outer_boundary_layer_params.intervals.size() ||
-        _duct_sizes.size() != _duct_outer_boundary_layer_params.biases.size())
-      paramError("duct_sizes",
-                 "The inner and outer duct boundary layer parameters must have the same sizes as "
-                 "duct_sizes.");
     if (_duct_sizes_style == DuctStyle::apothem)
       for (unsigned int i = 0; i < _duct_sizes.size(); i++)
       {
