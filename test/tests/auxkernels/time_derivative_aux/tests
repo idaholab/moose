@@ -1,0 +1,58 @@
+[Tests]
+  issues = "#442 #762"
+  design = "syntax/AuxKernels/index.md syntax/Kernels/index.md variables/AuxVariable.md syntax/Functions/index.md syntax/Materials/index.md"
+  [variable]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    cli_args = "AuxVariables/inactive='variable_derivative_fv function_derivative_qp function_derivative_elem' AuxKernels/inactive='var_derivative_to_fv function_derivative_quadrature_point function_derivative_element'"
+    requirement = "The system shall be able to compute the time derivative of a non linear variable."
+    ad_indexing_type = 'global'
+  []
+  [functors]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_functor_out.e'
+    cli_args = "AuxKernels/inactive='var_derivative var_derivative_to_fv' Outputs/file_base=test_functor_out"
+    requirement = "The system shall be able to compute the time derivative of functors for which the capability to obtain time derivatives on the fly is implemented."
+  []
+  [fv_variable]
+    type = 'Exodiff'
+    input = 'test_fv.i'
+    exodiff = 'test_fv_out.e'
+    requirement = "The system shall be able to compute the time derivative of finite volume variables."
+    ad_indexing_type = 'global'
+  []
+
+  [errors]
+    requirement = 'The system shall error if'
+    [not_implemented_functor_matprop]
+      type = RunException
+      input = 'test.i'
+      cli_args = "AuxKernels/inactive='var_derivative var_derivative_to_fv function_derivative_element' AuxKernels/function_derivative_quadrature_point/functor=some_matprop"
+      expect_err = 'Element quadrature point time derivative not implemented for functor some_matprop'
+      detail = 'a time derivative is requested from a functor material property for which the functor time derivative not implemented'
+    []
+    [not_a_nodal_kernel]
+      type = RunException
+      input = 'test.i'
+      cli_args = 'AuxVariables/nodal/family=LAGRANGE AuxKernels/var_derivative/variable=nodal'
+      expect_err = 'This AuxKernel only supports Elemental fields'
+      detail = 'a time derivative is requested but the variable is a nodal variable which is currently unsupported'
+    []
+    [implicit_fe_fv_conversion]
+      type = RunException
+      input = 'test.i'
+      cli_args = "AuxVariables/inactive='' AuxKernels/inactive=''"
+      expect_err = "'functor' argument is a finite element variable but 'variable' is not."
+      detail = 'a time derivative for a finite element variable is to be saved in a finite volume variable'
+    []
+    [implicit_fv_fe_conversion]
+      type = RunException
+      input = 'test_fv.i'
+      cli_args = "AuxVariables/inactive='' AuxKernels/inactive=''"
+      expect_err = "'variable' argument is a finite element variable but 'functor' is not."
+      detail = 'a time derivative for a finite volume variable is to be saved in a finite element variable'
+    []
+  []
+[]
