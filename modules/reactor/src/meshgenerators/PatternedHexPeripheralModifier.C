@@ -167,13 +167,14 @@ PatternedHexPeripheralModifier::generate()
   // As some elements are deleted, update the neighbor list
   input_mesh->find_neighbors();
   // Identify the new external boundary
+  BoundaryInfo & boundary_info = input_mesh->get_boundary_info();
   for (unsigned int i = 0; i < new_bid_elem_list.size(); i++)
   {
     // Assign default external Sideset ID to the new boundary
     for (unsigned int j = 0; j < input_mesh->elem_ptr(new_bid_elem_list[i])->n_sides(); j++)
     {
       if (input_mesh->elem_ptr(new_bid_elem_list[i])->neighbor_ptr(j) == nullptr)
-        input_mesh->boundary_info->add_side(new_bid_elem_list[i], j, OUTER_SIDESET_ID);
+        boundary_info.add_side(new_bid_elem_list[i], j, OUTER_SIDESET_ID);
     }
   }
 
@@ -205,9 +206,9 @@ PatternedHexPeripheralModifier::generate()
     const std::vector<Real> input_x{outer_end_1(0), outer_end_2(0)};
     const std::vector<Real> input_y{outer_end_1(1), outer_end_2(1)};
     std::unique_ptr<LinearInterpolation> linear_outer_x =
-        libmesh_make_unique<LinearInterpolation>(input_arg, input_x);
+        std::make_unique<LinearInterpolation>(input_arg, input_x);
     std::unique_ptr<LinearInterpolation> linear_outer_y =
-        libmesh_make_unique<LinearInterpolation>(input_arg, input_y);
+        std::make_unique<LinearInterpolation>(input_arg, input_y);
 
     // Uniformly spaced nodes on the outer boundary to facilitate stitching
     for (unsigned int i = 0; i < _new_num_sector + 1; i++)

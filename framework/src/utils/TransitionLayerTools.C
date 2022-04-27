@@ -240,6 +240,7 @@ elementsCreationFromNodesVectorsQuad(ReplicatedMesh & mesh,
                                      const boundary_id_type end_side_boundary_id)
 {
   const unsigned int node_number = node_number_vec.front();
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
   for (unsigned int i = 0; i < num_layers; i++)
     for (unsigned int j = 1; j < node_number; j++)
@@ -251,13 +252,13 @@ elementsCreationFromNodesVectorsQuad(ReplicatedMesh & mesh,
       elem->set_node(3) = nodes[i][j];
       elem->subdomain_id() = transition_layer_id;
       if (i == 0)
-        mesh.boundary_info->add_side(elem, 3, input_boundary_1_id);
+        boundary_info.add_side(elem, 3, input_boundary_1_id);
       if (i == num_layers - 1)
-        mesh.boundary_info->add_side(elem, 1, input_boundary_2_id);
+        boundary_info.add_side(elem, 1, input_boundary_2_id);
       if (j == 1)
-        mesh.boundary_info->add_side(elem, 0, begin_side_boundary_id);
+        boundary_info.add_side(elem, 0, begin_side_boundary_id);
       if (j == node_number - 1)
-        mesh.boundary_info->add_side(elem, 2, end_side_boundary_id);
+        boundary_info.add_side(elem, 2, end_side_boundary_id);
     }
 }
 
@@ -272,6 +273,8 @@ elementsCreationFromNodesVectors(ReplicatedMesh & mesh,
                                  const boundary_id_type begin_side_boundary_id,
                                  const boundary_id_type end_side_boundary_id)
 {
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+
   for (unsigned int i = 0; i < num_layers; i++)
   {
     unsigned int nodes_up_it = 0;
@@ -293,9 +296,9 @@ elementsCreationFromNodesVectors(ReplicatedMesh & mesh,
         elem->set_node(2) = nodes[i + 1][nodes_up_it + 1];
         elem->subdomain_id() = transition_layer_id;
         if (i == num_layers - 1)
-          mesh.boundary_info->add_side(elem, 2, input_boundary_2_id);
+          boundary_info.add_side(elem, 2, input_boundary_2_id);
         if (nodes_up_it == 0 && nodes_down_it == 0)
-          mesh.boundary_info->add_side(elem, 0, begin_side_boundary_id);
+          boundary_info.add_side(elem, 0, begin_side_boundary_id);
         nodes_up_it++;
       }
       else
@@ -306,9 +309,9 @@ elementsCreationFromNodesVectors(ReplicatedMesh & mesh,
         elem->set_node(2) = nodes[i][nodes_down_it + 1];
         elem->subdomain_id() = transition_layer_id;
         if (i == 0)
-          mesh.boundary_info->add_side(elem, 1, input_boundary_1_id);
+          boundary_info.add_side(elem, 1, input_boundary_1_id);
         if (nodes_up_it == 0 && nodes_down_it == 0)
-          mesh.boundary_info->add_side(elem, 0, begin_side_boundary_id);
+          boundary_info.add_side(elem, 0, begin_side_boundary_id);
         nodes_down_it++;
       }
     }
@@ -322,9 +325,9 @@ elementsCreationFromNodesVectors(ReplicatedMesh & mesh,
       elem->subdomain_id() = transition_layer_id;
       nodes_up_it++;
       if (i == num_layers - 1)
-        mesh.boundary_info->add_side(elem, 2, input_boundary_2_id);
+        boundary_info.add_side(elem, 2, input_boundary_2_id);
       if (nodes_up_it == node_number_up - 1 && nodes_down_it == node_number_down - 1)
-        mesh.boundary_info->add_side(elem, 1, end_side_boundary_id);
+        boundary_info.add_side(elem, 1, end_side_boundary_id);
     }
     while (nodes_down_it < node_number_down - 1)
     {
@@ -335,9 +338,9 @@ elementsCreationFromNodesVectors(ReplicatedMesh & mesh,
       elem->subdomain_id() = transition_layer_id;
       nodes_down_it++;
       if (i == 0)
-        mesh.boundary_info->add_side(elem, 1, input_boundary_1_id);
+        boundary_info.add_side(elem, 1, input_boundary_1_id);
       if (nodes_up_it == node_number_up - 1 && nodes_down_it == node_number_down - 1)
-        mesh.boundary_info->add_side(elem, 2, end_side_boundary_id);
+        boundary_info.add_side(elem, 2, end_side_boundary_id);
     }
   }
 }
@@ -401,9 +404,9 @@ weightedInterpolator(const unsigned int vec_node_num,
     pos_l.push_back(sum_tmp / gaussian_factor);
   }
   // Interpolate positions based on weighted indices
-  linear_vec_x = libmesh_make_unique<LinearInterpolation>(index, pos_x);
-  linear_vec_y = libmesh_make_unique<LinearInterpolation>(index, pos_y);
-  spline_vec_l = libmesh_make_unique<SplineInterpolation>(index, pos_l);
+  linear_vec_x = std::make_unique<LinearInterpolation>(index, pos_x);
+  linear_vec_y = std::make_unique<LinearInterpolation>(index, pos_y);
+  spline_vec_l = std::make_unique<SplineInterpolation>(index, pos_l);
 }
 
 void
