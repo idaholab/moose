@@ -2,6 +2,11 @@
 MOOSE_UNITY ?= true
 MOOSE_HEADER_SYMLINKS ?= true
 
+# We ignore this in the contrib folder because we will set up the include
+# directories manually later
+IGNORE_CONTRIB_INC ?= libtorch
+ENABLE_LIBTORCH ?= false
+
 # this allows us to modify the linked names/rpaths safely later for install targets
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
 	libmesh_LDFLAGS += -headerpad_max_install_names
@@ -56,6 +61,33 @@ hit_CLI          := $(HIT_DIR)/hit
 # hit python bindings
 #
 pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HIT_DIR)/braceexpr.cc
+
+#
+# Conditional parts if the user wants to compile MOOSE with torchlib
+#
+ifeq ($(ENABLE_LIBTORCH),true)
+  UNAME_S := $(shell uname -s)
+	LIBTORCH_LIB := libtorch.so
+  ifeq ($(UNAME_S),Darwin)
+    LIBTORCH_LIB := libtorch.dylib
+  endif
+
+  ifneq ($(wildcard $(LIBTORCH_DIR)/lib/$(LIBTORCH_LIB)),)
+    # Enabling parts that have pytorch dependencies
+    libmesh_CXXFLAGS += -DLIBTORCH_ENABLED
+
+    # Adding the include directories, we use -isystem to silence the warning coming from
+	# libtorch (which would cause errors in the testing phase)
+    libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include/torch/csrc/api/include
+    libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include
+
+    # Dynamically linking with the available pytorch library
+    libmesh_LDFLAGS += -Wl,-rpath,$(LIBTORCH_DIR)/lib
+    libmesh_LDFLAGS += -L$(LIBTORCH_DIR)/lib -ltorch
+  else
+    $(error ERROR! Cannot locate any dynamic libraries of libtorch. Make sure to install libtorch (manually or using scripts/setup_libtorch.sh) and to run the configure --with-libtorch before compiling moose!)
+  endif
+endif
 
 #
 # FParser JIT defines
@@ -164,6 +196,11 @@ moose_INC_DIRS := $(shell find $(FRAMEWORK_DIR)/include -type d)
 endif
 
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d)
+
+# We filter out the unnecessary include dirs from the contribs
+ignore_contrib_include := $(foreach ex_dir, $(IGNORE_CONTRIB_INC), $(if $(dir $(wildcard $(FRAMEWORK_DIR)/contrib/$(ex_dir)/.)),$(shell find $(FRAMEWORK_DIR)/contrib/$(ex_dir)/include -type d),))
+moose_INC_DIRS := $(filter-out $(ignore_contrib_include), $(moose_INC_DIRS))
+
 moose_INC_DIRS += $(gtest_DIR)
 moose_INC_DIRS += $(HIT_DIR)
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))

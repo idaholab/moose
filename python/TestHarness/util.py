@@ -43,7 +43,18 @@ MOOSE_OPTIONS = {
                     { 'TRUE'    : '1',
                       'FALSE'   : '0'
                     }
-                  }
+    },
+
+    'libtorch' :    { 're_option' : r'#define\s+MOOSE_LIBTORCH_ENABLED\s+(\d+)',
+                    'default'   : 'FALSE',
+                    'options'   :
+                    { 'TRUE'    : '1',
+                      'FALSE'   : '0'
+                    }
+    },
+
+    'libtorch_dir' : { 're_option' : r'#define\s+MOOSE_LIBTORCH_DIR\s+(.*)',
+                       'default'  : '/framework/contrib/libtorch'}
 }
 
 
@@ -200,6 +211,16 @@ LIBMESH_OPTIONS = {
                      'default'   : 'FALSE',
                      'options'   : {'TRUE' : '1', 'FALSE' : '0'}
                    },
+}
+
+LIBTORCH_OPTIONS = {
+      'libtorch_major' :  { 're_option' : r'#define\s+TORCH_VERSION_MAJOR\s+(\d+)',
+                   'default'   : '1'
+                 },
+      'libtorch_minor' :  { 're_option' : r'#define\s+TORCH_VERSION_MINOR\s+(\d+)',
+                   'default'   : '10'
+                 }
+
 }
 
 
@@ -481,6 +502,20 @@ def getVTKVersion(libmesh_dir):
 
     return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
 
+def getLibtorchVersion(moose_dir):
+    libtorch_dir = getMooseConfigOption(moose_dir, 'libtorch_dir')
+
+    if len(libtorch_dir) != 1:
+      return None
+
+    filenames = [libtorch_dir.pop()+'/include/torch/csrc/api/include/torch/version.h']
+    major_version = getConfigOption(filenames, 'libtorch_major', LIBTORCH_OPTIONS)
+    minor_version = getConfigOption(filenames, 'libtorch_minor', LIBTORCH_OPTIONS)
+
+    if len(major_version) != 1 or len(minor_version) != 1 or len(major_version) != 1:
+      return None
+
+    return major_version.pop() + '.' + minor_version.pop()
 
 def checkLogicVersionSingle(checks, iversion, package):
     logic, version = re.search(r'(.*?)(\d\S+)', iversion).groups()
@@ -575,6 +610,20 @@ def checkVTKVersion(checks, test):
        return (False, version_string)
 
     return (checkVersion(checks, version_string, 'vtk_version'), version_string)
+
+# Break down libtorch version logic in a new define
+def checkLibtorchVersion(checks, test):
+    version_string = ' '.join(test['libtorch_version'])
+
+    # If any version of libtorch works, return true immediately
+    if 'ALL' in set(test['libtorch_version']):
+        return (True, version_string)
+
+    # libtorch not installed or version could not be detected
+    if checks['libtorch_version'] == None:
+       return (False, version_string)
+
+    return (checkVersion(checks, version_string, 'libtorch_version'), version_string)
 
 
 def getIfAsioExists(moose_dir):
