@@ -1,6 +1,6 @@
 # Libtorch (Pytorch C++ API)
 
-The way one enables libtorch [!cite](paszke2019pytorch) capabilities in MOOSE depends on
+The way one enables LibTorch [!cite](paszke2019pytorch) capabilities in MOOSE depends on
 the operating system (Linux or Mac) and if we use HPC or just a local workstation.
 
 !alert! note
