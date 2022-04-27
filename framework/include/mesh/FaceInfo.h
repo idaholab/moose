@@ -165,9 +165,6 @@ public:
   /// Return the geometric weighting factor
   Real gC() const { return _gc; }
 
-  /// Return the weighting factor for skewed element-pairs
-  Real gCSkewed() const { return _gc_skewed; }
-
   /**
    * @return the distance vector drawn from centroid C to F, or in terms of MOOSE implementation,
    * the distance vector obtained from subtracting the element centroid from the neighbor centroid
@@ -241,9 +238,6 @@ private:
   const Point _neighbor_centroid;
   const Real _neighbor_volume;
 
-  /// Geometric weighting factor for face value interpolation
-  const Real _gc;
-
   /// the distance vector between neighbor and element centroids
   const RealVectorValue _d_cf;
 
@@ -256,9 +250,8 @@ private:
   /// The vector to the intersection of d_{CF} and the face.
   Point _r_intersection;
 
-  /// Geometric weighting factor for face value interpolation in case of skewed
-  /// cell-connections
-  Real _gc_skewed;
+  /// Geometric weighting factor for face value interpolation
+  Real _gc;
 
   /// cached locations of variables in solution vectors
   /// TODO: make this more efficient by not using a map if possible

@@ -55,7 +55,6 @@ FVMatAdvection::FVMatAdvection(const InputParameters & params)
 ADReal
 FVMatAdvection::computeQpResidual()
 {
-  ADReal adv_quant_interface;
   ADRealVectorValue v;
 
   using namespace Moose::FV;
@@ -66,12 +65,12 @@ FVMatAdvection::computeQpResidual()
   // Currently only Average is supported for the velocity
   interpolate(InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);
 
-  interpolate(_advected_interp_method,
-              adv_quant_interface,
-              _adv_quant(elem_face),
-              _adv_quant(neighbor_face),
-              v,
-              *_face_info,
-              true);
+  const auto adv_quant_interface =
+      interpolate(_adv_quant,
+                  makeFace(*_face_info,
+                           limiterType(_advected_interp_method),
+                           MetaPhysicL::raw_value(v) * _normal > 0,
+                           faceArgSubdomains(),
+                           _advected_interp_method == InterpMethod::SkewCorrectedAverage));
   return _normal * v * adv_quant_interface;
 }

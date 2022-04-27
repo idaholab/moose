@@ -14,6 +14,7 @@
 #include "FVUtils.h"
 #include "MooseMeshUtils.h"
 #include "VectorComponentFunctor.h"
+#include "ArrayComponentFunctor.h"
 #include "libmesh/elem.h"
 
 namespace Moose
@@ -34,7 +35,7 @@ namespace FV
  * face-evaluations computed in this function to the map
  * @return The computed cell gradient
  */
-template <typename T>
+template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
 VectorValue<T>
 greenGaussGradient(const ElemArg & elem_arg,
                    const FunctorBase<T> & functor,
@@ -108,7 +109,7 @@ greenGaussGradient(const ElemArg & elem_arg,
       mooseAssert(elem_arg.elem == &functor_elem,
                   "Just a sanity check that the element being passed in is the one we passed out.");
 
-      if (functor.isExtrapolatedBoundaryFace(*fi))
+      if (functor.isExtrapolatedBoundaryFace(*fi).first)
       {
         if (two_term_boundary_expansion)
         {
@@ -130,9 +131,7 @@ greenGaussGradient(const ElemArg & elem_arg,
           grad_b += surface_vector * elem_value;
       }
       else
-        grad_b += surface_vector * functor(makeCDFace(*fi,
-                                                      elem_arg.correct_skewness,
-                                                      elem_arg.apply_gradient_to_skewness));
+        grad_b += surface_vector * functor(makeCDFace(*fi, elem_arg.correct_skewness));
 
       if (!volume_set)
       {
@@ -265,7 +264,7 @@ greenGaussGradient(const ElemArg & elem_arg,
  * face-evaluations computed in this function to the map
  * @return The computed cell gradient
  */
-template <typename T>
+template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
 VectorValue<T>
 greenGaussGradient(const FaceArg & face_arg,
                    const FunctorBase<T> & functor,
@@ -277,8 +276,9 @@ greenGaussGradient(const FaceArg & face_arg,
   const auto & fi = *(face_arg.fi);
   const auto & elem_arg = face_arg.makeElem();
   const auto & neighbor_arg = face_arg.makeNeighbor();
+  const auto [is_extrapolated, defined_elem] = functor.isExtrapolatedBoundaryFace(fi);
 
-  if (!functor.isExtrapolatedBoundaryFace(fi))
+  if (!is_extrapolated)
   {
     // Compute the gradients in the two cells on both sides of the face
     const auto & grad_elem = greenGaussGradient(
@@ -300,7 +300,7 @@ greenGaussGradient(const FaceArg & face_arg,
   }
 
   // One term expansion
-  if (!fi.neighborPtr())
+  if (&fi.elem() == defined_elem)
     return functor.gradient(elem_arg);
   else
     return functor.gradient(neighbor_arg);
@@ -311,15 +311,14 @@ TensorValue<T>
 greenGaussGradient(const ElemArg & elem_arg,
                    const Moose::FunctorBase<VectorValue<T>> & functor,
                    const bool two_term_boundary_expansion,
-                   const MooseMesh & mesh,
-                   std::unordered_map<const FaceInfo *, T> * const face_to_value_cache = nullptr)
+                   const MooseMesh & mesh)
 {
   TensorValue<T> ret;
   for (const auto i : make_range(unsigned(LIBMESH_DIM)))
   {
     VectorComponentFunctor<T> scalar_functor(functor, i);
-    const auto row_gradient = greenGaussGradient(
-        elem_arg, scalar_functor, two_term_boundary_expansion, mesh, face_to_value_cache);
+    const auto row_gradient =
+        greenGaussGradient(elem_arg, scalar_functor, two_term_boundary_expansion, mesh);
     for (const auto j : make_range(unsigned(LIBMESH_DIM)))
       ret(i, j) = row_gradient(j);
   }
@@ -332,17 +331,104 @@ TensorValue<T>
 greenGaussGradient(const FaceArg & face_arg,
                    const Moose::FunctorBase<VectorValue<T>> & functor,
                    const bool two_term_boundary_expansion,
-                   const MooseMesh & mesh,
-                   std::unordered_map<const FaceInfo *, T> * const face_to_value_cache = nullptr)
+                   const MooseMesh & mesh)
 {
   TensorValue<T> ret;
   for (const auto i : make_range(unsigned(LIBMESH_DIM)))
   {
     VectorComponentFunctor<T> scalar_functor(functor, i);
-    const auto row_gradient = greenGaussGradient(
-        face_arg, scalar_functor, two_term_boundary_expansion, mesh, face_to_value_cache);
+    const auto row_gradient =
+        greenGaussGradient(face_arg, scalar_functor, two_term_boundary_expansion, mesh);
     for (const auto j : make_range(unsigned(LIBMESH_DIM)))
       ret(i, j) = row_gradient(j);
+  }
+
+  return ret;
+}
+
+template <typename T>
+typename Moose::FunctorBase<std::vector<T>>::GradientType
+greenGaussGradient(const ElemArg & elem_arg,
+                   const Moose::FunctorBase<std::vector<T>> & functor,
+                   const bool two_term_boundary_expansion,
+                   const MooseMesh & mesh)
+{
+  // Determine the size of the container
+  const auto vals = functor(elem_arg);
+  typedef typename Moose::FunctorBase<std::vector<T>>::GradientType GradientType;
+  GradientType ret(vals.size());
+  for (const auto i : index_range(ret))
+  {
+    // Note that this can be very inefficient. Within the scalar greenGaussGradient routine we're
+    // going to do value type evaluations of the array functor from scalar_functor and we will be
+    // discarding all the value type evaluations other than the one corresponding to i
+    ArrayComponentFunctor<T, FunctorBase<std::vector<T>>> scalar_functor(functor, i);
+    ret[i] = greenGaussGradient(elem_arg, scalar_functor, two_term_boundary_expansion, mesh);
+  }
+
+  return ret;
+}
+
+template <typename T>
+typename Moose::FunctorBase<std::vector<T>>::GradientType
+greenGaussGradient(const FaceArg & face_arg,
+                   const Moose::FunctorBase<std::vector<T>> & functor,
+                   const bool two_term_boundary_expansion,
+                   const MooseMesh & mesh)
+{
+  // Determine the size of the container
+  const auto vals = functor(face_arg);
+  typedef typename Moose::FunctorBase<std::vector<T>>::GradientType GradientType;
+  GradientType ret(vals.size());
+  for (const auto i : index_range(ret))
+  {
+    // Note that this can be very inefficient. Within the scalar greenGaussGradient routine we're
+    // going to do value type evaluations of the array functor from scalar_functor and we will be
+    // discarding all the value type evaluations other than the one corresponding to i
+    ArrayComponentFunctor<T, FunctorBase<std::vector<T>>> scalar_functor(functor, i);
+    ret[i] = greenGaussGradient(face_arg, scalar_functor, two_term_boundary_expansion, mesh);
+  }
+
+  return ret;
+}
+
+template <typename T, std::size_t N>
+typename Moose::FunctorBase<std::array<T, N>>::GradientType
+greenGaussGradient(const ElemArg & elem_arg,
+                   const Moose::FunctorBase<std::array<T, N>> & functor,
+                   const bool two_term_boundary_expansion,
+                   const MooseMesh & mesh)
+{
+  typedef typename Moose::FunctorBase<std::array<T, N>>::GradientType GradientType;
+  GradientType ret;
+  for (const auto i : make_range(N))
+  {
+    // Note that this can be very inefficient. Within the scalar greenGaussGradient routine we're
+    // going to do value type evaluations of the array functor from scalar_functor and we will be
+    // discarding all the value type evaluations other than the one corresponding to i
+    ArrayComponentFunctor<T, FunctorBase<std::array<T, N>>> scalar_functor(functor, i);
+    ret[i] = greenGaussGradient(elem_arg, scalar_functor, two_term_boundary_expansion, mesh);
+  }
+
+  return ret;
+}
+
+template <typename T, std::size_t N>
+typename Moose::FunctorBase<std::array<T, N>>::GradientType
+greenGaussGradient(const FaceArg & face_arg,
+                   const Moose::FunctorBase<std::array<T, N>> & functor,
+                   const bool two_term_boundary_expansion,
+                   const MooseMesh & mesh)
+{
+  typedef typename Moose::FunctorBase<std::array<T, N>>::GradientType GradientType;
+  GradientType ret;
+  for (const auto i : make_range(N))
+  {
+    // Note that this can be very inefficient. Within the scalar greenGaussGradient routine we're
+    // going to do value type evaluations of the array functor from scalar_functor and we will be
+    // discarding all the value type evaluations other than the one corresponding to i
+    ArrayComponentFunctor<T, FunctorBase<std::array<T, N>>> scalar_functor(functor, i);
+    ret[i] = greenGaussGradient(face_arg, scalar_functor, two_term_boundary_expansion, mesh);
   }
 
   return ret;

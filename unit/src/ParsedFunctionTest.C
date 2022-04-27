@@ -57,7 +57,7 @@ TEST_F(ParsedFunctionTest, basicConstructor)
 
   // Test elem overloads
   const Elem * const elem = lm_mesh.elem_ptr(0);
-  const auto elem_arg = Moose::ElemArg{elem, false, false};
+  const auto elem_arg = Moose::ElemArg{elem, false};
   const Point vtx_average = elem->vertex_average();
   f_traditional = f.value(0, vtx_average);
   f_functor = f_wrapped(elem_arg, 0);
@@ -79,7 +79,7 @@ TEST_F(ParsedFunctionTest, basicConstructor)
 
   // Test elem_from_face overloads
   const FaceInfo * const fi = _mesh->faceInfo(elem, side);
-  const auto elem_from_face = Moose::ElemFromFaceArg{elem, fi, false, false, elem->subdomain_id()};
+  const auto elem_from_face = Moose::ElemFromFaceArg{elem, fi, false, elem->subdomain_id()};
   f_functor = f_wrapped(elem_from_face, 0);
   gradient_functor = f_wrapped.gradient(elem_from_face, 0);
   dot_functor = f_wrapped.dot(elem_from_face, 0);

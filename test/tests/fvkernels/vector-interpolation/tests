@@ -1,0 +1,31 @@
+[Tests]
+  design = 'fv_design.md'
+  issues = '#20493'
+  [limiting_schemes]
+    requirement = 'The system shall be able to perform limiting schemes on Euclidean vector functors. These limiting schemes include'
+    [upwind]
+      type = Exodiff
+      input = test.i
+      exodiff = upwind.e
+      cli_args = 'GlobalParams/limiter=upwind Outputs/file_base=upwind'
+      detail = 'first-order upwind'
+      ad_indexing_type = 'global'
+    []
+    [central_difference]
+      type = Exodiff
+      input = test.i
+      exodiff = central_difference.e
+      cli_args = 'GlobalParams/limiter=central_difference Outputs/file_base=central_difference'
+      detail = 'central differencing'
+      ad_indexing_type = 'global'
+    []
+    [vanLeer]
+      type = Exodiff
+      input = test.i
+      exodiff = vanLeer.e
+      cli_args = 'GlobalParams/limiter=vanLeer Outputs/file_base=vanLeer'
+      detail = 'vanLeer'
+      ad_indexing_type = 'global'
+    []
+  []
+[]

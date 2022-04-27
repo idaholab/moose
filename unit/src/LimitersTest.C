@@ -44,3 +44,14 @@ TEST(LimitersTest, limitVector)
         EXPECT_EQ(result(d), 1);
     }
 }
+
+TEST(LimitersTest, limiterType)
+{
+  EXPECT_TRUE(limiterType(InterpMethod::Average) == LimiterType::CentralDifference);
+  EXPECT_TRUE(limiterType(InterpMethod::SkewCorrectedAverage) == LimiterType::CentralDifference);
+  EXPECT_TRUE(limiterType(InterpMethod::Upwind) == LimiterType::Upwind);
+  EXPECT_TRUE(limiterType(InterpMethod::VanLeer) == LimiterType::VanLeer);
+  EXPECT_TRUE(limiterType(InterpMethod::MinMod) == LimiterType::MinMod);
+  EXPECT_TRUE(limiterType(InterpMethod::SOU) == LimiterType::SOU);
+  EXPECT_TRUE(limiterType(InterpMethod::QUICK) == LimiterType::QUICK);
+}

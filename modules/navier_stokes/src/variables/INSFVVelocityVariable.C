@@ -163,7 +163,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
       mooseAssert(elem == &functor_elem,
                   "Just a sanity check that the element being passed in is the one we passed out.");
 
-      if (isExtrapolatedBoundaryFace(*fi))
+      if (isExtrapolatedBoundaryFace(*fi).first)
       {
         if (_two_term_boundary_expansion)
         {

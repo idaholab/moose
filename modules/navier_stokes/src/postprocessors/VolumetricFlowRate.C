@@ -10,6 +10,8 @@
 #include "VolumetricFlowRate.h"
 #include "MathFVUtils.h"
 #include "INSFVRhieChowInterpolator.h"
+#include "NSFVUtils.h"
+
 #include <math.h>
 
 registerMooseObject("NavierStokesApp", VolumetricFlowRate);
@@ -35,17 +37,7 @@ VolumetricFlowRate::validParams()
   params.addParam<MooseFunctorName>("advected_quantity",
                                     "The quantity to advect. This is the canonical parameter to "
                                     "set the advected quantity when finite volume is being used.");
-  MooseEnum advected_interp_method("average upwind", "upwind");
-  params.addParam<MooseEnum>("advected_interp_method",
-                             advected_interp_method,
-                             "The interpolation to use for the advected quantity. Options are "
-                             "'upwind' and 'average', with the default being 'upwind'.");
-  MooseEnum velocity_interp_method("average rc", "rc");
-  params.addParam<MooseEnum>(
-      "velocity_interp_method",
-      velocity_interp_method,
-      "The interpolation to use for the velocity. Options are "
-      "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
+  params += Moose::FV::interpolationParameters();
   params.addParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
   return params;
 }
@@ -84,27 +76,9 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
     if (!_adv_quant)
       mooseError("We were instructed to use finite volume, but no 'advected_quantity' parameter is "
                  "supplied.");
+
+    Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
   }
-
-  using namespace Moose::FV;
-
-  const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
-  if (advected_interp_method == "average")
-    _advected_interp_method = InterpMethod::Average;
-  else if (advected_interp_method == "upwind")
-    _advected_interp_method = InterpMethod::Upwind;
-  else
-    mooseError("Unrecognized advected quantity interpolation type ",
-               static_cast<std::string>(advected_interp_method));
-
-  const auto & velocity_interp_method = getParam<MooseEnum>("velocity_interp_method");
-  if (velocity_interp_method == "average")
-    _velocity_interp_method = InterpMethod::Average;
-  else if (velocity_interp_method == "rc")
-    _velocity_interp_method = InterpMethod::RhieChow;
-  else
-    mooseError("Unrecognized interpolation type ",
-               static_cast<std::string>(velocity_interp_method));
 }
 
 Real
@@ -120,19 +94,16 @@ VolumetricFlowRate::computeQpIntegral()
     // Get face value for velocity
     const auto vel =
         MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, _tid));
+    const bool correct_skewness =
+        _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
 
-    const auto elem_face = Moose::FV::elemFromFace(*_rc_uo, *fi);
-    const auto neighbor_face = Moose::FV::neighborFromFace(*_rc_uo, *fi);
+    const auto ssf = Moose::SingleSidedFaceArg({fi,
+                                                Moose::FV::LimiterType::CentralDifference,
+                                                true,
+                                                correct_skewness,
+                                                _current_elem->subdomain_id()});
 
-    Real adv_quant_interface;
-    Moose::FV::interpolate(_advected_interp_method,
-                           adv_quant_interface,
-                           MetaPhysicL::raw_value((*_adv_quant)(elem_face)),
-                           MetaPhysicL::raw_value((*_adv_quant)(neighbor_face)),
-                           vel,
-                           *fi,
-                           true);
-    return fi->normal() * vel * adv_quant_interface;
+    return fi->normal() * MetaPhysicL::raw_value((*_adv_quant)(ssf)) * vel;
   }
   else
 #endif

@@ -31,7 +31,7 @@ velocity_interp_method='rc'
     dim = 2
     dx = '${L}'
     dy = '0.667 0.333'
-    ix = '200'
+    ix = '100'
     iy = '10  1'
   []
 []
@@ -81,6 +81,12 @@ velocity_interp_method='rc'
     rho = ${rho}
   []
 
+  [u_time]
+    type = INSFVMomentumTimeDerivative
+    variable = u
+    rho = ${rho}
+    momentum_component = 'x'
+  []
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
@@ -111,6 +117,12 @@ velocity_interp_method='rc'
     pressure = pressure
   []
 
+  [v_time]
+    type = INSFVMomentumTimeDerivative
+    variable = v
+    rho = ${rho}
+    momentum_component = 'y'
+  []
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
@@ -218,14 +230,23 @@ velocity_interp_method='rc'
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      200                lu           NONZERO'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       NONZERO'
   line_search = 'none'
-  nl_rel_tol = 1e-12
+  [TimeStepper]
+    type = IterationAdaptiveDT
+    optimal_iterations = 6
+    dt = 1e-3
+  []
+  nl_abs_tol = 1e-8
+  end_time = 1e9
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type = Exodus
+    execute_on = 'final'
+  []
 []

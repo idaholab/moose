@@ -10,6 +10,7 @@
 #include "InternalVolumetricFlowRate.h"
 #include "MathFVUtils.h"
 #include "INSFVRhieChowInterpolator.h"
+#include "NSFVUtils.h"
 #include <math.h>
 
 registerMooseObject("NavierStokesApp", InternalVolumetricFlowRate);
@@ -24,11 +25,6 @@ InternalVolumetricFlowRate::validParams()
   params.addRequiredCoupledVar("vel_x", "The x-axis velocity");
   params.addCoupledVar("vel_y", 0, "The y-axis velocity");
   params.addCoupledVar("vel_z", 0, "The z-axis velocity");
-  MooseEnum advected_interp_method("average upwind", "upwind");
-  params.addParam<MooseEnum>("advected_interp_method",
-                             advected_interp_method,
-                             "The interpolation to use for the advected quantity. Options are "
-                             "'upwind' and 'average', with the default being 'upwind'.");
   params.addCoupledVar("advected_variable",
                        0,
                        "The advected variable quantity of which to study the flow; useful for "
@@ -40,12 +36,7 @@ InternalVolumetricFlowRate::validParams()
   params.addParam<MooseFunctorName>("advected_quantity",
                                     "The quantity to advect. This is the canonical parameter to "
                                     "set the advected quantity when finite volume is being used.");
-  MooseEnum velocity_interp_method("average rc", "rc");
-  params.addParam<MooseEnum>(
-      "velocity_interp_method",
-      velocity_interp_method,
-      "The interpolation to use for the velocity. Options are "
-      "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
+  params += Moose::FV::interpolationParameters();
   params.addParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
   return params;
 }
@@ -83,24 +74,7 @@ InternalVolumetricFlowRate::InternalVolumetricFlowRate(const InputParameters & p
   }
 
   using namespace Moose::FV;
-
-  const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
-  if (advected_interp_method == "average")
-    _advected_interp_method = InterpMethod::Average;
-  else if (advected_interp_method == "upwind")
-    _advected_interp_method = InterpMethod::Upwind;
-  else
-    mooseError("Unrecognized advected quantity interpolation type ",
-               static_cast<std::string>(advected_interp_method));
-
-  const auto & velocity_interp_method = getParam<MooseEnum>("velocity_interp_method");
-  if (velocity_interp_method == "average")
-    _velocity_interp_method = InterpMethod::Average;
-  else if (velocity_interp_method == "rc")
-    _velocity_interp_method = InterpMethod::RhieChow;
-  else
-    mooseError("Unrecognized interpolation type ",
-               static_cast<std::string>(velocity_interp_method));
+  setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
 }
 
 Real
@@ -115,23 +89,18 @@ InternalVolumetricFlowRate::computeQpIntegral()
     mooseAssert(
         !fi->isBoundary(),
         "Use VolumetricFlowRate instead of InternalVolumetricFlowRate for domain boundaries");
+    mooseAssert(_current_elem == &fi->elem(), "this must be true if the assertion on fi is true");
 
     // Get face value for velocity
     const auto vel =
         MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, _tid));
+    const auto adv_quant_face = MetaPhysicL::raw_value((*_adv_quant)(
+        Moose::FV::makeFace(*fi,
+                            Moose::FV::limiterType(_advected_interp_method),
+                            MetaPhysicL::raw_value(vel) * fi->normal() > 0,
+                            std::make_pair(fi->elemSubdomainID(), fi->neighborSubdomainID()))));
 
-    const auto elem_face = Moose::FV::elemFromFace(*_rc_uo, *fi);
-    const auto neighbor_face = Moose::FV::neighborFromFace(*_rc_uo, *fi);
-
-    Real adv_quant_interface;
-    Moose::FV::interpolate(_advected_interp_method,
-                           adv_quant_interface,
-                           MetaPhysicL::raw_value((*_adv_quant)(elem_face)),
-                           MetaPhysicL::raw_value((*_adv_quant)(neighbor_face)),
-                           vel,
-                           *fi,
-                           true);
-    return fi->normal() * vel * adv_quant_interface;
+    return fi->normal() * vel * adv_quant_face;
   }
   else
 #endif

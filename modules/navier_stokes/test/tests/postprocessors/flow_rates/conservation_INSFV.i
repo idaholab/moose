@@ -51,10 +51,6 @@ velocity_interp_method='rc'
   []
 []
 
-[Problem]
-  fv_bcs_integrity_check = true
-[]
-
 [Variables]
   [u]
     type = INSFVVelocityVariable
@@ -74,9 +70,7 @@ velocity_interp_method='rc'
 
 [AuxVariables]
   [advected_density]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = ${rho}
   []
 []

@@ -61,10 +61,23 @@ limiterType(const InterpMethod interp_method)
   switch (interp_method)
   {
     case InterpMethod::Average:
+    case InterpMethod::SkewCorrectedAverage:
       return LimiterType::CentralDifference;
 
     case InterpMethod::Upwind:
       return LimiterType::Upwind;
+
+    case InterpMethod::VanLeer:
+      return LimiterType::VanLeer;
+
+    case InterpMethod::MinMod:
+      return LimiterType::MinMod;
+
+    case InterpMethod::SOU:
+      return LimiterType::SOU;
+
+    case InterpMethod::QUICK:
+      return LimiterType::QUICK;
 
     default:
       mooseError("Unrecognized interpolation method type.");

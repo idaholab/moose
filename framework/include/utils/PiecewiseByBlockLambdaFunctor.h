@@ -52,7 +52,7 @@ public:
 
   virtual ~PiecewiseByBlockLambdaFunctor() = default;
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
+  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
 
   using typename Moose::FunctorBase<T>::FunctorType;
   using typename Moose::FunctorBase<T>::ValueType;
@@ -78,6 +78,8 @@ protected:
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const Moose::ElemArg & elem_arg, unsigned int) const override;
   GradientType evaluateGradient(const Moose::FaceArg & face_arg, unsigned int) const override;
+  GradientType evaluateGradient(const Moose::ElemFromFaceArg & elem_from_face_arg,
+                                unsigned int) const override;
 
 private:
   /**
@@ -161,14 +163,20 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
 }
 
 template <typename T>
-bool
+std::pair<bool, const Elem *>
 PiecewiseByBlockLambdaFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
 {
   if (!fi.neighborPtr())
-    return true;
+    return std::make_pair(true, &fi.elem());
 
-  return (_elem_functor.count(fi.elem().subdomain_id()) +
-          _elem_functor.count(fi.neighbor().subdomain_id())) == 1;
+  const bool defined_on_elem = _elem_functor.count(fi.elem().subdomain_id());
+  const bool defined_on_neighbor = _elem_functor.count(fi.neighbor().subdomain_id());
+  const bool extrapolated = (defined_on_elem + defined_on_neighbor) == 1;
+
+  mooseAssert(defined_on_elem || defined_on_neighbor,
+              "This shouldn't be called if we aren't defined on either side.");
+  const Elem * const ret_elem = defined_on_elem ? &fi.elem() : fi.neighborPtr();
+  return std::make_pair(extrapolated, ret_elem);
 }
 
 template <typename T>
@@ -228,36 +236,12 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::SingleSidedFaceArg & fac
 
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::ValueType
-PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face, unsigned int state) const
+PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face,
+                                           unsigned int libmesh_dbg_var(state)) const
 {
   using namespace Moose::FV;
-
-  mooseAssert(face.fi,
-              "We must have a non-null face_info in order to prepare our ElemFromFace tuples");
-  static const typename libMesh::TensorTools::IncrementRank<T>::type example_gradient(0);
-
-  switch (face.limiter_type)
-  {
-    case LimiterType::CentralDifference:
-    case LimiterType::Upwind:
-    {
-      const auto elem_from_face = face.elemFromFace();
-      const auto neighbor_from_face = face.neighborFromFace();
-      const auto & upwind_elem = face.elem_is_upwind ? elem_from_face : neighbor_from_face;
-      const auto & downwind_elem = face.elem_is_upwind ? neighbor_from_face : elem_from_face;
-      auto limiter_obj =
-          Limiter<typename LimiterValueType<T>::value_type>::build(face.limiter_type);
-      return interpolate(*limiter_obj,
-                         evaluate(upwind_elem, state),
-                         evaluate(downwind_elem, state),
-                         &example_gradient,
-                         *face.fi,
-                         face.elem_is_upwind);
-    }
-
-    default:
-      mooseError("Unsupported limiter type in PiecewiseByBlockLambdaFunctor::evaluate(FaceArg)");
-  }
+  mooseAssert(state == 0, "Only current time state supported.");
+  return interpolate(*this, face);
 }
 
 template <typename T>
@@ -289,15 +273,30 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemSideQpArg & elem_sid
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::GradientType
 PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::ElemArg & elem_arg,
-                                                   unsigned int) const
+                                                   unsigned int libmesh_dbg_var(state)) const
 {
+  mooseAssert(state == 0, "Only current time state supported.");
   return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
 }
 
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::GradientType
 PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::FaceArg & face_arg,
-                                                   unsigned int) const
+                                                   unsigned int libmesh_dbg_var(state)) const
 {
+  mooseAssert(state == 0, "Only current time state supported.");
   return Moose::FV::greenGaussGradient(face_arg, *this, true, _mesh);
+}
+
+template <typename T>
+typename PiecewiseByBlockLambdaFunctor<T>::GradientType
+PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(
+    const Moose::ElemFromFaceArg & elem_from_face_arg, unsigned int libmesh_dbg_var(state)) const
+{
+  mooseAssert(state == 0, "Only current time state supported.");
+  const auto elem_arg = elem_from_face_arg.makeElem();
+  if (elem_arg.elem)
+    return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
+  else
+    return GradientType();
 }

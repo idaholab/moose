@@ -240,7 +240,7 @@ FVFluxBC::makeSidedFace(const bool fi_elem, const bool correct_skewness) const
   if (fi_elem == (ft == FaceInfo::VarFaceNeighbors::ELEM))
   {
     mooseAssert(elem, "This should be non-null");
-    return {elem, _face_info, correct_skewness, correct_skewness, elem->subdomain_id()};
+    return {elem, _face_info, correct_skewness, elem->subdomain_id()};
   }
   else
   {
@@ -248,7 +248,7 @@ FVFluxBC::makeSidedFace(const bool fi_elem, const bool correct_skewness) const
     mooseAssert(elem_across,
                 "The elem across should be non-null and the element across should have dof indices "
                 "for this variable defined on it");
-    return {elem, _face_info, correct_skewness, correct_skewness, elem_across->subdomain_id()};
+    return {elem, _face_info, correct_skewness, elem_across->subdomain_id()};
   }
 }
 
