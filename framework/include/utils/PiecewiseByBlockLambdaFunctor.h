@@ -54,6 +54,8 @@ public:
 
   std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
 
+  bool hasBlocks(const SubdomainID & id) const override;
+
   using typename Moose::FunctorBase<T>::FunctorType;
   using typename Moose::FunctorBase<T>::ValueType;
   using typename Moose::FunctorBase<T>::DotType;
@@ -177,6 +179,18 @@ PiecewiseByBlockLambdaFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi
               "This shouldn't be called if we aren't defined on either side.");
   const Elem * const ret_elem = defined_on_elem ? &fi.elem() : fi.neighborPtr();
   return std::make_pair(extrapolated, ret_elem);
+}
+
+template <typename T>
+bool
+PiecewiseByBlockLambdaFunctor<T>::hasBlocks(const SubdomainID & id) const
+{
+  // If any of the maps has a functor for that block, it has the block
+  if (_elem_functor.count(id) || _elem_from_face_functor.count(id) || _face_functor.count(id) ||
+      _elem_qp_functor.count(id) || _elem_side_qp_functor.count(id))
+    return true;
+  else
+    return false;
 }
 
 template <typename T>
