@@ -40,7 +40,8 @@ MeshInfo::MeshInfo(const InputParameters & parameters)
     _num_dofs(declareHelper<unsigned int>("num_dofs", REPORTER_MODE_REPLICATED)),
     _num_dofs_nl(declareHelper<unsigned int>("num_dofs_nonlinear", REPORTER_MODE_REPLICATED)),
     _num_dofs_aux(declareHelper<unsigned int>("num_dofs_auxiliary", REPORTER_MODE_REPLICATED)),
-    _num_dofs_constrained(declareHelper<unsigned int>("num_dofs_constrained", REPORTER_MODE_REPLICATED)),
+    _num_dofs_constrained(
+        declareHelper<unsigned int>("num_dofs_constrained", REPORTER_MODE_REPLICATED)),
     _num_elem(declareHelper<unsigned int>("num_elements", REPORTER_MODE_REPLICATED)),
     _num_node(declareHelper<unsigned int>("num_nodes", REPORTER_MODE_REPLICATED)),
     _num_local_dofs(declareHelper<unsigned int>("num_local_dofs", REPORTER_MODE_DISTRIBUTED)),

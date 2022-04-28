@@ -149,8 +149,10 @@ outputSystemInformationHelper(std::stringstream & oss, System & system)
 
     if (system.n_constrained_dofs())
     {
-      oss << std::setw(console_field_width) << "  Num Constrained DOFs: " << system.n_constrained_dofs() << '\n'
-          << std::setw(console_field_width) << "  Local Constrained DOFs: " << system.n_local_constrained_dofs() << '\n';
+      oss << std::setw(console_field_width)
+          << "  Num Constrained DOFs: " << system.n_constrained_dofs() << '\n'
+          << std::setw(console_field_width)
+          << "  Local Constrained DOFs: " << system.n_local_constrained_dofs() << '\n';
     }
 
     std::streampos begin_string_pos = oss.tellp();
