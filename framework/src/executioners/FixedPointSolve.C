@@ -95,8 +95,8 @@ FixedPointSolve::validParams()
   params.addDeprecatedParam<std::vector<std::string>>(
       "relaxed_variables",
       std::vector<std::string>(),
-      "Relaxed variables is deprecated, use transformed_variables instead.",
-      "List of main app variables to relax during fixed point iterations");
+      "List of main app variables to relax during fixed point iterations",
+      "Relaxed variables is deprecated, use transformed_variables instead.");
 
   params.addParam<bool>("auto_advance",
                         "Whether to automatically advance sub-applications regardless of whether "
@@ -153,7 +153,6 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _xfem_update_count(0),
     _xfem_repeat_step(false),
     _old_entering_time(_problem.time() - 1),
-    _solve_message(_problem.shouldSolve() ? "Solve Converged!" : "Solve Skipped!"),
     _fail_step(false),
     _auto_advance_set_by_user(isParamValid("auto_advance")),
     _auto_advance_user_value(_auto_advance_set_by_user ? getParam<bool>("auto_advance") : true)
@@ -263,7 +262,8 @@ FixedPointSolve::solve()
       }
 
       _console << COLOR_MAGENTA << "Beginning fixed point iteration " << _fixed_point_it
-               << COLOR_DEFAULT << std::endl;
+               << COLOR_DEFAULT << std::endl
+               << std::endl;
     }
 
     // Save last postprocessor value as value before solve
@@ -394,15 +394,12 @@ FixedPointSolve::solveStep(Real & begin_norm,
   {
     _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_NONLINEAR;
 
-    _console << COLOR_RED << " Solve Did NOT Converge!" << COLOR_DEFAULT << std::endl;
     // Perform the output of the current, failed time step (this only occurs if desired)
     _problem.outputStep(EXEC_FAILED);
     return false;
   }
   else
     _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_NONLINEAR;
-
-  _console << COLOR_GREEN << ' ' << _solve_message << COLOR_DEFAULT << std::endl;
 
   // Use the fixed point algorithm if the conditions (availability of values, etc) are met
   if (_transformed_vars.size() > 0 && useFixedPointAlgorithmUpdateInsteadOfPicard(true))

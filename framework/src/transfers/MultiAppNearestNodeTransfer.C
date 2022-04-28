@@ -77,7 +77,8 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters &
 void
 MultiAppNearestNodeTransfer::execute()
 {
-  _console << "Beginning NearestNodeTransfer " << name() << std::endl;
+  TIME_SECTION(
+      "MultiAppNearestNodeTransfer::execute()", 5, "Transferring variables based on nearest nodes");
 
   getAppInfo();
 
@@ -644,7 +645,6 @@ MultiAppNearestNodeTransfer::execute()
   if (_fixed_meshes)
     _neighbors_cached = true;
 
-  _console << "Finished NearestNodeTransfer " << name() << std::endl;
 
   postExecute();
 }

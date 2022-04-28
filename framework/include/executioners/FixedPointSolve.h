@@ -263,9 +263,6 @@ private:
   /// Time of previous fixed point solve as a subapp
   Real _old_entering_time;
 
-  /// Console output for whether the solve is skipped or not
-  const std::string _solve_message;
-
   /// force the current step to fail, triggering are repeat with a cut dt
   bool _fail_step;
 

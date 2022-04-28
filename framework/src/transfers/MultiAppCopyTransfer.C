@@ -41,7 +41,7 @@ MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters)
 void
 MultiAppCopyTransfer::execute()
 {
-  _console << "Beginning MultiAppCopyTransfer " << name() << std::endl;
+  TIME_SECTION("MultiAppCopyTransfer::execute()", 5, "Copies variables");
 
   if (_current_direction == TO_MULTIAPP)
   {
@@ -77,6 +77,4 @@ MultiAppCopyTransfer::execute()
       mooseError("BETWEEN_MULTIAPP transfer not supported if there is not at least one subapp "
                  "per multiapp involved on each rank");
   }
-
-  _console << "Finished MultiAppCopyTransfer " << name() << std::endl;
 }
