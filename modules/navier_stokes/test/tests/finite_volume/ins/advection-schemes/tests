@@ -29,9 +29,8 @@
     []
     [quick]
       type = Exodiff
-      input = 'test.i'
-      exodiff = quick.e
-      cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=quick mu=100'
+      input = 'quick_test.i'
+      exodiff = quick_test_out.e
       ad_indexing_type = 'global'
       detail = 'QUICK'
     []
