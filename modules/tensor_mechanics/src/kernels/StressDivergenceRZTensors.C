@@ -37,6 +37,10 @@ StressDivergenceRZTensors::StressDivergenceRZTensors(const InputParameters & par
 void
 StressDivergenceRZTensors::initialSetup()
 {
+  // check if any of the eigenstrains provide derivatives wrt variables that are not coupled
+  for (auto eigenstrain_name : getParam<std::vector<MaterialPropertyName>>("eigenstrain_names"))
+    validateNonlinearCoupling<RankTwoTensor>(eigenstrain_name);
+
   if (getBlockCoordSystem() != Moose::COORD_RZ)
     mooseError("The coordinate system in the Problem block must be set to RZ for axisymmetric "
                "geometries.");

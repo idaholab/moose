@@ -13,141 +13,142 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./temp]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [temp]
     initial_condition = 400
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./hoop_stress]
+  [hoop_stress]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./temp_inner_func]
+  [temp_inner_func]
     type = PiecewiseLinear
     xy_data = '0 400
                1 350'
-  [../]
-  [./temp_outer_func]
+  []
+  [temp_outer_func]
     type = PiecewiseLinear
     xy_data = '0 400
                1 400'
-  [../]
-  [./press_func]
+  []
+  [press_func]
     type = PiecewiseLinear
     xy_data = '0 15
                1 15'
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     volumetric_locking_correction = true
-    add_variables  = true
+    add_variables = true
     incremental = true
     strain = FINITE
     eigenstrain_names = thermal_expansion
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress'
-  [../]
+    temperature = temp
+  []
 []
 
 [AuxKernels]
-  [./hoop_stress]
+  [hoop_stress]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = hoop_stress
     scalar_type = HoopStress
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./no_y]
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = '1'
     value = 0.0
-  [../]
+  []
 
-  [./Pressure]
-    [./internal_pressure]
+  [Pressure]
+    [internal_pressure]
       boundary = '4'
       factor = 1.e6
       function = press_func
-    [../]
-  [../]
+    []
+  []
 
-  [./t_in]
+  [t_in]
     type = FunctionDirichletBC
     variable = temp
     boundary = '4'
     function = temp_inner_func
-  [../]
+  []
 
-  [./t_out]
+  [t_out]
     type = FunctionDirichletBC
     variable = temp
     boundary = '2'
     function = temp_outer_func
-  [../]
+  []
 []
 
 [Constraints]
-  [./disp_y]
+  [disp_y]
     type = EqualValueBoundaryConstraint
     variable = disp_y
     primary = '65'
     secondary = '3'
     penalty = 1e18
-  [../]
+  []
 []
 
 [Materials]
-  [./thermal1]
+  [thermal1]
     type = HeatConductionMaterial
     block = '1'
     thermal_conductivity = 25.0
     specific_heat = 490.0
     temp = temp
-  [../]
+  []
 
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 193.05e9
     poissons_ratio = 0.3
-  [../]
+  []
 
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 
-  [./thermal_expansion]
+  [thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 13e-6
     stress_free_temperature = 295.00
     temperature = temp
     eigenstrain_name = thermal_expansion
-  [../]
+  []
 
-  [./density]
+  [density]
     type = Density
     block = '1'
     density = 8000.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -172,8 +173,8 @@
 [Outputs]
   file_base = 2d_out
   exodus = true
-  [./console]
+  [console]
     type = Console
     max_rows = 25
-  [../]
+  []
 []
