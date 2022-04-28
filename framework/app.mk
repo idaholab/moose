@@ -429,7 +429,18 @@ ifneq ($(app_test_LIB),)
 	lib_install_targets += $(dir $(app_test_LIB))install_lib_$(notdir $(app_test_LIB))
 endif
 
-install_libs: $(lib_install_targets)
+install_libs:: $(lib_install_targets)
+
+ifneq ($(wildcard $(APPLICATION_DIR)/data/.),)
+install_data_$(APPLICATION_NAME)_src := $(APPLICATION_DIR)/data
+install_data_$(APPLICATION_NAME)_dst := $(share_install_dir)
+install_data:: install_data_$(APPLICATION_NAME)
+endif
+
+install_data_%:
+	@echo "Installing "$($@_src)"..."
+	@mkdir -p $($@_dst)
+	@cp -r $($@_src) $($@_dst)
 
 $(copy_input_targets):
 	@$(eval kv := $(subst ->, ,$(subst target_$(APPLICATION_NAME)_,,$@)))
