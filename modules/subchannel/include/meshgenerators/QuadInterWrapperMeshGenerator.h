@@ -14,43 +14,45 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// unheated length of the fuel rod at the entry of the assembly
+  /// Distance between the neighbor fuel assemblies, assembly pitch
+  Real _assembly_pitch;
+  /// Sides of the assemblies in the x and y direction
+  Real _assembly_side_x;
+  Real _assembly_side_y;
+  /// unheated length of the inter-wrapper section at the entry of the assembly
   Real _unheated_length_entry;
-  /// heated length of the fuel rod
+  /// heated length of the inter-wrapper section
   Real _heated_length;
-  /// unheated length of the fuel rod at the exit of the assembly
+  /// unheated length of the inter-wrapper section at the exit of the assembly
   Real _unheated_length_exit;
+  /// Lateral form loss coefficient
+  const Real & _kij;
+  /// number of axial cells
+  unsigned int _n_cells;
+  /// Number of assemblies in the x direction
+  unsigned int _nx;
+  /// Number of assemblies in the y direction
+  unsigned int _ny;
+  /// Extra bypass lengths in the sides of the assembly
+  Real _side_bypass_length;
+  /// Total number of flow channels
+  unsigned int _n_channels;
+  /// Number of gaps per layer
+  unsigned int _n_gaps;
+  /// Number of assemblies
+  unsigned int _n_assemblies;
+  /// block index
+  unsigned int _block_id;
+
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// axial form loss coefficient per computational cell
   std::vector<Real> _k_grid;
-  /// axial location of the spacers
-  const std::vector<Real> & _spacer_z;
-  /// form loss coefficient of the spacers
-  const std::vector<Real> & _spacer_k;
-  /// Lateral form loss coefficient
-  const Real & _kij;
-  /// Distance between the neighbor fuel rods, pitch
-  Real _pitch;
-  /// fuel rod diameter
-  Real _rod_diameter;
-  /// number of axial cells
-  unsigned int _n_cells;
   /// number of axial blocks
   unsigned int _n_blocks;
-  /// Number of subchannels in the x direction
-  unsigned int _nx;
-  /// Number of subchannels in the y direction
-  unsigned int _ny;
-  /// Total number of subchannels
-  unsigned int _n_channels;
-  /// Number of gaps per layer
-  unsigned int _n_gaps;
-  /// Number of pins
-  unsigned int _n_pins;
-  Real _gap;
-  /// block index
-  unsigned int _block_id;
+
+  // Note: this ideally needs to be changes
+  // I am not changing them because it would entail changing the full solver
   /// Channel nodes
   std::vector<std::vector<Node *>> _nodes;
   /// Nodes of the gaps
