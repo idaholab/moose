@@ -151,6 +151,15 @@
       petsc_version = '>=3.9.0'
     []
 
+    [3tile_json_relative]
+      type = 'CSVDiff'
+      input = '3tile_json.i'
+      csvdiff = '3tile_json_out.csv'
+      cli_args = 'Materials/rom_stress_prediction/model=gold/3tile_json_export.json'
+      detail = 'for a variety of overlapping tiles and two overlapping partitions with a model loaded from a JSON data file relative to the input.'
+      petsc_version = '>=3.9.0'
+    []
+
     [3tile_json_export]
       type = 'JSONDiff'
       input = '3tile.i'

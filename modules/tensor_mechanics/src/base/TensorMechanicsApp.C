@@ -87,6 +87,7 @@ TensorMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerObjectsTo(f, {"TensorMechanicsApp"});
   Registry::registerActionsTo(af, {"TensorMechanicsApp"});
   associateSyntaxInner(s, af);
+  registerDataFilePath();
 }
 
 void

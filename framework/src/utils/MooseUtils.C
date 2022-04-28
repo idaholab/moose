@@ -16,6 +16,7 @@
 #include "ExecFlagEnum.h"
 #include "InfixIterator.h"
 #include "MaterialBase.h"
+#include "Registry.h"
 #include "MortarConstraintBase.h"
 #include "MortarNodalAuxKernel.h"
 
@@ -229,6 +230,16 @@ pathExists(const std::string & path)
 {
   struct stat buffer;
   return (stat(path.c_str(), &buffer) == 0);
+}
+
+bool
+pathIsDirectory(const std::string & path)
+{
+  struct stat buffer;
+  // stat call fails?
+  if (stat(path.c_str(), &buffer))
+    return false;
+  return S_IFDIR & buffer.st_mode;
 }
 
 bool

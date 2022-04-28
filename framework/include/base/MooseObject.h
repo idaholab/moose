@@ -93,6 +93,15 @@ public:
                                           const std::string & param2) const;
 
   /**
+   * Returns the path of a data file for a given FileName type parameter, searching
+   * (in the following order)
+   * - relative to the input file directory
+   * - relative to the running binary (assuming the application is installed)
+   * - relative to all registered data file directories
+   */
+  std::string getDataFileName(const std::string & param);
+
+  /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
    * The template parameter must be a pointer or an error will be thrown.
    */
