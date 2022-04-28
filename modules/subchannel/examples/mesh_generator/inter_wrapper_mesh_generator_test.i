@@ -8,12 +8,12 @@ P_out = 4.923e6 # Pa
       type = QuadInterWrapperMeshGenerator
       nx = 3
       ny = 3
-      n_cells = 20
+      n_cells = 50
       assembly_pitch = 0.2
       assembly_side_x = 0.18
       assembly_side_y = 0.18
       side_bypass = 0.01
-      heated_length = 0.01
+      heated_length = 3.0
     []
 []
 
@@ -76,8 +76,8 @@ P_out = 4.923e6 # Pa
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
-  implicit = false
-  segregated = true
+  implicit = true
+  segregated = false
   staggered_pressure = false
   monolithic_thermal = false
   discretization = "central_difference"
