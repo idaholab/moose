@@ -2,7 +2,7 @@
 ## Any changes made will require additional changes to any item above that.
 
 moose_libmesh:
-  - moose-libmesh 2022.04.07 build_0
+  - moose-libmesh 2022.04.07 build_1
 
 SHORT_VTK_NAME:
   - 9.1
@@ -11,42 +11,27 @@ vtk_version:
   - 9.1.0
 
 moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.1.0 build_6
+  - moose-libmesh-vtk 9.1.0
 
 moose_petsc:
-  - moose-petsc 3.16.5 build_2
+  - moose-petsc 3.16.5 build_3
 
 moose_mpich:
-  - moose-mpich 4.0.1 build_1
+  - moose-mpich 4.0.1 build_2
 
 #### MOOSE_TOOLS stuff (order is important, must match python version order)
 moose_python:
   - python 3.9
   - python 3.8
   - python 3.7                                             # [not arm64]
-  - python 3.6                                             # [not arm64]
-
-moose_vtk:
-  - vtk 9.1.0 qt_py39h5247bde_203                          # [not arm64 and osx]
-  - vtk 9.1.0 qt_py38hf8e4d4e_203                          # [not arm64 and osx]
-  - vtk 9.1.0 qt_py37hd791b3b_203                          # [not arm64 and osx]
-  - vtk 9.0.3 no_osmesa_py36h79fd37d_104                   # [not arm64 and osx]
-  - vtk 9.0.3 no_osmesa_py39h801044d_100                   # [linux]
-  - vtk 9.0.3 no_osmesa_py38h3850a3d_100                   # [linux]
-  - vtk 9.0.3 no_osmesa_py37h7b56ff3_100                   # [linux]
-  - vtk 9.0.3 no_osmesa_py36hfa3a401_100                   # [linux]
-  - vtk 9.0.3 no_osmesa_py39h8e4790f_105                   # [arm64]
-  - vtk 9.0.3 no_osmesa_py38hb8cbb7a_105                   # [arm64]
 
 moose_numpy:
   - numpy 1.22.1 py39h9d9ce41_0                            # [not arm64 and osx]
   - numpy 1.22.1 py38h9d72dae_0                            # [not arm64 and osx]
   - numpy 1.21.5 py37h3c8089f_0                            # [not arm64 and osx]
-  - numpy 1.19.5 py36h08b5fde_2                            # [not arm64 and osx]
   - numpy 1.21.1 py39hdbf815f_0                            # [linux]
   - numpy 1.21.1 py38h9894fe3_0                            # [linux]
   - numpy 1.21.1 py37h038b26d_0                            # [linux]
-  - numpy 1.19.5 py36hfc0c790_2                            # [linux]
   - numpy 1.21.3 py39h1f3b974_0                            # [arm64]
   - numpy 1.21.3 py38hbf7bb01_0                            # [arm64]
 
@@ -54,21 +39,17 @@ moose_pyqt:                                                # [not arm64]
   - pyqt 5.12.3 py39h6e9494a_8                             # [not arm64 and osx]
   - pyqt 5.12.3 py38h50d1736_8                             # [not arm64 and osx]
   - pyqt 5.12.3 py37hf985489_8                             # [not arm64 and osx]
-  - pyqt 5.12.3 py36h79c6626_7                             # [not arm64 and osx]
   - pyqt 5.12.3 py39hf3d152e_7                             # [linux]
   - pyqt 5.12.3 py38h578d9bd_7                             # [linux]
   - pyqt 5.12.3 py37h89c1867_7                             # [linux]
-  - pyqt 5.12.3 py36h5fab9bb_7                             # [linux]
 
 moose_matplotlib:
   - matplotlib 3.5.1 py39h6e9494a_0                        # [not arm64 and osx]
   - matplotlib 3.5.1 py38h50d1736_0                        # [not arm64 and osx]
   - matplotlib 3.5.1 py37hf985489_0                        # [not arm64 and osx]
-  - matplotlib 3.3.4 py36h79c6626_0                        # [not arm64 and osx]
   - matplotlib 3.4.2 py39hf3d152e_0                        # [linux]
   - matplotlib 3.4.2 py38h578d9bd_0                        # [linux]
   - matplotlib 3.4.2 py37h89c1867_0                        # [linux]
-  - matplotlib 3.3.4 py36h5fab9bb_0                        # [linux]
   - matplotlib 3.4.3 py39hdf13c20_0                        # [arm64]
   - matplotlib 3.4.3 py38h150bfb4_0                        # [arm64]
 
@@ -76,11 +57,9 @@ moose_pandas:
   - pandas 1.4.0 py39h4d6be9b_0                             # [not arm64 and osx]
   - pandas 1.4.0 py38ha53d530_0                             # [not arm64 and osx]
   - pandas 1.3.5 py37h5b83a90_0                             # [not arm64 and osx]
-  - pandas 1.1.5 py36h2be6da3_0                             # [not arm64 and osx]
   - pandas 1.3.1 py39hde0f152_0                             # [linux]
   - pandas 1.3.1 py38h1abd341_0                             # [linux]
   - pandas 1.3.1 py37h219a48f_0                             # [linux]
-  - pandas 1.1.5 py36h284efc9_0                             # [linux]
   - pandas 1.3.4 py39h7f752ed_0                             # [arm64]
   - pandas 1.3.4 py38h3777fb4_0                             # [arm64]
 
@@ -88,11 +67,9 @@ moose_pyyaml:
   - pyyaml 6.0 py39h89e85a6_3                               # [not arm64 and osx]
   - pyyaml 6.0 py38h96a0964_3                               # [not arm64 and osx]
   - pyyaml 6.0 py37h271585c_3                               # [not arm64 and osx]
-  - pyyaml 5.4.1 py36hfa26744_1                             # [not arm64 and osx]
   - pyyaml 5.4.1 py39h3811e60_0                             # [linux]
   - pyyaml 5.4.1 py38h497a2fe_0                             # [linux]
   - pyyaml 5.4.1 py37h5e8e339_0                             # [linux]
-  - pyyaml 5.4.1 py36h8f6f2f9_0                             # [linux]
   - pyyaml 6.0 py39h5161555_0                               # [arm64]
   - pyyaml 6.0 py38hea4295b_0                               # [arm64]
 
@@ -100,11 +77,9 @@ moose_pybtex:
   - pybtex 0.24.0 pyhd8ed1ab_2                              # [not arm64 and osx]
   - pybtex 0.24.0 pyhd8ed1ab_2                              # [not arm64 and osx]
   - pybtex 0.24.0 pyhd8ed1ab_2                              # [not arm64 and osx]
-  - pybtex 0.24.0 pyhd8ed1ab_2                              # [not arm64 and osx]
   - pybtex 0.24.0 py39hf3d152e_0                            # [linux]
   - pybtex 0.24.0 py38h578d9bd_0                            # [linux]
   - pybtex 0.24.0 py37h89c1867_0                            # [linux]
-  - pybtex 0.24.0 py36h5fab9bb_0                            # [linux]
   - pybtex 0.24.0 py39h2804cbe_0                            # [arm64]
   - pybtex 0.24.0 py38h10201cd_0                            # [arm64]
 
@@ -112,11 +87,9 @@ moose_mock:
   - mock 4.0.3 py39h6e9494a_2                               # [not arm64 and osx]
   - mock 4.0.3 py38h50d1736_2                               # [not arm64 and osx]
   - mock 4.0.3 py37hf985489_2                               # [not arm64 and osx]
-  - mock 4.0.3 py36h79c6626_1                               # [not arm64 and osx]
   - mock 4.0.3 py39hf3d152e_1                               # [linux]
   - mock 4.0.3 py38h578d9bd_1                               # [linux]
   - mock 4.0.3 py37h89c1867_1                               # [linux]
-  - mock 4.0.3 py36h5fab9bb_1                               # [linux]
   - mock 4.0.3 py39h2804cbe_1                               # [arm64]
   - mock 4.0.3 py38h10201cd_1                               # [arm64]
 
@@ -124,11 +97,9 @@ moose_lxml:
   - lxml 4.7.1 py39hf41e7f8_0                               # [not arm64 and osx]
   - lxml 4.7.1 py38h6ea4786_0                               # [not arm64 and osx]
   - lxml 4.6.3 py37h250624f_0                               # [not arm64 and osx]
-  - lxml 4.6.3 py36habcf893_0                               # [not arm64 and osx]
   - lxml 4.6.3 py39h107f48f_0                               # [linux]
   - lxml 4.6.3 py38hf1fe3a4_0                               # [linux]
   - lxml 4.6.3 py37h77fd288_0                               # [linux]
-  - lxml 4.6.3 py36h04a5ba7_0                               # [linux]
   - lxml 4.6.3 py39h3757d6e_0                               # [arm64]
   - lxml 4.6.3 py38hd4105a3_0                               # [arm64]
 
@@ -136,11 +107,9 @@ moose_scikit_image:
   - scikit-image 0.19.1 py39h4d6be9b_0                      # [not arm64 and osx]
   - scikit-image 0.19.1 py38ha53d530_0                      # [not arm64 and osx]
   - scikit-image 0.19.1 py37h5b83a90_0                      # [not arm64 and osx]
-  - scikit-image 0.17.2 py36h2be6da3_4                      # [not arm64 and osx]
   - scikit-image 0.18.2 py39hde0f152_0                      # [linux]
   - scikit-image 0.18.2 py38h1abd341_0                      # [linux]
   - scikit-image 0.18.2 py37h219a48f_0                      # [linux]
-  - scikit-image 0.17.2 py36h284efc9_4                      # [linux]
   - scikit-image 0.18.3 py39h7f752ed_0                      # [arm64]
   - scikit-image 0.18.3 py38h3777fb4_0                      # [arm64]
 
@@ -148,11 +117,9 @@ moose_sympy:
   - sympy 1.9 py39h6e9494a_1                                # [not arm64 and osx]
   - sympy 1.9 py38h50d1736_1                                # [not arm64 and osx]
   - sympy 1.9 py37hf985489_0                                # [not arm64 and osx]
-  - sympy 1.8 py36h79c6626_0                                # [not arm64 and osx]
   - sympy 1.9 py39hf3d152e_0                                # [linux]
   - sympy 1.9 py38h578d9bd_0                                # [linux]
   - sympy 1.9 py37h89c1867_0                                # [linux]
-  - sympy 1.8 py36h5fab9bb_0                                # [linux]
   - sympy 1.9 py39h2804cbe_0                                # [arm64]
   - sympy 1.9 py38h10201cd_0                                # [arm64]
 
@@ -181,7 +148,6 @@ moose_yaml:
 
 zip_keys:
   - moose_python
-  - moose_vtk
   - moose_numpy
   - moose_pyqt                                              # [not arm64]
   - moose_matplotlib
@@ -251,15 +217,17 @@ moose_mesa_libgl:                                           # [linux]
 moose_xorg_x11:                                             # [linux]
   - xorg-x11-proto-devel-cos7-x86_64 2018.4 h9b0a68f_1105   # [linux]
 
+moose_hdf5:
+  - hdf5 1.12.1 mpi_mpich_hfd824e9_4                        # [not arm64 and osx]
+  - hdf5 1.12.1 mpi_mpich_h08b82f9_4                        # [linux]
+  - hdf5 1.12.1 mpi_mpich_hfc22502_3                        # [arm64]
+
 #### build/run pining
 mpi:
   - moose-mpich
 
 pin_run_as_build:
   moose_mpich: x.x.x
-  moose_libblas: x.x.x
-  moose_libcblas: x.x.x
-  moose_liblapack: x.x.x
   moose_petsc: x.x.x
   moose_libmesh_vtk: x.x.x
   moose_python: x.x
