@@ -1327,8 +1327,6 @@ InterWrapper1PhaseProblem::computeh(int iblock)
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
 
-  std::cout << "In enthalpy function" << std::endl;
-
   if (iblock == 0)
   {
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
@@ -2882,7 +2880,7 @@ InterWrapper1PhaseProblem::externalSolve()
   unsigned int P_it = 0;
   unsigned int P_it_max = 2 * _n_blocks;
   if (_n_blocks == 1)
-    P_it_max = 1000;
+    P_it_max = 1;
   if (! _segregated_bool)
   {
     initializeSolution();
@@ -2923,7 +2921,9 @@ InterWrapper1PhaseProblem::externalSolve()
           if (_compute_power)
           {
             computeh(iblock);
+            std::cout << "Done with h solve" << std::endl;
             computeT(iblock);
+            std::cout << "Done with T solve" << std::endl;
           }
         }
         else
@@ -2939,13 +2939,13 @@ InterWrapper1PhaseProblem::externalSolve()
             std::cout << "No llores mas aqui estoy 2." << std::endl;
             implicitPetscSolve(iblock);
             std::cout << "Done with main solve." << std::endl;
-            //            if (_compute_power)
-            //            {
-            //              std::cout << "Starting enthalpy solve." << std::endl;
-            //              computeh(iblock);
-            //              std::cout << "Done with enthalpy solve." << std::endl;
-            //              computeT(iblock);
-            //            }
+            if (_compute_power)
+            {
+              std::cout << "Starting enthalpy solve." << std::endl;
+              computeh(iblock);
+              std::cout << "Done with enthalpy solve." << std::endl;
+              computeT(iblock);
+            }
             std::cout << "Done with thermal solve." << std::endl;
           }
         }
