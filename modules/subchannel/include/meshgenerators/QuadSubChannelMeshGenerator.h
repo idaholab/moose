@@ -53,16 +53,11 @@ protected:
   unsigned int _block_id;
   /// Channel nodes
   std::vector<std::vector<Node *>> _nodes;
-  /// Nodes of the gaps
+  /// gap nodes
   std::vector<std::vector<Node *>> _gapnodes;
-  /// Defining the channel maps
-  // Map from gaps to channels
   std::vector<std::pair<unsigned int, unsigned int>> _gap_to_chan_map;
-  // Map from channel to gaps
   std::vector<std::vector<unsigned int>> _chan_to_gap_map;
-  // Map of channels to pins
   std::vector<std::vector<unsigned int>> _chan_to_pin_map;
-  // Map of pins to channels
   std::vector<std::vector<unsigned int>> _pin_to_chan_map;
   /// Matrix used to give local sign to crossflow quantities
   std::vector<std::vector<double>> _sign_id_crossflow_map;

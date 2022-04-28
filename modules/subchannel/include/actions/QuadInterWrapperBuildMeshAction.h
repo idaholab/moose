@@ -6,10 +6,10 @@
  * Action for building empty mesh object for quadrilateral geometry that is filled by mesh
  * generators
  */
-class QuadSubChannelBuildMeshAction : public Action
+class QuadInterWrapperBuildMeshAction : public Action
 {
 public:
-  QuadSubChannelBuildMeshAction(InputParameters params);
+  QuadInterWrapperBuildMeshAction(InputParameters params);
 
   virtual void act();
 
