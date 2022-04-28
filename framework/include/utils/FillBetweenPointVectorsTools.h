@@ -178,7 +178,8 @@ void surrogateGenerator(std::vector<Real> & weighted_surrogate_index,
 bool needFlip(const std::vector<Point> vec_pts_1, const std::vector<Point> vec_pts_2);
 
 /**
- * Decides whether a boundary of a given mesh works with the algorithm used in this class.
+ * Decides whether a boundary of a given mesh is a closed loop with consecutive nodes's azimuthal
+ * angles change monotonically.
  * @param mesh input mesh that contains the boundary to be examined
  * @param max_node_radius the maximum radius of the nodes on the
  * boundary
@@ -186,14 +187,15 @@ bool needFlip(const std::vector<Point> vec_pts_1, const std::vector<Point> vec_p
  * @param bid ID of the boundary to be examined
  * @return whether the boundary works with the algorithm
  */
-bool isBoundaryValid(ReplicatedMesh & mesh,
-                     Real & max_node_radius,
-                     std::vector<dof_id_type> & boundary_ordered_node_list,
-                     const Point origin_pt,
-                     const boundary_id_type bid);
+bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
+                                Real & max_node_radius,
+                                std::vector<dof_id_type> & boundary_ordered_node_list,
+                                const Point origin_pt,
+                                const boundary_id_type bid);
 
 /**
- * Decides whether a boundary of a given mesh works with the algorithm used in this class.
+ * Decides whether a boundary of a given mesh is a closed loop with consecutive nodes's azimuthal
+ * angles change monotonically.
  * @param mesh input mesh that contains the boundary to be examined
  * @param max_node_radius the maximum radius of the nodes on the
  * boundary
@@ -201,19 +203,22 @@ bool isBoundaryValid(ReplicatedMesh & mesh,
  * @param bid ID of the boundary to be examined
  * @return whether the boundary works with the algorithm
  */
-bool isBoundaryValid(ReplicatedMesh & mesh,
-                     Real & max_node_radius,
-                     const Point origin_pt,
-                     const boundary_id_type bid);
+bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
+                                Real & max_node_radius,
+                                const Point origin_pt,
+                                const boundary_id_type bid);
 
 /**
- * Decides whether a boundary of a given mesh works with the algorithm used in this class.
+ * Decides whether a boundary of a given mesh is a closed loop with consecutive nodes's azimuthal
+ * angles change monotonically.
  * @param mesh input mesh that contains the boundary to be examined
  * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
  * @param bid ID of the boundary to be examined
  * @return whether the boundary works with the algorithm
  */
-bool isBoundaryValid(ReplicatedMesh & mesh, const Point origin_pt, const boundary_id_type bid);
+bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
+                                const Point origin_pt,
+                                const boundary_id_type bid);
 
 /**
  * Decides whether a boundary of a given mesh is an external boundary.

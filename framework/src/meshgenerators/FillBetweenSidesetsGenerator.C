@@ -153,33 +153,37 @@ FillBetweenSidesetsGenerator::generate()
 
   try
   {
-    FillBetweenPointVectorsTools::isBoundaryValid(*input_mesh_1,
-                                                  max_input_mesh_1_node_radius,
-                                                  boundary_1_ordered_nodes,
-                                                  _mesh_1_shift,
-                                                  input_mesh_1_external_bids.front());
+    if (FillBetweenPointVectorsTools::isBoundarySimpleClosedLoop(
+            *input_mesh_1,
+            max_input_mesh_1_node_radius,
+            boundary_1_ordered_nodes,
+            MooseMeshUtils::meshCentroidCalculator(*input_mesh_1),
+            input_mesh_1_external_bids.front()))
+      paramError("boundary_1", "The provided boundary is closed loop, which is not supported.");
   }
   catch (MooseException & e)
   {
     if (((std::string)e.what())
             .compare("This mesh generator does not work for the provided external boundary as it "
                      "is not a closed loop.") != 0)
-      paramError("boundary_1", "The provided boundary is not a single-segment boundary.");
+      paramError("boundary_1", "The provided boundary is not an open single-segment boundary.");
   }
   try
   {
-    FillBetweenPointVectorsTools::isBoundaryValid(*input_mesh_2,
-                                                  max_input_mesh_2_node_radius,
-                                                  boundary_2_ordered_nodes,
-                                                  _mesh_2_shift,
-                                                  input_mesh_2_external_bids.front());
+    if (FillBetweenPointVectorsTools::isBoundarySimpleClosedLoop(
+            *input_mesh_2,
+            max_input_mesh_2_node_radius,
+            boundary_2_ordered_nodes,
+            MooseMeshUtils::meshCentroidCalculator(*input_mesh_2),
+            input_mesh_2_external_bids.front()))
+      paramError("boundary_2", "The provided boundary is closed loop, which is not supported.");
   }
   catch (MooseException & e)
   {
     if (((std::string)e.what())
             .compare("This mesh generator does not work for the provided external boundary as it "
                      "is not a closed loop.") != 0)
-      paramError("boundary_2", "The provided boundary is not a single-segment boundary.");
+      paramError("boundary_2", "The provided boundary is not an open single-segment boundary.");
   }
 
   std::vector<Point> positions_vector_1;

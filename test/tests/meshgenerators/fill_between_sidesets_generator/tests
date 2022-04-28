@@ -54,8 +54,17 @@
     input = 'squares.i'
     cli_args = '--mesh-only squares_err.e
                Mesh/fbsg/boundary_1="top bottom"'
-    expect_err = 'The provided boundary is not a single-segment boundary.'
+    expect_err = 'The provided boundary is not an open single-segment boundary.'
     requirement = "The system shall throw an error if one of the input boundary to generate a mesh in-between has multiple segments."
+    mesh_mode = 'REPLICATED'
+  []
+  [err_closed_loop_boundary]
+    type = 'RunException'
+    input = 'squares.i'
+    cli_args = '--mesh-only squares_err.e
+               Mesh/fbsg/boundary_1="bottom right top left"'
+    expect_err = 'The provided boundary is closed loop, which is not supported.'
+    requirement = "The system shall throw an error if one of the input boundary to generate a mesh in-between is a closed loop."
     mesh_mode = 'REPLICATED'
   []
 []

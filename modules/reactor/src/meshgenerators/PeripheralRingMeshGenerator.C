@@ -165,7 +165,7 @@ PeripheralRingMeshGenerator::generate()
 
   try
   {
-    FillBetweenPointVectorsTools::isBoundaryValid(
+    FillBetweenPointVectorsTools::isBoundarySimpleClosedLoop(
         *input_mesh, max_input_mesh_node_radius, origin_pt, _input_mesh_external_bid);
   }
   catch (MooseException & e)

@@ -474,11 +474,11 @@ needFlip(const std::vector<Point> vec_pts_1, const std::vector<Point> vec_pts_2)
 }
 
 bool
-isBoundaryValid(ReplicatedMesh & mesh,
-                Real & max_node_radius,
-                std::vector<dof_id_type> & boundary_ordered_node_list,
-                const Point origin_pt,
-                const boundary_id_type bid)
+isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
+                           Real & max_node_radius,
+                           std::vector<dof_id_type> & boundary_ordered_node_list,
+                           const Point origin_pt,
+                           const boundary_id_type bid)
 {
   max_node_radius = 0.0;
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
@@ -592,20 +592,21 @@ isBoundaryValid(ReplicatedMesh & mesh,
 }
 
 bool
-isBoundaryValid(ReplicatedMesh & mesh,
-                Real & max_node_radius,
-                const Point origin_pt,
-                const boundary_id_type bid)
+isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
+                           Real & max_node_radius,
+                           const Point origin_pt,
+                           const boundary_id_type bid)
 {
   std::vector<dof_id_type> dummy_boundary_ordered_node_list;
-  return isBoundaryValid(mesh, max_node_radius, dummy_boundary_ordered_node_list, origin_pt, bid);
+  return isBoundarySimpleClosedLoop(
+      mesh, max_node_radius, dummy_boundary_ordered_node_list, origin_pt, bid);
 }
 
 bool
-isBoundaryValid(ReplicatedMesh & mesh, const Point origin_pt, const boundary_id_type bid)
+isBoundarySimpleClosedLoop(ReplicatedMesh & mesh, const Point origin_pt, const boundary_id_type bid)
 {
   Real dummy_max_node_radius;
-  return isBoundaryValid(mesh, dummy_max_node_radius, origin_pt, bid);
+  return isBoundarySimpleClosedLoop(mesh, dummy_max_node_radius, origin_pt, bid);
 }
 
 bool
