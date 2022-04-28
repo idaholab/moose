@@ -19,7 +19,8 @@
  * A calorically imperfect gas fluid property class
  * This fluid property assumes that internal energy is
  * a general monotonic function of temperature; behaves
- * like an ideal gas otherwise
+ * like an ideal gas otherwise. In particular, it assumes:
+ * p v = R_s T
  */
 class CaloricallyImperfectGas : public SinglePhaseFluidProperties, public NaNInterface
 {
@@ -110,13 +111,6 @@ public:
   virtual void
   gamma_from_p_T(Real p, Real T, Real & gamma, Real & dgamma_dp, Real & dgamma_dT) const override;
   virtual Real g_from_v_e(Real v, Real e) const override;
-  /**
-   * This fluid property is calorically imperfect but
-   * otherwise it is still an ideal gas. In particular gamma = constant
-   * We use c = sqrt(gamma * R * T / M) and obtain T from the parameters
-   * R_specific = R / M
-   * passed into the c(...) function
-   */
   virtual Real c_from_v_e(Real v, Real e) const override;
   virtual ADReal c_from_v_e(const ADReal & v, const ADReal & e) const override;
   virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
