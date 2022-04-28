@@ -200,7 +200,9 @@ MultiAppConservativeTransfer::postExecute()
 {
   if (_preserve_transfer)
   {
-    _console << "Beginning Conservative transfers " << name() << std::endl;
+    TIME_SECTION("MultiAppConservativeTransfer::execute()",
+                 5,
+                 "Post transfer to preserve postprocessor values");
 
     if (_current_direction == TO_MULTIAPP)
     {
@@ -255,8 +257,6 @@ MultiAppConservativeTransfer::postExecute()
         to_problem.computeUserObjectByName(
             EXEC_TRANSFER, Moose::POST_AUX, _to_postprocessors_to_be_preserved[0]);
     }
-
-    _console << "Finished Conservative transfers " << name() << std::endl;
   }
 }
 
@@ -515,11 +515,7 @@ MultiAppConservativeTransfer::performAdjustment(const PostprocessorValue & from,
   if (from * to > 0)
     return true;
   else if (_allow_skipped_adjustment)
-  {
-    _console << COLOR_CYAN << "MultiApp '" << name()
-             << ", skipping adjustment in conservative transfer " << std::endl;
     return false;
-  }
   else
     mooseError("Adjustment postprocessors from: ",
                from,

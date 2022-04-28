@@ -55,7 +55,9 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
 void
 MultiAppVariableValueSamplePostprocessorTransfer::execute()
 {
-  _console << "Beginning VariableValueSamplePostprocessorTransfer " << name() << std::endl;
+  TIME_SECTION("MultiAppVariableValueSamplePostprocessorTransfer::execute()",
+               5,
+               "Transferring a variable to a postprocessor through sampling");
 
   switch (_current_direction)
   {
@@ -133,5 +135,4 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
     }
   }
 
-  _console << "Finished VariableValueSamplePostprocessorTransfer " << name() << std::endl;
 }
