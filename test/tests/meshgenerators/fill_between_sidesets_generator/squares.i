@@ -25,8 +25,8 @@
     transform = ROTATE
     vector_value = '30 0 0'
   []
-  [tlc]
-    type = TransitionLayerConnector
+  [fbsg]
+    type = FillBetweenSidesetsGenerator
     input_mesh_1 = 'rotate_1'
     input_mesh_2 = 'rotate_2'
     boundary_1 = 'top right'

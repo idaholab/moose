@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TransitionLayerTools.h"
+#include "FillBetweenPointVectorsTools.h"
 #include "MooseMeshUtils.h"
 #include "MooseMesh.h"
 #include "MeshGenerator.h"
@@ -22,23 +22,23 @@
 #include "libmesh/face_tri3.h"
 #include "libmesh/face_quad4.h"
 
-namespace TransitionLayerTools
+namespace FillBetweenPointVectorsTools
 {
 void
-transitionLayerGenerator(ReplicatedMesh & mesh, // an empty mesh is expected
-                         const std::vector<Point> boundary_points_vec_1,
-                         std::vector<Point> boundary_points_vec_2,
-                         const unsigned int num_layers,
-                         const subdomain_id_type transition_layer_id,
-                         const boundary_id_type input_boundary_1_id,
-                         const boundary_id_type input_boundary_2_id,
-                         const boundary_id_type begin_side_boundary_id,
-                         const boundary_id_type end_side_boundary_id,
-                         const std::string type,
-                         const std::string name,
-                         const bool quad_elem,
-                         const Real bias_parameter,
-                         const Real sigma)
+fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh, // an empty mesh is expected
+                                 const std::vector<Point> boundary_points_vec_1,
+                                 std::vector<Point> boundary_points_vec_2,
+                                 const unsigned int num_layers,
+                                 const subdomain_id_type transition_layer_id,
+                                 const boundary_id_type input_boundary_1_id,
+                                 const boundary_id_type input_boundary_2_id,
+                                 const boundary_id_type begin_side_boundary_id,
+                                 const boundary_id_type end_side_boundary_id,
+                                 const std::string type,
+                                 const std::string name,
+                                 const bool quad_elem,
+                                 const Real bias_parameter,
+                                 const Real sigma)
 {
   if (!MooseMeshUtils::isCoPlanar(
           boundary_points_vec_1, Point(0.0, 0.0, 1.0), Point(0.0, 0.0, 0.0)) ||
@@ -49,7 +49,7 @@ transitionLayerGenerator(ReplicatedMesh & mesh, // an empty mesh is expected
                " ",
                name,
                ", the input vectors of points for "
-               "TransitionLayerTools::transitionLayerGenerator "
+               "FillBetweenPointVectorsTools::fillBetweenPointVectorsGenerator "
                "must be in XY plane.");
 
   const unsigned int vec_1_node_num = boundary_points_vec_1.size();
@@ -61,7 +61,7 @@ transitionLayerGenerator(ReplicatedMesh & mesh, // an empty mesh is expected
                " ",
                name,
                ", the two input vectors of points for "
-               "TransitionLayerTools::transitionLayerGenerator "
+               "FillBetweenPointVectorsTools::fillBetweenPointVectorsGenerator "
                "must respectively contain at least two elements.");
 
   if (quad_elem && boundary_points_vec_1.size() != boundary_points_vec_2.size())
@@ -75,8 +75,9 @@ transitionLayerGenerator(ReplicatedMesh & mesh, // an empty mesh is expected
   if (needFlip(boundary_points_vec_1, boundary_points_vec_2))
   {
     std::reverse(boundary_points_vec_2.begin(), boundary_points_vec_2.end());
-    mooseWarning("In TransitionLayerTools, one of the vector of Points must be flipped to ensure "
-                 "correct transition layer shape.");
+    mooseWarning(
+        "In FillBetweenPointVectorsTools, one of the vector of Points must be flipped to ensure "
+        "correct transition layer shape.");
   }
 
   std::vector<Real> vec_1_index; // Unweighted index
@@ -204,28 +205,28 @@ transitionLayerGenerator(ReplicatedMesh & mesh, // an empty mesh is expected
 }
 
 void
-transitionLayerGenerator(ReplicatedMesh & mesh,
-                         const std::vector<Point> boundary_points_vec_1,
-                         const std::vector<Point> boundary_points_vec_2,
-                         const unsigned int num_layers,
-                         const subdomain_id_type transition_layer_id,
-                         const boundary_id_type external_boundary_id,
-                         const std::string type,
-                         const std::string name,
-                         const bool quad_elem)
+fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh,
+                                 const std::vector<Point> boundary_points_vec_1,
+                                 const std::vector<Point> boundary_points_vec_2,
+                                 const unsigned int num_layers,
+                                 const subdomain_id_type transition_layer_id,
+                                 const boundary_id_type external_boundary_id,
+                                 const std::string type,
+                                 const std::string name,
+                                 const bool quad_elem)
 {
-  transitionLayerGenerator(mesh,
-                           boundary_points_vec_1,
-                           boundary_points_vec_2,
-                           num_layers,
-                           transition_layer_id,
-                           external_boundary_id,
-                           external_boundary_id,
-                           external_boundary_id,
-                           external_boundary_id,
-                           type,
-                           name,
-                           quad_elem);
+  fillBetweenPointVectorsGenerator(mesh,
+                                   boundary_points_vec_1,
+                                   boundary_points_vec_2,
+                                   num_layers,
+                                   transition_layer_id,
+                                   external_boundary_id,
+                                   external_boundary_id,
+                                   external_boundary_id,
+                                   external_boundary_id,
+                                   type,
+                                   name,
+                                   quad_elem);
 }
 
 void
@@ -540,7 +541,8 @@ isBoundaryValid(ReplicatedMesh & mesh,
       {
         // Flipped twice; this means the boundary has at least two segments.
         // This is invalid type #1
-        throw(unsigned short) 1;
+        throw MooseException("This mesh generator does not work for the provided external boundary "
+                             "as it has more than one segments.");
         return false;
       }
       // mark the first flip event.
@@ -556,7 +558,8 @@ isBoundaryValid(ReplicatedMesh & mesh,
   if (boundary_ordered_node_list.front() != boundary_ordered_node_list.back())
   {
     // This is invalid type #2
-    throw(unsigned short) 2;
+    throw MooseException("This mesh generator does not work for the provided external boundary as "
+                         "it is not a closed loop.");
     return false;
   }
   // It the boundary is a loop, check if azimuthal angles change monotonically
@@ -579,7 +582,8 @@ isBoundaryValid(ReplicatedMesh & mesh,
     if (ordered_node_azi_list.front() * ordered_node_azi_list.back() < 0.0)
     {
       // This is invalid type #3
-      throw(unsigned short) 3;
+      throw MooseException("This mesh generator does not work for the provided external boundary "
+                           "as azimuthal angles of consecutive nodes do not change monotonically.");
       return false;
     }
     else

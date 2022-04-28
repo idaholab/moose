@@ -11,15 +11,15 @@
 #include "MeshGenerator.h"
 
 /**
- * This TransitionLayerConnector object is designed to generate a transition layer to connect two
- * boundaries of two input meshes.
+ * This FillBetweenSidesetsGenerator object is designed to generate a transition layer to connect
+ * two boundaries of two input meshes.
  */
-class TransitionLayerConnector : public MeshGenerator
+class FillBetweenSidesetsGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  TransitionLayerConnector(const InputParameters & parameters);
+  FillBetweenSidesetsGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

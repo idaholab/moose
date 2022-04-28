@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TransitionLayerConnector.h"
-#include "TransitionLayerTools.h"
+#include "FillBetweenSidesetsGenerator.h"
+#include "FillBetweenPointVectorsTools.h"
 
 #include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 #include "libmesh/node.h"
 
-registerMooseObject("MooseApp", TransitionLayerConnector);
+registerMooseObject("MooseApp", FillBetweenSidesetsGenerator);
 
 InputParameters
-TransitionLayerConnector::validParams()
+FillBetweenSidesetsGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<MeshGeneratorName>("input_mesh_1",
@@ -72,12 +72,12 @@ TransitionLayerConnector::validParams()
       "keep_inputs",
       true,
       "Whether to output the input meshes stitched with the transition layer connector.");
-  params.addClassDescription("This TransitionLayerConnector object is designed to generate a "
+  params.addClassDescription("This FillBetweenSidesetsGenerator object is designed to generate a "
                              "transition layer to connect two boundaries of two input meshes.");
   return params;
 }
 
-TransitionLayerConnector::TransitionLayerConnector(const InputParameters & parameters)
+FillBetweenSidesetsGenerator::FillBetweenSidesetsGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input_name_1(getParam<MeshGeneratorName>("input_mesh_1")),
     _input_name_2(getParam<MeshGeneratorName>("input_mesh_2")),
@@ -103,7 +103,7 @@ TransitionLayerConnector::TransitionLayerConnector(const InputParameters & param
 }
 
 std::unique_ptr<MeshBase>
-TransitionLayerConnector::generate()
+FillBetweenSidesetsGenerator::generate()
 {
   auto input_mesh_1 = dynamic_cast<ReplicatedMesh *>(_input_1.get());
   auto input_mesh_2 = dynamic_cast<ReplicatedMesh *>(_input_2.get());
@@ -139,9 +139,11 @@ TransitionLayerConnector::generate()
         *input_mesh_2, input_mesh_2_external_bids[i], input_mesh_2_external_bids.front(), true);
   }
 
-  if (!TransitionLayerTools::isExternalBoundary(*input_mesh_1, input_mesh_1_external_bids.front()))
+  if (!FillBetweenPointVectorsTools::isExternalBoundary(*input_mesh_1,
+                                                        input_mesh_1_external_bids.front()))
     paramError("boundary_1", "The boundary provided is not an external boundary.");
-  if (!TransitionLayerTools::isExternalBoundary(*input_mesh_2, input_mesh_2_external_bids.front()))
+  if (!FillBetweenPointVectorsTools::isExternalBoundary(*input_mesh_2,
+                                                        input_mesh_2_external_bids.front()))
     paramError("boundary_2", "The boundary provided is not an external boundary.");
 
   Real max_input_mesh_1_node_radius;
@@ -151,28 +153,32 @@ TransitionLayerConnector::generate()
 
   try
   {
-    TransitionLayerTools::isBoundaryValid(*input_mesh_1,
-                                          max_input_mesh_1_node_radius,
-                                          boundary_1_ordered_nodes,
-                                          _mesh_1_shift,
-                                          input_mesh_1_external_bids.front());
+    FillBetweenPointVectorsTools::isBoundaryValid(*input_mesh_1,
+                                                  max_input_mesh_1_node_radius,
+                                                  boundary_1_ordered_nodes,
+                                                  _mesh_1_shift,
+                                                  input_mesh_1_external_bids.front());
   }
-  catch (unsigned short invalid_boundary_type)
+  catch (MooseException & e)
   {
-    if (invalid_boundary_type != 2)
+    if (((std::string)e.what())
+            .compare("This mesh generator does not work for the provided external boundary as it "
+                     "is not a closed loop.") != 0)
       paramError("boundary_1", "The provided boundary is not a single-segment boundary.");
   }
   try
   {
-    TransitionLayerTools::isBoundaryValid(*input_mesh_2,
-                                          max_input_mesh_2_node_radius,
-                                          boundary_2_ordered_nodes,
-                                          _mesh_2_shift,
-                                          input_mesh_2_external_bids.front());
+    FillBetweenPointVectorsTools::isBoundaryValid(*input_mesh_2,
+                                                  max_input_mesh_2_node_radius,
+                                                  boundary_2_ordered_nodes,
+                                                  _mesh_2_shift,
+                                                  input_mesh_2_external_bids.front());
   }
-  catch (unsigned short invalid_boundary_type)
+  catch (MooseException & e)
   {
-    if (invalid_boundary_type != 2)
+    if (((std::string)e.what())
+            .compare("This mesh generator does not work for the provided external boundary as it "
+                     "is not a closed loop.") != 0)
       paramError("boundary_2", "The provided boundary is not a single-segment boundary.");
   }
 
@@ -194,20 +200,20 @@ TransitionLayerConnector::generate()
   const boundary_id_type input_boundary_2_id =
       _keep_inputs ? (input_boundary_1_id + 1) : _input_boundary_2_id;
   auto mesh = buildReplicatedMesh(2);
-  TransitionLayerTools::transitionLayerGenerator(*mesh,
-                                                 positions_vector_1,
-                                                 positions_vector_2,
-                                                 _num_layers,
-                                                 _block_id,
-                                                 input_boundary_1_id,
-                                                 input_boundary_2_id,
-                                                 _begin_side_boundary_id,
-                                                 _end_side_boundary_id,
-                                                 _type,
-                                                 _name,
-                                                 _use_quad_elements,
-                                                 _bias_parameter,
-                                                 _sigma);
+  FillBetweenPointVectorsTools::fillBetweenPointVectorsGenerator(*mesh,
+                                                                 positions_vector_1,
+                                                                 positions_vector_2,
+                                                                 _num_layers,
+                                                                 _block_id,
+                                                                 input_boundary_1_id,
+                                                                 input_boundary_2_id,
+                                                                 _begin_side_boundary_id,
+                                                                 _end_side_boundary_id,
+                                                                 _type,
+                                                                 _name,
+                                                                 _use_quad_elements,
+                                                                 _bias_parameter,
+                                                                 _sigma);
 
   if (_keep_inputs)
   {

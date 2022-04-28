@@ -12,7 +12,7 @@
 #include "MooseMeshUtils.h"
 #include "MooseUtils.h"
 #include "LinearInterpolation.h"
-#include "TransitionLayerTools.h"
+#include "FillBetweenPointVectorsTools.h"
 
 // C++ includes
 #include <cmath> // for atan2
@@ -165,36 +165,19 @@ PeripheralRingMeshGenerator::generate()
 
   try
   {
-    TransitionLayerTools::isBoundaryValid(
+    FillBetweenPointVectorsTools::isBoundaryValid(
         *input_mesh, max_input_mesh_node_radius, origin_pt, _input_mesh_external_bid);
   }
-  catch (unsigned short invalid_boundary_type)
+  catch (MooseException & e)
   {
-    switch (invalid_boundary_type)
-    {
-      case 1:
-        paramError("input_mesh_external_boundary",
-                   "This mesh generator does not work for the provided external boundary as it has "
-                   "more than one segments.");
-        break;
-      case 2:
-        paramError("input_mesh_external_boundary",
-                   "This mesh generator does not work for the provided external boundary as it is "
-                   "not a closed loop.");
-        break;
-      case 3:
-        paramError("input_mesh_external_boundary",
-                   "This mesh generator does not work for the provided external boundary as "
-                   "azimuthal angles of consecutive nodes do not change monotonically.");
-        break;
-    }
+    paramError("input_mesh_external_boundary", e.what());
   }
 
   if (max_input_mesh_node_radius >= _peripheral_ring_radius)
     paramError(
         "peripheral_ring_radius",
         "The peripheral ring to be generated must be large enough to cover the entire input mesh.");
-  if (!TransitionLayerTools::isExternalBoundary(*input_mesh, _input_mesh_external_bid))
+  if (!FillBetweenPointVectorsTools::isExternalBoundary(*input_mesh, _input_mesh_external_bid))
     paramError("input_mesh_external_boundary",
                "The boundary provided is not an external boundary.");
 

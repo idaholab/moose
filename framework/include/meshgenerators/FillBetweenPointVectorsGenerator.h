@@ -11,15 +11,15 @@
 #include "MeshGenerator.h"
 
 /**
- * This StandaloneTransitionLayerGenerator object is designed to generate a transition layer with
+ * This FillBetweenPointVectorsGenerator object is designed to generate a transition layer with
  * two sides containing different node numbers.
  */
-class StandaloneTransitionLayerGenerator : public MeshGenerator
+class FillBetweenPointVectorsGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  StandaloneTransitionLayerGenerator(const InputParameters & parameters);
+  FillBetweenPointVectorsGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

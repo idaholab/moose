@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "StandaloneTransitionLayerGenerator.h"
-#include "TransitionLayerTools.h"
+#include "FillBetweenPointVectorsGenerator.h"
+#include "FillBetweenPointVectorsTools.h"
 
-registerMooseObject("MooseApp", StandaloneTransitionLayerGenerator);
+registerMooseObject("MooseApp", FillBetweenPointVectorsGenerator);
 
 InputParameters
-StandaloneTransitionLayerGenerator::validParams()
+FillBetweenPointVectorsGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<std::vector<Point>>("positions_vector_1",
@@ -57,12 +57,12 @@ StandaloneTransitionLayerGenerator::validParams()
       "Gaussian parameter used to smoothen local node density for automatic biasing; this "
       "parameter is not used if other biasing option is selected.");
   params.addClassDescription(
-      "This StandaloneTransitionLayerGenerator object is designed to generate a "
+      "This FillBetweenPointVectorsGenerator object is designed to generate a "
       "transition layer with two sides containing different numbers of nodes.");
   return params;
 }
 
-StandaloneTransitionLayerGenerator::StandaloneTransitionLayerGenerator(
+FillBetweenPointVectorsGenerator::FillBetweenPointVectorsGenerator(
     const InputParameters & parameters)
   : MeshGenerator(parameters),
     _positions_vector_1(getParam<std::vector<Point>>("positions_vector_1")),
@@ -80,22 +80,22 @@ StandaloneTransitionLayerGenerator::StandaloneTransitionLayerGenerator(
 }
 
 std::unique_ptr<MeshBase>
-StandaloneTransitionLayerGenerator::generate()
+FillBetweenPointVectorsGenerator::generate()
 {
   auto mesh = buildReplicatedMesh(2);
-  TransitionLayerTools::transitionLayerGenerator(*mesh,
-                                                 _positions_vector_2,
-                                                 _positions_vector_1,
-                                                 _num_layers,
-                                                 _block_id,
-                                                 _input_boundary_1_id,
-                                                 _input_boundary_2_id,
-                                                 _begin_side_boundary_id,
-                                                 _end_side_boundary_id,
-                                                 _type,
-                                                 _name,
-                                                 _use_quad_elements,
-                                                 _bias_parameter,
-                                                 _sigma);
+  FillBetweenPointVectorsTools::fillBetweenPointVectorsGenerator(*mesh,
+                                                                 _positions_vector_2,
+                                                                 _positions_vector_1,
+                                                                 _num_layers,
+                                                                 _block_id,
+                                                                 _input_boundary_1_id,
+                                                                 _input_boundary_2_id,
+                                                                 _begin_side_boundary_id,
+                                                                 _end_side_boundary_id,
+                                                                 _type,
+                                                                 _name,
+                                                                 _use_quad_elements,
+                                                                 _bias_parameter,
+                                                                 _sigma);
   return mesh;
 }

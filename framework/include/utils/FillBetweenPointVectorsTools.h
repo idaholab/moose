@@ -10,10 +10,11 @@
 #pragma once
 #include "LinearInterpolation.h"
 #include "SplineInterpolation.h"
+#include "MooseException.h"
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_modification.h"
 
-namespace TransitionLayerTools
+namespace FillBetweenPointVectorsTools
 {
 /**
  * Generates a 2D mesh with triangular elements for a region defined by two curves (sets of Points)
@@ -38,20 +39,20 @@ namespace TransitionLayerTools
  * @param sigma Gaussian parameter used for Gaussian blurring of local node density; only used if
  * bias_parameter <= 0
  */
-void transitionLayerGenerator(ReplicatedMesh & mesh,
-                              const std::vector<Point> boundary_points_vec_1,
-                              std::vector<Point> boundary_points_vec_2,
-                              const unsigned int num_layers,
-                              const subdomain_id_type transition_layer_id,
-                              const boundary_id_type input_boundary_1_id,
-                              const boundary_id_type input_boundary_2_id,
-                              const boundary_id_type begin_side_boundary_id,
-                              const boundary_id_type end_side_boundary_id,
-                              const std::string type,
-                              const std::string name,
-                              const bool quad_elem = false,
-                              const Real bias_parameter = 1.0,
-                              const Real sigma = 3.0);
+void fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh,
+                                      const std::vector<Point> boundary_points_vec_1,
+                                      std::vector<Point> boundary_points_vec_2,
+                                      const unsigned int num_layers,
+                                      const subdomain_id_type transition_layer_id,
+                                      const boundary_id_type input_boundary_1_id,
+                                      const boundary_id_type input_boundary_2_id,
+                                      const boundary_id_type begin_side_boundary_id,
+                                      const boundary_id_type end_side_boundary_id,
+                                      const std::string type,
+                                      const std::string name,
+                                      const bool quad_elem = false,
+                                      const Real bias_parameter = 1.0,
+                                      const Real sigma = 3.0);
 
 /**
  * Generates a 2D mesh with triangular elements for a region defined by two curves (sets of Points)
@@ -65,15 +66,15 @@ void transitionLayerGenerator(ReplicatedMesh & mesh,
  * @param name name of the MOOSE object that calls this method
  * @param quad_elem whether the QUAD4 elements are used to construct the mesh
  */
-void transitionLayerGenerator(ReplicatedMesh & mesh,
-                              const std::vector<Point> boundary_points_vec_1,
-                              const std::vector<Point> boundary_points_vec_2,
-                              const unsigned int num_layers,
-                              const subdomain_id_type transition_layer_id,
-                              const boundary_id_type external_boundary_id,
-                              const std::string type,
-                              const std::string name,
-                              const bool quad_elem = false);
+void fillBetweenPointVectorsGenerator(ReplicatedMesh & mesh,
+                                      const std::vector<Point> boundary_points_vec_1,
+                                      const std::vector<Point> boundary_points_vec_2,
+                                      const unsigned int num_layers,
+                                      const subdomain_id_type transition_layer_id,
+                                      const boundary_id_type external_boundary_id,
+                                      const std::string type,
+                                      const std::string name,
+                                      const bool quad_elem = false);
 
 /**
  * Generates a 2D mesh based on a 2D vector of Nodes using QUAD4 elements in the xy-plane

@@ -10,7 +10,7 @@
 #include "PatternedHexPeripheralModifier.h"
 
 #include "MooseMeshUtils.h"
-#include "TransitionLayerTools.h"
+#include "FillBetweenPointVectorsTools.h"
 
 registerMooseObject("ReactorApp", PatternedHexPeripheralModifier);
 
@@ -217,16 +217,16 @@ PatternedHexPeripheralModifier::generate()
                                 linear_outer_y->sample((Real)i / (Real)_new_num_sector),
                                 0.0));
     }
-    // Use transitionLayerGenerator to generate the transition layer
+    // Use fillBetweenPointVectorsGenerator to generate the transition layer
     auto mesh = buildReplicatedMesh(2);
-    TransitionLayerTools::transitionLayerGenerator(*mesh,
-                                                   inner_pts,
-                                                   outer_pts,
-                                                   _num_layers,
-                                                   _transition_layer_id,
-                                                   OUTER_SIDESET_ID,
-                                                   _type,
-                                                   _name);
+    FillBetweenPointVectorsTools::fillBetweenPointVectorsGenerator(*mesh,
+                                                                   inner_pts,
+                                                                   outer_pts,
+                                                                   _num_layers,
+                                                                   _transition_layer_id,
+                                                                   OUTER_SIDESET_ID,
+                                                                   _type,
+                                                                   _name);
 
     MeshTools::Modification::rotate(*mesh, (Real)i_side * 60.0, 0, 0);
     // Assign extra element id based on the nearest deleted element
