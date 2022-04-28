@@ -303,6 +303,8 @@ MultiApp::createApps()
   if (!_has_an_app)
     return;
 
+  TIME_SECTION("createApps", 2, "Instantiating Sub-Apps", false);
+
   // Read commandLine arguments that will be used when creating apps
   readCommandLineArguments();
 
