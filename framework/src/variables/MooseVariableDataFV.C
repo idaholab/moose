@@ -1144,6 +1144,55 @@ MooseVariableDataFV<OutputType>::dofValuesDuDotDotDu() const
 }
 
 template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::FieldVariableValue &
+MooseVariableDataFV<OutputType>::vectorTagValue(TagID tag) const
+{
+  // we need to check special tags until we use tagging for all evaluations
+  // otherwise we will have redundant evaluations.
+  if (tag == _subproblem.getVectorTagID(Moose::SOLUTION_TAG))
+    return sln(Moose::Current);
+  else if (_subproblem.vectorTagExists(Moose::OLD_SOLUTION_TAG) &&
+           tag == _subproblem.getVectorTagID(Moose::OLD_SOLUTION_TAG))
+    return sln(Moose::Old);
+  else if (_subproblem.vectorTagExists(Moose::OLDER_SOLUTION_TAG) &&
+           tag == _subproblem.getVectorTagID(Moose::OLDER_SOLUTION_TAG))
+    return sln(Moose::Older);
+  else
+  {
+    _need_vector_tag_u[tag] = true;
+
+    if (_sys.hasVector(tag) && tag < _vector_tag_u.size())
+      return _vector_tag_u[tag];
+    else
+      mooseError("Tag is not associated with any vector or there is not any data for tag ",
+                 tag,
+                 " for variable ",
+                 _var.name());
+  }
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::DoFValue &
+MooseVariableDataFV<OutputType>::vectorTagDofValue(TagID tag) const
+{
+  // we need to check special tags until we use tagging for all evaluations
+  // otherwise we will have redundant evaluations.
+  if (tag == _subproblem.getVectorTagID(Moose::SOLUTION_TAG))
+    return dofValues();
+  else if (_subproblem.vectorTagExists(Moose::OLD_SOLUTION_TAG) &&
+           tag == _subproblem.getVectorTagID(Moose::OLD_SOLUTION_TAG))
+    return dofValuesOld();
+  else if (_subproblem.vectorTagExists(Moose::OLDER_SOLUTION_TAG) &&
+           tag == _subproblem.getVectorTagID(Moose::OLDER_SOLUTION_TAG))
+    return dofValuesOlder();
+  else
+  {
+    _need_vector_tag_dof_u[tag] = true;
+    return _vector_tags_dof_u[tag];
+  }
+}
+
+template <typename OutputType>
 void
 MooseVariableDataFV<OutputType>::fetchDoFValues()
 {

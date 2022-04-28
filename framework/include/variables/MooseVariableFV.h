@@ -221,6 +221,10 @@ public:
   {
     return _element_data->vectorTagValue(tag);
   }
+  const DoFValue & vectorTagDofValue(TagID tag) const override
+  {
+    return _element_data->vectorTagDofValue(tag);
+  }
   const FieldVariableValue & matrixTagValue(TagID tag)
   {
     return _element_data->matrixTagValue(tag);

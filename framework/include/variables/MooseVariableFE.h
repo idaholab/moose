@@ -267,7 +267,7 @@ public:
   {
     return _element_data->vectorTagGradient(tag);
   }
-  const DoFValue & vectorTagDofValue(TagID tag) const
+  const DoFValue & vectorTagDofValue(TagID tag) const override
   {
     return _element_data->vectorTagDofValue(tag);
   }

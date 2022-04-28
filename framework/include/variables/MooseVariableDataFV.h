@@ -266,16 +266,18 @@ public:
 
   /////////////////////////////// Tags ///////////////////////////////////////////////////
 
-  const FieldVariableValue & vectorTagValue(TagID tag)
-  {
-    _need_vector_tag_u[tag] = true;
-    return _vector_tag_u[tag];
-  }
+  const FieldVariableValue & vectorTagValue(TagID tag) const;
   const FieldVariableValue & matrixTagValue(TagID tag)
   {
     _need_matrix_tag_u[tag] = true;
     return _matrix_tag_u[tag];
   }
+
+  /**
+   * Returns a reference to an array that holds the evaluations of the vector given by \p tag at the
+   * current degrees of freedom of this data's variable
+   */
+  const DoFValue & vectorTagDofValue(TagID tag) const;
 
   /// checks if a Dirichlet BC exists on this face
   bool hasDirichletBC() const { return _has_dirichlet_bc; }

@@ -2314,7 +2314,7 @@ MooseVariableData<OutputType>::vectorTagValue(TagID tag) const
            tag == _subproblem.getVectorTagID(Moose::OLD_SOLUTION_TAG))
     return sln(Moose::Old);
   else if (_subproblem.vectorTagExists(Moose::OLDER_SOLUTION_TAG) &&
-           tag == _subproblem.getVectorTagID(Moose::OLD_SOLUTION_TAG))
+           tag == _subproblem.getVectorTagID(Moose::OLDER_SOLUTION_TAG))
     return sln(Moose::Older);
   else
   {

@@ -256,16 +256,6 @@ protected:
                                                       unsigned int comp = 0) const;
 
   /**
-   * Returns value of a coupled variable for a given tag
-   * @param var_name Name of coupled variable
-   * @param tag_name vector tag name
-   * @return Reference to a VariableValue for the coupled variable
-   * @see Kernel::_u
-   */
-  const ArrayVariableValue & coupledVectorTagArrayValue(const std::string & var_name,
-                                                        const std::string & tag_name) const;
-
-  /**
    * Returns the values for all of a coupled variable's components for a given tag
    * @param var_name Name of coupled variable
    * @param tag vector tag ID
@@ -317,6 +307,15 @@ protected:
   virtual const VariableValue & coupledVectorTagDofValue(const std::string & var_name,
                                                          const std::string & tag_name,
                                                          unsigned int comp = 0) const;
+
+  /**
+   * Returns evaluations of a tagged vector at the requsted variable's degree of freedom indices
+   * @param var_name Name of coupled variable
+   * @param tag_name vector tag name
+   * @return Reference to a ArrayVariableValue for the coupled variable
+   */
+  const ArrayVariableValue & coupledVectorTagArrayDofValue(const std::string & var_name,
+                                                           const std::string & tag_name) const;
 
   /**
    * Returns the dof values for all of a coupled variable's components for a given tag
@@ -1272,7 +1271,10 @@ private:
    */
   template <typename T>
   const typename OutputTools<T>::VariableValue &
-  vectorTagValueHelper(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
+  vectorTagValueHelper(const std::string & var_name,
+                       TagID tag,
+                       unsigned int comp = 0,
+                       bool special_tag = false) const;
 
   /**
    * Generic helper method to get vector tag values based on tag name
@@ -1281,6 +1283,33 @@ private:
   const typename OutputTools<T>::VariableValue & vectorTagValueHelper(const std::string & var_name,
                                                                       const std::string & tag_name,
                                                                       unsigned int comp = 0) const;
+
+  /**
+   * Generic helper method to get vector tag degree of freedom values based on tag ID
+   */
+  template <typename T>
+  const typename OutputTools<T>::VariableValue &
+  vectorTagDofValueHelper(const std::string & var_name,
+                          TagID tag,
+                          unsigned int comp = 0,
+                          bool special_tag = false) const;
+
+  /**
+   * Generic helper method to get vector tag degree of freedom values based on tag name
+   */
+  template <typename T>
+  const typename OutputTools<T>::VariableValue & vectorTagDofValueHelper(
+      const std::string & var_name, const std::string & tag_name, unsigned int comp = 0) const;
+
+  /**
+   * Method that may request additional solution states from the variable's system depending on the
+   * value of \p tag_name. E.g. if the tag name corresponds to old or older variable solution
+   * values, then we must request more states
+   */
+  template <typename T>
+  void processSpecialTag(const std::string & var_name,
+                         const TagName & tag_name,
+                         const unsigned int comp);
 
   enum class FuncAge
   {
@@ -1487,6 +1516,12 @@ private:
   const bool _is_fv;
 
   const MooseObject * const _obj;
+
+  /// Special vector tag names for which we do not want to add to \p _fe_coupleable_vector_tags.
+  /// These tag names have special handling in variable \p vectorTagValue and \p vectorTagDofValue
+  /// getters
+  const std::set<std::string> _special_tags = {
+      Moose::SOLUTION_TAG, Moose::OLD_SOLUTION_TAG, Moose::OLDER_SOLUTION_TAG};
 };
 
 template <typename T>

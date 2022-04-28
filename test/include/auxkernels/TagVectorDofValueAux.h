@@ -12,25 +12,21 @@
 #include "TagAuxBase.h"
 #include "AuxKernel.h"
 
-/**
- * Couple a tagged vector, and return its evaluations at degree of freedom indices corresponding to
- * the coupled array variable
- */
-class TagVectorArrayAux : public TagAuxBase<ArrayAuxKernel>
+class TagVectorDofValueAux : public TagAuxBase<AuxKernel>
 {
 public:
   static InputParameters validParams();
 
-  TagVectorArrayAux(const InputParameters & parameters);
+  TagVectorDofValueAux(const InputParameters & parameters);
 
 protected:
   void compute() override;
-  RealEigenVector computeValue() override final { mooseError("Work is implemented in compute"); }
+  Real computeValue() override final { mooseError("Work is implemented in compute"); }
 
   /// The result of evaluating the supplied tagged vector at the degrees of freedom corresponding to
-  /// the provided array variable
-  const ArrayVariableValue & _v;
+  /// the provided variable
+  const VariableValue & _v;
 
-  using TagAuxBase<ArrayAuxKernel>::coupledVectorTagArrayDofValue;
-  using TagAuxBase<ArrayAuxKernel>::getArrayVar;
+  using TagAuxBase<AuxKernel>::coupledVectorTagDofValue;
+  using TagAuxBase<AuxKernel>::getFieldVar;
 };

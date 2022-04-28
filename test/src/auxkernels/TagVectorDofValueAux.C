@@ -7,32 +7,36 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TagVectorAux.h"
+#include "TagVectorDofValueAux.h"
 
-registerMooseObject("MooseApp", TagVectorAux);
+registerMooseObject("MooseApp", TagVectorDofValueAux);
 
 InputParameters
-TagVectorAux::validParams()
+TagVectorDofValueAux::validParams()
 {
   InputParameters params = TagAuxBase<AuxKernel>::validParams();
   params.addRequiredParam<TagName>("vector_tag", "Tag Name this Aux works on");
-  params.addClassDescription("Couple a tag vector, and return its nodal value");
   return params;
 }
 
-TagVectorAux::TagVectorAux(const InputParameters & parameters)
-  : TagAuxBase<AuxKernel>(parameters),
-    _v(coupledVectorTagValue("v", "vector_tag")),
-    _v_var(*getFieldVar("v", 0))
+TagVectorDofValueAux::TagVectorDofValueAux(const InputParameters & parameters)
+  : TagAuxBase<AuxKernel>(parameters), _v(coupledVectorTagDofValue("v", "vector_tag"))
+
 {
-  if (_v_var.feType() != _var.feType())
+  auto & v_var = *getFieldVar("v", 0);
+
+  if (v_var.feType() != _var.feType())
     paramError("variable",
                "The AuxVariable this AuxKernel is acting on has to have the same order and family "
                "as the variable 'v'");
 }
 
-Real
-TagVectorAux::computeValue()
+void
+TagVectorDofValueAux::compute()
 {
-  return _scaled ? _v[_qp] : _v[_qp] / _v_var.scalingFactor();
+  const auto n_local_dofs = _var.numberOfDofs();
+  _local_sol.resize(n_local_dofs);
+  for (const auto i : make_range(n_local_dofs))
+    _local_sol(i) = _v[i];
+  _var.setDofValues(_local_sol);
 }

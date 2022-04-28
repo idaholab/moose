@@ -168,4 +168,11 @@
     requirement = 'The system shall be able to retrieve tagged vector values for multiple coupled variables using a single interface.'
     cli_args = "AuxKernels/active='on_the_fly TagVectorAux2' Outputs/file_base=multiple_component_tag_interface"
   []
+  [fv]
+    type = 'Exodiff'
+    input = tag-fv.i
+    exodiff = tag-fv_out.e
+    requirement = 'The system shall be able to index solution vectors and residual vectors using the degree of freedom indices of a finite volume variable.'
+    ad_indexing_type = 'global'
+  []
 []

@@ -24,16 +24,24 @@ TagVectorArrayAux::validParams()
 }
 
 TagVectorArrayAux::TagVectorArrayAux(const InputParameters & parameters)
-  : TagAuxBase<ArrayAuxKernel>(parameters), _v(coupledVectorTagArrayValue("v", "vector_tag"))
+  : TagAuxBase<ArrayAuxKernel>(parameters), _v(coupledVectorTagArrayDofValue("v", "vector_tag"))
 {
   if (getArrayVar("v", 0)->feType() != _var.feType())
     paramError("variable",
                "The AuxVariable this AuxKernel is acting on has to have the same order and family "
                "as the variable 'v'");
+  if (getArrayVar("v", 0)->count() != _var.count())
+    paramError("variable",
+               "The AuxVariable this AuxKernel is acting on has to have the same number of "
+               "components as the variable 'v'");
 }
 
-RealEigenVector
-TagVectorArrayAux::computeValue()
+void
+TagVectorArrayAux::compute()
 {
-  return _v[_qp];
+  const auto n_local_dofs = _var.numberOfDofs();
+  _local_sol.resize(n_local_dofs);
+  for (const auto i : make_range(n_local_dofs))
+    _local_sol(i) = _v[i];
+  _var.setDofValues(_local_sol);
 }
