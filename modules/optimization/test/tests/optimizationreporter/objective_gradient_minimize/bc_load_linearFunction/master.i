@@ -117,22 +117,20 @@
   # HESSIAN transfers.  Same as forward.
   [fromHomogeneousForward]
     type = MultiAppReporterTransfer
-    multi_app = homogeneousForward
-    direction = from_multiapp
+    from_multi_app = homogeneousForward
     from_reporters = 'data_pt/temperature data_pt/temperature'
     to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
   []
   [toHomogeneousForward]
     type = OptimizationParameterTransfer
-    multi_app = homogeneousForward
+    to_multi_app = homogeneousForward
     value_names = 'p1 p2'
     parameters = 'Postprocessors/p1/value Postprocessors/p2/value'
     to_control = parameterReceiver
   []
   [toHomogeneousForward_measument]
     type = MultiAppReporterTransfer
-    multi_app = homogeneousForward
-    direction = to_multiapp
+    to_multi_app = homogeneousForward
     from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
     to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
   []

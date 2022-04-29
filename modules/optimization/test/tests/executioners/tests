@@ -19,20 +19,22 @@
     csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
     requirement = "Use bounded conjugate gradient solver"
   []
-#  [quadratic_taontr]
-#    type = CSVDiff
-#    cli_args = "Executioner/tao_solver=TAONTR"
-#    " Executioner/petsc_options_iname='-tao_ntr_min_radius -tao_ntr_max_radius -tao_ntr_init_type'"
-#    " Executioner/petsc_options_value='0 1e16 constant'"
-#    input = quadratic_minimize.i
-#    csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
-#    requirement = "Use TAONTR solver, exact"
-#  []
-#  [quadratic_multi]
-#    type = CSVDiff
-#    rel_err = 1.0e-4
-#    input = qm_multi_param.i
-#    csvdiff = qm_multi_param_out_OptimizationReporter_0001.csv
-#    requirement = "Solve with multiple parameters."
-#  []
+  [quadratic_taontr]
+    type = CSVDiff
+    cli_args = "Executioner/tao_solver=TAONTR"
+    " Executioner/petsc_options_iname='-tao_ntr_min_radius -tao_ntr_max_radius -tao_ntr_init_type'"
+    " Executioner/petsc_options_value='0 1e16 constant'"
+    input = quadratic_minimize.i
+    csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
+    skip = "Hessian broken"
+    requirement = "Use TAONTR solver, exact"
+  []
+  [quadratic_multi]
+    type = CSVDiff
+    rel_err = 1.0e-4
+    input = qm_multi_param.i
+    csvdiff = qm_multi_param_out_OptimizationReporter_0001.csv
+    skip = "Hessian broken"
+    requirement = "Solve with multiple parameters."
+  []
 []

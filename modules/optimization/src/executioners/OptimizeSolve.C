@@ -259,8 +259,7 @@ OptimizeSolve::objectiveAndGradientFunctionWrapper(
 }
 
 PetscErrorCode
-OptimizeSolve::hessianFunctionWrapper(
-    Tao /*tao*/, Vec /*x*/, Mat /*hessian*/, Mat /*pc*/, void * /*ctx*/)
+OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat /*hessian*/, Mat /*pc*/, void * ctx)
 {
   // this will need to set the real parameters (Vec x) on the solver (see ln 250) so that the
   // current parameter can be used in the applyHessianWrapper.  This is not important for force
@@ -294,9 +293,9 @@ PetscErrorCode
 OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVector<Number> & Hs)
 {
 
-  if (!_problem.hasMultiApps(EXEC_HOMOGENEOUS_FORWARD))
-    mooseError("Hessian based optimization algorithms require a sub-app with:\n"
-               "   execute_on = HOMOGENEOUS_FORWARD");
+  //  if (!_problem.hasMultiApps(EXEC_HOMOGENEOUS_FORWARD))
+  //    mooseError("Hessian based optimization algorithms require a sub-app with:\n"
+  //               "   execute_on = HOMOGENEOUS_FORWARD");
 
   // What happens for material inversion when the Hessian
   // is dependent on the parameters? Deal with it later???
@@ -327,10 +326,6 @@ OptimizeSolve::variableBoundsWrapper(Tao tao, Vec /*xl*/, Vec /*xu*/, void * ctx
 Real
 OptimizeSolve::objectiveFunction()
 {
-  if (!_problem.hasMultiApps(EXEC_FORWARD))
-    mooseError("All optimization algorithms require a sub-app with:\n"
-               "   execute_on = FORWARD");
-
   _form_function->updateParameters(*_parameters.get());
   bool multiapp_passed = true;
   if (!_problem.execMultiApps(EXEC_FORWARD))
@@ -343,10 +338,6 @@ OptimizeSolve::objectiveFunction()
 void
 OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 {
-  if (!_problem.hasMultiApps(EXEC_ADJOINT))
-    mooseError("Gradient based optimization algorithms require a sub-app with:\n"
-               "   execute_on = ADJOINT");
-
   _form_function->updateParameters(*_parameters.get());
   if (!_problem.execMultiApps(EXEC_ADJOINT))
     mooseError("Adjoint solve multiapp failed!");
