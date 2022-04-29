@@ -23,6 +23,8 @@ protected:
   virtual void computePartitionWeights(std::vector<GenericReal<is_ad>> & weights,
                                        std::vector<GenericReal<is_ad>> & dweights_dstress) override;
 
+  virtual void exportJSON() override;
+
   /**
    * Compute the partition weight on the location in input-space,
    * based on a calibrated Gaussian Process Regression model
@@ -39,37 +41,65 @@ protected:
   computeDSecondPartitionWeightDStress(GenericReal<is_ad> & dsecond_partition_weight_dstress);
 
   ///@{ Method and container for the Gaussian Process Regression lower triangular covariance matrix
-  virtual std::vector<std::vector<Real>> getClassificationLuu() = 0;
+  virtual std::vector<std::vector<Real>> getClassificationLuu()
+  {
+    this->checkJSONKey("luu");
+    return this->_json["luu"].template get<std::vector<std::vector<Real>>>();
+  }
   std::vector<std::vector<Real>> _partition_Luu;
   ///@}
 
   ///@{ Method and container for the Gaussian Process Regression model training points
-  virtual std::vector<std::vector<Real>> getClassificationXu() = 0;
+  virtual std::vector<std::vector<Real>> getClassificationXu()
+  {
+    this->checkJSONKey("xu");
+    return this->_json["xu"].template get<std::vector<std::vector<Real>>>();
+  }
   std::vector<std::vector<Real>> _partition_Xu;
   ///@}
 
   ///@{ Method and container for the inducing points of the Gaussian Process Regression model
-  virtual DenseVector<Real> getClassificationVind() = 0;
+  virtual DenseVector<Real> getClassificationVind()
+  {
+    this->checkJSONKey("vind");
+    return DenseVector<Real>(this->_json["vind"].template get<std::vector<Real>>());
+  }
   DenseVector<Real> _partition_Vind;
   ///@}
 
   ///@{ Method and container for the mean values of the training input
-  virtual std::vector<Real> getClassificationMmean() = 0;
+  virtual std::vector<Real> getClassificationMmean()
+  {
+    this->checkJSONKey("m_mean");
+    return this->_json["m_mean"].template get<std::vector<Real>>();
+  }
   std::vector<Real> _partition_Mmean;
   ///@}
 
   ///@{ Method and container for the scale factor of the training input points to normalize all input parameters to equivalent values
-  virtual std::vector<Real> getClassificationMscale() = 0;
+  virtual std::vector<Real> getClassificationMscale()
+  {
+    this->checkJSONKey("m_scale");
+    return this->_json["m_scale"].template get<std::vector<Real>>();
+  }
   std::vector<Real> _partition_Mscale;
   ///@}
 
   ///@{ Method and container for the calibrated Gaussian Regression Model hyperparameter "Ell", which controls the decay of the covariance as a function of distance
-  virtual Real getClassificationEll() = 0;
+  virtual Real getClassificationEll()
+  {
+    this->checkJSONKey("ell");
+    return this->_json["ell"].template get<Real>();
+  }
   Real _partition_Ell;
   ///@}
 
   ///@{ Method and container for the calibrated Gaussian Regression Model hyperparameter "Eta", which is a scale factor that controls the amplitude of the mean
-  virtual Real getClassificationEta() = 0;
+  virtual Real getClassificationEta()
+  {
+    this->checkJSONKey("eta");
+    return this->_json["eta"].template get<Real>();
+  }
   Real _partition_Eta;
   ///@}
 

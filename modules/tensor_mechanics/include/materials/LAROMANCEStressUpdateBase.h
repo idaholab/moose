@@ -10,6 +10,7 @@
 #pragma once
 
 #include "RadialReturnCreepStressUpdateBase.h"
+#include "nlohmann/json.h"
 
 template <bool is_ad>
 class LAROMANCEStressUpdateBaseTempl : public RadialReturnCreepStressUpdateBaseTempl<is_ad>
@@ -25,6 +26,8 @@ public:
   storeIncrementalMaterialProperties(const unsigned int total_number_substeps) override;
 
 protected:
+  virtual void exportJSON();
+
   virtual bool substeppingCapabilityEnabled() override;
 
   enum class ROMInputTransform
@@ -343,7 +346,12 @@ protected:
    * output[2]: strain increment
    * @return vector of the functions to use for the conversion of input variables.
    */
-  virtual std::vector<std::vector<std::vector<std::vector<ROMInputTransform>>>> getTransform() = 0;
+  virtual std::vector<std::vector<std::vector<std::vector<ROMInputTransform>>>> getTransform()
+  {
+    checkJSONKey("transform");
+    return _json["transform"]
+        .template get<std::vector<std::vector<std::vector<std::vector<ROMInputTransform>>>>>();
+  }
 
   /*
    * Returns factors for the functions for the conversion functions given in getTransform
@@ -361,7 +369,12 @@ protected:
    * output[2]: strain increment
    * @return factors for the functions for the conversion functions given in getTransform
    */
-  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getTransformCoefs() = 0;
+  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getTransformCoefs()
+  {
+    checkJSONKey("transform_coefs");
+    return _json["transform_coefs"]
+        .template get<std::vector<std::vector<std::vector<std::vector<Real>>>>>();
+  }
 
   /* Optional method that returns human-readable limits used for normalization. Default is to just
    * use the input limits.
@@ -377,6 +390,10 @@ protected:
    */
   virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getNormalizationLimits()
   {
+    if (_json.contains("normalization_limits"))
+      return _json["normalization_limits"]
+          .template get<std::vector<std::vector<std::vector<std::vector<Real>>>>>();
+
     return getInputLimits();
   }
 
@@ -391,14 +408,23 @@ protected:
    * input[5]: environmental factor (optional)
    * @return human-readable limits for the input limits
    */
-  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getInputLimits() = 0;
+  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getInputLimits()
+  {
+    checkJSONKey("input_limits");
+    return _json["input_limits"]
+        .template get<std::vector<std::vector<std::vector<std::vector<Real>>>>>();
+  }
 
   /*
    * Material specific coefficients multiplied by the Legendre polynomials for each of the input
    * variables
    * @return Legendre polynomial coefficients
    */
-  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getCoefs() = 0;
+  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getCoefs()
+  {
+    checkJSONKey("coefs");
+    return _json["coefs"].template get<std::vector<std::vector<std::vector<std::vector<Real>>>>>();
+  }
 
   /*
    * Material specific orientations of tiling
@@ -407,6 +433,9 @@ protected:
    */
   virtual std::vector<std::vector<unsigned int>> getTilings()
   {
+    if (_json.contains("tiling"))
+      return _json["tiling"].template get<std::vector<std::vector<unsigned int>>>();
+
     if (_environmental)
       return {{1, 1, 1, 1, 1, 1}};
     return {{1, 1, 1, 1, 1}};
@@ -417,7 +446,11 @@ protected:
    * by individual roms and each partition
    * @return Vector of material specific ROM low strain value for each partition
    */
-  virtual std::vector<Real> getStrainCutoff() = 0;
+  virtual std::vector<Real> getStrainCutoff()
+  {
+    checkJSONKey("cutoff");
+    return _json["cutoff"].template get<std::vector<Real>>();
+  }
 
   /// Coupled temperature variable
   const GenericVariableValue<is_ad> & _temperature;
@@ -602,6 +635,12 @@ protected:
 
   /// Material property capturing number of substeps for output purposes (defaults to one if substepping isn't used)
   MaterialProperty<Real> & _number_of_substeps;
+
+  /// check if a JSON file was loaded and if the specified key exists
+  void checkJSONKey(const std::string & key);
+
+  /// JSON object constructed from the datafile
+  nlohmann::json _json;
 
   using Material::_dt;
   using Material::_name;

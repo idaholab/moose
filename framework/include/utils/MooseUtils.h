@@ -615,11 +615,12 @@ std::string & removeColor(std::string & msg);
 std::list<std::string> listDir(const std::string path, bool files_only = false);
 
 bool pathExists(const std::string & path);
+bool pathIsDirectory(const std::string & path);
 
 /**
- * Retrieves the names of all of the files contained within the list of directories passed into the
- * routine.
- * The names returned will be the paths to the files relative to the current directory.
+ * Retrieves the names of all of the files contained within the list of directories passed into
+ * the routine. The names returned will be the paths to the files relative to the current
+ * directory.
  * @param directory_list The list of directories to retrieve files from.
  */
 std::list<std::string> getFilesInDirs(const std::list<std::string> & directory_list);

@@ -10,8 +10,18 @@
 #include "LAROMANCEStressUpdateBase.h"
 #include "Function.h"
 #include "MathUtils.h"
+#include "MooseUtils.h"
 #include "MooseRandom.h"
 #include "Units.h"
+
+#include <iostream>
+
+registerMooseObjectAliased("TensorMechanicsApp",
+                           LAROMANCEStressUpdateBase,
+                           "LAROMANCEStressUpdate");
+registerMooseObjectAliased("TensorMechanicsApp",
+                           ADLAROMANCEStressUpdateBase,
+                           "ADLAROMANCEStressUpdate");
 
 template <bool is_ad>
 InputParameters
@@ -143,6 +153,10 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
   params.addParam<unsigned int>("seed", 0, "Random number generator seed");
   params.addParam<std::string>("stress_unit", "Pa", "unit of stress");
 
+  // use std::string here to avoid automatic absolute path expansion
+  params.addParam<FileName>("model", "LaRomance model JSON datafile");
+  params.addParam<FileName>("export_model", "Write LaRomance model to JSON datafile");
+
   params.addParamNamesToGroup(
       "cell_dislocation_density_forcing_function wall_dislocation_density_forcing_function "
       "old_creep_strain_forcing_function effective_stress_forcing_function seed stress_unit",
@@ -248,7 +262,30 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
         parameters.get<MooseEnum>("environment_input_window_high_failure").getEnum<WindowFailure>();
   }
 
+  // load JSON datafile
+  if (this->isParamValid("model"))
+  {
+    const auto model_file_name = this->getDataFileName("model");
+    mooseInfo("Opening LaRomance data file '", model_file_name, "'...");
+    std::ifstream model_file(model_file_name.c_str());
+    model_file >> _json;
+  }
+
   setupUnitConversionFactors(parameters);
+}
+
+template <bool is_ad>
+void
+LAROMANCEStressUpdateBaseTempl<is_ad>::exportJSON()
+{
+  _json["strain_cutoff"] = getStrainCutoff();
+  _json["transform"] = getTransform();
+  _json["transform_coefs"] = getTransformCoefs();
+  _json["input_limits"] = getInputLimits();
+  _json["normalization_limits"] = getNormalizationLimits();
+  _json["coefs"] = getCoefs();
+  _json["tiling"] = getTilings();
+  _json["cutoff"] = getStrainCutoff();
 }
 
 template <bool is_ad>
@@ -273,6 +310,14 @@ template <bool is_ad>
 void
 LAROMANCEStressUpdateBaseTempl<is_ad>::initialSetup()
 {
+  // export models that are compiled in
+  if (this->isParamValid("export_model"))
+  {
+    exportJSON();
+    std::ofstream out(this->template getParam<FileName>("export_model").c_str());
+    out << _json;
+  }
+
   // Pull in relevant ROM information and do sanity checks
   _transform = getTransform();
   _transform_coefs = getTransformCoefs();
@@ -1340,6 +1385,21 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::outputIterationStep(
     *iter_output << " derivative: "
                  << MetaPhysicL::raw_value(computeDerivative(effective_trial_stress, scalar))
                  << std::endl;
+}
+
+template <bool is_ad>
+void
+LAROMANCEStressUpdateBaseTempl<is_ad>::checkJSONKey(const std::string & key)
+{
+  if (!this->isParamValid("model"))
+    this->paramError("model", "Specify a JSON data filename.");
+
+  const auto model_file_name = this->_pars.rawParamVal("model");
+  if (_json.empty())
+    this->paramError("model", "The specified JSON data file '", model_file_name, "' is empty.");
+  if (!_json.contains(key))
+    this->paramError(
+        "model", "The key '", key, "' is missing from the JSON data file '", model_file_name, "'.");
 }
 
 template class LAROMANCEStressUpdateBaseTempl<false>;
