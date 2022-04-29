@@ -1,6 +1,6 @@
 [Tests]
-  design = '/content/input_manual/multiscale_pebble.md'
-  issues = '#128'
+  design = 'MultiAppPostprocessorNearestElementTransfer.md'
+  issues = '#20913'
   [./full_domain_primary]
     type = Exodiff
     input = full_domain_primary.i
