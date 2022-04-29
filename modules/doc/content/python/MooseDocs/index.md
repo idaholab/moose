@@ -9,7 +9,7 @@ To ameliorate this problem, a single-source documentation system was developed b
 customizable markdown syntax---[Moose Style Markdown](MooseDocs/specification.md)---that includes
 features tailored to documenting MOOSE code:
 
-- C++ `MooseObject` descriptions and input parameters tables may be automatically generated from
+- C++ [`MooseObject`](MooseObject.md) descriptions and input parameters tables may be automatically generated from
   applications (see [/appsyntax.md]).
 - Cross-referencing links to examples and source code may be created (see [/autolink.md]).
 - Dynamic source code listings allow source to displayed without duplication and update

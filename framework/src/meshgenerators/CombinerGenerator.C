@@ -120,7 +120,6 @@ CombinerGenerator::generate()
   // Two cases:
   // 1. Multiple input meshes and optional positions
   // 2. One input mesh and multiple positions
-
   fillPositions();
 
   // Case 1
@@ -241,7 +240,6 @@ CombinerGenerator::copyIntoMesh(UnstructuredMesh & destination, const Unstructur
   // list APIs rather than element-by-element for speed.
   BoundaryInfo & boundary = destination.get_boundary_info();
   const BoundaryInfo & other_boundary = source.get_boundary_info();
-
   for (const auto & t : other_boundary.build_node_list())
     boundary.add_node(std::get<0>(t) + node_delta, std::get<1>(t));
 
@@ -253,4 +251,7 @@ CombinerGenerator::copyIntoMesh(UnstructuredMesh & destination, const Unstructur
 
   for (const auto & t : other_boundary.build_shellface_list())
     boundary.add_shellface(std::get<0>(t) + elem_delta, std::get<1>(t), std::get<2>(t));
+
+  for (auto elem : other_boundary.get_sideset_name_map())
+    boundary.set_sideset_name_map().insert(elem);
 }

@@ -195,18 +195,22 @@ mooseUnusedStream(S & oss, Args &&... args)
 
 template <typename S, typename... Args>
 void
+mooseInfoStreamRepeated(S & oss, Args &&... args)
+{
+  std::ostringstream ss;
+  mooseStreamAll(ss, args...);
+  std::string msg = mooseMsgFmt(ss.str(), "*** Info ***", COLOR_CYAN);
+  {
+    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+    oss << msg << std::flush;
+  }
+}
+
+template <typename S, typename... Args>
+void
 mooseInfoStream(S & oss, Args &&... args)
 {
-  mooseDoOnce(
-      {
-        std::ostringstream ss;
-        mooseStreamAll(ss, args...);
-        std::string msg = mooseMsgFmt(ss.str(), "*** Info ***", COLOR_CYAN);
-        {
-          Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
-          oss << msg << std::flush;
-        }
-      });
+  mooseDoOnce(mooseInfoStreamRepeated(oss, args...););
 }
 
 template <typename S, typename... Args>
@@ -295,4 +299,12 @@ void
 mooseInfo(Args &&... args)
 {
   moose::internal::mooseInfoStream(Moose::out, std::forward<Args>(args)...);
+}
+
+/// Emit an informational message with the given stringified, concatenated args.
+template <typename... Args>
+void
+mooseInfoRepeated(Args &&... args)
+{
+  moose::internal::mooseInfoStreamRepeated(Moose::out, std::forward<Args>(args)...);
 }

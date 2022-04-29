@@ -52,7 +52,17 @@
       cli_args = '--mesh-only'
       recover = false
 
-      detail = 'using multiple meshes with no positions.'
+      detail = 'using multiple meshes with no positions, and'
+    []
+
+    [name]
+      type = 'Exodiff'
+      input = 'combiner_merge_names.i'
+      exodiff = 'combiner_merge_names_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+
+      detail = 'while keeping name(s) of sidesets intact.'
     []
   []
 

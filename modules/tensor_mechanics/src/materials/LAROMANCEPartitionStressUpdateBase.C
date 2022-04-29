@@ -11,6 +11,13 @@
 
 #include <libmesh/dense_matrix.h> // libMesh::cholesky_solve
 
+registerMooseObjectAliased("TensorMechanicsApp",
+                           LAROMANCEPartitionStressUpdateBase,
+                           "LAROMANCEPartitionStressUpdate");
+registerMooseObjectAliased("TensorMechanicsApp",
+                           ADLAROMANCEPartitionStressUpdateBase,
+                           "ADLAROMANCEPartitionStressUpdate");
+
 template <bool is_ad>
 InputParameters
 LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::validParams()
@@ -53,6 +60,21 @@ LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::initialSetup()
   _partition_covariance.resize(_partition_distance.size());
   _partition_b.resize(_partition_covariance.size());
   _partition_A.resize(_partition_Luu[0].size(), _partition_Luu.size());
+}
+
+template <bool is_ad>
+void
+LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::exportJSON()
+{
+  LAROMANCEStressUpdateBaseTempl<is_ad>::exportJSON();
+
+  this->_json["m_mean"] = getClassificationMmean();
+  this->_json["m_scale"] = getClassificationMscale();
+  this->_json["xu"] = getClassificationXu();
+  this->_json["ell"] = getClassificationEll();
+  this->_json["eta"] = getClassificationEta();
+  this->_json["luu"] = getClassificationLuu();
+  this->_json["vind"] = getClassificationVind().get_values();
 }
 
 template <bool is_ad>
