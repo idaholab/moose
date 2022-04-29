@@ -1,0 +1,63 @@
+[Tests]
+  design = '/content/input_manual/multiscale_pebble.md'
+  issues = '#128'
+  [./full_domain_primary]
+    type = Exodiff
+    input = full_domain_primary.i
+    exodiff = full_domain_primary_out.e
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    requirement = "The system shall guarantee that linear lagrange variables transferred via MultiAppVariableValueSamplePostprocessorTransfer to the subapp are retrieved "
+                  " unchanged when transferred back using MultiAppPostprocessorNearestElementTransfer in case the CentroidMultiApp is used."
+  [../]
+  [./multiapp_block_restricted_primary]
+    type = Exodiff
+    input = multiapp_block_restricted_primary.i
+    exodiff = multiapp_block_restricted_primary_out.e
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    requirement = "The systen shall allow transferring CONSTANT MONOMIAL variables using block restriction in the CentroidMultiApp."
+  [../]
+  [./multiapp_and_var_block_restricted_primary]
+    type = Exodiff
+    input = multiapp_and_var_block_restricted_primary.i
+    exodiff = multiapp_and_var_block_restricted_primary_out.e
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    requirement = "The systen shall allow transferring block restricted CONSTANT MONOMIAL variables using block restriction in the CentroidMultiApp."
+  [../]
+  [./full_domain_primary_parallel]
+    type = Exodiff
+    input = full_domain_primary.i
+    exodiff = full_domain_primary_out.e
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    min_parallel = 4
+    max_parallel = 4
+    prereq = full_domain_primary
+    requirement = "The system shall guarantee that linear lagrange variables transferred via MultiAppVariableValueSamplePostprocessorTransfer to the subapp are retrieved "
+                  " unchanged when transferred back using MultiAppPostprocessorNearestElementTransfer in case the CentroidMultiApp is used when 4 mpi ranks are used."
+  [../]
+  [./multiapp_block_restricted_primary_parallel]
+    type = Exodiff
+    input = multiapp_block_restricted_primary.i
+    exodiff = multiapp_block_restricted_primary_out.e
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    min_parallel = 4
+    max_parallel = 4
+    prereq = multiapp_block_restricted_primary
+    requirement = "The systen shall allow transferring CONSTANT MONOMIAL variables using block restriction in the CentroidMultiApp when 4 mpi ranks are used."
+  [../]
+  [./multiapp_and_var_block_restricted_primary_parallel]
+    type = Exodiff
+    input = multiapp_and_var_block_restricted_primary.i
+    exodiff = multiapp_and_var_block_restricted_primary_out.e
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    min_parallel = 4
+    max_parallel = 4
+    prereq = multiapp_and_var_block_restricted_primary
+    requirement = "The systen shall allow transferring block restricted CONSTANT MONOMIAL variables using block restriction in the CentroidMultiApp when 4 mpi ranks are used."
+  [../]
+[]
