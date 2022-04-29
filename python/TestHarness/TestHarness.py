@@ -734,6 +734,27 @@ class TestHarness:
                 if len(sorted_tups) == 0 or float(sorted_tups[0][0].getTiming()) == 0:
                     print('No jobs were completed.')
 
+                # The TestHarness receives completed jobs serially out of order, when we want
+                # to work with groups (can't use self.test_table).
+                tester_dirs = {}
+                dag_table = []
+                for jobs, dag, thread_lock in self.scheduler.retrieveDAGs():
+                    original_dag = dag.getOriginalDAG()
+                    total_time = float(0.0)
+                    for tester in dag.topological_sort(original_dag):
+                        if not tester.isSkip():
+                            total_time += tester.getTiming()
+                    tester_dirs[tester.getTestDir()] = (tester_dirs.get(tester.getTestDir(), 0) + total_time)
+                for k, v in tester_dirs.items():
+                    dag_table.append([f'{os.path.sep}'.join(k.split(os.path.sep)[-2:]), f'{v:.3f}'])
+
+                sorted_table = sorted(dag_table, key=lambda dag_table: float(dag_table[1]), reverse=True)
+                if sorted_table[0:self.options.longest_jobs]:
+                    print(f'\n{self.options.longest_jobs} longest running spec files:')
+                    print(('-' * (util.TERM_COLS)))
+                    for group in sorted_table[0:self.options.longest_jobs]:
+                        print(str(group[0]).ljust((util.TERM_COLS - (len(group[1]) + 4)), ' '), f'[{group[1]}s]')
+
             # Perform any write-to-disc operations
             self.writeResults()
 
