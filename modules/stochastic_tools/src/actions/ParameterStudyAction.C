@@ -710,18 +710,18 @@ ParameterStudyAction::inferMultiAppMode()
   const auto input_filename = MooseUtils::realpath(getParam<FileName>("input"));
   std::ifstream f(input_filename);
   std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-  std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
-  hit::explode(root.get());
+  std::unique_ptr<wasp_hit::Node> root(wasp_hit::parse(input_filename, input));
+  wasp_hit::explode(root.get());
 
   // Walk through the input and see if every param is controllable
   AreParametersControllableWalker control_walker(params, _app);
-  root->walk(&control_walker, hit::NodeType::Section);
+  root->walk(&control_walker, wasp_hit::NodeType::Section);
   if (!control_walker.areControllable())
     return default_mode;
 
   // Walk through the input and determine how the problem is being executed
   ExecutionTypeWalker exec_walker;
-  root->walk(&exec_walker, hit::NodeType::Section);
+  root->walk(&exec_walker, wasp_hit::NodeType::Section);
   // If it is steady-state, then we don't need to restore
   if (exec_walker.getExecutionType() == 1)
     return 4;
@@ -748,7 +748,7 @@ AreParametersControllableWalker::AreParametersControllableWalker(
 void
 AreParametersControllableWalker::walk(const std::string & fullpath,
                                       const std::string & /*nodename*/,
-                                      hit::Node * n)
+                                      wasp_hit::Node * n)
 {
   for (const auto & i : index_range(_pars))
   {
@@ -757,7 +757,7 @@ AreParametersControllableWalker::walk(const std::string & fullpath,
     if (obj == fullpath)
     {
       const auto typeit = n->find("type");
-      if (typeit && typeit != n && typeit->type() == hit::NodeType::Field)
+      if (typeit && typeit != n && typeit->type() == wasp_hit::NodeType::Field)
       {
         const std::string obj_type = n->param<std::string>("type");
         const auto params = _app.getFactory().getValidParams(obj_type);
@@ -779,7 +779,7 @@ AreParametersControllableWalker::areControllable() const
 void
 ExecutionTypeWalker::walk(const std::string & fullpath,
                           const std::string & /*nodename*/,
-                          hit::Node * n)
+                          wasp_hit::Node * n)
 {
   if (fullpath == "Executioner")
   {
@@ -792,7 +792,7 @@ ExecutionTypeWalker::walk(const std::string & fullpath,
       // Get the type of executioner
       std::string executioner_type = "Unknown";
       const auto typeit = n->find("type");
-      if (typeit && typeit != n && typeit->type() == hit::NodeType::Field)
+      if (typeit && typeit != n && typeit->type() == wasp_hit::NodeType::Field)
         executioner_type = n->param<std::string>("type");
 
       // If it's Steady or Eigenvalue, then it's a steady-state problem
@@ -803,7 +803,7 @@ ExecutionTypeWalker::walk(const std::string & fullpath,
       {
         // Now we'll see if it's a pseudo transient
         const auto it = n->find("steady_state_detection");
-        if (it && it != n && it->type() == hit::NodeType::Field &&
+        if (it && it != n && it->type() == wasp_hit::NodeType::Field &&
             n->param<bool>("steady_state_detection"))
           _exec_type = 2;
         else

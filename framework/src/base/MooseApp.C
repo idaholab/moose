@@ -801,10 +801,10 @@ MooseApp::setupOptions()
 
     Moose::out << "### START REGISTRY DATA ###\n";
 
-    hit::Section root("");
-    auto sec = new hit::Section("registry");
+    wasp_hit::Section root("");
+    auto sec = new wasp_hit::Section("registry");
     root.addChild(sec);
-    auto objsec = new hit::Section("objects");
+    auto objsec = new wasp_hit::Section("objects");
     sec->addChild(objsec);
 
     auto & objmap = Registry::allObjects();
@@ -818,30 +818,30 @@ MooseApp::setupOptions()
         if (name.empty())
           name = obj._classname;
 
-        auto ent = new hit::Section("entry");
+        auto ent = new wasp_hit::Section("entry");
         objsec->addChild(ent);
-        ent->addChild(new hit::Field("label", hit::Field::Kind::String, entry.first));
-        ent->addChild(new hit::Field("type", hit::Field::Kind::String, "object"));
-        ent->addChild(new hit::Field("name", hit::Field::Kind::String, name));
-        ent->addChild(new hit::Field("class", hit::Field::Kind::String, obj._classname));
-        ent->addChild(new hit::Field("file", hit::Field::Kind::String, obj._file));
+        ent->addChild(new wasp_hit::Field("label", wasp_hit::Field::Kind::String, entry.first));
+        ent->addChild(new wasp_hit::Field("type", wasp_hit::Field::Kind::String, "object"));
+        ent->addChild(new wasp_hit::Field("name", wasp_hit::Field::Kind::String, name));
+        ent->addChild(new wasp_hit::Field("class", wasp_hit::Field::Kind::String, obj._classname));
+        ent->addChild(new wasp_hit::Field("file", wasp_hit::Field::Kind::String, obj._file));
       }
     }
 
-    auto actsec = new hit::Section("actions");
+    auto actsec = new wasp_hit::Section("actions");
     sec->addChild(actsec);
     auto & actmap = Registry::allActions();
     for (auto & entry : actmap)
     {
       for (auto & act : entry.second)
       {
-        auto ent = new hit::Section("entry");
+        auto ent = new wasp_hit::Section("entry");
         actsec->addChild(ent);
-        ent->addChild(new hit::Field("label", hit::Field::Kind::String, entry.first));
-        ent->addChild(new hit::Field("type", hit::Field::Kind::String, "action"));
-        ent->addChild(new hit::Field("task", hit::Field::Kind::String, act._name));
-        ent->addChild(new hit::Field("class", hit::Field::Kind::String, act._classname));
-        ent->addChild(new hit::Field("file", hit::Field::Kind::String, act._file));
+        ent->addChild(new wasp_hit::Field("label", wasp_hit::Field::Kind::String, entry.first));
+        ent->addChild(new wasp_hit::Field("type", wasp_hit::Field::Kind::String, "action"));
+        ent->addChild(new wasp_hit::Field("task", wasp_hit::Field::Kind::String, act._name));
+        ent->addChild(new wasp_hit::Field("class", wasp_hit::Field::Kind::String, act._classname));
+        ent->addChild(new wasp_hit::Field("file", wasp_hit::Field::Kind::String, act._file));
       }
     }
 

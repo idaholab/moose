@@ -414,7 +414,7 @@ endif
 $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
+	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) $(wasp_LIB)
 	@$(codesign)
 
 ###### install stuff #############

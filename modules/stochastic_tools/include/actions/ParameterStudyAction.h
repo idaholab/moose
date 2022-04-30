@@ -10,7 +10,7 @@
 #pragma once
 
 #include "Action.h"
-#include "hit.h"
+#include "wasp_hit.h"
 
 // Forward declarations
 class ReporterName;
@@ -191,12 +191,13 @@ ParameterStudyAction::getDistributionParam(std::string param, unsigned int count
 /**
  * This class is a hit walker used to see if a list of parameters are all controllable
  */
-class AreParametersControllableWalker : public hit::Walker
+class AreParametersControllableWalker : public wasp_hit::Walker
 {
 public:
   AreParametersControllableWalker(const std::vector<std::string> & parameters, MooseApp & app);
 
-  void walk(const std::string & fullpath, const std::string & nodename, hit::Node * n) override;
+  void
+  walk(const std::string & fullpath, const std::string & nodename, wasp_hit::Node * n) override;
   bool areControllable() const;
 
 private:
@@ -208,12 +209,13 @@ private:
 /**
  * This class is a hit walker used to see what type of execution the input is doing
  */
-class ExecutionTypeWalker : public hit::Walker
+class ExecutionTypeWalker : public wasp_hit::Walker
 {
 public:
   ExecutionTypeWalker() : _exec_type(0), _found_exec(false) {}
 
-  void walk(const std::string & fullpath, const std::string & nodename, hit::Node * n) override;
+  void
+  walk(const std::string & fullpath, const std::string & nodename, wasp_hit::Node * n) override;
   unsigned int getExecutionType() const { return _exec_type; }
 
 private:

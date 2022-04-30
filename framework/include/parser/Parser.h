@@ -15,7 +15,7 @@
 #include "InputParameters.h"
 #include "Syntax.h"
 
-#include "hit.h"
+#include "wasp_hit.h"
 
 #include <vector>
 #include <string>
@@ -30,18 +30,18 @@ class ActionFactory;
 class GlobalParamsAction;
 class JsonSyntaxTree;
 
-class FuncParseEvaler : public hit::Evaler
+class FuncParseEvaler : public wasp_hit::Evaler
 {
 public:
   virtual std::string
-  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp);
+  eval(wasp_hit::Field * n, const std::list<std::string> & args, wasp_hit::BraceExpander & exp);
 };
 
-class UnitsConversionEvaler : public hit::Evaler
+class UnitsConversionEvaler : public wasp_hit::Evaler
 {
 public:
   virtual std::string
-  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp);
+  eval(wasp_hit::Field * n, const std::list<std::string> & args, wasp_hit::BraceExpander & exp);
 };
 
 /**
@@ -49,7 +49,7 @@ public:
  * parsing files. It is not currently designed for extensibility. If you wish to build your own
  * parser, please contact the MOOSE team for guidance.
  */
-class Parser : public ConsoleStreamInterface, public hit::Walker
+class Parser : public ConsoleStreamInterface, public wasp_hit::Walker
 {
 public:
   enum SyntaxFormatterType
@@ -95,7 +95,7 @@ public:
    */
   void buildJsonSyntaxTree(JsonSyntaxTree & tree) const;
 
-  void walk(const std::string & fullpath, const std::string & nodepath, hit::Node * n);
+  void walk(const std::string & fullpath, const std::string & nodepath, wasp_hit::Node * n);
 
   void errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool err_unused);
 
@@ -229,8 +229,8 @@ protected:
                                     bool in_global,
                                     GlobalParamsAction * global_block);
 
-  std::unique_ptr<hit::Node> _cli_root = nullptr;
-  std::unique_ptr<hit::Node> _root = nullptr;
+  std::unique_ptr<wasp_hit::Node> _cli_root = nullptr;
+  std::unique_ptr<wasp_hit::Node> _root = nullptr;
   std::vector<std::string> _secs_need_first;
 
   /// The MooseApp this Parser is part of
@@ -265,5 +265,5 @@ protected:
 private:
   std::string _errmsg;
   std::string _warnmsg;
-  void walkRaw(std::string fullpath, std::string nodepath, hit::Node * n);
+  void walkRaw(std::string fullpath, std::string nodepath, wasp_hit::Node * n);
 };

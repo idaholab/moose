@@ -51,7 +51,9 @@
 #include <cstdlib>
 
 std::string
-FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
+FuncParseEvaler::eval(wasp_hit::Field * n,
+                      const std::list<std::string> & args,
+                      wasp_hit::BraceExpander & exp)
 {
   std::string func_text;
   for (auto & s : args)
@@ -65,7 +67,7 @@ FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::
   auto ret = fp.ParseAndDeduceVariables(func_text, var_names);
   if (ret != -1)
   {
-    exp.errors.push_back(hit::errormsg(n, "fparse error: ", fp.ErrorMsg()));
+    exp.errors.push_back(wasp_hit::errormsg(n, "fparse error: ", fp.ErrorMsg()));
     return n->val();
   }
 
@@ -74,20 +76,20 @@ FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::
   for (auto & var : var_names)
   {
     // recursively check all parent scopes for the needed variables
-    hit::Node * curr = n;
+    wasp_hit::Node * curr = n;
     while ((curr = curr->parent()))
     {
       auto src = curr->find(var);
-      if (src && src != n && src->type() == hit::NodeType::Field)
+      if (src && src != n && src->type() == wasp_hit::NodeType::Field)
       {
-        exp.used.push_back(hit::pathJoin({curr->fullpath(), var}));
+        exp.used.push_back(wasp_hit::pathJoin({curr->fullpath(), var}));
         var_vals.push_back(curr->param<double>(var));
         break;
       }
     }
 
     if (curr == nullptr)
-      exp.errors.push_back(hit::errormsg(
+      exp.errors.push_back(wasp_hit::errormsg(
           n, "\n    no variable '", var, "' found for use in function parser expression"));
   }
 
@@ -98,14 +100,14 @@ FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::
   ss << std::setprecision(17) << fp.Eval(var_vals.data());
 
   // change kind only (not val)
-  n->setVal(n->val(), hit::Field::Kind::Float);
+  n->setVal(n->val(), wasp_hit::Field::Kind::Float);
   return ss.str();
 }
 
 std::string
-UnitsConversionEvaler::eval(hit::Field * n,
+UnitsConversionEvaler::eval(wasp_hit::Field * n,
                             const std::list<std::string> & args,
-                            hit::BraceExpander & exp)
+                            wasp_hit::BraceExpander & exp)
 {
   std::vector<std::string> argv;
   argv.insert(argv.begin(), args.begin(), args.end());
@@ -113,17 +115,17 @@ UnitsConversionEvaler::eval(hit::Field * n,
   // no conversion, the expression currently only documents the units and passes through the value
   if (argv.size() == 2)
   {
-    n->setVal(n->val(), hit::Field::Kind::Float);
+    n->setVal(n->val(), wasp_hit::Field::Kind::Float);
     return argv[0];
   }
 
   // conversion
   if (argv.size() != 4 || (argv.size() >= 3 && argv[2] != "->"))
   {
-    exp.errors.push_back(
-        hit::errormsg(n,
-                      "units error: Expected 4 arguments ${units number from_unit -> to_unit} or "
-                      "2 arguments  ${units number unit}"));
+    exp.errors.push_back(wasp_hit::errormsg(
+        n,
+        "units error: Expected 4 arguments ${units number from_unit -> to_unit} or "
+        "2 arguments  ${units number unit}"));
     return n->val();
   }
 
@@ -132,16 +134,16 @@ UnitsConversionEvaler::eval(hit::Field * n,
   auto to_unit = MooseUnits(argv[3]);
   if (!from_unit.conformsTo(to_unit))
   {
-    exp.errors.push_back(hit::errormsg(n,
-                                       "units error: ",
-                                       argv[1],
-                                       " (",
-                                       from_unit,
-                                       ") does not convert to ",
-                                       argv[3],
-                                       " (",
-                                       to_unit,
-                                       ")"));
+    exp.errors.push_back(wasp_hit::errormsg(n,
+                                            "units error: ",
+                                            argv[1],
+                                            " (",
+                                            from_unit,
+                                            ") does not convert to ",
+                                            argv[3],
+                                            " (",
+                                            to_unit,
+                                            ")"));
     return n->val();
   }
 
@@ -153,7 +155,7 @@ UnitsConversionEvaler::eval(hit::Field * n,
   ss << std::setprecision(17) << to_unit.convert(num, from_unit);
 
   // change kind only (not val)
-  n->setVal(n->val(), hit::Field::Kind::Float);
+  n->setVal(n->val(), wasp_hit::Field::Kind::Float);
   return ss.str();
 }
 
@@ -174,34 +176,35 @@ Parser::Parser(MooseApp & app, ActionWarehouse & action_wh)
 Parser::~Parser() {}
 
 bool
-isSectionActive(std::string path, hit::Node * root)
+isSectionActive(std::string path, wasp_hit::Node * root)
 {
-  hit::Node * n = root->find(path);
+  wasp_hit::Node * n = root->find(path);
   while (n)
   {
-    hit::Node * section = n->parent();
+    wasp_hit::Node * section = n->parent();
     if (section)
     {
       auto actives = section->find("active");
       auto inactives = section->find("inactive");
 
       // only check current level, not nested ones
-      if (actives && actives->type() == hit::NodeType::Field && actives->parent() == section)
+      if (actives && actives->type() == wasp_hit::NodeType::Field && actives->parent() == section)
       {
         auto vars = section->param<std::vector<std::string>>("active");
         bool have_var = false;
         for (auto & var : vars)
-          if (n->path() == hit::pathNorm(var))
+          if (n->path() == wasp_hit::pathNorm(var))
             have_var = true;
         if (!have_var)
           return false;
       }
       // only check current level, not nested ones
-      if (inactives && inactives->type() == hit::NodeType::Field && inactives->parent() == section)
+      if (inactives && inactives->type() == wasp_hit::NodeType::Field &&
+          inactives->parent() == section)
       {
         auto vars = section->param<std::vector<std::string>>("inactive");
         for (auto & var : vars)
-          if (n->path() == hit::pathNorm(var))
+          if (n->path() == wasp_hit::pathNorm(var))
             return false;
       }
     }
@@ -210,13 +213,14 @@ isSectionActive(std::string path, hit::Node * root)
   return true;
 }
 
-class DupParamWalker : public hit::Walker
+class DupParamWalker : public wasp_hit::Walker
 {
 public:
   DupParamWalker() {}
-  void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
+  void
+  walk(const std::string & fullpath, const std::string & /*nodepath*/, wasp_hit::Node * n) override
   {
-    std::string prefix = n->type() == hit::NodeType::Field ? "parameter" : "section";
+    std::string prefix = n->type() == wasp_hit::NodeType::Field ? "parameter" : "section";
 
     if (_have.count(fullpath) > 0)
     {
@@ -224,10 +228,10 @@ public:
       if (_duplicates.count(fullpath) == 0)
       {
         errors.push_back(
-            hit::errormsg(existing, prefix, " '", fullpath, "' supplied multiple times"));
+            wasp_hit::errormsg(existing, prefix, " '", fullpath, "' supplied multiple times"));
         _duplicates.insert(fullpath);
       }
-      errors.push_back(hit::errormsg(n, prefix, " '", fullpath, "' supplied multiple times"));
+      errors.push_back(wasp_hit::errormsg(n, prefix, " '", fullpath, "' supplied multiple times"));
     }
     _have[fullpath] = n;
   }
@@ -236,17 +240,18 @@ public:
 
 private:
   std::set<std::string> _duplicates;
-  std::map<std::string, hit::Node *> _have;
+  std::map<std::string, wasp_hit::Node *> _have;
 };
 
-class CompileParamWalker : public hit::Walker
+class CompileParamWalker : public wasp_hit::Walker
 {
 public:
-  typedef std::map<std::string, hit::Node *> ParamMap;
+  typedef std::map<std::string, wasp_hit::Node *> ParamMap;
   CompileParamWalker(ParamMap & map) : _map(map) {}
-  void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
+  void
+  walk(const std::string & fullpath, const std::string & /*nodepath*/, wasp_hit::Node * n) override
   {
-    if (n->type() == hit::NodeType::Field)
+    if (n->type() == wasp_hit::NodeType::Field)
       _map[fullpath] = n;
   }
 
@@ -254,21 +259,22 @@ private:
   ParamMap & _map;
 };
 
-class OverrideParamWalker : public hit::Walker
+class OverrideParamWalker : public wasp_hit::Walker
 {
 public:
   OverrideParamWalker(const CompileParamWalker::ParamMap & map) : _map(map) {}
-  void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
+  void
+  walk(const std::string & fullpath, const std::string & /*nodepath*/, wasp_hit::Node * n) override
   {
     const auto it = _map.find(fullpath);
     if (it != _map.end())
-      warnings.push_back(hit::errormsg(n,
-                                       " Parameter '",
-                                       fullpath,
-                                       "' overrides the same parameter in ",
-                                       it->second->filename(),
-                                       ":",
-                                       it->second->line()));
+      warnings.push_back(wasp_hit::errormsg(n,
+                                            " Parameter '",
+                                            fullpath,
+                                            "' overrides the same parameter in ",
+                                            it->second->filename(),
+                                            ":",
+                                            it->second->line()));
   }
 
   std::vector<std::string> warnings;
@@ -320,12 +326,12 @@ Parser::listValidParams(std::string & section_name)
   return paramlist;
 }
 
-class UnusedWalker : public hit::Walker
+class UnusedWalker : public wasp_hit::Walker
 {
 public:
   UnusedWalker(std::set<std::string> used, Parser & p) : _used(used), _parser(p) {}
 
-  void walk(const std::string & fullpath, const std::string & nodename, hit::Node * n) override
+  void walk(const std::string & fullpath, const std::string & nodename, wasp_hit::Node * n) override
   {
     // the line() > 0 check allows us to skip nodes that were merged into this tree (i.e. CLI
     // args) because their unused params are checked+reported independently of the ones in the
@@ -337,10 +343,10 @@ public:
       auto paramlist = _parser.listValidParams(section_name);
       auto candidates = findSimilar(nodename, paramlist);
       if (candidates.size() > 0)
-        errors.push_back(hit::errormsg(
+        errors.push_back(wasp_hit::errormsg(
             n, "unused parameter '", fullpath, "'\n", "      Did you mean '", candidates[0], "'?"));
       else
-        errors.push_back(hit::errormsg(n, "unused parameter '", fullpath, "'"));
+        errors.push_back(wasp_hit::errormsg(n, "unused parameter '", fullpath, "'"));
     }
   }
 
@@ -351,27 +357,27 @@ private:
   Parser & _parser;
 };
 
-class BadActiveWalker : public hit::Walker
+class BadActiveWalker : public wasp_hit::Walker
 {
 public:
   BadActiveWalker() {}
   void walk(const std::string & /*fullpath*/,
             const std::string & /*nodepath*/,
-            hit::Node * section) override
+            wasp_hit::Node * section) override
   {
     auto actives = section->find("active");
     auto inactives = section->find("inactive");
 
-    if (actives && inactives && actives->type() == hit::NodeType::Field &&
-        inactives->type() == hit::NodeType::Field && actives->parent() == inactives->parent())
+    if (actives && inactives && actives->type() == wasp_hit::NodeType::Field &&
+        inactives->type() == wasp_hit::NodeType::Field && actives->parent() == inactives->parent())
     {
-      errors.push_back(
-          hit::errormsg(section, "'active' and 'inactive' parameters both provided in section"));
+      errors.push_back(wasp_hit::errormsg(
+          section, "'active' and 'inactive' parameters both provided in section"));
       return;
     }
 
     // ensures we don't recheck deeper nesting levels
-    if (actives && actives->type() == hit::NodeType::Field && actives->parent() == section)
+    if (actives && actives->type() == wasp_hit::NodeType::Field && actives->parent() == section)
     {
       auto vars = section->param<std::vector<std::string>>("active");
       std::string msg = "";
@@ -383,16 +389,17 @@ public:
       if (msg.size() > 0)
       {
         msg = msg.substr(0, msg.size() - 2);
-        errors.push_back(hit::errormsg(section,
-                                       "variables listed as active (",
-                                       msg,
-                                       ") in section '",
-                                       section->fullpath(),
-                                       "' not found in input"));
+        errors.push_back(wasp_hit::errormsg(section,
+                                            "variables listed as active (",
+                                            msg,
+                                            ") in section '",
+                                            section->fullpath(),
+                                            "' not found in input"));
       }
     }
     // ensures we don't recheck deeper nesting levels
-    if (inactives && inactives->type() == hit::NodeType::Field && inactives->parent() == section)
+    if (inactives && inactives->type() == wasp_hit::NodeType::Field &&
+        inactives->parent() == section)
     {
       auto vars = section->param<std::vector<std::string>>("inactive");
       std::string msg = "";
@@ -404,12 +411,12 @@ public:
       if (msg.size() > 0)
       {
         msg = msg.substr(0, msg.size() - 2);
-        errors.push_back(hit::errormsg(section,
-                                       "variables listed as inactive (",
-                                       msg,
-                                       ") in section '",
-                                       section->fullpath(),
-                                       "' not found in input"));
+        errors.push_back(wasp_hit::errormsg(section,
+                                            "variables listed as inactive (",
+                                            msg,
+                                            ") in section '",
+                                            section->fullpath(),
+                                            "' not found in input"));
       }
     }
   }
@@ -433,7 +440,7 @@ Parser::getPrimaryFileName(bool stripLeadingPath) const
 }
 
 void
-Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * n)
+Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, wasp_hit::Node * n)
 {
   InputParameters active_list_params = Action::validParams();
   InputParameters params = EmptyAction::validParams();
@@ -456,12 +463,12 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
   auto iters = _syntax.getActions(registered_identifier);
   if (iters.first == iters.second)
   {
-    _errmsg += hit::errormsg(n,
-                             "section '[",
-                             curr_identifier,
-                             "]' does not have an associated \"Action\".\n Common causes:\n"
-                             "- you misspelled the Action/section name\n"
-                             "- the app you are running does not support this Action/syntax") +
+    _errmsg += wasp_hit::errormsg(n,
+                                  "section '[",
+                                  curr_identifier,
+                                  "]' does not have an associated \"Action\".\n Common causes:\n"
+                                  "- you misspelled the Action/section name\n"
+                                  "- the app you are running does not support this Action/syntax") +
                "\n";
     return;
   }
@@ -472,7 +479,7 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
       continue;
     if (_syntax.isDeprecatedSyntax(registered_identifier))
       mooseDeprecated(
-          hit::errormsg(n, _syntax.deprecatedActionSyntaxMessage(registered_identifier)));
+          wasp_hit::errormsg(n, _syntax.deprecatedActionSyntaxMessage(registered_identifier)));
 
     params = _action_factory.getValidParams(it->second._action);
 
@@ -515,7 +522,7 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
 }
 
 void
-Parser::walk(const std::string & fullpath, const std::string & nodepath, hit::Node * n)
+Parser::walk(const std::string & fullpath, const std::string & nodepath, wasp_hit::Node * n)
 {
   // skip sections that were manually processed first.
   for (auto & sec : _secs_need_first)
@@ -583,14 +590,14 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
 
     try
     {
-      hit::check("CLI_ARG", arg);
+      wasp_hit::check("CLI_ARG", arg);
       hit_text += " " + arg;
       // handle case where bash ate quotes around an empty string after the "="
       if (arg.find("=", 0) == arg.size() - 1)
         hit_text += "''";
       _app.commandLine()->markHitParamUsed(i);
     }
-    catch (hit::ParseError & err)
+    catch (wasp_hit::ParseError & err)
     {
       // bash might have eaten quotes around a hit string value or vector
       // so try quoting after the "=" and reparse
@@ -600,11 +607,11 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
         quoted = arg.substr(0, pos + 1) + "'" + arg.substr(pos + 1, quoted.size() - pos) + "'";
       try
       {
-        hit::check("CLI_ARG", quoted);
+        wasp_hit::check("CLI_ARG", quoted);
         hit_text += " " + quoted;
         _app.commandLine()->markHitParamUsed(i);
       }
-      catch (hit::ParseError & err)
+      catch (wasp_hit::ParseError & err)
       {
         mooseError("invalid hit in arg '", arg, "': ", err.what());
       }
@@ -642,20 +649,20 @@ Parser::parse(const std::vector<std::string> & input_filenames)
 
     try
     {
-      std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
-      hit::explode(root.get());
+      std::unique_ptr<wasp_hit::Node> root(wasp_hit::parse(input_filename, input));
+      wasp_hit::explode(root.get());
 
       if (!_root)
         _root = std::move(root);
       else
       {
-        root->walk(&opw, hit::NodeType::Field);
-        hit::merge(root.get(), _root.get());
+        root->walk(&opw, wasp_hit::NodeType::Field);
+        wasp_hit::merge(root.get(), _root.get());
       }
 
-      _root->walk(&cpw, hit::NodeType::Field);
+      _root->walk(&cpw, wasp_hit::NodeType::Field);
     }
-    catch (hit::ParseError & err)
+    catch (wasp_hit::ParseError & err)
     {
       mooseError(err.what());
     }
@@ -669,23 +676,23 @@ Parser::parse(const std::vector<std::string> & input_filenames)
   try
   {
     auto cli_input = hitCLIFilter(_app.name(), _app.commandLine()->getArguments());
-    _cli_root.reset(hit::parse("CLI_ARGS", cli_input));
-    hit::explode(_cli_root.get());
-    hit::merge(_cli_root.get(), _root.get());
+    _cli_root.reset(wasp_hit::parse("CLI_ARGS", cli_input));
+    wasp_hit::explode(_cli_root.get());
+    wasp_hit::merge(_cli_root.get(), _root.get());
   }
-  catch (hit::ParseError & err)
+  catch (wasp_hit::ParseError & err)
   {
     mooseError(err.what());
   }
 
   // expand ${bla} parameter values and mark/include variables used in expansions as "used".  This
   // MUST occur before parameter extraction - otherwise parameters will get wrong values.
-  hit::RawEvaler raw;
-  hit::EnvEvaler env;
-  hit::ReplaceEvaler repl;
+  wasp_hit::RawEvaler raw;
+  wasp_hit::EnvEvaler env;
+  wasp_hit::ReplaceEvaler repl;
   FuncParseEvaler fparse_ev;
   UnitsConversionEvaler units_ev;
-  hit::BraceExpander exw;
+  wasp_hit::BraceExpander exw;
   exw.registerEvaler("raw", raw);
   exw.registerEvaler("env", env);
   exw.registerEvaler("fparse", fparse_ev);
@@ -701,8 +708,8 @@ Parser::parse(const std::vector<std::string> & input_filenames)
   // of surprising and disconnected from what caused them.
   DupParamWalker dw;
   BadActiveWalker bw;
-  _root->walk(&dw, hit::NodeType::Field);
-  _root->walk(&bw, hit::NodeType::Section);
+  _root->walk(&dw, wasp_hit::NodeType::Field);
+  _root->walk(&bw, wasp_hit::NodeType::Section);
   for (auto & msg : dw.errors)
     _errmsg += msg + "\n";
   for (auto & msg : bw.errors)
@@ -742,7 +749,7 @@ Parser::parse(const std::vector<std::string> & input_filenames)
     if (n)
       walkRaw(n->parent()->fullpath(), n->path(), n);
   }
-  _root->walk(this, hit::NodeType::Section);
+  _root->walk(this, wasp_hit::NodeType::Section);
 
   if (_errmsg.size() > 0)
     mooseError(_errmsg);
@@ -771,11 +778,11 @@ Parser::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool e
   if (warn_unused)
   {
     for (auto arg : cli->unused(comm))
-      _warnmsg += hit::errormsg("CLI_ARG",
-                                nullptr,
-                                "unused command line parameter '",
-                                cli->getArguments()[arg],
-                                "'") +
+      _warnmsg += wasp_hit::errormsg("CLI_ARG",
+                                     nullptr,
+                                     "unused command line parameter '",
+                                     cli->getArguments()[arg],
+                                     "'") +
                   "\n";
     for (auto & msg : uwcli.errors)
       _warnmsg += msg + "\n";
@@ -785,11 +792,11 @@ Parser::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool e
   else if (err_unused)
   {
     for (auto arg : cli->unused(comm))
-      _errmsg += hit::errormsg("CLI_ARG",
-                               nullptr,
-                               "unused command line parameter '",
-                               cli->getArguments()[arg],
-                               "'") +
+      _errmsg += wasp_hit::errormsg("CLI_ARG",
+                                    nullptr,
+                                    "unused command line parameter '",
+                                    cli->getArguments()[arg],
+                                    "'") +
                  "\n";
     for (auto & msg : uwcli.errors)
       _errmsg += msg + "\n";
@@ -1211,7 +1218,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 
     // Mark parameters appearing in the input file or command line
     auto node = _root->find(full_name);
-    if (node && node->type() == hit::NodeType::Field)
+    if (node && node->type() == wasp_hit::NodeType::Field)
     {
       p.set_attributes(it.first, false);
       _extracted_vars.insert(
@@ -1597,7 +1604,7 @@ template <>
 bool
 toBool<bool>(const std::string & s, bool & val)
 {
-  return hit::toBool(s, &val);
+  return wasp_hit::toBool(s, &val);
 }
 
 template <typename T, typename Base>
@@ -1612,7 +1619,7 @@ Parser::setScalarParameter(const std::string & full_name,
   {
     param->set() = _root->param<Base>(full_name);
   }
-  catch (hit::Error & err)
+  catch (wasp_hit::Error & err)
   {
     auto strval = _root->param<std::string>(full_name);
 
@@ -1628,13 +1635,13 @@ Parser::setScalarParameter(const std::string & full_name,
       catch (std::invalid_argument & /*e*/)
       {
         const std::string format_type = (t == typeid(double)) ? "float" : "integer";
-        _errmsg += hit::errormsg(_root->find(full_name),
-                                 "invalid ",
-                                 format_type,
-                                 " syntax for parameter: ",
-                                 full_name,
-                                 "=",
-                                 strval) +
+        _errmsg += wasp_hit::errormsg(_root->find(full_name),
+                                      "invalid ",
+                                      format_type,
+                                      " syntax for parameter: ",
+                                      full_name,
+                                      "=",
+                                      strval) +
                    "\n";
       }
     }
@@ -1642,11 +1649,11 @@ Parser::setScalarParameter(const std::string & full_name,
     {
       bool isbool = toBool(strval, param->set());
       if (!isbool)
-        _errmsg += hit::errormsg(_root->find(full_name),
-                                 "invalid boolean syntax for parameter: ",
-                                 full_name,
-                                 "=",
-                                 strval) +
+        _errmsg += wasp_hit::errormsg(_root->find(full_name),
+                                      "invalid boolean syntax for parameter: ",
+                                      full_name,
+                                      "=",
+                                      strval) +
                    "\n";
     }
     else
@@ -1720,9 +1727,9 @@ Parser::setVectorParameter(const std::string & full_name,
       for (auto val : tmp)
         vec.push_back(val);
     }
-    catch (hit::Error & err)
+    catch (wasp_hit::Error & err)
     {
-      _errmsg += hit::errormsg(_root->find(full_name), err.what()) + "\n";
+      _errmsg += wasp_hit::errormsg(_root->find(full_name), err.what()) + "\n";
       return;
     }
   }
@@ -1759,13 +1766,13 @@ Parser::setMapParameter(const std::string & full_name,
         ++it;
         if (it == string_vec.end())
         {
-          _errmsg +=
-              hit::errormsg(_root->find(full_name),
-                            "odd number of entries in string vector for map parameter: ",
-                            full_name,
-                            ". There must be "
-                            "an even number or else you will end up with a key without a value!") +
-              "\n";
+          _errmsg += wasp_hit::errormsg(
+                         _root->find(full_name),
+                         "odd number of entries in string vector for map parameter: ",
+                         full_name,
+                         ". There must be "
+                         "an even number or else you will end up with a key without a value!") +
+                     "\n";
           return;
         }
         const auto & string_value = *it;
@@ -1779,13 +1786,13 @@ Parser::setMapParameter(const std::string & full_name,
         }
         catch (std::invalid_argument & /*e*/)
         {
-          _errmsg += hit::errormsg(_root->find(full_name),
-                                   "invalid ",
-                                   demangle(typeid(KeyType).name()),
-                                   " syntax for map parameter ",
-                                   full_name,
-                                   " key: ",
-                                   string_key) +
+          _errmsg += wasp_hit::errormsg(_root->find(full_name),
+                                        "invalid ",
+                                        demangle(typeid(KeyType).name()),
+                                        " syntax for map parameter ",
+                                        full_name,
+                                        " key: ",
+                                        string_key) +
                      "\n";
           return;
         }
@@ -1796,13 +1803,13 @@ Parser::setMapParameter(const std::string & full_name,
         }
         catch (std::invalid_argument & /*e*/)
         {
-          _errmsg += hit::errormsg(_root->find(full_name),
-                                   "invalid ",
-                                   demangle(typeid(MappedType).name()),
-                                   " syntax for map parameter ",
-                                   full_name,
-                                   " value: ",
-                                   string_value) +
+          _errmsg += wasp_hit::errormsg(_root->find(full_name),
+                                        "invalid ",
+                                        demangle(typeid(MappedType).name()),
+                                        " syntax for map parameter ",
+                                        full_name,
+                                        " value: ",
+                                        string_value) +
                      "\n";
           return;
         }
@@ -1810,20 +1817,20 @@ Parser::setMapParameter(const std::string & full_name,
         auto insert_pr = the_map.insert(std::move(pr));
         if (!insert_pr.second)
         {
-          _errmsg += hit::errormsg(_root->find(full_name),
-                                   "Duplicate map entry for map parameter: ",
-                                   full_name,
-                                   ". The key ",
-                                   string_key,
-                                   " appears multiple times.") +
+          _errmsg += wasp_hit::errormsg(_root->find(full_name),
+                                        "Duplicate map entry for map parameter: ",
+                                        full_name,
+                                        ". The key ",
+                                        string_key,
+                                        " appears multiple times.") +
                      "\n";
           return;
         }
       }
     }
-    catch (hit::Error & err)
+    catch (wasp_hit::Error & err)
     {
-      _errmsg += hit::errormsg(_root->find(full_name), err.what()) + "\n";
+      _errmsg += wasp_hit::errormsg(_root->find(full_name), err.what()) + "\n";
       return;
     }
   }
@@ -1899,7 +1906,8 @@ Parser::setDoubleIndexParameter(const std::string & full_name,
     if (!MooseUtils::tokenizeAndConvert<T>(first_tokenized_vector[j], param->set()[j]))
     {
       _errmsg +=
-          hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) + "\n";
+          wasp_hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) +
+          "\n";
       return;
     }
 
@@ -1969,7 +1977,7 @@ Parser::setTripleIndexParameter(
       if (!MooseUtils::tokenizeAndConvert<T>(second_tokenized_vector[j][k], param->set()[j][k]))
       {
         _errmsg +=
-            hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) +
+            wasp_hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) +
             "\n";
         return;
       }
@@ -2005,21 +2013,21 @@ Parser::setScalarComponentParameter(const std::string & full_name,
   {
     vec = _root->param<std::vector<double>>(full_name);
   }
-  catch (hit::Error & err)
+  catch (wasp_hit::Error & err)
   {
-    _errmsg += hit::errormsg(_root->find(full_name), err.what()) + "\n";
+    _errmsg += wasp_hit::errormsg(_root->find(full_name), err.what()) + "\n";
     return;
   }
 
   if (vec.size() != LIBMESH_DIM)
   {
-    _errmsg += hit::errormsg(_root->find(full_name),
-                             "wrong number of values in scalar component parameter ",
-                             full_name,
-                             ": size ",
-                             vec.size(),
-                             " is not a multiple of ",
-                             LIBMESH_DIM) +
+    _errmsg += wasp_hit::errormsg(_root->find(full_name),
+                                  "wrong number of values in scalar component parameter ",
+                                  full_name,
+                                  ": size ",
+                                  vec.size(),
+                                  " is not a multiple of ",
+                                  LIBMESH_DIM) +
                "\n";
     return;
   }
@@ -2049,21 +2057,21 @@ Parser::setVectorComponentParameter(const std::string & full_name,
   {
     vec = _root->param<std::vector<double>>(full_name);
   }
-  catch (hit::Error & err)
+  catch (wasp_hit::Error & err)
   {
-    _errmsg += hit::errormsg(_root->find(full_name), err.what()) + "\n";
+    _errmsg += wasp_hit::errormsg(_root->find(full_name), err.what()) + "\n";
     return;
   }
 
   if (vec.size() % LIBMESH_DIM)
   {
-    _errmsg += hit::errormsg(_root->find(full_name),
-                             "wrong number of values in vector component parameter ",
-                             full_name,
-                             ": size ",
-                             vec.size(),
-                             " is not a multiple of ",
-                             LIBMESH_DIM) +
+    _errmsg += wasp_hit::errormsg(_root->find(full_name),
+                                  "wrong number of values in vector component parameter ",
+                                  full_name,
+                                  ": size ",
+                                  vec.size(),
+                                  " is not a multiple of ",
+                                  LIBMESH_DIM) +
                "\n";
     return;
   }
@@ -2112,7 +2120,8 @@ Parser::setVectorVectorComponentParameter(
     if (!MooseUtils::tokenizeAndConvert<double>(first_tokenized_vector[j], vecvec[j]))
     {
       _errmsg +=
-          hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) + "\n";
+          wasp_hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) +
+          "\n";
       return;
     }
 
@@ -2120,13 +2129,13 @@ Parser::setVectorVectorComponentParameter(
     if (vec.size() % LIBMESH_DIM)
     {
       _errmsg +=
-          hit::errormsg(_root->find(full_name),
-                        "wrong number of values in double-indexed vector component parameter ",
-                        full_name,
-                        ": size of subcomponent ",
-                        vec.size(),
-                        " is not a multiple of ",
-                        LIBMESH_DIM) +
+          wasp_hit::errormsg(_root->find(full_name),
+                             "wrong number of values in double-indexed vector component parameter ",
+                             full_name,
+                             ": size of subcomponent ",
+                             vec.size(),
+                             " is not a multiple of ",
+                             LIBMESH_DIM) +
           "\n";
       return;
     }
@@ -2195,9 +2204,9 @@ Parser::setScalarParameter<RealEigenVector, RealEigenVector>(
   {
     vec = _root->param<std::vector<double>>(full_name);
   }
-  catch (hit::Error & err)
+  catch (wasp_hit::Error & err)
   {
-    _errmsg += hit::errormsg(_root->find(full_name), err.what()) + "\n";
+    _errmsg += wasp_hit::errormsg(_root->find(full_name), err.what()) + "\n";
     return;
   }
 
@@ -2237,13 +2246,15 @@ Parser::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
     if (!MooseUtils::tokenizeAndConvert<Real>(first_tokenized_vector[j], values[j]))
     {
       _errmsg +=
-          hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) + "\n";
+          wasp_hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) +
+          "\n";
       return;
     }
     if (j != 0 && values[j].size() != values[0].size())
     {
       _errmsg +=
-          hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) + "\n";
+          wasp_hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) +
+          "\n";
       return;
     }
   }
@@ -2344,13 +2355,13 @@ Parser::setScalarParameter<RealTensorValue, RealTensorValue>(
   auto vec = _root->param<std::vector<double>>(full_name);
   if (vec.size() != LIBMESH_DIM * LIBMESH_DIM)
   {
-    _errmsg += hit::errormsg(_root->find(full_name),
-                             "invalid RealTensorValue parameter ",
-                             full_name,
-                             ": size is ",
-                             vec.size(),
-                             " but should be ",
-                             LIBMESH_DIM * LIBMESH_DIM) +
+    _errmsg += wasp_hit::errormsg(_root->find(full_name),
+                                  "invalid RealTensorValue parameter ",
+                                  full_name,
+                                  ": size is ",
+                                  vec.size(),
+                                  " but should be ",
+                                  LIBMESH_DIM * LIBMESH_DIM) +
                "\n";
     return;
   }
@@ -2399,10 +2410,10 @@ Parser::setScalarParameter<ReporterName, std::string>(
 {
   std::vector<std::string> names = MooseUtils::rsplit(_root->param<std::string>(full_name), "/", 2);
   if (names.size() != 2)
-    _errmsg += hit::errormsg(_root->find(full_name),
-                             "The supplied name ReporterName '",
-                             full_name,
-                             "' must contain the '/' delimiter.");
+    _errmsg += wasp_hit::errormsg(_root->find(full_name),
+                                  "The supplied name ReporterName '",
+                                  full_name,
+                                  "' must contain the '/' delimiter.");
   else
     param->set() = ReporterName(names[0], names[1]);
 }
@@ -2536,7 +2547,7 @@ Parser::setVectorParameter<VariableName, VariableName>(
       if (var_names[i] == "")
       {
         _errmsg +=
-            hit::errormsg(
+            wasp_hit::errormsg(
                 _root->find(full_name),
                 "invalid value for ",
                 full_name,
@@ -2567,10 +2578,10 @@ Parser::setVectorParameter<ReporterName, std::string>(
   {
     std::vector<std::string> names = MooseUtils::rsplit(rnames[i], "/", 2);
     if (names.size() != 2)
-      _errmsg += hit::errormsg(_root->find(full_name),
-                               "The supplied name ReporterName '",
-                               rnames[i],
-                               "' must contain the '/' delimiter.");
+      _errmsg += wasp_hit::errormsg(_root->find(full_name),
+                                    "The supplied name ReporterName '",
+                                    rnames[i],
+                                    "' must contain the '/' delimiter.");
     else
       param->set()[i] = ReporterName(names[0], names[1]);
   }

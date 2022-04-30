@@ -40,7 +40,7 @@ hit_CONTENT   := $(shell ls $(HIT_DIR) 2> /dev/null)
 ifeq ($(hit_CONTENT),)
   $(error The HIT input file parser does not seem to be available. If set, make sure the HIT_DIR environment variable is set to the correct location of your HIT parser.)
 endif
-hit_srcfiles  := $(HIT_DIR)/parse.cc $(HIT_DIR)/lex.cc $(HIT_DIR)/braceexpr.cc
+hit_srcfiles  := $(HIT_DIR)/parse.cc $(HIT_DIR)/lex.cc $(HIT_DIR)/braceexpr.cc $(HIT_DIR)/wasp_braceexpr.cc
 hit_objects   := $(patsubst %.cc, %.$(obj-suffix), $(hit_srcfiles))
 hit_LIB       := $(HIT_DIR)/libhit-$(METHOD).la
 # dependency files
@@ -53,6 +53,13 @@ hit_CLI          := $(HIT_DIR)/hit
 # hit python bindings
 #
 pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HIT_DIR)/braceexpr.cc
+
+#
+# wasp
+#
+wasp_DIR := $(MOOSE_DIR)/wasp/install
+wasp_INC := $(wasp_DIR)/include
+wasp_LIB := $(wildcard $(wasp_DIR)/lib/*wasp*) -Wl,-rpath,$(wasp_DIR)/lib
 
 #
 # Conditional parts if the user wants to compile MOOSE with torchlib
@@ -195,6 +202,7 @@ moose_INC_DIRS := $(filter-out $(ignore_contrib_include), $(moose_INC_DIRS))
 
 moose_INC_DIRS += $(gtest_DIR)
 moose_INC_DIRS += $(HIT_DIR)
+moose_INC_DIRS += $(wasp_INC)
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 
 #libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)

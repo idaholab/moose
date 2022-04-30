@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "hit.h"
+#include "wasp_hit.h"
 #include "Parser.h"
 
 #include "gtest_include.h"
@@ -59,7 +59,7 @@ TEST(HitTests, FailCases)
   for (size_t i = 0; i < sizeof(cases) / sizeof(PassFailCase); i++)
   {
     auto test = cases[i];
-    EXPECT_THROW(hit::parse("TESTCASE", test.input), hit::Error)
+    EXPECT_THROW(wasp_hit::parse("TESTCASE", test.input), wasp_hit::Error)
         << "case " << i + 1 << " FAIL (" << test.name << "): parser failed to error on bad input '"
         << test.input << "'";
   }
@@ -71,14 +71,14 @@ struct LineCase
   std::vector<int> line_nums;
 };
 
-class LineWalker : public hit::Walker
+class LineWalker : public wasp_hit::Walker
 {
 public:
   LineWalker(int i, const std::vector<int> & want_lines) : _case(i), _want(want_lines){};
   virtual void
-  walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
+  walk(const std::string & fullpath, const std::string & /*nodepath*/, wasp_hit::Node * n) override
   {
-    if (n->type() == hit::NodeType::Blank || fullpath == "")
+    if (n->type() == wasp_hit::NodeType::Blank || fullpath == "")
       return;
 
     if (_count >= _want.size())
@@ -109,12 +109,12 @@ TEST(HitTests, LineNumbers)
     auto test = cases[i];
     try
     {
-      std::unique_ptr<hit::Node> root(hit::parse("TESTCASE", test.input));
-      hit::explode(root.get());
+      std::unique_ptr<wasp_hit::Node> root(wasp_hit::parse("TESTCASE", test.input));
+      wasp_hit::explode(root.get());
       LineWalker w(i, test.line_nums);
-      root->walk(&w, hit::NodeType::All);
+      root->walk(&w, wasp_hit::NodeType::All);
     }
-    catch (hit::Error & err)
+    catch (wasp_hit::Error & err)
     {
       FAIL() << "case " << i + 1 << " FAIL: unexpected parser error on valid input '" << test.input
              << "': " << err.what();
@@ -143,9 +143,9 @@ TEST(HitTests, PassCases)
     auto test = cases[i];
     try
     {
-      hit::parse("TESTCASE", test.input);
+      wasp_hit::parse("TESTCASE", test.input);
     }
-    catch (hit::Error & err)
+    catch (wasp_hit::Error & err)
     {
       FAIL() << "case " << i + 1 << " FAIL (" << test.name
              << "): unexpected parser error on valid input '" << test.input << "': " << err.what();
@@ -154,17 +154,17 @@ TEST(HitTests, PassCases)
 }
 
 std::string
-strkind(hit::Field::Kind k)
+strkind(wasp_hit::Field::Kind k)
 {
-  if (k == hit::Field::Kind::String)
+  if (k == wasp_hit::Field::Kind::String)
     return "String";
-  else if (k == hit::Field::Kind::Bool)
+  else if (k == wasp_hit::Field::Kind::Bool)
     return "Bool";
-  else if (k == hit::Field::Kind::Int)
+  else if (k == wasp_hit::Field::Kind::Int)
     return "Int";
-  else if (k == hit::Field::Kind::Float)
+  else if (k == wasp_hit::Field::Kind::Float)
     return "Float";
-  else if (k == hit::Field::Kind::None)
+  else if (k == wasp_hit::Field::Kind::None)
     return "None";
   else
     return "Unknown";
@@ -176,16 +176,16 @@ struct ValCase
   std::string input;
   std::string key;
   std::string val;
-  hit::Field::Kind kind;
+  wasp_hit::Field::Kind kind;
 };
 
 TEST(HitTests, ExplodeParentless)
 {
-  hit::Node * n = new hit::Section("foo/bar");
+  wasp_hit::Node * n = new wasp_hit::Section("foo/bar");
 
   try
   {
-    n = hit::explode(n);
+    n = wasp_hit::explode(n);
     EXPECT_EQ("[foo]\n  [bar]\n  []\n[]", n->render());
   }
   catch (std::exception & err)
@@ -198,77 +198,90 @@ TEST(HitTests, ParseFields)
 {
   ValCase cases[] = {
       // types
-      {"int", "foo=42", "foo", "42", hit::Field::Kind::Int},
-      {"float1", "foo=4.2", "foo", "4.2", hit::Field::Kind::Float},
-      {"float2", "foo=.42", "foo", ".42", hit::Field::Kind::Float},
-      {"float3", "foo=1e10", "foo", "1e10", hit::Field::Kind::Float},
-      {"float4", "foo=e-23", "foo", "e-23", hit::Field::Kind::Float},
-      {"float5", "foo=12.345e+67", "foo", "12.345e+67", hit::Field::Kind::Float},
-      {"bool-true1", "foo=true", "foo", "true", hit::Field::Kind::Bool},
-      {"bool-true2", "foo=yes", "foo", "yes", hit::Field::Kind::Bool},
-      {"bool-true3", "foo=on", "foo", "on", hit::Field::Kind::Bool},
-      {"bool-case1", "foo=TRUE", "foo", "TRUE", hit::Field::Kind::Bool},
-      {"bool-case2", "foo=ON", "foo", "ON", hit::Field::Kind::Bool},
-      {"bool-case3", "foo=YeS", "foo", "YeS", hit::Field::Kind::Bool},
-      {"bool-false1", "foo=false", "foo", "false", hit::Field::Kind::Bool},
-      {"bool-false2", "foo=no", "foo", "no", hit::Field::Kind::Bool},
-      {"bool-false3", "foo=off", "foo", "off", hit::Field::Kind::Bool},
-      {"string", "foo=bar", "foo", "bar", hit::Field::Kind::String},
-      {"string-almost-float1", "foo=1e23.3", "foo", "1e23.3", hit::Field::Kind::String},
-      {"string-almost-float2", "foo=1a23.3", "foo", "1a23.3", hit::Field::Kind::String},
-      {"string-almost-float3", "foo=1.2.3", "foo", "1.2.3", hit::Field::Kind::String},
-      {"string-almost-float4", "foo=1e2e3", "foo", "1e2e3", hit::Field::Kind::String},
+      {"int", "foo=42", "foo", "42", wasp_hit::Field::Kind::Int},
+      {"float1", "foo=4.2", "foo", "4.2", wasp_hit::Field::Kind::Float},
+      {"float2", "foo=.42", "foo", ".42", wasp_hit::Field::Kind::Float},
+      {"float3", "foo=1e10", "foo", "1e10", wasp_hit::Field::Kind::Float},
+      // Previously, the HIT lexer classified "e-23" below as a 'float' from the text pattern alone
+      // but the MOOSE string-to-float conversion logic does not support this no coefficient syntax
+      // so even through the kind method called this a 'float', retrieving it as a float would fail
+      // however WASP-HIT reuses the convert and retrieve logic for consistent field classification
+      // making "foo=e-23" be classified now as a 'string' - is this okay or does it need to change
+      {"float4", "foo=e-23", "foo", "e-23", wasp_hit::Field::Kind::String},
+      {"float5", "foo=12.345e+67", "foo", "12.345e+67", wasp_hit::Field::Kind::Float},
+      {"bool-true1", "foo=true", "foo", "true", wasp_hit::Field::Kind::Bool},
+      {"bool-true2", "foo=yes", "foo", "yes", wasp_hit::Field::Kind::Bool},
+      {"bool-true3", "foo=on", "foo", "on", wasp_hit::Field::Kind::Bool},
+      {"bool-case1", "foo=TRUE", "foo", "TRUE", wasp_hit::Field::Kind::Bool},
+      {"bool-case2", "foo=ON", "foo", "ON", wasp_hit::Field::Kind::Bool},
+      {"bool-case3", "foo=YeS", "foo", "YeS", wasp_hit::Field::Kind::Bool},
+      {"bool-false1", "foo=false", "foo", "false", wasp_hit::Field::Kind::Bool},
+      {"bool-false2", "foo=no", "foo", "no", wasp_hit::Field::Kind::Bool},
+      {"bool-false3", "foo=off", "foo", "off", wasp_hit::Field::Kind::Bool},
+      {"string", "foo=bar", "foo", "bar", wasp_hit::Field::Kind::String},
+      {"string-almost-float1", "foo=1e23.3", "foo", "1e23.3", wasp_hit::Field::Kind::String},
+      {"string-almost-float2", "foo=1a23.3", "foo", "1a23.3", wasp_hit::Field::Kind::String},
+      {"string-almost-float3", "foo=1.2.3", "foo", "1.2.3", wasp_hit::Field::Kind::String},
+      {"string-almost-float4", "foo=1e2e3", "foo", "1e2e3", wasp_hit::Field::Kind::String},
 
       // quotes and escaping
-      {"quotes", "foo='bar'", "foo", "bar", hit::Field::Kind::String},
-      {"doublequotes", "foo=\"bar\"", "foo", "bar", hit::Field::Kind::String},
-      {"quotes_quotes", "foo='\\'bar\\''", "foo", "'bar'", hit::Field::Kind::String},
-      {"quotes_doublequotes", "foo='\"bar\"'", "foo", "\"bar\"", hit::Field::Kind::String},
+      {"quotes", "foo='bar'", "foo", "bar", wasp_hit::Field::Kind::String},
+      {"doublequotes", "foo=\"bar\"", "foo", "bar", wasp_hit::Field::Kind::String},
+      {"quotes_quotes", "foo='\\'bar\\''", "foo", "'bar'", wasp_hit::Field::Kind::String},
+      {"quotes_doublequotes", "foo='\"bar\"'", "foo", "\"bar\"", wasp_hit::Field::Kind::String},
       {"doublequotes_doublequotes",
        "foo=\"\\\"bar\\\"\"",
        "foo",
        "\"bar\"",
-       hit::Field::Kind::String},
+       wasp_hit::Field::Kind::String},
 
       // misc
       {"valid special field chars",
        "hello_./:<>-+world=foo",
        "hello_./:<>-+world",
        "foo",
-       hit::Field::Kind::String},
-      {"left-bracket-after-number", "[hello]foo=42[]", "hello/foo", "42", hit::Field::Kind::Int},
-      {"ignore leading spaces 1", "foo=    bar", "foo", "bar", hit::Field::Kind::String},
-      {"ignore leading spaces 2", "foo=     \t42", "foo", "42", hit::Field::Kind::Int},
-      {"ignore trailing spaces", "foo=bar\t   ", "foo", "bar", hit::Field::Kind::String},
+       wasp_hit::Field::Kind::String},
+      {"left-bracket-after-number",
+       "[hello]foo=42[]",
+       "hello/foo",
+       "42",
+       wasp_hit::Field::Kind::Int},
+      {"ignore leading spaces 1", "foo=    bar", "foo", "bar", wasp_hit::Field::Kind::String},
+      {"ignore leading spaces 2", "foo=     \t42", "foo", "42", wasp_hit::Field::Kind::Int},
+      {"ignore trailing spaces", "foo=bar\t   ", "foo", "bar", wasp_hit::Field::Kind::String},
       {"ignore unknown escapes",
        "foo='hello \\my nam\\e is joe'",
        "foo",
        "hello \\my nam\\e is joe",
-       hit::Field::Kind::String},
+       wasp_hit::Field::Kind::String},
       {"no escaped newline",
        "foo='hello\\nworld'",
        "foo",
        "hello\\nworld",
-       hit::Field::Kind::String},
-      {"cosecutive string literal 1", "foo='bar''baz'", "foo", "barbaz", hit::Field::Kind::String},
+       wasp_hit::Field::Kind::String},
+      {"cosecutive string literal 1",
+       "foo='bar''baz'",
+       "foo",
+       "barbaz",
+       wasp_hit::Field::Kind::String},
       {"cosecutive string literal 2",
        "foo='bar'\n\n'baz'",
        "foo",
        "barbaz",
-       hit::Field::Kind::String},
+       wasp_hit::Field::Kind::String},
       {"path-normalize-find #12313",
        "[foo][/bar]baz=42[][]",
        "foo/bar/baz",
        "42",
-       hit::Field::Kind::Int},
+       wasp_hit::Field::Kind::Int},
 
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(ValCase); i++)
   {
     auto test = cases[i];
-    auto root = hit::parse("TEST", test.input);
-    hit::BraceExpander exw;
+    auto root = wasp_hit::parse("TEST", test.input);
+    wasp_hit::BraceExpander exw;
     root->walk(&exw);
     auto n = root->find(test.key);
     if (!n)
@@ -284,7 +297,7 @@ TEST(HitTests, ParseFields)
       continue;
     }
 
-    auto f = dynamic_cast<hit::Field *>(n);
+    auto f = dynamic_cast<wasp_hit::Field *>(n);
     if (!f)
       FAIL() << "case " << i + 1 << " node type is not NodeType::Field";
     else if (f->kind() != test.kind)
@@ -295,62 +308,76 @@ TEST(HitTests, ParseFields)
 TEST(HitTests, BraceExpressions)
 {
   ValCase cases[] = {
-      {"substitute string", "foo=bar boo=${foo}", "boo", "bar", hit::Field::Kind::String},
+      {"substitute string", "foo=bar boo=${foo}", "boo", "bar", wasp_hit::Field::Kind::String},
       {"substitute string explicit",
        "foo=bar boo=${replace foo}",
        "boo",
        "bar",
-       hit::Field::Kind::String},
-      {"trailing space", "foo=bar boo=${foo} ", "boo", "bar", hit::Field::Kind::String},
-      {"substute number", "foo=42 boo=${foo}", "boo", "42", hit::Field::Kind::Int},
+       wasp_hit::Field::Kind::String},
+      {"trailing space", "foo=bar boo=${foo} ", "boo", "bar", wasp_hit::Field::Kind::String},
+      {"substute number", "foo=42 boo=${foo}", "boo", "42", wasp_hit::Field::Kind::Int},
       {"multiple replacements",
        "foo=42 boo='${foo} ${foo}'",
        "boo",
        "42 42",
-       hit::Field::Kind::String},
-      {"nested", "foo=bar [hello] boo='${foo}' []", "hello/boo", "bar", hit::Field::Kind::String},
+       wasp_hit::Field::Kind::String},
+      {"nested",
+       "foo=bar [hello] boo='${foo}' []",
+       "hello/boo",
+       "bar",
+       wasp_hit::Field::Kind::String},
       {"repl-header-before",
        "src=foo [src] bar='${src}' []",
        "src/bar",
        "foo",
-       hit::Field::Kind::String},
-      {"repl-header-missing", "[src] bar='${src}' []", "src/bar", "${src}", hit::Field::Kind::None},
+       wasp_hit::Field::Kind::String},
+      {"repl-header-missing",
+       "[src] bar='${src}' []",
+       "src/bar",
+       "${src}",
+       wasp_hit::Field::Kind::None},
       {"repl-header-shadow",
        "[src] bar='${src}' [] src=foo",
        "src/bar",
        "${src}",
-       hit::Field::Kind::None},
+       wasp_hit::Field::Kind::None},
       {"nested shadow",
        "foo=bar [hello] foo=baz boo='${foo}' []",
        "hello/boo",
        "baz",
-       hit::Field::Kind::String},
+       wasp_hit::Field::Kind::String},
+      // WASP-HIT evaluates the brace expression below to "foo=42" and classifies 'int' as the kind
+      // however the old HIT classified this as a 'string' - is this okay or does it need to change
       {"multi-line brace expression",
        "foo=${raw 4\n"
        "          2\n"
        "     }",
        "foo",
        "42",
-       hit::Field::Kind::String},
-      {"fparse", "foo=${fparse 40 + 2}\n", "foo", "42", hit::Field::Kind::Float},
+       wasp_hit::Field::Kind::Int},
+      {"fparse", "foo=${fparse 40 + 2}\n", "foo", "42", wasp_hit::Field::Kind::Float},
       {"fparse-dep-chain",
        "foo=${fparse 42} bar=${fparse foo}",
        "bar",
        "42",
-       hit::Field::Kind::Float},
+       wasp_hit::Field::Kind::Float},
       {"fparse-dep-chain-quoted",
        "foo='${fparse 42}' bar=${fparse foo}",
        "bar",
        "42",
-       hit::Field::Kind::Float},
-      {"fparse-with-pi", "foo=${fparse cos(pi)}\n", "foo", "-1", hit::Field::Kind::Float},
-      {"fparse-with-e", "foo=${fparse log(e)}\n", "foo", "1", hit::Field::Kind::Float},
-      {"fparse-with-var", "var=39 foo=${fparse var + 3}", "foo", "42", hit::Field::Kind::Float},
+       wasp_hit::Field::Kind::Float},
+      {"fparse-with-pi", "foo=${fparse cos(pi)}\n", "foo", "-1", wasp_hit::Field::Kind::Float},
+      {"fparse-with-e", "foo=${fparse log(e)}\n", "foo", "1", wasp_hit::Field::Kind::Float},
+      {"fparse-with-var",
+       "var=39 foo=${fparse var + 3}",
+       "foo",
+       "42",
+       wasp_hit::Field::Kind::Float},
       {"brace-expression-ends-before-newline",
        "foo=${raw 42} bar=23",
        "bar",
        "23",
-       hit::Field::Kind::Int},
+       wasp_hit::Field::Kind::Int},
       {"super-complicated",
        "foo1 = 42\n"
        "foo2 = 43\n"
@@ -368,31 +395,31 @@ TEST(HitTests, BraceExpressions)
        "     }\n",
        "a",
        "42.97674418604651",
-       hit::Field::Kind::Float},
+       wasp_hit::Field::Kind::Float},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(ValCase); i++)
   {
     auto test = cases[i];
-    hit::Node * root = nullptr;
+    wasp_hit::Node * root = nullptr;
     try
     {
-      root = hit::parse("TEST", test.input);
-      hit::BraceExpander exw;
-      hit::RawEvaler raw;
-      hit::ReplaceEvaler repl;
+      root = wasp_hit::parse("TEST", test.input);
+      wasp_hit::BraceExpander exw;
+      wasp_hit::RawEvaler raw;
+      wasp_hit::ReplaceEvaler repl;
       FuncParseEvaler fparse_ev;
       exw.registerEvaler("fparse", fparse_ev);
       exw.registerEvaler("raw", raw);
       exw.registerEvaler("replace", repl);
       root->walk(&exw);
-      if (exw.errors.size() > 0 && test.kind != hit::Field::Kind::None)
+      if (exw.errors.size() > 0 && test.kind != wasp_hit::Field::Kind::None)
       {
         for (auto & err : exw.errors)
           FAIL() << "case " << i + 1 << " unexpected error: " << err << "\n";
         continue;
       }
-      else if (exw.errors.size() == 0 && test.kind == hit::Field::Kind::None)
+      else if (exw.errors.size() == 0 && test.kind == wasp_hit::Field::Kind::None)
       {
         FAIL() << "case " << i + 1 << " missing expected error\n";
         continue;
@@ -417,10 +444,10 @@ TEST(HitTests, BraceExpressions)
       continue;
     }
 
-    auto f = dynamic_cast<hit::Field *>(n);
+    auto f = dynamic_cast<wasp_hit::Field *>(n);
     if (!f)
       FAIL() << "case " << i + 1 << " node type is not NodeType::Field";
-    else if (test.kind != hit::Field::Kind::None && f->kind() != test.kind)
+    else if (test.kind != wasp_hit::Field::Kind::None && f->kind() != test.kind)
       FAIL() << "case " << i + 1 << " wrong kind (key=" << test.key << "): got '"
              << strkind(f->kind()) << "', want '" << strkind(test.kind) << "'\n";
   }
@@ -428,7 +455,7 @@ TEST(HitTests, BraceExpressions)
 
 TEST(HitTests, RenderParentlessSection)
 {
-  auto n = new hit::Section("mypath");
+  auto n = new wasp_hit::Section("mypath");
   try
   {
     std::string got = n->render();
@@ -442,7 +469,7 @@ TEST(HitTests, RenderParentlessSection)
 
 TEST(HitTests, RenderSubsection)
 {
-  auto root = hit::parse("TESTCASE", "[hello][world]foo=42[][]");
+  auto root = wasp_hit::parse("TESTCASE", "[hello][world]foo=42[][]");
   auto n = root->find("hello/world");
   try
   {
@@ -486,7 +513,10 @@ TEST(HitTests, RenderCases)
        "foo='why'\n' separate '  'strings?'",
        "foo = 'why separate strings?'",
        0},
-      {"preserve quotes preceding blankline", "foo = '42'\n\n", "foo = '42'\n", 0},
+      // WASP-HIT preserves quotes before blank lines as tested below, but blank lines are rendered
+      // prior to the next non-blank node with blank lines that trail all content not being emitted
+      // so a newline was trimmed from the expected output - is this okay or does it need to change
+      {"preserve quotes preceding blankline", "foo = '42'\n\n", "foo = '42'", 0},
       {"preserve block comment (#10889)",
        "[hello]\n  foo = '42'\n\n  # comment\n  bar = 'baz'\n[]",
        "[hello]\n  foo = '42'\n\n  # comment\n  bar = 'baz'\n[]",
@@ -495,16 +525,26 @@ TEST(HitTests, RenderCases)
        "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
        "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
        0},
+      {"complex newline render",
+       "[section01]\n\n  field01 = 10\n\n\n\n  field02 = '20'\n\n  [section02]"
+       "\n\n    field03 = '30 31 32 33'\n\n\n    field04 = 40\n    [section03]"
+       "\n\n\n\n\n\n      field05 = \"double 50 quoted 51 string\"\n\n\n    []"
+       "\n\n\n    field06 = 60\n\n\n\n  []\n  field07 = '70 71 72 73 74'\n\n[]",
+       "[section01]\n\n  field01 = 10\n\n\n\n  field02 = '20'\n\n  [section02]"
+       "\n\n    field03 = '30 31 32 33'\n\n\n    field04 = 40\n    [section03]"
+       "\n\n\n\n\n\n      field05 = \"double 50 quoted 51 string\"\n\n\n    []"
+       "\n\n\n    field06 = 60\n\n\n\n  []\n  field07 = '70 71 72 73 74'\n\n[]",
+       0},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)
   {
     auto test = cases[i];
-    hit::Node * root = nullptr;
+    wasp_hit::Node * root = nullptr;
     std::string got;
     try
     {
-      root = hit::parse("TESTCASE", test.input);
+      root = wasp_hit::parse("TESTCASE", test.input);
       got = root->render(0, "  ", test.maxlen);
     }
     catch (std::exception & err)
@@ -518,33 +558,33 @@ TEST(HitTests, RenderCases)
 TEST(HitTests, MergeTree)
 {
   {
-    auto root1 = hit::parse("TESTCASE", "[foo]bar=42[]");
-    auto root2 = hit::parse("TESTCASE", "foo/baz/boo=42");
-    hit::explode(root2);
-    hit::merge(root2, root1);
+    auto root1 = wasp_hit::parse("TESTCASE", "[foo]bar=42[]");
+    auto root2 = wasp_hit::parse("TESTCASE", "foo/baz/boo=42");
+    wasp_hit::explode(root2);
+    wasp_hit::merge(root2, root1);
     EXPECT_EQ("[foo]\n  bar = 42\n  [baz]\n    boo = 42\n  []\n[]", root1->render());
   }
 
   {
-    auto root1 = hit::parse("TESTCASE", "foo/bar=baz");
-    auto root2 = hit::parse("TESTCASE", "foo/bar=42");
-    hit::merge(root2, root1);
+    auto root1 = wasp_hit::parse("TESTCASE", "foo/bar=baz");
+    auto root2 = wasp_hit::parse("TESTCASE", "foo/bar=42");
+    wasp_hit::merge(root2, root1);
     auto n = root1->find("foo/bar");
-    auto f = dynamic_cast<hit::Field *>(n);
+    auto f = dynamic_cast<wasp_hit::Field *>(n);
     if (!f)
       FAIL() << "merge case node type is not NodeType::Field";
 
     // Make sure that the the from type overrides the into type on merge
-    else if (f->kind() != hit::Field::Kind::Int)
+    else if (f->kind() != wasp_hit::Field::Kind::Int)
       FAIL() << "merge case kind type is not overridden (string)";
   }
 }
 
 TEST(HitTests, Clone)
 {
-  auto root1 = hit::parse("TESTCASE", "[foo][bar]baz=42[][]");
-  hit::Section root2("");
-  hit::Section root3("");
+  auto root1 = wasp_hit::parse("TESTCASE", "[foo][bar]baz=42[][]");
+  wasp_hit::Section root2("");
+  wasp_hit::Section root3("");
   root2.addChild(root1->children()[0]->children()[0]->children()[0]->clone());
   root3.addChild(root1->children()[0]->children()[0]->children()[0]->clone(true));
 
@@ -560,9 +600,9 @@ TEST(HitTests, GatherParamWalker)
 
   for (const auto & test : tests)
   {
-    auto root = hit::parse("TESTCASE", test.first);
-    hit::GatherParamWalker::ParamMap params;
-    hit::GatherParamWalker walker(params);
+    auto root = wasp_hit::parse("TESTCASE", test.first);
+    wasp_hit::GatherParamWalker::ParamMap params;
+    wasp_hit::GatherParamWalker walker(params);
     root->walk(&walker);
 
     if (test.second.size() != params.size())
@@ -586,12 +626,12 @@ TEST(HitTests, RemoveParamWalker)
 
   for (const auto & test : tests)
   {
-    auto root1 = hit::parse("TESTCASE", test[0]);
-    auto root2 = hit::parse("TESTCASE", test[1]);
+    auto root1 = wasp_hit::parse("TESTCASE", test[0]);
+    auto root2 = wasp_hit::parse("TESTCASE", test[1]);
 
-    hit::GatherParamWalker::ParamMap params;
-    hit::GatherParamWalker gather_walker(params);
-    hit::RemoveParamWalker remove_walker(params);
+    wasp_hit::GatherParamWalker::ParamMap params;
+    wasp_hit::GatherParamWalker gather_walker(params);
+    wasp_hit::RemoveParamWalker remove_walker(params);
 
     root2->walk(&gather_walker);
     root1->walk(&remove_walker);
@@ -610,9 +650,9 @@ TEST(HitTests, RemoveEmptySectionWalker)
 
   for (const auto & test : tests)
   {
-    auto root = hit::parse("TESTCASE", test[0]);
+    auto root = wasp_hit::parse("TESTCASE", test[0]);
 
-    hit::RemoveEmptySectionWalker walker;
+    wasp_hit::RemoveEmptySectionWalker walker;
     root->walk(&walker);
 
     EXPECT_EQ(root->render(), test[1]);
@@ -642,7 +682,7 @@ TEST(HitTests, Formatter)
     std::string got;
     try
     {
-      hit::Formatter fmter("STYLE", test.name);
+      wasp_hit::Formatter fmter("STYLE", test.name);
       got = fmter.format("TESTCASE", test.input);
     }
     catch (std::exception & err)
@@ -693,7 +733,7 @@ TEST(HitTests, Formatter_sorting)
     auto test = cases[i];
     std::string got;
 
-    hit::Formatter fmter;
+    wasp_hit::Formatter fmter;
     for (auto & pattern : test.patterns)
       fmter.addPattern(pattern.pattern, pattern.order);
 
@@ -711,10 +751,10 @@ TEST(HitTests, Formatter_sorting)
 
 TEST(HitTests, unsigned_int)
 {
-  hit::Node * root = nullptr;
+  wasp_hit::Node * root = nullptr;
   try
   {
-    root = hit::parse("TESTCASE", "par = -3");
+    root = wasp_hit::parse("TESTCASE", "par = -3");
     root->param<unsigned int>("par");
     FAIL() << "Exception was not thrown";
   }
@@ -726,10 +766,10 @@ TEST(HitTests, unsigned_int)
 
 TEST(HitTests, vector_unsigned_int)
 {
-  hit::Node * root = nullptr;
+  wasp_hit::Node * root = nullptr;
   try
   {
-    root = hit::parse("TESTCASE", "par = '-3 0 1'");
+    root = wasp_hit::parse("TESTCASE", "par = '-3 0 1'");
     root->param<std::vector<unsigned int>>("par");
     FAIL() << "Exception was not thrown";
   }
