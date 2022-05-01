@@ -7,36 +7,36 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSDivergenceAux.h"
+#include "DivergenceAux.h"
 #include "MooseMesh.h"
 
-registerMooseObject("NavierStokesApp", INSDivergenceAux);
+registerMooseObject("MooseApp", DivergenceAux);
 
 InputParameters
-INSDivergenceAux::validParams()
+DivergenceAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
-  params.addClassDescription("Computes h_min / |u|.");
+  params.addClassDescription("Computes the divergence of a vector of field variables.");
   // Coupled variables
-  params.addRequiredCoupledVar("u", "x-velocity");
-  params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D
-  params.addCoupledVar("w", "z-velocity"); // only required in 3D
+  params.addRequiredCoupledVar("u", "x-component of the vector");
+  params.addCoupledVar("v", "y-component of the vector"); // only required in 2D and 3D
+  params.addCoupledVar("w", "z-component of the vector"); // only required in 3D
 
   return params;
 }
 
-INSDivergenceAux::INSDivergenceAux(const InputParameters & parameters)
+DivergenceAux::DivergenceAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _grad_u_vel(coupledGradient("u")),
-    _grad_v_vel(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
-    _grad_w_vel(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero)
+    _grad_u(coupledGradient("u")),
+    _grad_v(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
+    _grad_w(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero)
 {
 }
 
 Real
-INSDivergenceAux::computeValue()
+DivergenceAux::computeValue()
 {
   // div U = du/dx + dv/dy + dw/dz
-  return _grad_u_vel[_qp](0) + _grad_v_vel[_qp](1) + _grad_w_vel[_qp](2);
+  return _grad_u[_qp](0) + _grad_v[_qp](1) + _grad_w[_qp](2);
 }

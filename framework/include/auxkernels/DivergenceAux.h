@@ -11,25 +11,21 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-
 /**
- * Computes h_min / |u|
+ * Computes the divergence of a vector of variables
  */
-class INSDivergenceAux : public AuxKernel
+class DivergenceAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  INSDivergenceAux(const InputParameters & parameters);
-
-  virtual ~INSDivergenceAux() {}
+  DivergenceAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
 
-  // Velocity gradients
-  const VariableGradient & _grad_u_vel;
-  const VariableGradient & _grad_v_vel;
-  const VariableGradient & _grad_w_vel;
+  // Component variable gradients
+  const VariableGradient & _grad_u;
+  const VariableGradient & _grad_v;
+  const VariableGradient & _grad_w;
 };
