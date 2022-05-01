@@ -1,0 +1,10 @@
+[Tests]
+  design = 'DivergenceAux.md'
+  [test]
+    type = 'CSVDiff'
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    issues = ''
+    requirement = "The system shall be able to compute the divergence of a vector of nonlinear variable."
+  []
+[]
