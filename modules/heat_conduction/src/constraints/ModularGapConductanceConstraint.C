@@ -39,6 +39,12 @@ ModularGapConductanceConstraint::validParams()
                                    "End point for line defining cylindrical axis");
   params.addParam<RealVectorValue>("sphere_origin", "Origin for sphere geometry");
 
+  // we should default use_displaced_mesh to true. if no displaced mesh exists
+  // FEProblemBase::addConstraint will automatically correect it to false. However,
+  // this will trigger a bug in MortarData::getMortarInterface, which will still
+  // try to look up the interface for the displaced mesh. So for now we rely on
+  // the manual setting and the consistency check below.
+
   return params;
 }
 
@@ -79,6 +85,8 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     _disp_primary[i] = &disp_var.adSlnNeighbor();
   }
 
+  const auto use_displaced_mesh = getParam<bool>("use_displaced_mesh");
+
   for (const auto & name : _gap_flux_model_names)
   {
     const auto & gap_model = getUserObjectByName<GapFluxModelBase>(name);
@@ -92,17 +100,21 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     // dependency into an explicit dependency that MOOSE will automatically fulfill.
 
     // pass variable dependencies through
-    std::cout << "=== Gap model " << name << " ===" << std::endl;
     const auto & var_dependencies = gap_model.getMooseVariableDependencies();
     for (const auto & var : var_dependencies)
-    {
-      std::cout << var->name() << std::endl;
       addMooseVariableDependency(var);
-    }
 
     // pass material property dependencies through
     const auto & mat_dependencies = gap_model.getMatPropDependencies();
     _material_property_dependencies.insert(mat_dependencies.begin(), mat_dependencies.end());
+
+    // ensure that the constraint and the flux models operate on the same mesh
+    if (gap_model.parameters().get<bool>("use_displaced_mesh") != use_displaced_mesh)
+      paramError(
+          "use_displaced_mesh",
+          "The gap flux model '",
+          name,
+          "' should operate on the same mesh (displaced/undisplaced) as the constraint object");
 
     // add gap model to list
     _gap_flux_models.push_back(&gap_model);
