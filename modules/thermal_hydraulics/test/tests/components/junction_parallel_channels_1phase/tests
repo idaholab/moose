@@ -37,6 +37,15 @@
     ad_indexing_type = 'global'
   []
 
+  [calorically_imperfect_gas]
+    type = 'CSVDiff'
+    input = 'junction_with_calorifically_imperfect_gas.i'
+    csvdiff = 'junction_with_calorifically_imperfect_gas_out.csv'
+    abs_zero = 1e-8
+    rel_err = 0
+    ad_indexing_type = 'global'
+  []
+
   # Tests conservation of mass and energy for 1-phase flow.
   [conservation_1phase]
     type = 'CSVDiff'

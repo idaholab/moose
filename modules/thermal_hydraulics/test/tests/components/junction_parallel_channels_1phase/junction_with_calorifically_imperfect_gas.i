@@ -204,7 +204,7 @@ p_out = 7e6
   type = Transient
   scheme = bdf2
   start_time = 0
-  end_time = 100
+  end_time = 200
   [TimeStepper]
     type = IterationAdaptiveDT
     dt = 0.01
