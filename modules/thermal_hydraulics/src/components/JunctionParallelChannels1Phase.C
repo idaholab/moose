@@ -83,8 +83,7 @@ JunctionParallelChannels1Phase::addVariables()
     const Real initial_vel_y = initial_vel_y_fn.value(0, _position);
     const Real initial_vel_z = initial_vel_z_fn.value(0, _position);
 
-    SinglePhaseFluidProperties & fp =
-        _sim.getUserObject<SinglePhaseFluidProperties>(_fp_name);
+    SinglePhaseFluidProperties & fp = _sim.getUserObject<SinglePhaseFluidProperties>(_fp_name);
     fp.initialSetup();
     const Real initial_rho = fp.rho_from_p_T(initial_p, initial_T);
     const RealVectorValue vel(initial_vel_x, initial_vel_y, initial_vel_z);
