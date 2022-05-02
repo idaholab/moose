@@ -1,13 +1,12 @@
-# This input file tests mass conservation at steady-state by looking at the
-# net mass flux into the domain.
+# This input file tests compatibility of VolumeJunction1Phase and CaloricallyImperfectGas.
 
 T_in = 523.0
-m_dot = 100
+vel = -1
 p_out = 7e6
 
 [GlobalParams]
   initial_p = ${p_out}
-  initial_vel = 1
+  initial_vel = ${vel}
   initial_T = ${T_in}
   gravity_vector = '0 0 0'
   closures = simple_closures
@@ -59,9 +58,9 @@ p_out = 7e6
 
 [Components]
   [inlet_bc]
-    type = InletMassFlowRateTemperature1Phase
+    type = InletVelocityTemperature1Phase
     input = 'inlet:in'
-    m_dot = ${m_dot}
+    vel = ${vel}
     T = ${T_in}
   []
   [inlet]
@@ -70,14 +69,14 @@ p_out = 7e6
     position = '0 0 11'
     orientation = '0 0 -1'
     length = 1
-    A = 3
+    A = 5
   []
   [inlet_plenum]
     type = VolumeJunction1Phase
     position = '0 0 10'
     initial_vel_x = 0
     initial_vel_y = 0
-    initial_vel_z = 1
+    initial_vel_z = ${vel}
     connections = 'inlet:out channel1:in channel2:in'
     volume = 1
     scaling_factor_rhoEV = '1e-5'
@@ -91,11 +90,6 @@ p_out = 7e6
     A = 4
     D_h = 1
   []
-  [K_bypass]
-    type = FormLossFromFunction1Phase
-    K_prime = 500
-    flow_channel = channel1
-  []
   [channel2]
     type = FlowChannel1Phase
     fp = fp
@@ -108,9 +102,9 @@ p_out = 7e6
   [outlet_plenum]
     type = VolumeJunction1Phase
     position = '0 0 0'
-    initial_vel_x = 1
+    initial_vel_x = 0
     initial_vel_y = 0
-    initial_vel_z = 1
+    initial_vel_z = ${vel}
     connections = 'channel1:out channel2:out outlet:in'
     volume = 1
     scaling_factor_rhoEV = '1e-5'
@@ -121,7 +115,7 @@ p_out = 7e6
     position = '0 0 0'
     orientation = '0 0 -1'
     length = 1
-    A = 1
+    A = 5
   []
   [outlet_bc]
     type = Outlet1Phase
