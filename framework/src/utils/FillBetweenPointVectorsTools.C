@@ -610,6 +610,33 @@ isBoundarySimpleClosedLoop(ReplicatedMesh & mesh, const Point origin_pt, const b
 }
 
 bool
+isBoundaryOpenSingleSegment(ReplicatedMesh & mesh,
+                            Real & max_node_radius,
+                            std::vector<dof_id_type> & boundary_ordered_node_list,
+                            const Point origin_pt,
+                            const boundary_id_type bid)
+{
+  try
+  {
+    isBoundarySimpleClosedLoop(mesh, max_node_radius, boundary_ordered_node_list, origin_pt, bid);
+  }
+  catch (MooseException & e)
+  {
+    if (((std::string)e.what())
+            .compare("This mesh generator does not work for the provided external boundary as it "
+                     "is not a closed loop.") != 0)
+    {
+      throw MooseException("The provided boundary is not an open single-segment boundary.");
+      return false;
+    }
+    else
+      return true;
+  }
+  throw MooseException("The provided boundary is closed loop, which is not supported.");
+  return false;
+}
+
+bool
 isExternalBoundary(ReplicatedMesh & mesh, const boundary_id_type bid)
 {
   if (!mesh.is_prepared())

@@ -185,7 +185,8 @@ bool needFlip(const std::vector<Point> vec_pts_1, const std::vector<Point> vec_p
  * boundary
  * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
  * @param bid ID of the boundary to be examined
- * @return whether the boundary works with the algorithm
+ * @return whether the boundary is a closed loop with consecutive nodes's azimuthal
+ * angles change monotonically
  */
 bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
                                 Real & max_node_radius,
@@ -201,7 +202,8 @@ bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
  * boundary
  * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
  * @param bid ID of the boundary to be examined
- * @return whether the boundary works with the algorithm
+ * @return whether the boundary is a closed loop with consecutive nodes's azimuthal
+ * angles change monotonically
  */
 bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
                                 Real & max_node_radius,
@@ -214,11 +216,27 @@ bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
  * @param mesh input mesh that contains the boundary to be examined
  * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
  * @param bid ID of the boundary to be examined
- * @return whether the boundary works with the algorithm
+ * @return whether the boundary is a closed loop with consecutive nodes's azimuthal
+ * angles change monotonically
  */
 bool isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
                                 const Point origin_pt,
                                 const boundary_id_type bid);
+
+/**
+ * Decides whether a boundary of a given mesh is an open single-segment boundary.
+ * @param mesh input mesh that contains the boundary to be examined
+ * @param max_node_radius the maximum radius of the nodes on the
+ * boundary
+ * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
+ * @param bid ID of the boundary to be examined
+ * @return whether the boundary is an open single-segment boundary
+ */
+bool isBoundaryOpenSingleSegment(ReplicatedMesh & mesh,
+                                 Real & max_node_radius,
+                                 std::vector<dof_id_type> & boundary_ordered_node_list,
+                                 const Point origin_pt,
+                                 const boundary_id_type bid);
 
 /**
  * Decides whether a boundary of a given mesh is an external boundary.

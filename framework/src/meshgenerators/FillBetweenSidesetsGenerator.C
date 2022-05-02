@@ -153,37 +153,29 @@ FillBetweenSidesetsGenerator::generate()
 
   try
   {
-    if (FillBetweenPointVectorsTools::isBoundarySimpleClosedLoop(
-            *input_mesh_1,
-            max_input_mesh_1_node_radius,
-            boundary_1_ordered_nodes,
-            MooseMeshUtils::meshCentroidCalculator(*input_mesh_1),
-            input_mesh_1_external_bids.front()))
-      paramError("boundary_1", "The provided boundary is closed loop, which is not supported.");
+    FillBetweenPointVectorsTools::isBoundaryOpenSingleSegment(
+        *input_mesh_1,
+        max_input_mesh_1_node_radius,
+        boundary_1_ordered_nodes,
+        MooseMeshUtils::meshCentroidCalculator(*input_mesh_1),
+        input_mesh_1_external_bids.front());
   }
   catch (MooseException & e)
   {
-    if (((std::string)e.what())
-            .compare("This mesh generator does not work for the provided external boundary as it "
-                     "is not a closed loop.") != 0)
-      paramError("boundary_1", "The provided boundary is not an open single-segment boundary.");
+    paramError("boundary_1", e.what());
   }
   try
   {
-    if (FillBetweenPointVectorsTools::isBoundarySimpleClosedLoop(
-            *input_mesh_2,
-            max_input_mesh_2_node_radius,
-            boundary_2_ordered_nodes,
-            MooseMeshUtils::meshCentroidCalculator(*input_mesh_2),
-            input_mesh_2_external_bids.front()))
-      paramError("boundary_2", "The provided boundary is closed loop, which is not supported.");
+    FillBetweenPointVectorsTools::isBoundaryOpenSingleSegment(
+        *input_mesh_2,
+        max_input_mesh_2_node_radius,
+        boundary_2_ordered_nodes,
+        MooseMeshUtils::meshCentroidCalculator(*input_mesh_2),
+        input_mesh_2_external_bids.front());
   }
   catch (MooseException & e)
   {
-    if (((std::string)e.what())
-            .compare("This mesh generator does not work for the provided external boundary as it "
-                     "is not a closed loop.") != 0)
-      paramError("boundary_2", "The provided boundary is not an open single-segment boundary.");
+    paramError("boundary_2", e.what());
   }
 
   std::vector<Point> positions_vector_1;
