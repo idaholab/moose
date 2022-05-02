@@ -47,13 +47,9 @@ MortarGapHeatTransferAction::validParams()
   params += ModularGapConductanceConstraint::validParams();
   params += GapFluxModelRadiation::validParams();
   params += GapFluxModelConduction::validParams();
-  //
-  params.makeParamNotRequired<std::vector<BoundaryName>>("boundary");
-  params.makeParamNotRequired<BoundaryName>("primary_boundary");
+
   params.makeParamNotRequired<SubdomainName>("primary_subdomain");
-  params.makeParamNotRequired<BoundaryName>("secondary_boundary");
   params.makeParamNotRequired<SubdomainName>("secondary_subdomain");
-  params.makeParamNotRequired<std::vector<VariableName>>("temperature");
 
   params.addParam<std::vector<UserObjectName>>(
       "user_object_physics",
