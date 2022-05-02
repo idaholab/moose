@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PolygonConcentricCircleMeshGenerator.md'
-  issues = '#18628 #20514 #20637'
+  issues = '#18628 #20514 #20637 #21420'
   [back_only]
     type = 'Exodiff'
     input = 'poly_2d.i'
@@ -156,6 +156,47 @@
                 --mesh-only "poly_2d_full_quad_custom.e"'
     requirement ='The system shall generate a hexagon mesh with rings, ducts and quad central elements with custom center quad factor.'
     recover = false
+  []
+  [reporting_id]
+    requirement = 'The system shall generate a pin mesh with the reporting ID'
+    [annular_block]
+      type = 'Exodiff'
+      input = 'pin_reporting_id.i'
+      exodiff = 'pin_reporting_id_annular_block_out.e'
+      cli_args = 'Mesh/pin/ring_id_name="ring_id"
+                  AuxKernels/set_id/extra_id_name="ring_id"
+                  Outputs/file_base="pin_reporting_id_annular_block_out"'
+      detail = 'for annular blocks.'
+      recover = false
+    []
+    [annular_ring]
+      type = 'Exodiff'
+      input = 'pin_reporting_id.i'
+      exodiff = 'pin_reporting_id_annular_ring_out.e'
+      cli_args = 'Mesh/pin/ring_id_name="ring_id"
+                  Mesh/pin/ring_id_assign_type="ring_wise"
+                  AuxKernels/set_id/extra_id_name="ring_id"
+                  Outputs/file_base="pin_reporting_id_annular_ring_out"'
+      detail = 'for annular individual rings.'
+      recover = false
+    []
+    [sector]
+      type = 'Exodiff'
+      input = 'pin_reporting_id.i'
+      exodiff = 'pin_reporting_id_sector_out.e'
+      cli_args = 'Mesh/pin/sector_id_name="sector_id"
+                  AuxKernels/set_id/extra_id_name="sector_id"
+                  Outputs/file_base="pin_reporting_id_sector_out"'
+      detail = 'for sectors.'
+      recover = false
+    []
+    [hexgeom]
+      type = 'Exodiff'
+      input = 'pin_hex_reporting_id.i'
+      exodiff = 'pin_hex_reporting_id_out.e'
+      detail = 'for ring and sectors on hexagonal pin.'
+      recover = false
+    []
   []
   [exceptions]
     requirement = "The system shall throw an error if "
