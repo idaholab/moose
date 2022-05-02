@@ -69,7 +69,6 @@
     input = 'junction_with_calorifically_imperfect_gas.i'
     csvdiff = 'junction_with_calorifically_imperfect_gas_out.csv'
     abs_zero = 5e-8
-    rel_err = 0
     ad_indexing_type = 'global'
   []
 
