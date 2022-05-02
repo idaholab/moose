@@ -219,7 +219,7 @@
   [./definition_input_choices_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'outputs\'{.*?\'value\'{.*?InputChoices=\[ "all" "none" PATH:"../../../../Outputs/["*"]/decl" \].*?}.*?} % end parameter outputs\n'
+    expect_out = '\'outputs\'{.*?\'value\'{.*?InputChoices=\[ "all" "none" PATH:"../../../../Outputs/["*"]/decl" \].*?}.*?}\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
@@ -247,7 +247,7 @@
   [./definition_valenum_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'execute_on\'{[^{]*{[^}]*ValEnums=\[ "NONE" "INI[^]]*?GIN" "FINAL" "CUSTOM"[^]]*\][^}]*}[^}]*} % end parameter execute_on'
+    expect_out = '\'execute_on\'{[^{]*{[^}]*ValEnums=\[ "NONE" "INI[^]]*?GIN" "FINAL" "CUSTOM"[^]]*\][^}]*}[^}]*}'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
@@ -261,7 +261,7 @@
   [./definition_active_parameter_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'active\'{.*?Description="If specified.*?made active".*?\'value\'{.*?InputDefault="__all__".*?} % end parameter active'
+    expect_out = '\'active\'{.*?Description="If specified.*?made active".*?\'value\'{.*?InputDefault="__all__".*?}'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
@@ -303,7 +303,7 @@
   [./definition_default_type_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'BoxMarker_type\'{.*?\'type\'{.*?\'value\'{.*?InputDefault="BoxMarker".*?}.*?} % end parameter type.*?} % end block BoxMarker_type'
+    expect_out = '\'BoxMarker_type\'{.*?\'type\'{.*?\'value\'{.*?InputDefault="BoxMarker".*?}.*?}.*?} % end block BoxMarker_type'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
@@ -317,7 +317,7 @@
   [./definition_minvalinc_inputdefault_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'cycles_per_step\'{.*?\'value\'{.*?MinValInc=0.*?InputDefault="1".*?} % end parameter cycles_per_step'
+    expect_out = '\'cycles_per_step\'{.*?\'value\'{.*?MinValInc=0.*?InputDefault="1".*?}'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
@@ -328,80 +328,10 @@
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
 
-  [./definition_block_type_maxoccurs_nolimit_test]
-    type = 'RunApp'
-    input = 'IGNORED'
-    expect_out = '\'AuxVariables\'{.*?InputTmpl=MooseBlock.*?InputName="AuxVariables".*?InputType=normal_top.*?InputDefault="AuxVariables".*?MinOccurs=0.*?MaxOccurs=NoLimit.*?decl{.*?\'active\'{'
-    cli_args = '--definition'
-    # suppress error checking, the word 'ERROR' shows up in the definition dump
-    errors = 'zzzzzzzzzz'
-    max_buffer_size = -1
-    issues = '#14277'
-    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Block type MaxOccurs NoLimit'
-    design = 'SONDefinitionFormatter.md'
-    valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
-
-  [./definition_functionname_type_maxoccurs_nolimit_test]
-    type = 'RunApp'
-    input = 'IGNORED'
-    expect_out = '\'x_forcing_func\'{.*?\'value\'{.*?MaxOccurs=NoLimit.*?}.*?} % end parameter x_forcing_func'
-    cli_args = '--definition'
-    # suppress error checking, the word 'ERROR' shows up in the definition dump
-    errors = 'zzzzzzzzzz'
-    max_buffer_size = -1
-    issues = '#14277'
-    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check FunctionName type MaxOccurs NoLimit'
-    design = 'SONDefinitionFormatter.md'
-    valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
-
-  [./definition_array_type_minoccurs_zero_test]
-    type = 'RunApp'
-    input = 'IGNORED'
-    expect_out = '\'active\'{.*?\'value\'{.*?MinOccurs=0.*?}.*?} % end parameter active'
-    cli_args = '--definition'
-    # suppress error checking, the word 'ERROR' shows up in the definition dump
-    errors = 'zzzzzzzzzz'
-    max_buffer_size = -1
-    issues = '#14277'
-    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Array type MinOccurs zero'
-    design = 'SONDefinitionFormatter.md'
-    valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
-
-  [./definition_declarator_minoccurs_zero_test]
-    type = 'RunApp'
-    input = 'IGNORED'
-    expect_out = '\'Variables\'{.*?InputDefault="Variables".*?decl{.*?MinOccurs=0.*?}.*?\'active\'{.*?} % end parameter active.*?} % end block Variables\n'
-    cli_args = '--definition'
-    # suppress error checking, the word 'ERROR' shows up in the definition dump
-    errors = 'zzzzzzzzzz'
-    max_buffer_size = -1
-    issues = '#17324'
-    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check declarator MinOccurs zero'
-    design = 'SONDefinitionFormatter.md'
-    valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
-
-  [./definition_eigen_matrix_type_maxoccurs_nolimit_test]
-    type = 'RunApp'
-    input = 'IGNORED'
-    expect_out = '\'prop_value\'{.*?InputTmpl=MooseParam.*?InputType=key_array.*?\'value\'{.*?MinOccurs=0.*?MaxOccurs=NoLimit.*?}.*?} % end parameter prop_value'
-    cli_args = '--definition'
-    # suppress error checking, the word 'ERROR' shows up in the definition dump
-    errors = 'zzzzzzzzzz'
-    max_buffer_size = -1
-    issues = '#17324'
-    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Eigen::Matrix type MaxOccurs NoLimit'
-    design = 'SONDefinitionFormatter.md'
-    valgrind = 'NONE' # Tested in "definition_input_choices_test"
-  [../]
-
   [./definition_default_types_child_parameter_promotion_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'Mesh\'{.*?InputName="Mesh".*?\'ghosting_patch_size\'{.*?InputName="ghosting_patch_size".*?} % end parameter ghosting_patch_size.*?} % end block Mesh\n'
+    expect_out = '\'Mesh\'{.*?InputName="Mesh".*?\'ghosting_patch_size\'{.*?InputName="ghosting_patch_size".*?}.*?} % end block Mesh\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
@@ -415,7 +345,7 @@
   [./definition_default_subblock_types_child_parameter_promotion_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'AuxVariables\'{.*?InputName="AuxVariables".*?\'["*"]\'{.*?InputName="["*"]".*?\'block\'{.*?InputName="block".*?} % end parameter block.*?} % end block ["*"].*?} % end block AuxVariables\n'
+    expect_out = '\'AuxVariables\'{.*?InputName="AuxVariables".*?\'["*"]\'{.*?InputName="["*"]".*?\'block\'{.*?InputName="block".*?}.*?} % end block ["*"].*?} % end block AuxVariables\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
@@ -443,7 +373,7 @@
   [./definition_boolean_type_valenum_choices_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = '\'enable\'{.*?\'value\'{.*?ValEnums=\[ true false 1 0 on off \].*?}.*?} % end parameter enable\n'
+    expect_out = '\'enable\'{.*?\'value\'{.*?ValEnums=\[ true false 1 0 on off \].*?}.*?}\n'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
