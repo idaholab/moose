@@ -1,4 +1,4 @@
-# This input file tests compatibility of VolumeJunction1Phase and CaloricallyImperfectGas.
+# This input file tests compatibility of JunctionParallelChannels1Phase and CaloricallyImperfectGas.
 
 T_in = 523.0
 vel = -1
