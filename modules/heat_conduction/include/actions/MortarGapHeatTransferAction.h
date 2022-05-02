@@ -37,9 +37,6 @@ protected:
   virtual void addMortarVariable();
   virtual void addUserObjects();
 
-  /// Gap heat transfer formulation
-  const GapHeatTransferFormulation _formulation;
-
 private:
   void checkForExistingSubdomains();
   bool _user_provided_mortar_meshes;

@@ -33,12 +33,8 @@ MortarGapHeatTransferAction::validParams()
   InputParameters params = Action::validParams();
   params.addClassDescription(
       "Action that controls the creation of all of the necessary objects for "
-      "calculation of heat transfer through an open/closed gap");
-
-  // Modular mortar gap conductance
-  MooseEnum gap_heat_transfer_formulation("point_segment mortar", "mortar");
-  params.addParam<MooseEnum>(
-      "formulation", gap_heat_transfer_formulation, "The gap heat transfer formulation to be used");
+      "calculation of heat transfer through an open/closed gap using a mortar formulation and a "
+      "modular design approach");
 
   params.addParam<Real>("thermal_lm_scaling",
                         1.,
@@ -50,6 +46,7 @@ MortarGapHeatTransferAction::validParams()
 
   params.makeParamNotRequired<SubdomainName>("primary_subdomain");
   params.makeParamNotRequired<SubdomainName>("secondary_subdomain");
+  params.makeParamNotRequired<Real>("gap_conductivity");
 
   params.addParam<std::vector<UserObjectName>>(
       "user_object_physics",
@@ -59,9 +56,7 @@ MortarGapHeatTransferAction::validParams()
 }
 
 MortarGapHeatTransferAction::MortarGapHeatTransferAction(const InputParameters & params)
-  : Action(params),
-    _formulation(getParam<MooseEnum>("formulation").getEnum<GapHeatTransferFormulation>()),
-    _user_provided_mortar_meshes(false)
+  : Action(params), _user_provided_mortar_meshes(false)
 {
 
   if (params.isParamSetByUser("primary_subdomain") &&
@@ -78,22 +73,14 @@ MortarGapHeatTransferAction::MortarGapHeatTransferAction(const InputParameters &
 void
 MortarGapHeatTransferAction::act()
 {
-  if (_formulation == GapHeatTransferFormulation::MORTAR)
-  {
-
-    if (_current_task == "append_mesh_generator")
-      addMortarMesh();
-    else if (_current_task == "add_mortar_variable")
-      addMortarVariable();
-    if (_current_task == "add_constraint")
-      addConstraints();
-    else if (_current_task == "add_user_object")
-      addUserObjects();
-  }
-  else
-    paramError(
-        "formulation",
-        "The formulation selected to solve gap heat transfer physics is not currently available.");
+  if (_current_task == "append_mesh_generator")
+    addMortarMesh();
+  else if (_current_task == "add_mortar_variable")
+    addMortarVariable();
+  if (_current_task == "add_constraint")
+    addConstraints();
+  else if (_current_task == "add_user_object")
+    addUserObjects();
 }
 
 void

@@ -1,5 +1,5 @@
 [Tests]
-  design = 'Constraints/index.md ModularGapConductanceConstraint.md'
+  design = 'Constraints/index.md ModularGapConductanceConstraint.md MortarGapHeatTransferAction.md'
   issues = '#13080 #19229 #20922'
   [modular_gap_heat_transfer_mortar_displaced_radiation_conduction_verbose]
     type = CSVDiff
