@@ -57,6 +57,7 @@ protected:
   unsigned int & _num_dofs;
   unsigned int & _num_dofs_nl;
   unsigned int & _num_dofs_aux;
+  unsigned int & _num_dofs_constrained;
   unsigned int & _num_elem;
   unsigned int & _num_node;
   unsigned int & _num_local_dofs;
