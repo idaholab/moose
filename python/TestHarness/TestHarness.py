@@ -734,8 +734,7 @@ class TestHarness:
                 if len(sorted_tups) == 0 or float(sorted_tups[0][0].getTiming()) == 0:
                     print('No jobs were completed.')
 
-                # The TestHarness receives completed jobs serially out of order, when we want
-                # to work with groups (can't use self.test_table).
+                # The TestHarness receives individual jobs out of order (can't realistically use self.test_table)
                 tester_dirs = {}
                 dag_table = []
                 for jobs, dag, thread_lock in self.scheduler.retrieveDAGs():
@@ -752,6 +751,7 @@ class TestHarness:
                 if sorted_table[0:self.options.longest_jobs]:
                     print(f'\n{self.options.longest_jobs} longest running spec files:')
                     print(('-' * (util.TERM_COLS)))
+                    # We can't use util.formatResults, as we are representing a group of testers
                     for group in sorted_table[0:self.options.longest_jobs]:
                         print(str(group[0]).ljust((util.TERM_COLS - (len(group[1]) + 4)), ' '), f'[{group[1]}s]')
 

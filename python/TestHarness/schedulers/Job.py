@@ -273,7 +273,7 @@ class Job(object):
         """ Return active time """
         m = re.search(r"Active time=(\S+)", self.__joined_out)
         if m != None:
-            return m.group(1)
+            return float(m.group(1))
 
     def getSolveTime(self):
         """ Return solve time """
