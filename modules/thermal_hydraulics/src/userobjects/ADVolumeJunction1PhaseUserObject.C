@@ -122,7 +122,7 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   const ADReal eJ = _rhoEV[0] / _rhoV[0] - 0.5 * rhouV2 / (_rhoV[0] * _rhoV[0]);
   const ADReal pJ = _fp.p_from_v_e(vJ, eJ);
 
-  if (c == 0)
+  if (c == 0 && std::abs(_K) > 1e-10)
   {
     const ADReal vel_in = _rhouA[0] / _rhoA[0];
     const ADReal v_in = THM::v_from_rhoA_A(_rhoA[0], _A[0]);
