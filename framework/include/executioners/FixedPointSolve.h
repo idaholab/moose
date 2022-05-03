@@ -24,6 +24,13 @@ public:
   static InputParameters validParams();
 
   /**
+   * Allocate storage for the fixed point algorithm.
+   * @param primary Whether this routine is to allocate storage for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void allocateStorage(const bool primary);
+
+  /**
    * Iteratively solves the FEProblem.
    * @return True if solver is converged.
    */
@@ -87,16 +94,6 @@ public:
     _secondary_transformed_pps = pps;
   }
 
-  /**
-   * Allocate storage for the fixed point algorithm.
-   * This creates the system vector of old (older, pre/post solve) variable values and the
-   * array of old (older, pre/post solve) postprocessor values.
-   *
-   * @param primary Whether this routine is to allocate storage for the primary transformed
-   *                quantities (as main app) or the secondary ones (as a subapp)
-   */
-  virtual void allocateStorage(const bool primary) = 0;
-
   /// Whether sub-applications are automatically advanced no matter what happens during their solves
   bool autoAdvance() const;
 
@@ -105,12 +102,31 @@ public:
 
 protected:
   /**
+   * Allocate storage for the fixed point algorithm.
+   * This creates the system vector of old (older, pre/post solve) variable values.
+   *
+   * @param primary Whether this routine is to allocate storage for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void allocateVariableStorage(SystemBase & system, const bool primary) = 0;
+
+  /**
+   * Allocate storage for the fixed point algorithm.
+   * This creates the vector storage for the postprocessors
+   *
+   * @param primary Whether this routine is to allocate storage for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  virtual void allocatePostprocessorStorage(const bool primary) = 0;
+
+  /**
    * Saves the current values of the variables, and update the old(er) vectors.
    *
+   * @param system The system holding the variables that will hold the saved vectors
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void saveVariableValues(const bool primary) = 0;
+  virtual void saveVariableValues(SystemBase & system, const bool primary) = 0;
 
   /**
    * Saves the current values of the postprocessors, and update the old(er) vectors.
@@ -168,7 +184,8 @@ protected:
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void transformVariables(const std::set<dof_id_type> & transformed_dofs,
+  virtual void transformVariables(SystemBase & system,
+                                  const std::set<dof_id_type> & transformed_dofs,
                                   const bool primary) = 0;
 
   /// Print the convergence history of the coupling, at every fixed point iteration
@@ -206,9 +223,12 @@ protected:
 
   /// Relaxation factor for fixed point Iteration
   const Real _relax_factor;
-  /// The variables (transferred or not) that are going to be relaxed
+  /// The variables (transferred or not) that are going to be relaxed/transformed
   std::vector<std::string> _transformed_vars; // TODO: make const once relaxed_variables is removed
-  /// The postprocessors (transferred or not) that are going to be relaxed
+  /// The auxiliary variables (transferred or not) that are going to be relaxed/transformed
+  const std::vector<std::string>
+      _transformed_auxvars; // TODO: make const once relaxed_variables is removed
+  /// The postprocessors (transferred or not) that are going to be relaxed/transformed
   const std::vector<PostprocessorName> _transformed_pps;
   /// Previous values of the relaxed postprocessors
   std::vector<std::vector<PostprocessorValue>> _transformed_pps_values;
@@ -237,6 +257,16 @@ protected:
   MooseFixedPointConvergenceReason _fixed_point_status;
   ///@}
 private:
+  /**
+   * Get the degrees of freedom indices into the system for the given variables to be transformed
+   * @param the names of the variables, in the same system
+   * @return a set of the dof indices for the given variables
+   */
+  std::set<dof_id_type> getVariableDofIndices(std::vector<std::string> var_names) const;
+
+  /// Check that the fixed point parameters are consistent with the algorithm
+  virtual void checkSufficientParameters();
+
   /// Relative tolerance on postprocessor value
   const Real _custom_rel_tol;
   /// Absolute tolerance on postprocessor value

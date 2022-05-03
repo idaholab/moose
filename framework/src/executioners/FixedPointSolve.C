@@ -88,6 +88,10 @@ FixedPointSolve::validParams()
       "transformed_variables",
       std::vector<std::string>(),
       "List of main app variables to transform during fixed point iterations");
+  params.addParam<std::vector<std::string>>(
+      "transformed_auxiliary_variables",
+      std::vector<std::string>(),
+      "List of main app auxiliary variables to transform during fixed point iterations");
   params.addParam<std::vector<PostprocessorName>>(
       "transformed_postprocessors",
       std::vector<PostprocessorName>(),
@@ -105,10 +109,16 @@ FixedPointSolve::validParams()
   params.addParamNamesToGroup(
       "fixed_point_min_its fixed_point_max_its accept_on_max_fixed_point_iteration "
       "disable_fixed_point_residual_norm_check fixed_point_rel_tol fixed_point_abs_tol "
-      "fixed_point_force_norms custom_pp fixed_point_rel_tol fixed_point_abs_tol direct_pp_value "
-      "relaxation_factor transformed_variables transformed_postprocessors auto_advance "
-      "custom_abs_tol custom_rel_tol",
-      "Fixed point iterations");
+      "fixed_point_force_norms relaxation_factor auto_advance",
+      "Fixed point iterations convergence");
+
+  params.addParamNamesToGroup(
+      "custom_pp direct_pp_value auto_advance custom_abs_tol custom_rel_tol",
+      "Fixed point iterations postprocessor-controlled convergence check");
+
+  params.addParamNamesToGroup(
+      "transformed_variables transformed_auxiliary_variables transformed_postprocessors",
+      "Fixed point iterations accelerated/relaxed quantities");
 
   params.addParam<unsigned int>(
       "max_xfem_update",
@@ -138,6 +148,7 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
                                                      : nullptr),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
+    _transformed_auxvars(getParam<std::vector<std::string>>("transformed_auxiliary_variables")),
     _transformed_pps(getParam<std::vector<PostprocessorName>>("transformed_postprocessors")),
     // this value will be set by MultiApp
     _secondary_relaxation_factor(1.0),
@@ -165,10 +176,12 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     paramError("fixed_point_min_its",
                "The minimum number of fixed point iterations may not exceed the maximum.");
 
-  if (_transformed_vars.size() > 0 && _transformed_pps.size() > 0)
+  if ((_transformed_vars.size() > 0) + (_transformed_auxvars.size() > 0) +
+          (_transformed_pps.size() > 0) >
+      1)
     mooseWarning(
-        "Both variable and postprocessor transformation are active. If the two share dofs, the "
-        "transformation will not be correct.");
+        "Several among variable/auxvariable/postprocessor transformation are "
+        "active. If the two share dofs, the transformation may not converge at the expected rate.");
 
   if (!_app.isUltimateMaster())
   {
@@ -178,11 +191,23 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
   }
 }
 
+void
+FixedPointSolve::allocateStorage(const bool primary)
+{
+  if (_transformed_vars.size() > 0)
+    allocateVariableStorage(_nl, primary);
+  if (_transformed_auxvars.size() > 0)
+    allocateVariableStorage(_aux, primary);
+  if (_transformed_pps.size() > 0)
+    allocatePostprocessorStorage(primary);
+}
+
 bool
 FixedPointSolve::solve()
 {
-  TIME_SECTION("PicardSolve", 1);
+  TIME_SECTION("FixedPointSolve", 1);
 
+  checkSufficientParameters();
   Real current_dt = _problem.dt();
 
   _fixed_point_timestep_begin_norm.clear();
@@ -199,15 +224,15 @@ FixedPointSolve::solve()
 
   // Prepare to relax variables as a main app
   std::set<dof_id_type> transformed_dofs;
-  if ((_relax_factor != 1.0 || !dynamic_cast<PicardSolve *>(this)) && _transformed_vars.size() > 0)
+  std::set<dof_id_type> transformed_auxdofs;
+  if ((_relax_factor != 1.0 || !dynamic_cast<PicardSolve *>(this)))
   {
-    // Snag all of the local dof indices for all of these variables
-    AllLocalDofIndicesThread aldit(_problem, _transformed_vars);
-    ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
-    Threads::parallel_reduce(elem_range, aldit);
-
-    transformed_dofs = aldit.getDofIndices();
+    if (_transformed_vars.size() > 0)
+      transformed_dofs = getVariableDofIndices(_transformed_vars);
+    if (_transformed_auxvars.size() > 0)
+      transformed_auxdofs = getVariableDofIndices(_transformed_auxvars);
   }
+
 
   // Prepare to relax variables as a subapp
   std::set<dof_id_type> secondary_transformed_dofs;
@@ -230,7 +255,8 @@ FixedPointSolve::solve()
       _main_fixed_point_it++;
 
       // Save variable values before the solve. Solving will provide new values
-      saveVariableValues(false);
+      saveVariableValues(_nl, false);
+      saveVariableValues(_aux, false);
     }
     else
       _main_fixed_point_it = 0;
@@ -316,7 +342,7 @@ FixedPointSolve::solve()
     // Update the subapp using the fixed point algorithm
     if (_secondary_transformed_variables.size() > 0 &&
         useFixedPointAlgorithmUpdateInsteadOfPicard(false) && _old_entering_time == _problem.time())
-      transformVariables(secondary_transformed_dofs, false);
+      transformVariables(_nl, secondary_transformed_dofs, false);
 
     // Update the entering time, used to detect failed solves
     _old_entering_time = _problem.time();
@@ -328,11 +354,26 @@ FixedPointSolve::solve()
   return converged;
 }
 
+std::set<dof_id_type>
+FixedPointSolve::getVariableDofIndices(std::vector<std::string> var_names) const
+{
+  // Snag all of the local dof indices for all of these variables
+  AllLocalDofIndicesThread aldit(_problem, var_names);
+  ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
+  Threads::parallel_reduce(elem_range, aldit);
+
+  return aldit.getDofIndices();
+}
+
 void
 FixedPointSolve::saveAllValues(const bool primary)
 {
-  saveVariableValues(primary);
-  savePostprocessorValues(primary);
+  if (_transformed_vars.size())
+    saveVariableValues(_nl, primary);
+  if (_transformed_auxvars.size())
+    saveVariableValues(_aux, primary);
+  if (_transformed_pps.size())
+    savePostprocessorValues(primary);
 }
 
 bool
@@ -403,7 +444,10 @@ FixedPointSolve::solveStep(Real & begin_norm,
 
   // Use the fixed point algorithm if the conditions (availability of values, etc) are met
   if (_transformed_vars.size() > 0 && useFixedPointAlgorithmUpdateInsteadOfPicard(true))
-    transformVariables(transformed_dofs, true);
+  {
+    transformVariables(_nl, transformed_dofs, true);
+    transformVariables(_aux, transformed_dofs, true);
+  }
 
   if (_problem.haveXFEM() && (_xfem_update_count < _max_xfem_update) && _problem.updateMeshXFEM())
   {
@@ -561,4 +605,17 @@ FixedPointSolve::autoAdvance() const
     auto_advance = _auto_advance_user_value;
 
   return auto_advance;
+}
+
+void
+FixedPointSolve::checkSufficientParameters()
+{
+  // Classical unrelaxed Picard does not require parameters
+  if (_relax_factor == 1.0 && dynamic_cast<PicardSolve *>(this))
+    return;
+  if (_transformed_vars.size() + _transformed_auxvars.size() + _transformed_pps.size() +
+          _secondary_transformed_variables.size() + _secondary_transformed_pps.size() ==
+      0)
+    mooseError("Fixed point acceleration or relaxation has been requested, but no "
+               "quantities to be accelerated / relaxed have been provided");
 }

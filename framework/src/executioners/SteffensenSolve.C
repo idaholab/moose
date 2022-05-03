@@ -25,43 +25,49 @@ SteffensenSolve::validParams()
 
 SteffensenSolve::SteffensenSolve(Executioner & ex) : FixedPointSolve(ex)
 {
-  allocateStorage(true);
+  allocateVariableStorage(_nl, true);
+  // Auxiliary system secant acceleration is not currently enabled
+  allocatePostprocessorStorage(true);
 
   // Steffensen method uses half-steps
   if (!parameters().isParamSetByAddParam("fixed_point_min_its"))
     _min_fixed_point_its *= 2;
   _max_fixed_point_its *= 2;
+
+  if (parameters().isParamSetByUser("transformed_auxiliary_variables"))
+    mooseError("Steffensen acceleration of auxiliary variables has not been implemented");
 }
 
 void
-SteffensenSolve::allocateStorage(const bool primary)
+SteffensenSolve::allocateVariableStorage(SystemBase & system, const bool primary)
 {
-  TagID fxn_m1_tagid;
-  TagID xn_m1_tagid;
+  const auto current_app_type = primary ? "_primary_" : "_secondary_";
+  const auto & solution_tag_type = Moose::VECTOR_TAG_SOLUTION;
+  TagID fxn_m1_tagid =
+      _problem.addVectorTag(system.name() + current_app_type + "fxn_m1", solution_tag_type);
+  TagID xn_m1_tagid =
+      _problem.addVectorTag(system.name() + current_app_type + "xn_m1", solution_tag_type);
+
+  // Store a copy of the previous solution here
+  system.addVector(xn_m1_tagid, false, PARALLEL);
+  system.addVector(fxn_m1_tagid, false, PARALLEL);
+}
+
+void
+SteffensenSolve::allocatePostprocessorStorage(const bool primary)
+{
   const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
-    xn_m1_tagid = _problem.addVectorTag("xn_m1", Moose::VECTOR_TAG_SOLUTION);
-    fxn_m1_tagid = _problem.addVectorTag("fxn_m1", Moose::VECTOR_TAG_SOLUTION);
     transformed_pps = &_transformed_pps;
     transformed_pps_values = &_transformed_pps_values;
-    _xn_m1_tagid = xn_m1_tagid;
-    _fxn_m1_tagid = fxn_m1_tagid;
   }
   else
   {
-    xn_m1_tagid = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
-    fxn_m1_tagid = _problem.addVectorTag("secondary_fxn_m1", Moose::VECTOR_TAG_SOLUTION);
     transformed_pps = &_secondary_transformed_pps;
     transformed_pps_values = &_secondary_transformed_pps_values;
-    _secondary_xn_m1_tagid = xn_m1_tagid;
-    _secondary_fxn_m1_tagid = fxn_m1_tagid;
   }
-
-  // Store a copy of the previous solution here
-  _nl.addVector(xn_m1_tagid, false, PARALLEL);
-  _nl.addVector(fxn_m1_tagid, false, PARALLEL);
 
   // Allocate storage for the previous postprocessor values
   (*transformed_pps_values).resize((*transformed_pps).size());
@@ -70,28 +76,17 @@ SteffensenSolve::allocateStorage(const bool primary)
 }
 
 void
-SteffensenSolve::saveVariableValues(const bool primary)
+SteffensenSolve::saveVariableValues(SystemBase & system, const bool primary)
 {
-  unsigned int iteration;
-  TagID fxn_m1_tagid;
-  TagID xn_m1_tagid;
-  if (primary)
-  {
-    iteration = _fixed_point_it;
-    fxn_m1_tagid = _fxn_m1_tagid;
-    xn_m1_tagid = _xn_m1_tagid;
-  }
-  else
-  {
-    iteration = _main_fixed_point_it;
-    fxn_m1_tagid = _secondary_fxn_m1_tagid;
-    xn_m1_tagid = _secondary_xn_m1_tagid;
-  }
+  const unsigned int iteration = primary ? _fixed_point_it : _main_fixed_point_it;
+  const auto current_app_type = primary ? "_primary_" : "_secondary_";
+  TagID fxn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "fxn_m1");
+  TagID xn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "xn_m1");
 
   // Save previous variable values
-  NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_tagid);
-  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_tagid);
+  NumericVector<Number> & solution = system.solution();
+  NumericVector<Number> & fxn_m1 = system.getVector(fxn_m1_tagid);
+  NumericVector<Number> & xn_m1 = system.getVector(xn_m1_tagid);
 
   // What 'solution' is with regards to the Steffensen solve depends on the step
   if (iteration % 2 == 1)
@@ -103,18 +98,16 @@ SteffensenSolve::saveVariableValues(const bool primary)
 void
 SteffensenSolve::savePostprocessorValues(const bool primary)
 {
-  unsigned int iteration;
+  const unsigned int iteration = primary ? _fixed_point_it : _main_fixed_point_it;
   const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
-    iteration = _fixed_point_it;
     transformed_pps = &_transformed_pps;
     transformed_pps_values = &_transformed_pps_values;
   }
   else
   {
-    iteration = _main_fixed_point_it;
     transformed_pps = &_secondary_transformed_pps;
     transformed_pps_values = &_secondary_transformed_pps_values;
   }
@@ -181,28 +174,18 @@ SteffensenSolve::transformPostprocessors(const bool primary)
 }
 
 void
-SteffensenSolve::transformVariables(const std::set<dof_id_type> & transformed_dofs,
+SteffensenSolve::transformVariables(SystemBase & system,
+                                    const std::set<dof_id_type> & transformed_dofs,
                                     const bool primary)
 {
-  Real relaxation_factor;
-  TagID fxn_m1_tagid;
-  TagID xn_m1_tagid;
-  if (primary)
-  {
-    relaxation_factor = _relax_factor;
-    fxn_m1_tagid = _fxn_m1_tagid;
-    xn_m1_tagid = _xn_m1_tagid;
-  }
-  else
-  {
-    relaxation_factor = _secondary_relaxation_factor;
-    fxn_m1_tagid = _secondary_fxn_m1_tagid;
-    xn_m1_tagid = _secondary_xn_m1_tagid;
-  }
+  Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
+  const auto current_app_type = primary ? "_primary_" : "_secondary_";
+  TagID fxn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "fxn_m1");
+  TagID xn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "xn_m1");
 
-  NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_tagid);
-  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_tagid);
+  NumericVector<Number> & solution = system.solution();
+  NumericVector<Number> & fxn_m1 = system.getVector(fxn_m1_tagid);
+  NumericVector<Number> & xn_m1 = system.getVector(xn_m1_tagid);
 
   for (const auto & dof : transformed_dofs)
   {
@@ -218,7 +201,7 @@ SteffensenSolve::transformVariables(const std::set<dof_id_type> & transformed_do
     solution.set(dof, new_value);
   }
   solution.close();
-  _nl.update();
+  system.update();
 }
 
 void

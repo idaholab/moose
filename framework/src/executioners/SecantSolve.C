@@ -25,8 +25,41 @@ SecantSolve::validParams()
 
 SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex)
 {
-  allocateStorage(true);
+  allocateVariableStorage(_nl, true);
+  // Auxiliary system secant acceleration is not currently enabled
+  allocatePostprocessorStorage(true);
 
+  if (parameters().isParamSetByUser("transformed_auxiliary_variables"))
+    mooseError("Secant acceleration of auxiliary variables has not been implemented");
+}
+
+void
+SecantSolve::allocateVariableStorage(SystemBase & system, const bool primary)
+{
+  const auto & sys_name = system.name();
+  const auto current_app_type = primary ? "_primary_" : "_secondary_";
+  const auto & solution_tag_type = Moose::VECTOR_TAG_SOLUTION;
+  TagID xn_m1_tagid =
+      _problem.addVectorTag(sys_name + current_app_type + "xn_m1", solution_tag_type);
+  TagID fxn_m1_tagid =
+      _problem.addVectorTag(sys_name + current_app_type + "_primary_fxn_m1", solution_tag_type);
+  TagID xn_m2_tagid =
+      _problem.addVectorTag(sys_name + current_app_type + "_primary_xn_m2", solution_tag_type);
+  TagID fxn_m2_tagid =
+      _problem.addVectorTag(sys_name + current_app_type + "_primary_fxn_m2", solution_tag_type);
+
+  // TODO: We would only need to store the solution for the degrees of freedom that
+  // will be transformed, not the entire solution.
+  // Store solution vectors for the two previous points and their evaluation
+  system.addVector(xn_m1_tagid, false, PARALLEL);
+  system.addVector(fxn_m1_tagid, false, PARALLEL);
+  system.addVector(xn_m2_tagid, false, PARALLEL);
+  system.addVector(fxn_m2_tagid, false, PARALLEL);
+}
+
+void
+SecantSolve::allocatePostprocessorStorage(const bool /* primary */)
+{
   _transformed_pps_values.resize(_transformed_pps.size());
   for (size_t i = 0; i < _transformed_pps.size(); i++)
     _transformed_pps_values[i].resize(4);
@@ -36,72 +69,20 @@ SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex)
 }
 
 void
-SecantSolve::allocateStorage(const bool primary)
+SecantSolve::saveVariableValues(SystemBase & system, const bool primary)
 {
-  TagID fxn_m1_tagid;
-  TagID xn_m1_tagid;
-  TagID fxn_m2_tagid;
-  TagID xn_m2_tagid;
-  if (primary)
-  {
-    xn_m1_tagid = _problem.addVectorTag("xn_m1", Moose::VECTOR_TAG_SOLUTION);
-    fxn_m1_tagid = _problem.addVectorTag("fxn_m1", Moose::VECTOR_TAG_SOLUTION);
-    xn_m2_tagid = _problem.addVectorTag("xn_m2", Moose::VECTOR_TAG_SOLUTION);
-    fxn_m2_tagid = _problem.addVectorTag("fxn_m2", Moose::VECTOR_TAG_SOLUTION);
-    _xn_m1_tagid = xn_m1_tagid;
-    _fxn_m1_tagid = fxn_m1_tagid;
-    _xn_m2_tagid = xn_m2_tagid;
-    _fxn_m2_tagid = fxn_m2_tagid;
-  }
-  else
-  {
-    xn_m1_tagid = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
-    fxn_m1_tagid = _problem.addVectorTag("secondary_fxn_m1", Moose::VECTOR_TAG_SOLUTION);
-    xn_m2_tagid = _problem.addVectorTag("secondary_xn_m2", Moose::VECTOR_TAG_SOLUTION);
-    fxn_m2_tagid = _problem.addVectorTag("secondary_fxn_m2", Moose::VECTOR_TAG_SOLUTION);
-    _secondary_xn_m1_tagid = xn_m1_tagid;
-    _secondary_fxn_m1_tagid = fxn_m1_tagid;
-    _secondary_xn_m2_tagid = xn_m2_tagid;
-    _secondary_fxn_m2_tagid = fxn_m2_tagid;
-  }
-
-  // TODO: We would only need to store the solution for the degrees of freedom that
-  // will be transformed, not the entire solution.
-  // Store solution vectors for the two previous points and their evaluation
-  _nl.addVector(xn_m1_tagid, false, PARALLEL);
-  _nl.addVector(fxn_m1_tagid, false, PARALLEL);
-  _nl.addVector(xn_m2_tagid, false, PARALLEL);
-  _nl.addVector(fxn_m2_tagid, false, PARALLEL);
-}
-
-void
-SecantSolve::saveVariableValues(const bool primary)
-{
-  TagID fxn_m1_tagid;
-  TagID xn_m1_tagid;
-  TagID fxn_m2_tagid;
-  TagID xn_m2_tagid;
-  if (primary)
-  {
-    fxn_m1_tagid = _fxn_m1_tagid;
-    xn_m1_tagid = _xn_m1_tagid;
-    fxn_m2_tagid = _fxn_m2_tagid;
-    xn_m2_tagid = _xn_m2_tagid;
-  }
-  else
-  {
-    fxn_m1_tagid = _secondary_fxn_m1_tagid;
-    xn_m1_tagid = _secondary_xn_m1_tagid;
-    fxn_m2_tagid = _secondary_fxn_m2_tagid;
-    xn_m2_tagid = _secondary_xn_m2_tagid;
-  }
+  const auto current_app_type = primary ? "_primary_" : "_secondary_";
+  TagID fxn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "fxn_m1");
+  TagID xn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "xn_m1");
+  TagID fxn_m2_tagid = _problem.getVectorTagID(system.name() + current_app_type + "fxn_m2");
+  TagID xn_m2_tagid = _problem.getVectorTagID(system.name() + current_app_type + "xn_m2");
 
   // Save previous variable values
-  NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_tagid);
-  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_tagid);
-  NumericVector<Number> & fxn_m2 = _nl.getVector(fxn_m2_tagid);
-  NumericVector<Number> & xn_m2 = _nl.getVector(xn_m2_tagid);
+  NumericVector<Number> & solution = system.solution();
+  NumericVector<Number> & fxn_m1 = system.getVector(fxn_m1_tagid);
+  NumericVector<Number> & xn_m1 = system.getVector(xn_m1_tagid);
+  NumericVector<Number> & fxn_m2 = system.getVector(fxn_m2_tagid);
+  NumericVector<Number> & xn_m2 = system.getVector(xn_m2_tagid);
 
   // Advance one step
   xn_m2 = xn_m1;
@@ -198,37 +179,24 @@ SecantSolve::transformPostprocessors(const bool primary)
 }
 
 void
-SecantSolve::transformVariables(const std::set<dof_id_type> & target_dofs, const bool primary)
+SecantSolve::transformVariables(SystemBase & system,
+                                const std::set<dof_id_type> & target_dofs,
+                                const bool primary)
 {
-  Real relaxation_factor;
-  TagID fxn_m1_tagid;
-  TagID xn_m1_tagid;
-  TagID fxn_m2_tagid;
-  TagID xn_m2_tagid;
-  if (primary)
-  {
-    relaxation_factor = _relax_factor;
-    fxn_m1_tagid = _fxn_m1_tagid;
-    xn_m1_tagid = _xn_m1_tagid;
-    fxn_m2_tagid = _fxn_m2_tagid;
-    xn_m2_tagid = _xn_m2_tagid;
-  }
-  else
-  {
-    relaxation_factor = _secondary_relaxation_factor;
-    fxn_m1_tagid = _secondary_fxn_m1_tagid;
-    xn_m1_tagid = _secondary_xn_m1_tagid;
-    fxn_m2_tagid = _secondary_fxn_m2_tagid;
-    xn_m2_tagid = _secondary_xn_m2_tagid;
-  }
+  const Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
+  const auto current_app_type = primary ? "_primary_" : "_secondary_";
+  TagID fxn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "fxn_m1");
+  TagID xn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "xn_m1");
+  TagID fxn_m2_tagid = _problem.getVectorTagID(system.name() + current_app_type + "fxn_m2");
+  TagID xn_m2_tagid = _problem.getVectorTagID(system.name() + current_app_type + "xn_m2");
 
-  NumericVector<Number> & solution = _nl.solution();
-  NumericVector<Number> & xn_m1 = _nl.getVector(xn_m1_tagid);
-  NumericVector<Number> & fxn_m2 = _nl.getVector(fxn_m2_tagid);
-  NumericVector<Number> & xn_m2 = _nl.getVector(xn_m2_tagid);
+  NumericVector<Number> & solution = system.solution();
+  NumericVector<Number> & xn_m1 = system.getVector(xn_m1_tagid);
+  NumericVector<Number> & fxn_m2 = system.getVector(fxn_m2_tagid);
+  NumericVector<Number> & xn_m2 = system.getVector(xn_m2_tagid);
 
   // Save the most recent evaluation of the coupled problem
-  NumericVector<Number> & fxn_m1 = _nl.getVector(fxn_m1_tagid);
+  NumericVector<Number> & fxn_m1 = system.getVector(fxn_m1_tagid);
   fxn_m1 = solution;
 
   for (const auto & dof : target_dofs)
@@ -245,7 +213,7 @@ SecantSolve::transformVariables(const std::set<dof_id_type> & target_dofs, const
     solution.set(dof, new_value);
   }
   solution.close();
-  _nl.update();
+  system.update();
 }
 
 void
