@@ -11,11 +11,6 @@
 
 #include "MultiAppTransfer.h"
 
-/**
- * Samples a variable's value in the Master domain at the point where
- * the MultiApp is.  Copies that value into a postprocessor in the
- * MultiApp.
- */
 class MultiAppVariableValueSamplePostprocessorTransfer : public MultiAppTransfer
 {
 public:
@@ -23,10 +18,19 @@ public:
 
   MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
   virtual void execute() override;
 
 protected:
-  AuxVariableName _postprocessor_name;
-  PostprocessorName _from_var_name;
+  /// the name of the postprocessor on the sub-applications
+  PostprocessorName _postprocessor_name;
+  /// the name of the variable on the main-application
+  AuxVariableName _var_name;
+  /// the component number of the variable for transferring
   unsigned int _comp;
+  /// the moose variable
+  MooseVariableFieldBase & _var;
+  // sub-application ids of all local active element of the main-application
+  std::vector<unsigned int> _cached_multiapp_pos_ids;
 };

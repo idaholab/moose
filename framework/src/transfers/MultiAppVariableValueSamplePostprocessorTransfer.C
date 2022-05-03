@@ -15,7 +15,7 @@
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
 #include "MultiApp.h"
-#include "SystemBase.h"
+#include "AuxiliarySystem.h"
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
@@ -27,8 +27,11 @@ MultiAppVariableValueSamplePostprocessorTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription(
-      "Transfers the value of a variable within the master application at each sub-application "
-      "position and transfers the value to a postprocessor on the sub-application(s).");
+      "Samples the value of a variable within the main application at each sub-application "
+      "position and transfers the value to a postprocessor on the sub-application(s) when "
+      "performing the to-multiapp transfer. Reconstructs the value of a CONSTANT MONOMIAL "
+      "variable associating the value of each element to the value of the postprocessor "
+      "in the closest sub-application whem performing the from-multiapp transfer.");
   params.addRequiredParam<PostprocessorName>(
       "postprocessor",
       "The name of the postprocessor in the MultiApp to transfer the value to.  "
@@ -42,14 +45,54 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
     const InputParameters & parameters)
   : MultiAppTransfer(parameters),
     _postprocessor_name(getParam<PostprocessorName>("postprocessor")),
-    _from_var_name(getParam<VariableName>("source_variable")),
-    _comp(getParam<unsigned int>("source_variable_component"))
+    _var_name(getParam<VariableName>("source_variable")),
+    _comp(getParam<unsigned int>("source_variable_component")),
+    _var(_fe_problem.getVariable(0, _var_name))
 {
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
 
   if (isParamValid("from_multi_app"))
-    paramError("from_multi_app", "This transfer direction has not been implemented");
+  {
+    // Check that the variable is a CONSTANT MONOMIAL.
+    auto & fe_type = _var.feType();
+    if (fe_type.order != CONSTANT || fe_type.family != MONOMIAL)
+      paramError("source_variable",
+                 "Variable must be in CONSTANT MONOMIAL when transferring from a postprocessor "
+                 "from sub-apps.");
+
+    if (!_fe_problem.getAuxiliarySystem().hasVariable(_var_name))
+      paramError("source_variable", "Variable must be an auxiliary variable");
+  }
+}
+
+void
+MultiAppVariableValueSamplePostprocessorTransfer::initialSetup()
+{
+  if (isParamValid("to_multi_app"))
+    return;
+
+  // Cache the Multiapp position ID for every element.
+  auto & mesh = _fe_problem.mesh().getMesh();
+  unsigned int multiapp_pos_id = 0;
+  for (auto & elem : as_range(mesh.active_local_elements_begin(), mesh.active_local_elements_end()))
+  {
+    // Exclude the elements without dofs.
+    if (_var.hasBlocks(elem->subdomain_id()))
+    {
+      Real distance = std::numeric_limits<Real>::max();
+      for (unsigned int j = 0; j < getFromMultiApp()->numGlobalApps(); ++j)
+      {
+        Real current_distance = (getFromMultiApp()->position(j) - elem->true_centroid()).norm();
+        if (current_distance < distance)
+        {
+          distance = current_distance;
+          multiapp_pos_id = j;
+        }
+      }
+      _cached_multiapp_pos_ids.push_back(multiapp_pos_id);
+    }
+  }
 }
 
 void
@@ -63,22 +106,17 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      FEProblemBase & from_problem = getToMultiApp()->problemBase();
-      auto & from_var = from_problem.getVariable(0, _from_var_name);
-      SystemBase & from_system_base = from_var.sys();
-      SubProblem & from_sub_problem = from_system_base.subproblem();
-
       const ArrayMooseVariable * array_var = nullptr;
       const MooseVariableField<Real> * standard_var = nullptr;
-      if (from_var.isArray())
-        array_var = &from_problem.getArrayVariable(0, _from_var_name);
-      else if (!from_var.isVector())
-        standard_var = static_cast<MooseVariableField<Real> *>(&from_var);
+      if (_var.isArray())
+        array_var = &_fe_problem.getArrayVariable(0, _var_name);
+      else if (!_var.isVector())
+        standard_var = static_cast<MooseVariableField<Real> *>(&_var);
       else
         mooseError("MultiAppVariableValueSamplePostprocessorTransfer does not support transfer of "
                    "vector variables");
 
-      MooseMesh & from_mesh = from_problem.mesh();
+      MooseMesh & from_mesh = _fe_problem.mesh();
 
       std::unique_ptr<PointLocatorBase> pl = from_mesh.getPointLocator();
 
@@ -99,8 +137,8 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
 
           if (elem && elem->processor_id() == from_mesh.processor_id())
           {
-            from_sub_problem.setCurrentSubdomainID(elem, 0);
-            from_sub_problem.reinitElemPhys(elem, point_vec, 0);
+            _fe_problem.setCurrentSubdomainID(elem, 0);
+            _fe_problem.reinitElemPhys(elem, point_vec, 0);
 
             if (array_var)
             {
@@ -129,10 +167,53 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      mooseError(
-          "Can't transfer a variable value from a MultiApp to a Postprocessor in the Master.");
+      auto & mesh = _fe_problem.mesh().getMesh();
+      auto & solution = _var.sys().solution();
+
+      // Store the local multiapps postprocessor values.
+      const unsigned int n_subapps = getFromMultiApp()->numGlobalApps();
+      std::vector<Real> pp_values(n_subapps, std::numeric_limits<Real>::max());
+#ifdef DEBUG
+      std::vector<Real> duplicate(n_subapps, -std::numeric_limits<Real>::max());
+#endif
+      for (const auto i : make_range(n_subapps))
+        if (getFromMultiApp()->hasLocalApp(i))
+        {
+          pp_values[i] = getFromMultiApp()->appPostprocessorValue(i, _postprocessor_name);
+#ifdef DEBUG
+          duplicate[i] = pp_values[i];
+#endif
+        }
+
+      // Gather all the multiapps postprocessor values.
+      _communicator.min(pp_values);
+#ifdef DEBUG
+      _communicator.max(duplicate);
+      for (const auto i : make_range(n_subapps))
+        if (pp_values[i] != duplicate[i])
+          mooseError(
+              "There should be only one processor setting a subapp postprocessor but now this "
+              "appears not true.");
+#endif
+
+      // Assign the multiapps postprocessor values to the local elements.
+      unsigned int i = 0;
+      for (auto & elem :
+           as_range(mesh.active_local_elements_begin(), mesh.active_local_elements_end()))
+      {
+        // Exclude the elements without dofs
+        if (_var.hasBlocks(elem->subdomain_id()))
+        {
+          std::vector<dof_id_type> dof_indices;
+          _var.getDofIndices(elem, dof_indices);
+          mooseAssert(dof_indices.size() == 1,
+                      "The variable must be in constant monomial with one DoF on an element");
+          solution.set(dof_indices[0], pp_values[_cached_multiapp_pos_ids[i]]);
+          ++i;
+        }
+      }
+      solution.close();
       break;
     }
   }
-
 }
