@@ -170,12 +170,14 @@ rho = 1
     boundary = 'top_right'
     vel_x = vel_x
     vel_y = vel_y
+    advected_quantity = ${rho}
   []
   [mdot_bottom]
     type = VolumetricFlowRate
     boundary = 'bottom_right'
     vel_x = vel_x
     vel_y = vel_y
+    advected_quantity = ${rho}
   []
 []
 

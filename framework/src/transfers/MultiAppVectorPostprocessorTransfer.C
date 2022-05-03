@@ -101,12 +101,11 @@ MultiAppVectorPostprocessorTransfer::executeFromMultiapp()
 void
 MultiAppVectorPostprocessorTransfer::execute()
 {
-  _console << "Beginning VectorPostprocessorTransfer " << name() << std::endl;
+  TIME_SECTION(
+      "MultiAppVectorPostprocessorTransfer::execute()", 5, "Transferring a vector postprocessor");
 
   if (_current_direction == FROM_MULTIAPP)
     executeFromMultiapp();
   else
     executeToMultiapp();
-
-  _console << "Finished PostprocessorTransfer " << name() << std::endl;
 }

@@ -97,6 +97,8 @@
 #define registerADMooseObjectRenamed(app, orig_class, time, new_class)                             \
   registerMooseObjectRenamed(app, orig_class, time, new_class)
 
+#define registerDataFilePath() Registry::addDataFilePath(__FILE__)
+
 struct RegistryEntry;
 class Factory;
 class ActionFactory;
@@ -190,6 +192,9 @@ public:
   /// addKnownLabel whitelists a label as valid for purposes of the checkLabels function.
   static char addKnownLabel(const std::string & label);
 
+  /// register search paths for built-in data files
+  static void addDataFilePath(const std::string & path);
+
   /// Returns a per-label keyed map of all MooseObjects in the registry.
   static const std::map<std::string, std::vector<RegistryEntry>> & allObjects()
   {
@@ -211,6 +216,12 @@ public:
     return getRegistry()._name_to_entry.count(name);
   }
 
+  /// Returns a vector of all registered data file paths
+  static const std::vector<std::string> & getDataFilePaths()
+  {
+    return getRegistry()._data_file_paths;
+  }
+
 private:
   Registry(){};
 
@@ -227,4 +238,5 @@ private:
   std::map<std::string, std::vector<RegistryEntry>> _per_label_objects;
   std::map<std::string, std::vector<RegistryEntry>> _per_label_actions;
   std::set<std::string> _known_labels;
+  std::vector<std::string> _data_file_paths;
 };

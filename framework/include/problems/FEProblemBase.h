@@ -1537,6 +1537,11 @@ public:
   void setParallelBarrierMessaging(bool flag) { _parallel_barrier_messaging = flag; }
 
   /**
+   * Whether or not to use verbose printing for MultiApps.
+   */
+  bool verboseMultiApps() const { return _verbose_multiapps; }
+
+  /**
    * Calls parentOutputPositionChanged() on all sub apps.
    */
   void parentOutputPositionChanged();
@@ -2237,6 +2242,9 @@ protected:
 
   /// Whether or not information about how many transfers have completed is printed
   bool _parallel_barrier_messaging;
+
+  /// Whether or not to be verbose with multiapps
+  const bool _verbose_multiapps;
 
   /// The error message to go with an exception
   std::string _exception_message;

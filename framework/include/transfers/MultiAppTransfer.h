@@ -12,11 +12,11 @@
 // MOOSE includes
 #include "Transfer.h"
 #include "MultiMooseEnum.h"
+#include "MultiApp.h"
 
 #include "libmesh/bounding_box.h"
 
 class MooseMesh;
-class MultiApp;
 
 /**
  * Base class for all MultiAppTransfer objects.
@@ -74,6 +74,30 @@ public:
           "A from_multiapp was requested but is unavailable. Check the from_multi_app parameter");
     else
       return _to_multi_app;
+  }
+
+  /**
+   * Get the name of thing being transferred from
+   * @return the name of the multiapp or "Parent"
+   */
+  std::string getFromName()
+  {
+    if (_from_multi_app)
+      return _from_multi_app->name();
+    else
+      return "Parent";
+  }
+
+  /**
+   * Get the name of thing being transferred to
+   * @return the name of the multiapp or "Parent"
+   */
+  std::string getToName()
+  {
+    if (_to_multi_app)
+      return _to_multi_app->name();
+    else
+      return "Parent";
   }
 
   /// Whether the transfer owns a non-null from_multi_app

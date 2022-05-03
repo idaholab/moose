@@ -25,6 +25,7 @@ public:
   using FunctorBase = Moose::FunctorBase<U>;
 
   using typename FunctorBase<VectorValue<T>>::ValueType;
+  using typename FunctorBase<VectorValue<T>>::GradientType;
   using ElemArg = Moose::ElemArg;
   using ElemFromFaceArg = Moose::ElemFromFaceArg;
   using FaceArg = Moose::FaceArg;
@@ -40,7 +41,26 @@ public:
   {
   }
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
+  VectorCompositeFunctor(const MooseFunctorName & name,
+                         const FunctorBase<T> & x_comp,
+                         const FunctorBase<T> & y_comp)
+    : Moose::FunctorBase<VectorValue<T>>(name),
+      _z_constant(std::make_unique<Moose::ConstantFunctor>(T(0))),
+      _x_comp(x_comp),
+      _y_comp(y_comp),
+      _z_comp(*_z_constant)
+  {
+  }
+
+  VectorCompositeFunctor(const MooseFunctorName & name, const FunctorBase<T> & x_comp)
+    : Moose::FunctorBase<VectorValue<T>>(name),
+      _y_constant(std::make_unique<Moose::ConstantFunctor>(T(0))),
+      _z_constant(std::make_unique<Moose::ConstantFunctor>(T(0))),
+      _x_comp(x_comp),
+      _y_comp(*_y_constant),
+      _z_comp(*_z_constant)
+  {
+  }
 
 private:
   ValueType evaluate(const ElemArg & elem_arg, unsigned int state) const override final
@@ -76,17 +96,27 @@ private:
         _x_comp(elem_side_qp, state), _y_comp(elem_side_qp, state), _z_comp(elem_side_qp, state)};
   }
 
-  /// The x-component functor
-  const FunctorBase<T> & _x_comp;
-  /// The y-component functor
-  const FunctorBase<T> & _y_comp;
-  /// The z-component functor
-  const FunctorBase<T> & _z_comp;
-};
+  using Moose::FunctorBase<VectorValue<T>>::evaluateGradient;
+  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
+                                unsigned int state) const override
+  {
+    return {_x_comp.gradient(elem_from_face, state),
+            _y_comp.gradient(elem_from_face, state),
+            _z_comp.gradient(elem_from_face, state)};
+  }
 
-template <typename T>
-bool
-VectorCompositeFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo &) const
-{
-  mooseError("not implemented");
-}
+  /// Possible holder of constant-0 y-component functor. This will be allocated if the user only
+  /// supplies one component functor during construction
+  std::unique_ptr<Moose::ConstantFunctor<T>> _y_constant;
+
+  /// Possible holder of constant-0 z-component functor. This will be allocated if the user only
+  /// supplies two component functors during construction
+  std::unique_ptr<Moose::ConstantFunctor<T>> _z_constant;
+
+  /// The x-component functor
+  const Moose::FunctorBase<T> & _x_comp;
+  /// The y-component functor
+  const Moose::FunctorBase<T> & _y_comp;
+  /// The z-component functor
+  const Moose::FunctorBase<T> & _z_comp;
+};

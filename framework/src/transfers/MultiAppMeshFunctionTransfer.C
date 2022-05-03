@@ -55,7 +55,8 @@ MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const InputParameters
 void
 MultiAppMeshFunctionTransfer::execute()
 {
-  _console << "Beginning MeshFunctionTransfer " << name() << std::endl;
+  TIME_SECTION(
+      "MultiAppMeshFunctionTransfer::execute()", 5, "Transferring variables via a mesh function");
 
   getAppInfo();
 
@@ -63,7 +64,6 @@ MultiAppMeshFunctionTransfer::execute()
   for (unsigned int i = 0; i < _var_size; ++i)
     transferVariable(i);
 
-  _console << "Finished MeshFunctionTransfer " << name() << std::endl;
 
   postExecute();
 }

@@ -75,6 +75,7 @@ function configure_petsc()
   fi
 
   # If HDF5 is not found locally, download it via PETSc (except on Apple Silicon)
+  HDF5_FORTRAN_STR=""
   if [ -z "$HDF5_STR" ]; then
     if [[ `uname -p` == "arm" ]] && [[ $(uname) == Darwin ]]; then
       # HDF5 currently doesn't build properly via PETSc download on macOS Apple

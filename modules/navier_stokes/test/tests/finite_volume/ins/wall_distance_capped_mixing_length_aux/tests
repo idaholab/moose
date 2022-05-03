@@ -13,5 +13,7 @@
     mesh_mode = REPLICATED
     valgrind = 'none'
     recover = false
+    abs_zero = 3e-10
+    heavy = true
   []
 []

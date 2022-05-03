@@ -32,6 +32,9 @@ protected:
   const ADVariableValue & _secondary_T;
   ///@}
 
+  /// Pressure (lagrange multiplier) variable
+  const ADVariableValue & _contact_pressure;
+
   /// Parameter used to scale the closed gap interface conductance value
   const Real _scaling;
 

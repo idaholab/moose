@@ -165,10 +165,10 @@ MultiAppCloneReporterTransfer::executeFromMultiapp()
 void
 MultiAppCloneReporterTransfer::execute()
 {
-  _console << "Beginning " << type() << " " << name() << std::endl;
+  TIME_SECTION("MultiAppCloneReporterTransfer::execute()", 5, "Transferring reporters");
+
   if (_current_direction == FROM_MULTIAPP)
     executeFromMultiapp();
   else
     executeToMultiapp();
-  _console << "Finished " << type() << " " << name() << std::endl;
 }

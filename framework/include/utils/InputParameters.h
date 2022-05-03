@@ -821,6 +821,10 @@ public:
    * usually only set/useable for file-path type parameters.
    */
   std::string & rawParamVal(const std::string & param) { return _params[param]._raw_val; }
+  const std::string & rawParamVal(const std::string & param) const
+  {
+    return _params.at(param)._raw_val;
+  }
 
   /**
    * Informs this object that values for this parameter set from the input file or from the command

@@ -1,8 +1,27 @@
 [Tests]
   [rom]
-    issues = '#14046 #16520 #17287'
+    issues = '#14046 #16520 #17287 #20827'
     design = '/LAROMANCE.md'
     requirement = 'The system shall compute a creep rate based on a reduced order model '
+    [3tile_strain]
+      type = 'CSVDiff'
+      input = '3tile_strain.i'
+      csvdiff = '3tile_strain_out.csv'
+      cli_args = 'Materials/rom_stress_prediction/finite_difference_width=1e-2'
+      detail = 'and evolve over time with an good finite difference width.'
+      petsc_version = '>=3.9.0'
+      allow_test_objects = true
+    []
+    [3tile_strain_small_fd]
+      type = 'CSVDiff'
+      input = '3tile_strain.i'
+      csvdiff = '3tile_strain_small_fd_out.csv'
+      cli_args = 'Outputs/file_base=3tile_strain_small_fd_out Materials/rom_stress_prediction/finite_difference_width=1e-20'
+      detail = 'and evolve over time with an poor finite difference width with more nonlinear iterations than with a good finite difference width.'
+      petsc_version = '>=3.9.0'
+      allow_test_objects = true
+    []
+
     [3d]
       type = 'CSVDiff'
       input = '3d.i'
@@ -29,6 +48,14 @@
       detail = 'in 2DRz.'
       petsc_version = '>=3.9.0'
       allow_test_objects = true
+    []
+
+    [2drz_json]
+      type = 'CSVDiff'
+      input = '2drz_json.i'
+      csvdiff = '2drz_json_out.csv'
+      detail = 'in 2DRz with a model loaded from a JSON data file.'
+      petsc_version = '>=3.9.0'
     []
 
     [nonad_verification]
@@ -113,6 +140,33 @@
       csvdiff = '3tile_out.csv'
       detail = 'for a variety of overlapping tiles and two overlapping partitions.'
       petsc_version = '>=3.9.0'
+      allow_test_objects = true
+    []
+
+    [3tile_json]
+      type = 'CSVDiff'
+      input = '3tile_json.i'
+      csvdiff = '3tile_json_out.csv'
+      detail = 'for a variety of overlapping tiles and two overlapping partitions with a model loaded from a JSON data file.'
+      petsc_version = '>=3.9.0'
+    []
+
+    [3tile_json_relative]
+      type = 'CSVDiff'
+      input = '3tile_json.i'
+      csvdiff = '3tile_json_out.csv'
+      cli_args = 'Materials/rom_stress_prediction/model=gold/3tile_json_export.json'
+      detail = 'for a variety of overlapping tiles and two overlapping partitions with a model loaded from a JSON data file relative to the input.'
+      petsc_version = '>=3.9.0'
+    []
+
+    [3tile_json_export]
+      type = 'JSONDiff'
+      input = '3tile.i'
+      jsondiff = '3tile_json_export.json'
+      detail = 'for a variety of overlapping tiles and two overlapping partitions, and be able to export the model data to a JSON file.'
+      petsc_version = '>=3.9.0'
+      cli_args = 'Materials/rom_stress_prediction/export_model=3tile_json_export.json'
       allow_test_objects = true
     []
   []

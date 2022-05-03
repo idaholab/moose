@@ -271,5 +271,5 @@ PicardSolve::printFixedPointConvergenceHistory()
              << '\n';
   }
 
-  _console << std::flush;
+  _console << std::endl;
 }

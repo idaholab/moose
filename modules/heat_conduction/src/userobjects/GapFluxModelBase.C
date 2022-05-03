@@ -15,6 +15,15 @@ GapFluxModelBase::validParams()
 {
   InputParameters params = InterfaceUserObjectBase::validParams();
   params.addClassDescription("Gap flux model base class");
+
+  // UOs of this type should not be executed by MOOSE, but only called through
+  // ModularGapConductanceConstraint
+  params.set<ExecFlagEnum>("execute_on") = EXEC_CUSTOM;
+  params.suppressParameter<ExecFlagEnum>("execute_on");
+
+  // flux models default to operating on the displaced mesh
+  params.set<bool>("use_displaced_mesh") = true;
+
   return params;
 }
 

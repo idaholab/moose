@@ -32,7 +32,7 @@ public:
   {
   }
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const override
+  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override
   {
     return _vector.isExtrapolatedBoundaryFace(fi);
   }

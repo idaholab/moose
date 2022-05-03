@@ -1,3 +1,5 @@
 libPNG_LIBS    := @LIBPNG_LIBS@
 libPNG_INCLUDE := @LIBPNG_INCLUDES@
 PREFIX         := @prefix@
+ENABLE_LIBTORCH := @libtorch_support@
+LIBTORCH_DIR := @libtorch_library@

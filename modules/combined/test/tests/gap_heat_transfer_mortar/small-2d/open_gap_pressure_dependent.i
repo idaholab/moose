@@ -156,7 +156,6 @@
     secondary_boundary = fixed_block_left
     secondary_subdomain = interface_secondary_subdomain
     gap_flux_models = 'closed'
-    contact_pressure = interface_normal_lm
     use_displaced_mesh = true
   []
 []
@@ -218,6 +217,7 @@
     primary_hardness = 1.0
     secondary_hardness = 1.0
     boundary = moving_block_right
+    contact_pressure = interface_normal_lm
   []
 []
 

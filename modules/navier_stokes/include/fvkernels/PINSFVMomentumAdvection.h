@@ -21,7 +21,7 @@ public:
   PINSFVMomentumAdvection(const InputParameters & params);
 
 protected:
-  virtual ADReal computeQpResidual() override;
+  const Moose::FunctorBase<ADReal> & epsilon() const override { return _eps; }
 
   /// porosity functor
   const Moose::Functor<ADReal> & _eps;

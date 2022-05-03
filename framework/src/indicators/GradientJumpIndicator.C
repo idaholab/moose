@@ -36,8 +36,9 @@ GradientJumpIndicator::computeQpIntegral()
   Real jump = 0;
   if (_var.isFV())
   {
-    jump = (MetaPhysicL::raw_value(_var.gradient(Moose::ElemArg{_current_elem, false, false})) -
-            MetaPhysicL::raw_value(_var.gradient(Moose::ElemArg{_neighbor_elem, false, false}))) *
+    jump = (MetaPhysicL::raw_value(
+                _var.gradient(Moose::ElemArg{_current_elem, /*correct_skewness=*/false})) -
+            MetaPhysicL::raw_value(_var.gradient(Moose::ElemArg{_neighbor_elem, false}))) *
            _normals[_qp];
   }
   else

@@ -339,6 +339,17 @@ public:
   void residualSetup() override;
   void jacobianSetup() override;
 
+  /*
+   * Returns whether a variable is defined on a block as a functor.
+   * This makes the link between functor block restriction and the
+   * BlockRestrictable interface.
+   * @param id subdomain id we want to know whether the variable is defined on
+   * @return whether the variable is defined on this domain
+   */
+  bool hasBlocks(const SubdomainID & id) const override { return BlockRestrictable::hasBlocks(id); }
+  // The five other definitions of hasBlocks should not be hidden
+  using BlockRestrictable::hasBlocks;
+
 protected:
   using FunctorArg = typename Moose::ADType<OutputType>::type;
   using Moose::FunctorBase<FunctorArg>::evaluate;

@@ -37,19 +37,23 @@ MooseVariableFV<OutputType>::validParams()
   params.set<bool>("fv") = true;
   params.set<MooseEnum>("family") = "MONOMIAL";
   params.set<MooseEnum>("order") = "CONSTANT";
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-  MooseEnum face_interp_method("average skewness-corrected vertex-based", "average");
-  params.template addParam<MooseEnum>("face_interp_method",
-                                      face_interp_method,
-                                      "Switch that can select between face interpoaltion methods.");
   params.template addParam<bool>(
       "two_term_boundary_expansion",
+#ifdef MOOSE_GLOBAL_AD_INDEXING
       true,
+#else
+      false,
+#endif
       "Whether to use a two-term Taylor expansion to calculate boundary face values. "
       "If the two-term expansion is used, then the boundary face value depends on the "
       "adjoining cell center gradient, which itself depends on the boundary face value. "
       "Consequently an implicit solve is used to simultaneously solve for the adjoining cell "
       "center gradient and boundary face value(s).");
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  MooseEnum face_interp_method("average skewness-corrected vertex-based", "average");
+  params.template addParam<MooseEnum>("face_interp_method",
+                                      face_interp_method,
+                                      "Switch that can select between face interpoaltion methods.");
   params.template addParam<bool>(
       "cache_face_gradients", false, "Whether to cache face gradients or re-compute them.");
   params.template addParam<bool>("cache_face_values",
@@ -79,7 +83,12 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
         this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
                                      ? this->template getParam<bool>("two_term_boundary_expansion")
-                                     : false),
+                                     :
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                                     true),
+#else
+                                     false),
+#endif
     _cache_face_gradients(this->isParamValid("cache_face_gradients")
                               ? this->template getParam<bool>("cache_face_gradients")
                               : false),
@@ -90,6 +99,12 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
                               ? this->template getParam<bool>("cache_cell_gradients")
                               : true)
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  if (_two_term_boundary_expansion)
+    this->paramError(
+        "two_term_boundary_expansion",
+        "Two term boundary expansion only works for global AD indexing configurations.");
+#endif
   _element_data = std::make_unique<MooseVariableDataFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Element, this->_assembly.elem());
   _neighbor_data = std::make_unique<MooseVariableDataFV<OutputType>>(
@@ -637,12 +652,7 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
     value = numerator / denominator;
   }
   else
-    value = Moose::FV::linearInterpolation(
-        *this,
-        Moose::FV::makeCDFace(
-            fi,
-            (_face_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage),
-            correct_skewness));
+    value = Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, correct_skewness));
 
   return value;
 }
@@ -696,10 +706,23 @@ MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(const FaceInfo & fi) 
 }
 
 template <typename OutputType>
-bool
+std::pair<bool, const Elem *>
 MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
 {
-  return !isDirichletBoundaryFace(fi) && !isInternalFace(fi);
+  const bool extrapolated = !isDirichletBoundaryFace(fi) && !isInternalFace(fi);
+
+  if (!fi.neighborPtr())
+    return std::make_pair(extrapolated, &fi.elem());
+
+  const bool defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
+#ifndef NDEBUG
+  const bool defined_on_neighbor = this->hasBlocks(fi.neighbor().subdomain_id());
+
+  mooseAssert(defined_on_elem || defined_on_neighbor,
+              "This shouldn't be called if we aren't defined on either side.");
+#endif
+  const Elem * const ret_elem = defined_on_elem ? &fi.elem() : fi.neighborPtr();
+  return std::make_pair(extrapolated, ret_elem);
 }
 
 template <typename OutputType>
@@ -711,7 +734,7 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
       "MooseVariableFV::getExtrapolatedBoundaryFaceValue only supported for global AD indexing");
 #endif
 
-  mooseAssert(isExtrapolatedBoundaryFace(fi),
+  mooseAssert(isExtrapolatedBoundaryFace(fi).first,
               "This function should only be called on extrapolated boundary faces");
 
   auto it = _face_to_value.find(&fi);
@@ -770,7 +793,7 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 
   if (isDirichletBoundaryFace(fi))
     return getDirichletBoundaryFaceValue(fi);
-  else if (isExtrapolatedBoundaryFace(fi))
+  else if (isExtrapolatedBoundaryFace(fi).first)
     return getExtrapolatedBoundaryFaceValue(fi);
 
   mooseError("Unknown boundary face type!");
@@ -794,13 +817,11 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
       return it->second;
   }
 
-  auto grad = FV::greenGaussGradient(
-      ElemArg(
-          {elem, _face_interp_method == FV::InterpMethod::SkewCorrectedAverage, correct_skewness}),
-      *this,
-      _two_term_boundary_expansion,
-      this->_mesh,
-      &_face_to_value);
+  auto grad = FV::greenGaussGradient(ElemArg({elem, correct_skewness}),
+                                     *this,
+                                     _two_term_boundary_expansion,
+                                     this->_mesh,
+                                     &_face_to_value);
 
   if (_cache_cell_gradients && !correct_skewness)
   {
@@ -867,15 +888,9 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
   {
     const VectorValue<ADReal> & elem_two_grad = adGradSln(elem_two, correct_skewness);
 
-    const auto interp_method =
-        (_face_interp_method == Moose::FV::InterpMethod::Average ||
-         _face_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
-            ? _face_interp_method
-            : Moose::FV::InterpMethod::Average;
-
     // Uncorrected gradient value
-    unc_face_grad = Moose::FV::linearInterpolation(
-        elem_one_grad, elem_two_grad, fi, elem_one_is_fi_elem, interp_method);
+    unc_face_grad =
+        Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, elem_one_is_fi_elem);
   }
 
   return unc_face_grad;
@@ -980,16 +995,45 @@ MooseVariableFV<OutputType>::clearAllDofIndices()
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::ValueType
-MooseVariableFV<OutputType>::evaluate(const FaceArg & face, unsigned int) const
+MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
+                                      const unsigned int libmesh_dbg_var(state)) const
 {
-  return evaluateFaceHelper(face);
+  mooseAssert(state == 0, "Only current time state supported.");
+  const FaceInfo * const fi = face.fi;
+  mooseAssert(fi, "The face information must be non-null");
+  if (isExtrapolatedBoundaryFace(*fi).first)
+    return getExtrapolatedBoundaryFaceValue(*fi);
+  else if (isInternalFace(*fi))
+  {
+    if (_face_interp_method == Moose::FV::InterpMethod::VertexBased)
+      return getInternalFaceValue(*fi, face.correct_skewness);
+    else
+      return Moose::FV::interpolate(*this, face);
+  }
+  else
+  {
+    mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
+    return getDirichletBoundaryFaceValue(*fi);
+  }
 }
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::ValueType
-MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face, unsigned int) const
+MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
+                                      const unsigned int libmesh_dbg_var(state)) const
 {
-  return evaluateFaceHelper(face);
+  mooseAssert(state == 0, "Only current time state supported.");
+  const FaceInfo * const fi = face.fi;
+  mooseAssert(fi, "The face information must be non-null");
+  if (isExtrapolatedBoundaryFace(*fi).first)
+    return getExtrapolatedBoundaryFaceValue(*fi);
+  else if (isInternalFace(*fi))
+    return getInternalFaceValue(face);
+  else
+  {
+    mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
+    return getDirichletBoundaryFaceValue(*fi);
+  }
 }
 
 template <typename OutputType>
@@ -1024,7 +1068,7 @@ MooseVariableFV<OutputType>::evaluateGradient(const ElemFromFaceArg & elem_from_
               "If the requested element is remote then I think we've messed up our ghosting");
 
   if (requested_elem && this->hasBlocks(requested_elem->subdomain_id()))
-    return adGradSln(requested_elem, elem_from_face.apply_gradient_to_skewness);
+    return adGradSln(requested_elem, elem_from_face.correct_skewness);
   else
     mooseError("We do not currently support ghosting of gradients");
 }

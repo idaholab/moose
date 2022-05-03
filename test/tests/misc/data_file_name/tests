@@ -1,0 +1,18 @@
+[Tests]
+  [exists]
+    type = RunApp
+    input = test.i
+    design = 'MooseObject.md'
+    issues = '#20839'
+    requirement = 'The system shall be to find data files in designated directories, regardless of the source repository or install location.'
+  []
+  [error]
+    type = RunException
+    input = test.i
+    cli_args = 'UserObjects/data_file/data_file=this/file/does/not/exist/anywhere.dat'
+    expect_err = 'Unable to find data file \'this/file/does/not/exist/anywhere.dat\' anywhere'
+    design = 'MooseObject.md'
+    issues = '#20839'
+    requirement = 'The system shall throw an exception if a data file cannot be found in any of the designated directories.'
+  []
+[]

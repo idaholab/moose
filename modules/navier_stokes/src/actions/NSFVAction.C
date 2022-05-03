@@ -380,7 +380,7 @@ NSFVAction::validParams()
       "of the advected passive scalar field.");
   params.addParam<bool>(
       "mixing_length_two_term_bc_expansion",
-      false,
+      true,
       "If a two-term Taylor expansion is needed for the determination of the boundary values"
       "of the mixing length field.");
 

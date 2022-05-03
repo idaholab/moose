@@ -29,21 +29,3 @@ PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
   : INSFVMomentumAdvection(params), _eps(getFunctor<ADReal>(NS::porosity))
 {
 }
-
-ADReal
-PINSFVMomentumAdvection::computeQpResidual()
-{
-  const auto elem_face = elemFromFace();
-  const auto neighbor_face = neighborFromFace();
-
-  // Superficial velocity interpolation
-  const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
-
-  const auto interp_coeffs = Moose::FV::interpCoeffs(_advected_interp_method, *_face_info, true, v);
-
-  _ae = _normal * v * _rho(elem_face) * interp_coeffs.first / _eps(elem_face);
-  // Minus sign because we apply a minus sign to the residual in computeResidual
-  _an = -_normal * v * _rho(neighbor_face) * interp_coeffs.second / _eps(neighbor_face);
-
-  return _ae * _var(elem_face) - _an * _var(neighbor_face);
-}

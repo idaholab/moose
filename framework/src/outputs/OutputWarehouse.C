@@ -207,7 +207,7 @@ OutputWarehouse::mooseConsole(std::ostringstream & buffer)
     buffer.clear();
     buffer.str("");
   }
-  else
+  else if (!_app.actionWarehouse().isTaskComplete("add_output"))
   {
     if (!_buffer_action_console_outputs)
     {

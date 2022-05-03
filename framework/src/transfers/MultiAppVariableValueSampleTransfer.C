@@ -65,7 +65,8 @@ MultiAppVariableValueSampleTransfer::initialSetup()
 void
 MultiAppVariableValueSampleTransfer::execute()
 {
-  _console << "Beginning VariableValueSampleTransfer " << name() << std::endl;
+  TIME_SECTION(
+      "MultiAppVariableValueSampleTransfer::execute()", 5, "Sampling a variable for transfer");
 
   switch (_current_direction)
   {
@@ -146,6 +147,4 @@ MultiAppVariableValueSampleTransfer::execute()
       break;
     }
   }
-
-  _console << "Finished VariableValueSampleTransfer " << name() << std::endl;
 }

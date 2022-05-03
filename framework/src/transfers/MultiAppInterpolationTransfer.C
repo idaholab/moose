@@ -408,7 +408,9 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
 void
 MultiAppInterpolationTransfer::execute()
 {
-  _console << "Beginning InterpolationTransfer " << name() << std::endl;
+  TIME_SECTION("MultiAppInterpolationTransfer::execute()",
+               5,
+               "Transferring variables based on node interpolation");
 
   const FEProblemBase & fe_problem =
       hasFromMultiApp() ? getFromMultiApp()->problemBase() : getToMultiApp()->problemBase();
@@ -501,8 +503,6 @@ MultiAppInterpolationTransfer::execute()
       break;
     }
   }
-
-  _console << "End InterpolationTransfer " << name() << std::endl;
 }
 
 void

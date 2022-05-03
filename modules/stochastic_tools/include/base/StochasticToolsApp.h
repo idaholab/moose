@@ -24,4 +24,6 @@ public:
   static void registerObjects(Factory & factory);
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
   static void registerExecFlags(Factory & factory);
+
+  static void requiresTorch(const MooseObject & obj);
 };
