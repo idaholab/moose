@@ -86,9 +86,7 @@
 
    primary_boundary = 100
    secondary_boundary = 101
-
-   user_object_physics = 'GapFluxModelRadiation GapFluxModelConduction'
-
+   gap_flux_options = 'CONDUCTION RADIATION'
   []
 []
 

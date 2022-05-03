@@ -7,20 +7,6 @@
     type = FileMeshGenerator
     file = 2blk-gap.e
   []
-  [secondary]
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = '101'
-    new_block_id = 10001
-    new_block_name = 'secondary_lower'
-    input = file
-  []
-  [primary]
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = '100'
-    new_block_id = 10000
-    new_block_name = 'primary_lower'
-    input = secondary
-  []
   allow_renumbering = false
 []
 
@@ -90,22 +76,36 @@
 
 [MortarGapHeatTransfer]
   [mortar_heat_transfer]
-    temperature = temp
+   temperature = temp
 
+   primary_emissivity = 1.0
+   secondary_emissivity = 1.0
+   boundary = 100
+   use_displaced_mesh = true
+   gap_conductivity = 0.02
+
+   primary_boundary = 100
+   secondary_boundary = 101
+   user_created_gap_flux_models = 'radiation_uo conduction_uo'
+  []
+[]
+
+
+[UserObjects]
+  [radiation_uo]
+    type = GapFluxModelRadiation
+    temperature = temp
+    boundary = 100
     primary_emissivity = 1.0
     secondary_emissivity = 1.0
-    boundary = 100
     use_displaced_mesh = true
+  []
+  [conduction_uo]
+    type = GapFluxModelConduction
+    temperature = temp
+    boundary = 100
     gap_conductivity = 0.02
-
-    primary_boundary = 100
-    secondary_boundary = 101
-# We already have mortar lower-dimensional domains and do not need the action
-# to create them for us. It will reuse those and define variables and constraints on
-# the existing appended meshes.
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    gap_flux_options = 'CONDUCTION RADIATION'
+    use_displaced_mesh = true
   []
 []
 

@@ -48,16 +48,36 @@ MortarGapHeatTransferAction::validParams()
   params.makeParamNotRequired<SubdomainName>("secondary_subdomain");
   params.makeParamNotRequired<Real>("gap_conductivity");
 
+  params.addParam<MultiMooseEnum>("gap_flux_options",
+                                  MortarGapHeatTransfer::mooseUOPhysicstType,
+                                  "The gap flux models to build");
+
   params.addParam<std::vector<UserObjectName>>(
-      "user_object_physics",
-      "The list of physical contributions to gap heat transfer implemented in user objects");
+      "user_created_gap_flux_models",
+      "The name of the user objects created by the user to represent gap heat transfer physics");
 
   return params;
 }
 
 MortarGapHeatTransferAction::MortarGapHeatTransferAction(const InputParameters & params)
-  : Action(params), _user_provided_mortar_meshes(false)
+  : Action(params),
+    _user_provided_mortar_meshes(false),
+    _user_provided_gap_flux_models(
+        getParam<std::vector<UserObjectName>>("user_created_gap_flux_models").size() > 0 ? true
+                                                                                         : false)
+
 {
+  if (getParam<MultiMooseEnum>("gap_flux_options").size() > 0 && _user_provided_gap_flux_models)
+    paramError(
+        "gap_flux_options",
+        "Either create user objects for the action in the input file or provide the desire physics "
+        "to the action via the gap_flux_options parameter. Mixed use is not supported");
+
+  for (unsigned int i = 0; i < getParam<MultiMooseEnum>("gap_flux_options").size(); i++)
+  {
+    _gap_flux_models.push_back(static_cast<MortarGapHeatTransfer::UserObjectToBuild>(
+        getParam<MultiMooseEnum>("gap_flux_options").get(i)));
+  }
 
   if (params.isParamSetByUser("primary_subdomain") &&
       params.isParamSetByUser("secondary_subdomain"))
@@ -68,6 +88,13 @@ MortarGapHeatTransferAction::MortarGapHeatTransferAction(const InputParameters &
   }
   else
     mooseInfo("Mortar gap heat transfer action is creating new lower-dimensional domains");
+
+  if (_user_provided_gap_flux_models)
+    mooseInfo(
+        "User decided to create user objects for the mortar gap heat transfer action to leverage.");
+  else
+    mooseInfo("The mortar gap heat transfer action will add gap heat transfer physics according to "
+              "the gap_flux_options input parameter");
 }
 
 void
@@ -80,7 +107,8 @@ MortarGapHeatTransferAction::act()
   if (_current_task == "add_constraint")
     addConstraints();
   else if (_current_task == "add_user_object")
-    addUserObjects();
+    if (!_user_provided_gap_flux_models)
+      addUserObjects();
 }
 
 void
@@ -202,24 +230,30 @@ MortarGapHeatTransferAction::addConstraints()
   params.set<VariableName>("secondary_variable") =
       getParam<std::vector<VariableName>>("temperature")[0];
 
-  const std::vector<UserObjectName> user_object_vector =
-      getParam<std::vector<UserObjectName>>("user_object_physics");
-
-  std::vector<UserObjectName> uoname_strings(0);
-  unsigned int conduction_index = 0;
-  unsigned int radiation_index = 0;
-
-  for (const auto i : index_range(user_object_vector))
+  if (!_user_provided_gap_flux_models)
   {
-    if (user_object_vector[i] == "GapFluxModelConduction")
-      uoname_strings.push_back("gap_flux_model_conduction_object_" + MooseUtils::shortName(name()) +
-                               "_" + Moose::stringify(conduction_index++));
-    else if (user_object_vector[i] == "GapFluxModelRadiation")
-      uoname_strings.push_back("gap_flux_model_radiation_object_" + MooseUtils::shortName(name()) +
-                               "_" + Moose::stringify(radiation_index++));
-  }
 
-  params.set<std::vector<UserObjectName>>("gap_flux_models") = uoname_strings;
+    std::vector<UserObjectName> uoname_strings(0);
+    unsigned int conduction_index = 0;
+    unsigned int radiation_index = 0;
+
+    for (const auto & uo_name : _gap_flux_models)
+    {
+      if (uo_name == MortarGapHeatTransfer::UserObjectToBuild::CONDUCTION)
+        uoname_strings.push_back("gap_flux_model_conduction_object_" +
+                                 MooseUtils::shortName(name()) + "_" +
+                                 Moose::stringify(conduction_index++));
+      else if (uo_name == MortarGapHeatTransfer::UserObjectToBuild::RADIATION)
+        uoname_strings.push_back("gap_flux_model_radiation_object_" +
+                                 MooseUtils::shortName(name()) + "_" +
+                                 Moose::stringify(radiation_index++));
+    }
+    params.set<std::vector<UserObjectName>>("gap_flux_models") = uoname_strings;
+  }
+  else
+    params.set<std::vector<UserObjectName>>("gap_flux_models") =
+        getParam<std::vector<UserObjectName>>("user_created_gap_flux_models");
+
   _problem->addConstraint(
       "ModularGapConductanceConstraint", action_name + "_ModularGapConductanceConstraint", params);
 }
@@ -249,12 +283,9 @@ MortarGapHeatTransferAction::addUserObjects()
   if (!_problem->isSNESMFReuseBaseSetbyUser())
     _problem->setSNESMFReuseBase(false, false);
 
-  const std::vector<UserObjectName> user_object_vector =
-      getParam<std::vector<UserObjectName>>("user_object_physics");
-
-  for (const auto i : index_range(user_object_vector))
+  for (const auto & uo_name : _gap_flux_models)
   {
-    if (user_object_vector[i] == "GapFluxModelConduction")
+    if (uo_name == MortarGapHeatTransfer::UserObjectToBuild::CONDUCTION)
     {
       auto var_params = _factory.getValidParams("GapFluxModelConduction");
 
@@ -284,7 +315,8 @@ MortarGapHeatTransferAction::addUserObjects()
                                   Moose::stringify(thermal_action_userobject_conduction_counter++),
                               var_params);
     }
-    else if (user_object_vector[i] == "GapFluxModelRadiation")
+    else if (uo_name == MortarGapHeatTransfer::UserObjectToBuild::RADIATION)
+
     {
       auto var_params = _factory.getValidParams("GapFluxModelRadiation");
 
@@ -306,10 +338,6 @@ MortarGapHeatTransferAction::addUserObjects()
                                   Moose::stringify(thermal_action_userobject_radiation_counter++),
                               var_params);
     }
-    else
-      paramError("user_object_physics",
-                 "At least one of the user objects provided to capture gap heat transfer physics "
-                 "using a mortar formulation are not currently supported");
   }
 }
 

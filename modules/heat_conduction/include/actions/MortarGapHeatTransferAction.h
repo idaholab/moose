@@ -12,11 +12,16 @@
 #include "Action.h"
 #include "MooseEnum.h"
 
-enum class GapHeatTransferFormulation
+namespace MortarGapHeatTransfer
 {
-  POINT_SEGMENT,
-  MORTAR,
+enum class UserObjectToBuild
+{
+  CONDUCTION,
+  RADIATION,
 };
+
+const MultiMooseEnum mooseUOPhysicstType("conduction radiation");
+}
 
 class MortarGapHeatTransferAction : public Action
 {
@@ -29,6 +34,8 @@ public:
   using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
 
+  static MooseEnum getModelEnum();
+
 protected:
   // Mortar
   virtual void coreMortarMesh();
@@ -40,4 +47,6 @@ protected:
 private:
   void checkForExistingSubdomains();
   bool _user_provided_mortar_meshes;
+  const bool _user_provided_gap_flux_models;
+  std::vector<MortarGapHeatTransfer::UserObjectToBuild> _gap_flux_models;
 };
