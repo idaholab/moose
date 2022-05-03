@@ -24,7 +24,7 @@ public:
 
 private:
   /**
-   * Allocate storage for the fixed point algorithm.
+   * Allocate storage for the fixed point algorithm variables.
    * This creates the system vector of old (older, pre/post solve) variable values.
    * @param primary Whether this routine is to allocate storage for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
@@ -32,8 +32,7 @@ private:
   void allocateVariableStorage(SystemBase & system, const bool primary) override final;
 
   /**
-   * Allocate storage for the fixed point algorithm.
-   * This creates the storage vectors for postprocessors.
+   * Allocate storage for the fixed point algorithm postprocessors.
    * @param primary Whether this routine is to allocate storage for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
