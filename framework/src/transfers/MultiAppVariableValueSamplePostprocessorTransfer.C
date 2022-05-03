@@ -21,6 +21,8 @@
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 
+#include "timpi/parallel_sync.h"
+
 registerMooseObject("MooseApp", MultiAppVariableValueSamplePostprocessorTransfer);
 
 InputParameters
@@ -45,6 +47,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::validParams()
 MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePostprocessorTransfer(
     const InputParameters & parameters)
   : MultiAppTransfer(parameters),
+    MeshChangedInterface(parameters),
     _postprocessor_name(getParam<PostprocessorName>("postprocessor")),
     _var_name(getParam<VariableName>("source_variable")),
     _comp(getParam<unsigned int>("source_variable_component")),
@@ -68,41 +71,80 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
 }
 
 void
+MultiAppVariableValueSamplePostprocessorTransfer::setupPostprocessorCommunication()
+{
+  if (!_directions.contains("from_multiapp"))
+    return;
+
+  const auto num_global_apps = getFromMultiApp()->numGlobalApps();
+
+  // Setup the communication pattern
+  _postprocessor_to_processor_id.resize(num_global_apps,
+                                        std::numeric_limits<processor_id_type>::max());
+  for (const auto i : make_range(num_global_apps))
+    if (getFromMultiApp()->hasLocalApp(i))
+      _postprocessor_to_processor_id[i] = this->processor_id();
+
+  _communicator.min(_postprocessor_to_processor_id);
+#ifdef DEBUG
+  for (const auto i : make_range(num_global_apps))
+  {
+    mooseAssert(_postprocessor_to_processor_id[i] != std::numeric_limits<processor_id_type>::max(),
+                "Every element in the vector should have been set.");
+    if (getFromMultiApp()->hasLocalApp(i))
+      mooseAssert(_postprocessor_to_processor_id[i] == this->processor_id(),
+                  "If I owned this app, then the processor id value should be my own");
+  }
+#endif
+}
+
+void
+MultiAppVariableValueSamplePostprocessorTransfer::cacheElemToPostprocessorData()
+{
+  if (!_directions.contains("from_multiapp"))
+    return;
+
+  // Cache the Multiapp position ID for every element.
+  auto & mesh = _fe_problem.mesh().getMesh();
+  unsigned int multiapp_pos_id = 0;
+  for (auto & elem : as_range(mesh.active_local_elements_begin(), mesh.active_local_elements_end()))
+    // Exclude the elements without dofs.
+    if (_var.hasBlocks(elem->subdomain_id()))
+    {
+      Real distance = std::numeric_limits<Real>::max();
+      unsigned int count = 0;
+      for (unsigned int j = 0; j < getFromMultiApp()->numGlobalApps(); ++j)
+      {
+        Real current_distance = (getFromMultiApp()->position(j) - elem->true_centroid()).norm();
+        if (MooseUtils::absoluteFuzzyLessThan(current_distance, distance))
+        {
+          distance = current_distance;
+          multiapp_pos_id = j;
+          count = 0;
+        }
+        else if (MooseUtils::absoluteFuzzyEqual(current_distance, distance))
+          ++count;
+      }
+      if (count > 0)
+        mooseError("The distances of an element to more than one sub-applications are too close."
+                   "\nDifferent positions for sub-applications or a centroid-based MultiApp can "
+                   "be used to resolve this error.");
+      _cached_multiapp_pos_ids.push_back(multiapp_pos_id);
+      _needed_postprocessors.insert(multiapp_pos_id);
+    }
+}
+
+void
 MultiAppVariableValueSamplePostprocessorTransfer::initialSetup()
 {
-  if (_directions.contains("from_multiapp"))
-  {
-    // Cache the Multiapp position ID for every element.
-    auto & mesh = _fe_problem.mesh().getMesh();
-    unsigned int multiapp_pos_id = 0;
-    for (auto & elem :
-         as_range(mesh.active_local_elements_begin(), mesh.active_local_elements_end()))
-    {
-      // Exclude the elements without dofs.
-      if (_var.hasBlocks(elem->subdomain_id()))
-      {
-        Real distance = std::numeric_limits<Real>::max();
-        unsigned int count = 0;
-        for (unsigned int j = 0; j < getFromMultiApp()->numGlobalApps(); ++j)
-        {
-          Real current_distance = (getFromMultiApp()->position(j) - elem->true_centroid()).norm();
-          if (MooseUtils::absoluteFuzzyLessThan(current_distance, distance))
-          {
-            distance = current_distance;
-            multiapp_pos_id = j;
-            count = 0;
-          }
-          else if (MooseUtils::absoluteFuzzyEqual(current_distance, distance))
-            ++count;
-        }
-        if (count > 0)
-          mooseError("The distances of an element to more than one sub-applications are too close."
-                     "\nDifferent positions for sub-applications or a centroid-based MultiApp can "
-                     "be used to resolve this error.");
-        _cached_multiapp_pos_ids.push_back(multiapp_pos_id);
-      }
-    }
-  }
+  setupPostprocessorCommunication();
+  cacheElemToPostprocessorData();
+}
+
+void
+MultiAppVariableValueSamplePostprocessorTransfer::meshChanged()
+{
+  cacheElemToPostprocessorData();
 }
 
 void
@@ -180,31 +222,71 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
       auto & mesh = _fe_problem.mesh().getMesh();
       auto & solution = _var.sys().solution();
 
-      // Store the local multiapps postprocessor values.
+      // Get the required postprocessor values
       const unsigned int n_subapps = getFromMultiApp()->numGlobalApps();
       std::vector<Real> pp_values(n_subapps, std::numeric_limits<Real>::max());
-#ifdef DEBUG
-      std::vector<Real> duplicate(n_subapps, -std::numeric_limits<Real>::max());
-#endif
       for (const auto i : make_range(n_subapps))
         if (getFromMultiApp()->hasLocalApp(i))
-        {
           pp_values[i] = getFromMultiApp()->appPostprocessorValue(i, _postprocessor_name);
-#ifdef DEBUG
-          duplicate[i] = pp_values[i];
-#endif
-        }
 
-      // Gather all the multiapps postprocessor values.
-      _communicator.min(pp_values);
-#ifdef DEBUG
-      _communicator.max(duplicate);
-      for (const auto i : make_range(n_subapps))
-        if (pp_values[i] != duplicate[i])
-          mooseError(
-              "There should be only one processor setting a subapp postprocessor but now this "
-              "appears not true.");
+      // Gather all the multiapps postprocessor values that we need
+      std::unordered_map<processor_id_type, std::vector<unsigned int>> postprocessor_queries;
+      for (const auto needed_postprocessor : _needed_postprocessors)
+      {
+        const auto proc_id = _postprocessor_to_processor_id[needed_postprocessor];
+        if (proc_id != this->processor_id())
+          postprocessor_queries[proc_id].push_back(needed_postprocessor);
+      }
+
+      auto gather_data = [&pp_values
+#ifndef NDEBUG
+                          ,
+                          this
 #endif
+      ](processor_id_type libmesh_dbg_var(pid),
+                         const std::vector<unsigned int> & postprocessor_ids,
+                         std::vector<Real> & postprocessor_values)
+      {
+        mooseAssert(pid != this->processor_id(), "Should not be pulling from self");
+        postprocessor_values.resize(postprocessor_ids.size());
+        for (const auto i : index_range(postprocessor_ids))
+        {
+          const auto pp_id = postprocessor_ids[i];
+          const auto pp_value = pp_values[pp_id];
+          mooseAssert(
+              pp_value != std::numeric_limits<Real>::max(),
+              "If we are getting queried for postprocessor data, then we better have a valid"
+              "postprocesor value.");
+          postprocessor_values[i] = pp_value;
+        }
+      };
+
+      auto act_on_data = [&pp_values
+#ifndef NDEBUG
+                          ,
+                          this
+#endif
+      ](processor_id_type libmesh_dbg_var(pid),
+                         const std::vector<unsigned int> & postprocessor_ids,
+                         const std::vector<Real> & postprocessor_values)
+      {
+        mooseAssert(pid != this->processor_id(), "Should not be returning a query from self");
+        mooseAssert(postprocessor_ids.size() == postprocessor_values.size(),
+                    "should be a 1-to-1 query-to-response");
+        for (const auto i : index_range(postprocessor_ids))
+        {
+          const auto pp_id = postprocessor_ids[i];
+          const auto pp_value = postprocessor_values[i];
+          mooseAssert(pp_value != std::numeric_limits<Real>::max(),
+                      "If we are returning postprocessor data, then we better have a valid"
+                      "postprocesor value.");
+          pp_values[pp_id] = pp_value;
+        }
+      };
+
+      constexpr Real example = 0;
+      TIMPI::pull_parallel_vector_data(
+          _communicator, postprocessor_queries, gather_data, act_on_data, &example);
 
       // Assign the multiapps postprocessor values to the local elements.
       unsigned int i = 0;
@@ -218,6 +300,8 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
           _var.getDofIndices(elem, dof_indices);
           mooseAssert(dof_indices.size() == 1,
                       "The variable must be in constant monomial with one DoF on an element");
+          mooseAssert(pp_values[_cached_multiapp_pos_ids[i]] != std::numeric_limits<Real>::max(),
+                      "We should have pulled all the data we needed.");
           solution.set(dof_indices[0] + _comp, pp_values[_cached_multiapp_pos_ids[i]]);
           ++i;
         }
