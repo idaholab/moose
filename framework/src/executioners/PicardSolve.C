@@ -117,7 +117,7 @@ PicardSolve::allocatePostprocessorStorage(const bool primary)
   const Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
   const std::vector<PostprocessorName> & transformed_pps =
       primary ? _transformed_pps : _secondary_transformed_pps;
-  const std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
+  std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
       primary ? _transformed_pps_values : _secondary_transformed_pps_values;
 
   if (relaxation_factor != 1.)
@@ -140,6 +140,8 @@ PicardSolve::saveVariableValues(SystemBase & system, const bool primary)
   {
     NumericVector<Number> & solution = system.solution();
     NumericVector<Number> & transformed_old = system.getVector(old_tag_id);
+    _console << "Saving " << relaxation_factor << " : " << solution(0) << " " << transformed_old(0)
+             << std::endl;
     transformed_old = solution;
   }
 }
@@ -150,7 +152,7 @@ PicardSolve::savePostprocessorValues(const bool primary)
   const Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
   const std::vector<PostprocessorName> & transformed_pps =
       primary ? _transformed_pps : _secondary_transformed_pps;
-  const std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
+  std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
       primary ? _transformed_pps_values : _secondary_transformed_pps_values;
 
   if (relaxation_factor != 1.)
@@ -176,7 +178,7 @@ PicardSolve::transformPostprocessors(const bool primary)
   const Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
   const std::vector<PostprocessorName> & transformed_pps =
       primary ? _transformed_pps : _secondary_transformed_pps;
-  const std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
+  std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
       primary ? _transformed_pps_values : _secondary_transformed_pps_values;
 
   // Relax the postprocessors
@@ -204,6 +206,8 @@ PicardSolve::transformVariables(SystemBase & system,
 
   NumericVector<Number> & solution = system.solution();
   NumericVector<Number> & transformed_old = system.getVector(old_tag_id);
+  _console << "Relaxing " << relaxation_factor << " : " << solution(0) << " " << transformed_old(0)
+           << std::endl;
 
   for (const auto & dof : transformed_dofs)
     solution.set(dof,

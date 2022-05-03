@@ -233,7 +233,6 @@ FixedPointSolve::solve()
       transformed_auxdofs = getVariableDofIndices(_transformed_auxvars);
   }
 
-
   // Prepare to relax variables as a subapp
   std::set<dof_id_type> secondary_transformed_dofs;
   if (_secondary_relaxation_factor != 1.0 || !dynamic_cast<PicardSolve *>(this))
@@ -255,8 +254,8 @@ FixedPointSolve::solve()
       _main_fixed_point_it++;
 
       // Save variable values before the solve. Solving will provide new values
-      saveVariableValues(_nl, false);
-      saveVariableValues(_aux, false);
+      if (_secondary_transformed_variables.size())
+        saveVariableValues(_nl, false);
     }
     else
       _main_fixed_point_it = 0;
@@ -370,8 +369,6 @@ FixedPointSolve::saveAllValues(const bool primary)
 {
   if (_transformed_vars.size())
     saveVariableValues(_nl, primary);
-  if (_transformed_auxvars.size())
-    saveVariableValues(_aux, primary);
   if (_transformed_pps.size())
     savePostprocessorValues(primary);
 }
@@ -390,6 +387,11 @@ FixedPointSolve::solveStep(Real & begin_norm,
                                            : std::numeric_limits<Real>::max());
 
   _executioner.preSolve();
+
+  // Auxiliary variables could be modified at TIMESTEP_BEGIN by transfers or auxkernels,
+  // should be saved before
+  if (_transformed_auxvars.size())
+    saveVariableValues(_aux, true);
 
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, auto_advance))
@@ -444,10 +446,7 @@ FixedPointSolve::solveStep(Real & begin_norm,
 
   // Use the fixed point algorithm if the conditions (availability of values, etc) are met
   if (_transformed_vars.size() > 0 && useFixedPointAlgorithmUpdateInsteadOfPicard(true))
-  {
     transformVariables(_nl, transformed_dofs, true);
-    transformVariables(_aux, transformed_dofs, true);
-  }
 
   if (_problem.haveXFEM() && (_xfem_update_count < _max_xfem_update) && _problem.updateMeshXFEM())
   {
@@ -473,6 +472,12 @@ FixedPointSolve::solveStep(Real & begin_norm,
       _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
       return false;
     }
+
+    // Auxiliary variables could be updated by auxkernels or transfers at TIMESTEP_END
+    _console << "Checking " << (_transformed_auxvars.size() > 0) << " "
+             << useFixedPointAlgorithmUpdateInsteadOfPicard(true) << std::endl;
+    if (_transformed_auxvars.size() > 0 && useFixedPointAlgorithmUpdateInsteadOfPicard(true))
+      transformVariables(_aux, transformed_dofs, true);
   }
 
   if (_fail_step)

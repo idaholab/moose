@@ -58,7 +58,7 @@ SteffensenSolve::allocatePostprocessorStorage(const bool primary)
 {
   const std::vector<PostprocessorName> & transformed_pps =
       primary ? _transformed_pps : _secondary_transformed_pps;
-  const std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
+  std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
       primary ? _transformed_pps_values : _secondary_transformed_pps_values;
 
   // Allocate storage for the previous postprocessor values
@@ -93,7 +93,7 @@ SteffensenSolve::savePostprocessorValues(const bool primary)
   const unsigned int iteration = primary ? _fixed_point_it : _main_fixed_point_it;
   const std::vector<PostprocessorName> & transformed_pps =
       primary ? _transformed_pps : _secondary_transformed_pps;
-  const std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
+  std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
       primary ? _transformed_pps_values : _secondary_transformed_pps_values;
 
   // Save previous postprocessor values
@@ -123,7 +123,7 @@ SteffensenSolve::transformPostprocessors(const bool primary)
   const Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
   const std::vector<PostprocessorName> & transformed_pps =
       primary ? _transformed_pps : _secondary_transformed_pps;
-  const std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
+  std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
       primary ? _transformed_pps_values : _secondary_transformed_pps_values;
 
   // Relax postprocessors for the main application
