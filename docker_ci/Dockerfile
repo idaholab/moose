@@ -51,6 +51,13 @@ COPY docker_ci/install_packages.sh docker_ci/apt_installs.sh docker_ci/yum_insta
 RUN ./install_packages.sh || exit 1; rm *.sh
 
 #-----------------------------------------------------------------------------#
+# Ensure all local repos are marked as safe for all users
+#-----------------------------------------------------------------------------#
+RUN for CURR_USR in root dev; do \
+    sudo -u $CURR_USR /bin/bash -c "printf '[safe]\n\tdirectory = *\n' > ~/.gitconfig" ; \
+done
+
+#-----------------------------------------------------------------------------#
 # Install mpich-3.3 to system path
 #-----------------------------------------------------------------------------#
 RUN curl -L -O http://www.mpich.org/static/downloads/3.3/mpich-3.3.tar.gz ; \
