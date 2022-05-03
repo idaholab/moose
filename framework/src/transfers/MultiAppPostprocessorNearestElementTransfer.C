@@ -99,21 +99,27 @@ MultiAppPostprocessorNearestElementTransfer::execute()
   // Store the local multiapps postprocessor values.
   const unsigned int n_subapps = getFromMultiApp()->numGlobalApps();
   std::vector<Real> pp_values(n_subapps, std::numeric_limits<Real>::max());
+#ifdef DEBUG
   std::vector<Real> duplicate(n_subapps, -std::numeric_limits<Real>::max());
+#endif
   for (const auto i : make_range(n_subapps))
     if (getFromMultiApp()->hasLocalApp(i))
     {
       pp_values[i] = getFromMultiApp()->appPostprocessorValue(i, _postprocessor_name);
+#ifdef DEBUG
       duplicate[i] = pp_values[i];
+#endif
     }
 
   // Gather all the multiapps postprocessor values.
   _communicator.min(pp_values);
+#ifdef DEBUG
   _communicator.max(duplicate);
   for (const auto i : make_range(n_subapps))
     if (pp_values[i] != duplicate[i])
       mooseError("There should be only one processor setting a subapp postprocessor but now this "
                  "appears not true.");
+#endif
 
   // Assign the multiapps postprocessor values to the local elements.
   unsigned int i = 0;
