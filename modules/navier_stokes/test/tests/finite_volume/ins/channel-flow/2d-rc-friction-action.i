@@ -18,8 +18,8 @@ rho=1.1
   [NavierStokesFV]
     compressibility = 'incompressible'
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
+    density = ${rho}
+    dynamic_viscosity = ${mu}
 
     initial_velocity = '1 1 0'
     initial_pressure = 0.0
@@ -34,15 +34,15 @@ rho=1.1
     pressure_function = '0'
 
     friction_types = 'darcy'
-    friction_coeffs = '25'
+    friction_coeffs = 'friction_coefficient'
   []
 []
 
 [Materials]
-  [const]
-    type = ADGenericFunctorMaterial
-    prop_names = 'rho mu'
-    prop_values = '${rho} ${mu}'
+  [friction_coefficient]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'friction_coefficient'
+    prop_values = '25 25 25'
   []
 []
 
