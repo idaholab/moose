@@ -430,10 +430,16 @@ template <typename Scalar, typename Vector>
 Scalar
 rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVectorValue & dCD)
 {
-  if ((phiD - phiC) == 0)
-    return 1e6 * MathUtils::sign(gradC * dCD) + 0 * (gradC * dCD + phiD + phiC);
+  const auto fgrad = phiD - phiC;
+  const auto fgradC = gradC * dCD;
+  constexpr Real coeff = 1e3;
+  static const auto zero_vec = RealVectorValue(0);
 
-  return 2. * gradC * dCD / (phiD - phiC) - 1.;
+  if (std::abs(fgradC) >= coeff * std::abs(fgrad))
+    // Second term (multiplied by zero) is to keep same sparsity pattern as else branch
+    return 2 * coeff * MathUtils::sign(fgradC) * MathUtils::sign(fgrad) + zero_vec * gradC;
+
+  return 2. * fgradC / fgrad - 1.;
 }
 
 /**
