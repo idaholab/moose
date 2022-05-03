@@ -1,0 +1,28 @@
+[Tests]
+  design = 'syntax/Executioner/FixedPointAlgorithms/index.md'
+  issues = '#20100'
+  [relaxation_aux]
+    type = 'Exodiff'
+    input = 'main.i'
+    exodiff = 'main_out.e main_out_sub0.e'
+    requirement = "The system shall allow for the relaxation of auxiliary variables in Picard fixed point iterations."
+  []
+
+  [errors]
+    requirement = "The system shall error if"
+    [secant_not_implemented]
+      type = RunException
+      input = 'main.i'
+      cli_args = 'Executioner/fixed_point_algorithm=secant'
+      expect_err = 'Secant acceleration of auxiliary variables has not been implemented'
+      detail = 'acceleration of auxiliary variable convergence is requested with the secant method and it is currently not implemented'
+    []
+    [steffensen_not_implemented]
+      type = RunException
+      input = 'main.i'
+      cli_args = 'Executioner/fixed_point_algorithm=steffensen'
+      expect_err = 'Steffensen acceleration of auxiliary variables has not been implemented'
+      detail = "acceleration of auxiliary variable convergence is requested with Steffensen's method and it is currently not implemented"
+    []
+  []
+[]
