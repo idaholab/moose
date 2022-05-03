@@ -745,15 +745,17 @@ class TestHarness:
                             total_time += tester.getTiming()
                     tester_dirs[tester.getTestDir()] = (tester_dirs.get(tester.getTestDir(), 0) + total_time)
                 for k, v in tester_dirs.items():
-                    dag_table.append([f'{os.path.sep}'.join(k.split(os.path.sep)[-2:]), f'{v:.3f}'])
+                    rel_spec_path = f'{os.path.sep}'.join(k.split(os.path.sep)[-2:])
+                    dag_table.append([f'{rel_spec_path}{os.path.sep}{self._infiles[0]}', f'{v:.3f}'])
 
                 sorted_table = sorted(dag_table, key=lambda dag_table: float(dag_table[1]), reverse=True)
                 if sorted_table[0:self.options.longest_jobs]:
-                    print(f'\n{self.options.longest_jobs} longest running spec files:')
+                    print(f'\n{self.options.longest_jobs} longest running folders:')
                     print(('-' * (util.TERM_COLS)))
                     # We can't use util.formatResults, as we are representing a group of testers
                     for group in sorted_table[0:self.options.longest_jobs]:
                         print(str(group[0]).ljust((util.TERM_COLS - (len(group[1]) + 4)), ' '), f'[{group[1]}s]')
+                    print('\n')
 
             # Perform any write-to-disc operations
             self.writeResults()
