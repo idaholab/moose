@@ -26,6 +26,13 @@ FixedPointSolve::validParams()
       "fixed_point_min_its", 1, "Specifies the minimum number of fixed point iterations.");
   params.addParam<unsigned int>(
       "fixed_point_max_its", 1, "Specifies the maximum number of fixed point iterations.");
+  params.addParam<unsigned int>(
+      "fixed_point_algorithm_start_iteration",
+      1,
+      "Specify which is the first iteration that will count as a term in a fixed point sequence. "
+      "The default (1) ignores the initial condition and starts using data to form a fixed point "
+      "algorithm after the first solve. This parameter is only provided for accelerating/relaxing "
+      "quantities from the parent application");
   params.addParam<bool>(
       "accept_on_max_fixed_point_iteration",
       false,
@@ -139,6 +146,7 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _min_fixed_point_its(getParam<unsigned int>("fixed_point_min_its")),
     _max_fixed_point_its(getParam<unsigned int>("fixed_point_max_its")),
     _has_fixed_point_its(_max_fixed_point_its > 1),
+    _start_fixed_point(getParam<unsigned int>("fixed_point_algorithm_start_iteration")),
     _accept_max_it(getParam<bool>("accept_on_max_fixed_point_iteration")),
     _has_fixed_point_norm(!getParam<bool>("disable_fixed_point_residual_norm_check")),
     _fixed_point_rel_tol(getParam<Real>("fixed_point_rel_tol")),
@@ -194,12 +202,22 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
 void
 FixedPointSolve::allocateStorage(const bool primary)
 {
-  if (_transformed_vars.size() > 0)
-    allocateVariableStorage(_nl, primary);
-  if (_transformed_auxvars.size() > 0)
-    allocateVariableStorage(_aux, primary);
-  if (_transformed_pps.size() > 0)
-    allocatePostprocessorStorage(primary);
+  if (primary)
+  {
+    if (_transformed_vars.size() > 0)
+      allocateVariableStorage(_nl, primary);
+    if (_transformed_auxvars.size() > 0)
+      allocateVariableStorage(_aux, primary);
+    if (_transformed_pps.size() > 0)
+      allocatePostprocessorStorage(primary);
+  }
+  else
+  {
+    if (_secondary_transformed_variables.size() > 0)
+      allocateVariableStorage(_nl, primary);
+    if (_secondary_transformed_pps.size() > 0)
+      allocatePostprocessorStorage(primary);
+  }
 }
 
 bool

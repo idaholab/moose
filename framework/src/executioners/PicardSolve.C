@@ -167,7 +167,7 @@ PicardSolve::useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary)
   // unrelaxed Picard is the default update for fixed point iterations
   // old values are required for relaxation
   if (primary)
-    return _relax_factor != 1. && _fixed_point_it > 0;
+    return _relax_factor != 1. && _fixed_point_it >= _start_fixed_point;
   else
     return _secondary_relaxation_factor != 1. && _main_fixed_point_it > 0;
 }

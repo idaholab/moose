@@ -122,7 +122,7 @@ SecantSolve::useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary)
 {
   // Need at least two evaluations to compute the Secant slope
   if (primary)
-    return _fixed_point_it > 1;
+    return _fixed_point_it >= _start_fixed_point;
   else
     return _main_fixed_point_it > 1;
 }

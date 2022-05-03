@@ -112,7 +112,7 @@ SteffensenSolve::useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary)
   // Need at least two values to compute the Steffensen update, and the update is only performed
   // every other iteration as two evaluations of the coupled problem are necessary
   if (primary)
-    return _fixed_point_it > 1 && (_fixed_point_it % 2 == 0);
+    return _fixed_point_it > _start_fixed_point && (_fixed_point_it % 2 == 0);
   else
     return _main_fixed_point_it > 1 && (_main_fixed_point_it % 2 == 0);
 }

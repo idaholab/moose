@@ -206,6 +206,8 @@ protected:
   unsigned int _max_fixed_point_its;
   /// Whether or not we activate fixed point iteration
   bool _has_fixed_point_its; // TODO: make const once picard parameters are removed
+  /// To start fixed point iteration late
+  const unsigned int _start_fixed_point;
   /// Whether or not to treat reaching maximum number of fixed point iteration as converged
   bool _accept_max_it; // TODO: make const once picard parameters are removed
   /// Whether or not to use residual norm to check the fixed point convergence
