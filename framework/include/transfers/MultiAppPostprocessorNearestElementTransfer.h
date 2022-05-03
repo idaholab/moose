@@ -29,7 +29,6 @@ public:
 protected:
   AuxVariableName _postprocessor_name;
   PostprocessorName _to_var_name;
-  const Real _relax_factor;
 
   // References to the problem, the variable and the system.
   FEProblemBase & _to_problem;

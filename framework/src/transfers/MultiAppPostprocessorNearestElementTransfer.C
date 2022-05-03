@@ -31,7 +31,6 @@ MultiAppPostprocessorNearestElementTransfer::validParams()
                                         "The CONSTANT "
                                         "MONOMIAL variable to transfer to.");
   params.addParam<unsigned int>("source_variable_component", 0, "The component of source variable");
-  params.addParam<Real>("relax_factor", 1, "The relaxation factor");
   return params;
 }
 
@@ -40,7 +39,6 @@ MultiAppPostprocessorNearestElementTransfer::MultiAppPostprocessorNearestElement
   : MultiAppTransfer(parameters),
     _postprocessor_name(getParam<PostprocessorName>("postprocessor")),
     _to_var_name(getParam<VariableName>("source_variable")),
-    _relax_factor(getParam<Real>("relax_factor")),
     _to_problem(getFromMultiApp()->problemBase()),
     _to_var(_to_problem.getVariable(0, _to_var_name)),
     _to_sys(_to_var.sys().system()),
@@ -126,9 +124,7 @@ MultiAppPostprocessorNearestElementTransfer::execute()
     if (elem->n_dofs(_to_sys_num, _to_var_num) > 0)
     {
       dof_id_type dof = elem->dof_number(_to_sys_num, _to_var_num, 0);
-      auto v = solution(dof);
-      Real nv = v * (1 - _relax_factor) + pp_values[_cached_multiapp_pos_ids[i]] * _relax_factor;
-      solution.set(dof, nv);
+      solution.set(dof, pp_values[_cached_multiapp_pos_ids[i]]);
       ++i;
     }
   }
