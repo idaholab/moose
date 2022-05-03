@@ -70,11 +70,21 @@
       requirement = "The system shall guarantee that constant monomial variables transferred via MultiAppVariableValueSamplePostprocessorTransfer to the subapp are retrieved "
                     " unchanged when transferred back using MultiAppVariableValueSamplePostprocessorTransfer in case the CentroidMultiApp is used."
     []
+    [same_distance_error]
+      type = RunException
+      input = full_domain_primary.i
+      cli_args = 'MultiApps/sub/block=1
+                  Outputs/file_base=multiapp_block_restricted_primary_error_out'
+      expect_err = 'The distances of an element to more than one sub-applications are too close'
+      requirement = "The systen shall error out if more than one sub-applications are in the same distance from an element."
+    []
     [multiapp_block_restricted_primary]
       type = Exodiff
       input = full_domain_primary.i
       exodiff = multiapp_block_restricted_primary_out.e
-      cli_args = 'MultiApps/sub/block=1 Outputs/file_base=multiapp_block_restricted_primary_out'
+      cli_args = 'Mesh/cartesian_basic_mesh/subdomain_id="1 1 2 2 1 1 2 2 1 1 2 2 1 1 2 2"
+                  MultiApps/sub/block=1
+                  Outputs/file_base=multiapp_block_restricted_primary_out'
       requirement = "The systen shall allow transferring CONSTANT MONOMIAL variables using block restriction in the CentroidMultiApp."
     []
     [multiapp_and_var_block_restricted_primary]

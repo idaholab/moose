@@ -16,6 +16,7 @@
 #include "MooseVariableFE.h"
 #include "MultiApp.h"
 #include "AuxiliarySystem.h"
+#include "MooseUtils.h"
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
@@ -81,15 +82,23 @@ MultiAppVariableValueSamplePostprocessorTransfer::initialSetup()
     if (_var.hasBlocks(elem->subdomain_id()))
     {
       Real distance = std::numeric_limits<Real>::max();
+      unsigned int count = 0;
       for (unsigned int j = 0; j < getFromMultiApp()->numGlobalApps(); ++j)
       {
         Real current_distance = (getFromMultiApp()->position(j) - elem->true_centroid()).norm();
-        if (current_distance < distance)
+        if (MooseUtils::absoluteFuzzyLessThan(current_distance, distance))
         {
           distance = current_distance;
           multiapp_pos_id = j;
+          count = 0;
         }
+        else if (MooseUtils::absoluteFuzzyEqual(current_distance, distance))
+          ++count;
       }
+      if (count > 0)
+        mooseError("The distances of an element to more than one sub-applications are too close."
+                   "\nDifferent positions for sub-applications or a centroid-based MultiApp can "
+                   "be used to resolve this error.");
       _cached_multiapp_pos_ids.push_back(multiapp_pos_id);
     }
   }
