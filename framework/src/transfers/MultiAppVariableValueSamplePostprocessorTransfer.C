@@ -53,7 +53,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
 
-  if (isParamValid("from_multi_app"))
+  if (_directions.contains("from_multiapp"))
   {
     // Check that the variable is a CONSTANT MONOMIAL.
     auto & fe_type = _var.feType();
@@ -70,36 +70,37 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
 void
 MultiAppVariableValueSamplePostprocessorTransfer::initialSetup()
 {
-  if (isParamValid("to_multi_app"))
-    return;
-
-  // Cache the Multiapp position ID for every element.
-  auto & mesh = _fe_problem.mesh().getMesh();
-  unsigned int multiapp_pos_id = 0;
-  for (auto & elem : as_range(mesh.active_local_elements_begin(), mesh.active_local_elements_end()))
+  if (_directions.contains("from_multiapp"))
   {
-    // Exclude the elements without dofs.
-    if (_var.hasBlocks(elem->subdomain_id()))
+    // Cache the Multiapp position ID for every element.
+    auto & mesh = _fe_problem.mesh().getMesh();
+    unsigned int multiapp_pos_id = 0;
+    for (auto & elem :
+         as_range(mesh.active_local_elements_begin(), mesh.active_local_elements_end()))
     {
-      Real distance = std::numeric_limits<Real>::max();
-      unsigned int count = 0;
-      for (unsigned int j = 0; j < getFromMultiApp()->numGlobalApps(); ++j)
+      // Exclude the elements without dofs.
+      if (_var.hasBlocks(elem->subdomain_id()))
       {
-        Real current_distance = (getFromMultiApp()->position(j) - elem->true_centroid()).norm();
-        if (MooseUtils::absoluteFuzzyLessThan(current_distance, distance))
+        Real distance = std::numeric_limits<Real>::max();
+        unsigned int count = 0;
+        for (unsigned int j = 0; j < getFromMultiApp()->numGlobalApps(); ++j)
         {
-          distance = current_distance;
-          multiapp_pos_id = j;
-          count = 0;
+          Real current_distance = (getFromMultiApp()->position(j) - elem->true_centroid()).norm();
+          if (MooseUtils::absoluteFuzzyLessThan(current_distance, distance))
+          {
+            distance = current_distance;
+            multiapp_pos_id = j;
+            count = 0;
+          }
+          else if (MooseUtils::absoluteFuzzyEqual(current_distance, distance))
+            ++count;
         }
-        else if (MooseUtils::absoluteFuzzyEqual(current_distance, distance))
-          ++count;
+        if (count > 0)
+          mooseError("The distances of an element to more than one sub-applications are too close."
+                     "\nDifferent positions for sub-applications or a centroid-based MultiApp can "
+                     "be used to resolve this error.");
+        _cached_multiapp_pos_ids.push_back(multiapp_pos_id);
       }
-      if (count > 0)
-        mooseError("The distances of an element to more than one sub-applications are too close."
-                   "\nDifferent positions for sub-applications or a centroid-based MultiApp can "
-                   "be used to resolve this error.");
-      _cached_multiapp_pos_ids.push_back(multiapp_pos_id);
     }
   }
 }
