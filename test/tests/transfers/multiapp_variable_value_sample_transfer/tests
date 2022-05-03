@@ -1,76 +1,91 @@
 [Tests]
-  issues = '#1737 #16099 #20816'
+  issues = '#1737 #16099 #20816 #20913'
   design = 'MultiAppVariableValueSampleTransfer.md'
 
-  [test]
-    type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out_sub0.e master_out_sub1.e'
-
-    requirement = "The system shall include the ability to transfer a field variable sampled at a "
-                  "point to populate a field variable on the sub-application with the supplied "
-                  "value."
-  []
-
-  [array_test]
-    type = 'Exodiff'
-    input = 'master_array.i'
-    exodiff = 'master_array_out_pp_sub00.e master_array_out_pp_sub01.e master_array_out_pp_sub10.e master_array_out_pp_sub11.e'
-
-    requirement = "The system shall include the ability to transfer a component of an array field variable sampled at a "
-                  "point to post processing variable on the sub-application."
-  []
-
-  [pp]
-    requirement = "The system shall include the ability to transfer a field variable sampled at a "
-                  "point to post processing variable on the sub-application"
-    [pp_test]
+  [to_multiapp]
+    [test]
       type = 'Exodiff'
-      input = 'pp_master.i'
-      exodiff = 'pp_master_out_pp_sub0.e pp_master_out_pp_sub1.e'
+      input = 'master.i'
+      exodiff = 'master_out_sub0.e master_out_sub1.e'
 
-      detail = "from a linear Lagrange source variable and"
+      requirement = "The system shall include the ability to transfer a field variable sampled at a "
+                    "point to populate a field variable on the sub-application with the supplied "
+                    "value."
     []
-    [monomial_to_sub_pp]
+
+    [array_test]
       type = 'Exodiff'
-      input = 'master_quad.i'
-      exodiff = 'master_quad_out.e master_quad_out_quad0.e master_quad_out_quad1.e '
-                'master_quad_out_quad2.e master_quad_out_quad3.e'
+      input = 'master_array.i'
+      exodiff = 'master_array_out_pp_sub00.e master_array_out_pp_sub01.e master_array_out_pp_sub10.e master_array_out_pp_sub11.e'
 
-      detail = "from a constant monomial source variable and"
+      requirement = "The system shall include the ability to transfer a component of an array field variable sampled at a "
+                    "point to post processing variable on the sub-application."
     []
-    [finite_volume]
-      type = 'Exodiff'
-      input = 'master_fv.i'
-      exodiff = 'master_fv_out_sub0.e master_fv_out_sub1.e '
-                'master_fv_out_pp_sub0.e master_fv_out_pp_sub1.e'
 
-      detail = "from a finite volume constant monomial source variable."
-      ad_indexing_type = 'global'
+    [pp]
+      requirement = "The system shall include the ability to transfer a field variable sampled at a "
+                    "point to post processing variable on the sub-application"
+      [pp_test]
+        type = 'Exodiff'
+        input = 'pp_master.i'
+        exodiff = 'pp_master_out_pp_sub0.e pp_master_out_pp_sub1.e'
+
+        detail = "from a linear Lagrange source variable and"
+      []
+      [monomial_to_sub_pp]
+        type = 'Exodiff'
+        input = 'master_quad.i'
+        exodiff = 'master_quad_out.e master_quad_out_quad0.e master_quad_out_quad1.e '
+                  'master_quad_out_quad2.e master_quad_out_quad3.e'
+
+        detail = "from a constant monomial source variable and"
+      []
+      [finite_volume]
+        type = 'Exodiff'
+        input = 'master_fv.i'
+        exodiff = 'master_fv_out_sub0.e master_fv_out_sub1.e '
+                  'master_fv_out_pp_sub0.e master_fv_out_pp_sub1.e'
+
+        detail = "from a finite volume constant monomial source variable."
+        ad_indexing_type = 'global'
+      []
+    []
+
+    [silence_barriers]
+      type = 'RunApp'
+      input = 'master.i'
+      prereq = 'to_multiapp/test'
+      absent_out = "Jobs complete:"
+
+      requirement = "The system shall support the ability to disable the use of parallel barriers when "
+                    "streaming text to the screen."
     []
   []
-  [silence_barriers]
-    type = 'RunApp'
-    input = 'master.i'
-    prereq = 'test'
-    absent_out = "Jobs complete:"
 
-    requirement = "The system shall support the ability to disable the use of parallel barriers when "
-                  "streaming text to the screen."
-  []
-
-  [error_direction]
-    type = RunException
-    input = master.i
-    expect_err = "This transfer direction has not been implemented"
-    cli_args = 'Transfers/sample_transfer_bad/type=MultiAppVariableValueSampleTransfer Transfers/sample_transfer_bad/source_variable=u Transfers/sample_transfer_bad/variable=from_master Transfers/sample_transfer_bad/from_multi_app=sub'
-    requirement = 'The system shall report a reasonable error if parameters for an unsupported transfer of variable values from multiapp to the main app are provided'
-  []
-  [error_direction_pp]
-    type = RunException
-    input = pp_master.i
-    expect_err = "This transfer direction has not been implemented"
-    cli_args = 'Transfers/sample_pp_transfer/from_multi_app=pp_sub'
-    requirement = 'The system shall report a reasonable error if parameters for an unsupported transfer of variable values to postprocessor values from multiapp to main app are provided'
+  [from_multiapp]
+    [full_domain_primary]
+      type = Exodiff
+      input = full_domain_primary.i
+      exodiff = full_domain_primary_out.e
+      requirement = "The system shall guarantee that linear lagrange variables transferred via MultiAppVariableValueSamplePostprocessorTransfer to the subapp are retrieved "
+                    " unchanged when transferred back using MultiAppVariableValueSamplePostprocessorTransfer in case the CentroidMultiApp is used."
+    []
+    [multiapp_block_restricted_primary]
+      type = Exodiff
+      input = full_domain_primary.i
+      exodiff = multiapp_block_restricted_primary_out.e
+      cli_args = 'MultiApps/sub/block=1 Outputs/file_base=multiapp_block_restricted_primary_out'
+      requirement = "The systen shall allow transferring CONSTANT MONOMIAL variables using block restriction in the CentroidMultiApp."
+    []
+    [multiapp_and_var_block_restricted_primary]
+      type = Exodiff
+      input = full_domain_primary.i
+      exodiff = multiapp_and_var_block_restricted_primary_out.e
+      cli_args = 'AuxVariables/from_subapp/block=1
+                  AuxVariables/from_subapp_check/block=1
+                  AuxVariables/subapp_primary_diff/block=1
+                  MultiApps/sub/block=1 Outputs/file_base=multiapp_and_var_block_restricted_primary_out'
+      requirement = "The systen shall allow transferring block restricted CONSTANT MONOMIAL variables using block restriction in the CentroidMultiApp."
+    []
   []
 []

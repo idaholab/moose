@@ -5,9 +5,9 @@
 []
 
 [Variables]
-  [./dummy]
+  [dummy]
     initial_condition = -2.0
-  [../]
+  []
 []
 [Problem]
   kernel_coverage_check = false
@@ -23,15 +23,15 @@
 []
 
 [Postprocessors]
-  [./from_primary_pp]
+  [from_primary_pp]
     type = Receiver
     default = -3.0
-  [../]
-  [./to_primary_pp]
+  []
+  [to_primary_pp]
     type = ScalePostprocessor
     scaling_factor = 1
     value = from_primary_pp
-  [../]
+  []
 []
 
 [Executioner]

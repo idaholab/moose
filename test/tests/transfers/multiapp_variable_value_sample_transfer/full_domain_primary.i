@@ -1,7 +1,7 @@
 [Mesh]
   type = MeshGeneratorMesh
 
-  [./cartesian_basic_mesh]
+  [cartesian_basic_mesh]
     type = CartesianMeshGenerator
     dim = 2
 
@@ -15,80 +15,74 @@
                     1 1 2 2
                     1 1 2 2
                     1 1 1 2'
-  [../]
-  [./central_node]
+  []
+  [central_node]
     type = ExtraNodesetGenerator
     coord = '0.5 0.5'
     input = cartesian_basic_mesh
     new_boundary = 'central_node'
-  [../]
+  []
 []
 
 [Variables]
-  [./to_subapp]
+  [to_subapp]
     initial_condition = -1.0
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./discretize_to_subapp]
+  [discretize_to_subapp]
     type = ParsedAux
     variable = from_subapp_check
     function = 'to_subapp'
     args = 'to_subapp'
-  [../]
-  [./subapp_primary_diff]
+  []
+  [subapp_primary_diff]
     type = ParsedAux
     variable = subapp_primary_diff
     function = 'from_subapp_check - from_subapp'
     args = 'from_subapp_check from_subapp'
-  [../]
-[]
-
-[Functions]
+  []
 []
 
 [AuxVariables]
-  [./from_subapp]
+  [from_subapp]
     family = MONOMIAL
     order = CONSTANT
     initial_condition = -2.0
-    block = 1
-  [../]
-  [./from_subapp_check]
+  []
+  [from_subapp_check]
     family = MONOMIAL
     order = CONSTANT
     initial_condition = -2.0
-    block = 1
-  [../]
-  [./subapp_primary_diff]
+  []
+  [subapp_primary_diff]
     family = MONOMIAL
     order = CONSTANT
     initial_condition = -2.0
-    block = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = to_subapp
-  [../]
+  []
 []
 
 [BCs]
-  [./edge]
+  [edge]
     type = DirichletBC
     variable = to_subapp
     boundary = 'top right left bottom'
     value = 1
-  [../]
-  [./center]
+  []
+  [center]
     type = DirichletBC
     variable = to_subapp
     boundary = 'central_node'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -101,7 +95,6 @@
 
   nl_abs_tol = 1e-13
   nl_rel_tol = 1e-12
-
 []
 
 [Outputs]
@@ -109,27 +102,23 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = CentroidMultiApp
     input_files = subapp.i
-    block = 1
-  [../]
-[]
-
-[Postprocessors]
+  []
 []
 
 [Transfers]
-  [./from_primary_to_sub_pp]
+  [from_primary_to_sub_pp]
     type = MultiAppVariableValueSamplePostprocessorTransfer
     to_multi_app = sub
     source_variable = to_subapp
     postprocessor = from_primary_pp
-  [../]
-  [./primary_average]
-    type = MultiAppPostprocessorNearestElementTransfer
+  []
+  [primary_average]
+    type = MultiAppVariableValueSamplePostprocessorTransfer
     from_multi_app = sub
     source_variable = from_subapp
     postprocessor = to_primary_pp
-  [../]
+  []
 []
