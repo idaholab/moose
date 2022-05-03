@@ -262,6 +262,13 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
 
+  params.addParam<bool>(
+      "greedy_search",
+      false,
+      "Whether or not to send a point to all the domains. If true, all the processors will be "
+      "checked for a given point."
+      "The code will be slow if this flag is on but it will give a better solution.");
+
   params.addParam<unsigned int>("num_nearest_points",
                                 1,
                                 "Number of nearest source (from) points will be chosen to "
@@ -290,6 +297,7 @@ MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer
   : MultiAppConservativeTransfer(parameters),
     _error_on_miss(getParam<bool>("error_on_miss")),
     _bbox_tol(getParam<Real>("bbox_tol")),
+    _greedy_search(getParam<bool>("greedy_search")),
     _num_nearest_points(getParam<unsigned int>("num_nearest_points"))
 {
   if (_to_var_names.size() == _from_var_names.size())
@@ -322,7 +330,8 @@ MultiAppGeneralFieldNearestNodeTransfer::transferVariable(unsigned int i)
   // Get the bounding boxes for the "from" domains.
   // Clean up _bboxes
   _bboxes.clear();
-  _bboxes = getFromBoundingBoxes();
+  //_bboxes = getFromBoundingBoxes();
+  _bboxes = getRestrictedFromBoundingBoxes();
 
   // Expand bounding boxes. Some right points might be excluded
   // without an expansion
@@ -414,7 +423,7 @@ MultiAppGeneralFieldNearestNodeTransfer::transferVariable(unsigned int i)
 
 void
 MultiAppGeneralFieldNearestNodeTransfer::locatePointReceivers(
-    const Point point, std::vector<processor_id_type> & processors)
+    const Point point, std::set<processor_id_type> & processors)
 {
   // Check which processors include this point
   // One point might have more than one points
@@ -434,9 +443,10 @@ MultiAppGeneralFieldNearestNodeTransfer::locatePointReceivers(
     {
       Real distance = bboxMinDistance(point, _bboxes[i_from]);
       // We will not break here because we want to send a point to all possible source domains
-      // if (distance <= nearest_max_distance || _bboxes[i_from].contains_point(point))
+      if (_greedy_search || distance <= nearest_max_distance ||
+          _bboxes[i_from].contains_point(point))
       {
-        processors.push_back(i_proc);
+        processors.insert(i_proc);
         found = true;
       }
     }
@@ -452,7 +462,7 @@ MultiAppGeneralFieldNearestNodeTransfer::cacheOutgoingPointInfor(
     const unsigned int problem_id,
     ProcessorToPointVec & outgoing_points)
 {
-  std::vector<processor_id_type> processors;
+  std::set<processor_id_type> processors;
   // Try to find which processors
   processors.clear();
   locatePointReceivers(point, processors);
@@ -1052,4 +1062,85 @@ MultiAppGeneralFieldNearestNodeTransfer::bboxMinDistance(const Point & p, const 
   }
 
   return min_distance;
+}
+
+std::vector<BoundingBox>
+MultiAppGeneralFieldNearestNodeTransfer::getRestrictedFromBoundingBoxes()
+{
+  std::vector<std::pair<Point, Point>> bb_points(_from_meshes.size());
+  const Real min_r = std::numeric_limits<Real>::lowest();
+  const Real max_r = std::numeric_limits<Real>::max();
+
+  for (const auto j : make_range(_from_meshes.size()))
+  {
+
+    Point min(max_r, max_r, max_r);
+    Point max(min_r, min_r, min_r);
+    bool at_least_one = false;
+    const auto & from_mesh = _from_meshes[j];
+
+    std::set<SubdomainID> subdomains;
+    if (isParamValid("from_blocks"))
+    {
+      // User input block names
+      auto & blocks = getParam<std::vector<SubdomainName>>("from_blocks");
+      // Subdomain ids
+      std::vector<SubdomainID> ids = from_mesh->getSubdomainIDs(blocks);
+      // Store these ids
+      subdomains.insert(ids.begin(), ids.end());
+    }
+
+    std::set<BoundaryID> boundaries;
+    if (isParamValid("from_boundary"))
+    {
+      // User input block names
+      auto & boundary_names = getParam<std::vector<BoundaryName>>("from_boundary");
+      std::vector<BoundaryID> boundary_ids = from_mesh->getBoundaryIDs(boundary_names);
+      // Store these ids
+      boundaries.insert(boundary_ids.begin(), boundary_ids.end());
+    }
+
+    for (auto & elem : as_range(from_mesh->getMesh().local_elements_begin(),
+                                from_mesh->getMesh().local_elements_end()))
+    {
+      if (!subdomains.empty() && !hasBlocks(subdomains, elem))
+        continue;
+
+      for (auto & node : elem->node_ref_range())
+      {
+        if (!boundaries.empty() && !hasBoundaries(boundaries, *from_mesh, &node))
+          continue;
+
+        at_least_one = true;
+        for (const auto i : make_range(LIBMESH_DIM))
+        {
+          min(i) = std::min(min(i), node(i));
+          max(i) = std::max(max(i), node(i));
+        }
+      }
+    }
+    BoundingBox bbox(min, max);
+    if (!at_least_one)
+      bbox.min() = max; // If we didn't hit any nodes, this will be _the_ minimum bbox
+    else
+    {
+      // Translate the bounding box to the from domain's position.
+      bbox.first += _from_positions[j];
+      bbox.second += _from_positions[j];
+    }
+
+    // Cast the bounding box into a pair of points (so it can be put through
+    // MPI communication).
+    bb_points[j] = static_cast<std::pair<Point, Point>>(bbox);
+  }
+
+  // Serialize the bounding box points.
+  _communicator.allgather(bb_points);
+
+  // Recast the points back into bounding boxes and return.
+  std::vector<BoundingBox> bboxes(bb_points.size());
+  for (const auto i : make_range(bb_points.size()))
+    bboxes[i] = static_cast<BoundingBox>(bb_points[i]);
+
+  return bboxes;
 }

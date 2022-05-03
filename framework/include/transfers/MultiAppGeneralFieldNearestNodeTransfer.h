@@ -82,6 +82,11 @@ private:
   /// How much we should relax bounding boxes
   Real _bbox_tol;
 
+  /// Whether or not a greedy strategy will be used
+  /// If true, all the partitions will be checked for a given
+  /// outgoing point
+  bool _greedy_search;
+
   /// Number of nearest points are chosen
   unsigned int _num_nearest_points;
 
@@ -107,7 +112,7 @@ private:
   /*
    * Which processors include this point
    */
-  void locatePointReceivers(const Point point, std::vector<processor_id_type> & processors);
+  void locatePointReceivers(const Point point, std::set<processor_id_type> & processors);
 
   /*
    * Whether or not a given element has blocks
@@ -182,4 +187,9 @@ private:
    * Compute max distance
    */
   Real bboxMaxDistance(const Point & p, const BoundingBox & bbox);
+
+  /*
+   * Get from bounding boxes for given domains and boundaries
+   * */
+  std::vector<BoundingBox> getRestrictedFromBoundingBoxes();
 };

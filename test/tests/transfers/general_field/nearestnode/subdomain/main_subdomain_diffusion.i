@@ -104,6 +104,7 @@
     multi_app = sub
     from_blocks = '1'
     to_blocks = '1'
+    greedy_search = true
   []
 
   [elemental_to_sub]
