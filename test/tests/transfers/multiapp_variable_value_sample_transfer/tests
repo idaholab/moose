@@ -94,6 +94,7 @@
       cli_args = 'AuxVariables/from_subapp/block=1
                   AuxVariables/from_subapp_check/block=1
                   AuxVariables/subapp_primary_diff/block=1
+                  AuxVariables/array_var/block=1
                   MultiApps/sub/block=1 Outputs/file_base=multiapp_and_var_block_restricted_primary_out'
       requirement = "The systen shall allow transferring block restricted CONSTANT MONOMIAL variables using block restriction in the CentroidMultiApp."
     []

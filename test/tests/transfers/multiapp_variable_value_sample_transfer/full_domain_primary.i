@@ -61,6 +61,12 @@
     order = CONSTANT
     initial_condition = -2.0
   []
+  [array_var]
+    family = MONOMIAL
+    order = CONSTANT
+    components = 3
+    initial_condition = '-2 -1 0'
+  []
 []
 
 [Kernels]
@@ -119,6 +125,13 @@
     type = MultiAppVariableValueSamplePostprocessorTransfer
     from_multi_app = sub
     source_variable = from_subapp
+    postprocessor = to_primary_pp
+  []
+  [array_var]
+    type = MultiAppVariableValueSamplePostprocessorTransfer
+    from_multi_app = sub
+    source_variable = array_var
+    source_variable_component = 2
     postprocessor = to_primary_pp
   []
 []

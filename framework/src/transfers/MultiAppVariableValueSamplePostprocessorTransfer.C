@@ -217,7 +217,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
           _var.getDofIndices(elem, dof_indices);
           mooseAssert(dof_indices.size() == 1,
                       "The variable must be in constant monomial with one DoF on an element");
-          solution.set(dof_indices[0], pp_values[_cached_multiapp_pos_ids[i]]);
+          solution.set(dof_indices[0] + _comp, pp_values[_cached_multiapp_pos_ids[i]]);
           ++i;
         }
       }

@@ -5,6 +5,7 @@
 ## Description
 
 This transfer supports data transfers between a variable on the main application and a postprocessor on the sub-applications.
+The variable can be a component of an array variable or a standard field variable.
 
 When transferring a variable to a postprocessor on the sub-applications of a MultiApp, the positions of sub-applications are used to sample the values of the variable and the sampled values are used to set the postprocessor values.
 
