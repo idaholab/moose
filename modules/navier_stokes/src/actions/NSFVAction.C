@@ -1253,7 +1253,6 @@ NSFVAction::addINSMomentumFrictionKernels()
     params.set<MooseFunctorName>(NS::porosity) = "1.0";
   }
 
-
   for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
   {
     std::string block_name = "";
