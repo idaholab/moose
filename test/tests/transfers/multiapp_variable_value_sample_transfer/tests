@@ -67,7 +67,7 @@
       type = Exodiff
       input = full_domain_primary.i
       exodiff = full_domain_primary_out.e
-      requirement = "The system shall guarantee that linear lagrange variables transferred via MultiAppVariableValueSamplePostprocessorTransfer to the subapp are retrieved "
+      requirement = "The system shall guarantee that constant monomial variables transferred via MultiAppVariableValueSamplePostprocessorTransfer to the subapp are retrieved "
                     " unchanged when transferred back using MultiAppVariableValueSamplePostprocessorTransfer in case the CentroidMultiApp is used."
     []
     [multiapp_block_restricted_primary]
