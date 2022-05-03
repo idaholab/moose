@@ -1097,6 +1097,7 @@ PolygonMeshGeneratorBase::fourPointIntercept(const std::pair<Real, Real> & p1,
 
 std::vector<Real>
 PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
+                                                   std::vector<Point> & boundary_points,
                                                    const Real lower_azi,
                                                    const Real upper_azi,
                                                    const unsigned int return_type,
@@ -1106,7 +1107,6 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
                                                    const Real input_origin_y,
                                                    const Real tol) const
 {
-  std::vector<Real> azimuthal_output;
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list =
       mesh.get_boundary_info().build_side_list();
   mesh.get_boundary_info().build_node_list_from_side_list();
@@ -1115,6 +1115,7 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
 
   std::vector<Real> bd_x_list;
   std::vector<Real> bd_y_list;
+  std::vector<Point> bd_p_list;
   Real origin_x = 0.0;
   Real origin_y = 0.0;
   Real tmp_azi;
@@ -1125,6 +1126,7 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
     {
       bd_x_list.push_back((mesh.node_ref(std::get<0>(node_list[i])))(0));
       bd_y_list.push_back((mesh.node_ref(std::get<0>(node_list[i])))(1));
+      bd_p_list.push_back((mesh.node_ref(std::get<0>(node_list[i]))));
     }
 
   if (calculate_origin)
@@ -1139,21 +1141,58 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
     origin_y = input_origin_y;
   }
 
+  std::vector<std::pair<Real, Point>> azi_point_pairs;
+
   for (unsigned int i = 0; i < bd_x_list.size(); ++i)
   {
     tmp_azi = atan2(bd_y_list[i] - origin_y, bd_x_list[i] - origin_x) * 180.0 / M_PI;
     if ((lower_azi <= upper_azi && (tmp_azi >= lower_azi - tol && tmp_azi <= upper_azi + tol)) ||
         (lower_azi > upper_azi && (tmp_azi >= lower_azi - tol || tmp_azi <= upper_azi + tol)))
     {
-      azimuthal_output.push_back(
+      azi_point_pairs.push_back(std::make_pair(
           return_type == ANGLE_DEGREE
               ? (tmp_azi - mid_azi)
-              : (1.0 + std::sqrt(3.0) * std::tan((tmp_azi - mid_azi) / 180.0 * M_PI)));
+              : (1.0 + std::sqrt(3.0) * std::tan((tmp_azi - mid_azi) / 180.0 * M_PI)),
+          bd_p_list[i]));
     }
   }
-  std::sort(azimuthal_output.begin(), azimuthal_output.end());
+  std::sort(azi_point_pairs.begin(), azi_point_pairs.end());
+
+  std::vector<Real> azimuthal_output;
+  for (auto it = std::make_move_iterator(azi_point_pairs.begin()),
+            end = std::make_move_iterator(azi_point_pairs.end());
+       it != end;
+       it++)
+  {
+    azimuthal_output.push_back(std::move(it->first));
+    boundary_points.push_back(std::move(it->second));
+  }
 
   return azimuthal_output;
+}
+
+std::vector<Real>
+PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
+                                                   const Real lower_azi,
+                                                   const Real upper_azi,
+                                                   const unsigned int return_type,
+                                                   const boundary_id_type bid,
+                                                   const bool calculate_origin,
+                                                   const Real input_origin_x,
+                                                   const Real input_origin_y,
+                                                   const Real tol) const
+{
+  std::vector<Point> boundary_points;
+  return azimuthalAnglesCollector(mesh,
+                                  boundary_points,
+                                  lower_azi,
+                                  upper_azi,
+                                  return_type,
+                                  bid,
+                                  calculate_origin,
+                                  input_origin_x,
+                                  input_origin_y,
+                                  tol);
 }
 
 std::vector<std::vector<Real>>

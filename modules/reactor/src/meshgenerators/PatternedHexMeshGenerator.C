@@ -149,7 +149,9 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     _control_drums_azimuthal_meta(declareMeshProperty<std::vector<std::vector<Real>>>(
         "control_drums_azimuthal_meta", std::vector<std::vector<Real>>())),
     _position_file_name(declareMeshProperty<std::string>("position_file_name",
-                                                         getParam<std::string>("position_file")))
+                                                         getParam<std::string>("position_file"))),
+    _peripheral_modifier_compatible(
+        declareMeshProperty<bool>("peripheral_modifier_compatible", _pattern_boundary == "hexagon"))
 {
   const unsigned int n_pattern_layers = _pattern.size();
   if (n_pattern_layers % 2 == 0)

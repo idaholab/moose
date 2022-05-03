@@ -118,4 +118,29 @@ std::map<dof_id_type, dof_id_type>
 getExtraIDUniqueCombinationMap(const MeshBase & mesh,
                                const std::set<SubdomainID> & block_ids,
                                std::vector<ExtraElementIDName> extra_ids);
+
+/**
+ * Decides whether all the Points of a vector of Points are in a plane that is defined by a normal
+ * vector and an inplane Point
+ * @param vec_pts vector of points to be examined
+ * @param plane_nvec normal vector of the plane
+ * @param fixed_pt a Point in the plane
+ * @return whether all the Points are in the given plane
+ */
+bool isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec, const Point fixed_pt);
+
+/**
+ * Decides whether all the Points of a vector of Points are in a plane with a given normal vector
+ * @param vec_pts vector of points to be examined
+ * @param plane_nvec normal vector of the plane
+ * @return whether all the Points are in the same plane with the given normal vector
+ */
+bool isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec);
+
+/**
+ * Decides whether all the Points of a vector of Points are coplanar
+ * @param vec_pts vector of points to be examined
+ * @return whether all the Points are in a same plane
+ */
+bool isCoPlanar(const std::vector<Point> vec_pts);
 }

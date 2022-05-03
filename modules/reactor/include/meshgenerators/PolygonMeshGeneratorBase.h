@@ -48,7 +48,8 @@ public:
 
   enum INTRISIC_SUBDOMAIN_ID : subdomain_id_type
   {
-    PERIPHERAL_ID_SHIFT = 1000
+    PERIPHERAL_ID_SHIFT = 1000,
+    TRANSITION_LAYER_DEFAULT = 10000
   };
   // boundary_id_type is short int so max is 32,767
   enum INTRINSIC_SIDESET_ID : boundary_id_type
@@ -430,9 +431,37 @@ protected:
   /**
    * Collects sorted azimuthal angles of the external boundary.
    * @param mesh input mesh whose boundary node azimuthal angles need to be collected
+   * @param boundary_points reference vector to contain the Points corresponding to the collected
+   * azimuthal angles
    * @param lower_azi lower boundary of the azimuthal angles to be collected
    * @param upper_azi upper boundary of the azimuthal angles to be collected
    * @param return_type whether angle values or tangent values are returned
+   * @param bid id of the boundary of which the nodes' azimuthal angles are collected
+   * @param calculate_origin whether the mesh origin is calculated based on the centroid position
+   * @param input_origin_x precalculated mesh origin coordinate x
+   * @param input_origin_y precalculated mesh origin coordinate y
+   * @param tol tolerance that the minimum azimuthal angle is
+   * @return the list of azimuthal angles of all the nodes on the external grain boundary within the
+   * given range
+   */
+  std::vector<Real> azimuthalAnglesCollector(ReplicatedMesh & mesh,
+                                             std::vector<Point> & boundary_points,
+                                             const Real lower_azi = -30.0,
+                                             const Real upper_azi = 30.0,
+                                             const unsigned int return_type = ANGLE_TANGENT,
+                                             const boundary_id_type bid = OUTER_SIDESET_ID,
+                                             const bool calculate_origin = true,
+                                             const Real input_origin_x = 0.0,
+                                             const Real input_origin_y = 0.0,
+                                             const Real tol = 1.0E-10) const;
+
+  /**
+   * Collects sorted azimuthal angles of the external boundary.
+   * @param mesh input mesh whose boundary node azimuthal angles need to be collected
+   * @param lower_azi lower boundary of the azimuthal angles to be collected
+   * @param upper_azi upper boundary of the azimuthal angles to be collected
+   * @param return_type whether angle values or tangent values are returned
+   * @param bid id of the boundary of which the nodes' azimuthal angles are collected
    * @param calculate_origin whether the mesh origin is calculated based on the centroid position
    * @param input_origin_x precalculated mesh origin coordinate x
    * @param input_origin_y precalculated mesh origin coordinate y

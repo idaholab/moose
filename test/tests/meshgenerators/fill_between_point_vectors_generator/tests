@@ -1,0 +1,66 @@
+[Tests]
+  design = 'meshgenerators/FillBetweenPointVectorsGenerator.md'
+  issues = '#20641'
+  [bow]
+    type = 'Exodiff'
+    input = 'bow.i'
+    exodiff = 'bow_in.e'
+    exodiff_opts = '-pedantic'
+    requirement = "The system shall generator a bow-shape transition layer based on the two input point vectors using TRI3 elements."
+    cli_args = '--mesh-only'
+    recover = false
+  []
+  [bow_man_bias]
+    type = 'Exodiff'
+    input = 'bow.i'
+    exodiff = 'bow_man_bias_in.e'
+    exodiff_opts = '-pedantic'
+    requirement = "The system shall generator a bow-shape transition layer with a provided bias growth factor based on the two input point vectors using TRI3 elements."
+    cli_args = '--mesh-only bow_man_bias_in.e
+               Mesh/fbpvg/bias_parameter=0.6'
+    recover = false
+  []
+  [bow_auto_bias]
+    type = 'Exodiff'
+    input = 'bow.i'
+    exodiff = 'bow_auto_bias_in.e'
+    exodiff_opts = '-pedantic'
+    requirement = "The system shall generator a bow-shape transition layer with automatically generated bias growth factors based on the two input point vectors using TRI3 elements."
+    cli_args = '--mesh-only bow_auto_bias_in.e
+               Mesh/fbpvg/bias_parameter=0.0'
+    recover = false
+  []
+  [bow_quad]
+    type = 'Exodiff'
+    input = 'bow_quad.i'
+    exodiff = 'bow_quad_in.e'
+    exodiff_opts = '-pedantic'
+    requirement = "The system shall generator a bow-shape transition layer based on the two input point vectors using QUAD4 elements."
+    cli_args = '--mesh-only'
+    recover = false
+  []
+  [non_xy_plane]
+    type = 'RunException'
+    input = 'bow.i'
+    cli_args = '--mesh-only
+               z=1.0'
+    expect_err = 'must be in XY plane.'
+    requirement ="The system shall throw an error if either input vector of points include points that are not in XY plane."
+  []
+  [not_enough_points]
+    type = 'RunException'
+    input = 'bow.i'
+    cli_args = '--mesh-only
+               Mesh/fbpvg/positions_vector_1="0.0 0.0 0.0"'
+    expect_err = 'must respectively contain at least two elements.'
+    requirement ="The system shall throw an error if either input vector of points include less than 2 points."
+  []
+  [quad_with_different_vector_sizes]
+    type = 'RunException'
+    input = 'bow.i'
+    cli_args = '--mesh-only
+               Mesh/fbpvg/use_quad_elements=true'
+    expect_err = 'have the same length.'
+    requirement ="The system shall throw an error if the two input vectors have different length and QUAD4 elements option is selected."
+  []
+[]

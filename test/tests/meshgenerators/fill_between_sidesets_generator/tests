@@ -1,0 +1,70 @@
+[Tests]
+  design = 'meshgenerators/FillBetweenSidesetsGenerator.md'
+  issues = '#20641'
+  [squares]
+    type = 'Exodiff'
+    input = 'squares.i'
+    exodiff = 'squares_in.e'
+    requirement = "The system shall be able to generate a connector transition layer based on the two input meshes and boundaries."
+    cli_args = '--mesh-only'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [squares_stitched]
+    type = 'Exodiff'
+    input = 'squares.i'
+    exodiff = 'squares_squares_stitched_in.e'
+    requirement = "The system shall be able to generate a connector transition layer based on the two input meshes and boundaries and stitch it with the input meshes."
+    cli_args = '--mesh-only squares_squares_stitched_in.e
+                Mesh/fbsg/keep_inputs=true'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [squares_bias]
+    type = 'Exodiff'
+    input = 'squares.i'
+    exodiff = 'squares_bias_in.e'
+    requirement = "The system shall be able to generate a connector transition layer with manual biasing based on the two input meshes and boundaries."
+    cli_args = '--mesh-only squares_bias_in.e
+                Mesh/fbsg/bias_parameter=1.2'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [squares_auto_bias]
+    type = 'Exodiff'
+    input = 'squares.i'
+    exodiff = 'squares_auto_bias_in.e'
+    requirement = "The system shall be able to generate a connector transition layer with automatic biasing based on the two input meshes and boundaries."
+    cli_args = '--mesh-only squares_auto_bias_in.e
+                Mesh/fbsg/bias_parameter=0.0'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [err_same_inputs]
+    type = 'RunException'
+    input = 'squares.i'
+    cli_args = '--mesh-only squares_err.e
+               Mesh/fbsg/input_mesh_2="rotate_1"'
+    expect_err = 'This parameter must be different from input_mesh_1.'
+    requirement = "The system shall throw an error if the two input meshes are the same."
+    mesh_mode = 'REPLICATED'
+  []
+  [err_multiseg_boundary]
+    type = 'RunException'
+    input = 'squares.i'
+    cli_args = '--mesh-only squares_err.e
+               Mesh/fbsg/boundary_1="top bottom"'
+    expect_err = 'The provided boundary is not an open single-segment boundary.'
+    requirement = "The system shall throw an error if one of the input boundary to generate a mesh in-between has multiple segments."
+    mesh_mode = 'REPLICATED'
+  []
+  [err_closed_loop_boundary]
+    type = 'RunException'
+    input = 'squares.i'
+    cli_args = '--mesh-only squares_err.e
+               Mesh/fbsg/boundary_1="bottom right top left"'
+    expect_err = 'The provided boundary is closed loop, which is not supported.'
+    requirement = "The system shall throw an error if one of the input boundary to generate a mesh in-between is a closed loop."
+    mesh_mode = 'REPLICATED'
+  []
+[]
