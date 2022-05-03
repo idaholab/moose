@@ -26,7 +26,7 @@ private:
    * @param primary Whether this routine is to allocate storage for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void allocateVariableStorage(SystemBase & system, const bool primary) override final;
+  void allocateVariableStorage(SystemBase & system, const bool primary) override final;
 
   /**
    * Allocate storage for the fixed point algorithm.
@@ -34,7 +34,7 @@ private:
    * @param primary Whether this routine is to allocate storage for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void allocatePostprocessorStorage(const bool /* primary */) override final;
+  void allocatePostprocessorStorage(const bool /* primary */) override final;
 
   /**
    * Saves the current values of the variables, and update the old(er) vectors.
@@ -43,7 +43,7 @@ private:
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void saveVariableValues(SystemBase & system, const bool primary) override final;
+  void saveVariableValues(SystemBase & system, const bool primary) override final;
 
   /**
    * Saves the current values of the postprocessors, and update the old(er) vectors.
@@ -51,7 +51,7 @@ private:
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void savePostprocessorValues(const bool primary) override final;
+  void savePostprocessorValues(const bool primary) override final;
 
   /**
    * Use the fixed point algorithm transform instead of simply using the Picard update
@@ -59,7 +59,7 @@ private:
    * @param primary Whether this routine is used for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual bool useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary) override final;
+  bool useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary) override final;
 
   /**
    * Use the fixed point algorithm to transform the postprocessors.
@@ -69,7 +69,7 @@ private:
    * @param primary Whether this routine is to save the variables for the primary transformed
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
-  virtual void transformPostprocessors(const bool primary) override final;
+  void transformPostprocessors(const bool primary) override final;
 
   /**
    * Use the fixed point algorithm to transform the variables.
@@ -86,5 +86,5 @@ private:
                           const bool primary) override final;
 
   /// Print the convergence history of the coupling, at every coupling iteration
-  virtual void printFixedPointConvergenceHistory() override final;
+  void printFixedPointConvergenceHistory() override final;
 };

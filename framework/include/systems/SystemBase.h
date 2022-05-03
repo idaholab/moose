@@ -771,15 +771,15 @@ public:
   /**
    * Adds a solution length vector to the system with the specified TagID
    *
-   * @param tag_name The name of the tag
+   * @param tag The ID of the tag
    * @param project Whether or not to project this vector when doing mesh refinement.
    *                If the vector is just going to be recomputed then there is no need to project
-   * it.
+   *                it.
    * @param type What type of parallel vector.  This is usually either PARALLEL or GHOSTED.
    *                                            GHOSTED is needed if you are going to be accessing
-   * off-processor entries.
+   *                                            off-processor entries.
    *                                            The ghosting pattern is the same as the solution
-   * vector.
+   *                                            vector.
    */
   NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
 
