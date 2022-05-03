@@ -43,9 +43,9 @@ SteffensenSolve::allocateVariableStorage(SystemBase & system, const bool primary
 {
   const auto current_app_type = primary ? "_primary_" : "_secondary_";
   const auto & solution_tag_type = Moose::VECTOR_TAG_SOLUTION;
-  TagID fxn_m1_tagid =
+  const TagID fxn_m1_tagid =
       _problem.addVectorTag(system.name() + current_app_type + "fxn_m1", solution_tag_type);
-  TagID xn_m1_tagid =
+  const TagID xn_m1_tagid =
       _problem.addVectorTag(system.name() + current_app_type + "xn_m1", solution_tag_type);
 
   // Store a copy of the previous solution here
@@ -56,23 +56,15 @@ SteffensenSolve::allocateVariableStorage(SystemBase & system, const bool primary
 void
 SteffensenSolve::allocatePostprocessorStorage(const bool primary)
 {
-  const std::vector<PostprocessorName> * transformed_pps;
-  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
-  if (primary)
-  {
-    transformed_pps = &_transformed_pps;
-    transformed_pps_values = &_transformed_pps_values;
-  }
-  else
-  {
-    transformed_pps = &_secondary_transformed_pps;
-    transformed_pps_values = &_secondary_transformed_pps_values;
-  }
+  const std::vector<PostprocessorName> & transformed_pps =
+      primary ? _transformed_pps : _secondary_transformed_pps;
+  const std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
+      primary ? _transformed_pps_values : _secondary_transformed_pps_values;
 
   // Allocate storage for the previous postprocessor values
-  (*transformed_pps_values).resize((*transformed_pps).size());
-  for (size_t i = 0; i < (*transformed_pps).size(); i++)
-    (*transformed_pps_values)[i].resize(2);
+  transformed_pps_values.resize(transformed_pps.size());
+  for (size_t i = 0; i < transformed_pps.size(); i++)
+    transformed_pps_values[i].resize(2);
 }
 
 void
@@ -80,8 +72,8 @@ SteffensenSolve::saveVariableValues(SystemBase & system, const bool primary)
 {
   const unsigned int iteration = primary ? _fixed_point_it : _main_fixed_point_it;
   const auto current_app_type = primary ? "_primary_" : "_secondary_";
-  TagID fxn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "fxn_m1");
-  TagID xn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "xn_m1");
+  const TagID fxn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "fxn_m1");
+  const TagID xn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "xn_m1");
 
   // Save previous variable values
   NumericVector<Number> & solution = system.solution();
@@ -99,26 +91,18 @@ void
 SteffensenSolve::savePostprocessorValues(const bool primary)
 {
   const unsigned int iteration = primary ? _fixed_point_it : _main_fixed_point_it;
-  const std::vector<PostprocessorName> * transformed_pps;
-  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
-  if (primary)
-  {
-    transformed_pps = &_transformed_pps;
-    transformed_pps_values = &_transformed_pps_values;
-  }
-  else
-  {
-    transformed_pps = &_secondary_transformed_pps;
-    transformed_pps_values = &_secondary_transformed_pps_values;
-  }
+  const std::vector<PostprocessorName> & transformed_pps =
+      primary ? _transformed_pps : _secondary_transformed_pps;
+  const std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
+      primary ? _transformed_pps_values : _secondary_transformed_pps_values;
 
   // Save previous postprocessor values
-  for (size_t i = 0; i < (*transformed_pps).size(); i++)
+  for (size_t i = 0; i < transformed_pps.size(); i++)
   {
     if (iteration % 2 == 0)
-      (*transformed_pps_values)[i][1] = getPostprocessorValueByName((*transformed_pps)[i]);
+      transformed_pps_values[i][1] = getPostprocessorValueByName(transformed_pps[i]);
     else
-      (*transformed_pps_values)[i][0] = getPostprocessorValueByName((*transformed_pps)[i]);
+      transformed_pps_values[i][0] = getPostprocessorValueByName(transformed_pps[i]);
   }
 }
 
@@ -136,29 +120,19 @@ SteffensenSolve::useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary)
 void
 SteffensenSolve::transformPostprocessors(const bool primary)
 {
-  Real relaxation_factor;
-  const std::vector<PostprocessorName> * transformed_pps;
-  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
-  if (primary)
-  {
-    relaxation_factor = _relax_factor;
-    transformed_pps = &_transformed_pps;
-    transformed_pps_values = &_transformed_pps_values;
-  }
-  else
-  {
-    relaxation_factor = _secondary_relaxation_factor;
-    transformed_pps = &_secondary_transformed_pps;
-    transformed_pps_values = &_secondary_transformed_pps_values;
-  }
+  const Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
+  const std::vector<PostprocessorName> & transformed_pps =
+      primary ? _transformed_pps : _secondary_transformed_pps;
+  const std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
+      primary ? _transformed_pps_values : _secondary_transformed_pps_values;
 
   // Relax postprocessors for the main application
-  for (size_t i = 0; i < (*transformed_pps).size(); i++)
+  for (size_t i = 0; i < transformed_pps.size(); i++)
   {
     // Get new postprocessor value
-    const Real current_value = getPostprocessorValueByName((*transformed_pps)[i]);
-    const Real fxn_m1 = (*transformed_pps_values)[i][0];
-    const Real xn_m1 = (*transformed_pps_values)[i][1];
+    const Real current_value = getPostprocessorValueByName(transformed_pps[i]);
+    const Real fxn_m1 = transformed_pps_values[i][0];
+    const Real xn_m1 = transformed_pps_values[i][1];
 
     // Compute and set relaxed value
     Real new_value = current_value;
@@ -169,7 +143,7 @@ SteffensenSolve::transformPostprocessors(const bool primary)
     // Relax update
     new_value = relaxation_factor * new_value + (1 - relaxation_factor) * fxn_m1;
 
-    _problem.setPostprocessorValueByName((*transformed_pps)[i], new_value);
+    _problem.setPostprocessorValueByName(transformed_pps[i], new_value);
   }
 }
 
@@ -178,10 +152,10 @@ SteffensenSolve::transformVariables(SystemBase & system,
                                     const std::set<dof_id_type> & transformed_dofs,
                                     const bool primary)
 {
-  Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
+  const Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
   const auto current_app_type = primary ? "_primary_" : "_secondary_";
-  TagID fxn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "fxn_m1");
-  TagID xn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "xn_m1");
+  const TagID fxn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "fxn_m1");
+  const TagID xn_m1_tagid = _problem.getVectorTagID(system.name() + current_app_type + "xn_m1");
 
   NumericVector<Number> & solution = system.solution();
   NumericVector<Number> & fxn_m1 = system.getVector(fxn_m1_tagid);

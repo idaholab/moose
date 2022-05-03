@@ -103,46 +103,29 @@ PicardSolve::allocateVariableStorage(SystemBase & system, const bool primary)
   const Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
   const auto current_app_type = primary ? "_primary_" : "_secondary_";
 
-  TagID old_tagid =
-      _problem.addVectorTag(sys_name + current_app_type + "xn_m1", Moose::VECTOR_TAG_SOLUTION);
+  const TagID old_tag_id =
+      _problem.addVectorTag(system.name() + current_app_type + "xn_m1", Moose::VECTOR_TAG_SOLUTION);
 
   if (relaxation_factor != 1.)
-  {
     // Store a copy of the previous solution
     system.addVector(old_tag_id, false, PARALLEL);
-
-    // Allocate storage for the previous postprocessor values
-    (*transformed_pps_values).resize((*transformed_pps).size());
-    for (size_t i = 0; i < (*transformed_pps).size(); i++)
-      (*transformed_pps_values)[i].resize(1);
-  }
 }
 
 void
 PicardSolve::allocatePostprocessorStorage(const bool primary)
 {
-  Real relaxation_factor;
-  const std::vector<PostprocessorName> * transformed_pps;
-  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
-  if (primary)
-  {
-    relaxation_factor = _relax_factor;
-    transformed_pps = &_transformed_pps;
-    transformed_pps_values = &_transformed_pps_values;
-  }
-  else
-  {
-    relaxation_factor = _secondary_relaxation_factor;
-    transformed_pps = &_secondary_transformed_pps;
-    transformed_pps_values = &_secondary_transformed_pps_values;
-  }
+  const Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
+  const std::vector<PostprocessorName> & transformed_pps =
+      primary ? _transformed_pps : _secondary_transformed_pps;
+  const std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
+      primary ? _transformed_pps_values : _secondary_transformed_pps_values;
 
   if (relaxation_factor != 1.)
   {
     // Allocate storage for the previous postprocessor values
-    (*transformed_pps_values).resize((*transformed_pps).size());
-    for (size_t i = 0; i < (*transformed_pps).size(); i++)
-      (*transformed_pps_values)[i].resize(1);
+    transformed_pps_values.resize(transformed_pps.size());
+    for (size_t i = 0; i < transformed_pps.size(); i++)
+      transformed_pps_values[i].resize(1);
   }
 }
 
@@ -164,26 +147,16 @@ PicardSolve::saveVariableValues(SystemBase & system, const bool primary)
 void
 PicardSolve::savePostprocessorValues(const bool primary)
 {
-  Real relaxation_factor;
-  const std::vector<PostprocessorName> * transformed_pps;
-  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
-  if (primary)
-  {
-    relaxation_factor = _relax_factor;
-    transformed_pps = &_transformed_pps;
-    transformed_pps_values = &_transformed_pps_values;
-  }
-  else
-  {
-    relaxation_factor = _secondary_relaxation_factor;
-    transformed_pps = &_secondary_transformed_pps;
-    transformed_pps_values = &_secondary_transformed_pps_values;
-  }
+  const Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
+  const std::vector<PostprocessorName> & transformed_pps =
+      primary ? _transformed_pps : _secondary_transformed_pps;
+  const std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
+      primary ? _transformed_pps_values : _secondary_transformed_pps_values;
 
   if (relaxation_factor != 1.)
     // Save postprocessor previous values
-    for (size_t i = 0; i < (*transformed_pps).size(); i++)
-      (*transformed_pps_values)[i][0] = getPostprocessorValueByName((*transformed_pps)[i]);
+    for (size_t i = 0; i < transformed_pps.size(); i++)
+      transformed_pps_values[i][0] = getPostprocessorValueByName(transformed_pps[i]);
 }
 
 bool
@@ -200,33 +173,23 @@ PicardSolve::useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary)
 void
 PicardSolve::transformPostprocessors(const bool primary)
 {
-  Real relaxation_factor;
-  const std::vector<PostprocessorName> * transformed_pps;
-  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
-  if (primary)
-  {
-    relaxation_factor = _relax_factor;
-    transformed_pps = &_transformed_pps;
-    transformed_pps_values = &_transformed_pps_values;
-  }
-  else
-  {
-    relaxation_factor = _secondary_relaxation_factor;
-    transformed_pps = &_secondary_transformed_pps;
-    transformed_pps_values = &_secondary_transformed_pps_values;
-  }
+  const Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
+  const std::vector<PostprocessorName> & transformed_pps =
+      primary ? _transformed_pps : _secondary_transformed_pps;
+  const std::vector<std::vector<PostprocessorValue>> & transformed_pps_values =
+      primary ? _transformed_pps_values : _secondary_transformed_pps_values;
 
   // Relax the postprocessors
-  for (size_t i = 0; i < (*transformed_pps).size(); i++)
+  for (size_t i = 0; i < transformed_pps.size(); i++)
   {
     // Get new postprocessor value
-    const Real current_value = getPostprocessorValueByName((*transformed_pps)[i]);
-    const Real old_value = (*transformed_pps_values)[i][0];
+    const Real current_value = getPostprocessorValueByName(transformed_pps[i]);
+    const Real old_value = transformed_pps_values[i][0];
 
     // Compute and set relaxed value
     Real new_value = current_value;
     new_value = relaxation_factor * current_value + (1 - relaxation_factor) * old_value;
-    _problem.setPostprocessorValueByName((*transformed_pps)[i], new_value);
+    _problem.setPostprocessorValueByName(transformed_pps[i], new_value);
   }
 }
 
@@ -235,18 +198,9 @@ PicardSolve::transformVariables(SystemBase & system,
                                 const std::set<dof_id_type> & transformed_dofs,
                                 const bool primary)
 {
-  Real relaxation_factor;
-  TagID old_tag_id;
-  if (primary)
-  {
-    relaxation_factor = _relax_factor;
-    old_tag_id = _problem.getVectorTagID(system.name() + "_primary_xn_m1");
-  }
-  else
-  {
-    relaxation_factor = _secondary_relaxation_factor;
-    old_tag_id = _problem.getVectorTagID(system.name() + "_secondary_xn_m1");
-  }
+  const Real relaxation_factor = primary ? _relax_factor : _secondary_relaxation_factor;
+  const auto current_app_type = primary ? "_primary_" : "_secondary_";
+  const TagID old_tag_id = _problem.getVectorTagID(system.name() + current_app_type + "xn_m1");
 
   NumericVector<Number> & solution = system.solution();
   NumericVector<Number> & transformed_old = system.getVector(old_tag_id);
