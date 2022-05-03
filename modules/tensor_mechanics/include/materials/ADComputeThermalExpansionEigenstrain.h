@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADComputeThermalExpansionEigenstrainBase.h"
+#include "ComputeThermalExpansionEigenstrainBase.h"
 
 /**
  * ADComputeThermalExpansionEigenstrain computes an eigenstrain for thermal expansion

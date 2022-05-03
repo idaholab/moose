@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADComputeThermalExpansionEigenstrainBase.h"
+#include "ComputeThermalExpansionEigenstrainBase.h"
 
 /**
  * ADComputeMeanThermalExpansionEigenstrainBase is a base class for computing the

@@ -12,7 +12,8 @@
 InputParameters
 ADComputeDilatationThermalExpansionEigenstrainBase::validParams()
 {
-  return ADComputeThermalExpansionEigenstrainBase::validParams();
+  auto params = ADComputeThermalExpansionEigenstrainBase::validParams();
+  return params;
 }
 
 ADComputeDilatationThermalExpansionEigenstrainBase::
