@@ -192,8 +192,7 @@
 [Transfers]
   [keff_from_sub]
     type = MultiAppPostprocessorInterpolationTransfer
-    direction = from_multiapp
-    multi_app = micro
+    from_multi_app = micro
     variable = k_eff
     power = 1
     postprocessor = k_eff
@@ -201,8 +200,7 @@
   []
   [temperature_to_sub]
     type = MultiAppVariableValueSamplePostprocessorTransfer
-    direction = to_multiapp
-    multi_app = micro
+    to_multi_app = micro
     source_variable = temperature
     postprocessor = temperature_in
     execute_on = 'timestep_end'
