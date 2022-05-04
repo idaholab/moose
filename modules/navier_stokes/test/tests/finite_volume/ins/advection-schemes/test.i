@@ -11,8 +11,8 @@ rho=1
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 10
-    ny = 10
+    nx = 11
+    ny = 11
   []
 []
 

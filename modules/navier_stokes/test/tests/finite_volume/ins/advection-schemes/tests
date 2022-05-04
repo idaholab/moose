@@ -7,7 +7,7 @@
       type = Exodiff
       input = 'test.i'
       exodiff = sou.e
-      cli_args = 'GlobalParams/advected_interp_method=sou Outputs/file_base=sou mu=100'
+      cli_args = 'GlobalParams/advected_interp_method=sou Outputs/file_base=sou'
       ad_indexing_type = 'global'
       detail = 'second-order upwind'
     []
@@ -29,8 +29,9 @@
     []
     [quick]
       type = Exodiff
-      input = 'quick_test.i'
-      exodiff = quick_test_out.e
+      input = 'test.i'
+      exodiff = quick.e
+      cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=quick'
       ad_indexing_type = 'global'
       detail = 'QUICK'
     []
