@@ -26,9 +26,10 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual void computeThermalStrain(ADReal & thermal_strain) override;
 
-  const VariableValue & _temperature_old;
+  virtual void computeThermalStrain(GenericReal<true> & thermal_strain,
+                                    Real * instantaneous_cte = nullptr) override;
+
   const Function & _thermal_expansion_function;
 
   /// Stores the thermal strain as a scalar for use in computing an incremental update to this.
@@ -39,6 +40,4 @@ protected:
 
   /// Indicates whether we are on the first step, avoiding false positives when restarting
   bool & _step_one;
-
-  using ADComputeThermalExpansionEigenstrainBase::computeThermalStrain;
 };

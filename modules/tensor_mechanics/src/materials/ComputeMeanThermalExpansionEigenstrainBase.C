@@ -27,7 +27,7 @@ ComputeMeanThermalExpansionEigenstrainBase::ComputeMeanThermalExpansionEigenstra
 
 void
 ComputeMeanThermalExpansionEigenstrainBase::computeThermalStrain(Real & thermal_strain,
-                                                                 Real & instantaneous_cte)
+                                                                 Real * instantaneous_cte)
 {
   const Real small = libMesh::TOLERANCE;
 
@@ -62,5 +62,7 @@ ComputeMeanThermalExpansionEigenstrainBase::computeThermalStrain(Real & thermal_
                                      (_stress_free_temperature[_qp] - reference_temperature);
   if (denominator < small)
     mooseError("Denominator too small in thermal strain calculation");
-  instantaneous_cte = numerator / denominator;
+
+  mooseAssert(instantaneous_cte, "Internal error. instantaneous_cte should not be nullptr.");
+  *instantaneous_cte = numerator / denominator;
 }

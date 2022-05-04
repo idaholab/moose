@@ -25,7 +25,7 @@ public:
   ADComputeDilatationThermalExpansionEigenstrainBase(const InputParameters & parameters);
 
 protected:
-  virtual void computeThermalStrain(ADReal & thermal_strain) override;
+  virtual void computeThermalStrain(ADReal & thermal_strain, Real *) override;
 
   /*
    * Compute the fractional linear dilatation due to thermal expansion delta L / L
@@ -33,6 +33,4 @@ protected:
    * @return fractional linear dilatation due
    */
   virtual ADReal computeDilatation(const ADReal & temperature) = 0;
-
-  using ADComputeThermalExpansionEigenstrainBase::computeThermalStrain;
 };

@@ -29,7 +29,6 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrain::validParams()
 ComputeInstantaneousThermalExpansionFunctionEigenstrain::
     ComputeInstantaneousThermalExpansionFunctionEigenstrain(const InputParameters & parameters)
   : ComputeThermalExpansionEigenstrainBase(parameters),
-    _temperature_old(coupledValueOld("temperature")),
     _thermal_expansion_function(getFunction("thermal_expansion_function")),
     _thermal_strain(
         declareProperty<Real>(_base_name + "InstantaneousThermalExpansionFunction_thermal_strain")),
@@ -47,7 +46,7 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrain::initQpStatefulPropertie
 
 void
 ComputeInstantaneousThermalExpansionFunctionEigenstrain::computeThermalStrain(
-    Real & thermal_strain, Real & instantaneous_cte)
+    Real & thermal_strain, Real * instantaneous_cte)
 {
   if (_t_step > 1)
     _step_one = false;
@@ -65,5 +64,6 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrain::computeThermalStrain(
   thermal_strain = old_thermal_strain + delta_T * 0.5 * (alpha_current_temp + alpha_old_temp);
   _thermal_strain[_qp] = thermal_strain;
 
-  instantaneous_cte = alpha_current_temp;
+  mooseAssert(instantaneous_cte, "Internal error. instantaneous_cte should not be nullptr.");
+  *instantaneous_cte = alpha_current_temp;
 }

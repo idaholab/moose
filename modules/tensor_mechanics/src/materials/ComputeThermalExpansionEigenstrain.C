@@ -32,8 +32,10 @@ ComputeThermalExpansionEigenstrain::ComputeThermalExpansionEigenstrain(
 
 void
 ComputeThermalExpansionEigenstrain::computeThermalStrain(Real & thermal_strain,
-                                                         Real & instantaneous_cte)
+                                                         Real * instantaneous_cte)
 {
   thermal_strain = _thermal_expansion_coeff * (_temperature[_qp] - _stress_free_temperature[_qp]);
-  instantaneous_cte = _thermal_expansion_coeff;
+
+  mooseAssert(instantaneous_cte, "Internal error. instantaneous_cte should not be nullptr.");
+  *instantaneous_cte = _thermal_expansion_coeff;
 }

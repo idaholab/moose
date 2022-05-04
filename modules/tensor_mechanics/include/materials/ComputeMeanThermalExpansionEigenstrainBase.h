@@ -37,7 +37,7 @@ protected:
    * param instantaneous_cte The current instantaneous coefficient of thermal expansion
    *                         (derivative of thermal_strain wrt temperature
    */
-  virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte) override;
+  virtual void computeThermalStrain(Real & thermal_strain, Real * instantaneous_cte) override;
 
   /*
    * Get the reference temperature for the mean thermal expansion relationship.  This is
@@ -59,6 +59,4 @@ protected:
    * param temperature  temperature at which this is evaluated
    */
   virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature) = 0;
-
-  using ComputeThermalExpansionEigenstrainBase::computeThermalStrain;
 };

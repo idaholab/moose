@@ -23,9 +23,7 @@ public:
   ADComputeThermalExpansionEigenstrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeThermalStrain(ADReal & thermal_strain) override;
+  virtual void computeThermalStrain(ADReal & thermal_strain, Real *) override;
 
   const Real & _thermal_expansion_coeff;
-
-  using ADComputeThermalExpansionEigenstrainBase::computeThermalStrain;
 };

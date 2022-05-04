@@ -31,7 +31,6 @@ ADComputeInstantaneousThermalExpansionFunctionEigenstrain::validParams()
 ADComputeInstantaneousThermalExpansionFunctionEigenstrain::
     ADComputeInstantaneousThermalExpansionFunctionEigenstrain(const InputParameters & parameters)
   : ADComputeThermalExpansionEigenstrainBase(parameters),
-    _temperature_old(coupledValueOld("temperature")),
     _thermal_expansion_function(getFunction("thermal_expansion_function")),
     _thermal_strain(declareADProperty<Real>(
         _base_name + "InstantaneousThermalExpansionFunction_thermal_strain")),
@@ -49,7 +48,7 @@ ADComputeInstantaneousThermalExpansionFunctionEigenstrain::initQpStatefulPropert
 
 void
 ADComputeInstantaneousThermalExpansionFunctionEigenstrain::computeThermalStrain(
-    ADReal & thermal_strain)
+    GenericReal<true> & thermal_strain, Real *)
 {
   if (_t_step > 1)
     _step_one = false;

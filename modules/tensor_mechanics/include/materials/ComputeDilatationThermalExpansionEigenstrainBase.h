@@ -25,7 +25,7 @@ public:
   ComputeDilatationThermalExpansionEigenstrainBase(const InputParameters & parameters);
 
 protected:
-  virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte) override;
+  virtual void computeThermalStrain(Real & thermal_strain, Real * dthermal_strain_dT) override;
 
   /*
    * Compute the fractional linear dilatation due to thermal expansion delta L / L
@@ -41,6 +41,4 @@ protected:
    * @return fractional linear dilatation due
    */
   virtual Real computeDilatationDerivative(const Real & temperature) = 0;
-
-  using ComputeThermalExpansionEigenstrainBase::computeThermalStrain;
 };

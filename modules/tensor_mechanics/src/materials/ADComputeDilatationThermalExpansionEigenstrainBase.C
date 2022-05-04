@@ -23,7 +23,8 @@ ADComputeDilatationThermalExpansionEigenstrainBase::
 }
 
 void
-ADComputeDilatationThermalExpansionEigenstrainBase::computeThermalStrain(ADReal & thermal_strain)
+ADComputeDilatationThermalExpansionEigenstrainBase::computeThermalStrain(ADReal & thermal_strain,
+                                                                         Real *)
 {
   if (_use_old_temperature)
     thermal_strain =

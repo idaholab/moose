@@ -35,7 +35,7 @@ protected:
    * current temperature, as well as the current instantaneous thermal expansion coefficient.
    * param thermal_strain    The current total linear thermal strain (\f$\delta L / L\f$)
    */
-  virtual void computeThermalStrain(ADReal & thermal_strain) override;
+  virtual void computeThermalStrain(ADReal & thermal_strain, Real *) override;
 
   /*
    * Get the reference temperature for the mean thermal expansion relationship.  This is
@@ -50,6 +50,4 @@ protected:
    * param temperature  temperature at which this is evaluated
    */
   virtual ADReal meanThermalExpansionCoefficient(const ADReal & temperature) = 0;
-
-  using ADComputeThermalExpansionEigenstrainBase::computeThermalStrain;
 };

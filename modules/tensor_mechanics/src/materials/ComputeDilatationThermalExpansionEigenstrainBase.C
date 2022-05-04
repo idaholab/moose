@@ -23,9 +23,11 @@ ComputeDilatationThermalExpansionEigenstrainBase::ComputeDilatationThermalExpans
 
 void
 ComputeDilatationThermalExpansionEigenstrainBase::computeThermalStrain(Real & thermal_strain,
-                                                                       Real & dthermal_strain_dT)
+                                                                       Real * dthermal_strain_dT)
 {
   const Real stress_free_thexp = computeDilatation(_stress_free_temperature[_qp]);
   thermal_strain = computeDilatation(_temperature[_qp]) - stress_free_thexp;
-  dthermal_strain_dT = computeDilatationDerivative(_temperature[_qp]);
+
+  mooseAssert(dthermal_strain_dT, "Internal error. dthermal_strain_dT should not be nullptr.");
+  *dthermal_strain_dT = computeDilatationDerivative(_temperature[_qp]);
 }

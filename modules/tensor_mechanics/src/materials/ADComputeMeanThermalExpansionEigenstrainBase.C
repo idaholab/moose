@@ -25,7 +25,7 @@ ADComputeMeanThermalExpansionEigenstrainBase::ADComputeMeanThermalExpansionEigen
 }
 
 void
-ADComputeMeanThermalExpansionEigenstrainBase::computeThermalStrain(ADReal & thermal_strain)
+ADComputeMeanThermalExpansionEigenstrainBase::computeThermalStrain(ADReal & thermal_strain, Real *)
 {
   const Real reference_temperature = referenceTemperature();
   const ADReal & current_temp = _temperature[_qp];

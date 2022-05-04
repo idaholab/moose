@@ -38,21 +38,20 @@ protected:
    *                         expansion (derivative of thermal_strain wrt
    *                         temperature
    */
-  virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte);
-  virtual void computeThermalStrain(ADReal & thermal_strain);
+  virtual void computeThermalStrain(GenericReal<is_ad> & thermal_strain,
+                                    Real * instantaneous_cte = nullptr) = 0;
 
   /// lag temperature variable
   const bool _use_old_temperature;
 
-  /// old temperature for use_old_temperature = true
-  const VariableValue & _temperature_old;
-
   /// current temperature
   const GenericVariableValue<is_ad> & _temperature;
 
-  /// the eigenstrain derivative
-  typename std::conditional<is_ad, void *, MaterialProperty<RankTwoTensor> &>::type
-      _deigenstrain_dT;
+  /// old temperature
+  const VariableValue & _temperature_old;
+
+  /// the eigenstrain derivative (only used for is_ad == false)
+  MaterialProperty<RankTwoTensor> * _deigenstrain_dT;
 
   const VariableValue & _stress_free_temperature;
 
