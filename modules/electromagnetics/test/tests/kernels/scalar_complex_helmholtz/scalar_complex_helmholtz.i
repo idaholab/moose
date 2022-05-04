@@ -28,7 +28,7 @@
 []
 
 [Functions]
-  [./ASquaredMinusBSquared]
+  [./negative_ASquaredMinusBSquared]
     type = WaveCoeff
     k_real = '2 * (1 + x/10)'
     k_imag = '(1 + x/10)'
@@ -36,6 +36,7 @@
     eps_rel_imag = 0
     mu_rel_real = 1
     mu_rel_imag = 0
+    coef = -1
     component = real
   [../]
   [./2TimesAB]
@@ -90,9 +91,8 @@
     variable = u_real
   [../]
   [./coeffField_real]
-    type = CoeffField
-    func = ASquaredMinusBSquared
-    coeff = -1
+    type = ADFuncReaction
+    func = negative_ASquaredMinusBSquared
     variable = u_real
   [../]
   [./coupledField_real]
@@ -120,9 +120,8 @@
     variable = u_imag
   [../]
   [./coeffField_imag]
-    type = CoeffField
-    func = ASquaredMinusBSquared
-    coeff = -1
+    type = ADFuncReaction
+    func = negative_ASquaredMinusBSquared
     variable = u_imag
   [../]
   [./coupledField_imag]

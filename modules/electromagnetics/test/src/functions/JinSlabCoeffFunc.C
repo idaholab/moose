@@ -23,6 +23,7 @@ JinSlabCoeffFunc::validParams()
   params.addRequiredParam<Real>("k", "Wavenumber");
   params.addRequiredParam<Real>("theta", "Wave Incidence angle, in degrees");
   params.addRequiredParam<Real>("length", "Length of slab domain");
+  params.addParam<Real>("coef", 1.0, "Real-valued function coefficient.");
   MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component");
   return params;
@@ -34,6 +35,7 @@ JinSlabCoeffFunc::JinSlabCoeffFunc(const InputParameters & parameters)
     _k(getParam<Real>("k")),
     _theta(getParam<Real>("theta")),
     _length(getParam<Real>("length")),
+    _coef(getParam<Real>("coef")),
     _component(getParam<MooseEnum>("component"))
 {
 }
@@ -45,7 +47,7 @@ JinSlabCoeffFunc::value(Real /*t*/, const Point & p) const
   std::complex<double> eps_r = 4.0 + (2.0 - jay * 0.1) * std::pow((1 - p(0) / _length), 2);
   std::complex<double> mu_r(2, -0.1);
 
-  std::complex<double> val = mu_r * std::pow(_k, 2) *
+  std::complex<double> val = _coef * mu_r * std::pow(_k, 2) *
                              (eps_r - (1.0 / mu_r) * std::pow(sin(_theta * libMesh::pi / 180.), 2));
 
   if (_component == electromagnetics::REAL)

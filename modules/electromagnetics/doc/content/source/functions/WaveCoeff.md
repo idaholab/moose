@@ -23,7 +23,7 @@ the user as functions.
 
 ## Example Input File Syntax
 
-!listing scalar_complex_helmholtz.i block=Functions/ASquaredMinusBSquared
+!listing scalar_complex_helmholtz.i block=Functions/negative_ASquaredMinusBSquared
 
 !syntax parameters /Functions/WaveCoeff
 

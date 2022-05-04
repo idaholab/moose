@@ -20,9 +20,9 @@
 []
 
 [Functions]
-  [./kSquared]
+  [./negative_kSquared]
     type = ParsedFunction
-    value = '0.4188790204786391^2'
+    value = '-0.4188790204786391^2'
   [../]
   [./inc_y]
     type = ParsedFunction
@@ -36,9 +36,8 @@
     variable = E_real
   [../]
   [./coeffField_real]
-    type = CoeffField
-    func = kSquared
-    coeff = -1
+    type = ADFuncReaction
+    func = negative_kSquared
     variable = E_real
   [../]
   [./diffusion_imaginary]
@@ -46,9 +45,8 @@
     variable = E_imag
   [../]
   [./coeffField_imaginary]
-    type = CoeffField
-    func = kSquared
-    coeff = -1
+    type = ADFuncReaction
+    func = negative_kSquared
     variable = E_imag
   [../]
 []

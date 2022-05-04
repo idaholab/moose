@@ -45,6 +45,7 @@ E0 = 1 # magnitude of the incident field (in V/m)
     type = JinSlabCoeffFunc
     k = ${k}
     length = ${L}
+    coef = -1
     component = real
   [../]
   [./coeff_imag]
@@ -64,9 +65,8 @@ E0 = 1 # magnitude of the incident field (in V/m)
     variable = E_real
   [../]
   [./field_real]
-    type = CoeffField
+    type = ADFuncReaction
     func = coeff_real
-    coeff = -1
     variable = E_real
   [../]
   [./coupled_real]
@@ -80,9 +80,8 @@ E0 = 1 # magnitude of the incident field (in V/m)
     variable = E_imag
   [../]
   [./field_imag]
-    type = CoeffField
+    type = ADFuncReaction
     func = coeff_real
-    coeff = -1
     variable = E_imag
   [../]
   [./coupled_imag]

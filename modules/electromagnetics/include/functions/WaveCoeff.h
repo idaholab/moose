@@ -41,6 +41,9 @@ protected:
   /// Imaginery component of the wave number (also known as the attenuation constant)
   const Function & _k_imag;
 
+  /// Real-valued function coefficient (defaults to 1)
+  Real _coef;
+
   /// Signifies whether function output should be the real or imaginary component
   const MooseEnum _component;
 };

@@ -27,9 +27,9 @@
 []
 
 [Functions]
-  [./ASquaredMinusBSquared]
+  [./negative_ASquaredMinusBSquared]
     type = ParsedFunction
-    value = '15*15 - 7*7'
+    value = '-(15*15 - 7*7)'
   [../]
   [./2TimesAB]
     type = ParsedFunction
@@ -47,9 +47,8 @@
     variable = u_real
   [../]
   [./coeffField_real]
-    type = CoeffField
-    func = ASquaredMinusBSquared
-    coeff = -1
+    type = ADFuncReaction
+    func = negative_ASquaredMinusBSquared
     variable = u_real
   [../]
   [./coupledField_real]
@@ -64,10 +63,9 @@
     variable = u_imag
   [../]
   [./coeffField_imag]
-    type = CoeffField
-    func = ASquaredMinusBSquared
+    type = ADFuncReaction
+    func = negative_ASquaredMinusBSquared
     variable = u_imag
-    coeff = -1
   [../]
   [./coupledField_imag]
     type = CoupledCoeffField

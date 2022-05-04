@@ -27,6 +27,7 @@ WaveCoeff::validParams()
                                         "Relative permeability, imaginary component.");
   params.addRequiredParam<FunctionName>("k_real", "Wave number, real component.");
   params.addParam<FunctionName>("k_imag", 0, "Wave number, imaginary component.");
+  params.addParam<Real>("coef", 1.0, "Real-valued function coefficient.");
   MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component.");
   return params;
@@ -42,6 +43,7 @@ WaveCoeff::WaveCoeff(const InputParameters & parameters)
     _mu_r_imag(getFunction("mu_rel_imag")),
     _k_real(getFunction("k_real")),
     _k_imag(getFunction("k_imag")),
+    _coef(getParam<Real>("coef")),
     _component(getParam<MooseEnum>("component"))
 {
 }
@@ -53,7 +55,7 @@ WaveCoeff::value(Real t, const Point & p) const
   std::complex<double> mu_r(_mu_r_real.value(t, p), _mu_r_imag.value(t, p));
   std::complex<double> k(_k_real.value(t, p), _k_imag.value(t, p));
 
-  std::complex<double> val = k * k * mu_r * eps_r;
+  std::complex<double> val = _coef * k * k * mu_r * eps_r;
 
   if (_component == electromagnetics::REAL)
   {

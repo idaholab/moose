@@ -4,7 +4,7 @@
     input = 'waveguide2D_test.i'
     exodiff = 'waveguide2D_test_out.e'
     requirement = 'The system shall be able to simulate a 2D electric field waveguide with boundary conditions for wave launching, absorption, and conducting walls for scalar field variables.'
-    design = 'CoeffField.md EMRobinBC.md benchmarks/WaveguideTransmission.md'
+    design = 'ADFuncReaction.md EMRobinBC.md benchmarks/WaveguideTransmission.md'
     verification = 'benchmarks/WaveguideTransmission.md'
     issues = '#13744'
   [../]

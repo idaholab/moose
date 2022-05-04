@@ -22,5 +22,7 @@ protected:
 
   Real _length;
 
+  Real _coef;
+
   MooseEnum _component;
 };

@@ -11,18 +11,16 @@
 
 #include "ADKernel.h"
 
-class CoeffField : public ADKernel
+class ADFuncReaction : public ADKernel
 {
 public:
   static InputParameters validParams();
 
-  CoeffField(const InputParameters & parameters);
+  ADFuncReaction(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
 private:
-  Real _coefficient;
-
   const Function & _func;
 };

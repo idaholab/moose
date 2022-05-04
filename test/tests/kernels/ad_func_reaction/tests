@@ -1,0 +1,18 @@
+[Tests]
+  [./ad_func_reaction]
+    type = 'Exodiff'
+    input = 'ad_func_reaction.i'
+    exodiff = 'ad_func_reaction_out.e'
+    requirement = 'The system shall provide an ability to solve a steady-state diffusion-reaction problem, where the reaction term has a function prefactor.'
+    issues = '#13744'
+    design = '/ADFuncReaction.md'
+  [../]
+  [./ad_func_reaction_jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_func_reaction.i'
+    difference_tol = 1e-7
+    requirement = 'The system shall calculate the correct Jacobian of ADFuncReaction using forward automatic differentiation.'
+    issues = '#13744'
+    design = '/ADFuncReaction.md'
+  [../]
+[]
