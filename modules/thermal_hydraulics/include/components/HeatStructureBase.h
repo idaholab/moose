@@ -80,6 +80,11 @@ public:
   Real getNumberOfUnits() const { return _num_rods; }
 
   /**
+   * Return true if this heat structure has the supplied boundary
+   */
+  bool hasBoundary(const BoundaryName & boundary_name) const;
+
+  /**
    * Get boundary info associated with the heat structure boundary
    *
    * @param[in] boundary  Boundary name of a heat structure boundary
