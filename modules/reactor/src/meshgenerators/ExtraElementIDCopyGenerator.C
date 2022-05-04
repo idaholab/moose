@@ -38,8 +38,9 @@ ExtraElementIDCopyGenerator::generate()
 
   auto src_id_name = getParam<std::string>("source_extra_element_id");
   bool copy_subdomain_id = (src_id_name == "subdomain_id");
+  bool copy_element_id = (src_id_name == "element_id");
   unsigned int src_id = 0;
-  if (!copy_subdomain_id)
+  if (!copy_subdomain_id && !copy_element_id)
   {
     if (!mesh->has_elem_integer(src_id_name))
       mooseError("The source element ID does not exist on the input mesh");
@@ -62,6 +63,8 @@ ExtraElementIDCopyGenerator::generate()
     dof_id_type id;
     if (copy_subdomain_id)
       id = elem->subdomain_id();
+    else if (copy_element_id)
+      id = elem->id();
     else
       id = elem->get_extra_integer(src_id);
 
