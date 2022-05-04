@@ -33,4 +33,6 @@ protected:
    * @return fractional linear dilatation due
    */
   virtual ADReal computeDilatation(const ADReal & temperature) = 0;
+
+  using ADComputeThermalExpansionEigenstrainBase::computeThermalStrain;
 };

@@ -41,4 +41,6 @@ protected:
    * @return fractional linear dilatation due
    */
   virtual Real computeDilatationDerivative(const Real & temperature) = 0;
+
+  using ComputeThermalExpansionEigenstrainBase::computeThermalStrain;
 };

@@ -39,4 +39,6 @@ protected:
 
   /// Indicates whether we are on the first step, avoiding false positives when restarting
   bool & _step_one;
+
+  using ADComputeThermalExpansionEigenstrainBase::computeThermalStrain;
 };

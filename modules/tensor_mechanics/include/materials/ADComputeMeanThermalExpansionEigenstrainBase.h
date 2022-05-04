@@ -50,4 +50,6 @@ protected:
    * param temperature  temperature at which this is evaluated
    */
   virtual ADReal meanThermalExpansionCoefficient(const ADReal & temperature) = 0;
+
+  using ADComputeThermalExpansionEigenstrainBase::computeThermalStrain;
 };

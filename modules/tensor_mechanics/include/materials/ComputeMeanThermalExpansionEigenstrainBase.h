@@ -59,4 +59,6 @@ protected:
    * param temperature  temperature at which this is evaluated
    */
   virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature) = 0;
+
+  using ComputeThermalExpansionEigenstrainBase::computeThermalStrain;
 };

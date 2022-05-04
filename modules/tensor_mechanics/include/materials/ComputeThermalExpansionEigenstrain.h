@@ -27,4 +27,6 @@ protected:
   virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte) override;
 
   const Real & _thermal_expansion_coeff;
+
+  using ComputeThermalExpansionEigenstrainBase::computeThermalStrain;
 };
