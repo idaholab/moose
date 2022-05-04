@@ -5,7 +5,7 @@ provisions to couple temperature fields to fluid domains through boundary condit
 
 ## Tutorial Problems
 
-A [tutorial](modules/heat_conduction/tutorials/introduction/index.md) for the Heat Condiction module is available to show the steps for setting up a basic model.
+A [tutorial](modules/heat_conduction/tutorials/introduction/index.md) for the Heat Conduction module is available to show the steps for setting up a basic model.
 
 ## Basic Theory of Heat Conduction
 

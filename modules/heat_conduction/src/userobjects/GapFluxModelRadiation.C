@@ -40,6 +40,7 @@ GapFluxModelRadiation::GapFluxModelRadiation(const InputParameters & parameters)
   const auto emissivity_primary = getParam<Real>("primary_emissivity");
   const auto emissivity_secondary = getParam<Real>("secondary_emissivity");
 
+  // Emissivity for plate geometries.
   _emissivity = emissivity_primary != 0.0 && emissivity_secondary != 0.0
                     ? 1.0 / emissivity_primary + 1.0 / emissivity_secondary - 1
                     : 0.0;
