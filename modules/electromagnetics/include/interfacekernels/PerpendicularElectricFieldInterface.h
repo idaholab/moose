@@ -11,6 +11,12 @@
 
 #include "InterfaceKernel.h"
 
+/**
+ *  VectorInterfaceKernel that enforces the difference between the perpendicular
+ *  vector field components on either side of a boundary based on the electrical
+ *  permittivities on either side of the interface as well as the free charge
+ *  build-up
+ */
 class PerpendicularElectricFieldInterface : public VectorInterfaceKernel
 {
 public:
@@ -22,13 +28,24 @@ protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
+  /// Free charge on the interface (default = 0)
   Real _free_charge;
+
+  /// Electrical permittivity on the primary side of the boundary
   Real _primary_eps;
+
+  /// Electrical permittivity on the secondary side of the boundary
   Real _secondary_eps;
 
+  /// Perpendicular field component of the solution variable on the primary side of the boundary
   RealVectorValue _u_perp;
+
+  /// Perpendicular field component of the solution variable on the secondary side of the boundary
   RealVectorValue _secondary_perp;
 
+  /// Perpendicular field component of the test function on the primary side of the boundary
   RealVectorValue _phi_u_perp;
+
+  /// Perpendicular field component of the test function on the secondary side of the boundary
   RealVectorValue _phi_secondary_perp;
 };

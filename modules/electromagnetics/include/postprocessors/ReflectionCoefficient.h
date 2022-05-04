@@ -12,6 +12,11 @@
 #include "SidePostprocessor.h"
 #include "MooseVariableInterface.h"
 
+/**
+ *  CURRENTLY ONLY FOR 1D PLANE WAVE SOLVES. Calculate power reflection coefficient
+ *  for impinging wave on a surface. Assumes that wave of form F = F_incoming +
+ *  R*F_reflected
+ */
 class ReflectionCoefficient : public SidePostprocessor, public MooseVariableInterface<Real>
 {
 public:
@@ -26,21 +31,30 @@ public:
   virtual void finalize() override;
 
 protected:
+  /// compute reflection coefficient
   virtual Real computeReflection();
 
+  /// quadrature point
   unsigned int _qp;
 
+  /// Real component of the coupled field variable
   const VariableValue & _coupled_real;
 
+  /// Imaginary component of the coupled field variable
   const VariableValue & _coupled_imag;
 
+  /// Wave incidence angle
   Real _theta;
 
+  /// Domain length
   Real _length;
 
+  /// Wave number
   Real _k;
 
+  /// Incoming field magnitude
   Real _incoming_mag;
 
+  /// Value of the reflection coefficient
   Real _reflection_coefficient;
 };

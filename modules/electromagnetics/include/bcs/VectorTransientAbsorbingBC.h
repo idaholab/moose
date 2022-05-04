@@ -12,6 +12,9 @@
 #include "VectorIntegratedBC.h"
 #include <complex>
 
+/**
+ *  First order transient absorbing boundary condition for nonlinear vector variables
+ */
 class VectorTransientAbsorbingBC : public VectorIntegratedBC
 {
 public:
@@ -24,18 +27,29 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
+  /// Intrinsic impedance of the infinite medium (default is the admittance of free space)
   const Function & _admittance;
 
+  /// Variable field component (real or imaginary)
   MooseEnum _component;
 
+  /// Coupled field vector variable
   const VectorVariableValue & _coupled_val;
+  /// Coupled field vector variable id
   unsigned int _coupled_var_num;
 
+  /// Vector field variable time derivative
   const VectorVariableValue & _u_dot;
+
+  /// Coupled vector field variable time derivative
   const VectorVariableValue & _coupled_dot;
 
+  /// Vector field variable dot du
   const VariableValue & _du_dot_du;
+
+  /// Coupled vector field variable dot du
   const VariableValue & _coupled_dot_du;
 
+  /// Value of complex number (can't use _j or _i due to basis function indices)
   std::complex<double> _jay;
 };

@@ -11,6 +11,10 @@
 
 #include "VectorKernel.h"
 
+/**
+ *  Calculates the current source term contribution in the helmholtz wave
+ *  equation
+ */
 class VectorCurrentSource : public VectorKernel
 {
 public:
@@ -22,10 +26,16 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
+private:
+  /// Function coefficient
   const Function & _func;
 
+  /// Real component of the current source
   const Function & _source_real;
+
+  /// Imaginary component of the current source
   const Function & _source_imag;
 
+  /// Component of the field vector (real or imaginary)
   MooseEnum _component;
 };

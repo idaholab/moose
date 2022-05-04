@@ -11,6 +11,9 @@
 
 #include "VectorTimeKernel.h"
 
+/**
+ *  The second time derivative operator for vector variables
+ */
 class VectorSecondTimeDerivative : public VectorTimeKernel
 {
 public:
@@ -22,8 +25,16 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
+private:
+  /// Second time derivative of the solution vector variable
   const VectorVariableValue & _u_dot_dot;
+
+  /**
+   *  du dot dot du Jacobian contribution of the second time derivative of the
+   * solution vector variable
+   */
   const VariableValue & _du_dot_dot_du;
 
+  /// Function coefficient
   const Function & _coeff;
 };

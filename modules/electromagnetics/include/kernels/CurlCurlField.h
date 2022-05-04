@@ -11,6 +11,10 @@
 
 #include "VectorKernel.h"
 
+/**
+ *  Weak form contribution corresponding to the curl(curl(E)) where E is the
+ *  electric field vector
+ */
 class CurlCurlField : public VectorKernel
 {
 public:
@@ -31,5 +35,6 @@ protected:
   /// Holds the solution curl at the current quadrature points
   const VectorVariableCurl & _curl_u;
 
+  /// Scalar coefficient
   Real _coeff;
 };

@@ -11,6 +11,11 @@
 
 #include "ADKernel.h"
 
+/**
+ *  Computes the Gauss's law Laplacian operator (including the electrical
+ *  conductivity represented as a material property) acting on the electrostatic
+ *  potential
+ */
 class ConductivityLaplacian : public ADKernel
 {
 public:
@@ -22,5 +27,6 @@ protected:
   virtual ADReal computeQpResidual() override;
 
 private:
+  /// Electrical conductivity of the material
   const ADMaterialProperty<Real> & _conductivity;
 };

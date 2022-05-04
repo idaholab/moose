@@ -11,6 +11,9 @@
 
 #include "Diffusion.h"
 
+/**
+ *  Represents a coupled Laplacian term with sign and function coefficients
+ */
 class CoupledFuncDiffusion : public Kernel
 {
 public:
@@ -23,9 +26,12 @@ protected:
   virtual Real computeQpJacobian() override;
 
 private:
+  /// Function coefficient
   const Function & _func;
 
+  /// Scalar coefficient representing the sign of the residual contribution
   Real _sign;
 
+  /// Coupled field variable
   const VariableGradient & _coupled_grad;
 };

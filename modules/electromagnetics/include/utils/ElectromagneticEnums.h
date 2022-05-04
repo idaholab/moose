@@ -9,18 +9,21 @@
 
 #pragma once
 
-/** ElectromagneticEnums contains various enumerations useful in the
- * Electromagnetic module, such as real/imag component definitions in
- * Kernels, BCs, etc.
+/**
+ *  ElectromagneticEnums contains various enumerations useful in the
+ *  Electromagnetic module, such as real/imag component definitions in
+ *  Kernels, BCs, etc.
  */
-
 namespace electromagnetics
 {
+/// Enum used when determining the component of a field vector or complex coefficient
 enum ComponentEnum
 {
   REAL,
   IMAGINARY
 };
+
+/// Enum used when determining the function of a Robin-style boundary condition
 enum RobinEnum
 {
   ABSORBING,

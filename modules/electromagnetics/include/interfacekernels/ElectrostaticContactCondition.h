@@ -17,7 +17,6 @@
  *  and gradient relationship as a result of contact between two dissimilar,
  *  homogeneous materials.
  */
-
 class ElectrostaticContactCondition : public ADInterfaceKernel
 {
 public:

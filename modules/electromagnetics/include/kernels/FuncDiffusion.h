@@ -11,6 +11,9 @@
 
 #include "Diffusion.h"
 
+/**
+ *  The Laplacian operator with a function coefficient
+ */
 class FuncDiffusion : public Diffusion
 {
 public:
@@ -23,5 +26,6 @@ protected:
   virtual Real computeQpJacobian() override;
 
 private:
+  /// Function coefficient
   const Function & _func;
 };

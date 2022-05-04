@@ -18,8 +18,7 @@ ReflectionCoefficient::validParams()
   InputParameters params = SidePostprocessor::validParams();
   params.addClassDescription(
       "CURRENTLY ONLY FOR 1D PLANE WAVE SOLVES. Calculate power reflection coefficient "
-      "for impinging wave on a "
-      "surface. Assumes that wave of form F = F_incoming + R*F_reflected");
+      "for impinging wave on a surface. Assumes that wave of form F = F_incoming + R*F_reflected");
   params.addRequiredCoupledVar(
       "field_real", "The name of the real field variable this postprocessor operates on.");
   params.addRequiredCoupledVar("field_imag", "Coupled imaginary field variable.");

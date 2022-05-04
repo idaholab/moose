@@ -11,6 +11,10 @@
 
 #include "VariableGradientComponent.h"
 
+/**
+ *  This AuxKernel calculates the electrostatic electric field given the
+ *  electrostatic potential.
+ */
 class PotentialToFieldAux : public VariableGradientComponent
 {
 public:
@@ -21,5 +25,6 @@ public:
 protected:
   virtual Real computeValue() override;
 
+  /// Sign prefactor for calculation as determined via MooseEnum (default = negative, or -1)
   Real _sign;
 };

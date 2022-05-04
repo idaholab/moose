@@ -12,6 +12,10 @@
 #include "VectorIntegratedBC.h"
 #include <complex>
 
+/**
+ *  First order Robin-style Absorbing/Port boundary condition for vector nonlinear
+ *  variables.
+ */
 class VectorEMRobinBC : public VectorIntegratedBC
 {
 public:
@@ -24,20 +28,33 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
+  /// Scalar waveguide propagation constant
   const Function & _beta;
 
+  /// Variable field component (real or imaginary)
   const MooseEnum _component;
 
+  /// Coupled field vector variable
   const VectorVariableValue & _coupled_val;
+
+  /// Coupled field vector variable id
   unsigned int _coupled_var_num;
 
+  /// Real incoming field vector
   const Function & _inc_real;
+
+  /// Imaginary incoming field vector
   const Function & _inc_imag;
 
+  /// Value of complex number (can't use _j or _i due to basis function indices)
   const std::complex<double> _jay;
 
+  /// Mode of operation (absorbing or port)
   const MooseEnum _mode;
 
+  /// Boolean marking whether real component of the incoming wave was set by the user
   const bool _real_incoming_was_set;
+
+  /// Boolean marking whether imaginary component of the incoming wave was set by the user
   const bool _imag_incoming_was_set;
 };

@@ -11,6 +11,11 @@
 
 #include "VectorKernel.h"
 
+/**
+ *  Kernel representing the contribution of the PDE term $cfu$, where $c$ and
+ *  $f$ are constant and function coefficients, respectively, and $u$ is a
+ *  vector variable.
+ */
 class VectorCoeffField : public VectorKernel
 {
 public:
@@ -22,7 +27,10 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
+private:
+  // Scalar coefficient
   Real _coefficient;
 
+  // Function coefficient
   const Function & _func;
 };

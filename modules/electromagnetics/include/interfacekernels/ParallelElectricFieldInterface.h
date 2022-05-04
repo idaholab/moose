@@ -11,6 +11,10 @@
 
 #include "InterfaceKernel.h"
 
+/**
+ *  VectorInterfaceKernel that enforces the equivalence of the parallel vector
+ *  field components on either side of a boundary
+ */
 class ParallelElectricFieldInterface : public VectorInterfaceKernel
 {
 public:
@@ -22,9 +26,15 @@ protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
+  /// Parallel component of the solution vector field on the primary side of the boundary
   RealVectorValue _u_parallel;
+
+  /// Parallel component of the solution vector field on the secondary side of the boundary
   RealVectorValue _secondary_parallel;
 
+  /// Parallel component of the test function on the primary side of the boundary
   RealVectorValue _phi_u_parallel;
+
+  /// Parallel component of the test function on the secondary side of the boundary
   RealVectorValue _phi_secondary_parallel;
 };
