@@ -74,7 +74,7 @@ P_out = 4.923e6 # Pa
   T_tol = 1e-6
   compute_density = true
   compute_viscosity = true
-  compute_power = true
+  compute_power = false
   P_out = ${P_out}
 []
 

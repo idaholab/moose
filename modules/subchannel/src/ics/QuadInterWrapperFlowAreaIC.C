@@ -26,9 +26,17 @@ QuadInterWrapperFlowAreaIC::value(const Point & p)
   auto i = _mesh.getSubchannelIndexFromPoint(p);
   auto subch_type = _mesh.getSubchannelType(i);
   if (subch_type == EChannelType::CORNER)
-    return standard_area * 0.25 + assembly_pitch * gap + gap * gap;
+  {
+    // Need to modify later to include the specific side
+    auto side_avg = (side_x + side_y) / 2.0;
+    return side_avg * gap;
+  }
   else if (subch_type == EChannelType::EDGE)
-    return standard_area * 0.5 + assembly_pitch * gap;
+  {
+    // Need to modify later to include the specific side
+    auto side_avg = (side_x + side_y) / 2.0;
+    return standard_area * 0.25 + side_avg * gap;
+  }
   else
     return standard_area;
 }

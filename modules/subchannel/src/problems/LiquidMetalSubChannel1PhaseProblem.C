@@ -734,7 +734,8 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
         }
         auto T_L2norm_old_block = _T_soln->L2norm();
 
-        computeWij(iblock);
+        //computeWij(iblock);
+        computeWijFromSolve(iblock);
 
         if (_compute_power)
         {
