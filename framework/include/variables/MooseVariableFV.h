@@ -475,10 +475,10 @@ public:
                           const ADReal & elem_value) const;
 
   /**
-   * Compute or retrieve from cache the solution value on an internal face, using linear
-   * interpolation or interpolating from vertex values, depending on the stencil.
+   * Compute or retrieve from cache the solution value on an internal face using linear
+   * interpolation.
    * @param fi The face information object
-   * @return the face value on the internal face associated with \p fi
+   * @return The face value on the internal face associated with \p fi
    */
   const ADReal & getInternalFaceValue(const FaceInfo & fi,
                                       const bool correct_skewness = false) const;
@@ -681,7 +681,7 @@ protected:
   /// Whether to cache cell gradients
   const bool _cache_cell_gradients;
 
-  /// Decides if a vertex-based, average or skewed corrected average is used for the
+  /// Decides if an average or skewed corrected average is used for the
   /// face interpolation. Other options are not taken into account here,
   /// but at higher, kernel-based levels.
   Moose::FV::InterpMethod _face_interp_method;

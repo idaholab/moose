@@ -50,7 +50,7 @@ MooseVariableFV<OutputType>::validParams()
       "Consequently an implicit solve is used to simultaneously solve for the adjoining cell "
       "center gradient and boundary face value(s).");
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  MooseEnum face_interp_method("average skewness-corrected vertex-based", "average");
+  MooseEnum face_interp_method("average skewness-corrected", "average");
   params.template addParam<MooseEnum>("face_interp_method",
                                       face_interp_method,
                                       "Switch that can select between face interpoaltion methods.");
@@ -117,8 +117,6 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
       _face_interp_method = Moose::FV::InterpMethod::Average;
     else if (interp_method == "skewness-corrected")
       _face_interp_method = Moose::FV::InterpMethod::SkewCorrectedAverage;
-    else if (interp_method == "vertex-based")
-      _face_interp_method = Moose::FV::InterpMethod::VertexBased;
   }
   else
     _face_interp_method = Moose::FV::InterpMethod::Average;
@@ -637,22 +635,7 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
 
   ADReal & value = *value_pointer;
 
-  if (_face_interp_method == Moose::FV::InterpMethod::VertexBased)
-  {
-    ADReal numerator = 0, denominator = 0;
-
-    for (const Node * const vertex : fi.vertices())
-    {
-      auto distance = (*vertex - fi.faceCentroid()).norm();
-
-      numerator += getVertexValue(*vertex) / distance;
-      denominator += 1. / distance;
-    }
-
-    value = numerator / denominator;
-  }
-  else
-    value = Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, correct_skewness));
+  value = Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, correct_skewness));
 
   return value;
 }
@@ -1005,10 +988,7 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
     return getExtrapolatedBoundaryFaceValue(*fi);
   else if (isInternalFace(*fi))
   {
-    if (_face_interp_method == Moose::FV::InterpMethod::VertexBased)
-      return getInternalFaceValue(*fi, face.correct_skewness);
-    else
-      return Moose::FV::interpolate(*this, face);
+    return Moose::FV::interpolate(*this, face);
   }
   else
   {

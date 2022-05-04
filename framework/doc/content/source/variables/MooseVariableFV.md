@@ -30,20 +30,6 @@ centroid are parallel to the surface normals *and* none of the surface normals
 are parallel to themselves (e.g. imagine an orthogonal quad with three extrapolated
 boundary faces).
 
-Another parameter in the `MooseVariableFV` template is
-`use_extended_stencil`. This is defaulted to `false`. When `false`, the gradient
-is computed using face values which are linearly interpolated between the
-current cell centroid and the neighboring cell centroids. When toggled to
-`true`, the face values are computed as a weighted function of the attached face
-vertices. This requires computing solution values at vertices which will be a
-function of all adjacent cells. This extends the stencil and increases the size
-of the Jacobian matrix. The benefit is supposed to be increased accuracy of the
-gradient computation. However, with the current implementation the vertex
-approach is actually *less* accurate (solution convergence of O(h^1.5) as
-opposed to O(h^2) for the smaller stencil). This may indicate a bug in the
-current vertex-based implementation which hopefully a smart user will come along
-and fix.
-
 ## Example Input File Syntax
 
 To create a `MooseVariableFVReal` a user can do one of the following in their
@@ -63,8 +49,7 @@ input file:
 ```
 
 Note that a user *must* specify the `type` if they want to be able to set finite
-volume variable specific parameters like `two_term_boundary_expansion` or
-`use_extended_stencil.`
+volume variable specific parameters like `two_term_boundary_expansion`.
 
 !syntax parameters /Adaptivity/Markers/MooseVariableFVReal
 
