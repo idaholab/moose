@@ -1271,10 +1271,7 @@ private:
    */
   template <typename T>
   const typename OutputTools<T>::VariableValue &
-  vectorTagValueHelper(const std::string & var_name,
-                       TagID tag,
-                       unsigned int comp = 0,
-                       bool special_tag = false) const;
+  vectorTagValueHelper(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
 
   /**
    * Generic helper method to get vector tag values based on tag name
@@ -1289,10 +1286,7 @@ private:
    */
   template <typename T>
   const typename OutputTools<T>::VariableValue &
-  vectorTagDofValueHelper(const std::string & var_name,
-                          TagID tag,
-                          unsigned int comp = 0,
-                          bool special_tag = false) const;
+  vectorTagDofValueHelper(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
 
   /**
    * Generic helper method to get vector tag degree of freedom values based on tag name
@@ -1307,9 +1301,8 @@ private:
    * values, then we must request more states
    */
   template <typename T>
-  void processSpecialTag(const std::string & var_name,
-                         const TagName & tag_name,
-                         const unsigned int comp);
+  void
+  requestStates(const std::string & var_name, const TagName & tag_name, const unsigned int comp);
 
   enum class FuncAge
   {
@@ -1517,11 +1510,9 @@ private:
 
   const MooseObject * const _obj;
 
-  /// Special vector tag names for which we do not want to add to \p _fe_coupleable_vector_tags.
-  /// These tag names have special handling in variable \p vectorTagValue and \p vectorTagDofValue
-  /// getters
-  const std::set<std::string> _special_tags = {
-      Moose::SOLUTION_TAG, Moose::OLD_SOLUTION_TAG, Moose::OLDER_SOLUTION_TAG};
+  /// vector tag names for which we need to request older solution states from the system
+  const std::set<std::string> _older_state_tags = {Moose::OLD_SOLUTION_TAG,
+                                                   Moose::OLDER_SOLUTION_TAG};
 };
 
 template <typename T>

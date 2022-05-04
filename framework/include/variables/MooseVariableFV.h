@@ -499,6 +499,8 @@ public:
   template <typename FaceCallingArg>
   ADReal getInternalFaceValue(const FaceCallingArg & face) const;
 
+  void setActiveTags(const std::set<TagID> & vtags) override;
+
 protected:
   /**
    * @return whether \p fi is an internal face for this variable
@@ -792,6 +794,14 @@ typename MooseVariableFV<OutputType>::DotType
 MooseVariableFV<OutputType>::evaluateDot(const SingleSidedFaceArg & face, unsigned int) const
 {
   return evaluateFaceDotHelper(face);
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::setActiveTags(const std::set<TagID> & vtags)
+{
+  _element_data->setActiveTags(vtags);
+  _neighbor_data->setActiveTags(vtags);
 }
 
 template <>

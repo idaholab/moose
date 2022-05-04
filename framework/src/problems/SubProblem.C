@@ -306,6 +306,8 @@ void
 SubProblem::setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid)
 {
   _active_fe_var_coupleable_vector_tags[tid] = vtags;
+  systemBaseNonlinear().setActiveVariableCoupleableVectorTags(vtags, tid);
+  systemBaseAuxiliary().setActiveVariableCoupleableVectorTags(vtags, tid);
 }
 
 void
@@ -342,6 +344,8 @@ void
 SubProblem::setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid)
 {
   _active_sc_var_coupleable_vector_tags[tid] = vtags;
+  systemBaseNonlinear().setActiveScalarVariableCoupleableVectorTags(vtags, tid);
+  systemBaseAuxiliary().setActiveScalarVariableCoupleableVectorTags(vtags, tid);
 }
 
 void

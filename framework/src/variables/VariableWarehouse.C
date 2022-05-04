@@ -286,6 +286,20 @@ VariableWarehouse::clearAllDofIndices()
     var->clearAllDofIndices();
 }
 
+void
+VariableWarehouse::setActiveVariableCoupleableVectorTags(const std::set<TagID> & vtags)
+{
+  for (auto * var : _vars)
+    var->setActiveTags(vtags);
+}
+
+void
+VariableWarehouse::setActiveScalarVariableCoupleableVectorTags(const std::set<TagID> & vtags)
+{
+  for (auto * var : _scalar_vars)
+    var->setActiveTags(vtags);
+}
+
 template MooseVariableField<Real> *
 VariableWarehouse::getActualFieldVariable<Real>(const std::string & var_name);
 template MooseVariableField<Real> *

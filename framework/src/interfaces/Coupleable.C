@@ -454,8 +454,7 @@ template <typename T>
 const typename OutputTools<T>::VariableValue &
 Coupleable::vectorTagValueHelper(const std::string & var_name,
                                  const TagID tag,
-                                 const unsigned int comp,
-                                 const bool special_tag) const
+                                 const unsigned int comp) const
 {
   const auto * const var = getVarHelper<MooseVariableField<T>>(var_name, comp);
   if (!var)
@@ -469,8 +468,7 @@ Coupleable::vectorTagValueHelper(const std::string & var_name,
                _c_name,
                ", but a vector tag with that ID does not exist");
 
-  if (!special_tag)
-    const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
+  const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
 
   if (_c_nodal)
     return var->nodalVectorTagValue(tag);
@@ -480,9 +478,9 @@ Coupleable::vectorTagValueHelper(const std::string & var_name,
 
 template <typename T>
 void
-Coupleable::processSpecialTag(const std::string & var_name,
-                              const TagName & tag_name,
-                              const unsigned int comp)
+Coupleable::requestStates(const std::string & var_name,
+                          const TagName & tag_name,
+                          const unsigned int comp)
 {
   auto var =
       const_cast<MooseVariableField<T> *>(getVarHelper<MooseVariableField<T>>(var_name, comp));
@@ -507,16 +505,16 @@ Coupleable::vectorTagValueHelper(const std::string & var_name,
 
   const TagName tag_name = MooseUtils::toUpper(_c_parameters.get<TagName>(tag_param_name));
 
-  const bool special_tag = _special_tags.count(tag_name);
-  if (special_tag)
+  const bool older_state_tag = _older_state_tags.count(tag_name);
+  if (older_state_tag)
     // We may need to add solution states and create vector tags
-    const_cast<Coupleable *>(this)->processSpecialTag<T>(var_name, tag_name, comp);
+    const_cast<Coupleable *>(this)->requestStates<T>(var_name, tag_name, comp);
 
   if (!_c_fe_problem.vectorTagExists(tag_name))
     mooseError("Tagged vector with tag name '", tag_name, "' does not exist");
 
   TagID tag = _c_fe_problem.getVectorTagID(tag_name);
-  return vectorTagValueHelper<T>(var_name, tag, comp, special_tag);
+  return vectorTagValueHelper<T>(var_name, tag, comp);
 }
 
 const VariableValue &
@@ -592,16 +590,14 @@ template <typename T>
 const typename OutputTools<T>::VariableValue &
 Coupleable::vectorTagDofValueHelper(const std::string & var_name,
                                     const TagID tag,
-                                    const unsigned int comp,
-                                    const bool special_tag) const
+                                    const unsigned int comp) const
 {
   const auto * var = getVarHelper<MooseVariableField<T>>(var_name, comp);
   if (!var)
     mooseError(var_name, ": invalid variable name for coupledVectorTagDofValue");
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
-  if (!special_tag)
-    const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
+  const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
 
   return var->vectorTagDofValue(tag);
 }
@@ -617,18 +613,17 @@ Coupleable::vectorTagDofValueHelper(const std::string & var_name,
 
   const TagName tag_name = MooseUtils::toUpper(_c_parameters.get<TagName>(tag_param_name));
 
-  const bool special_tag = _special_tags.count(tag_name);
-  if (special_tag)
+  const bool older_state_tag = _older_state_tags.count(tag_name);
+  if (older_state_tag)
     // We may need to add solution states and create vector tags
-    const_cast<Coupleable *>(this)->processSpecialTag<T>(var_name, tag_name, comp);
+    const_cast<Coupleable *>(this)->requestStates<T>(var_name, tag_name, comp);
 
   if (!_c_fe_problem.vectorTagExists(tag_name))
     mooseError("Tagged vector with tag name '", tag_name, "' does not exist");
 
   TagID tag = _c_fe_problem.getVectorTagID(tag_name);
 
-  return vectorTagDofValueHelper<T>(
-      var_name, tag, comp, _special_tags.count(MooseUtils::toUpper(tag_name)));
+  return vectorTagDofValueHelper<T>(var_name, tag, comp);
 }
 
 const VariableValue &
