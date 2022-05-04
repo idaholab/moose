@@ -483,7 +483,7 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
         auto volume = dz * (*_S_flow_soln)(node_in);
         auto time_term = _TR * ((*_rho_soln)(node_out)-_rho_soln->old(node_out)) * volume / _dt;
         // Wij positive out of i into j;
-        auto mdot_out = (*_mdot_soln)(node_in) - (*_SumWij_soln)(node_out)-time_term;
+        auto mdot_out = (*_mdot_soln)(node_in) - (*_SumWij_soln)(node_out) - time_term;
         if (mdot_out < 0)
         {
           _console << "Wij = : " << _Wij << "\n";
@@ -1025,15 +1025,15 @@ SubChannel1PhaseProblem::computeDP(int iblock)
     MatAssemblyBegin(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY);
     MatAXPY(amc_sys_mdot_mat, 1.0, amc_advective_derivative_mat, UNKNOWN_NONZERO_PATTERN);
     MatAssemblyBegin(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY);
-//    MatAXPY(amc_sys_mdot_mat, 1.0, amc_cross_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-//    MatAssemblyBegin(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY);
+    MatAXPY(amc_sys_mdot_mat, 1.0, amc_cross_derivative_mat, UNKNOWN_NONZERO_PATTERN);
+    MatAssemblyBegin(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY);
     MatAXPY(amc_sys_mdot_mat, 1.0, amc_friction_force_mat, UNKNOWN_NONZERO_PATTERN);
     MatAssemblyBegin(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY);
     std::cout << "Block: " << iblock << " - Linear momentum conservation matrix assembled" << std::endl;
     // RHS
     VecAXPY(amc_sys_mdot_rhs, 1.0, amc_time_derivative_rhs);
     VecAXPY(amc_sys_mdot_rhs, 1.0, amc_advective_derivative_rhs);
-//    VecAXPY(amc_sys_mdot_rhs, 1.0, amc_cross_derivative_rhs);
+    VecAXPY(amc_sys_mdot_rhs, 1.0, amc_cross_derivative_rhs);
     VecAXPY(amc_sys_mdot_rhs, 1.0, amc_friction_force_rhs);
     VecAXPY(amc_sys_mdot_rhs, 1.0, amc_gravity_rhs);
 
@@ -2930,13 +2930,11 @@ SubChannel1PhaseProblem::externalSolve()
         {
           if (_monolithic_thermal_bool)
           {
-            std::cout << "No llores mas aqui estoy 1." << std::endl;
             implicitPetscSolve(iblock);
             computeT(iblock);
           }
           else
           {
-            std::cout << "No llores mas aqui estoy 2." << std::endl;
             implicitPetscSolve(iblock);
             std::cout << "Done with main solve." << std::endl;
             if (_compute_power)
