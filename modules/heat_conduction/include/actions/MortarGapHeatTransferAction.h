@@ -20,7 +20,7 @@ enum class UserObjectToBuild
   RADIATION,
 };
 
-const MultiMooseEnum mooseUOPhysicstType("conduction radiation");
+const MultiMooseEnum gapFluxPhysics("conduction radiation");
 }
 
 class MortarGapHeatTransferAction : public Action
@@ -33,8 +33,6 @@ public:
 
   using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
-
-  static MooseEnum getModelEnum();
 
 protected:
   // Mortar

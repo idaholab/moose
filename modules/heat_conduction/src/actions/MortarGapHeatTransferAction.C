@@ -48,9 +48,8 @@ MortarGapHeatTransferAction::validParams()
   params.makeParamNotRequired<SubdomainName>("secondary_subdomain");
   params.makeParamNotRequired<Real>("gap_conductivity");
 
-  params.addParam<MultiMooseEnum>("gap_flux_options",
-                                  MortarGapHeatTransfer::mooseUOPhysicstType,
-                                  "The gap flux models to build");
+  params.addParam<MultiMooseEnum>(
+      "gap_flux_options", MortarGapHeatTransfer::gapFluxPhysics, "The gap flux models to build");
 
   params.addParam<std::vector<UserObjectName>>(
       "user_created_gap_flux_models",
@@ -261,8 +260,8 @@ MortarGapHeatTransferAction::addConstraints()
 void
 MortarGapHeatTransferAction::addMortarMesh()
 {
-  // Let's browse over existing mechanical actions to see if the primary and secondary
-  // subdomains have been created
+  // Evaluate whether we have sufficient information from the user to skip building the
+  // lower-dimensional domains.
   checkForExistingSubdomains();
 
   // We may have available lower-dimensional domains (e.g. from a mechanical contact action), whose
