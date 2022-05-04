@@ -10,7 +10,7 @@
 #include "VectorCurlPenaltyDirichletBC.h"
 #include "Function.h"
 
-registerMooseObject("MooseTestApp", VectorCurlPenaltyDirichletBC);
+registerMooseObject("MooseApp", VectorCurlPenaltyDirichletBC);
 
 InputParameters
 VectorCurlPenaltyDirichletBC::validParams()
