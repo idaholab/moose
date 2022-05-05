@@ -7,9 +7,9 @@ Using this `AuxKernel` to compute a term in a nonlinear equation will discard de
 
 ## Example input syntax
 
-In this example, the divergence of a field is computed over a block, and compared to the flux on the sides of the block, verifying the divergence theorem as a sanity check.
+In this example, the divergence of a finite volume vector field `(u, v)` is computed over a block, and compared to the flux on the sides of the block, verifying the divergence theorem as a sanity check.
 
-!listing test/tests/auxkernels/divergence_aux/test.i block=AuxKernels Postprocessors
+!listing test/tests/auxkernels/divergence_aux/test_fv.i block=AuxKernels Postprocessors
 
 !syntax parameters /AuxKernels/DivergenceAux
 

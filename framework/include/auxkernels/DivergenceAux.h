@@ -14,18 +14,27 @@
 /**
  * Computes the divergence of a vector of variables
  */
-class DivergenceAux : public AuxKernel
+template <bool is_ad>
+class DivergenceAuxTempl : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  DivergenceAux(const InputParameters & parameters);
+  DivergenceAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
 
   // Component variable gradients
-  const VariableGradient & _grad_u;
-  const VariableGradient & _grad_v;
-  const VariableGradient & _grad_w;
+  const Moose::Functor<GenericReal<is_ad>> & _u;
+  const Moose::Functor<GenericReal<is_ad>> * _v;
+  const Moose::Functor<GenericReal<is_ad>> * _w;
+
+  /// Whether to use a quadrature-based functor argument, appropriate for finite element
+  /// evaluations. If false, use a cell-center functor argument appropriate for finite volume
+  /// calculations
+  const bool _use_qp_arg;
 };
+
+typedef DivergenceAuxTempl<false> DivergenceAux;
+typedef DivergenceAuxTempl<true> ADDivergenceAux;
