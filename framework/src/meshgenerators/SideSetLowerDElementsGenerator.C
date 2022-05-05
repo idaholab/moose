@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MeshSideSetGenerator.h"
+#include "SideSetLowerDElementsGenerator.h"
 #include "BndElement.h"
 #include "CastUniquePointer.h"
 
@@ -17,10 +17,14 @@
 
 #include <typeinfo>
 
-registerMooseObject("MooseApp", MeshSideSetGenerator);
+registerMooseObject("MooseApp", SideSetLowerDElementsGenerator);
+registerMooseObjectRenamed("MooseApp",
+                           MeshSideSetGenerator,
+                           "08/30/2022 24:00",
+                           SideSetLowerDElementsGenerator);
 
 InputParameters
-MeshSideSetGenerator::validParams()
+SideSetLowerDElementsGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -37,17 +41,17 @@ MeshSideSetGenerator::validParams()
   return params;
 }
 
-MeshSideSetGenerator::MeshSideSetGenerator(const InputParameters & parameters)
+SideSetLowerDElementsGenerator::SideSetLowerDElementsGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _block_id(parameters.get<subdomain_id_type>("block_id"))
 {
   if (typeid(_input).name() == typeid(std::unique_ptr<DistributedMesh>).name())
-    mooseError("MeshSideSetGenerator only works with ReplicatedMesh");
+    mooseError("SideSetLowerDElementsGenerator only works with ReplicatedMesh");
 }
 
 std::unique_ptr<MeshBase>
-MeshSideSetGenerator::generate()
+SideSetLowerDElementsGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 

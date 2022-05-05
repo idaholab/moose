@@ -14,12 +14,12 @@
 /**
  * Add lower dimensional elements along the faces contained in a side set
  */
-class MeshSideSetGenerator : public MeshGenerator
+class SideSetLowerDElementsGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  MeshSideSetGenerator(const InputParameters & parameters);
+  SideSetLowerDElementsGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

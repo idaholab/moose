@@ -35,7 +35,7 @@
   []
 
   [./center_mesh]
-    type = MeshSideSetGenerator
+    type = SideSetLowerDElementsGenerator
     input = center_side_set
     boundaries = center_side_set
     block_id = 10
