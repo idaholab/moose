@@ -131,10 +131,10 @@ FEProblemSolve::validParams()
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
       "scaling_group_variables resid_vs_jac_scaling_param ignore_variables_for_autoscaling",
-      "Solver variable scaling parameters");
+      "Solver variable scaling");
   params.addParamNamesToGroup("line_search line_search_package contact_line_search_ltol "
                               "contact_line_search_allowed_lambda_cuts",
-                              "Solver line search parameters");
+                              "Solver line search");
 
   return params;
 }

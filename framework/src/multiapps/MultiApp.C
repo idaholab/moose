@@ -198,9 +198,9 @@ MultiApp::validParams()
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
   params.registerBase("MultiApp");
 
-  params.addParamNamesToGroup("reset_time reset_apps", "Reset MultiApp parameters");
+  params.addParamNamesToGroup("reset_time reset_apps", "Reset MultiApp");
   params.addParamNamesToGroup("move_time move_apps move_positions",
-                              "Timed move of MultiApps parameters");
+                              "Timed move of MultiApps");
   params.addParamNamesToGroup("relaxation_factor transformed_variables transformed_postprocessors",
                               "Fixed point acceleration of MultiApp quantities");
 
