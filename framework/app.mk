@@ -402,6 +402,9 @@ ifeq ($(libmesh_static),yes)
   endif
 endif
 
+# Write .AppName resource file
+writeredotsource := $(shell $(FRAMEWORK_DIR)/scripts/write_dotresource_file.py $(APPLICATION_DIR)/$(APPLICATION_NAME) $(libmesh_CXXFLAGS))
+
 # Codesign command (OS X Only)
 codesign :=
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
@@ -416,6 +419,7 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
 	@$(codesign)
+	@$(writedotresource)
 
 ###### install stuff #############
 docs_dir := $(APPLICATION_DIR)/doc
@@ -500,6 +504,7 @@ $(bindst): $(app_EXEC) all $(copy_input_targets) install_$(APPLICATION_NAME)_doc
 	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@for lib in $(libpaths); do $(call patch_relink,$@,$$lib,$$(basename $$lib)); done
+	@cp $(APPLICATION_DIR)/.$(APPLICATION_NAME) $(bin_install_dir)
 
 ifeq ($(want_exec),yes)
 install_bin: $(bindst)

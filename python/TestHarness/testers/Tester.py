@@ -611,11 +611,12 @@ class Tester(MooseObject):
 
         # We extract the registered apps only if we need them
         if self.specs["required_applications"] and checks["registered_apps"] is None:
-            checks["registered_apps"] = util.getExeRegisteredApps(self.specs["executable"])
+            checks["registered_apps"] = util.getRegisteredApps(self.specs["executable"],
+                                                               self.specs["app_name"])
 
         # Check to see if we have the required application names
         for var in self.specs['required_applications']:
-            if var not in checks["registered_apps"]:
+            if var.upper() not in checks["registered_apps"]:
                 reasons['required_applications'] = 'App %s not registered in executable' % var
                 break
 
