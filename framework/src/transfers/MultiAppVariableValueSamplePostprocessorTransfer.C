@@ -68,6 +68,9 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
     if (!_fe_problem.getAuxiliarySystem().hasVariable(_var_name))
       paramError("source_variable", "Variable must be an auxiliary variable");
   }
+  else if (_directions.contains("between_multiapp"))
+    mooseError("MultiAppVariableValueSamplePostprocessorTransfer has not been made to support "
+               "sibling transfers");
 }
 
 void
