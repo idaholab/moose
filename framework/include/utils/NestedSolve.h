@@ -64,7 +64,7 @@ public:
   template <int N = 0>
   using Value =
       typename std::conditional<N == 1,
-                                Real,
+                                NSReal,
                                 typename std::conditional<N == 0,
                                                           NestedSolveTempl<is_ad>::DynamicVector,
                                                           Eigen::Matrix<NSReal, N, 1>>::type>::type;
@@ -73,27 +73,28 @@ public:
   template <int N = 0>
   using Jacobian =
       typename std::conditional<N == 1,
-                                Real,
+                                NSReal,
                                 typename std::conditional<N == 0,
                                                           NestedSolveTempl<is_ad>::DynamicMatrix,
                                                           Eigen::Matrix<NSReal, N, N>>::type>::type;
 
   /// Solve the N*N nonlinear equation system using a built-in Netwon-Raphson loop
   template <typename V, typename T>
-  void nonlinear(V & guess, T compute);
+  void nonlinear(V & guess, T & compute);
 
   /// @{ The separate residual/Jacobian functor versions use Eigen::HybridNonLinearSolver
   template <typename R, typename J>
-  void nonlinear(DynamicVector & guess, R computeResidual, J computeJacobian);
+  void nonlinear(DynamicVector & guess, R & computeResidual, J & computeJacobian);
   template <typename R, typename J>
-  void nonlinear(NSReal & guess, R computeResidual, J computeJacobian);
+  void nonlinear(NSReal & guess, R & computeResidual, J & computeJacobian);
   template <typename R, typename J>
-  void nonlinear(NSRealVectorValue & guess, R computeResidual, J computeJacobian);
+  void nonlinear(NSRealVectorValue & guess, R & computeResidual, J & computeJacobian);
   ///@}
 
   /// @{ Perform a bounded solve use Eigen::HybridNonLinearSolver
   template <typename R, typename J, typename B>
-  void nonlinearBounded(NSReal & guess, R computeResidual, J computeJacobian, B computeBounds);
+  void
+  nonlinearBounded(NSReal & guess, R & computeResidual, J & computeJacobian, B & computeBounds);
   ///@}
 
   ///@{ default values
@@ -162,19 +163,19 @@ protected:
 private:
   /// Build a suitable Eigen adaptor functor
   template <typename R, typename J>
-  auto make_adaptor(R residual, J jacobian);
+  auto make_adaptor(R & residual, J & jacobian);
   template <typename R, typename J>
-  auto make_real_adaptor(R residual, J jacobian);
+  auto make_real_adaptor(R & residual, J & jacobian);
   template <typename R, typename J>
-  auto make_realvector_adaptor(R residual, J jacobian);
+  auto make_realvector_adaptor(R & residual, J & jacobian);
 };
 
 template <bool is_ad>
 template <typename R, typename J>
 void
 NestedSolveTempl<is_ad>::nonlinear(NestedSolveTempl<is_ad>::DynamicVector & guess,
-                                   R computeResidual,
-                                   J computeJacobian)
+                                   R & computeResidual,
+                                   J & computeJacobian)
 {
   // adaptor functor to utilize the Eigen non-linear solver
   auto functor = make_adaptor(computeResidual, computeJacobian);
@@ -190,7 +191,7 @@ NestedSolveTempl<is_ad>::nonlinear(NestedSolveTempl<is_ad>::DynamicVector & gues
 template <bool is_ad>
 template <typename R, typename J>
 void
-NestedSolveTempl<is_ad>::nonlinear(NSReal & guess, R computeResidual, J computeJacobian)
+NestedSolveTempl<is_ad>::nonlinear(NSReal & guess, R & computeResidual, J & computeJacobian)
 {
   using V = NestedSolveTempl<is_ad>::DynamicVector;
 
@@ -212,9 +213,9 @@ template <bool is_ad>
 template <typename R, typename J, typename B>
 void
 NestedSolveTempl<is_ad>::nonlinearBounded(NSReal & guess,
-                                          R computeResidual,
-                                          J computeJacobian,
-                                          B computeBounds)
+                                          R & computeResidual,
+                                          J & computeJacobian,
+                                          B & computeBounds)
 {
   auto functor = make_real_adaptor(computeResidual, computeJacobian);
   Eigen::HybridNonLinearSolver<decltype(functor), NSReal> solver(functor);
@@ -261,7 +262,9 @@ NestedSolveTempl<is_ad>::nonlinearBounded(NSReal & guess,
 template <bool is_ad>
 template <typename R, typename J>
 void
-NestedSolveTempl<is_ad>::nonlinear(NSRealVectorValue & guess, R computeResidual, J computeJacobian)
+NestedSolveTempl<is_ad>::nonlinear(NSRealVectorValue & guess,
+                                   R & computeResidual,
+                                   J & computeJacobian)
 {
   using V = NestedSolveTempl<is_ad>::DynamicVector;
 
@@ -284,7 +287,7 @@ NestedSolveTempl<is_ad>::nonlinear(NSRealVectorValue & guess, R computeResidual,
 template <bool is_ad>
 template <typename V, typename T>
 void
-NestedSolveTempl<is_ad>::nonlinear(V & guess, T compute)
+NestedSolveTempl<is_ad>::nonlinear(V & guess, T & compute)
 {
   V delta;
   V residual;
@@ -460,7 +463,7 @@ public:
   RealEigenAdaptorFunctor(R & residual, J & jacobian) : _residual(residual), _jacobian(jacobian) {}
   int operator()(V & guess, V & residual)
   {
-    _residual(guess(0), residual(0, 0));
+    _residual(guess(0), residual(0));
     return 0;
   }
   int df(V & guess, typename NestedSolveTempl<is_ad>::template CorrespondingJacobian<V> & jacobian)
@@ -518,14 +521,14 @@ private:
 template <bool is_ad>
 template <typename R, typename J>
 auto
-NestedSolveTempl<is_ad>::make_adaptor(R residual, J jacobian)
+NestedSolveTempl<is_ad>::make_adaptor(R & residual, J & jacobian)
 {
   return NestedSolveInternal::DynamicMatrixEigenAdaptorFunctor<is_ad, R, J>(residual, jacobian);
 }
 template <bool is_ad>
 template <typename R, typename J>
 auto
-NestedSolveTempl<is_ad>::make_real_adaptor(R residual, J jacobian)
+NestedSolveTempl<is_ad>::make_real_adaptor(R & residual, J & jacobian)
 {
   return NestedSolveInternal::RealEigenAdaptorFunctor<is_ad, R, J>(residual, jacobian);
 }
@@ -533,7 +536,7 @@ NestedSolveTempl<is_ad>::make_real_adaptor(R residual, J jacobian)
 template <bool is_ad>
 template <typename R, typename J>
 auto
-NestedSolveTempl<is_ad>::make_realvector_adaptor(R residual, J jacobian)
+NestedSolveTempl<is_ad>::make_realvector_adaptor(R & residual, J & jacobian)
 {
   return NestedSolveInternal::RealVectorEigenAdaptorFunctor<is_ad, R, J>(residual, jacobian);
 }
