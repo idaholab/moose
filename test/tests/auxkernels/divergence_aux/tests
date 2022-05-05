@@ -1,10 +1,17 @@
 [Tests]
   design = 'DivergenceAux.md'
-  [test]
+  [finite_element]
     type = 'CSVDiff'
-    input = 'test.i'
-    csvdiff = 'test_out.csv'
-    issues = ''
-    requirement = "The system shall be able to compute the divergence of a vector of nonlinear variable."
+    input = 'test_fe.i'
+    csvdiff = 'test_fe_out.csv'
+    issues = '#20955'
+    requirement = "The system shall be able to compute the divergence of a vector of finite element variables."
+  []
+  [finite_volume]
+    type = 'CSVDiff'
+    input = 'test_fv.i'
+    csvdiff = 'test_fv_out.csv'
+    issues = '#20955'
+    requirement = "The system shall be able to compute the divergence of a vector of finite volume variables."
   []
 []

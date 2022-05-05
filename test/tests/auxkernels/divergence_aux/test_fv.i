@@ -2,7 +2,7 @@
   [cmg]
     type = CartesianMeshGenerator
     dim = 2
-    dx = '1.5 2.4 0.1'
+    dx = '1.5 1 0.1'
     dy = '1.3 1 0.9'
     ix = '2 4 1'
     iy = '2 3 3'
@@ -11,29 +11,29 @@
                     1 1 1'
   []
   [add_inner_boundaries_top]
-    type = SideSetsAroundSubdomainsGenerator
+    type = SideSetsAroundSubdomainGenerator
     input = cmg
     new_boundary = 'block_2_top'
     block = 2
     normal = '0 1 0'
   []
   [add_inner_boundaries_bot]
-    type = SideSetsAroundSubdomainsGenerator
+    type = SideSetsAroundSubdomainGenerator
     input = add_inner_boundaries_top
     new_boundary = 'block_2_bot'
     block = 2
     normal = '0 -1 0'
   []
-  [add_inner_boundaries_top]
-    type = SideSetsAroundSubdomainsGenerator
-    input = cmg
+  [add_inner_boundaries_right]
+    type = SideSetsAroundSubdomainGenerator
+    input = add_inner_boundaries_bot
     new_boundary = 'block_2_right'
     block = 2
     normal = '1 0 0'
   []
-  [add_inner_boundaries_top]
-    type = SideSetsAroundSubdomainsGenerator
-    input = cmg
+  [add_inner_boundaries_left]
+    type = SideSetsAroundSubdomainGenerator
+    input = add_inner_boundaries_right
     new_boundary = 'block_2_left'
     block = 2
     normal = '-1 0 0'
@@ -42,57 +42,70 @@
 
 [Variables]
   [u]
+    type = MooseVariableFVReal
   []
   [v]
+    type = MooseVariableFVReal
   []
 []
 
-[Kernels]
+[FVKernels]
   [diff_u]
-    type = Diffusion
+    type = FVDiffusion
+    variable = u
+    coeff = 1
+  []
+  [reaction_u]
+    type = FVReaction
     variable = u
   []
   [diff_v]
-    type = Diffusion
+    type = FVDiffusion
+    variable = v
+    coeff = 2
+  []
+  [reaction_v]
+    type = FVReaction
     variable = v
   []
 []
 
 [AuxVariables]
   [div]
+    type = MooseVariableFVReal
   []
 []
 
 [AuxKernels]
   [divergence]
-    type = DivergenceAux
+    type = ADDivergenceAux
     variable = div
-    u = u
-    v = v
+    u = 'u'
+    v = 'v'
   []
 []
 
-[BCs]
+[FVBCs]
   [left]
-    type = DirichletBC
+    type = FVDirichletBC
     variable = u
     boundary = left
-    value = 0
+    value = 2
   []
   [right]
-    type = DirichletBC
+    type = FVDirichletBC
     variable = u
     boundary = right
     value = 1
   []
   [top]
-    type = DirichletBC
+    type = FVDirichletBC
     variable = v
     boundary = top
-    value = 0
+    value = 2
   []
   [bottom]
-    type = DirichletBC
+    type = FVDirichletBC
     variable = v
     boundary = bottom
     value = 1
@@ -119,27 +132,28 @@
     pp_names = 's1 s2 s3 s4'
   []
   [s1]
-    type = SideAverageValue
+    type = ADSideIntegralFunctorPostprocessor
     boundary = 'block_2_right'
-    variable = 'u'
+    functor = 'u'
   []
-  [s4]
-    type = SideAverageValue
+  [s2]
+    type = ADSideIntegralFunctorPostprocessor
     boundary = 'block_2_left'
-    variable = 'u'
+    functor = 'u'
   []
   [s3]
-    type = SideAverageValue
+    type = ADSideIntegralFunctorPostprocessor
     boundary = 'block_2_top'
-    variable = 'v'
+    functor = 'v'
   []
   [s4]
-    type = SideAverageValue
+    type = ADSideIntegralFunctorPostprocessor
     boundary = 'block_2_bot'
-    variable = 'v'
+    functor = 'v'
   []
 []
 
 [Outputs]
   csv = true
+  hide = 's1 s2 s3 s4'
 []
