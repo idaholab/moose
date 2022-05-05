@@ -1002,6 +1002,18 @@ protected:
   /// OutputWarehouse object for this App
   OutputWarehouse _output_warehouse;
 
+  /// Input parameter storage structure (this is a raw pointer so the destruction time can be explicitly controlled)
+  InputParameterWarehouse * _input_parameter_warehouse;
+
+  /// The Factory responsible for building Actions
+  ActionFactory _action_factory;
+
+  /// Where built actions are stored
+  ActionWarehouse _action_warehouse;
+
+  /// Parser for parsing the input file
+  Parser _parser;
+
   /// Where the restartable data is held (indexed on tid)
   RestartableDataMaps _restartable_data;
 
@@ -1016,18 +1028,6 @@ protected:
 
   /// The RankMap is a useful object for determining how the processes are laid out on the physical hardware
   const RankMap _rank_map;
-
-  /// Input parameter storage structure (this is a raw pointer so the destruction time can be explicitly controlled)
-  InputParameterWarehouse * _input_parameter_warehouse;
-
-  /// The Factory responsible for building Actions
-  ActionFactory _action_factory;
-
-  /// Where built actions are stored
-  ActionWarehouse _action_warehouse;
-
-  /// Parser for parsing the input file
-  Parser _parser;
 
   /// Pointer to the executioner of this run (typically build by actions)
   std::shared_ptr<Executioner> _executioner;
