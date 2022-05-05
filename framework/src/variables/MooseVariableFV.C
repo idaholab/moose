@@ -507,50 +507,6 @@ MooseVariableFV<OutputType>::getFluxBCs(const FaceInfo & fi) const
 }
 
 template <typename OutputType>
-const ADReal &
-MooseVariableFV<OutputType>::getVertexValue(const Node & vertex) const
-{
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("MooseVariableFV::getVertexValue only supported for global AD indexing");
-#endif
-
-  auto it = _vertex_to_value.find(&vertex);
-
-  if (it != _vertex_to_value.end())
-    return it->second;
-
-  // Returns a pair with the first being an iterator pointing to the key-value pair and the second a
-  // boolean denoting whether a new insertion took place
-  auto emplace_ret = _vertex_to_value.emplace(&vertex, 0);
-  mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
-  ADReal & value = emplace_ret.first->second;
-  ADReal numerator = 0, denominator = 0;
-
-  const auto node_elem_it = this->_mesh.nodeToElemMap().find(vertex.id());
-  mooseAssert(node_elem_it != this->_mesh.nodeToElemMap().end(), "Should have found the node");
-  const auto & connected_elems = node_elem_it->second;
-  const MeshBase & lm_mesh = this->_mesh.getMesh();
-
-  for (const auto elem_id : connected_elems)
-  {
-    const Elem * const elem = lm_mesh.elem_ptr(elem_id);
-    mooseAssert(elem, "If the elem ID exists, then the elem shouldn't be null");
-
-    if (this->hasBlocks(elem->subdomain_id()))
-    {
-      const auto & elem_value = getElemValue(elem);
-      auto distance = (vertex - elem->vertex_average()).norm();
-      numerator += elem_value / distance;
-      denominator += 1. / distance;
-    }
-  }
-
-  value = numerator / denominator;
-
-  return value;
-}
-
-template <typename OutputType>
 ADReal
 MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 {
@@ -954,7 +910,6 @@ MooseVariableFV<OutputType>::clearCaches()
   _elem_to_grad.clear();
   _face_to_unc_grad.clear();
   _face_to_grad.clear();
-  _vertex_to_value.clear();
   _face_to_value.clear();
 }
 

@@ -545,15 +545,6 @@ private:
    */
   const ADReal & getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const;
 
-  /**
-   * Get the finite volume solution interpolated to \p vertex. This interpolation is done doing a
-   * distance-weighted average of neighboring cell center values
-   * @param vertex The mesh vertex we want to interpolate the finite volume solution to
-   * @return The interpolated vertex value with derivative information from the degrees of freedom
-   * associated with the neighboring cell centers
-   */
-  const ADReal & getVertexValue(const Node & vertex) const;
-
 public:
   const MooseArray<OutputType> & nodalValueArray() const override
   {
@@ -696,9 +687,6 @@ private:
 
   /// A cache for storing gradients on faces
   mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_grad;
-
-  /// A cache that maps from mesh vertices to interpolated finite volume solutions at those vertices
-  mutable std::unordered_map<const Node *, ADReal> _vertex_to_value;
 };
 
 template <typename OutputType>
