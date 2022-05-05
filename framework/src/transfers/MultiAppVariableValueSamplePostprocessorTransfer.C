@@ -129,12 +129,17 @@ MultiAppVariableValueSamplePostprocessorTransfer::cacheElemToPostprocessorData()
           ++count;
       }
       if (count > 0)
-        mooseError("The distances of an element to more than one sub-applications are too close "
-                   " in transfer '",
-                   name(),
-                   "'.\nHaving different positions for sub-applications, "
-                   "a centroid-based MultiApp or adding block restriction to the variable can "
-                   "be used to resolve this error.");
+        mooseWarning("The distances of an element to more than one sub-applications are too close "
+                     " in transfer '",
+                     name(),
+                     "'. The code chooses the sub-application with the smallest ID to set "
+                     "the variable on the element, which may created undesired variable solutions."
+                     "\nHaving different positions for sub-applications, "
+                     "a centroid-based MultiApp or adding block restriction to the variable can "
+                     "be used to resolve this warning.");
+
+      // Note: in case of count>0, the sub-application with smallest id will be used for the
+      //       transfer.
       _cached_multiapp_pos_ids.push_back(multiapp_pos_id);
       _needed_postprocessors.insert(multiapp_pos_id);
     }
