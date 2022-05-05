@@ -1,0 +1,13 @@
+[Tests]
+  [./mesh_only_warning]
+    type = 'Exodiff'
+    input = 'tetgen_mesh.i'
+    cli_args = '--mesh-only'
+    exodiff = 'tetgen_mesh_in.e'
+    recover = false
+
+    issues = '#20694'
+    design = 'FileMeshGenerator.md'
+    requirement = 'The system shall read TetGen file meshes.'
+  [../]
+[]

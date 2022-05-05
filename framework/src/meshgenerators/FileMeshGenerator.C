@@ -63,8 +63,10 @@ FileMeshGenerator::generate()
 {
   auto mesh = buildMeshBaseObject();
 
-  bool exodus =
-      _file_name.rfind(".exd") < _file_name.size() || _file_name.rfind(".e") < _file_name.size();
+  // Figure out if we are reading an Exodus file, but not Tetgen (*.ele)
+  bool exodus = (_file_name.rfind(".exd") < _file_name.size() ||
+                 _file_name.rfind(".e") < _file_name.size()) &&
+                _file_name.rfind(".ele") == std::string::npos;
   bool has_exodus_integers = isParamValid("exodus_extra_element_integers");
   bool restart_exodus = (getParam<bool>("use_for_exodus_restart") && _app.getExodusFileRestart());
   if (exodus)
