@@ -16,15 +16,19 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/remote_elem.h"
 
-FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
+FaceInfo::FaceInfo(const Elem * elem,
+                   unsigned int side,
+                   const Elem * neighbor,
+                   const std::unordered_map<Elem *, Real> & cell_volumes,
+                   const std::unordered_map<Elem *, Point> & cell_centroids)
   : _processor_id(elem->processor_id()),
     _id(std::make_pair(elem->id(), side)),
     _elem(elem),
     _neighbor(neighbor),
     _elem_subdomain_id(elem->subdomain_id()),
     _elem_side_id(side),
-    _elem_centroid(elem->vertex_average()),
-    _elem_volume(elem->volume()),
+    _elem_centroid(&(cell_centroids.find(elem)->second)),
+    _elem_volume(&(cell_volumes.find(elem)->second)),
     _face(const_cast<Elem *>(elem)->build_side_ptr(_elem_side_id)),
     _face_area(_face->volume()),
     _face_centroid(_face->vertex_average()),
@@ -36,10 +40,11 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
     _neighbor_subdomain_id(_valid_neighbor ? neighbor->subdomain_id() : Moose::INVALID_BLOCK_ID),
     _neighbor_side_id(_valid_neighbor ? neighbor->which_neighbor_am_i(elem)
                                       : std::numeric_limits<unsigned int>::max()),
-    _neighbor_centroid(_valid_neighbor ? neighbor->vertex_average()
-                                       : 2 * (_face_centroid - _elem_centroid) + _elem_centroid),
-    _neighbor_volume(_valid_neighbor ? neighbor->volume() : _elem_volume),
-    _d_cf(_neighbor_centroid - _elem_centroid),
+    _neighbor_centroid(_valid_neighbor
+                           ? &(cell_centroids.find(neighbor)->second)
+                           : new Point(2 * (_face_centroid - *_elem_centroid) + *_elem_centroid)),
+    _neighbor_volume(_valid_neighbor ? &(cell_volumes.find(neighbor)->second) :_elem_volume),
+    _d_cf(*_neighbor_centroid - *_elem_centroid),
     _d_cf_mag(_d_cf.norm()),
     _e_cf(_d_cf / _d_cf_mag)
 {
@@ -54,9 +59,9 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
   _normal = normals[0];
 
   // Compute the position of the intersection of e_CF and the surface
-  _r_intersection =
-      _elem_centroid + (((_face_centroid - _elem_centroid) * _normal) / (_e_cf * _normal)) * _e_cf;
+  _r_intersection = *_elem_centroid +
+                    (((_face_centroid - *_elem_centroid) * _normal) / (_e_cf * _normal)) * _e_cf;
 
   // For interpolation coefficients
-  _gc = (_neighbor_centroid - _r_intersection).norm() / _d_cf_mag;
+  _gc = (*_neighbor_centroid - _r_intersection).norm() / _d_cf_mag;
 }

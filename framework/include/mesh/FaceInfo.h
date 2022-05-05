@@ -34,7 +34,11 @@ class Node;
 class FaceInfo
 {
 public:
-  FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor);
+  FaceInfo(const Elem * elem,
+           unsigned int side,
+           const Elem * neighbor,
+           const std::unordered_map<Elem *, Real> & cell_volumes,
+           const std::unordered_map<Elem *, Point> & cell_centroids);
 
   /// This enum is used to indicate which side(s) of a face a particular
   /// variable is defined on.  This is important for certain BC-related finite
@@ -96,8 +100,8 @@ public:
   /// - i.e. the vector from the elem element centroid to the face centroid is
   /// doubled in length.  The tip of this new vector is the neighbor centroid.
   /// This is important for FV dirichlet BCs.
-  const Point & elemCentroid() const { return _elem_centroid; }
-  const Point & neighborCentroid() const { return _neighbor_centroid; }
+  const Point & elemCentroid() const { return *_elem_centroid; }
+  const Point & neighborCentroid() const { return *_neighbor_centroid; }
   ///@}
 
   ///@{
@@ -130,10 +134,10 @@ public:
   std::set<BoundaryID> & boundaryIDs() { return _boundary_ids; }
 
   /// Return the element volume
-  Real elemVolume() const { return _elem_volume; }
+  Real elemVolume() const { return *_elem_volume; }
 
   /// Return the neighbor volume
-  Real neighborVolume() const { return _neighbor_volume; }
+  Real neighborVolume() const { return *_neighbor_volume; }
 
   /// Return the geometric weighting factor
   Real gC() const { return _gc; }
@@ -185,7 +189,7 @@ private:
   /// the elem local side id
   const unsigned int _elem_side_id;
 
-  const Point _elem_centroid;
+  const Point & _elem_centroid;
   const Real _elem_volume;
 
   /// A unique_ptr to the face element built from \p _elem and \p _elem_side_id
@@ -203,8 +207,8 @@ private:
   /// the neighbor local side ide
   const unsigned int _neighbor_side_id;
 
-  const Point _neighbor_centroid;
-  const Real _neighbor_volume;
+  const Point * _neighbor_centroid;
+  const Real * _neighbor_volume;
 
   /// the distance vector between neighbor and element centroids
   const RealVectorValue _d_cf;

@@ -3180,6 +3180,8 @@ MooseMesh::buildFaceInfo() const
   _face_info.clear();
   _all_face_info.clear();
   _elem_side_to_face_info.clear();
+  _elem_volumes.clear();
+  _elem_centroids.clear();
 
   // by performing the element ID comparison check in the below loop, we are ensuring that we never
   // double count face contributions. If a face lies along a process boundary, the only process that
@@ -3188,10 +3190,26 @@ MooseMesh::buildFaceInfo() const
   auto begin = getMesh().active_elements_begin();
   auto end = getMesh().active_elements_end();
 
+  std::vector<ElemInfo> _elem_info;
+  for (auto it = begin; it != end; ++it)
+  {
+    const Elem * elem = *it;
+    _elem_info.emplace_back(*it);
+    auto & elem_entry = _elem_info.back();
+
+    for (const auto side : elem->side_index_range())
+      if (!elem->neighbor_ptr(side))
+      {
+        _elem_info.emplace_back(elem_entry, side);
+      }
+  }
+
+  unsigned int counter = 0;
   for (auto it = begin; it != end; ++it)
   {
     const Elem * elem = *it;
     const dof_id_type elem_id = elem->id();
+
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       // get the neighbor element

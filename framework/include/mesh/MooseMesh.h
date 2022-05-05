@@ -69,11 +69,33 @@ public:
   Real _distance;
 };
 
+class ElemInfo
+{
+public:
+  ElemInfo(const Elem * const elem)
+  : _elem(elem)
+  {
+    _volume = _elem-volume();
+  }
+
+
+  const Elem * const elem() { return _elem; }
+  const Real & volume() { return _volume; }
+  const Point & centroid() { return _centroid; }
+
+protected:
+  const Elem * const _elem;
+  const Real _volume;
+  const Point _centroid;
+}
+
 /**
  * MooseMesh wraps a libMesh::Mesh object and enhances its capabilities
  * by caching additional data and storing more state.
  */
-class MooseMesh : public MooseObject, public Restartable, public PerfGraphInterface
+class MooseMesh : public MooseObject,
+                  public Restartable,
+                  public PerfGraphInterface
 {
 public:
   /**
@@ -1329,6 +1351,9 @@ private:
   /// Map from elem-side pair to FaceInfo
   mutable std::unordered_map<std::pair<const Elem *, unsigned int>, FaceInfo *>
       _elem_side_to_face_info;
+
+  mutable std::unordered_map<Elem *, Real> _elem_volumes;
+  mutable std::unordered_map<Elem *, Point> _elem_centroids;
 
   // true if the _face_info member needs to be rebuilt/updated.
   mutable bool _face_info_dirty = true;
