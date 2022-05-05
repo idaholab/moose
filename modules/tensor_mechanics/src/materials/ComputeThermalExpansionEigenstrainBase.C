@@ -55,12 +55,12 @@ ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::computeQpEigenstrain()
     computeThermalStrain(thermal_strain);
   else
   {
-    // instantaneous_cte is just the derivative of thermal_strain with respect to temperature
-    Real instantaneous_cte = 0.0;
-    computeThermalStrain(thermal_strain, &instantaneous_cte);
+    // dthermal_strain_dT is just the derivative of thermal_strain with respect to temperature
+    Real dthermal_strain_dT = 0.0;
+    computeThermalStrain(thermal_strain, &dthermal_strain_dT);
 
     (*_deigenstrain_dT)[_qp].zero();
-    (*_deigenstrain_dT)[_qp].addIa(instantaneous_cte);
+    (*_deigenstrain_dT)[_qp].addIa(dthermal_strain_dT);
   }
 
   _eigenstrain[_qp].zero();

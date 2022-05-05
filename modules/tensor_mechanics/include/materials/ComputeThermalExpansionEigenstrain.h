@@ -24,7 +24,7 @@ public:
   ComputeThermalExpansionEigenstrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeThermalStrain(Real & thermal_strain, Real * instantaneous_cte) override;
+  virtual void computeThermalStrain(Real & thermal_strain, Real * dthermal_strain_dT) override;
 
   const Real & _thermal_expansion_coeff;
 };

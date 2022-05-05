@@ -10,42 +10,49 @@
 #include "ComputeMeanThermalExpansionEigenstrainBase.h"
 #include "Function.h"
 
+template <bool is_ad>
 InputParameters
-ComputeMeanThermalExpansionEigenstrainBase::validParams()
+ComputeMeanThermalExpansionEigenstrainBaseTempl<is_ad>::validParams()
 {
-  InputParameters params = ComputeThermalExpansionEigenstrainBase::validParams();
+  InputParameters params = ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::validParams();
   params.addClassDescription("Base class for models that compute eigenstrain due to mean"
                              "thermal expansion as a function of temperature");
   return params;
 }
 
-ComputeMeanThermalExpansionEigenstrainBase::ComputeMeanThermalExpansionEigenstrainBase(
-    const InputParameters & parameters)
-  : ComputeThermalExpansionEigenstrainBase(parameters)
+template <bool is_ad>
+ComputeMeanThermalExpansionEigenstrainBaseTempl<
+    is_ad>::ComputeMeanThermalExpansionEigenstrainBaseTempl(const InputParameters & parameters)
+  : ComputeThermalExpansionEigenstrainBaseTempl<is_ad>(parameters)
 {
 }
 
+template <bool is_ad>
 void
-ComputeMeanThermalExpansionEigenstrainBase::computeThermalStrain(Real & thermal_strain,
-                                                                 Real * instantaneous_cte)
+ComputeMeanThermalExpansionEigenstrainBaseTempl<is_ad>::computeThermalStrain(
+    GenericReal<is_ad> & thermal_strain, Real * dthermal_strain_dT)
 {
   const Real small = libMesh::TOLERANCE;
 
-  const Real reference_temperature = referenceTemperature();
-  const Real & current_temp = _temperature[_qp];
-  const Real current_alphabar = meanThermalExpansionCoefficient(current_temp);
-  const Real thexp_current_temp = current_alphabar * (current_temp - reference_temperature);
+  const auto reference_temperature = referenceTemperature();
+
+  const auto & T =
+      this->_use_old_temperature ? this->_temperature_old[_qp] : this->_temperature[_qp];
+
+  const auto current_alphabar = meanThermalExpansionCoefficient(T);
+  const auto thexp_T = current_alphabar * (T - reference_temperature);
 
   // Mean linear thermal expansion coefficient relative to the reference temperature
   // evaluated at stress_free_temperature.  This is
   // \f$\bar{\alpha} = (\delta L(T_{sf}) / L) / (T_{sf} - T_{ref})\f$
   // where \f$T_sf\f$ is the stress-free temperature and \f$T_{ref}\f$ is the reference temperature.
-  const Real alphabar_stress_free_temperature =
-      meanThermalExpansionCoefficient(_stress_free_temperature[_qp]);
+  const auto alphabar_stress_free_temperature =
+      meanThermalExpansionCoefficient(this->_stress_free_temperature[_qp]);
   // Thermal expansion relative to the reference temperature evaluated at stress_free_temperature
   // \f$(\delta L(T_sf) / L)\f$, where \f$T_sf\f$ is the stress-free temperature.
-  const Real thexp_stress_free_temperature =
-      alphabar_stress_free_temperature * (_stress_free_temperature[_qp] - referenceTemperature());
+  const auto thexp_stress_free_temperature =
+      alphabar_stress_free_temperature *
+      (this->_stress_free_temperature[_qp] - referenceTemperature());
 
   // Per M. Niffenegger and K. Reichlin (2012), thermal_strain should be divided
   // by (1.0 + thexp_stress_free_temperature) to account for the ratio of
@@ -54,15 +61,33 @@ ComputeMeanThermalExpansionEigenstrainBase::computeThermalStrain(Real & thermal_
   // but we include it for completeness here.
 
   thermal_strain =
-      (thexp_current_temp - thexp_stress_free_temperature) / (1.0 + thexp_stress_free_temperature);
+      (thexp_T - thexp_stress_free_temperature) / (1.0 + thexp_stress_free_temperature);
 
-  const Real dalphabar_dT = meanThermalExpansionCoefficientDerivative(current_temp);
-  const Real numerator = dalphabar_dT * (current_temp - reference_temperature) + current_alphabar;
-  const Real denominator = 1.0 + alphabar_stress_free_temperature *
-                                     (_stress_free_temperature[_qp] - reference_temperature);
-  if (denominator < small)
-    mooseError("Denominator too small in thermal strain calculation");
+  if constexpr (!is_ad)
+  {
+    const Real dalphabar_dT = meanThermalExpansionCoefficientDerivative(T);
+    const Real numerator = dalphabar_dT * (T - reference_temperature) + current_alphabar;
+    const Real denominator =
+        1.0 + alphabar_stress_free_temperature *
+                  (this->_stress_free_temperature[_qp] - reference_temperature);
+    if (denominator < small)
+      mooseError("Denominator too small in thermal strain calculation");
 
-  mooseAssert(instantaneous_cte, "Internal error. instantaneous_cte should not be nullptr.");
-  *instantaneous_cte = numerator / denominator;
+    mooseAssert(dthermal_strain_dT, "Internal error. dthermal_strain_dT should not be nullptr.");
+    *dthermal_strain_dT = numerator / denominator;
+  }
+  else
+    libmesh_ignore(dthermal_strain_dT);
 }
+
+template <bool is_ad>
+Real
+ComputeMeanThermalExpansionEigenstrainBaseTempl<is_ad>::meanThermalExpansionCoefficientDerivative(
+    const Real)
+{
+  mooseError("meanThermalExpansionCoefficientDerivative must be implemented for any derived non-AD "
+             "class.");
+}
+
+template class ComputeMeanThermalExpansionEigenstrainBaseTempl<false>;
+template class ComputeMeanThermalExpansionEigenstrainBaseTempl<true>;

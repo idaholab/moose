@@ -34,12 +34,12 @@ protected:
    * expansion coefficient.
    * param thermal_strain    The current total linear thermal strain
    *                         (\delta L / L)
-   * param instantaneous_cte The current instantaneous coefficient of thermal
+   * param dthermal_strain_dT The current instantaneous coefficient of thermal
    *                         expansion (derivative of thermal_strain wrt
    *                         temperature
    */
   virtual void computeThermalStrain(GenericReal<is_ad> & thermal_strain,
-                                    Real * instantaneous_cte = nullptr) = 0;
+                                    Real * dthermal_strain_dT = nullptr) = 0;
 
   /// lag temperature variable
   const bool _use_old_temperature;

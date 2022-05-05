@@ -22,22 +22,25 @@
  * M. Niffenegger and K. Reichlin. The proper use of thermal expansion coefficients
  * in finite element calculations. Nuclear Engineering and Design, 243:356-359, Feb. 2012.
  */
-class ComputeMeanThermalExpansionEigenstrainBase : public ComputeThermalExpansionEigenstrainBase
+template <bool is_ad>
+class ComputeMeanThermalExpansionEigenstrainBaseTempl
+  : public ComputeThermalExpansionEigenstrainBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ComputeMeanThermalExpansionEigenstrainBase(const InputParameters & parameters);
+  ComputeMeanThermalExpansionEigenstrainBaseTempl(const InputParameters & parameters);
 
 protected:
   /*
    * Compute the total thermal strain relative to the stress-free temperature at the
    * current temperature, as well as the current instantaneous thermal expansion coefficient.
-   * param thermal_strain    The current total linear thermal strain (\f$\delta L / L\f$)
-   * param instantaneous_cte The current instantaneous coefficient of thermal expansion
+   * @param thermal_strain    The current total linear thermal strain (\f$\delta L / L\f$)
+   * @param dthermal_strain_dT The current instantaneous coefficient of thermal expansion
    *                         (derivative of thermal_strain wrt temperature
    */
-  virtual void computeThermalStrain(Real & thermal_strain, Real * instantaneous_cte) override;
+  virtual void computeThermalStrain(GenericReal<is_ad> & thermal_strain,
+                                    Real * dthermal_strain_dT) override;
 
   /*
    * Get the reference temperature for the mean thermal expansion relationship.  This is
@@ -49,14 +52,23 @@ protected:
    * Compute the mean thermal expansion coefficient relative to the reference temperature.
    * This is the linear thermal strain divided by the temperature difference:
    * \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
-   * param temperature  temperature at which this is evaluated
+   * @param temperature  temperature at which this is evaluated
    */
-  virtual Real meanThermalExpansionCoefficient(const Real temperature) = 0;
+  virtual GenericReal<is_ad>
+  meanThermalExpansionCoefficient(const GenericReal<is_ad> & temperature) = 0;
 
   /*
    * Compute the derivative of the mean thermal expansion coefficient \f$\bar{\alpha}\f$
    * with respect to temperature, where \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
-   * param temperature  temperature at which this is evaluated
+   * (only called in the non-AD instantiation)
+   * @param temperature  temperature at which this is evaluated ()
    */
-  virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature) = 0;
+  virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature);
+
+  using ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::_qp;
 };
+
+typedef ComputeMeanThermalExpansionEigenstrainBaseTempl<false>
+    ComputeMeanThermalExpansionEigenstrainBase;
+typedef ComputeMeanThermalExpansionEigenstrainBaseTempl<true>
+    ADComputeMeanThermalExpansionEigenstrainBase;

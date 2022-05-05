@@ -36,7 +36,7 @@ protected:
    * \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
    * param temperature  temperature at which this is evaluated
    */
-  virtual Real meanThermalExpansionCoefficient(const Real temperature) override;
+  virtual Real meanThermalExpansionCoefficient(const Real & temperature) override;
 
   /*
    * Compute the derivative of the mean thermal expansion coefficient \f$\bar{\alpha}\f$
