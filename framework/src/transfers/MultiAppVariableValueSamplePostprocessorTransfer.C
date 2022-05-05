@@ -126,8 +126,11 @@ MultiAppVariableValueSamplePostprocessorTransfer::cacheElemToPostprocessorData()
           ++count;
       }
       if (count > 0)
-        mooseError("The distances of an element to more than one sub-applications are too close."
-                   "\nDifferent positions for sub-applications or a centroid-based MultiApp can "
+        mooseError("The distances of an element to more than one sub-applications are too close "
+                   " in transfer '",
+                   name(),
+                   "'.\nHaving different positions for sub-applications, "
+                   "a centroid-based MultiApp or adding block restriction to the variable can "
                    "be used to resolve this error.");
       _cached_multiapp_pos_ids.push_back(multiapp_pos_id);
       _needed_postprocessors.insert(multiapp_pos_id);
@@ -299,7 +302,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
           std::vector<dof_id_type> dof_indices;
           _var.getDofIndices(elem, dof_indices);
           mooseAssert(dof_indices.size() == 1,
-                      "The variable must be in constant monomial with one DoF on an element");
+                      "The variable must be a constant monomial with one DoF on an element");
           mooseAssert(pp_values[_cached_multiapp_pos_ids[i]] != std::numeric_limits<Real>::max(),
                       "We should have pulled all the data we needed.");
           solution.set(dof_indices[0] + _comp, pp_values[_cached_multiapp_pos_ids[i]]);

@@ -77,6 +77,17 @@
     requirement = "The systen shall error out if more than one sub-applications are in the same distance from an element."
   []
 
+  [from_multiapp_set_primary_var_error]
+    type = RunException
+    input = full_domain_primary.i
+    cli_args = 'Variables/to_subapp/family=MONOMIAL
+                Variables/to_subapp/order=CONSTANT
+                Transfers/primary_average/source_variable=to_subapp
+                Outputs/file_base=set_primary_var_error_out'
+    expect_err = 'Variable must be an auxiliary variable'
+    requirement = "The systen shall error out if the MultiAppVariableValueSamplePostprocessorTransfer transfers postprocessor values on sub-applications to a primary variable on the main application."
+  []
+
   [block_restricted_primary]
     requirement = "The systen shall allow transferring CONSTANT MONOMIAL variables from the sub-applications"
     [multiapp]
