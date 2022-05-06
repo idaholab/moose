@@ -60,10 +60,12 @@ behaviors of each user-defined object.
 
 !template! item key=definitions
 !! definitions-begin
+
 - +Verification+: (1) The process of: evaluating a system or component to determine whether the
   products of a given development phase satisfy the conditions imposed at the start of that
-  phase. (2) Formal proof of program correctness (e.g., requirements, design, implementation reviews,
-  system tests) [!citep](ISO-systems-software).
+  phase. (2) Formal proof of program correctness (e.g., requirements, design, implementation
+  reviews, system tests) [!citep](ISO-systems-software).
+
 !! definitions-finish
 !template-end!
 
@@ -73,6 +75,7 @@ behaviors of each user-defined object.
 
 !template! item key=minimum-requirements
 !! minimum-requirements-begin
+
 - A [!ac](POSIX) compliant Unix including the two most recent versions of MacOS and most current
   versions of Linux.
 - 4 GB of RAM for optimized compilation (8 GB for debug compilation), 2 GB per core execution
@@ -80,6 +83,7 @@ behaviors of each user-defined object.
 - C++17 compatible compiler (GCC, Clang)
 - Python 3.7+
 - Git
+
 !! minimum-requirements-finish
 !template-end!
 
@@ -107,6 +111,7 @@ which may be disabled.
 
 !template! item key=maintainability
 !! maintainability-begin
+
 - The latest working version (defined as the version that passes all tests in the current regression
   test suite) shall be publicly available at all times through the repository host provider.
 - Flaws identified in the system shall be reported and tracked in a ticket or issue based system. The
@@ -116,6 +121,7 @@ which may be disabled.
   (within two business days).
 - The core framework in its entirety will be made publicly available under the [!ac](LGPL)
   version 2.0 license.
+
 !! maintainability-finish
 !template-end!
 
