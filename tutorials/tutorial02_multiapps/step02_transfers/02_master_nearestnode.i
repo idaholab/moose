@@ -75,10 +75,8 @@
   [push_u]
     type = MultiAppNearestNodeTransfer
 
-    multi_app = sub_app
-
     # Transfer to the sub-app from this app
-    direction = to_multiapp
+    to_multi_app = sub_app
 
     # The name of the variable in this app
     source_variable = u
