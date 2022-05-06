@@ -75,16 +75,14 @@
 [Transfers]
   [push_u]
     type = MultiAppVariableValueSampleTransfer
-    multi_app = micro
-    direction = to_multiapp
+    to_multi_app = micro
     source_variable = u
     variable = ut
   []
 
   [pull_v]
     type = MultiAppPostprocessorInterpolationTransfer
-    multi_app = micro
-    direction = from_multiapp
+    from_multi_app = micro
     variable = vt
     postprocessor = average_v
   []

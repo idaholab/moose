@@ -73,10 +73,8 @@
   [pull_v]
     type = MultiAppMeshFunctionTransfer
 
-    multi_app = sub_app
-
     # Transfer from the sub-app to this app
-    direction = from_multiapp
+    from_multi_app = sub_app
 
     # The name of the variable in the sub-app
     source_variable = v
@@ -88,10 +86,8 @@
   [push_u]
     type = MultiAppMeshFunctionTransfer
 
-    multi_app = sub_app
-
     # Transfer to the sub-app from this app
-    direction = to_multiapp
+    to_multi_app = sub_app
 
     # The name of the variable in this app
     source_variable = u

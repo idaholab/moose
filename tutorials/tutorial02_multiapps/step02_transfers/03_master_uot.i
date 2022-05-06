@@ -90,16 +90,14 @@
 [Transfers]
   [push_u]
     type = MultiAppUserObjectTransfer
-    multi_app = sub_app
-    direction = to_multiapp
+    to_multi_app = sub_app
     variable = u_integral
     user_object = layered_integral
   []
 
   [pull_v]
     type = MultiAppUserObjectTransfer
-    multi_app = sub_app
-    direction = from_multiapp
+    from_multi_app = sub_app
     variable = v_average
     user_object = layered_average
   []
