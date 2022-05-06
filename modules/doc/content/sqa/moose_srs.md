@@ -1,5 +1,21 @@
 !template load file=sqa/app_srs.md.template app=MOOSE category=_empty_
 
+!template item key=system-purpose
+!include system_purpose.md
+
+!template item key=system-scope
+!include system_scope.md
+
+!template item key=system-context
+!include framework_srs.md start=system-context-begin end=system-context-finish
+
+!template item key=user-characteristics
+!include framework_srs.md start=user-characteristics-begin end=user-characteristics-finish
+
+!template! item key=assumptions-and-dependencies
+!include sqa/assumptions_and_dependencies.md
+!template-end!
+
 !template item key=functional-requirements
 All of the requirements for [!ac](MOOSE) are provided in the dependent [!ac](SRS) documents, please
 refer to the documents listed in [#assumptions-and-dependencies].

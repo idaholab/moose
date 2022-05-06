@@ -9,17 +9,16 @@ This document serves as an addendum to [framework_sdd.md] and captures informati
 !alert-end!
 !template-end!
 
-!template item key=introduction
-!include framework_sdd.md start=introduction-begin end=introduction-finish
-
-!template item key=system-purpose
-!include framework_sdd.md start=system-purpose-begin end=system-purpose-finish
-
-!template item key=system-scope
-!include framework_sdd.md start=system-scope-begin end=system-scope-finish
-
-!template item key=dependencies-and-limitations
-!include framework_sdd.md start=dependencies-and-limitations-begin end=dependencies-and-limitations-finish
+!template! item key=system-purpose
+The Software Design Description provided here is description of each object in the
+system. The pluggable architecture of the underlying framework of {{app}} makes
+[!ac](MOOSE) and [!ac](MOOSE)-based applications straightforward to develop as each
+piece of end-user (developer) code that goes into the system follows a well-defined
+interface for the underlying systems that those object plug into. These descriptions are
+provided through developer-supplied "markdown" files that are required for all new
+objects that are developed as part of {{app}}. More information about the design
+documentation for MOOSE-based applications like {{app}} can be found in [framework/documenting.md].
+!template-end!
 
 !template item key=definitions
 !include framework_sdd.md start=definitions-begin end=definitions-finish
@@ -27,29 +26,40 @@ This document serves as an addendum to [framework_sdd.md] and captures informati
 !template item key=acronyms
 !acronym list
 
-!template item key=design-stakeholders
-!include framework_sdd.md start=design-stakeholders-begin end=design-stakeholders-finish
-
-!template item key=stakeholder-design-concerns
-!include framework_sdd.md start=stakeholder-design-concerns-begin end=stakeholder-design-concerns-finish
-
-!template item key=system-design
-!include framework_sdd.md start=system-design-begin end=system-design-finish
-
-!template item key=system-structure
-!include framework_sdd.md start=system-structure-begin end=system-structure-finish
+!template! item key=stakeholder-design-concerns
+Concerns from many of the stakeholders are similar. These concerns include correctness, stability,
+and performance. The mitigation plan for each of these can be addressed. For correctness, {{app}}
+development requires either regression or unit testing for all new code added to the repository.
+The project contains several comparisons against analytical solutions where possible and also
+other verification methods such as [MMS](python/mms.md optional=True). For stability, {{app}}
+maintains multiple branches to incorporate several layers of testing both internally and for dependent
+applications. Finally, performance tests are also performed as part of the the normal testing suite
+to monitor code change impacts to performance.
+!template-end!
 
 !template item key=data-design-and-control
 !include framework_sdd.md start=data-design-and-control-begin end=data-design-and-control-finish
 
-!template item key=human-machine-interface-design
-!include framework_sdd.md start=human-machine-interface-design-begin end=human-machine-interface-design-finish
+!template! item key=human-machine-interface-design
+{{app}} is a command-line driven program. All interaction with {{app}} is ultimately
+done through the command line. This is typical for [!ac](HPC) applications that use
+the [!ac](MPI) interface for running on super computing clusters. Optional GUIs may be
+used to assist in creating input files and launching executables on the command line.
+!template-end!
 
-!template item key=system-design-interface
-!include framework_sdd.md start=system-design-interface-begin end=system-design-interface-finish
+!template! item key=system-design-interface
+All external system interaction is performed either through file [!ac](I/O) or through
+local [!ac](API) calls. Neither {{app}}, nor the MOOSE framework, nor the MOOSE modules
+are designed to interact with any external system directly through remote procedure calls.
+Any code to code coupling performed using the framework are done directly through API calls
+either in a static binary or after loading shared libraries.
+!template-end!
 
-!template item key=security-structure
-!include framework_sdd.md start=security-structure-begin end=security-structure-finish
+!template! item key=security-structure
+{{app}} does not require any elevated privileges to operate and does not run any
+stateful services, daemons or other network programs. Distributed runs rely on the
+[!ac](MPI) library.
+!template-end!
 
 !template item key=requirements-cross-reference
 !sqa cross-reference category={{category}}
