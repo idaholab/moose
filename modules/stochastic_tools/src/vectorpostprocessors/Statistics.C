@@ -103,6 +103,14 @@ Statistics::initialSetup()
 }
 
 void
+Statistics::initialize()
+{
+  if (!containsCompleteHistory())
+    for (const auto & vec : _stat_vectors)
+      vec->clear();
+}
+
+void
 Statistics::execute()
 {
   TIME_SECTION("execute", 3, "Executing Statistics");

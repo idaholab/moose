@@ -28,7 +28,7 @@ public:
   virtual void execute() override;
 
   /// Not used; all parallel computation is wrapped in the Statistics objects
-  virtual void initialize() final{};
+  virtual void initialize() override;
   virtual void finalize() final{};
 
 protected:
