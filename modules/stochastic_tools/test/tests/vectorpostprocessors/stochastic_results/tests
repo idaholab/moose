@@ -7,7 +7,7 @@
 
     [replicated]
       type = CSVDiff
-      input = master.i
+      input = parent.i
       cli_args = 'VectorPostprocessors/storage/parallel_type=REPLICATED Outputs/file_base=replicated_out'
       csvdiff = replicated_out_storage_0002.csv
 
@@ -16,7 +16,7 @@
 
     [distributed]
       type = CSVDiff
-      input = master.i
+      input = parent.i
       min_parallel = 3
       max_parallel = 3
       cli_args = 'VectorPostprocessors/storage/parallel_type=DISTRIBUTED Outputs/file_base=distributed_out'
@@ -31,7 +31,7 @@
 
     [custom]
       type = CSVDiff
-      input = master.i
+      input = parent.i
       cli_args = 'VectorPostprocessors/storage/parallel_type=REPLICATED Outputs/file_base=prefix_out Transfers/data/prefix=prefix'
       csvdiff = prefix_out_storage_0002.csv
 
@@ -39,7 +39,7 @@
     []
     [none]
       type = CSVDiff
-      input = master.i
+      input = parent.i
       cli_args = 'VectorPostprocessors/storage/parallel_type=REPLICATED Outputs/file_base=no_prefix_out Transfers/data/prefix='''
       csvdiff = no_prefix_out_storage_0002.csv
 

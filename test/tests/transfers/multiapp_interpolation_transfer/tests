@@ -1,30 +1,30 @@
 [Tests]
   [tosub]
     type = 'Exodiff'
-    input = 'tosub_master.i'
-    exodiff = 'tosub_master_out_sub0.e'
+    input = 'tosub_parent.i'
+    exodiff = 'tosub_parent_out_sub0.e'
     design = 'transfers/MultiAppInterpolationTransfer.md'
     issues = '#1879'
-    requirement = "The system shall allow to interpolate variables from the master app to the sub apps"
+    requirement = "The system shall allow to interpolate variables from the parent app to the sub apps"
   []
 
   [fromsub]
     type = 'Exodiff'
-    input = 'fromsub_master.i'
-    exodiff = 'fromsub_master_out.e'
+    input = 'fromsub_parent.i'
+    exodiff = 'fromsub_parent_out.e'
     design = 'transfers/MultiAppInterpolationTransfer.md'
     issues = '#1879'
-    requirement = "The system shall allow to interpolate variables from the sub apps to the master app"
+    requirement = "The system shall allow to interpolate variables from the sub apps to the parent app"
   []
 
   [fromsub_restricted]
     type = 'Exodiff'
-    input = 'fromrestrictedsub_master.i'
-    exodiff = 'fromrestrictedsub_master_out.e'
+    input = 'fromrestrictedsub_parent.i'
+    exodiff = 'fromrestrictedsub_parent_out.e'
     platform = darwin # Object is sensitive and needs to be evaluated #12800
 
     design = 'transfers/MultiAppInterpolationTransfer.md'
     issues = '#1879 #12618'
-    requirement = "The system shall allow to interpolate block restricted variables from the sub apps to the master app"
+    requirement = "The system shall allow to interpolate block restricted variables from the sub apps to the parent app"
   []
 []

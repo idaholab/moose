@@ -16,7 +16,7 @@ A `MultiApp` can be executed at any point during the master solve by setting the
 `positions` parameters is a list of 3D coordinate pairs
 describing the offset of the sub-application(s) into the physical space of the master application.
 
-!listing multiapps/transient_multiapp/dt_from_master.i block=MultiApps
+!listing multiapps/transient_multiapp/dt_from_parent.i block=MultiApps
 
 !---
 
@@ -92,9 +92,9 @@ Each application will march forward in time together, solve, and output
 
 !---
 
-## 01_master.i
+## 01_parent.i
 
-!listing step01_multiapps/01_master.i
+!listing step01_multiapps/01_parent.i
 
 !---
 
@@ -106,7 +106,7 @@ Note how the `sub-app` input file doesn't even "know" it's being run within a Mu
 
 !---
 
-## Run 01_master.i
+## Run 01_parent.i
 
 - Look at the order of execution
 - Inspect outputs
@@ -125,7 +125,7 @@ Let's modify the sub-app to have a smaller timestep and see what happens
 
 !---
 
-## Run 02_master_sublimit.i
+## Run 02_parent_sublimit.i
 
 - Note the timestep being used by each app
 
@@ -143,13 +143,13 @@ Often better to allow the sub-app to take smaller timesteps.  For instance: if t
 
 To allow this: set `sub_cycling=true` in the `MultiApp` block:
 
-!listing step01_multiapps/03_master_subcycle.i
+!listing step01_multiapps/03_parent_subcycle.i
 	 block=MultiApps
-         caption=03_master_subcycle.i
+         caption=03_parent_subcycle.i
 
 !---
 
-## Run 03_master_subcycle.i
+## Run 03_parent_subcycle.i
 
 - Note the timestep size used by each solve
 - The sub-app will take however many timesteps are needed to reach the Master app's time
@@ -181,16 +181,16 @@ There are two options for specifying input files for the positions:
 
 ## Multiple Sub-App Hierarchy
 
-!listing step01_multiapps/04_master_multiple.i
+!listing step01_multiapps/04_parent_multiple.i
 	 block=MultiApps
-         caption=04_master_multiple.i
+         caption=04_parent_multiple.i
 
 !media multiapps_04_hierarchy.png
        style=width:50%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !---
 
-## Run 04_master_multiple.i
+## Run 04_parent_multiple.i
 
 - Note how there are now three solves when the MultiApp executes
 - Note the names of the output files
@@ -223,7 +223,7 @@ To achieve this, the available processors are evenly split among the sub-apps wi
 
 !---
 
-## Run 05_master_parallel.i
+## Run 05_parent_parallel.i
 
 - Try 1, 3, 6 MPI procs
 - Note the MultiApp Execution time
@@ -245,22 +245,22 @@ As discussed before, MultiApps can represent an arbitrary tree of solves.  Often
 
 In parallel, the MultiApps each receive the full amount of processors available from the Master app.  The processors are then split between the sub-apps.  This means that the MultiApps will execute "in-turn" in parallel - one before the other.  The order of executions is automatically determined based on the needs of transfers (more on that in a bit).
 
-To show how this works, we'll execute `06_master_twoapps.i` which will run a hierarchy like the one below...
+To show how this works, we'll execute `06_parent_twoapps.i` which will run a hierarchy like the one below...
 
 !---
 
 ## Multiple MultiApps Cont.
 
-!listing step01_multiapps/06_master_twoapps.i
+!listing step01_multiapps/06_parent_twoapps.i
 	 block=MultiApps
-         caption=06_master_twoapps.i
+         caption=06_parent_twoapps.i
 
 !media multiapps_06_hierarchy.png
        style=width:60%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
 
 !---
 
-## Run 06_master_twoapps.i
+## Run 06_parent_twoapps.i
 
 - Note how the apps execute
 - Run in parallel with 6, 12, 24 procs
@@ -294,11 +294,11 @@ It is possible to run this as _one_ calculation with MOOSE MultiApps!
 
 !---
 
-## Run 07_master_multilevel.i
+## Run 07_parent_multilevel.i
 
-!listing step01_multiapps/07_master_multilevel.i
+!listing step01_multiapps/07_parent_multilevel.i
 	 block=MultiApps
-         caption=07_master_multilevel.i
+         caption=07_parent_multilevel.i
 
 !listing step01_multiapps/07_sub_multilevel.i
 	 block=MultiApps

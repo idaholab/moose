@@ -8,15 +8,15 @@
 
     [test]
       type = 'Exodiff'
-      input = 'master.i'
-      exodiff = 'master_out.e'
+      input = 'parent.i'
+      exodiff = 'parent_out.e'
 
       detail = "using a inverse distance algorithm,"
     []
 
     [test_constant_monomial]
       type = 'Exodiff'
-      input = 'master.i'
+      input = 'parent.i'
       exodiff = 'constant_monomial.e'
       cli_args = 'AuxVariables/from_sub/order=CONSTANT AuxVariables/from_sub/family=MONOMIAL Outputs/file_base=constant_monomial'
       detail = "if the destination variable is CONSTANT MONOMIAL,"
@@ -24,35 +24,35 @@
 
     [radial_basis]
       type = 'Exodiff'
-      input = 'radial_master.i'
-      exodiff = 'radial_master_out.e'
+      input = 'radial_parent.i'
+      exodiff = 'radial_parent_out.e'
 
       detail = "using a radial basis algorithm,"
     []
 
     [multilevel]
       type = 'Exodiff'
-      input = 'multilevel_master.i'
-      exodiff = 'multilevel_master_out.e multilevel_master_out_sub0.e '
-                'multilevel_master_out_sub0_sub0.e multilevel_master_out_sub0_sub1.e '
-                'multilevel_master_out_sub1.e multilevel_master_out_sub1_sub0.e '
-                'multilevel_master_out_sub1_sub1.e'
+      input = 'multilevel_parent.i'
+      exodiff = 'multilevel_parent_out.e multilevel_parent_out_sub0.e '
+                'multilevel_parent_out_sub0_sub0.e multilevel_parent_out_sub0_sub1.e '
+                'multilevel_parent_out_sub1.e multilevel_parent_out_sub1_sub0.e '
+                'multilevel_parent_out_sub1_sub1.e'
 
       detail = "with multi-level sub-applications,"
     []
 
-    [from_sub_to_master]
+    [from_sub_to_parent]
       type = 'Exodiff'
-      input = 'master_quad.i'
-      exodiff = 'master_quad_out.e'
+      input = 'parent_quad.i'
+      exodiff = 'parent_quad_out.e'
 
       detail = "with multiple sub-application files, and"
     []
 
-    [from_sub_to_master_single_sub_file]
+    [from_sub_to_parent_single_sub_file]
       type = 'Exodiff'
-      input = 'master2_quad.i'
-      exodiff = 'master2_quad_out.e'
+      input = 'parent2_quad.i'
+      exodiff = 'parent2_quad_out.e'
 
       detail = "with a single sub-application file."
     []
@@ -60,7 +60,7 @@
 
   [test_error]
     type = 'RunException'
-    input = 'master.i'
+    input = 'parent.i'
     expect_err = 'Unknown variable \w+'
     cli_args = 'Transfers/pp_transfer/variable=invalid Outputs/exodus=false Outputs/active='
     prereq = basis/test
@@ -71,7 +71,7 @@
 
   [fetype_error]
     type = 'RunException'
-    input = 'master.i'
+    input = 'parent.i'
     expect_err = 'Must be either CONSTANT MONOMIAL or FIRST LAGRANGE'
     prereq = basis/test
     cli_args = 'AuxVariables/from_sub/order=FIRST AuxVariables/from_sub/family=MONOMIAL Outputs/exodus=false'
@@ -80,7 +80,7 @@
 
   [direction_error]
     type = 'RunException'
-    input = 'master.i'
+    input = 'parent.i'
     expect_err = "Bi-directional or MultiApp-to-MultiApp transfers are not implemented"
     cli_args = 'Transfers/pp_transfer/to_multi_app=sub'
     requirement = "The system shall report an error if parameters for an unsupported direction are provided for the transfer between sub-app scalars and a main app field variablea."

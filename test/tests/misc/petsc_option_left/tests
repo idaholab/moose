@@ -6,6 +6,6 @@
     type = RunApp
     input = '2d_diffusion_petsc_option.i'
     absent_out = "Option left.*value.*hypre"
-    requirement = "The system shall use the default PETSc option database in the master app to handle system-level PETSc parameters"
+    requirement = "The system shall use the default PETSc option database in the parent app to handle system-level PETSc parameters"
   []
 []

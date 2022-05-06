@@ -4,10 +4,10 @@
 
   [./test]
     type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out.e master_out_sub_app0.e master_out_sub_app1.e'
+    input = 'parent.i'
+    exodiff = 'parent_out.e parent_out_sub_app0.e parent_out_sub_app1.e'
     allow_warnings = true
 
-    requirement = "The system shall support running a transient simulation with sub-applications that can fail and re-execute with smaller timesteps until the execution times for the master and sub-applications are equivalent."
+    requirement = "The system shall support running a transient simulation with sub-applications that can fail and re-execute with smaller timesteps until the execution times for the parent and sub-applications are equivalent."
   [../]
 []

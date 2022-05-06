@@ -3,12 +3,12 @@
   design = 'syntax/MultiApps/index.md'
 
   [group]
-    requirement = "The system shall support the failure of sub-application that operates with differing time steps than the master application."
+    requirement = "The system shall support the failure of sub-application that operates with differing time steps than the parent application."
 
     [./test_failure]
       type = 'Exodiff'
-      input = 'master.i'
-      exodiff = 'master_out.e master_out_sub0.e'
+      input = 'parent.i'
+      exodiff = 'parent_out.e parent_out_sub0.e'
       allow_warnings = true
 
       detail = "The simulation shall continue by reducing the time step and"

@@ -1,23 +1,23 @@
 [Tests]
   design = 'syntax/MultiApps/index.md'
   issues = '#12576'
-  [master]
+  [parent]
     type = Exodiff
-    input = master.i
-    exodiff = 'master_out_sub0.e master_out_sub1.e'
+    input = parent.i
+    exodiff = 'parent_out_sub0.e parent_out_sub1.e'
     requirement = "The MultiApp system shall include the ability to set command line parameters for each sub application from the input file."
   []
 
-  [master_common]
+  [parent_common]
     type = Exodiff
-    input = master_common.i
-    exodiff = 'master_common_out_sub0.e master_common_out_sub1.e'
+    input = parent_common.i
+    exodiff = 'parent_common_out_sub0.e parent_common_out_sub1.e'
     requirement = "The MultiApp system shall include the ability to set common command line parameters for all sub applications from the input file."
   []
 
   [wrong_size]
     type = RunException
-    input = master_wrong_size.i
+    input = parent_wrong_size.i
     expect_err = 'The number of items supplied must be 1 or equal to the number of sub apps'
     requirement = "The MultiApp system shall error when the number of command line arguments supplied in the input file differs from the number if sub apps."
   []

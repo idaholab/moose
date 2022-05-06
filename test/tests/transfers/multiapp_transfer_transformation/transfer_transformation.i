@@ -151,7 +151,7 @@
     exclude_gap_blocks = '1 3'
   []
 
-  [from_master]
+  [from_parent]
     type = MultiAppInterpolationTransfer
     to_multi_app = sub
     num_points = 1
@@ -159,10 +159,10 @@
     shrink_mesh = 'target'
     source_variable = 'u'
     exclude_gap_blocks = '1 3'
-    variable = 'frommaster'
+    variable = 'fromparent'
   []
 
-  [from_master_elem]
+  [from_parent_elem]
     type = MultiAppInterpolationTransfer
     to_multi_app = sub
     num_points = 4
@@ -170,6 +170,6 @@
     shrink_mesh = 'target'
     source_variable = 'u'
     exclude_gap_blocks = '1 3'
-    variable = 'frommasterelem'
+    variable = 'fromparentelem'
   []
 []

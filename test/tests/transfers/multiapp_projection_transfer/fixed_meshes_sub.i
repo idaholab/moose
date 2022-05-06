@@ -11,9 +11,9 @@
 []
 
 [AuxVariables]
-  [./from_master]
+  [./from_parent]
   [../]
-  [./elemental_from_master]
+  [./elemental_from_parent]
     order = CONSTANT
     family = MONOMIAL
   [../]

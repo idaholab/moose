@@ -3,7 +3,7 @@
   design = 'TransientMultiApp.md'
   [run]
     type = RunApp
-    input = master.i
+    input = parent.i
     allow_warnings = True
     expect_out = 'sub1 failed to converge'
     max_buffer_size = -1

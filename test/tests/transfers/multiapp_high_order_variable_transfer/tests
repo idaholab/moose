@@ -4,18 +4,18 @@
 
   [L2_Lagrange]
     type = 'Exodiff'
-    input = 'master_L2_Lagrange.i'
-    exodiff = 'master_L2_Lagrange_out.e master_L2_Lagrange_out_sub0.e'
+    input = 'parent_L2_Lagrange.i'
+    exodiff = 'parent_L2_Lagrange_out.e parent_L2_Lagrange_out_sub0.e'
     requirement = "The system shall support mesh to mesh interpolation with the first order elemental variable"
   []
 
   [L2_Lagrange_different_mesh]
     type = 'Exodiff'
-    input = 'master_L2_Lagrange.i'
-    exodiff = 'master_L2_Lagrange_diff_out.e master_L2_Lagrange_diff_out_diff_sub0.e'
+    input = 'parent_L2_Lagrange.i'
+    exodiff = 'parent_L2_Lagrange_diff_out.e parent_L2_Lagrange_diff_out_diff_sub0.e'
     cli_args = "Mesh/xmin=0.1
                 Mesh/xmax=1.1
-                Outputs/file_base=master_L2_Lagrange_diff_out
+                Outputs/file_base=parent_L2_Lagrange_diff_out
                 MultiApps/diff_sub/type=FullSolveMultiApp
                 MultiApps/diff_sub/app_type=MooseTestApp
                 MultiApps/diff_sub/positions='0 0 0'
@@ -30,9 +30,9 @@
 
   [L2_Lagrange_nearest_node]
     type = 'Exodiff'
-    input = 'master_L2_Lagrange.i'
-    exodiff = 'master_L2_Lagrange_nearest_node_out.e master_L2_Lagrange_nearest_node_out_nearest_node_sub0.e'
-    cli_args = "Outputs/file_base=master_L2_Lagrange_nearest_node_out
+    input = 'parent_L2_Lagrange.i'
+    exodiff = 'parent_L2_Lagrange_nearest_node_out.e parent_L2_Lagrange_nearest_node_out_nearest_node_sub0.e'
+    cli_args = "Outputs/file_base=parent_L2_Lagrange_nearest_node_out
                 MultiApps/nearest_node_sub/type=FullSolveMultiApp
                 MultiApps/nearest_node_sub/app_type=MooseTestApp
                 MultiApps/nearest_node_sub/positions='0 0 0'
@@ -47,9 +47,9 @@
 
   [L2_Lagrange_interpolation]
     type = 'Exodiff'
-    input = 'master_L2_Lagrange.i'
-    exodiff = 'master_L2_Lagrange_interpolation_out.e master_L2_Lagrange_interpolation_out_interpolation_sub0.e'
-    cli_args = "Outputs/file_base=master_L2_Lagrange_interpolation_out
+    input = 'parent_L2_Lagrange.i'
+    exodiff = 'parent_L2_Lagrange_interpolation_out.e parent_L2_Lagrange_interpolation_out_interpolation_sub0.e'
+    cli_args = "Outputs/file_base=parent_L2_Lagrange_interpolation_out
                 MultiApps/interpolation_sub/type=FullSolveMultiApp
                 MultiApps/interpolation_sub/app_type=MooseTestApp
                 MultiApps/interpolation_sub/positions='0 0 0'
@@ -62,15 +62,15 @@
 
   [L2_Lagrange_userobject]
     type = 'Exodiff'
-    input = 'master_L2_Lagrange_userobject.i'
-    exodiff = 'master_L2_Lagrange_userobject_out.e master_L2_Lagrange_userobject_out_sub0.e'
+    input = 'parent_L2_Lagrange_userobject.i'
+    exodiff = 'parent_L2_Lagrange_userobject_out.e parent_L2_Lagrange_userobject_out_sub0.e'
     requirement = "The system shall support user object transfer with the first order elemental variable"
   []
 
   [L2_Lagrange_conservative]
     type = 'Exodiff'
-    input = 'master_L2_Lagrange_conservative.i'
-    exodiff = 'master_L2_Lagrange_conservative_out.e master_L2_Lagrange_conservative_out_sub0.e'
+    input = 'parent_L2_Lagrange_conservative.i'
+    exodiff = 'parent_L2_Lagrange_conservative_out.e parent_L2_Lagrange_conservative_out_sub0.e'
     requirement = "The system shall support conservative transfer with L2 nonlinear variable"
   []
 

@@ -65,7 +65,7 @@ MultiApp::validParams()
   params.addParam<MooseEnum>("app_type",
                              app_types_options,
                              "The type of application to build (applications not "
-                             "registered can be loaded with dynamic libraries. Master "
+                             "registered can be loaded with dynamic libraries. Parent "
                              "application type will be used if not provided.");
   params.addParam<std::string>("library_path",
                                "",
@@ -121,8 +121,8 @@ MultiApp::validParams()
 
   params.addParam<Real>("global_time_offset",
                         0,
-                        "The time offset relative to the master application for the purpose of "
-                        "starting a subapp at different time from the master application. The "
+                        "The time offset relative to the parent application for the purpose of "
+                        "starting a subapp at different time from the parent application. The "
                         "global time will be ahead by the offset specified here.");
   params.addParam<Real>("reset_time",
                         std::numeric_limits<Real>::max(),
@@ -182,8 +182,12 @@ MultiApp::validParams()
       "List of subapp postprocessors to use coupling "
       "algorithm on during Multiapp coupling iterations");
 
+  params.addDeprecatedParam<bool>("clone_master_mesh",
+                                  false,
+                                  "True to clone parent app mesh and use it for this MultiApp.",
+                                  "clone_master_mesh is deprecated, use clone_parent_mesh instead");
   params.addParam<bool>(
-      "clone_master_mesh", false, "True to clone master mesh and use it for this MultiApp.");
+      "clone_parent_mesh", false, "True to clone parent app mesh and use it for this MultiApp.");
 
   params.addParam<bool>("keep_solution_during_restore",
                         false,
@@ -648,7 +652,7 @@ MultiApp::keepSolutionDuringRestore(bool keep_solution_during_restore)
 {
   if (_pars.isParamSetByUser("keep_solution_during_restore"))
     paramError("keep_solution_during_restore",
-               "This parameter should be provided in only master app");
+               "This parameter should only be provided in parent app");
 
   _keep_solution_during_restore = keep_solution_during_restore;
 }
@@ -869,10 +873,10 @@ MultiApp::createApp(unsigned int i, Real start_time)
              << COLOR_DEFAULT << std::endl;
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
-  if (getParam<bool>("clone_master_mesh"))
+  if (getParam<bool>("clone_master_mesh") || getParam<bool>("clone_parent_mesh"))
   {
     if (_fe_problem.verboseMultiApps())
-      _console << COLOR_CYAN << "Cloned master mesh will be used for MultiApp " << name()
+      _console << COLOR_CYAN << "Cloned parent app mesh will be used for MultiApp " << name()
                << COLOR_DEFAULT << std::endl;
     app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
     auto displaced_problem = _fe_problem.getDisplacedProblem();
@@ -908,8 +912,8 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app->setupOptions();
   // if multiapp does not have file base in Outputs input block, output file base will
   // be empty here since setupOptions() does not set the default file base with the multiapp
-  // input file name. Master will create the default file base for multiapp by taking the
-  // output base of the master problem and appending the name of the multiapp plus a number to it
+  // input file name. Parent app will create the default file base for multiapp by taking the
+  // output base of the parent app problem and appending the name of the multiapp plus a number to it
   if (app->getOutputFileBase().empty())
     app->setOutputFileBase(_app.getOutputFileBase() + "_" + multiapp_name.str());
   preRunInputFile();

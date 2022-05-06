@@ -4,8 +4,8 @@
 
   [./test]
     type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out.e master_out_sub0.e'
+    input = 'parent.i'
+    exodiff = 'parent_out.e parent_out_sub0.e'
 
     requirement = "The system shall include the ability to halt the execution of sub-applications when steady-state is detected."
   [../]

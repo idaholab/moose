@@ -1,0 +1,37 @@
+[Tests]
+  issues = '#6297'
+  design = 'DataIO.md Restartable.md'
+
+  # only parent, 0 <= t <= 4
+  [./complete_solve_no_subapp]
+    type = 'Exodiff'
+    input = 'complete_solve_no_subapp.i'
+    exodiff = 'complete_solve_no_subapp.e'
+
+    requirement = 'The system shall support solving a transient problem as a reference solution for a two part multiapp solve.'
+  [../]
+  # split into sub solve 0 <= t <= 2 && parent 2 <= t <= 4
+  # also write cp files for restart case
+  [./two_step_solve_parent]
+    type = 'Exodiff'
+    input = 'two_step_solve_parent.i'
+    exodiff = 'two_step_solve_parent.e'
+    cli_args = 'Outputs/file_base=two_step_solve_parent
+                MultiApps/full_solve/input_files=two_step_solve_sub.i'
+    recover = false
+
+    requirement = 'The system shall support writing out checkpoint directly from a subapp, a subtree of the multiapp tree of the parent solve.'
+  [../]
+  # split into sub solve 0 <= t <= 2 && parent 2 <= t <= 4
+  # this time restart the sub but _not_ the parent
+  [./two_step_solve_parent_restart]
+    type = 'Exodiff'
+    input = 'two_step_solve_parent.i'
+    exodiff = 'two_step_solve_parent_restart.e'
+    cli_args = 'Outputs/file_base=two_step_solve_parent_restart
+                MultiApps/full_solve/input_files=two_step_solve_sub_restart.i'
+    prereq = 'two_step_solve_parent'
+
+    requirement = 'The system shall support restarting a subapp, a subtree of the multiapp tree of a parent solve without restarting the parent application.'
+  [../]
+[]

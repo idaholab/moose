@@ -50,8 +50,8 @@ Can be made to "conserve" a Postprocessor quantity.
 
 ## Master Input file
 
-!listing step02_transfers/01_master_meshfunction.i
-         caption=01_master_meshfunction.i
+!listing step02_transfers/01_parent_meshfunction.i
+         caption=01_parent_meshfunction.i
 
 !---
 
@@ -62,7 +62,7 @@ Can be made to "conserve" a Postprocessor quantity.
 
 !---
 
-## Run 01_master_meshfunction.i
+## Run 01_parent_meshfunction.i
 
 - Note when the Transfers happen
 - Look at the output files
@@ -88,9 +88,9 @@ This may seem rudimentary - but it is extremely handy...
 !col! width=70%
 To explore the NearestNodeTransfer we will create a situation where a 2D, 1x1 square will be sending and receiving to three 3D "columns" sticking out from it, as shown to the right.
 
-!listing step02_transfers/02_master_nearestnode.i
+!listing step02_transfers/02_parent_nearestnode.i
 	 block=Transfers
-         caption=02_master_nearestnode.i
+         caption=02_parent_nearestnode.i
 
 !col-end!
 
@@ -102,7 +102,7 @@ To explore the NearestNodeTransfer we will create a situation where a 2D, 1x1 sq
 
 !---
 
-## Run 02_master_nearestnode.i
+## Run 02_parent_nearestnode.i
 
 - Open all 4 outputs
 - Step through time and watch the values change
@@ -125,10 +125,10 @@ Some Spatial UserObjects that could be useful to Transfer:
 
 !---
 
-## Run 03_master_uot.i
+## Run 03_parent_uot.i
 
-!listing step02_transfers/03_master_uot.i
-         caption=03_master_uot.i
+!listing step02_transfers/03_parent_uot.i
+         caption=03_parent_uot.i
 
 This example is similar to the last one - except we've made the master domain 3D as well.  The idea is to integrate the field from the master in the vicinity of the sub-apps and transfer that to each sub-app.  In the reverse, the sub-app field is averaged in layers going up the column and those average values are transferred back to the Master.
 
@@ -152,9 +152,9 @@ The final class of Transfers, those moving scalar values, play a role here.  "Sa
 
 !---
 
-## Run 04_master_multiscale
+## Run 04_parent_multiscale
 
-!listing step02_transfers/04_master_multiscale.i
-         caption=04_master_multiscale.i
+!listing step02_transfers/04_parent_multiscale.i
+         caption=04_parent_multiscale.i
 
 Here a `VariableValueSampleTransfer` is used to get values from the Master domain to the sub-apps.  In the reverse a `PostprocessorInterpolationTransfer` works to take values computed in the micro-simulations and then interpolate between them to create a smooth field.

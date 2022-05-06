@@ -3,7 +3,7 @@
   design = 'multiapps/TransientMultiApp.md'
   [./picard_norm_output]
     type = 'RunApp'
-    input = 'picard_master.i'
+    input = 'picard_parent.i'
     # Looking for multiple Picard iteration residuals in one spot
     #  0 Picard |R| = 4.026807e-02
     #  1 Picard |R| = 3.670046e-04
@@ -14,14 +14,14 @@
   [../]
   [./ts_begin_multi_output]
     type = 'RunApp'
-    input = 'picard_master.i'
+    input = 'picard_parent.i'
     absent_out = "Fixed point residual norm after TIMESTEP_END"
 
     requirement = "The system shall only output the coupling iteration residual TIMESTEP_BEGIN norms when there are no TIMESTEP_END Multiapps."
   [../]
   [./ts_end_multi_output]
     type = 'RunApp'
-    input = 'picard_master.i'
+    input = 'picard_parent.i'
     absent_out = "Fixed point residual norm after TIMESTEP_BEGIN"
     cli_args = 'MultiApps/sub/execute_on=timestep_end'
 
@@ -29,7 +29,7 @@
   [../]
   [./ts_both_multi_output]
     type = 'RunApp'
-    input = 'picard_master_both.i'
+    input = 'picard_parent_both.i'
     expect_out = "Fixed point residual norm after TIMESTEP_BEGIN.*Fixed point residual norm after TIMESTEP_END"
 
     requirement = "The system shall output the coupling iteration residual norm for TIMESTEP_BEGIN and TIMESTEP_END Multiapps when both exist in the simulation."

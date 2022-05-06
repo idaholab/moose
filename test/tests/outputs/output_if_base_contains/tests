@@ -2,17 +2,17 @@
   issues = '#1927'
   design = 'syntax/Outputs/index.md'
 
-  [./dt_from_master]
+  [./dt_from_parent]
     type = 'CheckFiles'
-    input = 'dt_from_master_master.i'
-    check_files =      'dt_from_master_master_out.e '
-                       'dt_from_master_master_out_sub0.e '
-                       'dt_from_master_master_out_sub0_sub1.e '
-                       'dt_from_master_master_out_sub1.e '
-                       'dt_from_master_master_out_sub1_sub1.e'
+    input = 'dt_from_parent_parent.i'
+    check_files =      'dt_from_parent_parent_out.e '
+                       'dt_from_parent_parent_out_sub0.e '
+                       'dt_from_parent_parent_out_sub0_sub1.e '
+                       'dt_from_parent_parent_out_sub1.e '
+                       'dt_from_parent_parent_out_sub1_sub1.e'
 
-    check_not_exists = 'dt_from_master_master_out_sub0_sub0.e '
-                       'dt_from_master_master_out_sub1_sub0.e'
+    check_not_exists = 'dt_from_parent_parent_out_sub0_sub0.e '
+                       'dt_from_parent_parent_out_sub1_sub0.e'
     recover = false
 
     requirement = "The system shall support the ability to limit output to certain sub-applications based on name."

@@ -23,7 +23,8 @@ CentroidMultiApp::validParams()
   InputParameters params = TransientMultiApp::validParams();
   params += BlockRestrictable::validParams();
   params.addClassDescription(
-      "Automatically generates Sub-App positions from centroids of elements in the master mesh.");
+      "Automatically generates Sub-App positions from centroids of elements in the parent app "
+      " mesh.");
   params.suppressParameter<std::vector<Point>>("positions");
   params.suppressParameter<std::vector<FileName>>("positions_file");
   return params;
@@ -37,9 +38,9 @@ CentroidMultiApp::CentroidMultiApp(const InputParameters & parameters)
 void
 CentroidMultiApp::fillPositions()
 {
-  MooseMesh & master_mesh = _fe_problem.mesh();
+  MooseMesh & parent_app_mesh = _fe_problem.mesh();
 
-  for (const auto & elem_ptr : master_mesh.getMesh().active_local_element_ptr_range())
+  for (const auto & elem_ptr : parent_app_mesh.getMesh().active_local_element_ptr_range())
     if (hasBlocks(elem_ptr->subdomain_id()))
       _positions.push_back(elem_ptr->vertex_average());
 

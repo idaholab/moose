@@ -3,8 +3,8 @@
   design = "SamplerPostprocessorTransfer.md SamplerFullSolveMultiApp.md"
   [normal]
     type = CSVDiff
-    input = master_full_solve.i
-    csvdiff = master_full_solve_out_storage_0002.csv
+    input = parent_full_solve.i
+    csvdiff = parent_full_solve_out_storage_0002.csv
     cli_args = MultiApps/runner/mode=normal
     requirement = "The system shall support pulling postprocessor data from a sub-application for "
                   "each row of sampled data."
@@ -15,9 +15,9 @@
 
     [exodus_1]
       type = CheckFiles
-      input = master_full_solve.i
-      check_files = master_full_solve_out_runner0.e
-      check_not_exists = master_full_solve_out_runner1.e
+      input = parent_full_solve.i
+      check_files = parent_full_solve_out_runner0.e
+      check_not_exists = parent_full_solve_out_runner1.e
       max_parallel = 1
       prereq = normal
 
@@ -25,9 +25,9 @@
     []
     [exodus_2]
       type = CheckFiles
-      input = master_full_solve.i
-      check_files = 'master_full_solve_out_runner0.e master_full_solve_out_runner1.e'
-      check_not_exists = master_full_solve_out_runner2.e
+      input = parent_full_solve.i
+      check_files = 'parent_full_solve_out_runner0.e parent_full_solve_out_runner1.e'
+      check_not_exists = parent_full_solve_out_runner2.e
       max_parallel = 2
       min_parallel = 2
       prereq = batch/exodus_1
@@ -42,8 +42,8 @@
 
     [n1]
       type = CSVDiff
-      input = master_full_solve.i
-      csvdiff = master_full_solve_out_storage_0002.csv
+      input = parent_full_solve.i
+      csvdiff = parent_full_solve_out_storage_0002.csv
       prereq = batch/exodus_2
       max_parallel = 1
 
@@ -51,8 +51,8 @@
     []
     [n2]
       type = CSVDiff
-      input = master_full_solve.i
-      csvdiff = master_full_solve_out_storage_0002.csv
+      input = parent_full_solve.i
+      csvdiff = parent_full_solve_out_storage_0002.csv
       max_parallel = 2
       min_parallel = 2
       prereq = batch_csv/n1
@@ -61,8 +61,8 @@
     []
     [n2_restore]
       type = CSVDiff
-      input = master_full_solve.i
-      csvdiff = master_full_solve_out_storage_0002.csv
+      input = parent_full_solve.i
+      csvdiff = parent_full_solve_out_storage_0002.csv
       max_parallel = 2
       min_parallel = 2
       prereq = batch_csv/n2

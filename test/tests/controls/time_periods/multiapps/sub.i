@@ -40,7 +40,7 @@
 
 [Executioner]
   type = Transient
-  start_time = 0.3 # set to match start time of MultiApp in master
+  start_time = 0.3 # set to match start time of MultiApp in parent
   num_steps = 20
   dt = 0.1
   solve_type = PJFNK

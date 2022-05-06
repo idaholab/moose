@@ -52,11 +52,11 @@
 []
 
 [Postprocessors]
-  [master_time]
+  [parent_time]
     type = Receiver
     execute_on = 'timestep_end'
   []
-  [master_dt]
+  [parent_dt]
     type = Receiver
     execute_on = 'timestep_end'
   []

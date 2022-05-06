@@ -2,9 +2,9 @@
   [boundary_subdomain_connections]
     type = 'CSVDiff'
     input = '2D_9reg.i'
-    csvdiff = '2D_9reg_out_interface_0001.csv 2D_9reg_out_interface_master_0001.csv '
+    csvdiff = '2D_9reg_out_interface_0001.csv 2D_9reg_out_interface_parent_0001.csv '
               '2D_9reg_out_block_0_0001.csv 2D_9reg_out_block_1_0001.csv '
-              '2D_9reg_out_block_2_0001.csv 2D_9reg_out_block_2_master_0001.csv'
+              '2D_9reg_out_block_2_0001.csv 2D_9reg_out_block_2_parent_0001.csv'
     requirement = 'The system shall output all boundary and subdomain connections.'
     design = 'MooseMesh.md'
     issues = '#14971 #15019'

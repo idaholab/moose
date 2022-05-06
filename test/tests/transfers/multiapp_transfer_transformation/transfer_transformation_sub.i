@@ -100,9 +100,9 @@
 []
 
 [AuxVariables]
-  [./frommaster]
+  [./fromparent]
   []
-  [./frommasterelem]
+  [./fromparentelem]
     order = constant
     family = monomial
   [../]

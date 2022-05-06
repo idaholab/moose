@@ -4,8 +4,8 @@
   [./test]
     # Test the ability to toggle Trasnfer objects using TimePeriod control
     type = Exodiff
-    input = master.i
-    exodiff = 'master_out.e master_out_pp_sub0.e master_out_pp_sub1.e'
+    input = parent.i
+    exodiff = 'parent_out.e parent_out_pp_sub0.e parent_out_pp_sub1.e'
     requirement = "The Control system shall be capable of activating or deactivating Transfer objects with time."
   [../]
 []

@@ -1,4 +1,4 @@
-# yy is passed in from the master app
+# yy is passed in from the parent app
 
 [Mesh]
   [line]
@@ -12,7 +12,7 @@
     input = line
     bottom_left = '0 -0.1 -0.1'
     top_right = '1.5 0.1 0.1'
-    # need a different block ID than what is in the master app to make sure the transfer works properly
+    # need a different block ID than what is in the parent app to make sure the transfer works properly
     block_id = 20
   []
 []

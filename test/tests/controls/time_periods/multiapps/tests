@@ -3,8 +3,8 @@
   design = 'syntax/Controls/index.md source/controls/TimePeriod.md'
   [./test]
     type = Exodiff
-    input = master.i
-    exodiff = 'master_out.e master_out_sub0.e'
+    input = parent.i
+    exodiff = 'parent_out.e parent_out_sub0.e'
     requirement = "The Control system shall be capable of activating or deactivating MultiApp objects with time."
   [../]
 []

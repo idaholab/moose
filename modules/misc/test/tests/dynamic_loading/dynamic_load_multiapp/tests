@@ -3,8 +3,8 @@
   issues = '#12266'
   [./dynamic_load]
     type = 'Exodiff'
-    input = 'misc_master.i'
-    exodiff = 'misc_master_out.e misc_master_out_sub_app0.e'
+    input = 'misc_parent.i'
+    exodiff = 'misc_parent_out.e misc_parent_out_sub_app0.e'
     allow_warnings = true
     library_mode = 'DYNAMIC'
     recover = false # See #5207
@@ -13,8 +13,8 @@
 
   [./dynamic_load_w_name]
     type = 'Exodiff'
-    input = 'misc_master.i'
-    exodiff = 'misc_master_out.e misc_master_out_sub_app0.e'
+    input = 'misc_parent.i'
+    exodiff = 'misc_parent_out.e misc_parent_out_sub_app0.e'
     allow_warnings = true
     library_mode = 'DYNAMIC'
     cli_args = 'MultiApps/sub_app/library_name=libphase_field-opt.la'
@@ -26,7 +26,7 @@
 
   [./dynamic_load_error_check]
     type = 'RunException'
-    input = 'misc_master_bad.i'
+    input = 'misc_parent_bad.i'
     expect_err = 'Unable to locate library for "InvalidApp"'
     allow_warnings = true
     library_mode = 'DYNAMIC'

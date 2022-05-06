@@ -3,8 +3,8 @@
   design = 'level_set/index.md LevelSetMeshRefinementTransfer.md'
   [./test]
     type = Exodiff
-    input = master.i
-    exodiff = 'master_out.e master_out.e-s002 master_out.e-s003 master_out.e-s004 master_out_sub0.e master_out_sub0.e-s002 master_out_sub0.e-s003 master_out_sub0.e-s004'
+    input = parent.i
+    exodiff = 'parent_out.e parent_out.e-s002 parent_out.e-s003 parent_out.e-s004 parent_out_sub0.e parent_out_sub0.e-s002 parent_out_sub0.e-s003 parent_out_sub0.e-s004'
     requirement = "The level set module shall include the ability to transfer refinement patterns, with multiple levels of refinement, to a sub-application."
   [../]
 []

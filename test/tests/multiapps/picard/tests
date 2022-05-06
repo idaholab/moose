@@ -1,8 +1,8 @@
 [Tests]
   [./test]
     type = 'Exodiff'
-    input = 'picard_master.i'
-    exodiff = 'picard_master_out.e picard_master_out_sub0.e'
+    input = 'picard_parent.i'
+    exodiff = 'picard_parent_out.e picard_parent_out_sub0.e'
     rel_err = 5e-5  # Loosened for recovery tests
     design = 'multiapps/TransientMultiApp.md'
     issues = '#2116'
@@ -10,8 +10,8 @@
   [../]
   [./iteration_adaptive]
     type = 'Exodiff'
-    input = 'picard_adaptive_master.i'
-    exodiff = 'picard_adaptive_master_out.e'
+    input = 'picard_adaptive_parent.i'
+    exodiff = 'picard_adaptive_parent_out.e'
     cli_args = 'Executioner/TimeStepper/optimal_iterations=6 Executioner/TimeStepper/growth_factor=1.2 Executioner/TimeStepper/cutback_factor=0.4'
     design = 'timesteppers/IterationAdaptiveDT.md'
     issues = '#2116 #10311'
@@ -19,9 +19,9 @@
   [../]
   [./iteration_adaptive_picard_max_its]
     type = 'Exodiff'
-    input = 'picard_adaptive_master.i'
-    exodiff = 'picard_adaptive_master_picard_max_its.e'
-    cli_args = "Executioner/dt=1.0 Executioner/num_steps=3 Executioner/picard_max_its=3 Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' Executioner/TimeStepper/time_t='0 1.0 10' Outputs/file_base=picard_adaptive_master_picard_max_its sub0:Outputs/exodus=false"
+    input = 'picard_adaptive_parent.i'
+    exodiff = 'picard_adaptive_parent_picard_max_its.e'
+    cli_args = "Executioner/dt=1.0 Executioner/num_steps=3 Executioner/picard_max_its=3 Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' Executioner/TimeStepper/time_t='0 1.0 10' Outputs/file_base=picard_adaptive_parent_picard_max_its sub0:Outputs/exodus=false"
     design = 'timesteppers/IterationAdaptiveDT.md'
     issues = '#12618'
     requirement = "The system shall reject the solve if the maximum number of Picard iterations is reached without converging"
@@ -29,8 +29,8 @@
 
   [./rel_tol]
     type = 'Exodiff'
-    input = 'picard_rel_tol_master.i'
-    exodiff = 'picard_rel_tol_master_out.e'
+    input = 'picard_rel_tol_parent.i'
+    exodiff = 'picard_rel_tol_parent_out.e'
     design = 'multiapps/TransientMultiApp.md'
     issues = '#2116'
     requirement = "The system shall allow transient multiapps with Picard iterations controlled by relative tolerances"
@@ -38,8 +38,8 @@
 
   [./abs_tol]
     type = 'Exodiff'
-    input = 'picard_abs_tol_master.i'
-    exodiff = 'picard_abs_tol_master_out.e'
+    input = 'picard_abs_tol_parent.i'
+    exodiff = 'picard_abs_tol_parent_out.e'
     design = 'multiapps/TransientMultiApp.md'
     issues = '#2116'
     requirement = "The system shall allow transient multiapps with Picard iterations controlled by absolute tolerances"
@@ -47,8 +47,8 @@
 
   [./function_dt]
     type = 'Exodiff'
-    input = 'function_dt_master.i'
-    exodiff = 'function_dt_master_out.e function_dt_master_out_sub_app0.e'
+    input = 'function_dt_parent.i'
+    exodiff = 'function_dt_parent_out.e function_dt_parent_out_sub_app0.e'
     rel_err = 5e-5  # Loosened for recovery tests
     design = 'timesteppers/FunctionDT.md'
     issues = '#5800'
@@ -57,8 +57,8 @@
 
   [./steady]
     type = 'Exodiff'
-    input = 'steady_picard_master.i'
-    exodiff = 'steady_picard_master_out.e steady_picard_master_out_sub0.e'
+    input = 'steady_picard_parent.i'
+    exodiff = 'steady_picard_parent_out.e steady_picard_parent_out_sub0.e'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#9038'
@@ -67,7 +67,7 @@
 
   [./steady_fixed_picard_its]
     type = RunApp
-    input = 'steady_picard_master.i'
+    input = 'steady_picard_parent.i'
     cli_args = 'Executioner/disable_fixed_point_residual_norm_check=true Executioner/accept_on_max_fixed_point_iteration=true'
     expect_out = 'Fixed point convergence reason: REACH_MAX_ITS'
     recover = false
@@ -79,8 +79,8 @@
 
   [./steady_with_custom_convergence_check]
     type = 'Exodiff'
-    input = 'steady_custom_picard_master.i'
-    exodiff = 'steady_custom_picard_master_out.e steady_custom_picard_master_out_sub0.e'
+    input = 'steady_custom_picard_parent.i'
+    exodiff = 'steady_custom_picard_parent_out.e steady_custom_picard_parent_out_sub0.e'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#9038'
@@ -90,8 +90,8 @@
 
   [./steady_with_pseudo_transient_sub]
     type = 'Exodiff'
-    input = 'pseudo_transient_picard_master.i'
-    exodiff = 'pseudo_transient_picard_master_out.e pseudo_transient_picard_master_out_sub0.e'
+    input = 'pseudo_transient_picard_parent.i'
+    exodiff = 'pseudo_transient_picard_parent_out.e pseudo_transient_picard_parent_out_sub0.e'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#9038'

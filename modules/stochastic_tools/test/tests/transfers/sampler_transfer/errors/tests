@@ -2,7 +2,7 @@
   issues = '#11363'
   [multiapp_type]
     type = RunException
-    input = master_multiapp_type_error.i
+    input = parent_multiapp_type_error.i
     expect_err = "The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "
                  "'SamplerFullSolveMultiApp' object."
     design = 'SamplerParameterTransfer.md'
@@ -11,7 +11,7 @@
   []
   [control_missing]
     type = RunException
-    input = master_missing_control.i
+    input = parent_missing_control.i
     design = 'SamplerTransientMultiApp.md'
     expect_err = "The sub-application \(sub\) does not contain a Control object with the name "
                  "'stochastic'."
@@ -20,7 +20,7 @@
   []
   [wrong_control]
     type = RunException
-    input = master_wrong_control.i
+    input = parent_wrong_control.i
     expect_err = "The sub-application \(sub\) Control object for the 'to_control' parameter must be "
                  "of type 'SamplerReceiver'."
     design = 'SamplerTransientMultiApp.md'
@@ -29,7 +29,7 @@
   []
   [num_parameters_wrong]
     type = RunException
-    input = master_num_parameters_wrong.i
+    input = parent_num_parameters_wrong.i
     expect_err = "The supplied vector of Real values is not sized correctly, the Real parameter "
                  "'BCs/right/value requires a value but no more values are available in the supplied "
                  "values which have a size of 2."
@@ -39,7 +39,7 @@
   []
   [sampler_mismatch]
     type = RunException
-    input = master_transfer_wrong_sampler.i
+    input = parent_transfer_wrong_sampler.i
     expect_err = "The supplied 'multi_app' must have the same Sampler object as this Transfer."
     design = 'SamplerParameterTransfer.md'
     requirement = "The system shall produce an error if sampling method differs between the "

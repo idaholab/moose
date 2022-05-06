@@ -33,7 +33,7 @@
 []
 
 [Postprocessors]
-  [./from_master]
+  [./from_parent]
     type = Receiver
   [../]
 []

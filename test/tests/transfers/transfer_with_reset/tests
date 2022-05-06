@@ -3,11 +3,11 @@
   design = 'syntax/MultiApps/index.md syntax/Transfers/index.md'
   [test]
     type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out.e master_out_sub0.e master_out_sub0.e-s002'
+    input = 'parent.i'
+    exodiff = 'parent_out.e parent_out_sub0.e parent_out_sub0.e-s002'
     recover = false
 
-    requirement = "The system shall support the transfer of data between a master application and "
+    requirement = "The system shall support the transfer of data between a parent application and "
                   "sub-applications after a sub-application as been reset."
   []
 []

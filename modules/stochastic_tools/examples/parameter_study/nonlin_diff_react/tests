@@ -7,24 +7,24 @@
 
     [parameter_study_uniform]
       type = CSVDiff
-      input = nonlin_diff_react_master_uniform.i
+      input = nonlin_diff_react_parent_uniform.i
       allow_test_objects = true
       cli_args = "Samplers/hypercube/num_rows=5
                   runner:Mesh/gen/nx=10
                   runner:Mesh/gen/ny=10"
-      csvdiff = 'nonlin_diff_react_master_uniform_out_results_0002.csv'
+      csvdiff = 'nonlin_diff_react_parent_uniform_out_results_0002.csv'
       max_parallel = 5
 
       detail = "uniformly distributed and "
     []
     [parameter_study_normal]
       type = CSVDiff
-      input = nonlin_diff_react_master_normal.i
+      input = nonlin_diff_react_parent_normal.i
       allow_test_objects = true
       cli_args = "Samplers/hypercube/num_rows=5
                   runner:Mesh/gen/nx=10
                   runner:Mesh/gen/ny=10"
-      csvdiff = 'nonlin_diff_react_master_normal_out_results_0002.csv'
+      csvdiff = 'nonlin_diff_react_parent_normal_out_results_0002.csv'
       max_parallel = 5
 
       detail = "normally distributed."

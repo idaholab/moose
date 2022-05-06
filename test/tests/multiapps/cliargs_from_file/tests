@@ -4,16 +4,16 @@
 
   [./multiline_file]
     type = 'Exodiff'
-    input = 'cliargs_master.i'
-    exodiff = 'cliargs_master_out.e		cliargs_master_out_sub_app0.e	cliargs_master_out_sub_app1.e	cliargs_master_out_sub_app2.e	cliargs_master_out_sub_app3.e'
+    input = 'cliargs_parent.i'
+    exodiff = 'cliargs_parent_out.e		cliargs_parent_out_sub_app0.e	cliargs_parent_out_sub_app1.e	cliargs_parent_out_sub_app2.e	cliargs_parent_out_sub_app3.e'
 
     requirement = "The system shall support reading command-line arguments from a file with multiple lines"
   [../]
 
   [./one_line_file]
     type = 'Exodiff'
-    input = 'cliargs_master.i'
-    exodiff = 'cliargs_master_out.e		cliargs_master_out_sub_app0.e	cliargs_master_out_sub_app1.e	cliargs_master_out_sub_app2.e	cliargs_master_out_sub_app3.e'
+    input = 'cliargs_parent.i'
+    exodiff = 'cliargs_parent_out.e		cliargs_parent_out_sub_app0.e	cliargs_parent_out_sub_app1.e	cliargs_parent_out_sub_app2.e	cliargs_parent_out_sub_app3.e'
     cli_args = 'MultiApps/sub_app/cli_args_files=cliargs_oneline.txt'
     prereq = multiline_file
     requirement = "The system shall support reading command-line arguments from a file with a single line"
@@ -21,8 +21,8 @@
 
   [./two_files]
     type = 'Exodiff'
-    input = 'cliargs_master.i'
-    exodiff = 'cliargs_master_out.e		cliargs_master_out_sub_app0.e	cliargs_master_out_sub_app1.e	cliargs_master_out_sub_app2.e	cliargs_master_out_sub_app3.e'
+    input = 'cliargs_parent.i'
+    exodiff = 'cliargs_parent_out.e		cliargs_parent_out_sub_app0.e	cliargs_parent_out_sub_app1.e	cliargs_parent_out_sub_app2.e	cliargs_parent_out_sub_app3.e'
     cli_args = 'MultiApps/sub_app/positions_file="positions_1.txt positions_2.txt" MultiApps/sub_app/input_files="cliargs_sub_1.i cliargs_sub_2.i" MultiApps/sub_app/cli_args_files="cliargs_1.txt cliargs_2.txt"'
     prereq = one_line_file
     requirement = "The system shall support reading command-line arguments from multiple files"
@@ -30,8 +30,8 @@
 
   [./multiple_parameters]
     type = 'Exodiff'
-    input = 'cliargs_master.i'
-    exodiff = 'cliargs_master_out.e		cliargs_master_out_sub_app0.e	cliargs_master_out_sub_app1.e	cliargs_master_out_sub_app2.e	cliargs_master_out_sub_app3.e'
+    input = 'cliargs_parent.i'
+    exodiff = 'cliargs_parent_out.e		cliargs_parent_out_sub_app0.e	cliargs_parent_out_sub_app1.e	cliargs_parent_out_sub_app2.e	cliargs_parent_out_sub_app3.e'
     cli_args = 'MultiApps/sub_app/input_files=cliargs_sub_1.i MultiApps/sub_app/cli_args_files=cliargs_semicolon.txt'
     prereq = two_files
     requirement = "The system shall support reading command-line arguments from a file with multiple parameters separated semicolon"
@@ -39,7 +39,7 @@
 
   [./input_and_from_file]
     type = 'RunException'
-    input = 'cliargs_master.i'
+    input = 'cliargs_parent.i'
     cli_args = 'MultiApps/sub_app/cli_args="BCs/right/value=0.5"'
     expect_err = '\'cli_args\' and \'cli_args_files\' cannot be specified simultaneously in MultiApp'
     requirement = "The system shall not support commandLine arguments from a file and an input at the same time"
@@ -47,7 +47,7 @@
 
   [./input_and_file]
     type = 'RunException'
-    input = 'cliargs_master.i'
+    input = 'cliargs_parent.i'
     cli_args = 'MultiApps/sub_app/positions_file="positions_1.txt positions_2.txt" MultiApps/sub_app/input_files="cliargs_sub_1.i cliargs_sub_2.i" MultiApps/sub_app/cli_args_files="cliargs_1.txt cliargs_2.txt cliargs_3.txt"'
     expect_err = 'The number of commandLine argument files 3 for MultiApp sub_app must either be only one or match the number of input files 2'
     requirement = "The system shall make sure the number of commandLine argument files either be only one or match the number of input files"
@@ -55,7 +55,7 @@
 
   [./no_cliarg_file]
     type = 'RunException'
-    input = 'cliargs_master_inline.i'
+    input = 'cliargs_parent_inline.i'
     cli_args = 'MultiApps/sub_app/cli_args_files=""'
     expect_err = 'You need to provide at least one commandLine argument file'
     requirement = "The system shall provide at least one commandLine argument file when use parameter 'cli_args_files'"
@@ -63,7 +63,7 @@
 
   [./empty_cliarg_file]
     type = 'RunException'
-    input = 'cliargs_master_inline.i'
+    input = 'cliargs_parent_inline.i'
     cli_args = 'MultiApps/sub_app/cli_args_files="cliargs_empty.txt"'
     expect_err = ' There is no commandLine argument in the commandLine argument file'
     requirement = "The system shall not use an empty commandLine argument file"
@@ -71,7 +71,7 @@
 
   [./inconsistent_cliargs_from_file]
     type = 'RunException'
-    input = 'cliargs_master_inline.i'
+    input = 'cliargs_parent_inline.i'
     cli_args = 'MultiApps/sub_app/cli_args_files="cliargs_many.txt"'
     expect_err = 'The number of commandLine argument strings 5 must either be only one or match the total number of sub apps 4'
     requirement = "The system shall the total number of commandLine argument strings be only one or match the total number of sub apps"
@@ -79,7 +79,7 @@
 
   [./positions_and_cliargs]
     type = 'RunException'
-    input = 'cliargs_master.i'
+    input = 'cliargs_parent.i'
     cli_args = 'MultiApps/sub_app/cli_args_files="cliargs_many.txt"'
     expect_err = ' The number of commandLine argument strings 5 in the file.+?must either be only one or match the number of positions 4'
     requirement = "The system shall the total number of commandLine argument strings from a file be only one or match the total number of positions"

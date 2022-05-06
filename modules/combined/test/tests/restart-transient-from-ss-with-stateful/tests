@@ -2,16 +2,16 @@
   issues = '#15333'
   [ss]
     type = Exodiff
-    input = master_ss.i
-    exodiff = 'master_ss_out.e master_ss_out_bison0.e'
+    input = parent_ss.i
+    exodiff = 'parent_ss_out.e parent_ss_out_bison0.e'
     design = 'FullSolveMultiApp.md'
-    requirement = 'The system shall be able to solve multiple applications to steady-state with a one-way data transfer from master application to sub application.'
+    requirement = 'The system shall be able to solve multiple applications to steady-state with a one-way data transfer from parent application to sub application.'
     rel_err = 1e-5
   []
   [tr]
     type = Exodiff
-    input = master_tr.i
-    exodiff = 'master_tr_out.e master_tr_out_bison0.e'
+    input = parent_tr.i
+    exodiff = 'parent_tr_out.e parent_tr_out_bison0.e'
     requirement = 'The system shall be able to start a transient heat-conduction/finite-strain mechanics multi-application problem from previous steady-solve results, and shall not do any additional solving if no additional heat sources or mechanical loads are applied, such that the transient results are identical to the initial starting conditions.'
     design = 'TransientMultiApp.md'
     prereq = 'ss'

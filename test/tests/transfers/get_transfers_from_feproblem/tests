@@ -4,7 +4,7 @@
 
   [success]
     type = 'RunApp'
-    input = 'master.i'
+    input = 'parent.i'
 
     requirement = "The system shall include an interface for retrieving objects that pertain to transferring data between applications."
   []

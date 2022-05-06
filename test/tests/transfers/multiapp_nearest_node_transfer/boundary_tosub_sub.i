@@ -12,13 +12,13 @@
 []
 
 [AuxVariables]
-  [./from_master_1]
+  [./from_parent_1]
   [../]
-  [./from_master_2]
+  [./from_parent_2]
   [../]
-  [./from_master_3]
+  [./from_parent_3]
   [../]
-  [./from_master_4]
+  [./from_parent_4]
   [../]
 []
 

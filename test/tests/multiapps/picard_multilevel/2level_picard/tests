@@ -14,7 +14,7 @@
   [./parameter_error]
     type = 'RunException'
     input = 'mutilevel_app.i'
-    expect_err = 'This parameter should be provided in only master app'
+    expect_err = 'This parameter should only be provided in parent app'
     cli_args = 'level1-:MultiApps/level2-/keep_solution_during_restore=true level1-:MultiApps/level2-/catch_up=true'
     recover = false
     prereq = 'restart_from_latest_solution'

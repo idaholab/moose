@@ -28,7 +28,7 @@ each sub-application should be able to solve on its own
 - Any `UserObject` can override `Real spatialValue(Point &)` to provide a value given a point in space
 - A `UserObjectTransfer` can sample this spatially-varying data from one app and put the values into an `AuxVariable` in another
 
-!listing 3d_1d_master.i block=Transfers
+!listing 3d_1d_parent.i block=Transfers
 
 !---
 

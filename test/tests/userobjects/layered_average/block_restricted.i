@@ -31,13 +31,13 @@
     type = SpatialUserObjectAux
     variable = master_app_var
     execute_on = 'timestep_end'
-    user_object = master_uo
+    user_object = main_uo
     block = '1'
   []
 []
 
 [UserObjects]
-  [master_uo]
+  [main_uo]
     type = LayeredAverage
     direction = x
     variable = 'u'

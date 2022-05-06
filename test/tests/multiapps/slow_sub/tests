@@ -1,7 +1,7 @@
 [Tests]
   [slow_sub]
     type = 'RunApp'
-    input = 'master.i'
+    input = 'parent.i'
     expect_out = 'MultiApp::really_slow::solveStep'
 
     issues = '#19662'

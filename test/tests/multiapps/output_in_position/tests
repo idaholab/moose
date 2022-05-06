@@ -7,16 +7,16 @@
 
     [test]
       type = 'Exodiff'
-      input = 'master.i'
-      exodiff = 'master_out_sub0.e'
+      input = 'parent.i'
+      exodiff = 'parent_out_sub0.e'
 
       detail = "for single and"
     []
 
     [multilevel]
       type = 'Exodiff'
-      input = 'multilevel_master.i'
-      exodiff = 'multilevel_master_out_sub0_sub0.e'
+      input = 'multilevel_parent.i'
+      exodiff = 'multilevel_parent_out_sub0_sub0.e'
 
       detail = "multi-level sub-applications."
     []
