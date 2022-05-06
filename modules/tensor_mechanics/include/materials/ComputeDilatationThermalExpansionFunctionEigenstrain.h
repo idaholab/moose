@@ -10,19 +10,19 @@
 #pragma once
 
 #include "ComputeDilatationThermalExpansionEigenstrainBase.h"
-#include "DerivativeMaterialInterface.h"
 
 /**
  * ComputeDilatationThermalExpansionFunctionEigenstrain computes an eigenstrain for thermal
  * expansion from an dilatation function.
  */
-class ComputeDilatationThermalExpansionFunctionEigenstrain
-  : public ComputeDilatationThermalExpansionEigenstrainBase
+template <bool is_ad>
+class ComputeDilatationThermalExpansionFunctionEigenstrainTempl
+  : public ComputeDilatationThermalExpansionEigenstrainBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ComputeDilatationThermalExpansionFunctionEigenstrain(const InputParameters & parameters);
+  ComputeDilatationThermalExpansionFunctionEigenstrainTempl(const InputParameters & parameters);
 
 protected:
   /*
@@ -30,16 +30,21 @@ protected:
    * @param temperature current temperature
    * @return fractional linear dilatation due
    */
-  virtual Real computeDilatation(const Real & temperature) override;
+  virtual GenericReal<is_ad> computeDilatation(const GenericReal<is_ad> & temperature) override;
 
   /*
    * Compute the derivative of the fractional linear dilatation due to thermal expansion delta L / L
-   * with respect to temperature
+   * with respect to temperature (only called in the non-AD instantiation)
    * @param temperature current temperature
    * @return fractional linear dilatation due
    */
-  virtual Real computeDilatationDerivative(const Real & temperature) override;
+  virtual Real computeDilatationDerivative(const Real temperature) override;
 
   /// Dilatation function
   const Function & _dilatation_function;
 };
+
+typedef ComputeDilatationThermalExpansionFunctionEigenstrainTempl<false>
+    ComputeDilatationThermalExpansionFunctionEigenstrain;
+typedef ComputeDilatationThermalExpansionFunctionEigenstrainTempl<true>
+    ADComputeDilatationThermalExpansionFunctionEigenstrain;

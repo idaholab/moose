@@ -12,9 +12,11 @@
 #include "Function.h"
 
 registerMooseObject("TensorMechanicsApp", ComputeDilatationThermalExpansionFunctionEigenstrain);
+registerMooseObject("TensorMechanicsApp", ADComputeDilatationThermalExpansionFunctionEigenstrain);
 
+template <bool is_ad>
 InputParameters
-ComputeDilatationThermalExpansionFunctionEigenstrain::validParams()
+ComputeDilatationThermalExpansionFunctionEigenstrainTempl<is_ad>::validParams()
 {
   InputParameters params = ComputeDilatationThermalExpansionEigenstrainBase::validParams();
   params.addClassDescription("Computes eigenstrain due to thermal expansion using a function that "
@@ -25,22 +27,29 @@ ComputeDilatationThermalExpansionFunctionEigenstrain::validParams()
   return params;
 }
 
-ComputeDilatationThermalExpansionFunctionEigenstrain::
-    ComputeDilatationThermalExpansionFunctionEigenstrain(const InputParameters & parameters)
-  : ComputeDilatationThermalExpansionEigenstrainBase(parameters),
-    _dilatation_function(getFunction("dilatation_function"))
+template <bool is_ad>
+ComputeDilatationThermalExpansionFunctionEigenstrainTempl<is_ad>::
+    ComputeDilatationThermalExpansionFunctionEigenstrainTempl(const InputParameters & parameters)
+  : ComputeDilatationThermalExpansionEigenstrainBaseTempl<is_ad>(parameters),
+    _dilatation_function(this->getFunction("dilatation_function"))
 {
 }
 
-Real
-ComputeDilatationThermalExpansionFunctionEigenstrain::computeDilatation(const Real & temperature)
+template <bool is_ad>
+GenericReal<is_ad>
+ComputeDilatationThermalExpansionFunctionEigenstrainTempl<is_ad>::computeDilatation(
+    const GenericReal<is_ad> & temperature)
 {
-  return _dilatation_function.value(temperature, Point());
+  return _dilatation_function.value(temperature);
 }
 
+template <bool is_ad>
 Real
-ComputeDilatationThermalExpansionFunctionEigenstrain::computeDilatationDerivative(
-    const Real & temperature)
+ComputeDilatationThermalExpansionFunctionEigenstrainTempl<is_ad>::computeDilatationDerivative(
+    const Real temperature)
 {
   return _dilatation_function.timeDerivative(temperature);
 }
+
+template class ComputeDilatationThermalExpansionFunctionEigenstrainTempl<false>;
+template class ComputeDilatationThermalExpansionFunctionEigenstrainTempl<true>;

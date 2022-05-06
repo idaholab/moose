@@ -12,11 +12,14 @@
 #include "RankTwoTensor.h"
 
 registerMooseObject("TensorMechanicsApp", ComputeInstantaneousThermalExpansionFunctionEigenstrain);
+registerMooseObject("TensorMechanicsApp",
+                    ADComputeInstantaneousThermalExpansionFunctionEigenstrain);
 
+template <bool is_ad>
 InputParameters
-ComputeInstantaneousThermalExpansionFunctionEigenstrain::validParams()
+ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<is_ad>::validParams()
 {
-  InputParameters params = ComputeThermalExpansionEigenstrainBase::validParams();
+  InputParameters params = ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::validParams();
   params.addClassDescription("Computes eigenstrain due to thermal expansion using a function that "
                              "describes the instantaneous thermal expansion as a function of "
                              "temperature");
@@ -26,44 +29,61 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrain::validParams()
   return params;
 }
 
-ComputeInstantaneousThermalExpansionFunctionEigenstrain::
-    ComputeInstantaneousThermalExpansionFunctionEigenstrain(const InputParameters & parameters)
-  : ComputeThermalExpansionEigenstrainBase(parameters),
-    _temperature_old(coupledValueOld("temperature")),
-    _thermal_expansion_function(getFunction("thermal_expansion_function")),
-    _thermal_strain(
-        declareProperty<Real>(_base_name + "InstantaneousThermalExpansionFunction_thermal_strain")),
-    _thermal_strain_old(getMaterialPropertyOld<Real>(
-        _base_name + "InstantaneousThermalExpansionFunction_thermal_strain")),
-    _step_one(declareRestartableData<bool>("step_one", true))
+template <bool is_ad>
+ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<is_ad>::
+    ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl(const InputParameters & parameters)
+  : ComputeThermalExpansionEigenstrainBaseTempl<is_ad>(parameters),
+    _thermal_expansion_function(this->getFunction("thermal_expansion_function")),
+    _thermal_strain(this->template declareProperty<Real>(
+        this->_base_name + "InstantaneousThermalExpansionFunction_thermal_strain")),
+    _thermal_strain_old(this->template getMaterialPropertyOld<Real>(
+        this->_base_name + "InstantaneousThermalExpansionFunction_thermal_strain")),
+    _step_one(this->template declareRestartableData<bool>("step_one", true))
 {
+  if (this->_use_old_temperature)
+    this->paramError("use_old_temperature",
+                     "The old temperature value cannot be used in this incremental update model.");
 }
 
+template <bool is_ad>
 void
-ComputeInstantaneousThermalExpansionFunctionEigenstrain::initQpStatefulProperties()
+ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<is_ad>::initQpStatefulProperties()
 {
   _thermal_strain[_qp] = 0;
 }
 
+template <bool is_ad>
 void
-ComputeInstantaneousThermalExpansionFunctionEigenstrain::computeThermalStrain(
-    Real & thermal_strain, Real & instantaneous_cte)
+ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<is_ad>::computeThermalStrain(
+    GenericReal<is_ad> & thermal_strain, Real * dthermal_strain_dT)
 {
-  if (_t_step > 1)
+  if (this->_t_step > 1)
     _step_one = false;
 
-  const Real & current_temp = _temperature[_qp];
+  const auto & current_temp = this->_temperature[_qp];
 
   const Real & old_thermal_strain = _thermal_strain_old[_qp];
 
-  const Real & old_temp = (_step_one ? _stress_free_temperature[_qp] : _temperature_old[_qp]);
-  const Real delta_T = current_temp - old_temp;
+  const auto & old_temp =
+      (_step_one ? this->_stress_free_temperature[_qp] : this->_temperature_old[_qp]);
+  const auto delta_T = current_temp - old_temp;
 
-  const Real alpha_current_temp = _thermal_expansion_function.value(current_temp);
-  const Real alpha_old_temp = _thermal_expansion_function.value(old_temp);
+  const auto alpha_current_temp = _thermal_expansion_function.value(current_temp);
+  const auto alpha_old_temp = _thermal_expansion_function.value(old_temp);
 
   thermal_strain = old_thermal_strain + delta_T * 0.5 * (alpha_current_temp + alpha_old_temp);
-  _thermal_strain[_qp] = thermal_strain;
 
-  instantaneous_cte = alpha_current_temp;
+  // store this for use in the next timestep (no derivatives needed)
+  _thermal_strain[_qp] = MetaPhysicL::raw_value(thermal_strain);
+
+  if constexpr (!is_ad)
+  {
+    mooseAssert(dthermal_strain_dT, "Internal error. dthermal_strain_dT should not be nullptr.");
+    *dthermal_strain_dT = alpha_current_temp;
+  }
+  else
+    libmesh_ignore(dthermal_strain_dT);
 }
+
+template class ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<false>;
+template class ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<true>;
