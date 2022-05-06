@@ -528,7 +528,8 @@ NSFVAction::NSFVAction(InputParameters parameters)
         getParam<std::vector<MooseFunctorName>>("passive_scalar_diffusivity")),
     _passive_scalar_schmidt_number(getParam<std::vector<Real>>("passive_scalar_schmidt_number")),
     _passive_scalar_source(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
-    _passive_scalar_coupled_source(getParam<CoupledName>("passive_scalar_coupled_source")),
+    _passive_scalar_coupled_source(
+        getParam<std::vector<CoupledName>>("passive_scalar_coupled_source")),
     _passive_scalar_coupled_source_coeff(
         getParam<std::vector<Real>>("passive_scalar_coupled_source_coeff")),
     _passive_scalar_inlet_types(getParam<MultiMooseEnum>("passive_scalar_inlet_types")),
