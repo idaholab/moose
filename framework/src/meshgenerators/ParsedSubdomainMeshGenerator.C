@@ -30,10 +30,15 @@ ParsedSubdomainMeshGenerator::validParams()
                                              "Subdomain id to set for inside of the combinatorial");
   params.addParam<SubdomainName>("block_name",
                                  "Subdomain name to set for inside of the combinatorial");
-  params.addParam<std::vector<subdomain_id_type>>(
-      "excluded_subdomain_ids",
+  params.addParam<std::vector<SubdomainName>>(
+      "excluded_subdomains",
       "A set of subdomain ids that will not changed even if "
       "they are inside/outside the combinatorial geometry");
+  params.addDeprecatedParam<std::vector<subdomain_id_type>>(
+      "excluded_subdomain_ids",
+      "A set of subdomain ids that will not changed even if "
+      "they are inside/outside the combinatorial geometry",
+      "excluded_subdomain_ids is deprecated, use excluded_subdomains (ids or names accepted)");
   params.addParam<std::vector<std::string>>(
       "constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
   params.addParam<std::vector<std::string>>(
@@ -53,7 +58,9 @@ ParsedSubdomainMeshGenerator::ParsedSubdomainMeshGenerator(const InputParameters
     _input(getMesh("input")),
     _function(parameters.get<std::string>("combinatorial_geometry")),
     _block_id(parameters.get<SubdomainID>("block_id")),
-    _excluded_ids(parameters.get<std::vector<SubdomainID>>("excluded_subdomain_ids"))
+    _excluded_ids(isParamValid("excluded_subdomain_ids")
+                      ? parameters.get<std::vector<subdomain_id_type>>("excluded_subdomain_ids")
+                      : std::vector<subdomain_id_type>())
 {
   // base function object
   _func_F = std::make_shared<SymFunction>();
@@ -83,6 +90,10 @@ ParsedSubdomainMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
+  if (isParamValid("excluded_subdomains"))
+    _excluded_ids = MooseMeshUtils::getSubdomainIDs(
+        *mesh, parameters().get<std::vector<SubdomainName>>("excluded_subdomains"));
+
   // Loop over the elements
   for (const auto & elem : mesh->active_element_ptr_range())
   {
@@ -91,8 +102,9 @@ ParsedSubdomainMeshGenerator::generate()
     _func_params[2] = elem->vertex_average()(2);
     bool contains = evaluate(_func_F);
 
-    if (contains && std::find(_excluded_ids.begin(), _excluded_ids.end(), elem->subdomain_id()) ==
-                        _excluded_ids.end())
+    if (contains &&
+        std::find(_excluded_ids.begin(), _excluded_ids.end(), elem->subdomain_id()) ==
+            _excluded_ids.end())
       elem->subdomain_id() = _block_id;
   }
 

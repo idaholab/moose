@@ -35,7 +35,7 @@ protected:
   const subdomain_id_type _block_id;
 
   /// A list of excluded subdomain ids that will not be changed even if they are in the combinatorial geometry
-  const std::vector<subdomain_id_type> _excluded_ids;
+  std::vector<subdomain_id_type> _excluded_ids;
 
   /// function parser object describing the combinatorial geometry
   SymFunctionPtr _func_F;

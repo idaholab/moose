@@ -31,13 +31,22 @@ ParsedGenerateSideset::validParams()
   params.addRequiredParam<std::string>("combinatorial_geometry",
                                        "Function expression encoding a combinatorial geometry");
   params.addRequiredParam<BoundaryName>("new_sideset_name", "The name of the new sideset");
-  params.addParam<std::vector<subdomain_id_type>>(
+  params.addParam<std::vector<SubdomainName>>(
+      "included_subdomains",
+      "A set of subdomain names or ids whose sides will be included in the new sidesets");
+  params.addDeprecatedParam<std::vector<subdomain_id_type>>(
       "included_subdomain_ids",
-      "A set of subdomain ids whose sides will be included in the new sidesets");
-  params.addParam<std::vector<subdomain_id_type>>(
+      "A set of subdomain ids whose sides will be included in the new sidesets",
+      "included_subdomain_ids is deprecated, use included_subdomains with names or ids");
+  params.addParam<std::vector<SubdomainName>>("included_neighbors",
+                                              "A set of neighboring subdomain names or ids. A face "
+                                              "is only added if the subdomain id of the "
+                                              "neighbor is in this set");
+  params.addDeprecatedParam<std::vector<subdomain_id_type>>(
       "included_neighbor_ids",
       "A set of neighboring subdomain ids. A face is only added if the subdomain id of the "
-      "neighbor is in this set");
+      "neighbor is in this set",
+      "included_neighbor_ids is deprecated, use included_neighbors with names or ids");
   params.addParam<Point>(
       "normal",
       Point(),
@@ -61,19 +70,29 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
     _input(getMesh("input")),
     _function(parameters.get<std::string>("combinatorial_geometry")),
     _sideset_name(getParam<BoundaryName>("new_sideset_name")),
-    _check_subdomains(isParamValid("included_subdomain_ids")),
-    _check_neighbor_subdomains(isParamValid("included_neighbor_ids")),
+    _check_subdomains(isParamValid("included_subdomain_ids") ||
+                      isParamValid("included_subdomains")),
+    _check_neighbor_subdomains(isParamValid("included_neighbor_ids") ||
+                               isParamValid("included_neighbors")),
     _check_normal(parameters.isParamSetByUser("normal")),
-    _included_ids(_check_subdomains
+    _included_ids(isParamValid("included_subdomain_ids")
                       ? parameters.get<std::vector<SubdomainID>>("included_subdomain_ids")
                       : std::vector<SubdomainID>()),
-    _included_neighbor_ids(_check_neighbor_subdomains
+    _included_neighbor_ids(isParamValid("included_neighbor_ids")
                                ? parameters.get<std::vector<SubdomainID>>("included_neighbor_ids")
                                : std::vector<SubdomainID>()),
     _normal(getParam<Point>("normal"))
 {
   if (typeid(_input).name() == typeid(std::unique_ptr<DistributedMesh>).name())
     mooseError("GenerateAllSideSetsByNormals only works with ReplicatedMesh.");
+
+  // Handle deprecated parameters
+  if (isParamValid("included_subdomain_ids") && isParamValid("included_subdomains"))
+    paramError("included_subdomain_ids",
+               "included_subdomain_ids is deprecated, only specify included_subdomains");
+  if (isParamValid("included_neighbor_ids") && isParamValid("included_neighbors"))
+    paramError("included_neighbor_ids",
+               "included_neighbor_ids is deprecated, only specify included_neighbors");
 
   // base function object
   _func_F = std::make_shared<SymFunction>();
@@ -107,6 +126,14 @@ ParsedGenerateSideset::generate()
 
   // Get a reference to our BoundaryInfo object for later use
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
+
+  // Get the boundary ids from the names
+  if (parameters().isParamValid("included_subdomains"))
+    _included_ids = MooseMeshUtils::getSubdomainIDs(
+        *mesh, getParam<std::vector<SubdomainName>>("included_subdomains"));
+  if (parameters().isParamValid("included_neighbors"))
+    _included_neighbor_ids = MooseMeshUtils::getSubdomainIDs(
+        *mesh, getParam<std::vector<SubdomainName>>("included_neighbors"));
 
   // Get the BoundaryIDs from the mesh
   std::vector<boundary_id_type> boundary_ids =
