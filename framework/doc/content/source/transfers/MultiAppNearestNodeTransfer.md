@@ -2,6 +2,8 @@
 
 !syntax description /Transfers/MultiAppNearestNodeTransfer
 
+The projection mapping may be cached at the first execution of the transfer for better performance in later executions using the [!param](/Transfers/MultiAppNearestNodeTransfer/fixed_meshes) parameter. This is incompatible with adaptivity and refinement of the mesh.
+
 ## Example Input File Syntax
 
 The following examples demonstrate the use the MultiAppNearestNodeTransfer for transferring data
