@@ -56,40 +56,6 @@ protected:
   boundary_id_type _input_mesh_external_bid;
 
   /**
-   * Decides whether a boundary of a given mesh works with the algorithm used in this class.
-   * @param mesh input mesh that contains the boundary to be examined
-   * @param max_node_radius the maximum radius of the nodes on the
-   * boundary
-   * @param invalid_type help distinguish different types of invalid boundaries
-   * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
-   * @param bid ID of the boundary to be examined
-   * @return whether the boundary works with the algorithm
-   */
-  bool isBoundaryValid(ReplicatedMesh & mesh,
-                       Real & max_node_radius,
-                       unsigned short & invalid_type,
-                       const Point origin_pt,
-                       const boundary_id_type bid) const;
-
-  /**
-   * Decides whether a boundary of a given mesh works with the algorithm used in this class.
-   * @param mesh input mesh that contains the boundary to be examined
-   * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
-   * @param bid ID of the boundary to be examined
-   * @return whether the boundary works with the algorithm
-   */
-  bool
-  isBoundaryValid(ReplicatedMesh & mesh, const Point origin_pt, const boundary_id_type bid) const;
-
-  /**
-   * Decides whether a boundary of a given mesh works is an external boundary.
-   * @param mesh input mesh that contains the boundary to be examined
-   * @param bid ID of the boundary to be examined
-   * @return whether the boundary is the external boundary of the given mesh
-   */
-  bool isExternalBoundary(ReplicatedMesh & mesh, const boundary_id_type bid) const;
-
-  /**
    * Define node positions of the inner boundary layer that is conformal to the input mesh's
    * external boundary.
    * @param input_ext_node_num number of nodes on the external boundary of the input mesh

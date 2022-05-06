@@ -12,6 +12,7 @@
 #include "MooseMeshUtils.h"
 #include "MooseUtils.h"
 #include "LinearInterpolation.h"
+#include "FillBetweenPointVectorsTools.h"
 
 // C++ includes
 #include <cmath> // for atan2
@@ -161,39 +162,22 @@ PeripheralRingMeshGenerator::generate()
   const Point origin_pt = MooseMeshUtils::meshCentroidCalculator(*input_mesh);
   // Vessel for containing maximum radius of the boundary nodes
   Real max_input_mesh_node_radius;
-  unsigned short invalid_boundary_type;
 
-  if (!isBoundaryValid(*input_mesh,
-                       max_input_mesh_node_radius,
-                       invalid_boundary_type,
-                       origin_pt,
-                       _input_mesh_external_bid))
+  try
   {
-    switch (invalid_boundary_type)
-    {
-      case 1:
-        paramError("input_mesh_external_boundary",
-                   "This mesh generator does not work for the provided external boundary as it has "
-                   "more than one segments.");
-        break;
-      case 2:
-        paramError("input_mesh_external_boundary",
-                   "This mesh generator does not work for the provided external boundary as it is "
-                   "not a closed loop.");
-        break;
-      case 3:
-        paramError("input_mesh_external_boundary",
-                   "This mesh generator does not work for the provided external boundary as "
-                   "azimuthal angles of consecutive nodes do not change monotonically.");
-        break;
-    }
+    FillBetweenPointVectorsTools::isBoundarySimpleClosedLoop(
+        *input_mesh, max_input_mesh_node_radius, origin_pt, _input_mesh_external_bid);
+  }
+  catch (MooseException & e)
+  {
+    paramError("input_mesh_external_boundary", e.what());
   }
 
   if (max_input_mesh_node_radius >= _peripheral_ring_radius)
     paramError(
         "peripheral_ring_radius",
         "The peripheral ring to be generated must be large enough to cover the entire input mesh.");
-  if (!isExternalBoundary(*input_mesh, _input_mesh_external_bid))
+  if (!FillBetweenPointVectorsTools::isExternalBoundary(*input_mesh, _input_mesh_external_bid))
     paramError("input_mesh_external_boundary",
                "The boundary provided is not an external boundary.");
 
@@ -368,10 +352,10 @@ PeripheralRingMeshGenerator::generate()
 
   // This would make sure that the boundary OUTER_SIDESET_ID is deleted after stitching.
   if (_input_mesh_external_bid != OUTER_SIDESET_ID)
-    MooseMesh::changeBoundaryId(*input_mesh, _input_mesh_external_bid, OUTER_SIDESET_ID, true);
+    MooseMesh::changeBoundaryId(*input_mesh, _input_mesh_external_bid, OUTER_SIDESET_ID, false);
   mesh->prepare_for_use();
   // Use input_mesh here to retain the subdomain name map
-  input_mesh->stitch_meshes(*mesh, _input_mesh_external_bid, OUTER_SIDESET_ID_ALT, TOLERANCE, true);
+  input_mesh->stitch_meshes(*mesh, OUTER_SIDESET_ID, OUTER_SIDESET_ID_ALT, TOLERANCE, true);
 
   // Assign subdomain name to the new block if applicable
   if (isParamValid("peripheral_ring_block_name"))
@@ -391,151 +375,6 @@ PeripheralRingMeshGenerator::generate()
   }
 
   return dynamic_pointer_cast<MeshBase>(_input);
-}
-
-bool
-PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
-                                             Real & max_node_radius,
-                                             unsigned short & invalid_type,
-                                             const Point origin_pt,
-                                             const boundary_id_type bid) const
-{
-  max_node_radius = 0.0;
-  invalid_type = 0;
-  BoundaryInfo & boundary_info = mesh.get_boundary_info();
-  auto side_list_tmp = boundary_info.build_side_list();
-  unsigned int elem_counter = 0;
-  std::vector<std::pair<dof_id_type, dof_id_type>> boundary_node_assm;
-  std::vector<dof_id_type> boundary_ordered_node_list;
-  bool isFlipped = false;
-  for (unsigned int i = 0; i < side_list_tmp.size(); i++)
-  {
-    if (std::get<2>(side_list_tmp[i]) == bid)
-    {
-      elem_counter++;
-      // store two nodes of each side
-      boundary_node_assm.push_back(std::make_pair(mesh.elem_ptr(std::get<0>(side_list_tmp[i]))
-                                                      ->side_ptr(std::get<1>(side_list_tmp[i]))
-                                                      ->node_id(0),
-                                                  mesh.elem_ptr(std::get<0>(side_list_tmp[i]))
-                                                      ->side_ptr(std::get<1>(side_list_tmp[i]))
-                                                      ->node_id(1)));
-    }
-  }
-  // Start from the first element, try to find a chain of nodes
-  boundary_ordered_node_list.push_back(boundary_node_assm.front().first);
-  boundary_ordered_node_list.push_back(boundary_node_assm.front().second);
-  // Remove the element that has been added to boundary_ordered_node_list
-  boundary_node_assm.erase(boundary_node_assm.begin());
-  const unsigned int boundary_node_assm_size_0 = boundary_node_assm.size();
-  for (unsigned int i = 0; i < boundary_node_assm_size_0; i++)
-  {
-    // Find nodes to expand the chain
-    dof_id_type end_node_id = boundary_ordered_node_list.back();
-    auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
-    { return old_id_pair.first == end_node_id; };
-    auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
-    { return old_id_pair.second == end_node_id; };
-    auto result = std::find_if(boundary_node_assm.begin(), boundary_node_assm.end(), isMatch1);
-    bool match_first;
-    if (result == boundary_node_assm.end())
-    {
-      match_first = false;
-      result = std::find_if(boundary_node_assm.begin(), boundary_node_assm.end(), isMatch2);
-    }
-    else
-    {
-      match_first = true;
-    }
-    // If found, add the node to boundary_ordered_node_list
-    if (result != boundary_node_assm.end())
-    {
-      boundary_ordered_node_list.push_back(match_first ? (*result).second : (*result).first);
-      boundary_node_assm.erase(result);
-    }
-    // If there are still elements in boundary_node_assm and result ==
-    // boundary_node_assm.end(), this means the boundary is not a loop, the
-    // boundary_ordered_node_list is flipped and try the other direction that has not
-    // been examined yet.
-    else
-    {
-      if (isFlipped)
-      {
-        // Flipped twice; this means the boundary has at least two segments.
-        // This is invalid type #1
-        invalid_type = 1;
-        return false;
-      }
-      // mark the first flip event.
-      isFlipped = true;
-      std::reverse(boundary_ordered_node_list.begin(), boundary_ordered_node_list.end());
-      // As this iteration is wasted, set the iterator backward
-      i--;
-    }
-  }
-  // If the code ever gets here, boundary_node_assm is empty.
-  // If the isFlipped == true, the boundary is not a loop.
-  // This is not done inside the loop just for some potential applications in the future.
-  if (isFlipped)
-  {
-    // This is invalid type #2
-    invalid_type = 2;
-    return false;
-  }
-  // It the boundary is a loop, check if azimuthal angles change monotonically
-  else
-  {
-    // Utilize cross product here.
-    // If azimuthal angles change monotonically,
-    // the z components of the cross products are always negative or positive.
-    std::vector<Real> ordered_node_azi_list;
-    for (unsigned int i = 0; i < boundary_ordered_node_list.size() - 1; i++)
-    {
-      ordered_node_azi_list.push_back(
-          (*mesh.node_ptr(boundary_ordered_node_list[i]) - origin_pt)
-              .cross(*mesh.node_ptr(boundary_ordered_node_list[i + 1]) - origin_pt)(2));
-      // Use this opportunity to calculate maximum radius
-      max_node_radius = std::max((*mesh.node_ptr(boundary_ordered_node_list[i]) - origin_pt).norm(),
-                                 max_node_radius);
-    }
-    std::sort(ordered_node_azi_list.begin(), ordered_node_azi_list.end());
-    if (ordered_node_azi_list.front() * ordered_node_azi_list.back() < 0.0)
-    {
-      // This is invalid type #3
-      invalid_type = 3;
-      return false;
-    }
-    else
-      return true;
-  }
-}
-
-bool
-PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
-                                             const Point origin_pt,
-                                             const boundary_id_type bid) const
-{
-  Real dummy_max_node_radius;
-  unsigned short dummy_invalid_type;
-  return isBoundaryValid(mesh, dummy_max_node_radius, dummy_invalid_type, origin_pt, bid);
-}
-
-bool
-PeripheralRingMeshGenerator::isExternalBoundary(ReplicatedMesh & mesh,
-                                                const boundary_id_type bid) const
-{
-  if (!mesh.is_prepared())
-    mesh.find_neighbors();
-  BoundaryInfo & boundary_info = mesh.get_boundary_info();
-  auto side_list = boundary_info.build_side_list();
-  for (unsigned int i = 0; i < side_list.size(); i++)
-  {
-    if (std::get<2>(side_list[i]) == bid)
-      if (mesh.elem_ptr(std::get<0>(side_list[i]))->neighbor_ptr(std::get<1>(side_list[i])) !=
-          nullptr)
-        return false;
-  }
-  return true;
 }
 
 void
