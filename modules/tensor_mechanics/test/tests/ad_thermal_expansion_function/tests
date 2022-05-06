@@ -1,7 +1,7 @@
 [Tests]
   [./constant]
     issues = '#12650'
-    design = 'ADComputeMeanThermalExpansionFunctionEigenstrain.md ADComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
+    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
     requirement = 'The system shall compute an eigenstrain due to '
                   'thermal expansion using a function that describes a constant mean and instantaneous '
                   'thermal expansion using the AD formulation'
@@ -20,7 +20,7 @@
   [../]
   [./linear]
     issues = '#12650'
-    design = 'ADComputeMeanThermalExpansionFunctionEigenstrain.md ADComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
+    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
     requirement = 'The system shall compute an eigenstrain due to '
                   'thermal expansion using a function that describes a mean and instantaneous '
                   'thermal expansion with a linear relationship to temperature using the AD formulation'
@@ -39,7 +39,7 @@
   [../]
   [./individual]
     issues = '#13634 #14595'
-    design = 'ADComputeMeanThermalExpansionFunctionEigenstrain.md ADComputeInstantaneousThermalExpansionFunctionEigenstrain.md ADComputeDilatationThermalExpansionFunctionEigenstrain.md'
+    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md ComputeDilatationThermalExpansionFunctionEigenstrain.md'
     requirement = 'The system shall compute an eigenstrain due and allow a smooth transition from
                    negative to positive strain across the reference temperature and compare favorably
                    to hand calculations'
