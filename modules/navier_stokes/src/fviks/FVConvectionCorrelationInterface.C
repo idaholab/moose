@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVConvectionCorrelationInterface.h"
-#include "MooseVariableFV.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", FVConvectionCorrelationInterface);
 
@@ -19,9 +19,9 @@ FVConvectionCorrelationInterface::validParams()
   params.addClassDescription("Computes the residual for a convective heat transfer across an "
                              "interface for the finite volume method, "
                              "using a correlation for the heat transfer coefficient.");
-  params.addRequiredCoupledVar("temp_fluid", "The fluid temperature variable");
-  params.addRequiredCoupledVar("temp_solid", "The solid/wall temperature variable");
-  params.addRequiredParam<MaterialPropertyName>("h", "The convective heat transfer coefficient");
+  params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "The fluid temperature variable");
+  params.addRequiredParam<MooseFunctorName>(NS::T_solid, "The solid/wall temperature variable");
+  params.addRequiredParam<MooseFunctorName>("h", "The convective heat transfer coefficient");
   params.addParam<Real>(
       "bulk_distance", -1, "The distance to the bulk for evaluating the fluid bulk temperature");
   params.addParam<bool>("wall_cell_is_bulk",
@@ -32,10 +32,9 @@ FVConvectionCorrelationInterface::validParams()
 
 FVConvectionCorrelationInterface::FVConvectionCorrelationInterface(const InputParameters & params)
   : FVInterfaceKernel(params),
-    _temp_fluid(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("temp_fluid", 0))),
-    _temp_solid(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("temp_solid", 0))),
-    _htc_elem(getADMaterialProperty<Real>("h")),
-    _htc_neighbor(getNeighborADMaterialProperty<Real>("h")),
+    _temp_fluid(getFunctor<ADReal>(NS::T_fluid)),
+    _temp_solid(getFunctor<ADReal>(NS::T_solid)),
+    _htc(getFunctor<ADReal>("h")),
     _bulk_distance(getParam<Real>("bulk_distance")),
     _use_wall_cell(getParam<bool>("wall_cell_is_bulk")),
     _pl(mesh().getPointLocator())
@@ -44,10 +43,10 @@ FVConvectionCorrelationInterface::FVConvectionCorrelationInterface(const InputPa
     mooseError(
         "The bulk distance should be specified or 'wall_cell_is_bulk' should be set to true for "
         "the FVTwoVarConvectionCorrelationInterface");
-  if (&var1() != _temp_fluid)
-    paramError("temp_fluid", "variable1 must be equal to temp_fluid.");
-  if (&var2() != _temp_solid)
-    paramError("temp_solid", "variable2 must be equal to temp_solid.");
+  if ("wraps_" + var1().name() != _temp_fluid.functorName())
+    paramError(NS::T_fluid, "variable1 must be equal to T_fluid parameter.");
+  if ("wraps_" + var2().name() != _temp_solid.functorName())
+    paramError(NS::T_solid, "variable2 must be equal to T_solid parameter.");
 }
 
 ADReal
@@ -75,10 +74,9 @@ FVConvectionCorrelationInterface::computeQpResidual()
   mooseAssert(var1().hasBlocks(bulk_elem->subdomain_id()),
               "The fluid temperature is not defined at bulk_distance from the wall.");
 
-  if (elemIsOne())
-    return _htc_elem[_qp] *
-           (_temp_fluid->getElemValue(bulk_elem) - _temp_solid->getBoundaryFaceValue(*_face_info));
-  else
-    return _htc_neighbor[_qp] *
-           (_temp_fluid->getElemValue(bulk_elem) - _temp_solid->getBoundaryFaceValue(*_face_info));
+  const auto face_arg_side1 = singleSidedFaceArg(var1(), _face_info);
+  const auto face_arg_side2 = singleSidedFaceArg(var2(), _face_info);
+  const auto bulk_elem_arg = makeElemArg(bulk_elem);
+
+  return _htc(face_arg_side1) * (_temp_fluid(bulk_elem_arg) - _temp_solid(face_arg_side2));
 }
