@@ -93,7 +93,6 @@ ParsedSubdomainMeshGenerator::generate()
   if (isParamValid("excluded_subdomains"))
     _excluded_ids = MooseMeshUtils::getSubdomainIDs(
         *mesh, parameters().get<std::vector<SubdomainName>>("excluded_subdomains"));
-
   // Loop over the elements
   for (const auto & elem : mesh->active_element_ptr_range())
   {
@@ -102,9 +101,8 @@ ParsedSubdomainMeshGenerator::generate()
     _func_params[2] = elem->vertex_average()(2);
     bool contains = evaluate(_func_F);
 
-    if (contains &&
-        std::find(_excluded_ids.begin(), _excluded_ids.end(), elem->subdomain_id()) ==
-            _excluded_ids.end())
+    if (contains && std::find(_excluded_ids.begin(), _excluded_ids.end(), elem->subdomain_id()) ==
+                        _excluded_ids.end())
       elem->subdomain_id() = _block_id;
   }
 
