@@ -68,8 +68,8 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
   MooseEnum extrapolated_lower_limit_behavior(
       "ERROR WARN IGNORE EXCEPTION DONOTHING USELIMIT EXTRAPOLATE", "EXTRAPOLATE");
   // Forbid extrapolation of on high end of limit
-  MooseEnum extrapolated_upper_limit_behavior("ERROR WARN IGNORE EXCEPTION DONOTHING USELIMIT",
-                                              "USELIMIT");
+  MooseEnum extrapolated_upper_limit_behavior("ERROR WARN IGNORE EXCEPTION DONOTHING",
+                                              "EXCEPTION");
   params.addParam<MooseEnum>(
       "stress_input_window_low_failure",
       extrapolated_lower_limit_behavior,
@@ -625,9 +625,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
               // If input is within another tile's window of applicability, check to see if inputs
               // place us in that tile and ensure the two tiles are different in the dimension of
               // interest
-              if (areTilesNotIdentical(p, t, tt, in_index) &&
-                  input >= _input_limits[p][tt][in_index][0] &&
-                  input <= _input_limits[p][tt][in_index][1])
+              if (areTilesNotIdentical(p, t, tt, in_index) && checkInTile(p, tt))
               {
                 overlap = true;
 
