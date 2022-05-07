@@ -1,6 +1,6 @@
-# MultiAppCommandLineControl
+# MultiAppSamplerControl
 
-!syntax description /Controls/MultiAppCommandLineControl
+!syntax description /Controls/MultiAppSamplerControl
 
 ## Description
 
@@ -9,7 +9,7 @@ line arguments to the MultiApp objects being created. For example, if a the doma
 altered statistically in the x-direction the `Mesh/xmax` parameter in the sub-application must be
 altered. However, this value cannot be altered from within sub-application input file via a Control
 object because the `xmax` parameter is applied to the mesh when it is created. In this case, the
-`MultiAppCommandLineControl` can be used to pass custom values to the arguments of a MultiApp that
+`MultiAppSamplerControl` can be used to pass custom values to the arguments of a MultiApp that
 are generated from Sampler and Distribution objects.
 
 ## Example Use
@@ -33,14 +33,14 @@ uniform distribution is sampled twice. Since this sampled data will only be used
 
 !listing multiapps/commandline_control/master_multiple.i block=Samplers
 
-Finally, the `MultiAppCommandLineControl` is used to apply the sampled data to the
+Finally, the `MultiAppSamplerControl` is used to apply the sampled data to the
 desired Mesh settings.
 
 !listing multiapps/commandline_control/master_multiple.i block=Controls
 
 ## Vector Parameter
 
-The vector parameter can be altered statistically with `MultiAppCommandLineControl`. To illustrate its usage, we consider an input file listed below:
+The vector parameter can be altered statistically with `MultiAppSamplerControl`. To illustrate its usage, we consider an input file listed below:
 
 !listing multiapps/batch_commandline_control/master_vector.i block=Controls
 
@@ -57,10 +57,10 @@ Several cases exist for modifying the vector parameter:
 !alert note
 If `[]` is used, it must be provided to every parameter. By default, if the `[]` is not provided it is assumed that values are scalar and captured in order.
 
-!syntax parameters /Controls/MultiAppCommandLineControl
+!syntax parameters /Controls/MultiAppSamplerControl
 
-!syntax inputs /Controls/MultiAppCommandLineControl
+!syntax inputs /Controls/MultiAppSamplerControl
 
-!syntax children /Controls/MultiAppCommandLineControl
+!syntax children /Controls/MultiAppSamplerControl
 
 !bibtex bibliography
