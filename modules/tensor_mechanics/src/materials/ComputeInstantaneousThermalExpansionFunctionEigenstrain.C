@@ -26,6 +26,7 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<is_ad>::validParams
   params.addRequiredParam<FunctionName>("thermal_expansion_function",
                                         "Function describing the instantaneous thermal expansion "
                                         "coefficient as a function of temperature");
+  params.suppressParameter<bool>("use_old_temperature");
   return params;
 }
 
@@ -53,36 +54,26 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<is_ad>::initQpState
 }
 
 template <bool is_ad>
-void
-ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<is_ad>::computeThermalStrain(
-    GenericReal<is_ad> & thermal_strain, Real * dthermal_strain_dT)
+ValueAndDerivative<is_ad>
+ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<is_ad>::computeThermalStrain()
 {
   if (this->_t_step > 1)
     _step_one = false;
 
-  const auto & current_temp = this->_temperature[_qp];
-
-  const Real & old_thermal_strain = _thermal_strain_old[_qp];
-
   const auto & old_temp =
       (_step_one ? this->_stress_free_temperature[_qp] : this->_temperature_old[_qp]);
-  const auto delta_T = current_temp - old_temp;
+  const auto delta_T = this->_temperature[_qp] - old_temp;
 
-  const auto alpha_current_temp = _thermal_expansion_function.value(current_temp);
+  const auto alpha_current_temp = _thermal_expansion_function.value(this->_temperature[_qp]);
   const auto alpha_old_temp = _thermal_expansion_function.value(old_temp);
 
-  thermal_strain = old_thermal_strain + delta_T * 0.5 * (alpha_current_temp + alpha_old_temp);
+  const auto thermal_strain =
+      _thermal_strain_old[_qp] + delta_T * 0.5 * (alpha_current_temp + alpha_old_temp);
 
   // store this for use in the next timestep (no derivatives needed)
   _thermal_strain[_qp] = MetaPhysicL::raw_value(thermal_strain);
 
-  if constexpr (!is_ad)
-  {
-    mooseAssert(dthermal_strain_dT, "Internal error. dthermal_strain_dT should not be nullptr.");
-    *dthermal_strain_dT = alpha_current_temp;
-  }
-  else
-    libmesh_ignore(dthermal_strain_dT);
+  return thermal_strain;
 }
 
 template class ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<false>;

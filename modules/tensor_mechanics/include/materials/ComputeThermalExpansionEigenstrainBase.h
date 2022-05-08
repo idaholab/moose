@@ -12,6 +12,11 @@
 #include "ComputeEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
 #include "RankTwoTensorForward.h"
+#include "ChainedReal.h"
+
+/// Return type with a single derivative
+template <bool is_ad>
+using ValueAndDerivative = typename std::conditional<is_ad, ADReal, ChainedReal>::type;
 
 /**
  * ComputeThermalExpansionEigenstrainBase is a base class for all models that
@@ -26,31 +31,30 @@ public:
 
   ComputeThermalExpansionEigenstrainBaseTempl(const InputParameters & parameters);
 
-protected:
+  /// resize _temperature_buffer
+  virtual void subdomainSetup() final;
+
+  /// update _temperature_buffer
+  virtual void computeProperties() final;
+
   virtual void computeQpEigenstrain() override;
-  /*
-   * Compute the total thermal strain relative to the stress-free temperature at
-   * the current temperature, as well as the current instantaneous thermal
-   * expansion coefficient.
-   * param thermal_strain    The current total linear thermal strain
-   *                         (\delta L / L)
-   * param dthermal_strain_dT The current instantaneous coefficient of thermal
-   *                         expansion (derivative of thermal_strain wrt
-   *                         temperature
+
+protected:
+  virtual ValueAndDerivative<is_ad> computeThermalStrain() = 0;
+
+  /**
+   * temperature to use in the eigenstrain calculation (depending on _use_old_temperature).
+   * We use a const reference to a private member here to prevent derived classes for
+   * accidentally overwriting any values.
    */
-  virtual void computeThermalStrain(GenericReal<is_ad> & thermal_strain,
-                                    Real * dthermal_strain_dT = nullptr) = 0;
+  const std::vector<ValueAndDerivative<is_ad>> & _temperature;
 
   /// lag temperature variable
   const bool _use_old_temperature;
 
-  /// current temperature
-  const GenericVariableValue<is_ad> & _temperature;
-
-  /// old temperature
+  /// previous time step temperature
   const VariableValue & _temperature_old;
 
-  /// the eigenstrain derivative (only used for is_ad == false)
   MaterialProperty<RankTwoTensor> * _deigenstrain_dT;
 
   const VariableValue & _stress_free_temperature;
@@ -58,6 +62,13 @@ protected:
   using ComputeEigenstrainBaseTempl<is_ad>::_qp;
   using ComputeEigenstrainBaseTempl<is_ad>::_eigenstrain;
   using ComputeEigenstrainBaseTempl<is_ad>::_eigenstrain_name;
+
+private:
+  /// temperature to use in the eigenstrain calculation (depending on _use_old_temperature)
+  std::vector<ValueAndDerivative<is_ad>> _temperature_buffer;
+
+  /// current temperature
+  const GenericVariableValue<is_ad> & _temperature_prop;
 };
 
 typedef ComputeThermalExpansionEigenstrainBaseTempl<false> ComputeThermalExpansionEigenstrainBase;

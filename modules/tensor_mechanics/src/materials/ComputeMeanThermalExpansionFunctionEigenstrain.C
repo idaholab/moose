@@ -11,11 +11,13 @@
 #include "Function.h"
 
 registerMooseObject("TensorMechanicsApp", ComputeMeanThermalExpansionFunctionEigenstrain);
+registerMooseObject("TensorMechanicsApp", ADComputeMeanThermalExpansionFunctionEigenstrain);
 
+template <bool is_ad>
 InputParameters
-ComputeMeanThermalExpansionFunctionEigenstrain::validParams()
+ComputeMeanThermalExpansionFunctionEigenstrainTempl<is_ad>::validParams()
 {
-  InputParameters params = ComputeThermalExpansionEigenstrainBase::validParams();
+  InputParameters params = ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::validParams();
   params.addClassDescription("Computes eigenstrain due to thermal expansion using a function that "
                              "describes the mean thermal expansion as a function of temperature");
   params.addRequiredParam<FunctionName>(
@@ -28,30 +30,36 @@ ComputeMeanThermalExpansionFunctionEigenstrain::validParams()
   return params;
 }
 
-ComputeMeanThermalExpansionFunctionEigenstrain::ComputeMeanThermalExpansionFunctionEigenstrain(
-    const InputParameters & parameters)
-  : ComputeMeanThermalExpansionEigenstrainBase(parameters),
-    _thermal_expansion_function(getFunction("thermal_expansion_function")),
-    _thexp_func_ref_temp(getParam<Real>("thermal_expansion_function_reference_temperature"))
+template <bool is_ad>
+ComputeMeanThermalExpansionFunctionEigenstrainTempl<
+    is_ad>::ComputeMeanThermalExpansionFunctionEigenstrainTempl(const InputParameters & parameters)
+  : ComputeMeanThermalExpansionEigenstrainBaseTempl<is_ad>(parameters),
+    _thermal_expansion_function(this->getFunction("thermal_expansion_function")),
+    _thexp_func_ref_temp(
+        this->template getParam<Real>("thermal_expansion_function_reference_temperature"))
 {
 }
 
+template <bool is_ad>
 Real
-ComputeMeanThermalExpansionFunctionEigenstrain::referenceTemperature()
+ComputeMeanThermalExpansionFunctionEigenstrainTempl<is_ad>::referenceTemperature()
 {
   return _thexp_func_ref_temp;
 }
 
-Real
-ComputeMeanThermalExpansionFunctionEigenstrain::meanThermalExpansionCoefficient(
-    const Real & temperature)
+template <bool is_ad>
+ValueAndDerivative<is_ad>
+ComputeMeanThermalExpansionFunctionEigenstrainTempl<is_ad>::meanThermalExpansionCoefficient(
+    const ValueAndDerivative<is_ad> & temperature)
 {
-  return _thermal_expansion_function.value(temperature);
+  // we need these two branches because we cannot yet evaluate Functions with ChainedReals
+  if constexpr (is_ad)
+    return _thermal_expansion_function.value(temperature);
+  else
+    return {_thermal_expansion_function.value(temperature.value()),
+            _thermal_expansion_function.timeDerivative(temperature.value()) *
+                temperature.derivatives()};
 }
 
-Real
-ComputeMeanThermalExpansionFunctionEigenstrain::meanThermalExpansionCoefficientDerivative(
-    const Real temperature)
-{
-  return _thermal_expansion_function.timeDerivative(temperature, Point());
-}
+template class ComputeMeanThermalExpansionFunctionEigenstrainTempl<false>;
+template class ComputeMeanThermalExpansionFunctionEigenstrainTempl<true>;

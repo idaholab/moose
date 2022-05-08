@@ -10,6 +10,7 @@
 #include "LinearInterpolation.h"
 
 #include "DualRealOps.h"
+#include "ChainedReal.h"
 
 #include <cassert>
 #include <fstream>
@@ -82,6 +83,7 @@ LinearInterpolation::sample(const T & x) const
 
 template Real LinearInterpolation::sample<Real>(const Real &) const;
 template ADReal LinearInterpolation::sample<ADReal>(const ADReal &) const;
+template ChainedReal LinearInterpolation::sample<ChainedReal>(const ChainedReal &) const;
 
 template <typename T>
 T
@@ -114,6 +116,7 @@ LinearInterpolation::sampleDerivative(const T & x) const
 
 template Real LinearInterpolation::sampleDerivative<Real>(const Real &) const;
 template ADReal LinearInterpolation::sampleDerivative<ADReal>(const ADReal &) const;
+template ChainedReal LinearInterpolation::sampleDerivative<ChainedReal>(const ChainedReal &) const;
 
 Real
 LinearInterpolation::integrate()

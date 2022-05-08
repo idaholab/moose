@@ -18,6 +18,7 @@
 #include "ScalarCoupleable.h"
 #include "MooseFunctor.h"
 #include "MooseADWrapper.h"
+#include "ChainedReal.h"
 
 // libMesh
 #include "libmesh/vector_value.h"
@@ -76,6 +77,7 @@ public:
   virtual ADReal value(const ADReal & t, const ADPoint & p) const;
 
   ///@{ Helpers to call value(t,x,y,z)
+  ChainedReal value(const ChainedReal & t) const;
   template <typename U>
   auto value(const U & t) const;
   template <typename U>

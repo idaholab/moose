@@ -26,8 +26,8 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual void computeThermalStrain(GenericReal<is_ad> & thermal_strain,
-                                    Real * dthermal_strain_dT) override;
+
+  virtual ValueAndDerivative<is_ad> computeThermalStrain() override;
 
   const Function & _thermal_expansion_function;
 

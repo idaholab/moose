@@ -29,8 +29,8 @@ ComputeThermalExpansionEigenstrainBeam::ComputeThermalExpansionEigenstrainBeam(
 {
 }
 
-void
-ComputeThermalExpansionEigenstrainBeam::computeThermalStrain(Real & thermal_strain)
+Real
+ComputeThermalExpansionEigenstrainBeam::computeThermalStrain()
 {
-  thermal_strain = _thermal_expansion_coeff * (_temperature[_qp] - _stress_free_temperature[_qp]);
+  return _thermal_expansion_coeff * (_temperature[_qp] - _stress_free_temperature[_qp]);
 }

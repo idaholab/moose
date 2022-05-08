@@ -10,11 +10,13 @@
 #include "ComputeThermalExpansionEigenstrain.h"
 
 registerMooseObject("TensorMechanicsApp", ComputeThermalExpansionEigenstrain);
+registerMooseObject("TensorMechanicsApp", ADComputeThermalExpansionEigenstrain);
 
+template <bool is_ad>
 InputParameters
-ComputeThermalExpansionEigenstrain::validParams()
+ComputeThermalExpansionEigenstrainTempl<is_ad>::validParams()
 {
-  InputParameters params = ComputeThermalExpansionEigenstrainBase::validParams();
+  InputParameters params = ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::validParams();
   params.addClassDescription("Computes eigenstrain due to thermal expansion "
                              "with a constant coefficient");
   params.addRequiredParam<Real>("thermal_expansion_coeff", "Thermal expansion coefficient");
@@ -23,19 +25,20 @@ ComputeThermalExpansionEigenstrain::validParams()
   return params;
 }
 
-ComputeThermalExpansionEigenstrain::ComputeThermalExpansionEigenstrain(
+template <bool is_ad>
+ComputeThermalExpansionEigenstrainTempl<is_ad>::ComputeThermalExpansionEigenstrainTempl(
     const InputParameters & parameters)
-  : ComputeThermalExpansionEigenstrainBase(parameters),
-    _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff"))
+  : ComputeThermalExpansionEigenstrainBaseTempl<is_ad>(parameters),
+    _thermal_expansion_coeff(this->template getParam<Real>("thermal_expansion_coeff"))
 {
 }
 
-void
-ComputeThermalExpansionEigenstrain::computeThermalStrain(Real & thermal_strain,
-                                                         Real * dthermal_strain_dT)
+template <bool is_ad>
+ValueAndDerivative<is_ad>
+ComputeThermalExpansionEigenstrainTempl<is_ad>::computeThermalStrain()
 {
-  thermal_strain = _thermal_expansion_coeff * (_temperature[_qp] - _stress_free_temperature[_qp]);
-
-  mooseAssert(dthermal_strain_dT, "Internal error. dthermal_strain_dT should not be nullptr.");
-  *dthermal_strain_dT = _thermal_expansion_coeff;
+  return _thermal_expansion_coeff * (_temperature[_qp] - _stress_free_temperature[_qp]);
 }
+
+template class ComputeThermalExpansionEigenstrainTempl<false>;
+template class ComputeThermalExpansionEigenstrainTempl<true>;

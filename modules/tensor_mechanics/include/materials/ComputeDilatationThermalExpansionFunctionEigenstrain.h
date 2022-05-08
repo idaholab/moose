@@ -27,18 +27,10 @@ public:
 protected:
   /*
    * Compute the fractional linear dilatation due to thermal expansion delta L / L
-   * @param temperature current temperature
    * @return fractional linear dilatation due
    */
-  virtual GenericReal<is_ad> computeDilatation(const GenericReal<is_ad> & temperature) override;
-
-  /*
-   * Compute the derivative of the fractional linear dilatation due to thermal expansion delta L / L
-   * with respect to temperature (only called in the non-AD instantiation)
-   * @param temperature current temperature
-   * @return fractional linear dilatation due
-   */
-  virtual Real computeDilatationDerivative(const Real temperature) override;
+  virtual ValueAndDerivative<is_ad>
+  computeDilatation(const ValueAndDerivative<is_ad> & temperature) override;
 
   /// Dilatation function
   const Function & _dilatation_function;
