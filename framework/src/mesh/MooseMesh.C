@@ -3180,8 +3180,9 @@ MooseMesh::buildFaceInfo() const
   _face_info.clear();
   _all_face_info.clear();
   _elem_side_to_face_info.clear();
-  _elem_volumes.clear();
-  _elem_centroids.clear();
+
+  _internal_elem_info.clear();
+  _ghost_elem_info.clear();
 
   // by performing the element ID comparison check in the below loop, we are ensuring that we never
   // double count face contributions. If a face lies along a process boundary, the only process that
@@ -3190,24 +3191,30 @@ MooseMesh::buildFaceInfo() const
   auto begin = getMesh().active_elements_begin();
   auto end = getMesh().active_elements_end();
 
-  std::vector<ElemInfo> _elem_info;
-  for (auto it = begin; it != end; ++it)
-  {
-    const Elem * elem = *it;
-    _elem_info.emplace_back(*it);
-    auto & elem_entry = _elem_info.back();
-
-    for (const auto side : elem->side_index_range())
-      if (!elem->neighbor_ptr(side))
-      {
-        _elem_info.emplace_back(elem_entry, side);
-      }
-  }
-
+  std::unordered_map<const Elem *, unsigned int> helper;
   unsigned int counter = 0;
   for (auto it = begin; it != end; ++it)
   {
     const Elem * elem = *it;
+    _internal_elem_info.emplace_back(elem);
+    helper.emplace(elem, counter++);
+    auto & elem_entry = _internal_elem_info.back();
+
+    for (const auto side : elem->side_index_range())
+      if (!elem->neighbor_ptr(side))
+      {
+        _ghost_elem_info.emplace(std::piecewise_construct,
+                                 std::forward_as_tuple(std::make_pair(elem, side)),
+                                 std::forward_as_tuple(elem_entry, side));
+      }
+  }
+
+  counter = 0;
+  for (auto it = begin; it != end; ++it)
+  {
+    const Elem * elem = *it;
+    const ElemInfo * elem_info = &_internal_elem_info[counter++];
+
     const dof_id_type elem_id = elem->id();
 
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
@@ -3253,7 +3260,11 @@ MooseMesh::buildFaceInfo() const
         mooseAssert(!neighbor || (neighbor->level() < elem->level() ? neighbor->active() : true),
                     "If the neighbor is coarser than the element, we expect that the neighbor must "
                     "be active.");
-        _all_face_info.emplace_back(elem, side, neighbor);
+
+        const auto & neighbor_info =
+            neighbor ? _internal_elem_info[helper.find(neighbor)->second]
+                     : _ghost_elem_info.find(std::make_pair(elem, side))->second;
+        _all_face_info.emplace_back(elem_info, side, &neighbor_info);
 
         auto & fi = _all_face_info.back();
 

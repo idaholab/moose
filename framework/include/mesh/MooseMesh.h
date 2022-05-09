@@ -18,6 +18,7 @@
 #include "MooseHashing.h"
 #include "MooseApp.h"
 #include "FaceInfo.h"
+#include "ElemInfo.h"
 
 #include <memory> //std::unique_ptr
 #include <unordered_map>
@@ -68,26 +69,6 @@ public:
   /// The distance between them
   Real _distance;
 };
-
-class ElemInfo
-{
-public:
-  ElemInfo(const Elem * const elem)
-  : _elem(elem)
-  {
-    _volume = _elem-volume();
-  }
-
-
-  const Elem * const elem() { return _elem; }
-  const Real & volume() { return _volume; }
-  const Point & centroid() { return _centroid; }
-
-protected:
-  const Elem * const _elem;
-  const Real _volume;
-  const Point _centroid;
-}
 
 /**
  * MooseMesh wraps a libMesh::Mesh object and enhances its capabilities
@@ -1343,6 +1324,9 @@ private:
   /// FaceInfo object storing information for face based loops. This container holds all the \p
   /// FaceInfo objects accessible from this process
   mutable std::vector<FaceInfo> _all_face_info;
+
+  mutable std::vector<ElemInfo> _internal_elem_info;
+  mutable std::unordered_map<std::pair<const Elem *, unsigned int>, ElemInfo> _ghost_elem_info;
 
   /// Holds only those \p FaceInfo objects that have \p processor_id equal to this process's id,
   /// e.g. the local \p FaceInfo objects

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "ElemInfo.h"
 
 #include "libmesh/point.h"
 #include "libmesh/vector_value.h"
@@ -34,11 +35,7 @@ class Node;
 class FaceInfo
 {
 public:
-  FaceInfo(const Elem * elem,
-           unsigned int side,
-           const Elem * neighbor,
-           const std::unordered_map<Elem *, Real> & cell_volumes,
-           const std::unordered_map<Elem *, Point> & cell_centroids);
+  FaceInfo(const ElemInfo * elem_info, unsigned int side, const ElemInfo * neighbor_info);
 
   /// This enum is used to indicate which side(s) of a face a particular
   /// variable is defined on.  This is important for certain BC-related finite
@@ -67,7 +64,7 @@ public:
   const Point & normal() const { return _normal; }
 
   /// Returns true if this face resides on the mesh boundary.
-  bool isBoundary() const { return (_neighbor == nullptr); }
+  bool isBoundary() const { return (_neighbor_info->elem() == nullptr); }
 
   /// Returns the coordinates of the face centroid.
   const Point & faceCentroid() const { return _face_centroid; }
@@ -83,14 +80,14 @@ public:
   /// Returns the elem and neighbor elements adjacent to the face.
   /// If a face is on a mesh boundary, the neighborPtr
   /// will return nullptr - the elem will never be null.
-  const Elem & elem() const { return *_elem; }
-  const Elem * neighborPtr() const { return _neighbor; }
+  const Elem & elem() const { return *(_elem_info->elem()); }
+  const Elem * neighborPtr() const { return _neighbor_info->elem(); }
   const Elem & neighbor() const
   {
-    if (!_neighbor)
+    if (!_neighbor_info->elem())
       mooseError("FaceInfo object 'const Elem & neighbor()' is called but neighbor element pointer "
                  "is null. This occurs for faces at the domain boundary");
-    return *_neighbor;
+    return *(_neighbor_info->elem());
   }
   ///@}
 
@@ -100,15 +97,15 @@ public:
   /// - i.e. the vector from the elem element centroid to the face centroid is
   /// doubled in length.  The tip of this new vector is the neighbor centroid.
   /// This is important for FV dirichlet BCs.
-  const Point & elemCentroid() const { return *_elem_centroid; }
-  const Point & neighborCentroid() const { return *_neighbor_centroid; }
+  const Point & elemCentroid() const { return _elem_info->centroid(); }
+  const Point & neighborCentroid() const { return _neighbor_info->centroid(); }
   ///@}
 
   ///@{
   /// Returns the elem and neighbor subdomain IDs. If no neighbor element exists, then
   /// an invalid ID is returned for the neighbor subdomain ID.
-  SubdomainID elemSubdomainID() const { return _elem_subdomain_id; }
-  SubdomainID neighborSubdomainID() const { return _neighbor_subdomain_id; }
+  SubdomainID elemSubdomainID() const { return _elem_info->subdomain_id(); }
+  SubdomainID neighborSubdomainID() const { return _neighbor_info->subdomain_id(); }
   ///@}
 
   ///@{
@@ -134,10 +131,10 @@ public:
   std::set<BoundaryID> & boundaryIDs() { return _boundary_ids; }
 
   /// Return the element volume
-  Real elemVolume() const { return *_elem_volume; }
+  Real elemVolume() const { return _elem_info->volume(); }
 
   /// Return the neighbor volume
-  Real neighborVolume() const { return *_neighbor_volume; }
+  Real neighborVolume() const { return _neighbor_info->volume(); }
 
   /// Return the geometric weighting factor
   Real gC() const { return _gc; }
@@ -173,24 +170,18 @@ public:
   const std::pair<dof_id_type, unsigned int> & id() const { return _id; }
 
 private:
+  /// the elem and neighbor elems
+  const ElemInfo * _elem_info;
+  const ElemInfo * _neighbor_info;
+
   Real _face_coord = 0;
   Point _normal;
 
   const processor_id_type _processor_id;
   const std::pair<dof_id_type, unsigned int> _id;
 
-  /// the elem and neighbor elems
-  const Elem * const _elem;
-  const Elem * const _neighbor;
-
-  /// the elem subdomain id
-  const SubdomainID _elem_subdomain_id;
-
   /// the elem local side id
   const unsigned int _elem_side_id;
-
-  const Point & _elem_centroid;
-  const Real _elem_volume;
 
   /// A unique_ptr to the face element built from \p _elem and \p _elem_side_id
   std::unique_ptr<Elem> _face;
@@ -201,14 +192,8 @@ private:
   /// Whether neighbor is non-null and non-remote
   const bool _valid_neighbor;
 
-  /// the neighbor subdoman id
-  const SubdomainID _neighbor_subdomain_id;
-
   /// the neighbor local side ide
   const unsigned int _neighbor_side_id;
-
-  const Point * _neighbor_centroid;
-  const Real * _neighbor_volume;
 
   /// the distance vector between neighbor and element centroids
   const RealVectorValue _d_cf;
