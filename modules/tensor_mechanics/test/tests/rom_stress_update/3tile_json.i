@@ -167,12 +167,10 @@ endtime = 1.9
   [temperature]
     type = ElementAverageValue
     variable = temperature
-    # outputs = console
   []
   [partition_weight]
     type = ElementAverageMaterialProperty
     mat_prop = partition_weight
-    # outputs = console
   []
   [rhom_in]
     type = FunctionValuePostprocessor
@@ -190,7 +188,6 @@ endtime = 1.9
     type = FunctionValuePostprocessor
     function = vmJ2_fcn
     execute_on = 'TIMESTEP_END initial'
-    # outputs = console
   []
   [creep_rate]
     type = ElementAverageMaterialProperty

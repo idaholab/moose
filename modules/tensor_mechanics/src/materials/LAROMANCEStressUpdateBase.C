@@ -67,8 +67,8 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
 
   MooseEnum extrapolated_lower_limit_behavior(
       "ERROR WARN IGNORE EXCEPTION DONOTHING USELIMIT EXTRAPOLATE", "EXTRAPOLATE");
-  // Forbid extrapolation of on high end of limit
-  MooseEnum extrapolated_upper_limit_behavior("ERROR WARN IGNORE EXCEPTION DONOTHING", "EXCEPTION");
+  // Only allow ERROR and EXCEPTION on upper bounds
+  MooseEnum extrapolated_upper_limit_behavior("ERROR EXCEPTION", "EXCEPTION");
   params.addParam<MooseEnum>(
       "stress_input_window_low_failure",
       extrapolated_lower_limit_behavior,
