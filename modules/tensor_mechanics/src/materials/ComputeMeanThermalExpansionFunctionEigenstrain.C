@@ -44,7 +44,7 @@ ComputeMeanThermalExpansionFunctionEigenstrain::referenceTemperature()
 
 Real
 ComputeMeanThermalExpansionFunctionEigenstrain::meanThermalExpansionCoefficient(
-    const Real temperature)
+    const Real & temperature)
 {
   return _thermal_expansion_function.value(temperature);
 }

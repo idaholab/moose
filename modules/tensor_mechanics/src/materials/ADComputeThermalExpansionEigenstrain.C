@@ -29,7 +29,7 @@ ADComputeThermalExpansionEigenstrain::ADComputeThermalExpansionEigenstrain(
 }
 
 void
-ADComputeThermalExpansionEigenstrain::computeThermalStrain(ADReal & thermal_strain)
+ADComputeThermalExpansionEigenstrain::computeThermalStrain(ADReal & thermal_strain, Real *)
 {
   if (_use_old_temperature)
     thermal_strain =

@@ -9,23 +9,47 @@
 
 #include "ComputeDilatationThermalExpansionEigenstrainBase.h"
 
+template <bool is_ad>
 InputParameters
-ComputeDilatationThermalExpansionEigenstrainBase::validParams()
+ComputeDilatationThermalExpansionEigenstrainBaseTempl<is_ad>::validParams()
 {
-  return ComputeThermalExpansionEigenstrainBase::validParams();
+  return ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::validParams();
 }
 
-ComputeDilatationThermalExpansionEigenstrainBase::ComputeDilatationThermalExpansionEigenstrainBase(
-    const InputParameters & parameters)
-  : ComputeThermalExpansionEigenstrainBase(parameters)
+template <bool is_ad>
+ComputeDilatationThermalExpansionEigenstrainBaseTempl<is_ad>::
+    ComputeDilatationThermalExpansionEigenstrainBaseTempl(const InputParameters & parameters)
+  : ComputeThermalExpansionEigenstrainBaseTempl<is_ad>(parameters)
 {
 }
 
+template <bool is_ad>
 void
-ComputeDilatationThermalExpansionEigenstrainBase::computeThermalStrain(Real & thermal_strain,
-                                                                       Real & dthermal_strain_dT)
+ComputeDilatationThermalExpansionEigenstrainBaseTempl<is_ad>::computeThermalStrain(
+    GenericReal<is_ad> & thermal_strain, Real * dthermal_strain_dT)
 {
-  const Real stress_free_thexp = computeDilatation(_stress_free_temperature[_qp]);
-  thermal_strain = computeDilatation(_temperature[_qp]) - stress_free_thexp;
-  dthermal_strain_dT = computeDilatationDerivative(_temperature[_qp]);
+  const auto & T =
+      this->_use_old_temperature ? this->_temperature_old[_qp] : this->_temperature[_qp];
+
+  const auto stress_free_thexp = computeDilatation(this->_stress_free_temperature[_qp]);
+  thermal_strain = computeDilatation(T) - stress_free_thexp;
+
+  if constexpr (!is_ad)
+  {
+    mooseAssert(dthermal_strain_dT, "Internal error. dthermal_strain_dT should not be nullptr.");
+    *dthermal_strain_dT = computeDilatationDerivative(T);
+  }
+  else
+    libmesh_ignore(dthermal_strain_dT);
 }
+
+template <bool is_ad>
+Real
+ComputeDilatationThermalExpansionEigenstrainBaseTempl<is_ad>::computeDilatationDerivative(
+    const Real)
+{
+  mooseError("computeDilatationDerivative must be implemented for any derived non-AD class.");
+}
+
+template class ComputeDilatationThermalExpansionEigenstrainBaseTempl<false>;
+template class ComputeDilatationThermalExpansionEigenstrainBaseTempl<true>;

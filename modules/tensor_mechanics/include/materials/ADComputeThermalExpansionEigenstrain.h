@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADComputeThermalExpansionEigenstrainBase.h"
+#include "ComputeThermalExpansionEigenstrainBase.h"
 
 /**
  * ADComputeThermalExpansionEigenstrain computes an eigenstrain for thermal expansion
@@ -23,7 +23,7 @@ public:
   ADComputeThermalExpansionEigenstrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeThermalStrain(ADReal & thermal_strain) override;
+  virtual void computeThermalStrain(ADReal & thermal_strain, Real *) override;
 
   const Real & _thermal_expansion_coeff;
 };
