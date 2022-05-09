@@ -69,5 +69,5 @@ protected:
 public:
   static InputParameters validParams();
 
-  friend class PinMeshGenerator;
+  friend class QuadPinMeshGenerator;
 };

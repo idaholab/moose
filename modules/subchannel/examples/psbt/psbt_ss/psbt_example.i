@@ -18,7 +18,7 @@ P_out = 14.72e6 # Pa
   []
 
   [fuel_pins]
-    type = PinMeshGenerator
+    type = QuadPinMeshGenerator
     input = sub_channel
     nx = 6
     ny = 6

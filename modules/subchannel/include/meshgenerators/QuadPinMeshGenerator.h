@@ -7,10 +7,10 @@
 /**
  * Class to create Pin mesh in the square lattice geometry
  */
-class PinMeshGenerator : public MeshGenerator
+class QuadPinMeshGenerator : public MeshGenerator
 {
 public:
-  PinMeshGenerator(const InputParameters & parameters);
+  QuadPinMeshGenerator(const InputParameters & parameters);
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
