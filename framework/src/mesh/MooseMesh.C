@@ -3197,24 +3197,22 @@ MooseMesh::buildFaceInfo() const
   {
     const Elem * elem = *it;
     _internal_elem_info.emplace_back(elem);
-    helper.emplace(elem, counter++);
-    auto & elem_entry = _internal_elem_info.back();
+    helper.emplace(elem, counter);
 
     for (const auto side : elem->side_index_range())
       if (!elem->neighbor_ptr(side))
       {
         _ghost_elem_info.emplace(std::piecewise_construct,
                                  std::forward_as_tuple(std::make_pair(elem, side)),
-                                 std::forward_as_tuple(elem_entry, side));
+                                 std::forward_as_tuple(_internal_elem_info[counter], side));
       }
+    counter += 1;
   }
 
   counter = 0;
   for (auto it = begin; it != end; ++it)
   {
     const Elem * elem = *it;
-    const ElemInfo * elem_info = &_internal_elem_info[counter++];
-
     const dof_id_type elem_id = elem->id();
 
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
@@ -3261,12 +3259,25 @@ MooseMesh::buildFaceInfo() const
                     "If the neighbor is coarser than the element, we expect that the neighbor must "
                     "be active.");
 
-        const auto & neighbor_info =
-            neighbor ? _internal_elem_info[helper.find(neighbor)->second]
-                     : _ghost_elem_info.find(std::make_pair(elem, side))->second;
-        _all_face_info.emplace_back(elem_info, side, &neighbor_info);
+        ElemInfo * neighbor_info = nullptr;
+        if (!neighbor)
+        {
+          const auto & it = _ghost_elem_info.find(std::make_pair(elem, side));
+          neighbor_info = &(it->second);
+        }
+        else
+        {
+          const auto & neighbor_info_it = helper.find(neighbor);
+          unsigned int neighbor_info_index = neighbor_info_it->second;
+          neighbor_info = &_internal_elem_info[neighbor_info_index];
+        }
+
+        _all_face_info.emplace_back(&_internal_elem_info[counter], side);
 
         auto & fi = _all_face_info.back();
+        if (!neighbor)
+          neighbor_info->initialize_centroid(_internal_elem_info[counter], fi.faceCentroid());
+        fi.computeCoefficients(neighbor_info);
 
         // get all the sidesets that this face is contained in and cache them
         // in the face info.
@@ -3285,6 +3296,7 @@ MooseMesh::buildFaceInfo() const
         }
       }
     }
+    counter += 1;
   }
 
   // Build the local face info and elem_side to face info maps. We need to do this after

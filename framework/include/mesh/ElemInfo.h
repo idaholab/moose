@@ -33,13 +33,8 @@ public:
   {
   }
 
-  ElemInfo(const ElemInfo & elem_info, unsigned int side)
-    : _elem(nullptr),
-      _volume(elem_info.volume()),
-      _centroid(2 * (const_cast<Elem *>(elem_info.elem())->build_side_ptr(side)->vertex_average() -
-                     elem_info.centroid()) +
-                elem_info.centroid()),
-      _subdomain_id(Moose::INVALID_BLOCK_ID)
+  ElemInfo(const ElemInfo & elem_info, unsigned int /*side*/)
+    : _elem(nullptr), _volume(elem_info.volume()), _subdomain_id(Moose::INVALID_BLOCK_ID)
   {
   }
 
@@ -47,10 +42,14 @@ public:
   const Real & volume() const { return _volume; }
   const Point & centroid() const { return _centroid; }
   const SubdomainID & subdomain_id() const { return _subdomain_id; }
+  void initialize_centroid(const ElemInfo & elem_info, const Point & face_center)
+  {
+    _centroid = 2 * face_center - elem_info.centroid();
+  }
 
 protected:
   const Elem * const _elem;
   const Real _volume;
-  const Point _centroid;
+  Point _centroid;
   const SubdomainID _subdomain_id;
 };

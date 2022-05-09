@@ -74,9 +74,7 @@ public:
  * MooseMesh wraps a libMesh::Mesh object and enhances its capabilities
  * by caching additional data and storing more state.
  */
-class MooseMesh : public MooseObject,
-                  public Restartable,
-                  public PerfGraphInterface
+class MooseMesh : public MooseObject, public Restartable, public PerfGraphInterface
 {
 public:
   /**

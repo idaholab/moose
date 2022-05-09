@@ -35,7 +35,9 @@ class Node;
 class FaceInfo
 {
 public:
-  FaceInfo(const ElemInfo * elem_info, unsigned int side, const ElemInfo * neighbor_info);
+  FaceInfo(const ElemInfo * elem_info, unsigned int side);
+
+  void computeCoefficients(const ElemInfo * neighbor_info);
 
   /// This enum is used to indicate which side(s) of a face a particular
   /// variable is defined on.  This is important for certain BC-related finite
@@ -190,19 +192,19 @@ private:
   const Point _face_centroid;
 
   /// Whether neighbor is non-null and non-remote
-  const bool _valid_neighbor;
+  bool _valid_neighbor;
 
   /// the neighbor local side ide
-  const unsigned int _neighbor_side_id;
+  unsigned int _neighbor_side_id;
 
   /// the distance vector between neighbor and element centroids
-  const RealVectorValue _d_cf;
+  RealVectorValue _d_cf;
 
   /// the distance norm between neighbor and element centroids
-  const Real _d_cf_mag;
+  Real _d_cf_mag;
 
   /// The unit normal vector pointing from element center C to element center F
-  const RealVectorValue _e_cf;
+  RealVectorValue _e_cf;
 
   /// The vector to the intersection of d_{CF} and the face.
   Point _r_intersection;
