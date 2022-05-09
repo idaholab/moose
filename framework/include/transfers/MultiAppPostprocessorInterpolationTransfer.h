@@ -13,7 +13,7 @@
 #include "MultiAppTransfer.h"
 
 /**
- * Transfers from spatially varying PostprocessorInterpolations in a MultiApp to the "master"
+ * Transfers from spatially varying PostprocessorInterpolations in a MultiApp to the parent app
  * system.
  */
 class MultiAppPostprocessorInterpolationTransfer : public MultiAppTransfer
