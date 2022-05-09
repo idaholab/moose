@@ -17,7 +17,7 @@ heated_length = 1.0 # m
   []
 
   [fuel_pins]
-    type = PinMeshGenerator
+    type = QuadPinMeshGenerator
     input = sub_channel
     nx = 2
     ny = 2

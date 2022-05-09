@@ -28,7 +28,7 @@ pitch = 0.0126
   []
 
   [fuel_pins]
-    type = PinMeshGenerator
+    type = QuadPinMeshGenerator
     input = sub_channel
   []
 []

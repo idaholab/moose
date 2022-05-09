@@ -16,7 +16,7 @@
   []
 
   [fuel_pins]
-    type = PinMeshGenerator
+    type = QuadPinMeshGenerator
     input = sub_channel
   []
 []

@@ -106,5 +106,5 @@ public:
       unsigned int nx, unsigned int ny, Real pitch, Real elev, std::vector<Point> & pin_centers);
 
   friend class QuadSubChannelMeshGenerator;
-  friend class PinMeshGenerator;
+  friend class QuadPinMeshGenerator;
 };

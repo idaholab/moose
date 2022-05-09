@@ -1,4 +1,4 @@
-#include "PinMeshGenerator.h"
+#include "QuadPinMeshGenerator.h"
 #include "QuadSubChannelMesh.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/function_base.h"
@@ -24,10 +24,10 @@
 #include "libmesh/edge_edge2.h"
 #include <numeric>
 
-registerMooseObject("SubChannelApp", PinMeshGenerator);
+registerMooseObject("SubChannelApp", QuadPinMeshGenerator);
 
 InputParameters
-PinMeshGenerator::validParams()
+QuadPinMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The corresponding subchannel mesh");
@@ -43,7 +43,7 @@ PinMeshGenerator::validParams()
   return params;
 }
 
-PinMeshGenerator::PinMeshGenerator(const InputParameters & params)
+QuadPinMeshGenerator::QuadPinMeshGenerator(const InputParameters & params)
   : MeshGenerator(params),
     _input(getMesh("input")),
     _unheated_length_entry(getParam<Real>("unheated_length_entry")),
@@ -61,7 +61,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & params)
 }
 
 std::unique_ptr<MeshBase>
-PinMeshGenerator::generate()
+QuadPinMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh_base = std::move(_input);
   if (!mesh_base)
