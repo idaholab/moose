@@ -1,4 +1,3 @@
-
 # Mesh Splitting
 
 MOOSE provides the ability to pre-split a mesh into several chunks for use with
@@ -73,3 +72,6 @@ $ mpiexec -n 42 moose-app-opt -i your_input.i --use-split --split-file foo.cpr
 
 !alert note
 The mesh splitter commands do not work with DistributedMesh. You must only split with a ReplicatedMesh.
+
+!alert warning
+Using `--use-split` skips the `[Mesh]` block of the input file. Split mesh may be loaded using a [FileMeshGenerator.md] if further mesh generation is to be performed on the split mesh.
