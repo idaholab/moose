@@ -11,7 +11,6 @@ def get_registered_apps(parts_list):
     parts = [f'{x}APP' for x in re.findall(r'-D(\w+)_ENABLED',
                                            ''.join(parts_list))]
     app_name = re.sub('_|-', '', f'{os.path.basename(parts_list[0])}')
-    print(app_name)
     app_and_test = set([f'{app_name.upper()}APP',
                          f'{app_name.upper().replace("TEST", "")}TESTAPP'])
     parts.extend(app_and_test)
@@ -25,8 +24,8 @@ def getParts(parts_list):
     attributes = ['get_registered_apps']
     growing = {}
     for attribute in attributes:
-        growing = {**growing | getattr(sys.modules[__name__],
-                                       attribute)(parts_list)}
+        growing.update(getattr(sys.modules[__name__],
+                               attribute)(parts_list))
     return growing
 
 def main(args):
