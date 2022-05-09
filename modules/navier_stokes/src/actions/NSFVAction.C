@@ -290,15 +290,17 @@ NSFVAction::validParams()
       std::vector<MooseFunctorName>(),
       "Functor names for the sources used for the passive scalar fields.");
 
-  params.addParam<CoupledName>(
+  params.addParam<std::vector<CoupledName>>(
       "passive_scalar_coupled_source",
-      std::vector<VariableName>(),
-      "Coupled variable names for the sources used for the passive scalar fields.");
+      std::vector<CoupledName>(),
+      "Coupled variable names for the sources used for the passive scalar fields. If multiple "
+      "sources for each equation are specified, major (outer) ordering by equation.");
 
-  params.addParam<std::vector<Real>>(
+  params.addParam<std::vector<std::vector<Real>>>(
       "passive_scalar_coupled_source_coeff",
-      std::vector<Real>(),
-      "Coupled variable multipliers for the sources used for the passive scalar fields.");
+      std::vector<std::vector<Real>>(),
+      "Coupled variable multipliers for the sources used for the passive scalar fields. If multiple"
+      " sources for each equation are specified, major (outer) ordering by equation.");
 
   MultiMooseEnum ps_inlet_types("fixed-value flux-mass flux-velocity", "fixed-value");
   params.addParam<MultiMooseEnum>(
@@ -531,7 +533,7 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _passive_scalar_coupled_source(
         getParam<std::vector<CoupledName>>("passive_scalar_coupled_source")),
     _passive_scalar_coupled_source_coeff(
-        getParam<std::vector<Real>>("passive_scalar_coupled_source_coeff")),
+        getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff")),
     _passive_scalar_inlet_types(getParam<MultiMooseEnum>("passive_scalar_inlet_types")),
     _passive_scalar_inlet_function(
         getParam<std::vector<std::vector<std::string>>>("passive_scalar_inlet_function")),
@@ -1517,17 +1519,22 @@ NSFVAction::addScalarSourceKernels()
 void
 NSFVAction::addScalarCoupledSourceKernels()
 {
-  for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
+  for (unsigned int name_eq = 0; name_eq < _passive_scalar_names.size(); name_eq++)
   {
-    const std::string kernel_type = "FVCoupledForce";
-    InputParameters params = _factory.getValidParams(kernel_type);
-    params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<CoupledName>("v") = {_passive_scalar_coupled_source[name_i]};
-    params.set<Real>("coef") = _passive_scalar_coupled_source_coeff[name_i];
+    for (unsigned int i = 0; i < _passive_scalar_coupled_source[name_eq].size(); ++i)
+    {
+      const std::string kernel_type = "FVCoupledForce";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_eq];
+      params.set<std::vector<SubdomainName>>("block") = _blocks;
+      params.set<CoupledName>("v") = {_passive_scalar_coupled_source[name_eq][i]};
+      params.set<Real>("coef") = _passive_scalar_coupled_source_coeff[name_eq][i];
 
-    _problem->addFVKernel(
-        kernel_type, "ins_" + _passive_scalar_names[name_i] + "_coupled_source", params);
+      _problem->addFVKernel(kernel_type,
+                            "ins_" + _passive_scalar_names[name_eq] + "_coupled_source_" +
+                                std::to_string(i),
+                            params);
+    }
   }
 }
 
@@ -2390,12 +2397,20 @@ NSFVAction::checkPassiveScalarParameterErrors()
     if (_passive_scalar_coupled_source.size() != _passive_scalar_names.size())
       paramError("passive_scalar_coupled_source",
                  "The number of coupled sources defined is not equal to the number of passive "
-                 "scalar fields!");
+                 "scalar fields! Did you forget semicolons in the vector input?");
 
     if (_passive_scalar_coupled_source_coeff.size() != _passive_scalar_names.size())
       paramError("passive_scalar_coupled_source_coeff",
-                 "The number of coupled sources coefficients defined is not equal to the number of "
-                 "passive scalar fields!");
+                 "The number of coupled sources coefficients defined is not equal to the "
+                 "number of passive scalar fields! Did you forget semicolons in the vector input?");
+    for (unsigned int i = 0; i < _passive_scalar_coupled_source.size(); i++)
+    {
+      if (_passive_scalar_coupled_source[i].size() !=
+          _passive_scalar_coupled_source_coeff[i].size())
+        paramError("passive_scalar_coupled_source_coeff",
+                   "The number of coupled sources coefficients defined is not equal to the number "
+                   "of coupled sources! Did you forget semicolons in the vector input?");
+    }
   }
 }
 

@@ -227,9 +227,9 @@ protected:
   /// Passive scalar external source terms
   const std::vector<MooseFunctorName> _passive_scalar_source;
   /// Passive scalar coupled source terms
-  const CoupledName _passive_scalar_coupled_source;
+  const std::vector<std::vector<VariableName>> _passive_scalar_coupled_source;
   /// Passive scalar coupled source term coeffs
-  const std::vector<Real> _passive_scalar_coupled_source_coeff;
+  const std::vector<std::vector<Real>> _passive_scalar_coupled_source_coeff;
   /// Passive scalar inlet types (fixed-value/mass-flow)
   const MultiMooseEnum _passive_scalar_inlet_types;
   /// Passive scalar function names at inlet boundaries
