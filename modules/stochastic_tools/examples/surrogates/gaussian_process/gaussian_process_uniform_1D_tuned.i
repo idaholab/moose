@@ -48,7 +48,7 @@
 
 [Controls]
   [cmdline]
-    type = MultiAppCommandLineControl
+    type = MultiAppSamplerControl
     multi_app = sub
     sampler = train_sample
     param_names = 'Kernels/source/value'

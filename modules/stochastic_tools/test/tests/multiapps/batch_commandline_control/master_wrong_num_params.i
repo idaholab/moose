@@ -30,7 +30,7 @@
 
 [Controls]
   [cmdline]
-    type = MultiAppCommandLineControl
+    type = MultiAppSamplerControl
     multi_app = sub
     sampler = sample
     param_names = 'Mesh/xmax Mesh/ymax Mesh/zmax'

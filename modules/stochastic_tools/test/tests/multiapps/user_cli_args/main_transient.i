@@ -35,7 +35,7 @@
 
 [Controls]
   [cmdline]
-    type = MultiAppCommandLineControl
+    type = MultiAppSamplerControl
     multi_app = sub
     sampler = sample
     param_names = 'Functions/fun/value Postprocessors/function_val/scale_factor'

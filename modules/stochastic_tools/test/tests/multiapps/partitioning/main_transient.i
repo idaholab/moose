@@ -17,7 +17,7 @@
 []
 
 [Controls/cli]
-  type = MultiAppCommandLineControl
+  type = MultiAppSamplerControl
   multi_app = sub
   param_names = 'Postprocessors/pp1/scale_factor'
 []

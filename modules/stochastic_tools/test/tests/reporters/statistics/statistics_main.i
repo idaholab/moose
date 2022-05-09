@@ -18,7 +18,7 @@
 []
 
 [Controls/param]
-  type = MultiAppCommandLineControl
+  type = MultiAppSamplerControl
   multi_app = sub
   param_names = 'val'
 []

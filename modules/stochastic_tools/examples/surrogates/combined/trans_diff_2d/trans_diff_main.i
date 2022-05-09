@@ -38,7 +38,7 @@
 
 [Controls]
   [cmdline]
-    type = MultiAppCommandLineControl
+    type = MultiAppSamplerControl
     multi_app = runner
     sampler = hypercube
     param_names = 'Materials/diff_coeff/constant_expressions Functions/src_func/vals Variables/T/initial_condition'
