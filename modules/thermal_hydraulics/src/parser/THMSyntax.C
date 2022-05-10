@@ -30,6 +30,11 @@ associateSyntax(Syntax & syntax)
   syntax.registerActionSyntax("THMDebugAction", "Debug");
   syntax.registerActionSyntax("THMPrintComponentLoopsAction", "Debug");
   syntax.registerActionSyntax("THMOutputVectorVelocityAction", "Outputs");
+  syntax.registerActionSyntax("CoupledHeatTransferAction", "CoupledHeatTransfers/*", "add_bc");
+  syntax.registerActionSyntax(
+      "CoupledHeatTransferAction", "CoupledHeatTransfers/*", "add_user_object");
+  syntax.registerActionSyntax(
+      "CoupledHeatTransferAction", "CoupledHeatTransfers/*", "add_transfer");
 }
 
 void
