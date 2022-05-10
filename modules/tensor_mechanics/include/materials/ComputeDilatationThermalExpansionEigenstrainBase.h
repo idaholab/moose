@@ -28,10 +28,11 @@ public:
 protected:
   virtual ValueAndDerivative<is_ad> computeThermalStrain() override;
 
-  /*
+  /*#
    * Compute the fractional linear dilatation due to thermal expansion delta L / L
+   * along with its temperature derivative.
    * @param temperature current temperature
-   * @return fractional linear dilatation due
+   * @return fractional linear dilatation with temperature derivative
    */
   virtual ValueAndDerivative<is_ad>
   computeDilatation(const ValueAndDerivative<is_ad> & temperature) = 0;

@@ -31,9 +31,10 @@ protected:
 
   const Function & _thermal_expansion_function;
 
-  /// Stores the thermal strain as a scalar for use in computing an incremental update to this.
-  /// this is not a dual number as only the previous timestep values are used
-  //@{
+  /**
+   *@{ Stores the thermal strain as a scalar for use in computing an incremental update to this.
+   * this is not a dual number as only the previous timestep values are used
+   */
   MaterialProperty<Real> & _thermal_strain;
   const MaterialProperty<Real> & _thermal_strain_old;
   //@}

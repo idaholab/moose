@@ -40,10 +40,20 @@ public:
   virtual void computeQpEigenstrain() override;
 
 protected:
+  /**
+   * computeThermalStrain must be overridden in derived classes. The return type
+   * ValueAndDerivative<is_ad> contains the value for the thermal strain and its
+   * temperature derivative. Derived classes should use `_temperature[_qp]` to obtain
+   * the current temperature. In the is_ad == false case that member variable is
+   * agumented and will be of the type ChainedReal. I.e. even with is_ad == false
+   * a variant of forward mode automatic differentiation will be used internally to
+   * compute the thermal strain and no manual implementation of the temperature derivative
+   * is needed.
+   */
   virtual ValueAndDerivative<is_ad> computeThermalStrain() = 0;
 
   /**
-   * temperature to use in the eigenstrain calculation (depending on _use_old_temperature).
+   * Temperature to use in the eigenstrain calculation (depending on _use_old_temperature).
    * We use a const reference to a private member here to prevent derived classes for
    * accidentally overwriting any values.
    */
@@ -55,6 +65,7 @@ protected:
   /// previous time step temperature
   const VariableValue & _temperature_old;
 
+  // this temperature derivative property is onlycreated and set for is_ad == false
   MaterialProperty<RankTwoTensor> * _deigenstrain_dT;
 
   const VariableValue & _stress_free_temperature;

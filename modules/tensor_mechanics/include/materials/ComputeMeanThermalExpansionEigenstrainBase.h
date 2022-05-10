@@ -32,20 +32,21 @@ public:
   ComputeMeanThermalExpansionEigenstrainBaseTempl(const InputParameters & parameters);
 
 protected:
-  /*
+  /**
    * Compute the total thermal strain relative to the stress-free temperature at the
-   * current temperature, as well as the current instantaneous thermal expansion coefficient.
+   * current temperature along with its temperature derivative.
    */
   virtual ValueAndDerivative<is_ad> computeThermalStrain() override;
 
-  /*
+  /**
    * Get the reference temperature for the mean thermal expansion relationship.  This is
    * the temperature at which \f$\delta L = 0\f$.
    */
   virtual Real referenceTemperature() = 0;
 
   /*
-   * Compute the mean thermal expansion coefficient relative to the reference temperature.
+   * Compute the mean thermal expansion coefficient relative to the reference temperature
+   * along with its temperature derivative.
    * This is the linear thermal strain divided by the temperature difference:
    * \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
    * @param temperature  temperature at which this is evaluated
