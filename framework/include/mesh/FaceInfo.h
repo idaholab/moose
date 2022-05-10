@@ -37,7 +37,6 @@ class FaceInfo
 public:
   FaceInfo(const ElemInfo * elem_info, unsigned int side);
 
-  void computeCoefficients(const ElemInfo * neighbor_info);
 
   /// This enum is used to indicate which side(s) of a face a particular
   /// variable is defined on.  This is important for certain BC-related finite
@@ -170,6 +169,12 @@ public:
    * element's side that corresponds to this face
    */
   const std::pair<dof_id_type, unsigned int> & id() const { return _id; }
+
+  /**
+  * Takes the ElemInfo of the neighbor cell and computes interpolation weights
+  * together with other quantities used to generate spatial operators.
+  */
+  void computeCoefficients(const ElemInfo * const neighbor_info);
 
 private:
   /// the elem and neighbor elems

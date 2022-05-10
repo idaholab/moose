@@ -24,21 +24,61 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
     _face(const_cast<Elem *>(_elem_info->elem())->build_side_ptr(_elem_side_id)),
     _face_area(_face->volume()),
     _face_centroid(_face->vertex_average())
-// the neighbor info does not exist for domain boundaries. Additionally, we don't have any info
-// if the neighbor is a RemoteElem. This can happen for ghosted elements on the edge of a
-// stencil, for whom we have may have deleted some of their neighbors when running with a
-// distributed mesh
 {
+  // Compute the face-normals
+  unsigned int dim = _elem_info->elem()->dim();
+  // For 1D elements, this is simple
+  if (dim == 1)
+  {
+    _normal = (_face_centroid - _elem_info->centroid());
+    _normal /= _normal.norm();
+  }
+  // For 2D elements, this is equally simple, we just need to make sure that
+  // the normal points in the right direction.
+  else if (dim == 2)
+  {
+    std::vector<const Point *> side_nodes(2);
+    for (const auto vertex_num : make_range(2))
+      // We are casting the nodes to points in one go
+      side_nodes[vertex_num] = _face->node_ptr(vertex_num);
+
+    Point side = *side_nodes[0] - *side_nodes[1];
+    _normal = Point(-side(1), side(0));
+    _normal /= _normal.norm();
+    if (_normal * (_face_centroid - _elem_info->centroid()) < 0.0)
+      _normal *= -1.0;
+  }
+  // In 3D we need to use the vector product
+  else
+  {
+    std::vector<const Point *> side_nodes(3);
+    for (const auto vertex_num : make_range(3))
+      // We are casting the nodes to points in one go
+      side_nodes[vertex_num] = _face->node_ptr(vertex_num);
+
+    Point side_1 = *side_nodes[0] - *side_nodes[1];
+    Point side_2 = *side_nodes[0] - *side_nodes[2];
+    _normal = side_1.cross(side_2);
+    _normal /= _normal.norm();
+    if (_normal * (_face_centroid - _elem_info->centroid()) < 0.0)
+      _normal *= -1.0;
+  }
 }
 
 void
-FaceInfo::computeCoefficients(const ElemInfo * neighbor_info)
+FaceInfo::computeCoefficients(const ElemInfo * const neighbor_info)
 {
+  // the neighbor info does not exist for domain boundaries. Additionally, we don't have any info
+  // if the neighbor is a RemoteElem. This can happen for ghosted elements on the edge of a
+  // stencil, for whom we have may have deleted some of their neighbors when running with a
+  // distributed mesh
   _neighbor_info = neighbor_info;
   _valid_neighbor = _neighbor_info->elem() && _neighbor_info->elem() != remote_elem;
   _neighbor_side_id = _valid_neighbor
                           ? _neighbor_info->elem()->which_neighbor_am_i(_elem_info->elem())
                           : std::numeric_limits<unsigned int>::max();
+
+  // Setup quantities used for the approximation of the spatial derivatives
   _d_cf = _neighbor_info->centroid() - _elem_info->centroid();
   _d_cf_mag = _d_cf.norm();
   _e_cf = _d_cf / _d_cf_mag;
