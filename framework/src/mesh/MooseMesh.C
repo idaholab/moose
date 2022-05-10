@@ -3203,7 +3203,7 @@ MooseMesh::buildFiniteVolumeInfo() const
     _internal_elem_info.emplace_back(elem);
     _elem_to_elem_info.emplace(elem, counter);
 
-    // We are constucting artificial fake element if the neighbor does not exist  
+    // We are constucting artificial fake element if the neighbor does not exist
     for (const auto side : elem->side_index_range())
       if (!elem->neighbor_ptr(side))
         _ghost_elem_info.emplace(std::make_pair(elem, side), _internal_elem_info[counter].volume());
