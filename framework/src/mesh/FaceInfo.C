@@ -27,40 +27,29 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
 {
   // Compute the face-normals
   unsigned int dim = _elem_info->elem()->dim();
+  Point vector_to_face = _face_centroid - _elem_info->centroid();
+
   // For 1D elements, this is simple
   if (dim == 1)
-  {
-    _normal = (_face_centroid - _elem_info->centroid());
-    _normal /= _normal.norm();
-  }
+    _normal = vector_to_face / vector_to_face.norm();
   // For 2D elements, this is equally simple, we just need to make sure that
   // the normal points in the right direction.
   else if (dim == 2)
   {
-    std::vector<const Point *> side_nodes(2);
-    for (const auto vertex_num : make_range(2))
-      // We are casting the nodes to points in one go
-      side_nodes[vertex_num] = _face->node_ptr(vertex_num);
-
-    Point side = *side_nodes[0] - *side_nodes[1];
+    Point side = *_face->node_ptr(0) - *_face->node_ptr(1);
     _normal = Point(-side(1), side(0));
     _normal /= _normal.norm();
-    if (_normal * (_face_centroid - _elem_info->centroid()) < 0.0)
+    if (_normal * vector_to_face < 0.0)
       _normal *= -1.0;
   }
   // In 3D we need to use the vector product
   else
   {
-    std::vector<const Point *> side_nodes(3);
-    for (const auto vertex_num : make_range(3))
-      // We are casting the nodes to points in one go
-      side_nodes[vertex_num] = _face->node_ptr(vertex_num);
-
-    Point side_1 = *side_nodes[0] - *side_nodes[1];
-    Point side_2 = *side_nodes[0] - *side_nodes[2];
+    Point side_1 = *_face->node_ptr(0) - *_face->node_ptr(1);
+    Point side_2 = *_face->node_ptr(0) - *_face->node_ptr(2);
     _normal = side_1.cross(side_2);
     _normal /= _normal.norm();
-    if (_normal * (_face_centroid - _elem_info->centroid()) < 0.0)
+    if (_normal * vector_to_face < 0.0)
       _normal *= -1.0;
   }
 }

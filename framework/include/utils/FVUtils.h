@@ -39,7 +39,7 @@ loopOverElemFaceInfo(const Elem & elem,
 
     std::set<const Elem *> neighbors;
 
-    // See MooseMesh::buildFaceInfo for corresponding checks/additions of FaceInfo
+    // See MooseMesh::buildFiniteVolumeInfo for corresponding checks/additions of FaceInfo
     if (!candidate_neighbor)
     {
       neighbors.insert(candidate_neighbor);
