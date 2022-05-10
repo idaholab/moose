@@ -3181,9 +3181,9 @@ MooseMesh::buildFiniteVolumeInfo() const
   _all_face_info.clear();
   _elem_side_to_face_info.clear();
 
-  _internal_elem_info.clear();
-  _elem_to_elem_info.clear();
   _ghost_elem_info.clear();
+  _elem_to_elem_info.clear();
+  _internal_elem_info.clear();
 
   // by performing the element ID comparison check in the below loop, we are ensuring that we never
   // double count face contributions. If a face lies along a process boundary, the only process that
@@ -3271,6 +3271,11 @@ MooseMesh::buildFiniteVolumeInfo() const
         else
         {
           const auto & neighbor_info_it = _elem_to_elem_info.find(neighbor);
+          std::cout << "processor id: " << elem->processor_id() << " vector size "
+                    << _internal_elem_info.size() << std::endl;
+          std::cout << "processor id: " << elem->processor_id() << " trying to fetch " << neighbor
+                    << " success: " << (neighbor_info_it == _elem_to_elem_info.end()) << std::endl;
+          std::cout << neighbor_info_it->second << std::endl;
           neighbor_info = &_internal_elem_info[neighbor_info_it->second];
         }
 
