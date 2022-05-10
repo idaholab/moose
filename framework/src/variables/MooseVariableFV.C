@@ -588,9 +588,7 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
 
     value_pointer = &pr.first->second;
   }
-
   ADReal & value = *value_pointer;
-
   value = Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, correct_skewness));
 
   return value;
@@ -942,9 +940,7 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
   if (isExtrapolatedBoundaryFace(*fi).first)
     return getExtrapolatedBoundaryFaceValue(*fi);
   else if (isInternalFace(*fi))
-  {
     return Moose::FV::interpolate(*this, face);
-  }
   else
   {
     mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
