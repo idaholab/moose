@@ -17,4 +17,23 @@
     requirement = 'The system shall have the capability of generating a looped polyline geometry mesh.'
     design = 'meshgenerators/PolyLineMeshGenerator.md'
   []
+  [./polyline_mesh_generator_refine]
+    type = 'Exodiff'
+    input = 'polyline_mesh_generator_refine.i'
+    cli_args = '--mesh-only'
+    exodiff = 'polyline_mesh_generator_refine_in.e'
+    recover = false
+    requirement = 'The system shall have the capability of refining a polyline geometry mesh.'
+    design = 'meshgenerators/PolyLineMeshGenerator.md'
+  []
+  [./polyline_mesh_generator_loop_refine]
+    type = 'Exodiff'
+    input = 'polyline_mesh_generator_loop_refine.i'
+    cli_args = '--mesh-only'
+    exodiff = 'polyline_mesh_generator_loop_refine_in.e'
+    recover = false
+    requirement = 'The system shall have the capability of refining a looped polyline geometry mesh.'
+    design = 'meshgenerators/PolyLineMeshGenerator.md'
+  []
+
 []
