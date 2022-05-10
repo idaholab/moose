@@ -57,7 +57,7 @@ protected:
    * to perform initialization tasks.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real initialGuess(const Real /*effective_trial_stress*/) { return 0.0; }
+  virtual Real initialGuess(const Real & /*effective_trial_stress*/) { return 0.0; }
 
   /**
    * Compute the residual for a predicted value of the scalar.  This residual should be
@@ -157,6 +157,14 @@ protected:
   /// those bounds if outside them
   bool _bracket_solution;
 
+  /**
+   * Check to see whether the residual is within the convergence limits.
+   * @param residual  Current value of the residual
+   * @param reference Current value of the reference quantity
+   * @return Whether the model converged
+   */
+  bool converged(const Real residual, const Real reference);
+
 private:
   /// Helper function to compute and set the _residual and _derivative
   void computeResidualAndDerivativeHelper(const Real & effective_trial_stress, const Real & scalar);
@@ -226,14 +234,6 @@ private:
   SolveState internalSolve(const Real effective_trial_stress,
                            Real & scalar,
                            std::stringstream * iter_output = nullptr);
-
-  /**
-   * Check to see whether the residual is within the convergence limits.
-   * @param residual  Current value of the residual
-   * @param reference Current value of the reference quantity
-   * @return Whether the model converged
-   */
-  bool converged(const Real residual, const Real reference);
 
   /**
    * Check to see whether the residual is within acceptable convergence limits.
