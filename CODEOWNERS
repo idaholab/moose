@@ -39,7 +39,7 @@
 /modules/doc/content/newsletter @cticenhour
 /modules/electromagnetics @cticenhour
 /modules/external_petsc_solver @fdkong
-/modules/fluid_properties @andrsd
+/modules/fluid_properties @joshuahansel
 /modules/fsi @fdkong
 /modules/functional_expansion_tools @lindsayad
 /modules/navier_stokes @lindsayad @GiudGiud
@@ -48,6 +48,7 @@
 /modules/rdg @joshuahansel
 /modules/stochastic_tools @zachmprince
 /modules/tensor_mechanics @bwspenc @dschwen @jiangwen84
+/modules/thermal_hydraulics @joshuahansel
 /modules/xfem @bwspenc @jiangwen84
 
 /scripts/hpc_proxy.pac @loganharbour
