@@ -10,7 +10,7 @@ information refer to [batch_mode.md].
 
 ## Example Syntax
 
-!listing modules/stochastic_tools/test/tests/multiapps/sampler_transient_multiapp/master_transient.i block=MultiApps
+!listing modules/stochastic_tools/test/tests/multiapps/sampler_transient_multiapp/parent_transient.i block=MultiApps
 
 !syntax parameters /MultiApps/SamplerTransientMultiApp
 

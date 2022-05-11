@@ -6,7 +6,7 @@ weighted average of the level set variables values at each quadrature point of a
 
 ## Example Syntax
 
-!listing modules/level_set/test/tests/reinitialization/master.i block=Postprocessors remove=cfl
+!listing modules/level_set/test/tests/reinitialization/parent.i block=Postprocessors remove=cfl
 
 !syntax parameters /Postprocessors/LevelSetVolume
 

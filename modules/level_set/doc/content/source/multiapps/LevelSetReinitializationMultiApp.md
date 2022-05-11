@@ -7,7 +7,7 @@ which allows for the proper resetting of the pseudo reinitialization time.
 
 ## Example Syntax
 
-!listing modules/level_set/test/tests/reinitialization/master.i block=MultiApps
+!listing modules/level_set/test/tests/reinitialization/parent.i block=MultiApps
 
 !syntax parameters /MultiApps/LevelSetReinitializationMultiApp
 

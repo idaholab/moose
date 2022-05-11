@@ -42,19 +42,19 @@ in [fig:area-compare].
 
 Adding reinitializtion, in this case the scheme proposed by [!cite](olsson2007conservative), requires
 the use of the MOOSE [MultiApp](/MultiApps/index.md). The enable reinitialization two input files are
-required: a master and sub-application.
+required: a parent and sub-application.
 
-The master input file must add the necessary [MultiApps](/MultiApps/index.md) and
-[Transfers](/Transfers/index.md) blocks. For the problem at hand ([circle_rotate_master.i]) this
+The parent input file must add the necessary [MultiApps](/MultiApps/index.md) and
+[Transfers](/Transfers/index.md) blocks. For the problem at hand ([circle_rotate_parent.i]) this
 easily accomplished by adding the following to the input file from the first step (i.e., do not
 include the SUPG kernels).
 
-!listing modules/level_set/examples/rotating_circle/circle_rotate_master.i
+!listing modules/level_set/examples/rotating_circle/circle_rotate_parent.i
          start=[MultiApps]
          end=[Outputs]
 
 Next, the sub-application input file must be created, which is shown below. This input file mimics
-the master input file closely, with three notable exceptions. First, the
+the parent input file closely, with three notable exceptions. First, the
 [Kernels](syntax/Kernels/index.md) block utilize the time derivative and a new object,
 [LevelSetOlssonReinitialization](/LevelSetOlssonReinitialization.md), that implements the
 reinitialization scheme of [!cite](olsson2007conservative). Second, the [Problem](/Problem/index.md) is
@@ -66,7 +66,7 @@ reinitialization solve when steady-state is achieved according to the criteria d
 
 !listing modules/level_set/examples/rotating_circle/circle_rotate_sub.i
 
-[circle_rotate_master_out] shows the results of the bubble problem with reinitialization, the result
+[circle_rotate_parent_out] shows the results of the bubble problem with reinitialization, the result
 looks similar to the SUPG result. However, if you consider the area conservation discussed in the
 [Area Comparison](#area-comparison) section, the reinitialization scheme yields the superior solution
 for this problem.
@@ -83,7 +83,7 @@ for this problem.
                SUPG stabilization.
 
 !media level_set/circle_rotate_master_out.mp4
-       id=circle_rotate_master_out
+       id=circle_rotate_parent_out
        style=width:32%;float:left;
        caption=Results from solving the rotating circle problem with the level set equation with
                reinitialization.
