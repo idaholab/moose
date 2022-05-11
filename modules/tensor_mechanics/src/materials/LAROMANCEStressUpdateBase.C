@@ -36,7 +36,8 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
   params.addParam<MaterialPropertyName>("environmental_factor",
                                         "Optional coupled environmental factor");
 
-  MooseEnum error_lower_limit_behavior("ERROR WARN IGNORE EXCEPTION DONTHING USELIMIT", "EXCEPTION");
+  MooseEnum error_lower_limit_behavior("ERROR WARN IGNORE EXCEPTION DONTHING USELIMIT",
+                                       "EXCEPTION");
   // Only allow ERROR and EXCEPTION on upper bounds
   MooseEnum error_upper_limit_behavior("ERROR EXCEPTION", "EXCEPTION");
   params.addParam<MooseEnum>(
@@ -68,15 +69,13 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
 
   MooseEnum extrapolated_lower_limit_behavior(
       "ERROR WARN IGNORE EXCEPTION DONOTHING USELIMIT EXTRAPOLATE", "EXTRAPOLATE");
-  // Only allow ERROR and EXCEPTION on upper bounds
-  MooseEnum extrapolated_upper_limit_behavior("ERROR EXCEPTION", "EXCEPTION");
   params.addParam<MooseEnum>(
       "stress_input_window_low_failure",
       extrapolated_lower_limit_behavior,
       "What to do if stress is outside the lower global window of applicability.");
   params.addParam<MooseEnum>(
       "stress_input_window_high_failure",
-      extrapolated_upper_limit_behavior,
+      error_upper_limit_behavior,
       "What to do if stress is outside the upper global window of applicability.");
   params.addParam<MooseEnum>(
       "temperature_input_window_low_failure",
@@ -84,7 +83,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
       "What to do if temperature is outside the lower global window of applicability.");
   params.addParam<MooseEnum>(
       "temperature_input_window_high_failure",
-      extrapolated_upper_limit_behavior,
+      error_upper_limit_behavior,
       "What to do if temperature is outside the upper global window of applicability.");
   params.addParam<MooseEnum>(
       "environment_input_window_low_failure",
@@ -92,7 +91,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
       "What to do if environmental factor is outside the lower global window of applicability.");
   params.addParam<MooseEnum>(
       "environment_input_window_high_failure",
-      extrapolated_upper_limit_behavior,
+      error_upper_limit_behavior,
       "What to do if environmental factor is outside the upper global window of applicability.");
 
   params.addRequiredRangeCheckedParam<Real>(
