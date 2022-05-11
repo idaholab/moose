@@ -9,6 +9,7 @@
 
 #include "ComputeInstantaneousThermalExpansionFunctionEigenstrain.h"
 #include "Function.h"
+#include "CastDualNumber.h"
 #include "RankTwoTensor.h"
 
 registerMooseObject("TensorMechanicsApp", ComputeInstantaneousThermalExpansionFunctionEigenstrain);
@@ -35,7 +36,7 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<is_ad>::
     ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl(const InputParameters & parameters)
   : ComputeThermalExpansionEigenstrainBaseTempl<is_ad>(parameters),
     _thermal_expansion_function(this->getFunction("thermal_expansion_function")),
-    _thermal_strain(this->template declareProperty<Real>(
+    _thermal_strain(this->template declareGenericProperty<Real, is_ad>(
         this->_base_name + "InstantaneousThermalExpansionFunction_thermal_strain")),
     _thermal_strain_old(this->template getMaterialPropertyOld<Real>(
         this->_base_name + "InstantaneousThermalExpansionFunction_thermal_strain")),
@@ -70,8 +71,9 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrainTempl<is_ad>::computeTher
   const auto thermal_strain =
       _thermal_strain_old[_qp] + delta_T * 0.5 * (alpha_current_temp + alpha_old_temp);
 
-  // store this for use in the next timestep (no derivatives needed)
-  _thermal_strain[_qp] = MetaPhysicL::raw_value(thermal_strain);
+  // Store thermal strain for use in the next timestep (casts ValueAndDerivative<is_ad>
+  // to GenericReal<is_ad>).
+  _thermal_strain[_qp] = dual_number_cast<GenericReal<is_ad>>(thermal_strain);
 
   return thermal_strain;
 }
