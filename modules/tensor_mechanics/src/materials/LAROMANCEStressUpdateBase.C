@@ -36,33 +36,34 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
   params.addParam<MaterialPropertyName>("environmental_factor",
                                         "Optional coupled environmental factor");
 
-  // Forbid extrapolation of cell, wall, and old strain input parameters
-  MooseEnum error_limit_behavior("ERROR WARN IGNORE EXCEPTION DONTHING USELIMIT", "EXCEPTION");
+  MooseEnum error_lower_limit_behavior("ERROR WARN IGNORE EXCEPTION DONTHING USELIMIT", "EXCEPTION");
+  // Only allow ERROR and EXCEPTION on upper bounds
+  MooseEnum error_upper_limit_behavior("ERROR EXCEPTION", "EXCEPTION");
   params.addParam<MooseEnum>(
       "cell_input_window_low_failure",
-      error_limit_behavior,
+      error_lower_limit_behavior,
       "What to do if cell dislocation concentration is outside the lower global "
       "window of applicability.");
   params.addParam<MooseEnum>(
       "cell_input_window_high_failure",
-      error_limit_behavior,
+      error_upper_limit_behavior,
       "What to do if cell dislocation concentration is outside the upper global "
       "window of applicability.");
   params.addParam<MooseEnum>("wall_input_window_low_failure",
-                             error_limit_behavior,
+                             error_lower_limit_behavior,
                              "What to do if wall dislocation concentration is outside the "
                              "lower global window of applicability.");
   params.addParam<MooseEnum>("wall_input_window_high_failure",
-                             error_limit_behavior,
+                             error_upper_limit_behavior,
                              "What to do if wall dislocation concentration is outside the "
                              "upper global window of applicability.");
   params.addParam<MooseEnum>(
       "old_strain_input_window_low_failure",
-      error_limit_behavior,
+      error_lower_limit_behavior,
       "What to do if old strain is outside the lower global window of applicability.");
   params.addParam<MooseEnum>(
       "old_strain_input_window_high_failure",
-      error_limit_behavior,
+      error_upper_limit_behavior,
       "What to do if old strain is outside the upper global window of applicability.");
 
   MooseEnum extrapolated_lower_limit_behavior(
