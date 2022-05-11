@@ -64,7 +64,7 @@ temp_ref=${fparse hot_temp / 2.}
     rho = ${rho}
   []
   [mean_zero_pressure]
-    type = FVScalarLagrangeMultiplier
+    type = FVIntegralValueConstraint
     variable = pressure
     lambda = lambda
   []

@@ -111,7 +111,7 @@ rho=1.1
   []
 
   [mean-pressure]
-    type = FVScalarLagrangeMultiplier
+    type = FVIntegralValueConstraint
     variable = pressure
     lambda = lambda
     phi0 = 0.01

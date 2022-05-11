@@ -92,7 +92,7 @@ advected_interp_method = 'average'
     block = 0
   []
   [mean_zero_pressure]
-    type = FVScalarLagrangeMultiplier
+    type = FVIntegralValueConstraint
     variable = pressure
     lambda = lambda
     block = 0
