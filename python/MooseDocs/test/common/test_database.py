@@ -17,7 +17,11 @@ class TestClassDatabase(unittest.TestCase):
         """
         Create class database.
         """
-        cls.database = build_class_database(['${MOOSE_DIR}/framework/include',
+        cls.database = build_class_database(['${MOOSE_DIR}/framework/src',
+                                             '${MOOSE_DIR}/test/src',
+                                             '${MOOSE_DIR}/modules/heat_conduction/src'],
+                                            ['${MOOSE_DIR}/framework/include',
+                                             '${MOOSE_DIR}/test/include',
                                              '${MOOSE_DIR}/modules/heat_conduction/include'],
                                             ['${MOOSE_DIR}/test/tests'])
 
@@ -34,17 +38,9 @@ class TestClassDatabase(unittest.TestCase):
         """
         Test that named objects with h and C files are located.
         """
-        info = self.database['MooseParsedFunction']
+        info = self.database['ParsedFunction']
         self.assertEqual(info.header, 'framework/include/functions/MooseParsedFunction.h')
         self.assertEqual(info.source, 'framework/src/functions/MooseParsedFunction.C')
-
-    def testHeaderOnly(self):
-        """
-        Test that named objects with h and C files are located.
-        """
-        info = self.database['MooseObjectWarehouse']
-        self.assertEqual(info.header, 'framework/include/warehouses/MooseObjectWarehouse.h')
-        self.assertIsNone(info.source)
 
 class TestClassDatabaseEmptyInput(unittest.TestCase):
     def testDiffusion(self):
