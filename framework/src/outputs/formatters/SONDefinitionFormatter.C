@@ -57,7 +57,7 @@ SONDefinitionFormatter::toString(const nlohmann::json & root)
 void
 SONDefinitionFormatter::addLine(const std::string & line)
 {
-  _stream << std::string(!line.empty() * _level * _spaces, ' ') << line << "\n";
+  _stream << line << "\n";
   return;
 }
 
@@ -108,20 +108,12 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
   if (!description.empty())
     addLine("Description=\"" + description + "\"");
 
-  // add MinOccurs : optional because nothing available to specify block requirement
-  addLine("MinOccurs=0");
-
-  // add MaxOccurs : NoLimit because more than one block of the same name is allowed
-  addLine("MaxOccurs=NoLimit");
-
   // ensure every block has no more than one string declarator node and if this is a
   // TypeBlock but not a StarBlock then also ensure that the block [./declarator] is
   // the expected block_decl from above which should be the name of the parent block
   addLine("decl{");
   _level++;
-  addLine("MinOccurs=0");
   addLine("MaxOccurs=1");
-  addLine("ValType=String");
   if (is_typeblock && !is_starblock)
     addLine("ValEnums=[ \"" + block_decl + "\" ]");
   _level--;
@@ -135,7 +127,7 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
     addLine("'value'{");
     addLine("}");
     _level--;
-    addLine("} % end *");
+    addLine("}");
   }
 
   // store parameters ---
@@ -349,8 +341,7 @@ SONDefinitionFormatter::addParameters(const nlohmann::json & params)
         addLine("Description=\"" + description + "\"");
     }
 
-    // *** MinOccurs / MaxOccurs of parameter
-    addLine("MinOccurs=0");
+    // *** MaxOccurs=1 for each parameter
     addLine("MaxOccurs=1");
 
     // *** open parameter's value
@@ -358,16 +349,18 @@ SONDefinitionFormatter::addParameters(const nlohmann::json & params)
     _level++;
 
     // *** MinOccurs / MaxOccurs of parameter's value
-    addLine(is_array ? "MinOccurs=0" : "MinOccurs=1");
-    addLine(is_array ? "MaxOccurs=NoLimit" : "MaxOccurs=1");
+    // is_array indicates the parameter value child may occur zero or multiple times
+    if (!is_array)
+    {
+      addLine("MinOccurs=1");
+      addLine("MaxOccurs=1");
+    }
 
     // *** ValType of parameter's value
     if (basic_type == "Integer")
       addLine("ValType=Int");
     else if (basic_type == "Real")
       addLine("ValType=Real");
-    else
-      addLine("ValType=String");
 
     // *** ValEnums / InputChoices of parameter's value
     if (basic_type.find("Boolean") != std::string::npos)
@@ -415,6 +408,6 @@ SONDefinitionFormatter::addParameters(const nlohmann::json & params)
 
     // *** close parameter
     _level--;
-    addLine("} % end parameter " + name);
+    addLine("}");
   }
 }
