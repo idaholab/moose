@@ -38,7 +38,7 @@
       type = RunException
       input = 'parent_uo_transfer.i'
       cli_args = "MultiApps/sub/input_files='subapp_err_4.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false :Outputs/csv=false :Outputs/exodus=false"
-      expect_err = 'MultiAppUserObjectTransfer: Point corresponding to parent node at'
+      expect_err = 'MultiAppUserObjectTransfer: Point corresponding to parent app node at'
       detail = 'and LineValueSampler shall report an return value of infinity'
                     ' when the projection of the queried point onto the line'
                     ' segment lies outside the limits of the line segment.'

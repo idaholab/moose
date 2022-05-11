@@ -70,7 +70,7 @@
     type = 'RunException'
     input = '3d_1d_parent.i'
     cli_args = 'Transfers/layered_transfer_from_sub_app/all_master_nodes_contained_in_sub_app=true'
-    expect_err = 'MultiAppUserObjectTransfer: Master element with centroid at'
+    expect_err = 'MultiAppUserObjectTransfer: Parent app element with centroid at'
     prereq = transfer/3d_1d
 
     requirement = "MultiAppUserObjectTransfer shall generate an error if a parent node/element is "

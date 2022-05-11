@@ -79,9 +79,10 @@ MultiAppUserObjectTransfer::validParams()
 MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
     _user_object_name(getParam<UserObjectName>("user_object")),
-    _all_parent_nodes_contained_in_sub_app(isParamValid("all_master_nodes_contained_in_sub_app") ?
-        getParam<bool>("all_master_nodes_contained_in_sub_app") :
-        getParam<bool>("all_parent_nodes_contained_in_sub_app")),
+    _all_parent_nodes_contained_in_sub_app(
+        isParamValid("all_master_nodes_contained_in_sub_app")
+            ? getParam<bool>("all_master_nodes_contained_in_sub_app")
+            : getParam<bool>("all_parent_nodes_contained_in_sub_app")),
     _skip_bbox_check(getParam<bool>("skip_bounding_box_check")),
     _nearest_sub_app(getParam<bool>("nearest_sub_app"))
 {

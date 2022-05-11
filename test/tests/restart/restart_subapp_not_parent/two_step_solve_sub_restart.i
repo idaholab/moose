@@ -1,9 +1,9 @@
 [Mesh]
-  file = two_step_solve_master_full_solve0_checkpoint_cp/0002_mesh.cpr
+  file = two_step_solve_parent_full_solve0_checkpoint_cp/0002_mesh.cpr
 []
 
 [Problem]
-  restart_file_base = two_step_solve_master_full_solve0_checkpoint_cp/LATEST
+  restart_file_base = two_step_solve_parent_full_solve0_checkpoint_cp/LATEST
   force_restart = true
 []
 

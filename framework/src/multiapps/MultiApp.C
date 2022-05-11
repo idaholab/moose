@@ -913,7 +913,8 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // if multiapp does not have file base in Outputs input block, output file base will
   // be empty here since setupOptions() does not set the default file base with the multiapp
   // input file name. Parent app will create the default file base for multiapp by taking the
-  // output base of the parent app problem and appending the name of the multiapp plus a number to it
+  // output base of the parent app problem and appending the name of the multiapp plus a number to
+  // it
   if (app->getOutputFileBase().empty())
     app->setOutputFileBase(_app.getOutputFileBase() + "_" + multiapp_name.str());
   preRunInputFile();

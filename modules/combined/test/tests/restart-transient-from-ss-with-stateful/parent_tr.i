@@ -1,11 +1,11 @@
 [Problem]
-  restart_file_base = master_ss_checkpoint_cp/LATEST
+  restart_file_base = parent_ss_checkpoint_cp/LATEST
   force_restart = true
   skip_additional_restart_data = true
 []
 
 [Mesh]
-  file = master_ss_checkpoint_cp/LATEST
+  file = parent_ss_checkpoint_cp/LATEST
 []
 
 [Variables]
