@@ -9,6 +9,7 @@
 
 #include "BreakMeshByBlockGenerator.h"
 #include "CastUniquePointer.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/elem.h"
