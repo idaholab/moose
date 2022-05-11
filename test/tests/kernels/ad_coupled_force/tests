@@ -1,6 +1,6 @@
 [Tests]
   issues = "#18214"
-  design = "ADCoupledForce.md"
+  design = "CoupledForce.md"
   [jacobians]
     requirement = "The system shall provide a source term proportional to the value of"
     [aux]
