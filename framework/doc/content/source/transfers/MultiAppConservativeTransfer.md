@@ -24,9 +24,9 @@ The following examples demonstrate the use of the MultiAppConservativeTransfer f
 solution.
 
 
-!listing multiapp_conservative_transfer/master_conservative_transfer.i block=Transfers caption=Example use of MultiAppConservativeTransfer for transferring data conservatively.
+!listing multiapp_conservative_transfer/parent_conservative_transfer.i block=Transfers caption=Example use of MultiAppConservativeTransfer for transferring data conservatively.
 
 
-!listing multiapp_conservative_transfer/master_conservative_transfer.i block=Postprocessors caption=From postprocessor.
+!listing multiapp_conservative_transfer/parent_conservative_transfer.i block=Postprocessors caption=From postprocessor.
 
 !listing multiapp_conservative_transfer/sub_conservative_transfer.i block=Postprocessors caption=To postprocessor.  Note that `to postprocessor` need to be executed on `transfer`.

@@ -61,7 +61,7 @@ exceptions, we recommend that option 2 over option 1.
 The following input file shows the creation of a TransientMultiApp object with the time step
 size being governed by the main application.
 
-!listing transient_multiapp/dt_from_master.i block=MultiApps
+!listing transient_multiapp/dt_from_parent.i block=MultiApps
 
 !syntax parameters /MultiApps/TransientMultiApp
 
