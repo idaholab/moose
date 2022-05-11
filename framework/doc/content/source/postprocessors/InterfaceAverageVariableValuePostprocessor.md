@@ -9,7 +9,9 @@ The various types of averages that can be computed are describe in more details 
 
 ## Example Input File Syntax
 
-!listing test/tests/postprocessors/interface_value/interface_average_variable_value_postprocessor.i block=Postprocessors/diffusivity_average
+In this example the average of the diffusivity material property is computed across an interface by an `InterfaceAverageVariableValuePostprocessor`. Note that the type of the postprocessor is determined by a substitution here, replacing '${postprocessor_type}' with `InterfaceAverageVariableValuePostprocessor`.
+
+!listing test/tests/postprocessors/interface_value/interface_fe_variable_value_postprocessor.i block=Postprocessors/diffusivity_average
 
 !syntax parameters /Postprocessors/InterfaceAverageVariableValuePostprocessor
 
