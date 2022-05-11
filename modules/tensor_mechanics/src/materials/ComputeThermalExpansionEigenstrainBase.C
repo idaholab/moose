@@ -62,7 +62,7 @@ template <bool is_ad>
 void
 ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::computeProperties()
 {
-  // we need to convert the temperature varuable to a ChainedReal in the is_ad == false case
+  // we need to convert the temperature variable to a ChainedReal in the is_ad == false case
   for (_qp = 0; _qp < this->_qrule->n_points(); ++_qp)
     if constexpr (is_ad)
       _temperature_buffer[_qp] =

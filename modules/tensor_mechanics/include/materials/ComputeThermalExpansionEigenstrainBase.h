@@ -49,13 +49,16 @@ protected:
    * a variant of forward mode automatic differentiation will be used internally to
    * compute the thermal strain and no manual implementation of the temperature derivative
    * is needed.
+   *
+   * @return thermal strain and its derivative, where the thermal strain is the linear thermal
+   * strain (\delta L / L)
    */
   virtual ValueAndDerivative<is_ad> computeThermalStrain() = 0;
 
   /**
-   * Temperature to use in the eigenstrain calculation (depending on _use_old_temperature).
-   * We use a const reference to a private member here to prevent derived classes for
-   * accidentally overwriting any values.
+   * Temperature to use in the eigenstrain calculation (current value if _use_old_temperature=false,
+   * old value if _use_old_temperature=true). We use a const reference to a private member here to
+   * prevent derived classes from accidentally overwriting any values.
    */
   const std::vector<ValueAndDerivative<is_ad>> & _temperature;
 
@@ -75,7 +78,10 @@ protected:
   using ComputeEigenstrainBaseTempl<is_ad>::_eigenstrain_name;
 
 private:
-  /// temperature to use in the eigenstrain calculation (depending on _use_old_temperature)
+  /**
+   * Temperature used in the eigenstrain calculation (current value if _use_old_temperature=false,
+   * old value if _use_old_temperature=true).
+   */
   std::vector<ValueAndDerivative<is_ad>> _temperature_buffer;
 
   /// current temperature
