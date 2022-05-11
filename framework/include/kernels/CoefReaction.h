@@ -11,17 +11,21 @@
 
 #include "Reaction.h"
 
-class CoefReaction : public Reaction
+template <bool is_ad>
+class CoefReactionTempl : public ReactionTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  CoefReaction(const InputParameters & parameters);
+  CoefReactionTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
   /// input parameter multiplied by the reaction kernel
   const Real _coef;
 };
+
+typedef CoefReactionTempl<false> CoefReaction;
+typedef CoefReactionTempl<true> ADCoefReaction;
