@@ -42,10 +42,6 @@
   dt = 0.1
 []
 
-[Outputs]
-  exodus = true
-[]
-
 [MultiApps]
   [./sub]
     type = FullSolveMultiApp

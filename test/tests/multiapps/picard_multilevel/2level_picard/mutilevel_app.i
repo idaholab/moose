@@ -102,7 +102,6 @@
 
 [Outputs]
   exodus = true
-  csv = true
   perf_graph = true
   [screen]
     type = Console

@@ -48,7 +48,6 @@
 []
 
 [Outputs]
-  exodus = true
 
   # We can't control perf log output from a subapp
   perf_graph = true

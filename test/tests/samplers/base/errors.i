@@ -33,6 +33,3 @@
   solve = false
   kernel_coverage_check = false
 []
-
-[Outputs]
-[]

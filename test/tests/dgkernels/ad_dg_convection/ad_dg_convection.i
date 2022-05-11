@@ -44,7 +44,3 @@
   dt = 1
   dtmin = 1
 []
-
-[Outputs]
-  exodus = true
-[]

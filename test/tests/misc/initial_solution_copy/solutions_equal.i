@@ -73,10 +73,6 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Outputs]
-  exodus = true
-[]
-
 [ICs]
   [./initial]
     function = initial_func

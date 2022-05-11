@@ -24,6 +24,3 @@
   type = PPBindingSteady
   postprocessor = ndofs
 []
-
-[Outputs]
-[]

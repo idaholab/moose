@@ -52,7 +52,3 @@
     app_type = MooseTestApp
   [../]
 []
-
-[Outputs]
-  exodus = true
-[]

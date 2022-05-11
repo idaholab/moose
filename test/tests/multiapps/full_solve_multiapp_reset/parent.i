@@ -20,10 +20,6 @@
   num_steps = 2
 []
 
-[Outputs]
-  exodus = true
-[]
-
 [MultiApps]
   [full_solve]
     type = FullSolveMultiApp

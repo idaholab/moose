@@ -40,7 +40,6 @@
 []
 
 [Outputs]
-  exodus = true
   [console]
     type = Console
     system_info = 'framework mesh aux nonlinear relationship execution'

@@ -81,5 +81,4 @@
   perf_graph = true
   exodus = true
   color = true
-  csv = true
 []

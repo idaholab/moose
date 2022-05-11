@@ -46,10 +46,6 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Outputs]
-  csv = true
-[]
-
 [Controls]
   [./test_control]
     type = TestControl

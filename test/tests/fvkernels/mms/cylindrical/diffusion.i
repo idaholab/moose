@@ -66,7 +66,6 @@
 
 [Outputs]
   exodus = true
-  csv = true
 []
 
 [Postprocessors]
@@ -74,12 +73,10 @@
     type = ElementL2Error
     variable = v
     function = exact
-    outputs = 'console csv'
-    execute_on = 'timestep_end'
+    outputs = 'console'    execute_on = 'timestep_end'
   [../]
   [h]
     type = AverageElementSize
-    outputs = 'console csv'
-    execute_on = 'timestep_end'
+    outputs = 'console'    execute_on = 'timestep_end'
   []
 []

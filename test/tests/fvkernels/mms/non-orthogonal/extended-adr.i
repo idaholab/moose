@@ -80,7 +80,6 @@ diff=1.1
 []
 
 [Outputs]
-  exodus = true
   csv = true
 []
 

@@ -52,10 +52,6 @@
   [../]
 []
 
-[Outputs]
-  exodus = true
-[]
-
 [Controls]
   [./damping_control]
     type = TimePeriod
