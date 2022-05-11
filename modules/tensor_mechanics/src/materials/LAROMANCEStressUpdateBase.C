@@ -266,7 +266,6 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
   if (this->isParamValid("model"))
   {
     const auto model_file_name = this->getDataFileName("model");
-    mooseInfo("Opening LaRomance data file '", model_file_name, "'...");
     std::ifstream model_file(model_file_name.c_str());
     model_file >> _json;
   }

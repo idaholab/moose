@@ -102,6 +102,14 @@ public:
   std::string getDataFileName(const std::string & param);
 
   /**
+   * Returns the path of a data file for a given relative file path.
+   * This can be used for hardcoded datafile names and will search the same locations
+   * as getDataFileName. The optional param pointer can be used to turn the mooseErrors this
+   * function emits into paramErrors
+   */
+  std::string getDataFileNameByName(const std::string & name, const std::string * param = nullptr);
+
+  /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
    * The template parameter must be a pointer or an error will be thrown.
    */

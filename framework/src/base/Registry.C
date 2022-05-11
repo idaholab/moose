@@ -124,9 +124,5 @@ Registry::addDataFilePath(const std::string & fullpath)
   // if the data directory exists and hasn't been added before, add it
   if (MooseUtils::pathIsDirectory(data_dir) &&
       std::find(dfp.begin(), dfp.end(), data_dir) == dfp.end())
-  {
-
     dfp.push_back(data_dir);
-    mooseInfoRepeated("Added data file path: ", data_dir);
-  }
 }
