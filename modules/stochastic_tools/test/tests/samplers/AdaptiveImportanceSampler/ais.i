@@ -20,7 +20,7 @@
     distributions = 'mu1 mu2'
     proposal_std = '0.15 0.15'
     output_limit = 0.45
-    num_samples_train = 5
+    num_samples_train = 30
     std_factor = 0.8
     use_absolute_value = true
     seed = 1012
@@ -68,7 +68,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 10
+  num_steps = 40
 []
 
 [Outputs]
