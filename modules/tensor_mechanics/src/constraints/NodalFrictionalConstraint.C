@@ -14,7 +14,7 @@
 #include "Assembly.h"
 #include "SystemBase.h"
 
-#include "libmesh/mesh_inserter_iterator.h"
+#include "libmesh/null_output_iterator.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_elem.h"
 #include "libmesh/parallel_node.h"
@@ -137,12 +137,12 @@ NodalFrictionalConstraint::updateConstrainedNodes()
     _mesh.getMesh().comm().allgather_packed_range(&_mesh.getMesh(),
                                                   nodes_to_ghost.begin(),
                                                   nodes_to_ghost.end(),
-                                                  mesh_inserter_iterator<Node>(_mesh.getMesh()));
+                                                  null_output_iterator<Node>());
 
     _mesh.getMesh().comm().allgather_packed_range(&_mesh.getMesh(),
                                                   primary_elems_to_ghost.begin(),
                                                   primary_elems_to_ghost.end(),
-                                                  mesh_inserter_iterator<Elem>(_mesh.getMesh()));
+                                                  null_output_iterator<Elem>());
 
     _mesh.update(); // Rebuild node_to_elem_map
 
