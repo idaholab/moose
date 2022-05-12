@@ -1,0 +1,28 @@
+[Tests]
+  [BFGS]
+    requirement = " invert for a constant heat source with a"
+                  " temperature dependent thermal condutivity"
+                  " using limited memory BFGS algorithm"
+    type        = CSVDiff
+    rel_err     = 0.1
+    abs_zero    = 0.5
+    input       = masterBFGS.i
+    csvdiff     = masterBFGS_out_OptimizationReporter_0001.csv
+    max_threads = 1
+    # steady solve
+    recover = false
+  []
+  [Newton]
+    requirement = " invert for a constant heat source with a"
+                  " temperature dependent thermal condutivity"
+                  " using limited memory BFGS algorithm"
+    type        = CSVDiff
+    rel_err     = 0.1
+    abs_zero    = 0.5
+    input       = masterNewton.i
+    csvdiff     = masterNewton_out_OptimizationReporter_0001.csv
+    max_threads = 1
+    # steady solve
+    recover = false
+  []
+[]
