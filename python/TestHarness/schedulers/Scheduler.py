@@ -133,6 +133,10 @@ class Scheduler(MooseObject):
         """ return all the jobs the scheduler was tasked to perform work for """
         return self.__scheduled_jobs
 
+    def retrieveDAGs(self):
+        """ return all the dags containing the jobs the scueduler was tasked to perform work for """
+        return self.__dag_bank
+
     def schedulerError(self):
         """ boolean if the scheduler prematurely exited """
         return self.__error_state and not self.maxFailures()
