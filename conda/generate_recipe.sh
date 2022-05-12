@@ -57,7 +57,7 @@ function clean_repo()
 function string_replace()
 {
     printf "Creating recipes at $TMP_DIR/$RECIPES\n"
-    REPLACE=(APPLICATION FORMATTED_APPLICATION EXECUTABLE REPO BUILD VERSION MOOSE_JOBS MOOSE IS_MOOSE TMP_DIR RECIPES SKIP_DOCS SUBMODULES EXTRA_SUBMODULES PREFIX_PACKAGE_WITH)
+    REPLACE=(APPLICATION FORMATTED_APPLICATION EXECUTABLE REPO BUILD VERSION MOOSE_JOBS MOOSE IS_MOOSE TMP_DIR RECIPES SKIP_DOCS PREFIX_PACKAGE_WITH)
     for sfile in `find $SCRIPT_DIR/$TEMPLATE -type l`; do
         cat "$sfile" > "$TMP_DIR/$RECIPES/$(basename $sfile)"
     done
@@ -125,11 +125,6 @@ SKIP_DOCS='False'
 if [ -n "$MOOSE_SKIP_DOCS" ]; then
     printf "Influential environment variable: MOOSE_SKIP_DOCS detected.\n"
     export SKIP_DOCS="True"
-fi
-SUBMODULES="False"
-if [ -n "$EXTRA_SUBMODULES" ]; then
-    printf "Influential environment variable: EXTRA_SUBMODULES detected.\n"
-    export SUBMODULES="True"
 fi
 export APPLICATION=$(basename "$REPO" .git)
 export FORMATTED_APPLICATION=$(echo $APPLICATION | tr -dc '[:alnum:]\n\r' | tr '[:upper:]' '[:lower:]')
