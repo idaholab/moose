@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "ADKernel.h"
+#include "ADCoupledForce.h"
 
-class CoupledCoeffField : public ADKernel
+class CoupledCoeffField : public ADCoupledForce
 {
 public:
   static InputParameters validParams();
@@ -22,11 +22,7 @@ protected:
   virtual ADReal computeQpResidual() override;
 
 private:
-  Real _coefficient;
-
   const Function & _func;
-
-  const ADVariableValue & _coupled_val;
 
   Real _sign;
 };

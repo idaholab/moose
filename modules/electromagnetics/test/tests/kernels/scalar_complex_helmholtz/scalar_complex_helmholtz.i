@@ -97,7 +97,7 @@
   [../]
   [./coupledField_real]
     type = CoupledCoeffField
-    coupled_field = u_imag
+    v = u_imag
     func = 2TimesAB
     sign = 1.0
     variable = u_real
@@ -126,7 +126,7 @@
   [../]
   [./coupledField_imag]
     type = CoupledCoeffField
-    coupled_field = u_real
+    v = u_real
     func = 2TimesAB
     sign = -1.0
     variable = u_imag
