@@ -4,15 +4,19 @@
 
 ## Description
 
-This model computes the eigenstrain tensor resulting from isotropic thermal expansion
-where the constant thermal expansion is defined by a user-supplied scalar linear
-thermal-expansion coefficient, $\alpha$.
-The thermal expansion eigenstrain is then computed as
+This model computes the eigenstrain tensor resulting from isotropic thermal
+expansion where the constant thermal expansion is defined by a user-supplied
+scalar linear thermal-expansion coefficient, $\alpha$. The thermal expansion
+eigenstrain is then computed as
+
 \begin{equation}
 \boldsymbol{\epsilon}^{thermal} = \alpha \cdot \left( T - T_{stress\_free} \right) \boldsymbol{I}
 \end{equation}
-where $T$ is the current temperature, $T_{stress\_free}$ is the stress free temperature,
-and $\boldsymbol{I}$ is the identity matrix.
+
+where $T$ is the current temperature, $T_{stress\_free}$ is the stress free
+temperature, and $\boldsymbol{I}$ is the identity matrix.
+
+An automatic differentiation version of this object is available as `ADComputeThermalExpansionEigenstrain`.
 
 ## Example Input File Syntax
 

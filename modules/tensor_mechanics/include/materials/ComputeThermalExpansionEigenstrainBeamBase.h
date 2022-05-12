@@ -10,14 +10,12 @@
 #pragma once
 
 #include "ComputeEigenstrainBeamBase.h"
-#include "DerivativeMaterialInterface.h"
 
 /**
  * ComputeThermalExpansionEigenstrainBeamBase is a base class for all models that
  * compute beam eigenstrains due to thermal expansion of a material.
  */
-class ComputeThermalExpansionEigenstrainBeamBase
-  : public DerivativeMaterialInterface<ComputeEigenstrainBeamBase>
+class ComputeThermalExpansionEigenstrainBeamBase : public ComputeEigenstrainBeamBase
 {
 public:
   static InputParameters validParams();
@@ -33,7 +31,7 @@ protected:
    * param thermal_strain    The current total linear thermal strain
    *                         (\delta L / L)
    */
-  virtual void computeThermalStrain(Real & thermal_strain) = 0;
+  virtual Real computeThermalStrain() = 0;
 
   /// Value of temperature at each quadrature point
   const VariableValue & _temperature;

@@ -68,6 +68,14 @@ FunctionTempl<T>::value(const ADReal & t, const ADPoint & p) const
 }
 
 template <typename T>
+ChainedReal
+FunctionTempl<T>::value(const ChainedReal & t) const
+{
+  static const Point p;
+  return {value(t.value(), p), timeDerivative(t.value(), p) * t.derivatives()};
+}
+
+template <typename T>
 RealGradient
 FunctionTempl<T>::gradient(Real /*t*/, const Point & /*p*/) const
 {

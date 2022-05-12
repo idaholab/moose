@@ -15,13 +15,14 @@
  * ComputeMeanThermalExpansionFunctionEigenstrain computes an eigenstrain for thermal
  * expansion according to a mean thermal expansion function.
  */
-class ComputeMeanThermalExpansionFunctionEigenstrain
-  : public ComputeMeanThermalExpansionEigenstrainBase
+template <bool is_ad>
+class ComputeMeanThermalExpansionFunctionEigenstrainTempl
+  : public ComputeMeanThermalExpansionEigenstrainBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ComputeMeanThermalExpansionFunctionEigenstrain(const InputParameters & parameters);
+  ComputeMeanThermalExpansionFunctionEigenstrainTempl(const InputParameters & parameters);
 
 protected:
   /*
@@ -36,16 +37,15 @@ protected:
    * \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
    * param temperature  temperature at which this is evaluated
    */
-  virtual Real meanThermalExpansionCoefficient(const Real & temperature) override;
-
-  /*
-   * Compute the derivative of the mean thermal expansion coefficient \f$\bar{\alpha}\f$
-   * with respect to temperature, where \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
-   * param temperature  temperature at which this is evaluated
-   */
-  virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature) override;
+  virtual ValueAndDerivative<is_ad>
+  meanThermalExpansionCoefficient(const ValueAndDerivative<is_ad> & temperature) override;
 
   const Function & _thermal_expansion_function;
 
   const Real & _thexp_func_ref_temp;
 };
+
+typedef ComputeMeanThermalExpansionFunctionEigenstrainTempl<false>
+    ComputeMeanThermalExpansionFunctionEigenstrain;
+typedef ComputeMeanThermalExpansionFunctionEigenstrainTempl<true>
+    ADComputeMeanThermalExpansionFunctionEigenstrain;

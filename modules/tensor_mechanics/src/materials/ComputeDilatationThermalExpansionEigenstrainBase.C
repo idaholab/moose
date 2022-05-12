@@ -24,31 +24,15 @@ ComputeDilatationThermalExpansionEigenstrainBaseTempl<is_ad>::
 }
 
 template <bool is_ad>
-void
-ComputeDilatationThermalExpansionEigenstrainBaseTempl<is_ad>::computeThermalStrain(
-    GenericReal<is_ad> & thermal_strain, Real * dthermal_strain_dT)
+ValueAndDerivative<is_ad>
+ComputeDilatationThermalExpansionEigenstrainBaseTempl<is_ad>::computeThermalStrain()
 {
-  const auto & T =
-      this->_use_old_temperature ? this->_temperature_old[_qp] : this->_temperature[_qp];
+  const auto stress_free = computeDilatation(this->_stress_free_temperature[_qp]);
+  const auto current = computeDilatation(this->_temperature[_qp]);
 
-  const auto stress_free_thexp = computeDilatation(this->_stress_free_temperature[_qp]);
-  thermal_strain = computeDilatation(T) - stress_free_thexp;
-
-  if constexpr (!is_ad)
-  {
-    mooseAssert(dthermal_strain_dT, "Internal error. dthermal_strain_dT should not be nullptr.");
-    *dthermal_strain_dT = computeDilatationDerivative(T);
-  }
-  else
-    libmesh_ignore(dthermal_strain_dT);
-}
-
-template <bool is_ad>
-Real
-ComputeDilatationThermalExpansionEigenstrainBaseTempl<is_ad>::computeDilatationDerivative(
-    const Real)
-{
-  mooseError("computeDilatationDerivative must be implemented for any derived non-AD class.");
+  // in non-AD mode the T derivative of the stress_free term needs get dropped.
+  // We assume _stress_free_temperature does not depend on T. In AD mode this is automatic.
+  return current - (is_ad ? stress_free : stress_free.value());
 }
 
 template class ComputeDilatationThermalExpansionEigenstrainBaseTempl<false>;
