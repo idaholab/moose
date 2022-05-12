@@ -15,9 +15,6 @@
 #include "ChainedADReal.h"
 #include "InputParameters.h"
 
-template <bool is_ad>
-using GenericChainedReal = typename std::conditional<is_ad, ChainedADReal, ChainedReal>::type;
-
 class ConsoleStream;
 
 /**
