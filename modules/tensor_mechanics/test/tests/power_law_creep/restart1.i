@@ -13,110 +13,97 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1000.0
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     incremental = true
     add_variables = true
     generate_output = 'stress_yy creep_strain_xx creep_strain_yy creep_strain_zz elastic_strain_yy'
-    use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [Functions]
-  [./top_pull]
+  [top_pull]
     type = PiecewiseLinear
     x = '0 1'
     y = '1 1'
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
-    type = ADHeatConduction
+  [heat]
+    type = Diffusion
     variable = temp
-  [../]
-  [./heat_ie]
-    type = ADHeatConductionTimeDerivative
+  []
+  [heat_ie]
+    type = TimeDerivative
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
-  [./u_top_pull]
-    type = ADPressure
+  [u_top_pull]
+    type = Pressure
     variable = disp_y
-    component = 1
     boundary = top
-    constant = -10.0e6
+    factor = -10.0e6
     function = top_pull
-  [../]
-  [./u_bottom_fix]
-    type = ADDirichletBC
+  []
+  [u_bottom_fix]
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./u_yz_fix]
-    type = ADDirichletBC
+  []
+  [u_yz_fix]
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./u_xy_fix]
-    type = ADDirichletBC
+  []
+  [u_xy_fix]
+    type = DirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
-  [./temp_fix]
+  []
+  [temp_fix]
     type = DirichletBC
     variable = temp
     boundary = 'bottom top'
     value = 1000.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ADComputeIsotropicElasticityTensor
+  [elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2e11
     poissons_ratio = 0.3
-    constant_on = SUBDOMAIN
-  [../]
-  [./radial_return_stress]
-    type = ADComputeMultipleInelasticStress
+  []
+  [radial_return_stress]
+    type = ComputeMultipleInelasticStress
+    tangent_operator = elastic
     inelastic_models = 'power_law_creep'
-  [../]
-  [./power_law_creep]
-    type = ADPowerLawCreepStressUpdate
+  []
+  [power_law_creep]
+    type = PowerLawCreepStressUpdate
     coefficient = 1.0e-15
     n_exponent = 4
     activation_energy = 3.0e5
     temperature = temp
-  [../]
-
-  [./thermal]
-    type = ADHeatConductionMaterial
-    specific_heat = 1.0
-    thermal_conductivity = 100.
-  [../]
-  [./density]
-    type = ADDensity
-    density = 1.0
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
-
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp'
@@ -130,17 +117,17 @@
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-6
   l_tol = 1e-5
-  start_time = 0.6
+  start_time = 0.0
   end_time = 1.0
-  num_steps = 12
+  num_steps = 6
   dt = 0.1
 []
 
 [Outputs]
-  file_base = power_law_creep_out
   exodus = true
-[]
-
-[Problem]
-  restart_file_base = power_law_creep_restart1_out_cp/0006
+  csv = true
+  [out]
+    type = Checkpoint
+    num_files = 1
+  []
 []

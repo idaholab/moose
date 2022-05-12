@@ -1,7 +1,7 @@
 [Tests]
-  design = 'MooseException.md'
-  issues = '#9659 #20290'
   [exception]
+    design = 'MooseException.md'
+    issues = '#9659 #20290'
     requirement = 'The system shall gracefully allow exceptions from the radial return mapping '
                   'algorithm '
     [non]
@@ -38,6 +38,84 @@
       allow_test_objects = true
       cli_args = 'Executioner/num_steps=1 Materials/creep/initial_guess=-100'
       expect_out = 'Scalar less than minimum'
+    []
+  []
+  [nonad]
+    issues = '#8642'
+    design = 'PowerLawCreepStressUpdate.md'
+    requirement = 'The system shall provide a power law creep mechanical constitutive model not using AD '
+    [power_law_creep]
+      type = 'Exodiff'
+      input = 'power_law_creep.i'
+      exodiff = 'power_law_creep_out.e'
+      detail = 'that works with a finite strain formulation.'
+    []
+    [restart1]
+      type = 'RunApp'
+      input = 'restart1.i'
+      recover = false
+      detail = 'that shall be restartable.'
+    []
+    [power_law_creep_restart2]
+      type = 'Exodiff'
+      input = 'restart2.i'
+      exodiff = 'restart2_out.e'
+      detail = 'that shall be restartable with a response that matches the original run.'
+      exodiff_opts = '-TM'
+    []
+    [smallstrain]
+      type = Exodiff
+      input = 'smallstrain.i'
+      exodiff = 'smallstrain_out.e'
+      detail = 'that works with a small strain formulation.'
+    []
+  []
+  [ad]
+    issues = '#8642'
+    design = 'PowerLawCreepStressUpdate.md'
+    requirement = 'The system shall provide a power law creep mechanical constitutive model using AD'
+    [power_law_creep]
+      type = 'Exodiff'
+      input = 'ad_power_law_creep.i'
+      exodiff = 'ad_power_law_creep_out.e'
+      detail = 'that works with a finite strain formulation.'
+    []
+    [restart1]
+      type = 'RunApp'
+      input = 'ad_restart1.i'
+      recover = false
+      detail = 'that shall be restartable.'
+    []
+    [power_law_creep_restart2]
+      type = 'Exodiff'
+      input = 'ad_restart2.i'
+      exodiff = 'ad_restart2_out.e'
+      detail = 'that shall be restartable with a response that matches the original run.'
+      exodiff_opts = '-TM'
+    []
+    [smallstrain]
+      type = Exodiff
+      input = 'ad_smallstrain.i'
+      exodiff = 'ad_smallstrain_out.e'
+      detail = 'that works with a small strain formulation.'
+    []
+    [power_law_creep-jac]
+      type = 'PetscJacobianTester'
+      input = 'ad_power_law_creep.i'
+      ratio_tol = 5e-6
+      difference_tol = 1e6
+      cli_args = 'Executioner/num_steps=2 -snes_test_err 1e-11'
+      run_sim = True
+      detail = 'calculate a perfect Jacobian'
+    []
+    [small_strain-jac]
+      type = PetscJacobianTester
+      input = 'ad_smallstrain.i'
+      ratio_tol = 5e-6
+      difference_tol = 1e6
+      cli_args = 'Executioner/num_steps=2 -snes_test_err 1e-11'
+      run_sim = True
+      detail = 'calculate a perfect Jacobian with the small strain formulation'
     []
   []
 []

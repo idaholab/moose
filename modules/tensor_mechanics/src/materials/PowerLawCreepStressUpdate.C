@@ -10,15 +10,17 @@
 #include "PowerLawCreepStressUpdate.h"
 
 registerMooseObject("TensorMechanicsApp", PowerLawCreepStressUpdate);
+registerMooseObject("TensorMechanicsApp", ADPowerLawCreepStressUpdate);
 
+template <bool is_ad>
 InputParameters
-PowerLawCreepStressUpdate::validParams()
+PowerLawCreepStressUpdateTempl<is_ad>::validParams()
 {
-  InputParameters params = RadialReturnCreepStressUpdateBase::validParams();
+  InputParameters params = RadialReturnCreepStressUpdateBaseTempl<is_ad>::validParams();
   params.addClassDescription(
       "This class uses the stress update material in a radial return isotropic power law creep "
-      "model.  This class can be used in conjunction with other creep and plasticity materials for "
-      "more complex simulations.");
+      "model. This class can be used in conjunction with other creep and plasticity materials "
+      "for more complex simulations.");
 
   // Linear strain hardening parameters
   params.addCoupledVar("temperature", "Coupled temperature");
@@ -28,43 +30,47 @@ PowerLawCreepStressUpdate::validParams()
   params.addRequiredParam<Real>("activation_energy", "Activation energy");
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
   params.addParam<Real>("start_time", 0.0, "Start time (if not zero)");
-
   return params;
 }
 
-PowerLawCreepStressUpdate::PowerLawCreepStressUpdate(const InputParameters & parameters)
-  : RadialReturnCreepStressUpdateBase(parameters),
-    _has_temp(isParamValid("temperature")),
-    _temperature(_has_temp ? coupledValue("temperature") : _zero),
-    _coefficient(getParam<Real>("coefficient")),
-    _n_exponent(getParam<Real>("n_exponent")),
-    _m_exponent(getParam<Real>("m_exponent")),
-    _activation_energy(getParam<Real>("activation_energy")),
-    _gas_constant(getParam<Real>("gas_constant")),
-    _start_time(getParam<Real>("start_time"))
+template <bool is_ad>
+PowerLawCreepStressUpdateTempl<is_ad>::PowerLawCreepStressUpdateTempl(
+    const InputParameters & parameters)
+  : RadialReturnCreepStressUpdateBaseTempl<is_ad>(parameters),
+    _temperature(this->isParamValid("temperature")
+                     ? &this->template coupledGenericValue<is_ad>("temperature")
+                     : nullptr),
+    _coefficient(this->template getParam<Real>("coefficient")),
+    _n_exponent(this->template getParam<Real>("n_exponent")),
+    _m_exponent(this->template getParam<Real>("m_exponent")),
+    _activation_energy(this->template getParam<Real>("activation_energy")),
+    _gas_constant(this->template getParam<Real>("gas_constant")),
+    _start_time(this->template getParam<Real>("start_time")),
+    _exponential(1.0)
 {
-  if (_start_time < _app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
-    paramError("start_time",
-               "Start time must be equal to or greater than the Executioner start_time if a "
-               "non-integer m_exponent is used");
+  if (_start_time < this->_app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
+    this->paramError("start_time",
+                     "Start time must be equal to or greater than the Executioner start_time if a "
+                     "non-integer m_exponent is used");
 }
 
+template <bool is_ad>
 void
-PowerLawCreepStressUpdate::computeStressInitialize(const Real & /*effective_trial_stress*/,
-                                                   const RankFourTensor & /*elasticity_tensor*/)
+PowerLawCreepStressUpdateTempl<is_ad>::computeStressInitialize(
+    const GenericReal<is_ad> & /*effective_trial_stress*/,
+    const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/)
 {
-  if (_has_temp)
-    _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));
-  else
-    _exponential = 1.0;
+  if (_temperature)
+    _exponential = std::exp(-_activation_energy / (_gas_constant * (*_temperature)[_qp]));
 
   _exp_time = std::pow(_t - _start_time, _m_exponent);
 }
 
+template <bool is_ad>
 template <typename ScalarType>
 ScalarType
-PowerLawCreepStressUpdate::computeResidualInternal(const Real & effective_trial_stress,
-                                                   const ScalarType & scalar)
+PowerLawCreepStressUpdateTempl<is_ad>::computeResidualInternal(
+    const GenericReal<is_ad> & effective_trial_stress, const ScalarType & scalar)
 {
   const ScalarType stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
   const ScalarType creep_rate =
@@ -72,48 +78,62 @@ PowerLawCreepStressUpdate::computeResidualInternal(const Real & effective_trial_
   return creep_rate * _dt - scalar;
 }
 
-Real
-PowerLawCreepStressUpdate::computeDerivative(const Real & effective_trial_stress,
-                                             const Real & scalar)
+template <bool is_ad>
+GenericReal<is_ad>
+PowerLawCreepStressUpdateTempl<is_ad>::computeDerivative(
+    const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
 {
-  const Real stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
-  const Real creep_rate_derivative = -1.0 * _coefficient * _three_shear_modulus * _n_exponent *
-                                     std::pow(stress_delta, _n_exponent - 1.0) * _exponential *
-                                     _exp_time;
+  const GenericReal<is_ad> stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
+  const GenericReal<is_ad> creep_rate_derivative =
+      -_coefficient * _three_shear_modulus * _n_exponent *
+      std::pow(stress_delta, _n_exponent - 1.0) * _exponential * _exp_time;
   return creep_rate_derivative * _dt - 1.0;
 }
 
+template <bool is_ad>
 Real
-PowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
-    const MaterialProperty<RankTwoTensor> & stress,
-    const MaterialProperty<RankTwoTensor> & strain_rate)
+PowerLawCreepStressUpdateTempl<is_ad>::computeStrainEnergyRateDensity(
+    const GenericMaterialProperty<RankTwoTensor, is_ad> & stress,
+    const GenericMaterialProperty<RankTwoTensor, is_ad> & strain_rate)
 {
   if (_n_exponent <= 1)
     return 0.0;
 
   Real creep_factor = _n_exponent / (_n_exponent + 1);
 
-  return creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]);
+  return MetaPhysicL::raw_value(creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]));
 }
 
+template <bool is_ad>
 void
-PowerLawCreepStressUpdate::computeStressFinalize(const RankTwoTensor & plastic_strain_increment)
+PowerLawCreepStressUpdateTempl<is_ad>::computeStressFinalize(
+    const GenericRankTwoTensor<is_ad> & plastic_strain_increment)
 {
   _creep_strain[_qp] += plastic_strain_increment;
 }
 
+template <bool is_ad>
 void
-PowerLawCreepStressUpdate::resetIncrementalMaterialProperties()
+PowerLawCreepStressUpdateTempl<is_ad>::resetIncrementalMaterialProperties()
 {
   _creep_strain[_qp] = _creep_strain_old[_qp];
 }
 
+template <bool is_ad>
 bool
-PowerLawCreepStressUpdate::substeppingCapabilityEnabled()
+PowerLawCreepStressUpdateTempl<is_ad>::substeppingCapabilityEnabled()
 {
-  return getParam<bool>("use_substep");
+  return this->template getParam<bool>("use_substep");
 }
 
-template Real PowerLawCreepStressUpdate::computeResidualInternal<Real>(const Real &, const Real &);
+template Real PowerLawCreepStressUpdateTempl<false>::computeResidualInternal<Real>(const Real &,
+                                                                                   const Real &);
+template ADReal
+PowerLawCreepStressUpdateTempl<true>::computeResidualInternal<ADReal>(const ADReal &,
+                                                                      const ADReal &);
 template ChainedReal
-PowerLawCreepStressUpdate::computeResidualInternal<ChainedReal>(const Real &, const ChainedReal &);
+PowerLawCreepStressUpdateTempl<false>::computeResidualInternal<ChainedReal>(const Real &,
+                                                                            const ChainedReal &);
+template ChainedADReal
+PowerLawCreepStressUpdateTempl<true>::computeResidualInternal<ChainedADReal>(const ADReal &,
+                                                                             const ChainedADReal &);
