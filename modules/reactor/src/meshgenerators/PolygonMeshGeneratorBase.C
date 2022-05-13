@@ -60,6 +60,7 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
     const std::vector<Real> azimuthal_tangent,
     const subdomain_id_type block_id_shift,
     const bool quad_center_elements,
+    const Real center_quad_factor,
     const boundary_id_type boundary_id_shift)
 {
   auto mesh = buildReplicatedMesh(2);
@@ -132,7 +133,9 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
                      main_background_bias_terms.front();
     else
       ring_radii_0 = pitch / 2.0 * main_background_bias_terms.front();
-    ring_radii_0 = ring_radii_0 / div_num * (div_num - 1);
+    // If center_quad_factor is zero, default value (div_num - 1)/div_num  is used.
+    ring_radii_0 *=
+        center_quad_factor == 0.0 ? (((Real)div_num - 1.0) / (Real)div_num) : center_quad_factor;
 
     centerNodes(*mesh, side_number, div_num, ring_radii_0, nodes);
   }

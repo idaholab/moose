@@ -95,6 +95,8 @@ protected:
   const bool _uniform_mesh_on_sides;
   /// Whether the central elements need to be QUAD4
   const bool _quad_center_elements;
+  /// A fractional radius factor used to determine the radial positions of transition nodes in the center region meshed by quad elements (default is 1.0 - 1.0/div_num)
+  const Real _center_quad_factor;
   /// Whether to rotate the generated polygon mesh to ensure that one flat side faces up
   const bool & _flat_side_up;
   /// Maximum smooth iteration number
