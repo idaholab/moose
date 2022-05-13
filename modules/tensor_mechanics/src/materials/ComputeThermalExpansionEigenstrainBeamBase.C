@@ -23,7 +23,7 @@ ComputeThermalExpansionEigenstrainBeamBase::validParams()
 
 ComputeThermalExpansionEigenstrainBeamBase::ComputeThermalExpansionEigenstrainBeamBase(
     const InputParameters & parameters)
-  : DerivativeMaterialInterface<ComputeEigenstrainBeamBase>(parameters),
+  : ComputeEigenstrainBeamBase(parameters),
     _temperature(coupledValue("temperature")),
     _stress_free_temperature(coupledValue("stress_free_temperature"))
 {
@@ -43,9 +43,7 @@ ComputeThermalExpansionEigenstrainBeamBase::computeQpEigenstrain()
 
   _initial_axis /= _initial_axis.norm();
 
-  Real thermal_strain = 0.0;
-
-  computeThermalStrain(thermal_strain);
+  Real thermal_strain = computeThermalStrain();
 
   _disp_eigenstrain[_qp].zero();
   _rot_eigenstrain[_qp].zero();

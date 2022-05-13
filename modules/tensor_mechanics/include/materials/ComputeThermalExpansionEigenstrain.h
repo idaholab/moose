@@ -10,21 +10,29 @@
 #pragma once
 
 #include "ComputeThermalExpansionEigenstrainBase.h"
-#include "DerivativeMaterialInterface.h"
 
 /**
  * ComputeThermalExpansionEigenstrain computes an eigenstrain for thermal expansion
  * with a constant expansion coefficient.
  */
-class ComputeThermalExpansionEigenstrain : public ComputeThermalExpansionEigenstrainBase
+template <bool is_ad>
+class ComputeThermalExpansionEigenstrainTempl
+  : public ComputeThermalExpansionEigenstrainBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ComputeThermalExpansionEigenstrain(const InputParameters & parameters);
+  ComputeThermalExpansionEigenstrainTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeThermalStrain(Real & thermal_strain, Real * dthermal_strain_dT) override;
+  virtual ValueAndDerivative<is_ad> computeThermalStrain() override;
 
   const Real & _thermal_expansion_coeff;
+
+  using ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::_qp;
+  using ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::_temperature;
+  using ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::_stress_free_temperature;
 };
+
+typedef ComputeThermalExpansionEigenstrainTempl<false> ComputeThermalExpansionEigenstrain;
+typedef ComputeThermalExpansionEigenstrainTempl<true> ADComputeThermalExpansionEigenstrain;

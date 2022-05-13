@@ -11,7 +11,6 @@
 
 #include "Moose.h"
 #include "MooseTypes.h"
-#include "DualReal.h"
 
 #include <vector>
 #include <string>

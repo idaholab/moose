@@ -32,38 +32,27 @@ public:
   ComputeMeanThermalExpansionEigenstrainBaseTempl(const InputParameters & parameters);
 
 protected:
-  /*
+  /**
    * Compute the total thermal strain relative to the stress-free temperature at the
-   * current temperature, as well as the current instantaneous thermal expansion coefficient.
-   * @param thermal_strain    The current total linear thermal strain (\f$\delta L / L\f$)
-   * @param dthermal_strain_dT The current instantaneous coefficient of thermal expansion
-   *                         (derivative of thermal_strain wrt temperature
+   * current temperature along with its temperature derivative.
    */
-  virtual void computeThermalStrain(GenericReal<is_ad> & thermal_strain,
-                                    Real * dthermal_strain_dT) override;
+  virtual ValueAndDerivative<is_ad> computeThermalStrain() override;
 
-  /*
+  /**
    * Get the reference temperature for the mean thermal expansion relationship.  This is
    * the temperature at which \f$\delta L = 0\f$.
    */
   virtual Real referenceTemperature() = 0;
 
   /*
-   * Compute the mean thermal expansion coefficient relative to the reference temperature.
+   * Compute the mean thermal expansion coefficient relative to the reference temperature
+   * along with its temperature derivative.
    * This is the linear thermal strain divided by the temperature difference:
    * \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
    * @param temperature  temperature at which this is evaluated
    */
-  virtual GenericReal<is_ad>
-  meanThermalExpansionCoefficient(const GenericReal<is_ad> & temperature) = 0;
-
-  /*
-   * Compute the derivative of the mean thermal expansion coefficient \f$\bar{\alpha}\f$
-   * with respect to temperature, where \f$\bar{\alpha}=(\delta L / L)/(T - T_{ref})\f$.
-   * (only called in the non-AD instantiation)
-   * @param temperature  temperature at which this is evaluated ()
-   */
-  virtual Real meanThermalExpansionCoefficientDerivative(const Real temperature);
+  virtual ValueAndDerivative<is_ad>
+  meanThermalExpansionCoefficient(const ValueAndDerivative<is_ad> & temperature) = 0;
 
   using ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::_qp;
 };

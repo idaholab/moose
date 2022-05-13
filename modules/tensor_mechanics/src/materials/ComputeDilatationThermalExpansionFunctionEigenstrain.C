@@ -36,19 +36,16 @@ ComputeDilatationThermalExpansionFunctionEigenstrainTempl<is_ad>::
 }
 
 template <bool is_ad>
-GenericReal<is_ad>
+ValueAndDerivative<is_ad>
 ComputeDilatationThermalExpansionFunctionEigenstrainTempl<is_ad>::computeDilatation(
-    const GenericReal<is_ad> & temperature)
+    const ValueAndDerivative<is_ad> & temperature)
 {
-  return _dilatation_function.value(temperature);
-}
-
-template <bool is_ad>
-Real
-ComputeDilatationThermalExpansionFunctionEigenstrainTempl<is_ad>::computeDilatationDerivative(
-    const Real temperature)
-{
-  return _dilatation_function.timeDerivative(temperature);
+  // we need these two branches because we cannot yet evaluate Functions with ChainedReals
+  if constexpr (is_ad)
+    return _dilatation_function.value(temperature);
+  else
+    return {_dilatation_function.value(temperature.value()),
+            _dilatation_function.timeDerivative(temperature.value()) * temperature.derivatives()};
 }
 
 template class ComputeDilatationThermalExpansionFunctionEigenstrainTempl<false>;

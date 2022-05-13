@@ -1,5 +1,14 @@
-## Dependencies are listed in descending order.
-## Any changes made will require additional changes to any item above that.
+## Dependencies are listed in descending order. Generally speaking any
+## changes made will require additional changes to items listed above
+## your change (except where otherwise noted)
+
+# NCRC dependency
+moose_tools:
+  - moose-tools 2022.04.18
+
+# NCRC default Python
+moose_ncrc_python:
+  - python 3.9
 
 moose_libmesh:
   - moose-libmesh 2022.04.07 build_1

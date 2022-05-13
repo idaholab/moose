@@ -26,15 +26,15 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual void computeThermalStrain(GenericReal<is_ad> & thermal_strain,
-                                    Real * dthermal_strain_dT) override;
+
+  virtual ValueAndDerivative<is_ad> computeThermalStrain() override;
 
   const Function & _thermal_expansion_function;
 
-  /// Stores the thermal strain as a scalar for use in computing an incremental update to this.
-  /// this is not a dual number as only the previous timestep values are used
-  //@{
-  MaterialProperty<Real> & _thermal_strain;
+  /**
+   *@{ Stores the thermal strain as a scalar for use in computing an incremental update.
+   */
+  GenericMaterialProperty<Real, is_ad> & _thermal_strain;
   const MaterialProperty<Real> & _thermal_strain_old;
   //@}
 

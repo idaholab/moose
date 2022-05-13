@@ -51,7 +51,7 @@
     requirement = 'The tensor mechanics module shall have the capability to '
                   'calculate the eigenstrain tensor resulting from isotropic '
                   'thermal expansion.'
-    design = 'ADComputeThermalExpansionEigenstrain.md'
+    design = 'ComputeThermalExpansionEigenstrain.md'
     issues = '#13091'
   [../]
   [./ad_constant_expansion_coeff_old]
@@ -61,7 +61,7 @@
     requirement = 'The tensor mechanics module shall have the capability to '
                   'calculate the eigenstrain tensor resulting from isotropic '
                   'thermal expansion using the previous timestep.'
-    design = 'ADComputeThermalExpansionEigenstrain.md'
+    design = 'ComputeThermalExpansionEigenstrain.md'
     issues = '#13091'
   [../]
   [./ad_constant_expansion_coeff-jac]
@@ -71,7 +71,7 @@
     cli_args = 'Outputs/exodus=false Outputs/csv=false Executioner/num_steps=2'
     difference_tol = 1e-5
     issues = '#13091'
-    design = 'ADComputeThermalExpansionEigenstrain.md'
+    design = 'ComputeThermalExpansionEigenstrain.md'
     requirement = 'The Jacobian for the AD eigenstrain tensor resulting from isotropic '
                   'thermal expansion shall be perfect'
   [../]
@@ -84,7 +84,7 @@
                   'thermal expansion with an initial strain due to the '
                   'difference between the stress free temperature and initial '
                   'temperature of the material.'
-    design = 'ADComputeThermalExpansionEigenstrain.md'
+    design = 'ComputeThermalExpansionEigenstrain.md'
     issues = '#13091'
   [../]
   [./ad_constant_expansion_stress_free_temp-jac]
@@ -94,7 +94,7 @@
     cli_args = 'Outputs/exodus=false Executioner/num_steps=2'
     difference_tol = 1e-5
     issues = '#13091'
-    design = 'ADComputeThermalExpansionEigenstrain.md'
+    design = 'ComputeThermalExpansionEigenstrain.md'
     requirement = 'The Jacobian for the AD eigenstrain tensor resulting from isotropic '
                   'thermal expansion with an initial strain shall be perfect'
   [../]

@@ -26,23 +26,16 @@ public:
   ComputeDilatationThermalExpansionEigenstrainBaseTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeThermalStrain(GenericReal<is_ad> & thermal_strain,
-                                    Real * dthermal_strain_dT) override;
+  virtual ValueAndDerivative<is_ad> computeThermalStrain() override;
 
-  /*
+  /**
    * Compute the fractional linear dilatation due to thermal expansion delta L / L
+   * along with its temperature derivative.
    * @param temperature current temperature
-   * @return fractional linear dilatation due
+   * @return fractional linear dilatation with temperature derivative
    */
-  virtual GenericReal<is_ad> computeDilatation(const GenericReal<is_ad> & temperature) = 0;
-
-  /*
-   * Compute the derivative of the fractional linear dilatation due to thermal expansion delta L / L
-   * with respect to temperature. (only called in the non-AD instantiation)
-   * @param temperature current temperature
-   * @return fractional linear dilatation due
-   */
-  virtual Real computeDilatationDerivative(const Real temperature);
+  virtual ValueAndDerivative<is_ad>
+  computeDilatation(const ValueAndDerivative<is_ad> & temperature) = 0;
 
   using ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::_qp;
 };
