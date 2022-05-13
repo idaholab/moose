@@ -59,6 +59,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
     const Elem * elem = belem->_elem;
     unsigned short int side = belem->_side;
     BoundaryID boundary_id = belem->_bnd_id;
+    SubdomainID last_did = Elem::invalid_subdomain_id;
 
     // need to update the boundary ID in assembly
     _problem.setCurrentBoundaryID(boundary_id, _tid);
@@ -74,6 +75,12 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
 
       if (iter != boundary_kernels.end() && !(iter->second.empty()))
       {
+        auto did = elem->subdomain_id();
+        if (did != last_did)
+        {
+          _problem.subdomainSetup(did, _tid);
+          last_did = did;
+        }
         _problem.setCurrentSubdomainID(elem, _tid);
         _problem.prepare(elem, _tid);
         _problem.reinitElemFace(elem, side, boundary_id, _tid);
