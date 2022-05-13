@@ -22,6 +22,16 @@ MapMultiplyCoupledVars::validParams()
   params.addRequiredParam<std::map<std::string, std::string>>(
       "dummy_string_to_string_map",
       "A dummy parameter just to make sure that we can parse a string to string map");
+  params.addRequiredParam<std::map<unsigned long long, unsigned int>>(
+      "dummy_ullong_to_uint_map",
+      "A dummy parameter just to make sure that we can parse a unsigned long long to unsigned int "
+      "map");
+  params.addRequiredParam<std::map<unsigned int, unsigned int>>(
+      "dummy_uint_to_uint_map",
+      "A dummy parameter just to make sure that we can parse an unsigned int to unsigned int map");
+  params.addRequiredParam<std::map<unsigned long, unsigned int>>(
+      "dummy_ulong_to_uint_map",
+      "A dummy parameter just to make sure that we can parse an unsigned long to unsigned int map");
   return params;
 }
 
@@ -31,7 +41,13 @@ MapMultiplyCoupledVars::MapMultiplyCoupledVars(const InputParameters & parameter
     _w(adCoupledValue("w")),
     _coupled_map(getParam<std::map<std::string, Real>>("coupled_var_multipliers")),
     _dummy_string_to_string_map(
-        getParam<std::map<std::string, std::string>>("dummy_string_to_string_map"))
+        getParam<std::map<std::string, std::string>>("dummy_string_to_string_map")),
+    _dummy_ullong_to_uint_map(
+        getParam<std::map<unsigned long long, unsigned int>>("dummy_ullong_to_uint_map")),
+    _dummy_uint_to_uint_map(
+        getParam<std::map<unsigned int, unsigned int>>("dummy_uint_to_uint_map")),
+    _dummy_ulong_to_uint_map(
+        getParam<std::map<unsigned long, unsigned int>>("dummy_ulong_to_uint_map"))
 {
   if (_coupled_map.size() != 2)
     paramError("coupled_var_multipliers", "We need exactly 2 multipliers");
@@ -53,6 +69,27 @@ MapMultiplyCoupledVars::MapMultiplyCoupledVars(const InputParameters & parameter
                  getParam<std::vector<VariableName>>("w").front());
     _w_multiplier = it->second;
   }
+
+  // output the dummy map parameters on screen
+  _console << "The passed string-to-string map is";
+  for (const auto & pair : _dummy_string_to_string_map)
+    _console << " " << pair.first << ":" << pair.second;
+  _console << std::endl;
+
+  _console << "The passed ullong-to-uint map is";
+  for (const auto & pair : _dummy_ullong_to_uint_map)
+    _console << " " << pair.first << ":" << pair.second;
+  _console << std::endl;
+
+  _console << "The passed uint-to-uint map is";
+  for (const auto & pair : _dummy_uint_to_uint_map)
+    _console << " " << pair.first << ":" << pair.second;
+  _console << std::endl;
+
+  _console << "The passed long-to-uint map is";
+  for (const auto & pair : _dummy_ulong_to_uint_map)
+    _console << " " << pair.first << ":" << pair.second;
+  _console << std::endl;
 }
 
 ADReal
