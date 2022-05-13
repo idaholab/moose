@@ -1,4 +1,4 @@
-# CoefReaction
+# CoefReaction / ADCoefReaction
 
 !syntax description /Kernels/CoefReaction
 
@@ -9,9 +9,8 @@
 where $v$ (`v`) is a coupled variable.
 
 !alert note
-There is no AD (automatic differentiation) or FV (finite volume) version of `CoefReaction`.
-If you wish to use AD / FV, use [`ADCoupledForce`](/ADCoupledForce.md) /
-[`FVCoupledForce`](/FVCoupledForce.md) respectively.
+There is no FV (finite volume) version of `CoefReaction`. If you wish to use FV,
+use [/FVCoupledForce.md].
 
 !syntax parameters /Kernels/CoefReaction
 

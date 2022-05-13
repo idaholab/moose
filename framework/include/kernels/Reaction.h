@@ -9,18 +9,28 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 
-class Reaction : public Kernel
+/**
+ *  Implements a simple consuming reaction term with weak form $(\\psi_i, \\lambda u_h)$.
+ */
+template <bool is_ad>
+class ReactionTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  Reaction(const InputParameters & parameters);
+  ReactionTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
+  /// Scalar coefficient representing the relative amount consumed per unit time
   const Real & _rate;
+
+  usingGenericKernelMembers;
 };
+
+typedef ReactionTempl<false> Reaction;
+typedef ReactionTempl<true> ADReaction;

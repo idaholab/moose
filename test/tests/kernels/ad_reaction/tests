@@ -1,0 +1,35 @@
+[Tests]
+  [ad_reaction]
+    type = 'Exodiff'
+    input = 'ad_reaction.i'
+    exodiff = 'ad_reaction_out.e'
+    requirement = 'The system shall contain a consuming reaction term object whose Jacobian is calculated via forward automatic differentiation.'
+    design = 'Reaction.md'
+    issues = '#21009'
+  []
+  [ad_reaction_jac]
+    type = PetscJacobianTester
+    input = 'ad_reaction.i'
+    requirement = 'The system shall produce a perfect Jacobian for a consuming reaction term object using forward automatic differentiation.'
+    design = 'Reaction.md'
+    issues = '#21009'
+  []
+
+  [ad_coef_reaction]
+    type = 'Exodiff'
+    input = 'ad_reaction.i'
+    cli_args = 'Kernels/reaction/type=ADCoefReaction Kernels/reaction/coefficient=2 Outputs/file_base=ad_coef_reaction_out'
+    exodiff = 'ad_coef_reaction_out.e'
+    requirement = 'The system shall contain a consuming reaction term object with a scalar coefficient whose Jacobian is calculated via forward automatic differentiation.'
+    design = 'CoefReaction.md'
+    issues = '#21009'
+  []
+  [ad_coef_reaction_jac]
+    type = PetscJacobianTester
+    input = 'ad_reaction.i'
+    cli_args = 'Kernels/reaction/type=ADCoefReaction Kernels/reaction/coefficient=2'
+    requirement = 'The system shall produce a perfect Jacobian for a consuming reaction term object with a scalar coefficient using forward automatic differentiation.'
+    design = 'CoefReaction.md'
+    issues = '#21009'
+  []
+[]
