@@ -68,8 +68,8 @@
     [num_columns]
       type = RunException
       input = 'piecewise_constant.i'
-      cli_args = 'Functions/element/column_number=26'
-      expect_err = 'Property number 26 greater than total number of properties 3'
+      cli_args = 'Functions/node/column_number=26 ICs/active=node'
+      expect_err = 'Column number 26 greater than total number of properties 3'
       detail = 'if the desired column number in the CSV file is higher than the number of columns in the file'
     []
     [num_rows]

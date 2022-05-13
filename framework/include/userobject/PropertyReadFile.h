@@ -112,6 +112,11 @@ public:
    */
   ReadTypeEnum getReadType() const { return _read_type; }
 
+  /**
+   * Returns the number of properties (columns) read in the file
+   */
+  unsigned int getNumProperties() const { return _nprop; }
+
 protected:
   /// Name of file containing property values
   const std::string _prop_file_name;

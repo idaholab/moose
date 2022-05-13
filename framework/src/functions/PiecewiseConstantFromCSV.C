@@ -55,12 +55,17 @@ PiecewiseConstantFromCSV::PiecewiseConstantFromCSV(const InputParameters & param
 void
 PiecewiseConstantFromCSV::initialSetup()
 {
-  // Get a pointer to the ElementPropertyReadFile. A pointer is used because the UserObject is not
+  // Get a pointer to the PropertyReadFile. A pointer is used because the UserObject is not
   // available during the construction of the function
   _read_prop_user_object = &getUserObject<PropertyReadFile>("read_prop_user_object");
 
   if (_read_type != _read_prop_user_object->getReadType())
     paramError("read_type", "The PropertyReadFile UO should have the same read_type parameter.");
+  if (_column_number > _read_prop_user_object->getNumProperties())
+    paramError("column_number",
+               "Column number " + std::to_string(_column_number) +
+                   " greater than total number of properties " +
+                   std::to_string(_read_prop_user_object->getNumProperties()));
 }
 
 Real
