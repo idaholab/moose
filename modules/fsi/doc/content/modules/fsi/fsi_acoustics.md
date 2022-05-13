@@ -1,5 +1,8 @@
 # Fluid-structure interaction with acoustics
 
+A detailed description of the acoustic FSI formulation and its verification and validation
+can be found in [!cite](dhulipala2022acousticfsi).
+
 Fluid-structure interaction is solved by modeling the fluid as an acoustic domain
 and the structure as an elastic domain. The interface between the fluid and the
 structural domains ensures that: (1) displacements are the same; and (2) there is a

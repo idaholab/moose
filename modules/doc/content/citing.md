@@ -300,3 +300,20 @@ The following technical report documents functionalities and demonstration of th
   url         = {https://www.osti.gov/biblio/1821454},
 }
 ```
+
+### Fluid-structure interaction
+
+This paper documents the development of the acoustic FSI capabilities and its verification and experimental validation.
+
+```
+@article{dhulipala2022acousticfsi,
+  title = {Development, verification, and validation of comprehensive acoustic fluid-structure interaction capabilities in an open-source computational platform},
+ author = {Dhulipala, Somayajulu L. N. and Bolisetti, Chandrakanth and Munday, Lynn B. and Hoffman, William M. and Yu, Ching-Ching and Mir, Faizan U. H. and Kong, Fande and Lindsay, Alexander D. and Whittaker, Andrew S.},
+journal = {Earthquake Engineering and Structural Dynamics},
+   year = {2022}
+  month = {May},
+  pages = {1--33},
+ doi    = {10.1002/eqe.3659},
+ url    = {https://doi.org/10.1002/eqe.3659}
+}
+```
