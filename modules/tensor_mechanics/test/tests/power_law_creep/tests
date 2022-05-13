@@ -1,21 +1,23 @@
 [Tests]
   design = 'MooseException.md'
-  issues = '#9659'
+  issues = '#9659 #20290'
   [./g]
     requirement = 'The system shall gracefully allow exceptions from the radial return mapping algorithm'
-    [./nonad]
+    [./nonad_exception]
       type = RunApp
-      input = 'nonad.i'
+      input = 'nonad_exception.i'
       detail = 'not using automatic differentiation methods'
       allow_test_objects = true
       min_parallel = 2
+      expect_out = 'Exceeded maximum iterations in material return mapping iterations.'
     [../]
-    [./ad]
+    [./ad_exception]
       type = RunApp
-      input = 'ad.i'
+      input = 'ad_exception.i'
       detail = 'using automatic differentiation methods'
       allow_test_objects = true
       min_parallel = 2
+      expect_out = 'Exceeded maximum iterations in material return mapping iterations.'
     [../]
   [../]
 []
