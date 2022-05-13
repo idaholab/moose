@@ -11,7 +11,7 @@ moose_ncrc_python:
   - python 3.9
 
 moose_libmesh:
-  - moose-libmesh 2022.04.07 build_1
+  - moose-libmesh 2022.05.12 build_0
 
 SHORT_VTK_NAME:
   - 9.1
