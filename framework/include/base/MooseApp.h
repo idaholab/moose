@@ -999,9 +999,6 @@ protected:
   /// Syntax of the input file
   Syntax _syntax;
 
-  /// OutputWarehouse object for this App
-  OutputWarehouse _output_warehouse;
-
   /// Input parameter storage structure (this is a raw pointer so the destruction time can be explicitly controlled)
   InputParameterWarehouse * _input_parameter_warehouse;
 
@@ -1010,6 +1007,9 @@ protected:
 
   /// Where built actions are stored
   ActionWarehouse _action_warehouse;
+
+  /// OutputWarehouse object for this App
+  OutputWarehouse _output_warehouse;
 
   /// Parser for parsing the input file
   Parser _parser;
