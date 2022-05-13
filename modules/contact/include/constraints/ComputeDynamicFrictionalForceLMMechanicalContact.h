@@ -58,29 +58,46 @@ protected:
    */
   virtual void enforceConstraintOnDof3d(const DofObject * const dof);
 
+  void timestepSetup() override;
+
   /**
    * Communicate weighted velocities to the owning process
    */
-  void communicateVelocities();
+#ifdef MOOSE_SPARSE_AD
+  template <typename T>
+  void communicateVelocities(std::unordered_map<const DofObject *, std::array<T, 2>> & dof_map);
+#endif
 
   /**
    * Apply constant or function-based friction coefficient
    */
   ADReal computeFrictionValue(const ADReal & contact_pressure,
-                              const ADReal & tangential_vel,
-                              const ADReal & tangential_vel_dir);
+                              const Real & tangential_vel,
+                              const Real & tangential_vel_dir);
 
-  /// A map from node to two tangential velocities
+  /// A map from node to two weighted tangential velocities
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
+
+  /// A map from node to two tangential velocities. Required to have direct connection to physics.
+  std::unordered_map<const DofObject *, std::array<Real, 2>> _dof_to_real_tangential_velocity;
+
+  /// A map from node to two old tangential velocities. Required to have direct connection to physics.
+  std::unordered_map<const DofObject *, std::array<Real, 2>> _dof_to_old_real_tangential_velocity;
+
+  /// A map from node to normal pressure
+  std::unordered_map<const DofObject *, Real> _dof_to_normal_pressure;
+
+  /// A map from node to old normal pressure
+  std::unordered_map<const DofObject *, Real> _dof_to_old_normal_pressure;
 
   /// An array of two pointers to avoid copies
   std::array<const ADReal *, 2> _tangential_vel_ptr = {{nullptr, nullptr}};
 
-  /// The value of the tangential velocity values at the current quadrature point
-  std::array<ADReal, 2> _qp_tangential_velocity;
-
   /// The value of the tangential velocity vectors at the current node
   ADRealVectorValue _qp_tangential_velocity_nodal;
+
+  /// The value of the tangential velocity vectors at the current node
+  ADRealVectorValue _qp_real_tangential_velocity_nodal;
 
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;

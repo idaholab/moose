@@ -32,8 +32,10 @@ ComputeDynamicFrictionalForceLMMechanicalContact::validParams()
   params.addRequiredCoupledVar("friction_lm", "The frictional Lagrange's multiplier");
   params.addCoupledVar("friction_lm_dir",
                        "The frictional Lagrange's multiplier for an addtional direction.");
-  params.addParam<FunctionName>("function_friction",
-                                "Coupled function to evaluate with values from v");
+  params.addParam<FunctionName>(
+      "function_friction",
+      "Coupled function to evaluate friction with values from contact pressure and relative "
+      "tangential velocities (from the previous step).");
   params.addParam<Real>("c_t", 1e0, "Numerical parameter for tangential constraints");
   params.addParam<Real>(
       "epsilon",
@@ -110,6 +112,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeQpProperties()
   // It appears that the relative velocity between weighted gap and this class have a sign
   // difference
   _qp_tangential_velocity_nodal = -_relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
+  _qp_real_tangential_velocity_nodal = -_relative_velocity;
 }
 
 void
@@ -129,10 +132,20 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeQpIProperties()
   _dof_to_weighted_tangential_velocity[dof][0] +=
       _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[0][_i];
 
+  _dof_to_real_tangential_velocity[dof][0] +=
+      _test[_i][_qp] * MetaPhysicL::raw_value(_qp_real_tangential_velocity_nodal) *
+      nodal_tangents[0][_i];
+
   // Get the _dof_to_weighted_tangential_velocity map for a second direction
   if (_3d)
+  {
     _dof_to_weighted_tangential_velocity[dof][1] +=
         _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[1][_i];
+
+    _dof_to_real_tangential_velocity[dof][1] +=
+        _test[_i][_qp] * MetaPhysicL::raw_value(_qp_real_tangential_velocity_nodal) *
+        nodal_tangents[1][_i];
+  }
 }
 
 void
@@ -141,17 +154,38 @@ ComputeDynamicFrictionalForceLMMechanicalContact::residualSetup()
   // Clear both maps
   ComputeDynamicWeightedGapLMMechanicalContact::residualSetup();
   _dof_to_weighted_tangential_velocity.clear();
+  _dof_to_real_tangential_velocity.clear();
+  _dof_to_normal_pressure.clear();
 }
 
 void
-ComputeDynamicFrictionalForceLMMechanicalContact::communicateVelocities()
+ComputeDynamicFrictionalForceLMMechanicalContact::timestepSetup()
 {
+
+  ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup();
+
+  _dof_to_old_real_tangential_velocity.clear();
+  _dof_to_old_normal_pressure.clear();
+
+  for (auto & map_pr : _dof_to_real_tangential_velocity)
+    _dof_to_old_real_tangential_velocity.emplace(map_pr);
+
+  for (auto & map_pr : _dof_to_normal_pressure)
+    _dof_to_old_normal_pressure.emplace(map_pr);
+}
+
 #ifdef MOOSE_SPARSE_AD
+template <typename T>
+void
+ComputeDynamicFrictionalForceLMMechanicalContact::communicateVelocities(
+    std::unordered_map<const DofObject *, std::array<T, 2>> & dof_map)
+{
+
   // We may have weighted gap information that should go to other processes that own the dofs
-  using Datum = std::pair<dof_id_type, std::array<ADReal, 2>>;
+  using Datum = std::pair<dof_id_type, std::array<T, 2>>;
   std::unordered_map<processor_id_type, std::vector<Datum>> push_data;
 
-  for (auto & pr : _dof_to_weighted_tangential_velocity)
+  for (auto & pr : dof_map)
   {
     const auto * const dof_object = pr.first;
     const auto proc_id = dof_object->processor_id();
@@ -163,8 +197,8 @@ ComputeDynamicFrictionalForceLMMechanicalContact::communicateVelocities()
 
   const auto & lm_mesh = _mesh.getMesh();
 
-  auto action_functor = [this, &lm_mesh](const processor_id_type libmesh_dbg_var(pid),
-                                         const std::vector<Datum> & sent_data)
+  auto action_functor = [this, &lm_mesh, &dof_map](const processor_id_type libmesh_dbg_var(pid),
+                                                   const std::vector<Datum> & sent_data)
   {
     mooseAssert(pid != this->processor_id(), "We do not send messages to ourself here");
     for (auto & pr : sent_data)
@@ -173,21 +207,27 @@ ComputeDynamicFrictionalForceLMMechanicalContact::communicateVelocities()
       const auto * const dof_object =
           _nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
                  : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
-      mooseAssert(dof_object, "This should be non-null");
-      _dof_to_weighted_tangential_velocity[dof_object][0] += std::move(pr.second[0]);
-      _dof_to_weighted_tangential_velocity[dof_object][1] += std::move(pr.second[1]);
+      mooseAssert(dof_object, "This dof object should be non-null");
+      dof_map[dof_object][0] += std::move(pr.second[0]);
+      dof_map[dof_object][1] += std::move(pr.second[1]);
     }
   };
 
   TIMPI::push_parallel_vector_data(_communicator, push_data, action_functor);
-#endif
 }
+#endif
 
 void
 ComputeDynamicFrictionalForceLMMechanicalContact::post()
 {
   ComputeDynamicWeightedGapLMMechanicalContact::post();
-  communicateVelocities();
+
+#ifdef MOOSE_SPARSE_AD
+  communicateVelocities(_dof_to_weighted_tangential_velocity);
+
+  if (_has_friction_function)
+    communicateVelocities(_dof_to_real_tangential_velocity);
+#endif
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -220,7 +260,13 @@ ComputeDynamicFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
   ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(inactive_lm_nodes);
-  communicateVelocities();
+
+#ifdef MOOSE_SPARSE_AD
+  communicateVelocities(_dof_to_weighted_tangential_velocity);
+
+  if (_has_friction_function)
+    communicateVelocities(_dof_to_real_tangential_velocity);
+#endif
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -269,13 +315,17 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
     friction_lm_values[i] = (*_sys.currentSolution())(friction_dof_indices[i]);
     Moose::derivInsert(friction_lm_values[i].derivatives(), friction_dof_indices[i], 1.);
   }
+  // Normal pressure for friction model
+  _dof_to_normal_pressure[dof] = MetaPhysicL::raw_value(contact_pressure);
 
   // Get normalized c and c_t values (if normalization specified
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
   // Compute the friction coefficient (constant or function)
-  ADReal mu_ad = computeFrictionValue(contact_pressure, *tangential_vel[0], *tangential_vel[1]);
+  ADReal mu_ad = computeFrictionValue(_dof_to_old_normal_pressure[dof],
+                                      _dof_to_old_real_tangential_velocity[dof][0],
+                                      _dof_to_old_real_tangential_velocity[dof][1]);
 
   ADReal dof_residual;
   ADReal dof_residual_dir;
@@ -346,12 +396,16 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
 
+  // Normal pressure for friction model
+  _dof_to_normal_pressure[dof] = MetaPhysicL::raw_value(contact_pressure);
+
   // Get normalized c and c_t values (if normalization specified
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
   // Compute the friction coefficient (constant or function)
-  ADReal mu_ad = computeFrictionValue(contact_pressure, tangential_vel, ADReal(0.0));
+  ADReal mu_ad = computeFrictionValue(
+      _dof_to_old_normal_pressure[dof], _dof_to_old_real_tangential_velocity[dof][0], 0.0);
 
   ADReal dof_residual;
   // Primal-dual active set strategy (PDASS)
@@ -359,10 +413,10 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
     dof_residual = friction_lm_value;
   else
   {
-    const auto term_1 = std::max(_mu * (contact_pressure + c * weighted_gap),
+    const auto term_1 = std::max(mu_ad * (contact_pressure + c * weighted_gap),
                                  std::abs(friction_lm_value + c_t * tangential_vel * _dt)) *
                         friction_lm_value;
-    const auto term_2 = _mu * std::max(0.0, contact_pressure + c * weighted_gap) *
+    const auto term_2 = mu_ad * std::max(0.0, contact_pressure + c * weighted_gap) *
                         (friction_lm_value + c_t * tangential_vel * _dt);
 
     dof_residual = term_1 - term_2;
@@ -378,9 +432,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
 
 ADReal
 ComputeDynamicFrictionalForceLMMechanicalContact::computeFrictionValue(
-    const ADReal & contact_pressure,
-    const ADReal & tangential_vel,
-    const ADReal & tangential_vel_dir)
+    const ADReal & contact_pressure, const Real & tangential_vel, const Real & tangential_vel_dir)
 {
   // TODO: Introduce temperature dependence in the function. Do this when we have an example.
   ADReal mu_ad;

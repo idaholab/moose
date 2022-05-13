@@ -446,15 +446,15 @@ offset = 0.00
 
 [Executioner]
   type = Transient
-  end_time = .05
+  end_time = .075
   dt = .025
   dtmin = .001
   solve_type = 'PJFNK'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu       NONZERO               1e-14'
-  nl_rel_tol = 5e-13
-  nl_abs_tol = 5e-13
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = ' lu       superlu_dist               NONZERO               1e-14'
+  nl_rel_tol = 1e-13
+  nl_abs_tol = 1e-13
   line_search = 'basic'
   [TimeIntegrator]
     type = NewmarkBeta
