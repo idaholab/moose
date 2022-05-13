@@ -123,6 +123,7 @@
     n_exponent = 2
     activation_energy = 0
     block = inner
+    internal_solve_output_on = never
   [../]
 
   [./outer_stressstress]
