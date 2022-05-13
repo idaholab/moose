@@ -127,9 +127,6 @@ OptimizeSolve::taoSolve()
   // Set matrix-free version of the Hessian function
   ierr = MatCreateShell(_my_comm.get(), _ndof, _ndof, _ndof, _ndof, this, &_hessian);
   CHKERRQ(ierr);
-  // Define Hessian-vector multiplication routine
-  ierr = MatShellSetOperation(_hessian, MATOP_MULT, (void (*)(void))applyHessianWrapper);
-  CHKERRQ(ierr);
   // Link matrix-free Hessian to Tao
   ierr = TaoSetHessianRoutine(_tao, _hessian, _hessian, hessianFunctionWrapper, this);
   CHKERRQ(ierr);
@@ -261,20 +258,13 @@ OptimizeSolve::objectiveAndGradientFunctionWrapper(
 PetscErrorCode
 OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat /*hessian*/, Mat /*pc*/, void * ctx)
 {
-  // this will need to set the real parameters (Vec x) on the solver (see ln 250) so that the
-  // current parameter can be used in the applyHessianWrapper.  This is not important for force
-  // inversion because the hessian does not change.  This will be important for material
-  // inversion.
-
+  // Define Hessian-vector multiplication routine
   auto * solver = static_cast<OptimizeSolve *>(ctx);
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
   *solver->_parameters = param;
-  auto n = solver->_ndof;
-  auto comm = solver->_my_comm.get();
-  MatCreateShell(
-      comm, n, n, n, n, ctx, &(solver->_hessian)); // need to fix two of the n's for parallel
-  MatShellSetOperation(
+  PetscErrorCode ierr = MatShellSetOperation(
       solver->_hessian, MATOP_MULT, (void (*)(void))OptimizeSolve::applyHessianWrapper);
+  CHKERRQ(ierr);
   return 0;
 }
 
@@ -290,31 +280,6 @@ OptimizeSolve::applyHessianWrapper(Mat H, Vec s, Vec Hs)
 }
 
 PetscErrorCode
-OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVector<Number> & Hs)
-{
-
-  //  if (!_problem.hasMultiApps(EXEC_HOMOGENEOUS_FORWARD))
-  //    mooseError("Hessian based optimization algorithms require a sub-app with:\n"
-  //               "   execute_on = HOMOGENEOUS_FORWARD");
-
-  // What happens for material inversion when the Hessian
-  // is dependent on the parameters? Deal with it later???
-  // see notes on how this needs to change for Material inversion
-  _form_function->updateParameters(s);
-  if (!_problem.execMultiApps(EXEC_HOMOGENEOUS_FORWARD))
-    mooseError("Forward solve multiapp failed!");
-  _obj_iterate++;
-
-  _form_function->setMisfitToSimulatedValues();
-  if (!_problem.execMultiApps(EXEC_ADJOINT))
-    mooseError("Adjoint solve multiapp failed!");
-  _grad_iterate++;
-  _form_function->computeGradient(Hs);
-  _hess_iterate++;
-  return 0;
-}
-
-PetscErrorCode
 OptimizeSolve::variableBoundsWrapper(Tao tao, Vec /*xl*/, Vec /*xu*/, void * ctx)
 {
   auto * solver = static_cast<OptimizeSolve *>(ctx);
@@ -327,9 +292,12 @@ Real
 OptimizeSolve::objectiveFunction()
 {
   _form_function->updateParameters(*_parameters.get());
+  _problem.execute(EXEC_FORWARD);
   bool multiapp_passed = true;
   if (!_problem.execMultiApps(EXEC_FORWARD))
     multiapp_passed = false;
+  if (_solve_on.contains(EXEC_FORWARD))
+    _inner_solve->solve();
 
   _obj_iterate++;
   return _form_function->computeAndCheckObjective(multiapp_passed);
@@ -339,11 +307,43 @@ void
 OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 {
   _form_function->updateParameters(*_parameters.get());
+  _problem.execute(EXEC_ADJOINT);
   if (!_problem.execMultiApps(EXEC_ADJOINT))
     mooseError("Adjoint solve multiapp failed!");
-
+  if (_solve_on.contains(EXEC_ADJOINT))
+    _inner_solve->solve();
   _grad_iterate++;
   _form_function->computeGradient(gradient);
+}
+
+PetscErrorCode
+OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVector<Number> & Hs)
+{
+  // What happens for material inversion when the Hessian
+  // is dependent on the parameters? Deal with it later???
+  // see notes on how this needs to change for Material inversion
+  if (!_problem.hasMultiApps(EXEC_HOMOGENEOUS_FORWARD))
+    mooseError("Hessian based optimization algorithms require a sub-app with:\n"
+               "   execute_on = HOMOGENEOUS_FORWARD");
+  _form_function->updateParameters(s);
+
+  _problem.execute(EXEC_HOMOGENEOUS_FORWARD);
+  if (!_problem.execMultiApps(EXEC_HOMOGENEOUS_FORWARD))
+    mooseError("Homogeneous forward solve multiapp failed!");
+  if (_solve_on.contains(EXEC_HOMOGENEOUS_FORWARD))
+    _inner_solve->solve();
+
+  _form_function->setMisfitToSimulatedValues();
+
+  _problem.execute(EXEC_ADJOINT);
+  if (!_problem.execMultiApps(EXEC_ADJOINT))
+    mooseError("Adjoint solve multiapp failed!");
+  if (_solve_on.contains(EXEC_ADJOINT))
+    _inner_solve->solve();
+
+  _form_function->computeGradient(Hs);
+  _hess_iterate++;
+  return 0;
 }
 
 PetscErrorCode
