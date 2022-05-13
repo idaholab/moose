@@ -147,14 +147,10 @@ private:
   BoundingBox _bounding_box;
 
   /// Class attributes useful for range-checking
-  /// Number of elements (for reading a CSV file with properties ordered by elements)
-  const unsigned int _nelem;
   /// Number of properties in a row
   const unsigned int _nprop;
   /// Number of grains (for reading a CSV file with properties ordered by grains)
   const unsigned int _nvoronoi;
   /// Number of blocks (for reading a CSV file with properties ordered by blocks)
   const unsigned int _nblock;
-  /// Number of nodes (for reading a CSV file with properties ordered by nodes)
-  const unsigned int _nnode;
 };
