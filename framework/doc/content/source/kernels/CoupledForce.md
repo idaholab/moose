@@ -2,8 +2,8 @@
 
 ## Description
 
-`CoupledForce` (and the AD version, `ADCoupledForce`) implements a source term within the domain $\Omega$ proportional to a coupled
-variable:
+`CoupledForce` (and the AD version, `ADCoupledForce`) implements a source term
+within the domain $\Omega$ proportional to a coupled variable:
 \begin{equation}
 \underbrace{-\sigma v}_{\textrm{CoupledForce}} + \sum_{i=1}^n \beta_i = 0 \in \Omega,
 \end{equation}

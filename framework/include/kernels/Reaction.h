@@ -14,7 +14,6 @@
 /**
  *  Implements a simple consuming reaction term with weak form $(\\psi_i, \\lambda u_h)$.
  */
-
 template <bool is_ad>
 class ReactionTempl : public GenericKernel<is_ad>
 {

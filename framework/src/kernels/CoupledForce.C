@@ -52,7 +52,10 @@ CoupledForceTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // This function will never be called for the AD version. But because C++ does
   // not support an optional function declaration based on a template parameter,
-  // we must keep this this template for all cases.
+  // we must keep this template for all cases.
+  mooseAssert(!is_ad,
+              "In ADCoupledForce, computeQpJacobian should not be called. Check computeJacobian "
+              "implementation.");
   if (jvar == _v_var)
     return -_coef * _phi[_j][_qp] * _test[_i][_qp];
   return 0.0;
