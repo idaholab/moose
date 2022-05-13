@@ -58,8 +58,6 @@
     coefficient = 10e-22
     n_exponent = 2
     activation_energy = 0
-    initial_guess = 0
-    failure_step = 2
   []
 []
 

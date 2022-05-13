@@ -58,6 +58,8 @@
     coefficient = 10e-22
     n_exponent = 2
     activation_energy = 0
+    internal_solve_full_iteration_history = true
+    internal_solve_output_on = always
   []
 []
 
@@ -66,7 +68,7 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   line_search = none
-  num_steps = 2
+  num_steps = 1
 []
 
 [Outputs]
