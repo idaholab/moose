@@ -9,14 +9,14 @@
 
 #include "CoupledForce.h"
 
-#include "MooseVariable.h"
-
 registerMooseObject("MooseApp", CoupledForce);
+registerMooseObject("MooseApp", ADCoupledForce);
 
+template <bool is_ad>
 InputParameters
-CoupledForce::validParams()
+CoupledForceTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
 
   params.addClassDescription("Implements a source term proportional to the value of a coupled "
                              "variable. Weak form: $(\\psi_i, -\\sigma v)$.");
@@ -27,30 +27,39 @@ CoupledForce::validParams()
   return params;
 }
 
-CoupledForce::CoupledForce(const InputParameters & parameters)
-  : Kernel(parameters), _v_var(coupled("v")), _v(coupledValue("v")), _coef(getParam<Real>("coef"))
+template <bool is_ad>
+CoupledForceTempl<is_ad>::CoupledForceTempl(const InputParameters & parameters)
+  : GenericKernel<is_ad>(parameters),
+    _v_var(coupled("v")),
+    _v(this->template coupledGenericValue<is_ad>("v")),
+    _coef(this->template getParam<Real>("coef"))
 {
   if (_var.number() == _v_var)
-    mooseError("Coupled variable 'v' needs to be different from 'variable' with CoupledForce, "
-               "consider using the CoefReaction kernel or something similar");
+    mooseError("Coupled variable 'v' needs to be different from 'variable' with CoupledForce / "
+               "ADCoupledForce, consider using the CoefReaction kernel or something similar");
 }
 
-Real
-CoupledForce::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+CoupledForceTempl<is_ad>::computeQpResidual()
 {
   return -_coef * _v[_qp] * _test[_i][_qp];
 }
 
+template <bool is_ad>
 Real
-CoupledForce::computeQpJacobian()
+CoupledForceTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  return 0;
-}
-
-Real
-CoupledForce::computeQpOffDiagJacobian(unsigned int jvar)
-{
+  // This function will never be called for the AD version. But because C++ does
+  // not support an optional function declaration based on a template parameter,
+  // we must keep this template for all cases.
+  mooseAssert(!is_ad,
+              "In ADCoupledForce, computeQpJacobian should not be called. Check computeJacobian "
+              "implementation.");
   if (jvar == _v_var)
     return -_coef * _phi[_j][_qp] * _test[_i][_qp];
   return 0.0;
 }
+
+template class CoupledForceTempl<false>;
+template class CoupledForceTempl<true>;

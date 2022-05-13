@@ -10,11 +10,13 @@
 #include "Reaction.h"
 
 registerMooseObject("MooseApp", Reaction);
+registerMooseObject("MooseApp", ADReaction);
 
+template <bool is_ad>
 InputParameters
-Reaction::validParams()
+ReactionTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription(
       "Implements a simple consuming reaction term with weak form $(\\psi_i, \\lambda u_h)$.");
   params.addParam<Real>(
@@ -22,19 +24,31 @@ Reaction::validParams()
   return params;
 }
 
-Reaction::Reaction(const InputParameters & parameters)
-  : Kernel(parameters), _rate(getParam<Real>("rate"))
+template <bool is_ad>
+ReactionTempl<is_ad>::ReactionTempl(const InputParameters & parameters)
+  : GenericKernel<is_ad>(parameters), _rate(this->template getParam<Real>("rate"))
 {
 }
 
-Real
-Reaction::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+ReactionTempl<is_ad>::computeQpResidual()
 {
   return _test[_i][_qp] * _rate * _u[_qp];
 }
 
+template <bool is_ad>
 Real
-Reaction::computeQpJacobian()
+ReactionTempl<is_ad>::computeQpJacobian()
 {
+  // This function will never be called for the AD version. But because C++ does
+  // not support an optional function declaration based on a template parameter,
+  // we must keep this template for all cases.
+  mooseAssert(!is_ad,
+              "In ADReaction, computeQpJacobian should not be called. Check computeJacobian "
+              "implementation.");
   return _test[_i][_qp] * _rate * _phi[_j][_qp];
 }
+
+template class ReactionTempl<false>;
+template class ReactionTempl<true>;

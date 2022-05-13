@@ -9,27 +9,35 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 
 /**
- * Simple class to demonstrate off diagonal Jacobian contributions.
+ * Implements a source term proportional to the value of a coupled variable. Weak form: $(\\psi_i,
+ * -\\sigma v)$.
  */
-class CoupledForce : public Kernel
+template <bool is_ad>
+class CoupledForceTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  CoupledForce(const InputParameters & parameters);
+  CoupledForceTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
-
-  virtual Real computeQpJacobian() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
+  usingGenericKernelMembers;
+
 private:
+  /// Coupled variable number
   unsigned int _v_var;
-  const VariableValue & _v;
+  /// Coupled variable
+  const GenericVariableValue<is_ad> & _v;
+  /// Multiplier for the coupled force term
   Real _coef;
 };
+
+typedef CoupledForceTempl<false> CoupledForce;
+typedef CoupledForceTempl<true> ADCoupledForce;

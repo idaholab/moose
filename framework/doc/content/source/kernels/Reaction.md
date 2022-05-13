@@ -1,10 +1,10 @@
-# Reaction
+# Reaction / ADReaction
 
 ## Description
 
-`Reaction` implements a simple first-order reaction term where the rate of
-reaction is directly proportional to the governing variable $u$. Its weak form
-is given by
+`Reaction` (and its automatic differentiation version, `ADReaction`) implements
+a simple first-order reaction term where the rate of reaction is directly proportional
+to the governing variable $u$. Its weak form is given by
 \begin{equation}
 (\psi_i, \lambda u_h)
 \end{equation}
@@ -21,9 +21,8 @@ parameters. An example block is shown below for a diffusion-reaction equation:
 !listing test/tests/fvkernels/fv_coupled_var/coupled.i block=Kernels
 
 !alert note
-There is no AD (automatic differentiation) or FV (finite volume) version of `Reaction`.
-If you wish to use AD / FV, use [ADCoupledForce](/ADCoupledForce.md) /
-[FVCoupledForce](/FVCoupledForce.md) respectively.
+There is no FV (finite volume) version of `Reaction`. If you wish to use FV, use
+[/FVCoupledForce.md].
 
 !syntax parameters /Kernels/Reaction
 

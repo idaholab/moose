@@ -1,9 +1,9 @@
-# CoupledForce
+# CoupledForce / ADCoupledForce
 
 ## Description
 
-`CoupledForce` implements a source term within the domain $\Omega$ proportional to a coupled
-variable:
+`CoupledForce` (and the AD version, `ADCoupledForce`) implements a source term
+within the domain $\Omega$ proportional to a coupled variable:
 \begin{equation}
 \underbrace{-\sigma v}_{\textrm{CoupledForce}} + \sum_{i=1}^n \beta_i = 0 \in \Omega,
 \end{equation}
@@ -19,7 +19,7 @@ R_i(u_h) = (\psi_i, -\sigma v) \quad \forall \psi_i,
 where $\psi_i$ are the test functions and $u_h \in \mathcal{S}^h$
 is the finite element solution of the weak formulation.
 
-The corresponding Jacobian is
+The corresponding Jacobian (used in `CoupledForce`) is
 \begin{equation}
 \frac{\partial R_i(u_h)}{\partial u_j} = (\psi_i, -\sigma \phi_j).
 \end{equation}

@@ -884,10 +884,17 @@
     type = 'RunException'
     input = 'coupling_itself.i'
     expect_err = "Coupled variable 'v' needs to be different from 'variable' with CoupledForce"
-
     requirement = 'The system shall report an error when an attempt is made to couple a variable with itself.'
     issues = '#10398'
   [../]
+  [coupling_itself_ad]
+    type = 'RunException'
+    input = 'coupling_itself.i'
+    cli_args = 'Kernels/coupled/type=ADCoupledForce'
+    expect_err = "Coupled variable 'v' needs to be different from 'variable' with CoupledForce / ADCoupledForce"
+    requirement = 'The system shall report an error when an attempt is made to couple a variable with itself in coupled force term using automated differentiation.'
+    issues = '#18214'
+  []
 
   [./missing_input]
     type = 'RunException'
