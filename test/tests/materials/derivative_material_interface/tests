@@ -121,8 +121,44 @@
     []
   []
 
+  [bad_evaluation_jit]
+    requirement = 'The system shall handle a bad evaluation when using JIT by'
+    [nan]
+      type = 'RunApp'
+      cli_args = '--no-trap-fpe Materials/F/enable_jit=true'
+      input = 'bad_evaluation.i'
+      recover = false
+      detail = 'passing a silent nan.'
+    []
+    [warning]
+      type = 'RunApp'
+      input = 'bad_evaluation.i'
+      expect_out = 'In F: DerivativeParsedMaterial function evaluation encountered an error'
+      cli_args = '--no-trap-fpe Materials/F/enable_jit=true Materials/F/evalerror_behavior=nan_warning'
+      recover = false
+      detail = 'throwing a warning and passing a silent nan.'
+      allow_warnings = true
+    []
+    [error]
+      type = 'RunException'
+      input = 'bad_evaluation.i'
+      expect_err = 'In F: DerivativeParsedMaterial function evaluation encountered an error'
+      cli_args = '--no-trap-fpe Materials/F/enable_jit=true Materials/F/evalerror_behavior=error'
+      recover = false
+      detail = 'throwing an error.'
+    []
+    [exception]
+      type = 'RunApp'
+      input = 'bad_evaluation.i'
+      expect_out = 'Cutting timestep'
+      cli_args = '--no-trap-fpe Materials/F/enable_jit=true Materials/F/evalerror_behavior=exception'
+      recover = false
+      detail = 'throwing an exception.'
+    []
+  []
+
   [postprocessor_coupling]
-    requirement = 'The system shall be capable of couplimng postprocessor values in'
+    requirement = 'The system shall be capable of coupling postprocessor values in'
     [parsed_material]
       type = 'Exodiff'
       input = postprocessors.i
@@ -244,37 +280,34 @@
     [nan]
       type = 'RunApp'
       input = 'ad_bad_evaluation.i'
+      cli_args = '--no-trap-fpe'
       recover = false
       detail = 'passing a silent nan.'
-      skip = 'not supported yet'
     []
     [warning]
       type = 'RunApp'
       input = 'ad_bad_evaluation.i'
       expect_out = 'In F: DerivativeParsedMaterial function evaluation encountered an error'
-      cli_args = 'Materials/F/evalerror_behavior=nan_warning'
+      cli_args = '--no-trap-fpe Materials/F/evalerror_behavior=nan_warning'
       recover = false
       detail = 'throwing a warning and passing a silent nan.'
       allow_warnings = true
-      skip = 'not supported yet'
     []
     [error]
       type = 'RunException'
       input = 'ad_bad_evaluation.i'
       expect_err = 'In F: DerivativeParsedMaterial function evaluation encountered an error'
-      cli_args = 'Materials/F/evalerror_behavior=error'
+      cli_args = '--no-trap-fpe Materials/F/evalerror_behavior=error'
       recover = false
       detail = 'throwing an error.'
-      skip = 'not supported yet'
     []
     [exception]
       type = 'RunApp'
       input = 'ad_bad_evaluation.i'
       expect_out = 'Cutting timestep'
-      cli_args = 'Materials/F/evalerror_behavior=exception'
+      cli_args = '--no-trap-fpe Materials/F/evalerror_behavior=exception'
       recover = false
       detail = 'throwing an exception.'
-      skip = 'not supported yet'
     []
   []
 
