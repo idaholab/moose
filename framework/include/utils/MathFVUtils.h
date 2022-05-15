@@ -163,8 +163,6 @@ enum class InterpMethod
   Average,
   /// (gc*elem+(1-gc)*neighbor)+gradient*(rf-rf')
   SkewCorrectedAverage,
-  /// Extended stencil using the vertex values
-  VertexBased,
   /// weighted
   Upwind,
   // Rhie-Chow

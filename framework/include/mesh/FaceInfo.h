@@ -190,11 +190,6 @@ public:
   processor_id_type processor_id() const { return _processor_id; }
 
   /**
-   * @return the vertices attached to this face
-   */
-  const std::vector<const Node *> & vertices() const { return _vertices; }
-
-  /**
    * @return a unique identifier of this face object. It's formed using the element id and the
    * element's side that corresponds to this face
    */
@@ -263,6 +258,4 @@ private:
 
   /// the set of boundary ids that this face is associated with
   std::set<BoundaryID> _boundary_ids;
-
-  std::vector<const Node *> _vertices;
 };

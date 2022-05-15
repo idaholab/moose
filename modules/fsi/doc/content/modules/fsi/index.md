@@ -11,8 +11,8 @@ provides a simple approach for implementing even advanced capabilities:
 
 This module currently is capable of simulating fluid-structure interaction behavior
 using an acoustic formulation for the fluid. More information about this physics is
- available [here](/fsi_acoustics.md). Efforts are underway to add more capabilities such as Arbitrary
-Lagrangian Eulerian to this module.
+ available [here](/fsi_acoustics.md) and in [!cite](dhulipala2022acousticfsi).
+Efforts are underway to add more capabilities such as Arbitrary Lagrangian Eulerian to this module.
 
 ## Explore the Capabilities
 

@@ -475,10 +475,10 @@ public:
                           const ADReal & elem_value) const;
 
   /**
-   * Compute or retrieve from cache the solution value on an internal face, using linear
-   * interpolation or interpolating from vertex values, depending on the stencil.
+   * Compute or retrieve from cache the solution value on an internal face using linear
+   * interpolation.
    * @param fi The face information object
-   * @return the face value on the internal face associated with \p fi
+   * @return The face value on the internal face associated with \p fi
    */
   const ADReal & getInternalFaceValue(const FaceInfo & fi,
                                       const bool correct_skewness = false) const;
@@ -544,15 +544,6 @@ private:
    * @return the extrapolated value on the boundary face associated with \p fi
    */
   const ADReal & getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const;
-
-  /**
-   * Get the finite volume solution interpolated to \p vertex. This interpolation is done doing a
-   * distance-weighted average of neighboring cell center values
-   * @param vertex The mesh vertex we want to interpolate the finite volume solution to
-   * @return The interpolated vertex value with derivative information from the degrees of freedom
-   * associated with the neighboring cell centers
-   */
-  const ADReal & getVertexValue(const Node & vertex) const;
 
 public:
   const MooseArray<OutputType> & nodalValueArray() const override
@@ -681,7 +672,7 @@ protected:
   /// Whether to cache cell gradients
   const bool _cache_cell_gradients;
 
-  /// Decides if a vertex-based, average or skewed corrected average is used for the
+  /// Decides if an average or skewed corrected average is used for the
   /// face interpolation. Other options are not taken into account here,
   /// but at higher, kernel-based levels.
   Moose::FV::InterpMethod _face_interp_method;
@@ -696,9 +687,6 @@ private:
 
   /// A cache for storing gradients on faces
   mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_grad;
-
-  /// A cache that maps from mesh vertices to interpolated finite volume solutions at those vertices
-  mutable std::unordered_map<const Node *, ADReal> _vertex_to_value;
 };
 
 template <typename OutputType>

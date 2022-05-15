@@ -14,7 +14,6 @@
     family = MONOMIAL
     fv = true
     type = MooseVariableFVReal
-    face_interp_method = 'vertex-based'
   []
 []
 
