@@ -30,6 +30,9 @@ associateSyntax(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("TriSubChannelBuildMeshAction", "TriSubChannelMesh");
   registerSyntax("AddMeshGeneratorAction", "TriSubChannelMesh/*");
+
+  registerSyntax("TriInterWrapperBuildMeshAction", "TriInterWrapperMesh");
+  registerSyntax("AddMeshGeneratorAction", "TriInterWrapperMesh/*");
 }
 
 }

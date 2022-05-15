@@ -483,7 +483,7 @@ InterWrapper1PhaseProblem::computeMdot(int iblock)
         auto volume = dz * (*_S_flow_soln)(node_in);
         auto time_term = _TR * ((*_rho_soln)(node_out)-_rho_soln->old(node_out)) * volume / _dt;
         // Wij positive out of i into j;
-        auto mdot_out = (*_mdot_soln)(node_in) - (*_SumWij_soln)(node_out)-time_term;
+        auto mdot_out = (*_mdot_soln)(node_in) - (*_SumWij_soln)(node_out) -time_term;
         if (mdot_out < 0)
         {
           _console << "Wij = : " << _Wij << "\n";
