@@ -144,7 +144,7 @@
     use_substep_integration_error = true
 
     stress_input_window_low_failure = WARN
-    stress_input_window_high_failure = WARN
+    stress_input_window_high_failure = ERROR
     cell_input_window_high_failure = ERROR
     cell_input_window_low_failure = ERROR
     wall_input_window_low_failure = ERROR
