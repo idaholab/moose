@@ -15,6 +15,7 @@ public:
 
 protected:
   /// Distance between the neighbor fuel assemblies, assembly pitch
+  /// Distance between the neighbor fuel assemblies, assembly pitch
   Real _assembly_pitch;
   /// Sides of the assemblies in the x and y direction
   Real _assembly_side_x;

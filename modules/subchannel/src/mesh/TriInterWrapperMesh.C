@@ -1,25 +1,23 @@
-#include "TriSubChannelMesh.h"
+#include "TriInterWrapperMesh.h"
 #include <cmath>
 #include "libmesh/node.h"
 
-registerMooseObject("SubChannelApp", TriSubChannelMesh);
+registerMooseObject("SubChannelApp", TriInterWrapperMesh);
 
 InputParameters
-TriSubChannelMesh::validParams()
+TriInterWrapperMesh::validParams()
 {
-  InputParameters params = SubChannelMesh::validParams();
+  InputParameters params = InterWrapperMesh::validParams();
   return params;
 }
 
-TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params) : SubChannelMesh(params) {}
+TriInterWrapperMesh::TriInterWrapperMesh(const InputParameters & params) : InterWrapperMesh(params) {}
 
-TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
-  : SubChannelMesh(other_mesh),
+TriInterWrapperMesh::TriInterWrapperMesh(const TriInterWrapperMesh & other_mesh)
+  : InterWrapperMesh(other_mesh),
     _n_rings(other_mesh._n_rings),
     _n_channels(other_mesh._n_channels),
     _flat_to_flat(other_mesh._flat_to_flat),
-    _dwire(other_mesh._dwire),
-    _hwire(other_mesh._hwire),
     _duct_to_rod_gap(other_mesh._duct_to_rod_gap),
     _nodes(other_mesh._nodes),
     _duct_nodes(other_mesh._duct_nodes),
@@ -34,7 +32,7 @@ TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
     _rods_in_rings(other_mesh._rods_in_rings),
     _subchannel_to_rod_map(other_mesh._subchannel_to_rod_map),
     _gap_to_rod_map(other_mesh._gap_to_rod_map),
-    _nrods(other_mesh._nrods),
+    _n_assemblies(other_mesh._n_assemblies),
     _n_gaps(other_mesh._n_gaps),
     _subch_type(other_mesh._subch_type),
     _gap_type(other_mesh._gap_type),
@@ -45,13 +43,13 @@ TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
 }
 
 std::unique_ptr<MooseMesh>
-TriSubChannelMesh::safeClone() const
+TriInterWrapperMesh::safeClone() const
 {
-  return libmesh_make_unique<TriSubChannelMesh>(*this);
+  return libmesh_make_unique<TriInterWrapperMesh>(*this);
 }
 
 unsigned int
-TriSubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
+TriInterWrapperMesh::getSubchannelIndexFromPoint(const Point & p) const
 {
   Real distance0 = 1.0e+8;
   Real distance1;
@@ -72,35 +70,35 @@ TriSubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
 }
 
 unsigned int
-TriSubChannelMesh::channelIndex(const Point & /*point*/) const
+TriInterWrapperMesh::channelIndex(const Point & /*point*/) const
 {
   // FIXME:
   return 0;
 }
 
 void
-TriSubChannelMesh::buildMesh()
+TriInterWrapperMesh::buildMesh()
 {
 }
 
 unsigned int
-TriSubChannelMesh::getPinIndexFromPoint(const Point & /*p*/) const
+TriInterWrapperMesh::getPinIndexFromPoint(const Point & /*p*/) const
 {
   // TODO: implement routine that returns rod index given a point in 3D space
   return 0;
 }
 
 unsigned int
-TriSubChannelMesh::pinIndex(const Point & /*p*/) const
+TriInterWrapperMesh::pinIndex(const Point & /*p*/) const
 {
   // TODO: implement routine that returns rod index given a point in 3D space
   return 0;
 }
 
 void
-TriSubChannelMesh::rodPositions(std::vector<Point> & positions,
+TriInterWrapperMesh::rodPositions(std::vector<Point> & positions,
                                 unsigned int nrings,
-                                Real pitch,
+                                Real assembly_pitch,
                                 Point center)
 {
   /// Defining parameters
@@ -122,11 +120,11 @@ TriSubChannelMesh::rodPositions(std::vector<Point> & positions,
     {
       k = k + 1;
       theta1 = fmod(theta + 1.0e-10, pi / 3.0);
-      distance = std::sqrt((pow(i * pitch, 2) + pow(theta1 / dtheta * pitch, 2) -
-                            2.0 * i * pitch * (theta1 / dtheta * pitch) * std::cos(pi / 3.0)));
+      distance = std::sqrt((pow(i * assembly_pitch, 2) + pow(theta1 / dtheta * assembly_pitch, 2) -
+                            2.0 * i * assembly_pitch * (theta1 / dtheta * assembly_pitch) * std::cos(pi / 3.0)));
       theta_corrected = std::acos(
-          1.0 / (i * pitch) / distance / 2.0 *
-          (std::pow(i * pitch, 2) + std::pow(distance, 2) - std::pow(theta1 / dtheta * pitch, 2)));
+          1.0 / (i * assembly_pitch) / distance / 2.0 *
+          (std::pow(i * assembly_pitch, 2) + std::pow(distance, 2) - std::pow(theta1 / dtheta * assembly_pitch, 2)));
       if (theta1 < 1.0e-6)
       {
         theta_corrected = theta;
@@ -152,7 +150,7 @@ TriSubChannelMesh::rodPositions(std::vector<Point> & positions,
 }
 
 void
-TriSubChannelMesh::setChannelToDuctMaps(const std::vector<Node *> & duct_nodes)
+TriInterWrapperMesh::setChannelToDuctMaps(const std::vector<Node *> & duct_nodes)
 {
   const Real tol = 1e-10;
   for (size_t i = 0; i < duct_nodes.size(); i++)

@@ -329,7 +329,6 @@ QuadInterWrapperMeshGenerator::generate()
   sch_mesh->_assembly_pitch = _assembly_pitch;
   sch_mesh->_assembly_side_x = _assembly_side_x;
   sch_mesh->_assembly_side_y = _assembly_side_y;
-
   sch_mesh->_heated_length = _heated_length;
   sch_mesh->_unheated_length_exit = _unheated_length_exit;
   sch_mesh->_z_grid = _z_grid;
