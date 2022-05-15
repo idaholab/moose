@@ -142,7 +142,7 @@
     max_inelastic_increment = 0.0001
 
     stress_input_window_low_failure = WARN
-    stress_input_window_high_failure = WARN
+    stress_input_window_high_failure = ERROR
     cell_input_window_high_failure = ERROR
     cell_input_window_low_failure = ERROR
     wall_input_window_low_failure = ERROR

@@ -36,47 +36,46 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
   params.addParam<MaterialPropertyName>("environmental_factor",
                                         "Optional coupled environmental factor");
 
-  // Forbid extrapolation of cell, wall, and old strain input parameters
-  MooseEnum error_limit_behavior("ERROR WARN IGNORE EXCEPTION DONTHING USELIMIT", "EXCEPTION");
+  MooseEnum error_lower_limit_behavior("ERROR WARN IGNORE EXCEPTION DONTHING USELIMIT",
+                                       "EXCEPTION");
+  // Only allow ERROR and EXCEPTION on upper bounds
+  MooseEnum error_upper_limit_behavior("ERROR EXCEPTION", "EXCEPTION");
   params.addParam<MooseEnum>(
       "cell_input_window_low_failure",
-      error_limit_behavior,
+      error_lower_limit_behavior,
       "What to do if cell dislocation concentration is outside the lower global "
       "window of applicability.");
   params.addParam<MooseEnum>(
       "cell_input_window_high_failure",
-      error_limit_behavior,
+      error_upper_limit_behavior,
       "What to do if cell dislocation concentration is outside the upper global "
       "window of applicability.");
   params.addParam<MooseEnum>("wall_input_window_low_failure",
-                             error_limit_behavior,
+                             error_lower_limit_behavior,
                              "What to do if wall dislocation concentration is outside the "
                              "lower global window of applicability.");
   params.addParam<MooseEnum>("wall_input_window_high_failure",
-                             error_limit_behavior,
+                             error_upper_limit_behavior,
                              "What to do if wall dislocation concentration is outside the "
                              "upper global window of applicability.");
   params.addParam<MooseEnum>(
       "old_strain_input_window_low_failure",
-      error_limit_behavior,
+      error_lower_limit_behavior,
       "What to do if old strain is outside the lower global window of applicability.");
   params.addParam<MooseEnum>(
       "old_strain_input_window_high_failure",
-      error_limit_behavior,
+      error_upper_limit_behavior,
       "What to do if old strain is outside the upper global window of applicability.");
 
   MooseEnum extrapolated_lower_limit_behavior(
       "ERROR WARN IGNORE EXCEPTION DONOTHING USELIMIT EXTRAPOLATE", "EXTRAPOLATE");
-  // Forbid extrapolation of on high end of limit
-  MooseEnum extrapolated_upper_limit_behavior("ERROR WARN IGNORE EXCEPTION DONOTHING USELIMIT",
-                                              "USELIMIT");
   params.addParam<MooseEnum>(
       "stress_input_window_low_failure",
       extrapolated_lower_limit_behavior,
       "What to do if stress is outside the lower global window of applicability.");
   params.addParam<MooseEnum>(
       "stress_input_window_high_failure",
-      extrapolated_upper_limit_behavior,
+      error_upper_limit_behavior,
       "What to do if stress is outside the upper global window of applicability.");
   params.addParam<MooseEnum>(
       "temperature_input_window_low_failure",
@@ -84,7 +83,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
       "What to do if temperature is outside the lower global window of applicability.");
   params.addParam<MooseEnum>(
       "temperature_input_window_high_failure",
-      extrapolated_upper_limit_behavior,
+      error_upper_limit_behavior,
       "What to do if temperature is outside the upper global window of applicability.");
   params.addParam<MooseEnum>(
       "environment_input_window_low_failure",
@@ -92,7 +91,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
       "What to do if environmental factor is outside the lower global window of applicability.");
   params.addParam<MooseEnum>(
       "environment_input_window_high_failure",
-      extrapolated_upper_limit_behavior,
+      error_upper_limit_behavior,
       "What to do if environmental factor is outside the upper global window of applicability.");
 
   params.addRequiredRangeCheckedParam<Real>(
@@ -625,9 +624,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
               // If input is within another tile's window of applicability, check to see if inputs
               // place us in that tile and ensure the two tiles are different in the dimension of
               // interest
-              if (areTilesNotIdentical(p, t, tt, in_index) &&
-                  input >= _input_limits[p][tt][in_index][0] &&
-                  input <= _input_limits[p][tt][in_index][1])
+              if (areTilesNotIdentical(p, t, tt, in_index) && checkInTile(p, tt))
               {
                 overlap = true;
 
