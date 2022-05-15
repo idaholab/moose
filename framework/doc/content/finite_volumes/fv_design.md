@@ -156,27 +156,9 @@ Gradient reconstruction is implemented using the Green-Gauss method, e.g.
 
 where $\phi_f$ is the value of the quantity of interest on the face and
 $\vec{S}_f$ is equal to the surface area times the outward normal,
-e.g. $\vec{S}_f = A\hat{n}$. The value of $\phi_f$ can be computed in a couple
-of ways. The first, which is the default in MOOSE, uses a compact stencil and
-does a simple linear interpolation between the neighboring cell center values to
-the face. The second uses an vertex-based extended stencil, where the face value is taken to
-be a weighted average of the face vertex values, which are in turn taken to be
-a weighted average of the cell centers neighboring the point. To use the
-vertex-based extended stencil method, you can specify your finite volume variable input block
-like the following:
-
-!listing extended-cartesian.i block=Variables
-
-On regular, orthogonal meshes both the compact and extended stencils have
-demonstrated second order convergence with respect to mesh refinement. On a
-non-orthogonal mesh test (see the
-[compact](non-orthogonal/advection-diffusion-reaction.i) and
-[extended](/extended-adr.i) input files) the compact stencil displays second
-order convergence while the vertex-based extended stencil drops a half order to 1.5 order
-convergence. On a [skewed mesh test](fv_adapt/steady-adapt.i) where skewness is introduced via
-unequal neighboring mesh refinement levels, the compact stencil maintains first
-order convergence. Additionally, a skewness-correction is available for the compact
-stencil which uses the following equation:
+e.g. $\vec{S}_f = A\hat{n}$. The value of $\phi_f$ can be computed using central differences
+with or without skewness-correction.
+The skewness-correction of the compact (central-difference) stencil can be expressed as:
 
 \begin{equation}
 \phi_f = \phi_{f'} + \nabla \phi_{f'} (\vec{r}_{f'}-\vec{r}_f),
@@ -192,8 +174,6 @@ comes with an additional computational cost in the system assembly process.
 Due to its reduced stencil size (smaller memory footprint for
 the Jacobian matrix), its reduced computational expense, and demonstrated
 convergence properties, we generally recommend use of the compact stencil. The
-vertex-based extended stencil is supposed to be more accurate [!cite](moukalled2016finite),
-so perhaps there is a bug in the implementation that needs to be found. The
 skewness-corrected stencil is demonstrated to be more accurate, however it
 considerably slows (a factor of approx. 2-3 depending on the caching options)
 down the assembly process due to the fact that additional face gradients need to be computed.

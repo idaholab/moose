@@ -31,11 +31,4 @@
     ad_indexing_type = 'global'
     issues = '#16963'
   []
-  [extended-cartesian]
-    type = Exodiff
-    input = extended-cartesian.i
-    exodiff = extended-cartesian_out.e
-    requirement = "The system shall be able to implement advection through an element based kernel, that leverages the system's ability to reconstruct gradients using an extended stencil based on point-neighbors, and demonstrate second order convergence in a cartesian coordinate system."
-    ad_indexing_type = 'global'
-  []
 []

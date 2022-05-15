@@ -50,7 +50,7 @@ MooseVariableFV<OutputType>::validParams()
       "Consequently an implicit solve is used to simultaneously solve for the adjoining cell "
       "center gradient and boundary face value(s).");
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  MooseEnum face_interp_method("average skewness-corrected vertex-based", "average");
+  MooseEnum face_interp_method("average skewness-corrected", "average");
   params.template addParam<MooseEnum>("face_interp_method",
                                       face_interp_method,
                                       "Switch that can select between face interpoaltion methods.");
@@ -117,8 +117,6 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
       _face_interp_method = Moose::FV::InterpMethod::Average;
     else if (interp_method == "skewness-corrected")
       _face_interp_method = Moose::FV::InterpMethod::SkewCorrectedAverage;
-    else if (interp_method == "vertex-based")
-      _face_interp_method = Moose::FV::InterpMethod::VertexBased;
   }
   else
     _face_interp_method = Moose::FV::InterpMethod::Average;
@@ -509,50 +507,6 @@ MooseVariableFV<OutputType>::getFluxBCs(const FaceInfo & fi) const
 }
 
 template <typename OutputType>
-const ADReal &
-MooseVariableFV<OutputType>::getVertexValue(const Node & vertex) const
-{
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("MooseVariableFV::getVertexValue only supported for global AD indexing");
-#endif
-
-  auto it = _vertex_to_value.find(&vertex);
-
-  if (it != _vertex_to_value.end())
-    return it->second;
-
-  // Returns a pair with the first being an iterator pointing to the key-value pair and the second a
-  // boolean denoting whether a new insertion took place
-  auto emplace_ret = _vertex_to_value.emplace(&vertex, 0);
-  mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
-  ADReal & value = emplace_ret.first->second;
-  ADReal numerator = 0, denominator = 0;
-
-  const auto node_elem_it = this->_mesh.nodeToElemMap().find(vertex.id());
-  mooseAssert(node_elem_it != this->_mesh.nodeToElemMap().end(), "Should have found the node");
-  const auto & connected_elems = node_elem_it->second;
-  const MeshBase & lm_mesh = this->_mesh.getMesh();
-
-  for (const auto elem_id : connected_elems)
-  {
-    const Elem * const elem = lm_mesh.elem_ptr(elem_id);
-    mooseAssert(elem, "If the elem ID exists, then the elem shouldn't be null");
-
-    if (this->hasBlocks(elem->subdomain_id()))
-    {
-      const auto & elem_value = getElemValue(elem);
-      auto distance = (vertex - elem->vertex_average()).norm();
-      numerator += elem_value / distance;
-      denominator += 1. / distance;
-    }
-  }
-
-  value = numerator / denominator;
-
-  return value;
-}
-
-template <typename OutputType>
 ADReal
 MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 {
@@ -634,25 +588,8 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
 
     value_pointer = &pr.first->second;
   }
-
   ADReal & value = *value_pointer;
-
-  if (_face_interp_method == Moose::FV::InterpMethod::VertexBased)
-  {
-    ADReal numerator = 0, denominator = 0;
-
-    for (const Node * const vertex : fi.vertices())
-    {
-      auto distance = (*vertex - fi.faceCentroid()).norm();
-
-      numerator += getVertexValue(*vertex) / distance;
-      denominator += 1. / distance;
-    }
-
-    value = numerator / denominator;
-  }
-  else
-    value = Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, correct_skewness));
+  value = Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, correct_skewness));
 
   return value;
 }
@@ -971,7 +908,6 @@ MooseVariableFV<OutputType>::clearCaches()
   _elem_to_grad.clear();
   _face_to_unc_grad.clear();
   _face_to_grad.clear();
-  _vertex_to_value.clear();
   _face_to_value.clear();
 }
 
@@ -1004,12 +940,7 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
   if (isExtrapolatedBoundaryFace(*fi).first)
     return getExtrapolatedBoundaryFaceValue(*fi);
   else if (isInternalFace(*fi))
-  {
-    if (_face_interp_method == Moose::FV::InterpMethod::VertexBased)
-      return getInternalFaceValue(*fi, face.correct_skewness);
-    else
-      return Moose::FV::interpolate(*this, face);
-  }
+    return Moose::FV::interpolate(*this, face);
   else
   {
     mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
