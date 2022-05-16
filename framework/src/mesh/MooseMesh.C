@@ -3181,7 +3181,6 @@ MooseMesh::buildFiniteVolumeInfo() const
   _all_face_info.clear();
   _elem_side_to_face_info.clear();
 
-  _ghost_elem_info.clear();
   _elem_to_elem_info.clear();
   _internal_elem_info.clear();
 
@@ -3199,15 +3198,8 @@ MooseMesh::buildFiniteVolumeInfo() const
   unsigned int counter = 0;
   for (const Elem * elem : as_range(begin, end))
   {
-    // const Elem * elem = *it;
     _internal_elem_info.emplace_back(elem);
-    _elem_to_elem_info.emplace(elem, counter);
-
-    // We are constucting artificial fake element if the neighbor does not exist
-    for (const auto side : elem->side_index_range())
-      if (!elem->neighbor_ptr(side))
-        _ghost_elem_info.emplace(std::make_pair(elem, side), _internal_elem_info[counter].volume());
-    counter += 1;
+    _elem_to_elem_info.emplace(elem, counter++);
   }
 
   // Restart the counter to be able to access the ElemInfo-s directly
@@ -3260,53 +3252,29 @@ MooseMesh::buildFiniteVolumeInfo() const
                     "If the neighbor is coarser than the element, we expect that the neighbor must "
                     "be active.");
 
-        // Check if neighbor ElemInfo is one the internal mesh or if it is
-        // an artificial cell on the other side of the boundary.
-        ElemInfo * neighbor_info = nullptr;
-        if (!neighbor)
-        {
-          const auto & it = _ghost_elem_info.find(std::make_pair(elem, side));
-          neighbor_info = &(it->second);
-        }
-        else
-        {
-          const auto & neighbor_info_it = _elem_to_elem_info.find(neighbor);
-          std::cout << "processor id: " << elem->processor_id() << " vector size "
-                    << _internal_elem_info.size() << std::endl;
-          std::cout << "processor id: " << elem->processor_id() << " trying to fetch " << neighbor
-                    << " success: " << (neighbor_info_it == _elem_to_elem_info.end()) << std::endl;
-          std::cout << neighbor_info_it->second << std::endl;
-          neighbor_info = &_internal_elem_info[neighbor_info_it->second];
-        }
-
         // We construct the faceInfo using the elementinfo and side index
         _all_face_info.emplace_back(&_internal_elem_info[counter], side);
 
         auto & fi = _all_face_info.back();
 
-        // We compute the centroid of the artificial boundary elem (if needed)
-        if (!neighbor)
-          neighbor_info->initialize_centroid(_internal_elem_info[counter], fi.faceCentroid());
-
         // We initialize the weights/other information in faceInfo. We need these
         // for the computation of spatial differential operators in a finite volume
         // setting
-        fi.computeCoefficients(neighbor_info);
+        if (fi.onBoundary() || fi.facesRemote())
+          fi.computeCoefficients();
+        else
+          fi.computeCoefficients(&_internal_elem_info[_elem_to_elem_info.find(neighbor)->second]);
 
         // get all the sidesets that this face is contained in and cache them
         // in the face info.
         std::set<boundary_id_type> & boundary_ids = fi.boundaryIDs();
         boundary_ids.clear();
 
-        auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
-        if (lit != side_map.end())
-          boundary_ids.insert(lit->second.begin(), lit->second.end());
-
-        if (fi.neighborPtr())
+        if (fi.onBoundary())
         {
-          auto rit = side_map.find(Keytype(fi.neighborPtr(), fi.neighborSideID()));
-          if (rit != side_map.end())
-            boundary_ids.insert(rit->second.begin(), rit->second.end());
+          auto it = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
+          if (lit != side_map.end())
+            boundary_ids.insert(it->second.begin(), it->second.end());
         }
       }
     }

@@ -14,6 +14,8 @@
 
 #include "libmesh/point.h"
 #include "libmesh/vector_value.h"
+#include "libmesh/remote_elem.h"
+
 
 #include <map>
 #include <set>
@@ -64,7 +66,15 @@ public:
   const Point & normal() const { return _normal; }
 
   /// Returns true if this face resides on the mesh boundary.
-  bool isBoundary() const { return (_neighbor_info->elem() == nullptr); }
+  bool isBoundary() const
+  {
+    return (_elem_info->elem()->neighbor_ptr(_elem_side_id) == nullptr);
+  }
+
+  bool facesRemote() const
+  {
+    return (_elem_info->elem()->neighbor_ptr(_elem_side_id) == remote_elem);
+  }
 
   /// Returns the coordinates of the face centroid.
   const Point & faceCentroid() const { return _face_centroid; }
@@ -81,10 +91,15 @@ public:
   /// If a face is on a mesh boundary, the neighborPtr
   /// will return nullptr - the elem will never be null.
   const Elem & elem() const { return *(_elem_info->elem()); }
-  const Elem * neighborPtr() const { return _neighbor_info->elem(); }
+  const Elem * neighborPtr() const
+  {
+    if (!_neighbor_info)
+      mooseError("You are requesting a pointer to an invalid neighbor!");
+    return _neighbor_info->elem();
+  }
   const Elem & neighbor() const
   {
-    if (!_neighbor_info->elem())
+    if (!_neighbor_info)
       mooseError("FaceInfo object 'const Elem & neighbor()' is called but neighbor element pointer "
                  "is null. This occurs for faces at the domain boundary");
     return *(_neighbor_info->elem());
@@ -98,14 +113,24 @@ public:
   /// doubled in length.  The tip of this new vector is the neighbor centroid.
   /// This is important for FV dirichlet BCs.
   const Point & elemCentroid() const { return _elem_info->centroid(); }
-  const Point & neighborCentroid() const { return _neighbor_info->centroid(); }
+  const Point & neighborCentroid() const
+  {
+    if (!_neighbor_info)
+      mooseError("You are requesting the centroid of an invalid neighbor!");
+    return _neighbor_info->centroid();
+  }
   ///@}
 
   ///@{
   /// Returns the elem and neighbor subdomain IDs. If no neighbor element exists, then
   /// an invalid ID is returned for the neighbor subdomain ID.
   SubdomainID elemSubdomainID() const { return _elem_info->subdomain_id(); }
-  SubdomainID neighborSubdomainID() const { return _neighbor_info->subdomain_id(); }
+  SubdomainID neighborSubdomainID() const
+  {
+    if (!_neighbor_info)
+      mooseError("You are requesting the subdomain of an invalid neighbor!");
+    return _neighbor_info->subdomain_id();
+  }
   ///@}
 
   ///@{
@@ -134,7 +159,12 @@ public:
   Real elemVolume() const { return _elem_info->volume(); }
 
   /// Return the neighbor volume
-  Real neighborVolume() const { return _neighbor_info->volume(); }
+  Real neighborVolume() const
+  {
+    if (!_valid_neighbor)
+      mooseError("You are requesting the volume of an invalid neighbor!");
+    return _neighbor_info->volume();
+  }
 
   /// Return the geometric weighting factor
   Real gC() const { return _gc; }
