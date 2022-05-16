@@ -80,6 +80,22 @@ public:
   Real getNumberOfUnits() const { return _num_rods; }
 
   /**
+   * Return true if this heat structure has the supplied boundary
+   */
+  bool hasBoundary(const BoundaryName & boundary_name) const;
+
+  /**
+   * Get boundary info associated with the heat structure boundary
+   *
+   * @param[in] boundary  Boundary name of a heat structure boundary
+   *
+   * @return The list of tuples (element id, local side id) that is associated with boundary
+   * `boundary`
+   */
+  const std::vector<std::tuple<dof_id_type, unsigned short int>> &
+  getBoundaryInfo(const BoundaryName & boundary_name) const;
+
+  /**
    * Get boundary info associated with the heat structure side
    *
    * @return The list of tuples (element id, local side id) that is associated with side `side`
@@ -180,14 +196,9 @@ protected:
   std::vector<unsigned int> _outer_heat_node_ids;
   /// Nodes at the inner side of the generated heat structure
   std::vector<unsigned int> _inner_heat_node_ids;
-  /// Boundary info for the outer side of the heat structure
-  std::vector<std::tuple<dof_id_type, unsigned short int>> _outer_bnd_info;
-  /// Boundary info for the inner side of the heat structure
-  std::vector<std::tuple<dof_id_type, unsigned short int>> _inner_bnd_info;
-  /// Boundary info for the start side of the heat structure
-  std::vector<std::tuple<dof_id_type, unsigned short int>> _start_bnd_info;
-  /// Boundary info for the end side of the heat structure
-  std::vector<std::tuple<dof_id_type, unsigned short int>> _end_bnd_info;
+  /// Map of boundary name to list of tuples of element and side IDs for that boundary
+  std::map<BoundaryName, std::vector<std::tuple<dof_id_type, unsigned short int>>>
+      _hs_boundary_info;
 
   /// True if this heat structure is connected to at least one flow channel
   mutable bool _connected_to_flow_channel;
