@@ -5,5 +5,8 @@
     abs_zero = 1e-1
     input = master.i
     csvdiff = master_out_OptimizationReporter_0001.csv
+    max_threads = 1
+    # steady solve
+    recover = false
   []
 []
