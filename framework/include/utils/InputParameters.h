@@ -1035,17 +1035,14 @@ InputParameters::set(const std::string & name, bool quiet_mode)
   checkParamName(name);
   checkConsistentType<T>(name);
 
-  if (!this->have_parameter<T>(name))
-    _values[name] = new Parameter<T>;
-
-  set_attributes(name, false);
+  T & result = this->Parameters::set<T>(name);
 
   if (quiet_mode)
     _params[name]._set_by_add_param = true;
 
   setHelper<T>(name);
 
-  return cast_ptr<Parameter<T> *>(_values[name])->set();
+  return result;
 }
 
 template <typename T, typename... Ts>
