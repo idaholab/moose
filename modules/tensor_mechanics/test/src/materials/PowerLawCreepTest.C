@@ -21,10 +21,9 @@ PowerLawCreepTestTempl<is_ad>::validParams()
   InputParameters params = PowerLawCreepStressUpdateTempl<is_ad>::validParams();
   params.addClassDescription(
       "This class duplicates the ADPowerLawCreepStressUpdate, except at a specificed time step and "
-      "the "
-      "1st iteration, at which time a high residual is computed, forcing an exception. Optionally, "
-      "a high or low initial guess can be used to test the check_rage limits, which will also "
-      "force an exception.");
+      "the 1st iteration, at which time a high residual is computed, forcing an exception. "
+      "Optionally, a high or low initial guess can be used to test the check_rage limits, which "
+      "will also force an exception.");
   params.addParam<int>("failure_step", 2, "Time step for which to inject a high residual.");
   params.addParam<Real>("initial_guess", 0.0, "Initial guess for inner Newton solve.");
 
@@ -32,8 +31,7 @@ PowerLawCreepTestTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-PowerLawCreepTestTempl<is_ad>::PowerLawCreepTestTempl(
-    const InputParameters & parameters)
+PowerLawCreepTestTempl<is_ad>::PowerLawCreepTestTempl(const InputParameters & parameters)
   : PowerLawCreepStressUpdateTempl<is_ad>(parameters),
     _failure_step(this->template getParam<int>("failure_step")),
     _initial_guess(this->template getParam<Real>("initial_guess"))
@@ -43,8 +41,8 @@ PowerLawCreepTestTempl<is_ad>::PowerLawCreepTestTempl(
 
 template <bool is_ad>
 GenericReal<is_ad>
-PowerLawCreepTestTempl<is_ad>::computeResidual(
-    const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
+PowerLawCreepTestTempl<is_ad>::computeResidual(const GenericReal<is_ad> & effective_trial_stress,
+                                               const GenericReal<is_ad> & scalar)
 {
   if (_fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1 &&
       _t_step == _failure_step && _dt == 1.0)
@@ -55,8 +53,8 @@ PowerLawCreepTestTempl<is_ad>::computeResidual(
 
 template <bool is_ad>
 GenericReal<is_ad>
-PowerLawCreepTestTempl<is_ad>::computeDerivative(
-    const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
+PowerLawCreepTestTempl<is_ad>::computeDerivative(const GenericReal<is_ad> & effective_trial_stress,
+                                                 const GenericReal<is_ad> & scalar)
 {
   if (_fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1 &&
       _t_step == _failure_step && _dt == 1.0)
