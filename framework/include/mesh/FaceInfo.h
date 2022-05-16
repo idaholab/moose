@@ -161,7 +161,7 @@ public:
   /// Return the neighbor volume
   Real neighborVolume() const
   {
-    if (!_valid_neighbor)
+    if (!_neighbor_info)
       mooseError("You are requesting the volume of an invalid neighbor!");
     return _neighbor_info->volume();
   }
@@ -204,6 +204,7 @@ public:
    * together with other quantities used to generate spatial operators.
    */
   void computeCoefficients(const ElemInfo * const neighbor_info);
+  void computeCoefficients();
 
 private:
   /// the elem and neighbor elems
@@ -224,9 +225,6 @@ private:
 
   const Real _face_area;
   const Point _face_centroid;
-
-  /// Whether neighbor is non-null and non-remote
-  bool _valid_neighbor;
 
   /// the neighbor local side ide
   unsigned int _neighbor_side_id;
