@@ -21,6 +21,7 @@
 #define usingFunctionParserUtilsMembers(T)                                                         \
   using typename FunctionParserUtils<T>::SymFunction;                                              \
   using typename FunctionParserUtils<T>::SymFunctionPtr;                                           \
+  using typename FunctionParserUtils<T>::FailureMethod;                                            \
   using FunctionParserUtils<T>::evaluate;                                                          \
   using FunctionParserUtils<T>::setParserFeatureFlags;                                             \
   using FunctionParserUtils<T>::addFParserConstants;                                               \
@@ -28,8 +29,6 @@
   using FunctionParserUtils<T>::_enable_ad_cache;                                                  \
   using FunctionParserUtils<T>::_disable_fpoptimizer;                                              \
   using FunctionParserUtils<T>::_enable_auto_optimize;                                             \
-  using FunctionParserUtils<T>::_fail_on_evalerror;                                                \
-  using typename FunctionParserUtils<T>::FailureMethod;                                            \
   using FunctionParserUtils<T>::_eval_error_msg;                                                   \
   using FunctionParserUtils<T>::_func_params
 
@@ -81,7 +80,6 @@ protected:
   bool _enable_ad_cache;
   bool _disable_fpoptimizer;
   bool _enable_auto_optimize;
-  bool _fail_on_evalerror;
   //@}
 
   /// Enum for failure method
