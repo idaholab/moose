@@ -9,20 +9,24 @@
 
 #pragma once
 
-#include "ADCoupledForce.h"
+#include "CoupledForce.h"
 
-class CoupledCoeffField : public ADCoupledForce
+/**
+ *  Kernel representing the contribution of the PDE term $-cfv$, where $c$ and
+ *  $f$ are constant and function coefficients, respectively, and $v$ is a coupled
+ *  scalar variable.
+ */
+class ADFuncCoupledForce : public ADCoupledForce
 {
 public:
   static InputParameters validParams();
 
-  CoupledCoeffField(const InputParameters & parameters);
+  ADFuncCoupledForce(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
 private:
+  /// Function coefficient for coupled source term
   const Function & _func;
-
-  Real _sign;
 };

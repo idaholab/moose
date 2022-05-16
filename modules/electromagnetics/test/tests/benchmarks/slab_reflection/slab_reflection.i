@@ -70,9 +70,10 @@ E0 = 1 # magnitude of the incident field (in V/m)
     variable = E_real
   [../]
   [./coupled_real]
-    type = CoupledCoeffField
+    type = ADFuncCoupledForce
     func = coeff_imag
     v = E_imag
+    coef = -1.0
     variable = E_real
   [../]
   [./diffusion_imag]
@@ -85,9 +86,8 @@ E0 = 1 # magnitude of the incident field (in V/m)
     variable = E_imag
   [../]
   [./coupled_imag]
-    type = CoupledCoeffField
+    type = ADFuncCoupledForce
     func = coeff_imag
-    sign = -1
     v = E_real
     variable = E_imag
   [../]

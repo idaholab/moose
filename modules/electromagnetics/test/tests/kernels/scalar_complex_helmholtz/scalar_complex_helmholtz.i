@@ -96,10 +96,10 @@
     variable = u_real
   [../]
   [./coupledField_real]
-    type = CoupledCoeffField
+    type = ADFuncCoupledForce
     v = u_imag
     func = 2TimesAB
-    sign = 1.0
+    coef = -1.0
     variable = u_real
   [../]
   [./bodyForce_real]
@@ -125,10 +125,9 @@
     variable = u_imag
   [../]
   [./coupledField_imag]
-    type = CoupledCoeffField
+    type = ADFuncCoupledForce
     v = u_real
     func = 2TimesAB
-    sign = -1.0
     variable = u_imag
   [../]
   [./bodyForce_imag]
