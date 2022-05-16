@@ -65,6 +65,7 @@
   type = Transient
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
+  snesmf_reuse_base = false # prevents segfault on mac in dbg
   line_search = none
   num_steps = 2
 []
