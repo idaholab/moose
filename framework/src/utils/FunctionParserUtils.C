@@ -27,29 +27,21 @@ FunctionParserUtils<is_ad>::validParams()
       false,
 #endif
       "Enable just-in-time compilation of function expressions for faster evaluation");
-  params.addParamNamesToGroup("enable_jit", "Advanced");
   params.addParam<bool>(
       "enable_ad_cache", true, "Enable cacheing of function derivatives for faster startup time");
   params.addParam<bool>(
       "enable_auto_optimize", true, "Enable automatic immediate optimization of derivatives");
   params.addParam<bool>(
       "disable_fpoptimizer", false, "Disable the function parser algebraic optimizer");
-  params.addDeprecatedParam<bool>(
-      "fail_on_evalerror",
-      false,
-      "Fail fatally if a function evaluation returns an error code (otherwise just pass on NaN)",
-      "'evalerror_behavior' has replaced this parameter");
   MooseEnum evalerror("nan nan_warning error exception", "nan");
   params.addParam<MooseEnum>("evalerror_behavior",
                              evalerror,
                              "What to do if evaluation error occurs. Options are to pass a nan, "
                              "pass a nan with a warning, throw a error, or throw an exception");
 
-  params.addParamNamesToGroup("enable_ad_cache", "Advanced");
-  params.addParamNamesToGroup("enable_auto_optimize", "Advanced");
-  params.addParamNamesToGroup("disable_fpoptimizer", "Advanced");
-  params.addParamNamesToGroup("fail_on_evalerror", "Advanced");
-  params.addParamNamesToGroup("evalerror_behavior", "Advanced");
+  params.addParamNamesToGroup(
+      "enable_jit enable_ad_cache enable_auto_optimize disable_fpoptimizer evalerror_behavior",
+      "Advanced");
 
   return params;
 }
@@ -69,7 +61,6 @@ FunctionParserUtils<is_ad>::FunctionParserUtils(const InputParameters & paramete
     _enable_ad_cache(parameters.get<bool>("enable_ad_cache")),
     _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer")),
     _enable_auto_optimize(parameters.get<bool>("enable_auto_optimize") && !_disable_fpoptimizer),
-    _fail_on_evalerror(parameters.get<bool>("fail_on_evalerror")),
     _evalerror_behavior(parameters.get<MooseEnum>("evalerror_behavior").getEnum<FailureMethod>()),
     _quiet_nan(std::numeric_limits<Real>::quiet_NaN())
 {
@@ -101,35 +92,32 @@ FunctionParserUtils<is_ad>::evaluate(SymFunctionPtr & parser, const std::string 
   // evaluate expression
   auto result = parser->Eval(_func_params.data());
 
-  // fetch fparser evaluation error
-  int error_code = parser->EvalError();
+  // fetch fparser evaluation error (set to unknown if the JIT result is nan)
+  int error_code = _enable_jit ? (std::isnan(result) ? -1 : 0) : parser->EvalError();
 
   // no error
   if (error_code == 0)
     return result;
 
   // hard fail or return not a number
-  if (_fail_on_evalerror)
-    mooseError("In ",
-               name,
-               ": DerivativeParsedMaterial function evaluation encountered an error: ",
-               _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
-
   switch (_evalerror_behavior)
   {
     case FailureMethod::nan:
       return _quiet_nan;
+
     case FailureMethod::nan_warning:
       mooseWarning("In ",
                    name,
                    ": DerivativeParsedMaterial function evaluation encountered an error: ",
                    _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
       return _quiet_nan;
+
     case FailureMethod::error:
       mooseError("In ",
                  name,
                  ": DerivativeParsedMaterial function evaluation encountered an error: ",
                  _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
+
     case FailureMethod::exception:
       mooseException("In ",
                      name,
