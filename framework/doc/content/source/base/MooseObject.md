@@ -28,6 +28,12 @@ std::string & param)` function, where `param` is an input parameter of type
 - relative to the running binary in the shared directory (assuming the application is installed)
 - relative to all registered data file directories (which are determined by the source file locations when compiling and registered using the `registerDataFilePath` macro in `Registry.h`)
 
+### Hard coded data file names
+
+The `getDataFileNameByName` can be used for hard coded data file names. e.g. data files that are tied to a
+specific model and are not meant to be user replaceable. This method will not search relative to the input file
+location and will only find data files in source repositories and installed binary distributions.
+
 ## Parameter vector pairs
 
 ```C++

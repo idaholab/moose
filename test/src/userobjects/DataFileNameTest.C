@@ -22,5 +22,9 @@ DataFileNameTest::validParams()
 DataFileNameTest::DataFileNameTest(const InputParameters & parameters)
   : GeneralUserObject(parameters)
 {
+  // a data file name supplied through an input parameter
   mooseInfo(getDataFileName("data_file"));
+
+  // a hard coded data file name
+  mooseInfo(getDataFileNameByName("README.md"));
 }
