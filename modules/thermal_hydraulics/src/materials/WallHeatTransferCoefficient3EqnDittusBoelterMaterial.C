@@ -18,6 +18,9 @@ InputParameters
 WallHeatTransferCoefficient3EqnDittusBoelterMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addParam<MaterialPropertyName>("Hw",
+                                        FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL,
+                                        "Heat transfer coefficient material property");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density of the liquid");
   params.addRequiredParam<MaterialPropertyName>("vel", "x-component of the liquid velocity");
   params.addRequiredParam<MaterialPropertyName>("D_h", "Hydraulic diameter");
@@ -34,7 +37,7 @@ WallHeatTransferCoefficient3EqnDittusBoelterMaterial::validParams()
 WallHeatTransferCoefficient3EqnDittusBoelterMaterial::
     WallHeatTransferCoefficient3EqnDittusBoelterMaterial(const InputParameters & parameters)
   : Material(parameters),
-    _Hw(declareProperty<Real>(FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL)),
+    _Hw(declareProperty<Real>("Hw")),
     _rho(getMaterialProperty<Real>("rho")),
     _vel(getMaterialProperty<Real>("vel")),
     _D_h(getMaterialProperty<Real>("D_h")),
