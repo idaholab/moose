@@ -4,4 +4,10 @@
     input = 'test.i'
     csvdiff = 'test_out.csv'
   []
+  [test_name]
+    type = 'CSVDiff'
+    cli_args = "Materials/Hw_material/Hw=htc AuxKernels/Hw_ak/property=htc"
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+  []
 []
