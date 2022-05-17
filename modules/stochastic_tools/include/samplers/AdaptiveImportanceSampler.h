@@ -34,6 +34,18 @@ public:
   /// Access the output limit
   const Real & getOutputLimit() const;
 
+  /// Access the mean vector of the importance distribution
+  const std::vector<Real> & getImportanceVectorMean() const;
+
+  /// Access the std vector of the importance distribution
+  const std::vector<Real> & getImportanceVectorStd() const;
+
+  /// Access the std vector of the importance distribution
+  const std::vector<const Distribution *> & getDistributionNames() const;
+
+  /// Access the output limit
+  const Real & getStdFactor() const;
+
 protected:
   /// Return the sample for the given row (the sample index) and column (the parameter index)
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;

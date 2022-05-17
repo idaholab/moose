@@ -18,16 +18,17 @@
   [sample]
     type = AdaptiveImportance
     distributions = 'mu1 mu2'
-    proposal_std = '0.15 0.15'
+    proposal_std = '1.0 1.0'
     output_limit = 0.45
     num_samples_train = 30
-    std_factor = 0.8
-    use_absolute_value = true
-    seed = 1012
-    initial_values = '-0.10329808102501603 1.2396280668056123'
+    std_factor = 0.9
+    initial_values = '-0.103 1.239'
     inputs_reporter = 'adaptive_MC/inputs'
   []
 []
+
+# use_absolute_value = true
+# seed = 1012
 
 [MultiApps]
   [sub]
@@ -68,7 +69,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 40
+  num_steps = 60
 []
 
 [Outputs]

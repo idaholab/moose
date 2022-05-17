@@ -119,6 +119,30 @@ AdaptiveImportanceSampler::getOutputLimit() const
   return _output_limit;
 }
 
+const std::vector<Real> &
+AdaptiveImportanceSampler::getImportanceVectorMean() const
+{
+  return _mean_sto;
+}
+
+const std::vector<Real> &
+AdaptiveImportanceSampler::getImportanceVectorStd() const
+{
+  return _std_sto;
+}
+
+const std::vector<const Distribution *> &
+AdaptiveImportanceSampler::getDistributionNames() const
+{
+  return _distributions;
+}
+
+const Real &
+AdaptiveImportanceSampler::getStdFactor() const
+{
+  return _std_factor;
+}
+
 // Real
 // AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
 // {
