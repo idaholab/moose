@@ -336,8 +336,10 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType
   {
     case Moose::MortarType::Primary:
       return _lambda[_qp] * _test_primary[_i][_qp];
+
     case Moose::MortarType::Secondary:
       return -_lambda[_qp] * _test_secondary[_i][_qp];
+
     case Moose::MortarType::Lower:
     {
       // we are creating an AD version of phys points primary and secondary here...
