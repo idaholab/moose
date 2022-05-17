@@ -71,7 +71,7 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
     BlockRestrictable(this),
     BoundaryRestrictable(this, blockIDs(), false), // false for being _not_ nodal
     SetupInterface(this),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     ScalarCoupleable(this),
     FunctionInterface(this),
     DistributionInterface(this),

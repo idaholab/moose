@@ -2216,6 +2216,10 @@ protected:
   /// Determines whether a check to verify an active kernel on every subdomain
   bool _kernel_coverage_check;
 
+  /// whether to perform checking of boundary restricted object variable dependencies, e.g. whether
+  /// the variable dependencies are defined on the selected boundaries
+  const bool _boundary_restricted_integrity_check;
+
   /// Determines whether a check to verify an active material on every subdomain
   bool _material_coverage_check;
 

@@ -204,10 +204,13 @@ private:
   /// Whether or not this object is restricted to nodesets
   bool _bnd_nodal;
 
+  /// The moose object that this is an interface for
+  const MooseObject & _moose_object;
+
   /**
    * An initialization routine needed for dual constructors
    */
-  void initializeBoundaryRestrictable(const MooseObject * moose_object);
+  void initializeBoundaryRestrictable();
 
 protected:
   /**

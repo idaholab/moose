@@ -10,14 +10,20 @@
 #pragma once
 
 #include <set>
+#include <vector>
 
-// Forward declarations
+class MooseObject;
 class MooseVariableFieldBase;
+namespace libMesh
+{
+class DofObject;
+}
 
 class MooseVariableDependencyInterface
 {
 public:
-  MooseVariableDependencyInterface() {}
+  // Must be a pointer in order to disambiguate with default copy constructor
+  MooseVariableDependencyInterface(const MooseObject * moose_object);
 
   /**
    * Retrieve the set of MooseVariableFieldBase that _this_ object depends on.
@@ -28,6 +34,12 @@ public:
     return _moose_variable_dependencies;
   }
 
+  /**
+   * Check whether all of the variable dependencies are evaluable on the supplied degree of freedom
+   * object
+   */
+  void checkEvaluable(const libMesh::DofObject & dof_object) const;
+
 protected:
   /**
    * Call this function to add the passed in MooseVariableFieldBase as a variable that _this_ object
@@ -37,11 +49,17 @@ protected:
   {
     _moose_variable_dependencies.insert(var);
   }
-  void addMooseVariableDependency(std::vector<MooseVariableFieldBase *> vars)
+  void addMooseVariableDependency(const std::vector<MooseVariableFieldBase *> & vars)
   {
     _moose_variable_dependencies.insert(vars.begin(), vars.end());
   }
 
 private:
   std::set<MooseVariableFieldBase *> _moose_variable_dependencies;
+
+  /// The name of the moose object that this interface aggregates into
+  const std::string & _mvdi_name;
+
+  /// The type of the moose object that this interface aggregates into
+  const std::string & _mvdi_type;
 };

@@ -99,6 +99,7 @@
 #include "ADUtils.h"
 #include "Executioner.h"
 #include "VariadicTable.h"
+#include "BoundaryNodeIntegrityCheckThread.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -180,6 +181,11 @@ FEProblemBase::validParams()
       "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
   params.addParam<bool>(
       "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
+  params.addParam<bool>(
+      "boundary_restricted_integrity_check",
+      true,
+      "Set to false to disable checking of boundary restricted object variable dependencies, "
+      "e.g. are the variable dependencies defined on the selected boundaries?");
   params.addParam<bool>("material_coverage_check",
                         true,
                         "Set to false to disable material->subdomain coverage check");
@@ -287,6 +293,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(getParam<bool>("kernel_coverage_check")),
+    _boundary_restricted_integrity_check(getParam<bool>("boundary_restricted_integrity_check")),
     _material_coverage_check(getParam<bool>("material_coverage_check")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
@@ -730,8 +737,9 @@ FEProblemBase::initialSetup()
   std::set<std::string> depend_objects_aux = _aux->getDependObjects();
 
   // This replaces all prior updateDependObjects calls on the old user object warehouses.
+  TheWarehouse::Query uo_query = theWarehouse().query().condition<AttribSystem>("UserObject");
   std::vector<UserObject *> userobjs;
-  theWarehouse().query().condition<AttribSystem>("UserObject").queryInto(userobjs);
+  uo_query.queryInto(userobjs);
   groupUserObjects(
       theWarehouse(), getAuxiliarySystem(), _app.getExecuteOnEnum(), userobjs, depend_objects_ic);
 
@@ -983,6 +991,17 @@ FEProblemBase::initialSetup()
       transfer->setCurrentDirection(Transfer::DIRECTION::BETWEEN_MULTIAPP);
       transfer->initialSetup();
     }
+  }
+
+  if (_boundary_restricted_integrity_check)
+  {
+    TIME_SECTION("BoundaryRestrictedIntegrityCheck", 5);
+
+    // check that variables are defined along boundaries before executing user objects and aux
+    // kernels
+    ConstBndNodeRange & bnd_nodes = *mesh().getBoundaryNodeRange();
+    BoundaryNodeIntegrityCheckThread bnict(*this, uo_query);
+    Threads::parallel_reduce(bnd_nodes, bnict);
   }
 
   if (!_app.isRecovering())

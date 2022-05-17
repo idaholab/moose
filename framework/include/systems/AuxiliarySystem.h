@@ -153,6 +153,8 @@ public:
 
   void clearScalarVariableCoupleableTags();
 
+  void boundaryAuxKernelIntegrityCheck(const Node & nd, BoundaryID bnd_id, THREAD_ID tid) const;
+
 protected:
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);

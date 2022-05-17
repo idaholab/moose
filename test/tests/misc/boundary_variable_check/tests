@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#9734'
+  design = 'AuxKernels/index.md UserObjects/index.md'
+  [error]
+    requirement = 'The system shall error if a boundary restricted object depends on a variable that is not defined on any portion of the boundary. These boundary restricted objects include'
+    [aux]
+      type = RunException
+      input = test.i
+      expect_err = "'bad' of type 'SelfAux' depends on variable 'v'. However, that variable does not appear to have a superset of that object's block/boundary restriction."
+      detail = 'auxiliary kernels'
+    []
+    [uo]
+      type = RunException
+      input = test.i
+      expect_err = "'bad' of type 'NodalExtremeValue' depends on variable 'v'. However, that variable does not appear to have a superset of that object's block/boundary restriction."
+      cli_args = "AuxKernels/active='' Postprocessors/active='bad'"
+      detail = 'nodal user objects'
+    []
+  []
+[]

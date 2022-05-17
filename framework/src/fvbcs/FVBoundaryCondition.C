@@ -68,6 +68,7 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
                                  "variable",
                                  Moose::VarKindType::VAR_ANY,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
+    MooseVariableDependencyInterface(this),
     FunctorInterface(this),
     _var(*mooseVariableFV()),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
