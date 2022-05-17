@@ -168,21 +168,31 @@ HeatStructureBase::build2DMesh()
           if (i == 0)
           {
             boundary_info.add_side(elem, 0, _start_bc_id[0]);
-            _start_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
+            _hs_boundary_info[_boundary_names_start[0]].push_back(
+                std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
           }
           if (i == _n_elem - 1)
           {
             boundary_info.add_side(elem, 2, _end_bc_id[0]);
-            _end_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
+            _hs_boundary_info[_boundary_names_end[0]].push_back(
+                std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
           }
 
           // exterior axial boundaries (per radial section)
           if (_names.size() > 1)
           {
             if (i == 0)
+            {
               boundary_info.add_side(elem, 0, _radial_start_bc_id[j_section]);
+              _hs_boundary_info[_boundary_names_radial_start[j_section]].push_back(
+                  std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
+            }
             if (i == _n_elem - 1)
+            {
               boundary_info.add_side(elem, 2, _radial_end_bc_id[j_section]);
+              _hs_boundary_info[_boundary_names_radial_end[j_section]].push_back(
+                  std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
+            }
           }
 
           // interior axial boundaries (per radial section)
@@ -191,27 +201,39 @@ HeatStructureBase::build2DMesh()
           {
             const unsigned int k = i_section * _number_of_hs + j_section;
             boundary_info.add_side(elem, 2, _interior_axial_per_radial_section_bc_id[k]);
+            _hs_boundary_info[_boundary_names_interior_axial_per_radial_section[k]].push_back(
+                std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
           }
 
           // exterior radial boundaries (all axial sections)
           if (j == 0)
           {
             boundary_info.add_side(elem, 1, _inner_bc_id[0]);
-            _inner_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
+            _hs_boundary_info[_boundary_names_inner[0]].push_back(
+                std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
           }
           if (j == _total_elem_number - 1)
           {
             boundary_info.add_side(elem, 3, _outer_bc_id[0]);
-            _outer_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
+            _hs_boundary_info[_boundary_names_outer[0]].push_back(
+                std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
           }
 
           // exterior radial boundaries (per axial section)
           if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
           {
             if (j == 0)
+            {
               boundary_info.add_side(elem, 1, _axial_inner_bc_id[i_section]);
+              _hs_boundary_info[_boundary_names_axial_inner[i_section]].push_back(
+                  std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
+            }
             if (j == _total_elem_number - 1)
+            {
               boundary_info.add_side(elem, 3, _axial_outer_bc_id[i_section]);
+              _hs_boundary_info[_boundary_names_axial_outer[i_section]].push_back(
+                  std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
+            }
           }
 
           // interior radial boundaries (all axial sections)
@@ -222,7 +244,11 @@ HeatStructureBase::build2DMesh()
               j_section_begin += _n_part_elems[jj_section];
 
             if (j == j_section_begin)
+            {
               boundary_info.add_side(elem, 1, _inner_radial_bc_id[j_section - 1]);
+              _hs_boundary_info[_boundary_names_inner_radial[j_section - 1]].push_back(
+                  std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
+            }
           }
 
           j++;
@@ -296,38 +322,58 @@ HeatStructureBase::build2DMesh2ndOrder()
           if (i == 0)
           {
             boundary_info.add_side(elem, 0, _start_bc_id[0]);
-            _start_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
+            _hs_boundary_info[_boundary_names_start[0]].push_back(
+                std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
           }
           if (i == _n_elem - 1)
           {
             boundary_info.add_side(elem, 2, _end_bc_id[0]);
-            _end_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
+            _hs_boundary_info[_boundary_names_end[0]].push_back(
+                std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
           }
           if (_names.size() > 1)
           {
             if (i == 0)
+            {
               boundary_info.add_side(elem, 0, _radial_start_bc_id[j_section]);
+              _hs_boundary_info[_boundary_names_radial_start[j_section]].push_back(
+                  std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
+            }
             if (i == _n_elem - 1)
+            {
               boundary_info.add_side(elem, 2, _radial_end_bc_id[j_section]);
+              _hs_boundary_info[_boundary_names_radial_end[j_section]].push_back(
+                  std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
+            }
           }
 
           if (j == 0)
           {
             boundary_info.add_side(elem, 3, _inner_bc_id[0]);
-            _inner_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
+            _hs_boundary_info[_boundary_names_inner[0]].push_back(
+                std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
           }
           if (j == _total_elem_number - 1)
           {
             boundary_info.add_side(elem, 1, _outer_bc_id[0]);
-            _outer_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
+            _hs_boundary_info[_boundary_names_outer[0]].push_back(
+                std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
           }
 
           if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
           {
             if (j == 0)
+            {
               boundary_info.add_side(elem, 1, _axial_inner_bc_id[i_section]);
+              _hs_boundary_info[_boundary_names_axial_inner[i_section]].push_back(
+                  std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
+            }
             if (j == _total_elem_number - 1)
+            {
               boundary_info.add_side(elem, 3, _axial_outer_bc_id[i_section]);
+              _hs_boundary_info[_boundary_names_axial_outer[i_section]].push_back(
+                  std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
+            }
           }
 
           // interior radial boundaries
@@ -338,7 +384,11 @@ HeatStructureBase::build2DMesh2ndOrder()
               j_section_begin += _n_part_elems[jj_section];
 
             if (j == j_section_begin)
+            {
               boundary_info.add_side(elem, 1, _inner_radial_bc_id[j_section - 1]);
+              _hs_boundary_info[_boundary_names_inner_radial[j_section - 1]].push_back(
+                  std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
+            }
           }
 
           j++;
@@ -531,19 +581,55 @@ HeatStructureBase::getEndBoundaryNames() const
   return _boundary_names_end;
 }
 
+bool
+HeatStructureBase::hasBoundary(const BoundaryName & boundary_name) const
+{
+  // Put all boundary names in one vector
+  const std::vector<std::vector<BoundaryName>> all_boundary_names_vectors{
+      _boundary_names_inner,
+      _boundary_names_outer,
+      _boundary_names_start,
+      _boundary_names_end,
+      _boundary_names_interior_axial_per_radial_section,
+      _boundary_names_axial_inner,
+      _boundary_names_axial_outer,
+      _boundary_names_radial_start,
+      _boundary_names_radial_end,
+      _boundary_names_inner_radial};
+  std::vector<BoundaryName> all_boundary_names;
+  for (const auto & vec : all_boundary_names_vectors)
+    all_boundary_names.insert(all_boundary_names.end(), vec.begin(), vec.end());
+
+  return std::find(all_boundary_names.begin(), all_boundary_names.end(), boundary_name) !=
+         all_boundary_names.end();
+}
+
+const std::vector<std::tuple<dof_id_type, unsigned short int>> &
+HeatStructureBase::getBoundaryInfo(const BoundaryName & boundary_name) const
+{
+  if (_hs_boundary_info.find(boundary_name) != _hs_boundary_info.end())
+    return _hs_boundary_info.at(boundary_name);
+  else
+    mooseError("The heat structure boundary '",
+               boundary_name,
+               "' does not exist for the heat structure '",
+               name(),
+               "'.");
+}
+
 const std::vector<std::tuple<dof_id_type, unsigned short int>> &
 HeatStructureBase::getBoundaryInfo(const HeatStructureSideType & side) const
 {
   switch (side)
   {
     case HeatStructureSideType::INNER:
-      return _inner_bnd_info;
+      return getBoundaryInfo(_boundary_names_inner[0]);
     case HeatStructureSideType::OUTER:
-      return _outer_bnd_info;
+      return getBoundaryInfo(_boundary_names_outer[0]);
     case HeatStructureSideType::START:
-      return _start_bnd_info;
+      return getBoundaryInfo(_boundary_names_start[0]);
     case HeatStructureSideType::END:
-      return _end_bnd_info;
+      return getBoundaryInfo(_boundary_names_end[0]);
   }
 
   mooseError(name(), ": Unknown value of 'side' parameter.");

@@ -1,0 +1,111 @@
+[Tests]
+  design = 'HeatStructure2DCoupler.md'
+  issues = '#19851'
+
+  [cylindrical]
+    type = Exodiff
+    input = 'heat_structure_2d_coupler.i'
+    cli_args = "
+      Components/hs3/inner_radius=0.7
+      Postprocessors/E_tot/axis_dir='1 0 0'
+      Postprocessors/E_tot/axis_point='0 0 0'"
+    exodiff = 'cylindrical.e'
+    ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
+    requirement = 'The system shall be able to couple two 2D cylindrical heat structures.'
+  []
+
+  [plate]
+    type = Exodiff
+    input = 'heat_structure_2d_coupler.i'
+    cli_args = "
+      Components/hs1/type=HeatStructurePlate
+      Components/hs2/type=HeatStructurePlate
+      Components/hs3/type=HeatStructurePlate
+      Components/hs1/depth=1.0
+      Components/hs2/depth=1.0
+      Components/hs3/depth=1.0
+      Components/hs3/position='0.5 0.7 0'
+      Postprocessors/E_tot/type=ADHeatStructureEnergy
+      Postprocessors/E_tot/plate_depth=1.0
+      Outputs/file_base=plate"
+    exodiff = 'plate.e'
+    ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
+    requirement = 'The system shall be able to couple two 2D plate heat structures.'
+  []
+
+  [error_reporting]
+    requirement = 'The system shall report an error for HeatStructure2DCoupler when'
+
+    [missing_boundary]
+      type = RunException
+      input = 'heat_structure_2d_coupler.i'
+      cli_args = "
+        Components/hs3/inner_radius=0.7
+        Postprocessors/E_tot/axis_dir='1 0 0'
+        Postprocessors/E_tot/axis_point='0 0 0'
+        Components/hs_coupling_1_2/secondary_boundary=hs3:inner"
+      expect_err = "The heat structure 'hs1' does not have the boundary 'hs3:inner'"
+
+      detail = 'the provided heat structure boundary does not exist.'
+    []
+    [type_mismatch]
+      type = RunException
+      input = 'heat_structure_2d_coupler.i'
+      cli_args = "
+        Components/hs3/inner_radius=0.7
+        Postprocessors/E_tot/axis_dir='1 0 0'
+        Postprocessors/E_tot/axis_point='0 0 0'
+        Components/hs1/type=HeatStructurePlate
+        Components/hs1/depth=1.0"
+      expect_err = 'The coupled heat structures must have the same type'
+
+      detail = 'the types of the coupled heat structures do not match.'
+    []
+    [invalid_hs_type]
+      type = RunException
+      input = 'heat_structure_2d_coupler.i'
+      cli_args = "
+        Components/hs3/inner_radius=0.7
+        Postprocessors/E_tot/axis_dir='1 0 0'
+        Postprocessors/E_tot/axis_point='0 0 0'
+        Components/hs4/type=HeatStructureFromFile3D
+        Components/hs4/file=../heat_structure_from_file_3d/box.e
+        Components/hs4/position='0 0 0'
+        Components/hs4/initial_T=300
+        Materials/mat/type=ADGenericConstantMaterial
+        Materials/mat/block='hs4:brick'
+        Materials/mat/prop_names='density specific_heat thermal_conductivity'
+        Materials/mat/prop_values='1 1 1'
+        Components/hs_coupling_1_2/primary_heat_structure=hs4"
+      expect_err = "The type of the heat structure 'hs4' is not 'HeatStructurePlate' or inherited from 'HeatStructureCylindricalBase'"
+
+      detail = 'the types of either coupled heat structure is invalid.'
+    []
+    [mesh_mismatch]
+      type = RunException
+      input = 'heat_structure_2d_coupler.i'
+      cli_args = "
+        Components/hs3/inner_radius=0.8
+        Postprocessors/E_tot/axis_dir='1 0 0'
+        Postprocessors/E_tot/axis_point='0 0 0'"
+      expect_err = "The primary and secondary boundaries must have coincident meshes"
+      mesh_mode = 'replicated'
+
+      detail = 'the boundary meshes are not coincident.'
+    []
+    [distributed_mesh]
+      type = RunException
+      input = 'heat_structure_2d_coupler.i'
+      cli_args = "
+        Components/hs3/inner_radius=0.7
+        Postprocessors/E_tot/axis_dir='1 0 0'
+        Postprocessors/E_tot/axis_point='0 0 0'"
+      expect_err = "HeatStructure2DCoupler does not work with a distributed mesh"
+      mesh_mode = 'distributed'
+
+      detail = 'the parallel mesh type is distributed.'
+    []
+  []
+[]
