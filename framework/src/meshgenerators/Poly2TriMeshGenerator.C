@@ -14,6 +14,7 @@
 
 #include "libmesh/elem.h"
 #include "libmesh/int_range.h"
+#include "libmesh/mesh_triangle_holes.h"
 #include "libmesh/parsed_function.h"
 #include "libmesh/poly2tri_triangulator.h"
 #include "libmesh/unstructured_mesh.h"
@@ -99,8 +100,26 @@ Poly2TriMeshGenerator::generate()
     poly2tri.set_desired_area_function(&area_func);
   }
 
-  if (!_hole_ptrs.empty())
-    libmesh_not_implemented(); // Still working on it
+  std::vector<TriangulatorInterface::MeshedHole> meshed_holes;
+  std::vector<TriangulatorInterface::Hole *> triangulator_hole_ptrs;
+
+  // Make sure pointers here aren't invalidated by a resize
+  meshed_holes.reserve(_hole_ptrs.size());
+  for (auto hole_i : index_range(_hole_ptrs))
+  {
+    meshed_holes.emplace_back(*_hole_ptrs[hole_i]->get());
+    if (hole_i < _refine_holes.size())
+      meshed_holes.back().set_refine_boundary_allowed(_refine_holes[hole_i]);
+    if (_interpolate_holes.size() > hole_i)
+      libmesh_not_implemented();
+    if (_stitch_holes.size() > hole_i)
+      libmesh_not_implemented();
+
+    triangulator_hole_ptrs.push_back(&meshed_holes.back());
+  }
+
+  if (!triangulator_hole_ptrs.empty())
+    poly2tri.attach_hole_list(&triangulator_hole_ptrs);
 
   poly2tri.triangulate();
 
