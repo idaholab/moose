@@ -67,6 +67,9 @@ PatternedHexPeripheralModifier::PatternedHexPeripheralModifier(const InputParame
     _pattern_pitch_meta(declareMeshProperty<Real>("pattern_pitch_meta", 0.0)),
     // Use HexagonConcentricCircleAdaptiveBoundaryMeshGenerator for control drum meshing
     _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
+    _hexagon_peripheral_trimmability(
+        declareMeshProperty<bool>("hexagon_peripheral_trimmability", false)),
+    _hexagon_center_trimmability(declareMeshProperty<bool>("hexagon_center_trimmability", false)),
     _mesh(getMeshByName(_input_name))
 {
   if (_extra_id_names_to_modify.size() != _new_extra_id_values_to_assign.size())
@@ -77,6 +80,9 @@ PatternedHexPeripheralModifier::PatternedHexPeripheralModifier(const InputParame
 std::unique_ptr<MeshBase>
 PatternedHexPeripheralModifier::generate()
 {
+  if (hasMeshProperty("hexagon_center_trimmability", _input_name))
+    _hexagon_center_trimmability =
+        getMeshProperty<bool>("hexagon_center_trimmability", _input_name);
   // Check if the input mesh is compatible
   if (!getMeshProperty<bool>("peripheral_modifier_compatible", _input_name))
     paramError("input",

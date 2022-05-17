@@ -145,6 +145,7 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     _hexagon_size_style(
         getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
     _pattern_pitch_meta(declareMeshProperty("pattern_pitch_meta", 0.0)),
+    _input_pitch_meta(declareMeshProperty("input_pitch_meta", 0.0)),
     _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
     _control_drum_positions(
         declareMeshProperty<std::vector<Point>>("control_drum_positions", std::vector<Point>())),
@@ -154,10 +155,14 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
         "control_drums_azimuthal_meta", std::vector<std::vector<Real>>())),
     _position_file_name(declareMeshProperty<std::string>("position_file_name",
                                                          getParam<std::string>("position_file"))),
+    _hexagon_peripheral_trimmability(
+        declareMeshProperty<bool>("hexagon_peripheral_trimmability", !_generate_core_metadata)),
+    _hexagon_center_trimmability(declareMeshProperty<bool>("hexagon_center_trimmability", true)),
     _peripheral_modifier_compatible(
         declareMeshProperty<bool>("peripheral_modifier_compatible", _pattern_boundary == "hexagon"))
 {
   const unsigned int n_pattern_layers = _pattern.size();
+  declareMeshProperty("pattern_size", n_pattern_layers);
   if (n_pattern_layers % 2 == 0)
     paramError(
         "pattern",
@@ -291,7 +296,10 @@ PatternedHexMeshGenerator::generate()
                  ": pattern_pitch metadata values of all input mesh generators must be identical "
                  "when pattern_boundary is 'none' and generate_core_metadata is true.");
     else
+    {
       _pattern_pitch = pattern_pitch_array.front();
+      _input_pitch_meta = _pattern_pitch;
+    }
   }
   else
   {
@@ -338,6 +346,7 @@ PatternedHexMeshGenerator::generate()
       mooseError("In PatternedHexMeshGenerator ",
                  _name,
                  ": pitch metadata values of all input mesh generators must be identical.");
+    _input_pitch_meta = pitch_array.front();
     if (*std::max_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()) !=
         *std::min_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()))
       mooseError(
@@ -594,13 +603,23 @@ PatternedHexMeshGenerator::generate()
                               OUTER_SIDESET_ID,
                               OUTER_SIDESET_ID,
                               TOLERANCE,
-                              /*clear_stitched_boundary_ids=*/true);
+                              /*clear_stitched_boundary_ids=*/false);
 
       // Translate back now that we've stitched so that anyone else that uses this mesh has it at
       // the origin
       MeshTools::Modification::translate(pattern_mesh, -(deltax + j * input_pitch), -deltay, 0);
     }
   }
+
+  auto side_list = out_mesh->get_boundary_info().build_side_list();
+  for (auto & sl : side_list)
+  {
+    if (std::get<2>(sl) == OUTER_SIDESET_ID)
+      if (out_mesh->elem_ptr(std::get<0>(sl))->neighbor_ptr(std::get<1>(sl)) != nullptr)
+        out_mesh->get_boundary_info().remove_side(
+            out_mesh->elem_ptr(std::get<0>(sl)), std::get<1>(sl), std::get<2>(sl));
+  }
+  out_mesh->get_boundary_info().clear_boundary_node_ids();
 
   out_mesh->get_boundary_info().build_node_list_from_side_list();
   const auto node_list = out_mesh->get_boundary_info().build_node_list();

@@ -47,6 +47,10 @@ protected:
   Real & _pattern_pitch_meta;
   /// MeshMetaData: whether the generated mesh is a control drum
   const bool & _is_control_drum_meta;
+  /// MeshMetaData: whether the paeripheral area of the generated mesh can be trimmed by PolygonMeshTrimmer
+  const bool & _hexagon_peripheral_trimmability;
+  /// MeshMetaData: whether the generated mesh can be trimmed through its center by PolygonMeshTrimmer
+  bool & _hexagon_center_trimmability;
   /// The main mesh used in this class
   std::unique_ptr<MeshBase> & _mesh;
   /// Boundary ID of the external boundary of the input mesh
