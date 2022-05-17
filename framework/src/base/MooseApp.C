@@ -1256,10 +1256,9 @@ MooseApp::recursivelyCreateExecutors(const std::string & current_executor_name,
 
   for (const auto & param : params)
   {
-    if (dynamic_cast<InputParameters::Parameter<ExecutorName> *>(param.second))
+    if (params.have_parameter<ExecutorName>(param.first))
     {
-      const auto & dependency_name =
-          static_cast<InputParameters::Parameter<ExecutorName> *>(param.second)->get();
+      const auto & dependency_name = params.get<ExecutorName>(param.first);
 
       possible_roots.remove(dependency_name);
 

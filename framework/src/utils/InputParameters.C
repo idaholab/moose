@@ -459,12 +459,13 @@ InputParameters::mooseObjectSyntaxVisibility() const
 #define dynamicCastRangeCheck(type, up_type, long_name, short_name, param, oss)                    \
   do                                                                                               \
   {                                                                                                \
+    libMesh::Parameters::Value * val = MooseUtils::get(param);                                     \
     InputParameters::Parameter<type> * scalar_p =                                                  \
-        dynamic_cast<InputParameters::Parameter<type> *>(param);                                   \
+        dynamic_cast<InputParameters::Parameter<type> *>(val);                                     \
     if (scalar_p)                                                                                  \
       rangeCheck<type, up_type>(long_name, short_name, scalar_p, oss);                             \
     InputParameters::Parameter<std::vector<type>> * vector_p =                                     \
-        dynamic_cast<InputParameters::Parameter<std::vector<type>> *>(param);                      \
+        dynamic_cast<InputParameters::Parameter<std::vector<type>> *>(val);                        \
     if (vector_p)                                                                                  \
       rangeCheck<type, up_type>(long_name, short_name, vector_p, oss);                             \
   } while (0)
@@ -829,7 +830,7 @@ InputParameters::applyParameter(const InputParameters & common,
   if (local_exist && common_exist && common_valid && (!local_valid || !local_set) &&
       (!common_priv || !local_priv))
   {
-    delete _values[common_name];
+    remove(common_name);
     _values[common_name] = common._values.find(common_name)->second->clone();
     set_attributes(common_name, false);
   }

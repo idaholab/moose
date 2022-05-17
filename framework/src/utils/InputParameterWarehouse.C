@@ -74,7 +74,7 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
   for (libMesh::Parameters::iterator map_iter = ptr->begin(); map_iter != ptr->end(); ++map_iter)
   {
     const std::string & name = map_iter->first;
-    libMesh::Parameters::Value * value = map_iter->second;
+    libMesh::Parameters::Value * value = MooseUtils::get(map_iter->second);
 
     if (ptr->isControllable(name))
       for (const auto & object_name : object_names)
