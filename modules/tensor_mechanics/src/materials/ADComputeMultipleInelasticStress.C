@@ -226,7 +226,8 @@ ADComputeMultipleInelasticStress::updateQpState(
              << " time=" << _t << " int_pt=" << _qp << std::endl;
   }
   Real l2norm_delta_stress;
-  Real first_l2norm_delta_stress = 1.0;
+  RankTwoTensor relative_delta_stress;
+  Real l2norm_relative_delta_stress = 1.0;
   unsigned int counter = 0;
 
   std::vector<ADRankTwoTensor> inelastic_strain_increment;
@@ -235,7 +236,7 @@ ADComputeMultipleInelasticStress::updateQpState(
   for (unsigned i_rmm = 0; i_rmm < _models.size(); ++i_rmm)
     inelastic_strain_increment[i_rmm].zero();
 
-  ADRankTwoTensor stress_max, stress_min;
+  RankTwoTensor stress_max, stress_min;
 
   do
   {
@@ -279,8 +280,8 @@ ADComputeMultipleInelasticStress::updateQpState(
 
       if (i_rmm == 0)
       {
-        stress_max = _stress[_qp];
-        stress_min = _stress[_qp];
+        stress_max = MetaPhysicL::raw_value(_stress[_qp]);
+        stress_min = MetaPhysicL::raw_value(_stress[_qp]);
       }
       else
       {
@@ -289,28 +290,36 @@ ADComputeMultipleInelasticStress::updateQpState(
           for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
           {
             if (_stress[_qp](i, j) > stress_max(i, j))
-              stress_max(i, j) = _stress[_qp](i, j);
+              stress_max(i, j) = MetaPhysicL::raw_value(_stress[_qp](i, j));
             else if (stress_min(i, j) > _stress[_qp](i, j))
-              stress_min(i, j) = _stress[_qp](i, j);
+              stress_min(i, j) = MetaPhysicL::raw_value(_stress[_qp](i, j));
           }
         }
+      }
+    }
+
+    for (const auto i : make_range(LIBMESH_DIM))
+    {
+      for (const auto j : make_range(LIBMESH_DIM))
+      {
+        if (stress_max(i, j) || stress_min(i, j))
+          relative_delta_stress(i, j) =
+              2.0 * (stress_max(i, j) - stress_max(i, j)) / (stress_max(i, j) + stress_min(i, j));
+        else
+          relative_delta_stress(i, j) = 0.0;
       }
     }
 
     // now check convergence in the stress:
     // once the change in stress is within tolerance after each recompute material
     // consider the stress to be converged
-    l2norm_delta_stress = MetaPhysicL::raw_value((stress_max - stress_min).L2norm());
-    if (counter == 0 && l2norm_delta_stress > 0.0)
-      first_l2norm_delta_stress = l2norm_delta_stress;
+    l2norm_delta_stress = (stress_max - stress_min).L2norm();
+    l2norm_relative_delta_stress = relative_delta_stress.L2norm();
 
     if (_internal_solve_full_iteration_history == true)
     {
       _console << "stress iteration number = " << counter << "\n"
-               << " relative l2 norm delta stress = "
-               << (0 == first_l2norm_delta_stress ? 0
-                                                  : l2norm_delta_stress / first_l2norm_delta_stress)
-               << "\n"
+               << " relative l2 norm delta stress = " << l2norm_relative_delta_stress << "\n"
                << " stress convergence relative tolerance = " << _relative_tolerance << "\n"
                << " absolute l2 norm delta stress = " << l2norm_delta_stress << "\n"
                << " stress convergence absolute tolerance = " << _absolute_tolerance << std::endl;
@@ -318,11 +327,10 @@ ADComputeMultipleInelasticStress::updateQpState(
     ++counter;
 
   } while (counter < _max_iterations && l2norm_delta_stress > _absolute_tolerance &&
-           (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance &&
-           _num_models != 1);
+           l2norm_relative_delta_stress > _relative_tolerance && _num_models != 1);
 
   if (counter == _max_iterations && l2norm_delta_stress > _absolute_tolerance &&
-      (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance)
+      l2norm_relative_delta_stress > _relative_tolerance)
     mooseException(
         "In ", _name, ": Max stress iteration hit during ADComputeMultipleInelasticStress solve!");
 
