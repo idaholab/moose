@@ -216,7 +216,7 @@ p_out = 7e6
 
   line_search = none
   nl_rel_tol = 1e-8
-  nl_abs_tol = 2e-8
+  nl_abs_tol = 4e-8
   nl_max_its = 25
   l_tol = 1e-3
   l_max_its = 5
