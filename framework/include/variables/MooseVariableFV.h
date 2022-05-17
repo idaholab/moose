@@ -465,14 +465,10 @@ public:
    * or absent that we assume a zero gradient and simply return the \p elem_value
    * @param neighbor The \p neighbor element that we want to retrieve the solution value for
    * @param fi The face information object
-   * @param elem_value The solution value on the "element". This value may be used for computing the
-   * neighbor value if the neighbor is null or this variable doesn't exist on the neighbor subdomain
    * @return The neighbor solution value with derivative seeding according to the associated degree
    * of freedom
    */
-  ADReal getNeighborValue(const Elem * const neighbor,
-                          const FaceInfo & fi,
-                          const ADReal & elem_value) const;
+  ADReal getNeighborValue(const Elem * const neighbor, const FaceInfo & fi) const;
 
   /**
    * Compute or retrieve from cache the solution value on an internal face using linear

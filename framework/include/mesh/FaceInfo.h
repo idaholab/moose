@@ -16,7 +16,6 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/remote_elem.h"
 
-
 #include <map>
 #include <set>
 #include <memory>
@@ -66,10 +65,7 @@ public:
   const Point & normal() const { return _normal; }
 
   /// Returns true if this face resides on the mesh boundary.
-  bool isBoundary() const
-  {
-    return (_elem_info->elem()->neighbor_ptr(_elem_side_id) == nullptr);
-  }
+  bool isBoundary() const { return (_elem_info->elem()->neighbor_ptr(_elem_side_id) == nullptr); }
 
   bool facesRemote() const
   {
@@ -80,10 +76,9 @@ public:
   const Point & faceCentroid() const { return _face_centroid; }
 
   ///@{
-  /// Returns the coordinates of the approximate face centroid
-  /// (intersection of the face and the line between the cell centroids)
-  /// in case of skewed meshes.
-  const Point & rIntersection() const { return _r_intersection; }
+  /// Returns the skewness-correction vector (vector between the approximate and real face
+  /// centroids).
+  const Point & skewnessCorrectionVector() const { return _skewness_correction_vector; }
   ///@}
 
   ///@{
@@ -94,7 +89,7 @@ public:
   const Elem * neighborPtr() const
   {
     if (!_neighbor_info)
-      mooseError("You are requesting a pointer to an invalid neighbor!");
+      return nullptr;
     return _neighbor_info->elem();
   }
   const Elem & neighbor() const
@@ -128,7 +123,7 @@ public:
   SubdomainID neighborSubdomainID() const
   {
     if (!_neighbor_info)
-      mooseError("You are requesting the subdomain of an invalid neighbor!");
+      return Elem::invalid_subdomain_id;
     return _neighbor_info->subdomain_id();
   }
   ///@}
@@ -150,6 +145,17 @@ public:
   }
   /// Mutably returns which side(s) the given variable is defined on for this face.
   VarFaceNeighbors & faceType(const std::string & var_name) { return _face_types_by_var[var_name]; }
+
+  bool varDefinedOnElem(const std::string & var_name) const
+  {
+    auto it = _face_types_by_var.find(var_name);
+    if (it == _face_types_by_var.end())
+      mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
+
+    const VarFaceNeighbors & ft = faceType(var_name);
+    return (ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM);
+  }
+
   const std::set<BoundaryID> & boundaryIDs() const { return _boundary_ids; }
 
   /// Returns the set of boundary ids for all boundaries that include this face.
@@ -238,8 +244,9 @@ private:
   /// The unit normal vector pointing from element center C to element center F
   RealVectorValue _e_cf;
 
-  /// The vector to the intersection of d_{CF} and the face.
-  Point _r_intersection;
+  /// Holds the skewness-correction vector (vector between the approximate and real face
+  /// centroids).
+  Point _skewness_correction_vector;
 
   /// Geometric weighting factor for face value interpolation
   Real _gc;

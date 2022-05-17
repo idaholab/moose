@@ -73,21 +73,24 @@ FaceInfo::computeCoefficients(const ElemInfo * const neighbor_info)
   _d_cf_mag = _d_cf.norm();
   _e_cf = _d_cf / _d_cf_mag;
 
-  // compute an centroid face normal by using 1-point quadrature
-  unsigned int dim = _elem_info->elem()->dim();
-  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType(_elem_info->elem()->default_order())));
-  QGauss qface(dim - 1, CONSTANT);
-  fe->attach_quadrature_rule(&qface);
-  const std::vector<Point> & normals = fe->get_normals();
-  fe->reinit(_elem_info->elem(), _elem_side_id);
-  mooseAssert(normals.size() == 1, "FaceInfo construction broken w.r.t. computing face normals");
-  _normal = normals[0];
-
   // Compute the position of the intersection of e_CF and the surface
-  _r_intersection =
+  Point r_intersection =
       _elem_info->centroid() +
       (((_face_centroid - _elem_info->centroid()) * _normal) / (_e_cf * _normal)) * _e_cf;
 
+  _skewness_correction_vector = _face_centroid - r_intersection;
+
   // For interpolation coefficients
-  _gc = (_neighbor_info->centroid() - _r_intersection).norm() / _d_cf_mag;
+  _gc = (_neighbor_info->centroid() - r_intersection).norm() / _d_cf_mag;
+}
+
+void
+FaceInfo::computeCoefficients()
+{
+  _d_cf_mag = (_face_centroid - _elem_info->centroid()) * _normal;
+  _d_cf = _d_cf_mag * _normal;
+  _e_cf = _normal;
+
+  _skewness_correction_vector = _face_centroid - (_elem_info->centroid() + _d_cf);
+  _gc = 0.5;
 }

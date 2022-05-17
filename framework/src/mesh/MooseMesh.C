@@ -3324,12 +3324,8 @@ MooseMesh::computeFaceInfoFaceCoords()
   for (auto & fi : _all_face_info)
   {
     // get elem & neighbor elements, and set subdomain ids
-    const Elem & elem_elem = fi.elem();
-    const Elem * neighbor_elem = fi.neighborPtr();
-    SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
-    SubdomainID neighbor_subdomain_id = Elem::invalid_subdomain_id;
-    if (neighbor_elem && neighbor_elem != remote_elem)
-      neighbor_subdomain_id = neighbor_elem->subdomain_id();
+    const SubdomainID elem_subdomain_id = fi.elemSubdomainID();
+    const SubdomainID neighbor_subdomain_id = fi.neighborSubdomainID();
 
     coordTransformFactor(
         *this, elem_subdomain_id, fi.faceCentroid(), fi.faceCoord(), neighbor_subdomain_id);
@@ -3380,10 +3376,9 @@ MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & 
     // get elem & neighbor elements, and set subdomain ids
     const Elem & elem_elem = face.elem();
     const Elem * const neighbor_elem = face.neighborPtr();
-    const SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
-    const SubdomainID neighbor_subdomain_id = (neighbor_elem && neighbor_elem != remote_elem)
-                                                  ? neighbor_elem->subdomain_id()
-                                                  : Elem::invalid_subdomain_id;
+
+    const SubdomainID elem_subdomain_id = face.elemSubdomainID();
+    const SubdomainID neighbor_subdomain_id = face.neighborSubdomainID();
 
     // loop through vars
     for (unsigned int j = 0; j < moose_vars.size(); ++j)

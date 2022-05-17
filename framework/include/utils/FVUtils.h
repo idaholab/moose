@@ -104,56 +104,5 @@ loopOverElemFaceInfo(const Elem & elem,
     }
   }
 }
-
-/**
- * This utility determines element one and element two given a \p FaceInfo \p fi and variable \p
- * var. You may ask what in the world "element one" and "element two" means, and that would be a
- * very good question. What it means is: a variable will *always* have degrees of freedom on
- * element one. A variable may or may not have degrees of freedom on element two. So we are
- * introducing a second terminology here. FaceInfo geometric objects have element-neighbor pairs.
- * These element-neighbor pairs are purely geometric and have no relation to the algebraic system
- * of variables. The elem1-elem2 notation introduced here is based on dof/algebraic information
- * and may very well be different from variable to variable, e.g. elem1 may correspond to the
- * FaceInfo elem for one variable (and correspondingly elem2 will be the FaceInfo neighbor), but
- * elem1 may correspond to the FaceInfo neighbor for another variable (and correspondingly for
- * *that* variable elem2 will be the FaceInfo elem).
- * @return A tuple, where the first item is elem1, the second item is elem2, and the third item is
- * a boolean indicating whether elem1 corresponds to the FaceInfo elem
- */
-template <typename OutputType>
-std::tuple<const Elem *, const Elem *, bool>
-determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & var)
-{
-  auto ft = fi.faceType(var.name());
-  mooseAssert(ft == FaceInfo::VarFaceNeighbors::BOTH
-                  ? var.hasBlocks(fi.elem().subdomain_id()) && fi.neighborPtr() &&
-                        var.hasBlocks(fi.neighborPtr()->subdomain_id())
-                  : true,
-              "Finite volume variable " << var.name()
-                                        << " does not exist on both sides of the face despite "
-                                           "what the FaceInfo is telling us.");
-  mooseAssert(ft == FaceInfo::VarFaceNeighbors::ELEM
-                  ? var.hasBlocks(fi.elem().subdomain_id()) &&
-                        (!fi.neighborPtr() || !var.hasBlocks(fi.neighborPtr()->subdomain_id()))
-                  : true,
-              "Finite volume variable " << var.name()
-                                        << " does not exist on or only on the elem side of the "
-                                           "face despite what the FaceInfo is telling us.");
-  mooseAssert(ft == FaceInfo::VarFaceNeighbors::NEIGHBOR
-                  ? fi.neighborPtr() && var.hasBlocks(fi.neighborPtr()->subdomain_id()) &&
-                        !var.hasBlocks(fi.elem().subdomain_id())
-                  : true,
-              "Finite volume variable " << var.name()
-                                        << " does not exist on or only on the neighbor side of the "
-                                           "face despite what the FaceInfo is telling us.");
-
-  bool one_is_elem =
-      ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM;
-  const Elem * const elem_one = one_is_elem ? &fi.elem() : fi.neighborPtr();
-  mooseAssert(elem_one, "This elem should be non-null!");
-  const Elem * const elem_two = one_is_elem ? fi.neighborPtr() : &fi.elem();
-
-  return std::make_tuple(elem_one, elem_two, one_is_elem);
-}
 }
 }

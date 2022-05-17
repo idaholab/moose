@@ -40,7 +40,6 @@ gradUDotNormal(const T &
 
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-
   return fv_var.adGradSln(face_info, correct_skewness) * face_info.normal();
 #else
 
