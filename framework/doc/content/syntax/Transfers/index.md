@@ -77,19 +77,19 @@ a alpha-beta-gamma Euler angle rotation is:
 3. Rotation about the z-axis (again) by [!param](/Problem/FEProblem/gamma_rotation) degrees
 
 
-[!param](/Problem/FEProblem/length_units_per_meter) allows the user to specify
-how many mesh length units are in a meter. The last option which contributes to
+[!param](/Problem/FEProblem/length_unit) allows the user to specify
+their mesh length unit. The code in `MooseCoordTransform`
+which processes this parameter leverages the [MooseUnits](/Units.md) system. A
+scaling transform will be constructed to convert a point in the mesh domain with
+the prescribed mesh length unit to the reference domain with units of meters.
+The last option which contributes to
 transformation information held by the `MooseCoordTransform` class is the
 [!param](/MultiApps/TransientMultiApp/positions) parameter which is described in
 [MultiApps/index.md#multiapp-positions]. The value of `positions` exactly
 corresponds to the translation vector set in the `MooseCoordTransform` object of
 the sub-application. The `alpha_rotation`, `beta_rotation`, `gamma_rotation`,
 and `positions` parameters essentially describe forward transformations of the
-mesh domain described by the MOOSE `Mesh` block to a reference domain. The
-`length_units_per_meter` parameter effectively represents an inverse transform,
-e.g. the meter is chosen as the reference scale, so a $1/l$ scaling transform
-(where $l$ corresponds to `length_units_per_meter`) would be applied to the mesh
-domain in order to map to the meter-based reference domain. The sequence of
+mesh domain described by the MOOSE `Mesh` block to a reference domain. The sequence of
 transformations applied in the `MooseCoordTransform` class is:
 
 1. rotation
@@ -123,9 +123,8 @@ given in the `Problem` block of a sub-application:
 Here, the user is stating that a -90 degree alpha rotation should be applied to
 the sub-application's domain in order to map to the reference domain (which the user has
 chosen to correspond to the main application domain). Additionally, the user
-wishes for the coordinate transformation object to know that 5 sub-application
-domain units correspond to a meter (whereas the main application is already in
-units of meters). This information from the sub-application's `Problem` block
+wishes for the coordinate transformation object to know that one unit of mesh
+length corresponds to 20 centimeters. This information from the sub-application's `Problem` block
 combined with the translation vector described by the `positions` parameter in
 the main application `MultiApp` block
 

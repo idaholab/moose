@@ -11,7 +11,7 @@
 
 [Problem]
   alpha_rotation = -90
-  length_units_per_meter = 5
+  length_unit = '20*cm'
 []
 
 [Variables]

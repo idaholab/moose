@@ -10,8 +10,10 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "Units.h"
 #include "libmesh/point.h"
 #include <memory>
+#include <string>
 
 class InputParameters;
 namespace libMesh
@@ -128,15 +130,18 @@ public:
   void setRotation(Real alpha, Real beta, Real gamma);
 
   /**
-   * Set the scaling transformation which will be the reciprocal of the provided \p
-   * length_units_per_meter
-   * @param length_units_per_meter The number of mesh length units in a meter, e.g. if the moose
-   * mesh logically has units of centimeters, then the parameter value provided to this method
-   * should be 100. In contrast to the \p setTranslation and \p setRotation with angles APIs, this
-   * API represents an inverse transformation, e.g. we will apply the inverse of this provided
-   * parameter in order to convert the points in our domain to the reference domain
+   * Set the scaling transformation
+   * @param length_unit How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5
+   * inches. We will save off the value provided to this in the \p _length_unit data member as well
+   * as set the scaling transform
    */
-  void setLengthUnitsPerMeter(Real length_units_per_meter);
+  void setLengthUnit(const MooseUnits & length_unit);
+
+  /**
+   * @return How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5
+   * inches
+   */
+  const MooseUnits & lengthUnit() const { return _length_unit; }
 
   /**
    * Set our coordinate system
@@ -185,4 +190,7 @@ private:
   /// will not know in what coordinate system our point lies and will not know how to perform the
   /// dimension collapse, and so we will error
   bool _has_different_coord_sys = false;
+
+  /// How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5 inches
+  MooseUnits _length_unit = std::string("1m");
 };

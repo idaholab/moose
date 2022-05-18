@@ -128,10 +128,10 @@ MooseCoordTransform::setRotation(const Real alpha, const Real beta, const Real g
 }
 
 void
-MooseCoordTransform::setLengthUnitsPerMeter(const Real length_units_per_meter)
+MooseCoordTransform::setLengthUnit(const MooseUnits & length_unit)
 {
-  const auto scale = 1 / length_units_per_meter;
-
+  _length_unit = length_unit;
+  const auto scale = Real(_length_unit / MooseUnits("m"));
   _scale =
       std::make_unique<RealTensorValue>(RealTensorValue(scale, 0, 0, 0, scale, 0, 0, 0, scale));
 }
@@ -171,9 +171,9 @@ MooseCoordTransform::validParams()
       "coord_type", coord_types, "Type of the coordinate system per block param");
   params.addParam<MooseEnum>(
       "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
-  params.addParam<Real>("length_units_per_meter",
-                        "How many mesh length units are in a meter, e.g. if your mesh units are "
-                        "centimeters, then this parameter value should be 100.");
+  params.addParam<std::string>(
+      "length_unit",
+      "How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5inches");
   params.addRangeCheckedParam<Real>(
       "alpha_rotation",
       "-180<alpha_rotation<=180",
@@ -254,8 +254,8 @@ MooseCoordTransform::MooseCoordTransform(const InputParameters & params)
   //
   // Scale
   //
-  if (params.isParamValid("length_units_per_meter"))
-    setLengthUnitsPerMeter(params.get<Real>("length_units_per_meter"));
+  if (params.isParamValid("length_unit"))
+    setLengthUnit(MooseUnits(params.get<std::string>("length_unit")));
 }
 
 Point
