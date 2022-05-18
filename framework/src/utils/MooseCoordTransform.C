@@ -327,6 +327,14 @@ MooseCoordTransform::setDestinationCoordinateSystem(
   _destination_r_axis = destination_coord_transform._r_axis;
   _destination_z_axis = destination_coord_transform._z_axis;
 
+  if (destination_coord_transform._has_different_coord_sys &&
+      (_has_different_coord_sys || _coord_type != Moose::COORD_RSPHERICAL))
+    mooseError(
+        "The destination coordinate system has different coordinate systems and we have coordinate "
+        "system(s) that could require coordinate collapsing when transforming from our coordinate "
+        "system to the destination coordinate system. Because our transform method only takes a "
+        "point argument, and not subdomain arguments, the transform is ambiguous");
+
   if ((_destination_coord_type == Moose::COORD_RZ ||
        _destination_coord_type == Moose::COORD_RSPHERICAL) &&
       _has_different_coord_sys)
@@ -334,5 +342,5 @@ MooseCoordTransform::setDestinationCoordinateSystem(
                "coordinate collapsing based on *our* coordinate system. However, we have multiple "
                "coordinate systems, and since when evaluating transformations, we are only "
                "called with a Point argument, we do not know what subdomain we are on and "
-               "consequently we do not know what transformation to apply.");
+               "consequently we do not know what coordinate collapse to apply.");
 }
