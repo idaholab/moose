@@ -6,13 +6,13 @@
     [aux]
       type = RunException
       input = test.i
-      expect_err = "'bad' of type 'SelfAux' depends on variable 'v'. However, that variable does not appear to have a superset of that object's block/boundary restriction."
+      expect_err = "'bad' of type 'SelfAux' depends on variable 'v'. However, that variable does not appear to be defined on boundary 'left'."
       detail = 'auxiliary kernels'
     []
     [uo]
       type = RunException
       input = test.i
-      expect_err = "'bad' of type 'NodalExtremeValue' depends on variable 'v'. However, that variable does not appear to have a superset of that object's block/boundary restriction."
+      expect_err = "'bad' of type 'NodalExtremeValue' depends on variable 'v'. However, that variable does not appear to be defined on boundary 'left'."
       cli_args = "AuxKernels/active='' Postprocessors/active='bad'"
       detail = 'nodal user objects'
     []

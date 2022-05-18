@@ -37,8 +37,16 @@ public:
   /**
    * Check whether all of the variable dependencies are evaluable on the supplied degree of freedom
    * object
+   * @param dof_object The degree of freedom object (an element or node) that we want to check for
+   * existence of variable degrees of freedom on
+   * @param block True if we are checking block restriction. False if we are checking boundary
+   * restriction
+   * @param geometric_name The name of the block or boundary for which we are checking degree of
+   * freedom existence
    */
-  void checkEvaluable(const libMesh::DofObject & dof_object) const;
+  void checkVariables(const libMesh::DofObject & dof_object,
+                      bool block,
+                      const std::string & geometric_name) const;
 
 protected:
   /**

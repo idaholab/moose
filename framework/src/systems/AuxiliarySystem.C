@@ -928,7 +928,8 @@ AuxiliarySystem::boundaryAuxKernelIntegrityCheck(const Node & nd,
                                                  const BoundaryID bnd_id,
                                                  const THREAD_ID tid) const
 {
-  auto check = [&nd, bnd_id, tid](const auto & warehouse)
+  const auto & bnd_name = _mesh.getBoundaryName(bnd_id);
+  auto check = [&nd, bnd_id, tid, &bnd_name](const auto & warehouse)
   {
     if (!warehouse.hasBoundaryObjects(bnd_id, tid))
       return;
@@ -938,7 +939,7 @@ AuxiliarySystem::boundaryAuxKernelIntegrityCheck(const Node & nd,
       // Skip if this object uses geometric search because coupled variables may be defined on
       // paired boundaries instead of the boundary this node is on
       if (!bnd_object->requiresGeometricSearch())
-        bnd_object->checkEvaluable(nd);
+        bnd_object->checkVariables(nd, false, bnd_name);
   };
 
   check(_nodal_aux_storage);

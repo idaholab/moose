@@ -22,7 +22,9 @@ MooseVariableDependencyInterface::MooseVariableDependencyInterface(
 }
 
 void
-MooseVariableDependencyInterface::checkEvaluable(const libMesh::DofObject & dof_object) const
+MooseVariableDependencyInterface::checkVariables(const libMesh::DofObject & dof_object,
+                                                 const bool block,
+                                                 const std::string & geometric_name) const
 {
   for (const auto * const var : _moose_variable_dependencies)
     if (!dof_object.n_dofs(var->sys().number(), var->number()))
@@ -32,6 +34,9 @@ MooseVariableDependencyInterface::checkEvaluable(const libMesh::DofObject & dof_
                  _mvdi_type,
                  "' depends on variable '",
                  var->name(),
-                 "'. However, that variable does not appear to have a superset of that "
-                 "object's block/boundary restriction.");
+                 "'. However, that variable does not appear to be defined on ",
+                 block ? "block" : "boundary",
+                 " '",
+                 geometric_name,
+                 "'.");
 }

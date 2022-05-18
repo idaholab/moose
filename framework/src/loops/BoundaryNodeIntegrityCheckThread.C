@@ -49,11 +49,13 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
   if (node->processor_id() != _fe_problem.processor_id())
     return;
 
+  auto & mesh = _fe_problem.mesh();
+
   // Only check vertices. Variables may not be defined on non-vertex nodes (think first order
   // Lagrange on a second order mesh) and user-code can often handle that
-  const auto & node_to_elem_map = _fe_problem.mesh().nodeToActiveSemilocalElemMap();
+  const auto & node_to_elem_map = mesh.nodeToActiveSemilocalElemMap();
   const Elem * const an_elem =
-      _fe_problem.mesh().getMesh().elem_ptr(libmesh_map_find(node_to_elem_map, node->id()).front());
+      mesh.getMesh().elem_ptr(libmesh_map_find(node_to_elem_map, node->id()).front());
   if (!an_elem->is_vertex(an_elem->get_node_index(node)))
     return;
 
@@ -68,7 +70,7 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
       .condition<AttribBoundaries>(boundary_id, true)
       .queryInto(objs);
   for (const auto & uo : objs)
-    uo->checkEvaluable(*node);
+    uo->checkVariables(*node, false, mesh.getBoundaryName(boundary_id));
 }
 
 void
