@@ -101,24 +101,13 @@ YAMLFormatter::printParams(const std::string & prefix,
     if (!group_name.empty())
       oss << "'" << group_name << "'";
 
-    {
-      InputParameters::Parameter<MooseEnum> * enum_type =
-          dynamic_cast<InputParameters::Parameter<MooseEnum> *>(iter.second);
-      if (enum_type)
-        oss << "\n" << indent << "    options: " << enum_type->get().getRawNames();
-    }
-    {
-      InputParameters::Parameter<MultiMooseEnum> * enum_type =
-          dynamic_cast<InputParameters::Parameter<MultiMooseEnum> *>(iter.second);
-      if (enum_type)
-        oss << "\n" << indent << "    options: " << enum_type->get().getRawNames();
-    }
-    {
-      InputParameters::Parameter<std::vector<MooseEnum>> * enum_type =
-          dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum>> *>(iter.second);
-      if (enum_type)
-        oss << "\n" << indent << "    options: " << (enum_type->get())[0].getRawNames();
-    }
+    if (params.have_parameter<MooseEnum>(name))
+      oss << "\n" << indent << "    options: " << params.get<MooseEnum>(name).getRawNames();
+    if (params.have_parameter<MultiMooseEnum>(name))
+      oss << "\n" << indent << "    options: " << params.get<MultiMooseEnum>(name).getRawNames();
+    if (params.have_parameter<std::vector<MooseEnum>>(name))
+      oss << "\n"
+          << indent << "    options: " << params.get<std::vector<MooseEnum>>(name)[0].getRawNames();
 
     oss << "\n" << indent << "    description: |\n      " << indent << doc << std::endl;
   }
@@ -161,13 +150,14 @@ YAMLFormatter::buildOutputString(
     std::ostringstream & output,
     const std::iterator_traits<InputParameters::iterator>::value_type & p)
 {
+  libMesh::Parameters::Value * val = MooseUtils::get(p.second);
+
   // Account for Point
-  InputParameters::Parameter<Point> * ptr0 =
-      dynamic_cast<InputParameters::Parameter<Point> *>(p.second);
+  InputParameters::Parameter<Point> * ptr0 = dynamic_cast<InputParameters::Parameter<Point> *>(val);
 
   // Account for RealVectorValues
   InputParameters::Parameter<RealVectorValue> * ptr1 =
-      dynamic_cast<InputParameters::Parameter<RealVectorValue> *>(p.second);
+      dynamic_cast<InputParameters::Parameter<RealVectorValue> *>(val);
 
   // Output the Point components
   if (ptr0)

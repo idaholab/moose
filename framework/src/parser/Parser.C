@@ -1232,7 +1232,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       // parser.
 
       InputParameters::Parameter<OutFileBase> * scalar_p =
-          dynamic_cast<InputParameters::Parameter<OutFileBase> *>(it.second);
+          dynamic_cast<InputParameters::Parameter<OutFileBase> *>(MooseUtils::get(it.second));
       if (scalar_p)
       {
         std::string input_file_name = getPrimaryFileName();
@@ -1250,8 +1250,8 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
                    full_name,
                    "' is a private parameter and should not be used in an input file.");
 
-      auto par = it.second;
-      auto short_name = it.first;
+      auto & short_name = it.first;
+      libMesh::Parameters::Value * par = MooseUtils::get(it.second);
 
 #define setscalarvaltype(ptype, base, range)                                                       \
   else if (par->type() == demangle(typeid(ptype).name()))                                          \

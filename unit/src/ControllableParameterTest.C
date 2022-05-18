@@ -20,7 +20,7 @@ get_value(const std::string & name, const InputParameters & params)
   for (libMesh::Parameters::const_iterator map_iter = params.begin(); map_iter != params.end();
        ++map_iter)
     if (name == map_iter->first)
-      return map_iter->second;
+      return MooseUtils::get(map_iter->second);
   return nullptr;
 }
 }

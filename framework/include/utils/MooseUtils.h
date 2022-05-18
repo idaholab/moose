@@ -1051,6 +1051,39 @@ public:
   using Parent::_dynamic_n;
 };
 
+/**
+ * The MooseUtils::get() specializations are used to support making
+ * forwards-compatible code changes from dumb pointers to smart pointers.
+ * The same line of code, e.g.
+ *
+ * libMesh::Parameters::Value * value = MooseUtils::get(map_iter->second);
+ *
+ * will then work regardless of whether map_iter->second is a dumb pointer
+ * or a smart pointer. Note that the smart pointer get() functions are const
+ * so they can be (ab)used to get a non-const pointer to the underlying
+ * resource. We are simply following this convention here.
+ */
+template <typename T>
+T *
+get(const std::unique_ptr<T> & u)
+{
+  return u.get();
+}
+
+template <typename T>
+T *
+get(T * p)
+{
+  return p;
+}
+
+template <typename T>
+T *
+get(const std::shared_ptr<T> & s)
+{
+  return s.get();
+}
+
 } // MooseUtils namespace
 
 /**
