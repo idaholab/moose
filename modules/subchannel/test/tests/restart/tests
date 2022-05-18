@@ -12,5 +12,6 @@
     exodiff = transient_out.e
     prereq = 'steady'
     abs_zero = 5e-6
+    max_threads = 1
   []
 []
