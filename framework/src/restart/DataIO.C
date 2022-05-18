@@ -294,7 +294,9 @@ dataStore(std::ostream & stream, libMesh::Parameters & p, void * context)
 
 #define storescalar(ptype)                                                                         \
   else if (it->second->type() == demangle(typeid(ptype).name())) storeHelper(                      \
-      stream, (dynamic_cast<libMesh::Parameters::Parameter<ptype> *>(it->second))->get(), context)
+      stream,                                                                                      \
+      (dynamic_cast<libMesh::Parameters::Parameter<ptype> *>(MooseUtils::get(it->second)))->get(), \
+      context)
 
     if (false)
       ;

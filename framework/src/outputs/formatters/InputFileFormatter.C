@@ -93,11 +93,12 @@ InputFileFormatter::printParams(const std::string & /*prefix*/,
       // of course we are in dump mode
       if (!_dump_mode && iter.first == "active")
       {
-        libMesh::Parameters::Parameter<std::vector<std::string>> * val =
-            dynamic_cast<libMesh::Parameters::Parameter<std::vector<std::string>> *>(iter.second);
-        const std::vector<std::string> & active = val->get();
-        if (val != NULL && active.size() == 1 && active[0] == "__all__")
-          continue;
+        if (params.have_parameter<std::vector<std::string>>(iter.first))
+        {
+          const auto & active = params.get<std::vector<std::string>>(iter.first);
+          if (active.size() == 1 && active[0] == "__all__")
+            continue;
+        }
       }
 
       // Mark it as "seen"
@@ -106,12 +107,10 @@ InputFileFormatter::printParams(const std::string & /*prefix*/,
       // Don't print type if it is blank
       if (iter.first == "type")
       {
-        libMesh::Parameters::Parameter<std::string> * val =
-            dynamic_cast<libMesh::Parameters::Parameter<std::string> *>(iter.second);
-        if (val)
+        if (params.have_parameter<std::string>(iter.first))
         {
-          const std::string & active = val->get();
-          if (val != NULL && active == "")
+          const auto & active = params.get<std::string>(iter.first);
+          if (active == "")
             continue;
         }
       }

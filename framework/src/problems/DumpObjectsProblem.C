@@ -173,12 +173,14 @@ DumpObjectsProblem::stringifyParameters(const InputParameters & parameters)
       else
       {
         // special treatment for some types
-        auto param_bool = dynamic_cast<InputParameters::Parameter<bool> *>(value_pair.second);
 
         // parameter value
         std::string param_value;
-        if (param_bool)
-          param_value = param_bool->get() ? "true" : "false";
+        if (parameters.have_parameter<bool>(param_name))
+        {
+          const bool & b = parameters.get<bool>(param_name);
+          param_value = b ? "true" : "false";
+        }
         else
         {
           std::stringstream ss;
