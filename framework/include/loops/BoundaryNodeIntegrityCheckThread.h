@@ -15,6 +15,8 @@
 #include "TheWarehouse.h"
 
 class AuxiliarySystem;
+template <typename>
+class MooseObjectTagWarehouse;
 
 class BoundaryNodeIntegrityCheckThread
   : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
@@ -32,6 +34,9 @@ public:
 protected:
   /// The auxiliary system to whom we'll delegate the boundary variable dependency integrity check
   const AuxiliarySystem & _aux_sys;
+
+  /// The nodal boundary conditions from the nonlinear system
+  const MooseObjectTagWarehouse<NodalBCBase> & _nodal_bcs;
 
   /// A warehouse query that we will use to obtain user objects for boundary variable dependency
   /// integrity checks

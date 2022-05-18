@@ -10,10 +10,13 @@
 // MOOSE includes
 #include "BoundaryNodeIntegrityCheckThread.h"
 #include "AuxiliarySystem.h"
-#include "FEProblem.h"
+#include "NonlinearSystemBase.h"
+#include "FEProblemBase.h"
 #include "AuxKernel.h"
 #include "NodalUserObject.h"
 #include "MooseMesh.h"
+#include "NodalBCBase.h"
+#include "MooseObjectTagWarehouse.h"
 
 #include "libmesh/threads.h"
 #include "libmesh/node.h"
@@ -25,6 +28,7 @@ BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     FEProblemBase & fe_problem, const TheWarehouse::Query & query)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
+    _nodal_bcs(fe_problem.getNonlinearSystemBase().getNodalBCWarehouse()),
     _query(query)
 {
 }
@@ -34,6 +38,7 @@ BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     BoundaryNodeIntegrityCheckThread & x, Threads::split split)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
+    _nodal_bcs(x._nodal_bcs),
     _query(x._query)
 {
 }
@@ -62,6 +67,8 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
   // aux check
   _aux_sys.boundaryAuxKernelIntegrityCheck(*node, boundary_id, _tid);
 
+  const auto & bnd_name = mesh.getBoundaryName(boundary_id);
+
   // uo check
   std::vector<NodalUserObject *> objs;
   _query.clone()
@@ -70,7 +77,18 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
       .condition<AttribBoundaries>(boundary_id, true)
       .queryInto(objs);
   for (const auto & uo : objs)
-    uo->checkVariables(*node, false, mesh.getBoundaryName(boundary_id));
+    uo->checkVariables(*node, false, bnd_name);
+
+  // nodal bc check
+  if (_nodal_bcs.hasBoundaryObjects(boundary_id, _tid))
+  {
+    const auto & bnd_objects = _nodal_bcs.getBoundaryObjects(boundary_id, _tid);
+    for (const auto & bnd_object : bnd_objects)
+      // Skip if this object uses geometric search because coupled variables may be defined on
+      // paired boundaries instead of the boundary this node is on
+      if (!bnd_object->requiresGeometricSearch())
+        bnd_object->checkVariables(*node, false, bnd_name);
+  }
 }
 
 void

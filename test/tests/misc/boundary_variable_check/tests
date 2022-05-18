@@ -7,7 +7,7 @@
       type = RunException
       input = test.i
       expect_err = "'bad' of type 'SelfAux' depends on variable 'v'. However, that variable does not appear to be defined on boundary 'left'."
-      detail = 'auxiliary kernels'
+      detail = 'nodal auxiliary kernels'
     []
     [uo]
       type = RunException
@@ -15,6 +15,13 @@
       expect_err = "'bad' of type 'NodalExtremeValue' depends on variable 'v'. However, that variable does not appear to be defined on boundary 'left'."
       cli_args = "AuxKernels/active='' Postprocessors/active='bad'"
       detail = 'nodal user objects'
+    []
+    [nodal_bc]
+      type = RunException
+      input = test.i
+      expect_err = "'bad' of type 'MatchedValueBC' depends on variable 'v'. However, that variable does not appear to be defined on boundary 'left'."
+      cli_args = "AuxKernels/active='' BCs/active='bad right middle'"
+      detail = 'nodal boundary conditions'
     []
   []
 []

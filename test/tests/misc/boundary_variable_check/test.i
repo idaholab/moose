@@ -86,6 +86,12 @@
     boundary = 'left'
     value = 1
   []
+  [bad]
+    type = MatchedValueBC
+    variable = u
+    boundary = 'left'
+    v = v
+  []
   [right]
     type = DirichletBC
     variable = v
