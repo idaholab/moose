@@ -584,6 +584,8 @@ template <typename T>
 VectorValue<T>
 interpolate(const FunctorBase<VectorValue<T>> & functor, const FaceArg & face)
 {
+  if (face.fi->isBoundary() || face.fi->facesRemote())
+    mooseError("We are trying to interpolate on a boundary face!");
   static const VectorValue<T> grad_zero(0);
 
   mooseAssert(face.fi, "this must be non-null");

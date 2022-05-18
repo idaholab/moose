@@ -930,11 +930,18 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
   if (isExtrapolatedBoundaryFace(*fi).first)
+  {
+    std::cout << "Evaluating EBC on " << fi << std::endl;
     return getExtrapolatedBoundaryFaceValue(*fi);
+  }
   else if (isInternalFace(*fi))
+  {
+    std::cout << "Interpolating on " << fi << std::endl;
     return Moose::FV::interpolate(*this, face);
+  }
   else
   {
+    std::cout << "Evaluating DBC on " << fi << std::endl;
     mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
     return getDirichletBoundaryFaceValue(*fi);
   }
@@ -949,9 +956,15 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
   if (isExtrapolatedBoundaryFace(*fi).first)
+  {
+    std::cout << "Evaluating EBC on " << fi << std::endl;
     return getExtrapolatedBoundaryFaceValue(*fi);
+  }
   else if (isInternalFace(*fi))
+  {
+    std::cout << "Interpolating on " << fi << std::endl;
     return getInternalFaceValue(face);
+  }
   else
   {
     mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
