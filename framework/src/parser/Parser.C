@@ -1426,6 +1426,9 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       // map types
       setmap(string, Real);
       setmap(string, string);
+      setmap(unsigned int, unsigned int);
+      setmap(unsigned long, unsigned int);
+      setmap(unsigned long long, unsigned int);
 
       // Double indexed types
       setvectorvector(Real);
