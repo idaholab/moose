@@ -66,7 +66,6 @@ PinMeshGenerator::generate()
   std::unique_ptr<MeshBase> mesh_base = std::move(_input);
   if (!mesh_base)
     mesh_base = buildMeshBaseObject();
-  BoundaryInfo & boundary_info = mesh_base->get_boundary_info();
   mesh_base->set_mesh_dimension(3);
   mesh_base->reserve_elem(_n_cells * (_ny - 1) * (_nx - 1));
   mesh_base->reserve_nodes((_n_cells + 1) * (_ny - 1) * (_nx - 1));
@@ -114,19 +113,10 @@ PinMeshGenerator::generate()
             ((_n_cells + 1) * (_nx - 1)) * iy + (_n_cells + 1) * ix + (iz + 1) + node_sub;
         elem->set_node(0) = mesh_base->node_ptr(indx1);
         elem->set_node(1) = mesh_base->node_ptr(indx2);
-
-        if (iz == 0)
-          boundary_info.add_side(elem, 0, 0);
-        if (iz == _n_cells - 1)
-          boundary_info.add_side(elem, 1, 1);
       }
     }
   }
 
-  boundary_info.sideset_name(0) = "inlet";
-  boundary_info.sideset_name(1) = "outlet";
-  boundary_info.nodeset_name(0) = "inlet";
-  boundary_info.nodeset_name(1) = "outlet";
   mesh_base->subdomain_name(_block_id) = name();
   mesh_base->prepare_for_use();
 
