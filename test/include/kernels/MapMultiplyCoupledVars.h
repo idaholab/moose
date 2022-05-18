@@ -26,6 +26,9 @@ private:
   const ADVariableValue & _w;
   const std::map<std::string, Real> & _coupled_map;
   const std::map<std::string, std::string> & _dummy_string_to_string_map;
+  const std::map<unsigned long long, unsigned int> & _dummy_ullong_to_uint_map;
+  const std::map<unsigned int, unsigned int> & _dummy_uint_to_uint_map;
+  const std::map<unsigned long, unsigned int> & _dummy_ulong_to_uint_map;
   Real _v_multiplier;
   Real _w_multiplier;
 };

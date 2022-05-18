@@ -35,6 +35,9 @@
     w = w
     coupled_var_multipliers = 'v 2 w 3'
     dummy_string_to_string_map = 'a 1 b c'
+    dummy_ullong_to_uint_map = '5000000000 1 2 0'
+    dummy_uint_to_uint_map = '50 1 2 0'
+    dummy_ulong_to_uint_map = '50 1 2 0'
   []
   [odd_entries]
     type = MapMultiplyCoupledVars
@@ -43,6 +46,9 @@
     w = w
     coupled_var_multipliers = 'v 2 w'
     dummy_string_to_string_map = 'a 1 b c'
+    dummy_ullong_to_uint_map = '5000000000 1 2 0'
+    dummy_uint_to_uint_map = '50 1 2 0'
+    dummy_ulong_to_uint_map = '50 1 2 0'
   []
   [bad_value]
     type = MapMultiplyCoupledVars
@@ -51,6 +57,9 @@
     w = w
     coupled_var_multipliers = 'v 2 w a'
     dummy_string_to_string_map = 'a 1 b c'
+    dummy_ullong_to_uint_map = '5000000000 1 2 0'
+    dummy_uint_to_uint_map = '50 1 2 0'
+    dummy_ulong_to_uint_map = '50 1 2 0'
   []
 []
 
