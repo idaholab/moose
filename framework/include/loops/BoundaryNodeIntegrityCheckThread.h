@@ -13,10 +13,14 @@
 #include "MooseMesh.h"
 #include "ThreadedNodeLoop.h"
 #include "TheWarehouse.h"
+#include "AuxKernel.h"
 
 class AuxiliarySystem;
 template <typename>
 class MooseObjectTagWarehouse;
+template <typename>
+class ExecuteMooseObjectWarehouse;
+class NodalBCBase;
 
 class BoundaryNodeIntegrityCheckThread
   : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
@@ -34,6 +38,15 @@ public:
 protected:
   /// The auxiliary system to whom we'll delegate the boundary variable dependency integrity check
   const AuxiliarySystem & _aux_sys;
+
+  /// Nodal auxiliary kernels acting on standard field variables
+  const ExecuteMooseObjectWarehouse<AuxKernel> & _nodal_aux;
+
+  /// Nodal auxiliary kernels acting on vector field variables
+  const ExecuteMooseObjectWarehouse<VectorAuxKernel> & _nodal_vec_aux;
+
+  /// Nodal auxiliary kernels acting on array field variables
+  const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & _nodal_array_aux;
 
   /// The nodal boundary conditions from the nonlinear system
   const MooseObjectTagWarehouse<NodalBCBase> & _nodal_bcs;

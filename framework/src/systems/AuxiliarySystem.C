@@ -923,30 +923,6 @@ AuxiliarySystem::computeNodalVarsHelper(
   }
 }
 
-void
-AuxiliarySystem::boundaryAuxKernelIntegrityCheck(const Node & nd,
-                                                 const BoundaryID bnd_id,
-                                                 const THREAD_ID tid) const
-{
-  const auto & bnd_name = _mesh.getBoundaryName(bnd_id);
-  auto check = [&nd, bnd_id, tid, &bnd_name](const auto & warehouse)
-  {
-    if (!warehouse.hasBoundaryObjects(bnd_id, tid))
-      return;
-
-    const auto & bnd_objects = warehouse.getBoundaryObjects(bnd_id, tid);
-    for (const auto & bnd_object : bnd_objects)
-      // Skip if this object uses geometric search because coupled variables may be defined on
-      // paired boundaries instead of the boundary this node is on
-      if (!bnd_object->requiresGeometricSearch())
-        bnd_object->checkVariables(nd, false, bnd_name);
-  };
-
-  check(_nodal_aux_storage);
-  check(_nodal_vec_aux_storage);
-  check(_nodal_array_aux_storage);
-}
-
 template void AuxiliarySystem::computeElementalVarsHelper<AuxKernel>(
     const MooseObjectWarehouse<AuxKernel> &,
     const std::vector<std::vector<MooseVariableFEBase *>> &);

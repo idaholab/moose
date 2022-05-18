@@ -153,7 +153,9 @@ public:
 
   void clearScalarVariableCoupleableTags();
 
-  void boundaryAuxKernelIntegrityCheck(const Node & nd, BoundaryID bnd_id, THREAD_ID tid) const;
+  const ExecuteMooseObjectWarehouse<AuxKernel> & nodalAuxWarehouse() const;
+  const ExecuteMooseObjectWarehouse<VectorAuxKernel> & nodalVectorAuxWarehouse() const;
+  const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & nodalArrayAuxWarehouse() const;
 
 protected:
   void computeScalarVars(ExecFlagType type);
@@ -239,3 +241,21 @@ protected:
 
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 };
+
+inline const ExecuteMooseObjectWarehouse<AuxKernel> &
+AuxiliarySystem::nodalAuxWarehouse() const
+{
+  return _nodal_aux_storage;
+}
+
+inline const ExecuteMooseObjectWarehouse<VectorAuxKernel> &
+AuxiliarySystem::nodalVectorAuxWarehouse() const
+{
+  return _nodal_vec_aux_storage;
+}
+
+inline const ExecuteMooseObjectWarehouse<ArrayAuxKernel> &
+AuxiliarySystem::nodalArrayAuxWarehouse() const
+{
+  return _nodal_array_aux_storage;
+}
