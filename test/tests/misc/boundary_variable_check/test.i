@@ -1,3 +1,7 @@
+[Problem]
+  boundary_restricted_elem_integrity_check = true
+[]
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator

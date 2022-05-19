@@ -183,10 +183,15 @@ FEProblemBase::validParams()
   params.addParam<bool>(
       "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
   params.addParam<bool>(
-      "boundary_restricted_integrity_check",
+      "boundary_restricted_node_integrity_check",
       true,
-      "Set to false to disable checking of boundary restricted object variable dependencies, "
+      "Set to false to disable checking of boundary restricted nodal object variable dependencies, "
       "e.g. are the variable dependencies defined on the selected boundaries?");
+  params.addParam<bool>("boundary_restricted_elem_integrity_check",
+                        false,
+                        "Set to true to enable checking of boundary restricted elemental object "
+                        "variable dependencies, e.g. are the variable dependencies defined on the "
+                        "selected boundaries?");
   params.addParam<bool>("material_coverage_check",
                         true,
                         "Set to false to disable material->subdomain coverage check");
@@ -294,7 +299,10 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(getParam<bool>("kernel_coverage_check")),
-    _boundary_restricted_integrity_check(getParam<bool>("boundary_restricted_integrity_check")),
+    _boundary_restricted_node_integrity_check(
+        getParam<bool>("boundary_restricted_node_integrity_check")),
+    _boundary_restricted_elem_integrity_check(
+        getParam<bool>("boundary_restricted_elem_integrity_check")),
     _material_coverage_check(getParam<bool>("material_coverage_check")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
@@ -994,16 +1002,21 @@ FEProblemBase::initialSetup()
     }
   }
 
-  if (_boundary_restricted_integrity_check)
+  if (_boundary_restricted_node_integrity_check)
   {
-    TIME_SECTION("BoundaryRestrictedIntegrityCheck", 5);
+    TIME_SECTION("BoundaryRestrictedNodeIntegrityCheck", 5);
 
-    // check that variables are defined along boundaries of boundary restricted objects
-
+    // check that variables are defined along boundaries of boundary restricted nodal objects
     ConstBndNodeRange & bnd_nodes = *mesh().getBoundaryNodeRange();
     BoundaryNodeIntegrityCheckThread bnict(*this, uo_query);
     Threads::parallel_reduce(bnd_nodes, bnict);
+  }
 
+  if (_boundary_restricted_elem_integrity_check)
+  {
+    TIME_SECTION("BoundaryRestrictedElemIntegrityCheck", 5);
+
+    // check that variables are defined along boundaries of boundary restricted elemental objects
     ConstBndElemRange & bnd_elems = *mesh().getBoundaryElementRange();
     BoundaryElemIntegrityCheckThread beict(*this, uo_query);
     Threads::parallel_reduce(bnd_elems, beict);
