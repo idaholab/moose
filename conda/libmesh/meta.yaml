@@ -1,5 +1,5 @@
 # Do not use jinja templating (A physical change to this file is required to trigger a build)
-{% set build = 0 %}
+{% set build = 1 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "2022.05.12" %}
 
