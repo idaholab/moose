@@ -1,6 +1,3 @@
-starting_point = 0.25
-offset = 0.00
-
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   volumetric_locking_correction = true
@@ -178,7 +175,6 @@ offset = 0.00
     new_block_name = 'primary_lower'
   []
   uniform_refine = 0
-  allow_renumbering = false
 []
 
 [Functions]
@@ -195,14 +191,17 @@ offset = 0.00
   [mortar_normal_lm]
     block = 'secondary_lower'
     use_dual = true
+    scaling = 1e-3
   []
   [mortar_tangential_lm]
     block = 'secondary_lower'
     use_dual = true
+    scaling = 1e-3
   []
   [mortar_tangential_3d_lm]
     block = 'secondary_lower'
     use_dual = true
+    scaling = 1e-3
   []
 []
 
@@ -213,7 +212,7 @@ offset = 0.00
     newmark_beta = 0.25
     newmark_gamma = 0.5
     mass_damping_coefficient = 0.0
-    stiffness_damping_coefficient = 0.1
+    stiffness_damping_coefficient = 0.02
     displacements = 'disp_x disp_y disp_z'
     generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_zz'
     block = '1 2'
@@ -266,12 +265,13 @@ offset = 0.00
     use_displaced_mesh = true
     friction_lm = mortar_tangential_lm
     friction_lm_dir = mortar_tangential_3d_lm
-    c = 1e4
-    c_t = 1.0e4
+    c = 1e5
+    c_t = 1.0e5
     newmark_beta = 0.25
     newmark_gamma = 0.5
     interpolate_normals = false
     correct_edge_dropping = true
+    capture_tolerance = 1e-04
     function_friction = mu_function
   []
   [normal_x]
@@ -409,26 +409,26 @@ offset = 0.00
   [botx]
     type = DirichletBC
     variable = disp_x
-    boundary = 'bottom_left bottom_right bottom_front bottom_back'
+    boundary = 'bottom_left bottom_right bottom_front bottom_back bottom_top bottom_bottom'
     value = 0.0
   []
   [boty]
     type = DirichletBC
     variable = disp_y
-    boundary = 'bottom_left bottom_right bottom_front bottom_back'
+    boundary = 'bottom_left bottom_right bottom_front bottom_back bottom_top bottom_bottom'
     value = 0.0
   []
   [botz]
     type = DirichletBC
     variable = disp_z
-    boundary = 'bottom_left bottom_right bottom_front bottom_back'
+    boundary = 'bottom_left bottom_right bottom_front bottom_back bottom_top bottom_bottom'
     value = 0.0
   []
   [topx]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 'top_top'
-    function = '0.025*t'
+    function = '0.1*t'
   []
   [topy]
     type = DirichletBC
@@ -440,22 +440,23 @@ offset = 0.00
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'top_top'
-    function = '-${starting_point} * sin(2 * pi / 40 * t) + ${offset}'
+    function = '-0.1*t'
   []
 []
 
 [Executioner]
   type = Transient
-  end_time = .075
-  dt = .025
+  end_time = .04
+  dt = .02
   dtmin = .001
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = ' lu       superlu_dist               NONZERO               1e-14'
-  nl_rel_tol = 1e-13
-  nl_abs_tol = 1e-13
+  petsc_options_iname = '-pc_type  -pc_factor_shift_type'
+  petsc_options_value = ' lu       NONZERO             '
+  nl_rel_tol = 5e-13
+  nl_abs_tol = 5e-13
   line_search = 'basic'
+
   [TimeIntegrator]
     type = NewmarkBeta
     gamma = 0.5
