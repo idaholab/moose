@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <string>
+
 /**
  * Interface for objects that need to resolve data file paths (MooseObject and Action)
  */

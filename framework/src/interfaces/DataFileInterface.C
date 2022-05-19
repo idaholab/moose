@@ -9,6 +9,8 @@
 
 #include "DataFileInterface.h"
 #include "MooseError.h"
+#include "MooseObject.h"
+#include "Action.h"
 
 template <class T>
 DataFileInterface<T>::DataFileInterface(const T & parent) : _parent(parent)
@@ -21,7 +23,7 @@ DataFileInterface<T>::getDataFileName(const std::string & param) const
 {
   /// - relative to the input file directory
   {
-    const auto & absolute_path = getParam<FileName>(param);
+    const auto & absolute_path = _parent.template getParam<FileName>(param);
     if (MooseUtils::checkFileReadable(absolute_path, false, false, false))
     {
       _parent.paramInfo(param, "Data file '", absolute_path, "' found relative to the input file.");
@@ -29,7 +31,7 @@ DataFileInterface<T>::getDataFileName(const std::string & param) const
     }
   }
 
-  const auto & relative_path = _pars.rawParamVal(param);
+  const auto & relative_path = _parent.parameters().rawParamVal(param);
   return getDataFileNameByName(relative_path, &param);
 }
 
@@ -72,13 +74,11 @@ DataFileInterface<T>::getDataFileNameByName(const std::string & relative_path,
     }
   }
 
-  mooseException(param ? _pars.inputLocation(*param) : _name,
+  mooseException(param ? _parent.parameters().inputLocation(*param) : _parent.name(),
                  ": Unable to find data file '",
                  relative_path,
                  "' anywhere");
 }
 
-class Action;
-class MooseObject;
-template DataFileInterface<Action>;
-template DataFileInterface<MooseObject>;
+template class DataFileInterface<Action>;
+template class DataFileInterface<MooseObject>;
