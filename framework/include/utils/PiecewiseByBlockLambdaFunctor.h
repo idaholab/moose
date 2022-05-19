@@ -241,7 +241,6 @@ typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::SingleSidedFaceArg & face,
                                            unsigned int state) const
 {
-  std::cout << "Here single sided" << std::endl;
   auto it = _face_functor.find(face.sub_id);
   if (it == _face_functor.end())
     subdomainErrorMessage(face.sub_id);
@@ -254,9 +253,15 @@ typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face,
                                            unsigned int libmesh_dbg_var(state)) const
 {
-  std::cout << "Here double sided" << std::endl;
   using namespace Moose::FV;
   mooseAssert(state == 0, "Only current time state supported.");
+
+  if (face.fi->isBoundary())
+  {
+    Moose::SingleSidedFaceArg fa = {
+        face.fi, face.limiter_type, face.elem_is_upwind, face.correct_skewness, face.elem_sub_id};
+    return this->evaluate(fa, 0);
+  }
 
   return interpolate(*this, face);
 }

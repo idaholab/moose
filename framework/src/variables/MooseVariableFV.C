@@ -532,23 +532,6 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 }
 
 template <typename OutputType>
-ADReal
-MooseVariableFV<OutputType>::getNeighborValue(const Elem * const neighbor,
-                                              const FaceInfo & fi) const
-{
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("MooseVariableFV::getNeighborValue only supported for global AD indexing");
-#endif
-
-  if (neighbor && this->hasBlocks(neighbor->subdomain_id()))
-    return getElemValue(neighbor);
-  else
-    // If we don't have a neighbor, then we're along a boundary or at the edge of a
-    // remote elem (processor boundary)
-    return getBoundaryFaceValue(fi);
-}
-
-template <typename OutputType>
 bool
 MooseVariableFV<OutputType>::isInternalFace(const FaceInfo & fi) const
 {
@@ -829,6 +812,26 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
 }
 
 template <typename OutputType>
+VectorValue<ADReal>
+MooseVariableFV<OutputType>::adOrthogonalGradSln(const FaceInfo & fi) const
+{
+  bool var_defined_on_elem = fi.varDefinedOnElem(this->name());
+  const Elem * const elem = &fi.elem();
+  const Elem * const neighbor = fi.neighborPtr();
+
+  FaceInfo::VarFaceNeighbors face_type = fi.faceType(_var.name());
+  if (if face_type == Moose::FV::FaceInfo::BOTH)
+    return (getElemValue(elem) - getElemValue(neighbor)) / fi.dCFMag();
+    else
+
+  const ADReal side_one_value =
+      var_defined_on_elem ? getElemValue(elem) : getNeighborValue(elem, fi);
+
+  const ADReal side_two_value =
+      var_defined_on_elem ? getNeighborValue(neighbor, fi) : getElemValue(neighbor);
+}
+
+template <typename OutputType>
 const VectorValue<ADReal> &
 MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_skewness) const
 {
@@ -931,17 +934,14 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
   mooseAssert(fi, "The face information must be non-null");
   if (isExtrapolatedBoundaryFace(*fi).first)
   {
-    std::cout << "Evaluating EBC on " << fi << std::endl;
     return getExtrapolatedBoundaryFaceValue(*fi);
   }
   else if (isInternalFace(*fi))
   {
-    std::cout << "Interpolating on " << fi << std::endl;
     return Moose::FV::interpolate(*this, face);
   }
   else
   {
-    std::cout << "Evaluating DBC on " << fi << std::endl;
     mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
     return getDirichletBoundaryFaceValue(*fi);
   }
@@ -957,12 +957,10 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
   mooseAssert(fi, "The face information must be non-null");
   if (isExtrapolatedBoundaryFace(*fi).first)
   {
-    std::cout << "Evaluating EBC on " << fi << std::endl;
     return getExtrapolatedBoundaryFaceValue(*fi);
   }
   else if (isInternalFace(*fi))
   {
-    std::cout << "Interpolating on " << fi << std::endl;
     return getInternalFaceValue(face);
   }
   else

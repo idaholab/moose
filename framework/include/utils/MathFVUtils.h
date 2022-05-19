@@ -277,6 +277,8 @@ interpolate(InterpMethod m,
             const FaceInfo & fi,
             const bool one_is_elem)
 {
+  if (fi.isBoundary())
+    mooseError("Cannot use interpolation on boundary face!");
   switch (m)
   {
     case InterpMethod::Average:
@@ -342,6 +344,8 @@ interpolate(InterpMethod m,
             const Vector2<T3> & fi_neighbor_advector,
             const FaceInfo & fi)
 {
+  if (fi.isBoundary())
+    mooseError("Cannot use interpolation on boundary face!");
   switch (m)
   {
     case InterpMethod::Average:
@@ -389,6 +393,9 @@ interpolate(InterpMethod m,
             const FaceInfo & fi,
             const bool one_is_elem)
 {
+  if (fi.isBoundary())
+    mooseError("Cannot use interpolation on boundary face!");
+
   const auto coeffs = interpCoeffs(m, fi, one_is_elem, advector);
   result = coeffs.first * value1 + coeffs.second * value2;
 }
@@ -487,6 +494,9 @@ interpolate(const Limiter<Scalar> & limiter,
             const FaceInfo & fi,
             const bool fi_elem_is_upwind)
 {
+  if (fi.isBoundary())
+    mooseError("Cannot use interpolation on boundary face!");
+
   auto pr = interpCoeffs(limiter, phi_upwind, phi_downwind, grad_phi_upwind, fi, fi_elem_is_upwind);
   return pr.first * phi_upwind + pr.second * phi_downwind;
 }
@@ -571,6 +581,9 @@ template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>:
 T
 interpolate(const FunctorBase<T> & functor, const FaceArg & face)
 {
+  if (face.fi->isBoundary())
+    mooseError("Cannot use interpolation on boundary face!");
+
   // Special handling for central differencing as it is the only interpolation method which
   // currently supports skew correction
   if (face.limiter_type == LimiterType::CentralDifference)
@@ -634,6 +647,9 @@ template <typename T>
 T
 containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face)
 {
+  if (face.fi->isBoundary())
+    mooseError("Cannot use interpolation on boundary face!");
+
   typedef typename FunctorBase<T>::GradientType ContainerGradientType;
   typedef typename ContainerGradientType::value_type GradientType;
   const GradientType * const example_gradient = nullptr;

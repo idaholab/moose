@@ -459,18 +459,6 @@ public:
   ADReal getElemValue(const Elem * elem) const;
 
   /**
-   * Get the solution value with derivative seeding on the \p neighbor element. If the neighbor
-   * is null or this variable doesn't exist on the neighbor element's subdomain, then we compute a
-   * neighbor value based on any Dirichlet boundary conditions associated with the face information,
-   * or absent that we assume a zero gradient and simply return the \p elem_value
-   * @param neighbor The \p neighbor element that we want to retrieve the solution value for
-   * @param fi The face information object
-   * @return The neighbor solution value with derivative seeding according to the associated degree
-   * of freedom
-   */
-  ADReal getNeighborValue(const Elem * const neighbor, const FaceInfo & fi) const;
-
-  /**
    * Compute or retrieve from cache the solution value on an internal face using linear
    * interpolation.
    * @param fi The face information object

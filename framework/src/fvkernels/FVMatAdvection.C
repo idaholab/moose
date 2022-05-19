@@ -57,21 +57,17 @@ FVMatAdvection::computeQpResidual()
 {
   using namespace Moose::FV;
 
-  std::cout << "on boundary " << _face_info->isBoundary() << _face_info << std::endl;
   const auto v = _vel(makeFace(*_face_info,
                                LimiterType::CentralDifference,
                                true,
                                faceArgSubdomains(),
                                _advected_interp_method == InterpMethod::SkewCorrectedAverage));
-  std::cout << "velocity " << v(0) << std::endl;
   const auto adv_quant_interface =
       _adv_quant(makeFace(*_face_info,
                           limiterType(_advected_interp_method),
                           MetaPhysicL::raw_value(v) * _normal > 0,
                           faceArgSubdomains(),
                           _advected_interp_method == InterpMethod::SkewCorrectedAverage));
-
-  std::cout << "adv quantity " << adv_quant_interface << std::endl;
 
   return _normal * v * adv_quant_interface;
 }
