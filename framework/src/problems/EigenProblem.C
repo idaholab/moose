@@ -555,6 +555,10 @@ EigenProblem::solve()
     _nl->solve();
     _nl->update();
 
+    // with PJFNKMO solve type, we need to evaluate the linear objects to bring them up-to-date
+    if (solverParams()._eigen_solve_type == Moose::EST_PJFNKMO)
+      execute(EXEC_LINEAR);
+
     // Scale eigen vector if users ask
     postScaleEigenVector();
   }
