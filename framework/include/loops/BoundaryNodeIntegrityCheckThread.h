@@ -54,4 +54,7 @@ protected:
   /// A warehouse query that we will use to obtain user objects for boundary variable dependency
   /// integrity checks
   const TheWarehouse::Query & _query;
+
+  /// Node to element map. Used for determining vertex vs. non-vertex nodes
+  const std::map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
 };

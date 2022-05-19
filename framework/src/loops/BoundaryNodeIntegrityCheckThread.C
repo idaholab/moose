@@ -32,7 +32,8 @@ BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     _nodal_vec_aux(_aux_sys.nodalVectorAuxWarehouse()),
     _nodal_array_aux(_aux_sys.nodalArrayAuxWarehouse()),
     _nodal_bcs(fe_problem.getNonlinearSystemBase().getNodalBCWarehouse()),
-    _query(query)
+    _query(query),
+    _node_to_elem_map(fe_problem.mesh().nodeToActiveSemilocalElemMap())
 {
 }
 
@@ -45,7 +46,8 @@ BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     _nodal_vec_aux(x._nodal_vec_aux),
     _nodal_array_aux(x._nodal_array_aux),
     _nodal_bcs(x._nodal_bcs),
-    _query(x._query)
+    _query(x._query),
+    _node_to_elem_map(x._node_to_elem_map)
 {
 }
 
@@ -64,9 +66,8 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
 
   // Only check vertices. Variables may not be defined on non-vertex nodes (think first order
   // Lagrange on a second order mesh) and user-code can often handle that
-  const auto & node_to_elem_map = mesh.nodeToActiveSemilocalElemMap();
   const Elem * const an_elem =
-      mesh.getMesh().elem_ptr(libmesh_map_find(node_to_elem_map, node->id()).front());
+      mesh.getMesh().elem_ptr(libmesh_map_find(_node_to_elem_map, node->id()).front());
   if (!an_elem->is_vertex(an_elem->get_node_index(node)))
     return;
 
@@ -82,8 +83,12 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
   for (const auto & uo : objs)
     boundaryIntegrityCheckError(*uo, uo->checkVariables(*node), bnd_name);
 
-  auto check = [node, boundary_id, &bnd_name, this](const auto & warehouse)
+  auto check =
+      [node, boundary_id, &bnd_name, this](const auto & warehouse, const bool threaded = true)
   {
+    if (!threaded && _tid != 0)
+      return;
+
     if (!warehouse.hasBoundaryObjects(boundary_id, _tid))
       return;
 
@@ -98,7 +103,7 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
   check(_nodal_aux);
   check(_nodal_vec_aux);
   check(_nodal_array_aux);
-  check(_nodal_bcs);
+  check(_nodal_bcs, false);
 }
 
 void
