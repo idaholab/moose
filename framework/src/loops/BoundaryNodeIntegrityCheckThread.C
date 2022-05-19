@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "BoundaryNodeIntegrityCheckThread.h"
+#include "BoundaryElemIntegrityCheckThread.h"
 #include "AuxiliarySystem.h"
 #include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
@@ -79,7 +80,7 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
       .condition<AttribBoundaries>(boundary_id, true)
       .queryInto(objs);
   for (const auto & uo : objs)
-    uo->checkVariables(*node, false, bnd_name);
+    boundaryIntegrityCheckError(*uo, uo->checkVariables(*node), bnd_name);
 
   auto check = [node, boundary_id, &bnd_name, this](const auto & warehouse)
   {
@@ -91,7 +92,7 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
       // Skip if this object uses geometric search because coupled variables may be defined on
       // paired boundaries instead of the boundary this node is on
       if (!bnd_object->requiresGeometricSearch())
-        bnd_object->checkVariables(*node, false, bnd_name);
+        boundaryIntegrityCheckError(*bnd_object, bnd_object->checkVariables(*node), bnd_name);
   };
 
   check(_nodal_aux);

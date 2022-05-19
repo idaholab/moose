@@ -14,29 +14,29 @@
 #include "MooseError.h"
 
 #include "libmesh/dof_object.h"
+#include "libmesh/dof_map.h"
 
-MooseVariableDependencyInterface::MooseVariableDependencyInterface(
-    const MooseObject * const moose_object)
-  : _mvdi_name(moose_object->name()), _mvdi_type(moose_object->type())
+using namespace libMesh;
+
+MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject * const) {}
+
+template <typename DofObjectType>
+std::set<MooseVariableFieldBase *>
+MooseVariableDependencyInterface::checkVariables(
+    const DofObjectType & dof_object, const std::set<MooseVariableFieldBase *> & vars_to_check)
 {
+  std::set<MooseVariableFieldBase *> vars_without_indices;
+  for (auto * const var : vars_to_check)
+  {
+    var->sys().dofMap().dof_indices(&dof_object, _dof_indices, var->number());
+    if (_dof_indices.empty())
+      vars_without_indices.insert(var);
+  }
+
+  return vars_without_indices;
 }
 
-void
-MooseVariableDependencyInterface::checkVariables(const libMesh::DofObject & dof_object,
-                                                 const bool block,
-                                                 const std::string & geometric_name) const
-{
-  for (const auto * const var : _moose_variable_dependencies)
-    if (!dof_object.n_dofs(var->sys().number(), var->number()))
-      mooseError("'",
-                 _mvdi_name,
-                 "' of type '",
-                 _mvdi_type,
-                 "' depends on variable '",
-                 var->name(),
-                 "'. However, that variable does not appear to be defined on ",
-                 block ? "block" : "boundary",
-                 " '",
-                 geometric_name,
-                 "'.");
-}
+template std::set<MooseVariableFieldBase *> MooseVariableDependencyInterface::checkVariables(
+    const Elem & dof_object, const std::set<MooseVariableFieldBase *> & vars_to_check);
+template std::set<MooseVariableFieldBase *> MooseVariableDependencyInterface::checkVariables(
+    const Node & dof_object, const std::set<MooseVariableFieldBase *> & vars_to_check);

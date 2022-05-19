@@ -100,6 +100,7 @@
 #include "Executioner.h"
 #include "VariadicTable.h"
 #include "BoundaryNodeIntegrityCheckThread.h"
+#include "BoundaryElemIntegrityCheckThread.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -997,11 +998,15 @@ FEProblemBase::initialSetup()
   {
     TIME_SECTION("BoundaryRestrictedIntegrityCheck", 5);
 
-    // check that variables are defined along boundaries before executing user objects and aux
-    // kernels
+    // check that variables are defined along boundaries of boundary restricted objects
+
     ConstBndNodeRange & bnd_nodes = *mesh().getBoundaryNodeRange();
     BoundaryNodeIntegrityCheckThread bnict(*this, uo_query);
     Threads::parallel_reduce(bnd_nodes, bnict);
+
+    ConstBndElemRange & bnd_elems = *mesh().getBoundaryElementRange();
+    BoundaryElemIntegrityCheckThread beict(*this, uo_query);
+    Threads::parallel_reduce(bnd_elems, beict);
   }
 
   if (!_app.isRecovering())

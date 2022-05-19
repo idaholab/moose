@@ -157,6 +157,10 @@ public:
   const ExecuteMooseObjectWarehouse<VectorAuxKernel> & nodalVectorAuxWarehouse() const;
   const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & nodalArrayAuxWarehouse() const;
 
+  const ExecuteMooseObjectWarehouse<AuxKernel> & elemAuxWarehouse() const;
+  const ExecuteMooseObjectWarehouse<VectorAuxKernel> & elemVectorAuxWarehouse() const;
+  const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & elemArrayAuxWarehouse() const;
+
 protected:
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);
@@ -258,4 +262,22 @@ inline const ExecuteMooseObjectWarehouse<ArrayAuxKernel> &
 AuxiliarySystem::nodalArrayAuxWarehouse() const
 {
   return _nodal_array_aux_storage;
+}
+
+inline const ExecuteMooseObjectWarehouse<AuxKernel> &
+AuxiliarySystem::elemAuxWarehouse() const
+{
+  return _elemental_aux_storage;
+}
+
+inline const ExecuteMooseObjectWarehouse<VectorAuxKernel> &
+AuxiliarySystem::elemVectorAuxWarehouse() const
+{
+  return _elemental_vec_aux_storage;
+}
+
+inline const ExecuteMooseObjectWarehouse<ArrayAuxKernel> &
+AuxiliarySystem::elemArrayAuxWarehouse() const
+{
+  return _elemental_array_aux_storage;
 }

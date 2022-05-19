@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "libmesh/id_types.h"
+
 #include <set>
 #include <vector>
 
@@ -23,7 +25,7 @@ class MooseVariableDependencyInterface
 {
 public:
   // Must be a pointer in order to disambiguate with default copy constructor
-  MooseVariableDependencyInterface(const MooseObject * moose_object);
+  MooseVariableDependencyInterface(const MooseObject *);
 
   /**
    * Retrieve the set of MooseVariableFieldBase that _this_ object depends on.
@@ -35,18 +37,29 @@ public:
   }
 
   /**
-   * Check whether all of the variable dependencies are evaluable on the supplied degree of freedom
-   * object
+   * Check whether all of the variable dependencies have degree of freedom indices on the supplied
+   * degree of freedom object
    * @param dof_object The degree of freedom object (an element or node) that we want to check for
    * existence of variable degrees of freedom on
-   * @param block True if we are checking block restriction. False if we are checking boundary
-   * restriction
-   * @param geometric_name The name of the block or boundary for which we are checking degree of
-   * freedom existence
+   * @return Any variables that do not have degrees of freedom on the supplied degree of freedom
+   * object
    */
-  void checkVariables(const libMesh::DofObject & dof_object,
-                      bool block,
-                      const std::string & geometric_name) const;
+  template <typename DofObjectType>
+  std::set<MooseVariableFieldBase *> checkVariables(const DofObjectType & dof_object);
+
+  /**
+   * Check whether all of the supplied variables have degree of freedom indices on the supplied
+   * degree of freedom object
+   * @param dof_object The degree of freedom object (an element or node) that we want to check for
+   * existence of variable degrees of freedom on
+   * @param vars_to_check the variables to check
+   * @return Any variables that do not have degrees of freedom on the supplied degree of freedom
+   * object
+   */
+  template <typename DofObjectType>
+  std::set<MooseVariableFieldBase *>
+  checkVariables(const DofObjectType & dof_object,
+                 const std::set<MooseVariableFieldBase *> & vars_to_check);
 
 protected:
   /**
@@ -65,9 +78,13 @@ protected:
 private:
   std::set<MooseVariableFieldBase *> _moose_variable_dependencies;
 
-  /// The name of the moose object that this interface aggregates into
-  const std::string & _mvdi_name;
-
-  /// The type of the moose object that this interface aggregates into
-  const std::string & _mvdi_type;
+  /// A container for holding dof indices in order to avoid constant memory reallocation
+  std::vector<libMesh::dof_id_type> _dof_indices;
 };
+
+template <typename DofObjectType>
+std::set<MooseVariableFieldBase *>
+MooseVariableDependencyInterface::checkVariables(const DofObjectType & dof_object)
+{
+  return checkVariables(dof_object, _moose_variable_dependencies);
+}

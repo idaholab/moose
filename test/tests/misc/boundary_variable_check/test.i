@@ -23,6 +23,16 @@
 
 [AuxVariables]
   [dummy][]
+  [dummy2]
+    family = MONOMIAL
+    order = CONSTANT
+    block = 1
+  []
+  [dummy3]
+    family = MONOMIAL
+    order = CONSTANT
+    block = 0
+  []
 []
 
 [AuxKernels]
@@ -31,6 +41,12 @@
     type = SelfAux
     variable = dummy
     v = v
+    boundary = 'left'
+  []
+  [bad_elemental]
+    type = SelfAux
+    variable = dummy3
+    v = dummy2
     boundary = 'left'
   []
 []
@@ -92,6 +108,12 @@
     boundary = 'left'
     v = v
   []
+  [bad_integrated]
+    type = CoupledVarNeumannBC
+    variable = u
+    boundary = 'left'
+    v = v
+  []
   [right]
     type = DirichletBC
     variable = v
@@ -148,5 +170,11 @@
     type = NodalExtremeValue
     boundary = 'left'
     variable = v
+  []
+  [bad_side]
+    type = SideDiffusiveFluxIntegral
+    variable = v
+    diffusivity = 1
+    boundary = 'left'
   []
 []
