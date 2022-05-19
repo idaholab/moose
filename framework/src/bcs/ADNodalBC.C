@@ -70,6 +70,8 @@ void
 ADNodalBCTempl<T>::computeResidual()
 {
   const std::vector<dof_id_type> & dof_indices = _var.dofIndices();
+  if (dof_indices.empty())
+    return;
 
   mooseAssert(dof_indices.size() <= _set_components.size(),
               "The number of dof indices must be less than the number of settable components");
@@ -87,12 +89,15 @@ template <typename T>
 void
 ADNodalBCTempl<T>::computeJacobian()
 {
+  const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
+  if (cached_rows.empty())
+    return;
+
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   auto ad_offset = Moose::adOffset(_var.number(), _sys.getMaxVarNDofsPerNode());
 #endif
 
   auto residual = computeQpResidual();
-  const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
 
   mooseAssert(cached_rows.size() <= _set_components.size(),
               "The number of dof indices must be less than the number of settable components");
@@ -129,11 +134,14 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(const unsigned int jvar_num)
     computeJacobian();
   else
   {
+    const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
+    if (cached_rows.empty())
+      return;
+
 #ifndef MOOSE_GLOBAL_AD_INDEXING
     auto ad_offset = Moose::adOffset(jvar_num, _sys.getMaxVarNDofsPerNode());
 #endif
     auto residual = computeQpResidual();
-    const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
 
     mooseAssert(cached_rows.size() <= _set_components.size(),
                 "The number of dof indices must be less than the number of settable components");

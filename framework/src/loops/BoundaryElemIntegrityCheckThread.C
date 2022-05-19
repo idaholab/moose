@@ -76,7 +76,7 @@ BoundaryElemIntegrityCheckThread::operator()(const ConstBndElemRange & range)
         .condition<AttribBoundaries>(boundary_id, true)
         .queryInto(objs);
     for (const auto & uo : objs)
-      boundaryIntegrityCheckError(*uo, uo->checkVariables(*elem), bnd_name);
+      boundaryIntegrityCheckError(*uo, uo->checkAllVariables(*elem), bnd_name);
 
     auto check = [elem, boundary_id, &bnd_name, tid, &mesh, side](const auto & warehouse)
     {
@@ -90,7 +90,7 @@ BoundaryElemIntegrityCheckThread::operator()(const ConstBndElemRange & range)
         if (!bnd_object->requiresGeometricSearch())
         {
           // First check the higher-dimensional element
-          auto leftover_vars = bnd_object->checkVariables(*elem);
+          auto leftover_vars = bnd_object->checkAllVariables(*elem);
           if (!leftover_vars.empty())
           {
             const Elem * const lower_d_elem = mesh.getLowerDElem(elem, side);
