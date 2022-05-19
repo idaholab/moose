@@ -135,10 +135,7 @@ Action::addRelationshipManager(
   return added;
 }
 
-void
-Action::addRelationshipManagers(Moose::RelationshipManagerType)
-{
-}
+void Action::addRelationshipManagers(Moose::RelationshipManagerType) {}
 
 bool
 Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
