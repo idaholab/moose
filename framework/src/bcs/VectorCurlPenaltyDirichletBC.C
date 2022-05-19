@@ -20,13 +20,9 @@ VectorCurlPenaltyDirichletBC::validParams()
   params.addParam<FunctionName>("function_x", 0, "The function for the x component");
   params.addParam<FunctionName>("function_y", 0, "The function for the y component");
   params.addParam<FunctionName>("function_z", 0, "The function for the z component");
-
-  params.addDeprecatedParam<FunctionName>(
-      "x_exact_soln", "The exact solution for the x component", "Use 'function_x' instead.");
-  params.addDeprecatedParam<FunctionName>(
-      "y_exact_soln", "The exact solution for the y component", "Use 'function_y' instead.");
-  params.addDeprecatedParam<FunctionName>(
-      "z_exact_soln", "The exact solution for the z component", "Use 'function_z' instead.");
+  params.addClassDescription("Enforces a Dirichlet boundary condition for the curl of vector "
+                             "nonlinear variables in a weak sense by applying a penalty to the "
+                             "difference in the current solution and the Dirichlet data.");
   return params;
 }
 
@@ -34,22 +30,10 @@ VectorCurlPenaltyDirichletBC::VectorCurlPenaltyDirichletBC(const InputParameters
   : VectorIntegratedBC(parameters),
     _penalty(getParam<Real>("penalty")),
     _function(isParamValid("function") ? &getFunction("function") : nullptr),
-    _function_x(isParamValid("x_exact_soln") ? getFunction("x_exact_soln")
-                                             : getFunction("function_x")),
-    _function_y(isParamValid("y_exact_soln") ? getFunction("y_exact_soln")
-                                             : getFunction("function_y")),
-    _function_z(isParamValid("z_exact_soln") ? getFunction("z_exact_soln")
-                                             : getFunction("function_z"))
+    _function_x(getFunction("function_x")),
+    _function_y(getFunction("function_y")),
+    _function_z(getFunction("function_z"))
 {
-  if (_function &&
-      (parameters.isParamSetByUser("function_x") || parameters.isParamSetByUser("x_exact_soln")))
-    paramError("function_x", "The 'function' and 'function_x' parameters cannot both be set.");
-  if (_function &&
-      (parameters.isParamSetByUser("function_y") || parameters.isParamSetByUser("y_exact_soln")))
-    paramError("function_y", "The 'function' and 'function_y' parameters cannot both be set.");
-  if (_function &&
-      (parameters.isParamSetByUser("function_z") || parameters.isParamSetByUser("z_exact_soln")))
-    paramError("function_z", "The 'function' and 'function_z' parameters cannot both be set.");
 }
 
 Real

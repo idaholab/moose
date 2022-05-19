@@ -43,14 +43,14 @@
   [./antenna_real]                      # Impose exact solution of E-field onto antenna surface
     type = VectorCurlPenaltyDirichletBC #TODO: Replace with proper antenna surface current condition
     penalty = 1e5
-    y_exact_soln = 'cos(2*pi*1e9*t)'
+    function_y = 'cos(2*pi*1e9*t)'
     boundary = antenna
     variable = E_real
   [../]
   [./antenna_imag]
     type = VectorCurlPenaltyDirichletBC
     penalty = 1e5
-    y_exact_soln = 'sin(2*pi*1e9*t)'
+    function_y = 'sin(2*pi*1e9*t)'
     boundary = antenna
     variable = E_imag
   [../]

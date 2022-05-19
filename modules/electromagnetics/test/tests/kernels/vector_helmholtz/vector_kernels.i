@@ -39,8 +39,8 @@
   [./sides]
     type = VectorCurlPenaltyDirichletBC
     variable = u
-    x_exact_soln = 'y'
-    y_exact_soln = '-x'
+    function_x = 'y'
+    function_y = '-x'
     penalty = 1e8
     boundary = 'left right top bottom'
   [../]

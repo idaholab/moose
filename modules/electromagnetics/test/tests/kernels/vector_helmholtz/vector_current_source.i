@@ -75,16 +75,16 @@
   [./sides_real]
     type = VectorCurlPenaltyDirichletBC
     variable = u_real
-    x_exact_soln = 'y*y'
-    y_exact_soln = '-x*x'
+    function_x = 'y*y'
+    function_y = '-x*x'
     penalty = 1e8
     boundary = 'left right top bottom'
   [../]
   [./sides_imag]
     type = VectorCurlPenaltyDirichletBC
     variable = u_imag
-    x_exact_soln = 'y*y'
-    y_exact_soln = '-x*x'
+    function_x = 'y*y'
+    function_y = '-x*x'
     penalty = 1e8
     boundary = 'left right top bottom'
   [../]

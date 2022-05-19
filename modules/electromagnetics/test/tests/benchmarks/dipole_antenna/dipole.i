@@ -43,14 +43,14 @@
   [./antenna_real]                #TODO: Replace with proper antenna surface current condition
     type = VectorCurlPenaltyDirichletBC
     penalty = 1e5
-    y_exact_soln = '1'
+    function_y = '1'
     boundary = antenna
     variable = E_real
   [../]
   [./antenna_imag]
     type = VectorCurlPenaltyDirichletBC
     penalty = 1e5
-    y_exact_soln = '1'
+    function_y = '1'
     boundary = antenna
     variable = E_imag
   [../]
