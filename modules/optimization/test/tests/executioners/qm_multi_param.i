@@ -14,9 +14,9 @@
 
 [Executioner]
   type = Optimize
-  tao_solver = TAONTR
-  petsc_options_iname='-tao_ntr_min_radius -tao_ntr_max_radius -tao_ntr_init_type'
-  petsc_options_value='0 1e16 constant'
+  tao_solver = TAOBNCG
+  petsc_options_iname='-tao_gatol -tao_cg_delta_max'
+  petsc_options_value='1e-4 1e-2'
   solve_on = none
   verbose = true
 []

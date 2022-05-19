@@ -322,7 +322,7 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
   // What happens for material inversion when the Hessian
   // is dependent on the parameters? Deal with it later???
   // see notes on how this needs to change for Material inversion
-  if (!_problem.hasMultiApps(EXEC_HOMOGENEOUS_FORWARD))
+  if (_problem.hasMultiApps() && !_problem.hasMultiApps(EXEC_HOMOGENEOUS_FORWARD))
     mooseError("Hessian based optimization algorithms require a sub-app with:\n"
                "   execute_on = HOMOGENEOUS_FORWARD");
   _form_function->updateParameters(s);
