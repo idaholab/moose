@@ -65,6 +65,7 @@ Action::Action(InputParameters parameters)
                  ? std::string("::") + parameters.get<std::string>("task")
                  : "")),
     ParallelObject(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
+    DataFileInterface<Action>(*this),
     _pars(parameters),
     _registered_identifier(isParamValid("registered_identifier")
                                ? getParam<std::string>("registered_identifier")

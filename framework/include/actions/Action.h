@@ -14,6 +14,7 @@
 #include "MeshMetaDataInterface.h"
 #include "Registry.h"
 #include "PerfGraphInterface.h"
+#include "DataFileInterface.h"
 
 #include "libmesh/parallel_object.h"
 
@@ -34,7 +35,8 @@ class Factory;
 class Action : public ConsoleStreamInterface,
                public MeshMetaDataInterface,
                public PerfGraphInterface,
-               public libMesh::ParallelObject
+               public libMesh::ParallelObject,
+               public DataFileInterface<Action>
 {
 public:
   static InputParameters validParams();
