@@ -14,6 +14,7 @@
 #include "ConsoleStreamInterface.h"
 #include "Registry.h"
 #include "MooseUtils.h"
+#include "DataFileInterface.h"
 
 #include "libmesh/parallel_object.h"
 
@@ -41,7 +42,9 @@ std::string paramErrorPrefix(const InputParameters & params, const std::string &
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
-class MooseObject : public ConsoleStreamInterface, public libMesh::ParallelObject
+class MooseObject : public ConsoleStreamInterface,
+                    public libMesh::ParallelObject,
+                    public DataFileInterface<MooseObject>
 {
 public:
   static InputParameters validParams();
@@ -91,23 +94,6 @@ public:
   template <typename T1, typename T2>
   std::vector<std::pair<T1, T2>> getParam(const std::string & param1,
                                           const std::string & param2) const;
-
-  /**
-   * Returns the path of a data file for a given FileName type parameter, searching
-   * (in the following order)
-   * - relative to the input file directory
-   * - relative to the running binary (assuming the application is installed)
-   * - relative to all registered data file directories
-   */
-  std::string getDataFileName(const std::string & param);
-
-  /**
-   * Returns the path of a data file for a given relative file path.
-   * This can be used for hardcoded datafile names and will search the same locations
-   * as getDataFileName. The optional param pointer can be used to turn the mooseErrors this
-   * function emits into paramErrors
-   */
-  std::string getDataFileNameByName(const std::string & name, const std::string * param = nullptr);
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.

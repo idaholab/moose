@@ -54,6 +54,7 @@ MooseObject::validParams()
 MooseObject::MooseObject(const InputParameters & parameters)
   : ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
     ParallelObject(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
+    DataFileInterface<MooseObject>(*this, const InputParameters & parameters),
     _pars(parameters),
     _app(*getCheckedPointerParam<MooseApp *>("_moose_app")),
     _type(getParam<std::string>("_type")),
@@ -85,63 +86,4 @@ std::string
 MooseObject::typeAndName() const
 {
   return type() + std::string(" \"") + name() + std::string("\"");
-}
-
-std::string
-MooseObject::getDataFileName(const std::string & param)
-{
-  /// - relative to the input file directory
-  {
-    const auto & absolute_path = getParam<FileName>(param);
-    if (MooseUtils::checkFileReadable(absolute_path, false, false, false))
-    {
-      paramInfo(param, "Data file '", absolute_path, "' found relative to the input file.");
-      return absolute_path;
-    }
-  }
-
-  const auto & relative_path = _pars.rawParamVal(param);
-  return getDataFileNameByName(relative_path, &param);
-}
-
-std::string
-MooseObject::getDataFileNameByName(const std::string & relative_path, const std::string * param)
-{
-  /// - relative to the running binary (assuming the application is installed)
-  const auto share_dir = MooseUtils::pathjoin(Moose::getExecutablePath(), "..", "share");
-  if (MooseUtils::pathIsDirectory(share_dir))
-  {
-    const auto dirs = MooseUtils::listDir(share_dir, false);
-    for (const auto & data_dir : dirs)
-    {
-      const auto path = MooseUtils::pathjoin(data_dir, "data", relative_path);
-      if (MooseUtils::checkFileReadable(path, false, false, false))
-      {
-        if (param)
-          paramInfo(*param, "Data file '", path, "' found in an installed app distribution.");
-        else
-          mooseInfo("Data file '", path, "' found in an installed app distribution.");
-        return path;
-      }
-    }
-  }
-
-  /// - relative to all registered data file directories
-  for (const auto & data_dir : Registry::getRegistry().getDataFilePaths())
-  {
-    const auto path = MooseUtils::pathjoin(data_dir, relative_path);
-    if (MooseUtils::checkFileReadable(path, false, false, false))
-    {
-      if (param)
-        paramInfo(*param, "Data file '", path, "' found in a source repository.");
-      else
-        mooseInfo("Data file '", path, "' found in a source repository.");
-      return path;
-    }
-  }
-
-  mooseException(param ? _pars.inputLocation(*param) : _name,
-                 ": Unable to find data file '",
-                 relative_path,
-                 "' anywhere");
 }
