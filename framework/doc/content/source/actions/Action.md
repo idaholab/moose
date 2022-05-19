@@ -16,6 +16,8 @@ boundary surrounding a particular subdomain for imposing specific boundary
 conditions, based on the information not necessarily inside of a mesh generator
 block.
 
+MOOSE actions supports the capability of data file searching as [MooseObject.md] with the same two functions `getDataFileName` and `getDataFileNameByName`.
+
 ## Relationship Managers and Actions
 
 If adding any `MooseObjects` in a custom action and those objects have

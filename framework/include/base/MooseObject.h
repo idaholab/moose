@@ -99,7 +99,7 @@ public:
    * - relative to the running binary (assuming the application is installed)
    * - relative to all registered data file directories
    */
-  std::string getDataFileName(const std::string & param);
+  std::string getDataFileName(const std::string & param) const;
 
   /**
    * Returns the path of a data file for a given relative file path.
@@ -107,7 +107,8 @@ public:
    * as getDataFileName. The optional param pointer can be used to turn the mooseErrors this
    * function emits into paramErrors
    */
-  std::string getDataFileNameByName(const std::string & name, const std::string * param = nullptr);
+  std::string getDataFileNameByName(const std::string & name,
+                                    const std::string * param = nullptr) const;
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.

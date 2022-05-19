@@ -88,7 +88,7 @@ MooseObject::typeAndName() const
 }
 
 std::string
-MooseObject::getDataFileName(const std::string & param)
+MooseObject::getDataFileName(const std::string & param) const
 {
   /// - relative to the input file directory
   {
@@ -105,7 +105,8 @@ MooseObject::getDataFileName(const std::string & param)
 }
 
 std::string
-MooseObject::getDataFileNameByName(const std::string & relative_path, const std::string * param)
+MooseObject::getDataFileNameByName(const std::string & relative_path,
+                                   const std::string * param) const
 {
   /// - relative to the running binary (assuming the application is installed)
   const auto share_dir = MooseUtils::pathjoin(Moose::getExecutablePath(), "..", "share");

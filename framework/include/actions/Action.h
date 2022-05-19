@@ -201,6 +201,24 @@ public:
 
 protected:
   /**
+   * Returns the path of a data file for a given FileName type parameter, searching
+   * (in the following order)
+   * - relative to the input file directory
+   * - relative to the running binary (assuming the application is installed)
+   * - relative to all registered data file directories
+   */
+  std::string getDataFileName(const std::string & param) const;
+
+  /**
+   * Returns the path of a data file for a given relative file path.
+   * This can be used for hardcoded datafile names and will search the same locations
+   * as getDataFileName. The optional param pointer can be used to turn the mooseErrors this
+   * function emits into paramErrors
+   */
+  std::string getDataFileNameByName(const std::string & name,
+                                    const std::string * param = nullptr) const;
+
+  /**
    * Method to add objects to the simulation or perform other setup tasks.
    */
   virtual void act() = 0;
