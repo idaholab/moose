@@ -1,0 +1,24 @@
+[Tests]
+  [all]
+    requirement = 'The system shall have the ability to break all element-element interfaces within '
+                  'given subdomains both'
+    design = 'meshgenerators/ExplodeMeshGenerator.md'
+    issues = '#21060'
+    [2D]
+      type = 'Exodiff'
+      input = '2D.i'
+      cli_args = '--mesh-only'
+      exodiff = '2D_in.e'
+      recover = false
+      detail = 'in 2D, and'
+    []
+    [3D]
+      type = 'Exodiff'
+      input = '3D.i'
+      cli_args = '--mesh-only'
+      exodiff = '3D_in.e'
+      recover = false
+      detail = 'in 3D.'
+    []
+  []
+[]
