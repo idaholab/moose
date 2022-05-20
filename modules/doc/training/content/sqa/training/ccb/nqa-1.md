@@ -16,7 +16,7 @@ INL's contract with DOE requires us to abide by NQA-1 standards where applicable
 
 # NQA-1: SQA Program at INL
 
-The [!ac](SQA) program at Idaho National Laboratory [!ac](INL) implements the
+The [!ac](SQA) program at [!ac](INL) implements the
 contractual requirements and [!ac](DOE) expectations of 10 CFR 830 Subpart A,
 "Quality Assurance Requirements;" DOE Order 414.1D, "Quality Assurance;" and the American Society
 of Mechanical Engineers (ASME) NQA-1-2008/1a-2009 and 2017 editions, "Quality Assurance
