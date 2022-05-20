@@ -11,6 +11,10 @@
 
 #include "ADKernel.h"
 
+/**
+ *  Kernel representing the contribution of the PDE term $fu$, where $f$ is a
+ *  function coefficient, and $u$ is a scalar variable.
+ */
 class ADFuncReaction : public ADKernel
 {
 public:
@@ -22,5 +26,6 @@ protected:
   virtual ADReal computeQpResidual() override;
 
 private:
+  /// Function coefficient
   const Function & _func;
 };
