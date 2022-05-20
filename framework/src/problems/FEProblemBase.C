@@ -188,7 +188,7 @@ FEProblemBase::validParams()
       "Set to false to disable checking of boundary restricted nodal object variable dependencies, "
       "e.g. are the variable dependencies defined on the selected boundaries?");
   params.addParam<bool>("boundary_restricted_elem_integrity_check",
-                        false,
+                        true,
                         "Set to true to enable checking of boundary restricted elemental object "
                         "variable dependencies, e.g. are the variable dependencies defined on the "
                         "selected boundaries?");

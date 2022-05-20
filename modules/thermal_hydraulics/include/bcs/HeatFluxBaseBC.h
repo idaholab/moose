@@ -34,6 +34,8 @@ public:
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned jvar) override;
 
+  bool checkVariableBoundaryIntegrity() const override { return false; }
+
 protected:
   /**
    * Get the list of variable numbers that are used in off-diagonal Jacobian blocks

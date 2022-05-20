@@ -81,7 +81,8 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
       .condition<AttribBoundaries>(boundary_id, true)
       .queryInto(objs);
   for (const auto & uo : objs)
-    boundaryIntegrityCheckError(*uo, uo->checkAllVariables(*node), bnd_name);
+    if (uo->checkVariableBoundaryIntegrity())
+      boundaryIntegrityCheckError(*uo, uo->checkAllVariables(*node), bnd_name);
 
   auto check = [node, boundary_id, &bnd_name, this](const auto & warehouse)
   {
@@ -92,7 +93,7 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
     for (const auto & bnd_object : bnd_objects)
       // Skip if this object uses geometric search because coupled variables may be defined on
       // paired boundaries instead of the boundary this node is on
-      if (!bnd_object->requiresGeometricSearch())
+      if (!bnd_object->requiresGeometricSearch() && bnd_object->checkVariableBoundaryIntegrity())
         boundaryIntegrityCheckError(*bnd_object, bnd_object->checkAllVariables(*node), bnd_name);
   };
 
@@ -112,7 +113,7 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
     for (const auto & bnd_object : bnd_objects)
       // Skip if this object uses geometric search because coupled variables may be defined on
       // paired boundaries instead of the boundary this node is on
-      if (!bnd_object->requiresGeometricSearch())
+      if (!bnd_object->requiresGeometricSearch() && bnd_object->checkVariableBoundaryIntegrity())
       {
         std::set<MooseVariableFieldBase *> vars_to_omit = {&static_cast<MooseVariableFieldBase &>(
             const_cast<MooseVariableBase &>(bnd_object->variable()))};

@@ -76,7 +76,8 @@ BoundaryElemIntegrityCheckThread::operator()(const ConstBndElemRange & range)
         .condition<AttribBoundaries>(boundary_id, true)
         .queryInto(objs);
     for (const auto & uo : objs)
-      boundaryIntegrityCheckError(*uo, uo->checkAllVariables(*elem), bnd_name);
+      if (uo->checkVariableBoundaryIntegrity())
+        boundaryIntegrityCheckError(*uo, uo->checkAllVariables(*elem), bnd_name);
 
     auto check = [elem, boundary_id, &bnd_name, tid, &mesh, side](const auto & warehouse)
     {
@@ -87,7 +88,7 @@ BoundaryElemIntegrityCheckThread::operator()(const ConstBndElemRange & range)
       for (const auto & bnd_object : bnd_objects)
         // Skip if this object uses geometric search because coupled variables may be defined on
         // paired boundaries instead of the boundary this elem is on
-        if (!bnd_object->requiresGeometricSearch())
+        if (!bnd_object->requiresGeometricSearch() && bnd_object->checkVariableBoundaryIntegrity())
         {
           // First check the higher-dimensional element
           auto leftover_vars = bnd_object->checkAllVariables(*elem);

@@ -170,6 +170,14 @@ public:
    */
   const std::set<BoundaryID> & meshBoundaryIDs() const;
 
+  /**
+   * Whether integrity/coverage checking should be conducted for moose variables used in this
+   * object. This should return true if variables are only evaluated locally, e.g. on the current
+   * node or element. This should return false if evaluation of this object entails non-local
+   * variable evaluations
+   */
+  virtual bool checkVariableBoundaryIntegrity() const { return true; }
+
 private:
   /// Pointer to FEProblemBase
   FEProblemBase * _bnd_feproblem;
