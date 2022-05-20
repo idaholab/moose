@@ -10,6 +10,7 @@
       cli_args = '--mesh-only'
       exodiff = '2D_in.e'
       recover = false
+      mesh_mode = 'REPLICATED'
       detail = 'in 2D, and'
     []
     [3D]
@@ -18,6 +19,7 @@
       cli_args = '--mesh-only'
       exodiff = '3D_in.e'
       recover = false
+      mesh_mode = 'REPLICATED'
       detail = 'in 3D.'
     []
   []
