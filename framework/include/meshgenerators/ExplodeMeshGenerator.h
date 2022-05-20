@@ -26,19 +26,18 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  std::unordered_map<dof_id_type, std::vector<dof_id_type>>
+  typedef std::unordered_map<const Node *, std::vector<Elem *>> NodeToElemMapType;
+
+  NodeToElemMapType
   buildSubdomainRestrictedNodeToElemMap(std::unique_ptr<MeshBase> & mesh,
                                         const std::vector<SubdomainID> & subdomains) const;
 
-  void duplicateNodes(
-      std::unique_ptr<MeshBase> & mesh,
-      const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map) const;
+  void duplicateNodes(std::unique_ptr<MeshBase> & mesh,
+                      const NodeToElemMapType & node_to_elem_map) const;
 
   void duplicateNode(std::unique_ptr<MeshBase> & mesh, Elem * elem, const Node * node) const;
 
-  void createInterface(
-      MeshBase & mesh,
-      const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map) const;
+  void createInterface(MeshBase & mesh, const NodeToElemMapType & node_to_elem_map) const;
 
   /// The mesh to modify
   std::unique_ptr<MeshBase> & _input;

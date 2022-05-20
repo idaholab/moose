@@ -55,11 +55,11 @@ ExplodeMeshGenerator::generate()
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
-std::unordered_map<dof_id_type, std::vector<dof_id_type>>
+ExplodeMeshGenerator::NodeToElemMapType
 ExplodeMeshGenerator::buildSubdomainRestrictedNodeToElemMap(
     std::unique_ptr<MeshBase> & mesh, const std::vector<SubdomainID> & subdomains) const
 {
-  std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elem_map;
+  NodeToElemMapType node_to_elem_map;
   for (const auto & elem : mesh->active_element_ptr_range())
   {
     // Skip if the element is not in the specified subdomains
@@ -84,20 +84,19 @@ ExplodeMeshGenerator::buildSubdomainRestrictedNodeToElemMap(
         }
 
       if (should_duplicate)
-        node_to_elem_map[elem->node_id(n)].push_back(elem->id());
+        node_to_elem_map[elem->node_ptr(n)].push_back(elem);
     }
   }
   return node_to_elem_map;
 }
 
 void
-ExplodeMeshGenerator::duplicateNodes(
-    std::unique_ptr<MeshBase> & mesh,
-    const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map) const
+ExplodeMeshGenerator::duplicateNodes(std::unique_ptr<MeshBase> & mesh,
+                                     const NodeToElemMapType & node_to_elem_map) const
 {
-  for (const auto & [node_id, connected_elem_ids] : node_to_elem_map)
-    for (auto i : make_range(connected_elem_ids.size() - 1))
-      duplicateNode(mesh, mesh->elem_ptr(connected_elem_ids[i]), mesh->node_ptr(node_id));
+  for (const auto & [node, connected_elems] : node_to_elem_map)
+    for (auto i : make_range(connected_elems.size() - 1))
+      duplicateNode(mesh, connected_elems[i], node);
 }
 
 void
@@ -105,14 +104,13 @@ ExplodeMeshGenerator::duplicateNode(std::unique_ptr<MeshBase> & mesh,
                                     Elem * elem,
                                     const Node * node) const
 {
-  Node * new_node = nullptr;
-  new_node = Node::build(*node, mesh->n_nodes()).release();
+  std::unique_ptr<Node> new_node = Node::build(*node, Node::invalid_id);
   new_node->processor_id() = elem->processor_id();
-  mesh->add_node(new_node);
-  for (auto j : make_range(elem->n_nodes()))
+  Node * added_node = mesh->add_node(std::move(new_node));
+  for (const auto j : elem->node_index_range())
     if (elem->node_id(j) == node->id())
     {
-      elem->set_node(j) = new_node;
+      elem->set_node(j) = added_node;
       break;
     }
 
@@ -120,13 +118,12 @@ ExplodeMeshGenerator::duplicateNode(std::unique_ptr<MeshBase> & mesh,
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
   std::vector<boundary_id_type> node_boundary_ids;
   boundary_info.boundary_ids(node, node_boundary_ids);
-  boundary_info.add_node(new_node, node_boundary_ids);
+  boundary_info.add_node(added_node, node_boundary_ids);
 }
 
 void
-ExplodeMeshGenerator::createInterface(
-    MeshBase & mesh,
-    const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map) const
+ExplodeMeshGenerator::createInterface(MeshBase & mesh,
+                                      const NodeToElemMapType & node_to_elem_map) const
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   const auto & existing_boundary_ids = boundary_info.get_boundary_ids();
@@ -136,18 +133,11 @@ ExplodeMeshGenerator::createInterface(
 
   std::set<std::pair<dof_id_type, unsigned int>> sides_to_add;
 
-  for ([[maybe_unused]] const auto & [node_id, connected_elem_ids] : node_to_elem_map)
-    for (const auto & elem_id_i : connected_elem_ids)
-      for (const auto & elem_id_j : connected_elem_ids)
-      {
-        Elem * elem_i = mesh.elem_ptr(elem_id_i);
-        Elem * elem_j = mesh.elem_ptr(elem_id_j);
+  for (const auto & node_to_elems : node_to_elem_map)
+    for (const auto & elem_i : node_to_elems.second)
+      for (const auto & elem_j : node_to_elems.second)
         if (elem_i != elem_j && elem_i->id() < elem_j->id() && elem_i->has_neighbor(elem_j))
-        {
-          unsigned int side = elem_i->which_neighbor_am_i(elem_j);
-          sides_to_add.insert(std::make_pair(elem_id_i, side));
-        }
-      }
+          sides_to_add.insert(std::make_pair(elem_i->id(), elem_i->which_neighbor_am_i(elem_j)));
 
   for (const auto & [elem_id, side] : sides_to_add)
     boundary_info.add_side(elem_id, side, interface_id);
