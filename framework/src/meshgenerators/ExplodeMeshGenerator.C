@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ExplodeMeshGenerator.h"
+#include "CastUniquePointer.h"
+
 #include "libmesh/partitioner.h"
 
 registerMooseObject("MooseApp", ExplodeMeshGenerator);
@@ -134,7 +136,7 @@ ExplodeMeshGenerator::createInterface(
 
   std::set<std::pair<dof_id_type, unsigned int>> sides_to_add;
 
-  for (const auto & [node_id, connected_elem_ids] : node_to_elem_map)
+  for ([[maybe_unused]] const auto & [node_id, connected_elem_ids] : node_to_elem_map)
     for (const auto & elem_id_i : connected_elem_ids)
       for (const auto & elem_id_j : connected_elem_ids)
       {
