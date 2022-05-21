@@ -53,10 +53,11 @@ NSFVAction::validParams()
       turbulence_type,
       "The way additional diffusivities are determined in the turbulent regime.");
 
+  params.addParam<bool>("add_flow_equations", true, "True to add mass and momentum equations");
   params.addParam<bool>("add_energy_equation", false, "True to add energy equation");
 
   params.addParamNamesToGroup("compressibility porous_medium_treatment "
-                              "turbulence_handling add_energy_equation",
+                              "turbulence_handling add_flow_equations add_energy_equation",
                               "General control");
 
   params.addParam<std::vector<std::string>>(
@@ -472,6 +473,7 @@ NSFVAction::NSFVAction(InputParameters parameters)
   : Action(parameters),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
     _compressibility(getParam<MooseEnum>("compressibility")),
+    _has_flow_equations(getParam<bool>("add_flow_equations")),
     _has_energy_equation(getParam<bool>("add_energy_equation")),
     _boussinesq_approximation(getParam<bool>("boussinesq_approximation")),
     _turbulence_handling(getParam<MooseEnum>("turbulence_handling")),
@@ -603,7 +605,7 @@ NSFVAction::act()
     // Check if the user made mistakes in the definition of scalar kernel parameters
     checkPassiveScalarParameterErrors();
 
-    if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
+    if (_has_flow_equations)
     {
       if (_compressibility == "incompressible")
       {
@@ -626,19 +628,25 @@ NSFVAction::act()
             addWCNSEnergyTimeKernels();
         }
       }
+    }
 
+    if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
+    {
       // If the material properties are not constant, we can use the same kernels
       // for weakly-compressible simulations.
-      addINSMassKernels();
-      addINSMomentumAdvectionKernels();
-      addINSMomentumViscousDissipationKernels();
-      addINSMomentumPressureKernels();
-      addINSMomentumGravityKernels();
-      if (_friction_types.size())
-        addINSMomentumFrictionKernels();
+      if (_has_flow_equations)
+      {
+        addINSMassKernels();
+        addINSMomentumAdvectionKernels();
+        addINSMomentumViscousDissipationKernels();
+        addINSMomentumPressureKernels();
+        addINSMomentumGravityKernels();
+        if (_friction_types.size())
+          addINSMomentumFrictionKernels();
 
-      if (_turbulence_handling == "mixing-length")
-        addINSMomentumMixingLengthKernels();
+        if (_turbulence_handling == "mixing-length")
+          addINSMomentumMixingLengthKernels();
+      }
 
       if (_has_energy_equation)
       {
@@ -676,7 +684,8 @@ NSFVAction::act()
     {
       addINSInletBC();
       addINSOutletBC();
-      addINSWallBC();
+      if (_has_flow_equations)
+        addINSWallBC();
       if (_has_energy_equation)
       {
         addINSEnergyInletBC();
@@ -817,6 +826,13 @@ NSFVAction::addRhieChowUserObjects()
                                           ? getParam<unsigned short>("porosity_smoothing_layers")
                                           : 0;
     params.set<unsigned short>("smoothing_layers") = smoothing_layers;
+    // Set RhieChow coefficients
+    if (!_has_flow_equations)
+    {
+      params.set<MooseFunctorName>("a_u") = "ax";
+      params.set<MooseFunctorName>("a_v") = "ay";
+      params.set<MooseFunctorName>("a_w") = "az";
+    }
 
     _problem->addUserObject("PINSFVRhieChowInterpolator", "pins_rhie_chow_interpolator", params);
   }
@@ -828,6 +844,13 @@ NSFVAction::addRhieChowUserObjects()
       params.set<VariableName>(u_names[d]) = _velocity_name[d];
 
     params.set<VariableName>("pressure") = _pressure_name;
+    // Set RhieChow coefficients
+    if (!_has_flow_equations)
+    {
+      params.set<MooseFunctorName>("a_u") = "ax";
+      params.set<MooseFunctorName>("a_v") = "ay";
+      params.set<MooseFunctorName>("a_w") = "az";
+    }
 
     _problem->addUserObject("INSFVRhieChowInterpolator", "ins_rhie_chow_interpolator", params);
   }
@@ -2275,7 +2298,7 @@ NSFVAction::checkBoundaryParameterErrors()
     paramError("pressure_function",
                "Size is not the same as the number of pressure outlet boundaries!");
 
-  if (_compressibility == "incompressible")
+  if (_compressibility == "incompressible" && _has_flow_equations)
     if (num_pressure_outlets == 0 && !(getParam<bool>("pin_pressure")))
       mooseError("The pressure must be fixed for an incompressible simulation! Try setting "
                  "pin_pressure or change the compressibility settings!");

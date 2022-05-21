@@ -135,7 +135,10 @@ protected:
   /// Compressibility type, can be compressible, incompressible
   /// or weakly-compressible
   const MooseEnum _compressibility;
-  // Switch that can be used to create an integrated energy equation for
+  /// Switch that can be used to or not pressure and mass equations
+  /// for incompressible/weakly compressible simulations.
+  const bool _has_flow_equations;
+  /// Switch that can be used to create an integrated energy equation for
   /// incompressible/weakly compressible simulations.
   const bool _has_energy_equation;
   /// Switch to use to enable the Boussinesq approximation for incompressible
