@@ -34,7 +34,7 @@ protected:
   /// Block names of the ring regions in the three diamond sections
   const std::vector<std::vector<SubdomainName>> _ring_block_names;
   /// Type of hexagon_size parameter
-  const enum class HexagonSizeStyle { apothem, radius } _hexagon_size_style;
+  const PolygonSizeStyle _hexagon_size_style;
   /// Length of the side of the hexagon
   const Real _side_length;
   /// Offset distance of the circle centers from the center of each diamond section

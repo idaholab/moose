@@ -111,8 +111,8 @@ TriPinHexAssemblyGenerator::TriPinHexAssemblyGenerator(const InputParameters & p
                    : getParam<std::vector<std::vector<SubdomainName>>>("ring_block_names"))
             : std::vector<std::vector<SubdomainName>>(3, std::vector<SubdomainName>())),
     _hexagon_size_style(
-        getParam<MooseEnum>("hexagon_size_style").template getEnum<HexagonSizeStyle>()),
-    _side_length(_hexagon_size_style == HexagonSizeStyle::radius
+        getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
+    _side_length(_hexagon_size_style == PolygonSizeStyle::radius
                      ? getParam<Real>("hexagon_size")
                      : (getParam<Real>("hexagon_size") / cos(M_PI / 6.0))),
     _ring_offset(getParam<Real>("ring_offset")),
@@ -438,8 +438,6 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
       std::vector<Real>(),
       {std::vector<Real>(), std::vector<Real>(), std::vector<unsigned int>(), std::vector<Real>()},
       {std::vector<Real>(), std::vector<Real>(), std::vector<unsigned int>(), std::vector<Real>()},
-      has_rings,
-      false,
       primary_side_length_0,
       secondary_side_length_0,
       num_sectors_per_side,
@@ -450,7 +448,7 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
       node_id_background_meta,
       azimuthal_angle_0,
       azimuthal_tangent_0,
-      /* side_index = */1,
+      /* side_index = */ 1,
       false,
       rotation_angle_0);
 
@@ -471,8 +469,6 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
       std::vector<Real>(),
       {std::vector<Real>(), std::vector<Real>(), std::vector<unsigned int>(), std::vector<Real>()},
       {std::vector<Real>(), std::vector<Real>(), std::vector<unsigned int>(), std::vector<Real>()},
-      has_rings,
-      false,
       primary_side_length_1,
       secondary_side_length_1,
       num_sectors_per_side,

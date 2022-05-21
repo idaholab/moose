@@ -33,6 +33,12 @@ public:
 
   virtual std::unique_ptr<MeshBase> generate() override;
 
+  enum class PolygonSizeStyle
+  {
+    apothem,
+    radius
+  };
+
   enum MESH_TYPE
   {
     CORNER_MESH = 1,
@@ -100,8 +106,6 @@ protected:
    * factors of the inner boundary layer of the duct regions
    * @param duct_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
    * factors of the outer boundary layer of the duct regions
-   * @param has_rings whether the slice contains ring regions or not
-   * @param has_ducts whether the slice contains duct regions or not
    * @param pitch twice the distance from the ring center vertex to the side defined by the other
    * vertices
    * @param num_sectors_per_side number of azimuthal intervals
@@ -134,8 +138,6 @@ protected:
                    const std::vector<Real> duct_radial_biases,
                    const multiBdryLayerParams & duct_inner_boundary_layer_params,
                    const multiBdryLayerParams & duct_outer_boundary_layer_params,
-                   bool has_rings,
-                   bool has_ducts,
                    const Real pitch,
                    const unsigned int num_sectors_per_side,
                    const unsigned int background_intervals,
@@ -168,8 +170,6 @@ protected:
    * factors of the inner boundary layer of the duct regions
    * @param duct_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
    * factors of the outer boundary layer of the duct regions
-   * @param has_rings whether the slice contains ring regions or not
-   * @param has_ducts whether the slice contains duct regions or not
    * @param primary_side_length length of the first side that involves the ring center vertex
    * @param secondary_side_length length of the second side that involves the ring center vertex
    * @param num_sectors_per_side number of azimuthal intervals
@@ -199,8 +199,6 @@ protected:
                     const std::vector<Real> duct_radial_biases,
                     const multiBdryLayerParams & duct_inner_boundary_layer_params,
                     const multiBdryLayerParams & duct_outer_boundary_layer_params,
-                    const bool has_rings,
-                    const bool has_ducts,
                     const Real primary_side_length,
                     const Real secondary_side_length,
                     const unsigned int num_sectors_per_side,
@@ -232,8 +230,6 @@ protected:
    * factors of the inner boundary layer of the duct regions
    * @param duct_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
    * factors of the outer boundary layer of the duct regions
-   * @param has_rings whether the slice contains ring regions or not
-   * @param has_ducts whether the slice contains duct regions or not
    * @param pitch twice of the length of the first side times cosine of the azimuthal angle
    * @param num_sectors_per_side number of azimuthal intervals
    * @param background_intervals number of radial intervals of the background region
@@ -265,8 +261,6 @@ protected:
              const std::vector<Real> duct_radial_biases,
              const multiBdryLayerParams & duct_inner_boundary_layer_params,
              const multiBdryLayerParams & duct_outer_boundary_layer_params,
-             bool has_rings,
-             bool has_ducts,
              const Real pitch,
              const unsigned int num_sectors_per_side,
              const unsigned int background_intervals,

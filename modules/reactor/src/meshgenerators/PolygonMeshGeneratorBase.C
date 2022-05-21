@@ -46,8 +46,6 @@ PolygonMeshGeneratorBase::buildGeneralSlice(
     const std::vector<Real> duct_radial_biases,
     const multiBdryLayerParams & duct_inner_boundary_layer_params,
     const multiBdryLayerParams & duct_outer_boundary_layer_params,
-    const bool has_rings,
-    const bool has_ducts,
     const Real primary_side_length,
     const Real secondary_side_length,
     const unsigned int num_sectors_per_side,
@@ -76,8 +74,6 @@ PolygonMeshGeneratorBase::buildGeneralSlice(
                          duct_radial_biases,
                          duct_inner_boundary_layer_params,
                          duct_outer_boundary_layer_params,
-                         has_rings,
-                         has_ducts,
                          virtual_pitch,
                          num_sectors_per_side,
                          background_intervals,
@@ -108,8 +104,6 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
     const std::vector<Real> duct_radial_biases,
     const multiBdryLayerParams & duct_inner_boundary_layer_params,
     const multiBdryLayerParams & duct_outer_boundary_layer_params,
-    bool has_rings,
-    bool has_ducts,
     const Real pitch,
     const unsigned int num_sectors_per_side,
     const unsigned int background_intervals,
@@ -136,8 +130,6 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
                     duct_radial_biases,
                     duct_inner_boundary_layer_params,
                     duct_outer_boundary_layer_params,
-                    has_rings,
-                    has_ducts,
                     pitch,
                     num_sectors_per_side,
                     background_intervals,
@@ -166,8 +158,6 @@ PolygonMeshGeneratorBase::buildSlice(
     const std::vector<Real> duct_radial_biases,
     const multiBdryLayerParams & duct_inner_boundary_layer_params,
     const multiBdryLayerParams & duct_outer_boundary_layer_params,
-    bool has_rings,
-    bool has_ducts,
     const Real pitch,
     const unsigned int num_sectors_per_side,
     const unsigned int background_intervals,
@@ -183,6 +173,8 @@ PolygonMeshGeneratorBase::buildSlice(
     const boundary_id_type boundary_id_shift,
     const Real pitch_scale_factor)
 {
+  bool has_rings(ring_radii.size());
+  bool has_ducts(ducts_center_dist.size());
   auto mesh = buildReplicatedMesh(2);
 
   // Calculate biasing terms
