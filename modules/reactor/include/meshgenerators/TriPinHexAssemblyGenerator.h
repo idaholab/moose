@@ -89,7 +89,7 @@ protected:
    * @param background_intervals number of radial meshing intervals in background region (area
    * outside the rings)
    * @param block_ids_new customized block ids for the regions
-   * @param node_id_background_meta pointer to the first node's id of the background region
+   * @param node_id_background_meta reference to the first node's id of the background region
    * @return a mesh of a single-pin diamond section mesh
    */
   std::unique_ptr<ReplicatedMesh>

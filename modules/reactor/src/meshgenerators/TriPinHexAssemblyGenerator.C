@@ -20,11 +20,11 @@ TriPinHexAssemblyGenerator::validParams()
   InputParameters params = PolygonMeshGeneratorBase::validParams();
   params.addRequiredRangeCheckedParam<unsigned int>(
       "num_sectors_per_side", "num_sectors_per_side>0", "Number of azimuthal sectors per side.");
-  params.addRangeCheckedParam<unsigned int>(
-      "background_intervals",
-      1,
-      "background_intervals>0",
-      "Number of radial meshing intervals in background region (area outside the rings).");
+  params.addRangeCheckedParam<unsigned int>("background_intervals",
+                                            1,
+                                            "background_intervals>0",
+                                            "Number of radial meshing intervals in background "
+                                            "region (region around the rings in the assembly).");
   params.addRangeCheckedParam<std::vector<subdomain_id_type>>(
       "background_block_ids",
       "background_block_ids>0",
@@ -32,7 +32,7 @@ TriPinHexAssemblyGenerator::validParams()
   params.addParam<std::vector<SubdomainName>>("background_block_names",
                                               "Optional block names for the background region.");
   params.addRangeCheckedParam<std::vector<std::vector<Real>>>(
-      "ring_radii", "ring_radii>0", "Radii of the three sets of major concentric circles (rings).");
+      "ring_radii", "ring_radii>0", "Radii of the three sets of major concentric circles (pins).");
   params.addRangeCheckedParam<std::vector<std::vector<unsigned int>>>(
       "ring_intervals",
       "ring_intervals>0",
@@ -45,8 +45,7 @@ TriPinHexAssemblyGenerator::validParams()
   params.addParam<MooseEnum>("hexagon_size_style",
                              hexagon_size_style,
                              "Style in which hexagon size is given (apothem = center to face, "
-                             "radius = center to vertex). Options: " +
-                                 hexagon_size_style.getRawNames());
+                             "radius = center to vertex).");
   params.addRequiredRangeCheckedParam<Real>(
       "hexagon_size", "hexagon_size>0", "Size parameter of the hexagon assembly to be generated.");
   // This can be a vector if needed.
@@ -69,10 +68,10 @@ TriPinHexAssemblyGenerator::validParams()
       "Values of extra integer ID to be assigned to each of the three pin domains.");
   params.addParamNamesToGroup("ring_block_ids ring_block_names background_block_ids "
                               "background_block_names external_boundary_id external_boundary_name",
-                              "Customized Subdomain/Boundary");
+                              "Customized Subdomain/Boundary ids/names");
   params.addClassDescription(
       "This TriPinHexAssemblyGenerator object generates a hexagonal assembly "
-      "mesh with three pins in it.");
+      "mesh with three circular pins in a triangle at the center.");
   return params;
 }
 
@@ -155,6 +154,7 @@ TriPinHexAssemblyGenerator::TriPinHexAssemblyGenerator(const InputParameters & p
                                                         _num_sectors_per_side,
                                                         _num_sectors_per_side}))
 {
+  /* Parameter checks */
   if (_ring_radii.size() != 3)
     paramError("ring_radii", "This parameter must have a size of one or three if provided.");
   else
@@ -229,7 +229,8 @@ TriPinHexAssemblyGenerator::TriPinHexAssemblyGenerator(const InputParameters & p
         "pin_id_values",
         "If pin_id_name is provided, this parameter must be provided with a length of three.");
 
-  // Improve before submitting
+  // Just perform a simple and straightforward check for `ring_offset` here.
+  // A more comprehensive check for both `ring_offset` and `ring_radii` is done later.
   if (std::abs(_ring_offset) >= _side_length / 2.0)
     paramError(
         "ring_offset",
@@ -239,6 +240,7 @@ TriPinHexAssemblyGenerator::TriPinHexAssemblyGenerator(const InputParameters & p
 std::unique_ptr<MeshBase>
 TriPinHexAssemblyGenerator::generate()
 {
+  /* Pair specified block names and ids */
   std::set<subdomain_id_type> tmp_block_ids;
   std::set<SubdomainName> tmp_block_names;
   std::vector<std::pair<subdomain_id_type, SubdomainName>> block_info;
@@ -317,10 +319,9 @@ TriPinHexAssemblyGenerator::generate()
     MeshTools::Modification::rotate(*meshes[0], 90, 0, 0);
   else
     MeshTools::Modification::rotate(*meshes[0], 270, 0, 0);
+  /* Add subdomain names */
   for (const auto & block_info_pair : block_info)
-  {
     meshes[0]->subdomain_name(block_info_pair.first) = block_info_pair.second;
-  }
   if (_external_boundary_id > 0)
     MooseMesh::changeBoundaryId(*meshes[0], OUTER_SIDESET_ID, _external_boundary_id, false);
   if (!_external_boundary_name.empty())
