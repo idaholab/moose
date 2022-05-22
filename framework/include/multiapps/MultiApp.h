@@ -340,6 +340,9 @@ public:
   bool usingPositions() const { return _use_positions; }
 
 protected:
+  /// function that provides cli_args to subapps
+  virtual std::vector<std::string> cliArgs() const { return _cli_args; }
+
   /**
    * _must_ fill in _positions with the positions of the sub-aps
    */

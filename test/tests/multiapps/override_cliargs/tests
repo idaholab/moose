@@ -1,0 +1,10 @@
+[Tests]
+  design = 'syntax/MultiApps/index.md'
+  issues = '#20443'
+  [override_cli_args]
+    type = Exodiff
+    input = primary.i
+    exodiff = 'primary_out_sub0.e'
+    requirement = "The MultiApp system shall allow overriding the cliArgs function to provide parameters to the subapp programmatically."
+  []
+[]
