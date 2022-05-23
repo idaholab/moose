@@ -19,16 +19,15 @@
     type = AdaptiveImportance
     distributions = 'mu1 mu2'
     proposal_std = '1.0 1.0'
-    output_limit = 0.45
+    output_limit = 0.65
     num_samples_train = 30
     std_factor = 0.9
     initial_values = '-0.103 1.239'
     inputs_reporter = 'adaptive_MC/inputs'
+    use_absolute_value = true
+    seed = 1012
   []
 []
-
-# use_absolute_value = true
-# seed = 1012
 
 [MultiApps]
   [sub]
@@ -63,6 +62,11 @@
     type = AdaptiveMonteCarloDecision
     output_value = constant/reporter_transfer:average:value
     inputs = 'inputs'
+    sampler = sample
+  []
+  [ais_stats]
+    type = AdaptiveImportanceStats
+    output_value = constant/reporter_transfer:average:value
     sampler = sample
   []
 []

@@ -19,14 +19,16 @@ InputParameters
 AdaptiveImportanceStats::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
-  params.addClassDescription("Generic reporter which decides whether or not to accept a proposed "
-                             "sample in Adaptive Monte Carlo type of algorithms.");
+  params.addClassDescription("Reporter to compute statistics corresponding to the "
+                             "AdaptiveImportanceSampler.");
   params.addRequiredParam<ReporterName>("output_value",
                                         "Value of the model output from the SubApp.");
-  params.addParam<ReporterValueName>("mu_imp", "mu_imp", "Uncertain inputs to the model.");
-  params.addParam<ReporterValueName>("std_imp", "std_imp", "Uncertain inputs to the model.");
-  params.addParam<ReporterValueName>("pf", "pf", "Uncertain inputs to the model.");
-  params.addParam<ReporterValueName>("cov_pf", "cov_pf", "Uncertain inputs to the model.");
+  params.addParam<ReporterValueName>("mu_imp", "mu_imp", "Means of the importance distributions.");
+  params.addParam<ReporterValueName>(
+      "std_imp", "std_imp", "Standard deviations of the importance distributions.");
+  params.addParam<ReporterValueName>("pf", "pf", "Failure probability estimate.");
+  params.addParam<ReporterValueName>(
+      "cov_pf", "cov_pf", "Coefficient of variation of failure probability.");
   params.addRequiredParam<SamplerName>("sampler", "The sampler object.");
   return params;
 }
@@ -36,8 +38,8 @@ AdaptiveImportanceStats::AdaptiveImportanceStats(const InputParameters & paramet
     _output_value(getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
     _mu_imp(declareValue<std::vector<Real>>("mu_imp")),
     _std_imp(declareValue<std::vector<Real>>("std_imp")),
-    _pf(declareValue<std::vector<double>>("pf")),
-    _cov_pf(declareValue<std::vector<double>>("cov_pf")),
+    _pf(declareValue<std::vector<Real>>("pf")),
+    _cov_pf(declareValue<std::vector<Real>>("cov_pf")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _sampler(getSampler("sampler")),
     _ais(dynamic_cast<const AdaptiveImportanceSampler *>(&_sampler)),
@@ -46,6 +48,7 @@ AdaptiveImportanceStats::AdaptiveImportanceStats(const InputParameters & paramet
   if (!_ais)
     paramError("sampler", "The selected sampler is not of type AdaptiveImportance.");
 
+  // Initialize variables
   const auto rows = _sampler.getNumberOfRows();
   _mu_imp.resize(rows);
   _std_imp.resize(rows);
@@ -53,7 +56,8 @@ AdaptiveImportanceStats::AdaptiveImportanceStats(const InputParameters & paramet
   _cov_pf.resize(1);
   _pf_sum = 0.0;
   _var_sum = 0.0;
-
+  _distributions_store = _ais->getDistributionNames();
+  _factor = _ais->getStdFactor();
 }
 
 void
@@ -65,34 +69,33 @@ AdaptiveImportanceStats::execute()
     return;
   }
 
+  // Compute AdaptiveImportanceSampler statistics at each sample during the evaluation phase only.
   if (_step > _ais->getNumSamplesTrain())
   {
+    // Get the statistics of the importance distributions in the standard Normal space.
     _mu_imp = _ais->getImportanceVectorMean();
     _std_imp = _ais->getImportanceVectorStd();
 
+    // Get the failure probability estimate.
     const Real tmp = _ais->getUseAbsoluteValue() ? std::abs(_output_value[0]) : _output_value[0];
     const bool output_limit_reached = tmp >= _ais->getOutputLimit();
     Real prod1 = output_limit_reached ? 1.0 : 0.0;
     std::vector<Real> input1 = _sampler.getNextLocalRow();
     Real input_tmp = 0.0;
-    std::vector<const Distribution *> _distributions1 = _ais->getDistributionNames();
-    Real factor1 = _ais->getStdFactor();
     for (dof_id_type ss = 0; ss < _sampler.getNumberOfCols(); ++ss)
     {
-      input_tmp = Normal::quantile(_distributions1[ss]->cdf(input1[ss]), 0.0, 1.0);
-      prod1 = prod1 * (Normal::pdf(input_tmp, 0.0, 1.0) / Normal::pdf(input_tmp, _mu_imp[ss], factor1*_std_imp[ss]));
+      input_tmp = Normal::quantile(_distributions_store[ss]->cdf(input1[ss]), 0.0, 1.0);
+      prod1 = prod1 * (Normal::pdf(input_tmp, 0.0, 1.0) /
+                       Normal::pdf(input_tmp, _mu_imp[ss], _factor * _std_imp[ss]));
     }
     _pf_sum += prod1;
-    _var_sum += std::pow(prod1, 2.0);
+    _var_sum += Utility::pow<2>(prod1);
     _pf[0] = _pf_sum / (_step - _ais->getNumSamplesTrain());
 
-    // Double precision is needed below.
-    // std::cout << "Term 1 is " << _var_sum/(_step - _ais->getNumSamplesTrain()) << std::endl;
-    // std::cout << "Term 2 is " << std::pow(_pf[0], 2) << std::endl;
-    // std::cout << "Term is " << _var_sum/(_step - _ais->getNumSamplesTrain()) - std::pow(_pf[0], 2) << std::endl;
-    // std::cout << std::setw(16) << "Term is " << std::pow(1/(_step - _ais->getNumSamplesTrain()) * (_var_sum/(_step - _ais->getNumSamplesTrain()) - std::pow(_pf[0], 2)), 0.5) << std::endl;
-    double tmp_var = std::pow(1.0/(_step - _ais->getNumSamplesTrain()) * (_var_sum/(_step - _ais->getNumSamplesTrain()) - std::pow(_pf[0], 2)), 0.5);
-    std::cout << "Termm is " << tmp_var << std::endl;
+    // Get coefficient of variation of failure probability.
+    Real tmp_var =
+        std::sqrt(1.0 / (_step - _ais->getNumSamplesTrain()) *
+                  (_var_sum / (_step - _ais->getNumSamplesTrain()) - Utility::pow<2>(_pf[0])));
     _cov_pf[0] = tmp_var / _pf[0];
   }
 }

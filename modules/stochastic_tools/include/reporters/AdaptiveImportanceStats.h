@@ -29,17 +29,17 @@ protected:
   /// Model output value from SubApp
   const std::vector<Real> & _output_value;
 
-  /// Model input data that is uncertain
+  /// Means of the importance distributions
   std::vector<Real> & _mu_imp;
 
-  /// Model input data that is uncertain
+  /// Standard deviations of the importance distributions
   std::vector<Real> & _std_imp;
 
-  /// Model input data that is uncertain
-  std::vector<double> & _pf;
+  /// Failure probability estimate
+  std::vector<Real> & _pf;
 
-  /// Model input data that is uncertain
-  std::vector<double> & _cov_pf;
+  /// Coefficient of variation of failure probability
+  std::vector<Real> & _cov_pf;
 
 private:
   /// Track the current step of the main App
@@ -54,10 +54,15 @@ private:
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;
 
-  /// Ensure that the MCMC algorithm proceeds in a sequential fashion
-  double _pf_sum;
+  /// Storage for the sequential sum of pf
+  Real _pf_sum;
 
-  /// Ensure that the MCMC algorithm proceeds in a sequential fashion
-  double _var_sum;
+  /// Storage for the sequential sum of variance of pf
+  Real _var_sum;
 
+  /// Storage for the distribution names
+  std::vector<const Distribution *> _distributions_store;
+
+  /// Storage for the standard deviation factor over the importance distribution
+  Real _factor;
 };

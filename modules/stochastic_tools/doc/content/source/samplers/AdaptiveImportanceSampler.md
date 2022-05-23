@@ -96,6 +96,11 @@ sample index. The first `num_samples_train` time steps are the samples during th
 learning phase and should not be used for estimating the $P_f$ or COV. The next
 `num_steps - num_samples_train` are the required importance samples used for estimating $P_f$ or COV.
 
+## Failure probability and COV
+
+Statistics such as the $P_f$ and COV can be computed using the [AdaptiveImportanceStats](AdaptiveImportanceStats.md)
+Reporter object.
+
 !syntax parameters /Samplers/AdaptiveImportance
 
 !syntax inputs /Samplers/AdaptiveImportance
