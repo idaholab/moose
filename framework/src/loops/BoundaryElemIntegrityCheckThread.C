@@ -134,7 +134,7 @@ boundaryIntegrityCheckError(const MooseObject & object,
              object.type(),
              "' depends on variable(s) '",
              MooseUtils::join(names, ","),
-             "'. However, that variable does not appear to be defined on boundary '",
+             "'. However, that variable does not appear to be defined on (all of) boundary '",
              boundary_name,
              "'.");
 }
