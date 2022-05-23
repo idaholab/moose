@@ -284,6 +284,16 @@ MultiApp::init(unsigned int num_apps, const LocalRankConfig & config)
   if ((_cli_args.size() > 1) && (_total_num_apps != _cli_args.size()))
     paramError("cli_args",
                "The number of items supplied must be 1 or equal to the number of sub apps.");
+
+  // if cliArgs() != _cli_args, then cliArgs() was overridden and we need to check it
+  auto cla = cliArgs();
+  if (cla != _cli_args)
+  {
+    if ((cla.size() > 1) && (_total_num_apps != cla.size()))
+      mooseError("The number of items supplied as command line argument to subapps must be 1 or "
+                 "equal to the number of sub apps. Note: you use a multiapp that provides its own "
+                 "command line parameters so the error is not in cli_args");
+  }
 }
 
 void
@@ -426,8 +436,8 @@ MultiApp::readCommandLineArguments()
                "number of sub apps ",
                _total_num_apps);
 
-  if (_cli_args_from_file.size() && _cli_args.size())
-    mooseError("Can not set commandLine arguments from both input_file and external files");
+  if (_cli_args_from_file.size() && cliArgs().size())
+    mooseError("Cannot set commandLine arguments from both input_file and external files");
 }
 
 void
@@ -842,7 +852,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app_cli->initForMultiApp(full_name);
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = app_cli;
 
-  if (_cli_args.size() > 0 || _cli_args_from_file.size() > 0)
+  if (cliArgs().size() > 0 || _cli_args_from_file.size() > 0)
   {
     for (const std::string & str : MooseUtils::split(getCommandLineArgsParamHelper(i), ";"))
     {
@@ -924,18 +934,18 @@ MultiApp::createApp(unsigned int i, Real start_time)
 std::string
 MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
+  auto cla = cliArgs();
 
-  mooseAssert(_cli_args.size() || _cli_args_from_file.size(),
-              "There is no commandLine argument \n");
+  mooseAssert(cla.size() || _cli_args_from_file.size(), "There is no commandLine argument \n");
 
   // Single set of "cli_args" to be applied to all sub apps
-  if (_cli_args.size() == 1)
-    return _cli_args[0];
+  if (cla.size() == 1)
+    return cla[0];
   else if (_cli_args_from_file.size() == 1)
     return _cli_args_from_file[0];
-  else if (_cli_args.size())
+  else if (cla.size())
     // Unique set of "cli_args" to be applied to each sub apps
-    return _cli_args[local_app + _first_local_app];
+    return cla[local_app + _first_local_app];
   else
     return _cli_args_from_file[local_app + _first_local_app];
 }
