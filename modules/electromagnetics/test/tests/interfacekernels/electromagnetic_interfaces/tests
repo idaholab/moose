@@ -5,7 +5,7 @@
     exodiff = 'parallel_out.e'
     requirement = 'The system shall calculate the appropriate parallel component equivalence interface condition dictated by Maxwells Equations for parallel electromangetic vector fields.'
     design = 'ParallelElectricFieldInterface.md'
-    issues = '#13744'
+    issues = '#21075'
   [../]
   [./perpendicular]
     type = Exodiff
@@ -13,7 +13,7 @@
     exodiff = 'perpendicular_out.e'
     requirement = 'The system shall calculate the appropriate perpendicular equivalence interface condition dictated by Maxwells Equations for perpendicular electromagnetic vector fields, when properties are identical on either side of the interface.'
     design = 'PerpendicularElectricFieldInterface.md'
-    issues = '#13744'
+    issues = '#21075'
   [../]
   [./combined_default]
     type = Exodiff
@@ -21,7 +21,7 @@
     exodiff = 'combined_default_out.e'
     requirement = 'The system shall calculate the appropriate equivalence interface condition dictated by Maxwells Equations for both perpendicular and parallel components of electromagnetic vector fields at the same time with default, identical material property parameters.'
     design = 'ParallelElectricFieldInterface.md PerpendicularElectricFieldInterface.md'
-    issues = '#13744'
+    issues = '#21075'
   [../]
   [./combined_props]
     type = Exodiff
@@ -29,6 +29,6 @@
     exodiff = 'combined_props_out.e'
     requirement = 'The system shall calculate the appropriate interface condition dictated by Maxwells Equations for both perpendicular (subject to material properties) and parallel (equivalent) components of electromagnetic vector fields at an interface at the same time, with user-supplied material property parameters.'
     design = 'ParallelElectricFieldInterface.md PerpendicularElectricFieldInterface.md'
-    issues = '#13744'
+    issues = '#21075'
   [../]
 []

@@ -5,7 +5,7 @@
     exodiff = 'portbc_waves_out.e'
     requirement = 'The system shall be able to simulate a first order electromagnetic wave launching/absorbing port as a boundary condition, given the incoming/outgoing wave, for real and imaginary components of the field and for vector variables.'
     design = 'VectorEMRobinBC.md'
-    issues = '#13744'
+    issues = '#21077'
   []
   [./waves_absorbing_error]
     type = 'RunException'
@@ -15,6 +15,6 @@
     expect_err = 'In sides_real, mode was set to Absorbing, while an incoming'
     requirement = 'The system shall present an error to the user whenever the mode of operation for VectorEMRobinBC is set to absorbing, but incoming wave information is supplied.'
     design = 'VectorEMRobinBC.md'
-    issues = '#13744'
+    issues = '#21100'
   []
 []
