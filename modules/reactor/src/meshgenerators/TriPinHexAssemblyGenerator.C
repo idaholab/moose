@@ -20,27 +20,28 @@ TriPinHexAssemblyGenerator::validParams()
   InputParameters params = PolygonMeshGeneratorBase::validParams();
   params.addRequiredRangeCheckedParam<unsigned int>(
       "num_sectors_per_side", "num_sectors_per_side>0", "Number of azimuthal sectors per side.");
-  params.addRangeCheckedParam<unsigned int>("background_intervals",
-                                            1,
-                                            "background_intervals>0",
-                                            "Number of radial meshing intervals in background "
-                                            "region (region around the rings in the assembly).");
+  params.addRangeCheckedParam<unsigned int>(
+      "background_intervals",
+      1,
+      "background_intervals>0",
+      "Number of radial meshing intervals in background "
+      "region (region around the rings/pins in the assembly).");
   params.addRangeCheckedParam<std::vector<subdomain_id_type>>(
       "background_block_ids",
       "background_block_ids>0",
-      "Optional block ids for the background region.");
-  params.addParam<std::vector<SubdomainName>>("background_block_names",
-                                              "Optional block names for the background region.");
+      "Optional block ids for the background regions in the pins.");
+  params.addParam<std::vector<SubdomainName>>(
+      "background_block_names", "Optional block names for the background regions in the pins.");
   params.addRangeCheckedParam<std::vector<std::vector<Real>>>(
       "ring_radii", "ring_radii>0", "Radii of the three sets of major concentric circles (pins).");
   params.addRangeCheckedParam<std::vector<std::vector<unsigned int>>>(
       "ring_intervals",
       "ring_intervals>0",
-      "Number of radial mesh intervals within each set of major concentric circles.");
+      "Number of radial mesh intervals within each set of major concentric circles (pins).");
   params.addRangeCheckedParam<std::vector<std::vector<subdomain_id_type>>>(
-      "ring_block_ids", "ring_block_ids>0", "Optional block ids for the ring regions.");
+      "ring_block_ids", "ring_block_ids>0", "Optional block ids for the ring (pin) regions.");
   params.addParam<std::vector<std::vector<SubdomainName>>>(
-      "ring_block_names", "Optional block names for the ring regions.");
+      "ring_block_names", "Optional block names for the ring (pin) regions.");
   MooseEnum hexagon_size_style("apothem radius", "radius");
   params.addParam<MooseEnum>("hexagon_size_style",
                              hexagon_size_style,
@@ -48,11 +49,12 @@ TriPinHexAssemblyGenerator::validParams()
                              "radius = center to vertex).");
   params.addRequiredRangeCheckedParam<Real>(
       "hexagon_size", "hexagon_size>0", "Size parameter of the hexagon assembly to be generated.");
-  // This can be a vector if needed.
-  params.addParam<Real>("ring_offset", 0.0, "Offset of the ring center.");
-  params.addParam<bool>("preserve_volumes",
-                        true,
-                        "Volume of concentric circles can be preserved using this function.");
+  params.addParam<Real>(
+      "ring_offset", 0.0, "Offset of the ring (pin) center, shared by all three.");
+  params.addParam<bool>(
+      "preserve_volumes",
+      true,
+      "Volume of concentric circles (pins) can be preserved using this function.");
   MooseEnum assembly_orientation("pin_up pin_down", "pin_up");
   params.addParam<MooseEnum>(
       "assembly_orientation", assembly_orientation, "Orientation of the generated assembly.");
