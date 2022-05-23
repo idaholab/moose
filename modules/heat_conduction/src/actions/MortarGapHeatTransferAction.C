@@ -90,10 +90,27 @@ MortarGapHeatTransferAction::MortarGapHeatTransferAction(const InputParameters &
 
   if (_user_provided_gap_flux_models)
     mooseInfo(
-        "User decided to create user objects for the mortar gap heat transfer action to leverage.");
+        "User decided to create user objects to model physics for the mortar gap heat transfer "
+        "action independently, i.e. not through the mortar gap heat transfer action.");
   else
     mooseInfo("The mortar gap heat transfer action will add gap heat transfer physics according to "
               "the gap_flux_options input parameter");
+
+  const bool wrong_parameters_provided =
+      _user_provided_gap_flux_models &&
+      (params.isParamSetByUser("gap_conductivity") ||
+       params.isParamSetByUser("primary_emissivity") ||
+       params.isParamSetByUser("secondary_emissivity") ||
+       params.isParamSetByUser("gap_conductivity_function") ||
+       params.isParamSetByUser("gap_conductivity_function_variable") ||
+       params.isParamSetByUser("min_gap"));
+
+  if (wrong_parameters_provided)
+    paramError(
+        "user_created_gap_flux_models",
+        "The mortar gap heat transfer action requires that the input file defines user objects "
+        "with physics or adds physics parameters directly into the action. You have provided both "
+        "user objects and physics parameters (e.g. emissivities, gap conductance, etc.).");
 }
 
 void
