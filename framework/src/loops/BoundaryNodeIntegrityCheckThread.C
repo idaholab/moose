@@ -15,7 +15,6 @@
 #include "FEProblemBase.h"
 #include "NodalUserObject.h"
 #include "MooseMesh.h"
-#include "NodalBCBase.h"
 #include "MooseObjectTagWarehouse.h"
 
 #include "libmesh/threads.h"
@@ -31,7 +30,6 @@ BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     _nodal_aux(_aux_sys.nodalAuxWarehouse()),
     _nodal_vec_aux(_aux_sys.nodalVectorAuxWarehouse()),
     _nodal_array_aux(_aux_sys.nodalArrayAuxWarehouse()),
-    _nodal_bcs(fe_problem.getNonlinearSystemBase().getNodalBCWarehouse()),
     _query(query),
     _node_to_elem_map(fe_problem.mesh().nodeToActiveSemilocalElemMap())
 {
@@ -45,7 +43,6 @@ BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     _nodal_aux(x._nodal_aux),
     _nodal_vec_aux(x._nodal_vec_aux),
     _nodal_array_aux(x._nodal_array_aux),
-    _nodal_bcs(x._nodal_bcs),
     _query(x._query),
     _node_to_elem_map(x._node_to_elem_map)
 {
@@ -100,30 +97,6 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
   check(_nodal_aux);
   check(_nodal_vec_aux);
   check(_nodal_array_aux);
-
-  auto nodal_bc_check = [node, boundary_id, &bnd_name, this]()
-  {
-    if (_tid != 0)
-      return;
-
-    if (!_nodal_bcs.hasBoundaryObjects(boundary_id, _tid))
-      return;
-
-    const auto & bnd_objects = _nodal_bcs.getBoundaryObjects(boundary_id, _tid);
-    for (const auto & bnd_object : bnd_objects)
-      // Skip if this object uses geometric search because coupled variables may be defined on
-      // paired boundaries instead of the boundary this node is on
-      if (!bnd_object->requiresGeometricSearch() && bnd_object->checkVariableBoundaryIntegrity())
-      {
-        std::set<MooseVariableFieldBase *> vars_to_omit = {&static_cast<MooseVariableFieldBase &>(
-            const_cast<MooseVariableBase &>(bnd_object->variable()))};
-
-        boundaryIntegrityCheckError(
-            *bnd_object, bnd_object->checkAllVariables(*node, vars_to_omit), bnd_name);
-      }
-  };
-
-  nodal_bc_check();
 }
 
 void

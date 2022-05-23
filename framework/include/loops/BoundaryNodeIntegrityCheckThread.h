@@ -20,7 +20,6 @@ template <typename>
 class MooseObjectTagWarehouse;
 template <typename>
 class ExecuteMooseObjectWarehouse;
-class NodalBCBase;
 
 class BoundaryNodeIntegrityCheckThread
   : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
@@ -47,9 +46,6 @@ protected:
 
   /// Nodal auxiliary kernels acting on array field variables
   const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & _nodal_array_aux;
-
-  /// The nodal boundary conditions from the nonlinear system
-  const MooseObjectTagWarehouse<NodalBCBase> & _nodal_bcs;
 
   /// A warehouse query that we will use to obtain user objects for boundary variable dependency
   /// integrity checks
