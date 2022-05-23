@@ -101,6 +101,9 @@ ComputeDynamicFrictionalForceLMMechanicalContact::ComputeDynamicFrictionalForceL
       paramError(
           "friction_lm",
           "Frictional contact constraints only support elemental variables of CONSTANT order");
+
+  // Request the old solution state in unison
+  _sys.solutionOld();
 }
 
 void
