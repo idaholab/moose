@@ -88,5 +88,4 @@
 [Outputs]
   exodus = true
   execute_on = 'initial timestep_end'
-  csv = true
 []

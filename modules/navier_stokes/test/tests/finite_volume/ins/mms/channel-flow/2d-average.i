@@ -206,7 +206,6 @@ velocity_interp_method='average'
 []
 
 [Outputs]
-  exodus = true
   csv = true
 []
 

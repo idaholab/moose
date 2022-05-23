@@ -50,7 +50,3 @@
     type = SamplerReceiver
   []
 []
-
-[Outputs]
-  exodus = true
-[]

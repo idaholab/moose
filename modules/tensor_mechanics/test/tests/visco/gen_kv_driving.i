@@ -184,5 +184,4 @@
 [Outputs]
   file_base = gen_kv_driving_out
   exodus = true
-  csv = true
 []

@@ -139,7 +139,6 @@
 [Outputs]
   exodus = true
   execute_on = timestep_end
-  csv = true
   perf_graph = true
   [./console]
     type = Console

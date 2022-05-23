@@ -93,7 +93,3 @@
   dtmin = 0.005
   end_time = 0.005
 []
-
-[Outputs]
-  exodus = true
-[]

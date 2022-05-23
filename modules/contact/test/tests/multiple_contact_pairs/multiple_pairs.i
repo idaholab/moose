@@ -103,7 +103,6 @@ offset = 1e-2
 
 [Outputs]
   exodus = true
-  csv = true
 []
 
 [Preconditioning]

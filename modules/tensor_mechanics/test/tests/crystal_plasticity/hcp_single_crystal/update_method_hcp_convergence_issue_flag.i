@@ -137,6 +137,3 @@
   dtmax = 0.1
   num_steps = 1
 []
-
-[Outputs]
-[]

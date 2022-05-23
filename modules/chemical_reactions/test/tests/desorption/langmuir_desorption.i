@@ -125,6 +125,5 @@
 [Outputs]
   file_base = langmuir_desorption
   interval = 10
-  exodus = true
   csv = 10
 [] # Outputs

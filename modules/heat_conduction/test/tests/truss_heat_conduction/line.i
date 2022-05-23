@@ -94,7 +94,6 @@
     num_points = 40
     variable = 'temperature'
     sort_by = id
-    outputs = csv
   []
 []
 

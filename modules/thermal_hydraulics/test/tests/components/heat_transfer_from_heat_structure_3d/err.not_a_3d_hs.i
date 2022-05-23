@@ -128,7 +128,3 @@
   steady_state_tolerance = 1e-08
   nl_abs_tol = 1e-8
 []
-
-[Outputs]
-  exodus = true
-[]

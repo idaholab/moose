@@ -80,7 +80,3 @@
   dt = 1
 []
 
-
-[Outputs]
-  exodus = true
-[]

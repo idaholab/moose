@@ -142,6 +142,5 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = j_int_surfbreak_ellip_crack_sym_mm_cm_ad_out
-  exodus = true
   csv = true
 []

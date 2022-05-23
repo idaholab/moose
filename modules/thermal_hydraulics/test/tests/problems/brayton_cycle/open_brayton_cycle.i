@@ -429,7 +429,6 @@ p_ambient = 1e5
 []
 
 [Outputs]
-  exodus = true
   [csv]
     type = CSV
     file_base = 'open_brayton_cycle'
