@@ -19,7 +19,7 @@ GapFluxModelConduction::validParams()
   InputParameters params = GapFluxModelBase::validParams();
   params.addClassDescription("Gap flux model for varying gap conductance");
   params.addRequiredCoupledVar("temperature", "The name of the temperature variable");
-  params.addParam<Real>("gap_conductivity", 0.0, "Gap conductivity value");
+  params.addRequiredParam<Real>("gap_conductivity", "Gap conductivity value");
   params.addParam<FunctionName>(
       "gap_conductivity_function",
       "Thermal conductivity of the gap material as a function.  Multiplied "
@@ -52,16 +52,6 @@ GapFluxModelConduction::GapFluxModelConduction(const InputParameters & parameter
     _min_gap_order(getParam<unsigned int>("min_gap_order"))
 
 {
-  if (parameters.isParamSetByUser("gap_conductivity") &&
-      parameters.isParamSetByUser("gap_conductivity_function"))
-    paramError("gap_conductivity",
-               "You have provided both a constant gap conductivity and a gap conductivity "
-               "function. Please select one or the other.");
-  else if (!parameters.isParamSetByUser("gap_conductivity") &&
-           !parameters.isParamSetByUser("gap_conductivity_function"))
-    paramError("gap_conductivity",
-               "You have to provide a constant gap conductivity or a gap conductivity function. "
-               "Please select one or the other.");
 }
 
 ADReal
