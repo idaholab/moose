@@ -37,8 +37,7 @@ MOOSE performs several sanity checks just before the simulation runs. This inclu
   checking is controlled with
   [!param](/Problem/FEProblem/boundary_restricted_node_integrity_check). Elemental object
   integrity checking is controlled with
-  [!param](/Problem/FEProblem/boundary_restricted_elem_integrity_check). The former
-  parameter defaults to `true` while the latter defaults to `false`. Checked objects include
+  [!param](/Problem/FEProblem/boundary_restricted_elem_integrity_check). Checked objects include
     - Nodal user objects
     - Nodal auxiliary kernels
     - Nodal boundary conditions
