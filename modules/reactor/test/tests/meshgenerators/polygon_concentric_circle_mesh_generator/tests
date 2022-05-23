@@ -126,6 +126,21 @@
     requirement ='The system shall generate a hexagon mesh with rings, ducts and quad central elements.'
     recover = false
   []
+  [full_quad_custom]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_full_quad_custom.e'
+    cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
+                Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
+                Mesh/gen/duct_block_ids="1500 1600" Mesh/gen/duct_block_names="inner_duct outer_duct"
+                Mesh/gen/duct_sizes_style="apothem" Mesh/gen/quad_center_elements=true
+                Mesh/gen/center_quad_factor=0.9
+                --mesh-only "poly_2d_full_quad_custom.e"'
+    requirement ='The system shall generate a hexagon mesh with rings, ducts and quad central elements with custom center quad factor.'
+    recover = false
+  []
   [exceptions]
     requirement = "The system shall throw an error if "
     [err_quad_diff_sector_nums]
@@ -439,6 +454,13 @@
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'cannot exceeds the duct layer width.'
       detail = "duct's boundary layers are thicker than the ring itself."
+    []
+    [err_center_quad_factor_for_tri_elems]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/center_quad_factor=0.5'
+      expect_err = 'this parameter is only applicable if quad_center_elements is set true.'
+      detail = 'center_quad_factor is provided for triangular center elements.'
     []
   []
 []

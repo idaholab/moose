@@ -39,6 +39,7 @@ HexagonConcentricCircleAdaptiveBoundaryMeshGenerator::validParams()
   params.suppressParameter<bool>("uniform_mesh_on_sides");
   params.suppressParameter<bool>("quad_center_elements");
   params.suppressParameter<unsigned int>("smoothing_max_it");
+  params.suppressParameter<Real>("center_quad_factor");
   params.addParamNamesToGroup("is_control_drum", "Control Drum");
   params.addClassDescription(
       "This HexagonConcentricCircleAdaptiveBoundaryMeshGenerator object is designed to generate "
