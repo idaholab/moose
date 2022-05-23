@@ -171,8 +171,10 @@ protected:
    * factors of the inner boundary layer of the duct regions
    * @param duct_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
    * factors of the outer boundary layer of the duct regions
-   * @param primary_side_length length of the first side that involves the ring center vertex
-   * @param secondary_side_length length of the second side that involves the ring center vertex
+   * @param primary_side_length length of the first side (i.e., the side that is parallel to y-axis
+   * when rotation_angle is zero) that involves the ring center vertex
+   * @param secondary_side_length length of the second side (obtained by clockwise rotating the fist
+   * side by azimuthal_angle) that involves the ring center vertex
    * @param num_sectors_per_side number of azimuthal intervals
    * @param background_intervals number of radial intervals of the background region
    * @param background_radial_bias value used for radial meshing biasing in background region

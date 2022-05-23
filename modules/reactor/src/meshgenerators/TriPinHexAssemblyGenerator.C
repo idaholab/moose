@@ -349,12 +349,17 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
     const std::vector<subdomain_id_type> block_ids_new,
     dof_id_type & node_id_background_meta)
 {
+  // Each SinglePinSection, which has a diamond shape, is composed of four general slices.
+  // Considering symmetry, two unique general slices (0 and 1) need to be generated.
+  // For each slice, the center of the pin is one of its vertices; primary and secondary sides are
+  // the two sides that contain the pin center.
   const Real secondary_side_length_0(side_length / 2.0 - ring_offset);
   const Real secondary_side_length_1(
       std::sqrt(side_length * side_length / 4.0 * 3.0 + ring_offset * ring_offset));
   const Real primary_side_length_0(
       std::sqrt(side_length * side_length / 4.0 * 3.0 + ring_offset * ring_offset));
   const Real primary_side_length_1(side_length / 2.0 + ring_offset);
+  // Azimuthal angle is the included angle defined by the primary and secondary sides
   const Real azimuthal_angle_0(
       acos((secondary_side_length_0 * secondary_side_length_0 +
             primary_side_length_0 * primary_side_length_0 - side_length * side_length) /
@@ -365,10 +370,12 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
             primary_side_length_1 * primary_side_length_1 - side_length * side_length) /
            2.0 / primary_side_length_1 / secondary_side_length_1) /
       M_PI * 180.0);
-
+  // The primary side is parallel to y-axis by default (i.e., rotation_angle is zero). So the
+  // general slices need to be rotated before stitching,
   const Real rotation_angle_0(azimuthal_angle_0 - 90.0);
   const Real rotation_angle_1(azimuthal_angle_0 + azimuthal_angle_1 - 90.0);
-
+  // Alpha angle is the other included angle of the slice defined by the primary side and the third
+  // side.
   const Real alpha_angle_0(
       acos((primary_side_length_0 * primary_side_length_0 + side_length * side_length -
             secondary_side_length_0 * secondary_side_length_0) /
@@ -380,8 +387,8 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
            2.0 / primary_side_length_1 / side_length) /
       M_PI * 180.0);
 
-  std::vector<Real> azimuthal_tangent_0;
-  std::vector<Real> azimuthal_tangent_1;
+  // azimuthal_list is a list of azimuthal intervals of the mesh to support radius correction to
+  // ensure preserved volume.
   std::vector<Real> azimuthal_list;
   for (unsigned int i = 0; i < num_sectors_per_side; i++)
   {
@@ -448,7 +455,7 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
       {0.0, 0.0, 0, 1.0},
       node_id_background_meta,
       azimuthal_angle_0,
-      azimuthal_tangent_0,
+      std::vector<Real>(),
       /* side_index = */ 1,
       false,
       rotation_angle_0);
@@ -479,7 +486,7 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
       {0.0, 0.0, 0, 1.0},
       node_id_background_meta,
       azimuthal_angle_1,
-      azimuthal_tangent_1,
+      std::vector<Real>(),
       /* side_index = */ 1,
       false,
       rotation_angle_1);
