@@ -3319,11 +3319,21 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 void
 NonlinearSystemBase::mortarConstraints()
 {
-  for (auto & map_pr : _undisplaced_mortar_functors)
-    map_pr.second();
+  try
+  {
+    for (auto & map_pr : _undisplaced_mortar_functors)
+      map_pr.second();
 
-  for (auto & map_pr : _displaced_mortar_functors)
-    map_pr.second();
+    for (auto & map_pr : _displaced_mortar_functors)
+      map_pr.second();
+  }
+  catch (MetaPhysicL::LogicError &)
+  {
+    mooseError(
+        "We caught a MetaPhysicL error in NonlinearSystemBase::mortarConstraints. This is very "
+        "likely due to AD not having a sufficiently large derivative container size. Please run "
+        "MOOSE configure with the '--with-derivative-size=<n>' option");
+  }
 }
 
 void
