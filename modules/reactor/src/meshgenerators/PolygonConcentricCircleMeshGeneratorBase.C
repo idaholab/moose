@@ -167,6 +167,11 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
                         "Whether the side elements are reorganized to have a uniform size.");
   params.addParam<bool>(
       "quad_center_elements", false, "Whether the center elements are quad or triangular.");
+  params.addRangeCheckedParam<Real>(
+      "center_quad_factor",
+      "center_quad_factor>0&center_quad_factor<1",
+      "A fractional radius factor used to determine the radial positions of transition nodes in "
+      "the center region meshed by quad elements.");
   params.addParam<unsigned int>("smoothing_max_it",
                                 0,
                                 "Number of Laplacian smoothing iterations. This number is "
@@ -326,6 +331,8 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
                                   : std::vector<std::string>()),
     _uniform_mesh_on_sides(getParam<bool>("uniform_mesh_on_sides")),
     _quad_center_elements(getParam<bool>("quad_center_elements")),
+    _center_quad_factor(isParamValid("center_quad_factor") ? getParam<Real>("center_quad_factor")
+                                                           : 0.0),
     _flat_side_up(declareMeshProperty<bool>("flat_side_up", getParam<bool>("flat_side_up"))),
     _smoothing_max_it(getParam<unsigned int>("smoothing_max_it")),
     _sides_to_adapt(isParamValid("sides_to_adapt")
@@ -549,6 +556,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     if (_duct_sizes_style == DuctStyle::apothem)
       _background_outer_boundary_layer_params.width /= std::cos(M_PI / Real(_num_sides));
   }
+  if (!_quad_center_elements && _center_quad_factor)
+    paramError("center_quad_factor",
+               "this parameter is only applicable if quad_center_elements is set true.");
 }
 
 std::unique_ptr<MeshBase>
@@ -647,6 +657,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                 _azimuthal_angles_array[0],
                                 _block_id_shift,
                                 _quad_center_elements,
+                                _center_quad_factor,
                                 _interface_boundary_id_shift);
   // This loop builds add-on slices and stitches them to the first slice
   for (unsigned int mesh_index = 1; mesh_index < _num_sides; mesh_index++)
@@ -675,6 +686,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                      _azimuthal_angles_array[mesh_index],
                                      _block_id_shift,
                                      _quad_center_elements,
+                                     _center_quad_factor,
                                      _interface_boundary_id_shift);
 
     ReplicatedMesh other_mesh(*mesh_tmp);
