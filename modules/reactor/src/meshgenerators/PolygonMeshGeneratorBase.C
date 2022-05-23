@@ -58,6 +58,7 @@ PolygonMeshGeneratorBase::buildGeneralSlice(
     const std::vector<Real> azimuthal_tangent,
     const unsigned int side_index,
     const bool quad_center_elements,
+    const Real center_quad_factor,
     const Real rotation_angle)
 {
   const Real virtual_pitch = 2.0 * primary_side_length * cos(azimuthal_angle / 360.0 * M_PI);
@@ -86,6 +87,7 @@ PolygonMeshGeneratorBase::buildGeneralSlice(
                          azimuthal_tangent,
                          0,
                          quad_center_elements,
+                         center_quad_factor,
                          0,
                          pitch_scale_factor);
   MeshTools::Modification::rotate(*mesh, rotation_angle, 0, 0);
@@ -142,6 +144,7 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
                     azimuthal_tangent,
                     block_id_shift,
                     quad_center_elements,
+                    center_quad_factor,
                     boundary_id_shift,
                     1.0);
 }
@@ -170,6 +173,7 @@ PolygonMeshGeneratorBase::buildSlice(
     const std::vector<Real> azimuthal_tangent,
     const subdomain_id_type block_id_shift,
     const bool quad_center_elements,
+    const Real center_quad_factor,
     const boundary_id_type boundary_id_shift,
     const Real pitch_scale_factor)
 {
