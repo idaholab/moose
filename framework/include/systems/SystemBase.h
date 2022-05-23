@@ -198,7 +198,7 @@ public:
   /**
    * Initializes the solution state.
    */
-  void initSolutionState();
+  virtual void initSolutionState();
 
   /**
    * Get a state of the solution (0 = current, 1 = old, 2 = older, etc).
@@ -206,22 +206,22 @@ public:
    * If the state does not exist, it will be initialized in addition to any newer
    * states before it that have not been initialized.
    */
-  NumericVector<Number> & solutionState(const unsigned int state);
+  virtual NumericVector<Number> & solutionState(const unsigned int state);
 
   /**
    * Get a state of the solution (0 = current, 1 = old, 2 = older, etc).
    */
-  const NumericVector<Number> & solutionState(const unsigned int state) const;
+  virtual const NumericVector<Number> & solutionState(const unsigned int state) const;
 
   /**
    * Registers that the solution state \p state is needed.
    */
-  void needSolutionState(const unsigned int state);
+  virtual void needSolutionState(const unsigned int state);
 
   /**
    * Whether or not the system has the solution state (0 = current, 1 = old, 2 = older, etc).
    */
-  bool hasSolutionState(const unsigned int state) const { return _solution_states.size() > state; }
+  virtual bool hasSolutionState(const unsigned int state) const;
 
   virtual Number & duDotDu() { return _du_dot_du; }
   virtual Number & duDotDotDu() { return _du_dotdot_du; }
@@ -971,6 +971,12 @@ private:
   /// The saved solution states (0 = current, 1 = old, 2 = older, etc)
   std::vector<NumericVector<Number> *> _saved_solution_states;
 };
+
+inline bool
+SystemBase::hasSolutionState(const unsigned int state) const
+{
+  return _solution_states.size() > state;
+}
 
 #define PARALLEL_TRY
 
