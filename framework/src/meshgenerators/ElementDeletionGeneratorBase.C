@@ -38,6 +38,10 @@ ElementDeletionGeneratorBase::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
+  // Make sure that the mesh is prepared
+  if (!mesh->is_prepared())
+    mesh->prepare_for_use();
+
   // Elements that the deleter will remove
   std::set<Elem *> deleteable_elems;
 
@@ -65,15 +69,10 @@ ElementDeletionGeneratorBase::generate()
   }
 #endif
 
-  // Make sure that the mesh is prepared
   // Get the BoundaryID from the mesh
   boundary_id_type boundary_id = 0;
   if (_assign_boundary)
-  {
-    if (!mesh->is_prepared())
-      mesh->prepare_for_use();
     boundary_id = MooseMeshUtils::getBoundaryIDs(*mesh, {_boundary_name}, true)[0];
-  }
 
   // Get a reference to our BoundaryInfo object for later use
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
