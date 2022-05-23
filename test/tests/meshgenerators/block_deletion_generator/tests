@@ -24,5 +24,14 @@
       recover = false
       detail = 'multiple blocks simultaneously in a mesh based on subdomain ID.'
     []
+    [input_not_prepared]
+      type = 'Exodiff'
+      input = 'block_deletion_not_prepared.i'
+      exodiff = 'block_deletion_not_prepared_in.e'
+      exodiff_opts = '-pedantic'
+      cli_args = '--mesh-only'
+      recover = false
+      detail = 'blocks and assigning the new boundary even if the input mesh is not prepared.'
+    []
   []
 []

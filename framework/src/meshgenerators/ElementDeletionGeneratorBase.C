@@ -38,6 +38,10 @@ ElementDeletionGeneratorBase::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
+  // Make sure that the mesh is prepared
+  if (!mesh->is_prepared())
+    mesh->prepare_for_use();
+
   // Elements that the deleter will remove
   std::set<Elem *> deleteable_elems;
 
