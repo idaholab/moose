@@ -201,6 +201,19 @@ public:
     mooseInfo(prefix, args...);
   }
 
+  /**
+   * Emits an informational message as paramInfo except multiple messages can be issued by
+   * this function.
+   */
+  template <typename... Args>
+  void paramInfoRepeated(const std::string & param, Args... args) const
+  {
+    auto prefix = param + ": ";
+    if (!_pars.inputLocation(param).empty())
+      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + "):\n";
+    mooseInfoRepeated(prefix, args...);
+  }
+
 protected:
   /**
    * Method to add objects to the simulation or perform other setup tasks.

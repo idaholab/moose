@@ -147,6 +147,13 @@ public:
   void paramInfo(const std::string & param, Args... args) const;
 
   /**
+   * Emits an informational message as paramInfo except multiple messages can be issued by
+   * this function.
+   */
+  template <typename... Args>
+  void paramInfoRepeated(const std::string & param, Args... args) const;
+
+  /**
    * Emits an error prefixed with object name and type.
    */
   template <typename... Args>
@@ -282,6 +289,13 @@ void
 MooseObject::paramInfo(const std::string & param, Args... args) const
 {
   mooseInfo(paramErrorMsg(param, std::forward<Args>(args)...));
+}
+
+template <typename... Args>
+void
+MooseObject::paramInfoRepeated(const std::string & param, Args... args) const
+{
+  mooseInfoRepeated(paramErrorMsg(param, std::forward<Args>(args)...));
 }
 
 template <typename T1, typename T2>

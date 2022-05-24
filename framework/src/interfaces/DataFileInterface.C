@@ -25,10 +25,7 @@ DataFileInterface<T>::getDataFileName(const std::string & param) const
   {
     const auto & absolute_path = _parent.template getParam<FileName>(param);
     if (MooseUtils::checkFileReadable(absolute_path, false, false, false))
-    {
-      _parent.paramInfo(param, "Data file '", absolute_path, "' found relative to the input file.");
       return absolute_path;
-    }
   }
 
   const auto & relative_path = _parent.parameters().rawParamVal(param);
@@ -51,10 +48,10 @@ DataFileInterface<T>::getDataFileNameByName(const std::string & relative_path,
       if (MooseUtils::checkFileReadable(path, false, false, false))
       {
         if (param)
-          _parent.paramInfo(
+          _parent.paramInfoRepeated(
               *param, "Data file '", path, "' found in an installed app distribution.");
         else
-          mooseInfo("Data file '", path, "' found in an installed app distribution.");
+          mooseInfoRepeated("Data file '", path, "' found in an installed app distribution.");
         return path;
       }
     }
@@ -67,9 +64,9 @@ DataFileInterface<T>::getDataFileNameByName(const std::string & relative_path,
     if (MooseUtils::checkFileReadable(path, false, false, false))
     {
       if (param)
-        _parent.paramInfo(*param, "Data file '", path, "' found in a source repository.");
+        _parent.paramInfoRepeated(*param, "Data file '", path, "' found in a source repository.");
       else
-        mooseInfo("Data file '", path, "' found in a source repository.");
+        mooseInfoRepeated("Data file '", path, "' found in a source repository.");
       return path;
     }
   }
