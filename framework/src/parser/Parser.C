@@ -1376,6 +1376,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(ReporterValueName, string);
 
       // vector types
+      setvector(bool, bool);
       setvector(Real, double);
       setvector(int, int);
       setvector(long, int);
