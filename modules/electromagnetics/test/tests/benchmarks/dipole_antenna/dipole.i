@@ -3,8 +3,16 @@
 # Wave Propagation Medium: Vacuum
 
 [Mesh]
-  type = FileMesh
-  file = dipole_antenna_1G_fine.msh
+  [./file_mesh]
+    type = FileMeshGenerator
+    file = dipole_antenna_1G.msh
+  [../]
+  [./refine]
+    type = RefineBlockGenerator
+    input = file_mesh
+    block = 'vacuum'
+    refinement = 2
+  [../]
 []
 
 [Variables]

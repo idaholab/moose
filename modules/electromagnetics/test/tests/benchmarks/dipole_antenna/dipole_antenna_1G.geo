@@ -5,7 +5,8 @@
 // Antenna feed gap = L / 20
 // Domain radius = 5 * wavelength
 
-// Use global scaling factor = 0.2 to duplicate current "fine" saved MSH file.
+// Use global scaling factor = 0.2 to duplicate the "fine" MSH file used for
+// benchmark graphics.
 
 SetFactory("OpenCASCADE");
 Circle(1) = {0, 0, 0, 1.5, 0, 2*Pi};

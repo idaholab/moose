@@ -4,7 +4,7 @@
 
 [Mesh]
   type = FileMesh
-  file = dipole_antenna_1G_fine.msh
+  file = dipole_antenna_1G.msh
 []
 
 [Variables]
