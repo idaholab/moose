@@ -84,12 +84,6 @@ protected:
   /// A map from node to two old tangential velocities. Required to have direct connection to physics.
   std::unordered_map<const DofObject *, std::array<Real, 2>> _dof_to_old_real_tangential_velocity;
 
-  /// A map from node to normal pressure
-  std::unordered_map<const DofObject *, Real> _dof_to_normal_pressure;
-
-  /// A map from node to old normal pressure
-  std::unordered_map<const DofObject *, Real> _dof_to_old_normal_pressure;
-
   /// An array of two pointers to avoid copies
   std::array<const ADReal *, 2> _tangential_vel_ptr = {{nullptr, nullptr}};
 

@@ -158,7 +158,6 @@ ComputeDynamicFrictionalForceLMMechanicalContact::residualSetup()
   ComputeDynamicWeightedGapLMMechanicalContact::residualSetup();
   _dof_to_weighted_tangential_velocity.clear();
   _dof_to_real_tangential_velocity.clear();
-  _dof_to_normal_pressure.clear();
 }
 
 void
@@ -168,13 +167,9 @@ ComputeDynamicFrictionalForceLMMechanicalContact::timestepSetup()
   ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup();
 
   _dof_to_old_real_tangential_velocity.clear();
-  _dof_to_old_normal_pressure.clear();
 
   for (auto & map_pr : _dof_to_real_tangential_velocity)
     _dof_to_old_real_tangential_velocity.emplace(map_pr);
-
-  for (auto & map_pr : _dof_to_normal_pressure)
-    _dof_to_old_normal_pressure.emplace(map_pr);
 }
 
 #ifdef MOOSE_SPARSE_AD
@@ -318,15 +313,15 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
     friction_lm_values[i] = (*_sys.currentSolution())(friction_dof_indices[i]);
     Moose::derivInsert(friction_lm_values[i].derivatives(), friction_dof_indices[i], 1.);
   }
-  // Normal pressure for friction model
-  _dof_to_normal_pressure[dof] = MetaPhysicL::raw_value(contact_pressure);
 
   // Get normalized c and c_t values (if normalization specified
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
+  const Real contact_pressure_old = _sys.solutionOld()(normal_dof_index);
+
   // Compute the friction coefficient (constant or function)
-  ADReal mu_ad = computeFrictionValue(_dof_to_old_normal_pressure[dof],
+  ADReal mu_ad = computeFrictionValue(contact_pressure_old,
                                       _dof_to_old_real_tangential_velocity[dof][0],
                                       _dof_to_old_real_tangential_velocity[dof][1]);
 
@@ -399,16 +394,15 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
 
-  // Normal pressure for friction model
-  _dof_to_normal_pressure[dof] = MetaPhysicL::raw_value(contact_pressure);
+  const Real contact_pressure_old = _sys.solutionOld()(normal_dof_index);
 
   // Get normalized c and c_t values (if normalization specified
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
   // Compute the friction coefficient (constant or function)
-  ADReal mu_ad = computeFrictionValue(
-      _dof_to_old_normal_pressure[dof], _dof_to_old_real_tangential_velocity[dof][0], 0.0);
+  ADReal mu_ad =
+      computeFrictionValue(contact_pressure_old, _dof_to_old_real_tangential_velocity[dof][0], 0.0);
 
   ADReal dof_residual;
   // Primal-dual active set strategy (PDASS)
