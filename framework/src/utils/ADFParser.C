@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADFParser.h"
+#include "MooseUtils.h"
+#include "ExecutablePath.h"
 
 ADFParser::ADFParser() : FunctionParserAD(), _epsilon(1e-12) {}
 
@@ -28,11 +30,20 @@ ADFParser::JITCompile()
   std::string includes;
   bool result;
 
-  auto include_path_env = std::getenv("MOOSE_ADFPARSER_JIT_INCLUDE");
+  const auto include_path_env = std::getenv("MOOSE_ADFPARSER_JIT_INCLUDE");
   if (include_path_env)
     result = JITCompileHelper("ADReal", "", "#include \"" + std::string(include_path_env) + "\"\n");
   else
-    result = JITCompileHelper("ADReal", ADFPARSER_INCLUDES, "#include \"ADReal.h\"\n");
+  {
+    // check if we can find an installed version of the monolithic include
+    const auto include_path =
+        MooseUtils::pathjoin(Moose::getExecutablePath(), "../include/moose/ADRealMonolithic.h");
+    if (MooseUtils::checkFileReadable(include_path, false, false, false))
+      result = JITCompileHelper("ADReal", "", "#include \"" + include_path + "\"\n");
+    else
+      // otherwise use the compiled in location from the source tree
+      result = JITCompileHelper("ADReal", ADFPARSER_INCLUDES, "#include \"ADReal.h\"\n");
+  }
 
   if (!result)
 #endif
