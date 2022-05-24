@@ -52,6 +52,8 @@ Poly2TriMeshGenerator::validParams()
       "algorithm",
       algorithm,
       "Control the use of binary search for the nodes of the stitched surfaces.");
+  params.addParam<bool>(
+      "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
 
   return params;
 }
@@ -67,7 +69,8 @@ Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
     _refine_holes(getParam<std::vector<bool>>("refine_holes")),
     _desired_area(getParam<Real>("desired_area")),
     _desired_area_func(getParam<std::string>("desired_area_func")),
-    _algorithm(parameters.get<MooseEnum>("algorithm"))
+    _algorithm(parameters.get<MooseEnum>("algorithm")),
+    _verbose_stitching(parameters.get<bool>("verbose_stitching"))
 {
 }
 
@@ -112,8 +115,6 @@ Poly2TriMeshGenerator::generate()
       meshed_holes.back().set_refine_boundary_allowed(_refine_holes[hole_i]);
     if (_interpolate_holes.size() > hole_i)
       libmesh_not_implemented();
-    if (_stitch_holes.size() > hole_i)
-      libmesh_not_implemented();
 
     triangulator_hole_ptrs.push_back(&meshed_holes.back());
   }
@@ -123,5 +124,97 @@ Poly2TriMeshGenerator::generate()
 
   poly2tri.triangulate();
 
+  const bool use_binary_search = (_algorithm == "BINARY");
+
+  for (auto hole_i : index_range(_hole_ptrs))
+    {
+      if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
+      {
+        // The hole mesh was specified by the user, so it could have
+        // any BCID or no BCID or any combination of BCIDs on its
+        // outer boundary.  Let's just pick out our own temporary
+        // BCIDs to use for stitching.
+
+        // The new triangulation assigns BCID i+1 to hole i ... but
+        // we can't even use this for mesh stitching, because we
+        // can't be sure it isn't also already in use on the hole's
+        // mesh and so we won't be able to safely clear it
+        // afterwards.
+
+        UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*_hole_ptrs[hole_i]->get());
+        auto & hole_boundary_info = hole_mesh.get_boundary_info();
+        const std::set<boundary_id_type> & local_hole_bcids = hole_boundary_info.get_boundary_ids();
+
+        boundary_id_type new_hole_bcid = 0;
+        if (!local_hole_bcids.empty())
+          new_hole_bcid = *local_hole_bcids.rbegin();
+        hole_mesh.comm().max(new_hole_bcid);
+
+        ++new_hole_bcid;
+        const boundary_id_type inner_bcid = new_hole_bcid + 1;
+
+        // It would have been nicer for MeshedHole to add the BCID
+        // itself, but we want MeshedHole to work with a const mesh.
+        // We'll still use MeshedHole, for its code distinguishing
+        // outer boundaries from inner boundaries on a
+        // hole-with-holes.
+
+        TriangulatorInterface::MeshedHole mh{hole_mesh};
+
+        // We have to translate from MeshedHole points to mesh
+        // sides.
+        std::unordered_map<Point, Point> next_hole_boundary_point;
+        const int np = mh.n_points();
+        for (auto pi : make_range(1, np))
+          next_hole_boundary_point[mh.point(pi - 1)] = mh.point(pi);
+        next_hole_boundary_point[mh.point(np - 1)] = mh.point(0);
+
+        int found_hole_sides = 0;
+        for (auto elem : hole_mesh.element_ptr_range())
+        {
+          auto ns = elem->n_sides();
+          for (auto s : make_range(ns))
+          {
+            // Remember that the point ordering should be
+            // reversed since we're thinking of it as an outer
+            // boundary rather than an inner here.
+            auto it_s = next_hole_boundary_point.find(elem->point((s + 1) % ns));
+            if (it_s != next_hole_boundary_point.end())
+              if (it_s->second == elem->point(s))
+              {
+                hole_boundary_info.add_side(elem, s, new_hole_bcid);
+                ++found_hole_sides;
+              }
+          }
+        }
+        mooseAssert(found_hole_sides == np, "Failed to find full outer boundary of meshed hole");
+
+        auto & mesh_boundary_info = mesh->get_boundary_info();
+        int found_inner_sides = 0;
+        for (auto elem : mesh->element_ptr_range())
+        {
+          auto ns = elem->n_sides();
+          for (auto s : make_range(ns))
+          {
+            auto it_s = next_hole_boundary_point.find(elem->point(s));
+            if (it_s != next_hole_boundary_point.end())
+              if (it_s->second == elem->point((s + 1) % ns))
+              {
+                mesh_boundary_info.add_side(elem, s, inner_bcid);
+                ++found_inner_sides;
+              }
+          }
+        }
+        mooseAssert(found_inner_sides == np, "Failed to find full boundary around meshed hole");
+
+        mesh->stitch_meshes(hole_mesh,
+                            inner_bcid,
+                            new_hole_bcid,
+                            TOLERANCE,
+                            /*clear_stitched_bcids*/ true,
+                            _verbose_stitching,
+                            use_binary_search);
+        }
+    }
   return mesh;
 }
