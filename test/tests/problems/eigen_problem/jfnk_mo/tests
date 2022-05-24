@@ -1,6 +1,6 @@
 [Tests]
   design = "Eigenvalue.md"
-  issues = "#18493"
+  issues = "#18493 #21056"
 
   [ne_array_mo]
     type = 'CSVDiff'
@@ -10,6 +10,15 @@
     slepc_version = '>=3.11.0'
     expect_out = 'PJFNK\s+with\s+Matrix\s+Only'
     requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for eigenvalue calculations"
+  []
+
+  [ne_mo_with_linear_aux]
+    type = 'CSVDiff'
+    input = 'ne_mo_with_linear_aux.i'
+    csvdiff = 'ne_mo_with_linear_aux_out.csv'
+    slepc = true
+    slepc_version = '>=3.14.0'
+    requirement = "The system shall support evaluation of auxiliary variables on linear with the matrix-only eigenvalue solve type"
   []
 
   [const_mats]
