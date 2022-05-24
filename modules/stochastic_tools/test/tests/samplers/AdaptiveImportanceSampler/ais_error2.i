@@ -16,13 +16,9 @@
 
 [Samplers]
   [sample]
-    type = ParallelSubsetSimulation
+    type = MonteCarlo
+    num_rows = 1
     distributions = 'mu1 mu2'
-    num_samplessub = 20
-    num_parallel_chains = 2
-    output_reporter = 'constant/reporter_transfer:average:value'
-    inputs_reporter = 'adaptive_MC/inputs'
-    seed = 1012
   []
 []
 
@@ -56,17 +52,16 @@
     type = StochasticReporter
     outputs = none
   []
-  [adaptive_MC]
-    type = AdaptiveMonteCarloDecision
+  [ais_stats]
+    type = AdaptiveImportanceStats
     output_value = constant/reporter_transfer:average:value
-    inputs = 'inputs'
     sampler = sample
   []
 []
 
 [Executioner]
   type = Transient
-  num_steps = 60
+  num_steps = 1
 []
 
 [Outputs]
