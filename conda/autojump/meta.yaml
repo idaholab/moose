@@ -1,0 +1,37 @@
+{% set version = "22.5.3" %}
+{% set build = 0 %}
+{% set strbuild = "build_" + build|string %}
+{% set sha256 = "00daf3698e17ac3ac788d529877c03ee80c3790472a85d0ed063ac3a354c37b1" %}
+
+package:
+  name: moose-autojump
+  version: {{ version }}
+
+source:
+  - url: https://github.com/wting/autojump/archive/release-v{{ version }}.tar.gz
+    sha256: {{ sha256 }}
+
+build:
+  number: {{ build }}
+  string: {{ strbuild }}
+  noarch: python
+  skip: true # [win]
+
+requirements:
+  build:
+    - python=>3.7
+  run:
+    - python
+
+test:
+  commands:
+    - test -f $PREFIX/bin/autojump
+
+about:
+  home: https://github.com/wting/autojump
+  license: GNU
+  summary: 'autojump is a faster way to navigate your filesystem. It works by maintaining a database of the directories you use the most from the command line.'
+
+extra:
+  recipe-maintainers:
+    - milljm

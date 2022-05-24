@@ -1,14 +1,7 @@
 #!/bin/bash
 set -eu
 export PATH=/bin:$PATH
-
-if [[ $mpi == "openmpi" ]]; then
-  export OMPI_MCA_plm=isolated
-  export OMPI_MCA_rmaps_base_oversubscribe=yes
-  export OMPI_MCA_btl_vader_single_copy_mechanism=none
-elif [[ $mpi == "moose-mpich" ]]; then
-  export HYDRA_LAUNCHER=fork
-fi
+export HYDRA_LAUNCHER=fork
 
 # Qt is enabled in VTK by default, but currently doesn't exist on M1 Macs.
 # So, it is disabled if building on that platform.
@@ -16,7 +9,7 @@ QT="YES"
 if [[ $(uname) == Darwin ]] && [[ $(uname -p) == arm ]]; then
   QT="NO"
 fi
-
+echo "CC, CXX $CC $CXX"
 export CC=mpicc CXX=mpicxx
 mkdir -p build
 cd build
@@ -61,7 +54,7 @@ FAKE_EGG
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
 export VTKLIB_DIR=${VTK_PREFIX}/lib
-export VTKINCLUDE_DIR=${VTK_PREFIX}/include/vtk-${SHORT_VTK_NAME}
+export VTKINCLUDE_DIR=${VTK_PREFIX}/include/vtk-${vtk_friendly_version}
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
 unset VTKLIB_DIR
