@@ -26,7 +26,10 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  typedef std::unordered_map<const Node *, std::vector<Elem *>> NodeToElemMapType;
+  // It is important to maintain the exact same ordering across processors. Otherwise nodes with the
+  // same ID might have different processor IDs. std::map and std::set of dof_id_type are used here
+  // to ensure the same ordering.
+  typedef std::map<const dof_id_type, std::set<dof_id_type>> NodeToElemMapType;
 
   NodeToElemMapType
   buildSubdomainRestrictedNodeToElemMap(std::unique_ptr<MeshBase> & mesh,

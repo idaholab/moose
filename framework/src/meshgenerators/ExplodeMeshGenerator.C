@@ -84,9 +84,10 @@ ExplodeMeshGenerator::buildSubdomainRestrictedNodeToElemMap(
         }
 
       if (should_duplicate)
-        node_to_elem_map[elem->node_ptr(n)].push_back(elem);
+        node_to_elem_map[elem->node_id(n)].insert(elem->id());
     }
   }
+
   return node_to_elem_map;
 }
 
@@ -94,9 +95,10 @@ void
 ExplodeMeshGenerator::duplicateNodes(std::unique_ptr<MeshBase> & mesh,
                                      const NodeToElemMapType & node_to_elem_map) const
 {
-  for (const auto & [node, connected_elems] : node_to_elem_map)
-    for (auto i : make_range(connected_elems.size() - 1))
-      duplicateNode(mesh, connected_elems[i], node);
+  for (const auto & [node_id, connected_elem_ids] : node_to_elem_map)
+    for (auto & connected_elem_id : connected_elem_ids)
+      if (connected_elem_id != *connected_elem_ids.begin())
+        duplicateNode(mesh, mesh->elem_ptr(connected_elem_id), mesh->node_ptr(node_id));
 }
 
 void
@@ -134,10 +136,16 @@ ExplodeMeshGenerator::createInterface(MeshBase & mesh,
   std::set<std::pair<dof_id_type, unsigned int>> sides_to_add;
 
   for (const auto & node_to_elems : node_to_elem_map)
-    for (const auto & elem_i : node_to_elems.second)
-      for (const auto & elem_j : node_to_elems.second)
-        if (elem_i != elem_j && elem_i->id() < elem_j->id() && elem_i->has_neighbor(elem_j))
-          sides_to_add.insert(std::make_pair(elem_i->id(), elem_i->which_neighbor_am_i(elem_j)));
+    for (const auto & elem_id_i : node_to_elems.second)
+    {
+      Elem * elem_i = mesh.elem_ptr(elem_id_i);
+      for (const auto & elem_id_j : node_to_elems.second)
+      {
+        Elem * elem_j = mesh.elem_ptr(elem_id_j);
+        if (elem_i != elem_j && elem_id_i < elem_id_j && elem_i->has_neighbor(elem_j))
+          sides_to_add.insert(std::make_pair(elem_id_i, elem_i->which_neighbor_am_i(elem_j)));
+      }
+    }
 
   for (const auto & [elem_id, side] : sides_to_add)
     boundary_info.add_side(elem_id, side, interface_id);
