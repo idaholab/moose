@@ -81,6 +81,12 @@ protected:
   /// of freedom
   const MooseArray<ADPoint> & _ad_q_point;
 
+  /// The radial coordinate index for RZ coordinate systems
+  const unsigned int _rz_radial_coord;
+
+  /// The axial coordinate index for RZ coordinate systems
+  const unsigned int _rz_axial_coord;
+
   /// A user object that consumes information from INSAD residual objects and feeds it into this
   /// material
   const INSADObjectTracker * _object_tracker;

@@ -1,0 +1,10 @@
+[Tests]
+  design = 'insfv.md'
+  issues = '#21102'
+  [exo]
+    type = 'Exodiff'
+    input = 'pipe-flow.i'
+    requirement = 'The system shall be able to solve an axisymmetric pipe flow problem using a finite element discretization in which the axis of symmetry is the x-axis.'
+    exodiff = 'pipe-flow_out.e'
+  []
+[]
