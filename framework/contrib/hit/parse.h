@@ -183,6 +183,7 @@ public:
   /// the vec-prefixed value retrieval functions assume the node holds a string-typed value holding
   /// whitespace delimited entries of the element type indicated in the function name.
   virtual std::vector<double> vecFloatVal();
+  virtual std::vector<bool> vecBoolVal();
   virtual std::vector<int> vecIntVal();
   virtual std::vector<std::string> vecStrVal();
 
@@ -312,6 +313,12 @@ inline std::string
 Node::paramInner(Node * n)
 {
   return n->strVal();
+}
+template <>
+inline std::vector<bool>
+Node::paramInner(Node * n)
+{
+  return n->vecBoolVal();
 }
 template <>
 inline std::vector<int>
@@ -445,6 +452,7 @@ public:
   std::string val();
 
   virtual std::vector<double> vecFloatVal() override;
+  virtual std::vector<bool> vecBoolVal() override;
   virtual std::vector<int> vecIntVal() override;
   virtual std::vector<std::string> vecStrVal() override;
   virtual bool boolVal() override;
