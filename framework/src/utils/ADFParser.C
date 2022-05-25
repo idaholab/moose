@@ -36,7 +36,7 @@ ADFParser::JITCompile()
   else
   {
     // check if we can find an installed version of the monolithic include
-    const auto include_path =
+    const std::string include_path =
         MooseUtils::pathjoin(Moose::getExecutablePath(), "../include/moose/ADRealMonolithic.h");
     if (MooseUtils::checkFileReadable(include_path, false, false, false))
       result = JITCompileHelper("ADReal", "", "#include \"" + include_path + "\"\n");
