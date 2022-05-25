@@ -33,6 +33,14 @@
   []
 []
 
+[Functions]
+  [gc_function]
+    type = PiecewiseLinear
+    x = '-10000   10000'
+    y = '0.02 0.02'
+  []
+[]
+
 [Materials]
   [left]
     type = ADHeatConductionMaterial
@@ -76,17 +84,16 @@
 
 [MortarGapHeatTransfer]
   [mortar_heat_transfer]
-   temperature = temp
+    temperature = temp
 
-   boundary = 100
-   use_displaced_mesh = true
+    boundary = 100
+    use_displaced_mesh = true
 
-   primary_boundary = 100
-   secondary_boundary = 101
-   user_created_gap_flux_models = 'radiation_uo conduction_uo'
+    primary_boundary = 100
+    secondary_boundary = 101
+    user_created_gap_flux_models = 'radiation_uo conduction_uo'
   []
 []
-
 
 [UserObjects]
   [radiation_uo]
@@ -101,7 +108,9 @@
     type = GapFluxModelConduction
     temperature = temp
     boundary = 100
-    gap_conductivity = 0.02
+    gap_conductivity_function = gc_function
+    gap_conductivity_function_variable = temp
+    gap_conductivity = 1.0
     use_displaced_mesh = true
   []
 []
