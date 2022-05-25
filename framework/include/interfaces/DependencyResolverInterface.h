@@ -215,24 +215,24 @@ DependencyResolverInterface::sortDFS(typename std::vector<T> & vector)
     }
 
     /// adjacency lists (from leaves to roots)
-    typename std::map<T, std::list<T>> _adj;
+    std::map<T, std::list<T>> _adj;
     /// adjacency lists (from roots to leaves)
-    typename std::map<T, std::list<T>> _inv_adj;
+    std::map<T, std::list<T>> _inv_adj;
     /// vector of visited nodes
-    typename std::map<T, bool> _visited;
+    std::map<T, bool> _visited;
     /// recursive stack
-    typename std::map<T, bool> _rec_stack;
+    std::map<T, bool> _rec_stack;
     /// "sorted" vector of nodes
-    typename std::vector<T> _sorted_vector;
+    std::vector<T> _sorted_vector;
   } graph;
 
   // Map of suppliers: what is supplied -> by what object
-  typename std::map<std::string, T> suppliers_map;
+  std::multimap<std::string, T> suppliers_map;
   for (auto & v : vector)
   {
-    for (auto & ri : v->getSuppliedItems())
+    for (const auto & supplied_item : v->getSuppliedItems())
     {
-      suppliers_map[ri] = v;
+      suppliers_map.emplace(supplied_item, v);
       graph.addNode(v);
     }
   }
@@ -240,13 +240,21 @@ DependencyResolverInterface::sortDFS(typename std::vector<T> & vector)
   // build the dependency graph
   for (auto & v : vector)
   {
-    for (auto & ri : v->getRequestedItems())
+    for (const auto & requested_item : v->getRequestedItems())
     {
-      const auto & ri_it = suppliers_map.find(ri);
-      if (ri_it != suppliers_map.end())
-        graph.addEdge(ri_it->second, v);
-      else
+      const auto & [begin_it, end_it] = suppliers_map.equal_range(requested_item);
+      if (begin_it == end_it)
         graph.addNode(v);
+      else
+        for (const auto & [supplier_name, supplier_object] : as_range(begin_it, end_it))
+        {
+          libmesh_ignore(supplier_name);
+          if (supplier_object == v)
+            // We allow an object to have a circular dependency within itself; e.g. we choose to
+            // trust a developer knows what they are doing within a single object
+            continue;
+          graph.addEdge(supplier_object, v);
+        }
     }
   }
 
