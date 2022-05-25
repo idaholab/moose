@@ -33,6 +33,7 @@
 #include <fstream>
 #include <istream>
 #include <iterator>
+#include <filesystem>
 #include <ctime>
 #include <cstdlib>
 
@@ -1249,10 +1250,7 @@ fileSize(const std::string & filename)
 std::string
 realpath(const std::string & path)
 {
-  char dummy[PETSC_MAX_PATH_LEN];
-  if (PetscGetFullPath(path.c_str(), dummy, sizeof(dummy)))
-    mooseError("Failed to get real path for ", path);
-  return dummy;
+  return std::filesystem::absolute(path);
 }
 
 BoundingBox
