@@ -36,6 +36,8 @@ class PostprocessorInterface
 public:
   PostprocessorInterface(const MooseObject * moose_object);
 
+  PostprocessorInterface(const FEProblemBase * problem);
+
   static InputParameters validParams();
 
   ///@{
