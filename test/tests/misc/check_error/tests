@@ -899,7 +899,7 @@
   [./missing_input]
     type = 'RunException'
     input = 'missing_input_file.i'
-    expect_err = "Failed to get real path for missing_input_file.i"
+    expect_err = "Unable to open file \".*\/missing_input_file\.i\"\. Check to make sure that it exists and that you have read permission\."
 
     requirement = 'The system shall report an error when an input file cannot be opened and read.'
     issues = '#10909'
