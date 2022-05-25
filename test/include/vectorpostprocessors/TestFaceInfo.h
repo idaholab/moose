@@ -46,9 +46,5 @@ protected:
   VectorPostprocessorValue & _neighbor_cz;
 
   std::vector<VariableName> _vars;
-  std::vector<VectorPostprocessorValue *> _var_elem_dof;
-  std::vector<VectorPostprocessorValue *> _var_neighbor_dof;
-  std::vector<VectorPostprocessorValue *> _var_elem_dof_size;
-  std::vector<VectorPostprocessorValue *> _var_neighbor_dof_size;
   std::vector<VectorPostprocessorValue *> _var_face_type;
 };
