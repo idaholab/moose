@@ -1159,20 +1159,8 @@ std::string
 realpath(const std::string & path)
 {
   char dummy[PETSC_MAX_PATH_LEN];
-#if defined(PETSC_HAVE_REALPATH)
-  // If "realpath" is adopted by PETSc and
-  // "path" does not exist, then PETSc will print a misleading message.
-  // [0]PETSC ERROR: Error in external library
-  // [0]PETSC ERROR: realpath()
-  // [0]PETSC ERROR: See https://www.mcs.anl.gov/petsc/documentation/faq.html for trouble shooting.
-  // [0]PETSC ERROR: Petsc Release Version 3.13.3, unknown
-  // We here override the misleading message with a better one.
-  if (!::realpath(path.c_str(), dummy))
+  if (PetscGetFullPath(path.c_str(), dummy, sizeof(dummy)))
     mooseError("Failed to get real path for ", path);
-#endif
-  if (PetscGetRealPath(path.c_str(), dummy))
-    mooseError("Failed to get real path for ", path);
-
   return dummy;
 }
 
