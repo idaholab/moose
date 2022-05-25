@@ -54,6 +54,131 @@ private:
   const std::vector<T> & _original_order;
 };
 
+/**
+ * Class that represents the dependecy as a graph
+ */
+template <typename T>
+class DependencyResolver
+{
+public:
+  /**
+   * Add a node 'a' to the graph
+   */
+  void addNode(const T & a)
+  {
+    if (_adj.find(a) == _adj.end())
+      _adj[a] = {};
+
+    if (_inv_adj.find(a) == _inv_adj.end())
+      _inv_adj[a] = {};
+  }
+
+  /**
+   * Add an edge between nodes 'a' and 'b'
+   */
+  void addEdge(const T & a, const T & b)
+  {
+    addNode(a);
+    addNode(b);
+
+    _adj[a].push_back(b);
+    _inv_adj[b].push_back(a);
+  }
+
+  /**
+   * Return true, if the grpah has a cycle, otherwise false
+   */
+  bool isCyclic()
+  {
+    _visited.clear();
+    _rec_stack.clear();
+
+    // mark all nodes as not visited and not part of recursion stack
+    for (auto & n : _adj)
+    {
+      _visited[n.first] = false;
+      _rec_stack[n.first] = false;
+    }
+
+    // detect cycle for all nodes
+    for (auto & i : _adj)
+      if (isCyclicHelper(i.first))
+        return true;
+
+    return false;
+  }
+
+  /**
+   * Do depth-first search from root nodes to obtain order in which graph nodes should be
+   * "executed".
+   */
+  typename std::vector<T> dfs()
+  {
+    _sorted_vector.clear();
+
+    for (auto & n : _adj)
+      _visited[n.first] = false;
+
+    for (auto & n : _adj)
+    {
+      if (n.second.size() == 0)
+        dfsFromNode(n.first);
+    }
+
+    return _sorted_vector;
+  }
+
+  typename std::map<T, bool> recStack() const { return _rec_stack; }
+
+protected:
+  /**
+   * depth first search from a root node
+   * @param root The node we start from
+   */
+  void dfsFromNode(const T & root)
+  {
+    _visited[root] = true;
+
+    for (auto & i : _inv_adj[root])
+    {
+      if (!_visited.at(i))
+        dfsFromNode(i);
+    }
+
+    _sorted_vector.push_back(root);
+  }
+
+  bool isCyclicHelper(const T & v)
+  {
+    if (!_visited[v])
+    {
+      _visited[v] = true;
+      _rec_stack[v] = true;
+
+      for (auto & i : _adj[v])
+      {
+        if (!_visited.at(i) && isCyclicHelper(i))
+          return true;
+        else if (_rec_stack.at(i))
+          return true;
+      }
+    }
+    _rec_stack[v] = false;
+    return false;
+  }
+
+  /// adjacency lists (from leaves to roots)
+  std::map<T, std::list<T>> _adj;
+  /// adjacency lists (from roots to leaves)
+  std::map<T, std::list<T>> _inv_adj;
+  /// vector of visited nodes
+  std::map<T, bool> _visited;
+  /// recursive stack
+  std::map<T, bool> _rec_stack;
+  /// "sorted" vector of nodes
+  std::vector<T> _sorted_vector;
+};
+
 template <typename T>
 class DependencyResolver
 {
@@ -126,7 +251,7 @@ public:
   /**
    * Returns a list of all values that a given key depends on
    */
-  const std::list<T> getAncestors(const T & key);
+  std::list<T> getAncestors(const T & key);
 
   /**
    * Returns the number of unique items stored in the dependency resolver.
@@ -569,7 +694,7 @@ DependencyResolver<T>::dependsOn(const std::vector<T> & keys, const T & value)
 }
 
 template <typename T>
-const std::list<T>
+std::list<T>
 DependencyResolver<T>::getAncestors(const T & key)
 {
   std::list<T> ancestors = {key};
