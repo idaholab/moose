@@ -16,11 +16,6 @@ OptimizationReporter::validParams()
       "lower_bounds", std::vector<Real>(), "Lower bounds for each parameter value.");
   params.addParam<std::vector<Real>>(
       "upper_bounds", std::vector<Real>(), "Upper bounds for each parameter value.");
-  params.addRequiredParam<std::vector<Real>>(
-      "measurement_values",
-      "Measurement values collected from locations given by measurement_points");
-  params.addRequiredParam<std::vector<Point>>(
-      "measurement_points", "Point locations corresponding to each measurement value");
 
   return params;
 }

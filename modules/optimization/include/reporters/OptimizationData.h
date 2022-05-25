@@ -34,4 +34,7 @@ protected:
   // maybe add method to compute misfit
   // add param names
   // add param values
+private:
+  void readMeasurementsFromFile();
+  void readMeasurementsFromInput();
 };

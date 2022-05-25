@@ -21,11 +21,17 @@
   type = ObjectiveGradientMinimize
   parameter_names = 'p1 p2'
   num_values = '1 1'
-  measurement_points = '0.2 0.2 0
-                        0.8 0.6 0
-                        0.2 1.4 0
-                        0.8 1.8 0'
-  measurement_values = '207 204 185 125'
+  measurement_file = 'measurementData.csv'
+  file_xcoord = 'coordx'
+  #file_ycoord ='y'
+  file_zcoord ='z'
+  file_value = 'measured_value'
+  # contents of measurementData.csv
+  # measurement_points = '0.2 0.2 0
+  #                       0.8 0.6 0
+  #                       0.2 1.4 0
+  #                       0.8 1.8 0'
+  # measurement_values = '207 204 185 125'
 []
 
 [Executioner]
