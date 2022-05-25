@@ -35,6 +35,66 @@ PolygonMeshGeneratorBase::generate()
 }
 
 std::unique_ptr<ReplicatedMesh>
+PolygonMeshGeneratorBase::buildGeneralSlice(
+    std::vector<Real> ring_radii,
+    const std::vector<unsigned int> ring_layers,
+    const std::vector<Real> ring_radial_biases,
+    const multiBdryLayerParams & ring_inner_boundary_layer_params,
+    const multiBdryLayerParams & ring_outer_boundary_layer_params,
+    std::vector<Real> ducts_center_dist,
+    const std::vector<unsigned int> ducts_layers,
+    const std::vector<Real> duct_radial_biases,
+    const multiBdryLayerParams & duct_inner_boundary_layer_params,
+    const multiBdryLayerParams & duct_outer_boundary_layer_params,
+    const Real primary_side_length,
+    const Real secondary_side_length,
+    const unsigned int num_sectors_per_side,
+    const unsigned int background_intervals,
+    const Real background_radial_bias,
+    const singleBdryLayerParams & background_inner_boundary_layer_params,
+    const singleBdryLayerParams & background_outer_boundary_layer_params,
+    dof_id_type & node_id_background_meta,
+    const Real azimuthal_angle,
+    const std::vector<Real> azimuthal_tangent,
+    const unsigned int side_index,
+    const bool quad_center_elements,
+    const Real center_quad_factor,
+    const Real rotation_angle)
+{
+  const Real virtual_pitch = 2.0 * primary_side_length * cos(azimuthal_angle / 360.0 * M_PI);
+  const Real virtual_side_number = 360.0 / azimuthal_angle;
+  const Real pitch_scale_factor = secondary_side_length / primary_side_length;
+
+  auto mesh = buildSlice(ring_radii,
+                         ring_layers,
+                         ring_radial_biases,
+                         ring_inner_boundary_layer_params,
+                         ring_outer_boundary_layer_params,
+                         ducts_center_dist,
+                         ducts_layers,
+                         duct_radial_biases,
+                         duct_inner_boundary_layer_params,
+                         duct_outer_boundary_layer_params,
+                         virtual_pitch,
+                         num_sectors_per_side,
+                         background_intervals,
+                         background_radial_bias,
+                         background_inner_boundary_layer_params,
+                         background_outer_boundary_layer_params,
+                         node_id_background_meta,
+                         virtual_side_number,
+                         side_index,
+                         azimuthal_tangent,
+                         0,
+                         quad_center_elements,
+                         center_quad_factor,
+                         0,
+                         pitch_scale_factor);
+  MeshTools::Modification::rotate(*mesh, rotation_angle, 0, 0);
+  return mesh;
+}
+
+std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::buildSimpleSlice(
     std::vector<Real> ring_radii,
     const std::vector<unsigned int> ring_layers,
@@ -46,8 +106,6 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
     const std::vector<Real> duct_radial_biases,
     const multiBdryLayerParams & duct_inner_boundary_layer_params,
     const multiBdryLayerParams & duct_outer_boundary_layer_params,
-    bool has_rings,
-    bool has_ducts,
     const Real pitch,
     const unsigned int num_sectors_per_side,
     const unsigned int background_intervals,
@@ -63,6 +121,64 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
     const Real center_quad_factor,
     const boundary_id_type boundary_id_shift)
 {
+
+  return buildSlice(ring_radii,
+                    ring_layers,
+                    ring_radial_biases,
+                    ring_inner_boundary_layer_params,
+                    ring_outer_boundary_layer_params,
+                    ducts_center_dist,
+                    ducts_layers,
+                    duct_radial_biases,
+                    duct_inner_boundary_layer_params,
+                    duct_outer_boundary_layer_params,
+                    pitch,
+                    num_sectors_per_side,
+                    background_intervals,
+                    background_radial_bias,
+                    background_inner_boundary_layer_params,
+                    background_outer_boundary_layer_params,
+                    node_id_background_meta,
+                    side_number,
+                    side_index,
+                    azimuthal_tangent,
+                    block_id_shift,
+                    quad_center_elements,
+                    center_quad_factor,
+                    boundary_id_shift,
+                    1.0);
+}
+
+std::unique_ptr<ReplicatedMesh>
+PolygonMeshGeneratorBase::buildSlice(
+    std::vector<Real> ring_radii,
+    const std::vector<unsigned int> ring_layers,
+    const std::vector<Real> ring_radial_biases,
+    const multiBdryLayerParams & ring_inner_boundary_layer_params,
+    const multiBdryLayerParams & ring_outer_boundary_layer_params,
+    std::vector<Real> ducts_center_dist,
+    const std::vector<unsigned int> ducts_layers,
+    const std::vector<Real> duct_radial_biases,
+    const multiBdryLayerParams & duct_inner_boundary_layer_params,
+    const multiBdryLayerParams & duct_outer_boundary_layer_params,
+    const Real pitch,
+    const unsigned int num_sectors_per_side,
+    const unsigned int background_intervals,
+    const Real background_radial_bias,
+    const singleBdryLayerParams & background_inner_boundary_layer_params,
+    const singleBdryLayerParams & background_outer_boundary_layer_params,
+    dof_id_type & node_id_background_meta,
+    const Real virtual_side_number,
+    const unsigned int side_index,
+    const std::vector<Real> azimuthal_tangent,
+    const subdomain_id_type block_id_shift,
+    const bool quad_center_elements,
+    const Real center_quad_factor,
+    const boundary_id_type boundary_id_shift,
+    const Real pitch_scale_factor)
+{
+  bool has_rings(ring_radii.size());
+  bool has_ducts(ducts_center_dist.size());
   auto mesh = buildReplicatedMesh(2);
 
   // Calculate biasing terms
@@ -116,10 +232,11 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
 
   // Geometries
   const Real corner_to_corner =
-      pitch / std::cos(M_PI / side_number); // distance of bin center to cell corner
-  const Real corner_p[2][2] = {{0.0, 0.5 * corner_to_corner},
-                               {0.5 * corner_to_corner * std::sin(2.0 * M_PI / side_number),
-                                0.5 * corner_to_corner * std::cos(2.0 * M_PI / side_number)}};
+      pitch / std::cos(M_PI / virtual_side_number); // distance of bin center to cell corner
+  const Real corner_p[2][2] = {
+      {0.0, 0.5 * corner_to_corner},
+      {0.5 * corner_to_corner * pitch_scale_factor * std::sin(2.0 * M_PI / virtual_side_number),
+       0.5 * corner_to_corner * pitch_scale_factor * std::cos(2.0 * M_PI / virtual_side_number)}};
   const unsigned int div_num = angle_number / 2 + 1;
   std::vector<std::vector<Node *>> nodes(div_num, std::vector<Node *>(div_num));
   if (quad_center_elements)
@@ -129,7 +246,7 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
     if (has_rings)
       ring_radii_0 = ring_radii.front() * rings_bias_terms.front().front();
     else if (has_ducts)
-      ring_radii_0 = ducts_center_dist.front() * std::cos(M_PI / side_number) *
+      ring_radii_0 = ducts_center_dist.front() * std::cos(M_PI / virtual_side_number) *
                      main_background_bias_terms.front();
     else
       ring_radii_0 = pitch / 2.0 * main_background_bias_terms.front();
@@ -137,7 +254,7 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
     ring_radii_0 *=
         center_quad_factor == 0.0 ? (((Real)div_num - 1.0) / (Real)div_num) : center_quad_factor;
 
-    centerNodes(*mesh, side_number, div_num, ring_radii_0, nodes);
+    centerNodes(*mesh, virtual_side_number, div_num, ring_radii_0, nodes);
   }
   else // pin-cell center
     mesh->add_point(Point(0.0, 0.0, 0.0));
@@ -272,19 +389,20 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
 
 void
 PolygonMeshGeneratorBase::centerNodes(ReplicatedMesh & mesh,
-                                      const unsigned int side_number,
+                                      const Real virtual_side_number,
                                       const unsigned int div_num,
                                       const Real ring_radii_0,
                                       std::vector<std::vector<Node *>> & nodes) const
 {
   const std::pair<Real, Real> p_origin = std::make_pair(0.0, 0.0);
   const std::pair<Real, Real> p_bottom =
-      std::make_pair(0.0, ring_radii_0 * std::cos(M_PI / side_number));
+      std::make_pair(0.0, ring_radii_0 * std::cos(M_PI / virtual_side_number));
   const std::pair<Real, Real> p_top =
-      std::make_pair(p_bottom.second * std::sin(2.0 * M_PI / side_number),
-                     p_bottom.second * std::cos(2.0 * M_PI / side_number));
-  const std::pair<Real, Real> p_diag = std::make_pair(ring_radii_0 * std::sin(M_PI / side_number),
-                                                      ring_radii_0 * std::cos(M_PI / side_number));
+      std::make_pair(p_bottom.second * std::sin(2.0 * M_PI / virtual_side_number),
+                     p_bottom.second * std::cos(2.0 * M_PI / virtual_side_number));
+  const std::pair<Real, Real> p_diag =
+      std::make_pair(ring_radii_0 * std::sin(M_PI / virtual_side_number),
+                     ring_radii_0 * std::cos(M_PI / virtual_side_number));
 
   // The four vertices of the central quad region are defined above.
   // The following loops transverse all the nodes within this central quad region by moving p1 thru

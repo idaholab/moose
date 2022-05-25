@@ -29,7 +29,7 @@ protected:
   /// Size parameter of the hexagon
   const Real _hexagon_size;
   /// Style of the size parameter
-  const enum class HexagonStyle { apothem, radius } _hexagon_size_style;
+  const PolygonSizeStyle _hexagon_size_style;
   /// Pitch size of the hexagon
   Real _pitch;
   /// Whetther block_id is provided

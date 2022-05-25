@@ -42,7 +42,7 @@ protected:
   /// Subdomain Names of the ting regions
   const std::vector<SubdomainName> _ring_block_names;
   /// Thickness of each enclosing duct
-  const enum class DuctStyle { apothem, radius } _duct_sizes_style;
+  const PolygonSizeStyle _duct_sizes_style;
   /// Size parameters of the duct regions
   std::vector<Real> _duct_sizes;
   /// Number of layers in each enclosing duct
@@ -62,7 +62,7 @@ protected:
   /// Whether the generated mesh contains duct regions
   const bool _has_ducts;
   /// Type of polygon size parameter
-  const enum class PolygonStyle { apothem, radius } _polygon_size_style;
+  const PolygonSizeStyle _polygon_size_style;
   /// Polygon size parameter
   const Real _polygon_size;
   /// Mesh sector number of each polygon side

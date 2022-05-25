@@ -44,7 +44,7 @@ protected:
   /// Size parameter(s) of duct(s)
   std::vector<Real> _duct_sizes;
   /// Style of the duct size parameter(s)
-  const enum class DuctStyle { apothem, radius } _duct_sizes_style;
+  const PolygonSizeStyle _duct_sizes_style;
   /// Number(s) of radial intervals of duct layer(s)
   const std::vector<unsigned int> _duct_intervals;
   /// Whether the nodes on the external boundary are uniformly distributed
@@ -64,7 +64,7 @@ protected:
   /// Boundary name of mesh's external boundary
   const std::string _external_boundary_name;
   /// Style of the polygon size parameter
-  const enum class PolygonStyle { apothem, radius } _hexagon_size_style;
+  const PolygonSizeStyle _hexagon_size_style;
   /// Pitch size of the input assembly mesh
   Real _pattern_pitch;
   /// MeshMetaData of the assembly pitch size
