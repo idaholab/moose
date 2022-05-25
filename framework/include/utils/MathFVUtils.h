@@ -428,8 +428,14 @@ template <typename Scalar, typename Vector>
 Scalar
 rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVectorValue & dCD)
 {
+  static const auto zero_vec = RealVectorValue(0);
   if ((phiD - phiC) == 0)
-    return 1e6 * MathUtils::sign(gradC * dCD) + 0 * (gradC * dCD + phiD + phiC);
+    // Handle zero denominator case. Note that MathUtils::sign returns 1 for sign(0) so we can omit
+    // that operation here (e.g. sign(phiD - phiC) = sign(0) = 1). The second term preserves the
+    // same sparsity pattern as the else branch; we want to add this so that we don't risk PETSc
+    // shrinking the matrix now and then potentially reallocating nonzeros later (which is very
+    // slow)
+    return 1e6 * MathUtils::sign(gradC * dCD) + zero_vec * gradC;
 
   return 2. * gradC * dCD / (phiD - phiC) - 1.;
 }

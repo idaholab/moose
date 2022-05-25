@@ -25,10 +25,8 @@ template <typename T>
 class CentralDifferenceLimiter : public Limiter<T>
 {
 public:
-  T operator()(const T &,
-               const T &,
-               const VectorValue<T> *,
-               const RealVectorValue &) const override final
+  T
+  limit(const T &, const T &, const VectorValue<T> *, const RealVectorValue &) const override final
   {
     return 1;
   }
