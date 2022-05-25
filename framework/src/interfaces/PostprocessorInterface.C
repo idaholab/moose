@@ -25,6 +25,13 @@ PostprocessorInterface::PostprocessorInterface(const MooseObject * moose_object)
 {
 }
 
+PostprocessorInterface::PostprocessorInterface(const FEProblemBase * problem)
+  : _ppi_moose_object(*problem),
+    _ppi_params(_ppi_moose_object.parameters()),
+    _ppi_feproblem(*problem)
+{
+}
+
 const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValue(const std::string & param_name,
                                               const unsigned int index /* = 0 */) const
