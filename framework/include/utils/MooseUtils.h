@@ -35,7 +35,8 @@
 #include <vector>
 #include <map>
 #include <list>
-#include <iterator>
+// #include <iterator>
+#include <filesystem>
 #include <deque>
 
 // Forward Declarations
@@ -57,15 +58,13 @@ class MultiMooseEnum;
 namespace MooseUtils
 {
 
-std::string pathjoin(const std::string & s);
+std::filesystem::path pathjoin(const std::filesystem::path & p);
 
 template <typename... Args>
-std::string
-pathjoin(const std::string & s, Args... args)
+std::filesystem::path
+pathjoin(const std::filesystem::path & p, Args... args)
 {
-  if (s[s.size() - 1] == '/')
-    return s + pathjoin(args...);
-  return s + "/" + pathjoin(args...);
+  return p / pathjoin(args...);
 }
 
 /// Check if the input string can be parsed into a Real
@@ -230,7 +229,8 @@ std::string stripExtension(const std::string & s);
  *
  * If the supplied filename does not contain a path, it returns "." as the path
  */
-std::pair<std::string, std::string> splitFileName(std::string full_file);
+std::pair<std::filesystem::path, std::filesystem::path>
+splitFileName(const std::filesystem::path & full_file);
 
 /**
  * Returns the current working directory as a string. If there's a problem
