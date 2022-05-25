@@ -110,8 +110,13 @@ MultiAppFieldTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from
 
     // Check integrity
     if (to_var.feType() != from_var.feType())
-      paramError("variable",
-                 "Corresponding 'variable' and 'source_variable' inputs must be the same type "
+      mooseError("MultiAppFieldTransfer '",
+                 name(),
+                 "'requires that the target variable '",
+                 to_var.name(),
+                 "' and the source variable'",
+                 from_var.name(),
+                 "' must be the same type "
                  "(order and family): ",
                  libMesh::Utility::enum_to_string<FEFamily>(to_var.feType().family),
                  moose::internal::incompatVarMsg(to_var, from_var));
