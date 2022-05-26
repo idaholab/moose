@@ -84,23 +84,27 @@ findTestRoot()
 }
 
 std::string
-installedInputsDir(const std::string & app_name,
-                   const std::string & dir_name,
-                   const std::string & extra_error_msg)
+getInstalledDir(const std::string & app_name, const std::string & dir_name)
 {
   // See moose.mk for a detailed explanation of the assumed installed application
   // layout. Installed inputs are expected to be installed in "share/<app_name>/<folder>".
   // The binary, which has a defined location will be in "bin", a peer directory to "share".
-  std::string installed_path =
-      pathjoin(Moose::getExecutablePath(), "..", "share", app_name, dir_name);
+  return pathjoin(Moose::getExecutablePath(), "..", "share", app_name, dir_name);
+}
 
-  auto test_root = pathjoin(installed_path, "testroot");
+std::string
+installedInputsDir(const std::string & app_name,
+                   const std::string & dir_name,
+                   const std::string & extra_error_msg)
+{
+  std::string installed_path = getInstalledDir(app_name, dir_name);
   if (!pathExists(installed_path))
     mooseError("Couldn't locate any installed inputs to copy in path: ",
                installed_path,
                '\n',
                extra_error_msg);
 
+  auto test_root = pathjoin(installed_path, "testroot");
   checkFileReadable(test_root);
   return installed_path;
 }
@@ -108,10 +112,7 @@ installedInputsDir(const std::string & app_name,
 std::string
 docsDir(const std::string & app_name)
 {
-  // See moose.mk for a detailed explanation of the assumed installed application
-  // layout. Installed docs are expected to be installed in "share/<app_name>/doc".
-  // The binary, which has a defined location will be in "bin", a peer directory to "share".
-  std::string installed_path = pathjoin(Moose::getExecutablePath(), "..", "share", app_name, "doc");
+  std::string installed_path = getInstalledDir(app_name, "doc");
 
   auto docfile = pathjoin(installed_path, "css", "moose.css");
   if (pathExists(docfile) && checkFileReadable(docfile))
