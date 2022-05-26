@@ -24,10 +24,8 @@ template <typename T>
 class UpwindLimiter : public Limiter<T>
 {
 public:
-  T operator()(const T &,
-               const T &,
-               const VectorValue<T> *,
-               const RealVectorValue &) const override final
+  T
+  limit(const T &, const T &, const VectorValue<T> *, const RealVectorValue &) const override final
   {
     return 0;
   }

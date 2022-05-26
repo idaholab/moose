@@ -49,13 +49,7 @@ TestFaceInfo::TestFaceInfo(const InputParameters & parameters)
   {
     _vars = getParam<std::vector<VariableName>>("vars");
     for (auto & v : _vars)
-    {
-      _var_elem_dof.push_back(&declareVector(v + "_elem"));
-      _var_neighbor_dof.push_back(&declareVector(v + "_neighbor"));
-      _var_elem_dof_size.push_back(&declareVector(v + "_size_elem"));
-      _var_neighbor_dof_size.push_back(&declareVector(v + "_size_neighbor"));
       _var_face_type.push_back(&declareVector(v + "_face_type"));
-    }
   }
 }
 
@@ -94,38 +88,24 @@ TestFaceInfo::execute()
 
     for (unsigned int l = 0; l < _vars.size(); ++l)
     {
-      std::vector<dof_id_type> elemdofs;
-      std::vector<dof_id_type> neighbordofs;
-      elemdofs = p->elemDofIndices(_vars[l]);
-      neighbordofs = p->neighborDofIndices(_vars[l]);
       FaceInfo::VarFaceNeighbors vfn = p->faceType(_vars[l]);
       Real x = 0;
       switch (vfn)
       {
         case FaceInfo::VarFaceNeighbors::BOTH:
-          _var_elem_dof[l]->push_back(elemdofs[0]);
-          _var_neighbor_dof[l]->push_back(neighbordofs[0]);
           x = 1;
           break;
         case FaceInfo::VarFaceNeighbors::ELEM:
-          _var_elem_dof[l]->push_back(elemdofs[0]);
-          _var_neighbor_dof[l]->push_back(-1);
           x = 2;
           break;
         case FaceInfo::VarFaceNeighbors::NEIGHBOR:
-          _var_elem_dof[l]->push_back(-1);
-          _var_neighbor_dof[l]->push_back(neighbordofs[0]);
           x = 3;
           break;
         case FaceInfo::VarFaceNeighbors::NEITHER:
-          _var_elem_dof[l]->push_back(-1);
-          _var_neighbor_dof[l]->push_back(-1);
           x = 4;
           break;
       }
       _var_face_type[l]->push_back(x);
-      _var_elem_dof_size[l]->push_back(elemdofs.size());
-      _var_neighbor_dof_size[l]->push_back(neighbordofs.size());
     }
     ++j;
   }
