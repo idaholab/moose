@@ -28,4 +28,18 @@ mooseSetToZero<ADRankTwoTensor>(ADRankTwoTensor & v)
 {
   v.zero();
 }
+
+template <>
+RankTwoTensor
+transpose<RankTwoTensor>(const RankTwoTensor & v)
+{
+  return v.transpose();
+}
+
+template <>
+ADRankTwoTensor
+transpose<ADRankTwoTensor>(const ADRankTwoTensor & v)
+{
+  return v.transpose();
+}
 }

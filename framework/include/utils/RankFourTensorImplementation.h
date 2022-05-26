@@ -486,6 +486,21 @@ RankFourTensorTempl<T>::transposeIj() const
 }
 
 template <typename T>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::transposeKl() const
+{
+  RankFourTensorTempl<T> result;
+
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
+        for (auto l : make_range(N))
+          result(i, j, k, l) = (*this)(i, j, l, k);
+
+  return result;
+}
+
+template <typename T>
 void
 RankFourTensorTempl<T>::surfaceFillFromInputVector(const std::vector<T> & input)
 {
@@ -945,6 +960,63 @@ RankFourTensorTempl<T>::tripleProductJkl(const RankTwoTensorTempl<T> & A,
 
 template <typename T>
 RankFourTensorTempl<T>
+RankFourTensorTempl<T>::tripleProductIkl(const RankTwoTensorTempl<T> & A,
+                                         const RankTwoTensorTempl<T> & B,
+                                         const RankTwoTensorTempl<T> & C) const
+{
+  RankFourTensorTempl<T> R;
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      for (unsigned int k = 0; k < N; k++)
+        for (unsigned int l = 0; l < N; l++)
+          for (unsigned int m = 0; m < N; m++)
+            for (unsigned int n = 0; n < N; n++)
+              for (unsigned int t = 0; t < N; t++)
+                R(i, j, k, l) += (*this)(m, j, n, t) * A(i, m) * B(k, n) * C(l, t);
+
+  return R;
+}
+
+template <typename T>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::tripleProductIjl(const RankTwoTensorTempl<T> & A,
+                                         const RankTwoTensorTempl<T> & B,
+                                         const RankTwoTensorTempl<T> & C) const
+{
+  RankFourTensorTempl<T> R;
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      for (unsigned int k = 0; k < N; k++)
+        for (unsigned int l = 0; l < N; l++)
+          for (unsigned int m = 0; m < N; m++)
+            for (unsigned int n = 0; n < N; n++)
+              for (unsigned int t = 0; t < N; t++)
+                R(i, j, k, l) += (*this)(m, n, k, t) * A(i, m) * B(j, n) * C(l, t);
+
+  return R;
+}
+
+template <typename T>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::tripleProductIjk(const RankTwoTensorTempl<T> & A,
+                                         const RankTwoTensorTempl<T> & B,
+                                         const RankTwoTensorTempl<T> & C) const
+{
+  RankFourTensorTempl<T> R;
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      for (unsigned int k = 0; k < N; k++)
+        for (unsigned int l = 0; l < N; l++)
+          for (unsigned int m = 0; m < N; m++)
+            for (unsigned int n = 0; n < N; n++)
+              for (unsigned int t = 0; t < N; t++)
+                R(i, j, k, l) += (*this)(m, n, t, l) * A(i, m) * B(j, n) * C(k, t);
+
+  return R;
+}
+
+template <typename T>
+RankFourTensorTempl<T>
 RankFourTensorTempl<T>::singleProductI(const RankTwoTensorTempl<T> & A) const
 {
   RankFourTensorTempl<T> R;
@@ -955,6 +1027,54 @@ RankFourTensorTempl<T>::singleProductI(const RankTwoTensorTempl<T> & A) const
         for (unsigned int l = 0; l < N; l++)
           for (unsigned int m = 0; m < N; m++)
             R(i, j, k, l) += (*this)(m, j, k, l) * A(i, m);
+
+  return R;
+}
+
+template <typename T>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::singleProductJ(const RankTwoTensorTempl<T> & A) const
+{
+  RankFourTensorTempl<T> R;
+
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      for (unsigned int k = 0; k < N; k++)
+        for (unsigned int l = 0; l < N; l++)
+          for (unsigned int m = 0; m < N; m++)
+            R(i, j, k, l) += (*this)(i, m, k, l) * A(j, m);
+
+  return R;
+}
+
+template <typename T>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::singleProductK(const RankTwoTensorTempl<T> & A) const
+{
+  RankFourTensorTempl<T> R;
+
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      for (unsigned int k = 0; k < N; k++)
+        for (unsigned int l = 0; l < N; l++)
+          for (unsigned int m = 0; m < N; m++)
+            R(i, j, k, l) += (*this)(i, j, m, l) * A(k, m);
+
+  return R;
+}
+
+template <typename T>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::singleProductL(const RankTwoTensorTempl<T> & A) const
+{
+  RankFourTensorTempl<T> R;
+
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      for (unsigned int k = 0; k < N; k++)
+        for (unsigned int l = 0; l < N; l++)
+          for (unsigned int m = 0; m < N; m++)
+            R(i, j, k, l) += (*this)(i, j, k, m) * A(l, m);
 
   return R;
 }

@@ -128,7 +128,6 @@
   []
   [compute_stress]
     type = ComputeLagrangianLinearElasticStress
-    objective_rate = jaumann
   []
   [compute_strain]
     type = ComputeLagrangianStrain
@@ -150,6 +149,7 @@
 
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
+  automatic_scaling = true
 
   l_max_its = 2
   l_tol = 1e-14

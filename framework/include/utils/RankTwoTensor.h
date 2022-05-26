@@ -64,6 +64,21 @@ void mooseSetToZero<RankTwoTensor>(RankTwoTensor & v);
  */
 template <>
 void mooseSetToZero<ADRankTwoTensor>(ADRankTwoTensor & v);
+
+template <typename T>
+T transpose(const T & v);
+
+/**
+ * Helper function template specialization to transpose a second order tensor
+ */
+template <>
+RankTwoTensor transpose<RankTwoTensor>(const RankTwoTensor & v);
+
+/**
+ * Helper function template specialization to transpose a second order tensor
+ */
+template <>
+ADRankTwoTensor transpose<ADRankTwoTensor>(const ADRankTwoTensor & v);
 }
 
 /**
