@@ -2,7 +2,8 @@
 
 !syntax description /Materials/PINSFVSpeedFunctorMaterial
 
-This quantity is used in the porous media correlations to compute the local Reynolds number.
+This class defines the interstitial speed and interstitial velocity functors
+that are often used in pressure drop and heat transfer correlations.
 
 !syntax parameters /Materials/PINSFVSpeedFunctorMaterial
 

@@ -50,6 +50,16 @@ PINSFVSpeedFunctorMaterial::PINSFVSpeedFunctorMaterial(const InputParameters & p
                " superficial velocity components were provided for a mesh of dimension ",
                _mesh.dimension());
 
+  // Interstitial velocity is needed by certain correlations
+  addFunctorProperty<ADRealVectorValue>(NS::velocity,
+                                        [this](const auto & r, const auto & t) -> ADRealVectorValue
+                                        {
+                                          return ADRealVectorValue(_superficial_vel_x(r, t),
+                                                                   _superficial_vel_y(r, t),
+                                                                   _superficial_vel_z(r, t)) /
+                                                 _eps(r, t);
+                                        });
+
   // Speed is normal of regular interstitial velocity
   // This is needed to compute the Reynolds number
   addFunctorProperty<ADReal>(NS::speed,

@@ -57,6 +57,14 @@ velocity_interp_method='rc'
   [speed_output]
     type = MooseVariableFVReal
   []
+
+  [vel_x_output]
+    type = MooseVariableFVReal
+  []
+
+  [vel_y_output]
+    type = MooseVariableFVReal
+  []
 []
 
 [AuxKernels]
@@ -64,6 +72,20 @@ velocity_interp_method='rc'
     type = ADFunctorElementalAux
     variable = 'speed_output'
     functor = 'speed'
+  []
+
+  [vel_x]
+    type = ADFunctorVectorElementalAux
+    variable = 'vel_x_output'
+    functor = 'velocity'
+    component = 0
+  []
+
+  [vel_y]
+    type = ADFunctorVectorElementalAux
+    variable = 'vel_y_output'
+    functor = 'velocity'
+    component = 1
   []
 []
 
