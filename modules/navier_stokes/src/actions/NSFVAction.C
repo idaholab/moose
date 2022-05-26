@@ -198,10 +198,13 @@ NSFVAction::validParams()
   params.addParam<FunctionName>(
       "initial_temperature", "300", "The initial temperature, assumed constant everywhere");
 
-  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
-      "thermal_conductivity",
-      std::vector<std::vector<MooseFunctorName>>({std::vector<MooseFunctorName>({NS::k})}),
-      "The name of the fluid thermal conductivity");
+  params.addParam<std::vector<SubdomainName>>(
+      "thermal_conductivity_blocks",
+      "The blocks where the user wants define different thermal conductivities.");
+
+  params.addParam<std::vector<MooseFunctorName>>("thermal_conductivity",
+                                                 std::vector<MooseFunctorName>({NS::k}),
+                                                 "The name of the fluid thermal conductivity");
 
   params.addParam<MooseFunctorName>("specific_heat", NS::cp, "The name of the specific heat");
 
@@ -456,9 +459,9 @@ NSFVAction::validParams()
 
   // Create input parameter groups
 
-  params.addParamNamesToGroup(
-      "dynamic_viscosity density thermal_expansion thermal_conductivity specific_heat",
-      "Material property");
+  params.addParamNamesToGroup("dynamic_viscosity density thermal_expansion "
+                              "thermal_conductivity_blocks thermal_conductivity specific_heat",
+                              "Material property");
 
   params.addParamNamesToGroup(
       "inlet_boundaries momentum_inlet_types momentum_inlet_function energy_inlet_types "
@@ -529,8 +532,11 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _density_name(getParam<MooseFunctorName>("density")),
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
     _specific_heat_name(getParam<MooseFunctorName>("specific_heat")),
-    _thermal_conductivity_name(
-        getParam<std::vector<std::vector<MooseFunctorName>>>("thermal_conductivity")),
+    _thermal_conductivity_blocks(
+        isParamValid("thermal_conductivity_blocks")
+            ? getParam<std::vector<SubdomainName>>("thermal_conductivity_blocks")
+            : std::vector<SubdomainName>()),
+    _thermal_conductivity_name(getParam<std::vector<MooseFunctorName>>("thermal_conductivity")),
     _thermal_expansion_name(getParam<MooseFunctorName>("thermal_expansion")),
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
     _passive_scalar_diffusivity(
@@ -1396,30 +1402,43 @@ NSFVAction::addINSEnergyAdvectionKernels()
 void
 NSFVAction::addINSEnergyHeatConductionKernels()
 {
-  if (_porous_medium_treatment)
+  bool vector_conductivity = processThermalConductivity();
+  unsigned int num_blocks = _thermal_conductivity_blocks.size();
+  unsigned int num_used_blocks = num_blocks ? num_blocks : 1;
+
+  for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
   {
-    // We check if the thermal conductivity functor is a number of a vector
-    // if (_problem->hasFunctor(_thermal_conductivity_name[0],
-    //                          _problem->parameters().get<THREAD_ID>("_tid")))
+    if (_porous_medium_treatment)
+    {
+      const std::string kernel_type =
+          vector_conductivity ? "PINSFVEnergyAnisotropicDiffusion" : "PINSFVEnergyDiffusion";
 
-    const std::string kernel_type = "PINSFVEnergyDiffusion";
-    InputParameters params = _factory.getValidParams(kernel_type);
-    params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<MooseFunctorName>(NS::k) = _thermal_conductivity_name[0][0];
-    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      std::vector<SubdomainName> block_names =
+          num_blocks ? std::vector<SubdomainName>({_thermal_conductivity_blocks[block_i]})
+                     : _blocks;
+      params.set<std::vector<SubdomainName>>("block") = block_names;
 
-    _problem->addFVKernel(kernel_type, "pins_energy_diffusion", params);
-  }
-  else
-  {
-    const std::string kernel_type = "FVDiffusion";
-    InputParameters params = _factory.getValidParams(kernel_type);
-    params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[0][0];
+      std::string conductivity_name = vector_conductivity ? NS::kappa : NS::k;
+      params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[block_i];
+      params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
 
-    _problem->addFVKernel(kernel_type, "ins_energy_diffusion", params);
+      _problem->addFVKernel(kernel_type, "pins_energy_diffusion", params);
+    }
+    else
+    {
+      const std::string kernel_type = "FVDiffusion";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      std::vector<SubdomainName> block_names =
+          num_blocks ? std::vector<SubdomainName>({_thermal_conductivity_blocks[block_i]})
+                     : _blocks;
+      params.set<std::vector<SubdomainName>>("block") = block_names;
+      params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[block_i];
+
+      _problem->addFVKernel(kernel_type, "ins_energy_diffusion", params);
+    }
   }
 }
 
@@ -2181,10 +2200,53 @@ NSFVAction::processVariables()
                      ") supplied to the NavierStokesFV action does not exist!");
 }
 
-void
+bool
 NSFVAction::processThermalConductivity()
 {
-  _console << "olle" << std::endl;
+  checkBlockwiseConsistency<MooseFunctorName>("thermal_conductivity_blocks",
+                                              {"thermal_conductivity"});
+  bool have_scalar = false;
+  bool have_vector = false;
+
+  for (unsigned int i = 0; i < _thermal_conductivity_name.size(); ++i)
+  {
+    // First, check if the name is just a number (only in case of isotropic conduction
+    std::istringstream ss(_thermal_conductivity_name[i]);
+    Real real_value;
+    if (ss >> real_value && ss.eof())
+      have_scalar = true;
+    else
+    {
+      if (_problem->hasFunctorWithType<ADReal>(_thermal_conductivity_name[i],
+                                               _problem->parameters().get<THREAD_ID>("_tid")))
+        have_scalar = true;
+      else
+      {
+        if (_problem->hasFunctorWithType<ADRealVectorValue>(
+                _thermal_conductivity_name[i], _problem->parameters().get<THREAD_ID>("_tid")))
+          have_vector = true;
+        else
+        {
+          if (_problem->hasFunctorWithType<Real>(_thermal_conductivity_name[i],
+                                                 _problem->parameters().get<THREAD_ID>("_tid")))
+            have_scalar = true;
+        }
+      }
+    }
+  }
+
+  if (!have_vector && !have_scalar)
+    paramError("thermal_conductivity", "Could not find functors for thermal conductivity!");
+
+  if (have_vector && _porous_medium_treatment)
+    paramError("thermal_conductivity", "Cannot use anistropic diffusion with non-porous flows!");
+
+  if (have_vector == have_scalar)
+    paramError("thermal_conductivity",
+               "The entries on thermal conductivity shall either be scalars of vectors, mixing "
+               "them is not supported!");
+
+  return have_vector;
 }
 
 void
@@ -2221,6 +2283,7 @@ NSFVAction::checkGeneralControlErrors()
                                   "energy_wall_types",
                                   "energy_advection_interpolation",
                                   "specific_heat",
+                                  "thermal_conductivity_blocks",
                                   "thermal_conductivity"});
   if (!_porous_medium_treatment)
     checkDependentParameterError(

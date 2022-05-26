@@ -216,6 +216,8 @@ protected:
   const MooseFunctorName _dynamic_viscosity_name;
   /// Name of the specific heat material property
   const MooseFunctorName _specific_heat_name;
+  /// Subdomains where we want to have different thermal conduction
+  const std::vector<SubdomainName> _thermal_conductivity_blocks;
   /** Name of the thermal conductivity material property. We have multiple options here:
    * 1. The user defines a constant vector on the input file (anisotropic diffusion)
    * 2. The user defines a vector-functor in the material block and
@@ -228,7 +230,7 @@ protected:
    * And on top of this, the user can define conductivities for every mesh
    * block separately.
    **/
-  const std::vector<std::vector<MooseFunctorName>> _thermal_conductivity_name;
+  const std::vector<MooseFunctorName> _thermal_conductivity_name;
   /// Name of the thermal expansion material property
   const MooseFunctorName _thermal_expansion_name;
 
@@ -297,8 +299,9 @@ private:
   void processBlocks();
   /// Process the supplied variable names and if they are not available, create them
   void processVariables();
-  /// Process thermal conductivity (multiple functor input options are availalbe)
-  void processThermalConductivity();
+  /// Process thermal conductivity (multiple functor input options are availalbe).
+  /// Return true if we have vector conductivity and false if scalar
+  bool processThermalConductivity();
   /// Check for general user errors in the parameters
   void checkGeneralControlErrors();
   /// Check errors regarding the user defined boundary treatments
