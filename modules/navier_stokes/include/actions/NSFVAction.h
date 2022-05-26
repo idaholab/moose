@@ -197,14 +197,14 @@ protected:
   const std::vector<FunctionName> _pressure_function;
 
   /// Subdomains where we want to have ambient convection
-  const std::vector<SubdomainName> _ambient_convection_blocks;
+  const std::vector<std::vector<SubdomainName>> _ambient_convection_blocks;
   /// The heat exchange coefficients for ambient convection
   const std::vector<MooseFunctorName> _ambient_convection_alpha;
   /// The ambient temperature
   const std::vector<MooseFunctorName> _ambient_temperature;
 
   /// Subdomains where we want to have volumetric friction
-  const std::vector<SubdomainName> _friction_blocks;
+  const std::vector<std::vector<SubdomainName>> _friction_blocks;
   /// The friction correlation types used for each block
   const std::vector<std::vector<std::string>> _friction_types;
   /// The coefficients used for each item if friction type
@@ -217,7 +217,7 @@ protected:
   /// Name of the specific heat material property
   const MooseFunctorName _specific_heat_name;
   /// Subdomains where we want to have different thermal conduction
-  const std::vector<SubdomainName> _thermal_conductivity_blocks;
+  const std::vector<std::vector<SubdomainName>> _thermal_conductivity_blocks;
   /** Name of the thermal conductivity material property. We have multiple options here:
    * 1. The user defines a constant vector on the input file (anisotropic diffusion)
    * 2. The user defines a vector-functor in the material block and
@@ -344,15 +344,16 @@ void
 NSFVAction::checkBlockwiseConsistency(const std::string block_param_name,
                                       const std::vector<std::string> parameter_names)
 {
-  const std::vector<SubdomainName> & block_names =
-      _pars.get<std::vector<SubdomainName>>(block_param_name);
+  const std::vector<std::vector<SubdomainName>> & block_names =
+      _pars.get<std::vector<std::vector<SubdomainName>>>(block_param_name);
 
   if (block_names.size())
   {
-    for (const auto & block : block_names)
-      if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
-        paramError(block_param_name,
-                   "Block '" + block + "' is not present in the block IDs of the module!");
+    for (const auto & block_group : block_names)
+      for (const auto & block : block_group)
+        if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
+          paramError(block_param_name,
+                     "Block '" + block + "' is not present in the block IDs of the module!");
 
     for (const auto & param_name : parameter_names)
     {

@@ -198,7 +198,7 @@ NSFVAction::validParams()
   params.addParam<FunctionName>(
       "initial_temperature", "300", "The initial temperature, assumed constant everywhere");
 
-  params.addParam<std::vector<SubdomainName>>(
+  params.addParam<std::vector<std::vector<SubdomainName>>>(
       "thermal_conductivity_blocks",
       "The blocks where the user wants define different thermal conductivities.");
 
@@ -227,9 +227,9 @@ NSFVAction::validParams()
       std::vector<FunctionName>(),
       "Functions for Dirichlet/Neumann boundaries in the energy equation.");
 
-  params.addParam<std::vector<SubdomainName>>(
+  params.addParam<std::vector<std::vector<SubdomainName>>>(
       "ambient_convection_blocks",
-      std::vector<SubdomainName>(),
+      std::vector<std::vector<SubdomainName>>(),
       "The blocks where the ambient convection is present.");
 
   params.addParam<std::vector<MooseFunctorName>>(
@@ -256,7 +256,7 @@ NSFVAction::validParams()
    * Parameters controlling the friction terms in case of porous medium simulations.
    */
 
-  params.addParam<std::vector<SubdomainName>>(
+  params.addParam<std::vector<std::vector<SubdomainName>>>(
       "friction_blocks",
       "The blocks where the friction factors are applied to emulate flow resistances.");
 
@@ -517,12 +517,13 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _energy_wall_types(getParam<MultiMooseEnum>("energy_wall_types")),
     _energy_wall_function(getParam<std::vector<FunctionName>>("energy_wall_function")),
     _pressure_function(getParam<std::vector<FunctionName>>("pressure_function")),
-    _ambient_convection_blocks(getParam<std::vector<SubdomainName>>("ambient_convection_blocks")),
+    _ambient_convection_blocks(
+        getParam<std::vector<std::vector<SubdomainName>>>("ambient_convection_blocks")),
     _ambient_convection_alpha(getParam<std::vector<MooseFunctorName>>("ambient_convection_alpha")),
     _ambient_temperature(getParam<std::vector<MooseFunctorName>>("ambient_temperature")),
     _friction_blocks(isParamValid("friction_blocks")
-                         ? getParam<std::vector<SubdomainName>>("friction_blocks")
-                         : std::vector<SubdomainName>()),
+                         ? getParam<std::vector<std::vector<SubdomainName>>>("friction_blocks")
+                         : std::vector<std::vector<SubdomainName>>()),
     _friction_types(isParamValid("friction_types")
                         ? getParam<std::vector<std::vector<std::string>>>("friction_types")
                         : std::vector<std::vector<std::string>>()),
@@ -534,8 +535,8 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _specific_heat_name(getParam<MooseFunctorName>("specific_heat")),
     _thermal_conductivity_blocks(
         isParamValid("thermal_conductivity_blocks")
-            ? getParam<std::vector<SubdomainName>>("thermal_conductivity_blocks")
-            : std::vector<SubdomainName>()),
+            ? getParam<std::vector<std::vector<SubdomainName>>>("thermal_conductivity_blocks")
+            : std::vector<std::vector<SubdomainName>>()),
     _thermal_conductivity_name(getParam<std::vector<MooseFunctorName>>("thermal_conductivity")),
     _thermal_expansion_name(getParam<MooseFunctorName>("thermal_expansion")),
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
@@ -1279,12 +1280,8 @@ NSFVAction::addINSMomentumFrictionKernels()
 
     for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
     {
-      std::string block_name = "";
       if (num_friction_blocks)
-      {
-        params.set<std::vector<SubdomainName>>("block") = {_friction_blocks[block_i]};
-        block_name = _friction_blocks[block_i];
-      }
+        params.set<std::vector<SubdomainName>>("block") = _friction_blocks[block_i];
       else
         params.set<std::vector<SubdomainName>>("block") = _blocks;
 
@@ -1301,8 +1298,10 @@ NSFVAction::addINSMomentumFrictionKernels()
             params.set<MooseFunctorName>("Forchheimer_name") = _friction_coeffs[block_i][type_i];
         }
 
-        _problem->addFVKernel(
-            kernel_type, "momentum_friction_" + block_name + "_" + NS::directions[d], params);
+        _problem->addFVKernel(kernel_type,
+                              "momentum_friction_" + std::to_string(block_i) + "_" +
+                                  NS::directions[d],
+                              params);
       }
 
       if (_use_friction_correction)
@@ -1310,7 +1309,7 @@ NSFVAction::addINSMomentumFrictionKernels()
         const std::string correction_kernel_type = "PINSFVMomentumFrictionCorrection";
         InputParameters corr_params = _factory.getValidParams(correction_kernel_type);
         if (num_friction_blocks)
-          corr_params.set<std::vector<SubdomainName>>("block") = {_friction_blocks[block_i]};
+          corr_params.set<std::vector<SubdomainName>>("block") = _friction_blocks[block_i];
         else
           corr_params.set<std::vector<SubdomainName>>("block") = _blocks;
         corr_params.set<MooseFunctorName>(NS::density) = _density_name;
@@ -1332,8 +1331,8 @@ NSFVAction::addINSMomentumFrictionKernels()
           }
 
           _problem->addFVKernel(correction_kernel_type,
-                                "pins_momentum_friction_correction_" + block_name + "_" +
-                                    NS::directions[d],
+                                "pins_momentum_friction_correction_" + std::to_string(block_i) +
+                                    "_" + NS::directions[d],
                                 corr_params);
         }
       }
@@ -1347,12 +1346,8 @@ NSFVAction::addINSMomentumFrictionKernels()
 
     for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
     {
-      std::string block_name = "";
       if (num_friction_blocks)
-      {
-        params.set<std::vector<SubdomainName>>("block") = {_friction_blocks[block_i]};
-        block_name = _friction_blocks[block_i];
-      }
+        params.set<std::vector<SubdomainName>>("block") = _friction_blocks[block_i];
       else
         params.set<std::vector<SubdomainName>>("block") = _blocks;
 
@@ -1369,8 +1364,10 @@ NSFVAction::addINSMomentumFrictionKernels()
             params.set<MooseFunctorName>("quadratic_coef_name") = _friction_coeffs[block_i][type_i];
         }
 
-        _problem->addFVKernel(
-            kernel_type, "ins_momentum_friction_" + block_name + "_" + NS::directions[d], params);
+        _problem->addFVKernel(kernel_type,
+                              "ins_momentum_friction_" + std::to_string(block_i) + "_" +
+                                  NS::directions[d],
+                              params);
       }
     }
   }
@@ -1416,15 +1413,15 @@ NSFVAction::addINSEnergyHeatConductionKernels()
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
       std::vector<SubdomainName> block_names =
-          num_blocks ? std::vector<SubdomainName>({_thermal_conductivity_blocks[block_i]})
-                     : _blocks;
+          num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
       params.set<std::vector<SubdomainName>>("block") = block_names;
 
       std::string conductivity_name = vector_conductivity ? NS::kappa : NS::k;
       params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[block_i];
       params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
 
-      _problem->addFVKernel(kernel_type, "pins_energy_diffusion", params);
+      _problem->addFVKernel(
+          kernel_type, "pins_energy_diffusion_" + std::to_string(block_i), params);
     }
     else
     {
@@ -1432,8 +1429,7 @@ NSFVAction::addINSEnergyHeatConductionKernels()
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
       std::vector<SubdomainName> block_names =
-          num_blocks ? std::vector<SubdomainName>({_thermal_conductivity_blocks[block_i]})
-                     : _blocks;
+          num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
       params.set<std::vector<SubdomainName>>("block") = block_names;
       params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[block_i];
 
@@ -1458,17 +1454,14 @@ NSFVAction::addINSEnergyAmbientConvection()
   {
     std::string block_name = "";
     if (num_convection_blocks)
-    {
-      params.set<std::vector<SubdomainName>>("block") = {_ambient_convection_blocks[block_i]};
-      block_name = _ambient_convection_blocks[block_i];
-    }
+      params.set<std::vector<SubdomainName>>("block") = _ambient_convection_blocks[block_i];
     else
       params.set<std::vector<SubdomainName>>("block") = _blocks;
 
     params.set<MooseFunctorName>("h_solid_fluid") = _ambient_convection_alpha[block_i];
     params.set<MooseFunctorName>(NS::T_solid) = _ambient_temperature[block_i];
 
-    _problem->addFVKernel(kernel_type, "ambient_convection_" + block_name, params);
+    _problem->addFVKernel(kernel_type, "ambient_convection_" + block_i, params);
   }
 }
 
@@ -2210,11 +2203,13 @@ NSFVAction::processThermalConductivity()
 
   for (unsigned int i = 0; i < _thermal_conductivity_name.size(); ++i)
   {
+    _console << _thermal_conductivity_name[i] << std::endl;
     // First, check if the name is just a number (only in case of isotropic conduction
     std::istringstream ss(_thermal_conductivity_name[i]);
     Real real_value;
     if (ss >> real_value && ss.eof())
       have_scalar = true;
+
     else
     {
       if (_problem->hasFunctorWithType<ADReal>(_thermal_conductivity_name[i],
@@ -2238,14 +2233,13 @@ NSFVAction::processThermalConductivity()
   if (!have_vector && !have_scalar)
     paramError("thermal_conductivity", "Could not find functors for thermal conductivity!");
 
-  if (have_vector && _porous_medium_treatment)
+  if (have_vector && !_porous_medium_treatment)
     paramError("thermal_conductivity", "Cannot use anistropic diffusion with non-porous flows!");
 
   if (have_vector == have_scalar)
     paramError("thermal_conductivity",
                "The entries on thermal conductivity shall either be scalars of vectors, mixing "
                "them is not supported!");
-
   return have_vector;
 }
 
@@ -2447,7 +2441,8 @@ NSFVAction::checkFrictionParameterErrors()
     if (_friction_types[block_i].size() != _friction_coeffs[block_i].size())
     {
       paramError("friction_coeffs",
-                 "The number of friction coefficients for block: " + _friction_blocks[block_i] +
+                 "The number of friction coefficients for blocks: " +
+                     Moose::stringify(_friction_blocks[block_i]) +
                      " is not the same as the number of requested friction types!");
     }
 

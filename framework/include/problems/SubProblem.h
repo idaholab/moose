@@ -1010,7 +1010,7 @@ SubProblem::hasFunctorWithType(const std::string & name, const THREAD_ID tid) co
     return false;
   else
   {
-    return static_cast<Moose::Functor<T> *>(it->second.get());
+    return dynamic_cast<Moose::Functor<T> *>(it->second.get());
   }
 }
 

@@ -36,6 +36,17 @@
       valgrind = HEAVY
       cli_args = "Outputs/file_base='rc-heated-effective'"
     []
+    [kappa-action]
+      type = 'Exodiff'
+      input = 2d-rc-heated-effective-action.i
+      exodiff = rc-heated-effective-action.e
+      method = "!dbg"
+      abs_zero = 1e-9
+      detail = 'with an effective diffusion coefficient and NSFVAction syntax,'
+      ad_indexing_type = 'global'
+      valgrind = HEAVY
+      cli_args = "Outputs/file_base='rc-heated-effective-action'"
+    []
   []
   [solid-fluid]
     type = 'Exodiff'
