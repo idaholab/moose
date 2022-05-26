@@ -13,13 +13,6 @@
 #include "SingleVariableReturnMappingSolution.h"
 #include "ADSingleVariableReturnMappingSolution.h"
 
-// Forward declaration
-template <bool is_ad>
-using SingleVariableReturnMappingSolutionTempl =
-    typename std::conditional<is_ad,
-                              ADSingleVariableReturnMappingSolution,
-                              SingleVariableReturnMappingSolution>::type;
-
 /**
  * RadialReturnStressUpdate computes the radial return stress increment for
  * an isotropic elastic-viscoplasticity model after interating on the difference

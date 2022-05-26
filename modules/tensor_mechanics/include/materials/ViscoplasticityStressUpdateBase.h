@@ -91,13 +91,34 @@ protected:
   /// Enum for negative porosity handling
   const NegativeBehavior _negative_behavior;
 
-  // using Material::_current_elem;
-  using Material::_dt;
-  using Material::_name;
-  using Material::_q_point;
-  using Material::_qp;
+  using StressUpdateBaseTempl<is_ad>::_dt;
+  using StressUpdateBaseTempl<is_ad>::_name;
+  using StressUpdateBaseTempl<is_ad>::_q_point;
+  using StressUpdateBaseTempl<is_ad>::_qp;
   using StressUpdateBaseTempl<is_ad>::_base_name;
 };
+
+#define usingViscoplasticityStressUpdateBaseMembers                                                \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_dt;                                          \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_t;                                           \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_name;                                        \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_qp;                                          \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::isParamValid;                                 \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::paramError;                                   \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::paramWarning;                                 \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::updateState;                                  \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_console;                                     \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_q_point;                                     \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_verbose;                                     \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_intermediate_porosity;                       \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_effective_inelastic_strain;                  \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_effective_inelastic_strain_old;              \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_inelastic_strain;                            \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_inelastic_strain_old;                        \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::_porosity_old;                                \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::updateIntermediatePorosity;                   \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::computeStressFinalize;                        \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::computeStressInitialize;
 
 typedef ViscoplasticityStressUpdateBaseTempl<false> ViscoplasticityStressUpdateBase;
 typedef ViscoplasticityStressUpdateBaseTempl<true> ADViscoplasticityStressUpdateBase;

@@ -40,4 +40,11 @@
     requirement = 'The system shall converge under large deformation owing to the help of '
                   'substepping'
   []
+  [output]
+    type = 'RunApp'
+    input = 'power_law_creep.i'
+    cli_args = 'Executioner/num_steps=1 Materials/power_law_creep/internal_solve_full_iteration_history=true Materials/power_law_creep/internal_solve_output_on=always'
+    expect_out = "iteration=0 trial_stress="
+    requirement = 'The system shall output verbose information about radial return iterations.'
+  []
 []

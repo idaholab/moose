@@ -9,21 +9,26 @@
 
 #pragma once
 
+#include "MooseTypes.h"
+#include "DualRealOps.h"
 #include "ChainedReal.h"
+#include "ChainedADReal.h"
 #include "InputParameters.h"
-#include "ConsoleStream.h"
+
+class ConsoleStream;
 
 /**
  * Base class that provides capability for Newton return mapping
  * iterations on a single variable
  */
-class SingleVariableReturnMappingSolution
+template <bool is_ad>
+class SingleVariableReturnMappingSolutionTempl
 {
 public:
   static InputParameters validParams();
 
-  SingleVariableReturnMappingSolution(const InputParameters & parameters);
-  virtual ~SingleVariableReturnMappingSolution() {}
+  SingleVariableReturnMappingSolutionTempl(const InputParameters & parameters);
+  virtual ~SingleVariableReturnMappingSolutionTempl() {}
 
 protected:
   /**
@@ -32,8 +37,8 @@ protected:
    * @param scalar                 Inelastic strain increment magnitude being solved for
    * @param console                Console output
    */
-  void returnMappingSolve(const Real effective_trial_stress,
-                          Real & scalar,
+  void returnMappingSolve(const GenericReal<is_ad> & effective_trial_stress,
+                          GenericReal<is_ad> & scalar,
                           const ConsoleStream & console);
 
   /**
@@ -41,14 +46,16 @@ protected:
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real minimumPermissibleValue(const Real & effective_trial_stress) const;
+  virtual GenericReal<is_ad>
+  minimumPermissibleValue(const GenericReal<is_ad> & effective_trial_stress) const;
 
   /**
    * Compute the maximum permissible value of the scalar.  For some models, the magnitude
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real maximumPermissibleValue(const Real & effective_trial_stress) const;
+  virtual GenericReal<is_ad>
+  maximumPermissibleValue(const GenericReal<is_ad> & effective_trial_stress) const;
 
   /**
    * Compute an initial guess for the value of the scalar. For some cases, an
@@ -57,7 +64,10 @@ protected:
    * to perform initialization tasks.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real initialGuess(const Real /*effective_trial_stress*/) { return 0.0; }
+  virtual GenericReal<is_ad> initialGuess(const GenericReal<is_ad> & /*effective_trial_stress*/)
+  {
+    return 0.0;
+  }
 
   /**
    * Compute the residual for a predicted value of the scalar.  This residual should be
@@ -65,8 +75,8 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeResidual(const Real & /*effective_trial_stress*/,
-                               const Real & /*scalar*/) = 0;
+  virtual GenericReal<is_ad> computeResidual(const GenericReal<is_ad> & /*effective_trial_stress*/,
+                                             const GenericReal<is_ad> & /*scalar*/) = 0;
 
   /**
    * Compute the derivative of the residual as a function of the scalar variable.  The
@@ -74,8 +84,9 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeDerivative(const Real & /*effective_trial_stress*/,
-                                 const Real & /*scalar*/) = 0;
+  virtual GenericReal<is_ad>
+  computeDerivative(const GenericReal<is_ad> & /*effective_trial_stress*/,
+                    const GenericReal<is_ad> & /*scalar*/) = 0;
 
   /**
    * Compute the residual and the derivative for a predicted value of the scalar.  This residual
@@ -83,8 +94,9 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual ChainedReal computeResidualAndDerivative(const Real & /*effective_trial_stress*/,
-                                                   const ChainedReal & /*scalar*/)
+  virtual GenericChainedReal<is_ad>
+  computeResidualAndDerivative(const GenericReal<is_ad> & /*effective_trial_stress*/,
+                               const GenericChainedReal<is_ad> & /*scalar*/)
   {
     mooseError("computeResidualAndDerivative has to be implemented if "
                "automatic_differentiation_return_mapping = true.");
@@ -97,48 +109,14 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeReferenceResidual(const Real & effective_trial_stress,
-                                        const Real & scalar) = 0;
+  virtual Real computeReferenceResidual(const GenericReal<is_ad> & effective_trial_stress,
+                                        const GenericReal<is_ad> & scalar) = 0;
 
   /**
    * Finalize internal state variables for a model for a given iteration.
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual void iterationFinalize(Real /*scalar*/) {}
-
-  /**
-   * Output information for a single iteration step to build the convergence history of the model
-   * @param iter_output            Output stream
-   * @param it                     Current iteration count
-   * @param effective_trial_stress Effective trial stress
-   * @param scalar                 Inelastic strain increment magnitude being solved for
-   * @param residual               Current value of the residual
-   * @param reference              Current value of the reference quantity
-   */
-  virtual void outputIterationStep(std::stringstream * iter_output,
-                                   const unsigned int it,
-                                   const Real effective_trial_stress,
-                                   const Real scalar,
-                                   const Real residual,
-                                   const Real reference_residual);
-
-  /**
-   * Output information for a single iteration step to build the convergence history of the model.
-   * This method is duplicative of outputIterationStep, but matches the signature of
-   * ADSingleVariableReturnMappingSolution to allow for consistant code impelementation.
-   * @param iter_output            Output stream
-   * @param effective_trial_stress Effective trial stress
-   * @param residual               Current value of the residual
-   * @param reference              Current value of the reference quantity
-   */
-  virtual void outputIterationStep(std::stringstream * iter_output,
-                                   const Real & effective_trial_stress,
-                                   const Real & scalar,
-                                   const Real reference_residual)
-  {
-    return outputIterationStep(
-        iter_output, _iteration, effective_trial_stress, scalar, _residual, reference_residual);
-  };
+  virtual void iterationFinalize(GenericReal<is_ad> /*scalar*/) {}
 
   /**
    * Output summary information for the convergence history of the model
@@ -157,9 +135,30 @@ protected:
   /// those bounds if outside them
   bool _bracket_solution;
 
+  /**
+   * Output information for a single iteration step to build the convergence history of the model
+   * @param iter_output            Output stream
+   * @param effective_trial_stress Effective trial stress
+   * @param residual               Current value of the residual
+   * @param reference              Current value of the reference quantity
+   */
+  virtual void outputIterationStep(std::stringstream * iter_output,
+                                   const GenericReal<is_ad> & effective_trial_stress,
+                                   const GenericReal<is_ad> & scalar,
+                                   const Real reference_residual);
+
+  /**
+   * Check to see whether the residual is within the convergence limits.
+   * @param residual  Current value of the residual
+   * @param reference Current value of the reference quantity
+   * @return Whether the model converged
+   */
+  bool converged(const GenericReal<is_ad> & residual, const Real reference);
+
 private:
   /// Helper function to compute and set the _residual and _derivative
-  void computeResidualAndDerivativeHelper(const Real & effective_trial_stress, const Real & scalar);
+  void computeResidualAndDerivativeHelper(const GenericReal<is_ad> & effective_trial_stress,
+                                          const GenericReal<is_ad> & scalar);
 
   enum class InternalSolveOutput
   {
@@ -206,12 +205,12 @@ private:
   unsigned int _iteration;
 
   ///@{ Residual values, kept as members to retain solver state for summary outputting
-  Real _initial_residual;
-  Real _residual;
+  GenericReal<is_ad> _initial_residual;
+  GenericReal<is_ad> _residual;
   ///@}
 
   /// Derivative of the residual
-  Real _derivative;
+  GenericReal<is_ad> _derivative;
 
   /// MOOSE input name of the object performing the solve
   const std::string _svrms_name;
@@ -223,17 +222,9 @@ private:
    * @param iter_output            Output stream -- if null, no output is produced
    * @return Whether the solution was successful
    */
-  SolveState internalSolve(const Real effective_trial_stress,
-                           Real & scalar,
+  SolveState internalSolve(const GenericReal<is_ad> effective_trial_stress,
+                           GenericReal<is_ad> & scalar,
                            std::stringstream * iter_output = nullptr);
-
-  /**
-   * Check to see whether the residual is within the convergence limits.
-   * @param residual  Current value of the residual
-   * @param reference Current value of the reference quantity
-   * @return Whether the model converged
-   */
-  bool converged(const Real residual, const Real reference);
 
   /**
    * Check to see whether the residual is within acceptable convergence limits.
@@ -244,7 +235,7 @@ private:
    * @param reference Current value of the reference quantity
    * @return Whether the model converged
    */
-  bool convergedAcceptable(const unsigned int it, const Real residual, const Real reference);
+  bool convergedAcceptable(const unsigned int it, const Real reference);
 
   /**
    * Check to see whether solution is within admissible range, and set it within that range
@@ -256,11 +247,11 @@ private:
    * @param max_permissible_scalar Maximum permissible value of scalar
    * @param iter_output            Output stream
    */
-  void checkPermissibleRange(Real & scalar,
-                             Real & scalar_increment,
-                             const Real scalar_old,
-                             const Real min_permissible_scalar,
-                             const Real max_permissible_scalar,
+  void checkPermissibleRange(GenericReal<is_ad> & scalar,
+                             GenericReal<is_ad> & scalar_increment,
+                             const GenericReal<is_ad> & scalar_old,
+                             const GenericReal<is_ad> min_permissible_scalar,
+                             const GenericReal<is_ad> max_permissible_scalar,
                              std::stringstream * iter_output);
 
   /**
@@ -272,10 +263,13 @@ private:
    * @param scalar_lower_bound     Lower bound value of scalar
    * @param iter_output            Output stream
    */
-  void updateBounds(const Real scalar,
-                    const Real residual,
+  void updateBounds(const GenericReal<is_ad> & scalar,
+                    const GenericReal<is_ad> & residual,
                     const Real init_resid_sign,
-                    Real & scalar_upper_bound,
-                    Real & scalar_lower_bound,
+                    GenericReal<is_ad> & scalar_upper_bound,
+                    GenericReal<is_ad> & scalar_lower_bound,
                     std::stringstream * iter_output);
 };
+
+typedef SingleVariableReturnMappingSolutionTempl<false> SingleVariableReturnMappingSolution;
+typedef SingleVariableReturnMappingSolutionTempl<true> ADSingleVariableReturnMappingSolution;
