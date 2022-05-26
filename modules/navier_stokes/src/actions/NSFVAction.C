@@ -198,8 +198,10 @@ NSFVAction::validParams()
   params.addParam<FunctionName>(
       "initial_temperature", "300", "The initial temperature, assumed constant everywhere");
 
-  params.addParam<MooseFunctorName>(
-      "thermal_conductivity", NS::k, "The name of the fluid thermal conductivity");
+  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
+      "thermal_conductivity",
+      std::vector<std::vector<MooseFunctorName>>({std::vector<MooseFunctorName>({NS::k})}),
+      "The name of the fluid thermal conductivity");
 
   params.addParam<MooseFunctorName>("specific_heat", NS::cp, "The name of the specific heat");
 
@@ -527,7 +529,8 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _density_name(getParam<MooseFunctorName>("density")),
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
     _specific_heat_name(getParam<MooseFunctorName>("specific_heat")),
-    _thermal_conductivity_name(getParam<MooseFunctorName>("thermal_conductivity")),
+    _thermal_conductivity_name(
+        getParam<std::vector<std::vector<MooseFunctorName>>>("thermal_conductivity")),
     _thermal_expansion_name(getParam<MooseFunctorName>("thermal_expansion")),
     _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
     _passive_scalar_diffusivity(
@@ -1395,11 +1398,15 @@ NSFVAction::addINSEnergyHeatConductionKernels()
 {
   if (_porous_medium_treatment)
   {
+    // We check if the thermal conductivity functor is a number of a vector
+    // if (_problem->hasFunctor(_thermal_conductivity_name[0],
+    //                          _problem->parameters().get<THREAD_ID>("_tid")))
+
     const std::string kernel_type = "PINSFVEnergyDiffusion";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
     params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<MooseFunctorName>(NS::k) = _thermal_conductivity_name;
+    params.set<MooseFunctorName>(NS::k) = _thermal_conductivity_name[0][0];
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
 
     _problem->addFVKernel(kernel_type, "pins_energy_diffusion", params);
@@ -1410,7 +1417,7 @@ NSFVAction::addINSEnergyHeatConductionKernels()
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
     params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name;
+    params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[0][0];
 
     _problem->addFVKernel(kernel_type, "ins_energy_diffusion", params);
   }
@@ -2172,6 +2179,12 @@ NSFVAction::processVariables()
       paramError("pressure_variable",
                  "Variable (" + _fluid_temperature_name +
                      ") supplied to the NavierStokesFV action does not exist!");
+}
+
+void
+NSFVAction::processThermalConductivity()
+{
+  _console << "olle" << std::endl;
 }
 
 void
