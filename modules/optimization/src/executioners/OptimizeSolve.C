@@ -153,6 +153,9 @@ OptimizeSolve::taoSolve()
   ierr = TaoDestroy(&_tao);
   CHKERRQ(ierr);
 
+  ierr = MatDestroy(&_hessian);
+  CHKERRQ(ierr);
+
   return ierr;
 }
 
