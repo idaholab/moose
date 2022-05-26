@@ -62,37 +62,7 @@ template <typename T>
 void
 DependencyResolverInterface::sort(typename std::vector<T> & vector)
 {
-  DependencyResolver<T> resolver;
-
-  typename std::vector<T>::iterator start = vector.begin();
-  typename std::vector<T>::iterator end = vector.end();
-
-  for (typename std::vector<T>::iterator iter = start; iter != end; ++iter)
-  {
-    const std::set<std::string> & requested_items = (*iter)->getRequestedItems();
-
-    for (typename std::vector<T>::iterator iter2 = start; iter2 != end; ++iter2)
-    {
-      if (iter == iter2)
-        continue;
-
-      const std::set<std::string> & supplied_items = (*iter2)->getSuppliedItems();
-
-      std::set<std::string> intersect;
-      std::set_intersection(requested_items.begin(),
-                            requested_items.end(),
-                            supplied_items.begin(),
-                            supplied_items.end(),
-                            std::inserter(intersect, intersect.end()));
-
-      // If the intersection isn't empty then there is a dependency here
-      if (!intersect.empty())
-        resolver.insertDependency(*iter, *iter2);
-    }
-  }
-
-  // Sort based on dependencies
-  std::stable_sort(start, end, resolver);
+  sortDFS(vector);
 }
 
 template <typename T>
@@ -105,126 +75,7 @@ DependencyResolverInterface::sortDFS(typename std::vector<T> & vector)
   /**
    * Class that represents the dependecy as a graph
    */
-  class Graph
-  {
-  public:
-    /**
-     * Add a node 'a' to the graph
-     */
-    void addNode(const T & a)
-    {
-      if (_adj.find(a) == _adj.end())
-        _adj[a] = {};
-
-      if (_inv_adj.find(a) == _inv_adj.end())
-        _inv_adj[a] = {};
-    }
-
-    /**
-     * Add an edge between nodes 'a' and 'b'
-     */
-    void addEdge(const T & a, const T & b)
-    {
-      addNode(a);
-      addNode(b);
-
-      _adj[a].push_back(b);
-      _inv_adj[b].push_back(a);
-    }
-
-    /**
-     * Return true, if the grpah has a cycle, otherwise false
-     */
-    bool isCyclic()
-    {
-      _visited.clear();
-      _rec_stack.clear();
-
-      // mark all nodes as not visited and not part of recursion stack
-      for (auto & n : _adj)
-      {
-        _visited[n.first] = false;
-        _rec_stack[n.first] = false;
-      }
-
-      // detect cycle for all nodes
-      for (auto & i : _adj)
-        if (isCyclicHelper(i.first))
-          return true;
-
-      return false;
-    }
-
-    /**
-     * Do depth-first search from root nodes to obtain order in which graph nodes should be
-     * "executed".
-     */
-    typename std::vector<T> dfs()
-    {
-      _sorted_vector.clear();
-
-      for (auto & n : _adj)
-        _visited[n.first] = false;
-
-      for (auto & n : _adj)
-      {
-        if (n.second.size() == 0)
-          dfsFromNode(n.first);
-      }
-
-      return _sorted_vector;
-    }
-
-    typename std::map<T, bool> recStack() const { return _rec_stack; }
-
-  protected:
-    /**
-     * depth first search from a root node
-     * @param root The node we start from
-     */
-    void dfsFromNode(const T & root)
-    {
-      _visited[root] = true;
-
-      for (auto & i : _inv_adj[root])
-      {
-        if (!_visited.at(i))
-          dfsFromNode(i);
-      }
-
-      _sorted_vector.push_back(root);
-    }
-
-    bool isCyclicHelper(const T & v)
-    {
-      if (!_visited[v])
-      {
-        _visited[v] = true;
-        _rec_stack[v] = true;
-
-        for (auto & i : _adj[v])
-        {
-          if (!_visited.at(i) && isCyclicHelper(i))
-            return true;
-          else if (_rec_stack.at(i))
-            return true;
-        }
-      }
-      _rec_stack[v] = false;
-      return false;
-    }
-
-    /// adjacency lists (from leaves to roots)
-    std::map<T, std::list<T>> _adj;
-    /// adjacency lists (from roots to leaves)
-    std::map<T, std::list<T>> _inv_adj;
-    /// vector of visited nodes
-    std::map<T, bool> _visited;
-    /// recursive stack
-    std::map<T, bool> _rec_stack;
-    /// "sorted" vector of nodes
-    std::vector<T> _sorted_vector;
-  } graph;
+  DependencyResolver<T> graph;
 
   // Map of suppliers: what is supplied -> by what object
   std::multimap<std::string, T> suppliers_map;
@@ -258,24 +109,7 @@ DependencyResolverInterface::sortDFS(typename std::vector<T> & vector)
     }
   }
 
-  if (graph.isCyclic())
-  {
-    std::ostringstream oss;
-    oss << "Cyclic dependency detected in object ordering:" << std::endl;
-    auto rec_stack = graph.recStack();
-    auto first = rec_stack.begin();
-    auto first_name = first->first->name();
-    oss << first_name << " -> ";
-    for (auto & it = ++first; it != rec_stack.end(); ++it)
-    {
-      oss << it->first->name() << std::endl;
-      oss << it->first->name() << " -> ";
-    }
-    oss << first_name << std::endl;
-    mooseError(oss.str());
-  }
-  else
-    vector = graph.dfs();
+  vector = graph.dfs();
 }
 
 template <typename T, typename T2>
@@ -286,10 +120,10 @@ DependencyResolverInterface::cyclicDependencyError(CyclicDependencyException<T2>
   std::ostringstream oss;
 
   oss << header << ":\n";
-  const typename std::multimap<T2, T2> & depends = e.getCyclicDependencies();
-  for (typename std::multimap<T2, T2>::const_iterator it = depends.begin(); it != depends.end();
-       ++it)
-    oss << (static_cast<T>(it->first))->name() << " -> " << (static_cast<T>(it->second))->name()
-        << "\n";
+  const auto & adjacency_lists = e.getCyclicDependencies();
+  for (const auto & [object, object_adjacencies] : adjacency_lists)
+    for (const auto & adjacent_object : object_adjacencies)
+      oss << static_cast<T>(object)->name() << " -> " << static_cast<T>(adjacent_object)->name()
+          << "\n";
   mooseError(oss.str());
 }
