@@ -247,19 +247,20 @@ elementsCreationFromNodesVectorsQuad(ReplicatedMesh & mesh,
     for (unsigned int j = 1; j < node_number; j++)
     {
       Elem * elem = mesh.add_elem(new Quad4);
-      elem->set_node(0) = nodes[i][j - 1];
-      elem->set_node(1) = nodes[i + 1][j - 1];
-      elem->set_node(2) = nodes[i + 1][j];
-      elem->set_node(3) = nodes[i][j];
-      elem->subdomain_id() = transition_layer_id;
+      bool is_elem_flip = buildQuadElement(elem,
+                                           nodes[i][j - 1],
+                                           nodes[i + 1][j - 1],
+                                           nodes[i + 1][j],
+                                           nodes[i][j],
+                                           transition_layer_id);
       if (i == 0)
-        boundary_info.add_side(elem, 3, input_boundary_1_id);
+        boundary_info.add_side(elem, is_elem_flip ? 0 : 3, input_boundary_1_id);
       if (i == num_layers - 1)
-        boundary_info.add_side(elem, 1, input_boundary_2_id);
+        boundary_info.add_side(elem, is_elem_flip ? 2 : 1, input_boundary_2_id);
       if (j == 1)
-        boundary_info.add_side(elem, 0, begin_side_boundary_id);
+        boundary_info.add_side(elem, is_elem_flip ? 3 : 0, begin_side_boundary_id);
       if (j == node_number - 1)
-        boundary_info.add_side(elem, 2, end_side_boundary_id);
+        boundary_info.add_side(elem, is_elem_flip ? 1 : 2, end_side_boundary_id);
     }
 }
 
@@ -292,27 +293,29 @@ elementsCreationFromNodesVectors(ReplicatedMesh & mesh,
       if (dis1 > dis2)
       {
         Elem * elem = mesh.add_elem(new Tri3);
-        elem->set_node(0) = nodes[i + 1][nodes_up_it];
-        elem->set_node(1) = nodes[i][nodes_down_it];
-        elem->set_node(2) = nodes[i + 1][nodes_up_it + 1];
-        elem->subdomain_id() = transition_layer_id;
+        bool is_elem_flip = buildTriElement(elem,
+                                            nodes[i + 1][nodes_up_it],
+                                            nodes[i][nodes_down_it],
+                                            nodes[i + 1][nodes_up_it + 1],
+                                            transition_layer_id);
         if (i == num_layers - 1)
-          boundary_info.add_side(elem, 2, input_boundary_2_id);
+          boundary_info.add_side(elem, is_elem_flip ? 0 : 2, input_boundary_2_id);
         if (nodes_up_it == 0 && nodes_down_it == 0)
-          boundary_info.add_side(elem, 0, begin_side_boundary_id);
+          boundary_info.add_side(elem, is_elem_flip ? 2 : 0, begin_side_boundary_id);
         nodes_up_it++;
       }
       else
       {
         Elem * elem = mesh.add_elem(new Tri3);
-        elem->set_node(0) = nodes[i + 1][nodes_up_it];
-        elem->set_node(1) = nodes[i][nodes_down_it];
-        elem->set_node(2) = nodes[i][nodes_down_it + 1];
-        elem->subdomain_id() = transition_layer_id;
+        bool is_elem_flip = buildTriElement(elem,
+                                            nodes[i + 1][nodes_up_it],
+                                            nodes[i][nodes_down_it],
+                                            nodes[i][nodes_down_it + 1],
+                                            transition_layer_id);
         if (i == 0)
           boundary_info.add_side(elem, 1, input_boundary_1_id);
         if (nodes_up_it == 0 && nodes_down_it == 0)
-          boundary_info.add_side(elem, 0, begin_side_boundary_id);
+          boundary_info.add_side(elem, is_elem_flip ? 2 : 0, begin_side_boundary_id);
         nodes_down_it++;
       }
     }
@@ -320,28 +323,30 @@ elementsCreationFromNodesVectors(ReplicatedMesh & mesh,
     while (nodes_up_it < node_number_up - 1)
     {
       Elem * elem = mesh.add_elem(new Tri3);
-      elem->set_node(0) = nodes[i + 1][nodes_up_it];
-      elem->set_node(1) = nodes[i][nodes_down_it];
-      elem->set_node(2) = nodes[i + 1][nodes_up_it + 1];
-      elem->subdomain_id() = transition_layer_id;
+      bool is_elem_flip = buildTriElement(elem,
+                                          nodes[i + 1][nodes_up_it],
+                                          nodes[i][nodes_down_it],
+                                          nodes[i + 1][nodes_up_it + 1],
+                                          transition_layer_id);
       nodes_up_it++;
       if (i == num_layers - 1)
-        boundary_info.add_side(elem, 2, input_boundary_2_id);
+        boundary_info.add_side(elem, is_elem_flip ? 0 : 2, input_boundary_2_id);
       if (nodes_up_it == node_number_up - 1 && nodes_down_it == node_number_down - 1)
         boundary_info.add_side(elem, 1, end_side_boundary_id);
     }
     while (nodes_down_it < node_number_down - 1)
     {
       Elem * elem = mesh.add_elem(new Tri3);
-      elem->set_node(0) = nodes[i + 1][nodes_up_it];
-      elem->set_node(1) = nodes[i][nodes_down_it];
-      elem->set_node(2) = nodes[i][nodes_down_it + 1];
-      elem->subdomain_id() = transition_layer_id;
+      bool is_elem_flip = buildTriElement(elem,
+                                          nodes[i + 1][nodes_up_it],
+                                          nodes[i][nodes_down_it],
+                                          nodes[i][nodes_down_it + 1],
+                                          transition_layer_id);
       nodes_down_it++;
       if (i == 0)
         boundary_info.add_side(elem, 1, input_boundary_1_id);
       if (nodes_up_it == node_number_up - 1 && nodes_down_it == node_number_down - 1)
-        boundary_info.add_side(elem, 2, end_side_boundary_id);
+        boundary_info.add_side(elem, is_elem_flip ? 0 : 2, end_side_boundary_id);
     }
   }
 }
@@ -651,5 +656,57 @@ isExternalBoundary(ReplicatedMesh & mesh, const boundary_id_type bid)
         return false;
   }
   return true;
+}
+
+bool
+buildQuadElement(Elem * elem,
+                 Node * nd_0,
+                 Node * nd_1,
+                 Node * nd_2,
+                 Node * nd_3,
+                 const subdomain_id_type transition_layer_id)
+{
+  // Adjust the order of nodes in an element so that the mesh can be extruded in (0 0 1)
+  // direction.
+  elem->subdomain_id() = transition_layer_id;
+  if (((*nd_1 - *nd_0).cross((*nd_2 - *nd_0)).unit())(2) > 0)
+  {
+    elem->set_node(0) = nd_0;
+    elem->set_node(1) = nd_1;
+    elem->set_node(2) = nd_2;
+    elem->set_node(3) = nd_3;
+    return false;
+  }
+  else
+  {
+    elem->set_node(0) = nd_0;
+    elem->set_node(3) = nd_1;
+    elem->set_node(2) = nd_2;
+    elem->set_node(1) = nd_3;
+    return true;
+  }
+}
+
+bool
+buildTriElement(
+    Elem * elem, Node * nd_0, Node * nd_1, Node * nd_2, const subdomain_id_type transition_layer_id)
+{
+  // Adjust the order of nodes in an element so that the mesh can be extruded in (0 0 1)
+  // direction.
+  elem->subdomain_id() = transition_layer_id;
+  if (((*nd_1 - *nd_0).cross((*nd_2 - *nd_0)).unit())(2) > 0)
+  {
+    elem->set_node(0) = nd_0;
+    elem->set_node(1) = nd_1;
+    elem->set_node(2) = nd_2;
+    return false;
+  }
+  else
+  {
+    elem->set_node(0) = nd_0;
+    elem->set_node(2) = nd_1;
+    elem->set_node(1) = nd_2;
+    return true;
+  }
 }
 }

@@ -245,4 +245,36 @@ bool isBoundaryOpenSingleSegment(ReplicatedMesh & mesh,
  * @return whether the boundary is the external boundary of the given mesh
  */
 bool isExternalBoundary(ReplicatedMesh & mesh, const boundary_id_type bid);
+
+/**
+ * Creates an QUAD4 element that can be extruded in (0 0 1) direction.
+ * @param elem pointer of the element to be created
+ * @param nd_0 pointer of element's first node
+ * @param nd_1 pointer of element's second node
+ * @param nd_2 pointer of element's third node
+ * @param nd_3 pointer of element's fourth node
+ * @param transition_layer_id id of the subdomain that this element belongs to
+ * @return whether the element is flipped to ensure (0 0 1) extrudability
+ */
+bool buildQuadElement(Elem * elem,
+                      Node * nd_0,
+                      Node * nd_1,
+                      Node * nd_2,
+                      Node * nd_3,
+                      const subdomain_id_type transition_layer_id);
+
+/**
+ * Creates an TRI3 element that can be extruded in (0 0 1) direction.
+ * @param elem pointer of the element to be created
+ * @param nd_0 pointer of element's first node
+ * @param nd_1 pointer of element's second node
+ * @param nd_2 pointer of element's third node
+ * @param transition_layer_id id of the subdomain that this element belongs to
+ * @return whether the element is flipped to ensure (0 0 1) extrudability
+ */
+bool buildTriElement(Elem * elem,
+                     Node * nd_0,
+                     Node * nd_1,
+                     Node * nd_2,
+                     const subdomain_id_type transition_layer_id);
 }
