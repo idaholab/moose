@@ -44,4 +44,5 @@ public:
 
 private:
   const T & _parent;
+  bool _issue_info;
 };

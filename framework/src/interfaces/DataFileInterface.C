@@ -11,10 +11,21 @@
 #include "MooseError.h"
 #include "MooseObject.h"
 #include "Action.h"
+#include "Material.h"
 
 template <class T>
 DataFileInterface<T>::DataFileInterface(const T & parent) : _parent(parent)
 {
+  _issue_info = true;
+
+  // we do not want to issue the information for the face and neighbor materials
+  // because the same information has been outputted by the element material
+  auto mat_ptr = dynamic_cast<const Material *>(&_parent);
+  if (mat_ptr)
+  {
+    if (mat_ptr->isBoundaryMaterial() && mat_ptr->blockRestricted())
+      _issue_info = false;
+  }
 }
 
 template <class T>
@@ -47,11 +58,14 @@ DataFileInterface<T>::getDataFileNameByName(const std::string & relative_path,
       const auto path = MooseUtils::pathjoin(data_dir, "data", relative_path);
       if (MooseUtils::checkFileReadable(path, false, false, false))
       {
-        if (param)
-          _parent.paramInfoRepeated(
-              *param, "Data file '", path, "' found in an installed app distribution.");
-        else
-          mooseInfoRepeated("Data file '", path, "' found in an installed app distribution.");
+        if (_issue_info)
+        {
+          if (param)
+            _parent.paramInfoRepeated(
+                *param, "Data file '", path, "' found in an installed app distribution.");
+          else
+            mooseInfoRepeated("Data file '", path, "' found in an installed app distribution.");
+        }
         return path;
       }
     }
@@ -63,10 +77,14 @@ DataFileInterface<T>::getDataFileNameByName(const std::string & relative_path,
     const auto path = MooseUtils::pathjoin(data_dir, relative_path);
     if (MooseUtils::checkFileReadable(path, false, false, false))
     {
-      if (param)
-        _parent.paramInfoRepeated(*param, "Data file '", path, "' found in a source repository.");
-      else
-        mooseInfoRepeated("Data file '", path, "' found in a source repository.");
+      if (_issue_info)
+      {
+        if (param)
+          _parent.paramInfoRepeated(
+              *param, "Data file '", path, "' found in a registered data directory.");
+        else
+          mooseInfoRepeated("Data file '", path, "' found in a registered data directory.");
+      }
       return path;
     }
   }
