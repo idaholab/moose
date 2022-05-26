@@ -202,9 +202,10 @@ NSFVAction::validParams()
       "thermal_conductivity_blocks",
       "The blocks where the user wants define different thermal conductivities.");
 
-  params.addParam<std::vector<MooseFunctorName>>("thermal_conductivity",
-                                                 std::vector<MooseFunctorName>({NS::k}),
-                                                 "The name of the fluid thermal conductivity");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "thermal_conductivity",
+      std::vector<MooseFunctorName>({NS::k}),
+      "The name of the fluid thermal conductivity for each block");
 
   params.addParam<MooseFunctorName>("specific_heat", NS::cp, "The name of the specific heat");
 
@@ -1461,7 +1462,7 @@ NSFVAction::addINSEnergyAmbientConvection()
     params.set<MooseFunctorName>("h_solid_fluid") = _ambient_convection_alpha[block_i];
     params.set<MooseFunctorName>(NS::T_solid) = _ambient_temperature[block_i];
 
-    _problem->addFVKernel(kernel_type, "ambient_convection_" + block_i, params);
+    _problem->addFVKernel(kernel_type, "ambient_convection_" + std::to_string(block_i), params);
   }
 }
 
@@ -2203,13 +2204,12 @@ NSFVAction::processThermalConductivity()
 
   for (unsigned int i = 0; i < _thermal_conductivity_name.size(); ++i)
   {
-    _console << _thermal_conductivity_name[i] << std::endl;
     // First, check if the name is just a number (only in case of isotropic conduction
     std::istringstream ss(_thermal_conductivity_name[i]);
     Real real_value;
     if (ss >> real_value && ss.eof())
       have_scalar = true;
-
+    // Now we determine what kind of functor we are dealing with
     else
     {
       if (_problem->hasFunctorWithType<ADReal>(_thermal_conductivity_name[i],

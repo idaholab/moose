@@ -782,6 +782,9 @@ public:
    */
   bool hasFunctor(const std::string & name, THREAD_ID tid) const;
 
+  /**
+   * checks whether we have a functor of type T corresponding to \p name on the thread id \p tid
+   */
   template <typename T>
   bool hasFunctorWithType(const std::string & name, THREAD_ID tid) const;
 
@@ -1009,9 +1012,7 @@ SubProblem::hasFunctorWithType(const std::string & name, const THREAD_ID tid) co
   if (it == functors.end())
     return false;
   else
-  {
     return dynamic_cast<Moose::Functor<T> *>(it->second.get());
-  }
 }
 
 template <typename T, typename PolymorphicLambda>
