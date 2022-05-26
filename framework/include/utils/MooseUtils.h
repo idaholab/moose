@@ -77,17 +77,6 @@ MetaPhysicL::DualNumber<T, D, asd> abs(MetaPhysicL::DualNumber<T, D, asd> && in)
 namespace MooseUtils
 {
 
-std::string pathjoin(const std::string & s);
-
-template <typename... Args>
-std::string
-pathjoin(const std::string & s, Args... args)
-{
-  if (s[s.size() - 1] == '/')
-    return s + pathjoin(args...);
-  return s + "/" + pathjoin(args...);
-}
-
 /// Returns the location of either a local repo run_tests script - or an
 /// installed test executor script if run_tests isn't found.
 std::string runTestsExecutable();
@@ -241,6 +230,59 @@ std::string stripExtension(const std::string & s);
  * If the supplied filename does not contain a path, it returns "." as the path
  */
 std::pair<std::string, std::string> splitFileName(std::string full_file);
+
+std::string pathjoin(const std::string & s);
+
+/**
+ * Join parts of a path together to form the full path
+ * Note: Paths such as '.' or '..' will be removed properly by this function.
+ *       When '..' causes the access to a folder outside of the top folder specified
+ *       by the first path, this function will error out.
+ */
+template <typename... Args>
+std::string
+pathjoin(const std::string & s, Args... args)
+{
+  std::string path = s;
+  if (path[path.size() - 1] == '/')
+    path = path.substr(0, path.size() - 1);
+
+  std::string rest = pathjoin(args...);
+  if (rest.size() > 0 && rest[0] == '/')
+    mooseError("Cannot join an absolute path");
+
+  while (true)
+    if (rest.size() >= 2 && rest.substr(0, 2) == "..")
+    {
+      path = splitFileName(path).first;
+      if (rest.size() > 2)
+      {
+        if (rest[2] != '/')
+          mooseError("'..' must be followed by a back slash sign");
+        rest = rest.substr(3);
+      }
+      else
+        rest = "";
+    }
+    else if (rest.size() >= 1 && rest[0] == '.')
+    {
+      if (rest.size() > 1)
+      {
+        if (rest[1] != '/')
+          mooseError("'.' must be followed by a back slash sign");
+        rest = rest.substr(2);
+      }
+      else
+        rest = "";
+    }
+    else
+      break;
+
+  if (rest.size() > 0)
+    path = path + "/" + rest;
+
+  return path;
+}
 
 /**
  * Returns the current working directory as a string. If there's a problem
