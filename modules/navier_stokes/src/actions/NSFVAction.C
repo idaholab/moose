@@ -2241,15 +2241,15 @@ NSFVAction::checkICParameterErrors()
 void
 NSFVAction::checkBoundaryParameterErrors()
 {
-  if (_outlet_boundaries.size() > 0 && (_outlet_boundaries.size() != _momentum_outlet_types.size()))
+  if (_outlet_boundaries.size() != _momentum_outlet_types.size())
     paramError("momentum_outlet_types",
                "Size is not the same as the number of outlet boundaries in 'outlet_boundaries'");
 
-  if (_wall_boundaries.size() > 0 && (_wall_boundaries.size() != _momentum_wall_types.size()))
+  if (_wall_boundaries.size() > 0 && _wall_boundaries.size() != _momentum_wall_types.size())
     paramError("momentum_wall_types",
                "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
 
-  if (_inlet_boundaries.size() > 0 && (_inlet_boundaries.size() != _momentum_inlet_types.size()))
+  if (_inlet_boundaries.size() != _momentum_inlet_types.size())
     paramError("momentum_inlet_types",
                "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
 
@@ -2279,7 +2279,7 @@ NSFVAction::checkBoundaryParameterErrors()
         _momentum_outlet_types[enum_ind] == "fixed-pressure-zero-gradient")
       num_pressure_outlets += 1;
 
-  if (_outlet_boundaries.size() > 0 && _pressure_function.size() != num_pressure_outlets)
+  if (_pressure_function.size() != num_pressure_outlets)
     paramError("pressure_function",
                "Size is not the same as the number of pressure outlet boundaries!");
 
@@ -2290,15 +2290,15 @@ NSFVAction::checkBoundaryParameterErrors()
 
   if (_has_energy_equation)
   {
-    if (_inlet_boundaries.size() > 0 && (_inlet_boundaries.size() != _energy_inlet_types.size()))
+    if (_inlet_boundaries.size() != _energy_inlet_types.size())
       paramError("energy_inlet_types",
                  "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
 
-    if (_inlet_boundaries.size() > 0 && _energy_inlet_types.size() != _energy_inlet_function.size())
+    if (_energy_inlet_types.size() != _energy_inlet_function.size())
       paramError("energy_inlet_function",
                  "Size is not the same as the number of boundaries in 'energy_inlet_types'");
 
-    if (_wall_boundaries.size() > 0 && (_wall_boundaries.size() != _energy_wall_types.size()))
+    if (_wall_boundaries.size() != _energy_wall_types.size())
       paramError("energy_wall_types",
                  "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
 
@@ -2317,13 +2317,11 @@ NSFVAction::checkBoundaryParameterErrors()
   }
   if (_passive_scalar_names.size())
   {
-    if (_inlet_boundaries.size() > 0 &&
-        (_inlet_boundaries.size() != _passive_scalar_inlet_types.size()))
+    if (_inlet_boundaries.size() != _passive_scalar_inlet_types.size())
       paramError("passive_scalar_inlet_types",
                  "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
 
-    if (_inlet_boundaries.size() > 0 &&
-        _passive_scalar_inlet_types.size() != _passive_scalar_inlet_function.size())
+    if (_passive_scalar_inlet_types.size() != _passive_scalar_inlet_function.size())
       paramError(
           "passive_scalar_inlet_function",
           "Size is not the same as the number of boundaries in 'passive_scalar_inlet_types'");
