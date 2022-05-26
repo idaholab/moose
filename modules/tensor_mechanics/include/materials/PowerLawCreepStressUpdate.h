@@ -86,17 +86,17 @@ protected:
   /// Exponential calculated from current time
   Real _exp_time;
 
-private:
-  template <typename ScalarType>
-  ScalarType computeResidualInternal(const GenericReal<is_ad> & effective_trial_stress,
-                                     const ScalarType & scalar);
-
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_qp;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_dt;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_t;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_three_shear_modulus;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_creep_strain;
   using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_creep_strain_old;
+
+private:
+  template <typename ScalarType>
+  ScalarType computeResidualInternal(const GenericReal<is_ad> & effective_trial_stress,
+                                     const ScalarType & scalar);
 };
 
 typedef PowerLawCreepStressUpdateTempl<false> PowerLawCreepStressUpdate;

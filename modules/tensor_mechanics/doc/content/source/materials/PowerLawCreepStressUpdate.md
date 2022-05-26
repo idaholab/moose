@@ -1,4 +1,4 @@
-# PowerLawCreepStressUpdate
+# Power Law Creep Stress Update
 
 !syntax description /Materials/PowerLawCreepStressUpdate
 

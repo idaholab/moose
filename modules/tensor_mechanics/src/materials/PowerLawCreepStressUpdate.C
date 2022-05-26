@@ -125,7 +125,8 @@ PowerLawCreepStressUpdateTempl<is_ad>::substeppingCapabilityEnabled()
 {
   return this->template getParam<bool>("use_substep");
 }
-
+template class PowerLawCreepStressUpdateTempl<false>;
+template class PowerLawCreepStressUpdateTempl<true>;
 template Real PowerLawCreepStressUpdateTempl<false>::computeResidualInternal<Real>(const Real &,
                                                                                    const Real &);
 template ADReal
