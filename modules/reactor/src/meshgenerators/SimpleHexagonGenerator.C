@@ -51,7 +51,8 @@ SimpleHexagonGenerator::SimpleHexagonGenerator(const InputParameters & parameter
   : PolygonMeshGeneratorBase(parameters),
     _element_type(getParam<MooseEnum>("element_type").template getEnum<ElemType>()),
     _hexagon_size(getParam<Real>("hexagon_size")),
-    _hexagon_size_style(getParam<MooseEnum>("hexagon_size_style").template getEnum<HexagonStyle>()),
+    _hexagon_size_style(
+        getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
     _block_id_valid(isParamValid("block_id")),
     _block_id(isParamValid("block_id") ? getParam<subdomain_id_type>("block_id") : 0),
     _block_name(isParamValid("block_name") ? getParam<SubdomainName>("block_name")
@@ -70,7 +71,7 @@ SimpleHexagonGenerator::SimpleHexagonGenerator(const InputParameters & parameter
     _num_sectors_per_side_meta(declareMeshProperty<std::vector<unsigned int>>(
         "num_sectors_per_side_meta", {1, 1, 1, 1, 1, 1}))
 {
-  _pitch = 2.0 * (_hexagon_size_style == HexagonStyle::apothem
+  _pitch = 2.0 * (_hexagon_size_style == PolygonSizeStyle::apothem
                       ? _hexagon_size
                       : _hexagon_size * std::cos(M_PI / (Real)HEXAGON_NUM_SIDES));
   _pitch_meta = _pitch;

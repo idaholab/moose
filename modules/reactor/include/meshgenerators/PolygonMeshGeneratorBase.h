@@ -33,6 +33,13 @@ public:
 
   virtual std::unique_ptr<MeshBase> generate() override;
 
+  /// An enum class for style of input polygon size
+  enum class PolygonSizeStyle
+  {
+    apothem,
+    radius
+  };
+
   enum MESH_TYPE
   {
     CORNER_MESH = 1,
@@ -86,7 +93,6 @@ public:
 protected:
   /**
    * Creates a mesh of a slice that corresponds to a single side of the polygon to be generated.
-   * @param mesh input mesh to build the slice mesh onto
    * @param ring_radii radii of the ring regions
    * @param ring_layers numbers of radial intervals of the ring regions
    * @param ring_radial_biases values used for radial meshing biasing in ring regions
@@ -101,8 +107,8 @@ protected:
    * factors of the inner boundary layer of the duct regions
    * @param duct_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
    * factors of the outer boundary layer of the duct regions
-   * @param has_rings whether the slice contains ring regions or not
-   * @param has_ducts whether the slice contains duct regions or not
+   * @param pitch twice the distance from the ring center vertex to the side defined by the other
+   * vertices
    * @param num_sectors_per_side number of azimuthal intervals
    * @param background_intervals number of radial intervals of the background region
    * @param background_radial_bias value used for radial meshing biasing in background region
@@ -123,7 +129,7 @@ protected:
    * @return a mesh of a polygon slice
    */
   std::unique_ptr<ReplicatedMesh>
-  buildSimpleSlice(const std::vector<Real> ring_radii,
+  buildSimpleSlice(std::vector<Real> ring_radii,
                    const std::vector<unsigned int> ring_layers,
                    const std::vector<Real> ring_radial_biases,
                    const multiBdryLayerParams & ring_inner_boundary_layer_params,
@@ -133,8 +139,6 @@ protected:
                    const std::vector<Real> duct_radial_biases,
                    const multiBdryLayerParams & duct_inner_boundary_layer_params,
                    const multiBdryLayerParams & duct_outer_boundary_layer_params,
-                   bool has_rings,
-                   bool has_ducts,
                    const Real pitch,
                    const unsigned int num_sectors_per_side,
                    const unsigned int background_intervals,
@@ -151,16 +155,148 @@ protected:
                    const boundary_id_type boundary_id_shift = 0);
 
   /**
+   * Creates a mesh of a general polygon slice with a triangular shape and circular regions on one
+   * of its vertex.
+   * @param ring_radii radii of the ring regions
+   * @param ring_layers numbers of radial intervals of the ring regions
+   * @param ring_radial_biases values used for radial meshing biasing in ring regions
+   * @param ring_inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the inner boundary layer of the ring regions
+   * @param ring_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the outer boundary layer of the ring regions
+   * @param ducts_center_dist distance parameters of the duct regions
+   * @param ducts_layers numbers of radial intervals of the duct regions
+   * @param duct_radial_biases values used for radial meshing biasing in duct regions
+   * @param duct_inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the inner boundary layer of the duct regions
+   * @param duct_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the outer boundary layer of the duct regions
+   * @param primary_side_length length of the first side (i.e., the side that is parallel to y-axis
+   * when rotation_angle is zero) that involves the ring center vertex
+   * @param secondary_side_length length of the second side (obtained by clockwise rotating the fist
+   * side by azimuthal_angle) that involves the ring center vertex
+   * @param num_sectors_per_side number of azimuthal intervals
+   * @param background_intervals number of radial intervals of the background region
+   * @param background_radial_bias value used for radial meshing biasing in background region
+   * @param background_inner_boundary_layer_params width, radial sectors, and growth factor of the
+   * inner boundary layer of the background region
+   * @param background_outer_boundary_layer_params width, radial sectors, and growth factor of the
+   * outer boundary layer of the background region
+   * @param node_id_background_meta pointer to the first node's id of the background region
+   * @param azimuthal_angle the angle defined by the primary and secondary sides
+   * @param azimuthal_tangent vector of tangent values of the azimuthal angles as reference for
+   * adaptive boundary matching
+   * @param side_index index of the polygon side
+   * @param quad_center_elements whether the central region contains quad elements or not
+   * @param center_quad_factor A fractional radius factor used to determine the radial positions of
+   * transition nodes in the center region meshed by quad elements (default is 1.0 - 1.0/div_num)
+   * @param rotation_angle azimuthal angle of the primary side
+   * @return a mesh of a general slice
+   */
+  std::unique_ptr<ReplicatedMesh>
+  buildGeneralSlice(std::vector<Real> ring_radii,
+                    const std::vector<unsigned int> ring_layers,
+                    const std::vector<Real> ring_radial_biases,
+                    const multiBdryLayerParams & ring_inner_boundary_layer_params,
+                    const multiBdryLayerParams & ring_outer_boundary_layer_params,
+                    std::vector<Real> ducts_center_dist,
+                    const std::vector<unsigned int> ducts_layers,
+                    const std::vector<Real> duct_radial_biases,
+                    const multiBdryLayerParams & duct_inner_boundary_layer_params,
+                    const multiBdryLayerParams & duct_outer_boundary_layer_params,
+                    const Real primary_side_length,
+                    const Real secondary_side_length,
+                    const unsigned int num_sectors_per_side,
+                    const unsigned int background_intervals,
+                    const Real background_radial_bias,
+                    const singleBdryLayerParams & background_inner_boundary_layer_params,
+                    const singleBdryLayerParams & background_outer_boundary_layer_params,
+                    dof_id_type & node_id_background_meta,
+                    const Real azimuthal_angle,
+                    const std::vector<Real> azimuthal_tangent,
+                    const unsigned int side_index,
+                    const bool quad_center_elements,
+                    const Real center_quad_factor,
+                    const Real rotation_angle);
+
+  /**
+   * Generates a mesh of a polygon slice, which is the foundation of both buildGeneralSlice and
+   * buildSimpleSlice.
+   * @param ring_radii radii of the ring regions
+   * @param ring_layers numbers of radial intervals of the ring regions
+   * @param ring_radial_biases values used for radial meshing biasing in ring regions
+   * @param ring_inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the inner boundary layer of the ring regions
+   * @param ring_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the outer boundary layer of the ring regions
+   * @param ducts_center_dist distance parameters of the duct regions
+   * @param ducts_layers numbers of radial intervals of the duct regions
+   * @param duct_radial_biases values used for radial meshing biasing in duct regions
+   * @param duct_inner_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the inner boundary layer of the duct regions
+   * @param duct_outer_boundary_layer_params widths, radial fractions, radial sectors, and growth
+   * factors of the outer boundary layer of the duct regions
+   * @param pitch twice of the length of the first side times cosine of the azimuthal angle
+   * @param num_sectors_per_side number of azimuthal intervals
+   * @param background_intervals number of radial intervals of the background region
+   * @param background_radial_bias value used for radial meshing biasing in background region
+   * @param background_inner_boundary_layer_params width, radial sectors, and growth factor of the
+   * inner boundary layer of the background region
+   * @param background_outer_boundary_layer_params width, radial sectors, and growth factor of the
+   * outer boundary layer of the background region
+   * @param node_id_background_meta pointer to the first node's id of the background region
+   * @param virtual_side_number 360.0 over the azimuthal angle of the slice (happens to be number of
+   * sides of the polygon if a regular polygon is to be generated)
+   * @param side_index index of the polygon side
+   * @param azimuthal_tangent vector of tangent values of the azimuthal angles as reference for
+   * adaptive boundary matching
+   * @param block_id_shift shift of the subdomain ids generated by this function
+   * @param quad_center_elements whether the central region contrains quad elements or not
+   * @param center_quad_factor A fractional radius factor used to determine the radial positions of
+   * transition nodes in the center region meshed by quad elements (default is 1.0 - 1.0/div_num)
+   * @param boundary_id_shift shift of the interface boundary ids
+   * @param pitch_scale_factor the ratio between the secondary side length to the primary side
+   * length.
+   * @return a mesh of a slice
+   */
+  std::unique_ptr<ReplicatedMesh>
+  buildSlice(std::vector<Real> ring_radii,
+             const std::vector<unsigned int> ring_layers,
+             const std::vector<Real> ring_radial_biases,
+             const multiBdryLayerParams & ring_inner_boundary_layer_params,
+             const multiBdryLayerParams & ring_outer_boundary_layer_params,
+             std::vector<Real> ducts_center_dist,
+             const std::vector<unsigned int> ducts_layers,
+             const std::vector<Real> duct_radial_biases,
+             const multiBdryLayerParams & duct_inner_boundary_layer_params,
+             const multiBdryLayerParams & duct_outer_boundary_layer_params,
+             const Real pitch,
+             const unsigned int num_sectors_per_side,
+             const unsigned int background_intervals,
+             const Real background_radial_bias,
+             const singleBdryLayerParams & background_inner_boundary_layer_params,
+             const singleBdryLayerParams & background_outer_boundary_layer_params,
+             dof_id_type & node_id_background_meta,
+             const Real virtual_side_number,
+             const unsigned int side_index,
+             const std::vector<Real> azimuthal_tangent = std::vector<Real>(),
+             const subdomain_id_type block_id_shift = 0,
+             const bool quad_center_elements = false,
+             const Real center_quad_factor = 0.0,
+             const boundary_id_type boundary_id_shift = 0,
+             const Real pitch_scale_factor = 1.0);
+
+  /**
    * Creates nodes of the very central mesh layer of the polygon for quad central elements.
    * @param mesh input mesh to add the nodes onto
-   * @param side_number number of sides of the polygon
+   * @param virtual_side_number virtual number of sides of the polygon (360/slice_azimuthal)
    * @param div_num division number of the central mesh layer
    * @param ring_radii_0 radius of the central mesh layer
    * @param nodes pointer to the mesh's nodes
    * @param nodes vector that contains the nodes with basic geometry information
    */
   void centerNodes(ReplicatedMesh & mesh,
-                   const unsigned int side_number,
+                   const Real virtual_side_number,
                    const unsigned int div_num,
                    const Real ring_radii_0,
                    std::vector<std::vector<Node *>> & nodes) const;

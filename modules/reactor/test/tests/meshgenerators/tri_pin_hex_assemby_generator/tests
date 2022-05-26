@@ -1,0 +1,208 @@
+[Tests]
+  design = 'meshgenerators/TriPinHexAssemblyGenerator.md'
+  issues = '#20949'
+  [tri_pin]
+    type = 'Exodiff'
+    input = 'tri_pin.i'
+    exodiff = 'tri_pin_out.e'
+    cli_args = 'Mesh/assm_up/ring_block_names="ring_11 ring_12 ring_13;ring_21 ring_22; "
+                Mesh/assm_up/background_block_names="bg_1 bg_2"
+                Mesh/assm_up/pin_id_name=pin_id
+                Mesh/assm_up/pin_id_values="0 1 2"'
+    requirement ='The system shall be able to generate a tri-pin hexagonal assembly mesh.'
+    recover = false
+  []
+  [tri_pin_apothem]
+    type = 'Exodiff'
+    input = 'tri_pin.i'
+    exodiff = 'tri_pin_out.e'
+    cli_args = 'Mesh/assm_up/ring_block_names="ring_11 ring_12 ring_13;ring_21 ring_22; "
+                Mesh/assm_up/hexagon_size=20
+                Mesh/assm_up/hexagon_size_style=apothem
+                Mesh/assm_up/pin_id_name=pin_id
+                Mesh/assm_up/pin_id_values="0 1 2"'
+    requirement ='The system shall be able to generate a tri-pin assembly mesh by specifying the apothem size.'
+    recover = false
+  []
+  [tri_pin_dup]
+    type = 'Exodiff'
+    input = 'tri_pin_dup.i'
+    exodiff = 'tri_pin_dup_in.e'
+    cli_args = '--mesh-only'
+    requirement ='The system shall generate a tri-pin assembly mesh with three identical pins.'
+    recover = false
+  []
+  [dummy_core]
+    type = 'Exodiff'
+    input = 'dummy_core.i'
+    exodiff = 'dummy_core_in.e'
+    cli_args = '--mesh-only'
+    requirement ='The system shall be able to generate a dummy core mesh containing a tri-pin assembly.'
+    recover = false
+  []
+  [err_ring_radii_size]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_radii="7 8;5 6"'
+    expect_err = 'This parameter must have a size of one or three if provided.'
+    requirement = 'The system shall throw an error if the number of rings radii specified does not match either one or the number of pins'
+  []
+  [err_ring_radii_oversize]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_radii="7 10;5 6; "'
+    expect_err = 'The radii of the rings cannot exceed the boundary of the diamond section.'
+    requirement = 'The system shall throw an error if the largest ring specified exceeds the assembly boundary.'
+  []
+  [err_ring_intervals_size]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_intervals="2 1;1 1"'
+    expect_err = 'This parameter must have a size of one or three.'
+    requirement = 'The system shall throw an error if the parameter specifying the radial intervals of ring regions does not have appropriate size.'
+  []
+  [err_ring_block_ids_size]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_block_ids="200 400 600;700 800"'
+    expect_err = 'This parameter must have a size of one or three.'
+    requirement = 'The system shall throw an error if the parameter specifying the block ids of ring regions does not have appropriate size.'
+  []
+  [err_ring_intervals_consistency]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_intervals="2 1;1 1;1"'
+    expect_err = 'The parameter must be consistent with ring_radii.'
+    requirement = 'The system shall throw an error if the parameter specifying the radial intervals of ring regions is inconsistent with the parameter specifying the sizes of ring regions.'
+  []
+  [err_ring_block_ids_consistency_1]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_block_ids="200 400 600;700 800;900"'
+    expect_err = 'The parameter must be consistent with ring_radii if provided.'
+    requirement = 'The system shall throw an error if the parameter specifying the block ids of ring regions is inconsistent with the parameter specifying the sizes of ring regions (case 1).'
+  []
+  [err_ring_block_ids_consistency_2]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_radii="7 8;5 6;3 4"
+               Mesh/assm_up/ring_intervals="2 1;1 1;1 1"
+               Mesh/assm_up/ring_block_ids="200 400 600;700 800;900"'
+    expect_err = 'The parameter must be consistent with ring_radii if provided.'
+    requirement = 'The system shall throw an error if the parameter specifying the block ids of ring regions is inconsistent with the parameter specifying the sizes of ring regions (case 2).'
+  []
+  [err_ring_block_names_consistency_1]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_block_names="ring_11 ring_12 ring_13;ring_21 ring_22;ring_31"'
+    expect_err = 'The parameter must be consistent with ring_radii if provided.'
+    requirement = 'The system shall throw an error if the parameter specifying the block names of ring regions is inconsistent with the parameter specifying the sizes of ring regions (case 1).'
+  []
+  [err_ring_block_names_consistency_2]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_radii="7 8;5 6;3 4"
+               Mesh/assm_up/ring_intervals="2 1;1 1;1 1"
+               Mesh/assm_up/ring_block_names="ring_11 ring_12 ring_13;ring_21 ring_22;ring_31"'
+    expect_err = 'The parameter must be consistent with ring_radii if provided.'
+    requirement = 'The system shall throw an error if the parameter specifying the block names of ring regions is inconsistent with the parameter specifying the sizes of ring regions (case 2).'
+  []
+  [err_ring_block_names_consistency_3]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_block_names="ring_11 ring_12 ring_13;ring_11 ring_12; "'
+    expect_err = 'The block name assignment must be compatible with the existing block ids.'
+    requirement = 'The system shall throw an error if the parameter specifying the block names of ring regions is inconsistent with the parameter specifying the block ids of ring regions.'
+  []
+  [err_background_block_ids_consistency_1]
+    type = RunException
+    input = 'tri_pin_dup.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/background_block_ids="40 50"'
+    expect_err = 'If provided, the size of this parameter must be one if all sections have rings.'
+    requirement = 'The system shall throw an error if the size of the parameter specifying the block ids of background region is not one when all the three sections have rings.'
+  []
+  [err_background_block_names_consistency_1]
+    type = RunException
+    input = 'tri_pin_dup.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/background_block_names="bg_1 bg_2"'
+    expect_err = 'If provided, the size of this parameter must be one if all sections have rings.'
+    requirement = 'The system shall throw an error if the size of the parameter specifying the block names of background region is not one when all the three sections have rings.'
+  []
+  [err_background_block_ids_consistency_2]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/background_block_ids=40'
+    expect_err = 'If provided, the size of this parameter must be two if ring-free section exists.'
+    requirement = 'The system shall throw an error if the size of the parameter specifying the block ids of background region is not two when ring-free section exists.'
+  []
+  [err_background_block_names_consistency_2]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/background_block_names=bg_1'
+    expect_err = 'If provided, the size of this parameter must be two if ring-free section exists.'
+    requirement = 'The system shall throw an error if the size of the parameter specifying the block names of background region is not two when ring-free section exists.'
+  []
+  [err_background_block_ids_consistency_3]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_radii=" "
+               Mesh/assm_up/ring_intervals=" "
+               Mesh/assm_up/ring_block_ids=" "
+               Mesh/assm_up/background_intervals=1
+               Mesh/assm_up/background_block_ids="30 40"'
+    expect_err = 'If provided, the size of this parameter must be one if no sections have rings and background_intervals is one.'
+    requirement = 'The system shall throw an error if the size of the parameter specifying the block ids of background region is not one when all the sections are ring-free and background_intervals is 1.'
+  []
+  [err_background_block_names_consistency_3]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_radii=" "
+               Mesh/assm_up/ring_intervals=" "
+               Mesh/assm_up/ring_block_ids=" "
+               Mesh/assm_up/background_intervals=1
+               Mesh/assm_up/background_block_names="bg_1 bg_2"'
+    expect_err = 'If provided, the size of this parameter must be one if no sections have rings and background_intervals is one.'
+    requirement = 'The system shall throw an error if the size of the parameter specifying the block names of background region is not one when all the sections are ring-free and background_intervals is 1.'
+  []
+  [err_no_pin_id_name]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/pin_id_values="0 1 2"'
+    expect_err = 'This parameter cannot be used when pin_id_name is not provided.'
+    requirement = 'The system shall throw an error if extra element integer values of the pins are provided without specifying extra element integer names.'
+  []
+  [err_wrong_pin_id_values]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/pin_id_name=pin_id
+               Mesh/assm_up/pin_id_values="0 1"'
+    expect_err = 'If pin_id_name is provided, this parameter must be provided with a length of three.'
+    requirement = 'The system shall throw an error if extra element integer values specified do not have the correct size.'
+  []
+  [err_over_offset]
+    type = RunException
+    input = 'tri_pin.i'
+    cli_args = '--mesh-only tri_pin_err.e
+               Mesh/assm_up/ring_offset=20'
+    expect_err = 'This parameter cannot translate the ring center out of the hexagon assembly region.'
+    requirement = 'The system shall throw an error if the offset of the ring region center moves the center of the ring out of the hexagon assembly region.'
+  []
+[]

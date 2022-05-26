@@ -119,7 +119,7 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     _has_assembly_duct(isParamValid("duct_sizes")),
     _duct_sizes(isParamValid("duct_sizes") ? getParam<std::vector<Real>>("duct_sizes")
                                            : std::vector<Real>()),
-    _duct_sizes_style(getParam<MooseEnum>("duct_sizes_style").template getEnum<DuctStyle>()),
+    _duct_sizes_style(getParam<MooseEnum>("duct_sizes_style").template getEnum<PolygonSizeStyle>()),
     _duct_intervals(isParamValid("duct_intervals")
                         ? getParam<std::vector<unsigned int>>("duct_intervals")
                         : std::vector<unsigned int>()),
@@ -139,7 +139,8 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     _external_boundary_name(isParamValid("external_boundary_name")
                                 ? getParam<std::string>("external_boundary_name")
                                 : std::string()),
-    _hexagon_size_style(getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonStyle>()),
+    _hexagon_size_style(
+        getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
     _pattern_pitch_meta(declareMeshProperty("pattern_pitch_meta", 0.0)),
     _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
     _control_drum_positions(
@@ -297,7 +298,7 @@ PatternedHexMeshGenerator::generate()
         paramError("hexagon_size",
                    "This parameter must be provided when pattern_boundary is hexagon.");
       else
-        _pattern_pitch = 2.0 * (_hexagon_size_style == PolygonStyle::apothem
+        _pattern_pitch = 2.0 * (_hexagon_size_style == PolygonSizeStyle::apothem
                                     ? getParam<Real>("hexagon_size")
                                     : getParam<Real>("hexagon_size") * std::cos(M_PI / 6.0));
     }
@@ -355,7 +356,7 @@ PatternedHexMeshGenerator::generate()
     if (_has_assembly_duct)
       for (unsigned int i = 0; i < _duct_sizes.size(); i++)
       {
-        if (_duct_sizes_style == DuctStyle::radius)
+        if (_duct_sizes_style == PolygonSizeStyle::radius)
           _duct_sizes[i] /= std::cos(M_PI / 6.0);
         extra_dist.push_back(0.5 *
                              (_duct_sizes[i] * 2.0 - pitch_array.front() / std::sqrt(3.0) *

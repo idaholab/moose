@@ -247,7 +247,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _ring_block_names(isParamValid("ring_block_names")
                           ? getParam<std::vector<SubdomainName>>("ring_block_names")
                           : std::vector<SubdomainName>()),
-    _duct_sizes_style(getParam<MooseEnum>("duct_sizes_style").template getEnum<DuctStyle>()),
+    _duct_sizes_style(getParam<MooseEnum>("duct_sizes_style").template getEnum<PolygonSizeStyle>()),
     _duct_sizes(isParamValid("duct_sizes") ? getParam<std::vector<Real>>("duct_sizes")
                                            : std::vector<Real>()),
     _duct_intervals(isParamValid("duct_intervals")
@@ -288,8 +288,8 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _has_ducts(isParamValid("duct_sizes")),
     _polygon_size_style(
         isParamValid("polygon_size_style")
-            ? getParam<MooseEnum>("polygon_size_style").template getEnum<PolygonStyle>()
-            : getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonStyle>()),
+            ? getParam<MooseEnum>("polygon_size_style").template getEnum<PolygonSizeStyle>()
+            : getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
     _polygon_size(isParamValid("polygon_size") ? getParam<Real>("polygon_size")
                                                : getParam<Real>("hexagon_size")),
     _num_sectors_per_side(getParam<std::vector<unsigned int>>("num_sectors_per_side")),
@@ -350,7 +350,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
   // classes will trigger this error.
   if (!_sides_to_adapt.empty() && _num_sides != HEXAGON_NUM_SIDES)
     paramError("sides_to_adapt", "If provided, the generated mesh must be a hexagon.");
-  _pitch = 2.0 * (_polygon_size_style == PolygonStyle::apothem
+  _pitch = 2.0 * (_polygon_size_style == PolygonSizeStyle::apothem
                       ? _polygon_size
                       : _polygon_size * std::cos(M_PI / Real(_num_sides)));
   _pitch_meta = _pitch;
@@ -474,7 +474,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
                "duct_sizes.");
   if (_has_ducts)
   {
-    if (_duct_sizes_style == DuctStyle::apothem)
+    if (_duct_sizes_style == PolygonSizeStyle::apothem)
       for (unsigned int i = 0; i < _duct_sizes.size(); i++)
         _duct_sizes[i] /= std::cos(M_PI / Real(_num_sides));
     for (unsigned int i = 1; i < _duct_sizes.size(); i++)
@@ -489,7 +489,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
                  "This parameter must ensure that ducts are smaller than the polygon size.");
     if (*std::min_element(_duct_intervals.begin(), _duct_intervals.end()) <= 0)
       paramError("duct_intervals", "Elements of this parameter must be positive.");
-    if (_duct_sizes_style == DuctStyle::apothem)
+    if (_duct_sizes_style == PolygonSizeStyle::apothem)
       for (unsigned int i = 0; i < _duct_sizes.size(); i++)
       {
         _duct_inner_boundary_layer_params.widths[i] /= std::cos(M_PI / Real(_num_sides));
@@ -546,14 +546,15 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
         (_has_rings ? _ring_radii.back() : 0.0);
     if (_background_inner_boundary_layer_params.width +
             _background_outer_boundary_layer_params.width *
-                (_duct_sizes_style == DuctStyle::apothem ? 1.0
-                                                         : std::cos(M_PI / Real(_num_sides))) >=
+                (_duct_sizes_style == PolygonSizeStyle::apothem
+                     ? 1.0
+                     : std::cos(M_PI / Real(_num_sides))) >=
         min_background_thickness)
       paramError("background_inner_boundary_layer_width",
                  "The summation of background_inner_boundary_layer_width and "
                  "background_outer_boundary_layer_width must be less than the minimum thickness of "
                  "the background region.");
-    if (_duct_sizes_style == DuctStyle::apothem)
+    if (_duct_sizes_style == PolygonSizeStyle::apothem)
       _background_outer_boundary_layer_params.width /= std::cos(M_PI / Real(_num_sides));
   }
   if (!_quad_center_elements && _center_quad_factor)
@@ -643,8 +644,6 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                 _duct_radial_biases,
                                 _duct_inner_boundary_layer_params,
                                 _duct_outer_boundary_layer_params,
-                                _has_rings,
-                                _has_ducts,
                                 _pitch,
                                 _num_sectors_per_side[0],
                                 _background_intervals,
@@ -672,8 +671,6 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                      _duct_radial_biases,
                                      _duct_inner_boundary_layer_params,
                                      _duct_outer_boundary_layer_params,
-                                     _has_rings,
-                                     _has_ducts,
                                      _pitch,
                                      _num_sectors_per_side[mesh_index],
                                      _background_intervals,
