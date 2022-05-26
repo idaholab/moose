@@ -110,16 +110,22 @@ Registry::addKnownLabel(const std::string & label)
 }
 
 void
-Registry::addDataFilePath(const std::string & fullpath)
+Registry::addDataFilePathFromApp(const std::string & fullpath)
 {
-  auto & dfp = getRegistry()._data_file_paths;
-
   // split the *App.C filename from its containing directory
   const auto path = MooseUtils::splitFileName(fullpath).first;
 
   // This works for both build/unity_src/ and src/base/ as the *App.C file location,
   // in case __FILE__ doesn't get overriden in unity build
   const auto data_dir = MooseUtils::pathjoin(path, "../../data");
+
+  addDataFilePath(data_dir);
+}
+
+void
+Registry::addDataFilePath(const std::string & data_dir)
+{
+  auto & dfp = getRegistry()._data_file_paths;
 
   // if the data directory exists and hasn't been added before, add it
   if (MooseUtils::pathIsDirectory(data_dir) &&

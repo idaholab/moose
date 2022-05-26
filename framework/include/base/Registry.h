@@ -97,7 +97,7 @@
 #define registerADMooseObjectRenamed(app, orig_class, time, new_class)                             \
   registerMooseObjectRenamed(app, orig_class, time, new_class)
 
-#define registerDataFilePath() Registry::addDataFilePath(__FILE__)
+#define registerDataFilePath() Registry::addDataFilePathFromApp(__FILE__)
 
 struct RegistryEntry;
 class Factory;
@@ -191,6 +191,9 @@ public:
 
   /// addKnownLabel whitelists a label as valid for purposes of the checkLabels function.
   static char addKnownLabel(const std::string & label);
+
+  /// register search paths for built-in data files based on the app file name
+  static void addDataFilePathFromApp(const std::string & path);
 
   /// register search paths for built-in data files
   static void addDataFilePath(const std::string & path);
