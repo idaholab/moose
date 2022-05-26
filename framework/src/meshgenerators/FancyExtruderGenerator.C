@@ -315,6 +315,7 @@ FancyExtruderGenerator::generate()
       for (unsigned int k = 0; k != num_layers; ++k)
       {
         Elem * new_elem;
+        bool isFlipped(false);
         switch (etype)
         {
           case EDGE2:
@@ -388,6 +389,14 @@ FancyExtruderGenerator::generate()
             if (elem->neighbor_ptr(2) == remote_elem)
               new_elem->set_neighbor(3, const_cast<RemoteElem *>(remote_elem));
 
+            if (new_elem->volume() < 0.0)
+            {
+              swapNodesInElem(new_elem, 0, 3);
+              swapNodesInElem(new_elem, 1, 4);
+              swapNodesInElem(new_elem, 2, 5);
+              isFlipped = true;
+            }
+
             break;
           }
           case TRI6:
@@ -437,6 +446,17 @@ FancyExtruderGenerator::generate()
             if (elem->neighbor_ptr(2) == remote_elem)
               new_elem->set_neighbor(3, const_cast<RemoteElem *>(remote_elem));
 
+            if (new_elem->volume() < 0.0)
+            {
+              swapNodesInElem(new_elem, 0, 3);
+              swapNodesInElem(new_elem, 1, 4);
+              swapNodesInElem(new_elem, 2, 5);
+              swapNodesInElem(new_elem, 6, 12);
+              swapNodesInElem(new_elem, 7, 13);
+              swapNodesInElem(new_elem, 8, 14);
+              isFlipped = true;
+            }
+
             break;
           }
           case QUAD4:
@@ -467,6 +487,15 @@ FancyExtruderGenerator::generate()
               new_elem->set_neighbor(3, const_cast<RemoteElem *>(remote_elem));
             if (elem->neighbor_ptr(3) == remote_elem)
               new_elem->set_neighbor(4, const_cast<RemoteElem *>(remote_elem));
+
+            if (new_elem->volume() < 0.0)
+            {
+              swapNodesInElem(new_elem, 0, 4);
+              swapNodesInElem(new_elem, 1, 5);
+              swapNodesInElem(new_elem, 2, 6);
+              swapNodesInElem(new_elem, 3, 7);
+              isFlipped = true;
+            }
 
             break;
           }
@@ -536,6 +565,20 @@ FancyExtruderGenerator::generate()
               new_elem->set_neighbor(3, const_cast<RemoteElem *>(remote_elem));
             if (elem->neighbor_ptr(3) == remote_elem)
               new_elem->set_neighbor(4, const_cast<RemoteElem *>(remote_elem));
+
+            if (new_elem->volume() < 0.0)
+            {
+              swapNodesInElem(new_elem, 0, 4);
+              swapNodesInElem(new_elem, 1, 5);
+              swapNodesInElem(new_elem, 2, 6);
+              swapNodesInElem(new_elem, 3, 7);
+              swapNodesInElem(new_elem, 8, 16);
+              swapNodesInElem(new_elem, 9, 17);
+              swapNodesInElem(new_elem, 10, 18);
+              swapNodesInElem(new_elem, 11, 19);
+              swapNodesInElem(new_elem, 20, 25);
+              isFlipped = true;
+            }
 
             break;
           }
@@ -624,10 +667,12 @@ FancyExtruderGenerator::generate()
         // Give new boundary ids to bottom and top
         if (current_layer == 0)
         {
+          const unsigned short top_id =
+              new_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
           if (_has_bottom_boundary)
-            boundary_info.add_side(new_elem, 0, _bottom_boundary);
+            boundary_info.add_side(new_elem, isFlipped ? top_id : 0, _bottom_boundary);
           else
-            boundary_info.add_side(new_elem, 0, next_side_id);
+            boundary_info.add_side(new_elem, isFlipped ? top_id : 0, next_side_id);
         }
 
         if (current_layer == total_num_layers - 1)
@@ -639,9 +684,10 @@ FancyExtruderGenerator::generate()
               new_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
 
           if (_has_top_boundary)
-            boundary_info.add_side(new_elem, top_id, _top_boundary);
+            boundary_info.add_side(new_elem, isFlipped ? 0 : top_id, _top_boundary);
           else
-            boundary_info.add_side(new_elem, top_id, cast_int<boundary_id_type>(next_side_id + 1));
+            boundary_info.add_side(
+                new_elem, isFlipped ? 0 : top_id, cast_int<boundary_id_type>(next_side_id + 1));
         }
 
         current_layer++;
@@ -662,4 +708,12 @@ FancyExtruderGenerator::generate()
   mesh->set_isnt_prepared();
 
   return mesh;
+}
+
+void
+FancyExtruderGenerator::swapNodesInElem(Elem * elem, const unsigned int nd1, const unsigned int nd2)
+{
+  Node * n_temp = elem->node_ptr(nd1);
+  elem->set_node(nd1) = elem->node_ptr(nd2);
+  elem->set_node(nd2) = n_temp;
 }
