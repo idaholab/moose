@@ -9,6 +9,16 @@
     valgrind = HEAVY
     issues = '#16585'
   []
+  [multiapp_action]
+    type = Exodiff
+    input = 'fluid-flow.i'
+    exodiff = 'fluid-flow_out.e fluid-flow_out_scalar0.e'
+    cli_args = 'MultiApps/scalar/input_files=scalar-transport_action.i'
+    requirement = 'The system shall be able to transport passive scalar quantities in an application different from the fluid flow, using the NSFV simplified action syntax.'
+    ad_indexing_type = 'global'
+    valgrind = HEAVY
+    issues = '#16585'
+  []
 
   # Exception checking
   [average_yet_a_provided]
