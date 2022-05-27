@@ -55,6 +55,16 @@ public:
   template <typename T>
   T sample(const T & xcoord, const T & ycoord) const;
 
+  Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const;
+
+  /**
+   * Samples value and first derivatives at point (x1, x2)
+   * Use this function for speed when computing both value and derivatives,
+   * as it minimizes the amount of time spent locating the point in the
+   * tabulated data
+   */
+  void sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const;
+
   void
   getNeighborIndices(const std::vector<Real> & inArr, Real x, int & lowerX, int & upperX) const;
 

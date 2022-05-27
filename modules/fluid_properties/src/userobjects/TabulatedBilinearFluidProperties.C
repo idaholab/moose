@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TabulatedFluidProperties.h"
-#include "BicubicInterpolation.h"
+#include "TabulatedBilinearFluidProperties.h"
+#include "BilinearInterpolation.h"
 #include "MooseUtils.h"
 #include "Conversion.h"
 #include "KDTree.h"
@@ -17,10 +17,10 @@
 #include <fstream>
 #include <ctime>
 
-registerMooseObject("FluidPropertiesApp", TabulatedFluidProperties);
+registerMooseObject("FluidPropertiesApp", TabulatedBilinearFluidProperties);
 
 InputParameters
-TabulatedFluidProperties::validParams()
+TabulatedBilinearFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addParam<FileName>(
@@ -76,11 +76,12 @@ TabulatedFluidProperties::validParams()
       true,
       "If true exceeding pressure or temperature tabulation values leads to an error.");
   params.addClassDescription(
-      "Fluid properties using bicubic interpolation on tabulated values provided");
+      "Fluid properties using bilinear interpolation on tabulated values provided");
+
   return params;
 }
 
-TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & parameters)
+TabulatedBilinearFluidProperties::TabulatedBilinearFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters),
     _file_name(getParam<FileName>("fluid_property_file")),
     _temperature_min(getParam<Real>("temperature_min")),
@@ -115,21 +116,22 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _num_e(getParam<unsigned int>("num_e")),
     _inversion_interpolation_order(getParam<unsigned int>("pt_ve_inversion_interpolation_order")),
     _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds"))
+
 {
   // Sanity check on minimum and maximum temperatures and pressures
   if (_temperature_max <= _temperature_min)
-    mooseError("temperature_max must be greater than temperature_min");
+    mooseError(name(), ": temperature_max must be greater than temperature_min");
   if (_pressure_max <= _pressure_min)
-    mooseError("pressure_max must be greater than pressure_min");
+    mooseError(name(), ": pressure_max must be greater than pressure_min");
 
   // Lines starting with # in the data file are treated as comments
   _csv_reader.setComment("#");
 }
 
-TabulatedFluidProperties::~TabulatedFluidProperties() {}
+TabulatedBilinearFluidProperties::~TabulatedBilinearFluidProperties() {}
 
 void
-TabulatedFluidProperties::initialSetup()
+TabulatedBilinearFluidProperties::initialSetup()
 {
   // Check to see if _file_name supplied exists. If it does, that data
   // will be used. If it does not exist, data will be generated and then
@@ -147,7 +149,8 @@ TabulatedFluidProperties::initialSetup()
     {
       if (std::find(column_names.begin(), column_names.end(), _required_columns[i]) ==
           column_names.end())
-        mooseError("no ",
+        mooseError(name(),
+                   ": no ",
                    _required_columns[i],
                    " data read in ",
                    _file_name,
@@ -166,10 +169,12 @@ TabulatedFluidProperties::initialSetup()
       {
         if (std::find(_property_columns.begin(), _property_columns.end(), column_names[i]) ==
             _property_columns.end())
-          mooseError(column_names[i],
+          mooseError(name(),
+                     ": ",
+                     column_names[i],
                      " read in ",
                      _file_name,
-                     " is not one of the properties that TabulatedFluidProperties understands");
+                     " is not one of the properties that TabulatedBilinearFluidProperties understands");
         else
           _interpolated_properties.push_back(column_names[i]);
       }
@@ -191,7 +196,8 @@ TabulatedFluidProperties::initialSetup()
     // Pressure and temperature data contains duplicates due to the csv format.
     // First, check that pressure is monotonically increasing
     if (!std::is_sorted(_pressure.begin(), _pressure.end()))
-      mooseError("the column data for pressure is not monotonically increasing in ", _file_name);
+      mooseError(
+          name(), ": the column data for pressure is not monotonically increasing in ", _file_name);
 
     // The first pressure value is repeated for each temperature value. Counting the
     // number of repeats provides the number of temperature values
@@ -204,7 +210,8 @@ TabulatedFluidProperties::initialSetup()
 
     // Check that the number of rows in the csv file is equal to _num_p * _num_T
     if (column_data[0].size() != _num_p * static_cast<unsigned int>(num_T))
-      mooseError(": the number of rows in ",
+      mooseError(name(),
+                 ": the number of rows in ",
                  _file_name,
                  " is not equal to the number of unique pressure values ",
                  _num_p,
@@ -215,14 +222,17 @@ TabulatedFluidProperties::initialSetup()
     // as well as duplicated for each pressure value
     std::vector<Real> temp0(_temperature.begin(), _temperature.begin() + num_T);
     if (!std::is_sorted(temp0.begin(), temp0.end()))
-      mooseError("the column data for temperature is not monotonically increasing in ", _file_name);
+      mooseError(name(),
+                 ": the column data for temperature is not monotonically increasing in ",
+                 _file_name);
 
     auto it_temp = _temperature.begin() + num_T;
     for (std::size_t i = 1; i < _pressure.size(); ++i)
     {
       std::vector<Real> temp(it_temp, it_temp + num_T);
       if (temp != temp0)
-        mooseError("temperature values for pressure ",
+        mooseError(name(),
+                   ": temperature values for pressure ",
                    _pressure[i],
                    " are not identical to values for ",
                    _pressure[0]);
@@ -264,7 +274,7 @@ TabulatedFluidProperties::initialSetup()
   }
 
   // At this point, all properties read or generated are able to be used by
-  // TabulatedFluidProperties. Now set flags and indexes for each property in
+  // TabulatedBilinearFluidProperties. Now set flags and indexes for each property in
   //_interpolated_properties to use in property calculations
   for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
   {
@@ -310,15 +320,15 @@ TabulatedFluidProperties::initialSetup()
     }
   }
 
-  // Construct bicubic interpolants from tabulated data
-  std::vector<std::vector<Real>> data_matrix;
+  // Construct bilinear interpolants from tabulated data
+  ColumnMajorMatrix data_matrix(_num_p, _num_T);
   _property_ipol.resize(_properties.size());
 
   for (std::size_t i = 0; i < _property_ipol.size(); ++i)
   {
     reshapeData2D(_num_p, _num_T, _properties[i], data_matrix);
     _property_ipol[i] =
-        std::make_unique<BicubicInterpolation>(_pressure, _temperature, data_matrix);
+        std::make_unique<BilinearInterpolation>(_pressure, _temperature, data_matrix);
   }
 
   // do we need to construct the reverse lookup p(v,e), T(v,e)?
@@ -392,16 +402,19 @@ TabulatedFluidProperties::initialSetup()
       _enthalpy[j] = _h_min + j * dh;
 
     // match p, T data to these grid points
-    std::vector<std::vector<Real>> p_from_v_e(_num_v);
-    std::vector<std::vector<Real>> T_from_v_e(_num_v);
-    std::vector<std::vector<Real>> p_from_v_h(_num_v);
-    std::vector<std::vector<Real>> T_from_v_h(_num_v);
+    ColumnMajorMatrix p_from_v_e(_num_v,_num_e);
+    ColumnMajorMatrix T_from_v_e(_num_v,_num_e);
+    ColumnMajorMatrix p_from_v_h(_num_v,_num_e);
+    ColumnMajorMatrix T_from_v_h(_num_v,_num_e);
     for (unsigned int iv = 0; iv < _num_v; ++iv)
     {
-      p_from_v_e[iv].resize(_num_e);
-      T_from_v_e[iv].resize(_num_e);
-      p_from_v_h[iv].resize(_num_e);
-      T_from_v_h[iv].resize(_num_e);
+      //Commented out statements below not needed
+      //when using ColumnMajorMatrix
+
+      // p_from_v_e(iv).resize(_num_e);
+      // T_from_v_e(iv).resize(_num_e);
+      // p_from_v_h(iv).resize(_num_e);
+      // T_from_v_h(iv).resize(_num_e);
       for (unsigned int ie = 0; ie < _num_e; ++ie)
       {
         // do v & e mapping first
@@ -422,8 +435,8 @@ TabulatedFluidProperties::initialSetup()
             nearest_temperatures[j] = pT_points[return_index[j]](1);
           }
 
-          p_from_v_e[iv][ie] = inverseDistance(nearest_pressures, return_dist_sqr);
-          T_from_v_e[iv][ie] = inverseDistance(nearest_temperatures, return_dist_sqr);
+          p_from_v_e(iv , ie) = inverseDistance(nearest_pressures, return_dist_sqr);
+          T_from_v_e(iv , ie) = inverseDistance(nearest_temperatures, return_dist_sqr);
         }
 
         // now do v & h mapping
@@ -443,26 +456,26 @@ TabulatedFluidProperties::initialSetup()
             nearest_temperatures[j] = pT_points[return_index[j]](1);
           }
 
-          p_from_v_h[iv][ie] = inverseDistance(nearest_pressures, return_dist_sqr);
-          T_from_v_h[iv][ie] = inverseDistance(nearest_temperatures, return_dist_sqr);
+          p_from_v_h(iv , ie) = inverseDistance(nearest_pressures, return_dist_sqr);
+          T_from_v_h(iv , ie) = inverseDistance(nearest_temperatures, return_dist_sqr);
         }
       }
     }
 
-    // the bicubic interpolation object are init'ed now
+    // the bilinear interpolation object are init'ed now
     _p_from_v_e_ipol =
-        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, p_from_v_e);
+        libmesh_make_unique<BilinearInterpolation>(_specific_volume, _internal_energy, p_from_v_e);
     _T_from_v_e_ipol =
-        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, T_from_v_e);
+        libmesh_make_unique<BilinearInterpolation>(_specific_volume, _internal_energy, T_from_v_e);
     _p_from_v_h_ipol =
-        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _enthalpy, p_from_v_h);
+        libmesh_make_unique<BilinearInterpolation>(_specific_volume, _enthalpy, p_from_v_h);
     _T_from_v_h_ipol =
-        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _enthalpy, T_from_v_h);
+        libmesh_make_unique<BilinearInterpolation>(_specific_volume, _enthalpy, T_from_v_h);
   }
 }
 
 Real
-TabulatedFluidProperties::inverseDistance(const std::vector<Real> & value,
+TabulatedBilinearFluidProperties::inverseDistance(const std::vector<Real> & value,
                                           const std::vector<Real> & distance) const
 {
   Real ret = 0.0;
@@ -478,19 +491,19 @@ TabulatedFluidProperties::inverseDistance(const std::vector<Real> & value,
 }
 
 std::string
-TabulatedFluidProperties::fluidName() const
+TabulatedBilinearFluidProperties::fluidName() const
 {
   return _fp.fluidName();
 }
 
 Real
-TabulatedFluidProperties::molarMass() const
+TabulatedBilinearFluidProperties::molarMass() const
 {
   return _fp.molarMass();
 }
 
 Real
-TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
+TabulatedBilinearFluidProperties::v_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_density)
   {
@@ -502,7 +515,7 @@ TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
 }
 
 void
-TabulatedFluidProperties::v_from_p_T(
+TabulatedBilinearFluidProperties::v_from_p_T(
     Real pressure, Real temperature, Real & v, Real & dv_dp, Real & dv_dT) const
 {
   Real rho, drho_dp, drho_dT;
@@ -522,7 +535,7 @@ TabulatedFluidProperties::v_from_p_T(
 }
 
 Real
-TabulatedFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
+TabulatedBilinearFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_density)
   {
@@ -534,7 +547,7 @@ TabulatedFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 }
 
 void
-TabulatedFluidProperties::rho_from_p_T(
+TabulatedBilinearFluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   if (_interpolate_density)
@@ -548,7 +561,7 @@ TabulatedFluidProperties::rho_from_p_T(
 }
 
 Real
-TabulatedFluidProperties::e_from_p_T(Real pressure, Real temperature) const
+TabulatedBilinearFluidProperties::e_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_internal_energy)
   {
@@ -560,7 +573,7 @@ TabulatedFluidProperties::e_from_p_T(Real pressure, Real temperature) const
 }
 
 void
-TabulatedFluidProperties::e_from_p_T(
+TabulatedBilinearFluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
   if (_interpolate_internal_energy)
@@ -574,7 +587,7 @@ TabulatedFluidProperties::e_from_p_T(
 }
 
 Real
-TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
+TabulatedBilinearFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_enthalpy)
   {
@@ -586,7 +599,7 @@ TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 }
 
 void
-TabulatedFluidProperties::h_from_p_T(
+TabulatedBilinearFluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   if (_interpolate_enthalpy)
@@ -600,7 +613,7 @@ TabulatedFluidProperties::h_from_p_T(
 }
 
 Real
-TabulatedFluidProperties::mu_from_p_T(Real pressure, Real temperature) const
+TabulatedBilinearFluidProperties::mu_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_viscosity)
   {
@@ -612,7 +625,7 @@ TabulatedFluidProperties::mu_from_p_T(Real pressure, Real temperature) const
 }
 
 void
-TabulatedFluidProperties::mu_from_p_T(
+TabulatedBilinearFluidProperties::mu_from_p_T(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
   if (_interpolate_viscosity)
@@ -626,20 +639,20 @@ TabulatedFluidProperties::mu_from_p_T(
 }
 
 Real
-TabulatedFluidProperties::c_from_p_T(Real pressure, Real temperature) const
+TabulatedBilinearFluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
   return _fp.c_from_p_T(pressure, temperature);
 }
 
 void
-TabulatedFluidProperties::c_from_p_T(
+TabulatedBilinearFluidProperties::c_from_p_T(
     Real pressure, Real temperature, Real & c, Real & dc_dp, Real & dc_dT) const
 {
   _fp.c_from_p_T(pressure, temperature, c, dc_dp, dc_dT);
 }
 
 Real
-TabulatedFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
+TabulatedBilinearFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_cp)
   {
@@ -651,7 +664,7 @@ TabulatedFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
 }
 
 void
-TabulatedFluidProperties::cp_from_p_T(
+TabulatedBilinearFluidProperties::cp_from_p_T(
     Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
 {
   if (_interpolate_cp)
@@ -664,7 +677,7 @@ TabulatedFluidProperties::cp_from_p_T(
 }
 
 Real
-TabulatedFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
+TabulatedBilinearFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_cv)
   {
@@ -676,7 +689,7 @@ TabulatedFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 }
 
 void
-TabulatedFluidProperties::cv_from_p_T(
+TabulatedBilinearFluidProperties::cv_from_p_T(
     Real pressure, Real temperature, Real & cv, Real & dcv_dp, Real & dcv_dT) const
 {
   if (_interpolate_cv)
@@ -689,7 +702,7 @@ TabulatedFluidProperties::cv_from_p_T(
 }
 
 Real
-TabulatedFluidProperties::k_from_p_T(Real pressure, Real temperature) const
+TabulatedBilinearFluidProperties::k_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_k)
   {
@@ -701,7 +714,7 @@ TabulatedFluidProperties::k_from_p_T(Real pressure, Real temperature) const
 }
 
 void
-TabulatedFluidProperties::k_from_p_T(
+TabulatedBilinearFluidProperties::k_from_p_T(
     Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
   if (_interpolate_k)
@@ -715,7 +728,7 @@ TabulatedFluidProperties::k_from_p_T(
 }
 
 Real
-TabulatedFluidProperties::s_from_p_T(Real pressure, Real temperature) const
+TabulatedBilinearFluidProperties::s_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_entropy)
   {
@@ -727,13 +740,13 @@ TabulatedFluidProperties::s_from_p_T(Real pressure, Real temperature) const
 }
 
 void
-TabulatedFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+TabulatedBilinearFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
 {
   SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
 }
 
 Real
-TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
+TabulatedBilinearFluidProperties::g_from_v_e(Real v, Real e) const
 {
   const Real p = p_from_v_e(v, e);
   const Real T = T_from_v_e(v, e);
@@ -744,7 +757,7 @@ TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
 }
 
 Real
-TabulatedFluidProperties::e_from_v_h(Real v, Real h) const
+TabulatedBilinearFluidProperties::e_from_v_h(Real v, Real h) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling e_from_v_h.");
@@ -754,7 +767,7 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h) const
 }
 
 void
-TabulatedFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const
+TabulatedBilinearFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling e_from_v_h.");
@@ -770,25 +783,25 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Rea
 }
 
 std::vector<Real>
-TabulatedFluidProperties::henryCoefficients() const
+TabulatedBilinearFluidProperties::henryCoefficients() const
 {
   return _fp.henryCoefficients();
 }
 
 Real
-TabulatedFluidProperties::vaporPressure(Real temperature) const
+TabulatedBilinearFluidProperties::vaporPressure(Real temperature) const
 {
   return _fp.vaporPressure(temperature);
 }
 
 void
-TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const
+TabulatedBilinearFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const
 {
   _fp.vaporPressure(temperature, psat, dpsat_dT);
 }
 
 Real
-TabulatedFluidProperties::p_from_v_e(Real v, Real e) const
+TabulatedBilinearFluidProperties::p_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling p_from_v_e.");
@@ -796,7 +809,7 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e) const
 }
 
 void
-TabulatedFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const
+TabulatedBilinearFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling p_from_v_e.");
@@ -804,7 +817,7 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Rea
 }
 
 DualReal
-TabulatedFluidProperties::p_from_v_e(const DualReal & v, const DualReal & e) const
+TabulatedBilinearFluidProperties::p_from_v_e(const DualReal & v, const DualReal & e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling p_from_v_e.");
@@ -821,7 +834,7 @@ TabulatedFluidProperties::p_from_v_e(const DualReal & v, const DualReal & e) con
 }
 
 Real
-TabulatedFluidProperties::T_from_v_e(Real v, Real e) const
+TabulatedBilinearFluidProperties::T_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling T_from_v_e.");
@@ -829,7 +842,7 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e) const
 }
 
 void
-TabulatedFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const
+TabulatedBilinearFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling T_from_v_e.");
@@ -837,7 +850,7 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Rea
 }
 
 DualReal
-TabulatedFluidProperties::T_from_v_e(const DualReal & v, const DualReal & e) const
+TabulatedBilinearFluidProperties::T_from_v_e(const DualReal & v, const DualReal & e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling p_from_v_e.");
@@ -854,7 +867,7 @@ TabulatedFluidProperties::T_from_v_e(const DualReal & v, const DualReal & e) con
 }
 
 Real
-TabulatedFluidProperties::c_from_v_e(Real v, Real e) const
+TabulatedBilinearFluidProperties::c_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling c_from_v_e.");
@@ -864,7 +877,7 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e) const
 }
 
 void
-TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
+TabulatedBilinearFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling c_from_v_e.");
@@ -879,7 +892,7 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Rea
 }
 
 DualReal
-TabulatedFluidProperties::c_from_v_e(const DualReal & v, const DualReal & e) const
+TabulatedBilinearFluidProperties::c_from_v_e(const DualReal & v, const DualReal & e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling p_from_v_e.");
@@ -896,7 +909,7 @@ TabulatedFluidProperties::c_from_v_e(const DualReal & v, const DualReal & e) con
 }
 
 Real
-TabulatedFluidProperties::cp_from_v_e(Real v, Real e) const
+TabulatedBilinearFluidProperties::cp_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling cp_from_v_e.");
@@ -906,7 +919,7 @@ TabulatedFluidProperties::cp_from_v_e(Real v, Real e) const
 }
 
 void
-TabulatedFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
+TabulatedBilinearFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling cp_from_v_e.");
@@ -921,7 +934,7 @@ TabulatedFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, 
 }
 
 Real
-TabulatedFluidProperties::cv_from_v_e(Real v, Real e) const
+TabulatedBilinearFluidProperties::cv_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling cv_from_v_e.");
@@ -931,7 +944,7 @@ TabulatedFluidProperties::cv_from_v_e(Real v, Real e) const
 }
 
 void
-TabulatedFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const
+TabulatedBilinearFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling cv_from_v_e.");
@@ -946,7 +959,7 @@ TabulatedFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, 
 }
 
 Real
-TabulatedFluidProperties::mu_from_v_e(Real v, Real e) const
+TabulatedBilinearFluidProperties::mu_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling mu_from_v_e.");
@@ -956,7 +969,7 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e) const
 }
 
 void
-TabulatedFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
+TabulatedBilinearFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling mu_from_v_e.");
@@ -971,7 +984,7 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, 
 }
 
 Real
-TabulatedFluidProperties::k_from_v_e(Real v, Real e) const
+TabulatedBilinearFluidProperties::k_from_v_e(Real v, Real e) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling k_from_v_e.");
@@ -981,7 +994,7 @@ TabulatedFluidProperties::k_from_v_e(Real v, Real e) const
 }
 
 void
-TabulatedFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const
+TabulatedBilinearFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const
 {
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling k_from_v_e.");
@@ -996,7 +1009,7 @@ TabulatedFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Rea
 }
 
 void
-TabulatedFluidProperties::writeTabulatedData(std::string file_name)
+TabulatedBilinearFluidProperties::writeTabulatedData(std::string file_name)
 {
   if (processor_id() == 0)
   {
@@ -1006,7 +1019,7 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 
     // Write out date and fluid type
     time_t now = time(&now);
-    file_out << "# " << _fp.fluidName() << " properties created by TabulatedFluidProperties on "
+    file_out << "# " << _fp.fluidName() << " properties created by TabulatedBilinearFluidProperties on "
              << ctime(&now) << "\n";
 
     // Write out column names
@@ -1031,7 +1044,7 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 }
 
 void
-TabulatedFluidProperties::generateTabulatedData()
+TabulatedBilinearFluidProperties::generateTabulatedData()
 {
   _pressure.resize(_num_p);
   _temperature.resize(_num_T);
@@ -1104,25 +1117,21 @@ TabulatedFluidProperties::generateTabulatedData()
 }
 
 void
-TabulatedFluidProperties::reshapeData2D(unsigned int nrow,
+TabulatedBilinearFluidProperties::reshapeData2D(unsigned int nrow,
                                         unsigned int ncol,
                                         const std::vector<Real> & vec,
-                                        std::vector<std::vector<Real>> & mat)
+                                        ColumnMajorMatrix & mat)
 {
   if (!vec.empty())
   {
-    mat.resize(nrow);
-    for (unsigned int i = 0; i < nrow; ++i)
-      mat[i].resize(ncol);
-
     for (unsigned int i = 0; i < nrow; ++i)
       for (unsigned int j = 0; j < ncol; ++j)
-        mat[i][j] = vec[i * ncol + j];
+        mat(i,j) = vec[i * ncol + j];
   }
 }
 
 void
-TabulatedFluidProperties::checkInputVariables(Real & pressure, Real & temperature) const
+TabulatedBilinearFluidProperties::checkInputVariables(Real & pressure, Real & temperature) const
 {
   if (pressure < _pressure_min || pressure > _pressure_max)
   {

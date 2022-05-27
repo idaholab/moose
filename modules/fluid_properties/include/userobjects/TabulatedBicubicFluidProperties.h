@@ -85,13 +85,13 @@ class BicubicInterpolation;
  * wrt pressure and temperature) will be calculated using bicubic interpolation, while all
  * remaining fluid properties are calculated using the supplied FluidProperties UserObject.
  */
-class TabulatedFluidProperties : public SinglePhaseFluidProperties
+class TabulatedBicubicFluidProperties : public SinglePhaseFluidProperties
 {
 public:
   static InputParameters validParams();
 
-  TabulatedFluidProperties(const InputParameters & parameters);
-  virtual ~TabulatedFluidProperties();
+  TabulatedBicubicFluidProperties(const InputParameters & parameters);
+  virtual ~TabulatedBicubicFluidProperties();
 
   virtual void initialSetup() override;
 
