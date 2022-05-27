@@ -61,3 +61,19 @@
   []
   construct_side_list_from_node_list = true
 []
+[Variables]
+  [./diffused]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+[Kernels]
+  [./diff]
+    type = Diffusion
+    variable = diffused
+  [../]
+[]
+[Executioner]
+  type = Steady
+  solve_type = 'PJFNK'
+[]

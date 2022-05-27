@@ -1,6 +1,6 @@
 [Tests]
   issues = '#18436'
-  design = 'meshgenerators/RefineBlockGenerator.md'
+  design = 'meshgenerators/ConvertNodeSetSideSetGenerator.md'
 
   [generate]
     requirement = 'The system shall support the ability to refine'
@@ -28,6 +28,12 @@
       cli_args = "Mesh/refine/enable_neighbor_refinement=true --mesh-only test_neighbor_in.e"
       recover = false
       detail = 'multiple blocks within a multi-domain mesh, with neighbor refinement enabled'
+    []
+    [example]
+    type = 'Exodiff'
+    input = 'main_example.i'
+    exodiff = 'test_single_in.e'
+
     []
   []
 []

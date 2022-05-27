@@ -12,14 +12,14 @@
 #include "MeshGenerator.h"
 
 /**
- * MeshGenerator for refining one or more blocks
+ * MeshGenerator for transcribing Node Sets into Side Sets, and/or Side Sets into Node Sets
  */
-class ConvertNodeSideGenerator : public MeshGenerator
+class ConvertNodeSetSideSetGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  ConvertNodeSideGenerator(const InputParameters & parameters);
+  ConvertNodeSetSideSetGenerator(const InputParameters & parameters);
 
 protected:
   virtual std::unique_ptr<MeshBase> generate() override;
@@ -27,5 +27,11 @@ protected:
 private:
   /// Input mesh to refine
   std::unique_ptr<MeshBase> & _input;
+
+  /// Flag signalling if nodes should be transcribed to sides
+  const bool _convert_side_list_from_node_list;
+
+  /// Flag signalling if sides should be transcribed to nodes
+  const bool _convert_node_list_from_side_listc;
 
 };
