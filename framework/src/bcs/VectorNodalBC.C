@@ -41,6 +41,8 @@ void
 VectorNodalBC::computeResidual()
 {
   const std::vector<dof_id_type> & dof_indices = _var.dofIndices();
+  if (dof_indices.empty())
+    return;
 
   RealVectorValue res(0, 0, 0);
   res = computeQpResidual();
@@ -54,8 +56,11 @@ VectorNodalBC::computeResidual()
 void
 VectorNodalBC::computeJacobian()
 {
-  RealVectorValue cached_val = computeQpJacobian();
   const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
+  if (cached_rows.empty())
+    return;
+
+  RealVectorValue cached_val = computeQpJacobian();
 
   // Cache the user's computeQpJacobian() value for later use.
   for (auto tag : _matrix_tags)
@@ -71,8 +76,11 @@ VectorNodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
     computeJacobian();
   else
   {
-    Real cached_val = computeQpOffDiagJacobian(jvar_num);
     const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
+    if (cached_rows.empty())
+      return;
+
+    Real cached_val = computeQpOffDiagJacobian(jvar_num);
     // Note: this only works for Lagrange variables...
     dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
 

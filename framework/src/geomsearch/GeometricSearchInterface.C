@@ -26,7 +26,8 @@ GeometricSearchInterface::validParams()
 GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_object)
   : _geometric_search_data(moose_object->parameters()
                                .getCheckedPointerParam<SubProblem *>("_subproblem")
-                               ->geomSearchData())
+                               ->geomSearchData()),
+    _requires_geometric_search(false)
 {
 }
 
@@ -35,6 +36,7 @@ GeometricSearchInterface::getPenetrationLocator(const BoundaryName & primary,
                                                 const BoundaryName & secondary,
                                                 Order order)
 {
+  _requires_geometric_search = true;
   return _geometric_search_data.getPenetrationLocator(primary, secondary, order);
 }
 
@@ -43,6 +45,7 @@ GeometricSearchInterface::getQuadraturePenetrationLocator(const BoundaryName & p
                                                           const BoundaryName & secondary,
                                                           Order order)
 {
+  _requires_geometric_search = true;
   return _geometric_search_data.getQuadraturePenetrationLocator(primary, secondary, order);
 }
 
@@ -50,6 +53,7 @@ NearestNodeLocator &
 GeometricSearchInterface::getNearestNodeLocator(const BoundaryName & primary,
                                                 const BoundaryName & secondary)
 {
+  _requires_geometric_search = true;
   return _geometric_search_data.getNearestNodeLocator(primary, secondary);
 }
 
@@ -57,5 +61,6 @@ NearestNodeLocator &
 GeometricSearchInterface::getQuadratureNearestNodeLocator(const BoundaryName & primary,
                                                           const BoundaryName & secondary)
 {
+  _requires_geometric_search = true;
   return _geometric_search_data.getQuadratureNearestNodeLocator(primary, secondary);
 }

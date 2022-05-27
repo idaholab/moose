@@ -1,0 +1,10 @@
+[Tests]
+  [error]
+    issues = '#9734'
+    design = 'AuxKernels/index.md UserObjects/index.md'
+    requirement = 'The system shall error if an object restricted on an internal boundarydepends on a variable that is not defined on any portion of the boundary.'
+    type = RunException
+    input = test.i
+    expect_err = "'bad' of type 'MatchedValueBC' depends on variable\(s\) 'v'. However, that variable does not appear to be defined on \(all of\) boundary 'primary0_interface'."
+  []
+[]

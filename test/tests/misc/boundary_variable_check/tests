@@ -1,0 +1,55 @@
+[Tests]
+  issues = '#9734'
+  design = 'AuxKernels/index.md UserObjects/index.md'
+  [error]
+    requirement = 'The system shall error if a boundary restricted object depends on a variable that is not defined on any portion of the boundary. These boundary restricted objects include'
+    [nodal_aux]
+      type = RunException
+      input = test.i
+      expect_err = "'bad' of type 'SelfAux' depends on variable\(s\) 'v'. However, that variable does not appear to be defined on \(all of\) boundary 'left'."
+      detail = 'nodal auxiliary kernels'
+    []
+    [nodal_uo]
+      type = RunException
+      input = test.i
+      expect_err = "'bad' of type 'NodalExtremeValue' depends on variable\(s\) 'v'. However, that variable does not appear to be defined on \(all of\) boundary 'left'."
+      cli_args = "AuxKernels/active='' Postprocessors/active='bad'"
+      detail = 'nodal user objects'
+    []
+    [nodal_bc]
+      type = RunException
+      input = test.i
+      expect_err = "'bad' of type 'MatchedValueBC' depends on variable\(s\) 'v'. However, that variable does not appear to be defined on \(all of\) boundary 'left'."
+      cli_args = "AuxKernels/active='' BCs/active='bad right middle'"
+      detail = 'nodal boundary conditions'
+    []
+    [integrated_bc]
+      type = RunException
+      input = test.i
+      expect_err = "'bad_integrated' of type 'CoupledVarNeumannBC' depends on variable\(s\) 'v'. However, that variable does not appear to be defined on \(all of\) boundary 'left'."
+      cli_args = "AuxKernels/active='' BCs/active='bad_integrated right middle'"
+      detail = 'integrated boundary conditions'
+    []
+    [side_uo]
+      type = RunException
+      input = test.i
+      expect_err = "'bad_side' of type 'SideDiffusiveFluxIntegral' depends on variable\(s\) 'v'. However, that variable does not appear to be defined on \(all of\) boundary 'left'."
+      cli_args = "AuxKernels/active='' Postprocessors/active='bad_side'"
+      detail = 'side user objects'
+    []
+    [elemental_aux]
+      type = RunException
+      input = test.i
+      expect_err = "'bad_elemental' of type 'SelfAux' depends on variable\(s\) 'dummy2'. However, that variable does not appear to be defined on \(all of\) boundary 'left'."
+      cli_args = "AuxKernels/active='bad_elemental'"
+      detail = 'elemental auxiliary kernels'
+    []
+  []
+  [partial_coverage]
+    type = RunException
+    input = test.i
+    cli_args = "AuxKernels/active='' BCs/middle/boundary='top' Mesh/gen/dim=2"
+    requirement = 'The system shall error if a variable is coupled into a boundary restricted object, along whose boundary the variable is only partially defined.'
+    expect_err = "'middle' of type 'MatchedValueBC' depends on variable\((s\)) 'u'. However, that variable does not appear to be defined on \(all of\) boundary 'top'."
+  []
+[]

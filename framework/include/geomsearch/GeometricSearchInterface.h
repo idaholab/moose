@@ -58,6 +58,16 @@ public:
   NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & primary,
                                                        const BoundaryName & secondary);
 
+  /**
+   * Whether any of this interface's methods have been called, e.g. whether the object that this
+   * interface is for requires geometric search data
+   */
+  bool requiresGeometricSearch() const { return _requires_geometric_search; }
+
 protected:
   GeometricSearchData & _geometric_search_data;
+
+  /// Whether any of this interface's methods have been called, e.g. whether the object that this
+  /// interface is for requires geometric search data
+  bool _requires_geometric_search;
 };

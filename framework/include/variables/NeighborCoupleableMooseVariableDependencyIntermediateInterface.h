@@ -31,7 +31,9 @@ public:
                                                                  bool nodal,
                                                                  bool neighbor_nodal,
                                                                  bool is_fv = false)
-    : NeighborCoupleable(moose_object, nodal, neighbor_nodal, is_fv), ScalarCoupleable(moose_object)
+    : NeighborCoupleable(moose_object, nodal, neighbor_nodal, is_fv),
+      ScalarCoupleable(moose_object),
+      MooseVariableDependencyInterface(moose_object)
   {
     for (MooseVariableFEBase * coupled_var : getCoupledMooseVars())
       addMooseVariableDependency(coupled_var);

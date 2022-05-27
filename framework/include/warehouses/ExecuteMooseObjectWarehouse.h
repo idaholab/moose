@@ -42,7 +42,7 @@ public:
    * Adds an object to the storage structure.
    * @param object A shared pointer to the object being added
    */
-  virtual void addObject(std::shared_ptr<T> object, THREAD_ID tid = 0, bool recurse = true);
+  void addObject(std::shared_ptr<T> object, THREAD_ID tid = 0, bool recurse = true) override;
   void addObjectMask(std::shared_ptr<T> object,
                      THREAD_ID tid = 0,
                      std::uint16_t flag_mask = std::numeric_limits<std::uint16_t>::max());
@@ -73,7 +73,7 @@ public:
   /**
    * Updates the active objects storage.
    */
-  virtual void updateActive(THREAD_ID tid = 0);
+  void updateActive(THREAD_ID tid = 0) override;
 
   ///@{
   /**
@@ -81,8 +81,8 @@ public:
    *
    * Limits call to these methods only to objects being executed on linear/nonlinear iterations.
    */
-  void jacobianSetup(THREAD_ID tid = 0) const;
-  void residualSetup(THREAD_ID tid = 0) const;
+  void jacobianSetup(THREAD_ID tid = 0) const override;
+  void residualSetup(THREAD_ID tid = 0) const override;
   void setup(const ExecFlagType & exec_flag, THREAD_ID tid = 0) const;
   ///@}
 

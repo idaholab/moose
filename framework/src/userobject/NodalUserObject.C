@@ -33,7 +33,7 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters)
     BlockRestrictable(this),
     BoundaryRestrictable(this, blockIDs(), true), // true for applying to nodesets
     Coupleable(this, true),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     TransientInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, true),
     _mesh(_subproblem.mesh()),

@@ -73,6 +73,9 @@ ArrayNodalBC::computeJacobian()
 void
 ArrayNodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
 {
+  if (!_var.isNodalDefined())
+    return;
+
   const auto & jvar = getVariable(jvar_num);
 
   RealEigenMatrix cached_val = computeQpOffDiagJacobian(const_cast<MooseVariableFieldBase &>(jvar));

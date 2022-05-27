@@ -46,7 +46,7 @@ FeatureVolumeVectorPostprocessor::validParams()
 FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
     const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     BoundaryRestrictable(this, false),
     _single_feature_per_elem(getParam<bool>("single_feature_per_element")),
     _output_centroids(getParam<bool>("output_centroids")),
