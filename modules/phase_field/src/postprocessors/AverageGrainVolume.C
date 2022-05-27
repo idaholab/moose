@@ -44,7 +44,7 @@ AverageGrainVolume::validParams()
 AverageGrainVolume::AverageGrainVolume(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     Coupleable(this, false),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     _mesh(_subproblem.mesh()),
     _assembly(_subproblem.assembly(0)),
     _q_point(_assembly.qPoints()),

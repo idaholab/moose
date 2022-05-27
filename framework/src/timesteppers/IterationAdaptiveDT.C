@@ -35,10 +35,10 @@ IterationAdaptiveDT::validParams()
                             "to determine target linear iterations and "
                             "window for adaptive timestepping (default = "
                             "25)");
-  params.addParam<PostprocessorName>("timestep_limiting_postprocessor",
-                                     "If specified, the postprocessor value "
-                                     "is used as an upper limit for the "
-                                     "current time step length");
+  params.addParam<std::vector<PostprocessorName>>("timestep_limiting_postprocessor",
+                                                  "If specified, a list of postprocessor values "
+                                                  "used as an upper limit for the "
+                                                  "current time step length");
   params.addParam<std::vector<FunctionName>>(
       "timestep_limiting_function",
       "A list of 'PiecewiseBase' type functions used to control the timestep by "
@@ -98,9 +98,8 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
                                 ? getParam<unsigned>("linear_iteration_ratio")
                                 : 25), // Default to 25
     _adaptive_timestepping(false),
-    _pps_value(isParamValid("timestep_limiting_postprocessor")
-                   ? &getPostprocessorValue("timestep_limiting_postprocessor")
-                   : nullptr),
+    _pps_value(
+        parameters.get<std::vector<PostprocessorName>>("timestep_limiting_postprocessor").size()),
     _timestep_limiting_functions(),
     _piecewise_timestep_limiting_functions(),
     _piecewise_linear_timestep_limiting_functions(),
@@ -124,6 +123,11 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
     _reject_large_step(getParam<bool>("reject_large_step")),
     _large_step_rejection_threshold(getParam<Real>("reject_large_step_threshold"))
 {
+  auto timestep_limiting_postprocessor_names =
+      parameters.get<std::vector<PostprocessorName>>("timestep_limiting_postprocessor");
+  for (size_t i = 0; i < _pps_value.size(); ++i)
+    _pps_value[i] = &getPostprocessorValueByName(timestep_limiting_postprocessor_names[i]);
+
   if (isParamValid("optimal_iterations"))
   {
     _adaptive_timestepping = true;
@@ -362,14 +366,21 @@ IterationAdaptiveDT::converged() const
 void
 IterationAdaptiveDT::limitDTToPostprocessorValue(Real & limitedDT) const
 {
-  if (_pps_value && _t_step > 1)
-    if (limitedDT > *_pps_value)
+  if (_pps_value.size() != 0 && _t_step > 1)
+  {
+    Real limiting_pps_value = *_pps_value[0];
+    for (size_t i = 1; i < _pps_value.size(); ++i)
+      if (*_pps_value[i] < limiting_pps_value)
+        limiting_pps_value = *_pps_value[i];
+
+    if (limitedDT > limiting_pps_value)
     {
-      limitedDT = std::max(_dt_min, *_pps_value);
+      limitedDT = std::max(_dt_min, limiting_pps_value);
 
       if (_verbose)
         _console << "Limiting dt to postprocessor value. dt = " << limitedDT << std::endl;
     }
+  }
 }
 
 void

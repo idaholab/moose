@@ -26,7 +26,7 @@ SideUserObject::SideUserObject(const InputParameters & parameters)
     BoundaryRestrictableRequired(this, false), // false for applying to sidesets
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
     Coupleable(this, false),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     TransientInterface(this),
     ElementIDInterface(this),
     _mesh(_subproblem.mesh()),
