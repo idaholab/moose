@@ -828,14 +828,6 @@ NSFVAction::addRhieChowUserObjects()
                                           ? getParam<unsigned short>("porosity_smoothing_layers")
                                           : 0;
     params.set<unsigned short>("smoothing_layers") = smoothing_layers;
-    // Set RhieChow coefficients
-    if (!_has_flow_equations)
-    {
-      params.set<MooseFunctorName>("a_u") = "ax";
-      params.set<MooseFunctorName>("a_v") = "ay";
-      params.set<MooseFunctorName>("a_w") = "az";
-    }
-
     _problem->addUserObject("PINSFVRhieChowInterpolator", "pins_rhie_chow_interpolator", params);
   }
   else
@@ -849,6 +841,7 @@ NSFVAction::addRhieChowUserObjects()
     // Set RhieChow coefficients
     if (!_has_flow_equations)
     {
+      checkRhieChowFunctorsDefined();
       params.set<MooseFunctorName>("a_u") = "ax";
       params.set<MooseFunctorName>("a_v") = "ay";
       params.set<MooseFunctorName>("a_w") = "az";
@@ -2188,6 +2181,10 @@ NSFVAction::checkGeneralControlErrors()
     paramError("use_friction_correction",
                "This parameter should not be defined if the porous medium treatment is disabled!");
 
+  if (_porous_medium_treatment && _has_scalar_equation)
+    paramError("porous_medium_treatment",
+               "Porous media scalar advection is currently unimplemented");
+
   if (isParamValid("consistent_scaling") && !_use_friction_correction)
     paramError("consistent_scaling",
                "Consistent scaling should not be defined if friction correction is disabled!");
@@ -2433,4 +2430,18 @@ NSFVAction::checkDependentParameterError(const std::string main_parameter,
       paramError(param,
                  "This parameter should not be given by the user with the corresponding " +
                      main_parameter + " setting!");
+}
+
+void
+NSFVAction::checkRhieChowFunctorsDefined()
+{
+  if (!_problem->hasFunctor("ax", _problem->parameters().get<THREAD_ID>("_tid")))
+    paramError("add_flow_equations",
+               "Rhie Chow coefficient ax must be provided for advection by auxiliary velocities");
+  if (_dim >= 2 && !_problem->hasFunctor("ay", _problem->parameters().get<THREAD_ID>("_tid")))
+    paramError("add_flow_equations",
+               "Rhie Chow coefficient ay must be provided for advection by auxiliary velocities");
+  if (_dim == 3 && !_problem->hasFunctor("az", _problem->parameters().get<THREAD_ID>("_tid")))
+    paramError("add_flow_equations",
+               "Rhie Chow coefficient az must be provided for advection by auxiliary velocities");
 }

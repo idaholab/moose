@@ -308,6 +308,10 @@ private:
   void checkDependentParameterError(const std::string main_parameter,
                                     const std::vector<std::string> dependent_parameters);
 
+  /// Checks that sufficient Rhie Chow coefficients have been defined for the given dimension, used
+  /// for scalar or temperature advection by auxiliary variables
+  void checkRhieChowFunctorsDefined();
+
   /// List to show which advected scalar field variable needs to be created within
   /// this action
   std::vector<bool> _create_scalar_variable;
