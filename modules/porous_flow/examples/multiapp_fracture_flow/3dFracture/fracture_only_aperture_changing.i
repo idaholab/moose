@@ -331,8 +331,8 @@ injection_rate = 10 # kg/s
     dt = 1
     optimal_iterations = 10
     growth_factor = 1.5
-    timestep_limiting_postprocessor = 1E8
   []
+  dtmax = 1E8
   end_time = 1E8
   nl_abs_tol = 1E-3
   nl_max_its = 20
