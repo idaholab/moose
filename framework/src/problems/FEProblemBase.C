@@ -99,6 +99,9 @@
 #include "ADUtils.h"
 #include "Executioner.h"
 #include "VariadicTable.h"
+#include "BoundaryNodeIntegrityCheckThread.h"
+#include "BoundaryElemIntegrityCheckThread.h"
+#include "NodalBCBase.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -180,6 +183,16 @@ FEProblemBase::validParams()
       "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
   params.addParam<bool>(
       "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
+  params.addParam<bool>(
+      "boundary_restricted_node_integrity_check",
+      true,
+      "Set to false to disable checking of boundary restricted nodal object variable dependencies, "
+      "e.g. are the variable dependencies defined on the selected boundaries?");
+  params.addParam<bool>("boundary_restricted_elem_integrity_check",
+                        true,
+                        "Set to false to disable checking of boundary restricted elemental object "
+                        "variable dependencies, e.g. are the variable dependencies defined on the "
+                        "selected boundaries?");
   params.addParam<bool>("material_coverage_check",
                         true,
                         "Set to false to disable material->subdomain coverage check");
@@ -287,6 +300,10 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(getParam<bool>("kernel_coverage_check")),
+    _boundary_restricted_node_integrity_check(
+        getParam<bool>("boundary_restricted_node_integrity_check")),
+    _boundary_restricted_elem_integrity_check(
+        getParam<bool>("boundary_restricted_elem_integrity_check")),
     _material_coverage_check(getParam<bool>("material_coverage_check")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
@@ -730,8 +747,9 @@ FEProblemBase::initialSetup()
   std::set<std::string> depend_objects_aux = _aux->getDependObjects();
 
   // This replaces all prior updateDependObjects calls on the old user object warehouses.
+  TheWarehouse::Query uo_query = theWarehouse().query().condition<AttribSystem>("UserObject");
   std::vector<UserObject *> userobjs;
-  theWarehouse().query().condition<AttribSystem>("UserObject").queryInto(userobjs);
+  uo_query.queryInto(userobjs);
   groupUserObjects(
       theWarehouse(), getAuxiliarySystem(), _app.getExecuteOnEnum(), userobjs, depend_objects_ic);
 
@@ -983,6 +1001,61 @@ FEProblemBase::initialSetup()
       transfer->setCurrentDirection(Transfer::DIRECTION::BETWEEN_MULTIAPP);
       transfer->initialSetup();
     }
+  }
+
+  if (_boundary_restricted_node_integrity_check)
+  {
+    TIME_SECTION("BoundaryRestrictedNodeIntegrityCheck", 5);
+
+    // check that variables are defined along boundaries of boundary restricted nodal objects
+    ConstBndNodeRange & bnd_nodes = *mesh().getBoundaryNodeRange();
+    BoundaryNodeIntegrityCheckThread bnict(*this, uo_query);
+    Threads::parallel_reduce(bnd_nodes, bnict);
+
+    // Nodal bcs aren't threaded
+    const auto & nodal_bcs = _nl->getNodalBCWarehouse();
+    const auto & node_to_elem_map = _mesh.nodeToActiveSemilocalElemMap();
+    for (const auto & bnode : bnd_nodes)
+    {
+      const auto boundary_id = bnode->_bnd_id;
+      const Node * const node = bnode->_node;
+
+      if (node->processor_id() != this->processor_id() ||
+          !nodal_bcs.hasBoundaryObjects(boundary_id, 0))
+        continue;
+
+      // Only check vertices. Variables may not be defined on non-vertex nodes (think first order
+      // Lagrange on a second order mesh) and user-code can often handle that
+      const Elem * const an_elem =
+          _mesh.getMesh().elem_ptr(libmesh_map_find(node_to_elem_map, node->id()).front());
+      if (!an_elem->is_vertex(an_elem->get_node_index(node)))
+        continue;
+
+      const auto & bnd_name = _mesh.getBoundaryName(boundary_id);
+
+      const auto & bnd_objects = nodal_bcs.getBoundaryObjects(boundary_id, 0);
+      for (const auto & bnd_object : bnd_objects)
+        // Skip if this object uses geometric search because coupled variables may be defined on
+        // paired boundaries instead of the boundary this node is on
+        if (!bnd_object->requiresGeometricSearch() && bnd_object->checkVariableBoundaryIntegrity())
+        {
+          std::set<MooseVariableFieldBase *> vars_to_omit = {&static_cast<MooseVariableFieldBase &>(
+              const_cast<MooseVariableBase &>(bnd_object->variable()))};
+
+          boundaryIntegrityCheckError(
+              *bnd_object, bnd_object->checkAllVariables(*node, vars_to_omit), bnd_name);
+        }
+    }
+  }
+
+  if (_boundary_restricted_elem_integrity_check)
+  {
+    TIME_SECTION("BoundaryRestrictedElemIntegrityCheck", 5);
+
+    // check that variables are defined along boundaries of boundary restricted elemental objects
+    ConstBndElemRange & bnd_elems = *mesh().getBoundaryElementRange();
+    BoundaryElemIntegrityCheckThread beict(*this, uo_query);
+    Threads::parallel_reduce(bnd_elems, beict);
   }
 
   if (!_app.isRecovering())

@@ -28,6 +28,7 @@ public:
   virtual void execute() override;
   virtual void initialize() override;
   virtual void finalize() override;
+  bool checkVariableBoundaryIntegrity() const override { return false; }
 
   /// Define enum for boundary type
   enum RAD_BND_TYPE

@@ -128,6 +128,9 @@ NodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
     computeJacobian();
   else
   {
+    if (!_var.isNodalDefined())
+      return;
+
     Real cached_val = 0.0;
     cached_val = computeQpOffDiagJacobian(jvar_num);
 

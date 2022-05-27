@@ -43,6 +43,8 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
   if (_primary_node_ids.size() != _weights.size())
     mooseError("primary and weights should be of equal size.");
 
+  const auto & lm_mesh = _mesh.getMesh();
+
   if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id == "NaN"))
     mooseError("Please specify secondary_node_ids or secondary_node_set.");
   else if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id != "NaN"))
@@ -53,15 +55,19 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
 
     for (in = nodelist.begin(); in != nodelist.end(); ++in)
     {
-      if (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id())
+      const Node * const node = lm_mesh.query_node_ptr(*in);
+      if (node && node->processor_id() == _subproblem.processor_id())
         _connected_nodes.push_back(*in); // defining secondary nodes in the base class
     }
   }
   else if ((_secondary_node_ids.size() > 0) && (_secondary_node_set_id == "NaN"))
   {
     for (const auto & dof : _secondary_node_ids)
-      if (_mesh.nodeRef(dof).processor_id() == _subproblem.processor_id())
+    {
+      const Node * const node = lm_mesh.query_node_ptr(dof);
+      if (node && node->processor_id() == _subproblem.processor_id())
         _connected_nodes.push_back(dof);
+    }
   }
 
   const auto & node_to_elem_map = _mesh.nodeToElemMap();
@@ -69,11 +75,15 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
   // Add elements connected to primary node to Ghosted Elements
   for (const auto & dof : _primary_node_ids)
   {
+    auto node_to_elem_pair = node_to_elem_map.find(dof);
+
+    // Our mesh may be distributed
+    if (node_to_elem_pair == node_to_elem_map.end())
+      continue;
+
     // defining primary nodes in base class
     _primary_node_vector.push_back(dof);
 
-    auto node_to_elem_pair = node_to_elem_map.find(dof);
-    mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
     const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
 
     for (const auto & elem_id : elems)
