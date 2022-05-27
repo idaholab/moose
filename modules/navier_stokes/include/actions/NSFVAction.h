@@ -141,6 +141,9 @@ protected:
   /// Switch that can be used to create an integrated energy equation for
   /// incompressible/weakly compressible simulations.
   const bool _has_energy_equation;
+  /// Switch that can be used to create an integrated energy equation for
+  /// incompressible/weakly compressible simulations.
+  const bool _has_scalar_equation;
   /// Switch to use to enable the Boussinesq approximation for incompressible
   /// fluid simulations
   const bool _boussinesq_approximation;

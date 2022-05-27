@@ -55,9 +55,10 @@ NSFVAction::validParams()
 
   params.addParam<bool>("add_flow_equations", true, "True to add mass and momentum equations");
   params.addParam<bool>("add_energy_equation", false, "True to add energy equation");
+  params.addParam<bool>("add_scalar_equation", false, "True to add advected scalar(s) equation");
 
-  params.addParamNamesToGroup("compressibility porous_medium_treatment "
-                              "turbulence_handling add_flow_equations add_energy_equation",
+  params.addParamNamesToGroup("compressibility porous_medium_treatment turbulence_handling "
+                              "add_flow_equations add_energy_equation add_scalar_equation",
                               "General control");
 
   params.addParam<std::vector<std::string>>(
@@ -475,6 +476,7 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _compressibility(getParam<MooseEnum>("compressibility")),
     _has_flow_equations(getParam<bool>("add_flow_equations")),
     _has_energy_equation(getParam<bool>("add_energy_equation")),
+    _has_scalar_equation(getParam<bool>("add_scalar_equation")),
     _boussinesq_approximation(getParam<bool>("boussinesq_approximation")),
     _turbulence_handling(getParam<MooseEnum>("turbulence_handling")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
@@ -660,7 +662,7 @@ NSFVAction::act()
         if (_turbulence_handling == "mixing-length")
           addWCNSEnergyMixingLengthKernels();
       }
-      if (_passive_scalar_names.size())
+      if (_has_scalar_equation)
       {
         if (_problem->isTransient())
           addScalarTimeKernels();
@@ -692,7 +694,7 @@ NSFVAction::act()
         addINSEnergyWallBC();
       }
 
-      if (_passive_scalar_names.size())
+      if (_has_scalar_equation)
         addScalarInletBC();
     }
   }
@@ -788,7 +790,7 @@ NSFVAction::addINSVariables()
   }
 
   // Add passive scalar variables is needed
-  if (_passive_scalar_names.size())
+  if (_has_scalar_equation)
   {
     auto params = _factory.getValidParams("MooseVariableFVReal");
     params.set<std::vector<SubdomainName>>("block") = _blocks;
@@ -889,7 +891,7 @@ NSFVAction::addINSInitialConditions()
     }
   }
 
-  if (_passive_scalar_names.size())
+  if (_has_scalar_equation)
   {
     unsigned int ic_counter = 0;
     for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
@@ -2215,9 +2217,10 @@ NSFVAction::checkGeneralControlErrors()
                                   "von_karman_const",
                                   "von_karman_const_0"});
 
-  if (!_passive_scalar_names.size())
-    checkDependentParameterError("passive_scalar_names",
-                                 {"passive_scalar_source",
+  if (!_has_scalar_equation)
+    checkDependentParameterError("add_scalar_equation",
+                                 {"passive_scalar_names",
+                                  "passive_scalar_source",
                                   "passive_scalar_scaling",
                                   "passive_scalar_diffusivity",
                                   "passive_scalar_inlet_types",
@@ -2330,7 +2333,7 @@ NSFVAction::checkBoundaryParameterErrors()
                      "'energy_wall_types' (" +
                      std::to_string(num_fixed_energy_walls) + ")");
   }
-  if (_passive_scalar_names.size())
+  if (_has_scalar_equation)
   {
     if (_inlet_boundaries.size() > 0 &&
         (_inlet_boundaries.size() != _passive_scalar_inlet_types.size()))

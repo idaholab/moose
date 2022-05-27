@@ -5,6 +5,7 @@ diff=1e-3
     # General parameters
     compressibility = 'incompressible'
     add_flow_equations = false
+    add_scalar_equation = true
 
     # Variables, defined below
     velocity_variable = 'u v'

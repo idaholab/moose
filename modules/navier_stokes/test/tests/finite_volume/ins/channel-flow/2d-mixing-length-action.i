@@ -26,6 +26,7 @@ advected_interp_method='upwind'
   [NavierStokesFV]
     compressibility = 'incompressible'
     turbulence_handling = 'mixing-length'
+    add_scalar_equation = true
 
     passive_scalar_names = 'scalar'
 
