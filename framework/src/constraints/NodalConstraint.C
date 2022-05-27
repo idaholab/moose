@@ -91,19 +91,17 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
   if ((_weights.size() == 0) && (_primary_node_vector.size() == 1))
     _weights.push_back(1.0);
 
-  // Calculate Jacobian enteries and cache those entries along with the row and column indices
+  // Calculate the dense-block Jacobian entries
   std::vector<dof_id_type> secondarydof = _var.dofIndicesNeighbor();
   std::vector<dof_id_type> primarydof = _var.dofIndices();
 
   DenseMatrix<Number> Kee(primarydof.size(), primarydof.size());
   DenseMatrix<Number> Ken(primarydof.size(), secondarydof.size());
   DenseMatrix<Number> Kne(secondarydof.size(), primarydof.size());
-  DenseMatrix<Number> Knn(secondarydof.size(), secondarydof.size());
 
   Kee.zero();
   Ken.zero();
   Kne.zero();
-  Knn.zero();
 
   for (_i = 0; _i < secondarydof.size(); ++_i)
   {
@@ -115,15 +113,12 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
           Kee(_j, _j) += computeQpJacobian(Moose::PrimaryPrimary);
           Ken(_j, _i) += computeQpJacobian(Moose::PrimarySecondary);
           Kne(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
-          Knn(_i, _i) += computeQpJacobian(Moose::SecondarySecondary);
           break;
         case Moose::Kinematic:
           Kee(_j, _j) = 0.;
           Ken(_j, _i) += jacobian(secondarydof[_i], primarydof[_j]) * _weights[_j];
           Kne(_i, _j) += -jacobian(secondarydof[_i], primarydof[_j]) / primarydof.size() +
                          computeQpJacobian(Moose::SecondaryPrimary);
-          Knn(_i, _i) += -jacobian(secondarydof[_i], secondarydof[_i]) / primarydof.size() +
-                         computeQpJacobian(Moose::SecondarySecondary);
           break;
       }
     }
@@ -131,7 +126,23 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
   _assembly.cacheJacobianBlock(Kee, primarydof, primarydof, _var.scalingFactor());
   _assembly.cacheJacobianBlock(Ken, primarydof, secondarydof, _var.scalingFactor());
   _assembly.cacheJacobianBlock(Kne, secondarydof, primarydof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Knn, secondarydof, secondarydof, _var.scalingFactor());
+
+  // Calculate and cache the diagonal secondary-secondary entries
+  for (_i = 0; _i < secondarydof.size(); ++_i)
+  {
+    Number value = 0.0;
+    switch (_formulation)
+    {
+      case Moose::Penalty:
+        value = computeQpJacobian(Moose::SecondarySecondary);
+        break;
+      case Moose::Kinematic:
+        value = -jacobian(secondarydof[_i], secondarydof[_i]) / primarydof.size() +
+                computeQpJacobian(Moose::SecondarySecondary);
+        break;
+    }
+    _assembly.cacheJacobian(secondarydof[_i], secondarydof[_i], value * _var.scalingFactor());
+  }
 }
 
 void
