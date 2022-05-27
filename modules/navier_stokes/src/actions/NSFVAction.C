@@ -2230,9 +2230,6 @@ NSFVAction::processThermalConductivity()
     }
   }
 
-  if (!have_vector && !have_scalar)
-    paramError("thermal_conductivity", "Could not find functors for thermal conductivity!");
-
   if (have_vector && !_porous_medium_treatment)
     paramError("thermal_conductivity", "Cannot use anistropic diffusion with non-porous flows!");
 
@@ -2441,8 +2438,7 @@ NSFVAction::checkFrictionParameterErrors()
     if (_friction_types[block_i].size() != _friction_coeffs[block_i].size())
     {
       paramError("friction_coeffs",
-                 "The number of friction coefficients for blocks: " +
-                     Moose::stringify(_friction_blocks[block_i]) +
+                 "The number of friction coefficients for block-group: " + std::to_string(block_i) +
                      " is not the same as the number of requested friction types!");
     }
 
@@ -2456,7 +2452,7 @@ NSFVAction::checkFrictionParameterErrors()
       unsigned int c = std::count(ft.begin(), ft.end(), name);
       if (c > 1)
         paramError("friction_types",
-                   "The following keyword: " + name + " appeared more than once in block " +
+                   "The following keyword: " + name + " appeared more than once in block-group " +
                        std::to_string(block_i) + " of 'friction_types'.");
     }
   }

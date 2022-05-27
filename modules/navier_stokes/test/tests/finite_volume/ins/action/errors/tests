@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#19472'
+  issues = '#19472 #21135'
   design = 'NSFVAction.md'
   [momentum-inlet-error]
     type = 'RunException'
@@ -207,6 +207,38 @@
     requirement = 'The system shall throw an error if the user requests the currently unimplemented porous flow scalar quantity advection'
     cli_args = 'Modules/NavierStokesFV/porous_medium_treatment=true Modules/NavierStokesFV/add_scalar_equation=true'
     expect_err = "Porous media scalar advection is currently unimplemented"
+    ad_indexing_type = 'global'
+  []
+  [thermal-conductivity-type-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user supplies vector and scalar thermal conductivities together'
+    cli_args = "Modules/NavierStokesFV/porous_medium_treatment=true Modules/NavierStokesFV/thermal_conductivity_blocks='1; 2' Modules/NavierStokesFV/thermal_conductivity='1.0 kappa'"
+    expect_err = "The entries on thermal conductivity shall either be scalars of vectors, mixing them is not supported!"
+    ad_indexing_type = 'global'
+  []
+  [thermal-conductivity-type-porous-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user supplies vector thermal conductivity with non-porous treatment'
+    cli_args = "Modules/NavierStokesFV/thermal_conductivity='kappa'"
+    expect_err = "Cannot use anistropic diffusion with non-porous flows!"
+    ad_indexing_type = 'global'
+  []
+  [thermal-conductivity-block-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user defines a non-existing block for thermal conductivity'
+    cli_args = "Modules/NavierStokesFV/porous_medium_treatment=true Modules/NavierStokesFV/thermal_conductivity_blocks='1; 3' Modules/NavierStokesFV/thermal_conductivity='kappa kappa'"
+    expect_err = "Block '3' is not present in the block IDs of the module!"
+    ad_indexing_type = 'global'
+  []
+  [friction-block-error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if there is a mismatch in the number of friction coefficients and the number of friction types'
+    cli_args = "Modules/NavierStokesFV/friction_coeffs='1.0; 1.0 1.0'"
+    expect_err = "The number of friction coefficients for block-group: 1 is not the same as the number of requested friction types!"
     ad_indexing_type = 'global'
   []
 []
