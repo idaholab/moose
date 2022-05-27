@@ -6,7 +6,7 @@
     csvdiff = 'power_law_creep_out.csv'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten"'
     requirement = "The AD multiple inelastic stress calculator shall provide a correct stress for a single power law creep model (reference computation)"
-    design = 'ADPowerLawCreepStressUpdate.md'
+    design = 'PowerLawCreepStressUpdate.md'
   [../]
   [./powerlaw_zero]
     type = 'CSVDiff'

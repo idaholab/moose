@@ -6,7 +6,7 @@
 
 Metals can exihibit distinctively different creep behavior depending on the stress
 level. This object represents creep behavior with various power law expressions (following
-logic analogous to [ADPowerLawCreepStressUpdate](ADPowerLawCreepStressUpdate.md)), 
+logic analogous to [PowerLawCreepStressUpdate](PowerLawCreepStressUpdate.md)), 
 and selects the right set of parameters for the von Mises stress value seen during
 the return mapping. 
 

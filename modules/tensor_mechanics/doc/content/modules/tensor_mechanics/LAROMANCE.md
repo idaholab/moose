@@ -5,7 +5,7 @@
 The `LAROMANCEStressUpdateBase` class computes the creep rate of materials by sampling a Los Alamos Reduced Order
 Model Applied to Nonlinear Constitutive Equations (LAROMANCE) formulated
 via calibration with lower-length scale simulations. `LAROMANCEStressUpdateBase` utilizes the exact same techniques
-utilized in [ADPowerLawCreepStressUpdate](/ADPowerLawCreepStressUpdate.md) including the radial
+utilized in [PowerLawCreepStressUpdate](/PowerLawCreepStressUpdate.md) including the radial
 return method implemented in [RadialReturnStressUpdate](/RadialReturnStressUpdate.md), however
 in place of a traditional power-law creep model, a ROM is sampled to determine the creep rate as a
 function of temperature, defect concentrations, the von Mises trial stress, and an environmental
