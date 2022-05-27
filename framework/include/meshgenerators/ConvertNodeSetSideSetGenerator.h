@@ -32,6 +32,6 @@ private:
   const bool _convert_side_list_from_node_list;
 
   /// Flag signalling if sides should be transcribed to nodes
-  const bool _convert_node_list_from_side_listc;
+  const bool _convert_node_list_from_side_list;
 
 };
