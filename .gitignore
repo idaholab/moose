@@ -252,3 +252,6 @@ conf_vars.mk
 # MetaData files in Reactor Module tests
 modules/reactor/test/tests/functions/multi_control_drum_function/positions_meta.data
 modules/reactor/test/tests/meshgenerators/patterned_hex_mesh_generator/positions_meta.data
+
+# Atom package side-artifaces
+.tags # byproduct of the symbol-gen Atom package
