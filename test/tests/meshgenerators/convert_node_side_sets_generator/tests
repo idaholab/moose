@@ -29,10 +29,10 @@
       recover = false
       detail = 'multiple blocks within a multi-domain mesh, with neighbor refinement enabled'
     []
-    [example]
-    type = 'Exodiff'
-    input = 'main_example.i'
-    exodiff = 'test_single_in.e'
+    [testy]
+      type = 'Exodiff'
+      input = 'testy.i'
+      exodiff = 'testy_outie_innie.e'
 
     []
   []
