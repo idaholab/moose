@@ -181,25 +181,7 @@ public:
   /**
    * Return true, if the grpah has a cycle, otherwise false
    */
-  bool isCyclic()
-  {
-    _visited.clear();
-    _rec_stack.clear();
-
-    // mark all nodes as not visited and not part of recursion stack
-    for (auto & n : _adj)
-    {
-      _visited[n.first] = false;
-      _rec_stack[n.first] = false;
-    }
-
-    // detect cycle for all nodes
-    for (auto & i : _adj)
-      if (isCyclicHelper(i.first))
-        return true;
-
-    return false;
-  }
+  bool isCyclic() const { return _is_cyclic; }
 
   /**
    * Do depth-first search from root nodes to obtain order in which graph nodes should be
@@ -208,15 +190,28 @@ public:
   const std::vector<T> & dfs()
   {
     _sorted_vector.clear();
-
-    for (auto & n : _adj)
-      _visited[n.first] = false;
+    _visited.clear();
+    _rec_stack.clear();
 
     for (auto & n : _adj)
     {
-      if (n.second.size() == 0)
-        dfsFromNode(n.first);
+      _visited[n.first] = false;
+      _rec_stack[n.first] = false;
     }
+
+    _is_cyclic = false;
+    // If there are no adjacencies, then all nodes are both roots and leaves
+    bool roots_found = _adj.empty();
+    for (auto & n : _adj)
+      if (n.second.size() == 0)
+      {
+        roots_found = true;
+        _is_cyclic = dfsFromNode(n.first);
+        if (_is_cyclic)
+          break;
+      }
+    if (!roots_found)
+      _is_cyclic = true;
 
     return _sorted_vector;
   }
@@ -355,40 +350,23 @@ protected:
     return false;
   }
 
-  /**
-   * depth first search from a root node
-   * @param root The node we start from
-   */
-  void dfsFromNode(const T & root)
+  bool dfsFromNode(const T & root)
   {
+    bool cyclic = false;
     _visited[root] = true;
+    _rec_stack[root] = true;
 
     for (auto & i : _inv_adj[root])
     {
-      if (!_visited.at(i))
-        dfsFromNode(i);
+      if (!_visited.at(i) && dfsFromNode(i))
+        cyclic = true;
+      else if (_rec_stack.at(i))
+        cyclic = true;
     }
 
     _sorted_vector.push_back(root);
-  }
-
-  bool isCyclicHelper(const T & v)
-  {
-    if (!_visited[v])
-    {
-      _visited[v] = true;
-      _rec_stack[v] = true;
-
-      for (auto & i : _adj[v])
-      {
-        if (!_visited.at(i) && isCyclicHelper(i))
-          return true;
-        else if (_rec_stack.at(i))
-          return true;
-      }
-    }
-    _rec_stack[v] = false;
-    return false;
+    _rec_stack[root] = false;
+    return cyclic;
   }
 
   /// adjacency lists (from leaves to roots)
@@ -403,12 +381,21 @@ protected:
   std::vector<T> _sorted_vector;
   /// The sorted vector of sets
   std::vector<std::vector<T>> _ordered_items;
+  /// Whether the graph is cyclic
+  bool _is_cyclic = false;
+
+  friend class CyclicDependencyException<T>;
 };
 
 template <typename T>
 class CyclicDependencyException : public std::runtime_error
 {
 public:
+  CyclicDependencyException(const std::string & error, const DependencyResolver<T> & graph) throw()
+    : runtime_error(error), _cyclic_items(graph._adj)
+  {
+  }
+
   CyclicDependencyException(const std::string & error,
                             const std::map<T, std::list<T>> & cyclic_items) throw()
     : runtime_error(error), _cyclic_items(cyclic_items)
