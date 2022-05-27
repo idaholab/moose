@@ -89,15 +89,16 @@ ComputeMultipleCrystalPlasticityStress::ComputeMultipleCrystalPlasticityStress(
         _num_eigenstrains
             ? &getMaterialPropertyOld<RankTwoTensor>("eigenstrain_deformation_gradient")
             : nullptr),
-    _deformation_gradient(getMaterialProperty<RankTwoTensor>("deformation_gradient")),
-    _deformation_gradient_old(getMaterialPropertyOld<RankTwoTensor>("deformation_gradient")),
+    _deformation_gradient(getMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _deformation_gradient_old(
+        getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
     _pk2(declareProperty<RankTwoTensor>("second_piola_kirchhoff_stress")),
     _pk2_old(getMaterialPropertyOld<RankTwoTensor>("second_piola_kirchhoff_stress")),
     _total_lagrangian_strain(
         declareProperty<RankTwoTensor>("total_lagrangian_strain")), // Lagrangian strain
     _updated_rotation(declareProperty<RankTwoTensor>("updated_rotation")),
     _crysrot(getMaterialProperty<RankTwoTensor>(
-        "crysrot")), // defined in the elasticity tensor classes for crystal plasticity
+        _base_name + "crysrot")), // defined in the elasticity tensor classes for crystal plasticity
     _print_convergence_message(getParam<bool>("print_state_variable_convergence_error_messages"))
 {
   _convergence_failed = false;

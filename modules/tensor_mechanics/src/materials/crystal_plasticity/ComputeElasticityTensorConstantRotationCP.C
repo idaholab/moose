@@ -24,7 +24,7 @@ ComputeElasticityTensorConstantRotationCP::validParams()
 ComputeElasticityTensorConstantRotationCP::ComputeElasticityTensorConstantRotationCP(
     const InputParameters & parameters)
   : ComputeElasticityTensor(parameters),
-    _crysrot(declareProperty<RankTwoTensor>("crysrot")),
+    _crysrot(declareProperty<RankTwoTensor>(_base_name + "crysrot")),
     _Euler_angles_material_property(declareProperty<RealVectorValue>("Euler_angles")),
     _R(_Euler_angles),
     _crysrot_constant(_R.transpose())
