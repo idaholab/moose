@@ -72,8 +72,8 @@ protected:
   /// adaptive timestepping is active if the optimal_iterations input parameter is specified
   bool _adaptive_timestepping;
 
-  /// if specified, the postprocessor value is an upper limit for the time step length
-  const PostprocessorValue * const _pps_value;
+  /// if specified, the postprocessor values used to determine an upper limit for the time step length
+  std::vector<const PostprocessorValue *> _pps_value;
 
   std::vector<const Function *> _timestep_limiting_functions;
   std::vector<const PiecewiseBase *> _piecewise_timestep_limiting_functions;
@@ -113,4 +113,3 @@ protected:
   /// Threshold used to detect whether we need to reject a step
   double _large_step_rejection_threshold;
 };
-

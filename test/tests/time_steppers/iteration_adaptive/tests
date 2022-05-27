@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#5535'
+  issues = '#5535 #21119'
   design = 'source/timesteppers/IterationAdaptiveDT.md'
   [./hit_knot]
     type = 'Exodiff'
@@ -86,6 +86,14 @@
     exodiff = 'adapt_tstep_pps_lim_out.e'
     requirement = "The system shall support the ability to limit the time step size
     based on a postprocessor value."
+  [../]
+
+  [./multi_pps_lim]
+    type = 'CSVDiff'
+    input = 'adapt_tstep_multi_pps_lim.i'
+    csvdiff = 'adapt_tstep_multi_pps_lim_out.csv'
+    requirement = "The system shall support the ability to limit the time step size
+    based on multiple postprocessor values."
   [../]
 
   [./reject_large_dt]
