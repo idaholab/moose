@@ -82,6 +82,7 @@ public:
   /**
    * Add an edge between nodes 'a' and 'b'
    */
+  template <bool check_cyclic = false>
   void addEdge(const T & a, const T & b)
   {
     addNode(a);
@@ -90,7 +91,7 @@ public:
     _adj[a].push_back(b);
     _inv_adj[b].push_back(a);
 
-    if (isCyclic())
+    if (check_cyclic && isCyclic())
     {
       auto cyclic_adjacencies = _adj;
       removeEdge(a, b);
@@ -124,7 +125,34 @@ public:
    * Insert a dependency pair - the first value or the "key" depends on the second value or the
    * "value"
    */
-  void insertDependency(const T & key, const T & value) { addEdge(value, key); }
+  void insertDependency(const T & key, const T & value)
+  {
+    // Let's take a literal meaning
+
+    // Do inverse adjacencies
+    auto & value_adjacencies = _adj[value];
+    for (auto & depends_on_value_obj : value_adjacencies)
+    {
+      auto & dependencies_of_obj = _inv_adj[depends_on_value_obj];
+      auto it = std::find(dependencies_of_obj.begin(), dependencies_of_obj.end(), value);
+      mooseAssert(it != dependencies_of_obj.end(),
+                  "If there is an adjacent relationship, then there must be an inverse-adjacent "
+                  "relationship.");
+      // Insert our new dependency
+      *it = key;
+    }
+    auto & inv_key_adjacencies = _inv_adj[key];
+    mooseAssert(inv_key_adjacencies.empty(),
+                "Asked to insert dependency, but root already has dependencies.");
+    inv_key_adjacencies.push_back(value);
+
+    // Do adjacencies
+    auto & key_adjacencies = _adj[key];
+    mooseAssert(key_adjacencies.empty(),
+                "Asked to insert dependency, but root already has dependencies.");
+    key_adjacencies.push_back(key);
+    key_adjacencies.swap(value_adjacencies);
+  }
 
   /**
    * Delete a dependency (only the edge) between items in the resolver

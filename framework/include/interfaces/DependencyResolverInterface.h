@@ -109,6 +109,9 @@ DependencyResolverInterface::sortDFS(typename std::vector<T> & vector)
     }
   }
 
+  if (graph.isCyclic())
+    mooseError("Cyclic graph detected.");
+
   vector = graph.dfs();
 }
 

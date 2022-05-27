@@ -964,7 +964,7 @@ MooseApp::setupOptions()
     {
       _syntax.registerTaskName("mesh_only", true);
       _syntax.addDependency("mesh_only", "setup_mesh_complete");
-      _syntax.addDependency("check_integrity_early", "mesh_only");
+      // _syntax.addDependency("check_integrity_early", "mesh_only");
       _action_warehouse.setFinalTask("mesh_only");
     }
     else if (isParamValid("split_mesh"))
@@ -972,7 +972,7 @@ MooseApp::setupOptions()
       _split_mesh = true;
       _syntax.registerTaskName("split_mesh", true);
       _syntax.addDependency("split_mesh", "setup_mesh_complete");
-      _syntax.addDependency("check_integrity_early", "split_mesh");
+      // _syntax.addDependency("check_integrity_early", "split_mesh");
       _action_warehouse.setFinalTask("split_mesh");
     }
     _action_warehouse.build();
@@ -2039,7 +2039,7 @@ MooseApp::createMeshGeneratorOrder()
                    "spelling mistake or forget to include it "
                    "in your input file?");
 
-      resolver.insertDependency(it.second, depend_it->second);
+      resolver.addEdge(depend_it->second, it.second);
     }
   }
 

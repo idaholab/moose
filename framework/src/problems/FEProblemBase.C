@@ -4030,7 +4030,7 @@ FEProblemBase::executeControls(const ExecFlagType & exec_type)
         if (controls_wh.hasActiveObject(depend_name))
         {
           auto dep_control = controls_wh.getActiveObject(depend_name);
-          resolver.insertDependency(it, dep_control);
+          resolver.addEdge(dep_control, it);
         }
         else
           mooseError("The Control \"",

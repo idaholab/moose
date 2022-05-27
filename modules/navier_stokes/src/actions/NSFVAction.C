@@ -580,6 +580,9 @@ NSFVAction::NSFVAction(InputParameters parameters)
   // Running the general checks, the rest are run after we already know some
   // geometry-related parameters.
   checkGeneralControlErrors();
+
+  // Check if the user defined the boundary conditions in a sensible way
+  checkBoundaryParameterErrors();
 }
 
 void
@@ -731,12 +734,7 @@ NSFVAction::act()
   }
 
   if (_current_task == "add_navier_stokes_pps")
-  {
-    // Check if the user defined the boundary conditions in a sensible way
-    checkBoundaryParameterErrors();
-
     addBoundaryPostprocessors();
-  }
 }
 
 void
