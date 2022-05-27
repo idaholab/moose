@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "KernelBase.h"
+#include "KernelValue.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
