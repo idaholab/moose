@@ -2,8 +2,7 @@
 
 !syntax description /FVKernels/FVTimeKernel
 
-The time derivative is automatically computed based on the [time integration scheme
-selected](syntax/Executioners/TimeIntegrator/index.md).
+The time derivative is automatically computed based on the [time integration scheme selected](syntax/Executioner/TimeIntegrator/index.md).
 
 !alert note
 When creating a new time derivative kernel, developers should consider inheriting this class
