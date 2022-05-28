@@ -132,9 +132,6 @@ def _match_input(objects, filename, match):
     # - as they share parameters, it does not hurt to merge both documentations
     # - only one documentation file has been created for both classes usually
     # This would be problematic if the classes were separate and had different parameters
-    if key.replace('AD', '') in objects:
+    elif key.replace('AD', '') in objects:
         filename = os.path.relpath(filename, MooseDocs.ROOT_DIR)
         objects[key.replace('AD', '')].inputs.add(filename)
-    # Let's have a message at least, though this could qualify for an error
-    else:
-        print("Could not find corresponding class for", key, "in", filename)
