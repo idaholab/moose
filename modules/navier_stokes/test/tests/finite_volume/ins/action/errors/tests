@@ -193,4 +193,12 @@
     expect_err = "Variable \(T_fuid\) supplied to the NavierStokesFV action does not exist!"
     ad_indexing_type = 'global'
   []
+  [porous_scalar_error]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user requests the currently unimplemented porous flow scalar quantity advection'
+    cli_args = 'Modules/NavierStokesFV/porous_medium_treatment=true Modules/NavierStokesFV/add_scalar_equation=true'
+    expect_err = "Porous media scalar advection is currently unimplemented"
+    ad_indexing_type = 'global'
+  []
 []

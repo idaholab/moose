@@ -135,9 +135,15 @@ protected:
   /// Compressibility type, can be compressible, incompressible
   /// or weakly-compressible
   const MooseEnum _compressibility;
-  // Switch that can be used to create an integrated energy equation for
+  /// Switch that can be used to or not pressure and mass equations
+  /// for incompressible/weakly compressible simulations.
+  const bool _has_flow_equations;
+  /// Switch that can be used to create an integrated energy equation for
   /// incompressible/weakly compressible simulations.
   const bool _has_energy_equation;
+  /// Switch that can be used to create an integrated energy equation for
+  /// incompressible/weakly compressible simulations.
+  const bool _has_scalar_equation;
   /// Switch to use to enable the Boussinesq approximation for incompressible
   /// fluid simulations
   const bool _boussinesq_approximation;
@@ -301,6 +307,10 @@ private:
   /// the corresponding main parameter is disabled
   void checkDependentParameterError(const std::string main_parameter,
                                     const std::vector<std::string> dependent_parameters);
+
+  /// Checks that sufficient Rhie Chow coefficients have been defined for the given dimension, used
+  /// for scalar or temperature advection by auxiliary variables
+  void checkRhieChowFunctorsDefined();
 
   /// List to show which advected scalar field variable needs to be created within
   /// this action

@@ -53,10 +53,12 @@ NSFVAction::validParams()
       turbulence_type,
       "The way additional diffusivities are determined in the turbulent regime.");
 
+  params.addParam<bool>("add_flow_equations", true, "True to add mass and momentum equations");
   params.addParam<bool>("add_energy_equation", false, "True to add energy equation");
+  params.addParam<bool>("add_scalar_equation", false, "True to add advected scalar(s) equation");
 
-  params.addParamNamesToGroup("compressibility porous_medium_treatment "
-                              "turbulence_handling add_energy_equation",
+  params.addParamNamesToGroup("compressibility porous_medium_treatment turbulence_handling "
+                              "add_flow_equations add_energy_equation add_scalar_equation",
                               "General control");
 
   params.addParam<std::vector<std::string>>(
@@ -472,7 +474,9 @@ NSFVAction::NSFVAction(InputParameters parameters)
   : Action(parameters),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
     _compressibility(getParam<MooseEnum>("compressibility")),
+    _has_flow_equations(getParam<bool>("add_flow_equations")),
     _has_energy_equation(getParam<bool>("add_energy_equation")),
+    _has_scalar_equation(getParam<bool>("add_scalar_equation")),
     _boussinesq_approximation(getParam<bool>("boussinesq_approximation")),
     _turbulence_handling(getParam<MooseEnum>("turbulence_handling")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
@@ -603,7 +607,7 @@ NSFVAction::act()
     // Check if the user made mistakes in the definition of scalar kernel parameters
     checkPassiveScalarParameterErrors();
 
-    if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
+    if (_has_flow_equations)
     {
       if (_compressibility == "incompressible")
       {
@@ -626,19 +630,25 @@ NSFVAction::act()
             addWCNSEnergyTimeKernels();
         }
       }
+    }
 
+    if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
+    {
       // If the material properties are not constant, we can use the same kernels
       // for weakly-compressible simulations.
-      addINSMassKernels();
-      addINSMomentumAdvectionKernels();
-      addINSMomentumViscousDissipationKernels();
-      addINSMomentumPressureKernels();
-      addINSMomentumGravityKernels();
-      if (_friction_types.size())
-        addINSMomentumFrictionKernels();
+      if (_has_flow_equations)
+      {
+        addINSMassKernels();
+        addINSMomentumAdvectionKernels();
+        addINSMomentumViscousDissipationKernels();
+        addINSMomentumPressureKernels();
+        addINSMomentumGravityKernels();
+        if (_friction_types.size())
+          addINSMomentumFrictionKernels();
 
-      if (_turbulence_handling == "mixing-length")
-        addINSMomentumMixingLengthKernels();
+        if (_turbulence_handling == "mixing-length")
+          addINSMomentumMixingLengthKernels();
+      }
 
       if (_has_energy_equation)
       {
@@ -652,7 +662,7 @@ NSFVAction::act()
         if (_turbulence_handling == "mixing-length")
           addWCNSEnergyMixingLengthKernels();
       }
-      if (_passive_scalar_names.size())
+      if (_has_scalar_equation)
       {
         if (_problem->isTransient())
           addScalarTimeKernels();
@@ -676,14 +686,15 @@ NSFVAction::act()
     {
       addINSInletBC();
       addINSOutletBC();
-      addINSWallBC();
+      if (_has_flow_equations)
+        addINSWallBC();
       if (_has_energy_equation)
       {
         addINSEnergyInletBC();
         addINSEnergyWallBC();
       }
 
-      if (_passive_scalar_names.size())
+      if (_has_scalar_equation)
         addScalarInletBC();
     }
   }
@@ -779,7 +790,7 @@ NSFVAction::addINSVariables()
   }
 
   // Add passive scalar variables is needed
-  if (_passive_scalar_names.size())
+  if (_has_scalar_equation)
   {
     auto params = _factory.getValidParams("MooseVariableFVReal");
     params.set<std::vector<SubdomainName>>("block") = _blocks;
@@ -817,7 +828,6 @@ NSFVAction::addRhieChowUserObjects()
                                           ? getParam<unsigned short>("porosity_smoothing_layers")
                                           : 0;
     params.set<unsigned short>("smoothing_layers") = smoothing_layers;
-
     _problem->addUserObject("PINSFVRhieChowInterpolator", "pins_rhie_chow_interpolator", params);
   }
   else
@@ -828,6 +838,14 @@ NSFVAction::addRhieChowUserObjects()
       params.set<VariableName>(u_names[d]) = _velocity_name[d];
 
     params.set<VariableName>("pressure") = _pressure_name;
+    // Set RhieChow coefficients
+    if (!_has_flow_equations)
+    {
+      checkRhieChowFunctorsDefined();
+      params.set<MooseFunctorName>("a_u") = "ax";
+      params.set<MooseFunctorName>("a_v") = "ay";
+      params.set<MooseFunctorName>("a_w") = "az";
+    }
 
     _problem->addUserObject("INSFVRhieChowInterpolator", "ins_rhie_chow_interpolator", params);
   }
@@ -866,7 +884,7 @@ NSFVAction::addINSInitialConditions()
     }
   }
 
-  if (_passive_scalar_names.size())
+  if (_has_scalar_equation)
   {
     unsigned int ic_counter = 0;
     for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
@@ -2163,6 +2181,10 @@ NSFVAction::checkGeneralControlErrors()
     paramError("use_friction_correction",
                "This parameter should not be defined if the porous medium treatment is disabled!");
 
+  if (_porous_medium_treatment && _has_scalar_equation)
+    paramError("porous_medium_treatment",
+               "Porous media scalar advection is currently unimplemented");
+
   if (isParamValid("consistent_scaling") && !_use_friction_correction)
     paramError("consistent_scaling",
                "Consistent scaling should not be defined if friction correction is disabled!");
@@ -2192,9 +2214,10 @@ NSFVAction::checkGeneralControlErrors()
                                   "von_karman_const",
                                   "von_karman_const_0"});
 
-  if (!_passive_scalar_names.size())
-    checkDependentParameterError("passive_scalar_names",
-                                 {"passive_scalar_source",
+  if (!_has_scalar_equation)
+    checkDependentParameterError("add_scalar_equation",
+                                 {"passive_scalar_names",
+                                  "passive_scalar_source",
                                   "passive_scalar_scaling",
                                   "passive_scalar_diffusivity",
                                   "passive_scalar_inlet_types",
@@ -2275,7 +2298,7 @@ NSFVAction::checkBoundaryParameterErrors()
     paramError("pressure_function",
                "Size is not the same as the number of pressure outlet boundaries!");
 
-  if (_compressibility == "incompressible")
+  if (_compressibility == "incompressible" && _has_flow_equations)
     if (num_pressure_outlets == 0 && !(getParam<bool>("pin_pressure")))
       mooseError("The pressure must be fixed for an incompressible simulation! Try setting "
                  "pin_pressure or change the compressibility settings!");
@@ -2307,7 +2330,7 @@ NSFVAction::checkBoundaryParameterErrors()
                      "'energy_wall_types' (" +
                      std::to_string(num_fixed_energy_walls) + ")");
   }
-  if (_passive_scalar_names.size())
+  if (_has_scalar_equation)
   {
     if (_inlet_boundaries.size() > 0 &&
         (_inlet_boundaries.size() != _passive_scalar_inlet_types.size()))
@@ -2407,4 +2430,18 @@ NSFVAction::checkDependentParameterError(const std::string main_parameter,
       paramError(param,
                  "This parameter should not be given by the user with the corresponding " +
                      main_parameter + " setting!");
+}
+
+void
+NSFVAction::checkRhieChowFunctorsDefined()
+{
+  if (!_problem->hasFunctor("ax", _problem->parameters().get<THREAD_ID>("_tid")))
+    paramError("add_flow_equations",
+               "Rhie Chow coefficient ax must be provided for advection by auxiliary velocities");
+  if (_dim >= 2 && !_problem->hasFunctor("ay", _problem->parameters().get<THREAD_ID>("_tid")))
+    paramError("add_flow_equations",
+               "Rhie Chow coefficient ay must be provided for advection by auxiliary velocities");
+  if (_dim == 3 && !_problem->hasFunctor("az", _problem->parameters().get<THREAD_ID>("_tid")))
+    paramError("add_flow_equations",
+               "Rhie Chow coefficient az must be provided for advection by auxiliary velocities");
 }
