@@ -72,11 +72,28 @@ public:
    */
   void addNode(const T & a)
   {
+#ifndef NDEBUG
+    bool new_adj_insertion = false, new_inv_insertion = false;
+#endif
     if (_adj.find(a) == _adj.end())
+    {
+#ifndef NDEBUG
+      new_adj_insertion = true;
+#endif
       _adj[a] = {};
+      _insertion_order.push_back(a);
+    }
 
     if (_inv_adj.find(a) == _inv_adj.end())
+    {
+#ifndef NDEBUG
+      new_inv_insertion = true;
+#endif
       _inv_adj[a] = {};
+    }
+    mooseAssert(new_adj_insertion == new_inv_insertion,
+                "We should have symmetric behavior between adjacent and inverse-adjacent "
+                "insertion/non-insertion.");
   }
 
   /**
@@ -129,6 +146,10 @@ public:
   {
     // Let's take a literal meaning
 
+    mooseAssert(_adj.find(value) != _adj.end() && _inv_adj.find(value) != _inv_adj.end(),
+                "The pre-req should already exist in the graph");
+    addNode(key);
+
     // Do inverse adjacencies
     auto & value_adjacencies = _adj[value];
     for (auto & depends_on_value_obj : value_adjacencies)
@@ -176,6 +197,7 @@ public:
   {
     _adj.clear();
     _inv_adj.clear();
+    _insertion_order.clear();
   }
 
   /**
@@ -202,11 +224,11 @@ public:
     _is_cyclic = false;
     // If there are no adjacencies, then all nodes are both roots and leaves
     bool roots_found = _adj.empty();
-    for (auto & n : _adj)
-      if (n.second.size() == 0)
+    for (auto & n : _insertion_order)
+      if (_adj[n].size() == 0)
       {
         roots_found = true;
-        _is_cyclic = dfsFromNode(n.first);
+        _is_cyclic = dfsFromNode(n);
         if (_is_cyclic)
           break;
       }
@@ -383,6 +405,12 @@ protected:
   std::vector<std::vector<T>> _ordered_items;
   /// Whether the graph is cyclic
   bool _is_cyclic = false;
+  /// Container for keeping track of the insertion order. We will use this to determine iteration
+  /// order because it is essential that iteration order be sync'd across multiple
+  /// processes. Iterating over maps with pointer keys, for example, can be out of sync on multiple
+  /// processes. If dependency resolver memory usage shows up in profiling, we can consider making
+  /// this a container of reference wrappers
+  std::vector<T> _insertion_order;
 
   friend class CyclicDependencyException<T>;
 };
