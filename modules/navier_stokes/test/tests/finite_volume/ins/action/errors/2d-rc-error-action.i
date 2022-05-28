@@ -49,6 +49,7 @@ alpha=1
     compressibility = 'incompressible'
     porous_medium_treatment = false
     add_energy_equation = true
+    add_scalar_equation = true
 
     passive_scalar_names = 'scalar'
 
