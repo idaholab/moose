@@ -150,8 +150,15 @@ public:
                 "The pre-req should already exist in the graph");
     addNode(key);
 
-    // Do inverse adjacencies
     auto & value_adjacencies = _adj[value];
+    if (!_inv_adj[key].empty())
+    {
+      mooseAssert(dependsOn(key, value),
+                  "If we have already processed this key, then it must depend on value.");
+      return;
+    }
+
+    // Do inverse adjacencies
     for (auto & depends_on_value_obj : value_adjacencies)
     {
       auto & dependencies_of_obj = _inv_adj[depends_on_value_obj];

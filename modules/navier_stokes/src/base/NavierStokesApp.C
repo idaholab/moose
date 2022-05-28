@@ -53,7 +53,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // add variables action
   registerTask("add_navier_stokes_variables", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_variables", "add_variable");
-  addTaskDependency("add_mortar_variable", "add_navier_stokes_variables");
 
   // add ICs action
   registerTask("add_navier_stokes_ics", /*is_required=*/false);
@@ -74,7 +73,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // register attributes
   registerTask("ns_meta_action", /*is_required=*/true);
   addTaskDependency("ns_meta_action", "meta_action");
-  addTaskDependency("dynamic_object_registration", "ns_meta_action");
 
   // register attributes
   registerTask("add_navier_stokes_pps", /*is_required=*/false);
