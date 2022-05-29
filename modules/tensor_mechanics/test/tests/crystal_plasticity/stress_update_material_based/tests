@@ -162,5 +162,14 @@
     design = '/ComputeUpdatedEulerAngle.md '
              '/ComputeMultipleCrystalPlasticityStress.md'
   []
-
+  [bicrystal_test]
+    type = 'CSVDiff'
+    input = 'bicrystal_test.i'
+    csvdiff = 'bicrystal_test_out.csv'
+    requirement = 'The system shall allow multiple crystal plasticity models to '
+                  'be used in a polycrystalline simulation through the use of '
+                  'the base_name input parameter.'
+    issues = '#21036'
+    design = '/ComputeMultipleCrystalPlasticityStress.md'
+  []
 []
