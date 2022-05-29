@@ -14,13 +14,13 @@
     [ais_error1]
       type = RunException
       input = 'ais_error1.i'
-      detail = 'the selected sampler type is not of an adaptive type. '
+      detail = 'the selected sampler type is not of an adaptive type when performing adaptive decision;'
       expect_err = "The selected sampler is not an adaptive sampler."
     []
     [ais_error2]
       type = RunException
       input = 'ais_error2.i'
-      detail = 'the selected sampler is not of type AdaptiveImportance. '
+      detail = 'the selected sampler is not of type AdaptiveImportance when reporting adaptive sampling statistics;'
       expect_err = "The selected sampler is not of type AdaptiveImportance."
     []
   []

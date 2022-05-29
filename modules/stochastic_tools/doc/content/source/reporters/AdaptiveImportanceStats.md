@@ -16,10 +16,8 @@ The following statistics have been implemented:
   samples. For computing this statistic, the samples from the training phase of [AdaptiveImportanceSampler](AdaptiveImportanceSampler.md)
   are not used. The equation for computing pf is given by [!cite](au1999new):
 
-  \begin{equation}
-    \label{eqn:ais_stats1}
-    \hat{P}_f^{\textrm{AIS}} = \frac{1}{N}~\sum_{i=1}^N I\big(F_i(\pmb{x})\geq \mathcal{F}\big)~\frac{q(\pmb{x})}{f(\pmb{x})}
-  \end{equation}
+  !equation id=eqn:ais_stats1
+  \hat{P}_f^{\textrm{AIS}} = \frac{1}{N}~\sum_{i=1}^N I\big(F_i(\pmb{x})\geq \mathcal{F}\big)~\frac{q(\pmb{x})}{f(\pmb{x})}
 
   where, $q(.)$ is the nominal density, $f(.)$ is the importance density, and $I[.]$ is
   the indicator function of model failure.
@@ -29,16 +27,13 @@ The following statistics have been implemented:
   This quantity is computed as the ratio of square root of variance of pf to the
   mean pf. The variance of pf is given by [!cite](au1999new):
 
-  \begin{equation}
-    \label{eqn:ais_stats2}
-    \textrm{Var}(\hat{P}_f^{\textrm{AIS}}) = \frac{1}{N}~\Bigg\{\frac{1}{N}~\sum_{i=1}^{N}\Bigg[I\big(F_i(\pmb{x})\geq \mathcal{F}\big)~\frac{q(\pmb{x})}{f(\pmb{x})}\Bigg]^2-\big(\hat{P}_f^{\textrm{AIS}}\big)^2\Bigg\}
-  \end{equation}
+  !equation id=eqn:ais_stats2
+  \textrm{Var}(\hat{P}_f^{\textrm{AIS}}) = \frac{1}{N}~\Bigg\{\frac{1}{N}~\sum_{i=1}^{N}\Bigg[I\big(F_i(\pmb{x})\geq \mathcal{F}\big)~\frac{q(\pmb{x})}{f(\pmb{x})}\Bigg]^2-\big(\hat{P}_f^{\textrm{AIS}}\big)^2\Bigg\}
 
   The cov is given by:
 
-  \begin{equation}
-    \label{eqn:ais_stats3}
-    \hat{\delta}^{\textrm{AIS}} = \frac{\sqrt{\textrm{Var}(\hat{P}_f^{\textrm{AIS}})}}{\hat{P}_f^{\textrm{AIS}}}
+  !equation id=eqn:ais_stats3
+  \hat{\delta}^{\textrm{AIS}} = \frac{\sqrt{\textrm{Var}(\hat{P}_f^{\textrm{AIS}})}}{\hat{P}_f^{\textrm{AIS}}}
   \end{equation}
 
   For computing this statistic, the samples from the training phase of [AdaptiveImportanceSampler](AdaptiveImportanceSampler.md)
