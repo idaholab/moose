@@ -39,6 +39,13 @@ Eigenvalues::Eigenvalues(const InputParameters & parameters)
 }
 
 void
+Eigenvalues::initialize()
+{
+  _eigen_values_real.clear();
+  _eigen_values_imag.clear();
+}
+
+void
 Eigenvalues::execute()
 {
 #ifdef LIBMESH_HAVE_SLEPC

@@ -54,13 +54,13 @@
 
 [Controls]
   [pc_cmdline]
-    type = MultiAppCommandLineControl
+    type = MultiAppSamplerControl
     multi_app = pc_sub
     sampler = pc_sampler
     param_names = 'Materials/conductivity/prop_values Kernels/source/value Mesh/xmax BCs/right/value'
   []
   [pr_cmdline]
-    type = MultiAppCommandLineControl
+    type = MultiAppSamplerControl
     multi_app = pr_sub
     sampler = pr_sampler
     param_names = 'Materials/conductivity/prop_values Kernels/source/value Mesh/xmax BCs/right/value'

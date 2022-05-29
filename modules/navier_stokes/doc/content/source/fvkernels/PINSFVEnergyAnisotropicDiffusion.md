@@ -7,12 +7,12 @@ This kernel accepts an anisotropic thermal conductivity material property, an is
 specified using a [PINSFVEnergyDiffusion.md] kernel.
 
 \begin{equation}
-\nabla \cdot \left( \epsilon \k \nabla T \right)
+\nabla \cdot \left( \epsilon k \nabla T \right)
 \end{equation}
-where $\epsilon$ is the porosity, $\k is the thermal conductivity, and $T$ the fluid temperature. The
+where $\epsilon$ is the porosity, $k$ is the thermal conductivity, and $T$ the fluid temperature. The
 multiplication by $\epsilon$ may be removed by specifying the
 [!param](/FVKernels/PINSFVEnergyAnisotropicDiffusion/effective_diffusivity) parameter. This effectively
-switches from using a $k$ thermal conductivity to a $kappa$ effective thermal conductivity.
+switches from using a $k$ thermal conductivity to a $\kappa$ effective thermal conductivity.
 
 More information may be found on effective thermal conductivity models in the Pronghorn manual. They
 generally account for heat conduction, radiation and some convective effects like changes in flow directions

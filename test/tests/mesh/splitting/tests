@@ -134,4 +134,21 @@
     requirement = 'Splitting meshes from a generated mesh should work with custom partitioners.'
     mesh_mode = REPLICATED
   []
+
+  [meshgenerators_acting_on_split]
+    type = 'Exodiff'
+    input = 'extrude_from_split.i'
+    cli_args = '--mesh-only'
+    mesh_mode = DISTRIBUTED
+    exodiff = 'extrude_from_split_in.e'
+    recover = false
+
+    min_parallel = 3
+    max_parallel = 3
+    prereq = 'use_split'
+
+    issues = '#18635'
+    design = 'Mesh/splitting.md FileMeshGenerator.md'
+    requirement = 'The system should be able to load a pre-split mesh and perform additional mesh generation on it.'
+  []
 []

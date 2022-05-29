@@ -49,6 +49,7 @@ HistogramVectorPostprocessor::initialSetup()
 void
 HistogramVectorPostprocessor::initialize()
 {
+  // no need to reset, execute() writes in place
 }
 
 void

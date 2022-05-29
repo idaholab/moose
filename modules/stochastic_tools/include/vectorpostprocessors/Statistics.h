@@ -28,8 +28,8 @@ public:
   virtual void execute() override;
 
   /// Not used; all parallel computation is wrapped in the Statistics objects
-  virtual void initialize() final{};
-  virtual void finalize() final{};
+  void initialize() override final;
+  void finalize() override final {}
 
 protected:
   /// The selected statistics to compute
