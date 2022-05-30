@@ -81,7 +81,7 @@ public:
       new_adj_insertion = true;
 #endif
       _adj[a] = {};
-      _insertion_order.push_back(a);
+      _insertion_order.push_front(a);
     }
 
     if (_inv_adj.find(a) == _inv_adj.end())
@@ -417,7 +417,7 @@ protected:
   /// processes. Iterating over maps with pointer keys, for example, can be out of sync on multiple
   /// processes. If dependency resolver memory usage shows up in profiling, we can consider making
   /// this a container of reference wrappers
-  std::vector<T> _insertion_order;
+  std::deque<T> _insertion_order;
 
   friend class CyclicDependencyException<T>;
 };
