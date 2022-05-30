@@ -342,7 +342,7 @@ NSFVAction::checkBlockwiseConsistency(const std::string block_param_name,
       for (const auto & block : block_group)
         if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
           paramError(block_param_name,
-                     "Block '" + block + "' is not present in the block IDs of the module!");
+                     "Block '" + block + "' is not present in the block restriction of the fluid flow action!");
 
     for (const auto & param_name : parameter_names)
     {

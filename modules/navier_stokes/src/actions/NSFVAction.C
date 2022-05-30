@@ -2204,7 +2204,7 @@ NSFVAction::processThermalConductivity()
 
   for (unsigned int i = 0; i < _thermal_conductivity_name.size(); ++i)
   {
-    // First, check if the name is just a number (only in case of isotropic conduction
+    // First, check if the name is just a number (only in case of isotropic conduction)
     std::istringstream ss(_thermal_conductivity_name[i]);
     Real real_value;
     if (ss >> real_value && ss.eof())
