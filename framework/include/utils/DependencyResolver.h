@@ -317,8 +317,6 @@ public:
    */
   std::size_t size() const { return _sorted_vector.size(); }
 
-  bool operator()(const T & a, const T & b);
-
 protected:
   /**
    * depth first search from a root node for a specific item
@@ -415,33 +413,3 @@ public:
 private:
   std::map<T, std::list<T>> _cyclic_items;
 };
-
-template <typename T>
-bool
-DependencyResolver<T>::operator()(const T & a, const T & b)
-{
-  if (_sorted_vector.empty())
-    getSortedValues();
-
-  auto a_it = std::find(_sorted_vector.begin(), _sorted_vector.end(), a);
-  auto b_it = std::find(_sorted_vector.begin(), _sorted_vector.end(), b);
-
-  /**
-   * It's possible that a and/or b are not in the resolver in which case
-   *  we want those values to come out first.  However, we need to make
-   *  sure that we maintain strict weak ordering so we'll compare b_it first,
-   *  which will return false for a_it < b_it and b_it < a_it when both values
-   *  are not in the ordered_items vector.
-   */
-  if (b_it == _sorted_vector.end())
-    return false;
-  if (a_it == _sorted_vector.end())
-    return true;
-  else
-    /**
-     * Compare the iterators.  Users sometime fail to state all their
-     * items' dependencies, but do introduce dependant items only after
-     * the items they depended on; this preserves that sorting.
-     */
-    return a_it < b_it;
-}
