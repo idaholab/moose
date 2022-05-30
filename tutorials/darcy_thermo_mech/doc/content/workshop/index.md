@@ -44,10 +44,6 @@
 
 !---
 
-!include workshop/numerical/fvm_overview.md
-
-!---
-
 !include workshop/cpp/01_basics.md
 
 !---
@@ -289,6 +285,10 @@
 !---
 
 !include workshop/systems/index.md
+
+!---
+
+!include workshop/numerical/fvm_overview.md
 
 !---
 
