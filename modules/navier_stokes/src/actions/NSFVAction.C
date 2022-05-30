@@ -973,11 +973,9 @@ NSFVAction::addINSEnergyTimeKernels()
   if (_porous_medium_treatment)
   {
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-    if (_problem->hasFunctor(NS::time_deriv(_density_name),
-                             _problem->parameters().get<THREAD_ID>("_tid")))
+    if (_problem->hasFunctor(NS::time_deriv(_density_name), /*thread_id=*/0))
       params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-    if (_problem->hasFunctor(NS::time_deriv(_specific_heat_name),
-                             _problem->parameters().get<THREAD_ID>("_tid")))
+    if (_problem->hasFunctor(NS::time_deriv(_specific_heat_name), /*thread_id=*/0))
       params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
     params.set<bool>("is_solid") = false;
   }
@@ -2212,19 +2210,18 @@ NSFVAction::processThermalConductivity()
     // Now we determine what kind of functor we are dealing with
     else
     {
-      if (_problem->hasFunctorWithType<ADReal>(_thermal_conductivity_name[i],
-                                               _problem->parameters().get<THREAD_ID>("_tid")))
+      if (_problem->hasFunctorWithType<ADReal>(_thermal_conductivity_name[i], /*thread_id=*/0))
         have_scalar = true;
       else
       {
-        if (_problem->hasFunctorWithType<ADRealVectorValue>(
-                _thermal_conductivity_name[i], _problem->parameters().get<THREAD_ID>("_tid")))
+        if (_problem->hasFunctorWithType<ADRealVectorValue>(_thermal_conductivity_name[i],
+                                                            /*thread_id=*/0))
           have_vector = true;
         else
         {
-          if (_problem->hasFunctorWithType<Real>(_thermal_conductivity_name[i],
-                                                 _problem->parameters().get<THREAD_ID>("_tid")))
-            have_scalar = true;
+          paramError("thermal_conductivity",
+                     "We only allow functor of type ADReal or ADRealVectorValue for thermal "
+                     "conductivity!");
         }
       }
     }
@@ -2516,13 +2513,13 @@ NSFVAction::checkDependentParameterError(const std::string main_parameter,
 void
 NSFVAction::checkRhieChowFunctorsDefined()
 {
-  if (!_problem->hasFunctor("ax", _problem->parameters().get<THREAD_ID>("_tid")))
+  if (!_problem->hasFunctor("ax", /*thread_id=*/0)
     paramError("add_flow_equations",
                "Rhie Chow coefficient ax must be provided for advection by auxiliary velocities");
-  if (_dim >= 2 && !_problem->hasFunctor("ay", _problem->parameters().get<THREAD_ID>("_tid")))
+  if (_dim >= 2 && !_problem->hasFunctor("ay", /*thread_id=*/0))
     paramError("add_flow_equations",
                "Rhie Chow coefficient ay must be provided for advection by auxiliary velocities");
-  if (_dim == 3 && !_problem->hasFunctor("az", _problem->parameters().get<THREAD_ID>("_tid")))
+  if (_dim == 3 && !_problem->hasFunctor("az", /*thread_id=*/0))
     paramError("add_flow_equations",
                "Rhie Chow coefficient az must be provided for advection by auxiliary velocities");
 }
