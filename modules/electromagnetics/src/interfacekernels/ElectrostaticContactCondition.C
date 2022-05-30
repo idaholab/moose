@@ -32,7 +32,7 @@ ElectrostaticContactCondition::validParams()
   params.addClassDescription(
       "Interface condition that describes the current continuity and contact conductance across a "
       "boundary formed between two dissimilar materials (resulting in a potential discontinuity). "
-      "Conductivity on each side of the boundary is defined via the material peoperties system.");
+      "Conductivity on each side of the boundary is defined via the material properties system.");
   return params;
 }
 
@@ -52,6 +52,14 @@ ElectrostaticContactCondition::ElectrostaticContactCondition(const InputParamete
 {
   _conductance_was_set = parameters.isParamSetByUser("user_electrical_contact_conductance");
   _mean_hardness_was_set = parameters.isParamSetByUser("mean_hardness");
+
+  if (_conductance_was_set && _mean_hardness_was_set)
+    mooseError(
+        "In ",
+        _name,
+        ", both user-supplied electrical contact conductance and mean hardness values (for "
+        "calculating contact conductance) have been provided. Please only provide one or the "
+        "other!");
 }
 
 ADReal
@@ -70,13 +78,6 @@ ElectrostaticContactCondition::computeQpResidual(Moose::DGResidualType type)
         _alpha_electric * mean_conductivity *
         std::pow((_mechanical_pressure.value(_t, _q_point[_qp]) / _mean_hardness[_qp]),
                  _beta_electric);
-  else
-    mooseError(
-        "In ",
-        _name,
-        ", both user-supplied electrical contact conductance and mean hardness values (for "
-        "calculating contact conductance) have been provided. Please only provide one or the "
-        "other!");
 
   switch (type)
   {

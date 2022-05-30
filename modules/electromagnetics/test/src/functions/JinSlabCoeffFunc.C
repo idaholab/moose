@@ -32,7 +32,6 @@ JinSlabCoeffFunc::validParams()
 
 JinSlabCoeffFunc::JinSlabCoeffFunc(const InputParameters & parameters)
   : Function(parameters),
-
     _k(getParam<Real>("k")),
     _theta(getParam<Real>("theta")),
     _length(getParam<Real>("length")),
@@ -51,11 +50,7 @@ JinSlabCoeffFunc::value(Real /*t*/, const Point & p) const
                              (eps_r - (1.0 / mu_r) * std::pow(sin(_theta * libMesh::pi / 180.), 2));
 
   if (_component == EM::REAL)
-  {
     return val.real();
-  }
   else
-  {
     return val.imag();
-  }
 }

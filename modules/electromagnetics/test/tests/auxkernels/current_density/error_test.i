@@ -42,7 +42,7 @@
 []
 
 [BCs]
-#natural BCs for both (all variables = 0)
+# natural BCs for both (all variables = 0)
 []
 
 [AuxKernels]

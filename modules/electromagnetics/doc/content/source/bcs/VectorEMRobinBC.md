@@ -7,7 +7,7 @@
 !style halign=left
 The VectorEMRobinBC object is an implementation of the first-order Robin-style boundary
 condition outlined in [!citep](jin-fem) Equation 9.60 and [!citep](jin-computation)
-Equation 9.3.51 for scalar variables.
+Equation 9.3.51 for vector field variables.
 
 #### General (vector field) form
 

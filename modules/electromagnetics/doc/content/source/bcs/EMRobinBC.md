@@ -7,13 +7,13 @@
 !style halign=left
 The EMRobinBC object is an implementation of the first-order Robin-style boundary
 condition outlined in [!citep](jin-fem) Equation 9.60 and [!citep](jin-computation)
-Equation 9.3.51 for scalar variables.
+Equation 9.3.51 for scalar field variables.
 
 #### General (vector field) form
 
 !style halign=left
-The generic Jin condition is, in turn, based on the Sommerfeld radiation condition
-for scattered fields. Given that any scattered field can be made up of a
+The generic condition from from [!citep](jin-fem) is, in turn, based on the Sommerfeld
+radiation condition for scattered fields. Given that any scattered field can be made up of a
 combination of the scattered field and the incident field
 ($\vec{E} = \vec{E}_{sc} + \vec{E}_{inc}$), then we have
 

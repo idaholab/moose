@@ -23,9 +23,7 @@ PotentialToFieldAux::validParams()
 }
 
 PotentialToFieldAux::PotentialToFieldAux(const InputParameters & parameters)
-  : VariableGradientComponent(parameters),
-
-    _sign(getParam<MooseEnum>("sign"))
+  : VariableGradientComponent(parameters), _sign(getParam<MooseEnum>("sign"))
 {
 }
 

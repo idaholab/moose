@@ -31,7 +31,7 @@ frequency-domain electric field wave equation in general is given by:
 where
 
 - $\vec{E}$ is the complex electric field vector in V/m,
-- $\mu_0$ is the vacuum magnetic permability of the medium in H/m,
+- $\mu_0$ is the vacuum magnetic permeability of the medium in H/m,
 - $\varepsilon$ is the electric permittivity of the medium in F/m,
 - $\omega$ is the operating frequency in rad/s
 - $\vec{J}$ is the external current density in A/$\text{m}^2$, and
@@ -81,7 +81,7 @@ Important constant model parameters are shown below in [evanescent-model-paramet
 | Operating frequency, $f$ (GHz) | 16 - 28.4 |
 | Relative permittivity, $\varepsilon_r$ (1) | 1 |
 | Vacuum electric permittivity, $\varepsilon_0$ (F/m) | $8.854 \times 10^{-12}$ |
-| Vacuum magnetic permability, $\mu_0$ (H/m) | $4 \pi \times 10^{-7}$ |
+| Vacuum magnetic permeability, $\mu_0$ (H/m) | $4 \pi \times 10^{-7}$ |
 
 Calculated parameters needed for the boundary conditions (the wave number in the
 direction of propagation of the traveling wave in a 2D waveguide) were calculated

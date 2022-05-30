@@ -6,7 +6,7 @@
 
 !style halign=left
 The VectorSecondTimeDerivative object implements the weak form inner product term
-associated with the second time derivative of a vector variable with a function
+associated with the second time derivative of a vector field variable with a function
 coefficient. The term is
 
 \begin{equation}
@@ -16,7 +16,7 @@ coefficient. The term is
 where
 
 - $\vec{\psi}_i$ is a vector-valued test function,
-- $\vec{u}$ is the solution variable, and
+- $\vec{u}$ is the solution vector field variable, and
 - $a(\mathbf{r}, t)$ is a function coefficient (default = 1.0).
 
 ## Example Input File Syntax

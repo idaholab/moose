@@ -43,7 +43,6 @@ EMRobinBC::validParams()
 
 EMRobinBC::EMRobinBC(const InputParameters & parameters)
   : ADIntegratedBC(parameters),
-
     _field_real(adCoupledValue("field_real")),
     _field_imag(adCoupledValue("field_imaginary")),
     _component(getParam<MooseEnum>("component")),

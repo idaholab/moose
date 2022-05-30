@@ -11,7 +11,7 @@ normal and the difference between the current solution and the Dirichlet data,
 also crossed with the surface normal. This is given by
 
 \begin{equation}
-  p(\vec{u}^\ast \cross \hat{n}, (\vec{u} - \vec{u}_0) \cross \hat{n})
+  p(\vec{u}^\ast \times \hat{n}, (\vec{u} - \vec{u}_0) \times \hat{n})
 \end{equation}
 
 where $p$ is a scalar defining the penalty value, $\vec{u}^\ast$ is the test

@@ -68,7 +68,6 @@ VectorEMRobinBC::VectorEMRobinBC(const InputParameters & parameters)
 Real
 VectorEMRobinBC::computeQpResidual()
 {
-
   // Initialize E components
   std::complex<double> field_0(0, 0);
   std::complex<double> field_1(0, 0);

@@ -138,7 +138,7 @@ The field result for this simulation (real and imaginary components) is shown in
        caption=Electric field result, $E_x$ (imaginary component), of the 2-D waveguide verification case.
 
 A comparison of the real component results to compared to that in [cheng-solution]
-is shown in [waveguide-benchmark-comparison]. This data is taken town the centerline
+is shown in [waveguide-benchmark-comparison]. This data is taken down the centerline
 of the waveguide geometry ($y = 5$). There is decent agreement between the two
 solutions, but note the increasing phase error along the length of the waveguide.
 This is known as "numerical disperson" or "numerical phase error" in the literature,

@@ -13,7 +13,7 @@
 #include "FunctionInterface.h"
 
 /**
- *    Function for use as coefficient in standard-form Helmholtz wave equation applications.
+ *  Function for use as coefficient in standard-form Helmholtz wave equation applications.
  */
 class WaveCoeff : public Function, public FunctionInterface
 {
@@ -41,7 +41,7 @@ protected:
   /// Real component of the wave number
   const Function & _k_real;
 
-  /// Imaginery component of the wave number (also known as the attenuation constant)
+  /// Imaginary component of the wave number (also known as the attenuation constant)
   const Function & _k_imag;
 
   /// Real-valued function coefficient (defaults to 1)

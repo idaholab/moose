@@ -12,13 +12,13 @@ results shown using the HELM10 FEM code developed by Reddy et al.
 Eigenvalue calculation in MOOSE is handled via the SLEPc [!citep](slepc-paper)
 package, which is built within PETSc. Using SLEPc, a selection of the largest or
 smallest (real and imaginary), closest to a target component (real and imaginary)
-or magnitude, or all available within a given problem. Whether more than one
-eigenvalue can be calculated in a given problem is both a consequence of the
-problem being considered (in the case of the waveguides, whether the geometry can
-handle more than one mode) and the SLEPc solver options, the nuances of which are
-discussed in great detail on the [SLEPc webpage](https://slepc.upv.es/). The examples
-presented in this section will all use the SLEPc default, which is to calculate
-the smallest real eigenvalue.
+or magnitude, or all available eigenvalues within a given problem can be obtained.
+Whether more than one eigenvalue can be calculated in a given problem is both a
+consequence of the problem being considered (in the case of the waveguides, whether
+the geometry can handle more than one mode) and the SLEPc solver options, the nuances
+of which are discussed in great detail on the [SLEPc webpage](https://slepc.upv.es/).
+The examples presented in this section will all use the SLEPc default, which is to
+calculate the smallest real eigenvalue.
 
 The physical equation being solved for is a helmholtz-style equation for a scalar
 potential, given as:
@@ -27,12 +27,12 @@ potential, given as:
 \frac{\partial^2 \psi}{\partial x^2} + \frac{\partial^2 \psi}{\partial y^2} + k_c^2 \psi = 0
 
 where $k_c$ is the eigenvalue and $\psi$ is the associated eigenfunction.
-For a TE mode, $\psi = H_z$, and for a TM mode, $\psi = E_z$. As previously
-stated, several waveguide geometries (rectangular, circular, and coaxial) will
-be simulated to determine the fundamental TM mode wavenumber that can exist in
-each one. In TM mode simulations, the scalar potential is set to zero on waveguide
-perfectly conducting walls in order to satisfy the conditions on $E_z$. Given
-$E_z$ one can also find expressions for $E_x$ and $E_y$:
+For a transverse electric (TE) mode, $\psi = H_z$, and for a transverse magnetic
+(TM) mode, $\psi = E_z$. As previously stated, several waveguide geometries
+(rectangular, circular, and coaxial) will be simulated to determine the fundamental
+TM mode wavenumber that can exist in each one. In TM mode simulations, the scalar
+potential is set to zero on waveguide perfectly conducting walls in order to satisfy
+the conditions on $E_z$. Given $E_z$ one can also find expressions for $E_x$ and $E_y$:
 
 !equation
 E_x = -Z_0^{\text{TM}} \frac{\partial \psi}{\partial x}

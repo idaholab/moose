@@ -3,7 +3,7 @@
 #include "Function.h"
 
 /**
- *    Function for field coefficient in slab reflection benchmark case.
+ *  Function for field coefficient in slab reflection benchmark case.
  */
 class JinSlabCoeffFunc : public Function
 {

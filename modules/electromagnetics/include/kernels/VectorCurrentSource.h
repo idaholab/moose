@@ -12,7 +12,7 @@
 #include "VectorKernel.h"
 
 /**
- *  Calculates the current source term contribution in the helmholtz wave
+ *  Calculates the current source term contribution in the Helmholtz wave
  *  equation
  */
 class VectorCurrentSource : public VectorKernel

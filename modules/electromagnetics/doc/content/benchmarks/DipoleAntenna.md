@@ -44,7 +44,7 @@ of this assumption for this scenario.
 | Resonant frequency (GHz) | 1 |
 | Wavelength, $\lambda$ (m) | 0.3 |
 | Antenna length, $L$ (m) | 0.15 |
-| Antenna feed gap ($L / 20$) (m) | 0.015 |
+| Antenna feed gap ($L / 20$) (m) | 0.0075 |
 | Domain radius ($5 \lambda$) (m) | 1.5 |
 
 ## Governing Equations and Boundary Conditions
@@ -61,7 +61,7 @@ field wave equation in general is given by:
 where
 
 - $\vec{E}$ is the complex electric field vector in V/m,
-- $\mu_0$ is the vacuum magnetic permability of the medium in H/m,
+- $\mu_0$ is the vacuum magnetic permeability of the medium in H/m,
 - $\varepsilon$ is the electric permittivity of the medium in F/m, and
 - $\omega$ is the operating frequency in rad/s.
 
@@ -104,7 +104,7 @@ Important constant model parameters are shown below in [dipole-model-parameters]
 | Operating frequency, $f$ (GHz) | 1 |
 | Relative permittivity, $\varepsilon_r$ (1) | 1 |
 | Vacuum electric permittivity, $\varepsilon_0$ (F/m) | $8.854 \times 10^{-12}$ |
-| Vacuum magnetic permability, $\mu_0$ (H/m) | $4 \pi \times 10^{-7}$ |
+| Vacuum magnetic permeability, $\mu_0$ (H/m) | $4 \pi \times 10^{-7}$ |
 
 Calculated parameters needed for the boundary conditions (the wave number in the
 direction of propagation of the traveling wave in a 2D waveguide) were calculated
@@ -118,7 +118,7 @@ where:
 - $c$ is the speed of light (or $3 \times 10^8$ m/s).
 
 Using the 1 GHz operating frequency presented in [dipole-results-figure], the value
-for $\beta$ used in the input file shown below is
+for $\beta$ (m$^{-1}) used in the input file shown below is
 
 !equation
 \beta = \frac{2 \pi (1 \times 10^9)}{3 \times 10^8}

@@ -13,7 +13,7 @@
 
 /**
  *  Kernel representing the contribution of the PDE term $fu$, where $f$ is a
- *  function coefficient, and $u$ is a scalar variable.
+ *  function coefficient, and $u$ is a scalar field variable.
  */
 class ADFunctionReaction : public ADKernel
 {
