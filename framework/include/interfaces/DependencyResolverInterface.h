@@ -109,12 +109,7 @@ DependencyResolverInterface::sortDFS(typename std::vector<T> & vector)
     }
   }
 
-  if (graph.isCyclic())
-    mooseError("Cyclic graph detected.");
-
   vector = graph.dfs();
-  if (graph.isCyclic())
-    throw CyclicDependencyException<T>("Cyclic graph detected", graph);
 }
 
 template <typename T, typename T2>

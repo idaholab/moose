@@ -99,7 +99,6 @@ public:
   /**
    * Add an edge between nodes 'a' and 'b'
    */
-  template <bool check_cyclic = false>
   void addEdge(const T & a, const T & b)
   {
     addNode(a);
@@ -107,15 +106,6 @@ public:
 
     _adj[a].push_back(b);
     _inv_adj[b].push_back(a);
-
-    if (check_cyclic && isCyclic())
-    {
-      auto cyclic_adjacencies = _adj;
-      removeEdge(a, b);
-      throw CyclicDependencyException<T>(
-          "DependencyResolver: attempt to insert dependency will result in cyclic graph",
-          std::move(cyclic_adjacencies));
-    }
   }
 
   /**
@@ -208,11 +198,6 @@ public:
   }
 
   /**
-   * Return true, if the grpah has a cycle, otherwise false
-   */
-  bool isCyclic() const { return _is_cyclic; }
-
-  /**
    * Do depth-first search from root nodes to obtain order in which graph nodes should be
    * "executed".
    */
@@ -228,19 +213,22 @@ public:
       _rec_stack[n.first] = false;
     }
 
-    _is_cyclic = false;
+    bool is_cyclic = false;
     // If there are no adjacencies, then all nodes are both roots and leaves
     bool roots_found = _adj.empty();
     for (auto & n : _insertion_order)
       if (_adj[n].size() == 0)
       {
         roots_found = true;
-        _is_cyclic = dfsFromNode(n);
-        if (_is_cyclic)
+        is_cyclic = dfsFromNode(n);
+        if (is_cyclic)
           break;
       }
     if (!roots_found)
-      _is_cyclic = true;
+      is_cyclic = true;
+
+    if (is_cyclic)
+      throw CyclicDependencyException<T>("cyclic graph detected", *this);
 
     return _sorted_vector;
   }
@@ -410,8 +398,6 @@ protected:
   std::vector<T> _sorted_vector;
   /// The sorted vector of sets
   std::vector<std::vector<T>> _ordered_items;
-  /// Whether the graph is cyclic
-  bool _is_cyclic = false;
   /// Container for keeping track of the insertion order. We will use this to determine iteration
   /// order because it is essential that iteration order be sync'd across multiple
   /// processes. Iterating over maps with pointer keys, for example, can be out of sync on multiple
