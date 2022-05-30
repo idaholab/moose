@@ -1,17 +1,19 @@
-# New Feature: Finite Volume Method (FVM)
+# Finite Volume Method (FVM)
 
 !---
 
 ## Advantages of Finite Volume Method
 
-+(1) Flexible:+ Works with arbitrary cell types (even if they are mixed in the same problem)
++(1) Flexible:+ Works with arbitrary mixed cell types (even if they are mixed in the same problem)
 
 +(2) Inherently conservative:+ Uses the integral form of the PDEs. This makes it perfect for
       applications where conservation laws need to be respected (fluid flows).
 
-+(3) "Accurate":+ Can be second-order accurate in space.
++(3) Accurate:+ Can be second-order accurate in space. Higher order possible, but not common.
 
-+(4) Rich literature:+ Widely used in Computational Fluid Dynamics (CFD) and has been researched for decades.
++(4) Robust:+ It is the current standard for most commercial (STAR-CCM+, ANSYS-Fluent, etc.) and major open-source (OpenFOAM, etc.) CFD codes.
+
++(4) Rich literature:+ Has been researched for decades.
 
 !---
 
@@ -29,7 +31,8 @@ First, domain $\Omega$ is split into $N_c$ cells ($\Omega_{i},~i=1,...,N_c$).
 
 !col! width=50%
 
-In MOOSE, the cell-centered finite volume approximation ([!citet](moukalled2016finite) and [!citet](jasak1996error)) is used:
+In MOOSE, the cell-centered finite volume approximation ([!citet](moukalled2016finite) and [!citet](jasak1996error)) is used
+due to the fact that it supports +both unstructured and structured meshes+:
 
 - Constant over the cells (value at cell centroid): $u \approx u_C$ if $r \in \Omega_C$
 - Constant over the faces (value at face centroid): $u \approx u_f$ if $r \in \partial\Omega_f$
@@ -52,12 +55,12 @@ Error analysis is done using Taylor expansions, we prefer second-order discretiz
 +(2)+ Integrate the equation over the domain $\Omega$:
 
 !equation
-\int_\Omega \left(\nabla\cdot k\nabla u + \vec{\beta} \cdot \nabla u +cu -f \right) dV = 0
+\int_\Omega \left(-\nabla\cdot k\nabla u + \vec{\beta} \cdot \nabla u +cu -f \right) dV = 0
 
 +(3)+ Split the integral into different terms:
 
 !equation
-\int_\Omega\nabla\cdot k\nabla u dV + \int_\Omega \vec{\beta} \cdot \nabla u dV + \int_\Omega cu dV -\int_\Omega f dV = 0
+-\int_\Omega \nabla\cdot k\nabla u dV + \int_\Omega \vec{\beta} \cdot \nabla u dV + \int_\Omega cu dV -\int_\Omega f dV = 0
 
 !---
 
@@ -77,7 +80,8 @@ Use the finite volume approximation (on cell C):
 
 ## Approximating the Reaction and Source Terms
 
-For a finite volume variable, there is only one quadrature point and it is the cell/face centroid.
+For a finite volume variable, there is only one quadrature point and it is the cell centroid. This form
+is very similar to the one used in the FEM routines (We always use a test function of 1!).
 
 !listing framework/src/fvkernels/FVReaction.C re=ADReal\sFVReaction::computeQpResidual.*?^}
 
@@ -105,33 +109,29 @@ Non-othogonal scenario:
 !style fontsize=80%
 Split into cell-wise integrals and use the divergence theorem:
 
+!style fontsize=80%
 !equation
 \int_\Omega\nabla\cdot k\nabla u dV = \sum_i^{N_c}\int_{\Omega_i}\nabla\cdot k\nabla u dV = \sum_i^{N_c}\int_{\partial\Omega_i} k\nabla u \cdot \hat{n} dS
 
 !style fontsize=80%
 On an internal cell (let's say on cell C):
 
+!style fontsize=80%
 !equation
 \int_{\partial\Omega_C} k\nabla u \cdot \hat{n} dS = \sum_f^{N_{f,C}}\int_{\partial\Omega_{C,f}}k\nabla u \cdot \hat{n} dS \approx \sum_f^{N_{f,C}}k_f\left(\nabla u\right)_f \cdot \hat{n}_f |S_f|
 
-!style fontsize=80%
+!style! fontsize=80%
 - $\left(\nabla u\right)_f \cdot \hat{n}$ for orthogonal scenario: $\frac{u_N-u_C}{\delta_{CN}}$ (cheap and accurate)
-
-!style fontsize=80%
 - $\left(\nabla u\right)_f \cdot \hat{n}$ for nonorthogonal scenario: $\frac{u_N-u_C}{\delta_{CN}}|\Delta_f|+\hat{k}_f\cdot \left(\nabla u\right)_f$  
 
-!style fontsize=80%
-The surface normal ($\hat{n}$) is expanded into a $\delta_{CN}$-parallel ($\hat{\Delta}_f$) and a remaining vector ($\hat{k}_f$): $\hat{n}_f=\hat{\Delta}_f + \hat{k}_f$
+  - The surface normal ($\hat{n}$) is expanded into a $\delta_{CN}$-parallel ($\hat{\Delta}_f$) and a remaining vector ($\hat{k}_f$): $\hat{n}_f=\hat{\Delta}_f + \hat{k}_f$
+  - $\left(\nabla u\right)_f$ on the right hand side is computed using the interpolation of cell gradients (next slide)  
+
+!style-end!
 
 !col-end!
 
 !row-end!
-
-!---
-
-## Approximating the Diffusion Term
-
-!listing framework/src/fvkernels/FVDiffusion.C re=ADReal\sFVDiffusion::computeQpResidual.*?^}
 
 !---
 
@@ -180,6 +180,12 @@ From the two equations:
 
 !---
 
+## Approximating the Diffusion Term
+
+!listing framework/src/fvkernels/FVDiffusion.C re=ADReal\sFVDiffusion::computeQpResidual.*?^}
+
+!---
+
 ## Approximating the Advection Term
 
 !row!
@@ -213,9 +219,15 @@ Common interpolation method for $u_f$:
 
 !---
 
-## Approximating the Reaction and Source Terms
+## Approximating the Advection Term
 
 !listing framework/src/fvkernels/FVAdvection.C re=ADReal\sFVAdvection::computeQpResidual.*?^}
+
+!---
+
+## Example Input File
+
+!listing test/tests/fvkernels/mms/non-orthogonal/advection-diffusion-reaction.i
 
 !---
 
