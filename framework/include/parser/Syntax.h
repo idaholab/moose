@@ -55,8 +55,6 @@ public:
 
   void addDependency(const std::string & task, const std::string & pre_req);
 
-  void addDontInsertDependency(const std::string & task, const std::string & pre_req);
-
   /**
    * Adds all dependencies in a single call. The string is split on parenthesis and each task
    * listed within the parenthesis is given equal precedence.

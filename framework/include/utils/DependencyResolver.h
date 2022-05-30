@@ -126,51 +126,25 @@ public:
   /**
    * Remove edges drawn from 'a'
    */
-  void removeEdgesPointingTo(const T & a) { _inv_adj[a].clear(); }
+  void removeEdgesInvolving(const T & a)
+  {
+    const auto & inv_adjs = _inv_adj[a];
+    for (const auto & inv_adj : inv_adjs)
+    {
+      auto & adj = _adj[inv_adj];
+      auto it = std::find(adj.begin(), adj.end(), a);
+      mooseAssert(it != adj.end(), "Should have reciprocity");
+      adj.erase(it);
+    }
+
+    _inv_adj[a].clear();
+  }
 
   /**
    * Insert a dependency pair - the first value or the "key" depends on the second value or the
    * "value"
    */
-  void insertDependency(const T & key, const T & value)
-  {
-    // Let's take a literal meaning
-
-    mooseAssert(_adj.find(value) != _adj.end() && _inv_adj.find(value) != _inv_adj.end(),
-                "The pre-req should already exist in the graph");
-    addNode(key);
-
-    auto & value_adjacencies = _adj[value];
-    if (!_inv_adj[key].empty())
-    {
-      mooseAssert(dependsOn(key, value),
-                  "If we have already processed this key, then it must depend on value.");
-      return;
-    }
-
-    // Do inverse adjacencies
-    for (auto & depends_on_value_obj : value_adjacencies)
-    {
-      auto & dependencies_of_obj = _inv_adj[depends_on_value_obj];
-      auto it = std::find(dependencies_of_obj.begin(), dependencies_of_obj.end(), value);
-      mooseAssert(it != dependencies_of_obj.end(),
-                  "If there is an adjacent relationship, then there must be an inverse-adjacent "
-                  "relationship.");
-      // Insert our new dependency
-      *it = key;
-    }
-    auto & inv_key_adjacencies = _inv_adj[key];
-    mooseAssert(inv_key_adjacencies.empty(),
-                "Asked to insert dependency, but root already has dependencies.");
-    inv_key_adjacencies.push_back(value);
-
-    // Do adjacencies
-    auto & key_adjacencies = _adj[key];
-    mooseAssert(key_adjacencies.empty(),
-                "Asked to insert dependency, but root already has dependencies.");
-    key_adjacencies.push_back(key);
-    key_adjacencies.swap(value_adjacencies);
-  }
+  void insertDependency(const T & key, const T & value) { addEdge(value, key); }
 
   /**
    * Delete a dependency (only the edge) between items in the resolver
@@ -180,7 +154,7 @@ public:
   /**
    * Removes dependencies of the given key
    */
-  void deleteDependenciesOfKey(const T & key) { removeEdgesPointingTo(key); }
+  void deleteDependenciesOfKey(const T & key) { removeEdgesInvolving(key); }
 
   /**
    * Add an independent item to the set

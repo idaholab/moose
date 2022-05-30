@@ -61,15 +61,6 @@ Syntax::addDependency(const std::string & task, const std::string & pre_req)
 }
 
 void
-Syntax::addDontInsertDependency(const std::string & task, const std::string & pre_req)
-{
-  if (_registered_tasks.find(task) == _registered_tasks.end())
-    mooseError("A ", task, " is not a registered task name.");
-
-  _tasks.addEdge(pre_req, task);
-}
-
-void
 Syntax::addDependencySets(const std::string & action_sets)
 {
   std::vector<std::string> sets, prev_names, tasks;
@@ -83,7 +74,7 @@ Syntax::addDependencySets(const std::string & action_sets)
     {
       // Each line should depend on each item in the previous line
       for (unsigned int k = 0; k < prev_names.size(); ++k)
-        addDontInsertDependency(tasks[j], prev_names[k]);
+        addDependency(tasks[j], prev_names[k]);
     }
     // Copy the the current items to the previous items for the next iteration
     std::swap(tasks, prev_names);
