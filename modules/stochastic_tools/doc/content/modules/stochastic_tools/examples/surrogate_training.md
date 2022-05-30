@@ -93,15 +93,15 @@ First, a sampler needs to be created, which defines the training points for whic
 
 !listing examples/surrogates/nearest_point_training.i block=Samplers
 
-The [!param](/Samplers/CartesianProduct/linear_space_items) parameter defines a uniform grid of points. Having 10 points for each parameter results in 10,000 training points. [!param](/Samplers/CartesianProduct/execute_on) needs to be set to `PRE_MULTIAPP_SETUP` for this example since we will be using [MultiAppCommandLineControl.md] to perturb the parameters.
+The [!param](/Samplers/CartesianProduct/linear_space_items) parameter defines a uniform grid of points. Having 10 points for each parameter results in 10,000 training points. [!param](/Samplers/CartesianProduct/execute_on) needs to be set to `PRE_MULTIAPP_SETUP` for this example since we will be using [MultiAppSamplerControl.md] to perturb the parameters.
 
 ### MultiApp and Control
 
-[SamplerFullSolveMultiApp.md] is used to setup the communication between the master and sub app with the ability to loop over samples. [MultiAppCommandLineControl.md] defines which parameters to perturb, which =must= correspond with the dimensionality defined in the [Sampler](Samplers/index.md).
+[SamplerFullSolveMultiApp.md] is used to setup the communication between the master and sub app with the ability to loop over samples. [MultiAppSamplerControl.md] defines which parameters to perturb, which =must= correspond with the dimensionality defined in the [Sampler](Samplers/index.md).
 
 !listing examples/surrogates/nearest_point_training.i block=MultiApps Controls
 
-[MultiAppCommandLineControl.md] is not the only method to perturb sub app input parameters. If all the parameters are controllable, then [SamplerParameterTransfer.md] can be used. See the [Monte Carlo Example](/examples/monte_carlo.md) for more details.
+[MultiAppSamplerControl.md] is not the only method to perturb sub app input parameters. If all the parameters are controllable, then [SamplerParameterTransfer.md] can be used. See the [Monte Carlo Example](/examples/monte_carlo.md) for more details.
 
 ### Transferring Results
 

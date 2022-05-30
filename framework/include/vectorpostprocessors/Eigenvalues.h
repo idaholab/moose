@@ -20,12 +20,19 @@ public:
 
   Eigenvalues(const InputParameters & parameters);
 
-  virtual void initialize() override {}
+  virtual void initialize() override;
   virtual void execute() override;
 
 protected:
+  /// Whether to report the inverse of the eigenvalues
   const bool _inverse;
+
+  /// Real part of the eigenvalues
   VectorPostprocessorValue & _eigen_values_real;
+
+  /// Imaginary part of the eigenvalues
   VectorPostprocessorValue & _eigen_values_imag;
+
+  /// Nonlinear eigen-system to get the eigenvalues from
   NonlinearEigenSystem * _nl_eigen;
 };

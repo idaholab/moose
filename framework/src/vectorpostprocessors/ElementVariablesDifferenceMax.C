@@ -112,6 +112,11 @@ void
 ElementVariablesDifferenceMax::initialize()
 {
   _all[MAXIMUM_DIFFERENCE] = 0.0;
+  _all[MAXIMUM_DIFFERENCE_A_VALUE] = 0.0;
+  _all[MAXIMUM_DIFFERENCE_B_VALUE] = 0.0;
+  _all[MAXIMUM_DIFFERENCE_X] = 0.0;
+  _all[MAXIMUM_DIFFERENCE_Y] = 0.0;
+  _all[MAXIMUM_DIFFERENCE_Z] = 0.0;
 }
 
 void

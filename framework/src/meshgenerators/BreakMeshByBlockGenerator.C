@@ -9,6 +9,7 @@
 
 #include "BreakMeshByBlockGenerator.h"
 #include "CastUniquePointer.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/elem.h"
@@ -26,10 +27,10 @@ BreakMeshByBlockGenerator::validParams()
                              "attached. Naming convention for the new boundaries will be the old "
                              "boundary name plus \"_to_\" plus the subdomain name. At the moment"
                              "this only works on REPLICATED mesh");
-  params.addParam<std::vector<SubdomainID>>(
+  params.addParam<std::vector<SubdomainName>>(
       "surrounding_blocks",
       "The list of subdomain names surrounding which interfaces will be generated.");
-  params.addParam<std::vector<std::vector<SubdomainID>>>(
+  params.addParam<std::vector<std::vector<SubdomainName>>>(
       "block_pairs", "The list of subdomain pairs between which interfaces will be generated.");
   params.addParam<bool>("add_transition_interface",
                         false,
@@ -62,25 +63,6 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
                "BreakMeshByBlockGenerator: 'surrounding_blocks' and 'block_pairs' can not be used "
                "at the same time.");
 
-  if (_block_pairs_restricted)
-  {
-    for (auto block_pair : getParam<std::vector<std::vector<SubdomainID>>>("block_pairs"))
-    {
-      if (block_pair.size() != 2)
-        paramError("block_pair",
-                   "Each row of 'block_pairs' must have a size of two (block names).");
-      std::pair<SubdomainID, SubdomainID> pair = std::make_pair(
-          std::min(block_pair[0], block_pair[1]), std::max(block_pair[0], block_pair[1]));
-
-      _block_pairs.insert(pair);
-      std::copy(block_pair.begin(), block_pair.end(), std::inserter(_block_set, _block_set.end()));
-    }
-  }
-  else if (_surrounding_blocks_restricted)
-    std::copy(getParam<std::vector<SubdomainID>>("surrounding_blocks").begin(),
-              getParam<std::vector<SubdomainID>>("surrounding_blocks").end(),
-              std::inserter(_block_set, _block_set.end()));
-
   if (typeid(_input).name() == typeid(DistributedMesh).name())
     mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
 
@@ -100,6 +82,31 @@ BreakMeshByBlockGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
+
+  // Handle block restrictions
+  if (_block_pairs_restricted)
+  {
+    for (auto block_name_pair : getParam<std::vector<std::vector<SubdomainName>>>("block_pairs"))
+    {
+      if (block_name_pair.size() != 2)
+        paramError("block_pair",
+                   "Each row of 'block_pairs' must have a size of two (block names).");
+      const auto block_pair = MooseMeshUtils::getSubdomainIDs(*mesh, block_name_pair);
+      std::pair<SubdomainID, SubdomainID> pair = std::make_pair(
+          std::min(block_pair[0], block_pair[1]), std::max(block_pair[0], block_pair[1]));
+
+      _block_pairs.insert(pair);
+      std::copy(block_pair.begin(), block_pair.end(), std::inserter(_block_set, _block_set.end()));
+    }
+  }
+  else if (_surrounding_blocks_restricted)
+  {
+    const auto surrounding_block_ids = MooseMeshUtils::getSubdomainIDs(
+        *mesh, getParam<std::vector<SubdomainName>>("surrounding_blocks"));
+    std::copy(surrounding_block_ids.begin(),
+              surrounding_block_ids.end(),
+              std::inserter(_block_set, _block_set.end()));
+  }
 
   // check that a boundary named _interface_transition_name does not already exist in the mesh
   if ((_block_pairs_restricted || _surrounding_blocks_restricted) && _add_transition_interface &&

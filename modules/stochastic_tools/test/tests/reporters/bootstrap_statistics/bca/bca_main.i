@@ -47,7 +47,7 @@
 []
 
 [Controls/param]
-  type = MultiAppCommandLineControl
+  type = MultiAppSamplerControl
   multi_app = sub
   param_names = 'Reporters/const/real_vector_values[0,1,2,3,4]'
 []

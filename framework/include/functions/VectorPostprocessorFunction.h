@@ -41,6 +41,6 @@ protected:
   /// used to get the current linear/non-linear iteration number
   FEProblemBase & _fe_problem;
 
-  /// last iteration during which teh linear interpolation was rebuilt
-  mutable std::pair<unsigned int, unsigned int> _last_update;
+  /// last iteration during which the linear interpolation was rebuilt
+  mutable std::tuple<Real, unsigned int, unsigned int> _last_update;
 };

@@ -141,16 +141,24 @@
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar coupled source functions'
-    cli_args = "Modules/NavierStokesFV/passive_scalar_coupled_source='v w'"
+    cli_args = "Modules/NavierStokesFV/passive_scalar_coupled_source='v; w'"
     expect_err = "The number of coupled sources defined is not equal to the number of passive scalar fields!"
     ad_indexing_type = 'global'
   []
-  [passive-scalar-coupled-source-coeff-error]
+  [passive-scalar-coupled-source-coeff-error-1]
     type = 'RunException'
     input = 2d-rc-error-action.i
-    requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar coupled source coefficients'
-    cli_args = "Modules/NavierStokesFV/passive_scalar_coupled_source='v' Modules/NavierStokesFV/passive_scalar_coupled_source_coeff='0.1 0.2'"
+    requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar coupled source coefficients with regards to the number of scalar equations'
+    cli_args = "Modules/NavierStokesFV/passive_scalar_coupled_source='v' Modules/NavierStokesFV/passive_scalar_coupled_source_coeff='0.1; 0.2'"
     expect_err = "The number of coupled sources coefficients defined is not equal to the number of passive scalar fields!"
+    ad_indexing_type = 'global'
+  []
+  [passive-scalar-coupled-source-coeff-error-2]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the user defines an inappropriate number of passive scalar coupled source coefficients with regards to the number of sources'
+    cli_args = "Modules/NavierStokesFV/passive_scalar_coupled_source='v' Modules/NavierStokesFV/passive_scalar_coupled_source_coeff='0.1 0.2'"
+    expect_err = "The number of coupled sources coefficients defined is not equal to the number of coupled sources!"
     ad_indexing_type = 'global'
   []
   [passive-scalar-schmidt-error]

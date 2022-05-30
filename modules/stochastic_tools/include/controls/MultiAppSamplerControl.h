@@ -20,14 +20,14 @@ class Sampler;
 class MultiApp;
 
 /**
- * A Control object for receiving data from a master application Sampler object.
+ * A Control object for receiving data from a parent application Sampler object.
  */
-class MultiAppCommandLineControl : public Control, public SamplerInterface
+class MultiAppSamplerControl : public Control, public SamplerInterface
 {
 public:
   static InputParameters validParams();
 
-  MultiAppCommandLineControl(const InputParameters & parameters);
+  MultiAppSamplerControl(const InputParameters & parameters);
 
   /**
    * Do not allow the use of initialSetup, because this class is designed to operate

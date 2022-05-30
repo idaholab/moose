@@ -66,12 +66,10 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
     _ngrain(isParamValid("ngrain") ? getParam<unsigned int>("ngrain")
                                    : getParam<unsigned int>("nvoronoi")),
     _mesh(_fe_problem.mesh()),
-    _nelem(_mesh.nElem()),
     _nprop(getParam<unsigned int>("nprop")),
     _nvoronoi(isParamValid("ngrain") ? getParam<unsigned int>("ngrain")
                                      : getParam<unsigned int>("nvoronoi")),
-    _nblock(getParam<unsigned int>("nblock")),
-    _nnode(_mesh.nNodes())
+    _nblock(getParam<unsigned int>("nblock"))
 {
   if (!_use_random_tesselation && parameters.isParamSetByUser("rand_seed"))
     paramError("rand_seed",
@@ -209,11 +207,11 @@ Real
 PropertyReadFile::getElementData(const Elem * elem, unsigned int prop_num) const
 {
   unsigned int jelem = elem->id();
-  if (jelem >= _nelem)
+  if (jelem >= _mesh.nElem())
     mooseError("Element ID ",
                jelem,
                " greater than than total number of element in mesh: ",
-               _nelem,
+               _mesh.nElem(),
                ". Elements should be numbered consecutively.");
   return _reader.getData(jelem)[prop_num];
 }
@@ -222,11 +220,11 @@ Real
 PropertyReadFile::getNodeData(const Node * const node, const unsigned int prop_num) const
 {
   unsigned int jnode = node->id();
-  if (jnode >= _nnode)
+  if (jnode >= _mesh.nNodes())
     mooseError("Node ID ",
                jnode,
                " greater than than total number of nodes in mesh: ",
-               _nnode,
+               _mesh.nNodes(),
                ". Nodes should be numbered consecutively.");
   return _reader.getData(jnode)[prop_num];
 }

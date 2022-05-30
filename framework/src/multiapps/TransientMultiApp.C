@@ -66,6 +66,10 @@ TransientMultiApp::validParams()
   params.addParam<unsigned int>(
       "max_failures", 0, "Maximum number of solve failures tolerated while sub_cycling.");
 
+  params.addParamNamesToGroup("sub_cycling interpolate_transfers detect_steady_state "
+                              "steady_state_tol output_sub_cycles print_sub_cycles max_failures",
+                              "Sub cycling");
+
   params.addParam<bool>("tolerate_failure",
                         false,
                         "If true this MultiApp won't participate in dt "

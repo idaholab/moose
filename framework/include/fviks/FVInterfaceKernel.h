@@ -154,7 +154,7 @@ protected:
 
   /**
    * Determine the single sided face argument when evaluating a functor on a face.
-   * This is used to perform evluations of material properties with the actual face values of
+   * This is used to perform evaluations of material properties with the actual face values of
    * their dependences, rather than interpolate the material property to the boundary.
    * @param fi the FaceInfo for this face
    * @param limiter_type the limiter type, to be specified if more than the default average

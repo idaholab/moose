@@ -19,16 +19,13 @@ protected:
   ADReal computeQpResidual() override;
 
   /// The fluid temperature variable
-  const MooseVariableFV<Real> * _temp_fluid;
+  const Moose::Functor<ADReal> & _temp_fluid;
 
   /// The solid/wall temperature variable
-  const MooseVariableFV<Real> * _temp_solid;
+  const Moose::Functor<ADReal> & _temp_solid;
 
   /// The convective heat transfer coefficient in the local element
-  const ADMaterialProperty<Real> & _htc_elem;
-
-  /// The convective heat transfer coefficient in the neighbor element
-  const ADMaterialProperty<Real> & _htc_neighbor;
+  const Moose::Functor<ADReal> & _htc;
 
   /// The distance from the wall before evaluating the bulk temperature
   const Real _bulk_distance;

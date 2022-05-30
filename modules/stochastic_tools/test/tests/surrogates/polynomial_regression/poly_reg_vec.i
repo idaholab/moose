@@ -38,7 +38,7 @@
 
 [Controls]
   [cmdline]
-    type = MultiAppCommandLineControl
+    type = MultiAppSamplerControl
     multi_app = sub
     param_names = 'Materials/conductivity/prop_values L'
   []

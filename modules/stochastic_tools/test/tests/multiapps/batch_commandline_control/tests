@@ -1,5 +1,5 @@
 [Tests]
-  design = 'SamplerFullSolveMultiApp.md MultiAppCommandLineControl.md'
+  design = 'SamplerFullSolveMultiApp.md MultiAppSamplerControl.md'
   issues = '#13320'
 
   [master]

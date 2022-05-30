@@ -1,0 +1,19 @@
+[Tests]
+  design = 'DivergenceAux.md'
+  [finite_element]
+    type = 'CSVDiff'
+    input = 'test_fe.i'
+    csvdiff = 'test_fe_out.csv'
+    issues = '#20955'
+    requirement = "The system shall be able to compute the divergence of a vector of finite element variables."
+    ad_indexing_type = 'global'
+  []
+  [finite_volume]
+    type = 'CSVDiff'
+    input = 'test_fv.i'
+    csvdiff = 'test_fv_out.csv'
+    issues = '#20955'
+    requirement = "The system shall be able to compute the divergence of a vector of finite volume variables."
+    ad_indexing_type = 'global'
+  []
+[]

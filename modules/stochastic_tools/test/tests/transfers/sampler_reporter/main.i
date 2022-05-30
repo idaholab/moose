@@ -34,7 +34,7 @@
 
 [Controls]
   [runner]
-    type = MultiAppCommandLineControl
+    type = MultiAppSamplerControl
     multi_app = sub
     param_names = 'Reporters/constant/integer_values
                    real_val
