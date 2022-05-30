@@ -47,7 +47,7 @@
     variable = u_real
   [../]
   [./coeffField_real]
-    type = ADFuncReaction
+    type = ADFunctionReaction
     func = negative_ASquaredMinusBSquared
     variable = u_real
   [../]
@@ -63,7 +63,7 @@
     variable = u_imag
   [../]
   [./coeffField_imag]
-    type = ADFuncReaction
+    type = ADFunctionReaction
     func = negative_ASquaredMinusBSquared
     variable = u_imag
   [../]

@@ -53,7 +53,7 @@ component and the phase shift should be adequate to check for proper performance
 Given Gauss's Law with an absence of charge density (as the waveguide is filled
 with vacuum), a standard diffusion-reaction style equation (without a source) is
 the final form of the equation being modeled, with the [Diffusion.md] and
-[ADFuncReaction.md] objects being used for each real and imaginary component.
+[ADFunctionReaction.md] objects being used for each real and imaginary component.
 
 With respect to boundary conditions, $E_x$ is set to zero on the waveguide walls,
 to satisfy the perfect electrical conductor boundary condition for this case. For

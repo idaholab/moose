@@ -65,7 +65,7 @@ E0 = 1 # magnitude of the incident field (in V/m)
     variable = E_real
   [../]
   [./field_real]
-    type = ADFuncReaction
+    type = ADFunctionReaction
     func = coeff_real
     variable = E_real
   [../]
@@ -81,7 +81,7 @@ E0 = 1 # magnitude of the incident field (in V/m)
     variable = E_imag
   [../]
   [./field_imag]
-    type = ADFuncReaction
+    type = ADFunctionReaction
     func = coeff_real
     variable = E_imag
   [../]

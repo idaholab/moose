@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADFuncReaction.h"
+#include "ADFunctionReaction.h"
 #include "Function.h"
 
-registerMooseObject("MooseApp", ADFuncReaction);
+registerMooseObject("MooseApp", ADFunctionReaction);
 
 InputParameters
-ADFuncReaction::validParams()
+ADFunctionReaction::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addClassDescription(
@@ -23,13 +23,13 @@ ADFuncReaction::validParams()
   return params;
 }
 
-ADFuncReaction::ADFuncReaction(const InputParameters & parameters)
+ADFunctionReaction::ADFunctionReaction(const InputParameters & parameters)
   : ADKernel(parameters), _func(getFunction("func"))
 {
 }
 
 ADReal
-ADFuncReaction::computeQpResidual()
+ADFunctionReaction::computeQpResidual()
 {
   return _func.value(_t, _q_point[_qp]) * _test[_i][_qp] * _u[_qp];
 }

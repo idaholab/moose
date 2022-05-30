@@ -36,7 +36,7 @@
     variable = E_real
   [../]
   [./coeffField_real]
-    type = ADFuncReaction
+    type = ADFunctionReaction
     func = negative_kSquared
     variable = E_real
   [../]
@@ -45,7 +45,7 @@
     variable = E_imag
   [../]
   [./coeffField_imaginary]
-    type = ADFuncReaction
+    type = ADFunctionReaction
     func = negative_kSquared
     variable = E_imag
   [../]

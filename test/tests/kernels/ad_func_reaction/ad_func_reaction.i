@@ -31,7 +31,7 @@
     variable = u
   []
   [reaction]
-    type = ADFuncReaction
+    type = ADFunctionReaction
     variable = u
     func = rxn_func
   []

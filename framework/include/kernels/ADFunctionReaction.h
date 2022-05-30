@@ -15,12 +15,12 @@
  *  Kernel representing the contribution of the PDE term $fu$, where $f$ is a
  *  function coefficient, and $u$ is a scalar variable.
  */
-class ADFuncReaction : public ADKernel
+class ADFunctionReaction : public ADKernel
 {
 public:
   static InputParameters validParams();
 
-  ADFuncReaction(const InputParameters & parameters);
+  ADFunctionReaction(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
