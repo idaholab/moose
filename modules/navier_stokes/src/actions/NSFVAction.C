@@ -1279,10 +1279,17 @@ NSFVAction::addINSMomentumFrictionKernels()
 
     for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
     {
+      std::string block_name = "";
       if (num_friction_blocks)
+      {
         params.set<std::vector<SubdomainName>>("block") = _friction_blocks[block_i];
+        block_name = Moose::stringify(_friction_blocks[block_i]);
+      }
       else
+      {
         params.set<std::vector<SubdomainName>>("block") = _blocks;
+        block_name = std::to_string(block_i);
+      }
 
       for (unsigned int d = 0; d < _dim; ++d)
       {
@@ -1297,10 +1304,8 @@ NSFVAction::addINSMomentumFrictionKernels()
             params.set<MooseFunctorName>("Forchheimer_name") = _friction_coeffs[block_i][type_i];
         }
 
-        _problem->addFVKernel(kernel_type,
-                              "momentum_friction_" + std::to_string(block_i) + "_" +
-                                  NS::directions[d],
-                              params);
+        _problem->addFVKernel(
+            kernel_type, "momentum_friction_" + block_name + "_" + NS::directions[d], params);
       }
 
       if (_use_friction_correction)
@@ -1330,8 +1335,8 @@ NSFVAction::addINSMomentumFrictionKernels()
           }
 
           _problem->addFVKernel(correction_kernel_type,
-                                "pins_momentum_friction_correction_" + std::to_string(block_i) +
-                                    "_" + NS::directions[d],
+                                "pins_momentum_friction_correction_" + block_name + "_" +
+                                    NS::directions[d],
                                 corr_params);
         }
       }
@@ -1345,10 +1350,17 @@ NSFVAction::addINSMomentumFrictionKernels()
 
     for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
     {
+      std::string block_name = "";
       if (num_friction_blocks)
+      {
         params.set<std::vector<SubdomainName>>("block") = _friction_blocks[block_i];
+        block_name = Moose::stringify(_friction_blocks[block_i]);
+      }
       else
+      {
         params.set<std::vector<SubdomainName>>("block") = _blocks;
+        block_name = std::to_string(block_i);
+      }
 
       for (unsigned int d = 0; d < _dim; ++d)
       {
@@ -1363,10 +1375,8 @@ NSFVAction::addINSMomentumFrictionKernels()
             params.set<MooseFunctorName>("quadratic_coef_name") = _friction_coeffs[block_i][type_i];
         }
 
-        _problem->addFVKernel(kernel_type,
-                              "ins_momentum_friction_" + std::to_string(block_i) + "_" +
-                                  NS::directions[d],
-                              params);
+        _problem->addFVKernel(
+            kernel_type, "ins_momentum_friction_" + block_name + "_" + NS::directions[d], params);
       }
     }
   }
@@ -1404,6 +1414,12 @@ NSFVAction::addINSEnergyHeatConductionKernels()
 
   for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
   {
+    std::string block_name = "";
+    if (num_blocks)
+      block_name = Moose::stringify(_thermal_conductivity_blocks[block_i]);
+    else
+      block_name = std::to_string(block_i);
+
     if (_porous_medium_treatment)
     {
       const std::string kernel_type =
@@ -1419,8 +1435,7 @@ NSFVAction::addINSEnergyHeatConductionKernels()
       params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[block_i];
       params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
 
-      _problem->addFVKernel(
-          kernel_type, "pins_energy_diffusion_" + std::to_string(block_i), params);
+      _problem->addFVKernel(kernel_type, "pins_energy_diffusion_" + block_name, params);
     }
     else
     {
@@ -1432,7 +1447,7 @@ NSFVAction::addINSEnergyHeatConductionKernels()
       params.set<std::vector<SubdomainName>>("block") = block_names;
       params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[block_i];
 
-      _problem->addFVKernel(kernel_type, "ins_energy_diffusion", params);
+      _problem->addFVKernel(kernel_type, "ins_energy_diffusion_" + block_name, params);
     }
   }
 }
@@ -1453,14 +1468,20 @@ NSFVAction::addINSEnergyAmbientConvection()
   {
     std::string block_name = "";
     if (num_convection_blocks)
+    {
       params.set<std::vector<SubdomainName>>("block") = _ambient_convection_blocks[block_i];
+      block_name = Moose::stringify(_ambient_convection_blocks[block_i]);
+    }
     else
+    {
       params.set<std::vector<SubdomainName>>("block") = _blocks;
+      block_name = std::to_string(block_i);
+    }
 
     params.set<MooseFunctorName>("h_solid_fluid") = _ambient_convection_alpha[block_i];
     params.set<MooseFunctorName>(NS::T_solid) = _ambient_temperature[block_i];
 
-    _problem->addFVKernel(kernel_type, "ambient_convection_" + std::to_string(block_i), params);
+    _problem->addFVKernel(kernel_type, "ambient_convection_" + block_name, params);
   }
 }
 
@@ -2254,7 +2275,7 @@ NSFVAction::checkGeneralControlErrors()
 
   if (_porous_medium_treatment && _has_scalar_equation)
     paramError("porous_medium_treatment",
-               "Porous media scalar advection is currently unimplemented");
+               "Porous media scalar advection is currently unimplemented!");
 
   if (isParamValid("consistent_scaling") && !_use_friction_correction)
     paramError("consistent_scaling",
@@ -2430,12 +2451,17 @@ NSFVAction::checkFrictionParameterErrors()
 {
   checkBlockwiseConsistency<std::vector<std::string>>("friction_blocks",
                                                       {"friction_types", "friction_coeffs"});
-
   for (unsigned int block_i = 0; block_i < _friction_types.size(); ++block_i)
     if (_friction_types[block_i].size() != _friction_coeffs[block_i].size())
     {
+      std::string block_name = "";
+      if (_friction_blocks.size())
+        block_name = Moose::stringify(_friction_blocks[block_i]);
+      else
+        block_name = std::to_string(block_i);
+
       paramError("friction_coeffs",
-                 "The number of friction coefficients for block-group: " + std::to_string(block_i) +
+                 "The number of friction coefficients for block(s): " + block_name +
                      " is not the same as the number of requested friction types!");
     }
 
@@ -2448,9 +2474,17 @@ NSFVAction::checkFrictionParameterErrors()
     {
       unsigned int c = std::count(ft.begin(), ft.end(), name);
       if (c > 1)
+      {
+        std::string block_name = "";
+        if (_friction_blocks.size())
+          block_name = Moose::stringify(_friction_blocks[block_i]);
+        else
+          block_name = std::to_string(block_i);
+
         paramError("friction_types",
-                   "The following keyword: " + name + " appeared more than once in block-group " +
-                       std::to_string(block_i) + " of 'friction_types'.");
+                   "The following keyword: " + name + " appeared more than once in block(s) " +
+                       block_name + " of 'friction_types'.");
+      }
     }
   }
 }
@@ -2513,7 +2547,7 @@ NSFVAction::checkDependentParameterError(const std::string main_parameter,
 void
 NSFVAction::checkRhieChowFunctorsDefined()
 {
-  if (!_problem->hasFunctor("ax", /*thread_id=*/0)
+  if (!_problem->hasFunctor("ax", /*thread_id=*/0))
     paramError("add_flow_equations",
                "Rhie Chow coefficient ax must be provided for advection by auxiliary velocities");
   if (_dim >= 2 && !_problem->hasFunctor("ay", /*thread_id=*/0))
