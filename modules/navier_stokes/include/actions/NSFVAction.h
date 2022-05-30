@@ -318,7 +318,7 @@ private:
   void checkRhieChowFunctorsDefined();
 
   /// Check if the input string can be parsed to a Real
-  inline bool parsesToReal(const std::string & input)
+  bool parsesToReal(const std::string & input)
   {
     std::istringstream ss(input);
     Real real_value;
