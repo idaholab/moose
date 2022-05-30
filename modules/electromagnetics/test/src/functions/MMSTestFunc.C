@@ -71,7 +71,7 @@ MMSTestFunc::value(Real /*t*/, const Point & p) const
 
   F = c_grad * sln_grad;
 
-  if (_component == electromagnetics::REAL)
+  if (_component == EM::REAL)
   {
     val = F.real();
   }

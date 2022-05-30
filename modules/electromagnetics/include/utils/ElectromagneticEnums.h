@@ -14,7 +14,7 @@
  *  Electromagnetic module, such as real/imag component definitions in
  *  Kernels, BCs, etc.
  */
-namespace electromagnetics
+namespace EM
 {
 /// Enum used when determining the component of a field vector or complex coefficient
 enum ComponentEnum
@@ -29,4 +29,4 @@ enum RobinEnum
   ABSORBING,
   PORT
 };
-} // namespace electromagnetics
+} // namespace EM

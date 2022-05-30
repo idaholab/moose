@@ -9,6 +9,7 @@
 
 #include "VectorCurrentSource.h"
 #include "ElectromagneticEnums.h"
+#include "ElectromagneticConstants.h"
 #include "Function.h"
 #include <complex>
 
@@ -53,11 +54,9 @@ VectorCurrentSource::computeQpResidual()
                                 _source_imag.vectorValue(_t, _q_point[_qp])(2));
   VectorValue<std::complex<double>> source(source_0, source_1, source_2);
 
-  std::complex<double> jay(0, 1);
+  std::complex<double> res = EM::j * _func.value(_t, _q_point[_qp]) * source * _test[_i][_qp];
 
-  std::complex<double> res = jay * _func.value(_t, _q_point[_qp]) * source * _test[_i][_qp];
-
-  if (_component == electromagnetics::REAL)
+  if (_component == EM::REAL)
   {
     return res.real();
   }

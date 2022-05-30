@@ -49,7 +49,4 @@ protected:
 
   /// Coupled vector field variable dot du
   const VariableValue & _coupled_dot_du;
-
-  /// Value of complex number (can't use _j or _i due to basis function indices)
-  std::complex<double> _jay;
 };

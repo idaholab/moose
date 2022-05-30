@@ -58,7 +58,7 @@ VectorTransientAbsorbingBC::computeQpResidual()
   std::complex<double> field_dot_2(0, 0);
 
   // Create E_dot for residual based on component parameter
-  if (_component == electromagnetics::REAL)
+  if (_component == EM::REAL)
   {
     field_dot_0.real(_u_dot[_qp](0));
     field_dot_0.imag(_coupled_dot[_qp](0));
@@ -89,7 +89,7 @@ VectorTransientAbsorbingBC::computeQpResidual()
 
   std::complex<double> res = -p_dot_test;
 
-  if (_component == electromagnetics::REAL)
+  if (_component == EM::REAL)
   {
     return res.real();
   }

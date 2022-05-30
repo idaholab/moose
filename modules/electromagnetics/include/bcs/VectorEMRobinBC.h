@@ -46,9 +46,6 @@ protected:
   /// Imaginary incoming field vector
   const Function & _inc_imag;
 
-  /// Value of complex number (can't use _j or _i due to basis function indices)
-  const std::complex<double> _jay;
-
   /// Mode of operation (absorbing or port)
   const MooseEnum _mode;
 

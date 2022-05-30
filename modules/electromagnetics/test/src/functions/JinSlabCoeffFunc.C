@@ -9,6 +9,7 @@
 
 #include "JinSlabCoeffFunc.h"
 #include "ElectromagneticEnums.h"
+#include "ElectromagneticConstants.h"
 #include <complex>
 
 registerMooseObject("ElectromagneticsTestApp", JinSlabCoeffFunc);
@@ -43,14 +44,13 @@ JinSlabCoeffFunc::JinSlabCoeffFunc(const InputParameters & parameters)
 Real
 JinSlabCoeffFunc::value(Real /*t*/, const Point & p) const
 {
-  std::complex<double> jay(0, 1);
-  std::complex<double> eps_r = 4.0 + (2.0 - jay * 0.1) * std::pow((1 - p(0) / _length), 2);
+  std::complex<double> eps_r = 4.0 + (2.0 - EM::j * 0.1) * std::pow((1 - p(0) / _length), 2);
   std::complex<double> mu_r(2, -0.1);
 
   std::complex<double> val = _coef * mu_r * std::pow(_k, 2) *
                              (eps_r - (1.0 / mu_r) * std::pow(sin(_theta * libMesh::pi / 180.), 2));
 
-  if (_component == electromagnetics::REAL)
+  if (_component == EM::REAL)
   {
     return val.real();
   }

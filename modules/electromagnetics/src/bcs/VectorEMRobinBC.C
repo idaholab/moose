@@ -9,6 +9,7 @@
 
 #include "VectorEMRobinBC.h"
 #include "ElectromagneticEnums.h"
+#include "ElectromagneticConstants.h"
 #include "Function.h"
 #include <complex>
 
@@ -49,15 +50,12 @@ VectorEMRobinBC::VectorEMRobinBC(const InputParameters & parameters)
     _inc_real(getFunction("real_incoming")),
     _inc_imag(getFunction("imag_incoming")),
 
-    // Value of complex j (can't use _j or _i due to MOOSE basis fxn conventions)
-    _jay(0, 1),
-
     _mode(getParam<MooseEnum>("mode")),
 
     _real_incoming_was_set(parameters.isParamSetByUser("real_incoming")),
     _imag_incoming_was_set(parameters.isParamSetByUser("imag_incoming"))
 {
-  if (_mode == electromagnetics::ABSORBING && (_real_incoming_was_set || _imag_incoming_was_set))
+  if (_mode == EM::ABSORBING && (_real_incoming_was_set || _imag_incoming_was_set))
   {
     mooseError(
         "In ",
@@ -77,7 +75,7 @@ VectorEMRobinBC::computeQpResidual()
   std::complex<double> field_2(0, 0);
 
   // Create E and ncrossE for residual based on component parameter
-  if (_component == electromagnetics::REAL)
+  if (_component == EM::REAL)
   {
     field_0.real(_u[_qp](0));
     field_0.imag(_coupled_val[_qp](0));
@@ -137,18 +135,18 @@ VectorEMRobinBC::computeQpResidual()
   std::complex<double> u_inc_dot_test = 0.0;
   switch (_mode)
   {
-    case electromagnetics::PORT:
+    case EM::PORT:
       // Calculate incoming wave contribution to BC residual
       u_inc_dot_test = _test[_i][_qp].cross(_normals[_qp]) * curl_inc +
-                       _jay * _beta.value(_t, _q_point[_qp]) *
+                       EM::j * _beta.value(_t, _q_point[_qp]) *
                            (_test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(field_inc));
       break;
-    case electromagnetics::ABSORBING:
+    case EM::ABSORBING:
       break;
   }
 
   // Calculate solution field contribution to BC residual (first order version)
-  std::complex<double> p_dot_test = _jay * _beta.value(_t, _q_point[_qp]) *
+  std::complex<double> p_dot_test = EM::j * _beta.value(_t, _q_point[_qp]) *
                                     _test[_i][_qp].cross(_normals[_qp]) *
                                     _normals[_qp].cross(field);
 
@@ -156,10 +154,10 @@ VectorEMRobinBC::computeQpResidual()
   Real res = 0.0;
   switch (_component)
   {
-    case electromagnetics::REAL:
+    case EM::REAL:
       res = diff.real();
       break;
-    case electromagnetics::IMAGINARY:
+    case EM::IMAGINARY:
       res = diff.imag();
       break;
   }
@@ -178,11 +176,11 @@ VectorEMRobinBC::computeQpOffDiagJacobian(unsigned int jvar)
   Real off_diag_jac = _beta.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]) *
                       _normals[_qp].cross(_phi[_j][_qp]);
 
-  if (_component == electromagnetics::REAL && jvar == _coupled_var_num)
+  if (_component == EM::REAL && jvar == _coupled_var_num)
   {
     return off_diag_jac;
   }
-  else if (_component == electromagnetics::IMAGINARY && jvar == _coupled_var_num)
+  else if (_component == EM::IMAGINARY && jvar == _coupled_var_num)
   {
     return -off_diag_jac;
   }

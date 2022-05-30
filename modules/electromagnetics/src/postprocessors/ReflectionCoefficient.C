@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ReflectionCoefficient.h"
+#include "ElectromagneticConstants.h"
 #include <complex>
 
 registerMooseObject("ElectromagneticsApp", ReflectionCoefficient);
@@ -83,13 +84,12 @@ ReflectionCoefficient::finalize()
 Real
 ReflectionCoefficient::computeReflection()
 {
-  std::complex<double> jay(0, 1);
   std::complex<double> field(_coupled_real[_qp], _coupled_imag[_qp]);
 
   std::complex<double> incoming_wave =
-      _incoming_mag * std::exp(jay * _k * _length * std::cos(_theta * libMesh::pi / 180.));
+      _incoming_mag * std::exp(EM::j * _k * _length * std::cos(_theta * libMesh::pi / 180.));
   std::complex<double> reversed_wave =
-      _incoming_mag * std::exp(-jay * _k * _length * std::cos(_theta * libMesh::pi / 180.));
+      _incoming_mag * std::exp(-EM::j * _k * _length * std::cos(_theta * libMesh::pi / 180.));
 
   std::complex<double> reflection_coefficient_complex = (field - incoming_wave) / reversed_wave;
 

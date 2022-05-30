@@ -9,6 +9,7 @@
 
 #include "EMRobinBC.h"
 #include "ElectromagneticEnums.h"
+#include "ElectromagneticConstants.h"
 #include "Function.h"
 #include <complex>
 
@@ -58,7 +59,7 @@ EMRobinBC::EMRobinBC(const InputParameters & parameters)
   bool profile_func_real_was_set = parameters.isParamSetByUser("profile_func_real");
   bool profile_func_imag_was_set = parameters.isParamSetByUser("profile_func_imag");
 
-  if (_mode == electromagnetics::ABSORBING &&
+  if (_mode == EM::ABSORBING &&
       (profile_func_real_was_set || profile_func_imag_was_set))
   {
     mooseError(
@@ -77,19 +78,18 @@ EMRobinBC::computeQpResidual()
   std::complex<double> profile_func(_profile_func_real.value(_t, _q_point[_qp]),
                                     _profile_func_imag.value(_t, _q_point[_qp]));
   std::complex<double> coeff(_coeff_real, _coeff_imag);
-  std::complex<double> jay(0, 1);
 
-  std::complex<double> common = jay * coeff * func;
+  std::complex<double> common = EM::j * coeff * func;
   ADReal lhs_real = common.real() * _field_real[_qp] - common.imag() * _field_imag[_qp];
   ADReal lhs_imag = common.real() * _field_imag[_qp] + common.imag() * _field_real[_qp];
 
   std::complex<double> rhs = 0.0;
   switch (_mode)
   {
-    case electromagnetics::PORT:
+    case EM::PORT:
       rhs = 2.0 * common * profile_func * std::exp(common * _q_point[_qp](0));
       break;
-    case electromagnetics::ABSORBING:
+    case EM::ABSORBING:
       break;
   }
 
@@ -99,10 +99,10 @@ EMRobinBC::computeQpResidual()
   ADReal res = 0.0;
   switch (_component)
   {
-    case electromagnetics::REAL:
+    case EM::REAL:
       res = _sign * _test[_i][_qp] * diff_real;
       break;
-    case electromagnetics::IMAGINARY:
+    case EM::IMAGINARY:
       res = _sign * _test[_i][_qp] * diff_imag;
       break;
   }
