@@ -13,22 +13,21 @@
 
 TEST_F(DependencyResolverTest, operatorParensTest)
 {
-  std::vector<std::string> unsorted(6);
-  unsorted[0] = "c";
-  unsorted[1] = "f";
-  unsorted[2] = "a";
-  unsorted[3] = "d";
-  unsorted[4] = "b";
-  unsorted[5] = "e";
-
   // Sort based on the dependency resolver
   // "bead" will come out after the independent items
-  std::sort(unsorted.begin(), unsorted.end(), _strict_ordering);
+  const auto & unsorted = _strict_ordering.dfs();
 
-  EXPECT_EQ(unsorted[2], "b");
-  EXPECT_EQ(unsorted[3], "e");
-  EXPECT_EQ(unsorted[4], "a");
-  EXPECT_EQ(unsorted[5], "d");
+  const auto b_loc =
+      std::distance(unsorted.begin(), std::find(unsorted.begin(), unsorted.end(), "b"));
+  const auto e_loc =
+      std::distance(unsorted.begin(), std::find(unsorted.begin(), unsorted.end(), "e"));
+  const auto a_loc =
+      std::distance(unsorted.begin(), std::find(unsorted.begin(), unsorted.end(), "a"));
+  const auto d_loc =
+      std::distance(unsorted.begin(), std::find(unsorted.begin(), unsorted.end(), "d"));
+  EXPECT_LT(b_loc, e_loc);
+  EXPECT_LT(e_loc, a_loc);
+  EXPECT_LT(a_loc, d_loc);
 }
 
 TEST_F(DependencyResolverTest, ptrTest)
@@ -43,15 +42,8 @@ TEST_F(DependencyResolverTest, ptrTest)
   resolver.insertDependency(&mat3, &mat1);
   resolver.insertDependency(&mat3, &mat2);
 
-  std::vector<int *> sorted(3);
-  sorted[0] = &mat1;
-  sorted[1] = &mat2;
-  sorted[2] = &mat3;
+  const auto & sorted = resolver.dfs();
 
-  /*const std::vector<std::set<int *> > & sets =*/
-  resolver.getSortedValuesSets();
-
-  std::sort(sorted.begin(), sorted.end(), resolver);
   EXPECT_EQ(sorted[0], &mat1);
   EXPECT_EQ(sorted[1], &mat2);
   EXPECT_EQ(sorted[2], &mat3);
@@ -69,15 +61,8 @@ TEST_F(DependencyResolverTest, simpleTest)
   resolver.insertDependency(mat3, mat1);
   resolver.insertDependency(mat3, mat2);
 
-  std::vector<int> sorted(3);
-  sorted[0] = mat1;
-  sorted[1] = mat2;
-  sorted[2] = mat3;
+  const auto & sorted = resolver.dfs();
 
-  /*const std::vector<std::set<int> > & sets =*/
-  resolver.getSortedValuesSets();
-
-  std::sort(sorted.begin(), sorted.end(), resolver);
   EXPECT_EQ(sorted[0], mat1);
   EXPECT_EQ(sorted[1], mat2);
   EXPECT_EQ(sorted[2], mat3);
@@ -89,18 +74,18 @@ TEST_F(DependencyResolverTest, resolverSets)
   _resolver.addItem("aa");
 
   const auto & sets = _resolver.getSortedValuesSets();
+  // Flatten
+  std::vector<std::string> flat;
+  for (const auto & set : sets)
+    flat.insert(flat.end(), set.begin(), set.end());
 
-  EXPECT_EQ(sets.size(), 3);
-  EXPECT_EQ(sets[0].size(), 2);
-  EXPECT_NE(std::find(sets[0].begin(), sets[0].end(), "a"), sets[0].end());
-  EXPECT_NE(std::find(sets[0].begin(), sets[0].end(), "aa"), sets[0].end());
-
-  EXPECT_EQ(sets[1].size(), 2);
-  EXPECT_NE(std::find(sets[1].begin(), sets[1].end(), "b"), sets[1].end());
-  EXPECT_NE(std::find(sets[1].begin(), sets[1].end(), "c"), sets[1].end());
-
-  EXPECT_EQ(sets[2].size(), 1);
-  EXPECT_NE(std::find(sets[2].begin(), sets[2].end(), "d"), sets[2].end());
+  const auto a_loc = std::distance(flat.begin(), std::find(flat.begin(), flat.end(), "a"));
+  const auto b_loc = std::distance(flat.begin(), std::find(flat.begin(), flat.end(), "b"));
+  const auto c_loc = std::distance(flat.begin(), std::find(flat.begin(), flat.end(), "c"));
+  const auto d_loc = std::distance(flat.begin(), std::find(flat.begin(), flat.end(), "d"));
+  EXPECT_LT(a_loc, b_loc);
+  EXPECT_LT(a_loc, c_loc);
+  EXPECT_LT(c_loc, d_loc);
 }
 
 TEST_F(DependencyResolverTest, dependsOnTest)
@@ -155,16 +140,8 @@ TEST_F(DependencyResolverTest, deleteDepTest)
   resolver.insertDependency(mat3, mat2);
   resolver.insertDependency(mat4, mat3);
 
-  std::array<int, 4> sorted;
-  sorted[0] = mat1;
-  sorted[1] = mat2;
-  sorted[2] = mat3;
-  sorted[3] = mat4;
+  const auto & sorted = resolver.dfs();
 
-  /*const std::vector<std::set<int> > & sets =*/
-  resolver.getSortedValuesSets();
-
-  std::sort(sorted.begin(), sorted.end(), resolver);
   EXPECT_EQ(sorted[0], mat1);
   EXPECT_EQ(sorted[1], mat2);
   EXPECT_EQ(sorted[2], mat3);
@@ -174,9 +151,8 @@ TEST_F(DependencyResolverTest, deleteDepTest)
   resolver.deleteDependency(mat3, mat2);
   resolver.insertDependency(mat1, mat4);
 
-  resolver.getSortedValuesSets();
+  resolver.dfs();
 
-  std::sort(sorted.begin(), sorted.end(), resolver);
   EXPECT_EQ(sorted[0], mat3);
   EXPECT_EQ(sorted[1], mat4);
   EXPECT_EQ(sorted[2], mat1);
@@ -193,13 +169,12 @@ TEST_F(DependencyResolverTest, deleteDepIndCheckTest)
 
   resolver.deleteDependency(4, 3);
 
-  // By removing the edge between 4 and 3, we leave 4 as an independent item, meaning it'll
-  // come out before 3 which has no dependencies but is part of the remaining graph.
-  const auto & items = resolver.getSortedValues();
-  EXPECT_EQ(items[0], 4);
-  EXPECT_EQ(items[1], 1);
-  EXPECT_EQ(items[2], 2);
-  EXPECT_EQ(items[3], 3);
+  const auto & items = resolver.dfs();
+  const auto one_loc = std::distance(items.begin(), std::find(items.begin(), items.end(), 1));
+  const auto two_loc = std::distance(items.begin(), std::find(items.begin(), items.end(), 2));
+  const auto three_loc = std::distance(items.begin(), std::find(items.begin(), items.end(), 3));
+  EXPECT_LT(one_loc, two_loc);
+  EXPECT_LT(two_loc, three_loc);
 }
 
 TEST_F(DependencyResolverTest, deleteDepsCheck)
@@ -231,15 +206,14 @@ TEST_F(DependencyResolverTest, cyclicTest)
   {
     // Attempt to insert a dependency that results in cyclicity
     _resolver.insertDependency("a", "b");
+    _resolver.dfs();
     FAIL() << "missing expected exception";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(
-        msg.find("DependencyResolver: attempt to insert dependency will result in cyclic graph") !=
-        std::string::npos)
-        << "failed with unexpected error: " << msg;
+    ASSERT_TRUE(msg.find("cyclic graph") != std::string::npos);
+    _resolver.removeEdge("b", "a");
   }
 }
 
