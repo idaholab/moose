@@ -983,9 +983,7 @@ NSFVAction::addINSEnergyTimeKernels()
   {
     // check if the name of the specific heat is just a constant, if it is,
     // we automatically assign a zero timederivative
-    std::istringstream ss(_specific_heat_name);
-    Real real_value;
-    if (ss >> real_value && ss.eof())
+    if (parsesToReal(_specific_heat_name))
       params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = "0";
     else
       params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
@@ -2224,9 +2222,7 @@ NSFVAction::processThermalConductivity()
   for (unsigned int i = 0; i < _thermal_conductivity_name.size(); ++i)
   {
     // First, check if the name is just a number (only in case of isotropic conduction)
-    std::istringstream ss(_thermal_conductivity_name[i]);
-    Real real_value;
-    if (ss >> real_value && ss.eof())
+    if (parsesToReal(_thermal_conductivity_name[i]))
       have_scalar = true;
     // Now we determine what kind of functor we are dealing with
     else
