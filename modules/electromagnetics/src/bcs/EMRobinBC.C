@@ -61,13 +61,11 @@ EMRobinBC::EMRobinBC(const InputParameters & parameters)
 
   if (_mode == EM::ABSORBING &&
       (profile_func_real_was_set || profile_func_imag_was_set))
-  {
     mooseError(
         "In ",
         _name,
         ", mode was set to Absorbing, while an incoming profile function (used for Port BCs) was "
         "defined. Either remove the profile function parameters, or set your BC to Port mode!");
-  }
 }
 
 ADReal

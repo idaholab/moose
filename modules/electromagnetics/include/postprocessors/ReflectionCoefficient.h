@@ -44,16 +44,16 @@ protected:
   const VariableValue & _coupled_imag;
 
   /// Wave incidence angle
-  Real _theta;
+  const Real _theta;
 
   /// Domain length
-  Real _length;
+  const Real _length;
 
   /// Wave number
-  Real _k;
+  const Real _k;
 
   /// Incoming field magnitude
-  Real _incoming_mag;
+  const Real _incoming_mag;
 
   /// Value of the reflection coefficient
   Real _reflection_coefficient;

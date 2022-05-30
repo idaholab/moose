@@ -26,9 +26,7 @@ VectorCoeffField::validParams()
 
 VectorCoeffField::VectorCoeffField(const InputParameters & parameters)
   : VectorKernel(parameters),
-
     _coefficient(getParam<Real>("coeff")),
-
     _func(getFunction("func"))
 {
 }

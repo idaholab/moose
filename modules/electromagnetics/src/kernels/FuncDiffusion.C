@@ -23,9 +23,7 @@ FuncDiffusion::validParams()
 
 FuncDiffusion::FuncDiffusion(const InputParameters & parameters)
   : Diffusion(parameters),
-
     _func(getFunction("func"))
-
 {
 }
 

@@ -90,13 +90,9 @@ VectorTransientAbsorbingBC::computeQpResidual()
   std::complex<double> res = -p_dot_test;
 
   if (_component == EM::REAL)
-  {
     return res.real();
-  }
   else
-  {
     return res.imag();
-  }
 }
 
 Real
@@ -119,7 +115,5 @@ VectorTransientAbsorbingBC::computeQpOffDiagJacobian(unsigned int jvar)
     return prefix * _normals[_qp].cross(_coupled_dot_du[_qp] * _phi[_j][_qp]);
   }
   else
-  {
     return 0.0;
-  }
 }

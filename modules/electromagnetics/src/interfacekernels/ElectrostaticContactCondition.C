@@ -64,25 +64,19 @@ ElectrostaticContactCondition::computeQpResidual(Moose::DGResidualType type)
                              (_conductivity_primary[_qp] + _conductivity_secondary[_qp]);
 
   if (_conductance_was_set && !_mean_hardness_was_set)
-  {
     contact_conductance = _user_contact_conductance;
-  }
   else if (_mean_hardness_was_set && !_conductance_was_set)
-  {
     contact_conductance =
         _alpha_electric * mean_conductivity *
         std::pow((_mechanical_pressure.value(_t, _q_point[_qp]) / _mean_hardness[_qp]),
                  _beta_electric);
-  }
   else
-  {
     mooseError(
         "In ",
         _name,
         ", both user-supplied electrical contact conductance and mean hardness values (for "
         "calculating contact conductance) have been provided. Please only provide one or the "
         "other!");
-  }
 
   switch (type)
   {

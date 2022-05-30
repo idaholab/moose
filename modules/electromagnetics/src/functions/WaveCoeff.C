@@ -58,11 +58,7 @@ WaveCoeff::value(Real t, const Point & p) const
   std::complex<double> val = _coef * k * k * mu_r * eps_r;
 
   if (_component == EM::REAL)
-  {
     return val.real();
-  }
   else
-  {
     return val.imag();
-  }
 }

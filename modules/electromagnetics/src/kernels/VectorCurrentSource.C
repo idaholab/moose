@@ -35,7 +35,6 @@ VectorCurrentSource::validParams()
 
 VectorCurrentSource::VectorCurrentSource(const InputParameters & parameters)
   : VectorKernel(parameters),
-
     _func(getFunction("function_coefficient")),
     _source_real(getFunction("source_real")),
     _source_imag(getFunction("source_imag")),
@@ -57,13 +56,9 @@ VectorCurrentSource::computeQpResidual()
   std::complex<double> res = EM::j * _func.value(_t, _q_point[_qp]) * source * _test[_i][_qp];
 
   if (_component == EM::REAL)
-  {
     return res.real();
-  }
   else
-  {
     return res.imag();
-  }
 }
 
 Real

@@ -26,11 +26,9 @@ CoupledFuncDiffusion::validParams()
 
 CoupledFuncDiffusion::CoupledFuncDiffusion(const InputParameters & parameters)
   : Kernel(parameters),
-
     _func(getFunction("func")),
     _sign(getParam<Real>("sign")),
     _coupled_grad(coupledGradient("coupled_field"))
-
 {
 }
 
