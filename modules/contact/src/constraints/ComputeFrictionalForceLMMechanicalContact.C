@@ -19,6 +19,8 @@
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 #include "timpi/parallel_sync.h"
 
+#include <cmath>
+
 registerMooseObject("ContactApp", ComputeFrictionalForceLMMechanicalContact);
 
 InputParameters
@@ -38,7 +40,8 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
       "epsilon",
       1.0e-7,
       "Minimum value of contact pressure that will trigger frictional enforcement");
-  params.addParam<Real>("mu", 0.5, "The friction coefficient for the Coulomb friction law");
+  params.addRangeCheckedParam<Real>(
+      "mu", "mu > 0", "The friction coefficient for the Coulomb friction law");
   return params;
 }
 
@@ -53,7 +56,8 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _secondary_z_dot(_has_disp_z ? &adCoupledDot("disp_z") : nullptr),
     _primary_z_dot(_has_disp_z ? &adCoupledNeighborValueDot("disp_z") : nullptr),
     _epsilon(getParam<Real>("epsilon")),
-    _mu(getParam<Real>("mu")),
+    _mu(isParamValid("function_friction") ? std::numeric_limits<double>::quiet_NaN()
+                                          : getParam<Real>("mu")),
     _function_friction(isParamValid("function_friction") ? &getFunction("function_friction")
                                                          : nullptr),
     _has_friction_function(isParamValid("function_friction")),
