@@ -8,9 +8,10 @@
 k =  0.41887902047863906 # 2 * pi * 20e6 / 3e8
 L =  75 # = 5 * c / freq. (in m)
 E0 = 1 # magnitude of the incident field (in V/m)
+theta = 0 # wave incidence angle, in degrees
 
 [GlobalParams]
-  theta = 0
+  theta = ${theta}
 []
 
 [Mesh]
@@ -55,7 +56,8 @@ E0 = 1 # magnitude of the incident field (in V/m)
     component = imaginary
   []
   [cosTheta]
-    type = CosTheta
+    type = ParsedFunction
+    value = 'cos(${theta})'
   []
 []
 
