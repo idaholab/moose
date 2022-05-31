@@ -47,6 +47,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerMooseObjectTask("add_geochemistry_molality_aux", AddGeochemistrySolverAction, false);
   addTaskDependency("add_geochemistry_molality_aux",
                     "add_geochemistry_reactor"); // depends on the GeochemistryReactor
+  addTaskDependency("add_distribution", "add_geochemistry_molality_aux");
 }
 
 void
