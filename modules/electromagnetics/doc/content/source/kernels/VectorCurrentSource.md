@@ -19,8 +19,8 @@ where
 - $\vec{J}$ is the complex source vector field.
 
 Note that $\vec{J}$ is provided via vector-valued functions, using the
-`source_real` and `source_imag` parameters for the real and imaginary components
-respectively.
+[!param](/Kernels/VectorCurrentSource/source_real) and [!param](/Kernels/VectorCurrentSource/source_imag)
+parameters for the real and imaginary components respectively.
 
 ## Example Input File Syntax
 

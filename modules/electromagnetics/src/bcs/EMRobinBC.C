@@ -32,7 +32,8 @@ EMRobinBC::validParams()
       "profile_func_imag", 0.0, "Function coefficient, imaginary component.");
   params.addParam<Real>("coeff_real", 1.0, "Constant coefficient, real component.");
   params.addParam<Real>("coeff_imag", 0.0, "Constant coefficient, real component.");
-  params.addParam<Real>("sign", 1.0, "Sign of term in weak form.");
+  MooseEnum sign("positive=1 negative=-1", "positive");
+  params.addParam<MooseEnum>("sign", sign, "Sign of boundary term in weak form.");
   MooseEnum mode("absorbing port", "port");
   params.addParam<MooseEnum>("mode",
                              mode,
@@ -52,14 +53,13 @@ EMRobinBC::EMRobinBC(const InputParameters & parameters)
     _profile_func_imag(getFunction("profile_func_imag")),
     _coeff_real(getParam<Real>("coeff_real")),
     _coeff_imag(getParam<Real>("coeff_imag")),
-    _sign(getParam<Real>("sign")),
+    _sign(getParam<MooseEnum>("sign")),
     _mode(getParam<MooseEnum>("mode"))
 {
   bool profile_func_real_was_set = parameters.isParamSetByUser("profile_func_real");
   bool profile_func_imag_was_set = parameters.isParamSetByUser("profile_func_imag");
 
-  if (_mode == EM::ABSORBING &&
-      (profile_func_real_was_set || profile_func_imag_was_set))
+  if (_mode == EM::ABSORBING && (profile_func_real_was_set || profile_func_imag_was_set))
     mooseError(
         "In ",
         _name,

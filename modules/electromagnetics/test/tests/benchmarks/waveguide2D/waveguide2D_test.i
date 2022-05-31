@@ -67,7 +67,7 @@
   [port_real]
     type = EMRobinBC
     coeff_real = -0.27706242940220277  # -sqrt(k^2 - (pi/10)^2)
-    sign = 1.0
+    sign = positive
     profile_func_real = inc_y
     profile_func_imag = 0
     field_real = E_real
@@ -80,7 +80,7 @@
   [exit_real]
     type = EMRobinBC
     coeff_real = 0.27706242940220277
-    sign = -1.0
+    sign = negative
     field_real = E_real
     field_imaginary = E_imag
     variable = E_real
@@ -103,7 +103,7 @@
   [port_imaginary]
     type = EMRobinBC
     coeff_real = -0.27706242940220277
-    sign = 1.0
+    sign = positive
     profile_func_real = inc_y
     profile_func_imag = 0
     field_real = E_real
@@ -116,7 +116,7 @@
   [exit_imaginary]
     type = EMRobinBC
     coeff_real = 0.27706242940220277
-    sign = -1.0
+    sign = negative
     field_real = E_real
     field_imaginary = E_imag
     variable = E_imag

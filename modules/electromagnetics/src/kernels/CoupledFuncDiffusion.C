@@ -19,7 +19,8 @@ CoupledFuncDiffusion::validParams()
   params.addClassDescription(
       "Represents a coupled Laplacian term with sign and function coefficients.");
   params.addParam<FunctionName>("func", 1.0, "Function multiplier for diffusion term.");
-  params.addParam<Real>("sign", 1.0, "Sign of Kernel, if it needs to be changed.");
+  MooseEnum sign("positive=1 negative=-1", "positive");
+  params.addParam<MooseEnum>("sign", sign, "Sign of kernel.");
   params.addRequiredCoupledVar("coupled_field", "Coupled field variable.");
   return params;
 }
@@ -27,7 +28,7 @@ CoupledFuncDiffusion::validParams()
 CoupledFuncDiffusion::CoupledFuncDiffusion(const InputParameters & parameters)
   : Kernel(parameters),
     _func(getFunction("func")),
-    _sign(getParam<Real>("sign")),
+    _sign(getParam<MooseEnum>("sign")),
     _coupled_grad(coupledGradient("coupled_field"))
 {
 }

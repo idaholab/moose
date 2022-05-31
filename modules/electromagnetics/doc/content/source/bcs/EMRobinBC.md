@@ -51,10 +51,10 @@ where
 - $k$ is the wavenumber, and
 - $F(x)$ is a function representing the amplitude profile of the incoming wave.
 
-Note that in EMRobinBC, $k$ could be set via the `coeff_real` and `coeff_imag`
-parameters for a constant wavenumber, or `func_real` and `func_imag` for a
+Note that in EMRobinBC, $k$ could be set via the [!param](/BCs/EMRobinBC/coeff_real) and [!param](/BCs/EMRobinBC/coeff_imag)
+parameters for a constant wavenumber, or [!param](/BCs/EMRobinBC/func_real) and [!param](/BCs/EMRobinBC/func_imag) for a
 property that varies in space or time. The incoming profile is set via
-`profile_func_real` and `profile_func_imag`.
+[!param](/BCs/EMRobinBC/profile_func_real) and [!param](/BCs/EMRobinBC/profile_func_imag).
 
 
 #### Usage notes

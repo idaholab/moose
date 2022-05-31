@@ -118,7 +118,7 @@ theta = 0 # wave incidence angle, in degrees
     field_real = E_real
     field_imaginary = E_imag
     variable = E_real
-    sign = -1
+    sign = negative
   []
   [vacuum_imag]
     type = EMRobinBC
@@ -130,7 +130,7 @@ theta = 0 # wave incidence angle, in degrees
     field_real = E_real
     field_imaginary = E_imag
     variable = E_imag
-    sign = -1
+    sign = negative
   []
 []
 

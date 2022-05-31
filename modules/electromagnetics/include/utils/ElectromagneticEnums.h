@@ -26,7 +26,10 @@ enum ComponentEnum
 /// Enum used when determining the function of a Robin-style boundary condition
 enum RobinEnum
 {
-  ABSORBING,
-  PORT
+  ABSORBING, ///< Case when the boundary is configured to absorb impinging electromagnetic radiation
+
+  PORT ///< Case when the boundary is configured to both absorb impinging electromagnetic radiation
+       ///< and launch an incoming pre-defined electromagnetic wave from the boundary into the
+       ///< simulation domain
 };
 } // namespace EM

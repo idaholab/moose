@@ -96,7 +96,7 @@
     variable = u_real
     field_real = u_real
     field_imaginary = u_imag
-    sign = -1.0
+    sign = negative
   []
   [right_imag]
     type = EMRobinBC
@@ -106,7 +106,7 @@
     variable = u_imag
     field_real = u_real
     field_imaginary = u_imag
-    sign = -1.0
+    sign = negative
   []
 []
 

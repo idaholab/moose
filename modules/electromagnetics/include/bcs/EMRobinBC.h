@@ -48,13 +48,13 @@ private:
   const Function & _profile_func_imag;
 
   /// Real component of the constant coefficient representing the wavenumber
-  Real _coeff_real;
+  const Real _coeff_real;
 
   /// Imaginary component of the constant coefficient representing the wavenumber
-  Real _coeff_imag;
+  const Real _coeff_imag;
 
   /// Scalar value representing the sign of the term in the weak form
-  Real _sign;
+  const MooseEnum _sign;
 
   /// Enum for selection of boundary condition mode: absorbing or port (Default = port)
   const MooseEnum _mode;

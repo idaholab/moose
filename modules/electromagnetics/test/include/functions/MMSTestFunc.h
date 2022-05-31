@@ -24,13 +24,21 @@ public:
   virtual Real value(Real t, const Point & p) const override;
 
 protected:
-  Real _length;
+  /// Length of 1D test domain, where 0 < x < L
+  const Real _length;
 
+  /// Real component of DirichletBC, where x = 0
   const Real _g_0_real;
+
+  /// Imaginary component of DirichletBC, where x = 0
   const Real _g_0_imag;
 
+  /// Real component of DirichletBC, where x = L
   const Real _g_l_real;
+
+  /// Imaginary component of DirichletBC, where x = L
   const Real _g_l_imag;
 
+  /// Enum signifying the component of the function being calculated
   const MooseEnum _component;
 };

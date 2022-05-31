@@ -16,13 +16,18 @@ public:
   virtual Real value(Real t, const Point & p) const override;
 
 protected:
-  Real _k;
+  /// Wavenumber of incoming wave (1/m)
+  const Real _k;
 
-  Real _theta;
+  /// Wave incidence angle, in degrees
+  const Real _theta;
 
-  Real _length;
+  /// Length of slab domain (m)
+  const Real _length;
 
-  Real _coef;
+  /// Real-valued function coefficient
+  const Real _coef;
 
-  MooseEnum _component;
+  /// Enum signifying the component of the function being calculated
+  const MooseEnum _component;
 };

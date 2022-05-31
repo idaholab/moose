@@ -30,7 +30,7 @@ private:
   const Function & _func;
 
   /// Scalar coefficient representing the sign of the residual contribution
-  Real _sign;
+  const MooseEnum _sign;
 
   /// Coupled field variable
   const VariableGradient & _coupled_grad;

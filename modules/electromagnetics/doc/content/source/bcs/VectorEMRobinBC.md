@@ -47,7 +47,7 @@ where
 
 Note that $\beta$ generally is just the wavenumber $k$, since this condition is
 generally applied in free space, but any function can be applied through the
-`beta` parameter.
+[!param](/BCs/VectorEMRobinBC/beta) parameter.
 
 #### Usage notes
 

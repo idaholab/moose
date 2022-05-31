@@ -29,11 +29,7 @@ VectorEMRobinBC::validParams()
   params.addParam<FunctionName>("real_incoming", 0.0, "Real incoming field vector.");
   params.addParam<FunctionName>("imag_incoming", 0.0, "Imaginary incoming field vector.");
   MooseEnum mode("absorbing port", "port");
-  params.addParam<MooseEnum>(
-      "mode",
-      mode,
-      "Mode of operation for VectorEMRobinBC. Can be set to 'absorbing' or 'port' "
-      "(default: 'port').");
+  params.addParam<MooseEnum>("mode", mode, "Mode of operation for VectorEMRobinBC.");
   return params;
 }
 
@@ -114,20 +110,19 @@ VectorEMRobinBC::computeQpResidual()
   if (_real_incoming_was_set && _imag_incoming_was_set)
   {
     // Creating vector, curl for field_inc before residual and Jacobian contributions
-    std::complex<double> field_inc_0(_inc_real.vectorValue(_t, _q_point[_qp])(0),
-                                     _inc_imag.vectorValue(_t, _q_point[_qp])(0));
-    std::complex<double> field_inc_1(_inc_real.vectorValue(_t, _q_point[_qp])(1),
-                                     _inc_imag.vectorValue(_t, _q_point[_qp])(1));
-    std::complex<double> field_inc_2(_inc_real.vectorValue(_t, _q_point[_qp])(2),
-                                     _inc_imag.vectorValue(_t, _q_point[_qp])(2));
+    RealVectorValue inc_real_value = _inc_real.vectorValue(_t, _q_point[_qp]);
+    RealVectorValue inc_imag_value = _inc_imag.vectorValue(_t, _q_point[_qp]);
+    RealVectorValue inc_real_curl = _inc_real.vectorCurl(_t, _q_point[_qp]);
+    RealVectorValue inc_imag_curl = _inc_imag.vectorCurl(_t, _q_point[_qp]);
+
+    std::complex<double> field_inc_0(inc_real_value(0), inc_imag_value(0));
+    std::complex<double> field_inc_1(inc_real_value(1), inc_imag_value(1));
+    std::complex<double> field_inc_2(inc_real_value(2), inc_imag_value(2));
     field_inc = VectorValue<std::complex<double>>(field_inc_0, field_inc_1, field_inc_2);
 
-    std::complex<double> curl_inc_0(_inc_real.vectorCurl(_t, _q_point[_qp])(0),
-                                    _inc_imag.vectorCurl(_t, _q_point[_qp])(0));
-    std::complex<double> curl_inc_1(_inc_real.vectorCurl(_t, _q_point[_qp])(1),
-                                    _inc_imag.vectorCurl(_t, _q_point[_qp])(1));
-    std::complex<double> curl_inc_2(_inc_real.vectorCurl(_t, _q_point[_qp])(2),
-                                    _inc_imag.vectorCurl(_t, _q_point[_qp])(2));
+    std::complex<double> curl_inc_0(inc_real_curl(0), inc_imag_curl(0));
+    std::complex<double> curl_inc_1(inc_real_curl(1), inc_imag_curl(1));
+    std::complex<double> curl_inc_2(inc_real_curl(2), inc_imag_curl(2));
     curl_inc = VectorValue<std::complex<double>>(curl_inc_0, curl_inc_1, curl_inc_2);
   }
 
@@ -176,15 +171,9 @@ VectorEMRobinBC::computeQpOffDiagJacobian(unsigned int jvar)
                       _normals[_qp].cross(_phi[_j][_qp]);
 
   if (_component == EM::REAL && jvar == _coupled_var_num)
-  {
     return off_diag_jac;
-  }
   else if (_component == EM::IMAGINARY && jvar == _coupled_var_num)
-  {
     return -off_diag_jac;
-  }
   else
-  {
     return 0.0;
-  }
 }

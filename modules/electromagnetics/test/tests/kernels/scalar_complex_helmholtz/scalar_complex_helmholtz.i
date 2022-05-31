@@ -86,7 +86,7 @@
   [coupledLaplacian_real]
     type = CoupledFuncDiffusion
     func = h_func
-    sign = -1.0
+    sign = negative
     coupled_field = u_imag
     variable = u_real
   []
@@ -115,7 +115,7 @@
   [coupledLaplacian_imag]
     type = CoupledFuncDiffusion
     func = h_func
-    sign = 1.0
+    sign = positive
     coupled_field = u_real
     variable = u_imag
   []

@@ -31,12 +31,12 @@ protected:
   const Function & _admittance;
 
   /// Variable field component (real or imaginary)
-  MooseEnum _component;
+  const MooseEnum _component;
 
   /// Coupled field vector variable
   const VectorVariableValue & _coupled_val;
   /// Coupled field vector variable id
-  unsigned int _coupled_var_num;
+  const unsigned int _coupled_var_num;
 
   /// Vector field variable time derivative
   const VectorVariableValue & _u_dot;
