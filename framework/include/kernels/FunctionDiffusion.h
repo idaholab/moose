@@ -14,12 +14,12 @@
 /**
  *  The Laplacian operator with a function coefficient
  */
-class FuncDiffusion : public Diffusion
+class FunctionDiffusion : public Diffusion
 {
 public:
   static InputParameters validParams();
 
-  FuncDiffusion(const InputParameters & parameters);
+  FunctionDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -27,5 +27,5 @@ protected:
 
 private:
   /// Function coefficient
-  const Function & _func;
+  const Function & _function;
 };

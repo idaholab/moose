@@ -79,8 +79,8 @@
 
 [Kernels]
   [laplacian_real]
-    type = FuncDiffusion
-    func = d_func
+    type = FunctionDiffusion
+    function = d_func
     variable = u_real
   []
   [coupledLaplacian_real]
@@ -108,8 +108,8 @@
     variable = u_real
   []
   [laplacian_imag]
-    type = FuncDiffusion
-    func = d_func
+    type = FunctionDiffusion
+    function = d_func
     variable = u_imag
   []
   [coupledLaplacian_imag]
