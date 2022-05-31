@@ -167,6 +167,9 @@ CalculatorBuilder<std::vector<InType>, std::vector<OutType>>::build(
   else if (item == "median")
     return std::make_unique<VectorCalculator<InType, OutType, Median>>(other, item);
 
+  else if (item == "meanabs")
+    return std::make_unique<VectorCalculator<InType, OutType, MeanAbsoluteValue>>(other, item);
+
   ::mooseError("Failed to create Statistics::Calculator object for ", item);
   return nullptr;
 }
