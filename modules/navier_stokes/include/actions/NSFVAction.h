@@ -317,17 +317,6 @@ private:
   /// for scalar or temperature advection by auxiliary variables
   void checkRhieChowFunctorsDefined();
 
-  /// Check if the input string can be parsed to a Real
-  bool parsesToReal(const std::string & input)
-  {
-    std::istringstream ss(input);
-    Real real_value;
-    if (ss >> real_value && ss.eof())
-      return true;
-
-    return false;
-  }
-
   /// List to show which advected scalar field variable needs to be created within
   /// this action
   std::vector<bool> _create_scalar_variable;
