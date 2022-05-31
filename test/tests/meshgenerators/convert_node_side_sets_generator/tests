@@ -3,37 +3,24 @@
   design = 'meshgenerators/ConvertNodeSetSideSetGenerator.md'
 
   [generate]
-    requirement = 'The system shall support the ability to refine'
+    requirement = 'The system shall support the ability to create a nodeset out of all available side sets, and vice versa.'
 
-    [single_block]
+
+    [build_node_list_from_side_list]
       type = 'Exodiff'
-      input = 'test_single.i'
-      exodiff = 'test_single_in.e'
-      cli_args = '--mesh-only'
-      recover = false
-      detail = 'a single block within a multi-domain mesh'
-    []
-    [multiple_block]
-      type = 'Exodiff'
-      input = 'test_multi.i'
-      exodiff = 'test_multi_in.e'
+      input = 'from_sides.i'
+      exodiff = 'from_sides_in.e'
       recover = false
       cli_args = "--mesh-only"
-      detail = 'multiple blocks within a multi-domain mesh'
+      detail = 'build corresponding node sets based on all existing side sets'
     []
-    [neighbor_refinement]
+    [build_side_list_from_node_list]
       type = 'Exodiff'
-      input = 'test_multi.i'
-      exodiff = 'test_neighbor_in.e'
-      cli_args = "Mesh/refine/enable_neighbor_refinement=true --mesh-only test_neighbor_in.e"
+      input = 'from_nodes.i'
+      exodiff = 'from_nodes_in.e'
+      cli_args = "--mesh-only"
       recover = false
-      detail = 'multiple blocks within a multi-domain mesh, with neighbor refinement enabled'
-    []
-    [testy]
-      type = 'Exodiff'
-      input = 'testy.i'
-      exodiff = 'testy_outie_innie.e'
-
+      detail = 'builds corresponding side sets based on all existing node sets'
     []
   []
 []
