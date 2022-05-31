@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FancyExtruderGenerator.h"
+#include "MooseUtils.h"
 
 #include "libmesh/boundary_info.h"
 #include "libmesh/function_base.h"
@@ -42,11 +43,17 @@ FancyExtruderGenerator::validParams()
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh to extrude");
 
-  params.addClassDescription("Extrudes a 2D mesh into 3D, can have a variable height for each "
-                             "elevation, variable number of layers within each elevation and remap "
-                             "subdomain_ids and element extra integers within each elevation.");
+  params.addClassDescription(
+      "Extrudes a 1D mesh into 2D, or a 2D mesh into 3D, can have a variable height for each "
+      "elevation, variable number of layers within each elevation, variable growth factors of "
+      "axial element sizes within each elevation and remap subdomain_ids, boundary_ids and element "
+      "extra integers within each elevation as well as interface boundaries between neighboring "
+      "elevation layers.");
 
   params.addRequiredParam<std::vector<Real>>("heights", "The height of each elevation");
+
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "biases", "biases>0.0", "The axial growth factor used for mesh biasing for each elevation.");
 
   params.addRequiredParam<std::vector<unsigned int>>(
       "num_layers", "The number of layers for each elevation - must be num_elevations in length!");
@@ -56,11 +63,16 @@ FancyExtruderGenerator::validParams()
       "For each row, every two entries are interpreted as a pair of "
       "'from' and 'to' to remap the subdomains for that elevation");
 
+  params.addParam<std::vector<std::vector<boundary_id_type>>>(
+      "boundary_swaps",
+      "For each row, every two entries are interpreted as a pair of "
+      "'from' and 'to' to remap the boundaries for that elevation");
+
   params.addParam<std::vector<std::string>>(
       "elem_integer_names_to_swap",
       "Array of element extra integer names that need to be swapped during extrusion.");
 
-  params.addParam<std::vector<std::vector<unsigned int>>>(
+  params.addParam<std::vector<std::vector<dof_id_type>>>(
       "elem_integers_swaps",
       "For each row, every two entries are interpreted as a pair of 'from' and 'to' to remap the "
       "element extra integer for that elevation. If multiple element extra integers need to be "
@@ -80,6 +92,19 @@ FancyExtruderGenerator::validParams()
       "bottom_boundary",
       "The boundary ID to set on the bottom boundary.  If omitted one will be generated.");
 
+  params.addParam<std::vector<std::vector<subdomain_id_type>>>(
+      "upward_boundary_source_blocks", "Block ids used to generate upward interface boundaries.");
+
+  params.addParam<std::vector<std::vector<boundary_id_type>>>("upward_boundary_ids",
+                                                              "Upward interface boundary ids.");
+
+  params.addParam<std::vector<std::vector<subdomain_id_type>>>(
+      "downward_boundary_source_blocks",
+      "Block ids used to generate downward interface boundaries.");
+
+  params.addParam<std::vector<std::vector<boundary_id_type>>>("downward_boundary_ids",
+                                                              "Downward interface boundary ids.");
+
   return params;
 }
 
@@ -87,16 +112,39 @@ FancyExtruderGenerator::FancyExtruderGenerator(const InputParameters & parameter
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _heights(getParam<std::vector<Real>>("heights")),
+    _biases(isParamValid("biases") ? getParam<std::vector<Real>>("biases")
+                                   : std::vector<Real>(_heights.size(), 1.0)),
     _num_layers(getParam<std::vector<unsigned int>>("num_layers")),
     _subdomain_swaps(getParam<std::vector<std::vector<subdomain_id_type>>>("subdomain_swaps")),
+    _boundary_swaps(getParam<std::vector<std::vector<boundary_id_type>>>("boundary_swaps")),
     _elem_integer_names_to_swap(getParam<std::vector<std::string>>("elem_integer_names_to_swap")),
-    _elem_integers_swaps(getParam<std::vector<std::vector<unsigned int>>>("elem_integers_swaps")),
+    _elem_integers_swaps(getParam<std::vector<std::vector<dof_id_type>>>("elem_integers_swaps")),
     _direction(getParam<Point>("direction")),
     _has_top_boundary(isParamValid("top_boundary")),
     _top_boundary(isParamValid("top_boundary") ? getParam<boundary_id_type>("top_boundary") : 0),
     _has_bottom_boundary(isParamValid("bottom_boundary")),
     _bottom_boundary(isParamValid("bottom_boundary") ? getParam<boundary_id_type>("bottom_boundary")
-                                                     : 0)
+                                                     : 0),
+    _upward_boundary_source_blocks(
+        isParamValid("upward_boundary_source_blocks")
+            ? getParam<std::vector<std::vector<subdomain_id_type>>>("upward_boundary_source_blocks")
+            : std::vector<std::vector<subdomain_id_type>>(_heights.size(),
+                                                          std::vector<subdomain_id_type>())),
+    _upward_boundary_ids(
+        isParamValid("upward_boundary_ids")
+            ? getParam<std::vector<std::vector<boundary_id_type>>>("upward_boundary_ids")
+            : std::vector<std::vector<boundary_id_type>>(_heights.size(),
+                                                         std::vector<boundary_id_type>())),
+    _downward_boundary_source_blocks(isParamValid("downward_boundary_source_blocks")
+                                         ? getParam<std::vector<std::vector<subdomain_id_type>>>(
+                                               "downward_boundary_source_blocks")
+                                         : std::vector<std::vector<subdomain_id_type>>(
+                                               _heights.size(), std::vector<subdomain_id_type>())),
+    _downward_boundary_ids(
+        isParamValid("downward_boundary_ids")
+            ? getParam<std::vector<std::vector<boundary_id_type>>>("downward_boundary_ids")
+            : std::vector<std::vector<boundary_id_type>>(_heights.size(),
+                                                         std::vector<boundary_id_type>()))
 {
   if (!_direction.norm())
     paramError("direction", "Must have some length!");
@@ -133,6 +181,32 @@ FancyExtruderGenerator::FancyExtruderGenerator(const InputParameters & parameter
 
     for (unsigned int j = 0; j < elevation_swaps.size(); j += 2)
       elevation_swap_pairs[elevation_swaps[j]] = elevation_swaps[j + 1];
+  }
+
+  if (_boundary_swaps.size() && (_boundary_swaps.size() != num_elevations))
+    paramError("boundary_swaps",
+               "If specified, 'boundary_swaps' must be the same length as 'heights' in ",
+               name());
+
+  _boundary_swap_pairs.resize(_boundary_swaps.size());
+
+  // Reprocess the boundary swaps to make pairs out of them so they are easier to use
+  for (unsigned int i = 0; i < _boundary_swaps.size(); i++)
+  {
+    const auto & elevation_bdry_swaps = _boundary_swaps[i];
+    auto & elevation_bdry_swap_pairs = _boundary_swap_pairs[i];
+
+    if (elevation_bdry_swaps.size() % 2)
+      paramError("boundary_swaps",
+                 "Row ",
+                 i + 1,
+                 " of boundary_swaps in ",
+                 name(),
+                 " does not contain an even number of entries! Num entries: ",
+                 elevation_bdry_swaps.size());
+
+    for (unsigned int j = 0; j < elevation_bdry_swaps.size(); j += 2)
+      elevation_bdry_swap_pairs[elevation_bdry_swaps[j]] = elevation_bdry_swaps[j + 1];
   }
 
   if (_elem_integers_swaps.size() &&
@@ -175,6 +249,30 @@ FancyExtruderGenerator::FancyExtruderGenerator(const InputParameters & parameter
 
   if (has_negative_entry && has_positive_entry)
     paramError("heights", "Cannot have both positive and negative heights!");
+  if (_biases.size() != _heights.size())
+    paramError("biases", "Size of this parameter, if provided, must be the same as heights.");
+
+  if (_upward_boundary_source_blocks.size() != _upward_boundary_ids.size() ||
+      _upward_boundary_ids.size() != _heights.size())
+    paramError(
+        "upward_boundary_ids",
+        "This parameter must have the same length as upward_boundary_source_blocks and heights.");
+  for (unsigned int i = 0; i < _upward_boundary_source_blocks.size(); i++)
+    if (_upward_boundary_source_blocks[i].size() != _upward_boundary_ids[i].size())
+      paramError("upward_boundary_ids",
+                 "Every element of this parameter must have the same length as the corrresponding "
+                 "element of upward_boundary_source_blocks.");
+
+  if (_downward_boundary_source_blocks.size() != _downward_boundary_ids.size() ||
+      _downward_boundary_ids.size() != _heights.size())
+    paramError(
+        "downward_boundary_ids",
+        "This parameter must have the same length as downward_boundary_source_blocks and heights.");
+  for (unsigned int i = 0; i < _downward_boundary_source_blocks.size(); i++)
+    if (_downward_boundary_source_blocks[i].size() != _downward_boundary_ids[i].size())
+      paramError("downward_boundary_ids",
+                 "Every element of this parameter must have the same length as the corrresponding "
+                 "element of downward_boundary_source_blocks.");
 }
 
 std::unique_ptr<MeshBase>
@@ -268,13 +366,25 @@ FancyExtruderGenerator::generate()
 
       auto height = _heights[e];
 
+      auto bias = _biases[e];
+
       for (unsigned int k = 0; k < order * num_layers + (e == 0 ? 1 : 0); ++k)
       {
         // For the first layer we don't need to move
         if (e == 0 && k == 0)
           current_distance.zero();
         else
-          current_distance = old_distance + _direction * (height / (Real)num_layers / (Real)order);
+        {
+          auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
+          if (MooseUtils::absoluteFuzzyEqual(bias, 1.0))
+            current_distance =
+                old_distance + _direction * (height / (Real)num_layers / (Real)order);
+          else
+            current_distance =
+                old_distance + _direction * height * std::pow(bias, (Real)(layer_index - 1)) *
+                                   (1.0 - bias) / (1.0 - std::pow(bias, (Real)(num_layers))) /
+                                   (Real)order;
+        }
 
         Node * new_node = mesh->add_point(*node + current_distance,
                                           node->id() + (current_node_layer * orig_nodes),
@@ -294,7 +404,14 @@ FancyExtruderGenerator::generate()
 #endif
 
         input_boundary_info.boundary_ids(node, ids_to_copy);
-        boundary_info.add_node(new_node, ids_to_copy);
+        if (_boundary_swap_pairs.empty())
+          boundary_info.add_node(new_node, ids_to_copy);
+        else
+          for (const auto & id_to_copy : ids_to_copy)
+            boundary_info.add_node(new_node,
+                                   _boundary_swap_pairs[e].count(id_to_copy)
+                                       ? _boundary_swap_pairs[e][id_to_copy]
+                                       : id_to_copy);
 
         old_distance = current_distance;
         current_node_layer++;
@@ -621,6 +738,26 @@ FancyExtruderGenerator::generate()
         // maintain the subdomain_id
         new_elem->subdomain_id() = elem->subdomain_id();
 
+        // define upward boundaries
+        if (k == num_layers - 1)
+        {
+          const unsigned short top_id =
+              new_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
+          for (unsigned int i = 0; i < _upward_boundary_source_blocks[e].size(); i++)
+            if (new_elem->subdomain_id() == _upward_boundary_source_blocks[e][i])
+              boundary_info.add_side(new_elem, isFlipped ? 0 : top_id, _upward_boundary_ids[e][i]);
+        }
+        // define downward boundaries
+        if (k == 0)
+        {
+          const unsigned short top_id =
+              new_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
+          for (unsigned int i = 0; i < _downward_boundary_source_blocks[e].size(); i++)
+            if (new_elem->subdomain_id() == _downward_boundary_source_blocks[e][i])
+              boundary_info.add_side(
+                  new_elem, isFlipped ? top_id : 0, _downward_boundary_ids[e][i]);
+        }
+
         if (_subdomain_swap_pairs.size())
         {
           auto & elevation_swap_pairs = _subdomain_swap_pairs[e];
@@ -663,7 +800,15 @@ FancyExtruderGenerator::generate()
             // for side s on the old element to side s+1 on the
             // new element.  This is just a happy coincidence as
             // far as I can tell...
-            boundary_info.add_side(new_elem, cast_int<unsigned short>(s + 1), ids_to_copy);
+            if (_boundary_swap_pairs.empty())
+              boundary_info.add_side(new_elem, cast_int<unsigned short>(s + 1), ids_to_copy);
+            else
+              for (const auto & id_to_copy : ids_to_copy)
+                boundary_info.add_side(new_elem,
+                                       cast_int<unsigned short>(s + 1),
+                                       _boundary_swap_pairs[e].count(id_to_copy)
+                                           ? _boundary_swap_pairs[e][id_to_copy]
+                                           : id_to_copy);
           }
           else
           {
@@ -673,7 +818,15 @@ FancyExtruderGenerator::generate()
             // 1        -> 1
             libmesh_assert_less(s, 2);
             const unsigned short sidemap[2] = {3, 1};
-            boundary_info.add_side(new_elem, sidemap[s], ids_to_copy);
+            if (_boundary_swap_pairs.empty())
+              boundary_info.add_side(new_elem, sidemap[s], ids_to_copy);
+            else
+              for (const auto & id_to_copy : ids_to_copy)
+                boundary_info.add_side(new_elem,
+                                       sidemap[s],
+                                       _boundary_swap_pairs[e].count(id_to_copy)
+                                           ? _boundary_swap_pairs[e][id_to_copy]
+                                           : id_to_copy);
           }
         }
 

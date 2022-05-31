@@ -32,21 +32,30 @@ protected:
   /// Height of each elevation
   const std::vector<Real> & _heights;
 
+  /// Bias growth factor of each elevation
+  const std::vector<Real> _biases;
+
   /// Number of layers in each elevation
   const std::vector<unsigned int> & _num_layers;
 
   /// Subdomains to swap out for each elevation
   const std::vector<std::vector<subdomain_id_type>> & _subdomain_swaps;
 
+  /// Boundaries to swap out for each elevation
+  const std::vector<std::vector<boundary_id_type>> & _boundary_swaps;
+
   /// Names and indices of extra element integers to swap
   const std::vector<std::string> & _elem_integer_names_to_swap;
   std::vector<unsigned int> _elem_integer_indices_to_swap;
 
   /// Extra element integers to swap out for each elevation and each element interger name
-  const std::vector<std::vector<unsigned int>> & _elem_integers_swaps;
+  const std::vector<std::vector<dof_id_type>> & _elem_integers_swaps;
 
   /// Easier to work with version of _sudomain_swaps
   std::vector<std::unordered_map<subdomain_id_type, subdomain_id_type>> _subdomain_swap_pairs;
+
+  /// Easier to work with version of _boundary_swaps
+  std::vector<std::unordered_map<boundary_id_type, boundary_id_type>> _boundary_swap_pairs;
 
   /// Easier to work with version of _elem_integers_swaps
   std::vector<std::unordered_map<unsigned int, unsigned int>> _elem_integers_swap_pairs;
@@ -59,6 +68,18 @@ protected:
 
   bool _has_bottom_boundary;
   boundary_id_type _bottom_boundary;
+
+  /// The list of input mesh's blocks that need to be assigned upward boundary interfaces for each layer of elevation
+  const std::vector<std::vector<subdomain_id_type>> _upward_boundary_source_blocks;
+
+  /// Upward boundary interfaces for each layer of elevation
+  const std::vector<std::vector<boundary_id_type>> _upward_boundary_ids;
+
+  /// The list of input mesh's blocks that need to be assigned downward boundary interfaces for each layer of elevation
+  const std::vector<std::vector<subdomain_id_type>> _downward_boundary_source_blocks;
+
+  /// Downward boundary interfaces for each layer of elevation
+  const std::vector<std::vector<boundary_id_type>> _downward_boundary_ids;
 
   /**
    * Swap two nodes within an element

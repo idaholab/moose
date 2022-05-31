@@ -3,15 +3,15 @@
 []
 
 [Mesh]
-  [./fg]
+  # See fancy_extruder_with_boundary_swap.i for details about mesh_2d.e
+  [fmg]
     type = FileMeshGenerator
     file = mesh_2d.e
     exodus_extra_element_integers = 'element_extra_integer_1 element_extra_integer_2'
   []
-
-  [./extrude]
+  [extrude]
     type = FancyExtruderGenerator
-    input = fg
+    input = fmg
     heights = '1 2 3'
     num_layers = '1 2 3'
     direction = '0 0 1'
