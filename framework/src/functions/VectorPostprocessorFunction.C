@@ -46,7 +46,8 @@ VectorPostprocessorFunction::VectorPostprocessorFunction(const InputParameters &
                                               getParam<std::string>("value_column"))),
     _component(getParam<MooseEnum>("component")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _last_update({libMesh::invalid_uint, libMesh::invalid_uint})
+    _last_update(
+        {std::numeric_limits<Real>::lowest(), libMesh::invalid_uint, libMesh::invalid_uint})
 {
   try
   {
@@ -77,8 +78,9 @@ VectorPostprocessorFunction::valueInternal(const T & t, const P & p) const
   if (_argument_column.empty())
     return 0.0;
 
-  const auto now =
-      std::make_pair(_fe_problem.nNonlinearIterations(), _fe_problem.nLinearIterations());
+  const std::tuple<Real, unsigned int, unsigned int> now = {MetaPhysicL::raw_value(t),
+                                                            _fe_problem.nNonlinearIterations(),
+                                                            _fe_problem.nLinearIterations()};
 
   if (now != _last_update)
   {

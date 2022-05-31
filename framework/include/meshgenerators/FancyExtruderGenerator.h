@@ -59,4 +59,12 @@ protected:
 
   bool _has_bottom_boundary;
   boundary_id_type _bottom_boundary;
+
+  /**
+   * Swap two nodes within an element
+   * @param elem element whose nodes need to be swapped
+   * @param nd1 index of the first node to be swapped
+   * @param nd2 index of the second node to be swapped
+   */
+  void swapNodesInElem(Elem * elem, const unsigned int nd1, const unsigned int nd2);
 };

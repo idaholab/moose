@@ -8,16 +8,20 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "MultiAppCommandLineControl.h"
+#include "MultiAppSamplerControl.h"
 #include "Function.h"
 #include "Sampler.h"
 #include "MultiApp.h"
 #include "SamplerFullSolveMultiApp.h"
 
-registerMooseObject("StochasticToolsApp", MultiAppCommandLineControl);
+registerMooseObject("StochasticToolsApp", MultiAppSamplerControl);
+registerMooseObjectRenamed("StochasticToolsApp",
+                           MultiAppCommandLineControl,
+                           "01/01/2023 00:00",
+                           MultiAppSamplerControl);
 
 InputParameters
-MultiAppCommandLineControl::validParams()
+MultiAppSamplerControl::validParams()
 {
   InputParameters params = Control::validParams();
   params += SamplerInterface::validParams();
@@ -37,7 +41,7 @@ MultiAppCommandLineControl::validParams()
   return params;
 }
 
-MultiAppCommandLineControl::MultiAppCommandLineControl(const InputParameters & parameters)
+MultiAppSamplerControl::MultiAppSamplerControl(const InputParameters & parameters)
   : Control(parameters),
     SamplerInterface(this),
     _multi_app(_fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"))),
@@ -92,14 +96,14 @@ MultiAppCommandLineControl::MultiAppCommandLineControl(const InputParameters & p
 }
 
 void
-MultiAppCommandLineControl::initialSetup()
+MultiAppSamplerControl::initialSetup()
 {
   // Do not put anything here, this method is being called after execute because the execute_on
   // is set to PRE_MULTIAPP_SETUP for this class. It won't work any other way.
 }
 
 void
-MultiAppCommandLineControl::execute()
+MultiAppSamplerControl::execute()
 {
   // Gather the original arguments given in the parameter so we can keep them
   if (_orig_args.empty())

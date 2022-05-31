@@ -17,6 +17,12 @@ guide relies on the utilization of `mamba`, an optimized package manager for Con
   bash Mambaforge-MacOSX-x86_64.sh -b -p ~/mambaforge3
   ```
 
+- +Macintosh Users with Apple Silicon processors:+
+
+  ```bash
+  curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-MacOSX-arm64.sh
+  bash Mambaforge-MacOSX-arm64.sh -b -p ~/mambaforge3
+  ```
 
 With Mambaforge installed to your home directory, export PATH, so that it may be used:
 

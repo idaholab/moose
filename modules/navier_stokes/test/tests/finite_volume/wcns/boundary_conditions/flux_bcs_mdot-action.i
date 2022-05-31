@@ -30,6 +30,7 @@ inlet_velocity = 0.001
   [NavierStokesFV]
     compressibility = 'weakly-compressible'
     add_energy_equation = true
+    add_scalar_equation = true
     passive_scalar_names = 'scalar'
 
     density = 'rho'

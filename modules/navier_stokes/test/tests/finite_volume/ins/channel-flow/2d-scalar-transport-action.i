@@ -48,7 +48,7 @@ cp=1
   [NavierStokesFV]
     compressibility = 'incompressible'
     add_energy_equation = true
-
+    add_scalar_equation = true
     passive_scalar_names = 'scalar'
 
     density = ${rho}

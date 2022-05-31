@@ -30,7 +30,7 @@
 
 [Controls]
   [runner]
-    type = MultiAppCommandLineControl
+    type = MultiAppSamplerControl
     multi_app = sub
     param_names = 'BCs/left/value'
     sampler = sample

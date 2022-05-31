@@ -40,7 +40,7 @@
 
 [Controls]
   [cmdline]
-    type = MultiAppCommandLineControl
+    type = MultiAppSamplerControl
     multi_app = sub
     sampler = cartesian
     param_names = 'Executioner/nl_rel_tol'

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'gen_extrude.i'
     cli_args = '--mesh-only'
@@ -9,13 +9,37 @@
     requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap subdomain IDs'
     design = 'FancyExtruderGenerator.md'
     issues = '#13276 #3554 #5634'
-  [../]
+  []
+  [test_flip]
+    type = 'Exodiff'
+    input = 'gen_extrude.i'
+    cli_args = 'Mesh/extrude/direction="0 0 -1" --mesh-only gen_extrude_flip_in.e'
+    exodiff = 'gen_extrude_flip_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap subdomain IDs in the reverse direction'
+    design = 'FancyExtruderGenerator.md'
+    issues = '#13276 #3554 #5634 #21162'
+  []
   [prepare_mesh]
     type = 'RunApp'
     input = need-neighbors.i
     requirement = 'The system shall make sure the mesh is prepared after a mesh generator has indicated the mesh is not prepared and before running a solve.'
     issues = '#15944 #15936 #15823'
     design = 'FancyExtruderGenerator.md'
+  []
+  [elem_flip]
+    type = 'Exodiff'
+    input = elem_flip.i
+    cli_args = '--mesh-only'
+    exodiff = 'elem_flip_in.e'
+    exodiff_opts = '-pedantic'
+    recover = false
+
+    requirement = 'The system shall be able to fix the negative-volume elements by flipping them during extrusion.'
+    design = 'FancyExtruderGenerator.md'
+    issues = '#21162'
+    mesh_mode = 'REPLICATED'
   []
   [extruder_then_parsed_gen_sideset]
     type = 'Exodiff'

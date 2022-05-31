@@ -29,7 +29,7 @@
 
 [Controls]
   [cmdline]
-    type = MultiAppCommandLineControl
+    type = MultiAppSamplerControl
     multi_app = sub
     sampler = sample
     arguments = 'Mesh/nx'

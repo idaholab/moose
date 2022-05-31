@@ -288,7 +288,7 @@ You might find that using [SamplerTransientMultiApp.md], like in the previous se
 restrictive. For instance, the time steps in the sub-app input must be defined by the steps in the main input.
 This restricts the use of[TimeSteppers](syntax/Executioner/TimeStepper/index.md) like [IterationAdaptiveDT.md]
 and sub-cycling sub-sub-apps becomes difficult. Also, [SamplerTransientMultiApp.md] does not support
-`batch-reset` mode, so there isn't an memory-efficient way of sampling with [MultiAppCommandLineControl.md].
+`batch-reset` mode, so there isn't an memory-efficient way of sampling with [MultiAppSamplerControl.md].
 
 An alternative to using [SamplerTransientMultiApp.md] is to leverage [AccumulateReporter.md], which accumulates
 postprocessors/vector-postprocessor/reporters into vector where each element is the value at a certain

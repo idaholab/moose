@@ -52,24 +52,28 @@ SidesetInfoVectorPostprocessor::SidesetInfoVectorPostprocessor(const InputParame
     else
       _vpp_entry_names.push_back(_meta_data_types[j]);
   }
+
+  // now we can initialize the _meta_data vector
+  _meta_data.resize(_vpp_entry_names.size());
+  for (unsigned int j = 0; j < _vpp_entry_names.size(); ++j)
+    _meta_data[j] = &declareVector(_vpp_entry_names[j]);
 }
 
 void
 SidesetInfoVectorPostprocessor::initialize()
 {
+  // Clear existing data
+  _sideset_ids.clear();
+  for (unsigned int j = 0; j < _vpp_entry_names.size(); ++j)
+    _meta_data[j]->clear();
+
   for (auto & e : boundaryIDs())
     _boundary_data[e] = BoundaryData();
 
-  // resize the sideset id vector
+  // resize containers for possibly new number of boundaries
   _sideset_ids.resize(numBoundaryIDs());
-
-  // now we can initialize the _meta_data vector
-  _meta_data.resize(_vpp_entry_names.size());
   for (unsigned int j = 0; j < _vpp_entry_names.size(); ++j)
-  {
-    _meta_data[j] = &declareVector(_vpp_entry_names[j]);
     _meta_data[j]->resize(numBoundaryIDs());
-  }
 }
 
 void

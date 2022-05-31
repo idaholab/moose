@@ -808,6 +808,10 @@ getPetscValidParams()
   params.addParam<std::vector<std::string>>(
       "petsc_options_value",
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
+  params.addParamNamesToGroup("solve_type petsc_options petsc_options_iname petsc_options_value "
+                              "mffd_type",
+                              "PETSc");
+
   return params;
 }
 
