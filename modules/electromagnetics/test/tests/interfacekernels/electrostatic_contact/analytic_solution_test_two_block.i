@@ -14,166 +14,166 @@
 #
 
 [Mesh]
-  [./line]
+  [line]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 4
     xmax = 2
-  [../]
-  [./break]
+  []
+  [break]
     type = SubdomainBoundingBoxGenerator
     input = line
     block_id = 1
     block_name = 'graphite'
     bottom_left = '1 0 0'
     top_right = '2 0 0'
-  [../]
-  [./block_rename]
+  []
+  [block_rename]
     type = RenameBlockGenerator
     input = break
     old_block = 0
     new_block = 'stainless_steel'
-  [../]
-  [./interface]
+  []
+  [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = block_rename
     primary_block = 'stainless_steel'
     paired_block = 'graphite'
     new_boundary = 'ssg_interface'
-  [../]
+  []
 []
 
 [Variables]
-  [./potential_graphite]
+  [potential_graphite]
     block = graphite
-  [../]
-  [./potential_stainless_steel]
+  []
+  [potential_stainless_steel]
     block = stainless_steel
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./analytic_potential_stainless_steel]
+  [analytic_potential_stainless_steel]
     block = stainless_steel
-  [../]
-  [./analytic_potential_graphite]
+  []
+  [analytic_potential_graphite]
     block = graphite
-  [../]
+  []
 []
 
 [Kernels]
-  [./electric_graphite]
+  [electric_graphite]
     type = ConductivityLaplacian
     variable = potential_graphite
     conductivity_coefficient = electrical_conductivity
     block = graphite
-  [../]
-  [./electric_stainless_steel]
+  []
+  [electric_stainless_steel]
     type = ConductivityLaplacian
     variable = potential_stainless_steel
     conductivity_coefficient = electrical_conductivity
     block = stainless_steel
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./analytic_function_aux_stainless_steel]
+  [analytic_function_aux_stainless_steel]
     type = FunctionAux
     function = potential_fxn_stainless_steel
     variable = analytic_potential_stainless_steel
     block = stainless_steel
-  [../]
-  [./analytic_function_aux_graphite]
+  []
+  [analytic_function_aux_graphite]
     type = FunctionAux
     function = potential_fxn_graphite
     variable = analytic_potential_graphite
     block = graphite
-  [../]
+  []
 []
 
 [BCs]
-  [./elec_left]
+  [elec_left]
     type = ADDirichletBC
     variable = potential_stainless_steel
     boundary = left
     value = 1
-  [../]
-  [./elec_right]
+  []
+  [elec_right]
     type = ADDirichletBC
     variable = potential_graphite
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [InterfaceKernels]
-  [./electric_contact_conductance_ssg]
+  [electric_contact_conductance_ssg]
     type = ElectrostaticContactCondition
     variable = potential_stainless_steel
     neighbor_var = potential_graphite
     boundary = ssg_interface
     mean_hardness = mean_hardness
     mechanical_pressure = 3000
-  [../]
+  []
 []
 
 [Materials]
   #graphite (at 300 K)
-  [./sigma_graphite]
+  [sigma_graphite]
     type = ADGenericConstantMaterial
     prop_names = electrical_conductivity
     prop_values = 73069.2
     block = graphite
-  [../]
+  []
 
   #stainless_steel (at 300 K)
-  [./sigma_stainless_steel]
+  [sigma_stainless_steel]
     type = ADGenericConstantMaterial
     prop_names = electrical_conductivity
     prop_values = 1.41867e6
     block = stainless_steel
-  [../]
+  []
 
   # harmonic mean of graphite and stainless steel hardness
-  [./mean_hardness]
+  [mean_hardness]
     type = ADGenericConstantMaterial
     prop_names = mean_hardness
     prop_values = 2.4797e9
-  [../]
+  []
 []
 
 [Functions]
-  [./potential_fxn_stainless_steel]
+  [potential_fxn_stainless_steel]
     type = ElectricalContactTestFunc
     domain = stainless_steel
-  [../]
-  [./potential_fxn_graphite]
+  []
+  [potential_fxn_graphite]
     type = ElectricalContactTestFunc
     domain = graphite
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./error_stainless_steel]
+  [error_stainless_steel]
     type = ElementL2Error
     variable = potential_stainless_steel
     function = potential_fxn_stainless_steel
     block = stainless_steel
-  [../]
-  [./error_graphite]
+  []
+  [error_graphite]
     type = ElementL2Error
     variable = potential_graphite
     function = potential_fxn_graphite
     block = graphite
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

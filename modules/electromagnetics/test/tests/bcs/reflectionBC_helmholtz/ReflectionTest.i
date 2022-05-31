@@ -16,79 +16,79 @@
 []
 
 [Variables]
-  [./u_real]
+  [u_real]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./u_imag]
+  []
+  [u_imag]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./negative_ASquaredMinusBSquared]
+  [negative_ASquaredMinusBSquared]
     type = ParsedFunction
     value = '-(15*15 - 7*7)'
-  [../]
-  [./2TimesAB]
+  []
+  [2TimesAB]
     type = ParsedFunction
     value = '2*15*7'
-  [../]
-  [./cos]
+  []
+  [cos]
     type = ParsedFunction
     value = 'cos(0.5)'
-  [../]
+  []
 []
 
 [Kernels]
-  [./laplacian_real]
+  [laplacian_real]
     type = FuncDiffusion
     variable = u_real
-  [../]
-  [./coeffField_real]
+  []
+  [coeffField_real]
     type = ADFunctionReaction
     func = negative_ASquaredMinusBSquared
     variable = u_real
-  [../]
-  [./coupledField_real]
+  []
+  [coupledField_real]
     type = ADFuncCoupledForce
     v = u_imag
     func = 2TimesAB
     coef = -1.0
     variable = u_real
-  [../]
-  [./laplacian_imag]
+  []
+  [laplacian_imag]
     type = FuncDiffusion
     variable = u_imag
-  [../]
-  [./coeffField_imag]
+  []
+  [coeffField_imag]
     type = ADFunctionReaction
     func = negative_ASquaredMinusBSquared
     variable = u_imag
-  [../]
-  [./coupledField_imag]
+  []
+  [coupledField_imag]
     type = ADFuncCoupledForce
     v = u_real
     func = 2TimesAB
     variable = u_imag
-  [../]
+  []
 []
 
 [BCs]
-  [./left_real]
+  [left_real]
     type = DirichletBC
     value = 0
     boundary = left
     variable = u_real
-  [../]
-  [./left_imag]
+  []
+  [left_imag]
     type = DirichletBC
     value = 1
     boundary = left
     variable = u_imag
-  [../]
-  [./right_real]
+  []
+  [right_real]
     type = EMRobinBC
     func_real = cos
     boundary = right
@@ -97,8 +97,8 @@
     field_real = u_real
     field_imaginary = u_imag
     sign = -1.0
-  [../]
-  [./right_imag]
+  []
+  [right_imag]
     type = EMRobinBC
     func_real = cos
     boundary = right
@@ -107,7 +107,7 @@
     field_real = u_real
     field_imaginary = u_imag
     sign = -1.0
-  [../]
+  []
 []
 
 [Executioner]

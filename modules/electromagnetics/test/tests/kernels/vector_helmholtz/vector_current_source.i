@@ -13,88 +13,88 @@
 []
 
 [Functions]
-  [./source_real]
+  [source_real]
     type = ParsedVectorFunction
     value_x = 'y*y - 2'
     value_y = '2 - x*x'
-  [../]
-  [./source_imag]
+  []
+  [source_imag]
     type = ParsedVectorFunction
     value_x = '2 - y*y'
     value_y = 'x*x - 2'
-  [../]
+  []
 []
 
 [Variables]
-  [./u_real]
+  [u_real]
     family = NEDELEC_ONE
     order = FIRST
-  [../]
-  [./u_imag]
+  []
+  [u_imag]
     family = NEDELEC_ONE
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./curl_curl_real]
+  [curl_curl_real]
     type = CurlCurlField
     variable = u_real
-  [../]
-  [./coeff_real]
+  []
+  [coeff_real]
     type = VectorCoeffField
     variable = u_real
-  [../]
-  [./current_real]
+  []
+  [current_real]
     type = VectorCurrentSource
     variable = u_real
     function_coefficient = -1.0
     source_real = source_real
     source_imag = source_imag
     component = real
-  [../]
-  [./curl_curl_imag]
+  []
+  [curl_curl_imag]
     type = CurlCurlField
     variable = u_imag
-  [../]
-  [./coeff_imag]
+  []
+  [coeff_imag]
     type = VectorCoeffField
     variable = u_imag
-  [../]
-  [./current_imag]
+  []
+  [current_imag]
     type = VectorCurrentSource
     variable = u_imag
     function_coefficient = -1.0
     source_real = source_real
     source_imag = source_imag
     component = imaginary
-  [../]
+  []
 []
 
 [BCs]
-  [./sides_real]
+  [sides_real]
     type = VectorCurlPenaltyDirichletBC
     variable = u_real
     function_x = 'y*y'
     function_y = '-x*x'
     penalty = 1e8
     boundary = 'left right top bottom'
-  [../]
-  [./sides_imag]
+  []
+  [sides_imag]
     type = VectorCurlPenaltyDirichletBC
     variable = u_imag
     function_x = 'y*y'
     function_y = '-x*x'
     penalty = 1e8
     boundary = 'left right top bottom'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

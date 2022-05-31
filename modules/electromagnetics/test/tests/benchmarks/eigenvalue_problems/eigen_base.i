@@ -35,96 +35,96 @@
 []
 
 [Variables]
-  [./potential]
+  [potential]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./Ex]
+  [Ex]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./Ey]
+  []
+  [Ey]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = potential
-  [../]
-  [./coeff]
+  []
+  [coeff]
     type = CoefReaction
     coefficient = -1
     variable = potential
     extra_vector_tags = 'eigen'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./Ex_aux]
+  [Ex_aux]
     type = PotentialToFieldAux
     variable = Ex
     gradient_variable = potential
     sign = negative
     component = x
-  [../]
-  [./Ey_aux]
+  []
+  [Ey_aux]
     type = PotentialToFieldAux
     variable = Ey
     gradient_variable = potential
     sign = negative
     component = y
-  [../]
+  []
 []
 
 [BCs]
   active = 'rectangle eigen_rectangle'
-  [./rectangle]
+  [rectangle]
     type = DirichletBC
     variable = potential
     boundary = 'left right top bottom'
     value = 0
-  [../]
-  [./eigen_rectangle]
+  []
+  [eigen_rectangle]
     type = EigenDirichletBC
     variable = potential
     boundary = 'left right top bottom'
-  [../]
+  []
   # alternative BCs for circle case
-  [./circle]
+  [circle]
     type = DirichletBC
     variable = potential
     boundary = 'wall'
     value = 0
-  [../]
-  [./eigen_circle]
+  []
+  [eigen_circle]
     type = EigenDirichletBC
     variable = potential
     boundary = 'wall'
-  [../]
+  []
   # alternative BCs for coaxial case
-  [./coaxial]
+  [coaxial]
     type = DirichletBC
     variable = potential
     boundary = 'outer inner'
     value = 0
-  [../]
-  [./eigen_coaxial]
+  []
+  [eigen_coaxial]
     type = EigenDirichletBC
     variable = potential
     boundary = 'outer inner'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./eigenvalues]
+  [eigenvalues]
     type = Eigenvalues
-  [../]
+  []
 []
 
 [Executioner]

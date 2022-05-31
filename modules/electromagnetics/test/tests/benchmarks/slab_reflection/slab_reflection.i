@@ -14,99 +14,99 @@ E0 = 1 # magnitude of the incident field (in V/m)
 []
 
 [Mesh]
-  [./slab]
+  [slab]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 100
     xmin = 0
     xmax = ${L}
-  [../]
-  [./rename]
+  []
+  [rename]
     type = RenameBoundaryGenerator
     input = slab
     old_boundary = 'left right'
     new_boundary = 'metal vacuum'
-  [../]
+  []
 []
 
 [Variables]
-  [./E_real]
+  [E_real]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./E_imag]
+  []
+  [E_imag]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./coeff_real]
+  [coeff_real]
     type = JinSlabCoeffFunc
     k = ${k}
     length = ${L}
     coef = -1
     component = real
-  [../]
-  [./coeff_imag]
+  []
+  [coeff_imag]
     type = JinSlabCoeffFunc
     k = ${k}
     length = ${L}
     component = imaginary
-  [../]
-  [./cosTheta]
+  []
+  [cosTheta]
     type = CosTheta
-  [../]
+  []
 []
 
 [Kernels]
-  [./diffusion_real]
+  [diffusion_real]
     type = Diffusion
     variable = E_real
-  [../]
-  [./field_real]
+  []
+  [field_real]
     type = ADFunctionReaction
     func = coeff_real
     variable = E_real
-  [../]
-  [./coupled_real]
+  []
+  [coupled_real]
     type = ADFuncCoupledForce
     func = coeff_imag
     v = E_imag
     coef = -1.0
     variable = E_real
-  [../]
-  [./diffusion_imag]
+  []
+  [diffusion_imag]
     type = Diffusion
     variable = E_imag
-  [../]
-  [./field_imag]
+  []
+  [field_imag]
     type = ADFunctionReaction
     func = coeff_real
     variable = E_imag
-  [../]
-  [./coupled_imag]
+  []
+  [coupled_imag]
     type = ADFuncCoupledForce
     func = coeff_imag
     v = E_real
     variable = E_imag
-  [../]
+  []
 []
 
 [BCs]
-  [./metal_real]
+  [metal_real]
     type = DirichletBC
     value = 0
     variable = E_real
     boundary = metal
-  [../]
-  [./metal_imag]
+  []
+  [metal_imag]
     type = DirichletBC
     value = 0
     variable = E_imag
     boundary = metal
-  [../]
-  [./vacuum_real]
+  []
+  [vacuum_real]
     type = EMRobinBC
     coeff_real = ${k}
     func_real = cosTheta
@@ -117,8 +117,8 @@ E0 = 1 # magnitude of the incident field (in V/m)
     field_imaginary = E_imag
     variable = E_real
     sign = -1
-  [../]
-  [./vacuum_imag]
+  []
+  [vacuum_imag]
     type = EMRobinBC
     coeff_real = ${k}
     func_real = cosTheta
@@ -129,11 +129,11 @@ E0 = 1 # magnitude of the incident field (in V/m)
     field_imaginary = E_imag
     variable = E_imag
     sign = -1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./reflection_coefficient]
+  [reflection_coefficient]
     type = ReflectionCoefficient
     k = ${k}
     length = ${L}
@@ -142,14 +142,14 @@ E0 = 1 # magnitude of the incident field (in V/m)
     field_imag = E_imag
     boundary = vacuum
     outputs = 'csv console'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

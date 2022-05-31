@@ -1,5 +1,5 @@
 [Mesh]
-  [./box]
+  [box]
     type = CartesianMeshGenerator
     dim = 2
     dx = '0.5 0.5'
@@ -9,25 +9,25 @@
     subdomain_id = '1 1
                     2 3
                     1 1'
-  [../]
-  [./rename_subdomains]
+  []
+  [rename_subdomains]
     type = RenameBlockGenerator
     input = box
     old_block = '1 2'
     new_block = 'stainless_steel graphite'
-  [../]
-  [./create_interface]
+  []
+  [create_interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = rename_subdomains
     primary_block = stainless_steel
     paired_block = graphite
     new_boundary = 'ssg_interface'
-  [../]
-  [./delete_block]
+  []
+  [delete_block]
     type = BlockDeletionGenerator
     input = create_interface
     block = 3
-  [../]
+  []
 []
 
 [Problem]
@@ -35,46 +35,46 @@
 []
 
 [Variables]
-  [./potential_graphite]
+  [potential_graphite]
     block = graphite
-  [../]
-  [./potential_stainless_steel]
+  []
+  [potential_stainless_steel]
     block = stainless_steel
-  [../]
+  []
 []
 
 [Kernels]
-  [./electric_graphite]
+  [electric_graphite]
     type = ConductivityLaplacian
     variable = potential_graphite
     conductivity_coefficient = electrical_conductivity
     block = graphite
-  [../]
-  [./electric_stainless_steel]
+  []
+  [electric_stainless_steel]
     type = ConductivityLaplacian
     variable = potential_stainless_steel
     conductivity_coefficient = electrical_conductivity
     block = stainless_steel
-  [../]
+  []
 []
 
 [BCs]
-  [./elec_top]
+  [elec_top]
     type = DirichletBC
     variable = potential_stainless_steel
     boundary = top
     value = 1
-  [../]
-  [./elec_bottom]
+  []
+  [elec_bottom]
     type = DirichletBC
     variable = potential_stainless_steel
     boundary = bottom
     value = 0
-  [../]
+  []
 []
 
 [InterfaceKernels]
-  [./electrostatic_contact]
+  [electrostatic_contact]
     type = ElectrostaticContactCondition
     variable = potential_stainless_steel
     neighbor_var = potential_graphite
@@ -82,32 +82,32 @@
     secondary_conductivity = electrical_conductivity
     boundary = ssg_interface
     user_electrical_contact_conductance = 1.47e5 # as described in Cincotti et al (https://doi.org/10.1002/aic.11102)
-  [../]
+  []
 []
 
 [Materials]
   #graphite
-  [./sigma_graphite]
+  [sigma_graphite]
     type = ADGenericConstantMaterial
     prop_names = 'electrical_conductivity'
     prop_values = 3.33e2
     block = graphite
-  [../]
+  []
 
   #stainless_steel
-  [./sigma_stainless_steel]
+  [sigma_stainless_steel]
     type = ADGenericConstantMaterial
     prop_names = 'electrical_conductivity'
     prop_values = 1.429e6
     block = stainless_steel
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

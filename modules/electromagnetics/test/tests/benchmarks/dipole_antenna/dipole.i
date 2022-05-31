@@ -3,66 +3,66 @@
 # Wave Propagation Medium: Vacuum
 
 [Mesh]
-  [./file_mesh]
+  [file_mesh]
     type = FileMeshGenerator
     file = dipole_antenna_1G.msh
-  [../]
-  [./refine]
+  []
+  [refine]
     type = RefineBlockGenerator
     input = file_mesh
     block = 'vacuum'
     refinement = 2
-  [../]
+  []
 []
 
 [Variables]
-  [./E_real]
+  [E_real]
     order = FIRST
     family = NEDELEC_ONE
-  [../]
-  [./E_imag]
+  []
+  [E_imag]
     order = FIRST
     family = NEDELEC_ONE
-  [../]
+  []
 []
 
 [Kernels]
-  [./curl_curl_real]
+  [curl_curl_real]
     type = CurlCurlField
     variable = E_real
-  [../]
-  [./coeff_real]
+  []
+  [coeff_real]
     type = VectorCoeffField
     variable = E_real
     func = '-(2*pi*1e9/3e8)*(2*pi*1e9/3e8)'  # -(wave number)^2
-  [../]
-  [./curl_curl_imag]
+  []
+  [curl_curl_imag]
     type = CurlCurlField
     variable = E_imag
-  [../]
-  [./coeff_imag]
+  []
+  [coeff_imag]
     type = VectorCoeffField
     variable = E_imag
     func = '-(2*pi*1e9/3e8)*(2*pi*1e9/3e8)'  # -(wave number)^2
-  [../]
+  []
 []
 
 [BCs]
-  [./antenna_real]                #TODO: Replace with proper antenna surface current condition
+  [antenna_real]                #TODO: Replace with proper antenna surface current condition
     type = VectorCurlPenaltyDirichletBC
     penalty = 1e5
     function_y = '1'
     boundary = antenna
     variable = E_real
-  [../]
-  [./antenna_imag]
+  []
+  [antenna_imag]
     type = VectorCurlPenaltyDirichletBC
     penalty = 1e5
     function_y = '1'
     boundary = antenna
     variable = E_imag
-  [../]
-  [./radiation_condition_real]
+  []
+  [radiation_condition_real]
     type = VectorEMRobinBC
     variable = E_real
     coupled_field = E_imag
@@ -70,8 +70,8 @@
     component = real
     mode = absorbing
     beta = 20.9439510239  # wave number at 1 GHz
-  [../]
-  [./radiation_condition_imag]
+  []
+  [radiation_condition_imag]
     type = VectorEMRobinBC
     variable = E_imag
     coupled_field = E_real
@@ -79,14 +79,14 @@
     component = imaginary
     mode = absorbing
     beta = 20.9439510239  # wave number at 1 GHz
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

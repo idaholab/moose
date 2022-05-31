@@ -9,62 +9,62 @@
 []
 
 [Variables]
-  [./E_real]
+  [E_real]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./E_imag]
+  []
+  [E_imag]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./negative_kSquared]
+  [negative_kSquared]
     type = ParsedFunction
     value = '-0.4188790204786391^2'
-  [../]
-  [./inc_y]
+  []
+  [inc_y]
     type = ParsedFunction
     value = 'sin(pi * y / 10)'
-  [../]
+  []
 []
 
 [Kernels]
-  [./diffusion_real]
+  [diffusion_real]
     type = Diffusion
     variable = E_real
-  [../]
-  [./coeffField_real]
+  []
+  [coeffField_real]
     type = ADFunctionReaction
     func = negative_kSquared
     variable = E_real
-  [../]
-  [./diffusion_imaginary]
+  []
+  [diffusion_imaginary]
     type = Diffusion
     variable = E_imag
-  [../]
-  [./coeffField_imaginary]
+  []
+  [coeffField_imaginary]
     type = ADFunctionReaction
     func = negative_kSquared
     variable = E_imag
-  [../]
+  []
 []
 
 [BCs]
-  [./top_real]
+  [top_real]
     type = DirichletBC
     value = 0
     variable = E_real
     boundary = top
-  [../]
-  [./bottom_real]
+  []
+  [bottom_real]
     type = DirichletBC
     value = 0
     variable = E_real
     boundary = bottom
-  [../]
-  [./port_real]
+  []
+  [port_real]
     type = EMRobinBC
     coeff_real = -0.27706242940220277  # -sqrt(k^2 - (pi/10)^2)
     sign = 1.0
@@ -76,8 +76,8 @@
     component = real
     mode = port
     boundary = port
-  [../]
-  [./exit_real]
+  []
+  [exit_real]
     type = EMRobinBC
     coeff_real = 0.27706242940220277
     sign = -1.0
@@ -87,20 +87,20 @@
     component = real
     mode = absorbing
     boundary = exit
-  [../]
-  [./top_imaginary]
+  []
+  [top_imaginary]
     type = DirichletBC
     value = 0
     variable = E_imag
     boundary = top
-  [../]
-  [./bottom_imaginary]
+  []
+  [bottom_imaginary]
     type = DirichletBC
     value = 0
     variable = E_imag
     boundary = bottom
-  [../]
-  [./port_imaginary]
+  []
+  [port_imaginary]
     type = EMRobinBC
     coeff_real = -0.27706242940220277
     sign = 1.0
@@ -112,8 +112,8 @@
     component = imaginary
     mode = port
     boundary = port
-  [../]
-  [./exit_imaginary]
+  []
+  [exit_imaginary]
     type = EMRobinBC
     coeff_real = 0.27706242940220277
     sign = -1.0
@@ -123,7 +123,7 @@
     component = imaginary
     mode = absorbing
     boundary = exit
-  [../]
+  []
 []
 
 [Executioner]

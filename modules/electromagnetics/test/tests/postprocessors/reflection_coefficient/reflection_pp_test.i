@@ -1,39 +1,39 @@
 [Mesh]
-  [./slab]
+  [slab]
     type = GeneratedMeshGenerator
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./reflection_coefficient]
+  [reflection_coefficient]
     type = ReflectionCoefficient
     k = 1
     length = 1
@@ -42,14 +42,14 @@
     field_real = u
     field_imag = 0
     boundary = right
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

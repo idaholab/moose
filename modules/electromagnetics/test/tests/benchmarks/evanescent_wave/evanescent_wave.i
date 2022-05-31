@@ -9,50 +9,50 @@
 []
 
 [Functions]
-  [./waveNumSq]
+  [waveNumSq]
     type = ParsedFunction
     value = '(2*pi*20e9/3e8)^2'
-  [../]
-  [./omegaMu]
+  []
+  [omegaMu]
     type = ParsedFunction
     value = '2*pi*20e9*4*pi*1e-7'
-  [../]
-  [./beta]
+  []
+  [beta]
     type = ParsedFunction
     value = '2*pi*20e9/3e8'
-  [../]
-  [./curr_real]
+  []
+  [curr_real]
     type = ParsedVectorFunction
     value_y = 1.0
-  [../]
-  [./curr_imag] # defaults to '0.0 0.0 0.0'
+  []
+  [curr_imag] # defaults to '0.0 0.0 0.0'
     type = ParsedVectorFunction
-  [../]
+  []
 []
 
 [Variables]
-  [./E_real]
+  [E_real]
     family = NEDELEC_ONE
     order = FIRST
-  [../]
-  [./E_imag]
+  []
+  [E_imag]
     family = NEDELEC_ONE
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./curlCurl_real]
+  [curlCurl_real]
     type = CurlCurlField
     variable = E_real
-  [../]
-  [./coeff_real]
+  []
+  [coeff_real]
     type = VectorCoeffField
     variable = E_real
     func = waveNumSq
     coeff = -1.0
-  [../]
-  [./source_real]
+  []
+  [source_real]
     type = VectorCurrentSource
     variable = E_real
     component = real
@@ -60,18 +60,18 @@
     source_imag = curr_imag
     function_coefficient = omegaMu
     block = source
-  [../]
-  [./curlCurl_imag]
+  []
+  [curlCurl_imag]
     type = CurlCurlField
     variable = E_imag
-  [../]
-  [./coeff_imag]
+  []
+  [coeff_imag]
     type = VectorCoeffField
     variable = E_imag
     func = waveNumSq
     coeff = -1.0
-  [../]
-  [./source_imaginary]
+  []
+  [source_imaginary]
     type = VectorCurrentSource
     variable = E_imag
     component = imaginary
@@ -79,11 +79,11 @@
     source_imag = curr_imag
     function_coefficient = omegaMu
     block = source
-  [../]
+  []
 []
 
 [BCs]
-  [./absorbing_left_real]
+  [absorbing_left_real]
     type = VectorEMRobinBC
     variable = E_real
     component = real
@@ -91,8 +91,8 @@
     coupled_field = E_imag
     mode = absorbing
     boundary = 'port'
-  [../]
-  [./absorbing_right_real]
+  []
+  [absorbing_right_real]
     type = VectorEMRobinBC
     variable = E_real
     component = real
@@ -100,8 +100,8 @@
     coupled_field = E_imag
     mode = absorbing
     boundary = 'exit'
-  [../]
-  [./absorbing_left_imag]
+  []
+  [absorbing_left_imag]
     type = VectorEMRobinBC
     variable = E_imag
     component = imaginary
@@ -109,8 +109,8 @@
     coupled_field = E_real
     mode = absorbing
     boundary = 'port'
-  [../]
-  [./absorbing_right_imag]
+  []
+  [absorbing_right_imag]
     type = VectorEMRobinBC
     variable = E_imag
     component = imaginary
@@ -118,14 +118,14 @@
     coupled_field = E_real
     mode = absorbing
     boundary = 'exit'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
