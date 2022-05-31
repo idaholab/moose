@@ -11,6 +11,7 @@
 
 #include "SinglePhaseFluidProperties.h"
 #include "DelimitedFileReader.h"
+#include "TabulatedFluidProperties.h"
 
 class SinglePhaseFluidPropertiesPT;
 class BilinearInterpolation;
@@ -85,241 +86,27 @@ class BilinearInterpolation;
  * wrt pressure and temperature) will be calculated using bilinear interpolation, while all
  * remaining fluid properties are calculated using the supplied FluidProperties UserObject.
  */
-class TabulatedBilinearFluidProperties : public SinglePhaseFluidProperties
+class TabulatedBilinearFluidProperties : public TabulatedFluidProperties
 {
 public:
   static InputParameters validParams();
 
   TabulatedBilinearFluidProperties(const InputParameters & parameters);
-  virtual ~TabulatedBilinearFluidProperties();
 
-  virtual void initialSetup() override;
-
-  virtual std::string fluidName() const override;
-
-  virtual Real molarMass() const override;
-
-  virtual Real rho_from_p_T(Real pressure, Real temperature) const override;
-
-  virtual void rho_from_p_T(
-      Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
-
-  virtual Real v_from_p_T(Real pressure, Real temperature) const override;
-
-  virtual void
-  v_from_p_T(Real pressure, Real temperature, Real & v, Real & dv_dp, Real & dv_dT) const override;
-
-  virtual Real e_from_p_T(Real pressure, Real temperature) const override;
-
-  virtual void
-  e_from_p_T(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
-
-  virtual Real h_from_p_T(Real p, Real T) const override;
-
-  virtual void
-  h_from_p_T(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
-
-  virtual Real mu_from_p_T(Real pressure, Real temperature) const override;
-
-  virtual void mu_from_p_T(
-      Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
-
-  virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
-  virtual void cp_from_p_T(
-      Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
-
-  using SinglePhaseFluidProperties::cp_from_p_T;
-
-  virtual Real cv_from_p_T(Real pressure, Real temperature) const override;
-  virtual void cv_from_p_T(
-      Real pressure, Real temperature, Real & cv, Real & dcv_dp, Real & dcv_dT) const override;
-
-  virtual Real c_from_p_T(Real pressure, Real temperature) const override;
-  virtual void
-  c_from_p_T(Real pressure, Real temperature, Real & c, Real & dc_dp, Real & dc_dT) const override;
-
-  virtual Real k_from_p_T(Real pressure, Real temperature) const override;
-
-  virtual void
-  k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
-
-  virtual Real s_from_p_T(Real pressure, Real temperature) const override;
-
-  virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
-
-  virtual std::vector<Real> henryCoefficients() const override;
-
-  virtual Real vaporPressure(Real temperature) const override;
-
-  virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const override;
-
-  /**
-   * Derivatives like dc_dv & dc_de are computed using the chain role
-   * dy/dx(p,T) = dy/dp * dp/dx + dy/dT * dT/dx
-   * where y = c, cp, cv... & x = v, e
-   */
-  virtual Real p_from_v_e(Real v, Real e) const override;
-  virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
-  virtual Real T_from_v_e(Real v, Real e) const override;
-  virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const override;
-  virtual Real c_from_v_e(Real v, Real e) const override;
-  virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
-  virtual Real cp_from_v_e(Real v, Real e) const override;
-  virtual void cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const override;
-  virtual Real cv_from_v_e(Real v, Real e) const override;
-  virtual void cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const override;
-  virtual Real mu_from_v_e(Real v, Real e) const override;
-  virtual void mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const override;
-  virtual Real k_from_v_e(Real v, Real e) const override;
-  virtual void k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const override;
-  virtual Real g_from_v_e(Real v, Real e) const override;
-  virtual Real e_from_v_h(Real v, Real h) const override;
-  virtual void e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const override;
-
-  // AD versions of properties
-  virtual DualReal p_from_v_e(const DualReal & v, const DualReal & e) const override;
-  virtual DualReal T_from_v_e(const DualReal & v, const DualReal & e) const override;
-  virtual DualReal c_from_v_e(const DualReal & v, const DualReal & e) const override;
+  virtual void routine_1() override;
 
 protected:
   /**
-   * Writes tabulated data to a file.
-   * @param file_name name of the file to be written
-   */
-  void writeTabulatedData(std::string file_name);
-
-  /**
-   * Checks that the inputs are within the range of the tabulated data, and throws
-   * an error if they are not.
-   * @param pressure input pressure (Pa)
-   * @param temperature input temperature (K)
-   */
-  virtual void checkInputVariables(Real & pressure, Real & temperature) const;
-
-  /**
-   * Generates a table of fluid properties by looping over pressure and temperature
-   * and calculating properties using the FluidProperties UserObject _fp.
-   */
-  virtual void generateTabulatedData();
-
-  /**
-   * Forms a 2D matrix from a single std::vector.
+   * Forms a Column Major Matrix from a single std::vector.
    * @param nrow number of rows in the matrix
    * @param ncol number of columns in the matrix
    * @param vec 1D vector to reshape into a 2D matrix
-   * @param[out] 2D matrix formed by reshaping vec
+   * @param[out] Column Major Matrix
    */
   void reshapeData2D(unsigned int nrow,
                      unsigned int ncol,
                      const std::vector<Real> & vec,
                      ColumnMajorMatrix & mat);
-
-  Real inverseDistance(const std::vector<Real> & value, const std::vector<Real> & distance) const;
-
-  /// File name of tabulated data file
-  FileName _file_name;
-  /// Pressure vector
-  std::vector<Real> _pressure;
-  /// Temperature vector
-  std::vector<Real> _temperature;
-  /// Tabulated fluid properties
-  std::vector<std::vector<Real>> _properties;
-
-  /// Interpolated fluid property
-  std::vector<std::unique_ptr<BilinearInterpolation>> _property_ipol;
-
-  /// Minimum temperature in tabulated data
-  Real _temperature_min;
-  /// Maximum temperature in tabulated data
-  Real _temperature_max;
-  /// Minimum pressure in tabulated data
-  Real _pressure_min;
-  /// Maximum pressure in tabulated data
-  Real _pressure_max;
-  /// Number of temperature points in the tabulated data
-  unsigned int _num_T;
-  /// Number of pressure points in the tabulated data
-  unsigned int _num_p;
-  /// Whether to save a generated fluid properties file to disk
-  const bool _save_file;
-
-  /// SinglePhaseFluidPropertiesPT UserObject
-  const SinglePhaseFluidProperties & _fp;
-
-  /// List of required column names to be read
-  const std::vector<std::string> _required_columns{"pressure", "temperature"};
-  /// List of possible property column names to be read
-  const std::vector<std::string> _property_columns{
-      "density", "enthalpy", "internal_energy", "viscosity", "k", "cv", "cp", "entropy"};
-  /// Properties to be interpolated entered in the input file
-  MultiMooseEnum _interpolated_properties_enum;
-  /// List of properties to be interpolated
-  std::vector<std::string> _interpolated_properties;
-  /// Set of flags to note whether a property is to be interpolated
-  bool _interpolate_density;
-  bool _interpolate_enthalpy;
-  bool _interpolate_internal_energy;
-  bool _interpolate_viscosity;
-  bool _interpolate_k;
-  bool _interpolate_cp;
-  bool _interpolate_cv;
-  bool _interpolate_entropy;
-
-  /// Index of each property
-  unsigned int _density_idx;
-  unsigned int _enthalpy_idx;
-  unsigned int _internal_energy_idx;
-  unsigned int _viscosity_idx;
-  unsigned int _k_idx;
-  unsigned int _cp_idx;
-  unsigned int _cv_idx;
-  unsigned int _entropy_idx;
-
-  /// The MOOSE delimited file reader.
-  MooseUtils::DelimitedFileReader _csv_reader;
-
-  /// if the loopup table p(v, e) and T(v, e) should be constructed
-  bool _construct_pT_from_ve;
-  /// Number of specific volume points in the tabulated data
-  unsigned int _num_v;
-  /// Number of internal energy points in tabulated data
-  unsigned int _num_e;
-  /// interpolation order for inversion
-  unsigned int _inversion_interpolation_order;
-  /// to error or not on out of bounds check
-  bool _error_on_out_of_bounds;
-
-  /// interpolate temperature from (v,e)
-  std::unique_ptr<BilinearInterpolation> _T_from_v_e_ipol;
-
-  /// interpolate pressure from (v,e)
-  std::unique_ptr<BilinearInterpolation> _p_from_v_e_ipol;
-
-  /// interpolate temperature from (v,h)
-  std::unique_ptr<BilinearInterpolation> _T_from_v_h_ipol;
-
-  /// interpolate pressure from (v,h)
-  std::unique_ptr<BilinearInterpolation> _p_from_v_h_ipol;
-
-  /// Minimum internal energy in tabulated data
-  Real _e_min;
-  /// Maximum internal energy in tabulated data
-  Real _e_max;
-  /// Minimum specific volume in tabulated data
-  Real _v_min;
-  /// Maximum specific volume in tabulated data
-  Real _v_max;
-  /// Minimum specific enthalpy in tabulated data
-  Real _h_min;
-  /// Maximum specific enthalpy in tabulated data
-  Real _h_max;
-
-  /// specific volume vector
-  std::vector<Real> _specific_volume;
-  /// internal energy vector
-  std::vector<Real> _internal_energy;
-  /// enthalpy vector
-  std::vector<Real> _enthalpy;
 };
 
 #pragma GCC diagnostic pop
