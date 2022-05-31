@@ -272,6 +272,9 @@ public:
    */
   bool dependsOn(const T & key, const T & value)
   {
+    if (_adj.find(value) == _adj.end())
+      return false;
+
     for (auto & n : _adj)
       _visited[n.first] = false;
 
@@ -283,6 +286,12 @@ public:
    */
   bool dependsOn(const std::vector<T> & keys, const T & value)
   {
+    if (_adj.find(value) == _adj.end())
+      return false;
+
+    for (auto & n : _adj)
+      _visited[n.first] = false;
+
     for (const auto & key : keys)
       if (dependsOnFromNode(key, value))
         return true;
