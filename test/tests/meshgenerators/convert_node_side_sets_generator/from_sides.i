@@ -1,5 +1,7 @@
 [Mesh]
-  [./gmg]
+  construct_node_list_from_side_list = false
+  construct_side_list_from_node_list = false
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 3
@@ -9,21 +11,25 @@
     ymax = 3
     zmax = 3
   []
-
-  [./subdomains]
+  [subdomains]
     type = ParsedSubdomainMeshGenerator
     input = gmg
     combinatorial_geometry = 'x < 1 & y > 1 & y < 2'
-    block_id = 1
+    block_id = 7
   []
-
-  [./sideset]
+  [sideset]
     type = ParsedGenerateSideset
     input = subdomains
     combinatorial_geometry = 'z < 1'
-    included_subdomain_ids = '1'
+    included_subdomain_ids = '7'
     normal = '1 0 0'
     new_sideset_name = interior
+  []
+  [transcribe]
+    type = ConvertNodeSetSideSetGenerator
+    input = sideset
+    convert_side_list_from_node_list = false
+    convert_node_list_from_side_list = true
   []
 []
 
