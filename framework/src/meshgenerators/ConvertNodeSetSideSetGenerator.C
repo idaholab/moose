@@ -24,10 +24,10 @@ ConvertNodeSetSideSetGenerator::validParams()
   params.addClassDescription("Mesh generator which refines one or more blocks in an existing mesh");
   params.addRequiredParam<MeshGeneratorName>("input", "Input mesh to refine");
   params.addRequiredParam<bool>(
-      "_convert_node_list_from_side_list",
+      "convert_node_list_from_side_list",
       "Toggles whether side entities should be transcribed into nodes.");
   params.addRequiredParam<bool>(
-      "_convert_side_list_from_node_list",
+      "convert_side_list_from_node_list",
       "Toggles whether node entities should be transcribed into sides.");
 
   return params;
@@ -36,8 +36,8 @@ ConvertNodeSetSideSetGenerator::validParams()
 ConvertNodeSetSideSetGenerator::ConvertNodeSetSideSetGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
-    _convert_side_list_from_node_list(getParam<bool>("_convert_side_list_from_node_list")),
-    _convert_node_list_from_side_list(getParam<bool>("_convert_node_list_from_side_list"))
+    _convert_side_list_from_node_list(getParam<bool>("convert_side_list_from_node_list")),
+    _convert_node_list_from_side_list(getParam<bool>("convert_node_list_from_side_list"))
 {
 
 }
