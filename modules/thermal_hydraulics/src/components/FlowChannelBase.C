@@ -299,6 +299,9 @@ FlowChannelBase::buildMesh()
     for (auto && id : _elem_ids)
       _mesh.elemPtr(id)->subdomain_id() = subdomain_id;
   }
+
+  // Update the mesh
+  _mesh.update();
 }
 
 void
