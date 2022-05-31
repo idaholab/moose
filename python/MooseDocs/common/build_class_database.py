@@ -124,14 +124,14 @@ def _match_input(objects, filename, match):
     """Input use match function."""
     key = match.group('key')
 
-    if key in objects :
-        filename = os.path.relpath(filename, MooseDocs.ROOT_DIR)
-        objects[key].inputs.add(filename)
     # AD instances are caught for both the regular and AD object. This is done because:
     # - in all cases I know of, the AD/nonAD are from the same template
     # - as they share parameters, it does not hurt to merge both documentations
     # - only one documentation file has been created for both classes usually
     # This would be problematic if the classes were separate and had different parameters
-    elif key.replace('AD', '') in objects:
-        filename = os.path.relpath(filename, MooseDocs.ROOT_DIR)
-        objects[key.replace('AD', '')].inputs.add(filename)
+    if key.replace('AD', '') in objects:
+        full_filename = os.path.relpath(filename, MooseDocs.ROOT_DIR)
+        objects[key.replace('AD', '')].inputs.add(full_filename)
+    if 'AD' in key and key in objects:
+        full_filename = os.path.relpath(filename, MooseDocs.ROOT_DIR)
+        objects[key].inputs.add(full_filename)
