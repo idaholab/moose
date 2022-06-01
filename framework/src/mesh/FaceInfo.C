@@ -22,10 +22,13 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
     _processor_id(_elem_info->elem()->processor_id()),
     _id(std::make_pair(_elem_info->elem()->id(), side)),
     _elem_side_id(side),
-    _face(const_cast<Elem *>(_elem_info->elem())->build_side_ptr(_elem_side_id)),
-    _face_area(_face->volume()),
-    _face_centroid(_face->vertex_average())
+    _neighbor_side_id(std::numeric_limits<unsigned int>::max())
 {
+  // Compute face-related quantities
+  std::unique_ptr<const Elem> face(_elem_info->elem()->build_side_ptr(_elem_side_id));
+  _face_area = face->volume();
+  _face_centroid = face->vertex_average();
+
   // Compute the face-normals
   unsigned int dim = _elem_info->elem()->dim();
   Point vector_to_face = _face_centroid - _elem_info->centroid();
@@ -37,7 +40,7 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
   // the normal points in the right direction.
   else if (dim == 2)
   {
-    Point side = *_face->node_ptr(0) - *_face->node_ptr(1);
+    Point side = face->node_ref(0) - face->node_ref(1);
     _normal = Point(-side(1), side(0));
     _normal /= _normal.norm();
     if (_normal * vector_to_face < 0.0)
@@ -46,27 +49,24 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
   // In 3D we need to use the vector product
   else
   {
-    Point side_1 = *_face->node_ptr(0) - *_face->node_ptr(1);
-    Point side_2 = *_face->node_ptr(0) - *_face->node_ptr(2);
+    Point side_1 = face->node_ref(0) - face->node_ref(1);
+    Point side_2 = face->node_ref(0) - face->node_ref(2);
     _normal = side_1.cross(side_2);
     _normal /= _normal.norm();
     if (_normal * vector_to_face < 0.0)
       _normal *= -1.0;
   }
+
+  face.release();
 }
 
 void
 FaceInfo::computeCoefficients(const ElemInfo * const neighbor_info)
 {
-  // the neighbor info does not exist for domain boundaries. Additionally, we don't have any info
-  // if the neighbor is a RemoteElem. This can happen for ghosted elements on the edge of a
-  // stencil, for whom we have may have deleted some of their neighbors when running with a
-  // distributed mesh
+  mooseAssert(neighbor_info,
+              "We need a neighbor if we want to compute interpolation coefficients!");
   _neighbor_info = neighbor_info;
-  _valid_neighbor = _neighbor_info->elem() && _neighbor_info->elem() != remote_elem;
-  _neighbor_side_id = _valid_neighbor
-                          ? _neighbor_info->elem()->which_neighbor_am_i(_elem_info->elem())
-                          : std::numeric_limits<unsigned int>::max();
+  _neighbor_side_id = _neighbor_info->elem()->which_neighbor_am_i(_elem_info->elem());
 
   // Setup quantities used for the approximation of the spatial derivatives
   _d_cf = _neighbor_info->centroid() - _elem_info->centroid();

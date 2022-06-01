@@ -11,6 +11,7 @@
 
 #include "MooseFunctor.h"
 #include "MathFVUtils.h"
+#include "FVInterpolationUtils.h"
 #include "FVUtils.h"
 #include "MooseMeshUtils.h"
 #include "VectorComponentFunctor.h"
@@ -286,9 +287,8 @@ greenGaussGradient(const FaceArg & face_arg,
     const auto & grad_neighbor = greenGaussGradient(
         neighbor_arg, functor, two_term_boundary_expansion, mesh, face_to_value_cache);
 
-    VectorValue<T> face_gradient;
-    Moose::FV::interpolate(
-        Moose::FV::InterpMethod::Average, face_gradient, grad_elem, grad_neighbor, fi, true);
+    VectorValue<T> face_gradient =
+        Moose::FV::linearInterpolation(grad_elem, grad_neighbor, fi, true);
 
     // Perform orthogonality correction
     const auto & value_elem = functor(elem_arg);

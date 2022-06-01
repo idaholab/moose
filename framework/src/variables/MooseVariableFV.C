@@ -483,6 +483,21 @@ MooseVariableFV<OutputType>::getDirichletBC(const FaceInfo & fi) const
 }
 
 template <typename OutputType>
+ADReal
+MooseVariableFV<OutputType>::getNeighborValue(const Elem * const neighbor,
+                                              const FaceInfo & fi) const
+{
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("MooseVariableFV::getNeighborValue only supported for global AD indexing");
+#endif
+
+  if (neighbor && this->hasBlocks(neighbor->subdomain_id()))
+    return getElemValue(neighbor);
+  else
+    return getBoundaryFaceValue(fi);
+}
+
+template <typename OutputType>
 std::pair<bool, std::vector<const FVFluxBC *>>
 MooseVariableFV<OutputType>::getFluxBCs(const FaceInfo & fi) const
 {
@@ -812,23 +827,11 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
 }
 
 template <typename OutputType>
-VectorValue<ADReal>
-MooseVariableFV<OutputType>::adOrthogonalGradSln(const FaceInfo & fi) const
+const VectorValue<ADReal>
+MooseVariableFV<OutputType>::adInternalOrthogonalGradSln(const FaceInfo & fi) const
 {
-  bool var_defined_on_elem = fi.varDefinedOnElem(this->name());
-  const Elem * const elem = &fi.elem();
-  const Elem * const neighbor = fi.neighborPtr();
-
-  FaceInfo::VarFaceNeighbors face_type = fi.faceType(_var.name());
-  if (if face_type == Moose::FV::FaceInfo::BOTH)
-    return (getElemValue(elem) - getElemValue(neighbor)) / fi.dCFMag();
-    else
-
-  const ADReal side_one_value =
-      var_defined_on_elem ? getElemValue(elem) : getNeighborValue(elem, fi);
-
-  const ADReal side_two_value =
-      var_defined_on_elem ? getNeighborValue(neighbor, fi) : getElemValue(neighbor);
+  mooseAssert(fi.faceType(this->name) == Moose::FV::FaceInfo::VarFaceNeighbors::ELEM, "We ");
+  return (getElemValue(fi.elemPtr()) - getElemValue(fi.neighborPtr())) / fi.dCFMag();
 }
 
 template <typename OutputType>

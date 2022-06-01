@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVOrthogonalDiffusion.h"
+#include "FVInterpolationUtils.h"
 
 registerMooseObject("MooseApp", FVOrthogonalDiffusion);
 
@@ -39,13 +40,8 @@ FVOrthogonalDiffusion::FVOrthogonalDiffusion(const InputParameters & parameters)
 ADReal
 FVOrthogonalDiffusion::computeQpResidual()
 {
-  ADReal coeff_interface;
-  Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                         coeff_interface,
-                         _coeff_elem[_qp],
-                         _coeff_neighbor[_qp],
-                         *_face_info,
-                         true);
+  ADReal coeff_interface =
+      Moose::FV::linearInterpolation(_coeff_elem[_qp], _coeff_neighbor[_qp], *_face_info, true);
 
   return -coeff_interface * (_diff_quant_neighbor[_qp] - _diff_quant_elem[_qp]) /
          _face_info->dCFMag();

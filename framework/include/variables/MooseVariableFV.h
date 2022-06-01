@@ -279,6 +279,9 @@ public:
     return _element_data->adGradSln();
   }
 
+  virtual const VectorValue<ADReal> adInternalOrthogonalGradSln(const FaceInfo & fi) const;
+  virtual const VectorValue<ADReal> adBoundaryOrthogonalGradSln(const FaceInfo & fi) const;
+
   /**
    * Retrieve (or potentially compute) the gradient on the provided element. Overriders of this
    * method *cannot* call \p getBoundaryFaceValue because that method itself may lead to a call to
@@ -457,6 +460,20 @@ public:
    * @param elem The element to retrieive the solution value for
    */
   ADReal getElemValue(const Elem * elem) const;
+
+  /**
+   * Get the solution value with derivative seeding on the \p neighbor element. If the neighbor
+   * is null or this variable doesn't exist on the neighbor element's subdomain, then we compute a
+   * neighbor value based on any Dirichlet boundary conditions associated with the face information,
+   * or absent that we assume a zero gradient and simply return the \p elem_value
+   * @param neighbor The \p neighbor element that we want to retrieve the solution value for
+   * @param fi The face information object
+   * @param elem_value The solution value on the "element". This value may be used for computing the
+   * neighbor value if the neighbor is null or this variable doesn't exist on the neighbor subdomain
+   * @return The neighbor solution value with derivative seeding according to the associated degree
+   * of freedom
+   */
+  ADReal getNeighborValue(const Elem * const neighbor, const FaceInfo & fi) const;
 
   /**
    * Compute or retrieve from cache the solution value on an internal face using linear

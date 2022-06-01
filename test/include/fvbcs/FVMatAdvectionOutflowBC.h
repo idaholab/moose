@@ -25,9 +25,6 @@ protected:
   /// The advected quantity on the elem
   const Moose::Functor<ADReal> & _adv_quant;
 
-  /// Whether to evaluate functors with a single-sided face argument
-  const bool _use_ssf;
-
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;
 };

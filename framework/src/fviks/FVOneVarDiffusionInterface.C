@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVOneVarDiffusionInterface.h"
-#include "MathFVUtils.h"
+#include "FVInterpolationUtils.h"
 
 registerMooseObject("MooseApp", FVOneVarDiffusionInterface);
 
@@ -45,13 +45,8 @@ FVOneVarDiffusionInterface::computeQpResidual()
 
   const auto & grad = var1().adGradSln(*_face_info);
 
-  ADReal coef;
-  interpolate(Moose::FV::InterpMethod::Average,
-              coef,
-              coef_elem(elemFromFace()),
-              coef_neighbor(neighborFromFace()),
-              *_face_info,
-              true);
+  ADReal coef = Moose::FV::linearInterpolation(
+      coef_elem(elemFromFace()), coef_neighbor(neighborFromFace()), *_face_info, true);
 
   return _normal * -coef * grad;
 }

@@ -86,18 +86,19 @@ public:
   /// If a face is on a mesh boundary, the neighborPtr
   /// will return nullptr - the elem will never be null.
   const Elem & elem() const { return *(_elem_info->elem()); }
-  const Elem * neighborPtr() const
-  {
-    if (!_neighbor_info)
-      return nullptr;
-    return _neighbor_info->elem();
-  }
+  const Elem * elemPtr() const { return _elem_info->elem(); }
   const Elem & neighbor() const
   {
     if (!_neighbor_info)
       mooseError("FaceInfo object 'const Elem & neighbor()' is called but neighbor element pointer "
                  "is null. This occurs for faces at the domain boundary");
     return *(_neighbor_info->elem());
+  }
+  const Elem * neighborPtr() const
+  {
+    if (!_neighbor_info)
+      return nullptr;
+    return _neighbor_info->elem();
   }
   ///@}
 
@@ -236,11 +237,8 @@ private:
   /// the elem local side id
   const unsigned int _elem_side_id;
 
-  /// A unique_ptr to the face element built from \p _elem and \p _elem_side_id
-  std::unique_ptr<Elem> _face;
-
-  const Real _face_area;
-  const Point _face_centroid;
+  Real _face_area;
+  Point _face_centroid;
 
   /// the neighbor local side ide
   unsigned int _neighbor_side_id;

@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InterfaceDiffusiveFluxIntegral.h"
-#include "MathFVUtils.h"
+#include "FVInterpolationUtils.h"
 #include "FaceInfo.h"
 
 #include "libmesh/remote_elem.h"
@@ -80,13 +80,11 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
     one_over_gradient_support /= (one_over_gradient_support * one_over_gradient_support);
     const auto gradient = (_u[_qp] - _u_neighbor[_qp]) * one_over_gradient_support;
 
-    Real diffusivity;
-    interpolate(Moose::FV::InterpMethod::Average,
-                diffusivity,
-                MetaPhysicL::raw_value(_diffusion_coef[_qp]),
-                MetaPhysicL::raw_value(_diffusion_coef_neighbor[_qp]),
-                *_fi,
-                true);
+    Real diffusivity =
+        Moose::FV::linearInterpolation(MetaPhysicL::raw_value(_diffusion_coef[_qp]),
+                                       MetaPhysicL::raw_value(_diffusion_coef_neighbor[_qp]),
+                                       *_fi,
+                                       true);
 
     return -diffusivity * MetaPhysicL::raw_value(gradient * normal);
   }
