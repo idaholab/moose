@@ -1,10 +1,19 @@
 [Tests]
-  issues = 'cf61044773b14d5560e583867462fe9831dd1f3e'
   design = 'syntax/Functions/index.md source/functions/PiecewiseLinear.md'
-  [./test]
+  [./index]
     type = 'Exodiff'
     input = 'function_file_format_test.i'
+    cli_args = 'Functions/e_func/x_index_in_file=2 Functions/e_func/y_index_in_file=0 Functions/f/x_index_in_file=2 Functions/f/y_index_in_file=0'
     exodiff = 'out.e'
+    issues = 'cf61044773b14d5560e583867462fe9831dd1f3e'
     requirement = "The Function system shall include the ability to read comma or space separated data and perform linear interpolation using the supplied data."
+  [../]
+  [./title]
+    type = 'Exodiff'
+    input = 'function_file_format_test.i'
+    cli_args = 'Functions/e_func/x_title=time Functions/e_func/y_title=amplitude Functions/f/x_title=x Functions/f/y_title=y'
+    exodiff = 'out.e'
+    issues = '#21186'
+    requirement = "The Function system shall include the ability to pick rows or columns from comma or space separated data based on row or column headers."
   [../]
 []

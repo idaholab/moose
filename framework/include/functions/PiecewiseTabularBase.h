@@ -39,6 +39,7 @@ protected:
   using BaseClass::_raw_x;
   using BaseClass::_raw_y;
   using BaseClass::isParamValid;
+  using BaseClass::paramError;
 
 private:
   /// Reads data from supplied CSV file.
