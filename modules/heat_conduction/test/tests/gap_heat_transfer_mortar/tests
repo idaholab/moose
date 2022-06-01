@@ -243,7 +243,7 @@
     ad_indexing_type = 'global'
   []
   [gap_heat_transfer_3d_mortar_hex20]
-    input = 'gap_heat_transfer_3d_mortar.i'
+    input = 'gap_heat_transfer_3D_mortar.i'
     type = CSVDiff
     csvdiff = 'gap_heat_transfer_3D_mortar_hex20_out_NodalTemperature_0001.csv'
     cli_args = 'Mesh/left_block/elem_type=HEX20 Mesh/right_block/elem_type=HEX20 '
