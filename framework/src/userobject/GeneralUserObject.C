@@ -40,6 +40,13 @@ GeneralUserObject::getSuppliedItems()
 }
 
 void
+GeneralUserObject::addUserObjectDependencyHelper(const UserObject & uo) const
+{
+  UserObject::addUserObjectDependencyHelper(uo);
+  _depend_vars.insert(uo.name());
+}
+
+void
 GeneralUserObject::addPostprocessorDependencyHelper(const PostprocessorName & name) const
 {
   UserObject::addPostprocessorDependencyHelper(name);

@@ -191,6 +191,7 @@ protected:
   virtual void addPostprocessorDependencyHelper(const PostprocessorName & name) const override;
   virtual void
   addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & name) const override;
+  virtual void addUserObjectDependencyHelper(const UserObject & uo) const override;
 
   /// Reference to the Subproblem for this user object
   SubProblem & _subproblem;
@@ -208,8 +209,6 @@ protected:
   const bool _duplicate_initial_execution;
 
 private:
-  virtual void addUserObjectDependencyHelper(const UserObject & uo) const override final;
-
   UserObject * _primary_thread_copy = nullptr;
 
   /// Depend UserObjects that to be used by AuxKernel for finding the full UO dependency
