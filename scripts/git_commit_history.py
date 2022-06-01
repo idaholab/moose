@@ -23,7 +23,7 @@ import os
 
 ##############################
 # Favorite plots
-# $ ./git_commit_history.py --open-source --authors=all --unique --output=contributors.pdf
+# $ ./git_commit_history.py --open-source --authors=all --unique --disable-legend --output=contributors.pdf
 # $ ./git_commit_history.py --additions --authors=all --days=7 --open-source  --disable-legend --output=additions.pdf
 ##############################
 
@@ -300,6 +300,9 @@ if __name__ == '__main__':
             mkr = None if len(contributors) == 1 else next(marker)
             h = ax1.plot(x[idx], y[idx], label=contributors[i], linewidth=2, markevery=60, marker=mkr, color=clr)
             handles.append(h[0])
+
+        if len(contributors) == 1:
+            y_label = 'Total Contributions'
 
         if not options.disable_legend:
             if options.unique and options.unique_label== 'legend':
