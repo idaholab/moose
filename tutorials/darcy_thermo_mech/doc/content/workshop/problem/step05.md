@@ -145,13 +145,13 @@ rather than being replaced with a known flux, as is done in a `NeumannBC`.
 
 !---
 
-## Step 5c: Run and Visualize with Peacock
+## Step 5c: Run
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step05_heat_conduction
 make -j 12 # use number of processors for your system
 cd problems
-~/projects/moose/python/peacock/peacock -i step5b_transient.i
+../darcy_thermo_mech-opt -i step5b_transient.i
 ```
 
 !---
