@@ -83,6 +83,17 @@
     abs_zero = 1.0e-5
     max_parallel = 8
   []
+  [frictional-mortar-3d-function]
+    type = 'Exodiff'
+    input = 'frictional-mortar-3d-function.i'
+    min_ad_size = 100
+    exodiff = 'frictional-mortar-3d-function_out.e'
+    requirement = 'The system shall solve a 3D frictional block problem with mortar '
+                  'constraint using a simple frictional model dependent on relative velocity and contact pressure'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-5
+    max_parallel = 8
+  []
   [frictional-mortar-3d-action]
     type = 'CSVDiff'
     input = 'frictional-mortar-3d-action.i'

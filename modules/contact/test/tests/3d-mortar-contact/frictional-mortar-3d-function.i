@@ -1,3 +1,6 @@
+starting_point = 0.25
+offset = 0.00
+
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   volumetric_locking_correction = true
@@ -18,36 +21,46 @@
   []
 []
 
+[Functions]
+  # x: Contact pressure
+  # y: Magnitude of tangential relative velocity
+  # z: Temperature (to be implemented)
+  [mu_function]
+    type = ParsedFunction
+    value = '0.3 + (0.7 - 0.3) * 2.17^(-0.5/y) - x/10000'
+  []
+[]
+
 [AuxKernels]
   [friction_x_component]
-    type = MortarFrictionalPressureVectorAux
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    tangent_one = mortar_tangential_lm
-    tangent_two = mortar_tangential_3d_lm
-    variable = mortar_tangent_x
-    component = 0
-    boundary = 'top_bottom'
+   type = MortarFrictionalPressureVectorAux
+   primary_boundary = 'bottom_top'
+   secondary_boundary = 'top_bottom'
+   tangent_one = mortar_tangential_lm
+   tangent_two = mortar_tangential_3d_lm
+   variable = mortar_tangent_x
+   component = 0
+   boundary = 'top_bottom'
   []
   [friction_y_component]
-    type = MortarFrictionalPressureVectorAux
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    tangent_one = mortar_tangential_lm
-    tangent_two = mortar_tangential_3d_lm
-    variable = mortar_tangent_y
-    component = 1
-    boundary = 'top_bottom'
+   type = MortarFrictionalPressureVectorAux
+   primary_boundary = 'bottom_top'
+   secondary_boundary = 'top_bottom'
+   tangent_one = mortar_tangential_lm
+   tangent_two = mortar_tangential_3d_lm
+   variable = mortar_tangent_y
+   component = 1
+   boundary = 'top_bottom'
   []
   [friction_z_component]
-    type = MortarFrictionalPressureVectorAux
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    tangent_one = mortar_tangential_lm
-    tangent_two = mortar_tangential_3d_lm
-    variable = mortar_tangent_z
-    component = 2
-    boundary = 'top_bottom'
+   type = MortarFrictionalPressureVectorAux
+   primary_boundary = 'bottom_top'
+   secondary_boundary = 'top_bottom'
+   tangent_one = mortar_tangential_lm
+   tangent_two = mortar_tangential_3d_lm
+   variable = mortar_tangent_z
+   component = 2
+   boundary = 'top_bottom'
   []
 []
 
@@ -55,9 +68,9 @@
   [top_block]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 2
-    ny = 2
-    nz = 1
+    nx = 3
+    ny = 3
+    nz = 3
     xmin = -0.25
     xmax = 0.25
     ymin = -0.25
@@ -86,9 +99,9 @@
   [bottom_block]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 2
-    ny = 2
-    nz = 1
+    nx = 10
+    ny = 10
+    nz = 2
     xmin = -.5
     xmax = .5
     ymin = -.5
@@ -175,59 +188,35 @@
     new_block_name = 'primary_lower'
   []
   uniform_refine = 0
-[]
-
-[Functions]
-  # x: Contact pressure
-  # y: Magnitude of tangential relative velocity
-  # z: Temperature (to be implemented)
-  [mu_function]
-    type = ParsedFunction
-    value = '0.3 + 0.5 * 2.17^(-x/100) - 10.0 * y'
-  []
+  allow_renumbering = false
 []
 
 [Variables]
   [mortar_normal_lm]
     block = 'secondary_lower'
     use_dual = true
-    scaling = 1e-3
   []
   [mortar_tangential_lm]
     block = 'secondary_lower'
     use_dual = true
-    scaling = 1e-3
   []
   [mortar_tangential_3d_lm]
     block = 'secondary_lower'
     use_dual = true
-    scaling = 1e-3
   []
 []
 
-[Modules/TensorMechanics/DynamicMaster]
+[Modules/TensorMechanics/Master]
   [all]
     add_variables = true
-    hht_alpha = 0.0
-    newmark_beta = 0.25
-    newmark_gamma = 0.5
-    mass_damping_coefficient = 0.0
-    stiffness_damping_coefficient = 0.02
-    displacements = 'disp_x disp_y disp_z'
-    generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_zz'
-    block = '1 2'
     strain = FINITE
-    density = density
+    block = '1 2'
+    use_automatic_differentiation = false
+    generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_zz'
   []
 []
 
 [Materials]
-  [density]
-    type = GenericConstantMaterial
-    block = '1 2'
-    prop_names = 'density'
-    prop_values = '1.0'
-  []
   [tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1'
@@ -253,7 +242,7 @@
 
 [Constraints]
   [friction]
-    type = ComputeDynamicFrictionalForceLMMechanicalContact
+    type = ComputeFrictionalForceLMMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -263,16 +252,13 @@
     disp_y = disp_y
     disp_z = disp_z
     use_displaced_mesh = true
+    # mu = 0.4
+    function_friction = mu_function
+    c = 1e4
+    c_t = 1.0e6
     friction_lm = mortar_tangential_lm
     friction_lm_dir = mortar_tangential_3d_lm
-    c = 1e5
-    c_t = 1.0e5
-    newmark_beta = 0.25
-    newmark_gamma = 0.5
     interpolate_normals = false
-    correct_edge_dropping = true
-    capture_tolerance = 1e-04
-    function_friction = mu_function
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -286,7 +272,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
-    correct_edge_dropping = true
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -300,7 +285,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
-    correct_edge_dropping = true
   []
   [normal_z]
     type = NormalMortarMechanicalContact
@@ -314,7 +298,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
-    correct_edge_dropping = true
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
@@ -328,7 +311,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
-    correct_edge_dropping = true
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
@@ -342,7 +324,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
-    correct_edge_dropping = true
   []
   [tangential_z]
     type = TangentialMortarMechanicalContact
@@ -356,7 +337,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
-    correct_edge_dropping = true
   []
   [tangential_dir_x]
     type = TangentialMortarMechanicalContact
@@ -371,7 +351,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
-    correct_edge_dropping = true
   []
   [tangential_dir_y]
     type = TangentialMortarMechanicalContact
@@ -386,7 +365,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
-    correct_edge_dropping = true
   []
   [tangential_dir_z]
     type = TangentialMortarMechanicalContact
@@ -401,7 +379,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
-    correct_edge_dropping = true
   []
 []
 
@@ -409,59 +386,55 @@
   [botx]
     type = DirichletBC
     variable = disp_x
-    boundary = 'bottom_left bottom_right bottom_front bottom_back bottom_top bottom_bottom'
+    boundary = 'bottom_left bottom_right bottom_front bottom_back'
     value = 0.0
   []
   [boty]
     type = DirichletBC
     variable = disp_y
-    boundary = 'bottom_left bottom_right bottom_front bottom_back bottom_top bottom_bottom'
+    boundary = 'bottom_left bottom_right bottom_front bottom_back'
     value = 0.0
   []
   [botz]
     type = DirichletBC
     variable = disp_z
-    boundary = 'bottom_left bottom_right bottom_front bottom_back bottom_top bottom_bottom'
+    boundary = 'bottom_left bottom_right bottom_front bottom_back'
     value = 0.0
   []
   [topx]
-    type = FunctionDirichletBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'top_top'
-    function = '0.1*t'
+    value = 0.0
   []
   [topy]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 'top_top'
-    value = 0.0
+    function = '0.1*t'
   []
   [topz]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'top_top'
-    function = '-0.1*t'
+    function = '-${starting_point} * sin(2 * pi / 40 * t) + ${offset}'
   []
 []
 
 [Executioner]
   type = Transient
-  end_time = .04
-  dt = .02
+  end_time = .05
+  dt = .025
   dtmin = .001
-  solve_type = 'NEWTON'
+  solve_type = 'PJFNK'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_ksp_ew'
-  petsc_options_iname = '-pc_type  -pc_factor_shift_type'
-  petsc_options_value = ' lu       NONZERO             '
-  nl_rel_tol = 5e-13
-  nl_abs_tol = 5e-13
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
+  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-14                  1e-5'
+  l_max_its = 15
+  nl_max_its = 30
+  nl_rel_tol = 1e-11
+  nl_abs_tol = 1e-12
   line_search = 'basic'
-
-  [TimeIntegrator]
-    type = NewmarkBeta
-    gamma = 0.5
-    beta = 0.25
-  []
 []
 
 [Debug]
@@ -496,34 +469,34 @@
     block = secondary_lower
     variable = mortar_normal_lm
     sort_by = 'id'
-    execute_on = TIMESTEP_END
+    execute_on = NONLINEAR
   []
   [frictional-pressure]
     type = NodalValueSampler
     block = secondary_lower
     variable = mortar_tangential_lm
     sort_by = 'id'
-    execute_on = TIMESTEP_END
+    execute_on = NONLINEAR
   []
   [frictional-pressure-3d]
     type = NodalValueSampler
     block = secondary_lower
     variable = mortar_tangential_3d_lm
     sort_by = 'id'
-    execute_on = TIMESTEP_END
+    execute_on = NONLINEAR
   []
   [tangent_x]
     type = NodalValueSampler
     block = secondary_lower
     variable = mortar_tangent_x
     sort_by = 'id'
-    execute_on = TIMESTEP_END
+    execute_on = NONLINEAR
   []
   [tangent_y]
     type = NodalValueSampler
     block = secondary_lower
     variable = mortar_tangent_y
     sort_by = 'id'
-    execute_on = TIMESTEP_END
+    execute_on = NONLINEAR
   []
 []

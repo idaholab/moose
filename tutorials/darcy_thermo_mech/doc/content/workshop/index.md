@@ -288,4 +288,8 @@
 
 !---
 
+!include workshop/numerical/fvm_overview.md
+
+!---
+
 !bibtex bibliography title-level=1

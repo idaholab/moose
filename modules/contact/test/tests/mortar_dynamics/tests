@@ -151,7 +151,6 @@
     abs_zero = 1.0e-5
     min_ad_size = 100
     ad_indexing_type = 'global'
-    max_parallel = '2'
     requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem with '
                   'mortar constraint using nodal-attached geometry and a friction coefficient that '
                   'depends on the normal contact pressure and the relative tangential velocity'

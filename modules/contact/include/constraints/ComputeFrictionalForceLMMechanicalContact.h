@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ComputeWeightedGapLMMechanicalContact.h"
+#include "Function.h"
 
 /**
  * Computes frictional constraints (and normal contact constraints by calling its parent object)
@@ -60,10 +61,23 @@ protected:
   /**
    * Communicate weighted velocities to the owning process
    */
-  void communicateVelocities();
+#ifdef MOOSE_SPARSE_AD
+  template <typename T>
+  void communicateVelocities(std::unordered_map<const DofObject *, std::array<T, 2>> & dof);
+#endif
+  /**
+   * Compute coefficient of friction. Allows the use of contact pressure and relative velocity
+   * dependent friction.
+   */
+  ADReal computeFrictionValue(const ADReal & contact_pressure,
+                              const ADReal & tangential_vel,
+                              const ADReal & tangential_vel_dir);
 
-  /// A map from node to two tangential velocities
+  /// A map from node to two weighted tangential velocities
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
+
+  /// A map from node to two interpolated, physical tangential velocities
+  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_real_tangential_velocity;
 
   /// An array of two pointers to avoid copies
   std::array<const ADReal *, 2> _tangential_vel_ptr = {{nullptr, nullptr}};
@@ -71,8 +85,14 @@ protected:
   /// The value of the tangential velocity values at the current quadrature point
   std::array<ADReal, 2> _qp_tangential_velocity;
 
+  /// The value of the "real" tangential velocity values at the current quadrature point
+  std::array<ADReal, 2> _qp_real_tangential_velocity;
+
   /// The value of the tangential velocity vectors at the current node
   ADRealVectorValue _qp_tangential_velocity_nodal;
+
+  /// The value of the real tangential velocity vectors at the current node
+  ADRealVectorValue _qp_real_tangential_velocity_nodal;
 
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
@@ -103,6 +123,12 @@ protected:
 
   /// Friction coefficient
   const Real _mu;
+
+  /// input function
+  const Function * const _function_friction;
+
+  /// Boolean to determine whether the friction coefficient is taken from a function
+  const bool _has_friction_function;
 
   /// Automatic flag to determine whether we are doing three-dimensional work
   bool _3d;

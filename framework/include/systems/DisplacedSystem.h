@@ -214,6 +214,12 @@ public:
     return _undisplaced_system.hasMatrix(tag_id);
   }
 
+  void initSolutionState() override;
+  NumericVector<Number> & solutionState(const unsigned int state) override;
+  const NumericVector<Number> & solutionState(const unsigned int state) const override;
+  void needSolutionState(const unsigned int state) override;
+  bool hasSolutionState(const unsigned int state) const override;
+
   virtual SparseMatrix<Number> & getMatrix(TagID tag) override
   {
     return _undisplaced_system.getMatrix(tag);
@@ -240,3 +246,33 @@ protected:
   SystemBase & _undisplaced_system;
   TransientExplicitSystem & _sys;
 };
+
+inline void
+DisplacedSystem::initSolutionState()
+{
+  _undisplaced_system.initSolutionState();
+}
+
+inline NumericVector<Number> &
+DisplacedSystem::solutionState(const unsigned int state)
+{
+  return _undisplaced_system.solutionState(state);
+}
+
+inline const NumericVector<Number> &
+DisplacedSystem::solutionState(const unsigned int state) const
+{
+  return _undisplaced_system.solutionState(state);
+}
+
+inline void
+DisplacedSystem::needSolutionState(const unsigned int state)
+{
+  _undisplaced_system.needSolutionState(state);
+}
+
+inline bool
+DisplacedSystem::hasSolutionState(const unsigned int state) const
+{
+  return _undisplaced_system.hasSolutionState(state);
+}
