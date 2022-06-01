@@ -119,7 +119,9 @@ ParsedGenerateSideset::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   if (!mesh->is_replicated())
-    mooseError("ParsedGenerateSideset is not implemented for distributed meshes");
+    mooseWarning(
+        "ParsedGenerateSideset is not implemented for distributed meshes. Make sure the "
+        "parsed sideset does NOT cross any mesh distribution boundaries, using the ProcessorAux");
 
   setup(*mesh);
 

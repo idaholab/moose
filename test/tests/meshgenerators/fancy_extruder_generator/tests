@@ -51,6 +51,7 @@
     requirement = 'The system shall be able to use the result from FancyExtruderGenerator in subsequent mesh generators'
     design = 'FancyExtruderGenerator.md'
     issues = '#16902'
+    allow_warnings = true # parsed sideset generation isn't fully supported on distributed meshes
   []
   [extruder_with_element_extra_integer_swap]
     type = 'Exodiff'

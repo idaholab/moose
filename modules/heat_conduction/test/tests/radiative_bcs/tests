@@ -6,6 +6,8 @@
     requirement = "The system shall be able to model radiative transfer from a cylindrical surface as a boundary condition."
     design = 'source/bcs/InfiniteCylinderRadiativeBC.md'
     issues = "#13053"
+    # see #21185
+    allow_warnings = true
   [../]
   [ad_radiative_bc_cyl]
     type = CSVDiff
@@ -15,6 +17,8 @@
     design = 'source/bcs/ADInfiniteCylinderRadiativeBC.md'
     issues = "#13053"
     cli_args = "Outputs/file_base=radiative_bc_cyl_out"
+    # see #21185
+    allow_warnings = true
   []
   [ad_radiative_bc_cyl_jacobian]
     type = PetscJacobianTester
@@ -24,6 +28,8 @@
     requirement = "The system shall be able to model radiative transfer from a cylindrical surface as boundary condition with automated differentiation and provide exact Jacobian."
     design = 'source/bcs/ADInfiniteCylinderRadiativeBC.md'
     issues = "#13053"
+    # see #21185
+    allow_warnings = true
   []
   [./function_radiative_bc]
     type = Exodiff
