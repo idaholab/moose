@@ -207,7 +207,7 @@ if __name__ == '__main__':
     dates, data, contrib, contributors = getData(options)
 
     # Create the figure
-    fig, ax1 = plt.subplots()
+    fig, ax1 = plt.subplots(dpi=200)
     fig.set_facecolor([1,1,1])
     for tick in ax1.yaxis.get_ticklabels():
         tick.set_fontsize(options.font)
