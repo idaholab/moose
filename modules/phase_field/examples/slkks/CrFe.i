@@ -38,22 +38,25 @@
     type = PiecewiseLinear
     data_file = CrFe_sigma_out_var_0001.csv
     format = columns
-    x_title = cCr
-    y_title = SIGMA_0CR
+    x_index_in_file = 5
+    y_index_in_file = 2
+    xy_in_file_only = false
   []
   [sigma_cr1]
     type = PiecewiseLinear
     data_file = CrFe_sigma_out_var_0001.csv
     format = columns
-    x_title = cCr
-    y_title = SIGMA_1CR
+    x_index_in_file = 5
+    y_index_in_file = 3
+    xy_in_file_only = false
   []
   [sigma_cr2]
     type = PiecewiseLinear
     data_file = CrFe_sigma_out_var_0001.csv
     format = columns
-    x_title = cCr
-    y_title = SIGMA_2CR
+    x_index_in_file = 5
+    y_index_in_file = 4
+    xy_in_file_only = false
   []
 []
 
