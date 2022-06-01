@@ -55,7 +55,7 @@ SubChannel1PhaseProblem::validParams()
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
   params.addParam<Real>("T_tol", 1e-6, "Temperature tolerance");
-  params.addParam<int>("T_maxit", 10, "Maximum number of iterations for inner temperature loop");
+  params.addParam<int>("T_maxit", 1000, "Maximum number of iterations for inner temperature loop");
   params.addParam<PetscReal>("rtol", 1e-6, "Relative tolerance for ksp solver");
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
@@ -1637,7 +1637,7 @@ SubChannel1PhaseProblem::computeh(int iblock)
     VecAXPY(hc_sys_h_rhs, 1.0, hc_cross_derivative_rhs);
     VecAXPY(hc_sys_h_rhs, 1.0, hc_added_heat_rhs);
 
-    if(_segregated_bool)
+    if(_segregated_bool || (! _monolithic_thermal_bool))
     {
       // Assembly the matrix system
       KSP ksploc; PC  pc;
@@ -2162,8 +2162,10 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   PC             pc;           /* preconditioner context */
   PetscErrorCode ierr;
   PetscInt       Q = _monolithic_thermal_bool ? 4 : 3;
-  Mat            mat_array[Q*Q];
-  Vec            vec_array[Q];
+  std::vector<Mat> mat_array(Q*Q);
+  std::vector<Vec> vec_array(Q);
+//  Mat            mat_array[Q*Q];
+//  Vec            vec_array[Q];
 
   /// Initializing flags
   bool _axial_mass_flow_tight_coupling = true;
@@ -2668,8 +2670,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   std::cout << "Linear solver relaxed." << std::endl;
 
   // Creating nested matrices
-  ierr = MatCreateNest(PETSC_COMM_WORLD,Q,NULL,Q,NULL,mat_array,&A_nest); CHKERRQ(ierr);
-  ierr = VecCreateNest(PETSC_COMM_WORLD,Q,NULL,vec_array,&b_nest); CHKERRQ(ierr);
+  ierr = MatCreateNest(PETSC_COMM_WORLD,Q,NULL,Q,NULL,mat_array.data(),&A_nest); CHKERRQ(ierr);
+  ierr = VecCreateNest(PETSC_COMM_WORLD,Q,NULL,vec_array.data(),&b_nest); CHKERRQ(ierr);
   std::cout << "Nested system created." << std::endl;
 
   /// Setting up linear solver
@@ -2683,8 +2685,10 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   PCSetType(pc,PCFIELDSPLIT);
   ierr = KSPSetTolerances(ksp,_rtol, _atol, _dtol, _maxit); CHKERRQ(ierr);
   // Splitting fields
-  IS rows[Q]; PetscInt M = 0;
-  ierr = MatNestGetISs(A_nest,rows,NULL); CHKERRQ(ierr);
+  std::vector<IS> rows(Q);
+  //IS rows[Q];
+  PetscInt M = 0;
+  ierr = MatNestGetISs(A_nest,rows.data(),NULL); CHKERRQ(ierr);
   for (unsigned int j=0; j<Q; ++j) {
     IS expand1;
     ISDuplicate(rows[M],&expand1);
@@ -2880,8 +2884,14 @@ SubChannel1PhaseProblem::externalSolve()
   _console << "Executing subchannel solver\n";
   auto P_error = 1.0;
   unsigned int P_it = 0;
-  unsigned int P_it_max = 2 * _n_blocks;
-  if (_n_blocks == 1)
+  unsigned int P_it_max;
+
+  if (_segregated_bool)
+    P_it_max = 2 * _n_blocks;
+  else
+    P_it_max = 100;
+
+  if ((_n_blocks == 1) && (_segregated_bool))
     P_it_max = 1;
   if (! _segregated_bool)
   {
@@ -2966,6 +2976,8 @@ SubChannel1PhaseProblem::externalSolve()
     P_error =
         std::abs((P_L2norm_new_axial - P_L2norm_old_axial) / (P_L2norm_old_axial + _P_out + 1E-14));
     _console << "P_error :" << P_error << std::endl;
+    std::cout << "Iteration:  " << P_it << std::endl;
+    std::cout << "Maximum iterations: " << P_it_max << std::endl;
   }
   // update old crossflow matrix
   _Wij_old = _Wij;

@@ -553,7 +553,7 @@ DetailedQuadSubChannelMeshGenerator::generate()
   }
 
   // Add elements to the mesh.  The elements are 6-node prisms.  The
-  // bases of these prisms form a triangulated representation of an cross-section
+  // bases of these prisms form a triangulated representation of a cross-section
   // of a center subchannel.
   if (_n_channels == 2)
   {

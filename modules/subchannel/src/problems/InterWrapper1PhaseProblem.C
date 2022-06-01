@@ -2160,8 +2160,10 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   PC             pc;           /* preconditioner context */
   PetscErrorCode ierr;
   PetscInt       Q = _monolithic_thermal_bool ? 4 : 3;
-  Mat            mat_array[Q*Q];
-  Vec            vec_array[Q];
+  std::vector<Mat> mat_array(Q*Q);
+  std::vector<Vec> vec_array(Q);
+//  Mat            mat_array[Q*Q];
+//  Vec            vec_array[Q];
 
   /// Initializing flags
   bool _axial_mass_flow_tight_coupling = true;
@@ -2517,7 +2519,6 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   // Relaxing linear system
   if (true)
   {
-
     // Estimating cross-flow resistances to achieve realizable solves
     populateVectorFromHandle<SolutionHandle *>(prod, _mdot_soln, first_node, last_node, _n_channels);
     Vec mdot_estimate; createPetscVector(mdot_estimate, _block_size * _n_channels);
@@ -2666,8 +2667,8 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   std::cout << "Linear solver relaxed." << std::endl;
 
   // Creating nested matrices
-  ierr = MatCreateNest(PETSC_COMM_WORLD,Q,NULL,Q,NULL,mat_array,&A_nest); CHKERRQ(ierr);
-  ierr = VecCreateNest(PETSC_COMM_WORLD,Q,NULL,vec_array,&b_nest); CHKERRQ(ierr);
+  ierr = MatCreateNest(PETSC_COMM_WORLD,Q,NULL,Q,NULL,mat_array.data(),&A_nest); CHKERRQ(ierr);
+  ierr = VecCreateNest(PETSC_COMM_WORLD,Q,NULL,vec_array.data(),&b_nest); CHKERRQ(ierr);
   std::cout << "Nested system created." << std::endl;
 
   /// Setting up linear solver
@@ -2681,8 +2682,10 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   PCSetType(pc,PCFIELDSPLIT);
   ierr = KSPSetTolerances(ksp,_rtol, _atol, _dtol, _maxit); CHKERRQ(ierr);
   // Splitting fields
-  IS rows[Q]; PetscInt M = 0;
-  ierr = MatNestGetISs(A_nest,rows,NULL); CHKERRQ(ierr);
+  std::vector<IS> rows(Q);
+  //IS rows[Q];
+  PetscInt M = 0;
+  ierr = MatNestGetISs(A_nest,rows.data(),NULL); CHKERRQ(ierr);
   for (unsigned int j=0; j<Q; ++j) {
     IS expand1;
     ISDuplicate(rows[M],&expand1);

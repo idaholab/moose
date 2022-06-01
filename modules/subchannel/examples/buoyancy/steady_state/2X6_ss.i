@@ -85,6 +85,9 @@ P_out = 101325 # Pa
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
+  implicit = true
+  segregated = false
+  monolithic_thermal = false
 []
 
 [ICs]
@@ -101,7 +104,7 @@ P_out = 101325 # Pa
   [q_prime_IC]
     type = QuadPowerIC
     variable = q_prime
-    power = 5460  # W
+    power = 20000 #5460  # W
     filename = "power_profile.txt"
   []
 

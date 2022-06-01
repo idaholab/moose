@@ -6,7 +6,7 @@ P_out = 2.0e5 # Pa
   [subchannel]
     type = TriSubChannelMeshGenerator
     nrings = 4
-    n_cells = 100
+    n_cells = 10
     flat_to_flat = 0.077
     heated_length = 1.0
     rod_diameter = 0.01
@@ -173,4 +173,25 @@ P_out = 2.0e5 # Pa
   type = Steady
   nl_rel_tol = 0.9
   l_tol = 0.9
+[]
+
+################################################################################
+# A multiapp that projects data to a detailed mesh
+################################################################################
+
+[MultiApps]
+  [viz]
+    type = FullSolveMultiApp
+    input_files = "3d.i"
+    execute_on = "timestep_end"
+  []
+[]
+
+[Transfers]
+  [xfer]
+    type = MultiAppDetailedSolutionTransfer
+    multi_app = viz
+    direction = to_multiapp
+    variable = 'mdot SumWij P DP h T rho mu q_prime S'
+  []
 []
