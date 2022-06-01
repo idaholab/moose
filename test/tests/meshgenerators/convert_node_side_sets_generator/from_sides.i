@@ -15,13 +15,13 @@
     type = ParsedSubdomainMeshGenerator
     input = gmg
     combinatorial_geometry = 'x < 1 & y > 1 & y < 2'
-    block_id = 7
+    block_id = 1
   []
   [sideset]
     type = ParsedGenerateSideset
     input = subdomains
     combinatorial_geometry = 'z < 1'
-    included_subdomain_ids = '7'
+    included_subdomain_ids = '1'
     normal = '1 0 0'
     new_sideset_name = interior
   []
