@@ -21,14 +21,12 @@ ConvertNodeSetSideSetGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  params.addClassDescription("Mesh generator which refines one or more blocks in an existing mesh");
-  params.addRequiredParam<MeshGeneratorName>("input", "Input mesh to refine");
-  params.addRequiredParam<bool>(
-      "convert_node_list_from_side_list",
-      "Toggles whether side entities should be transcribed into nodes.");
-  params.addRequiredParam<bool>(
-      "convert_side_list_from_node_list",
-      "Toggles whether node entities should be transcribed into sides.");
+  params.addClassDescription("Mesh generator which constructs side sets from node sets, and vise versa");
+  params.addRequiredParam<MeshGeneratorName>("input", "Input mesh the opertation will be applied to");
+  params.addRequiredParam<bool>("convert_node_list_from_side_list",
+                                "Flag signaling if nodes should be constructed from sides");
+  params.addRequiredParam<bool>("convert_side_list_from_node_list",
+                                "Flag signaling if sides should be constructed from nodes");
 
   return params;
 }
@@ -39,7 +37,6 @@ ConvertNodeSetSideSetGenerator::ConvertNodeSetSideSetGenerator(const InputParame
     _convert_side_list_from_node_list(getParam<bool>("convert_side_list_from_node_list")),
     _convert_node_list_from_side_list(getParam<bool>("convert_node_list_from_side_list"))
 {
-
 }
 
 std::unique_ptr<MeshBase>

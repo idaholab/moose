@@ -28,8 +28,11 @@ Mesh/construct_node_list_from_side_list=true
 Mesh/construct_side_list_from_node_list=false
 ```
 
-If you have a mesh that is missing a side set (but it has a node set) you may be able to get around that issue by setting
+If you have a mesh that is missing a side set (but it has a node set) you could set
 the second parameter (from above) to true.
+
+You could also use the [`ConvertNodeSetSideSetGenerator`](ConvertNodeSetSideSetGenerator.md) class to construct side sets from node
+ sets. The `ConvertNodeSetSideSetGenerator` object allows you to manually construct side sets from node sets after mesh generation.
 
 ## Minimal interface
 

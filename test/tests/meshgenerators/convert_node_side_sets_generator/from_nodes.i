@@ -1,6 +1,6 @@
 [Mesh]
-  construct_node_list_from_side_list = false
-  construct_side_list_from_node_list = false
+  construct_node_list_from_side_list = false  # these are set to false for demonstration purposes
+  construct_side_list_from_node_list = false  #
   [gmg]
     type = GeneratedMeshGenerator
     dim = 3
@@ -24,7 +24,7 @@
     convert_side_list_from_node_list = true
     convert_node_list_from_side_list = false
   []
-[]
+[] # ordinarily the construct_side_list_from_node_list method is called after the mesh generation
 
 [Outputs]
   exodus = true
