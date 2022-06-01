@@ -61,18 +61,14 @@ cd problems
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step04_velocity_aux
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step3.i
 ```
 
 !---
 
-## Step 4: Visualize Result
-
-```bash
-~/projects/moose/python/peacock/peacock -r step4_out.e
-```
+## Step 4: Result
 
 !media darcy_thermo_mech/step04_result.png
 
