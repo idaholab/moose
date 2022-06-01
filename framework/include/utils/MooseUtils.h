@@ -88,6 +88,9 @@ pathjoin(const std::string & s, Args... args)
   return s + "/" + pathjoin(args...);
 }
 
+/// Check if the input string can be parsed into a Real
+bool parsesToReal(const std::string & input);
+
 /// Returns the location of either a local repo run_tests script - or an
 /// installed test executor script if run_tests isn't found.
 std::string runTestsExecutable();

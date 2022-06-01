@@ -83,6 +83,16 @@ findTestRoot()
   return "";
 }
 
+bool
+parsesToReal(const std::string & input)
+{
+  std::istringstream ss(input);
+  Real real_value;
+  if (ss >> real_value && ss.eof())
+    return true;
+  return false;
+}
+
 std::string
 installedInputsDir(const std::string & app_name,
                    const std::string & dir_name,
