@@ -1,8 +1,8 @@
 [Tests]
   [heated]
-    issues = '#16756 #19472'
+    issues = '#16756 #19472 #21135'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel'
-    design = 'PINSFVEnergyAdvection.md'
+    design = 'PINSFVEnergyAdvection.md NSFVAction.md'
     [fluid_only]
       type = 'Exodiff'
       input = 2d-rc-heated.i
@@ -35,6 +35,17 @@
       ad_indexing_type = 'global'
       valgrind = HEAVY
       cli_args = "Outputs/file_base='rc-heated-effective'"
+    []
+    [kappa-action]
+      type = 'Exodiff'
+      input = 2d-rc-heated-effective-action.i
+      exodiff = rc-heated-effective-action.e
+      method = "!dbg"
+      abs_zero = 1e-9
+      detail = 'with an effective diffusion coefficient and NSFVAction syntax,'
+      ad_indexing_type = 'global'
+      valgrind = HEAVY
+      cli_args = "Outputs/file_base='rc-heated-effective-action'"
     []
   []
   [solid-fluid]
