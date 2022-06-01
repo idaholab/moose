@@ -171,7 +171,7 @@ PropertyReadFile::initVoronoiCenterPoints()
 Real
 PropertyReadFile::getData(const Elem * const elem, const unsigned int prop_num) const
 {
-  if (prop_num >= _nprop)
+  if (prop_num > _nprop)
     paramError(
         "nprop", "Property number ", prop_num, " greater than total number of properties ", _nprop);
 
