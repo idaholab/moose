@@ -827,14 +827,6 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
 }
 
 template <typename OutputType>
-const VectorValue<ADReal>
-MooseVariableFV<OutputType>::adInternalOrthogonalGradSln(const FaceInfo & fi) const
-{
-  mooseAssert(fi.faceType(this->name) == Moose::FV::FaceInfo::VarFaceNeighbors::ELEM, "We ");
-  return (getElemValue(fi.elemPtr()) - getElemValue(fi.neighborPtr())) / fi.dCFMag();
-}
-
-template <typename OutputType>
 const VectorValue<ADReal> &
 MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_skewness) const
 {

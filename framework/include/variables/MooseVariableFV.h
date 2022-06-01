@@ -279,9 +279,6 @@ public:
     return _element_data->adGradSln();
   }
 
-  virtual const VectorValue<ADReal> adInternalOrthogonalGradSln(const FaceInfo & fi) const;
-  virtual const VectorValue<ADReal> adBoundaryOrthogonalGradSln(const FaceInfo & fi) const;
-
   /**
    * Retrieve (or potentially compute) the gradient on the provided element. Overriders of this
    * method *cannot* call \p getBoundaryFaceValue because that method itself may lead to a call to
