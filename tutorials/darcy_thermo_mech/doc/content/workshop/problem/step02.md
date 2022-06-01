@@ -68,10 +68,6 @@ cd problems
 
 !---
 
-## Step 2: Visualize Result
-
-```bash
-~/projects/moose/python/peacock/peacock -r step2_out.e
-```
+## Step 2: Result
 
 !media darcy_thermo_mech/step02_result.png
