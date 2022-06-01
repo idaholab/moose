@@ -42,13 +42,13 @@ Add custom syntax to build objects that are common to all Darcy thermal mecahnic
 
 !---
 
-## Step 11: Run and Visualize
+## Step 11: Run
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step11_action
 make -j 12 # use number of processors for your system
 cd problems
-~/projects/moose/python/peacock/peacock -i step11.i
+../darcy_thermo_mech-opt -i step11.i
 ```
 
 !---
