@@ -109,8 +109,10 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   //  Given the number of rods and number of fuel rod rings, the number of subchannels can be
   //  computed as follows:
   unsigned int chancount = 0.0;
+  // Summing internal channels
   for (unsigned int j = 0; j < _n_rings - 1; j++)
     chancount += j * 6;
+  // Adding external channels to the total count
   _n_channels = chancount + _nrods - 1 + (_n_rings - 1) * 6 + 6;
 
   _subchannel_to_rod_map.resize(_n_channels);

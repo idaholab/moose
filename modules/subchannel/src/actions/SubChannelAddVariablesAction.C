@@ -17,6 +17,7 @@ SubChannelAddVariablesAction::SubChannelAddVariablesAction(const InputParameters
   : Action(parameters),
     _fe_family(AddVariableAction::getNonlinearVariableFamilies()),
     _fe_order(AddVariableAction::getNonlinearVariableOrders())
+// Set the block parameters to the hardcoded 'subchannel' and 'pins' domains
 {
 }
 
