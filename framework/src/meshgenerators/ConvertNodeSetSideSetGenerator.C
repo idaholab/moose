@@ -21,12 +21,12 @@ ConvertNodeSetSideSetGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  params.addClassDescription("Mesh generator which constructs side sets from node sets, and vise versa");
-  params.addRequiredParam<MeshGeneratorName>("input", "Input mesh the opertation will be applied to");
+  params.addClassDescription("Mesh generator which refines one or more blocks in an existing mesh");
+  params.addRequiredParam<MeshGeneratorName>("input", "Input mesh to refine");
   params.addRequiredParam<bool>("convert_node_list_from_side_list",
-                                "Flag signaling if nodes should be constructed from sides");
+                                "Toggles whether side entities should be transcribed into nodes.");
   params.addRequiredParam<bool>("convert_side_list_from_node_list",
-                                "Flag signaling if sides should be constructed from nodes");
+                                "Toggles whether node entities should be transcribed into sides.");
 
   return params;
 }
@@ -42,10 +42,10 @@ ConvertNodeSetSideSetGenerator::ConvertNodeSetSideSetGenerator(const InputParame
 std::unique_ptr<MeshBase>
 ConvertNodeSetSideSetGenerator::generate()
 {
-  if(_convert_node_list_from_side_list)
+  if (_convert_node_list_from_side_list)
     _input->get_boundary_info().build_node_list_from_side_list();
 
-  if(_convert_side_list_from_node_list)
+  if (_convert_side_list_from_node_list)
     _input->get_boundary_info().build_side_list_from_node_list();
 
   return dynamic_pointer_cast<MeshBase>(_input);

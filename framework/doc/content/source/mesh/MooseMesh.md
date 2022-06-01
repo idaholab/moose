@@ -17,7 +17,7 @@ By default, MOOSE will construct a node set corresponding to each side set withi
 side sets (to node sets) you won't have any issues applying any kind of boundary condition or other "boundary" type object within
 MOOSE.
 
-### More detail
+### More detail id=more_detail
 
 As users of MOOSE, you do have the ability to control whether side sets or node sets are automatically constructed. By default
 node sets are constructed from side sets but the converse is not true. Both of these parameters can be controlled by the following

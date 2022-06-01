@@ -33,5 +33,4 @@ private:
 
   /// Flag signalling if sides should be constructed from nodes
   const bool _convert_node_list_from_side_list;
-
 };
