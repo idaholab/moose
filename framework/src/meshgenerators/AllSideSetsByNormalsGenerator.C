@@ -46,9 +46,9 @@ AllSideSetsByNormalsGenerator::AllSideSetsByNormalsGenerator(const InputParamete
 std::unique_ptr<MeshBase>
 AllSideSetsByNormalsGenerator::generate()
 {
-  _mesh->errorIfDistributedMesh("AddAllSideSetsByNormals");
-
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+  if (!mesh->is_replicated())
+    mooseError("AllSideSetsByNormalsGenerator is not implemented for distributed meshes");
   setup(*mesh);
 
   // Get the current list of boundaries so we can generate new ones that won't conflict

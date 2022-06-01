@@ -83,9 +83,6 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
                                : std::vector<SubdomainID>()),
     _normal(getParam<Point>("normal"))
 {
-  if (typeid(_input).name() == typeid(std::unique_ptr<DistributedMesh>).name())
-    mooseError("GenerateAllSideSetsByNormals only works with ReplicatedMesh.");
-
   // Handle deprecated parameters
   if (isParamValid("included_subdomain_ids") && isParamValid("included_subdomains"))
     paramError("included_subdomain_ids",
@@ -121,6 +118,8 @@ std::unique_ptr<MeshBase>
 ParsedGenerateSideset::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+  if (!mesh->is_replicated())
+    mooseError("ParsedGenerateSideset is not implemented for distributed meshes");
 
   setup(*mesh);
 
