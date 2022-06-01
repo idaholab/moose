@@ -1445,6 +1445,8 @@ SystemBase::solutionState(const unsigned int state)
 void
 SystemBase::needSolutionState(const unsigned int state)
 {
+  libmesh_parallel_only(this->comm());
+
   if (hasSolutionState(state))
     return;
 
