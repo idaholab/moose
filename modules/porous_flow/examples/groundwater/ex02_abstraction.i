@@ -178,6 +178,7 @@
   [baseflow_l_per_m_per_day]
     type = FunctionValuePostprocessor
     function = baseflow_rate
+    indirect_dependencies = 'baseflow_kg dt'
   []
   [abstraction_kg]
     type = PorousFlowPlotQuantity
@@ -187,6 +188,7 @@
   [abstraction_kg_per_day]
     type = FunctionValuePostprocessor
     function = abstraction_rate
+    indirect_dependencies = 'abstraction_kg dt'
   []
 []
 
@@ -222,4 +224,3 @@
     type = CSV
   []
 []
-

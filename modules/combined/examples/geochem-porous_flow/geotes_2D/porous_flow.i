@@ -201,18 +201,22 @@ production_rate = 1.0 # kg/s/m
   [mole_rate_Na_produced]
     type = FunctionValuePostprocessor
     function = moles_Na
+    indirect_dependencies = 'kg_Na_produced_this_timestep dt'
   []
   [mole_rate_Cl_produced]
     type = FunctionValuePostprocessor
     function = moles_Cl
+    indirect_dependencies = 'kg_Cl_produced_this_timestep dt'
   []
   [mole_rate_SiO2_produced]
     type = FunctionValuePostprocessor
     function = moles_SiO2
+    indirect_dependencies = 'kg_SiO2_produced_this_timestep dt'
   []
   [mole_rate_H2O_produced]
     type = FunctionValuePostprocessor
     function = moles_H2O
+    indirect_dependencies = 'kg_H2O_produced_this_timestep dt'
   []
   [heat_joules_extracted_this_timestep]
     type = PorousFlowPlotQuantity
