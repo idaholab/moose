@@ -60,7 +60,7 @@ prop_values = '0.01         200'
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step5_heat_conduction
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step5a_steady.i
 ```
@@ -105,7 +105,7 @@ only an update to the input file is required to run the transient case.
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step5_heat_conduction
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step5b_transient.i
 ```
@@ -149,7 +149,7 @@ rather than being replaced with a known flux, as is done in a `NeumannBC`.
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step05_heat_conduction
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ~/projects/moose/python/peacock/peacock -i step5b_transient.i
 ```

@@ -50,7 +50,7 @@ permeability and viscosity.
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step02_darcy_pressure
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ~/projects/moose/python/peacock/peacock -i step2.i
 ```
@@ -61,7 +61,7 @@ cd problems
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step02_darcy_pressure
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step2.i
 ```

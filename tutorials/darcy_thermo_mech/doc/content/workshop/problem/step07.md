@@ -14,7 +14,7 @@
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_adaptivity
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ~/projects/moose/python/peacock/peacock -i step7a_coarse.i
 ```
@@ -31,7 +31,7 @@ cd problems
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_adaptivity
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ~/projects/moose/python/peacock/peacock -i step7b_fine.i
 ```
@@ -48,7 +48,7 @@ cd problems
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_adaptivity
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ~/projects/moose/python/peacock/peacock -i step7a_adapt.i
 ```

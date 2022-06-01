@@ -70,7 +70,7 @@ it must be updated to consume the newly created material properties.
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step03_darcy_material
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ~/projects/moose/python/peacock/peacock -i step3.i
 ```
@@ -81,7 +81,7 @@ cd problems
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step03_darcy_material
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step3.i
 ```

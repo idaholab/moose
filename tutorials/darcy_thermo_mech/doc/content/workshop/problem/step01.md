@@ -51,7 +51,7 @@ A basic MOOSE input file requires six parts, each of which will be covered in gr
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step01_diffusion
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ~/projects/moose/python/peacock/peacock -i step1.i
 ```
@@ -62,7 +62,7 @@ cd problems
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step01_diffusion
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step1.i
 ```
