@@ -171,7 +171,9 @@ ContactAction::validParams()
       "newmark_gamma",
       0.5,
       "Newmark-beta gamma parameter for its inclusion in the weighted gap update formula");
-
+  params.addCoupledVar("wear_depth",
+                       "The name of the mortar auxiliary variable that is used to modify the "
+                       "weighted gap definition");
   return params;
 }
 
@@ -579,6 +581,8 @@ ContactAction::addMortarContact()
         params.set<Real>("newmark_beta") = getParam<Real>("newmark_beta");
         params.set<Real>("newmark_gamma") = getParam<Real>("newmark_gamma");
         params.set<Real>("capture_tolerance") = getParam<Real>("capture_tolerance");
+        if (isParamValid("wear_depth"))
+          params.set<CoupledName>("wear_depth") = getParam<CoupledName>("wear_depth");
       }
 
       params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
@@ -620,6 +624,8 @@ ContactAction::addMortarContact()
         params.set<Real>("newmark_beta") = getParam<Real>("newmark_beta");
         params.set<Real>("newmark_gamma") = getParam<Real>("newmark_gamma");
         params.set<Real>("capture_tolerance") = getParam<Real>("capture_tolerance");
+        if (isParamValid("wear_depth"))
+          params.set<CoupledName>("wear_depth") = getParam<CoupledName>("wear_depth");
       }
       params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
 
