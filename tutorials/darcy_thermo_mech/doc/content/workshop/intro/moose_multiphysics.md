@@ -135,4 +135,4 @@ XFEM
 
 !---
 
-!media darcy_thermo_mech/moose_herd_2019.png style=margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_herd_2022.png style=margin-left:auto;margin-right:auto;display:block;
