@@ -46,24 +46,13 @@ occurs in the element interiors.
 
 !---
 
-## Step 4: Run and Visualize with Peacock
+## Step 4: Run
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step04_velocity_aux
 make -j 12 # use number of processors for your system
 cd problems
-~/projects/moose/python/peacock/peacock -i step4.i
-```
-
-!---
-
-## Step 4: Run via Command-line
-
-```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step04_velocity_aux
-make -j 12 # use number of processors for your system
-cd problems
-../darcy_thermo_mech-opt -i step3.i
+../darcy_thermo_mech-opt -i step4.i
 ```
 
 !---
