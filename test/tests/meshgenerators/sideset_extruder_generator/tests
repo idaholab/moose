@@ -1,0 +1,52 @@
+[Tests]
+  design = 'meshgenerators/SideSetExtruderGenerator.md'
+  issues = '#20880'
+
+  [extruder]
+    requirement = 'The system shall have the capability of extruding the sideset of a mesh '
+                  'in a given direction'
+
+    [control]
+      type = 'Exodiff'
+      input = 'external_generators.i'
+      exodiff = 'external_generators_in.e'
+      recover = false
+      mesh_mode = 'REPLICATED'
+      cli_args = '--mesh-only'
+      
+      detail = 'SideSetExtruderGenerator is essentially just a wrapper for 4 other generators used in sequence. 
+      The output of the 4 other generators should be identical to SideSetExtruderGenerator, or SideSetExtruderGenerator
+      has changed behavior'
+    []
+    [square]
+      type = 'Exodiff'
+      input = 'extrude_square.i'
+      exodiff = 'extrude_square_in.e'
+      recover = false
+      mesh_mode = 'REPLICATED'
+      cli_args = '--mesh-only'
+      
+      detail = 'A simple case, extruding the right side of a square out at an upward angle'
+    []
+    [cube]
+      type = 'Exodiff'
+      input = 'extrude_cube.i'
+      exodiff = 'extrude_cube_in.e'
+      recover = false
+      mesh_mode = 'REPLICATED'
+      cli_args = '--mesh-only'
+      
+      detail = 'Extruding the top side of a cube out a side-ways angle'
+    []
+    [multiblock]
+      type = 'Exodiff'
+      input = 'extrude_multiblock.i'
+      exodiff = 'extrude_multiblock_in.e'
+      recover = false
+      mesh_mode = 'REPLICATED'
+      cli_args = '--mesh-only'
+      
+      detail = 'extruding an entangled block in a complicated 3d geomitry'
+    []
+  []
+[]

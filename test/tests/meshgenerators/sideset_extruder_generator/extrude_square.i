@@ -1,0 +1,15 @@
+[Mesh]
+  # Note: don't change the parameters without also changing extrude_square,
+  # as they should be using identical file(s) in gold
+  [square]
+    type = GeneratedMeshGenerator
+    dim = 2
+  []
+  [extrude_right]
+    type = SideSetExtruderGenerator
+    input = square
+    sideset = 'right'
+    extrusion_vector = '1 0.5 0'
+    num_layers = 3
+  []
+[]
