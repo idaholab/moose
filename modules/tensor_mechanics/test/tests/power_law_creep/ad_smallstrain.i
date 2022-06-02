@@ -41,14 +41,14 @@
 []
 
 [Kernels]
-  [./heat]
-    type = ADHeatConduction
+  [heat]
+    type = Diffusion
     variable = temp
-  [../]
-  [./heat_ie]
-    type = ADHeatConductionTimeDerivative
+  []
+  [heat_ie]
+    type = TimeDerivative
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
@@ -103,16 +103,6 @@
     n_exponent = 4
     activation_energy = 3.0e5
     temperature = temp
-  [../]
-
-  [./thermal]
-    type = ADHeatConductionMaterial
-    specific_heat = 1.0
-    thermal_conductivity = 100.
-  [../]
-  [./density]
-    type = ADDensity
-    density = 1.0
   [../]
 []
 

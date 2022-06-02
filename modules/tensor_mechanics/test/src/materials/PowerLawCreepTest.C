@@ -20,7 +20,7 @@ PowerLawCreepTestTempl<is_ad>::validParams()
 {
   InputParameters params = PowerLawCreepStressUpdateTempl<is_ad>::validParams();
   params.addClassDescription(
-      "This class duplicates the ADPowerLawCreepStressUpdate, except at a specificed time step and "
+      "This class duplicates the PowerLawCreepStressUpdate, except at a specificed time step and "
       "the 1st iteration, at which time a high residual is computed, forcing an exception. "
       "Optionally, a high or low initial guess can be used to test the check_rage limits, which "
       "will also force an exception.");

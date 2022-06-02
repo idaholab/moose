@@ -7,10 +7,15 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
 []
 
-[AuxVariables]
+[Variables]
   [./temp]
+    order = FIRST
+    family = LAGRANGE
     initial_condition = 1000.0
   [../]
 []
@@ -24,12 +29,34 @@
     use_automatic_differentiation = true
   [../]
 []
+
+[Functions]
+  [./top_pull]
+    type = PiecewiseLinear
+    x = '0 1'
+    y = '1 1'
+  [../]
+[]
+
+[Kernels]
+  [heat]
+    type = Diffusion
+    variable = temp
+  []
+  [heat_ie]
+    type = TimeDerivative
+    variable = temp
+  []
+[]
+
 [BCs]
-  [./u_top_fix]
-    type = ADDirichletBC
+  [./u_top_pull]
+    type = ADPressure
     variable = disp_y
+    component = 1
     boundary = top
-    value = 1e-5
+    constant = -10.0e6
+    function = top_pull
   [../]
   [./u_bottom_fix]
     type = ADDirichletBC
@@ -48,6 +75,12 @@
     variable = disp_z
     boundary = back
     value = 0.0
+  [../]
+  [./temp_fix]
+    type = DirichletBC
+    variable = temp
+    boundary = 'bottom top'
+    value = 1000.0
   [../]
 []
 
@@ -71,21 +104,32 @@
   [../]
 []
 
-[Preconditioning]
-  [./smp]
-    type = SMP
-    full = true
-  [../]
-[]
-
 [Executioner]
   type = Transient
+
   solve_type = 'PJFNK'
 
-  num_steps = 10
+  petsc_options = '-snes_ksp'
+  petsc_options_iname = '-ksp_gmres_restart'
+  petsc_options_value = '101'
+
+  line_search = 'none'
+
+  l_max_its = 20
+  nl_max_its = 20
+  nl_rel_tol = 1e-6
+  nl_abs_tol = 1e-6
+  l_tol = 1e-5
+  start_time = 0.6
+  end_time = 1.0
+  num_steps = 12
   dt = 0.1
 []
 
 [Outputs]
   exodus = true
+[]
+
+[Problem]
+  restart_file_base = restart1_out_cp/0006
 []

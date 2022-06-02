@@ -26,6 +26,7 @@
     incremental = true
     add_variables = true
     generate_output = 'stress_yy creep_strain_xx creep_strain_yy creep_strain_zz elastic_strain_yy'
+    use_automatic_differentiation = true
   [../]
 []
 
@@ -38,38 +39,39 @@
 []
 
 [Kernels]
-  [./heat]
-    type = HeatConduction
+  [heat]
+    type = Diffusion
     variable = temp
-  [../]
-  [./heat_ie]
-    type = HeatConductionTimeDerivative
+  []
+  [heat_ie]
+    type = TimeDerivative
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
   [./u_top_pull]
-    type = Pressure
+    type = ADPressure
     variable = disp_y
+    component = 1
     boundary = top
-    factor = -10.0e6
+    constant = -10.0e6
     function = top_pull
   [../]
   [./u_bottom_fix]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
   [./u_yz_fix]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   [../]
   [./u_xy_fix]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_z
     boundary = back
     value = 0.0
@@ -84,31 +86,21 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 2e11
     poissons_ratio = 0.3
+    constant_on = SUBDOMAIN
   [../]
   [./radial_return_stress]
-    type = ComputeMultipleInelasticStress
-    tangent_operator = elastic
+    type = ADComputeMultipleInelasticStress
     inelastic_models = 'power_law_creep'
   [../]
   [./power_law_creep]
-    type = PowerLawCreepStressUpdate
+    type = ADPowerLawCreepStressUpdate
     coefficient = 1.0e-15
     n_exponent = 4
     activation_energy = 3.0e5
     temperature = temp
-  [../]
-
-  [./thermal]
-    type = HeatConductionMaterial
-    specific_heat = 1.0
-    thermal_conductivity = 100.
-  [../]
-  [./density]
-    type = Density
-    density = 1.0
   [../]
 []
 

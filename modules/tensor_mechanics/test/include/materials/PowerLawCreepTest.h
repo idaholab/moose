@@ -10,11 +10,6 @@
 #pragma once
 
 #include "PowerLawCreepStressUpdate.h"
-#include "ADPowerLawCreepStressUpdate.h"
-
-template <bool is_ad>
-using PowerLawCreepStressUpdateTempl =
-    typename std::conditional<is_ad, ADPowerLawCreepStressUpdate, PowerLawCreepStressUpdate>::type;
 
 template <bool is_ad>
 class PowerLawCreepTestTempl : public PowerLawCreepStressUpdateTempl<is_ad>
