@@ -52,4 +52,4 @@ pip install --upgrade pycalphad
 Database files can be obtained online at
 
 * [Computational Phase Diagram Database](http://cpddb.nims.go.jp/index_en.html) (CPDDB)
-* [Thermodynamic Databas Database](https://avdwgroup.engin.brown.edu/) (TDBDB)
+* [Thermodynamic Database Database](https://avdwgroup.engin.brown.edu/) (TDBDB)

@@ -41,7 +41,9 @@ SLKKSMultiPhaseBase::SLKKSMultiPhaseBase(const InputParameters & parameters)
 {
   // consistent number of phases?
   if (_ns.size() != _nh)
-    paramError("ns", "Need to pass in as many sublattice counts switching functions 'h_name'");
+    paramError("ns",
+               "Need to pass in as many switching functions (parameter `h_names`) as size of "
+               "number of sublattices in each phase (parameter `ns`)");
 
   // sum up ns numbers
   unsigned int nssum = 0;

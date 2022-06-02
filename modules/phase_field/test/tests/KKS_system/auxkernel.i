@@ -1,5 +1,5 @@
 #
-# This test checks if the thwo phase and lagrange multiplier solutions can be replicated
+# This test checks if the two phase and lagrange multiplier solutions can be replicated
 # with a two order parameter approach, where the second order parameter eta2 is an
 # auxiliary variable that is set as eta2 := 1 - eta1
 # The solution is reproduced, but convergence is suboptimal, as important Jacobian

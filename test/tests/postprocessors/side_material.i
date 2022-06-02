@@ -34,7 +34,7 @@
   []
 
   # while TypeMaterial supplies the types below as well, we're providing custom
-  # ones to ensure that the average stays teh same and we can use a single CSV
+  # ones to ensure that the average stays the same and we can use a single CSV
   # gold file for the test
   [real]
     type = GenericConstantMaterial

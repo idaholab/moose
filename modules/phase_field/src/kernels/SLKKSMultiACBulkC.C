@@ -15,7 +15,7 @@ InputParameters
 SLKKSMultiACBulkC::validParams()
 {
   auto params = SLKKSMultiPhaseBase::validParams();
-  params.addClassDescription("Multi-phase KKS model kernel (part 2 of 2) for the bulk Allen-Cahn. "
+  params.addClassDescription("Multi-phase SLKKS model kernel for the bulk Allen-Cahn. "
                              "This includes all terms dependent on chemical potential.");
   params.addRequiredParam<MaterialPropertyName>(
       "F", "Phase free energy function that is a function of 'c'");

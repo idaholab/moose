@@ -47,14 +47,14 @@
   [c1]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.9
+    initial_condition = 0.2
   []
 
   # phase concentration 2
   [c2]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.1
+    initial_condition = 0.5
   []
 
   # Lagrange multiplier
@@ -311,18 +311,6 @@
 
   num_steps = 35
   dt = 10
-[]
-
-[Preconditioning]
-  active = 'full'
-  [full]
-    type = SMP
-    full = true
-  []
-  [mydebug]
-    type = FDP
-    full = true
-  []
 []
 
 [VectorPostprocessors]

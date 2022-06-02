@@ -75,9 +75,6 @@
     order = FIRST
     family = LAGRANGE
     [InitialCondition]
-      # type = RandomIC
-      # min = 0.30
-      # max = 0.4
       type = FunctionIC
       function = '(x+25)/50*0.5+0.1'
     []
@@ -579,12 +576,9 @@
   []
 []
 
-[Debug]
-  # show_var_residual_norms = true
-[]
-
 [Outputs]
   exodus = true
   print_linear_residuals = false
   csv = true
+  perf_graph = true
 []

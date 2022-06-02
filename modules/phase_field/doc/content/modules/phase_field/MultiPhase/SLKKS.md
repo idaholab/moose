@@ -1,8 +1,8 @@
 # Sublattice KKS model
 
 The sublattice Kim-Kim-Suzuki (SLKKS) [!cite](Schwen2021) model is an extension
-of the original KKS model incorporaring an additional equal chemical potential
-constrain among the sublattice concentration in each phase.
+of the original KKS model incorporating an additional equal chemical potential
+constraint among the sublattice concentration in each phase.
 
 As such each component in the system will have corresponding phase
 concentrations, which are split up into per-sublattice concentrations.
@@ -18,8 +18,8 @@ phase. $a_{jk}$ is the fraction of $k$ sublattice sites in phase $j$.
 
 ## Sublattice equilibrium
 
-All sublattice pairs $k$ and $k'$ in a given phase are always in equilibrium,
-thus
+All sublattice pairs $k$ and $k'$ in a given phase are assumed to be always in
+equilibrium, thus
 
 \begin{equation}
 \frac 1{a_{jk}} \frac{\partial F_j}{\partial c_{ijk}} = \frac 1{a_{jk'}} \frac{\partial F_j}{\partial c_{ijk'}}
@@ -92,7 +92,7 @@ To illustrate this we can re-order the summation to yield
 This means we need to add a `MatDiffusion` kernel for sublattice in all phases,
 each operating on the variable $c_i$. We use the
 [!param](/Kernels/MatDiffusion/v) parameter to  specify $c_{ijk}$ as the
-variable to take the gradient of (rathe than $c_i$). The effective diffusivity
+variable to take the gradient of (rather than $c_i$). The effective diffusivity
 $D'_i$ passed into the kernel is $D\cdot h_j \cdot a_{jk}$, which can be provided
 by a [`DerivativeParsedMaterial`](DerivativeParsedMaterial.md)
 

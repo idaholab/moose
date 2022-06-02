@@ -61,7 +61,7 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
   torch::Tensor loss = torch::mse_loss(prediction.reshape({prediction.size(0)}), output);
   // We propagate the error back to compute gradient
   loss.backward();
-  // We update the weights using teh computed gradients
+  // We update the weights using the computed gradients
   optimizer.step();
 
   optimizer.zero_grad();

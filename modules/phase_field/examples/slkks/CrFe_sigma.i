@@ -7,7 +7,7 @@
 #
 # In this simulation we solve only for the sublattice concentrations of the sigma phase
 # (and consequently for the free energy of the sigma phase as function of total concentration.)
-# The Cr concentration is prescribed as linear gradient. This permits us to plot
+# The Cr concentration is prescribed as a linear gradient. This permits us to plot
 # the free energies of the BCC and sigma phases.
 #
 
