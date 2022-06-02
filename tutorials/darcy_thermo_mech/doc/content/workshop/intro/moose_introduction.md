@@ -63,7 +63,7 @@ Multi-physics Object Oriented Simulation Environment
 ## Software Quality
 
 - MOOSE follows an Nuclear Quality Assurance Level 1 (NQA-1) development process
-- all commits undergo review using GitHub Pull Requests and must pass a set of application
+- All commits undergo review using GitHub Pull Requests and must pass a set of application
   regression tests before they are available to our users
 - MOOSE includes a test suite and documentation system to allow for agile development while
   maintaining a NQA-1 process
