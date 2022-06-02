@@ -36,15 +36,15 @@ Multi-physics Object Oriented Simulation Environment
 
 ## General Capabilities
 
-- continuous and Discontinuous Galerkin FEM
-- finite Volume
-- fully coupled, fully implicit (and explicit)
-- [!ac](AD)
-- unstructured mesh with FEM shapes
-- higher order geometry
-- mesh adaptivity (refinement and coarsening)
-- massively parallel (MPI and threads)
-- user code agnostic of dimension, parallelism, shape functions, etc.
+- Continuous and Discontinuous Galerkin FEM
+- Finite Volume
+- Fully coupled, fully implicit (and explicit)
+- Automatic differentiation (AD)
+- Unstructured mesh with FEM shapes
+- Higher order geometry
+- Mesh adaptivity (refinement and coarsening)
+- Massively parallel (MPI and threads)
+- User code agnostic of dimension, parallelism, shape functions, etc.
 
 !---
 
