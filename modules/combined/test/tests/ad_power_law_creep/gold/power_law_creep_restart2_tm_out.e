@@ -1,1 +1,0 @@
-../../power_law_creep/gold/power_law_creep_restart2_tm_out.e

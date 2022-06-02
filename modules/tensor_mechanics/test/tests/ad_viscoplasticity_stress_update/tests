@@ -5,8 +5,8 @@
     type = CSVDiff
     input = creep.i
     csvdiff = creep_out.csv
-    design = 'source/materials/ADPowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
-    requirement = 'The ADPowerLawCreepStressUpdate, called through the ADComputeMultipleInelasticStress, shall compute a creep strain based on an extrenal loading.'
+    design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+    requirement = 'The PowerLawCreepStressUpdate, called through the ADComputeMultipleInelasticStress, shall compute a creep strain based on an extrenal loading.'
   [../]
   [./creep-jac]
     type = 'PetscJacobianTester'
@@ -17,7 +17,7 @@
     difference_tol = 1e8
     prereq = creep
     requirement = 'The Jacobian for the AD regular creep problem shall be perfect'
-    design = 'source/materials/ADPowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
+    design = 'source/materials/PowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
   [../]
 
   [./exact_spherical]

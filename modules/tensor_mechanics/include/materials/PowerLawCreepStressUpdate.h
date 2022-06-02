@@ -21,42 +21,46 @@
  * creep based on stress, temperature, and time effects.  This class also
  * computes the creep strain as a stateful material property.
  */
-class PowerLawCreepStressUpdate : public RadialReturnCreepStressUpdateBase
+template <bool is_ad>
+class PowerLawCreepStressUpdateTempl : public RadialReturnCreepStressUpdateBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PowerLawCreepStressUpdate(const InputParameters & parameters);
+  PowerLawCreepStressUpdateTempl(const InputParameters & parameters);
 
-  virtual Real
-  computeStrainEnergyRateDensity(const MaterialProperty<RankTwoTensor> & stress,
-                                 const MaterialProperty<RankTwoTensor> & strain_rate) override;
+  virtual Real computeStrainEnergyRateDensity(
+      const GenericMaterialProperty<RankTwoTensor, is_ad> & stress,
+      const GenericMaterialProperty<RankTwoTensor, is_ad> & strain_rate) override;
 
   virtual bool substeppingCapabilityEnabled() override;
 
   virtual void resetIncrementalMaterialProperties() override;
 
 protected:
-  virtual void computeStressInitialize(const Real & effective_trial_stress,
-                                       const RankFourTensor & elasticity_tensor) override;
-  virtual void computeStressFinalize(const RankTwoTensor & plastic_strain_increment) override;
+  virtual void
+  computeStressInitialize(const GenericReal<is_ad> & effective_trial_stress,
+                          const GenericRankFourTensor<is_ad> & elasticity_tensor) override;
 
-  virtual Real computeResidual(const Real & effective_trial_stress, const Real & scalar) override
-  {
-    return computeResidualInternal<Real>(effective_trial_stress, scalar);
-  }
-  virtual Real computeDerivative(const Real & effective_trial_stress, const Real & scalar) override;
-  virtual ChainedReal computeResidualAndDerivative(const Real & effective_trial_stress,
-                                                   const ChainedReal & scalar) override
-  {
-    return computeResidualInternal<ChainedReal>(effective_trial_stress, scalar);
-  }
+  virtual void
+  computeStressFinalize(const GenericRankTwoTensor<is_ad> & plastic_strain_increment) override;
 
-  /// Flag to determine if temperature is supplied by the user
-  const bool _has_temp;
+  virtual GenericReal<is_ad> computeResidual(const GenericReal<is_ad> & effective_trial_stress,
+                                             const GenericReal<is_ad> & scalar) override
+  {
+    return computeResidualInternal<GenericReal<is_ad>>(effective_trial_stress, scalar);
+  }
+  virtual GenericReal<is_ad> computeDerivative(const GenericReal<is_ad> & effective_trial_stress,
+                                               const GenericReal<is_ad> & scalar) override;
+  virtual GenericChainedReal<is_ad>
+  computeResidualAndDerivative(const GenericReal<is_ad> & effective_trial_stress,
+                               const GenericChainedReal<is_ad> & scalar) override
+  {
+    return computeResidualInternal<GenericChainedReal<is_ad>>(effective_trial_stress, scalar);
+  }
 
   /// Temperature variable value
-  const VariableValue & _temperature;
+  const GenericVariableValue<is_ad> * const _temperature;
 
   /// Leading coefficient
   const Real _coefficient;
@@ -77,13 +81,23 @@ protected:
   const Real _start_time;
 
   /// Exponential calculated from activiaction, gas constant, and temperature
-  Real _exponential;
+  GenericReal<is_ad> _exponential;
 
   /// Exponential calculated from current time
   Real _exp_time;
 
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_qp;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_dt;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_t;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_three_shear_modulus;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_creep_strain;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_creep_strain_old;
+
 private:
   template <typename ScalarType>
-  ScalarType computeResidualInternal(const Real & effective_trial_stress,
+  ScalarType computeResidualInternal(const GenericReal<is_ad> & effective_trial_stress,
                                      const ScalarType & scalar);
 };
+
+typedef PowerLawCreepStressUpdateTempl<false> PowerLawCreepStressUpdate;
+typedef PowerLawCreepStressUpdateTempl<true> ADPowerLawCreepStressUpdate;
