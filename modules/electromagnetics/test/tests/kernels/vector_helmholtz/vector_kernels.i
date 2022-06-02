@@ -2,13 +2,15 @@
 # Manufactured solution: u = y * x_hat - x * y_hat
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
-  xmin = -1
-  ymin = -1
-  elem_type = QUAD9
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    ny = 10
+    xmin = -1
+    ymin = -1
+    elem_type = QUAD9
+  []
 []
 
 [Variables]

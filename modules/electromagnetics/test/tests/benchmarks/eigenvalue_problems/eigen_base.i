@@ -2,15 +2,17 @@
 # RECTANGULAR (Default)
 #     Mesh file rectangular.e based on Mesh block:
 #         [Mesh]
-#           type = GeneratedMesh
-#           dim = 2
-#           nx = 50
-#           ny = 25
-#           xmin = 0
-#           xmax = 2
-#           ymin = 0
-#           ymax = 1
-#           elem_type = TRI3
+#           [gmg]
+#             type = GeneratedMeshGenerator
+#             dim = 2
+#             nx = 50
+#             ny = 25
+#             xmin = 0
+#             xmax = 2
+#             ymin = 0
+#             ymax = 1
+#             elem_type = TRI3
+#           []
 #         []
 #     Expected analytic eigenvalue = 12.337005
 #     EM Module calculated eigenvalue = 12.363806
@@ -30,8 +32,10 @@
 
 
 [Mesh]
-  type = FileMesh
-  file = rectangular.e
+  [fmg]
+    type = FileMeshGenerator
+    file = rectangular.e
+  []
 []
 
 [Variables]

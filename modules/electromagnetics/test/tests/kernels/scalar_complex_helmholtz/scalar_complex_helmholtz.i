@@ -9,11 +9,13 @@
 # L = 10
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  xmin = 0
-  xmax = 10
-  nx = 100
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 1
+    xmin = 0
+    xmax = 10
+    nx = 100
+  []
 []
 
 [Variables]

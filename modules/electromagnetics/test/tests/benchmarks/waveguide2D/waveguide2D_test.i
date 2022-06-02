@@ -4,8 +4,10 @@
 # k = 2*pi*freq/c, freq = 20e6 Hz, c = 3e8 m/s
 
 [Mesh]
-  type = FileMesh
-  file = waveguide.msh
+  [fmg]
+    type = FileMeshGenerator
+    file = waveguide.msh
+  []
 []
 
 [Variables]

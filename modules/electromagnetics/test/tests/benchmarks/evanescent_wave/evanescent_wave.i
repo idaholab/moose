@@ -4,8 +4,10 @@
 # mu_R = 1.0
 
 [Mesh]
-  type = FileMesh
-  file = waveguide_discontinuous.msh
+  [fmg]
+    type = FileMeshGenerator
+    file = waveguide_discontinuous.msh
+  []
 []
 
 [Functions]
