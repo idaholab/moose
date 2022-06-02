@@ -1,4 +1,4 @@
-# Test for EM module vector kernels CurlCurlField and VectorCoeffField
+# Test for EM module vector kernels CurlCurlField and VectorFunctionReaction
 # Manufactured solution: u = y * x_hat - x * y_hat
 
 [Mesh]
@@ -24,7 +24,7 @@
     variable = u
   []
   [coeff]
-    type = VectorCoeffField
+    type = VectorFunctionReaction
     variable = u
   []
   [rhs]

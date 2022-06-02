@@ -60,7 +60,7 @@
     block = 0
   []
   [coeff_u]
-    type = VectorCoeffField
+    type = VectorFunctionReaction
     variable = u
     block = 0
   []
@@ -78,7 +78,7 @@
     block = 1
   []
   [coeff_v]
-    type = VectorCoeffField
+    type = VectorFunctionReaction
     variable = v
     block = 1
   []

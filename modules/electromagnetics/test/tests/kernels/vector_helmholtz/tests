@@ -4,7 +4,7 @@
     input = 'vector_kernels.i'
     exodiff = 'vector_kernels_out.e'
     requirement = 'The system shall be capable of modeling the vector Helmholtz equation for vector fields.'
-    design = 'CurlCurlField.md VectorCoeffField.md'
+    design = 'CurlCurlField.md VectorFunctionReaction.md'
     issues = '#21078'
   [../]
   [./vector_current_source]

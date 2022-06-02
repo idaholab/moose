@@ -10,27 +10,27 @@
 #pragma once
 
 #include "VectorKernel.h"
+#include "Function.h"
 
 /**
- *  Kernel representing the contribution of the PDE term $cfu$, where $c$ and
- *  $f$ are constant and function coefficients, respectively, and $u$ is a
- *  vector variable.
+ *  Kernel representing the contribution of the PDE term $fu$, where $f$ is a function
+ *  coefficient and $u$ is a vector variable.
  */
-class VectorCoeffField : public VectorKernel
+class VectorFunctionReaction : public VectorKernel
 {
 public:
   static InputParameters validParams();
 
-  VectorCoeffField(const InputParameters & parameters);
+  VectorFunctionReaction(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
 private:
-  // Scalar coefficient
-  Real _coefficient;
+  // MooseEnum signifying sign of weak form contribution
+  const MooseEnum _sign;
 
   // Function coefficient
-  const Function & _func;
+  const Function & _function;
 };

@@ -38,7 +38,7 @@ where
 - $j$ is the imaginary unit ($j^2 = -1$).
 
 In the EM module, these terms are represented by the [CurlCurlField.md],
-[VectorCoeffField.md], and [VectorCurrentSource.md] objects, respectively. The
+[VectorFunctionReaction.md], and [VectorCurrentSource.md] objects, respectively. The
 current source in this study is applied in the $y$-direction and only on the real
 component, so in 2D we have
 

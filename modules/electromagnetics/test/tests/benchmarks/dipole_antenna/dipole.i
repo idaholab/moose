@@ -26,24 +26,33 @@
   []
 []
 
+[Functions]
+  [WaveNumberSquared]
+    type = ParsedFunction
+    value = '(2*pi*1e9/3e8)*(2*pi*1e9/3e8)'
+  []
+[]
+
 [Kernels]
   [curl_curl_real]
     type = CurlCurlField
     variable = E_real
   []
   [coeff_real]
-    type = VectorCoeffField
+    type = VectorFunctionReaction
     variable = E_real
-    func = '-(2*pi*1e9/3e8)*(2*pi*1e9/3e8)'  # -(wave number)^2
+    function = WaveNumberSquared
+    sign = negative
   []
   [curl_curl_imag]
     type = CurlCurlField
     variable = E_imag
   []
   [coeff_imag]
-    type = VectorCoeffField
+    type = VectorFunctionReaction
     variable = E_imag
-    func = '-(2*pi*1e9/3e8)*(2*pi*1e9/3e8)'  # -(wave number)^2
+    function = WaveNumberSquared
+    sign = negative
   []
 []
 

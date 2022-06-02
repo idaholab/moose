@@ -42,7 +42,7 @@
     variable = u_real
   []
   [coeff_real]
-    type = VectorCoeffField
+    type = VectorFunctionReaction
     variable = u_real
   []
   [current_real]
@@ -58,7 +58,7 @@
     variable = u_imag
   []
   [coeff_imag]
-    type = VectorCoeffField
+    type = VectorFunctionReaction
     variable = u_imag
   []
   [current_imag]

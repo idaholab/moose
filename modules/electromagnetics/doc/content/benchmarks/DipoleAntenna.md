@@ -66,7 +66,7 @@ where
 - $\omega$ is the operating frequency in rad/s.
 
 In the EM module, these terms are represented by the [CurlCurlField.md] and
-[VectorCoeffField.md] objects, respectively. At the edge of the simulation domain,
+[VectorFunctionReaction.md] objects, respectively. At the edge of the simulation domain,
 this model uses the [VectorEMRobinBC.md] object. This is given by
 
 !equation

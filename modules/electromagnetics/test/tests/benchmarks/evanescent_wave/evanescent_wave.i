@@ -9,7 +9,7 @@
 []
 
 [Functions]
-  [waveNumSq]
+  [waveNumberSquared]
     type = ParsedFunction
     value = '(2*pi*20e9/3e8)^2'
   []
@@ -47,10 +47,10 @@
     variable = E_real
   []
   [coeff_real]
-    type = VectorCoeffField
+    type = VectorFunctionReaction
     variable = E_real
-    func = waveNumSq
-    coeff = -1.0
+    function = waveNumberSquared
+    sign = negative
   []
   [source_real]
     type = VectorCurrentSource
@@ -66,10 +66,10 @@
     variable = E_imag
   []
   [coeff_imag]
-    type = VectorCoeffField
+    type = VectorFunctionReaction
     variable = E_imag
-    func = waveNumSq
-    coeff = -1.0
+    function = waveNumberSquared
+    sign = negative
   []
   [source_imaginary]
     type = VectorCurrentSource

@@ -41,7 +41,7 @@
     variable = u_real
   []
   [coeff_real]
-    type = VectorCoeffField
+    type = VectorFunctionReaction
     variable = u_real
   []
   [rhs_real]
@@ -55,7 +55,7 @@
     variable = u_imaginary
   []
   [coeff_imaginary]
-    type = VectorCoeffField
+    type = VectorFunctionReaction
     variable = u_imaginary
   []
   [rhs_imaginary]
