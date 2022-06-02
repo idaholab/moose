@@ -55,3 +55,9 @@ make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step1.i
 ```
+
+!---
+
+## Step 1: Result
+
+!media darcy_thermo_mech/step01_result.png
