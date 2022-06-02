@@ -21,44 +21,8 @@ GeneralUserObject::validParams()
 GeneralUserObject::GeneralUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
-    TransientInterface(this),
-    DependencyResolverInterface()
+    TransientInterface(this)
 {
-  _supplied_vars.insert(name());
-}
-
-const std::set<std::string> &
-GeneralUserObject::getRequestedItems()
-{
-  return _depend_vars;
-}
-
-const std::set<std::string> &
-GeneralUserObject::getSuppliedItems()
-{
-  return _supplied_vars;
-}
-
-void
-GeneralUserObject::addUserObjectDependencyHelper(const UserObject & uo) const
-{
-  UserObject::addUserObjectDependencyHelper(uo);
-  _depend_vars.insert(uo.name());
-}
-
-void
-GeneralUserObject::addPostprocessorDependencyHelper(const PostprocessorName & name) const
-{
-  UserObject::addPostprocessorDependencyHelper(name);
-  _depend_vars.insert(name);
-}
-
-void
-GeneralUserObject::addVectorPostprocessorDependencyHelper(
-    const VectorPostprocessorName & name) const
-{
-  UserObject::addVectorPostprocessorDependencyHelper(name);
-  _depend_vars.insert(name);
 }
 
 void
@@ -73,10 +37,4 @@ GeneralUserObject::subdomainSetup()
 {
   mooseError("GeneralUserObjects do not execute subdomainSetup method, this function does nothing "
              "and should not be used.");
-}
-
-void
-GeneralUserObject::addReporterDependencyHelper(const ReporterName & reporter_name)
-{
-  _depend_vars.insert(reporter_name.getObjectName());
 }

@@ -173,9 +173,9 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
     {
       DependencyResolverInterface::sort(dependers);
     }
-    catch (CyclicDependencyException<GeneralUserObject *> & e)
+    catch (CyclicDependencyException<DependencyResolverInterface *> & e)
     {
-      DependencyResolverInterface::cyclicDependencyError<GeneralUserObject *>(
+      DependencyResolverInterface::cyclicDependencyError<UserObject *>(
           e, "Cyclic dependency detected in object ordering");
     }
 

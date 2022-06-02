@@ -82,6 +82,8 @@ UserObject::UserObject(const InputParameters & parameters)
     paramError("force_preaux",
                "A user object may be specified as executing before or after "
                "AuxKernels, not both.");
+
+  _supplied_uo.insert(name());
 }
 
 std::set<UserObjectName>
@@ -124,6 +126,12 @@ void
 UserObject::addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & name) const
 {
   _depend_uo.insert(name);
+}
+
+void
+UserObject::addReporterDependencyHelper(const ReporterName & reporter_name)
+{
+  _depend_uo.insert(reporter_name.getObjectName());
 }
 
 void
