@@ -25,7 +25,7 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
     _neighbor_side_id(std::numeric_limits<unsigned int>::max())
 {
   // Compute face-related quantities
-  std::unique_ptr<const Elem> face(_elem_info->elem()->build_side_ptr(_elem_side_id));
+  const std::unique_ptr<const Elem> face = _elem_info->elem()->build_side_ptr(_elem_side_id);
   _face_area = face->volume();
   _face_centroid = face->vertex_average();
 
@@ -56,8 +56,6 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
     if (_normal * vector_to_face < 0.0)
       _normal *= -1.0;
   }
-
-  face.release();
 }
 
 void

@@ -148,7 +148,7 @@ interpolate(InterpMethod m,
             const Vector2<T3> & fi_neighbor_advector,
             const FaceInfo & fi)
 {
-  mooseAssert(!face.fi->isBoundary(), "We should not call interpolation on a boundary face!");
+  mooseAssert(!fi.isBoundary(), "We should not call interpolation on a boundary face!");
   switch (m)
   {
     case InterpMethod::Average:

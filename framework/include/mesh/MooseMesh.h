@@ -1326,10 +1326,6 @@ private:
   /// ElemInfo object storing additional information for elements (e.g. volume, centroid)
   mutable std::vector<ElemInfo> _internal_elem_info;
 
-  /// Map containing ElemInfo for artificial cells which are utilized
-  /// for boundary treatment
-  mutable std::unordered_map<std::pair<const Elem *, unsigned int>, ElemInfo> _ghost_elem_info;
-
   /// Map connecting elems with their corresponding ElemInfo
   mutable std::unordered_map<const Elem *, unsigned int> _elem_to_elem_info;
 
