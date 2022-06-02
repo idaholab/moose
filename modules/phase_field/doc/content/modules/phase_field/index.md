@@ -29,6 +29,7 @@ MOOSE provides capabilities that enable the easy development of multiphase field
 
 - [phase_field/MultiPhase/WBMTwoPhase.md]: Two phases, one phase order parameter
 - [phase_field/MultiPhase/KKS.md]: per-phase concentrations, two phases
+- [phase_field/MultiPhase/SLKKS.md]: per-phase concentrations, per-sublattice concentrations, multiple phases
 - [phase_field/MultiPhase/WBM.md]: $N$ phases, $N$ phase order parameters
 - [Grand Potential Model](/GrandPotentialKernelAction.md): solving a Legendre transform of the phase field equations, where the independent variable is the chemical potential
 

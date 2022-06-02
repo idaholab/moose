@@ -6,7 +6,7 @@
     type = Exodiff
     input = order.i
     exodiff = order_out.e
-    requirement = "By default coupled variables shall map to teh x,y,z, and t function parameters."
+    requirement = "By default coupled variables shall map to the x,y,z, and t function parameters."
   []
   [order_shuffled]
     type = Exodiff

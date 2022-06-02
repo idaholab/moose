@@ -1,0 +1,13 @@
+[Tests]
+  [CrFe_sigma]
+    type = RunApp
+    input = 'CrFe_sigma.i'
+    check_input = True
+  []
+  [CrFe]
+    type = RunApp
+    input = 'CrFe.i'
+    check_input = True
+    skip = 'prerequisite file missing'
+  []
+[]

@@ -1,0 +1,26 @@
+[Tests]
+  [sublattice_concentrations]
+    type = Exodiff
+    input = sublattice_concentrations.i
+    exodiff = sublattice_concentrations_out.e
+    issues = '#5862'
+    design = 'SLKKS.md'
+    requirement = 'The system shall be able to solve for sublattice concentrations in the SLKKS model.'
+  []
+  [full_solve]
+    type = Exodiff
+    input = full_solve.i
+    exodiff = full_solve_out.e
+    issues = '#5862'
+    design = 'SLKKS.md'
+    requirement = 'The system shall be able to solve for mass transport, phases, and sublattice concentrations simultaneously in the SLKKS model.'
+  []
+  [weighted_average]
+    type = CSVDiff
+    input = weighted_average.i
+    csvdiff = weighted_average_out.csv
+    issues = '#5862'
+    design = 'WeightedVariableAverage.md'
+    requirement = 'The system shall be able to compute the average value of a variable field weighted by a material property.'
+  []
+[]
