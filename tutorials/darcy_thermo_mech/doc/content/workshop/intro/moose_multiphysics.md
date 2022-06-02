@@ -105,7 +105,7 @@ VectorPostprocessors\\
 
 ## Finite-Element Reactor Fuel Simulation
 
-!media darcy_thermo_mech/simulator.m4v style=width:70%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/simulator.mp4 style=width:70%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
