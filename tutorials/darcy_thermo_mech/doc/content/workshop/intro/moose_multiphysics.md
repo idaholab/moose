@@ -114,20 +114,24 @@ VectorPostprocessors\\
 !style halign=center
 Chemical Reactions\\
 Contact\\
+Electromagnetics (coming soon)\\
 External PETSc Solver\\
 Fluid Properties\\
 Function Expansion Tools\\
+Geochemistry\\
 Heat Conduction\\
 Level Set\\
 Navier Stokes\\
+Peridynamics\\
 Phase Field\\
 Porous Flow\\
+Ray Tracing\\
 rDG\\
+Reactor\\
 Stochastic Tools\\
 Tensor (solid) Mechanics\\
-XFEM\\
-Shallow Water (work in progress)\\
-Ray Tracing (work in progress)
+Thermal Hydraulics\\
+XFEM
 
 !---
 
