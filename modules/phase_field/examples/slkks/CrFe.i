@@ -7,23 +7,20 @@
 #
 # In this simulation we consider diffusion (Cahn-Hilliard) and phase transformation.
 #
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# Note: This input is currently in draft status. The free energies are in the wrong units.
-# and the Allen-Cahn equations are not quite correct yet.
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 160
-  ny = 1
-  nz = 0
-  xmin = -25
-  xmax = 25
-  ymin = -2.5
-  ymax = 2.5
-  elem_type = QUAD4
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 160
+    ny = 1
+    nz = 0
+    xmin = -25
+    xmax = 25
+    ymin = -2.5
+    ymax = 2.5
+    elem_type = QUAD4
+  []
 []
 
 [AuxVariables]

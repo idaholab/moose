@@ -15,4 +15,12 @@
     design = 'SLKKS.md'
     requirement = 'The system shall be able to solve for mass transport, phases, and sublattice concentrations simultaneously in the SLKKS model.'
   []
+  [weighted_average]
+    type = CSVDiff
+    input = weighted_average.i
+    csvdiff = weighted_average_out.csv
+    issues = '#5862'
+    design = 'WeightedVariableAverage.md'
+    requirement = 'The system shall be able to compute teh average value of a variable field weighted by a material property.'
+  []
 []

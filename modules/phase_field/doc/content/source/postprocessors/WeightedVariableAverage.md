@@ -4,7 +4,7 @@
 
 Compute the ratio $a$ of volume integrals
 \begin{equation}
-a=\frac{\int_Omega v dr}{\int_Omega w dr},
+a=\frac{\int_Omega w\cdot v dr}{\int_Omega w dr},
 \end{equation}
 where $v$ (`v`) is a coupled variable and $w$ (`weight`) a material property.
 

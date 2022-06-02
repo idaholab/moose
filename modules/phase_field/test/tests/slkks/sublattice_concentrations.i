@@ -12,13 +12,15 @@
 #
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 100
-  ny = 1
-  xmin = 0.01
-  xmax = 0.99
-  ymax = 0.1
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 100
+    ny = 1
+    xmin = 0.01
+    xmax = 0.99
+    ymax = 0.1
+  []
 []
 
 [AuxVariables]
