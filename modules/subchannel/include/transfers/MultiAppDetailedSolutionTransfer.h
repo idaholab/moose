@@ -11,7 +11,7 @@ public:
   MultiAppDetailedSolutionTransfer(const InputParameters & parameters);
 
 protected:
-  virtual Node * getFromNode(const SubChannelMesh & from_mesh, const Point & src_node);
+  Node * getFromNode(const SubChannelMesh & from_mesh, const Point & src_node) override;
 
 public:
   static InputParameters validParams();

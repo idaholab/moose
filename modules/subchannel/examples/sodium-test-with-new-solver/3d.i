@@ -2,7 +2,7 @@
   [subchannel]
     type = DetailedTriSubChannelMeshGenerator
     nrings = 4
-    n_cells = 10
+    n_cells = 100
     flat_to_flat = 0.077
     heated_length = 1.0
     rod_diameter = 0.01
