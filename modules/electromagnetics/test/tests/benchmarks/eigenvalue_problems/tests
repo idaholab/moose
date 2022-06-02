@@ -8,7 +8,7 @@
     requirement = 'The system shall calculate the fundamental waveguide cutoff wavenumber for a TM mode for a rectangular waveguide geometry.'
     design = 'benchmarks/WaveguideEigenvalue.md'
     verification = 'benchmarks/WaveguideEigenvalue.md'
-    issues = '#13744'
+    issues = '#21202'
   [../]
   [./circular]
     type = CSVDiff
@@ -18,7 +18,7 @@
     requirement = 'The system shall calculate the fundamental waveguide cutoff wavenumber for a TM mode for a circular waveguide geometry.'
     design = 'benchmarks/WaveguideEigenvalue.md'
     verification = 'benchmarks/WaveguideEigenvalue.md'
-    issues = '#13744'
+    issues = '#21202'
   [../]
   [./coaxial]
     type = CSVDiff
@@ -28,6 +28,6 @@
     requirement = 'The system shall calculate the fundamental waveguide cutoff wavenumber for a TM mode for a coaxial waveguide geometry.'
     design = 'benchmarks/WaveguideEigenvalue.md'
     verification = 'benchmarks/WaveguideEigenvalue.md'
-    issues = '#13744'
+    issues = '#21202'
   [../]
 []

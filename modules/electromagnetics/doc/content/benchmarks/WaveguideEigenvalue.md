@@ -186,42 +186,58 @@ consistent with established literature expectations for this waveguide geometry.
 Other visual differences in the vector glyph distribution and magnitude in all
 cases are due to mesh differences and Paraview visualization software scaling.
 
+!row!
+!col small=12 medium=6 large=6
 !media rectangleTM11.png
-       style=width:50%;margin:auto;
+       style=width:100%;margin:auto;
        caption=TM11 mode electric field distribution in a rectangular waveguide, calculated by the EM module.
        id=rectangular-results-emm
 
+!col small=12 medium=6 large=6
 !media rectangleTM11_reddy.png
-       style=width:50%;margin:auto;
+       style=width:100%;margin:auto;
        caption=TM11 mode electric field distribution in a rectangular waveguide, calculated by HELM10. [!citep](nasa-fem-eigenvalue-problems)
        id=rectangular-results-reddy
+!row-end!
 
+!row!
+!col small=12 medium=6 large=6
 !media circleTM01.png
-       style=width:50%;margin:auto;
+       style=width:100%;margin:auto;
        caption=TM01 mode electric field distribution in a circular waveguide, calculated by the EM module.
        id=circular-results-emm
 
+!col small=12 medium=6 large=6
 !media circleTM01_reddy.png
-       style=width:50%;margin:auto;
+       style=width:100%;margin:auto;
        caption=TM01 mode electric field distribution in a circular waveguide, calculated by HELM10. [!citep](nasa-fem-eigenvalue-problems)
        id=circular-results-reddy
+!row-end!
 
+!row!
+!col small=12 medium=6 large=6
 !media circular_TM01_comsol.png
-       style=width:50%;margin:auto;
+       style=width:100%;margin:auto;
        caption=TM01 mode electric field distribution in a circular waveguide, calculated by the COMSOL RF Module in [!citep](comsol-circular-port-boundary-condition). (Coloring is the electric field norm)
        id=comsol-tm01
 
+!col small=12 medium=6 large=6
 !media circular_TM01_jin.png
-       style=width:50%;margin:auto;
-       caption=TM01 mode field distribution in a circular waveguide, presented by Jin. [!citep](jin-computation) Note that the solid lines correspond to the electric field.
+       style=width:100%;margin:auto;
+       caption=TM01 mode field distribution in a circular waveguide, presented in [!citep](jin-computation). Note that the solid lines correspond to the electric field.
        id=jin-tm01
+!row-end!
 
+!row!
+!col small=12 medium=6 large=6
 !media coaxialTM01.png
-       style=width:50%;margin:auto;
+       style=width:100%;margin:auto;
        caption=TM01 mode electric field distribution in a coaxial waveguide, calculated by the EM module.
        id=coaxial-results-emm
 
+!col small=12 medium=6 large=6
 !media coaxialTM01_reddy.png
-       style=width:50%;margin:auto;
+       style=width:100%;margin:auto;
        caption=TM01 mode electric field distribution in a coaxial waveguide, calculated by HELM10. [!citep](nasa-fem-eigenvalue-problems)
        id=coaxial-results-reddy
+!row-end!
