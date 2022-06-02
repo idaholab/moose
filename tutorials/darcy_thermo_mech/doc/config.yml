@@ -43,7 +43,6 @@ Extensions:
         macros:
             \vec: "\\bar" # TODO: \vec doesn't render
             \pf: "\\frac{\\partial #1}{\\partial #2}"
-            \pd: "\\frac{\\partial #1}{\\partial #2}"
     MooseDocs.extensions.style: default
     MooseDocs.extensions.autolink: default
     MooseDocs.extensions.materialicon: default
