@@ -35,7 +35,7 @@ def run(*args, **kwargs):
     options = kwargs.pop("options", None)
 
     if options:
-        loc = os.getenv('MOOSE_DIR', os.path.join(os.getenv('HOME'), 'projects', 'moose2'))
+        loc = os.getenv('MOOSE_DIR', os.path.join(os.getenv('HOME'), 'projects', 'moose'))
         if options.framework:
             loc = os.path.join(loc, 'framework')
         elif options.modules:
