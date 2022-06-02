@@ -72,10 +72,24 @@ TriSubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
 }
 
 unsigned int
-TriSubChannelMesh::channelIndex(const Point & /*point*/) const
+TriSubChannelMesh::channelIndex(const Point & p) const
 {
-  // FIXME:
-  return 0;
+  Real distance0 = 1.0e+8;
+  Real distance1;
+  unsigned int j = 0;
+
+  for (unsigned int i = 0; i < _n_channels; i++)
+  {
+    distance1 = std::sqrt(std::pow((p(0) - _subchannel_position[i][0]), 2.0) +
+                          std::pow((p(1) - _subchannel_position[i][1]), 2.0));
+
+    if (distance1 < distance0)
+    {
+      j = i;
+      distance0 = distance1;
+    } // if
+  }   // for
+  return j;
 }
 
 void
@@ -84,17 +98,77 @@ TriSubChannelMesh::buildMesh()
 }
 
 unsigned int
-TriSubChannelMesh::getPinIndexFromPoint(const Point & /*p*/) const
+TriSubChannelMesh::getPinIndexFromPoint(const Point & p) const
 {
-  // TODO: implement routine that returns rod index given a point in 3D space
-  return 0;
+  /// Function that returns the pin number given a point
+
+  // Define the current ring
+  Real x_position = p(0);
+  Real y_position = p(1);
+  Real distance_rod = std::sqrt(std::pow(x_position, 2) + std::pow(y_position, 2));
+  Real d0 = 1e5; unsigned int current_ring = 0;
+  Real distance_ring, distance_to_ring;
+  for (unsigned int i = 0; i < _n_rings; i++)
+  {
+    distance_ring = std::sqrt(pow(i * _pitch, 2));
+    distance_to_ring = std::abs(distance_ring - distance_rod);
+    if (distance_to_ring < d0)
+    {
+      d0 = distance_to_ring;
+      current_ring = i;
+    }
+  }
+
+  // Count the number of rods until the current ring
+  unsigned int count_elapsed_rods = 0;
+  for (unsigned int i = 0; i < current_ring; i++)
+  {
+    count_elapsed_rods += i * 6;
+  }
+
+  // Find the rod in the ring
+  Real angle = std::atan(y_position/x_position);
+  Real delta_theta = libMesh::pi / (current_ring * 6);
+  unsigned int current_index = std::trunc((angle - delta_theta/2) / delta_theta);
+
+  return count_elapsed_rods + current_index;
 }
 
 unsigned int
-TriSubChannelMesh::pinIndex(const Point & /*p*/) const
+TriSubChannelMesh::pinIndex(const Point & p) const
 {
-  // TODO: implement routine that returns rod index given a point in 3D space
-  return 0;
+  /// Function that returns the pin number given a point
+
+  // Define the current ring
+  Real x_position = p(0);
+  Real y_position = p(1);
+  Real distance_rod = std::sqrt(std::pow(x_position, 2) + std::pow(y_position, 2));
+  Real d0 = 1e5; unsigned int current_ring = 0;
+  Real distance_ring, distance_to_ring;
+  for (unsigned int i = 0; i < _n_rings; i++)
+  {
+    distance_ring = std::sqrt(pow(i * _pitch, 2));
+    distance_to_ring = std::abs(distance_ring - distance_rod);
+    if (distance_to_ring < d0)
+    {
+      d0 = distance_to_ring;
+      current_ring = i;
+    }
+  }
+
+  // Count the number of rods until the current ring
+  unsigned int count_elapsed_rods = 0;
+  for (unsigned int i = 0; i < current_ring; i++)
+  {
+    count_elapsed_rods += i * 6;
+  }
+
+  // Find the rod in the ring
+  Real angle = std::atan(y_position/x_position);
+  Real delta_theta = libMesh::pi / (current_ring * 6);
+  unsigned int current_index = std::trunc((angle - delta_theta/2) / delta_theta);
+
+  return count_elapsed_rods + current_index;
 }
 
 void

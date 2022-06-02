@@ -89,7 +89,7 @@ APPLICATION_DIR    := $(CURDIR)
 APPLICATION_NAME   := subchannel
 BUILD_EXEC         := yes
 GEN_REVISION       := no
-ADDITIONAL_CPPFLAGS += -Wall -Wextra -Werror
+ADDITIONAL_CPPFLAGS += -Wall -Wextra
 include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################

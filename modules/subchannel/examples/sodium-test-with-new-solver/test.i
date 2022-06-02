@@ -6,7 +6,7 @@ P_out = 2.0e5 # Pa
   [subchannel]
     type = TriSubChannelMeshGenerator
     nrings = 4
-    n_cells = 10
+    n_cells = 100
     flat_to_flat = 0.077
     heated_length = 1.0
     rod_diameter = 0.01
@@ -57,20 +57,21 @@ P_out = 2.0e5 # Pa
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
-  n_blocks = 1
+  n_blocks = 20
   beta = 0.1
   P_out = 2.0e5
   CT = 1.0
   enforce_uniform_pressure = false
-  compute_density = true
-  compute_viscosity = true
+  compute_density = false
+  compute_viscosity = false
   compute_power = true
-#  P_tol = 1.0e-5
-#  T_tol = 1.0e-5
+  P_tol = 1.0e-1
+  T_tol = 1.0e-1
   implicit = false
   segregated = true
   staggered_pressure = false
   monolithic_thermal = false
+  verbose_multiapps = true
 []
 
 [ICs]
@@ -190,8 +191,17 @@ P_out = 2.0e5 # Pa
 [Transfers]
   [xfer]
     type = MultiAppDetailedSolutionTransfer
-    multi_app = viz
-    direction = to_multiapp
+    to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu q_prime S'
   []
 []
+
+#[Transfers]
+#  [xfer]
+#    type = MultiAppNearestNodeTransfer
+#    #fixed_meshes = true
+#    to_multi_app = viz
+#    source_variable = mdot
+#    variable = mdot
+#  []
+#[]
