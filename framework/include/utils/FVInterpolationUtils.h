@@ -231,8 +231,14 @@ template <typename Scalar, typename Vector>
 Scalar
 rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVectorValue & dCD)
 {
+  static const auto zero_vec = RealVectorValue(0);
   if ((phiD - phiC) == 0)
-    return 1e6 * MathUtils::sign(gradC * dCD) + 0 * (gradC * dCD + phiD + phiC);
+    // Handle zero denominator case. Note that MathUtils::sign returns 1 for sign(0) so we can omit
+    // that operation here (e.g. sign(phiD - phiC) = sign(0) = 1). The second term preserves the
+    // same sparsity pattern as the else branch; we want to add this so that we don't risk PETSc
+    // shrinking the matrix now and then potentially reallocating nonzeros later (which is very
+    // slow)
+    return 1e6 * MathUtils::sign(gradC * dCD) + zero_vec * gradC;
 
   return 2. * gradC * dCD / (phiD - phiC) - 1.;
 }
@@ -328,6 +334,7 @@ template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>:
 T
 interpolate(const FunctorBase<T> & functor, const FaceArg & face)
 {
+  mooseAssert(face.fi, "this must be non-null");
   mooseAssert(!face.fi->isBoundary(), "We should not call interpolation on a boundary face!");
 
   auto phi_upwind =
@@ -341,7 +348,6 @@ interpolate(const FunctorBase<T> & functor, const FaceArg & face)
     return linearInterpolation(functor, face);
   else
   {
-    mooseAssert(face.fi, "this must be non-null");
     const auto upwind_arg = face.elem_is_upwind ? face.elemFromFace() : face.neighborFromFace();
     const auto limiter =
         Limiter<typename LimiterValueType<T>::value_type>::build(face.limiter_type);

@@ -3373,10 +3373,6 @@ MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & 
 
   for (FaceInfo & face : _all_face_info)
   {
-    // get elem & neighbor elements, and set subdomain ids
-    const Elem & elem_elem = face.elem();
-    const Elem * const neighbor_elem = face.neighborPtr();
-
     const SubdomainID elem_subdomain_id = face.elemSubdomainID();
     const SubdomainID neighbor_subdomain_id = face.neighborSubdomainID();
 
