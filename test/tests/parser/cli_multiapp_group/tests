@@ -4,9 +4,9 @@
 
   [./cli_override_group]
     type = 'Exodiff'
-    input = 'dt_from_master.i'
-    exodiff = 'dt_from_master_out_sub_left0.e dt_from_master_out_sub_left1.e dt_from_master_out_sub_left2.e dt_from_master_out_sub_left3.e '
-              'dt_from_master_out_sub_right0.e dt_from_master_out_sub_right1.e dt_from_master_out_sub_right2.e dt_from_master_out_sub_right3.e'
+    input = 'dt_from_parent.i'
+    exodiff = 'dt_from_parent_out_sub_left0.e dt_from_parent_out_sub_left1.e dt_from_parent_out_sub_left2.e dt_from_parent_out_sub_left3.e '
+              'dt_from_parent_out_sub_right0.e dt_from_parent_out_sub_right1.e dt_from_parent_out_sub_right2.e dt_from_parent_out_sub_right3.e'
 
     # Only sub apps separately
     cli_args = 'sub_left:BCs/right/value=5 sub_right:BCs/right/value=10'

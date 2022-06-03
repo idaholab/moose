@@ -3,42 +3,42 @@
   design = 'syntax/MultiApps/index.md'
 
   [group]
-  requirement = "The system shall support the execution of sub-applications that operate with smaller time steps then the master application:"
+  requirement = "The system shall support the execution of sub-applications that operate with smaller time steps then the parent application:"
 
     [test]
       type = 'Exodiff'
-      input = 'master.i'
-      exodiff = 'master_out.e master_out_sub0.e'
+      input = 'parent.i'
+      exodiff = 'parent_out.e parent_out_sub0.e'
 
-      detail = "with a sub-application that continues to the end time of the master application and"
+      detail = "with a sub-application that continues to the end time of the parent application and"
     []
     [test_short_subapp]
       type = 'Exodiff'
-      input = 'master_short.i'
-      exodiff = 'master_short_out.e master_short_out_sub0.e'
+      input = 'parent_short.i'
+      exodiff = 'parent_short_out.e parent_short_out_sub0.e'
       # cannot run in recover mode, because the subapp time gets cut into a half, but the subapp
       # needs to run till 0.2s in the first half, then recover and continue.
       recover = false
 
-      detail = "with a sub-application that specifies and completion time prior to the master application."
+      detail = "with a sub-application that specifies and completion time prior to the parent application."
     []
   []
 
   [test_sub_cycle_output]
     # Run the same test as above, but test for sub-cycle output
     type = 'Exodiff'
-    input = 'master_sub_output.i'
-    exodiff = 'master_sub_output_out.e master_sub_output_out_sub0.e'
+    input = 'parent_sub_output.i'
+    exodiff = 'parent_sub_output_out.e parent_sub_output_out_sub0.e'
 
-    requirement = "The system shall support the output of sub-application data that operate with smaller time steps then the master application."
+    requirement = "The system shall support the output of sub-application data that operate with smaller time steps then the parent application."
   []
   [test_it_adapt]
     # Test using the IterationAdaptiveDT Timestepper in a sub-app
     type = 'Exodiff'
-    input = 'master_iteration_adaptive.i'
-    exodiff = 'master_iteration_adaptive_out.e master_iteration_adaptive_out_sub0.e master_iteration_adaptive_out_sub1.e'
+    input = 'parent_iteration_adaptive.i'
+    exodiff = 'parent_iteration_adaptive_out.e parent_iteration_adaptive_out_sub0.e parent_iteration_adaptive_out_sub1.e'
 
-    requirement = "The system shall support the execution of sub-application that operate with adaptive time steps that differ from the master application."
+    requirement = "The system shall support the execution of sub-application that operate with adaptive time steps that differ from the parent application."
   []
   [test_negative_time]
     # test that sub-cycling with negative times does not make the main and sub-app out-of-sync

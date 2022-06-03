@@ -3,9 +3,9 @@
   [./full_original_reinitialization]
     # Runs two steps of a full original reinitialization problem just to make sure it continues to work
     type = Exodiff
-    input = master.i
-    exodiff = master_original.e
-    cli_args = 'Executioner/num_steps=2 Outputs/file_base=master_original'
+    input = parent.i
+    exodiff = parent_original.e
+    cli_args = 'Executioner/num_steps=2 Outputs/file_base=parent_original'
     method = '!dbg' # complete reinitilization solve, debug is slow and not needed
     valgrind = HEAVY
     requirement = "The level set module shall be capable of solving the level set equation with original reinitialization."
@@ -14,9 +14,9 @@
   [./full_modified_reinitialization]
     # Runs two steps of a full modified reinitialization problem just to make sure it continues to work
     type = Exodiff
-    input = master.i
-    exodiff = master_modified.e
-    cli_args = 'Executioner/num_steps=2 MultiApps/reinit/input_files=reinit_modified.i Outputs/file_base=master_modified'
+    input = parent.i
+    exodiff = parent_modified.e
+    cli_args = 'Executioner/num_steps=2 MultiApps/reinit/input_files=reinit_modified.i Outputs/file_base=parent_modified'
     method = '!dbg' # complete reinitilization solve, debug is slow and not needed
     valgrind = HEAVY
     requirement = "The level set module shall be capable of solving the level set equation with modified reinitialization."

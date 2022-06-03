@@ -6,26 +6,26 @@
     requirement = "The system shall support the transfer of scalar post processing data:"
     [to_multiapp]
       type = 'Exodiff'
-      input = 'master.i'
-      exodiff = 'master_out_pp_sub0.e master_out_pp_sub1.e master_out.e'
+      input = 'parent.i'
+      exodiff = 'parent_out_pp_sub0.e parent_out_pp_sub1.e parent_out.e'
 
-      detail = "from the master application to sub-applications and"
+      detail = "from the parent application to sub-applications and"
     []
     [from_multiapp]
       type = 'Exodiff'
-      input = 'master_from_multiapp.i'
-      exodiff = 'master_from_multiapp_out_sub0.e master_from_multiapp_out_sub1.e '
-                'master_from_multiapp_out.e'
+      input = 'parent_from_multiapp.i'
+      exodiff = 'parent_from_multiapp_out_sub0.e parent_from_multiapp_out_sub1.e '
+                'parent_from_multiapp_out.e'
 
-      detail = "to the master application from sub-applications."
+      detail = "to the parent application from sub-applications."
     []
   []
 
   [from_one_sub]
     # We need this test to make sure everything is working when n_procs > n_apps
     type = 'Exodiff'
-    input = 'from_one_sub_master.i'
-    exodiff = 'from_one_sub_master_out.e from_one_sub_master_out_sub0.e'
+    input = 'from_one_sub_parent.i'
+    exodiff = 'from_one_sub_parent_out.e from_one_sub_parent_out_sub0.e'
 
     requirement = "The system shall support the transfer of scalar post processing data from a "
                   "single sub-application."

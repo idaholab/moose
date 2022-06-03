@@ -39,7 +39,7 @@
 [Executioner]
   type = Transient
   num_steps = 10
-  dt = 1 # This will be constrained by the master solve
+  dt = 1 # This will be constrained by the parent solve
 
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'

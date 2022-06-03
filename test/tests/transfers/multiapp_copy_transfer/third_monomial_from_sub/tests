@@ -4,8 +4,8 @@
 
   [./test]
     type = Exodiff
-    input = master.i
-    exodiff = 'master_out.e master_out_sub0.e'
+    input = parent.i
+    exodiff = 'parent_out.e parent_out_sub0.e'
 
     requirement = "The system shall support direct copy of a third-order monomial auxiliary variable +from+ a sub-application +to+ a third-order monomial nonlinear variable in the main application."
   [../]

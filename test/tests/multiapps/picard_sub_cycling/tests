@@ -4,10 +4,10 @@
 
   [./test]
     type = 'Exodiff'
-    input = 'picard_master.i'
-    exodiff = 'picard_master_out.e'
+    input = 'picard_parent.i'
+    exodiff = 'picard_parent_out.e'
     allow_warnings = true
 
-    requirement = 'The system shall support performing iterative solves of sub-applications that used smaller time steps than master application.'
+    requirement = 'The system shall support performing iterative solves of sub-applications that used smaller time steps than parent application.'
   [../]
 []

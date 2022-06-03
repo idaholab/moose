@@ -8,8 +8,8 @@
 
     [n1]
       type = CSVDiff
-      input = master.i
-      csvdiff = 'master_out_storage_0001.csv master_out_data_0001.csv'
+      input = parent.i
+      csvdiff = 'parent_out_storage_0001.csv parent_out_data_0001.csv'
       cli_args = 'MultiApps/runner/mode=normal'
       max_parallel = 1
 
@@ -17,8 +17,8 @@
     []
     [n2]
       type = CSVDiff
-      input = master.i
-      csvdiff = 'master_out_storage_0001.csv master_out_data_0001.csv'
+      input = parent.i
+      csvdiff = 'parent_out_storage_0001.csv parent_out_data_0001.csv'
       cli_args = 'MultiApps/runner/mode=normal'
       prereq = normal/n1
       min_parallel = 2
@@ -28,11 +28,11 @@
     []
     [n3]
       type = CSVDiff
-      input = master.i
-      csvdiff = 'master_small_storage_0001.csv master_small_data_0001.csv'
+      input = parent.i
+      csvdiff = 'parent_small_storage_0001.csv parent_small_data_0001.csv'
       cli_args = 'MultiApps/runner/mode=normal
                   Samplers/mc/num_rows=3
-                  Outputs/file_base=master_small'
+                  Outputs/file_base=parent_small'
       min_parallel = 4
       max_parallel = 4
 
@@ -46,8 +46,8 @@
 
     [n1]
       type = CSVDiff
-      input = master.i
-      csvdiff = 'master_out_storage_0001.csv master_out_data_0001.csv'
+      input = parent.i
+      csvdiff = 'parent_out_storage_0001.csv parent_out_data_0001.csv'
       max_parallel = 1
       prereq = normal/n2
 
@@ -55,8 +55,8 @@
     []
     [n2]
       type = CSVDiff
-      input = master.i
-      csvdiff = 'master_out_storage_0001.csv master_out_data_0001.csv'
+      input = parent.i
+      csvdiff = 'parent_out_storage_0001.csv parent_out_data_0001.csv'
       min_parallel = 2
       max_parallel = 2
       prereq = batch/n1
@@ -65,8 +65,8 @@
     []
     [n2_restore]
       type = CSVDiff
-      input = master.i
-      csvdiff = 'master_out_storage_0001.csv master_out_data_0001.csv'
+      input = parent.i
+      csvdiff = 'parent_out_storage_0001.csv parent_out_data_0001.csv'
       min_parallel = 2
       max_parallel = 2
       prereq = batch/n2
@@ -80,13 +80,13 @@
       requirement = "The system shall include the ability to transfer stochastic results for two sub apps."
       issues = '#17079'
       type = CSVDiff
-      input = master_2sub.i
-      csvdiff = 'master_2sub_out_data0_0001.csv master_2sub_out_data1_0001.csv master_2sub_out_storage0_0001.csv master_2sub_out_storage1_0001.csv'
+      input = parent_2sub.i
+      csvdiff = 'parent_2sub_out_data0_0001.csv parent_2sub_out_data1_0001.csv parent_2sub_out_storage0_0001.csv parent_2sub_out_storage1_0001.csv'
   []
 
   [StochasticToolsTransfer_execute_on_error]
     type = RunException
-    input = master.i
+    input = parent.i
     cli_args = Transfers/data/execute_on=INITIAL
     expect_err = "The 'execute_on' parameter for the 'data' transfer was set"
     requirement = "The 'StochasticToolsTransfer object shall error if the 'execute_on' parameter is "
@@ -94,7 +94,7 @@
   []
   [StochasticToolsTransfer_execute_on_check]
     type = RunException
-    input = master.i
+    input = parent.i
     cli_args = "Transfers/data/execute_on=INITIAL MultiApps/runner/mode=normal"
     expect_err = "MultiAppTransfer execute_on flags do not match associated from_multi_app execute_on "
                  "flags"
@@ -104,7 +104,7 @@
 
   [direction_error]
     type = RunException
-    input = master.i
+    input = parent.i
     cli_args = 'Transfers/data/to_multi_app=runner'
     expect_err = 'Transfers between multiapp are not currently supported for this transfer type'
     requirement = 'The system shall report a reasonable error if parameters for a trasnfer between multiapps are provided to stochastics transfer, which do not support this currently'

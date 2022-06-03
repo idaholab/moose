@@ -41,7 +41,7 @@ the sampler partitioning is equivalent to the multiapp partitioning.
 
 ## Example Syntax
 
-!listing modules/stochastic_tools/test/tests/multiapps/sampler_full_solve_multiapp/master_full_solve.i block=MultiApps
+!listing modules/stochastic_tools/test/tests/multiapps/sampler_full_solve_multiapp/parent_full_solve.i block=MultiApps
 
 !syntax parameters /MultiApps/SamplerFullSolveMultiApp
 

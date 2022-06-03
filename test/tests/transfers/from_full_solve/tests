@@ -4,10 +4,10 @@
 
   [./test]
     type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out.e master_out_full_solve0.e'
+    input = 'parent.i'
+    exodiff = 'parent_out.e parent_out_full_solve0.e'
     recover = false
 
-    requirement = "The system shall support the transfer of data from a completed solve within sub-application to the master application."
+    requirement = "The system shall support the transfer of data from a completed solve within sub-application to the parent application."
   [../]
 []

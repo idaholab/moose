@@ -4,10 +4,10 @@
 
   [transient]
     type = CheckFiles
-    input = master_transient.i
-    check_files = 'master_transient_out_runner0.e master_transient_out_runner1.e '
-                  'master_transient_out_runner2.e master_transient_out_runner3.e '
-                  'master_transient_out_runner4.e'
+    input = parent_transient.i
+    check_files = 'parent_transient_out_runner0.e parent_transient_out_runner1.e '
+                  'parent_transient_out_runner2.e parent_transient_out_runner3.e '
+                  'parent_transient_out_runner4.e'
 
     requirement = 'The system shall provide the ability to create a transient sub-application from '
                   'the sample data generated from distributions.'
@@ -15,10 +15,10 @@
 
   [transient_cmdline_control]
     type = Exodiff
-    input = master_transient_cmd_control.i
-    exodiff = 'master_transient_cmd_control_out_runner0.e master_transient_cmd_control_out_runner1.e '
-              'master_transient_cmd_control_out_runner2.e master_transient_cmd_control_out_runner3.e '
-              'master_transient_cmd_control_out_runner4.e'
+    input = parent_transient_cmd_control.i
+    exodiff = 'parent_transient_cmd_control_out_runner0.e parent_transient_cmd_control_out_runner1.e '
+              'parent_transient_cmd_control_out_runner2.e parent_transient_cmd_control_out_runner3.e '
+              'parent_transient_cmd_control_out_runner4.e'
 
     requirement = 'The system shall provide the ability to set a transient sub-application command '
                   'line parameters from a sample distribution.'

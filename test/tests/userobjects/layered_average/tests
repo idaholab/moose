@@ -98,7 +98,7 @@
       type = 'Exodiff'
       input = 'block_restricted.i'
       exodiff = 'block_restricted_out.e'
-      cli_args = 'UserObjects/master_uo/bounds="0.4 0.5 0.6"'
+      cli_args = 'UserObjects/main_uo/bounds="0.4 0.5 0.6"'
 
       detail = "within a prescribed region in a subdomain."
     []
@@ -108,7 +108,7 @@
     type = 'Exodiff'
     input = 'block_restricted.i'
     exodiff = 'block_restricted_num_layers_out.e'
-    cli_args = 'UserObjects/master_uo/num_layers=2 Outputs/file_base=block_restricted_num_layers_out'
+    cli_args = 'UserObjects/main_uo/num_layers=2 Outputs/file_base=block_restricted_num_layers_out'
 
     requirement = "The system shall respect block restriction for layered averages even when using "
                   "num_layers"

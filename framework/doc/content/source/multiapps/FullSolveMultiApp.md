@@ -12,7 +12,7 @@ time scales.
 
 The following code snippet demonstrates how to create a FullSolveMultiApp object.
 
-!listing full_solve_multiapp/master.i block=MultiApps
+!listing full_solve_multiapp/parent.i block=MultiApps
 
 
 !syntax parameters /MultiApps/FullSolveMultiApp

@@ -1,8 +1,8 @@
 [Tests]
   [./test]
     type = Exodiff
-    input = 'master.i'
-    exodiff = 'master_out.e'
+    input = 'parent.i'
+    exodiff = 'parent_out.e'
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to keep track of a postprocessor value associated with a sub-app at a geometrical location'
     design = 'PostprocessorSpatialUserObject.md'

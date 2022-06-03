@@ -45,7 +45,7 @@
 []
 
 [AuxVariables]
-  [from_master]
+  [from_parent]
     block = 1
   []
 []
@@ -63,10 +63,10 @@
     block = 1
     variable = sink
   []
-  [from_master_pp]
+  [from_parent_pp]
     type = ElementIntegralVariablePostprocessor
     block = 1
-    variable = from_master
+    variable = from_parent
     execute_on = 'transfer'
   []
 []

@@ -3,8 +3,8 @@
   design = '/userobject/UserObject.md'
   [./test]
     type = 'CSVDiff'
-    input = 'master.i'
-    csvdiff = 'master_out_sub0.csv'
+    input = 'parent.i'
+    csvdiff = 'parent_out_sub0.csv'
     requirement = 'The system shall allow forcibly evaluating general user objects on the initial timestep before applying initial conditions.'
   [../]
 []

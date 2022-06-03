@@ -6,15 +6,15 @@
     requirement = "The system shall be capable of executing a sub-application from a Steady executioner on "
     [exec_initial]
       type = 'Exodiff'
-      input = 'master.i'
-      exodiff = 'master_out.e master_out_full_solve0.e'
+      input = 'parent.i'
+      exodiff = 'parent_out.e parent_out_full_solve0.e'
       recover = false
 
       detail = "initial and "
     []
     [exec_final]
       type = 'Exodiff'
-      input = 'master.i'
+      input = 'parent.i'
       cli_args = 'MultiApps/full_solve/execute_on=final Outputs/file_base=exec_final'
       exodiff = 'exec_final.e exec_final_full_solve0.e'
       recover = false
@@ -27,15 +27,15 @@
     requirement = "The system shall be capable of executing a sub-application from a Eigenvalue executioner on "
     [exec_initial]
       type = 'Exodiff'
-      input = 'master_eigen.i'
-      exodiff = 'master_eigen_out.e master_eigen_out_full_solve0.e'
+      input = 'parent_eigen.i'
+      exodiff = 'parent_eigen_out.e parent_eigen_out_full_solve0.e'
       recover = false
 
       detail = "initial and "
     []
     [exec_final]
       type = 'Exodiff'
-      input = 'master_eigen.i'
+      input = 'parent_eigen.i'
       cli_args = 'MultiApps/full_solve/execute_on=final Outputs/file_base=exec_final_eigen'
       exodiff = 'exec_final_eigen.e exec_final_eigen_full_solve0.e'
       recover = false
@@ -48,7 +48,7 @@
     requirement = "When sub-application solve does not converge, the system shall be able to either "
     [abort]
       type = RunException
-      input = master.i
+      input = parent.i
       cli_args = 'full_solve0:Executioner/nl_rel_tol=0
                   full_solve0:Executioner/dtmin=0.01
                   full_solve0:Executioner/nl_max_its=3'
@@ -58,7 +58,7 @@
     []
     [error]
       type = RunException
-      input = master.i
+      input = parent.i
       cli_args = 'MultiApps/full_solve/ignore_solve_not_converge=true'
       expect_err = 'Requesting to ignore failed solutions, but \'Executioner\/error\_on\_dtmin\' '
                    'is true in sub-application. Set this parameter to false in '
@@ -68,14 +68,14 @@
     []
     [continue]
       type = Exodiff
-      input = master.i
+      input = parent.i
       cli_args = 'MultiApps/full_solve/ignore_solve_not_converge=true
                   full_solve0:Executioner/nl_rel_tol=0
                   full_solve0:Executioner/dtmin=0.01
                   full_solve0:Executioner/nl_max_its=3
                   full_solve0:Executioner/error_on_dtmin=false
-                  Outputs/file_base=master_diverge_out'
-      exodiff = 'master_diverge_out.e master_diverge_out_full_solve0.e'
+                  Outputs/file_base=parent_diverge_out'
+      exodiff = 'parent_diverge_out.e parent_diverge_out_full_solve0.e'
 
       detail = "continue run."
     []

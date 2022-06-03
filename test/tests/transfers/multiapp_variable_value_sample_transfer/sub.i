@@ -11,7 +11,7 @@
 []
 
 [AuxVariables]
-  [./from_master]
+  [./from_parent]
   [../]
 []
 

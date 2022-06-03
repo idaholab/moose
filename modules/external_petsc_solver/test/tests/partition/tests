@@ -4,8 +4,8 @@
 
   [2D_2]
     type = 'Exodiff'
-    input = 'moose_as_master.i'
-    exodiff = 'moose_as_master_out.e moose_as_master_out_sub_app0.e'
+    input = 'moose_as_parent.i'
+    exodiff = 'moose_as_parent_out.e moose_as_parent_out_sub_app0.e'
     cli_args = 'Outputs/hide="picard_its"'
     requirement = "The system shall be able to match partitions from DMDA as much as possible using 2 cores."
     min_parallel = 2
@@ -17,9 +17,9 @@
 
   [2D_3]
     type = 'Exodiff'
-    input = 'moose_as_master.i'
-    exodiff = 'moose_as_master_out_3.e moose_as_master_out_3_sub_app0.e'
-    cli_args = 'Outputs/hide="picard_its" Outputs/file_base="moose_as_master_out_3"'
+    input = 'moose_as_parent.i'
+    exodiff = 'moose_as_parent_out_3.e moose_as_parent_out_3_sub_app0.e'
+    cli_args = 'Outputs/hide="picard_its" Outputs/file_base="moose_as_parent_out_3"'
     requirement = "The system shall be able to match partitions from DMDA as much as possible using 3 cores."
     min_parallel = 3
     max_parallel = 3
@@ -30,9 +30,9 @@
 
   [2D_4]
     type = 'Exodiff'
-    input = 'moose_as_master.i'
-    exodiff = 'moose_as_master_out_4.e moose_as_master_out_4_sub_app0.e'
-    cli_args = 'Outputs/hide="picard_its" Outputs/file_base="moose_as_master_out_4"'
+    input = 'moose_as_parent.i'
+    exodiff = 'moose_as_parent_out_4.e moose_as_parent_out_4_sub_app0.e'
+    cli_args = 'Outputs/hide="picard_its" Outputs/file_base="moose_as_parent_out_4"'
     requirement = "The system shall be able to match partitions from DMDA as much as possible using 4 cores."
     min_parallel = 4
     max_parallel = 4
@@ -43,9 +43,9 @@
 
   [2D_6]
     type = 'Exodiff'
-    input = 'moose_as_master.i'
-    exodiff = 'moose_as_master_out_6.e moose_as_master_out_6_sub_app0.e'
-    cli_args = 'Outputs/hide="picard_its" Outputs/file_base="moose_as_master_out_6"'
+    input = 'moose_as_parent.i'
+    exodiff = 'moose_as_parent_out_6.e moose_as_parent_out_6_sub_app0.e'
+    cli_args = 'Outputs/hide="picard_its" Outputs/file_base="moose_as_parent_out_6"'
     requirement = "The system shall be able to match partitions from DMDA as much as possible using 6 cores."
     min_parallel = 6
     max_parallel = 6

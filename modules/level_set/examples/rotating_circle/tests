@@ -14,7 +14,7 @@
   [../]
   [./level_set_reinit]
     type = RunApp
-    input = circle_rotate_master.i
+    input = circle_rotate_parent.i
     cli_args = Executioner/num_steps=2
     method = opt # Can be slow in debug and this is simply to make sure input file remains working
   [../]

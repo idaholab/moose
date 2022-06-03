@@ -30,7 +30,7 @@ TransientMultiApp::validParams()
 {
   InputParameters params = MultiApp::validParams();
   params += TransientInterface::validParams();
-  params.addClassDescription("MultiApp for performing coupled simulations with the master and "
+  params.addClassDescription("MultiApp for performing coupled simulations with the parent and "
                              "sub-application both progressing in time.");
 
   params.addParam<bool>("sub_cycling",
@@ -38,7 +38,7 @@ TransientMultiApp::validParams()
                         "Set to true to allow this MultiApp to take smaller "
                         "timesteps than the rest of the simulation.  More "
                         "than one timestep will be performed for each "
-                        "'master' timestep");
+                        "parent application timestep");
 
   params.addParam<bool>("interpolate_transfers",
                         false,

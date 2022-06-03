@@ -2,8 +2,8 @@
    design = 'multiapps/FullSolveMultiApp.md'
   [./test]
     type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out.e master_out_level1-0.e master_out_level1-0_level2-0.e'
+    input = 'parent.i'
+    exodiff = 'parent_out.e parent_out_level1-0.e parent_out_level1-0_level2-0.e'
 
     issues = '#13310'
     requirement = 'The system shall support Picard iteration with a FullSolveMultiApp at the root with multiple multiapp levels.'

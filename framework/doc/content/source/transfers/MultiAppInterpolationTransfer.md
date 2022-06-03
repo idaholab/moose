@@ -36,7 +36,7 @@ all of the nodes in the element are used for the interpolation.
 
 ## Example Syntax
 
-!listing test/tests/transfers/multiapp_interpolation_transfer/fromsub_master.i start=[Transfers] end=elemental_fromsub footer=[]
+!listing test/tests/transfers/multiapp_interpolation_transfer/fromsub_parent.i start=[Transfers] end=elemental_fromsub footer=[]
 
 !syntax parameters /Transfers/MultiAppInterpolationTransfer
 

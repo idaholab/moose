@@ -5,7 +5,7 @@
 ## Overview
 
 This object is designed to transfer data from a [Postprocessor](/Postprocessors/index.md)
-to a [VectorPostprocessor](/VectorPostprocessors/index.md) on the master application. This
+to a [VectorPostprocessor](/VectorPostprocessors/index.md) on the parent application. This
 object +must+ transfer data to a [StochasticResults](/StochasticResults.md)
 object.
 
@@ -26,7 +26,7 @@ is set to true will transfer whatever the last computed value of the postprocess
 
 ## Example Syntax
 
-!listing modules/stochastic_tools/test/tests/transfers/sampler_postprocessor/master.i block=Transfers
+!listing modules/stochastic_tools/test/tests/transfers/sampler_postprocessor/parent.i block=Transfers
 
 !syntax parameters /Transfers/SamplerPostprocessorTransfer
 

@@ -14,19 +14,19 @@
 []
 
 [AuxVariables]
-  [./nodal_source_from_master_nodal]
+  [./nodal_source_from_parent_nodal]
     family = LAGRANGE
     order = FIRST
   [../]
-  [./nodal_source_from_master_elemental]
+  [./nodal_source_from_parent_elemental]
     family = MONOMIAL
     order = CONSTANT
   [../]
-  [./elemental_source_from_master_nodal]
+  [./elemental_source_from_parent_nodal]
     family = LAGRANGE
     order = FIRST
   [../]
-  [./elemental_source_from_master_elemental]
+  [./elemental_source_from_parent_elemental]
     family = MONOMIAL
     order = CONSTANT
   [../]

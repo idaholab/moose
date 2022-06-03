@@ -39,7 +39,7 @@
     input = 'lots_of_variables.i'
     exodiff = 'lots_of_variables_out.e'
 
-    # this test has unknown issue with PETSc-master
+    # this test has unknown issue with PETSc-parent
     # It is related to communcators in VTK
     # We will fix it in the new release
     petsc_version_release = true

@@ -7,8 +7,8 @@
 
     [test]
       type = 'Exodiff'
-      input = 'master.i'
-      exodiff = 'master_out.e master_out_sub0.e master_out_sub0.e-s002'
+      input = 'parent.i'
+      exodiff = 'parent_out.e parent_out_sub0.e parent_out_sub0.e-s002'
       recover = false
 
       detail = "for single and"
@@ -16,8 +16,8 @@
 
     [multilevel]
       type = 'Exodiff'
-      input = 'multilevel_master.i'
-      exodiff = 'multilevel_master_out.e multilevel_master_out_sub0.e multilevel_master_out_sub0.e-s002 multilevel_master_out_sub0_sub0.e multilevel_master_out_sub0_sub0.e-s002'
+      input = 'multilevel_parent.i'
+      exodiff = 'multilevel_parent_out.e multilevel_parent_out_sub0.e multilevel_parent_out_sub0.e-s002 multilevel_parent_out_sub0_sub0.e multilevel_parent_out_sub0_sub0.e-s002'
       recover = false
 
       detail = "multi-level sub-applications."

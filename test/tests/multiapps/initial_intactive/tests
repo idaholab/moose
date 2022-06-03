@@ -1,8 +1,8 @@
 [Tests]
   [./initial_inactive]
     type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out_sub0.e'
+    input = 'parent.i'
+    exodiff = 'parent_out_sub0.e'
 
     design = 'TransientMultiApp.md'
     issues = '#12642'

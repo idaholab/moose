@@ -1,11 +1,11 @@
 [Tests]
   [start_time]
     type = Exodiff
-    input = master.i
-    exodiff = master_out_sub_app0.e
+    input = parent.i
+    exodiff = parent_out_sub_app0.e
 
     issues = '#12755'
-    requirement = "The system shall support a time offset between the master and a subapp when using the Multiapp system."
+    requirement = "The system shall support a time offset between the parent and a subapp when using the Multiapp system."
     design = "TransientMultiApp.md"
   []
 []

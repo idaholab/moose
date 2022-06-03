@@ -7,7 +7,7 @@
 
     [first]
       type = 'RunApp'
-      input = 'master.i'
+      input = 'parent.i'
 
       detail = "that executes sub-applications, which"
     []
@@ -15,8 +15,8 @@
     [second]
       type = 'Exodiff'
       prereq = 'group/first'
-      input = 'master2.i'
-      exodiff = 'master2_out_sub_app0.e'
+      input = 'parent2.i'
+      exodiff = 'parent2_out_sub_app0.e'
       abs_zero = 1e-8
 
       detail = "can restart from a previous simulation and project the initial condition from the previous solution to the current, restarted simulation."

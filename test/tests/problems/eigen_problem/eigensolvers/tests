@@ -111,23 +111,23 @@
     requirement = "Eigenvalue system should be able to handle DG kernels"
   []
 
-  [./eigen_as_master]
+  [./eigen_as_parent]
     type = 'CSVDiff'
     input = 'ne_coupled_picard.i'
     csvdiff = 'ne_coupled_picard_out_eigenvalues_0001.csv'
     slepc_version = '>=3.12.0'
     issues = "#15513"
-    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a master."
+    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a parent."
   []
 
-  [./eigen_as_master_exodus]
+  [./eigen_as_parent_exodus]
     type = 'Exodiff'
     input = 'ne_coupled_picard.i'
     exodiff = 'ne_coupled_picard_out.e ne_coupled_picard_out_sub0.e'
-    prereq = 'eigen_as_master'
+    prereq = 'eigen_as_parent'
     slepc_version = '>=3.12.0'
     issues = "#15513"
-    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a master and output eigen vectors as an exodus file."
+    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a parent and output eigen vectors as an exodus file."
   []
 
   [./eigen_as_sub]

@@ -4,7 +4,7 @@
 
 ## Description
 
-Creates a sub-app at the centroid of every element in the master app, which can be leveraged for
+Creates a sub-app at the centroid of every element in the parent app, which can be leveraged for
 doing multiscale solves. This object requires no special parameters, but this is
 [block restrictable](BlockRestrictable.md) so that the sub-applications can be restricted to only
 be generated on specified subdomains.

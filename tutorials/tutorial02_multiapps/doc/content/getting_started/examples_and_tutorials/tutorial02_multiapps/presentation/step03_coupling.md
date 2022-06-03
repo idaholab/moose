@@ -38,7 +38,7 @@ No problem!
 
 !---
 
-## Loose Coupling Example (01_master.i)
+## Loose Coupling Example (01_parent.i)
 
 Here we continue with the microstructure calculation.  But now we will add Kernels and MaterialProperties that couple to the transferred fields.
 
@@ -50,10 +50,10 @@ What we end up with is then a smooth field over the whole Master domain that rep
 
 !---
 
-## Run 01_master.i
+## Run 01_parent.i
 
-!listing step03_coupling/01_master.i
-         caption=01_master.i
+!listing step03_coupling/01_parent.i
+         caption=01_parent.i
 
 !---
 
@@ -77,7 +77,7 @@ One caveat: in order for this to work, both apps need to have Backup/Restore cap
 
 !---
 
-## Run 02_master.i
+## Run 02_parent.i
 
 This solves the same problem as a moment ago - but now using Picard iteration.
 
@@ -105,7 +105,7 @@ The graphic on the next slide should help...
 
 !---
 
-## Run 03_master.i
+## Run 03_parent.i
 
 Same problem solved again - but now the sub-app is taking smaller timesteps and it sub_cycling.
 

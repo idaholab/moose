@@ -1,8 +1,8 @@
 [Tests]
   [./test]
     type = 'Exodiff'
-    input = 'picard_master.i'
-    exodiff = 'picard_master_out_sub0.e picard_master_out.e'
+    input = 'picard_parent.i'
+    exodiff = 'picard_parent_out_sub0.e picard_parent_out.e'
     max_parallel = 1 # This is here because we're counting residual evaluations
     max_threads = 1 # NanAtCountKernel changes behavior with threads
     recover = false
@@ -18,8 +18,8 @@
 
   [./test_csv]
     type = 'CSVDiff'
-    input = 'picard_master.i'
-    csvdiff = 'picard_master_out_sub0.csv picard_master_out.csv'
+    input = 'picard_parent.i'
+    csvdiff = 'picard_parent_out_sub0.csv picard_parent_out.csv'
     max_parallel = 1 # This is here because we're counting residual evaluations
     max_threads = 1 # NanAtCountKernel changes behavior with threads
     recover = false
@@ -38,8 +38,8 @@
 
   [./test_2subapps]
     type = 'Exodiff'
-    input = 'picard_master.i'
-    exodiff = 'picard_master_2subapps_out_sub.e picard_master_2subapps_out_sub_no_fail.e picard_master_2subapps_out.e'
+    input = 'picard_parent.i'
+    exodiff = 'picard_parent_2subapps_out_sub.e picard_parent_2subapps_out_sub_no_fail.e picard_parent_2subapps_out.e'
     max_parallel = 1 # This is here because we're counting residual evaluations
     max_threads = 1 # NanAtCountKernel changes behavior with threads
     recover = false
@@ -48,10 +48,10 @@
     petsc_version_release = true
     compiler = '!INTEL'
 
-    cli_args = 'MultiApps/active="sub sub_no_fail" Outputs/file_base=picard_master_2subapps_out sub:Outputs/file_base=picard_master_2subapps_out_sub sub_no_fail:Outputs/file_base=picard_master_2subapps_out_sub_no_fail'
+    cli_args = 'MultiApps/active="sub sub_no_fail" Outputs/file_base=picard_parent_2subapps_out sub:Outputs/file_base=picard_parent_2subapps_out_sub sub_no_fail:Outputs/file_base=picard_parent_2subapps_out_sub_no_fail'
 
     design = '/MultiApps/index.md'
-    requirement = 'Multiapps shall be able to cut the master app time step when any subapp encounters a solve failure.'
+    requirement = 'Multiapps shall be able to cut the parent app time step when any subapp encounters a solve failure.'
     issues = '#12477'
   [../]
 []

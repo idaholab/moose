@@ -59,7 +59,7 @@
 
     [missed_point]
       type = 'RunException'
-      input = 'missing_master.i'
+      input = 'missing_parent.i'
       expect_err = 'Point not found'
 
       detail = "the evaluation point does not exist and"
@@ -72,7 +72,7 @@
       allow_warnings = true
       max_parallel = 1
 
-      detail = "if the execution settings do not match between the master and sub-applications."
+      detail = "if the execution settings do not match between the parent and sub-applications."
     []
   []
 []

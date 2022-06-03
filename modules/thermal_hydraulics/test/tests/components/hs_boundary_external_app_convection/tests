@@ -1,7 +1,7 @@
 [Tests]
   [energy_conservation_plate]
     type = Exodiff
-    input = 'plate.master.i'
-    exodiff = 'plate.master_out.e plate.master_out_thm0.e'
+    input = 'plate.parent.i'
+    exodiff = 'plate.parent_out.e plate.parent_out_thm0.e'
   []
 []

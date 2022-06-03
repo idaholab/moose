@@ -3,13 +3,13 @@
   design = 'MultiAppInterpolationTransfer.md'
   [test]
     type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out_sub0.e'
+    input = 'parent.i'
+    exodiff = 'parent_out_sub0.e'
     use_old_floor = True
     rel_err = 3.8e-05
 
     requirement = "The system shall support support the ability to perform interpolation between "
-                  "time steps when transferring field data between a master application and "
+                  "time steps when transferring field data between a parent application and "
                   "sub-applications."
   []
 []

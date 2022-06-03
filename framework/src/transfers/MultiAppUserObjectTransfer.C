@@ -39,12 +39,20 @@ MultiAppUserObjectTransfer::validParams()
       "user_object",
       "The UserObject you want to transfer values from.  Note: This might be a "
       "UserObject from your MultiApp's input file!");
-  params.addParam<bool>("all_master_nodes_contained_in_sub_app",
+  params.addParam<bool>("all_parent_nodes_contained_in_sub_app",
                         false,
-                        "Set to true if every master node is mapped to a distinct point on one of "
-                        "the subApps during a transfer from sub App to Master App. If master node "
-                        "cannot be found within bounding boxes of any of the subApps, an error is "
-                        "generated.");
+                        "Set to true if every parent app node is mapped to a distinct point on one "
+                        "of the subApps during a transfer from sub App to Parent App. If parent app"
+                        " node cannot be found within bounding boxes of any of the subApps, an "
+                        " error is generated.");
+  params.addDeprecatedParam<bool>(
+      "all_master_nodes_contained_in_sub_app",
+      "Set to true if every parent app node is mapped to a distinct point on one "
+      "of the subApps during a transfer from sub App to Parent App. If parent app"
+      " node cannot be found within bounding boxes of any of the subApps, an "
+      " error is generated.",
+      "all_master_nodes_contained_in_sub_app is deprecated. Use "
+      "all_parent_nodes_contained_in_sub_app");
   params.addParam<bool>(
       "skip_bounding_box_check",
       false,
@@ -57,7 +65,7 @@ MultiAppUserObjectTransfer::validParams()
       "parameter is used).");
 
   params.addClassDescription(
-      "Samples a variable's value in the Master domain at the point where the MultiApp is and "
+      "Samples a variable's value in the Parent app domain at the point where the MultiApp is and "
       "copies that value into a post-processor in the MultiApp");
 
   params.addParam<bool>("nearest_sub_app",
@@ -71,7 +79,10 @@ MultiAppUserObjectTransfer::validParams()
 MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
     _user_object_name(getParam<UserObjectName>("user_object")),
-    _all_master_nodes_contained_in_sub_app(getParam<bool>("all_master_nodes_contained_in_sub_app")),
+    _all_parent_nodes_contained_in_sub_app(
+        isParamValid("all_master_nodes_contained_in_sub_app")
+            ? getParam<bool>("all_master_nodes_contained_in_sub_app")
+            : getParam<bool>("all_parent_nodes_contained_in_sub_app")),
     _skip_bbox_check(getParam<bool>("skip_bounding_box_check")),
     _nearest_sub_app(getParam<bool>("nearest_sub_app"))
 {
@@ -111,7 +122,7 @@ MultiAppUserObjectTransfer::execute()
         {
           Moose::ScopedCommSwapper swapper(getToMultiApp()->comm());
 
-          // Loop over the master nodes and set the value of the variable
+          // Loop over the parent app nodes and set the value of the variable
           System * to_sys = find_sys(getToMultiApp()->appProblemBase(i).es(), _to_var_name);
 
           unsigned int sys_num = to_sys->number();
@@ -286,10 +297,10 @@ MultiAppUserObjectTransfer::execute()
       if (fe_type.order > FIRST && !is_nodal)
         mooseError("We don't currently support second order or higher elemental variable ");
 
-      if (_all_master_nodes_contained_in_sub_app)
+      if (_all_parent_nodes_contained_in_sub_app)
       {
-        // check to see if master nodes or elements lies within any of the sub application bounding
-        // boxes
+        // check to see if parent app nodes or elements lies within any of the sub application
+        // bounding boxes
         if (is_nodal)
         {
           for (auto & node : to_mesh->getMesh().node_ptr_range())
@@ -317,14 +328,14 @@ MultiAppUserObjectTransfer::execute()
               if (node_found_in_sub_app == 0)
               {
                 Point n = *node;
-                mooseError("MultiAppUserObjectTransfer: Master node ",
+                mooseError("MultiAppUserObjectTransfer: Parent app node ",
                            n,
                            " not found within the bounding box of any of the sub applications.");
               }
               else if (node_found_in_sub_app > 1)
               {
                 Point n = *node;
-                mooseError("MultiAppUserObjectTransfer: Master node ",
+                mooseError("MultiAppUserObjectTransfer: Parent app node ",
                            n,
                            " found within the bounding box of two or more sub applications.");
               }
@@ -383,14 +394,14 @@ MultiAppUserObjectTransfer::execute()
               }
 
               if (elem_found_in_sub_app == 0)
-                mooseError("MultiAppUserObjectTransfer: Master element with ",
+                mooseError("MultiAppUserObjectTransfer: Parent app element with ",
                            n_points > 1 ? "node" : "centroid",
                            " at ",
                            point,
                            " not found within the bounding box of any of the sub applications.");
 
               else if (elem_found_in_sub_app > 1)
-                mooseError("MultiAppUserObjectTransfer: Master element with ",
+                mooseError("MultiAppUserObjectTransfer: Parent app element with ",
                            n_points > 1 ? "node" : "centroid",
                            " at ",
                            point,
@@ -432,7 +443,7 @@ MultiAppUserObjectTransfer::execute()
             if (from_value == std::numeric_limits<Real>::infinity())
             {
               Point n = *node;
-              mooseError("MultiAppUserObjectTransfer: Point corresponding to master node at (",
+              mooseError("MultiAppUserObjectTransfer: Point corresponding to parent app node at (",
                          n,
                          ") not found in the sub application.");
             }

@@ -4,8 +4,8 @@
 
   [./cli_override_single]
     type = 'Exodiff'
-    input = 'dt_from_master.i'
-    exodiff = 'dt_from_master_out_sub_app0.e dt_from_master_out_sub_app1.e dt_from_master_out_sub_app2.e dt_from_master_out_sub_app3.e'
+    input = 'dt_from_parent.i'
+    exodiff = 'dt_from_parent_out_sub_app0.e dt_from_parent_out_sub_app1.e dt_from_parent_out_sub_app2.e dt_from_parent_out_sub_app3.e'
 
     # Multiapp Overrides
     cli_args = 'sub_app1:BCs/right/value=10 sub_app3:BCs/right/value=30'
@@ -15,7 +15,7 @@
 
   [./cli_override_error_check]
     type = 'RunException'
-    input = 'dt_from_master.i'
+    input = 'dt_from_parent.i'
     expect_err = "unused command line parameter 'sub_app4:BCs/right/value=10'"
 
     # Multiapp Overrides (out of range value)

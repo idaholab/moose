@@ -4,7 +4,7 @@
 
   [./different_mesh]
     type = RunException
-    input = master.i
+    input = parent.i
     cli_args = Mesh/nx=12
     expect_err = 'The meshes must be identical to utilize MultiAppCopyTransfer'
 
@@ -12,7 +12,7 @@
   [../]
   [./different_variable_type]
     type = RunException
-    input = master.i
+    input = parent.i
     cli_args = 'sub0:Mesh/elem_type=QUAD8 sub0:Variables/u/order=SECOND Outputs/exodus=false'
     expect_err = 'must be the same type \(order and family\)'
 

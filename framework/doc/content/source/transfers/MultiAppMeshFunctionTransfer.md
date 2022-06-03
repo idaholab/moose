@@ -2,7 +2,7 @@
 
 Performs a transfer of field data to/from postprocessor data within sub-applications at locations
 specified by the sub-application position. The transfer utilizes the finite element function of
-the master application, via a `libMesh::MeshFunction` object, to perform the transfer.
+the parent application, via a `libMesh::MeshFunction` object, to perform the transfer.
 
 ## Example Input File Syntax
 
