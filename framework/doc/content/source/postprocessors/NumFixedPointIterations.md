@@ -9,13 +9,13 @@ convergence. This postprocessor serves to measure the number of iterations neede
 
 ## Example Input File Syntax
 
-In this input file, we have a two-level multiphysics coupling, meaning that the master app is
+In this input file, we have a two-level multiphysics coupling, meaning that the parent app is
 coupled with a sub-app, which is itself coupled with a sub-sub-app. We count the number of iterations
 to converge the top level coupling with this postprocessor. The iterations taken to converge the bottom
 level coupling are not counted, they would be counted by a similar postprocessor in the intermediate
 sub-application.
 
-!listing tests/multiapps/picard_multilevel/picard_master.i block=Postprocessors/picard_its
+!listing tests/multiapps/picard_multilevel/picard_parent.i block=Postprocessors/picard_its
 
 !syntax parameters /Postprocessors/NumFixedPointIterations
 

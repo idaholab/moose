@@ -4,15 +4,15 @@
 
   [./test]
     type = Exodiff
-    input = master_conservative_transfer.i
-    exodiff = 'master_conservative_transfer_out.e master_conservative_transfer_out_sub0.e'
+    input = parent_conservative_transfer.i
+    exodiff = 'parent_conservative_transfer_out.e parent_conservative_transfer_out_sub0.e'
     requirement = 'The system shall support conservative transfers'
   [../]
 
   [./test_execute_on]
     type = RunException
     prereq = 'test'
-    input = master_conservative_transfer.i
+    input = parent_conservative_transfer.i
     expect_err = "execute_on='transfer'\s+is\s+required\s+in\s+the\s+conversative\s+transfer\s+for\s+to_postprocessor"
     cli_args ="sub:Postprocessors/to_postprocessor/execute_on='timestep_end'"
     requirement = 'The system shall check execute_on for PP in sub app'
@@ -20,55 +20,55 @@
 
   [./subs]
     type = Exodiff
-    input = master_power_density.i
-    exodiff = 'master_power_density_out.e master_power_density_out_sub0.e master_power_density_out_sub1.e'
+    input = parent_power_density.i
+    exodiff = 'parent_power_density_out.e parent_power_density_out_sub0.e parent_power_density_out_sub1.e'
     requirement = 'The system shall support conservative transfers using regular postprocessors'
   [../]
 
   [./subs_execute_on]
     type = RunException
     prereq = 'subs'
-    input = master_power_density.i
+    input = parent_power_density.i
     cli_args ="Postprocessors/from_sub1/execute_on='timestep_end'"
     expect_err = "execute_on='transfer'\s+is\s+required\s+in\s+the\s+conversative\s+transfer\s+for\s+from\_sub1"
-    requirement = 'The system shall check execute_on for PP in master app'
+    requirement = 'The system shall check execute_on for PP in parent app'
   [../]
 
   [./nearest_point]
     type = Exodiff
-    input = master_nearest_point.i
-    exodiff = 'master_nearest_point_out.e master_nearest_point_out_sub0.e master_nearest_point_out_sub1.e'
+    input = parent_nearest_point.i
+    exodiff = 'parent_nearest_point_out.e parent_nearest_point_out_sub0.e parent_nearest_point_out_sub1.e'
     requirement = 'The system shall support conservative transfers with nearestpoint VectorPostprocessors'
   [../]
 
   [./nearest_point_execute_on]
     type = RunException
     prereq = 'nearest_point'
-    input = master_nearest_point.i
+    input = parent_nearest_point.i
     cli_args ="VectorPostprocessors/to_nearest_point/execute_on='timestep_end'"
     expect_err = "execute\_on='transfer'\s+is\s+required\s+in\s+the\s+conversative\s+transfer\s+for\s+to\_nearest\_point"
-    requirement = 'The system shall check execute_on for vector PP in master app'
+    requirement = 'The system shall check execute_on for vector PP in parent app'
   [../]
 
   [./nearest_point_vector_pps]
     type = CSVDiff
-    input = 'master_nearest_point.i'
-    csvdiff = 'master_nearest_point_out_from_nearest_point_0001.csv master_nearest_point_out_to_nearest_point_0001.csv'
+    input = 'parent_nearest_point.i'
+    csvdiff = 'parent_nearest_point_out_from_nearest_point_0001.csv parent_nearest_point_out_to_nearest_point_0001.csv'
     prereq = nearest_point
     requirement = 'The system shall be able to output the adjusting values in conservative transfers'
   [../]
 
   [./userobject_transfer]
     type = Exodiff
-    input = master_userobject.i
-    exodiff = 'master_userobject_out.e master_userobject_out_sub_app0.e master_userobject_out_sub_app1.e'
+    input = parent_userobject.i
+    exodiff = 'parent_userobject_out.e parent_userobject_out_sub_app0.e parent_userobject_out_sub_app1.e'
     requirement = 'The system shall support conservative transfers in MultiAppUserObjectTransfer'
   [../]
 
   [./userobject_transfer_csv]
     type = CSVDiff
-    input = 'master_userobject.i'
-    csvdiff = 'master_userobject_out_to_nearest_point_0001.csv master_userobject_out_to_nearest_point_element_0001.csv'
+    input = 'parent_userobject.i'
+    csvdiff = 'parent_userobject_out_to_nearest_point_0001.csv parent_userobject_out_to_nearest_point_element_0001.csv'
     prereq = userobject_transfer
     requirement = 'The system shall be able to output the adjusting values in conservative transfers for MultiAppUserObjectTransfer'
   [../]

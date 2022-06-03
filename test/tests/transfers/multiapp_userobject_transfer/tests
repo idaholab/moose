@@ -7,10 +7,10 @@
 
     [from_sub]
       type = 'Exodiff'
-      input = 'master.i'
-      exodiff = 'master_out.e master_out_sub_app0.e master_out_sub_app1.e'
+      input = 'parent.i'
+      exodiff = 'parent_out.e parent_out_sub_app0.e parent_out_sub_app1.e'
 
-      detail = "to a master application from sub-applications,"
+      detail = "to a parent application from sub-applications,"
     []
 
     [from_sub_nearest_sub_app]
@@ -18,38 +18,38 @@
       input = 'main_nearest_sub_app.i'
       exodiff = 'main_nearest_sub_app_out.e'
 
-      detail = "to a master application from the nearest sub-applications,"
+      detail = "to a parent application from the nearest sub-applications,"
     []
 
     [to_sub]
       type = 'Exodiff'
-      input = 'tosub_master.i'
-      exodiff = 'tosub_master_out.e tosub_master_out_sub_app0.e tosub_master_out_sub_app1.e'
+      input = 'tosub_parent.i'
+      exodiff = 'tosub_parent_out.e tosub_parent_out_sub_app0.e tosub_parent_out_sub_app1.e'
 
-      detail = "from a master application to sub-applications,"
+      detail = "from a parent application to sub-applications,"
     []
     [to_sub_displaced]
       type = 'Exodiff'
-      input = 'tosub_displaced_master.i'
-      exodiff = 'tosub_displaced_master_out.e tosub_displaced_master_out_sub_app0.e'
+      input = 'tosub_displaced_parent.i'
+      exodiff = 'tosub_displaced_parent_out.e tosub_displaced_parent_out_sub_app0.e'
 
-      detail = "from a master application to sub-applications that have a deformed mesh, and"
+      detail = "from a parent application to sub-applications that have a deformed mesh, and"
     []
 
     [3d_1d]
       type = 'Exodiff'
-      input = '3d_1d_master.i'
-      exodiff = '3d_1d_master_out.e 3d_1d_master_out_sub_app0.e'
+      input = '3d_1d_parent.i'
+      exodiff = '3d_1d_parent_out.e 3d_1d_parent_out_sub_app0.e'
       recover = false
 
-      detail = "between a 3D master application and 1D sub-applications."
+      detail = "between a 3D parent application and 1D sub-applications."
     []
   []
 
   [restricted_node]
     type = 'Exodiff'
-    input = 'restricted_node_master.i'
-    exodiff = 'restricted_node_master_out.e restricted_node_master_out_ch00.e restricted_node_master_out_ch10.e'
+    input = 'restricted_node_parent.i'
+    exodiff = 'restricted_node_parent_out.e restricted_node_parent_out_ch00.e restricted_node_parent_out_ch10.e'
 
     requirement = "The system shall transfer user-defined spatial data into block and boundary restricted nodal variables."
     design = "MultiAppUserObjectTransfer.md"
@@ -58,8 +58,8 @@
 
   [restricted_elem]
     type = 'Exodiff'
-    input = 'restricted_elem_master.i'
-    exodiff = 'restricted_elem_master_out.e restricted_elem_master_out_ch00.e restricted_elem_master_out_ch10.e'
+    input = 'restricted_elem_parent.i'
+    exodiff = 'restricted_elem_parent_out.e restricted_elem_parent_out_ch00.e restricted_elem_parent_out_ch10.e'
 
     requirement = "The system shall transfer user-defined spatial data into block and boundary restricted elemental variables."
     design = "MultiAppUserObjectTransfer.md"
@@ -68,19 +68,19 @@
 
   [3d_1d_err]
     type = 'RunException'
-    input = '3d_1d_master.i'
+    input = '3d_1d_parent.i'
     cli_args = 'Transfers/layered_transfer_from_sub_app/all_master_nodes_contained_in_sub_app=true'
-    expect_err = 'MultiAppUserObjectTransfer: Master element with centroid at'
+    expect_err = 'MultiAppUserObjectTransfer: Parent app element with centroid at'
     prereq = transfer/3d_1d
 
-    requirement = "MultiAppUserObjectTransfer shall generate an error if a master node/element is "
+    requirement = "MultiAppUserObjectTransfer shall generate an error if a parent node/element is "
                   "not contained within any sub application domains."
   []
 
   [./two_pipes]
     type = 'Exodiff'
-    input = 'two_pipe_master.i'
-    exodiff = 'two_pipe_master_out.e'
+    input = 'two_pipe_parent.i'
+    exodiff = 'two_pipe_parent_out.e'
     requirement = "MultiAppUserObjectTransfer shall allow skipping the bounding box test."
     mesh_mode = replicated
     issues = "#13701"

@@ -22,7 +22,7 @@ class MooseMesh;
  * Base class for all MultiAppTransfer objects.
  *
  * MultiAppTransfers are objects that push and pull values to and from
- * MultiApp objects from and to the main (master) system.
+ * MultiApp objects from and to the main (parent app) system.
  *
  * Classes that inherit from this class still need to override the
  * execute() method from Transfer.

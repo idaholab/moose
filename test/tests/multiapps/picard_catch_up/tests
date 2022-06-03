@@ -2,11 +2,11 @@
   [catch_up]
     issues = '#10337'
     design = 'syntax/MultiApps/index.md'
-    requirement = 'The system shall support performing iterative solves of sub-applications that perform additional time steps to maintain time step consistency with the master application'
+    requirement = 'The system shall support performing iterative solves of sub-applications that perform additional time steps to maintain time step consistency with the parent application'
     [test]
       type = 'Exodiff'
-      input = 'master.i'
-      exodiff = 'master_out_sub0.e master_out.e'
+      input = 'parent.i'
+      exodiff = 'parent_out_sub0.e parent_out.e'
       max_parallel = 1 # This is here because we're counting residual evaluations
       max_threads = 1 # NanAtCountKernel changes behavior with threads
       recover = false
@@ -18,10 +18,10 @@
     []
     [keep_solution]
       type = 'Exodiff'
-      input = 'master.i'
-      exodiff = 'keep_solution_master_out_sub0.e keep_solution_master_out.e'
+      input = 'parent.i'
+      exodiff = 'keep_solution_parent_out_sub0.e keep_solution_parent_out.e'
       allow_warnings = true
-      cli_args = "MultiApps/sub/keep_solution_during_restore=true Executioner/num_steps=4 MultiApps/sub/input_files='sub_failing_problem.i' Outputs/file_base='keep_solution_master_out'"
+      cli_args = "MultiApps/sub/keep_solution_during_restore=true Executioner/num_steps=4 MultiApps/sub/input_files='sub_failing_problem.i' Outputs/file_base='keep_solution_parent_out'"
       detail = 'or re-using the previous solution as the initial condition for subsequent iterations.'
     []
   []

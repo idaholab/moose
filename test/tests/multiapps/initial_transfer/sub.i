@@ -20,7 +20,7 @@
     type = ScalePostprocessor
     value = receiver
     scaling_factor = 2
-    # Note: during subapp initial setup, master postprocessor has not been transferred
+    # Note: during subapp initial setup, parent postprocessor has not been transferred
     execute_on = 'initial timestep_end'
   []
   [receiver]

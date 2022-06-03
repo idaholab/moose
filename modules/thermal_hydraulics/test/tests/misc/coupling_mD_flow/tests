@@ -1,8 +1,8 @@
 [Tests]
   [coupling_mD_nonoverlapping]
     type = Exodiff
-    input = 'master_non_overlapping.i'
-    exodiff = 'master_non_overlapping_out.e'
+    input = 'parent_non_overlapping.i'
+    exodiff = 'parent_non_overlapping_out.e'
     recover = false
     ad_indexing_type = 'global'
   []

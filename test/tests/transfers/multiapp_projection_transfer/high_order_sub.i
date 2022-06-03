@@ -13,7 +13,7 @@
 []
 
 [AuxVariables]
-  [./from_master]
+  [./from_parent]
     family = monomial
     order = first
   [../]

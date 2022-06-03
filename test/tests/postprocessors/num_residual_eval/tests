@@ -5,8 +5,8 @@
     csvdiff = 'out.csv'
     max_parallel=2
     min_parallel=2
-    # Do not test this against PETSc-master because
-    # PETSc-master has a little better convergence in terms of the number
+    # Do not test this against PETSc-parent because
+    # PETSc-parent has a little better convergence in terms of the number
     # of iterations.  And then the number of residuals is reduced by 1,
     # and this causes CSV diff.
     petsc_version_release = true

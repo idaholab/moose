@@ -5,11 +5,11 @@
 ## Example Input File Syntax
 
 The MultiAppPostprocessorTransfer allows for a Postprocessor value to be transfer between the
-master application and sub-application(s). For example, the input file snippet below
-sets up a transfer of a Postprocessor value from the master application to a Postprocessor on
+parent application and sub-application(s). For example, the input file snippet below
+sets up a transfer of a Postprocessor value from the parent application to a Postprocessor on
 each of the sub-applications.
 
-!listing multiapp_postprocessor_transfer/master.i block=Transfers
+!listing multiapp_postprocessor_transfer/parent.i block=Transfers
 
 !syntax parameters /Transfers/MultiAppPostprocessorTransfer
 

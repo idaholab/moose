@@ -76,7 +76,7 @@
     app_type = MooseTestApp
     positions = '0 0 0'
     input_files = 'steady_sub.i'
-    clone_master_mesh = true
+    clone_parent_mesh = true
 
     transformed_variables = 'v'
   []

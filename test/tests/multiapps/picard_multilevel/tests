@@ -2,18 +2,18 @@
    design = 'multiapps/TransientMultiApp.md'
   [./test]
     type = 'Exodiff'
-    input = 'picard_master.i'
-    exodiff = 'picard_master_out.e picard_master_out_sub10.e picard_master_out_sub10_sub20.e'
+    input = 'picard_parent.i'
+    exodiff = 'picard_parent_out.e picard_parent_out_sub10.e picard_parent_out_sub10_sub20.e'
 
     issues = '#5126 #15837'
     requirement = 'The system shall support Picard iteration with multiple levels of Multiapps.'
   [../]
   [./test_force_norms]
     type = 'Exodiff'
-    input = 'picard_master.i'
-    cli_args = 'Executioner/fixed_point_force_norms=true Outputs/file_base=picard_master_out_extra'
+    input = 'picard_parent.i'
+    cli_args = 'Executioner/fixed_point_force_norms=true Outputs/file_base=picard_parent_out_extra'
 
-    exodiff = 'picard_master_out_extra.e picard_master_out_extra_sub10.e picard_master_out_extra_sub10_sub20.e'
+    exodiff = 'picard_parent_out_extra.e picard_parent_out_extra_sub10.e picard_parent_out_extra_sub10_sub20.e'
     prereq = test
 
     issues = '#12709 #15837'

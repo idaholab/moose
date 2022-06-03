@@ -6,7 +6,7 @@ the sub-app exists.
 
 ## Example of a Multi-App Setup
 
-!listing test/tests/userobjects/postprocessor_spatial_user_object/master.i
+!listing test/tests/userobjects/postprocessor_spatial_user_object/parent.i
 
 !listing test/tests/userobjects/postprocessor_spatial_user_object/sub.i
 

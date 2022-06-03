@@ -4,8 +4,8 @@
 
   [multiple]
     type = CSVDiff
-    input = master.i
-    csvdiff = master_out_storage_0002.csv
+    input = parent.i
+    csvdiff = parent_out_storage_0002.csv
 
     requirement = "The system shall support the collection of stochastic data from multiple "
                   "sub-applications."

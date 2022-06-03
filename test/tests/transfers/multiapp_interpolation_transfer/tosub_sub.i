@@ -12,15 +12,15 @@
 []
 
 [AuxVariables]
-  [./from_master]
+  [./from_parent]
   [../]
-  [./elemental_from_master]
+  [./elemental_from_parent]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./radial_from_master]
+  [./radial_from_parent]
   [../]
-  [./radial_elemental_from_master]
+  [./radial_elemental_from_parent]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -29,15 +29,15 @@
   [../]
   [./disp_y]
   [../]
-  [./displaced_target_from_master]
+  [./displaced_target_from_parent]
   [../]
-  [./displaced_source_from_master]
+  [./displaced_source_from_parent]
   [../]
-  [./elemental_from_master_elemental]
+  [./elemental_from_parent_elemental]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./nodal_from_master_elemental]
+  [./nodal_from_parent_elemental]
   [../]
 []
 

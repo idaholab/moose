@@ -4,7 +4,7 @@
     # this provide an example. It is an error because the CSVReader will need to override the
     # spatialValue method.
     type = RunException
-    input = master.i
+    input = parent.i
     expect_err = 'data does not satisfy the Spatial UserObject interface!'
 
     issues = '#9860'

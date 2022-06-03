@@ -4,9 +4,9 @@
 
   [./test_stateful_subcycle]
     type = 'CSVDiff'
-    input = 'material_sub_app_test_master.i'
-    csvdiff = 'material_sub_app_test_master_out_sub0.csv'
+    input = 'material_sub_app_test_parent.i'
+    csvdiff = 'material_sub_app_test_parent_out_sub0.csv'
 
-    requirement = "The system shall support executing sub-applications that operate with smaller time steps then the master application that include material properties that are based on previous time steps."
+    requirement = "The system shall support executing sub-applications that operate with smaller time steps then the parent application that include material properties that are based on previous time steps."
   [../]
 []

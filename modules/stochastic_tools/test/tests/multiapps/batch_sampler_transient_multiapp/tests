@@ -8,18 +8,18 @@
 
     [normal]
       type = CSVDiff
-      input = master_transient.i
+      input = parent_transient.i
       cli_args = MultiApps/runner/mode=normal
-      csvdiff = 'master_transient_out_storage_0000.csv master_transient_out_storage_0001.csv '
-                'master_transient_out_storage_0002.csv master_transient_out_storage_0003.csv'
+      csvdiff = 'parent_transient_out_storage_0000.csv parent_transient_out_storage_0001.csv '
+                'parent_transient_out_storage_0002.csv parent_transient_out_storage_0003.csv'
 
       detail = 'with individual sub-applications,'
     []
     [batch]
       type = CSVDiff
-      input = master_transient.i
-      csvdiff = 'master_transient_out_storage_0000.csv master_transient_out_storage_0001.csv '
-                'master_transient_out_storage_0002.csv master_transient_out_storage_0003.csv'
+      input = parent_transient.i
+      csvdiff = 'parent_transient_out_storage_0000.csv parent_transient_out_storage_0001.csv '
+                'parent_transient_out_storage_0002.csv parent_transient_out_storage_0003.csv'
       prereq = transient/normal
       max_parallel = 5
 
@@ -28,7 +28,7 @@
   []
   [mode_error]
     type = RunException
-    input = master_transient.i
+    input = parent_transient.i
     cli_args = MultiApps/runner/mode=batch-reset
     expect_err = "The supplied mode, 'batch-reset', currently"
     requirement = "The SamplerTransientMultiApp object shall error if the 'batch-reset' mode is "

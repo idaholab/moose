@@ -4,8 +4,8 @@
 
   [to_multiapp_test]
     type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out_sub0.e master_out_sub1.e'
+    input = 'parent.i'
+    exodiff = 'parent_out_sub0.e parent_out_sub1.e'
 
     requirement = "The system shall include the ability to transfer a field variable sampled at a "
                   "point to populate a field variable on the sub-application with the supplied "
@@ -14,8 +14,8 @@
 
   [array_test]
     type = 'Exodiff'
-    input = 'master_array.i'
-    exodiff = 'master_array_out_pp_sub00.e master_array_out_pp_sub01.e master_array_out_pp_sub10.e master_array_out_pp_sub11.e'
+    input = 'parent_array.i'
+    exodiff = 'parent_array_out_pp_sub00.e parent_array_out_pp_sub01.e parent_array_out_pp_sub10.e parent_array_out_pp_sub11.e'
 
     requirement = "The system shall include the ability to transfer a component of an array field variable sampled at a "
                   "point to post processing variable on the sub-application."
@@ -26,24 +26,24 @@
                   "point to post processing variable on the sub-application"
     [pp_test]
       type = 'Exodiff'
-      input = 'pp_master.i'
-      exodiff = 'pp_master_out_pp_sub0.e pp_master_out_pp_sub1.e'
+      input = 'pp_parent.i'
+      exodiff = 'pp_parent_out_pp_sub0.e pp_parent_out_pp_sub1.e'
 
       detail = "from a linear Lagrange source variable and"
     []
     [monomial_to_sub_pp]
       type = 'Exodiff'
-      input = 'master_quad.i'
-      exodiff = 'master_quad_out.e master_quad_out_quad0.e master_quad_out_quad1.e '
-                'master_quad_out_quad2.e master_quad_out_quad3.e'
+      input = 'parent_quad.i'
+      exodiff = 'parent_quad_out.e parent_quad_out_quad0.e parent_quad_out_quad1.e '
+                'parent_quad_out_quad2.e parent_quad_out_quad3.e'
 
       detail = "from a constant monomial source variable and"
     []
     [finite_volume]
       type = 'Exodiff'
-      input = 'master_fv.i'
-      exodiff = 'master_fv_out_sub0.e master_fv_out_sub1.e '
-                'master_fv_out_pp_sub0.e master_fv_out_pp_sub1.e'
+      input = 'parent_fv.i'
+      exodiff = 'parent_fv_out_sub0.e parent_fv_out_sub1.e '
+                'parent_fv_out_pp_sub0.e parent_fv_out_pp_sub1.e'
 
       detail = "from a finite volume constant monomial source variable."
       ad_indexing_type = 'global'
@@ -52,7 +52,7 @@
 
   [silence_barriers]
     type = 'RunApp'
-    input = 'master.i'
+    input = 'parent.i'
     prereq = 'to_multiapp_test'
     absent_out = "Jobs complete:"
 

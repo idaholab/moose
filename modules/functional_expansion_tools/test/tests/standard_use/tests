@@ -8,17 +8,17 @@
     min_threads = 2
     petsc_version = '>=3.7.6' #This test times out on Falcon on PETSc 3.6.3 with 2 threads
     group = functional_expansion_tools
-    requirement = 'The functional_expansion_tools module shall be capable of coupling interface data between a master and sub app in 2D.'
+    requirement = 'The functional_expansion_tools module shall be capable of coupling interface data between a parent and sub app in 2D.'
   [../]
 
 
   [./volume_coupling]
-    # This test couples a master and sub app in 1D for a light but fully-functional volumetric test
+    # This test couples a parent and sub app in 1D for a light but fully-functional volumetric test
     type = Exodiff
     input = volume_coupled.i
     exodiff = volume_coupled_out.e
     group = functional_expansion_tools
-    requirement = 'The functional_expansion_tools module shall be capable of coupling volumetric data between a master and sub app in 1D.'
+    requirement = 'The functional_expansion_tools module shall be capable of coupling volumetric data between a parent and sub app in 1D.'
   [../]
 
   [./volume_coupling_custom_norm]
@@ -27,7 +27,7 @@
     exodiff = volume_coupled_out.e
     group = functional_expansion_tools
     prereq = 'volume_coupling'
-    requirement = 'The functional_expansion_tools module shall be capable of coupling volumetric data between a master and sub app in 1D using a custom norm.'
+    requirement = 'The functional_expansion_tools module shall be capable of coupling volumetric data between a parent and sub app in 1D using a custom norm.'
   [../]
 
 

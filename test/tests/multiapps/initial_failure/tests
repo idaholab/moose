@@ -4,7 +4,7 @@
 
   [./initial_multiapp_failure]
     type = 'RunException'
-    input = 'master.i'
+    input = 'parent.i'
     expect_err = 'failed to converge initial MultiApp'
 
     requirement = 'The system shall error if the execution of a sub-application fails during the initial execution.'

@@ -82,6 +82,6 @@
 
     requirement = "The mechanics system shall correctly predict 1D wave propagation in a linear "
                   "elastic material with Rayleigh damping when using the dynamic tensor mechanics "
-                  "master action."
+                  "parent action."
   []
 []

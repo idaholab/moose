@@ -3,39 +3,39 @@
   issues = '#9115'
   [./standard]
     type = 'Exodiff'
-    input = 'picard_master.i'
-    exodiff = 'picard_master_out.e'
+    input = 'picard_parent.i'
+    exodiff = 'picard_parent_out.e'
     rel_err = 5e-5  # Loosened for recovery tests
     requirement = 'The system shall provide an ability to perform iterative solves with sub-applications.'
   [../]
 
-  [./master_relaxed]
+  [./parent_relaxed]
     type = 'Exodiff'
-    input = 'picard_relaxed_master.i'
-    exodiff = 'picard_relaxed_master_out.e'
+    input = 'picard_relaxed_parent.i'
+    exodiff = 'picard_relaxed_parent_out.e'
     rel_err = 5e-5  # Loosened for recovery tests
     requirement = 'The system shall provide an ability to relax solutions with iterative solves with sub-applications.'
   [../]
 
   [./sub_relaxed]
     type = 'Exodiff'
-    input = 'sub_relaxed_master.i'
-    exodiff = 'sub_relaxed_master_out.e'
+    input = 'sub_relaxed_parent.i'
+    exodiff = 'sub_relaxed_parent_out.e'
     rel_err = 5e-5  # Loosened for recovery tests
-    requirement = 'The system shall provide an ability to relax sub-applications solutions along with the master solution for during iterative solves.'
+    requirement = 'The system shall provide an ability to relax sub-applications solutions along with the parent solution for during iterative solves.'
   [../]
 
   [./array_relaxed]
     type = 'Exodiff'
-    input = 'picard_relaxed_array_master.i'
-    exodiff = 'picard_relaxed_array_master_out.e'
+    input = 'picard_relaxed_array_parent.i'
+    exodiff = 'picard_relaxed_array_parent_out.e'
     rel_err = 5e-5  # Loosened for recovery tests
     requirement = 'The system shall provide an ability to relax solutions of array variables with iterative solves with sub-applications.'
   [../]
 
   [./bad_relax_factor]
     type = 'RunException'
-    input = 'bad_relax_factor_master.i'
+    input = 'bad_relax_factor_parent.i'
     expect_err = 'Expression: relaxation_factor>0 & relaxation_factor<2'
     requirement = 'The system shall error if provided relaxation factor that is less than or equal to 0 or greater than or equal to 2.'
   [../]

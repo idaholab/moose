@@ -11,7 +11,7 @@
 []
 
 [AuxVariables]
-  [./from_master_app]
+  [./from_parent_app]
     order = FIRST
     family = SCALAR
   [../]
@@ -45,9 +45,9 @@
 []
 
 [Postprocessors]
-  [./from_master]
+  [./from_parent]
     type = ScalarVariable
-    variable = from_master_app
+    variable = from_parent_app
   [../]
 []
 
@@ -64,5 +64,5 @@
 
 [Outputs]
   exodus = true
-  hide = from_master_app
+  hide = from_parent_app
 []

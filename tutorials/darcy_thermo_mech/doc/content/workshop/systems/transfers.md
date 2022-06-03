@@ -1,6 +1,6 @@
 # Transfer System
 
-A system to move data to and from the "master" and "sub-applications" of a MultiApp.
+A system to move data to and from the "parent application" and "sub-applications" of a MultiApp.
 
 !---
 
@@ -28,7 +28,7 @@ each sub-application should be able to solve on its own
 - Any `UserObject` can override `Real spatialValue(Point &)` to provide a value given a point in space
 - A `UserObjectTransfer` can sample this spatially-varying data from one app and put the values into an `AuxVariable` in another
 
-!listing 3d_1d_master.i block=Transfers
+!listing 3d_1d_parent.i block=Transfers
 
 !---
 
@@ -37,6 +37,6 @@ each sub-application should be able to solve on its own
 A Postprocessor transfer allows a transfer of scalar values between applications
 
 - When transferring to a `MultiApp`, the value can either be put into a `Postprocessor` value or can be put into a constant `AuxVariable` field
-- When transferring from a `MultiApp` to the master, the value can be interpolated from all the sub-apps into an auxiliary field
+- When transferring from a `MultiApp` to the parent application, the value can be interpolated from all the sub-apps into an auxiliary field
 
-!listing multiapp_postprocessor_transfer/master.i block=Transfers
+!listing multiapp_postprocessor_transfer/parent.i block=Transfers

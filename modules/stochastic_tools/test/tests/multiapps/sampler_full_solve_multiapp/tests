@@ -4,10 +4,10 @@
 
   [full_solve]
     type = CheckFiles
-    input = master_full_solve.i
-    check_files = 'master_full_solve_out_runner0.e master_full_solve_out_runner1.e '
-                  'master_full_solve_out_runner2.e master_full_solve_out_runner3.e '
-                  'master_full_solve_out_runner4.e'
+    input = parent_full_solve.i
+    check_files = 'parent_full_solve_out_runner0.e parent_full_solve_out_runner1.e '
+                  'parent_full_solve_out_runner2.e parent_full_solve_out_runner3.e '
+                  'parent_full_solve_out_runner4.e'
 
     requirement = 'The system shall provide the ability to create a full-solve type sub-application '
                   'from sampled data from distributions.'

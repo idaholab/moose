@@ -5,36 +5,36 @@
   [group]
     requirement = "The system shall support evaluating multi-level sub-applications:"
 
-    [dt_from_master]
+    [dt_from_parent]
       type = 'Exodiff'
-      input = 'dt_from_master_master.i'
-      exodiff = 'dt_from_master_master_out.e dt_from_master_master_out_sub0.e dt_from_master_master_out_sub0_sub0.e dt_from_master_master_out_sub0_sub1.e dt_from_master_master_out_sub1.e dt_from_master_master_out_sub1_sub0.e dt_from_master_master_out_sub1_sub1.e'
+      input = 'dt_from_parent_parent.i'
+      exodiff = 'dt_from_parent_parent_out.e dt_from_parent_parent_out_sub0.e dt_from_parent_parent_out_sub0_sub0.e dt_from_parent_parent_out_sub0_sub1.e dt_from_parent_parent_out_sub1.e dt_from_parent_parent_out_sub1_sub0.e dt_from_parent_parent_out_sub1_sub1.e'
 
-      detail = "where the master application controls the time step for all sub-applications;"
+      detail = "where the parent application controls the time step for all sub-applications;"
     []
-    [time_dt_from_master]
+    [time_dt_from_parent]
       type = 'Exodiff'
-      input = 'time_dt_from_master_master.i'
-      exodiff = 'time_dt_from_master_master_out.e time_dt_from_master_master_out_sub0.e time_dt_from_master_master_out_sub0_sub0.e time_dt_from_master_master_out_sub0_sub1.e time_dt_from_master_master_out_sub1.e time_dt_from_master_master_out_sub1_sub0.e time_dt_from_master_master_out_sub1_sub1.e'
+      input = 'time_dt_from_parent_parent.i'
+      exodiff = 'time_dt_from_parent_parent_out.e time_dt_from_parent_parent_out_sub0.e time_dt_from_parent_parent_out_sub0_sub0.e time_dt_from_parent_parent_out_sub0_sub1.e time_dt_from_parent_parent_out_sub1.e time_dt_from_parent_parent_out_sub1_sub0.e time_dt_from_parent_parent_out_sub1_sub1.e'
       abs_zero = 5e-7
       use_old_floor = true
 
-      detail = "where the master application controls the time step via a function for all sub-applications; and"
+      detail = "where the parent application controls the time step via a function for all sub-applications; and"
     []
     [dt_from_sub]
       type = 'Exodiff'
-      input = 'dt_from_sub_master.i'
-      exodiff = 'dt_from_sub_master_out.e dt_from_sub_master_out_sub0.e dt_from_sub_master_out_sub0_sub0.e dt_from_sub_master_out_sub0_sub1.e dt_from_sub_master_out_sub1.e dt_from_sub_master_out_sub1_sub0.e dt_from_sub_master_out_sub1_sub1.e'
+      input = 'dt_from_sub_parent.i'
+      exodiff = 'dt_from_sub_parent_out.e dt_from_sub_parent_out_sub0.e dt_from_sub_parent_out_sub0_sub0.e dt_from_sub_parent_out_sub0_sub1.e dt_from_sub_parent_out_sub1.e dt_from_sub_parent_out_sub1_sub0.e dt_from_sub_parent_out_sub1_sub1.e'
 
-      detail = "where the sub-application controls the time step for the master application,"
+      detail = "where the sub-application controls the time step for the parent application,"
     []
   []
 
   [console_to_file]
     type = 'CheckFiles'
-    input = 'time_dt_from_master_master.i'
-    check_files = 'time_dt_from_master_master_out.txt time_dt_from_master_master_out_sub0_console.txt time_dt_from_master_master_out_sub0_sub0_console.txt time_dt_from_master_master_out_sub0_sub1_console.txt time_dt_from_master_master_out_sub1_console.txt time_dt_from_master_master_out_sub1_sub0_console.txt time_dt_from_master_master_out_sub1_sub1_console.txt'
-    prereq = 'group/time_dt_from_master'
+    input = 'time_dt_from_parent_parent.i'
+    check_files = 'time_dt_from_parent_parent_out.txt time_dt_from_parent_parent_out_sub0_console.txt time_dt_from_parent_parent_out_sub0_sub0_console.txt time_dt_from_parent_parent_out_sub0_sub1_console.txt time_dt_from_parent_parent_out_sub1_console.txt time_dt_from_parent_parent_out_sub1_sub0_console.txt time_dt_from_parent_parent_out_sub1_sub1_console.txt'
+    prereq = 'group/time_dt_from_parent'
 
     requirement = "The system shall support writing screen output from multi-level sub-applications to a file."
   []

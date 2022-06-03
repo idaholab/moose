@@ -76,11 +76,11 @@
     type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
   [../]
-  [master_time]
+  [parent_time]
     type = Receiver
     execute_on = 'timestep_end'
   []
-  [master_dt]
+  [parent_dt]
     type = Receiver
     execute_on = 'timestep_end'
   []
@@ -143,13 +143,13 @@
   [matser_time_to_sub]
     type = MultiAppPostprocessorTransfer
     from_postprocessor = time
-    to_postprocessor = master_time
+    to_postprocessor = parent_time
     to_multi_app = sub2
   []
-  [master_dt_to_sub]
+  [parent_dt_to_sub]
     type = MultiAppPostprocessorTransfer
     from_postprocessor = dt
-    to_postprocessor = master_dt
+    to_postprocessor = parent_dt
     to_multi_app = sub2
   []
 []

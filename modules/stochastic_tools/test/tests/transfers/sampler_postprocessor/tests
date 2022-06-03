@@ -4,9 +4,9 @@
 
   [sobol_from_multiapp]
     type = CSVDiff
-    input = master.i
-    csvdiff = 'master_out_storage_0001.csv master_out_storage_0002.csv master_out_storage_0003.csv '
-              'master_out_storage_0004.csv master_out_storage_0005.csv'
+    input = parent.i
+    csvdiff = 'parent_out_storage_0001.csv parent_out_storage_0002.csv parent_out_storage_0003.csv '
+              'parent_out_storage_0004.csv parent_out_storage_0005.csv'
 
     requirement = "The system shall support the ability to transfer a single value from each "
                   "sub-application for a set of stochastic data."
@@ -14,7 +14,7 @@
 
   [invalid_sub_pp_name]
     type = RunException
-    input = master.i
+    input = parent.i
     cli_args = Transfers/data/from_postprocessor=wrong
     expect_err = "Unknown postprocesssor name 'wrong' on sub-application 'sub'"
 

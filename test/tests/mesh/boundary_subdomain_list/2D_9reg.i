@@ -35,7 +35,7 @@
     boundary = interface
     interface_boundary = true
   []
-  [interface_master]
+  [interface_parent]
     type = SubdomainBoundaryConnectivity
     boundary = interface
   []
@@ -53,7 +53,7 @@
     block = 2
     interface_boundary = true
   []
-  [block_2_master]
+  [block_2_parent]
     type = SubdomainBoundaryConnectivity
     block = 2
   []

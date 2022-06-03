@@ -6,7 +6,7 @@
 
     [with_multi]
       type = 'RunApp'
-      input = 'master.i'
+      input = 'parent.i'
       expect_out = 'MooseTestApp (sub_app0)'
       match_literal = true
 
@@ -14,7 +14,7 @@
     []
     [with_sub_cycle]
       type = 'RunApp'
-      input = 'master_sub_cycle.i'
+      input = 'parent_sub_cycle.i'
       expect_out = 'MooseTestApp (sub_app0)'
       match_literal = true
 
@@ -22,7 +22,7 @@
     []
     [with_full]
       type = 'RunApp'
-      input = 'master_full.i'
+      input = 'parent_full.i'
       expect_out = 'MooseTestApp (full_solve0)'
       match_literal = true
 

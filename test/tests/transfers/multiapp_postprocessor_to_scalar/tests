@@ -3,24 +3,24 @@
   design = 'MultiAppPostprocessorToAuxScalarTransfer.md'
 
   [transfer]
-    requirement = "The system shall support the transfer of data between a master and "
+    requirement = "The system shall support the transfer of data between a parent and "
                   "sub-applications for scalar unknowns and postprocessing data:"
-    [master_to_sub]
+    [parent_to_sub]
       type = 'Exodiff'
-      input = 'master.i'
-      exodiff = 'master_out_pp_sub0.e master_out_pp_sub1.e'
+      input = 'parent.i'
+      exodiff = 'parent_out_pp_sub0.e parent_out_pp_sub1.e'
       max_threads = 1 # Diffs with threads
 
-      detail = "from the master application to the sub-applications and"
+      detail = "from the parent application to the sub-applications and"
     []
 
-    [sub_to_master]
+    [sub_to_parent]
       type = 'Exodiff'
-      input = 'master2.i'
-      exodiff = 'master2_out.e'
+      input = 'parent2.i'
+      exodiff = 'parent2_out.e'
       max_threads = 1 # Diffs with threads
 
-      detail = "to the master application from the sub-applications."
+      detail = "to the parent application from the sub-applications."
     []
   []
 
@@ -28,17 +28,17 @@
     requirement = "The system shall error during the transfer of scalar variable and postprocessor "
                   "data if the number of sub-applications differs from the order of the scalar "
                   "variable if"
-    [sub_to_master_wrong_order]
+    [sub_to_parent_wrong_order]
       type = 'RunException'
-      input = 'master2_wrong_order.i'
+      input = 'parent2_wrong_order.i'
       expect_err = "The number of sub apps \(3\) must be equal to the order of the scalar "
                    "AuxVariable \(4\)"
 
       detail = "the order is too large and"
     []
-    [sub_to_master_wrong_positions]
+    [sub_to_parent_wrong_positions]
       type = 'RunException'
-      input = 'master2_wrong_positions.i'
+      input = 'parent2_wrong_positions.i'
       expect_err = "The number of sub apps \(1\) must be equal to the order of the scalar "
                    "AuxVariable \(3\)"
 

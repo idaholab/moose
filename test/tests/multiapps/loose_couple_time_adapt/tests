@@ -3,7 +3,7 @@
   design = 'syntax/MultiApps/index.md'
 
   [group]
-    requirement = "The system shall support the ability for a sub-application to adaptive modify the time step of the master application when the sub-application operates at the"
+    requirement = "The system shall support the ability for a sub-application to adaptive modify the time step of the parent application when the sub-application operates at the"
 
     [begin]
       type = 'Exodiff'
