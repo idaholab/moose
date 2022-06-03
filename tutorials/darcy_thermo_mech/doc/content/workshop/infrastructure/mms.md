@@ -37,7 +37,7 @@ Need to solve:  $-\nabla \cdot \nabla u - f = 0$
 
 ```bash
 cd ~/projects/moose/examples/ex14_pps
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 ./ex14-opt -i ex14.i
 ```
 

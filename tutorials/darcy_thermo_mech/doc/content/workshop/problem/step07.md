@@ -10,13 +10,13 @@
 
 !---
 
-## Step 7a: Run and Visualize
+## Step 7a: Run
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_adaptivity
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
-~/projects/moose/python/peacock/peacock -i step7a_coarse.i
+../darcy_thermo_mech-opt -i step7a_coarse.i
 ```
 
 !---
@@ -27,13 +27,13 @@ cd problems
 
 !---
 
-## Step 7b: Run and Visualize
+## Step 7b: Run
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_adaptivity
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
-~/projects/moose/python/peacock/peacock -i step7b_fine.i
+../darcy_thermo_mech-opt -i step7b_fine.i
 ```
 
 !---
@@ -44,13 +44,13 @@ cd problems
 
 !---
 
-## Step 7c: Run and Visualize
+## Step 7c: Run
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step07_adaptivity
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
-~/projects/moose/python/peacock/peacock -i step7a_adapt.i
+../darcy_thermo_mech-opt -i step7a_adapt.i
 ```
 
 !---

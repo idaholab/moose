@@ -1,10 +1,13 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
-  ymax = 0.1
-  xmax = 0.1
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    ny = 10
+    ymax = 0.1
+    xmax = 0.1
+  []
+
   uniform_refine = 0
 []
 

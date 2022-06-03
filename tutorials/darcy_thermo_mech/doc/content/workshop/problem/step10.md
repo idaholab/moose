@@ -26,13 +26,13 @@ Run full simulation but compute thermal conductivity and porosity from micro-str
 
 !---
 
-## Step 10: Run and Visualize Micro-scale
+## Step 10: Run Micro-scale
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step10_multiapps
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
-~/projects/moose/python/peacock/peacock -i step10_micro.i
+../darcy_thermo_mech-opt  -i step10_micro.i
 ```
 
 !---
@@ -61,13 +61,13 @@ cd problems
 
 !---
 
-## Step 10: Run and Visualize Multi-scale
+## Step 10: Run Multi-scale
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step10_multiapps
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
-~/projects/moose/python/peacock/peacock -i step10.i
+../darcy_thermo_mech-opt -i step10.i
 ```
 
 !---

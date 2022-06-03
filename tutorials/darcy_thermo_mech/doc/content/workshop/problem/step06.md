@@ -125,13 +125,13 @@ row 4: (0, 0.401973)  (1, 0.)  (2, 0.00397056)  (3, 0.)  (4, -6.43156)  (5, 0.) 
 
 !---
 
-## Step 6a: Run and Visualize with Peacock
+## Step 6a: Run
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_coupled_darcy_heat_conduction
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
-~/projects/moose/python/peacock/peacock -i step6a_coupled.i
+../darcy_thermo_mech-opt -i step6a_coupled.i
 ```
 
 !---
@@ -161,13 +161,13 @@ as a function of temperature.
 
 !---
 
-## Step 6b: Run and Visualize with Peacock
+## Step 6b: Run
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step06_coupled_darcy_heat_conduction
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
-~/projects/moose/python/peacock/peacock -i step6b_transient_inflow.i
+../darcy_thermo_mech-opt -i step6b_transient_inflow.i
 ```
 
 !---

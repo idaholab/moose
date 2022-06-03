@@ -46,32 +46,17 @@ permeability and viscosity.
 
 !---
 
-## Step 2: Run and Visualize with Peacock
+## Step 2: Run
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step02_darcy_pressure
-make -j 12 # use number of processors for you system
-cd problems
-~/projects/moose/python/peacock/peacock -i step2.i
-```
-
-!---
-
-## Step 2: Run via Command-line
-
-```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step02_darcy_pressure
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step2.i
 ```
 
 !---
 
-## Step 2: Visualize Result
-
-```bash
-~/projects/moose/python/peacock/peacock -r step2_out.e
-```
+## Step 2: Result
 
 !media darcy_thermo_mech/step02_result.png

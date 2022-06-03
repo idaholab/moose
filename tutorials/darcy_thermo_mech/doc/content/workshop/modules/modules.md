@@ -51,7 +51,7 @@ separate app [!citep](Wendt2018a,Wendt2017c,Kerby2017).
 Basic utilities for solving the transient heat conduction equation:
 
 !equation
-\rho c_p \pd{T}{t} - \nabla\cdot k \nabla T - s = 0
+\rho c_p \pf{T}{t} - \nabla\cdot k \nabla T - s = 0
 
 !---
 
@@ -61,7 +61,7 @@ The level set module provides basic functionality to solve the level set equatio
 simply the multi-dimensional advection equation:
 
 !equation
-\pd{u}{t} + \vec{v}\cdot\nabla u = 0
+\pf{u}{t} + \vec{v}\cdot\nabla u = 0
 
 !---
 

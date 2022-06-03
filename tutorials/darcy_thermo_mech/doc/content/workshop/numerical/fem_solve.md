@@ -118,89 +118,6 @@ J_{ij}(\vec{u}_n) = \frac{\partial \vec{R}_i(\vec{u}_n)}{\partial u_j}
 
 !---
 
-## Jacobian Free Newton Krylov (JFNK)
-
-$\mathbf{J}(\vec{u}_n)\delta \vec{u}_{n+1} = -\vec{R}(\vec{u}_n)$ is a linear system solved
-during each Newton step.
-
-In MOOSE an iterative Krylov method is used to produce a sequence of iterates
-$(\delta \vec{u}_{n+1})_k \rightarrow \delta \vec{u}_{n+1}$, $k=1,2,\ldots$
-
-- $\mathbf{J}(\vec{u}_n)$ and $-\vec{R}(\vec{u}_n)$ remain fixed during the iterative process.
-
-The "linear residual" at step $k$ is defined as:
-
-!equation id=jfnk_linear_residual
-\vec{\rho}_k \equiv \mathbf{J}(\vec{u}_n)(\delta \vec{u}_{n+1})_k + \vec{R}(\vec{u}_n)
-
-MOOSE prints the norm of this vector, $\|\vec{\rho}_k\|$, at each linear iteration and the
-"nonlinear residual" printed by MOOSE is $\|\vec{R}(\vec{u}_n)\|$.
-
-!---
-
-Krylov methods construct a subspace ($\mathcal{K}_k$) for the iterate $k$:
-
-!equation
-\mathcal{K}_k = \text{span}\{ \vec{b}, \mathbf{A}\vec{b}, \mathbf{A}^2\vec{b}, \ldots, \mathbf{A}^{k-1}\vec{b}\},
-
-where $\mathbf{A} \equiv \mathbf{J}(\vec{u}_n)$ and $\vec{b} \equiv -\vec{R}(\vec{u}_n)$.
-
-Different Krylov methods produce the $(\delta \vec{u}_{n+1})_k$ iterates in different ways:
-
-- Conjugate Gradients: $\vec{\rho}_k$ orthogonal to $\mathcal{K}_k$.
-- GMRES/MINRES: $\vec{\rho}_k$ has minimum norm for $(\delta \vec{u}_{n+1})_k$ in $\mathcal{K}_k$.
-- Biconjugate Gradients: $\vec{\rho}_k$ is orthogonal to $\mathcal{K}_k((\mathbf{J}(\vec{u}_n))^T)$
-
-The important part is that $\mathbf{J}$ is never explicitly needed to construct the subspace, only
-the action of $\mathbf{J}$ on a vector is required.
-
-!---
-
-This action can be approximated by:
-
-!equation id=jfnk_jacobian
-\mathbf{J}\vec{v} \approx \frac{\vec{R}(\vec{u} + \epsilon\vec{v}) - \vec{R}(\vec{u})}{\epsilon}
-
-This form has many advantages:
-
-- No need to do analytic derivatives to form $\mathbf{J}$
-- No time needed to compute $\mathbf{J}$ (just residual computations)
-- No space needed to store $\mathbf{J}$
-
-!---
-
-## Preconditioned JFNK
-
-Krylov methods need preconditioning to be efficient (or even effective!),
-see [!citet](knoll2004jacobian).
-
-- Reduces the total number of linear iterations
-- Krylov methods, in theory, converge in the number of linear iterations equal to the number of unknowns in the system
-
-Even though the Jacobian is never formed, JFNK methods still require preconditioning.
-
-!---
-
-When using right preconditioning:
-
-!equation
-\mathbf{J} (\vec{u}_i) \mathbf{M}^{-1} (\mathbf{M}\delta \vec{u}_{i+1}) = -\vec{R}(\vec{u}_i)
-
-$\mathbf{M}$ symbolically represents the preconditioning matrix or process, and with GMRES only
-the action of $\mathbf{M}^{-1}$ on a vector is required.
-
-When right-preconditioned, [jfnk_linear_residual] becomes:
-
-!equation id=pjfnk_linear_residual
-\vec{\rho}_k \equiv \mathbf{J} (\vec{u}_i) \mathbf{M}^{-1} (\mathbf{M}\delta \vec{u}_{i+1})_k + \vec{R}(\vec{u}_i),
-
-and [jfnk_jacobian] becomes:
-
-!equation id=pjfnk_jacobian
-\mathbf{J} (\vec{u}_i) \mathbf{M}^{-1}\vec{v} \approx \frac{\vec{R}(\vec{u}_i + \epsilon \mathbf{M}^{-1}\vec{v}) - \vec{R}(\vec{u}_i)}{\epsilon}
-
-!---
-
 ## MOOSE Solve Types
 
 The solve type is specified in the `[Executioner]` block within the input file:
@@ -224,8 +141,8 @@ Available options include:
 The `Kernel` method `computeQpResidual` is called to compute
 $\vec{R}(\vec{u}_n)$ during the nonlinear step ([newton]).
 
-During each linear step of [jfnk_linear_residual] the `computeQpResidual` method is called to
-compute $\mathbf{J}\vec{v}$ using [jfnk_jacobian].
+During each linear step of JFNK, the `computeQpResidual` method is called
+to approximate the action of the Jacobian on the Krylov vector.
 
 !---
 
@@ -234,10 +151,9 @@ compute $\mathbf{J}\vec{v}$ using [jfnk_jacobian].
 The `Kernel` method `computeQpResidual` is called to compute
 $\vec{R}(\vec{u}_n)$ during the nonlinear step ([newton]).
 
-During each linear step of [pjfnk_linear_residual] the `computeQpResidual` method is called to
-compute $\mathbf{J} (\vec{u}_i) \mathbf{M}^{-1}\vec{v}$ using [pjfnk_jacobian]. The
-`computeQpJacobian` and `computeQpOffDiagJacobian` methods are used to compute values for the
-preconditioning matrix $\mathbf{M}$.
+During each linear step of PJFNK, the `computeQpResidual` method is called to approximate the action
+of the Jacobian on the Krylov vector. The `computeQpJacobian` and `computeQpOffDiagJacobian` methods
+are used to compute values for the preconditioning matrix.
 
 !---
 
@@ -247,10 +163,9 @@ The `Kernel` method `computeQpResidual` is called to compute $\vec{R}(\vec{u}_n)
 nonlinear step ([newton]).
 
 The `computeQpJacobian` and `computeQpOffDiagJacobian` methods are used to compute the
-preconditioning matrix $\mathbf{M}$. It is assumed that $\mathbf{M} = \mathbf{J}$, thus the
-approximation in [pjfnk_jacobian] is =not= needed allowing for the
-residual and Jacobian calculations to remain constant during the linear iterations in
-[pjfnk_linear_residual].
+preconditioning matrix. It is assumed that the preconditioning matrix is the
+Jacobian matrix, thus the residual and Jacobian calculations are able to remain constant
+during linear iterations.
 
 !---
 

@@ -3,12 +3,14 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  ny = 200
-  nx = 10
-  ymax = 0.304 # Length of test chamber
-  xmax = 0.0257 # Test chamber radius
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    ny = 200
+    nx = 10
+    ymax = 0.304 # Length of test chamber
+    xmax = 0.0257 # Test chamber radius
+  []
 []
 
 [Variables]

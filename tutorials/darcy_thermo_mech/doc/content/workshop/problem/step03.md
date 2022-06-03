@@ -66,33 +66,18 @@ it must be updated to consume the newly created material properties.
 
 !---
 
-## Step 3: Run and Visualize with Peacock
+## Step 3: Run
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step03_darcy_material
-make -j 12 # use number of processors for you system
-cd problems
-~/projects/moose/python/peacock/peacock -i step3.i
-```
-
-!---
-
-## Step 3: Run via Command-line
-
-```bash
-cd ~/projects/moose/tutorials/darcy-thermo_mech/step03_darcy_material
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
 ../darcy_thermo_mech-opt -i step3.i
 ```
 
 !---
 
-## Step 3: Visualize Result
-
-```bash
-~/projects/moose/python/peacock/peacock -r step3_out.e
-```
+## Step 3: Result
 
 !media darcy_thermo_mech/step03_result.png
 
@@ -110,6 +95,6 @@ Update the input file to vary the sphere size from 1 to 3 along the length of th
 
 !---
 
-## Step 3b: Visualize Result
+## Step 3b: Result
 
 !media darcy_thermo_mech/step03b_result.png
