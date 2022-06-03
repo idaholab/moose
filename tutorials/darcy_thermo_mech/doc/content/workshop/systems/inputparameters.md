@@ -140,16 +140,15 @@ Syntax: [warp.povusers.org/FunctionParser/fparser.html](http://warp.povusers.org
 
 Each application  is capable of generating documentation from the `validParams` functions.
 
-+Option 1+: All parameter documentation and class description is displayed in MOOSE GUI "peacock"\\
-+Option 2+: Command line `--dump`
++Option 1+: Command line `--dump`
 
 - `--dump [optional search string]`
 - the search string may contain wildcard characters
 - searches both block names and parameters
 
-+Option 3+: Command line `--show-input` generates a tree based on your input file\\
++Option 2+: Command line `--show-input` generates a tree based on your input file\\
 
-+Option 4+: [mooseframework.org/syntax](syntax/index.md alternative=https://mooseframework.org/syntax)
++Option 3+: [mooseframework.org/syntax](syntax/index.md alternative=https://mooseframework.org/syntax)
 
 !---
 
@@ -172,7 +171,7 @@ Other supported parameter types include:
 
 !---
 
-MOOSE uses a large number of string types to make Peacock more context-aware. All of these types can
+MOOSE uses a large number of string types to make `InputParameters` more context-aware. All of these types can
 be treated just like strings, but will cause compile errors if mixed improperly in the template
 functions.
 
@@ -237,8 +236,7 @@ InputParameters MyObject::validParams()
 }
 ```
 
-Peacock will create a drop box when using `MooseEnum` and if an invalid value is supplied, an
-error message is provided.
+If an invalid value is supplied, an error message is provided.
 
 !---
 

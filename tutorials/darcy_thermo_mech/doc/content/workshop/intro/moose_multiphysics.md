@@ -105,7 +105,7 @@ VectorPostprocessors\\
 
 ## Finite-Element Reactor Fuel Simulation
 
-!media darcy_thermo_mech/simulator.m4v style=width:70%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/simulator.mp4 style=width:70%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -114,21 +114,25 @@ VectorPostprocessors\\
 !style halign=center
 Chemical Reactions\\
 Contact\\
+Electromagnetics (coming soon)\\
 External PETSc Solver\\
 Fluid Properties\\
 Function Expansion Tools\\
+Geochemistry\\
 Heat Conduction\\
 Level Set\\
 Navier Stokes\\
+Peridynamics\\
 Phase Field\\
 Porous Flow\\
+Ray Tracing\\
 rDG\\
+Reactor\\
 Stochastic Tools\\
 Tensor (solid) Mechanics\\
-XFEM\\
-Shallow Water (work in progress)\\
-Ray Tracing (work in progress)
+Thermal Hydraulics\\
+XFEM
 
 !---
 
-!media darcy_thermo_mech/moose_herd_2019.png style=margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_herd_2022.png style=margin-left:auto;margin-right:auto;display:block;

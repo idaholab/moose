@@ -14,6 +14,7 @@ import datetime
 import re
 import numpy
 import matplotlib.pyplot as plt
+import matplotlib
 import multiprocessing
 import argparse
 import itertools
@@ -22,8 +23,8 @@ import os
 
 ##############################
 # Favorite plots
-# $ ./git_commit_history.py --open-source --moose-dev --unique --output=contributors.pdf
-# $ ./git_commit_history.py --additions --moose-dev --days=7 --open-source --output=additions.pdf
+# $ ./git_commit_history.py --open-source --authors=all --unique --disable-legend --output=contributors.pdf
+# $ ./git_commit_history.py --additions --authors=all --days=7 --open-source  --disable-legend --output=additions.pdf
 ##############################
 
 from matplotlib import rc
@@ -70,6 +71,9 @@ def getContributors(options, **kwargs):
     if num_authors == 'moose':
         contributors = ['Derek Gaston', 'Cody Permann', 'David Andrs', 'John W. Peterson', 'Andrew E. Slaughter', 'Brain Alger', 'Fande Kong', 'Robert Carlsen', 'Alex Lindsay', 'Jason M. Miller']
         contributors += ['Other (' + str(n-len(contributors)) + ')']
+
+    elif num_authors == 'all':
+        contributors = ['All']
 
     elif num_authors:
         num_authors = int(num_authors)
@@ -187,7 +191,7 @@ if __name__ == '__main__':
 
     # Markers/colors
     marker = itertools.cycle(('o', 'v', 's', 'd'))
-    color = itertools.cycle(('g', 'r', 'b', 'c', 'm', 'y', 'k'))
+    color = itertools.cycle(('r', 'b', 'g', 'c', 'm', 'y', 'k'))
 
     # Setup authors defaults for various cases
     if options.moose_dev and options.authors:
@@ -203,7 +207,7 @@ if __name__ == '__main__':
     dates, data, contrib, contributors = getData(options)
 
     # Create the figure
-    fig, ax1 = plt.subplots()
+    fig, ax1 = plt.subplots(dpi=200)
     fig.set_facecolor([1,1,1])
     for tick in ax1.yaxis.get_ticklabels():
         tick.set_fontsize(options.font)
@@ -213,12 +217,11 @@ if __name__ == '__main__':
     # Show unique contributors
     if options.unique:
         ax2 = ax1.twinx()
-        ax2.plot(dates, contrib, linewidth=2, linestyle='-', color='k', label='Unique Contributors')
-        ax2.set_ylabel('Unique Contributors', color='k', fontsize=options.font)
-        for tick in ax2.yaxis.get_ticklabels():
+        ax2.plot(dates, contrib, linewidth=2, linestyle='-', color='royalblue', label='Unique Contributors')
+        ax2.set_ylabel('Unique Contributors', color='royalblue', fontsize=options.font)
+        for tick in ax2.xaxis.get_ticklabels() + ax2.yaxis.get_ticklabels():
             tick.set_fontsize(options.font)
-        for tick in ax2.xaxis.get_ticklabels():
-            tick.set_fontsize(options.font)
+            tick.set_color('royalblue')
 
         if options.unique_label == 'arrow':
             arrow = dict(arrowstyle="-|>", connectionstyle="arc3,rad=0.3", fc="w")
@@ -236,7 +239,7 @@ if __name__ == '__main__':
             handles[i].set_label(contributors[i])
 
     elif options.additions: #additions/deletions plot
-        y_label = 'Additions / Deletions'
+        y_label = 'Lines Added / Deleted'
         n = len(contributors)
         for i in reversed(range(n)):
             x = numpy.array(dates)
@@ -244,20 +247,25 @@ if __name__ == '__main__':
 
             if n == 1:
                 label = 'Additions'
+                alpha = 0.95
+                clr = 'b'
             else:
                 label = contributors[i] + '(Additions)'
+                alpha = 0.4
+                clr = next(color)
 
-            clr = next(color)
-            ax1.fill_between(x, 0, y, label=label, alpha=0.4)
+            ax1.fill_between(x, 0, y, label=label, alpha=alpha, color=clr)
 
             y = -numpy.log10(numpy.array(data['out'][i,:]))
 
             if n == 1:
                 label = 'Deletions'
+                clr = 'r'
             else:
                 label = contributors[i] + '(Deletions)'
-            clr = next(color)
-            ax1.fill_between(x, 0, y, label=label, alpha=0.4)
+                clr = next(color)
+
+            ax1.fill_between(x, 0, y, label=label, alpha=alpha, color=clr)
 
         fig.canvas.draw()
 
@@ -269,6 +277,7 @@ if __name__ == '__main__':
                 labels.append('$10^{}$'.format(int(value)))
 
         ax1.set_yticklabels(labels)
+        ax1.grid()
 
         if not options.disable_legend:
             handles, labels = ax1.get_legend_handles_labels()
@@ -287,8 +296,13 @@ if __name__ == '__main__':
             x = numpy.array(dates)
             y = data['commits'][i,:]
             idx = y>0
-            h = ax1.plot(x[idx], y[idx], label=contributors[i], linewidth=2, markevery=60, marker=next(marker), color=next(color))
+            clr = 'k' if len(contributors) == 1 else next(color)
+            mkr = None if len(contributors) == 1 else next(marker)
+            h = ax1.plot(x[idx], y[idx], label=contributors[i], linewidth=2, markevery=60, marker=mkr, color=clr)
             handles.append(h[0])
+
+        if len(contributors) == 1:
+            y_label = 'Total Contributions'
 
         if not options.disable_legend:
             if options.unique and options.unique_label== 'legend':
@@ -305,16 +319,16 @@ if __name__ == '__main__':
 
     # Show open-source region
     if options.open_source:
-        os = datetime.date(2014,3,10)
+        os_start = matplotlib.dates.date2num(datetime.date(2014,3,10))
         x_lim = ax1.get_xlim()
         if options.unique:
             y_lim = ax2.get_ylim()
         else:
             y_lim = ax1.get_ylim()
 
-        delta = x_lim[1] - os.toordinal()
-        plt.gca().add_patch(plt.Rectangle((os.toordinal(), y_lim[0]), delta, y_lim[1]-y_lim[0], facecolor='green', alpha=0.1))
-        ax1.annotate('Open-source ', xy=(x_lim[1] - (delta/2.), y_lim[0]), ha='center', va='bottom', size=options.font)
+        delta = x_lim[1] - os_start
+        plt.gca().add_patch(plt.Rectangle((os_start, y_lim[0]), delta, y_lim[1]-y_lim[0], facecolor='green', alpha=0.1))
+        ax1.annotate('open source ', xy=(x_lim[1] - (delta/2.), y_lim[0]), ha='center', va='bottom', size=options.font)
 
     plt.tight_layout()
     plt.savefig(options.output, format='pdf')

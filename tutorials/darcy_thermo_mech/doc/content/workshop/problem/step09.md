@@ -42,13 +42,13 @@ on the boundary and $\boldsymbol{t}$ is the prescribed traction on the boundary.
 
 !---
 
-## Step 9: Run and Visualize
+## Step 9: Run
 
 ```bash
 cd ~/projects/moose/tutorials/darcy-thermo_mech/step09_mechanics
-make -j 12 # use number of processors for you system
+make -j 12 # use number of processors for your system
 cd problems
-~/projects/moose/python/peacock/peacock -i step9.i
+../darcy_thermo_mech-opt -i step9.i
 ```
 
 !---
