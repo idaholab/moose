@@ -50,10 +50,12 @@ void
 ComputeUserObjectsThread::subdomainChanged()
 {
   // for the current thread get block objects for the current subdomain and *all* side objects
-  std::vector<UserObject *> objs;
-  querySubdomain(Interfaces::ElementUserObject | Interfaces::InternalSideUserObject |
-                     Interfaces::InterfaceUserObject,
-                 objs);
+  std::vector<UserObject *> element_objs;
+  std::vector<UserObject *> internal_side_objs;
+  std::vector<UserObject *> interface_objs;
+  querySubdomain(Interfaces::ElementUserObject, element_objs);
+  querySubdomain(Interfaces::InternalSideUserObject, internal_side_objs);
+  querySubdomain(Interfaces::InterfaceUserObject, interface_objs);
 
   std::vector<UserObject *> side_objs;
   _query.clone()
@@ -61,7 +63,13 @@ ComputeUserObjectsThread::subdomainChanged()
       .condition<AttribInterfaces>(Interfaces::SideUserObject)
       .queryInto(side_objs);
 
-  objs.insert(objs.begin(), side_objs.begin(), side_objs.end());
+  std::vector<UserObject *> objs;
+  objs.reserve(element_objs.size() + internal_side_objs.size() + interface_objs.size() +
+               side_objs.size());
+  objs.insert(objs.end(), element_objs.begin(), element_objs.end());
+  objs.insert(objs.end(), side_objs.begin(), side_objs.end());
+  objs.insert(objs.end(), internal_side_objs.begin(), internal_side_objs.end());
+  objs.insert(objs.end(), interface_objs.begin(), interface_objs.end());
 
   // collect dependenciesand run subdomain setup
   _fe_problem.subdomainSetup(_subdomain, _tid);

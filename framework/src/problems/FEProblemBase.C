@@ -3906,12 +3906,18 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
   std::vector<GeneralUserObject *> genobjs;
   query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
 
-  std::vector<UserObject *> userobjs;
+  std::vector<UserObject *> element_uos;
+  std::vector<UserObject *> side_uos;
+  std::vector<UserObject *> internal_side_uos;
+  std::vector<UserObject *> interface_uos;
+  query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject).queryInto(element_uos);
+  query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject).queryInto(side_uos);
   query.clone()
-      .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
-                                   Interfaces::InternalSideUserObject |
-                                   Interfaces::InterfaceUserObject)
-      .queryInto(userobjs);
+      .condition<AttribInterfaces>(Interfaces::InternalSideUserObject)
+      .queryInto(internal_side_uos);
+  query.clone()
+      .condition<AttribInterfaces>(Interfaces::InterfaceUserObject)
+      .queryInto(interface_uos);
 
   std::vector<UserObject *> tgobjs;
   query.clone()
@@ -3921,7 +3927,8 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
   std::vector<UserObject *> nodal;
   query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
 
-  if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty())
+  if (element_uos.empty() && side_uos.empty() && internal_side_uos.empty() &&
+      interface_uos.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty())
     return;
 
   TIME_SECTION("computeUserObjects", 1, "Computing User Objects");
@@ -3929,11 +3936,29 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
   // Start the timer here since we have at least one active user object
   std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
 
+  auto resid_setup = [](auto & uo) { uo->residualSetup(); };
+  auto jac_setup = [](auto & uo) { uo->jacobianSetup(); };
+  auto initialize = [](auto & uo) { uo->initialize(); };
+  auto loop_and_act = [](auto & uos, auto action_functor)
+  {
+    for (auto & uo : uos)
+      action_functor(uo);
+  };
+  auto loop_loop_uos_and_act =
+      [loop_and_act, &element_uos, &side_uos, &internal_side_uos, &interface_uos](
+          auto action_functor)
+  {
+    // match order from below
+    loop_and_act(side_uos, action_functor);
+    loop_and_act(internal_side_uos, action_functor);
+    loop_and_act(interface_uos, action_functor);
+    loop_and_act(element_uos, action_functor);
+  };
+
   // Perform Residual/Jacobian setups
   if (type == EXEC_LINEAR)
   {
-    for (auto obj : userobjs)
-      obj->residualSetup();
+    loop_loop_uos_and_act(resid_setup);
     for (auto obj : nodal)
       obj->residualSetup();
     for (auto obj : tgobjs)
@@ -3943,8 +3968,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
   }
   else if (type == EXEC_NONLINEAR)
   {
-    for (auto obj : userobjs)
-      obj->jacobianSetup();
+    loop_loop_uos_and_act(jac_setup);
     for (auto obj : nodal)
       obj->jacobianSetup();
     for (auto obj : tgobjs)
@@ -3953,11 +3977,11 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
       obj->jacobianSetup();
   }
 
-  for (auto obj : userobjs)
-    obj->initialize();
+  loop_loop_uos_and_act(initialize);
 
   // Execute Elemental/Side/InternalSideUserObjects
-  if (!userobjs.empty())
+  if (!element_uos.empty() || !side_uos.empty() || !internal_side_uos.empty() ||
+      !interface_uos.empty())
   {
     // non-nodal user objects have to be run separately before the nodal user objects run
     // because some nodal user objects (NodalNormal related) depend on elemental user objects :-(
