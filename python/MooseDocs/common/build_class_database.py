@@ -125,11 +125,12 @@ def _match_input(objects, filename, match):
     key = match.group('key')
 
     # AD instances are caught for both the regular and AD object. This is done because:
-    # - in all cases I know of, the AD/nonAD are from the same template
+    # - in many cases, the AD/nonAD are from the same template
     # - as they share parameters, it does not hurt to merge both documentations
-    # - only one documentation file has been created for both classes usually
-    # This would be problematic if the classes were separate and had different parameters
-    if key.replace('AD', '') in objects:
+    # - only one documentation file (the non AD) has been created for both classes usually
+    # We avoid doing this when the classes source were separate and may have different parameters
+    if key.replace('AD', '') in objects and (key not in objects or
+         (objects[key.replace('AD', '')].source == objects[key].source)):
         full_filename = os.path.relpath(filename, MooseDocs.ROOT_DIR)
         objects[key.replace('AD', '')].inputs.add(full_filename)
     if 'AD' in key and key in objects:
