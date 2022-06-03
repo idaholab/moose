@@ -383,54 +383,47 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
   // True if the postprocessors has been limited using 'outputs' parameter
   bool has_limited_pps = false;
 
-  auto query = _problem_ptr->theWarehouse().query().condition<AttribThread>(0);
+  std::vector<UserObject *> objs;
+  _problem_ptr->theWarehouse()
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribThread>(0)
+      .queryInto(objs);
 
-  auto process_objs = [&](auto interface)
+  for (const auto & obj : objs)
   {
-    std::vector<UserObject *> objs;
-    query.clone().condition<AttribInterfaces>(interface).queryInto(objs);
+    auto pps = dynamic_cast<postprocessor_type *>(obj);
+    if (!pps)
+      continue;
 
-    for (const auto & obj : objs)
+    execute_data.available.insert(pps->PPName());
+
+    // Extract the list of outputs
+    const auto & pps_outputs = pps->getOutputs();
+
+    // Check that the outputs lists are valid
+    _app.getOutputWarehouse().checkOutputs(pps_outputs);
+
+    // Check that the output object allows postprocessor output,
+    // account for "all" keyword (if it is present assume "all" was desired)
+    if (pps_outputs.find(name()) != pps_outputs.end() ||
+        pps_outputs.find("all") != pps_outputs.end())
     {
-      auto pps = dynamic_cast<postprocessor_type *>(obj);
-      if (!pps)
-        continue;
-
-      execute_data.available.insert(pps->PPName());
-
-      // Extract the list of outputs
-      const auto & pps_outputs = pps->getOutputs();
-
-      // Check that the outputs lists are valid
-      _app.getOutputWarehouse().checkOutputs(pps_outputs);
-
-      // Check that the output object allows postprocessor output,
-      // account for "all" keyword (if it is present assume "all" was desired)
-      if (pps_outputs.find(name()) != pps_outputs.end() ||
-          pps_outputs.find("all") != pps_outputs.end())
-      {
-        if (!_advanced_execute_on.contains(execute_data_name) ||
-            (_advanced_execute_on[execute_data_name].isValid() &&
-             _advanced_execute_on[execute_data_name].contains("none")))
-          mooseWarning(
-              "Postprocessor '",
-              pps->PPName(),
-              "' has requested to be output by the '",
-              name(),
-              "' output, but postprocessor output is not support by this type of output object.");
-      }
-
-      // Set the flag state for postprocessors that utilize 'outputs' parameter
-      if (!pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end())
-        has_limited_pps = true;
+      if (!_advanced_execute_on.contains(execute_data_name) ||
+          (_advanced_execute_on[execute_data_name].isValid() &&
+           _advanced_execute_on[execute_data_name].contains("none")))
+        mooseWarning(
+            "Postprocessor '",
+            pps->PPName(),
+            "' has requested to be output by the '",
+            name(),
+            "' output, but postprocessor output is not support by this type of output object.");
     }
-  };
-  process_objs(Interfaces::ElementUserObject);
-  process_objs(Interfaces::SideUserObject);
-  process_objs(Interfaces::InternalSideUserObject);
-  process_objs(Interfaces::NodalUserObject);
-  process_objs(Interfaces::InterfaceUserObject);
-  process_objs(Interfaces::GeneralUserObject);
+
+    // Set the flag state for postprocessors that utilize 'outputs' parameter
+    if (!pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end())
+      has_limited_pps = true;
+  }
 
   // Produce the warning when 'outputs' is used, but postprocessor output is disabled
   if (has_limited_pps && isParamValid(execute_on_name))
