@@ -93,6 +93,8 @@ class AppSyntaxExtension(command.CommandExtension):
         config['app_name'] = (None,
                               "The MOOSE application name (e.g., moose_test); if not provided an " \
                               "attempt will be made to determine the name.")
+        config['sources'] = ([],
+                             "List of source directories to investigate for class information.")
         config['includes'] = ([],
                               "List of include directories to investigate for class information.")
         config['inputs'] = ([],
@@ -196,7 +198,8 @@ class AppSyntaxExtension(command.CommandExtension):
 
         start = time.time()
         LOG.info("Building MOOSE class database...")
-        self._database = common.build_class_database(self['includes'], self['inputs'])
+        self._database = common.build_class_database(
+            self['sources'], self['includes'], self['inputs'])
 
         # Cache the syntax entries, search the tree is very slow
         self._cache = dict()
