@@ -91,6 +91,53 @@ private:
   int _id = -1;
 };
 
+#define clonefunc(T)                                                                               \
+  virtual std::unique_ptr<Attribute> clone() const override                                        \
+  {                                                                                                \
+    return std::unique_ptr<Attribute>(new T(*this));                                               \
+  }
+
+#define hashfunc(...)                                                                              \
+  virtual size_t hash() const override                                                             \
+  {                                                                                                \
+    size_t h = 0;                                                                                  \
+    Moose::hash_combine(h, __VA_ARGS__);                                                           \
+    return h;                                                                                      \
+  }
+
+/**
+ * This attribute describes sorting state
+ */
+class AttribSorted : public Attribute
+{
+public:
+  typedef bool Key;
+  void setFrom(const Key & k) { _val = k; }
+
+  AttribSorted(TheWarehouse & w) : Attribute(w, "sorted"), _val(false), _initd(false) {}
+  AttribSorted(TheWarehouse & w, bool is_sorted)
+    : Attribute(w, "sorted"), _val(is_sorted), _initd(true)
+  {
+  }
+  AttribSorted(const AttribSorted &) = default;
+  AttribSorted(AttribSorted &&) = default;
+  AttribSorted & operator=(const AttribSorted &) = default;
+  AttribSorted & operator=(AttribSorted &&) = default;
+
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribSorted);
+
+private:
+  bool _val;
+  bool _initd;
+};
+
+#undef clonefunc
+#undef hashfunc
+
 /// TheWarehouse uses this operator function for indexing and caching queries. So this is
 /// important even though you don't see it being called (directly) anywhere - it *IS* being used.
 bool operator==(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribute> & rhs);
@@ -258,18 +305,24 @@ public:
     /// ::Key typedef specified for each corresponding parametrized attribute.
     /// All results must be castable to the templated type T.
     template <typename T, typename... Args>
-    std::vector<T *> & queryInto(std::vector<T *> & results, Args &&... args)
+    std::vector<T *> &
+    queryInto(std::vector<T *> & results, const bool sort = true, Args &&... args)
     {
       std::lock_guard<std::mutex> lock(_cache_mutex);
       setKeysInner<0, KeyType<Attribs>...>(args...);
 
       size_t query_id;
-      const auto entry = _cache.find(_key_tup);
+      const auto entry = _cache.find(std::make_pair(sort, _key_tup));
       if (entry == _cache.end())
       {
         setAttribsInner<0, KeyType<Attribs>...>(args...);
+        // add the sort attribute. No need (I think) to clear the cache because the base query is
+        // not changing
+        _attribs.emplace_back(new AttribSorted(*_w, sort));
         query_id = _w->queryID(_attribs);
-        _cache[_key_tup] = query_id;
+        _cache[std::make_pair(sort, _key_tup)] = query_id;
+        // remove the sort attribute
+        _attribs.pop_back();
       }
       else
         query_id = entry->second;
@@ -320,7 +373,7 @@ public:
 
     KeyTuple _key_tup;
     AttribTuple _attrib_tup;
-    std::map<KeyTuple, size_t> _cache;
+    std::map<std::pair<bool, KeyTuple>, size_t> _cache;
     std::mutex _cache_mutex;
   };
 
