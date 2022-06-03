@@ -1,11 +1,11 @@
-# CoupledFuncDiffusion
+# ADCoupledFunctionDiffusion
 
-!syntax description /Kernels/CoupledFuncDiffusion
+!syntax description /Kernels/ADCoupledFunctionDiffusion
 
 ## Overview
 
 !style halign=left
-The CoupledFuncDiffusion object represents a coupled Laplacian operator term with a function coefficient for scalar field variables. This term is
+The ADCoupledFunctionDiffusion object represents a coupled Laplacian operator term with a function coefficient for scalar field variables. This term is
 
 \begin{equation}
   s f(\mathbf{r}) \nabla^2 v
@@ -21,8 +21,8 @@ where
 
 !listing scalar_complex_helmholtz.i block=Kernels/coupledLaplacian_real
 
-!syntax parameters /Kernels/CoupledFuncDiffusion
+!syntax parameters /Kernels/ADCoupledFunctionDiffusion
 
-!syntax inputs /Kernels/CoupledFuncDiffusion
+!syntax inputs /Kernels/ADCoupledFunctionDiffusion
 
-!syntax children /Kernels/CoupledFuncDiffusion
+!syntax children /Kernels/ADCoupledFunctionDiffusion

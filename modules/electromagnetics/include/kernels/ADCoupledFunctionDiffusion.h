@@ -9,27 +9,26 @@
 
 #pragma once
 
-#include "Diffusion.h"
+#include "ADKernel.h"
 
 /**
  *  Represents a coupled Laplacian term with sign and function coefficients
  */
-class CoupledFuncDiffusion : public Kernel
+class ADCoupledFunctionDiffusion : public ADKernel
 {
 public:
   static InputParameters validParams();
 
-  CoupledFuncDiffusion(const InputParameters & parameters);
+  ADCoupledFunctionDiffusion(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
+  virtual ADReal computeQpResidual() override;
 
 private:
   /// Function coefficient
   const Function & _func;
 
-  /// Scalar coefficient representing the sign of the residual contribution
+  /// Scalar coefficient determined via a MooseEnum representing the sign of the residual contribution
   const MooseEnum _sign;
 
   /// Coupled field variable

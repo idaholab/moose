@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CoupledFuncDiffusion.h"
+#include "ADCoupledFunctionDiffusion.h"
 #include "Function.h"
 
-registerMooseObject("ElectromagneticsApp", CoupledFuncDiffusion);
+registerMooseObject("ElectromagneticsApp", ADCoupledFunctionDiffusion);
 
 InputParameters
-CoupledFuncDiffusion::validParams()
+ADCoupledFunctionDiffusion::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addClassDescription(
       "Represents a coupled Laplacian term with sign and function coefficients.");
   params.addParam<FunctionName>("func", 1.0, "Function multiplier for diffusion term.");
@@ -25,22 +25,16 @@ CoupledFuncDiffusion::validParams()
   return params;
 }
 
-CoupledFuncDiffusion::CoupledFuncDiffusion(const InputParameters & parameters)
-  : Kernel(parameters),
+ADCoupledFunctionDiffusion::ADCoupledFunctionDiffusion(const InputParameters & parameters)
+  : ADKernel(parameters),
     _func(getFunction("func")),
     _sign(getParam<MooseEnum>("sign")),
     _coupled_grad(coupledGradient("coupled_field"))
 {
 }
 
-Real
-CoupledFuncDiffusion::computeQpResidual()
+ADReal
+ADCoupledFunctionDiffusion::computeQpResidual()
 {
   return _sign * _func.value(_t, _q_point[_qp]) * _grad_test[_i][_qp] * _coupled_grad[_qp];
-}
-
-Real
-CoupledFuncDiffusion::computeQpJacobian()
-{
-  return 0;
 }
