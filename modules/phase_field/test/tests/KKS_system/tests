@@ -1,55 +1,91 @@
 [Tests]
-  [./derivative_parsed_material]
+  [derivative_parsed_material]
     type = 'Exodiff'
     input = 'derivative_parsed_material.i'
     exodiff = 'derivative_parsed_material.e'
     issues = '#4835'
     design = 'DerivativeParsedMaterial.md'
-    requirement = 'The Kim-Kim-Suzuki model implementation shall use free energy densities provided by DerivativeParsedMaterials'
-  [../]
+    requirement = 'The Kim-Kim-Suzuki model implementation shall use free energy densities provided '
+                  'by DerivativeParsedMaterials'
+  []
 
-  [./kks_example]
+  [kks_example]
     type = 'Exodiff'
     input = 'kks_example.i'
     exodiff = 'kks_example.e'
     issues = '#4835'
     design = 'KKSCHBulk.md'
     requirement = 'A non-split version of the Kim-Kim-Suzuki shall be provided'
-  [../]
+  []
 
-  [./kks_example_split]
+  [kks_example_split]
     type = 'Exodiff'
     input = 'kks_example_split.i'
     exodiff = 'kks_example_split.e'
     issues = '#4835'
     design = 'KKSSplitCHCRes.md'
     requirement = 'A split version of the Kim-Kim-Suzuki shall be provided'
-  [../]
+  []
 
-  [./kks_example_offset]
+  [kks_example_offset]
     type = 'Exodiff'
     input = 'kks_example_offset.i'
     exodiff = 'kks_example_offset.e'
     issues = '#10315'
     design = 'KKSSplitCHCRes.md'
-    requirement = 'The split version of the Kim-Kim-Suzuki shall be yield the correct results with asymmetric free energies'
-  [../]
+    requirement = 'The split version of the Kim-Kim-Suzuki shall be yield the correct results with '
+                  'asymmetric free energies'
+  []
 
-  [./kks_xevac]
+  [kks_xevac]
     type = 'Exodiff'
     input = 'kks_xevac.i'
     exodiff = 'kks_xevac.e'
     design = 'KKSSplitCHCRes.md'
     issues = '#4879'
     requirement = 'A multi component Kim-Kim-Suzuki model shall be implemented'
-  [../]
+  []
 
-  [./kks_multiphase]
+  [kks_multiphase]
     type = 'Exodiff'
     input = 'kks_multiphase.i'
     exodiff = 'kks_multiphase_out.e'
     issues = '#7007'
     design = 'KKSMultiACBulkC.md'
     requirement = 'A multi component Kim-Kim-Suzuki model shall be implemented'
-  [../]
+  []
+
+  [two_phase_lagrange_multiplier]
+    issues = '#5862'
+    requirement = 'The system shall produce the same equilibrium solution for'
+    design = WBM.md
+
+    [two_phase]
+      type = CSVDiff
+      input = two_phase.i
+      csvdiff = two_phase_out_c_0036.csv
+      detail = 'the dedicated two phase one order parameter formulation.'
+    []
+    [lagrange_multiplier]
+      type = CSVDiff
+      input = lagrange_multiplier.i
+      csvdiff = lagrange_multiplier_out_c_0036.csv
+      detail = 'the general Lagrange multiplier enforced multiphase formulation with two order '
+               'parameters.'
+    []
+    [auxkernel]
+      type = CSVDiff
+      input = auxkernel.i
+      csvdiff = auxkernel_out_c_0036.csv
+      detail = 'a two order parameter system, where the second order parameter is an auxiliary '
+               'variable.'
+    []
+    [nonlinear]
+      type = CSVDiff
+      input = nonlinear.i
+      csvdiff = nonlinear_out_c_0036.csv
+      detail = 'a two order parameter system, where the second order parameter is an prescribed '
+               'nonlinear variable.'
+    []
+  []
 []

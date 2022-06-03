@@ -54,7 +54,7 @@
                    "supplied to select a component. It looks like you were expecting the material "
                    "property to have a different type."
       cli_args = 'Materials/active=realvector Postprocessors/integral/component="1 2 3"'
-      detail = 'And shall error out if the index components do not match teh dimension of the '
+      detail = 'And shall error out if the index components do not match the dimension of the '
                'supplied property'
     []
   []

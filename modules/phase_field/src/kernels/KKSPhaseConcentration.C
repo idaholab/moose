@@ -22,8 +22,7 @@ KKSPhaseConcentration::validParams()
   params.addRequiredCoupledVar("c", "Real concentration");
   params.addRequiredCoupledVar("eta", "Phase a/b order parameter");
   params.addParam<MaterialPropertyName>(
-      "h_name", "h", "Base name for the switching function h(eta)"); // TODO: everywhere else this
-                                                                     // is called just "h"
+      "h_name", "h", "Base name for the switching function h(eta)");
   return params;
 }
 
