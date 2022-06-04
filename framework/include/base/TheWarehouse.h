@@ -303,10 +303,42 @@ public:
     /// than zero template arguments) args must contain one value for each
     /// parametrized query attribute - the types of args should be equal to the
     /// ::Key typedef specified for each corresponding parametrized attribute.
-    /// All results must be castable to the templated type T.
+    /// All results must be castable to the templated type T. If the objects
+    /// we are querying into inherit from the dependency resolver interface, then
+    /// they will be sorted
     template <typename T, typename... Args>
-    std::vector<T *> &
-    queryInto(std::vector<T *> & results, const bool sort = true, Args &&... args)
+    std::vector<T *> & queryInto(std::vector<T *> & results, Args &&... args)
+    {
+      return queryIntoHelper(results, true, args...);
+    }
+
+    /// queryInto executes the query and stores the results in the given
+    /// vector.  For parametrized queries (i.e. QueryCaches created with more
+    /// than zero template arguments) args must contain one value for each
+    /// parametrized query attribute - the types of args should be equal to the
+    /// ::Key typedef specified for each corresponding parametrized attribute.
+    /// All results must be castable to the templated type T. These objects
+    /// will not be sorted
+    template <typename T, typename... Args>
+    std::vector<T *> & queryIntoUnsorted(std::vector<T *> & results, Args &&... args)
+    {
+      return queryIntoHelper(results, false, args...);
+    }
+
+    /// Gets the number of attributes associated with the cached query
+    std::size_t numAttribs() const { return _attribs.size(); }
+
+  private:
+    /// queryInto executes the query and stores the results in the given
+    /// vector.  For parametrized queries (i.e. QueryCaches created with more
+    /// than zero template arguments) args must contain one value for each
+    /// parametrized query attribute - the types of args should be equal to the
+    /// ::Key typedef specified for each corresponding parametrized attribute.
+    /// All results must be castable to the templated type T. If the objects
+    /// we are querying into inherit from the dependency resolver interface, then
+    /// they will be sorted if \p sort is true
+    template <typename T, typename... Args>
+    std::vector<T *> & queryIntoHelper(std::vector<T *> & results, const bool sort, Args &&... args)
     {
       std::lock_guard<std::mutex> lock(_cache_mutex);
       setKeysInner<0, KeyType<Attribs>...>(args...);
@@ -330,10 +362,6 @@ public:
       return _w->queryInto(query_id, results);
     }
 
-    /// Gets the number of attributes associated with the cached query
-    std::size_t numAttribs() const { return _attribs.size(); }
-
-  private:
     template <int Index, typename A, typename... As>
     void addAttribs()
     {

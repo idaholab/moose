@@ -1231,7 +1231,7 @@ FEProblemBase::timestepSetup()
   }
 
   std::vector<UserObject *> userobjs;
-  theWarehouse().query().condition<AttribSystem>("UserObject").queryInto(userobjs, /*sort=*/false);
+  theWarehouse().query().condition<AttribSystem>("UserObject").queryIntoUnsorted(userobjs);
   for (auto obj : userobjs)
     obj->timestepSetup();
 

@@ -63,12 +63,12 @@ private:
   template <typename T>
   void querySubdomain(Interfaces iface, std::vector<T> & results)
   {
-    _query_subdomain.queryInto(results, true, _tid, _subdomain, iface);
+    _query_subdomain.queryInto(results, _tid, _subdomain, iface);
   }
   template <typename T>
   void queryBoundary(Interfaces iface, BoundaryID bnd, std::vector<T> & results)
   {
-    _query_boundary.queryInto(results, true, _tid, std::make_tuple(bnd, false), iface);
+    _query_boundary.queryInto(results, _tid, std::make_tuple(bnd, false), iface);
   }
 
   const TheWarehouse::Query _query;

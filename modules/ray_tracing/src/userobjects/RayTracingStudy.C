@@ -1122,7 +1122,7 @@ RayTracingStudy::getRayKernels(std::vector<RayKernelBase *> & result, SubdomainI
     _threaded_cache_ray_kernel[tid] = query.clone();
   }
 
-  _threaded_cache_ray_kernel[tid].queryInto(result, true, id);
+  _threaded_cache_ray_kernel[tid].queryInto(result, id);
 }
 
 void
@@ -1174,7 +1174,7 @@ RayTracingStudy::getRayBCs(std::vector<RayBoundaryConditionBase *> & result,
     _threaded_cache_ray_bc[tid] = query.clone();
   }
 
-  _threaded_cache_ray_bc[tid].queryInto(result, true, std::make_tuple(id, false));
+  _threaded_cache_ray_bc[tid].queryInto(result, std::make_tuple(id, false));
 }
 
 void
