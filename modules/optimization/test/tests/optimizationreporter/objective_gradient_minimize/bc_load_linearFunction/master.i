@@ -86,8 +86,8 @@
     [fromForward]
       type = MultiAppReporterTransfer
       from_multi_app = forward
-      from_reporters = 'data_pt/temperature data_pt/temperature'
-      to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+      from_reporters = 'data_pt/temperature'
+      to_reporters = 'OptimizationReporter/simulation_values'
     []
     [toAdjoint]
       type = MultiAppReporterTransfer
@@ -124,8 +124,8 @@
   [fromHomogeneousForward]
     type = MultiAppReporterTransfer
     from_multi_app = homogeneousForward
-    from_reporters = 'data_pt/temperature data_pt/temperature'
-    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+    from_reporters = 'data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values'
   []
   [toHomogeneousForward]
     type = OptimizationParameterTransfer
@@ -143,11 +143,6 @@
 []
 
 [Reporters]
-  [receiver]
-    type = ConstantReporter
-    real_vector_names = measured
-    real_vector_values = '0'
-   []
    [optInfo]
      type = OptimizationInfo
      items = 'current_iterate function_value gnorm'

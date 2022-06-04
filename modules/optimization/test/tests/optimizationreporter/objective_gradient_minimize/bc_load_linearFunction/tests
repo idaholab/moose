@@ -19,7 +19,7 @@
     rel_err = 0.01
     input = master.i
     min_parallel = 2
-    csvdiff = master_out_receiver_0001.csv
+    csvdiff = master_out_OptimizationReporter_0001.csv
     # steady solve
     recover = false
   []

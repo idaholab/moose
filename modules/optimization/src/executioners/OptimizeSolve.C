@@ -167,13 +167,15 @@ OptimizeSolve::getTaoSolutionStatus(std::vector<int> & tot_iters,
                                     std::vector<int> & grad_iters,
                                     std::vector<double> & xdiff,
                                     std::vector<int> & hess_iters,
-                                    std::vector<double> & f) const
+                                    std::vector<double> & f,
+                                    std::vector<int> & tot_solves) const
 {
   size_t num = _total_iterate_vec.size();
   tot_iters.resize(num);
   obj_iters.resize(num);
   grad_iters.resize(num);
   hess_iters.resize(num);
+  tot_solves.resize(num);
   f.resize(num);
   gnorm.resize(num);
   cnorm.resize(num);
@@ -185,6 +187,7 @@ OptimizeSolve::getTaoSolutionStatus(std::vector<int> & tot_iters,
     obj_iters[i] = _obj_iterate_vec[i];
     grad_iters[i] = _grad_iterate_vec[i];
     hess_iters[i] = _hess_iterate_vec[i];
+    tot_solves[i] = _function_solve_vec[i];
     f[i] = _f_vec[i];
     gnorm[i] = _gnorm_vec[i];
     cnorm[i] = _cnorm_vec[i];
@@ -205,6 +208,9 @@ OptimizeSolve::setTaoSolutionStatus(double f, int its, double gnorm, double cnor
   _obj_iterate_vec.push_back(_obj_iterate);
   _grad_iterate_vec.push_back(_grad_iterate);
   _hess_iterate_vec.push_back(_hess_iterate);
+  // count total number of FE solves
+  int solves = _obj_iterate + _grad_iterate + 2 * _hess_iterate;
+  _function_solve_vec.push_back(solves);
   _obj_iterate = 0;
   _grad_iterate = 0;
   _hess_iterate = 0;

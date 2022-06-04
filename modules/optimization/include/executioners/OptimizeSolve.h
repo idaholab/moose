@@ -28,7 +28,8 @@ public:
                             std::vector<int> & grad_iters,
                             std::vector<double> & xdiff,
                             std::vector<int> & hess_iters,
-                            std::vector<double> & f) const;
+                            std::vector<double> & f,
+                            std::vector<int> & tot_solves) const;
 
 protected:
   /// Bounds routine
@@ -66,6 +67,7 @@ private:
   std::vector<int> _obj_iterate_vec;
   std::vector<int> _grad_iterate_vec;
   std::vector<int> _hess_iterate_vec;
+  std::vector<int> _function_solve_vec;
   std::vector<double> _f_vec;
   std::vector<double> _gnorm_vec;
   std::vector<double> _cnorm_vec;

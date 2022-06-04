@@ -1,3 +1,3 @@
-current_iterate,function_value,gnorm,gradient_iterate,hessian_iterate,objective_iterate
-0,1628.791831479,11.302658163982,1,0,1
-1,0.046536922646379,4.9512041309835e-13,1,2,1
+current_iterate,function_solves,function_value,gnorm,gradient_iterate,hessian_iterate,objective_iterate
+0,2,1628.791831479,11.302658163982,1,0,1
+1,6,0.04653692264637,1.2122644515079e-12,1,2,1

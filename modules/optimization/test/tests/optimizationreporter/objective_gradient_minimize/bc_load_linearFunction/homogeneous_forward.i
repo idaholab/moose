@@ -71,7 +71,8 @@
 
 [Executioner]
   type = Steady
-  solve_type = PJFNK
+  line_search=none
+  solve_type = NEWTON
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
   petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_package'
@@ -130,5 +131,5 @@
 [Outputs]
   console = false
   exodus = false
-  file_base = 'hessian'
+  file_base = 'homogenous'
 []

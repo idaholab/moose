@@ -48,6 +48,10 @@ OptimizationInfo::OptimizationInfo(const InputParameters & parameters)
     _hessianIterate(
         (!_items.isValid() || _items.contains("current_iterate"))
             ? declareValueByName<std::vector<int>>("hessian_iterate", REPORTER_MODE_REPLICATED)
+            : declareUnusedValue<std::vector<int>>()),
+    _functionSolves(
+        (!_items.isValid() || _items.contains("current_iterate"))
+            ? declareValueByName<std::vector<int>>("function_solves", REPORTER_MODE_REPLICATED)
             : declareUnusedValue<std::vector<int>>())
 {
   if (!_optimization_executioner)
@@ -57,7 +61,6 @@ OptimizationInfo::OptimizationInfo(const InputParameters & parameters)
 void
 OptimizationInfo::execute()
 {
-
   _optimization_executioner->getOptimizeSolve().getTaoSolutionStatus(_currentIterate,
                                                                      _gnorm,
                                                                      _objectiveIterate,
@@ -65,5 +68,6 @@ OptimizationInfo::execute()
                                                                      _gradientIterate,
                                                                      _xdiff,
                                                                      _hessianIterate,
-                                                                     _functionValue);
+                                                                     _functionValue,
+                                                                     _functionSolves);
 }

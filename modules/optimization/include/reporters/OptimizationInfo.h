@@ -37,6 +37,7 @@ private:
   std::vector<int> & _objectiveIterate;
   std::vector<int> & _gradientIterate;
   std::vector<int> & _hessianIterate;
+  std::vector<int> & _functionSolves;
 
   // Helper to perform optional declaration based on "_items" from MeshInfo.h
   template <typename T>
