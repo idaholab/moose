@@ -49,17 +49,8 @@ MultiAppDetailedSolutionTransferBase::transferToMultiApps()
   if (dynamic_cast<SubChannelMesh *>(_from_meshes[0]) == nullptr)
     mooseError("This transfer works only with SubChannelMesh classes.");
 
-<<<<<<< HEAD
   for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
     if (getToMultiApp()->hasLocalApp(i))
-=======
-  _console << "********** Transfer to MultiApps b **********" << std::endl;
-  _console << _multi_app->numGlobalApps() << std::endl;
-  for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-  {
-    _console << i;
-    if (_multi_app->hasLocalApp(i))
->>>>>>> 27b56aa (transfer mods)
       transferVarsToApp(i);
     _console << i;
   }

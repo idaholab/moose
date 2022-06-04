@@ -53,41 +53,74 @@ TriSubChannelMesh::safeClone() const
 unsigned int
 TriSubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
 {
-  Real distance0 = 1.0e+8;
-  Real distance1;
-  unsigned int j = 0;
-
-  for (unsigned int i = 0; i < _n_channels; i++)
-  {
-    distance1 = std::sqrt(std::pow((p(0) - _subchannel_position[i][0]), 2.0) +
-                          std::pow((p(1) - _subchannel_position[i][1]), 2.0));
-
-    if (distance1 < distance0)
-    {
-      j = i;
-      distance0 = distance1;
-    } // if
-  }   // for
-  return j;
+    /// Function that returns the subchannel index given a point
+    return this->channelIndex(p);
 }
 
 unsigned int
 TriSubChannelMesh::channelIndex(const Point & p) const
 {
-  Real distance0 = 1.0e+8;
-  Real distance1;
-  unsigned int j = 0;
+  /// Function that returns the subchannel index given a point
+  /// Determining a channel index given a point
+  /// Looping over all subchannels to determine the closest one to the point
+  /// Special treatment for edge and corner subchannels since deformed elements may lead to wrong transfers
 
+  // Distances to determine the closest subchannel
+  Real distance0 = 1.0e+8; // Dummy distance to keep updating the closes distance found
+  Real distance1; // Distance to be updated with the current subchannel distance
+  unsigned int j = 0; // Index to keep track of the closest point to subchannel
+
+  // Projecting point into hexahedral coordinated to determine if the point belongs to a center subchannel
+  Real distance_outer_ring = _flat_to_flat/2 - _duct_to_rod_gap - _rod_diameter/2;
+  Real channel_distance = std::sqrt(std::pow(p(0),2) + std::pow(p(1),2));
+  Real angle = std::abs(std::atan(p(1)/p(0)));
+  Real projection_angle = angle - libMesh::pi / 6 - std::trunc(angle / (libMesh::pi / 3)) * (libMesh::pi / 3);
+  channel_distance = channel_distance * std::cos(projection_angle);
+
+  // Projecting point on top edge to determine if the point is a corner or edge subchannel by x coordinate
+  Real loc_angle = std::atan(p(1)/p(0));
+  if (p(0) <= 0)
+      loc_angle += libMesh::pi;
+  else if (p(0) >= 0 && p(1) <= 0)
+      loc_angle += 2*libMesh::pi;
+  Real rem_ang = std::trunc(loc_angle / (libMesh::pi / 3)) * (libMesh::pi / 3) - libMesh::pi / 3;
+  Real x_coord_new = (std::cos(-rem_ang) * p(0) - std::sin(-rem_ang) * p(1));
+  Real x_lim = (_n_rings - 1) * _pitch / 2.0;
+
+  // looping over all channels
   for (unsigned int i = 0; i < _n_channels; i++)
   {
+    // Distance from the point to subchannel
     distance1 = std::sqrt(std::pow((p(0) - _subchannel_position[i][0]), 2.0) +
                           std::pow((p(1) - _subchannel_position[i][1]), 2.0));
 
-    if (distance1 < distance0)
+    // If subchannel belongs to center ring
+    if (channel_distance < distance_outer_ring)
     {
-      j = i;
-      distance0 = distance1;
+      if ((distance1 < distance0) && (_subch_type[i] == EChannelType::CENTER))
+      {
+        j = i;
+        distance0 = distance1;
+      } // if
     } // if
+    // If subchannel belongs to outer ring
+    else
+    {
+      if ((distance1 < distance0) && (_subch_type[i] == EChannelType::EDGE || _subch_type[i] == EChannelType::CORNER))
+      {
+        if (((x_coord_new > x_lim) || (x_coord_new < -x_lim)) && _subch_type[i] == EChannelType::CORNER)
+        {
+          j = i;
+          distance0 = distance1;
+        } // if
+        else if (((x_coord_new > x_lim) || (x_coord_new > -x_lim)) && _subch_type[i] == EChannelType::EDGE)
+        {
+          j = i;
+          distance0 = distance1;
+        } // if
+      } // if
+    } //else
+
   }   // for
   return j;
 }
@@ -102,36 +135,7 @@ TriSubChannelMesh::getPinIndexFromPoint(const Point & p) const
 {
   /// Function that returns the pin number given a point
 
-  // Define the current ring
-  Real x_position = p(0);
-  Real y_position = p(1);
-  Real distance_rod = std::sqrt(std::pow(x_position, 2) + std::pow(y_position, 2));
-  Real d0 = 1e5; unsigned int current_ring = 0;
-  Real distance_ring, distance_to_ring;
-  for (unsigned int i = 0; i < _n_rings; i++)
-  {
-    distance_ring = std::sqrt(pow(i * _pitch, 2));
-    distance_to_ring = std::abs(distance_ring - distance_rod);
-    if (distance_to_ring < d0)
-    {
-      d0 = distance_to_ring;
-      current_ring = i;
-    }
-  }
-
-  // Count the number of rods until the current ring
-  unsigned int count_elapsed_rods = 0;
-  for (unsigned int i = 0; i < current_ring; i++)
-  {
-    count_elapsed_rods += i * 6;
-  }
-
-  // Find the rod in the ring
-  Real angle = std::atan(y_position/x_position);
-  Real delta_theta = libMesh::pi / (current_ring * 6);
-  unsigned int current_index = std::trunc((angle - delta_theta/2) / delta_theta);
-
-  return count_elapsed_rods + current_index;
+  return this->pinIndex(p);
 }
 
 unsigned int
