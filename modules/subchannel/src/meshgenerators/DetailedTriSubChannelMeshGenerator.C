@@ -456,30 +456,23 @@ DetailedTriSubChannelMeshGenerator::generate()
       auto c_pt = circle_points_triangle[1 * m_quarter - ii];
       corner_points[ii + 1] = quadrant_centers_corner[0] + c_pt;
     }
-    Real side_short = (_duct_to_rod_gap + _rod_diameter) * 0.5 * shrink_factor;
-    Real side_long = (2.0*_duct_to_rod_gap + _rod_diameter) * 0.5 * shrink_factor;
+    Real side_short = (_duct_to_rod_gap + _rod_diameter) * 0.5;
+    Real side_long = (2.0*_duct_to_rod_gap + _rod_diameter) * 0.5;
     Real side_length = std::sqrt(std::pow(side_short, 2) + std::pow(side_long, 2)
                                  - 2 * side_short * side_long * std::cos(libMesh::pi/6));
-    Real _close_delta = (_rod_diameter/2 + _duct_to_rod_gap/2) * std::sin(libMesh::pi/3)
-                        - (_rod_diameter/2 + _duct_to_rod_gap) * std::sin(libMesh::pi/6);
+    Real angle = libMesh::pi - libMesh::pi/3 -
+                 std::acos((-std::pow(side_long,2) + std::pow(side_short,2) + std::pow(side_length,2))
+                            / (2 * side_short * side_length));
     corner_points[points_per_sixth + 1] =
-        Point(side_length, -_close_delta * shrink_factor, 0);
+        Point(side_length * std::cos(angle) * shrink_factor, - side_length * std::sin(angle) * shrink_factor, 0);
     corner_points[points_per_sixth + 2] =
         Point(0.5 * _duct_to_rod_gap * shrink_factor * std::tan(libMesh::pi / 6),
               0.5 * _duct_to_rod_gap * shrink_factor / std::cos(libMesh::pi / 6),
               0);
     corner_points[points_per_sixth + 3] =
-        Point(-side_length / 2.0 - _close_delta * shrink_factor,
-              0.5 * _duct_to_rod_gap * shrink_factor / std::cos(libMesh::pi / 6) + 0.5 * _close_delta * shrink_factor,
+        Point(-side_length * std::cos(libMesh::pi/2 - angle - libMesh::pi/6) * shrink_factor,
+              side_length * std::sin(libMesh::pi/2 - angle - libMesh::pi/6) * shrink_factor,
               0);
-//    corner_points[points_per_sixth + 2] =
-//        Point(_rel_rod_positions_outer_ring * std::cos(libMesh::pi/3) / 2.0,
-//              _rel_rod_positions_outer_ring/2.0,
-//              0);
-//    corner_points[points_per_sixth + 3] =
-//        Point(0.0,
-//              _pitch * 0.5 * shrink_factor + _duct_to_rod_gap,
-//              0);
   }
 
 
