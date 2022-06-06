@@ -53,6 +53,7 @@ ADNodalKernel::computeResidual()
 void
 ADNodalKernel::computeJacobian()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_var.isNodalDefined())
   {
     const auto dof_idx = _var.nodalDofIndex();
@@ -60,6 +61,7 @@ ADNodalKernel::computeJacobian()
     const auto res = computeQpResidual();
     _assembly.processDerivatives(res, dof_idx, _matrix_tags);
   }
+#endif
 }
 
 void

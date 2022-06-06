@@ -99,5 +99,5 @@ INSFVMomentumAdvectionOutflowBC::gatherRCData(const FaceInfo & fi)
                 _index,
                 a * (fi.faceArea() * fi.faceCoord()));
 
-  processResidual(strong_resid * (fi.faceArea() * fi.faceCoord()));
+  processResidualAndDerivatives(strong_resid * (fi.faceArea() * fi.faceCoord()));
 }

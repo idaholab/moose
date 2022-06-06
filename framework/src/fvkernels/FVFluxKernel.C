@@ -243,7 +243,7 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
     mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-    _assembly.processResidual(r, _var.dofIndices()[0], _vector_tags, _matrix_tags);
+    _assembly.processResidualAndDerivatives(r, _var.dofIndices()[0], _vector_tags, _matrix_tags);
 #else
     auto element_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
     {
@@ -286,7 +286,8 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
                 "We're currently built to use CONSTANT MONOMIALS");
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-    _assembly.processResidual(neighbor_r, _var.dofIndicesNeighbor()[0], _vector_tags, _matrix_tags);
+    _assembly.processResidualAndDerivatives(
+        neighbor_r, _var.dofIndicesNeighbor()[0], _vector_tags, _matrix_tags);
 #else
     auto neighbor_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
     {

@@ -59,5 +59,5 @@ WCNSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
 
   const auto volume = _assembly.elementVolume(&elem);
   _rc_uo.addToA(&elem, _index, a * volume);
-  processResidual(strong_resid * volume, dof_number);
+  processResidualAndDerivatives(strong_resid * volume, dof_number);
 }

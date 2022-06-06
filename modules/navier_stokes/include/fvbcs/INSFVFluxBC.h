@@ -34,7 +34,7 @@ public:
   /**
    * Process into either the system residual or Jacobian
    */
-  void processResidual(const ADReal & residual);
+  void processResidualAndDerivatives(const ADReal & residual);
 
 protected:
   ADReal computeQpResidual() override final

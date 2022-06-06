@@ -40,10 +40,13 @@ FVScalarLagrangeMultiplierConstraint::FVScalarLagrangeMultiplierConstraint(
 void
 FVScalarLagrangeMultiplierConstraint::computeResidualAndJacobian()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   const auto volume = _assembly.elemVolume();
-  _assembly.processResidual(_lambda[0] * volume, _var.dofIndices()[0], _vector_tags, _matrix_tags);
-  _assembly.processResidual(
+  _assembly.processResidualAndDerivatives(
+      _lambda[0] * volume, _var.dofIndices()[0], _vector_tags, _matrix_tags);
+  _assembly.processResidualAndDerivatives(
       computeQpResidual() * volume, _lambda_var.dofIndices()[0], _vector_tags, _matrix_tags);
+#endif
 }
 
 void
@@ -72,6 +75,7 @@ FVScalarLagrangeMultiplierConstraint::computeJacobian()
 void
 FVScalarLagrangeMultiplierConstraint::computeOffDiagJacobian()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   // Primal
   mooseAssert(_lambda.size() == 1 && _lambda_var.order() == 1,
               "The lambda variable should be first order");
@@ -83,4 +87,5 @@ FVScalarLagrangeMultiplierConstraint::computeOffDiagJacobian()
   const auto lm_r = computeQpResidual() * _assembly.elemVolume();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
   _assembly.processDerivatives(lm_r, _lambda_var.dofIndices()[0], _matrix_tags);
+#endif
 }

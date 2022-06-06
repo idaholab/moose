@@ -1678,24 +1678,23 @@ public:
    */
   void processResidual(Real residual, dof_id_type dof_index, const std::set<TagID> & vector_tags);
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
-   * This method is only meant to be called if MOOSE is configured to use global AD indexing.
    * This simply caches the derivative values for the corresponding column indices for the provided
-   * \p matrix_tags, and applies any scaling factors. If called when using local AD indexing, this
-   * method will simply error
+   * \p matrix_tags, and applies any scaling factors
    */
   void processDerivatives(const ADReal & residual,
                           dof_id_type dof_index,
                           const std::set<TagID> & matrix_tags);
 
   /**
-   * This method is only meant to be called if MOOSE is configured to use global AD indexing. This
-   * performs the duties of both \p processResidual and \p processDerivatives
+   * This performs the duties of both \p processResidual and \p processDerivatives
    */
-  void processResidual(const ADReal & residual,
-                       dof_id_type dof_index,
-                       const std::set<TagID> & vector_tags,
-                       const std::set<TagID> & matrix_tags);
+  void processResidualAndDerivatives(const ADReal & residual,
+                                     dof_id_type dof_index,
+                                     const std::set<TagID> & vector_tags,
+                                     const std::set<TagID> & matrix_tags);
+#endif
 
   /**
    * Process the \p derivatives() data of an \p ADReal. When using global indexing, this method
@@ -1728,19 +1727,20 @@ public:
                         const std::set<TagID> & vector_tags,
                         Real scaling_factor);
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * Process the value and \p derivatives() data of a vector of \p ADReals. When using global
    * indexing, this method simply caches the value (residual) for the provided \p vector_tags and
    * derivative values (Jacobian) for the corresponding column indices for the provided \p
    * matrix_tags. Note that this overload will call \p DofMap::constrain_element_vector and \p
-   * DofMap::constrain_element_matrix. If not using global indexing, calling of this method will
-   * result in an error
+   * DofMap::constrain_element_matrix
    */
-  void processResiduals(const std::vector<ADReal> & residuals,
-                        const std::vector<dof_id_type> & row_indices,
-                        const std::set<TagID> & vector_tags,
-                        const std::set<TagID> & matrix_tags,
-                        Real scaling_factor);
+  void processResidualsAndDerivatives(const std::vector<ADReal> & residuals,
+                                      const std::vector<dof_id_type> & row_indices,
+                                      const std::set<TagID> & vector_tags,
+                                      const std::set<TagID> & matrix_tags,
+                                      Real scaling_factor);
+#endif
 
   /**
    * Process the \p derivatives() data of a vector of \p ADReals. When using global indexing, this
@@ -1768,11 +1768,11 @@ public:
    * correspond to mortar constraint residuals along faces such that interior hanging nodes will not
    * feel the contribution
    */
-  void processUnconstrainedResiduals(const std::vector<ADReal> & residuals,
-                                     const std::vector<dof_id_type> & row_indices,
-                                     const std::set<TagID> & vector_tags,
-                                     const std::set<TagID> & matrix_tags,
-                                     Real scaling_factor);
+  void processUnconstrainedResidualsAndDerivatives(const std::vector<ADReal> & residuals,
+                                                   const std::vector<dof_id_type> & row_indices,
+                                                   const std::set<TagID> & vector_tags,
+                                                   const std::set<TagID> & matrix_tags,
+                                                   Real scaling_factor);
 
   /**
    * signals this object that a vector containing variable scaling factors should be used when
@@ -1792,7 +1792,8 @@ public:
   void modifyArbitraryWeights(const std::vector<Real> & weights);
 
   /**
-   * @return whether we are computing a residual
+   * @return whether we are computing a residual. In practice this will return true whenever we are
+   * not computing a Jacobian
    */
   bool computingResidual() const { return !_computing_jacobian; }
 
@@ -2830,12 +2831,6 @@ Assembly::processDerivatives(const ADReal & residual,
   for (std::size_t i = 0; i < column_indices.size(); ++i)
     cacheJacobian(row_index, column_indices[i], values[i] * scalar, matrix_tags);
 }
-#else
-inline void
-Assembly::processDerivatives(const ADReal &, const dof_id_type, const std::set<TagID> &)
-{
-  mooseError("This method should not be used if using local AD indexing");
-}
 #endif
 
 template <typename LocalFunctor>
@@ -2873,7 +2868,7 @@ Assembly::processDerivatives(const std::vector<ADReal> & residuals,
 )
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  processResiduals(residuals, input_row_indices, {}, matrix_tags, scaling_factor);
+  processResidualsAndDerivatives(residuals, input_row_indices, {}, matrix_tags, scaling_factor);
 #else
   local_functor(residuals, input_row_indices, matrix_tags);
 #endif

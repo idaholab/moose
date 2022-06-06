@@ -38,5 +38,5 @@ INSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
 
   _rc_uo.addToA(&elem, _index, a);
 
-  processResidual(residual, dof_number);
+  processResidualAndDerivatives(residual, dof_number);
 }

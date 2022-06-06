@@ -128,6 +128,6 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
 
   const auto strong_resid = -diff_face * dudn;
 
-  processResidual(strong_resid * (fi.faceArea() * fi.faceCoord()));
+  processResidualAndDerivatives(strong_resid * (fi.faceArea() * fi.faceCoord()));
 #endif
 }

@@ -26,8 +26,15 @@ INSFVTimeKernel::INSFVTimeKernel(const InputParameters & params)
 {
 }
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
-INSFVTimeKernel::processResidual(const ADReal & residual, const dof_id_type dof_index)
+INSFVTimeKernel::processResidualAndDerivatives(const ADReal & residual, const dof_id_type dof_index)
 {
-  _assembly.processResidual(residual, dof_index, _vector_tags, _matrix_tags);
+  _assembly.processResidualAndDerivatives(residual, dof_index, _vector_tags, _matrix_tags);
 }
+#else
+void
+INSFVTimeKernel::processResidualAndDerivatives(const ADReal &, const dof_id_type)
+{
+}
+#endif

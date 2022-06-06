@@ -67,10 +67,7 @@ ResidualObject::prepareShapes(const unsigned int var_num)
 void
 ResidualObject::computeResidualAndJacobian()
 {
-  mooseError("'",
-             name(),
-             "' is of system type '",
-             getParam<std::string>("_moose_base"),
-             "' which has not yet implemented 'computeResidualAndJacobian'. If you would like that "
-             "feature for this system, please contact a MOOSE developer.");
+  mooseError(
+      "This object has not yet implemented 'computeResidualAndJacobian'. If you would like that "
+      "feature for this object, please contact a MOOSE developer.");
 }

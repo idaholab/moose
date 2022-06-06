@@ -81,7 +81,8 @@ protected:
 
   /// Data members for holding residuals
   ADReal _r;
-  std::vector<ADReal> _residuals;
+  std::vector<Real> _residuals;
+  std::vector<ADReal> _residuals_and_jacobians;
 
 private:
   /**

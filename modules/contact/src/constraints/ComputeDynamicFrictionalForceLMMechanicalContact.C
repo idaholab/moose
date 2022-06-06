@@ -363,8 +363,12 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
     dof_residual_dir = term_1_y - term_2_y;
   }
 
-  _assembly.processResidual(dof_residual, friction_dof_indices[0], _vector_tags, _matrix_tags);
-  _assembly.processResidual(dof_residual_dir, friction_dof_indices[1], _vector_tags, _matrix_tags);
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  _assembly.processResidualAndDerivatives(
+      dof_residual, friction_dof_indices[0], _vector_tags, _matrix_tags);
+  _assembly.processResidualAndDerivatives(
+      dof_residual_dir, friction_dof_indices[1], _vector_tags, _matrix_tags);
+#endif
 }
 
 void
@@ -408,7 +412,10 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
     dof_residual = term_1 - term_2;
   }
 
-  _assembly.processResidual(dof_residual, friction_dof_index, _vector_tags, _matrix_tags);
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  _assembly.processResidualAndDerivatives(
+      dof_residual, friction_dof_index, _vector_tags, _matrix_tags);
+#endif
 }
 
 ADReal

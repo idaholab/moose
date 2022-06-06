@@ -138,9 +138,13 @@ template <typename T>
 void
 ADIntegratedBCTempl<T>::computeResidualAndJacobian()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   computeResidualsForJacobian();
-  _assembly.processResiduals(
+  _assembly.processResidualsAndDerivatives(
       _residuals, _var.dofIndices(), _vector_tags, _matrix_tags, _var.scalingFactor());
+#else
+  mooseError("residual and jacobian together only supported for global AD indexing");
+#endif
 }
 
 template <typename T>

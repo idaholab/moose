@@ -59,5 +59,5 @@ PINSFVMomentumFriction::gatherRCData(const Elem & elem)
   _rc_uo.addToA(&elem, _index, coefficient);
 
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
-  processResidual(coefficient * _u_functor(elem_arg), dof_number);
+  processResidualAndDerivatives(coefficient * _u_functor(elem_arg), dof_number);
 }

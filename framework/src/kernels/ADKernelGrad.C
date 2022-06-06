@@ -91,9 +91,13 @@ template <typename T>
 void
 ADKernelGradTempl<T>::computeResidualAndJacobian()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   computeResidualsForJacobian();
-  _assembly.processResiduals(
+  _assembly.processResidualsAndDerivatives(
       _residuals, _var.dofIndices(), _vector_tags, _matrix_tags, _var.scalingFactor());
+#else
+  mooseError("compute residual and Jacobian only supported for global AD indexing");
+#endif
 }
 
 template <typename T>

@@ -385,9 +385,6 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::onFace(const FaceInfo & fi)
 {
   reinitVariables(fi);
 
-  if (_fv_flux_kernels.size() == 0)
-    return;
-
   for (auto * const k : _fv_flux_kernels)
     compute(*k, fi);
 }
@@ -790,11 +787,7 @@ ComputeFVFluxResidualThread<RangeType>::postFace(const FaceInfo & /*fi*/)
   _fe_problem.cacheResidual(_tid);
   _fe_problem.cacheResidualNeighbor(_tid);
 
-  if (_num_cached % 20 == 0)
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _fe_problem.addCachedResidual(_tid);
-  }
+  _fe_problem.addCachedResidual(_tid);
 }
 
 template <typename RangeType>
