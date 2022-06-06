@@ -8,77 +8,75 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FlowJunction.h"
-#include "GeometricalFlowComponent.h"
-#include "THMMesh.h"
+#include "FlowChannelBase.h"
 
 InputParameters
 FlowJunction::validParams()
 {
-  InputParameters params = FlowConnection::validParams();
+  InputParameters params = Component1DJunction::validParams();
   params.addPrivateParam<std::string>("component_type", "flow_junction");
-  params.addRequiredParam<std::vector<BoundaryName>>("connections", "Junction connections");
   return params;
 }
 
 FlowJunction::FlowJunction(const InputParameters & params)
-  : FlowConnection(params),
+  : Component1DJunction(params),
 
     _junction_uo_name(genName(name(), "junction_uo"))
 {
-  const std::vector<BoundaryName> & connections =
-      getParam<std::vector<BoundaryName>>("connections");
-  for (const auto & connection_string : connections)
-    addConnection(connection_string);
 }
 
 void
-FlowJunction::setupMesh()
+FlowJunction::init()
 {
-  FlowConnection::setupMesh();
+  Component1DJunction::init();
 
-  const BoundaryID boundary_id = _mesh.getNextBoundaryId();
-
-  auto & boundary_info = _mesh.getMesh().get_boundary_info();
-
-  for (const auto & connection : getConnections())
+  if (_connections.size() > 0)
   {
-    const std::string & comp_name = connection._geometrical_component_name;
-
-    if (hasComponentByName<GeometricalFlowComponent>(comp_name))
+    std::vector<UserObjectName> fp_names;
+    std::vector<THM::FlowModelID> flow_model_ids;
+    for (const auto & connection : _connections)
     {
-      const GeometricalFlowComponent & gc = getComponentByName<GeometricalFlowComponent>(comp_name);
-      for (auto && conn : gc.getConnections(connection._end_type))
-        // add connection's node to nodeset of all nodes connected to this zero-D component
-        boundary_info.add_node(conn._node, boundary_id);
+      const std::string comp_name = connection._component_name;
+      if (hasComponentByName<FlowChannelBase>(comp_name))
+      {
+        const FlowChannelBase & comp = _sim.getComponentByName<FlowChannelBase>(comp_name);
+
+        fp_names.push_back(comp.getFluidPropertiesName());
+        flow_model_ids.push_back(comp.getFlowModelID());
+      }
+    }
+
+    if (fp_names.size() > 0)
+    {
+      checkAllConnectionsHaveSame<UserObjectName>(fp_names, "fluid properties object");
+      _fp_name = fp_names[0];
+
+      checkAllConnectionsHaveSame<THM::FlowModelID>(flow_model_ids, "flow model ID");
+      _flow_model_id = flow_model_ids[0];
+
+      if (hasComponentByName<FlowChannelBase>(_connections[0]._component_name))
+      {
+        const FlowChannelBase & flow_channel =
+            getComponentByName<FlowChannelBase>(_connections[0]._component_name);
+        _flow_model = flow_channel.getFlowModel();
+      }
     }
   }
-
-  // name the nodeset/sideset corresponding to the nodes of all connected flow channel ends
-  _mesh.setBoundaryName(boundary_id, name());
-
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = _mesh.nodeToElemMap();
-  for (auto & nid : _nodes)
-  {
-    const auto & it = node_to_elem.find(nid);
-    if (it == node_to_elem.end())
-      mooseError(name(), ": failed to find node ", nid, "in the mesh!");
-
-    const std::vector<dof_id_type> & elems = it->second;
-    for (const auto & e : elems)
-      _connected_elems.push_back(e);
-  }
 }
 
 void
-FlowJunction::initSecondary()
+FlowJunction::check() const
 {
-  for (auto & eid : _connected_elems)
-  {
-    const Elem * elem = _mesh.queryElemPtr(eid);
-    if (elem != nullptr && elem->processor_id() == processor_id())
-      _proc_ids.push_back(elem->processor_id());
-    else
-      _proc_ids.push_back(0);
-  }
-  comm().sum(_proc_ids);
+  Component1DJunction::check();
+
+  for (const auto & comp_name : _connected_component_names)
+    checkComponentOfTypeExistsByName<FlowChannelBase>(comp_name);
+}
+
+const UserObjectName &
+FlowJunction::getFluidPropertiesName() const
+{
+  checkSetupStatus(INITIALIZED_PRIMARY);
+
+  return _fp_name;
 }

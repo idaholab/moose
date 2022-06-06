@@ -32,21 +32,6 @@ JunctionParallelChannels1Phase::JunctionParallelChannels1Phase(const InputParame
 }
 
 void
-JunctionParallelChannels1Phase::init()
-{
-  FlowConnection::init();
-  for (const auto & connection : getConnections())
-  {
-    const std::string & comp_name = connection._geometrical_component_name;
-    if (hasComponentByName<GeometricalFlowComponent>(comp_name))
-    {
-      const GeometricalFlowComponent & gc = getComponentByName<GeometricalFlowComponent>(comp_name);
-      _directions.push_back(gc.getDirection());
-    }
-  }
-}
-
-void
 JunctionParallelChannels1Phase::addVariables()
 {
   auto connected_subdomains = getConnectedSubdomainNames();

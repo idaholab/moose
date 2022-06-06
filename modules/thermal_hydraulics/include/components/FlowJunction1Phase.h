@@ -12,19 +12,19 @@
 #include "FlowJunction.h"
 
 /**
- * Base class for volumetric junction components
+ * Base class for 1-phase flow junctions
  */
-class VolumeJunctionBase : public FlowJunction
+class FlowJunction1Phase : public FlowJunction
 {
 public:
-  VolumeJunctionBase(const InputParameters & params);
+  FlowJunction1Phase(const InputParameters & params);
 
 protected:
-  /// Volume of the junction
-  const Real _volume;
+  virtual void init() override;
+  virtual void check() const override;
 
-  /// Spatial position of center of the junction
-  const Point & _position;
+  // Numerical flux user object names
+  std::vector<UserObjectName> _numerical_flux_names;
 
 public:
   static InputParameters validParams();

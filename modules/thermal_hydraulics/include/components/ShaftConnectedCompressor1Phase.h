@@ -28,7 +28,6 @@ public:
   }
 
 protected:
-  virtual void init() override;
   virtual void check() const override;
   virtual void buildVolumeJunctionUserObject() override;
 
@@ -73,8 +72,6 @@ protected:
   const VariableName _friction_torque_var_name;
   /// Name of compressor inertia variable
   const VariableName _moi_var_name;
-  /// Directions at each connection
-  std::vector<RealVectorValue> _directions;
 
 public:
   static InputParameters validParams();

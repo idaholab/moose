@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "VolumeJunctionBase.h"
+#include "VolumeJunction1Phase.h"
 #include "ShaftConnectable.h"
 
 /**
  * Component that shows how to connect a junction-like component to a shaft
  */
-class ShaftConnectedTestComponent : public VolumeJunctionBase, public ShaftConnectable
+class ShaftConnectedTestComponent : public VolumeJunction1Phase, public ShaftConnectable
 {
 public:
   ShaftConnectedTestComponent(const InputParameters & params);

@@ -83,21 +83,6 @@ ShaftConnectedTurbine1Phase::ShaftConnectedTurbine1Phase(const InputParameters &
 }
 
 void
-ShaftConnectedTurbine1Phase::init()
-{
-  FlowConnection::init();
-  for (const auto & connection : getConnections())
-  {
-    const std::string & comp_name = connection._geometrical_component_name;
-    if (hasComponentByName<GeometricalFlowComponent>(comp_name))
-    {
-      const GeometricalFlowComponent & gc = getComponentByName<GeometricalFlowComponent>(comp_name);
-      _directions.push_back(gc.getDirection());
-    }
-  }
-}
-
-void
 ShaftConnectedTurbine1Phase::check() const
 {
   VolumeJunction1Phase::check();

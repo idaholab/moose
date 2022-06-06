@@ -42,7 +42,7 @@
 
   [out]
     type = SolidWall
-    connections = 'pipe:out'
+    input = 'pipe:out'
   []
 []
 

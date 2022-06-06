@@ -20,7 +20,10 @@ const unsigned int VolumeJunction1Phase::N_EQ = 5;
 InputParameters
 VolumeJunction1Phase::validParams()
 {
-  InputParameters params = VolumeJunctionBase::validParams();
+  InputParameters params = FlowJunction1Phase::validParams();
+
+  params.addRequiredParam<Real>("volume", "Volume of the junction [m^3]");
+  params.addRequiredParam<Point>("position", "Spatial position of the center of the junction [m]");
 
   params.addParam<FunctionName>("initial_p", "Initial pressure [Pa]");
   params.addParam<FunctionName>("initial_T", "Initial temperature [K]");
@@ -43,7 +46,10 @@ VolumeJunction1Phase::validParams()
 }
 
 VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
-  : VolumeJunctionBase(params),
+  : FlowJunction1Phase(params),
+
+    _volume(getParam<Real>("volume")),
+    _position(getParam<Point>("position")),
 
     _scaling_factor_rhoV(getParam<Real>("scaling_factor_rhoV")),
     _scaling_factor_rhouV(getParam<Real>("scaling_factor_rhouV")),
@@ -73,7 +79,7 @@ VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
 void
 VolumeJunction1Phase::check() const
 {
-  VolumeJunctionBase::check();
+  FlowJunction1Phase::check();
 
   if (_flow_model_id != THM::FM_SINGLE_PHASE)
     logModelNotImplementedError(_flow_model_id);

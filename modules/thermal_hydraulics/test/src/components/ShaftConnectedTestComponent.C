@@ -16,7 +16,7 @@ registerMooseObject("ThermalHydraulicsApp", ShaftConnectedTestComponent);
 InputParameters
 ShaftConnectedTestComponent::validParams()
 {
-  InputParameters params = VolumeJunctionBase::validParams();
+  InputParameters params = VolumeJunction1Phase::validParams();
   params += ShaftConnectable::validParams();
   params.addClassDescription(
       "Component that shows how to connect a junction-like component to a shaft.");
@@ -24,7 +24,7 @@ ShaftConnectedTestComponent::validParams()
 }
 
 ShaftConnectedTestComponent::ShaftConnectedTestComponent(const InputParameters & parameters)
-  : VolumeJunctionBase(parameters),
+  : VolumeJunction1Phase(parameters),
     ShaftConnectable(this),
     _jct_var_name(Component::genName(name(), "var"))
 {

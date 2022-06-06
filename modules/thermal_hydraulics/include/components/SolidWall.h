@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "FlowConnection.h"
+#include "FlowBoundary.h"
 
 /**
  * A simple component for solid wall BC
  *
  * Deprecated
  */
-class SolidWall : public FlowConnection
+class SolidWall : public FlowBoundary
 {
 public:
   SolidWall(const InputParameters & params);

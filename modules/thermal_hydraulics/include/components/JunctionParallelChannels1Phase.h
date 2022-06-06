@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "VolumeJunctionBase.h"
 #include "VolumeJunction1Phase.h"
 
 /**
@@ -24,14 +23,10 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
-  virtual void init() override;
   /**
    * Builds user object for computing and storing the fluxes
    */
   virtual void buildVolumeJunctionUserObject() override;
-
-  /// Directions at each connection
-  std::vector<RealVectorValue> _directions;
 
 public:
   static InputParameters validParams();

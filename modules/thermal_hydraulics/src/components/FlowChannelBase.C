@@ -250,7 +250,7 @@ FlowChannelBase::buildMesh()
     if (i == 0)
     {
       Point pt = _position;
-      _connections[FlowConnection::IN].push_back(
+      _connections[Component1DConnection::IN].push_back(
           Connection(pt, elem->node_ptr(0), bc_id_inlet, -1));
       boundary_info.add_side(elem, 0, bc_id_inlet);
       _mesh.setBoundaryName(bc_id_inlet, genName(name(), "in"));
@@ -258,7 +258,7 @@ FlowChannelBase::buildMesh()
     if (i == (_n_elem - 1))
     {
       Point pt = _position + _length * _dir;
-      _connections[FlowConnection::OUT].push_back(
+      _connections[Component1DConnection::OUT].push_back(
           Connection(pt, elem->node_ptr(1), bc_id_outlet, 1));
       boundary_info.add_side(elem, 1, bc_id_outlet);
       _mesh.setBoundaryName(bc_id_outlet, genName(name(), "out"));
