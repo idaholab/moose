@@ -12,28 +12,31 @@
 #include "FunctorMaterial.h"
 
 /**
- * Linear friction term when velocity is opposite the direction of the diode
+ * Additional anistropic friction linear or quadratic terms
  */
-class FrictionFlowDiodeMaterial : public FunctorMaterial
+class NSFVFrictionFlowDiodeMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  FrictionFlowDiodeMaterial(const InputParameters & parameters);
+  NSFVFrictionFlowDiodeMaterial(const InputParameters & parameters);
 
 private:
   /// Direction of the diode
   const RealVectorValue _direction;
 
-  /// A linear friction coefficient applied when velocity is opposite the direction
-  const Real _resistance;
+  /// Magnitude of the additional linear resistance
+  const RealVectorValue _linear_resistance;
+
+  /// Magnitude of the additional quadratic resistance
+  const RealVectorValue _quadratic_resistance;
 
   /// Base linear friction coefficient, from the correlation for the porous media friction
-  const Moose::Functor<ADRealVectorValue> & _base_friction;
+  const Moose::Functor<ADRealVectorValue> & _base_linear_friction;
 
-  ///@{Components of the superficial velocity
-  const Moose::Functor<ADReal> & _u;
-  const Moose::Functor<ADReal> & _v;
-  const Moose::Functor<ADReal> & _w;
-  ///@}
+  /// Base quadratic friction coefficient, from the correlation for the porous media friction
+  const Moose::Functor<ADRealVectorValue> & _base_quadratic_friction;
+
+  /// Whether the diode is active or not
+  const bool & _diode_on;
 };

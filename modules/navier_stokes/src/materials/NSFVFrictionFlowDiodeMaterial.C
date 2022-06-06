@@ -7,63 +7,71 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FrictionFlowDiodeMaterial.h"
+#include "NSFVFrictionFlowDiodeMaterial.h"
 #include "NS.h"
 #include "SystemBase.h"
 #include "MooseVariableFV.h"
 
-registerMooseObject("NavierStokesApp", FrictionFlowDiodeMaterial);
+registerMooseObject("NavierStokesApp", NSFVFrictionFlowDiodeMaterial);
 
 InputParameters
-FrictionFlowDiodeMaterial::validParams()
+NSFVFrictionFlowDiodeMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params.addClassDescription("Creates a linear friction material, -K vel_i * |d(i)|, i being the momentum"
-                             "component, if the flow is opposite the direction d of the diode");
-  params.addRequiredParam<Real>("resistance",
-                                "Friction factor multiplying the superficial velocity if the flow "
-                                "is in a half plane in the opposite direction of the normal");
-  params.addRequiredParam<RealVectorValue>(
-      "direction",
-      "Normal direction of the diode. Flow is free in this half-plane, "
-      "subject to friction in the other halfplane");
-  params.addRequiredParam<MooseFunctorName>("base_friction_name",
-                                            "Name of the Darcy/linear base friction coefficents");
-  params.addRequiredParam<MooseFunctorName>("new_friction_name",
-                                            "Name of the compounded linear friction coefficents");
-  params.addRequiredParam<MooseFunctorName>(NS::superficial_velocity_x,
-                                            "superficial velocity x-component");
-  params.addRequiredParam<MooseFunctorName>(NS::superficial_velocity_y,
-                                            "superficial velocity y-component");
-  params.addRequiredParam<MooseFunctorName>(NS::superficial_velocity_z,
-                                            "superficial velocity z-component");
+  params.addClassDescription("Increases the anistropic friction coefficients, linear or quadratic, "
+                             "by K_i * |direction_i| when the diode is turned on with a boolean");
+  params.addRequiredParam<RealVectorValue>("direction", "Direction of the diode");
+  params.addRequiredRangeCheckedParam<RealVectorValue>("additional_linear_resistance",
+                                                       "additional_linear_resistance >= 0",
+                                                       "Additional linear friction factor");
+  params.addRequiredRangeCheckedParam<RealVectorValue>("additional_quadratic_resistance",
+                                                       "additional_quadratic_resistance >= 0",
+                                                       "Additional quadratic friction factor");
+  params.addRequiredParam<MooseFunctorName>(
+      "base_linear_friction_coefs", "Name of the base anistropic Darcy/linear friction functor");
+  params.addRequiredParam<MooseFunctorName>(
+      "base_quadratic_friction_coefs",
+      "Name of the base anistropic Forchheimer/quadratic friction functor");
+  params.addRequiredParam<MooseFunctorName>("sum_linear_friction_name",
+                                            "Name of the additional Darcy/linear friction functor");
+  params.addRequiredParam<MooseFunctorName>(
+      "sum_quadratic_friction_name",
+      "Name of the additional Forchheimer/quadratic friction functor");
+  params.addRequiredParam<bool>("turn_on_diode", "Whether to add the additional friction");
+  params.declareControllable("turn_on_diode");
 
   return params;
 }
 
-FrictionFlowDiodeMaterial::FrictionFlowDiodeMaterial(const InputParameters & params)
+NSFVFrictionFlowDiodeMaterial::NSFVFrictionFlowDiodeMaterial(const InputParameters & params)
   : FunctorMaterial(params),
     _direction(getParam<RealVectorValue>("direction")),
-    _resistance(getParam<Real>("resistance")),
-    _base_friction(getFunctor<ADRealVectorValue>("base_friction_name")),
-    _u(getFunctor<ADReal>(NS::superficial_velocity_x)),
-    _v(getFunctor<ADReal>(NS::superficial_velocity_y)),
-    _w(getFunctor<ADReal>(NS::superficial_velocity_z))
+    _linear_resistance(getParam<RealVectorValue>("additional_linear_resistance")),
+    _quadratic_resistance(getParam<RealVectorValue>("additional_quadratic_resistance")),
+    _base_linear_friction(getFunctor<ADRealVectorValue>("base_linear_friction_coefs")),
+    _base_quadratic_friction(getFunctor<ADRealVectorValue>("base_quadratic_friction_coefs")),
+    _diode_on(getParam<bool>("turn_on_diode"))
 {
   addFunctorProperty<ADRealVectorValue>(
-    getParam<MooseFunctorName>("new_friction_name"),
-    [this](const auto & r, const auto & t) -> ADRealVectorValue
-    {
-      return {
-        (_u(r, t) * _direction(0) < 0) ?
-          _base_friction(r, t)(0) + _resistance * std::abs(_direction(0)) * _u(r, t) :
-          _base_friction(r, t)(0),
-        (_v(r, t) * _direction(1) < 0) ?
-          _base_friction(r, t)(1) + _resistance * std::abs(_direction(1)) * _v(r, t) :
-          _base_friction(r, t)(1),
-        (_w(r, t) * _direction(2) < 0) ?
-          _base_friction(r, t)(2) + _resistance * std::abs(_direction(2)) * _w(r, t):
-          _base_friction(r, t)(2)
-        };
+      getParam<MooseFunctorName>("sum_linear_friction_name"),
+      [this](const auto & r, const auto & t) -> ADRealVectorValue
+      {
+        return {_base_linear_friction(r, t)(0) +
+                    (_diode_on ? _linear_resistance(0) * std::abs(_direction(0)) : 0),
+                _base_linear_friction(r, t)(1) +
+                    (_diode_on ? _linear_resistance(1) * std::abs(_direction(1)) : 0),
+                _base_linear_friction(r, t)(2) +
+                    (_diode_on ? _linear_resistance(2) * std::abs(_direction(2)) : 0)};
+      });
+  addFunctorProperty<ADRealVectorValue>(
+      getParam<MooseFunctorName>("sum_quadratic_friction_name"),
+      [this](const auto & r, const auto & t) -> ADRealVectorValue
+      {
+        return {_base_quadratic_friction(r, t)(0) +
+                    (_diode_on ? _quadratic_resistance(0) * std::abs(_direction(0)) : 0),
+                _base_quadratic_friction(r, t)(1) +
+                    (_diode_on ? _quadratic_resistance(1) * std::abs(_direction(1)) : 0),
+                _base_quadratic_friction(r, t)(2) +
+                    (_diode_on ? _quadratic_resistance(2) * std::abs(_direction(2)) : 0)};
       });
 }
