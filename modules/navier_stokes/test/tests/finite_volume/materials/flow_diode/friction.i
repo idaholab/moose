@@ -1,5 +1,5 @@
-mu = 1
-rho = 1
+mu = 0.1
+rho = 10
 
 [Mesh]
   [cmg]
@@ -7,10 +7,10 @@ rho = 1
     dim = 2
     dx = '1 0.5 1'
     dy = '0.5 0.5'
-    ix = '8 5 8'
-    iy = '8 8'
-    subdomain_id = '0 1 2
-                    1 2 1'
+    ix = '3 2 3'
+    iy = '3 3'
+    subdomain_id = '1 1 2
+                    2 1 1'
   []
 
   [top_outlet]
@@ -29,146 +29,78 @@ rho = 1
 []
 
 [GlobalParams]
-  rhie_chow_user_object = 'rc'
+  rhie_chow_user_object = 'pins_rhie_chow_interpolator'
   advected_interp_method = 'upwind'
   velocity_interp_method = 'rc'
 []
 
-[UserObjects]
-  [rc]
-    type = INSFVRhieChowInterpolator
-    u = vel_x
-    v = vel_y
-    pressure = pressure
+[Modules]
+  [NavierStokesFV]
+    compressibility = 'incompressible'
+    porous_medium_treatment = true
+
+    density = ${rho}
+    dynamic_viscosity = ${mu}
+
+    initial_velocity = '1e-6 1e-6 0'
+    initial_pressure = 0.0
+
+    inlet_boundaries = 'left'
+    momentum_inlet_types = 'fixed-velocity'
+    momentum_inlet_function = '1 0'
+
+    wall_boundaries = 'top bottom'
+    momentum_wall_types = 'noslip noslip'
+
+    outlet_boundaries = 'right'
+    momentum_outlet_types = 'fixed-pressure'
+    pressure_function = '1'
+
+    use_friction_correction = true
+    consistent_scaling = 10
+    friction_blocks = '1; 2'
+    friction_types = 'darcy forchheimer; darcy forchheimer'
+    # Base friction
+    # friction_coeffs = 'Darcy Forchheimer; Darcy Forchheimer'
+    # Combined with diode
+    friction_coeffs = 'combined_linear combined_quadratic; combined_linear combined_quadratic'
   []
 []
 
-[Variables]
-  [vel_x]
-    type = INSFVVelocityVariable
-    initial_condition = 1e-6
+[Materials]
+  [porosity]
+    type = ADGenericFunctorMaterial
+    prop_names = 'porosity'
+    prop_values = '0.5'
   []
-  [vel_y]
-    type = INSFVVelocityVariable
-    initial_condition = 1e-6
+  [base_friction]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'Darcy Forchheimer'
+    prop_values = '1 1 1 0.1 0.2 0.3'
   []
-  [pressure]
-    type = INSFVPressureVariable
-  []
-[]
-
-[FVKernels]
-  [mass]
-    type = INSFVMassAdvection
-    variable = pressure
-    rho = ${rho}
-  []
-
-  [u_advection]
-    type = INSFVMomentumAdvection
-    variable = vel_x
-    rho = ${rho}
-    momentum_component = 'x'
-  []
-  [u_viscosity]
-    type = INSFVMomentumDiffusion
-    variable = vel_x
-    mu = ${mu}
-    momentum_component = 'x'
-  []
-  [u_pressure]
-    type = INSFVMomentumPressure
-    variable = vel_x
-    momentum_component = 'x'
-    pressure = pressure
-  []
-
-  [v_advection]
-    type = INSFVMomentumAdvection
-    variable = vel_y
-    rho = ${rho}
-    momentum_component = 'y'
-  []
-  [v_viscosity]
-    type = INSFVMomentumDiffusion
-    variable = vel_y
-    mu = ${mu}
-    momentum_component = 'y'
-  []
-  [v_pressure]
-    type = INSFVMomentumPressure
-    variable = vel_y
-    momentum_component = 'y'
-    pressure = pressure
-  []
-
-  [diodes_against_flow_x]
-    type = INSFVFrictionFlowDiode
-    resistance = 100
-    variable = vel_x
-    direction = '-1 0 0'
-    block = 1
-    momentum_component = 'x'
-  []
-  [diodes_against_flow_y]
-    type = INSFVFrictionFlowDiode
-    resistance = 100
-    variable = vel_y
-    direction = '-1 0 0'
-    block = 1
-    momentum_component = 'y'
-  []
-
-  [diode_free_flow_x]
-    type = INSFVFrictionFlowDiode
-    resistance = 100
-    variable = vel_x
+  [diode]
+    type = NSFVFrictionFlowDiodeMaterial
     direction = '1 0 0'
-    block = 2
-    momentum_component = 'x'
+    additional_linear_resistance = '10 0 0' #'100 10 20'
+    additional_quadratic_resistance = '10 0 0' #'10 4 4'
+    base_linear_friction_coefs = 'Darcy'
+    base_quadratic_friction_coefs = 'Forchheimer'
+    sum_linear_friction_name = 'diode_linear'
+    sum_quadratic_friction_name = 'diode_quad'
+    block = '2'
+    turn_on_diode = true
   []
-  [diode_free_flow_y]
-    type = INSFVFrictionFlowDiode
-    resistance = 100
-    variable = vel_y
-    direction = '1 0 0'
-    block = 2
-    momentum_component = 'y'
+  [combine_linear_friction]
+    type = ADPiecewiseByBlockVectorFunctorMaterial
+    prop_name = 'combined_linear'
+    subdomain_to_prop_value = '1 Darcy
+                               2 diode_linear'
   []
-[]
-
-[FVBCs]
-  [walls_u]
-    type = INSFVNoSlipWallBC
-    variable = vel_x
-    boundary = 'top bottom'
-    function = 0
-  []
-  [walls_v]
-    type = INSFVNoSlipWallBC
-    variable = vel_y
-    boundary = 'top bottom'
-    function = 0
-  []
-
-  [inlet_u]
-    type = INSFVInletVelocityBC
-    variable = vel_x
-    boundary = 'left'
-    function = 1
-  []
-  [inlet_v]
-    type = INSFVInletVelocityBC
-    variable = vel_y
-    boundary = 'left'
-    function = 0
-  []
-
-  [outlet]
-    type = INSFVOutletPressureBC
-    variable = pressure
-    boundary = 'right'
-    function = 1
+  [combine_quadratic_friction]
+    type = ADPiecewiseByBlockVectorFunctorMaterial
+    prop_name = 'combined_quadratic'
+    subdomain_to_prop_value = '1 Forchheimer
+                               2 diode_quad'
   []
 []
 
@@ -186,15 +118,15 @@ rho = 1
   [mdot_top]
     type = VolumetricFlowRate
     boundary = 'top_right'
-    vel_x = vel_x
-    vel_y = vel_y
+    vel_x = superficial_vel_x
+    vel_y = superficial_vel_y
     advected_quantity = ${rho}
   []
   [mdot_bottom]
     type = VolumetricFlowRate
     boundary = 'bottom_right'
-    vel_x = vel_x
-    vel_y = vel_y
+    vel_x = superficial_vel_x
+    vel_y = superficial_vel_y
     advected_quantity = ${rho}
   []
 []
