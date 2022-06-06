@@ -158,8 +158,13 @@ protected:
   /// Old material property containing jacobian of transformation
   std::vector<const MaterialProperty<Real> *> _J_map_old;
 
-  /// Rotation matrix material property
-  std::vector<MaterialProperty<RankTwoTensor> *> _rotation_matrix;
+  /// Covariant base vector matrix material property to transform stress
+  std::vector<MaterialProperty<RankTwoTensor> *> _covariant_transformation_matrix;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _covariant_transformation_matrix_old;
+
+  /// Contravariant base vector matrix material property to transform strain
+  std::vector<MaterialProperty<RankTwoTensor> *> _contravariant_transformation_matrix;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _contravariant_transformation_matrix_old;
 
   /// Total strain in global coordinate system
   std::vector<MaterialProperty<RankTwoTensor> *> _total_global_strain;
