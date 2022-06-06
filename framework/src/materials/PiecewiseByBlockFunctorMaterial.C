@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", PiecewiseByBlockFunctorMaterial);
 registerMooseObject("MooseApp", ADPiecewiseByBlockFunctorMaterial);
+registerMooseObject("MooseApp", PiecewiseByBlockVectorFunctorMaterial);
+registerMooseObject("MooseApp", ADPiecewiseByBlockVectorFunctorMaterial);
 registerMooseObjectRenamed("MooseApp",
                            FVPropValPerSubdomainMaterial,
                            "06/30/2022 24:00",
@@ -20,13 +22,13 @@ registerMooseObjectRenamed("MooseApp",
                            "06/30/2022 24:00",
                            ADPiecewiseByBlockFunctorMaterial);
 
-template <bool is_ad>
+template <typename T>
 InputParameters
-PiecewiseByBlockFunctorMaterialTempl<is_ad>::validParams()
+PiecewiseByBlockFunctorMaterialTempl<T>::validParams()
 {
   auto params = FunctorMaterial::validParams();
   params.addClassDescription("Computes a property value on a per-subdomain basis");
-  // Somehow min gcc doesn't know the type of params here
+  // Somehow min gcc doesn't know the typename of params here
   params.template addRequiredParam<MaterialPropertyName>("prop_name",
                                                          "The name of the property to declare");
   params.template addRequiredParam<std::map<std::string, std::string>>(
@@ -36,8 +38,8 @@ PiecewiseByBlockFunctorMaterialTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-PiecewiseByBlockFunctorMaterialTempl<is_ad>::PiecewiseByBlockFunctorMaterialTempl(
+template <typename T>
+PiecewiseByBlockFunctorMaterialTempl<T>::PiecewiseByBlockFunctorMaterialTempl(
     const InputParameters & params)
   : FunctorMaterial(params)
 {
@@ -45,13 +47,15 @@ PiecewiseByBlockFunctorMaterialTempl<is_ad>::PiecewiseByBlockFunctorMaterialTemp
        getParam<std::map<std::string, std::string>>("subdomain_to_prop_value"))
   {
     const auto & name = map_pr.second;
-    const auto & functor = getFunctor<GenericReal<is_ad>>(name);
-    addFunctorPropertyByBlocks<GenericReal<is_ad>>(
+    const auto & functor = getFunctor<T>(name);
+    addFunctorPropertyByBlocks<T>(
         "prop_name",
-        [&functor](const auto & r, const auto & t) -> GenericReal<is_ad> { return functor(r, t); },
+        [&functor](const auto & r, const auto & t) -> T { return functor(r, t); },
         std::set<SubdomainID>({_mesh.getSubdomainID(map_pr.first)}));
   }
 }
 
-template class PiecewiseByBlockFunctorMaterialTempl<false>;
-template class PiecewiseByBlockFunctorMaterialTempl<true>;
+template class PiecewiseByBlockFunctorMaterialTempl<GenericReal<false>>;
+template class PiecewiseByBlockFunctorMaterialTempl<GenericReal<true>>;
+template class PiecewiseByBlockFunctorMaterialTempl<GenericRealVectorValue<false>>;
+template class PiecewiseByBlockFunctorMaterialTempl<GenericRealVectorValue<true>>;

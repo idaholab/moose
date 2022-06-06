@@ -15,7 +15,7 @@
  * Defines a functor material property by another functor (possibly constant) on each block,
  * discontinuous at interfaces
  */
-template <bool is_ad>
+template <typename T>
 class PiecewiseByBlockFunctorMaterialTempl : public FunctorMaterial
 {
 public:
@@ -23,5 +23,9 @@ public:
   static InputParameters validParams();
 };
 
-typedef PiecewiseByBlockFunctorMaterialTempl<false> PiecewiseByBlockFunctorMaterial;
-typedef PiecewiseByBlockFunctorMaterialTempl<true> ADPiecewiseByBlockFunctorMaterial;
+typedef PiecewiseByBlockFunctorMaterialTempl<GenericReal<false>> PiecewiseByBlockFunctorMaterial;
+typedef PiecewiseByBlockFunctorMaterialTempl<GenericReal<true>> ADPiecewiseByBlockFunctorMaterial;
+typedef PiecewiseByBlockFunctorMaterialTempl<GenericRealVectorValue<false>>
+    PiecewiseByBlockVectorFunctorMaterial;
+typedef PiecewiseByBlockFunctorMaterialTempl<GenericRealVectorValue<true>>
+    ADPiecewiseByBlockVectorFunctorMaterial;
