@@ -57,11 +57,6 @@ public:
    */
   virtual void executeOnInternalSide() {}
 
-  /**
-   * execute method that is called during ComputeUserObjects::onInterface
-   */
-  virtual void executeOnInterface() {}
-
 protected:
   /// the Moose mesh
   MooseMesh & _mesh;
