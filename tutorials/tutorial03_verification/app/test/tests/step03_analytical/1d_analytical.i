@@ -62,8 +62,8 @@
     vars = 'k    rho  cp  T0  qs'
     vals = '80.2 7800 450 300 7e5'
     value = 'T0 + '
-            'qs/k*(2*sqrt(k/(rho*cp)*t/pi)*exp(-x^2/(4*k/(rho*cp)*t)) - '
-            'x*(1-erf(x/(2*sqrt(k/(rho*cp)*t)))))'
+            'qs/k*(2*sqrt(k/(rho*cp)*t/pi)*exp(-x^2/(4*k/(rho*cp)*(t+1e-50))) - '
+            'x*(1-erf(x/(2*sqrt(k/(rho*cp)*(t+1e-50))))))'
   []
 []
 

@@ -50,6 +50,7 @@ function configure_libmesh()
                --enable-hdf5 \
                --enable-petsc-hypre-required \
                --enable-metaphysicl-required \
+               --enable-xdr-required \
                --with-cxx-std-min=2014 \
                --without-gdb-command \
                --with-methods="${METHODS}" \
