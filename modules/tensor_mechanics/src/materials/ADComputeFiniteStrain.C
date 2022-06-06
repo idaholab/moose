@@ -148,9 +148,12 @@ ADComputeFiniteStrain::computeQpIncrements(ADRankTwoTensor & total_strain_increm
       const ADReal C1_squared =
           p + 3.0 * Utility::pow<2>(p) * (1.0 - (p + q)) / Utility::pow<2>(p + q) -
           2.0 * Utility::pow<3>(p) * (1.0 - (p + q)) / Utility::pow<3>(p + q);
-      mooseAssert(C1_squared >= 0.0,
-                  "Cannot take square root of a negative number. This may happen when elements "
-                  "become heavily distorted.");
+      if (C1_squared <= 0.0)
+        mooseException(
+            "Cannot take square root of a number less than or equal to zero in the calculation of "
+            "C1 for the Rashid approximation for the rotation tensor. This zero or negative number "
+            "may occur when elements become heavily distorted.");
+
       const ADReal C1 = std::sqrt(C1_squared);
 
       ADReal C2;
@@ -169,9 +172,12 @@ ADComputeFiniteStrain::computeQpIncrements(ADRankTwoTensor & total_strain_increm
 
       const ADReal C3_test =
           (p * q * (3.0 - q) + Utility::pow<3>(p) + Utility::pow<2>(q)) / Utility::pow<3>(p + q);
-      mooseAssert(C3_test >= 0.0,
-                  "Cannot take square root of a negative number. This may happen when elements "
-                  "become heavily distorted.");
+      if (C3_test <= 0.0)
+        mooseException(
+            "Cannot take square root of a number less than or equal to zero in the calculation of "
+            "C3_test for the Rashid approximation for the rotation tensor. This zero or negative "
+            "number may occur when elements become heavily distorted.");
+
       const ADReal C3 = 0.5 * std::sqrt(C3_test); // sin theta_a/(2 sqrt(q))
 
       // Calculate incremental rotation. Note that this value is the transpose of that from Rashid,
