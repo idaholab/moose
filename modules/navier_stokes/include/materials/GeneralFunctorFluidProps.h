@@ -35,7 +35,7 @@ protected:
    * Characteristic length $d$ used in computing the Reynolds number
    * $Re=\rho_fVd/\mu_f$.
    */
-  const Real _d;
+  const Moose::Functor<Real> & _d;
 
   /// variables
   const Moose::Functor<ADReal> & _pressure;
