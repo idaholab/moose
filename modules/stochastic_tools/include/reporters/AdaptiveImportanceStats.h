@@ -45,11 +45,8 @@ private:
   /// Track the current step of the main App
   const int & _step;
 
-  /// The adaptive Monte Carlo sampler
-  Sampler & _sampler;
-
   /// Adaptive Importance Sampler
-  const AdaptiveImportanceSampler * const _ais;
+  AdaptiveImportanceSampler & _ais;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;

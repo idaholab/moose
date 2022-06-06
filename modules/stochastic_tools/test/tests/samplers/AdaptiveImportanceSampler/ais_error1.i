@@ -1,3 +1,6 @@
+[StochasticTools]
+[]
+
 [Samplers/sample]
   type = CartesianProduct
   linear_space_items = '0 1 1'

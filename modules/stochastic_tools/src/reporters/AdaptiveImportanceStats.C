@@ -41,48 +41,44 @@ AdaptiveImportanceStats::AdaptiveImportanceStats(const InputParameters & paramet
     _pf(declareValue<std::vector<Real>>("pf")),
     _cov_pf(declareValue<std::vector<Real>>("cov_pf")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
-    _sampler(getSampler("sampler")),
-    _ais(dynamic_cast<const AdaptiveImportanceSampler *>(&_sampler)),
+    _ais(getSampler<AdaptiveImportanceSampler>("sampler")),
     _check_step(std::numeric_limits<int>::max())
 {
-  if (!_ais)
-    paramError("sampler", "The selected sampler is not of type AdaptiveImportance.");
-
   // Initialize variables
-  const auto rows = _sampler.getNumberOfRows();
+  const auto rows = _ais.getNumberOfRows();
   _mu_imp.resize(rows);
   _std_imp.resize(rows);
   _pf.resize(1);
   _cov_pf.resize(1);
   _pf_sum = 0.0;
   _var_sum = 0.0;
-  _distributions_store = _ais->getDistributionNames();
-  _factor = _ais->getStdFactor();
+  _distributions_store = _ais.getDistributionNames();
+  _factor = _ais.getStdFactor();
 }
 
 void
 AdaptiveImportanceStats::execute()
 {
-  if (_sampler.getNumberOfLocalRows() == 0 || _check_step == _step)
+  if (_ais.getNumberOfLocalRows() == 0 || _check_step == _step)
   {
     _check_step = _step;
     return;
   }
 
   // Compute AdaptiveImportanceSampler statistics at each sample during the evaluation phase only.
-  if (_step > _ais->getNumSamplesTrain())
+  if (_step > _ais.getNumSamplesTrain())
   {
     // Get the statistics of the importance distributions in the standard Normal space.
-    _mu_imp = _ais->getImportanceVectorMean();
-    _std_imp = _ais->getImportanceVectorStd();
+    _mu_imp = _ais.getImportanceVectorMean();
+    _std_imp = _ais.getImportanceVectorStd();
 
     // Get the failure probability estimate.
-    const Real tmp = _ais->getUseAbsoluteValue() ? std::abs(_output_value[0]) : _output_value[0];
-    const bool output_limit_reached = tmp >= _ais->getOutputLimit();
+    const Real tmp = _ais.getUseAbsoluteValue() ? std::abs(_output_value[0]) : _output_value[0];
+    const bool output_limit_reached = tmp >= _ais.getOutputLimit();
     Real prod1 = output_limit_reached ? 1.0 : 0.0;
-    std::vector<Real> input1 = _sampler.getNextLocalRow();
+    std::vector<Real> input1 = _ais.getNextLocalRow();
     Real input_tmp = 0.0;
-    for (dof_id_type ss = 0; ss < _sampler.getNumberOfCols(); ++ss)
+    for (dof_id_type ss = 0; ss < _ais.getNumberOfCols(); ++ss)
     {
       input_tmp = Normal::quantile(_distributions_store[ss]->cdf(input1[ss]), 0.0, 1.0);
       prod1 = prod1 * (Normal::pdf(input_tmp, 0.0, 1.0) /
@@ -90,12 +86,12 @@ AdaptiveImportanceStats::execute()
     }
     _pf_sum += prod1;
     _var_sum += Utility::pow<2>(prod1);
-    _pf[0] = _pf_sum / (_step - _ais->getNumSamplesTrain());
+    _pf[0] = _pf_sum / (_step - _ais.getNumSamplesTrain());
 
     // Get coefficient of variation of failure probability.
     Real tmp_var =
-        std::sqrt(1.0 / (_step - _ais->getNumSamplesTrain()) *
-                  (_var_sum / (_step - _ais->getNumSamplesTrain()) - Utility::pow<2>(_pf[0])));
+        std::sqrt(1.0 / (_step - _ais.getNumSamplesTrain()) *
+                  (_var_sum / (_step - _ais.getNumSamplesTrain()) - Utility::pow<2>(_pf[0])));
     _cov_pf[0] = tmp_var / _pf[0];
   }
 }
