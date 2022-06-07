@@ -95,30 +95,6 @@ AdaptiveImportanceSampler::AdaptiveImportanceSampler(const InputParameters & par
   setNumberOfRandomSeeds(_num_random_seeds);
 }
 
-const std::vector<Real> &
-AdaptiveImportanceSampler::getInitialValues() const
-{
-  return _initial_values;
-}
-
-const int &
-AdaptiveImportanceSampler::getNumSamplesTrain() const
-{
-  return _num_samples_train;
-}
-
-const bool &
-AdaptiveImportanceSampler::getUseAbsoluteValue() const
-{
-  return _use_absolute_value;
-}
-
-const Real &
-AdaptiveImportanceSampler::getOutputLimit() const
-{
-  return _output_limit;
-}
-
 Real
 AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
 {
@@ -134,11 +110,11 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
     if (sample)
     {
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
-        _prev_value[j] = Normal::quantile(_distributions[j]->cdf(_inputs[j][0]), 0, 1);
+        _prev_value[j] = Normal::quantile(_distributions[j]->cdf(_inputs[j][0]), 0.0, 1.0);
       Real acceptance_ratio = 0.0;
       for (dof_id_type i = 0; i < _distributions.size(); ++i)
-        acceptance_ratio += std::log(Normal::pdf(_prev_value[i], 0, 1)) -
-                            std::log(Normal::pdf(_inputs_sto[i].back(), 0, 1));
+        acceptance_ratio += std::log(Normal::pdf(_prev_value[i], 0.0, 1.0)) -
+                            std::log(Normal::pdf(_inputs_sto[i].back(), 0.0, 1.0));
       if (acceptance_ratio > std::log(getRand(_step)))
       {
         for (dof_id_type i = 0; i < _distributions.size(); ++i)
@@ -149,9 +125,9 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
         for (dof_id_type i = 0; i < _distributions.size(); ++i)
           _inputs_sto[i].push_back(_inputs_sto[i].back());
       }
+      for (dof_id_type i = 0; i < _distributions.size(); ++i)
+        _prev_value[i] = Normal::quantile(getRand(_step), _inputs_sto[i].back(), _proposal_std[i]);
     }
-    _prev_value[col_index] =
-        Normal::quantile(getRand(_step), _inputs_sto[col_index].back(), _proposal_std[col_index]);
   }
   else if (sample)
   {
@@ -170,5 +146,5 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
   }
 
   _check_step = _step;
-  return _distributions[col_index]->quantile(Normal::cdf(_prev_value[col_index], 0, 1));
+  return _distributions[col_index]->quantile(Normal::cdf(_prev_value[col_index], 0.0, 1.0));
 }
