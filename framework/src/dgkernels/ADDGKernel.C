@@ -208,12 +208,12 @@ ADDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
     }
   };
 
-  _assembly.processDerivatives(residuals,
-                               type == Moose::ElementElement ? _var.dofIndices()
-                                                             : _var.dofIndicesNeighbor(),
-                               _matrix_tags,
-                               _var.scalingFactor(),
-                               local_functor);
+  _assembly.processJacobian(residuals,
+                            type == Moose::ElementElement ? _var.dofIndices()
+                                                          : _var.dofIndicesNeighbor(),
+                            _matrix_tags,
+                            _var.scalingFactor(),
+                            local_functor);
 
   if (_has_diag_save_in)
   {
@@ -323,10 +323,10 @@ ADDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, const Mo
     }
   };
 
-  _assembly.processDerivatives(residuals,
-                               type == Moose::ElementElement ? _var.dofIndices()
-                                                             : _var.dofIndicesNeighbor(),
-                               _matrix_tags,
-                               _var.scalingFactor(),
-                               local_functor);
+  _assembly.processJacobian(residuals,
+                            type == Moose::ElementElement ? _var.dofIndices()
+                                                          : _var.dofIndicesNeighbor(),
+                            _matrix_tags,
+                            _var.scalingFactor(),
+                            local_functor);
 }

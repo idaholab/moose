@@ -1683,17 +1683,17 @@ public:
    * This simply caches the derivative values for the corresponding column indices for the provided
    * \p matrix_tags, and applies any scaling factors
    */
-  void processDerivatives(const ADReal & residual,
-                          dof_id_type dof_index,
-                          const std::set<TagID> & matrix_tags);
+  void processJacobian(const ADReal & residual,
+                       dof_id_type dof_index,
+                       const std::set<TagID> & matrix_tags);
 
   /**
-   * This performs the duties of both \p processResidual and \p processDerivatives
+   * This performs the duties of both \p processResidual and \p processJacobian
    */
-  void processResidualAndDerivatives(const ADReal & residual,
-                                     dof_id_type dof_index,
-                                     const std::set<TagID> & vector_tags,
-                                     const std::set<TagID> & matrix_tags);
+  void processResidualAndJacobian(const ADReal & residual,
+                                  dof_id_type dof_index,
+                                  const std::set<TagID> & vector_tags,
+                                  const std::set<TagID> & matrix_tags);
 #endif
 
   /**
@@ -1708,10 +1708,10 @@ public:
    * should be added to, and the \p matrix_tags specifying the matrices that will  be added into
    */
   template <typename LocalFunctor>
-  void processDerivatives(const ADReal & residual,
-                          dof_id_type dof_index,
-                          const std::set<TagID> & matrix_tags,
-                          LocalFunctor & local_functor);
+  void processJacobian(const ADReal & residual,
+                       dof_id_type dof_index,
+                       const std::set<TagID> & matrix_tags,
+                       LocalFunctor & local_functor);
 
   /**
    * Process the supplied residual values. This is a mirror of of the non-templated version of \p
@@ -1735,11 +1735,11 @@ public:
    * matrix_tags. Note that this overload will call \p DofMap::constrain_element_vector and \p
    * DofMap::constrain_element_matrix
    */
-  void processResidualsAndDerivatives(const std::vector<ADReal> & residuals,
-                                      const std::vector<dof_id_type> & row_indices,
-                                      const std::set<TagID> & vector_tags,
-                                      const std::set<TagID> & matrix_tags,
-                                      Real scaling_factor);
+  void processResidualsAndJacobian(const std::vector<ADReal> & residuals,
+                                   const std::vector<dof_id_type> & row_indices,
+                                   const std::set<TagID> & vector_tags,
+                                   const std::set<TagID> & matrix_tags,
+                                   Real scaling_factor);
 #endif
 
   /**
@@ -1754,11 +1754,11 @@ public:
    * added into
    */
   template <typename LocalFunctor>
-  void processDerivatives(const std::vector<ADReal> & residuals,
-                          const std::vector<dof_id_type> & row_indices,
-                          const std::set<TagID> & matrix_tags,
-                          Real scaling_factor,
-                          LocalFunctor & local_functor);
+  void processJacobian(const std::vector<ADReal> & residuals,
+                       const std::vector<dof_id_type> & row_indices,
+                       const std::set<TagID> & matrix_tags,
+                       Real scaling_factor,
+                       LocalFunctor & local_functor);
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
@@ -1768,11 +1768,11 @@ public:
    * correspond to mortar constraint residuals along faces such that interior hanging nodes will not
    * feel the contribution
    */
-  void processUnconstrainedResidualsAndDerivatives(const std::vector<ADReal> & residuals,
-                                                   const std::vector<dof_id_type> & row_indices,
-                                                   const std::set<TagID> & vector_tags,
-                                                   const std::set<TagID> & matrix_tags,
-                                                   Real scaling_factor);
+  void processUnconstrainedResidualsAndJacobian(const std::vector<ADReal> & residuals,
+                                                const std::vector<dof_id_type> & row_indices,
+                                                const std::set<TagID> & vector_tags,
+                                                const std::set<TagID> & matrix_tags,
+                                                Real scaling_factor);
 
   /**
    * signals this object that a vector containing variable scaling factors should be used when
@@ -2815,9 +2815,9 @@ Assembly::adGradPhi<RealVectorValue>(const MooseVariableFE<RealVectorValue> & v)
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 inline void
-Assembly::processDerivatives(const ADReal & residual,
-                             const dof_id_type row_index,
-                             const std::set<TagID> & matrix_tags)
+Assembly::processJacobian(const ADReal & residual,
+                          const dof_id_type row_index,
+                          const std::set<TagID> & matrix_tags)
 {
   const auto & derivs = residual.derivatives();
 
@@ -2835,17 +2835,17 @@ Assembly::processDerivatives(const ADReal & residual,
 
 template <typename LocalFunctor>
 void
-Assembly::processDerivatives(const ADReal & residual,
-                             const dof_id_type row_index,
-                             const std::set<TagID> & matrix_tags,
-                             LocalFunctor &
+Assembly::processJacobian(const ADReal & residual,
+                          const dof_id_type row_index,
+                          const std::set<TagID> & matrix_tags,
+                          LocalFunctor &
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-                                 local_functor
+                              local_functor
 #endif
 )
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  processDerivatives(residual, row_index, matrix_tags);
+  processJacobian(residual, row_index, matrix_tags);
 #else
   local_functor(residual, row_index, matrix_tags);
 #endif
@@ -2853,22 +2853,22 @@ Assembly::processDerivatives(const ADReal & residual,
 
 template <typename LocalFunctor>
 void
-Assembly::processDerivatives(const std::vector<ADReal> & residuals,
-                             const std::vector<dof_id_type> & input_row_indices,
-                             const std::set<TagID> & matrix_tags,
-                             const Real
+Assembly::processJacobian(const std::vector<ADReal> & residuals,
+                          const std::vector<dof_id_type> & input_row_indices,
+                          const std::set<TagID> & matrix_tags,
+                          const Real
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-                                 scaling_factor
+                              scaling_factor
 #endif
-                             ,
-                             LocalFunctor &
+                          ,
+                          LocalFunctor &
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-                                 local_functor
+                              local_functor
 #endif
 )
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  processResidualsAndDerivatives(residuals, input_row_indices, {}, matrix_tags, scaling_factor);
+  processResidualsAndJacobian(residuals, input_row_indices, {}, matrix_tags, scaling_factor);
 #else
   local_functor(residuals, input_row_indices, matrix_tags);
 #endif

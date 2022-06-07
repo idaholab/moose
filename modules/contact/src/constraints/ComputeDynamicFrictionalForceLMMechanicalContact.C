@@ -364,9 +364,9 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
   }
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  _assembly.processResidualAndDerivatives(
+  _assembly.processResidualAndJacobian(
       dof_residual, friction_dof_indices[0], _vector_tags, _matrix_tags);
-  _assembly.processResidualAndDerivatives(
+  _assembly.processResidualAndJacobian(
       dof_residual_dir, friction_dof_indices[1], _vector_tags, _matrix_tags);
 #endif
 }
@@ -413,7 +413,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
   }
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  _assembly.processResidualAndDerivatives(
+  _assembly.processResidualAndJacobian(
       dof_residual, friction_dof_index, _vector_tags, _matrix_tags);
 #endif
 }

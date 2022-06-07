@@ -171,7 +171,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
   mooseAssert(dof_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  _assembly.processResidualAndDerivatives(r, dof_indices[0], _vector_tags, _matrix_tags);
+  _assembly.processResidualAndJacobian(r, dof_indices[0], _vector_tags, _matrix_tags);
 #else
 
   auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
@@ -198,7 +198,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
                  fi.faceCentroid());
   };
 
-  _assembly.processDerivatives(r, dof_indices[0], _matrix_tags, local_functor);
+  _assembly.processJacobian(r, dof_indices[0], _matrix_tags, local_functor);
 #endif
 }
 

@@ -59,7 +59,7 @@ ADNodalKernel::computeJacobian()
     const auto dof_idx = _var.nodalDofIndex();
     _qp = 0;
     const auto res = computeQpResidual();
-    _assembly.processDerivatives(res, dof_idx, _matrix_tags);
+    _assembly.processJacobian(res, dof_idx, _matrix_tags);
   }
 #endif
 }

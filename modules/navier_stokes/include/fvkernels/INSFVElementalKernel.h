@@ -41,7 +41,7 @@ protected:
   /**
    * Process into either the system residual or Jacobian
    */
-  void processResidualAndDerivatives(const ADReal & residual, dof_id_type dof);
+  void processResidualAndJacobian(const ADReal & residual, dof_id_type dof);
 
 private:
   using FVElementalKernel::_current_elem;

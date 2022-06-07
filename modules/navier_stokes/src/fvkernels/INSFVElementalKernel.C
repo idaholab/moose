@@ -24,14 +24,14 @@ INSFVElementalKernel::INSFVElementalKernel(const InputParameters & params)
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 void
-INSFVElementalKernel::processResidualAndDerivatives(const ADReal & residual,
-                                                    const dof_id_type dof_index)
+INSFVElementalKernel::processResidualAndJacobian(const ADReal & residual,
+                                                 const dof_id_type dof_index)
 {
-  _assembly.processResidualAndDerivatives(residual, dof_index, _vector_tags, _matrix_tags);
+  _assembly.processResidualAndJacobian(residual, dof_index, _vector_tags, _matrix_tags);
 }
 #else
 void
-INSFVElementalKernel::processResidualAndDerivatives(const ADReal &, const dof_id_type)
+INSFVElementalKernel::processResidualAndJacobian(const ADReal &, const dof_id_type)
 {
 }
 #endif

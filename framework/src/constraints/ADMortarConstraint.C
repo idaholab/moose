@@ -104,7 +104,7 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
       residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  _assembly.processUnconstrainedResidualsAndDerivatives(
+  _assembly.processUnconstrainedResidualsAndJacobian(
       residuals, dof_indices, _vector_tags, _matrix_tags, scaling_factor);
 #else
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
@@ -176,7 +176,7 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
     }
   };
 
-  _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, scaling_factor, local_functor);
+  _assembly.processJacobian(residuals, dof_indices, _matrix_tags, scaling_factor, local_functor);
 #endif
 }
 

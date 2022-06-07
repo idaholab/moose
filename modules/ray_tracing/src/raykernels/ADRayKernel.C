@@ -130,7 +130,7 @@ ADRayKernelTempl<T>::computeJacobian()
     }
   };
 
-  _assembly.processDerivatives(
+  _assembly.processJacobian(
       _residuals, _var.dofIndices(), _matrix_tags, _var.scalingFactor(), local_functor);
 }
 

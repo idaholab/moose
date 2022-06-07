@@ -26,7 +26,7 @@ INSFVFluxBC::INSFVFluxBC(const InputParameters & params)
 }
 
 void
-INSFVFluxBC::processResidualAndDerivatives(const ADReal & residual)
+INSFVFluxBC::processResidualAndJacobian(const ADReal & residual)
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   const auto * const elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM)
@@ -34,7 +34,7 @@ INSFVFluxBC::processResidualAndDerivatives(const ADReal & residual)
                                 : _face_info->neighborPtr();
   const auto dof_index = elem->dof_number(_sys.number(), _var.number(), 0);
 
-  _assembly.processResidualAndDerivatives(residual, dof_index, _vector_tags, _matrix_tags);
+  _assembly.processResidualAndJacobian(residual, dof_index, _vector_tags, _matrix_tags);
 #else
   libmesh_ignore(residual);
 #endif

@@ -3435,7 +3435,7 @@ Assembly::cacheResidual(dof_id_type dof, Real value, const std::set<TagID> & tag
 }
 
 // swapped argument order from above methods to be consistent with argument order for
-// Assembly::processDerivatives
+// Assembly::processJacobian
 void
 Assembly::processResidual(Real value, const dof_id_type dof, const std::set<TagID> & tags)
 {
@@ -3457,10 +3457,10 @@ Assembly::processResidual(Real value, const dof_id_type dof, const std::set<TagI
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 void
-Assembly::processResidualAndDerivatives(const ADReal & residual,
-                                        const dof_id_type row_index,
-                                        const std::set<TagID> & vector_tags,
-                                        const std::set<TagID> & matrix_tags)
+Assembly::processResidualAndJacobian(const ADReal & residual,
+                                     const dof_id_type row_index,
+                                     const std::set<TagID> & vector_tags,
+                                     const std::set<TagID> & matrix_tags)
 {
   mooseAssert(!(_computing_jacobian && _computing_residual_and_jacobian),
               "These should never be true at the same time");
@@ -3469,7 +3469,7 @@ Assembly::processResidualAndDerivatives(const ADReal & residual,
     processResidual(MetaPhysicL::raw_value(residual), row_index, vector_tags);
 
   if (computingJacobian())
-    processDerivatives(residual, row_index, matrix_tags);
+    processJacobian(residual, row_index, matrix_tags);
 }
 #endif
 
@@ -4630,11 +4630,11 @@ Assembly::modifyArbitraryWeights(const std::vector<Real> & weights)
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 void
-Assembly::processUnconstrainedResidualsAndDerivatives(const std::vector<ADReal> & residuals,
-                                                      const std::vector<dof_id_type> & row_indices,
-                                                      const std::set<TagID> & vector_tags,
-                                                      const std::set<TagID> & matrix_tags,
-                                                      const Real scaling_factor)
+Assembly::processUnconstrainedResidualsAndJacobian(const std::vector<ADReal> & residuals,
+                                                   const std::vector<dof_id_type> & row_indices,
+                                                   const std::set<TagID> & vector_tags,
+                                                   const std::set<TagID> & matrix_tags,
+                                                   const Real scaling_factor)
 {
   mooseAssert(residuals.size() == row_indices.size(),
               "The number of residuals should match the number of dof indices");
@@ -4831,11 +4831,11 @@ Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 void
-Assembly::processResidualsAndDerivatives(const std::vector<ADReal> & residuals,
-                                         const std::vector<dof_id_type> & input_row_indices,
-                                         const std::set<TagID> & vector_tags,
-                                         const std::set<TagID> & matrix_tags,
-                                         const Real scaling_factor)
+Assembly::processResidualsAndJacobian(const std::vector<ADReal> & residuals,
+                                      const std::vector<dof_id_type> & input_row_indices,
+                                      const std::set<TagID> & vector_tags,
+                                      const std::set<TagID> & matrix_tags,
+                                      const Real scaling_factor)
 {
   // First handle the residuals
   processResiduals(residuals, input_row_indices, vector_tags, scaling_factor);

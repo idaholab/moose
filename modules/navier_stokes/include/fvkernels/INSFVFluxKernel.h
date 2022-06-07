@@ -43,5 +43,5 @@ protected:
   /**
    * Process into either the system residual or Jacobian
    */
-  void processResidualAndDerivatives(const ADReal & residual);
+  void processResidualAndJacobian(const ADReal & residual);
 };

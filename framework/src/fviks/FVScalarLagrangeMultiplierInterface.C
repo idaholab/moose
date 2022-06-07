@@ -65,15 +65,13 @@ FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo & fi)
 
   // Primal
   const auto primal_r = _lambda[0] * fi.faceArea() * fi.faceCoord() * (2 * _elem_is_one - 1);
-  _assembly.processResidualAndDerivatives(
-      primal_r, elem_dof_indices[0], _vector_tags, _matrix_tags);
-  _assembly.processResidualAndDerivatives(
-      -primal_r, neigh_dof_indices[0], _vector_tags, _matrix_tags);
+  _assembly.processResidualAndJacobian(primal_r, elem_dof_indices[0], _vector_tags, _matrix_tags);
+  _assembly.processResidualAndJacobian(-primal_r, neigh_dof_indices[0], _vector_tags, _matrix_tags);
 
   // LM
   const auto lm_r = computeQpResidual() * fi.faceArea() * fi.faceCoord();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
-  _assembly.processResidualAndDerivatives(
+  _assembly.processResidualAndJacobian(
       lm_r, _lambda_var.dofIndices()[0], _vector_tags, _matrix_tags);
 }
 #else

@@ -173,9 +173,9 @@ FVInterfaceKernel::processResidual(const Real resid,
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 void
-FVInterfaceKernel::processDerivatives(const ADReal & resid, const dof_id_type dof_index)
+FVInterfaceKernel::processJacobian(const ADReal & resid, const dof_id_type dof_index)
 {
-  _assembly.processDerivatives(resid, dof_index, _matrix_tags);
+  _assembly.processJacobian(resid, dof_index, _matrix_tags);
 }
 #endif
 
@@ -213,8 +213,8 @@ FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
 
   const auto r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-  _assembly.processResidualAndDerivatives(r, elem_dof_indices[0], _vector_tags, _matrix_tags);
-  _assembly.processResidualAndDerivatives(-r, neigh_dof_indices[0], _vector_tags, _matrix_tags);
+  _assembly.processResidualAndJacobian(r, elem_dof_indices[0], _vector_tags, _matrix_tags);
+  _assembly.processResidualAndJacobian(-r, neigh_dof_indices[0], _vector_tags, _matrix_tags);
 }
 #else
 void

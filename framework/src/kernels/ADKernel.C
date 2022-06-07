@@ -231,7 +231,7 @@ ADKernelTempl<T>::computeADJacobian(
     }
   };
 
-  _assembly.processDerivatives(
+  _assembly.processJacobian(
       _residuals, dofIndices(), _matrix_tags, _var.scalingFactor(), local_functor);
 }
 
@@ -265,7 +265,7 @@ ADKernelTempl<T>::computeResidualAndJacobian()
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   computeResidualsForJacobian();
-  _assembly.processResidualsAndDerivatives(
+  _assembly.processResidualsAndJacobian(
       _residuals, _var.dofIndices(), _vector_tags, _matrix_tags, _var.scalingFactor());
 #else
   mooseError("residual and jacobian together only supported for global AD indexing");

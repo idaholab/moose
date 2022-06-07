@@ -196,7 +196,7 @@ ADInterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
   };
 
   const bool element_var_is_var = (type == Moose::ElementElement || type == Moose::ElementNeighbor);
-  _assembly.processDerivatives(
+  _assembly.processJacobian(
       residuals,
       element_var_is_var ? _var.dofIndices() : _neighbor_var.dofIndicesNeighbor(),
       _matrix_tags,
@@ -315,7 +315,7 @@ ADInterfaceKernelTempl<T>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
   };
 
   // We assert earlier that the type cannot be Moose::ElementNeighbor (nor Moose::NeighborElement)
-  _assembly.processDerivatives(
+  _assembly.processJacobian(
       residuals,
       type == Moose::ElementElement ? _var.dofIndices() : _neighbor_var.dofIndicesNeighbor(),
       _matrix_tags,

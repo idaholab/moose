@@ -79,6 +79,6 @@ ADScalarKernel::computeADJacobian()
                "global AD indexing.");
   };
 
-  _assembly.processDerivatives(
+  _assembly.processJacobian(
       _residuals, _var.dofIndices(), _matrix_tags, _var.scalingFactor(), local_functor);
 }

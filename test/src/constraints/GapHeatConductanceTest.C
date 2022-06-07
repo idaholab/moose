@@ -122,7 +122,7 @@ GapHeatConductanceTest::computeJacobian(Moose::MortarType mortar_type)
 
   trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, residuals, true);
   trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, residuals, false);
-  _assembly.processUnconstrainedResidualsAndDerivatives(
+  _assembly.processUnconstrainedResidualsAndJacobian(
       residuals, dof_indices, _vector_tags, _matrix_tags, scaling_factor);
 
 #else
@@ -196,6 +196,6 @@ GapHeatConductanceTest::computeJacobian(Moose::MortarType mortar_type)
     }
   };
 
-  _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, scaling_factor, local_functor);
+  _assembly.processJacobian(residuals, dof_indices, _matrix_tags, scaling_factor, local_functor);
 #endif
 }

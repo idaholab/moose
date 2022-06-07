@@ -27,13 +27,13 @@ INSFVFluxKernel::INSFVFluxKernel(const InputParameters & params)
 }
 
 void
-INSFVFluxKernel::processResidualAndDerivatives(const ADReal & residual)
+INSFVFluxKernel::processResidualAndJacobian(const ADReal & residual)
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   auto process_residual = [this](const ADReal & residual, const Elem & elem)
   {
     const auto dof_index = elem.dof_number(_sys.number(), _var.number(), 0);
-    _assembly.processResidualAndDerivatives(residual, dof_index, _vector_tags, _matrix_tags);
+    _assembly.processResidualAndJacobian(residual, dof_index, _vector_tags, _matrix_tags);
   };
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||

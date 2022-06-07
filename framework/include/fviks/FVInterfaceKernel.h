@@ -135,7 +135,7 @@ protected:
   /**
    * Process the derivatives for the provided residual and dof index
    */
-  void processDerivatives(const ADReal & resid, dof_id_type dof_index);
+  void processJacobian(const ADReal & resid, dof_id_type dof_index);
 #endif
 
   /**
