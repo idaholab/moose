@@ -353,13 +353,14 @@ TEST_F(RankFourTensorTest, printReal)
   EXPECT_EQ(ss.str(), gold);
 }
 
-TEST_F(RankFourTensorTest, mixedProductIjklJ)
+TEST_F(RankFourTensorTest, mixedProductI)
 {
-  const RankThreeTensor computed_val = _r4.mixedProductIjklJ(_v);
+  usingTensorIndicesIJKL;
+  const RankThreeTensor computed_val = _r4.mixedProduct<I>(_v);
   RankThreeTensor expected_val;
-  expected_val.fillFromInputVector({78,  84,  90,  96,  102, 108, 114, 120, 126,
-                                    240, 246, 252, 258, 264, 270, 276, 282, 288,
-                                    402, 408, 414, 420, 426, 432, 438, 444, 450},
+  expected_val.fillFromInputVector({222, 228, 234, 240, 246, 252, 258, 264, 270,
+                                    276, 282, 288, 294, 300, 306, 312, 318, 324,
+                                    330, 336, 342, 348, 354, 360, 366, 372, 378},
                                    RankThreeTensor::general);
   for (unsigned int k = 0; k < 3; ++k)
     for (unsigned int j = 0; j < 3; ++j)
@@ -367,13 +368,14 @@ TEST_F(RankFourTensorTest, mixedProductIjklJ)
         EXPECT_NEAR(expected_val(i, j, k), computed_val(i, j, k), 1e-5);
 }
 
-TEST_F(RankFourTensorTest, mixedProductIjklI)
+TEST_F(RankFourTensorTest, mixedProductJ)
 {
-  const RankThreeTensor computed_val = _r4.mixedProductIjklI(_v);
+  usingTensorIndicesIJKL;
+  const RankThreeTensor computed_val = _r4.mixedProduct<J>(_v);
   RankThreeTensor expected_val;
-  expected_val.fillFromInputVector({222, 228, 234, 240, 246, 252, 258, 264, 270,
-                                    276, 282, 288, 294, 300, 306, 312, 318, 324,
-                                    330, 336, 342, 348, 354, 360, 366, 372, 378},
+  expected_val.fillFromInputVector({78,  84,  90,  96,  102, 108, 114, 120, 126,
+                                    240, 246, 252, 258, 264, 270, 276, 282, 288,
+                                    402, 408, 414, 420, 426, 432, 438, 444, 450},
                                    RankThreeTensor::general);
   for (unsigned int k = 0; k < 3; ++k)
     for (unsigned int j = 0; j < 3; ++j)

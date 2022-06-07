@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseTypes.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
 #include "ADRankThreeTensorForward.h"
@@ -109,6 +110,9 @@ public:
     symmetric6 = 6,
     general = 9
   };
+
+  /// Convenience enum to specify indices in templated products
+  usingTensorIndicesIJKLM;
 
   // Deprecated constructor (replaced by initializeFromRows)
   RankTwoTensorTempl(const TypeVector<T> & row1,
@@ -315,26 +319,55 @@ public:
   /// returns _coords_ij * a_ij (sum on i, j)
   T doubleContraction(const RankTwoTensorTempl<T> & a) const;
 
+  /// returns C_ijkl = a_mn * b_pq
+  template <int m, int n, int p, int q>
+  RankFourTensorTempl<T> mixedProduct(const RankTwoTensorTempl<T> & b) const;
+
+  /// returns C_ijkl = a_mn * b_pqrs
+  template <int m, int n, int p, int q, int r, int s>
+  RankFourTensorTempl<T> mixedProduct(const RankFourTensorTempl<T> & b) const;
+
   /// returns C_ijkl = a_ij * b_kl
-  RankFourTensorTempl<T> outerProduct(const RankTwoTensorTempl<T> & a) const;
+  RankFourTensorTempl<T> outerProduct(const RankTwoTensorTempl<T> & b) const
+  {
+    return mixedProduct<I, J, K, L>(b);
+  }
 
   /// returns C_ijkl = a_ik * b_jl
-  RankFourTensorTempl<T> mixedProductIkJl(const RankTwoTensorTempl<T> & a) const;
+  RankFourTensorTempl<T> mixedProductIkJl(const RankTwoTensorTempl<T> & b) const
+  {
+    return mixedProduct<I, K, J, L>(b);
+  }
 
   /// returns C_ijkl = a_jk * b_il
-  RankFourTensorTempl<T> mixedProductJkIl(const RankTwoTensorTempl<T> & a) const;
+  RankFourTensorTempl<T> mixedProductJkIl(const RankTwoTensorTempl<T> & b) const
+  {
+    return mixedProduct<J, K, I, L>(b);
+  }
 
   /// returns C_ijkl = a_il * b_jk
-  RankFourTensorTempl<T> mixedProductIlJk(const RankTwoTensorTempl<T> & a) const;
+  RankFourTensorTempl<T> mixedProductIlJk(const RankTwoTensorTempl<T> & b) const
+  {
+    return mixedProduct<I, L, J, K>(b);
+  }
 
-  /// returns C_iklm = a_ij * b_jklm
-  RankFourTensorTempl<T> mixedProductIjJklm(const RankFourTensorTempl<T> & a) const;
+  /// returns C_ijkl = a_im * b_mjkl
+  RankFourTensorTempl<T> mixedProductIjJklm(const RankFourTensorTempl<T> & b) const
+  {
+    return mixedProduct<I, M, M, J, K, L>(b);
+  }
 
-  /// returns C_iklm = a_jm * b_ijkl
-  RankFourTensorTempl<T> mixedProductJmIjkl(const RankFourTensorTempl<T> & b) const;
+  /// returns C_ijkl = a_ml * b_imjk
+  RankFourTensorTempl<T> mixedProductJmIjkl(const RankFourTensorTempl<T> & b) const
+  {
+    return mixedProduct<M, L, I, M, J, K>(b);
+  }
 
-  /// returns C_iklm = a_jk * b_ijlm
-  RankFourTensorTempl<T> mixedProductJkIjlm(const RankFourTensorTempl<T> & b) const;
+  /// returns C_ijkl = a_mj * b_imkl
+  RankFourTensorTempl<T> mixedProductJkIjlm(const RankFourTensorTempl<T> & b) const
+  {
+    return mixedProduct<M, J, I, M, K, L>(b);
+  }
 
   /// returns C_ikl = a_ij * b_jkl
   RankThreeTensorTempl<T> mixedProductIjJkl(const RankThreeTensorTempl<T> & b) const;
@@ -794,4 +827,37 @@ typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, RankFourTensorTempl<
 RankTwoTensorTempl<T>::d2sin3Lode(const T &) const
 {
   mooseError("d2sin3Lode is only available for ordered tensor component types");
+}
+
+template <typename T>
+template <int i, int j, int k, int l>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::mixedProduct(const RankTwoTensorTempl<T> & b) const
+{
+  RankFourTensorTempl<T> result;
+  std::size_t x[4];
+  for (x[0] = 0; x[0] < N; ++x[0])
+    for (x[1] = 0; x[1] < N; ++x[1])
+      for (x[2] = 0; x[2] < N; ++x[2])
+        for (x[3] = 0; x[3] < N; ++x[3])
+          result(x[0], x[1], x[2], x[3]) = (*this)(x[i], x[j]) * b(x[k], x[l]);
+
+  return result;
+}
+
+template <typename T>
+template <int m, int n, int p, int q, int r, int s>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::mixedProduct(const RankFourTensorTempl<T> & b) const
+{
+  RankFourTensorTempl<T> result;
+  std::size_t x[5];
+  for (x[0] = 0; x[0] < N; ++x[0])
+    for (x[1] = 0; x[1] < N; ++x[1])
+      for (x[2] = 0; x[2] < N; ++x[2])
+        for (x[3] = 0; x[3] < N; ++x[3])
+          for (x[4] = 0; x[4] < N; ++x[4])
+            result(x[0], x[1], x[2], x[3]) += (*this)(x[m], x[n]) * b(x[p], x[q], x[r], x[s]);
+
+  return result;
 }
