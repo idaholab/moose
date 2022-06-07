@@ -155,17 +155,15 @@ Override all methods in `SolidPropertiesMaterial` that you would like to imlemen
 properties for. The header file for your new material indicates all methods that will be defined.
 
 !listing language=cpp
-#ifndef THERMALGORILLAGLUEMATERIAL_H
-#define THERMALGORILLAGLUEMATERIAL_H
+#pragma once
 //
 #include "ThermalSolidPropertiesMaterial.h"
-//
-class ThermalGorillaGlueProperties;
-template <> InputParameters validParams<ThermalGorillaGlueProperties>();
 //
 class ThermalGraphiteProperties : public ThermalSolidPropertiesMaterial
 {
 public:
+  static InputParameters inputParams();
+
   ThermalGraphiteProperties(const InputParameters & parameters);
   virtual const std::string & solidName() const override;
   virtual Real molarMass() const override;
@@ -178,7 +176,6 @@ public:
 private:
   static const std::string _name;
 };
-#endif /* THERMALGORILLAGLUEMATERIAL_H */
 
 Next, implement those methods in a `ThermalGorillaGlueProperties` material. You can provide
 a class description to make it clear what properties this new material provides.
@@ -188,11 +185,10 @@ a class description to make it clear what properties this new material provides.
 registerMooseObject("SolidPropertiesApp", ThermalGorillaGlueProperties);
 const std::string ThermalGorillaGlueProperties::_name = std::string("thermal_gorilla_glue");
 //
-template <>
 InputParameters
-validParams<ThermalGorillaGlueProperties>()
+ThermalGorillaGlueProperties::validParams()
 {
-  InputParameters params = validParams<ThermalSolidPropertiesMaterial>();
+  InputParameters params = ThermalSolidPropertiesMaterial::validParams();
   params.addClassDescription("ThermalSolidPropertiesMaterial defining Gorilla Glue properties.");
   return params;
 }

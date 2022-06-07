@@ -14,11 +14,10 @@ registerMooseObject("SolidPropertiesApp", ThermalStainlessSteel316Properties);
 const std::string ThermalStainlessSteel316Properties::_name =
     std::string("thermal_stainless_steel_316");
 
-template <>
 InputParameters
-validParams<ThermalStainlessSteel316Properties>()
+ThermalStainlessSteel316Properties::validParams()
 {
-  InputParameters params = validParams<ThermalSolidPropertiesMaterial>();
+  InputParameters params = ThermalSolidPropertiesMaterial::validParams();
   params.addClassDescription("ThermalSolidPropertiesMaterial defining stainless steel 316 thermal "
                              "properties.");
   return params;

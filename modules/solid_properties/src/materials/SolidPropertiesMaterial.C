@@ -11,11 +11,10 @@
 
 const std::string SolidPropertiesMaterial::_name = "";
 
-template <>
 InputParameters
-validParams<SolidPropertiesMaterial>()
+SolidPropertiesMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Base class for defining solid property materials");
   return params;
 }

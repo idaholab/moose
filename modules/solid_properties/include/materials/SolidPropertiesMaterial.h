@@ -7,16 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SOLIDPROPERTIESMATERIAL_H
-#define SOLIDPROPERTIESMATERIAL_H
+#pragma once
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
-
-class SolidPropertiesMaterial;
-
-template <>
-InputParameters validParams<SolidPropertiesMaterial>();
 
 /**
  * Base class for defining solid property materials.
@@ -24,6 +18,8 @@ InputParameters validParams<SolidPropertiesMaterial>();
 class SolidPropertiesMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
+  static InputParameters validParams();
+
   SolidPropertiesMaterial(const InputParameters & parameters);
 
   /**
@@ -82,5 +78,3 @@ private:
   /// The solid name
   static const std::string _name;
 };
-
-#endif /* SOLIDPROPERTIESMATERIAL_H */

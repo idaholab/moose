@@ -7,15 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THERMALSTAINLESSSTEEL316MATERIAL_H
-#define THERMALSTAINLESSSTEEL316MATERIAL_H
+#pragma once
 
 #include "ThermalSolidPropertiesMaterial.h"
-
-class ThermalStainlessSteel316Properties;
-
-template <>
-InputParameters validParams<ThermalStainlessSteel316Properties>();
 
 /**
  * Stainless steel alloy 306 thermal solid properties as a function of
@@ -28,6 +22,8 @@ InputParameters validParams<ThermalStainlessSteel316Properties>();
 class ThermalStainlessSteel316Properties : public ThermalSolidPropertiesMaterial
 {
 public:
+  static InputParameters validParams();
+
   ThermalStainlessSteel316Properties(const InputParameters & parameters);
 
   /**
@@ -81,5 +77,3 @@ private:
   /// The solid name
   static const std::string _name;
 };
-
-#endif /* THERMALSTAINLESSSTEEL316MATERIAL_H */

@@ -9,11 +9,10 @@
 
 #include "ThermalSolidPropertiesMaterial.h"
 
-template <>
 InputParameters
-validParams<ThermalSolidPropertiesMaterial>()
+ThermalSolidPropertiesMaterial::validParams()
 {
-  InputParameters params = validParams<SolidPropertiesMaterial>();
+  InputParameters params = SolidPropertiesMaterial::validParams();
   params.addClassDescription("Material providing solid thermal properties");
   params.addRequiredCoupledVar("temperature", "Temperature");
   params.addParam<std::string>(

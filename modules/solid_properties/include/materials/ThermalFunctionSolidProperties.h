@@ -7,16 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THERMALFUNCTIONMATERIAL_H
-#define THERMALFUNCTIONMATERIAL_H
+#pragma once
 
 #include "ThermalSolidPropertiesMaterial.h"
 #include "Function.h"
-
-class ThermalFunctionSolidProperties;
-
-template <>
-InputParameters validParams<ThermalFunctionSolidProperties>();
 
 /**
  * Thermal material properties as a function of temperature from function
@@ -27,6 +21,8 @@ InputParameters validParams<ThermalFunctionSolidProperties>();
 class ThermalFunctionSolidProperties : public ThermalSolidPropertiesMaterial
 {
 public:
+  static InputParameters validParams();
+
   ThermalFunctionSolidProperties(const InputParameters & parameters);
 
   /**
@@ -67,5 +63,3 @@ private:
   /// The solid name
   static const std::string _name;
 };
-
-#endif /* THERMALFUNCTIONMATERIAL_H */

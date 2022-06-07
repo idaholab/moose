@@ -13,11 +13,10 @@ registerMooseObject("SolidPropertiesApp", ThermalSiliconCarbideProperties);
 
 const std::string ThermalSiliconCarbideProperties::_name = std::string("thermal_silicon_carbide");
 
-template <>
 InputParameters
-validParams<ThermalSiliconCarbideProperties>()
+ThermalSiliconCarbideProperties::validParams()
 {
-  InputParameters params = validParams<ThermalSolidPropertiesMaterial>();
+  InputParameters params = ThermalSolidPropertiesMaterial::validParams();
   params.addClassDescription("Material defining silicon carbide thermal properties.");
 
   MooseEnum ThermalSiliconCarbidePropertiesKModel("snead parfume", "snead");

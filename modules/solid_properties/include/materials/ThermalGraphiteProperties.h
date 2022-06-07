@@ -7,15 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THERMALGRAPHITEMATERIAL_H
-#define THERMALGRAPHITEMATERIAL_H
+#pragma once
 
 #include "ThermalSolidPropertiesMaterial.h"
-
-class ThermalGraphiteProperties;
-
-template <>
-InputParameters validParams<ThermalGraphiteProperties>();
 
 /**
  * Graphite thermal properties as a function of temperature appropriate for
@@ -36,6 +30,8 @@ InputParameters validParams<ThermalGraphiteProperties>();
 class ThermalGraphiteProperties : public ThermalSolidPropertiesMaterial
 {
 public:
+  static InputParameters validParams();
+
   ThermalGraphiteProperties(const InputParameters & parameters);
 
   /**
@@ -137,5 +133,3 @@ private:
   /// The solid name
   static const std::string _name;
 };
-
-#endif /* THERMALGRAPHITEMATERIAL_H */

@@ -7,15 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THERMALSILICONCARBIDEMATERIAL_H
-#define THERMALSILICONCARBIDEMATERIAL_H
+#pragma once
 
 #include "ThermalSolidPropertiesMaterial.h"
-
-class ThermalSiliconCarbideProperties;
-
-template <>
-InputParameters validParams<ThermalSiliconCarbideProperties>();
 
 /**
  * Monolithic silicon carbide properties as a function of temperature \cite snead.
@@ -23,6 +17,8 @@ InputParameters validParams<ThermalSiliconCarbideProperties>();
 class ThermalSiliconCarbideProperties : public ThermalSolidPropertiesMaterial
 {
 public:
+  static InputParameters validParams();
+
   ThermalSiliconCarbideProperties(const InputParameters & parameters);
 
   /**
@@ -121,5 +117,3 @@ private:
   /// The solid name
   static const std::string _name;
 };
-
-#endif /* THERMALSILICONCARBIDEMATERIAL_H */

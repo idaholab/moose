@@ -13,11 +13,10 @@ registerMooseObject("SolidPropertiesApp", ThermalGraphiteProperties);
 
 const std::string ThermalGraphiteProperties::_name = std::string("thermal_graphite");
 
-template <>
 InputParameters
-validParams<ThermalGraphiteProperties>()
+ThermalGraphiteProperties::validParams()
 {
-  InputParameters params = validParams<ThermalSolidPropertiesMaterial>();
+  InputParameters params = ThermalSolidPropertiesMaterial::validParams();
   params.addClassDescription("Userobject defining graphite thermal properties.");
   params.addRangeCheckedParam<Real>(
       "density_room_temp", 1600.0, "density_room_temp > 0.0", "Density at room temperature");

@@ -7,15 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THERMALSOLIDPROPERTIESMATERIAL_H
-#define THERMALSOLIDPROPERTIESMATERIAL_H
+#pragma once
 
 #include "SolidPropertiesMaterial.h"
-
-class ThermalSolidPropertiesMaterial;
-
-template <>
-InputParameters validParams<ThermalSolidPropertiesMaterial>();
 
 /**
  * Base class for defining thermal solid property materials as a function of
@@ -24,6 +18,8 @@ InputParameters validParams<ThermalSolidPropertiesMaterial>();
 class ThermalSolidPropertiesMaterial : public SolidPropertiesMaterial
 {
 public:
+  static InputParameters validParams();
+
   ThermalSolidPropertiesMaterial(const InputParameters & parameters);
 
 protected:
@@ -63,5 +59,3 @@ protected:
   /// Derivative of density with respect to temperature
   MaterialProperty<Real> & _drho_dT;
 };
-
-#endif /* THERMALSOLIDPROPERTIESMATERIAL_H */

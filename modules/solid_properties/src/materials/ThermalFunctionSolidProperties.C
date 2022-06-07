@@ -13,11 +13,10 @@ registerMooseObject("SolidPropertiesApp", ThermalFunctionSolidProperties);
 
 const std::string ThermalFunctionSolidProperties::_name = "thermal_function";
 
-template <>
 InputParameters
-validParams<ThermalFunctionSolidProperties>()
+ThermalFunctionSolidProperties::validParams()
 {
-  InputParameters params = validParams<ThermalSolidPropertiesMaterial>();
+  InputParameters params = ThermalSolidPropertiesMaterial::validParams();
   params.addClassDescription("Userobject defining thermal properties from functions.");
   params.addRequiredParam<FunctionName>("k", "Thermal conductivity");
   params.addRequiredParam<FunctionName>("cp", "Isobaric specific heat");
