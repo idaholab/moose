@@ -34,6 +34,7 @@ ifeq ($(ALL_MODULES),yes)
         RDG                         := yes
         REACTOR                     := yes
         RICHARDS                    := yes
+        SOLID_PROPERTIES            := yes
         STOCHASTIC_TOOLS            := yes
         TENSOR_MECHANICS            := yes
         THERMAL_HYDRAULICS          := yes
@@ -89,7 +90,7 @@ ifeq ($(XFEM),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow ray_tracing rdg reactor richards stochastic_tools tensor_mechanics thermal_hydraulics xfem"
+MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow ray_tracing rdg reactor richards solid_properties stochastic_tools tensor_mechanics thermal_hydraulics xfem"
 
 ################################################################################
 ########################## MODULE REGISTRATION #################################
@@ -177,6 +178,13 @@ ifeq ($(RICHARDS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/richards
   APPLICATION_NAME   := richards
   SUFFIX             := rich
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(SOLID_PROPERTIES),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_properties
+  APPLICATION_NAME   := solid_properties
+  SUFFIX             := sp
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
