@@ -4,7 +4,7 @@
 
 ## Chemical Reactions
 
-The chemical reactions module provides a set of tools for the calculation of multicomponent aqueous
+Provides a set of tools for the calculation of multicomponent aqueous
 reactive transport in porous media, originally developed as the MOOSE application RAT
 [!citep](guo2013).
 
@@ -12,16 +12,23 @@ reactive transport in porous media, originally developed as the MOOSE applicatio
 
 ## Contact
 
-The MOOSE contact module provides the necessary tools for modeling mechanical contact using
+Provides the necessary tools for modeling mechanical contact using
 algorithms to enforce constraints between surfaces in the mesh, to prevent penetration and develop
 contact forces.
 
 !---
 
+## Contact: Frictional Ironing Problem
+
+!media contact/ironing_gallery.mp4
+
+!---
+
 ## External PETSc Solver
 
-The External PETSc Solver module provides support for stand-alone native PETSc applications that
-to be coupled with moose-based applications.
+Provides support for stand-alone native PETSc applications that
+are I alto be coupled with moose-based applications. Is used as a general
+example for coupling to an external application.
 
 !---
 
@@ -31,6 +38,14 @@ The Fluid Properties module provides a consistent interface to fluid properties 
 viscosity, enthalpy and many others, as well as derivatives with respect to the primary
 variables. The consistent interface allows different fluids to be used in an input file by simply
 swapping the name of the Fluid Properties UserObject in a plug-and-play manner.
+
+!---
+
+## Fluid-Structure Interaction
+
+Provides tools that solve fluid and structure problems, wherein, their behavior is
+inter-dependent. Currently capable of simulating fluid-structure interaction
+behavior using an acoustic formulation for the fluid.
 
 !---
 
@@ -46,12 +61,29 @@ separate app [!citep](Wendt2018a,Wendt2017c,Kerby2017).
 
 !---
 
+## Geochemistry
+
+Solves geochemical models. The capabilities include:
+
+- Equilibrium aqueous systems
+- Redox disequilibrium
+- Sorption and surface complexation
+- Kinetics
+- All of the above combined with fluid and heat transport
+
+It is designed to interface easily with the porous flow module so that complicated reactive transport scenarios can be studied.
+
+!--
+
 ## Heat Conduction
 
 Basic utilities for solving the transient heat conduction equation:
 
 !equation
 \rho c_p \pf{T}{t} - \nabla\cdot k \nabla T - s = 0
+
+Also contains capability for generalized heat transfer. Will likely be renamed
+heat transfer in the future, accordingly.
 
 !---
 
@@ -67,10 +99,14 @@ simply the multi-dimensional advection equation:
 
 ## Navier Stokes
 
-The MOOSE Navier-Stokes module is a library for the implementation of simulation tools that solve the
-Navier-Stokes equations using the continuous Galerkin finite element (CGFE) method. The Navier-Stokes
-equations are usually solved using either the pressure-based, incompressible formulation (assuming a
-constant fluid density), or the density-based, compressible formulation.
+A library for the implementation of simulation tools that solve the multi-dimensional
+Navier-Stokes equations using either the continuous Galerkin finite element (CGFE) or the finite volume (FV) method. The Navier-Stokes equations may be solved with:
+
+- An incompressible formulation (CGFE & FV)
+- A weakly compressible formulation (FV)
+- A fully compressible formulation (FV)
+
+Zero-dimensional turbulence models are available and coarse regularized k-epsilon will be added soon.
 
 !---
 
@@ -90,6 +126,26 @@ set of primary variables.
 
 !---
 
+## Ray Tracing
+
+Provides capability for tracing rays through a finite element mesh. Notable features include:
+
+- Contribution to residuals and Jacobians from along a ray
+- Ray interaction with internal and external boundaries
+- Supports storage and manipulation of data unique to each ray
+- Supports ray interaction with field variables
+- Highly parallelizable: tested to 20k MPI ranks
+
+!---
+
+## Ray Tracing: Flashlight source
+
+!media ray_tracing/cone_ray_study_u.png style=width:49%;margin-left:auto;margin-right:1%;display:inline;background:white;
+
+!media ray_tracing/cone_ray_study_rays.png style=width:49%;margin-left:1%;margin-right:auto;display:inline;background:white;
+
+!--
+
 ## Reconstructed Discontinuous Galerkin (rDG)
 
 The MOOSE rDG module is a library for the implementation of simulation tools that solve
@@ -101,17 +157,26 @@ second-order cell-centered finite volume method (FVM).
 
 ## Reactor
 
-The Reactor module adds advanced meshing capabilities to MOOSE so that users can create complex-geometry
-meshes related to the structures of reactor cores. This includes objects for creating and modifying
-hexagonal mesh components for assemblies, stitching assemblies together to form core meshes, creating
-peripheral regions for assemblies and cores, adding IDs for pins and assembly regions, and enabling
-the dynamic and static simulation of rotational control drums.
+Adds advanced meshing capabilities to MOOSE so that users can create complex-geometry
+meshes related to the structures of reactor cores. This includes:
+
+- Creating and modifying hexagonal mesh components for assemblies
+- Stitching assemblies together to form core meshes
+- Creating peripheral regions for assemblies and cores
+- Adding IDs for pins and assembly regions
+- Enabling the dynamic and static simulation of rotational control drums.
+
+!---
+
+## Reactor: Meshing a Microreactor
+
+!media tutorials/darcy_thermo_mech/reactor_microreactor.png
 
 !---
 
 ## Stochastic Tools
 
-The stochastic tools module is a toolbox designed for performing stochastic analysis for MOOSE-based
+A toolbox designed for performing stochastic analysis for MOOSE-based
 applications.
 
 !---
