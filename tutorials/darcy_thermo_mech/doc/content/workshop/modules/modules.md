@@ -27,7 +27,7 @@ contact forces.
 ## External PETSc Solver
 
 Provides support for stand-alone native PETSc applications that
-are I alto be coupled with moose-based applications. Is used as a general
+are to be coupled with moose-based applications. Is used as a general
 example for coupling to an external application.
 
 !---
