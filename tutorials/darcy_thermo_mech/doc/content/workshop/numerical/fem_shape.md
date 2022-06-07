@@ -33,7 +33,7 @@ The discretized expansion of $u$ takes on the following form:
 !equation
 u \approx u_h = \sum_{j=1}^N u_j \phi_j,
 
-where $\phi_j$ are the "basis functions", which form the basis for the the "trial function", $u_h$.
+where $\phi_j$ are the "basis functions", which form the basis for the "trial function", $u_h$.
 $N$ is the total number of functions for the discretized domain.
 
 The gradient of $u$ can be expanded similarly:

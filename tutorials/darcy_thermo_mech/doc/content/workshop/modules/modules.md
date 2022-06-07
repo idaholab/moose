@@ -125,6 +125,26 @@ Zero-dimensional turbulence models are available and coarse regularized k-epsilo
 
 !---
 
+## Navier Stokes
+
+Flow in a lid-driven cavity with Re=417 (left) and Re=833 (right).
+
+!row!
+!col! width=50%
+
+!media darcy_thermo_mech/ns-re-417.png style=width:80%;background:white;
+
+!col-end!
+
+!col! width=50%
+
+!media darcy_thermo_mech/ns-re-833.png style=width:82%;background:white;
+
+!col-end!
+!row-end!
+
+!---
+
 ## Phase Field
 
 The MOOSE phase field module is a library for simplifying the implementation of simulation tools that
@@ -196,8 +216,25 @@ meshes related to the structures of reactor cores. This includes:
 
 ## Stochastic Tools
 
+!row!
+!col! width=60%
+
 A toolbox designed for performing stochastic analysis for MOOSE-based
-applications.
+applications. Capabilities include:
+
+- Parameter Studies
+- Sensitivity Analysis
+- Uncertainty Quantification
+- Surrogate/Reduced-Order Model generation
+
+!col-end!
+
+!col! width=40%
+
+!media darcy_thermo_mech/stochastic_tools.png style=width:100%;background:white;
+
+!col-end!
+!row-end!
 
 !---
 
