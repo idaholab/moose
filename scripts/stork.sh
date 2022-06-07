@@ -154,8 +154,11 @@ if [[ "$kind" == "module" ]]; then
     echo "      c. Create a new registration section for the new module"
     echo "    2. Modify the moose/scripts/sqa_stats.py file"
     echo "      a. Add a new compute requirements stats section"
-    echo "    3. Ensure that no stork files hang around before committing"
-    echo "    4. Ensure that proper testing is performed for per module tests (e.g. parallel testing)"
+    echo "    3. Modify the moose/modules/combined/src/base/CombinedApp.C file"
+    echo "      a. Add the new module to the set of included files (alphabetical)"
+    echo "      b. Add the new module to the registerAll function (alphabetical)"
+    echo "    4. Ensure that no stork files hang around before committing"
+    echo "    5. Ensure that proper testing is performed for per module tests (e.g. parallel testing)"
     echo ""
 
     rm -f $dir/LICENSE
