@@ -21,6 +21,21 @@ contact forces.
 ## Contact: Frictional Ironing Problem
 
 !media contact/ironing_gallery.mp4
+  style=margin:auto;
+  caption=Frictional ironing model using mortar contact.
+
+!---
+
+## Electromagnetics (coming soon)
+
+The Electromagnetics module provides components and models to simulate electromagnetic wave problems
+using MOOSE, and facilitate coupling of electromagnetic simulations to other physical domains.
+Maxwell's Equations is solved for complex fields using a Helmholtz wave equation formulation in 1-D
+and 2-D. Electrostatic contact is also provided for imperfect electric interfaces.
+
+!media gallery/dipole_antenna.mp4
+  style=width:40%;margin:auto;
+  caption=Electric field radiation pattern of half-wave dipole antenna.
 
 !---
 
@@ -140,9 +155,13 @@ Provides capability for tracing rays through a finite element mesh. Notable feat
 
 ## Ray Tracing: Flashlight source
 
-!media ray_tracing/cone_ray_study_u.png style=width:49%;margin-left:auto;margin-right:1%;display:inline;background:white;
+!media ray_tracing/cone_ray_study_u.png
+  style=width:49%;float:left;
+  caption=Example of flashlight point sources within a diffusion-reaction problem
 
-!media ray_tracing/cone_ray_study_rays.png style=width:49%;margin-left:1%;margin-right:auto;display:inline;background:white;
+!media ray_tracing/cone_ray_study_rays.png
+  style=width:49%;float:right;
+  caption=Overlay of the rays used within the problem on the left
 
 !--
 
@@ -171,6 +190,7 @@ meshes related to the structures of reactor cores. This includes:
 ## Reactor: Meshing a Microreactor
 
 !media tutorials/darcy_thermo_mech/reactor_microreactor.png
+  caption=Meshing a microreactor in stages using the Reactor module: from pins and control drums to assemblies, cores, and peripheral regions.
 
 !---
 
