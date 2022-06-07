@@ -30,7 +30,7 @@ contact forces.
 
 The Electromagnetics module provides components and models to simulate electromagnetic wave problems
 using MOOSE, and facilitate coupling of electromagnetic simulations to other physical domains.
-Maxwell's Equations is solved for complex fields using a Helmholtz wave equation formulation in 1-D
+Maxwell's equations are solved for complex fields using a Helmholtz wave equation formulation in 1-D
 and 2-D. Electrostatic contact is also provided for imperfect electric interfaces.
 
 !media gallery/dipole_antenna.mp4
@@ -42,7 +42,7 @@ and 2-D. Electrostatic contact is also provided for imperfect electric interface
 ## External PETSc Solver
 
 Provides support for stand-alone native PETSc applications that
-are to be coupled with moose-based applications. Is used as a general
+are to be coupled with moose-based applications. It is also a general
 example for coupling to an external application.
 
 !---
@@ -97,7 +97,7 @@ Basic utilities for solving the transient heat conduction equation:
 !equation
 \rho c_p \pf{T}{t} - \nabla\cdot k \nabla T - s = 0
 
-Also contains capability for generalized heat transfer. Will likely be renamed
+Also contains capability for generalized heat transfer (convection, radiation, ...). Will likely be renamed
 heat transfer in the future, accordingly.
 
 !---
