@@ -29,7 +29,7 @@
 [AuxVariables]
   [./error]
     family = MONOMIAL
-    order = FIRST
+    order = CONSTANT
   [../]
 []
 

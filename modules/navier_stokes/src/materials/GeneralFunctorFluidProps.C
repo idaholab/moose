@@ -34,10 +34,8 @@ GeneralFunctorFluidProps::validParams()
   params.addParam<FunctionName>(
       "mu_rampdown", 1, "A function describing a ramp down of viscosity over time");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "porosity");
-  params.addRequiredRangeCheckedParam<Real>(
-      "characteristic_length",
-      "characteristic_length > 0.0",
-      "characteristic length for Reynolds number calculation");
+  params.addRequiredParam<MooseFunctorName>(
+      "characteristic_length", "characteristic length for Reynolds number calculation");
   return params;
 }
 
@@ -45,7 +43,7 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
   : FunctorMaterial(parameters),
     _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
     _eps(getFunctor<ADReal>(NS::porosity)),
-    _d(getParam<Real>("characteristic_length")),
+    _d(getFunctor<Real>("characteristic_length")),
 
     _pressure(getFunctor<ADReal>(NS::pressure)),
     _T_fluid(getFunctor<ADReal>(NS::T_fluid)),
@@ -256,7 +254,7 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
                                    static constexpr Real small_number = 1e-8;
                                    return std::max(fp::reynolds(_rho(r, t),
                                                                 _eps(r, t) * _speed(r, t),
-                                                                _d,
+                                                                _d(r, t),
                                                                 std::max(mu(r, t), small_number)),
                                                    small_number);
                                  });
