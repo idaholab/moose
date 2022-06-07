@@ -312,7 +312,6 @@ velocity_interp_method = 'rc'
   [speed]
     type = PINSFVSpeedFunctorMaterial
     porosity = 'porosity'
-    T_fluid = 'T_fluid'
     superficial_vel_x = 'superficial_vel_x'
     superficial_vel_y = 'superficial_vel_y'
   []

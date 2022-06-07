@@ -11,8 +11,8 @@ p = 'cos(pi * x / 4) * sin(3 * pi * y / 2)'
 
 porosity = '.5 + .1 * sin(pi * x / 4) * cos(pi * y / 4)'
 
-f_u, e_u = mms.evaluate('div(vel*rho*u/porosity) - div(mu*porosity*grad(u/porosity)) + porosity*grad(p).dot(e_i) + (darcy + forch)*rho*u/porosity', u, variable='u', vel=vel, p=p, porosity=porosity, scalars=['mu', 'rho', 'darcy', 'forch'])
-f_v, e_v = mms.evaluate('div(vel*rho*v/porosity) - div(mu*porosity*grad(v/porosity)) + porosity*grad(p).dot(e_j) + (darcy + forch)*rho*v/porosity', v, variable='v', vel=vel, p=p, porosity=porosity, scalars=['mu', 'rho', 'darcy', 'forch'])
+f_u, e_u = mms.evaluate('div(vel*rho*u/porosity) - div(mu*porosity*grad(u/porosity)) + porosity*grad(p).dot(e_i) + darcy*mu*u + forch*rho/2*u*sqrt(u*u+v*v)/porosity', u, variable='u', v=v, vel=vel, p=p, porosity=porosity, scalars=['mu', 'rho', 'darcy', 'forch'])
+f_v, e_v = mms.evaluate('div(vel*rho*v/porosity) - div(mu*porosity*grad(v/porosity)) + porosity*grad(p).dot(e_j) + darcy*mu*v + forch*rho/2*v*sqrt(u*u+v*v)/porosity', v, variable='v', u=u, vel=vel, p=p, porosity=porosity, scalars=['mu', 'rho', 'darcy', 'forch'])
 f_p, e_p = mms.evaluate('div(vel*rho)', p, variable='p', vel=vel, scalars=['rho'])
 
 rho = sympy.Symbol('rho')
