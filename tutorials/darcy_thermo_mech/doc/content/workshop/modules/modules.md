@@ -99,6 +99,16 @@ second-order cell-centered finite volume method (FVM).
 
 !---
 
+## Reactor
+
+The Reactor module adds advanced meshing capabilities to MOOSE so that users can create complex-geometry
+meshes related to the structures of reactor cores. This includes objects for creating and modifying
+hexagonal mesh components for assemblies, stitching assemblies together to form core meshes, creating
+peripheral regions for assemblies and cores, adding IDs for pins and assembly regions, and enabling
+the dynamic and static simulation of rotational control drums.
+
+!---
+
 ## Stochastic Tools
 
 The stochastic tools module is a toolbox designed for performing stochastic analysis for MOOSE-based
@@ -112,6 +122,15 @@ The Tensor Mechanics module is a library of simulation tools that solve continuu
 problems. The module can be used to simulation both linear and finite strain
 mechanics, including Elasticity and Cosserat elasticity, Plasticity and micromechanics plasticity,
 Creep, and Damage due to cracking and property degradation.
+
+!---
+
+## Thermal Hydraulics
+
+The Thermal Hydraulics module is a library of components that can be used to build thermal-hydraulic
+simulations. Basic capabilities include a 1-phase, variable-area, inviscid, compressible flow model
+with a non-condensable vapor mixture, 2-D and 3-D heat conduction, a control logic system, and
+pluggable closure systems and models.
 
 !---
 
