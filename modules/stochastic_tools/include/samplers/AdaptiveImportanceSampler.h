@@ -22,17 +22,29 @@ public:
 
   AdaptiveImportanceSampler(const InputParameters & parameters);
 
-  /// Access the initial values vector
-  const std::vector<Real> & getInitialValues() const;
+  // Access the initial values vector
+  const std::vector<Real> & getInitialValues() const { return _initial_values; }
 
-  /// Access the number of training samples
-  const int & getNumSamplesTrain() const;
+  // Access the number of training samples
+  const int & getNumSamplesTrain() const { return _num_samples_train; }
 
-  /// Access use absolute value bool
-  const bool & getUseAbsoluteValue() const;
+  // Access use absolute value bool
+  const bool & getUseAbsoluteValue() const { return _use_absolute_value; }
 
-  /// Access the output limit
-  const Real & getOutputLimit() const;
+  // Access the output limit
+  const Real & getOutputLimit() const { return _output_limit; }
+
+  // Access the mean vector of the importance distribution
+  const std::vector<Real> & getImportanceVectorMean() const { return _mean_sto; }
+
+  // Access the std vector of the importance distribution
+  const std::vector<Real> & getImportanceVectorStd() const { return _std_sto; }
+
+  // Access the std vector of the importance distribution
+  const std::vector<const Distribution *> & getDistributionNames() const { return _distributions; }
+
+  // Access the output limit
+  const Real & getStdFactor() const { return _std_factor; }
 
 protected:
   /// Return the sample for the given row (the sample index) and column (the parameter index)
