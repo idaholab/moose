@@ -37,31 +37,12 @@ public:
    */
   virtual const THM::FlowModelID & getFlowModelID() const = 0;
 
-  /**
-   * Gets the numerical flux user object name
-   */
-  const UserObjectName & getNumericalFluxUserObjectName() const { return _numerical_flux_name; }
-
-  /**
-   * Gets the slope reconstruction option used
-   */
-  const MooseEnum & getSlopeReconstruction() const { return _rdg_slope_reconstruction; }
-
 protected:
   /// Angle between orientation vector and gravity vector, in degrees
   const Real _gravity_angle;
 
   /// Name of fluid properties user object
   const UserObjectName & _fp_name;
-
-  /// Numerical flux user object name
-  const UserObjectName _numerical_flux_name;
-
-  /// rDG interfacial variables user object name
-  const UserObjectName _rdg_int_var_uo_name;
-
-  /// Slope reconstruction type for rDG
-  const MooseEnum _rdg_slope_reconstruction;
 
 public:
   static InputParameters validParams();

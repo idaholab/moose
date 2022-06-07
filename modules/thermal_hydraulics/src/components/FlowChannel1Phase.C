@@ -13,6 +13,7 @@
 #include "HeatTransfer1PhaseBase.h"
 #include "Closures1PhaseBase.h"
 #include "ThermalHydraulicsApp.h"
+#include "SlopeReconstruction1DInterface.h"
 
 registerMooseObject("ThermalHydraulicsApp", FlowChannel1Phase);
 
@@ -25,6 +26,10 @@ FlowChannel1Phase::validParams()
   params.addParam<FunctionName>("initial_vel", "Initial velocity in the flow channel [m/s]");
   params.addParam<FunctionName>("initial_T", "Initial temperature in the flow channel [K]");
   params.addParam<FunctionName>("D_h", "Hydraulic diameter [m]");
+  params.addParam<MooseEnum>(
+      "rdg_slope_reconstruction",
+      SlopeReconstruction1DInterface<true>::getSlopeReconstructionMooseEnum("None"),
+      "Slope reconstruction type for rDG spatial discretization");
 
   params.declareControllable("initial_p initial_T initial_vel D_h");
 
@@ -33,7 +38,13 @@ FlowChannel1Phase::validParams()
   return params;
 }
 
-FlowChannel1Phase::FlowChannel1Phase(const InputParameters & params) : FlowChannelBase(params) {}
+FlowChannel1Phase::FlowChannel1Phase(const InputParameters & params)
+  : FlowChannelBase(params),
+
+    _numerical_flux_name(genName(name(), "numerical_flux")),
+    _rdg_slope_reconstruction(getParam<MooseEnum>("rdg_slope_reconstruction"))
+{
+}
 
 void
 FlowChannel1Phase::init()

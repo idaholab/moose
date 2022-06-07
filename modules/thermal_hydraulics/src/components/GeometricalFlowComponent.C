@@ -9,7 +9,6 @@
 
 #include "GeometricalFlowComponent.h"
 #include "FluidProperties.h"
-#include "SlopeReconstruction1DInterface.h"
 
 InputParameters
 GeometricalFlowComponent::validParams()
@@ -18,10 +17,6 @@ GeometricalFlowComponent::validParams()
   params += GravityInterface::validParams();
 
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object");
-  params.addParam<MooseEnum>(
-      "rdg_slope_reconstruction",
-      SlopeReconstruction1DInterface<true>::getSlopeReconstructionMooseEnum("None"),
-      "Slope reconstruction type for rDG spatial discretization");
 
   return params;
 }
@@ -34,9 +29,6 @@ GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & param
                        ? 0.0
                        : std::acos(_dir * _gravity_vector / (_dir.norm() * _gravity_magnitude)) *
                              180 / M_PI),
-    _fp_name(getParam<UserObjectName>("fp")),
-    _numerical_flux_name(genName(name(), "numerical_flux")),
-    _rdg_int_var_uo_name(genName(name(), "rdg_int_var_uo")),
-    _rdg_slope_reconstruction(getParam<MooseEnum>("rdg_slope_reconstruction"))
+    _fp_name(getParam<UserObjectName>("fp"))
 {
 }
