@@ -162,8 +162,7 @@ TabulatedFluidProperties::initialSetup()
     // Pressure and temperature data contains duplicates due to the csv format.
     // First, check that pressure is monotonically increasing
     if (!std::is_sorted(_pressure.begin(), _pressure.end()))
-      mooseError(
-          "the column data for pressure is not monotonically increasing in ", _file_name);
+      mooseError("the column data for pressure is not monotonically increasing in ", _file_name);
 
     // The first pressure value is repeated for each temperature value. Counting the
     // number of repeats provides the number of temperature values
@@ -187,8 +186,7 @@ TabulatedFluidProperties::initialSetup()
     // as well as duplicated for each pressure value
     std::vector<Real> temp0(_temperature.begin(), _temperature.begin() + num_T);
     if (!std::is_sorted(temp0.begin(), temp0.end()))
-      mooseError("the column data for temperature is not monotonically increasing in ",
-                 _file_name);
+      mooseError("the column data for temperature is not monotonically increasing in ", _file_name);
 
     auto it_temp = _temperature.begin() + num_T;
     for (std::size_t i = 1; i < _pressure.size(); ++i)

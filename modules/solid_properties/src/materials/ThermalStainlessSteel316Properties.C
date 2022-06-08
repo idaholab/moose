@@ -26,7 +26,6 @@ ThermalStainlessSteel316Properties::ThermalStainlessSteel316Properties(
 {
 }
 
-
 Real
 ThermalStainlessSteel316Properties::molarMass() const
 {

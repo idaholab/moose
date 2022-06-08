@@ -615,6 +615,5 @@ StiffenedGasFluidProperties::k_from_p_T(
 
 Real StiffenedGasFluidProperties::pp_sat_from_p_T(Real /*p*/, Real /*T*/) const
 {
-  mooseError(
-      __PRETTY_FUNCTION__, " not implemented. Use a real fluid property class!");
+  mooseError(__PRETTY_FUNCTION__, " not implemented. Use a real fluid property class!");
 }
