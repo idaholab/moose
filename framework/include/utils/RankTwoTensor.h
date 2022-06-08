@@ -112,7 +112,7 @@ public:
   };
 
   /// Convenience enum to specify indices in templated products
-  usingTensorIndicesIJKLM;
+  usingTensorIndices(i, j, k, l, m);
 
   // Deprecated constructor (replaced by initializeFromRows)
   RankTwoTensorTempl(const TypeVector<T> & row1,
@@ -330,43 +330,43 @@ public:
   /// returns C_ijkl = a_ij * b_kl
   RankFourTensorTempl<T> outerProduct(const RankTwoTensorTempl<T> & b) const
   {
-    return mixedProduct<I, J, K, L>(b);
+    return mixedProduct<i, j, k, l>(b);
   }
 
   /// returns C_ijkl = a_ik * b_jl
   RankFourTensorTempl<T> mixedProductIkJl(const RankTwoTensorTempl<T> & b) const
   {
-    return mixedProduct<I, K, J, L>(b);
+    return mixedProduct<i, k, j, l>(b);
   }
 
   /// returns C_ijkl = a_jk * b_il
   RankFourTensorTempl<T> mixedProductJkIl(const RankTwoTensorTempl<T> & b) const
   {
-    return mixedProduct<J, K, I, L>(b);
+    return mixedProduct<j, k, i, l>(b);
   }
 
   /// returns C_ijkl = a_il * b_jk
   RankFourTensorTempl<T> mixedProductIlJk(const RankTwoTensorTempl<T> & b) const
   {
-    return mixedProduct<I, L, J, K>(b);
+    return mixedProduct<i, l, j, k>(b);
   }
 
   /// returns C_ijkl = a_im * b_mjkl
   RankFourTensorTempl<T> mixedProductIjJklm(const RankFourTensorTempl<T> & b) const
   {
-    return mixedProduct<I, M, M, J, K, L>(b);
+    return mixedProduct<i, m, m, j, k, l>(b);
   }
 
   /// returns C_ijkl = a_ml * b_imjk
   RankFourTensorTempl<T> mixedProductJmIjkl(const RankFourTensorTempl<T> & b) const
   {
-    return mixedProduct<M, L, I, M, J, K>(b);
+    return mixedProduct<m, l, i, m, j, k>(b);
   }
 
   /// returns C_ijkl = a_mj * b_imkl
   RankFourTensorTempl<T> mixedProductJkIjlm(const RankFourTensorTempl<T> & b) const
   {
-    return mixedProduct<M, J, I, M, K, L>(b);
+    return mixedProduct<m, j, i, m, k, l>(b);
   }
 
   /// returns C_ikl = a_ij * b_jkl
@@ -725,8 +725,8 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
       const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
       const auto Mb = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
 
-      Gab = Ma.mixedProduct<I, K, J, L>(Mb) + Ma.mixedProduct<I, L, J, K>(Mb);
-      Gba = Mb.mixedProduct<I, K, J, L>(Ma) + Mb.mixedProduct<I, L, J, K>(Ma);
+      Gab = Ma.mixedProduct<i, k, j, l>(Mb) + Ma.mixedProduct<i, l, j, k>(Mb);
+      Gba = Mb.mixedProduct<i, k, j, l>(Ma) + Mb.mixedProduct<i, l, j, k>(Ma);
 
       T theta_ab;
       if (!MooseUtils::absoluteFuzzyEqual(eigval[a], eigval[b]))

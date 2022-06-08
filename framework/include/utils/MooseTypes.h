@@ -955,20 +955,8 @@ extern const TagName PREVIOUS_NL_SOLUTION_TAG;
 }
 
 /// macros for adding Tensor index enums locally
-#define usingTensorIndicesIJKL                                                                     \
+#define usingTensorIndices(...)                                                                    \
   enum                                                                                             \
   {                                                                                                \
-    I,                                                                                             \
-    J,                                                                                             \
-    K,                                                                                             \
-    L                                                                                              \
-  }
-#define usingTensorIndicesIJKLM                                                                    \
-  enum                                                                                             \
-  {                                                                                                \
-    I,                                                                                             \
-    J,                                                                                             \
-    K,                                                                                             \
-    L,                                                                                             \
-    M                                                                                              \
+    __VA_ARGS__                                                                                    \
   }

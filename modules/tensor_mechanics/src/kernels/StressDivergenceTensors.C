@@ -367,9 +367,9 @@ StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 void
 StressDivergenceTensors::computeFiniteDeformJacobian()
 {
-  usingTensorIndicesIJKL;
-  const auto I1 = RankTwoTensor::Identity();
-  const RankFourTensor I2 = I1.mixedProduct<I, K, J, L>(I1);
+  usingTensorIndices(i, j, k, l);
+  const auto I = RankTwoTensor::Identity();
+  const RankFourTensor I2 = I.mixedProduct<i, k, j, l>(I);
 
   // Bring back to unrotated config
   const RankTwoTensor unrotated_stress =
@@ -382,46 +382,45 @@ StressDivergenceTensors::computeFiniteDeformJacobian()
 
   const RankTwoTensor rot_times_stress = (*_rotation_increment)[_qp] * unrotated_stress;
   const RankFourTensor dstress_drot =
-      I1.mixedProduct<I, K, J, L>(rot_times_stress) + I1.mixedProduct<J, K, I, L>(rot_times_stress);
+      I.mixedProduct<i, k, j, l>(rot_times_stress) + I.mixedProduct<j, k, i, l>(rot_times_stress);
   const RankFourTensor rot_rank_four =
-      (*_rotation_increment)[_qp].mixedProduct<I, K, J, L>((*_rotation_increment)[_qp]);
-  const RankFourTensor drot_dUhatinv = Fhat.mixedProduct<I, K, J, L>(I1);
+      (*_rotation_increment)[_qp].mixedProduct<i, k, j, l>((*_rotation_increment)[_qp]);
+  const RankFourTensor drot_dUhatinv = Fhat.mixedProduct<i, k, j, l>(I);
 
-  const RankTwoTensor A = I1 - Fhatinv;
+  const RankTwoTensor A = I - Fhatinv;
 
-  // Ctilde = Chat^-1 - I1
+  // Ctilde = Chat^-1 - I
   const RankTwoTensor Ctilde = A * A.transpose() - A - A.transpose();
-  const RankFourTensor dCtilde_dFhatinv = -I1.mixedProduct<I, K, J, L>(A) -
-                                          I1.mixedProduct<J, K, I, L>(A) + I2 +
-                                          I1.mixedProduct<J, K, I, L>(I1);
+  const RankFourTensor dCtilde_dFhatinv = -I.mixedProduct<i, k, j, l>(A) -
+                                          I.mixedProduct<j, k, i, l>(A) + I2 +
+                                          I.mixedProduct<j, k, i, l>(I);
 
   // Second order approximation of Uhat - consistent with strain increment definition
-  // const RankTwoTensor Uhat = I1 - 0.5 * Ctilde - 3.0/8.0 * Ctilde * Ctilde;
+  // const RankTwoTensor Uhat = I - 0.5 * Ctilde - 3.0/8.0 * Ctilde * Ctilde;
 
   RankFourTensor dUhatinv_dCtilde =
       0.5 * I2 -
-      1.0 / 8.0 * (I1.mixedProduct<I, K, J, L>(Ctilde) + Ctilde.mixedProduct<I, K, J, L>(I1));
+      1.0 / 8.0 * (I.mixedProduct<i, k, j, l>(Ctilde) + Ctilde.mixedProduct<i, k, j, l>(I));
   RankFourTensor drot_dFhatinv = drot_dUhatinv * dUhatinv_dCtilde * dCtilde_dFhatinv;
 
-  drot_dFhatinv -= Fhat.mixedProduct<I, K, J, L>((*_rotation_increment)[_qp].transpose());
+  drot_dFhatinv -= Fhat.mixedProduct<i, k, j, l>((*_rotation_increment)[_qp].transpose());
   _finite_deform_Jacobian_mult[_qp] = dstress_drot * drot_dFhatinv;
 
   const RankFourTensor dstrain_increment_dCtilde =
-      -0.5 * I2 +
-      0.25 * (I1.mixedProduct<I, K, J, L>(Ctilde) + Ctilde.mixedProduct<I, K, J, L>(I1));
+      -0.5 * I2 + 0.25 * (I.mixedProduct<i, k, j, l>(Ctilde) + Ctilde.mixedProduct<i, k, j, l>(I));
   _finite_deform_Jacobian_mult[_qp] +=
       rot_rank_four * _Jacobian_mult[_qp] * dstrain_increment_dCtilde * dCtilde_dFhatinv;
-  _finite_deform_Jacobian_mult[_qp] += Fhat.mixedProduct<J, K, I, L>(_stress[_qp]);
+  _finite_deform_Jacobian_mult[_qp] += Fhat.mixedProduct<j, k, i, l>(_stress[_qp]);
 
-  const RankFourTensor dFhat_dFhatinv = -Fhat.mixedProduct<I, K, J, L>(Fhat.transpose());
+  const RankFourTensor dFhat_dFhatinv = -Fhat.mixedProduct<i, k, j, l>(Fhat.transpose());
   const RankTwoTensor dJ_dFhatinv = dFhat_dFhatinv.innerProductTranspose(Fhat.ddet());
 
   // Component from Jacobian derivative
-  _finite_deform_Jacobian_mult[_qp] += _stress[_qp].mixedProduct<I, J, K, L>(dJ_dFhatinv);
+  _finite_deform_Jacobian_mult[_qp] += _stress[_qp].mixedProduct<i, j, k, l>(dJ_dFhatinv);
 
   // Derivative of Fhatinv w.r.t. undisplaced coordinates
   const RankTwoTensor Finv = (*_deformation_gradient)[_qp].inverse();
-  const RankFourTensor dFhatinv_dGradu = -Fhatinv.mixedProduct<I, K, J, L>(Finv.transpose());
+  const RankFourTensor dFhatinv_dGradu = -Fhatinv.mixedProduct<i, k, j, l>(Finv.transpose());
   _finite_deform_Jacobian_mult[_qp] = _finite_deform_Jacobian_mult[_qp] * dFhatinv_dGradu;
 }
 

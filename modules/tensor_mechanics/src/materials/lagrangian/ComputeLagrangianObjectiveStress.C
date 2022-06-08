@@ -109,22 +109,25 @@ RankFourTensor
 ComputeLagrangianObjectiveStress::updateTensor(const RankTwoTensor & Q)
 {
   auto I = RankTwoTensor::Identity();
-  return (1.0 + Q.trace()) * I.mixedProductIkJl(I) - Q.mixedProductIkJl(I) - I.mixedProductIkJl(Q);
+  usingTensorIndices(i, j, k, l);
+  return (1.0 + Q.trace()) * I.mixedProduct<i, k, j, l>(I) - Q.mixedProduct<i, k, j, l>(I) -
+         I.mixedProduct<i, k, j, l>(Q);
 }
 
 RankFourTensor
 ComputeLagrangianObjectiveStress::truesdellTangent(const RankTwoTensor & S)
 {
   auto I = RankTwoTensor::Identity();
-
-  return S.outerProduct(I) - I.mixedProductIkJl(S.transpose()) - S.mixedProductIlJk(I);
+  usingTensorIndices(i, j, k, l);
+  return S.mixedProduct<i, j, k, l>(I) - I.mixedProduct<i, k, j, l>(S.transpose()) -
+         S.mixedProduct<i, l, j, k>(I);
 }
 
 RankFourTensor
 ComputeLagrangianObjectiveStress::jaumannTangent(const RankTwoTensor & S)
 {
   auto I = RankTwoTensor::Identity();
-
-  return 0.5 * (I.mixedProductIlJk(S.transpose()) + S.mixedProductIkJl(I) -
-                I.mixedProductIkJl(S.transpose()) - S.mixedProductIlJk(I));
+  usingTensorIndices(i, j, k, l);
+  return 0.5 * (I.mixedProduct<i, l, j, k>(S.transpose()) + S.mixedProduct<i, k, j, l>(I) -
+                I.mixedProduct<i, k, j, l>(S.transpose()) - S.mixedProduct<i, l, j, k>(I));
 }
