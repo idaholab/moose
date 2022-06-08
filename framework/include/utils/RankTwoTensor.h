@@ -725,8 +725,8 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
       const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
       const auto Mb = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
 
-      Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);
-      Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);
+      Gab = Ma.mixedProduct<I, K, J, L>(Mb) + Ma.mixedProduct<I, L, J, K>(Mb);
+      Gba = Mb.mixedProduct<I, K, J, L>(Ma) + Mb.mixedProduct<I, L, J, K>(Ma);
 
       T theta_ab;
       if (!MooseUtils::absoluteFuzzyEqual(eigval[a], eigval[b]))
