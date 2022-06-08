@@ -12,12 +12,12 @@ The thermal properties of graphite are strongly dependent on the raw materials,
 manufacturing process, and oxidation state, so manufacturer-specific properties,
 if available, are preferred to the use of this material.
 
-Isobaric specific heat is calculated from [cite:butland]. Thermal
-conductivity is calculated from a curve fit of tabulated data in [cite:mceligot]
+Isobaric specific heat is calculated from [!cite](butland). Thermal
+conductivity is calculated from a curve fit of tabulated data in [!cite](mceligot)
 for G-348 isotropic graphite.
 Density is calculated given a room temperature density and an estimation of an
 average thermal expansion coefficient from 20$\degree$C to the temperature of
-interest according to thermal expansion data in [cite:baker].
+interest according to thermal expansion data in [!cite](baker).
 Molar mass is calculated assuming pure elemental graphite.
 
 ## Range of Validity
