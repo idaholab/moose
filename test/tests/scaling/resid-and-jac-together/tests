@@ -24,6 +24,7 @@
       ad_indexing_type = 'global'
       run_sim = True
       detail = 'compute the correct Jacobian when the residual and Jacobian are computed separately'
+      ratio_tol = 5e-8
     []
     [jac_together]
       type = PetscJacobianTester
@@ -32,6 +33,7 @@
       run_sim = True
       ad_indexing_type = 'global'
       detail = 'compute the correct Jacobian when the residual and Jacobian are computed together'
+      ratio_tol = 5e-8
     []
   []
 []
