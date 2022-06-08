@@ -1,5 +1,4 @@
-#ifndef HEATDIFFUSION_H
-#define HEATDIFFUSION_H
+#pragma once
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
@@ -32,5 +31,3 @@ protected:
   /// derivative of thermal conductivity with respect to temperature
   const MaterialProperty<Real> & _dk_dT;
 };
-
-#endif //HEATDIFFUSION_H
