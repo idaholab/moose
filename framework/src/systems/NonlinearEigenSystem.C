@@ -470,11 +470,12 @@ NonlinearEigenSystem::turnOffJacobian()
 }
 
 void
-NonlinearEigenSystem::residAndJacobianTogether()
+NonlinearEigenSystem::residualAndJacobianTogether()
 {
-  mooseError("NonlinearEigenSystem::residAndJacobianTogether is not implemented. It might even be "
-             "nonsensical. If it is sensical and you want this capability, please contact a MOOSE "
-             "developer.");
+  mooseError(
+      "NonlinearEigenSystem::residualAndJacobianTogether is not implemented. It might even be "
+      "nonsensical. If it is sensical and you want this capability, please contact a MOOSE "
+      "developer.");
 }
 
 void

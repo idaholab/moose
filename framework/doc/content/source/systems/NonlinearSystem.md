@@ -350,7 +350,7 @@ already computes the residual and Jacobian simultaneously, with the dual number
 at the core of AD holding value (residual) and derivatives
 (Jacobian). Simultaneous evaluation of residual and Jacobian using a single
 function can be triggered by setting
-[!param](/Executioner/Steady/resid_and_jacobian_together) to `true`. What this does in
+[!param](/Executioner/Steady/residual_and_jacobian_together) to `true`. What this does in
 the background is funnels the (generally AD) computed local residuals and
 Jacobians into the global residual vector and Jacobian
 matrix respectively when PETSc calls the libMesh/MOOSE residual/function

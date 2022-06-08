@@ -375,7 +375,7 @@ NonlinearSystem::getSNES()
 }
 
 void
-NonlinearSystem::residAndJacobianTogether()
+NonlinearSystem::residualAndJacobianTogether()
 {
   if (_fe_problem.solverParams()._type == Moose::ST_JFNK)
     mooseError(

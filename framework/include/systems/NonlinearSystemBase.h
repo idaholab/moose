@@ -642,7 +642,7 @@ public:
   /**
    * Call this method if you want the residual and Jacobian to be computed simultaneously
    */
-  virtual void residAndJacobianTogether() = 0;
+  virtual void residualAndJacobianTogether() = 0;
 
   bool computeScalingOnce() const { return _compute_scaling_once; }
   void computeScalingOnce(bool compute_scaling_once)

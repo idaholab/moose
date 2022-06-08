@@ -55,7 +55,7 @@
 
 [Executioner]
   type = Steady
-  resid_and_jacobian_together = true
+  residual_and_jacobian_together = true
   solve_type = NEWTON
 []
 
