@@ -74,7 +74,19 @@ input files using Atom
 
 ## Source navigation with [rtags](https://github.com/Andersbakken/rtags)
 
-Download and build rtags
+Download and build rtags. In order to configure and build rtags, `llvm-config`
+and some other llvm and clang development tools will need to be available in
+your environment. To obtain the necessary tools, in your MOOSE mamba/conda
+environment, perform
+
+```bash
+mamba install moose-libmesh moose-tools llvmdev clangdev
+```
+
+Note that though the relevant packages are `llvmdev` and `clangdev`, specifying
+the MOOSE packages (`moose-libmesh` and `moose-tools` in this example) may be
+necessary in order to prevent downgrading of those package versions. After
+installing `llvmdev` and `clangdev`, we can proceed to building and installing rtags:
 
 ```bash
 git clone https://github.com/Andersbakken/rtags.git
