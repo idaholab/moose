@@ -7,101 +7,101 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 1000.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./T]
+  [T]
     initial_condition = 1073.15
-  [../]
-  [./cp]
+  []
+  [cp]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./dcp_dT]
+  []
+  [dcp_dT]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./k]
+  []
+  [k]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./dk_dT]
+  []
+  [dk_dT]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./rho]
+  []
+  [rho]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./drho_dT]
+  []
+  [drho_dT]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./cp]
+  [cp]
     type = MaterialRealAux
     variable = cp
     property = cp_solid
-  [../]
-  [./dcp_dT]
+  []
+  [dcp_dT]
     type = MaterialRealAux
     variable = dcp_dT
     property = dcp_solid/dT
-  [../]
-  [./k]
+  []
+  [k]
     type = MaterialRealAux
     variable = k
     property = k_solid
-  [../]
-  [./dk_dT]
+  []
+  [dk_dT]
     type = MaterialRealAux
     variable = dk_dT
     property = dk_solid/dT
-  [../]
-  [./rho]
+  []
+  [rho]
     type = MaterialRealAux
     variable = rho
     property = rho_solid
-  [../]
-  [./drho_dT]
+  []
+  [drho_dT]
     type = MaterialRealAux
     variable = drho_dT
     property = drho_solid/dT
-  [../]
+  []
 []
 
 [Materials]
-  [./sp_mat]
+  [sp_mat]
     type = ThermalGraphiteProperties
     temperature = T
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1000.0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 500.0
-  [../]
+  []
 []
 
 [Executioner]

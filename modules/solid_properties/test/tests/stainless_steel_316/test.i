@@ -6,71 +6,71 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     initial_condition = 1000.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./cp]
+  [cp]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./k]
+  []
+  [k]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./rho]
+  []
+  [rho]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./cp]
+  [cp]
     type = MaterialRealAux
      variable = cp
      property = cp_solid
-  [../]
-  [./k]
+  []
+  [k]
     type = MaterialRealAux
      variable = k
      property = k_solid
-  [../]
-  [./rho]
+  []
+  [rho]
     type = MaterialRealAux
      variable = rho
      property = rho_solid
-  [../]
+  []
 []
 
 [Materials]
-  [./sp_mat]
+  [sp_mat]
     type = ThermalStainlessSteel316Properties
     temperature = T
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = T
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = T
     boundary = 'left'
     value = 1000.0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = T
     boundary = 'right'
     value = 500.0
-  [../]
+  []
 []
 
 [Executioner]
