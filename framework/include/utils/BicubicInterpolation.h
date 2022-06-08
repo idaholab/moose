@@ -10,6 +10,9 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "BidimensionalInterpolation.h"
+
+class BidimensionalInterpolation;
 
 /**
  * This class interpolates tabulated data with a bicubic function. In order to
@@ -25,7 +28,7 @@
  * corresponds to moving over the x1 coord. Likewise, moving over a row means
  * moving over the x2 coord.
  */
-class BicubicInterpolation
+class BicubicInterpolation : public BidimensionalInterpolation
 {
 public:
   BicubicInterpolation(const std::vector<Real> & x1,
@@ -42,8 +45,8 @@ public:
   /**
    * Samples value at point (x1, x2)
    */
-  Real sample(Real x1, Real x2) const;
-  ADReal sample(const ADReal & x1, const ADReal & x2) const;
+  Real sample(const Real x1, const Real x2) const override;
+  ADReal sample(const ADReal & x1, const ADReal & x2) const override;
 
   /**
    * Samples value and first derivatives at point (x1, x2)
@@ -51,17 +54,17 @@ public:
    * as it minimizes the amount of time spent locating the point in the
    * tabulated data
    */
-  void sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const;
+  void sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const override;
 
   /**
    * Samples first derivative at point (x1, x2)
    */
-  Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const;
+  Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const override;
 
   /**
    * Samples second derivative at point (x1, x2)
    */
-  Real sample2ndDerivative(Real x1, Real x2, unsigned int deriv_var) const;
+  Real sample2ndDerivative(Real x1, Real x2, unsigned int deriv_var) const override;
 
   /**
    * Precompute all of the coefficients for the bicubic interpolation to avoid
@@ -81,7 +84,7 @@ protected:
                     T & xs) const;
 
   template <typename T>
-  T sampleInternal(T x1, T x2) const;
+  T sampleInternal(const T & x1, const T & x2) const;
 
   /**
    * Provides the values of the first derivatives in each direction at all
@@ -93,10 +96,6 @@ protected:
                         std::vector<std::vector<Real>> & dy_dx2,
                         std::vector<std::vector<Real>> & d2y_dx1x2);
 
-  /// Independent values in the x1 direction
-  std::vector<Real> _x1;
-  /// Independent values in the x2 direction
-  std::vector<Real> _x2;
   /// The dependent values at (x1, x2) points
   std::vector<std::vector<Real>> _y;
 

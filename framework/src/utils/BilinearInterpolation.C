@@ -12,11 +12,10 @@
 
 int BilinearInterpolation::_file_number = 0;
 
-BilinearInterpolation::BilinearInterpolation(const std::vector<Real> & x,
-                                             const std::vector<Real> & y,
-                                             const ColumnMajorMatrix & z)
-  : _xAxis(x), _yAxis(y), _zSurface(z)
-
+BilinearInterpolation::BilinearInterpolation(const std::vector<Real> & x1,
+                                             const std::vector<Real> & x2,
+                                             const ColumnMajorMatrix & y)
+  : BidimensionalInterpolation(x1, x2), _zSurface(y)
 {}
 
 void
@@ -56,64 +55,30 @@ BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr,
   }
 }
 
-template <typename T>
-T
-BilinearInterpolation::sample(const T & xcoord, const T & ycoord) const
+Real
+BilinearInterpolation::sample(Real x1, Real x2) const
 {
-  // first find 4 neighboring points
-  int lx = 0; // index of x coordinate of adjacent grid point to left of P
-  int ux = 0; // index of x coordinate of adjacent grid point to right of P
-  getNeighborIndices(_xAxis, MetaPhysicL::raw_value(xcoord), lx, ux);
-
-  int ly = 0; // index of y coordinate of adjacent grid point below P
-  int uy = 0; // index of y coordinate of adjacent grid point above P
-  getNeighborIndices(_yAxis, MetaPhysicL::raw_value(ycoord), ly, uy);
-
-  const Real & fQ11 = _zSurface(ly, lx);
-  const Real & fQ21 = _zSurface(ly, ux);
-  const Real & fQ12 = _zSurface(uy, lx);
-  const Real & fQ22 = _zSurface(uy, ux);
-
-  // if point exactly found on a node do not interpolate
-  if ((lx == ux) && (ly == uy))
-    return fQ11;
-
-  const auto & x = xcoord;
-  const auto & y = ycoord;
-  const Real & x1 = _xAxis[lx];
-  const Real & x2 = _xAxis[ux];
-  const Real & y1 = _yAxis[ly];
-  const Real & y2 = _yAxis[uy];
-
-  // if xcoord lies exactly on an xAxis node do linear interpolation
-  if (lx == ux)
-    return fQ11 + (fQ12 - fQ11) * (y - y1) / (y2 - y1);
-
-  // if ycoord lies exactly on an yAxis node do linear interpolation
-
-  if (ly == uy)
-    return fQ11 + (fQ21 - fQ11) * (x - x1) / (x2 - x1);
-
-  auto fxy = fQ11 * (x2 - x) * (y2 - y);
-  fxy += fQ21 * (x - x1) * (y2 - y);
-  fxy += fQ12 * (x2 - x) * (y - y1);
-  fxy += fQ22 * (x - x1) * (y - y1);
-  fxy /= ((x2 - x1) * (y2 - y1));
-
-  return fxy;
+  return sampleInternal(x1, x2);
 }
 
-Real
-BilinearInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const
+ADReal
+BilinearInterpolation::sample(const ADReal & x1, const ADReal & x2) const
+{
+  return sampleInternal(x1, x2);
+}
+
+template <typename T>
+T
+BilinearInterpolation::sampleInternal(T & x1, T & x2) const
 {
   // first find 4 neighboring points
   int lx = 0; // index of x coordinate of adjacent grid point to left of P
   int ux = 0; // index of x coordinate of adjacent grid point to right of P
-  getNeighborIndices(_xAxis, x1, lx, ux);
+  getNeighborIndices(_x1, MetaPhysicL::raw_value(x1), lx, ux);
 
   int ly = 0; // index of y coordinate of adjacent grid point below P
   int uy = 0; // index of y coordinate of adjacent grid point above P
-  getNeighborIndices(_yAxis, x2, ly, uy);
+  getNeighborIndices(_x2, MetaPhysicL::raw_value(x2), ly, uy);
 
   const Real & fQ11 = _zSurface(ly, lx);
   const Real & fQ21 = _zSurface(ly, ux);
@@ -126,16 +91,62 @@ BilinearInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var
 
   const auto & x = x1;
   const auto & y = x2;
-  const Real & x_1 = _xAxis[lx];
-  const Real & x_2 = _xAxis[ux];
-  const Real & y1 = _yAxis[ly];
-  const Real & y2 = _yAxis[uy];
+  const Real & x_1 = _x1[lx];
+  const Real & x_2 = _x1[ux];
+  const Real & y1 = _x2[ly];
+  const Real & y2 = _x2[uy];
 
-  // if xcoord lies exactly on an xAxis node do linear interpolation
+  // if x1 lies exactly on an xAxis node do linear interpolation
   if (lx == ux)
     return fQ11 + (fQ12 - fQ11) * (y - y1) / (y2 - y1);
 
-  // if ycoord lies exactly on an yAxis node do linear interpolation
+  // if x2 lies exactly on an yAxis node do linear interpolation
+
+  if (ly == uy)
+    return fQ11 + (fQ21 - fQ11) * (x - x_1) / (x_2 - x_1);
+
+  auto fxy = fQ11 * (x_2 - x) * (y2 - y);
+  fxy += fQ21 * (x - x_1) * (y2 - y);
+  fxy += fQ12 * (x_2 - x) * (y - y1);
+  fxy += fQ22 * (x - x_1) * (y - y1);
+  fxy /= ((x_2 - x_1) * (y2 - y1));
+
+  return fxy;
+}
+
+Real
+BilinearInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const
+{
+  // first find 4 neighboring points
+  int lx = 0; // index of x coordinate of adjacent grid point to left of P
+  int ux = 0; // index of x coordinate of adjacent grid point to right of P
+  getNeighborIndices(_x1, x1, lx, ux);
+
+  int ly = 0; // index of y coordinate of adjacent grid point below P
+  int uy = 0; // index of y coordinate of adjacent grid point above P
+  getNeighborIndices(_x2, x2, ly, uy);
+
+  const Real & fQ11 = _zSurface(ly, lx);
+  const Real & fQ21 = _zSurface(ly, ux);
+  const Real & fQ12 = _zSurface(uy, lx);
+  const Real & fQ22 = _zSurface(uy, ux);
+
+  // if point exactly found on a node do not interpolate
+  if ((lx == ux) && (ly == uy))
+    return fQ11;
+
+  const auto & x = x1;
+  const auto & y = x2;
+  const Real & x_1 = _x1[lx];
+  const Real & x_2 = _x1[ux];
+  const Real & y1 = _x2[ly];
+  const Real & y2 = _x2[uy];
+
+  // if x1 lies exactly on an xAxis node do linear interpolation
+  if (lx == ux)
+    return fQ11 + (fQ12 - fQ11) * (y - y1) / (y2 - y1);
+
+  // if x2 lies exactly on an yAxis node do linear interpolation
 
   if (ly == uy)
     return fQ11 + (fQ21 - fQ11) * (x - x_1) / (x2 - x_1);
@@ -206,5 +217,3 @@ BilinearInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var
     }
   }
 }
-template Real BilinearInterpolation::sample<Real>(const Real &, const Real &) const;
-template ADReal BilinearInterpolation::sample<ADReal>(const ADReal &, const ADReal &) const;

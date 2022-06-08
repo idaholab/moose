@@ -169,7 +169,7 @@ TabulatedFluidProperties::initialSetup()
                      column_names[i],
                      " read in ",
                      _file_name,
-                     " is not one of the properties that TabulatedBilinearFluidProperties understands");
+                     " is not one of the properties that TabulatedFluidProperties understands");
         else
           _interpolated_properties.push_back(column_names[i]);
       }
