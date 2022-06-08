@@ -14,7 +14,6 @@
 #include "MooseVariableScalar.h"
 #include "Assembly.h"
 #include "ScalarKernel.h"
-#include "GeometricalFlowComponent.h"
 
 registerMooseObject("ThermalHydraulicsApp", ShaftConnectedPump1Phase);
 

@@ -15,7 +15,6 @@
 #include "MooseVariableScalar.h"
 #include "Assembly.h"
 #include "ScalarKernel.h"
-#include "GeometricalFlowComponent.h"
 #include "ADVolumeJunction1PhaseUserObject.h"
 
 registerMooseObject("ThermalHydraulicsApp", ShaftConnectedCompressor1Phase);

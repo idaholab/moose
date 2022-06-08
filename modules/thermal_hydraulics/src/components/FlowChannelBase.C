@@ -52,7 +52,10 @@ THM::stringToEnum(const std::string & s)
 InputParameters
 FlowChannelBase::validParams()
 {
-  InputParameters params = GeometricalFlowComponent::validParams();
+  InputParameters params = Component1D::validParams();
+  params += GravityInterface::validParams();
+
+  params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object");
   params.addRequiredParam<FunctionName>(
       "A", "Area of the flow channel, can be a constant or a function");
   params.addParam<Real>("roughness", 0.0, "Roughness [m]");
@@ -76,8 +79,15 @@ FlowChannelBase::validParams()
 }
 
 FlowChannelBase::FlowChannelBase(const InputParameters & params)
-  : GeometricalFlowComponent(params),
+  : Component1D(params),
+    GravityInterface(params),
+
     _flow_model(nullptr),
+    _fp_name(getParam<UserObjectName>("fp")),
+    _gravity_angle(MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0)
+                       ? 0.0
+                       : std::acos(_dir * _gravity_vector / (_dir.norm() * _gravity_magnitude)) *
+                             180 / M_PI),
     _closures_name(getParam<std::string>("closures")),
     _pipe_pars_transferred(getParam<bool>("pipe_pars_transferred")),
     _roughness(getParam<Real>("roughness")),
@@ -115,7 +125,7 @@ FlowChannelBase::createAreaFunctionAndGetName()
 void
 FlowChannelBase::init()
 {
-  GeometricalFlowComponent::init();
+  Component1D::init();
 
   _area_function = createAreaFunctionAndGetName();
 
@@ -146,7 +156,7 @@ FlowChannelBase::buildClosures()
 void
 FlowChannelBase::initSecondary()
 {
-  GeometricalFlowComponent::initSecondary();
+  Component1D::initSecondary();
 
   // Determine heat transfer mode based on connected heat transfer components;
   // if at least one heat transfer component of temperature component is
@@ -165,7 +175,7 @@ FlowChannelBase::initSecondary()
 void
 FlowChannelBase::check() const
 {
-  GeometricalFlowComponent::check();
+  Component1D::check();
 
   if (_closures)
     _closures->checkFlowChannel(*this);

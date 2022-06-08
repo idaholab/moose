@@ -7,12 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VolumeJunction1Phase.h"
 #include "JunctionParallelChannels1Phase.h"
 #include "FlowModelSinglePhase.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Function.h"
-#include "GeometricalFlowComponent.h"
 
 registerMooseObject("ThermalHydraulicsApp", JunctionParallelChannels1Phase);
 
