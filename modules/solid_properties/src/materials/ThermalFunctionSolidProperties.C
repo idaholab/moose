@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ThermalFunctionSolidProperties.h"
+#include "Function.h"
 
 registerMooseObject("SolidPropertiesApp", ThermalFunctionSolidProperties);
 

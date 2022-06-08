@@ -10,7 +10,8 @@
 #pragma once
 
 #include "ThermalSolidPropertiesMaterial.h"
-#include "Function.h"
+
+class Function;
 
 /**
  * Thermal material properties as a function of temperature from function
