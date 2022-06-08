@@ -28,15 +28,14 @@ ElementLpNormAux::validParams()
 ElementLpNormAux::ElementLpNormAux(const InputParameters & parameters)
   : AuxKernel(parameters), _p(getParam<Real>("p")), _coupled_var(coupledValue("coupled_variable"))
 {
+  if (mooseVariableBase()->feType() != FEType(CONSTANT, MONOMIAL))
+    paramError("variable", "Must be of type CONSTANT MONOMIAL");
 }
 
 void
 ElementLpNormAux::compute()
 {
   precalculateValue();
-
-  if (isNodal())
-    mooseError("ElementLpNormAux only makes sense as an Elemental AuxVariable.");
 
   // Sum up the squared-error values by calling computeValue(), then
   // return the sqrt of the result.
@@ -47,7 +46,7 @@ ElementLpNormAux::compute()
     summed_value += _JxW[_qp] * _coord[_qp] * std::pow(std::abs(val), _p);
   }
 
-  _var.setNodalValue(std::pow(summed_value, 1. / _p));
+  _var.setDofValue(std::pow(summed_value, 1. / _p), 0);
 }
 
 Real

@@ -2,7 +2,7 @@
   [friction_flow_diode]
     type = Exodiff
     issues = '#20695'
-    design = 'INSFVFrictionFlowDiode.md'
+    design = 'NSFVFrictionFlowDiodeMaterial.md'
     requirement = 'The system shall be able to model a simple friction-based volumetric flow diode'
     input = 'friction.i'
     exodiff = friction_out.e
