@@ -45,8 +45,7 @@ TwoPhaseFluidPropertiesIndependent::getTwoPhaseInterfaceDummyValue() const
 {
   if (_error_on_unimplemented)
     mooseError(
-        name(),
-        ": The 2-phase fluid properties class 'TwoPhaseFluidPropertiesIndependent' does not allow "
+        "The 2-phase fluid properties class 'TwoPhaseFluidPropertiesIndependent' does not allow "
         "calling any 2-phase property interfaces.");
   else
     return 0;

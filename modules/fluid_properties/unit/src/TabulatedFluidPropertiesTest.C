@@ -27,7 +27,7 @@ TEST_F(TabulatedFluidPropertiesTest, unorderedData)
     std::size_t pos =
         std::string(err.what())
             .find(
-                "unordered_fp: the column data for temperature is not monotonically increasing in "
+                "the column data for temperature is not monotonically increasing in "
                 "data/csv/unordered_fluid_props.csv");
     ASSERT_TRUE(pos != std::string::npos);
   }
@@ -44,7 +44,7 @@ TEST_F(TabulatedFluidPropertiesTest, unequalTemperatures)
   catch (const std::exception & err)
   {
     std::size_t pos = std::string(err.what())
-                          .find("unequal_fp: temperature values for pressure 2e+06 are not "
+                          .find("temperature values for pressure 2e+06 are not "
                                 "identical to values for 1e+06");
     ASSERT_TRUE(pos != std::string::npos);
   }
@@ -61,7 +61,7 @@ TEST_F(TabulatedFluidPropertiesTest, missingColumn)
   catch (const std::exception & err)
   {
     std::size_t pos = std::string(err.what())
-                          .find("missing_col_fp: no temperature data read in "
+                          .find("no temperature data read in "
                                 "data/csv/missing_col_fluid_props.csv. A "
                                 "column named temperature must be present");
     ASSERT_TRUE(pos != std::string::npos);
@@ -97,7 +97,7 @@ TEST_F(TabulatedFluidPropertiesTest, missingData)
   {
     std::size_t pos =
         std::string(err.what())
-            .find("missing_data_fp: the number of rows in data/csv/missing_data_fluid_props.csv "
+            .find("the number of rows in data/csv/missing_data_fluid_props.csv "
                   "is not equal to the number of unique pressure values 3 multiplied "
                   "by the number of unique temperature values 3");
     ASSERT_TRUE(pos != std::string::npos);
