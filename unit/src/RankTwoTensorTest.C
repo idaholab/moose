@@ -508,9 +508,10 @@ TEST_F(RankTwoTensorTest, ADConversion)
   generic_reg = MetaPhysicL::raw_value(generic_ad);
 }
 
-TEST_F(RankTwoTensorTest, mixedProductIjJklm)
+TEST_F(RankTwoTensorTest, mixedProductIMMJKL)
 {
-  const RankFourTensor computed_val = _unsymmetric1.mixedProductIjJklm(_r4);
+  usingTensorIndices(i, j, k, l, m);
+  const RankFourTensor computed_val = _unsymmetric1.mixedProduct<i, m, m, j, k, l>(_r4);
   RankFourTensor expected_val;
   expected_val.fillFromInputVector(
       {274, 278, 282, 286, 290, 294, 298, 302, 306, 310, 314, 318, 322, 326, 330, 334, 338,
@@ -527,9 +528,10 @@ TEST_F(RankTwoTensorTest, mixedProductIjJklm)
           EXPECT_NEAR(expected_val(i, j, k, l), computed_val(i, j, k, l), 1e-5);
 }
 
-TEST_F(RankTwoTensorTest, mixedProductJmIjkl)
+TEST_F(RankTwoTensorTest, mixedProductMLIMJK)
 {
-  const RankFourTensor computed_val = _unsymmetric1.mixedProductJmIjkl(_r4);
+  usingTensorIndices(i, j, k, l, m);
+  const RankFourTensor computed_val = _unsymmetric1.mixedProduct<m, l, i, m, j, k>(_r4);
   RankFourTensor expected_val;
   expected_val.fillFromInputVector(
       {78,    -168, 277,  84,    -183, 302,   90,    -198, 327,   96,    -213, 352,   102,  -228,
@@ -547,9 +549,10 @@ TEST_F(RankTwoTensorTest, mixedProductJmIjkl)
           EXPECT_EQ(expected_val(i, j, k, l), computed_val(i, j, k, l));
 }
 
-TEST_F(RankTwoTensorTest, mixedProductJkIjlm)
+TEST_F(RankTwoTensorTest, mixedProductMJIMKL)
 {
-  const RankFourTensor computed_val = _unsymmetric1.mixedProductJkIjlm(_r4);
+  usingTensorIndices(i, j, k, l, m);
+  const RankFourTensor computed_val = _unsymmetric1.mixedProduct<m, j, i, m, k, l>(_r4);
   RankFourTensor expected_val;
   expected_val.fillFromInputVector(
       {78,    84,    90,   96,   102,  108,  114,  120,  126,  -168,  -183,  -198,  -213,  -228,

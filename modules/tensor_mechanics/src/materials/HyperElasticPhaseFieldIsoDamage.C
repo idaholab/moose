@@ -207,5 +207,6 @@ HyperElasticPhaseFieldIsoDamage::computeQpJacobian()
     _d2Fdcdstrain[_qp] =
         -_df_dstretch_inc.innerProductTranspose(dG0_df) * 2.0 * (1.0 - _c[_qp]) * (1 - _kdamage);
 
-  _dstress_dc[_qp] = _fe.mixedProductIkJl(_fe) * _dpk2_dc;
+  usingTensorIndices(i, j, k, l);
+  _dstress_dc[_qp] = _fe.mixedProduct<i, k, j, l>(_fe) * _dpk2_dc;
 }

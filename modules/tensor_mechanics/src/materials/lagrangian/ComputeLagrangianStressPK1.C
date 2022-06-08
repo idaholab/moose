@@ -43,8 +43,9 @@ ComputeLagrangianStressPK1::computeQpCauchyStress()
     _cauchy_stress[_qp] = _pk1_stress[_qp] * _F[_qp].transpose() / _detJ[_qp];
 
     auto f = _inv_df[_qp].inverse();
-    _cauchy_jacobian[_qp] =
-        _cauchy_stress[_qp].mixedProductIlJk(f) - _cauchy_stress[_qp].outerProduct(f.transpose());
+    usingTensorIndices(i, j, k, l);
+    _cauchy_jacobian[_qp] = _cauchy_stress[_qp].mixedProduct<i, l, j, k>(f) -
+                            _cauchy_stress[_qp].mixedProduct<i, j, k, l>(f.transpose());
     _cauchy_jacobian[_qp] +=
         _pk1_jacobian[_qp].tripleProductJkl(_F[_qp], f.transpose(), _F[_qp]) / _detJ[_qp];
   }

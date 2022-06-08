@@ -602,7 +602,8 @@ FiniteStrainUObasedCP::elastoPlasticTangentModuli()
         deedfe(i, j, k, j) = deedfe(i, j, k, j) + _fe(k, i) * 0.5;
       }
 
-  dsigdpk2dfe = _fe.mixedProductIkJl(_fe) * _elasticity_tensor[_qp] * deedfe;
+  usingTensorIndices(i, j, k, l);
+  dsigdpk2dfe = _fe.mixedProduct<i, k, j, l>(_fe) * _elasticity_tensor[_qp] * deedfe;
 
   pk2fet = _pk2[_qp] * _fe.transpose();
   fepk2 = _fe * _pk2[_qp];

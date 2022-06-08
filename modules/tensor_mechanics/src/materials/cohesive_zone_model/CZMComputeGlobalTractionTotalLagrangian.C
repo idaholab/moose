@@ -73,7 +73,8 @@ void
 CZMComputeGlobalTractionTotalLagrangian::computeAreaRatioAndDerivatives()
 {
   _dR_dF = CohesiveZoneModelTools::computedRdF(_R[_qp], _R[_qp].transpose() * _F[_qp]);
-  _dczm_total_rotation_dF = _czm_reference_rotation[_qp].mixedProductJkIjlm(_dR_dF);
+  usingTensorIndices(i, j, k, l, m);
+  _dczm_total_rotation_dF = _czm_reference_rotation[_qp].mixedProduct<m, j, i, m, k, l>(_dR_dF);
 
   const RankFourTensor dFinv_dF = CohesiveZoneModelTools::computedFinversedF(_F_inv);
 

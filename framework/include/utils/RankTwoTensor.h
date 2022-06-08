@@ -333,42 +333,6 @@ public:
     return mixedProduct<i, j, k, l>(b);
   }
 
-  /// returns C_ijkl = a_ik * b_jl
-  RankFourTensorTempl<T> mixedProductIkJl(const RankTwoTensorTempl<T> & b) const
-  {
-    return mixedProduct<i, k, j, l>(b);
-  }
-
-  /// returns C_ijkl = a_jk * b_il
-  RankFourTensorTempl<T> mixedProductJkIl(const RankTwoTensorTempl<T> & b) const
-  {
-    return mixedProduct<j, k, i, l>(b);
-  }
-
-  /// returns C_ijkl = a_il * b_jk
-  RankFourTensorTempl<T> mixedProductIlJk(const RankTwoTensorTempl<T> & b) const
-  {
-    return mixedProduct<i, l, j, k>(b);
-  }
-
-  /// returns C_ijkl = a_im * b_mjkl
-  RankFourTensorTempl<T> mixedProductIjJklm(const RankFourTensorTempl<T> & b) const
-  {
-    return mixedProduct<i, m, m, j, k, l>(b);
-  }
-
-  /// returns C_ijkl = a_ml * b_imjk
-  RankFourTensorTempl<T> mixedProductJmIjkl(const RankFourTensorTempl<T> & b) const
-  {
-    return mixedProduct<m, l, i, m, j, k>(b);
-  }
-
-  /// returns C_ijkl = a_mj * b_imkl
-  RankFourTensorTempl<T> mixedProductJkIjlm(const RankFourTensorTempl<T> & b) const
-  {
-    return mixedProduct<m, j, i, m, k, l>(b);
-  }
-
   /// returns C_ikl = a_ij * b_jkl
   RankThreeTensorTempl<T> mixedProductIjJkl(const RankThreeTensorTempl<T> & b) const;
 
