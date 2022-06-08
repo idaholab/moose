@@ -27,12 +27,6 @@ public:
   ThermalStainlessSteel316Properties(const InputParameters & parameters);
 
   /**
-   * Solid name
-   * @return "thermal_stainless_steel_316"
-   */
-  virtual const std::string & solidName() const override;
-
-  /**
    * Molar mass
    * The nominal chemical composition in weight percent is:
    * 0.08 C, 17.0 Cr, 0.3 Cu, 65.0 Fe, 2.0 Mn, 2.5 Mo, 12.0 Ni, 1.0 Si \cite mills.

@@ -24,9 +24,7 @@ the overall type of property.
 ## Solid properties
 
 All solid properties inherit from the `SolidPropertiesMaterial` base material class, which provides
-interfaces for all types of solid properties that might be desired, in addition to:
-
-- Solid name: `solidName()`
+interfaces for all types of solid properties that might be desired.
 
 ## Thermal properties
 
@@ -165,7 +163,6 @@ public:
   static InputParameters inputParams();
 
   ThermalGraphiteProperties(const InputParameters & parameters);
-  virtual const std::string & solidName() const override;
   virtual Real molarMass() const override;
   virtual void computeIsobaricSpecificHeat() override;
   virtual void computeIsobaricSpecificHeatDerivatives() override;

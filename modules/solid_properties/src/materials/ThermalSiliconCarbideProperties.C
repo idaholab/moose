@@ -11,8 +11,6 @@
 
 registerMooseObject("SolidPropertiesApp", ThermalSiliconCarbideProperties);
 
-const std::string ThermalSiliconCarbideProperties::_name = std::string("thermal_silicon_carbide");
-
 InputParameters
 ThermalSiliconCarbideProperties::validParams()
 {
@@ -33,12 +31,6 @@ ThermalSiliconCarbideProperties::ThermalSiliconCarbideProperties(const InputPara
                  .getEnum<ThermalSiliconCarbidePropertiesKModel>()),
     _rho_const(getParam<Real>("density"))
 {
-}
-
-const std::string &
-ThermalSiliconCarbideProperties::solidName() const
-{
-  return _name;
 }
 
 Real

@@ -11,8 +11,6 @@
 
 registerMooseObject("SolidPropertiesApp", ThermalFunctionSolidProperties);
 
-const std::string ThermalFunctionSolidProperties::_name = "thermal_function";
-
 InputParameters
 ThermalFunctionSolidProperties::validParams()
 {
@@ -30,12 +28,6 @@ ThermalFunctionSolidProperties::ThermalFunctionSolidProperties(const InputParame
     _cp_function(getFunction("cp")),
     _rho_function(getFunction("rho"))
 {
-}
-
-const std::string &
-ThermalFunctionSolidProperties::solidName() const
-{
-  return _name;
 }
 
 void

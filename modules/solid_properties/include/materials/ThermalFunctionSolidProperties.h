@@ -25,12 +25,6 @@ public:
 
   ThermalFunctionSolidProperties(const InputParameters & parameters);
 
-  /**
-   * Solid name
-   * @return "thermal_function"
-   */
-  virtual const std::string & solidName() const override;
-
   /// Isobaric specific heat capacity
   virtual void computeIsobaricSpecificHeat() override;
 

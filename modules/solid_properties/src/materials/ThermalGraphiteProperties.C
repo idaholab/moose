@@ -11,8 +11,6 @@
 
 registerMooseObject("SolidPropertiesApp", ThermalGraphiteProperties);
 
-const std::string ThermalGraphiteProperties::_name = std::string("thermal_graphite");
-
 InputParameters
 ThermalGraphiteProperties::validParams()
 {
@@ -28,12 +26,6 @@ ThermalGraphiteProperties::ThermalGraphiteProperties(const InputParameters & par
     _rho_room_temp(getParam<Real>("density_room_temp")),
     _beta0(2.925e-6)
 {
-}
-
-const std::string &
-ThermalGraphiteProperties::solidName() const
-{
-  return _name;
 }
 
 Real

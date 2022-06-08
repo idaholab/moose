@@ -35,12 +35,6 @@ public:
   ThermalGraphiteProperties(const InputParameters & parameters);
 
   /**
-   * Solid name
-   * @return "thermal_graphite"
-   */
-  virtual const std::string & solidName() const override;
-
-  /**
    * Molar mass
    * A typical chemically-purified nuclear grade graphite contains less than
    * 10 ppm Si, 10 ppm Al, 5 ppm Fe, 10 ppm Ca, 1 ppm Mg, 1 ppm Ni, 1 ppm Ti,

@@ -23,12 +23,6 @@ public:
   SolidPropertiesMaterial(const InputParameters & parameters);
 
   /**
-   * Solid name
-   * @return string representing solid name
-   */
-  virtual const std::string & solidName() const;
-
-  /**
    * Molar mass
    * @return molar mass
    */

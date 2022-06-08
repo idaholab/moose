@@ -9,8 +9,6 @@
 
 #include "SolidPropertiesMaterial.h"
 
-const std::string SolidPropertiesMaterial::_name = "";
-
 InputParameters
 SolidPropertiesMaterial::validParams()
 {
@@ -22,12 +20,6 @@ SolidPropertiesMaterial::validParams()
 SolidPropertiesMaterial::SolidPropertiesMaterial(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters)
 {
-}
-
-const std::string &
-SolidPropertiesMaterial::solidName() const
-{
-  return _name;
 }
 
 Real

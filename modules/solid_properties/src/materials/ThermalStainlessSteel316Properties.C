@@ -11,9 +11,6 @@
 
 registerMooseObject("SolidPropertiesApp", ThermalStainlessSteel316Properties);
 
-const std::string ThermalStainlessSteel316Properties::_name =
-    std::string("thermal_stainless_steel_316");
-
 InputParameters
 ThermalStainlessSteel316Properties::validParams()
 {
@@ -29,11 +26,6 @@ ThermalStainlessSteel316Properties::ThermalStainlessSteel316Properties(
 {
 }
 
-const std::string &
-ThermalStainlessSteel316Properties::solidName() const
-{
-  return _name;
-}
 
 Real
 ThermalStainlessSteel316Properties::molarMass() const

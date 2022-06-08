@@ -22,12 +22,6 @@ public:
   ThermalSiliconCarbideProperties(const InputParameters & parameters);
 
   /**
-   * Solid name
-   * @return "thermal_silicon_carbide"
-   */
-  virtual const std::string & solidName() const override;
-
-  /**
    * Molar mass
    * @return molar mass (kg/mol)
    */
