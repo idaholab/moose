@@ -13,7 +13,7 @@
 #include "DelimitedFileReader.h"
 
 class SinglePhaseFluidPropertiesPT;
-class BicubicInterpolation;
+class BidimensionalInterpolation;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
@@ -82,7 +82,7 @@ class BicubicInterpolation;
  * less than using the original FluidProperties UserObject.
  *
  * Properties specified in the data file or listed in the input file (and their derivatives
- * wrt pressure and temperature) will be calculated using bicubic interpolation, while all
+ * wrt pressure and temperature) will be calculated using Bidimensional interpolation, while all
  * remaining fluid properties are calculated using the supplied FluidProperties UserObject.
  */
 class TabulatedFluidProperties : public SinglePhaseFluidProperties
@@ -213,8 +213,8 @@ protected:
   /// Tabulated fluid properties
   std::vector<std::vector<Real>> _properties;
 
-  /// Bicubic Interpolated fluid property
-  std::vector<std::unique_ptr<BicubicInterpolation>> _property_ipol;
+  /// Bidimensional Interpolated fluid property
+  std::vector<std::unique_ptr<BidimensionalInterpolation>> _property_ipol;
 
   /// Minimum temperature in tabulated data
   Real _temperature_min;
@@ -277,17 +277,17 @@ protected:
   /// to error or not on out of bounds check
   bool _error_on_out_of_bounds;
 
-  /// bicubic interpolate temperature from (v,e)
-  std::unique_ptr<BicubicInterpolation> _T_from_v_e_ipol;
+  /// Bidimensional interpolate temperature from (v,e)
+  std::unique_ptr<BidimensionalInterpolation> _T_from_v_e_ipol;
 
-  /// bicubic interpolate pressure from (v,e)
-  std::unique_ptr<BicubicInterpolation> _p_from_v_e_ipol;
+  /// Bidimensional interpolate pressure from (v,e)
+  std::unique_ptr<BidimensionalInterpolation> _p_from_v_e_ipol;
 
-  /// bicubic interpolate temperature from (v,h)
-  std::unique_ptr<BicubicInterpolation> _T_from_v_h_ipol;
+  /// Bidimensional interpolate temperature from (v,h)
+  std::unique_ptr<BidimensionalInterpolation> _T_from_v_h_ipol;
 
-  /// bicubic interpolate pressure from (v,h)
-  std::unique_ptr<BicubicInterpolation> _p_from_v_h_ipol;
+  /// Bidimensional interpolate pressure from (v,h)
+  std::unique_ptr<BidimensionalInterpolation> _p_from_v_h_ipol;
 
   /// Minimum internal energy in tabulated data
   Real _e_min;
