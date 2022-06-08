@@ -11,9 +11,12 @@
 
 // MOOSE includes
 #include "ColumnMajorMatrix.h"
+#include "BidimensionalInterpolation.h"
 
 // C++ includes
 #include <vector>
+
+class BidimensionalInterpolation;
 
 /**
  * This class applies the Least Squares algorithm to a set of points
@@ -22,7 +25,7 @@
  * function of two values e.g. z(x,y).  Supply Bilinearlinear with a
  * vector of x and a vector of y and a ColumnMajorMatrix of function
  * values, z, that correspond to the values in the vectors x and
- * y...and also a sample point (xcoord and ycoord), and
+ * y...and also a sample point (x1 and x2), and
  * BilinearInterpolation will return the value of the function at the
  * sample point.  A simple example:
  *
@@ -31,9 +34,9 @@
  * z = [1 2]
  *     [3 4]
  *
- * with xcoord = 1.5 and ycoord = 1.5 returns a value of 2.5.
+ * with x1 = 1.5 and x2 = 1.5 returns a value of 2.5.
  */
-class BilinearInterpolation
+class BilinearInterpolation : public BidimensionalInterpolation
 {
 public:
   /**
@@ -52,10 +55,8 @@ public:
    * This function will take an independent variable input and will
    * return the dependent variable based on the generated fit.
    */
-  template <typename T>
-  T sample(const T & xcoord, const T & ycoord) const;
-
-  Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const;
+  Real sample(const Real x1, const Real x2) const override;
+  ADReal sample(const ADReal & x1, const ADReal & x2) const override;
 
   /**
    * Samples value and first derivatives at point (x1, x2)
@@ -63,14 +64,16 @@ public:
    * as it minimizes the amount of time spent locating the point in the
    * tabulated data
    */
-  void sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const;
+  Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const override;
 
   void
   getNeighborIndices(const std::vector<Real> & inArr, Real x, int & lowerX, int & upperX) const;
 
 private:
-  std::vector<Real> _xAxis;
-  std::vector<Real> _yAxis;
+  /// sampleInternal only used by BilinearInterpolation, hence made private
+  template <typename T>
+  T sampleInternal(T & x1, T & x2) const;
+
   ColumnMajorMatrix _zSurface;
   static int _file_number;
 };

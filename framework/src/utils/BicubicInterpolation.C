@@ -17,11 +17,12 @@
 BicubicInterpolation::BicubicInterpolation(const std::vector<Real> & x1,
                                            const std::vector<Real> & x2,
                                            const std::vector<std::vector<Real>> & y)
-  : _x1(x1), _x2(x2), _y(y)
+  : BidimensionalInterpolation(x1, x2), _y(y)
 {
   errorCheck();
 
-  // Resize the vector of coefficients
+  // Resize the vector of
+  //resize not working since _x1(x1), _x2(x2) changed to BidimensionalInt...
   auto m = _x1.size();
   auto n = _x2.size();
 
@@ -42,7 +43,7 @@ BicubicInterpolation::BicubicInterpolation(const std::vector<Real> & x1,
 }
 
 Real
-BicubicInterpolation::sample(Real x1, Real x2) const
+BicubicInterpolation::sample(const Real x1, const Real x2) const
 {
   return sampleInternal(x1, x2);
 }
@@ -55,7 +56,7 @@ BicubicInterpolation::sample(const ADReal & x1, const ADReal & x2) const
 
 template <typename T>
 T
-BicubicInterpolation::sampleInternal(T x1, T x2) const
+BicubicInterpolation::sampleInternal(const T & x1, const T & x2) const
 {
   unsigned int x1l, x1u, x2l, x2u;
   T t, u;
@@ -69,9 +70,6 @@ BicubicInterpolation::sampleInternal(T x1, T x2) const
 
   return sample;
 }
-
-template Real BicubicInterpolation::sampleInternal(Real x1, Real x2) const;
-template ADReal BicubicInterpolation::sampleInternal(ADReal x1, ADReal x2) const;
 
 Real
 BicubicInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const
