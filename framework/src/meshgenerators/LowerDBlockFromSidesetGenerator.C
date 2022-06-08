@@ -104,11 +104,15 @@ LowerDBlockFromSidesetGenerator::generate()
   if (!mesh->is_serial() && mesh->comm().size() > 1)
   {
     std::vector<Elem *> elements_to_send;
+    unsigned short i_need_boundary_elems = 0;
     for (const auto & [elem_id, side, bc_id] : side_list)
     {
       libmesh_ignore(side);
       if (sidesets.count(bc_id))
       {
+        // Whether we have this boundary information through our locally owned element or a ghosted
+        // element, we'll need the boundary elements for parallel consistent addition
+        i_need_boundary_elems = 1;
         auto * elem = mesh->elem_ptr(elem_id);
         if (elem->processor_id() == mesh->processor_id())
           elements_to_send.push_back(elem);
@@ -123,8 +127,8 @@ LowerDBlockFromSidesetGenerator::generate()
     for (auto * nd : connected_nodes)
       connected_node_ids.insert(nd->id());
 
-    std::vector<std::size_t> need_boundary_elems(mesh->comm().size());
-    mesh->comm().allgather(elements_to_send.size(), need_boundary_elems);
+    std::vector<unsigned short> need_boundary_elems(mesh->comm().size());
+    mesh->comm().allgather(i_need_boundary_elems, need_boundary_elems);
     std::unordered_map<processor_id_type, decltype(elements_to_send)> push_element_data;
     std::unordered_map<processor_id_type, decltype(connected_nodes)> push_node_data;
 
@@ -136,21 +140,15 @@ LowerDBlockFromSidesetGenerator::generate()
         push_node_data[pid] = connected_nodes;
       }
 
-    auto node_action_functor =
-        [&mesh](processor_id_type libmesh_dbg_var(pid), auto & incoming_nodes)
+    auto node_action_functor = [](processor_id_type, auto &)
     {
-      mooseAssert(pid != mesh->processor_id(), "We should not be sending to self");
-      for (auto nd : incoming_nodes)
-        mesh->add_node(const_cast<Node *>(nd));
+      // Node packing specialization already has unpacked node into mesh, so nothing to do
     };
     Parallel::push_parallel_packed_range(
         mesh->comm(), push_node_data, mesh.get(), node_action_functor);
-    auto elem_action_functor =
-        [&mesh](processor_id_type libmesh_dbg_var(pid), decltype(elements_to_send) & incoming_elems)
+    auto elem_action_functor = [](processor_id_type, auto &)
     {
-      mooseAssert(pid != mesh->processor_id(), "We should not be sending to self");
-      for (auto elem : incoming_elems)
-        mesh->add_elem(elem);
+      // Elem packing specialization already has unpacked elem into mesh, so nothing to do
     };
     TIMPI::push_parallel_packed_range(
         mesh->comm(), push_element_data, mesh.get(), elem_action_functor);
