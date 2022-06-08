@@ -17,7 +17,7 @@ ThermalSiliconCarbideProperties::validParams()
   InputParameters params = ThermalSolidPropertiesMaterial::validParams();
   params.addClassDescription("Material defining silicon carbide thermal properties.");
 
-  MooseEnum ThermalSiliconCarbidePropertiesKModel("snead parfume", "snead");
+  MooseEnum ThermalSiliconCarbidePropertiesKModel("SNEAD PARFUME", "SNEAD");
   params.addParam<MooseEnum>("thermal_conductivity_model",
                              ThermalSiliconCarbidePropertiesKModel,
                              "Thermal conductivity model to be used");
@@ -56,9 +56,9 @@ ThermalSiliconCarbideProperties::computeIsobaricSpecificHeatDerivatives()
 void
 ThermalSiliconCarbideProperties::computeThermalConductivity()
 {
-  if (_k_model == snead)
+  if (_k_model == SNEAD)
     _k[_qp] = 1.0 / (-0.0003 + 1.05e-5 * _temperature[_qp]);
-  else if (_k_model == parfume)
+  else if (_k_model == PARFUME)
     _k[_qp] = 17885.0 / _temperature[_qp] + 2.0;
   else
     mooseError("Unhandled MooseEnum in ThermalSiliconCarbideProperties!");
@@ -67,9 +67,9 @@ ThermalSiliconCarbideProperties::computeThermalConductivity()
 void
 ThermalSiliconCarbideProperties::computeThermalConductivityDerivatives()
 {
-  if (_k_model == snead)
+  if (_k_model == SNEAD)
     _dk_dT[_qp] = -1.0 / std::pow(-0.0003 + 1.05e-5 * _temperature[_qp], 2.0) * 1.05e-5;
-  else if (_k_model == parfume)
+  else if (_k_model == PARFUME)
     _dk_dT[_qp] = -17885.0 / std::pow(_temperature[_qp], 2.0);
   else
     mooseError("Unhandled MooseEnum in ThermalSiliconCarbideProperties!");

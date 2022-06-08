@@ -97,8 +97,8 @@ protected:
   /// enumeration for selecting the thermal conductivity model
   enum ThermalSiliconCarbidePropertiesKModel
   {
-    snead,
-    parfume
+    SNEAD,
+    PARFUME
   };
 
   /// type of thermal conductivity model
