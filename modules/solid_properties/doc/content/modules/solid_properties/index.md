@@ -201,4 +201,4 @@ of the methods defined in the header file for Gorilla Glue.
 
 ## Objects, Actions, and Syntax
 
-!syntax complete group=SolidPropertiesApp level=3 actions=False
+!syntax complete groups=SolidPropertiesApp heading-level=3 actions=False
