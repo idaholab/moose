@@ -9,15 +9,15 @@
 
 #pragma once
 
-#include "Component1DJunction.h"
+#include "Component1DBoundary.h"
 
 /**
- * Base class for flow junctions
+ * Base class for components that connect to flow channel boundaries
  */
-class FlowJunction : public Component1DJunction
+class FlowBoundary : public Component1DBoundary
 {
 public:
-  FlowJunction(const InputParameters & params);
+  FlowBoundary(const InputParameters & params);
 
   /**
    * Gets the name of fluid properties used in all flow connections
@@ -36,8 +36,6 @@ protected:
   std::shared_ptr<const FlowModel> _flow_model;
   /// Fluid property user object name
   UserObjectName _fp_name;
-  /// Name of junction user object name, if any
-  const std::string _junction_uo_name;
 
 public:
   static InputParameters validParams();

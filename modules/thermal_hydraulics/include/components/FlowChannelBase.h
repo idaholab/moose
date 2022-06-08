@@ -9,7 +9,8 @@
 
 #pragma once
 
-#include "GeometricalFlowComponent.h"
+#include "Component1D.h"
+#include "GravityInterface.h"
 
 class ClosuresBase;
 
@@ -18,7 +19,7 @@ class ClosuresBase;
  *
  * A flow channel is defined by its position, direction, length and area.
  */
-class FlowChannelBase : public GeometricalFlowComponent
+class FlowChannelBase : public Component1D, public GravityInterface
 {
 public:
   FlowChannelBase(const InputParameters & params);
@@ -44,6 +45,23 @@ public:
   virtual void buildMesh() override;
   virtual void addVariables() override;
   virtual void addMooseObjects() override;
+
+  /**
+   * Gets the gravity angle for this component
+   *
+   * @return gravity angle for this component
+   */
+  virtual const Real & getGravityAngle() const { return _gravity_angle; }
+
+  /**
+   * Gets the name of the fluid properties user object for this component
+   */
+  const UserObjectName & getFluidPropertiesName() const { return _fp_name; }
+
+  /**
+   * Gets the flow model ID
+   */
+  virtual const THM::FlowModelID & getFlowModelID() const = 0;
 
   /**
    * Gets a MooseEnum for convective heat transfer geometry type
@@ -168,6 +186,12 @@ protected:
 
   /// The flow model used by this flow channel
   std::shared_ptr<FlowModel> _flow_model;
+
+  /// Name of fluid properties user object
+  const UserObjectName & _fp_name;
+
+  /// Angle between orientation vector and gravity vector, in degrees
+  const Real _gravity_angle;
 
   /// Function describing the flow channel area
   FunctionName _area_function;

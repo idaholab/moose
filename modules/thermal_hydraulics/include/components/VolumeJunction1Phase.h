@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "VolumeJunctionBase.h"
+#include "FlowJunction1Phase.h"
 
 /**
  * Junction between 1-phase flow channels that has a non-zero volume
  */
-class VolumeJunction1Phase : public VolumeJunctionBase
+class VolumeJunction1Phase : public FlowJunction1Phase
 {
 public:
   VolumeJunction1Phase(const InputParameters & params);
@@ -41,6 +41,12 @@ protected:
    * Builds user object for computing and storing the fluxes
    */
   virtual void buildVolumeJunctionUserObject();
+
+  /// Volume of the junction
+  const Real _volume;
+
+  /// Spatial position of center of the junction
+  const Point & _position;
 
   /// Scaling factor for rho*V
   const Real & _scaling_factor_rhoV;

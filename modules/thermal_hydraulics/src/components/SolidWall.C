@@ -14,11 +14,11 @@ registerMooseObject("ThermalHydraulicsApp", SolidWall);
 InputParameters
 SolidWall::validParams()
 {
-  InputParameters params = FlowConnection::validParams();
+  InputParameters params = FlowBoundary::validParams();
   return params;
 }
 
-SolidWall::SolidWall(const InputParameters & params) : FlowConnection(params)
+SolidWall::SolidWall(const InputParameters & params) : FlowBoundary(params)
 {
   logError("Deprecated component. Use SolidWall1Phase or SolidWall2Phase instead.");
 }

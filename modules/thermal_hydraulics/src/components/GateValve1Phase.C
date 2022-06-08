@@ -8,16 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GateValve1Phase.h"
-#include "GeometricalFlowComponent.h"
+#include "FlowChannel1Phase.h"
 #include "FlowModelSinglePhase.h"
-#include "THMMesh.h"
 
 registerMooseObject("ThermalHydraulicsApp", GateValve1Phase);
 
 InputParameters
 GateValve1Phase::validParams()
 {
-  InputParameters params = FlowJunction::validParams();
+  InputParameters params = FlowJunction1Phase::validParams();
 
   params.addRequiredParam<Real>("open_area_fraction", "Fraction of flow area that is open [-]");
 
@@ -28,12 +27,12 @@ GateValve1Phase::validParams()
   return params;
 }
 
-GateValve1Phase::GateValve1Phase(const InputParameters & params) : FlowJunction(params) {}
+GateValve1Phase::GateValve1Phase(const InputParameters & params) : FlowJunction1Phase(params) {}
 
 void
 GateValve1Phase::setupMesh()
 {
-  FlowJunction::setupMesh();
+  FlowJunction1Phase::setupMesh();
 
   if (_connected_elems.size() == 2)
     _sim.augmentSparsity(_connected_elems[0], _connected_elems[1]);
@@ -42,7 +41,7 @@ GateValve1Phase::setupMesh()
 void
 GateValve1Phase::check() const
 {
-  FlowJunction::check();
+  FlowJunction1Phase::check();
 
   if (_flow_model_id != THM::FM_SINGLE_PHASE)
     logModelNotImplementedError(_flow_model_id);
@@ -54,12 +53,12 @@ GateValve1Phase::check() const
   bool slope_reconstruction_used = false;
   for (const auto & connection : getConnections())
   {
-    const std::string & gc_name = connection._geometrical_component_name;
-    if (hasComponentByName<GeometricalFlowComponent>(gc_name))
+    const std::string & comp_name = connection._component_name;
+    if (hasComponentByName<FlowChannel1Phase>(comp_name))
     {
-      const GeometricalFlowComponent & gc = getComponentByName<GeometricalFlowComponent>(gc_name);
+      const FlowChannel1Phase & comp = getComponentByName<FlowChannel1Phase>(comp_name);
       slope_reconstruction_used =
-          slope_reconstruction_used || (gc.getSlopeReconstruction() != "none");
+          slope_reconstruction_used || (comp.getSlopeReconstruction() != "none");
     }
   }
   if (slope_reconstruction_used)

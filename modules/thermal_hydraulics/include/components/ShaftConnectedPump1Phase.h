@@ -28,7 +28,6 @@ public:
   }
 
 protected:
-  virtual void init() override;
   virtual void check() const override;
   virtual void buildVolumeJunctionUserObject() override;
 
@@ -70,8 +69,6 @@ protected:
   const VariableName _friction_torque_var_name;
   /// Name of pump inertia variable
   const VariableName _moi_var_name;
-  /// Directions at each connection
-  std::vector<RealVectorValue> _directions;
   /// Transition width for the sign of the frictional torque when speed is 0
   const Real & _transition_width;
 

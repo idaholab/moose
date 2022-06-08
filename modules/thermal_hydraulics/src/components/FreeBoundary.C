@@ -14,11 +14,11 @@ registerMooseObject("ThermalHydraulicsApp", FreeBoundary);
 InputParameters
 FreeBoundary::validParams()
 {
-  InputParameters params = FlowConnection::validParams();
+  InputParameters params = FlowBoundary::validParams();
   return params;
 }
 
-FreeBoundary::FreeBoundary(const InputParameters & parameters) : FlowConnection(parameters)
+FreeBoundary::FreeBoundary(const InputParameters & parameters) : FlowBoundary(parameters)
 {
   logError("Deprecated component. Use FreeBoundary1Phase or FreeBoundary2Phase instead.");
 }

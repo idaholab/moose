@@ -15,7 +15,6 @@
 #include "MooseVariableScalar.h"
 #include "Assembly.h"
 #include "ScalarKernel.h"
-#include "GeometricalFlowComponent.h"
 #include "ADVolumeJunction1PhaseUserObject.h"
 
 registerMooseObject("ThermalHydraulicsApp", ShaftConnectedCompressor1Phase);
@@ -97,21 +96,6 @@ ShaftConnectedCompressor1Phase::ShaftConnectedCompressor1Phase(const InputParame
 
   checkSizeEqualsValue<Real>("tau_fr_coeff", 4);
   checkSizeEqualsValue<Real>("inertia_coeff", 4);
-}
-
-void
-ShaftConnectedCompressor1Phase::init()
-{
-  FlowConnection::init();
-  for (const auto & connection : getConnections())
-  {
-    const std::string & comp_name = connection._geometrical_component_name;
-    if (hasComponentByName<GeometricalFlowComponent>(comp_name))
-    {
-      const GeometricalFlowComponent & gc = getComponentByName<GeometricalFlowComponent>(comp_name);
-      _directions.push_back(gc.getDirection());
-    }
-  }
 }
 
 void

@@ -169,7 +169,7 @@ Simulation::identifyLoops()
   for (const auto & component : _components)
   {
     const auto flow_connection =
-        MooseSharedNamespace::dynamic_pointer_cast<FlowConnection>(component);
+        MooseSharedNamespace::dynamic_pointer_cast<Component1DConnection>(component);
     if (flow_connection)
     {
       // create vector of names of this component and its connected flow channels, and then sort
@@ -683,18 +683,18 @@ Simulation::integrityCheck() const
     flow_channel_outlets[comp->name()] = 0;
   }
 
-  // mark connections of any FlowConnection components
+  // mark connections of any Component1DConnection components
   for (const auto & comp : _components)
   {
-    auto pc_comp = dynamic_cast<FlowConnection *>(comp.get());
+    auto pc_comp = dynamic_cast<Component1DConnection *>(comp.get());
     if (pc_comp != nullptr)
     {
       for (const auto & connection : pc_comp->getConnections())
       {
-        if (connection._end_type == FlowConnection::IN)
-          flow_channel_inlets[connection._geometrical_component_name]++;
-        else if (connection._end_type == FlowConnection::OUT)
-          flow_channel_outlets[connection._geometrical_component_name]++;
+        if (connection._end_type == Component1DConnection::IN)
+          flow_channel_inlets[connection._component_name]++;
+        else if (connection._end_type == Component1DConnection::OUT)
+          flow_channel_outlets[connection._component_name]++;
       }
     }
   }
