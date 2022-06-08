@@ -25,53 +25,53 @@ SolidPropertiesMaterial::SolidPropertiesMaterial(const InputParameters & paramet
 Real
 SolidPropertiesMaterial::molarMass() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SolidPropertiesMaterial::computeIsobaricSpecificHeat()
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SolidPropertiesMaterial::computeIsobaricSpecificHeatDerivatives()
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SolidPropertiesMaterial::computeThermalConductivity()
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SolidPropertiesMaterial::computeThermalConductivityDerivatives()
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SolidPropertiesMaterial::computeDensity()
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SolidPropertiesMaterial::computeDensityDerivatives()
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SolidPropertiesMaterial::computeThermalExpansionCoefficient()
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SolidPropertiesMaterial::computeSurfaceEmissivity()
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }

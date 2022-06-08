@@ -61,7 +61,7 @@ ThermalSiliconCarbideProperties::computeThermalConductivity()
   else if (_k_model == parfume)
     _k[_qp] = 17885.0 / _temperature[_qp] + 2.0;
   else
-    mooseError(name(), ": Unhandled MooseEnum in ThermalSiliconCarbideProperties!");
+    mooseError("Unhandled MooseEnum in ThermalSiliconCarbideProperties!");
 }
 
 void
@@ -72,7 +72,7 @@ ThermalSiliconCarbideProperties::computeThermalConductivityDerivatives()
   else if (_k_model == parfume)
     _dk_dT[_qp] = -17885.0 / std::pow(_temperature[_qp], 2.0);
   else
-    mooseError(name(), ": Unhandled MooseEnum in ThermalSiliconCarbideProperties!");
+    mooseError("Unhandled MooseEnum in ThermalSiliconCarbideProperties!");
 }
 
 void
