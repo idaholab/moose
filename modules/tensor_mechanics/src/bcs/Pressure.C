@@ -14,16 +14,21 @@
 #include "MooseError.h"
 
 registerMooseObject("TensorMechanicsApp", Pressure);
+registerMooseObject("TensorMechanicsApp", ADPressure);
 
+template <bool is_ad>
 InputParameters
-Pressure::validParams()
+PressureTempl<is_ad>::validParams()
 {
-  InputParameters params = IntegratedBC::validParams();
+  InputParameters params = PressureParent<is_ad>::validParams();
   params.addClassDescription("Applies a pressure on a given boundary in a given direction");
   params.addDeprecatedParam<unsigned int>(
       "component", "The component for the pressure", "This parameter is no longer necessary");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
+  params.addDeprecatedParam<Real>("constant",
+                                  "The magnitude to use in computing the pressure",
+                                  "Use 'factor' in place of 'constant'");
   params.addParam<Real>("factor", 1.0, "The magnitude to use in computing the pressure");
   params.addParam<FunctionName>("function", "The function that describes the pressure");
   params.addParam<PostprocessorName>("postprocessor",
@@ -33,30 +38,37 @@ Pressure::validParams()
   return params;
 }
 
-Pressure::Pressure(const InputParameters & parameters)
-  : IntegratedBC(parameters),
+template <bool is_ad>
+PressureTempl<is_ad>::PressureTempl(const InputParameters & parameters)
+  : PressureParent<is_ad>(parameters),
     _component(libMesh::invalid_uint),
-    _ndisp(coupledComponents("displacements")),
-    _factor(getParam<Real>("factor")),
-    _function(isParamValid("function") ? &getFunction("function") : NULL),
-    _postprocessor(isParamValid("postprocessor") ? &getPostprocessorValue("postprocessor") : NULL),
-    _alpha(getParam<Real>("alpha")),
+    _ndisp(this->coupledComponents("displacements")),
+    _factor(parameters.isParamSetByUser("factor")     ? this->template getParam<Real>("factor")
+            : parameters.isParamSetByUser("constant") ? this->template getParam<Real>("constant")
+                                                      : 1.0),
+    _function(this->isParamValid("function") ? &this->getFunction("function") : NULL),
+    _postprocessor(
+        this->isParamValid("postprocessor") ? &this->getPostprocessorValue("postprocessor") : NULL),
+    _alpha(this->template getParam<Real>("alpha")),
     _fe_side(_assembly.getFEFace(_var.feType(), _sys.mesh().dimension())),
     _q_dxi(nullptr),
     _q_deta(nullptr),
     _phi_dxi(nullptr),
     _phi_deta(nullptr),
-    _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
+    _use_displaced_mesh(this->template getParam<bool>("use_displaced_mesh")),
     _fe(libMesh::n_threads())
 {
+  if (parameters.isParamSetByUser("factor") && parameters.isParamSetByUser("constant"))
+    mooseError("Error in " + _name + ". Cannot set 'factor' and 'constant'.");
+
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
-    _disp_var.push_back(coupled("displacements", i));
+    _disp_var.push_back(this->coupled("displacements", i));
     if (_var.number() == _disp_var[i])
     {
       _component = i;
       if (parameters.isParamSetByUser("component") &&
-          _component != getParam<unsigned int>("component"))
+          _component != this->template getParam<unsigned int>("component"))
         mooseError("Incompatibility between component and displacements in " + _name);
     }
   }
@@ -64,10 +76,11 @@ Pressure::Pressure(const InputParameters & parameters)
     mooseError("Problem with displacements in " + _name);
 }
 
+template <bool is_ad>
 void
-Pressure::initialSetup()
+PressureTempl<is_ad>::initialSetup()
 {
-  auto boundary_ids = boundaryIDs();
+  auto boundary_ids = this->boundaryIDs();
   std::set<SubdomainID> block_ids;
   for (auto bndry_id : boundary_ids)
   {
@@ -83,61 +96,17 @@ Pressure::initialSetup()
   }
 }
 
-Real
-Pressure::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+PressureTempl<is_ad>::computeQpResidual()
 {
   return computeFactor() * (_normals[_qp](_component) * _test[_i][_qp]);
 }
 
+template <>
 Real
-Pressure::computeQpJacobian()
-{
-  if (_use_displaced_mesh)
-    return computeStiffness(_component);
-
-  return 0;
-}
-
-Real
-Pressure::computeQpOffDiagJacobian(const unsigned int jvar_num)
-{
-  if (_use_displaced_mesh)
-    for (unsigned int j = 0; j < _ndisp; ++j)
-      if (jvar_num == _disp_var[j])
-        return computeStiffness(j);
-
-  return 0;
-}
-
-Real
-Pressure::computeStiffness(const unsigned int coupled_component)
-{
-  if (_ndisp > 1)
-  {
-    const std::map<unsigned int, unsigned int>::iterator j_it = _node_map.find(_j);
-    if (_test[_i][_qp] == 0 || j_it == _node_map.end())
-      return 0;
-
-    return computeFaceStiffness(j_it->second, coupled_component);
-  }
-
-  else if (_coord_type == Moose::COORD_RSPHERICAL)
-  {
-    return computeFactor() * _normals[_qp](_component) * _test[_i][_qp] * _phi[_j][_qp] *
-           (2 / _q_point[_qp](0));
-  }
-
-  if (_coord_type == Moose::COORD_RZ)
-  {
-    return computeFactor() * _normals[_qp](_component) * _test[_i][_qp] * _phi[_j][_qp] /
-           _q_point[_qp](0);
-  }
-
-  return 0;
-}
-
-Real
-Pressure::computeFaceStiffness(const unsigned int local_j, const unsigned int coupled_component)
+PressureTempl<false>::computeFaceStiffness(const unsigned int local_j,
+                                           const unsigned int coupled_component)
 {
   //
   // Note that this approach will break down for shell elements, i.e.,
@@ -177,10 +146,61 @@ Pressure::computeFaceStiffness(const unsigned int local_j, const unsigned int co
   return computeFactor() * _test[_i][_qp] * (inv_length * variation_b + rz_term);
 }
 
+template <>
 Real
-Pressure::computeFactor() const
+PressureTempl<false>::computeStiffness(const unsigned int coupled_component)
 {
-  Real factor = _factor;
+  if (_ndisp > 1)
+  {
+    const std::map<unsigned int, unsigned int>::iterator j_it = _node_map.find(_j);
+    if (_test[_i][_qp] == 0 || j_it == _node_map.end())
+      return 0;
+
+    return computeFaceStiffness(j_it->second, coupled_component);
+  }
+
+  else if (_coord_type == Moose::COORD_RSPHERICAL)
+  {
+    return computeFactor() * _normals[_qp](_component) * _test[_i][_qp] * _phi[_j][_qp] *
+           (2 / _q_point[_qp](0));
+  }
+
+  if (_coord_type == Moose::COORD_RZ)
+  {
+    return computeFactor() * _normals[_qp](_component) * _test[_i][_qp] * _phi[_j][_qp] /
+           _q_point[_qp](0);
+  }
+
+  return 0;
+}
+
+template <>
+Real
+PressureTempl<false>::computeQpJacobian()
+{
+  if (_use_displaced_mesh)
+    return computeStiffness(_component);
+
+  return 0;
+}
+
+template <>
+Real
+PressureTempl<false>::computeQpOffDiagJacobian(const unsigned int jvar_num)
+{
+  if (_use_displaced_mesh)
+    for (unsigned int j = 0; j < _ndisp; ++j)
+      if (jvar_num == _disp_var[j])
+        return computeStiffness(j);
+
+  return 0;
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+PressureTempl<is_ad>::computeFactor() const
+{
+  GenericReal<is_ad> factor = _factor;
 
   if (_function)
     factor *= _function->value(_t + _alpha * _dt, _q_point[_qp]);
@@ -191,8 +211,9 @@ Pressure::computeFactor() const
   return factor;
 }
 
+template <>
 void
-Pressure::precalculateQpJacobian()
+PressureTempl<false>::precalculateQpJacobian()
 {
   if (_ndisp == 1)
     return;
@@ -244,8 +265,40 @@ Pressure::precalculateQpJacobian()
   }
 }
 
+template <>
 void
-Pressure::precalculateQpOffDiagJacobian(const MooseVariableFEBase & /*jvar*/)
+PressureTempl<false>::precalculateQpOffDiagJacobian(const MooseVariableFEBase & /*jvar*/)
 {
   precalculateQpJacobian();
 }
+
+template <>
+void
+PressureTempl<true>::precalculateQpJacobian()
+{
+  mooseError("This should never be called");
+}
+
+template <>
+Real
+PressureTempl<true>::computeQpJacobian()
+{
+  mooseError("This should never be called");
+}
+
+template <>
+Real
+PressureTempl<true>::computeQpOffDiagJacobian(const unsigned int /*jvar_num*/)
+{
+  mooseError("This should never be called");
+}
+
+template <>
+void
+PressureTempl<true>::precalculateQpOffDiagJacobian(const MooseVariableFEBase & /*jvar*/)
+{
+  mooseError("This should never be called");
+}
+
+template class PressureTempl<false>;
+template class PressureTempl<true>;

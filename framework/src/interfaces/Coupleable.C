@@ -2147,6 +2147,21 @@ Coupleable::coupledGradients(const std::string & var_name) const
   return coupledVectorHelper<const VariableGradient *>(var_name, func);
 }
 
+template <>
+std::vector<const GenericVariableGradient<false> *>
+Coupleable::coupledGenericGradients<false>(const std::string & var_name) const
+{
+  return coupledGradients(var_name);
+}
+
+template <>
+std::vector<const GenericVariableGradient<true> *>
+Coupleable::coupledGenericGradients<true>(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &adCoupledGradient(var_name, comp); };
+  return coupledVectorHelper<const GenericVariableGradient<true> *>(var_name, func);
+}
+
 std::vector<const ADVariableGradient *>
 Coupleable::adCoupledGradients(const std::string & var_name) const
 {
