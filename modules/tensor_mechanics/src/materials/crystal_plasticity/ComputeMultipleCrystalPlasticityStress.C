@@ -591,9 +591,8 @@ ComputeMultipleCrystalPlasticityStress::elastoPlasticTangentModuli(RankFourTenso
       }
 
   usingTensorIndices(i, j, k, l);
-  dsigdpk2dfe =
-      _elastic_deformation_gradient.mixedProduct<i, k, j, l>(_elastic_deformation_gradient) *
-      _elasticity_tensor[_qp] * deedfe;
+  dsigdpk2dfe = _elastic_deformation_gradient.times<i, k, j, l>(_elastic_deformation_gradient) *
+                _elasticity_tensor[_qp] * deedfe;
 
   pk2fet = _pk2[_qp] * _elastic_deformation_gradient.transpose();
   fepk2 = _elastic_deformation_gradient * _pk2[_qp];

@@ -287,28 +287,28 @@ public:
   RankFourTensorTempl<T> transposeIj() const;
 
   /**
-   * multiply a RankFourTensor with a vector
-   * @return C_jkl = a_ijkl*b_m where m={i,j,k,l}
+   * single contraction of a RankFourTensor with a vector over index m
+   * @return C_xxx = a_ijkl*b_m where m={i,j,k,l} and xxx the remaining indices
    */
   template <int m>
-  RankThreeTensorTempl<T> mixedProduct(const VectorValue<T> & b) const;
+  RankThreeTensorTempl<T> contraction(const VectorValue<T> & b) const;
 
   /**
-   * multiply a RankFourTensor with a vector
+   * single contraction of a RankFourTensor with a vector over index i
    * @return C_jkl = a_ijkl*b_i
    */
   RankThreeTensorTempl<T> mixedProductIjklI(const VectorValue<T> & b) const
   {
-    return mixedProduct<i>(b);
+    return contraction<i>(b);
   }
 
   /**
-   * multiply a RankFourTensor with a vector
+   * single contraction of a RankFourTensor with a vector over index j
    * @return C_ikl = a_ijkl * b_j
    */
   RankThreeTensorTempl<T> mixedProductIjklJ(const VectorValue<T> & b) const
   {
-    return mixedProduct<j>(b);
+    return contraction<j>(b);
   }
 
   /**
@@ -778,7 +778,7 @@ RankFourTensorTempl<T>::inverse() const
 template <typename T>
 template <int m>
 RankThreeTensorTempl<T>
-RankFourTensorTempl<T>::mixedProduct(const VectorValue<T> & b) const
+RankFourTensorTempl<T>::contraction(const VectorValue<T> & b) const
 {
   RankThreeTensorTempl<T> result;
   static constexpr std::size_t z[4][3] = {{1, 2, 3}, {0, 2, 3}, {0, 1, 3}, {0, 1, 2}};

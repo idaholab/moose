@@ -38,11 +38,10 @@ ComputeLagrangianStressPK2::computeQpPK1Stress()
   {
     _pk1_stress[_qp] = _F[_qp] * _S[_qp];
     usingTensorIndices(i, j, k, l);
-    RankFourTensor dE =
-        0.5 * (RankTwoTensor::Identity().mixedProduct<i, l, j, k>(_F[_qp].transpose()) +
-               _F[_qp].transpose().mixedProduct<i, k, j, l>(RankTwoTensor::Identity()));
+    RankFourTensor dE = 0.5 * (RankTwoTensor::Identity().times<i, l, j, k>(_F[_qp].transpose()) +
+                               _F[_qp].transpose().times<i, k, j, l>(RankTwoTensor::Identity()));
 
-    _pk1_jacobian[_qp] = RankTwoTensor::Identity().mixedProduct<i, k, j, l>(_S[_qp].transpose()) +
+    _pk1_jacobian[_qp] = RankTwoTensor::Identity().times<i, k, j, l>(_S[_qp].transpose()) +
                          (_C[_qp] * dE).singleProductI(_F[_qp]);
   }
   // Small deformations all are equivalent

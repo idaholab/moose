@@ -74,7 +74,7 @@ CZMComputeGlobalTractionTotalLagrangian::computeAreaRatioAndDerivatives()
 {
   _dR_dF = CohesiveZoneModelTools::computedRdF(_R[_qp], _R[_qp].transpose() * _F[_qp]);
   usingTensorIndices(i, j, k, l, m);
-  _dczm_total_rotation_dF = _czm_reference_rotation[_qp].mixedProduct<m, j, i, m, k, l>(_dR_dF);
+  _dczm_total_rotation_dF = _czm_reference_rotation[_qp].times<m, j, i, m, k, l>(_dR_dF);
 
   const RankFourTensor dFinv_dF = CohesiveZoneModelTools::computedFinversedF(_F_inv);
 
@@ -86,13 +86,13 @@ void
 CZMComputeGlobalTractionTotalLagrangian::computedTPK1dF()
 {
   // The derivative of the PK1 traction w.r.t. F
-
+  usingTensorIndices(i, j, k, l);
   const RankThreeTensor djump_dF =
-      _dczm_total_rotation_dF.transposeIj().mixedProductIjklJ(_displacement_jump_global[_qp]);
+      _dczm_total_rotation_dF.transposeIj().contraction<j>(_displacement_jump_global[_qp]);
 
   _dPK1traction_dF[_qp] =
       _d_area_ratio_dF.mixedProductJkI(_czm_total_rotation[_qp] * _interface_traction[_qp]) +
-      _area_ratio * (_dczm_total_rotation_dF.mixedProductIjklJ(_interface_traction[_qp]) +
-                     (_czm_total_rotation[_qp] * _dinterface_traction_djump[_qp])
-                         .mixedProductIjJkl(djump_dF));
+      _area_ratio *
+          (_dczm_total_rotation_dF.contraction<j>(_interface_traction[_qp]) +
+           (_czm_total_rotation[_qp] * _dinterface_traction_djump[_qp]).contraction(djump_dF));
 }

@@ -353,10 +353,10 @@ TEST_F(RankFourTensorTest, printReal)
   EXPECT_EQ(ss.str(), gold);
 }
 
-TEST_F(RankFourTensorTest, mixedProductI)
+TEST_F(RankFourTensorTest, contractionI)
 {
   usingTensorIndices(i, j, k, l);
-  const RankThreeTensor computed_val = _r4.mixedProduct<i>(_v);
+  const RankThreeTensor computed_val = _r4.contraction<i>(_v);
   RankThreeTensor expected_val;
   expected_val.fillFromInputVector({222, 228, 234, 240, 246, 252, 258, 264, 270,
                                     276, 282, 288, 294, 300, 306, 312, 318, 324,
@@ -368,10 +368,10 @@ TEST_F(RankFourTensorTest, mixedProductI)
         EXPECT_NEAR(expected_val(i, j, k), computed_val(i, j, k), 1e-5);
 }
 
-TEST_F(RankFourTensorTest, mixedProductJ)
+TEST_F(RankFourTensorTest, contractionJ)
 {
   usingTensorIndices(i, j, k, l);
-  const RankThreeTensor computed_val = _r4.mixedProduct<j>(_v);
+  const RankThreeTensor computed_val = _r4.contraction<j>(_v);
   RankThreeTensor expected_val;
   expected_val.fillFromInputVector({78,  84,  90,  96,  102, 108, 114, 120, 126,
                                     240, 246, 252, 258, 264, 270, 276, 282, 288,

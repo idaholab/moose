@@ -124,8 +124,7 @@ TotalLagrangianStressDivergence::eigenstrainJacobianComponent(unsigned int cvar,
   }
 
   usingTensorIndices(i, j, k, l);
-  const auto U =
-      0.5 * (A.mixedProduct<i, k, j, l>(B.transpose()) + A.mixedProduct<i, l, j, k>(B.transpose()));
+  const auto U = 0.5 * (A.times<i, k, j, l>(B.transpose()) + A.times<i, l, j, k>(B.transpose()));
 
   return -(C * U * total_deigen).doubleContraction(grad_test) * phi;
 }

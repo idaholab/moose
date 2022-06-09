@@ -52,15 +52,15 @@ ComputeNeoHookeanStress::computeQpPK2Stress()
     _S[_qp] =
         (_lambda[_qp] * log(_detJ[_qp]) - _mu[_qp]) * Cinv + _mu[_qp] * RankTwoTensor::Identity();
     _C[_qp] = -2.0 * (_lambda[_qp] * log(_detJ[_qp]) - _mu[_qp]) *
-                  Cinv.mixedProduct<i, k, j, l>(Cinv.transpose()) +
-              _lambda[_qp] * Cinv.mixedProduct<i, j, k, l>(Cinv);
+                  Cinv.times<i, k, j, l>(Cinv.transpose()) +
+              _lambda[_qp] * Cinv.times<i, j, k, l>(Cinv);
   }
   // Small deformations = linear strain
   else
   {
     RankTwoTensor strain = 0.5 * (_F[_qp] + _F[_qp].transpose());
     const auto I = RankTwoTensor::Identity();
-    _C[_qp] = _lambda[_qp] * I.mixedProduct<i, j, k, l>(I) +
+    _C[_qp] = _lambda[_qp] * I.times<i, j, k, l>(I) +
               2.0 * _mu[_qp] * RankFourTensor(RankFourTensor::initIdentitySymmetricFour);
     _S[_qp] = _C[_qp] * strain;
   }

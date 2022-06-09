@@ -319,22 +319,22 @@ public:
   /// returns _coords_ij * a_ij (sum on i, j)
   T doubleContraction(const RankTwoTensorTempl<T> & a) const;
 
-  /// returns C_ijkl = a_mn * b_pq
-  template <int m, int n, int p, int q>
-  RankFourTensorTempl<T> mixedProduct(const RankTwoTensorTempl<T> & b) const;
+  /// returns C_ijkl = a_no * b_pq
+  template <int n, int o, int p, int q>
+  RankFourTensorTempl<T> times(const RankTwoTensorTempl<T> & b) const;
 
   /// returns C_ijkl = a_no * b_pqrs
   template <int n, int o, int p, int q, int r, int s>
-  RankFourTensorTempl<T> mixedProduct(const RankFourTensorTempl<T> & b) const;
+  RankFourTensorTempl<T> times(const RankFourTensorTempl<T> & b) const;
 
   /// returns C_ijkl = a_ij * b_kl
   RankFourTensorTempl<T> outerProduct(const RankTwoTensorTempl<T> & b) const
   {
-    return mixedProduct<i, j, k, l>(b);
+    return times<i, j, k, l>(b);
   }
 
-  /// returns C_ikl = a_ij * b_jkl
-  RankThreeTensorTempl<T> mixedProductIjJkl(const RankThreeTensorTempl<T> & b) const;
+  /// returns C_ikl = a_ij * b_jkl (single contraction over index j)
+  RankThreeTensorTempl<T> contraction(const RankThreeTensorTempl<T> & b) const;
 
   /// returns C_ijk = a_jk * b_i
   RankThreeTensorTempl<T> mixedProductJkI(const VectorValue<T> & b) const;
@@ -689,8 +689,8 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
       const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
       const auto Mb = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
 
-      Gab = Ma.mixedProduct<i, k, j, l>(Mb) + Ma.mixedProduct<i, l, j, k>(Mb);
-      Gba = Mb.mixedProduct<i, k, j, l>(Ma) + Mb.mixedProduct<i, l, j, k>(Ma);
+      Gab = Ma.times<i, k, j, l>(Mb) + Ma.times<i, k, j, l>(Mb);
+      Gba = Mb.times<i, k, j, l>(Ma) + Mb.times<i, k, j, l>(Ma);
 
       T theta_ab;
       if (!MooseUtils::absoluteFuzzyEqual(eigval[a], eigval[b]))
@@ -796,7 +796,7 @@ RankTwoTensorTempl<T>::d2sin3Lode(const T &) const
 template <typename T>
 template <int i, int j, int k, int l>
 RankFourTensorTempl<T>
-RankTwoTensorTempl<T>::mixedProduct(const RankTwoTensorTempl<T> & b) const
+RankTwoTensorTempl<T>::times(const RankTwoTensorTempl<T> & b) const
 {
   RankFourTensorTempl<T> result;
   std::size_t x[4];
@@ -812,7 +812,7 @@ RankTwoTensorTempl<T>::mixedProduct(const RankTwoTensorTempl<T> & b) const
 template <typename T>
 template <int n, int o, int p, int q, int r, int s>
 RankFourTensorTempl<T>
-RankTwoTensorTempl<T>::mixedProduct(const RankFourTensorTempl<T> & b) const
+RankTwoTensorTempl<T>::times(const RankFourTensorTempl<T> & b) const
 {
   RankFourTensorTempl<T> result;
   std::size_t x[5];

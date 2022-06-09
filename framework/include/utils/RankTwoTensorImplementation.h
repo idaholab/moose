@@ -459,7 +459,7 @@ RankTwoTensorTempl<T>::doubleContraction(const RankTwoTensorTempl<T> & b) const
 
 template <typename T>
 RankThreeTensorTempl<T>
-RankTwoTensorTempl<T>::mixedProductIjJkl(const RankThreeTensorTempl<T> & b) const
+RankTwoTensorTempl<T>::contraction(const RankThreeTensorTempl<T> & b) const
 {
   RankThreeTensorTempl<T> result;
 
