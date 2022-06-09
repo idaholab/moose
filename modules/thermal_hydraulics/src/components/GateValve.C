@@ -8,9 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GateValve.h"
-#include "GeometricalFlowComponent.h"
-#include "FlowModelSinglePhase.h"
-#include "THMMesh.h"
 
 registerMooseObject("ThermalHydraulicsApp", GateValve);
 

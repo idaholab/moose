@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "FlowConnection.h"
+#include "FlowBoundary.h"
 
 /**
  * Adds the boundary terms resulting from an integration by parts of the
@@ -17,7 +17,7 @@
  *
  * Deprecated
  */
-class FreeBoundary : public FlowConnection
+class FreeBoundary : public FlowBoundary
 {
 public:
   FreeBoundary(const InputParameters & parameters);

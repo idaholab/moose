@@ -7,12 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VolumeJunction1Phase.h"
 #include "JunctionParallelChannels1Phase.h"
 #include "FlowModelSinglePhase.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Function.h"
-#include "GeometricalFlowComponent.h"
 
 registerMooseObject("ThermalHydraulicsApp", JunctionParallelChannels1Phase);
 
@@ -29,21 +27,6 @@ JunctionParallelChannels1Phase::validParams()
 JunctionParallelChannels1Phase::JunctionParallelChannels1Phase(const InputParameters & params)
   : VolumeJunction1Phase(params)
 {
-}
-
-void
-JunctionParallelChannels1Phase::init()
-{
-  FlowConnection::init();
-  for (const auto & connection : getConnections())
-  {
-    const std::string & comp_name = connection._geometrical_component_name;
-    if (hasComponentByName<GeometricalFlowComponent>(comp_name))
-    {
-      const GeometricalFlowComponent & gc = getComponentByName<GeometricalFlowComponent>(comp_name);
-      _directions.push_back(gc.getDirection());
-    }
-  }
 }
 
 void

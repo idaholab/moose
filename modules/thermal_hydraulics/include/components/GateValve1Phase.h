@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "FlowJunction.h"
+#include "FlowJunction1Phase.h"
 
 /**
  * Gate valve component for 1-phase flow
  */
-class GateValve1Phase : public FlowJunction
+class GateValve1Phase : public FlowJunction1Phase
 {
 public:
   GateValve1Phase(const InputParameters & params);

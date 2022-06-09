@@ -81,12 +81,6 @@ protected:
   /// Lump the mass matrix
   const bool _lump_mass_matrix;
 
-  /// Slope reconstruction type for rDG
-  const MooseEnum _rdg_slope_reconstruction;
-
-  /// Numerical flux user object name
-  const UserObjectName _numerical_flux_name;
-
   // Solution variable names
   std::vector<VariableName> _solution_vars;
 

@@ -12,12 +12,12 @@
 #include "Component.h"
 
 /**
- * Base class for components that connect to flow channels (junctions and boundaries)
+ * Base class for 1D component junctions and boundaries
  */
-class FlowConnection : public Component
+class Component1DConnection : public Component
 {
 public:
-  FlowConnection(const InputParameters & params);
+  Component1DConnection(const InputParameters & params);
 
   /// End type
   enum EEndType
@@ -34,18 +34,16 @@ public:
     /// The name of the boundary this connection is attached to
     const BoundaryName _boundary_name;
 
-    /// Name of the geometrical component in the connection
-    const std::string _geometrical_component_name;
+    /// Name of the component in the connection
+    const std::string _component_name;
 
     /// End type for the connection
     const EEndType _end_type;
 
     Connection(const BoundaryName & boundary_name,
-               const std::string & geometrical_component_name,
+               const std::string & component_name,
                const EEndType & end_type)
-      : _boundary_name(boundary_name),
-        _geometrical_component_name(geometrical_component_name),
-        _end_type(end_type)
+      : _boundary_name(boundary_name), _component_name(component_name), _end_type(end_type)
     {
     }
   };
@@ -58,9 +56,9 @@ public:
   const std::vector<Connection> & getConnections() const { return _connections; }
 
   /**
-   * Returns a list of names of flow channels that are connected to this component
+   * Returns a list of names of components that are connected to this component
    *
-   * @returns list of names of flow channels that are connected to this component
+   * @returns list of names of components that are connected to this component
    */
   const std::vector<std::string> & getConnectedComponentNames() const
   {
@@ -88,13 +86,6 @@ public:
    * @return boundary names for this component
    */
   const std::vector<BoundaryName> & getBoundaryNames() const;
-
-  /**
-   * Gets the name of fluid properties used in all flow connections
-   *
-   * @return name of fluid properties used in all flow connections
-   */
-  const UserObjectName & getFluidPropertiesName() const;
 
 protected:
   virtual void setupMesh() override;
@@ -138,32 +129,24 @@ protected:
   void checkAllConnectionsHaveSame(const std::vector<T> & objects,
                                    const std::string & description) const;
 
-  /// Physical positions of connected flow channels
+  /// Physical positions of connected components
   std::vector<Point> _positions;
-  /// Boundary node IDs from connected flow channels
+  /// Boundary node IDs from connected components
   std::vector<dof_id_type> _nodes;
-  /// Boundary IDs of connected flow channels
+  /// Boundary IDs of connected components
   std::vector<unsigned int> _boundary_ids;
-  /// Boundary names of connected flow channels
+  /// Boundary names of connected components
   std::vector<BoundaryName> _boundary_names;
-  /// Outward normals associated with connected flow channels
+  /// Outward normals associated with connected components
   std::vector<Real> _normals;
+  /// Directions of connected components
+  std::vector<RealVectorValue> _directions;
 
-  /// Convenience variable that stores model type
-  THM::FlowModelID _flow_model_id;
-  /// Flow model used in this connection
-  std::shared_ptr<const FlowModel> _flow_model;
-  /// The name of the fluid property user object
-  UserObjectName _fp_name;
-  /// Numerical flux user object names
-  std::vector<UserObjectName> _numerical_flux_names;
-  /// rDG interfacial variables user object names
-  std::vector<UserObjectName> _rdg_int_var_uo_names;
   /// Vector of connections of this component
   std::vector<Connection> _connections;
   /// Vector of connected component names
   std::vector<std::string> _connected_component_names;
-  /// Vector of subdomain names of the connected geometrical flow components
+  /// Vector of subdomain names of the connected components
   std::vector<SubdomainName> _connected_subdomain_names;
 
 public:
@@ -172,7 +155,7 @@ public:
 
 template <typename T>
 void
-FlowConnection::checkSizeEqualsNumberOfConnections(const std::string & param) const
+Component1DConnection::checkSizeEqualsNumberOfConnections(const std::string & param) const
 {
   const auto & value = getParam<std::vector<T>>(param);
   if (value.size() != _connections.size())
@@ -187,8 +170,8 @@ FlowConnection::checkSizeEqualsNumberOfConnections(const std::string & param) co
 
 template <typename T>
 void
-FlowConnection::checkAllConnectionsHaveSame(const std::vector<T> & objects,
-                                            const std::string & description) const
+Component1DConnection::checkAllConnectionsHaveSame(const std::vector<T> & objects,
+                                                   const std::string & description) const
 {
   for (const auto & obj : objects)
     if (obj != objects[0])
@@ -198,5 +181,5 @@ FlowConnection::checkAllConnectionsHaveSame(const std::vector<T> & objects,
 namespace THM
 {
 template <>
-FlowConnection::EEndType stringToEnum(const std::string & s);
+Component1DConnection::EEndType stringToEnum(const std::string & s);
 }

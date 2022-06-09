@@ -9,7 +9,7 @@
 
 #include "Shaft.h"
 #include "ShaftConnectable.h"
-#include "FlowConnection.h"
+#include "Component1DConnection.h"
 
 registerMooseObject("ThermalHydraulicsApp", Shaft);
 
@@ -70,9 +70,9 @@ Shaft::addVariables()
   for (const auto & comp_name : _connected_components)
   {
     const Component & c = getComponentByName<Component>(comp_name);
-    if (dynamic_cast<const FlowConnection *>(&c) != nullptr)
+    if (dynamic_cast<const Component1DConnection *>(&c) != nullptr)
     {
-      const FlowConnection & fc = dynamic_cast<const FlowConnection &>(c);
+      const Component1DConnection & fc = dynamic_cast<const Component1DConnection &>(c);
       auto fc_csdn = fc.getConnectedSubdomainNames();
       connected_subdomains.insert(connected_subdomains.end(), fc_csdn.begin(), fc_csdn.end());
     }

@@ -52,7 +52,10 @@ THM::stringToEnum(const std::string & s)
 InputParameters
 FlowChannelBase::validParams()
 {
-  InputParameters params = GeometricalFlowComponent::validParams();
+  InputParameters params = Component1D::validParams();
+  params += GravityInterface::validParams();
+
+  params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object");
   params.addRequiredParam<FunctionName>(
       "A", "Area of the flow channel, can be a constant or a function");
   params.addParam<Real>("roughness", 0.0, "Roughness [m]");
@@ -76,8 +79,15 @@ FlowChannelBase::validParams()
 }
 
 FlowChannelBase::FlowChannelBase(const InputParameters & params)
-  : GeometricalFlowComponent(params),
+  : Component1D(params),
+    GravityInterface(params),
+
     _flow_model(nullptr),
+    _fp_name(getParam<UserObjectName>("fp")),
+    _gravity_angle(MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0)
+                       ? 0.0
+                       : std::acos(_dir * _gravity_vector / (_dir.norm() * _gravity_magnitude)) *
+                             180 / M_PI),
     _closures_name(getParam<std::string>("closures")),
     _pipe_pars_transferred(getParam<bool>("pipe_pars_transferred")),
     _roughness(getParam<Real>("roughness")),
@@ -115,7 +125,7 @@ FlowChannelBase::createAreaFunctionAndGetName()
 void
 FlowChannelBase::init()
 {
-  GeometricalFlowComponent::init();
+  Component1D::init();
 
   _area_function = createAreaFunctionAndGetName();
 
@@ -146,7 +156,7 @@ FlowChannelBase::buildClosures()
 void
 FlowChannelBase::initSecondary()
 {
-  GeometricalFlowComponent::initSecondary();
+  Component1D::initSecondary();
 
   // Determine heat transfer mode based on connected heat transfer components;
   // if at least one heat transfer component of temperature component is
@@ -165,7 +175,7 @@ FlowChannelBase::initSecondary()
 void
 FlowChannelBase::check() const
 {
-  GeometricalFlowComponent::check();
+  Component1D::check();
 
   if (_closures)
     _closures->checkFlowChannel(*this);
@@ -250,7 +260,7 @@ FlowChannelBase::buildMesh()
     if (i == 0)
     {
       Point pt = _position;
-      _connections[FlowConnection::IN].push_back(
+      _connections[Component1DConnection::IN].push_back(
           Connection(pt, elem->node_ptr(0), bc_id_inlet, -1));
       boundary_info.add_side(elem, 0, bc_id_inlet);
       _mesh.setBoundaryName(bc_id_inlet, genName(name(), "in"));
@@ -258,7 +268,7 @@ FlowChannelBase::buildMesh()
     if (i == (_n_elem - 1))
     {
       Point pt = _position + _length * _dir;
-      _connections[FlowConnection::OUT].push_back(
+      _connections[Component1DConnection::OUT].push_back(
           Connection(pt, elem->node_ptr(1), bc_id_outlet, 1));
       boundary_info.add_side(elem, 1, bc_id_outlet);
       _mesh.setBoundaryName(bc_id_outlet, genName(name(), "out"));
