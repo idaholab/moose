@@ -994,11 +994,6 @@ public:
   void addCachedJacobian();
 
   /**
-   * Same as addCachedJacobian but deprecated.
-   */
-  void addCachedJacobian(SparseMatrix<Number> & jacobian);
-
-  /**
    * Get local residual block for a variable and a tag.
    */
   DenseVector<Number> & residualBlock(unsigned int var_num, TagID tag_id = 0)

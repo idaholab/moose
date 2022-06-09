@@ -392,49 +392,4 @@ DelimitedFileReader::header(const std::string & line)
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// DEPRECATED METHODS (TODO: To be removed after applications are updated)
-////////////////////////////////////////////////////////////////////////////////////////////////////
-DelimitedFileReader::DelimitedFileReader(const std::string & filename,
-                                         const bool header,
-                                         const std::string delimiter,
-                                         const libMesh::Parallel::Communicator * comm)
-  : _filename(filename),
-    _header_flag(header ? HeaderFlag::ON : HeaderFlag::AUTO),
-    _delimiter(delimiter),
-    _ignore_empty_lines(true),
-    _communicator(comm),
-    _format_flag(FormatFlag::COLUMNS)
-{
-  mooseDeprecated("Use setHeader and setDelimiter method rather than specifying in constructor.");
-}
-
-const std::vector<std::string> &
-DelimitedFileReader::getColumnNames() const
-{
-  mooseDeprecated("Use getNames instead.");
-  return getNames();
-}
-
-const std::vector<std::vector<double>> &
-DelimitedFileReader::getColumnData() const
-{
-  mooseDeprecated("Use getData instead.");
-  return getData();
-}
-
-const std::vector<double> &
-DelimitedFileReader::getColumnData(const std::string & name) const
-{
-  mooseDeprecated("Use getData instead.");
-  return getData(name);
-}
-
-void
-DelimitedFileReader::setHeaderFlag(bool value)
-{
-  mooseDeprecated("Use header method with HeaderFlag input.");
-  _header_flag = value ? HeaderFlag::ON : HeaderFlag::OFF;
-}
-
 } // MooseUtils

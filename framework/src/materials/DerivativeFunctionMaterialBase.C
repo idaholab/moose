@@ -19,9 +19,6 @@ DerivativeFunctionMaterialBaseTempl<is_ad>::validParams()
   InputParameters params = FunctionMaterialBase<is_ad>::validParams();
   params.addClassDescription("Material to provide a function (such as a free energy) and its "
                              "derivatives w.r.t. the coupled variables");
-  params.addDeprecatedParam<bool>("third_derivatives",
-                                  "Flag to indicate if third derivatives are needed",
-                                  "Use derivative_order instead.");
   params.addRangeCheckedParam<unsigned int>("derivative_order",
                                             3,
                                             "derivative_order>=2 & derivative_order<=3",

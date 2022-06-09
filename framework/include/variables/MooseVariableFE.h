@@ -538,7 +538,6 @@ public:
    */
   void addSolutionNeighbor(const DenseVector<Number> & v);
 
-  const DoFValue & dofValue() const;
   const DoFValue & dofValues() const override;
   const DoFValue & dofValuesOld() const override;
   const DoFValue & dofValuesOlder() const override;

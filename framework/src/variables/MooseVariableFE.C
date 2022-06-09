@@ -256,14 +256,6 @@ MooseVariableFE<OutputType>::addSolutionNeighbor(const DenseVector<Number> & v)
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValue() const
-{
-  mooseDeprecated("Use dofValues instead of dofValue");
-  return dofValues();
-}
-
-template <typename OutputType>
-const typename MooseVariableFE<OutputType>::DoFValue &
 MooseVariableFE<OutputType>::dofValues() const
 {
   return _element_data->dofValues();

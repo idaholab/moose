@@ -310,8 +310,6 @@ public:
    * If the requested node is a remote node on a distributed mesh,
    * only the query accessors are valid to call, and they return NULL.
    */
-  virtual const Node & node(const dof_id_type i) const;
-  virtual Node & node(const dof_id_type i);
   virtual const Node & nodeRef(const dof_id_type i) const;
   virtual Node & nodeRef(const dof_id_type i);
   virtual const Node * nodePtr(const dof_id_type i) const;

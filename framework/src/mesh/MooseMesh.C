@@ -504,20 +504,6 @@ MooseMesh::buildLowerDMesh()
 }
 
 const Node &
-MooseMesh::node(const dof_id_type i) const
-{
-  mooseDeprecated("MooseMesh::node() is deprecated, please use MooseMesh::nodeRef() instead");
-  return nodeRef(i);
-}
-
-Node &
-MooseMesh::node(const dof_id_type i)
-{
-  mooseDeprecated("MooseMesh::node() is deprecated, please use MooseMesh::nodeRef() instead");
-  return nodeRef(i);
-}
-
-const Node &
 MooseMesh::nodeRef(const dof_id_type i) const
 {
   if (i > getMesh().max_node_id())
@@ -2420,25 +2406,6 @@ MooseMesh::buildNodeListFromSideList()
     getMesh().get_boundary_info().build_node_list_from_side_list();
 }
 
-void
-MooseMesh::buildSideList(std::vector<dof_id_type> & el,
-                         std::vector<unsigned short int> & sl,
-                         std::vector<boundary_id_type> & il)
-{
-#ifdef LIBMESH_ENABLE_DEPRECATED
-  mooseDeprecated("The version of MooseMesh::buildSideList() taking three arguments is "
-                  "deprecated, call the version that returns a vector of tuples instead.");
-  getMesh().get_boundary_info().build_side_list(el, sl, il);
-#else
-  libmesh_ignore(el);
-  libmesh_ignore(sl);
-  libmesh_ignore(il);
-  mooseError("The version of MooseMesh::buildSideList() taking three "
-             "arguments is not available in your version of libmesh, call the "
-             "version that returns a vector of tuples instead.");
-#endif
-}
-
 std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>
 MooseMesh::buildSideList()
 {
@@ -2527,20 +2494,6 @@ dof_id_type
 MooseMesh::maxElemId() const
 {
   return getMesh().max_elem_id();
-}
-
-Elem *
-MooseMesh::elem(const dof_id_type i)
-{
-  mooseDeprecated("MooseMesh::elem() is deprecated, please use MooseMesh::elemPtr() instead");
-  return elemPtr(i);
-}
-
-const Elem *
-MooseMesh::elem(const dof_id_type i) const
-{
-  mooseDeprecated("MooseMesh::elem() is deprecated, please use MooseMesh::elemPtr() instead");
-  return elemPtr(i);
 }
 
 Elem *

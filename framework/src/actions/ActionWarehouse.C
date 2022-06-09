@@ -427,14 +427,6 @@ ActionWarehouse::printInputFile(std::ostream & out)
   out << tree.print("");
 }
 
-std::shared_ptr<FEProblem>
-ActionWarehouse::problem()
-{
-  mooseDeprecated(
-      "ActionWarehouse::problem() is deprecated, please use ActionWarehouse::problemBase() \n");
-  return std::dynamic_pointer_cast<FEProblem>(_problem);
-}
-
 std::string
 ActionWarehouse::getCurrentActionName() const
 {

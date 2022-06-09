@@ -103,14 +103,6 @@ public:
    */
   const std::string & name() const { return _name; }
 
-  ///@{
-  /**
-   * Deprecated name methods, use name()
-   */
-  std::string getBaseName() const;
-  std::string getShortName() const;
-  ///@}
-
   const std::string & type() const { return _action_type; }
 
   InputParameters & parameters() { return _pars; }

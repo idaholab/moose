@@ -3805,14 +3805,6 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
   jac_block.zero();
 }
 
-void
-Assembly::addCachedJacobian(SparseMatrix<Number> & /*jacobian*/)
-{
-  mooseDeprecated(" Please use addCachedJacobian() ");
-
-  addCachedJacobian();
-}
-
 Real
 Assembly::elementVolume(const Elem * elem) const
 {

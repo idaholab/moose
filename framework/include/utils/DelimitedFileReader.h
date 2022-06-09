@@ -118,20 +118,6 @@ public:
   const std::vector<double> & getData(std::size_t index) const;
   ///@}
 
-  ///@{
-  /**
-   * Deprecated
-   */
-  void setHeaderFlag(bool value);
-  const std::vector<std::string> & getColumnNames() const;
-  const std::vector<std::vector<double>> & getColumnData() const;
-  const std::vector<double> & getColumnData(const std::string & name) const;
-  DelimitedFileReader(const std::string & filename,
-                      const bool header,
-                      const std::string delimiter,
-                      const libMesh::Parallel::Communicator * comm = nullptr);
-  ///@}
-
 protected:
   /// The supplied filename.
   const std::string _filename;

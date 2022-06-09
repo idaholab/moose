@@ -158,18 +158,3 @@ Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
 
   return added;
 }
-
-/// DEPRECATED METHODS
-std::string
-Action::getShortName() const
-{
-  mooseDeprecated("getShortName() is deprecated.");
-  return MooseUtils::shortName(_name);
-}
-
-std::string
-Action::getBaseName() const
-{
-  mooseDeprecated("getBaseName() is deprecated.");
-  return MooseUtils::baseName(_name);
-}

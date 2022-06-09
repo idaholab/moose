@@ -227,14 +227,6 @@ Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned i
 }
 
 const MooseVariableFieldBase *
-Coupleable::getFEVar(const std::string & var_name, unsigned int comp) const
-{
-  mooseDeprecated("Coupleable::getFEVar is deprecated. Please use Coupleable::getFieldVar instead. "
-                  "Note that this method could potentially return a finite volume variable");
-  return getFieldVar(var_name, comp);
-}
-
-const MooseVariableFieldBase *
 Coupleable::getFieldVar(const std::string & var_name, unsigned int comp) const
 {
   return getVarHelper<MooseVariableFieldBase>(var_name, comp);
@@ -1914,27 +1906,6 @@ Coupleable::getADDefaultSecond() const
 {
   _ad_default_second.resize(_coupleable_max_qps);
   return _ad_default_second;
-}
-
-const ADVariableValue &
-Coupleable::adZeroValue() const
-{
-  mooseDeprecated("Method adZeroValue() is deprecated. Use '_ad_zero' instead.");
-  return _ad_zero;
-}
-
-const ADVariableGradient &
-Coupleable::adZeroGradient() const
-{
-  mooseDeprecated("Method adZeroGradient() is deprecated. Use '_ad_grad_zero' instead.");
-  return _ad_grad_zero;
-}
-
-const ADVariableSecond &
-Coupleable::adZeroSecond() const
-{
-  mooseDeprecated("Method adZeroSecond() is deprecated. Use '_ad_second_zero' instead.");
-  return _ad_second_zero;
 }
 
 template <>

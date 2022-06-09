@@ -57,11 +57,6 @@ AdaptivityAction::validParams()
       "Maximum number of times a single element can be refined. If 0 then infinite.");
   params.addParam<MooseEnum>(
       "error_estimator", estimators, "The class name of the error estimator you want to use.");
-  params.addDeprecatedParam<bool>(
-      "print_changed_info",
-      false,
-      "Determines whether information about the mesh is printed when adaptivity occurs",
-      "Use the Console output parameter 'print_mesh_changed_info'");
   params.addParam<Real>("start_time",
                         -std::numeric_limits<Real>::max(),
                         "The time that adaptivity will be active after.");
@@ -166,8 +161,6 @@ AdaptivityAction::act()
     adapt.setParam("max h-level", getParam<unsigned int>("max_h_level"));
     adapt.setParam("recompute_markers_during_cycles",
                    getParam<bool>("recompute_markers_during_cycles"));
-
-    adapt.setPrintMeshChanged(getParam<bool>("print_changed_info"));
 
     const std::vector<std::string> & weight_names =
         getParam<std::vector<std::string>>("weight_names");

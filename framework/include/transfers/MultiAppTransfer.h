@@ -106,9 +106,6 @@ public:
   /// Whether the transfer owns a non-null to_multi_app
   bool hasToMultiApp() const { return !(!_to_multi_app); }
 
-  /// Return the execution flags, handling "same_as_multiapp"
-  virtual const std::vector<ExecFlagType> & execFlags() const;
-
 protected:
   /// Deprecated class attribute for compatibility with the apps
   std::shared_ptr<MultiApp> _multi_app;

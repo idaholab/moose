@@ -58,11 +58,6 @@ public:
   virtual void execute() = 0;
 
   /**
-   * (DEPRECATED) Return the valid "execute_on" options for Control objects
-   */
-  static MultiMooseEnum getExecuteOptions();
-
-  /**
    * Return the Controls that must run before this Control
    */
   std::vector<std::string> & getDependencies() { return _depends_on; }

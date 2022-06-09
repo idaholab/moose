@@ -1080,23 +1080,6 @@ protected:
   // coupled-dof-values-end
 
   /**
-   * method that returns _zero to RESIDUAL computing objects and _ad_zero to JACOBIAN
-   * computing objects
-   */
-  const ADVariableValue & adZeroValue() const;
-
-  /**
-   *  method that returns _grad_zero to RESIDUAL computing objects and _ad_grad_zero to
-   * JACOBIAN computing objects
-   */
-  const ADVariableGradient & adZeroGradient() const;
-
-  /**
-   * Retrieve a zero second for automatic differentiation
-   */
-  const ADVariableSecond & adZeroSecond() const;
-
-  /**
    * Returns zero value templated with automatic differentiation boolean
    * @return Reference to a const GenericVariableValue
    */
@@ -1272,16 +1255,6 @@ private:
   void checkFuncType(const std::string var_name, VarType t, FuncAge age) const;
 
 protected:
-  /**
-   * Deprecated method. Use \p getFieldVar instead
-   * Extract pointer to a base coupled field variable. Could be either a finite volume or finite
-   * element variable
-   * @param var_name Name of parameter desired
-   * @param comp Component number of multiple coupled variables
-   * @return Pointer to the desired variable
-   */
-  const MooseVariableFieldBase * getFEVar(const std::string & var_name, unsigned int comp) const;
-
   /*
    * Extract pointer to a base coupled field variable. Could be either a finite volume or finite
    * element variable

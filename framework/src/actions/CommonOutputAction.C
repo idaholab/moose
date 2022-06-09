@@ -109,10 +109,6 @@ CommonOutputAction::validParams()
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.addParam<ExecFlagEnum>("execute_on", exec_enum, exec_enum.getDocString());
 
-  // Add special Console flags
-  params.addDeprecatedParam<bool>(
-      "print_perf_log", false, "Use perf_graph instead!", "Use perf_graph instead!");
-
   params.addParam<bool>(
       "perf_graph", false, "Enable printing of the performance graph to the screen (Console)");
 
@@ -224,8 +220,7 @@ CommonOutputAction::act()
       create("ControlOutput");
 
     if (!_app.getParam<bool>("no_timing") &&
-        (getParam<bool>("perf_graph") || getParam<bool>("print_perf_log") ||
-         _app.getParam<bool>("timing")))
+        (getParam<bool>("perf_graph") || _app.getParam<bool>("timing")))
       create("PerfGraphOutput");
 
     if (!_app.getParam<bool>("no_timing") && getParam<bool>("perf_graph_live"))
