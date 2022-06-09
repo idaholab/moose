@@ -24,7 +24,7 @@
     type = GeneratedMeshGenerator
     dim = 2
     nx = 20
-    ny = 10
+    ny = 13
     xmin = 0.25
     xmax = 0.5
     ymin = 0
