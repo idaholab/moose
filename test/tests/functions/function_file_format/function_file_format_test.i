@@ -28,138 +28,119 @@
 []
 
 [Variables]
-
-  [./a]
-  [../]
-
-  [./b]
-  [../]
-
-  [./c]
-  [../]
-
-  [./d]
-  [../]
-
-  [./e]
-  [../]
-
-  [./f]
-  [../]
-
+  [a]
+  []
+  [b]
+  []
+  [c]
+  []
+  [d]
+  []
+  [e]
+  []
+  [f]
+  []
 []
 
 [Functions]
-
-
-  [./a]
+  [a]
     type = PiecewiseLinear
     data_file = rows.csv
     format = rows
-  [../]
-  [./b]
+  []
+  [b]
     type = PiecewiseLinear
     data_file = columns.csv
     format = columns
-  [../]
-  [./c]
+  []
+  [c]
     type = PiecewiseLinear
     data_file = rows_space.dat
     format = rows
-  [../]
-  [./d]
+  []
+  [d]
     type = PiecewiseLinear
     data_file = columns_space.dat
     format = columns
-  [../]
-  [./e_func]
+  []
+  [e_func]
     type = PiecewiseLinear
     data_file = rows_more_data.csv
     format = rows
     xy_in_file_only = false
-    x_index_in_file = 2
-    y_index_in_file = 0
-  [../]
-  [./f]
+  []
+  [f]
     type = PiecewiseLinear
     data_file = columns_more_data.csv
     format = columns
     xy_in_file_only = false
-    x_index_in_file = 2
-    y_index_in_file = 0
-  [../]
-
-
+  []
 []
 
 [Kernels]
-
-  [./diffa]
+  [diffa]
     type = Diffusion
     variable = a
-  [../]
-  [./diffb]
+  []
+  [diffb]
     type = Diffusion
     variable = b
-  [../]
-  [./diffc]
+  []
+  [diffc]
     type = Diffusion
     variable = c
-  [../]
-  [./diffd]
+  []
+  [diffd]
     type = Diffusion
     variable = d
-  [../]
-  [./diffe]
+  []
+  [diffe]
     type = Diffusion
     variable = e
-  [../]
-  [./difff]
+  []
+  [difff]
     type = Diffusion
     variable = f
-  [../]
-
+  []
 []
 
 [BCs]
-
-  [./a]
+  [a]
     type = FunctionDirichletBC
     variable = a
     boundary = '1'
     function = a
-  [../]
-  [./b]
+  []
+  [b]
     type = FunctionDirichletBC
     variable = b
     boundary = '1'
     function = b
-  [../]
-  [./c]
+  []
+  [c]
     type = FunctionDirichletBC
     variable = c
     boundary = '1'
     function = c
-  [../]
-  [./d]
+  []
+  [d]
     type = FunctionDirichletBC
     variable = d
     boundary = '1'
     function = d
-  [../]
-  [./e]
+  []
+  [e]
     type = FunctionDirichletBC
     variable = e
     boundary = '1'
     function = e_func
-  [../]
-  [./f]
+  []
+  [f]
     type = FunctionDirichletBC
     variable = f
     boundary = '1'
     function = f
-  [../]
-
+  []
 []
 
 [Executioner]
