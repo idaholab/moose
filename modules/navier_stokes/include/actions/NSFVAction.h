@@ -324,8 +324,11 @@ private:
   bool _create_velocity;
   /// Boolean showing if the pressure is created in the action or not
   bool _create_pressure;
-  /// Boolean showing if the fludi tempreture is created in the action or not
+  /// Boolean showing if the fluid tempreture is created in the action or not
   bool _create_fluid_temperature;
+  /// Boolean showing if the user wants to disable the generation of the enthalpy
+  /// material within this action
+  bool _use_external_enthalpy_material;
 };
 
 template <typename T>
