@@ -47,7 +47,7 @@ In general, speeding up BoomerAMG or improving scalability typically comes from 
 
 ### Timing
 
-Before venturing futher, you will definitely want to turn on the performance log ("perf log").  You do that by putting `print_perf_log = true` in the `[Outputs]` block in your input file.  At the end of the solve it will print out a table showing times.
+Before venturing futher, you will definitely want to turn on the performance log ("perf log").  You do that by putting `perf_graph = true` in the `[Outputs]` block in your input file.  At the end of the solve it will print out a table showing times.
 
 For preconditioning what you want to pay attention to is the `Total Time With Sub` column.  The total time during the nonlinear solve is in the `solve()` row.  Your objective should be to reduce that.  `solve()` is mainly a combination of three things: `compute_residual()`, `compute_jacobian()` and the preconditioner (with a little going to the linear/nonlinear solver in PETSc).
 

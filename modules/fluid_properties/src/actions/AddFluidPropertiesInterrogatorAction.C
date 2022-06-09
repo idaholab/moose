@@ -57,7 +57,6 @@ AddFluidPropertiesInterrogatorAction::AddFluidPropertiesInterrogatorAction(Input
   ExecFlagEnum exec_enum = Output::getDefaultExecFlagEnum();
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   pars.addParam<ExecFlagEnum>("execute_on", exec_enum, "(Does not need to be set)");
-  pars.addParam<bool>("print_perf_log", false, "(Does not need to be set)");
   pars.addParam<bool>("print_linear_residuals", false, "(Does not need to be set)");
 }
 

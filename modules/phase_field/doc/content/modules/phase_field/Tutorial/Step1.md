@@ -191,7 +191,7 @@ The outputs block lets us decide what MOOSE tells us about the simulation. We wi
 [Outputs]
   exodus = true
   console = true
-  print_perf_log = true
+  perf_graph = true
   output_initial = true
 []
 ```

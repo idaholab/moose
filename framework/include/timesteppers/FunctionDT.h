@@ -32,23 +32,11 @@ protected:
 
   void removeOldKnots();
 
-  const std::vector<Real> & _time_t;
-  const std::vector<Real> & _time_dt;
-
-  /// true, if we are using `_function`, false if we are using _time_ipol
-  bool _use_function;
-  /// The time-dependent function specifying the time step size (turn this into a reference then
-  /// `time_t` and `time_dt` is removed)
-  const Function * _function;
-
-  /// Piecewise linear definition of time stepping
-  std::unique_ptr<LinearInterpolation> _time_ipol;
+  /// The time-dependent function specifying the time step size
+  const Function & _function;
 
   Real _growth_factor;
   Real _min_dt;
-
-  /// Whether or not to interpolate DT between times
-  bool _interpolate;
 
   std::vector<Real> _time_knots;
 };

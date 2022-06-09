@@ -199,12 +199,6 @@ Console::Console(const InputParameters & parameters)
       _execute_on.erase("linear");
   }
 
-  if (!_pars.isParamSetByUser("perf_log") && common && common->getParam<bool>("print_perf_log"))
-  {
-    _perf_log = true;
-    _solve_log = true;
-  }
-
   // Append the common 'execute_on' to the setting for this object
   // This is unique to the Console object, all other objects inherit from the common options
   if (common)

@@ -80,7 +80,7 @@ Now that we have Postprocessors, we need to output them. We modify the outputs b
   exodus = true
   console = true
   csv = true
-  print_perf_log = true
+  perf_graph = true
   output_initial = true
   [./console]
     type = Console

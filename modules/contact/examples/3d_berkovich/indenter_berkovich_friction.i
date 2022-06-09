@@ -216,7 +216,7 @@
   exodus = true
   csv = true
   print_linear_residuals = true
-  print_perf_log = true
+  perf_graph = true
   [./console]
     type = Console
     max_rows = 5
