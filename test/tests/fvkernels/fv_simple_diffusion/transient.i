@@ -54,9 +54,10 @@
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  residual_and_jacobian_together = true
   num_steps = 20
   dt = 0.1
 []

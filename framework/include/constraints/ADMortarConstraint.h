@@ -53,6 +53,7 @@ protected:
                               DualNumbers & ad_vars,
                               const bool is_secondary);
 #endif
+  void computeResidualAndJacobian() override;
 
 private:
   /// A dummy object useful for constructing _lambda when not using Lagrange multipliers

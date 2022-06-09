@@ -268,6 +268,19 @@ public:
   void computeResidualTags(const std::set<TagID> & tags);
 
   /**
+   * Form possibly multiple tag-associated vectors and matrices
+   */
+  void computeResidualAndJacobianTags(const std::set<TagID> & vector_tags,
+                                      const std::set<TagID> & matrix_tags);
+
+  /**
+   * Compute residual and Jacobian from contributions not related to constraints, such as nodal
+   * boundary conditions
+   */
+  void computeResidualAndJacobianInternal(const std::set<TagID> & vector_tags,
+                                          const std::set<TagID> & matrix_tags);
+
+  /**
    * Form a residual vector for a given tag
    */
   void computeResidual(NumericVector<Number> & residual, TagID tag_id);
@@ -626,6 +639,11 @@ public:
   TagID residualVectorTag() const override { return _Re_tag; }
   TagID systemMatrixTag() const override { return _Ke_system_tag; }
 
+  /**
+   * Call this method if you want the residual and Jacobian to be computed simultaneously
+   */
+  virtual void residualAndJacobianTogether() = 0;
+
   bool computeScalingOnce() const { return _compute_scaling_once; }
   void computeScalingOnce(bool compute_scaling_once)
   {
@@ -706,6 +724,11 @@ protected:
   void computeNodalBCs(const std::set<TagID> & tags);
 
   /**
+   * compute the residual and Jacobian for nodal boundary conditions
+   */
+  void computeNodalBCsResidualAndJacobian();
+
+  /**
    * Form multiple matrices for all the tags. Users should not call this func directly.
    */
   void computeJacobianInternal(const std::set<TagID> & tags);
@@ -723,7 +746,7 @@ protected:
   /**
    * Do mortar constraint residual/jacobian computations
    */
-  void mortarConstraints();
+  void mortarConstraints(Moose::ComputeType compute_type);
 
   /**
    * Compute a "Jacobian" for automatic scaling purposes

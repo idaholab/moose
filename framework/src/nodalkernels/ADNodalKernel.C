@@ -46,21 +46,22 @@ ADNodalKernel::computeResidual()
     const auto dof_idx = _var.nodalDofIndex();
     _qp = 0;
     auto res = MetaPhysicL::raw_value(computeQpResidual());
-    res *= _var.scalingFactor();
-    _assembly.cacheResidual(dof_idx, res, _vector_tags);
+    _assembly.processResidual(res, dof_idx, _vector_tags);
   }
 }
 
 void
 ADNodalKernel::computeJacobian()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_var.isNodalDefined())
   {
     const auto dof_idx = _var.nodalDofIndex();
     _qp = 0;
     const auto res = computeQpResidual();
-    _assembly.processDerivatives(res, dof_idx, _matrix_tags);
+    _assembly.processJacobian(res, dof_idx, _matrix_tags);
   }
+#endif
 }
 
 void

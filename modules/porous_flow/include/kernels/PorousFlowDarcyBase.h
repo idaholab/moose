@@ -62,6 +62,8 @@ protected:
     CALCULATE_JACOBIAN = 1
   };
 
+  using ResidualObject::computeResidualAndJacobian;
+
   /**
    * Computation of the residual and Jacobian.
    *

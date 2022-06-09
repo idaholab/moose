@@ -22,11 +22,16 @@ INSFVElementalKernel::INSFVElementalKernel(const InputParameters & params)
 {
 }
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
-INSFVElementalKernel::processResidual(const ADReal & residual, const dof_id_type dof_index)
+INSFVElementalKernel::processResidualAndJacobian(const ADReal & residual,
+                                                 const dof_id_type dof_index)
 {
-  if (_subproblem.currentlyComputingJacobian())
-    _assembly.processDerivatives(residual, dof_index, _matrix_tags);
-  else
-    _assembly.processResidual(residual.value(), dof_index, _vector_tags);
+  _assembly.processResidualAndJacobian(residual, dof_index, _vector_tags, _matrix_tags);
 }
+#else
+void
+INSFVElementalKernel::processResidualAndJacobian(const ADReal &, const dof_id_type)
+{
+}
+#endif

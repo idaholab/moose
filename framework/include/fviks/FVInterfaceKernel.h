@@ -26,6 +26,7 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "FunctorInterface.h"
+#include "FVFaceResidualObject.h"
 
 #include <set>
 
@@ -54,7 +55,8 @@ class FVInterfaceKernel : public MooseObject,
                           public TaggingInterface,
                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
                           public TwoMaterialPropertyInterface,
-                          public FunctorInterface
+                          public FunctorInterface,
+                          public FVFaceResidualObject
 {
 public:
   /**
@@ -71,15 +73,9 @@ public:
    */
   const SubProblem & subProblem() const { return _subproblem; }
 
-  /**
-   * Compute the residual on the supplied face
-   */
-  virtual void computeResidual(const FaceInfo & fi);
-
-  /**
-   * Compute the jacobian on the supplied face
-   */
-  virtual void computeJacobian(const FaceInfo & fi);
+  void computeResidual(const FaceInfo & fi) override;
+  void computeJacobian(const FaceInfo & fi) override;
+  void computeResidualAndJacobian(const FaceInfo & fi) override;
 
 protected:
   /**
@@ -135,10 +131,12 @@ protected:
    */
   void processResidual(Real resid, unsigned int var_num, bool neighbor);
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * Process the derivatives for the provided residual and dof index
    */
-  void processDerivatives(const ADReal & resid, dof_id_type dof_index);
+  void processJacobian(const ADReal & resid, dof_id_type dof_index);
+#endif
 
   /**
    * @return A structure that contains information about the face info element, face info, skewness

@@ -34,12 +34,14 @@ public:
   /// Usually you should not override these functions - they have some
   /// tricky stuff in them that you don't want to mess up!
   ///@{
-  virtual void computeResidual();
-  virtual void computeJacobian();
+  void computeResidual() override;
+  void computeResidualAndJacobian() override;
+  void computeJacobian() override;
   virtual void computeOffDiagJacobian();
+  void computeOffDiagJacobian(unsigned int) override;
   ///@}
 
-  const MooseVariableFV<Real> & variable() const { return _var; }
+  const MooseVariableFV<Real> & variable() const override { return _var; }
 
 protected:
   /// This is the primary function that must be implemented for flux kernel

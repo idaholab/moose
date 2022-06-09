@@ -18,10 +18,10 @@ public:
   FVScalarLagrangeMultiplierInterface(const InputParameters & params);
 
   void computeResidual(const FaceInfo & fi) override final;
-  void computeJacobian(const FaceInfo &) override final;
+  void computeJacobian(const FaceInfo & fi) override final;
 
 protected:
-  virtual ADReal computeQpResidual() override = 0;
+  ADReal computeQpResidual() override = 0;
 
   /// The Lagrange Multiplier variable
   const MooseVariableScalar & _lambda_var;

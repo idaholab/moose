@@ -99,21 +99,18 @@ public:
 protected:
   const FEProblemBase & feProblem() const { return _fe_problem; }
 
-private:
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;
 
-protected:
   /// Pointer to the lagrange multipler variable. nullptr if none
-  const MooseVariable * const _var;
+  MooseVariable * const _var;
 
   /// Reference to the secondary variable
-  const MooseVariable & _secondary_var;
+  MooseVariable & _secondary_var;
 
   /// Reference to the primary variable
-  const MooseVariable & _primary_var;
+  MooseVariable & _primary_var;
 
-private:
   /// Whether to compute primal residuals
   const bool _compute_primal_residuals;
 
@@ -123,7 +120,6 @@ private:
   /// A dummy object useful for constructing _test when not using Lagrange multipliers
   const VariableTestValue _test_dummy;
 
-protected:
   /// Whether to use the dual motar approach
   const bool _use_dual;
 

@@ -25,20 +25,19 @@ public:
 
   const MooseVariableFE<T> & variable() const override { return _var; }
 
-private:
-  void computeJacobian() override final;
-  void computeOffDiagJacobian(unsigned int jvar) override final;
-  void computeOffDiagJacobianScalar(unsigned int jvar) override final;
-
 protected:
   void computeResidual() override;
+  void computeJacobian() override;
+  void computeResidualAndJacobian() override;
+  void computeOffDiagJacobian(unsigned int jvar) override;
+  void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
   /**
    * compute the \p _residuals member for filling the Jacobian. We want to calculate these residuals
    * up-front when doing loal derivative indexing because we can use those residuals to fill \p
    * _local_ke for every associated jvariable. We do not want to re-do these calculations for every
    * jvariable and corresponding \p _local_ke. For global indexing we will simply pass the computed
-   * \p _residuals directly to \p Assembly::processDerivatives
+   * \p _residuals directly to \p Assembly::processJacobian
    */
   virtual void computeResidualsForJacobian();
 
@@ -82,7 +81,8 @@ protected:
 
   /// Data members for holding residuals
   ADReal _r;
-  std::vector<ADReal> _residuals;
+  std::vector<Real> _residuals;
+  std::vector<ADReal> _residuals_and_jacobians;
 
 private:
   /**

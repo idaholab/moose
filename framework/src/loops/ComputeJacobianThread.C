@@ -166,7 +166,6 @@ ComputeJacobianThread::subdomainChanged()
         .template condition<AttribSystem>("FVElementalKernel")
         .template condition<AttribSubdomains>(_subdomain)
         .template condition<AttribThread>(_tid)
-        .template condition<AttribMatrixTags>(_tags)
         .queryInto(fv_kernels);
     for (const auto fv_kernel : fv_kernels)
     {

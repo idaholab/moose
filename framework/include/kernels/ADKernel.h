@@ -34,6 +34,7 @@ public:
 
 private:
   void computeJacobian() override final;
+  void computeResidualAndJacobian() override;
   void computeOffDiagJacobian(unsigned int) override final;
   void computeOffDiagJacobianScalar(unsigned int jvar) override final;
 
@@ -44,7 +45,7 @@ private:
    * indices. For example a user could have something like an \p LMKernel which sums computed
    * strong residuals into both primal and LM residuals. That user needs to be
    * able to feed dof indices from both the primal and LM variable into
-   * \p Assembly::processDerivatives
+   * \p Assembly::processJacobian
    */
   virtual const std::vector<dof_id_type> & dofIndices() const { return _var.dofIndices(); }
 
@@ -57,7 +58,7 @@ protected:
    * up-front when doing loal derivative indexing because we can use those residuals to fill \p
    * _local_ke for every associated jvariable. We do not want to re-do these calculations for every
    * jvariable and corresponding \p _local_ke. For global indexing we will simply pass the computed
-   * \p _residuals directly to \p Assembly::processDerivatives
+   * \p _residuals directly to \p Assembly::processJacobian
    */
   virtual void computeResidualsForJacobian();
 

@@ -470,6 +470,15 @@ NonlinearEigenSystem::turnOffJacobian()
 }
 
 void
+NonlinearEigenSystem::residualAndJacobianTogether()
+{
+  mooseError(
+      "NonlinearEigenSystem::residualAndJacobianTogether is not implemented. It might even be "
+      "nonsensical. If it is sensical and you want this capability, please contact a MOOSE "
+      "developer.");
+}
+
+void
 NonlinearEigenSystem::computeScalingJacobian()
 {
   _eigen_problem.computeJacobianTag(*_current_solution, *_scaling_matrix, precondMatrixTag());

@@ -17,7 +17,7 @@
 
 [Kernels]
   [diff]
-    type = Diffusion
+    type = ADDiffusion
     variable = u
   []
 []
@@ -55,13 +55,13 @@
 
 [BCs]
   [left]
-    type = NeumannBC
+    type = ADNeumannBC
     variable = u
     boundary = left
     value = 5
   []
   [right]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = u
     boundary = right
     value = 42

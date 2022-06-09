@@ -113,6 +113,7 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
   typedef Moose::MortarType MType;
   std::vector<JType> jacobian_types;
   std::vector<dof_id_type> dof_indices;
+  Real scaling_factor = 1;
 
   _primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
       *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
@@ -124,17 +125,20 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
     case MType::Secondary:
       dof_indices = _secondary_var.dofIndices();
       jacobian_types = {JType::SecondarySecondary, JType::SecondaryPrimary, JType::SecondaryLower};
+      scaling_factor = _secondary_var.scalingFactor();
       break;
 
     case MType::Primary:
       dof_indices = _primary_var.dofIndicesNeighbor();
       jacobian_types = {JType::PrimarySecondary, JType::PrimaryPrimary, JType::PrimaryLower};
+      scaling_factor = _primary_var.scalingFactor();
       break;
 
     case MType::Lower:
-      if (_var)
-        dof_indices = _var->dofIndicesLower();
+      mooseAssert(_var, "This should be non-null");
+      dof_indices = _var->dofIndicesLower();
       jacobian_types = {JType::LowerSecondary, JType::LowerPrimary, JType::LowerLower};
+      scaling_factor = _var->scalingFactor();
       break;
   }
   test_space_size = dof_indices.size();
@@ -281,5 +285,6 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
     }
   };
 
-  _assembly.processDerivatives(residuals_lower, dof_indices_lower, _matrix_tags, local_functor);
+  _assembly.processJacobian(
+      residuals_lower, dof_indices_lower, _matrix_tags, scaling_factor, local_functor);
 }

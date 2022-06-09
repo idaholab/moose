@@ -364,17 +364,10 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
   }
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  if (_subproblem.currentlyComputingJacobian())
-  {
-    _assembly.processUnconstrainedDerivatives({dof_residual, dof_residual_dir},
-                                              {friction_dof_indices[0], friction_dof_indices[1]},
-                                              _matrix_tags);
-  }
-  else
-  {
-    _assembly.processResidual(dof_residual.value(), friction_dof_indices[0], _vector_tags);
-    _assembly.processResidual(dof_residual_dir.value(), friction_dof_indices[1], _vector_tags);
-  }
+  _assembly.processResidualAndJacobian(
+      dof_residual, friction_dof_indices[0], _vector_tags, _matrix_tags);
+  _assembly.processResidualAndJacobian(
+      dof_residual_dir, friction_dof_indices[1], _vector_tags, _matrix_tags);
 #endif
 }
 
@@ -420,10 +413,8 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
   }
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  if (_subproblem.currentlyComputingJacobian())
-    _assembly.processUnconstrainedDerivatives({dof_residual}, {friction_dof_index}, _matrix_tags);
-  else
-    _assembly.processResidual(dof_residual.value(), friction_dof_index, _vector_tags);
+  _assembly.processResidualAndJacobian(
+      dof_residual, friction_dof_index, _vector_tags, _matrix_tags);
 #endif
 }
 

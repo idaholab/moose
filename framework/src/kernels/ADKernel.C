@@ -112,27 +112,24 @@ template <typename T>
 void
 ADKernelTempl<T>::computeResidual()
 {
-  prepareVectorTag(_assembly, _var.number());
-
   precalculateResidual();
+
+  std::vector<Real> residuals(_test.size(), 0);
 
   if (_use_displaced_mesh)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       for (_i = 0; _i < _test.size(); _i++)
-        _local_re(_i) += raw_value(_ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual());
+        residuals[_i] += raw_value(_ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual());
   else
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       for (_i = 0; _i < _test.size(); _i++)
-        _local_re(_i) += raw_value(_JxW[_qp] * _coord[_qp] * computeQpResidual());
+        residuals[_i] += raw_value(_JxW[_qp] * _coord[_qp] * computeQpResidual());
 
-  accumulateTaggedLocalResidual();
+  _assembly.processResiduals(residuals, _var.dofIndices(), _vector_tags, _var.scalingFactor());
 
   if (_has_save_in)
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (unsigned int i = 0; i < _save_in.size(); i++)
-      _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
-  }
+      _save_in[i]->sys().solution().add_vector(residuals.data(), _save_in[i]->dofIndices());
 }
 
 template <typename T>
@@ -234,7 +231,8 @@ ADKernelTempl<T>::computeADJacobian(
     }
   };
 
-  _assembly.processDerivatives(_residuals, dofIndices(), _matrix_tags, local_functor);
+  _assembly.processJacobian(
+      _residuals, dofIndices(), _matrix_tags, _var.scalingFactor(), local_functor);
 }
 
 template <typename T>
@@ -259,6 +257,19 @@ template <typename T>
 void
 ADKernelTempl<T>::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
 {
+}
+
+template <typename T>
+void
+ADKernelTempl<T>::computeResidualAndJacobian()
+{
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  computeResidualsForJacobian();
+  _assembly.processResidualsAndJacobian(
+      _residuals, _var.dofIndices(), _vector_tags, _matrix_tags, _var.scalingFactor());
+#else
+  mooseError("residual and jacobian together only supported for global AD indexing");
+#endif
 }
 
 template class ADKernelTempl<Real>;
