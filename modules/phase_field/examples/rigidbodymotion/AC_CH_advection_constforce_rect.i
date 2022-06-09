@@ -48,10 +48,10 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    f_name = F
+    property_name = F
     kappa_name = kappa_c
     w = w
-    args = eta
+    variable_names = eta
   [../]
   [./w_res]
     type = SplitCHWRes
@@ -91,15 +91,15 @@
     type = ACInterface
     variable = eta
     mob_name = M
-    args = c
+    variable_names = c
     kappa_name = kappa_eta
   [../]
   [./acbulk_eta]
     type = AllenCahn
     variable = eta
     mob_name = M
-    f_name = F
-    args = c
+    property_name = F
+    variable_names = c
   [../]
 []
 
@@ -130,7 +130,7 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    args = 'c eta'
+    variable_names = 'c eta'
     constant_names = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+(c-eta)^2

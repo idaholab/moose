@@ -52,7 +52,7 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    f_name = F
+    property_name = F
     kappa_name = kappa_c
     w = w
   [../]
@@ -85,8 +85,8 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = c
+    property_name = F
+    variable_names = c
     constant_names = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2

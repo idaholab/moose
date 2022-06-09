@@ -74,7 +74,7 @@
   []
   [should_be_static]
     type = ParsedAux
-    args = 'mineral a'
+    variable_names = 'mineral a'
     function = 'a + mineral / 0.1'
     variable = should_be_static
   []

@@ -84,7 +84,7 @@
 
 [Materials]
   # This input file is used to compare the MOOSE and UMAT models, activating
-  # specific ones with cli args.
+  # specific ones with cli variable_names.
 
   # 1. Active for umat calculation
   [umat]

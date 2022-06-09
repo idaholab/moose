@@ -227,7 +227,7 @@
   [./psi_potential]
     variable = psi
     type = ParsedAux
-    args = 'Fglobal w c f_el sigma11 e11'
+    variable_names = 'Fglobal w c f_el sigma11 e11'
     function = 'Fglobal - w*c + f_el - sigma11*e11'
   [../]
 []
@@ -276,24 +276,24 @@
   # Chemical free energy of the matrix
   [./fm]
     type = DerivativeParsedMaterial
-    f_name = fm
-    args = 'cm'
+    property_name = fm
+    variable_names = 'cm'
     function = '6.55*(cm-0.13)^2'
   [../]
 
   # Chemical Free energy of the precipitate phase
   [./fp]
     type = DerivativeParsedMaterial
-    f_name = fp
-    args = 'cp'
+    property_name = fp
+    variable_names = 'cp'
     function = '6.55*(cp-0.235)^2'
   [../]
 
 # Elastic energy of the precipitate
   [./elastic_free_energy_p]
     type = ElasticEnergyMaterial
-    f_name = f_el_mat
-    args = 'eta'
+    property_name = f_el_mat
+    variable_names = 'eta'
     outputs = exodus
   [../]
 
@@ -308,8 +308,8 @@
   # 1- h(eta), putting in function explicitly
   [./one_minus_h_eta_explicit]
     type = DerivativeParsedMaterial
-    f_name = one_minus_h_explicit
-    args = eta
+    property_name = one_minus_h_explicit
+    variable_names = eta
     function = 1-eta^3*(6*eta^2-15*eta+10)
     outputs = exodus
   [../]
@@ -343,7 +343,7 @@
   [../]
   [./C]
     type = CompositeElasticityTensor
-    args = eta
+    variable_names = eta
     tensors = 'C_matrix               C_ppt'
     weights = 'one_minus_h_explicit   h'
   [../]
@@ -359,7 +359,7 @@
     type = ComputeVariableEigenstrain
     eigen_base = '0.00377 0.00377 0.00377 0 0 0'
     prefactor = h
-    args = eta
+    variable_names = eta
     eigenstrain_name = 'eigenstrain_ppt'
   [../]
 []
@@ -418,7 +418,7 @@
     fa_name  = fm
     fb_name  = fp
     w        = 0.0264
-    args = 'cp cm'
+    variable_names = 'cp cm'
   [../]
   [./ACBulkC]
     type = KKSACBulkC
@@ -430,7 +430,7 @@
   [./ACBulk_el] #This adds df_el/deta for strain interpolation
     type = AllenCahn
     variable = eta
-    f_name = f_el_mat
+    property_name = f_el_mat
   [../]
   [./ACInterface]
     type = ACInterface

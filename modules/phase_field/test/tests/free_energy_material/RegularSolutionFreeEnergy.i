@@ -68,7 +68,7 @@
 [Materials]
   [./free_energy]
     type = RegularSolutionFreeEnergy
-    f_name = F
+    property_name = F
     c = c
     T = myT
     outputs = out

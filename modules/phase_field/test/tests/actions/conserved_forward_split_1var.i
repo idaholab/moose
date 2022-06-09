@@ -47,7 +47,7 @@
   [./local_energy]
     type = TotalFreeEnergy
     variable = local_energy
-    f_name = F
+    property_name = F
     kappa_names = kappa_c
     interfacial_vars = c
   [../]
@@ -61,9 +61,9 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    args = c
+    variable_names = c
     function = '(1 - c)^2 * (1 + c)^2'
-    f_name = F
+    property_name = F
   [../]
 []
 

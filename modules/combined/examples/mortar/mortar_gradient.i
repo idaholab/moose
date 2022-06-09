@@ -254,7 +254,7 @@
     type = ParsedAux
     variable = diff_constraint
     function = 'c-v'
-    args = 'c v'
+    variable_names = 'c v'
     block = 0
   [../]
 
@@ -267,7 +267,7 @@
     type = ParsedAux
     variable = diff_periodic
     function = 'c-p-slope'
-    args = 'c p slope'
+    variable_names = 'c p slope'
     block = 0
   [../]
 
@@ -277,7 +277,7 @@
     type = ParsedAux
     variable = diff_slope
     function = 'c-slope'
-    args = 'c slope'
+    variable_names = 'c slope'
     block = 0
   [../]
 []

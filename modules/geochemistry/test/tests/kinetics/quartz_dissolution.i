@@ -59,7 +59,7 @@
 [AuxKernels]
   [diss]
     type = ParsedAux
-    args = moles_Quartz
+    variable_names = moles_Quartz
     function = '83.216414271 - moles_Quartz'
     variable = diss
   []

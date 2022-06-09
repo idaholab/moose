@@ -180,7 +180,7 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    f_name = F
+    property_name = F
     kappa_name = kappa_c
     w = w
     block = 0
@@ -250,20 +250,20 @@
   [./weight1]
     type = DerivativeParsedMaterial
     function = '0.3*c^2'
-    f_name = weight1
-    args = c
+    property_name = weight1
+    variable_names = c
   [../]
   [./weight2]
     type = DerivativeParsedMaterial
     function = '0.3*(1-c)^2'
-    f_name = weight2
-    args = c
+    property_name = weight2
+    variable_names = c
   [../]
   [./weight3]
     type = DerivativeParsedMaterial
     function = '4*(0.5-c)^2'
-    f_name = weight3
-    args = c
+    property_name = weight3
+    variable_names = c
   [../]
 
   [./elasticity_tensor]
@@ -281,7 +281,7 @@
     type = CompositeEigenstrain
     tensors = 'shear1  shear2  expand3'
     weights = 'weight1 weight2 weight3'
-    args = c
+    variable_names = c
     eigenstrain_name = eigenstrain
   [../]
 
@@ -298,9 +298,9 @@
   # chemical free energies
   [./chemical_free_energy]
     type = DerivativeParsedMaterial
-    f_name = Fc
+    property_name = Fc
     function = '4*c^2*(1-c)^2'
-    args = 'c'
+    variable_names = 'c'
     outputs = exodus
     output_properties = Fc
   [../]
@@ -308,8 +308,8 @@
   # elastic free energies
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    f_name = Fe
-    args = 'c'
+    property_name = Fe
+    variable_names = 'c'
     outputs = exodus
     output_properties = Fe
   [../]
@@ -318,9 +318,9 @@
   [./free_energy]
     type = DerivativeSumMaterial
     block = 0
-    f_name = F
+    property_name = F
     sum_materials = 'Fc Fe'
-    args = 'c'
+    variable_names = 'c'
   [../]
 []
 

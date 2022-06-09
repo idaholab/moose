@@ -50,14 +50,14 @@
   [./eta_bulk1]
     type = AllenCahn
     variable = eta1
-    args = 'eta2'
-    f_name = F
+    variable_names = 'eta2'
+    property_name = F
   [../]
   [./eta_bulk2]
     type = AllenCahn
     variable = eta2
-    args = 'eta1'
-    f_name = F
+    variable_names = 'eta1'
+    property_name = F
   [../]
   [./eta_interface1]
     type = ACInterface
@@ -89,8 +89,8 @@
 
   [./chemical_free_energy]
     type = DerivativeParsedMaterial
-    f_name = Fc
-    args = 'eta1 eta2'
+    property_name = Fc
+    variable_names = 'eta1 eta2'
     constant_names = 'A2 A3 A4'
     constant_expressions = '0.2 -12.6 12.4'
     function = 'A2/2*(eta1^2+eta2^2) + A3/3*(eta1^3+eta2^3) + A4/4*(eta1^2+eta2^2)^2'
@@ -110,16 +110,16 @@
 
   [./var_dependence1]
     type = DerivativeParsedMaterial
-    f_name = var_dep1
-    args = 'eta1'
+    property_name = var_dep1
+    variable_names = 'eta1'
     function = eta1
     enable_jit = true
     derivative_order = 2
   [../]
   [./var_dependence2]
     type = DerivativeParsedMaterial
-    f_name = var_dep2
-    args = 'eta2'
+    property_name = var_dep2
+    variable_names = 'eta2'
     function = eta2
     enable_jit = true
     derivative_order = 2
@@ -129,7 +129,7 @@
     type = ComputeVariableEigenstrain
     eigen_base = '0.1 -0.1 0 0 0 0'
     prefactor = var_dep1
-    args = 'eta1'
+    variable_names = 'eta1'
     eigenstrain_name = eigenstrain1
   [../]
 
@@ -137,22 +137,22 @@
     type = ComputeVariableEigenstrain
     eigen_base = '-0.1 0.1 0 0 0 0'
     prefactor = var_dep2
-    args = 'eta2'
+    variable_names = 'eta2'
     eigenstrain_name = eigenstrain2
   [../]
 
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    f_name = Fe
-    args = 'eta1 eta2'
+    property_name = Fe
+    variable_names = 'eta1 eta2'
     derivative_order = 2
   [../]
 
   [./totol_free_energy]
     type = DerivativeSumMaterial
-    f_name = F
+    property_name = F
     sum_materials = 'Fc Fe'
-    args = 'eta1 eta2'
+    variable_names = 'eta1 eta2'
     derivative_order = 2
   [../]
 []

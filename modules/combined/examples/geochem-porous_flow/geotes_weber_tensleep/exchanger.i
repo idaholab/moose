@@ -354,127 +354,127 @@
   []
   [transported_mass_auxk]
     type = ParsedAux
-    args = ' transported_H transported_Cl transported_SO4 transported_HCO3 transported_SiO2aq transported_Al transported_Ca transported_Mg transported_Fe transported_K transported_Na transported_Sr transported_F transported_BOH transported_Br transported_Ba transported_Li transported_NO3 transported_O2aq transported_H2O'
+    variable_names = ' transported_H transported_Cl transported_SO4 transported_HCO3 transported_SiO2aq transported_Al transported_Ca transported_Mg transported_Fe transported_K transported_Na transported_Sr transported_F transported_BOH transported_Br transported_Ba transported_Li transported_NO3 transported_O2aq transported_H2O'
     variable = transported_mass
     function = ' transported_H * 1.0079 + transported_Cl * 35.453 + transported_SO4 * 96.0576 + transported_HCO3 * 61.0171 + transported_SiO2aq * 60.0843 + transported_Al * 26.9815 + transported_Ca * 40.08 + transported_Mg * 24.305 + transported_Fe * 55.847 + transported_K * 39.0983 + transported_Na * 22.9898 + transported_Sr * 87.62 + transported_F * 18.9984 + transported_BOH * 61.8329 + transported_Br * 79.904 + transported_Ba * 137.33 + transported_Li * 6.941 + transported_NO3 * 62.0049 + transported_O2aq * 31.9988 + transported_H2O * 18.01801802'
   []
   [massfrac_H_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_H'
+    variable_names = 'transported_mass transported_H'
     variable = massfrac_H
     function = '1.0079 * transported_H / transported_mass'
   []
   [massfrac_Cl_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_Cl'
+    variable_names = 'transported_mass transported_Cl'
     variable = massfrac_Cl
     function = '35.453 * transported_Cl / transported_mass'
   []
   [massfrac_SO4_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_SO4'
+    variable_names = 'transported_mass transported_SO4'
     variable = massfrac_SO4
     function = '96.0576 * transported_SO4 / transported_mass'
   []
   [massfrac_HCO3_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_HCO3'
+    variable_names = 'transported_mass transported_HCO3'
     variable = massfrac_HCO3
     function = '61.0171 * transported_HCO3 / transported_mass'
   []
   [massfrac_SiO2aq_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_SiO2aq'
+    variable_names = 'transported_mass transported_SiO2aq'
     variable = massfrac_SiO2aq
     function = '60.0843 * transported_SiO2aq / transported_mass'
   []
   [massfrac_Al_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_Al'
+    variable_names = 'transported_mass transported_Al'
     variable = massfrac_Al
     function = '26.9815 * transported_Al / transported_mass'
   []
   [massfrac_Ca_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_Ca'
+    variable_names = 'transported_mass transported_Ca'
     variable = massfrac_Ca
     function = '40.08 * transported_Ca / transported_mass'
   []
   [massfrac_Mg_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_Mg'
+    variable_names = 'transported_mass transported_Mg'
     variable = massfrac_Mg
     function = '24.305 * transported_Mg / transported_mass'
   []
   [massfrac_Fe_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_Fe'
+    variable_names = 'transported_mass transported_Fe'
     variable = massfrac_Fe
     function = '55.847 * transported_Fe / transported_mass'
   []
   [massfrac_K_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_K'
+    variable_names = 'transported_mass transported_K'
     variable = massfrac_K
     function = '39.0983 * transported_K / transported_mass'
   []
   [massfrac_Na_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_Na'
+    variable_names = 'transported_mass transported_Na'
     variable = massfrac_Na
     function = '22.9898 * transported_Na / transported_mass'
   []
   [massfrac_Sr_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_Sr'
+    variable_names = 'transported_mass transported_Sr'
     variable = massfrac_Sr
     function = '87.62 * transported_Sr / transported_mass'
   []
   [massfrac_F_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_F'
+    variable_names = 'transported_mass transported_F'
     variable = massfrac_F
     function = '18.9984 * transported_F / transported_mass'
   []
   [massfrac_BOH_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_BOH'
+    variable_names = 'transported_mass transported_BOH'
     variable = massfrac_BOH
     function = '61.8329 * transported_BOH / transported_mass'
   []
   [massfrac_Br_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_Br'
+    variable_names = 'transported_mass transported_Br'
     variable = massfrac_Br
     function = '79.904 * transported_Br / transported_mass'
   []
   [massfrac_Ba_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_Ba'
+    variable_names = 'transported_mass transported_Ba'
     variable = massfrac_Ba
     function = '137.33 * transported_Ba / transported_mass'
   []
   [massfrac_Li_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_Li'
+    variable_names = 'transported_mass transported_Li'
     variable = massfrac_Li
     function = '6.941 * transported_Li / transported_mass'
   []
   [massfrac_NO3_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_NO3'
+    variable_names = 'transported_mass transported_NO3'
     variable = massfrac_NO3
     function = '62.0049 * transported_NO3 / transported_mass'
   []
   [massfrac_O2aq_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_O2aq'
+    variable_names = 'transported_mass transported_O2aq'
     variable = massfrac_O2aq
     function = '31.9988 * transported_O2aq / transported_mass'
   []
   [massfrac_H2O_auxk]
     type = ParsedAux
-    args = 'transported_mass transported_H2O'
+    variable_names = 'transported_mass transported_H2O'
     variable = massfrac_H2O
     function = '18.01801802 * transported_H2O / transported_mass'
   []

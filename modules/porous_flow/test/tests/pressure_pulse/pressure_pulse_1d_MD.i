@@ -121,7 +121,7 @@
   [pp]
     type = ParsedAux
     function = '(md-6.9077552789821)*2.0E9'
-    args = 'md'
+    variable_names = 'md'
     variable = pp
   []
 []

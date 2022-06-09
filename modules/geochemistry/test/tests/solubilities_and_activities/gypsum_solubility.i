@@ -54,7 +54,7 @@
 [AuxKernels]
   [dissolved_gypsum_moles]
     type = ParsedAux
-    args = 'bulk_moles_Gypsum free_mg_Gypsum'
+    variable_names = 'bulk_moles_Gypsum free_mg_Gypsum'
     function = 'bulk_moles_Gypsum - free_mg_Gypsum / 1000 / 172.168 '
     variable = dissolved_gypsum_moles
     execute_on = 'timestep_end'

@@ -41,7 +41,7 @@
   [./c_res]
     type = ADSplitCHParsed
     variable = c
-    f_name = F
+    property_name = F
     kappa_name = kappa_c
     w = w
   [../]
@@ -66,7 +66,7 @@
 
   [./free_energy]
     type = ADMathFreeEnergy
-    f_name = F
+    property_name = F
     c = 'c'
   [../]
 []

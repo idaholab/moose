@@ -31,10 +31,10 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    f_name = F
+    property_name = F
     kappa_name = kappa_c
     w = w
-    args = 'eta0 eta1 eta2 eta3'
+    variable_names = 'eta0 eta1 eta2 eta3'
   [../]
   [./w_res]
     type = SplitCHWRes
@@ -59,7 +59,7 @@
   [./RigidBodyMultiKernel]
     # Creates all of the necessary Allen Cahn kernels automatically
     c = c
-    f_name = F
+    property_name = F
     mob_name = L
     kappa_name = kappa_eta
     grain_force = grain_force
@@ -89,8 +89,8 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    #args = 'c eta0 eta1 eta2 eta3'
+    property_name = F
+    #variable_names = 'c eta0 eta1 eta2 eta3'
     #constant_names = 'barr_height  cv_eq'
     #constant_expressions = '0.1          1.0e-2'
     #function = '16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
@@ -98,7 +98,7 @@
     #           +eta2*(1-eta2)*c+eta3*(1-eta3)*c'
     constant_names = 'A B'
     constant_expressions = '450 1.5'
-    args = 'c eta0 eta1 eta2 eta3' #Must be changed as op_num changes. Copy/paste from line 4
+    variable_names = 'c eta0 eta1 eta2 eta3' #Must be changed as op_num changes. Copy/paste from line 4
     function = 'A*c^2*(1-c)^2+B*(c^2+6*(1-c)*(eta0^2+eta1^2+eta2^2+eta3^2)
                 -4*(2-c)*(eta0^3+eta1^3+eta2^3+eta3^3)
                 +3*(eta0^2+eta1^2+eta2^2+eta3^2)^2)'

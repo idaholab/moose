@@ -52,7 +52,7 @@
   [./eta_bulk]
     type = AllenCahn
     variable = eta
-    f_name = F
+    property_name = F
   [../]
   [./eta_interface]
     type = ACInterface
@@ -102,7 +102,7 @@
   [./elastic_free_energy_a]
     type = ElasticEnergyMaterial
     base_name = phasea
-    f_name = Fea
+    property_name = Fea
     block = 0
     args = ''
   [../]
@@ -139,7 +139,7 @@
   [./elastic_free_energy_b]
     type = ElasticEnergyMaterial
     base_name = phaseb
-    f_name = Feb
+    property_name = Feb
     block = 0
     args = ''
   [../]
@@ -160,7 +160,7 @@
   [./free_energy]
     type = DerivativeTwoPhaseMaterial
     block = 0
-    f_name = F
+    property_name = F
     fa_name = Fea
     fb_name = Feb
     eta = eta

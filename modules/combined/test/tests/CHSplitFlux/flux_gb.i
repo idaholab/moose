@@ -144,8 +144,8 @@
   [./chemical_potential]
     type = DerivativeParsedMaterial
     block = 0
-    f_name = mu_prop
-    args = c
+    property_name = mu_prop
+    variable_names = c
     function = 'c'
     derivative_order = 1
   [../]
@@ -153,8 +153,8 @@
     type = DerivativeParsedMaterial
     block = 0
     function = 'c*(1.0-c)'
-    args = c
-    f_name = var_dep
+    variable_names = c
+    property_name = var_dep
     derivative_order = 1
   [../]
   [./mobility]
@@ -163,7 +163,7 @@
     M_name = mobility_prop
     tensors = diffusivity
     weights = var_dep
-    args = c
+    variable_names = c
   [../]
   [./phase_normal]
     type = PhaseNormalTensor

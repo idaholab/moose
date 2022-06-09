@@ -87,7 +87,7 @@
     variable = etaa0
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    args = 'etab0 w'
+    variable_names = 'etab0 w'
   [../]
   [./ACa0_int1]
     type = ACInterface2DMultiPhase1
@@ -119,7 +119,7 @@
     variable = etab0
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    args = 'etaa0 w'
+    variable_names = 'etaa0 w'
   [../]
   [./ACb0_int1]
     type = ACInterface2DMultiPhase1
@@ -143,7 +143,7 @@
   [./w_dot]
     type = SusceptibilityTimeDerivative
     variable = w
-    f_name = chi
+    property_name = chi
   [../]
   [./Diffusion]
     type = MatDiffusion
@@ -156,7 +156,7 @@
     v = etaa0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0'
+    variable_names = 'etaa0 etab0'
   [../]
   [./coupled_etab0dot]
     type = CoupledSwitchingTimeDerivative
@@ -164,7 +164,7 @@
     v = etab0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0'
+    variable_names = 'etaa0 etab0'
   [../]
 []
 
@@ -184,29 +184,29 @@
   [../]
   [./omegaa]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = omegaa
+    variable_names = 'w'
+    property_name = omegaa
     material_property_names = 'Vm ka caeq'
     function = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
   [../]
   [./omegab]
     type = DerivativeParsedMaterial
-    args = 'w T'
-    f_name = omegab
+    variable_names = 'w T'
+    property_name = omegab
     material_property_names = 'Vm kb cbeq S Tm'
     function = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq-S*(T-Tm)'
   [../]
   [./rhoa]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = rhoa
+    variable_names = 'w'
+    property_name = rhoa
     material_property_names = 'Vm ka caeq'
     function = 'w/Vm^2/ka + caeq/Vm'
   [../]
   [./rhob]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = rhob
+    variable_names = 'w'
+    property_name = rhob
     material_property_names = 'Vm kb cbeq'
     function = 'w/Vm^2/kb + cbeq/Vm'
   [../]
@@ -237,7 +237,7 @@
   [../]
   [./Mobility]
     type = ParsedMaterial
-    f_name = Dchi
+    property_name = Dchi
     material_property_names = 'D chi'
     function = 'D*chi'
   [../]

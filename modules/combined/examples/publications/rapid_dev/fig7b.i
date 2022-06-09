@@ -99,8 +99,8 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    f_name = F
-    args = 'eta'
+    property_name = F
+    variable_names = 'eta'
     kappa_name = kappa_c
     w = w
   [../]
@@ -123,9 +123,9 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta
-    args = 'c'
+    variable_names = 'c'
     mob_name = L
-    f_name = F
+    property_name = F
   [../]
   [./ACInterface]
     type = ACInterface
@@ -159,7 +159,7 @@
   # forcing function mask
   [./mask]
     type = ParsedMaterial
-    f_name = mask
+    property_name = mask
     function = grad/dt
     material_property_names = 'grad dt'
   [../]
@@ -187,7 +187,7 @@
     type = ComputeVariableEigenstrain
     eigen_base = '0.05 0.05 0.05 0 0 0'
     prefactor = h
-    args = eta
+    variable_names = eta
     eigenstrain_name = eigenstrain
   [../]
 
@@ -206,35 +206,35 @@
   # chemical free energies
   [./chemical_free_energy_1]
     type = DerivativeParsedMaterial
-    f_name = Fc1
+    property_name = Fc1
     function = 'c^2'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_2]
     type = DerivativeParsedMaterial
-    f_name = Fc2
+    property_name = Fc2
     function = '(1-c)^2'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
 
   # global chemical free energy
   [./chemical_free_energy]
     type = DerivativeTwoPhaseMaterial
-    f_name = Fc
+    property_name = Fc
     fa_name = Fc1
     fb_name = Fc2
     eta = eta
-    args = 'c'
+    variable_names = 'c'
     W = 4
   [../]
 
   # global elastic free energy
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    f_name = Fe
-    args = 'eta'
+    property_name = Fe
+    variable_names = 'eta'
     output_properties = Fe
     derivative_order = 2
   [../]
@@ -242,9 +242,9 @@
   # free energy
   [./free_energy]
     type = DerivativeSumMaterial
-    f_name = F
+    property_name = F
     sum_materials = 'Fc Fe'
-    args = 'c eta'
+    variable_names = 'c eta'
     derivative_order = 2
   [../]
 []

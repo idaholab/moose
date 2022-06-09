@@ -46,8 +46,8 @@
     type = AllenCahn
     variable = w
     mob_name = M
-    f_name = fbulk
-    args = 'T'
+    property_name = fbulk
+    variable_names = 'T'
   [../]
   [./T_dot]
     type = TimeDerivative
@@ -68,8 +68,8 @@
 [Materials]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = fbulk
-    args = 'w T'
+    property_name = fbulk
+    variable_names = 'w T'
     constant_names = 'alpha gamma T_e pi'
     constant_expressions = '0.9 10 1 4*atan(1)'
     function = 'm:=alpha/pi * atan(gamma * (T_e - T)); 1/4*w^4 - (1/2 - m/3) * w^3 + (1/4 - m/2) * w^2'

@@ -32,13 +32,13 @@
     variable = c
     kappa_name = kappa_c
     w = w
-    f_name = F
+    property_name = F
   [../]
   [./wres]
     type = SplitCHWRes
     variable = w
     mob_name = M
-    args = c
+    variable_names = c
   [../]
   [./time]
     type = CoupledTimeDerivative
@@ -63,15 +63,15 @@
   [../]
   [./mob]
     type = DerivativeParsedMaterial
-    f_name = M
-    args = c
+    property_name = M
+    variable_names = c
     function = '1-0.9*c^2'
     outputs = exodus
     derivative_order = 1
   [../]
   [./free_energy]
     type = MathEBFreeEnergy
-    f_name = F
+    property_name = F
     c = c
   [../]
 []

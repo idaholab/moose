@@ -198,7 +198,7 @@
   [eqm_const_auxk]
     type = ParsedAux
     variable = eqm_const
-    args = temp
+    variable_names = temp
     function = '(358 - temp) / (358 - 294)'
   []
   [porosity_auxk]

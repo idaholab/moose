@@ -17,7 +17,7 @@
         free_energy = F
         mobility = 1.0
         kappa = 20.0
-        args = 'eta'
+        variable_names = 'eta'
         solve_type = direct
       [../]
     [../]
@@ -26,7 +26,7 @@
         free_energy = F
         mobility = 1.0
         kappa = 20
-        args = 'c'
+        variable_names = 'c'
         family = HERMITE
         order = THIRD
       [../]
@@ -55,8 +55,8 @@
 [Materials]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'eta c'
+    property_name = F
+    variable_names = 'eta c'
     function = '(1 - eta)*10.0*(c - 0.1)^2 + eta*(8.0*(c - 0.9)^2) + 10.0*eta^2*(1-eta)^2'
   [../]
 []

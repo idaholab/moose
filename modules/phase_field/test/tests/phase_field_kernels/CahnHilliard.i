@@ -41,7 +41,7 @@
   [./CHSolid]
     type = CahnHilliard
     variable = cv
-    f_name = F
+    property_name = F
     mob_name = M
   [../]
   [./CHInterface]
@@ -60,8 +60,8 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'cv'
+    property_name = F
+    variable_names = 'cv'
     function = '(1-cv)^2 * (1+cv)^2'
   [../]
 []

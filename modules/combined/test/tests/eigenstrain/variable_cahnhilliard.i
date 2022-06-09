@@ -45,7 +45,7 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    f_name = F
+    property_name = F
     kappa_name = kappa_c
     w = w
   [../]
@@ -98,8 +98,8 @@
   [./chemical_free_energy]
     type = DerivativeParsedMaterial
     block = 0
-    f_name = Fc
-    args = 'c'
+    property_name = Fc
+    variable_names = 'c'
     constant_names       = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
@@ -120,8 +120,8 @@
     type = DerivativeParsedMaterial
     block = 0
     function = 0.1*c
-    args = c
-    f_name = var_dep
+    variable_names = c
+    property_name = var_dep
     enable_jit = true
     derivative_order = 2
   [../]
@@ -130,7 +130,7 @@
     block = 0
     eigen_base = '1 1 1 0 0 0'
     prefactor = var_dep
-    args = 'c'
+    variable_names = 'c'
     eigenstrain_name = eigenstrain
   [../]
   [./strain]
@@ -141,17 +141,17 @@
   [../]
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    f_name = Fe
+    property_name = Fe
     block = 0
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
   [./free_energy]
     type = DerivativeSumMaterial
     block = 0
-    f_name = F
+    property_name = F
     sum_materials = 'Fc Fe'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
 []

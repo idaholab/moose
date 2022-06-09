@@ -58,7 +58,7 @@
 [AuxKernels]
   [diss_rate]
     type = ParsedAux
-    args = mol_change_Quartz
+    variable_names = mol_change_Quartz
     function = '-mol_change_Quartz / 1.0' # 1.0 = timestep size
     variable = diss_rate
   []

@@ -64,7 +64,7 @@
   [./coupled_parsed]
     variable = c
     type = SplitCHParsed
-    f_name = f_loc
+    property_name = f_loc
     kappa_name = kappa_c
     w = w
   [../]
@@ -83,8 +83,8 @@
   [./mobility]               # Mobility (nm^2 mol/eV/s)
     # NOTE: This is a fitted equation, so only 'Conv' has units
     type = DerivativeParsedMaterial
-    f_name = M
-    args = c
+    property_name = M
+    variable_names = c
     constant_names =       'Acr    Bcr    Ccr    Dcr
                             Ecr    Fcr    Gcr
                             Afe    Bfe    Cfe    Dfe
@@ -106,8 +106,8 @@
   [../]
   [./local_energy]           # Local free energy function (eV/mol)
     type = DerivativeParsedMaterial
-    f_name = f_loc
-    args = c
+    property_name = f_loc
+    variable_names = c
     constant_names = 'A   B   C   D   E   F   G  eV_J  d'
     constant_expressions = '-2.446831e+04 -2.827533e+04 4.167994e+03 7.052907e+03
                             1.208993e+04 2.568625e+03 -2.354293e+03
@@ -118,8 +118,8 @@
   [../]
   [./precipitate_indicator]  # Returns 1/625 if precipitate
     type = ParsedMaterial
-    f_name = prec_indic
-    args = c
+    property_name = prec_indic
+    variable_names = c
     function = if(c>0.6,0.0016,0)
   [../]
 []

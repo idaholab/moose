@@ -41,7 +41,7 @@
     variable = c
     kappa_name = kappa
     w = w
-    f_name = F
+    property_name = F
   [../]
   [./w_res]
     type = SplitCHWRes
@@ -101,9 +101,9 @@
   [./thcond]
     type = ParsedMaterial
     block = 0
-    args = 'c'
+    variable_names = 'c'
     function = 'if(c>0.7,1e-8,4e-8)'
-    f_name = thermal_conductivity
+    property_name = thermal_conductivity
     outputs = exodus
   [../]
   [./free_energy]

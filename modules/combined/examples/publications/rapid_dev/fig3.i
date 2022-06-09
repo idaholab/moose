@@ -50,16 +50,16 @@
     type = ParsedAux
     variable = diff
     function = c-ca
-    args = 'c ca'
+    variable_names = 'c ca'
   [../]
 []
 
 [Materials]
   [./F]
     type = DerivativeParsedMaterial
-    f_name = F
+    property_name = F
     function = 'c^2*(1-c)^2'
-    args = c
+    variable_names = c
   [../]
 []
 
@@ -68,7 +68,7 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    f_name = F
+    property_name = F
     kappa_name = 1
     w = w
   [../]

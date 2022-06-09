@@ -98,13 +98,13 @@
 #  [./c_res]
 #    type = SplitCHParsed
 #    variable = c
-#    f_name = F
+#    property_name = F
 #    kappa_name = kappa_c
 #    w = w
-#    args = 'eta1 eta2 eta3 eta0'
+#    variable_names = 'eta1 eta2 eta3 eta0'
 #  [../]
 #  [./w_res]
-#    # args = 'c'
+#    # variable_names = 'c'
 #    type = SplitCHWRes
 #    variable = w
 #    mob_name = M
@@ -112,8 +112,8 @@
 #  [./AC1_bulk]
 #    type = AllenCahn
 #    variable = eta1
-#    f_name = F
-#    args = 'c eta2 eta3 eta0'
+#    property_name = F
+#    variable_names = 'c eta2 eta3 eta0'
 #  [../]
 #  [./AC1_int]
 #    type = ACInterface
@@ -127,8 +127,8 @@
 #  [./AC2_bulk]
 #    type = AllenCahn
 #    variable = eta2
-#    f_name = F
-#    args = 'c eta1 eta3 eta0'
+#    property_name = F
+#    variable_names = 'c eta1 eta3 eta0'
 #  [../]
 #  [./AC2_int]
 #    type = ACInterface
@@ -141,8 +141,8 @@
 #  [./AC3_bulk]
 #    type = AllenCahn
 #    variable = eta3
-#    f_name = F
-#    args = 'c eta2 eta1 eta0'
+#    property_name = F
+#    variable_names = 'c eta2 eta1 eta0'
 #  [../]
 #  [./AC3_int]
 #    type = ACInterface
@@ -155,8 +155,8 @@
 #  [./AC4_bulk]
 #    type = AllenCahn
 #    variable = eta0
-#    f_name = F
-#    args = 'c eta2 eta3 eta1'
+#    property_name = F
+#    variable_names = 'c eta2 eta3 eta1'
 #  [../]
 #  [./AC4_int]
 #    type = ACInterface
@@ -185,16 +185,16 @@
   [../]
   #[./ha]
   #  type = DerivativeParsedMaterial
-  #  args = 'eta1 eta2 eta3 eta0'
-  #  f_name = ha_parsed
+  #  variable_names = 'eta1 eta2 eta3 eta0'
+  #  property_name = ha_parsed
   #  function = 'eta1^2/(eta1^2+eta2^2+eta3^2+eta0^2)'
   #  derivative_order = 2
   #  outputs = exodus
   #[../]
   #[./hb]
   #  type = DerivativeParsedMaterial
-  #  args = 'eta1 eta2 eta3 eta0'
-  #  f_name = hb_parsed
+  #  variable_names = 'eta1 eta2 eta3 eta0'
+  #  property_name = hb_parsed
   #  function = '(eta2^2+eta3^2+eta0^2)/(eta1^2+eta2^2+eta3^2+eta0^2)'
   #  derivative_order = 2
   #  outputs = exodus
@@ -202,8 +202,8 @@
 
   #[./FreeEng]
   #  type = DerivativeParsedMaterial
-  #  args = 'c eta1 eta2 eta3 eta0'
-  #  f_name = F
+  #  variable_names = 'c eta1 eta2 eta3 eta0'
+  #  property_name = F
   #  constant_names = 'c1 c2 s g d e h z'
   #  constant_expressions = '1.0 0.0 1.5 1.5 1.0 1.0 1 1.0'
   #  material_property_names = 'ha(eta1,eta2,eta3,eta0) hb(eta1,eta2,eta3,eta0)'

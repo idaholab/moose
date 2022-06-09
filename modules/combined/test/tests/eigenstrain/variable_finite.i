@@ -93,10 +93,10 @@
     type = DerivativeParsedMaterial
     block = 0
     function = 0.01*c^2
-    args = c
+    variable_names = c
     outputs = exodus
     output_properties = 'var_dep'
-    f_name = var_dep
+    property_name = var_dep
     enable_jit = true
     derivative_order = 2
   [../]
@@ -104,7 +104,7 @@
     type = ComputeVariableEigenstrain
     block = 0
     eigen_base = '1 1 1 0 0 0'
-    args = c
+    variable_names = c
     prefactor = var_dep
     eigenstrain_name = eigenstrain
   [../]

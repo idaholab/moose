@@ -49,7 +49,7 @@
 [Materials]
   [diff]
     type = ParsedMaterial
-    f_name = D
+    property_name = D
     args = 'vt'
     function = 'vt'
   []

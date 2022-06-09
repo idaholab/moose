@@ -63,7 +63,7 @@
   [./ACBulk]
     type = AllenCahn
     variable = c
-    f_name = F
+    property_name = F
   [../]
 
   [./ACInterface]
@@ -103,13 +103,13 @@
   [./define_mobility]
     type = ParsedMaterial
     material_property_names = 'gc_prop visco'
-    f_name = L
+    property_name = L
     function = '1.0/(gc_prop * visco)'
   [../]
   [./define_kappa]
     type = ParsedMaterial
     material_property_names = 'gc_prop l'
-    f_name = kappa_op
+    property_name = kappa_op
     function = 'gc_prop * l'
   [../]
   [./elasticity_tensor]
@@ -127,8 +127,8 @@
   [../]
   [./degradation]
     type = DerivativeParsedMaterial
-    f_name = degradation
-    args = 'c'
+    property_name = degradation
+    variable_names = 'c'
     function = '(1.0-c)^2*(1.0 - eta) + eta'
     constant_names       = 'eta'
     constant_expressions = '0.0'
@@ -136,18 +136,18 @@
   [../]
   [./local_fracture_energy]
     type = DerivativeParsedMaterial
-    f_name = local_fracture_energy
-    args = 'c'
+    property_name = local_fracture_energy
+    variable_names = 'c'
     material_property_names = 'gc_prop l'
     function = 'c^2 * gc_prop / 2 / l'
     derivative_order = 2
   [../]
   [./fracture_driving_energy]
     type = DerivativeSumMaterial
-    args = c
+    variable_names = c
     sum_materials = 'elastic_energy local_fracture_energy'
     derivative_order = 2
-    f_name = F
+    property_name = F
   [../]
 []
 

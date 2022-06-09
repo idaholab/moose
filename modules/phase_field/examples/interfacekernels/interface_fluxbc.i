@@ -128,14 +128,14 @@
     type = ParsedAux
     variable = diff
     block = 1
-    args = 'u1 u2'
+    variable_names = 'u1 u2'
     function = 'u1 - u2'
   [../]
   [./v_side]
     type = ParsedAux
     variable = diff
     block = 2
-    args = 'v1 v2'
+    variable_names = 'v1 v2'
     function = 'v1 - v2'
   [../]
 []

@@ -155,8 +155,8 @@
     cb       = cvb
     fa_name  = f_total_matrix
     fb_name  = f_total_bub
-    args_a = 'cgm'
-    args_b = 'cgb'
+    variable_names_a = 'cgm'
+    variable_names_b = 'cgb'
   [../]
   [./ChemPotGas]
     type = KKSPhaseChemicalPotential
@@ -164,8 +164,8 @@
     cb       = cgb
     fa_name  = f_total_matrix
     fb_name  = f_total_bub
-    args_a = 'cvm'
-    args_b = 'cvb'
+    variable_names_a = 'cvm'
+    variable_names_b = 'cvb'
   [../]
 
   #
@@ -177,7 +177,7 @@
     ca       = cgm
     fa_name  = f_total_matrix
     w        = wg
-    args_a   = 'cvm'
+    variable_names_a   = 'cvm'
   [../]
   [./CHBulk_v]
     type = KKSSplitCHCRes
@@ -185,7 +185,7 @@
     ca       = cvm
     fa_name  = f_total_matrix
     w        = wv
-    args_a   = 'cgm'
+    variable_names_a   = 'cgm'
   [../]
 
   [./dcgdt]
@@ -219,7 +219,7 @@
     fa_name  = f_total_matrix
     fb_name  = f_total_bub
     w        = 0.356
-    args = 'cvm cvb cgm cgb'
+    variable_names = 'cvm cvb cgm cgb'
   [../]
   [./ACBulkCv]
     type = KKSACBulkC
@@ -227,7 +227,7 @@
     ca       = cvm
     cb       = cvb
     fa_name  = f_total_matrix
-    args     = 'cgm'
+    variable_names     = 'cgm'
   [../]
   [./ACBulkCg]
     type = KKSACBulkC
@@ -235,7 +235,7 @@
     ca       = cgm
     cb       = cgb
     fa_name  = f_total_matrix
-    args     = 'cvm'
+    variable_names     = 'cvm'
   [../]
   [./ACInterface]
     type = ACInterface
@@ -252,8 +252,8 @@
   # Chemical free energy of the matrix
   [./fm]
     type = DerivativeParsedMaterial
-    f_name = fm
-    args = 'cvm cgm'
+    property_name = fm
+    variable_names = 'cvm cgm'
     material_property_names = 'kvmatrix kgmatrix cvmatrixeq cgmatrixeq'
     function = '0.5*kvmatrix*(cvm-cvmatrixeq)^2 + 0.5*kgmatrix*(cgm-cgmatrixeq)^2'
   [../]
@@ -261,22 +261,22 @@
   [./elastic_free_energy_m]
     type = ElasticEnergyMaterial
     base_name = matrix
-    f_name = fe_m
-    args = ' '
+    property_name = fe_m
+    variable_names = ' '
   [../]
 # Total free energy of the matrix
   [./Total_energy_matrix]
     type = DerivativeSumMaterial
-    f_name = f_total_matrix
+    property_name = f_total_matrix
     sum_materials = 'fm fe_m'
-    args = 'cvm cgm'
+    variable_names = 'cvm cgm'
   [../]
 
   # Free energy of the bubble phase
   [./fb]
     type = DerivativeParsedMaterial
-    f_name = fb
-    args = 'cvb cgb'
+    property_name = fb
+    variable_names = 'cvb cgb'
     material_property_names = 'kToverV nQ Va b f0 kpen kgbub kvbub cvbubeq cgbubeq'
     function = '0.5*kgbub*(cvb-cvbubeq)^2 + 0.5*kvbub*(cgb-cgbubeq)^2'
   [../]
@@ -285,17 +285,17 @@
   [./elastic_free_energy_p]
     type = ElasticEnergyMaterial
     base_name = bub
-    f_name = fe_b
-    args = ' '
+    property_name = fe_b
+    variable_names = ' '
   [../]
 
 # Total free energy of the bubble
   [./Total_energy_bub]
     type = DerivativeSumMaterial
-    f_name = f_total_bub
+    property_name = f_total_bub
     sum_materials = 'fb fe_b'
     # sum_materials = 'fb'
-    args = 'cvb cgb'
+    variable_names = 'cvb cgb'
   [../]
 
   # h(eta)
@@ -320,7 +320,7 @@
   [../]
   [./cvmatrixeq]
     type = ParsedMaterial
-    f_name = cvmatrixeq
+    property_name = cvmatrixeq
     material_property_names = 'T'
     constant_names        = 'kB           Efv'
     constant_expressions  = '8.6173324e-5 1.69'
@@ -328,7 +328,7 @@
   [../]
   [./cgmatrixeq]
     type = ParsedMaterial
-    f_name = cgmatrixeq
+    property_name = cgmatrixeq
     material_property_names = 'T'
     constant_names        = 'kB           Efg'
     constant_expressions  = '8.6173324e-5 4.92'
@@ -336,7 +336,7 @@
   [../]
   [./kToverV]
     type = ParsedMaterial
-    f_name = kToverV
+    property_name = kToverV
     material_property_names = 'T Va'
     constant_names        = 'k          C44dim' #k in J/K and dimensional C44 in J/m^3
     constant_expressions  = '1.38e-23   63e9'
@@ -344,7 +344,7 @@
   [../]
   [./nQ]
     type = ParsedMaterial
-    f_name = nQ
+    property_name = nQ
     material_property_names = 'T'
     constant_names        = 'k          Pi      M         hbar' #k in J/K, M is Xe atomic mass in kg, hbar in J s
     constant_expressions  = '1.38e-23   3.14159 2.18e-25  1.05459e-34'

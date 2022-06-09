@@ -39,7 +39,7 @@
   [./c1_res]
     type = SplitCHParsed
     variable = c1
-    f_name = F
+    property_name = F
     kappa_name = kappa_c
     w = w1
   [../]
@@ -58,7 +58,7 @@
   [./c2_res]
     type = SplitCHParsed
     variable = c2
-    f_name = F
+    property_name = F
     kappa_name = kappa_c
     w = w2
   [../]
@@ -96,8 +96,8 @@
   [./free_energy]
     # equivalent to `MathFreeEnergy`
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'c1 c2'
+    property_name = F
+    variable_names = 'c1 c2'
     function = '0.25*(1+c1)^2*(1-c1)^2 + 0.25*(1+c2)^2*(1-c2)^2'
     derivative_order = 2
   [../]

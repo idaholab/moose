@@ -96,21 +96,21 @@ hot_temp=310
     variable = vel_x
     function = 'u'
     execute_on = 'initial timestep_end'
-    args = 'u'
+    variable_names = 'u'
   []
   [vel_y]
     type = ParsedAux
     variable = vel_y
     function = 'v'
     execute_on = 'initial timestep_end'
-    args = 'v'
+    variable_names = 'v'
   []
   [viz_T]
     type = ParsedAux
     variable = viz_T
     function = 'T'
     execute_on = 'initial timestep_end'
-    args = 'T'
+    variable_names = 'T'
   []
   [rho_out]
     type = ADFunctorElementalAux

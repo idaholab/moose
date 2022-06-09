@@ -48,7 +48,7 @@
   [./calculate_s] # Something to make 's' change each time, but allow a converging solution
     type = ParsedAux
     variable = s
-    args = m_in
+    variable_names = m_in
     function = '2*exp(-m_in/0.8)'
   [../]
 []

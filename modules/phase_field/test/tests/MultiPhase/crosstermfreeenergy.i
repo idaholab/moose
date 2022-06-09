@@ -25,7 +25,7 @@
 [AuxKernels]
   [./local_free_energy]
     type = TotalFreeEnergy
-    f_name = F0
+    property_name = F0
     variable = local_energy
     additional_free_energy = cross_energy
   [../]

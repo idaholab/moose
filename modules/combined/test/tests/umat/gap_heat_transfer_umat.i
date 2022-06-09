@@ -129,15 +129,15 @@
   [temp_dependent_elasticity_tensor]
     type = CompositeElasticityTensor
     block = '1 2'
-    args = temp
+    variable_names = temp
     tensors = 'base'
     weights = 'prefactor_material'
   []
   [prefactor_material_block]
     type = DerivativeParsedMaterial
     block = '1 2'
-    f_name = prefactor_material
-    args = temp
+    property_name = prefactor_material
+    variable_names = temp
     function = '273/(temp)'
   []
   [stress]

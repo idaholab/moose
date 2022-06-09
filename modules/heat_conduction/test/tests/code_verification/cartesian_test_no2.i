@@ -60,8 +60,8 @@
   [../]
   [./thermal_conductivity]
     type = ParsedMaterial
-    f_name = 'thermal_conductivity'
-    args = u
+    property_name = 'thermal_conductivity'
+    variable_names = u
     function = '5 + 1e-3 * (u-0)'
   [../]
 []

@@ -74,7 +74,7 @@
   [./RigidBodyMultiKernel]
     # Creates all of the necessary Allen Cahn kernels automatically
     c = c
-    f_name = f_loc
+    property_name = f_loc
     mob_name = L
     kappa_name = kappa_gr
     grain_force = grain_force
@@ -95,10 +95,10 @@
   [./CH_Parsed]
     type = SplitCHParsed
     variable = c
-    f_name = f_loc
+    property_name = f_loc
     w = w
     kappa_name = kappa_c
-    args = 'gr0 gr1 gr2 gr3' # Must be changed as op_num changes. Copy/paste from line 4
+    variable_names = 'gr0 gr1 gr2 gr3' # Must be changed as op_num changes. Copy/paste from line 4
   [../]
   [./CH_RBM]
     type = MultiGrainRigidBodyMotion
@@ -125,7 +125,7 @@
   [./energy_density]
     type = TotalFreeEnergy
     variable = free_energy
-    f_name = f_loc
+    property_name = f_loc
     kappa_names = kappa_c
     interfacial_vars = c
   [../]
@@ -153,10 +153,10 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = f_loc
+    property_name = f_loc
     constant_names = 'A B'
     constant_expressions = '450 1.5'
-    args = 'c gr0 gr1 gr2 gr3' #Must be changed as op_num changes. Copy/paste from line 4
+    variable_names = 'c gr0 gr1 gr2 gr3' #Must be changed as op_num changes. Copy/paste from line 4
     function = 'A*c^2*(1-c)^2+B*(c^2+6*(1-c)*(gr0^2+gr1^2+gr2^2+gr3^2)
                 -4*(2-c)*(gr0^3+gr1^3+gr2^3+gr3^3)
                 +3*(gr0^2+gr1^2+gr2^2+gr3^2)^2)'

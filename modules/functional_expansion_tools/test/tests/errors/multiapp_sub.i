@@ -39,7 +39,7 @@
   [./calculate_s]
     type = ParsedAux
     variable = s
-    args = m_in
+    variable_names = m_in
     function = '2*exp(-m_in/0.8)'
   [../]
 []

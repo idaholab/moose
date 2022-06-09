@@ -95,13 +95,13 @@
   []
   [strain_dependent_elasticity_tensor]
     type = CompositeElasticityTensor
-    args = strain_yy
+    variable_names = strain_yy
     tensors = 'base'
     weights = 'prefactor_material'
   []
   [prefactor_material_block]
     type = DerivativeParsedMaterial
-    f_name = prefactor_material
+    property_name = prefactor_material
     # 0.11112 is the strain_yy increment
     function = '1.0/(1.0 + 0.11112)'
   []

@@ -46,7 +46,7 @@
   [./ACBulk]
     type = AllenCahn
     variable = eta
-    f_name = F
+    property_name = F
   [../]
 
   [./CoupledBulk]
@@ -77,8 +77,8 @@
 
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'eta'
+    property_name = F
+    variable_names = 'eta'
     function = 'eta^2 * (1-eta)^2'
     derivative_order = 2
   [../]

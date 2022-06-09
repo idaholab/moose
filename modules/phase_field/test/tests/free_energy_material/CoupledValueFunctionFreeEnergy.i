@@ -109,8 +109,8 @@
   [gr0bulk]
     type = AllenCahn
     variable = gr0
-    f_name = F
-    args = 'gr1 gr2 gr3'
+    property_name = F
+    variable_names = 'gr1 gr2 gr3'
   []
   [gr0int]
     type = ACInterface
@@ -125,8 +125,8 @@
   [gr1bulk]
     type = AllenCahn
     variable = gr1
-    f_name = F
-    args = 'gr0 gr2 gr3'
+    property_name = F
+    variable_names = 'gr0 gr2 gr3'
   []
   [gr1int]
     type = ACInterface
@@ -141,8 +141,8 @@
   [gr2bulk]
     type = AllenCahn
     variable = gr2
-    f_name = F
-    args = 'gr0 gr1 gr3'
+    property_name = F
+    variable_names = 'gr0 gr1 gr3'
   []
   [gr2int]
     type = ACInterface
@@ -157,8 +157,8 @@
   [gr3bulk]
     type = AllenCahn
     variable = gr3
-    f_name = F
-    args = 'gr0 gr1 gr2'
+    property_name = F
+    variable_names = 'gr0 gr1 gr2'
   []
   [gr3int]
     type = ACInterface

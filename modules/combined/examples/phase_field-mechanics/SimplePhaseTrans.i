@@ -51,7 +51,7 @@
   [./eta_bulk]
     type = AllenCahn
     variable = eta
-    f_name = F
+    property_name = F
   [../]
   [./eta_interface]
     type = ACInterface
@@ -73,8 +73,8 @@
 
   [./chemical_free_energy]
     type = DerivativeParsedMaterial
-    f_name = Fc
-    args = 'eta'
+    property_name = Fc
+    variable_names = 'eta'
     constant_names = 'A2 A3 A4'
     constant_expressions = '0.2 -12.6 12.4'
     function = A2/2*eta^2+A3/3*eta^3+A4/4*eta^4
@@ -95,8 +95,8 @@
   [./var_dependence]
     type = DerivativeParsedMaterial
     function = eta
-    args = 'eta'
-    f_name = var_dep
+    variable_names = 'eta'
+    property_name = var_dep
     enable_jit = true
     derivative_order = 2
   [../]
@@ -106,22 +106,22 @@
     eigen_base = '0.1 0.1 0 0 0 0'
     prefactor = var_dep
     #outputs = exodus
-    args = 'eta'
+    variable_names = 'eta'
     eigenstrain_name = eigenstrain
   [../]
 
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    f_name = Fe
-    args = 'eta'
+    property_name = Fe
+    variable_names = 'eta'
     derivative_order = 2
   [../]
 
   [./free_energy]
     type = DerivativeSumMaterial
-    f_name = F
+    property_name = F
     sum_materials = 'Fc Fe'
-    args = 'eta'
+    variable_names = 'eta'
     derivative_order = 2
   [../]
 []

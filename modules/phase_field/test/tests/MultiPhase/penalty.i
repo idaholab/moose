@@ -62,8 +62,8 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta1
-    args = 'c eta2'
-    f_name = F
+    variable_names = 'c eta2'
+    property_name = F
   [../]
   [./ACInterface1]
     type = ACInterface
@@ -84,8 +84,8 @@
   [./ACBulk2]
     type = AllenCahn
     variable = eta2
-    args = 'c eta1'
-    f_name = F
+    variable_names = 'c eta1'
+    property_name = F
   [../]
   [./ACInterface2]
     type = ACInterface
@@ -102,10 +102,10 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    f_name = F
+    property_name = F
     kappa_name = kappa_c
     w = w
-    args = 'eta1 eta2'
+    variable_names = 'eta1 eta2'
   [../]
   [./w_res]
     type = SplitCHWRes
@@ -142,9 +142,9 @@
   [./hsum]
     type = ParsedMaterial
     function = h1+h2
-    f_name = hsum
+    property_name = hsum
     material_property_names = 'h1 h2'
-    args = 'c'
+    variable_names = 'c'
     outputs = exodus
   [../]
 
@@ -168,26 +168,26 @@
 
   [./free_energy_A]
     type = DerivativeParsedMaterial
-    f_name = Fa
-    args = 'c'
+    property_name = Fa
+    variable_names = 'c'
     function = '(c-0.1)^2'
     derivative_order = 2
   [../]
   [./free_energy_B]
     type = DerivativeParsedMaterial
-    f_name = Fb
-    args = 'c'
+    property_name = Fb
+    variable_names = 'c'
     function = '(c-0.9)^2'
     derivative_order = 2
   [../]
 
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    f_name = F
+    property_name = F
     fi_names = 'Fa   Fb'
     hi_names = 'h1   h2'
     etas     = 'eta1 eta2'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
 []

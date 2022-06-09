@@ -20,14 +20,14 @@
         kappa = 2.0
         mobility = 1.0
         variable_mobility = false
-        args = 'eta2'
+        variable_names = 'eta2'
       [../]
       [./eta2]
         free_energy = F
         kappa = 2.0
         mobility = 1.0
         variable_mobility = false
-        args = 'eta1'
+        variable_names = 'eta1'
       [../]
     [../]
   [../]
@@ -59,8 +59,8 @@
 [Materials]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'eta1 eta2'
+    property_name = F
+    variable_names = 'eta1 eta2'
     function = '2.5 * (eta1^4/4 - eta1^2/2 + eta2^4/4 - eta2^2/2 + 3/2 * eta1^2 * eta2^2) + 1/4'
     derivative_order = 2
   [../]

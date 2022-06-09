@@ -243,21 +243,21 @@
   [./Fa]
     type = DerivativeParsedMaterial
     block = 0
-    f_name = Fa
+    property_name = Fa
     function = c^2
-    args = c
+    variable_names = c
   [../]
   [./Fb]
     type = DerivativeParsedMaterial
     block = 0
-    f_name = Fb
+    property_name = Fb
     function = (1-c)^3
-    args = c
+    variable_names = c
   [../]
   [./C]
     type = CompositeElasticityTensor
     block = 0
-    args = c
+    variable_names = c
     tensors = 'Ca Cb'
     weights = 'Fa Fb'
   [../]

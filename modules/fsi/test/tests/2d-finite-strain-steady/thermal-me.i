@@ -300,7 +300,7 @@ alpha_fluid = 2e-4 # thermal expansion coefficient of fluid used in INSADBoussin
 [Materials]
   [rho_solid]
     type = ADParsedMaterial
-    f_name = rho
+    property_name = rho
     function = '0.0110876 * pow(9.9672e-1 + 1.179e-5 * Ts - 2.429e-9 * pow(Ts,2) + 1.219e-12 * pow(Ts,3),-3)'
     args = 'Ts'
     block = 'solid'
@@ -308,7 +308,7 @@ alpha_fluid = 2e-4 # thermal expansion coefficient of fluid used in INSADBoussin
   []
   [cp_solid]
     type = ADParsedMaterial
-    f_name = cp
+    property_name = cp
     function = '0.76 * ((302.27 * pow((548.68 / Ts),2) * exp(548.68 / Ts)) / pow((exp(548.68 / Ts) - 1),2) + 2 * 8.463e-3 * Ts + 8.741e7 * 18531.7 * exp(-18531.7 / Ts) / pow(Ts,2)) + 0.24 * ((322.49 * pow((587.41/Ts),2) * exp(587.41 / Ts)) / pow((exp(587.41 / Ts) - 1),2) + 2 * 1.4679e-2 * Ts)'
     args = 'Ts'
     block = 'solid'
@@ -316,7 +316,7 @@ alpha_fluid = 2e-4 # thermal expansion coefficient of fluid used in INSADBoussin
   []
   [k_solid]
     type = ADParsedMaterial
-    f_name = k
+    property_name = k
     function = '1.158/(7.5408 + 17.692 * (Ts / 1000) + 3.6142 * pow((Ts/1000),2)) + 74.105 * pow((Ts / 1000),-2.5) * exp(-16.35 / (Ts / 1000))'
     args = 'Ts'
     block = 'solid'
@@ -325,7 +325,7 @@ alpha_fluid = 2e-4 # thermal expansion coefficient of fluid used in INSADBoussin
 
   [rho_fluid]
     type = ADParsedMaterial
-    f_name = rho
+    property_name = rho
     function = '(11096 - 1.3236 * Tf) * 1e-6'
     args = 'Tf'
     block = 'fluid'
@@ -333,7 +333,7 @@ alpha_fluid = 2e-4 # thermal expansion coefficient of fluid used in INSADBoussin
   []
   [cp_fluid]
     type = ADParsedMaterial
-    f_name = cp
+    property_name = cp
     function = '159 - 2.72e-2 * Tf + 7.12e-6 * pow(Tf,2)'
     args = 'Tf'
     block = 'fluid'
@@ -341,7 +341,7 @@ alpha_fluid = 2e-4 # thermal expansion coefficient of fluid used in INSADBoussin
   []
   [k_fluid]
     type = ADParsedMaterial
-    f_name = k
+    property_name = k
     function = '(3.61 + 1.517e-2 * Tf - 1.741e-6 * pow(Tf,2)) * 1e-2'
     args = 'Tf'
     block = 'fluid'
@@ -349,7 +349,7 @@ alpha_fluid = 2e-4 # thermal expansion coefficient of fluid used in INSADBoussin
   []
   [mu_fluid]
     type = ADParsedMaterial
-    f_name = mu
+    property_name = mu
     function = '4.94e-6 * exp(754.1/Tf)'
     args = 'Tf'
     block = 'fluid'

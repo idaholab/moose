@@ -100,7 +100,7 @@
   [../]
   [./v]
     type = ParsedAux
-    args = rho
+    variable_names = rho
     function = 1/rho
     variable = v
   [../]

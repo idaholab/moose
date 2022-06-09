@@ -45,7 +45,7 @@
     type = CoupledAllenCahn
     variable = w
     v = eta
-    f_name = F
+    property_name = F
     mob_name = 1
   [../]
   [./W]
@@ -64,7 +64,7 @@
     variable = eta
     kappa_name = 1
     mob_name = L
-    args = w
+    variable_names = w
   [../]
 []
 
@@ -72,14 +72,14 @@
   [./mobility]
     type = DerivativeParsedMaterial
     f_name  = L
-    args = 'eta w'
+    variable_names = 'eta w'
     function = '(1.5-eta)^2+(1.5-w)^2'
     derivative_order = 2
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'eta'
+    property_name = F
+    variable_names = 'eta'
     function = 'eta^2 * (1-eta)^2'
     derivative_order = 2
   [../]

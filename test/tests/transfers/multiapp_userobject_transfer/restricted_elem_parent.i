@@ -83,7 +83,7 @@ num_layers = 2
     bounding_box_padding = '0 0.5 1'
     positions = '0 0.5 -0.1'
     output_in_position = true
-    cli_variable_names = 'yy=0'
+    cli_args = 'yy=0'
   []
   [ch1]
     type = TransientMultiApp
@@ -91,7 +91,7 @@ num_layers = 2
     bounding_box_padding = '0 0.5 1'
     positions = '0 0.5  1.1'
     output_in_position = true
-    cli_variable_names = 'yy=1'
+    cli_args = 'yy=1'
   []
 []
 

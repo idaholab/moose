@@ -104,22 +104,22 @@
   # Free energy coefficients for parabolic curves
   [./ks]
     type = ParsedMaterial
-    f_name = ks
-    args = 'T'
+    property_name = ks
+    variable_names = 'T'
     constant_names = 'a b'
     constant_expressions = '-0.0025 157.16'
     function = 'a*T + b'
   [../]
   [./kv]
     type = ParsedMaterial
-    f_name = kv
+    property_name = kv
     material_property_names = 'ks'
     function = '10*ks'
   [../]
   # Diffusivity and mobilities
   [./chiD]
     type = GrandPotentialTensorMaterial
-    f_name = chiD
+    property_name = chiD
     solid_mobility = L
     void_mobility = Lv
     chi = chi
@@ -138,8 +138,8 @@
   # Equilibrium vacancy concentration
   [./cs_eq]
     type = DerivativeParsedMaterial
-    f_name = cs_eq
-    args = 'gr0 gr1 gr2 gr3 T'
+    property_name = cs_eq
+    variable_names = 'gr0 gr1 gr2 gr3 T'
     constant_names = 'Ef c_GB kB'
     constant_expressions = '2.69 0.189 8.617343e-5'
     function = 'bnds:=gr0^2 + gr1^2 + gr2^2 + gr3^2; exp(-Ef/kB/T) + 4.0 * c_GB * (1 - bnds)^2'
@@ -161,7 +161,7 @@
   # Concentration is only meant for output
   [./c]
     type = ParsedMaterial
-    f_name = c
+    property_name = c
     material_property_names = 'hs rhos hv rhov'
     constant_names = 'Va'
     constant_expressions = '0.04092'
@@ -170,8 +170,8 @@
   [../]
   [./f_bulk]
     type = ParsedMaterial
-    f_name = f_bulk
-    args = 'phi gr0 gr1 gr2 gr3'
+    property_name = f_bulk
+    variable_names = 'phi gr0 gr1 gr2 gr3'
     material_property_names = 'mu gamma'
     function = 'mu*(phi^4/4-phi^2/2 + gr0^4/4-gr0^2/2 + gr1^4/4-gr1^2/2
                   + gr2^4/4-gr2^2/2 + gr3^4/4-gr3^2/2
@@ -181,15 +181,15 @@
   [../]
   [./f_switch]
     type = ParsedMaterial
-    f_name = f_switch
-    args = 'w'
+    property_name = f_switch
+    variable_names = 'w'
     material_property_names = 'chi'
     function = '0.5*w^2*chi'
     outputs = exodus
   [../]
   [./f0]
     type = ParsedMaterial
-    f_name = f0
+    property_name = f0
     material_property_names = 'f_bulk f_switch'
     function = 'f_bulk + f_switch'
   [../]
@@ -236,7 +236,7 @@
   [./F_aux]
     type = TotalFreeEnergy
     variable = F_loc
-    f_name = f0
+    property_name = f0
     interfacial_vars = 'phi gr0 gr1 gr2 gr3'
     kappa_names = 'kappa kappa kappa kappa kappa'
   [../]

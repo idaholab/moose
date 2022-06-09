@@ -128,8 +128,8 @@
   [./c_res]
     type = CahnHilliard
     variable = c
-    f_name = F
-    args = 'eta1 eta2 eta3'
+    property_name = F
+    variable_names = 'eta1 eta2 eta3'
   [../]
   [./time]
     type = TimeDerivative
@@ -144,9 +144,9 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta1
-    args = 'eta2 eta3 c'
+    variable_names = 'eta2 eta3 c'
     mob_name = L1
-    f_name = F
+    property_name = F
   [../]
   [./ACInterface1]
     type = ACMultiInterface
@@ -170,9 +170,9 @@
   [./ACBulk2]
     type = AllenCahn
     variable = eta2
-    args = 'eta1 eta3 c'
+    variable_names = 'eta1 eta3 c'
     mob_name = L2
-    f_name = F
+    property_name = F
   [../]
   [./ACInterface2]
     type = ACMultiInterface
@@ -196,9 +196,9 @@
   [./ACBulk3]
     type = AllenCahn
     variable = eta3
-    args = 'eta1 eta2 c'
+    variable_names = 'eta1 eta2 c'
     mob_name = L3
-    f_name = F
+    property_name = F
   [../]
   [./ACInterface3]
     type = ACMultiInterface
@@ -236,8 +236,8 @@
   # ideally it should be 0 everywhere, if the constraint is fully enforced
   [./etasummat]
     type = ParsedMaterial
-    f_name = etasum
-    args = 'eta1 eta2 eta3'
+    property_name = etasum
+    variable_names = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
     function = 'h1+h2+h3-1'
     outputs = exodus
@@ -247,8 +247,8 @@
   # It will be 0 for phase 1, -1 for phase 2, and 1 for phase 3
   [./phasemap]
     type = ParsedMaterial
-    f_name = phase
-    args = 'eta2 eta3'
+    property_name = phase
+    variable_names = 'eta2 eta3'
     function = 'if(eta3>0.5,1,0)-if(eta2>0.5,1,0)'
     outputs = exodus
   [../]
@@ -346,23 +346,23 @@
   # chemical free energies
   [./chemical_free_energy_1]
     type = DerivativeParsedMaterial
-    f_name = Fc1
+    property_name = Fc1
     function = '4*c^2'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_2]
     type = DerivativeParsedMaterial
-    f_name = Fc2
+    property_name = Fc2
     function = '(c-0.9)^2-0.4'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_3]
     type = DerivativeParsedMaterial
-    f_name = Fc3
+    property_name = Fc3
     function = '(c-0.9)^2-0.5'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
 
@@ -370,56 +370,56 @@
   [./elastic_free_energy_1]
     type = ElasticEnergyMaterial
     base_name = phase1
-    f_name = Fe1
+    property_name = Fe1
     derivative_order = 2
-    args = 'c' # should be empty
+    variable_names = 'c' # should be empty
   [../]
   [./elastic_free_energy_2]
     type = ElasticEnergyMaterial
     base_name = phase2
-    f_name = Fe2
+    property_name = Fe2
     derivative_order = 2
-    args = 'c' # should be empty
+    variable_names = 'c' # should be empty
   [../]
   [./elastic_free_energy_3]
     type = ElasticEnergyMaterial
     base_name = phase3
-    f_name = Fe3
+    property_name = Fe3
     derivative_order = 2
-    args = 'c' # should be empty
+    variable_names = 'c' # should be empty
   [../]
 
   # phase free energies (chemical + elastic)
   [./phase_free_energy_1]
     type = DerivativeSumMaterial
-    f_name = F1
+    property_name = F1
     sum_materials = 'Fc1 Fe1'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
   [./phase_free_energy_2]
     type = DerivativeSumMaterial
-    f_name = F2
+    property_name = F2
     sum_materials = 'Fc2 Fe2'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
   [./phase_free_energy_3]
     type = DerivativeSumMaterial
-    f_name = F3
+    property_name = F3
     sum_materials = 'Fc3 Fe3'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
 
   # global free energy
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    f_name = F
+    property_name = F
     fi_names = 'F1  F2  F3'
     hi_names = 'h1  h2  h3'
     etas     = 'eta1 eta2 eta3'
-    args = 'c'
+    variable_names = 'c'
     W = 3
   [../]
 

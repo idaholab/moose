@@ -86,16 +86,16 @@
   # Free energy of the liquid
   [./fl]
     type = DerivativeParsedMaterial
-    f_name = fl
-    args = 'cl'
+    property_name = fl
+    variable_names = 'cl'
     function = '(0.1-cl)^2'
   [../]
 
   # Free energy of the solid
   [./fs]
     type = DerivativeParsedMaterial
-    f_name = fs
-    args = 'cs'
+    property_name = fs
+    variable_names = 'cs'
     function = '(0.9-cs)^2'
   [../]
 
@@ -173,7 +173,7 @@
     fa_name  = fl
     fb_name  = fs
     w        = 1.0
-    args = 'cl cs'
+    variable_names = 'cl cs'
   [../]
   [./ACBulkC]
     type = KKSACBulkC

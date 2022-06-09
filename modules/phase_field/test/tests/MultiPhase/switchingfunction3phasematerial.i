@@ -44,7 +44,7 @@
 [Materials]
   [./h_material_1]
     type = SwitchingFunction3PhaseMaterial
-    f_name = h_i1
+    property_name = h_i1
     eta_i = eta1
     eta_j = eta2
     eta_k = eta3
@@ -54,7 +54,7 @@
 # with respect to interchanging these two, as it is designed to be
   [./h_material_2]
     type = SwitchingFunction3PhaseMaterial
-    f_name = h_i2
+    property_name = h_i2
     eta_i = eta1
     eta_j = eta3
     eta_k = eta2

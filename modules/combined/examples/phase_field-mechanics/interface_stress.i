@@ -42,15 +42,15 @@
 [Materials]
   [./ym]
     type = DerivativeParsedMaterial
-    f_name = ym
+    property_name = ym
     function = (1-eta)*7+0.5
-    args = eta
+    variable_names = eta
   [../]
   [./elasticity]
     type = ComputeVariableIsotropicElasticityTensor
     poissons_ratio = 0.45
     youngs_modulus = ym
-    args = eta
+    variable_names = eta
   [../]
 
   [./stress]

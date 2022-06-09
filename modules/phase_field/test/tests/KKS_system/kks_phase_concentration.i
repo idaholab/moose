@@ -81,14 +81,14 @@
   # simple toy free energy
   [./fa]
     type = DerivativeParsedMaterial
-    f_name = Fa
-    args = 'ca'
+    property_name = Fa
+    variable_names = 'ca'
     function = 'ca^2'
   [../]
   [./fb]
     type = DerivativeParsedMaterial
-    f_name = Fb
-    args = 'cb'
+    property_name = Fb
+    variable_names = 'cb'
     function = '(1-cb)^2'
   [../]
 

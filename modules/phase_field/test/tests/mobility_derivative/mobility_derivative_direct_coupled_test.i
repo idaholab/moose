@@ -45,15 +45,15 @@
     type = CahnHilliard
     variable = c
     mob_name = M
-    f_name = F
-    args = d
+    property_name = F
+    variable_names = d
   [../]
   [./c_int]
     type = CHInterface
     variable = c
     kappa_name = kappa_c
     mob_name = M
-    args = d
+    variable_names = d
   [../]
   [./c_dot]
     type = TimeDerivative
@@ -78,14 +78,14 @@
   [../]
   [./mob]
     type = DerivativeParsedMaterial
-    f_name = M
-    args = 'c d'
+    property_name = M
+    variable_names = 'c d'
     function = if(d>0.001,d,0.001)*if(c<0,0.5,if(c>1,0.5,1-0.5*c^2))
     derivative_order = 2
   [../]
   [./free_energy]
     type = MathEBFreeEnergy
-    f_name = F
+    property_name = F
     c = c
   [../]
   [./d_diff]

@@ -60,16 +60,16 @@
   # Free energy of the matrix
   [fm]
     type = DerivativeParsedMaterial
-    f_name = fm
-    args = 'cm'
+    property_name = fm
+    variable_names = 'cm'
     function = '(0.1-cm)^2'
   []
 
   # Free energy of the delta phase
   [fd]
     type = DerivativeParsedMaterial
-    f_name = fd
-    args = 'cd'
+    property_name = fd
+    variable_names = 'cd'
     function = '(0.9-cd)^2'
   []
 
@@ -147,7 +147,7 @@
     variable = eta
     fa_name = fm
     fb_name = fd
-    args = 'cm cd'
+    variable_names = 'cm cd'
     w = 0.4
   []
   [ACBulkC]

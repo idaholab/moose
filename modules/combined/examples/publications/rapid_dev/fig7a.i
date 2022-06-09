@@ -103,8 +103,8 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    f_name = F
-    args = 'eta'
+    property_name = F
+    variable_names = 'eta'
     kappa_name = kappa_c
     w = w
   [../]
@@ -127,9 +127,9 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta
-    args = 'c'
+    variable_names = 'c'
     mob_name = L
-    f_name = F
+    property_name = F
   [../]
   [./ACInterface]
     type = ACInterface
@@ -163,7 +163,7 @@
   # forcing function mask
   [./mask]
     type = ParsedMaterial
-    f_name = mask
+    property_name = mask
     function = grad/dt
     material_property_names = 'grad dt'
   [../]
@@ -230,31 +230,31 @@
   # chemical free energies
   [./chemical_free_energy_1]
     type = DerivativeParsedMaterial
-    f_name = Fc1
+    property_name = Fc1
     function = 'c^2'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_2]
     type = DerivativeParsedMaterial
-    f_name = Fc2
+    property_name = Fc2
     function = '(1-c)^2'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
 
   # elastic free energies
   [./elastic_free_energy_1]
     type = ElasticEnergyMaterial
-    f_name = Fe1
-    args = ''
+    property_name = Fe1
+    variable_names = ''
     base_name = phase1
     derivative_order = 2
   [../]
   [./elastic_free_energy_2]
     type = ElasticEnergyMaterial
-    f_name = Fe2
-    args = ''
+    property_name = Fe2
+    variable_names = ''
     base_name = phase2
     derivative_order = 2
   [../]
@@ -262,27 +262,27 @@
   # per phase free energies
   [./free_energy_1]
     type = DerivativeSumMaterial
-    f_name = F1
+    property_name = F1
     sum_materials = 'Fc1 Fe1'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
   [./free_energy_2]
     type = DerivativeSumMaterial
-    f_name = F2
+    property_name = F2
     sum_materials = 'Fc2 Fe2'
-    args = 'c'
+    variable_names = 'c'
     derivative_order = 2
   [../]
 
   # global chemical free energy
   [./global_free_energy]
     type = DerivativeTwoPhaseMaterial
-    f_name = F
+    property_name = F
     fa_name = F1
     fb_name = F2
     eta = eta
-    args = 'c'
+    variable_names = 'c'
     W = 4
   [../]
 
@@ -295,11 +295,11 @@
 
   [./elastic_free_energy]
     type = DerivativeTwoPhaseMaterial
-    f_name = Fe
+    property_name = Fe
     fa_name = Fe1
     fb_name = Fe2
     eta = eta
-    args = 'c'
+    variable_names = 'c'
     W = 0
   [../]
 []

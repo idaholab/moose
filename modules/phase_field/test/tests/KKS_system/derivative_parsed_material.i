@@ -61,8 +61,8 @@
 [Materials]
   [./fa]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'c1 c2'
+    property_name = F
+    variable_names = 'c1 c2'
     constant_names       = 'T    kB'
     constant_expressions = '400  .000086173324'
     function = 'c1^2+100*T*kB*(c2-0.5)^3+c1^4*c2^5'

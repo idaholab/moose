@@ -19,7 +19,7 @@
         free_energy = F
         kappa = 2.0
         mobility = M
-        args = 'cv'
+        variable_names = 'cv'
       [../]
     [../]
   [../]
@@ -39,15 +39,15 @@
 [Materials]
   [./variable_mob]
     type = DerivativeParsedMaterial
-    f_name = M
-    args = 'cv'
+    property_name = M
+    variable_names = 'cv'
     function = '0.1 + (1 + cv)/2'
     outputs = exodus
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'cv'
+    property_name = F
+    variable_names = 'cv'
     function = '(1-cv)^2 * (1+cv)^2'
   [../]
 []

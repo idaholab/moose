@@ -88,7 +88,7 @@
     variable = etaa0
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    args = 'etab0 etab1 w'
+    variable_names = 'etab0 etab1 w'
   [../]
   [./ACa0_int]
     type = ACInterface
@@ -111,7 +111,7 @@
     variable = etab0
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    args = 'etaa0 etab1 w'
+    variable_names = 'etaa0 etab1 w'
   [../]
   [./ACb0_int]
     type = ACInterface
@@ -134,7 +134,7 @@
     variable = etab1
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    args = 'etaa0 etab0 w'
+    variable_names = 'etaa0 etab0 w'
   [../]
   [./ACb1_int]
     type = ACInterface
@@ -149,8 +149,8 @@
   [./w_dot]
     type = SusceptibilityTimeDerivative
     variable = w
-    f_name = chi
-    args = '' # in this case chi (the susceptibility) is simply a constant
+    property_name = chi
+    variable_names = '' # in this case chi (the susceptibility) is simply a constant
   [../]
   [./Diffusion]
     type = MatDiffusion
@@ -164,7 +164,7 @@
     v = etaa0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0 etab1'
+    variable_names = 'etaa0 etab0 etab1'
   [../]
   [./coupled_etab0dot]
     type = CoupledSwitchingTimeDerivative
@@ -172,7 +172,7 @@
     v = etab0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0 etab1'
+    variable_names = 'etaa0 etab0 etab1'
   [../]
   [./coupled_etab1dot]
     type = CoupledSwitchingTimeDerivative
@@ -180,7 +180,7 @@
     v = etab1
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0 etab1'
+    variable_names = 'etaa0 etab0 etab1'
   [../]
 []
 
@@ -210,8 +210,8 @@
   [../]
   [./omegaa]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = omegaa
+    variable_names = 'w'
+    property_name = omegaa
     material_property_names = 'Vm ka caeq'
     function = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
     derivative_order = 2
@@ -219,8 +219,8 @@
   [../]
   [./omegab]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = omegab
+    variable_names = 'w'
+    property_name = omegab
     material_property_names = 'Vm kb cbeq'
     function = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
     derivative_order = 2
@@ -228,8 +228,8 @@
   [../]
   [./rhoa]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = rhoa
+    variable_names = 'w'
+    property_name = rhoa
     material_property_names = 'Vm ka caeq'
     function = 'w/Vm^2/ka + caeq/Vm'
     derivative_order = 2
@@ -237,8 +237,8 @@
   [../]
   [./rhob]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = rhob
+    variable_names = 'w'
+    property_name = rhob
     material_property_names = 'Vm kb cbeq'
     function = 'w/Vm^2/kb + cbeq/Vm'
     derivative_order = 2
@@ -251,7 +251,7 @@
   [../]
   [./Mobility]
     type = DerivativeParsedMaterial
-    f_name = Dchi
+    property_name = Dchi
     material_property_names = 'D chi'
     function = 'D*chi'
     derivative_order = 2

@@ -114,7 +114,7 @@
   [pp_change]
     type = ParsedAux
     variable = pp_change
-    args = 'pp ini_pp'
+    variable_names = 'pp ini_pp'
     function = 'pp - ini_pp'
   []
 []

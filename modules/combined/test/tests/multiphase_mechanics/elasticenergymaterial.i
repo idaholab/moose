@@ -72,8 +72,8 @@
   [../]
   [./prefactor]
     type = DerivativeParsedMaterial
-    args = c
-    f_name = prefactor
+    variable_names = c
+    property_name = prefactor
     constant_names       = 'epsilon0 c0'
     constant_expressions = '0.05     0'
     function = '(c - c0) * epsilon0'
@@ -81,14 +81,14 @@
   [./eigenstrain]
     type = ComputeVariableEigenstrain
     eigen_base = '1'
-    args = c
+    variable_names = c
     prefactor = prefactor
     eigenstrain_name = eigenstrain
   [../]
 
   [./elasticenergy]
     type = ElasticEnergyMaterial
-    args = 'c'
+    variable_names = 'c'
     outputs = exodus
   [../]
 []

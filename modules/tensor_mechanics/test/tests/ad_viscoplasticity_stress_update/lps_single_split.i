@@ -71,7 +71,7 @@
   [../]
   [./coef]
     type = ADParsedMaterial
-    f_name = coef
+    property_name = coef
     # Example of creep power law
     function = '0.5e-18 * exp(-4e4 / 1.987 / 1200)'
   [../]

@@ -51,8 +51,8 @@ mu = 1
   [parsed]
     type = ADParsedMaterial
     function = '-2*(1-3*u+2*u*u)'
-    args = 'u'
-    f_name = 'L'
+    variable_names = 'u'
+    property_name = 'L'
   []
 []
 

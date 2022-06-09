@@ -34,9 +34,9 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    f_name = F
+    property_name = F
     kappa_name = kappa_c
-    args = 'eta0 eta1'
+    variable_names = 'eta0 eta1'
     w = w
   [../]
   [./w_res]
@@ -61,7 +61,7 @@
   [./RigidBodyMultiKernel]
     # Creates all of the necessary Allen Cahn kernels automatically
     c = c
-    f_name = F
+    property_name = F
     mob_name = M
     kappa_name = kappa_eta
     grain_force = grain_force
@@ -78,8 +78,8 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'c eta0 eta1'
+    property_name = F
+    variable_names = 'c eta0 eta1'
     constant_names = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+eta0*(1-eta0)*c+eta1*(1-eta1)*c

@@ -114,7 +114,7 @@
   []
   [head_change]
     type = ParsedAux
-    args = 'pp insitu_head'
+    variable_names = 'pp insitu_head'
     use_xyzt = true
     function = 'pp / 1E4 + z - insitu_head'
     variable = head_change

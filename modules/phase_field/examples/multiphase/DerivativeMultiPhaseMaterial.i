@@ -123,8 +123,8 @@
   [./c_res]
     type = CahnHilliard
     variable = c
-    f_name = F
-    args = 'eta1 eta2 eta3'
+    property_name = F
+    variable_names = 'eta1 eta2 eta3'
   [../]
   [./time]
     type = TimeDerivative
@@ -148,9 +148,9 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta1
-    args = 'eta2 eta3 c'
+    variable_names = 'eta2 eta3 c'
     mob_name = L1
-    f_name = F
+    property_name = F
   [../]
   [./ACInterface1]
     type = ACMultiInterface
@@ -176,9 +176,9 @@
   [./ACBulk2]
     type = AllenCahn
     variable = eta2
-    args = 'eta1 eta3 c'
+    variable_names = 'eta1 eta3 c'
     mob_name = L2
-    f_name = F
+    property_name = F
   [../]
   [./ACInterface2]
     type = ACMultiInterface
@@ -204,9 +204,9 @@
   [./ACBulk3]
     type = AllenCahn
     variable = eta3
-    args = 'eta1 eta2 c'
+    variable_names = 'eta1 eta2 c'
     mob_name = L3
-    f_name = F
+    property_name = F
   [../]
   [./ACInterface3]
     type = ACMultiInterface
@@ -246,8 +246,8 @@
   # (see GlobalParams section above) and can be used to check the constraint enforcement.
   [./etasummat]
     type = ParsedMaterial
-    f_name = etasum
-    args = 'eta1 eta2 eta3'
+    property_name = etasum
+    variable_names = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
     function = 'h1+h2+h3'
   [../]
@@ -289,33 +289,33 @@
   # by custom kernels).
   [./phase_free_energy_1]
     type = DerivativeParsedMaterial
-    f_name = F1
+    property_name = F1
     function = '(c-1)^2'
-    args = 'c'
+    variable_names = 'c'
   [../]
   [./phase_free_energy_2]
     type = DerivativeParsedMaterial
-    f_name = F2
+    property_name = F2
     function = '(c-0.5)^2'
-    args = 'c'
+    variable_names = 'c'
   [../]
   [./phase_free_energy_3]
     type = DerivativeParsedMaterial
-    f_name = F3
+    property_name = F3
     function = 'c^2'
-    args = 'c'
+    variable_names = 'c'
   [../]
 
   # The DerivativeMultiPhaseMaterial ties the phase free energies together into a global free energy.
   # http://mooseframework.org/wiki/PhysicsModules/PhaseField/DevelopingModels/MultiPhaseModels/
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    f_name = F
+    property_name = F
     # we use a constant free energy (GeneriConstantmaterial property Fx)
     fi_names = 'F1  F2  F3'
     hi_names = 'h1  h2  h3'
     etas     = 'eta1 eta2 eta3'
-    args = 'c'
+    variable_names = 'c'
     W = 1
   [../]
 []

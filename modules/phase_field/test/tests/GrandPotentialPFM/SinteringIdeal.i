@@ -91,8 +91,8 @@
   # Free energy coefficients for parabolic curve
   [./kv]
     type = ParsedMaterial
-    f_name = kv
-    args = 'T'
+    property_name = kv
+    variable_names = 'T'
     constant_names = 'a b'
     constant_expressions = '-0.025 1571.6'
     function = 'a*T + b'
@@ -100,7 +100,7 @@
   # Diffusivity and mobilities
   [./chiD]
     type = GrandPotentialTensorMaterial
-    f_name = chiD
+    property_name = chiD
     solid_mobility = L
     void_mobility = Lv
     chi = chi
@@ -118,8 +118,8 @@
   # Equilibrium vacancy concentration
   [./cs_eq]
     type = DerivativeParsedMaterial
-    f_name = cs_eq
-    args = 'gr0 gr1 T'
+    property_name = cs_eq
+    variable_names = 'gr0 gr1 T'
     constant_names = 'Ef Egb kB'
     constant_expressions = '2.69 2.1 8.617343e-5'
     function = 'bnds:=gr0^2 + gr1^2; cb:=exp(-Ef/kB/T); cgb:=exp(-(Ef-Egb)/kB/T);
@@ -142,7 +142,7 @@
   # Concentration is only meant for output
   [./c]
     type = ParsedMaterial
-    f_name = c
+    property_name = c
     material_property_names = 'hs rhos hv rhov'
     constant_names = 'Va'
     constant_expressions = '0.04092'

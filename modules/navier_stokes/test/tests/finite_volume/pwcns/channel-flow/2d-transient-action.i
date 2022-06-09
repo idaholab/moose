@@ -148,7 +148,7 @@ top_side_temperature = 150
   [speed]
     type = ParsedAux
     variable = 'velocity_norm'
-    args = 'superficial_vel_x superficial_vel_y porosity'
+    variable_names = 'superficial_vel_x superficial_vel_y porosity'
     function = 'sqrt(superficial_vel_x*superficial_vel_x + superficial_vel_y*superficial_vel_y) / '
                'porosity'
   []

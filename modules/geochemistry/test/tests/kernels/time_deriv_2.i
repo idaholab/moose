@@ -65,7 +65,7 @@
   []
   [should_be_zero]
     type = ParsedAux
-    args = 'expected conc'
+    variable_names = 'expected conc'
     function = 'expected - conc'
     variable = should_be_zero
   []

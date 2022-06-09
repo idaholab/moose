@@ -45,7 +45,7 @@
   [./local_energy]
     type = TotalFreeEnergy
     variable = local_energy
-    f_name = fbulk
+    property_name = fbulk
     interfacial_vars = c
     kappa_names = kappa_c
     execute_on = timestep_end
@@ -68,8 +68,8 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = fbulk
-    args = c
+    property_name = fbulk
+    variable_names = c
     constant_names = W
     constant_expressions = 1.0/2^2
     function = W*(1-c)^2*(1+c)^2

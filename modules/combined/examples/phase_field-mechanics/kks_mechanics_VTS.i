@@ -248,7 +248,7 @@
   [./psi_potential]
     variable = psi
     type = ParsedAux
-    args = 'Fglobal w c f_el sigma11 e11'
+    variable_names = 'Fglobal w c f_el sigma11 e11'
     function = 'Fglobal - w*c + f_el - sigma11*e11'
   [../]
 []
@@ -297,31 +297,31 @@
   # Chemical free energy of the matrix
   [./fm]
     type = DerivativeParsedMaterial
-    f_name = fm
-    args = 'cm'
+    property_name = fm
+    variable_names = 'cm'
     function = '6.55*(cm-0.13)^2'
   [../]
 # Elastic energy of the matrix
   [./elastic_free_energy_m]
     type = ElasticEnergyMaterial
     base_name = matrix
-    f_name = fe_m
-    args = ' '
+    property_name = fe_m
+    variable_names = ' '
     outputs = exodus
   [../]
 # Total free energy of the matrix
   [./Total_energy_matrix]
     type = DerivativeSumMaterial
-    f_name = f_total_matrix
+    property_name = f_total_matrix
     sum_materials = 'fm fe_m'
-    args = 'cm'
+    variable_names = 'cm'
   [../]
 
   # Free energy of the precipitate phase
   [./fp]
     type = DerivativeParsedMaterial
-    f_name = fp
-    args = 'cp'
+    property_name = fp
+    variable_names = 'cp'
     function = '6.55*(cp-0.235)^2'
   [../]
 
@@ -329,24 +329,24 @@
   [./elastic_free_energy_p]
     type = ElasticEnergyMaterial
     base_name = ppt
-    f_name = fe_p
-    args = ' '
+    property_name = fe_p
+    variable_names = ' '
     outputs = exodus
   [../]
 
 # Total free energy of the precipitate
   [./Total_energy_ppt]
     type = DerivativeSumMaterial
-    f_name = f_total_ppt
+    property_name = f_total_ppt
     sum_materials = 'fp fe_p'
-    args = 'cp'
+    variable_names = 'cp'
   [../]
 
   # Total elastic energy
     [./Total_elastic_energy]
       type = DerivativeTwoPhaseMaterial
       eta = eta
-      f_name = f_el_mat
+      property_name = f_el_mat
       fa_name = fe_m
       fb_name = fe_p
       outputs = exodus
@@ -478,7 +478,7 @@
     fa_name  = f_total_matrix
     fb_name  = f_total_ppt
     w        = 0.0264
-    args = 'cp cm'
+    variable_names = 'cp cm'
   [../]
   [./ACBulkC]
     type = KKSACBulkC

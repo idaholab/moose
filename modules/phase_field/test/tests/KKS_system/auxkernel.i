@@ -37,7 +37,7 @@
     type = ParsedAux
     variable = eta2
     function = '1-eta1'
-    args = eta1
+    variable_names = eta1
   []
 []
 
@@ -78,14 +78,14 @@
   # simple toy free energies
   [f1] # = fd
     type = DerivativeParsedMaterial
-    f_name = F1
-    args = 'c1'
+    property_name = F1
+    variable_names = 'c1'
     function = '(0.9-c1)^2'
   []
   [f2] # = fm
     type = DerivativeParsedMaterial
-    f_name = F2
-    args = 'c2'
+    property_name = F2
+    variable_names = 'c2'
     function = '(0.1-c2)^2'
   []
 
@@ -100,8 +100,8 @@
     type = DerivativeParsedMaterial
     material_property_names = 'h1(eta1)'
     function = '1-h1'
-    f_name = h2
-    args = eta1
+    property_name = h2
+    variable_names = eta1
   []
 
   # Coefficients for diffusion equation
@@ -109,15 +109,15 @@
     type = DerivativeParsedMaterial
     material_property_names = 'D h1(eta1)'
     function = D*h1
-    f_name = Dh1
-    args = eta1
+    property_name = Dh1
+    variable_names = eta1
   []
   [Dh2]
     type = DerivativeParsedMaterial
     material_property_names = 'D h2(eta1)'
     function = 'D*h2'
-    f_name = Dh2
-    args = eta1
+    property_name = Dh2
+    variable_names = eta1
   []
 
   # Barrier functions for each phase
@@ -176,7 +176,7 @@
     gi_name = g1
     eta_i = eta1
     wi = 0.2
-    args = 'c1 c2 eta2'
+    variable_names = 'c1 c2 eta2'
   []
   [ACBulkC1]
     type = KKSMultiACBulkC
@@ -185,7 +185,7 @@
     hj_names = 'h1 h2'
     cj_names = 'c1 c2'
     eta_i = eta1
-    args = 'eta2'
+    variable_names = 'eta2'
   []
   [ACInterface1]
     type = ACInterface

@@ -128,16 +128,16 @@
   # Free energy of the liquid
   [./fl]
     type = DerivativeParsedMaterial
-    f_name = fl
-    args = 'c1l c2l'
+    property_name = fl
+    variable_names = 'c1l c2l'
     function = '(0.1-c1l)^2+(0.05-c2l)^2'
   [../]
 
   # Free energy of the solid
   [./fs]
     type = DerivativeParsedMaterial
-    f_name = fs
-    args = 'c1s c2s'
+    property_name = fs
+    variable_names = 'c1s c2s'
     function = '(0.8-c1s)^2+(0.1-c2s)^2'
   [../]
 
@@ -255,7 +255,7 @@
     fa_name  = fl
     fb_name  = fs
     w        = 1.0
-    args = 'c1l c1s c2l c2s'
+    variable_names = 'c1l c1s c2l c2s'
   [../]
   [./ACBulkC1]
     type = KKSACBulkC
@@ -263,7 +263,7 @@
     ca       = c1l
     cb       = c1s
     fa_name  = fl
-    args     = 'c2l'
+    variable_names     = 'c2l'
   [../]
   [./ACBulkC2]
     type = KKSACBulkC
@@ -271,7 +271,7 @@
     ca       = c2l
     cb       = c2s
     fa_name  = fl
-    args     = 'c1l'
+    variable_names     = 'c1l'
   [../]
   [./ACInterface]
     type = ACInterface

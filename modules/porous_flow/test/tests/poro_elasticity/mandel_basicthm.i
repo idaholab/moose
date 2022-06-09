@@ -128,7 +128,7 @@
 [AuxKernels]
   [tot_force]
     type = ParsedAux
-    args = 'stress_yy porepressure'
+    variable_names = 'stress_yy porepressure'
     execute_on = timestep_end
     variable = tot_force
     function = '-stress_yy+0.6*porepressure'

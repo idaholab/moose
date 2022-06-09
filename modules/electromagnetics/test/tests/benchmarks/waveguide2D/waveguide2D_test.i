@@ -127,7 +127,7 @@
 [Materials]
   [kSquared]
     type = ADParsedMaterial
-    f_name = kSquared
+    property_name = kSquared
     function = '0.4188790204786391^2'
   []
 []

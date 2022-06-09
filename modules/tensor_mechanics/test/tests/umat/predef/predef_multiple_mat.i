@@ -129,13 +129,13 @@
   []
   [strain_dependent_elasticity_tensor]
     type = CompositeElasticityTensor
-    args = 'strain_yy strain_xx'
+    variable_names = 'strain_yy strain_xx'
     tensors = 'base'
     weights = 'prefactor_material'
   []
   [prefactor_material_block]
     type = DerivativeParsedMaterial
-    f_name = prefactor_material
+    property_name = prefactor_material
     material_property_names = 'strain_yy strain_xx'
     function = '1.0/(1.0 + strain_yy + strain_xx)'
   []

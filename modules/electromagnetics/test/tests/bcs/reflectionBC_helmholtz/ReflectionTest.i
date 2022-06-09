@@ -38,17 +38,17 @@
 [Materials]
   [ASquaredMinusBSquared]
     type = ADParsedMaterial
-    f_name = ASquaredMinusBSquared
+    property_name = ASquaredMinusBSquared
     function = '(15*15 - 7*7)'
   []
   [2TimesAB]
     type = ADParsedMaterial
-    f_name = 2TimesAB
+    property_name = 2TimesAB
     function = '2*15*7'
   []
   [negative_2TimesAB]
     type = ADParsedMaterial
-    f_name = negative_2TimesAB
+    property_name = negative_2TimesAB
     function = '-2*15*7'
   []
 []

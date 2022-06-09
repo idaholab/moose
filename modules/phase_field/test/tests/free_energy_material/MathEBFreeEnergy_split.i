@@ -47,7 +47,7 @@
     variable = c
     kappa_name = kappa_c
     w = w
-    f_name = F
+    property_name = F
   []
 
   [wres]
@@ -87,7 +87,7 @@
   []
   [free_energy]
     type = MathEBFreeEnergy
-    f_name = F
+    property_name = F
     c = c
   []
 []

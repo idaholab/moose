@@ -138,13 +138,13 @@
   [./define_mobility]
     type = ParsedMaterial
     material_property_names = 'gc_prop visco'
-    f_name = L
+    property_name = L
     function = '1/(gc_prop * visco)'
   [../]
   [./define_kappa]
     type = ParsedMaterial
     material_property_names = 'gc_prop l'
-    f_name = kappa_op
+    property_name = kappa_op
     function = 'gc_prop * l'
   [../]
   [./viscop_damage]

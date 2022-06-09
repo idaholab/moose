@@ -108,21 +108,21 @@
   [./weight1]
     type = DerivativeParsedMaterial
     function = 0.02*c^2
-    f_name = weight1
-    args = c
+    property_name = weight1
+    variable_names = c
   [../]
   [./weight2]
     type = DerivativeParsedMaterial
     function = 0.02*(1-c)^2
-    f_name = weight2
-    args = c
+    property_name = weight2
+    variable_names = c
   [../]
 
   [./eigenstrain]
     type = CompositeEigenstrain
     tensors = 'eigen1  eigen2'
     weights = 'weight1 weight2'
-    args = c
+    variable_names = c
     eigenstrain_name = eigenstrain
   [../]
 []

@@ -33,7 +33,7 @@
   [./local_energy]
     type = CahnHilliard
     variable = c
-    f_name = F
+    property_name = F
   [../]
   [./gradient_energy]
     type = CHInterface
