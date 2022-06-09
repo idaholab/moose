@@ -26,7 +26,9 @@ ParsedODEKernel::validParams()
 
   params.addRequiredCustomTypeParam<std::string>(
       "function", "FunctionExpression", "function expression");
-  params.addCoupledVar("args", "additional coupled variables");
+  params.addDeprecatedCoupledVar(
+      "args", "additional coupled variables", "args is deprecated, use variable_names");
+  params.addCoupledVar("variable_names", "Vector of names of additional coupled variables");
   params.addParam<std::vector<std::string>>(
       "constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
   params.addParam<std::vector<std::string>>(
@@ -42,7 +44,9 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   : ODEKernel(parameters),
     FunctionParserUtils(parameters),
     _function(getParam<std::string>("function")),
-    _nargs(isCoupledScalar("args") ? coupledScalarComponents("args") : 0),
+    _nargs(isCoupledScalar("args")             ? coupledScalarComponents("args")
+           : isCoupledScalar("variable_names") ? coupledScalarComponents("variable_names")
+                                               : 0),
     _args(_nargs),
     _arg_names(_nargs),
     _func_dFdarg(_nargs),
@@ -52,15 +56,20 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   // build variables argument (start with variable the kernel is operating on)
   std::string variables = _var.name();
 
+  // handle the deprecation
+  std::string param_name = "args";
+  if (isCoupledScalar("variable_names"))
+    param_name = "variable_names";
+
   // add additional coupled variables
   for (unsigned int i = 0; i < _nargs; ++i)
   {
-    _arg_names[i] = getScalarVar("args", i)->name();
+    _arg_names[i] = getScalarVar(param_name, i)->name();
     variables += "," + _arg_names[i];
-    _args[i] = &coupledScalarValue("args", i);
+    _args[i] = &coupledScalarValue(param_name, i);
 
     // populate number -> arg index lookup table skipping aux variables
-    unsigned int number = coupledScalar("args", i);
+    unsigned int number = coupledScalar(param_name, i);
     if (number < _number_of_nl_variables)
       _arg_index[number] = i;
   }

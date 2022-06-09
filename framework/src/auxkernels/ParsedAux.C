@@ -20,8 +20,11 @@ ParsedAux::validParams()
       "Sets a field variable value to the evaluation of a parsed expression.");
 
   params.addRequiredCustomTypeParam<std::string>(
-      "function", "FunctionExpression", "function expression");
-  params.addCoupledVar("args", "coupled variables");
+      "function", "FunctionExpression", "Parsed function expression to compute");
+  params.addDeprecatedCoupledVar(
+      "args", "coupled variables", "args is deprecated, use variable_names");
+  params.addCoupledVar("variable_names", "Vector of coupled variable names");
+
   params.addParam<bool>(
       "use_xyzt",
       false,
@@ -39,16 +42,20 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     FunctionParserUtils(parameters),
     _function(getParam<std::string>("function")),
-    _nargs(coupledComponents("args")),
-    _args(coupledValues("args")),
+    _nargs(isCoupled("args") ? coupledComponents("args") : coupledComponents("variable_names")),
+    _args(isCoupled("args") ? coupledValues("args") : coupledValues("variable_names")),
     _use_xyzt(getParam<bool>("use_xyzt"))
 {
   // build variables argument
   std::string variables;
 
   // coupled field variables
-  for (std::size_t i = 0; i < _nargs; ++i)
-    variables += (i == 0 ? "" : ",") + getFieldVar("args", i)->name();
+  if (isCoupled("args"))
+    for (std::size_t i = 0; i < _nargs; ++i)
+      variables += (i == 0 ? "" : ",") + getFieldVar("args", i)->name();
+  else
+    for (std::size_t i = 0; i < _nargs; ++i)
+      variables += (i == 0 ? "" : ",") + getFieldVar("variable_names", i)->name();
 
   // "system" variables
   const std::vector<std::string> xyzt = {"x", "y", "z", "t"};

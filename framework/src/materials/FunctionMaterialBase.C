@@ -16,9 +16,7 @@ FunctionMaterialBase<is_ad>::validParams()
   InputParameters params = Material::validParams();
   params.addClassDescription("Material to provide a function (such as a free energy)");
   params.addParam<std::string>(
-      "f_name",
-      "F",
-      "Base name of the free energy function (used to name the material properties)");
+      "f_name", "F", "Name of the parsed material property (base name for a free energy)");
   return params;
 }
 

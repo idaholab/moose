@@ -20,15 +20,19 @@ DerivativeSumMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = DerivativeFunctionMaterialBaseTempl<is_ad>::validParams();
   params.addClassDescription("Meta-material to sum up multiple derivative materials");
-  params.addParam<std::vector<std::string>>(
-      "sum_materials",
-      "Base name of the free energy function (used to name the material properties)");
+  params.addParam<std::vector<std::string>>("sum_materials",
+                                            "Base name of the parsed sum material property");
   // params.addParam<bool>("third_derivatives", true, "Calculate third derivatoves of the free
   // energy");
 
-  // All arguments of the free energies being summed
-  params.addRequiredCoupledVar(
-      "args", "Arguments of the free energy functions being summed - use vector coupling");
+  // All arguments of the parsed expression (free energy) being summed
+  params.addDeprecatedCoupledVar(
+      "args",
+      "Arguments of the free energy functions being summed - use vector coupling",
+      "args is deprecated, use variable_names instead");
+  // TODO Make required once deprecation is handled, see #20535
+  params.addCoupledVar("variable_names", "Vector of names of variables being summed");
+
   params.addCoupledVar("displacement_gradients",
                        "Vector of displacement gradient variables (see "
                        "Modules/PhaseField/DisplacementGradients "
@@ -41,7 +45,7 @@ DerivativeSumMaterialTempl<is_ad>::validParams()
   params.addParam<bool>("validate_coupling",
                         true,
                         "Check if all variables the specified materials depend on are listed in "
-                        "the `args` parameter.");
+                        "the `variable_names` parameter.");
   params.addParamNamesToGroup("prefactor constant", "Advanced");
 
   return params;

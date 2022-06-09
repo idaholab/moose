@@ -13,7 +13,9 @@ InputParameters
 ParsedMaterialBase::validParams()
 {
   InputParameters params = emptyInputParameters();
-  params.addCoupledVar("args", "Arguments of F() - use vector coupling");
+  params.addDeprecatedCoupledVar(
+      "args", "Arguments of F() - use vector coupling", "args is deprecated, use variable_names");
+  params.addCoupledVar("variable_names", "Vector of variables used in the parsed function");
 
   // Constants and their values
   params.addParam<std::vector<std::string>>(
@@ -49,7 +51,9 @@ ParsedMaterialBase::validParams()
 
   // Function expression
   params.addRequiredCustomTypeParam<std::string>(
-      "function", "FunctionExpression", "FParser function expression for the parsed material");
+      "function",
+      "FunctionExpression",
+      "Parsed function (see FParser) expression for the parsed material");
 
   return params;
 }
