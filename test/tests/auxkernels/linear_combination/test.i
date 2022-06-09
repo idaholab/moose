@@ -71,7 +71,7 @@
     type = ParsedAux
     variable = lc
     function = 'v1*w1+v2*w2'
-    args = 'v1 w1 v2 w2'
+    coupled_variables = 'v1 w1 v2 w2'
     execute_on = 'timestep_end'
   [../]
 []

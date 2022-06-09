@@ -85,7 +85,7 @@
     type = FullSolveMultiApp
     execute_on = initial
     positions = '0 0 0'
-    # input file will come from cli-args
+    # input file will come from cli-coupled_variables
   [../]
 []
 
@@ -100,6 +100,6 @@
 []
 
 [Outputs]
-  #file_base will come from cli-args
+  #file_base will come from cli-coupled_variables
   exodus = true
 []

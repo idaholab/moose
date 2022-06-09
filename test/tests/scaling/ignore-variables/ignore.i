@@ -44,7 +44,7 @@
   [ode_x]
     type = ParsedODEKernel
     variable = x
-    args = y
+    coupled_variables = y
     function = '-3*x - 2*y'
   []
   [dt_y]

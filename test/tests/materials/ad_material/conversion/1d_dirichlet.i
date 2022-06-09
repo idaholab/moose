@@ -49,9 +49,9 @@
 [Materials]
   [ad_coef]
     type = ADParsedMaterial
-    f_name = 'ad_coef'
+    property_name = 'ad_coef'
     function = '0.01 * max(v, 1)'
-    args = 'v'
+    coupled_variables = 'v'
   []
   [converter_to_regular]
     type = MaterialADConverter

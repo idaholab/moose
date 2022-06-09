@@ -35,13 +35,13 @@
     type = ParsedAux
     variable = from_subapp_check
     function = 'to_subapp'
-    args = 'to_subapp'
+    coupled_variables = 'to_subapp'
   []
   [subapp_primary_diff]
     type = ParsedAux
     variable = subapp_primary_diff
     function = 'from_subapp_check - from_subapp'
-    args = 'from_subapp_check from_subapp'
+    coupled_variables = 'from_subapp_check from_subapp'
   []
 []
 

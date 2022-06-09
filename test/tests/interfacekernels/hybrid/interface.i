@@ -133,14 +133,14 @@
   [u]
     type = ParsedAux
     variable = c
-    args = 'u'
+    coupled_variables = 'u'
     function = 'u'
     block = 0
   []
   [v]
     type = ParsedAux
     variable = c
-    args = 'v'
+    coupled_variables = 'v'
     function = 'v'
     block = 1
   []

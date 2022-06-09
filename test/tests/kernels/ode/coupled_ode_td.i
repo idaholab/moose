@@ -43,7 +43,7 @@
     type = ParsedODEKernel
     variable = f_times_mult
     function = '-f * g'
-    args = 'f g'
+    coupled_variables = 'f g'
   [../]
 []
 

@@ -28,9 +28,9 @@
 [Materials]
   [./Dc]
     type = DerivativeParsedMaterial
-    f_name = Du
+    property_name = Du
     function = '0.01+u^2'
-    args = 'u'
+    coupled_variables = 'u'
     derivative_order = 1
   [../]
 []

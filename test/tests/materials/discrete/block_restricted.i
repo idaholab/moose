@@ -30,7 +30,7 @@
   [recompute_props_0]
     type = RecomputeMaterial
     block = 0
-    f_name = 'f'
+    property_name = 'f'
     f_prime_name = 'f_prime'
     p_name = 'p'
     compute = false # make this material "discrete"
@@ -38,7 +38,7 @@
   [newton_0]
     type = NewtonMaterial
     block = 0
-    f_name = 'f'
+    property_name = 'f'
     f_prime_name = 'f_prime'
     p_name = 'p'
     material = 'recompute_props_0'
@@ -46,7 +46,7 @@
   [recompute_props_1]
     type = RecomputeMaterial
     block = 1
-    f_name = 'f'
+    property_name = 'f'
     f_prime_name = 'f_prime'
     p_name = 'p'
     compute = false # make this material "discrete"
@@ -54,7 +54,7 @@
   [newton_1]
     type = NewtonMaterial
     block = 1
-    f_name = 'f'
+    property_name = 'f'
     f_prime_name = 'f_prime'
     p_name = 'p'
     material = 'recompute_props_1'

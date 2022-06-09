@@ -79,7 +79,7 @@ v_growth = 2
   [./v_constraint]
     type = ParsedODEKernel
     variable = v
-    args = 'u'
+    coupled_variables = 'u'
     function = 'v - u'
   [../]
 []

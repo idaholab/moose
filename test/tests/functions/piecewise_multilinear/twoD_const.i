@@ -60,7 +60,7 @@
     type = ParsedAux
     variable = diff
     function = 'constant - constant_ref'
-    args = 'constant constant_ref'
+    coupled_variables = 'constant constant_ref'
   [../]
 []
 

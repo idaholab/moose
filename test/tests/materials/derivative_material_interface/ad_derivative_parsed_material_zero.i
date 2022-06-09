@@ -15,7 +15,7 @@
 [Materials]
   [F]
     type = ADDerivativeParsedMaterial
-    args = 'eta'
+    coupled_variables = 'eta'
     function = 'eta+5'
     derivative_order = 3
     outputs = exodus

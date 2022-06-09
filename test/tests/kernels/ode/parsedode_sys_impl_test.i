@@ -73,7 +73,7 @@
     type = ParsedODEKernel
     function = '-3*x - 2*y'
     variable = x
-    args = y
+    coupled_variables = y
   [../]
 
   [./td2]
@@ -84,7 +84,7 @@
     type = ParsedODEKernel
     function = '-4*x - y'
     variable = y
-    args = x
+    coupled_variables = x
   [../]
 []
 

@@ -47,7 +47,7 @@
   [./recompute_props]
     type = RecomputeMaterial
     block = 0
-    f_name = 'f'
+    property_name = 'f'
     f_prime_name = 'f_prime'
     p_name = 'p'
     outputs = all
@@ -60,7 +60,7 @@
     type = NewtonMaterial
     block = 0
     outputs = all
-    f_name = 'f'
+    property_name = 'f'
     f_prime_name = 'f_prime'
     p_name = 'p'
     material = 'recompute_props'

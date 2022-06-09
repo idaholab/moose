@@ -33,13 +33,13 @@
 [Materials]
   [./Fbar]
     type = ADDerivativeParsedMaterial
-    args  = 'eta'
-    f_name = Fbar
+    coupled_variables  = 'eta'
+    property_name = Fbar
     function ='1/3*(eta-0.5)^3'
   []
   [./F]
     type = ADParsedMaterial
-    args  = 'eta'
+    coupled_variables  = 'eta'
     material_property_names = 'F:=D[Fbar,eta]'
     function ='F'
     outputs = exodus

@@ -30,37 +30,37 @@
 [Materials]
   [./free_energy1]
     type = ADDerivativeParsedMaterial
-    f_name = Fa
-    args = 'c'
+    property_name = Fa
+    coupled_variables = 'c'
     function = (c-0.1)^4*(1-0.1-c)^4
   [../]
   [./free_energy2]
     type = ADDerivativeParsedMaterial
-    f_name = Fb
-    args = 'c'
+    property_name = Fb
+    coupled_variables = 'c'
     function = -0.25*(c-0.1)^4*(1-0.1-c)^4
   [../]
 
   # Fa+Fb+Fb == Fc
   [./free_energy3]
     type = ADDerivativeParsedMaterial
-    f_name = Fc
-    args = 'c'
+    property_name = Fc
+    coupled_variables = 'c'
     function = 0.5*(c-0.1)^4*(1-0.1-c)^4
     outputs = all
   [../]
   [./dfree_energy3]
     type = ADDerivativeParsedMaterial
-    f_name = dFc
-    args = 'c'
+    property_name = dFc
+    coupled_variables = 'c'
     material_property_names = 'F:=D[Fc,c]'
     function = F
     outputs = all
   [../]
   [./d2free_energy3]
     type = ADDerivativeParsedMaterial
-    f_name = d2Fc
-    args = 'c'
+    property_name = d2Fc
+    coupled_variables = 'c'
     material_property_names = 'F:=D[Fc,c,c]'
     function = F
     outputs = all
@@ -68,25 +68,25 @@
 
   [./free_energy]
     type = ADDerivativeSumMaterial
-    f_name = F_sum
+    property_name = F_sum
     sum_materials = 'Fa Fb Fb'
-    args = 'c'
+    coupled_variables = 'c'
     outputs = all
   [../]
   [./dfree_energy]
     type = ADDerivativeParsedMaterial
-    f_name = dF_sum
+    property_name = dF_sum
     material_property_names = 'F:=D[F_sum,c]'
     function = F
-    args = 'c'
+    coupled_variables = 'c'
     outputs = all
   [../]
   [./d2free_energy]
     type = ADDerivativeParsedMaterial
-    f_name = d2F_sum
+    property_name = d2F_sum
     material_property_names = 'F:=D[F_sum,c,c]'
     function = F
-    args = 'c'
+    coupled_variables = 'c'
     outputs = all
   [../]
 []

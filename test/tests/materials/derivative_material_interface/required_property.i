@@ -17,14 +17,14 @@
   [prime]
     type = DerivativeParsedMaterial
     function = Q
-    f_name = P
+    property_name = P
   []
   [second]
     type = DerivativeParsedMaterial
     function = c
     derivative_order = 1
-    args = c
-    f_name = S
+    coupled_variables = c
+    property_name = S
   []
 []
 

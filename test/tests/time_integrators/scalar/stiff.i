@@ -70,7 +70,7 @@
     type = ParsedODEKernel
     variable = y1
     function = '-(${LAMBDA})*y1 - y2^${Y2_EXPONENT}'
-    args = 'y2'
+    coupled_variables = 'y2'
   [../]
   [./y2_time]
     type = ODETimeDerivative

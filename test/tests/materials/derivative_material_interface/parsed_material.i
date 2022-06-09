@@ -24,7 +24,7 @@
 [Materials]
   [./consts]
     type = ParsedMaterial
-    args  = 'eta'
+    coupled_variables  = 'eta'
     function ='(eta-0.5)^2'
     outputs = exodus
   [../]

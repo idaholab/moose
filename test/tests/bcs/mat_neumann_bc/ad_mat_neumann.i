@@ -56,8 +56,8 @@
 [Materials]
   [./hm]
     type = ADParsedMaterial
-    f_name = hm
-    args = 'phi'
+    property_name = hm
+    coupled_variables = 'phi'
     function = '3*phi^2 - 2*phi^3'
     outputs = exodus
   [../]
