@@ -57,10 +57,12 @@ Output::validParams()
   // Add ability to append to the 'execute_on' list
   params.addParam<ExecFlagEnum>("additional_execute_on", exec_enum, exec_enum.getDocString());
   params.set<ExecFlagEnum>("additional_execute_on").clear();
+  params.addParamNamesToGroup("execute_on additional_execute_on", "execute_on");
 
   // 'Timing' group
-  params.addParamNamesToGroup("time_tolerance interval sync_times sync_only start_time end_time ",
-                              "Timing");
+  params.addParamNamesToGroup("time_tolerance interval sync_times sync_only start_time end_time "
+                              "start_step end_step ",
+                              "Timing and frequency");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
   params.addPrivateParam<bool>("_built_by_moose", false);
