@@ -36,13 +36,13 @@ private:
   /// Morris sampler (don't need any specific functions, but should be this type)
   Sampler & _sampler;
 
-  // CI levels to be computed
+  /// CI levels to be computed
   const std::vector<Real> & _ci_levels;
 
-  // Number of CI replicates to use in Bootstrap methods
+  /// Number of CI replicates to use in Bootstrap methods
   const unsigned int & _ci_replicates;
 
-  // Random seed for producing CI replicates
+  /// Random seed for producing CI replicates
   const unsigned int & _ci_seed;
 
   /// Whether or not initialize() has been called for reporter value declaration

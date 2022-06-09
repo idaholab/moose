@@ -9,7 +9,7 @@
 
 #include "MorrisReporter.h"
 
-#include "Sampler.h"
+#include "MorrisSampler.h"
 
 registerMooseObject("StochasticToolsApp", MorrisReporter);
 
@@ -31,10 +31,11 @@ MorrisReporter::validParams()
       "ci_levels",
       std::vector<Real>(),
       "A vector of confidence levels to consider, values must be in (0, 1).");
-  params.addParam<unsigned int>(
-      "ci_replicates",
-      10000,
-      "The number of replicates to use when computing confidence level intervals.");
+  params.addParam<unsigned int>("ci_replicates",
+                                10000,
+                                "The number of replicates to use when computing confidence level "
+                                "intervals. This is basically the number of times the statistics "
+                                "are recomputed with a random selection of indices.");
   params.addParam<unsigned int>("ci_seed",
                                 1,
                                 "The random number generator seed used for creating replicates "
@@ -50,6 +51,9 @@ MorrisReporter::MorrisReporter(const InputParameters & parameters)
     _ci_seed(getParam<unsigned int>("ci_seed")),
     _initialized(false)
 {
+  if (!dynamic_cast<MorrisSampler *>(&_sampler))
+    paramError("sampler", "Computing Morris sensitivities requires the use of a Morris sampler.");
+
   // CI levels error checking
   if (!_ci_levels.empty())
   {

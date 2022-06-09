@@ -17,7 +17,7 @@ Given a model with $D$ parameters defined by the vector $\vec{x}$ and a model wi
 !equation
 EE_k = \frac{f(\vec{x} + \vec{\Delta_d}) - f(\vec{x})}{\Delta_d}\,, k=1,...,D ,
 
-where $\Delta_k$ is a perturbation of parameter $x_k$ and $\vec{\Delta_k}$ is a vector of length $D$ of all zeros except the $k$th entry equal to $\Delta_k$. Given a one-at-a-time (OAT) sampling strategy, detailed in [MorrisSampler.md], with $N$ replicates, or trajectories, there will be a total of $N\times D$ elementary effects. This reporter computes the folloing statistics of this elementary effect matrix:
+where $\Delta_k$ is a perturbation of parameter $x_k$ and $\vec{\Delta_k}$ is a vector of length $D$ of all zeros except the $k$th entry equal to $\Delta_k$. Given a one-at-a-time (OAT) sampling strategy, detailed in [MorrisSampler.md], with $N$ replicates, or trajectories, there will be a total of $N\times D$ elementary effects. The purpose of computing these elementary effects is to evaluate a local sensitivity over these random trajectories, the global sensitivity can then be gleaned by accumulating these local effects. As such, this reporter computes the following statistics of this elementary effect matrix:
 
 !equation
 \mu_d = \frac{1}{N}\sum_{i=1}^{N}EE_{i,d},
@@ -40,7 +40,7 @@ This reporter can also compute confidence intervals using percentile bootstrappi
 
 ### Trajectory Design
 
-Computing elementary effects from the trajectory design is rather simple. For a single trajectory matrix ($\mathbf{x_{i}}$) and the corresponding response vector ($\vec{y_i}$), the elementary effects ($\vec{EE_{i}}$) is computed as:
+Computing elementary effects from the trajectory design is rather simple. For a single trajectory matrix ($\mathbf{x_{i}}$) and the corresponding response vector ($\vec{y_i}$), the elementary effects ($\vec{EE_{i}}$) can be computed as:
 
 !equation
 \vec{EE_{i}} = \delta\mathbf{x_i}^{-1}\delta\vec{y_i}\,, i=1,...,N,
@@ -95,7 +95,7 @@ The resulting output is a [json file](JSONOutput.md) with the statistics and the
 
 !listing reporters/morris/gold/morris_main_out.json language=json
 
-We see that for each vector we have three quantities: `mu` for $\mu$, `mu_star` for $\mu^{*}$, `sigma` for $\sigma$. Each has a pair contianing a vector and a vector of vectors of the response value type. The first is the computed value for each parameter. The second has an entry for these values' for each confidence point.
+We see that for each vector we have three quantities: `mu` for $\mu$, `mu_star` for $\mu^{*}$, `sigma` for $\sigma$. Each has a pair contianing a vector and a vector of vectors of the response value type. The first is the computed value for each parameter. The second has an entry for these values for each confidence point.
 
 !syntax parameters /Reporters/MorrisReporter
 
