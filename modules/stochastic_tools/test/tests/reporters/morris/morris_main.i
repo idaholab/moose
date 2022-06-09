@@ -8,7 +8,7 @@
 []
 
 [Samplers/morris]
-  type = Morris
+  type = MorrisSampler
   distributions = 'uniform uniform uniform uniform uniform uniform'
   trajectories = 10
   levels = 4

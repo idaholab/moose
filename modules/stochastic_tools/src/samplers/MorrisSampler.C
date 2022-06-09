@@ -10,7 +10,7 @@
 #include "MorrisSampler.h"
 #include "Distribution.h"
 
-registerMooseObjectAliased("StochasticToolsApp", MorrisSampler, "Morris");
+registerMooseObject("StochasticToolsApp", MorrisSampler);
 
 InputParameters
 MorrisSampler::validParams()

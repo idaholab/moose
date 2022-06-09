@@ -1,6 +1,6 @@
 # Morris
 
-!syntax description /Samplers/Morris
+!syntax description /Samplers/MorrisSampler
 
 ## Overview
 
@@ -8,7 +8,7 @@ The Morris screening method is a one-at-a-time (OAT) pertabative sampling method
 
 ## Trajectory Design
 
-Although multiple sampling strategies exist for Morris screening, this object utilizes the trajectory design. This strategy performs set perturbations in random directions for individual parameters one-at-a-time. A trajectory performs the perturbation for each parameter randomly starting from a random starting point. The number of parameters ($D$) is determined by the number of entries in [!param](/Samplers/Morris/distributions). The number of trajectories is specified by [!param](/Samplers/Morris/trajectories). The discretization of the starting point and the perturbation $\Delta$ is determined by [!param](/Samplers/Morris/levels):
+Although multiple sampling strategies exist for Morris screening, this object utilizes the trajectory design. This strategy performs set perturbations in random directions for individual parameters one-at-a-time. A trajectory performs the perturbation for each parameter randomly starting from a random starting point. The number of parameters ($D$) is determined by the number of entries in [!param](/Samplers/MorrisSampler/distributions). The number of trajectories is specified by [!param](/Samplers/MorrisSampler/trajectories). The discretization of the starting point and the perturbation $\Delta$ is determined by [!param](/Samplers/MorrisSampler/levels):
 
 !equation
 \Delta = \frac{1}{2}\,\frac{\texttt{levels}}{\texttt{levels} - 1} .
@@ -26,7 +26,7 @@ where,
 - $p^{*} \equiv$ $D$-by-$D$ maxtrix where each row has a different column equal to 1 with no repeated columns, this determines which parameter is perturbed, and
 - $j \equiv$ ($D+1$)-by-$D$ dense matrix of 1s.
 
-Each row of the resulting $b^{*}$ represents OAT perturbed sample between 0 and 1; each entry of the rows is put through the corresponding [!param](/Samplers/Morris/distributions)'s quantile to produce a $D+1$ samples. A seperate $b^{*}$ is produced for the number specified by [!param](/Samplers/Morris/trajectories).
+Each row of the resulting $b^{*}$ represents OAT perturbed sample between 0 and 1; each entry of the rows is put through the corresponding [!param](/Samplers/MorrisSampler/distributions)'s quantile to produce a $D+1$ samples. A seperate $b^{*}$ is produced for the number specified by [!param](/Samplers/MorrisSampler/trajectories).
 
 ## Example Input Syntax
 
@@ -42,10 +42,10 @@ The following input generates a 3-dimensional sampling matrix with 4 trajecterie
           {'x':[0.6,0.6,0,0], 'y':[0.2,0.2,0.2,0.8], 'name':'Trajectory 3'},
           {'x':[0.2,0.8,0.8,0.8], 'y':[1,1,0.4,0.4], 'name':'Trajectory 4'}]
 
-!syntax parameters /Samplers/Morris
+!syntax parameters /Samplers/MorrisSampler
 
-!syntax inputs /Samplers/Morris
+!syntax inputs /Samplers/MorrisSampler
 
-!syntax children /Samplers/Morris
+!syntax children /Samplers/MorrisSampler
 
 !bibtex bibliography

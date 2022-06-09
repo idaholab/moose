@@ -8,7 +8,7 @@
 []
 
 [Samplers/morris]
-  type = Morris
+  type = MorrisSampler
   distributions = 'dist dist dist dist dist dist'
   trajectories = 1024
   levels = 4

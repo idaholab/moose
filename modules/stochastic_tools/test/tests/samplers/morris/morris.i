@@ -9,7 +9,7 @@
 
 [Samplers]
   [morris]
-    type = Morris
+    type = MorrisSampler
     distributions = 'dist dist dist'
     trajectories = 4
     levels = 6
