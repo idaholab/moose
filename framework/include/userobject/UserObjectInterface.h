@@ -58,32 +58,47 @@ public:
   /**
    * Get an user object with a given parameter \p param_name
    * @param param_name The name of the parameter key of the user object to retrieve
+   * @param is_dependency Whether the user object we are retrieving should be viewed as a
+   * dependency, e.g. whether the retrieved user object should be sorted and executed before this
+   * object (if we are a user object)
    * @return The user object with name associated with the parameter \p param_name
    */
   template <class T>
-  const T & getUserObject(const std::string & param_name) const;
+  const T & getUserObject(const std::string & param_name, bool is_dependency = true) const;
 
   /**
    * Get an user object with the name \p object_name
    * @param object_name The name of the user object to retrieve
+   * @param is_dependency Whether the user object we are retrieving should be viewed as a
+   * dependency, e.g. whether the retrieved user object should be sorted and executed before this
+   * object (if we are a user object)
    * @return The user object with the name \p object_name
    */
   template <class T>
-  const T & getUserObjectByName(const UserObjectName & object_name) const;
+  const T & getUserObjectByName(const UserObjectName & object_name,
+                                bool is_dependency = true) const;
 
   /**
    * Get an user object with a given parameter \p param_name
    * @param param_name The name of the parameter key of the user object to retrieve
+   * @param is_dependency Whether the user object we are retrieving should be viewed as a
+   * dependency, e.g. whether the retrieved user object should be sorted and executed before this
+   * object (if we are a user object)
    * @return The user object with name associated with the parameter \p param_name
    */
-  const UserObject & getUserObjectBase(const std::string & param_name) const;
+  const UserObject & getUserObjectBase(const std::string & param_name,
+                                       bool is_dependency = true) const;
 
   /**
    * Get an user object with the name \p object_name
    * @param object_name The name of the user object to retrieve
+   * @param is_dependency Whether the user object we are retrieving should be viewed as a
+   * dependency, e.g. whether the retrieved user object should be sorted and executed before this
+   * object (if we are a user object)
    * @return The user object with the name \p object_name
    */
-  const UserObject & getUserObjectBaseByName(const UserObjectName & object_name) const;
+  const UserObject & getUserObjectBaseByName(const UserObjectName & object_name,
+                                             bool is_dependency = true) const;
 
 protected:
   /**
@@ -142,16 +157,17 @@ UserObjectInterface::castUserObject(const UserObject & uo_base,
 
 template <class T>
 const T &
-UserObjectInterface::getUserObject(const std::string & param_name) const
+UserObjectInterface::getUserObject(const std::string & param_name, const bool is_dependency) const
 {
-  return castUserObject<T>(getUserObjectBase(param_name), param_name);
+  return castUserObject<T>(getUserObjectBase(param_name, is_dependency), param_name);
 }
 
 template <class T>
 const T &
-UserObjectInterface::getUserObjectByName(const UserObjectName & object_name) const
+UserObjectInterface::getUserObjectByName(const UserObjectName & object_name,
+                                         const bool is_dependency) const
 {
-  return castUserObject<T>(getUserObjectBaseByName(object_name));
+  return castUserObject<T>(getUserObjectBaseByName(object_name, is_dependency));
 }
 
 template <class T>
