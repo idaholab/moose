@@ -182,22 +182,6 @@ MooseEnum::compareCurrent(const MooseEnum & other, CompareMode mode) const
   return false;
 }
 
-bool
-MooseEnum::operator==(const MooseEnum & value) const
-{
-  mooseDeprecated("This method will be removed because the meaning is not well defined, please use "
-                  "the 'compareCurrent' method instead.");
-  return value._current.name() == _current.name();
-}
-
-bool
-MooseEnum::operator!=(const MooseEnum & value) const
-{
-  mooseDeprecated("This method will be removed because the meaning is not well defined, please use "
-                  "the 'compareCurrent' method instead.");
-  return value._current.name() != _current.name();
-}
-
 void
 MooseEnum::checkDeprecated() const
 {
