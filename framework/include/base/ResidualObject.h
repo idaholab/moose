@@ -64,6 +64,9 @@ public:
   /// Compute this object's contribution to the diagonal Jacobian entries
   virtual void computeJacobian() = 0;
 
+  /// Compute this object's contribution to the residual and Jacobian simultaneously
+  virtual void computeResidualAndJacobian();
+
   /**
    * Computes this object's contribution to off-diagonal blocks of the system Jacobian matrix
    * @param jvar The number of the coupled variable. We pass the number of the coupled variable

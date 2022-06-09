@@ -59,6 +59,19 @@ FVElementalKernel::computeResidual()
 }
 
 void
+FVElementalKernel::computeResidualAndJacobian()
+{
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  const auto r = computeQpResidual() * _assembly.elemVolume();
+  const auto dof_index = _var.dofIndices()[0];
+  _assembly.processJacobian(r, dof_index, _matrix_tags);
+  _assembly.processResidual(r.value(), dof_index, _vector_tags);
+#else
+  mooseError("computing residual and Jacobian together only supported for global AD indexing");
+#endif
+}
+
+void
 FVElementalKernel::computeJacobian()
 {
   const auto r = computeQpResidual() * _assembly.elemVolume();
@@ -78,7 +91,7 @@ FVElementalKernel::computeJacobian()
     accumulateTaggedLocalMatrix();
   };
 
-  _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
+  _assembly.processJacobian(r, _var.dofIndices()[0], _matrix_tags, local_functor);
 }
 
 void
@@ -131,5 +144,11 @@ FVElementalKernel::computeOffDiagJacobian()
     }
   };
 
-  _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
+  _assembly.processJacobian(r, _var.dofIndices()[0], _matrix_tags, local_functor);
+}
+
+void
+FVElementalKernel::computeOffDiagJacobian(unsigned int)
+{
+  mooseError("FVElementalKernel::computeOffDiagJacobian should be called with no arguments");
 }

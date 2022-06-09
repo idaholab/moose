@@ -15,6 +15,7 @@
 #include "TwoMaterialPropertyInterface.h"
 #include "NeighborMooseVariableInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "FVFaceResidualObject.h"
 
 class FaceInfo;
 
@@ -28,20 +29,21 @@ class FaceInfo;
 class FVFluxKernel : public FVKernel,
                      public TwoMaterialPropertyInterface,
                      public NeighborMooseVariableInterface<Real>,
-                     public NeighborCoupleableMooseVariableDependencyIntermediateInterface
+                     public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+                     public FVFaceResidualObject
 {
 public:
   static InputParameters validParams();
   FVFluxKernel(const InputParameters & params);
 
-  /// Usually you should not override these functions - they have some super
-  /// tricky stuff in them that you don't want to mess up!
-  // @{
-  virtual void computeResidual(const FaceInfo & fi);
-  virtual void computeJacobian(const FaceInfo & fi);
-  /// @}
+  void computeResidual() override;
+  void computeJacobian() override;
+  void computeResidualAndJacobian() override;
+  void computeResidual(const FaceInfo & fi) override;
+  void computeJacobian(const FaceInfo & fi) override;
+  void computeResidualAndJacobian(const FaceInfo & fi) override;
 
-  const MooseVariableFV<Real> & variable() const { return _var; }
+  const MooseVariableFV<Real> & variable() const override { return _var; }
 
 protected:
   /// This is the primary function that must be implemented for flux kernel
@@ -139,7 +141,7 @@ private:
   ///
   /// @param residual The already computed residual (probably done with \p computeQpResidual) that
   /// also holds derivative information for filling in the Jacobians.
-  void computeJacobian(Moose::DGJacobianType type, const ADReal & residual);
+  void computeJacobianType(Moose::DGJacobianType type, const ADReal & residual);
 
   /// Whether to force execution of flux kernels on all external boundaries
   const bool _force_boundary_execution;

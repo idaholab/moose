@@ -71,6 +71,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _displaced(dynamic_cast<DisplacedSystem *>(&sys) ? true : false),
     _nonlocal_cm(_subproblem.nonlocalCouplingMatrix()),
     _computing_jacobian(_subproblem.currentlyComputingJacobian()),
+    _computing_residual_and_jacobian(_subproblem.currentlyComputingResidualAndJacobian()),
     _dof_map(_sys.dofMap()),
     _tid(tid),
     _mesh(sys.mesh()),
@@ -991,7 +992,7 @@ Assembly::computeAffineMapAD(const Elem * elem,
         const Node & node = *elem_nodes[i];
         VectorValue<DualReal> elem_point = node;
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             if (node.n_dofs(sys_num, disp_num))
               Moose::derivInsert(elem_point(dimension++).derivatives(),
@@ -1110,7 +1111,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             if (node.n_dofs(sys_num, disp_num))
               Moose::derivInsert(elem_point(dimension++).derivatives(),
@@ -1167,7 +1168,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(elem_point(dimension++).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -1250,7 +1251,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(elem_point(dimension++).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -1440,7 +1441,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 #endif
 
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(side_point(dimension++).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -1494,7 +1495,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 #endif
 
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(side_point(dimension++).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -1570,7 +1571,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 #endif
 
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(side_point(dimension++).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -3434,7 +3435,7 @@ Assembly::cacheResidual(dof_id_type dof, Real value, const std::set<TagID> & tag
 }
 
 // swapped argument order from above methods to be consistent with argument order for
-// Assembly::processDerivatives
+// Assembly::processJacobian
 void
 Assembly::processResidual(Real value, const dof_id_type dof, const std::set<TagID> & tags)
 {
@@ -3453,6 +3454,24 @@ Assembly::processResidual(Real value, const dof_id_type dof, const std::set<TagI
     _cached_residual_rows[tag._type_id].push_back(dof);
   }
 }
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+void
+Assembly::processResidualAndJacobian(const ADReal & residual,
+                                     const dof_id_type row_index,
+                                     const std::set<TagID> & vector_tags,
+                                     const std::set<TagID> & matrix_tags)
+{
+  mooseAssert(!(_computing_jacobian && _computing_residual_and_jacobian),
+              "These should never be true at the same time");
+
+  if (computingResidual())
+    processResidual(MetaPhysicL::raw_value(residual), row_index, vector_tags);
+
+  if (computingJacobian())
+    processJacobian(residual, row_index, matrix_tags);
+}
+#endif
 
 void
 Assembly::cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id)
@@ -4611,26 +4630,34 @@ Assembly::modifyArbitraryWeights(const std::vector<Real> & weights)
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 void
-Assembly::processUnconstrainedDerivatives(const std::vector<ADReal> & residuals,
-                                          const std::vector<dof_id_type> & row_indices,
-                                          const std::set<TagID> & matrix_tags)
+Assembly::processUnconstrainedResidualsAndJacobian(const std::vector<ADReal> & residuals,
+                                                   const std::vector<dof_id_type> & row_indices,
+                                                   const std::set<TagID> & vector_tags,
+                                                   const std::set<TagID> & matrix_tags,
+                                                   const Real scaling_factor)
 {
   mooseAssert(residuals.size() == row_indices.size(),
               "The number of residuals should match the number of dof indices");
   mooseAssert(residuals.size() >= 1, "Why you calling me with no residuals?");
 
-  for (const auto i : index_range(row_indices))
-  {
-    const auto row_index = row_indices[i];
-    const Real scalar = _scaling_vector ? (*_scaling_vector)(row_index) : 1.;
+  // First handle the residuals
+  if (computingResidual() && !vector_tags.empty())
+    for (const auto i : index_range(row_indices))
+      cacheResidual(row_indices[i], residuals[i].value() * scaling_factor, vector_tags);
 
-    const auto & sparse_derivatives = residuals[i].derivatives();
-    const auto & column_indices = sparse_derivatives.nude_indices();
-    const auto & raw_derivatives = sparse_derivatives.nude_data();
+  if (computingJacobian() && !matrix_tags.empty())
+    for (const auto i : index_range(row_indices))
+    {
+      const auto row_index = row_indices[i];
 
-    for (std::size_t j = 0; j < column_indices.size(); ++j)
-      cacheJacobian(row_index, column_indices[j], raw_derivatives[j] * scalar, matrix_tags);
-  }
+      const auto & sparse_derivatives = residuals[i].derivatives();
+      const auto & column_indices = sparse_derivatives.nude_indices();
+      const auto & raw_derivatives = sparse_derivatives.nude_data();
+
+      for (std::size_t j = 0; j < column_indices.size(); ++j)
+        cacheJacobian(
+            row_index, column_indices[j], raw_derivatives[j] * scaling_factor, matrix_tags);
+    }
 }
 #endif
 
@@ -4801,6 +4828,66 @@ Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
   buildVectorFaceNeighborFE(type);
   return _vector_fe_shape_data_face_neighbor[type]->_curl_phi;
 }
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+void
+Assembly::processResidualsAndJacobian(const std::vector<ADReal> & residuals,
+                                      const std::vector<dof_id_type> & input_row_indices,
+                                      const std::set<TagID> & vector_tags,
+                                      const std::set<TagID> & matrix_tags,
+                                      const Real scaling_factor)
+{
+  // First handle the residuals
+  processResiduals(residuals, input_row_indices, vector_tags, scaling_factor);
+
+  //
+  // Now the Jacobian
+  //
+
+  if (!computingJacobian() || matrix_tags.empty())
+    return;
+
+  const auto & compare_dofs = residuals[0].derivatives().nude_indices();
+#ifndef NDEBUG
+  auto compare_dofs_set = std::set<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
+
+  for (auto resid_it = residuals.begin() + 1; resid_it != residuals.end(); ++resid_it)
+  {
+    auto current_dofs_set = std::set<dof_id_type>(resid_it->derivatives().nude_indices().begin(),
+                                                  resid_it->derivatives().nude_indices().end());
+    mooseAssert(compare_dofs_set == current_dofs_set,
+                "We're going to see whether the dof sets are the same. IIRC the degree of freedom "
+                "dependence (as indicated by the dof index set held by the ADReal) has to be the "
+                "same for every residual passed to this method otherwise constrain_element_matrix "
+                "will not work.");
+  }
+#endif
+  auto column_indices = std::vector<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
+
+  // If there's no derivatives then there is nothing to do. Moreover, if we pass zero size column
+  // indices to constrain_element_matrix then we will potentially get errors out of BLAS
+  if (!column_indices.size())
+    return;
+
+  // Need to make a copy because we might modify this in constrain_element_matrix
+  std::vector<dof_id_type> row_indices = input_row_indices;
+
+  DenseMatrix<Number> element_matrix(row_indices.size(), column_indices.size());
+  for (const auto i : index_range(row_indices))
+  {
+    const auto & sparse_derivatives = residuals[i].derivatives();
+
+    for (const auto j : index_range(column_indices))
+      element_matrix(i, j) = sparse_derivatives[column_indices[j]] * scaling_factor;
+  }
+
+  _dof_map.constrain_element_matrix(element_matrix, row_indices, column_indices);
+
+  for (const auto i : index_range(row_indices))
+    for (const auto j : index_range(column_indices))
+      cacheJacobian(row_indices[i], column_indices[j], element_matrix(i, j), matrix_tags);
+}
+#endif
 
 template void coordTransformFactor<Point, Real>(const SubProblem & s,
                                                 SubdomainID sub_id,

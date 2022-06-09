@@ -339,3 +339,29 @@ information comes from [`NearestNodeLocators`](/NearestNodeLocator.md) held by
 displacements). In the future sparsity augmentation from constraints will occur
 through [`RelationshipManagers`](/RelationshipManager.md) instead of through the
 `augmentSparsity` method.
+
+## Computing Residual and Jacobian Together id=resid_and_jac_together
+
+The default behavior in MOOSE is to have separate functions compute the residual
+and Jacobian. However, with the advent of [NonlinearSystem.md#AD] it can make
+sense to use a single function to compute the residual and Jacobian
+simultaneously. At the local residual object level, automatic differentiation (AD)
+already computes the residual and Jacobian simultaneously, with the dual number
+at the core of AD holding value (residual) and derivatives
+(Jacobian). Simultaneous evaluation of residual and Jacobian using a single
+function can be triggered by setting
+[!param](/Executioner/Steady/residual_and_jacobian_together) to `true`. What this does in
+the background is funnels the (generally AD) computed local residuals and
+Jacobians into the global residual vector and Jacobian
+matrix respectively when PETSc calls the libMesh/MOOSE residual/function
+evaluation routine. Then when PETSc calls the libMesh/MOOSE Jacobian evaluation
+routine, we simply return because the global matrix has already been computed.
+
+Computing the residual and Jacobian together has shown 20% gains for
+Navier-Stokes finite volume simulations for which automatic differentiation is
+leveraged even during standard residual evaluations. Other areas where computing
+the residual and Jacobian together may be advantageous is in simulations in
+which there are quite a few nonlinear iterations per timestep, for which the
+cost of an additional Jacobian evaluation during the final residual evaluation
+is amortized. Also, simulations in which material property calculations are very
+expensive may be good candidates for computing the residual and Jacobian together.

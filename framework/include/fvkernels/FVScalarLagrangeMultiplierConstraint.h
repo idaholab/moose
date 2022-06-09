@@ -27,7 +27,9 @@ public:
 private:
   void computeResidual() override final;
   void computeJacobian() override final;
+  using FVElementalKernel::computeOffDiagJacobian;
   void computeOffDiagJacobian() override final;
+  void computeResidualAndJacobian() override final;
   ADReal computeQpResidual() override = 0;
 
   /// The Lagrange Multiplier variable

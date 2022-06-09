@@ -6,6 +6,13 @@
     input = 'test.i'
     exodiff = 'test_out.e'
     requirement = 'The system shall be able to couple a lower-dimensional variable into a boundary condition for a higher-dimensional variable.'
-    mesh_mode = 'REPLICATED' # LowerDBlockFromSidesetGenerator does not yet work in distributed mode
+  []
+  [resid_and_jac_together]
+    type = Exodiff
+    input = 'together.i'
+    exodiff = 'together_out.e'
+    requirement = 'The system shall be able to compute the residual and Jacobian together when boundary conditions couple in variables defined on lower-dimensional blocks.'
+    issues = '#19444'
+    ad_indexing_type = 'global'
   []
 []

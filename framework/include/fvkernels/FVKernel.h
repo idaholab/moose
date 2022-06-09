@@ -9,17 +9,9 @@
 
 #pragma once
 
-#include "MooseObject.h"
-#include "TaggingInterface.h"
-#include "TransientInterface.h"
+#include "ResidualObject.h"
 #include "BlockRestrictable.h"
-#include "FunctionInterface.h"
-#include "SetupInterface.h"
-#include "UserObjectInterface.h"
-#include "PostprocessorInterface.h"
 #include "Assembly.h"
-#include "Restartable.h"
-#include "FunctorInterface.h"
 
 class SubProblem;
 
@@ -35,16 +27,7 @@ class SubProblem;
 /// "[FVKernels]" input file block.  FVKernels can only operate on and work
 /// with finite volume variables (i.e. with the variable's parameter "fv = true" set).
 
-class FVKernel : public MooseObject,
-                 public TaggingInterface,
-                 public TransientInterface,
-                 public BlockRestrictable,
-                 public FunctionInterface,
-                 public UserObjectInterface,
-                 public PostprocessorInterface,
-                 public SetupInterface,
-                 public Restartable,
-                 public FunctorInterface
+class FVKernel : public ResidualObject, public BlockRestrictable
 {
 public:
   static InputParameters validParams();
@@ -52,13 +35,4 @@ public:
                           InputParameters & rm_params,
                           unsigned short ghost_layers);
   FVKernel(const InputParameters & params);
-
-  const SubProblem & subProblem() const { return _subproblem; }
-
-protected:
-  SubProblem & _subproblem;
-  const SystemBase & _sys;
-  THREAD_ID _tid;
-  Assembly & _assembly;
-  const MooseMesh & _mesh;
 };

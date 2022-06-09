@@ -28,7 +28,9 @@ public:
 
   void computeResidual() override final {}
   void computeJacobian() override final {}
+  using FVTimeKernel::computeOffDiagJacobian;
   void computeOffDiagJacobian() override final {}
+  void computeResidualAndJacobian() override final {}
 
 protected:
   ADReal computeQpResidual() override final
@@ -39,7 +41,7 @@ protected:
   /**
    * Process into either the system residual or Jacobian
    */
-  void processResidual(const ADReal & residual, dof_id_type dof);
+  void processResidualAndJacobian(const ADReal & residual, dof_id_type dof);
 
 private:
   using FVTimeKernel::_current_elem;

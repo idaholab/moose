@@ -29,11 +29,12 @@ public:
 
   void computeResidual(const FaceInfo &) override final {}
   void computeJacobian(const FaceInfo &) override final {}
+  void computeResidualAndJacobian(const FaceInfo &) override final {}
 
   /**
    * Process into either the system residual or Jacobian
    */
-  void processResidual(const ADReal & residual);
+  void processResidualAndJacobian(const ADReal & residual);
 
 protected:
   ADReal computeQpResidual() override final

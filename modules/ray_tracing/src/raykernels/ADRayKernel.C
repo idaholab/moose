@@ -130,7 +130,8 @@ ADRayKernelTempl<T>::computeJacobian()
     }
   };
 
-  _assembly.processDerivatives(_residuals, _var.dofIndices(), _matrix_tags, local_functor);
+  _assembly.processJacobian(
+      _residuals, _var.dofIndices(), _matrix_tags, _var.scalingFactor(), local_functor);
 }
 
 template class ADRayKernelTempl<Real>;

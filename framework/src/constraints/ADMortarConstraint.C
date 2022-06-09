@@ -68,28 +68,32 @@ void
 ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
 {
   std::vector<DualReal> residuals;
-  size_t test_space_size = 0;
+  std::size_t test_space_size = 0;
   typedef Moose::ConstraintJacobianType JType;
   typedef Moose::MortarType MType;
   std::vector<JType> jacobian_types;
   std::vector<dof_id_type> dof_indices;
+  Real scaling_factor = 1;
 
   switch (mortar_type)
   {
     case MType::Secondary:
       dof_indices = _secondary_var.dofIndices();
       jacobian_types = {JType::SecondarySecondary, JType::SecondaryPrimary, JType::SecondaryLower};
+      scaling_factor = _secondary_var.scalingFactor();
       break;
 
     case MType::Primary:
       dof_indices = _primary_var.dofIndicesNeighbor();
       jacobian_types = {JType::PrimarySecondary, JType::PrimaryPrimary, JType::PrimaryLower};
+      scaling_factor = _primary_var.scalingFactor();
       break;
 
     case MType::Lower:
-      if (_var)
-        dof_indices = _var->dofIndicesLower();
+      mooseAssert(_var, "The Lagrange Multiplier should be non-null if this is getting called");
+      dof_indices = _var->dofIndicesLower();
       jacobian_types = {JType::LowerSecondary, JType::LowerPrimary, JType::LowerLower};
+      scaling_factor = _var->scalingFactor();
       break;
   }
   test_space_size = dof_indices.size();
@@ -100,9 +104,9 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
       residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  _assembly.processUnconstrainedDerivatives(residuals, dof_indices, _matrix_tags);
+  _assembly.processUnconstrainedResidualsAndJacobian(
+      residuals, dof_indices, _vector_tags, _matrix_tags, scaling_factor);
 #else
-
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
                            const std::vector<dof_id_type> &,
                            const std::set<TagID> &)
@@ -135,7 +139,7 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
       }
 
       // Derivatives are offset by the variable number
-      std::vector<size_t> ad_offsets{
+      std::vector<std::size_t> ad_offsets{
           Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element),
           Moose::adOffset(jvar,
                           _sys.getMaxVarNDofsPerElem(),
@@ -145,9 +149,9 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
                           _sys.getMaxVarNDofsPerElem(),
                           Moose::ElementType::Lower,
                           _sys.system().n_vars())};
-      std::vector<size_t> shape_space_sizes{jvariable.dofIndices().size(),
-                                            jvariable.dofIndicesNeighbor().size(),
-                                            jvariable.dofIndicesLower().size()};
+      std::vector<std::size_t> shape_space_sizes{jvariable.dofIndices().size(),
+                                                 jvariable.dofIndicesNeighbor().size(),
+                                                 jvariable.dofIndicesLower().size()};
 
       for (MooseIndex(3) type_index = 0; type_index < 3; ++type_index)
       {
@@ -172,7 +176,7 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
     }
   };
 
-  _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, local_functor);
+  _assembly.processJacobian(residuals, dof_indices, _matrix_tags, scaling_factor, local_functor);
 #endif
 }
 
@@ -201,3 +205,12 @@ ADMortarConstraint::trimDerivative(const dof_id_type remove_derivative_index, AD
   dual_number.derivatives().nude_data().resize(n_indices);
 }
 #endif
+
+void
+ADMortarConstraint::computeResidualAndJacobian()
+{
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("computeResidualAndJacobian not supported for ", name());
+#endif
+  computeJacobian();
+}

@@ -47,4 +47,13 @@
       required_python_packages = 'pandas matplotlib'
     []
   []
+  [resid_and_jac]
+    requirement = 'The system shall be able to compute the residual and Jacobian together for a finite volume interface kernel.'
+    design = 'FVOneVarDiffusionInterface.md'
+    issues = '#19444'
+    input = test.i
+    exodiff = test_out.e
+    ad_indexing_type = 'global'
+    type = Exodiff
+  []
 []

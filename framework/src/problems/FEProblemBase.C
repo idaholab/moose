@@ -3785,12 +3785,6 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 {
   // Set the current flag
   setCurrentExecuteOnFlag(exec_type);
-  if (exec_type == EXEC_NONLINEAR)
-  {
-    _currently_computing_jacobian = true;
-    if (_displaced_problem)
-      _displaced_problem->setCurrentlyComputingJacobian(true);
-  }
 
   if (exec_type != EXEC_INITIAL)
     executeControls(exec_type);
@@ -3814,9 +3808,6 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 
   // Return the current flag to None
   setCurrentExecuteOnFlag(EXEC_NONE);
-  _currently_computing_jacobian = false;
-  if (_displaced_problem)
-    _displaced_problem->setCurrentlyComputingJacobian(false);
 }
 
 void
@@ -5490,6 +5481,172 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln, NumericVector
     _fe_vector_tags.insert(residual_vector_tag._id);
 
   computeResidualInternal(soln, residual, _fe_vector_tags);
+}
+
+void
+FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
+                                          NumericVector<Number> & residual,
+                                          SparseMatrix<Number> & jacobian)
+{
+  // vector tags
+  {
+    const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
+
+    _fe_vector_tags.clear();
+
+    for (const auto & residual_vector_tag : residual_vector_tags)
+      _fe_vector_tags.insert(residual_vector_tag._id);
+  }
+
+  // matrix tags
+  {
+    _fe_matrix_tags.clear();
+
+    auto & tags = getMatrixTags();
+    for (auto & tag : tags)
+      _fe_matrix_tags.insert(tag.second);
+  }
+
+  try
+  {
+    _nl->setSolution(soln);
+
+    _nl->associateVectorToTag(residual, _nl->residualVectorTag());
+    _nl->associateMatrixToTag(jacobian, _nl->systemMatrixTag());
+
+    for (const auto tag : _fe_matrix_tags)
+      if (_nl->hasMatrix(tag))
+      {
+        auto & matrix = _nl->getMatrix(tag);
+        matrix.zero();
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+        if (haveADObjects())
+          // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
+          // diagonal dependence. With global AD indexing we only add non-zero
+          // dependence, so PETSc will scream at us unless we artificially add the diagonals.
+          for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
+            matrix.add(index, index, 0);
+#endif
+      }
+
+    _nl->zeroVariablesForResidual();
+    _aux->zeroVariablesForResidual();
+
+    unsigned int n_threads = libMesh::n_threads();
+
+    _current_execute_on_flag = EXEC_LINEAR;
+
+    // Random interface objects
+    for (const auto & it : _random_data_objects)
+      it.second->updateSeeds(EXEC_LINEAR);
+
+    _currently_computing_residual_and_jacobian = true;
+    if (_displaced_problem)
+      _displaced_problem->setCurrentlyComputingResidualAndJacobian(true);
+
+    execTransfers(EXEC_LINEAR);
+
+    execMultiApps(EXEC_LINEAR);
+
+    for (unsigned int tid = 0; tid < n_threads; tid++)
+      reinitScalars(tid);
+
+    computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
+
+    _aux->residualSetup();
+
+    if (_displaced_problem)
+    {
+      _aux->compute(EXEC_PRE_DISPLACE);
+      try
+      {
+        try
+        {
+          _displaced_problem->updateMesh();
+          if (_mortar_data.hasDisplacedObjects())
+            updateMortarMesh();
+        }
+        catch (libMesh::LogicError & e)
+        {
+          throw MooseException("We caught a libMesh error in FEProblemBase");
+        }
+      }
+      catch (MooseException & e)
+      {
+        setException(e.what());
+      }
+      try
+      {
+        // Propagate the exception to all processes if we had one
+        checkExceptionAndStopSolve();
+      }
+      catch (MooseException &)
+      {
+        // Just end now. We've inserted our NaN into the residual vector
+        return;
+      }
+    }
+
+    for (THREAD_ID tid = 0; tid < n_threads; tid++)
+    {
+      _all_materials.residualSetup(tid);
+      _functions.residualSetup(tid);
+    }
+
+    _nl->computeTimeDerivatives();
+
+    try
+    {
+      _aux->compute(EXEC_LINEAR);
+    }
+    catch (MooseException & e)
+    {
+      _console << "\nA MooseException was raised during Auxiliary variable computation.\n"
+               << "The next solve will fail, the timestep will be reduced, and we will try again.\n"
+               << std::endl;
+
+      // We know the next solve is going to fail, so there's no point in
+      // computing anything else after this.  Plus, using incompletely
+      // computed AuxVariables in subsequent calculations could lead to
+      // other errors or unhandled exceptions being thrown.
+      return;
+    }
+
+    computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
+
+    executeControls(EXEC_LINEAR);
+
+    _current_execute_on_flag = EXEC_NONE;
+
+    _app.getOutputWarehouse().residualSetup();
+
+    _safe_access_tagged_vectors = false;
+    _safe_access_tagged_matrices = false;
+
+    _nl->computeResidualAndJacobianTags(_fe_vector_tags, _fe_matrix_tags);
+
+    _safe_access_tagged_vectors = true;
+    _safe_access_tagged_matrices = true;
+
+    _nl->disassociateMatrixFromTag(jacobian, _nl->systemMatrixTag());
+    _nl->disassociateVectorFromTag(residual, _nl->residualVectorTag());
+
+    _currently_computing_residual_and_jacobian = false;
+    if (_displaced_problem)
+      _displaced_problem->setCurrentlyComputingResidualAndJacobian(false);
+  }
+  catch (MooseException & e)
+  {
+    // If a MooseException propagates all the way to here, it means
+    // that it was thrown from a MOOSE system where we do not
+    // (currently) properly support the throwing of exceptions, and
+    // therefore we have no choice but to error out.  It may be
+    // *possible* to handle exceptions from other systems, but in the
+    // meantime, we don't want to silently swallow any unhandled
+    // exceptions here.
+    mooseError("An unhandled MooseException was raised during residual computation.  Please "
+               "contact the MOOSE team for assistance.");
+  }
 }
 
 void

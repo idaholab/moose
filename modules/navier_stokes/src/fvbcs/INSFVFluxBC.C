@@ -26,15 +26,16 @@ INSFVFluxBC::INSFVFluxBC(const InputParameters & params)
 }
 
 void
-INSFVFluxBC::processResidual(const ADReal & residual)
+INSFVFluxBC::processResidualAndJacobian(const ADReal & residual)
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   const auto * const elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM)
                                 ? &_face_info->elem()
                                 : _face_info->neighborPtr();
   const auto dof_index = elem->dof_number(_sys.number(), _var.number(), 0);
 
-  if (_fv_problem.currentlyComputingJacobian())
-    _assembly.processDerivatives(residual, dof_index, _matrix_tags);
-  else
-    _assembly.processResidual(residual.value(), dof_index, _vector_tags);
+  _assembly.processResidualAndJacobian(residual, dof_index, _vector_tags, _matrix_tags);
+#else
+  libmesh_ignore(residual);
+#endif
 }

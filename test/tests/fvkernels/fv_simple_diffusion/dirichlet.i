@@ -17,7 +17,7 @@
 
 [Kernels]
   [diff]
-    type = Diffusion
+    type = ADDiffusion
     variable = u
   []
 []
@@ -55,13 +55,13 @@
 
 [BCs]
   [left]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = u
     boundary = left
     value = 7
   []
   [right]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = u
     boundary = right
     value = 42
@@ -70,9 +70,10 @@
 
 [Executioner]
   type = Steady
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  residual_and_jacobian_together = true
 []
 
 [Outputs]
