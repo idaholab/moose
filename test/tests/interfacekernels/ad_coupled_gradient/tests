@@ -1,0 +1,19 @@
+[Tests]
+  design = 'automatic_differentiation/index.md'
+  issues = '#15307'
+  [exo]
+    type = 'Exodiff'
+    input = 'coupled.i'
+    exodiff = 'coupled_out.e'
+    requirement = 'The system shall be able to solve a simple interfacial source problem using '
+                  'automatic differentiation in which the source term depends on the gradient jump '
+                  'of a coupled variable.'
+  []
+  [jac]
+    type = 'PetscJacobianTester'
+    input = 'coupled.i'
+    difference_tol = 1e-6
+    requirement = 'The system shall be able to couple variable gradients at interfaces and have an '
+                  'accurate Jacobian provided through automatic differentiation.'
+  []
+[]
