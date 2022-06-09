@@ -57,7 +57,7 @@
     type = ADGenericConstantMaterial
     prop_names = 'electrical_conductivity'
     prop_values = 3.33e2 # electrical conductivity for graphite at 293.15 K
-  [../]
+  []
 []
 
 [Executioner]

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'waveguide2D_test.i'
     exodiff = 'waveguide2D_test_out.e'
@@ -7,8 +7,8 @@
     design = 'ADFunctionReaction.md EMRobinBC.md benchmarks/WaveguideTransmission.md'
     verification = 'benchmarks/WaveguideTransmission.md'
     issues = '#21098'
-  [../]
-  [./absorbing_error]
+  []
+  [absorbing_error]
     type = 'RunException'
     input = 'waveguide2D_test.i'
     prereq = test

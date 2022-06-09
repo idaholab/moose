@@ -1,5 +1,5 @@
 [Tests]
-  [./rectangular]
+  [rectangular]
     type = CSVDiff
     input = 'eigen_base.i'
     csvdiff = 'eigen_rectangular_out_eigenvalues_0002.csv'
@@ -9,8 +9,8 @@
     design = 'benchmarks/WaveguideEigenvalue.md'
     verification = 'benchmarks/WaveguideEigenvalue.md'
     issues = '#21202'
-  [../]
-  [./circular]
+  []
+  [circular]
     type = CSVDiff
     input = 'eigen_base.i'
     csvdiff = 'eigen_circular_out_eigenvalues_0002.csv'
@@ -19,8 +19,8 @@
     design = 'benchmarks/WaveguideEigenvalue.md'
     verification = 'benchmarks/WaveguideEigenvalue.md'
     issues = '#21202'
-  [../]
-  [./coaxial]
+  []
+  [coaxial]
     type = CSVDiff
     input = 'eigen_base.i'
     csvdiff = 'eigen_coaxial_out_eigenvalues_0002.csv'
@@ -29,5 +29,5 @@
     design = 'benchmarks/WaveguideEigenvalue.md'
     verification = 'benchmarks/WaveguideEigenvalue.md'
     issues = '#21202'
-  [../]
+  []
 []

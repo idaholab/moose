@@ -65,11 +65,11 @@
 []
 
 [Materials]
-  [conductivity]
-    type = ADGenericConstantMaterial
-    prop_names = 'electrical_conductivity'
-    prop_values = 3.33e2 # electrical conductivity for graphite at 293.15 K
-  [../]
+  [conductivity]                            # Electrical conductivity for graphite at 293.15 K in S/m
+    type = ADGenericConstantMaterial        # perpendicular to basal plane
+    prop_names = 'electrical_conductivity'  # Citation: H. Pierson, "Handbook of carbon, graphite,
+    prop_values = 3.33e2                    #           diamond, and fullerenes: properties, processing,
+  []                                        #           and applications," p. 61, William Andrew, 1993.
 []
 
 [Executioner]

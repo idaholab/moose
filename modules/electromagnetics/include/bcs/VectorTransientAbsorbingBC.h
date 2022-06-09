@@ -30,6 +30,9 @@ protected:
   /// Intrinsic impedance of the infinite medium (default is the admittance of free space)
   const Function & _admittance;
 
+  /// Magnetic permeability of free space in SI units (H/m)
+  const Real _mu_vacuum;
+
   /// Variable field component (real or imaginary)
   const MooseEnum _component;
 

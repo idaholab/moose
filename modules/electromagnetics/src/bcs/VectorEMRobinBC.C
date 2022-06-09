@@ -20,8 +20,7 @@ VectorEMRobinBC::validParams()
 {
   InputParameters params = VectorIntegratedBC::validParams();
   params.addClassDescription("First order Robin-style Absorbing/Port BC for vector variables.");
-  params.addParam<FunctionName>(
-      "beta", 1.0, "Scalar waveguide propagation constant (usually some k, k0).");
+  params.addParam<FunctionName>("beta", 1.0, "Scalar wave number.");
   MooseEnum component("real imaginary");
   params.addParam<MooseEnum>(
       "component", component, "Variable field component (real or imaginary).");
@@ -125,6 +124,11 @@ VectorEMRobinBC::computeQpResidual()
     std::complex<double> curl_inc_2(inc_real_curl(2), inc_imag_curl(2));
     curl_inc = VectorValue<std::complex<double>>(curl_inc_0, curl_inc_1, curl_inc_2);
   }
+
+  // Do some error checking
+  mooseAssert(_beta.value(_t, _q_point[_qp]) > 0,
+              "Wave number expected to be positive, calculated to be "
+                  << _beta.value(_t, _q_point[_qp]));
 
   std::complex<double> u_inc_dot_test = 0.0;
   switch (_mode)

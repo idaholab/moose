@@ -36,6 +36,7 @@ VectorTransientAbsorbingBC::VectorTransientAbsorbingBC(const InputParameters & p
   : VectorIntegratedBC(parameters),
 
     _admittance(getFunction("admittance")),
+    _mu_vacuum(4.0 * libMesh::pi * 1.0e-7),
 
     _component(getParam<MooseEnum>("component")),
 
@@ -83,9 +84,9 @@ VectorTransientAbsorbingBC::computeQpResidual()
   VectorValue<std::complex<double>> field_dot(field_dot_0, field_dot_1, field_dot_2);
 
   // Calculate solution field contribution to BC residual
-  std::complex<double> p_dot_test =
-      4.0 * libMesh::pi * 1.0e-7 * _admittance.value(_t, _q_point[_qp]) *
-      _test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(field_dot);
+  std::complex<double> p_dot_test = _mu_vacuum * _admittance.value(_t, _q_point[_qp]) *
+                                    _test[_i][_qp].cross(_normals[_qp]) *
+                                    _normals[_qp].cross(field_dot);
 
   std::complex<double> res = -p_dot_test;
 
@@ -98,8 +99,8 @@ VectorTransientAbsorbingBC::computeQpResidual()
 Real
 VectorTransientAbsorbingBC::computeQpJacobian()
 {
-  RealVectorValue prefix = 4.0 * libMesh::pi * 1.0e-7 * _admittance.value(_t, _q_point[_qp]) *
-                           _test[_i][_qp].cross(_normals[_qp]);
+  RealVectorValue prefix =
+      _mu_vacuum * _admittance.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]);
 
   return prefix * _normals[_qp].cross(_du_dot_du[_qp] * _phi[_j][_qp]);
 }
@@ -109,8 +110,8 @@ VectorTransientAbsorbingBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _coupled_var_num)
   {
-    RealVectorValue prefix = 4.0 * libMesh::pi * 1.0e-7 * _admittance.value(_t, _q_point[_qp]) *
-                             _test[_i][_qp].cross(_normals[_qp]);
+    RealVectorValue prefix =
+        _mu_vacuum * _admittance.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]);
 
     return prefix * _normals[_qp].cross(_coupled_dot_du[_qp] * _phi[_j][_qp]);
   }

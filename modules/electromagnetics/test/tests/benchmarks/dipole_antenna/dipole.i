@@ -57,8 +57,8 @@
 []
 
 [BCs]
-  [antenna_real]                #TODO: Replace with proper antenna surface current condition
-    type = VectorCurlPenaltyDirichletBC
+  [antenna_real]                          # Impose exact solution of E-field onto antenna surface.
+    type = VectorCurlPenaltyDirichletBC   # Replace with proper antenna surface current condition.
     penalty = 1e5
     function_y = '1'
     boundary = antenna

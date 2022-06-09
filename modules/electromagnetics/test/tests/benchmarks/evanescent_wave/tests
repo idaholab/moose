@@ -1,5 +1,5 @@
 [Tests]
-  [./time_harmonic]
+  [time_harmonic]
     type = Exodiff
     input = 'evanescent_wave.i'
     exodiff = 'evanescent_wave_out.e'
@@ -8,5 +8,5 @@
     design = 'benchmarks/EvanescentWave.md'
     verification = 'benchmarks/EvanescentWave.md'
     issues = '#13744'
-  [../]
+  []
 []

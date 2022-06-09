@@ -1,5 +1,5 @@
 [Tests]
-  [./waves]
+  [waves]
     type = 'Exodiff'
     input = 'portbc_waves.i'
     exodiff = 'portbc_waves_out.e'
@@ -7,7 +7,7 @@
     design = 'VectorEMRobinBC.md'
     issues = '#21077'
   []
-  [./waves_absorbing_error]
+  [waves_absorbing_error]
     type = 'RunException'
     input = 'portbc_waves.i'
     prereq = waves

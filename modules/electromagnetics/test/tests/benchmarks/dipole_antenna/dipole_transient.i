@@ -42,8 +42,8 @@
 []
 
 [BCs]
-  [antenna_real]                      # Impose exact solution of E-field onto antenna surface
-    type = VectorCurlPenaltyDirichletBC #TODO: Replace with proper antenna surface current condition
+  [antenna_real]                          # Impose exact solution of E-field onto antenna surface.
+    type = VectorCurlPenaltyDirichletBC   # Replace with proper antenna surface current condition.
     penalty = 1e5
     function_y = 'cos(2*pi*1e9*t)'
     boundary = antenna
@@ -56,7 +56,7 @@
     boundary = antenna
     variable = E_imag
   []
-  [radiation_condition_real]    # First order absorbing boundary condition
+  [radiation_condition_real]              # First order absorbing boundary condition
     type = VectorTransientAbsorbingBC
     variable = E_real
     coupled_field = E_imag

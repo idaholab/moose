@@ -1,5 +1,5 @@
 [Tests]
-  [./electric]
+  [electric]
     type = CSVDiff
     input = slab_reflection.i
     csvdiff = slab_reflection_out.csv
@@ -8,5 +8,5 @@
     verification = 'benchmarks/OneDReflection.md'
     issues = '#13744'
     allow_test_objects = true
-  [../]
+  []
 []

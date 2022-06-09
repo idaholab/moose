@@ -1,5 +1,5 @@
 [Tests]
-  [./time_harmonic]
+  [time_harmonic]
     type = Exodiff
     input = 'dipole.i'
     exodiff = 'dipole_out.e'
@@ -8,8 +8,8 @@
     design = 'benchmarks/DipoleAntenna.md'
     verification = 'benchmarks/DipoleAntenna.md'
     issues = '#21086'
-  [../]
-  [./transient]
+  []
+  [transient]
     type = Exodiff
     input = 'dipole_transient.i'
     exodiff = 'dipole_transient_out.e'
@@ -18,5 +18,5 @@
     design = 'benchmarks/DipoleAntenna.md'
     verification = 'benchmarks/DipoleAntenna.md'
     issues = '#21086'
-  [../]
+  []
 []
