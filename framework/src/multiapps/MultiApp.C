@@ -957,8 +957,6 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // the copy is required so that the addArgument command below doesn't accumulate more and more
   // of the same cli_args, which is important when running in batch mode.
   std::shared_ptr<CommandLine> app_cli = std::make_shared<CommandLine>(*_app.commandLine());
-  app_cli->initForMultiApp(full_name);
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = app_cli;
 
   if (cliArgs().size() > 0 || _cli_args_from_file.size() > 0)
   {
@@ -966,9 +964,11 @@ MultiApp::createApp(unsigned int i, Real start_time)
     {
       std::ostringstream oss;
       oss << full_name << ":" << str;
-      app_params.get<std::shared_ptr<CommandLine>>("_command_line")->addArgument(oss.str());
+      app_cli->addArgument(oss.str());
     }
   }
+  app_cli->initForMultiApp(full_name);
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = app_cli;
 
   if (_fe_problem.verboseMultiApps())
     _console << COLOR_CYAN << "Creating MultiApp " << name() << " of type " << _app_type

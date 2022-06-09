@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#21233'
+  [cmd_line]
+    design = 'MultiAppSamplerControl.md'
+    requirement = 'The system shall be able to apply command line parameter(s) to nested sub-applications in'
+    [normal]
+      type = CSVDiff
+      input = stm.i
+      csvdiff = stm_out_storage_0001.csv
+      detail = 'normal multiapp mode;'
+    []
+    [batch]
+      type = CSVDiff
+      input = stm.i
+      cli_args = 'MultiApps/main/mode=batch-reset'
+      csvdiff = stm_out_storage_0001.csv
+      detail = 'batch multiapp mode;'
+    []
+  []
+[]
