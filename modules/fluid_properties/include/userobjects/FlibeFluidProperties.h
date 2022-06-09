@@ -48,13 +48,15 @@ public:
    * @param[out] dp_dv   derivative of pressure w.r.t. specific volume
    * @param[out] dp_de   derivative of pressure w.r.t. specific internal energy
    */
+  virtual Real e_from_p_rho(Real p, Real rho) const override;
+
   virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
   virtual void p_from_v_e(const DualReal & v,
                           const DualReal & e,
                           DualReal & p,
                           DualReal & dp_dv,
                           DualReal & dp_de) const override;
-
+  virtual Real T_from_p_rho(Real p, Real rho) const;
   /**
    * Temperature from specific volume and specific internal energy
    *
@@ -79,6 +81,7 @@ public:
                           DualReal & T,
                           DualReal & dT_dv,
                           DualReal & dT_de) const override;
+  virtual Real T_from_p_h(Real p, Real h) const override;
 
   /**
    * Isobaric specific heat from specific volume and specific internal energy

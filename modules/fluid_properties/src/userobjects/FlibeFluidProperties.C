@@ -142,6 +142,12 @@ FlibeFluidProperties::T_from_v_e(
   dT_dv = -dT_de * de_dv_at_constant_T;
 }
 
+Real
+FlibeFluidProperties::T_from_p_h(Real /* p */, Real h) const
+{
+  return h / _cp;
+}
+
 Real FlibeFluidProperties::cp_from_v_e(Real /*v*/, Real /*e*/) const { return _cp; }
 
 void
@@ -285,6 +291,19 @@ FlibeFluidProperties::e_from_p_T(
   // definition of e = h - p * v
   Real cp = cp_from_v_e(v, e);
   de_dT = cp - pressure * dv_dT;
+}
+
+Real
+FlibeFluidProperties::e_from_p_rho(Real p, Real rho) const
+{
+  return e_from_p_T(p, T_from_p_rho(p, rho));
+}
+
+Real
+FlibeFluidProperties::T_from_p_rho(Real p, Real rho) const
+{
+  Real temperature = (-p * _drho_dp + rho - _c0) / _drho_dT;
+  return temperature;
 }
 
 Real FlibeFluidProperties::cp_from_p_T(Real /*pressure*/, Real /*temperature*/) const

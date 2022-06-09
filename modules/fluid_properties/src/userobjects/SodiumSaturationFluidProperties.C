@@ -70,6 +70,13 @@ SodiumSaturationFluidProperties::v_from_p_T(const DualReal & /* pressure */,
   return 1.0 / (1.00423e3 - 0.21390 * temperature - 1.1046e-5 * temperature * temperature);
 }
 
+DualReal
+SodiumSaturationFluidProperties::T_from_v_e(const DualReal & v,
+                                            const DualReal & e) const ///////////
+{
+  return 0.798843+std::sqrt(0.798843e2 - 4*(-1.1046e-5*0)))/2*(-1.1046e-5);
+}
+
 Real
 SodiumSaturationFluidProperties::v_from_p_T(Real /* pressure */, Real temperature) const
 {
@@ -102,6 +109,22 @@ SodiumSaturationFluidProperties::h_from_p_T(
   h = h_from_p_T(pressure, temperature);
   dh_dp = 0.0;
   dh_dT = cp_from_p_T(pressure, temperature);
+}
+
+DualReal
+SodiumSaturationFluidProperties::P_from_v_e(const DualReal & v,
+                                            const DualReal & e) const ////////////
+{
+  DualReal temperature = T_from_v_e(v, e);
+  // h does not depend on presure
+  return (e - h_from_p_T(0, temperature)) / v;
+}
+
+DualReal
+SodiumSaturationFluidProperties::P_from_v_e(const DualReal & v,
+                                            const DualReal & e) const /////////////
+{
+  return rho_from_p_T;
 }
 
 Real

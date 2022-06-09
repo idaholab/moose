@@ -142,6 +142,12 @@ FlinakFluidProperties::T_from_v_e(
   dT_dv = -dT_de * de_dv_at_constant_T;
 }
 
+Real
+FlinakFluidProperties::T_from_p_h(Real /* p */, Real h) const
+{
+  return h / _cp;
+}
+
 Real FlinakFluidProperties::cp_from_v_e(Real /*v*/, Real /*e*/) const { return _cp; }
 
 void

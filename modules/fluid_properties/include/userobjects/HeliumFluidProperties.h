@@ -99,6 +99,8 @@ public:
                   DualReal & T,
                   DualReal & dT_dv,
                   DualReal & dT_de) const override;
+virtual Real T_from_p_h(Real p, Real h) const override;
+
 
   using SinglePhaseFluidProperties::c_from_v_e;
 
