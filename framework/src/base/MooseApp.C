@@ -390,29 +390,32 @@ MooseApp::MooseApp(InputParameters parameters)
   {
     bool has_cpu_profiling = false;
     bool has_heap_profiling = false;
-    static std::string profile_file;
+    static std::string cpu_profile_file;
+    static std::string heap_profile_file;
 
     // For CPU profiling, users need to have environment 'MOOSE_PROFILE_BASE'
     if (std::getenv("MOOSE_PROFILE_BASE"))
     {
       has_cpu_profiling = true;
-      profile_file = std::getenv("MOOSE_PROFILE_BASE") + std::to_string(_comm->rank()) + ".prof";
+      cpu_profile_file =
+          std::getenv("MOOSE_PROFILE_BASE") + std::to_string(_comm->rank()) + ".prof";
+      // create directory if needed
+      auto name = MooseUtils::splitFileName(cpu_profile_file);
+      if (!name.first.empty())
+      {
+        if (processor_id() == 0)
+          MooseUtils::makedirs(name.first.c_str());
+        _comm->barrier();
+      }
     }
 
     // For Heap profiling, users need to have 'MOOSE_HEAP_BASE'
     if (std::getenv("MOOSE_HEAP_BASE"))
     {
       has_heap_profiling = true;
-      profile_file = std::getenv("MOOSE_HEAP_BASE") + std::to_string(_comm->rank());
-    }
-
-    if (has_cpu_profiling && has_heap_profiling)
-      mooseError("Can not do CPU and heap profiling together");
-
-    if (has_cpu_profiling || has_heap_profiling)
-    {
+      heap_profile_file = std::getenv("MOOSE_HEAP_BASE") + std::to_string(_comm->rank());
       // create directory if needed
-      auto name = MooseUtils::splitFileName(profile_file);
+      auto name = MooseUtils::splitFileName(heap_profile_file);
       if (!name.first.empty())
       {
         if (processor_id() == 0)
@@ -450,12 +453,12 @@ MooseApp::MooseApp(InputParameters parameters)
     }
 
     if (_cpu_profiling)
-      if (!ProfilerStart(profile_file.c_str()))
+      if (!ProfilerStart(cpu_profile_file.c_str()))
         mooseError("CPU profiler is not started properly");
 
     if (_heap_profiling)
     {
-      HeapProfilerStart(profile_file.c_str());
+      HeapProfilerStart(heap_profile_file.c_str());
       if (!IsHeapProfilerRunning())
         mooseError("Heap profiler is not started properly");
     }
