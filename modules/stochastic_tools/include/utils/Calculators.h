@@ -150,6 +150,16 @@ protected:
 };
 
 template <typename InType, typename OutType>
+class MeanAbsoluteValue : public Mean<InType, OutType>
+{
+public:
+  using Mean<InType, OutType>::Mean;
+
+protected:
+  virtual void update(const typename InType::value_type & val) override;
+};
+
+template <typename InType, typename OutType>
 class Ratio : public Calculator<InType, OutType>
 {
 public:
