@@ -320,7 +320,7 @@
   [./function_file_test12]
     type = 'RunException'
     input = 'function_file_test12.i'
-    expect_err = "In \S+: The 'y_index_in_file' is out-of-range of the available data in '\S+', which contains 3 columns of data."
+    expect_err = "Index out-of-range of the available data in '\S+', which contains 3 columns of data."
 
     requirement = 'The system shall report an error when an out of range y-column index is supplied in the Piecewise utility.'
     issues = '#2421'
@@ -329,7 +329,7 @@
   [./function_file_test13]
     type = 'RunException'
     input = 'function_file_test13.i'
-    expect_err = "In \S+: The 'x_index_in_file' is out-of-range of the available data in '\S+', which contains 3 columns of data."
+    expect_err = "Index out-of-range of the available data in '\S+', which contains 3 columns of data."
 
     requirement = 'The system shall report an error when an out of range x-column index is supplied in the Piecewise utility.'
     issues = '#2421'
@@ -347,7 +347,7 @@
   [./function_file_test15]
     type = 'RunException'
     input = 'function_file_test15.i'
-    expect_err = "In \S+: The 'x_index_in_file' is out-of-range of the available data in '\S+', which contains 3 rows of data."
+    expect_err = "Index out-of-range of the available data in '\S+', which contains 3 rows of data."
 
     requirement = 'The system shall report an error when an out of range x-row index is supplied in the Piecewise utility.'
     issues = '#2421'
@@ -356,7 +356,7 @@
   [./function_file_test16]
     type = 'RunException'
     input = 'function_file_test16.i'
-    expect_err = "In \S+: The 'y_index_in_file' is out-of-range of the available data in '\S+', which contains 3 rows of data."
+    expect_err = "Index out-of-range of the available data in '\S+', which contains 3 rows of data."
 
     requirement = 'The system shall report an error when an out of range y-row index is supplied in the Piecewise utility.'
     issues = '#2421'
