@@ -2591,14 +2591,6 @@ MooseMesh::setBoundaryToNormalMap(
   _boundary_to_normal_map = std::move(boundary_map);
 }
 
-void
-MooseMesh::setBoundaryToNormalMap(std::map<BoundaryID, RealVectorValue> * boundary_map)
-{
-  mooseDeprecated("setBoundaryToNormalMap(std::map<BoundaryID, RealVectorValue> * boundary_map) is "
-                  "deprecated, use the unique_ptr version instead");
-  _boundary_to_normal_map.reset(boundary_map);
-}
-
 unsigned int
 MooseMesh::uniformRefineLevel() const
 {

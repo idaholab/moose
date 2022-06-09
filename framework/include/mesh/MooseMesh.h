@@ -249,15 +249,6 @@ public:
   void buildNodeListFromSideList();
 
   /**
-   * Calls BoundaryInfo::build_side_list().
-   * Fills in the three passed vectors with list logical (element, side, id) tuples.
-   * This function will eventually be deprecated in favor of the one below, which
-   * returns a single std::vector of (elem-id, side-id, bc-id) tuples instead.
-   */
-  void buildSideList(std::vector<dof_id_type> & el,
-                     std::vector<unsigned short int> & sl,
-                     std::vector<boundary_id_type> & il);
-  /**
    * As above, but uses the non-deprecated std::tuple interface.
    */
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> buildSideList();
@@ -323,8 +314,6 @@ public:
    * If the requested elem is a remote element on a distributed mesh,
    * only the query accessors are valid to call, and they return NULL.
    */
-  virtual Elem * elem(const dof_id_type i);
-  virtual const Elem * elem(const dof_id_type i) const;
   virtual Elem * elemPtr(const dof_id_type i);
   virtual const Elem * elemPtr(const dof_id_type i) const;
   virtual Elem * queryElemPtr(const dof_id_type i);
@@ -447,9 +436,6 @@ public:
    * Is called by AddAllSideSetsByNormals
    */
   void setBoundaryToNormalMap(std::unique_ptr<std::map<BoundaryID, RealVectorValue>> boundary_map);
-
-  // DEPRECATED METHOD
-  void setBoundaryToNormalMap(std::map<BoundaryID, RealVectorValue> * boundary_map);
 
   /**
    * Sets the set of BoundaryIDs
