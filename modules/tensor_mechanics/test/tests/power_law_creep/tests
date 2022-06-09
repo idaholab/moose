@@ -23,6 +23,7 @@
     design = 'PowerLawCreepStressUpdate.md'
     requirement = 'The system shall gracefully correct for out of bounds guess from the radial '
                   'return mapping algorithm '
+    issues = '#9659 #20290'
     [high]
       type = RunApp
       input = 'nonad_bounds.i'
