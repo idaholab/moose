@@ -323,8 +323,8 @@ public:
   template <int m, int n, int p, int q>
   RankFourTensorTempl<T> mixedProduct(const RankTwoTensorTempl<T> & b) const;
 
-  /// returns C_ijkl = a_mn * b_pqrs
-  template <int m, int n, int p, int q, int r, int s>
+  /// returns C_ijkl = a_no * b_pqrs
+  template <int n, int o, int p, int q, int r, int s>
   RankFourTensorTempl<T> mixedProduct(const RankFourTensorTempl<T> & b) const;
 
   /// returns C_ijkl = a_ij * b_kl
@@ -810,7 +810,7 @@ RankTwoTensorTempl<T>::mixedProduct(const RankTwoTensorTempl<T> & b) const
 }
 
 template <typename T>
-template <int m, int n, int p, int q, int r, int s>
+template <int n, int o, int p, int q, int r, int s>
 RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::mixedProduct(const RankFourTensorTempl<T> & b) const
 {
@@ -821,7 +821,7 @@ RankTwoTensorTempl<T>::mixedProduct(const RankFourTensorTempl<T> & b) const
       for (x[2] = 0; x[2] < N; ++x[2])
         for (x[3] = 0; x[3] < N; ++x[3])
           for (x[4] = 0; x[4] < N; ++x[4])
-            result(x[0], x[1], x[2], x[3]) += (*this)(x[m], x[n]) * b(x[p], x[q], x[r], x[s]);
+            result(x[0], x[1], x[2], x[3]) += (*this)(x[n], x[o]) * b(x[p], x[q], x[r], x[s]);
 
   return result;
 }
