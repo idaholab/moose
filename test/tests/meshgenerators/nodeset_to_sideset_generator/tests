@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#18436'
+  design = 'meshgenerators/SideSetToNodeSetGenerator.md'
+
+  [generate]
+    requirement = 'The system shall support the ability to create a nodeset out of all available side sets'
+
+
+    [build_side_list_from_node_list]
+      type = 'Exodiff'
+      input = 'from_nodes.i'
+      exodiff = 'from_nodes_in.e'
+      cli_args = "--mesh-only"
+      recover = false
+      detail = 'builds corresponding side sets based on all existing node sets'
+    []
+  []
+[]

@@ -1,12 +1,11 @@
-# ConvertNodeSetSideSetGenerator
+# NodeSetToSideSetGenerator
 
-!syntax description /Mesh/ConvertNodeSetSideSetGenerator
+!syntax description /Mesh/NodeSetToSideSetGenerator
 
 ## Overview
 
 
-This MeshGenerator object allows the user to make a matching set of sides for every node set,
-and a matching set of nodes for every side set. It does not delete or erase node sets or side sets.
+This MeshGenerator object allows the user to make a matching set of nodes for every side set. It does not delete or erase side sets in the process.
 
 Immediately after mesh generation,
 this operation is done [automatically](MooseMesh.md#more_detail) if `construct_sideset_from_nodeset = true`.
@@ -17,10 +16,10 @@ There needs to be at least four nodes in a node set to construct one side elemen
 Currently this operation indiscriminately converts all node sets into side sets, and all side sets into node sets.
 There is no way to choose which sets to perform the operation on.
 
-!listing /test/tests/meshgenerators/convert_node_side_sets_generator/from_nodes.i
+!listing /test/tests/meshgenerators/nodeset_to_sideset_generator/from_nodes.i
 
-!syntax parameters /Mesh/ConvertNodeSetSideSetGenerator
+!syntax parameters /Mesh/NodeSetToSideSetGenerator
 
-!syntax inputs /Mesh/ConvertNodeSetSideSetGenerator
+!syntax inputs /Mesh/NodeSetToSideSetGenerator
 
-!syntax children /Mesh/ConvertNodeSetSideSetGenerator
+!syntax children /Mesh/NodeSetToSideSetGenerator

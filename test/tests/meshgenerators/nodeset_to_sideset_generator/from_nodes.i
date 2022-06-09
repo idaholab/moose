@@ -19,10 +19,8 @@
     bottom_left = '-0.1 -0.1 -0.1'
   []
   [transcribe]
-    type = ConvertNodeSetSideSetGenerator
+    type = NodeSetToSideSetGenerator
     input = bounding_box
-    convert_side_list_from_node_list = true
-    convert_node_list_from_side_list = false
   []
 [] # ordinarily the construct_side_list_from_node_list method is called after the mesh generation
 

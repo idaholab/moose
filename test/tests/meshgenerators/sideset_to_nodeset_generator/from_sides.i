@@ -26,10 +26,8 @@
     new_sideset_name = interior
   []
   [transcribe]
-    type = ConvertNodeSetSideSetGenerator
+    type = SideSetToNodeSetGenerator
     input = sideset
-    convert_side_list_from_node_list = false
-    convert_node_list_from_side_list = true
   []
 []
 
