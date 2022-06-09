@@ -71,7 +71,7 @@ FunctionDT::computeInitialDT()
 Real
 FunctionDT::computeDT()
 {
-  Real local_dt = _function->value(_time, _point_zero);
+  Real local_dt = _function.value(_time, _point_zero);
   ;
 
   // sync to time knot
