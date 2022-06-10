@@ -1,0 +1,70 @@
+[Tests]
+  design = 'TurbinePressureRatioEfficiency1Phase.md'
+  issues = '#19863'
+
+  # mass and energy conservation
+  [phy:mass_energy_conservation]
+    type = 'CSVDiff'
+    input = 'shaft_motor_turbine.i'
+    csvdiff = 'shaft_motor_turbine_out.csv'
+    cli_args = "Outputs/out/type=CSV Outputs/out/execute_on=final Outputs/out/show='mass_conservation energy_conservation'"
+    abs_zero = 1e-5
+    rel_err = 1e-10
+    ad_indexing_type = 'global'
+
+    requirement = 'The system shall conserve mass and energy when using TurbinePressureRatioEfficiency1Phase.'
+  []
+
+  [phy:loop]
+    type = 'Exodiff'
+    input = 'shaft_motor_turbine.i'
+    exodiff = 'shaft_motor_turbine_out.e'
+    rel_err = 4e-3
+    abs_zero = 1e-9
+    cli_args = 'Outputs/exodus=true'
+    ad_indexing_type = 'global'
+
+    requirement = 'The system shall be able to model a turbine with TurbinePressureRatioEfficiency1Phase.'
+  []
+
+  [runs_with_zero_shaft_speed]
+    type = 'RunApp'
+    input = 'shaft_motor_turbine.i'
+    cli_args = "
+      Components/shaft/initial_speed=0
+      GlobalParams/initial_vel=0
+      GlobalParams/initial_vel_x=0
+      Executioner/num_steps=1"
+    recover = False
+    ad_indexing_type = 'global'
+
+    requirement = 'The system shall allow TurbinePressureRatioEfficiency1Phase to run with a zero shaft speed.'
+    issues = '#19863 #20008 #20009'
+  []
+
+  # jacobian test
+  [jac:test]
+    type = 'PetscJacobianTester'
+    input = 'jac.test.i'
+    ratio_tol = 4e-3
+    difference_tol = 8
+    cli_args = 'Debug/check_jacobian=true'
+    allow_test_objects = true
+    max_threads = 1
+    max_parallel = 1
+    ad_indexing_type = 'global'
+
+    requirement = 'The system shall correctly compute Jacobians for TurbinePressureRatioEfficiency1Phase.'
+  []
+
+  [err:not_connected_to_shaft]
+    type = 'RunException'
+    input = 'shaft_motor_turbine.i'
+    cli_args = "Components/shaft/connected_components=''"
+    expect_err = "This component must be connected to a shaft"
+    ad_indexing_type = 'global'
+
+    requirement = 'The system shall throw an error if TurbinePressureRatioEfficiency1Phase is not connected to a shaft component.'
+    issues = '#19863 #19998'
+  []
+[]

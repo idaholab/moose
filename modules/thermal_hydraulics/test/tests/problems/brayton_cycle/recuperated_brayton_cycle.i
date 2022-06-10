@@ -590,16 +590,12 @@ hs_power = 105750
 
   # Turbine as defined in MAGNET PCU document (Guillen 2020) and (Wright 2006)
   [turbine]
-    type = ShaftConnectedCompressor1Phase
+    type = TurbinePressureRatioEfficiency1Phase
     position = '${x7} ${y7} 0'
     inlet = 'pipe6:out'
     outlet = 'pipe7:in'
     A_ref = ${A_ref_turb}
     volume = ${V_turb}
-
-    # A turbine is treated as an "inverse" compressor, this value determines if component is to be treated as turbine or compressor
-    # If treat_as_turbine is omitted, code automatically assumes it is a compressor
-    treat_as_turbine = true
 
     omega_rated = ${speed_rated}
     mdot_rated = ${rated_mfr}

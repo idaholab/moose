@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADShaftConnectedCompressor1PhaseUserObject.h"
+#include "ADTurbinePressureRatioEfficiency1PhaseUserObject.h"
 #include "SinglePhaseFluidProperties.h"
 #include "VolumeJunction1Phase.h"
 #include "MooseVariableScalar.h"
@@ -19,29 +19,29 @@
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 #include "libmesh/parallel_algebra.h"
 
-registerMooseObject("ThermalHydraulicsApp", ADShaftConnectedCompressor1PhaseUserObject);
+registerMooseObject("ThermalHydraulicsApp", ADTurbinePressureRatioEfficiency1PhaseUserObject);
 
 InputParameters
-ADShaftConnectedCompressor1PhaseUserObject::validParams()
+ADTurbinePressureRatioEfficiency1PhaseUserObject::validParams()
 {
   InputParameters params = ADVolumeJunction1PhaseUserObject::validParams();
   params += ADShaftConnectableUserObjectInterface::validParams();
 
-  params.addParam<BoundaryName>("inlet", "Compressor inlet");
-  params.addParam<BoundaryName>("outlet", "Compressor outlet");
+  params.addParam<BoundaryName>("inlet", "Turbine inlet");
+  params.addParam<BoundaryName>("outlet", "Turbine outlet");
   params.addRequiredParam<Point>("di_out", "Direction of connected outlet");
-  params.addRequiredParam<Real>("omega_rated", "Rated compressor speed [rad/s]");
-  params.addRequiredParam<Real>("mdot_rated", "Rated compressor mass flow rate [kg/s]");
+  params.addRequiredParam<Real>("omega_rated", "Rated turbine speed [rad/s]");
+  params.addRequiredParam<Real>("mdot_rated", "Rated turbine mass flow rate [kg/s]");
   params.addRequiredParam<Real>("rho0_rated",
-                                "Rated compressor inlet stagnation fluid density [kg/m^3]");
-  params.addRequiredParam<Real>("c0_rated", "Rated compressor inlet stagnation sound speed [m/s]");
-  params.addRequiredParam<Real>("speed_cr_fr", "Compressor speed threshold for friction [-]");
-  params.addRequiredParam<Real>("tau_fr_const", "Compressor friction constant [N-m]");
+                                "Rated turbine inlet stagnation fluid density [kg/m^3]");
+  params.addRequiredParam<Real>("c0_rated", "Rated turbine inlet stagnation sound speed [m/s]");
+  params.addRequiredParam<Real>("speed_cr_fr", "turbine speed threshold for friction [-]");
+  params.addRequiredParam<Real>("tau_fr_const", "turbine friction constant [N-m]");
   params.addRequiredParam<std::vector<Real>>("tau_fr_coeff", "Friction coefficients [N-m]");
-  params.addRequiredParam<Real>("speed_cr_I", "Compressor speed threshold for inertia [-]");
-  params.addRequiredParam<Real>("inertia_const", "Compressor inertia constant [kg-m^2]");
+  params.addRequiredParam<Real>("speed_cr_I", "turbine speed threshold for inertia [-]");
+  params.addRequiredParam<Real>("inertia_const", "Turbine inertia constant [kg-m^2]");
   params.addRequiredParam<std::vector<Real>>("inertia_coeff",
-                                             "Compressor inertia coefficients [kg-m^2]");
+                                             "Turbine inertia coefficients [kg-m^2]");
   params.addRequiredParam<std::vector<Real>>(
       "speeds",
       "Relative corrected speeds. Order of speeds needs correspond to the "
@@ -58,18 +58,18 @@ ADShaftConnectedCompressor1PhaseUserObject::validParams()
       "to the order of speeds in the `speeds` parameter [-]");
   params.addRequiredParam<Real>("min_pressure_ratio", "Minimum pressure ratio");
   params.addRequiredParam<Real>("max_pressure_ratio", "Maximum pressure ratio");
-  params.addRequiredParam<std::string>("compressor_name",
-                                       "Name of the instance of this compressor component");
+  params.addRequiredParam<std::string>("turbine_name",
+                                       "Name of the instance of this turbine component");
   params.addRequiredCoupledVar("omega", "Shaft rotational speed [rad/s]");
 
   params.addClassDescription("Computes and caches flux and residual vectors for a 1-phase "
-                             "compressor. Also computes compressor torque "
+                             "turbine. Also computes turbine torque "
                              "and delta_p which is passed to the connected shaft");
 
   return params;
 }
 
-ADShaftConnectedCompressor1PhaseUserObject::ADShaftConnectedCompressor1PhaseUserObject(
+ADTurbinePressureRatioEfficiency1PhaseUserObject::ADTurbinePressureRatioEfficiency1PhaseUserObject(
     const InputParameters & params)
   : ADVolumeJunction1PhaseUserObject(params),
     ADShaftConnectableUserObjectInterface(this),
@@ -93,7 +93,7 @@ ADShaftConnectedCompressor1PhaseUserObject::ADShaftConnectedCompressor1PhaseUser
     _eff_functions(_n_speeds),
     _Rp_min(getParam<Real>("min_pressure_ratio")),
     _Rp_max(getParam<Real>("max_pressure_ratio")),
-    _compressor_name(getParam<std::string>("compressor_name")),
+    _turbine_name(getParam<std::string>("turbine_name")),
     _omega(adCoupledScalarValue("omega"))
 {
   if (_n_speeds != _Rp_function_names.size() || _n_speeds != _eff_function_names.size())
@@ -112,7 +112,7 @@ ADShaftConnectedCompressor1PhaseUserObject::ADShaftConnectedCompressor1PhaseUser
 }
 
 void
-ADShaftConnectedCompressor1PhaseUserObject::initialSetup()
+ADTurbinePressureRatioEfficiency1PhaseUserObject::initialSetup()
 {
   ADVolumeJunction1PhaseUserObject::initialSetup();
 
@@ -121,7 +121,7 @@ ADShaftConnectedCompressor1PhaseUserObject::initialSetup()
 }
 
 void
-ADShaftConnectedCompressor1PhaseUserObject::initialize()
+ADTurbinePressureRatioEfficiency1PhaseUserObject::initialize()
 {
   ADVolumeJunction1PhaseUserObject::initialize();
   ADShaftConnectableUserObjectInterface::initialize();
@@ -135,7 +135,7 @@ ADShaftConnectedCompressor1PhaseUserObject::initialize()
 }
 
 void
-ADShaftConnectedCompressor1PhaseUserObject::execute()
+ADTurbinePressureRatioEfficiency1PhaseUserObject::execute()
 {
   ADVolumeJunctionBaseUserObject::storeConnectionData();
   ADShaftConnectableUserObjectInterface::setConnectionData(
@@ -147,7 +147,7 @@ ADShaftConnectedCompressor1PhaseUserObject::execute()
 }
 
 void
-ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c)
+ADTurbinePressureRatioEfficiency1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c)
 {
   ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(c);
 
@@ -230,16 +230,16 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
     // Apply bounds
     _Rp = std::max(_Rp_min, std::min(_Rp_max, _Rp));
 
-    // Invert if treating as turbine
-    ADReal Rp_comp = _Rp;
-    ADReal eff_comp = _eff;
+    // Apply pressure ratio and efficiency curves
+    ADReal Rp_turb = 1.0 / _Rp;
+    ADReal eff_turb = 1.0 / _eff;
 
-    const ADReal p0_out = p0_in * Rp_comp;
+    const ADReal p0_out = p0_in * Rp_turb;
     const ADReal rho0_out_isen = _fp.rho_from_p_s(p0_out, s_out);
 
     const ADReal e0_out_isen = _fp.e_from_p_rho(p0_out, rho0_out_isen);
 
-    _delta_p = p0_in * (Rp_comp - 1.0);
+    _delta_p = p0_in * (Rp_turb - 1.0);
 
     if (MooseUtils::absoluteFuzzyEqual(_omega[0], 0.0))
     {
@@ -251,8 +251,8 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
       const ADReal h0_out_isen = THM::h_from_e_p_rho(e0_out_isen, p0_out, rho0_out_isen);
       _isentropic_torque = -(rhouA_in / _omega[0]) * (h0_out_isen - h0_in); // tau_isen
 
-      const ADReal g_x = h0_out_isen - h0_in + h0_in * eff_comp;
-      const ADReal h0_out = g_x / eff_comp;
+      const ADReal g_x = h0_out_isen - h0_in + h0_in * eff_turb;
+      const ADReal h0_out = g_x / eff_turb;
 
       _dissipation_torque = -(rhouA_in / _omega[0]) * (h0_out - h0_out_isen);
     }
@@ -304,43 +304,43 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
 }
 
 ADReal
-ADShaftConnectedCompressor1PhaseUserObject::getIsentropicTorque() const
+ADTurbinePressureRatioEfficiency1PhaseUserObject::getIsentropicTorque() const
 {
   return _isentropic_torque;
 }
 
 ADReal
-ADShaftConnectedCompressor1PhaseUserObject::getDissipationTorque() const
+ADTurbinePressureRatioEfficiency1PhaseUserObject::getDissipationTorque() const
 {
   return _dissipation_torque;
 }
 
 ADReal
-ADShaftConnectedCompressor1PhaseUserObject::getFrictionTorque() const
+ADTurbinePressureRatioEfficiency1PhaseUserObject::getFrictionTorque() const
 {
   return _friction_torque;
 }
 
 ADReal
-ADShaftConnectedCompressor1PhaseUserObject::getCompressorDeltaP() const
+ADTurbinePressureRatioEfficiency1PhaseUserObject::getTurbineDeltaP() const
 {
   return _delta_p;
 }
 
 ADReal
-ADShaftConnectedCompressor1PhaseUserObject::getPressureRatio() const
+ADTurbinePressureRatioEfficiency1PhaseUserObject::getPressureRatio() const
 {
   return _Rp;
 }
 
 ADReal
-ADShaftConnectedCompressor1PhaseUserObject::getEfficiency() const
+ADTurbinePressureRatioEfficiency1PhaseUserObject::getEfficiency() const
 {
   return _eff;
 }
 
 void
-ADShaftConnectedCompressor1PhaseUserObject::finalize()
+ADTurbinePressureRatioEfficiency1PhaseUserObject::finalize()
 {
   ADVolumeJunction1PhaseUserObject::finalize();
   ADShaftConnectableUserObjectInterface::finalize();
@@ -358,13 +358,13 @@ ADShaftConnectedCompressor1PhaseUserObject::finalize()
 }
 
 void
-ADShaftConnectedCompressor1PhaseUserObject::threadJoin(const UserObject & uo)
+ADTurbinePressureRatioEfficiency1PhaseUserObject::threadJoin(const UserObject & uo)
 {
   ADVolumeJunction1PhaseUserObject::threadJoin(uo);
   ADShaftConnectableUserObjectInterface::threadJoin(uo);
 
-  const ADShaftConnectedCompressor1PhaseUserObject & scpuo =
-      dynamic_cast<const ADShaftConnectedCompressor1PhaseUserObject &>(uo);
+  const ADTurbinePressureRatioEfficiency1PhaseUserObject & scpuo =
+      dynamic_cast<const ADTurbinePressureRatioEfficiency1PhaseUserObject &>(uo);
   _isentropic_torque += scpuo._isentropic_torque;
   _dissipation_torque += scpuo._dissipation_torque;
   _friction_torque += scpuo._friction_torque;

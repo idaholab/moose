@@ -248,14 +248,12 @@ p_ambient = 1e5
     A = ${A4}
   []
   [turbine]
-    type = ShaftConnectedCompressor1Phase
+    type = TurbinePressureRatioEfficiency1Phase
     position = '${x5} 0 0'
     inlet = 'pipe4:out'
     outlet = 'pipe5:in'
     A_ref = ${A_ref_turb}
     volume = ${V_turb}
-
-    treat_as_turbine = true
 
     omega_rated = ${speed_rated}
     mdot_rated = ${rated_mfr}
