@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/RenameBoundaryGenerator.md'
-  issues = '#11640 #14128 #16885'
+  issues = '#11640 #14128 #16885 #21268'
 
   [rename]
     requirement = 'The system shall be able to rename or renumber mesh boundaries by:'
@@ -57,7 +57,14 @@
                   Outputs/file_base=mixed_out'
       jsondiff = 'mixed_out.json'
 
-      detail = 'and by identifying boundaries by both id and name.'
+      detail = 'identifying boundaries by both id and name,'
+    []
+
+    [identical_name_and_id]
+      type = JSONDiff
+      input = 'name_and_id.i'
+      jsondiff = 'name_and_id_out.json'
+      detail = 'and by changing both id and name for old boundaries where the id and name match.'
     []
   []
 

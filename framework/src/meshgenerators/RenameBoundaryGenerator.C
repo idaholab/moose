@@ -218,7 +218,13 @@ RenameBoundaryGenerator::generate()
 
       // Preserve the old boundary name if there was one
       if (old_boundary_names[i].size())
-        new_names[id] = old_boundary_names[i];
+      {
+        // if the name was the same as the ID, change the name as well
+        if (old_boundary_names[i] == std::to_string(old_boundary_ids[i]))
+          new_names[id] = std::to_string(new_boundary_ids[i]);
+        else
+          new_names[id] = old_boundary_names[i];
+      }
     }
     // If the user input a name, we will use the ID that it is coming from for the
     // "new" name if the new name does not name a current boundary. If the name does
