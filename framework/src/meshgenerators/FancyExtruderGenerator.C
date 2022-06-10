@@ -162,6 +162,19 @@ FancyExtruderGenerator::FancyExtruderGenerator(const InputParameters & parameter
         elevation_extra_swap_pairs[elevation_extra_swaps[k]] = elevation_extra_swaps[k + 1];
     }
   }
+
+  bool has_negative_entry = false;
+  bool has_positive_entry = false;
+  for (const auto & h : _heights)
+  {
+    if (h > 0.0)
+      has_positive_entry = true;
+    else
+      has_negative_entry = true;
+  }
+
+  if (has_negative_entry && has_positive_entry)
+    paramError("heights", "Cannot have both positive and negative heights!");
 }
 
 std::unique_ptr<MeshBase>
