@@ -75,6 +75,14 @@ public:
                                                               unsigned int comp = 0) const;
   virtual const VariableGradient & coupledNeighborGradientOlder(const std::string & var_name,
                                                                 unsigned int comp = 0) const;
+
+  /**
+   * Get the coupled neighbor variable gradient for \p var_name with derivative information for
+   * automatic differentiation objects
+   */
+  virtual const ADVariableGradient & adCoupledNeighborGradient(const std::string & var_name,
+                                                               unsigned int comp = 0) const;
+
   virtual const VectorVariableGradient & coupledVectorNeighborGradient(const std::string & var_name,
                                                                        unsigned int comp = 0) const;
   virtual const VectorVariableGradient &
