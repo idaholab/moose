@@ -26,6 +26,7 @@ SamplerParameterTransfer::validParams()
   InputParameters params = StochasticToolsTransfer::validParams();
   params.addClassDescription("Copies Sampler data to a SamplerReceiver object.");
   params.suppressParameter<MultiMooseEnum>("direction");
+  params.suppressParameter<MultiAppName>("multi_app");
   params.addParam<std::vector<std::string>>(
       "parameters",
       "A list of parameters (on the sub application) to control "
