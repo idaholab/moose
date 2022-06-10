@@ -111,9 +111,6 @@ public:
     general = 9
   };
 
-  /// Convenience enum to specify indices in templated products
-  usingTensorIndices(i_, j_, k_, l_, m_);
-
   // Deprecated constructor (replaced by initializeFromRows)
   RankTwoTensorTempl(const TypeVector<T> & row1,
                      const TypeVector<T> & row2,
@@ -330,6 +327,7 @@ public:
   /// returns C_ijkl = a_ij * b_kl
   RankFourTensorTempl<T> outerProduct(const RankTwoTensorTempl<T> & b) const
   {
+    usingTensorIndices(i_, j_, k_, l_);
     return times<i_, j_, k_, l_>(b);
   }
 
@@ -683,14 +681,15 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
     proj_pos += d[a] * Ma.outerProduct(Ma);
   }
 
+  usingTensorIndices(i_, j_, k_, l_);
   for (auto a : make_range(N))
     for (auto b : make_range(a))
     {
       const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
       const auto Mb = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
 
-      Gab = Ma.times<i_, j_, k_, l_>(Mb) + Ma.times<i_, j_, k_, l_>(Mb);
-      Gba = Mb.times<i_, j_, k_, l_>(Ma) + Mb.times<i_, j_, k_, l_>(Ma);
+      Gab = Ma.template times<i_, k_, j_, l_>(Mb) + Ma.template times<i_, l_, j_, k_>(Mb);
+      Gba = Mb.template times<i_, k_, j_, l_>(Ma) + Mb.template times<i_, l_, j_, k_>(Ma);
 
       T theta_ab;
       if (!MooseUtils::absoluteFuzzyEqual(eigval[a], eigval[b]))
@@ -794,7 +793,7 @@ RankTwoTensorTempl<T>::d2sin3Lode(const T &) const
 }
 
 template <typename T>
-template <int i, int j, int k, int l>
+template <int n, int o, int p, int q>
 RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::times(const RankTwoTensorTempl<T> & b) const
 {
@@ -804,7 +803,7 @@ RankTwoTensorTempl<T>::times(const RankTwoTensorTempl<T> & b) const
     for (x[1] = 0; x[1] < N; ++x[1])
       for (x[2] = 0; x[2] < N; ++x[2])
         for (x[3] = 0; x[3] < N; ++x[3])
-          result(x[0], x[1], x[2], x[3]) = (*this)(x[i], x[j]) * b(x[k], x[l]);
+          result(x[0], x[1], x[2], x[3]) = (*this)(x[n], x[o]) * b(x[p], x[q]);
 
   return result;
 }

@@ -531,7 +531,7 @@ TEST_F(RankTwoTensorTest, timesIMMJKL)
 TEST_F(RankTwoTensorTest, timesMLIMJK)
 {
   usingTensorIndices(i_, j_, k_, l_, m_);
-  const RankFourTensor computed_val = _unsymmetric1.times<i_, m_, m_, j_, k_, l_>(_r4);
+  const RankFourTensor computed_val = _unsymmetric1.times<m_, l_, i_, m_, j_, k_>(_r4);
   RankFourTensor expected_val;
   expected_val.fillFromInputVector(
       {78,    -168, 277,  84,    -183, 302,   90,    -198, 327,   96,    -213, 352,   102,  -228,
@@ -552,7 +552,7 @@ TEST_F(RankTwoTensorTest, timesMLIMJK)
 TEST_F(RankTwoTensorTest, timesMJIMKL)
 {
   usingTensorIndices(i_, j_, k_, l_, m_);
-  const RankFourTensor computed_val = _unsymmetric1.times<i_, m_, m_, j_, k_, l_>(_r4);
+  const RankFourTensor computed_val = _unsymmetric1.times<m_, j_, i_, m_, k_, l_>(_r4);
   RankFourTensor expected_val;
   expected_val.fillFromInputVector(
       {78,    84,    90,   96,   102,  108,  114,  120,  126,  -168,  -183,  -198,  -213,  -228,
