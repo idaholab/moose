@@ -1,0 +1,43 @@
+[Tests]
+  design = MorrisReporter.md
+  issues = '#21191'
+
+  [morris]
+    requirement = 'The system shall support the ability to compute Morris sensitivity values with '
+    [distributed]
+      type = JSONDiff
+      input = morris.i
+      jsondiff = morris_out.json
+      allow_test_objects = true
+      detail = 'distributed data;'
+    []
+    [replicated]
+      type = JSONDiff
+      input = morris.i
+      cli_args = 'VectorPostprocessors/gfun/parallel_type=REPLICATED'
+      jsondiff = morris_out.json
+      allow_test_objects = true
+      detail = 'replicated data;'
+    []
+  []
+  [morris_vec]
+    requirement = 'The system shall support the ability to compute Morris sensitivity values for vector-type data that is '
+    [distributed]
+      type = JSONDiff
+      input = morris_main.i
+      jsondiff = morris_main_out.json
+      allow_test_objects = true
+      method = 'opt'
+      detail = 'distributed;'
+    []
+    [root]
+      type = JSONDiff
+      input = morris_main.i
+      cli_args = 'Reporters/storage/parallel_type=ROOT'
+      jsondiff = morris_main_out.json
+      allow_test_objects = true
+      method = 'opt'
+      detail = 'on root processor;'
+    []
+  []
+[]

@@ -1,0 +1,34 @@
+[Tests]
+  design = 'MorrisSampler.md'
+  issues = '#21191'
+
+  [morris]
+    requirement = 'The system shall include a Morris trajectory method for sampling distribution data:'
+
+    [serial]
+      type = CSVDiff
+      input = morris.i
+      csvdiff = 'morris_out_data_0000.csv morris_out_data_0001.csv'
+      detail = "with replicated output;"
+    []
+    [parallel]
+      type = CSVDiff
+      input = morris.i
+      cli_args = 'VectorPostprocessors/data/parallel_type=DISTRIBUTED Outputs/file_base=morris3'
+      min_parallel = 3
+      max_parallel = 3
+      csvdiff = 'morris3_data_0000.csv.0 morris3_data_0000.csv.1 morris3_data_0000.csv.2 morris3_data_0001.csv.0 morris3_data_0001.csv.1 morris3_data_0001.csv.2'
+      detail = "with parallel output;"
+    []
+    [parallel_more]
+      type = CSVDiff
+      input = morris.i
+      cli_args = 'VectorPostprocessors/data/parallel_type=DISTRIBUTED Outputs/file_base=morris5'
+      min_parallel = 5
+      max_parallel = 5
+      csvdiff = 'morris5_data_0000.csv.0 morris5_data_0000.csv.1 morris5_data_0000.csv.2 morris5_data_0000.csv.3 morris5_data_0000.csv.4
+                 morris5_data_0001.csv.0 morris5_data_0001.csv.1 morris5_data_0001.csv.2 morris5_data_0001.csv.3 morris5_data_0001.csv.4'
+      detail = "with more processors than trajectories;"
+    []
+  []
+[]

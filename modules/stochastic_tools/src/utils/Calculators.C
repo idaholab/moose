@@ -15,7 +15,8 @@ namespace StochasticTools
 MultiMooseEnum
 makeCalculatorEnum()
 {
-  return MultiMooseEnum("min=0 max=1 sum=2 mean=3 stddev=4 norm2=5 ratio=6 stderr=7 median=8");
+  return MultiMooseEnum(
+      "min=0 max=1 sum=2 mean=3 stddev=4 norm2=5 ratio=6 stderr=7 median=8 meanabs=9");
 }
 
 // MEAN ////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,6 +47,14 @@ Mean<InType, OutType>::finalize(bool is_distributed)
   }
   if (_count > 0)
     _sum /= static_cast<OutType>(_count);
+}
+
+// MEAN ABS ////////////////////////////////////////////////////////////////////////////////////////
+template <typename InType, typename OutType>
+void
+MeanAbsoluteValue<InType, OutType>::update(const typename InType::value_type & val)
+{
+  Mean<InType, OutType>::update(std::abs(val));
 }
 
 // SUM /////////////////////////////////////////////////////////////////////////////////////////////
@@ -310,6 +319,9 @@ CalculatorBuilder<InType, OutType>::build(const MooseEnumItem & item,
 
   else if (item == "median")
     return std::make_unique<Median<InType, OutType>>(other, item);
+
+  else if (item == "meanabs")
+    return std::make_unique<MeanAbsoluteValue<InType, OutType>>(other, item);
 
   ::mooseError("Failed to create Statistics::Calculator object for ", item);
   return nullptr;
