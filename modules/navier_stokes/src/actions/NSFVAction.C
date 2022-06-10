@@ -248,6 +248,9 @@ NSFVAction::validParams()
       "The name of a functor which contains the external heat source for the energy equation.");
   params.addParam<Real>(
       "external_heat_source_coeff", 1.0, "Multiplier for the coupled heat source term.");
+  params.addParam<bool>("use_external_enthalpy_material",
+                        false,
+                        "To indicate if the enthalpy material is set up outside of the action.");
 
   params.addParamNamesToGroup("ambient_convection_alpha ambient_convection_blocks "
                               "ambient_temperature external_heat_source external_heat_source_coeff",
@@ -571,7 +574,8 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _passive_scalar_scaling(getParam<Real>("passive_scalar_scaling")),
     _create_velocity(!isParamValid("velocity_variable")),
     _create_pressure(!isParamValid("pressure_variable")),
-    _create_fluid_temperature(!isParamValid("fluid_temperature_variable"))
+    _create_fluid_temperature(!isParamValid("fluid_temperature_variable")),
+    _use_external_enthalpy_material(getParam<bool>("use_external_enthalpy_material"))
 {
   // Running the general checks, the rest are run after we already know some
   // geometry-related parameters.
@@ -717,7 +721,7 @@ NSFVAction::act()
   {
     if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
     {
-      if (_has_energy_equation)
+      if (_has_energy_equation && !_use_external_enthalpy_material)
         addEnthalpyMaterial();
       if (_porous_medium_treatment)
         addPorousMediumSpeedMaterial();
@@ -2289,7 +2293,8 @@ NSFVAction::checkGeneralControlErrors()
                                   "energy_advection_interpolation",
                                   "specific_heat",
                                   "thermal_conductivity_blocks",
-                                  "thermal_conductivity"});
+                                  "thermal_conductivity",
+                                  "use_external_enthalpy_material"});
   if (!_porous_medium_treatment)
     checkDependentParameterError(
         "porous_medium_treatment",
