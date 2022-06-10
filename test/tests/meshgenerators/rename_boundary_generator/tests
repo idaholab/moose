@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/RenameBoundaryGenerator.md'
-  issues = '#11640 #14128 #16885'
+  issues = '#11640 #14128 #16885 #21268'
 
   [rename]
     requirement = 'The system shall be able to rename or renumber mesh boundaries by:'

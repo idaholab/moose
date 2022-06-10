@@ -34,6 +34,8 @@
   # We compare by element numbers, which are not consistent in parallel
   # if this is true
   allow_renumbering = false
+
+  parallel_type = replicated
 []
 
 [Reporters/mesh_info]
