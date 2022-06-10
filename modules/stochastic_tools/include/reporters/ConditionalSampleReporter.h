@@ -21,7 +21,7 @@ typedef ConditionalSampleReporterTempl<Real> ConditionalSampleReporter;
 
 /**
  * This object is mainly meant for demonstration for eventual active learning
- * algrorithms, but could prove useful. Basically, it enables a inputted function
+ * algorithms, but could prove useful. Basically, it enables a inputted function
  * to determine if a multiapp solve is "possible". For instance, maybe a certain
  * sampled value needs to be possitive, this class can filter those samples out
  * and replace quantities of interest with a default value.

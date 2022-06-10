@@ -42,7 +42,7 @@ the sampler partitioning is equivalent to the multiapp partitioning.
 ## Skipping Sample Solves
 
 The parameter [!param](/MultiApps/SamplerFullSolveMultiApp/should_run_reporter)
-allows for an inputted reporter value to determine whether a the sub-app should
+allows for an inputted reporter value to determine whether the sub-app should
 be run for a certain sample. And example of using this parameter can be found in
 [ConditionalSampleReporter.md].
 

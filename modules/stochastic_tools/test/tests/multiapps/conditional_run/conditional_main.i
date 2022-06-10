@@ -1,20 +1,7 @@
 [StochasticTools]
 []
 
-[Distributions]
-  [uniform_0]
-    type = Uniform
-    lower_bound = 0.1
-    upper_bound = 0.3
-  []
-[]
-
 [Samplers]
-  [mc]
-    type = MonteCarlo
-    num_rows = 5
-    distributions = 'uniform_0'
-  []
   [cart]
     type = CartesianProduct
     linear_space_items = '1 1 10'
@@ -34,7 +21,7 @@
 [Transfers]
   [data]
     type = SamplerReporterTransfer
-    multi_app = runner
+    from_multi_app = runner
     sampler = cart
     from_reporter = 'average/value'
     stochastic_reporter = conditional
