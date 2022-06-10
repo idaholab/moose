@@ -31,7 +31,7 @@
 
 [Functions]
   [negative_ASquaredMinusBSquared]
-    type = WaveCoeff
+    type = WaveEquationCoefficient
     k_real = '2 * (1 + x/10)'
     k_imag = '(1 + x/10)'
     eps_rel_real = 1
@@ -42,7 +42,7 @@
     component = real
   []
   [2TimesAB]
-    type = WaveCoeff
+    type = WaveEquationCoefficient
     k_real = '2 * (1 + x/10)'
     k_imag = '(1 + x/10)'
     eps_rel_real = 1

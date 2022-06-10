@@ -15,12 +15,12 @@
 /**
  *  Function for use as coefficient in standard-form Helmholtz wave equation applications.
  */
-class WaveCoeff : public Function, public FunctionInterface
+class WaveEquationCoefficient : public Function, public FunctionInterface
 {
 public:
   static InputParameters validParams();
 
-  WaveCoeff(const InputParameters & parameters);
+  WaveEquationCoefficient(const InputParameters & parameters);
 
   using Function::value;
   virtual Real value(Real t, const Point & p) const override;

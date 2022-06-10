@@ -1,6 +1,6 @@
-# WaveCoeff
+# WaveEquationCoefficient
 
-!syntax description /Functions/WaveCoeff
+!syntax description /Functions/WaveEquationCoefficient
 
 ## Overview
 
@@ -25,8 +25,8 @@ the user as functions.
 
 !listing scalar_complex_helmholtz.i block=Functions/negative_ASquaredMinusBSquared
 
-!syntax parameters /Functions/WaveCoeff
+!syntax parameters /Functions/WaveEquationCoefficient
 
-!syntax inputs /Functions/WaveCoeff
+!syntax inputs /Functions/WaveEquationCoefficient
 
-!syntax children /Functions/WaveCoeff
+!syntax children /Functions/WaveEquationCoefficient

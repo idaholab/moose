@@ -7,18 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "WaveCoeff.h"
+#include "WaveEquationCoefficient.h"
 #include "ElectromagneticEnums.h"
 #include <complex>
 
-registerMooseObject("ElectromagneticsApp", WaveCoeff);
+registerMooseObject("ElectromagneticsApp", WaveEquationCoefficient);
 
 InputParameters
-WaveCoeff::validParams()
+WaveEquationCoefficient::validParams()
 {
   InputParameters params = Function::validParams();
   params.addClassDescription(
-      "Function for use as coefficient in standard-form Helmholtz wave equation applications.");
+      "Function for use as coefficient in standard-form Helmholtz wave equation applications with "
+      "derivatives calculated using automatic differentiation.");
   params.addRequiredParam<FunctionName>("eps_rel_real", "Relative permittivity, real component.");
   params.addRequiredParam<FunctionName>("eps_rel_imag",
                                         "Relative permittivity, imaginary component.");
@@ -30,13 +31,13 @@ WaveCoeff::validParams()
   params.addParam<Real>("coef", 1.0, "Real-valued function coefficient.");
   MooseEnum component("real imaginary");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component.");
+  params.addParam<FunctionName>("prop_name", "User-specified material property name.");
   return params;
 }
 
-WaveCoeff::WaveCoeff(const InputParameters & parameters)
+WaveEquationCoefficient::WaveEquationCoefficient(const InputParameters & parameters)
   : Function(parameters),
     FunctionInterface(this),
-
     _eps_r_real(getFunction("eps_rel_real")),
     _eps_r_imag(getFunction("eps_rel_imag")),
     _mu_r_real(getFunction("mu_rel_real")),
@@ -49,7 +50,7 @@ WaveCoeff::WaveCoeff(const InputParameters & parameters)
 }
 
 Real
-WaveCoeff::value(Real t, const Point & p) const
+WaveEquationCoefficient::value(Real t, const Point & p) const
 {
   std::complex<double> eps_r(_eps_r_real.value(t, p), _eps_r_imag.value(t, p));
   std::complex<double> mu_r(_mu_r_real.value(t, p), _mu_r_imag.value(t, p));
