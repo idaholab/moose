@@ -76,25 +76,28 @@ UserObjectInterface::hasUserObjectByName(const UserObjectName & object_name) con
 }
 
 const UserObject &
-UserObjectInterface::getUserObjectBase(const std::string & param_name) const
+UserObjectInterface::getUserObjectBase(const std::string & param_name,
+                                       const bool is_dependency) const
 {
   const auto object_name = getUserObjectName(param_name);
   if (!hasUserObjectByName(object_name))
     _uoi_moose_object.paramError(
         param_name, "The requested UserObject with the name \"", object_name, "\" was not found.");
 
-  return getUserObjectBaseByName(object_name);
+  return getUserObjectBaseByName(object_name, is_dependency);
 }
 
 const UserObject &
-UserObjectInterface::getUserObjectBaseByName(const UserObjectName & object_name) const
+UserObjectInterface::getUserObjectBaseByName(const UserObjectName & object_name,
+                                             const bool is_dependency) const
 {
   if (!hasUserObjectByName(object_name))
     _uoi_moose_object.mooseError(
         "The requested UserObject with the name \"", object_name, "\" was not found.");
 
   const auto & uo_base_tid0 = _uoi_feproblem.getUserObjectBase(object_name, /* tid = */ 0);
-  addUserObjectDependencyHelper(uo_base_tid0);
+  if (is_dependency)
+    addUserObjectDependencyHelper(uo_base_tid0);
 
   const THREAD_ID tid = uo_base_tid0.needThreadedCopy() ? _uoi_tid : 0;
   return _uoi_feproblem.getUserObjectBase(object_name, tid);
