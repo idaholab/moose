@@ -19,6 +19,7 @@ SamplerFullSolveMultiApp::validParams()
 {
   InputParameters params = FullSolveMultiApp::validParams();
   params += SamplerInterface::validParams();
+  params += ReporterInterface::validParams();
   params.addClassDescription(
       "Creates a full-solve type sub-application for each row of each Sampler matrix.");
   params.addRequiredParam<SamplerName>("sampler",
@@ -37,12 +38,17 @@ SamplerFullSolveMultiApp::validParams()
       modes,
       "The operation mode, 'normal' creates one sub-application for each row in the Sampler and "
       "'batch' creates one sub-application for each processor and re-executes for each row.");
+  params.addParam<ReporterName>(
+      "should_run_reporter",
+      "Vector reporter value determining whether a certain multiapp should be run with this "
+      "multiapp. This only works in batch-reset or batch-restore mode.");
   return params;
 }
 
 SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & parameters)
   : FullSolveMultiApp(parameters),
     SamplerInterface(this),
+    ReporterInterface(this),
     _sampler(getSampler("sampler")),
     _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>()),
     _local_batch_app_index(0),
@@ -64,6 +70,10 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
        _sampler.getRankConfig(_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
                               _mode == StochasticTools::MultiAppMode::BATCH_RESTORE));
   _number_of_sampler_rows = _sampler.getNumberOfRows();
+
+  if (isParamValid("should_run_reporter") && _mode == StochasticTools::MultiAppMode::NORMAL)
+    paramError("should_run_reporter",
+               "Conditionally run sampler multiapp only works in batch modes.");
 }
 
 void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
@@ -82,6 +92,9 @@ void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
   // Reinitialize app to original state prior to solve, if a solve has occured
   if (_solved_once)
     initialSetup();
+
+  if (isParamValid("should_run_reporter"))
+    _should_run = &getReporterValue<std::vector<bool>>("should_run_reporter");
 }
 
 bool
@@ -107,6 +120,17 @@ SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 bool
 SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_advance)
 {
+  TIME_SECTION("solveStepBatch", 3, "Solving Step Batch For SamplerFullSolveMultiApp");
+
+  if (_should_run && _should_run->size() < _sampler.getNumberOfLocalRows())
+    paramError("should_run_reporter",
+               "Reporter deteriming multiapp run must be of size greater than or equal to the "
+               "number of local rows in the sampler, ",
+               _should_run->size(),
+               " < ",
+               _sampler.getNumberOfLocalRows(),
+               ".");
+
   // Value to return
   bool last_solve_converged = true;
 
@@ -138,6 +162,19 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
        ++i)
   {
     updateRowData(_local_batch_app_index);
+
+    bool run = true;
+    if (_should_run)
+    {
+      if (isRootProcessor())
+        run = (*_should_run)[_local_batch_app_index];
+      _my_communicator.broadcast(run, 0);
+    }
+    if (!run)
+    {
+      _local_batch_app_index++;
+      continue;
+    }
 
     for (auto & transfer : to_transfers)
     {

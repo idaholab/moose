@@ -39,6 +39,13 @@ the sampler partitioning is equivalent to the multiapp partitioning.
 
 !! min_procs_end
 
+## Skipping Sample Solves
+
+The parameter [!param](/MultiApps/SamplerFullSolveMultiApp/should_run_reporter)
+allows for an inputted reporter value to determine whether the sub-app should
+be run for a certain sample. And example of using this parameter can be found in
+[ConditionalSampleReporter.md].
+
 ## Example Syntax
 
 !listing modules/stochastic_tools/test/tests/multiapps/sampler_full_solve_multiapp/parent_full_solve.i block=MultiApps
