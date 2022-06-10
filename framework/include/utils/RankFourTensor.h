@@ -105,7 +105,7 @@ public:
   };
 
   /// Convenience enum to specify indices in templated products
-  usingTensorIndices(i, j, k, l);
+  usingTensorIndices(i_, j_, k_, l_);
 
   template <template <typename> class Tensor, typename Scalar>
   struct TwoTensorMultTraits
@@ -299,7 +299,7 @@ public:
    */
   RankThreeTensorTempl<T> mixedProductIjklI(const VectorValue<T> & b) const
   {
-    return contraction<i>(b);
+    return contraction<i_>(b);
   }
 
   /**
@@ -308,7 +308,7 @@ public:
    */
   RankThreeTensorTempl<T> mixedProductIjklJ(const VectorValue<T> & b) const
   {
-    return contraction<j>(b);
+    return contraction<j_>(b);
   }
 
   /**

@@ -1091,8 +1091,8 @@ FiniteStrainCrystalPlasticity::elastoPlasticTangentModuli()
         deedfe(i, j, k, j) = deedfe(i, j, k, j) + _fe(k, i) * 0.5;
       }
 
-  usingTensorIndices(i, j, k, l);
-  dsigdpk2dfe = _fe.times<i, k, j, l>(_fe) * _elasticity_tensor[_qp] * deedfe;
+  usingTensorIndices(i_, j_, k_, l_);
+  dsigdpk2dfe = _fe.times<i_, k_, j_, l_>(_fe) * _elasticity_tensor[_qp] * deedfe;
 
   pk2fet = _pk2_tmp * _fe.transpose();
   fepk2 = _fe * _pk2_tmp;

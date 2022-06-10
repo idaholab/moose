@@ -355,8 +355,8 @@ TEST_F(RankFourTensorTest, printReal)
 
 TEST_F(RankFourTensorTest, contractionI)
 {
-  usingTensorIndices(i, j, k, l);
-  const RankThreeTensor computed_val = _r4.contraction<i>(_v);
+  usingTensorIndices(i_, j_, k_, l_);
+  const RankThreeTensor computed_val = _r4.contraction<i_>(_v);
   RankThreeTensor expected_val;
   expected_val.fillFromInputVector({222, 228, 234, 240, 246, 252, 258, 264, 270,
                                     276, 282, 288, 294, 300, 306, 312, 318, 324,
@@ -370,8 +370,8 @@ TEST_F(RankFourTensorTest, contractionI)
 
 TEST_F(RankFourTensorTest, contractionJ)
 {
-  usingTensorIndices(i, j, k, l);
-  const RankThreeTensor computed_val = _r4.contraction<j>(_v);
+  usingTensorIndices(i_, j_, k_, l_);
+  const RankThreeTensor computed_val = _r4.contraction<j_>(_v);
   RankThreeTensor expected_val;
   expected_val.fillFromInputVector({78,  84,  90,  96,  102, 108, 114, 120, 126,
                                     240, 246, 252, 258, 264, 270, 276, 282, 288,

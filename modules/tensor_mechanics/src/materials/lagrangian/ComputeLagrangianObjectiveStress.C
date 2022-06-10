@@ -109,24 +109,25 @@ RankFourTensor
 ComputeLagrangianObjectiveStress::updateTensor(const RankTwoTensor & Q)
 {
   auto I = RankTwoTensor::Identity();
-  usingTensorIndices(i, j, k, l);
-  return (1.0 + Q.trace()) * I.times<i, k, j, l>(I) - Q.times<i, k, j, l>(I) -
-         I.times<i, k, j, l>(Q);
+  usingTensorIndices(i_, j_, k_, l_);
+  return (1.0 + Q.trace()) * I.times<i_, k_, j_, l_>(I) - Q.times<i_, k_, j_, l_>(I) -
+         I.times<i_, k_, j_, l_>(Q);
 }
 
 RankFourTensor
 ComputeLagrangianObjectiveStress::truesdellTangent(const RankTwoTensor & S)
 {
   auto I = RankTwoTensor::Identity();
-  usingTensorIndices(i, j, k, l);
-  return S.times<i, j, k, l>(I) - I.times<i, k, j, l>(S.transpose()) - S.times<i, l, j, k>(I);
+  usingTensorIndices(i_, j_, k_, l_);
+  return S.times<i_, j_, k_, l_>(I) - I.times<i_, k_, j_, l_>(S.transpose()) -
+         S.times<i_, l_, j_, k_>(I);
 }
 
 RankFourTensor
 ComputeLagrangianObjectiveStress::jaumannTangent(const RankTwoTensor & S)
 {
   auto I = RankTwoTensor::Identity();
-  usingTensorIndices(i, j, k, l);
-  return 0.5 * (I.times<i, l, j, k>(S.transpose()) + S.times<i, k, j, l>(I) -
-                I.times<i, k, j, l>(S.transpose()) - S.times<i, l, j, k>(I));
+  usingTensorIndices(i_, j_, k_, l_);
+  return 0.5 * (I.times<i_, l_, j_, k_>(S.transpose()) + S.times<i_, k_, j_, l_>(I) -
+                I.times<i_, k_, j_, l_>(S.transpose()) - S.times<i_, l_, j_, k_>(I));
 }

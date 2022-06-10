@@ -112,7 +112,7 @@ public:
   };
 
   /// Convenience enum to specify indices in templated products
-  usingTensorIndices(i, j, k, l, m);
+  usingTensorIndices(i_, j_, k_, l_, m_);
 
   // Deprecated constructor (replaced by initializeFromRows)
   RankTwoTensorTempl(const TypeVector<T> & row1,
@@ -330,7 +330,7 @@ public:
   /// returns C_ijkl = a_ij * b_kl
   RankFourTensorTempl<T> outerProduct(const RankTwoTensorTempl<T> & b) const
   {
-    return times<i, j, k, l>(b);
+    return times<i_, j_, k_, l_>(b);
   }
 
   /// returns C_ikl = a_ij * b_jkl (single contraction over index j)
@@ -689,8 +689,8 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
       const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
       const auto Mb = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
 
-      Gab = Ma.times<i, k, j, l>(Mb) + Ma.times<i, k, j, l>(Mb);
-      Gba = Mb.times<i, k, j, l>(Ma) + Mb.times<i, k, j, l>(Ma);
+      Gab = Ma.times<i_, j_, k_, l_>(Mb) + Ma.times<i_, j_, k_, l_>(Mb);
+      Gba = Mb.times<i_, j_, k_, l_>(Ma) + Mb.times<i_, j_, k_, l_>(Ma);
 
       T theta_ab;
       if (!MooseUtils::absoluteFuzzyEqual(eigval[a], eigval[b]))

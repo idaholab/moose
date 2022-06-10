@@ -43,7 +43,7 @@ ComputeNeoHookeanStress::computeQpPK2Stress()
   // want a truly linear model
   //
   // This is because we need to drop quadratic terms for the linear update
-  usingTensorIndices(i, j, k, l);
+  usingTensorIndices(i_, j_, k_, l_);
 
   // Large deformation = nonlinear strain
   if (_large_kinematics)
@@ -52,15 +52,15 @@ ComputeNeoHookeanStress::computeQpPK2Stress()
     _S[_qp] =
         (_lambda[_qp] * log(_detJ[_qp]) - _mu[_qp]) * Cinv + _mu[_qp] * RankTwoTensor::Identity();
     _C[_qp] = -2.0 * (_lambda[_qp] * log(_detJ[_qp]) - _mu[_qp]) *
-                  Cinv.times<i, k, j, l>(Cinv.transpose()) +
-              _lambda[_qp] * Cinv.times<i, j, k, l>(Cinv);
+                  Cinv.times<i_, k_, j_, l_>(Cinv.transpose()) +
+              _lambda[_qp] * Cinv.times<i_, j_, k_, l_>(Cinv);
   }
   // Small deformations = linear strain
   else
   {
     RankTwoTensor strain = 0.5 * (_F[_qp] + _F[_qp].transpose());
     const auto I = RankTwoTensor::Identity();
-    _C[_qp] = _lambda[_qp] * I.times<i, j, k, l>(I) +
+    _C[_qp] = _lambda[_qp] * I.times<i_, j_, k_, l_>(I) +
               2.0 * _mu[_qp] * RankFourTensor(RankFourTensor::initIdentitySymmetricFour);
     _S[_qp] = _C[_qp] * strain;
   }
