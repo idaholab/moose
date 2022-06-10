@@ -62,7 +62,7 @@ RndBoundingBoxIC::value(const Point & p)
   // Random number between 0 and 1
   Real rand_num = MooseRandom::rand();
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
     if (p(i) < _bottom_left(i) || p(i) > _top_right(i))
       return rand_num * _range_outvalue + _mn_outvalue;
 

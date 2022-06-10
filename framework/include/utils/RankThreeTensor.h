@@ -56,6 +56,12 @@ template <typename T>
 class RankThreeTensorTempl
 {
 public:
+  ///@{ tensor dimension and powers of the dimension
+  static constexpr unsigned int N = Moose::dim;
+  static constexpr unsigned int N2 = N * N;
+  static constexpr unsigned int N3 = N * N * N;
+  ///@}
+
   /// Initialization method
   enum InitMethod
   {
@@ -199,11 +205,6 @@ public:
   VectorValue<T> doubleContraction(const RankTwoTensorTempl<T> & b) const;
 
 protected:
-  /// Dimensionality of rank-three tensor
-  static constexpr unsigned int N = LIBMESH_DIM;
-  static constexpr unsigned int N2 = N * N;
-  static constexpr unsigned int N3 = N * N * N;
-
   /// The values of the rank-three tensor stored by index=((i * LIBMESH_DIM + j) * LIBMESH_DIM + k)
   T _vals[N3];
 
@@ -235,9 +236,9 @@ struct RawType<RankThreeTensorTempl<T>>
   static value_type value(const RankThreeTensorTempl<T> & in)
   {
     value_type ret;
-    for (auto i : make_range(LIBMESH_DIM))
-      for (auto j : make_range(LIBMESH_DIM))
-        for (auto k : make_range(LIBMESH_DIM))
+    for (const auto i : make_range(RankThreeTensorTempl<T>::N))
+      for (const auto j : make_range(RankThreeTensorTempl<T>::N))
+        for (const auto k : make_range(RankThreeTensorTempl<T>::N))
           ret(i, j, k) = raw_value(in(i, j, k));
 
     return ret;
@@ -249,7 +250,7 @@ template <typename T>
 template <typename T2>
 RankThreeTensorTempl<T>::RankThreeTensorTempl(const RankThreeTensorTempl<T2> & copy)
 {
-  for (auto i : make_range(N3))
+  for (const auto i : make_range(N3))
     _vals[i] = copy._vals[i];
 }
 
@@ -259,19 +260,19 @@ void
 RankThreeTensorTempl<T>::rotate(const T2 & R)
 {
   unsigned int index = 0;
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
       {
         unsigned int index2 = 0;
         T sum = 0.0;
-        for (auto m : make_range(N))
+        for (const auto m : make_range(N))
         {
           T a = R(i, m);
-          for (auto n : make_range(N))
+          for (const auto n : make_range(N))
           {
             T ab = a * R(j, n);
-            for (auto o : make_range(N))
+            for (const auto o : make_range(N))
               sum += ab * R(k, o) * _vals[index2++];
           }
         }
@@ -291,11 +292,13 @@ template <typename T>
 RankTwoTensorTempl<T>
 operator*(const VectorValue<T> & p, const RankThreeTensorTempl<T> & b)
 {
+  static_assert(RankThreeTensorTempl<T>::N == RankTwoTensorTempl<T>::N,
+                "RankTwoTensor and RankThreeTensor have to have the same dimension N.");
   RankTwoTensorTempl<T> result;
 
-  for (auto i : make_range(LIBMESH_DIM))
-    for (auto j : make_range(LIBMESH_DIM))
-      for (auto k : make_range(LIBMESH_DIM))
+  for (const auto i : make_range(RankThreeTensorTempl<T>::N))
+    for (const auto j : make_range(RankThreeTensorTempl<T>::N))
+      for (const auto k : make_range(RankThreeTensorTempl<T>::N))
         result(i, j) += p(k) * b(k, i, j);
 
   return result;
@@ -306,9 +309,9 @@ template <typename T2>
 RankThreeTensorTempl<T> &
 RankThreeTensorTempl<T>::operator=(const RankThreeTensorTempl<T2> & a)
 {
-  for (auto i : make_range(LIBMESH_DIM))
-    for (auto j : make_range(LIBMESH_DIM))
-      for (auto k : make_range(LIBMESH_DIM))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
         (*this)(i, j, k) = a(i, j, k);
 
   return *this;

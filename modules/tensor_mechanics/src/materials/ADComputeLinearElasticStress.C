@@ -8,35 +8,45 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADComputeLinearElasticStress.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
+#include "SymmetricRankTwoTensor.h"
+#include "SymmetricRankFourTensor.h"
 
 registerMooseObject("TensorMechanicsApp", ADComputeLinearElasticStress);
+registerMooseObject("TensorMechanicsApp", ADSymmetricLinearElasticStress);
 
+template <typename R2, typename R4>
 InputParameters
-ADComputeLinearElasticStress::validParams()
+ADComputeLinearElasticStressTempl<R2, R4>::validParams()
 {
-  InputParameters params = ADComputeStressBase::validParams();
+  InputParameters params = ADComputeStressBaseTempl<R2>::validParams();
   params.addClassDescription("Compute stress using elasticity for small strains");
   return params;
 }
 
-ADComputeLinearElasticStress::ADComputeLinearElasticStress(const InputParameters & parameters)
-  : ADComputeStressBase(parameters),
+template <typename R2, typename R4>
+ADComputeLinearElasticStressTempl<R2, R4>::ADComputeLinearElasticStressTempl(
+    const InputParameters & parameters)
+  : ADComputeStressBaseTempl<R2>(parameters),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
-    _elasticity_tensor(getADMaterialProperty<RankFourTensor>(_elasticity_tensor_name))
+    _elasticity_tensor(this->template getADMaterialProperty<R4>(_elasticity_tensor_name))
 {
 }
 
+template <typename R2, typename R4>
 void
-ADComputeLinearElasticStress::initialSetup()
+ADComputeLinearElasticStressTempl<R2, R4>::initialSetup()
 {
-  if (this->template hasBlockMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
+  if (this->template hasBlockMaterialProperty<R2>(_base_name + "strain_increment"))
     mooseError("This linear elastic stress calculation only works for small strains; use "
                "ADComputeFiniteStrainElasticStress for simulations using incremental and finite "
                "strains.");
 }
 
+template <typename R2, typename R4>
 void
-ADComputeLinearElasticStress::computeQpStress()
+ADComputeLinearElasticStressTempl<R2, R4>::computeQpStress()
 {
   // stress = C * e
   _stress[_qp] = _elasticity_tensor[_qp] * _mechanical_strain[_qp];
@@ -44,3 +54,6 @@ ADComputeLinearElasticStress::computeQpStress()
   // Assign value for elastic strain, which is equal to the mechanical strain
   _elastic_strain[_qp] = _mechanical_strain[_qp];
 }
+
+template class ADComputeLinearElasticStressTempl<RankTwoTensor, RankFourTensor>;
+template class ADComputeLinearElasticStressTempl<SymmetricRankTwoTensor, SymmetricRankFourTensor>;

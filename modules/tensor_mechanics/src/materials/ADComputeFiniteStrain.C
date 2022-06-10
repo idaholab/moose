@@ -8,40 +8,49 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADComputeFiniteStrain.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
+#include "SymmetricRankTwoTensor.h"
+#include "SymmetricRankFourTensor.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
 
 registerMooseObject("TensorMechanicsApp", ADComputeFiniteStrain);
+registerMooseObject("TensorMechanicsApp", ADSymmetricFiniteStrain);
 
+template <typename R2, typename R4>
 MooseEnum
-ADComputeFiniteStrain::decompositionType()
+ADComputeFiniteStrainTempl<R2, R4>::decompositionType()
 {
   return MooseEnum("TaylorExpansion EigenSolution", "TaylorExpansion");
 }
 
+template <typename R2, typename R4>
 InputParameters
-ADComputeFiniteStrain::validParams()
+ADComputeFiniteStrainTempl<R2, R4>::validParams()
 {
   InputParameters params = ADComputeIncrementalStrainBase::validParams();
   params.addClassDescription(
       "Compute a strain increment and rotation increment for finite strains.");
   params.addParam<MooseEnum>("decomposition_method",
-                             ADComputeFiniteStrain::decompositionType(),
+                             ADComputeFiniteStrainTempl<R2, R4>::decompositionType(),
                              "Methods to calculate the strain and rotation increments");
   return params;
 }
 
-ADComputeFiniteStrain::ADComputeFiniteStrain(const InputParameters & parameters)
-  : ADComputeIncrementalStrainBase(parameters),
-    _Fhat(_fe_problem.getMaxQps()),
+template <typename R2, typename R4>
+ADComputeFiniteStrainTempl<R2, R4>::ADComputeFiniteStrainTempl(const InputParameters & parameters)
+  : ADComputeIncrementalStrainBaseTempl<R2>(parameters),
+    _Fhat(this->_fe_problem.getMaxQps()),
     _decomposition_method(
-        getParam<MooseEnum>("decomposition_method").template getEnum<DecompMethod>())
+        this->template getParam<MooseEnum>("decomposition_method").template getEnum<DecompMethod>())
 {
 }
 
+template <typename R2, typename R4>
 void
-ADComputeFiniteStrain::computeProperties()
+ADComputeFiniteStrainTempl<R2, R4>::computeProperties()
 {
   ADRankTwoTensor ave_Fhat;
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
@@ -72,21 +81,22 @@ ADComputeFiniteStrain::computeProperties()
   if (_volumetric_locking_correction)
     ave_Fhat /= _current_elem_volume;
 
+  const auto ave_Fhat_det = ave_Fhat.det();
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     // Finalize volumetric locking correction
     if (_volumetric_locking_correction)
-      // std::cbrt is not yet supported for dual numbers (MetaPhysicL/issues/36)
-      _Fhat[_qp] *= std::pow(ave_Fhat.det() / _Fhat[_qp].det(), 1.0 / 3.0);
+      _Fhat[_qp] *= std::cbrt(ave_Fhat_det / _Fhat[_qp].det());
 
     computeQpStrain();
   }
 }
 
+template <typename R2, typename R4>
 void
-ADComputeFiniteStrain::computeQpStrain()
+ADComputeFiniteStrainTempl<R2, R4>::computeQpStrain()
 {
-  ADRankTwoTensor total_strain_increment;
+  ADR2 total_strain_increment;
 
   // two ways to calculate these increments: TaylorExpansion(default) or EigenSolution
   computeQpIncrements(total_strain_increment, _rotation_increment[_qp]);
@@ -94,7 +104,7 @@ ADComputeFiniteStrain::computeQpStrain()
   _strain_increment[_qp] = total_strain_increment;
 
   // Remove the eigenstrain increment
-  subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
+  this->subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
 
   if (_dt > 0)
     _strain_rate[_qp] = _strain_increment[_qp] / _dt;
@@ -106,18 +116,17 @@ ADComputeFiniteStrain::computeQpStrain()
   _total_strain[_qp] = _total_strain_old[_qp] + total_strain_increment;
 
   // Rotate strain to current configuration
-  _mechanical_strain[_qp] =
-      _rotation_increment[_qp] * _mechanical_strain[_qp] * _rotation_increment[_qp].transpose();
-  _total_strain[_qp] =
-      _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
+  _mechanical_strain[_qp].rotate(_rotation_increment[_qp]);
+  _total_strain[_qp].rotate(_rotation_increment[_qp]);
 
   if (_global_strain)
     _total_strain[_qp] += (*_global_strain)[_qp];
 }
 
+template <typename R2, typename R4>
 void
-ADComputeFiniteStrain::computeQpIncrements(ADRankTwoTensor & total_strain_increment,
-                                           ADRankTwoTensor & rotation_increment)
+ADComputeFiniteStrainTempl<R2, R4>::computeQpIncrements(ADR2 & total_strain_increment,
+                                                        ADRankTwoTensor & rotation_increment)
 {
   switch (_decomposition_method)
   {
@@ -130,11 +139,11 @@ ADComputeFiniteStrain::computeQpIncrements(ADRankTwoTensor & total_strain_increm
       ADRankTwoTensor A(ADRankTwoTensor::initIdentity);
       A -= invFhat;
 
-      // Cinv - I = A A^T - A - A^T;
-      ADRankTwoTensor Cinv_I = A * A.transpose() - A - A.transpose();
+      // Cinv - I = A A^T - (A + A^T);
+      ADR2 Cinv_I = ADR2::timesTranspose(A) - ADR2::plusTranspose(A);
 
       // strain rate D from Taylor expansion, Chat = (-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
-      total_strain_increment = -Cinv_I * 0.5 + Cinv_I * Cinv_I * 0.25;
+      total_strain_increment = -Cinv_I * 0.5 + Cinv_I.square() * 0.25;
 
       const ADReal a[3] = {invFhat(1, 2) - invFhat(2, 1),
                            invFhat(2, 0) - invFhat(0, 2),
@@ -177,7 +186,6 @@ ADComputeFiniteStrain::computeQpIncrements(ADRankTwoTensor & total_strain_increm
             "Cannot take square root of a number less than or equal to zero in the calculation of "
             "C3_test for the Rashid approximation for the rotation tensor. This zero or negative "
             "number may occur when elements become heavily distorted.");
-
       const ADReal C3 = 0.5 * std::sqrt(C3_test); // sin theta_a/(2 sqrt(q))
 
       // Calculate incremental rotation. Note that this value is the transpose of that from Rashid,
@@ -202,7 +210,7 @@ ADComputeFiniteStrain::computeQpIncrements(ADRankTwoTensor & total_strain_increm
     case DecompMethod::EigenSolution:
     {
       std::vector<ADReal> e_value(3);
-      ADRankTwoTensor e_vector, N1, N2, N3;
+      ADRankTwoTensor e_vector;
 
       const auto Chat = _Fhat[_qp].transpose() * _Fhat[_qp];
       Chat.symmetricEigenvaluesEigenvectors(e_value, e_vector);
@@ -211,11 +219,12 @@ ADComputeFiniteStrain::computeQpIncrements(ADRankTwoTensor & total_strain_increm
       const auto lambda2 = std::sqrt(e_value[1]);
       const auto lambda3 = std::sqrt(e_value[2]);
 
-      N1.vectorOuterProduct(e_vector.column(0), e_vector.column(0));
-      N2.vectorOuterProduct(e_vector.column(1), e_vector.column(1));
-      N3.vectorOuterProduct(e_vector.column(2), e_vector.column(2));
+      // outer product of a vector with itself is guaranteed to be symmetric
+      const auto N1 = ADR2::selfOuterProduct(e_vector.column(0));
+      const auto N2 = ADR2::selfOuterProduct(e_vector.column(1));
+      const auto N3 = ADR2::selfOuterProduct(e_vector.column(2));
 
-      const auto Uhat = N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
+      const ADRankTwoTensor Uhat(N1 * lambda1 + N2 * lambda2 + N3 * lambda3);
       const ADRankTwoTensor invUhat(Uhat.inverse());
 
       rotation_increment = _Fhat[_qp] * invUhat;
@@ -230,3 +239,6 @@ ADComputeFiniteStrain::computeQpIncrements(ADRankTwoTensor & total_strain_increm
                  "EigenSolution.");
   }
 }
+
+template class ADComputeFiniteStrainTempl<RankTwoTensor, RankFourTensor>;
+template class ADComputeFiniteStrainTempl<SymmetricRankTwoTensor, SymmetricRankFourTensor>;

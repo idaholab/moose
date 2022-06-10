@@ -542,14 +542,14 @@ FiniteStrainUObasedCP::calcJacobian()
 {
   RankFourTensor dfedfpinv, deedfe, dfpinvdpk2;
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
         dfedfpinv(i, j, k, j) = _dfgrd_tmp(i, k);
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
       {
         deedfe(i, j, k, i) = deedfe(i, j, k, i) + _fe(k, j) * 0.5;
         deedfe(i, j, k, j) = deedfe(i, j, k, j) + _fe(k, i) * 0.5;
@@ -594,9 +594,9 @@ FiniteStrainUObasedCP::elastoPlasticTangentModuli()
   RankFourTensor deedfe, dsigdpk2dfe, dfedf;
 
   // Fill in the matrix stiffness material property
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
       {
         deedfe(i, j, k, i) = deedfe(i, j, k, i) + _fe(k, j) * 0.5;
         deedfe(i, j, k, j) = deedfe(i, j, k, j) + _fe(k, i) * 0.5;
@@ -607,9 +607,9 @@ FiniteStrainUObasedCP::elastoPlasticTangentModuli()
   pk2fet = _pk2[_qp] * _fe.transpose();
   fepk2 = _fe * _pk2[_qp];
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto l : make_range(Moose::dim))
       {
         tan_mod(i, j, i, l) += pk2fet(l, j);
         tan_mod(i, j, j, l) += fepk2(i, l);
@@ -621,9 +621,9 @@ FiniteStrainUObasedCP::elastoPlasticTangentModuli()
   if (je > 0.0)
     tan_mod /= je;
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto l : make_range(Moose::dim))
         dfedf(i, j, i, l) = _fp_inv(l, j);
 
   _Jacobian_mult[_qp] = tan_mod * dfedf;

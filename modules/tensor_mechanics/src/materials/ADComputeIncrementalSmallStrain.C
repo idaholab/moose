@@ -8,12 +8,19 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADComputeIncrementalSmallStrain.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
+#include "SymmetricRankTwoTensor.h"
+#include "SymmetricRankFourTensor.h"
+
 #include "libmesh/quadrature.h"
 
 registerMooseObject("TensorMechanicsApp", ADComputeIncrementalSmallStrain);
+registerMooseObject("TensorMechanicsApp", ADSymmetricIncrementalSmallStrain);
 
+template <typename R2>
 InputParameters
-ADComputeIncrementalSmallStrain::validParams()
+ADComputeIncrementalSmallStrainTempl<R2>::validParams()
 {
   InputParameters params = ADComputeIncrementalStrainBase::validParams();
   params.addClassDescription(
@@ -21,18 +28,21 @@ ADComputeIncrementalSmallStrain::validParams()
   return params;
 }
 
-ADComputeIncrementalSmallStrain::ADComputeIncrementalSmallStrain(const InputParameters & parameters)
-  : ADComputeIncrementalStrainBase(parameters)
+template <typename R2>
+ADComputeIncrementalSmallStrainTempl<R2>::ADComputeIncrementalSmallStrainTempl(
+    const InputParameters & parameters)
+  : ADComputeIncrementalStrainBaseTempl<R2>(parameters)
 {
 }
 
+template <typename R2>
 void
-ADComputeIncrementalSmallStrain::computeProperties()
+ADComputeIncrementalSmallStrainTempl<R2>::computeProperties()
 {
   ADReal volumetric_strain = 0.0;
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    ADRankTwoTensor total_strain_increment;
+    ADR2 total_strain_increment;
     computeTotalStrainIncrement(total_strain_increment);
 
     _strain_increment[_qp] = total_strain_increment;
@@ -49,15 +59,13 @@ ADComputeIncrementalSmallStrain::computeProperties()
     if (_volumetric_locking_correction)
     {
       const auto correction = (volumetric_strain - _strain_increment[_qp].trace()) / 3.0;
-      _strain_increment[_qp](0, 0) += correction;
-      _strain_increment[_qp](1, 1) += correction;
-      _strain_increment[_qp](2, 2) += correction;
+      _strain_increment[_qp].addIa(correction);
     }
 
     _total_strain[_qp] = _strain_increment[_qp] + _total_strain_old[_qp];
 
     // Remove the Eigen strain increment
-    subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
+    this->subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
 
     // strain rate
     if (_dt > 0)
@@ -73,19 +81,19 @@ ADComputeIncrementalSmallStrain::computeProperties()
   }
 }
 
+template <typename R2>
 void
-ADComputeIncrementalSmallStrain::computeTotalStrainIncrement(
-    ADRankTwoTensor & total_strain_increment)
+ADComputeIncrementalSmallStrainTempl<R2>::computeTotalStrainIncrement(ADR2 & total_strain_increment)
 {
-  // Deformation gradient
-  auto A = ADRankTwoTensor::initializeFromRows(
-      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]); // Deformation gradient
-  auto Fbar =
-      RankTwoTensor ::initializeFromRows((*_grad_disp_old[0])[_qp],
-                                         (*_grad_disp_old[1])[_qp],
-                                         (*_grad_disp_old[2])[_qp]); // Old Deformation gradient
+  // Deformation gradient (symmetrized)
+  const auto A = ADR2::initializeSymmetric(
+      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
+  // Old Deformation gradient (symmetrized)
+  const auto Fbar = ADR2::initializeSymmetric(
+      (*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]);
 
-  A -= Fbar; // A = grad_disp - grad_disp_old
-
-  total_strain_increment = 0.5 * (A + A.transpose());
+  total_strain_increment = A - Fbar;
 }
+
+template class ADComputeIncrementalSmallStrainTempl<RankTwoTensor>;
+template class ADComputeIncrementalSmallStrainTempl<SymmetricRankTwoTensor>;

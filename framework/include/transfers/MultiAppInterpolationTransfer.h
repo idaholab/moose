@@ -51,14 +51,14 @@ protected:
   fillSourceInterpolationPoints(FEProblemBase & from_problem,
                                 const MooseVariableFieldBase & from_var,
                                 const Point & from_app_position,
-                                std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi);
+                                std::unique_ptr<InverseDistanceInterpolation<Moose::dim>> & idi);
 
   void
   interpolateTargetPoints(FEProblemBase & to_problem,
                           MooseVariableFieldBase & to_var,
                           NumericVector<Real> & to_solution,
                           const Point & to_app_position,
-                          const std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi);
+                          const std::unique_ptr<InverseDistanceInterpolation<Moose::dim>> & idi);
 
   void
   subdomainIDsNode(MooseMesh & mesh, const Node & node, std::set<subdomain_id_type> & subdomainids);

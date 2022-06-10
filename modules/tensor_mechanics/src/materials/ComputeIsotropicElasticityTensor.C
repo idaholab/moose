@@ -11,10 +11,12 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeIsotropicElasticityTensor);
 registerMooseObject("TensorMechanicsApp", ADComputeIsotropicElasticityTensor);
+registerMooseObject("TensorMechanicsApp", SymmetricIsotropicElasticityTensor);
+registerMooseObject("TensorMechanicsApp", ADSymmetricIsotropicElasticityTensor);
 
-template <bool is_ad>
+template <bool is_ad, typename T>
 InputParameters
-ComputeIsotropicElasticityTensorTempl<is_ad>::validParams()
+ComputeIsotropicElasticityTensorTempl<is_ad, T>::validParams()
 {
   InputParameters params = ComputeElasticityTensorBase::validParams();
   params.addClassDescription("Compute a constant isotropic elasticity tensor.");
@@ -27,10 +29,10 @@ ComputeIsotropicElasticityTensorTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-ComputeIsotropicElasticityTensorTempl<is_ad>::ComputeIsotropicElasticityTensorTempl(
+template <bool is_ad, typename T>
+ComputeIsotropicElasticityTensorTempl<is_ad, T>::ComputeIsotropicElasticityTensorTempl(
     const InputParameters & parameters)
-  : ComputeElasticityTensorBaseTempl<is_ad>(parameters),
+  : ComputeElasticityTensorBaseTempl<is_ad, T>(parameters),
     _bulk_modulus_set(parameters.isParamSetByUser("bulk_modulus")),
     _lambda_set(parameters.isParamSetByUser("lambda")),
     _poissons_ratio_set(parameters.isParamSetByUser("poissons_ratio")),
@@ -69,9 +71,9 @@ ComputeIsotropicElasticityTensorTempl<is_ad>::ComputeIsotropicElasticityTensorTe
     mooseError("Youngs modulus must be positive in material '" + name() + "'.");
 }
 
-template <bool is_ad>
+template <bool is_ad, typename T>
 void
-ComputeIsotropicElasticityTensorTempl<is_ad>::residualSetup()
+ComputeIsotropicElasticityTensorTempl<is_ad, T>::residualSetup()
 {
   std::vector<Real> iso_const(2);
   Real elas_mod;
@@ -190,12 +192,12 @@ ComputeIsotropicElasticityTensorTempl<is_ad>::residualSetup()
     mooseError("Incorrect combination of elastic properties in ComputeIsotropicElasticityTensor.");
 
   // Fill elasticity tensor
-  _Cijkl.fillFromInputVector(iso_const, RankFourTensor::symmetric_isotropic);
+  _Cijkl.fillFromInputVector(iso_const, T::symmetric_isotropic);
 }
 
-template <bool is_ad>
+template <bool is_ad, typename T>
 void
-ComputeIsotropicElasticityTensorTempl<is_ad>::computeQpElasticityTensor()
+ComputeIsotropicElasticityTensorTempl<is_ad, T>::computeQpElasticityTensor()
 {
   // Assign elasticity tensor at a given quad point
   _elasticity_tensor[_qp] = _Cijkl;
@@ -204,5 +206,7 @@ ComputeIsotropicElasticityTensorTempl<is_ad>::computeQpElasticityTensor()
   _effective_stiffness[_qp] = _effective_stiffness_local;
 }
 
-template class ComputeIsotropicElasticityTensorTempl<false>;
-template class ComputeIsotropicElasticityTensorTempl<true>;
+template class ComputeIsotropicElasticityTensorTempl<false, RankFourTensor>;
+template class ComputeIsotropicElasticityTensorTempl<true, RankFourTensor>;
+template class ComputeIsotropicElasticityTensorTempl<false, SymmetricRankFourTensor>;
+template class ComputeIsotropicElasticityTensorTempl<true, SymmetricRankFourTensor>;

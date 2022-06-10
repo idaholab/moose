@@ -35,6 +35,19 @@
 #include "GeometricSearchInterface.h"
 #include "FunctorInterface.h"
 
+#define usingMaterialBaseMembers                                                                   \
+  usingTransientInterfaceMembers;                                                                  \
+  using MaterialBase::_subproblem;                                                                 \
+  using MaterialBase::_fe_problem;                                                                 \
+  using MaterialBase::_tid;                                                                        \
+  using MaterialBase::_assembly;                                                                   \
+  using MaterialBase::_qp;                                                                         \
+  using MaterialBase::_coord;                                                                      \
+  using MaterialBase::_normals;                                                                    \
+  using MaterialBase::_mesh
+
+// forward declarations
+class MaterialBase;
 class MooseMesh;
 class SubProblem;
 class FaceInfo;

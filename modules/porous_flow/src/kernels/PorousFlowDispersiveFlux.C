@@ -113,7 +113,7 @@ PorousFlowDispersiveFlux::computeQpResidual()
 
     if (velocity_abs > 0.0)
     {
-      v2.vectorOuterProduct(velocity, velocity);
+      v2 = RankTwoTensor::selfOuterProduct(velocity);
 
       // Add longitudinal dispersion to diffusive component
       diffusion += _disp_trans[ph] * velocity_abs;
@@ -168,7 +168,7 @@ PorousFlowDispersiveFlux::computeQpJac(unsigned int jvar) const
 
     if (velocity_abs > 0.0)
     {
-      v2.vectorOuterProduct(velocity, velocity);
+      v2 = RankTwoTensor::selfOuterProduct(velocity);
 
       // Add longitudinal dispersion to diffusive component
       diffusion += _disp_trans[ph] * velocity_abs;
@@ -186,7 +186,7 @@ PorousFlowDispersiveFlux::computeQpJac(unsigned int jvar) const
       dvelocity += _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] *
                    (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
 
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         dvelocity += _dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) *
                      (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
     }
@@ -217,8 +217,8 @@ PorousFlowDispersiveFlux::computeQpJac(unsigned int jvar) const
     if (velocity_abs > 0.0)
     {
       RankTwoTensor dv2a, dv2b;
-      dv2a.vectorOuterProduct(velocity, dvelocity);
-      dv2b.vectorOuterProduct(dvelocity, velocity);
+      dv2a = RankTwoTensor::outerProduct(velocity, dvelocity);
+      dv2b = RankTwoTensor::outerProduct(dvelocity, velocity);
       ddispersion = (_disp_long[ph] - _disp_trans[ph]) * (dv2a + dv2b) / velocity_abs;
       ddispersion -=
           (_disp_long[ph] - _disp_trans[ph]) * v2 * dvelocity_abs / velocity_abs / velocity_abs;

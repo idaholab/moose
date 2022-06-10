@@ -183,21 +183,21 @@ greenGaussGradient(const ElemArg & elem_arg,
     else
     {
       // We have to solve a system
-      const unsigned int sys_dim = LIBMESH_DIM + num_ebfs;
+      const unsigned int sys_dim = Moose::dim + num_ebfs;
       DenseVector<T> x(sys_dim), b(sys_dim);
       DenseMatrix<T> A(sys_dim, sys_dim);
 
-      // Let's make i refer to LIBMESH_DIM indices, and j refer to num_ebfs indices
+      // Let's make i refer to Moose::dim indices, and j refer to num_ebfs indices
 
       // eqn. 1
-      for (const auto i : make_range(unsigned(LIBMESH_DIM)))
+      for (const auto i : make_range(Moose::dim))
       {
         // LHS term 1 coeffs
         A(i, i) = 1;
 
         // LHS term 2 coeffs
         for (const auto j : make_range(num_ebfs))
-          A(i, LIBMESH_DIM + j) = grad_ebf_coeffs[j](i) / volume;
+          A(i, Moose::dim + j) = grad_ebf_coeffs[j](i) / volume;
 
         // RHS
         b(i) = grad_b(i);
@@ -207,24 +207,24 @@ greenGaussGradient(const ElemArg & elem_arg,
       for (const auto j : make_range(num_ebfs))
       {
         // LHS term 1 coeffs
-        A(LIBMESH_DIM + j, LIBMESH_DIM + j) = 1;
+        A(Moose::dim + j, Moose::dim + j) = 1;
 
         // LHS term 2 coeffs
-        for (const auto i : make_range(unsigned(LIBMESH_DIM)))
-          A(LIBMESH_DIM + j, i) = ebf_grad_coeffs[j](i);
+        for (const auto i : make_range(unsigned(Moose::dim)))
+          A(Moose::dim + j, i) = ebf_grad_coeffs[j](i);
 
         // RHS
-        b(LIBMESH_DIM + j) = *ebf_b[j];
+        b(Moose::dim + j) = *ebf_b[j];
       }
 
       A.lu_solve(b, x);
-      for (const auto i : make_range(unsigned(LIBMESH_DIM)))
+      for (const auto i : make_range(Moose::dim))
         grad(i) = x(i);
 
       // Optionally cache the face value information
       if (face_to_value_cache)
         for (const auto j : make_range(num_ebfs))
-          face_to_value_cache->emplace(ebf_faces[j], x(LIBMESH_DIM + j));
+          face_to_value_cache->emplace(ebf_faces[j], x(Moose::dim + j));
     }
 
     return grad;
@@ -314,12 +314,12 @@ greenGaussGradient(const ElemArg & elem_arg,
                    const MooseMesh & mesh)
 {
   TensorValue<T> ret;
-  for (const auto i : make_range(unsigned(LIBMESH_DIM)))
+  for (const auto i : make_range(Moose::dim))
   {
     VectorComponentFunctor<T> scalar_functor(functor, i);
     const auto row_gradient =
         greenGaussGradient(elem_arg, scalar_functor, two_term_boundary_expansion, mesh);
-    for (const auto j : make_range(unsigned(LIBMESH_DIM)))
+    for (const auto j : make_range(unsigned(Moose::dim)))
       ret(i, j) = row_gradient(j);
   }
 
@@ -334,12 +334,12 @@ greenGaussGradient(const FaceArg & face_arg,
                    const MooseMesh & mesh)
 {
   TensorValue<T> ret;
-  for (const auto i : make_range(unsigned(LIBMESH_DIM)))
+  for (const auto i : make_range(unsigned(Moose::dim)))
   {
     VectorComponentFunctor<T> scalar_functor(functor, i);
     const auto row_gradient =
         greenGaussGradient(face_arg, scalar_functor, two_term_boundary_expansion, mesh);
-    for (const auto j : make_range(unsigned(LIBMESH_DIM)))
+    for (const auto j : make_range(unsigned(Moose::dim)))
       ret(i, j) = row_gradient(j);
   }
 

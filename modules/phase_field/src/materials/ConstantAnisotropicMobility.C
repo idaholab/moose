@@ -40,8 +40,8 @@ template <bool is_ad>
 void
 ConstantAnisotropicMobilityTempl<is_ad>::computeQpProperties()
 {
-  for (unsigned int a = 0; a < LIBMESH_DIM; ++a)
-    for (unsigned int b = 0; b < LIBMESH_DIM; ++b)
+  for (const auto a : make_range(Moose::dim))
+    for (const auto b : make_range(Moose::dim))
       _mobility[_qp](a, b) = _mobility_values[a * 3 + b];
 }
 

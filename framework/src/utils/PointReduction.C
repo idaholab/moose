@@ -20,6 +20,13 @@ namespace PointReduction
 Real
 sqr(Real a)
 {
+  mooseDeprecated("use PointReduction::square() instead");
+  return a * a;
+}
+
+Real
+square(Real a)
+{
   return a * a;
 }
 
@@ -35,7 +42,7 @@ perpendicularDistance(const FunctionNode & node,
   const Real x2 = end.first;
   const Real y2 = end.second;
 
-  const Real denom = std::sqrt(sqr(y2 - y1) + sqr(x2 - x1));
+  const Real denom = std::sqrt(square(y2 - y1) + square(x2 - x1));
   mooseAssert(MooseUtils::absoluteFuzzyGreaterThan(denom, 0.0),
               "Line begin and end points must not be the same");
 

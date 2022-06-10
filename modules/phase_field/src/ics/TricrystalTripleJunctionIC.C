@@ -46,14 +46,14 @@ TricrystalTripleJunctionIC::TricrystalTripleJunctionIC(const InputParameters & p
   // Default junction point is the center
   if (!parameters.isParamValid("junction"))
   {
-    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    for (const auto i : make_range(Moose::dim))
       _junction(i) = (_mesh.getMaxInDimension(i) - _mesh.getMinInDimension(i)) / 2.0;
   }
   else
     _junction = getParam<Point>("junction");
 
   // Make sure that _junction is in the domain
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
   {
     if ((_mesh.getMinInDimension(i) > _junction(i)) || (_mesh.getMaxInDimension(i) < _junction(i)))
       paramError("junction", "Triple junction out of bounds");

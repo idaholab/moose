@@ -15,12 +15,13 @@
  * ADComputeLinearElasticStress computes the stress following linear elasticity theory (small
  * strains)
  */
-class ADComputeLinearElasticStress : public ADComputeStressBase
+template <typename R2, typename R4>
+class ADComputeLinearElasticStressTempl : public ADComputeStressBaseTempl<R2>
 {
 public:
   static InputParameters validParams();
 
-  ADComputeLinearElasticStress(const InputParameters & parameters);
+  ADComputeLinearElasticStressTempl(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 
@@ -29,6 +30,14 @@ protected:
 
   /// Name of the elasticity tensor material property
   const std::string _elasticity_tensor_name;
+
   /// Elasticity tensor material property
-  const ADMaterialProperty<RankFourTensor> & _elasticity_tensor;
+  const ADMaterialProperty<R4> & _elasticity_tensor;
+
+  usingComputeStressBaseMembers;
 };
+
+typedef ADComputeLinearElasticStressTempl<RankTwoTensor, RankFourTensor>
+    ADComputeLinearElasticStress;
+typedef ADComputeLinearElasticStressTempl<SymmetricRankTwoTensor, SymmetricRankFourTensor>
+    ADSymmetricLinearElasticStress;

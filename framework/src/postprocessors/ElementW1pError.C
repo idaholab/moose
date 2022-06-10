@@ -46,7 +46,7 @@ ElementW1pError::computeQpIntegral()
   Real val = std::pow(std::abs(funcdiff), _p);
 
   // Add all of the absolute gradient component differences to the pth power
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
     val += std::pow(std::abs(graddiff(i)), _p);
 
   return val;

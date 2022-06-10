@@ -54,7 +54,7 @@ LevelSetOlssonBubble::gradient(Real /*t*/, const Point & p) const
   RealGradient output;
 
   Real g_prime;
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
   {
     g_prime = (p(i) - _center(i)) / (_epsilon * norm);
     output(i) = -(g_prime * std::exp(g)) / ((std::exp(g) + 1) * (std::exp(g) + 1));

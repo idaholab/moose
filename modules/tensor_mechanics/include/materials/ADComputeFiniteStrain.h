@@ -11,34 +11,43 @@
 
 #include "ADComputeIncrementalStrainBase.h"
 
+#define usingComputeFiniteStrainMembers                                                            \
+  usingComputeIncrementalStrainBaseMembers;                                                        \
+  using ADComputeFiniteStrainTempl<R2, R4>::_Fhat
+
 /**
  * ADComputeFiniteStrain defines a strain increment and rotation increment, for finite strains.
  */
-class ADComputeFiniteStrain : public ADComputeIncrementalStrainBase
+template <typename R2, typename R4>
+class ADComputeFiniteStrainTempl : public ADComputeIncrementalStrainBaseTempl<R2>
 {
 public:
   static InputParameters validParams();
 
-  ADComputeFiniteStrain(const InputParameters & parameters);
+  ADComputeFiniteStrainTempl(const InputParameters & parameters);
 
   void computeProperties() override;
 
   static MooseEnum decompositionType();
 
 protected:
+  using ADR2 = Moose::GenericType<R2, true>;
+
   virtual void computeQpStrain();
-  virtual void computeQpIncrements(ADRankTwoTensor & e, ADRankTwoTensor & r);
+  virtual void computeQpIncrements(ADR2 & e, ADRankTwoTensor & r);
 
   std::vector<ADRankTwoTensor> _Fhat;
 
-private:
   enum class DecompMethod
   {
     TaylorExpansion,
     EigenSolution
   };
-
   const DecompMethod _decomposition_method;
 
-protected:
+  usingComputeIncrementalStrainBaseMembers;
 };
+
+typedef ADComputeFiniteStrainTempl<RankTwoTensor, RankFourTensor> ADComputeFiniteStrain;
+typedef ADComputeFiniteStrainTempl<SymmetricRankTwoTensor, SymmetricRankFourTensor>
+    ADSymmetricFiniteStrain;

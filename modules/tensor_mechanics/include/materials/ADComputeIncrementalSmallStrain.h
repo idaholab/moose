@@ -11,23 +11,34 @@
 
 #include "ADComputeIncrementalStrainBase.h"
 
+#define usingComputeIncrementalSmallStrainMembers usingComputeIncrementalStrainBaseMembers
+
 /**
- * ADComputeIncrementalSmallStrain defines a strain increment and rotation increment (=1), for small
- * strains.
+ * ADComputeIncrementalSmallStrainTempl defines a strain increment and rotation increment (=1), for
+ * small strains.
  */
-class ADComputeIncrementalSmallStrain : public ADComputeIncrementalStrainBase
+template <typename R2>
+class ADComputeIncrementalSmallStrainTempl : public ADComputeIncrementalStrainBaseTempl<R2>
 {
 public:
   static InputParameters validParams();
 
-  ADComputeIncrementalSmallStrain(const InputParameters & parameters);
+  ADComputeIncrementalSmallStrainTempl(const InputParameters & parameters);
 
   virtual void computeProperties() override;
 
 protected:
+  using ADR2 = Moose::GenericType<R2, true>;
+
   /**
    * Computes the current and old deformation gradients and passes back the
    * total strain increment tensor.
    */
-  virtual void computeTotalStrainIncrement(ADRankTwoTensor & total_strain_increment);
+  virtual void computeTotalStrainIncrement(ADR2 & total_strain_increment);
+
+  usingComputeIncrementalStrainBaseMembers;
 };
+
+typedef ADComputeIncrementalSmallStrainTempl<RankTwoTensor> ADComputeIncrementalSmallStrain;
+typedef ADComputeIncrementalSmallStrainTempl<SymmetricRankTwoTensor>
+    ADSymmetricIncrementalSmallStrain;

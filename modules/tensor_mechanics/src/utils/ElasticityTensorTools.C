@@ -38,8 +38,8 @@ elasticJacobian(const RankFourTensor & r4t,
   // This is the algorithm that is unrolled below:
   //
   //    Real sum = 0.0;
-  //    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-  //      for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+  //    for (const auto j: make_range(Moose::dim))
+  //      for (const auto l: make_range(Moose::dim))
   //        sum += r4t(i, j, k, l) * grad_phi(l) * grad_test(j);
   //    return sum;
 
@@ -74,9 +74,9 @@ elasticJacobianWC(const RankFourTensor & r4t,
   // d(stress_ij*d(test)/dx_j)/dw_k = d(C_ijmn*eps_mnp*w_p*dtest/dx_j)/dw_k (only nonzero for p ==
   // k)
   Real sum = 0.0;
-  for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-    for (unsigned int m = 0; m < LIBMESH_DIM; ++m)
-      for (unsigned int n = 0; n < LIBMESH_DIM; ++n)
+  for (const auto j : make_range(Moose::dim))
+    for (const auto m : make_range(Moose::dim))
+      for (const auto n : make_range(Moose::dim))
         sum += r4t(i, j, m, n) * PermutationTensor::eps(m, n, k) * grad_test(j);
   return sum * phi;
 }
@@ -91,9 +91,9 @@ momentJacobian(const RankFourTensor & r4t,
   // Jacobian entry: d(eps_ijm*stress_jm*test)/du_k = d(eps_ijm*C_jmln*du_l/dx_n*test)/du_k (only
   // nonzero for l == k)
   Real sum = 0.0;
-  for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-    for (unsigned int m = 0; m < LIBMESH_DIM; ++m)
-      for (unsigned int n = 0; n < LIBMESH_DIM; ++n)
+  for (const auto j : make_range(Moose::dim))
+    for (const auto m : make_range(Moose::dim))
+      for (const auto n : make_range(Moose::dim))
         sum += PermutationTensor::eps(i, j, m) * r4t(j, m, k, n) * grad_phi(n);
   return test * sum;
 }
@@ -104,10 +104,10 @@ momentJacobianWC(const RankFourTensor & r4t, unsigned int i, unsigned int k, Rea
   // Jacobian entry: d(eps_ijm*stress_jm*test)/dw_k = d(eps_ijm*C_jmln*eps_lnp*w_p*test)/dw_k (only
   // nonzero for p ==k)
   Real sum = 0.0;
-  for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-    for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-      for (unsigned int m = 0; m < LIBMESH_DIM; ++m)
-        for (unsigned int n = 0; n < LIBMESH_DIM; ++n)
+  for (const auto j : make_range(Moose::dim))
+    for (const auto l : make_range(Moose::dim))
+      for (const auto m : make_range(Moose::dim))
+        for (const auto n : make_range(Moose::dim))
           sum +=
               PermutationTensor::eps(i, j, m) * r4t(j, m, l, n) * PermutationTensor::eps(l, n, k);
 

@@ -39,8 +39,8 @@ ColumnMajorMatrixTempl<T>::ColumnMajorMatrixTempl(const TypeTensor<T> & rhs)
     _n_entries(LIBMESH_DIM * LIBMESH_DIM),
     _values(LIBMESH_DIM * LIBMESH_DIM)
 {
-  for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto j : make_range(Moose::dim))
+    for (const auto i : make_range(Moose::dim))
       (*this)(i, j) = rhs(i, j);
 }
 
@@ -68,13 +68,13 @@ ColumnMajorMatrixTempl<T>::ColumnMajorMatrixTempl(const TypeVector<T> & col1,
     _values(LIBMESH_DIM * LIBMESH_DIM)
 {
   unsigned int entry = 0;
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  for (const auto i : make_range(Moose::dim))
     _values[entry++] = col1(i);
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  for (const auto i : make_range(Moose::dim))
     _values[entry++] = col2(i);
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  for (const auto i : make_range(Moose::dim))
     _values[entry++] = col3(i);
 }
 

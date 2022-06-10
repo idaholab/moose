@@ -17,6 +17,22 @@
 
 #include <string>
 
+#define usingMaterialMembers                                                                       \
+  usingMaterialBaseMembers;                                                                        \
+  usingCoupleableMembers;                                                                          \
+  using Material::_q_point;                                                                        \
+  using Material::_qrule;                                                                          \
+  using Material::_JxW;                                                                            \
+  using Material::_current_elem;                                                                   \
+  using Material::_current_subdomain_id;                                                           \
+  using Material::_current_side
+
+// forward declarations
+class Material;
+
+template <>
+InputParameters validParams<Material>();
+
 /**
  * Materials compute MaterialProperties.
  */

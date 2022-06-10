@@ -136,18 +136,18 @@ CrystalPlasticitySlipRateGSS::calcFlowDirection(unsigned int qp,
   // Update slip direction and normal with crystal orientation
   for (unsigned int i = 0; i < _variable_size; ++i)
   {
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+    for (const auto j : make_range(Moose::dim))
     {
       mo(i * LIBMESH_DIM + j) = 0.0;
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+      for (const auto k : make_range(Moose::dim))
         mo(i * LIBMESH_DIM + j) =
             mo(i * LIBMESH_DIM + j) + _crysrot[qp](j, k) * _mo(i * LIBMESH_DIM + k);
     }
 
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+    for (const auto j : make_range(Moose::dim))
     {
       no(i * LIBMESH_DIM + j) = 0.0;
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+      for (const auto k : make_range(Moose::dim))
         no(i * LIBMESH_DIM + j) =
             no(i * LIBMESH_DIM + j) + _crysrot[qp](j, k) * _no(i * LIBMESH_DIM + k);
     }
@@ -155,8 +155,8 @@ CrystalPlasticitySlipRateGSS::calcFlowDirection(unsigned int qp,
 
   // Calculate Schmid tensor and resolved shear stresses
   for (unsigned int i = 0; i < _variable_size; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
         flow_direction[i](j, k) = mo(i * LIBMESH_DIM + j) * no(i * LIBMESH_DIM + k);
 }
 

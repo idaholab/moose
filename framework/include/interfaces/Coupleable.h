@@ -17,6 +17,10 @@
 #include "InputParameters.h"
 #include "HasMembers.h"
 
+#define usingCoupleableMembers                                                                     \
+  using Coupleable::_zero;                                                                         \
+  using Coupleable::_grad_zero
+
 // Forward declarations
 class MooseVariableScalar;
 class MooseObject;

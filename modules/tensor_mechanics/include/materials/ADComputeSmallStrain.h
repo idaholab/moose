@@ -11,15 +11,23 @@
 
 #include "ADComputeStrainBase.h"
 
+#define usingComputeSmallStrainMembers usingComputeStrainBaseMembers
+
 /**
  * ADComputeSmallStrain defines a strain tensor, assuming small strains.
  */
-class ADComputeSmallStrain : public ADComputeStrainBase
+template <typename R2>
+class ADComputeSmallStrainTempl : public ADComputeStrainBaseTempl<R2>
 {
 public:
   static InputParameters validParams();
 
-  ADComputeSmallStrain(const InputParameters & parameters);
+  ADComputeSmallStrainTempl(const InputParameters & parameters);
 
   virtual void computeProperties() override;
+
+  usingComputeStrainBaseMembers;
 };
+
+typedef ADComputeSmallStrainTempl<RankTwoTensor> ADComputeSmallStrain;
+typedef ADComputeSmallStrainTempl<SymmetricRankTwoTensor> ADSymmetricSmallStrain;

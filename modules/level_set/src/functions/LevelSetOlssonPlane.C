@@ -52,7 +52,7 @@ LevelSetOlssonPlane::gradient(Real /*t*/, const Point & p) const
   RealGradient output;
   Real x_prime;
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
   {
     x_prime = -unit_normal(i) / _epsilon;
     output(i) = -(x_prime * std::exp(x)) / Utility::pow<2>(std::exp(x) + 1);

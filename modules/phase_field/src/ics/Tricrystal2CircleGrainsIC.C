@@ -33,7 +33,7 @@ Tricrystal2CircleGrainsIC::Tricrystal2CircleGrainsIC(const InputParameters & par
     paramError("op_num", "Tricrystal ICs must have op_num = 3");
 
   // Set up domain bounds with mesh tools
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  for (const auto i : make_range(Moose::dim))
   {
     _bottom_left(i) = _mesh.getMinInDimension(i);
     _top_right(i) = _mesh.getMaxInDimension(i);

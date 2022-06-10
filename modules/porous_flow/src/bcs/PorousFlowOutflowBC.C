@@ -231,7 +231,7 @@ PorousFlowOutflowBC::jac(unsigned int jvar) const
     {
       darcyprime += _normals[_qp] * (_dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] *
                                      (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity));
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         darcyprime +=
             _normals[_qp] * (_dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) *
                              (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity));
