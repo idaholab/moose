@@ -13,11 +13,14 @@
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
 #include "ADRankThreeTensorForward.h"
+#include "ADSymmetricRankTwoTensorForward.h"
 #include "MooseUtils.h"
+#include "MathUtils.h"
 
 // Any requisite includes here
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
+#include "libmesh/vector_value.h"
 #include "libmesh/int_range.h"
 
 #include "metaphysicl/raw_type.h"
@@ -75,6 +78,11 @@ template <typename T>
 class RankTwoTensorTempl : public TensorValue<T>
 {
 public:
+  ///@{ tensor dimension and dimension squared
+  static constexpr unsigned int N = Moose::dim;
+  static constexpr unsigned int N2 = N * N;
+  ///@}
+
   // Select initialization
   enum InitMethod
   {
@@ -102,32 +110,46 @@ public:
     general = 9
   };
 
-  /**
-   * Constructor that takes in 3 vectors and uses them to create rows
-   * _coords[0][i] = row1(i), _coords[1][i] = row2(i), _coords[2][i] = row3(i)
-   */
+  // Deprecated constructor (replaced by initializeFromRows)
   RankTwoTensorTempl(const TypeVector<T> & row1,
                      const TypeVector<T> & row2,
                      const TypeVector<T> & row3);
 
-  /// named constructor for initializing from row vectors
-  static RankTwoTensorTempl initializeFromRows(const TypeVector<T> & row0,
-                                               const TypeVector<T> & row1,
-                                               const TypeVector<T> & row2);
+  /**
+   * Named constructor for initializing symetrically. The supplied vectors are
+   * used as row and column vectors to construct two tensors respectively, that
+   * are averaged to create a symmetric tensor.
+   */
+  [[nodiscard]] static RankTwoTensorTempl
+  initializeSymmetric(const TypeVector<T> & v0, const TypeVector<T> & v1, const TypeVector<T> & v2);
 
-  /// named constructor for initializing from column vectors
-  static RankTwoTensorTempl initializeFromColumns(const TypeVector<T> & col0,
-                                                  const TypeVector<T> & col1,
-                                                  const TypeVector<T> & col2);
+  /// Named constructor for initializing from row vectors
+  [[nodiscard]] static RankTwoTensorTempl initializeFromRows(const TypeVector<T> & row0,
+                                                             const TypeVector<T> & row1,
+                                                             const TypeVector<T> & row2);
+
+  /// Named constructor for initializing from column vectors
+  [[nodiscard]] static RankTwoTensorTempl initializeFromColumns(const TypeVector<T> & col0,
+                                                                const TypeVector<T> & col1,
+                                                                const TypeVector<T> & col2);
 
   /// Constructor that proxies the fillFromInputVector method
   RankTwoTensorTempl(const std::vector<T> & input) { this->fillFromInputVector(input); };
 
   /// Initialization list replacement constructors, 6 arguments
-  RankTwoTensorTempl(T S11, T S22, T S33, T S23, T S13, T S12);
+  RankTwoTensorTempl(
+      const T & S11, const T & S22, const T & S33, const T & S23, const T & S13, const T & S12);
 
   /// Initialization list replacement constructors, 9 arguments
-  RankTwoTensorTempl(T S11, T S21, T S31, T S12, T S22, T S32, T S13, T S23, T S33);
+  RankTwoTensorTempl(const T & S11,
+                     const T & S21,
+                     const T & S31,
+                     const T & S12,
+                     const T & S22,
+                     const T & S32,
+                     const T & S13,
+                     const T & S23,
+                     const T & S33);
 
   /// Copy assignment operator must be defined if used
   RankTwoTensorTempl(const RankTwoTensorTempl<T> & a) = default;
@@ -138,6 +160,18 @@ public:
   /// Copy constructor from TypeTensor<T>
   RankTwoTensorTempl(const TypeTensor<T> & a) : TensorValue<T>(a) {}
 
+  /// Copy constructor from SymmetricRankTwoTensor (delegates)
+  template <typename T2>
+  RankTwoTensorTempl(const SymmetricRankTwoTensorTempl<T2> & a)
+    : RankTwoTensorTempl<T>(a(0),
+                            a(1),
+                            a(2),
+                            a(3) / MathUtils::sqrt2,
+                            a(4) / MathUtils::sqrt2,
+                            a(5) / MathUtils::sqrt2)
+  {
+  }
+
   /// Construct from other template
   template <typename T2>
   RankTwoTensorTempl(const RankTwoTensorTempl<T2> & a) : TensorValue<T>(a)
@@ -145,10 +179,10 @@ public:
   }
 
   // Named constructors
-  static RankTwoTensorTempl Identity() { return RankTwoTensorTempl(initIdentity); }
+  [[nodiscard]] static RankTwoTensorTempl Identity() { return RankTwoTensorTempl(initIdentity); }
 
   /// Static method for use in validParams for getting the "fill_method"
-  static MooseEnum fillMethodEnum();
+  [[nodiscard]] static MooseEnum fillMethodEnum();
 
   /**
    * fillFromInputVector takes 6 or 9 inputs to fill in the Rank-2 tensor.
@@ -169,9 +203,22 @@ public:
    */
   void fillFromScalarVariable(const VariableValue & scalar_variable);
 
-public:
   /// returns _coords[i][c], ie, column c, with c = 0, 1, 2
-  TypeVector<T> column(const unsigned int c) const;
+  VectorValue<T> column(const unsigned int c) const;
+
+  /// return the matrix multiplied with its transpose A*A^T (guaranteed symmetric)
+  [[nodiscard]] static RankTwoTensorTempl<T> timesTranspose(const RankTwoTensorTempl<T> &);
+
+  /// return the matrix multiplied with its transpose A^T*A (guaranteed symmetric)
+  [[nodiscard]] static RankTwoTensorTempl<T> transposeTimes(const RankTwoTensorTempl<T> &);
+
+  /// return the matrix plus its transpose A+A^T (guaranteed symmetric)
+  [[nodiscard]] static RankTwoTensorTempl<T> plusTranspose(const RankTwoTensorTempl<T> &);
+
+  /**
+   * Returns the matrix squared
+   */
+  RankTwoTensorTempl<T> square() const;
 
   /**
    * Returns a rotated version of the tensor data given a rank two tensor rotation tensor
@@ -319,15 +366,15 @@ public:
   RankTwoTensorTempl<T> dtrace() const;
 
   /**
-   * Denote the _coords[i][j] by A_ij, then
-   * S_ij = A_ij - de_ij*tr(A)/3
-   * Then this returns (S_ij + S_ji)*(S_ij + S_ji)/8
-   * Note the explicit symmeterisation
+   * Calculates the second invariant (I2) of a tensor
    */
   T generalSecondInvariant() const;
 
   /**
-   * Calculates the second invariant (I2) of a tensor
+   * Denote the _vals[i][j] by A_ij, then
+   * S_ij = A_ij - de_ij*tr(A)/3
+   * Then this returns (S_ij + S_ji)*(S_ij + S_ji)/8
+   * Note the explicit symmeterisation
    */
   T secondInvariant() const;
 
@@ -464,17 +511,6 @@ public:
   void d2symmetricEigenvalues(std::vector<RankFourTensorTempl<T>> & deriv) const;
 
   /**
-   * Uses the petscblaslapack.h LAPACKsyev_ routine to find, for symmetric _coords:
-   *  (1) the eigenvalues (if calculation_type == "N")
-   *  (2) the eigenvalues and eigenvectors (if calculation_type == "V")
-   * @param calculation_type If "N" then calculation eigenvalues only
-   * @param eigvals Eigenvalues are placed in this array, in ascending order
-   * @param a Eigenvectors are placed in this array if calculation_type == "V".
-   * See code in dsymmetricEigenvalues for extracting eigenvectors from the a output.
-   */
-  void syev(const char * calculation_type, std::vector<T> & eigvals, std::vector<T> & a) const;
-
-  /**
    * Uses the petscblaslapack.h LAPACKsyev_ routine to perform RU decomposition and obtain the
    * rotation tensor.
    */
@@ -490,17 +526,24 @@ public:
    * The first real scales the random number.
    * The second real offsets the uniform random number
    */
-  static RankTwoTensorTempl<T> genRandomTensor(T, T);
+  [[nodiscard]] static RankTwoTensorTempl<T> genRandomTensor(T, T);
 
   /**
    * This function generates a random symmetric rank two tensor.
    * The first real scales the random number.
    * The second real offsets the uniform random number
    */
-  static RankTwoTensorTempl<T> genRandomSymmTensor(T, T);
+  [[nodiscard]] static RankTwoTensorTempl<T> genRandomSymmTensor(T, T);
+
+  /// RankTwoTensorTempl<T> from outer product of vectors (sets the current tensor and should be deprecated)
+  void vectorOuterProduct(const TypeVector<T> &, const TypeVector<T> &);
 
   /// RankTwoTensorTempl<T> from outer product of vectors
-  void vectorOuterProduct(const TypeVector<T> &, const TypeVector<T> &);
+  [[nodiscard]] static RankTwoTensorTempl<T> outerProduct(const TypeVector<T> &,
+                                                          const TypeVector<T> &);
+
+  /// RankTwoTensorTempl<T> from outer product of a vector with itself
+  [[nodiscard]] static RankTwoTensorTempl<T> selfOuterProduct(const TypeVector<T> &);
 
   /// Return real tensor of a rank two tensor
   void fillRealTensor(TensorValue<T> &);
@@ -517,13 +560,25 @@ public:
   /// set the tensor to the identity matrix
   void setToIdentity();
 
+protected:
+  /**
+   * Uses the petscblaslapack.h LAPACKsyev_ routine to find, for symmetric _coords:
+   *  (1) the eigenvalues (if calculation_type == "N")
+   *  (2) the eigenvalues and eigenvectors (if calculation_type == "V")
+   * @param calculation_type If "N" then calculation eigenvalues only
+   * @param eigvals Eigenvalues are placed in this array, in ascending order
+   * @param a Eigenvectors are placed in this array if calculation_type == "V".
+   * See code in dsymmetricEigenvalues for extracting eigenvectors from the a output.
+   */
+  void syev(const char * calculation_type, std::vector<T> & eigvals, std::vector<T> & a) const;
+
 private:
-  static constexpr unsigned int N = LIBMESH_DIM;
-  static constexpr unsigned int N2 = N * N;
   static constexpr Real identityCoords[N2] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 
   template <class T2>
   friend void dataStore(std::ostream &, RankTwoTensorTempl<T2> &, void *);
+
+  using TensorValue<T>::_coords;
 
   template <class T2>
   friend void dataLoad(std::istream &, RankTwoTensorTempl<T2> &, void *);
@@ -543,8 +598,8 @@ struct RawType<RankTwoTensorTempl<T>>
   static value_type value(const RankTwoTensorTempl<T> & in)
   {
     value_type ret;
-    for (auto i : make_range(LIBMESH_DIM))
-      for (auto j : make_range(LIBMESH_DIM))
+    for (auto i : make_range(RankTwoTensorTempl<T>::N))
+      for (auto j : make_range(RankTwoTensorTempl<T>::N))
         ret(i, j) = raw_value(in(i, j));
 
     return ret;
@@ -624,19 +679,18 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
   // projection tensor
   RankFourTensorTempl<T> proj_pos;
   RankFourTensorTempl<T> Gab, Gba;
-  RankTwoTensorTempl<T> Ma, Mb;
 
   for (auto a : make_range(N))
   {
-    Ma.vectorOuterProduct(eigvec.column(a), eigvec.column(a));
+    const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
     proj_pos += d[a] * Ma.outerProduct(Ma);
   }
 
   for (auto a : make_range(N))
     for (auto b : make_range(a))
     {
-      Ma.vectorOuterProduct(eigvec.column(a), eigvec.column(a));
-      Mb.vectorOuterProduct(eigvec.column(b), eigvec.column(b));
+      const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
+      const auto Mb = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
 
       Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);
       Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);

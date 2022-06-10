@@ -110,7 +110,7 @@ FlowModelSinglePhase::addInitialConditions()
     if (_output_vector_velocity)
     {
       std::vector<VariableName> var_name = {VELOCITY_X, VELOCITY_Y, VELOCITY_Z};
-      for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+      for (const auto i : make_range(Moose::dim))
       {
         std::string class_name = "VectorVelocityIC";
         InputParameters params = _factory.getValidParams(class_name);
@@ -360,7 +360,7 @@ FlowModelSinglePhase::addMooseObjects()
       execute_on = {EXEC_INITIAL, EXEC_TIMESTEP_END};
 
       std::vector<AuxVariableName> var_names = {VELOCITY_X, VELOCITY_Y, VELOCITY_Z};
-      for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+      for (const auto i : make_range(Moose::dim))
       {
         std::string class_name = "ADVectorVelocityComponentAux";
         InputParameters params = _factory.getValidParams(class_name);

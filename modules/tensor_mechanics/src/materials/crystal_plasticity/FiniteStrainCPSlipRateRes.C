@@ -194,14 +194,14 @@ FiniteStrainCPSlipRateRes::calcDtauDsliprate()
     dfpinvdsliprate[i] = -_fp_old_inv * _s0[i] * _dt;
   }
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
         dfedfpinv(i, j, k, j) = _dfgrd_tmp(i, k);
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
       {
         deedfe(i, j, k, i) = deedfe(i, j, k, i) + _fe(k, j) * 0.5;
         deedfe(i, j, k, j) = deedfe(i, j, k, j) + _fe(k, i) * 0.5;

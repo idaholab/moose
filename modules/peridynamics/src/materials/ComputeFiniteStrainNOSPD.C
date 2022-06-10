@@ -173,7 +173,7 @@ ComputeFiniteStrainNOSPD::computeQpStrainRotationIncrements(RankTwoTensor & tota
     case DecompMethod::EigenSolution:
     {
       std::vector<Real> e_value(3);
-      RankTwoTensor e_vector, N1, N2, N3;
+      RankTwoTensor e_vector;
 
       RankTwoTensor Chat = _Fhat[_qp].transpose() * _Fhat[_qp];
       Chat.symmetricEigenvaluesEigenvectors(e_value, e_vector);
@@ -182,9 +182,9 @@ ComputeFiniteStrainNOSPD::computeQpStrainRotationIncrements(RankTwoTensor & tota
       const Real lambda2 = std::sqrt(e_value[1]);
       const Real lambda3 = std::sqrt(e_value[2]);
 
-      N1.vectorOuterProduct(e_vector.column(0), e_vector.column(0));
-      N2.vectorOuterProduct(e_vector.column(1), e_vector.column(1));
-      N3.vectorOuterProduct(e_vector.column(2), e_vector.column(2));
+      const auto N1 = RankTwoTensor::selfOuterProduct(e_vector.column(0));
+      const auto N2 = RankTwoTensor::selfOuterProduct(e_vector.column(1));
+      const auto N3 = RankTwoTensor::selfOuterProduct(e_vector.column(2));
 
       RankTwoTensor Uhat = N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
       RankTwoTensor invUhat(Uhat.inverse());

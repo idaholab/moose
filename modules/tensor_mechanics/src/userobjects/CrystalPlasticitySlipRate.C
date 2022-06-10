@@ -75,7 +75,7 @@ CrystalPlasticitySlipRate::getSlipSystems()
   for (unsigned int i = 0; i < _variable_size; ++i)
   {
     // Read the slip normal
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+    for (const auto j : make_range(Moose::dim))
       if (!(fileslipsys >> vec[j]))
         mooseError(
             "CrystalPlasticitySlipRate Error: Premature end of file reading slip system file \n");
@@ -89,7 +89,7 @@ CrystalPlasticitySlipRate::getSlipSystems()
       _no(i * LIBMESH_DIM + j) = vec[j] / mag;
 
     // Read the slip direction
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+    for (const auto j : make_range(Moose::dim))
       if (!(fileslipsys >> vec[j]))
         mooseError(
             "CrystalPlasticitySlipRate Error: Premature end of file reading slip system file \n");
@@ -98,11 +98,11 @@ CrystalPlasticitySlipRate::getSlipSystems()
     mag = Utility::pow<2>(vec[0]) + Utility::pow<2>(vec[1]) + Utility::pow<2>(vec[2]);
     mag = std::sqrt(mag);
 
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+    for (const auto j : make_range(Moose::dim))
       _mo(i * LIBMESH_DIM + j) = vec[j] / mag;
 
     mag = 0.0;
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+    for (const auto j : make_range(Moose::dim))
       mag += _mo(i * LIBMESH_DIM + j) * _no(i * LIBMESH_DIM + j);
 
     if (std::abs(mag) > 1e-8)

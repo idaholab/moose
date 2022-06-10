@@ -553,8 +553,8 @@ RichardsMaterial::computeSUPG()
       _tauvel_SUPG[qp][i] = tau * vel;
 
       RealTensorValue dtauvel_dgradp = tau * dvel_dgradp;
-      for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-        for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+      for (const auto j : make_range(Moose::dim))
+        for (const auto k : make_range(Moose::dim))
           dtauvel_dgradp(j, k) +=
               dtau_dgradp(j) * vel(k); // this is outerproduct - maybe libmesh can do it better?
       for (unsigned int j = 0; j < _num_p; ++j)
@@ -581,8 +581,8 @@ RichardsMaterial::computeProperties()
     _porosity_old[qp] = _material_por + _por_change_old[qp];
 
     _permeability[qp] = _material_perm;
-    for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-      for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+    for (const auto i : make_range(Moose::dim))
+      for (const auto j : make_range(Moose::dim))
         _permeability[qp](i, j) *= std::pow(10, (*_perm_change[LIBMESH_DIM * i + j])[qp]);
 
     _gravity[qp] = _material_gravity;

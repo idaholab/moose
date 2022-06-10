@@ -200,7 +200,7 @@ AbaqusUMATStress::computeQpStress()
   }
 
   // current coordinates
-  for (const auto i : make_range(LIBMESH_DIM))
+  for (const auto i : make_range(Moose::dim))
     _aqCOORDS[i] = _q_point[_qp](i);
 
   // zero out Jacobian contribution
@@ -306,7 +306,7 @@ AbaqusUMATStress::computeQpStress()
   _stress[_qp].rotate(_rotation_increment[_qp]);
 
   // Build Jacobian matrix from UMAT's Voigt non-standard order to fourth order tensor.
-  const unsigned int N = LIBMESH_DIM;
+  const unsigned int N = Moose::dim;
   const unsigned int ntens = N * (N + 1) / 2;
   const int nskip = N - 1;
 

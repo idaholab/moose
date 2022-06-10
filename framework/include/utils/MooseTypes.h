@@ -11,11 +11,13 @@
 
 #include "Moose.h"
 #include "ADReal.h"
+#include "ChainedReal.h"
+#include "ChainedADReal.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankThreeTensorForward.h"
 #include "ADRankFourTensorForward.h"
-#include "ChainedReal.h"
-#include "ChainedADReal.h"
+#include "ADSymmetricRankTwoTensorForward.h"
+#include "ADSymmetricRankFourTensorForward.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
@@ -136,10 +138,10 @@ namespace libMesh
 template <typename>
 class VectorValue;
 typedef VectorValue<Real> RealVectorValue;
-typedef Eigen::Matrix<Real, LIBMESH_DIM, 1> RealDIMValue;
+typedef Eigen::Matrix<Real, Moose::dim, 1> RealDIMValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealEigenVector;
-typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> RealVectorArrayValue;
-typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> RealTensorArrayValue;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim> RealVectorArrayValue;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim * Moose::dim> RealTensorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealEigenMatrix;
 template <typename>
 class TypeVector;
@@ -161,17 +163,17 @@ namespace TensorTools
 template <>
 struct IncrementRank<Eigen::Matrix<Real, Eigen::Dynamic, 1>>
 {
-  typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> type;
+  typedef Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim> type;
 };
 
 template <>
-struct IncrementRank<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM>>
+struct IncrementRank<Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim>>
 {
-  typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> type;
+  typedef Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim * Moose::dim> type;
 };
 
 template <>
-struct DecrementRank<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM>>
+struct DecrementRank<Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim>>
 {
   typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> type;
 };
@@ -382,6 +384,18 @@ struct ADType<RankFourTensor>
 {
   typedef ADRankFourTensor type;
 };
+
+template <>
+struct ADType<SymmetricRankTwoTensor>
+{
+  typedef ADSymmetricRankTwoTensor type;
+};
+template <>
+struct ADType<SymmetricRankFourTensor>
+{
+  typedef ADSymmetricRankFourTensor type;
+};
+
 template <template <typename> class W>
 struct ADType<W<Real>>
 {

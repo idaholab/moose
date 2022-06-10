@@ -64,12 +64,12 @@ ComputeLinearElasticPFFractureStress::computeStrainSpectral(Real & F_pos, Real &
   // Calculate tensors of outerproduct of eigen vectors
   std::vector<RankTwoTensor> etens(LIBMESH_DIM);
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    etens[i].vectorOuterProduct(eigvec.column(i), eigvec.column(i));
+  for (const auto i : make_range(Moose::dim))
+    etens[i] = RankTwoTensor::selfOuterProduct(eigvec.column(i));
 
   // Separate out positive and negative eigen values
   std::vector<Real> epos(LIBMESH_DIM), eneg(LIBMESH_DIM);
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
   {
     epos[i] = (std::abs(eigval[i]) + eigval[i]) / 2.0;
     eneg[i] = -(std::abs(eigval[i]) - eigval[i]) / 2.0;
@@ -77,7 +77,7 @@ ComputeLinearElasticPFFractureStress::computeStrainSpectral(Real & F_pos, Real &
 
   // Seprate positive and negative sums of all eigenvalues
   Real etr = 0.0;
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
     etr += eigval[i];
 
   const Real etrpos = (std::abs(etr) + etr) / 2.0;
@@ -85,7 +85,7 @@ ComputeLinearElasticPFFractureStress::computeStrainSpectral(Real & F_pos, Real &
 
   // Calculate the tensile (postive) and compressive (negative) parts of stress
   RankTwoTensor stress0pos, stress0neg;
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
   {
     stress0pos += etens[i] * (lambda * etrpos + 2.0 * mu * epos[i]);
     stress0neg += etens[i] * (lambda * etrneg + 2.0 * mu * eneg[i]);
@@ -93,7 +93,7 @@ ComputeLinearElasticPFFractureStress::computeStrainSpectral(Real & F_pos, Real &
 
   // sum squares of epos and eneg
   Real pval(0.0), nval(0.0);
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
   {
     pval += epos[i] * epos[i];
     nval += eneg[i] * eneg[i];

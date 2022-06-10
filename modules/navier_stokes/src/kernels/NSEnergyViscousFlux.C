@@ -66,7 +66,7 @@ NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
         // Return value
         Real value = 0.0;
 
-        for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+        for (const auto k : make_range(Moose::dim))
         {
           Real intermediate_value = 0.0;
 
@@ -92,7 +92,7 @@ NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
         // into Point objects.
         const unsigned int m_local = m - 1;
 
-        for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+        for (const auto k : make_range(Moose::dim))
         {
           Real intermediate_value = tau(k, m_local) * phij / rho;
 

@@ -42,8 +42,8 @@ PhaseNormalTensor::computeQpProperties()
 
   if (magnitude > 0.0)
   {
-    RealVectorValue vector = _grad_u[_qp] / magnitude;
-    _normal_tensor[_qp].vectorOuterProduct(vector, vector);
+    const RealVectorValue vector = _grad_u[_qp] / magnitude;
+    _normal_tensor[_qp] = RankTwoTensor::selfOuterProduct(vector);
   }
   else
     _normal_tensor[_qp].zero();

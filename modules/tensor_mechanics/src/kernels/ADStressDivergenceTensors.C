@@ -9,12 +9,15 @@
 
 #include "ADStressDivergenceTensors.h"
 #include "RankTwoTensor.h"
+#include "SymmetricRankTwoTensor.h"
 #include "libmesh/quadrature.h"
 
 registerMooseObject("TensorMechanicsApp", ADStressDivergenceTensors);
+registerMooseObject("TensorMechanicsApp", ADSymmetricStressDivergenceTensors);
 
+template <typename R2>
 InputParameters
-ADStressDivergenceTensors::validParams()
+ADStressDivergenceTensorsTempl<R2>::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addClassDescription("Stress divergence kernel with automatic differentiation for the "
@@ -36,10 +39,12 @@ ADStressDivergenceTensors::validParams()
   return params;
 }
 
-ADStressDivergenceTensors::ADStressDivergenceTensors(const InputParameters & parameters)
+template <typename R2>
+ADStressDivergenceTensorsTempl<R2>::ADStressDivergenceTensorsTempl(
+    const InputParameters & parameters)
   : ADKernel(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _stress(getADMaterialProperty<RankTwoTensor>(_base_name + "stress")),
+    _stress(getADMaterialProperty<R2>(_base_name + "stress")),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
@@ -59,16 +64,18 @@ ADStressDivergenceTensors::ADStressDivergenceTensors(const InputParameters & par
     mooseError("Volumetric locking correction should be set to false for 1-D problems.");
 }
 
+template <typename R2>
 void
-ADStressDivergenceTensors::initialSetup()
+ADStressDivergenceTensorsTempl<R2>::initialSetup()
 {
   if (getBlockCoordSystem() != Moose::COORD_XYZ)
     mooseError(
         "The coordinate system in the Problem block must be set to XYZ for cartesian geometries.");
 }
 
+template <typename R2>
 ADReal
-ADStressDivergenceTensors::computeQpResidual()
+ADStressDivergenceTensorsTempl<R2>::computeQpResidual()
 {
   ADReal residual = _stress[_qp].row(_component) * _grad_test[_i][_qp];
 
@@ -85,8 +92,9 @@ ADStressDivergenceTensors::computeQpResidual()
   return residual;
 }
 
+template <typename R2>
 void
-ADStressDivergenceTensors::precalculateResidual()
+ADStressDivergenceTensorsTempl<R2>::precalculateResidual()
 {
   if (!_volumetric_locking_correction)
     return;
@@ -106,3 +114,6 @@ ADStressDivergenceTensors::precalculateResidual()
     _avg_grad_test[_i] /= ad_current_elem_volume;
   }
 }
+
+template class ADStressDivergenceTensorsTempl<RankTwoTensor>;
+template class ADStressDivergenceTensorsTempl<SymmetricRankTwoTensor>;

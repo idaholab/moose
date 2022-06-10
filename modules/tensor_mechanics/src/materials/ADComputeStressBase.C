@@ -9,10 +9,11 @@
 
 #include "ADComputeStressBase.h"
 #include "RankTwoTensor.h"
-#include "RankFourTensor.h"
+#include "SymmetricRankTwoTensor.h"
 
+template <typename R2>
 InputParameters
-ADComputeStressBase::validParams()
+ADComputeStressBaseTempl<R2>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addParam<std::string>("base_name",
@@ -27,12 +28,13 @@ ADComputeStressBase::validParams()
   return params;
 }
 
-ADComputeStressBase::ADComputeStressBase(const InputParameters & parameters)
+template <typename R2>
+ADComputeStressBaseTempl<R2>::ADComputeStressBaseTempl(const InputParameters & parameters)
   : Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _mechanical_strain(getADMaterialProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
-    _stress(declareADProperty<RankTwoTensor>(_base_name + "stress")),
-    _elastic_strain(declareADProperty<RankTwoTensor>(_base_name + "elastic_strain")),
+    _mechanical_strain(getADMaterialProperty<R2>(_base_name + "mechanical_strain")),
+    _stress(declareADProperty<R2>(_base_name + "stress")),
+    _elastic_strain(declareADProperty<R2>(_base_name + "elastic_strain")),
     _extra_stresses(getParam<std::vector<MaterialPropertyName>>("extra_stress_names").size())
 {
   if (getParam<bool>("use_displaced_mesh"))
@@ -41,18 +43,20 @@ ADComputeStressBase::ADComputeStressBase(const InputParameters & parameters)
   const std::vector<MaterialPropertyName> extra_stress_names =
       getParam<std::vector<MaterialPropertyName>>("extra_stress_names");
   for (MooseIndex(_extra_stresses) i = 0; i < _extra_stresses.size(); ++i)
-    _extra_stresses[i] = &getMaterialProperty<RankTwoTensor>(extra_stress_names[i]);
+    _extra_stresses[i] = &getMaterialProperty<R2>(extra_stress_names[i]);
 }
 
+template <typename R2>
 void
-ADComputeStressBase::initQpStatefulProperties()
+ADComputeStressBaseTempl<R2>::initQpStatefulProperties()
 {
   _elastic_strain[_qp].zero();
   _stress[_qp].zero();
 }
 
+template <typename R2>
 void
-ADComputeStressBase::computeQpProperties()
+ADComputeStressBaseTempl<R2>::computeQpProperties()
 {
   computeQpStress();
 
@@ -60,3 +64,6 @@ ADComputeStressBase::computeQpProperties()
   for (MooseIndex(_extra_stresses) i = 0; i < _extra_stresses.size(); ++i)
     _stress[_qp] += (*_extra_stresses[i])[_qp];
 }
+
+template class ADComputeStressBaseTempl<RankTwoTensor>;
+template class ADComputeStressBaseTempl<SymmetricRankTwoTensor>;

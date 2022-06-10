@@ -727,13 +727,13 @@ SolutionUserObject::pointValue(Real libmesh_dbg_var(t),
     if (_transformation_order[trans_num] == "rotation0")
       pt = _r0 * pt;
     else if (_transformation_order[trans_num] == "translation")
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         pt(i) -= _translation[i];
     else if (_transformation_order[trans_num] == "scale")
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         pt(i) /= _scale[i];
     else if (_transformation_order[trans_num] == "scale_multiplier")
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         pt(i) *= _scale_multiplier[i];
     else if (_transformation_order[trans_num] == "rotation1")
       pt = _r1 * pt;
@@ -776,13 +776,13 @@ SolutionUserObject::discontinuousPointValue(Real libmesh_dbg_var(t),
     if (_transformation_order[trans_num] == "rotation0")
       pt = _r0 * pt;
     else if (_transformation_order[trans_num] == "translation")
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         pt(i) -= _translation[i];
     else if (_transformation_order[trans_num] == "scale")
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         pt(i) /= _scale[i];
     else if (_transformation_order[trans_num] == "scale_multiplier")
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         pt(i) *= _scale_multiplier[i];
     else if (_transformation_order[trans_num] == "rotation1")
       pt = _r1 * pt;
@@ -894,13 +894,13 @@ SolutionUserObject::pointValueGradient(Real libmesh_dbg_var(t),
     if (_transformation_order[trans_num] == "rotation0")
       pt = _r0 * pt;
     else if (_transformation_order[trans_num] == "translation")
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         pt(i) -= _translation[i];
     else if (_transformation_order[trans_num] == "scale")
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         pt(i) /= _scale[i];
     else if (_transformation_order[trans_num] == "scale_multiplier")
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         pt(i) *= _scale_multiplier[i];
     else if (_transformation_order[trans_num] == "rotation1")
       pt = _r1 * pt;
@@ -945,13 +945,13 @@ SolutionUserObject::discontinuousPointValueGradient(
     if (_transformation_order[trans_num] == "rotation0")
       pt = _r0 * pt;
     else if (_transformation_order[trans_num] == "translation")
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         pt(i) -= _translation[i];
     else if (_transformation_order[trans_num] == "scale")
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         pt(i) /= _scale[i];
     else if (_transformation_order[trans_num] == "scale_multiplier")
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         pt(i) *= _scale_multiplier[i];
     else if (_transformation_order[trans_num] == "rotation1")
       pt = _r1 * pt;

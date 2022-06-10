@@ -282,7 +282,7 @@ PorousFlowSink::jac(unsigned int jvar) const
     if (_perm_derivs)
     {
       RealTensorValue ktprime = (*_dpermeability_dvar)[_qp][pvar] * _phi[_j][_qp];
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         ktprime += (*_dpermeability_dgradvar)[_qp][i][pvar] * _grad_phi[_j][_qp](i);
       const Real kprime = (ktprime * _normals[_qp]) * _normals[_qp];
 

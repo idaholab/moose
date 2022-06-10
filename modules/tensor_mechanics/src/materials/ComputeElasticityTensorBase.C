@@ -10,9 +10,9 @@
 #include "ComputeElasticityTensorBase.h"
 #include "Function.h"
 
-template <bool is_ad>
+template <bool is_ad, typename T>
 InputParameters
-ComputeElasticityTensorBaseTempl<is_ad>::validParams()
+ComputeElasticityTensorBaseTempl<is_ad, T>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addParam<FunctionName>(
@@ -25,14 +25,14 @@ ComputeElasticityTensorBaseTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-ComputeElasticityTensorBaseTempl<is_ad>::ComputeElasticityTensorBaseTempl(
+template <bool is_ad, typename T>
+ComputeElasticityTensorBaseTempl<is_ad, T>::ComputeElasticityTensorBaseTempl(
     const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     GuaranteeProvider(this),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
-    _elasticity_tensor(declareGenericProperty<RankFourTensor, is_ad>(_elasticity_tensor_name)),
+    _elasticity_tensor(declareGenericProperty<T, is_ad>(_elasticity_tensor_name)),
     _effective_stiffness(declareGenericProperty<Real, is_ad>(_base_name + "effective_stiffness")),
     _prefactor_function(isParamValid("elasticity_tensor_prefactor")
                             ? &getFunction("elasticity_tensor_prefactor")
@@ -40,9 +40,9 @@ ComputeElasticityTensorBaseTempl<is_ad>::ComputeElasticityTensorBaseTempl(
 {
 }
 
-template <bool is_ad>
+template <bool is_ad, typename T>
 void
-ComputeElasticityTensorBaseTempl<is_ad>::computeQpProperties()
+ComputeElasticityTensorBaseTempl<is_ad, T>::computeQpProperties()
 {
   _effective_stiffness[_qp] = 0; // Currently overriden by ComputeIsotropicElasticityTensor
   computeQpElasticityTensor();
@@ -55,5 +55,7 @@ ComputeElasticityTensorBaseTempl<is_ad>::computeQpProperties()
   }
 }
 
-template class ComputeElasticityTensorBaseTempl<false>;
-template class ComputeElasticityTensorBaseTempl<true>;
+template class ComputeElasticityTensorBaseTempl<false, RankFourTensor>;
+template class ComputeElasticityTensorBaseTempl<true, RankFourTensor>;
+template class ComputeElasticityTensorBaseTempl<false, SymmetricRankFourTensor>;
+template class ComputeElasticityTensorBaseTempl<true, SymmetricRankFourTensor>;

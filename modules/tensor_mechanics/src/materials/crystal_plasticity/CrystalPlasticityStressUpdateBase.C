@@ -307,7 +307,7 @@ CrystalPlasticityStressUpdateBase::sortCrossSlipFamilies()
       // check to see if the slip system direction i matches any of the existing slip directions
       // First calculate the dot product
       Real dot_product = 0.0;
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+      for (const auto k : make_range(Moose::dim))
       {
         unsigned int check_family_index = _cross_slip_familes[j][0];
         dot_product += std::abs(_slip_direction[check_family_index](k) - _slip_direction[i](k));

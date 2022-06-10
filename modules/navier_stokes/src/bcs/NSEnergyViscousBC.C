@@ -145,7 +145,7 @@ NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
       case 0: // density
       {
         // Loop over k and ell as in the notes...
-        for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+        for (const auto k : make_range(Moose::dim))
         {
           Real intermediate_value = 0.0;
           for (unsigned int ell = 0; ell < LIBMESH_DIM; ++ell)
@@ -168,7 +168,7 @@ NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
         unsigned int m_local = m - 1;
 
         // Loop over k and ell as in the notes...
-        for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+        for (const auto k : make_range(Moose::dim))
         {
           Real intermediate_value = tau(k, m_local) * phij / rho;
 

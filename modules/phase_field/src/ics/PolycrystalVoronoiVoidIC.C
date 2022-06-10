@@ -108,7 +108,7 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
 
       Point rand_point;
 
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         rand_point(i) = _bottom_left(i) + _range(i) * _random.rand(_tid);
 
       // Allow the vectors to be sorted based on their distance from the
@@ -146,14 +146,14 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
 
       Real slope_dot = slope * slope;
       mooseAssert(slope_dot > 0, "The dot product of slope with itself is zero");
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i : make_range(Moose::dim))
         lambda += (mid_rand_vector(i) * slope(i)) / slope_dot;
 
       // Assigning points to vector
       _centers[vp] = slope * lambda + midpoint;
 
       // Checking to see if points are in the domain ONLY WORKS FOR PERIODIC
-      for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+      for (const auto i : make_range(Moose::dim))
         if ((_centers[vp](i) > _top_right(i)) || (_centers[vp](i) < _bottom_left(i)))
           try_again = true;
 

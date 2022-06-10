@@ -1003,7 +1003,7 @@ MooseVariableData<RealEigenVector>::computeValues()
 
       _u[qp] += phi_local * _dof_values[i];
 
-      for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+      for (const auto d : make_range(Moose::dim))
         _grad_u[qp].col(d) += dphi_qp(d) * _dof_values[i];
 
       if (is_transient)
@@ -1015,11 +1015,11 @@ MooseVariableData<RealEigenVector>::computeValues()
           _u_older[qp] += phi_local * _dof_values_older[i];
 
         if (_need_grad_old)
-          for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+          for (const auto d : make_range(Moose::dim))
             _grad_u_old[qp].col(d) += dphi_qp(d) * _dof_values_old[i];
 
         if (_need_grad_older)
-          for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+          for (const auto d : make_range(Moose::dim))
             _grad_u_older[qp].col(d) += dphi_qp(d) * _dof_values_older[i];
 
         if (_need_u_dot)
@@ -1035,11 +1035,11 @@ MooseVariableData<RealEigenVector>::computeValues()
           _u_dotdot_old[qp] += phi_local * _dof_values_dotdot_old[i];
 
         if (_need_grad_dot)
-          for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+          for (const auto d : make_range(Moose::dim))
             _grad_u_dot[qp].col(d) += dphi_qp(d) * _dof_values_dot[i];
 
         if (_need_grad_dotdot)
-          for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+          for (const auto d : make_range(Moose::dim))
             _grad_u_dotdot[qp].col(d) += dphi_qp(d) * _dof_values_dotdot[i];
 
         if (_need_du_dot_du)
@@ -1099,7 +1099,7 @@ MooseVariableData<RealEigenVector>::computeValues()
         if (_need_vector_tag_u[tag])
           _vector_tag_u[tag][qp] += phi_local * _vector_tags_dof_u[tag][i];
         if (_need_vector_tag_grad[tag])
-          for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+          for (const auto d : make_range(Moose::dim))
             _vector_tag_grad[tag][qp].col(d) += dphi_qp(d) * _vector_tags_dof_u[tag][i];
       }
 
@@ -1111,7 +1111,7 @@ MooseVariableData<RealEigenVector>::computeValues()
         _u_previous_nl[qp] += phi_local * _dof_values_previous_nl[i];
 
       if (_need_grad_previous_nl)
-        for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+        for (const auto d : make_range(Moose::dim))
           _grad_u_previous_nl[qp].col(d) += dphi_qp(d) * _dof_values_previous_nl[i];
     }
   }

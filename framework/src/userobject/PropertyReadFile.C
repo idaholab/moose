@@ -76,7 +76,7 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
                "Random seeds should only be provided if random tesselation is desired");
 
   Point mesh_min, mesh_max;
-  for (unsigned int i : make_range(LIBMESH_DIM))
+  for (unsigned int i : make_range(Moose::dim))
   {
     mesh_min(i) = _mesh.getMinInDimension(i);
     mesh_max(i) = _mesh.getMaxInDimension(i);
@@ -154,16 +154,16 @@ PropertyReadFile::initVoronoiCenterPoints()
   if (_use_random_tesselation)
   {
     MooseRandom::seed(_rand_seed);
-    for (unsigned int i = 0; i < _nvoronoi; i++)
-      for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+    for (const auto i : make_range(_nvoronoi))
+      for (const auto j : make_range(Moose::dim))
         _center[i](j) = _bounding_box.min()(j) +
                         MooseRandom::rand() * (_bounding_box.max() - _bounding_box.min())(j);
   }
   // Read tesselation from file
   else
   {
-    for (unsigned int i = 0; i < _nvoronoi; i++)
-      for (unsigned int j = 0; j < _mesh.dimension(); j++)
+    for (const auto i : make_range(_nvoronoi))
+      for (const auto j : make_range(_mesh.dimension()))
         _center[i](j) = _reader.getData(i)[j];
   }
 }
@@ -253,7 +253,7 @@ PropertyReadFile::getVoronoiData(const Point & point, const unsigned int prop_nu
   Real min_dist = std::numeric_limits<Real>::max();
   unsigned int ivoronoi = 0;
 
-  for (unsigned int i = 0; i < _nvoronoi; ++i)
+  for (const auto i : make_range(_nvoronoi))
   {
     Real dist = 0.0;
     switch (_rve_type)

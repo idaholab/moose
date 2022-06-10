@@ -25,7 +25,7 @@ PeriodicDistanceAux::PeriodicDistanceAux(const InputParameters & parameters)
   : AuxKernel(parameters), _point(getParam<Point>("point"))
 {
   // Make sure the point is in the domain
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
     if (_point(i) < _mesh.getMinInDimension(i) || _point(i) > _mesh.getMaxInDimension(i))
       paramError("point",
                  _mesh.getMinInDimension(i),

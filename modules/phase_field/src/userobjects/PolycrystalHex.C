@@ -50,7 +50,7 @@ PolycrystalHex::precomputeGrainStructure()
     mooseError("PolycrystalHex requires a square or cubic number depending on the mesh dimension");
 
   // Set up domain bounds with mesh tools
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
   {
     _bottom_left(i) = _mesh.getMinInDimension(i);
     _top_right(i) = _mesh.getMaxInDimension(i);
@@ -86,7 +86,7 @@ PolycrystalHex::precomputeGrainStructure()
 
   // Assign center point values
   for (unsigned int grain = 0; grain < _grain_num; ++grain)
-    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    for (const auto i : make_range(Moose::dim))
     {
       if (_range(i) == 0)
         continue;

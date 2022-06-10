@@ -55,7 +55,7 @@ LatticeSmoothCircleIC::initialSetup()
   _circles_per_side.resize(3);
 
   // Set up domain bounds with mesh tools
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
   {
     _bottom_left(i) = _mesh.getMinInDimension(i);
     _top_right(i) = _mesh.getMaxInDimension(i);

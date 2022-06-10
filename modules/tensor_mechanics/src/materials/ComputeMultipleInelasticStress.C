@@ -344,16 +344,12 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
       }
       else
       {
-        for (const auto i : make_range(LIBMESH_DIM))
-        {
-          for (const auto j : make_range(LIBMESH_DIM))
-          {
+        for (const auto i : make_range(Moose::dim))
+          for (const auto j : make_range(Moose::dim))
             if (_stress[_qp](i, j) > stress_max(i, j))
               stress_max(i, j) = _stress[_qp](i, j);
             else if (stress_min(i, j) > _stress[_qp](i, j))
               stress_min(i, j) = _stress[_qp](i, j);
-          }
-        }
       }
     }
 

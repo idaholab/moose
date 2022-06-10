@@ -49,7 +49,7 @@ ArrayFunctionIC::gradient(const Point & p)
   for (unsigned int i = 0; i < _var.count(); ++i)
   {
     auto gd = _func[i]->gradient(_t, p);
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+    for (const auto j : make_range(Moose::dim))
       v(i, j) = gd(j);
   }
   return v;

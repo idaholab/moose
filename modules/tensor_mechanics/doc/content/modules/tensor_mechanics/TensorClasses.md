@@ -6,6 +6,7 @@
 
 ## Specifying Values from an Input File
 
+### Full tensor notation
 
 Both `RankTwoTensor` and `RankFourTensor` allow a user to specify how to the tensor from an input
 file.
@@ -20,6 +21,12 @@ file.
   \end{equation}
   Several fill methods are available to specify additional symmetries as described
   in [ComputeElasticityTensor](/ComputeElasticityTensor.md).
+
+### Symmetric Mandel notation tensors
+
+- `SymmetricRankTwoTensor` uses the 6-vector representation of a symmetric rank two tensor.
+
+- `SymmetricRankFourTensor` uses the 6x6 matrix representation with Mandel notation coefficients. The Mandel notation was chosen as it yields meaningful eigenvectors.
 
 ## Getting and Setting Specific Component Values
 

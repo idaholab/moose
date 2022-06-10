@@ -41,7 +41,7 @@ enum class TangentCalculationMethod
  * All materials inheriting from this class must be called by a separate material,
  * such as ComputeMultipleInelasticStress
  */
-template <bool is_ad>
+template <bool is_ad, typename R2 = RankTwoTensor, typename R4 = RankFourTensor>
 class StressUpdateBaseTempl : public Material
 {
 public:
@@ -53,6 +53,11 @@ public:
   using Material::_dt;
   using Material::_q_point;
   using Material::_qp;
+
+  using GR2 = GenericRankTwoTensor<is_ad>;
+  using GSR2 = Moose::GenericType<R2, is_ad>;
+  using GR4 = GenericRankFourTensor<is_ad>;
+  using GSR4 = Moose::GenericType<R4, is_ad>;
 
   /**
    * Given a strain increment that results in a trial stress, perform some
@@ -81,12 +86,12 @@ public:
    * choice.  tangent_operator is only computed if _fe_problem.currentlyComputingJacobian() = true
    */
   virtual void
-  updateState(GenericRankTwoTensor<is_ad> & strain_increment,
-              GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
-              const GenericRankTwoTensor<is_ad> & rotation_increment,
-              GenericRankTwoTensor<is_ad> & stress_new,
+  updateState(GR2 & strain_increment,
+              GR2 & inelastic_strain_increment,
+              const GR2 & rotation_increment,
+              GR2 & stress_new,
               const RankTwoTensor & stress_old,
-              const GenericRankFourTensor<is_ad> & elasticity_tensor,
+              const GR4 & elasticity_tensor,
               const RankTwoTensor & elastic_strain_old,
               bool compute_full_tangent_operator = false,
               RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor);
@@ -95,12 +100,12 @@ public:
    * Similar to the updateState function, this method updates the strain and stress for one substep
    */
   virtual void updateStateSubstep(
-      GenericRankTwoTensor<is_ad> & /*strain_increment*/,
-      GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
-      const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
-      GenericRankTwoTensor<is_ad> & /*stress_new*/,
+      GR2 & /*strain_increment*/,
+      GR2 & /*inelastic_strain_increment*/,
+      const GR2 & /*rotation_increment*/,
+      GR2 & /*stress_new*/,
       const RankTwoTensor & /*stress_old*/,
-      const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
+      const GR4 & /*elasticity_tensor*/,
       const RankTwoTensor & /*elastic_strain_old*/,
       bool compute_full_tangent_operator = false,
       RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor);
@@ -152,10 +157,7 @@ public:
    * to bring a substepped trial stress guess distance from the yield surface
    * into the tolerance specified in the individual child class.
    */
-  virtual int calculateNumberSubsteps(const GenericRankTwoTensor<is_ad> & /*strain_increment*/)
-  {
-    return 1;
-  }
+  virtual int calculateNumberSubsteps(const GR2 & /*strain_increment*/) { return 1; }
 
   /**
    * Properly set up the incremental calculation storage of the stateful material
@@ -193,6 +195,6 @@ protected:
 typedef StressUpdateBaseTempl<false> StressUpdateBase;
 typedef StressUpdateBaseTempl<true> ADStressUpdateBase;
 
-template <bool is_ad>
-RankFourTensor StressUpdateBaseTempl<is_ad>::_identityTensor =
+template <bool is_ad, typename R2, typename R4>
+RankFourTensor StressUpdateBaseTempl<is_ad, R2, R4>::_identityTensor =
     RankFourTensor(RankFourTensor::initIdentityFour);

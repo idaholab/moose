@@ -15,12 +15,13 @@
 /**
  * ADStressDivergenceTensors is the automatic differentiation version of StressDivergenceTensors
  */
-class ADStressDivergenceTensors : public ADKernel
+template <typename R2>
+class ADStressDivergenceTensorsTempl : public ADKernel
 {
 public:
   static InputParameters validParams();
 
-  ADStressDivergenceTensors(const InputParameters & parameters);
+  ADStressDivergenceTensorsTempl(const InputParameters & parameters);
 
 protected:
   void initialSetup() override;
@@ -32,7 +33,7 @@ protected:
   const std::string _base_name;
 
   /// The stress tensor that the divergence operator operates on
-  const ADMaterialProperty<RankTwoTensor> & _stress;
+  const ADMaterialProperty<R2> & _stress;
 
   /// An integer corresponding to the direction this kernel acts in
   const unsigned int _component;
@@ -55,3 +56,6 @@ protected:
   /// Flag for volumetric locking correction
   const bool _volumetric_locking_correction;
 };
+
+typedef ADStressDivergenceTensorsTempl<RankTwoTensor> ADStressDivergenceTensors;
+typedef ADStressDivergenceTensorsTempl<SymmetricRankTwoTensor> ADSymmetricStressDivergenceTensors;

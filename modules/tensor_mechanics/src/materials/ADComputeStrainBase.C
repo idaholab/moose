@@ -9,11 +9,13 @@
 
 #include "ADComputeStrainBase.h"
 #include "RankTwoTensor.h"
+#include "SymmetricRankTwoTensor.h"
 #include "MooseMesh.h"
 #include "Assembly.h"
 
+template <typename R2>
 InputParameters
-ADComputeStrainBase::validParams()
+ADComputeStrainBaseTempl<R2>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addRequiredCoupledVar(
@@ -34,18 +36,19 @@ ADComputeStrainBase::validParams()
   return params;
 }
 
-ADComputeStrainBase::ADComputeStrainBase(const InputParameters & parameters)
+template <typename R2>
+ADComputeStrainBaseTempl<R2>::ADComputeStrainBaseTempl(const InputParameters & parameters)
   : Material(parameters),
     _ndisp(coupledComponents("displacements")),
     _disp(adCoupledValues("displacements")),
     _grad_disp(adCoupledGradients("displacements")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _mechanical_strain(declareADProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
-    _total_strain(declareADProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _mechanical_strain(declareADProperty<R2>(_base_name + "mechanical_strain")),
+    _total_strain(declareADProperty<R2>(_base_name + "total_strain")),
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _eigenstrains(_eigenstrain_names.size()),
     _global_strain(isParamValid("global_strain")
-                       ? &getADMaterialProperty<RankTwoTensor>(_base_name + "global_strain")
+                       ? &getADMaterialProperty<R2>(_base_name + "global_strain")
                        : nullptr),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction") &&
                                    !this->isBoundaryMaterial()),
@@ -61,7 +64,7 @@ ADComputeStrainBase::ADComputeStrainBase(const InputParameters & parameters)
   for (unsigned int i = 0; i < _eigenstrains.size(); ++i)
   {
     _eigenstrain_names[i] = _base_name + _eigenstrain_names[i];
-    _eigenstrains[i] = &getADMaterialProperty<RankTwoTensor>(_eigenstrain_names[i]);
+    _eigenstrains[i] = &getADMaterialProperty<R2>(_eigenstrain_names[i]);
   }
 
   if (_ndisp == 1 && _volumetric_locking_correction)
@@ -71,14 +74,16 @@ ADComputeStrainBase::ADComputeStrainBase(const InputParameters & parameters)
     paramError("use_displaced_mesh", "The strain calculator needs to run on the undisplaced mesh.");
 }
 
+template <typename R2>
 void
-ADComputeStrainBase::initialSetup()
+ADComputeStrainBaseTempl<R2>::initialSetup()
 {
   displacementIntegrityCheck();
 }
 
+template <typename R2>
 void
-ADComputeStrainBase::displacementIntegrityCheck()
+ADComputeStrainBaseTempl<R2>::displacementIntegrityCheck()
 {
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
@@ -87,9 +92,13 @@ ADComputeStrainBase::displacementIntegrityCheck()
         "The number of variables supplied in 'displacements' must match the mesh dimension.");
 }
 
+template <typename R2>
 void
-ADComputeStrainBase::initQpStatefulProperties()
+ADComputeStrainBaseTempl<R2>::initQpStatefulProperties()
 {
   _mechanical_strain[_qp].zero();
   _total_strain[_qp].zero();
 }
+
+template class ADComputeStrainBaseTempl<RankTwoTensor>;
+template class ADComputeStrainBaseTempl<SymmetricRankTwoTensor>;

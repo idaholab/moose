@@ -61,6 +61,6 @@ PorousFlowPermeabilityConstFromVar::computeQpProperties()
   _dpermeability_qp_dvar[_qp].resize(_num_var, RealTensorValue());
   _dpermeability_qp_dgradvar[_qp].resize(LIBMESH_DIM);
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
     _dpermeability_qp_dgradvar[_qp][i].resize(_num_var, RealTensorValue());
 }

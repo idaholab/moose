@@ -72,8 +72,8 @@ Real
 MomentBalancing::computeQpResidual()
 {
   Real the_sum = 0.0;
-  for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-    for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+  for (const auto j : make_range(Moose::dim))
+    for (const auto k : make_range(Moose::dim))
       the_sum += PermutationTensor::eps(_component, j, k) * _stress[_qp](j, k);
   return _test[_i][_qp] * the_sum;
 }

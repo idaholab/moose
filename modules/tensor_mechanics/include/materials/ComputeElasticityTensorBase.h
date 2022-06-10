@@ -12,12 +12,13 @@
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
 #include "RankFourTensor.h"
+#include "SymmetricRankFourTensor.h"
 #include "GuaranteeProvider.h"
 
 /**
  * ComputeElasticityTensorBase the base class for computing elasticity tensors
  */
-template <bool is_ad>
+template <bool is_ad, typename T = RankFourTensor>
 class ComputeElasticityTensorBaseTempl : public DerivativeMaterialInterface<Material>,
                                          public GuaranteeProvider
 {
@@ -35,7 +36,7 @@ protected:
 
   std::string _elasticity_tensor_name;
 
-  GenericMaterialProperty<RankFourTensor, is_ad> & _elasticity_tensor;
+  GenericMaterialProperty<T, is_ad> & _elasticity_tensor;
   GenericMaterialProperty<Real, is_ad> & _effective_stiffness;
 
   /// prefactor function to multiply the elasticity tensor with

@@ -54,10 +54,10 @@ CappedWeakInclinedPlaneStressUpdate::finalizeReturnProcess(const RankTwoTensor &
 {
   CappedWeakPlaneStressUpdate::finalizeReturnProcess(rotation_increment);
   if (_perform_finite_strain_rotations)
-    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    for (const auto i : make_range(Moose::dim))
     {
       _n[_qp](i) = 0.0;
-      for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+      for (const auto j : make_range(Moose::dim))
         _n[_qp](i) += rotation_increment(i, j) * _n_old[_qp](j);
     }
 }

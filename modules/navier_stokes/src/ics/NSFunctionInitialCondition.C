@@ -65,7 +65,7 @@ NSFunctionInitialCondition::NSFunctionInitialCondition(const InputParameters & p
     _fp(getUserObject<IdealGasFluidProperties>("fluid_properties")),
     _pressure_variable_name(getParam<std::string>("pressure_variable_name"))
 {
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  for (const auto i : make_range(Moose::dim))
     _initial_velocity.push_back(
         &getFunctionByName(getParam<std::vector<FunctionName>>("initial_velocity")[i]));
 }

@@ -9,13 +9,12 @@
 
 #include "RankFourTensorTest.h"
 #include "RankThreeTensor.h"
-#include "RotationTensor.h"
 #include "MooseTypes.h"
 #include "ADReal.h"
 
 #include "metaphysicl/raw_type.h"
 
-RankFourTensor iSymmetric = RankFourTensor(RankFourTensor::initIdentitySymmetricFour);
+#include <sstream>
 
 TEST_F(RankFourTensorTest, invSymm1)
 {
@@ -24,6 +23,7 @@ TEST_F(RankFourTensorTest, invSymm1)
   input[0] = 1;
   input[1] = 3;
   RankFourTensor a(input, RankFourTensor::symmetric_isotropic);
+  RankFourTensor iSymmetric = RankFourTensor(RankFourTensor::initIdentitySymmetricFour);
 
   EXPECT_NEAR(0, (iSymmetric - a.invSymm() * a).L2norm(), 1E-5);
 }
@@ -94,6 +94,7 @@ TEST_F(RankFourTensorTest, invSymm2)
   a(1, 2, 1, 2) = a(1, 2, 2, 1) = a(2, 1, 1, 2) = a(2, 1, 2, 1) = 1.4;
   a(1, 2, 2, 2) = a(2, 1, 2, 2) = 0.1;
 
+  RankFourTensor iSymmetric = RankFourTensor(RankFourTensor::initIdentitySymmetricFour);
   EXPECT_NEAR(0, (iSymmetric - a.invSymm() * a).L2norm(), 1E-5);
 }
 
@@ -298,30 +299,6 @@ TEST_F(RankFourTensorTest, anisotropic9)
   EXPECT_NEAR(0, (a - b).L2norm(), 1E-5);
 }
 
-TEST_F(RankFourTensorTest, rotation)
-{
-  std::vector<Real> input(81);
-  for (size_t i = 0; i < input.size(); ++i)
-    input[i] = i + 1.1;
-
-  RankFourTensor a(input, RankFourTensor::general);
-
-  RotationTensor xrot(RotationTensor::XAXIS, 90);
-  RotationTensor yrot(RotationTensor::YAXIS, 90);
-
-  auto xyrot = xrot * yrot;
-  auto yxrot = yrot * xrot;
-
-  auto axy1 = a;
-  axy1.rotate(xrot);
-  axy1.rotate(yrot);
-
-  auto axy2 = a;
-  axy2.rotate(yxrot);
-
-  EXPECT_NEAR(0, (axy1 - axy2).L2norm(), 1E-8);
-}
-
 TEST_F(RankFourTensorTest, transposeIj)
 {
   const RankFourTensor computed_val = _r4.transposeIj();
@@ -330,6 +307,50 @@ TEST_F(RankFourTensorTest, transposeIj)
       for (unsigned int j = 0; j < 3; ++j)
         for (unsigned int i = 0; i < 3; ++i)
           EXPECT_NEAR(computed_val(i, j, k, l), _r4(j, i, k, l), 1e-5);
+}
+
+TEST_F(RankFourTensorTest, printReal)
+{
+  std::stringstream ss;
+  _r4.printReal(ss);
+  const std::string gold = "i = 0 j = 0\n"
+                           "              1               2               3 \n"
+                           "              4               5               6 \n"
+                           "              7               8               9 \n"
+                           "i = 0 j = 1\n"
+                           "             10              11              12 \n"
+                           "             13              14              15 \n"
+                           "             16              17              18 \n"
+                           "i = 0 j = 2\n"
+                           "             19              20              21 \n"
+                           "             22              23              24 \n"
+                           "             25              26              27 \n"
+                           "i = 1 j = 0\n"
+                           "             28              29              30 \n"
+                           "             31              32              33 \n"
+                           "             34              35              36 \n"
+                           "i = 1 j = 1\n"
+                           "             37              38              39 \n"
+                           "             40              41              42 \n"
+                           "             43              44              45 \n"
+                           "i = 1 j = 2\n"
+                           "             46              47              48 \n"
+                           "             49              50              51 \n"
+                           "             52              53              54 \n"
+                           "i = 2 j = 0\n"
+                           "             55              56              57 \n"
+                           "             58              59              60 \n"
+                           "             61              62              63 \n"
+                           "i = 2 j = 1\n"
+                           "             64              65              66 \n"
+                           "             67              68              69 \n"
+                           "             70              71              72 \n"
+                           "i = 2 j = 2\n"
+                           "             73              74              75 \n"
+                           "             76              77              78 \n"
+                           "             79              80              81 \n";
+
+  EXPECT_EQ(ss.str(), gold);
 }
 
 TEST_F(RankFourTensorTest, mixedProductIjklJ)

@@ -12,17 +12,27 @@
 #include "Material.h"
 #include "Function.h"
 #include "ADRankTwoTensorForward.h"
-#include "ADRankFourTensorForward.h"
+#include "ADSymmetricRankTwoTensorForward.h"
+
+#define usingComputeStressBaseMembers                                                              \
+  usingMaterialMembers;                                                                            \
+  using ADComputeStressBaseTempl<R2>::_base_name;                                                  \
+  using ADComputeStressBaseTempl<R2>::_mechanical_strain;                                          \
+  using ADComputeStressBaseTempl<R2>::_stress;                                                     \
+  using ADComputeStressBaseTempl<R2>::_elastic_strain;                                             \
+  using ADComputeStressBaseTempl<R2>::_extra_stresses;                                             \
+  using ADComputeStressBaseTempl<R2>::_initial_stress_fcn
 
 /**
- * ADComputeStressBase is the base class for stress tensors
+ * ADComputeStressBaseTempl is the base class for stress tensors
  */
-class ADComputeStressBase : public Material
+template <typename R2>
+class ADComputeStressBaseTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  ADComputeStressBase(const InputParameters & parameters);
+  ADComputeStressBaseTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -32,15 +42,17 @@ protected:
   /// Base name of the material system
   const std::string _base_name;
 
-  const ADMaterialProperty<RankTwoTensor> & _mechanical_strain;
+  const ADMaterialProperty<R2> & _mechanical_strain;
 
   /// The stress tensor to be calculated
-  ADMaterialProperty<RankTwoTensor> & _stress;
-  ADMaterialProperty<RankTwoTensor> & _elastic_strain;
+  ADMaterialProperty<R2> & _stress;
+  ADMaterialProperty<R2> & _elastic_strain;
 
   /// Extra stress tensors
-  std::vector<const MaterialProperty<RankTwoTensor> *> _extra_stresses;
+  std::vector<const MaterialProperty<R2> *> _extra_stresses;
 
   /// initial stress components
   std::vector<const Function *> _initial_stress_fcn;
 };
+
+typedef ADComputeStressBaseTempl<RankTwoTensor> ADComputeStressBase;

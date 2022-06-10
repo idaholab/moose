@@ -180,7 +180,9 @@ HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_inpu
   _hill_tensor(5, 5) = 2.0 * M;
 
   // Transformed the Hill tensor given the total rotation matrix
-  // https://scicomp.stackexchange.com/questions/35600/4th-order-tensor-rotation-sources-to-refer
+  // MEHRABADI, MORTEZA M.; COWIN, STEPHEN C.  (1990). EIGENTENSORS OF LINEAR ANISOTROPIC ELASTIC
+  // MATERIALS. The Quarterly Journal of Mechanics and Applied Mathematics, 43(1), 15-41.
+  // doi:10.1093/qjmam/43.1.15
   DenseMatrix<Real> transformation_matrix_n(6, 6);
   const static std::array<std::size_t, 3> a = {{1, 0, 0}};
   const static std::array<std::size_t, 3> b = {{2, 2, 1}};

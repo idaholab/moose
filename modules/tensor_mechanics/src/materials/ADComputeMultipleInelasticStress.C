@@ -284,9 +284,9 @@ ADComputeMultipleInelasticStress::updateQpState(
       }
       else
       {
-        for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        for (const auto i : make_range(Moose::dim))
         {
-          for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+          for (const auto j : make_range(Moose::dim))
           {
             if (_stress[_qp](i, j) > stress_max(i, j))
               stress_max(i, j) = _stress[_qp](i, j);

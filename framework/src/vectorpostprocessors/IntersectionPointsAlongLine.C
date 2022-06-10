@@ -80,11 +80,11 @@ IntersectionPointsAlongLine::execute()
   if (num_elems == 0)
     return;
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  for (const auto i : make_range(Moose::dim))
     _intersections[i]->resize(num_elems + 1);
 
   // Add the beginning point
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  for (const auto i : make_range(Moose::dim))
     (*_intersections[i])[0] = _start(i);
 
   // Add the ending point of every segment
@@ -94,7 +94,7 @@ IntersectionPointsAlongLine::execute()
 
     const Point & end_point = segment.end();
 
-    for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+    for (const auto j : make_range(Moose::dim))
       (*_intersections[j])[i + 1] = end_point(j);
   }
 }
