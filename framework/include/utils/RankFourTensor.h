@@ -291,26 +291,6 @@ public:
   RankThreeTensorTempl<T> contraction(const VectorValue<T> & b) const;
 
   /**
-   * single contraction of a RankFourTensor with a vector over index i
-   * @return C_jkl = a_ijkl*b_i
-   */
-  RankThreeTensorTempl<T> mixedProductIjklI(const VectorValue<T> & b) const
-  {
-    usingTensorIndices(i_, j_);
-    return contraction<i_>(b);
-  }
-
-  /**
-   * single contraction of a RankFourTensor with a vector over index j
-   * @return C_ikl = a_ijkl * b_j
-   */
-  RankThreeTensorTempl<T> mixedProductIjklJ(const VectorValue<T> & b) const
-  {
-    usingTensorIndices(i_, j_);
-    return contraction<j_>(b);
-  }
-
-  /**
    * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l =
    * 3).
    * Fill method depends on size of input
