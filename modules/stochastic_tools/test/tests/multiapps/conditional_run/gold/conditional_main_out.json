@@ -1,0 +1,446 @@
+{
+    "reporters": {
+        "conditional": {
+            "type": "ConditionalSampleReporter",
+            "values": {
+                "data:average:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "data:converged": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<bool>"
+                },
+                "need_sample": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<bool>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "conditional": {
+                "data:average:value": [
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337
+                ],
+                "data:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "need_sample": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "conditional": {
+                "data:average:value": [
+                    1.0,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337
+                ],
+                "data:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "need_sample": [
+                    false,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        },
+        {
+            "conditional": {
+                "data:average:value": [
+                    1.0,
+                    1.0,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337
+                ],
+                "data:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "need_sample": [
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            },
+            "time": 3.0,
+            "time_step": 3
+        },
+        {
+            "conditional": {
+                "data:average:value": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337
+                ],
+                "data:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "need_sample": [
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            },
+            "time": 4.0,
+            "time_step": 4
+        },
+        {
+            "conditional": {
+                "data:average:value": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337
+                ],
+                "data:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "need_sample": [
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            },
+            "time": 5.0,
+            "time_step": 5
+        },
+        {
+            "conditional": {
+                "data:average:value": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337
+                ],
+                "data:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "need_sample": [
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            },
+            "time": 6.0,
+            "time_step": 6
+        },
+        {
+            "conditional": {
+                "data:average:value": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337
+                ],
+                "data:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "need_sample": [
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            },
+            "time": 7.0,
+            "time_step": 7
+        },
+        {
+            "conditional": {
+                "data:average:value": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.3925299174190337,
+                    0.3925299174190337,
+                    0.3925299174190337
+                ],
+                "data:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "need_sample": [
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true
+                ]
+            },
+            "time": 8.0,
+            "time_step": 8
+        },
+        {
+            "conditional": {
+                "data:average:value": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.3925299174190337,
+                    0.3925299174190337
+                ],
+                "data:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "need_sample": [
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true
+                ]
+            },
+            "time": 9.0,
+            "time_step": 9
+        },
+        {
+            "conditional": {
+                "data:average:value": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.3925299174190337
+                ],
+                "data:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "need_sample": [
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    true
+                ]
+            },
+            "time": 10.0,
+            "time_step": 10
+        }
+    ]
+}

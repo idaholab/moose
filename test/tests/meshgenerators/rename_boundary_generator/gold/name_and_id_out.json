@@ -1,0 +1,91 @@
+{
+    "reporters": {
+        "mesh_info": {
+            "type": "MeshInfo",
+            "values": {
+                "sideset_elems": {
+                    "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "mesh_info": {
+                "sideset_elems": null
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "mesh_info": {
+                "sideset_elems": [
+                    {
+                        "id": 0,
+                        "name": "bottom",
+                        "sides": [
+                            {
+                                "elem_id": 0,
+                                "side": 0
+                            }
+                        ]
+                    },
+                    {
+                        "id": 1,
+                        "name": "right",
+                        "sides": [
+                            {
+                                "elem_id": 0,
+                                "side": 1
+                            },
+                            {
+                                "elem_id": 2,
+                                "side": 1
+                            }
+                        ]
+                    },
+                    {
+                        "id": 2,
+                        "name": "top",
+                        "sides": [
+                            {
+                                "elem_id": 1,
+                                "side": 2
+                            },
+                            {
+                                "elem_id": 2,
+                                "side": 2
+                            }
+                        ]
+                    },
+                    {
+                        "id": 3,
+                        "name": "left",
+                        "sides": [
+                            {
+                                "elem_id": 1,
+                                "side": 3
+                            }
+                        ]
+                    },
+                    {
+                        "id": 101,
+                        "name": "101",
+                        "sides": [
+                            {
+                                "elem_id": 0,
+                                "side": 3
+                            },
+                            {
+                                "elem_id": 1,
+                                "side": 0
+                            }
+                        ]
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

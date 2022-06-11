@@ -18,7 +18,9 @@
 class Sampler;
 class StochasticToolsTransfer;
 
-class SamplerFullSolveMultiApp : public FullSolveMultiApp, public SamplerInterface
+class SamplerFullSolveMultiApp : public FullSolveMultiApp,
+                                 public SamplerInterface,
+                                 public ReporterInterface
 {
 public:
   static InputParameters validParams();
@@ -82,4 +84,7 @@ private:
   std::vector<Real> _row_data;
   /// Current local index representing _row_data
   dof_id_type _local_row_index = std::numeric_limits<dof_id_type>::max();
+
+  /// Reporter value determining whether the sub-app should be run for a certain sample
+  const std::vector<bool> * _should_run = nullptr;
 };

@@ -17,6 +17,10 @@ The following will change the name for the boundary "meaningless" to "interior" 
 []
 ```
 
+For the special case where the original boundary name and ID are the same, this mesh generator
+will convert *both* to the new boundary name/ID. For instance, if the mesh contains a boundary
+named `3` that also has an ID of `3`, this mesh generator will convert both the name and ID.
+
 ## Merging Boundaries
 
 When using the `RenameBoundaryGenerator` to merge boundaries, the result is not necessarily independent of ordering.
