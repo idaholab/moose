@@ -1,21 +1,23 @@
-T_in = 660
+T_in = 588.5
+flow_area = 0.0004980799633447909 #m2
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 37.00 / 36000.*0.5}
+mass_flux_in = ${fparse 55*3.78541/10/60/flow_area}
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
-    nrings = 4
+    nrings = 3
     n_cells = 100
-    flat_to_flat = 0.085
-    heated_length = 1.0
-    rod_diameter = 0.01
-    pitch = 0.012
-    dwire = 0.002
-    hwire = 0.0833
-    spacer_z = '0 0.2 0.4 0.6 0.8'
-    spacer_k = '0.1 0.1 0.1 0.1 0.10'
-    discretization = "central_difference"
+    flat_to_flat = 3.41e-2
+    heated_length = 0.5334
+    unheated_length_entry = 0.4064
+    unheated_length_exit = 0.0762
+    rod_diameter = 5.84e-3
+    pitch = 7.26e-3
+    dwire = 1.42e-3
+    hwire = 0.3048
+    spacer_z = '0'
+    spacer_k = '0'
   []
 []
 
@@ -57,7 +59,7 @@ P_out = 2.0e5 # Pa
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
-  n_blocks = 1
+  n_blocks = 10
   beta = 0.1
   P_out = 2.0e5
   CT = 1.0
@@ -66,9 +68,9 @@ P_out = 2.0e5 # Pa
   compute_viscosity = true
   compute_power = true
   P_tol = 1.0e-6
-  T_tol = 1.0e-3
-  implicit = true
-  segregated = false
+  T_tol = 1.0e-6
+  implicit = false
+  segregated = true
   staggered_pressure = false
   monolithic_thermal = false
   verbose_multiapps = true
@@ -89,8 +91,8 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 1.000e5 # W
-    filename = "pin_power_profile37.txt"
+    power = ${fparse 16975/(0.5334+0.4046+0.0762)} # W/m
+    filename = "pin_power_profile_19.txt"
   []
 
   [T_ic]
@@ -184,7 +186,7 @@ P_out = 2.0e5 # Pa
 [MultiApps]
   [viz]
     type = FullSolveMultiApp
-    input_files = "3d.i"
+    input_files = "3d_ORNL_19.i"
     execute_on = "timestep_end"
   []
 []
@@ -196,13 +198,3 @@ P_out = 2.0e5 # Pa
     variable = 'mdot SumWij P DP h T rho mu q_prime S'
   []
 []
-
-#[Transfers]
-#  [xfer]
-#    type = MultiAppNearestNodeTransfer
-#    #fixed_meshes = true
-#    to_multi_app = viz
-#    source_variable = mdot
-#    variable = mdot
-#  []
-#[]

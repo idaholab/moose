@@ -62,8 +62,10 @@ TriDuctMeshGenerator::generate()
 
   mesh_base->prepare_for_use();
 
-  std::shared_ptr<TriSubChannelMesh> sch_mesh = std::dynamic_pointer_cast<TriSubChannelMesh>(_mesh);
+  std::shared_ptr<TriSubChannelMesh> sch_mesh =
+      std::dynamic_pointer_cast<TriSubChannelMesh>(_mesh);
   sch_mesh->setChannelToDuctMaps(duct_nodes);
+  sch_mesh->_duct_mesh_exist = true;
 
   return mesh_base;
 }

@@ -107,6 +107,8 @@ protected:
   const bool _compute_power;
   /// Flag that informs if there is a pin mesh or not
   const bool _pin_mesh_exist;
+  /// Flag that informs if there is a pin mesh or not
+  const bool _duct_mesh_exist;
   /// Variable that informs whether we exited external solve with a converged solution or not
   bool _converged;
   /// Time step
@@ -141,6 +143,8 @@ protected:
   const bool _segregated_bool;
   /// Thermal monolithic bool
   const bool _monolithic_thermal_bool;
+  /// Boolean to printout information related to subchannel solve
+  const bool _verbose_subchannel;
 
   /// Solutions handles and link to TH tables properties
   const SinglePhaseFluidProperties * _fp;
@@ -156,6 +160,8 @@ protected:
   SolutionHandle * _S_flow_soln;
   SolutionHandle * _w_perim_soln;
   SolutionHandle * _q_prime_soln;
+  SolutionHandle * _q_prime_duct_soln; // Only used for ducted assemblies
+  SolutionHandle * _Tduct_soln; // Only used for ducted assemblies
 
   /// Petsc Functions
   virtual PetscErrorCode createPetscVector(Vec & v, PetscInt n);

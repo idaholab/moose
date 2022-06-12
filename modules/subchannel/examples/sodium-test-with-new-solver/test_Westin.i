@@ -2,13 +2,14 @@ T_in = 660
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = ${fparse 1e+6 * 37.00 / 36000.*0.5}
 P_out = 2.0e5 # Pa
+
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
-    nrings = 4
-    n_cells = 100
-    flat_to_flat = 0.085
-    heated_length = 1.0
+    nrings = 9
+    n_cells = 200
+    flat_to_flat = 0.185
+    heated_length = 2.0
     rod_diameter = 0.01
     pitch = 0.012
     dwire = 0.002
@@ -49,7 +50,7 @@ P_out = 2.0e5 # Pa
 [Modules]
   [FluidProperties]
     [sodium]
-       type = PBSodiumFluidProperties
+      type = PBSodiumFluidProperties
     []
   []
 []
@@ -57,22 +58,22 @@ P_out = 2.0e5 # Pa
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
-  n_blocks = 1
+  n_blocks = 100
   beta = 0.1
   P_out = 2.0e5
   CT = 1.0
   enforce_uniform_pressure = false
-  compute_density = true
-  compute_viscosity = true
-  compute_power = true
-  P_tol = 1.0e-6
+  compute_density = false
+  compute_viscosity = false
+  compute_power = false
+  P_tol = 1.0e-3
   T_tol = 1.0e-3
-  implicit = true
-  segregated = false
+  implicit = false
+  segregated = true
   staggered_pressure = false
   monolithic_thermal = false
   verbose_multiapps = true
-  verbose_subchannel = false
+  verbose_subchannel = true
 []
 
 [ICs]
@@ -86,11 +87,11 @@ P_out = 2.0e5 # Pa
     variable = w_perim
   []
 
-   [q_prime_IC]
+  [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
     power = 1.000e5 # W
-    filename = "pin_power_profile37.txt"
+    filename = "pin_power_profile_217.txt"
   []
 
   [T_ic]
@@ -110,7 +111,8 @@ P_out = 2.0e5 # Pa
     variable = DP
     value = 0.0
   []
-    [Viscosity_ic]
+
+  [Viscosity_ic]
     type = ViscosityIC
     variable = mu
     p = ${P_out}
@@ -140,7 +142,7 @@ P_out = 2.0e5 # Pa
     variable = mdot
     value = 0.0
   []
-[]
+  []
 
 [AuxKernels]
   [P_out_bc]
@@ -184,7 +186,7 @@ P_out = 2.0e5 # Pa
 [MultiApps]
   [viz]
     type = FullSolveMultiApp
-    input_files = "3d.i"
+    input_files = "3d_Westin.i"
     execute_on = "timestep_end"
   []
 []
@@ -196,13 +198,3 @@ P_out = 2.0e5 # Pa
     variable = 'mdot SumWij P DP h T rho mu q_prime S'
   []
 []
-
-#[Transfers]
-#  [xfer]
-#    type = MultiAppNearestNodeTransfer
-#    #fixed_meshes = true
-#    to_multi_app = viz
-#    source_variable = mdot
-#    variable = mdot
-#  []
-#[]

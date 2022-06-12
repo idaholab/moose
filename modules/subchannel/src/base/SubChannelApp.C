@@ -20,6 +20,8 @@ const std::string SubChannelApp::DENSITY = "rho";
 const std::string SubChannelApp::VISCOSITY = "mu";
 const std::string SubChannelApp::WETTED_PERIMETER = "w_perim";
 const std::string SubChannelApp::LINEAR_HEAT_RATE = "q_prime";
+const std::string SubChannelApp::DUCT_LINEAR_HEAT_RATE = "q_prime_duct";
+const std::string SubChannelApp::DUCT_TEMPERATURE = "Tduct";
 
 InputParameters
 SubChannelApp::validParams()

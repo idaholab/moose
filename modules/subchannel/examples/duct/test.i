@@ -1,5 +1,4 @@
 T_in = 660
-# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = ${fparse 1e+6 * 37.00 / 36000.*0.5}
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
@@ -15,34 +14,62 @@ P_out = 2.0e5 # Pa
     hwire = 0.0833
     spacer_z = '0 0.2 0.4 0.6 0.8'
     spacer_k = '0.1 0.1 0.1 0.1 0.10'
-    discretization = "central_difference"
+  []
+
+  [duct]
+    type = TriDuctMeshGenerator
+    input = subchannel
+    nrings = 4
+    n_cells = 100
+    flat_to_flat = 0.085
+    heated_length = 1.0
+    pitch = 0.012
   []
 []
 
+
 [AuxVariables]
   [mdot]
+    block = subchannel
   []
   [SumWij]
+    block = subchannel
   []
   [P]
+    block = subchannel
   []
   [DP]
+    block = subchannel
   []
   [h]
+    block = subchannel
   []
   [T]
+    block = subchannel
   []
   [rho]
+    block = subchannel
   []
   [S]
+    block = subchannel
   []
   [Sij]
+    block = subchannel
   []
   [w_perim]
+    block = subchannel
   []
   [q_prime]
+    block = subchannel
   []
   [mu]
+    block = subchannel
+  []
+  [q_prime_duct]
+    block = duct
+  []
+  [Tduct]
+    block = duct
   []
 []
 
@@ -57,18 +84,18 @@ P_out = 2.0e5 # Pa
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
-  n_blocks = 1
+  n_blocks = 50
   beta = 0.1
   P_out = 2.0e5
   CT = 1.0
   enforce_uniform_pressure = false
-  compute_density = true
-  compute_viscosity = true
+  compute_density = false
+  compute_viscosity = false
   compute_power = true
-  P_tol = 1.0e-6
-  T_tol = 1.0e-3
-  implicit = true
-  segregated = false
+  P_tol = 1.0e-5
+  T_tol = 1.0e-5
+  implicit = false
+  segregated = true
   staggered_pressure = false
   monolithic_thermal = false
   verbose_multiapps = true
@@ -140,6 +167,12 @@ P_out = 2.0e5 # Pa
     variable = mdot
     value = 0.0
   []
+
+  [T_duct_ic]
+    type = ConstantIC
+    variable = Tduct
+    value = ${T_in}
+  []
 []
 
 [AuxKernels]
@@ -196,13 +229,3 @@ P_out = 2.0e5 # Pa
     variable = 'mdot SumWij P DP h T rho mu q_prime S'
   []
 []
-
-#[Transfers]
-#  [xfer]
-#    type = MultiAppNearestNodeTransfer
-#    #fixed_meshes = true
-#    to_multi_app = viz
-#    source_variable = mdot
-#    variable = mdot
-#  []
-#[]

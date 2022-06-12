@@ -18,6 +18,7 @@ public:
   virtual Node * getPinNode(unsigned int, unsigned) const override { return nullptr; }
 
   virtual bool pinMeshExist() const override { return false; }
+  virtual bool ductMeshExist() const override { return false; }
 
   virtual const Real & getDuctToRodGap() const { return _duct_to_rod_gap; }
 
