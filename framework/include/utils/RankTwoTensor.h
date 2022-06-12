@@ -316,11 +316,19 @@ public:
   /// returns _coords_ij * a_ij (sum on i, j)
   T doubleContraction(const RankTwoTensorTempl<T> & a) const;
 
-  /// returns C_ijkl = a_no * b_pq
+  /**
+   * Assuming a bijective index map M: {n,o,p,q} -> {i,j,k,l}, this function returns
+   * C_{ijkl} = a_{M(n)M(o)} b_{M(p)M(q)}. The bijective map is deduced from the
+   * positions of template arguments n, o, p, q.
+   */
   template <int n, int o, int p, int q>
   RankFourTensorTempl<T> times(const RankTwoTensorTempl<T> & b) const;
 
-  /// returns C_ijkl = a_no * b_pqrs
+  /**
+   * Assuming a surjective index map M: {n,o,p,q,r,s} -> {i,j,k,l}, this function
+   * returns C_{ijkl} = a_{M(n)M(o)} b_{M(p)M(q)M(r)M(s)}. The surjective map is
+   * deduced from the positions of template arguments n, o, p, q, r, s.
+   */
   template <int n, int o, int p, int q, int r, int s>
   RankFourTensorTempl<T> times(const RankFourTensorTempl<T> & b) const;
 
