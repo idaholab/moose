@@ -21,10 +21,18 @@ public:
     return _pin_nodes[i_pin][iz];
   }
 
+  // Duct functions not applicable to quad channel
+  // Over-writing to avoid abstract template definition in this class
+  virtual Node * getChanNodeFromDuct(Node *) override {return nullptr;}
+  virtual Node * getDuctNodeFromChannel(Node *) override {return nullptr;}
+  virtual Node * getChannelNodeFromDuct(Node *) override {return nullptr;}
+  virtual const std::vector<Node *> getDuctNodes() const override {return std::vector<Node *>();}
+
   virtual const unsigned int & getNumOfChannels() const override { return _n_channels; }
   virtual const unsigned int & getNumOfGapsPerLayer() const override { return _n_gaps; }
   virtual const unsigned int & getNumOfPins() const override { return _n_pins; }
   virtual bool pinMeshExist() const override { return _pin_mesh_exist; }
+  virtual bool ductMeshExist() const override { return false; }
   virtual const std::pair<unsigned int, unsigned int> &
   getGapNeighborChannels(unsigned int i_gap) const override
   {

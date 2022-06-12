@@ -56,6 +56,11 @@ public:
   virtual bool pinMeshExist() const = 0;
 
   /**
+   * Return if Pin Mesh exists or not
+   */
+  virtual bool ductMeshExist() const = 0;
+
+  /**
    * Return the number of gaps per layer
    */
   virtual const unsigned int & getNumOfGapsPerLayer() const = 0;

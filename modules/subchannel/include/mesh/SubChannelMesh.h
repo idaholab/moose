@@ -46,6 +46,21 @@ public:
   virtual Node * getPinNode(unsigned int i_pin, unsigned iz) const = 0;
 
   /**
+   * Function that gets the channel node from the duct node
+   */
+  virtual Node * getChanNodeFromDuct(Node * duct_node) = 0;
+
+  /**
+   * Function that gets the channel node from the duct node
+   */
+  virtual Node * getChannelNodeFromDuct(Node * channel_node) = 0;
+
+  /**
+   * Function that gets the duct node from the channel node
+   */
+  virtual Node * getDuctNodeFromChannel(Node * channel_node) = 0;
+
+  /**
    * Return the number of channels per layer
    */
   virtual const unsigned int & getNumOfChannels() const = 0;
@@ -54,6 +69,11 @@ public:
    * Return if Pin Mesh exists or not
    */
   virtual bool pinMeshExist() const = 0;
+
+  /**
+   * Return if Duct Mesh exists or not
+   */
+  virtual bool ductMeshExist() const = 0;
 
   /**
    * Return the number of gaps per layer
@@ -144,6 +164,11 @@ public:
    * Return gap width for a given gap index
    */
   virtual Real getGapWidth(unsigned int gap_index) const = 0;
+
+  /**
+   * Function that return the vector with the maps to the nodes if they exist
+   */
+  virtual const std::vector<Node *> getDuctNodes() const = 0;
 
 protected:
   /// unheated length of the fuel rod at the entry of the assembly

@@ -25,6 +25,7 @@ TriSubChannelMeshGenerator::validParams()
                                              "Axial location of spacers/vanes/mixing_vanes [m]");
   params.addRequiredParam<std::vector<Real>>(
       "spacer_k", "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
+  params.addParam<unsigned int>("block_id", 0, "Domain Index");
   return params;
 }
 
@@ -33,6 +34,7 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
     _unheated_length_entry(getParam<Real>("unheated_length_entry")),
     _heated_length(getParam<Real>("heated_length")),
     _unheated_length_exit(getParam<Real>("unheated_length_exit")),
+    _block_id(getParam<unsigned int>("block_id")),
     _spacer_z(getParam<std::vector<Real>>("spacer_z")),
     _spacer_k(getParam<std::vector<Real>>("spacer_k")),
     _pitch(getParam<Real>("pitch")),
@@ -628,6 +630,7 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   {
     gap.shrink_to_fit();
   }
+
 }
 
 std::unique_ptr<MeshBase>
@@ -680,6 +683,9 @@ TriSubChannelMeshGenerator::generate()
   boundary_info.sideset_name(1) = "outlet";
   boundary_info.nodeset_name(0) = "inlet";
   boundary_info.nodeset_name(1) = "outlet";
+
+  // Naming the block
+  mesh_base->subdomain_name(_block_id) = name();
 
   mesh_base->prepare_for_use();
 

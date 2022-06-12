@@ -24,7 +24,8 @@ public:
   virtual const unsigned int & getNumOfChannels() const override { return _n_channels; }
   virtual const unsigned int & getNumOfGapsPerLayer() const override { return _n_gaps; }
   virtual const unsigned int & getNumOfPins() const override { return _n_assemblies; }
-  virtual bool pinMeshExist() const override { return _pin_mesh_exist; }
+  virtual bool pinMeshExist() const override { return false; }
+  virtual bool ductMeshExist() const override { return false; }
   virtual const std::pair<unsigned int, unsigned int> &
   getGapNeighborChannels(unsigned int i_gap) const override
   {

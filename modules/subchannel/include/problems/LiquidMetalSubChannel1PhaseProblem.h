@@ -21,6 +21,8 @@ protected:
   virtual double computeFrictionFactor(double Re, int i_ch, Real S, Real w_perim, Real Dh_i);
   /// computeFrictionFactor(double Re) is currently not used for sodium coolant
   virtual double computeFrictionFactor(double Re) override;
+  /// Function that computes the heat flux added by the duct
+  virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
   /// computeDP(int iz) is defined/overridden in order to use the friction factor for sodium
   virtual void computeDP(int iblock) override;
   /// computeMassFlowForDPDZ(double dpdz, int i_ch) and enforceUniformDPDZAtInlet()

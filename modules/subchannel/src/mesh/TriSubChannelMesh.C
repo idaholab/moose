@@ -11,7 +11,10 @@ TriSubChannelMesh::validParams()
   return params;
 }
 
-TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params) : SubChannelMesh(params) {}
+TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
+  : SubChannelMesh(params), _duct_mesh_exist(false)
+{
+}
 
 TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
   : SubChannelMesh(other_mesh),
@@ -40,7 +43,8 @@ TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
     _gap_type(other_mesh._gap_type),
     _gap_pairs_sf(other_mesh._gap_pairs_sf),
     _chan_pairs_sf(other_mesh._chan_pairs_sf),
-    _pin_to_chan_map(other_mesh._pin_to_chan_map)
+    _pin_to_chan_map(other_mesh._pin_to_chan_map),
+    _duct_mesh_exist(other_mesh._duct_mesh_exist)
 {
 }
 

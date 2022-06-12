@@ -65,6 +65,7 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<bool>("staggered_pressure", false, "Boolean to define the use of explicit or implicit solution.");
   params.addParam<bool>("segregated", true, "Boolean to define whether to use a segregated solution.");
   params.addParam<bool>("monolithic_thermal", false, "Boolean to define whether to use thermal monolithic solve.");
+  params.addParam<bool>("verbose_subchannel", false, "Boolean to print out information related to subchannel solve.");
   params.addRequiredParam<bool>("compute_density", "Flag that enables the calculation of density");
   params.addRequiredParam<bool>("compute_viscosity",
                                 "Flag that enables the calculation of viscosity");
@@ -89,6 +90,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _compute_viscosity(getParam<bool>("compute_viscosity")),
     _compute_power(getParam<bool>("compute_power")),
     _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
+    _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
     _dt(isTransient() ? dt() : _one),
     _P_out(getParam<Real>("P_out")),
     _beta(getParam<Real>("beta")),
@@ -105,8 +107,11 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _staggered_pressure_bool(getParam<bool>("staggered_pressure")),
     _segregated_bool(getParam<bool>("segregated")),
     _monolithic_thermal_bool(getParam<bool>("monolithic_thermal")),
+    _verbose_subchannel(getParam<bool>("verbose_subchannel")),
     _fp(nullptr),
-    _Tpin_soln(nullptr)
+    _Tpin_soln(nullptr),
+    _q_prime_duct_soln(nullptr),
+    _Tduct_soln(nullptr)
 {
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
@@ -194,6 +199,11 @@ SubChannel1PhaseProblem::initialSetup()
   _S_flow_soln = new SolutionHandle(getVariable(0, SubChannelApp::SURFACE_AREA));
   _w_perim_soln = new SolutionHandle(getVariable(0, SubChannelApp::WETTED_PERIMETER));
   _q_prime_soln = new SolutionHandle(getVariable(0, SubChannelApp::LINEAR_HEAT_RATE));
+  if (_duct_mesh_exist)
+  {
+    _q_prime_duct_soln = new SolutionHandle(getVariable(0, SubChannelApp::DUCT_LINEAR_HEAT_RATE));
+    _Tduct_soln = new SolutionHandle(getVariable(0, SubChannelApp::DUCT_TEMPERATURE));
+  }
 }
 
 SubChannel1PhaseProblem::~SubChannel1PhaseProblem()
@@ -210,6 +220,11 @@ SubChannel1PhaseProblem::~SubChannel1PhaseProblem()
   delete _S_flow_soln;
   delete _w_perim_soln;
   delete _q_prime_soln;
+  if (_duct_mesh_exist)
+  {
+    delete _q_prime_duct_soln;
+    delete _Tduct_soln;
+  }
   //  MatDestroy(&mc_sumWij_mat);
   //  VecDestroy(&Wij_vec);
   //  VecDestroy(&prod);
@@ -447,10 +462,13 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
     MatAssemblyEnd(mc_sumWij_mat,MAT_FINAL_ASSEMBLY);
     if(_segregated_bool)
     {
+      Vec loc_prod; VecDuplicate(amc_sys_mdot_rhs,&loc_prod);
       populateVectorFromDense<libMesh::DenseMatrix<Real>>(Wij_vec, _Wij, first_node, last_node, _n_gaps);
-      MatMult(mc_sumWij_mat, Wij_vec, prod);
+      PetscInt p, q;
+      MatGetSize(mc_sumWij_mat, &p, &q);
+      MatMult(mc_sumWij_mat, Wij_vec, loc_prod);
       PetscScalar * xx;
-      VecGetArray(prod, &xx);
+      VecGetArray(loc_prod, &xx);
       for (unsigned int iz = first_node; iz < last_node + 1; iz++)
       {
         unsigned int iz_ind = iz - first_node;
@@ -461,6 +479,7 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
           _SumWij_soln->set(node_out, value);
         }
       }
+      VecDestroy(&loc_prod);
     }
   }
 }
@@ -549,7 +568,8 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
     }
     MatAssemblyBegin(mc_axial_convection_mat,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(mc_axial_convection_mat,MAT_FINAL_ASSEMBLY);
-    std::cout << "Block: " << iblock << " - Mass conservation matrix assembled" << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Block: " << iblock << " - Mass conservation matrix assembled" << std::endl;
 
     if(_segregated_bool)
     {
@@ -1029,7 +1049,8 @@ SubChannel1PhaseProblem::computeDP(int iblock)
     MatAssemblyBegin(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY);
     MatAXPY(amc_sys_mdot_mat, 1.0, amc_friction_force_mat, UNKNOWN_NONZERO_PATTERN);
     MatAssemblyBegin(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY);
-    std::cout << "Block: " << iblock << " - Linear momentum conservation matrix assembled" << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Block: " << iblock << " - Linear momentum conservation matrix assembled" << std::endl;
     // RHS
     VecAXPY(amc_sys_mdot_rhs, 1.0, amc_time_derivative_rhs);
     VecAXPY(amc_sys_mdot_rhs, 1.0, amc_advective_derivative_rhs);
@@ -1264,7 +1285,8 @@ SubChannel1PhaseProblem::computeP(int iblock)
       // Solving pressure problem
       MatAssemblyBegin(amc_pressure_force_mat,MAT_FINAL_ASSEMBLY);
       MatAssemblyEnd(amc_pressure_force_mat,MAT_FINAL_ASSEMBLY);
-      std::cout << "Block: " << iblock << " - Axial momentum pressure force matrix assembled" << std::endl;
+      if (_verbose_subchannel)
+        std::cout << "Block: " << iblock << " - Axial momentum pressure force matrix assembled" << std::endl;
 
       if(_segregated_bool)
       {
@@ -1326,8 +1348,6 @@ SubChannel1PhaseProblem::computeh(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
-
-  std::cout << "In enthalpy function" << std::endl;
 
   if (iblock == 0)
   {
@@ -1406,15 +1426,11 @@ SubChannel1PhaseProblem::computeh(int iblock)
   else
   {
 
-    std::cout << "Setting matrices" << std::endl;
-
     MatZeroEntries(hc_time_derivative_mat); MatZeroEntries(hc_advective_derivative_mat);
     MatZeroEntries(hc_cross_derivative_mat);
     VecZeroEntries(hc_time_derivative_rhs); VecZeroEntries(hc_advective_derivative_rhs);
     VecZeroEntries(hc_cross_derivative_rhs); VecZeroEntries(hc_added_heat_rhs);
     MatZeroEntries(hc_sys_h_mat); VecZeroEntries(hc_sys_h_rhs);
-
-    std::cout << "Starting enthalpy assembly" << std::endl;
 
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     {
@@ -1616,8 +1632,6 @@ SubChannel1PhaseProblem::computeh(int iblock)
       }
     }
 
-    std::cout << "Done with enthalpy assembly" << std::endl;
-
     /// Assembling system
     MatAssemblyBegin(hc_time_derivative_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(hc_time_derivative_mat,MAT_FINAL_ASSEMBLY);
     MatAssemblyBegin(hc_advective_derivative_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(hc_advective_derivative_mat,MAT_FINAL_ASSEMBLY);
@@ -1630,7 +1644,8 @@ SubChannel1PhaseProblem::computeh(int iblock)
     MatAssemblyBegin(hc_sys_h_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(hc_sys_h_mat,MAT_FINAL_ASSEMBLY);
     MatAXPY(hc_sys_h_mat, 1.0, hc_cross_derivative_mat, UNKNOWN_NONZERO_PATTERN);
     MatAssemblyBegin(hc_sys_h_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(hc_sys_h_mat,MAT_FINAL_ASSEMBLY);
-    std::cout << "Block: " << iblock << " - Enthalpy conservation matrix assembled" << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Block: " << iblock << " - Enthalpy conservation matrix assembled" << std::endl;
     // RHS
     VecAXPY(hc_sys_h_rhs, 1.0, hc_time_derivative_rhs);
     VecAXPY(hc_sys_h_rhs, 1.0, hc_advective_derivative_rhs);
@@ -1980,8 +1995,10 @@ SubChannel1PhaseProblem::computeWij(int iblock)
     MatAssemblyBegin(cmc_sys_Wij_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(cmc_sys_Wij_mat,MAT_FINAL_ASSEMBLY);
     MatAXPY(cmc_sys_Wij_mat, 1.0, cmc_friction_force_mat, UNKNOWN_NONZERO_PATTERN);
     MatAssemblyBegin(cmc_sys_Wij_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(cmc_sys_Wij_mat,MAT_FINAL_ASSEMBLY);
-    std::cout << "Block: " << iblock << " - Cross flow system matrix assembled" << std::endl;
-    std::cout << "Block: " << iblock << " - Cross flow pressure force matrix assembled" << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Block: " << iblock << " - Cross flow system matrix assembled" << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Block: " << iblock << " - Cross flow pressure force matrix assembled" << std::endl;
     // RHS
     VecAXPY(cmc_sys_Wij_rhs, 1.0, cmc_time_derivative_rhs);
     VecAXPY(cmc_sys_Wij_rhs, 1.0, cmc_advective_derivative_rhs);
@@ -2190,16 +2207,23 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // If monolithic solve - Assembling enthalpy matrix
   if(_monolithic_thermal_bool) computeh(iblock);
 
-  std::cout << "Starting nested system." << std::endl;
-  std::cout << Q << std::endl;
+  if (_verbose_subchannel)
+  {
+    std::cout << "Starting nested system." << std::endl;
+    std::cout << Q << std::endl;
+  }
   // Mass conservation
   PetscInt field_num = 0;
+  ierr = MatAssemblyBegin(mc_axial_convection_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+  ierr = MatAssemblyEnd(mc_axial_convection_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
   ierr = MatDuplicate(mc_axial_convection_mat,MAT_COPY_VALUES,&mat_array[Q*field_num+0]); CHKERRQ(ierr);
   ierr = MatAssemblyBegin(mat_array[Q*field_num+0],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
   ierr = MatAssemblyEnd(mat_array[Q*field_num+0],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
   mat_array[Q*field_num+1] = NULL;
   if (_axial_mass_flow_tight_coupling)
   {
+    ierr = MatAssemblyBegin(mc_sumWij_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+    ierr = MatAssemblyEnd(mc_sumWij_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
     ierr = MatDuplicate(mc_sumWij_mat,MAT_COPY_VALUES,&mat_array[Q*field_num+2]); CHKERRQ(ierr);
     ierr = MatAssemblyBegin(mat_array[Q*field_num+2],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
     ierr = MatAssemblyEnd(mat_array[Q*field_num+2],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
@@ -2208,6 +2232,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   {
     mat_array[Q*field_num+2] = NULL;
   }
+  _console << "Term 3" << std::endl;
   if(_monolithic_thermal_bool)
   {
     mat_array[Q*field_num+3] = NULL;
@@ -2239,11 +2264,14 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 //  MatGetRowMaxAbs(mc_axial_convection_mat, mc_axial_convection_rhs, NULL);
 //  VecView(mc_axial_convection_rhs, PETSC_VIEWER_STDOUT_WORLD);
 
-  std::cout << "Mass ok." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Mass ok." << std::endl;
   // Axial momentum conservation
   field_num = 1;
   if (_pressure_axial_momentum_tight_coupling)
   {
+    ierr = MatAssemblyBegin(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+    ierr = MatAssemblyEnd(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
     ierr = MatDuplicate(amc_sys_mdot_mat,MAT_COPY_VALUES,&mat_array[Q*field_num+0]); CHKERRQ(ierr);
     ierr = MatAssemblyBegin(mat_array[Q*field_num+0],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
     ierr = MatAssemblyEnd(mat_array[Q*field_num+0],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
@@ -2252,6 +2280,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   {
     mat_array[Q*field_num+0] = NULL;
   }
+  ierr = MatAssemblyBegin(amc_pressure_force_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+  ierr = MatAssemblyEnd(amc_pressure_force_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
   ierr = MatDuplicate(amc_pressure_force_mat,MAT_COPY_VALUES,&mat_array[Q*field_num+1]); CHKERRQ(ierr);
   ierr = MatAssemblyBegin(mat_array[Q*field_num+1],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
   ierr = MatAssemblyEnd(mat_array[Q*field_num+1],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
@@ -2284,13 +2314,16 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
 //  MatGetRowMaxAbs(amc_pressure_force_mat, amc_pressure_force_rhs, NULL);
 //  VecView(amc_pressure_force_rhs, PETSC_VIEWER_STDOUT_WORLD);
-  std::cout << "Lin mom OK." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Lin mom OK." << std::endl;
 
   // Cross momentum conservation
   field_num = 2;
   mat_array[Q*field_num+0] = NULL;
   if (_pressure_cross_momentum_tight_coupling)
   {
+    ierr = MatAssemblyBegin(cmc_pressure_force_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+    ierr = MatAssemblyEnd(cmc_pressure_force_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
     ierr = MatDuplicate(cmc_pressure_force_mat,MAT_COPY_VALUES,&mat_array[Q*field_num+1]); CHKERRQ(ierr);
     ierr = MatAssemblyBegin(mat_array[Q*field_num+1],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
     ierr = MatAssemblyEnd(mat_array[Q*field_num+1],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
@@ -2364,7 +2397,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     PetscScalar max_value;
     //VecMax(sumWij_loc, NULL, &max_value);
     VecMean(sumWij_loc, &max_value);
-    std::cout << "Max val: " << max_value << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Max val: " << max_value << std::endl;
 
     Vec Wij_new_loc, Wij_old_loc;
     ierr = VecDuplicate(cmc_sys_Wij_rhs,&Wij_old_loc); CHKERRQ(ierr);
@@ -2407,6 +2441,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     ierr =  MatShift(cmc_sys_Wij_mat,local_shift); CHKERRQ(ierr);
   }
 
+  ierr = MatAssemblyBegin(cmc_sys_Wij_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+  ierr = MatAssemblyEnd(cmc_sys_Wij_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
   ierr = MatDuplicate(cmc_sys_Wij_mat,MAT_COPY_VALUES,&mat_array[Q*field_num+2]); CHKERRQ(ierr);
   //ierr = MatScale(mat_array[Q*field_num+2], -1.0); CHKERRQ(ierr);
   ierr = MatAssemblyBegin(mat_array[Q*field_num+2],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
@@ -2485,10 +2521,13 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     PetscScalar diag_value;
     ierr = VecGetValues(diag_Wij, 1, &max_pos, &diag_value); CHKERRQ(ierr);
     PetscScalar scaling = diag_value * constraint_max;
-    std::cout << "Max constraint: " << constraint_max << std::endl;
-    std::cout << "Diagonal value: " << diag_value << std::endl;
-
-    std::cout << "Relaxation diagonal factor for Wij: " << scaling << std::endl;
+    if (_verbose_subchannel)
+    {
+      std::cout << "Max constraint: " << constraint_max << std::endl;
+      std::cout << "Diagonal value: " << diag_value << std::endl;
+    }
+    if (_verbose_subchannel)
+      std::cout << "Relaxation diagonal factor for Wij: " << scaling << std::endl;
     ierr =  MatShift(mat_array[Q*field_num+2],-1.0*std::abs(scaling)); CHKERRQ(ierr);
 
     VecDestroy(&sol_holder_P);
@@ -2501,7 +2540,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 //  MatGetRowMaxAbs(cmc_sys_Wij_mat, cmc_sys_Wij_rhs, NULL);
 //  VecView(cmc_sys_Wij_rhs, PETSC_VIEWER_STDOUT_WORLD);
 
-  std::cout << "Cross mom ok." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Cross mom ok." << std::endl;
 
   // Energy conservation
   if(_monolithic_thermal_bool)
@@ -2510,13 +2550,16 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     mat_array[Q*field_num+0] = NULL;
     mat_array[Q*field_num+1] = NULL;
     mat_array[Q*field_num+2] = NULL;
+    ierr = MatAssemblyBegin(hc_sys_h_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+    ierr = MatAssemblyEnd(hc_sys_h_mat,MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
     ierr = MatDuplicate(hc_sys_h_mat,MAT_COPY_VALUES,&mat_array[Q*field_num+3]); CHKERRQ(ierr);
     ierr = MatAssemblyBegin(mat_array[Q*field_num+3],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
     ierr = MatAssemblyEnd(mat_array[Q*field_num+3],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
     ierr = VecDuplicate(hc_sys_h_rhs,&vec_array[field_num]); CHKERRQ(ierr);
     ierr = VecCopy(hc_sys_h_rhs,vec_array[field_num]); CHKERRQ(ierr);
   }
-  std::cout << "Energy ok." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Energy ok." << std::endl;
 
   // Relaxing linear system
   if (true)
@@ -2568,30 +2611,37 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
     PetscScalar min_mdot; VecAbs(prod);
     ierr = VecMin(prod, NULL, &min_mdot); CHKERRQ(ierr);
-    std::cout << "Minimum estimated mdot: " << min_mdot << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Minimum estimated mdot: " << min_mdot << std::endl;
 
     VecAbs(sumWij_loc);
     ierr = VecMax(sumWij_loc, NULL, &max_sumWij); CHKERRQ(ierr);
-    std::cout << "Maximum estimated Wij: " << max_sumWij << std::endl;
+    max_sumWij = std::max(1e-10, max_sumWij);
+    if (_verbose_subchannel)
+      std::cout << "Maximum estimated Wij: " << max_sumWij << std::endl;
 
     populateVectorFromDense<libMesh::DenseMatrix<Real>>(_Wij_loc_vec, _Wij, first_node, last_node, _n_gaps); VecAbs(_Wij_loc_vec);
     populateVectorFromDense<libMesh::DenseMatrix<Real>>(_Wij_old_loc_vec, _Wij_old, first_node, last_node, _n_gaps); VecAbs(_Wij_old_loc_vec);
     ierr = VecAXPY(_Wij_loc_vec, -1.0, _Wij_old_loc_vec); CHKERRQ(ierr);
     PetscScalar relax_factor; VecAbs(_Wij_loc_vec); VecMean(_Wij_loc_vec, &relax_factor);
     relax_factor = relax_factor/max_sumWij + 0.5;
-    std::cout << "Relax base value: " << relax_factor << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Relax base value: " << relax_factor << std::endl;
 
     PetscScalar resistance_relaxation = 0.9;
     _added_K = max_sumWij / min_mdot;
-    std::cout << "New cross resistance: " << _added_K << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "New cross resistance: " << _added_K << std::endl;
     _added_K = (_added_K * resistance_relaxation + (1.0 - resistance_relaxation) * _added_K_old) * relax_factor;
-    std::cout << "Relaxed cross resistance: " << _added_K << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Relaxed cross resistance: " << _added_K << std::endl;
     if (_added_K < 10 && _added_K >= 1.0) _added_K = 1.0; //(1.0 - resistance_relaxation);
     if (_added_K < 1.0 && _added_K >= 0.1) _added_K = 0.5;
     if (_added_K < 0.1 && _added_K >= 0.01) _added_K = 1./3.;
     if (_added_K < 1e-2 && _added_K >= 1e-3) _added_K = 0.1;
     if (_added_K < 1e-3) _added_K = 1.0*_added_K;
-    std::cout << "Actual added cross resistance: " << _added_K << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Actual added cross resistance: " << _added_K << std::endl;
     ierr = VecScale(unity_vec_Wij, _added_K); CHKERRQ(ierr);
     _added_K_old = _added_K;
 
@@ -2608,9 +2658,9 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     PetscScalar relaxation_factor_mdot, relaxation_factor_P, relaxation_factor_Wij;
 //    if (relax_factor < 1E-10)
 //    {
-      relaxation_factor_mdot = 1.0;
-      relaxation_factor_P = 1.0; //std::exp(-5.0);
-      relaxation_factor_Wij = 0.1;
+    relaxation_factor_mdot = 1.0;
+    relaxation_factor_P = 1.0; //std::exp(-5.0);
+    relaxation_factor_Wij = 0.1;
 //    }
 //    else
 //    {
@@ -2620,9 +2670,12 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 //      relax_factor_loc = std::min(relax_factor, 7.0);
 //      relaxation_factor_Wij = std::exp(-1.0*relax_factor_loc);
 //    }
-    std::cout << "Relax mdot: " << relaxation_factor_mdot << std::endl;
-    std::cout << "Relax P: " << relaxation_factor_P << std::endl;
-    std::cout << "Relax Wij: " << relaxation_factor_Wij << std::endl;
+    if (_verbose_subchannel)
+    {
+      std::cout << "Relax mdot: " << relaxation_factor_mdot << std::endl;
+      std::cout << "Relax P: " << relaxation_factor_P << std::endl;
+      std::cout << "Relax Wij: " << relaxation_factor_Wij << std::endl;
+    }
 
     PetscInt field_num = 0;
     Vec diag_mdot;
@@ -2636,7 +2689,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     ierr = VecAXPY(vec_array[field_num], 1.0, prod); CHKERRQ(ierr);
     VecDestroy(&diag_mdot);
 
-    std::cout << "mdot relaxed" << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "mdot relaxed" << std::endl;
 
     field_num = 1;
     Vec diag_P;
@@ -2644,14 +2698,16 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     ierr = MatGetDiagonal(mat_array[Q*field_num+field_num],diag_P); CHKERRQ(ierr);
     ierr = VecScale(diag_P, 1.0/relaxation_factor_P); CHKERRQ(ierr);
     ierr = MatDiagonalSet(mat_array[Q*field_num+field_num], diag_P, INSERT_VALUES); CHKERRQ(ierr);
-    std::cout << "Mat assembled" << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Mat assembled" << std::endl;
     populateVectorFromHandle<SolutionHandle *>(prod, _P_soln, first_node, last_node, _n_channels);
     ierr = VecScale(diag_P, (1.0-relaxation_factor_P)); CHKERRQ(ierr);
     ierr = VecPointwiseMult(prod, prod, diag_P); CHKERRQ(ierr);
     ierr = VecAXPY(vec_array[field_num], 1.0, prod); CHKERRQ(ierr);
     VecDestroy(&diag_P);
 
-    std::cout << "P relaxed" << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "P relaxed" << std::endl;
 
     field_num = 2;
     Vec diag_Wij;
@@ -2665,14 +2721,17 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     ierr = VecAXPY(vec_array[field_num], 1.0, Wij_vec); CHKERRQ(ierr);
     VecDestroy(&diag_Wij);
 
-    std::cout << "Wij relaxed" << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Wij relaxed" << std::endl;
   }
-  std::cout << "Linear solver relaxed." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Linear solver relaxed." << std::endl;
 
   // Creating nested matrices
   ierr = MatCreateNest(PETSC_COMM_WORLD,Q,NULL,Q,NULL,mat_array.data(),&A_nest); CHKERRQ(ierr);
   ierr = VecCreateNest(PETSC_COMM_WORLD,Q,NULL,vec_array.data(),&b_nest); CHKERRQ(ierr);
-  std::cout << "Nested system created." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Nested system created." << std::endl;
 
   /// Setting up linear solver
   // Creating linear solver
@@ -2696,14 +2755,13 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     PCFieldSplitSetIS(pc,NULL,expand1);
     ISDestroy(&expand1);
   }
-  std::cout << "Linear solver assembled." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Linear solver assembled." << std::endl;
 
   /// Solving
   ierr = VecDuplicate(b_nest,&x_nest); CHKERRQ(ierr);
   ierr = VecSet(x_nest, 0.0); CHKERRQ(ierr);
   ierr = KSPSolve(ksp, b_nest, x_nest); CHKERRQ(ierr);
-//  VecView(x_nest, PETSC_VIEWER_STDOUT_WORLD);
-//  std::cout << "Linear system solved." << std::endl;
 
   /// Destroying solver elements
   ierr = VecDestroy(&b_nest);CHKERRQ(ierr);
@@ -2717,23 +2775,26 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   {
     ierr = VecDestroy(&vec_array[i]);CHKERRQ(ierr);
   }
-  std::cout << "Solver elements destroyed." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Solver elements destroyed." << std::endl;
 
   /// Recovering the solutions
   Vec sol_mdot, sol_p, sol_Wij;
-  std::cout << "Vectors created." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Vectors created." << std::endl;
   PetscInt num_vecs;
   Vec *loc_vecs;
   ierr = VecNestGetSubVecs(x_nest,&num_vecs,&loc_vecs); CHKERRQ(ierr);
-  std::cout << "Starting extraction." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Starting extraction." << std::endl;
   VecDuplicate(mc_axial_convection_rhs,&sol_mdot);
   VecCopy(loc_vecs[0],sol_mdot);
   ierr = VecDuplicate(amc_sys_mdot_rhs,&sol_p); CHKERRQ(ierr);
   ierr = VecCopy(loc_vecs[1],sol_p); CHKERRQ(ierr);
   ierr = VecDuplicate(cmc_sys_Wij_rhs,&sol_Wij); CHKERRQ(ierr);
   ierr = VecCopy(loc_vecs[2],sol_Wij); CHKERRQ(ierr);
-  //VecView(sol_Wij, PETSC_VIEWER_STDOUT_WORLD);
-  std::cout << "Getting individual field solutions from coupled solver." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Getting individual field solutions from coupled solver." << std::endl;
 
   /// Assigning the solutions to arrays
   PetscScalar * sol_mdot_array; VecGetArray(sol_mdot, &sol_mdot_array);
@@ -2759,7 +2820,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz-1);
       PetscScalar value = sol_p_array[iz_ind*_n_channels + i_ch];
       _P_soln->set(node_in, value);
-      //std::cout << (*_P_soln)(node_in) << std::endl;
     }
   }
 
@@ -2815,7 +2875,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
       auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
       PetscScalar value = xx[iz_ind*_n_channels + i_ch];
       _SumWij_soln->set(node_out, value);
-      //std::cout << "Sum Wij: " << value << std::endl;
     }
   }
 
@@ -2823,18 +2882,21 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   populateVectorFromHandle<SolutionHandle *>(prod, _SumWij_soln, first_node, last_node, _n_channels);
   PetscScalar max_sumWij_new; VecAbs(prod);
   ierr = VecMax(prod, NULL, &max_sumWij_new); CHKERRQ(ierr);
-  std::cout << "Maximum estimated Wij new: " << max_sumWij_new << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Maximum estimated Wij new: " << max_sumWij_new << std::endl;
   correction_factor = max_sumWij_new/max_sumWij;
-  std::cout << "Correction factor: " << correction_factor << std::endl;
-
-  std::cout << "Solutions assigned to MOOSE variables." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Correction factor: " << correction_factor << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Solutions assigned to MOOSE variables." << std::endl;
 
   /// Destroying arrays
   ierr = VecDestroy(&x_nest);CHKERRQ(ierr);
   ierr = VecDestroy(&sol_mdot);CHKERRQ(ierr);
   ierr = VecDestroy(&sol_p);CHKERRQ(ierr);
   ierr = VecDestroy(&sol_Wij);CHKERRQ(ierr);
-  std::cout << "Solutions destroyed." << std::endl;
+  if (_verbose_subchannel)
+    std::cout << "Solutions destroyed." << std::endl;
 
   return ierr;
 
@@ -2896,7 +2958,8 @@ SubChannel1PhaseProblem::externalSolve()
   if (! _segregated_bool)
   {
     initializeSolution();
-    std::cout << "Solution initialized" << std::endl;
+    if (_verbose_subchannel)
+      std::cout << "Solution initialized" << std::endl;
   }
   while ((P_error > _P_tol && P_it < P_it_max))
   {
@@ -2946,15 +3009,19 @@ SubChannel1PhaseProblem::externalSolve()
           else
           {
             implicitPetscSolve(iblock);
-            std::cout << "Done with main solve." << std::endl;
+            if (_verbose_subchannel)
+              std::cout << "Done with main solve." << std::endl;
             if (_compute_power)
             {
-              std::cout << "Starting enthalpy solve." << std::endl;
+              if (_verbose_subchannel)
+                std::cout << "Starting enthalpy solve." << std::endl;
               computeh(iblock);
-              std::cout << "Done with enthalpy solve." << std::endl;
+              if (_verbose_subchannel)
+                std::cout << "Done with enthalpy solve." << std::endl;
               computeT(iblock);
             }
-            std::cout << "Done with thermal solve." << std::endl;
+            if (_verbose_subchannel)
+              std::cout << "Done with thermal solve." << std::endl;
           }
         }
 
@@ -2964,7 +3031,8 @@ SubChannel1PhaseProblem::externalSolve()
         if (_compute_viscosity)
           computeMu(iblock);
 
-        std::cout << "Done updating thermophysical properties." << std::endl;
+        if (_verbose_subchannel)
+          std::cout << "Done updating thermophysical properties." << std::endl;
 
         auto T_L2norm_new = _T_soln->L2norm();
         T_block_error =
@@ -2976,8 +3044,11 @@ SubChannel1PhaseProblem::externalSolve()
     P_error =
         std::abs((P_L2norm_new_axial - P_L2norm_old_axial) / (P_L2norm_old_axial + _P_out + 1E-14));
     _console << "P_error :" << P_error << std::endl;
-    std::cout << "Iteration:  " << P_it << std::endl;
-    std::cout << "Maximum iterations: " << P_it_max << std::endl;
+    if (_verbose_subchannel)
+    {
+      std::cout << "Iteration:  " << P_it << std::endl;
+      std::cout << "Maximum iterations: " << P_it_max << std::endl;
+    }
   }
   // update old crossflow matrix
   _Wij_old = _Wij;
