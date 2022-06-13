@@ -12,7 +12,7 @@ TriSubChannelMesh::validParams()
 }
 
 TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
-  : SubChannelMesh(params), _duct_mesh_exist(false)
+  : SubChannelMesh(params), _pin_mesh_exist(false), _duct_mesh_exist(false)
 {
 }
 
@@ -44,6 +44,7 @@ TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
     _gap_pairs_sf(other_mesh._gap_pairs_sf),
     _chan_pairs_sf(other_mesh._chan_pairs_sf),
     _pin_to_chan_map(other_mesh._pin_to_chan_map),
+    _pin_mesh_exist(other_mesh._pin_mesh_exist),
     _duct_mesh_exist(other_mesh._duct_mesh_exist)
 {
 }
@@ -148,35 +149,25 @@ TriSubChannelMesh::pinIndex(const Point & p) const
   /// Function that returns the pin number given a point
 
   // Define the current ring
-  Real x_position = p(0);
-  Real y_position = p(1);
-  Real distance_rod = std::sqrt(std::pow(x_position, 2) + std::pow(y_position, 2));
-  Real d0 = 1e5; unsigned int current_ring = 0;
-  Real distance_ring, distance_to_ring;
-  for (unsigned int i = 0; i < _n_rings; i++)
+  Real distance_rod;
+  Real d0 = 1e5; unsigned int current_rod = 0;
+
+  std::vector<Point> positions;
+  Point center(0,0);
+  this->rodPositions(positions, _n_rings, _pitch, center);
+  for (unsigned int i = 0; i < _nrods; i++)
   {
-    distance_ring = std::sqrt(pow(i * _pitch, 2));
-    distance_to_ring = std::abs(distance_ring - distance_rod);
-    if (distance_to_ring < d0)
+    Real x_dist = positions[i](0) - p(0);
+    Real y_dist = positions[i](1) - p(1);
+    distance_rod = std::sqrt(std::pow(x_dist, 2) + std::pow(y_dist, 2));
+    if (distance_rod < d0)
     {
-      d0 = distance_to_ring;
-      current_ring = i;
+      d0 = distance_rod;
+      current_rod = i;
     }
   }
 
-  // Count the number of rods until the current ring
-  unsigned int count_elapsed_rods = 0;
-  for (unsigned int i = 0; i < current_ring; i++)
-  {
-    count_elapsed_rods += i * 6;
-  }
-
-  // Find the rod in the ring
-  Real angle = std::atan(y_position/x_position);
-  Real delta_theta = libMesh::pi / (current_ring * 6);
-  unsigned int current_index = std::trunc((angle - delta_theta/2) / delta_theta);
-
-  return count_elapsed_rods + current_index;
+  return current_rod;
 }
 
 void

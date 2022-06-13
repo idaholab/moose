@@ -5,12 +5,12 @@
 /**
  * Computes linear heat rate
  */
-class QPrimeAux : public DiffusionFluxAux
+class QPrimeAuxPin : public DiffusionFluxAux
 {
 public:
   static InputParameters validParams();
 
-  QPrimeAux(const InputParameters & parameters);
+  QPrimeAuxPin(const InputParameters & parameters);
 
   virtual Real computeValue() override;
 

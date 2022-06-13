@@ -896,7 +896,10 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
 
       double added_enthalpy;
       if (z_grid[iz] > unheated_length_entry && z_grid[iz] <= unheated_length_entry + heated_length)
-        added_enthalpy = ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
+      {
+        // added_enthalpy = ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
+        added_enthalpy = computeAddedHeatPin(i_ch, iz);
+      }
       else
         added_enthalpy = 0.0;
 
@@ -1153,30 +1156,89 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
   // update old crossflow matrix
   _Wij_old = _Wij;
   _console << "Finished executing subchannel solver\n";
+
+  /// Assigning temperature to the fuel pins
+  if (_pin_mesh_exist)
+  {
+    _console << "Commencing calculation of Pin surface temperature" << std::endl;
+    for (unsigned int i_pin = 0; i_pin < _n_pins; i_pin++)
+    {
+      for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
+      {
+        auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
+        Real sumTemp = 0.0;
+        Real rod_counter = 0.0;
+        // Calculate sum of pin surface temperatures that the channels around the pin see
+        for (auto i_ch : _subchannel_mesh.getPinChannels(i_pin))
+        {
+          auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+
+          auto mu = (*_mu_soln)(node);
+          auto S = (*_S_flow_soln)(node);
+          auto w_perim = (*_w_perim_soln)(node);
+          auto Dh_i = 4.0 * S / w_perim;
+          auto Re = (((*_mdot_soln)(node) / S) * Dh_i / mu);
+
+          auto k = _fp->k_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+          auto cp = _fp->cp_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+          auto Pr = (*_mu_soln)(node)*cp / k;
+
+          auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
+          auto hw = Nu * k / Dh_i;
+
+          sumTemp += (*_q_prime_soln)(pin_node) / (_subchannel_mesh.getRodDiameter() * M_PI * hw) +
+                     (*_T_soln)(node);
+
+          rod_counter += 1.0;
+        }
+
+        _Tpin_soln->set(pin_node, sumTemp/rod_counter);
+      }
+    }
+  }
+
+  /// Assigning temperatures to duct
   if (_duct_mesh_exist)
   {
-    _console << "Commencing calculation of duct surface temperature \n";
-//    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-//    {
-//      for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
-//        {
-//          auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-//          if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
-//          {
-//            //auto dz = _z_grid[iz] - _z_grid[iz - 1];
-//            auto * node_chan = _subchannel_mesh.getChannelNode(i_ch, iz);
-//            auto * node_duct = _subchannel_mesh.getDuctNodeFromChannel(node_chan);
-//            auto T_chan = (*_T_soln)(node_chan);
-//            //_console << "T_chan: " << T_chan << std::endl;
-//            _Tduct_soln->set(node_duct, T_chan);
-//          }
-//        }
-//    }
+    _console << "Commencing calculation of duct surface temperature " << std::endl;
+    /// TODO: looping over the channels omits the corners - should check later
+    //    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+    //    {
+    //      for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
+    //        {
+    //          auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+    //          if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
+    //          {
+    //            //auto dz = _z_grid[iz] - _z_grid[iz - 1];
+    //            auto * node_chan = _subchannel_mesh.getChannelNode(i_ch, iz);
+    //            auto * node_duct = _subchannel_mesh.getDuctNodeFromChannel(node_chan);
+    //            auto T_chan = (*_T_soln)(node_chan);
+    //            //_console << "T_chan: " << T_chan << std::endl;
+    //            _Tduct_soln->set(node_duct, T_chan);
+    //          }
+    //        }
+    //    }
     auto duct_nodes = _subchannel_mesh.getDuctNodes();
     for (Node * dn: duct_nodes)
     {
+
       auto * node_chan = _subchannel_mesh.getChannelNodeFromDuct(dn);
-      auto T_chan = (*_T_soln)(node_chan);
+
+      auto mu = (*_mu_soln)(node_chan);
+      auto S = (*_S_flow_soln)(node_chan);
+      auto w_perim = (*_w_perim_soln)(node_chan);
+      auto Dh_i = 4.0 * S / w_perim;
+      auto Re = (((*_mdot_soln)(node_chan) / S) * Dh_i / mu);
+
+      auto k = _fp->k_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
+      auto cp = _fp->cp_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
+      auto Pr = (*_mu_soln)(node_chan)*cp / k;
+
+      auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
+      auto hw = Nu * k / Dh_i;
+
+      auto T_chan = (*_q_prime_duct_soln)(dn) / (_subchannel_mesh.getRodDiameter() * M_PI * hw) +
+                            (*_T_soln)(node_chan);;
       _Tduct_soln->set(dn, T_chan);
     }
   }
@@ -1192,6 +1254,4 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
     power_out += (*_mdot_soln)(node_out) * (*_h_soln)(node_out);
   }
   _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
-
-  _console << "********************* Duct mesh exists *********************** " << _duct_mesh_exist << std::endl;
 }

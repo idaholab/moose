@@ -15,9 +15,12 @@ public:
 
   virtual const unsigned int & getNumOfPins() const override { return _nrods; }
 
-  virtual Node * getPinNode(unsigned int, unsigned) const override { return nullptr; }
+  virtual Node * getPinNode(unsigned int i_pin, unsigned iz) const override
+  {
+    return _pin_nodes[i_pin][iz];
+  }
 
-  virtual bool pinMeshExist() const override { return false; }
+  virtual bool pinMeshExist() const override { return _pin_mesh_exist; }
   virtual bool ductMeshExist() const override { return _duct_mesh_exist; }
 
 
@@ -147,6 +150,8 @@ protected:
   Real _duct_to_rod_gap;
   /// nodes
   std::vector<std::vector<Node *>> _nodes;
+  /// pin nodes
+  std::vector<std::vector<Node *>> _pin_nodes;
 
   /// A list of all mesh nodes that form the (elements of) the hexagonal duct
   /// mesh that surrounds the rods/subchannels.
@@ -193,6 +198,8 @@ protected:
   std::vector<std::pair<unsigned int, unsigned int>> _chan_pairs_sf;
   /// TODO: channel indices corresponding to a given pin index
   std::vector<std::vector<unsigned int>> _pin_to_chan_map;
+  /// Flag that informs the solver whether there is a Pin Mesh or not
+  bool _pin_mesh_exist;
   /// Flag that informs the solver whether there is a Duct Mesh or not
   bool _duct_mesh_exist;
 
@@ -210,6 +217,8 @@ public:
 
   friend class TriSubChannelMeshGenerator;
   friend class TriDuctMeshGenerator;
+  friend class TriPinMeshGenerator;
+  friend class DetailedTriPinMeshGenerator;
 
   /// number of corners in the duct x-sec
   static const unsigned int N_CORNERS = 6;

@@ -84,7 +84,7 @@ P_out = 2.0e5 # Pa
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
-  n_blocks = 50
+  n_blocks = 1
   beta = 0.1
   P_out = 2.0e5
   CT = 1.0
@@ -94,8 +94,8 @@ P_out = 2.0e5 # Pa
   compute_power = true
   P_tol = 1.0e-5
   T_tol = 1.0e-5
-  implicit = false
-  segregated = true
+  implicit = true
+  segregated = false
   staggered_pressure = false
   monolithic_thermal = false
   verbose_multiapps = true
@@ -116,7 +116,7 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 1.000e5 # W
+    power = 1e5 #1.000e5 # W
     filename = "pin_power_profile37.txt"
   []
 
@@ -200,6 +200,18 @@ P_out = 2.0e5 # Pa
   []
 []
 
+[UserObjects]
+  [Tduct_avg_uo]
+    type = NearestPointLayeredAverage
+    direction = z
+    num_layers = 1000
+    variable = Tduct
+    block = duct
+    points = '0 0 0'
+    execute_on = 'TIMESTEP_END'
+  []
+[]
+
 [Outputs]
   exodus = true
 []
@@ -215,6 +227,16 @@ P_out = 2.0e5 # Pa
 ################################################################################
 
 [MultiApps]
+  # Multiapp to duct heat conduction module
+  [duct_map]
+    type = FullSolveMultiApp
+    input_files = wrapper.i # seperate file for multiapps due to radial power profile
+    execute_on = 'timestep_end'
+    positions = '0   0   0'
+    bounding_box_padding = '10.0 10.0 10.0'
+  []
+
+  # Multiapp to detailed mesh for vizualization
   [viz]
     type = FullSolveMultiApp
     input_files = "3d.i"
@@ -223,6 +245,36 @@ P_out = 2.0e5 # Pa
 []
 
 [Transfers]
+
+  # [duct_temperature_transfer] # Send duct temperature to heat conduction
+  #   type = MultiAppUserObjectTransfer2
+  #   to_multi_app = duct_map
+  #   variable = duct_surface_temperature
+  #   user_object = Tduct_avg_uo
+  #   all_parent_nodes_contained_in_sub_app = true
+  # []
+  #
+  # [q_prime] # Recover q_prime from heat conduction solve
+  #   type = MultiAppUserObjectTransfer2
+  #   from_multi_app = duct_map
+  #   variable = q_prime_duct
+  #   user_object = q_prime_uo
+  # []
+
+  [duct_temperature_transfer] # Send duct temperature to heat conduction
+    type = MultiAppInterpolationTransfer
+    to_multi_app = duct_map
+    source_variable = Tduct
+    variable = duct_surface_temperature
+  []
+
+  [q_prime] # Recover q_prime from heat conduction solve
+    type = MultiAppInterpolationTransfer
+    from_multi_app = duct_map
+    source_variable = q_prime
+    variable = q_prime_duct
+  []
+
   [xfer]
     type = MultiAppDetailedSolutionTransfer
     to_multi_app = viz

@@ -70,6 +70,8 @@ protected:
   std::vector<std::vector<Real>> _rods_in_rings;
   /// stores the fuel rods belonging to each subchannel
   std::vector<std::vector<unsigned int>> _subchannel_to_rod_map;
+  /// stores the map from pins to channels
+  std::vector<std::vector<unsigned int>> _pin_to_chan_map;
   /// stores the fuel rods belonging to each gap
   std::vector<std::vector<unsigned int>> _gap_to_rod_map;
   /// number of fuel rods
