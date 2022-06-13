@@ -121,6 +121,7 @@
 [Executioner]
   type = Steady
   solve_type = PJFNK
+  nl_rel_tol = 1e-09
   petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm         101   preonly   ilu      1'
   automatic_scaling = true
