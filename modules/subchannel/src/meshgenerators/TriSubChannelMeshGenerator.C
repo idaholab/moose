@@ -118,6 +118,7 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   _n_channels = chancount + _nrods - 1 + (_n_rings - 1) * 6 + 6;
 
   _subchannel_to_rod_map.resize(_n_channels);
+  _pin_to_chan_map.resize(_nrods);
   _subch_type.resize(_n_channels);
   _n_gaps = _n_channels + _nrods - 1; /// initial assignment
   _gap_to_chan_map.resize(_n_gaps);
@@ -146,6 +147,9 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
       _subchannel_position.at(i).push_back(0.0);
     }
   } // i
+
+  for (unsigned int i = 0; i < _nrods; i++)
+    _pin_to_chan_map[i].reserve(6);
 
   // create the subchannels
   k = 0; // initialize the subchannel counter index
@@ -292,6 +296,25 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
       } // if
     }   // for j
   }     // for i
+
+
+  // Constructing pins to channels mao
+  for (unsigned int loc_rod = 0; loc_rod < _nrods; loc_rod++)
+  {
+    for(unsigned int i = 0; i < _n_channels; i++)
+    {
+      bool rod_in_sc = false;
+      for(unsigned int j : _subchannel_to_rod_map[i])
+      {
+        if (j == loc_rod)
+          rod_in_sc = true;
+      }
+      if (rod_in_sc)
+      {
+        _pin_to_chan_map[loc_rod].push_back(i);
+      }
+    }
+  }
 
   // find the _gap_to_chan_map and _chan_to_gap_map using the gap_to_rod and subchannel_to_rod_maps
 
@@ -723,6 +746,7 @@ TriSubChannelMeshGenerator::generate()
   sch_mesh->_gap_type = _gap_type;
   sch_mesh->_gap_pairs_sf = _gap_pairs_sf;
   sch_mesh->_chan_pairs_sf = _chan_pairs_sf;
+  sch_mesh->_pin_to_chan_map = _pin_to_chan_map;
 
   return mesh_base;
 }

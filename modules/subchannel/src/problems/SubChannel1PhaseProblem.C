@@ -1319,7 +1319,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
 }
 
 Real
-SubChannel1PhaseProblem::computeAddedHeat(unsigned int i_ch, unsigned int iz)
+SubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz)
 {
   auto dz = _z_grid[iz] - _z_grid[iz - 1];
   if (_pin_mesh_exist)
@@ -1379,7 +1379,7 @@ SubChannel1PhaseProblem::computeh(int iblock)
         double added_enthalpy;
         if (_z_grid[iz] > unheated_length_entry &&
             _z_grid[iz] <= unheated_length_entry + heated_length)
-          added_enthalpy = computeAddedHeat(i_ch, iz);
+          added_enthalpy = computeAddedHeatPin(i_ch, iz);
         else
           added_enthalpy = 0.0;
 
@@ -1623,7 +1623,7 @@ SubChannel1PhaseProblem::computeh(int iblock)
         PetscScalar added_enthalpy;
         if (_z_grid[iz] > unheated_length_entry &&
             _z_grid[iz] <= unheated_length_entry + heated_length)
-          added_enthalpy = computeAddedHeat(i_ch, iz);
+          added_enthalpy = computeAddedHeatPin(i_ch, iz);
         else
           added_enthalpy = 0.0;
 

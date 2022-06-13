@@ -57,7 +57,7 @@ protected:
   /// Computes cross fluxes for block iblock
   virtual void computeWij(int iblock);
   /// Computes added heat for channel i_ch and cell iz
-  virtual Real computeAddedHeat(unsigned int i_ch, unsigned int iz);
+  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz);
   /// Computes Residual per gap for block iblock
   virtual libMesh::DenseVector<Real> residualFunction(int iblock,
                                                       libMesh::DenseVector<Real> solution);
