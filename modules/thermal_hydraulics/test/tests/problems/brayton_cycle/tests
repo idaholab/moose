@@ -59,14 +59,12 @@
   []
 
   [recuperated]
+    type = RunApp
+    input = 'recuperated_brayton_cycle.i'
+    check_input = true
+    max_parallel = 1
+    recover = false
+    ad_indexing_type = 'global'
     requirement = 'The system shall be able to model an open recuperated Brayton cycle'
-    [check_syntax]
-      type = RunApp
-      input = 'recuperated_brayton_cycle.i'
-      check_input = true
-      max_parallel = 1
-      recover = false
-      ad_indexing_type = 'global'
-    []
   []
 []
