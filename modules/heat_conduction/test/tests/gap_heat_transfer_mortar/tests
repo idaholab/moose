@@ -255,6 +255,7 @@
                   'radiation between two blocks in 3D using HEX20 elements and match reasonably well '
                   'with the node-to-segment approach with a refined mesh.'
     ad_indexing_type = 'global'
+    valgrind = 'heavy'
   []
   [gap_heat_transfer_sphere3d]
     input = 'gap_heat_transfer_sphere3D.i'
