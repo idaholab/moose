@@ -8,17 +8,20 @@ allow derived classes to perform setup applications prior to execution.
 ## Execute On
 
 Any object inheriting from the SetupInterface, that adds the `SetupInterface::validParams()` within its
-own parameters, will have an "execute_on" parameter that can be set to various flags, the most common
+own parameters, will have an "execute_on" parameter that can be set to various flags, the most common (default)
 flags are listed below.
 
 | Execute Flag | Description |
 | :- | :- |
+NONE | Never executed.
 INITIAL | Prior to the first time step.
-TIMESTEP_BEGIN | Prior to the solve for each time step.
-NONLINEAR | Prior do each nonlinear iteration during the solve.
-LINEAR | Prior do each linear iteration during the solve.
+LINEAR | Prior to each residual evaluation.
+NONLINEAR | Prior to each Jacobian evaluation.
 TIMESTEP_END | After the solve for each time step.
-SUBDOMAIN | Executes when the subdomain (i.e., "blocks") change during calculations.
+TIMESTEP_BEGIN | Prior to the solve for each time step.
+FINAL | At the end of the entire simulation.
+CUSTOM | At user specified instants.
+ALWAYS | Union of all the above flags.
 
 The "execute_on" parameter can be set to a single flag or multiple flags. For example, it may be
 desirable to only execute an object initially because the state of the auxiliary computation does not
