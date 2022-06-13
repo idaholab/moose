@@ -97,14 +97,14 @@ sphere_outer_Tinf = 300 # K
 [UserObjects]
   [radiation]
     type = GapFluxModelRadiation
-    T = temp
+    temperature = temp
     boundary = 2
     primary_emissivity = 0.0
     secondary_emissivity = 0.0
   []
   [conduction]
     type = GapFluxModelConduction
-    T = temp
+    temperature = temp
     boundary = 2
     gap_conductivity = 5.0
   []
