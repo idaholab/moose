@@ -1181,7 +1181,7 @@ MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
 void
 MooseApp::setCheckUnusedFlag(bool warn_is_error)
 {
-   _enable_unused_check = warn_is_error ? ERROR_UNUSED : WARN_UNUSED;
+  _enable_unused_check = warn_is_error ? ERROR_UNUSED : WARN_UNUSED;
 }
 
 void
