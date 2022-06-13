@@ -1,4 +1,5 @@
 T_in = 660
+# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = ${fparse 1e+6 * 37.00 / 36000.*0.5}
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
@@ -14,11 +15,21 @@ P_out = 2.0e5 # Pa
     hwire = 0.0833
     spacer_z = '0 0.2 0.4 0.6 0.8'
     spacer_k = '0.1 0.1 0.1 0.1 0.10'
+    discretization = "central_difference"
+  []
+
+  [fuel_pins]
+    type = TriPinMeshGenerator
+    input = subchannel
+    nrings = 4
+    n_cells = 100
+    heated_length = 1.0
+    pitch = 0.012
   []
 
   [duct]
     type = TriDuctMeshGenerator
-    input = subchannel
+    input = fuel_pins
     nrings = 4
     n_cells = 100
     flat_to_flat = 0.085
@@ -27,6 +38,14 @@ P_out = 2.0e5 # Pa
   []
 []
 
+[Functions]
+  [axial_heat_rate]
+    type = ParsedFunction
+    value = '(pi/2)*sin(pi*z/L)'
+    vars = 'L'
+    vals = '1.0'
+  []
+[]
 
 [AuxVariables]
   [mdot]
@@ -47,6 +66,9 @@ P_out = 2.0e5 # Pa
   [T]
     block = subchannel
   []
+  [Tpin]
+    block = fuel_pins
+  []
   [rho]
     block = subchannel
   []
@@ -60,7 +82,7 @@ P_out = 2.0e5 # Pa
     block = subchannel
   []
   [q_prime]
-    block = subchannel
+    block = fuel_pins
   []
   [mu]
     block = subchannel
@@ -84,7 +106,7 @@ P_out = 2.0e5 # Pa
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
-  n_blocks = 1
+  n_blocks = 50
   beta = 0.1
   P_out = 2.0e5
   CT = 1.0
@@ -92,10 +114,10 @@ P_out = 2.0e5 # Pa
   compute_density = false
   compute_viscosity = false
   compute_power = true
-  P_tol = 1.0e-5
-  T_tol = 1.0e-5
-  implicit = true
-  segregated = false
+  P_tol = 1.0e-2
+  T_tol = 1.0e-2
+  implicit = false
+  segregated = true
   staggered_pressure = false
   monolithic_thermal = false
   verbose_multiapps = true
@@ -113,11 +135,12 @@ P_out = 2.0e5 # Pa
     variable = w_perim
   []
 
-   [q_prime_IC]
+  [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 1e5 #1.000e5 # W
+    power = 1.000e5 # W
     filename = "pin_power_profile37.txt"
+    axial_heat_rate = axial_heat_rate
   []
 
   [T_ic]
@@ -182,6 +205,7 @@ P_out = 2.0e5 # Pa
     boundary = outlet
     value = ${P_out}
     execute_on = 'timestep_begin'
+    block = subchannel
   []
   [T_in_bc]
     type = ConstantAux
@@ -189,6 +213,7 @@ P_out = 2.0e5 # Pa
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
+    block = subchannel
   []
   [mdot_in_bc]
     type = MassFlowRateAux
@@ -197,18 +222,19 @@ P_out = 2.0e5 # Pa
     area = S
     mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
+    block = subchannel
   []
 []
 
 [UserObjects]
-  [Tduct_avg_uo]
+  [Tpin_avg_uo]
     type = NearestPointLayeredAverage
     direction = z
     num_layers = 1000
-    variable = Tduct
-    block = duct
+    variable = Tpin
+    block = fuel_pins
     points = '0 0 0'
-    execute_on = 'TIMESTEP_END'
+    execute_on = 'timestep_end'
   []
 []
 
@@ -218,48 +244,44 @@ P_out = 2.0e5 # Pa
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+  fixed_point_max_its = 30
+  fixed_point_min_its = 1
+  fixed_point_rel_tol = 1e-6
 []
 
 ################################################################################
 # A multiapp that projects data to a detailed mesh
 ################################################################################
-
 [MultiApps]
   # Multiapp to duct heat conduction module
   [duct_map]
     type = FullSolveMultiApp
-    input_files = wrapper.i # seperate file for multiapps due to radial power profile
+    input_files = wrapper.i # seperate file for duct heat conduction
     execute_on = 'timestep_end'
     positions = '0   0   0'
-    bounding_box_padding = '10.0 10.0 10.0'
+    bounding_box_padding = '0.0 0.0 0.1'
   []
 
-  # Multiapp to detailed mesh for vizualization
+  # Multiapp to pin heat conduction module
+  [pin_map]
+    type = FullSolveMultiApp
+    input_files = pin.i # seperate file for multiapps due to radial power profile
+    execute_on = 'timestep_end'
+    positions = '0   0   0'
+    bounding_box_padding = '0 0 0.01'
+  []
+
+
   [viz]
     type = FullSolveMultiApp
     input_files = "3d.i"
-    execute_on = "timestep_end"
+    execute_on = "final"
   []
 []
 
 [Transfers]
-
-  # [duct_temperature_transfer] # Send duct temperature to heat conduction
-  #   type = MultiAppUserObjectTransfer2
-  #   to_multi_app = duct_map
-  #   variable = duct_surface_temperature
-  #   user_object = Tduct_avg_uo
-  #   all_parent_nodes_contained_in_sub_app = true
-  # []
-  #
-  # [q_prime] # Recover q_prime from heat conduction solve
-  #   type = MultiAppUserObjectTransfer2
-  #   from_multi_app = duct_map
-  #   variable = q_prime_duct
-  #   user_object = q_prime_uo
-  # []
 
   [duct_temperature_transfer] # Send duct temperature to heat conduction
     type = MultiAppInterpolationTransfer
@@ -267,17 +289,34 @@ P_out = 2.0e5 # Pa
     source_variable = Tduct
     variable = duct_surface_temperature
   []
-
-  [q_prime] # Recover q_prime from heat conduction solve
+  [q_prime_duct] # Recover q_prime from heat conduction solve
     type = MultiAppInterpolationTransfer
     from_multi_app = duct_map
-    source_variable = q_prime
+    source_variable = q_prime_d
     variable = q_prime_duct
   []
 
-  [xfer]
+  [Tpin] # send pin surface temperature to bison,
+    type = MultiAppUserObjectTransfer2
+    to_multi_app = pin_map
+    variable = Pin_surface_temperature
+    user_object = Tpin_avg_uo
+  []
+  [q_prime_pin] # send heat flux from slave/BISON/heatConduction to subchannel/master
+    type = MultiAppUserObjectTransfer2
+    from_multi_app = pin_map
+    variable = q_prime
+    user_object = q_prime_uo
+  []
+
+  [subchannel_transfer]
     type = MultiAppDetailedSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
+    variable = 'mdot SumWij P DP h T rho mu S'
+  []
+  [pin_transfer]
+    type = MultiAppDetailedPinSolutionTransfer
+    to_multi_app = viz
+    variable = 'Tpin q_prime'
   []
 []
