@@ -1,0 +1,25 @@
+[Tests]
+  design = '/SaturationDensityFunction.md'
+  issues = '#21256'
+
+  [test]
+    requirement = 'The system shall provide a function that computes saturation density from a temperature function'
+
+    [liquid]
+      type = 'CSVDiff'
+      input = 'saturation_density_function.i'
+      csvdiff = 'liquid.csv'
+      allow_test_objects = True
+      detail = 'for the liquid phase'
+    []
+
+    [vapor]
+      type = 'CSVDiff'
+      input = 'saturation_density_function.i'
+      csvdiff = 'vapor.csv'
+      cli_args = "Functions/rho_sat_fn/use_liquid=false Outputs/file_base=vapor"
+      allow_test_objects = True
+      detail = 'for the vapor phase'
+    []
+  []
+[]
