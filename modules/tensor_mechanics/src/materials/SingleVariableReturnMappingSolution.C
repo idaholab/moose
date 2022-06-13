@@ -196,6 +196,8 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
   while (_iteration < _max_its && !converged(_residual, reference_residual) &&
          !convergedAcceptable(_iteration, reference_residual))
   {
+    preStep(scalar_old, _residual, _derivative);
+
     scalar_increment = -_residual / _derivative;
     scalar = scalar_old + scalar_increment;
 

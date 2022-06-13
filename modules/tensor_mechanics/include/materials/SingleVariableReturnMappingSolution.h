@@ -112,6 +112,12 @@ protected:
   virtual Real computeReferenceResidual(const GenericReal<is_ad> & effective_trial_stress,
                                         const GenericReal<is_ad> & scalar) = 0;
 
+  virtual void preStep(const GenericReal<is_ad> & /*scalar_old*/,
+                       const GenericReal<is_ad> & /*residual*/,
+                       const GenericReal<is_ad> & /*jacobian*/)
+  {
+  }
+
   /**
    * Finalize internal state variables for a model for a given iteration.
    * @param scalar                 Inelastic strain increment magnitude being solved for
