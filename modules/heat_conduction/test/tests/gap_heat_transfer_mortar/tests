@@ -235,27 +235,27 @@
     csvdiff = 'gap_heat_transfer_3D_mortar_out_NodalTemperature_0001.csv'
     rel_err = 4e-2
     abs_zero = 1e-8
-    min_ad_size = 100
     mesh_mode = 'REPLICATED'
+    min_ad_size = 100
     requirement = 'We shall be able to generate mortar numerical results for conduction and '
                   'radiation between two blocks in 3D and match reasonably well with the '
                   'node-to-segment approach with a refined mesh.'
     ad_indexing_type = 'global'
   []
   [gap_heat_transfer_3d_mortar_hex20]
-    input = 'gap_heat_transfer_3d_mortar.i'
+    input = 'gap_heat_transfer_3D_mortar.i'
     type = CSVDiff
     csvdiff = 'gap_heat_transfer_3D_mortar_hex20_out_NodalTemperature_0001.csv'
     cli_args = 'Mesh/left_block/elem_type=HEX20 Mesh/right_block/elem_type=HEX20 '
                'Outputs/file_base=gap_heat_transfer_3D_mortar_hex20_out'
     rel_err = 4e-2
     abs_zero = 1e-8
-    min_ad_size = 100
     mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to generate mortar numerical results for conduction and '
                   'radiation between two blocks in 3D using HEX20 elements and match reasonably well '
                   'with the node-to-segment approach with a refined mesh.'
     ad_indexing_type = 'global'
+    valgrind = 'heavy'
   []
   [gap_heat_transfer_sphere3d]
     input = 'gap_heat_transfer_sphere3D.i'
@@ -263,7 +263,6 @@
     csvdiff = 'gap_heat_transfer_sphere3D_out_NodalTemperature_0001.csv'
     rel_err = 1e-3
     abs_zero = 1e-8
-    min_ad_size = 100
     ad_indexing_type = 'global'
     mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to generate node-to-segment numerical results using thermal '
@@ -276,7 +275,6 @@
     csvdiff = 'gap_heat_transfer_sphere3D_mortar_out_NodalTemperature_0001.csv'
     rel_err = 4e-2
     abs_zero = 1e-8
-    min_ad_size = 100
     ad_indexing_type = 'global'
     mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to generate mortar numerical results using thermal contact that '
