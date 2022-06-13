@@ -640,8 +640,8 @@
   [../]
 
   [./unused_param_test]
-    type = 'RunApp'
-    expect_out = "unused parameter 'Mesh/unused_param'"
+    type = 'RunException'
+    expect_err = "unused parameter 'Mesh/unused_param'"
     input = 'unused_param_test.i'
     allow_unused = true
 
@@ -650,8 +650,8 @@
   [../]
 
   [./unused_param_test_cli]
-    type = 'RunApp'
-    expect_out = "unused parameter 'Executioner/unused_param'"
+    type = 'RunException'
+    expect_err = "unused parameter 'Executioner/unused_param'"
     input = 'unused_param_test.i'
     cli_args = 'Executioner/unused_param=true'
     allow_unused = true
