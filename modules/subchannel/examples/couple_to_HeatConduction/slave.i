@@ -42,7 +42,7 @@ T_in = 297.039 # K
 
 [AuxKernels]
   [QPrime]
-    type = QPrimeAux
+    type = QPrimeAuxPin
     diffusivity = 'thermal_conductivity'
     rod_diameter = ${fparse rod_diameter}
     variable = q_prime
