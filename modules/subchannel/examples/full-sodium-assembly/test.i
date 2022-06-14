@@ -15,7 +15,6 @@ P_out = 2.0e5 # Pa
     hwire = 0.0833
     spacer_z = '0 0.2 0.4 0.6 0.8'
     spacer_k = '0.1 0.1 0.1 0.1 0.10'
-    discretization = "central_difference"
   []
 
   [fuel_pins]
@@ -160,14 +159,14 @@ P_out = 2.0e5 # Pa
     variable = DP
     value = 0.0
   []
-    [Viscosity_ic]
+
+  [Viscosity_ic]
     type = ViscosityIC
     variable = mu
     p = ${P_out}
     T = T
     fp = sodium
   []
-
 
   [rho_ic]
     type = RhoFromPressureTemperatureIC
@@ -233,8 +232,8 @@ P_out = 2.0e5 # Pa
     num_layers = 1000
     variable = Tpin
     block = fuel_pins
-    points = '0 0 0'
-    execute_on = 'timestep_end'
+    points = '${fparse 0.012} 0.0 0.0'
+    execute_on = timestep_end
   []
 []
 
@@ -255,24 +254,23 @@ P_out = 2.0e5 # Pa
 # A multiapp that projects data to a detailed mesh
 ################################################################################
 [MultiApps]
+  # Multiapp to pin heat conduction module
+  [pin_map]
+    type = FullSolveMultiApp
+    input_files = pin.i # seperate file for multiapps due to radial power profile
+    execute_on = 'timestep_end'
+    positions = '${fparse 0.012}  0   0'
+    bounding_box_padding = '0 0 0.01'
+  []
+
   # Multiapp to duct heat conduction module
   [duct_map]
     type = FullSolveMultiApp
     input_files = wrapper.i # seperate file for duct heat conduction
     execute_on = 'timestep_end'
     positions = '0   0   0'
-    bounding_box_padding = '0.0 0.0 0.1'
+    bounding_box_padding = '0.0 0.0 0.01'
   []
-
-  # Multiapp to pin heat conduction module
-  [pin_map]
-    type = FullSolveMultiApp
-    input_files = pin.i # seperate file for multiapps due to radial power profile
-    execute_on = 'timestep_end'
-    positions = '0   0   0'
-    bounding_box_padding = '0 0 0.01'
-  []
-
 
   [viz]
     type = FullSolveMultiApp
@@ -282,6 +280,19 @@ P_out = 2.0e5 # Pa
 []
 
 [Transfers]
+
+  [Tpin] # send pin surface temperature to bison,
+    type = MultiAppInterpolationTransfer
+    to_multi_app = pin_map
+    source_variable = Tpin
+    variable = Pin_surface_temperature
+  []
+  [q_prime_pin] # send heat flux from slave/BISON/heatConduction to subchannel/master
+    type = MultiAppInterpolationTransfer
+    from_multi_app = pin_map
+    source_variable = q_prime_pin
+    variable = q_prime
+  []
 
   [duct_temperature_transfer] # Send duct temperature to heat conduction
     type = MultiAppInterpolationTransfer
@@ -294,19 +305,6 @@ P_out = 2.0e5 # Pa
     from_multi_app = duct_map
     source_variable = q_prime_d
     variable = q_prime_duct
-  []
-
-  [Tpin] # send pin surface temperature to bison,
-    type = MultiAppUserObjectTransfer2
-    to_multi_app = pin_map
-    variable = Pin_surface_temperature
-    user_object = Tpin_avg_uo
-  []
-  [q_prime_pin] # send heat flux from slave/BISON/heatConduction to subchannel/master
-    type = MultiAppUserObjectTransfer2
-    from_multi_app = pin_map
-    variable = q_prime
-    user_object = q_prime_uo
   []
 
   [subchannel_transfer]
