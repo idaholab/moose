@@ -316,6 +316,18 @@ private:
   /// Checks that sufficient Rhie Chow coefficients have been defined for the given dimension, used
   /// for scalar or temperature advection by auxiliary variables
   void checkRhieChowFunctorsDefined();
+  /// Check that two parameters are the same size
+  void checkSizeFriendParams(const unsigned int param_vector_1_size,
+                             const unsigned int param_vector_2_size,
+                             const std::string & param_name_1,
+                             const std::string & param_name_2,
+                             const std::string & object_name_1) const;
+  /// Check that a parameter is of the expected size
+  void checkSizeParam(const unsigned int param_vector_size,
+                      const std::string & param_name,
+                      const unsigned int size_wanted,
+                      const std::string & object_name,
+                      const std::string & size_source_explanation) const;
 
   /// List to show which advected scalar field variable needs to be created within
   /// this action
@@ -353,8 +365,11 @@ NSFVAction::checkBlockwiseConsistency(const std::string block_param_name,
       const std::vector<T> & param_vector = _pars.get<std::vector<T>>(param_name);
       if (block_names.size() != param_vector.size())
         paramError(param_name,
-                   "The number of entries in '" + param_name +
-                       "' is not the same as the number of blocks in '" + block_param_name + "'!");
+                   "The number of entries in '" + param_name + "' (" +
+                       std::to_string(param_vector.size()) +
+                       ") is not the same as the number of blocks"
+                       " (" +
+                       std::to_string(block_names.size()) + ") in '" + block_param_name + "'!");
     }
   }
   else
