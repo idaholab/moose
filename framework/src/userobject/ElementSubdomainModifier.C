@@ -161,9 +161,6 @@ ElementSubdomainModifier::finalize()
     // Set old and older solution on the initialized dofs
     setOldAndOlderSolutionsForMovedNodes(_fe_problem.getNonlinearSystemBase());
     setOldAndOlderSolutionsForMovedNodes(_fe_problem.getAuxiliarySystem());
-
-    if (_fe_problem.isTransient())
-      _fe_problem.restoreSolutions();
   }
 
   // Initialize stateful material properties for the newly activated elements
