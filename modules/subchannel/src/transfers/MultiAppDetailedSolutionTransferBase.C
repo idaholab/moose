@@ -35,9 +35,7 @@ MultiAppDetailedSolutionTransferBase::execute()
       break;
 
     default:
-      _console << "Going into default transfer case." << std::endl;
       break;
-
   }
 }
 
@@ -52,8 +50,6 @@ MultiAppDetailedSolutionTransferBase::transferToMultiApps()
   for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
     if (getToMultiApp()->hasLocalApp(i))
       transferVarsToApp(i);
-    _console << i;
-  }
 }
 
 void
