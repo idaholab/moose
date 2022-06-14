@@ -21,8 +21,6 @@ BicubicInterpolation::BicubicInterpolation(const std::vector<Real> & x1,
 {
   errorCheck();
 
-  // Resize the vector of
-  //resize not working since _x1(x1), _x2(x2) changed to BidimensionalInt...
   auto m = _x1.size();
   auto n = _x2.size();
 

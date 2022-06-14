@@ -74,7 +74,7 @@ TabulatedFluidProperties::validParams()
       true,
       "If true exceeding pressure or temperature tabulation values leads to an error.");
   params.addClassDescription(
-      "Fluid properties using bicubic interpolation on tabulated values provided");
+      "Fluid properties using bicubic or bilinear interpolation on tabulated values provided");
 
   return params;
 }
@@ -269,7 +269,7 @@ TabulatedFluidProperties::initialSetup()
   }
 
   // At this point, all properties read or generated are able to be used by
-  // TabulatedBilinearFluidProperties. Now set flags and indexes for each property in
+  // TabulatedFluidProperties. Now set flags and indexes for each property in
   //_interpolated_properties to use in property calculations
   for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
   {
@@ -314,7 +314,7 @@ TabulatedFluidProperties::initialSetup()
       _entropy_idx = i;
     }
   }
-  routine_1();
+  constructInterpolation();
 }
 
 Real
