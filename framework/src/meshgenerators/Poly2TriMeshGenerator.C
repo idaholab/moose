@@ -55,6 +55,8 @@ Poly2TriMeshGenerator::validParams()
   params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
 
+  params.addClassDescription("Triangulates meshes within boundaries defined by input meshes.");
+
   return params;
 }
 
