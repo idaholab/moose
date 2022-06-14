@@ -257,8 +257,11 @@ MooseVariableDataBase<OutputType>::stateToTagHelper(const Moose::SolutionState s
                                                     Functor functor)
 {
   if (state > 0)
+  {
     // We need to request all states that are between current and the requested state
     stateToTagHelper<ReturnType>(Moose::SolutionState(static_cast<int>(state) - 1), functor);
+    needSolutionState(cast_int<unsigned int>(state));
+  }
 
   switch (state)
   {
@@ -267,7 +270,6 @@ MooseVariableDataBase<OutputType>::stateToTagHelper(const Moose::SolutionState s
 
     case Moose::Old:
     {
-      needSolutionState(1);
       _old_solution_tag = _subproblem.getVectorTagID(Moose::OLD_SOLUTION_TAG);
       insertSolutionTag(_old_solution_tag);
       return functor(_old_solution_tag);
@@ -275,7 +277,6 @@ MooseVariableDataBase<OutputType>::stateToTagHelper(const Moose::SolutionState s
 
     case Moose::Older:
     {
-      needSolutionState(2);
       _older_solution_tag = _subproblem.getVectorTagID(Moose::OLDER_SOLUTION_TAG);
       insertSolutionTag(_older_solution_tag);
       return functor(_older_solution_tag);
@@ -362,6 +363,7 @@ void
 MooseVariableDataBase<OutputType>::setNodalValue(const OutputType & value, unsigned int idx)
 {
   auto & dof_values = _vector_tags_dof_u[_solution_tag];
+  mooseAssert(idx < dof_values.size(), "idx is out of the bounds of degree of freedom values");
   dof_values[idx] = value; // update variable nodal value
   _has_dof_values = true;
   _nodal_value = value;
@@ -392,6 +394,8 @@ MooseVariableDataBase<OutputType>::insert(NumericVector<Number> & residual)
   if (_has_dof_values)
   {
     auto & dof_values = _vector_tags_dof_u[_solution_tag];
+    mooseAssert(dof_values.size() == _dof_indices.size(),
+                "Degree of freedom values size and degree of freedom indices sizes must match.");
     residual.insert(&dof_values[0], _dof_indices);
   }
 }
