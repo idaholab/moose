@@ -35,5 +35,15 @@
     requirement = 'The system shall have the capability of deeply nesting triangulations within triangulations.'
     design = 'meshgenerators/Poly2TriMeshGenerator.md'
   []
+  [./poly2tri_smoothed]
+    type = 'Exodiff'
+    input = 'poly2tri_smoothed.i'
+    cli_args = '--mesh-only'
+    exodiff = 'poly2tri_smoothed_in.e'
+    recover = false
+    requirement = 'The system shall have the capability of smoothing triangulator output.'
+    design = 'meshgenerators/Poly2TriMeshGenerator.md'
+  []
+
 
 []
