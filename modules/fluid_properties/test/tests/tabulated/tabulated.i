@@ -1,4 +1,4 @@
-# Test thermophysical property calculations using TabulatedFluidProperties.
+# Test thermophysical property calculations using TabulatedBiCubic/LinearFluidProperties.
 # Calculations for density, internal energy and enthalpy using bicubic spline
 # interpolation of data generated using CO2FluidProperties.
 
@@ -109,7 +109,7 @@
       type = CO2FluidProperties
     [../]
     [./tabulated]
-      type = TabulatedFluidProperties
+      type = TabulatedBicubicFluidProperties
       fp = co2
       fluid_property_file = fluid_properties.csv
     [../]
