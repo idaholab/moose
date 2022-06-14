@@ -1,24 +1,76 @@
-rod_diameter = 0.012065
+rod_diameter = 0.01
 heated_length = 1.0
-T_in = 297.039 # K
+T_in = 660 # K
+height = 1.0
 
 [Mesh]
   second_order = true
-  [bisonMesh]
-    type = GeneratedMeshGenerator
+  [rmp]
+    type = ReactorMeshParams
     dim = 2
-    xmax = ${fparse 0.01/2.0} # rod diameter / 2.0
-    bias_x = 1.0
-    nx = 20
-    ymax = 1.0 # heated length
-    ny = 10 # number of axial cells
+    geom = "Square"
+    assembly_pitch = 0.012
+    axial_mesh_intervals = '1'
   []
+
+  [pin1]
+    type = PinMeshGenerator
+    reactor_params = rmp
+    pin_type = 1
+    pitch = 0.012
+    num_sectors = 4
+    region_ids='1 2 3 4'
+    ring_radii = '${fparse rod_diameter/2}
+                  ${fparse rod_diameter/2 + 1e-5}
+                  ${fparse rod_diameter/2 + 2e-5}'
+    mesh_intervals = '5 1 1 1'
+    quad_center_elements = true
+  []
+
+  [remove]
+    type = BlockDeletionGenerator
+    block = '2 3 4'
+    input = pin1
+  []
+
+  [extrude]
+    type = FancyExtruderGenerator
+    direction = '0 0 1'
+    heights = '${height}'
+    input = remove
+    num_layers = 10
+    bottom_boundary = 1
+    top_boundary = 2
+  []
+
+  [rename_top_bottom]
+    type = RenameBoundaryGenerator
+    input = extrude
+    old_boundary = '1 2'
+    new_boundary = 'bottom top'
+  []
+
+  [rename_side]
+    type = ParsedGenerateSideset
+    input = rename_top_bottom
+    new_sideset_name = side
+    combinatorial_geometry = 'sqrt(pow(x,2) + pow(y,2)) > ${fparse rod_diameter/2 - 1e-4}
+                              & z > 1e-10 & ${fparse height} - z > 1e-10'
+  []
+
+  [rename]
+    type = RenameBlockGenerator
+    input = rename_side
+    old_block = '1'
+    new_block = 'fuel_pin'
+  []
+
 []
 
 [Functions]
   [volumetric_heat_rate]
     type = ParsedFunction
-    value = '(4.0 * 1000 / (pi * D* D * L)) * (pi/2)*sin(pi*y/L)'
+    value = '(4.0 * 1000 / (pi * D* D * L)) * (pi/2)*sin(pi*z/L) * cos((x*x+y*y)/(2*D)*(pi/2))'
     vars = 'L D'
     vals = '${heated_length} ${rod_diameter}'
   []
@@ -34,7 +86,7 @@ T_in = 297.039 # K
 [AuxVariables]
   [Pin_surface_temperature]
   []
-  [q_prime]
+  [q_prime_pin]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -45,10 +97,10 @@ T_in = 297.039 # K
     type = QPrimeAuxPin
     diffusivity = 'thermal_conductivity'
     rod_diameter = ${fparse rod_diameter}
-    variable = q_prime
+    variable = q_prime_pin
     diffusion_variable = temperature
     component = normal
-    boundary = 'right'
+    boundary = 'side'
     execute_on = 'timestep_end'
   []
 []
@@ -69,23 +121,33 @@ T_in = 297.039 # K
   [heat_conductor]
     type = HeatConductionMaterial
     thermal_conductivity = 1.0
-    block = 0
+    block = fuel_pin
   []
 []
 
 [BCs]
-  [left]
+  [top_bottom]
     type = NeumannBC
     variable = temperature
-    boundary = 'left'
+    boundary = 'top bottom'
   []
-  [right]
+  [side]
     type = MatchedValueBC
     variable = temperature
-    boundary = 'right'
+    boundary = 'side'
     v = Pin_surface_temperature
   []
+  # [side]
+  #   type = DirichletBC
+  #   variable = temperature
+  #   boundary = 'side'
+  #   value = ${T_in}
+  # []
 []
+
+# [DefaultElementQuality]
+#   failure_type = warning
+# []
 
 [ICs]
   [temperature_ic]
@@ -93,18 +155,23 @@ T_in = 297.039 # K
     variable = temperature
     value = ${T_in}
   []
-  [q_prime_ic]
+  [q_prime_pin_ic]
     type = ConstantIC
-    variable = q_prime
+    variable = q_prime_pin
     value = 666.0
+  []
+  [Pin_surface_temperature_ic]
+    type = ConstantIC
+    variable = Pin_surface_temperature
+    value = ${T_in}
   []
 []
 
 [UserObjects]
-  [q_prime_uo]
+  [q_prime_pin_uo]
     type = LayeredSideAverage
-    boundary = right
-    variable = q_prime
+    boundary = side
+    variable = q_prime_pin
     num_layers = 1000
     direction = y
     execute_on = 'TIMESTEP_END'
@@ -112,8 +179,7 @@ T_in = 297.039 # K
 []
 
 [Problem]
-  coord_type = RZ
-  rz_coord_axis = Y
+  coord_type = XYZ
 []
 
 [Executioner]
