@@ -66,18 +66,18 @@ difficult. One mechanism MOOSE provides for making this communication simpler is
 the `MooseCoordTransform` class. Each `MooseApp` instance holds a coordinate
 transformation object in its `FEProblemBase` object. Users may specify
 transformation information about their simulation setup on a per-application
-basis in the input file `Problem` block. The [!param](/Problem/FEProblem/coord_type)
+basis in the input file `Problem` block. The [!param](/Mesh/GeneratedMesh/coord_type)
 parameter specifies the coordinate system type, e.g. XYZ, RZ, or
 RSPHERICAL. [Euler angles](https://en.wikipedia.org/wiki/Euler_angles) are
 available to describe extrinsic rotations. The convention MOOSE uses for
 a alpha-beta-gamma Euler angle rotation is:
 
-1. Rotation about the z-axis by [!param](/Problem/FEProblem/alpha_rotation) degrees
-2. Rotation about the x-axis by [!param](/Problem/FEProblem/beta_rotation) degrees
-3. Rotation about the z-axis (again) by [!param](/Problem/FEProblem/gamma_rotation) degrees
+1. Rotation about the z-axis by [!param](/Mesh/GeneratedMesh/alpha_rotation) degrees
+2. Rotation about the x-axis by [!param](/Mesh/GeneratedMesh/beta_rotation) degrees
+3. Rotation about the z-axis (again) by [!param](/Mesh/GeneratedMesh/gamma_rotation) degrees
 
 
-[!param](/Problem/FEProblem/length_unit) allows the user to specify
+[!param](/Mesh/GeneratedMesh/length_unit) allows the user to specify
 their mesh length unit. The code in `MooseCoordTransform`
 which processes this parameter leverages the [MooseUnits](/Units.md) system. A
 scaling transform will be constructed to convert a point in the mesh domain with
@@ -118,7 +118,7 @@ transferring information between two different coordinate systems.
 Let's consider an example. The below listing shows coordinate transformation
 given in the `Problem` block of a sub-application:
 
-!listing transfers/coord_transform/sub-app.i block=Problem
+!listing transfers/coord_transform/sub-app.i block=Mesh
 
 Here, the user is stating that a -90 degree alpha rotation should be applied to
 the sub-application's domain in order to map to the reference domain (which the user has
@@ -146,7 +146,7 @@ simulation, in order to align with the z-axis when transferring data between the
 2D RZ and 3D XYZ simulations. This simple rotation is achieved by specifying the
 `beta_rotation` value below
 
-!listing transfers/coord_transform/rz-xyz/2d-rz.i block=Problem
+!listing transfers/coord_transform/rz-xyz/2d-rz.i block=Mesh
 
 We can see that the rotation transformation has been successful by examining the
 same field in both applications (in this case the field is solved by the
@@ -157,7 +157,7 @@ main application into the auxiliary field `v`).
 
 We mentioned how forward rotation transformations can be achieved by specifying
 Euler angles. Another parameter that can be used to perform rotations is
-[!param](/Problem/FEProblem/up_direction). As described in the parameter
+[!param](/Mesh/GeneratedMesh/up_direction). As described in the parameter
 documentation string, if `up_direction` is specified, then in the
 `MooseCoordTransform` object we will prescribe a rotation matrix that
 corresponds to a single 90 degree rotation such that a point lying on the

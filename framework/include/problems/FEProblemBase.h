@@ -2357,10 +2357,6 @@ private:
 
   /// Flag used to indicate whether we are computing the scaling Residual
   bool _computing_scaling_residual = false;
-
-  /// A coordinate transformation object that describes how to transform this problem's coordinate
-  /// system into the canonical/reference coordinate system
-  std::unique_ptr<MooseCoordTransform> _coord_transform;
 };
 
 using FVProblemBase = FEProblemBase;
@@ -2434,13 +2430,6 @@ FEProblemBase::addObject(const std::string & type,
   }
 
   return objects;
-}
-
-inline MooseCoordTransform &
-FEProblemBase::coordTransform()
-{
-  mooseAssert(_coord_transform, "The coordinate transformation object is null.");
-  return *_coord_transform;
 }
 
 template <>

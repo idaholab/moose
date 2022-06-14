@@ -12,16 +12,12 @@
 #include "MooseTypes.h"
 #include "Units.h"
 #include "libmesh/point.h"
+#include "libmesh/tensor_value.h"
 #include <memory>
 #include <string>
 
 class InputParameters;
-namespace libMesh
-{
-template <typename>
-class TensorValue;
-typedef TensorValue<Real> RealTensorValue;
-}
+class MooseMesh;
 
 class MooseCoordTransform
 {
@@ -33,13 +29,19 @@ public:
    */
   MooseCoordTransform();
 
-  /**
-   * Construct this object from the provided input parameters. See the \p validParams implementation
-   * for valid parameters
-   */
-  MooseCoordTransform(const InputParameters & params);
+  MooseCoordTransform(const MooseCoordTransform & other); // we have unique pointers
+  MooseCoordTransform(MooseCoordTransform && other) = default;
 
-  ~MooseCoordTransform();
+  /**
+   * Construct this object from the provided mesh and its input parameters. See the \p validParams
+   * implementation for valid parameters
+   */
+  MooseCoordTransform(const MooseMesh & mesh);
+
+  ~MooseCoordTransform() = default;
+
+  MooseCoordTransform & operator=(const MooseCoordTransform & other); // we have unique pointers
+  MooseCoordTransform & operator=(MooseCoordTransform && other) = default;
 
   /**
    * Describes the parameters this object can take to setup transformations. These include
@@ -169,28 +171,28 @@ private:
   libMesh::Point _translation;
 
   /// Our coordinate system
-  Moose::CoordinateSystemType _coord_type = Moose::COORD_XYZ;
+  Moose::CoordinateSystemType _coord_type;
   /// If we are RZ or RSPHERICAL, the Cartesian axis corresponding to the radial coordinate
-  Direction _r_axis = INVALID;
+  Direction _r_axis;
   /// If we are RZ, the Cartesian axis corresponding to the axial/axis-of-symmetry coordinate
-  Direction _z_axis = INVALID;
+  Direction _z_axis;
 
   /// The destination coordinate system
-  Moose::CoordinateSystemType _destination_coord_type = Moose::COORD_XYZ;
+  Moose::CoordinateSystemType _destination_coord_type;
   /// If the destination coordinate system is RZ or RSPHERICAL, the Cartesian axis corresponding to
   /// the radial coordinate
-  Direction _destination_r_axis = INVALID;
+  Direction _destination_r_axis;
   /// If the destination coordinate system is RZ, the Cartesian axis corresponding to the
   /// axial/axis-of-symmetry coordinate
-  Direction _destination_z_axis = INVALID;
+  Direction _destination_z_axis;
 
   /// Whether we have different coordinate systems within our single domain. If we do, this will be
   /// problematic if we need to collapse from our space into an RZ or RSPHERICAL space because we
   /// are only ever provided with a point argument and not a subdomain ID argument. Consequently we
   /// will not know in what coordinate system our point lies and will not know how to perform the
   /// dimension collapse, and so we will error
-  bool _has_different_coord_sys = false;
+  bool _has_different_coord_sys;
 
   /// How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5 inches
-  MooseUnits _length_unit = std::string("1m");
+  MooseUnits _length_unit;
 };

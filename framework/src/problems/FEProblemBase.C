@@ -103,7 +103,6 @@
 #include "BoundaryNodeIntegrityCheckThread.h"
 #include "BoundaryElemIntegrityCheckThread.h"
 #include "NodalBCBase.h"
-#include "MooseCoordTransform.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -171,8 +170,23 @@ FEProblemBase::validParams()
                         "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
                         "that there are variables to solve for).");
 
-  // Add coordinate transformation parameters
-  params += MooseCoordTransform::validParams();
+  /// One entry of coord system per block, the size of _blocks and _coord_sys has to match, except:
+  /// 1. _blocks.size() == 0, then there needs to be just one entry in _coord_sys, which will
+  ///    be set for the whole domain
+  /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
+  /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
+  params.addDeprecatedParam<std::vector<SubdomainName>>(
+      "block", "Block IDs for the coordinate systems", "Please use 'Mesh/block' instead");
+  MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
+  MooseEnum rz_coord_axis("X=0 Y=1", "Y");
+  params.addDeprecatedParam<MultiMooseEnum>("coord_type",
+                                            coord_types,
+                                            "Type of the coordinate system per block param",
+                                            "Please use 'Mesh/coord_type' instead");
+  params.addDeprecatedParam<MooseEnum>("rz_coord_axis",
+                                       rz_coord_axis,
+                                       "The rotation axis (X | Y) for axisymetric coordinates",
+                                       "Please use 'Mesh/rz_coord_axis' instead");
   params.addParam<bool>(
       "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
   params.addParam<bool>(
@@ -330,7 +344,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _num_grid_steps(0),
     _displaced_neighbor_ref_pts("invert_elem_phys use_undisplaced_ref unset", "unset")
 {
-
   //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
   //  things that we setup early in the simulation actually get their derivative vectors initalized.
   //  We will toggle this to false when doing residual evaluations
@@ -380,11 +393,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   _eq.parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 
-  setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
-                 getParam<MultiMooseEnum>("coord_type"));
-  setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
-
-  _coord_transform = std::make_unique<MooseCoordTransform>(parameters);
+  if (parameters.isParamSetByUser("coord_type"))
+    setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
+                   getParam<MultiMooseEnum>("coord_type"));
+  if (parameters.isParamSetByUser("rz_coord_axis"))
+    setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
 
   if (isParamValid("restart_file_base"))
   {
@@ -7514,6 +7527,12 @@ FEProblemBase::jacobianSetup()
   SubProblem::jacobianSetup();
   if (_displaced_problem)
     _displaced_problem->jacobianSetup();
+}
+
+MooseCoordTransform &
+FEProblemBase::coordTransform()
+{
+  return mesh().coordTransform();
 }
 
 template <typename T>

@@ -13,13 +13,7 @@
 #include "MooseEnum.h"
 #include "MooseMesh.h"
 
-#include "libmesh/tensor_value.h"
-#include "libmesh/point.h"
-
 using namespace libMesh;
-
-MooseCoordTransform::MooseCoordTransform() {}
-MooseCoordTransform::~MooseCoordTransform() {}
 
 MooseCoordTransform::Direction
 MooseCoordTransform::processZAxis(const Direction z_axis)
@@ -206,14 +200,24 @@ MooseCoordTransform::validParams()
   return params;
 }
 
-MooseCoordTransform::MooseCoordTransform(const InputParameters & params)
+MooseCoordTransform::MooseCoordTransform(const MooseMesh & mesh)
+  : _translation(),
+    _coord_type(Moose::COORD_XYZ),
+    _r_axis(INVALID),
+    _z_axis(INVALID),
+    _destination_coord_type(Moose::COORD_XYZ),
+    _destination_r_axis(INVALID),
+    _destination_z_axis(INVALID),
+    _has_different_coord_sys(false),
+    _length_unit(std::string("1m"))
 {
+  const auto & params = mesh.parameters();
+
   //
   // coordinate system transformation. If we have multiple different coordinate system types in our
   // problem, we take note of it because that can cause issues if there is a non-Cartesian
   // destination coordinate system
   //
-  const auto & mesh = *params.getCheckedPointerParam<MooseMesh *>("mesh");
   const auto & coord_sys = mesh.getCoordSystem();
   std::unordered_set<Moose::CoordinateSystemType> coord_types;
   auto map_it = coord_sys.begin();
@@ -256,6 +260,57 @@ MooseCoordTransform::MooseCoordTransform(const InputParameters & params)
   //
   if (params.isParamValid("length_unit"))
     setLengthUnit(MooseUnits(params.get<std::string>("length_unit")));
+}
+
+MooseCoordTransform::MooseCoordTransform()
+  : _translation(),
+    _coord_type(Moose::COORD_XYZ),
+    _r_axis(INVALID),
+    _z_axis(INVALID),
+    _destination_coord_type(Moose::COORD_XYZ),
+    _destination_r_axis(INVALID),
+    _destination_z_axis(INVALID),
+    _has_different_coord_sys(false),
+    _length_unit(std::string("1m"))
+{
+}
+
+MooseCoordTransform::MooseCoordTransform(const MooseCoordTransform & other)
+  : _translation(other._translation),
+    _coord_type(other._coord_type),
+    _r_axis(other._r_axis),
+    _z_axis(other._z_axis),
+    _destination_coord_type(other._destination_coord_type),
+    _destination_r_axis(other._destination_r_axis),
+    _destination_z_axis(other._destination_z_axis),
+    _has_different_coord_sys(other._has_different_coord_sys),
+    _length_unit(other._length_unit)
+{
+  if (other._scale)
+    _scale = std::make_unique<RealTensorValue>(*other._scale);
+  if (other._rotate)
+    _rotate = std::make_unique<RealTensorValue>(*other._rotate);
+}
+
+MooseCoordTransform &
+MooseCoordTransform::operator=(const MooseCoordTransform & other)
+{
+  _translation = other._translation;
+  _coord_type = other._coord_type;
+  _r_axis = other._r_axis;
+  _z_axis = other._z_axis;
+  _destination_coord_type = other._destination_coord_type;
+  _destination_r_axis = other._destination_r_axis;
+  _destination_z_axis = other._destination_z_axis;
+  _has_different_coord_sys = other._has_different_coord_sys;
+  _length_unit = other._length_unit;
+
+  if (other._scale)
+    _scale = std::make_unique<RealTensorValue>(*other._scale);
+  if (other._rotate)
+    _rotate = std::make_unique<RealTensorValue>(*other._rotate);
+
+  return *this;
 }
 
 Point

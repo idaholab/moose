@@ -38,6 +38,7 @@
 class Assembly;
 class RelationshipManager;
 class MooseVariableBase;
+class MooseCoordTransform;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1156,6 +1157,12 @@ public:
    */
   void finiteVolumeInfoDirty() { _finite_volume_info_dirty = true; }
 
+  /**
+   * @return the coordinate transformation object that describes how to transform this problem's
+   * coordinate system into the canonical/reference coordinate system
+   */
+  MooseCoordTransform & coordTransform();
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
@@ -1528,9 +1535,20 @@ private:
   /// Storage for RZ axis selection
   unsigned int _rz_coord_axis;
 
+  /// A coordinate transformation object that describes how to transform this problem's coordinate
+  /// system into the canonical/reference coordinate system
+  std::unique_ptr<MooseCoordTransform> _coord_transform;
+
   template <typename T>
   struct MeshType;
 };
+
+inline MooseCoordTransform &
+MooseMesh::coordTransform()
+{
+  mooseAssert(_coord_transform, "The coordinate transformation object is null.");
+  return *_coord_transform;
+}
 
 template <>
 struct MooseMesh::MeshType<ReplicatedMesh>

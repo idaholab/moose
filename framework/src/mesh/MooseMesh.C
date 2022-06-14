@@ -20,6 +20,7 @@
 #include "SubProblem.h"
 #include "MooseVariableBase.h"
 #include "MooseMeshUtils.h"
+#include "MooseCoordTransform.h"
 
 #include <utility>
 
@@ -145,6 +146,8 @@ MooseMesh::validParams()
   params.addParam<bool>("skip_refine_when_use_split",
                         true,
                         "True to skip uniform refinements when using a pre-split mesh.");
+
+  params += MooseCoordTransform::validParams();
 
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
   // derived types that do so.
@@ -355,6 +358,12 @@ MooseMesh::prepare(bool)
     _communicator.set_union(_mesh_nodeset_ids);
     _communicator.set_union(_mesh_sideset_ids);
   }
+
+  setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
+                 getParam<MultiMooseEnum>("coord_type"));
+  setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
+
+  _coord_transform = std::make_unique<MooseCoordTransform>(*this);
 
   detectOrthogonalDimRanges();
 

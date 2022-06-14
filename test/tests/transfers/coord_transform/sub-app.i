@@ -7,9 +7,6 @@
   ymax = 10
   nx = 10
   ny = 20
-[]
-
-[Problem]
   alpha_rotation = -90
   length_unit = '20*cm'
 []
