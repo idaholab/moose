@@ -34,6 +34,9 @@ Poly2TriMeshGenerator::validParams()
       "interpolate_boundary", 0, "How many more nodes to add in each outer boundary segment.");
   params.addParam<bool>(
       "refine_boundary", true, "Whether to allow automatically refining the outer boundary.");
+  params.addParam<bool>("smooth_triangulation",
+                        false,
+                        "Whether to do Laplacian mesh smoothing on the generated triangles.");
   params.addParam<std::vector<MeshGeneratorName>>(
       "holes", std::vector<MeshGeneratorName>(), "The MeshGenerators that define mesh holes.");
   params.addParam<std::vector<bool>>(
@@ -65,6 +68,7 @@ Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
     _bdy_ptr(getMesh("boundary")),
     _interpolate_bdy(getParam<unsigned int>("interpolate_boundary")),
     _refine_bdy(getParam<bool>("refine_boundary")),
+    _smooth_tri(getParam<bool>("smooth_triangulation")),
     _hole_ptrs(getMeshes("holes")),
     _stitch_holes(getParam<std::vector<bool>>("stitch_holes")),
     _interpolate_holes(getParam<std::vector<unsigned int>>("interpolate_holes")),
@@ -96,7 +100,7 @@ Poly2TriMeshGenerator::generate()
 
   poly2tri.desired_area() = _desired_area;
   poly2tri.minimum_angle() = 0; // Not yet supported
-  poly2tri.smooth_after_generating() = false; // Unsafe on concave domains IMHO
+  poly2tri.smooth_after_generating() = _smooth_tri;
 
   if (_desired_area_func != "")
   {
@@ -125,6 +129,21 @@ Poly2TriMeshGenerator::generate()
     poly2tri.attach_hole_list(&triangulator_hole_ptrs);
 
   poly2tri.triangulate();
+
+  // I do not trust Laplacian mesh smoothing not to invert elements
+  // near reentrant corners.  Eventually we'll add better smoothing
+  // options, but even those might have failure cases.  Better to
+  // always do an extra loop here than to ever let users try to run on
+  // a degenerate mesh.
+  if (_smooth_tri)
+    for (auto elem : mesh->element_ptr_range())
+    {
+      libmesh_assert(elem->type() == TRI3);
+      auto cross_prod = (elem->point(1) - elem->point(0)).cross(elem->point(2) - elem->point(0));
+
+      if (cross_prod(2) <= 0)
+        mooseError("Found inverted element in triangulation.  Disable Laplacian smoothing?");
+    }
 
   const bool use_binary_search = (_algorithm == "BINARY");
 
