@@ -208,6 +208,16 @@ protected:
   coupledGenericValues(const std::string & var_name) const;
 
   /**
+   * Returns DOF value of a coupled variable for use in templated automatic differentiation classes
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a GenericVariableValue for the coupled variable
+   */
+  template <bool is_ad>
+  const GenericVariableValue<is_ad> & coupledGenericDofValue(const std::string & var_name,
+                                                             unsigned int comp = 0) const;
+
+  /**
    * Returns value of a coupled lower-dimensional variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables

@@ -550,6 +550,20 @@ Coupleable::vectorTagValueHelper(const std::string & var_names,
   return vectorTagValueHelper<T>(var_names, tag, index);
 }
 
+template <>
+const GenericVariableValue<false> &
+Coupleable::coupledGenericDofValue<false>(const std::string & var_name, unsigned int comp) const
+{
+  return coupledDofValues(var_name, comp);
+}
+
+template <>
+const GenericVariableValue<true> &
+Coupleable::coupledGenericDofValue<true>(const std::string & var_name, unsigned int comp) const
+{
+  return adCoupledValue(var_name, comp);
+}
+
 const VariableValue &
 Coupleable::coupledValueLower(const std::string & var_name, const unsigned int comp) const
 {
