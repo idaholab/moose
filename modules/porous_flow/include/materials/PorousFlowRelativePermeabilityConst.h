@@ -12,20 +12,25 @@
 #include "PorousFlowRelativePermeabilityBase.h"
 
 /**
- * This class simply sets a constant relative permeability at the nodes. This
- * simple class is useful for testing purposes mainly
+ * This class sets a constant relative permeability. This simple class is useful
+ * for testing purposes mainly
  */
-class PorousFlowRelativePermeabilityConst : public PorousFlowRelativePermeabilityBase
+template <bool is_ad>
+class PorousFlowRelativePermeabilityConstTempl
+  : public PorousFlowRelativePermeabilityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowRelativePermeabilityConst(const InputParameters & parameters);
+  PorousFlowRelativePermeabilityConstTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real relativePermeability(Real seff) const override;
+  virtual GenericReal<is_ad> relativePermeability(GenericReal<is_ad> seff) const override;
   virtual Real dRelativePermeability(Real seff) const override;
 
   /// Constant relative permeability
   const Real _relperm;
 };
+
+typedef PorousFlowRelativePermeabilityConstTempl<false> PorousFlowRelativePermeabilityConst;
+typedef PorousFlowRelativePermeabilityConstTempl<true> ADPorousFlowRelativePermeabilityConst;
