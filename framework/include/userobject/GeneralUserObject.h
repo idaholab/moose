@@ -20,17 +20,12 @@
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
 class GeneralUserObject : public UserObject,
                           public MaterialPropertyInterface,
-                          public TransientInterface,
-                          public DependencyResolverInterface
+                          public TransientInterface
 {
 public:
   static InputParameters validParams();
 
   GeneralUserObject(const InputParameters & parameters);
-
-  const std::set<std::string> & getRequestedItems() override;
-
-  const std::set<std::string> & getSuppliedItems() override;
 
   ///@{
   /**
@@ -39,14 +34,4 @@ public:
   virtual void threadJoin(const UserObject &) override;
   virtual void subdomainSetup() override;
   ///@}
-
-protected:
-  mutable std::set<std::string> _depend_vars;
-  std::set<std::string> _supplied_vars;
-
-private:
-  void addReporterDependencyHelper(const ReporterName & state_name) override final;
-  void addPostprocessorDependencyHelper(const PostprocessorName & name) const override final;
-  void
-  addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & name) const override final;
 };
