@@ -2,8 +2,9 @@
 
 !syntax description /Modules/FluidProperties/TabulatedFluidProperties
 
-The TabulatedFluidProperties UserObject calculates fluid properties using bicubic interpolation
+The TabulatedFluidProperties UserObject calculates fluid properties using either bilinear or bicubic interpolation
 of data provided in a text file.
+Note, Bilinear Interpolation uses two vectors and a ColumnMajorMatrix, while Bicubic Interpolation uses two vectors and a vector of a vector.
 
 Property values are read from a CSV file containing property data.  Monotonically increasing values
 of pressure and temperature must be included in the data file, specifying the phase space where
@@ -53,6 +54,16 @@ pressure, temperature,   density, enthalpy, internal_energy
 
 and so on.
 
+### Alternative variable sets
+
+Alternatively, from the input internal energy and volume TFP can determine various parameters (p,T,g,c,cp,cv,k, and mu from (v,e)).
+
+We convert to (v,e) by creating v, e, and h grids. The grids are created by filling points using volume[j]=_v_min + j * dv for specific volume and
+energy[j]=_e_min + j * de for j=0 to number of points.
+These grids are then filled and (p,T) data are matched to the grid points. The h and e grids use the same number of grid points.
+
+The bounds are determined by the maximums and minimums of the input parameters.
+
 ## Using TabulatedFluidProperties
 
 ### Reading from an existing file
@@ -60,12 +71,18 @@ and so on.
 Consider the example where TabulatedFluidProperties is used to reduce the cost of calculating
 CO$_2$ fluid properties. In this example, a file containing the tabulated fluid properties, named
 `fluid_properties.csv` is provided. All properties listed in this file will be calculated using
-interpolation, while all remaining properties provided by the `FluidProperties` interface will be
+either Bilinear or Bicubic interpolation (the interpolation type is to be specified in the input file), while all remaining properties provided by the `FluidProperties` interface will be
 calculated using a [CO2FluidProperties](/CO2FluidProperties.md) UserObject.
+
+Bilinear Interpolation and Bicubic Interpolation are sub classes of Bidimensional Interpolation. The TabulatedFluidProperties inherits Bilinear or Bicubic Interpolation depending on the type specified in the input file.
 
 The input file syntax necessary to achieve this is
 
 !listing modules/fluid_properties/test/tests/tabulated/tabulated.i block=Modules
+or
+!listing modules/fluid_properties/test/tests/tabulated/tabulated_v_e.i block=Modules
+
+The "tabulated_v_e.i" input file is to be used if ICs are v and e. If ICs are (p,T), "tabulated.i" should be used.
 
 ### Writing data file
 
@@ -84,7 +101,7 @@ divided into 50 and 100 equal points, respectively, then the input file syntax n
       type = CO2FluidProperties
     [../]
     [./tabulated]
-      type = TabulatedFluidProperties
+      type = TabulatedBi___FluidProperties
       fp = co2
       fluid_property_file = fluid_properties.csv
       interpolated_properties = 'density enthalpy viscosity'
@@ -98,6 +115,7 @@ divided into 50 and 100 equal points, respectively, then the input file syntax n
   []
 []
 ```
+Note that Bi___ should be replaced with Bicubic or Bilinear depending on desired the Interpolation method
 
 This tabulated data will be written to file in the correct format, enabling suitable data files to be
 created for future use. There is an upfront computational expense required for this initial data
@@ -109,7 +127,7 @@ FluidProperties UserObject.
 
 !alert note
 All fluid properties read from a file or specified in the input file (and their derivatives with
-respect to pressure and temperature) will be calculated using bicubic interpolation, while all
+respect to pressure and temperature) will be calculated using bicubic or bilinear interpolation, while all
 remaining fluid properties will be calculated using the provided FluidProperties UserObject.
 
 !syntax parameters /Modules/FluidProperties/TabulatedFluidProperties
