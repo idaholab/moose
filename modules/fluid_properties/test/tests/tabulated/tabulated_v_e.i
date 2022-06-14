@@ -1,5 +1,5 @@
-# Test thermophysical property calculations using TabulatedFluidProperties.
-# Calculations for density, internal energy and enthalpy using bicubic spline
+# Test thermophysical property calculations using TabulatedBiCubic/LinearFluidProperties.
+# Calculations for density, internal energy and enthalpy using bicubic or bilinear
 # interpolation of data generated using CO2FluidProperties.
 
 [Mesh]
@@ -115,7 +115,7 @@
       type = CO2FluidProperties
     []
     [tabulated]
-      type = TabulatedFluidProperties
+      type = TabulatedBilinearFluidProperties
       fp = co2
       construct_pT_from_ve = true
       fluid_property_file = fluid_properties.csv
