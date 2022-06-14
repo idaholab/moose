@@ -34,7 +34,7 @@ TabulatedBilinearFluidProperties::TabulatedBilinearFluidProperties(const InputPa
 {}
 
 void
-TabulatedBilinearFluidProperties::routine_1()
+TabulatedBilinearFluidProperties::constructInterpolation()
 {
   // Construct bilinear interpolants from tabulated data
   ColumnMajorMatrix data_matrix(_num_p, _num_T);
@@ -43,8 +43,8 @@ TabulatedBilinearFluidProperties::routine_1()
   for (std::size_t i = 0; i < _property_ipol.size(); ++i)
   {
     reshapeData2D(_num_p, _num_T, _properties[i], data_matrix);
-    // _property_ipol[i] =
-    //     std::make_unique<BilinearInterpolation>(_pressure, _temperature, data_matrix);
+    _property_ipol[i] =
+        std::make_unique<BilinearInterpolation>(_pressure, _temperature, data_matrix);
   }
 
   // do we need to construct the reverse lookup p(v,e), T(v,e)?
@@ -172,14 +172,14 @@ TabulatedBilinearFluidProperties::routine_1()
     }
 
     // the bilinear interpolation object are init'ed now
-    // _p_from_v_e_ipol =
-    //     libmesh_make_unique<BilinearInterpolation>(_specific_volume, _internal_energy, p_from_v_e);
-    // _T_from_v_e_ipol =
-    //     libmesh_make_unique<BilinearInterpolation>(_specific_volume, _internal_energy, T_from_v_e);
-    // _p_from_v_h_ipol =
-    //     libmesh_make_unique<BilinearInterpolation>(_specific_volume, _enthalpy, p_from_v_h);
-    // _T_from_v_h_ipol =
-    //     libmesh_make_unique<BilinearInterpolation>(_specific_volume, _enthalpy, T_from_v_h);
+    _p_from_v_e_ipol =
+        libmesh_make_unique<BilinearInterpolation>(_specific_volume, _internal_energy, p_from_v_e);
+    _T_from_v_e_ipol =
+        libmesh_make_unique<BilinearInterpolation>(_specific_volume, _internal_energy, T_from_v_e);
+    _p_from_v_h_ipol =
+        libmesh_make_unique<BilinearInterpolation>(_specific_volume, _enthalpy, p_from_v_h);
+    _T_from_v_h_ipol =
+        libmesh_make_unique<BilinearInterpolation>(_specific_volume, _enthalpy, T_from_v_h);
   }
 }
 

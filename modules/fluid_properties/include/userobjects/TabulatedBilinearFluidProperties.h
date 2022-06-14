@@ -15,6 +15,7 @@
 
 class SinglePhaseFluidPropertiesPT;
 class BilinearInterpolation;
+class TabulatedFluidProperties;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
@@ -93,7 +94,7 @@ public:
 
   TabulatedBilinearFluidProperties(const InputParameters & parameters);
 
-  virtual void routine_1() override;
+  virtual void constructInterpolation() override;
 
 protected:
   /**

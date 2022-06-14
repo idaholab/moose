@@ -93,7 +93,7 @@ public:
 
   TabulatedBicubicFluidProperties(const InputParameters & parameters);
 
-  virtual void routine_1() override;
+  virtual void constructInterpolation() override;
 
 protected:
 

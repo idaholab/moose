@@ -38,7 +38,7 @@ TabulatedBicubicFluidProperties::TabulatedBicubicFluidProperties(const InputPara
 {}
 
 void
-TabulatedBicubicFluidProperties::routine_1()
+TabulatedBicubicFluidProperties::constructInterpolation()
 {
   // Construct bicubic interpolants from tabulated data
   std::vector<std::vector<Real>> data_matrix;

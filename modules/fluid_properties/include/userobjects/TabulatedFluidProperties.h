@@ -93,7 +93,7 @@ public:
   TabulatedFluidProperties(const InputParameters & parameters);
 
   virtual void initialSetup() override;
-  virtual void routine_1() = 0;
+  virtual void constructInterpolation() = 0;
 
   virtual std::string fluidName() const override;
 
