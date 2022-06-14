@@ -14,16 +14,26 @@
 /**
  * Material designed to provide a constant permeability tensor
  */
-class PorousFlowPermeabilityConst : public PorousFlowPermeabilityBase
+template <bool is_ad>
+class PorousFlowPermeabilityConstTempl : public PorousFlowPermeabilityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowPermeabilityConst(const InputParameters & parameters);
+  PorousFlowPermeabilityConstTempl(const InputParameters & parameters);
 
 protected:
   void computeQpProperties() override;
 
   /// Constant value of permeability tensor
   const RealTensorValue _input_permeability;
+
+  using PorousFlowPermeabilityBaseTempl<is_ad>::_dpermeability_qp_dgradvar;
+  using PorousFlowPermeabilityBaseTempl<is_ad>::_dpermeability_qp_dvar;
+  using PorousFlowPermeabilityBaseTempl<is_ad>::_num_var;
+  using PorousFlowPermeabilityBaseTempl<is_ad>::_permeability_qp;
+  using PorousFlowPermeabilityBaseTempl<is_ad>::_qp;
 };
+
+typedef PorousFlowPermeabilityConstTempl<false> PorousFlowPermeabilityConst;
+typedef PorousFlowPermeabilityConstTempl<true> ADPorousFlowPermeabilityConst;
