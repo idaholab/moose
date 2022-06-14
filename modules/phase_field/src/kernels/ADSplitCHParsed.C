@@ -20,7 +20,7 @@ ADSplitCHParsed::validParams()
   params.addRequiredParam<MaterialPropertyName>(
       "f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
   params.addDeprecatedCoupledVar("args", "Vector of additional arguments to F");
-  params.addCoupledVar("variable_names", "Vector of additional variable arguments to F");
+  params.addCoupledVar("coupled_variables", "Vector of additional variable arguments to F");
 
   return params;
 }

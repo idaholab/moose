@@ -19,7 +19,11 @@ ElasticEnergyMaterial::validParams()
   InputParameters params = DerivativeFunctionMaterialBase::validParams();
   params.addClassDescription("Free energy material for the elastic energy contributions.");
   params.addParam<std::string>("base_name", "Material property base name");
-  params.addRequiredCoupledVar("args", "Arguments of F() - use vector coupling");
+  params.addDeprecatedCoupledVar("args",
+                                 "Arguments of the free energy function",
+                                 "args is deprecated, use 'coupled_variables' instead");
+  params.addCoupledVar("coupled_variables",
+                       "Vector of variable arguments of the free energy function");
   params.addCoupledVar("displacement_gradients",
                        "Vector of displacement gradient variables (see "
                        "Modules/PhaseField/DisplacementGradients "
