@@ -125,7 +125,10 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
     uo->execute();
 
   for (auto & uo : _domain_objs)
+  {
+    uo->preExecuteOnElement();
     uo->executeOnElement();
+  }
 
   // UserObject Jacobians
   if (_fe_problem.currentlyComputingJacobian() && _shape_element_objs.size() > 0)
@@ -171,7 +174,10 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
     uo->execute();
 
   for (auto & uo : _domain_objs)
+  {
+    uo->preExecuteOnBoundary();
     uo->executeOnBoundary();
+  }
 
   // UserObject Jacobians
   std::vector<ShapeSideUserObject *> shapers;
@@ -225,7 +231,10 @@ ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
 
   for (auto & uo : _domain_objs)
     if (!uo->blockRestricted() || uo->hasBlocks(neighbor->subdomain_id()))
+    {
+      uo->preExecuteOnInternalSide();
       uo->executeOnInternalSide();
+    }
 }
 
 void

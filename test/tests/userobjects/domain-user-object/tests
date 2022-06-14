@@ -1,0 +1,9 @@
+[Tests]
+  [domain_uo]
+    type = RunApp
+    input = measure-conservation.i
+    requirement = 'The system shall be able to execute user objects that perform operations on elements, boundaries, and internal sides.'
+    design = 'UserObjects/index.md'
+    issues = '#19995'
+  []
+[]

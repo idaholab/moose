@@ -57,7 +57,27 @@ public:
    */
   virtual void executeOnInternalSide() {}
 
+  /**
+   * method that is called right before executeOnElement; sets the data to volumetric
+   */
+  void preExecuteOnElement();
+
+  /**
+   * method that is called right before executeOnBoundary; sets the data to face
+   */
+  void preExecuteOnBoundary();
+
+  /**
+   * method that is called right before executeOnInternalSide; sets the data to face
+   */
+  void preExecuteOnInternalSide();
+
 protected:
+  const MooseArray<Point> & qPoints() const { return *_current_q_point; }
+  const QBase & qRule() const { return *_current_q_rule; }
+  const MooseArray<Real> & JxW() const { return *_current_JxW; }
+  const MooseArray<Real> & coord() const { return _coord; }
+
   /// the Moose mesh
   MooseMesh & _mesh;
 
@@ -78,6 +98,18 @@ protected:
 
   /// the neighboring element's volume
   const Real & _current_neighbor_volume;
+
+private:
+  void setVolumeData();
+
+  void setFaceData();
+
+  /// A pointer to the current volume/face quadrature points
+  const MooseArray<Point> * _current_q_point;
+  /// A pointer to the current volume/face quadrature rule
+  const QBase * _current_q_rule;
+  /// A pointer to the current JxW
+  const MooseArray<Real> * _current_JxW;
 
   /// The quadrature points in physical space used in the element interior
   const MooseArray<Point> & _q_point;
@@ -103,4 +135,38 @@ DomainUserObject::execute()
 {
   mooseError("Users of DomainUserObjects should call "
              "executeOnElement/executeOnBoundary/executeOnInternalSide/executeOnInterface");
+}
+
+inline void
+DomainUserObject::preExecuteOnElement()
+{
+  setVolumeData();
+}
+
+inline void
+DomainUserObject::preExecuteOnBoundary()
+{
+  setFaceData();
+}
+
+inline void
+DomainUserObject::preExecuteOnInternalSide()
+{
+  setFaceData();
+}
+
+inline void
+DomainUserObject::setVolumeData()
+{
+  _current_q_point = &_q_point;
+  _current_q_rule = _qrule;
+  _current_JxW = &_JxW;
+}
+
+inline void
+DomainUserObject::setFaceData()
+{
+  _current_q_point = &_q_point_face;
+  _current_q_rule = _qrule_face;
+  _current_JxW = &_JxW_face;
 }
