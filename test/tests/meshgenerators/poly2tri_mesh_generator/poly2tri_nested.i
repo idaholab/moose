@@ -18,7 +18,7 @@
     type = PolyLineMeshGenerator
     points = '-1.0 0.0 0.0
               0.0 -1.0 0.0
-              1.0 0.0 0.0 
+              1.0 0.0 0.0
               0.0 1.0 0.0'
     loop = true
   []
@@ -26,7 +26,7 @@
     type = PolyLineMeshGenerator
     points = '-1.5 -1.5 0.0
               1.5 -1.5 0.0
-              1.5 1.5 0.0 
+              1.5 1.5 0.0
               -1.5 1.5 0.0'
     loop = true
   []
@@ -34,7 +34,7 @@
     type = PolyLineMeshGenerator
     points = '-4.0 0.0 0.0
               0.0 -4.0 0.0
-              4.0 0.0 0.0 
+              4.0 0.0 0.0
               0.0 4.0 0.0'
     loop = true
   []
