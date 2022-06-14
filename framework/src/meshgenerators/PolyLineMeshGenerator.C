@@ -63,37 +63,37 @@ PolyLineMeshGenerator::generate()
 
   const auto n_points = _points.size();
   for (auto i : make_range(n_points))
+  {
+    Point p = _points[i];
+    mesh.add_point(p, i * _nebp);
+    if (_nebp > 1)
     {
-      Point p = _points[i];
-      mesh.add_point(p, i * _nebp);
-      if (_nebp > 1)
+      if (!_loop && (i + 1) == n_points)
+        break;
+
+      const auto ip1 = (i + 1) % n_points;
+      const Point pvec = (_points[ip1] - p) / _nebp;
+
+      for (auto j : make_range(1u, _nebp))
       {
-        if (!_loop && (i + 1) == n_points)
-          break;
-
-        const auto ip1 = (i + 1) % n_points;
-        const Point pvec = (_points[ip1] - p) / _nebp;
-
-        for (auto j : make_range(1u, _nebp))
-        {
-          p += pvec;
-          mesh.add_point(p, i * _nebp + j);
-        }
+        p += pvec;
+        mesh.add_point(p, i * _nebp + j);
       }
     }
+  }
 
-    const auto n_segments = _loop ? n_points : (n_points - 1);
-    const auto n_elem = n_segments * _nebp;
-    const auto max_nodes = n_points * _nebp;
-    for (auto i : make_range(n_elem))
-    {
-      const auto ip1 = (i + 1) % max_nodes;
-      auto elem = Elem::build(EDGE2);
-      elem->set_node(0) = mesh.node_ptr(i);
-      elem->set_node(1) = mesh.node_ptr(ip1);
-      elem->set_id() = i;
-      mesh.add_elem(std::move(elem));
-    }
+  const auto n_segments = _loop ? n_points : (n_points - 1);
+  const auto n_elem = n_segments * _nebp;
+  const auto max_nodes = n_points * _nebp;
+  for (auto i : make_range(n_elem))
+  {
+    const auto ip1 = (i + 1) % max_nodes;
+    auto elem = Elem::build(EDGE2);
+    elem->set_node(0) = mesh.node_ptr(i);
+    elem->set_node(1) = mesh.node_ptr(ip1);
+    elem->set_id() = i;
+    mesh.add_elem(std::move(elem));
+  }
 
   if (!_loop)
   {
