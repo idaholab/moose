@@ -19,61 +19,62 @@
  * AuxVariables can be used and as such, all properties are evaluated
  * at the qps only
  */
-class PorousFlowPropertyAux : public AuxKernel
+template <bool is_ad>
+class PorousFlowPropertyAuxTempl : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowPropertyAux(const InputParameters & parameters);
+  PorousFlowPropertyAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
 private:
   /// Pressure of each phase
-  const MaterialProperty<std::vector<Real>> * _pressure;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * _pressure;
 
   /// Saturation of each phase
-  const MaterialProperty<std::vector<Real>> * _saturation;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * _saturation;
 
   /// Temperature of the fluid
-  const MaterialProperty<Real> * _temperature;
+  const GenericMaterialProperty<Real, is_ad> * _temperature;
 
   /// Fluid density of each phase
-  const MaterialProperty<std::vector<Real>> * _fluid_density;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * _fluid_density;
 
   /// Viscosity of each phase
-  const MaterialProperty<std::vector<Real>> * _fluid_viscosity;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * _fluid_viscosity;
 
   /// Mass fraction of each component in each phase
-  const MaterialProperty<std::vector<std::vector<Real>>> * _mass_fractions;
+  const GenericMaterialProperty<std::vector<std::vector<Real>>, is_ad> * _mass_fractions;
 
   /// Relative permeability of each phase
-  const MaterialProperty<std::vector<Real>> * _relative_permeability;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * _relative_permeability;
 
   /// Enthalpy of each phase
-  const MaterialProperty<std::vector<Real>> * _enthalpy;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * _enthalpy;
 
   /// Internal energy of each phase
-  const MaterialProperty<std::vector<Real>> * _internal_energy;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * _internal_energy;
 
   /// Secondary-species concentration
-  const MaterialProperty<std::vector<Real>> * _sec_conc;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * _sec_conc;
 
   /// Mineral-species concentration
-  const MaterialProperty<std::vector<Real>> * _mineral_conc;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * _mineral_conc;
 
   /// Mineral-species reacion rate
-  const MaterialProperty<std::vector<Real>> * _mineral_reaction_rate;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * _mineral_reaction_rate;
 
   /// Porosity of the media
-  const MaterialProperty<Real> * _porosity;
+  const GenericMaterialProperty<Real, is_ad> * _porosity;
 
   /// Permeability of the media
-  const MaterialProperty<RealTensorValue> * _permeability;
+  const GenericMaterialProperty<RealTensorValue, is_ad> * _permeability;
 
   /// Hysteresis order
-  const MaterialProperty<unsigned> * _hys_order;
+  const MaterialProperty<unsigned int> * _hys_order;
 
   /// Hysteresis saturation turning points
   const MaterialProperty<std::array<Real, PorousFlowConstants::MAX_HYSTERESIS_ORDER>> *
@@ -132,3 +133,6 @@ private:
   const unsigned int _k_row;
   const unsigned int _k_col;
 };
+
+typedef PorousFlowPropertyAuxTempl<false> PorousFlowPropertyAux;
+typedef PorousFlowPropertyAuxTempl<true> ADPorousFlowPropertyAux;
