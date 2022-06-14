@@ -595,6 +595,8 @@ VariableCondensationPreconditioner::mergeArrays(const PetscInt * a,
 void
 VariableCondensationPreconditioner::setup()
 {
+  _matrix->print_personal();
+
   if (_adaptive_condensation)
     findZeroDiagonals(*_matrix, _zero_rows);
 

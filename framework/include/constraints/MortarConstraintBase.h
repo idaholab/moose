@@ -96,14 +96,28 @@ public:
   void zeroInactiveLMDofs(const std::unordered_set<const Node *> & inactive_lm_nodes,
                           const std::unordered_set<const Elem *> & inactive_lm_elems);
 
+  /**
+   * Whether to include lm value along the z direction
+   */
+  bool useLMZ() const { return _use_lm_z; }
+
 protected:
   const FEProblemBase & feProblem() const { return _fe_problem; }
 
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;
 
+protected:
+  /// Check if we need 3 lm variables
+  const bool _use_lm_z;
+
   /// Pointer to the lagrange multipler variable. nullptr if none
   MooseVariable * const _var;
+
+  /// Pointer to the lagrange multipler variable in the Cartesian coordinate system.
+  const MooseVariable * const _var_x;
+  const MooseVariable * const _var_y;
+  const MooseVariable * const _var_z;
 
   /// Reference to the secondary variable
   MooseVariableField<Real> & _secondary_var;

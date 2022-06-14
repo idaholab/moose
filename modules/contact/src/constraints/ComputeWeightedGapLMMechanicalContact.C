@@ -231,8 +231,7 @@ ComputeWeightedGapLMMechanicalContact::communicateGaps()
   const auto & lm_mesh = _mesh.getMesh();
 
   auto action_functor = [this, &lm_mesh](const processor_id_type libmesh_dbg_var(pid),
-                                         const std::vector<Datum> & sent_data)
-  {
+                                         const std::vector<Datum> & sent_data) {
     mooseAssert(pid != this->processor_id(), "We do not send messages to ourself here");
     for (auto & tup : sent_data)
     {
@@ -293,11 +292,50 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   const auto & weighted_gap = *_weighted_gap_ptr;
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
 
-  const auto dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
-  ADReal lm_value = (*_sys.currentSolution())(dof_index);
-  Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
+  const auto dof_index_x = dof->dof_number(_sys.number(), _var_x->number(), 0);
+  const auto dof_index_y = dof->dof_number(_sys.number(), _var_y->number(), 0);
+  ADReal lm_x = (*_sys.currentSolution())(dof_index_x);
+  ADReal lm_y = (*_sys.currentSolution())(dof_index_y);
 
-  const ADReal dof_residual = std::min(lm_value, weighted_gap * c);
+  Moose::derivInsert(lm_x.derivatives(), dof_index_x, 1.);
+  Moose::derivInsert(lm_y.derivatives(), dof_index_y, 1.);
+
+  // project x, y and z lm component values to the local coordinate system to get the normal contact
+  // pressure
+  ADReal normal_lm_value = lm_x * _normals[_i](0) + lm_y * _normals[_i](1);
+
+  // similarly, project to get tangential contact pressure
+  const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+  ADReal tangential_lm_value = lm_x * nodal_tangents[0][_i](0) + lm_y * nodal_tangents[0][_i](1);
+
+  dof_id_type dof_index_z;
+  ADReal tangential_lm_value2 = 0.0; // only exists in 3D
+  if (_has_disp_z)
+  {
+    dof_index_z = dof->dof_number(_sys.number(), _var_z->number(), 0);
+    ADReal lm_z = (*_sys.currentSolution())(dof_index_z);
+    Moose::derivInsert(lm_z.derivatives(), dof_index_z, 1.);
+
+    normal_lm_value += lm_z * _normals[_i](2);
+    tangential_lm_value += lm_z * nodal_tangents[0][_i](2);
+    tangential_lm_value2 = lm_x * nodal_tangents[1][_i](0) + lm_y * nodal_tangents[1][_i](1) +
+                           lm_z * nodal_tangents[1][_i](2);
+  }
+
+  const ADReal normal_dof_residual = std::min(normal_lm_value, weighted_gap * c);
+
+  const ADReal dof_residual_x = normal_dof_residual * _normals[_i](0) +
+                                tangential_lm_value * nodal_tangents[0][_i](0) +
+                                tangential_lm_value2 * nodal_tangents[1][_i](0);
+
+  const ADReal dof_residual_y = normal_dof_residual * _normals[_i](1) +
+                                tangential_lm_value * nodal_tangents[0][_i](1) +
+                                tangential_lm_value2 * nodal_tangents[1][_i](1);
+  ADReal dof_residual_z;
+  if (_has_disp_z)
+    dof_residual_z = normal_dof_residual * _normals[_i](2) +
+                     tangential_lm_value * nodal_tangents[0][_i](2) +
+                     tangential_lm_value2 * nodal_tangents[1][_i](2);
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processResidualAndJacobian(dof_residual, dof_index, _vector_tags, _matrix_tags);

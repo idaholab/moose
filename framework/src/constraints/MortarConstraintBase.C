@@ -81,6 +81,11 @@ MortarConstraintBase::validParams()
       "While DEFAULT quadrature order is typically sufficiently accurate, exact integration of "
       "QUAD mortar faces requires SECOND order quadrature for FIRST variables and FOURTH order "
       "quadrature for SECOND order variables.");
+
+  params.addRequiredCoupledVar("var_x", "x-direction Lagrange multiplier variable.");
+  params.addRequiredCoupledVar("var_y", "y-direction Lagrange multiplier variable.");
+  params.addCoupledVar("var_z", "z-direction Lagrange multiplier variable.");
+
   return params;
 }
 
@@ -95,9 +100,13 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
                                  Moose::VarKindType::VAR_NONLINEAR,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _use_lm_z(_fe_problem.mesh().dimension() == 3 ? true : false),
     _var(isParamValid("variable")
              ? &_subproblem.getStandardVariable(_tid, parameters.getMooseType("variable"))
              : nullptr),
+    _var_x(getVar("var_x", 0)),
+    _var_y(getVar("var_y", 0)),
+    _var_z(_use_lm_z ? getVar("var_z", 0) : nullptr),
     _secondary_var(
         isParamValid("secondary_variable")
             ? _sys.getActualFieldVariable<Real>(_tid, parameters.getMooseType("secondary_variable"))
@@ -187,16 +196,25 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
                                          const std::unordered_set<const Elem *> & inactive_lm_elems)
 {
   // If no LM variable has been defined, skip
-  if (!_var)
+  if (!_var_x || !_var_y)
     return;
 
   const auto sn = _sys.number();
-  const auto vn = _var->number();
 
-  // If variable is nodal, zero DoFs based on inactive LM nodes
-  if (_var->isNodal())
+  std::vector<const MooseVariable *> vars = {_var_x, _var_y};
+  if (_use_lm_z)
+    vars.push_back(_var_z);
+
+  for (const auto var : vars)
   {
-    for (const auto node : inactive_lm_nodes)
+    const auto vn = var->number();
+    if (_subproblem.currentlyComputingJacobian())
+      prepareMatrixTagLower(_assembly, vn, vn, Moose::ConstraintJacobianType::LowerLower);
+    else
+      prepareVectorTagLower(_assembly, vn);
+
+    // If variable is nodal, zero DoFs based on inactive LM nodes
+    if (var->isNodal())
     {
       // Allow mixed Lagrange orders between primal and LM
       if (!node->n_comp(sn, vn))
@@ -208,17 +226,9 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
         _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
       if (!_subproblem.currentlyComputingJacobian())
       {
-        Real lm_value = _var->getNodalValue(*node);
-        _assembly.cacheResidual(dof_index, lm_value, _vector_tags);
-      }
-    }
-  }
-  // If variable is elemental, zero based on inactive LM elems
-  else
-  {
-    for (const auto el : inactive_lm_elems)
-    {
-      const auto n_comp = el->n_comp(sn, vn);
+        // Allow mixed Lagrange orders between primal and LM
+        if (!node->n_comp(sn, vn))
+          continue;
 
       for (const auto comp : make_range(n_comp))
       {
@@ -227,8 +237,29 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
           _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
         if (_assembly.computingResidual())
         {
-          const Real lm_value = _var->getElementalValue(el, comp);
+          Real lm_value = var->getNodalValue(*node);
           _assembly.cacheResidual(dof_index, lm_value, _vector_tags);
+        }
+      }
+    }
+    // If variable is elemental, zero based on inactive LM elems
+    else
+    {
+      for (const auto el : inactive_lm_elems)
+      {
+        const auto n_comp = el->n_comp(sn, vn);
+
+        for (const auto comp : make_range(n_comp))
+        {
+          const auto dof_index = el->dof_number(sn, vn, comp);
+          // Insert to system
+          if (_subproblem.currentlyComputingJacobian())
+            _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
+          else
+          {
+            const Real lm_value = var->getElementalValue(el, comp);
+            _assembly.cacheResidual(dof_index, lm_value, _vector_tags);
+          }
         }
       }
     }
