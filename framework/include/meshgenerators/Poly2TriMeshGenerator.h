@@ -32,6 +32,8 @@ protected:
 
   bool _refine_bdy;
 
+  bool _smooth_tri;
+
   // Holds pointers to the pointers to the meshes.
   std::vector<std::unique_ptr<MeshBase> *> _hole_ptrs;
 
