@@ -83,23 +83,23 @@ PorousFlowPorosityExponentialBase::computeQpProperties()
     deriv = (_porosity[_qp] - a) * expx;
   }
 
-  _dporosity_dvar[_qp].resize(_num_var);
-  _dporosity_dgradvar[_qp].resize(_num_var);
+  (*_dporosity_dvar)[_qp].resize(_num_var);
+  (*_dporosity_dgradvar)[_qp].resize(_num_var);
   for (unsigned int v = 0; v < _num_var; ++v)
   {
-    _dporosity_dvar[_qp][v] = ddecayQp_dvar(v) * deriv;
-    _dporosity_dgradvar[_qp][v] = ddecayQp_dgradvar(v) * deriv;
+    (*_dporosity_dvar)[_qp][v] = ddecayQp_dvar(v) * deriv;
+    (*_dporosity_dgradvar)[_qp][v] = ddecayQp_dgradvar(v) * deriv;
 
     const Real da = datNegInfinityQp(v);
     const Real db = datZeroQp(v);
-    _dporosity_dvar[_qp][v] += da * (1 - exp_term) + db * exp_term;
+    (*_dporosity_dvar)[_qp][v] += da * (1 - exp_term) + db * exp_term;
 
     if (!(decay <= 0.0 || !_ensure_positive))
     {
       const Real c = std::log(a / (a - b));
       const Real expx = std::exp(-decay / c);
       const Real dc = (a - b) * (da * b / a - db) / std::pow(a, 2);
-      _dporosity_dvar[_qp][v] += (b - a) * exp_term * dc * (1 - expx - expx / c);
+      (*_dporosity_dvar)[_qp][v] += (b - a) * exp_term * dc * (1 - expx - expx / c);
     }
   }
 }

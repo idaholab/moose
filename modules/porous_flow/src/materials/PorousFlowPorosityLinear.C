@@ -130,8 +130,8 @@ void
 PorousFlowPorosityLinear::initQpStatefulProperties()
 {
   _porosity[_qp] = _phi_ref[0];
-  _dporosity_dvar[_qp].assign(_num_var, 0.0);
-  _dporosity_dgradvar[_qp].assign(_num_var, 0.0);
+  (*_dporosity_dvar)[_qp].assign(_num_var, 0.0);
+  (*_dporosity_dgradvar)[_qp].assign(_num_var, 0.0);
 }
 
 void
@@ -160,8 +160,8 @@ PorousFlowPorosityLinear::computeQpProperties()
   else
     _porosity[_qp] = porosity;
 
-  _dporosity_dvar[_qp].resize(_num_var);
-  _dporosity_dgradvar[_qp].resize(_num_var);
+  (*_dporosity_dvar)[_qp].resize(_num_var);
+  (*_dporosity_dgradvar)[_qp].resize(_num_var);
   for (unsigned int pvar = 0; pvar < _num_var; ++pvar)
   {
     Real deriv = 0.0;
@@ -170,9 +170,9 @@ PorousFlowPorosityLinear::computeQpProperties()
     if (_uses_T)
       deriv += _T_coeff * (*_dtemperature_dvar)[_qp][pvar];
     if (porosity < _porosity_min)
-      _dporosity_dvar[_qp][pvar] = _zero_modifier * deriv;
+      (*_dporosity_dvar)[_qp][pvar] = _zero_modifier * deriv;
     else
-      _dporosity_dvar[_qp][pvar] = deriv;
+      (*_dporosity_dvar)[_qp][pvar] = deriv;
 
     RealGradient deriv_grad(0.0, 0.0, 0.0);
     if (_uses_volstrain)
@@ -182,8 +182,8 @@ PorousFlowPorosityLinear::computeQpProperties()
       deriv_grad += _epv_coeff * _dvol_strain_qp_dvar[qp_to_use][pvar];
     }
     if (porosity < _porosity_min)
-      _dporosity_dgradvar[_qp][pvar] = _zero_modifier * deriv_grad;
+      (*_dporosity_dgradvar)[_qp][pvar] = _zero_modifier * deriv_grad;
     else
-      _dporosity_dgradvar[_qp][pvar] = deriv_grad;
+      (*_dporosity_dgradvar)[_qp][pvar] = deriv_grad;
   }
 }

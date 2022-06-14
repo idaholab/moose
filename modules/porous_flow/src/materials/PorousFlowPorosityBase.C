@@ -9,8 +9,9 @@
 
 #include "PorousFlowPorosityBase.h"
 
+template <bool is_ad>
 InputParameters
-PorousFlowPorosityBase::validParams()
+PorousFlowPorosityBaseTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addPrivateParam<std::string>("pf_material_type", "porosity");
@@ -18,16 +19,22 @@ PorousFlowPorosityBase::validParams()
   return params;
 }
 
-PorousFlowPorosityBase::PorousFlowPorosityBase(const InputParameters & parameters)
+template <bool is_ad>
+PorousFlowPorosityBaseTempl<is_ad>::PorousFlowPorosityBaseTempl(const InputParameters & parameters)
   : PorousFlowMaterialVectorBase(parameters),
-    _porosity(_nodal_material ? declareProperty<Real>("PorousFlow_porosity_nodal")
-                              : declareProperty<Real>("PorousFlow_porosity_qp")),
-    _dporosity_dvar(_nodal_material
-                        ? declareProperty<std::vector<Real>>("dPorousFlow_porosity_nodal_dvar")
-                        : declareProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar")),
+    _porosity(_nodal_material ? declareGenericProperty<Real, is_ad>("PorousFlow_porosity_nodal")
+                              : declareGenericProperty<Real, is_ad>("PorousFlow_porosity_qp")),
+    _dporosity_dvar(is_ad ? nullptr
+                    : _nodal_material
+                        ? &declareProperty<std::vector<Real>>("dPorousFlow_porosity_nodal_dvar")
+                        : &declareProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar")),
     _dporosity_dgradvar(
-        _nodal_material
-            ? declareProperty<std::vector<RealGradient>>("dPorousFlow_porosity_nodal_dgradvar")
-            : declareProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar"))
+        is_ad ? nullptr
+        : _nodal_material
+            ? &declareProperty<std::vector<RealGradient>>("dPorousFlow_porosity_nodal_dgradvar")
+            : &declareProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar"))
 {
 }
+
+template class PorousFlowPorosityBaseTempl<false>;
+template class PorousFlowPorosityBaseTempl<true>;
