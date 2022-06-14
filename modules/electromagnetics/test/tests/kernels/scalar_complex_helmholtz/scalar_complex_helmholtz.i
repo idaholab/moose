@@ -30,26 +30,13 @@
 []
 
 [Functions]
-  [negative_ASquaredMinusBSquared]
-    type = WaveEquationCoefficient
-    k_real = '2 * (1 + x/10)'
-    k_imag = '(1 + x/10)'
-    eps_rel_real = 1
-    eps_rel_imag = 0
-    mu_rel_real = 1
-    mu_rel_imag = 0
-    coef = -1
-    component = real
+  [k_real]
+    type = ParsedFunction
+    value = '2*(1 + x/10)'
   []
-  [2TimesAB]
-    type = WaveEquationCoefficient
-    k_real = '2 * (1 + x/10)'
-    k_imag = '(1 + x/10)'
-    eps_rel_real = 1
-    eps_rel_imag = 0
-    mu_rel_real = 1
-    mu_rel_imag = 0
-    component = imaginary
+  [k_imag]
+    type = ParsedFunction
+    value = '(1 + x/10)'
   []
   [d_func]
     type = ParsedFunction
@@ -79,6 +66,40 @@
   []
 []
 
+[Materials]
+  [k_real_mat]
+    type = ADGenericFunctionMaterial
+    prop_names = k_real_mat
+    prop_values = k_real
+  []
+  [k_imag_mat]
+    type = ADGenericFunctionMaterial
+    prop_names = k_imag_mat
+    prop_values = k_imag
+  []
+  [wave_equation_coefficient]
+    type = WaveEquationCoefficient
+    k_real = k_real_mat
+    k_imag = k_imag_mat
+    eps_rel_real = 1
+    eps_rel_imag = 0
+    mu_rel_real = 1
+    mu_rel_imag = 0
+  []
+  [negative_wave_equation_coefficient_real]
+    type = ADParsedMaterial
+    f_name = negative_wave_equation_coefficient_real
+    material_property_names = wave_equation_coefficient_real
+    function = '-1 * wave_equation_coefficient_real'
+  []
+  [negative_wave_equation_coefficient_imaginary]
+    type = ADParsedMaterial
+    f_name = negative_wave_equation_coefficient_imaginary
+    material_property_names = wave_equation_coefficient_imaginary
+    function = '-1 * wave_equation_coefficient_imaginary'
+  []
+[]
+
 [Kernels]
   [laplacian_real]
     type = FunctionDiffusion
@@ -93,15 +114,14 @@
     variable = u_real
   []
   [coeffField_real]
-    type = ADFunctionReaction
-    func = negative_ASquaredMinusBSquared
+    type = ADMatReaction
+    mat_prop_name = negative_wave_equation_coefficient_real
     variable = u_real
   []
   [coupledField_real]
-    type = ADFuncCoupledForce
+    type = ADMatCoupledForce
     v = u_imag
-    func = 2TimesAB
-    coef = -1.0
+    mat_prop_name = negative_wave_equation_coefficient_imaginary
     variable = u_real
   []
   [bodyForce_real]
@@ -122,14 +142,14 @@
     variable = u_imag
   []
   [coeffField_imag]
-    type = ADFunctionReaction
-    func = negative_ASquaredMinusBSquared
+    type = ADMatReaction
+    mat_prop_name = negative_wave_equation_coefficient_real
     variable = u_imag
   []
   [coupledField_imag]
-    type = ADFuncCoupledForce
+    type = ADMatCoupledForce
     v = u_real
-    func = 2TimesAB
+    mat_prop_name = wave_equation_coefficient_imaginary
     variable = u_imag
   []
   [bodyForce_imag]

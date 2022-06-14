@@ -22,10 +22,6 @@
 []
 
 [Functions]
-  [negative_kSquared]
-    type = ParsedFunction
-    value = '-0.4188790204786391^2'
-  []
   [inc_y]
     type = ParsedFunction
     value = 'sin(pi * y / 10)'
@@ -38,8 +34,8 @@
     variable = E_real
   []
   [coeffField_real]
-    type = ADFunctionReaction
-    func = negative_kSquared
+    type = ADMatReaction
+    mat_prop_name = negative_kSquared
     variable = E_real
   []
   [diffusion_imaginary]
@@ -47,8 +43,8 @@
     variable = E_imag
   []
   [coeffField_imaginary]
-    type = ADFunctionReaction
-    func = negative_kSquared
+    type = ADMatReaction
+    mat_prop_name = negative_kSquared
     variable = E_imag
   []
 []
@@ -125,6 +121,14 @@
     component = imaginary
     mode = absorbing
     boundary = exit
+  []
+[]
+
+[Materials]
+  [negative_kSquared]
+    type = ADParsedMaterial
+    f_name = negative_kSquared
+    function = '-0.4188790204786391^2'
   []
 []
 

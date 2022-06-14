@@ -9,24 +9,24 @@
 
 #pragma once
 
-#include "CoupledForce.h"
+#include "ADKernel.h"
 
 /**
- *  Kernel representing the contribution of the PDE term $-cfv$, where $c$ and
- *  $f$ are constant and function coefficients, respectively, and $v$ is a coupled
- *  scalar variable.
+ *  Kernel representing the contribution of the PDE term $m*u$, where $m$ is a
+ *  material property coefficient/reaction rate and $u$ is a scalar variable, and
+ *  whose Jacobian contribution is calculated using sutomatic differentiation.
  */
-class ADFuncCoupledForce : public ADCoupledForce
+class ADMatReaction : public ADKernel
 {
 public:
   static InputParameters validParams();
 
-  ADFuncCoupledForce(const InputParameters & parameters);
+  ADMatReaction(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
 private:
-  /// Function coefficient for coupled source term
-  const Function & _func;
+  /// Material property coefficient / reaction rate
+  const ADMaterialProperty<Real> & _mat_prop;
 };

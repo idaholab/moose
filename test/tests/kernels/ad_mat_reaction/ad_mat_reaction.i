@@ -18,10 +18,11 @@
   []
 []
 
-[Functions]
-  [rxn_func]
-    type = ParsedFunction
-    value = 'log(3)*log(3)'
+[Materials]
+  [ad_prop]
+    type = ADParsedMaterial
+    function = 'log(3)*log(3)'
+    f_name = rxn_prop
   []
 []
 
@@ -31,9 +32,9 @@
     variable = u
   []
   [reaction]
-    type = ADFunctionReaction
+    type = ADMatReaction
     variable = u
-    func = rxn_func
+    mat_prop_name = rxn_prop
   []
 []
 

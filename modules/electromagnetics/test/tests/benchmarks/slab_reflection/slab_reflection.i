@@ -55,9 +55,34 @@ theta = 0 # wave incidence angle, in degrees
     length = ${L}
     component = imaginary
   []
+  [negative_coeff_imag]
+    type = JinSlabCoeffFunc
+    k = ${k}
+    length = ${L}
+    coef = -1
+    component = imaginary
+  []
   [cosTheta]
     type = ParsedFunction
     value = 'cos(${theta})'
+  []
+[]
+
+[Materials]
+  [coeff_real_material]
+    type = ADGenericFunctionMaterial
+    prop_names = coeff_real_material
+    prop_values = coeff_real
+  []
+  [coeff_imag_material]
+    type = ADGenericFunctionMaterial
+    prop_names = coeff_imag_material
+    prop_values = coeff_imag
+  []
+  [negative_coeff_imag_material]
+    type = ADGenericFunctionMaterial
+    prop_names = negative_coeff_imag_material
+    prop_values = negative_coeff_imag
   []
 []
 
@@ -67,15 +92,14 @@ theta = 0 # wave incidence angle, in degrees
     variable = E_real
   []
   [field_real]
-    type = ADFunctionReaction
-    func = coeff_real
+    type = ADMatReaction
+    mat_prop_name = coeff_real_material
     variable = E_real
   []
   [coupled_real]
-    type = ADFuncCoupledForce
-    func = coeff_imag
+    type = ADMatCoupledForce
+    mat_prop_name = negative_coeff_imag_material
     v = E_imag
-    coef = -1.0
     variable = E_real
   []
   [diffusion_imag]
@@ -83,13 +107,13 @@ theta = 0 # wave incidence angle, in degrees
     variable = E_imag
   []
   [field_imag]
-    type = ADFunctionReaction
-    func = coeff_real
+    type = ADMatReaction
+    mat_prop_name = coeff_real_material
     variable = E_imag
   []
   [coupled_imag]
-    type = ADFuncCoupledForce
-    func = coeff_imag
+    type = ADMatCoupledForce
+    mat_prop_name = coeff_imag_material
     v = E_real
     variable = E_imag
   []

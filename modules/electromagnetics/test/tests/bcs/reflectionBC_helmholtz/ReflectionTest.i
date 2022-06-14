@@ -29,17 +29,27 @@
 []
 
 [Functions]
-  [negative_ASquaredMinusBSquared]
-    type = ParsedFunction
-    value = '-(15*15 - 7*7)'
-  []
-  [2TimesAB]
-    type = ParsedFunction
-    value = '2*15*7'
-  []
   [cos]
     type = ParsedFunction
     value = 'cos(0.5)'
+  []
+[]
+
+[Materials]
+  [negative_ASquaredMinusBSquared]
+    type = ADParsedMaterial
+    f_name = negative_ASquaredMinusBSquared
+    function = '-(15*15 - 7*7)'
+  []
+  [2TimesAB]
+    type = ADParsedMaterial
+    f_name = 2TimesAB
+    function = '2*15*7'
+  []
+  [negative_2TimesAB]
+    type = ADParsedMaterial
+    f_name = negative_2TimesAB
+    function = '-2*15*7'
   []
 []
 
@@ -49,15 +59,14 @@
     variable = u_real
   []
   [coeffField_real]
-    type = ADFunctionReaction
-    func = negative_ASquaredMinusBSquared
+    type = ADMatReaction
+    mat_prop_name = negative_ASquaredMinusBSquared
     variable = u_real
   []
   [coupledField_real]
-    type = ADFuncCoupledForce
+    type = ADMatCoupledForce
     v = u_imag
-    func = 2TimesAB
-    coef = -1.0
+    mat_prop_name = negative_2TimesAB
     variable = u_real
   []
   [laplacian_imag]
@@ -65,14 +74,14 @@
     variable = u_imag
   []
   [coeffField_imag]
-    type = ADFunctionReaction
-    func = negative_ASquaredMinusBSquared
+    type = ADMatReaction
+    mat_prop_name = negative_ASquaredMinusBSquared
     variable = u_imag
   []
   [coupledField_imag]
-    type = ADFuncCoupledForce
+    type = ADMatCoupledForce
     v = u_real
-    func = 2TimesAB
+    mat_prop_name = 2TimesAB
     variable = u_imag
   []
 []

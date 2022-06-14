@@ -1,12 +1,12 @@
 # WaveEquationCoefficient
 
-!syntax description /Functions/WaveEquationCoefficient
+!syntax description /Materials/WaveEquationCoefficient
 
 ## Overview
 
 !style halign=left
 This object provides a ready-to-use coefficient for the electric field Helmholtz
-wave equation problem, specifically a coefficient function of the form
+wave equation problem, specifically a coefficient material property of the form
 
 \begin{equation}
   f(\mathbf{r}) = k^2 \mu_r \epsilon_r
@@ -19,14 +19,14 @@ where
 - $\mu_r$ is the complex relative magnetic permeability.
 
 Note that all of these parameters (real and imaginary parts) can be provided by
-the user as functions.
+the user as material properties.
 
 ## Example Input File Syntax
 
-!listing scalar_complex_helmholtz.i block=Functions/negative_ASquaredMinusBSquared
+!listing scalar_complex_helmholtz.i block=Materials/wave_equation_coefficient
 
-!syntax parameters /Functions/WaveEquationCoefficient
+!syntax parameters /Materials/WaveEquationCoefficient
 
-!syntax inputs /Functions/WaveEquationCoefficient
+!syntax inputs /Materials/WaveEquationCoefficient
 
-!syntax children /Functions/WaveEquationCoefficient
+!syntax children /Materials/WaveEquationCoefficient
