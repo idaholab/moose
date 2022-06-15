@@ -43,9 +43,7 @@ ADDGDiffusion::computeQpResidual(Moose::DGResidualType type)
 {
   ADReal r = 0;
 
-  const unsigned int elem_b_order = _var.order();
-  const Real h_elem =
-      this->_current_elem_volume / this->_current_side_volume * 1. / Utility::pow<2>(elem_b_order);
+  const double h_elem = _current_elem->hmin();
 
   switch (type)
   {

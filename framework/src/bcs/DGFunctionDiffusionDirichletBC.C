@@ -49,9 +49,7 @@ DGFunctionDiffusionDirichletBC::DGFunctionDiffusionDirichletBC(const InputParame
 Real
 DGFunctionDiffusionDirichletBC::computeQpResidual()
 {
-  const unsigned int elem_b_order = _var.order();
-  const double h_elem =
-      _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
+  const double h_elem = _current_elem->hmin();
 
   Real fn = _func.value(_t, _q_point[_qp]);
   Real r = 0;
@@ -65,9 +63,7 @@ DGFunctionDiffusionDirichletBC::computeQpResidual()
 Real
 DGFunctionDiffusionDirichletBC::computeQpJacobian()
 {
-  const unsigned int elem_b_order = _var.order();
-  const double h_elem =
-      _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
+  const double h_elem = _current_elem->hmin();
 
   Real r = 0;
   r -= (_diff[_qp] * _grad_phi[_j][_qp] * _normals[_qp] * _test[_i][_qp]);
