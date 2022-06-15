@@ -98,7 +98,7 @@ theta = 0 # wave incidence angle, in degrees
   []
   [coupled_real]
     type = ADMatCoupledForce
-    mat_prop_name = negative_coeff_imag_material
+    mat_prop_coef = negative_coeff_imag_material
     v = E_imag
     variable = E_real
   []
@@ -113,7 +113,7 @@ theta = 0 # wave incidence angle, in degrees
   []
   [coupled_imag]
     type = ADMatCoupledForce
-    mat_prop_name = coeff_imag_material
+    mat_prop_coef = coeff_imag_material
     v = E_real
     variable = E_imag
   []

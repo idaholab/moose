@@ -9,7 +9,7 @@
 
 #include "ADMatCoupledForce.h"
 
-registerMooseObject("ElectromagneticsApp", ADMatCoupledForce);
+registerMooseObject("MooseApp", ADMatCoupledForce);
 
 InputParameters
 ADMatCoupledForce::validParams()
@@ -20,14 +20,14 @@ ADMatCoupledForce::validParams()
       "coefficient, $v$ is a coupled scalar variable, and Jacobian derivatives are calculated "
       "using automatic differentiation.");
   params.addParam<MaterialPropertyName>(
-      "mat_prop_name",
+      "mat_prop_coef",
       1.0,
-      "User-supplied name for the material property multiplier for the coupled force term.");
+      "User-supplied material property multiplier for the coupled force term.");
   return params;
 }
 
 ADMatCoupledForce::ADMatCoupledForce(const InputParameters & parameters)
-  : ADCoupledForce(parameters), _mat_prop(getADMaterialProperty<Real>("mat_prop_name"))
+  : ADCoupledForce(parameters), _mat_prop(getADMaterialProperty<Real>("mat_prop_coef"))
 {
 }
 

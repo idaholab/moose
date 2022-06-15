@@ -66,7 +66,7 @@
   [coupledField_real]
     type = ADMatCoupledForce
     v = u_imag
-    mat_prop_name = negative_2TimesAB
+    mat_prop_coef = negative_2TimesAB
     variable = u_real
   []
   [laplacian_imag]
@@ -81,7 +81,7 @@
   [coupledField_imag]
     type = ADMatCoupledForce
     v = u_real
-    mat_prop_name = 2TimesAB
+    mat_prop_coef = 2TimesAB
     variable = u_imag
   []
 []

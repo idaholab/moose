@@ -121,7 +121,7 @@
   [coupledField_real]
     type = ADMatCoupledForce
     v = u_imag
-    mat_prop_name = negative_wave_equation_coefficient_imaginary
+    mat_prop_coef = negative_wave_equation_coefficient_imaginary
     variable = u_real
   []
   [bodyForce_real]
@@ -149,7 +149,7 @@
   [coupledField_imag]
     type = ADMatCoupledForce
     v = u_real
-    mat_prop_name = wave_equation_coefficient_imaginary
+    mat_prop_coef = wave_equation_coefficient_imaginary
     variable = u_imag
   []
   [bodyForce_imag]
