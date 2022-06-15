@@ -128,6 +128,7 @@
     type = FunctionValuePostprocessor
     function = mass_bal_fcn
     execute_on = timestep_end
+    indirect_dependencies = 'fluid_mass1 fluid_mass0 pls_report'
   []
 
   [p00]

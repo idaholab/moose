@@ -753,82 +753,102 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
   [mole_rate_H_produced]
     type = FunctionValuePostprocessor
     function = moles_H
+    indirect_dependencies = 'kg_H_produced_this_timestep dt'
   []
   [mole_rate_Cl_produced]
     type = FunctionValuePostprocessor
     function = moles_Cl
+    indirect_dependencies = 'kg_Cl_produced_this_timestep dt'
   []
   [mole_rate_SO4_produced]
     type = FunctionValuePostprocessor
     function = moles_SO4
+    indirect_dependencies = 'kg_SO4_produced_this_timestep dt'
   []
   [mole_rate_HCO3_produced]
     type = FunctionValuePostprocessor
     function = moles_HCO3
+    indirect_dependencies = 'kg_HCO3_produced_this_timestep dt'
   []
   [mole_rate_SiO2aq_produced]
     type = FunctionValuePostprocessor
     function = moles_SiO2aq
+    indirect_dependencies = 'kg_SiO2aq_produced_this_timestep dt'
   []
   [mole_rate_Al_produced]
     type = FunctionValuePostprocessor
     function = moles_Al
+    indirect_dependencies = 'kg_Al_produced_this_timestep dt'
   []
   [mole_rate_Ca_produced]
     type = FunctionValuePostprocessor
     function = moles_Ca
+    indirect_dependencies = 'kg_Ca_produced_this_timestep dt'
   []
   [mole_rate_Mg_produced]
     type = FunctionValuePostprocessor
     function = moles_Mg
+    indirect_dependencies = 'kg_Mg_produced_this_timestep dt'
   []
   [mole_rate_Fe_produced]
     type = FunctionValuePostprocessor
     function = moles_Fe
+    indirect_dependencies = 'kg_Fe_produced_this_timestep dt'
   []
   [mole_rate_K_produced]
     type = FunctionValuePostprocessor
     function = moles_K
+    indirect_dependencies = 'kg_K_produced_this_timestep dt'
   []
   [mole_rate_Na_produced]
     type = FunctionValuePostprocessor
     function = moles_Na
+    indirect_dependencies = 'kg_Na_produced_this_timestep dt'
   []
   [mole_rate_Sr_produced]
     type = FunctionValuePostprocessor
     function = moles_Sr
+    indirect_dependencies = 'kg_Sr_produced_this_timestep dt'
   []
   [mole_rate_F_produced]
     type = FunctionValuePostprocessor
     function = moles_F
+    indirect_dependencies = 'kg_F_produced_this_timestep dt'
   []
   [mole_rate_BOH_produced]
     type = FunctionValuePostprocessor
     function = moles_BOH
+    indirect_dependencies = 'kg_BOH_produced_this_timestep dt'
   []
   [mole_rate_Br_produced]
     type = FunctionValuePostprocessor
     function = moles_Br
+    indirect_dependencies = 'kg_Br_produced_this_timestep dt'
   []
   [mole_rate_Ba_produced]
     type = FunctionValuePostprocessor
     function = moles_Ba
+    indirect_dependencies = 'kg_Ba_produced_this_timestep dt'
   []
   [mole_rate_Li_produced]
     type = FunctionValuePostprocessor
     function = moles_Li
+    indirect_dependencies = 'kg_Li_produced_this_timestep dt'
   []
   [mole_rate_NO3_produced]
     type = FunctionValuePostprocessor
     function = moles_NO3
+    indirect_dependencies = 'kg_NO3_produced_this_timestep dt'
   []
   [mole_rate_O2aq_produced]
     type = FunctionValuePostprocessor
     function = moles_O2aq
+    indirect_dependencies = 'kg_O2aq_produced_this_timestep dt'
   []
   [mole_rate_H2O_produced]
     type = FunctionValuePostprocessor
     function = moles_H2O
+    indirect_dependencies = 'kg_H2O_produced_this_timestep dt'
   []
   [heat_joules_extracted_this_timestep]
     type = PorousFlowPlotQuantity

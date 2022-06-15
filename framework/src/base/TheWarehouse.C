@@ -35,6 +35,24 @@ operator==(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribu
 
 Attribute::Attribute(TheWarehouse & w, const std::string name) : _id(w.attribID(name)) {}
 
+void
+AttribSorted::initFrom(const MooseObject *)
+{
+}
+
+bool
+AttribSorted::isMatch(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribSorted *>(&other);
+  return _initd && a && a->_initd && (a->_val == _val);
+}
+
+bool
+AttribSorted::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}
+
 class VecStore : public Storage
 {
 public:
@@ -140,7 +158,26 @@ TheWarehouse::update(MooseObject * obj)
 int
 TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
 {
+  bool sort = false;
+  std::unique_ptr<Attribute> sorted_attrib;
+  if (!conds.empty() && dynamic_cast<AttribSorted *>(conds.back().get()))
+  {
+    sorted_attrib = std::move(conds.back());
+    static const AttribSorted sorted_attrib_true(*this, true);
+    sort = sorted_attrib->isMatch(sorted_attrib_true);
+    // Remove the sorted condition temporarily
+    conds.pop_back();
+  }
+
+#ifdef DEBUG
+  for (auto & cond : conds)
+    mooseAssert(!dynamic_cast<AttribSorted *>(cond.get()),
+                "There should be no sorted attributes in this container.");
+#endif
+
   auto obj_ids = _store->query(conds);
+  if (sorted_attrib)
+    conds.push_back(std::move(sorted_attrib));
 
   std::lock_guard<std::mutex> lock(_obj_cache_mutex);
   _obj_cache.push_back({});
@@ -155,7 +192,7 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
   for (auto & id : obj_ids)
     vec.push_back(_objects[id].get());
 
-  if (!vec.empty() && dynamic_cast<DependencyResolverInterface *>(vec[0]))
+  if (sort && !vec.empty() && dynamic_cast<DependencyResolverInterface *>(vec[0]))
   {
     std::vector<DependencyResolverInterface *> dependers;
     for (auto obj : vec)
@@ -173,9 +210,9 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
     {
       DependencyResolverInterface::sort(dependers);
     }
-    catch (CyclicDependencyException<GeneralUserObject *> & e)
+    catch (CyclicDependencyException<DependencyResolverInterface *> & e)
     {
-      DependencyResolverInterface::cyclicDependencyError<GeneralUserObject *>(
+      DependencyResolverInterface::cyclicDependencyError<UserObject *>(
           e, "Cyclic dependency detected in object ordering");
     }
 

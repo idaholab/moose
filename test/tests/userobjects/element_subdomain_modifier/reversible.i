@@ -59,7 +59,7 @@
     type = FunctionAux
     variable = phi
     function = moving_circle
-    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END'
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 

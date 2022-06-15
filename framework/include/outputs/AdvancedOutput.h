@@ -388,7 +388,7 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
       .query()
       .condition<AttribSystem>("UserObject")
       .condition<AttribThread>(0)
-      .queryInto(objs);
+      .queryIntoUnsorted(objs);
 
   for (const auto & obj : objs)
   {
