@@ -3,8 +3,8 @@
 ## Equations
 
 This module implements the porous media Navier Stokes equations. They are expressed in terms of the superficial
-viscosity $\vec{v}_d = \epsilon \vec{V}$ where $\epsilon$ is the porosity and $\vec{V}$ the interstitial velocity. The
-superficial viscosity is also known as the extrinsic or Darcy velocity. The other non-linear variables used are
+velocity $\vec{v}_d = \epsilon \vec{V}$ where $\epsilon$ is the porosity and $\vec{V}$ the interstitial velocity. The
+superficial velocity is also known as the extrinsic or Darcy velocity. The other non-linear variables used are
 pressure and temperature. This is known as the primitive superficial set of variables.
 
 Mass equation:
@@ -14,7 +14,7 @@ Mass equation:
 
 Momentum equation, with friction and gravity force as example forces:
 \begin{equation}
-\dfrac{\partial \rho \mathbf{v}_D}{\partial t} + \nabla \cdot (\dfrac{\rho}{\epsilon} \mathbf{v}_D \otimes \mathbf{v}_D) = \nabla \cdot (\mu \nabla \dfrac{\mathbf{v}_D}{\epsilon}) - \epsilon \nabla p + \epsilon (\mathbf{F}_g + \mathbf{F}_f)
+\dfrac{\partial \rho \mathbf{v}_D}{\partial t} + \nabla \cdot (\dfrac{\rho}{\epsilon} \mathbf{v}_D \otimes \mathbf{v}_D) = \nabla \cdot (\eps \mu \nabla \dfrac{\mathbf{v}_D}{\epsilon}) - \epsilon \nabla p + \epsilon (\mathbf{F}_g + \mathbf{F}_f)
 \end{equation}
 
 Fluid phase energy equation, with a convective heat transfer term:

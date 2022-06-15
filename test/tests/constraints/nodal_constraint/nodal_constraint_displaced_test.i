@@ -1,6 +1,7 @@
 [Mesh]
   file = 2-lines.e
   displacements = 'disp_x'
+  allow_renumbering = false
 []
 
 [AuxVariables]

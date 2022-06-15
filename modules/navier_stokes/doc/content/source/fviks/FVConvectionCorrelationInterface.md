@@ -4,7 +4,7 @@
 
 The surface convective flux to the fluid is then:
 \begin{equation}
-q_s = h_{correlation} (T_solid - T_fluid)
+q_s = h_{correlation} (T_{solid} - T_{fluid})
 \end{equation}
 with $q_s$ the surface convective heat flux, $h_{correlation}$ the heat transfer coefficient
 defined by the correlation as a material property and $T_{solid/fluid}$ the temperature of the

@@ -63,9 +63,6 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
                "BreakMeshByBlockGenerator: 'surrounding_blocks' and 'block_pairs' can not be used "
                "at the same time.");
 
-  if (typeid(_input).name() == typeid(DistributedMesh).name())
-    mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
-
   if (!_add_transition_interface && _split_transition_interface)
     paramError("split_transition_interface",
                "BreakMeshByBlockGenerator cannot split the transition interface because "
@@ -81,6 +78,9 @@ std::unique_ptr<MeshBase>
 BreakMeshByBlockGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+  if (!mesh->is_replicated())
+    mooseError("BreakMeshByBlockGenerator is not implemented for distributed meshes");
+
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   // Handle block restrictions
