@@ -137,11 +137,12 @@ Poly2TriMeshGenerator::generate()
   if (_smooth_tri)
     for (auto elem : mesh->element_ptr_range())
     {
-      libmesh_assert(elem->type() == TRI3);
+      mooseAssert(elem->type() == TRI3, "Unexpected non-Tri3 found in triangulation");
       auto cross_prod = (elem->point(1) - elem->point(0)).cross(elem->point(2) - elem->point(0));
 
       if (cross_prod(2) <= 0)
-        mooseError("Found inverted element in triangulation.  Disable Laplacian smoothing?");
+        mooseError("Inverted element found in triangulation.\n"
+                   "Laplacian smoothing can create these at reentrant corners; disable it?");
     }
 
   const bool use_binary_search = (_algorithm == "BINARY");
