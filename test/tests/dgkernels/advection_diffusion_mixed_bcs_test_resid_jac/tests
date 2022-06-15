@@ -6,7 +6,7 @@
     input = 'dg_advection_diffusion_test.i'
     exodiff = 'dg_advection_diffusion_test_out.e'
     cli_args = 'Mesh/uniform_refine=4'
-    abs_zero = 1e-9
+    abs_zero = 1e-7
     requirement = "The system shall be able to solve the advection diffusion equation using the discontinuous Galerkin method."
   [../]
   [./jac]
