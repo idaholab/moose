@@ -47,6 +47,11 @@ PolyLineMeshGenerator::PolyLineMeshGenerator(const InputParameters & parameters)
     _bcid1(getParam<boundary_id_type>("bcid1")),
     _num_edges_between_points(getParam<unsigned int>("num_edges_between_points"))
 {
+  if (_points.size() < 2)
+    paramError("points", "At least 2 points are needed to define a polyline");
+
+  if (_loop && _points.size() < 3)
+    paramError("points", "At least 3 points are needed to define a polygon");
 }
 
 std::unique_ptr<MeshBase>
@@ -54,12 +59,6 @@ PolyLineMeshGenerator::generate()
 {
   auto uptr_mesh = buildMeshBaseObject();
   MeshBase & mesh = *uptr_mesh;
-
-  if (_points.size() < 2)
-    paramError("points", "At least 2 points are needed to define a polyline");
-
-  if (_loop && _points.size() < 3)
-    paramError("points", "At least 3 points are needed to define a polygon");
 
   const auto n_points = _points.size();
   for (auto i : make_range(n_points))
