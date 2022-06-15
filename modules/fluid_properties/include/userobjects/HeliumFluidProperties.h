@@ -99,8 +99,15 @@ public:
                   DualReal & T,
                   DualReal & dT_dv,
                   DualReal & dT_de) const override;
-virtual Real T_from_p_h(Real p, Real h) const override;
 
+  /**
+   * Temperature and its derivatives from pressure and spesific enthalpy
+   *
+   * @param[in] h       specific enthalpy (J/kg)
+   * @param[in] p       pressure (Pa)
+   * @param[out] T       temperature (K)
+   */
+  virtual Real T_from_p_h(Real p, Real h) const override;
 
   using SinglePhaseFluidProperties::c_from_v_e;
 
