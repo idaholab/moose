@@ -6,14 +6,20 @@
     input = current_density.i
     cli_args = 'Outputs/file_base=ad_current_density_out'
     exodiff = ad_current_density_out.e
-    requirement = 'The system shall calculate the current density provided with either electrostatic or electromagnetic field calculations, using an AD material property for electrical conductivity.'
+    requirement = 'The system shall calculate the current density provided with electrostatic field calculations, using an AD material property for electrical conductivity.'
   []
   [non_ad_exodiff]
     type = Exodiff
     input = current_density.i
     cli_args = 'Outputs/file_base=non_ad_current_density_out Materials/conductivity/type=GenericConstantMaterial AuxKernels/current_density/type=CurrentDensity'
     exodiff = non_ad_current_density_out.e
-    requirement = 'The system shall calculate the current density provided with either electrostatic or electromagnetic field calculations, using a non-AD material property for electrical conductivity.'
+    requirement = 'The system shall calculate the current density provided with electrostatic field calculations, using a non-AD material property for electrical conductivity.'
+  []
+  [em_ad_exodiff]
+    type = Exodiff
+    input = em_current_density.i
+    exodiff = em_current_density_out.e
+    requirement = 'The system shall calculate the current density when provided with a vector field variable, simulating the case when an electromagnetic vector field is provided.'
   []
   [error_two_vars]
     type = RunException

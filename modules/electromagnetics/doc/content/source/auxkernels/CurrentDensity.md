@@ -31,7 +31,7 @@ given the setting for the `electrostatic` boolean parameter.
 
 ## Example Input File Syntax
 
-!listing current_density.i block=AuxKernels/current_density
+!listing /current_density.i block=AuxKernels/current_density
 
 !syntax parameters /AuxKernels/CurrentDensity
 

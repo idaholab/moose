@@ -11,7 +11,6 @@
     type = PetscJacobianTester
     input = 'contact_conductance_supplied.i'
     run_sim = false
-    difference_tol = 2e-8   #default = 1e-8, first evaluation is 1.15647e-8
     prereq = electrostatic_contact_conductance_supplied
     requirement = 'The system shall calculate the correct AD jacobian contribution for electrostatic contact at an interface, given a user-supplied contact conductance.'
     design = 'ElectrostaticContactCondition.md'
@@ -39,7 +38,6 @@
     type = PetscJacobianTester
     input = 'contact_conductance_calculated.i'
     run_sim = false
-    difference_tol = 2e-8   #default = 1e-8, first evaluation is 1.15647e-8
     prereq = electrostatic_contact_conductance_calculated
     requirement = 'The system shall calculate the correct AD jacobian contribution for electrostatic contact at an interface, given a system-calculated contact conductance.'
     design = 'ElectrostaticContactCondition.md'
