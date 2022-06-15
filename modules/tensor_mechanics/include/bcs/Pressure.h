@@ -34,14 +34,9 @@ public:
   PressureTempl(const InputParameters & parameters);
 
 protected:
-  virtual void initialSetup();
-  virtual GenericReal<is_ad> computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual void precalculateQpJacobian();
-  virtual Real computeQpOffDiagJacobian(const unsigned int jvar_num);
-  virtual void precalculateQpOffDiagJacobian(const MooseVariableFEBase & jvar);
-  Real computeStiffness(const unsigned int coupled_component);
-  Real computeFaceStiffness(const unsigned int local_j, const unsigned int coupled_component);
+  virtual void initialSetup() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
+
   GenericReal<is_ad> computeFactor() const;
 
   /// displacement component to apply the bc to
@@ -92,5 +87,19 @@ protected:
   using PressureParent<is_ad>::_var;
 };
 
-typedef PressureTempl<false> Pressure;
+class Pressure : public PressureTempl<false>
+{
+public:
+  using PressureTempl<false>::PressureTempl;
+
+protected:
+  virtual Real computeQpJacobian() override;
+  virtual void precalculateQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(const unsigned int jvar_num) override;
+  virtual void precalculateQpOffDiagJacobian(const MooseVariableFEBase & jvar) override;
+
+  Real computeStiffness(const unsigned int coupled_component);
+  Real computeFaceStiffness(const unsigned int local_j, const unsigned int coupled_component);
+};
+
 typedef PressureTempl<true> ADPressure;

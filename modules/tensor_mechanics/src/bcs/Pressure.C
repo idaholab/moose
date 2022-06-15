@@ -103,10 +103,23 @@ PressureTempl<is_ad>::computeQpResidual()
   return computeFactor() * (_normals[_qp](_component) * _test[_i][_qp]);
 }
 
-template <>
+template <bool is_ad>
+GenericReal<is_ad>
+PressureTempl<is_ad>::computeFactor() const
+{
+  GenericReal<is_ad> factor = _factor;
+
+  if (_function)
+    factor *= _function->value(_t + _alpha * _dt, _q_point[_qp]);
+
+  if (_postprocessor)
+    factor *= *_postprocessor;
+
+  return factor;
+}
+
 Real
-PressureTempl<false>::computeFaceStiffness(const unsigned int local_j,
-                                           const unsigned int coupled_component)
+Pressure::computeFaceStiffness(const unsigned int local_j, const unsigned int coupled_component)
 {
   //
   // Note that this approach will break down for shell elements, i.e.,
@@ -146,9 +159,8 @@ PressureTempl<false>::computeFaceStiffness(const unsigned int local_j,
   return computeFactor() * _test[_i][_qp] * (inv_length * variation_b + rz_term);
 }
 
-template <>
 Real
-PressureTempl<false>::computeStiffness(const unsigned int coupled_component)
+Pressure::computeStiffness(const unsigned int coupled_component)
 {
   if (_ndisp > 1)
   {
@@ -174,9 +186,8 @@ PressureTempl<false>::computeStiffness(const unsigned int coupled_component)
   return 0;
 }
 
-template <>
 Real
-PressureTempl<false>::computeQpJacobian()
+Pressure::computeQpJacobian()
 {
   if (_use_displaced_mesh)
     return computeStiffness(_component);
@@ -184,9 +195,8 @@ PressureTempl<false>::computeQpJacobian()
   return 0;
 }
 
-template <>
 Real
-PressureTempl<false>::computeQpOffDiagJacobian(const unsigned int jvar_num)
+Pressure::computeQpOffDiagJacobian(const unsigned int jvar_num)
 {
   if (_use_displaced_mesh)
     for (unsigned int j = 0; j < _ndisp; ++j)
@@ -196,24 +206,8 @@ PressureTempl<false>::computeQpOffDiagJacobian(const unsigned int jvar_num)
   return 0;
 }
 
-template <bool is_ad>
-GenericReal<is_ad>
-PressureTempl<is_ad>::computeFactor() const
-{
-  GenericReal<is_ad> factor = _factor;
-
-  if (_function)
-    factor *= _function->value(_t + _alpha * _dt, _q_point[_qp]);
-
-  if (_postprocessor)
-    factor *= *_postprocessor;
-
-  return factor;
-}
-
-template <>
 void
-PressureTempl<false>::precalculateQpJacobian()
+Pressure::precalculateQpJacobian()
 {
   if (_ndisp == 1)
     return;
@@ -265,39 +259,10 @@ PressureTempl<false>::precalculateQpJacobian()
   }
 }
 
-template <>
 void
-PressureTempl<false>::precalculateQpOffDiagJacobian(const MooseVariableFEBase & /*jvar*/)
+Pressure::precalculateQpOffDiagJacobian(const MooseVariableFEBase & /*jvar*/)
 {
   precalculateQpJacobian();
-}
-
-template <>
-void
-PressureTempl<true>::precalculateQpJacobian()
-{
-  mooseError("This should never be called");
-}
-
-template <>
-Real
-PressureTempl<true>::computeQpJacobian()
-{
-  mooseError("This should never be called");
-}
-
-template <>
-Real
-PressureTempl<true>::computeQpOffDiagJacobian(const unsigned int /*jvar_num*/)
-{
-  mooseError("This should never be called");
-}
-
-template <>
-void
-PressureTempl<true>::precalculateQpOffDiagJacobian(const MooseVariableFEBase & /*jvar*/)
-{
-  mooseError("This should never be called");
 }
 
 template class PressureTempl<false>;
