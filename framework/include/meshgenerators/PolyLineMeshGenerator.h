@@ -31,8 +31,8 @@ protected:
   /// Whether edges should form a closed loop
   const bool _loop;
 
-  /// Boundary Condition ids for (non-looped) polyline start and end
-  const boundary_id_type _bcid0, _bcid1;
+  /// Boundary names to assign to (non-looped) polyline start and end
+  const BoundaryName _start_boundary, _end_boundary;
 
   /// How many Edge elements to build between each point pair
   const unsigned int _num_edges_between_points;
