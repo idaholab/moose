@@ -28,9 +28,11 @@ PolyLineMeshGenerator::validParams()
 
   params.addParam<bool>("loop", false, "Whether edges should form a closed loop");
 
-  params.addParam<boundary_id_type>("bcid0", 0, "Boundary id for (non-looped) polyline start");
+  params.addParam<BoundaryName>(
+      "start_boundary", "start", "Boundary to assign to (non-looped) polyline start");
 
-  params.addParam<boundary_id_type>("bcid1", 1, "Boundary id for (non-looped) polyline end");
+  params.addParam<BoundaryName>(
+      "end_boundary", "end", "Boundary to assign to (non-looped) polyline end");
 
   params.addParam<unsigned int>(
       "num_edges_between_points", 1, "How many Edge elements to build between each point pair");
@@ -44,8 +46,8 @@ PolyLineMeshGenerator::PolyLineMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _points(getParam<std::vector<Point>>("points")),
     _loop(getParam<bool>("loop")),
-    _bcid0(getParam<boundary_id_type>("bcid0")),
-    _bcid1(getParam<boundary_id_type>("bcid1")),
+    _start_boundary(getParam<BoundaryName>("start_boundary")),
+    _end_boundary(getParam<BoundaryName>("end_boundary")),
     _num_edges_between_points(getParam<unsigned int>("num_edges_between_points"))
 {
   if (_points.size() < 2)
@@ -98,8 +100,10 @@ PolyLineMeshGenerator::generate()
   if (!_loop)
   {
     BoundaryInfo & bi = mesh.get_boundary_info();
-    bi.add_side(mesh.elem_ptr(0), 0, _bcid0);
-    bi.add_side(mesh.elem_ptr(n_elem - 1), 1, _bcid1);
+    std::vector<BoundaryName> bdy_names{_start_boundary, _end_boundary};
+    std::vector<boundary_id_type> ids = MooseMeshUtils::getBoundaryIDs(mesh, bdy_names, true);
+    bi.add_side(mesh.elem_ptr(0), 0, ids[0]);
+    bi.add_side(mesh.elem_ptr(n_elem - 1), 1, ids[1]);
   }
 
   mesh.prepare_for_use();
