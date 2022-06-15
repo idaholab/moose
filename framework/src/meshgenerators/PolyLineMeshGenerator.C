@@ -45,7 +45,7 @@ PolyLineMeshGenerator::PolyLineMeshGenerator(const InputParameters & parameters)
     _loop(getParam<bool>("loop")),
     _bcid0(getParam<boundary_id_type>("bcid0")),
     _bcid1(getParam<boundary_id_type>("bcid1")),
-    _nebp(getParam<unsigned int>("num_edges_between_points"))
+    _num_edges_between_points(getParam<unsigned int>("num_edges_between_points"))
 {
 }
 
@@ -65,26 +65,26 @@ PolyLineMeshGenerator::generate()
   for (auto i : make_range(n_points))
   {
     Point p = _points[i];
-    mesh.add_point(p, i * _nebp);
-    if (_nebp > 1)
+    mesh.add_point(p, i * _num_edges_between_points);
+    if (_num_edges_between_points > 1)
     {
       if (!_loop && (i + 1) == n_points)
         break;
 
       const auto ip1 = (i + 1) % n_points;
-      const Point pvec = (_points[ip1] - p) / _nebp;
+      const Point pvec = (_points[ip1] - p) / _num_edges_between_points;
 
-      for (auto j : make_range(1u, _nebp))
+      for (auto j : make_range(1u, _num_edges_between_points))
       {
         p += pvec;
-        mesh.add_point(p, i * _nebp + j);
+        mesh.add_point(p, i * _num_edges_between_points + j);
       }
     }
   }
 
   const auto n_segments = _loop ? n_points : (n_points - 1);
-  const auto n_elem = n_segments * _nebp;
-  const auto max_nodes = n_points * _nebp;
+  const auto n_elem = n_segments * _num_edges_between_points;
+  const auto max_nodes = n_points * _num_edges_between_points;
   for (auto i : make_range(n_elem))
   {
     const auto ip1 = (i + 1) % max_nodes;

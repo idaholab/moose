@@ -31,5 +31,5 @@ protected:
 
   const boundary_id_type _bcid0, _bcid1;
 
-  const unsigned int _nebp;
+  const unsigned int _num_edges_between_points;
 };
