@@ -21,7 +21,7 @@
 [Materials]
   [ad_prop]
     type = ADParsedMaterial
-    function = 'log(3)*log(3)'
+    function = '-log(3)*log(3)'
     f_name = rxn_prop
   []
 []
@@ -34,7 +34,7 @@
   [reaction]
     type = ADMatReaction
     variable = u
-    mat_prop_name = rxn_prop
+    reaction_rate = rxn_prop
   []
 []
 

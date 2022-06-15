@@ -35,7 +35,7 @@
   []
   [coeffField_real]
     type = ADMatReaction
-    mat_prop_name = negative_kSquared
+    reaction_rate = kSquared
     variable = E_real
   []
   [diffusion_imaginary]
@@ -44,7 +44,7 @@
   []
   [coeffField_imaginary]
     type = ADMatReaction
-    mat_prop_name = negative_kSquared
+    reaction_rate = kSquared
     variable = E_imag
   []
 []
@@ -125,10 +125,10 @@
 []
 
 [Materials]
-  [negative_kSquared]
+  [kSquared]
     type = ADParsedMaterial
-    f_name = negative_kSquared
-    function = '-0.4188790204786391^2'
+    f_name = kSquared
+    function = '0.4188790204786391^2'
   []
 []
 

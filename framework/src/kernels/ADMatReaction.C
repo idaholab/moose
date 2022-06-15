@@ -16,21 +16,26 @@ ADMatReaction::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addClassDescription(
-      "Kernel representing the contribution of the PDE term $m*u$, where $m$ is a "
-      "material property coefficient/reaction rate and $u$ is a scalar variable, and whose "
-      "Jacobian contribution is calculated using sutomatic differentiation.");
+      "Kernel representing the contribution of the PDE term $-L*v$, where $L$ is a reaction rate "
+      "material property, $v$ is a scalar variable (nonlinear or coupled), and whose Jacobian "
+      "contribution is calculated using automatic differentiation.");
+  params.addCoupledVar("v",
+                       "Set this to make v a coupled variable, otherwise it will use the "
+                       "kernel's nonlinear variable for v");
   params.addParam<MaterialPropertyName>(
-      "mat_prop_name", 1.0, "The coefficient / reaction rate used with the kernel.");
+      "reaction_rate", "L", "The reaction_rate used with the kernel.");
   return params;
 }
 
 ADMatReaction::ADMatReaction(const InputParameters & parameters)
-  : ADKernel(parameters), _mat_prop(getADMaterialProperty<Real>("mat_prop_name"))
+  : ADKernel(parameters),
+    _v(isCoupled("v") ? adCoupledValue("v") : _u),
+    _reaction_rate(getADMaterialProperty<Real>("reaction_rate"))
 {
 }
 
 ADReal
 ADMatReaction::computeQpResidual()
 {
-  return _mat_prop[_qp] * _test[_i][_qp] * _u[_qp];
+  return -_reaction_rate[_qp] * _test[_i][_qp] * _v[_qp];
 }

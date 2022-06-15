@@ -86,12 +86,6 @@
     mu_rel_real = 1
     mu_rel_imag = 0
   []
-  [negative_wave_equation_coefficient_real]
-    type = ADParsedMaterial
-    f_name = negative_wave_equation_coefficient_real
-    material_property_names = wave_equation_coefficient_real
-    function = '-1 * wave_equation_coefficient_real'
-  []
   [negative_wave_equation_coefficient_imaginary]
     type = ADParsedMaterial
     f_name = negative_wave_equation_coefficient_imaginary
@@ -115,7 +109,7 @@
   []
   [coeffField_real]
     type = ADMatReaction
-    mat_prop_name = negative_wave_equation_coefficient_real
+    reaction_rate = wave_equation_coefficient_real
     variable = u_real
   []
   [coupledField_real]
@@ -143,7 +137,7 @@
   []
   [coeffField_imag]
     type = ADMatReaction
-    mat_prop_name = negative_wave_equation_coefficient_real
+    reaction_rate = wave_equation_coefficient_real
     variable = u_imag
   []
   [coupledField_imag]

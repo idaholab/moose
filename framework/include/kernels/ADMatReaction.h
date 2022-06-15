@@ -12,9 +12,9 @@
 #include "ADKernel.h"
 
 /**
- *  Kernel representing the contribution of the PDE term $m*u$, where $m$ is a
- *  material property coefficient/reaction rate and $u$ is a scalar variable, and
- *  whose Jacobian contribution is calculated using sutomatic differentiation.
+ *  Kernel representing the contribution of the PDE term $-L*v$, where $L$ is a
+ *  reaction rate material property, $v$ is a scalar variable (nonlinear or coupled),
+ *  and whose Jacobian contribution is calculated using automatic differentiation.
  */
 class ADMatReaction : public ADKernel
 {
@@ -27,6 +27,14 @@ protected:
   virtual ADReal computeQpResidual() override;
 
 private:
-  /// Material property coefficient / reaction rate
-  const ADMaterialProperty<Real> & _mat_prop;
+  /**
+   * Kernel variable (can be nonlinear or coupled variable)
+   * (For constrained Allen-Cahn problems such as those in
+   * phase field, v = lambda where lambda is the Lagrange
+   * multiplier)
+   */
+  const ADVariableValue & _v;
+
+  /// Reaction rate material property
+  const ADMaterialProperty<Real> & _reaction_rate;
 };

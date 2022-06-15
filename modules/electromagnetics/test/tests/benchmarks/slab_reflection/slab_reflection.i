@@ -46,7 +46,6 @@ theta = 0 # wave incidence angle, in degrees
     type = JinSlabCoeffFunc
     k = ${k}
     length = ${L}
-    coef = -1
     component = real
   []
   [coeff_imag]
@@ -93,7 +92,7 @@ theta = 0 # wave incidence angle, in degrees
   []
   [field_real]
     type = ADMatReaction
-    mat_prop_name = coeff_real_material
+    reaction_rate = coeff_real_material
     variable = E_real
   []
   [coupled_real]
@@ -108,7 +107,7 @@ theta = 0 # wave incidence angle, in degrees
   []
   [field_imag]
     type = ADMatReaction
-    mat_prop_name = coeff_real_material
+    reaction_rate = coeff_real_material
     variable = E_imag
   []
   [coupled_imag]

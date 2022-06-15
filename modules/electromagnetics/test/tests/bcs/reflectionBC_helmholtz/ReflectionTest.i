@@ -36,10 +36,10 @@
 []
 
 [Materials]
-  [negative_ASquaredMinusBSquared]
+  [ASquaredMinusBSquared]
     type = ADParsedMaterial
-    f_name = negative_ASquaredMinusBSquared
-    function = '-(15*15 - 7*7)'
+    f_name = ASquaredMinusBSquared
+    function = '(15*15 - 7*7)'
   []
   [2TimesAB]
     type = ADParsedMaterial
@@ -60,7 +60,7 @@
   []
   [coeffField_real]
     type = ADMatReaction
-    mat_prop_name = negative_ASquaredMinusBSquared
+    reaction_rate = ASquaredMinusBSquared
     variable = u_real
   []
   [coupledField_real]
@@ -75,7 +75,7 @@
   []
   [coeffField_imag]
     type = ADMatReaction
-    mat_prop_name = negative_ASquaredMinusBSquared
+    reaction_rate = ASquaredMinusBSquared
     variable = u_imag
   []
   [coupledField_imag]
