@@ -31,7 +31,7 @@ protected:
   const Function & _admittance;
 
   /// Magnetic permeability of free space in SI units (H/m)
-  const Real _mu_vacuum;
+  const Real _mu0;
 
   /// Variable field component (real or imaginary)
   const MooseEnum _component;

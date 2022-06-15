@@ -17,21 +17,31 @@ ElectricalContactTestFunc::validParams()
   InputParameters params = Function::validParams();
   params.addClassDescription(
       "Function used in ElectrostaticContactCondition analytic solution testing.");
-  params.addParam<Real>("mechanical_pressure",
-                        3000.,
-                        "Mechanical pressure uniformly applied at the contact surface area "
-                        "(Pressure = Force / Surface Area).");
-  params.addParam<Real>(
-      "mean_hardness", 2.4797e9, "Geometric mean of the hardness of graphite and stainless steel.");
-  params.addParam<Real>(
-      "graphite_conductivity", 73069.2, "Conductivity in graphite (default at 300 K).");
-  params.addParam<Real>("stainless_steel_conductivity",
-                        1.41867e6,
-                        "Conductivity in stainless steel (default at 300 K).");
-  params.addParam<Real>("contact_conductance",
-                        75524.,
-                        "Electrical contact conductance at the interface (default is at 300 K with "
-                        "3 kN/m^2 applied pressure).");
+  params.addRangeCheckedParam<Real>(
+      "mechanical_pressure",
+      3000.,
+      "mechanical_pressure>0",
+      "Mechanical pressure uniformly applied at the contact surface area "
+      "(Pressure = Force / Surface Area).");
+  params.addRangeCheckedParam<Real>(
+      "mean_hardness",
+      2.4797e9,
+      "mean_hardness>0",
+      "Geometric mean of the hardness of graphite and stainless steel.");
+  params.addRangeCheckedParam<Real>("graphite_conductivity",
+                                    73069.2,
+                                    "graphite_conductivity>0",
+                                    "Conductivity in graphite (default at 300 K).");
+  params.addRangeCheckedParam<Real>("stainless_steel_conductivity",
+                                    1.41867e6,
+                                    "stainless_steel_conductivity>0",
+                                    "Conductivity in stainless steel (default at 300 K).");
+  params.addRangeCheckedParam<Real>(
+      "contact_conductance",
+      75524.,
+      "contact_conductance >0",
+      "Electrical contact conductance at the interface (default is at 300 K with "
+      "3 kN/m^2 applied pressure).");
   MooseEnum domain("stainless_steel graphite");
   params.addParam<MooseEnum>(
       "domain", domain, "Material domain / block of interest (stainless_steel, graphite).");

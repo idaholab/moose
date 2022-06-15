@@ -23,10 +23,11 @@ ReflectionCoefficient::validParams()
   params.addRequiredCoupledVar(
       "field_real", "The name of the real field variable this postprocessor operates on.");
   params.addRequiredCoupledVar("field_imag", "Coupled imaginary field variable.");
-  params.addRequiredParam<Real>("theta", "Wave incidence angle");
-  params.addRequiredParam<Real>("length", "Domain length");
-  params.addRequiredParam<Real>("k", "Wave number");
-  params.addParam<Real>("incoming_field_magnitude", 1.0, "Incoming field magnitude");
+  params.addRequiredRangeCheckedParam<Real>("theta", "theta>=0", "Wave incidence angle");
+  params.addRequiredRangeCheckedParam<Real>("length", "length>0", "Domain length");
+  params.addRequiredRangeCheckedParam<Real>("k", "k>0", "Wave number");
+  params.addRangeCheckedParam<Real>(
+      "incoming_field_magnitude", 1.0, "incoming_field_magnitude>0", "Incoming field magnitude");
   return params;
 }
 
