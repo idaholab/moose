@@ -68,6 +68,8 @@
     refine_boundary = true
     desired_area = 0.2
   []
+
+  parallel_type = replicated  # libMesh bug workaround
 []
 
 [Outputs]
