@@ -71,6 +71,8 @@
     desired_area = 0.2
     smooth_triangulation = true
   []
+
+  parallel_type = replicated  # libMesh bug workaround
 []
 
 [Outputs]
