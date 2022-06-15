@@ -28,27 +28,27 @@ public:
 protected:
   std::unique_ptr<MeshBase> & _bdy_ptr;
 
-  unsigned int _interpolate_bdy;
+  const unsigned int _interpolate_bdy;
 
-  bool _refine_bdy;
+  const bool _refine_bdy;
 
-  bool _smooth_tri;
+  const bool _smooth_tri;
 
   // Holds pointers to the pointers to the meshes.
-  std::vector<std::unique_ptr<MeshBase> *> _hole_ptrs;
+  const std::vector<std::unique_ptr<MeshBase> *> _hole_ptrs;
 
-  std::vector<bool> _stitch_holes;
+  const std::vector<bool> _stitch_holes;
 
-  std::vector<unsigned int> _interpolate_holes;
+  const std::vector<unsigned int> _interpolate_holes;
 
-  std::vector<bool> _refine_holes;
+  const std::vector<bool> _refine_holes;
 
-  Real _desired_area;
+  const Real _desired_area;
 
-  std::string _desired_area_func;
+  const std::string _desired_area_func;
 
   /// Type of algorithm used to find matching nodes (binary or exhaustive)
-  MooseEnum _algorithm;
+  const MooseEnum _algorithm;
 
-  bool _verbose_stitching;
+  const bool _verbose_stitching;
 };

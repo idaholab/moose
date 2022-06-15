@@ -25,11 +25,11 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  std::vector<Point> _points;
+  const std::vector<Point> _points;
 
-  bool _loop;
+  const bool _loop;
 
-  boundary_id_type _bcid0, _bcid1;
+  const boundary_id_type _bcid0, _bcid1;
 
-  unsigned int _nebp;
+  const unsigned int _nebp;
 };
