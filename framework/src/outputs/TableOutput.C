@@ -49,6 +49,8 @@ TableOutput::validParams()
                         "The independent variable tolerance for determining when a new row should "
                         "be added to the table (Note: This value must be set independently for "
                         "Postprocessor output to type=Console and type=CSV file separately.");
+  params.addParamNamesToGroup("time_data time_column", "Additional columns");
+  params.addParamNamesToGroup("new_row_tolerance", "Table formatting");
 
   return params;
 }

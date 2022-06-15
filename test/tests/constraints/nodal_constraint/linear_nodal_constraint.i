@@ -4,43 +4,44 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 3
-  [../]
+  []
 []
 
 [Constraints]
-  [./c1]
-    type = EqualValueNodalConstraint
+  [c1]
+    type = LinearNodalConstraint
     variable = u
     primary = 0
-    secondary = 4
+    secondary_node_ids = 4
     penalty = 100000
-  [../]
+    weights = 10
+  []
 []
 
 [Executioner]

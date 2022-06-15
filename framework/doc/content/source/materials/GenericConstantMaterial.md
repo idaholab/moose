@@ -8,11 +8,9 @@ domain explored by the simulation.
 
 ## Example Input File Syntax
 
-In this example, we create an `ADGenericConstantMaterial` for the diffusion coefficient for this fluid flow simulation.
-We add the prefix `AD` as this simulation is making use of automatic differentiation to compute the Jacobian exactly.
-The diffusion coefficient is retrieved as an `ADMaterialProperty` by the diffusion kernel.
+In this example, we create an `GenericConstantMaterial` for the diffusion coefficient for this fluid flow simulation.
 
-!listing test/tests/fvkernels/mms/advection-diffusion.i block=Materials/diff
+!listing test/tests/auxkernels/diffusion_flux/diffusion_flux.i block=Materials
 
 !syntax parameters /Materials/GenericConstantMaterial
 

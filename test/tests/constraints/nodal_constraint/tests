@@ -1,21 +1,30 @@
 [Tests]
   issues = '#665'
   design = 'syntax/Constraints/index.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'nodal_constraint_test.i'
     exodiff = 'nodal_constraint_test_out.e'
     max_parallel = 1
     max_threads = 1 #6511
     requirement = "The system shall support the ability to constrain nodal values."
-  [../]
+  []
 
-  [./displaced_test]
+  [displaced_test]
     type = 'Exodiff'
     input = 'nodal_constraint_displaced_test.i'
     exodiff = 'nodal_constraint_displaced_test_out.e'
     max_parallel = 1
     max_threads = 1 #6511
     requirement = "The system shall support the ability to constrain nodal values using a displaced mesh."
-  [../]
+  []
+
+  [linear_nodal]
+    type = 'Exodiff'
+    input = 'linear_nodal_constraint.i'
+    exodiff = 'linear_nodal_constraint_out.e'
+    max_parallel = 1
+    max_threads = 1 #6511
+    requirement = "The system shall support the ability to linearly constrain nodal values."
+  []
 []

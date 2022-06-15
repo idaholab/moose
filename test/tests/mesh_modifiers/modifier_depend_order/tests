@@ -9,6 +9,7 @@
       type = 'Exodiff'
       input = 'modifier_depend_order.i'
       exodiff = 'modifier_depend_order_out.e'
+      mesh_mode = 'replicated'
 
       detail = "without restriction to the order of the supplied inputs with"
     []

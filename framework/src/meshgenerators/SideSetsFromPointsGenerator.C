@@ -49,9 +49,6 @@ SideSetsFromPointsGenerator::SideSetsFromPointsGenerator(const InputParameters &
     _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary")),
     _points(getParam<std::vector<Point>>("points"))
 {
-  if (typeid(_input).name() == typeid(std::unique_ptr<DistributedMesh>).name())
-    mooseError("GenerateAllSideSetsByNormals only works with ReplicatedMesh.");
-
   if (_points.size() != _boundary_names.size())
     mooseError("point list and boundary list are not the same length");
 }
@@ -60,6 +57,8 @@ std::unique_ptr<MeshBase>
 SideSetsFromPointsGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+  if (!mesh->is_replicated())
+    mooseError("SideSetsFromPointsGenerator is not implemented for distributed meshes");
 
   // Get the BoundaryIDs from the mesh
   std::vector<BoundaryID> boundary_ids =

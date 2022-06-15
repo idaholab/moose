@@ -39,6 +39,8 @@ CSV::validParams()
       false,
       "Enable/disable the creation of a _LATEST symlink for vector postprocessor data.");
 
+  params.addParamNamesToGroup("sort_columns align delimiter precision", "Table formatting");
+  params.addParamNamesToGroup("create_latest_symlink create_final_symlink", "Symbolic links");
   // Suppress unused parameters
   params.suppressParameter<unsigned int>("padding");
 
