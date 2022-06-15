@@ -16,6 +16,13 @@ LiquidMetalSubChannel1PhaseProblem::LiquidMetalSubChannel1PhaseProblem(
   : SubChannel1PhaseProblem(params),
     _tri_sch_mesh(dynamic_cast<TriSubChannelMesh &>(_subchannel_mesh))
 {
+  _outer_channels = 0.0;
+  for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+  {
+    auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+    if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
+      _outer_channels += 1.0;
+  }
 }
 
 double
@@ -275,7 +282,7 @@ LiquidMetalSubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsi
       auto * node_out_duct = _subchannel_mesh.getDuctNodeFromChannel(node_out_chan);
       auto heat_rate_in = (*_q_prime_duct_soln)(node_in_duct);
       auto heat_rate_out = (*_q_prime_duct_soln)(node_out_duct);
-      return 0.5 * (heat_rate_in + heat_rate_out) * dz;
+      return 0.5 * (heat_rate_in + heat_rate_out) * dz / _outer_channels;
     }
     else
     {

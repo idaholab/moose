@@ -45,6 +45,7 @@ protected:
   /// average relative error in pressure drop of channels
   Real _dpz_error;
   TriSubChannelMesh & _tri_sch_mesh;
+  Real _outer_channels;
 
 public:
   static InputParameters validParams();
