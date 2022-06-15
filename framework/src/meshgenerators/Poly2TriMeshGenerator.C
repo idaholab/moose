@@ -78,6 +78,11 @@ Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
     _algorithm(parameters.get<MooseEnum>("algorithm")),
     _verbose_stitching(parameters.get<bool>("verbose_stitching"))
 {
+  if (!_stitch_holes.empty() && _stitch_holes.size() != _hole_ptrs.size())
+    paramError("stitch_holes", "Need one stitch_holes entry per hole, if specified.");
+
+  if (!_interpolate_holes.empty() && _interpolate_holes.size() != _hole_ptrs.size())
+    paramError("interpolate_holes", "Need one interpolate_holes entry per hole, if specified.");
 }
 
 std::unique_ptr<MeshBase>
@@ -85,12 +90,6 @@ Poly2TriMeshGenerator::generate()
 {
   // We put the boundary mesh in a local pointer
   std::unique_ptr<UnstructuredMesh> mesh = dynamic_pointer_cast<UnstructuredMesh>(_bdy_ptr);
-
-  if (!_stitch_holes.empty() && _stitch_holes.size() != _hole_ptrs.size())
-    paramError("stitch_holes", "Need one stitch_holes entry per hole, if specified.");
-
-  if (!_interpolate_holes.empty() && _interpolate_holes.size() != _hole_ptrs.size())
-    paramError("interpolate_holes", "Need one interpolate_holes entry per hole, if specified.");
 
   Poly2TriTriangulator poly2tri(*mesh);
   poly2tri.triangulation_type() = TriangulatorInterface::PSLG;
