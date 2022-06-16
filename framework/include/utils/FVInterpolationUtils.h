@@ -229,9 +229,9 @@ interpolate(InterpMethod m,
  */
 template <typename Scalar, typename Vector>
 Scalar
-rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVectorValue & dCD)
+rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const Point & dCD)
 {
-  static const auto zero_vec = RealVectorValue(0);
+  static const auto zero_vec = Point(0);
   if ((phiD - phiC) == 0)
     // Handle zero denominator case. Note that MathUtils::sign returns 1 for sign(0) so we can omit
     // that operation here (e.g. sign(phiD - phiC) = sign(0) = 1). The second term preserves the
@@ -266,7 +266,7 @@ interpCoeff(const Limiter<T> & limiter,
   const auto psi = limiter(phi_upwind,
                            phi_downwind,
                            grad_phi_upwind,
-                           fi_elem_is_upwind ? fi.dCN() : RealVectorValue(-fi.dCN()));
+                           fi_elem_is_upwind ? fi.dCN() : Point(-fi.dCN()));
 
   const auto w_f = fi_elem_is_upwind ? fi.gC() : (1. - fi.gC());
 

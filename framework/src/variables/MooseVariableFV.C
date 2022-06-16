@@ -790,9 +790,6 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
   const Elem * const elem_one = var_defined_on_elem ? &fi.elem() : fi.neighborPtr();
   const Elem * const elem_two = var_defined_on_elem ? fi.neighborPtr() : &fi.elem();
 
-  std::cout << "Face info: " << &fi << " is boundary " << fi.isBoundary() << std::endl;
-  std::cout << "Elem one " << elem_one << " elem two " << elem_two << std::endl;
-
   const VectorValue<ADReal> elem_one_grad = adGradSln(elem_one, correct_skewness);
 
   VectorValue<ADReal> * unc_face_grad_pointer = &_temp_face_unc_gradient;
@@ -840,27 +837,8 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   // Use a pointer to choose the right reference
   VectorValue<ADReal> * face_grad_pointer = &_temp_face_gradient;
 
-  // We ensure that no caching takes place when we compute skewness-corrected
-  // quantities.
-  if (_cache_face_gradients && !correct_skewness)
-  {
-    auto it = _face_to_grad.find(&fi);
-
-    if (it != _face_to_grad.end())
-      return it->second;
-
-    // Returns a pair with the first being an iterator pointing to the key-value pair and the second
-    // a boolean denoting whether a new insertion took place
-    auto emplace_ret = _face_to_grad.emplace(&fi, uncorrectedAdGradSln(fi, correct_skewness));
-
-    mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
-
-    face_grad_pointer = &emplace_ret.first->second;
-  }
-  else
-    *face_grad_pointer = uncorrectedAdGradSln(fi, correct_skewness);
-
-  VectorValue<ADReal> & face_grad = *face_grad_pointer;
+  bool internal_face = isInternalFace(fi);
+  bool non_orthogonal_corrector = true; // this will be a parameter at some point
 
   bool var_defined_on_elem = fi.varDefinedOnElem(this->name());
   const Elem * const elem = &fi.elem();
@@ -872,15 +850,46 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   const ADReal side_two_value =
       var_defined_on_elem ? getNeighborValue(neighbor, fi) : getElemValue(neighbor);
 
+  const Real delta = internal_face ? fi.dCNMag() : fi.cellCenterToFaceDistance(var_defined_on_elem);
+  const Point e_cf =
+      internal_face ? fi.eCN() : (var_defined_on_elem ? fi.normal() : Point(-fi.normal()));
+
   // perform the correction. Note that direction is important here because we have a minus sign.
   // Neighbor has to be neighbor, and elem has to be elem. Hence all the elem_is_elem_one logic
   // above
 
-  std::cout << "elem " << side_one_value << " neighbor " << side_two_value << " dcf " << fi.dCNMag()
-            << std::endl;
+  // std::cout << "elem " << side_one_value << " neighbor " << side_two_value << " delta " << delta
+  //           << std::endl;
 
-  face_grad += ((side_two_value - side_one_value) / fi.dCNMag() - face_grad * fi.eCN()) * fi.eCN();
+  // We ensure that no caching takes place when we compute skewness-corrected
+  // quantities.
+  if (_cache_face_gradients && !correct_skewness)
+  {
+    auto it = _face_to_grad.find(&fi);
 
+    if (it != _face_to_grad.end())
+      return it->second;
+
+    // Returns a pair with the first being an iterator pointing to the key-value pair and the second
+    // a boolean denoting whether a new insertion took place
+    auto emplace_ret =
+        _face_to_grad.emplace(&fi, ((side_two_value - side_one_value) / delta) * e_cf);
+
+    mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
+
+    face_grad_pointer = &emplace_ret.first->second;
+  }
+  else
+    *face_grad_pointer = ((side_two_value - side_one_value) / delta) * e_cf;
+
+  VectorValue<ADReal> & face_grad = *face_grad_pointer;
+
+  // We only need nonorthogonal correctors in 2+ D and on internal faces
+  if (non_orthogonal_corrector && LIBMESH_DIM > 1 && internal_face)
+  {
+    const auto & interpolated_gradient = uncorrectedAdGradSln(fi, correct_skewness);
+    face_grad += interpolated_gradient - (interpolated_gradient * e_cf) * e_cf;
+  }
   return face_grad;
 }
 

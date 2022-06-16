@@ -117,9 +117,7 @@ greenGaussGradient(const ElemArg & elem_arg,
           ebf_faces.push_back(fi);
 
           // eqn. 2
-          ebf_grad_coeffs.push_back(-1. * (elem_has_info
-                                               ? (fi->faceCentroid() - fi->elemCentroid())
-                                               : (fi->faceCentroid() - fi->neighborCentroid())));
+          ebf_grad_coeffs.push_back(-1. * fi->cellCenterToFaceVector(elem_has_info));
           ebf_b.push_back(&elem_value);
 
           // eqn. 1

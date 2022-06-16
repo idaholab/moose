@@ -12,7 +12,6 @@
 #include "MooseTypes.h"
 #include "ElemInfo.h"
 
-#include "libmesh/point.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/remote_elem.h"
 
@@ -212,7 +211,7 @@ public:
    * @return the distance vector drawn from centroid C to F, or in terms of MOOSE implementation,
    * the distance vector obtained from subtracting the element centroid from the neighbor centroid
    */
-  const RealVectorValue & dCN() const
+  const Point & dCN() const
   {
     if (!_neighbor_info)
       mooseError(
@@ -243,7 +242,7 @@ public:
       return _r_nf_mag;
   }
 
-  const RealVectorValue & cellCenterToFaceVector(bool elem_side = true) const
+  const Point & cellCenterToFaceVector(bool elem_side = true) const
   {
     if (!_neighbor_info && !elem_side)
       mooseError("The neighbor info does not exist so the vector to the face cannot be returned "
@@ -259,7 +258,7 @@ public:
    * MOOSE implementation, the normalized (e.g. unit) distance vector obtained from subtracting the
    * element centroid from the neighbor centroid
    */
-  const RealVectorValue & eCN() const { return _e_cn; }
+  const Point & eCN() const { return _e_cn; }
 
   /**
    * @return the ID of the processor that owns this object
@@ -297,10 +296,10 @@ private:
   Point _face_centroid;
 
   /// the distance vector between neighbor and element centroids
-  RealVectorValue _d_cn;
-  RealVectorValue _r_nf;
-  RealVectorValue _r_cf;
-  RealVectorValue _e_cn;
+  Point _d_cn;
+  Point _r_nf;
+  Point _r_cf;
+  Point _e_cn;
 
   /// the distance norm between neighbor and element centroids
   Real _d_cn_mag;

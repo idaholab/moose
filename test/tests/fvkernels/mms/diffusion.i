@@ -5,12 +5,8 @@
 []
 
 [Variables]
-  # [u]
-  # []
   [v]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
   []
 []
 
@@ -68,13 +64,6 @@
 []
 
 [Postprocessors]
-  # [./L2u]
-  #   type = ElementL2Error
-  #   variable = u
-  #   function = exact
-  #   outputs = 'console'
-  #   execute_on = 'timestep_end'
-  # [../]
   [./error]
     type = ElementL2Error
     variable = v

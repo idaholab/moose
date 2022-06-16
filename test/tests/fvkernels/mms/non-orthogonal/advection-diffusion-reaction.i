@@ -17,7 +17,7 @@ diff=1.1
 
 [Variables]
   [./v]
-    family = MooseVariableFVReal
+    type = MooseVariableFVReal
     initial_condition = 1
   [../]
 []
