@@ -196,25 +196,16 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
                                          const std::unordered_set<const Elem *> & inactive_lm_elems)
 {
   // If no LM variable has been defined, skip
-  if (!_var_x || !_var_y)
+  if (!_var)
     return;
 
   const auto sn = _sys.number();
+  const auto vn = _var->number();
 
-  std::vector<const MooseVariable *> vars = {_var_x, _var_y};
-  if (_use_lm_z)
-    vars.push_back(_var_z);
-
-  for (const auto var : vars)
+  // If variable is nodal, zero DoFs based on inactive LM nodes
+  if (_var->isNodal())
   {
-    const auto vn = var->number();
-    if (_subproblem.currentlyComputingJacobian())
-      prepareMatrixTagLower(_assembly, vn, vn, Moose::ConstraintJacobianType::LowerLower);
-    else
-      prepareVectorTagLower(_assembly, vn);
-
-    // If variable is nodal, zero DoFs based on inactive LM nodes
-    if (var->isNodal())
+    for (const auto node : inactive_lm_nodes)
     {
       // Allow mixed Lagrange orders between primal and LM
       if (!node->n_comp(sn, vn))
@@ -226,9 +217,17 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
         _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
       if (!_subproblem.currentlyComputingJacobian())
       {
-        // Allow mixed Lagrange orders between primal and LM
-        if (!node->n_comp(sn, vn))
-          continue;
+        Real lm_value = _var->getNodalValue(*node);
+        _assembly.cacheResidual(dof_index, lm_value, _vector_tags);
+      }
+    }
+  }
+  // If variable is elemental, zero based on inactive LM elems
+  else
+  {
+    for (const auto el : inactive_lm_elems)
+    {
+      const auto n_comp = el->n_comp(sn, vn);
 
       for (const auto comp : make_range(n_comp))
       {
@@ -237,29 +236,8 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
           _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
         if (_assembly.computingResidual())
         {
-          Real lm_value = var->getNodalValue(*node);
+          const Real lm_value = _var->getElementalValue(el, comp);
           _assembly.cacheResidual(dof_index, lm_value, _vector_tags);
-        }
-      }
-    }
-    // If variable is elemental, zero based on inactive LM elems
-    else
-    {
-      for (const auto el : inactive_lm_elems)
-      {
-        const auto n_comp = el->n_comp(sn, vn);
-
-        for (const auto comp : make_range(n_comp))
-        {
-          const auto dof_index = el->dof_number(sn, vn, comp);
-          // Insert to system
-          if (_subproblem.currentlyComputingJacobian())
-            _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
-          else
-          {
-            const Real lm_value = var->getElementalValue(el, comp);
-            _assembly.cacheResidual(dof_index, lm_value, _vector_tags);
-          }
         }
       }
     }

@@ -294,6 +294,7 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
 
   const auto dof_index_x = dof->dof_number(_sys.number(), _var_x->number(), 0);
   const auto dof_index_y = dof->dof_number(_sys.number(), _var_y->number(), 0);
+
   ADReal lm_x = (*_sys.currentSolution())(dof_index_x);
   ADReal lm_y = (*_sys.currentSolution())(dof_index_y);
 
@@ -324,20 +325,26 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
 
   const ADReal normal_dof_residual = std::min(normal_lm_value, weighted_gap * c);
 
-  const ADReal dof_residual_x = normal_dof_residual * _normals[_i](0) +
-                                tangential_lm_value * nodal_tangents[0][_i](0) +
-                                tangential_lm_value2 * nodal_tangents[1][_i](0);
-
-  const ADReal dof_residual_y = normal_dof_residual * _normals[_i](1) +
-                                tangential_lm_value * nodal_tangents[0][_i](1) +
-                                tangential_lm_value2 * nodal_tangents[1][_i](1);
-  ADReal dof_residual_z;
-  if (_has_disp_z)
-    dof_residual_z = normal_dof_residual * _normals[_i](2) +
-                     tangential_lm_value * nodal_tangents[0][_i](2) +
-                     tangential_lm_value2 * nodal_tangents[1][_i](2);
+  // const ADReal dof_residual_x = normal_dof_residual * _normals[_i](0) +
+  //                               tangential_lm_value * nodal_tangents[0][_i](0) +
+  //                               tangential_lm_value2 * nodal_tangents[1][_i](0);
+  //
+  // const ADReal dof_residual_y = normal_dof_residual * _normals[_i](1) +
+  //                               tangential_lm_value * nodal_tangents[0][_i](1) +
+  //                               tangential_lm_value2 * nodal_tangents[1][_i](1);
+  // ADReal dof_residual_z;
+  // if (_has_disp_z)
+  //   dof_residual_z = normal_dof_residual * _normals[_i](2) +
+  //                    tangential_lm_value * nodal_tangents[0][_i](2) +
+  //                    tangential_lm_value2 * nodal_tangents[1][_i](2);
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  _assembly.processResidualAndJacobian(dof_residual, dof_index, _vector_tags, _matrix_tags);
+  _assembly.processResidualAndJacobian(
+      normal_dof_residual, dof_index_x, _vector_tags, _matrix_tags);
+  _assembly.processResidualAndJacobian(
+      tangential_lm_value, dof_index_y, _vector_tags, _matrix_tags);
+  if (_has_disp_z)
+    _assembly.processResidualAndJacobian(
+        tangential_lm_value2, dof_index_z, _vector_tags, _matrix_tags);
 #endif
 }
