@@ -9,7 +9,7 @@
 
 #include "CoupledVarDirichletBC.h"
 
-registerMooseObject("MastodonApp", CoupledVarDirichletBC);
+registerMooseObject("MooseApp", CoupledVarDirichletBC);
 
 InputParameters
 CoupledVarDirichletBC::validParams()
