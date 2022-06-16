@@ -17,6 +17,12 @@ PolycrystalEBSD::validParams()
 {
   InputParameters params = PolycrystalUserObjectBase::validParams();
   params.addClassDescription("Object for setting up a polycrystal structure from an EBSD Datafile");
+  MooseEnum idType("PHASE GLOBAL FEATURE", "PHASE");
+  params.addParam<MooseEnum>(
+      "id_type",
+      idType,
+      "Type of grain ID to generate (either the index for a specified phase, the global contiguous "
+      "index, or the feature id from the EBSD file");
   params.addParam<unsigned int>("phase", "The phase to use for all queries.");
   params.addParam<UserObjectName>("ebsd_reader", "EBSD Reader for initial condition");
   return params;
@@ -24,10 +30,13 @@ PolycrystalEBSD::validParams()
 
 PolycrystalEBSD::PolycrystalEBSD(const InputParameters & parameters)
   : PolycrystalUserObjectBase(parameters),
+    _id_type(getParam<MooseEnum>("id_type").getEnum<IdType>()),
     _phase(isParamValid("phase") ? getParam<unsigned int>("phase") : libMesh::invalid_uint),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
     _node_to_grain_weight_map(_ebsd_reader.getNodeToGrainWeightMap())
 {
+  if (_phase == libMesh::invalid_uint && _id_type == IdType::phase)
+    paramError("id_type", "Specify a phase ID when using id_type=phase");
 }
 
 void
@@ -43,12 +52,24 @@ PolycrystalEBSD::getGrainsBasedOnPoint(const Point & point,
     return;
   }
 
-  // Get the ids from the EBSD reader
-  const auto global_id = _ebsd_reader.getGlobalID(d._feature_id);
-  const auto local_id = _ebsd_reader.getAvgData(global_id)._local_id;
-
   grains.resize(1);
-  grains[0] = _phase != libMesh::invalid_uint ? local_id : global_id;
+  switch (_id_type)
+  {
+    case IdType::phase:
+    {
+      const auto global_id = _ebsd_reader.getGlobalID(d._feature_id);
+      grains[0] = _ebsd_reader.getAvgData(global_id)._local_id;
+      break;
+    }
+
+    case IdType::global:
+      grains[0] = _ebsd_reader.getGlobalID(d._feature_id);
+      break;
+
+    case IdType::feature:
+      grains[0] = d._feature_id;
+      break;
+  }
 }
 
 unsigned int
@@ -69,8 +90,8 @@ PolycrystalEBSD::getNodalVariableValue(unsigned int op_index, const Node & n) co
   if (it == _node_to_grain_weight_map.end())
     mooseError("The following node id is not in the node map: ", n.id());
 
-  // Increment through all grains at node_index (these are global IDs if consider_phase is false and
-  // local IDs otherwise)
+  // Increment through all grains at node_index (these are global IDs if consider_phase is false
+  // and local IDs otherwise)
   const auto num_grains = getNumGrains();
   for (MooseIndex(num_grains) index = 0; index < num_grains; ++index)
   {
