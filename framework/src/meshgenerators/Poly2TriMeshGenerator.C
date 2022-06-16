@@ -42,9 +42,6 @@ Poly2TriMeshGenerator::validParams()
       "holes", std::vector<MeshGeneratorName>(), "The MeshGenerators that define mesh holes.");
   params.addParam<std::vector<bool>>(
       "stitch_holes", std::vector<bool>(), "Whether to stitch to the mesh defining each hole.");
-  params.addParam<std::vector<unsigned int>>("interpolate_holes",
-                                             std::vector<unsigned int>(),
-                                             "How many nodes to add per hole boundary segment.");
   params.addParam<std::vector<bool>>("refine_holes",
                                      std::vector<bool>(),
                                      "Whether to allow automatically refining each hole boundary.");
@@ -73,7 +70,6 @@ Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
     _smooth_tri(getParam<bool>("smooth_triangulation")),
     _hole_ptrs(getMeshes("holes")),
     _stitch_holes(getParam<std::vector<bool>>("stitch_holes")),
-    _interpolate_holes(getParam<std::vector<unsigned int>>("interpolate_holes")),
     _refine_holes(getParam<std::vector<bool>>("refine_holes")),
     _desired_area(getParam<Real>("desired_area")),
     _desired_area_func(getParam<std::string>("desired_area_func")),
@@ -82,9 +78,6 @@ Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
 {
   if (!_stitch_holes.empty() && _stitch_holes.size() != _hole_ptrs.size())
     paramError("stitch_holes", "Need one stitch_holes entry per hole, if specified.");
-
-  if (!_interpolate_holes.empty() && _interpolate_holes.size() != _hole_ptrs.size())
-    paramError("interpolate_holes", "Need one interpolate_holes entry per hole, if specified.");
 }
 
 std::unique_ptr<MeshBase>
@@ -120,8 +113,6 @@ Poly2TriMeshGenerator::generate()
     meshed_holes.emplace_back(*_hole_ptrs[hole_i]->get());
     if (hole_i < _refine_holes.size())
       meshed_holes.back().set_refine_boundary_allowed(_refine_holes[hole_i]);
-    if (_interpolate_holes.size() > hole_i)
-      libmesh_not_implemented();
 
     triangulator_hole_ptrs.push_back(&meshed_holes.back());
   }
