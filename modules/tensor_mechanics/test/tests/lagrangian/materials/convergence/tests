@@ -51,6 +51,7 @@
     ratio_tol = 1E-6
     difference_tol = 1E10
     run_sim = true
+    design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
     requirement = 'Correct Jacobian for elastoplasticity with linear hardening with relative error '
                   'less than 1e-6'
   []
@@ -61,6 +62,7 @@
     ratio_tol = 1E-6
     difference_tol = 1E10
     run_sim = true
+    design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
     requirement = 'Correct Jacobian for elastoplasticity with power-law hardening with relative '
                   'error less than 1e-6'
   []
