@@ -35,5 +35,5 @@ protected:
   const Real _coef;
 
   /// Scale factor
-  const VariableValue & _scale_factor;
+  const Moose::Functor<ADReal> & _scale_factor;
 };
