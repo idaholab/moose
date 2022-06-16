@@ -97,15 +97,6 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
   // The element Jacobian times weights
   const auto & JxW_msm = assembly.jxWMortar();
 
-  // Set required variables
-  std::set<MooseVariableFieldBase *> needed_moose_vars;
-  for (const auto & consumer : consumers)
-  {
-    const auto & mv_deps = consumer->getMooseVariableDependencies();
-    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-  }
-  fe_problem.setActiveElementalMooseVariables(needed_moose_vars, /*tid=*/tid);
-
   // Set required material properties
   std::set<unsigned int> needed_mat_props;
   for (const auto & consumer : consumers)
