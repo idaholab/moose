@@ -17,8 +17,6 @@ CoupledVarDirichletBC::validParams()
   InputParameters params = DirichletBCBase::validParams();
   params.addRequiredCoupledVar("v", "Coupled variable setting the value on the boundary.");
   params.addParam<FunctorName>("scale_factor", 1., "Scale factor to multiply the heat flux with");
-  params.addParam<Real>(
-      "coef", 1.0, "Coefficent ($\\sigma$) multiplier for the coupled force term.");
   params.addClassDescription("Imposes the essential boundary condition $u=v$, where $v$ "
                              "is a variable.");
   return params;
