@@ -44,7 +44,7 @@
     holes = 'inner_square'
     stitch_holes = 'true'
     refine_holes = 'false'
-    interpolate_boundary = 3
+    add_nodes_per_boundary_segment = 3
     refine_boundary = false
     desired_area = 0.05
     smooth_triangulation = true
@@ -55,7 +55,7 @@
     holes = 'triang_2'
     stitch_holes = 'true'
     refine_holes = 'false'
-    interpolate_boundary = 3
+    add_nodes_per_boundary_segment = 3
     refine_boundary = false
     desired_area = 0.1
     # smooth_triangulation = false # default
@@ -66,7 +66,7 @@
     holes = 'triang_3'
     stitch_holes = 'true'
     refine_holes = 'false'
-    interpolate_boundary = 3
+    add_nodes_per_boundary_segment = 3
     refine_boundary = true
     desired_area = 0.2
     smooth_triangulation = true
