@@ -148,32 +148,39 @@ Poly2TriMeshGenerator::generate()
 
   const bool use_binary_search = (_algorithm == "BINARY");
 
+  // The hole meshes are specified by the user, so they could have any
+  // BCID or no BCID or any combination of BCIDs on their outer
+  // boundary, so we'll have to set our own BCID to use for stitching
+  // there.  We'll need to check all the holes for used BCIDs, if we
+  // want to pick a new ID on hole N that doesn't conflict with any
+  // IDs on hole M < N (or with the IDs on the new triangulation)
+
+  // The new triangulation assigns BCID i+1 to hole i ... but we can't
+  // even use this for mesh stitching, because we can't be sure it
+  // isn't also already in use on the hole's mesh and so we won't be
+  // able to safely clear it afterwards.
+
+  boundary_id_type new_hole_bcid = _hole_ptrs.size();
+  for (auto hole_i : index_range(_hole_ptrs))
+  {
+    const MeshBase & hole_mesh = **_hole_ptrs[hole_i];
+    auto & hole_boundary_info = hole_mesh.get_boundary_info();
+    const std::set<boundary_id_type> & local_hole_bcids = hole_boundary_info.get_boundary_ids();
+
+    if (!local_hole_bcids.empty())
+      new_hole_bcid = std::max(new_hole_bcid, *local_hole_bcids.rbegin());
+    hole_mesh.comm().max(new_hole_bcid);
+  }
+
+  new_hole_bcid++;
+  const boundary_id_type inner_bcid = new_hole_bcid + 1;
+
   for (auto hole_i : index_range(_hole_ptrs))
   {
     if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
     {
-      // The hole mesh was specified by the user, so it could have
-      // any BCID or no BCID or any combination of BCIDs on its
-      // outer boundary.  Let's just pick out our own temporary
-      // BCIDs to use for stitching.
-
-      // The new triangulation assigns BCID i+1 to hole i ... but
-      // we can't even use this for mesh stitching, because we
-      // can't be sure it isn't also already in use on the hole's
-      // mesh and so we won't be able to safely clear it
-      // afterwards.
-
       UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*_hole_ptrs[hole_i]->get());
       auto & hole_boundary_info = hole_mesh.get_boundary_info();
-      const std::set<boundary_id_type> & local_hole_bcids = hole_boundary_info.get_boundary_ids();
-
-      boundary_id_type new_hole_bcid = 0;
-      if (!local_hole_bcids.empty())
-        new_hole_bcid = *local_hole_bcids.rbegin();
-      hole_mesh.comm().max(new_hole_bcid);
-
-      ++new_hole_bcid;
-      const boundary_id_type inner_bcid = new_hole_bcid + 1;
 
       // It would have been nicer for MeshedHole to add the BCID
       // itself, but we want MeshedHole to work with a const mesh.
