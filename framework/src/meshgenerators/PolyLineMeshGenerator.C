@@ -10,6 +10,7 @@
 #include "PolyLineMeshGenerator.h"
 
 #include "CastUniquePointer.h"
+#include "MooseMeshUtils.h"
 #include "MooseUtils.h"
 
 #include "libmesh/elem.h"
