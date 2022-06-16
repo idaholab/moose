@@ -10,7 +10,7 @@
   [./triang]
     type = Poly2TriMeshGenerator
     boundary = 'outer_bdy'
-    interpolate_boundary = 4
+    add_nodes_per_boundary_segment = 4
     refine_boundary = false
     desired_area = 0.05
   []

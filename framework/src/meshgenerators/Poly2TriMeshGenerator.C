@@ -30,8 +30,9 @@ Poly2TriMeshGenerator::validParams()
 
   params.addRequiredParam<MeshGeneratorName>(
       "boundary", "The MeshGenerator that defines the mesh outer boundary.");
-  params.addParam<unsigned int>(
-      "interpolate_boundary", 0, "How many more nodes to add in each outer boundary segment.");
+  params.addParam<unsigned int>("add_nodes_per_boundary_segment",
+                                0,
+                                "How many more nodes to add in each outer boundary segment.");
   params.addParam<bool>(
       "refine_boundary", true, "Whether to allow automatically refining the outer boundary.");
   params.addParam<bool>("smooth_triangulation",
@@ -67,7 +68,7 @@ Poly2TriMeshGenerator::validParams()
 Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _bdy_ptr(getMesh("boundary")),
-    _interpolate_bdy(getParam<unsigned int>("interpolate_boundary")),
+    _add_nodes_per_boundary_segment(getParam<unsigned int>("add_nodes_per_boundary_segment")),
     _refine_bdy(getParam<bool>("refine_boundary")),
     _smooth_tri(getParam<bool>("smooth_triangulation")),
     _hole_ptrs(getMeshes("holes")),
@@ -95,7 +96,7 @@ Poly2TriMeshGenerator::generate()
   Poly2TriTriangulator poly2tri(*mesh);
   poly2tri.triangulation_type() = TriangulatorInterface::PSLG;
 
-  poly2tri.set_interpolate_boundary_points(_interpolate_bdy);
+  poly2tri.set_interpolate_boundary_points(_add_nodes_per_boundary_segment);
   poly2tri.set_refine_boundary_allowed(_refine_bdy);
 
   poly2tri.desired_area() = _desired_area;

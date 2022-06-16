@@ -30,7 +30,7 @@ protected:
   std::unique_ptr<MeshBase> & _bdy_ptr;
 
   /// How many more nodes to add in each outer boundary segment
-  const unsigned int _interpolate_bdy;
+  const unsigned int _add_nodes_per_boundary_segment;
 
   /// Whether to allow automatically refining the outer boundary
   const bool _refine_bdy;

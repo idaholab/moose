@@ -46,7 +46,7 @@
                     false'
     refine_holes = 'false
                     false'
-    interpolate_boundary = 4
+    add_nodes_per_boundary_segment = 4
     refine_boundary = false
     desired_area = 0.05
   []
