@@ -22,7 +22,8 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
     _processor_id(_elem_info->elem()->processor_id()),
     _id(std::make_pair(_elem_info->elem()->id(), side)),
     _elem_side_id(side),
-    _neighbor_side_id(std::numeric_limits<unsigned int>::max())
+    _neighbor_side_id(std::numeric_limits<unsigned int>::max()),
+    _gc(0.5)
 {
   // Compute face-related quantities
   const std::unique_ptr<const Elem> face = _elem_info->elem()->build_side_ptr(_elem_side_id);
@@ -53,9 +54,11 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
     Point side_2 = face->node_ref(0) - face->node_ref(2);
     _normal = side_1.cross(side_2);
     _normal /= _normal.norm();
-    if (_normal * vector_to_face < 0.0)
+    if (_normal * _r_cf < 0.0)
       _normal *= -1.0;
   }
+  _r_cf_mag = vector_to_face * _normal;
+  _r_cf = _r_cf_mag * _normal;
 }
 
 void
@@ -67,28 +70,17 @@ FaceInfo::computeCoefficients(const ElemInfo * const neighbor_info)
   _neighbor_side_id = _neighbor_info->elem()->which_neighbor_am_i(_elem_info->elem());
 
   // Setup quantities used for the approximation of the spatial derivatives
-  _d_cf = _neighbor_info->centroid() - _elem_info->centroid();
-  _d_cf_mag = _d_cf.norm();
-  _e_cf = _d_cf / _d_cf_mag;
+  _d_cn = _neighbor_info->centroid() - _elem_info->centroid();
+  _d_cn_mag = _d_cn.norm();
+  _e_cn = _d_cn / _d_cn_mag;
 
-  // Compute the position of the intersection of e_CF and the surface
+  _r_nf_mag = -(_face_centroid - _neighbor_info->centroid()) * _normal;
+  _r_nf = -_r_nf_mag * _normal;
+
   Point r_intersection =
       _elem_info->centroid() +
-      (((_face_centroid - _elem_info->centroid()) * _normal) / (_e_cf * _normal)) * _e_cf;
-
-  _skewness_correction_vector = _face_centroid - r_intersection;
+      (((_face_centroid - _elem_info->centroid()) * _normal) / (_e_cn * _normal)) * _e_cn;
 
   // For interpolation coefficients
-  _gc = (_neighbor_info->centroid() - r_intersection).norm() / _d_cf_mag;
-}
-
-void
-FaceInfo::computeCoefficients()
-{
-  _d_cf_mag = (_face_centroid - _elem_info->centroid()) * _normal;
-  _d_cf = _d_cf_mag * _normal;
-  _e_cf = _normal;
-
-  _skewness_correction_vector = _face_centroid - (_elem_info->centroid() + _d_cf);
-  _gc = 0.5;
+  _gc = (_neighbor_info->centroid() - r_intersection).norm() / _d_cn_mag;
 }

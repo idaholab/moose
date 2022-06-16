@@ -29,17 +29,14 @@ class ElemInfo
 public:
   /// Constructor using a real element
   ElemInfo(const Elem * const elem)
-    : _elem(elem),
-      _volume(_elem->volume()),
-      _centroid(_elem->vertex_average()),
-      _subdomain_id(elem->subdomain_id())
+    : _elem(elem), _volume(_elem->volume()), _centroid(_elem->vertex_average())
   {
   }
 
   const Elem * elem() const { return _elem; }
   Real volume() const { return _volume; }
   const Point & centroid() const { return _centroid; }
-  SubdomainID subdomain_id() const { return _subdomain_id; }
+  SubdomainID subdomain_id() const { return _elem->subdomain_id(); }
 
 protected:
   /// Reference to the element in libmesh
@@ -48,6 +45,4 @@ protected:
   const Real _volume;
   /// Centroid of the element
   Point _centroid;
-  /// Subdomain ID of the element
-  const SubdomainID _subdomain_id;
 };

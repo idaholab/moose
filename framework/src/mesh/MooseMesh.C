@@ -3257,25 +3257,27 @@ MooseMesh::buildFiniteVolumeInfo() const
 
         auto & fi = _all_face_info.back();
 
-        // We initialize the weights/other information in faceInfo. We need these
-        // for the computation of spatial differential operators in a finite volume
-        // setting
-        if (fi.isBoundary() || fi.facesRemote())
-          fi.computeCoefficients();
-        else
-          fi.computeCoefficients(&_internal_elem_info[_elem_to_elem_info.find(neighbor)->second]);
-
         // get all the sidesets that this face is contained in and cache them
         // in the face info.
         std::set<boundary_id_type> & boundary_ids = fi.boundaryIDs();
         boundary_ids.clear();
 
-        if (fi.isBoundary())
+        auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
+        if (lit != side_map.end())
+          boundary_ids.insert(lit->second.begin(), lit->second.end());
+
+        if (fi.neighborPtr())
         {
-          auto it = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
+          auto it = side_map.find(Keytype(fi.neighborPtr(), fi.neighborSideID()));
           if (it != side_map.end())
             boundary_ids.insert(it->second.begin(), it->second.end());
         }
+
+        // We initialize the weights/other information in faceInfo. We need these
+        // for the computation of spatial differential operators in a finite volume
+        // setting
+        if (neighbor)
+          fi.computeCoefficients(&_internal_elem_info[_elem_to_elem_info.find(neighbor)->second]);
       }
     }
     counter += 1;

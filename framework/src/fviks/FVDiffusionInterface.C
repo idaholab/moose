@@ -42,16 +42,12 @@ FVDiffusionInterface::computeQpResidual()
   Point one_over_gradient_support = _face_info->elemCentroid() - _face_info->neighborCentroid();
   one_over_gradient_support /= (one_over_gradient_support * one_over_gradient_support);
 
-  std::cout << "here" << std::endl;
-  _console << one_over_gradient_support << std::endl;
   const auto gradient = elemIsOne() ? (var1().getElemValue(&_face_info->elem()) -
                                        var2().getElemValue(_face_info->neighborPtr())) *
                                           one_over_gradient_support
                                     : (var1().getElemValue(_face_info->neighborPtr()) -
                                        var2().getElemValue(&_face_info->elem())) *
                                           -one_over_gradient_support;
-
-  _console << gradient(0) << std::endl;
 
   ADReal diffusivity = Moose::FV::linearInterpolation(
       coef_elem(elemFromFace()), coef_neighbor(neighborFromFace()), *_face_info, true);

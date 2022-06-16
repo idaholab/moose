@@ -65,10 +65,15 @@ FVDiffusion::computeQpResidual()
 {
   auto dudn = gradUDotNormal();
 
+  _console << "Block " << blocks()[0] << " dudn " << dudn << std::endl;
+
   // Eventually, it will be nice to offer automatic-switching triggered by
   // input parameters to change between different interpolation methods for
   // this.
   const auto k = _coeff(Moose::FV::makeCDFace(*_face_info, faceArgSubdomains()));
+
+  _console << "Subdomain 1 " << faceArgSubdomains().first << " Subdomain 2 " << faceArgSubdomains().second << std::endl;
+  _console << "Block " << blocks()[0] << " k " << k << std::endl;
 
   return -1 * k * dudn;
 }

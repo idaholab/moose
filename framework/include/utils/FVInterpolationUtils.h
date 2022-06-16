@@ -266,7 +266,7 @@ interpCoeff(const Limiter<T> & limiter,
   const auto psi = limiter(phi_upwind,
                            phi_downwind,
                            grad_phi_upwind,
-                           fi_elem_is_upwind ? fi.dCF() : RealVectorValue(-fi.dCF()));
+                           fi_elem_is_upwind ? fi.dCN() : RealVectorValue(-fi.dCN()));
 
   const auto w_f = fi_elem_is_upwind ? fi.gC() : (1. - fi.gC());
 

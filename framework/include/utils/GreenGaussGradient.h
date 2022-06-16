@@ -295,7 +295,7 @@ greenGaussGradient(const FaceArg & face_arg,
     const auto & value_neighbor = functor(neighbor_arg);
 
     face_gradient += outer_product(
-        fi.eCF(), (value_neighbor - value_elem) / fi.dCFMag() - face_gradient * fi.eCF());
+        fi.eCN(), (value_neighbor - value_elem) / fi.dCNMag() - face_gradient * fi.eCN());
     return face_gradient;
   }
 

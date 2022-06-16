@@ -2,7 +2,7 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 20
+    nx = 4
     xmax = 2
   []
   [./subdomain1]

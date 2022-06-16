@@ -83,29 +83,19 @@ FVMatAdvectionFunctionBC::FVMatAdvectionFunctionBC(const InputParameters & param
 ADReal
 FVMatAdvectionFunctionBC::computeQpResidual()
 {
-  ADReal flux_var_face;
-
   mooseAssert(
       _flux_variable_exact_solution,
       "_flux_variable_exact_solution is null in FVMatAdvectionFunctionBC::computeQpResidual. Did "
       "you suppress the flux_variable_exact_solution parameter in your derived class and forget to "
       "override computeQpResidual?");
 
-  Real flux_var_ghost = _flux_variable_exact_solution->value(_t, _face_info->faceCentroid());
-  RealVectorValue v_ghost(
+  ADReal flux_var_face = _flux_variable_exact_solution->value(_t, _face_info->faceCentroid());
+  ADRealVectorValue v_face(
       _vel_x_exact_solution.value(_t, _face_info->faceCentroid()),
       _vel_y_exact_solution ? _vel_y_exact_solution->value(_t, _face_info->faceCentroid()) : 0,
       _vel_z_exact_solution ? _vel_z_exact_solution->value(_t, _face_info->faceCentroid()) : 0);
 
-  ADRealVectorValue v_face = Moose::FV::linearInterpolation(
-      _vel(makeElemArg(&_face_info->elem())), v_ghost, *_face_info, true);
+  _console << v_face(0) << flux_var_face << std::endl;
 
-  interpolate(_advected_interp_method,
-              flux_var_face,
-              _adv_quant(makeElemArg(&_face_info->elem())),
-              flux_var_ghost,
-              v_face,
-              *_face_info,
-              true);
   return _normal * v_face * flux_var_face;
 }

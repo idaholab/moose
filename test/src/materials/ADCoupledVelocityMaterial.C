@@ -55,12 +55,7 @@ ADCoupledVelocityMaterial::ADCoupledVelocityMaterial(const InputParameters & par
 
   addFunctorProperty<ADReal>(
       getParam<MaterialPropertyName>("rho_u"),
-      [this](const auto & r, const auto & t) -> ADReal
-      {
-        std::cout << "rho " << _rho(r, t) << std::endl;
-        std::cout << "vel_x " << _vel_x(r, t) << std::endl;
-        return _rho(r, t) * _vel_x(r, t);
-      },
+      [this](const auto & r, const auto & t) -> ADReal { return _rho(r, t) * _vel_x(r, t); },
       clearance_schedule);
 
   addFunctorProperty<ADReal>(

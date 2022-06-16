@@ -78,7 +78,29 @@ public:
   ///@{
   /// Returns the skewness-correction vector (vector between the approximate and real face
   /// centroids).
-  const Point & skewnessCorrectionVector() const { return _skewness_correction_vector; }
+  const Point skewnessCorrectionVector() const
+  {
+    if (!_neighbor_info)
+      mooseError("The neighbor info does not exist so the double-sided skewness-correction vector "
+                 "cannot be returned!");
+
+    Point r_intersection =
+        _elem_info->centroid() +
+        (((_face_centroid - _elem_info->centroid()) * _normal) / (_e_cn * _normal)) * _e_cn;
+
+    return _face_centroid - r_intersection;
+  }
+
+  const Point singleSidedSkewnessCorrectionVector(bool elem_side = true) const
+  {
+    if (!_neighbor_info && !elem_side)
+      mooseError("The neighbor info does not exist so the single-sided skewness-correction vector "
+                 "cannot be returned from the neighbor side!");
+    if (elem_side)
+      return _face_centroid - _r_cf;
+    else
+      return _face_centroid - _r_nf;
+  }
   ///@}
 
   ///@{
@@ -190,20 +212,54 @@ public:
    * @return the distance vector drawn from centroid C to F, or in terms of MOOSE implementation,
    * the distance vector obtained from subtracting the element centroid from the neighbor centroid
    */
-  const RealVectorValue & dCF() const { return _d_cf; }
+  const RealVectorValue & dCN() const
+  {
+    if (!_neighbor_info)
+      mooseError(
+          "The neighbor info does not exist so the cell-neighbor vector cannot be returned!");
+    return _d_cn;
+  }
 
   /**
    * @return the magnitude of the distance vector between centroids C and F, or in terms of MOOSE
    * implementation, the magnitude of the distance vector between neighbor and element centroids
    */
-  Real dCFMag() const { return _d_cf_mag; }
+  Real dCNMag() const
+  {
+    if (!_neighbor_info)
+      mooseError(
+          "The neighbor info does not exist so the cell-neighbor distance cannot be returned!");
+    return _d_cn_mag;
+  }
+
+  Real cellCenterToFaceDistance(bool elem_side = true) const
+  {
+    if (!_neighbor_info && !elem_side)
+      mooseError("The neighbor info does not exist so the distance to the face cannot be returned "
+                 "from the neighbor side!");
+    if (elem_side)
+      return _r_cf_mag;
+    else
+      return _r_nf_mag;
+  }
+
+  const RealVectorValue & cellCenterToFaceVector(bool elem_side = true) const
+  {
+    if (!_neighbor_info && !elem_side)
+      mooseError("The neighbor info does not exist so the vector to the face cannot be returned "
+                 "from the neighbor side!");
+    if (elem_side)
+      return _r_cf;
+    else
+      return _r_nf;
+  }
 
   /**
    * @return the normalized (e.g. unit) distance vector drawn from centroid C to F, or in terms of
    * MOOSE implementation, the normalized (e.g. unit) distance vector obtained from subtracting the
    * element centroid from the neighbor centroid
    */
-  const RealVectorValue & eCF() const { return _e_cf; }
+  const RealVectorValue & eCN() const { return _e_cn; }
 
   /**
    * @return the ID of the processor that owns this object
@@ -221,7 +277,6 @@ public:
    * together with other quantities used to generate spatial operators.
    */
   void computeCoefficients(const ElemInfo * const neighbor_info);
-  void computeCoefficients();
 
 private:
   /// the elem and neighbor elems
@@ -236,25 +291,21 @@ private:
 
   /// the elem local side id
   const unsigned int _elem_side_id;
+  unsigned int _neighbor_side_id;
 
   Real _face_area;
   Point _face_centroid;
 
-  /// the neighbor local side ide
-  unsigned int _neighbor_side_id;
-
   /// the distance vector between neighbor and element centroids
-  RealVectorValue _d_cf;
+  RealVectorValue _d_cn;
+  RealVectorValue _r_nf;
+  RealVectorValue _r_cf;
+  RealVectorValue _e_cn;
 
   /// the distance norm between neighbor and element centroids
-  Real _d_cf_mag;
-
-  /// The unit normal vector pointing from element center C to element center F
-  RealVectorValue _e_cf;
-
-  /// Holds the skewness-correction vector (vector between the approximate and real face
-  /// centroids).
-  Point _skewness_correction_vector;
+  Real _d_cn_mag;
+  Real _r_nf_mag;
+  Real _r_cf_mag;
 
   /// Geometric weighting factor for face value interpolation
   Real _gc;

@@ -16,9 +16,7 @@ a=1.1
 
 [Variables]
   [./v]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
   [../]
 []
 
@@ -69,8 +67,10 @@ a=1.1
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      NONZERO'
+  petsc_options_iname = '-snes_type -pc_type'
+  petsc_options_value = 'ksponly lu'
+  petsc_options = '-ksp_view_pmat -ksp_view_rhs'
+  line_search = none
 []
 
 [Outputs]

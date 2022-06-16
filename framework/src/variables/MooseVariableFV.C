@@ -790,6 +790,9 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
   const Elem * const elem_one = var_defined_on_elem ? &fi.elem() : fi.neighborPtr();
   const Elem * const elem_two = var_defined_on_elem ? fi.neighborPtr() : &fi.elem();
 
+  std::cout << "Face info: " << &fi << " is boundary " << fi.isBoundary() << std::endl;
+  std::cout << "Elem one " << elem_one << " elem two " << elem_two << std::endl;
+
   const VectorValue<ADReal> elem_one_grad = adGradSln(elem_one, correct_skewness);
 
   VectorValue<ADReal> * unc_face_grad_pointer = &_temp_face_unc_gradient;
@@ -872,7 +875,11 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   // perform the correction. Note that direction is important here because we have a minus sign.
   // Neighbor has to be neighbor, and elem has to be elem. Hence all the elem_is_elem_one logic
   // above
-  face_grad += ((side_two_value - side_one_value) / fi.dCFMag() - face_grad * fi.eCF()) * fi.eCF();
+
+  std::cout << "elem " << side_one_value << " neighbor " << side_two_value << " dcf " << fi.dCNMag()
+            << std::endl;
+
+  face_grad += ((side_two_value - side_one_value) / fi.dCNMag() - face_grad * fi.eCN()) * fi.eCN();
 
   return face_grad;
 }

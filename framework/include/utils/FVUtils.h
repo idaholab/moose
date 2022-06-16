@@ -30,6 +30,7 @@ loopOverElemFaceInfo(const Elem & elem,
                      const unsigned int rz_radial_coord = libMesh::invalid_uint)
 {
   mooseAssert(elem.active(), "We should never call this method with an inactive element");
+  std::cout << "Loop on elem " << &elem << std::endl;
 
   for (const auto side : elem.side_index_range())
   {
@@ -38,18 +39,28 @@ loopOverElemFaceInfo(const Elem & elem,
     bool elem_has_info;
 
     std::set<const Elem *> neighbors;
+    std::cout << "Candidate neighbor " << candidate_neighbor << std::endl;
+    if (candidate_neighbor)
+    {
+      std::cout << "Found nonnull active: " << candidate_neighbor->active() << std::endl;
+    }
 
     // See MooseMesh::buildFiniteVolumeInfo for corresponding checks/additions of FaceInfo
+
+    // If the neighbor doesn't exist we must be on a boundary so we can assume that
+    // the faceInfo corresponds to the element
     if (!candidate_neighbor)
     {
       neighbors.insert(candidate_neighbor);
       elem_has_info = true;
     }
+    // If we have a difference in refinement levels, we do an additional check
     else if (elem.level() != candidate_neighbor->level())
     {
       neighbors.insert(candidate_neighbor);
       elem_has_info = candidate_neighbor->level() < elem.level();
     }
+    // Check if we are next to an element which was refined
     else if (!candidate_neighbor->active())
     {
       // We must be next to an element that has been refined
@@ -79,11 +90,18 @@ loopOverElemFaceInfo(const Elem & elem,
       elem_has_info = elem.id() < candidate_neighbor->id();
     }
 
+    std::cout << "Elem has info: " << elem_has_info << std::endl;
+
     for (const Elem * const neighbor : neighbors)
     {
       const FaceInfo * const fi =
           elem_has_info ? mesh.faceInfo(&elem, side)
                         : mesh.faceInfo(neighbor, neighbor->which_neighbor_am_i(&elem));
+
+      std::cout << "My neighbor: " << neighbor << std::endl;
+      std::cout << "My faceinfo: " << fi << std::endl;
+      std::cout << "  Facienfo Elem: " << &fi->elem() << std::endl;
+      std::cout << "  Facienfo Neighbor: " << fi->neighborPtr() << std::endl;
 
       mooseAssert(fi, "We should have found a FaceInfo");
       mooseAssert(elem_has_info ? &elem == &fi->elem() : &elem == fi->neighborPtr(),
