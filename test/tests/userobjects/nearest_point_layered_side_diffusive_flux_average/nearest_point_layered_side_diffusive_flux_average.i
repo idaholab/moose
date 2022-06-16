@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 40
-  ny = 10
-  nz = 10
+  nx = 10
+  ny = 4
+  nz = 4
 []
 
 [Variables]
@@ -37,7 +37,7 @@
 
 [UserObjects]
   [./nplsfa]
-    type = NearestPointLayeredSideFluxAverage
+    type = NearestPointLayeredSideDiffusiveFluxAverage
     direction = x
     points='0.25 0 0.25 0.75 0 0.25 0.25 0 0.75 0.75 0 0.75'
     num_layers = 10

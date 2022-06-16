@@ -21,11 +21,11 @@
  * Given a list of points this object computes the layered average flux
  * closest to each one of those points.
  */
-class NearestPointLayeredSideFluxAverage
+class NearestPointLayeredSideDiffusiveFluxAverage
   : public NearestPointBase<LayeredSideDiffusiveFluxAverage, SideIntegralVariableUserObject>
 {
 public:
   static InputParameters validParams();
 
-  NearestPointLayeredSideFluxAverage(const InputParameters & parameters);
+  NearestPointLayeredSideDiffusiveFluxAverage(const InputParameters & parameters);
 };

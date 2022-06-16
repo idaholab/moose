@@ -7,24 +7,28 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NearestPointLayeredSideFluxAverage.h"
+#include "NearestPointLayeredSideDiffusiveFluxAverage.h"
 #include "LayeredSideDiffusiveFluxAverage.h"
 
-registerMooseObject("MooseApp", NearestPointLayeredSideFluxAverage);
+registerMooseObject("MooseApp", NearestPointLayeredSideDiffusiveFluxAverage);
+registerMooseObjectRenamed("MooseApp",
+                           NearestPointLayeredSideFluxAverage,
+                           "12/31/2022 24:00",
+                           NearestPointLayeredSideDiffusiveFluxAverage);
 
 InputParameters
-NearestPointLayeredSideFluxAverage::validParams()
+NearestPointLayeredSideDiffusiveFluxAverage::validParams()
 {
   InputParameters params = NearestPointBase<LayeredSideDiffusiveFluxAverage,
                                             SideIntegralVariableUserObject>::validParams();
 
   params.addClassDescription(
-      "Compute layered side flux averages for nearest-point based subdomains");
+      "Compute layered side diffusive flux averages for nearest-point based subdivisions");
 
   return params;
 }
 
-NearestPointLayeredSideFluxAverage::NearestPointLayeredSideFluxAverage(
+NearestPointLayeredSideDiffusiveFluxAverage::NearestPointLayeredSideDiffusiveFluxAverage(
     const InputParameters & parameters)
   : NearestPointBase<LayeredSideDiffusiveFluxAverage, SideIntegralVariableUserObject>(parameters)
 {
