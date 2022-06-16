@@ -32,5 +32,5 @@ CoupledVarDirichletBC::CoupledVarDirichletBC(const InputParameters & parameters)
 Real
 CoupledVarDirichletBC::computeQpValue()
 {
-  return  _coupled_var[_qp];
+  return  _scale_factor(_current_elem, _t) * _coupled_var[_qp];
 }
