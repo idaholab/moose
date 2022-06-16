@@ -235,7 +235,6 @@ two_term_boundary_expansion=true
 []
 
 [Outputs]
-  exodus = true
   csv = true
   [dof]
     type = DOFMap

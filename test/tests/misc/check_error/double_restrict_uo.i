@@ -67,7 +67,3 @@
 
   solve_type = 'PJFNK'
 []
-
-[Outputs]
-  exodus = true
-[]

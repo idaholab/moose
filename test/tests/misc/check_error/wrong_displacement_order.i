@@ -91,7 +91,3 @@
   dtmin = .001
 []
 
-[Outputs]
-  exodus = true
-[]
-

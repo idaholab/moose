@@ -90,7 +90,3 @@
   type = Transient
   num_steps = 1
 []
-
-[Outputs]
-  exodus = true
-[]

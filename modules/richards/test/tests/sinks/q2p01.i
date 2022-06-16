@@ -211,7 +211,6 @@
 
 [Outputs]
   file_base = q2p01
-  exodus = true
   [./CSV]
     type = CSV
   [../]

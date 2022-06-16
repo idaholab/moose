@@ -133,7 +133,6 @@
 []
 
 [Outputs]
-  csv = true
   console = true
   [./out]
     type = Exodus

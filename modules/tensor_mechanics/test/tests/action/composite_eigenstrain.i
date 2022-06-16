@@ -143,7 +143,6 @@
 []
 
 [Outputs]
-  csv = true
   exodus = true
   checkpoint = true
 []

@@ -301,23 +301,19 @@
   [./av_linesearch]
     type = ElementAverageValue
     variable = linesearch
-    outputs = 'console csv'
-  [../]
+    outputs = 'console'  [../]
   [./av_ld]
     type = ElementAverageValue
     variable = ld
-    outputs = 'console csv'
-  [../]
+    outputs = 'console'  [../]
   [./av_constr_added]
     type = ElementAverageValue
     variable = constr_added
-    outputs = 'console csv'
-  [../]
+    outputs = 'console'  [../]
   [./av_iter]
     type = ElementAverageValue
     variable = iter
-    outputs = 'console csv'
-  [../]
+    outputs = 'console'  [../]
 []
 
 
@@ -407,5 +403,4 @@
 [Outputs]
   file_base = cto14
   exodus = false
-  csv = true
 []

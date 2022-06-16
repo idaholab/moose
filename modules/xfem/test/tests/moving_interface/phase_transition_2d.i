@@ -156,5 +156,4 @@
   execute_on = timestep_end
   exodus = true
   perf_graph = true
-  csv = true
 []

@@ -251,7 +251,6 @@ name = 'finite_rr'
 []
 
 [Outputs]
-  exodus = true
   file_base = ${name}
   [comp]
     type = CSV

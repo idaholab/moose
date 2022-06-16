@@ -63,7 +63,8 @@
     point = '0.75 0.75 0'
   [../]
 []
+
 [Outputs]
-  exodus = true
   csv = true
+  exodus = true
 []

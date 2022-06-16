@@ -216,6 +216,5 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = th22
-  exodus = true
   csv = true
 []

@@ -63,6 +63,3 @@ L = 1
     sort_by = x
   []
 []
-
-[Outputs]
-[]

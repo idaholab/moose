@@ -208,5 +208,4 @@ velocity_face_value_caching = true
   hide = 'physical'
   perf_graph = true
   exodus = true
-  csv = true
 []

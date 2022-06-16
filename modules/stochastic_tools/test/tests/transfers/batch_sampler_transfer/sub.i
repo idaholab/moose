@@ -55,6 +55,3 @@
     type = SamplerReceiver
   []
 []
-
-[Outputs]
-[]

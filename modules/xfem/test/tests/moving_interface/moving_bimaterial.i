@@ -310,7 +310,6 @@
 [Outputs]
   exodus = true
   execute_on = timestep_end
-  csv = true
   [./console]
     type = Console
     output_linear = true

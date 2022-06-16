@@ -176,29 +176,25 @@ rho=2.5
     type = ElementL2Error
     variable = vel_x
     function = vel_x_func
-    outputs = 'console csv'
-    execute_on = 'timestep_end'
+    outputs = 'console'    execute_on = 'timestep_end'
   [../]
   [./L2vel_y]
     variable = vel_y
     function = vel_y_func
     type = ElementL2Error
-    outputs = 'console csv'
-    execute_on = 'timestep_end'
+    outputs = 'console'    execute_on = 'timestep_end'
   [../]
   [./L2p]
     variable = p
     function = p_func
     type = ElementL2Error
-    outputs = 'console csv'
-    execute_on = 'timestep_end'
+    outputs = 'console'    execute_on = 'timestep_end'
   [../]
   [./L2vxx]
     variable = vxx
     function = vxx_func
     type = ElementL2Error
-    outputs = 'console csv'
-    execute_on = 'timestep_end'
+    outputs = 'console'    execute_on = 'timestep_end'
   [../]
 []
 

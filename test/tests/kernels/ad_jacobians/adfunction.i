@@ -46,7 +46,3 @@
   solve_type = NEWTON
   num_steps = 1
 []
-
-[Outputs]
-  exodus = true
-[]

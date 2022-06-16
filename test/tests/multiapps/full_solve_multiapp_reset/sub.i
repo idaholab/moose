@@ -42,7 +42,3 @@
   dt = 0.25
   solve_type = 'NEWTON'
 []
-
-[Outputs]
-  exodus = true
-[]

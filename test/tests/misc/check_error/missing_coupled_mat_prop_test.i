@@ -75,5 +75,4 @@
 
 [Outputs]
   file_base = missing_mat_prop_test
-  exodus = true
 []

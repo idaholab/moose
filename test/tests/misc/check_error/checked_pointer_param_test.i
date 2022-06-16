@@ -53,5 +53,4 @@ x[Mesh]
 
 [Outputs]
   file_base = out
-  exodus = true
 []

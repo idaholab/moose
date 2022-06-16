@@ -218,7 +218,6 @@
 
 [Outputs]
   file_base = single_point_2d_out_glued_kin
-  exodus = true
   print_linear_residuals = true
   perf_graph = true
   csv = true

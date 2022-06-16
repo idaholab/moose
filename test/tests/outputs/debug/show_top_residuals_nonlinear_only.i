@@ -43,7 +43,6 @@
 []
 
 [Outputs]
-  exodus = true
   [./debug] # This is only a test, this should be turned on via the [Debug] block
     type = TopResidualDebugOutput
     num_residuals = 1

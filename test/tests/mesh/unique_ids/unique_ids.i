@@ -55,7 +55,3 @@
     type = VerifyNodalUniqueID
   [../]
 []
-
-[Outputs]
-  exodus = true
-[]

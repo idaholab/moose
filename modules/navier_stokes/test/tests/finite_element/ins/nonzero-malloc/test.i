@@ -182,6 +182,5 @@
 
 [Outputs]
   file_base = lid_driven_out
-  exodus = true
   perf_graph = true
 []

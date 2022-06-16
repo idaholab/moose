@@ -117,7 +117,6 @@
 
 [Outputs]
   exodus = true
-  csv = true
   perf_graph = true
   checkpoint = true
   execute_on = 'INITIAL TIMESTEP_END FINAL'

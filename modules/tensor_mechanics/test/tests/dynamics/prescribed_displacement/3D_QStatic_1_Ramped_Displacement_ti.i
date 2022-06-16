@@ -323,6 +323,5 @@
 [Outputs]
   file_base = "3D_QStatic_1_Ramped_Displacement_out"
   exodus = true
-  csv = true
   perf_graph = true
 []

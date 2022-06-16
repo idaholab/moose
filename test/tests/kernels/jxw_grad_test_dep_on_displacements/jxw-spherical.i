@@ -83,7 +83,6 @@
     type = DOFMap
     execute_on = 'initial'
   [../]
-  exodus = true
 []
 
 [ICs]

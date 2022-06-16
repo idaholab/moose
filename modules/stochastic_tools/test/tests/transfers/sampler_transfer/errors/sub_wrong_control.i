@@ -52,7 +52,3 @@
     parameter = 'BCs/left/value'
   []
 []
-
-[Outputs]
-  exodus = true
-[]

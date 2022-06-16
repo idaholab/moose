@@ -80,7 +80,3 @@
     order = SECOND
   []
 []
-
-[Outputs]
-  exodus = true
-[]

@@ -228,6 +228,5 @@
 [Outputs]
   file_base = pressure_pulse_1d_3comp
   print_linear_residuals = true
-  exodus = true
   csv = true
 []

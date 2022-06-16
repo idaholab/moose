@@ -51,10 +51,6 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Outputs]
-  csv = true
-[]
-
 [Functions]
   [./func_coef]
     type = ParsedFunction

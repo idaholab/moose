@@ -34,6 +34,3 @@
     max_degree = 3
   []
 []
-
-[Outputs]
-[]

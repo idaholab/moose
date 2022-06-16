@@ -149,7 +149,6 @@ offset = 1e-2
 []
 
 [Outputs]
-  exodus = true
   [checkfile]
     type = CSV
     show = 'cont_press friction'

@@ -53,9 +53,6 @@
   [../]
 []
 
-[Outputs]
-[]
-
 [Controls]
   [./damping_control]
     type = TimePeriod

@@ -101,5 +101,4 @@ v_right = 50
 
 [Outputs]
   csv = true
-  exodus = true
 []
