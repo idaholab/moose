@@ -92,7 +92,6 @@
     poissons_ratio = 0.3
   []
   [stress]
-    displacements ='disp_x disp_y'
     type = ComputeLinearElasticStress
   []
 []
