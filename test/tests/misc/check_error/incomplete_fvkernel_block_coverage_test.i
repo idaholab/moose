@@ -52,6 +52,3 @@
   type = Steady
   solve_type = 'PJFNK'
 []
-
-[Outputs]
-[]

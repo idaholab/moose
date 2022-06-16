@@ -52,7 +52,6 @@
 
 [Outputs]
   exodus = true
-  csv = true
 []
 
 [Materials]

@@ -18,7 +18,3 @@
 [Executioner]
   type = Steady
 []
-
-[Outputs]
-  exodus = true
-[]

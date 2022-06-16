@@ -204,7 +204,6 @@ velocity_interp_method='rc'
 []
 
 [Outputs]
-  exodus = true
   csv = true
 []
 

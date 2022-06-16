@@ -50,5 +50,4 @@
 
 [Outputs]
   file_base = out
-  exodus = true
 []

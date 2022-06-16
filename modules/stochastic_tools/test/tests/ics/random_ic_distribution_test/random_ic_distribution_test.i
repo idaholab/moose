@@ -80,7 +80,6 @@
 []
 
 [Outputs]
-  exodus = true
   [initial]
     type = CSV
     execute_on = initial

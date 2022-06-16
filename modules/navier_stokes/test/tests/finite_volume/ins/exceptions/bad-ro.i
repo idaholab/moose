@@ -150,7 +150,3 @@ rho=1
   petsc_options_value = 'asm      100                lu           NONZERO'
   nl_rel_tol = 1e-12
 []
-
-[Outputs]
-  exodus = true
-[]

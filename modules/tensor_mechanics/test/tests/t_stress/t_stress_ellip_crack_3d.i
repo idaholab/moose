@@ -125,6 +125,5 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = t_stress_ellip_crack_out
-  exodus = true
   csv = true
 []

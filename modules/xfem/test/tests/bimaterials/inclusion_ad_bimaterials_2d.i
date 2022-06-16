@@ -246,7 +246,6 @@
   exodus = true
   file_base = inclusion_bimaterials_2d_out
   execute_on = timestep_end
-  csv = true
   [./console]
     type = Console
     output_linear = true

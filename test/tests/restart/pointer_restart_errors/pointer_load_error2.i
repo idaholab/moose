@@ -52,7 +52,6 @@
 []
 
 [Outputs]
-  exodus = true
   [./out]
     type = Checkpoint
     num_files = 1

@@ -184,7 +184,6 @@
 []
 
 [Outputs]
-  exodus = true
   csv = true
   [dofmap]
     type = DOFMap

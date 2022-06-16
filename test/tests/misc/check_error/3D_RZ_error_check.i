@@ -52,7 +52,6 @@
 
 [Outputs]
   file_base = out
-  exodus = true
 []
 
 # Try to specify an RZ problem with a 3D mesh

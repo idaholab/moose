@@ -446,6 +446,5 @@
 
 [Outputs]
   perf_graph = true
-  exodus = true
   csv = true
 []

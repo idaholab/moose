@@ -53,6 +53,6 @@
 []
 
 [Outputs]
-  csv = true
   perf_graph = true
+  csv = true
 []

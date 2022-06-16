@@ -323,7 +323,6 @@ name = 'small'
 []
 
 [Outputs]
-  exodus = true
   file_base = ${name}
   checkpoint = true
   [comp]

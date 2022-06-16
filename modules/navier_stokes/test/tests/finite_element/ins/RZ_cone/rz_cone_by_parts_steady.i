@@ -36,7 +36,6 @@ petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
 []
 
 [Outputs]
-  csv = true
   console = true
   [./out]
     type = Exodus

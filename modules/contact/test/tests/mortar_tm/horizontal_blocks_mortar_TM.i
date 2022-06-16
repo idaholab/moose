@@ -183,7 +183,3 @@ offset = 0.01
   nl_abs_tol = 1e-6
   nl_max_its = 100
 []
-
-[Outputs]
-  exodus = true
-[]

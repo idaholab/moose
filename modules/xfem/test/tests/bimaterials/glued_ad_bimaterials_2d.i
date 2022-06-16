@@ -277,7 +277,6 @@
   exodus = true
   file_base = glued_bimaterials_2d_out
   execute_on = timestep_end
-  csv = true
   [./console]
     type = Console
     output_linear = true

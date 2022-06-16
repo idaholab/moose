@@ -111,7 +111,6 @@
 
 [Outputs]
   exodus = true
-  csv = true
   perf_graph = true
   # print_linear_residuals = false
 []

@@ -54,7 +54,3 @@
     timestep_to_fail = 2
   []
 []
-
-[Outputs]
-  exodus = true
-[]

@@ -40,7 +40,6 @@
 []
 
 [Outputs]
-  exodus = true
   append_date = true
   [./date]
     type = Exodus

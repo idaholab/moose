@@ -56,6 +56,3 @@
     variable = T
   []
 []
-
-[Outputs]
-[]

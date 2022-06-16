@@ -229,7 +229,6 @@ name = 'small'
 []
 
 [Outputs]
-  exodus = true
   file_base = ${name}
   [comp]
     type = CSV

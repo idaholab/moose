@@ -45,5 +45,4 @@
 
 [Outputs]
   csv = true
-  exodus = true
 []

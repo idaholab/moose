@@ -272,7 +272,6 @@
 [Outputs]
   exodus = true
   execute_on = timestep_end
-  csv = true
   file_base = moving_bimaterial_out
   perf_graph = true
   [./console]

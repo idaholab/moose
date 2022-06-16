@@ -56,10 +56,6 @@
   num_steps = 4
 []
 
-[Outputs]
-  exodus = true
-[]
-
 [Debug]
   show_material_props = true
 []

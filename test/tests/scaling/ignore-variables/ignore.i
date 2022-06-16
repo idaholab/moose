@@ -68,7 +68,3 @@
   solve_type = NEWTON
   verbose = true
 []
-
-[Outputs]
-  exodus = true
-[]

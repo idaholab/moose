@@ -153,7 +153,3 @@
   end_time = 1.0
   dt = 0.1
 []
-
-[Outputs]
-  csv = true
-[]

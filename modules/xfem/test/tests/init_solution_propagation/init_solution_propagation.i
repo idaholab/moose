@@ -159,7 +159,6 @@
 
 [Outputs]
   exodus = true
-  csv = true
   [./console]
     type = Console
     output_linear = true

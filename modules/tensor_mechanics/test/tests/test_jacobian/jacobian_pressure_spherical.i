@@ -79,7 +79,3 @@
   end_time = 1
   dt = 1
 []
-
-[Outputs]
-  exodus = true
-[]
