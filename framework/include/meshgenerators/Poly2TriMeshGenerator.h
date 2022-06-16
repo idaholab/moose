@@ -44,9 +44,6 @@ protected:
   /// Whether to stitch to the mesh defining each hole
   const std::vector<bool> _stitch_holes;
 
-  /// How many nodes to add per hole boundary segment
-  const std::vector<unsigned int> _interpolate_holes;
-
   /// Whether to allow automatically refining each hole boundary
   const std::vector<bool> _refine_holes;
 
