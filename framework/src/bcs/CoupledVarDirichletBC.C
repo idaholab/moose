@@ -26,8 +26,7 @@ CoupledVarDirichletBC::CoupledVarDirichletBC(const InputParameters & parameters)
   : DirichletBCBase(parameters),
     _coupled_var(coupledValue("v")),
     _coupled_num(coupled("v")),
-    _coef(getParam<Real>("coef")),
-    _scale_factor(coupledValue("scale_factor"))
+    _scale_factor(getFunctor<ADReal>("scale_factor"))
 {
 }
 
