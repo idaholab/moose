@@ -10,6 +10,7 @@
 #pragma once
 
 #include "RankTwoTensor.h"
+#include "SymmetricRankTwoTensor.h"
 
 // forward declarations
 template <typename>
@@ -67,12 +68,12 @@ public:
   }
 
   // @{ getters
-  template <typename T2 = RankTwoTensorTempl<typename T::value_type>>
+  template <typename T2 = T>
   T2 get() const
   {
     return static_cast<T2>(assemble());
   }
-  template <typename T2 = RankTwoTensorTempl<typename T::value_type>>
+  template <typename T2 = T>
   T2 get()
   {
     return static_cast<T2>(assemble());
@@ -280,6 +281,7 @@ FactorizedRankTwoTensorTempl<T>::operator/(const T2 & a) const
   }
 }
 
-// In the future, we could also instantiate on [AD]SymmtericRankTwoTensor
 typedef FactorizedRankTwoTensorTempl<RankTwoTensor> FactorizedRankTwoTensor;
 typedef FactorizedRankTwoTensorTempl<ADRankTwoTensor> ADFactorizedRankTwoTensor;
+typedef FactorizedRankTwoTensorTempl<SymmetricRankTwoTensor> FactorizedSymmetricRankTwoTensor;
+typedef FactorizedRankTwoTensorTempl<ADSymmetricRankTwoTensor> ADFactorizedSymmetricRankTwoTensor;

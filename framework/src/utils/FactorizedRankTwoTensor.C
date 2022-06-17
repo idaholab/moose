@@ -100,3 +100,5 @@ FactorizedRankTwoTensorTempl<T>::addIa(const typename T::value_type & a)
 
 template class FactorizedRankTwoTensorTempl<RankTwoTensor>;
 template class FactorizedRankTwoTensorTempl<ADRankTwoTensor>;
+template class FactorizedRankTwoTensorTempl<SymmetricRankTwoTensor>;
+template class FactorizedRankTwoTensorTempl<ADSymmetricRankTwoTensor>;

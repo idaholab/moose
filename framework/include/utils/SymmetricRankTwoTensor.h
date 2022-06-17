@@ -73,6 +73,9 @@ template <typename T>
 class SymmetricRankTwoTensorTempl
 {
 public:
+  /// For generic programming
+  typedef T value_type;
+
   ///@{ tensor dimension and Mandel vector length
   static constexpr unsigned int Ndim = Moose::dim;
   static constexpr unsigned int N = Ndim + (Ndim * (Ndim - 1)) / 2;
