@@ -7,6 +7,8 @@ parameter. If the solution values to be matched are between different variables,
 `secondary_variable` parameter can also be supplied. Lagrange multipliers are used
 to perform the constraint enforcement.
 
+See [PenaltyEqualValueConstraint](/PenaltyEqualValueConstraint.md) for penalty-based enforcement of analogous constraints.
+
 !syntax description /Constraints/EqualValueConstraint
 
 !syntax parameters /Constraints/EqualValueConstraint
