@@ -299,7 +299,7 @@ class HTMLRenderer(Renderer):
         for i, css in enumerate(self.get('extra-css')):
             files[('extra-css-{}'.format(i), 'css')] = (css, {})
         for i, js in enumerate(self.get('extra-js')):
-            self.addJavaScript('extra-js-{}.format(i)', js)
+            self.addJavaScript('extra-js-{}'.format(i), js)
         for (key, context) in sorted(files, key=(lambda f: f[1])):
             name, kwargs = files.pop((key, context))
             if context == 'css':
