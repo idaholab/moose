@@ -317,17 +317,17 @@ public:
   T doubleContraction(const RankTwoTensorTempl<T> & a) const;
 
   /**
-   * Assuming a bijective index map M: {n,o,p,q} -> {i,j,k,l}, this function returns
-   * C_{ijkl} = a_{M(n)M(o)} b_{M(p)M(q)}. The bijective map is deduced from the
-   * positions of template arguments n, o, p, q.
+   * This function returns
+   * C_{ijkl} = a_{M(n)M(o)} b_{M(p)M(q)}.
+   * where the set of indices {n,o,p,q} is a permutation of the indices {i,j,k,l}
    */
   template <int n, int o, int p, int q>
   RankFourTensorTempl<T> times(const RankTwoTensorTempl<T> & b) const;
 
   /**
-   * Assuming a surjective index map M: {n,o,p,q,r,s} -> {i,j,k,l}, this function
-   * returns C_{ijkl} = a_{M(n)M(o)} b_{M(p)M(q)M(r)M(s)}. The surjective map is
-   * deduced from the positions of template arguments n, o, p, q, r, s.
+   * This function returns
+   * C_{ijkl} = a_{M(n)M(o)} b_{M(p)M(q)M(r)M(s)}.
+   * where the index set {n,o,p,q,r,s} contains each index {i,j,k,l} at least once.
    */
   template <int n, int o, int p, int q, int r, int s>
   RankFourTensorTempl<T> times(const RankFourTensorTempl<T> & b) const;
