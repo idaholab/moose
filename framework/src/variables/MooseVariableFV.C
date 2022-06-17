@@ -851,8 +851,7 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
       var_defined_on_elem ? getNeighborValue(neighbor, fi) : getElemValue(neighbor);
 
   const Real delta = internal_face ? fi.dCNMag() : fi.cellCenterToFaceDistance(var_defined_on_elem);
-  const Point e_cf =
-      internal_face ? fi.eCN() : (var_defined_on_elem ? fi.normal() : Point(-fi.normal()));
+  const Point e_cf = internal_face ? fi.eCN() : fi.normal();
 
   // perform the correction. Note that direction is important here because we have a minus sign.
   // Neighbor has to be neighbor, and elem has to be elem. Hence all the elem_is_elem_one logic

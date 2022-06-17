@@ -212,6 +212,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
         postFace(**faceinfo);
 
         const std::set<BoundaryID> boundary_ids = (*faceinfo)->boundaryIDs();
+        std::cout << "Boundary ID size " << boundary_ids.size() << std::endl;
         for (auto & it : boundary_ids)
           onBoundary(**faceinfo, it);
 
