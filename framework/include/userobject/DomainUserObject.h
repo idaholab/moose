@@ -40,7 +40,7 @@ public:
 
   DomainUserObject(const InputParameters & parameters);
 
-  void execute() override;
+  void execute() override final;
 
   /**
    * execute method that is called during ComputeUserObjects::onElement
@@ -77,27 +77,34 @@ protected:
   const QBase & qRule() const { return *_current_q_rule; }
   const MooseArray<Real> & JxW() const { return *_current_JxW; }
   const MooseArray<Real> & coord() const { return _coord; }
+  const MooseArray<Point> & normals() const { return _normals; }
 
   /// the Moose mesh
   MooseMesh & _mesh;
 
-  /// The current element pointer (available during execute())
+  /// The current element pointer (available during all execute functions)
   const Elem * const & _current_elem;
 
-  /// The current element volume (available during execute())
+  /// The current element volume (available during all execute functions)
   const Real & _current_elem_volume;
 
-  /// current side of the current element
+  /// Current side of the current element (available during executeOnInternalSide() and executeOnBoundary())
   const unsigned int & _current_side;
 
+  /// Current side of the current element (available during executeOnInternalSide() and executeOnBoundary())
   const Elem * const & _current_side_elem;
+
+  /// Current side volume (available during executeOnInternalSide() and executeOnBoundary())
   const Real & _current_side_volume;
 
-  /// The neighboring element
+  /// The neighboring element (available during executeOnInternalSide())
   const Elem * const & _neighbor_elem;
 
-  /// the neighboring element's volume
+  /// the neighboring element's volume (available during executeOnInternalSide())
   const Real & _current_neighbor_volume;
+
+  /// The boundary ID (available during executeOnBoundary())
+  const BoundaryID & _current_boundary_id;
 
 private:
   void setVolumeData();
@@ -128,13 +135,15 @@ private:
   /// An array representing coordinate system volume modifications. Unity for Cartesian, 2piR for
   /// RZ, 4piR^2 for spherical
   const MooseArray<Real> & _coord;
+  /// The unit norm at quadrature points on the element side/face from the current element perpendicular to the side
+  const MooseArray<Point> & _normals;
 };
 
 inline void
 DomainUserObject::execute()
 {
   mooseError("Users of DomainUserObjects should call "
-             "executeOnElement/executeOnBoundary/executeOnInternalSide/executeOnInterface");
+             "executeOnElement/executeOnBoundary/executeOnInternalSide");
 }
 
 inline void
