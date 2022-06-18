@@ -775,7 +775,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
 []
 
 [Executioner]
-  type = Transient
+  type = Steady #Transient
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'lu       30                '
