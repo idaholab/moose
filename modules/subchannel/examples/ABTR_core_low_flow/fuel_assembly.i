@@ -5,11 +5,7 @@
 ###################################################
 T_in = 630
 P_out = 758423 # Pa
-reactor_power = 250e6 #WTh
-fuel_assemblies_per_power_unit = ${fparse 4}
-fuel_pins_per_assembly = 217
-pin_power = ${fparse reactor_power/(fuel_assemblies_per_power_unit*fuel_pins_per_assembly)} # Approx.
-mass_flux_in = ${fparse 2786} # kg/(m2.s)
+mass_flux_in = ${fparse 1000} # kg/(m2.s)
 
 ###################################################
 # Geometric parameters
@@ -143,18 +139,18 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
 []
 
 [Problem]
-  type = LiquidWaterSubChannel1PhaseProblem
+  type = LiquidWaterSubChannel1PhaseProblem # Not solving heat conduction yet
   fp = sodium
   n_blocks = 25
   beta = 0.1
   P_out = ${P_out}
-  CT = 1.0
+  CT = 2.0
   enforce_uniform_pressure = false
-  compute_density = true
-  compute_viscosity = true
+  compute_density = false
+  compute_viscosity = false
   compute_power = true
-  P_tol = 1.0e-6
-  T_tol = 1.0e-3
+  P_tol = 1.0e-4
+  T_tol = 1.0e-4
   implicit = false
   segregated = true
   staggered_pressure = false
@@ -177,7 +173,7 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = ${pin_power} # W
+    power = 1000 # W
     filename = "pin_power_profile217.txt"
     axial_heat_rate = axial_heat_rate
   []
@@ -294,23 +290,23 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
 # A multiapp that projects data to a detailed mesh
 ################################################################################
 [MultiApps]
-  # Multiapp to pin heat conduction module
-  [pin_map]
-    type = FullSolveMultiApp
-    input_files = pin.i # seperate file for multiapps due to radial power profile
-    execute_on = 'timestep_end'
-    positions = '0  0   0'
-    bounding_box_padding = '0 0 0.01'
-  []
-
-  # Multiapp to duct heat conduction module
-  [duct_map]
-    type = FullSolveMultiApp
-    input_files = wrapper.i # seperate file for duct heat conduction
-    execute_on = 'timestep_end'
-    positions = '0   0   0'
-    bounding_box_padding = '0.0 0.0 0.01'
-  []
+  # # Multiapp to pin heat conduction module
+  # [pin_map]
+  #   type = FullSolveMultiApp
+  #   input_files = pin.i # seperate file for multiapps due to radial power profile
+  #   execute_on = 'timestep_end'
+  #   positions = '0  0   0'
+  #   bounding_box_padding = '0 0 0.01'
+  # []
+  #
+  # # Multiapp to duct heat conduction module
+  # [duct_map]
+  #   type = FullSolveMultiApp
+  #   input_files = wrapper.i # seperate file for duct heat conduction
+  #   execute_on = 'timestep_end'
+  #   positions = '0   0   0'
+  #   bounding_box_padding = '0.0 0.0 0.01'
+  # []
 
   [viz]
     type = FullSolveMultiApp
@@ -321,31 +317,31 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
 
 [Transfers]
 
-  [Tpin] # send pin surface temperature to bison,
-    type = MultiAppInterpolationTransfer
-    to_multi_app = pin_map
-    source_variable = Tpin
-    variable = Pin_surface_temperature
-  []
-  [q_prime_pin] # send heat flux from slave/BISON/heatConduction to subchannel/master
-    type = MultiAppInterpolationTransfer
-    from_multi_app = pin_map
-    source_variable = q_prime_pin
-    variable = q_prime
-  []
-
-  [duct_temperature_transfer] # Send duct temperature to heat conduction
-    type = MultiAppInterpolationTransfer
-    to_multi_app = duct_map
-    source_variable = Tduct
-    variable = duct_surface_temperature
-  []
-  [q_prime_duct] # Recover q_prime from heat conduction solve
-    type = MultiAppInterpolationTransfer
-    from_multi_app = duct_map
-    source_variable = q_prime_d
-    variable = q_prime_duct
-  []
+  # [Tpin] # send pin surface temperature to bison,
+  #   type = MultiAppInterpolationTransfer
+  #   to_multi_app = pin_map
+  #   source_variable = Tpin
+  #   variable = Pin_surface_temperature
+  # []
+  # [q_prime_pin] # send heat flux from slave/BISON/heatConduction to subchannel/master
+  #   type = MultiAppInterpolationTransfer
+  #   from_multi_app = pin_map
+  #   source_variable = q_prime_pin
+  #   variable = q_prime
+  # []
+  #
+  # [duct_temperature_transfer] # Send duct temperature to heat conduction
+  #   type = MultiAppInterpolationTransfer
+  #   to_multi_app = duct_map
+  #   source_variable = Tduct
+  #   variable = duct_surface_temperature
+  # []
+  # [q_prime_duct] # Recover q_prime from heat conduction solve
+  #   type = MultiAppInterpolationTransfer
+  #   from_multi_app = duct_map
+  #   source_variable = q_prime_d
+  #   variable = q_prime_duct
+  # []
 
   [subchannel_transfer]
     type = MultiAppDetailedSolutionTransfer
