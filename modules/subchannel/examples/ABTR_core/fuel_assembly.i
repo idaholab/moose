@@ -6,7 +6,7 @@
 T_in = 630
 P_out = 758423 # Pa
 reactor_power = 250e6 #WTh
-fuel_assemblies_per_power_unit = ${fparse 2}
+fuel_assemblies_per_power_unit = ${fparse 2.5}
 fuel_pins_per_assembly = 217
 pin_power = ${fparse reactor_power/(fuel_assemblies_per_power_unit*fuel_pins_per_assembly)} # Approx.
 mass_flux_in = ${fparse 2786} # kg/(m2.s)
