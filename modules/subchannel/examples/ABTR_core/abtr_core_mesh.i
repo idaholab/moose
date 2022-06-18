@@ -57,24 +57,28 @@ total_height = ${fparse orifice_plate_height + height + 2 * top_bottom}
     interface_boundary_names = 'remove2'
   []
 
-  [dummy]
+  [fuel_coupled]
     type = PolygonConcentricCircleMeshGenerator
     num_sides = 6
     num_sectors_per_side = '2 2 2 2 2 2'
     background_intervals = 1
-    background_block_ids = 1000
+    background_block_ids = '22'
     # note that polygon_size is "like radius"
     polygon_size = ${fparse fuel_element_pitch / 2}
+    duct_sizes = '${fparse duct_inside / 2 / f}'
+    duct_intervals = '2'
+    duct_block_ids = '2'
+    interface_boundary_names = 'remove1'
   []
 
   [pattern]
     type = PatternedHexMeshGenerator
-    inputs = 'fuel control dummy'
+    inputs = 'fuel control fuel_coupled'
     pattern = '
                0 0 0 0;
               0 0 0 0 0;
              0 1 0 0 1 0;
-            0 0 0 1 0 0 0;
+            0 0 0 2 0 0 0;
              0 0 0 0 0 0;
               0 0 1 0 0;
                0 0 0 0'
@@ -126,6 +130,7 @@ total_height = ${fparse orifice_plate_height + height + 2 * top_bottom}
     old_block = '1
                  2
                  11
+                 22
                  402
                  101
                  102
@@ -138,6 +143,7 @@ total_height = ${fparse orifice_plate_height + height + 2 * top_bottom}
     new_block = 'fuel
                  wrapper_interwrapper
                  control
+                 coupled_fuel
                  free_duct
                  cold_pool1
                  cold_pool2
@@ -205,11 +211,19 @@ total_height = ${fparse orifice_plate_height + height + 2 * top_bottom}
     input = outer_perimeter
   []
 
+  [interior_walls_2]
+    type = SideSetsBetweenSubdomainsGenerator
+    primary_block = 'coupled_fuel'
+    paired_block = 'wrapper_interwrapper'
+    new_boundary = interior_walls_coupled
+    input = interior_walls
+  []
+
   [scale]
     type = TransformGenerator
     vector_value = '0.01 0.01 0.01'
     transform = SCALE
-    input = interior_walls
+    input = interior_walls_2
   []
 
   [delete2000]

@@ -33,7 +33,7 @@ height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
 orifice_plate_height = ${fparse 5*scale_factor}
 duct_outside = ${fparse fuel_element_pitch - inter_assembly_gap}
 duct_inside = ${fparse duct_outside - 2 * duct_thickness}
-
+###################################################
 
 [TriSubChannelMesh]
   [subchannel]
