@@ -219,11 +219,18 @@ total_height = ${fparse orifice_plate_height + height + 2 * top_bottom}
     input = interior_walls
   []
 
+  [translate]
+    type = TransformGenerator
+    input = interior_walls_2
+    transform = TRANSLATE
+    vector_value = '0 0 -${top_bottom}'
+  []
+
   [scale]
     type = TransformGenerator
     vector_value = '0.01 0.01 0.01'
     transform = SCALE
-    input = interior_walls_2
+    input = translate
   []
 
   [delete2000]
