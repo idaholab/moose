@@ -185,13 +185,16 @@ namespace MathUtils
     typedef RankTwoTensorTempl<typename T::value_type> R2T;                                        \
                                                                                                    \
     for (auto a : make_range(3))                                                                   \
-      P += op_derivs[a] * R2T::selfOuterProduct(A.eigvecs().column(a));                            \
+    {                                                                                              \
+      const auto Ma = R2T::selfOuterProduct(A.eigvecs().column(a));                                \
+      P += op_derivs[a] * Ma.outerProduct(Ma);                                                     \
+    }                                                                                              \
                                                                                                    \
     for (auto a : make_range(3))                                                                   \
       for (auto b : make_range(a))                                                                 \
       {                                                                                            \
-        R2T Ma = R2T::selfOuterProduct(A.eigvecs().column(a));                                     \
-        R2T Mb = R2T::selfOuterProduct(A.eigvecs().column(b));                                     \
+        const auto Ma = R2T::selfOuterProduct(A.eigvecs().column(a));                              \
+        const auto Mb = R2T::selfOuterProduct(A.eigvecs().column(b));                              \
                                                                                                    \
         Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);                                   \
         Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);                                   \
@@ -240,12 +243,12 @@ FactorizedRankTwoTensorOperatorMapDerivativeUnary(dexp, std::exp(eigval), std::e
 FactorizedRankTwoTensorOperatorMapUnary(sqrt, std::sqrt(eigval));
 FactorizedRankTwoTensorOperatorMapDerivativeUnary(dsqrt,
                                                   std::sqrt(eigval),
-                                                  1 / 2 / std::sqrt(eigval));
+                                                  std::pow(eigval, -1. / 2.) / 2.);
 
 FactorizedRankTwoTensorOperatorMapUnary(cbrt, std::cbrt(eigval));
 FactorizedRankTwoTensorOperatorMapDerivativeUnary(dcbrt,
                                                   std::cbrt(eigval),
-                                                  1 / 3 / std::cbrt(eigval));
+                                                  std::pow(eigval, -2. / 3.) / 3.);
 
 FactorizedRankTwoTensorOperatorMapBinary(pow, std::pow(eigval, arg));
 FactorizedRankTwoTensorOperatorMapDerivativeBinary(dpow,
