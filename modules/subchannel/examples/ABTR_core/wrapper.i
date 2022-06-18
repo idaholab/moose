@@ -105,7 +105,7 @@ T_in = 630
   []
   [duct_outside_temperature]
     type = ParsedFunction
-    value = '630+(685-630)*z/L'
+    value = '630+(736-630)*z/L'
     vars = 'L'
     vals = '${height}'
   []

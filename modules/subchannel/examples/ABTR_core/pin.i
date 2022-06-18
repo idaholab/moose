@@ -1,6 +1,6 @@
 T_in = 630 # K
 reactor_power = 250e6 #WTh
-fuel_assemblies_per_power_unit = ${fparse 4}
+fuel_assemblies_per_power_unit = ${fparse 2}
 fuel_pins_per_assembly = 217
 pin_power = ${fparse reactor_power/(fuel_assemblies_per_power_unit*fuel_pins_per_assembly)} # Approx.
 
