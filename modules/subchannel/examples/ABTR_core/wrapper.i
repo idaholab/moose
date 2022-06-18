@@ -187,18 +187,18 @@ T_in = 630
     boundary = 'inside'
     v = duct_surface_temperature
   []
-  # [outside_bc]
-  #   type = FunctionDirichletBC
-  #   variable = temperature
-  #   boundary = 'outside'
-  #   function = duct_outside_temperature
-  # []
   [outside_bc]
-    type = MatchedValueBC
+    type = FunctionDirichletBC
     variable = temperature
-    boundary = 'inside'
-    v = duct_surface_temperature_out
+    boundary = 'outside'
+    function = duct_outside_temperature
   []
+  # [outside_bc]
+  #   type = MatchedValueBC
+  #   variable = temperature
+  #   boundary = 'inside'
+  #   v = duct_surface_temperature_out
+  # []
 []
 
 [ICs]
