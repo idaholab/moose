@@ -435,6 +435,14 @@ RankTwoTensorTempl<T>::operator==(const RankTwoTensorTempl<T> & a) const
 }
 
 template <typename T>
+bool
+RankTwoTensorTempl<T>::isSymmetric() const
+{
+  auto test = MetaPhysicL::raw_value(*this - transpose());
+  return MooseUtils::absoluteFuzzyEqual(test.norm_sq(), 0);
+}
+
+template <typename T>
 RankTwoTensorTempl<T> &
 RankTwoTensorTempl<T>::operator=(const ColumnMajorMatrixTempl<T> & a)
 {

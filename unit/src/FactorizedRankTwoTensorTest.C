@@ -175,3 +175,19 @@ TEST(FactorizedRankTwoTensor, addIa)
   Af.addIa(100);
   EXPECT_R2T_NEAR(A, Af.get(), 1e-6);
 }
+
+TEST(FactorizedRankTwoTensor, trace)
+{
+  RankTwoTensor A(1, 2, 3, 2, 5, -3, 3, -3, -9);
+  FactorizedRankTwoTensor Af(A);
+
+  EXPECT_NEAR(A.trace(), Af.trace(), 1e-6);
+}
+
+TEST(FactorizedRankTwoTensor, det)
+{
+  RankTwoTensor A(1, 2, 3, 2, 5, -3, 3, -3, -9);
+  FactorizedRankTwoTensor Af(A);
+
+  EXPECT_NEAR(A.det(), Af.det(), 1e-6);
+}

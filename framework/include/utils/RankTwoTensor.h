@@ -309,6 +309,9 @@ public:
   /// Defines logical equality with another RankTwoTensorTempl<T>
   bool operator==(const RankTwoTensorTempl<T> & a) const;
 
+  /// Test for symmetry
+  bool isSymmetric() const;
+
   /// Sets _coords to the values in a ColumnMajorMatrix (must be 3x3)
   RankTwoTensorTempl<T> & operator=(const ColumnMajorMatrixTempl<T> & a);
 

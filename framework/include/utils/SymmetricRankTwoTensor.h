@@ -288,6 +288,9 @@ public:
   template <typename T2>
   bool operator==(const SymmetricRankTwoTensorTempl<T2> & a) const;
 
+  /// Test for symmetry. Surprisingly this is always true.
+  bool isSymmetric() const { return true; }
+
   /// Defines logical inequality with another SymmetricRankTwoTensorTempl<T2>
   template <typename T2>
   bool operator!=(const SymmetricRankTwoTensorTempl<T2> & a) const;
@@ -542,6 +545,28 @@ SymmetricRankTwoTensorTempl<T>::operator*(const TypeVector<T2> & a) const
   ret(0) = a(0) * _vals[0] + a(1) * _vals[5] + a(2) * _vals[4];
   ret(1) = a(0) * _vals[5] + a(1) * _vals[1] + a(2) * _vals[3];
   ret(2) = a(0) * _vals[4] + a(1) * _vals[3] + a(2) * _vals[2];
+}
+
+template <typename T>
+template <typename T2>
+bool
+SymmetricRankTwoTensorTempl<T>::operator==(const SymmetricRankTwoTensorTempl<T2> & a) const
+{
+  for (std::size_t i = 0; i < N; ++i)
+    if (_vals[i] != a._vals[i])
+      return false;
+  return true;
+}
+
+template <typename T>
+template <typename T2>
+bool
+SymmetricRankTwoTensorTempl<T>::operator!=(const SymmetricRankTwoTensorTempl<T2> & a) const
+{
+  for (std::size_t i = 0; i < N; ++i)
+    if (_vals[i] != a._vals[i])
+      return true;
+  return false;
 }
 
 template <typename T>

@@ -47,13 +47,8 @@ public:
   /// Constructor if the factorization isn't known a priori
   FactorizedRankTwoTensorTempl(const T & A)
   {
-#ifdef DEBUG
-    // Replace the following check with
-    // if (!A.isSymmetric())
-    auto test = MetaPhysicL::raw_value(A - A.transpose());
-    if (!MooseUtils::absoluteFuzzyEqual(test.norm(), 0))
+    if (!A.isSymmetric())
       mooseError("The tensor is not symmetric.");
-#endif
     A.symmetricEigenvaluesEigenvectors(_eigvals, _eigvecs);
   }
 
@@ -123,6 +118,12 @@ public:
 
   /// add identity times a to _A
   void addIa(const typename T::value_type & a);
+
+  /// trace of _A
+  typename T::value_type trace() const;
+
+  /// determinant of _A
+  typename T::value_type det() const;
 
 private:
   // Assemble the tensor from the factorization

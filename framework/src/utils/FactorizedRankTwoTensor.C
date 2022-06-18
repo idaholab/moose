@@ -98,6 +98,20 @@ FactorizedRankTwoTensorTempl<T>::addIa(const typename T::value_type & a)
     eigval += a;
 }
 
+template <typename T>
+typename T::value_type
+FactorizedRankTwoTensorTempl<T>::trace() const
+{
+  return _eigvals[0] + _eigvals[1] + _eigvals[2];
+}
+
+template <typename T>
+typename T::value_type
+FactorizedRankTwoTensorTempl<T>::det() const
+{
+  return _eigvals[0] * _eigvals[1] * _eigvals[2];
+}
+
 template class FactorizedRankTwoTensorTempl<RankTwoTensor>;
 template class FactorizedRankTwoTensorTempl<ADRankTwoTensor>;
 template class FactorizedRankTwoTensorTempl<SymmetricRankTwoTensor>;

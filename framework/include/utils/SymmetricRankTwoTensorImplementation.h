@@ -133,6 +133,28 @@ SymmetricRankTwoTensorTempl<T>::fromRawComponents(
   return ret;
 }
 
+template <typename T>
+SymmetricRankTwoTensorTempl<T>::SymmetricRankTwoTensorTempl(const TensorValue<T> & a)
+{
+  _vals[0] = a(0, 0);
+  _vals[1] = a(1, 1);
+  _vals[2] = a(2, 2);
+  _vals[3] = (a(1, 2) + a(2, 1)) / mandelFactor(3);
+  _vals[4] = (a(0, 2) + a(2, 0)) / mandelFactor(4);
+  _vals[5] = (a(0, 1) + a(1, 0)) / mandelFactor(5);
+}
+
+template <typename T>
+SymmetricRankTwoTensorTempl<T>::SymmetricRankTwoTensorTempl(const TypeTensor<T> & a)
+{
+  _vals[0] = a(0, 0);
+  _vals[1] = a(1, 1);
+  _vals[2] = a(2, 2);
+  _vals[3] = (a(1, 2) + a(2, 1)) / mandelFactor(3);
+  _vals[4] = (a(0, 2) + a(2, 0)) / mandelFactor(4);
+  _vals[5] = (a(0, 1) + a(1, 0)) / mandelFactor(5);
+}
+
 /// named constructor for initializing symmetrically
 template <typename T>
 SymmetricRankTwoTensorTempl<T>
@@ -412,28 +434,6 @@ SymmetricRankTwoTensorTempl<T>::operator/=(const T & a)
   for (std::size_t i = 0; i < N; ++i)
     _vals[i] /= a;
   return *this;
-}
-
-template <typename T>
-template <typename T2>
-bool
-SymmetricRankTwoTensorTempl<T>::operator==(const SymmetricRankTwoTensorTempl<T2> & a) const
-{
-  for (std::size_t i = 0; i < N; ++i)
-    if (_vals[i] != a._vals[i])
-      return false;
-  return true;
-}
-
-template <typename T>
-template <typename T2>
-bool
-SymmetricRankTwoTensorTempl<T>::operator!=(const SymmetricRankTwoTensorTempl<T2> & a) const
-{
-  for (std::size_t i = 0; i < N; ++i)
-    if (_vals[i] != a._vals[i])
-      return true;
-  return false;
 }
 
 template <typename T>
