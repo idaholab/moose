@@ -42,13 +42,13 @@ heat_source = 1e8
 pool_flow_blocks = 'cold_pool1 cold_pool2 hot_pool1 hot_pool2 inlet_duct'
 
 # all blocks which define some sort of flow
-flow_blocks = 'fuel control free_duct cold_pool1 cold_pool2 hot_pool1 hot_pool2
+flow_blocks = 'fuel coupled_fuel control free_duct cold_pool1 cold_pool2 hot_pool1 hot_pool2
                cr_tip fuel_orifice control_orifice inlet_duct'
 
 # Blocks where we have either fuel or control rods
 # on these blocks we define T_solid & have conjugate heat transfer with the fluid
 #                    and use Rehme drag coefficients
-rodded_flow_blocks = 'fuel control'
+rodded_flow_blocks = 'fuel coupled_fuel control'
 
 # Complement to the rodded_flow_blocks
 non_rodded_flow_blocks = 'free_duct cold_pool1 cold_pool2 hot_pool1 hot_pool2
@@ -213,7 +213,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
     variable = T_solid
     function = heat_source_fn
     # heat is only applied in the fuel blocks
-    block = 'fuel'
+    block = 'fuel coupled_fuel'
   []
 
   [fluid_to_solid_convection]
@@ -301,6 +301,11 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
   [kappa_var_z]
     type = MooseVariableFVReal
     block = ${flow_blocks}
+  []
+
+  [q_prime_duct_out]
+    order = CONSTANT
+    family = MONOMIAL
   []
 []
 
@@ -414,7 +419,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
     # conjugate heat transfer T_sold w/ T_fluid
     ambient_convection_alpha = 'alpha alpha'
     # defined on the porous flow blocks
-    ambient_convection_blocks = 'fuel; control'
+    ambient_convection_blocks = 'fuel; coupled_fuel; control'
     ambient_temperature = 'T_solid T_solid'
 
     # discretization parameters
@@ -431,6 +436,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
                             kappa kappa kappa kappa kappa'
     # defined on all flow blocks
     thermal_conductivity_blocks = 'fuel;
+                                   coupled_fuel;
                                    control;
                                    free_duct;
                                    cold_pool1;
@@ -456,10 +462,10 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
     energy_inlet_types = 'fixed-temperature'
     energy_inlet_function = '${inlet_temperature}'
 
-    wall_boundaries = 'interior_walls hot_pool_wall cold_pool_wall'
-    momentum_wall_types = 'slip slip slip'
-    energy_wall_types = 'heatflux heatflux heatflux'
-    energy_wall_function = '0 0 0'
+    wall_boundaries = 'interior_walls interior_walls_coupled hot_pool_wall cold_pool_wall'
+    momentum_wall_types = 'slip slip slip slip'
+    energy_wall_types = 'heatflux heatflux heatflux heatflux'
+    energy_wall_function = '0 q_prime_duct_out 0 0'
 
     outlet_boundaries = 'outlet'
     momentum_outlet_types = 'fixed-pressure'
@@ -478,7 +484,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
     speed = speed
     fp = fp
     characteristic_length = ${D_hydraulic_fuel}
-    block = 'fuel fuel_orifice'
+    block = 'fuel coupled_fuel fuel_orifice'
   []
 
   [fluid_props_control]
@@ -519,6 +525,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
     type = ADPiecewiseByBlockFunctorMaterial
     prop_name = 'porosity'
     subdomain_to_prop_value = 'fuel            0.31
+                               coupled_fuel    0.31
                                fuel_orifice    1
                                control         0.45
                                control_orifice ${cntrl_orifice_gamma}
@@ -544,6 +551,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
     type = ADPiecewiseByBlockFunctorMaterial
     prop_name =  'characteristic_length'
     subdomain_to_prop_value = 'fuel            ${D_hydraulic_fuel}
+                               coupled_fuel    ${D_hydraulic_fuel}
                                fuel_orifice    ${D_hydraulic_fuel}
                                control         ${D_hydraulic_control}
                                control_orifice ${D_hydraulic_control}
@@ -570,7 +578,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
     type = FunctorRehmeDragCoefficients
     multipliers = '100 100 1'
     hex_lattice = fuel_hex
-    block = 'fuel'
+    block = 'fuel coupled_fuel'
   []
 
   [drag_control]
@@ -624,7 +632,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
   [alpha_fuel]
     type = FunctorHexagonalLatticeHTC
     hex_lattice = fuel_hex
-    block = 'fuel'
+    block = 'fuel coupled_fuel'
   []
 
   [alpha_control]
@@ -638,7 +646,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
   [kappa_f_fuel]
     type = FunctorLinearPecletHexagonalLatticeKappaFluid
     hex_lattice = fuel_hex
-    block = 'fuel'
+    block = 'fuel coupled_fuel'
   []
 
   [kappa_f_control]
@@ -660,7 +668,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
   [total_heat]
     type = FunctionElementIntegral
     function = heat_source_fn
-    block = 'fuel'
+    block = 'fuel coupled_fuel'
   []
 
   [inlet_average_temperature]
