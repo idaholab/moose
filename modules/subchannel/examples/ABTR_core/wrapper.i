@@ -135,7 +135,13 @@ T_in = 630
     order = CONSTANT
     family = MONOMIAL
   []
+  [q_prime_d_out]
+    order = CONSTANT
+    family = MONOMIAL
+  []
   [duct_surface_temperature]
+  []
+  [duct_surface_temperature_out]
   []
 []
 
@@ -148,6 +154,15 @@ T_in = 630
     diffusion_variable = temperature
     component = normal
     boundary = 'inside'
+    execute_on = 'timestep_end'
+  []
+  [QPrime_duct_out]
+    type = DiffusionFluxAux
+    diffusivity = 'thermal_conductivity'
+    variable = q_prime_d_out
+    diffusion_variable = temperature
+    component = normal
+    boundary = 'outside'
     execute_on = 'timestep_end'
   []
 []
@@ -172,11 +187,17 @@ T_in = 630
     boundary = 'inside'
     v = duct_surface_temperature
   []
+  # [outside_bc]
+  #   type = FunctionDirichletBC
+  #   variable = temperature
+  #   boundary = 'outside'
+  #   function = duct_outside_temperature
+  # []
   [outside_bc]
-    type = FunctionDirichletBC
+    type = MatchedValueBC
     variable = temperature
-    boundary = 'outside'
-    function = duct_outside_temperature
+    boundary = 'inside'
+    v = duct_surface_temperature_out
   []
 []
 
@@ -190,6 +211,16 @@ T_in = 630
     type = ConstantIC
     variable = q_prime_d
     value = 0.0
+  []
+  [temperature_duct_in_ic]
+    type = ConstantIC
+    variable = duct_surface_temperature
+    value = ${T_in}
+  []
+  [temperature_duct_out_ic]
+    type = ConstantIC
+    variable = duct_surface_temperature_out
+    value = ${T_in}
   []
 []
 
@@ -219,6 +250,32 @@ T_in = 630
     side_order = FOURTH
   []
 []
+
+# [MultiApps]
+#   # Multiapp to pin heat conduction module
+#   [external_duct_map]
+#     type = FullSolveMultiApp
+#     input_files = core.i # seperate file for multiapps due to radial power profile
+#     execute_on = 'timestep_end'
+#     positions = '0  0   0'
+#     bounding_box_padding = '0 0 0.01'
+#   []
+# []
+#
+# [Transfers]
+#   [q_prime_duct_out_to_core] # Send duct temperature to heat conduction
+#     type = MultiAppInterpolationTransfer
+#     to_multi_app = external_duct_map
+#     source_variable = q_prime_d_out
+#     variable = q_prime_duct
+#   []
+#   [T_duct_out_from_core] # Recover q_prime from heat conduction solve
+#     type = MultiAppInterpolationTransfer
+#     from_multi_app = external_duct_map
+#     source_variable = T_wrapper
+#     variable = duct_surface_temperature_out
+#   []
+# []
 
 [Outputs]
   exodus = true
