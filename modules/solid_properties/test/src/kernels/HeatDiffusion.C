@@ -1,20 +1,20 @@
 #include "HeatDiffusion.h"
 
-registerMooseObject("SolidPropertiesApp", HeatDiffusion);
+registerMooseObject("SolidPropertiesTestApp", HeatDiffusion);
 
-template<>
-InputParameters validParams<HeatDiffusion>()
+InputParameters
+HeatDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Thermal conduction kernel");
   return params;
 }
 
 
 HeatDiffusion::HeatDiffusion(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Kernel>(parameters),
+    Kernel(parameters),
     _k(getMaterialProperty<Real>("k_solid")),
-    _dk_dT(getMaterialPropertyDerivative<Real>("k_solid", _var.name()))
+    _dk_dT(getMaterialProperty<Real>("dk_solid_dT"))
 {
 }
 

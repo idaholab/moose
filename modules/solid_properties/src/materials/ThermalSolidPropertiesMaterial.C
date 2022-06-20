@@ -37,6 +37,9 @@ ThermalSolidPropertiesMaterial::ThermalSolidPropertiesMaterial(const InputParame
     _cp(declareProperty<Real>(_cp_name)),
     _k(declareProperty<Real>(_k_name)),
     _rho(declareProperty<Real>(_rho_name)),
+    _dcp_dT(declareProperty<Real>("d" + _cp_name + "_dT")),
+    _dk_dT(declareProperty<Real>("d" + _k_name + "_dT")),
+    _drho_dT(declareProperty<Real>("d" + _rho_name + "_dT")),
 
     _sp(getUserObject<ThermalSolidProperties>("sp"))
 {

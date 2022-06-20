@@ -1,22 +1,18 @@
 #pragma once
 
 #include "Kernel.h"
-#include "DerivativeMaterialInterface.h"
-
-class HeatDiffusion;
-
-template<>
-InputParameters validParams<HeatDiffusion>();
 
 /**
  * Kernel providing the heat diffusion kernel for example purposes, with
  * strong form $-\nabla\cdot\left(k\nabla T\right)$, where $k$ is the
  * thermal conductivity and $T$ is the temperature.
  */
-class HeatDiffusion : public DerivativeMaterialInterface<Kernel>
+class HeatDiffusion : public Kernel
 {
 public:
   HeatDiffusion(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   /// Compute weak form residual

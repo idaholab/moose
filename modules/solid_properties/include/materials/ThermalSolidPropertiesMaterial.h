@@ -47,6 +47,15 @@ protected:
   /// Density
   MaterialProperty<Real> & _rho;
 
+  /// Derivative of isobaric specific heat capacity w.r.t. temperature
+  MaterialProperty<Real> & _dcp_dT;
+
+  /// Derivative of thermal conductivity w.r.t. temperature
+  MaterialProperty<Real> & _dk_dT;
+
+  /// Derivative of density w.r.t. temperature
+  MaterialProperty<Real> & _drho_dT;
+
   /// Solid properties
   const ThermalSolidProperties & _sp;
 };
