@@ -12,9 +12,6 @@
 []
 
 [AuxVariables]
-  [T]
-    initial_condition = 1000.0
-  []
   [cp]
     family = MONOMIAL
     order = CONSTANT
@@ -24,18 +21,6 @@
     order = CONSTANT
   []
   [rho]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [dcp_dT]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [dk_dT]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [drho_dT]
     family = MONOMIAL
     order = CONSTANT
   []
@@ -57,30 +42,24 @@
     variable = rho
     property = rho_solid
   []
-  [dcp_dT]
-    type = MaterialRealAux
-    variable = dcp_dT
-    property = dcp_solid/dT
-  []
-  [dk_dT]
-    type = MaterialRealAux
-    variable = dk_dT
-    property = dk_solid/dT
-  []
-  [drho_dT]
-    type = MaterialRealAux
-    variable = drho_dT
-    property = drho_solid/dT
+[]
+
+[Modules]
+  [SolidProperties]
+    [func]
+      type = ThermalFunctionSolidProperties
+      rho = '1000.0'
+      cp = '200*t+150.0'
+      k = '2.0*exp(-100.0/(2.0+t))+1.0'
+    []
   []
 []
 
 [Materials]
   [sp_mat]
-    type = ThermalFunctionSolidProperties
-    temperature = T
-    rho = '1000.0'
-    cp = '200*t+150.0'
-    k = '2.0*exp(-100.0/(2.0+t))+1.0'
+    type = ThermalSolidPropertiesMaterial
+    sp = func
+    temperature = u
   []
 []
 

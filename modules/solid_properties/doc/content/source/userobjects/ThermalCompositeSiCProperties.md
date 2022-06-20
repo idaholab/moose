@@ -7,6 +7,8 @@
 This userobject provides
 thermal properties for composite silicon carbide as a function of temperature.
 
+!include solid_properties_units.md
+
 Isobaric specific heat is calculated from [!cite](snead) as
 
 \begin{equation}

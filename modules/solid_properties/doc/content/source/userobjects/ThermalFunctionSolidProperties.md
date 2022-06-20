@@ -1,10 +1,10 @@
 # ThermalFunctionSolidProperties
 
-!syntax description /Materials/ThermalFunctionSolidProperties
+!syntax description /UserObjects/ThermalFunctionSolidProperties
 
 ## Description
 
-The `ThermalFunctionSolidProperties` class provides
+This userobject provides
 thermal properties for an arbitrary solid as a function of temperature.
 Parsed function inputs are provided for density, thermal conductivity, and
 specific heat by parameterizing the time variable `t` as temperature.
@@ -18,12 +18,14 @@ by the user. Note that arbitrary units can be specified with this material.
 
 ## Example Input File Syntax
 
-!listing modules/solid_properties/test/tests/functional/test.i block=Materials
+!listing modules/solid_properties/test/tests/functional/test.i
+  start=Modules
+  end=Kernels
 
-!syntax parameters /Materials/ThermalFunctionSolidProperties
+!syntax parameters /UserObjects/ThermalFunctionSolidProperties
 
-!syntax inputs /Materials/ThermalFunctionSolidProperties
+!syntax inputs /UserObjects/ThermalFunctionSolidProperties
 
-!syntax children /Materials/ThermalFunctionSolidProperties
+!syntax children /UserObjects/ThermalFunctionSolidProperties
 
 !bibtex bibliography

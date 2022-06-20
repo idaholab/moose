@@ -31,7 +31,7 @@
                                                                                                    \
   virtual void want##_from_T(const DualReal & T, DualReal & val, DualReal & d##want##dT) const     \
   {                                                                                                \
-    solidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivative derivatives not implemented."); \
+    solidPropError(__PRETTY_FUNCTION__, " derivative derivatives not implemented.");               \
     Real dummy, tmp;                                                                               \
     val = want##_from_T(T);                                                                        \
     want##_from_T(T.value(),  dummy, tmp);                                                         \
@@ -45,12 +45,12 @@
 #define propfunc(want)                                                                             \
   virtual Real want##_from_T(const Real &) const                                                   \
   {                                                                                                \
-    mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");                            \
+    mooseError(__PRETTY_FUNCTION__, " not implemented.");                                          \
   }                                                                                                \
                                                                                                    \
   virtual void want##_from_T(const Real & T, Real & val, Real & d##want##dT) const                 \
   {                                                                                                \
-    solidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");            \
+    solidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");                          \
     d##want##dT = 0;                                                                               \
     val = want##_from_T(T);                                                                        \
   }                                                                                                \
@@ -100,7 +100,7 @@ public:
 #undef propfunc
 #undef propfuncAD
 
-private:
+protected:
   template <typename... Args>
   void solidPropError(Args... args) const
   {

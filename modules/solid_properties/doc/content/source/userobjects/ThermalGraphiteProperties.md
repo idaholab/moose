@@ -16,6 +16,8 @@ Because many coke-based graphite grades show approximately the same specified he
 it is a reasonable approximation to use the same $C_p$ correlation from
 [!cite](butland) for many different grades [!cite](baker).
 
+!include solid_properties_units.md
+
 ### H-451
 
 H-451 graphite is a near-isotropic, artifical graphite based on
