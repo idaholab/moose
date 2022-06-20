@@ -44,8 +44,8 @@ FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const InputParameters &
     _rtol(getParam<Real>("rtol")),
     _ftol(getParam<Real>("ftol")),
     _eptol(getParam<Real>("eptol")),
-    _deltaOuter(RankTwoTensor::Identity().outerProduct(RankTwoTensor::Identity())),
-    _deltaMixed(RankTwoTensor::Identity().mixedProductIkJl(RankTwoTensor::Identity()))
+    _deltaOuter(RankTwoTensor::Identity().times<i_, j_, k_, l_>(RankTwoTensor::Identity())),
+    _deltaMixed(RankTwoTensor::Identity().times<i_, k_, j_, l_>(RankTwoTensor::Identity()))
 {
 }
 

@@ -486,36 +486,6 @@ RankFourTensorTempl<T>::transposeIj() const
 }
 
 template <typename T>
-RankThreeTensorTempl<T>
-RankFourTensorTempl<T>::mixedProductIjklJ(const VectorValue<T> & b) const
-{
-  RankThreeTensorTempl<T> result;
-
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
-          result(i, k, l) += (*this)(i, j, k, l) * b(j);
-
-  return result;
-}
-
-template <typename T>
-RankThreeTensorTempl<T>
-RankFourTensorTempl<T>::mixedProductIjklI(const VectorValue<T> & b) const
-{
-  RankThreeTensorTempl<T> result;
-
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
-          result(j, k, l) += (*this)(i, j, k, l) * b(i);
-
-  return result;
-}
-
-template <typename T>
 void
 RankFourTensorTempl<T>::surfaceFillFromInputVector(const std::vector<T> & input)
 {

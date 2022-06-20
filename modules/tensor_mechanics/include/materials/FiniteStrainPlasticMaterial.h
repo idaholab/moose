@@ -134,4 +134,7 @@ protected:
    * d(yieldstress)/d(equivalent plastic strain)
    */
   Real getdYieldStressdPlasticStrain(const Real equivalent_plastic_strain);
+
+  /// make i,j,k,l available as tensor indices for mixedProduct
+  usingTensorIndices(i_, j_, k_, l_);
 };
