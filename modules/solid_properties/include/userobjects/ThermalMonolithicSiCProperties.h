@@ -12,16 +12,16 @@
 #include "ThermalSolidProperties.h"
 
 /**
- * Monolithic silicon carbide properties as a function of temperature \cite snead.
+ * Monolithic silicon carbide properties as a function of temperature.
  */
-class ThermalSiliconCarbideProperties : public ThermalSolidProperties
+class ThermalMonolithicSiCProperties : public ThermalSolidProperties
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 public:
   static InputParameters validParams();
 
-  ThermalSiliconCarbideProperties(const InputParameters & parameters);
+  ThermalMonolithicSiCProperties(const InputParameters & parameters);
 
   /**
    * Thermal conductivity from temperature
@@ -88,7 +88,7 @@ protected:
   enum ThermalConductivityModel
   {
     SNEAD,
-    PARFUME
+    STONE
   } _k_model;
 
   /// (constant) density

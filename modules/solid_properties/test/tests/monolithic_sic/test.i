@@ -47,7 +47,8 @@
 [Modules]
   [SolidProperties]
     [sic]
-      type = ThermalSiliconCarbideProperties
+      type = ThermalMonolithicSiCProperties
+      thermal_conductivity_model = SNEAD
     []
   []
 []

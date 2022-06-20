@@ -8,13 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SolidPropertiesTestUtils.h"
-#include "ThermalSiliconCarbidePropertiesTest.h"
+#include "ThermalMonolithicSiCPropertiesTest.h"
 
 /**
  * Test that the thermal conductivity and its derivatives are
  * correctly computed.
  */
-TEST_F(ThermalSiliconCarbidePropertiesTest, k)
+TEST_F(ThermalMonolithicSiCPropertiesTest, k)
 {
   Real T;
 
@@ -27,13 +27,13 @@ TEST_F(ThermalSiliconCarbidePropertiesTest, k)
   REL_TEST(_sp1->k_from_T(T), 202.02020202020205, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_sp1->k_from_T, T, REL_TOL_DERIVATIVE);
 
-  // PARFUME correlation
+  // Stone correlation
   T = 800.0;
-  REL_TEST(_sp2->k_from_T(T), 24.35625, REL_TOL_SAVED_VALUE);
+  REL_TEST(_sp2->k_from_T(T), 61.516, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_sp2->k_from_T, T, REL_TOL_DERIVATIVE);
 
   T = 500.0;
-  REL_TEST(_sp2->k_from_T(T), 37.77, REL_TOL_SAVED_VALUE);
+  REL_TEST(_sp2->k_from_T(T), 79.975, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_sp2->k_from_T, T, REL_TOL_DERIVATIVE);
 }
 
@@ -41,7 +41,7 @@ TEST_F(ThermalSiliconCarbidePropertiesTest, k)
  * Test that the isobaric specific heat capacity and its derivatives are
  * correctly computed.
  */
-TEST_F(ThermalSiliconCarbidePropertiesTest, cp)
+TEST_F(ThermalMonolithicSiCPropertiesTest, cp)
 {
   Real T;
 
@@ -58,14 +58,13 @@ TEST_F(ThermalSiliconCarbidePropertiesTest, cp)
  * Test that the density and its derivatives are
  * correctly computed.
  */
-TEST_F(ThermalSiliconCarbidePropertiesTest, rho)
+TEST_F(ThermalMonolithicSiCPropertiesTest, rho)
 {
   Real T = 800.0;
 
   REL_TEST(_sp1->rho_from_T(T), 3216.0, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_sp1->rho_from_T, T, REL_TOL_DERIVATIVE);
 
-  std::cout << _sp2->rho_from_T(T) << std::endl;
   REL_TEST(_sp2->rho_from_T(T), 3000.0, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_sp2->rho_from_T, T, REL_TOL_DERIVATIVE);
 }
