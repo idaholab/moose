@@ -30,8 +30,6 @@ ifneq ($(check_conda),fail)
   $(warning The moose-petsc conda package is out of date compared to the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
  endif
 endif
-#$(info $(check_conda))
-
 
 #
 # MOOSE
