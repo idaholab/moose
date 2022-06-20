@@ -100,10 +100,10 @@ public:
 #undef propfunc
 #undef propfuncAD
 
-protected:
-  /// Function to determine how to elevate errors/warnings about missing AD derivatives
-  template <typename... Args>
-  void solidPropError(Args... args) const
+      protected :
+    /// Function to determine how to elevate errors/warnings about missing AD derivatives
+    template <typename... Args>
+    void solidPropError(Args... args) const
   {
     if (_allow_imperfect_jacobians)
       mooseDoOnce(mooseWarning(std::forward<Args>(args)...));
