@@ -12,29 +12,25 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
 	libmesh_LDFLAGS += -headerpad_max_install_names
 endif
 
-#libmesh conda check
-conda_libmesh_status := $(shell conda list | grep "moose-libmesh " | awk '{print $2}')
-conda_libmesh_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/libmesh/meta.yaml | cut -f 2 -d "\"")
-ifneq ($(conda_libmesh_status),$(conda_libmesh_file))
- $(warning The moose-libmesh conda package is out of date compared to the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
+#check if conda exists on the system, then run checks if it does.
+check_conda := $(shell conda list . 2> /dev/null; echo fail)
+ifneq ($(check_conda),fail)
+
+ #libmesh conda check
+ conda_libmesh_status := $(shell conda list | grep "moose-libmesh " | awk '{print $$2;}')
+ conda_libmesh_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/libmesh/meta.yaml | cut -f 2 -d "\"")
+ ifneq ($(conda_libmesh_status),$(conda_libmesh_file))
+  $(warning The moose-libmesh conda package is out of date compared to the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
+ endif
+
+ #petsc conda check
+ conda_petsc_status := $(shell conda list | grep "moose-petsc" | awk '{print $$2}')
+ conda_petsc_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/petsc/meta.yaml | cut -f 2 -d "\"")
+ ifneq ($(conda_petsc_status),$(conda_petsc_file))
+  $(warning The moose-petsc conda package is out of date compared to the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
+ endif
 endif
-
-#petsc conda check
-conda_petsc_status := $(shell conda list | grep "moose-petsc" | awk '{print $2}')
-conda_petsc_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/petsc/meta.yaml | cut -f 2 -d "\"")
-ifneq ($(conda_petsc_status),$(conda_petsc_file))
- $(warning The moose-libmesh conda package is out of date compared to the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
-endif
-
-#
-# Verify Conda
-#
-CONDA_RESULT:=$(shell bash -c "$(MOOSE_DIR)/scripts/verify_conda_libmesh.py $(MOOSE_DIR)")
-ifneq ($(CONDA_RESULT),0)
- $(error Build failed)
-endif
-
-
+#$(info $(check_conda))
 
 
 #
