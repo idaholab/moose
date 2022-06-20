@@ -3,7 +3,6 @@
   dim = 2
   nx = 10
   ny = 2
-  elem_type = QUAD4
 []
 
 [Variables]
@@ -45,10 +44,19 @@
   []
 []
 
+[Modules]
+  [SolidProperties]
+    [sic]
+      type = ThermalSiliconCarbideProperties
+    []
+  []
+[]
+
 [Materials]
   [sp_mat]
-    type = ThermalSiliconCarbideProperties
+    type = ThermalSolidPropertiesMaterial
     temperature = T
+    sp = sic
   []
 []
 

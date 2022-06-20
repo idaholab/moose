@@ -4,7 +4,7 @@
 
 ## Description
 
-This userobject projects
+This userobject provides
 thermal properties for monolithic silicon carbide as a function of temperature.
 These properties may be used for modeling the silicon carbide layer in
 [!ac](TRISO) fuels, although there is still much variation in reported properties

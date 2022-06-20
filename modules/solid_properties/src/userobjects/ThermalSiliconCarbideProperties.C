@@ -16,13 +16,13 @@ InputParameters
 ThermalSiliconCarbideProperties::validParams()
 {
   InputParameters params = ThermalSolidProperties::validParams();
-  params.addClassDescription("Silicon carbide thermal properties.");
 
   MooseEnum ThermalConductivityModel("SNEAD PARFUME", "SNEAD");
   params.addParam<MooseEnum>("thermal_conductivity_model",
                              ThermalConductivityModel,
                              "Thermal conductivity model to be used");
   params.addRangeCheckedParam<Real>("density", 3216.0, "density > 0.0", "(Constant) density");
+  params.addClassDescription("Silicon carbide thermal properties.");
   return params;
 }
 
