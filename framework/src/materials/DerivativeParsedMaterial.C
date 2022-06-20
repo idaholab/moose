@@ -40,6 +40,12 @@ DerivativeParsedMaterialTempl<is_ad>::DerivativeParsedMaterialTempl(
                 _tol_values);
 }
 
+template <bool is_ad>
+void
+DerivativeParsedMaterialTempl<is_ad>::resetQpProperties()
+{
+}
+
 // explicit instantiation
 template class DerivativeParsedMaterialTempl<false>;
 template class DerivativeParsedMaterialTempl<true>;
