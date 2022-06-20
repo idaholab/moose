@@ -16,14 +16,14 @@ endif
 conda_libmesh_status := $(shell conda list | grep "moose-libmesh   " | cut -c 27-36)
 conda_libmesh_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/libmesh/meta.yaml | cut -f 2 -d "\"")
 ifneq ($(conda_libmesh_status),$(conda_libmesh_file))
- $(error Conda install package is out of date for moose-libmesh. Please run "conda update")
+ $(warning Conda install package is out of date for moose-libmesh. Please run "conda update")
 endif
 
 #petsc conda check
 conda_petsc_status := $(shell conda list | grep "moose-petsc" | cut -c 27-32)
 conda_petsc_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/petsc/meta.yaml | cut -f 2 -d "\"")
 ifneq ($(conda_petsc_status),$(conda_petsc_file))
- $(error Conda install package is out of date for moose-petsc. Please run "conda update")
+ $(warning Conda install package is out of date for moose-petsc. Please run "conda update")
 endif
 
 #
