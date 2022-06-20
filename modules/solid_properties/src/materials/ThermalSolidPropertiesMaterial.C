@@ -8,44 +8,44 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ThermalSolidPropertiesMaterial.h"
+#include "ThermalSolidProperties.h"
+
+registerMooseObject("SolidPropertiesApp", ThermalSolidPropertiesMaterial);
 
 InputParameters
 ThermalSolidPropertiesMaterial::validParams()
 {
   InputParameters params = SolidPropertiesMaterial::validParams();
-  params.addClassDescription("Material providing solid thermal properties");
   params.addRequiredCoupledVar("temperature", "Temperature");
+  params.addRequiredParam<UserObjectName>("sp", "The name of the user object for solid properties");
   params.addParam<std::string>(
       "cp_name", "cp_solid", "Name to be used for the isobaric specific heat");
   params.addParam<std::string>("k_name", "k_solid", "Name to be used for the thermal conductivity");
   params.addParam<std::string>("rho_name", "rho_solid", "Name to be used for the density");
+  params.addClassDescription("Computes solid thermal properties as a function of temperature");
   return params;
 }
 
 ThermalSolidPropertiesMaterial::ThermalSolidPropertiesMaterial(const InputParameters & parameters)
   : SolidPropertiesMaterial(parameters),
     _temperature(coupledValue("temperature")),
-    _temperature_name(getVar("temperature", 0)->name()),
+
     _cp_name(getParam<std::string>("cp_name")),
     _k_name(getParam<std::string>("k_name")),
     _rho_name(getParam<std::string>("rho_name")),
+
     _cp(declareProperty<Real>(_cp_name)),
-    _dcp_dT(declarePropertyDerivative<Real>(_cp_name, _temperature_name)),
     _k(declareProperty<Real>(_k_name)),
-    _dk_dT(declarePropertyDerivative<Real>(_k_name, _temperature_name)),
     _rho(declareProperty<Real>(_rho_name)),
-    _drho_dT(declarePropertyDerivative<Real>(_rho_name, _temperature_name))
+
+    _sp(getUserObject<ThermalSolidProperties>("sp"))
 {
 }
 
 void
 ThermalSolidPropertiesMaterial::computeQpProperties()
 {
-  computeIsobaricSpecificHeat();
-  computeThermalConductivity();
-  computeDensity();
-
-  computeIsobaricSpecificHeatDerivatives();
-  computeThermalConductivityDerivatives();
-  computeDensityDerivatives();
+  _cp[_qp] = _sp.cp_from_T(_temperature[_qp]);
+  _k[_qp] = _sp.k_from_T(_temperature[_qp]);
+  _rho[_qp] = _sp.rho_from_T(_temperature[_qp]);
 }

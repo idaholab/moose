@@ -17,24 +17,24 @@
  * overriden in derived classes.
  */
 #define propfuncAD(want)                                                                           \
-  virtual DualReal want##(const DualReal & T) const                                                \
+  virtual DualReal want##_from_T(const DualReal & T) const                                         \
   {                                                                                                \
     Real x = 0;                                                                                    \
     Real raw = T.value();                                                                          \
     Real dxdT = 0;                                                                                 \
-    want##(raw, x, dxdT);                                                                          \
+    want##_from_T(raw, x, dxdT);                                                                   \
                                                                                                    \
     DualReal result = x;                                                                           \
     result.derivatives() = T.derivatives() * dxdT;                                                 \
     return result;                                                                                 \
   }                                                                                                \
                                                                                                    \
-  virtual void want##(const DualReal & T, DualReal & val, DualReal & d##want##dT) const            \
+  virtual void want##_from_T(const DualReal & T, DualReal & val, DualReal & d##want##dT) const     \
   {                                                                                                \
     solidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivative derivatives not implemented."); \
     Real dummy, tmp;                                                                               \
-    val = want##(T);                                                                               \
-    want##(T.value(),  dummy, tmp);                                                                \
+    val = want##_from_T(T);                                                                        \
+    want##_from_T(T.value(),  dummy, tmp);                                                         \
     d##want##dT = tmp;                                                                             \
   }
 
@@ -43,19 +43,19 @@
  * derived classes where required. AD versions are constructed automatically using propfuncAD.
  */
 #define propfunc(want)                                                                             \
-  virtual Real want##(Real) const                                                                  \
+  virtual Real want##_from_T(const Real &) const                                                   \
   {                                                                                                \
     mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");                            \
   }                                                                                                \
                                                                                                    \
-  virtual void want##(Real T, Real & val, Real & d##want##dT) const                                \
+  virtual void want##_from_T(const Real & T, Real & val, Real & d##want##dT) const                 \
   {                                                                                                \
     solidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");            \
     d##want##dT = 0;                                                                               \
-    val = want##(T);                                                                               \
+    val = want##_from_T(T);                                                                        \
   }                                                                                                \
                                                                                                    \
-  propfuncAD(want, T)
+  propfuncAD(want)
 
 /**
  * Common class for solid properties that are a function of temperature
@@ -72,7 +72,7 @@ public:
   // clang-format off
 
   /**
-   * @brief Compute a solid property as a function of temperature
+   * @brief Compute a solid property as a function of temperature (Kelvin)
    *
    * For all functions, the first argument is the given property (temperature)
    * that defines the solid properties. For the one-argument variants, the desired

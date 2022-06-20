@@ -11,9 +11,10 @@
 
 #include "SolidPropertiesMaterial.h"
 
+class ThermalSolidProperties;
+
 /**
- * Base class for defining thermal solid property materials as a function of
- * temperature.
+ * Computes solid thermal properties as a function of temperature.
  */
 class ThermalSolidPropertiesMaterial : public SolidPropertiesMaterial
 {
@@ -23,14 +24,10 @@ public:
   ThermalSolidPropertiesMaterial(const InputParameters & parameters);
 
 protected:
-  /// Compute properties at quadrature point
   virtual void computeQpProperties() override;
 
   /// Temperature
   const VariableValue & _temperature;
-
-  /// Name of the temperature variable
-  const VariableName _temperature_name;
 
   /// Name of the isobaric specific heat
   const std::string _cp_name;
@@ -44,18 +41,12 @@ protected:
   /// Isobaric specific heat capacity
   MaterialProperty<Real> & _cp;
 
-  /// Derivative of isobaric specific heat capacity with respect to temperature
-  MaterialProperty<Real> & _dcp_dT;
-
   /// Thermal conductivity
   MaterialProperty<Real> & _k;
-
-  /// Derivative of thermal conductivity with respect to temperature
-  MaterialProperty<Real> & _dk_dT;
 
   /// Density
   MaterialProperty<Real> & _rho;
 
-  /// Derivative of density with respect to temperature
-  MaterialProperty<Real> & _drho_dT;
+  /// Solid properties
+  const ThermalSolidProperties & _sp;
 };

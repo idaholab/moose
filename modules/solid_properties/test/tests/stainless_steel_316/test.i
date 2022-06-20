@@ -11,6 +11,12 @@
   []
 []
 
+[Modules/SolidProperties]
+  [steel]
+    type = ThermalStainlessSteel316Properties
+  []
+[]
+
 [AuxVariables]
   [cp]
     family = MONOMIAL
@@ -46,8 +52,9 @@
 
 [Materials]
   [sp_mat]
-    type = ThermalStainlessSteel316Properties
+    type = ThermalSolidPropertiesMaterial
     temperature = T
+    sp = steel
   []
 []
 
