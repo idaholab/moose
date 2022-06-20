@@ -11,12 +11,6 @@
   []
 []
 
-[Modules/SolidProperties]
-  [steel]
-    type = ThermalStainlessSteel316Properties
-  []
-[]
-
 [AuxVariables]
   [cp]
     family = MONOMIAL
@@ -47,6 +41,14 @@
     type = MaterialRealAux
      variable = rho
      property = rho_solid
+  []
+[]
+
+[Modules]
+  [SolidProperties]
+    [steel]
+      type = ThermalStainlessSteel316Properties
+    []
   []
 []
 
