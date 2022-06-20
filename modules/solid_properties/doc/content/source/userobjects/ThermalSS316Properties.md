@@ -1,6 +1,6 @@
-# ThermalStainlessSteel316Properties
+# ThermalSS316Properties
 
-!syntax description /UserObjects/ThermalStainlessSteel316Properties
+!syntax description /UserObjects/ThermalSS316Properties
 
 ## Description
 
@@ -48,10 +48,10 @@ The properties are valid for 25$\degree$C $\le$ T $\le$ 1300$\degree$C.
   start=Modules
   end=Kernels
 
-!syntax parameters /UserObjects/ThermalStainlessSteel316Properties
+!syntax parameters /UserObjects/ThermalSS316Properties
 
-!syntax inputs /UserObjects/ThermalStainlessSteel316Properties
+!syntax inputs /UserObjects/ThermalSS316Properties
 
-!syntax children /UserObjects/ThermalStainlessSteel316Properties
+!syntax children /UserObjects/ThermalSS316Properties
 
 !bibtex bibliography

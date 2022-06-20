@@ -47,7 +47,7 @@
 [Modules]
   [SolidProperties]
     [steel]
-      type = ThermalStainlessSteel316Properties
+      type = ThermalSS316Properties
     []
   []
 []

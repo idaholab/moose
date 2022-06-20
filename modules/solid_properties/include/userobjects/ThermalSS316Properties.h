@@ -12,17 +12,17 @@
 #include "ThermalSolidProperties.h"
 
 /**
- * Stainless steel alloy 306 thermal solid properties as a function of
- * temperature \cite mills.
+ * Stainless steel alloy 316 thermal solid properties as a function of
+ * temperature.
  */
-class ThermalStainlessSteel316Properties : public ThermalSolidProperties
+class ThermalSS316Properties : public ThermalSolidProperties
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 public:
   static InputParameters validParams();
 
-  ThermalStainlessSteel316Properties(const InputParameters & parameters);
+  ThermalSS316Properties(const InputParameters & parameters);
 
   /**
    * Thermal conductivity from temperature

@@ -8,13 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SolidPropertiesTestUtils.h"
-#include "ThermalStainlessSteel316PropertiesTest.h"
+#include "ThermalSS316PropertiesTest.h"
 
 /**
  * Test that the thermal conductivity and its derivatives are
  * correctly computed.
  */
-TEST_F(ThermalStainlessSteel316PropertiesTest, k)
+TEST_F(ThermalSS316PropertiesTest, k)
 {
   Real T;
 
@@ -31,7 +31,7 @@ TEST_F(ThermalStainlessSteel316PropertiesTest, k)
  * Test that the isobaric specific heat capacity and its derivatives are
  * correctly computed.
  */
-TEST_F(ThermalStainlessSteel316PropertiesTest, cp)
+TEST_F(ThermalSS316PropertiesTest, cp)
 {
   Real T;
 
@@ -48,7 +48,7 @@ TEST_F(ThermalStainlessSteel316PropertiesTest, cp)
  * Test that the density and its derivatives are
  * correctly computed.
  */
-TEST_F(ThermalStainlessSteel316PropertiesTest, rho)
+TEST_F(ThermalSS316PropertiesTest, rho)
 {
   Real T;
 
