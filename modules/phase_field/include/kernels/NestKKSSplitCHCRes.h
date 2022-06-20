@@ -11,6 +11,7 @@
 
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
+#include "Kernel.h"
 
 // Forward Declarations
 
