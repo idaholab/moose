@@ -1,0 +1,10 @@
+[Tests]
+  [taoblmvm]
+    type = CSVDiff
+    max_threads = 1
+    input = main.i
+    abs_zero = 1e-2
+    csvdiff =  main_out_OptimizationReporter_0001.csv
+    recover = false
+  []
+[]
