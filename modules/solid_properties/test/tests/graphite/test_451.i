@@ -1,8 +1,10 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 2
+  [mesh]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    ny = 2
+  []
 []
 
 [Variables]

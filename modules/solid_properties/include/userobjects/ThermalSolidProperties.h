@@ -34,7 +34,7 @@
     solidPropError(__PRETTY_FUNCTION__, " derivative derivatives not implemented.");               \
     Real dummy, tmp;                                                                               \
     val = want##_from_T(T);                                                                        \
-    want##_from_T(T.value(),  dummy, tmp);                                                         \
+    want##_from_T(T.value(), dummy, tmp);                                                          \
     d##want##dT = tmp;                                                                             \
   }
 
@@ -101,6 +101,7 @@ public:
 #undef propfuncAD
 
 protected:
+  /// Function to determine how to elevate errors/warnings about missing AD derivatives
   template <typename... Args>
   void solidPropError(Args... args) const
   {

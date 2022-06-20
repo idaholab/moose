@@ -45,7 +45,9 @@ ThermalFunctionSolidProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_
 }
 
 void
-ThermalFunctionSolidProperties::cp_from_T(const DualReal & T, DualReal & cp, DualReal & dcp_dT) const
+ThermalFunctionSolidProperties::cp_from_T(const DualReal & T,
+                                          DualReal & cp,
+                                          DualReal & dcp_dT) const
 {
   cp = ThermalSolidProperties::cp_from_T(T);
 
@@ -95,7 +97,9 @@ ThermalFunctionSolidProperties::rho_from_T(const Real & T, Real & rho, Real & dr
 }
 
 void
-ThermalFunctionSolidProperties::rho_from_T(const DualReal & T, DualReal & rho, DualReal & drho_dT) const
+ThermalFunctionSolidProperties::rho_from_T(const DualReal & T,
+                                           DualReal & rho,
+                                           DualReal & drho_dT) const
 {
   rho = ThermalSolidProperties::rho_from_T(T);
 

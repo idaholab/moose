@@ -37,9 +37,8 @@ ThermalGraphiteProperties::cp_from_T(const Real & T) const
   switch (_grade)
   {
     case GraphiteGrade::H_451:
-      return 4184.0 * (0.54212 - 2.42667e-6 * T - 90.2725 / T -
-             43449.3 / Utility::pow<2>(T) + 1.59309e7 / Utility::pow<3>(T) -
-             1.43688e9 / Utility::pow<4>(T));
+      return 4184.0 * (0.54212 - 2.42667e-6 * T - 90.2725 / T - 43449.3 / Utility::pow<2>(T) +
+                       1.59309e7 / Utility::pow<3>(T) - 1.43688e9 / Utility::pow<4>(T));
     default:
       mooseError("Unhandled GraphiteGrade enum!");
   }
@@ -54,9 +53,8 @@ ThermalGraphiteProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) c
   {
     case GraphiteGrade::H_451:
     {
-      dcp_dT = 4184.0 * (-2.42667e-6 + 90.2725 / Utility::pow<2>(T) +
-               86898.6 / Utility::pow<3>(T) - 4.77927e7 / Utility::pow<4>(T) +
-               5.74752e9 / Utility::pow<5>(T));
+      dcp_dT = 4184.0 * (-2.42667e-6 + 90.2725 / Utility::pow<2>(T) + 86898.6 / Utility::pow<3>(T) -
+                         4.77927e7 / Utility::pow<4>(T) + 5.74752e9 / Utility::pow<5>(T));
       break;
     }
     default:
@@ -73,10 +71,9 @@ ThermalGraphiteProperties::cp_from_T(const DualReal & T, DualReal & cp, DualReal
   {
     case GraphiteGrade::H_451:
     {
-        dcp_dT = 4184.0 * (-2.42667e-6 + 90.2725 / Utility::pow<2>(T) +
-                 86898.6 / Utility::pow<3>(T) - 4.77927e7 / Utility::pow<4>(T) +
-                 5.74752e9 / Utility::pow<5>(T));
-        break;
+      dcp_dT = 4184.0 * (-2.42667e-6 + 90.2725 / Utility::pow<2>(T) + 86898.6 / Utility::pow<3>(T) -
+                         4.77927e7 / Utility::pow<4>(T) + 5.74752e9 / Utility::pow<5>(T));
+      break;
     }
     default:
       mooseError("Unhandled GraphiteGrade enum!");
@@ -141,7 +138,6 @@ ThermalGraphiteProperties::rho_from_T(const Real & T, Real & rho, Real & drho_dT
   rho = rho_from_T(T);
   drho_dT = 0.0;
 }
-
 
 void
 ThermalGraphiteProperties::rho_from_T(const DualReal & T, DualReal & rho, DualReal & drho_dT) const

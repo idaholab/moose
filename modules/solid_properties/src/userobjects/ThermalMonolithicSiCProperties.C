@@ -28,8 +28,7 @@ ThermalMonolithicSiCProperties::validParams()
 
 ThermalMonolithicSiCProperties::ThermalMonolithicSiCProperties(const InputParameters & parameters)
   : ThermalSolidProperties(parameters),
-    _k_model(getParam<MooseEnum>("thermal_conductivity_model")
-                 .getEnum<ThermalConductivityModel>()),
+    _k_model(getParam<MooseEnum>("thermal_conductivity_model").getEnum<ThermalConductivityModel>()),
     _rho_const(getParam<Real>("density"))
 {
 }
@@ -48,7 +47,9 @@ ThermalMonolithicSiCProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_
 }
 
 void
-ThermalMonolithicSiCProperties::cp_from_T(const DualReal & T, DualReal & cp, DualReal & dcp_dT) const
+ThermalMonolithicSiCProperties::cp_from_T(const DualReal & T,
+                                          DualReal & cp,
+                                          DualReal & dcp_dT) const
 {
   cp = ThermalSolidProperties::cp_from_T(T);
   dcp_dT = 0.3772 - 1.58518e-4 * T + 6.3892e7 / Utility::pow<3>(T);
@@ -126,7 +127,9 @@ ThermalMonolithicSiCProperties::rho_from_T(const Real & T, Real & rho, Real & dr
 }
 
 void
-ThermalMonolithicSiCProperties::rho_from_T(const DualReal & T, DualReal & rho, DualReal & drho_dT) const
+ThermalMonolithicSiCProperties::rho_from_T(const DualReal & T,
+                                           DualReal & rho,
+                                           DualReal & drho_dT) const
 {
   rho = ThermalSolidProperties::rho_from_T(T);
   drho_dT = 0.0;
