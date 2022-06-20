@@ -23,24 +23,17 @@ build:
 
 requirements:
   build:
-    - {{ moose_python }}
     - {{ moose_mpich }}
     - openssl <3
-    - pyqt               # [not arm64]
     - ninja
     - cmake
   run:
-    - {{ moose_python }}
     - {{ moose_mpich }}
-    - pyqt               # [not arm64]
 
 test:
   commands:
     - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ vtk_friendly_version }}.dylib # [osx]
     - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ vtk_friendly_version }}.so    # [linux]
-  imports:
-    - PyQt5              # [not arm64]
-    - vtk
 
 about:
   home: http://www.vtk.org/
