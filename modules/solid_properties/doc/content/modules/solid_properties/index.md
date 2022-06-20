@@ -45,11 +45,11 @@ An example is provided below for creating a new solid material providing thermal
 Materials available in the SolidProperties module that provide thermal properties
 are:
 
-- [function](/ThermalFunctionSolidProperties.md)
 - [graphite](/ThermalGraphiteProperties.md)
 - [monolithic silicon carbide](/ThermalMonolithicSiCProperties.md)
 - [composite silicon carbide](/ThermalCompositeSiCProperties.md)
 - [stainless steel alloy 316](/ThermalSS316Properties.md)
+- [using functions](/ThermalFunctionSolidProperties.md)
 
 !alert note
 Additional classes of solid properties, such as mechanical properties, are not yet
