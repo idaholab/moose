@@ -12,6 +12,13 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
 	libmesh_LDFLAGS += -headerpad_max_install_names
 endif
 
+#libmesh conda check
+conda_libmesh_status := $(shell conda list | grep moose-libmesh | cut -f 14 -d " ")
+conda_libmesh_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/libmesh/meta.yaml | cut -f 2 -d "\"")
+ifneq ($(conda_libmesh_status),$(conda_libmesh_file))
+ $(error Conda install package is out of date for moose-libmesh. Please run "conda update")
+endif
+
 #
 # Verify Conda
 #
@@ -19,6 +26,9 @@ CONDA_RESULT:=$(shell bash -c "$(MOOSE_DIR)/scripts/verify_conda_libmesh.py $(MO
 ifneq ($(CONDA_RESULT),0)
  $(error Build failed)
 endif
+
+
+
 
 #
 # MOOSE
