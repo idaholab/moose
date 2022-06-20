@@ -17,15 +17,12 @@ from optparse import OptionParser, OptionGroup, Values
 
 ##################################################################
 # Modify the following variable(s) for your cluster or use one of the versions below
-### FISSION
-#node_name_pattern = re.compile("(fission-\d{4})")
-#pstack_binary = 'pstack'
-### BECHLER
-#node_name_pattern = re.compile("(b\d{2})")
-#pstack_binary = 'pstack'
-### FALCON
-node_name_pattern = re.compile("(r\di\dn\d{1,2})")
+### LEMHI (default)
+node_name_pattern = re.compile(b"(lemhi\d{4}\.ib)")
 pstack_binary = 'gstack'
+### SAWTOOTH
+#node_name_pattern = re.compile(b"(r\di\dn\d\.ib\d\.sawtooth\.inl\.gov)")
+#pstack_binary = 'gstack'
 ##################################################################
 
 def generateTraces(job_num, application_name, num_hosts):
@@ -181,12 +178,12 @@ def main():
     traces = readTracesFromFile(cache_filename)
     unique_stack_traces = processTraces(traces, num_to_keep)
 
-    print "Unique Stack Traces"
-    for trace, count in unique_stack_traces.iteritems():
-        print "*"*80 + "\nCount: " + str(len(count)) + "\n"
+    print("Unique Stack Traces")
+    for trace, count in unique_stack_traces.items():
+        print("*"*80 + "\nCount: " + str(len(count)) + "\n")
         if len(count) < 10:
-            print "\n".join(count)
-        print "\n" + trace
+            print("\n".join(count))
+        print("\n" + trace)
 
 
 if __name__ == '__main__':
