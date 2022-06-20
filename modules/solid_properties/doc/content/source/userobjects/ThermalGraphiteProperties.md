@@ -8,7 +8,7 @@ This userobject provides thermal properties for graphite
 as a function of temperature. Because there are many different
 grades of graphite, this user object computes properties individually
 for each grade. Because many grades are encapsulated in this
-material, the applicability ranges of the correlations are unique to
+userobject, the applicability ranges of the correlations are unique to
 each grade.
 
 Many of the graphite grades encapsulated in this userobject are coke-based.
