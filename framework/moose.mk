@@ -13,17 +13,17 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
 endif
 
 #libmesh conda check
-conda_libmesh_status := $(shell conda list | grep "moose-libmesh   " | cut -c 27-36)
+conda_libmesh_status := $(shell conda list | grep "moose-libmesh " | awk '{print $2}')
 conda_libmesh_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/libmesh/meta.yaml | cut -f 2 -d "\"")
 ifneq ($(conda_libmesh_status),$(conda_libmesh_file))
- $(warning Conda install package is out of date for moose-libmesh. Please run "conda update")
+ $(warning The moose-libmesh conda package is out of date compared to the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
 endif
 
 #petsc conda check
-conda_petsc_status := $(shell conda list | grep "moose-petsc" | cut -c 27-32)
+conda_petsc_status := $(shell conda list | grep "moose-petsc" | awk '{print $2}')
 conda_petsc_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/petsc/meta.yaml | cut -f 2 -d "\"")
 ifneq ($(conda_petsc_status),$(conda_petsc_file))
- $(warning Conda install package is out of date for moose-petsc. Please run "conda update")
+ $(warning The moose-libmesh conda package is out of date compared to the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
 endif
 
 #
