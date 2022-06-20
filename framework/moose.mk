@@ -17,7 +17,7 @@ check_conda := $(shell conda list . 2> /dev/null; echo fail)
 ifneq ($(check_conda),fail)
 
  #libmesh conda check
- conda_libmesh_status := $(shell conda list | grep "moose-libmesh " | awk '{print $$2;}')
+ conda_libmesh_status := $(shell conda list | grep "moose-libmesh " | awk '{print $$2}')
  conda_libmesh_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/libmesh/meta.yaml | cut -f 2 -d "\"")
  ifneq ($(conda_libmesh_status),$(conda_libmesh_file))
   $(warning The moose-libmesh conda package is out of date compared to the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
