@@ -19,9 +19,7 @@ ThermalGraphiteProperties::validParams()
 
   MooseEnum graphite_grade("H_451");
   params.addRequiredParam<MooseEnum>("grade", graphite_grade, "Graphite grade");
-
-  params.addRangeCheckedParam<Real>(
-      "density_room_temp", 1600.0, "density_room_temp > 0.0", "Density at room temperature");
+  params.addRangeCheckedParam<Real>("density", 1850.0, "density > 0.0", "(Constant) density");
   params.addClassDescription("Graphite thermal properties.");
   return params;
 }
@@ -29,8 +27,7 @@ ThermalGraphiteProperties::validParams()
 ThermalGraphiteProperties::ThermalGraphiteProperties(const InputParameters & parameters)
   : ThermalSolidProperties(parameters),
     _grade(getParam<MooseEnum>("grade").getEnum<GraphiteGrade>()),
-    _rho_room_temp(getParam<Real>("density_room_temp")),
-    _beta0(2.925e-6)
+    _rho_const(getParam<Real>("density"))
 {
 }
 
@@ -133,29 +130,16 @@ ThermalGraphiteProperties::k_from_T(const DualReal & T, DualReal & k, DualReal &
 }
 
 Real
-ThermalGraphiteProperties::rho_from_T(const Real & T) const
+ThermalGraphiteProperties::rho_from_T(const Real & /* T */) const
 {
-  return _rho_room_temp * (1.0 - beta(T) * (T - 293.15));
+  return _rho_const;
 }
 
 void
 ThermalGraphiteProperties::rho_from_T(const Real & T, Real & rho, Real & drho_dT) const
 {
   rho = rho_from_T(T);
-
-  if (T > 373.15)
-  {
-    Real d_betaT = _beta0 + (2.1e-9 * 4.0 * Utility::pow<3>(T) -
-                             1.23726e-5 * 3.0 * Utility::pow<2>(T) +
-                             3.05359e-2 * 2.0 * T - 9.73349) *
-                                1e-7;
-    Real d_beta = (2.1e-9 * 3.0 * Utility::pow<2>(T) -
-                   1.23726e-5 * 2.0 * T + 3.05359e-2) *
-                  1e-7;
-    drho_dT = -_rho_room_temp * (d_betaT - 293.15 * d_beta);
-  }
-  else
-    drho_dT = -_beta0 * _rho_room_temp;
+  drho_dT = 0.0;
 }
 
 
@@ -163,33 +147,5 @@ void
 ThermalGraphiteProperties::rho_from_T(const DualReal & T, DualReal & rho, DualReal & drho_dT) const
 {
   rho = ThermalSolidProperties::rho_from_T(T);
-  mooseError("unknown");
-
-  //if (T > 373.15)
-  //{
-  //  Real d_betaT = _beta0 + (2.1e-9 * 4.0 * Utility::pow<3>(T) -
-  //                           1.23726e-5 * 3.0 * Utility::pow<2>(T) +
-  //                           3.05359e-2 * 2.0 * T - 9.73349) *
-  //                              1e-7;
-  //  Real d_beta = (2.1e-9 * 3.0 * Utility::pow<2>(T) -
-  //                 1.23726e-5 * 2.0 * T + 3.05359e-2) *
-  //                1e-7;
-  //  drho_dT = -_rho_room_temp * (d_betaT - 293.15 * d_beta);
-  //}
-  //else
-  //  drho_dT = -_beta0 * _rho_room_temp;
-}
-
-Real
-ThermalGraphiteProperties::beta(const Real & T) const
-{
-  Real term = 0.0;
-
-  if (T > 373.15)
-    term =
-        (2.1e-9 * Utility::pow<3>(T) - 1.23726e-5 * Utility::pow<2>(T) +
-         3.05359e-2 * T - 9.73349) *
-        1e-7;
-
-  return _beta0 + term;
+  drho_dT = 0.0;
 }

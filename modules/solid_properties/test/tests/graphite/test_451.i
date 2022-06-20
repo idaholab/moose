@@ -3,24 +3,16 @@
   dim = 2
   nx = 10
   ny = 2
-  elem_type = QUAD4
 []
 
 [Variables]
-  [u]
+  [T]
     initial_condition = 1000.0
   []
 []
 
 [AuxVariables]
-  [T]
-    initial_condition = 368.15
-  []
   [cp]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [dcp_dT]
     family = MONOMIAL
     order = CONSTANT
   []
@@ -28,15 +20,7 @@
     family = MONOMIAL
     order = CONSTANT
   []
-  [dk_dT]
-    family = MONOMIAL
-    order = CONSTANT
-  []
   [rho]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [drho_dT]
     family = MONOMIAL
     order = CONSTANT
   []
@@ -45,39 +29,34 @@
 [AuxKernels]
   [cp]
     type = MaterialRealAux
-    variable = cp
-    property = cp_solid
-  []
-  [dcp_dT]
-    type = MaterialRealAux
-    variable = dcp_dT
-    property = dcp_solid/dT
+     variable = cp
+     property = cp_solid
   []
   [k]
     type = MaterialRealAux
-    variable = k
-    property = k_solid
-  []
-  [dk_dT]
-    type = MaterialRealAux
-    variable = dk_dT
-    property = dk_solid/dT
+     variable = k
+     property = k_solid
   []
   [rho]
     type = MaterialRealAux
-    variable = rho
-    property = rho_solid
+     variable = rho
+     property = rho_solid
   []
-  [drho_dT]
-    type = MaterialRealAux
-    variable = drho_dT
-    property = drho_solid/dT
+[]
+
+[Modules]
+  [SolidProperties]
+    [graphite]
+      type = ThermalGraphiteProperties
+      grade = H_451
+    []
   []
 []
 
 [Materials]
-  [sp_mat]
-    type = ThermalGraphiteProperties
+  [solid]
+    type = ThermalSolidPropertiesMaterial
+    sp = graphite
     temperature = T
   []
 []
@@ -85,20 +64,20 @@
 [Kernels]
   [diff]
     type = Diffusion
-    variable = u
+    variable = T
   []
 []
 
 [BCs]
   [left]
     type = DirichletBC
-    variable = u
+    variable = T
     boundary = 'left'
     value = 1000.0
   []
   [right]
     type = DirichletBC
-    variable = u
+    variable = T
     boundary = 'right'
     value = 500.0
   []

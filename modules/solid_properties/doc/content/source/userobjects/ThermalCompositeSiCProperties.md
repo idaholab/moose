@@ -24,7 +24,7 @@ k=-1.71\times 10^{-11} T^4+7.35\times 10^{-8}T^3 - 1.10\times 10^{-4}T^2+0.061T+
 
 The density is assumed constant because the thermal expansion coefficient
 of silicon carbide is very small.
-A default value if provided as an average
+A default value is provided as an average
 over four different crystal structures at room temperature [!cite](snead) as
 
 \begin{equation}
