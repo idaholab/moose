@@ -6,7 +6,7 @@
     requirement = "This test demonstrates correct input file syntax for "
       "declaring stainless steel 316 thermal solid properties and their usage "
       "in providing thermal materials."
-    design = 'ThermalStainlessSteel316Properties.md ThermalSolidPropertiesMaterial.md'
+    design = 'ThermalSS316Properties.md ThermalSolidPropertiesMaterial.md'
     issues = '#12284'
   []
 []

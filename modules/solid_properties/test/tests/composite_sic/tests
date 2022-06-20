@@ -6,7 +6,7 @@
     requirement = "This test demonstrates correct input file syntax for "
       "declaring silicon carbide properties and their usage in providing "
       "thermal materials."
-    design = 'ThermalMonolithicSiCProperties.md ThermalSolidPropertiesMaterial.md'
+    design = 'ThermalCompositeSiCProperties.md ThermalSolidPropertiesMaterial.md'
     issues = '#12284'
   []
 []

@@ -1,11 +1,11 @@
-# ThermalMonolithicSiCProperties
+# ThermalCompositeSiCProperties
 
-!syntax description /UserObjects/ThermalMonolithicSiCProperties
+!syntax description /UserObjects/ThermalCompositeSiCProperties
 
 ## Description
 
 This userobject provides
-thermal properties for monolithic silicon carbide as a function of temperature.
+thermal properties for composite silicon carbide as a function of temperature.
 
 Isobaric specific heat is calculated from [!cite](snead) as
 
@@ -16,14 +16,10 @@ C_p=925.65 + 0.3772 * T - 7.9259\times10^{-5} * T^2 - 3.1946\times 10^7 * T^{-2}
 The uncertainty is $\pm$ 7% in the range 200 K $\le$ T $\le$ 1000 K and $\pm$ 4% in the range
 1000 K $\le$ T $\le$ 2400 K.
 
-Two methods are available for computing thermal conductivity from
-[!cite](snead) and [!cite](stone) as
+Thermal conductivity is calculated from [!cite](stone) as
 
 \begin{equation}
-k=\begin{cases}
-\frac{1.0}{-0.0003 + 1.05\times 10^{-5} * T} & \text{Snead correlation}\\
--3.70\times 10^{-8}T^3+1.54\times 10^{-4}T^2-0.214T+153.1 & \text{Stone correlation}\\
-\end{cases}
+k=-1.71\times 10^{-11} T^4+7.35\times 10^{-8}T^3 - 1.10\times 10^{-4}T^2+0.061T+7.97
 \end{equation}
 
 The density is assumed constant because the thermal expansion coefficient
@@ -39,20 +35,18 @@ over four different crystal structures at room temperature [!cite](snead) as
 
 This userobject is valid for estimating isobaric
 specific heat over 200 K $\le$ T $\le$ 2400 K; for estimating thermal
-conductivity over 300 K $\le$ T $\le$ 1800 K with the Snead correlation
-[!cite](snead) and over an unspecified range for the Stone correlation
-[!cite](stone).
+over an unspecified range [!cite](stone).
 
 ## Example Input File Syntax
 
-!listing modules/solid_properties/test/tests/monolithic_sic/test.i
+!listing modules/solid_properties/test/tests/composite_sic/test.i
   start=Modules
   end=Kernels
 
-!syntax parameters /UserObjects/ThermalMonolithicSiCProperties
+!syntax parameters /UserObjects/ThermalCompositeSiCProperties
 
-!syntax inputs /UserObjects/ThermalMonolithicSiCProperties
+!syntax inputs /UserObjects/ThermalCompositeSiCProperties
 
-!syntax children /UserObjects/ThermalMonolithicSiCProperties
+!syntax children /UserObjects/ThermalCompositeSiCProperties
 
 !bibtex bibliography
