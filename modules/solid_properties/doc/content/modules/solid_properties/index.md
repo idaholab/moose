@@ -1,7 +1,7 @@
 # Solid Properties Module
 
 The Solid Properties module provides a consistent interface to solid properties. Unlike
-fluid properties that are often times only a function of pressure and temperature
+fluid properties that are oftentimes only a function of pressure and temperature
 (or two other state variables), solid properties are frequently a function of many
 other parameters in addition to temperature, such as accumulated radiation damage,
 oxidation state, and microstructure. Some common properties include thermal
