@@ -13,6 +13,7 @@
 #include "HeatStructureCylindricalBase.h"
 #include "FlowModelSinglePhase.h"
 #include "THMMesh.h"
+#include "MooseUtils.h"
 
 registerMooseObject("ThermalHydraulicsApp", HeatTransferFromHeatStructure1Phase);
 
@@ -94,7 +95,7 @@ HeatTransferFromHeatStructure1Phase::check() const
                hs.getNumElems(),
                ". They must be the same.");
 
-    if (hs.getLength() != flow_channel.getLength())
+    if (!MooseUtils::absoluteFuzzyEqual(hs.getLength(), flow_channel.getLength()))
       logError("The length of component '",
                _flow_channel_name,
                "' is ",
