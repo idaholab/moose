@@ -112,9 +112,12 @@ greenGaussGradient(const ElemArg & elem_arg,
 
       if (functor.isExtrapolatedBoundaryFace(*fi).first)
       {
+        std::cout << " On extrapolated face" << std::endl;
         if (two_term_boundary_expansion)
         {
           ebf_faces.push_back(fi);
+
+          std::cout << " Using 2 term bc expansion" << std::endl;
 
           // eqn. 2
           ebf_grad_coeffs.push_back(-1. * fi->cellCenterToFaceVector(elem_has_info));
@@ -176,6 +179,8 @@ greenGaussGradient(const ElemArg & elem_arg,
         "int. I applaud you.");
     const auto num_ebfs = static_cast<unsigned int>(ebf_faces.size());
 
+    std::cout << num_ebfs << std::endl;
+
     // test for simple case
     if (num_ebfs == 0)
       grad = grad_b;
@@ -223,7 +228,11 @@ greenGaussGradient(const ElemArg & elem_arg,
       // Optionally cache the face value information
       if (face_to_value_cache)
         for (const auto j : make_range(num_ebfs))
+        {
+          std::cout << "Caching cell gradient face: " << ebf_faces[j] << " value "
+                    << x(Moose::dim + j) << std::endl;
           face_to_value_cache->emplace(ebf_faces[j], x(Moose::dim + j));
+        }
     }
 
     return grad;

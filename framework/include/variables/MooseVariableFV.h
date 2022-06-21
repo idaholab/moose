@@ -493,12 +493,15 @@ public:
   template <typename FaceCallingArg>
   ADReal getInternalFaceValue(const FaceCallingArg & face) const;
 
-protected:
   /**
    * @return whether \p fi is an internal face for this variable
    */
   bool isInternalFace(const FaceInfo & fi) const;
 
+  /// Return if the variable requires a linear extrapolation to determine extrapoalted face values
+  bool twoTermBoundaryExpansion() { return _two_term_boundary_expansion; }
+
+protected:
   /**
    * @return whether \p fi is a Dirichlet boundary face for this variable
    */
@@ -541,7 +544,8 @@ private:
   /**
    * @return the extrapolated value on the boundary face associated with \p fi
    */
-  const ADReal & getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const;
+  const ADReal & getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
+                                                  bool two_term_expansion = true) const;
 
 public:
   const MooseArray<OutputType> & nodalValueArray() const override

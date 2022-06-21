@@ -90,8 +90,6 @@ public:
    */
   void computeValuesFace(const FaceInfo & fi);
 
-  void computeGhostValuesFace(const FaceInfo & fi, MooseVariableDataFV<OutputType> & other_face);
-
   /**
    * compute the variable values
    */

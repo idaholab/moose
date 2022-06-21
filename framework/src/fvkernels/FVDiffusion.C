@@ -69,9 +69,5 @@ FVDiffusion::computeQpResidual()
   // this.
   const auto k = _coeff(Moose::FV::makeCDFace(*_face_info, faceArgSubdomains()));
 
-  _console << "Subdomain 1 " << faceArgSubdomains().first << " Subdomain 2 "
-           << faceArgSubdomains().second << std::endl;
-  _console << "Block " << blocks()[0] << " dudn " << dudn << " k " << k << std::endl;
-
   return -1 * k * dudn;
 }

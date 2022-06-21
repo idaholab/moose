@@ -263,10 +263,8 @@ interpCoeff(const Limiter<T> & limiter,
             const FaceInfo & fi,
             const bool fi_elem_is_upwind)
 {
-  const auto psi = limiter(phi_upwind,
-                           phi_downwind,
-                           grad_phi_upwind,
-                           fi_elem_is_upwind ? fi.dCN() : Point(-fi.dCN()));
+  const auto psi = limiter(
+      phi_upwind, phi_downwind, grad_phi_upwind, fi_elem_is_upwind ? fi.dCN() : Point(-fi.dCN()));
 
   const auto w_f = fi_elem_is_upwind ? fi.gC() : (1. - fi.gC());
 
@@ -287,7 +285,7 @@ interpolate(const Limiter<Scalar> & limiter,
             const FaceInfo & fi,
             const bool fi_elem_is_upwind)
 {
-  mooseAssert(fi.isBoundary(), "We should not call interpolation on a boundary face!");
+  mooseAssert(!fi.isBoundary(), "We should not call interpolation on a boundary face!");
 
   Scalar wf =
       interpCoeff(limiter, phi_upwind, phi_downwind, grad_phi_upwind, fi, fi_elem_is_upwind);
@@ -343,7 +341,7 @@ interpolate(const FunctorBase<T> & functor, const FaceArg & face)
       face.elem_is_upwind ? functor(face.neighborFromFace()) : functor(face.elemFromFace());
 
   if (face.limiter_type == LimiterType::Upwind)
-    return phi_downwind;
+    return phi_upwind;
   else if (face.limiter_type == LimiterType::CentralDifference)
     return linearInterpolation(functor, face);
   else
@@ -371,7 +369,7 @@ interpolate(const FunctorBase<VectorValue<T>> & functor, const FaceArg & face)
       face.elem_is_upwind ? functor(face.neighborFromFace()) : functor(face.elemFromFace());
 
   if (face.limiter_type == LimiterType::Upwind)
-    return phi_downwind;
+    return phi_upwind;
   else if (face.limiter_type == LimiterType::CentralDifference)
     return linearInterpolation(functor, face);
   else // We do component-wise limiting for now
@@ -405,7 +403,7 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face)
 
   // initialize in order to get proper size
   if (face.limiter_type == LimiterType::Upwind)
-    return phi_downwind;
+    return phi_upwind;
   else if (face.limiter_type == LimiterType::CentralDifference)
   {
     T ret = phi_upwind;
