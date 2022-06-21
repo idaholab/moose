@@ -23,10 +23,15 @@ public:
 
 protected:
   virtual Real computeQpValue() override;
+  virtual Real computeQpJacobian(unsigned int jvar);
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// Variable providing the value u on the boundary.
   const VariableValue & _coupled_var;
 
+  /// The identifying number of the coupled variable
+  const unsigned int _coupled_num;
+  
   /// Scale factor
   const Moose::Functor<ADReal> & _scale_factor;
 };

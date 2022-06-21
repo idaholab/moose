@@ -16,7 +16,7 @@ CoupledVarDirichletBC::validParams()
 {
   InputParameters params = DirichletBCBase::validParams();
   params.addRequiredCoupledVar("v", "Coupled variable setting the value on the boundary.");
-  params.addParam<FunctorName>("scale_factor", 1., "Scale factor to multiply the heat flux with");
+  params.addParam<MooseFunctorName>("scale_factor", 1., "Scale factor to multiply the heat flux with");
   params.addClassDescription("Imposes the Dirichlet boundary condition $u=v$, where $u$ is the equation variable and $v$ is another variable"
                              "is a variable.");
   return params;
@@ -25,6 +25,7 @@ CoupledVarDirichletBC::validParams()
 CoupledVarDirichletBC::CoupledVarDirichletBC(const InputParameters & parameters)
   : DirichletBCBase(parameters),
     _coupled_var(coupledValue("v")),
+    _coupled_num(coupled("v")),
     _scale_factor(getFunctor<ADReal>("scale_factor"))
 {
 }
@@ -32,5 +33,23 @@ CoupledVarDirichletBC::CoupledVarDirichletBC(const InputParameters & parameters)
 Real
 CoupledVarDirichletBC::computeQpValue()
 {
-  return  _scale_factor(_current_elem, _t) * _coupled_var[_qp];
+  return _scale_factor(_current_elem, _t) * _coupled_var[_qp];
+}
+
+Real
+CoupledVarDirichletBC::computeQpJacobian(const unsigned int jvar)
+{
+  if (jvar == _coupled_num)
+    return _scale_factor(_current_elem, _t);
+  else
+    return 0;
+}
+
+Real
+CoupledVarDirichletBC::computeQpOffDiagJacobian(const unsigned int jvar)
+{
+  if (jvar != _coupled_num)
+    return _scale_factor(_current_elem, _t);
+  else
+    return 0;
 }
