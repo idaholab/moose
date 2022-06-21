@@ -2,14 +2,6 @@
 set -eu
 export PATH=/bin:$PATH
 export HYDRA_LAUNCHER=fork
-
-# Qt is enabled in VTK by default, but currently doesn't exist on M1 Macs.
-# So, it is disabled if building on that platform.
-QT="YES"
-if [[ $(uname) == Darwin ]] && [[ $(uname -p) == arm ]]; then
-  QT="NO"
-fi
-echo "CC, CXX $CC $CXX"
 export CC=mpicc CXX=mpicxx
 mkdir -p build
 cd build
