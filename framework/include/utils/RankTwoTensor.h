@@ -87,7 +87,7 @@ public:
   static constexpr unsigned int N = Moose::dim;
 
   /**
-   * @brief Tensor dimension squared.
+   * @brief The square of the tensor dimension.
    */
   static constexpr unsigned int N2 = N * N;
 
@@ -118,7 +118,6 @@ public:
 
   /**
    * @brief Initialize the random seed based on an unsigned integer.
-   *
    * Deprecated in favor of MooseRandom::seed().
    */
   static void initRandom(unsigned int);
@@ -708,8 +707,8 @@ public:
    * //       0 0 0 ]
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    *
-   * When `input.size() == 3`, the scalar values are used to fill the in-plane components of the
-   second order tensor using the Voigt notation:
+   * When `scalar_variable.size() == 3`, the scalar values are used to fill the in-plane components
+   * of the second order tensor using the Voigt notation:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * // Suppose v[0] = 1
    * //         v[1] = 2
@@ -721,8 +720,8 @@ public:
    * //       0 0 0 ]
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    *
-   * When `input.size() == 6`, the second order tensor is filled symmetrically using the Voigt
-   * notation:
+   * When `scalar_variable.size() == 6`, the second order tensor is filled symmetrically using the
+   * Voigt notation:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * // Suppose v[0] = 1
    * //         v[1] = 2
