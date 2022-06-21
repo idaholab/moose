@@ -12,11 +12,13 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
 	libmesh_LDFLAGS += -headerpad_max_install_names
 endif
 
+$(info Checking if conda packages exist...)
 #check if conda exists on the system, then run checks if it does.
 check_conda := $(shell conda list | grep "moose-libmesh \|moose-petsc"; echo 0)
 ifneq ($(check_conda),0)
 
  #libmesh conda check
+ $(info Checking if libmesh version is up to date...)
  conda_libmesh_status := $(shell awk '{print $$2}' <<< '$(check_conda)')
  conda_libmesh_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/libmesh/meta.yaml | cut -f 2 -d "\"")
  ifneq ($(conda_libmesh_status),$(conda_libmesh_file))
@@ -24,6 +26,7 @@ ifneq ($(check_conda),0)
  endif
 
  #petsc conda check
+ $(info Checking if petsc version is up to date...)
  conda_petsc_status := $(shell awk '{print $$6}' <<< '$(check_conda)')
  conda_petsc_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/petsc/meta.yaml | cut -f 2 -d "\"")
  ifneq ($(conda_petsc_status),$(conda_petsc_file))
