@@ -33,14 +33,14 @@ CoupledVarDirichletBC::CoupledVarDirichletBC(const InputParameters & parameters)
 Real
 CoupledVarDirichletBC::computeQpValue()
 {
-  return _scale_factor(_current_elem, _t) * _coupled_var[_qp];
+  return _scale_factor(_current_node, _t) * _coupled_var[_qp];
 }
 
 Real
 CoupledVarDirichletBC::computeQpJacobian(const unsigned int jvar)
 {
   if (jvar == _coupled_num)
-    return _scale_factor(_current_elem, _t);
+    return _scale_factor(_current_node, _t);
   else
     return 0;
 }
@@ -49,7 +49,7 @@ Real
 CoupledVarDirichletBC::computeQpOffDiagJacobian(const unsigned int jvar)
 {
   if (jvar != _coupled_num)
-    return _scale_factor(_current_elem, _t);
+    return _scale_factor(_current_node, _t);
   else
     return 0;
 }
