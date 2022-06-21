@@ -95,9 +95,9 @@ RankTwoTensorTempl<T>::RankTwoTensorTempl(const InitMethod init)
 }
 
 template <typename T>
-RankTwoTensorTempl<T>::RankTwoTensorTempl(const TypeVector<T> & row1,
-                                          const TypeVector<T> & row2,
-                                          const TypeVector<T> & row3)
+RankTwoTensorTempl<T>::RankTwoTensorTempl(const libMesh::TypeVector<T> & row1,
+                                          const libMesh::TypeVector<T> & row2,
+                                          const libMesh::TypeVector<T> & row3)
 {
   mooseDeprecated(
       "This constructor is deprecated in favor of RankTwoTensorTempl<T>::initializeFromRows");
@@ -115,9 +115,9 @@ RankTwoTensorTempl<T>::RankTwoTensorTempl(const TypeVector<T> & row1,
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::initializeSymmetric(const TypeVector<T> & v0,
-                                           const TypeVector<T> & v1,
-                                           const TypeVector<T> & v2)
+RankTwoTensorTempl<T>::initializeSymmetric(const libMesh::TypeVector<T> & v0,
+                                           const libMesh::TypeVector<T> & v1,
+                                           const libMesh::TypeVector<T> & v2)
 {
   return RankTwoTensorTempl<T>(v0(0),
                                (v1(0) + v0(1)) / 2.0,
@@ -132,9 +132,9 @@ RankTwoTensorTempl<T>::initializeSymmetric(const TypeVector<T> & v0,
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::initializeFromRows(const TypeVector<T> & row0,
-                                          const TypeVector<T> & row1,
-                                          const TypeVector<T> & row2)
+RankTwoTensorTempl<T>::initializeFromRows(const libMesh::TypeVector<T> & row0,
+                                          const libMesh::TypeVector<T> & row1,
+                                          const libMesh::TypeVector<T> & row2)
 {
   return RankTwoTensorTempl<T>(
       row0(0), row1(0), row2(0), row0(1), row1(1), row2(1), row0(2), row1(2), row2(2));
@@ -142,9 +142,9 @@ RankTwoTensorTempl<T>::initializeFromRows(const TypeVector<T> & row0,
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::initializeFromColumns(const TypeVector<T> & col0,
-                                             const TypeVector<T> & col1,
-                                             const TypeVector<T> & col2)
+RankTwoTensorTempl<T>::initializeFromColumns(const libMesh::TypeVector<T> & col0,
+                                             const libMesh::TypeVector<T> & col1,
+                                             const libMesh::TypeVector<T> & col2)
 {
   return RankTwoTensorTempl<T>(
       col0(0), col0(1), col0(2), col1(0), col1(1), col1(2), col2(0), col2(1), col2(2));
@@ -364,14 +364,14 @@ template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::transpose() const
 {
-  return TensorValue<T>::transpose();
+  return libMesh::TensorValue<T>::transpose();
 }
 
 template <typename T>
 RankTwoTensorTempl<T> &
 RankTwoTensorTempl<T>::operator=(const RankTwoTensorTempl<T> & a)
 {
-  TensorValue<T>::operator=(a);
+  libMesh::TensorValue<T>::operator=(a);
   return *this;
 }
 
@@ -379,7 +379,7 @@ template <typename T>
 RankTwoTensorTempl<T> &
 RankTwoTensorTempl<T>::operator+=(const RankTwoTensorTempl<T> & a)
 {
-  TensorValue<T>::operator+=(a);
+  libMesh::TensorValue<T>::operator+=(a);
   return *this;
 }
 
@@ -387,7 +387,7 @@ template <typename T>
 RankTwoTensorTempl<T> &
 RankTwoTensorTempl<T>::operator-=(const RankTwoTensorTempl<T> & a)
 {
-  TensorValue<T>::operator-=(a);
+  libMesh::TensorValue<T>::operator-=(a);
   return *this;
 }
 
@@ -395,14 +395,14 @@ template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::operator-() const
 {
-  return TensorValue<T>::operator-();
+  return libMesh::TensorValue<T>::operator-();
 }
 
 template <typename T>
 RankTwoTensorTempl<T> &
 RankTwoTensorTempl<T>::operator*=(const T & a)
 {
-  TensorValue<T>::operator*=(a);
+  libMesh::TensorValue<T>::operator*=(a);
   return *this;
 }
 
@@ -410,13 +410,13 @@ template <typename T>
 RankTwoTensorTempl<T> &
 RankTwoTensorTempl<T>::operator/=(const T & a)
 {
-  TensorValue<T>::operator/=(a);
+  libMesh::TensorValue<T>::operator/=(a);
   return *this;
 }
 
 template <typename T>
 RankTwoTensorTempl<T> &
-RankTwoTensorTempl<T>::operator*=(const TypeTensor<T> & a)
+RankTwoTensorTempl<T>::operator*=(const libMesh::TypeTensor<T> & a)
 {
   *this = *this * a;
   return *this;
@@ -462,7 +462,7 @@ T
 RankTwoTensorTempl<T>::doubleContraction(const RankTwoTensorTempl<T> & b) const
 {
   // deprecate this!
-  return TensorValue<T>::contract(b);
+  return libMesh::TensorValue<T>::contract(b);
 }
 
 template <typename T>
@@ -563,16 +563,16 @@ RankTwoTensorTempl<T>::trace() const
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::inverse() const
+RankTwoTensorTempl<T>::dtrace() const
 {
-  return TensorValue<T>::inverse();
+  return RankTwoTensorTempl<T>(1, 0, 0, 0, 1, 0, 0, 0, 1);
 }
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::dtrace() const
+RankTwoTensorTempl<T>::inverse() const
 {
-  return RankTwoTensorTempl<T>(1, 0, 0, 0, 1, 0, 0, 0, 1);
+  return libMesh::TensorValue<T>::inverse();
 }
 
 template <typename T>
@@ -1041,26 +1041,27 @@ RankTwoTensorTempl<T>::initRandom(unsigned int rand_seed)
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::genRandomTensor(T scale, T offset)
+RankTwoTensorTempl<T>::genRandomTensor(T stddev, T mean)
 {
   RankTwoTensorTempl<T> result;
   for (const auto i : make_range(N))
     for (const auto j : make_range(N))
-      result(i, j) = (MooseRandom::rand() + offset) * scale;
+      result(i, j) = (MooseRandom::rand() + mean) * stddev;
   return result;
 }
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::genRandomSymmTensor(T scale, T offset)
+RankTwoTensorTempl<T>::genRandomSymmTensor(T stddev, T mean)
 {
-  auto r = [&]() { return (MooseRandom::rand() + offset) * scale; };
+  auto r = [&]() { return (MooseRandom::rand() + mean) * stddev; };
   return RankTwoTensorTempl<T>(r(), r(), r(), r(), r(), r());
 }
 
 template <typename T>
 void
-RankTwoTensorTempl<T>::vectorOuterProduct(const TypeVector<T> & v1, const TypeVector<T> & v2)
+RankTwoTensorTempl<T>::vectorOuterProduct(const libMesh::TypeVector<T> & v1,
+                                          const libMesh::TypeVector<T> & v2)
 {
   RankTwoTensorTempl<T> & a = *this;
   for (const auto i : make_range(N))
@@ -1070,7 +1071,8 @@ RankTwoTensorTempl<T>::vectorOuterProduct(const TypeVector<T> & v1, const TypeVe
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::outerProduct(const TypeVector<T> & v1, const TypeVector<T> & v2)
+RankTwoTensorTempl<T>::outerProduct(const libMesh::TypeVector<T> & v1,
+                                    const libMesh::TypeVector<T> & v2)
 {
   RankTwoTensorTempl<T> result;
   for (const auto i : make_range(N))
@@ -1081,7 +1083,7 @@ RankTwoTensorTempl<T>::outerProduct(const TypeVector<T> & v1, const TypeVector<T
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::selfOuterProduct(const TypeVector<T> & v)
+RankTwoTensorTempl<T>::selfOuterProduct(const libMesh::TypeVector<T> & v)
 {
   RankTwoTensorTempl<T> result(RankTwoTensorTempl<T>::initNone);
   for (unsigned int i = 0; i < N; ++i)
@@ -1092,7 +1094,7 @@ RankTwoTensorTempl<T>::selfOuterProduct(const TypeVector<T> & v)
 
 template <typename T>
 void
-RankTwoTensorTempl<T>::fillRealTensor(TensorValue<T> & tensor)
+RankTwoTensorTempl<T>::fillRealTensor(libMesh::TensorValue<T> & tensor)
 {
   for (const auto i : make_range(N))
     for (const auto j : make_range(N))
@@ -1101,7 +1103,7 @@ RankTwoTensorTempl<T>::fillRealTensor(TensorValue<T> & tensor)
 
 template <typename T>
 void
-RankTwoTensorTempl<T>::fillRow(unsigned int r, const TypeVector<T> & v)
+RankTwoTensorTempl<T>::fillRow(unsigned int r, const libMesh::TypeVector<T> & v)
 {
   for (const auto i : make_range(N))
     (*this)(r, i) = v(i);
@@ -1109,7 +1111,7 @@ RankTwoTensorTempl<T>::fillRow(unsigned int r, const TypeVector<T> & v)
 
 template <typename T>
 void
-RankTwoTensorTempl<T>::fillColumn(unsigned int c, const TypeVector<T> & v)
+RankTwoTensorTempl<T>::fillColumn(unsigned int c, const libMesh::TypeVector<T> & v)
 {
   for (const auto i : make_range(N))
     (*this)(i, c) = v(i);
