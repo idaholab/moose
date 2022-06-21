@@ -27,6 +27,7 @@ requirements:
     - go
   run:
     - gperftools
+    - graphviz
     - perl
 
 test:
