@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseTypes.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
 #include "ADRankThreeTensorForward.h"
@@ -283,16 +284,11 @@ public:
   RankFourTensorTempl<T> transposeIj() const;
 
   /**
-   * multiply a RankFourTensor with a vector
-   * @return C_ikl = a_ijkl*b_j
+   * single contraction of a RankFourTensor with a vector over index m
+   * @return C_xxx = a_ijkl*b_m where m={i,j,k,l} and xxx the remaining indices
    */
-  RankThreeTensorTempl<T> mixedProductIjklJ(const VectorValue<T> & b) const;
-
-  /**
-   * multiply a RankFourTensor with a vector
-   * @return C_jkl = a_ijkl*b_i
-   */
-  RankThreeTensorTempl<T> mixedProductIjklI(const VectorValue<T> & b) const;
+  template <int m>
+  RankThreeTensorTempl<T> contraction(const VectorValue<T> & b) const;
 
   /**
    * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l =
@@ -754,6 +750,23 @@ RankFourTensorTempl<T>::inverse() const
   const Eigen::Map<const Eigen::Matrix<T, 9, 9, Eigen::RowMajor>> mat(&_vals[0]);
   Eigen::Map<Eigen::Matrix<T, 9, 9, Eigen::RowMajor>> res(&result._vals[0]);
   res = mat.inverse();
+
+  return result;
+}
+
+template <typename T>
+template <int m>
+RankThreeTensorTempl<T>
+RankFourTensorTempl<T>::contraction(const VectorValue<T> & b) const
+{
+  RankThreeTensorTempl<T> result;
+  static constexpr std::size_t z[4][3] = {{1, 2, 3}, {0, 2, 3}, {0, 1, 3}, {0, 1, 2}};
+  std::size_t x[4];
+  for (x[0] = 0; x[0] < N; ++x[0])
+    for (x[1] = 0; x[1] < N; ++x[1])
+      for (x[2] = 0; x[2] < N; ++x[2])
+        for (x[3] = 0; x[3] < N; ++x[3])
+          result(x[z[m][0]], x[z[m][1]], x[z[m][2]]) += (*this)(x[0], x[1], x[2], x[3]) * b(x[m]);
 
   return result;
 }

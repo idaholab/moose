@@ -47,7 +47,8 @@ computedRdF(const RankTwoTensor & R, const RankTwoTensor & U)
 RankFourTensor
 computedFinversedF(const RankTwoTensor & F_inv)
 {
-  return -F_inv.mixedProductIkJl(F_inv.transpose());
+  usingTensorIndices(i_, j_, k_, l_);
+  return -F_inv.times<i_, k_, j_, l_>(F_inv.transpose());
 }
 
 Real
