@@ -12,6 +12,8 @@
 #include "SinglePhaseFluidProperties.h"
 #include "DelimitedFileReader.h"
 
+#include "libmesh/utility.h"
+
 class SinglePhaseFluidPropertiesPT;
 class BidimensionalInterpolation;
 
@@ -114,6 +116,15 @@ public:
   virtual void
   e_from_p_T(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
+  virtual Real
+  T_from_p_rho(Real pressure, Real rho) const;
+
+  virtual Real
+  e_from_p_rho(Real pressure, Real rho) const override;
+
+  virtual void
+  e_from_p_rho(Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
+
   virtual Real h_from_p_T(Real p, Real T) const override;
 
   virtual void
@@ -146,6 +157,20 @@ public:
   virtual Real s_from_p_T(Real pressure, Real temperature) const override;
 
   virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
+
+  virtual Real s_from_v_e(Real v, Real e) const override;
+
+  virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const override;
+
+  virtual void pT_from_h_s(Real & h, Real & s, Real & p0, Real & T0) const;
+
+  virtual Real p_from_h_s(Real h, Real s) const override;
+
+  virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const override;
+
+  virtual Real T_from_h_s(Real h, Real s) const;
+
+  virtual void T_from_h_s(Real h, Real s, Real & T, Real & dT_dh, Real & dT_ds) const;
 
   virtual std::vector<Real> henryCoefficients() const override;
 
@@ -301,6 +326,12 @@ protected:
   Real _h_min;
   /// Maximum specific enthalpy in tabulated data
   Real _h_max;
+  /// Tolerance for 2D Newton variable set conversion
+  Real _tolerance;
+  /// Temperature initial guess for 2D Newton variable set conversion
+  Real _T_initial_guess;
+  /// Pressure initial guess for 2D Newton variable set conversion
+  Real _p_initial_guess;
 
   /// specific volume vector
   std::vector<Real> _specific_volume;

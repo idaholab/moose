@@ -16,6 +16,7 @@
 // C++ includes
 #include <fstream>
 #include <ctime>
+#include <math.h>
 
 InputParameters
 TabulatedFluidProperties::validParams()
@@ -28,13 +29,13 @@ TabulatedFluidProperties::validParams()
       "no file exists and save_file = true, then one will be written to "
       "fluid_properties.csv using the temperature and pressure range specified.");
   params.addRangeCheckedParam<Real>("temperature_min",
-                                    300.0,
+                                    300,
                                     "temperature_min > 0",
                                     "Minimum temperature for tabulated data. Default is 300 K)");
   params.addParam<Real>(
-      "temperature_max", 500.0, "Maximum temperature for tabulated data. Default is 500 K");
+      "temperature_max", 500, "Maximum temperature for tabulated data. Default is 500 K");
   params.addRangeCheckedParam<Real>("pressure_min",
-                                    1.0e5,
+                                    1e5,
                                     "pressure_min > 0",
                                     "Minimum pressure for tabulated data. Default is 0.1 MPa)");
   params.addParam<Real>(
@@ -75,6 +76,18 @@ TabulatedFluidProperties::validParams()
       "If true exceeding pressure or temperature tabulation values leads to an error.");
   params.addClassDescription(
       "Fluid properties using bicubic or bilinear interpolation on tabulated values provided");
+  params.addRangeCheckedParam<Real>("tolerance",
+                        1e-8,
+                        "tolerance > 0",
+                        "Tolerance for 2D Newton variable set conversion");
+  params.addRangeCheckedParam<Real>("T_initial_guess",
+                        400,
+                        "T_initial_guess > 0",
+                        "Temperature initial guess for 2D Newton variable set conversion");
+  params.addRangeCheckedParam<Real>("p_initial_guess",
+                        2e5,
+                        "p_initial_guess > 0",
+                        "Pressure initial guess for 2D Newton variable set conversion");
 
   return params;
 }
@@ -113,7 +126,10 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _num_v(getParam<unsigned int>("num_v")),
     _num_e(getParam<unsigned int>("num_e")),
     _inversion_interpolation_order(getParam<unsigned int>("pt_ve_inversion_interpolation_order")),
-    _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds"))
+    _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds")),
+    _tolerance(getParam<Real>("tolerance")),
+    _T_initial_guess(getParam<Real>("T_initial_guess")),
+    _p_initial_guess(getParam<Real>("p_initial_guess"))
 {
   // Sanity check on minimum and maximum temperatures and pressures
   if (_temperature_max <= _temperature_min)
@@ -430,6 +446,23 @@ TabulatedFluidProperties::e_from_p_T(
 }
 
 Real
+TabulatedFluidProperties::e_from_p_rho(Real pressure, Real rho) const
+{
+  Real T = T_from_p_rho(pressure, rho);
+  Real e = e_from_p_T(pressure, T);
+  return e;
+}
+
+void
+TabulatedFluidProperties::e_from_p_rho(Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const
+{
+  Real T = T_from_p_rho(pressure, rho);
+  e = e_from_p_T(pressure, T);
+  de_dp = 0;
+  de_drho = 0;
+}
+
+Real
 TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_enthalpy)
@@ -585,7 +618,169 @@ TabulatedFluidProperties::s_from_p_T(Real pressure, Real temperature) const
 void
 TabulatedFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
 {
-  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
+  if (_interpolate_entropy)
+  {
+    checkInputVariables(p, T);
+    return _property_ipol[_entropy_idx]->sampleValueAndDerivatives(p, T, s, ds_dp, ds_dT);
+  }
+  else
+    _fp.s_from_p_T(p, T, s, ds_dp, ds_dT);
+}
+
+Real
+TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
+{
+  const Real eps = 1e-6;
+  Real current_T = _T_initial_guess; //find good initial guess, know something about e from interpolation tables
+  Real next_T;
+  Real f;
+  unsigned int iteration = 1;
+  Real residual = current_T;
+
+  while (residual> _tolerance)
+  {
+    Real new_rho, df_dT, df_dp;
+    rho_from_p_T(pressure, current_T, new_rho, df_dp, df_dT);
+    _console << std::endl;
+    _console <<" new_rho = " << new_rho <<std::endl;
+    _console <<" df_dp =  " << df_dp <<std::endl;
+    _console <<" df_dT " << df_dT <<std::endl;
+    _console <<" residual " << residual <<std::endl;
+    _console <<" current_T " << current_T <<std::endl;
+
+
+    f = new_rho - rho;
+    next_T = current_T - (f)/df_dT;
+    residual = std::abs(current_T - next_T);
+    current_T = std::min(std::max(_temperature_min + eps, next_T), _temperature_max - eps);
+    _console <<" next_T " << next_T <<std::endl;
+
+    ++iteration;
+
+    if (iteration > 100)
+    {
+      mooseError("T_from_p_rho_Convergence Failed in Newton Solve");
+    }
+  }
+  _console <<" current_T soln" << current_T <<std::endl;
+  return current_T;
+}
+
+Real
+TabulatedFluidProperties::s_from_v_e(Real v, Real e) const
+{
+  const Real p = p_from_v_e(v, e);
+  const Real T = T_from_v_e(v, e);
+  const Real s = s_from_p_T(p, T);
+  return s;
+}
+
+void
+TabulatedFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const
+{
+  s = s_from_v_e(v, e);
+  ds_dv = 0;
+  ds_de = 0;
+}
+
+void
+TabulatedFluidProperties::pT_from_h_s(Real & h, //h value
+                                      Real & s, //s value
+                                      Real & p0,//returned pressure/initial guess
+                                      Real & T0//returned temperature/intial guess
+                                      ) const
+{
+  RealEigenMatrix jacobian(2,2); //Compute Jacobian
+
+  RealEigenVector current_vec(2);//initialize current_vec with initial guess
+  current_vec << p0, T0;
+
+  RealEigenVector next_vec(2); //initialize "next" vector
+
+  RealEigenVector target(2); //Real h and Real s
+  target << h, s;
+
+  RealEigenVector function(2);
+
+  unsigned int iteration = 1;
+  Real res1 = 1; //initialize residual;
+  Real res2 = 1;
+  Real residual = 1;
+
+  while (residual > _tolerance) //tol instead of 1e-8
+  {
+    Real new_h, dh_dp, dh_dT, new_s, ds_dp, ds_dT;
+    h_from_p_T(current_vec[0], current_vec[1], new_h, dh_dp, dh_dT); //get new h and derivatives
+    s_from_p_T(current_vec[0], current_vec[1], new_s, ds_dp, ds_dT); //get new s and derivatives
+
+    jacobian << dh_dp, dh_dT, //fill jacobian
+                ds_dp, ds_dT;
+    function << new_h, new_s; //fill function
+    // _console << "jacobian =  " << jacobian << std::endl;
+    // _console << "xi = " << current_vec <<std::endl;
+    // _console << "function = " << function << std::endl;
+
+
+//check determinant of jacobian, if not equal to 0, invertible
+    // Real det = (dh_dp * ds_dT) - (dh_dT * ds_dp);
+    // _console << "det= " << det << std::endl;
+    // _console <<"jacobian inverse = " << jacobian.inverse() << std::endl;
+    next_vec = current_vec - (jacobian.inverse() * ( function - target)); //2D Newton Method
+    res1 = (current_vec[0] - next_vec[0]); //update residual 1
+    res2 = (current_vec[1] - next_vec[1]); //update residual 2
+    residual = pow(pow(res1, 2) + pow(res2, 2), 0.5); //update residual
+    // _console << "res1" << res1 << std::endl;
+    // _console << "res2" << res2 << std::endl;
+    // _console << "residual" << residual << std::endl;
+
+    current_vec = next_vec; //update current_vec for next iteration
+    // _console << "iteration = " << iteration << std::endl;
+    // _console << "current_T = " << std::to_string(current_vec[1]) << std::endl;
+    // _console << "current_p = " << std::to_string(current_vec[0]) << std::endl;
+    ++iteration; //update iteration;
+
+    if (iteration > 100)
+      mooseError("2D Newton Solve, Convergence Failed");
+  }
+  p0 = current_vec[0]; //returned pressure
+  T0 = current_vec[1]; //returned temperature
+  // Real dp_dh = jacobian.inverse()[0,0];
+  // Real dT_dh = jacobian.inverse()[0,1];
+  // Real dp_ds = jacobian.inverse()[1,0];
+  // Real dT_ds = jacobian.inverse()[1,1];
+}
+//RAII
+Real
+TabulatedFluidProperties::p_from_h_s(Real h, Real s) const
+{
+  Real p0 = _p_initial_guess;
+  Real T0 = _T_initial_guess;
+  pT_from_h_s(h, s, p0, T0);
+  return p0;
+}
+
+void
+TabulatedFluidProperties::p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const
+{
+  p = p_from_h_s(h, s);
+  dp_dh = 0;
+  dp_ds = 0;
+}
+
+Real
+TabulatedFluidProperties::T_from_h_s(Real h, Real s) const
+{
+  Real p0, T0;
+  pT_from_h_s(h, s, p0, T0);
+  return T0;
+}
+
+void
+TabulatedFluidProperties::T_from_h_s(Real h, Real s, Real & T, Real & dT_dh, Real & dT_ds) const
+{
+  T = T_from_h_s(h, s);
+  dT_dh = 0;
+  dT_ds = 0;
 }
 
 Real
@@ -976,7 +1171,7 @@ TabulatedFluidProperties::checkInputVariables(Real & pressure, Real & temperatur
   if (temperature < _temperature_min || temperature > _temperature_max)
   {
     if (_error_on_out_of_bounds)
-      throw MooseException("Temperature " + Moose::stringify(temperature) +
+      mooseError("Temperature " + Moose::stringify(temperature) +
                            " is outside the range of tabulated temperature (" +
                            Moose::stringify(_temperature_min) + ", " +
                            Moose::stringify(_temperature_max) + ").");
