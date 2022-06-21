@@ -70,8 +70,9 @@ std::unique_ptr<MeshBase>
 SideSetsFromNormalsGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  if (!mesh->is_replicated())
-    mooseError("SideSetsFromNormalsGenerator is not implemented for distributed meshes");
+  if (!_fixed_normal && !mesh->is_replicated())
+    mooseError("SideSetsFromNormalsGenerator is not implemented for distributed meshes when "
+               "fixed_normal = false");
 
   std::vector<BoundaryID> boundary_ids =
       MooseMeshUtils::getBoundaryIDs(*mesh, _boundary_names, true);
