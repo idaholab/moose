@@ -640,12 +640,6 @@ protected:
   /// A cache for storing gradients on elements
   mutable std::unordered_map<const Elem *, VectorValue<ADReal>> _elem_to_grad;
 
-  /// A cache for storing uncorrected gradients on faces
-  mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_unc_grad;
-
-  /// A cache that maps from faces to face values
-  mutable std::unordered_map<const FaceInfo *, ADReal> _face_to_value;
-
   /// Whether to use a two term expansion for computing boundary face values
   bool _two_term_boundary_expansion;
 
@@ -662,13 +656,6 @@ protected:
   /// A member to hold the face value when not caching, used to return a reference
   mutable ADReal _temp_face_value;
 
-  /// Whether to cache the gradients the first time they are computed on a cell face. Caching avoids
-  /// redundant calculation, but can increase the memory cost substantially
-  const bool _cache_face_gradients;
-
-  /// Whether to cache face values or re-compute them every time
-  const bool _cache_face_values;
-
   /// Whether to cache cell gradients
   const bool _cache_cell_gradients;
 
@@ -684,9 +671,6 @@ private:
    */
   template <typename FaceCallingArg>
   DotType evaluateFaceDotHelper(const FaceCallingArg & face) const;
-
-  /// A cache for storing gradients on faces
-  mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_grad;
 };
 
 template <typename OutputType>
