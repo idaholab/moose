@@ -48,7 +48,7 @@ ThermalSolidPropertiesMaterial::ThermalSolidPropertiesMaterial(const InputParame
 void
 ThermalSolidPropertiesMaterial::computeQpProperties()
 {
-  _cp[_qp] = _sp.cp_from_T(_temperature[_qp]);
-  _k[_qp] = _sp.k_from_T(_temperature[_qp]);
-  _rho[_qp] = _sp.rho_from_T(_temperature[_qp]);
+  _sp.cp_from_T(_temperature[_qp], _cp[_qp], _dcp_dT[_qp]);
+  _sp.k_from_T(_temperature[_qp], _k[_qp], _dk_dT[_qp]);
+  _sp.rho_from_T(_temperature[_qp], _rho[_qp], _drho_dT[_qp]);
 }
