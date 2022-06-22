@@ -38,7 +38,7 @@
 
 [Materials]
   [bc_value]
-    type = ADGenericFunctorMaterial
+    type = GenericFunctorMaterial
     prop_names = bc_value
     prop_values = 10
   []

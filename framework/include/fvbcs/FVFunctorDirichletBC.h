@@ -22,5 +22,5 @@ public:
 
 private:
   /// The value for this BC
-  const Moose::Functor<ADReal> & _functor;
+  const Moose::Functor<Real> & _functor;
 };

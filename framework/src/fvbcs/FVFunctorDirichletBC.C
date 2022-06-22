@@ -22,12 +22,12 @@ FVFunctorDirichletBC::validParams()
 }
 
 FVFunctorDirichletBC::FVFunctorDirichletBC(const InputParameters & parameters)
-  : FVDirichletBCBase(parameters), _functor(getFunctor<ADReal>("functor"))
+  : FVDirichletBCBase(parameters), _functor(getFunctor<Real>("functor"))
 {
 }
 
 Real
 FVFunctorDirichletBC::boundaryValue(const FaceInfo & fi) const
 {
-  return MetaPhysicL::raw_value(_functor(singleSidedFaceArg(&fi)));
+  return _functor(singleSidedFaceArg(&fi));
 }
