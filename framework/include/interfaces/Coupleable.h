@@ -519,6 +519,16 @@ protected:
                                                                 unsigned int comp = 0) const;
 
   /**
+   * Returns the gradients for all of a coupled variable's components for use in templated automatic
+   * differentiation
+   * @param var_name Name of coupled variable
+   * @return Vector of VariableGradient pointers for each component of \p var_name
+   */
+  template <bool is_ad>
+  std::vector<const GenericVariableGradient<is_ad> *>
+  coupledGenericGradients(const std::string & var_name) const;
+
+  /**
    * Returns gradient of a coupled vector variable for use in Automatic Differentation
    * @param var_name Name of coupled vector variable
    * @param comp Component number for vector of coupled vector variables
