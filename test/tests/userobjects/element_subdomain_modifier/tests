@@ -1,9 +1,18 @@
 [Tests]
-  issues = '#15795 #17100 #17239'
+  issues = '#15795 #17100 #17239 #21383'
   design = 'CoupledVarThresholdElementSubdomainModifier.md'
   [group]
     requirement = 'The framework shall include the ability to change element subdomain during '
                   'simulation'
+
+    [complement_moving_boundary]
+      type = 'Exodiff'
+      input = 'complement_boundary.i'
+      exodiff = 'complement_boundary_out.e complement_boundary_out.e-s002 '
+                'complement_boundary_out.e-s003 complement_boundary_out.e-s004 '
+                'complement_boundary_out.e-s005 complement_boundary_out.e-s006'
+      detail = 'with complement moving boundary,'
+    []
 
     [reversible]
       type = 'Exodiff'

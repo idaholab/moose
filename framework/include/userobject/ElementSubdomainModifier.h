@@ -38,12 +38,28 @@ protected:
     return _moving_boundary_id;
   }
 
+  // The ID of the complement moving boundary that this object creates/modifies.
+  BoundaryID complementMovingBoundaryID() const
+  {
+    if (!_complement_moving_boundary_specified)
+      mooseError("no complement moving boundary specified");
+    return _complement_moving_boundary_id;
+  }
+
   // The name of the moving boundary that this object creates/modifies.
   const BoundaryName movingBoundaryName() const
   {
     if (!_moving_boundary_specified)
       mooseError("no moving boundary specified");
     return _moving_boundary_name;
+  }
+
+  // The name of the complement moving boundary that this object creates/modifies.
+  const BoundaryName complementMovingBoundaryName() const
+  {
+    if (!_complement_moving_boundary_specified)
+      mooseError("no complement moving boundary specified");
+    return _complement_moving_boundary_name;
   }
 
   // Range of the elements who changed their subdomain ID
@@ -59,7 +75,10 @@ private:
   // Set the name of the moving boundary. Create the nodeset/sideset if not exist.
   void setMovingBoundaryName(MooseMesh & mesh);
 
-  // Update the moving boundary (both the underlying sideset and nodeset)
+  // Set the name of the complement moving boundary. Create the nodeset/sideset if not exist.
+  void setComplementMovingBoundaryName(MooseMesh & mesh);
+
+  // Update the moving and complement moving boundaries (both the underlying sideset and nodeset)
   void updateBoundaryInfo(MooseMesh & mesh, const std::vector<const Elem *> & moved_elems);
 
   // Helper function to add nodes on a side of an element to a set
@@ -108,9 +127,18 @@ private:
   /// Whether a moving boundary name is provided
   const bool _moving_boundary_specified;
 
+  /// Whether a complement moving boundary name is provided
+  const bool _complement_moving_boundary_specified;
+
   /// The name of the moving boundary
   BoundaryName _moving_boundary_name;
 
+  /// The name of the complement moving boundary
+  BoundaryName _complement_moving_boundary_name;
+
   /// The Id of the moving boundary
   BoundaryID _moving_boundary_id;
+
+  /// The Id of the complement moving boundary
+  BoundaryID _complement_moving_boundary_id;
 };
