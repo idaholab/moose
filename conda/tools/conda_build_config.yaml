@@ -1,1 +1,14 @@
-../mpich/conda_build_config.yaml
+moose_python:
+  - python 3.9
+  - python 3.8
+  - python 3.7                                             # [not arm64]
+
+# Pesky packages that break internal CI
+# Note: Modifying/Updating this will require changes to conda/mpich!
+openssl:
+  - <3.0
+setuptools:
+  - <60.0
+pin_run_as_build:
+  openssl: x.x
+  setuptools: x.x
