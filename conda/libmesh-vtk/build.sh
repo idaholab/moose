@@ -21,6 +21,7 @@ cmake .. -G "Ninja" \
     -DVTK_GROUP_ENABLE_Qt::STRING=NO \
     -DVTK_GROUP_ENABLE_Views:STRING=NO \
     -DVTK_GROUP_ENABLE_Web:STRING=NO \
+    -DCMAKE_INSTALL_LIBDIR=lib \
     -DCMAKE_OSX_SYSROOT=${CONDA_BUILD_SYSROOT}
 
 ninja install -v -j ${MOOSE_JOBS:-2}

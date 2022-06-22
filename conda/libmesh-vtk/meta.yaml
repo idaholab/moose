@@ -33,7 +33,7 @@ requirements:
 test:
   commands:
     - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ vtk_friendly_version }}.dylib   # [osx]
-    - test -f $PREFIX/libmesh-vtk/lib64/libvtkCommonCore-{{ vtk_friendly_version }}.so    # [linux]
+    - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ vtk_friendly_version }}.so      # [linux]
 
 about:
   home: http://www.vtk.org/
