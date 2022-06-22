@@ -21,6 +21,9 @@ namespace Moose
 {
 namespace FV
 {
+
+bool elemHasFaceInfo(const Elem & elem, const Elem * const neighbor);
+
 template <typename ActionFunctor>
 void
 loopOverElemFaceInfo(const Elem & elem,
@@ -35,22 +38,14 @@ loopOverElemFaceInfo(const Elem & elem,
   {
     const Elem * const candidate_neighbor = elem.neighbor_ptr(side);
 
-    bool elem_has_info;
+    bool elem_has_info = elemHasFaceInfo(elem, candidate_neighbor);
 
     std::set<const Elem *> neighbors;
 
+    bool inactive_neighbor_detected = candidate_neighbor ? !candidate_neighbor->active() : false;
+
     // See MooseMesh::buildFaceInfo for corresponding checks/additions of FaceInfo
-    if (!candidate_neighbor)
-    {
-      neighbors.insert(candidate_neighbor);
-      elem_has_info = true;
-    }
-    else if (elem.level() != candidate_neighbor->level())
-    {
-      neighbors.insert(candidate_neighbor);
-      elem_has_info = candidate_neighbor->level() < elem.level();
-    }
-    else if (!candidate_neighbor->active())
+    if (inactive_neighbor_detected)
     {
       // We must be next to an element that has been refined
       mooseAssert(candidate_neighbor->has_children(), "We should have children");
@@ -67,17 +62,9 @@ loopOverElemFaceInfo(const Elem & elem,
                       "We shouldn't have greater than a face mismatch level of one");
           neighbors.insert(child);
         }
-
-      elem_has_info = false;
     }
     else
-    {
       neighbors.insert(candidate_neighbor);
-
-      // Both elements are active and they are on the same level, so which one has the info is
-      // determined by the lower ID
-      elem_has_info = elem.id() < candidate_neighbor->id();
-    }
 
     for (const Elem * const neighbor : neighbors)
     {

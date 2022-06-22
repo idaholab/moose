@@ -562,8 +562,6 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
 
   mooseAssert(isInternalFace(fi), "This function only be called on internal faces.");
 
-  ADReal * value_pointer = &_temp_face_value;
-
   _temp_face_value =
       Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, correct_skewness));
 
@@ -640,9 +638,15 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
   const Elem * const elem = std::get<0>(tup);
 
   if (_two_term_boundary_expansion)
-    _temp_face_value = adGradSln(elem) * fi.dCF() / 2 + getElemValue(elem);
+  {
+    const Point vector_to_face = std::get<2>(tup) ? (fi.faceCentroid() - fi.elemCentroid())
+                                                  : (fi.faceCentroid() - fi.neighborCentroid());
+
+    _temp_face_value = adGradSln(elem) * vector_to_face + getElemValue(elem);
+  }
   else
     _temp_face_value = getElemValue(elem);
+
   return _temp_face_value;
 }
 

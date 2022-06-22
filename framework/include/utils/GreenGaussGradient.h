@@ -46,9 +46,8 @@ greenGaussGradient(const ElemArg & elem_arg,
 
   T elem_value = functor(elem_arg);
 
-  // We'll save off the extrapolated boundary faces (ebf) for later assignment to the cache (these
-  // are the keys)
-  std::vector<const FaceInfo *> ebf_faces;
+  // We'll count the extrapolated boundaries
+  unsigned int num_ebfs = 0;
 
   try
   {
@@ -87,7 +86,7 @@ greenGaussGradient(const ElemArg & elem_arg,
                            &volume,
                            &elem_value,
                            &elem_arg,
-                           &ebf_faces,
+                           &num_ebfs,
                            &ebf_grad_coeffs,
                            &ebf_b,
                            &grad_ebf_coeffs,
@@ -110,7 +109,7 @@ greenGaussGradient(const ElemArg & elem_arg,
       {
         if (two_term_boundary_expansion)
         {
-          ebf_faces.push_back(fi);
+          num_ebfs += 1;
 
           // eqn. 2
           ebf_grad_coeffs.push_back(-1. * (elem_has_info
@@ -168,12 +167,6 @@ greenGaussGradient(const ElemArg & elem_arg,
         "We have not yet implemented the correct translation from gradient to divergence for "
         "spherical coordinates yet.");
 
-    mooseAssert(
-        ebf_faces.size() < UINT_MAX,
-        "You've created a mystical element that has more faces than can be held by unsigned "
-        "int. I applaud you.");
-    const auto num_ebfs = static_cast<unsigned int>(ebf_faces.size());
-
     // test for simple case
     if (num_ebfs == 0)
       grad = grad_b;
@@ -227,7 +220,7 @@ greenGaussGradient(const ElemArg & elem_arg,
     mooseAssert(two_term_boundary_expansion,
                 "I believe we should only get singular systems when two-term boundary expansion is "
                 "being used");
-    const auto grad = greenGaussGradient(elem_arg, functor, false, mesh, face_to_value_cache);
+    const auto grad = greenGaussGradient(elem_arg, functor, false, mesh);
 
     // We failed to compute the extrapolated boundary faces with two-term expansion and callers of
     // this method may be relying on those values (e.g. if the caller is
@@ -267,10 +260,10 @@ greenGaussGradient(const FaceArg & face_arg,
   if (!is_extrapolated)
   {
     // Compute the gradients in the two cells on both sides of the face
-    const auto & grad_elem = greenGaussGradient(
-        elem_arg, functor, two_term_boundary_expansion, mesh, face_to_value_cache);
-    const auto & grad_neighbor = greenGaussGradient(
-        neighbor_arg, functor, two_term_boundary_expansion, mesh, face_to_value_cache);
+    const auto & grad_elem =
+        greenGaussGradient(elem_arg, functor, two_term_boundary_expansion, mesh);
+    const auto & grad_neighbor =
+        greenGaussGradient(neighbor_arg, functor, two_term_boundary_expansion, mesh);
 
     VectorValue<T> face_gradient;
     Moose::FV::interpolate(
