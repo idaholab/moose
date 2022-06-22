@@ -20,12 +20,12 @@
  * 2) Support vector vars and regular vars
  * 3) Support higher order FEM
  */
-class MultiAppGeneralFieldTransfer : public MultiAppConservativeTransfer
+class MultiAppGeneralFieldMeshFunctionTransfer: public MultiAppConservativeTransfer
 {
 public:
   static InputParameters validParams();
 
-  MultiAppGeneralFieldTransfer(const InputParameters & parameters);
+  MultiAppGeneralFieldMeshFunctionTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 

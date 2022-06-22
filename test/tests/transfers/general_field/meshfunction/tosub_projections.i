@@ -74,7 +74,7 @@
     source_variable = u
     direction = to_multiapp
     variable = transferred_u
-    type = MultiAppGeneralFieldTransfer
+    type = MultiAppGeneralFieldMeshFunctionTransfer
     multi_app = sub
   []
 
@@ -82,7 +82,7 @@
     source_variable = u
     direction = to_multiapp
     variable = elemental_transferred_u
-    type = MultiAppGeneralFieldTransfer
+    type = MultiAppGeneralFieldMeshFunctionTransfer
     multi_app = sub
   []
 
@@ -90,7 +90,7 @@
     source_variable = sub_u
     direction = from_multiapp
     variable = from_sub
-    type = MultiAppGeneralFieldTransfer
+    type = MultiAppGeneralFieldMeshFunctionTransfer
     multi_app = sub
   []
 
@@ -98,7 +98,7 @@
     source_variable = sub_u
     direction = from_multiapp
     variable = elemental_from_sub
-    type = MultiAppGeneralFieldTransfer
+    type = MultiAppGeneralFieldMeshFunctionTransfer
     multi_app = sub
   []
 []

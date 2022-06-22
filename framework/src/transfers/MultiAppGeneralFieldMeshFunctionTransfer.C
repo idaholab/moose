@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultiAppGeneralFieldTransfer.h"
+#include "MultiAppGeneralFieldMeshFunctionTransfer.h"
 
 // MOOSE includes
 #include "DisplacedProblem.h"
@@ -165,7 +165,7 @@ protected:
   typedef typename TensorTools::MakeBaseNumber<Output>::type DofValueType;
 
 public:
-  typedef std::unordered_map<Point, Output, MultiAppGeneralFieldTransfer::hash_point> Cache;
+  typedef std::unordered_map<Point, Output, MultiAppGeneralFieldMeshFunctionTransfer::hash_point> Cache;
 
   typedef typename TensorTools::MakeReal<Output>::type RealType;
   typedef DofValueType ValuePushType;
@@ -246,10 +246,10 @@ private:
 
 }
 
-registerMooseObject("MooseApp", MultiAppGeneralFieldTransfer);
+registerMooseObject("MooseApp", MultiAppGeneralFieldMeshFunctionTransfer);
 
 InputParameters
-MultiAppGeneralFieldTransfer::validParams()
+MultiAppGeneralFieldMeshFunctionTransfer::validParams()
 {
   InputParameters params = MultiAppConservativeTransfer::validParams();
   params.addClassDescription(
@@ -273,7 +273,7 @@ MultiAppGeneralFieldTransfer::validParams()
   return params;
 }
 
-MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters & parameters)
+MultiAppGeneralFieldMeshFunctionTransfer::MultiAppGeneralFieldMeshFunctionTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
     _error_on_miss(getParam<bool>("error_on_miss")),
     _bbox_tol(getParam<Real>("bbox_tol")),
@@ -289,7 +289,7 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
 }
 
 void
-MultiAppGeneralFieldTransfer::execute()
+MultiAppGeneralFieldMeshFunctionTransfer::execute()
 {
   _console << "Beginning GeneralFieldTransfer " << name() << std::endl;
 
@@ -305,7 +305,7 @@ MultiAppGeneralFieldTransfer::execute()
 }
 
 void
-MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
+MultiAppGeneralFieldMeshFunctionTransfer::transferVariable(unsigned int i)
 {
   mooseAssert(i < _var_size, "The variable of index " << i << " does not exist");
 
@@ -389,7 +389,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
 }
 
 void
-MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
+MultiAppGeneralFieldMeshFunctionTransfer::locatePointReceivers(const Point point,
                                                    std::vector<processor_id_type> & processors)
 {
   // Check which processors include this point
@@ -412,7 +412,7 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
 }
 
 void
-MultiAppGeneralFieldTransfer::cacheOutgoingPointInfor(const Point point,
+MultiAppGeneralFieldMeshFunctionTransfer::cacheOutgoingPointInfor(const Point point,
                                                       const dof_id_type dof_object_id,
                                                       const unsigned int problem_id,
                                                       ProcessorToPointVec & outgoing_points)
@@ -437,7 +437,7 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfor(const Point point,
 }
 
 void
-MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_name,
+MultiAppGeneralFieldMeshFunctionTransfer::extractOutgoingPoints(const VariableName & var_name,
                                                     ProcessorToPointVec & outgoing_points)
 {
   // Clean up the map from processor to pointInfo vector
@@ -557,7 +557,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
 }
 
 void
-MultiAppGeneralFieldTransfer::extractLocalFromBoundingBoxes(std::vector<BoundingBox> & local_bboxes)
+MultiAppGeneralFieldMeshFunctionTransfer::extractLocalFromBoundingBoxes(std::vector<BoundingBox> & local_bboxes)
 {
   local_bboxes.resize(_froms_per_proc[processor_id()]);
   // Find the index to the first of this processor's local bounding boxes.
@@ -575,7 +575,7 @@ MultiAppGeneralFieldTransfer::extractLocalFromBoundingBoxes(std::vector<Bounding
 }
 
 void
-MultiAppGeneralFieldTransfer::buildMeshFunctions(
+MultiAppGeneralFieldMeshFunctionTransfer::buildMeshFunctions(
     const VariableName & var_name, std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns)
 {
   // Construct a local mesh for each problem
@@ -598,7 +598,7 @@ MultiAppGeneralFieldTransfer::buildMeshFunctions(
 }
 
 void
-MultiAppGeneralFieldTransfer::evaluateInterpValues(
+MultiAppGeneralFieldMeshFunctionTransfer::evaluateInterpValues(
     const std::vector<BoundingBox> & local_bboxes,
     const std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns,
     const std::vector<Point> & incoming_points,
@@ -628,7 +628,7 @@ MultiAppGeneralFieldTransfer::evaluateInterpValues(
 }
 
 void
-MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
+MultiAppGeneralFieldMeshFunctionTransfer::cacheIncomingInterpVals(
     processor_id_type pid,
     const VariableName & var_name,
     std::vector<PointInfor> & pointInfoVec,
@@ -722,7 +722,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
 }
 
 void
-MultiAppGeneralFieldTransfer::setSolutionVectorValues(
+MultiAppGeneralFieldMeshFunctionTransfer::setSolutionVectorValues(
     const VariableName & var_name,
     const DofobjectToInterpValVec & dofobject_to_valsvec,
     const InterpCaches & interp_caches)
@@ -808,25 +808,25 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
 }
 
 bool
-MultiAppGeneralFieldTransfer::blockRestrictedTarget() const
+MultiAppGeneralFieldMeshFunctionTransfer::blockRestrictedTarget() const
 {
   return _has_to_blocks;
 }
 
 bool
-MultiAppGeneralFieldTransfer::blockRestrictedSource() const
+MultiAppGeneralFieldMeshFunctionTransfer::blockRestrictedSource() const
 {
   return !_from_blocks.empty();
 }
 
 bool
-MultiAppGeneralFieldTransfer::hasBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const
+MultiAppGeneralFieldMeshFunctionTransfer::hasBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const
 {
   return blocks.find(elem->subdomain_id()) != blocks.end();
 }
 
 bool
-MultiAppGeneralFieldTransfer::hasBlocks(std::set<SubdomainID> & blocks,
+MultiAppGeneralFieldMeshFunctionTransfer::hasBlocks(std::set<SubdomainID> & blocks,
                                         const MooseMesh * mesh,
                                         const Node * node) const
 {
