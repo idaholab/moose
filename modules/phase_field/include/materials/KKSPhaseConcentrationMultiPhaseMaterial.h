@@ -24,22 +24,32 @@ protected:
   virtual void initialSetup() override;
   virtual void computeQpProperties() override;
 
+  /// Global concentrations
   const std::vector<const VariableValue *> _prop_c;
+
+  /// Number of global concentrations
   const unsigned int _num_c;
-  const unsigned int _num_j;
+
+  /// Phase parameters
   const std::vector<VariableName> _eta_names;
+
+  /// Number of phase parameters
+  const unsigned int _num_j;
+
+  /// Switching functions
   std::vector<MaterialPropertyName> _hj_names;
   std::vector<const MaterialProperty<Real> *> _prop_hj;
+
+  /// Free energies
+  const std::vector<MaterialName> _Fj_names;
+  std::vector<const MaterialProperty<Real> *> _prop_Fi;
+  std::vector<MaterialProperty<Real> *> _Fi_copy;
+
+  /// Phase concentrations
   std::vector<MaterialPropertyName> _ci_names;
   std::vector<MaterialProperty<Real> *> _prop_ci;
   std::vector<const MaterialProperty<Real> *> _ci_old;
   std::vector<Real> _ci_IC;
-
-  const std::vector<MaterialName> _Fj_names;
-  // std::vector<std::string> _Fj_mat_names;
-
-  std::vector<const MaterialProperty<Real> *> _prop_Fi;
-  std::vector<MaterialProperty<Real> *> _Fi_copy;
 
   /// Derivative of free energies wrt phase concentrations \f$ \frac d{dc_i} F_i \f$
   std::vector<std::vector<const MaterialProperty<Real> *>> _dFidci;

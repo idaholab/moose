@@ -37,7 +37,7 @@ NestKKSSplitCHCRes::NestKKSSplitCHCRes(const InputParameters & parameters)
     _c_names(coupledNames("global_cs")),
     _num_c(coupledComponents("global_cs")),
     _c_map(getParameterJvarMap("global_cs")),
-    _o(-1), // position of nonlinear variable c in the list of global_cs
+    _o(-1),
     _w_var(coupled("w")),
     _w(coupledValue("w")),
     _c1_names(getParam<std::vector<MaterialPropertyName>>("c1_names")),
@@ -56,7 +56,7 @@ NestKKSSplitCHCRes::NestKKSSplitCHCRes(const InputParameters & parameters)
       _o = i;
   }
 
-  // _dcideta and _dcid are computed in KKSPhaseConcentrationDerivatives
+  // _dcideta and _dcidb are computed in KKSPhaseConcentrationDerivatives
   for (unsigned int m = 0; m < _num_c; ++m)
   {
     _dc1detaj[m].resize(_num_j);

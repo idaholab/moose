@@ -28,12 +28,12 @@
  * corresponding phase concentration \f$ c_a \f$
  */
 
-class NestKKSSplitCHCRes
-    : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>> {
+class NestKKSSplitCHCRes : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
+{
 public:
   static InputParameters validParams();
 
-  NestKKSSplitCHCRes(const InputParameters &parameters);
+  NestKKSSplitCHCRes(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -45,18 +45,18 @@ protected:
 
   /// Number of phase parameters
   const unsigned int _num_j;
-  const JvarMap &_eta_map;
+  const JvarMap & _eta_map;
 
   /// Global concentrations
   const std::vector<VariableName> _c_names;
 
   /// Number of global concentrations
   const unsigned int _num_c;
-  const JvarMap &_c_map;
+  const JvarMap & _c_map;
   int _o;
   /// Chemical potential
   const unsigned int _w_var;
-  const VariableValue &_w;
+  const VariableValue & _w;
 
   /// Phase concentration of the first phase in _eta_names
   const std::vector<MaterialPropertyName> _c1_names;
