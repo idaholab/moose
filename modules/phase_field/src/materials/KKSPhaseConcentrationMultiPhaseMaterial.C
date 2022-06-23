@@ -18,23 +18,25 @@ KKSPhaseConcentrationMultiPhaseMaterial::validParams()
   InputParameters params = DerivativeMaterialInterface<Material>::validParams();
   params.addClassDescription(
       "Computes the KKS phase concentrations by using a nested Newton iteration "
-      "to solve the equal chemical potential and concentration conservation equations");
-  params.addRequiredCoupledVar("global_cs", "Global concentrations, for example, c, b.");
-  params.addRequiredCoupledVar("all_etas", "Order parameters for all phases.");
+      "to solve the equal chemical potential and concentration conservation equations for "
+      "multiphase systems. This class is intented to be used with "
+      "KKSPhaseConcentrationMultiPhaseDerivatives.");
+  params.addRequiredCoupledVar("global_cs", "The interpolated concentrations c, b, etc.");
+  params.addRequiredCoupledVar("all_etas", "Order parameters.");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
-      "hj_names", "Names of the switching functions in the same order of the all_etas");
+      "hj_names", "Switching functions in the same order as all_etas.");
+  params.addRequiredParam<std::vector<MaterialName>>(
+      "Fj_material", "Free energy material objects in the same order as all_etas.");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "ci_names",
-      "Phase concentrations. These must have the same order as Fj_names and global_cs, for "
+      "Phase concentrations. They must have the same order as Fj_names and global_cs, for "
       "example, c1, c2, b1, b2.");
   params.addRequiredParam<std::vector<Real>>("ci_IC",
                                              "Initial values of ci in the same order of ci_names");
-  params.addRequiredParam<std::vector<MaterialName>>("Fj_material",
-                                                     "Free energy material objects.");
   params.addParam<MaterialPropertyName>(
       "nested_iterations",
-      "The output number of nested Newton iterations at each quadrature point");
-  params.addCoupledVar("args", "The coupled variables of free energy.");
+      "The output number of nested Newton iterations at each quadrature point.");
+  params.addCoupledVar("args", "The coupled variables of free energies.");
   params += NestedSolve::validParams();
   return params;
 }
@@ -44,19 +46,17 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
   : DerivativeMaterialInterface<Material>(parameters),
     _prop_c(coupledValues("global_cs")),
     _num_c(coupledComponents("global_cs")),
-    _num_j(coupledComponents("all_etas")),
     _eta_names(coupledNames("all_etas")),
+    _num_j(coupledComponents("all_etas")),
     _hj_names(getParam<std::vector<MaterialPropertyName>>("hj_names")),
     _prop_hj(_num_j),
+    _Fj_names(getParam<std::vector<MaterialName>>("Fj_material")),
+    _prop_Fi(_num_j),
+    _Fi_copy(_num_j),
     _ci_names(getParam<std::vector<MaterialPropertyName>>("ci_names")),
     _prop_ci(_num_c * _num_j),
     _ci_old(_num_c * _num_j),
     _ci_IC(getParam<std::vector<Real>>("ci_IC")),
-
-    _Fj_names(getParam<std::vector<MaterialName>>("Fj_material")),
-
-    _prop_Fi(_num_j),
-    _Fi_copy(_num_j),
     _dFidci(_num_j),
     _dFidci_copy(_num_j),
     _d2Fidcidbi(_num_j),
@@ -73,12 +73,14 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
     _nested_solve(NestedSolve(parameters))
 
 {
+  // phase concentrations
   for (unsigned int m = 0; m < _num_c * _num_j; ++m)
   {
     _ci_old[m] = &getMaterialPropertyOld<Real>(_ci_names[m]);
     _prop_ci[m] = &declareProperty<Real>(_ci_names[m]);
   }
 
+  // free energies
   for (unsigned int m = 0; m < _num_j; ++m)
   {
     _prop_Fi[m] = &getMaterialPropertyByName<Real>(_Fj_names[m]);
@@ -89,6 +91,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
   {
     _prop_hj[m] = &getMaterialPropertyByName<Real>(_hj_names[m]);
 
+    // derivative of free energies wrt phase concentrations
     _dFidci[m].resize(_num_c);
     _dFidci_copy[m].resize(_num_c);
     _d2Fidcidbi[m].resize(_num_c);
@@ -113,7 +116,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
     }
   }
 
-  // partial derivative of Fi wrt coupled variables, to be passed to kernels
+  // derivative of free energies wrt coupled variables
   for (unsigned int m = 0; m < _num_j; ++m)
   {
     _dFidarg[m].resize(_n_args);
@@ -126,7 +129,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
     }
   }
 
-  // second partial derivatives of F1 wrt c1 and another coupled variable, to be passed to kernels
+  // second derivatives of F1 wrt c1 and other coupled variables
   for (unsigned int m = 0; m < _num_c; ++m)
   {
     _d2F1dc1darg[m].resize(_n_args);
@@ -152,6 +155,8 @@ KKSPhaseConcentrationMultiPhaseMaterial::initQpStatefulProperties()
 void
 KKSPhaseConcentrationMultiPhaseMaterial::initialSetup()
 {
+  _Fj_mat.resize(_num_j);
+
   for (unsigned int m = 0; m < _num_j; ++m)
     _Fj_mat[m] = &getMaterialByName(_Fj_names[m]);
 }
@@ -197,25 +202,19 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
     }
 
     // fill in the non-zero terms in jacobian
-    // first assign the terms in jacobian that come from the mu equality derivative equations
-    // loop through the constraint equation sets of the mth component
     for (unsigned int m = 0; m < _num_c; ++m)
     {
-      // loop through the nth constraint equation in the constraint set of one component
+      // equal chemical potential derivative equations
       for (unsigned int n = 0; n < (_num_j - 1); ++n)
       {
-        // loop through the lth chain rule terms in one constrain equation
         for (unsigned int l = 0; l < _num_c; ++l)
         {
           jacobian(m * _num_j + n, n + l * _num_j) = (*_d2Fidcidbi[n][m][l])[_qp];
           jacobian(m * _num_j + n, n + l * _num_j + 1) = -(*_d2Fidcidbi[n + 1][m][l])[_qp];
         }
       }
-    }
 
-    // then assign the terms in jacobian that come from the concentration conservation equations
-    for (unsigned int m = 0; m < _num_c; ++m)
-    {
+      // concentration conservation derivative equations
       for (unsigned int n = 0; n < _num_j; ++n)
         jacobian((m + 1) * _num_j - 1, m * _num_j + n) = (*_prop_hj[n])[_qp];
     }
@@ -225,7 +224,10 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
   _iter[_qp] = _nested_solve.getIterations();
 
   if (_nested_solve.getState() == NestedSolve::State::NOT_CONVERGED)
-    mooseError("Nested Newton iteration did not converge.");
+  {
+    std::cout << "Newton iteration did not converge." << std::endl;
+    // mooseError("Nested Newton iteration did not converge.");
+  }
 
   // assign solution to ci
   for (unsigned int m = 0; m < _num_c * _num_j; ++m)
@@ -254,7 +256,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
 
   for (unsigned int m = 0; m < _num_c; ++m)
   {
-    for (unsigned int n = 0; n < _num_j; ++n)
+    for (unsigned int n = 0; n < _n_args; ++n)
       (*_d2F1dc1darg_copy[m][n])[_qp] = (*_d2F1dc1darg[m][n])[_qp];
   }
 }

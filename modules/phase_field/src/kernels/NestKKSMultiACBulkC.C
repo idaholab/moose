@@ -18,21 +18,20 @@ NestKKSMultiACBulkC::validParams()
   params.addClassDescription("Multi-phase KKS model kernel (part 2 of 2) for the Bulk Allen-Cahn. "
                              "This includes all terms dependent on chemical potential.");
   params.addRequiredCoupledVar("global_cs", "Global concentrations, for example, c, b.");
-  params.addRequiredCoupledVar(
-      "all_etas", "Order parameters for all phases. Place in the same order as Fj_names.");
+  params.addRequiredCoupledVar("all_etas", "Order parameters.");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "ci_names",
-      "Phase concentrations. These must have the same order as Fj_names and global_cs, for "
+      "Phase concentrations. They must have the same order as Fj_names and global_cs, for "
       "example, c1, c2, b1, b2.");
   return params;
 }
 
 NestKKSMultiACBulkC::NestKKSMultiACBulkC(const InputParameters & parameters)
   : KKSMultiACBulkBase(parameters),
-    _c_names(coupledComponents("global_cs")),
+    _c_names(coupledNames("global_cs")),
     _c_map(getParameterJvarMap("global_cs")),
     _num_c(coupledComponents("global_cs")),
-    _eta_names(coupledComponents("all_etas")),
+    _eta_names(coupledNames("all_etas")),
     _eta_map(getParameterJvarMap("all_etas")),
     _k(-1),
     _ci_names(getParam<std::vector<MaterialPropertyName>>("ci_names")),
@@ -40,7 +39,6 @@ NestKKSMultiACBulkC::NestKKSMultiACBulkC(const InputParameters & parameters)
     _prop_ci(_num_c),
     _dcidetaj(_num_c),
     _dcidb(_num_c),
-
     _prop_d2hjdetaidetap(_num_j),
     _dF1dc1(_num_c),
     _d2F1dc1db1(_num_c),
@@ -69,6 +67,7 @@ NestKKSMultiACBulkC::NestKKSMultiACBulkC(const InputParameters & parameters)
     }
   }
 
+  // _dcidetaj and _dcidb are computed in KKSPhaseConcentrationMultiPhaseDerivatives
   for (unsigned int m = 0; m < _num_c; ++m)
   {
     _dcidetaj[m].resize(_num_j);
@@ -79,14 +78,10 @@ NestKKSMultiACBulkC::NestKKSMultiACBulkC(const InputParameters & parameters)
       _dcidetaj[m][n].resize(_num_j);
       _dcidb[m][n].resize(_num_c);
 
-      // declare _prop_dcidetaj. m is the numerator species, n is the phase of the numerator i, l is
-      // the phase of denominator j
       for (unsigned int l = 0; l < _num_j; ++l)
         _dcidetaj[m][n][l] =
             &getMaterialPropertyDerivative<Real>(_ci_names[n + m * _num_j], _eta_names[l]);
 
-      // declare _prop_dcidb. m is the numerator species, n is the phase of the numerator i, l is
-      // the denominator species
       for (unsigned int l = 0; l < _num_c; ++l)
         _dcidb[m][n][l] =
             &getMaterialPropertyDerivative<Real>(_ci_names[n + m * _num_j], _c_names[l]);
@@ -102,18 +97,18 @@ NestKKSMultiACBulkC::NestKKSMultiACBulkC(const InputParameters & parameters)
           &getMaterialPropertyDerivative<Real>(_hj_names[m], _eta_names[_k], _eta_names[n]);
   }
 
+  // _dF1dc1 and _d2F1dc1db1 are computed in KKSPhaseConcentrationMultiPhaseMaterial
   for (unsigned int m = 0; m < _num_c; ++m)
   {
     _dF1dc1[m] = &getMaterialPropertyDerivative<Real>("cp" + _Fj_names[0], _ci_names[m * _num_j]);
     _d2F1dc1db1[m].resize(_num_c);
 
-    // initialize _d2F1dc1db1[m][n]. m is the species of c1, n is the species of b1
     for (unsigned int n = 0; n < _num_c; ++n)
       _d2F1dc1db1[m][n] = &getMaterialPropertyDerivative<Real>(
           "cp" + _Fj_names[0], _ci_name_matrix[m][0], _ci_name_matrix[n][0]);
   }
 
-  // second partial derivatives of F1 wrt c1 and another coupled variable
+  // _d2F1dc1darg are computed in KKSPhaseConcentrationMultiPhaseMaterial
   for (unsigned int m = 0; m < _num_c; ++m)
   {
     _d2F1dc1darg[m].resize(_n_args);
@@ -185,6 +180,7 @@ NestKKSMultiACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
 
   Real sum = 0.0;
 
+  // Then add dependence of KKSACBulkF on other variables.
   // if other cs are the coupled variables
   auto compvar = mapJvarToCvar(jvar, _c_map);
   if (compvar >= 0)
