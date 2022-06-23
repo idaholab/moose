@@ -12,7 +12,15 @@
       recover = false
       detail = "within an input polyline"
     []
-    [with_holes]
+    [from_2d]
+      type = 'Exodiff'
+      input = 'poly2tri_from_2d.i'
+      cli_args = '--mesh-only'
+      exodiff = 'poly2tri_from_2d_in.e'
+      recover = false
+      detail = "or a 2D input mesh"
+    []
+   [with_holes]
       type = 'Exodiff'
       input = 'poly2tri_with_holes.i'
       cli_args = '--mesh-only'
