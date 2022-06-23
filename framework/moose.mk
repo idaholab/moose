@@ -14,7 +14,7 @@ endif
 
 $(info Checking if conda packages exist...)
 #check if conda exists on the system, then run checks if it does.
-check_conda := $(shell conda list | grep "moose-libmesh \|moose-petsc"; echo 0)
+check_conda := $(shell conda list 2> /dev/null | grep "moose-libmesh \|moose-petsc"; echo 0)
 ifneq ($(check_conda),0)
 
  #libmesh conda check
