@@ -1,6 +1,6 @@
 # ThermalCompositeSiCProperties
 
-!syntax description /UserObjects/ThermalCompositeSiCProperties
+!syntax description /Modules/SolidProperties/ThermalCompositeSiCProperties
 
 ## Description
 
@@ -45,10 +45,10 @@ over an unspecified range [!cite](stone).
   start=Modules
   end=Kernels
 
-!syntax parameters /UserObjects/ThermalCompositeSiCProperties
+!syntax parameters /Modules/SolidProperties/ThermalCompositeSiCProperties
 
-!syntax inputs /UserObjects/ThermalCompositeSiCProperties
+!syntax inputs /Modules/SolidProperties/ThermalCompositeSiCProperties
 
-!syntax children /UserObjects/ThermalCompositeSiCProperties
+!syntax children /Modules/SolidProperties/ThermalCompositeSiCProperties
 
 !bibtex bibliography

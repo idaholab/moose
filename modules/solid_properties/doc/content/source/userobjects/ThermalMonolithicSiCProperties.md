@@ -1,6 +1,6 @@
 # ThermalMonolithicSiCProperties
 
-!syntax description /UserObjects/ThermalMonolithicSiCProperties
+!syntax description /Modules/SolidProperties/ThermalMonolithicSiCProperties
 
 ## Description
 
@@ -51,10 +51,10 @@ conductivity over 300 K $\le$ T $\le$ 1800 K with the Snead correlation
   start=Modules
   end=Kernels
 
-!syntax parameters /UserObjects/ThermalMonolithicSiCProperties
+!syntax parameters /Modules/SolidProperties/ThermalMonolithicSiCProperties
 
-!syntax inputs /UserObjects/ThermalMonolithicSiCProperties
+!syntax inputs /Modules/SolidProperties/ThermalMonolithicSiCProperties
 
-!syntax children /UserObjects/ThermalMonolithicSiCProperties
+!syntax children /Modules/SolidProperties/ThermalMonolithicSiCProperties
 
 !bibtex bibliography

@@ -1,6 +1,6 @@
 # ThermalGraphiteProperties
 
-!syntax description /UserObjects/ThermalGraphiteProperties
+!syntax description /Modules/SolidProperties/ThermalGraphiteProperties
 
 ## Description
 
@@ -53,10 +53,10 @@ Density is taken as a constant value; a default value is provided based on
   start=Modules
   end=Kernels
 
-!syntax parameters /UserObjects/ThermalGraphiteProperties
+!syntax parameters /Modules/SolidProperties/ThermalGraphiteProperties
 
-!syntax inputs /UserObjects/ThermalGraphiteProperties
+!syntax inputs /Modules/SolidProperties/ThermalGraphiteProperties
 
-!syntax children /UserObjects/ThermalGraphiteProperties
+!syntax children /Modules/SolidProperties/ThermalGraphiteProperties
 
 !bibtex bibliography
