@@ -25,10 +25,15 @@ requirements:
     - sysroot_linux-64 2.17              # [linux64]
     - gnuconfig                          # [unix]
     - go
+    - openssl
+    - setuptools
+
   run:
     - gperftools
     - graphviz
     - perl
+    - openssl
+    - setuptools
 
 test:
   commands:

@@ -18,6 +18,8 @@ requirements:
     - {{ compiler('cxx') }}
     - {{ moose_python }}
     - cython
+    - openssl
+    - setuptools
 
   host:
     - {{ compiler('cxx') }}
@@ -25,8 +27,8 @@ requirements:
     - cython
 
   run:
-    - openssl <3
-    - setuptools <60
+    - openssl
+    - setuptools
     - python
 
 test:
