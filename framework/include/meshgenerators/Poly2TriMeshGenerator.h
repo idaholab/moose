@@ -26,7 +26,7 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// Input mesh defining the boundary to triangulate
+  /// Input mesh defining the boundary to triangulate within
   std::unique_ptr<MeshBase> & _bdy_ptr;
 
   /// How many more nodes to add in each outer boundary segment
