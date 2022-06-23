@@ -232,6 +232,7 @@ class HTMLRenderer(Renderer):
         config['google_analytics'] = (False, "Enable Google Analytics.")
         config['favicon'] = (None, "The location of the website favicon.")
         config['extra-css'] = ([], "List of additional CSS files to include.")
+        config['extra-js'] = ([],"List of additional JS files to include.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -297,7 +298,8 @@ class HTMLRenderer(Renderer):
         files = {**self.__global_files, **page.get('renderer_files', dict())}
         for i, css in enumerate(self.get('extra-css')):
             files[('extra-css-{}'.format(i), 'css')] = (css, {})
-
+        for i, js in enumerate(self.get('extra-js')):
+            self.addJavaScript('extra-js-{}'.format(i), js)
         for (key, context) in sorted(files, key=(lambda f: f[1])):
             name, kwargs = files.pop((key, context))
             if context == 'css':
