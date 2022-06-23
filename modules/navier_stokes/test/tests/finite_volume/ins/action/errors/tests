@@ -12,9 +12,17 @@
   [momentum-inlet-function-error]
     type = 'RunException'
     input = 2d-rc-error-action.i
-    requirement = 'The system shall throw an error if the number of momentum inlet functions does not match the number of inlet boundaries times the dimension of the mesh.'
+    requirement = 'The system shall throw an error if the number of momentum inlet functions is not equal to the problem dimension for a fixed-velocity inlet.'
     cli_args = "Modules/NavierStokesFV/momentum_inlet_function='1'"
-    expect_err = "Size \(1\) is not the same as the number of direction dependent directions in 'inlet_boundaries' times the mesh dimension \(2\)"
+    expect_err = "Size \(1\) is not the same as the number of entries  in  the momentum_inlet_types subvector for fixed-velocity \(2\)"
+    ad_indexing_type = 'global'
+  []
+  [momentum-inlet-function-error-2]
+    type = 'RunException'
+    input = 2d-rc-error-action.i
+    requirement = 'The system shall throw an error if the number of entries in momentum_inlet_types does not match the total number of fixed-velocity and fixed-pressure inlet boundaries.'
+    cli_args = "Modules/NavierStokesFV/momentum_inlet_function='1 1; 2'"
+    expect_err = "Size \(2\) is not the same as the number of fixed-velocity and fixed-pressure entries in momentum_inlet_types \(1\)"
     ad_indexing_type = 'global'
   []
   [momentum-outlet-error]
