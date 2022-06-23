@@ -120,13 +120,6 @@ public:
   const std::vector<T> & dfs();
 
   /**
-   * @return the recursive stack map which keeps track of whether or not we have already encountered
-   * a given graph node within the current traversal. Encountering a true value in this map while
-   * doing a depth-first-search indicates that we have a cyclic graph
-   */
-  const std::map<T, bool> & recStack() const { return _rec_stack; }
-
-  /**
    * Returns a vector of sets that represent dependency resolved values.  Items in the same
    * subvector have no dependence upon one and other.
    */
