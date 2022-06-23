@@ -1,5 +1,5 @@
 {% set build = 0 %}
-{% set version = "2022.04.18" %}
+{% set version = "2022.06.16" %}
 
 package:
   name: moose-tools
@@ -14,31 +14,33 @@ build:
 requirements:
   build:
     - {{ moose_python }}
-
+    - openssl
+    - setuptools
   run:
-    - {{ moose_mpich }}
-    - {{ moose_numpy }}
-    - {{ moose_matplotlib }}
-    - {{ moose_pandas }}
-    - {{ moose_livereload }}
-    - {{ moose_yaml }}
-    - {{ moose_pyyaml }}
-    - {{ moose_beautifulsoup4 }}
-    - {{ moose_pybtex }}
-    - {{ moose_mock }}
-    - {{ moose_lxml }}
-    - {{ moose_scikit_image }}
-    - {{ moose_pylatexenc }}
-    - {{ moose_jinja2 }}
-    - {{ moose_mako }}
-    - {{ moose_sympy }}
-    - {{ moose_deepdiff }}
-    - openssl <3
-    - setuptools <60
-    - clang-tools
+    - numpy
+    - matplotlib
+    - pandas
+    - pyyaml
+    - pybtex
+    - mock
+    - lxml
+    - scikit-image
+    - sympy
+    - deepdiff
+    - beautifulsoup4
+    - pylatexenc
+    - jinja2
+    - mako
+    - livereload
+    - yaml
     - python
+    - openssl
+    - setuptools
+    - graphviz
 
 test:
+  commands:
+    - dot -V
   imports:
     - numpy
     - matplotlib
@@ -58,7 +60,9 @@ test:
 about:
   home: https://mooseframework.org/
   license: LGPL 2.1
-  summary: 'This superficial module (moose-tools) acts as a top-level module designed to provide all dependencies required in order to run Peacock and MOOSE Documentation.'
+  summary: >
+    This superficial module (moose-tools) acts as a top-level module designed to provide all
+    dependencies required in order to run Peacock and MOOSE Documentation.
 
 extra:
   recipe-maintainers:

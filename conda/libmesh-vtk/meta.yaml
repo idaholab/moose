@@ -1,7 +1,9 @@
-# Do not use jinja templating (A physical change to this file is required to trigger a build)
-{% set build = 7 %}
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   libmesh/
+{% set build = 8 %}
 {% set vtk_version = "9.1.0" %}
-{% set friendly_version = "9.1" %}
+{% set vtk_friendly_version = "9.1" %}
 {% set sha256 = "8fed42f4f8f1eb8083107b68eaa9ad71da07110161a3116ad807f43e5ca5ce96" %}
 
 package:
@@ -9,53 +11,29 @@ package:
   version: {{ vtk_version }}
 
 source:
-  url: https://www.vtk.org/files/release/{{ friendly_version }}/VTK-{{ vtk_version }}.tar.gz
+  url: https://www.vtk.org/files/release/{{ vtk_friendly_version }}/VTK-{{ vtk_version }}.tar.gz
   sha256: {{ sha256 }}
 
 build:
   number: {{ build }}
-  skip: true  # [win]
+  skip: true             # [win]
   script_env:
     - MOOSE_JOBS
+    - vtk_friendly_version={{ vtk_friendly_version }}
 
 requirements:
   build:
     - {{ moose_mpich }}
-    - {{ moose_python }}
-    - {{ moose_pyqt }}         # [not arm64]
-    - cmake
+    - openssl <3
     - ninja
-    - {{ moose_libglu }}       # [linux]
-    - {{ moose_mesalib }}      # [linux]
-    - {{ moose_libxt }}        # [linux]
-    - {{ moose_libsm }}        # [linux]
-    - {{ moose_libx11 }}       # [linux]
-    - {{ moose_libice }}       # [linux]
-    - {{ moose_libxext }}      # [linux]
-    - {{ moose_mesa_libgl }}   # [linux]
-    - {{ moose_xorg_x11 }}     # [linux]
-
+    - cmake
   run:
     - {{ moose_mpich }}
-    - {{ moose_python }}
-    - {{ moose_pyqt }}         # [not arm64]
-    - {{ moose_libglu }}       # [linux]
-    - {{ moose_mesalib }}      # [linux]
-    - {{ moose_libxt }}        # [linux]
-    - {{ moose_libsm }}        # [linux]
-    - {{ moose_libx11 }}       # [linux]
-    - {{ moose_libice }}       # [linux]
-    - {{ moose_libxext }}      # [linux]
-    - {{ moose_mesa_libgl }}   # [linux]
-    - {{ moose_xorg_x11 }}     # [linux]
 
 test:
   commands:
-    - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ friendly_version }}.dylib # [osx]
-    - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ friendly_version }}.so    # [linux]
-  imports:
-    - PyQt5  # [not arm64]
-    - vtk
+    - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ vtk_friendly_version }}.dylib   # [osx]
+    - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ vtk_friendly_version }}.so      # [linux]
 
 about:
   home: http://www.vtk.org/

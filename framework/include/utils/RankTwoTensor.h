@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseTypes.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
 #include "ADRankThreeTensorForward.h"
@@ -315,29 +316,31 @@ public:
   /// returns _coords_ij * a_ij (sum on i, j)
   T doubleContraction(const RankTwoTensorTempl<T> & a) const;
 
+  /**
+   * This function returns
+   * C_{ijkl} = a_{M(n)M(o)} b_{M(p)M(q)}.
+   * where the set of indices {n,o,p,q} is a permutation of the indices {i,j,k,l}
+   */
+  template <int n, int o, int p, int q>
+  RankFourTensorTempl<T> times(const RankTwoTensorTempl<T> & b) const;
+
+  /**
+   * This function returns
+   * C_{ijkl} = a_{M(n)M(o)} b_{M(p)M(q)M(r)M(s)}.
+   * where the index set {n,o,p,q,r,s} contains each index {i,j,k,l} at least once.
+   */
+  template <int n, int o, int p, int q, int r, int s>
+  RankFourTensorTempl<T> times(const RankFourTensorTempl<T> & b) const;
+
   /// returns C_ijkl = a_ij * b_kl
-  RankFourTensorTempl<T> outerProduct(const RankTwoTensorTempl<T> & a) const;
+  RankFourTensorTempl<T> outerProduct(const RankTwoTensorTempl<T> & b) const
+  {
+    usingTensorIndices(i_, j_, k_, l_);
+    return times<i_, j_, k_, l_>(b);
+  }
 
-  /// returns C_ijkl = a_ik * b_jl
-  RankFourTensorTempl<T> mixedProductIkJl(const RankTwoTensorTempl<T> & a) const;
-
-  /// returns C_ijkl = a_jk * b_il
-  RankFourTensorTempl<T> mixedProductJkIl(const RankTwoTensorTempl<T> & a) const;
-
-  /// returns C_ijkl = a_il * b_jk
-  RankFourTensorTempl<T> mixedProductIlJk(const RankTwoTensorTempl<T> & a) const;
-
-  /// returns C_iklm = a_ij * b_jklm
-  RankFourTensorTempl<T> mixedProductIjJklm(const RankFourTensorTempl<T> & a) const;
-
-  /// returns C_iklm = a_jm * b_ijkl
-  RankFourTensorTempl<T> mixedProductJmIjkl(const RankFourTensorTempl<T> & b) const;
-
-  /// returns C_iklm = a_jk * b_ijlm
-  RankFourTensorTempl<T> mixedProductJkIjlm(const RankFourTensorTempl<T> & b) const;
-
-  /// returns C_ikl = a_ij * b_jkl
-  RankThreeTensorTempl<T> mixedProductIjJkl(const RankThreeTensorTempl<T> & b) const;
+  /// returns C_ikl = a_ij * b_jkl (single contraction over index j)
+  RankThreeTensorTempl<T> contraction(const RankThreeTensorTempl<T> & b) const;
 
   /// returns C_ijk = a_jk * b_i
   RankThreeTensorTempl<T> mixedProductJkI(const VectorValue<T> & b) const;
@@ -686,14 +689,15 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
     proj_pos += d[a] * Ma.outerProduct(Ma);
   }
 
+  usingTensorIndices(i_, j_, k_, l_);
   for (auto a : make_range(N))
     for (auto b : make_range(a))
     {
       const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
       const auto Mb = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
 
-      Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);
-      Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);
+      Gab = Ma.template times<i_, k_, j_, l_>(Mb) + Ma.template times<i_, l_, j_, k_>(Mb);
+      Gba = Mb.template times<i_, k_, j_, l_>(Ma) + Mb.template times<i_, l_, j_, k_>(Ma);
 
       T theta_ab;
       if (!MooseUtils::absoluteFuzzyEqual(eigval[a], eigval[b]))
@@ -794,4 +798,37 @@ typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, RankFourTensorTempl<
 RankTwoTensorTempl<T>::d2sin3Lode(const T &) const
 {
   mooseError("d2sin3Lode is only available for ordered tensor component types");
+}
+
+template <typename T>
+template <int n, int o, int p, int q>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::times(const RankTwoTensorTempl<T> & b) const
+{
+  RankFourTensorTempl<T> result;
+  std::size_t x[4];
+  for (x[0] = 0; x[0] < N; ++x[0])
+    for (x[1] = 0; x[1] < N; ++x[1])
+      for (x[2] = 0; x[2] < N; ++x[2])
+        for (x[3] = 0; x[3] < N; ++x[3])
+          result(x[0], x[1], x[2], x[3]) = (*this)(x[n], x[o]) * b(x[p], x[q]);
+
+  return result;
+}
+
+template <typename T>
+template <int n, int o, int p, int q, int r, int s>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::times(const RankFourTensorTempl<T> & b) const
+{
+  RankFourTensorTempl<T> result;
+  std::size_t x[5];
+  for (x[0] = 0; x[0] < N; ++x[0])
+    for (x[1] = 0; x[1] < N; ++x[1])
+      for (x[2] = 0; x[2] < N; ++x[2])
+        for (x[3] = 0; x[3] < N; ++x[3])
+          for (x[4] = 0; x[4] < N; ++x[4])
+            result(x[0], x[1], x[2], x[3]) += (*this)(x[n], x[o]) * b(x[p], x[q], x[r], x[s]);
+
+  return result;
 }

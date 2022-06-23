@@ -14,12 +14,13 @@
 /**
  * Compute density, which may changed based on a deforming mesh.
  */
-class Density : public Material
+template <bool is_ad>
+class DensityTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  Density(const InputParameters & params);
+  DensityTempl(const InputParameters & params);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -27,12 +28,15 @@ protected:
 
   const bool _is_coupled;
   const Moose::CoordinateSystemType _coord_system;
-  const VariableValue & _disp_r;
+  const GenericVariableValue<is_ad> & _disp_r;
 
   const std::string _base_name;
   const Real _initial_density;
 
 private:
-  std::vector<const VariableGradient *> _grad_disp;
-  MaterialProperty<Real> & _density;
+  std::vector<const GenericVariableGradient<is_ad> *> _grad_disp;
+  GenericMaterialProperty<Real, is_ad> & _density;
 };
+
+typedef DensityTempl<false> Density;
+typedef DensityTempl<true> ADDensity;

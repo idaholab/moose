@@ -33,72 +33,68 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = SMALL
     add_variables = true
     generate_output = 'stress_zz'
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
-  [../]
-  [./stress]
-  [../]
+  []
+  [stress]
+  []
 []
 
 [BCs]
 # pin particle along symmetry planes
-  [./no_disp_r]
+  [no_disp_r]
     type = DirichletBC
     variable = disp_r
     boundary = xzero
     value = 0.0
-  [../]
+  []
 
-  [./no_disp_z]
+  [no_disp_z]
     type = DirichletBC
     variable = disp_z
     boundary = yzero
     value = 0.0
-  [../]
+  []
 
 # exterior and internal pressures
-  [./exterior_pressure_r]
+  [exterior_pressure_r]
     type = ADPressure
     variable = disp_r
     boundary = outer
-    component = 0
-    constant = 200000
-  [../]
+    factor = 200000
+  []
 
- [./exterior_pressure_z]
+ [exterior_pressure_z]
     type = ADPressure
     variable = disp_z
     boundary = outer
-    component = 1
-    constant = 200000
-  [../]
+    factor = 200000
+  []
 
-  [./interior_pressure_r]
+  [interior_pressure_r]
     type = ADPressure
     variable = disp_r
     boundary = inner
-    component = 0
-    constant = 100000
-  [../]
+    factor = 100000
+  []
 
-  [./interior_pressure_z]
+  [interior_pressure_z]
     type = ADPressure
     variable = disp_z
     boundary = inner
-    component = 1
-    constant = 100000
-  [../]
+    factor = 100000
+  []
 []
 
 [Debug]
@@ -106,10 +102,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -137,25 +133,25 @@
   dtmax = 5e6
   dtmin = 1
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
     optimal_iterations = 6
     iteration_window = 0
     linear_iteration_ratio = 100
-  [../]
+  []
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Outputs]

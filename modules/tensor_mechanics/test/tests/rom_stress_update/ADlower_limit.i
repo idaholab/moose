@@ -14,13 +14,13 @@ disp = 1.0053264195e6
 []
 
 [AuxVariables]
-  [./temperature]
+  [temperature]
     initial_condition = ${temp}
-  [../]
+  []
 []
 
 [Functions]
-  [./temp_weight]
+  [temp_weight]
     type = ParsedFunction
     vars = 'lower_limit avg'
     vals = '800.0160634 temp_avg'
@@ -29,8 +29,8 @@ disp = 1.0053264195e6
              plus := exp(-2 / (1 + clamped));
              minus := exp(-2 / (1 - clamped));
              plus / (plus + minus)'
-  [../]
-  [./stress_weight]
+  []
+  [stress_weight]
     type = ParsedFunction
     vars = 'lower_limit avg'
     vals = '2.010652839e6 vonmises_stress'
@@ -39,84 +39,81 @@ disp = 1.0053264195e6
              plus := exp(-2 / (1 + clamped));
              minus := exp(-2 / (1 - clamped));
              plus / (plus + minus)'
-  [../]
-  [./creep_rate_exact]
+  []
+  [creep_rate_exact]
     type = ParsedFunction
     vars = 'lower_limit_strain temp_weight stress_weight'
     vals = '3.370764e-12       temp_weight stress_weight'
     value = 'lower_limit_strain * temp_weight * stress_weight'
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     use_automatic_differentiation = true
     generate_output = vonmises_stress
-  [../]
+  []
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
-  [../]
-  [./symmx]
+  []
+  [symmx]
     type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0
-  [../]
-  [./symmz]
+  []
+  [symmz]
     type = ADDirichletBC
     variable = disp_z
     boundary = back
     value = 0
-  [../]
-  [./pressure_x]
+  []
+  [pressure_x]
     type = ADPressure
     variable = disp_x
-    component = 0
     boundary = right
-    constant = ${disp}
-  [../]
-  [./pressure_y]
+    factor = ${disp}
+  []
+  [pressure_y]
     type = ADPressure
     variable = disp_y
-    component = 1
     boundary = top
-    constant = -${disp}
-  [../]
-  [./pressure_z]
+    factor = -${disp}
+  []
+  [pressure_z]
     type = ADPressure
     variable = disp_z
-    component = 2
     boundary = front
-    constant = -${disp}
-  [../]
+    factor = -${disp}
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 3.30e11
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeMultipleInelasticStress
     inelastic_models = rom_stress_prediction
-  [../]
-  [./rom_stress_prediction]
+  []
+  [rom_stress_prediction]
     type = ADSS316HLAROMANCEStressUpdateTest
     temperature = temperature
     initial_cell_dislocation_density = 6.0e12
     initial_wall_dislocation_density = 4.4e11
     outputs = all
     apply_strain = false
-  [../]
+  []
 []
 
 [Executioner]
@@ -133,35 +130,35 @@ disp = 1.0053264195e6
 []
 
 [Postprocessors]
-  [./creep_rate_exact]
+  [creep_rate_exact]
     type = FunctionValuePostprocessor
     function = creep_rate_exact
-  [../]
-  [./creep_rate_avg]
+  []
+  [creep_rate_avg]
     type = ElementAverageValue
     variable = creep_rate
-  [../]
-  [./creep_rate_diff]
+  []
+  [creep_rate_diff]
     type = DifferencePostprocessor
     value1 = creep_rate_exact
     value2 = creep_rate_avg
-  [../]
-  [./temp_avg]
+  []
+  [temp_avg]
     type = ElementAverageValue
     variable = temperature
-  [../]
-  [./cell_dislocations]
+  []
+  [cell_dislocations]
     type = ElementAverageValue
     variable = cell_dislocations
-  [../]
-  [./wall_disloactions]
+  []
+  [wall_disloactions]
     type = ElementAverageValue
     variable = wall_dislocations
-  [../]
-  [./vonmises_stress]
+  []
+  [vonmises_stress]
     type = ElementAverageValue
     variable = vonmises_stress
-  [../]
+  []
 []
 
 [Outputs]

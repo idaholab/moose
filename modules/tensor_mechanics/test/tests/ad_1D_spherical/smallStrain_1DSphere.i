@@ -75,8 +75,7 @@
     type = ADPressure
     boundary = right
     variable = disp_r
-    component = 0
-    constant = 1
+    factor = 1
   []
 []
 

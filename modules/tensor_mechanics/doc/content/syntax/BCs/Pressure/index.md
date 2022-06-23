@@ -28,7 +28,7 @@ Note that the location of each of the variables in the `displacements` string de
 
 As in the [Pressure](/Pressure.md) boundary condition, the  magnitude of the `Pressure` boundary condition can be specified as either a scalar (use the input parameter `factor`) or a `function` parameter.
 
-The use of the automatic differentiation boundary condition [ADPressure](/ADPressure.md) can optionally
+The use of the automatic differentiation boundary condition [ADPressure](Pressure.md) can optionally
 be selected via the `use_automatic_differentiation` input parameter.
 
 ## Example Input Syntax
