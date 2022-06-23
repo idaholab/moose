@@ -70,75 +70,22 @@ public:
   /**
    * Add a node 'a' to the graph
    */
-  void addNode(const T & a)
-  {
-#ifndef NDEBUG
-    bool new_adj_insertion = false, new_inv_insertion = false;
-#endif
-    if (_adj.find(a) == _adj.end())
-    {
-#ifndef NDEBUG
-      new_adj_insertion = true;
-#endif
-      _adj[a] = {};
-      _insertion_order.push_back(a);
-    }
-
-    if (_inv_adj.find(a) == _inv_adj.end())
-    {
-#ifndef NDEBUG
-      new_inv_insertion = true;
-#endif
-      _inv_adj[a] = {};
-    }
-    mooseAssert(new_adj_insertion == new_inv_insertion,
-                "We should have symmetric behavior between adjacent and inverse-adjacent "
-                "insertion/non-insertion.");
-  }
+  void addNode(const T & a);
 
   /**
    * Add an edge between nodes 'a' and 'b'
    */
-  void addEdge(const T & a, const T & b)
-  {
-    addNode(a);
-    addNode(b);
-
-    _adj[a].push_back(b);
-    _inv_adj[b].push_back(a);
-  }
+  void addEdge(const T & a, const T & b);
 
   /**
    * Remove an edge between nodes 'a' and 'b'
    */
-  void removeEdge(const T & a, const T & b)
-  {
-    auto remove_item = [](auto & list, const auto & item)
-    {
-      auto it = std::find(list.begin(), list.end(), item);
-      mooseAssert(it != list.end(), "We should have this item");
-      list.erase(it);
-    };
-    remove_item(_adj[a], b);
-    remove_item(_inv_adj[b], a);
-  }
+  void removeEdge(const T & a, const T & b);
 
   /**
    * Remove edges drawn from 'a'
    */
-  void removeEdgesInvolving(const T & a)
-  {
-    const auto & inv_adjs = _inv_adj[a];
-    for (const auto & inv_adj : inv_adjs)
-    {
-      auto & adj = _adj[inv_adj];
-      auto it = std::find(adj.begin(), adj.end(), a);
-      mooseAssert(it != adj.end(), "Should have reciprocity");
-      adj.erase(it);
-    }
-
-    _inv_adj[a].clear();
-  }
+  void removeEdgesInvolving(const T & a);
 
   /**
    * Insert a dependency pair - the first value or the "key" depends on the second value or the
@@ -164,91 +111,26 @@ public:
   /**
    * Clear Items from the resolver
    */
-  void clear()
-  {
-    _adj.clear();
-    _inv_adj.clear();
-    _insertion_order.clear();
-  }
+  void clear();
 
   /**
    * Do depth-first search from root nodes to obtain order in which graph nodes should be
    * "executed".
    */
-  const std::vector<T> & dfs()
-  {
-    _sorted_vector.clear();
-    _visited.clear();
-    _rec_stack.clear();
+  const std::vector<T> & dfs();
 
-    for (auto & n : _adj)
-    {
-      _visited[n.first] = false;
-      _rec_stack[n.first] = false;
-    }
-
-    bool is_cyclic = false;
-    // If there are no adjacencies, then all nodes are both roots and leaves
-    bool roots_found = _adj.empty();
-    for (auto & n : _insertion_order)
-      if (_adj[n].size() == 0)
-      {
-        roots_found = true;
-        is_cyclic = dfsFromNode(n);
-        if (is_cyclic)
-          break;
-      }
-    if (!roots_found)
-      is_cyclic = true;
-
-    if (is_cyclic)
-      throw CyclicDependencyException<T>("cyclic graph detected", *this);
-
-    return _sorted_vector;
-  }
-
+  /**
+   * @return the recursive stack map which keeps track of whether or not we have already encountered
+   * a given graph node within the current traversal. Encountering a true value in this map while
+   * doing a depth-first-search indicates that we have a cyclic graph
+   */
   const std::map<T, bool> & recStack() const { return _rec_stack; }
 
   /**
    * Returns a vector of sets that represent dependency resolved values.  Items in the same
    * subvector have no dependence upon one and other.
    */
-  const std::vector<std::vector<T>> & getSortedValuesSets()
-  {
-    _ordered_items.clear();
-
-    const auto & flat_sorted = dfs();
-
-    std::vector<T> current_group;
-    for (const auto & object : flat_sorted)
-    {
-      if (current_group.empty())
-      {
-        current_group.push_back(object);
-        continue;
-      }
-
-      const auto & prev_adj_list = _adj[current_group.back()];
-      const bool depends_on_prev =
-          std::find(prev_adj_list.begin(), prev_adj_list.end(), object) != prev_adj_list.end();
-
-      if (depends_on_prev)
-      {
-        _ordered_items.push_back({object});
-        auto & finalized_group = _ordered_items.back();
-        // Swap the current-group into the back of our ordered items container, and now our newest
-        // object becomes the current group
-        finalized_group.swap(current_group);
-      }
-      else
-        current_group.push_back(object);
-    }
-
-    if (!current_group.empty())
-      _ordered_items.push_back(std::move(current_group));
-
-    return _ordered_items;
-  }
+  const std::vector<std::vector<T>> & getSortedValuesSets();
 
   /**
    * This function also returns dependency resolved values but with a simpler single vector
@@ -270,55 +152,17 @@ public:
    * has been performed.
    * dependsOn(x, x) always returns true
    */
-  bool dependsOn(const T & key, const T & value)
-  {
-    if (_adj.find(value) == _adj.end())
-      return false;
-
-    for (auto & n : _adj)
-      _visited[n.first] = false;
-
-    return dependsOnFromNode(key, value);
-  }
+  bool dependsOn(const T & key, const T & value);
 
   /**
    * Return true if any of elements of keys depends on value
    */
-  bool dependsOn(const std::vector<T> & keys, const T & value)
-  {
-    if (_adj.find(value) == _adj.end())
-      return false;
-
-    for (auto & n : _adj)
-      _visited[n.first] = false;
-
-    for (const auto & key : keys)
-      if (dependsOnFromNode(key, value))
-        return true;
-
-    return false;
-  }
+  bool dependsOn(const std::vector<T> & keys, const T & value);
 
   /**
    * Returns a list of all values that a given key depends on
    */
-  std::list<T> getAncestors(const T & key)
-  {
-    std::vector<T> ret_vec;
-    // Our sorted vector is our work vector but we also return references to it. So we have to make
-    // sure at the end that we restore the original data we had in it
-    ret_vec.swap(_sorted_vector);
-
-    for (auto & n : _adj)
-      _visited[n.first] = false;
-
-    dfsFromNode(key);
-
-    ret_vec.swap(_sorted_vector);
-    mooseAssert(ret_vec.back() == key, "Our key should be the back of the vector");
-
-    return {ret_vec.begin(), ret_vec.end()};
-  }
+  std::list<T> getAncestors(const T & key);
 
   /**
    * Returns the number of unique items stored in the dependency resolver. lindsayad comment: does
@@ -328,44 +172,19 @@ public:
 
 protected:
   /**
-   * depth first search from a root node for a specific item
+   * depth first search from a root node, searching for a specific item
    * @param root The node we start from
    * @param item The node we are searching for
    */
-  bool dependsOnFromNode(const T & root, const T & item)
-  {
-    if (root == item)
-      return true;
+  bool dependsOnFromNode(const T & root, const T & item);
 
-    _visited[root] = true;
-
-    auto & my_dependencies = _inv_adj[root];
-
-    for (auto & i : my_dependencies)
-      if (!_visited.at(i) && dependsOnFromNode(i, item))
-        return true;
-
-    return false;
-  }
-
-  bool dfsFromNode(const T & root)
-  {
-    bool cyclic = false;
-    _visited[root] = true;
-    _rec_stack[root] = true;
-
-    for (auto & i : _inv_adj[root])
-    {
-      if (!_visited.at(i) && dfsFromNode(i))
-        cyclic = true;
-      else if (_rec_stack.at(i))
-        cyclic = true;
-    }
-
-    _sorted_vector.push_back(root);
-    _rec_stack[root] = false;
-    return cyclic;
-  }
+  /**
+   * Perform a depth-first-search from the specified \p root node. Populates _visited and
+   * _sorted_vector data members
+   * @return whether a cyclic graph was detected while performing the depth-first-search from the \p
+   * root node
+   */
+  bool dfsFromNode(const T & root);
 
   /// adjacency lists (from leaves to roots)
   std::map<T, std::list<T>> _adj;
@@ -388,6 +207,246 @@ protected:
 
   friend class CyclicDependencyException<T>;
 };
+
+template <typename T>
+void
+DependencyResolver<T>::addNode(const T & a)
+{
+#ifndef NDEBUG
+  bool new_adj_insertion = false, new_inv_insertion = false;
+#endif
+  if (_adj.find(a) == _adj.end())
+  {
+#ifndef NDEBUG
+    new_adj_insertion = true;
+#endif
+    _adj[a] = {};
+    _insertion_order.push_back(a);
+  }
+
+  if (_inv_adj.find(a) == _inv_adj.end())
+  {
+#ifndef NDEBUG
+    new_inv_insertion = true;
+#endif
+    _inv_adj[a] = {};
+  }
+  mooseAssert(new_adj_insertion == new_inv_insertion,
+              "We should have symmetric behavior between adjacent and inverse-adjacent "
+              "insertion/non-insertion.");
+}
+
+template <typename T>
+void
+DependencyResolver<T>::addEdge(const T & a, const T & b)
+{
+  addNode(a);
+  addNode(b);
+
+  _adj[a].push_back(b);
+  _inv_adj[b].push_back(a);
+}
+
+template <typename T>
+void
+DependencyResolver<T>::removeEdge(const T & a, const T & b)
+{
+  auto remove_item = [](auto & list, const auto & item)
+  {
+    auto it = std::find(list.begin(), list.end(), item);
+    mooseAssert(it != list.end(), "We should have this item");
+    list.erase(it);
+  };
+  remove_item(_adj[a], b);
+  remove_item(_inv_adj[b], a);
+}
+
+template <typename T>
+void
+DependencyResolver<T>::removeEdgesInvolving(const T & a)
+{
+  const auto & inv_adjs = _inv_adj[a];
+  for (const auto & inv_adj : inv_adjs)
+  {
+    auto & adj = _adj[inv_adj];
+    auto it = std::find(adj.begin(), adj.end(), a);
+    mooseAssert(it != adj.end(), "Should have reciprocity");
+    adj.erase(it);
+  }
+
+  _inv_adj[a].clear();
+}
+
+template <typename T>
+void
+DependencyResolver<T>::clear()
+{
+  _adj.clear();
+  _inv_adj.clear();
+  _insertion_order.clear();
+}
+
+template <typename T>
+const std::vector<T> &
+DependencyResolver<T>::dfs()
+{
+  _sorted_vector.clear();
+  _visited.clear();
+  _rec_stack.clear();
+
+  for (auto & n : _adj)
+  {
+    _visited[n.first] = false;
+    _rec_stack[n.first] = false;
+  }
+
+  bool is_cyclic = false;
+  // If there are no adjacencies, then all nodes are both roots and leaves
+  bool roots_found = _adj.empty();
+  for (auto & n : _insertion_order)
+    if (_adj[n].size() == 0)
+    {
+      roots_found = true;
+      is_cyclic = dfsFromNode(n);
+      if (is_cyclic)
+        break;
+    }
+  if (!roots_found)
+    is_cyclic = true;
+
+  if (is_cyclic)
+    throw CyclicDependencyException<T>("cyclic graph detected", *this);
+
+  return _sorted_vector;
+}
+
+template <typename T>
+const std::vector<std::vector<T>> &
+DependencyResolver<T>::getSortedValuesSets()
+{
+  _ordered_items.clear();
+
+  const auto & flat_sorted = dfs();
+
+  std::vector<T> current_group;
+  for (const auto & object : flat_sorted)
+  {
+    if (current_group.empty())
+    {
+      current_group.push_back(object);
+      continue;
+    }
+
+    const auto & prev_adj_list = _adj[current_group.back()];
+    const bool depends_on_prev =
+        std::find(prev_adj_list.begin(), prev_adj_list.end(), object) != prev_adj_list.end();
+
+    if (depends_on_prev)
+    {
+      _ordered_items.push_back({object});
+      auto & finalized_group = _ordered_items.back();
+      // Swap the current-group into the back of our ordered items container, and now our newest
+      // object becomes the current group
+      finalized_group.swap(current_group);
+    }
+    else
+      current_group.push_back(object);
+  }
+
+  if (!current_group.empty())
+    _ordered_items.push_back(std::move(current_group));
+
+  return _ordered_items;
+}
+
+template <typename T>
+bool
+DependencyResolver<T>::dependsOn(const T & key, const T & value)
+{
+  if (_adj.find(value) == _adj.end())
+    return false;
+
+  for (auto & n : _adj)
+    _visited[n.first] = false;
+
+  return dependsOnFromNode(key, value);
+}
+
+template <typename T>
+bool
+DependencyResolver<T>::dependsOn(const std::vector<T> & keys, const T & value)
+{
+  if (_adj.find(value) == _adj.end())
+    return false;
+
+  for (auto & n : _adj)
+    _visited[n.first] = false;
+
+  for (const auto & key : keys)
+    if (dependsOnFromNode(key, value))
+      return true;
+
+  return false;
+}
+
+template <typename T>
+std::list<T>
+DependencyResolver<T>::getAncestors(const T & key)
+{
+  std::vector<T> ret_vec;
+  // Our sorted vector is our work vector but we also return references to it. So we have to make
+  // sure at the end that we restore the original data we had in it
+  ret_vec.swap(_sorted_vector);
+
+  for (auto & n : _adj)
+    _visited[n.first] = false;
+
+  dfsFromNode(key);
+
+  ret_vec.swap(_sorted_vector);
+  mooseAssert(ret_vec.back() == key, "Our key should be the back of the vector");
+
+  return {ret_vec.begin(), ret_vec.end()};
+}
+
+template <typename T>
+bool
+DependencyResolver<T>::dependsOnFromNode(const T & root, const T & item)
+{
+  if (root == item)
+    return true;
+
+  _visited[root] = true;
+
+  auto & my_dependencies = _inv_adj[root];
+
+  for (auto & i : my_dependencies)
+    if (!_visited.at(i) && dependsOnFromNode(i, item))
+      return true;
+
+  return false;
+}
+
+template <typename T>
+bool
+DependencyResolver<T>::dfsFromNode(const T & root)
+{
+  bool cyclic = false;
+  _visited[root] = true;
+  _rec_stack[root] = true;
+
+  for (auto & i : _inv_adj[root])
+  {
+    if (!_visited.at(i) && dfsFromNode(i))
+      cyclic = true;
+    else if (_rec_stack.at(i))
+      cyclic = true;
+  }
+
+  _sorted_vector.push_back(root);
+  _rec_stack[root] = false;
+  return cyclic;
+}
 
 template <typename T>
 class CyclicDependencyException : public std::runtime_error
