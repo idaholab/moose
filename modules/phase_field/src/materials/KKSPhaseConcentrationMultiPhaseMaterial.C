@@ -224,10 +224,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
   _iter[_qp] = _nested_solve.getIterations();
 
   if (_nested_solve.getState() == NestedSolve::State::NOT_CONVERGED)
-  {
-    std::cout << "Newton iteration did not converge." << std::endl;
-    // mooseError("Nested Newton iteration did not converge.");
-  }
+    _console << "Newton iteration did not converge." << std::endl;
 
   // assign solution to ci
   for (unsigned int m = 0; m < _num_c * _num_j; ++m)
