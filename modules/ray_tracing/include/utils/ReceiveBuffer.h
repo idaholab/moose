@@ -295,8 +295,8 @@ ReceiveBuffer<Object, Context>::cleanupRequests()
           _buffers_received++;
           _objects_received += objects->size();
 
-          if (_buffer.capacity() < _buffer.capacity() + objects->size())
-            _buffer.setCapacity(_buffer.capacity() + objects->size());
+          if (_buffer.capacity() < _buffer.size() + objects->size())
+            _buffer.setCapacity(_buffer.size() + objects->size());
 
           for (auto & object : *objects)
             _buffer.move(object);
