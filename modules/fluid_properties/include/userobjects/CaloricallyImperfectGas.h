@@ -111,6 +111,8 @@ public:
   virtual void
   gamma_from_p_T(Real p, Real T, Real & gamma, Real & dgamma_dp, Real & dgamma_dT) const override;
   virtual Real g_from_v_e(Real v, Real e) const override;
+  virtual Real p_from_h_s(Real h, Real s) const override;
+  virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const override;
   virtual Real c_from_v_e(Real v, Real e) const override;
   virtual ADReal c_from_v_e(const ADReal & v, const ADReal & e) const override;
   virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
@@ -155,6 +157,9 @@ protected:
 
   /// temperature interval in lookup tables
   Real _delta_T;
+
+  /// Flag to error if out of bounds
+  const bool _out_of_bound_error;
 
   // tolerance for checking monotonicity of T for h(T) & e(T)
   Real _tol;
