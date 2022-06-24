@@ -27,7 +27,7 @@ require_total = 87
 require_total = 37
 
 [electromagnetics]
-require_total = 96
+require_total = 95
 
 [external_petsc_solver]
 require_total = 86
