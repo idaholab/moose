@@ -11,6 +11,7 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "Assembly.h"
+#include "SystemBase.h"
 
 #include "libmesh/quadrature.h" // _qrule
 
@@ -103,7 +104,7 @@ ReferenceElementJacobianDamper::computeGradDisp(const Elem * elem,
     {
       _grad_disp[i][qp].zero();
       _grad_disp_update[i][qp].zero();
-      for (auto dof_idx : make_range(dof_indices.size()))
+      for (auto dof_idx : index_range(dof_indices))
       {
         _grad_disp[i][qp] += (*_grad_phi[i])[dof_idx][qp] *
                              (solution(dof_indices[dof_idx]) + update(dof_indices[dof_idx]));
