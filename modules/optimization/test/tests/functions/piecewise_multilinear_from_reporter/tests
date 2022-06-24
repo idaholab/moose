@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#2476'
+  design = 'source/functions/PiecewiseMultilinear.md'
+  [./twoDa]
+    type = 'CSVDiff'
+    input = 'twoDa.i'
+    csvdiff = 'twoDa.csv'
+    abs_zero = 1E-8
+    requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation on a 2D domain."
+  [../]
+[]
