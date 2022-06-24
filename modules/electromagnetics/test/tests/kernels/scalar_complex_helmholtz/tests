@@ -5,7 +5,7 @@
     exodiff = 'scalar_complex_helmholtz_out.e'
     allow_test_objects = True
     requirement = 'The system shall be capable of modeling the Helmholtz equation for scalar complex field variables, where real/imaginary coupling occurs for both the diffusion and reaction terms and coefficient values vary spatially.'
-    design = 'FunctionDiffusion.md ADCoupledFunctionDiffusion.md ADMatReaction.md ADMatCoupledForce.md'
+    design = 'FunctionDiffusion.md ADMatReaction.md ADMatCoupledForce.md'
     issues = '#13744'
   []
 []

@@ -28,4 +28,13 @@ protected:
 private:
   /// Function coefficient
   const Function & _function;
+
+  /// Gradient of the concentration variable for kernel to operate on
+  const VariableGradient & _grad_v;
+
+  /// Optional coupled concentration variable
+  const MooseVariable * _v_var;
+
+  /// Gradient of the shape function
+  const VariablePhiGradient & _grad_v_phi;
 };

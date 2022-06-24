@@ -5,16 +5,20 @@
 ## Overview
 
 !style halign=left
-The `FunctionDiffusion` object represents a Laplacian operator term with a function coefficient for scalar field variables. This term is
+The `FunctionDiffusion` object represents a Laplacian operator term with a function coefficient for 
+scalar field variables. This term is
 
 \begin{equation}
-  f(\mathbf{r}, t) \nabla^2 u
+  f(\mathbf{r}, t) \nabla^2 v
 \end{equation}
 
 where
 
-- $u$ is a scalar field solution variable, and
+- $v$ is a scalar field solution variable, and
 - $f(\mathbf{r}, t)$ is a scalar function serving as a coefficient.
+
+Note that the [!param](/Kernels/FunctionDiffusion/v) parameter is optional. If no variable is entered 
+there, then the kernel's nonlinear variable will be used in the operator as usual. 
 
 ## Example Input File Syntax
 

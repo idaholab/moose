@@ -46,6 +46,10 @@
     type = ParsedFunction
     value = '4 * (1 + x/10)^2'
   []
+  [negative_h_func]
+    type = ParsedFunction
+    value = '-4 * (1 + x/10)^2'
+  []
   [RHS_real]
     type = MMSTestFunc
     L = 10
@@ -101,10 +105,9 @@
     variable = u_real
   []
   [coupledLaplacian_real]
-    type = ADCoupledFunctionDiffusion
-    func = h_func
-    sign = negative
-    coupled_field = u_imag
+    type = FunctionDiffusion
+    function = negative_h_func
+    v = u_imag
     variable = u_real
   []
   [coeffField_real]
@@ -129,10 +132,9 @@
     variable = u_imag
   []
   [coupledLaplacian_imag]
-    type = ADCoupledFunctionDiffusion
-    func = h_func
-    sign = positive
-    coupled_field = u_real
+    type = FunctionDiffusion
+    function = h_func
+    v = u_real
     variable = u_imag
   []
   [coeffField_imag]
