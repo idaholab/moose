@@ -17,10 +17,10 @@ InputParameters
 WaveEquationCoefficient::validParams()
 {
   InputParameters params = ADMaterial::validParams();
-  params.addClassDescription(
-      "Material for use as coefficient $a k^2 mu_r epsilon_r$ (where a is a scalar coefficient) "
-      "in standard-form Helmholtz wave equation applications with "
-      "derivatives calculated using automatic differentiation.");
+  params.addClassDescription("Material for use as coefficient $a k^2 \\mu_r \\epsilon_r$ (where a "
+                             "is a scalar coefficient) "
+                             "in standard-form Helmholtz wave equation applications with "
+                             "derivatives calculated using automatic differentiation.");
   params.addRequiredParam<MaterialPropertyName>("eps_rel_real",
                                                 "Relative permittivity, real component.");
   params.addRequiredParam<MaterialPropertyName>("eps_rel_imag",

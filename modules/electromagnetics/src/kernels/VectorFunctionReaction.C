@@ -16,7 +16,7 @@ VectorFunctionReaction::validParams()
 {
   InputParameters params = VectorKernel::validParams();
   params.addClassDescription(
-      "Kernel representing the contribution of the PDE term $cfu$, where $f$ "
+      "Kernel representing the contribution of the PDE term $sign * f * u$, where $f$ "
       "is a function coefficient and $u$ is a vector variable.");
   MooseEnum sign("positive=1 negative=-1", "positive");
   params.addParam<MooseEnum>("sign", sign, "Sign of boundary term in weak form.");

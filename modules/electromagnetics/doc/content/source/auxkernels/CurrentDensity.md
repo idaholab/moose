@@ -4,7 +4,7 @@
 
 ## Overview
 
-`CurrentDensity` and `ADCurrentDensity` allows the calculation of the electric
+`CurrentDensity` and `ADCurrentDensity` allow for the calculation of the electric
 current density given by
 
 \begin{equation}

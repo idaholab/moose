@@ -20,7 +20,7 @@ VectorCurrentSource::validParams()
 {
   InputParameters params = VectorKernel::validParams();
   params.addClassDescription(
-      "Kernel to calculate the current source term in the helmholtz wave equation.");
+      "Kernel to calculate the current source term in the Helmholtz wave equation.");
   params.addParam<FunctionName>("function_coefficient",
                                 1.0,
                                 "Function coefficient multiplier for current source (normally "

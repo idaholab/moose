@@ -20,7 +20,7 @@ of which are discussed in great detail on the [SLEPc webpage](https://slepc.upv.
 The examples presented in this section will all use the SLEPc default, which is to
 calculate the smallest real eigenvalue.
 
-The physical equation being solved for is a helmholtz-style equation for a scalar
+The physical equation being solved for is a Helmholtz-style equation for a scalar
 potential, given as:
 
 !equation id=eigen-helmholtz
@@ -130,7 +130,7 @@ A base input file was used to run each case in this benchmark.
 
 !listing eigen_base.i
 
-In order to simulate the right case, the following command line arguments should applied to the input file at runtime:
+In order to simulate the right case, the following command line arguments should be applied to the input file at runtime:
 
 ### Rectangular
 
@@ -170,7 +170,7 @@ verification. Comparisons for each geometry case are shown in [rectangular-resul
 and [rectangular-results-reddy] for the rectangular geometry, [circular-results-emm]
 and [circular-results-reddy] for the circular geometry, and [coaxial-results-emm]
 and [coaxial-results-reddy] for the coaxial geometry. Overall, results are in
-general good agreement with that of HELM10, in terms of vector field orientation,
+general in good agreement with that of HELM10, in terms of vector field orientation,
 except for the circular TM01 waveguide case. In this instance, potential distribution
 was identical except for the sign, where the EM module predicted a positive peak
 in the center of the waveguide, and HELM10 predicted a negative peak. This difference

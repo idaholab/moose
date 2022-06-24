@@ -28,7 +28,7 @@ where
 - $j = \sqrt{-1}$,
 - $k$ is the wave number ($2 \pi / \lambda$ where $\lambda$ is the wavelength),
 - $L$ is the length of the slab domain, and
-- $\theta$ is the incident angle of the incoming wave.
+- $\theta$ is the incident angle of the incoming wave, in degrees.
 
 To calculate the percentage of reflected power, as required in the benchmark,
 the squared magnitude of $R$ above is taken as the object output

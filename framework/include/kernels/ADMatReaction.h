@@ -13,8 +13,8 @@
 
 /**
  *  Kernel representing the contribution of the PDE term $-L*v$, where $L$ is a
- *  reaction rate material property, $v$ is a scalar variable (nonlinear or coupled),
- *  and whose Jacobian contribution is calculated using automatic differentiation.
+ *  reaction rate coefficient material property, $v$ is a scalar variable (nonlinear or coupled
+ * auxvariable), and whose Jacobian contribution is calculated using automatic differentiation.
  */
 class ADMatReaction : public ADKernel
 {

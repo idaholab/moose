@@ -52,7 +52,7 @@ which is implemented in code by [DirichletBC.md] and the boundary condition just
 inside the slab interface with free space is given by
 
 !equation
-\left[ \frac{1}{\mu_r} \frac{\text{d} E_z}{\text{d}x} + j k_0 \text{cos} \theta E_z(x) \right]_{x = L-0} = 2j k_0 \text{cos} \theta E_0 \text{e}^{j k_0 L \text{cos} \theta}
+\left[ \frac{1}{\mu_r} \frac{\text{d} E_z}{\text{d}x} + j k_0 \text{cos} \theta E_z(x) \right]_{x = L_0} = 2j k_0 \text{cos} \theta E_0 \text{e}^{j k_0 L \text{cos} \theta}
 
 which is implemented in code by [EMRobinBC.md].
 

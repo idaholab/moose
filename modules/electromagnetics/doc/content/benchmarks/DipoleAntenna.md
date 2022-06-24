@@ -102,7 +102,7 @@ Important constant model parameters are shown below in [dipole-model-parameters]
 | Parameter (unit) | Value(s) |
 | - | - |
 | Operating frequency, $f$ (GHz) | 1 |
-| Relative permittivity, $\varepsilon_r$ (1) | 1 |
+| Relative permittivity, $\varepsilon_r$ (-) | 1 |
 | Vacuum electric permittivity, $\varepsilon_0$ (F/m) | $8.854 \times 10^{-12}$ |
 | Vacuum magnetic permeability, $\mu_0$ (H/m) | $4 \pi \times 10^{-7}$ |
 
@@ -118,7 +118,7 @@ where:
 - $c$ is the speed of light (or $3 \times 10^8$ m/s).
 
 Using the 1 GHz operating frequency presented in [dipole-results-figure], the value
-for $\beta$ (m$^{-1}) used in the input file shown below is
+for $\beta$ (m$^{-1}$) used in the input file shown below is
 
 !equation
 \beta = \frac{2 \pi (1 \times 10^9)}{3 \times 10^8}

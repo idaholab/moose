@@ -17,7 +17,8 @@ ADMatCoupledForce::validParams()
   InputParameters params = ADCoupledForce::validParams();
   params.addClassDescription(
       "Kernel representing the contribution of the PDE term $mv$, where $m$ is a material property "
-      "coefficient, $v$ is a coupled scalar variable, and Jacobian derivatives are calculated "
+      "coefficient, $v$ is a coupled scalar field variable, and Jacobian derivatives are "
+      "calculated "
       "using automatic differentiation.");
   params.addParam<MaterialPropertyName>(
       "mat_prop_coef",

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#13484 #13744'
-  design = '/ADMatReaction.md'
+  design = 'ADMatReaction.md'
   [./ad_mat_reaction]
     type = 'Exodiff'
     input = 'ad_mat_reaction.i'
