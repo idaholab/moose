@@ -102,9 +102,10 @@
 [Executioner]
   solve_type = NEWTON
   type = Steady
-  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type '
-                        '-pc_factor_shift_amount'
-  petsc_options_value = 'lu       basic                 NONZERO               1e-15'
+
+  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
+  petsc_options_value = '201                hypre    boomeramg      6'
+
 []
 
 [Outputs]
