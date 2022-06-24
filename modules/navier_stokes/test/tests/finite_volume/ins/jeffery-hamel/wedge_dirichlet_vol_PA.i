@@ -1,4 +1,4 @@
-mu=.01
+mu=1
 rho=1
 
 # This input file tests whether we can converge to the semi-analytical
@@ -7,6 +7,10 @@ rho=1
   velocity_interp_method = 'rc'
   advected_interp_method = 'average'
   rhie_chow_user_object = 'rc'
+  alpha_degrees = 15
+  Re = 30
+  K = -9.78221333616
+  f = f_theta
 []
 
 [Mesh]
@@ -18,16 +22,6 @@ rho=1
     # file = wedge_32x48.e
     # file = wedge_64x96.e
   []
-  [./corner_node]
-    # Pin is on the centerline of the channel on the left-hand side of
-    # the domain at r=1.  If you change the domain, you will need to
-    # update this pin location for the pressure exact solution to
-    # work.
-    type = ExtraNodesetGenerator
-    new_boundary = pinned_node
-    coord = '1 0'
-    input = file
-  [../]
 []
 
 [UserObjects]
@@ -48,6 +42,10 @@ rho=1
   []
   [pressure]
     type = INSFVPressureVariable
+  []
+  [lambda]
+    family = SCALAR
+    order = FIRST
   []
 []
 
@@ -73,6 +71,13 @@ rho=1
     type = INSFVMassAdvection
     variable = pressure
     rho = ${rho}
+  []
+
+  [mean_zero_pressure]
+    type = FVIntegralValueConstraint
+    variable = pressure
+    lambda = lambda
+    phi0 = 0.0
   []
 
   [u_advection]
@@ -106,14 +111,14 @@ rho=1
   [v_viscosity]
     type = INSFVMomentumDiffusion
     variable = vel_y
-    mu = 'mu'
-    momentum_component = 'y'
+    mu = mu
+    momentum_component = y
   []
 
   [v_pressure]
     type = INSFVMomentumPressure
     variable = vel_y
-    momentum_component = 'y'
+    momentum_component = y
     pressure = pressure
   []
 []
@@ -137,23 +142,41 @@ rho=1
   [inlet_x]
     type = INSFVInletVelocityBC
     variable = vel_x
-    boundary = 'inlet'
-    function = 1
+    boundary = 'inlet outlet'
+    function = vel_x_exact
   []
 
   [inlet_y]
     type = INSFVInletVelocityBC
     variable = vel_y
-    boundary = 'inlet'
-    function = 0
+    boundary = 'inlet outlet'
+    function = vel_y_exact
   []
+[]
 
-  [outlet_p]
-    type = INSFVOutletPressureBC
-    boundary = 'outlet'
-    variable = pressure
-    function = 0
+[Functions]
+  [vel_x_exact]
+    type = WedgeFunction
+    var_num = 0
+    mu = 1
+    rho = 1
   []
+  [vel_y_exact]
+    type = WedgeFunction
+    var_num = 1
+    mu = 1
+    rho = 1
+  []
+  [./f_theta]
+    # Non-dimensional solution values f(eta), 0 <= eta <= 1 for
+    # alpha=15 deg, Re=30.  Note: this introduces an input file
+    # ordering dependency: this Function must appear *before* the two
+    # functions below which use it since apparently proper dependency
+    # resolution is not done in this scenario.
+    type = PiecewiseLinear
+    data_file = 'f.csv'
+    format = 'columns'
+  [../]
 []
 
 [Materials]
