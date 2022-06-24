@@ -89,4 +89,23 @@
                   'these computations in the definition of mortar normal contact constraints in an '
                   'asymmetric problem for a short simulation.'
   []
+  [block-dynamics-aux-fretting-wear-test-action-quick]
+    type = 'Exodiff'
+    exodiff = 'block-dynamics-aux-fretting-wear-test-action-quick_out.e'
+    input = 'block-dynamics-aux-fretting-wear-test-action.i'
+    rel_err = 1.0e-3
+    abs_zero = 1.0e-4
+    min_parallel = 1
+    max_parallel = 4
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    map = False
+    partial = True
+    cli_args = 'Executioner/end_time=0.15 '
+               'Outputs/file_base=block-dynamics-aux-fretting-wear-test-action-quick_out'
+    requirement = 'Contact module shall compute nodal wear depth values in accordance with Archard '
+                  'equation and the mortar gap velocity via mortar auxiliary kernels while including '
+                  'these computations in the definition of mortar normal contact constraints in an '
+                  'asymmetric problem for a short simulation using the contact action.'
+  []
 []
