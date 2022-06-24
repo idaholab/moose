@@ -155,6 +155,16 @@ rho=1
 []
 
 [Functions]
+[./f_theta]
+  # Non-dimensional solution values f(eta), 0 <= eta <= 1 for
+  # alpha=15 deg, Re=30.  Note: this introduces an input file
+  # ordering dependency: this Function must appear *before* the two
+  # functions below which use it since apparently proper dependency
+  # resolution is not done in this scenario.
+  type = PiecewiseLinear
+  data_file = 'f.csv'
+  format = 'columns'
+[../]
   [vel_x_exact]
     type = WedgeFunction
     var_num = 0
@@ -167,16 +177,6 @@ rho=1
     mu = 1
     rho = 1
   []
-  [./f_theta]
-    # Non-dimensional solution values f(eta), 0 <= eta <= 1 for
-    # alpha=15 deg, Re=30.  Note: this introduces an input file
-    # ordering dependency: this Function must appear *before* the two
-    # functions below which use it since apparently proper dependency
-    # resolution is not done in this scenario.
-    type = PiecewiseLinear
-    data_file = 'f.csv'
-    format = 'columns'
-  [../]
 []
 
 [Materials]
