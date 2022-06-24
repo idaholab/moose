@@ -76,7 +76,8 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
                "Conditionally run sampler multiapp only works in batch modes.");
 }
 
-void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
+void
+SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
 {
   // Reinitialize MultiApp size
   const auto num_rows = _sampler.getNumberOfRows();
@@ -90,7 +91,8 @@ void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
   }
 
   // Reinitialize app to original state prior to solve, if a solve has occured
-  if (_solved_once)
+  if (_solved_once && (_mode == StochasticTools::MultiAppMode::NORMAL ||
+                       _mode == StochasticTools::MultiAppMode::BATCH_RESTORE))
     initialSetup();
 
   if (isParamValid("should_run_reporter"))
@@ -176,6 +178,11 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
       continue;
     }
 
+    if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+      restore();
+    else
+      initialSetup();
+
     for (auto & transfer : to_transfers)
     {
       transfer->setGlobalRowIndex(i);
@@ -193,17 +200,6 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     }
 
     _local_batch_app_index++;
-
-    if (i < _rank_config.first_local_sim_index + _rank_config.num_local_sims - 1)
-    {
-      if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
-        restore();
-      else
-      {
-        resetApp(_local_batch_app_index + i, target_time);
-        initialSetup();
-      }
-    }
   }
   _local_batch_app_index = 0;
 
@@ -239,10 +235,13 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
   // With multiple processors per app, there are no local rows for non-root processors
   if (isRootProcessor())
   {
-    // Since we only store param_names in cli_args, we need to find the values for each param from
-    // sampler data and combine them to get full command line option strings.
+    // We only request a new parameter sample if we are in normal mode, otherwise this is
+    // taken care of the batchSolve
     updateRowData(_mode == StochasticTools::MultiAppMode::NORMAL ? local_app
                                                                  : _local_batch_app_index);
+
+    // Since we only store param_names in cli_args, we need to find the values for each param from
+    // sampler data and combine them to get full command line option strings.
     const std::vector<std::string> & full_args_name =
         MooseUtils::split(FullSolveMultiApp::getCommandLineArgsParamHelper(local_app), ";");
     args = sampledCommandLineArgs(_row_data, full_args_name);
