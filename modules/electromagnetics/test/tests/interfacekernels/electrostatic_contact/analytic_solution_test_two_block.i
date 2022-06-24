@@ -63,15 +63,15 @@
 
 [Kernels]
   [electric_graphite]
-    type = ConductivityLaplacian
+    type = ADMatDiffusion
     variable = potential_graphite
-    conductivity_coefficient = electrical_conductivity
+    diffusivity = electrical_conductivity
     block = graphite
   []
   [electric_stainless_steel]
-    type = ConductivityLaplacian
+    type = ADMatDiffusion
     variable = potential_stainless_steel
-    conductivity_coefficient = electrical_conductivity
+    diffusivity = electrical_conductivity
     block = stainless_steel
   []
 []
