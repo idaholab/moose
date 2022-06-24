@@ -14,6 +14,13 @@
 #include "MooseHashing.h"
 #include "KDTree.h"
 
+#include "libmesh/generic_projector.h"
+#include "libmesh/meshfree_interpolation.h"
+#include "libmesh/system.h"
+#include "libmesh/mesh_function.h"
+#include "libmesh/mesh_tools.h"
+#include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
+
 /**
  * It is a general field transfer. It will do the following things
  * 1) From part of source domain to part of domain. Support subdomains to
@@ -57,6 +64,22 @@ protected:
    * Local from bounding boxes for current processor
    */
   void extractLocalFromBoundingBoxes(std::vector<BoundingBox> & local_bboxes);
+
+  /*
+   * Whether or not a given element has blocks
+   */
+  bool hasBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const;
+
+  /*
+   * Whether or not a given node has blocks
+   */
+  bool hasBlocks(std::set<SubdomainID> & blocks, const MooseMesh & mesh, const Node * node) const;
+
+  /*
+   * Whether or not a given node has blocks
+   */
+  bool
+  hasBoundaries(std::set<BoundaryID> & boundaries, const MooseMesh & mesh, const Node * node) const;
 
 private:
   /// A map from pid to a set of points
@@ -132,22 +155,6 @@ private:
   void locatePointReceivers(const Point point, std::set<processor_id_type> & processors);
 
   /*
-   * Whether or not a given element has blocks
-   */
-  bool hasBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const;
-
-  /*
-   * Whether or not a given node has blocks
-   */
-  bool hasBlocks(std::set<SubdomainID> & blocks, const MooseMesh & mesh, const Node * node) const;
-
-  /*
-   * Whether or not a given node has blocks
-   */
-  bool
-  hasBoundaries(std::set<BoundaryID> & boundaries, const MooseMesh & mesh, const Node * node) const;
-
-  /*
    * cache incoming values
    */
   void cacheIncomingInterpVals(processor_id_type pid,
@@ -195,7 +202,7 @@ namespace GeneralFieldTransfer
 // Transfer::OutOfMeshValue is an actual number.  Why?  Why!
 static_assert(std::numeric_limits<Real>::has_infinity,
               "What are you trying to use for Real?  It lacks infinity!");
-Number BetterOutOfMeshValue = std::numeric_limits<Real>::infinity();
+extern Number BetterOutOfMeshValue;
 
 inline bool
 isBetterOutOfMeshValue(Number val)

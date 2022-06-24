@@ -16,16 +16,14 @@
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
 
-#include "libmesh/generic_projector.h"
-#include "libmesh/meshfree_interpolation.h"
-#include "libmesh/system.h"
-#include "libmesh/mesh_function.h"
-#include "libmesh/mesh_tools.h"
-#include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
-
 // TIMPI includes
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
+
+namespace GeneralFieldTransfer
+{
+Number BetterOutOfMeshValue = std::numeric_limits<Real>::infinity();
+}
 
 InputParameters
 MultiAppGeneralFieldTransfer::validParams()
@@ -55,6 +53,10 @@ MultiAppGeneralFieldTransfer::validParams()
                                 1,
                                 "Number of nearest source (from) points will be chosen to "
                                 "construct a value for the target point.");
+  params.addParam<bool>(
+      "error_on_miss",
+      false,
+      "Whether or not to error in the case that a target point is not found in the source domain.");
   return params;
 }
 
@@ -289,15 +291,15 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
     // We support more general variables via libMesh GenericProjector
     if (fe_type.order > CONSTANT && !is_nodal)
     {
-      NearestNode::RecordRequests<Number> f;
-      NearestNode::RecordRequests<Gradient> g;
-      NearestNode::NullAction<Number> nullsetter;
+      GeneralFieldTransfer::RecordRequests<Number> f;
+      GeneralFieldTransfer::RecordRequests<Gradient> g;
+      GeneralFieldTransfer::NullAction<Number> nullsetter;
       const std::vector<unsigned int> varvec(1, var_num);
 
-      libMesh::GenericProjector<NearestNode::RecordRequests<Number>,
-                                NearestNode::RecordRequests<Gradient>,
+      libMesh::GenericProjector<GeneralFieldTransfer::RecordRequests<Number>,
+                                GeneralFieldTransfer::RecordRequests<Gradient>,
                                 Number,
-                                NearestNode::NullAction<Number>>
+                                GeneralFieldTransfer::NullAction<Number>>
           request_gather(*to_sys, f, &g, nullsetter, varvec);
 
       const MeshBase::element_iterator to_begin =
@@ -429,7 +431,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       // We should only have one value for each variable at any given point.
       libmesh_assert(cache.count(p) == 0);
       const Number val = incoming_vals[val_offset].first;
-      if (!NearestNode::isBetterOutOfMeshValue(val))
+      if (!GeneralFieldTransfer::isBetterOutOfMeshValue(val))
         cache[p] = val;
     }
     else
@@ -549,7 +551,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         auto val = val_pair.second.interp;
 
         // This will happen if meshes are mismatched
-        if (_error_on_miss && NearestNode::isBetterOutOfMeshValue(val))
+        if (_error_on_miss && GeneralFieldTransfer::isBetterOutOfMeshValue(val))
         {
           if (is_nodal)
             mooseError("Node ", dof_object_id, " for app ", problem_id, " could not be located ");
@@ -559,7 +561,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         }
 
         // We should not put garbage into solution vector
-        if (NearestNode::isBetterOutOfMeshValue(val))
+        if (GeneralFieldTransfer::isBetterOutOfMeshValue(val))
           continue;
 
         to_sys->solution->set(dof, val);

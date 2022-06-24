@@ -36,11 +36,6 @@ MultiAppGeneralFieldMeshFunctionTransfer::validParams()
   params.addClassDescription(
       "Transfers field data at the MultiApp position using solution the finite element function "
       "from the master application, via a 'libMesh::MeshFunction' object.");
-
-  params.addParam<bool>(
-      "error_on_miss",
-      false,
-      "Whether or not to error in the case that a target point is not found in the source domain.");
   return params;
 }
 
