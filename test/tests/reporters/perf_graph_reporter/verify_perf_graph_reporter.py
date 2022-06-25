@@ -50,15 +50,15 @@ def check(file, pid, recover):
         section = pgr.section(gold_section.name())
         if section is None:
             check_section(False, gold_section, 'Section is missing')
+        else:
+            check_section(section.name() == gold_section.name(), gold_section, 'Name mismatch')
+            check_section(section.level() == gold_section.level(), gold_section, 'Level mismatch')
+            check_section(section.numCalls() == gold_section.numCalls(), gold_section, 'Num calls mismatch')
+            check_section(len(section.nodes()) == len(gold_section.nodes()), gold_section, 'Number of nodes mismatch')
 
-        check_section(section.name() == gold_section.name(), gold_section, 'Name mismatch')
-        check_section(section.level() == gold_section.level(), gold_section, 'Level mismatch')
-        check_section(section.numCalls() == gold_section.numCalls(), gold_section, 'Num calls mismatch')
-        check_section(len(section.nodes()) == len(gold_section.nodes()), gold_section, 'Number of nodes mismatch')
-
-        for gold_node in gold_section.nodes():
-            if section.node(gold_node.path()) is None:
-                check_section(False, gold_section, 'Node "' + gold_node.name() + '" is missing')
+            for gold_node in gold_section.nodes():
+                if section.node(gold_node.path()) is None:
+                    check_section(False, gold_section, 'Node "' + gold_node.name() + '" is missing')
 
     for section in pgr.sections():
         if gold_pgr.section(section.name()) is None:
