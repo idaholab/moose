@@ -33,6 +33,7 @@ CaloricallyImperfectGas::validParams()
   params.addRequiredParam<Real>("max_temperature", "Largest temperature for lookup tables [K]");
   params.addParam<Real>(
       "temperature_resolution", 1, "Step size in temperature for creating the inverse lookup T(e)");
+  params.addParam<bool>("out_of_bound_error", true, "Error if out of bounds");
   params.addClassDescription("Fluid properties for an ideal gas with imperfect caloric behavior.");
 
   return params;
@@ -49,6 +50,7 @@ CaloricallyImperfectGas::CaloricallyImperfectGas(const InputParameters & paramet
     _min_temperature(getParam<Real>("min_temperature")),
     _max_temperature(getParam<Real>("max_temperature")),
     _delta_T(getParam<Real>("temperature_resolution")),
+    _out_of_bound_error(getParam<bool>("out_of_bound_error")),
     _tol(1e-4)
 {
 }
@@ -922,6 +924,27 @@ CaloricallyImperfectGas::g_from_v_e(Real v, Real e) const
   return h_from_p_T(p, T) - T * s_from_p_T(p, T);
 }
 
+Real
+CaloricallyImperfectGas::p_from_h_s(Real h, Real s) const
+{
+  Real T = T_from_h(h);
+  Real e = e_from_T(T);
+  Real Z = Z_from_T(T);
+  Real v = std::exp((s - Z) / _R_specific);
+  return p_from_v_e(v, e);
+}
+
+void
+CaloricallyImperfectGas::p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const
+{
+  p = p_from_h_s(h, s);
+  Real pert = 1e-7;
+  Real p_pert = p_from_h_s(h * (1 + pert), s);
+  dp_dh = (p_pert - p) / (h * pert);
+  p_pert = p_from_h_s(h, s * (1 + pert));
+  dp_ds = (p_pert - p) / (s * pert);
+}
+
 void
 CaloricallyImperfectGas::outOfBounds(const std::string & function,
                                      Real value,
@@ -931,5 +954,8 @@ CaloricallyImperfectGas::outOfBounds(const std::string & function,
   std::stringstream ss;
   ss << "Function " << function << " encountered argument value of " << value
      << " which is outside of the bounds of " << min << " .. " << max;
-  mooseError(ss.str());
+  if (_out_of_bound_error)
+    mooseError(ss.str());
+  else
+    mooseWarning(ss.str());
 }

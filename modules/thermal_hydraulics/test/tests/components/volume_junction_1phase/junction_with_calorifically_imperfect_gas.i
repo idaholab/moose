@@ -1,7 +1,9 @@
 # This input file tests compatibility of VolumeJunction1Phase and CaloricallyImperfectGas.
+# Loss coefficient is applied in first junction.
+# Expected pressure drop ~0.5*K*rho_in*vel_in^2=0.5*100*3.219603*1 = 160.9 Pa
 
 T_in = 523.0
-vel = -1
+vel = 1
 p_out = 7e6
 
 [GlobalParams]
@@ -13,6 +15,9 @@ p_out = 7e6
   n_elems = 3
   f = 0
   scaling_factor_1phase = '1 1 1e-5'
+  scaling_factor_rhoV = '1e2'
+  scaling_factor_rhowV = '1e-2'
+  scaling_factor_rhoEV = '1e-5'
 []
 
 [Functions]
@@ -47,6 +52,7 @@ p_out = 7e6
     mu = mu_fn
     min_temperature = 100
     max_temperature = 5000
+    out_of_bound_error = false
   []
 []
 
@@ -77,9 +83,9 @@ p_out = 7e6
     initial_vel_x = 0
     initial_vel_y = 0
     initial_vel_z = ${vel}
+    K = 100
     connections = 'inlet:out channel1:in channel2:in'
     volume = 1
-    scaling_factor_rhoEV = '1e-5'
   []
   [channel1]
     type = FlowChannel1Phase
@@ -107,7 +113,6 @@ p_out = 7e6
     initial_vel_z = ${vel}
     connections = 'channel1:out channel2:out outlet:in'
     volume = 1
-    scaling_factor_rhoEV = '1e-5'
   []
   [outlet]
     type = FlowChannel1Phase
@@ -125,6 +130,21 @@ p_out = 7e6
 []
 
 [Postprocessors]
+  [p_in]
+    type = SideAverageValue
+    variable = p
+    boundary = inlet:in
+  []
+  [p_out]
+    type = SideAverageValue
+    variable = p
+    boundary = outlet:out
+  []
+  [Delta_p]
+    type = DifferencePostprocessor
+    value1 = p_out
+    value2 = p_in
+  []
   [inlet_in_m_dot]
     type = ADFlowBoundaryFlux1Phase
     boundary = 'inlet_bc'
@@ -204,17 +224,17 @@ p_out = 7e6
   type = Transient
   scheme = bdf2
   start_time = 0
-  end_time = 10
+  end_time = 20
   [TimeStepper]
     type = IterationAdaptiveDT
-    dt = 0.01
+    dt = 1
     optimal_iterations = 8
     iteration_window = 2
   []
   timestep_tolerance = 1e-6
   abort_on_solve_fail = true
 
-  line_search = none
+  line_search = basic
   nl_rel_tol = 1e-8
   nl_abs_tol = 4e-8
   nl_max_its = 25
@@ -229,6 +249,6 @@ p_out = 7e6
   [out]
     type = CSV
     execute_on = 'FINAL'
-    show = 'net_mass_flow_rate_domain net_mass_flow_rate_volume_junction'
+    show = 'net_mass_flow_rate_domain net_mass_flow_rate_volume_junction Delta_p'
   []
 []
