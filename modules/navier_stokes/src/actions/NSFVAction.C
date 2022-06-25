@@ -2410,6 +2410,7 @@ NSFVAction::checkBoundaryParameterErrors()
                  "fixed-velocity and fixed-pressure entries",
                  "momentum_inlet_types");
 
+  // index into _momentum_inlet_function
   unsigned int k = 0;
   for (unsigned int j = 0; j < _momentum_inlet_types.size(); ++j)
   {
@@ -2422,13 +2423,15 @@ NSFVAction::checkBoundaryParameterErrors()
                      "momentum_inlet_function",
                      _dim,
                      "entries ",
-                     " the momentum_inlet_types subvector for fixed-velocity");
+                     " the momentum_inlet_types subvector for fixed-velocity inlet: " +
+                         _inlet_boundaries[k]);
     else if (type == "fixed-pressure")
       checkSizeParam(_momentum_inlet_function[k].size(),
                      "momentum_inlet_function",
                      1,
                      "entries ",
-                     " the momentum_inlet_types subvector for fixed-pressure");
+                     " the momentum_inlet_types subvector for fixed-pressure inlet: " +
+                         _inlet_boundaries[k]);
     ++k;
   }
 
@@ -2627,7 +2630,7 @@ NSFVAction::checkSizeFriendParams(const unsigned int param_vector_1_size,
                "Size (" + std::to_string(param_vector_2_size) +
                    ") is not the same as the "
                    "number of " +
-                   object_name_1 + " in '" + param_name_1 + "' (" +
+                   object_name_1 + " in '" + param_name_1 + "' (size " +
                    std::to_string(param_vector_1_size) + ")");
 }
 
@@ -2642,7 +2645,7 @@ NSFVAction::checkSizeParam(const unsigned int param_vector_size,
     paramError(param_name,
                "Size (" + std::to_string(param_vector_size) +
                    ") is not the same as the number of " + object_name + " in " +
-                   size_source_explanation + " (" + std::to_string(size_wanted) + ")");
+                   size_source_explanation + " (size " + std::to_string(size_wanted) + ")");
 }
 
 void

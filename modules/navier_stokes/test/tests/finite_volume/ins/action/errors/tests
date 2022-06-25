@@ -6,7 +6,7 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of momentum inlet types does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/momentum_inlet_types=''"
-    expect_err = "Size \(0\) is not the same as the number of inlet boundaries in 'inlet_boundaries' \(1\)"
+    expect_err = "Size \(0\) is not the same as the number of inlet boundaries in 'inlet_boundaries' \(size 1\)"
     ad_indexing_type = 'global'
   []
   [momentum-inlet-function-error]
@@ -14,15 +14,15 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of momentum inlet functions is not equal to the problem dimension for a fixed-velocity inlet.'
     cli_args = "Modules/NavierStokesFV/momentum_inlet_function='1'"
-    expect_err = "Size \(1\) is not the same as the number of entries  in  the momentum_inlet_types subvector for fixed-velocity \(2\)"
+    expect_err = "Size \(1\) is not the same as the number of entries  in  the momentum_inlet_types subvector for fixed-velocity inlet: left \(size 2\)"
     ad_indexing_type = 'global'
   []
   [momentum-inlet-function-error-2]
     type = 'RunException'
     input = 2d-rc-error-action.i
-    requirement = 'The system shall throw an error if the number of entries in momentum_inlet_types does not match the total number of fixed-velocity and fixed-pressure inlet boundaries.'
+    requirement = 'The system shall throw an error if the number of entries for momentum inlet types does not match the total number of fixed-velocity and fixed-pressure inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/momentum_inlet_function='1 1; 2'"
-    expect_err = "Size \(2\) is not the same as the number of fixed-velocity and fixed-pressure entries in momentum_inlet_types \(1\)"
+    expect_err = "Size \(2\) is not the same as the number of fixed-velocity and fixed-pressure entries in momentum_inlet_types \(size 1\)"
     ad_indexing_type = 'global'
   []
   [momentum-outlet-error]
@@ -30,7 +30,7 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of momentum outlet types does not match the number of outlet boundaries.'
     cli_args = "Modules/NavierStokesFV/momentum_outlet_types=''"
-    expect_err = "Size \(0\) is not the same as the number of outlet boundaries in 'outlet_boundaries' \(1\)"
+    expect_err = "Size \(0\) is not the same as the number of outlet boundaries in 'outlet_boundaries' \(size 1\)"
     ad_indexing_type = 'global'
   []
   [pressure-outlet-function-error]
@@ -38,7 +38,7 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of pressure outlet functions is not the same the pressure outlet boundaries.'
     cli_args = "Modules/NavierStokesFV/pressure_function=''"
-    expect_err = "Size \(0\) is not the same as the number of pressure outlet boundaries in 'fixed-pressure/fixed-pressure-zero-gradient' \(1\)"
+    expect_err = "Size \(0\) is not the same as the number of pressure outlet boundaries in 'fixed-pressure/fixed-pressure-zero-gradient' \(size 1\)"
     ad_indexing_type = 'global'
   []
   [momentum-wall-error]
@@ -46,7 +46,7 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of momentum wall types does not match the number of wall boundaries.'
     cli_args = "Modules/NavierStokesFV/momentum_wall_types=''"
-    expect_err = "Size \(0\) is not the same as the number of wall boundaries in 'wall_boundaries' \(2\)"
+    expect_err = "Size \(0\) is not the same as the number of wall boundaries in 'wall_boundaries' \(size 2\)"
     ad_indexing_type = 'global'
   []
   [energy-inlet-error]
@@ -54,7 +54,7 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of energy inlet types does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/energy_inlet_types=''"
-    expect_err = "Size \(0\) is not the same as the number of inlet boundaries in 'inlet_boundaries' \(1\)"
+    expect_err = "Size \(0\) is not the same as the number of inlet boundaries in 'inlet_boundaries' \(size 1\)"
     ad_indexing_type = 'global'
   []
   [passive-scalar-inlet-error]
@@ -62,7 +62,7 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of passive scalar inlet types does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_types=''"
-    expect_err = "Size \(0\) is not the same as the number of inlet boundaries in 'inlet_boundaries' \(1\)"
+    expect_err = "Size \(0\) is not the same as the number of inlet boundaries in 'inlet_boundaries' \(size 1\)"
     ad_indexing_type = 'global'
   []
   [passive-scalar-inlet-function-error]
@@ -70,7 +70,7 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of passive scalar inlet functions does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_function=''"
-    expect_err = "Size \(0\) is not the same as the number of boundaries in 'passive_scalar_inlet_types' \(1\)"
+    expect_err = "Size \(0\) is not the same as the number of boundaries in 'passive_scalar_inlet_types' \(size 1\)"
     ad_indexing_type = 'global'
   []
   [energy-wall-error]
@@ -78,7 +78,7 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of energy wall types does not match the number of wall boundaries.'
     cli_args = "Modules/NavierStokesFV/energy_wall_types=''"
-    expect_err = "Size \(0\) is not the same as the number of wall boundaries in 'wall_boundaries' \(2\)"
+    expect_err = "Size \(0\) is not the same as the number of wall boundaries in 'wall_boundaries' \(size 2\)"
     ad_indexing_type = 'global'
   []
   [energy-wall-function-action-error]
@@ -86,7 +86,7 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of energy wall functions does not match the number of energy wall types.'
     cli_args = "Modules/NavierStokesFV/energy_wall_function=''"
-    expect_err = "Size \(0\) is not the same as the number of Dirichlet/Neumann conditions in 'energy_wall_types' \(2\)"
+    expect_err = "Size \(0\) is not the same as the number of Dirichlet/Neumann conditions in 'energy_wall_types' \(size 2\)"
     ad_indexing_type = 'global'
   []
   [scalar-ic-error]

@@ -21,7 +21,6 @@ density = ${fparse p0 / (Ri * T0)}
 head = ${fparse height * density * gravity}
 k = 25.68e-3
 gamma = 1.4
-cp = ${fparse gamma * Ri / (gamma - 1.0)}
 
 [Mesh]
   [mesh]
@@ -73,6 +72,9 @@ cp = ${fparse gamma * Ri / (gamma - 1.0)}
   [FluidProperties]
     [air]
       type = IdealGasFluidProperties
+      molar_mass = ${molar_mass}
+      k = ${k}
+      gamma = ${gamma}
     []
   []
 []
