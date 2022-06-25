@@ -2,7 +2,7 @@
   second_order = true
   [file]
     type = FileMeshGenerator
-    file = spheres_hex20.e
+    file = spheres_coarse_hex20.e
   []
   [secondary]
     input = file
@@ -103,9 +103,9 @@
   solve_type = NEWTON
   type = Steady
 
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-  petsc_options_value = '201                hypre    boomeramg      6'
-
+  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type '
+                        '-pc_factor_shift_amount'
+  petsc_options_value = 'lu       basic                 NONZERO               1e-15'
 []
 
 [Outputs]

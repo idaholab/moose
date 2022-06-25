@@ -141,7 +141,6 @@
     partial = True
     ad_indexing_type = global
     min_parallel = 2
-    heavy = true
   []
 
 []
