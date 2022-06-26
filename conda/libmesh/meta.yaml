@@ -1,4 +1,4 @@
-{% set build = 1 %}
+{% set build = 2 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "2022.06.06" %}
 {% set vtk_friendly_version = "9.1" %}
@@ -26,11 +26,6 @@ requirements:
     - {{ moose_libmesh_vtk }}
     - pkg-config
     - libpng
-    - libtool                                           # [arm64]
-    - autoconf                                          # [arm64]
-    - automake                                          # [arm64]
-    - make                                              # [arm64]
-    - m4                                                # [arm64]
   run:
     - {{ moose_mpich }}
     - {{ moose_petsc }}

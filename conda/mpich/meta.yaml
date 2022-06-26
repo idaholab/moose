@@ -3,7 +3,7 @@
 #   petsc/
 #   libmesh-vtk/
 #   libmesh/
-{% set build = 3 %}
+{% set build = 4 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "4.0.1" %}
 
@@ -30,11 +30,12 @@ requirements:
     - {{ base_mpifort }}
     - {{ moose_hdf5 }}
     - {{ moose_ld64 }}          # [osx]
-    - autoconf                  # [unix]
-    - automake                  # [unix]
-    - libtool                   # [unix]
-    - make                      # [unix]
-    - gnuconfig                 # [arm64]
+    - cmake
+    - make
+    - libtool                   # [arm64]
+    - autoconf                  # [arm64]
+    - automake 1.16.1           # [arm64]
+    - m4                        # [arm64]
     - openssl <3
   host: []
   run:
@@ -44,6 +45,12 @@ requirements:
     - {{ base_mpifort }}
     - {{ moose_hdf5 }}
     - {{ moose_ld64 }}          # [osx]
+    - cmake
+    - make
+    - libtool                   # [arm64]
+    - autoconf                  # [arm64]
+    - automake 1.16.1           # [arm64]
+    - m4                        # [arm64]
     - {{ moose_libxt }}         # [linux]
     - {{ moose_libsm }}         # [linux]
     - {{ moose_libx11 }}        # [linux]
