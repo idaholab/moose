@@ -13,7 +13,6 @@ This script can be used to figure out if a job on a cluster is hung.
 If all goes well, it'll print the unique stack traces out.
 """
 
-import string
 import sys
 import os
 import re
@@ -23,7 +22,6 @@ from tempfile import TemporaryFile
 from time import sleep
 from multiprocessing.pool import ThreadPool
 import threading # for thread locking and thread timers
-import multiprocessing # for timeouts
 
 ##################################################################
 # Modify the following variable(s) for your cluster or use one of the versions below
@@ -63,7 +61,7 @@ class Job:
         """
         Return stdout if process has completed
         """
-        if self.get_process().poll():
+        if self.get_process().poll() is not None:
             self.__stdout_file.seek(0)
             return self.__stdout_file.read().decode('utf-8')
         return None
@@ -71,11 +69,11 @@ class Job:
         """
         Return stderr if process has completed
         """
-        if self.get_process().poll():
+        if self.get_process().poll() is not None:
             self.__stderr_file.seek(0)
             return self.__stderr_file.read().decode('utf-8')
         return None
-    def run(self, e_timeout=None):
+    def run(self, exec_timeout=None):
         """
         Execute command and wait for return code
         """
@@ -84,7 +82,8 @@ class Job:
                               stderr=self.__stderr_file,
                               shell=True,
                               encoding='utf-8') as self.__process:
-            self.__process.wait(timeout=e_timeout)
+            self.__process.wait(timeout=exec_timeout)
+            return self.__process.poll()
 
 class Scheduler:
     """
@@ -99,47 +98,58 @@ class Scheduler:
     .wait_finish() blocks until all jobs finish.
     .get_finished() returns
     """
-    def __init__(self, max_slots=6, e_timeout=None):
+    def __init__(self, max_slots=6, exec_timeout=None):
         self.max_slots = int(max_slots)
         self.worker_pool = ThreadPool(processes=self.max_slots)
         self.thread_lock = threading.Lock()
         self.job_queue = set([])
         self.active = set([])
         self.finished = set([])
-        self.__timeout = e_timeout
+        self.__timeout = exec_timeout
+
+    def get_finished(self):
+        """
+        Return finished jobs
+        """
+        return self.finished
 
     def wait_finish(self):
         """
-        block until all submitted jobs are finished
+        blocks until all submitted jobs are finished
         """
         while self.job_queue or self.active:
-            sleep(0.5)
+            sleep(.5)
         self.worker_pool.close()
         self.worker_pool.join()
 
     def schedule_jobs(self, jobs):
         """
-        Begin launching jobs by providing a list of lists with
-        shell commands to run.
+        Instance one or more Job objects and queue them into the
+        thread pool.
         """
-        with self.thread_lock:
-            for a_job in jobs:
-                o_job = Job(a_job)
-                self.job_queue.add(o_job)
-        self.queue_jobs(self.job_queue)
+        instanced_jobs = []
+        for a_job in jobs:
+            instanced_jobs.append(Job(a_job))
+        if instanced_jobs:
+            self.queue_jobs(instanced_jobs)
 
     def queue_jobs(self, jobs):
         """
         Add all jobs to the thread pool
         """
         for o_job in jobs:
+            #self.launch_job(o_job)
             self.worker_pool.apply_async(self.launch_job, (o_job,))
 
-    def reserve_allocation(self, o_job):
+    def __reserve_allocation(self, o_job):
         """
-        Return bool if enough resources exist to launch job
+        launch_job calls this method when asking for available
+        resources. If available resources exist, add o_job to
+        the active set, remove it from the queue, and return True.
+        Else do nothing and return False.
         """
         with self.thread_lock:
+            self.job_queue.add(o_job)
             if len(self.active) < self.max_slots:
                 self.active.add(o_job)
                 self.job_queue.remove(o_job)
@@ -151,100 +161,102 @@ class Scheduler:
         Run subprocess using provided command list
         """
         try:
-            if self.reserve_allocation(o_job):
-                o_job.run(timeout=self.__timeout)
+            if self.__reserve_allocation(o_job):
+                o_job.run(exec_timeout=self.__timeout)
                 with self.thread_lock:
                     self.active.remove(o_job)
                     self.finished.add(o_job)
             else:
-                sleep(.1)
+                sleep(.5)
                 self.queue_jobs([o_job])
         except KeyboardInterrupt:
             sys.exit(1)
 
+##### END Threading Class Object
+def __schedule_task(jobs):
+    schedule_jobs = Scheduler()
+    schedule_jobs.schedule_jobs(jobs)
+    schedule_jobs.wait_finish()
+    return schedule_jobs.get_finished()
 
-def run_command(command, timeout=10):
+def get_sshpids(application_name, host):
     """
-    Run a command and return stdout.
-
-    Quits if command does not return within 10 seconds (default), or
-    if command results in non-zero return code.
-    """
-    with subprocess.Popen(f'{command}',
-                          shell=True,
-                          stdout=subprocess.PIPE) as run_proc:
-        try:
-            run_proc.wait(timeout=timeout)
-            (s_stdout, s_stderr) = run_proc.communicate(timeout=timeout)
-            if run_proc.poll():
-                print(f'Error running {command}\n{s_stderr.decode("utf-8")}')
-                sys.exit(run_proc.poll())
-            return s_stdout.decode('utf-8')
-        except subprocess.TimeoutExpired:
-            print(f'Timeout after {timeout} seconds waiting for {command}')
-            sys.exit(1)
-        except KeyboardInterrupt:
-            sys.exit(1)
-
-def get_sshoutput(application_name, host):
-    """
-    Generate and return a valid SSH remote execution command
+    Generate and return a valid SSH remote ps command
     """
     ps_grep = f'ps -e | grep {application_name}'
-    awk_print = r'awk \'{print \$1}\''
-    xargs_echo = f'xargs -I \'{{}}\' sh -c \'echo Host: {host} PID: {{}}; ' \
-                 f'{PSTACK_BINARY} {{}}; printf \'*%.0s\' {{1..80}}; echo\' '
-    command = f'ssh {host} "{ps_grep} | {awk_print} | {xargs_echo}"'
-    return run_command(command)
+    awk_print = r"awk '{print \$1}'"
+    return f'ssh {host} "echo {host}; {ps_grep} | {awk_print}"'
+
+def get_sshstack(host, pid):
+    """
+    Generate and return a valid SSH remote stacktrace command
+    """
+    return f'ssh {host} "echo Host: {host} PID: {pid}; ' \
+           f'{PSTACK_BINARY} {pid}; printf "*%.0s" {{1..80}}; echo"'
+
+def __get_pids(application_name, hosts):
+    """
+    SSH into each host and retrieve PIDs
+    return a dictionary of {'hostname' : [pids]}
+    """
+    jobs = []
+    results = {}
+    for host in hosts:
+        jobs.append(get_sshpids(application_name, host))
+    finished_jobs = __schedule_task(jobs)
+    for job in finished_jobs:
+        std_out = job.get_stdout().split()
+        results[std_out[0]] = std_out[1:]
+    return results
+
+def __get_stacks(hosts_pids):
+    """
+    Iterate over dictionary of hosts, and PIDs and run
+    a stack trace on each one, return a list of results.
+    """
+    jobs = []
+    results = []
+    for host, pids in hosts_pids.items():
+        for pid in pids:
+            jobs.append(get_sshstack(host, pid))
+    finished_jobs = __schedule_task(jobs)
+    for job in finished_jobs:
+        results.append(job.get_stdout())
+    return results
 
 def generate_traces(job_num, application_name, num_hosts):
     """
     Generate a temporary file with traces and return
     formated results
     """
-    # The lists of hosts
-    hosts = []
-    # The array of jobs
-    jobs = []
-    # The machine name should go here!
+    hosts = set([])
+    a_job = Job(f'qstat -n {job_num}')
+    a_job.run()
+    results = a_job.get_stdout()
+    for i in node_name_pattern.findall(results):
+        hosts.add(i)
+    if num_hosts:
+        # convert back into set
+        hosts = set(list(hosts)[:num_hosts])
 
-    host_strs = node_name_pattern.findall(run_command(f'qstat -n {job_num}'))
-    for i in host_strs:
-        hosts.append(i)
+    # Use a Scheduler to get hosts and PIDs
+    hosts_pids = __get_pids(application_name, hosts)
 
-    # Launch all the jobs
-    if num_hosts == 0:
-        num_hosts = len(hosts)
+    # Use a Scheduler to get stack traces from each
+    # host for every PID
+    stack_list = __get_stacks(hosts_pids)
 
-    for i in range(len(hosts)):
-        if i >= num_hosts:
-            continue
-
-
-        temp_f = TemporaryFile()
-        ssh_proc = subprocess.Popen(command, stdout=temp_f, close_fds=False, shell=True)
-        jobs.append((ssh_proc, temp_f))
-
-    # Now process the output from each of the jobs
     traces = []
-    for (ssh_proc, temp_f) in jobs:
-        ssh_proc.wait()
-        temp_f.seek(0)
-        output = temp_f.read()
-        temp_f.close()
-
-        # strip blank lines
-        output = os.linesep.join([s for s in output.splitlines() if s])
-
+    for stack in stack_list:
+        output = os.linesep.join([s for s in stack.splitlines() if s])
         traces.extend(split_traces(output))
-
     return traces
 
 def read_tracesfromfile(filename):
     """
     Read tracefile, and return a list of traces
     """
-    with open(filename) as t_file:
+    with open(filename, encoding='utf-8') as t_file:
         data = t_file.read()
         return split_traces(data)
 
@@ -265,7 +277,7 @@ def process_traces(traces, num_lines_to_keep):
     Process the individual traces
     """
     unique_stack_traces = {}
-    last_lines_regex = re.compile(rf'(?:.*\n){{str(num_lines_to_keep)}}\Z', re.M)
+    last_lines_regex = re.compile(fr'(?:.*\n){{{num_lines_to_keep}}}\Z', re.M)
     host_regex = re.compile('^(Host.*)', re.M)
 
     for trace in traces:
@@ -273,20 +285,20 @@ def process_traces(traces, num_lines_to_keep):
             continue
 
         # Grab the host and PID
-        m = host_regex.search(trace)
-        if m:
-            host_pid = m.group(1)
+        tmp_trace = host_regex.search(trace)
+        if tmp_trace:
+            host_pid = tmp_trace.group(1)
 
         # If the user requested to save only the last few lines, do that here
         if num_lines_to_keep:
-            m = last_lines_regex.search(trace)
-            if m:
-                trace = m.group(0)
+            tmp_trace = last_lines_regex.search(trace)
+            if tmp_trace:
+                trace = tmp_trace.group(0)
 
         unique = ''
-        for bt in unique_stack_traces:
-            if compare_traces(trace, bt):
-                unique = bt
+        for back_trace in unique_stack_traces:
+            if compare_traces(trace, back_trace):
+                unique = back_trace
 
         if unique == '':
             unique_stack_traces[trace] = [host_pid]
@@ -309,10 +321,9 @@ def compare_traces(trace1, trace2):
     # Note this subroutine may need tweaking if the stack trace is different
     # on the current machine
     memory_re = re.compile('0x[0-9a-f]*')
-    for i in range(len(lines1)):
-        line1 = lines1[i].split()[2:]
-        line2 = lines2[i].split()[2:]
-
+    for a_line in lines1:
+        line1 = a_line.split()[2:]
+        line2 = a_line.split()[2:]
         # Let's strip out all the memory addresses too
         line1 = [memory_re.sub('0x...', line) for line in line1]
         line2 = [memory_re.sub('0x...', line) for line in line2]
@@ -328,49 +339,36 @@ def main():
     """
     parser = argparse.ArgumentParser(description='Usage: %prog [options] <PBS Job num> '
                                                  '<Application>')
-    parser.add_argument('PBS job number', type=int)
-    parser.add_argument('Application', type=string)
-    parser.add_argument('-s', '--stacks', action='store', dest='stacks', type='int',
-                      default=0, help='The number of stack frames to keep and compare '
-                      'for uniqueness (Default: ALL)')
-    parser.add_argument('-n', '--hosts', action='store', dest='hosts', type='int',
-                      default=0, help='The number of hosts to visit (Default: ALL)')
-    parser.add_argument('-f', '--force', action='store_true', dest='force',
-                      default=False, help='Whether or not to force a regen if a cache '
-                      'file exists')
+    parser.add_argument('job_num', type=int)
+    parser.add_argument('application', type=str)
+    parser.add_argument('-s', '--stacks', action='store', type=int, default=0,
+                       help='The number of stack frames to keep and compare for '
+                       'uniqueness (Default: ALL)')
+    parser.add_argument('-n', '--hosts', action='store', type=int, default=0,
+                       help='The number of hosts to visit (Default: ALL)')
+    parser.add_argument('-f', '--force', action='store_true', default=False,
+                       help='Whether or not to force a regen if a cache file exists')
     args = parser.parse_args()
 
-    if len(args) != 2:
-        parser.print_help()
-        sys.exit(1)
-
-    # The PBS job number and the application should be passed on the command line
-    # Additionally, an optional argument of the number of frames to keep (compare) may be passed
-    job_num = args[0]
-    application = args[1]
-    num_to_keep = args.stacks
-    num_hosts = args.hosts
-
     # first see if there is a cache file available
-    cache_filename = f'{application}.{job_num}.cache'
+    cache_filename = f'{args.application}.{args.job_num}.cache'
 
     traces = []
     if not os.path.exists(cache_filename) or args.force:
-        traces = generate_traces(job_num, application, args.hosts)
+        traces = generate_traces(args.job_num, args.application, args.hosts)
 
         # Cache the restuls to a file
-        cache_file = open(cache_filename, 'w')
-        for trace in traces:
-            cache_file.write(f'{trace}{"*"*80}\n')
-        cache_file.write('\n')
-        cache_file.close()
+        with open(cache_filename, 'w', encoding='utf-8') as cache_file:
+            for trace in traces:
+                cache_file.write(f'{trace}{"*"*80}\n')
+                cache_file.write('\n')
 
     # Process the traces to collapse them into unique stacks
     traces = read_tracesfromfile(cache_filename)
-    unique_stack_traces = process_traces(traces, num_to_keep)
+    unique_stack_traces = process_traces(traces, args.stacks)
 
     print('Unique Stack Traces')
-    for trace, count in unique_stack_traces.iteritems():
+    for trace, count in unique_stack_traces.items():
         print(f'{"*"*80}\nCount: {len(count)}\n')
         if len(count) < 10:
             print("\n".join(count))
