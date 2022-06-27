@@ -198,7 +198,7 @@ class RenderFloatCaption(components.RenderComponent):
     def createLatex(self, parent, token, page):
         caption = latex.Command(parent, 'caption')
         if token['key']:
-            latex.Command(caption, 'label', string=token['key'], escape=True)
+            latex.Command(caption, 'label', string=token['key'], escape=False)
         return caption
 
 class RenderFloatReference(core.RenderShortcutLink):
@@ -251,5 +251,5 @@ class RenderFloatReference(core.RenderShortcutLink):
         prefix = float_node.get('prefix', None)
         prefix = '' if prefix is None else prefix.title()
         latex.String(parent, content=prefix + '~', escape=False)
-        latex.Command(parent, 'ref', string=token['label'])
+        latex.Command(parent, 'ref', string=token['label'], escape=False)
         return parent

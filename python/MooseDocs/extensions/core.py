@@ -408,7 +408,7 @@ class RenderHeading(components.RenderComponent):
                             info=token.info)
         id_ = token.get('id')
         if id_:
-            latex.Command(sec, 'label', string=id_)
+            latex.Command(sec, 'label', string=id_, escape=False)
         return sec
 
 class RenderCode(components.RenderComponent):
@@ -445,7 +445,8 @@ class RenderShortcutLink(components.RenderComponent):
             latex.String(parent, content='{}~'.format(node['prefix']), escape=False)
             h = latex.Command(parent, 'ref',
                               string=link,
-                              info=token.info)
+                              info=token.info,
+                              escape=False)
         else:
             h = latex.Command(parent, 'href',
                               args=[latex.Brace(string=link)],
@@ -505,7 +506,7 @@ class RenderLink(components.RenderComponent):
                                 info=token.info)
         else:
             cmd = latex.Command(parent, 'hyperref',
-                                args=[latex.Bracket(string=url)],
+                                args=[latex.Bracket(string=url, escape=False)],
                                 info=token.info)
         return cmd
 
