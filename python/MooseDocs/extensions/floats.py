@@ -176,8 +176,8 @@ class RenderFloat(components.RenderComponent):
         style = latex.parse_style(token)
 
         width = style.get('width', None)
-        if width and token(0).name == 'Image':
-            token(0).set('style', 'width:{};'.format(width))
+        if width and token(1).name == 'Image':
+            token(1)['style'] = 'width:{};'.format(width)
 
         if style.get('text-align', None) == 'center':
             latex.Command(env, 'centering')
