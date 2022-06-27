@@ -17,7 +17,7 @@ CoupledVarDirichletBC::validParams()
 {
   InputParameters params = DirichletBCBase::validParams();
   params.addRequiredCoupledVar("v", "Coupled variable setting the value on the boundary.");
-  params.addParam<MooseFunctorName>("scale_factor", 1., "Scale factor to multiply the heat flux with");
+  params.addParam<FunctionName>("scale_factor", 1., "Scale factor to multiply the heat flux with");
   params.addClassDescription("Imposes the Dirichlet boundary condition $u=v$, where $u$ is the equation variable and $v$ is another variable"
                              "is a variable.");
   return params;
