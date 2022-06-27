@@ -245,7 +245,7 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
 
   std::vector<UserObject *> userobjs;
   queryBoundary(Interfaces::InterfaceUserObject, bnd_id, userobjs);
-  if (_interface_user_objects.size() == 0)
+  if (_interface_user_objects.size() == 0 && _domain_objs.size() == 0)
     return;
   if (!(neighbor->active()))
     return;
@@ -271,6 +271,12 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
 
   for (const auto & uo : userobjs)
     uo->execute();
+
+  for (auto & uo : _domain_objs)
+  {
+    uo->preExecuteOnInterface();
+    uo->executeOnInterface();
+  }
 }
 
 void

@@ -58,6 +58,11 @@ public:
   virtual void executeOnInternalSide() {}
 
   /**
+   * execute method that is called during ComputeUserObjects::onInterface
+   */
+  virtual void executeOnInterface() {}
+
+  /**
    * method that is called right before executeOnElement; sets the data to volumetric
    */
   void preExecuteOnElement();
@@ -71,6 +76,11 @@ public:
    * method that is called right before executeOnInternalSide; sets the data to face
    */
   void preExecuteOnInternalSide();
+
+  /**
+   * method that is called right before executeOnInterface; sets the data to face
+   */
+  void preExecuteOnInterface();
 
 protected:
   const MooseArray<Point> & qPoints() const { return *_current_q_point; }
@@ -88,23 +98,31 @@ protected:
   /// The current element volume (available during all execute functions)
   const Real & _current_elem_volume;
 
-  /// Current side of the current element (available during executeOnInternalSide() and executeOnBoundary())
+  /// Current side of the current element (available during executeOnInternalSide() and
+  /// executeOnBoundary() and executeOnInterface())
   const unsigned int & _current_side;
 
-  /// Current side of the current element (available during executeOnInternalSide() and executeOnBoundary())
+  /// Current side of the current element (available during executeOnInternalSide() and
+  /// executeOnBoundary() and executeOnInterface())
   const Elem * const & _current_side_elem;
 
-  /// Current side volume (available during executeOnInternalSide() and executeOnBoundary())
+  /// Current side volume (available during executeOnInternalSide() and executeOnBoundary() and
+  /// executeOnInterface())
   const Real & _current_side_volume;
 
-  /// The neighboring element (available during executeOnInternalSide())
+  /// The neighboring element (available during executeOnInternalSide() and executeOnInterface())
   const Elem * const & _neighbor_elem;
 
-  /// the neighboring element's volume (available during executeOnInternalSide())
+  /// the neighboring element's volume (available during executeOnInternalSide() and
+  /// executeOnInterface())
   const Real & _current_neighbor_volume;
 
-  /// The boundary ID (available during executeOnBoundary())
+  /// The boundary ID (available during executeOnBoundary() and executeOnInterface())
   const BoundaryID & _current_boundary_id;
+
+  /// The unit norm at quadrature points on the element side/face from the current element
+  /// perpendicular to the side
+  const MooseArray<Point> & _normals;
 
 private:
   void setVolumeData();
@@ -135,8 +153,6 @@ private:
   /// An array representing coordinate system volume modifications. Unity for Cartesian, 2piR for
   /// RZ, 4piR^2 for spherical
   const MooseArray<Real> & _coord;
-  /// The unit norm at quadrature points on the element side/face from the current element perpendicular to the side
-  const MooseArray<Point> & _normals;
 };
 
 inline void
@@ -160,6 +176,12 @@ DomainUserObject::preExecuteOnBoundary()
 
 inline void
 DomainUserObject::preExecuteOnInternalSide()
+{
+  setFaceData();
+}
+
+inline void
+DomainUserObject::preExecuteOnInterface()
 {
   setFaceData();
 }

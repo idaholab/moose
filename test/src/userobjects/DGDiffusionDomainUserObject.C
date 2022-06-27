@@ -41,8 +41,7 @@ DGDiffusionDomainUserObject::DGDiffusionDomainUserObject(const InputParameters &
     _grad_test_face_neighbor(_var.gradPhiFaceNeighbor()),
     _func(getFunction("function")),
     _epsilon(getParam<Real>("epsilon")),
-    _sigma(getParam<Real>("sigma")),
-    _normals(_assembly.normals())
+    _sigma(getParam<Real>("sigma"))
 {
 }
 
@@ -142,7 +141,7 @@ DGDiffusionDomainUserObject::finalize()
     local_integrals.resize(size);
     gatherSum(local_integrals);
     for (const auto integral : local_integrals)
-      if (integral > TOLERANCE * TOLERANCE)
+      if (std::abs(integral) > TOLERANCE * TOLERANCE)
         mooseError("DG diffusion problem not converged");
   }
 }

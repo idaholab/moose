@@ -13,26 +13,28 @@
 
 class Function;
 
-class DGDiffusionDomainUserObject : public DomainUserObject
+class InterfaceDomainUserObject : public DomainUserObject
 {
 public:
   static InputParameters validParams();
 
-  DGDiffusionDomainUserObject(const InputParameters & parameters);
+  InterfaceDomainUserObject(const InputParameters & parameters);
 
   void initialize() override;
   void executeOnElement() override;
   void executeOnBoundary() override;
-  void executeOnInternalSide() override;
+  void executeOnInterface() override;
   void finalize() override;
   void threadJoin(const UserObject & y) override;
+  void checkVariable(const MooseVariableFieldBase & variable) const override;
 
 protected:
   const VariableValue & _u;
-  const VariableValue & _u_neighbor;
+  const VariableValue & _v_neighbor;
   const VariableGradient & _grad_u;
-  const VariableGradient & _grad_u_neighbor;
+  const VariableGradient & _grad_v_neighbor;
   MooseVariable & _var;
+  MooseVariable & _v_var;
   const VariableTestValue & _test;
   const VariableTestGradient & _grad_test;
   const VariableTestValue & _test_face;
@@ -40,7 +42,11 @@ protected:
   const VariableTestValue & _test_face_neighbor;
   const VariableTestGradient & _grad_test_face_neighbor;
   const Function & _func;
-  const Real & _epsilon;
-  const Real & _sigma;
-  std::vector<std::vector<Real>> _elem_integrals;
+  const Real _robin_coef;
+  const Real _interface_penalty;
+  const Real _nl_abs_tol;
+  std::set<BoundaryID> _robin_bnd_ids;
+  std::set<BoundaryID> _interface_bnd_ids;
+  std::set<SubdomainID> _interface_connected_blocks;
+  std::vector<Real> _nodal_integrals;
 };

@@ -45,14 +45,14 @@ DomainUserObject::DomainUserObject(const InputParameters & parameters)
     _neighbor_elem(_assembly.neighbor()),
     _current_neighbor_volume(_assembly.neighborVolume()),
     _current_boundary_id(_assembly.currentBoundaryID()),
+    _normals(_assembly.normals()),
     _q_point(_assembly.qPoints()),
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
     _q_point_face(_assembly.qPointsFace()),
     _qrule_face(_assembly.qRuleFace()),
     _JxW_face(_assembly.JxWFace()),
-    _coord(_assembly.coordTransformation()),
-    _normals(_assembly.normals())
+    _coord(_assembly.coordTransformation())
 {
   // Keep track of which variables are coupled so we know what we depend on
   const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();

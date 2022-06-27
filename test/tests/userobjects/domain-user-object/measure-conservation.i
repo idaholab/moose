@@ -17,7 +17,6 @@
     function = 'x'
     epsilon = -1
     sigma = 6
-    execute_on = 'timestep_end'
     u = u
   []
 []
