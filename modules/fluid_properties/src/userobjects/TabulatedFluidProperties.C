@@ -12,6 +12,7 @@
 #include "MooseUtils.h"
 #include "Conversion.h"
 #include "KDTree.h"
+#include "NewtonInversion.h"
 
 // C++ includes
 #include <fstream>
@@ -76,18 +77,6 @@ TabulatedFluidProperties::validParams()
       "If true exceeding pressure or temperature tabulation values leads to an error.");
   params.addClassDescription(
       "Fluid properties using bicubic or bilinear interpolation on tabulated values provided");
-  params.addRangeCheckedParam<Real>("tolerance",
-                        1e-8,
-                        "tolerance > 0",
-                        "Tolerance for 2D Newton variable set conversion");
-  params.addRangeCheckedParam<Real>("T_initial_guess",
-                        400,
-                        "T_initial_guess > 0",
-                        "Temperature initial guess for 2D Newton variable set conversion");
-  params.addRangeCheckedParam<Real>("p_initial_guess",
-                        2e5,
-                        "p_initial_guess > 0",
-                        "Pressure initial guess for 2D Newton variable set conversion");
 
   return params;
 }
@@ -126,10 +115,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _num_v(getParam<unsigned int>("num_v")),
     _num_e(getParam<unsigned int>("num_e")),
     _inversion_interpolation_order(getParam<unsigned int>("pt_ve_inversion_interpolation_order")),
-    _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds")),
-    _tolerance(getParam<Real>("tolerance")),
-    _T_initial_guess(getParam<Real>("T_initial_guess")),
-    _p_initial_guess(getParam<Real>("p_initial_guess"))
+    _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds"))
 {
   // Sanity check on minimum and maximum temperatures and pressures
   if (_temperature_max <= _temperature_min)
@@ -419,6 +405,21 @@ TabulatedFluidProperties::rho_from_p_T(
     _fp.rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
 }
 
+void //need ADReal for use in navier_stokes
+TabulatedFluidProperties::rho_from_p_T(
+    const ADReal & pressure, const ADReal & temperature, ADReal & rho, ADReal & drho_dp, ADReal & drho_dT) const
+{
+  if (_interpolate_density)
+  {
+    ADReal p=pressure, T=temperature;
+    checkInputVariables(p, T);
+    _property_ipol[_density_idx]->ADsampleValueAndDerivatives(
+        p, T, rho, drho_dp, drho_dT);
+  }
+  else
+    _fp.rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
+}
+
 Real
 TabulatedFluidProperties::e_from_p_T(Real pressure, Real temperature) const
 {
@@ -457,9 +458,24 @@ void
 TabulatedFluidProperties::e_from_p_rho(Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const
 {
   Real T = T_from_p_rho(pressure, rho);
-  e = e_from_p_T(pressure, T);
-  de_dp = 0;
-  de_drho = 0;
+  Real v = 1 / rho;
+  Real de_dT, dp_dv, dp_de, dT_dv, dT_de;
+  e_from_p_T(pressure, T, e, de_dp, de_dT);
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling e_from_p_rho.");
+  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, pressure, dp_dv, dp_de);
+  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+  de_drho = ((de_dT * dT_dv) + (de_dp * dp_dv)) / (-rho * rho);
+}
+
+Real
+TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
+{
+  auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
+  {
+    rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT);
+  };
+  return NewtonMethod::NewtonSolve(pressure, rho, _T_initial_guess, _tolerance, lambda);
 }
 
 Real
@@ -628,173 +644,6 @@ TabulatedFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Rea
 }
 
 Real
-TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
-{
-  const Real eps = 1e-6;
-  Real current_T = _T_initial_guess; //find good initial guess, know something about e from interpolation tables
-  Real next_T;
-  Real f;
-  unsigned int iteration = 1;
-  Real residual = current_T;
-
-  while (residual> _tolerance)
-  {
-    Real new_rho, df_dT, df_dp;
-    rho_from_p_T(pressure, current_T, new_rho, df_dp, df_dT);
-    _console << std::endl;
-    _console <<" new_rho = " << new_rho <<std::endl;
-    _console <<" df_dp =  " << df_dp <<std::endl;
-    _console <<" df_dT " << df_dT <<std::endl;
-    _console <<" residual " << residual <<std::endl;
-    _console <<" current_T " << current_T <<std::endl;
-
-
-    f = new_rho - rho;
-    next_T = current_T - (f)/df_dT;
-    residual = std::abs(current_T - next_T);
-    current_T = std::min(std::max(_temperature_min + eps, next_T), _temperature_max - eps);
-    _console <<" next_T " << next_T <<std::endl;
-
-    ++iteration;
-
-    if (iteration > 100)
-    {
-      mooseError("T_from_p_rho_Convergence Failed in Newton Solve");
-    }
-  }
-  _console <<" current_T soln" << current_T <<std::endl;
-  return current_T;
-}
-
-Real
-TabulatedFluidProperties::s_from_v_e(Real v, Real e) const
-{
-  const Real p = p_from_v_e(v, e);
-  const Real T = T_from_v_e(v, e);
-  const Real s = s_from_p_T(p, T);
-  return s;
-}
-
-void
-TabulatedFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const
-{
-  s = s_from_v_e(v, e);
-  ds_dv = 0;
-  ds_de = 0;
-}
-
-void
-TabulatedFluidProperties::pT_from_h_s(Real & h, //h value
-                                      Real & s, //s value
-                                      Real & p0,//returned pressure/initial guess
-                                      Real & T0//returned temperature/intial guess
-                                      ) const
-{
-  RealEigenMatrix jacobian(2,2); //Compute Jacobian
-
-  RealEigenVector current_vec(2);//initialize current_vec with initial guess
-  current_vec << p0, T0;
-
-  RealEigenVector next_vec(2); //initialize "next" vector
-
-  RealEigenVector target(2); //Real h and Real s
-  target << h, s;
-
-  RealEigenVector function(2);
-
-  unsigned int iteration = 1;
-  Real res1 = 1; //initialize residual;
-  Real res2 = 1;
-  Real residual = 1;
-
-  while (residual > _tolerance) //tol instead of 1e-8
-  {
-    Real new_h, dh_dp, dh_dT, new_s, ds_dp, ds_dT;
-    h_from_p_T(current_vec[0], current_vec[1], new_h, dh_dp, dh_dT); //get new h and derivatives
-    s_from_p_T(current_vec[0], current_vec[1], new_s, ds_dp, ds_dT); //get new s and derivatives
-
-    jacobian << dh_dp, dh_dT, //fill jacobian
-                ds_dp, ds_dT;
-    function << new_h, new_s; //fill function
-    // _console << "jacobian =  " << jacobian << std::endl;
-    // _console << "xi = " << current_vec <<std::endl;
-    // _console << "function = " << function << std::endl;
-
-
-//check determinant of jacobian, if not equal to 0, invertible
-    // Real det = (dh_dp * ds_dT) - (dh_dT * ds_dp);
-    // _console << "det= " << det << std::endl;
-    // _console <<"jacobian inverse = " << jacobian.inverse() << std::endl;
-    next_vec = current_vec - (jacobian.inverse() * ( function - target)); //2D Newton Method
-    res1 = (current_vec[0] - next_vec[0]); //update residual 1
-    res2 = (current_vec[1] - next_vec[1]); //update residual 2
-    residual = pow(pow(res1, 2) + pow(res2, 2), 0.5); //update residual
-    // _console << "res1" << res1 << std::endl;
-    // _console << "res2" << res2 << std::endl;
-    // _console << "residual" << residual << std::endl;
-
-    current_vec = next_vec; //update current_vec for next iteration
-    // _console << "iteration = " << iteration << std::endl;
-    // _console << "current_T = " << std::to_string(current_vec[1]) << std::endl;
-    // _console << "current_p = " << std::to_string(current_vec[0]) << std::endl;
-    ++iteration; //update iteration;
-
-    if (iteration > 100)
-      mooseError("2D Newton Solve, Convergence Failed");
-  }
-  p0 = current_vec[0]; //returned pressure
-  T0 = current_vec[1]; //returned temperature
-  // Real dp_dh = jacobian.inverse()[0,0];
-  // Real dT_dh = jacobian.inverse()[0,1];
-  // Real dp_ds = jacobian.inverse()[1,0];
-  // Real dT_ds = jacobian.inverse()[1,1];
-}
-//RAII
-Real
-TabulatedFluidProperties::p_from_h_s(Real h, Real s) const
-{
-  Real p0 = _p_initial_guess;
-  Real T0 = _T_initial_guess;
-  pT_from_h_s(h, s, p0, T0);
-  return p0;
-}
-
-void
-TabulatedFluidProperties::p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const
-{
-  p = p_from_h_s(h, s);
-  dp_dh = 0;
-  dp_ds = 0;
-}
-
-Real
-TabulatedFluidProperties::T_from_h_s(Real h, Real s) const
-{
-  Real p0, T0;
-  pT_from_h_s(h, s, p0, T0);
-  return T0;
-}
-
-void
-TabulatedFluidProperties::T_from_h_s(Real h, Real s, Real & T, Real & dT_dh, Real & dT_ds) const
-{
-  T = T_from_h_s(h, s);
-  dT_dh = 0;
-  dT_ds = 0;
-}
-
-Real
-TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
-{
-  const Real p = p_from_v_e(v, e);
-  const Real T = T_from_v_e(v, e);
-  const Real s = s_from_p_T(p, T);
-  const Real h = h_from_p_T(p, T);
-  // this is simple the definition of Gibbs free energy
-  return h - T * s;
-}
-
-Real
 TabulatedFluidProperties::e_from_v_h(Real v, Real h) const
 {
   if (!_construct_pT_from_ve)
@@ -841,9 +690,14 @@ TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dp
 Real
 TabulatedFluidProperties::p_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling p_from_v_e.");
-  return _p_from_v_e_ipol->sample(v, e);
+  if (_construct_pT_from_ve)
+    return _p_from_v_e_ipol->sample(v, e);
+  else
+  {
+    Real p, T;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e, _p_initial_guess, _T_initial_guess, p, T);
+    return p;
+  }
 }
 
 void
@@ -858,7 +712,20 @@ DualReal
 TabulatedFluidProperties::p_from_v_e(const DualReal & v, const DualReal & e) const
 {
   if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling p_from_v_e.");
+  {
+    Real vr = v.value();
+    Real er = e.value();
+    Real p, T;
+    SinglePhaseFluidProperties::p_T_from_v_e(vr, er, _p_initial_guess, _T_initial_guess, p, T);
+    Real p1, T1;
+    SinglePhaseFluidProperties::p_T_from_v_e(vr + 1e-8, er, _p_initial_guess, _T_initial_guess, p1, T1);
+    Real p2, T2;
+    SinglePhaseFluidProperties::p_T_from_v_e(vr, er + 1e-8, _p_initial_guess, _T_initial_guess, p2, T2);
+    ADReal p_ad = p;
+    p_ad.derivatives() = v.derivatives() * (p1 - p)*1e8 + e.derivatives() * (p2 - p) * 1e8;
+    return p_ad;
+  }
+    // mooseError("You must construct pT from ve tables when calling p_from_v_e.");
   Real x = 0;
   Real raw1 = v.value();
   Real raw2 = e.value();
@@ -891,7 +758,20 @@ DualReal
 TabulatedFluidProperties::T_from_v_e(const DualReal & v, const DualReal & e) const
 {
   if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling p_from_v_e.");
+  {
+    Real vr = v.value();
+    Real er = e.value();
+    Real p, T;
+    SinglePhaseFluidProperties::p_T_from_v_e(vr, er, _p_initial_guess, _T_initial_guess, p, T);
+    Real p1, T1;
+    SinglePhaseFluidProperties::p_T_from_v_e(vr + 1e-8, er, _p_initial_guess, _T_initial_guess, p1, T1);
+    Real p2, T2;
+    SinglePhaseFluidProperties::p_T_from_v_e(vr, er + 1e-8, _p_initial_guess, _T_initial_guess, p2, T2);
+    ADReal T_ad = T;
+    T_ad.derivatives() = v.derivatives() * (T1 - T)*1e8 + e.derivatives() * (T2 - T) * 1e8;
+    return T_ad;
+  }
+    // mooseError("You must construct pT from ve tables when calling T_from_v_e.");
   Real x = 0;
   Real raw1 = v.value();
   Real raw2 = e.value();
@@ -907,18 +787,45 @@ TabulatedFluidProperties::T_from_v_e(const DualReal & v, const DualReal & e) con
 Real
 TabulatedFluidProperties::c_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling c_from_v_e.");
-  Real T = _T_from_v_e_ipol->sample(v, e);
-  Real p = _p_from_v_e_ipol->sample(v, e);
-  return c_from_p_T(p, T);
+  if (_construct_pT_from_ve)
+  {
+    Real p,T;
+    p = _p_from_v_e_ipol->sample(v, e);
+    T = _T_from_v_e_ipol->sample(v, e);
+    return c_from_p_T(p, T);
+  }
+
+  else
+  {
+    Real p, T;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e, _p_initial_guess, _T_initial_guess, p, T);
+    return c_from_p_T(p,T);
+  }
 }
 
 void
 TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
 {
   if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling c_from_v_e.");
+  {
+    Real p = 0, dp_dv = 0, dp_de = 0;
+    Real T = 0, dT_dv = 0, dT_de = 0;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e, _p_initial_guess, _T_initial_guess, p, T);
+    Real p1, T1;
+    SinglePhaseFluidProperties::p_T_from_v_e(v + 1e-8, e, _p_initial_guess, _T_initial_guess, p1, T1);
+    Real p2, T2;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e + 1e-8, _p_initial_guess, _T_initial_guess, p2, T2);
+    dT_dv = (T1 - T) * 1e8;
+    dT_de = (T2 - T) * 1e8;
+    dp_dv = (T1 - T) * 1e8;
+    dp_de = (T2 - T) * 1e8;
+    Real dc_dp, dc_dT;
+    c_from_p_T(p, T, c, dc_dp, dc_dT);
+    dc_dv = dc_dp * dp_dv + dc_dT * dT_dv;
+    dc_de = dc_dp * dp_de + dc_dT * dT_de;
+    return;
+    // mooseError("You must construct pT from ve tables when calling c_from_v_e.");
+  }
   Real p = 0, dp_dv = 0, dp_de = 0;
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
   Real T = 0, dT_dv = 0, dT_de = 0;
@@ -932,8 +839,6 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Rea
 DualReal
 TabulatedFluidProperties::c_from_v_e(const DualReal & v, const DualReal & e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling p_from_v_e.");
   Real x = 0;
   Real raw1 = v.value();
   Real raw2 = e.value();
@@ -949,18 +854,45 @@ TabulatedFluidProperties::c_from_v_e(const DualReal & v, const DualReal & e) con
 Real
 TabulatedFluidProperties::cp_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling cp_from_v_e.");
-  Real T = _T_from_v_e_ipol->sample(v, e);
-  Real p = _p_from_v_e_ipol->sample(v, e);
-  return cp_from_p_T(p, T);
+  if (_construct_pT_from_ve)
+  {
+    Real p,T;
+    p = _p_from_v_e_ipol->sample(v, e);
+    T = _T_from_v_e_ipol->sample(v, e);
+    return cp_from_p_T(p, T);
+  }
+
+  else
+  {
+    Real p, T;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e, _p_initial_guess, _T_initial_guess, p, T);
+    return cp_from_p_T(p,T);
+  }
 }
 
 void
 TabulatedFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
 {
   if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling cp_from_v_e.");
+  {
+    Real p = 0, dp_dv = 0, dp_de = 0;
+    Real T = 0, dT_dv = 0, dT_de = 0;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e, _p_initial_guess, _T_initial_guess, p, T);
+    Real p1, T1;
+    SinglePhaseFluidProperties::p_T_from_v_e(v + 1e-8, e, _p_initial_guess, _T_initial_guess, p1, T1);
+    Real p2, T2;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e + 1e-8, _p_initial_guess, _T_initial_guess, p2, T2);
+    dT_dv = (T1 - T) * 1e8;
+    dT_de = (T2 - T) * 1e8;
+    dp_dv = (T1 - T) * 1e8;
+    dp_de = (T2 - T) * 1e8;
+    Real dcp_dp, dcp_dT;
+    cp_from_p_T(p, T, cp, dcp_dp, dcp_dT);
+    dcp_dv = dcp_dp * dp_dv + dcp_dT * dT_dv;
+    dcp_de = dcp_dp * dp_de + dcp_dT * dT_de;
+    return;
+  }
+    // mooseError("You must construct pT from ve tables when calling cp_from_v_e.");
   Real p = 0, dp_dv = 0, dp_de = 0;
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
   Real T = 0, dT_dv = 0, dT_de = 0;
@@ -974,18 +906,45 @@ TabulatedFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, 
 Real
 TabulatedFluidProperties::cv_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling cv_from_v_e.");
-  Real T = _T_from_v_e_ipol->sample(v, e);
-  Real p = _p_from_v_e_ipol->sample(v, e);
-  return cv_from_p_T(p, T);
+  if (_construct_pT_from_ve)
+  {
+    Real p,T;
+    p = _p_from_v_e_ipol->sample(v, e);
+    T = _T_from_v_e_ipol->sample(v, e);
+    return cv_from_p_T(p, T);
+  }
+
+  else
+  {
+    Real p, T;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e, _p_initial_guess, _T_initial_guess, p, T);
+    return cv_from_p_T(p,T);
+  }
 }
 
 void
 TabulatedFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const
 {
   if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling cv_from_v_e.");
+  {
+    Real p = 0, dp_dv = 0, dp_de = 0;
+    Real T = 0, dT_dv = 0, dT_de = 0;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e, _p_initial_guess, _T_initial_guess, p, T);
+    Real p1, T1;
+    SinglePhaseFluidProperties::p_T_from_v_e(v + 1e-8, e, _p_initial_guess, _T_initial_guess, p1, T1);
+    Real p2, T2;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e + 1e-8, _p_initial_guess, _T_initial_guess, p2, T2);
+    dT_dv = (T1 - T) * 1e8;
+    dT_de = (T2 - T) * 1e8;
+    dp_dv = (T1 - T) * 1e8;
+    dp_de = (T2 - T) * 1e8;
+    Real dcv_dp, dcv_dT;
+    cv_from_p_T(p, T, cv, dcv_dp, dcv_dT);
+    dcv_dv = dcv_dp * dp_dv + dcv_dT * dT_dv;
+    dcv_de = dcv_dp * dp_de + dcv_dT * dT_de;
+    return;
+  }
+    // mooseError("You must construct pT from ve tables when calling cv_from_v_e.");
   Real p = 0, dp_dv = 0, dp_de = 0;
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
   Real T = 0, dT_dv = 0, dT_de = 0;
@@ -999,18 +958,45 @@ TabulatedFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, 
 Real
 TabulatedFluidProperties::mu_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling mu_from_v_e.");
-  Real T = _T_from_v_e_ipol->sample(v, e);
-  Real p = _p_from_v_e_ipol->sample(v, e);
-  return mu_from_p_T(p, T);
+  if (_construct_pT_from_ve)
+  {
+    Real p,T;
+    p = _p_from_v_e_ipol->sample(v, e);
+    T = _T_from_v_e_ipol->sample(v, e);
+    return mu_from_p_T(p, T);
+  }
+
+  else
+  {
+    Real p, T;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e, _p_initial_guess, _T_initial_guess, p, T);
+    return mu_from_p_T(p,T);
+  }
 }
 
 void
 TabulatedFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
 {
   if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling mu_from_v_e.");
+  {
+    Real p = 0, dp_dv = 0, dp_de = 0;
+    Real T = 0, dT_dv = 0, dT_de = 0;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e, _p_initial_guess, _T_initial_guess, p, T);
+    Real p1, T1;
+    SinglePhaseFluidProperties::p_T_from_v_e(v + 1e-8, e, _p_initial_guess, _T_initial_guess, p1, T1);
+    Real p2, T2;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e + 1e-8, _p_initial_guess, _T_initial_guess, p2, T2);
+    dT_dv = (T1 - T) * 1e8;
+    dT_de = (T2 - T) * 1e8;
+    dp_dv = (T1 - T) * 1e8;
+    dp_de = (T2 - T) * 1e8;
+    Real dmu_dp, dmu_dT;
+    mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
+    dmu_dv = dmu_dp * dp_dv + dmu_dT * dT_dv;
+    dmu_de = dmu_dp * dp_de + dmu_dT * dT_de;
+    return;
+  }
+    // mooseError("You must construct pT from ve tables when calling mu_from_v_e.");
   Real p = 0, dp_dv = 0, dp_de = 0;
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
   Real T = 0, dT_dv = 0, dT_de = 0;
@@ -1024,18 +1010,45 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, 
 Real
 TabulatedFluidProperties::k_from_v_e(Real v, Real e) const
 {
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling k_from_v_e.");
-  Real T = _T_from_v_e_ipol->sample(v, e);
-  Real p = _p_from_v_e_ipol->sample(v, e);
-  return k_from_p_T(p, T);
+  if (_construct_pT_from_ve)
+  {
+    Real p,T;
+    p = _p_from_v_e_ipol->sample(v, e);
+    T = _T_from_v_e_ipol->sample(v, e);
+    return k_from_p_T(p, T);
+  }
+
+  else
+  {
+    Real p, T;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e, _p_initial_guess, _T_initial_guess, p, T);
+    return k_from_p_T(p,T);
+  }
 }
 
 void
 TabulatedFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const
 {
   if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling k_from_v_e.");
+  {
+    Real p = 0, dp_dv = 0, dp_de = 0;
+    Real T = 0, dT_dv = 0, dT_de = 0;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e, _p_initial_guess, _T_initial_guess, p, T);
+    Real p1, T1;
+    SinglePhaseFluidProperties::p_T_from_v_e(v + 1e-8, e, _p_initial_guess, _T_initial_guess, p1, T1);
+    Real p2, T2;
+    SinglePhaseFluidProperties::p_T_from_v_e(v, e + 1e-8, _p_initial_guess, _T_initial_guess, p2, T2);
+    dT_dv = (T1 - T) * 1e8;
+    dT_de = (T2 - T) * 1e8;
+    dp_dv = (T1 - T) * 1e8;
+    dp_de = (T2 - T) * 1e8;
+    Real dk_dp, dk_dT;
+    k_from_p_T(p, T, k, dk_dp, dk_dT);
+    dk_dv = dk_dp * dp_dv + dk_dT * dT_dv;
+    dk_de = dk_dp * dp_de + dk_dT * dT_de;
+    return;
+  }
+    // mooseError("You must construct pT from ve tables when calling k_from_v_e.");
   Real p = 0, dp_dv = 0, dp_de = 0;
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
   Real T = 0, dT_dv = 0, dT_de = 0;
@@ -1045,6 +1058,42 @@ TabulatedFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Rea
   dk_dv = dk_dp * dp_dv + dk_dT * dT_dv;
   dk_de = dk_dp * dp_de + dk_dT * dT_de;
 }
+
+Real
+TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
+{
+  Real p0 = _p_initial_guess;
+  Real T0 = _T_initial_guess;
+  Real p, T;
+  p_T_from_v_e(v, e, p0, T0, p, T);
+  const Real s = s_from_p_T(p, T);
+  const Real h = h_from_p_T(p, T);
+  // this is simple the definition of Gibbs free energy
+  return h - T * s;
+}
+
+Real
+TabulatedFluidProperties::T_from_h_s(Real h, Real s) const
+{
+  Real p0 = _p_initial_guess;
+  Real T0 = _T_initial_guess;
+  Real p, T;
+  p_T_from_h_s(h, s, p0, T0, p, T);
+  return T;
+}
+
+// void
+// TabulatedFluidProperties::T_from_h_s(Real h, Real s, Real & T, Real & dT_dh, Real & dT_ds) const
+// {
+//   Real p0 = _p_initial_guess;
+//   Real T0 = _T_initial_guess;
+//   p_T_from_h_s(h, s, p0, T0);
+//   p=p0;
+//   T = T0;
+//   // mooseWarning("Derivatives not implemented for T_from_h_s");
+//   dT_dh = 1 / cp_from_p_T(p,T);
+//   dT_ds = 0;
+// }
 
 void
 TabulatedFluidProperties::writeTabulatedData(std::string file_name)
@@ -1154,8 +1203,9 @@ TabulatedFluidProperties::generateTabulatedData()
   }
 }
 
+template <typename T>
 void
-TabulatedFluidProperties::checkInputVariables(Real & pressure, Real & temperature) const
+TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) const
 {
   if (pressure < _pressure_min || pressure > _pressure_max)
   {
@@ -1176,6 +1226,10 @@ TabulatedFluidProperties::checkInputVariables(Real & pressure, Real & temperatur
                            Moose::stringify(_temperature_min) + ", " +
                            Moose::stringify(_temperature_max) + ").");
     else
-      temperature = std::max(_temperature_min, std::min(temperature, _temperature_max));
+      temperature = std::max(T(_temperature_min), std::min(temperature, T(_temperature_max)));
   }
 }
+
+template void TabulatedFluidProperties::checkInputVariables(Real & pressure, Real & temperature) const;
+
+template void TabulatedFluidProperties::checkInputVariables(ADReal & pressure, ADReal & temperature) const;

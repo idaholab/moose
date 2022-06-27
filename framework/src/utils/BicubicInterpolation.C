@@ -52,16 +52,16 @@ BicubicInterpolation::sample(const ADReal & x1, const ADReal & x2) const
   return sampleInternal(x1, x2);
 }
 
-template <typename T>
-T
-BicubicInterpolation::sampleInternal(const T & x1, const T & x2) const
+template <class C>
+C
+BicubicInterpolation::sampleInternal(const C & x1, const C & x2) const
 {
   unsigned int x1l, x1u, x2l, x2u;
-  T t, u;
+  C t, u;
   findInterval(_x1, x1, x1l, x1u, t);
   findInterval(_x2, x2, x2l, x2u, u);
 
-  T sample = 0.0;
+  C sample = 0.0;
   for (const auto i : make_range(4))
     for (const auto j : make_range(4))
       sample += _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) * MathUtils::pow(u, j);
@@ -166,8 +166,7 @@ BicubicInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int deriv_v
     mooseError("deriv_var must be either 1 or 2 in BicubicInterpolation");
 }
 
-void
-BicubicInterpolation::sampleValueAndDerivatives(
+void BicubicInterpolation::sampleValueAndDerivatives(
     Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const
 {
   unsigned int x1l, x1u, x2l, x2u;
@@ -200,6 +199,41 @@ BicubicInterpolation::sampleValueAndDerivatives(
   Real d2 = _x2[x2u] - _x2[x2l];
 
   if (!MooseUtils::absoluteFuzzyEqual(d2, Real(0.0)))
+    dy2 /= d2;
+}
+
+void BicubicInterpolation::ADsampleValueAndDerivatives(const ADReal & x1, const ADReal & x2, ADReal & y, ADReal & dy1, ADReal & dy2) const
+{
+  unsigned int x1l, x1u, x2l, x2u;
+  ADReal t, u;
+  findInterval(_x1, x1, x1l, x1u, t);
+  findInterval(_x2, x2, x2l, x2u, u);
+
+  y = 0.0;
+  for (const auto i : make_range(4))
+    for (const auto j : make_range(4))
+      y += _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) * MathUtils::pow(u, j);
+
+  // Note: sum from i = 1 as the first term is zero
+  dy1 = 0.0;
+  for (const auto i : make_range(1, 4))
+    for (const auto j : make_range(4))
+      dy1 += i * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i - 1) * MathUtils::pow(u, j);
+
+  // Note: sum from j = 1 as the first term is zero
+  dy2 = 0.0;
+  for (const auto i : make_range(4))
+    for (const auto j : make_range(1, 4))
+      dy2 += j * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) * MathUtils::pow(u, j - 1);
+
+  ADReal d1 = _x1[x1u] - _x1[x1l];
+
+  if (!MooseUtils::absoluteFuzzyEqual(d1, ADReal(0.0)))
+    dy1 /= d1;
+
+  ADReal d2 = _x2[x2u] - _x2[x2l];
+
+  if (!MooseUtils::absoluteFuzzyEqual(d2, ADReal(0.0)))
     dy2 /= d2;
 }
 
@@ -333,10 +367,9 @@ BicubicInterpolation::tableDerivatives(std::vector<std::vector<Real>> & dy_dx1,
     }
 }
 
-template <typename T>
-void
-BicubicInterpolation::findInterval(
-    const std::vector<Real> & x, const T & xi, unsigned int & klo, unsigned int & khi, T & xs) const
+template <class C>
+void BicubicInterpolation::findInterval(
+    const std::vector<Real> & x, const C & xi, unsigned int & klo, unsigned int & khi, C & xs) const
 {
   // Find the indices that bracket the point xi
   klo = 0;

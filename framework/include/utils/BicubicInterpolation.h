@@ -54,7 +54,8 @@ public:
    * as it minimizes the amount of time spent locating the point in the
    * tabulated data
    */
-  void sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const override;
+  virtual void sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const override;
+  virtual void ADsampleValueAndDerivatives(const ADReal & x1, const ADReal & x2, ADReal & y, ADReal & dy1, ADReal & dy2) const override;
 
   /**
    * Samples first derivative at point (x1, x2)
@@ -76,15 +77,15 @@ protected:
   /**
    * Find the indices of the dependent values axis which bracket the point xi
    */
-  template <typename T>
+  template <class C>
   void findInterval(const std::vector<Real> & x,
-                    const T & xi,
+                    const C & xi,
                     unsigned int & klo,
                     unsigned int & khi,
-                    T & xs) const;
+                    C & xs) const;
 
-  template <typename T>
-  T sampleInternal(const T & x1, const T & x2) const;
+  template <class C>
+  C sampleInternal(const C & x1, const C & x2) const;
 
   /**
    * Provides the values of the first derivatives in each direction at all
