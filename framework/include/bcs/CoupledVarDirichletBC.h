@@ -12,7 +12,7 @@
 #include "DirichletBCBase.h"
 
 /**
- * Implements a Dirichlet BC where u=_coupled_var on the boundary.
+ * Implements a Dirichlet BC where u=factor * _coupled_var on the boundary.
  */
 class CoupledVarDirichletBC : public DirichletBCBase
 {
