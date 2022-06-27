@@ -182,6 +182,11 @@ class RenderFloat(components.RenderComponent):
         if style.get('text-align', None) == 'center':
             latex.Command(env, 'centering')
 
+        if token['bottom']:
+            cap = token(0)
+            cap.parent = None
+            cap.parent = token
+
         return env
 
 class RenderFloatCaption(components.RenderComponent):
