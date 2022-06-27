@@ -13,7 +13,7 @@ Note that [!param](/BCs/CoupledVarDirichletBC/scale_factor) being a Function, it
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/coupled_var_dirichlet/coupled_var_dirichlet.i start=[./right] end=[../] include-end=true
+!listing test/tests/bcs/coupled_var_dirichlet/coupled_var_dirichlet.i block=BCs
 
 !syntax parameters /BCs/CoupledVarDirichletBC
 
