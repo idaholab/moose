@@ -209,7 +209,7 @@ MooseCoordTransform::MooseCoordTransform(const MooseMesh & mesh)
     _destination_r_axis(INVALID),
     _destination_z_axis(INVALID),
     _has_different_coord_sys(false),
-    _length_unit(std::string("1m"))
+    _length_unit(std::string("1*m"))
 {
   const auto & params = mesh.parameters();
 
@@ -271,7 +271,7 @@ MooseCoordTransform::MooseCoordTransform()
     _destination_r_axis(INVALID),
     _destination_z_axis(INVALID),
     _has_different_coord_sys(false),
-    _length_unit(std::string("1m"))
+    _length_unit(std::string("1*m"))
 {
 }
 

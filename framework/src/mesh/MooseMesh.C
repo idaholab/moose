@@ -3538,3 +3538,10 @@ MooseMesh::setCoordData(const MooseMesh & other_mesh)
   _coord_sys = other_mesh._coord_sys;
   _rz_coord_axis = other_mesh._rz_coord_axis;
 }
+
+const MooseUnits &
+MooseMesh::lengthUnit() const
+{
+  mooseAssert(_coord_transform, "This must be non-null");
+  return _coord_transform->lengthUnit();
+}

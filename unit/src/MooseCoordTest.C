@@ -11,6 +11,13 @@
 
 #include "MooseCoordTransform.h"
 #include "MooseUtils.h"
+#include "Units.h"
+#include "MeshGeneratorMesh.h"
+#include "GeneratedMeshGenerator.h"
+#include "InputParameters.h"
+#include "AppFactory.h"
+#include "MooseEnum.h"
+#include "libmesh/mesh_base.h"
 #include "libmesh/point.h"
 
 using namespace MooseUtils;
@@ -130,4 +137,38 @@ TEST(MooseCoordTest, testCoordCollapse)
     EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 0.));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(2), 0.));
   }
+}
+
+TEST(MooseCoordTest, testLengthUnit)
+{
+  const char * argv[2] = {"foo", "\0"};
+
+  const auto nx = 2;
+  auto app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
+  auto * factory = &app->getFactory();
+  std::string mesh_type = "MeshGeneratorMesh";
+
+  std::shared_ptr<MeshGeneratorMesh> mesh;
+  {
+    InputParameters params = factory->getValidParams(mesh_type);
+    mesh = factory->create<MeshGeneratorMesh>(mesh_type, "moose_mesh", params);
+  }
+
+  app->actionWarehouse().mesh() = mesh;
+
+  {
+    std::unique_ptr<MeshBase> lm_mesh;
+    InputParameters params = factory->getValidParams("GeneratedMeshGenerator");
+    params.set<unsigned int>("nx") = nx;
+    params.set<unsigned int>("ny") = nx;
+    params.set<MooseEnum>("dim") = "2";
+    auto mesh_gen =
+        factory->create<GeneratedMeshGenerator>("GeneratedMeshGenerator", "mesh_gen", params);
+    lm_mesh = mesh_gen->generate();
+    mesh->setMeshBase(std::move(lm_mesh));
+  }
+
+  mesh->prepare();
+
+  EXPECT_TRUE(mesh->lengthUnit() == MooseUnits("1*m"));
 }

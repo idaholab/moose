@@ -39,6 +39,7 @@ class Assembly;
 class RelationshipManager;
 class MooseVariableBase;
 class MooseCoordTransform;
+class MooseUnits;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1162,6 +1163,11 @@ public:
    * coordinate system into the canonical/reference coordinate system
    */
   MooseCoordTransform & coordTransform();
+
+  /**
+   * @return the length unit of this mesh (provided through the coordinate transformation object
+   */
+  const MooseUnits & lengthUnit() const;
 
 protected:
   /// Deprecated (DO NOT USE)
