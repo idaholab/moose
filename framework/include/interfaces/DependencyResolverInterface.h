@@ -73,7 +73,7 @@ DependencyResolverInterface::sortDFS(typename std::vector<T> & vector)
     return;
 
   /**
-   * Class that represents the dependecy as a graph
+   * Class that represents the dependency as a graph
    */
   DependencyResolver<T> graph;
 
