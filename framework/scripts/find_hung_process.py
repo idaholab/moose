@@ -102,7 +102,6 @@ class Scheduler:
         self.max_slots = int(max_slots)
         self.worker_pool = ThreadPool(processes=self.max_slots)
         self.thread_lock = threading.Lock()
-        self.job_queue = set([])
         self.active = set([])
         self.finished = set([])
         self.__timeout = exec_timeout
@@ -117,7 +116,7 @@ class Scheduler:
         """
         blocks until all submitted jobs are finished
         """
-        while self.job_queue or self.active:
+        while self.active:
             sleep(.5)
         self.worker_pool.close()
         self.worker_pool.join()
@@ -141,34 +140,14 @@ class Scheduler:
             #self.launch_job(o_job)
             self.worker_pool.apply_async(self.launch_job, (o_job,))
 
-    def __reserve_allocation(self, o_job):
-        """
-        launch_job calls this method when asking for available
-        resources. If available resources exist, add o_job to
-        the active set, remove it from the queue, and return True.
-        Else do nothing and return False.
-        """
-        with self.thread_lock:
-            self.job_queue.add(o_job)
-            if len(self.active) < self.max_slots:
-                self.active.add(o_job)
-                self.job_queue.remove(o_job)
-                return True
-        return False
-
     def launch_job(self, o_job):
         """
         Run subprocess using provided command list
         """
         try:
-            if self.__reserve_allocation(o_job):
-                o_job.run(exec_timeout=self.__timeout)
-                with self.thread_lock:
-                    self.active.remove(o_job)
-                    self.finished.add(o_job)
-            else:
-                sleep(.5)
-                self.queue_jobs([o_job])
+            o_job.run(exec_timeout=self.__timeout)
+            with self.thread_lock:
+                self.finished.add(o_job)
         except KeyboardInterrupt:
             sys.exit(1)
 
