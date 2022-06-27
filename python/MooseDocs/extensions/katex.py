@@ -247,7 +247,7 @@ class RenderEquation(components.RenderComponent):
         return parent
 
     def createLatex(self, parent, token, page):
-        if token.name == 'LatexInlineEquation':
+        if token['inline']:
             latex.String(parent, content='${}$'.format(token['tex']), escape=False)
         else:
             cmd = 'equation' if token['number'] else 'equation*'
