@@ -33,5 +33,5 @@ protected:
   const unsigned int _coupled_num;
   
   /// Scale factor
-  const Moose::Functor<ADReal> & _scale_factor;
+  const Function & _scale_factor;
 };

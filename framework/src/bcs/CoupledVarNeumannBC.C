@@ -40,7 +40,7 @@ CoupledVarNeumannBC::computeQpResidual()
   return -_scale_factor[_qp] * _coef * _test[_i][_qp] * _coupled_var[_qp];
 }
 
-Real
+eal
 CoupledVarNeumannBC::computeQpOffDiagJacobian(const unsigned int jvar)
 {
   if (jvar == _coupled_num)
