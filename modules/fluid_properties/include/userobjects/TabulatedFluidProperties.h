@@ -105,6 +105,8 @@ public:
 
   virtual void rho_from_p_T(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
+  virtual void rho_from_p_T(
+      const ADReal & pressure, const ADReal & temperature, ADReal & rho, ADReal & drho_dp, ADReal & drho_dT) const override;
 
   virtual Real v_from_p_T(Real pressure, Real temperature) const override;
 
@@ -117,13 +119,12 @@ public:
   e_from_p_T(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
   virtual Real
-  T_from_p_rho(Real pressure, Real rho) const;
-
-  virtual Real
   e_from_p_rho(Real pressure, Real rho) const override;
 
   virtual void
   e_from_p_rho(Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
+
+  virtual Real T_from_p_rho(Real pressure, Real rho) const;
 
   virtual Real h_from_p_T(Real p, Real T) const override;
 
@@ -136,6 +137,7 @@ public:
       Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
 
   virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
+
   virtual void cp_from_p_T(
       Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
 
@@ -157,20 +159,6 @@ public:
   virtual Real s_from_p_T(Real pressure, Real temperature) const override;
 
   virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
-
-  virtual Real s_from_v_e(Real v, Real e) const override;
-
-  virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const override;
-
-  virtual void pT_from_h_s(Real & h, Real & s, Real & p0, Real & T0) const;
-
-  virtual Real p_from_h_s(Real h, Real s) const override;
-
-  virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const override;
-
-  virtual Real T_from_h_s(Real h, Real s) const;
-
-  virtual void T_from_h_s(Real h, Real s, Real & T, Real & dT_dh, Real & dT_ds) const;
 
   virtual std::vector<Real> henryCoefficients() const override;
 
@@ -200,6 +188,8 @@ public:
   virtual Real g_from_v_e(Real v, Real e) const override;
   virtual Real e_from_v_h(Real v, Real h) const override;
   virtual void e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const override;
+  virtual Real T_from_h_s(Real h, Real s) const;
+  // virtual void T_from_h_s(Real h, Real s, Real & T, Real & dT_dh, Real & dT_ds) const;
 
   // AD versions of properties
   virtual DualReal p_from_v_e(const DualReal & v, const DualReal & e) const override;
@@ -219,8 +209,8 @@ protected:
    * @param pressure input pressure (Pa)
    * @param temperature input temperature (K)
    */
-  virtual void checkInputVariables(Real & pressure, Real & temperature) const;
-
+  template <typename T>
+  void checkInputVariables(T & pressure, T & temperature) const;
   /**
    * Generates a table of fluid properties by looping over pressure and temperature
    * and calculating properties using the FluidProperties UserObject _fp.
@@ -326,12 +316,6 @@ protected:
   Real _h_min;
   /// Maximum specific enthalpy in tabulated data
   Real _h_max;
-  /// Tolerance for 2D Newton variable set conversion
-  Real _tolerance;
-  /// Temperature initial guess for 2D Newton variable set conversion
-  Real _T_initial_guess;
-  /// Pressure initial guess for 2D Newton variable set conversion
-  Real _p_initial_guess;
 
   /// specific volume vector
   std::vector<Real> _specific_volume;
