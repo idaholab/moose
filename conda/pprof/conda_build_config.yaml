@@ -1,3 +1,13 @@
+# Pesky packages that break internal CI
+# Note: Modifying/Updating this will require changes to conda/mpich!
+openssl:
+  - <3.0
+setuptools:
+  - <60.0
+pin_run_as_build:
+  openssl: x.x
+  setuptools: x.x
+
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
   - /opt/MacOSX10.12.sdk                                    # [not arm64 and osx]

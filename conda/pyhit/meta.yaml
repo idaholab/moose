@@ -1,5 +1,5 @@
 {% set build = 0 %}
-{% set version = "2022.06.16" %}
+{% set version = "2022.06.23" %}
 
 package:
   name: moose-pyhit
@@ -18,6 +18,8 @@ requirements:
     - {{ compiler('cxx') }}
     - {{ moose_python }}
     - cython
+    - openssl
+    - setuptools
 
   host:
     - {{ compiler('cxx') }}
@@ -25,8 +27,8 @@ requirements:
     - cython
 
   run:
-    - openssl <3
-    - setuptools <60
+    - openssl
+    - setuptools
     - python
 
 test:
