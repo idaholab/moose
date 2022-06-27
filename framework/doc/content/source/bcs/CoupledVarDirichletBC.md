@@ -8,9 +8,8 @@
 coupling a single real value through the `value` parameter, a coupled variable
 is provided for the `v` parameter.
 
-Parameter $scale_factor$ can be used to scale the boundary condition value with a Real value, a Function or a Variable. By default, it is $1.$ (i.e. no scaling).
-Note that $scale_factor$ can be a field variable, so spatially dependent scaling is possible.
-This can be used to locally turn the BC on or off.
+Parameter [!param](/BCs/CoupledVarDirichletBC/scale_factor) can be used to scale the boundary condition value with a Real value or a Function. By default, it is $1.$ (i.e. no scaling).
+Note that [!param](/BCs/CoupledVarDirichletBC/scale_factor) being a Function, it may be used to turn on or off the boundary condition on part of the domain at different points in time. 
 
 ## Example Input Syntax
 
