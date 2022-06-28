@@ -13,6 +13,8 @@
 
 #include "libmesh/quadrature.h"
 
+#include <limits>
+
 namespace
 {
 const InputParameters &
@@ -105,6 +107,12 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
 
   // We have to reinit the node for this variable in order to get the dof index set for the node
   _var.reinitNode();
+
+  // If the node doesn't have corresponding mortar segments, force the value assigned in this step
+  // to be zero. This can be useful when nodes initially do not project but will project at a
+  // different stage of the simulation
+  if (total_volume == 0)
+    total_volume = std::numeric_limits<Real>::max();
 
   // Allow mortar auxiliary kernels to compute quantities incrementally
   if (!_incremental)
