@@ -20,6 +20,8 @@
 #include "ElementIDInterface.h"
 #include "MooseError.h"
 
+class MooseVariableFieldBase;
+
 namespace libMesh
 {
 class Elem;
@@ -82,12 +84,22 @@ public:
    */
   void preExecuteOnInterface();
 
+  void checkVariable(const MooseVariableFieldBase & variable) const override;
+
 protected:
   const MooseArray<Point> & qPoints() const { return *_current_q_point; }
   const QBase & qRule() const { return *_current_q_rule; }
   const MooseArray<Real> & JxW() const { return *_current_JxW; }
   const MooseArray<Real> & coord() const { return _coord; }
   const MooseArray<Point> & normals() const { return _normals; }
+
+  /**
+   * Routes through to \p Coupleable::getFieldVar, but also inserts the return variable into a set
+   * of field variables to check on interface-connected blocks, as opposed to our blocks, when
+   * performing our block-restriction integrity check
+   */
+  const MooseVariableFieldBase * getInterfaceFieldVar(const std::string & var_name,
+                                                      unsigned int comp);
 
   /// the Moose mesh
   MooseMesh & _mesh;
@@ -123,6 +135,15 @@ protected:
   /// The unit norm at quadrature points on the element side/face from the current element
   /// perpendicular to the side
   const MooseArray<Point> & _normals;
+
+  /// The set of boundary IDs on which this object should perform \p executeOnInterface
+  std::set<BoundaryID> _interface_bnd_ids;
+
+  /// The set of blocks connected to our blocks through the \p _interface_bnd_ids data member
+  std::set<SubdomainID> _interface_connected_blocks;
+
+  /// The set of variables we wish to evaluate on the interface connected blocks
+  std::set<const MooseVariableFieldBase *> _interface_vars;
 
 private:
   void setVolumeData();

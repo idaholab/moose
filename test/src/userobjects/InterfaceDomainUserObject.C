@@ -25,9 +25,6 @@ InterfaceDomainUserObject::validParams()
   params.addParam<Real>("robin_coef", 2, "The cofficient multiplying the Robin boundary condition");
   params.addParam<std::vector<BoundaryName>>(
       "robin_boundaries", "The boundaries on which to apply the Robin boundary condition");
-  params.addParam<std::vector<BoundaryName>>(
-      "interface_boundaries",
-      "The interface boundaries on which to apply the continuity of flux and value conditions");
   params.addRequiredParam<Real>(
       "interface_penalty",
       "The penalty that penalizes jump between primary and neighbor variables.");
@@ -42,7 +39,7 @@ InterfaceDomainUserObject::InterfaceDomainUserObject(const InputParameters & par
     _grad_u(coupledGradient("u")),
     _grad_v_neighbor(*coupledNeighborGradients("v")[0]),
     _var(*getVar("u", 0)),
-    _v_var(*getVar("v", 0)),
+    _v_var(*getInterfaceFieldVar("v", 0)),
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
     _test_face(_var.phiFace()),
@@ -57,25 +54,6 @@ InterfaceDomainUserObject::InterfaceDomainUserObject(const InputParameters & par
   const auto & robin_boundaries = getParam<std::vector<BoundaryName>>("robin_boundaries");
   const auto & robin_bnd_ids_vec = _mesh.getBoundaryIDs(robin_boundaries);
   _robin_bnd_ids = std::set<BoundaryID>(robin_bnd_ids_vec.begin(), robin_bnd_ids_vec.end());
-
-  const auto & interface_boundaries = getParam<std::vector<BoundaryName>>("interface_boundaries");
-  const auto & interface_bnd_ids_vec = _mesh.getBoundaryIDs(interface_boundaries);
-  _interface_bnd_ids =
-      std::set<BoundaryID>(interface_bnd_ids_vec.begin(), interface_bnd_ids_vec.end());
-
-  for (const auto interface_bnd_id : _interface_bnd_ids)
-  {
-    const auto & interface_connected_blocks = _mesh.getInterfaceConnectedBlocks(interface_bnd_id);
-    for (const auto interface_connected_block : interface_connected_blocks)
-    {
-      if (hasBlocks(interface_connected_block))
-        // we're operating on this block
-        continue;
-
-      // these are blocks connected to our blocks
-      _interface_connected_blocks.insert(interface_connected_block);
-    }
-  }
 }
 
 void
@@ -142,23 +120,4 @@ InterfaceDomainUserObject::threadJoin(const UserObject & y)
       dynamic_cast<const InterfaceDomainUserObject &>(y);
   for (unsigned int i = 0; i < _nodal_integrals.size(); i++)
     _nodal_integrals[i] += interface_uo._nodal_integrals[i];
-}
-
-void
-InterfaceDomainUserObject::checkVariable(const MooseVariableFieldBase & variable) const
-{
-  if (variable.name() == _v_var.name())
-  {
-    // we could have done this check in the constructor but to be consistent with other block
-    // restrictable checks, we'll do it here
-    for (const auto connected_block : _interface_connected_blocks)
-      if (!_v_var.hasBlocks(connected_block))
-        mooseError("Variable '",
-                   _v_var.name(),
-                   "' is not defined on the interface connected block '",
-                   _mesh.getSubdomainName(connected_block),
-                   "'");
-  }
-  else
-    BlockRestrictable::checkVariable(variable);
 }

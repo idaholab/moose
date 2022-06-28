@@ -20,6 +20,8 @@ DomainUserObject::validParams()
   params += TwoMaterialPropertyInterface::validParams();
   params += TransientInterface::validParams();
   params += RandomInterface::validParams();
+  params.addParam<std::vector<BoundaryName>>(
+      "interface_boundaries", "The interface boundaries on which this object will execute");
   // Need one layer of ghosting
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
@@ -58,4 +60,51 @@ DomainUserObject::DomainUserObject(const InputParameters & parameters)
   const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
+
+  const auto & interface_boundaries = getParam<std::vector<BoundaryName>>("interface_boundaries");
+  const auto & interface_bnd_ids_vec = _mesh.getBoundaryIDs(interface_boundaries);
+  _interface_bnd_ids =
+      std::set<BoundaryID>(interface_bnd_ids_vec.begin(), interface_bnd_ids_vec.end());
+
+  for (const auto interface_bnd_id : _interface_bnd_ids)
+  {
+    const auto & interface_connected_blocks = _mesh.getInterfaceConnectedBlocks(interface_bnd_id);
+    for (const auto interface_connected_block : interface_connected_blocks)
+    {
+      if (hasBlocks(interface_connected_block))
+        // we're operating on this block
+        continue;
+
+      // these are blocks connected to our blocks
+      _interface_connected_blocks.insert(interface_connected_block);
+    }
+  }
+}
+
+const MooseVariableFieldBase *
+DomainUserObject::getInterfaceFieldVar(const std::string & var_name, const unsigned int comp)
+{
+  const auto * const field_var = getFieldVar(var_name, comp);
+  mooseAssert(field_var, "We should not be able to return a null variable");
+  _interface_vars.insert(field_var);
+  return field_var;
+}
+
+void
+DomainUserObject::checkVariable(const MooseVariableFieldBase & variable) const
+{
+  if (_interface_vars.count(&variable))
+  {
+    // we could have done this check in the constructor but to be consistent with other block
+    // restrictable checks, we'll do it here
+    for (const auto connected_block : _interface_connected_blocks)
+      if (!variable.hasBlocks(connected_block))
+        mooseError("Variable '",
+                   variable.name(),
+                   "' is not defined on the interface connected block '",
+                   _mesh.getSubdomainName(connected_block),
+                   "'");
+  }
+  else
+    BlockRestrictable::checkVariable(variable);
 }

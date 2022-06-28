@@ -26,7 +26,6 @@ public:
   void executeOnInterface() override;
   void finalize() override;
   void threadJoin(const UserObject & y) override;
-  void checkVariable(const MooseVariableFieldBase & variable) const override;
 
 protected:
   const VariableValue & _u;
@@ -34,7 +33,7 @@ protected:
   const VariableGradient & _grad_u;
   const VariableGradient & _grad_v_neighbor;
   MooseVariable & _var;
-  MooseVariable & _v_var;
+  const MooseVariableFieldBase & _v_var;
   const VariableTestValue & _test;
   const VariableTestGradient & _grad_test;
   const VariableTestValue & _test_face;
@@ -46,7 +45,5 @@ protected:
   const Real _interface_penalty;
   const Real _nl_abs_tol;
   std::set<BoundaryID> _robin_bnd_ids;
-  std::set<BoundaryID> _interface_bnd_ids;
-  std::set<SubdomainID> _interface_connected_blocks;
   std::vector<Real> _nodal_integrals;
 };
