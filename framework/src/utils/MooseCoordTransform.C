@@ -48,7 +48,7 @@ MooseCoordTransform::setUpDirection(const Direction up_direction)
         _z_axis = processZAxis(Y);
       }
       else
-        mooseAssert(false, "we should never get here");
+        mooseError("Bad r-axis value");
     }
   }
   else if (up_direction == Y)
@@ -70,11 +70,11 @@ MooseCoordTransform::setUpDirection(const Direction up_direction)
         _z_axis = processZAxis(X);
       }
       else
-        mooseAssert(false, "we should never get here");
+        mooseError("Bad r-axis value");
     }
   }
   else
-    mooseAssert(false, "we should never get here");
+    mooseError("Bad up direction value");
 
   _rotate = std::make_unique<RealTensorValue>(
       RealTensorValue::extrinsic_rotation_matrix(alpha, beta, gamma));

@@ -102,7 +102,7 @@ The last item in the list, coordinate collapsing, is only relevant when
 information has to be transferred between applications with different coordinate
 systems. For transferring information from XYZ to RZ, we must collapse XYZ
 coordinates into the RZ space since there is a unique mapping of XYZ coordinates
-into RZ coordinates, but not visa versa, e.g. a point in RZ has infinitely many
+into RZ coordinates, but not vice versa, e.g. a point in RZ has infinitely many
 corresponding locations in XYZ space due to rotation about the axis of
 symmetry. The table below summarizes the coordinate collapses that occur when
 transferring information between two different coordinate systems.
@@ -114,6 +114,16 @@ transferring information between two different coordinate systems.
 | XYZ | RSPHERICAL | RSPHERICAL |
 | RZ | RSPHERICAL | RSPHERICAL |
 
+Note that there are consequences for these coordinate system collapses. When
+transferring data in the A -> B directions, there are infinitely many points
+in, for example, three-dimensional Cartesian space that correspond to a single
+RZ coordinate. For example, the Cartesian points (1, 0, 0) and (0, 1, 0) map to the same
+RZ coordinate (1, 0) if the z-axis is the axis of symmetry on the Cartesian
+mesh. So if we are performing a nearest-node transfer of data from XYZ to RZ,
+where the "to" point is (1, 0), then selection of the "from" point is arbitrary
+if both (1, 0, 0) and (0, 1, 0) points (or any combination of $\sqrt{x^2+y^2}=1$
+points) exist. We are considering how best to handle these situations moving
+forward. One option would be to average the field data from equivalent points.
 
 Let's consider an example. The below listing shows coordinate transformation
 given in the `Problem` block of a sub-application:

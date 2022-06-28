@@ -1165,7 +1165,7 @@ public:
   MooseCoordTransform & coordTransform();
 
   /**
-   * @return the length unit of this mesh (provided through the coordinate transformation object
+   * @return the length unit of this mesh provided through the coordinate transformation object
    */
   const MooseUnits & lengthUnit() const;
 
