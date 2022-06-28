@@ -152,11 +152,41 @@ class Scheduler:
 
 
 
-def __schedule_task(jobs):
-    schedule_jobs = Scheduler()
+def __schedule_task(jobs, num_threads):
+    schedule_jobs = Scheduler(max_slots=num_threads)
     schedule_jobs.schedule_jobs(jobs)
     schedule_jobs.wait_finish()
     return schedule_jobs.get_finished()
+
+def __get_pids(application_name, hosts, num_threads):
+    """
+    SSH into each host and retrieve PIDs
+    return a dictionary of {'hostname' : [pids]}
+    """
+    jobs = []
+    results = {}
+    for host in hosts:
+        jobs.append(get_sshpids(application_name, host))
+    finished_jobs = __schedule_task(jobs, num_threads)
+    for job in finished_jobs:
+        std_out = job.get_stdout().split()
+        results[std_out[0]] = std_out[1:]
+    return results
+
+def __get_stacks(hosts_pids, num_threads):
+    """
+    Iterate over dictionary of hosts, and PIDs and run
+    a stack trace on each one, return a list of results.
+    """
+    jobs = []
+    results = []
+    for host, pids in hosts_pids.items():
+        for pid in pids:
+            jobs.append(get_sshstack(host, pid))
+    finished_jobs = __schedule_task(jobs, num_threads)
+    for job in finished_jobs:
+        results.append(job.get_stdout())
+    return results
 
 def get_sshpids(application_name, host):
     """
@@ -173,37 +203,7 @@ def get_sshstack(host, pid):
     return f'ssh {host} "echo Host: {host} PID: {pid}; ' \
            f'{PSTACK_BINARY} {pid}; printf "*%.0s" {{1..80}}; echo"'
 
-def __get_pids(application_name, hosts):
-    """
-    SSH into each host and retrieve PIDs
-    return a dictionary of {'hostname' : [pids]}
-    """
-    jobs = []
-    results = {}
-    for host in hosts:
-        jobs.append(get_sshpids(application_name, host))
-    finished_jobs = __schedule_task(jobs)
-    for job in finished_jobs:
-        std_out = job.get_stdout().split()
-        results[std_out[0]] = std_out[1:]
-    return results
-
-def __get_stacks(hosts_pids):
-    """
-    Iterate over dictionary of hosts, and PIDs and run
-    a stack trace on each one, return a list of results.
-    """
-    jobs = []
-    results = []
-    for host, pids in hosts_pids.items():
-        for pid in pids:
-            jobs.append(get_sshstack(host, pid))
-    finished_jobs = __schedule_task(jobs)
-    for job in finished_jobs:
-        results.append(job.get_stdout())
-    return results
-
-def generate_traces(job_num, application_name, num_hosts):
+def generate_traces(job_num, application_name, num_hosts, num_threads):
     """
     Generate a temporary file with traces and return
     formated results
@@ -219,11 +219,11 @@ def generate_traces(job_num, application_name, num_hosts):
         hosts = set(list(hosts)[:num_hosts])
 
     # Use a Scheduler to get hosts and PIDs
-    hosts_pids = __get_pids(application_name, hosts)
+    hosts_pids = __get_pids(application_name, hosts, num_threads)
 
     # Use a Scheduler to get stack traces from each
     # host for every PID
-    stack_list = __get_stacks(hosts_pids)
+    stack_list = __get_stacks(hosts_pids, num_threads)
 
     traces = []
     for stack in stack_list:
@@ -316,23 +316,26 @@ def main():
     """
     parser = argparse.ArgumentParser(description='Usage: %prog [options] <PBS Job num> '
                                                  '<Application>')
-    parser.add_argument('job_num', type=int)
+    parser.add_argument('pbs_job_num', type=int)
     parser.add_argument('application', type=str)
-    parser.add_argument('-s', '--stacks', action='store', type=int, default=0,
+    parser.add_argument('-s', '--stacks', metavar='int', action='store', type=int, default=0,
                        help='The number of stack frames to keep and compare for '
                        'uniqueness (Default: ALL)')
-    parser.add_argument('-n', '--hosts', action='store', type=int, default=0,
+    parser.add_argument('-n', '--hosts', metavar='int', action='store', type=int, default=0,
                        help='The number of hosts to visit (Default: ALL)')
     parser.add_argument('-f', '--force', action='store_true', default=False,
                        help='Whether or not to force a regen if a cache file exists')
+    parser.add_argument('-t', '--threads', metavar='int', type=int, default=12,
+                       help='Number of threads used when remoting around gathering data. '
+                       'Default: %(default)s')
     args = parser.parse_args()
 
     # first see if there is a cache file available
-    cache_filename = f'{args.application}.{args.job_num}.cache'
+    cache_filename = f'{args.application}.{args.pbs_job_num}.cache'
 
     traces = []
     if not os.path.exists(cache_filename) or args.force:
-        traces = generate_traces(args.job_num, args.application, args.hosts)
+        traces = generate_traces(args.pbs_job_num, args.application, args.hosts, args.threads)
 
         # Cache the restuls to a file
         with open(cache_filename, 'w', encoding='utf-8') as cache_file:
