@@ -1,4 +1,4 @@
-{% set version = "2022.06.23" %}
+{% set version = "2022.06.28" %}
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
 
