@@ -4,7 +4,9 @@
 [Samplers]
   [cart]
     type = CartesianProduct
-    linear_space_items = '1 1 10'
+    linear_space_items = '1 1 3
+                          1 1 3'
+    execute_on = PRE_MULTIAPP_SETUP
   []
 []
 
@@ -15,6 +17,7 @@
     input_files = 'sub.i'
     mode = batch-reset
     should_run_reporter = conditional/need_sample
+    execute_on = timestep_end
   []
 []
 
@@ -28,22 +31,31 @@
   []
 []
 
+[Controls]
+  [cmdline]
+    type = MultiAppCommandLineControl
+    multi_app = runner
+    sampler = cart
+    param_names = 'BCs/left/value BCs/right/value'
+  []
+[]
+
 [Reporters]
   [conditional]
     type = ConditionalSampleReporter
     sampler = cart
-    default_value = 1
-    function = 'val >= t'
-    sampler_vars = 'val'
-    sampler_var_indices = '0'
+    default_value = 999
+    function = 'val1 * val2 >= t'
+    sampler_vars = 'val1 val2'
+    sampler_var_indices = '0 1'
     parallel_type = ROOT
-    execute_on = 'initial timestep_begin'
+    execute_on = 'timestep_begin'
   []
 []
 
 [Executioner]
   type = Transient
-  num_steps = 10
+  num_steps = 4
 []
 
 [Outputs]

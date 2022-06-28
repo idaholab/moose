@@ -76,8 +76,7 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
                "Conditionally run sampler multiapp only works in batch modes.");
 }
 
-void
-SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
+void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
 {
   // Reinitialize MultiApp size
   const auto num_rows = _sampler.getNumberOfRows();
@@ -91,8 +90,7 @@ SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
   }
 
   // Reinitialize app to original state prior to solve, if a solve has occured
-  if (_solved_once && (_mode == StochasticTools::MultiAppMode::NORMAL ||
-                       _mode == StochasticTools::MultiAppMode::BATCH_RESTORE))
+  if (_solved_once)
     initialSetup();
 
   if (isParamValid("should_run_reporter"))
@@ -178,10 +176,15 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
       continue;
     }
 
-    if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
-      restore();
-    else
-      initialSetup();
+    // Only reinitialize/restore if we are not solving the first sample. The
+    // reinitialization in preTransfer() took care of the first sample.
+    if (i != _rank_config.first_local_sim_index)
+    {
+      if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+        restore();
+      else
+        initialSetup();
+    }
 
     for (auto & transfer : to_transfers)
     {

@@ -5,17 +5,17 @@
             "values": {
                 "data:average:value": {
                     "row_begin": 0,
-                    "row_end": 10,
+                    "row_end": 9,
                     "type": "std::vector<double>"
                 },
                 "data:converged": {
                     "row_begin": 0,
-                    "row_end": 10,
+                    "row_end": 9,
                     "type": "std::vector<bool>"
                 },
                 "need_sample": {
                     "row_begin": 0,
-                    "row_end": 10,
+                    "row_end": 9,
                     "type": "std::vector<bool>"
                 }
             }
@@ -25,19 +25,17 @@
         {
             "conditional": {
                 "data:average:value": [
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337
+                    1.0000000000000004,
+                    1.5000000000000029,
+                    2.0000000000000027,
+                    1.5000000000000022,
+                    2.000000000000001,
+                    2.500000000000005,
+                    2.000000000000002,
+                    2.500000000000005,
+                    3.000000000000001
                 ],
                 "data:converged": [
-                    true,
                     true,
                     true,
                     true,
@@ -49,7 +47,6 @@
                     true
                 ],
                 "need_sample": [
-                    true,
                     true,
                     true,
                     true,
@@ -67,19 +64,17 @@
         {
             "conditional": {
                 "data:average:value": [
-                    1.0,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337
+                    999.0,
+                    1.5000000000000029,
+                    2.0000000000000027,
+                    1.5000000000000022,
+                    2.000000000000001,
+                    2.500000000000005,
+                    2.000000000000002,
+                    2.500000000000005,
+                    3.000000000000001
                 ],
                 "data:converged": [
-                    true,
                     true,
                     true,
                     true,
@@ -92,7 +87,6 @@
                 ],
                 "need_sample": [
                     false,
-                    true,
                     true,
                     true,
                     true,
@@ -109,19 +103,17 @@
         {
             "conditional": {
                 "data:average:value": [
-                    1.0,
-                    1.0,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337
+                    999.0,
+                    999.0,
+                    2.0000000000000027,
+                    999.0,
+                    2.000000000000001,
+                    2.500000000000005,
+                    2.000000000000002,
+                    2.500000000000005,
+                    3.000000000000001
                 ],
                 "data:converged": [
-                    true,
                     true,
                     true,
                     true,
@@ -136,8 +128,7 @@
                     false,
                     false,
                     true,
-                    true,
-                    true,
+                    false,
                     true,
                     true,
                     true,
@@ -151,19 +142,17 @@
         {
             "conditional": {
                 "data:average:value": [
-                    1.0,
-                    1.0,
-                    1.0,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337
+                    999.0,
+                    999.0,
+                    999.0,
+                    999.0,
+                    2.000000000000001,
+                    2.500000000000005,
+                    999.0,
+                    2.500000000000005,
+                    3.000000000000001
                 ],
                 "data:converged": [
-                    true,
                     true,
                     true,
                     true,
@@ -178,269 +167,16 @@
                     false,
                     false,
                     false,
+                    false,
                     true,
                     true,
-                    true,
-                    true,
-                    true,
+                    false,
                     true,
                     true
                 ]
             },
             "time": 4.0,
             "time_step": 4
-        },
-        {
-            "conditional": {
-                "data:average:value": [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337
-                ],
-                "data:converged": [
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true
-                ],
-                "need_sample": [
-                    false,
-                    false,
-                    false,
-                    false,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true
-                ]
-            },
-            "time": 5.0,
-            "time_step": 5
-        },
-        {
-            "conditional": {
-                "data:average:value": [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337
-                ],
-                "data:converged": [
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true
-                ],
-                "need_sample": [
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true
-                ]
-            },
-            "time": 6.0,
-            "time_step": 6
-        },
-        {
-            "conditional": {
-                "data:average:value": [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337
-                ],
-                "data:converged": [
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true
-                ],
-                "need_sample": [
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    true,
-                    true,
-                    true,
-                    true
-                ]
-            },
-            "time": 7.0,
-            "time_step": 7
-        },
-        {
-            "conditional": {
-                "data:average:value": [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    0.3925299174190337,
-                    0.3925299174190337,
-                    0.3925299174190337
-                ],
-                "data:converged": [
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true
-                ],
-                "need_sample": [
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    true,
-                    true,
-                    true
-                ]
-            },
-            "time": 8.0,
-            "time_step": 8
-        },
-        {
-            "conditional": {
-                "data:average:value": [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    0.3925299174190337,
-                    0.3925299174190337
-                ],
-                "data:converged": [
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true
-                ],
-                "need_sample": [
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    true,
-                    true
-                ]
-            },
-            "time": 9.0,
-            "time_step": 9
-        },
-        {
-            "conditional": {
-                "data:average:value": [
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    0.3925299174190337
-                ],
-                "data:converged": [
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true,
-                    true
-                ],
-                "need_sample": [
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    true
-                ]
-            },
-            "time": 10.0,
-            "time_step": 10
         }
     ]
 }
