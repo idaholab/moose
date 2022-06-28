@@ -26,11 +26,11 @@ import threading # for thread locking and thread timers
 ##################################################################
 # Modify the following variable(s) for your cluster or use one of the versions below
 ### FISSION
-#node_name_pattern = re.compile('(fission-\d{4})')
-#pstack_binary = 'pstack'
+# node_name_pattern = re.compile('(fission-\d{4})')
+# pstack_binary = 'pstack'
 ### BECHLER
-#node_name_pattern = re.compile('(b\d{2})')
-#pstack_binary = 'pstack'
+# node_name_pattern = re.compile('(b\d{2})')
+# pstack_binary = 'pstack'
 ### FALCON
 node_name_pattern = re.compile(r'(r\di\dn\d{1,2})')
 PSTACK_BINARY = 'gstack'
@@ -92,13 +92,13 @@ class Scheduler:
     Syntax:
       jobs = [[job], [job]]
       runner = Scheduler()
-      runner.schedule_jobs(jobs)
 
-    .schedule_jobs() blocks until all jobs launch.
-    .wait_finish() blocks until all jobs finish.
-    .get_finished() returns
+    .schedule_jobs(jobs) calls object's run method
+    .schedule_jobs()     blocks until all jobs launch
+    .wait_finish()       blocks until all jobs finish
+    .get_finished()      returns
     """
-    def __init__(self, max_slots=6, exec_timeout=None):
+    def __init__(self, max_slots=12, exec_timeout=None):
         self.max_slots = int(max_slots)
         self.worker_pool = ThreadPool(processes=self.max_slots)
         self.thread_lock = threading.Lock()
@@ -137,7 +137,6 @@ class Scheduler:
         Add all jobs to the thread pool
         """
         for o_job in jobs:
-            #self.launch_job(o_job)
             self.worker_pool.apply_async(self.launch_job, (o_job,))
 
     def launch_job(self, o_job):
@@ -151,7 +150,8 @@ class Scheduler:
         except KeyboardInterrupt:
             sys.exit(1)
 
-##### END Threading Class Object
+
+
 def __schedule_task(jobs):
     schedule_jobs = Scheduler()
     schedule_jobs.schedule_jobs(jobs)
@@ -306,10 +306,8 @@ def compare_traces(trace1, trace2):
         # Let's strip out all the memory addresses too
         line1 = [memory_re.sub('0x...', line) for line in line1]
         line2 = [memory_re.sub('0x...', line) for line in line2]
-
         if line1 != line2:
             return False
-
     return True
 
 def main():
