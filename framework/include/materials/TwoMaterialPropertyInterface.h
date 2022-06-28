@@ -52,12 +52,12 @@ public:
   template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
   const ADMaterialProperty<T> & getGenericNeighborMaterialProperty(const std::string & name)
   {
-    return getNeighborADMaterialProperty<T>(name);
+    return getADMaterialProperty<T>(name, *_neighbor_material_data);
   }
   template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
   const MaterialProperty<T> & getGenericNeighborMaterialProperty(const std::string & name)
   {
-    return getNeighborMaterialProperty<T>(name);
+    return getMaterialProperty<T>(name, *_neighbor_material_data);
   }
 
 protected:
@@ -68,79 +68,33 @@ template <typename T>
 const MaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborMaterialProperty(const std::string & name)
 {
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-
-  return this->getNeighborMaterialPropertyByName<T>(prop_name);
+  return getMaterialProperty<T>(name, *_neighbor_material_data);
 }
 
 template <typename T>
 const MaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborMaterialPropertyByName(const std::string & name)
 {
-  checkExecutionStage();
-  checkMaterialProperty(name);
-
-  // mark property as requested
-  markMatPropRequested(name);
-
-  // Update the boolean flag.
-  _get_material_property_called = true;
-
-  _material_property_dependencies.insert(_material_data->getPropertyId(name));
-
-  return _neighbor_material_data->getProperty<T>(name);
+  return getMaterialPropertyByName<T>(name, *_neighbor_material_data);
 }
 
 template <typename T>
 const ADMaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborADMaterialProperty(const std::string & name)
 {
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant
-  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-  else
-  {
-    _material_property_dependencies.insert(_material_data->getPropertyId(prop_name));
-    return _neighbor_material_data->getADProperty<T>(prop_name);
-  }
+  return getADMaterialProperty<T>(name, *_neighbor_material_data);
 }
 
 template <typename T>
 const MaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborMaterialPropertyOld(const std::string & name)
 {
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-  else
-    return _neighbor_material_data->getPropertyOld<T>(prop_name);
+  return getMaterialPropertyOld<T>(name, *_neighbor_material_data);
 }
 
 template <typename T>
 const MaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborMaterialPropertyOlder(const std::string & name)
 {
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-  else
-    return _neighbor_material_data->getPropertyOlder<T>(prop_name);
+  return getMaterialPropertyOlder<T>(name, *_neighbor_material_data);
 }
