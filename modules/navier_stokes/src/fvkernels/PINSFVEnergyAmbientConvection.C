@@ -18,10 +18,8 @@ PINSFVEnergyAmbientConvection::validParams()
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Implements the solid-fluid ambient convection term in the porous "
                              "media Navier Stokes energy equation.");
-  params.addRequiredParam<MooseFunctorName>(
-      "h_solid_fluid",
-      "Name of the convective heat "
-      "transfer coefficient. This coefficient should include the influence of porosity.");
+  params.addRequiredParam<MooseFunctorName>("h_solid_fluid",
+                                            "Name of the convective heat transfer coefficient.");
   params.addRequiredParam<bool>("is_solid", "Whether this kernel acts on the solid temperature");
   params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "Fluid temperature");
   params.addRequiredParam<MooseFunctorName>(NS::T_solid, "Solid temperature");
