@@ -1,0 +1,53 @@
+[Tests]
+  design = 'meshgenerators/BlockToMeshConverterGenerator.md'
+  issues = '#20880'
+
+  [extract_block]
+    requirement = 'The system shall have the capability of creating a new mesh given '
+                  'one or more subdomains within an existing mesh.'
+
+    [simple_two_dimensional_test]
+      type = 'Exodiff'
+      input = 'conv_simple_2dblock.i'
+      exodiff = 'conv_simple_2dblock_in.e'
+      recover = false
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+
+      detail = 'tests wheather the simplest case - a one block, single element, 2d mesh of a square - can be handled'
+    []
+
+    [two_dimensional_test]
+      type = 'Exodiff'
+      input = 'conv_2dblock.i'
+      exodiff = 'conv_2dblock_in.e'
+      recover = false
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+
+      detail = 'tests whether several 2D blocks may be extracted from a 2D mesh'
+    []
+
+    [three_dimensional_test]  
+      type = 'Exodiff'
+      input = 'conv_multiblock.i'
+      exodiff = 'conv_multiblock_in.e'
+      recover = false
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+
+      detail = 'tests whether multiple subdomains/blocks can be incorporated into a new mesh in 3D'
+    []
+
+    [lower_dimensional_test]
+      type = 'Exodiff'
+      input = 'conv_lowerDblock.i'
+      exodiff = 'conv_lowerDblock_in.e'
+      recover = false
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+
+      detail = 'tests whether a lower dimension block (1D) may be extracted from a 2D mesh'
+    []
+  []
+[]
