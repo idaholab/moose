@@ -78,8 +78,8 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
   ComputeValueType value(0);
   Real total_volume = 0;
 
-  const auto & its = amg().secondariesToMortarSegments(*_current_node);
-  std::array<MortarNodalAuxKernelTempl<ComputeValueType> *, 1> consumers = {{this}};
+  const std::vector<AutomaticMortarGeneration::MortarFilterIter> & its =
+      amg().secondariesToMortarSegments(*_current_node);
 
   auto act_functor = [&value, &total_volume, this]()
   {
@@ -87,6 +87,8 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
     value += computeValue();
     total_volume += _msm_volume;
   };
+
+  std::array<MortarNodalAuxKernelTempl<ComputeValueType> *, 1> consumers = {{this}};
 
   Moose::Mortar::loopOverMortarSegments(its,
                                         _assembly,

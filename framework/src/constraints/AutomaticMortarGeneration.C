@@ -2226,9 +2226,21 @@ AutomaticMortarGeneration::secondariesToMortarSegments(const Node & node) const
     auto msm_it = _secondary_elems_to_mortar_segments.find(secondary_elems[i]);
     if (msm_it == _secondary_elems_to_mortar_segments.end())
       mooseError("end of mortar segment map in associatedMortarSegments");
-
     ret[i] = msm_it;
   }
 
-  return ret;
+  // Remove empty mortar segments from the set associated with secondary nodes
+  std::vector<AutomaticMortarGeneration::MortarFilterIter> iterators;
+  for (size_t i = 0; i < ret.size(); i++)
+  {
+    mooseAssert(ret[i]->first->active(),
+                "We loop over active elements when building the mortar segment mesh, so we golly "
+                "well hope this is active.");
+
+    if (!ret[i]->second.empty())
+      // This is local and the mortar segment set isn't empty, so include
+      iterators.push_back(ret[i]);
+  }
+
+  return iterators;
 }
