@@ -1,4 +1,4 @@
-{% set version = "2022.06.23" %}
+{% set version = "2022.06.29" %}
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
 
@@ -25,15 +25,11 @@ requirements:
     - sysroot_linux-64 2.17              # [linux64]
     - gnuconfig                          # [unix]
     - go
-    - openssl
-    - setuptools
 
   run:
     - gperftools
     - graphviz
     - perl
-    - openssl
-    - setuptools
 
 test:
   commands:
