@@ -17,7 +17,7 @@ DomainUserObject::validParams()
 {
   InputParameters params = UserObject::validParams();
   params += BlockRestrictable::validParams();
-  params += TwoMaterialPropertyInterface::validParams();
+  params += ThreeMaterialPropertyInterface::validParams();
   params += TransientInterface::validParams();
   params += RandomInterface::validParams();
   params.addParam<std::vector<BoundaryName>>(
@@ -32,7 +32,7 @@ DomainUserObject::validParams()
 DomainUserObject::DomainUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     BlockRestrictable(this),
-    TwoMaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
+    ThreeMaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     NeighborCoupleable(this, false, false),
     MooseVariableDependencyInterface(this),
     TransientInterface(this),

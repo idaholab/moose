@@ -12,7 +12,7 @@
 // MOOSE includes
 #include "UserObject.h"
 #include "BlockRestrictable.h"
-#include "TwoMaterialPropertyInterface.h"
+#include "ThreeMaterialPropertyInterface.h"
 #include "NeighborCoupleable.h"
 #include "MooseVariableDependencyInterface.h"
 #include "TransientInterface.h"
@@ -30,7 +30,7 @@ class QBase;
 
 class DomainUserObject : public UserObject,
                          public BlockRestrictable,
-                         public TwoMaterialPropertyInterface,
+                         public ThreeMaterialPropertyInterface,
                          public NeighborCoupleable,
                          public MooseVariableDependencyInterface,
                          public TransientInterface,
