@@ -84,6 +84,11 @@ public:
    */
   void preExecuteOnInterface();
 
+  /**
+   * Return whether this object should run \p executeOnInterface
+   */
+  bool shouldExecuteOnInterface() const;
+
   void checkVariable(const MooseVariableFieldBase & variable) const override;
 
 protected:
@@ -221,4 +226,10 @@ DomainUserObject::setFaceData()
   _current_q_point = &_q_point_face;
   _current_q_rule = _qrule_face;
   _current_JxW = &_JxW_face;
+}
+
+inline bool
+DomainUserObject::shouldExecuteOnInterface() const
+{
+  return _interface_bnd_ids.count(_current_boundary_id);
 }

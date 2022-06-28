@@ -92,8 +92,8 @@ InterfaceDomainUserObject::executeOnBoundary()
 void
 InterfaceDomainUserObject::executeOnInterface()
 {
-  if (!_interface_bnd_ids.count(_current_boundary_id))
-    return;
+  mooseAssert(_interface_bnd_ids.count(_current_boundary_id),
+              "We should only get called if shouldExecuteOnInterface returns true");
 
   for (const auto i : make_range(_test_face.size()))
   {

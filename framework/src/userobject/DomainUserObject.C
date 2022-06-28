@@ -61,22 +61,25 @@ DomainUserObject::DomainUserObject(const InputParameters & parameters)
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 
-  const auto & interface_boundaries = getParam<std::vector<BoundaryName>>("interface_boundaries");
-  const auto & interface_bnd_ids_vec = _mesh.getBoundaryIDs(interface_boundaries);
-  _interface_bnd_ids =
-      std::set<BoundaryID>(interface_bnd_ids_vec.begin(), interface_bnd_ids_vec.end());
-
-  for (const auto interface_bnd_id : _interface_bnd_ids)
+  if (isParamValid("interface_boundaries"))
   {
-    const auto & interface_connected_blocks = _mesh.getInterfaceConnectedBlocks(interface_bnd_id);
-    for (const auto interface_connected_block : interface_connected_blocks)
-    {
-      if (hasBlocks(interface_connected_block))
-        // we're operating on this block
-        continue;
+    const auto & interface_boundaries = getParam<std::vector<BoundaryName>>("interface_boundaries");
+    const auto & interface_bnd_ids_vec = _mesh.getBoundaryIDs(interface_boundaries);
+    _interface_bnd_ids =
+        std::set<BoundaryID>(interface_bnd_ids_vec.begin(), interface_bnd_ids_vec.end());
 
-      // these are blocks connected to our blocks
-      _interface_connected_blocks.insert(interface_connected_block);
+    for (const auto interface_bnd_id : _interface_bnd_ids)
+    {
+      const auto & interface_connected_blocks = _mesh.getInterfaceConnectedBlocks(interface_bnd_id);
+      for (const auto interface_connected_block : interface_connected_blocks)
+      {
+        if (hasBlocks(interface_connected_block))
+          // we're operating on this block
+          continue;
+
+        // these are blocks connected to our blocks
+        _interface_connected_blocks.insert(interface_connected_block);
+      }
     }
   }
 }

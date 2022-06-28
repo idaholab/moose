@@ -242,12 +242,23 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
 {
   // Pointer to the neighbor we are currently working on.
   const Elem * neighbor = elem->neighbor_ptr(side);
+  if (!(neighbor->active()))
+    return;
 
   std::vector<UserObject *> userobjs;
   queryBoundary(Interfaces::InterfaceUserObject, bnd_id, userobjs);
-  if (_interface_user_objects.size() == 0 && _domain_objs.size() == 0)
-    return;
-  if (!(neighbor->active()))
+
+  bool should_execute = !userobjs.empty();
+
+  if (!should_execute && !_domain_objs.empty())
+    for (const auto * const domain_uo : _domain_objs)
+      if (domain_uo->shouldExecuteOnInterface())
+      {
+        should_execute = true;
+        break;
+      }
+
+  if (!should_execute)
     return;
 
   _fe_problem.prepareFace(elem, _tid);
@@ -273,10 +284,11 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
     uo->execute();
 
   for (auto & uo : _domain_objs)
-  {
-    uo->preExecuteOnInterface();
-    uo->executeOnInterface();
-  }
+    if (uo->shouldExecuteOnInterface())
+    {
+      uo->preExecuteOnInterface();
+      uo->executeOnInterface();
+    }
 }
 
 void
