@@ -5,7 +5,8 @@ export GOPATH="$PREFIX/pprof"
 go install github.com/google/pprof@c488b8fa1db3fa467bf30beb5a1d6f4f10bb1b87
 
 # go creates read-only files. Do this so Civet can properly clean up
-go clean -modcache
+chmod -R 700 ${GOPATH}/pkg
+rm -rf ${GOPATH}/pkg
 
 # Set GPERF_DIR path (influential environment variable in MOOSE make files)
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
