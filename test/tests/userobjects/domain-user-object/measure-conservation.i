@@ -18,13 +18,16 @@
     epsilon = -1
     sigma = 6
     u = u
+    diff = 'diff'
+    ad_diff = 'ad_diff'
   []
 []
 
 [Kernels]
   [diff]
-    type = Diffusion
+    type = MatDiffusion
     variable = u
+    diffusivity = 'diff'
   []
 []
 
@@ -34,6 +37,7 @@
     variable = u
     epsilon = -1
     sigma = 6
+    diff = 'diff'
   []
 []
 
@@ -45,6 +49,20 @@
     function = 'x'
     epsilon = -1
     sigma = 6
+    diff = 'diff'
+  []
+[]
+
+[Materials]
+  [constant]
+    type = GenericConstantMaterial
+    prop_names = 'diff'
+    prop_values = '2'
+  []
+  [ad_constant]
+    type = ADGenericConstantMaterial
+    prop_names = 'ad_diff'
+    prop_values = '2'
   []
 []
 

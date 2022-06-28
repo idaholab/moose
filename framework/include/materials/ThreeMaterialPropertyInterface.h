@@ -52,12 +52,12 @@ public:
   template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
   const ADMaterialProperty<T> & getGenericFaceMaterialProperty(const std::string & name)
   {
-    return getADMaterialProperty<T>(name, *_face_material_data);
+    return getFaceADMaterialProperty<T>(name);
   }
   template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
   const MaterialProperty<T> & getGenericFaceMaterialProperty(const std::string & name)
   {
-    return getMaterialProperty<T>(name, *_face_material_data);
+    return getFaceMaterialProperty<T>(name);
   }
 
 protected:

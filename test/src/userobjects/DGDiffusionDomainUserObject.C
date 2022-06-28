@@ -23,6 +23,11 @@ DGDiffusionDomainUserObject::validParams()
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addRequiredParam<Real>("epsilon", "Epsilon");
   params.addRequiredParam<Real>("sigma", "Sigma");
+  params.addRequiredParam<MaterialPropertyName>(
+      "diff", "The diffusion (or thermal conductivity or viscosity) coefficient.");
+  params.addRequiredParam<MaterialPropertyName>(
+      "ad_diff",
+      "The AD version of the diffusion (or thermal conductivity or viscosity) coefficient.");
   return params;
 }
 
@@ -41,7 +46,14 @@ DGDiffusionDomainUserObject::DGDiffusionDomainUserObject(const InputParameters &
     _grad_test_face_neighbor(_var.gradPhiFaceNeighbor()),
     _func(getFunction("function")),
     _epsilon(getParam<Real>("epsilon")),
-    _sigma(getParam<Real>("sigma"))
+    _sigma(getParam<Real>("sigma")),
+    _diff(getMaterialProperty<Real>("diff")),
+    _diff_face(getGenericFaceMaterialProperty<Real, false>("diff")),
+    _ad_diff_face(getGenericFaceMaterialProperty<Real, true>("ad_diff")),
+    _diff_face_by_name(getFaceMaterialPropertyByName<Real>(deducePropertyName("diff"))),
+    _diff_neighbor(getNeighborMaterialProperty<Real>("diff")),
+    _diff_face_old(getFaceMaterialPropertyOld<Real>("diff")),
+    _diff_face_older(getFaceMaterialPropertyOlder<Real>("diff"))
 {
 }
 
@@ -60,7 +72,7 @@ DGDiffusionDomainUserObject::executeOnElement()
 
   for (const auto i : make_range(_test.size()))
     for (const auto qp : make_range(qRule().n_points()))
-      local_integrals[i] += JxW()[qp] * coord()[qp] * _grad_u[qp] * _grad_test[i][qp];
+      local_integrals[i] += JxW()[qp] * coord()[qp] * _diff[qp] * _grad_u[qp] * _grad_test[i][qp];
 }
 
 void
@@ -73,14 +85,18 @@ DGDiffusionDomainUserObject::executeOnBoundary()
   for (const auto i : make_range(_test_face.size()))
     for (const auto qp : make_range(qRule().n_points()))
     {
+      mooseAssert(_diff_face[qp] == _diff_face_by_name[qp], "API sanity check");
+      mooseAssert(_diff_face[qp] == _diff_face_old[qp], "API sanity check");
+      mooseAssert(_diff_face[qp] == _diff_face_older[qp], "API sanity check");
       const unsigned int elem_b_order = _var.order();
       const double h_elem =
           _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
 
       Real fn = _func.value(_t, qPoints()[qp]);
       Real r = 0;
-      r -= (_grad_u[qp] * _normals[qp] * _test_face[i][qp]);
-      r += _epsilon * (_u[qp] - fn) * _grad_test_face[i][qp] * _normals[qp];
+      r -= (_diff_face[qp] * _grad_u[qp] * _normals[qp] * _test_face[i][qp]);
+      r += _epsilon * (_u[qp] - fn) * MetaPhysicL::raw_value(_ad_diff_face[qp]) *
+           _grad_test_face[i][qp] * _normals[qp];
       r += _sigma / h_elem * (_u[qp] - fn) * _test_face[i][qp];
       local_integrals[i] += JxW()[qp] * coord()[qp] * r;
     }
@@ -103,9 +119,12 @@ DGDiffusionDomainUserObject::executeOnInternalSide()
       for (const auto qp : make_range(qRule().n_points()))
       {
         Real r = 0;
-        r -= 0.5 * (_grad_u[qp] * _normals[qp] + _grad_u_neighbor[qp] * _normals[qp]) *
+        r -= 0.5 *
+             (_diff_face[qp] * _grad_u[qp] * _normals[qp] +
+              _diff_neighbor[qp] * _grad_u_neighbor[qp] * _normals[qp]) *
              _test_face[i][qp];
-        r += _epsilon * 0.5 * (_u[qp] - _u_neighbor[qp]) * _grad_test_face[i][qp] * _normals[qp];
+        r += _epsilon * 0.5 * (_u[qp] - _u_neighbor[qp]) * _diff_face[qp] * _grad_test_face[i][qp] *
+             _normals[qp];
         r += _sigma / h_elem * (_u[qp] - _u_neighbor[qp]) * _test_face[i][qp];
         local_integrals[i] += JxW()[qp] * coord()[qp] * r;
       }
@@ -121,10 +140,12 @@ DGDiffusionDomainUserObject::executeOnInternalSide()
       for (const auto qp : make_range(qRule().n_points()))
       {
         Real r = 0;
-        r += 0.5 * (_grad_u[qp] * _normals[qp] + _grad_u_neighbor[qp] * _normals[qp]) *
+        r += 0.5 *
+             (_diff_face[qp] * _grad_u[qp] * _normals[qp] +
+              _diff_neighbor[qp] * _grad_u_neighbor[qp] * _normals[qp]) *
              _test_face_neighbor[i][qp];
-        r += _epsilon * 0.5 * (_u[qp] - _u_neighbor[qp]) * _grad_test_face_neighbor[i][qp] *
-             _normals[qp];
+        r += _epsilon * 0.5 * (_u[qp] - _u_neighbor[qp]) * _diff_neighbor[qp] *
+             _grad_test_face_neighbor[i][qp] * _normals[qp];
         r -= _sigma / h_elem * (_u[qp] - _u_neighbor[qp]) * _test_face_neighbor[i][qp];
         local_integrals[i] += JxW()[qp] * coord()[qp] * r;
       }

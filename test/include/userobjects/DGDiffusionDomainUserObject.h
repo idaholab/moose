@@ -42,5 +42,12 @@ protected:
   const Function & _func;
   const Real & _epsilon;
   const Real & _sigma;
+  const MaterialProperty<Real> & _diff;
+  const MaterialProperty<Real> & _diff_face;
+  const ADMaterialProperty<Real> & _ad_diff_face;
+  const MaterialProperty<Real> & _diff_face_by_name;
+  const MaterialProperty<Real> & _diff_neighbor;
+  const MaterialProperty<Real> & _diff_face_old;
+  const MaterialProperty<Real> & _diff_face_older;
   std::vector<std::vector<Real>> _elem_integrals;
 };
