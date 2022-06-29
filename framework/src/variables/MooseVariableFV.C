@@ -565,6 +565,8 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
   _temp_face_value =
       Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, correct_skewness));
 
+  std::cout << "Face value " << _temp_face_value << std::endl;
+
   return _temp_face_value;
 }
 
@@ -716,7 +718,7 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
   const Elem * const elem_two = std::get<1>(tup);
   const bool elem_one_is_fi_elem = std::get<2>(tup);
 
-  _temp_face_unc_gradient = adGradSln(elem_one, correct_skewness);
+  const VectorValue<ADReal> elem_one_grad = adGradSln(elem_one, correct_skewness);
 
   // If we have a neighbor then we interpolate between the two to the face. If we do not, then we
   // apply a zero Hessian assumption and use the element centroid gradient as the uncorrected face
@@ -726,9 +728,11 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
     const VectorValue<ADReal> & elem_two_grad = adGradSln(elem_two, correct_skewness);
 
     // Uncorrected gradient value
-    _temp_face_unc_gradient = Moose::FV::linearInterpolation(
-        _temp_face_unc_gradient, elem_two_grad, fi, elem_one_is_fi_elem);
+    _temp_face_unc_gradient =
+        Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, elem_one_is_fi_elem);
   }
+  else
+    _temp_face_unc_gradient = elem_one_grad;
 
   return _temp_face_unc_gradient;
 }
