@@ -147,6 +147,11 @@ protected:
    */
   const std::vector<Real> & getSamplerData() const { return _row_data; };
 
+  /*
+   * Get current sample size (this is recalculated to reflect the number of skipped samples)
+   */
+  unsigned int getCurrentSampleSize() const { return _current_sample_size; };
+
   // TRAINING_DATA_END
 
   /// Sampler being used for training
@@ -181,6 +186,9 @@ private:
 
   /// Whether or not the current sample has a converged solution
   const bool * _converged;
+
+  /// Number of samples used to train the model.
+  unsigned int _current_sample_size;
 
   /// Vector of reporter names and their corresponding values (to be filled by getTrainingData)
   std::unordered_map<ReporterName, std::shared_ptr<TrainingDataBase>> _training_data;

@@ -7,7 +7,7 @@
       type = CSVDiff
       input = uniform_train_and_cv.i
       allow_test_objects = true
-      cli_args = "Samplers/pr_sampler/num_rows=6
+      cli_args = "Samplers/pr_sampler/num_rows=12
                   Trainers/pr_max/max_degree=1
                   Trainers/pr_max/cv_n_trials=3
                   Trainers/pr_max/cv_splits=2
@@ -19,7 +19,7 @@
       type = CSVDiff
       input = normal_train_and_cv.i
       allow_test_objects = true
-      cli_args = "Samplers/pr_sampler/num_rows=6
+      cli_args = "Samplers/pr_sampler/num_rows=12
                   Trainers/pr_max/max_degree=1
                   Trainers/pr_max/cv_n_trials=3
                   Trainers/pr_max/cv_splits=2

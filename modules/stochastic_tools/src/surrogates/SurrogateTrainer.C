@@ -139,6 +139,7 @@ SurrogateTrainer::execute()
     for (const auto & trial : make_range(_cv_n_trials))
       _cv_trial_scores[trial] = crossValidate();
 
+  _current_sample_size = _sampler.getNumberOfRows();
   executeTraining();
 }
 
@@ -170,7 +171,6 @@ void
 SurrogateTrainer::executeTraining()
 {
   checkIntegrity();
-
   _row = _sampler.getLocalRowBegin();
   _local_row = 0;
 
@@ -235,6 +235,8 @@ SurrogateTrainer::crossValidate()
       split_ids_buffer = split_indices[k];
     _communicator.broadcast(split_ids_buffer, 0);
 
+    _current_sample_size = _sampler.getNumberOfRows() - split_ids_buffer.size();
+
     auto first = std::lower_bound(
         split_ids_buffer.begin(), split_ids_buffer.end(), _sampler.getLocalRowBegin());
     auto last = std::upper_bound(
@@ -247,10 +249,11 @@ SurrogateTrainer::crossValidate()
     // Evaluate the model
     Real split_mse = 0;
     auto skipped_row = _skip_indices.begin();
+
     for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
     {
       const std::vector<Real> row = _sampler.getNextLocalRow();
-      if (p == *skipped_row)
+      if (skipped_row != _skip_indices.end() && p == *skipped_row)
       {
         for (auto & pair : _training_data)
           pair.second->setCurrentIndex(
@@ -261,7 +264,6 @@ SurrogateTrainer::crossValidate()
         skipped_row++;
       }
     }
-
     gatherSum(split_mse);
     cv_score += split_mse / n_rows;
 
