@@ -14,6 +14,7 @@
 
 #include "libmesh/elem.h"
 #include "libmesh/int_range.h"
+#include "libmesh/mesh_serializer.h"
 #include "libmesh/mesh_triangle_holes.h"
 #include "libmesh/parsed_function.h"
 #include "libmesh/poly2tri_triangulator.h"
@@ -159,6 +160,8 @@ Poly2TriMeshGenerator::generate()
   // able to safely clear it afterwards.
 
   boundary_id_type new_hole_bcid = _hole_ptrs.size();
+  bool doing_stitching = false;
+
   for (auto hole_i : index_range(_hole_ptrs))
   {
     const MeshBase & hole_mesh = **_hole_ptrs[hole_i];
@@ -168,10 +171,17 @@ Poly2TriMeshGenerator::generate()
     if (!local_hole_bcids.empty())
       new_hole_bcid = std::max(new_hole_bcid, *local_hole_bcids.rbegin());
     hole_mesh.comm().max(new_hole_bcid);
+
+    if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
+      doing_stitching = true;
   }
 
   new_hole_bcid++;
   const boundary_id_type inner_bcid = new_hole_bcid + 1;
+
+  // libMesh mesh stitching still requires a serialized mesh, and it's
+  // cheaper to do that once than to do it once-per-hole
+  MeshSerializer serial(*mesh, doing_stitching);
 
   for (auto hole_i : index_range(_hole_ptrs))
   {
@@ -179,6 +189,12 @@ Poly2TriMeshGenerator::generate()
     {
       UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*_hole_ptrs[hole_i]->get());
       auto & hole_boundary_info = hole_mesh.get_boundary_info();
+
+      // Our algorithm here requires a serialized Mesh.  To avoid
+      // redundant serialization and deserialization (libMesh
+      // MeshedHole and stitch_meshes still also require
+      // serialization) we'll do the serialization up front.
+      MeshSerializer serial_hole(hole_mesh);
 
       // It would have been nicer for MeshedHole to add the BCID
       // itself, but we want MeshedHole to work with a const mesh.
