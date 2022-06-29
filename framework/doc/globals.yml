@@ -25,3 +25,5 @@ ScalarKernels: /ScalarKernels/index.md
 FVKernels: /FVKernels/index.md
 FVBCs: /FVBCs/index.md
 GitHub: https://github.com
+Gmsh: https://gmsh.info/
+SLEPc: https://slepc.upv.es/

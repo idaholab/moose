@@ -1,0 +1,18 @@
+[Tests]
+  [vector_kernels]
+    type = 'Exodiff'
+    input = 'vector_kernels.i'
+    exodiff = 'vector_kernels_out.e'
+    requirement = 'The system shall be capable of modeling the vector Helmholtz equation for vector fields.'
+    design = 'CurlCurlField.md VectorFunctionReaction.md'
+    issues = '#21078'
+  []
+  [vector_current_source]
+    type = 'Exodiff'
+    input = 'vector_current_source.i'
+    exodiff = 'vector_current_source_out.e'
+    requirement = 'The system shall be capable of modeling the vector Helmholtz equation for vector fields with a vector current density source for real and imaginary components.'
+    design = 'VectorCurrentSource.md'
+    issues = '#21080'
+  []
+[]

@@ -1,0 +1,58 @@
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{patterns}
+\usepackage{amsmath}
+\usepackage{environ}
+\NewEnviron{scaledaligned}{
+  \scalebox{1.5}{$\begin{aligned}
+  \BODY
+  \end{aligned}$}
+}
+
+% ensures a white background in the converted image
+\pagecolor{white}
+
+\begin{document}
+\begin{tikzpicture}
+  % draw fills so lines sit on top of them
+  \fill [fill=black!30!white] (0, 0) rectangle (10, 1);
+  \fill [fill=black!70!white] (10, 0) rectangle (20, 1);
+  \fill [fill=black!30!white] (20, 0) rectangle (30, 1);
+  % outlines
+  \draw [ultra thick] (0, 0) rectangle (30, 1);
+  \draw [ultra thick, dashed] (10, 0) -- (10, 1);
+  \draw [ultra thick, dashed] (20, 0) -- (20, 1);
+  % material labels
+  \node [fill=white] at (5, 0.5) {\scalebox{1.5}{Stainless Steel}};
+  \node [fill=white] at (15, 0.5) {\scalebox{1.5}{Graphite}};
+  \node [fill=white] at (25, 0.5) {\scalebox{1.5}{Stainless Steel}};
+  % edge position markers with boundary conditions
+  \node at (-0.57, -1.4) {
+    \begin{scaledaligned}
+      x &= 0 \\ \\
+      \phi_S (0) &= 1
+    \end{scaledaligned}
+  };
+  \node at (29.45, -1.4) {
+    \begin{scaledaligned}
+      x &= 3 \\ \\
+      \phi_S (3) &= 0
+    \end{scaledaligned}
+  };
+  % interface position markers and interface conditions
+  \node at (10.95, -2.5) {
+    \begin{scaledaligned}
+      x &= 1 \\ \\
+      \sigma_S \left. \frac{\text{d} \phi_S}{\text{d} x} \right|_{x = 1} &= \sigma_G \left. \frac{\text{d} \phi_G}{\text{d} x} \right|_{x = 1} \\
+      \sigma_S \left. \frac{\text{d} \phi_S}{\text{d} x} \right|_{x = 1} &= -C_E (\phi_S(1) - \phi_G(1))
+    \end{scaledaligned}
+  };
+  \node at (20.95, -2.5) {
+    \begin{scaledaligned}
+      x &= 2 \\ \\
+      \sigma_G \left. \frac{\text{d} \phi_G}{\text{d} x} \right|_{x = 2} &= \sigma_S \left. \frac{\text{d} \phi_S}{\text{d} x} \right|_{x = 2} \\
+      \sigma_G \left. \frac{\text{d} \phi_G}{\text{d} x} \right|_{x = 2} &= -C_E (\phi_G(2) - \phi_S(2))
+    \end{scaledaligned}
+  };
+\end{tikzpicture}
+\end{document}

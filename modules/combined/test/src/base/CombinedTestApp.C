@@ -16,6 +16,7 @@
 
 #include "ChemicalReactionsTestApp.h"
 #include "ContactTestApp.h"
+#include "ElectromagneticsTestApp.h"
 #include "ExternalPetscSolverTestApp.h"
 #include "FluidPropertiesTestApp.h"
 #include "FsiTestApp.h"
@@ -66,6 +67,7 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
 
     ChemicalReactionsTestApp::registerAll(f, af, s, use_test_objs);
     ContactTestApp::registerAll(f, af, s, use_test_objs);
+    ElectromagneticsTestApp::registerAll(f, af, s, use_test_objs);
     ExternalPetscSolverTestApp::registerAll(f, af, s, use_test_objs);
     FluidPropertiesTestApp::registerAll(f, af, s, use_test_objs);
     FsiTestApp::registerAll(f, af, s, use_test_objs);
