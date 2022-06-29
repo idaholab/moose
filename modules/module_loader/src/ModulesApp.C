@@ -19,6 +19,9 @@
 #ifdef CONTACT_ENABLED
 #include "ContactApp.h"
 #endif
+#ifdef ELECTROMAGNETICS_ENABLED
+#include "ElectromagneticsApp.h"
+#endif
 #ifdef FLUID_PROPERTIES_ENABLED
 #include "FluidPropertiesApp.h"
 #endif
@@ -126,6 +129,10 @@ ModulesApp::registerObjects(Factory & factory)
   ContactApp::registerObjects(factory);
 #endif
 
+#ifdef ELECTROMAGNETICS_ENABLED
+  ElectromagneticsApp::registerObjects(factory);
+#endif
+
 #ifdef FLUID_PROPERTIES_ENABLED
   FluidPropertiesApp::registerObjects(factory);
 #endif
@@ -207,6 +214,10 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
 #ifdef CONTACT_ENABLED
   ContactApp::associateSyntax(syntax, action_factory);
+#endif
+
+#ifdef ELECTROMAGNETICS_ENABLED
+  ElectromagneticsApp::associateSyntax(syntax, action_factory);
 #endif
 
 #ifdef FLUID_PROPERTIES_ENABLED
@@ -292,6 +303,10 @@ ModulesApp::registerExecFlags(Factory & factory)
   ContactApp::registerExecFlags(factory);
 #endif
 
+#ifdef ELECTROMAGNETICS_ENABLED
+  ElectromagneticsApp::registerExecFlags(factory);
+#endif
+
 #ifdef FLUID_PROPERTIES_ENABLED
   FluidPropertiesApp::registerExecFlags(factory);
 #endif
@@ -368,6 +383,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef CONTACT_ENABLED
   ContactApp::registerAll(f, af, s);
+#endif
+
+#ifdef ELECTROMAGNETICS_ENABLED
+  ElectromagneticsApp::registerAll(f, af, s);
 #endif
 
 #ifdef FLUID_PROPERTIES_ENABLED

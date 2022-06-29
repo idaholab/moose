@@ -1,0 +1,10 @@
+[Tests]
+  [dim_error]
+    type = RunException
+    input = 'reflection_pp_test.i'
+    expect_err = 'The ReflectionCoefficient object is not currently configured to work with 2D or 3D meshes'
+    requirement = 'The system shall supply an error if the ReflectionCoefficient object is used on meshes with a dimension larger than one.'
+    design = 'ReflectionCoefficient.md'
+    issues = '#13744'
+  []
+[]

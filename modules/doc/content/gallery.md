@@ -69,7 +69,7 @@ the [phase field module](modules/phase_field/index.md).
 
 !card! gallery/dipole_antenna.mp4 title=2D Half-Wave Dipole Antenna
 The 2D electric field radiation pattern of a broadcasting half-wave dipole antenna, modeled using
-the [VectorMooseVariable.md] system with first-order Nedelec elements.
+the [modules/electromagnetics/index.md] with first-order Nedelec elements.
 !card-end!
 
 !card! gallery/grain_tracker.mp4 title=3D Grain Tracking

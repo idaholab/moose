@@ -39,7 +39,11 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("ContactAction", "Contact/*");
 
   registerTask("output_penetration_info_vars", false);
+  registerTask("add_contact_aux_variable", false);
   syntax.addDependency("output_penetration_info_vars", "add_output");
+  syntax.addDependency("add_postprocessor", "output_penetration_info_vars");
+  syntax.addDependency("add_contact_aux_variable", "add_variable");
+  syntax.addDependency("setup_variable_complete", "add_contact_aux_variable");
 }
 
 void

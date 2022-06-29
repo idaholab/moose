@@ -139,7 +139,7 @@ class RenderLinkBase(components.RenderComponent):
 
     def createLatexHelper(self, parent, token, page, desired):
         func = lambda p, t, u, l: latex.Command(p, 'hyperref', token=t,
-                                                args=[latex.Bracket(string=l)])
+                                                args=[latex.Bracket(string=l, escape=False)])
         # Create optional content
         bookmark = token['bookmark']
 

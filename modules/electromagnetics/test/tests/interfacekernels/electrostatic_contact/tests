@@ -1,0 +1,66 @@
+[Tests]
+  [electrostatic_contact_conductance_supplied]
+    type = Exodiff
+    input = 'contact_conductance_supplied.i'
+    exodiff = 'contact_conductance_supplied_out.e'
+    requirement = 'The system shall be capable of calculating the effect of electrostatic contact at an interface between two different materials, given a user-supplied contact conductance.'
+    design = 'ElectrostaticContactCondition.md'
+    issues = '#21089 #21091'
+  []
+  [electrostatic_contact_conductance_supplied_jacobian]
+    type = PetscJacobianTester
+    input = 'contact_conductance_supplied.i'
+    run_sim = false
+    prereq = electrostatic_contact_conductance_supplied
+    requirement = 'The system shall calculate the correct AD jacobian contribution for electrostatic contact at an interface, given a user-supplied contact conductance.'
+    design = 'ElectrostaticContactCondition.md'
+    issues = '#21091'
+  []
+  [electrostatic_contact_conductance_error]
+    type = RunException
+    input = 'contact_conductance_supplied.i'
+    cli_args = 'InterfaceKernels/electrostatic_contact/mean_hardness=1.0'
+    expect_err = 'In electrostatic_contact, both user-supplied electrical contact conductance'
+    prereq = electrostatic_contact_conductance_supplied
+    requirement = 'The system shall supply an error if both user-supplied and system-calculated contact conductance is requested when determining the effect of electrostatic contact on an interface.'
+    design = 'ElectrostaticContactCondition.md'
+    issues = '#21091'
+  []
+  [electrostatic_contact_conductance_calculated]
+    type = Exodiff
+    input = 'contact_conductance_calculated.i'
+    exodiff = 'contact_conductance_calculated_out.e'
+    requirement = 'The system shall be capable of calculating the effect of electrostatic contact at an interface between two different materials, given a system-calculated contact conductance.'
+    design = 'ElectrostaticContactCondition.md'
+    issues = '#21091'
+  []
+  [electrostatic_contact_conductance_calculated_jacobian]
+    type = PetscJacobianTester
+    input = 'contact_conductance_calculated.i'
+    run_sim = false
+    prereq = electrostatic_contact_conductance_calculated
+    requirement = 'The system shall calculate the correct AD jacobian contribution for electrostatic contact at an interface, given a system-calculated contact conductance.'
+    design = 'ElectrostaticContactCondition.md'
+    issues = '#21091'
+  []
+  [electrostatic_contact_analytic_solution_test_two_block]
+    type = CSVDiff
+    input = 'analytic_solution_test_two_block.i'
+    csvdiff = 'analytic_solution_test_two_block_out.csv'
+    allow_test_objects = True
+    requirement = 'The system shall calculate the correct electrostatic contact potential solution when compared to an analytic result, given a one-dimensional, two-material-block scenario.'
+    design = 'ElectrostaticContactCondition.md'
+    verification = 'electrostatic_contact_two_block.md'
+    issues = '#21096'
+  []
+  [electrostatic_contact_analytic_solution_test_three_block]
+    type = CSVDiff
+    input = 'analytic_solution_test_three_block.i'
+    csvdiff = 'analytic_solution_test_three_block_out.csv'
+    allow_test_objects = True
+    requirement = 'The system shall calculate the correct electrostatic contact potential solution when compared to an analytic result, given a one-dimensional, three-material-block scenario.'
+    design = 'ElectrostaticContactCondition.md'
+    verification = 'electrostatic_contact_three_block.md'
+    issues = '#21096'
+  []
+[]

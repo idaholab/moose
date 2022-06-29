@@ -37,6 +37,13 @@ Applications:
         log_missing_markdown: WARNING
         show_warning: false
 
+    electromagnetics:
+        exe_directory: modules/combined
+        app_types:
+            - ElectromagneticsApp
+        content_directory: modules/electromagnetics/doc/content
+        show_warning: false
+
     external_petsc_solver:
         exe_directory: modules/combined
         app_types:
@@ -317,6 +324,11 @@ Requirements:
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_missing_requirement: WARNING
+        show_warning: false
+
+    electromagnetics:
+        directories:
+            - modules/electromagnetics
         show_warning: false
 
     external_petsc_solver:

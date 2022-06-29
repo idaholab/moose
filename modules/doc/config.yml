@@ -4,6 +4,7 @@ Content:
     - modules/chemical_reactions/doc/content
     - modules/combined/doc/content
     - modules/contact/doc/content
+    - modules/electromagnetics/doc/content
     - modules/external_petsc_solver/doc/content
     - modules/geochemistry/doc/content
     - modules/fluid_properties/doc/content
@@ -144,6 +145,7 @@ Extensions:
             thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thermal_hydraulics.yml
             porous_flow: !include modules/porous_flow/doc/sqa_porous_flow.yml
             level_set: !include modules/level_set/doc/sqa_level_set.yml
+            electromagnetics: !include modules/electromagnetics/doc/sqa_electromagnetics.yml
 
         requirement-groups:
             dgkernels: DGKernel Objects

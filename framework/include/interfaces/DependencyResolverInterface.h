@@ -46,6 +46,12 @@ public:
   static void sort(typename std::vector<T> & vector);
 
   /**
+   * Given a vector, sort using the depth-first search
+   */
+  template <typename T>
+  static void sortDFS(typename std::vector<T> & vector);
+
+  /**
    * A helper method for cyclic errors.
    */
   template <typename T, typename T2>
@@ -56,37 +62,54 @@ template <typename T>
 void
 DependencyResolverInterface::sort(typename std::vector<T> & vector)
 {
-  DependencyResolver<T> resolver;
+  sortDFS(vector);
+}
 
-  typename std::vector<T>::iterator start = vector.begin();
-  typename std::vector<T>::iterator end = vector.end();
+template <typename T>
+void
+DependencyResolverInterface::sortDFS(typename std::vector<T> & vector)
+{
+  if (vector.size() <= 1)
+    return;
 
-  for (typename std::vector<T>::iterator iter = start; iter != end; ++iter)
+  /**
+   * Class that represents the dependency as a graph
+   */
+  DependencyResolver<T> graph;
+
+  // Map of suppliers: what is supplied -> by what object
+  std::multimap<std::string, T> suppliers_map;
+  for (auto & v : vector)
   {
-    const std::set<std::string> & requested_items = (*iter)->getRequestedItems();
-
-    for (typename std::vector<T>::iterator iter2 = start; iter2 != end; ++iter2)
+    for (const auto & supplied_item : v->getSuppliedItems())
     {
-      if (iter == iter2)
-        continue;
-
-      const std::set<std::string> & supplied_items = (*iter2)->getSuppliedItems();
-
-      std::set<std::string> intersect;
-      std::set_intersection(requested_items.begin(),
-                            requested_items.end(),
-                            supplied_items.begin(),
-                            supplied_items.end(),
-                            std::inserter(intersect, intersect.end()));
-
-      // If the intersection isn't empty then there is a dependency here
-      if (!intersect.empty())
-        resolver.insertDependency(*iter, *iter2);
+      suppliers_map.emplace(supplied_item, v);
+      graph.addNode(v);
     }
   }
 
-  // Sort based on dependencies
-  std::stable_sort(start, end, resolver);
+  // build the dependency graph
+  for (auto & v : vector)
+  {
+    for (const auto & requested_item : v->getRequestedItems())
+    {
+      const auto & [begin_it, end_it] = suppliers_map.equal_range(requested_item);
+      if (begin_it == end_it)
+        graph.addNode(v);
+      else
+        for (const auto & [supplier_name, supplier_object] : as_range(begin_it, end_it))
+        {
+          libmesh_ignore(supplier_name);
+          if (supplier_object == v)
+            // We allow an object to have a circular dependency within itself; e.g. we choose to
+            // trust a developer knows what they are doing within a single object
+            continue;
+          graph.addEdge(supplier_object, v);
+        }
+    }
+  }
+
+  vector = graph.dfs();
 }
 
 template <typename T, typename T2>
@@ -97,10 +120,10 @@ DependencyResolverInterface::cyclicDependencyError(CyclicDependencyException<T2>
   std::ostringstream oss;
 
   oss << header << ":\n";
-  const typename std::multimap<T2, T2> & depends = e.getCyclicDependencies();
-  for (typename std::multimap<T2, T2>::const_iterator it = depends.begin(); it != depends.end();
-       ++it)
-    oss << (static_cast<T>(it->first))->name() << " -> " << (static_cast<T>(it->second))->name()
-        << "\n";
+  const auto & adjacency_lists = e.getCyclicDependencies();
+  for (const auto & [object, object_adjacencies] : adjacency_lists)
+    for (const auto & adjacent_object : object_adjacencies)
+      oss << static_cast<T>(object)->name() << " -> " << static_cast<T>(adjacent_object)->name()
+          << "\n";
   mooseError(oss.str());
 }
