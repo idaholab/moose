@@ -1,0 +1,22 @@
+[Tests]
+  issues = '#21457'
+  design = 'RayTracingStudy.md'
+
+  [initial]
+    type = CSVDiff
+    input = registration_restart.i
+    csvdiff = initial.csv
+    cli_args = 'Outputs/file_base=initial'
+    recover = false
+    requirement = 'The system shall support the storage of registered rays via the restart and recover system'
+  []
+  [restart]
+    type = CSVDiff
+    input = registration_restart.i
+    csvdiff = restart.csv
+    prereq = initial
+    cli_args = 'Outputs/file_base=restart Executioner/start_time=1 Problem/force_restart=true Problem/restart_file_base=initial_cp/LATEST'
+    recover = false
+    requirement = 'The system shall support the loading of registered rays via the restart and recover system'
+  []
+[]
