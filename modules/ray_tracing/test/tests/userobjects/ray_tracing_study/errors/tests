@@ -274,14 +274,5 @@
       allow_test_objects = true
       detail = 'getting the index of ray aux data when data with the same name exists'
     []
-    [register_ray_again]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/type=RayTracingStudyWithRegistrationTest
-                  UserObjects/study/register_ray_again=true'
-      expect_err = 'A ray with the name "foo" is already registered'
-      allow_test_objects = true
-      detail = 'registering a ray more than once with the same name'
-    []
   []
 []
