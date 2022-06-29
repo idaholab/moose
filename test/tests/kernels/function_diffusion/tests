@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = 'Exodiff'
+    input = 'function_diffusion.i'
+    exodiff = 'function_diffusion_out.e'
+
+    issues = '#13744'
+    design = 'kernels/FunctionDiffusion.md'
+    requirement = 'The system shall run a simple 2D linear diffusion problem with Dirichlet boundary conditions on a regular mesh, where the laplace operator uses a function coefficient.'
+  []
+[]

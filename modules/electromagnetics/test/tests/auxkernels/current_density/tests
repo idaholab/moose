@@ -1,0 +1,48 @@
+[Tests]
+  design = 'CurrentDensity.md'
+  issues = '#21095'
+  [ad_exodiff]
+    type = Exodiff
+    input = current_density.i
+    cli_args = 'Outputs/file_base=ad_current_density_out'
+    exodiff = ad_current_density_out.e
+    requirement = 'The system shall calculate the current density provided with electrostatic field calculations, using an AD material property for electrical conductivity.'
+  []
+  [non_ad_exodiff]
+    type = Exodiff
+    input = current_density.i
+    cli_args = 'Outputs/file_base=non_ad_current_density_out Materials/conductivity/type=GenericConstantMaterial AuxKernels/current_density/type=CurrentDensity'
+    exodiff = non_ad_current_density_out.e
+    requirement = 'The system shall calculate the current density provided with electrostatic field calculations, using a non-AD material property for electrical conductivity.'
+  []
+  [em_ad_exodiff]
+    type = Exodiff
+    input = em_current_density.i
+    exodiff = em_current_density_out.e
+    requirement = 'The system shall calculate the current density when provided with a vector field variable, simulating the case when an electromagnetic vector field is provided.'
+  []
+  [errors]
+    requirement = "The system shall provide an error while "
+    [two_vars]
+      type = RunException
+      input = error_test.i
+      cli_args = 'AuxKernels/current_density/potential=potential AuxKernels/current_density/electric_field=electric_field'
+      expect_err = 'In current_density, both electrostatic potential and electric field variables have been provided. Please only provide one or the other!'
+      detail = 'calculating the current density when both electrostatic and electromagnetic field variables are provided by the user.'
+    []
+    [ES_electric_field_var]
+      type = RunException
+      input = error_test.i
+      cli_args = 'AuxKernels/current_density/electric_field=electric_field'
+      expect_err = 'In current_density, an electric field vector variable has been provided when `electrostatic = TRUE`'
+      detail = 'calculating the current density when an electrostatic calculation is requested but an electromagnetic field variable is provided.'
+    []
+    [EM_potential_var]
+      type = RunException
+      input = error_test.i
+      cli_args = 'AuxKernels/current_density/potential=potential AuxKernels/current_density/electrostatic=false'
+      expect_err = 'In current_density, an electrostatic potential variable has been provided when `electrostatic = FALSE`'
+      detail = 'calculating the current density when an electromagnetic calculation is requested but an electrostatic field variable is provided.'
+    []
+  []
+[]

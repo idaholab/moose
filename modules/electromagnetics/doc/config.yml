@@ -1,0 +1,22 @@
+Content:
+    - framework/doc/content
+    - modules/electromagnetics/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE Electromagnetics Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/electromagnetics
+    MooseDocs.extensions.appsyntax:
+        executable: ${MOOSE_DIR}/modules/electromagnetics
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/electromagnetics/include
+    MooseDocs.extensions.common:
+        shortcuts: !include framework/doc/globals.yml
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.sqa: disable

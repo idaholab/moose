@@ -1,0 +1,30 @@
+[Tests]
+  [waves]
+    type = Exodiff
+    input = portbc_waves.i
+    exodiff = portbc_waves_out.e
+    requirement = 'The system shall be able to simulate a first order electromagnetic wave launching/absorbing port as a boundary condition, given the incoming/outgoing wave, for real and imaginary components of the field and for vector variables.'
+    design = 'VectorEMRobinBC.md'
+    issues = '#21077'
+  []
+  [waves_jacobian_test]
+    type = PetscJacobianTester
+    input = 'portbc_waves.i'
+    run_sim = false
+    difference_tol = 3.8e-07  # default 1e-07
+    prereq = waves
+    requirement = 'The system shall use the correct jacobian contribution for a first order electromagnetics wave launching/absorbing port boundary condition for vector field variables.'
+    design = 'VectorEMRobinBC.md'
+    issues = '#21077'
+  []
+  [waves_absorbing_error]
+    type = RunException
+    input = portbc_waves.i
+    prereq = waves
+    cli_args = 'BCs/sides_real/mode=absorbing'
+    expect_err = 'In sides_real, mode was set to Absorbing, while an incoming'
+    requirement = 'The system shall present an error to the user whenever the mode of operation for VectorEMRobinBC is set to absorbing, but incoming wave information is supplied.'
+    design = 'VectorEMRobinBC.md'
+    issues = '#21100'
+  []
+[]
