@@ -53,34 +53,42 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // add variables action
   registerTask("add_navier_stokes_variables", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_variables", "add_variable");
+  addTaskDependency("add_mortar_variable", "add_navier_stokes_variables");
 
   // add ICs action
   registerTask("add_navier_stokes_ics", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_ics", "add_ic");
+  addTaskDependency("add_constraint", "add_navier_stokes_ics");
 
   // add user objects action
   registerTask("add_navier_stokes_user_objects", /*is_required=*/false);
-  addTaskDependency("add_navier_stokes_user_objects", "add_navier_stokes_ics");
+  addTaskDependency("add_navier_stokes_user_objects", "add_user_object");
+  addTaskDependency("add_distribution", "add_navier_stokes_user_objects");
 
   // add Kernels action
   registerTask("add_navier_stokes_kernels", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_kernels", "add_kernel");
+  addTaskDependency("resolve_optional_materials", "add_navier_stokes_kernels");
 
   // add BCs actions
   registerTask("add_navier_stokes_bcs", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_bcs", "add_bc");
+  addTaskDependency("resolve_optional_materials", "add_navier_stokes_bcs");
 
   // register attributes
   registerTask("ns_meta_action", /*is_required=*/true);
   addTaskDependency("ns_meta_action", "meta_action");
+  addTaskDependency("dynamic_object_registration", "ns_meta_action");
 
   // register attributes
   registerTask("add_navier_stokes_pps", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_pps", "add_postprocessor");
+  addTaskDependency("add_vector_postprocessor", "add_navier_stokes_pps");
 
   // register attributes
   registerTask("add_navier_stokes_materials", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_materials", "add_material");
+  addTaskDependency("add_master_action_material", "add_navier_stokes_materials");
 }
 
 void

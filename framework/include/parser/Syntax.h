@@ -53,14 +53,11 @@ public:
    */
   void appendTaskName(const std::string & task, const std::string & moose_object_type);
 
-  /**
-   * Method to insert a new task in the list of existing tasks at the specified location.
-   */
   void addDependency(const std::string & task, const std::string & pre_req);
 
   /**
-   * Adds all dependencies in a single call. The string is split on parenthesis and each task listed
-   * within the parenthesis is given equal precedence.
+   * Adds all dependencies in a single call. The string is split on parenthesis and each task
+   * listed within the parenthesis is given equal precedence.
    */
   void addDependencySets(const std::string & action_sets);
 
