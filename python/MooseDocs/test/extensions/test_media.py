@@ -114,11 +114,11 @@ class TestImage(MooseDocsTestCase):
         res = self.render(ast, renderer=base.LatexRenderer())
         self.assertSize(res, 1)
         self.assertLatexEnvironment(res(0), 'figure', size=2)
-        self.assertLatexCommand(res(0,0), 'caption', size=2)
-        self.assertLatexCommand(res(0,0,0), 'label', size=1, string='idaho')
-        self.assertLatexString(res(0,0,1), 'test')
-        self.assertLatexCommand(res(0,1), 'includegraphics')
-        self.assertIn('Flag_of_Idaho.pdf', res(0,1,0)['content'])
+        self.assertLatexCommand(res(0,1), 'caption', size=2)
+        self.assertLatexCommand(res(0,1,0), 'label', size=1, string='idaho')
+        self.assertLatexString(res(0,1,1), 'test')
+        self.assertLatexCommand(res(0,0), 'includegraphics')
+        self.assertIn('Flag_of_Idaho.pdf', res(0,0,0)['content'])
 
 class TestVideo(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, media]
@@ -230,12 +230,12 @@ class TestVideo(MooseDocsTestCase):
         res = self.render(ast, renderer=base.LatexRenderer())
         self.assertSize(res, 1)
         self.assertLatexEnvironment(res(0), 'figure', size=5)
-        self.assertLatexCommand(res(0,0), 'caption', size=2)
-        self.assertLatexCommand(res(0,0,0), 'label', size=1, string='idaho')
-        self.assertLatexString(res(0,0,1), 'test')
-        self.assertLatexCommand(res(0,1), 'includegraphics')
-        self.assertIn('Flag_of_Idaho.pdf', res(0,1,0)['content'])
-        self.assertLatexCommand(res(0,3), 'url', string='http://clips.vorwaerts-gmbh.de/VfE.webm')
+        self.assertLatexCommand(res(0,4), 'caption', size=2)
+        self.assertLatexCommand(res(0,4,0), 'label', size=1, string='idaho')
+        self.assertLatexString(res(0,4,1), 'test')
+        self.assertLatexCommand(res(0,0), 'includegraphics')
+        self.assertIn('Flag_of_Idaho.pdf', res(0,0,0)['content'])
+        self.assertLatexCommand(res(0,2), 'url', string='http://clips.vorwaerts-gmbh.de/VfE.webm')
 
 
 class TestYouTube(MooseDocsTestCase):
