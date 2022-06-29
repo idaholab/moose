@@ -202,7 +202,6 @@ SinglePhaseFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, R
   // From e(p, rho), compute: de(p,rho)/dp, de(p,rho)/drho
   Real depr_dp = 0., depr_drho = 0.;
   e_from_p_rho(p, rho, e, depr_dp, depr_drho);
-
   // Using partial derivative rules, we have:
   // de(p,T)/dp = de(p,rho)/dp * dp/dp + de(p,rho)/drho * drho(p,T)/dp, (dp/dp == 1)
   // de(p,T)/dT = de(p,rho)/dp * dp/dT + de(p,rho)/drho * drho(p,T)/dT, (dp/dT == 0)
