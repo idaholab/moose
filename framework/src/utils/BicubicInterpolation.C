@@ -174,11 +174,13 @@ void BicubicInterpolation::sampleValueAndDerivatives(
   findInterval(_x1, x1, x1l, x1u, t);
   findInterval(_x2, x2, x2l, x2u, u);
 
+
   y = 0.0;
   for (const auto i : make_range(4))
     for (const auto j : make_range(4))
+    {
       y += _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) * MathUtils::pow(u, j);
-
+    }
   // Note: sum from i = 1 as the first term is zero
   dy1 = 0.0;
   for (const auto i : make_range(1, 4))
@@ -375,6 +377,23 @@ void BicubicInterpolation::findInterval(
   klo = 0;
   mooseAssert(x.size() >= 2,
               "There must be at least two points in the table in BicubicInterpolation");
+
+  // if (xi <= x[0])
+  // {
+  //   mooseDoOnce(mooseWarning("Bicubic interpolation sampled out of bounds"));
+  //   klo = 0;
+  //   khi = 1;
+  //   xs = 0;
+  //   return;
+  // }
+  // else if (xi >= x.back())
+  // {
+  //   mooseDoOnce(mooseWarning("Bicubic interpolation sampled out of bounds"));
+  //   klo = x.size() - 2;
+  //   khi = x.size() - 1;
+  //   xs = 1;
+  //   return;
+  // }
 
   khi = x.size() - 1;
   while (khi - klo > 1)
