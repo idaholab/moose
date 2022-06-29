@@ -30,6 +30,8 @@ requirements:
     - gperftools
     - graphviz
     - perl
+    - setuptools <60
+    - openssl <3
 
 test:
   commands:
