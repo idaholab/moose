@@ -696,7 +696,13 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
         std::abs(msinfo.xi2_b) > 1.0 + TOLERANCE)
     {
       // Erase from secondary to msms map
-      libmesh_map_find(_secondary_elems_to_mortar_segments, msinfo.secondary_elem).erase(msm_elem);
+      auto it = _secondary_elems_to_mortar_segments.find(msinfo.secondary_elem);
+      mooseAssert(it != _secondary_elems_to_mortar_segments.end(),
+                  "We should have found the element");
+      auto & msm_set = it->second;
+      msm_set.erase(msm_elem);
+      if (msm_set.empty())
+        _secondary_elems_to_mortar_segments.erase(it);
 
       // Erase msinfo
       _msm_elem_to_info.erase(msm_elem);
@@ -851,14 +857,18 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
          ++el)
     {
       const Elem * secondary_side_elem = *el;
-      auto & secondary_to_msm_element_set =
-          _secondary_elems_to_mortar_segments[secondary_side_elem];
 
       const Real secondary_volume = secondary_side_elem->volume();
 
       // If this Elem is not in the current secondary subdomain, go on to the next one.
       if (secondary_side_elem->subdomain_id() != secondary_subd_id)
         continue;
+
+      auto [secondary_elem_to_msm_map_it, insertion_happened] =
+          _secondary_elems_to_mortar_segments.emplace(secondary_side_elem,
+                                                      std::set<Elem *, CompareDofObjectsByID>{});
+      libmesh_ignore(insertion_happened);
+      auto & secondary_to_msm_element_set = secondary_elem_to_msm_map_it->second;
 
       std::vector<std::unique_ptr<MortarSegmentHelper>> mortar_segment_helper(
           secondary_side_elem->n_sub_elem());
@@ -1127,10 +1137,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
                            " problem geometry but may indicate a failure of the element search"
                            " or projection"));
       }
-      // End loop through secondary elements
-    }
-    // End loop through mortar constraint pairs
-  }
+
+      if (secondary_to_msm_element_set.empty())
+        _secondary_elems_to_mortar_segments.erase(secondary_elem_to_msm_map_it);
+    } // End loop through secondary elements
+  }   // End loop through mortar constraint pairs
 
   _mortar_segment_mesh->cache_elem_data();
 
@@ -2219,28 +2230,25 @@ AutomaticMortarGeneration::secondariesToMortarSegments(const Node & node) const
     mooseError("end of secondary map in associatedMortarSegments");
 
   const auto & secondary_elems = secondary_it->second;
-  std::vector<MortarFilterIter> ret(secondary_elems.size());
+  std::vector<MortarFilterIter> ret;
+  ret.reserve(secondary_elems.size());
 
   for (const auto i : index_range(secondary_elems))
   {
-    auto msm_it = _secondary_elems_to_mortar_segments.find(secondary_elems[i]);
+    auto * const secondary_elem = secondary_elems[i];
+    auto msm_it = _secondary_elems_to_mortar_segments.find(secondary_elem);
     if (msm_it == _secondary_elems_to_mortar_segments.end())
-      mooseError("end of mortar segment map in associatedMortarSegments");
-    ret[i] = msm_it;
-  }
+      // We may have removed this element key from this map
+      continue;
 
-  // Remove empty mortar segments from the set associated with secondary nodes
-  std::vector<AutomaticMortarGeneration::MortarFilterIter> iterators;
-  for (size_t i = 0; i < ret.size(); i++)
-  {
-    mooseAssert(ret[i]->first->active(),
+    mooseAssert(secondary_elem->active(),
                 "We loop over active elements when building the mortar segment mesh, so we golly "
                 "well hope this is active.");
-
-    if (!ret[i]->second.empty())
-      // This is local and the mortar segment set isn't empty, so include
-      iterators.push_back(ret[i]);
+    mooseAssert(!msm_it->second.empty(),
+                "We should have removed all secondaries from this map if they do not have any "
+                "mortar segments associated with them.");
+    ret.push_back(msm_it);
   }
 
-  return iterators;
+  return ret;
 }
