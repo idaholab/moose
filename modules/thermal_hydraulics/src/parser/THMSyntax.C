@@ -74,6 +74,7 @@ registerActions(Syntax & syntax)
     syntax.addDependency("THM:identify_loops", "add_fluid_properties");
     syntax.addDependency("THM:integrity_check", "THM:init_components");
     syntax.addDependency("THM:integrity_check", "THM:identify_loops");
+    syntax.addDependency("THM:integrity_check", "THM:debug_action");
     syntax.addDependency("THM:build_mesh", "THM:init_simulation");
     syntax.addDependency("add_mesh_generator", "THM:build_mesh");
     syntax.addDependency("THM:setup_mesh", "create_problem_complete");
@@ -95,6 +96,7 @@ registerActions(Syntax & syntax)
     syntax.addDependency("THM:preconditioning_integrity_check", "check_integrity");
     syntax.addDependency("THM:add_relationship_managers", "add_geometric_rm");
     syntax.addDependency("THM:output_vector_velocity", "THM:add_relationship_managers");
+    syntax.addDependency("THM:add_variables", "THM:integrity_check");
   }
   catch (CyclicDependencyException<std::string> & e)
   {

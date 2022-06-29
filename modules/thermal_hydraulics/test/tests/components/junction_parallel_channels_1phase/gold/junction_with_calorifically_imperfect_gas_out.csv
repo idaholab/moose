@@ -1,2 +1,2 @@
-time,net_mass_flow_rate_domain,net_mass_flow_rate_volume_junction
-200,0,0
+time,Delta_p,net_mass_flow_rate_domain,net_mass_flow_rate_volume_junction
+20,-182.76397849061,0,0

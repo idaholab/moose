@@ -79,6 +79,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerTask("validate_coordinate_systems", /*is_required=*/false);
   addTaskDependency("validate_coordinate_systems", "create_problem_complete");
+  addTaskDependency("setup_postprocessor_data", "validate_coordinate_systems");
 }
 
 void

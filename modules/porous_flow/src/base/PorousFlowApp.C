@@ -66,6 +66,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerMooseObjectTask("add_porous_flow_bc", PorousFlowSinkBC, false);
   addTaskDependency("add_porous_flow_bc", "add_bc");
+  addTaskDependency("resolve_optional_materials", "add_porous_flow_bc");
 
   // Task dependency and syntax for action to automatically add PorousFlow materials
   registerSyntax("PorousFlowAddMaterialAction", "Materials");
@@ -73,6 +74,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // Task dependency and syntax for action to automatically add PorousFlowJoiner materials
   registerTask("add_joiners", /*is_required=*/false);
   addTaskDependency("add_joiners", "add_material");
+  addTaskDependency("add_master_action_material", "add_joiners");
 
   registerSyntaxTask("PorousFlowAddMaterialJoiner", "Materials", "add_joiners");
 }

@@ -33,6 +33,7 @@ static unsigned int contact_userobject_counter = 0;
 registerMooseAction("ContactApp", ContactAction, "append_mesh_generator");
 registerMooseAction("ContactApp", ContactAction, "add_aux_variable");
 // for mortar Lagrange multiplier
+registerMooseAction("ContactApp", ContactAction, "add_contact_aux_variable");
 registerMooseAction("ContactApp", ContactAction, "add_mortar_variable");
 registerMooseAction("ContactApp", ContactAction, "add_aux_kernel");
 // for mortar constraint
@@ -255,7 +256,7 @@ void
 ContactAction::act()
 {
   // proform problem checks/corrections once during the first feasible task
-  if (_current_task == "add_aux_variable")
+  if (_current_task == "add_contact_aux_variable")
   {
     if (!_problem->getDisplacedProblem())
       mooseError(
@@ -384,7 +385,7 @@ ContactAction::act()
     }
   }
 
-  if (_current_task == "add_aux_variable")
+  if (_current_task == "add_contact_aux_variable")
   {
     std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
     const auto order =

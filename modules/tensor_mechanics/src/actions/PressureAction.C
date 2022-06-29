@@ -84,8 +84,6 @@ PressureAction::act()
     params.set<Real>("alpha") =
         isParamValid("alpha") ? getParam<Real>("alpha") : getParam<Real>("hht_alpha");
 
-    if (_use_ad)
-      params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];
 
     if (_has_save_in_vars[i])
