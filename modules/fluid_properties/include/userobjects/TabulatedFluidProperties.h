@@ -126,6 +126,8 @@ public:
 
   virtual Real T_from_p_rho(Real pressure, Real rho) const;
 
+  virtual void T_from_p_rho(Real pressure, Real rho, Real & T, Real & dT_dp, Real &  dT_drho) const;
+
   virtual Real h_from_p_T(Real p, Real T) const override;
 
   virtual void
@@ -283,6 +285,10 @@ protected:
 
   /// if the loopup table p(v, e) and T(v, e) should be constructed
   bool _construct_pT_from_ve;
+  /// if the loopup table p(v, e) and T(v, e) should be constructed
+  bool _construct_from_ve;
+  /// if the loopup table p(v, h) and T(v, h) should be constructed
+  bool _construct_from_vh;
   /// Number of specific volume points in the tabulated data
   unsigned int _num_v;
   /// Number of internal energy points in tabulated data
