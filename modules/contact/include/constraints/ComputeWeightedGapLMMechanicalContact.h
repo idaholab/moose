@@ -97,6 +97,9 @@ protected:
   /// Whether the dof objects are nodal; if they're not, then they're elemental
   const bool _nodal;
 
+  /// Cartesian Lagrange multipliers for mechanical contact
+  std::vector<MooseVariable *> _lm_vars;
+
   /// The x displacement variable
   const MooseVariable * const _disp_x_var;
   /// The y displacement variable
@@ -109,6 +112,12 @@ protected:
 
   /// A map from node to weighted gap and normalization (if requested)
   std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_weighted_gap;
+
+  /// A map from node to normal vector (2D)
+  std::unordered_map<const DofObject *, RealVectorValue> _dof_to_normal_vector;
+
+  /// A map from node to tangent vector (2D for now)
+  std::unordered_map<const DofObject *, std::array<RealVectorValue, 2>> _dof_to_tangent_vectors;
 
   /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _weighted_gap_ptr = nullptr;

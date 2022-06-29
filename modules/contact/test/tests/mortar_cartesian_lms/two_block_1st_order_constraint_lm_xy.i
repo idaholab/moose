@@ -3,8 +3,8 @@
   volumetric_locking_correction = true
 []
 
-theta = 60
-velocity = 0.15
+theta = 0
+velocity = -0.05
 
 [Mesh]
   [left_block]
@@ -97,11 +97,16 @@ velocity = 0.15
   #   block = 'secondary_lower'
   #   use_dual = true
   # []
-  [px]
+  [lm_x]
     block = 'secondary_lower'
     use_dual = true
   []
-  [py]
+  [lm_y]
+    block = 'secondary_lower'
+    use_dual = true
+  []
+  # Not used, dummy
+  [lm_z]
     block = 'secondary_lower'
     use_dual = true
   []
@@ -185,9 +190,10 @@ velocity = 0.15
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
     secondary_subdomain = 'secondary_lower'
-    variable = px
-    var_x = px
-    var_y = py
+    lm_x = lm_x
+    lm_y = lm_y
+
+    variable = lm_z # This can be anything really
     disp_x = disp_x
     disp_y = disp_y
     use_displaced_mesh = true
@@ -200,9 +206,7 @@ velocity = 0.15
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
     secondary_subdomain = 'secondary_lower'
-    variable = px
-    var_x = px
-    var_y = py
+    variable = lm_x
     secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
@@ -216,9 +220,7 @@ velocity = 0.15
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
     secondary_subdomain = 'secondary_lower'
-    variable = py
-    var_x = px
-    var_y = py
+    variable = lm_y
     secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
@@ -247,7 +249,7 @@ velocity = 0.15
   line_search = none
 
   dt = 0.1
-  dtmin = 0.1
+  dtmin = 0.001
   end_time = 0.4
 
   l_max_its = 100

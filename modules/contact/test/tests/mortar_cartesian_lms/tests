@@ -1,0 +1,16 @@
+[Tests]
+  design = 'constraints/ComputeWeightedGapLMMechanicalContact.md'
+  issues = '#21641'
+  [frictionless-weighted-gap-lm]
+    type = 'Exodiff'
+    exodiff = 'frictionless-weighted-gap-lm_out.e'
+    input = 'frictionless-weighted-gap-lm.i'
+    rel_err = 5.0e-4
+    min_parallel = 4
+    max_parallel = 4
+    min_ad_size = '50'
+    valgrind = 'heavy'
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall solve a two-dimensional frictionless problem with Cartesian Lagrange multipliers.'
+  []
+[]

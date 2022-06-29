@@ -81,11 +81,6 @@ MortarConstraintBase::validParams()
       "While DEFAULT quadrature order is typically sufficiently accurate, exact integration of "
       "QUAD mortar faces requires SECOND order quadrature for FIRST variables and FOURTH order "
       "quadrature for SECOND order variables.");
-
-  params.addRequiredCoupledVar("var_x", "x-direction Lagrange multiplier variable.");
-  params.addRequiredCoupledVar("var_y", "y-direction Lagrange multiplier variable.");
-  params.addCoupledVar("var_z", "z-direction Lagrange multiplier variable.");
-
   return params;
 }
 
@@ -100,13 +95,9 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
                                  Moose::VarKindType::VAR_NONLINEAR,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _use_lm_z(_fe_problem.mesh().dimension() == 3 ? true : false),
     _var(isParamValid("variable")
              ? &_subproblem.getStandardVariable(_tid, parameters.getMooseType("variable"))
              : nullptr),
-    _var_x(getVar("var_x", 0)),
-    _var_y(getVar("var_y", 0)),
-    _var_z(_use_lm_z ? getVar("var_z", 0) : nullptr),
     _secondary_var(
         isParamValid("secondary_variable")
             ? _sys.getActualFieldVariable<Real>(_tid, parameters.getMooseType("secondary_variable"))

@@ -63,11 +63,6 @@ protected:
   /// The LM solution
   const ADVariableValue & _lambda;
 
-  /// The LM solution in the cartesian coordinate system
-  const ADVariableValue & _lambda_x;
-  const ADVariableValue & _lambda_y;
-  const ADVariableValue & _lambda_z;
-
   /// The primal solution on the secondary side
   const ADVariableValue & _u_secondary;
 

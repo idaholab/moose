@@ -49,6 +49,14 @@ ComputeWeightedGapLMMechanicalContact::validParams()
   params.addCoupledVar("disp_z", "The z displacement variable");
   params.addParam<Real>(
       "c", 1e6, "Parameter for balancing the size of the gap and contact pressure");
+
+  params.addRequiredCoupledVar("lm_x",
+                               "Mechanical contact Lagrange multiplier along the x Cartesian axis");
+  params.addRequiredCoupledVar(
+      "lm_y", "Mechanical contact Lagrange multiplier along the y Cartesian axis.");
+  params.addCoupledVar("lm_z",
+                       "Mechanical contact Lagrange multiplier along the z Cartesian axis.");
+
   params.addParam<bool>(
       "normalize_c",
       false,
@@ -82,14 +90,33 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
              "in order to make its implementation feasible");
 #endif
 
+  _lm_vars.push_back(getVar("lm_x", 0));
+  _lm_vars.push_back(getVar("lm_y", 0));
+
+  if (isParamValid("lm_z") ^ _has_disp_z)
+    paramError("lm_z",
+               "In three-dimensions, both the Z Lagrange multiplier and the Z displacement need to "
+               "be provided");
+
+  if (_has_disp_z)
+    _lm_vars.push_back(getVar("lm_z", 0));
+
+  if (_interpolate_normals)
+    paramError("interpolate_normals",
+               "This version of normal mechanical contact does not allow mortar interpolation of "
+               "geometric vectors");
+
+  // TODO: Add a third variable for three dimensions.
+
   if (!getParam<bool>("use_displaced_mesh"))
     paramError(
         "use_displaced_mesh",
         "'use_displaced_mesh' must be true for the ComputeWeightedGapLMMechanicalContact object");
 
-  if (!_var->isNodal())
-    if (_var->feType().order != static_cast<Order>(0))
-      mooseError("Normal contact constraints only support elemental variables of CONSTANT order");
+  for (const auto i : index_range(_lm_vars))
+    if (!_lm_vars[i]->isNodal())
+      if (_lm_vars[i]->feType().order != static_cast<Order>(0))
+        mooseError("Normal contact constraints only support elemental variables of CONSTANT order");
 }
 
 ADReal ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType)
@@ -156,14 +183,11 @@ ComputeWeightedGapLMMechanicalContact::computeQpIProperties()
               "Making sure that _normals is the expected size");
 
   // Get the _dof_to_weighted_gap map
-  const DofObject * dof = _var->isNodal()
+  const DofObject * dof = _lm_vars[0]->isNodal()
                               ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                               : static_cast<const DofObject *>(_lower_secondary_elem);
 
-  if (_interpolate_normals)
-    _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap;
-  else
-    _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap_nodal * _normals[_i];
+  _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap_nodal * _normals[_i];
 
   if (_normalize_c)
     _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
@@ -173,6 +197,8 @@ void
 ComputeWeightedGapLMMechanicalContact::residualSetup()
 {
   _dof_to_weighted_gap.clear();
+  _dof_to_normal_vector.clear();
+  _dof_to_tangent_vectors.clear();
 }
 
 void
@@ -187,13 +213,26 @@ ComputeWeightedGapLMMechanicalContact::computeResidual(const Moose::MortarType m
   if (mortar_type != Moose::MortarType::Lower)
     return;
 
-  mooseAssert(_var, "LM variable is null");
+  mooseAssert(_lm_vars[0], "LM variable is null");
 
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
     computeQpProperties();
     for (_i = 0; _i < _test.size(); ++_i)
+    {
       computeQpIProperties();
+
+      // Get the _dof_to_weighted_gap map
+      const DofObject * dof =
+          _lm_vars[0]->isNodal()
+              ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
+              : static_cast<const DofObject *>(_lower_secondary_elem);
+      // We do not interpolate geometry, so just match the local node _i with the corresponding _i
+      _dof_to_normal_vector[dof] = _normals[_i];
+      const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+      _dof_to_tangent_vectors[dof][0] = nodal_tangents[0][_i];
+      _dof_to_tangent_vectors[dof][1] = nodal_tangents[1][_i];
+    }
   }
 }
 
@@ -231,7 +270,8 @@ ComputeWeightedGapLMMechanicalContact::communicateGaps()
   const auto & lm_mesh = _mesh.getMesh();
 
   auto action_functor = [this, &lm_mesh](const processor_id_type libmesh_dbg_var(pid),
-                                         const std::vector<Datum> & sent_data) {
+                                         const std::vector<Datum> & sent_data)
+  {
     mooseAssert(pid != this->processor_id(), "We do not send messages to ourself here");
     for (auto & tup : sent_data)
     {
@@ -292,8 +332,8 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   const auto & weighted_gap = *_weighted_gap_ptr;
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
 
-  const auto dof_index_x = dof->dof_number(_sys.number(), _var_x->number(), 0);
-  const auto dof_index_y = dof->dof_number(_sys.number(), _var_y->number(), 0);
+  const auto dof_index_x = dof->dof_number(_sys.number(), _lm_vars[0]->number(), 0);
+  const auto dof_index_y = dof->dof_number(_sys.number(), _lm_vars[1]->number(), 0);
 
   ADReal lm_x = (*_sys.currentSolution())(dof_index_x);
   ADReal lm_y = (*_sys.currentSolution())(dof_index_y);
@@ -301,50 +341,30 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   Moose::derivInsert(lm_x.derivatives(), dof_index_x, 1.);
   Moose::derivInsert(lm_y.derivatives(), dof_index_y, 1.);
 
-  // project x, y and z lm component values to the local coordinate system to get the normal contact
-  // pressure
-  ADReal normal_lm_value = lm_x * _normals[_i](0) + lm_y * _normals[_i](1);
-
-  // similarly, project to get tangential contact pressure
-  const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
-  ADReal tangential_lm_value = lm_x * nodal_tangents[0][_i](0) + lm_y * nodal_tangents[0][_i](1);
-
   dof_id_type dof_index_z;
-  ADReal tangential_lm_value2 = 0.0; // only exists in 3D
+  ADReal lm_z;
   if (_has_disp_z)
   {
-    dof_index_z = dof->dof_number(_sys.number(), _var_z->number(), 0);
-    ADReal lm_z = (*_sys.currentSolution())(dof_index_z);
+    dof_index_z = dof->dof_number(_sys.number(), _lm_vars[2]->number(), 0);
+    lm_z = (*_sys.currentSolution())(dof_index_z);
     Moose::derivInsert(lm_z.derivatives(), dof_index_z, 1.);
-
-    normal_lm_value += lm_z * _normals[_i](2);
-    tangential_lm_value += lm_z * nodal_tangents[0][_i](2);
-    tangential_lm_value2 = lm_x * nodal_tangents[1][_i](0) + lm_y * nodal_tangents[1][_i](1) +
-                           lm_z * nodal_tangents[1][_i](2);
   }
 
-  const ADReal normal_dof_residual = std::min(normal_lm_value, weighted_gap * c);
+  ADReal normal_pressure_value =
+      lm_x * _dof_to_normal_vector[dof](0) + lm_y * _dof_to_normal_vector[dof](1);
+  ADReal tangential_pressure_value =
+      lm_x * _dof_to_tangent_vectors[dof][0](0) + lm_y * _dof_to_tangent_vectors[dof][0](1);
 
-  // const ADReal dof_residual_x = normal_dof_residual * _normals[_i](0) +
-  //                               tangential_lm_value * nodal_tangents[0][_i](0) +
-  //                               tangential_lm_value2 * nodal_tangents[1][_i](0);
-  //
-  // const ADReal dof_residual_y = normal_dof_residual * _normals[_i](1) +
-  //                               tangential_lm_value * nodal_tangents[0][_i](1) +
-  //                               tangential_lm_value2 * nodal_tangents[1][_i](1);
-  // ADReal dof_residual_z;
-  // if (_has_disp_z)
-  //   dof_residual_z = normal_dof_residual * _normals[_i](2) +
-  //                    tangential_lm_value * nodal_tangents[0][_i](2) +
-  //                    tangential_lm_value2 * nodal_tangents[1][_i](2);
+  ADReal normal_dof_residual = std::min(normal_pressure_value, weighted_gap * c);
+  ADReal tangential_dof_residual = tangential_pressure_value;
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
+
+  // Associate constraint residual with lm_x
   _assembly.processResidualAndJacobian(
       normal_dof_residual, dof_index_x, _vector_tags, _matrix_tags);
+  // Associate null tangential pressure residual with lm_y
   _assembly.processResidualAndJacobian(
-      tangential_lm_value, dof_index_y, _vector_tags, _matrix_tags);
-  if (_has_disp_z)
-    _assembly.processResidualAndJacobian(
-        tangential_lm_value2, dof_index_z, _vector_tags, _matrix_tags);
+      tangential_dof_residual, dof_index_y, _vector_tags, _matrix_tags);
 #endif
 }
