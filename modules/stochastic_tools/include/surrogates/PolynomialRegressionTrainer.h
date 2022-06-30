@@ -72,7 +72,7 @@ private:
   ///@}
 
   /// Calculators used in standardizing polynomial features.
-  std::unordered_map<std::string, std::vector<std::unique_ptr<RealCalculator>>> _calculators;
+  std::vector<std::unique_ptr<RealCalculator>> _calculators;
 
   /// Calculator used to sum response values.
   std::vector<Real> _r_sum;

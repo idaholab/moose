@@ -93,21 +93,13 @@ PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters &
     mooseError("Number of data points must be greater than the number of terms in the polynomial.");
 
   // Creating calculators needed for feature standardization.
-  std::vector<std::unique_ptr<RealCalculator>> means(_n_poly_terms);
-  std::vector<std::unique_ptr<RealCalculator>> stddevs(_n_poly_terms);
-  std::vector<std::unique_ptr<RealCalculator>> sum_pfs(_n_poly_terms);
-
+  _calculators.resize(_n_poly_terms * 3);
   for (const auto & term : make_range(_n_poly_terms))
   {
-    means[term] = StochasticTools::makeCalculator(MooseEnumItem("mean"), *this);
-    stddevs[term] = StochasticTools::makeCalculator(MooseEnumItem("stddev"), *this);
-    sum_pfs[term] = StochasticTools::makeCalculator(MooseEnumItem("sum"), *this);
+    _calculators[3 * term] = StochasticTools::makeCalculator(MooseEnumItem("mean"), *this);
+    _calculators[3 * term + 1] = StochasticTools::makeCalculator(MooseEnumItem("stddev"), *this);
+    _calculators[3 * term + 2] = StochasticTools::makeCalculator(MooseEnumItem("sum"), *this);
   }
-
-  // Move calculators.
-  _calculators.insert(std::pair{"mean", std::move(means)});
-  _calculators.insert(std::pair{"stddev", std::move(stddevs)});
-  _calculators.insert(std::pair{"sum_pf", std::move(sum_pfs)});
 }
 
 void
@@ -118,9 +110,10 @@ PolynomialRegressionTrainer::preTrain()
     _rhs[r].zero();
 
   /// Init calculators.
-  for (auto & calc_type : _calculators)
-    for (const auto & term : make_range(_n_poly_terms))
-      calc_type.second[term]->initializeCalculator();
+  for (auto & calc : _calculators)
+    calc->initializeCalculator();
+
+  _r_sum.assign(1, 0.0);
 }
 
 void
@@ -138,13 +131,11 @@ PolynomialRegressionTrainer::train()
 
   // Emplace new values if necessary
   if (_rvecval)
-  {
     for (unsigned int r = _rhs.size(); r < _rvecval->size(); ++r)
     {
       _rhs.emplace_back(_n_poly_terms, 0.0);
       _r_sum.emplace_back(0.0);
     }
-  }
 
   for (unsigned int i = 0; i < _n_poly_terms; ++i)
   {
@@ -162,8 +153,8 @@ PolynomialRegressionTrainer::train()
     }
 
     // Update calculators.
-    for (auto & calc_type : _calculators)
-      calc_type.second[i]->updateCalculator(i_value);
+    for (unsigned int c = i * 3; c < (i + 1) * 3; ++c)
+      _calculators[c]->updateCalculator(i_value);
 
     if (_rval)
       _rhs[0](i) += i_value * (*_rval);
@@ -202,9 +193,8 @@ PolynomialRegressionTrainer::postTrain()
   gatherSum(_r_sum);
 
   // Finalize calculators.
-  for (auto & calc_type : _calculators)
-    for (const auto & term : make_range(_n_poly_terms))
-      calc_type.second[term]->finalizeCalculator(true);
+  for (auto & calc : _calculators)
+    calc->finalizeCalculator(true);
 
   std::vector<Real> mu(_n_poly_terms);
   std::vector<Real> sig(_n_poly_terms);
@@ -213,13 +203,13 @@ PolynomialRegressionTrainer::postTrain()
   for (unsigned int i = 0; i < _n_poly_terms; ++i)
   {
     // To handle intercept, use mu = 0, sig = 1.
-    mu[i] = (i > 0 ? _calculators["mean"][i]->getValue() : 0.0);
-    sig[i] = (i > 0 ? _calculators["stddev"][i]->getValue() : 1.0);
-    sum_pf[i] = _calculators["sum_pf"][i]->getValue();
+    mu[i] = i > 0 ? _calculators[3 * i]->getValue() : 0.0;
+    sig[i] = i > 0 ? _calculators[3 * i + 1]->getValue() : 1.0;
+    sum_pf[i] = _calculators[3 * i + 2]->getValue();
   }
 
   // Transform _matrix and _rhs to match standardized features.
-  unsigned int n = getCurrentSampleSize();
+  const Real n = sum_pf[0]; // Sum of intercept term = n.
   for (unsigned int i = 0; i < _n_poly_terms; ++i)
   {
     for (unsigned int j = 0; j < _n_poly_terms; ++j)
@@ -246,7 +236,4 @@ PolynomialRegressionTrainer::postTrain()
       _coeff[r][0] -= _coeff[r][i] * mu[i];
     }
   }
-
-  for (unsigned int r = 0; r < _r_sum.size(); ++r)
-    _r_sum[r] = 0.0;
 }

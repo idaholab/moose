@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SurrogateTrainer.h"
+#include "SurrogateModel.h"
 #include "Sampler.h"
 #include "RestartableDataIO.h"
 #include "StochasticToolsApp.h"
