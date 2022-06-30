@@ -67,7 +67,7 @@ DY = ${fparse y_location + clad_bot_gap_height + top_bot_clad_height}
 
 # [AuxKernels]
 #   [QPrime]
-#     type = QPrimeAux
+#     type = QPrimeAuxPin
 #     diffusivity = 'thermal_conductivity'
 #     rod_diameter = ${rod_diameter}
 #     variable = q_prime
