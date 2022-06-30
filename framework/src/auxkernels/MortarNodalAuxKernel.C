@@ -80,8 +80,7 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
   ComputeValueType value(0);
   Real total_volume = 0;
 
-  const std::vector<AutomaticMortarGeneration::MortarFilterIter> & its =
-      amg().secondariesToMortarSegments(*_current_node);
+  const auto & its = amg().secondariesToMortarSegments(*_current_node);
 
   auto act_functor = [&value, &total_volume, this]()
   {
