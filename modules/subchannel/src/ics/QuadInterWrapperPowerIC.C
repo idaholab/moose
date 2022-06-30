@@ -112,7 +112,7 @@ QuadInterWrapperPowerIC::initialSetup()
     Point p1(0, 0, z1 - unheated_length_entry);
     Point p2(0, 0, z2 - unheated_length_entry);
     // cycle through pins to estimate the total power of each pin
-    if (z2 > unheated_length_entry && z2 <= unheated_length_entry + heated_length)
+    if (z2>unheated_length_entry && z2 <= unheated_length_entry + heated_length)
     {
       for (unsigned int i_pin = 0; i_pin < (ny - 1) * (nx - 1); i_pin++)
       {
