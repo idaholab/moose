@@ -92,13 +92,15 @@
   []
   [block-dynamics-aux-fretting-wear-test-quick-no-projection]
     type = 'Exodiff'
-    exodiff = 'block-dynamics-aux-fretting-wear-test-no-projection-quick_out.e'
+    exodiff = 'block-dynamics-aux-fretting-wear-test-quick-no-projection_out.e'
     input = 'block-dynamics-aux-fretting-wear-test.i'
     rel_err = 1.0e-3
     abs_zero = 1.0e-4
     min_parallel = 1
     max_parallel = 4
     min_ad_size = '50'
+    map = False
+    partial = True
     ad_indexing_type = 'global'
     cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-no-project.e Executioner/end_time=0.15 '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick-no-projection_out'
