@@ -1,0 +1,22 @@
+[Tests]
+  issues = '#14798'
+  design = 'SodiumProperties.md SodiumPropertiesMaterial.md'
+  [./exact]
+    type = CSVDiff
+    input = 'exact.i'
+    csvdiff = 'exact_out.csv'
+    abs_zero = 1e-9
+    # At the initial time, an assertion is triggered regarding the temperature
+    # exceeding the critical temperature. The temperature variable stays within
+    # this critical temperature, but temperature computed from the given enthalpy
+    # does not.
+    method = 'OPT'
+    requirement = 'The system shall be able to compute liquid sodium properties and compare exactly to analytical expressions.'
+  [../]
+  [./constant]
+    type = CSVDiff
+    input = 'constant.i'
+    csvdiff = 'constant_out.csv'
+    requirement = 'The system shall be able to compute liquid sodium properties given constant thermal conductivity and specific heat values.'
+  [../]
+[]
