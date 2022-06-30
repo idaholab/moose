@@ -1,7 +1,7 @@
 # Electromagnetics Module
 
 The electromagnetics module provides components and models to simulate electromagnetic
-wave problems within the MOOSE framework, and facilitate multiphysics coupling of
+wave problems within the MOOSE framework, and facilitates multiphysics coupling of
 electromagnetic simulations to other physical domains. Features include:
 
 - Transient and time-harmonic (i.e., single-frequency, steady-state) simulation
