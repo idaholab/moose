@@ -41,7 +41,7 @@ TriInterWrapperPowerIC::TriInterWrapperPowerIC(const InputParameters & params)
         _pin_power_correction[i] = 1.0;
     }
 
-    if(_filename.compare("file_was_not_found"))
+    if (_filename.compare("file_was_not_found"))
     {
 
         Real vin;

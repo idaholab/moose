@@ -786,9 +786,9 @@ DetailedTriSubChannelMeshGenerator::rotatePoint(Point b, Real theta)
 
   // Rotating vector
   Point rotated_vector = Point(0.0, 0.0, 0.0);
-  for(unsigned int i = 0; i<3; i++)
+  for (unsigned int i = 0; i<3; i++)
   {
-    for(unsigned int j = 0; j<3; j++)
+    for (unsigned int j = 0; j<3; j++)
     {
       rotated_vector(i) += A[i][j] * b(j);
     }
@@ -802,7 +802,7 @@ DetailedTriSubChannelMeshGenerator::translatePoint(Point b, Point translation_ve
 {
   // Translating point
   Point translated_vector = Point(0.0, 0.0, 0.0);
-  for(unsigned int i = 0; i<3; i++)
+  for (unsigned int i = 0; i<3; i++)
   {
     translated_vector(i) = b(i) + translation_vector(i);
   }

@@ -646,7 +646,7 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
     VecAXPY(amc_sys_mdot_rhs, 1.0, amc_friction_force_rhs);
     VecAXPY(amc_sys_mdot_rhs, 1.0, amc_gravity_rhs);
 
-    if(_segregated_bool)
+    if (_segregated_bool)
     {
       // Assembly the matrix system
       populateVectorFromHandle<SolutionHandle *>(prod, _mdot_soln, first_node, last_node, _n_channels);
@@ -1100,7 +1100,7 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
         }
         auto T_L2norm_old_block = _T_soln->L2norm();
 
-        if(_segregated_bool)
+        if (_segregated_bool)
         {
           computeWijFromSolve(iblock);
           if (_compute_power)
