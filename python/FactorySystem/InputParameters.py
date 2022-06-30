@@ -84,6 +84,30 @@ class InputParameters:
         else:
             return None
 
+    def basicTypeHelper(self, value_type):
+        if value_type == int:
+            return "Integer"
+        elif value_type == float:
+            return "Real"
+        elif value_type == bool:
+            return "Boolean"
+        else:
+            return "String"
+
+    def basicType(self, key):
+        if key in self.valid:
+            if type(self.valid[key]) == list:
+                if len(self.valid[key]) == 0:
+                    return 'Array:String'
+                else:
+                    return 'Array:' + self.basicTypeHelper(type(self.valid[key][0]))
+            else:
+                return self.basicTypeHelper(type(self.valid[key]))
+        else:
+            # we don't know any better at this point so we return the most general type
+            # self.strict_types might help, but it is not used anywhere
+            return 'String'
+
     def keys(self):
         return set([k for k in self.desc])
 

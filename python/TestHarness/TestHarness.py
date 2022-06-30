@@ -1036,6 +1036,7 @@ class TestHarness:
         outputgroup.add_argument('-a', '--sep-files-fail', action='store_true', dest='fail_files', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
         outputgroup.add_argument('--include-input-file', action='store_true', dest='include_input', help='Include the contents of the input file when writing the results of a test to a file')
         outputgroup.add_argument("--testharness-unittest", action="store_true", help="Run the TestHarness unittests that test the TestHarness.")
+        outputgroup.add_argument("--json", action="store_true", dest="json", help="Dump the parameters for the testers in JSON Format")
         outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
         outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
         outputgroup.add_argument("--no-trimmed-output", action="store_true", dest="no_trimmed_output", help="Do not trim the output")
@@ -1152,7 +1153,10 @@ class TestHarness:
         return
 
     def preRun(self):
-        if self.options.yaml:
+        if self.options.json:
+            self.factory.printJSON("Tests")
+            sys.exit(0)
+        elif self.options.yaml:
             self.factory.printYaml("Tests")
             sys.exit(0)
         elif self.options.dump:
