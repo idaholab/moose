@@ -36,7 +36,7 @@ DetailedQuadInterWrapperMeshGenerator::DetailedQuadInterWrapperMeshGenerator(
     _n_cells(getParam<unsigned int>("n_cells")),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
-    _n_channels((_nx+1) * (_ny+1)),
+    _n_channels((_nx + 1) * (_ny + 1)),
     _side_bypass_length(getParam<Real>("side_bypass")),
     _block_id(getParam<unsigned int>("block_id"))
 {
@@ -140,22 +140,24 @@ DetailedQuadInterWrapperMeshGenerator::generate()
     {
       u = radius * std::cos(theta);
       v = radius * std::sin(theta);
-      double val_check_u = std::abs(u) - std::sqrt(2.0)/2.0;
-      double val_check_v = std::abs(v) - std::sqrt(2.0)/2.0;
+      double val_check_u = std::abs(u) - std::sqrt(2.0) / 2.0;
+      double val_check_v = std::abs(v) - std::sqrt(2.0) / 2.0;
       if (val_check_u < 1e-5 && val_check_v < 1e-5)
       {
-        circle_points[i](0) = u * 2.0/std::sqrt(2);
-        circle_points[i](1) = v * 2.0/std::sqrt(2);
+        circle_points[i](0) = u * 2.0 / std::sqrt(2);
+        circle_points[i](1) = v * 2.0 / std::sqrt(2);
       }
       else
       {
-        circle_points[i](0) = 0.5*std::sqrt(2.+std::pow(u,2)-std::pow(v,2)+2.*u*std::sqrt(2))
-                              - 0.5*std::sqrt(2.+std::pow(u,2)-std::pow(v,2)-2.*u*std::sqrt(2));
-        circle_points[i](1) = 0.5*std::sqrt(2.-std::pow(u,2)+std::pow(v,2)+2.*v*std::sqrt(2))
-                              - 0.5*std::sqrt(2.-std::pow(u,2)+std::pow(v,2)-2.*v*std::sqrt(2));
+        circle_points[i](0) =
+            0.5 * std::sqrt(2. + std::pow(u, 2) - std::pow(v, 2) + 2. * u * std::sqrt(2)) -
+            0.5 * std::sqrt(2. + std::pow(u, 2) - std::pow(v, 2) - 2. * u * std::sqrt(2));
+        circle_points[i](1) =
+            0.5 * std::sqrt(2. - std::pow(u, 2) + std::pow(v, 2) + 2. * v * std::sqrt(2)) -
+            0.5 * std::sqrt(2. - std::pow(u, 2) + std::pow(v, 2) - 2. * v * std::sqrt(2));
       }
-      circle_points[i](0) *= _assembly_side_x/2.0;
-      circle_points[i](1) *= _assembly_side_y/2.0;
+      circle_points[i](0) *= _assembly_side_x / 2.0;
+      circle_points[i](1) *= _assembly_side_y / 2.0;
       theta += 2 * M_PI / theta_res;
     }
   }
@@ -166,10 +168,14 @@ DetailedQuadInterWrapperMeshGenerator::generate()
   // this detailed mesh with a nearest-neighbor search.
   const Real shrink_factor = 0.99999;
   std::array<Point, 4> quadrant_centers;
-  quadrant_centers[0] = Point(_assembly_pitch * 0.5 * shrink_factor, _assembly_pitch * 0.5 * shrink_factor, 0);
-  quadrant_centers[1] = Point(-_assembly_pitch * 0.5 * shrink_factor, _assembly_pitch * 0.5 * shrink_factor, 0);
-  quadrant_centers[2] = Point(-_assembly_pitch * 0.5 * shrink_factor, -_assembly_pitch * 0.5 * shrink_factor, 0);
-  quadrant_centers[3] = Point(_assembly_pitch * 0.5 * shrink_factor, -_assembly_pitch * 0.5 * shrink_factor, 0);
+  quadrant_centers[0] =
+      Point(_assembly_pitch * 0.5 * shrink_factor, _assembly_pitch * 0.5 * shrink_factor, 0);
+  quadrant_centers[1] =
+      Point(-_assembly_pitch * 0.5 * shrink_factor, _assembly_pitch * 0.5 * shrink_factor, 0);
+  quadrant_centers[2] =
+      Point(-_assembly_pitch * 0.5 * shrink_factor, -_assembly_pitch * 0.5 * shrink_factor, 0);
+  quadrant_centers[3] =
+      Point(_assembly_pitch * 0.5 * shrink_factor, -_assembly_pitch * 0.5 * shrink_factor, 0);
 
   const unsigned int m = theta_res / 4;
   // Build an array of points that represent a cross section of a center subchannel
@@ -216,10 +222,9 @@ DetailedQuadInterWrapperMeshGenerator::generate()
     }
     tl_corner_points[points_per_quad + 1] =
         Point(_assembly_pitch * 0.5 * shrink_factor, _side_bypass_length, 0);
-    tl_corner_points[points_per_quad + 2] =
-        Point(- _side_bypass_length, + _side_bypass_length, 0);
+    tl_corner_points[points_per_quad + 2] = Point(-_side_bypass_length, +_side_bypass_length, 0);
     tl_corner_points[points_per_quad + 3] =
-        Point(- _side_bypass_length, -_assembly_pitch * 0.5 * shrink_factor, 0);
+        Point(-_side_bypass_length, -_assembly_pitch * 0.5 * shrink_factor, 0);
   }
 
   // Build an array of points that represent a cross section of a top right corner subchannel
@@ -238,8 +243,7 @@ DetailedQuadInterWrapperMeshGenerator::generate()
     }
     tr_corner_points[points_per_quad + 1] =
         Point(_side_bypass_length, -_assembly_pitch * 0.5 * shrink_factor, 0);
-    tr_corner_points[points_per_quad + 2] =
-        Point(_side_bypass_length, _side_bypass_length, 0);
+    tr_corner_points[points_per_quad + 2] = Point(_side_bypass_length, _side_bypass_length, 0);
     tr_corner_points[points_per_quad + 3] =
         Point(-_assembly_pitch * 0.5 * shrink_factor, _side_bypass_length, 0);
   }
@@ -260,8 +264,7 @@ DetailedQuadInterWrapperMeshGenerator::generate()
     }
     bl_corner_points[points_per_quad + 1] =
         Point(-_side_bypass_length, _assembly_pitch * 0.5 * shrink_factor, 0);
-    bl_corner_points[points_per_quad + 2] =
-        Point(-_side_bypass_length, -_side_bypass_length, 0);
+    bl_corner_points[points_per_quad + 2] = Point(-_side_bypass_length, -_side_bypass_length, 0);
     bl_corner_points[points_per_quad + 3] =
         Point(_assembly_pitch * 0.5 * shrink_factor, -_side_bypass_length, 0);
   }
@@ -282,8 +285,7 @@ DetailedQuadInterWrapperMeshGenerator::generate()
     }
     br_corner_points[points_per_quad + 1] =
         Point(-_assembly_pitch * 0.5 * shrink_factor, -_side_bypass_length, 0);
-    br_corner_points[points_per_quad + 2] =
-        Point(_side_bypass_length, -_side_bypass_length, 0);
+    br_corner_points[points_per_quad + 2] = Point(_side_bypass_length, -_side_bypass_length, 0);
     br_corner_points[points_per_quad + 3] =
         Point(_side_bypass_length, _assembly_pitch * 0.5 * shrink_factor, 0);
   }

@@ -28,9 +28,12 @@ public:
   virtual void initialSetup() override;
 
 protected:
-
   /// Standard return structure for reusing in implicit/explicit formulations
-  struct StructPetscMatVec{ Mat A; Vec x;};
+  struct StructPetscMatVec
+  {
+    Mat A;
+    Vec x;
+  };
 
   /// Returns friction factor
   virtual double computeFrictionFactor(double Re) = 0;
@@ -161,7 +164,7 @@ protected:
   SolutionHandle * _w_perim_soln;
   SolutionHandle * _q_prime_soln;
   SolutionHandle * _q_prime_duct_soln; // Only used for ducted assemblies
-  SolutionHandle * _Tduct_soln; // Only used for ducted assemblies
+  SolutionHandle * _Tduct_soln;        // Only used for ducted assemblies
 
   /// Petsc Functions
   virtual PetscErrorCode createPetscVector(Vec & v, PetscInt n);
@@ -274,8 +277,6 @@ protected:
   PetscScalar max_sumWij;
   PetscScalar max_sumWij_new;
   PetscScalar correction_factor = 1.0;
-
-
 
 public:
   static InputParameters validParams();

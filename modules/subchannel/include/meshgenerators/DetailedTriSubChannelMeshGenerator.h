@@ -16,9 +16,9 @@ protected:
   EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
   Point rotatePoint(Point b, double theta);
   Point translatePoint(Point b, Point translation_vector);
-  Point getRodPosition(unsigned int i) {return _rod_position[i]; }
-  std::vector<Real> getSubchannelPosition(unsigned int i) {return _subchannel_position[i]; }
-  std::vector<unsigned int> getSubChannelRods(unsigned int i) {return _subchannel_to_rod_map[i]; }
+  Point getRodPosition(unsigned int i) { return _rod_position[i]; }
+  std::vector<Real> getSubchannelPosition(unsigned int i) { return _subchannel_position[i]; }
+  std::vector<unsigned int> getSubChannelRods(unsigned int i) { return _subchannel_to_rod_map[i]; }
 
   /// unheated length of the fuel rod at the entry of the assembly
   Real _unheated_length_entry;

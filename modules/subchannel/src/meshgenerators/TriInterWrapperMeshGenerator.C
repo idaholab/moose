@@ -18,7 +18,8 @@ TriInterWrapperMeshGenerator::validParams()
   params.addRequiredParam<unsigned int>("nrings", "Number of fuel rod rings per assembly [-]");
   params.addRequiredParam<Real>("flat_to_flat",
                                 "Flat to flat distance for the hexagonal assembly [m]");
-  params.addRequiredParam<Real>("side_bypass", "Extra size of the bypass for the side assemblies [m]");
+  params.addRequiredParam<Real>("side_bypass",
+                                "Extra size of the bypass for the side assemblies [m]");
   return params;
 }
 
@@ -665,7 +666,8 @@ TriInterWrapperMeshGenerator::generate()
   mesh_base->prepare_for_use();
 
   // move the meta data into TriInterWrapperMesh
-  std::shared_ptr<TriInterWrapperMesh> sch_mesh = std::dynamic_pointer_cast<TriInterWrapperMesh>(_mesh);
+  std::shared_ptr<TriInterWrapperMesh> sch_mesh =
+      std::dynamic_pointer_cast<TriInterWrapperMesh>(_mesh);
   sch_mesh->_unheated_length_entry = _unheated_length_entry;
   sch_mesh->_heated_length = _heated_length;
   sch_mesh->_unheated_length_exit = _unheated_length_exit;

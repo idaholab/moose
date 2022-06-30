@@ -297,7 +297,6 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
     }   // for j
   }     // for i
 
-
   // Constructing pins to channels mao
   for (unsigned int loc_rod = 0; loc_rod < _nrods; loc_rod++)
   {
@@ -653,7 +652,6 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   {
     gap.shrink_to_fit();
   }
-
 }
 
 std::unique_ptr<MeshBase>

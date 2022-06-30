@@ -162,8 +162,10 @@ public:
    * spaced 'assembly_pitch' apart.  The points are generated such that the duct is
    * centered at the given center point.
    */
-  static void
-  rodPositions(std::vector<Point> & positions, unsigned int nrings, Real assembly_pitch, Point center);
+  static void rodPositions(std::vector<Point> & positions,
+                           unsigned int nrings,
+                           Real assembly_pitch,
+                           Point center);
 
   friend class TriInterWrapperMeshGenerator;
 

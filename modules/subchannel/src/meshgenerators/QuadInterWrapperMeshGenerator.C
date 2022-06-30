@@ -30,10 +30,13 @@ InputParameters
 QuadInterWrapperMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addClassDescription("Creates a mesh for the inter-wrapper in the location of the modeled reactor section centroid");
+  params.addClassDescription("Creates a mesh for the inter-wrapper in the location of the modeled "
+                             "reactor section centroid");
   params.addRequiredParam<Real>("assembly_pitch", "Pitch [m]");
-  params.addRequiredParam<Real>("assembly_side_x", "Outer side lengths of assembly in x [m] - including duct");
-  params.addRequiredParam<Real>("assembly_side_y", "Outer side lengths of assembly in y [m] - including duct");
+  params.addRequiredParam<Real>("assembly_side_x",
+                                "Outer side lengths of assembly in x [m] - including duct");
+  params.addRequiredParam<Real>("assembly_side_y",
+                                "Outer side lengths of assembly in y [m] - including duct");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
@@ -41,7 +44,8 @@ QuadInterWrapperMeshGenerator::validParams()
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addRequiredParam<unsigned int>("nx", "Number of assemblies in the x direction [-]");
   params.addRequiredParam<unsigned int>("ny", "Number of assemblies in the y direction [-]");
-  params.addRequiredParam<Real>("side_bypass", "Extra size of the bypass for the side assemblies [m]");
+  params.addRequiredParam<Real>("side_bypass",
+                                "Extra size of the bypass for the side assemblies [m]");
   params.addParam<unsigned int>("block_id", 0, "Domain Index");
   return params;
 }
@@ -69,8 +73,7 @@ QuadInterWrapperMeshGenerator::QuadInterWrapperMeshGenerator(const InputParamete
   _ny += 1;
 
   if (_nx < 2 && _ny < 2)
-    mooseError(name(),
-               ": The number of assemblies cannot be less than one in any direction. ");
+    mooseError(name(), ": The number of assemblies cannot be less than one in any direction. ");
 
   // Defining the total length from 3 axial sections
   Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
@@ -283,7 +286,8 @@ QuadInterWrapperMeshGenerator::generate()
       for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
       {
         _nodes[i_ch].push_back(mesh_base->add_point(
-            Point(_assembly_pitch * ix - offset_x, _assembly_pitch * iy - offset_y, _z_grid[iz]), node_id++));
+            Point(_assembly_pitch * ix - offset_x, _assembly_pitch * iy - offset_y, _z_grid[iz]),
+            node_id++));
       }
     }
   }

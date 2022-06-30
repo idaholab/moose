@@ -217,7 +217,8 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
   }     // for i
 
   // set the subchannel positions
-  Real _duct_to_rod_gap = 0.5 * (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _rod_diameter);
+  Real _duct_to_rod_gap =
+      0.5 * (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _rod_diameter);
   for (unsigned int i = 0; i < _n_channels; i++)
   {
     if (_subch_type[i] == EChannelType::CENTER)
@@ -295,7 +296,7 @@ DetailedTriSubChannelMeshGenerator::generate()
   // Define the resolution (the number of points used to represent a circle).
   // This must be divisible by 4.
   const unsigned int theta_res_triangle = 24; // TODO: parameterize
-  const unsigned int theta_res_square = 24; // TODO: parameterize
+  const unsigned int theta_res_square = 24;   // TODO: parameterize
   // Compute the number of points needed to represent one sixth and quadrant of a circle.
   const unsigned int points_per_sixth = theta_res_triangle / 6 + 1;
   const unsigned int points_per_quadrant = theta_res_square / 4 + 1;
@@ -320,7 +321,7 @@ DetailedTriSubChannelMeshGenerator::generate()
 
   // Compute the number of elements (Prism6) which combined base creates the sub-channel
   // cross-section
-  const unsigned int elems_per_center = theta_res_triangle * 3 / 6 + 3; //TODO: check
+  const unsigned int elems_per_center = theta_res_triangle * 3 / 6 + 3; // TODO: check
   const unsigned int elems_per_corner = theta_res_triangle / 6 + 4;
   const unsigned int elems_per_side = 2 * theta_res_square / 4 + 4;
   if (_verbose)
@@ -341,7 +342,7 @@ DetailedTriSubChannelMeshGenerator::generate()
   else
   {
     n_corner = 6;
-    n_side = (_n_rings -1) * 6;
+    n_side = (_n_rings - 1) * 6;
     n_center = _n_channels - n_side - n_corner;
   }
   if (_verbose)
@@ -371,7 +372,8 @@ DetailedTriSubChannelMeshGenerator::generate()
   mesh_base->reserve_nodes(n_points);
   mesh_base->reserve_elem(n_elems);
   // Build an array of points arranged in a circle on the xy-plane. (last and first node overlap)
-  // We build for both the square discretization in the edges and the triangular discretization within the mesh
+  // We build for both the square discretization in the edges and the triangular discretization
+  // within the mesh
   const double radius = _rod_diameter / 2.0;
   std::array<Point, theta_res_square + 1> circle_points_square;
   {
@@ -383,7 +385,7 @@ DetailedTriSubChannelMeshGenerator::generate()
       theta += 2.0 * libMesh::pi / theta_res_square;
     }
   }
-  std::array<Point, theta_res_triangle+ 1> circle_points_triangle;
+  std::array<Point, theta_res_triangle + 1> circle_points_triangle;
   {
     double theta = 0;
     for (unsigned int i = 0; i < theta_res_triangle + 1; i++)
@@ -400,19 +402,26 @@ DetailedTriSubChannelMeshGenerator::generate()
   // this detailed mesh with a nearest-neighbor search.
   const Real shrink_factor = 0.99999;
   // Quadrants are used only for the side and corner subchannels
-  Real _duct_to_rod_gap = 0.5 * (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _rod_diameter);
+  Real _duct_to_rod_gap =
+      0.5 * (_flat_to_flat - (_n_rings - 1) * _pitch * std::sqrt(3.0) - _rod_diameter);
   std::array<Point, 2> quadrant_centers_sides;
-  quadrant_centers_sides[0] = Point(-_pitch * 0.5 * shrink_factor, - (_duct_to_rod_gap + _rod_diameter) * 0.5 * shrink_factor, 0);
-  quadrant_centers_sides[1] = Point(_pitch * 0.5 * shrink_factor, - (_duct_to_rod_gap + _rod_diameter) * 0.5 * shrink_factor, 0);
+  quadrant_centers_sides[0] = Point(
+      -_pitch * 0.5 * shrink_factor, -(_duct_to_rod_gap + _rod_diameter) * 0.5 * shrink_factor, 0);
+  quadrant_centers_sides[1] = Point(
+      _pitch * 0.5 * shrink_factor, -(_duct_to_rod_gap + _rod_diameter) * 0.5 * shrink_factor, 0);
   std::array<Point, 1> quadrant_centers_corner;
-  quadrant_centers_corner[0] = Point(- (_duct_to_rod_gap + _rod_diameter) * 0.5 * std::sin(libMesh::pi/6) * shrink_factor,
-                                     - (_duct_to_rod_gap + _rod_diameter) * 0.5 * std::cos(libMesh::pi/6) * shrink_factor,
-                                     0);
+  quadrant_centers_corner[0] =
+      Point(-(_duct_to_rod_gap + _rod_diameter) * 0.5 * std::sin(libMesh::pi / 6) * shrink_factor,
+            -(_duct_to_rod_gap + _rod_diameter) * 0.5 * std::cos(libMesh::pi / 6) * shrink_factor,
+            0);
   // Triangles are used for all center subchannels
   std::array<Point, 3> triangle_centers;
-  triangle_centers[0] = Point(0, _pitch * std::cos(libMesh::pi/6) * 2/3 * shrink_factor, 0);
-  triangle_centers[1] = Point(-_pitch * 0.5 * shrink_factor, -_pitch * std::cos(libMesh::pi/6) * 1/3 * shrink_factor, 0);
-  triangle_centers[2] = Point(_pitch * 0.5 * shrink_factor,  -_pitch * std::cos(libMesh::pi/6) * 1/3 * shrink_factor, 0);
+  triangle_centers[0] = Point(0, _pitch * std::cos(libMesh::pi / 6) * 2 / 3 * shrink_factor, 0);
+  triangle_centers[1] = Point(-_pitch * 0.5 * shrink_factor,
+                              -_pitch * std::cos(libMesh::pi / 6) * 1 / 3 * shrink_factor,
+                              0);
+  triangle_centers[2] = Point(
+      _pitch * 0.5 * shrink_factor, -_pitch * std::cos(libMesh::pi / 6) * 1 / 3 * shrink_factor, 0);
 
   const unsigned int m_sixth = theta_res_triangle / 6;
   const unsigned int m_quarter = theta_res_square / 4;
@@ -421,7 +430,7 @@ DetailedTriSubChannelMeshGenerator::generate()
   //    3   1
   //      2
   //      0
-  //4 5         8 9
+  // 4 5         8 9
   //  6         7
   std::array<Point, points_per_center> center_points;
   {
@@ -433,7 +442,7 @@ DetailedTriSubChannelMeshGenerator::generate()
       if (i == 1)
         start = 1 * (m_sixth);
       if (i == 2)
-        start = 3 * (m_sixth );
+        start = 3 * (m_sixth);
       for (unsigned int ii = 0; ii < points_per_sixth; ii++)
       {
         auto c_pt = circle_points_triangle[start - ii];
@@ -444,10 +453,10 @@ DetailedTriSubChannelMeshGenerator::generate()
 
   // Build an array of points that represent a cross section of a top left corner subchannel
   // cell. The points are ordered in this fashion:
-  //6
+  // 6
   //        5
   //    0
-  //1 2         4
+  // 1 2         4
   //   3
   std::array<Point, points_per_corner> corner_points;
   {
@@ -457,24 +466,25 @@ DetailedTriSubChannelMeshGenerator::generate()
       corner_points[ii + 1] = quadrant_centers_corner[0] + c_pt;
     }
     Real side_short = (_duct_to_rod_gap + _rod_diameter) * 0.5;
-    Real side_long = (2.0*_duct_to_rod_gap + _rod_diameter) * 0.5;
-    Real side_length = std::sqrt(std::pow(side_short, 2) + std::pow(side_long, 2)
-                                 - 2 * side_short * side_long * std::cos(libMesh::pi/6));
-    Real angle = libMesh::pi - libMesh::pi/3 -
-                 std::acos((-std::pow(side_long,2) + std::pow(side_short,2) + std::pow(side_length,2))
-                            / (2 * side_short * side_length));
-    corner_points[points_per_sixth + 1] =
-        Point(side_length * std::cos(angle) * shrink_factor, - side_length * std::sin(angle) * shrink_factor, 0);
+    Real side_long = (2.0 * _duct_to_rod_gap + _rod_diameter) * 0.5;
+    Real side_length = std::sqrt(std::pow(side_short, 2) + std::pow(side_long, 2) -
+                                 2 * side_short * side_long * std::cos(libMesh::pi / 6));
+    Real angle =
+        libMesh::pi - libMesh::pi / 3 -
+        std::acos((-std::pow(side_long, 2) + std::pow(side_short, 2) + std::pow(side_length, 2)) /
+                  (2 * side_short * side_length));
+    corner_points[points_per_sixth + 1] = Point(side_length * std::cos(angle) * shrink_factor,
+                                                -side_length * std::sin(angle) * shrink_factor,
+                                                0);
     corner_points[points_per_sixth + 2] =
         Point(0.5 * _duct_to_rod_gap * shrink_factor * std::tan(libMesh::pi / 6),
               0.5 * _duct_to_rod_gap * shrink_factor / std::cos(libMesh::pi / 6),
               0);
     corner_points[points_per_sixth + 3] =
-        Point(-side_length * std::cos(libMesh::pi/2 - angle - libMesh::pi/6) * shrink_factor,
-              side_length * std::sin(libMesh::pi/2 - angle - libMesh::pi/6) * shrink_factor,
+        Point(-side_length * std::cos(libMesh::pi / 2 - angle - libMesh::pi / 6) * shrink_factor,
+              side_length * std::sin(libMesh::pi / 2 - angle - libMesh::pi / 6) * shrink_factor,
               0);
   }
-
 
   // Build an array of points that represent a cross-section of a top side subchannel
   // cell.  The points are ordered in this fashion:
@@ -505,8 +515,8 @@ DetailedTriSubChannelMeshGenerator::generate()
   unsigned int node_id = 0;
   for (unsigned int i = 0; i < _n_channels; i++)
   {
-//    Real offset_x = _flat_to_flat / 2.0;
-//    Real offset_y = _flat_to_flat / 2.0;
+    //    Real offset_x = _flat_to_flat / 2.0;
+    //    Real offset_y = _flat_to_flat / 2.0;
 
     if (getSubchannelType(i) == EChannelType::CENTER)
     {
@@ -521,25 +531,27 @@ DetailedTriSubChannelMeshGenerator::generate()
 
         // Determine orientation of current subchannel
         auto subchannel_rods = getSubChannelRods(i);
-        Point subchannel_side = getRodPosition(subchannel_rods[0]) + getRodPosition(subchannel_rods[1]);
+        Point subchannel_side =
+            getRodPosition(subchannel_rods[0]) + getRodPosition(subchannel_rods[1]);
         Point base_center_orientation = {0, -1};
 
         // Get rotation angle for current subchannel
         Real dot_prod = 0;
         for (unsigned int lp = 0; lp < 2; lp++)
           dot_prod += base_center_orientation(lp) * subchannel_side(lp);
-        auto theta = std::acos(dot_prod / (base_center_orientation.norm() * subchannel_side.norm()));
+        auto theta =
+            std::acos(dot_prod / (base_center_orientation.norm() * subchannel_side.norm()));
         if (subchannel_side(0) < 0)
-          theta = 2.0*libMesh::pi - theta;
+          theta = 2.0 * libMesh::pi - theta;
 
-//        Real distance_side = subchannel_side.norm();
-//        Real distance_top = getRodPosition(subchannel_rods[2]).norm();
-//        if (distance_top > distance_side)
-//                  theta += libMesh::pi * 0.0;
+        //        Real distance_side = subchannel_side.norm();
+        //        Real distance_top = getRodPosition(subchannel_rods[2]).norm();
+        //        if (distance_top > distance_side)
+        //                  theta += libMesh::pi * 0.0;
 
         theta += _orientation_map[i];
 
-        theta = trunc((theta + (libMesh::pi/6.0)) / (libMesh::pi/3.0)) * libMesh::pi/3.0;
+        theta = trunc((theta + (libMesh::pi / 6.0)) / (libMesh::pi / 3.0)) * libMesh::pi / 3.0;
 
         if (_verbose)
         {
@@ -581,17 +593,19 @@ DetailedTriSubChannelMeshGenerator::generate()
 
         // Determine orientation of current subchannel
         auto subchannel_rods = getSubChannelRods(i);
-        Point subchannel_side = getRodPosition(subchannel_rods[0]) + getRodPosition(subchannel_rods[1]);
+        Point subchannel_side =
+            getRodPosition(subchannel_rods[0]) + getRodPosition(subchannel_rods[1]);
         Point base_center_orientation = {0, 1};
 
         // Get rotation angle for current subchannel
         Real dot_prod = 0;
         for (unsigned int lp = 0; lp < 2; lp++)
           dot_prod += base_center_orientation(lp) * subchannel_side(lp);
-        auto theta = std::acos(dot_prod / (base_center_orientation.norm() * subchannel_side.norm()));
+        auto theta =
+            std::acos(dot_prod / (base_center_orientation.norm() * subchannel_side.norm()));
         if (subchannel_side(0) > 0)
-            theta = 2. * libMesh::pi - theta;
-        theta = trunc((theta + (libMesh::pi/6.0)) / (libMesh::pi/3.0)) * libMesh::pi/3.0;
+          theta = 2. * libMesh::pi - theta;
+        theta = trunc((theta + (libMesh::pi / 6.0)) / (libMesh::pi / 3.0)) * libMesh::pi / 3.0;
 
         if (_verbose)
         {
@@ -633,17 +647,19 @@ DetailedTriSubChannelMeshGenerator::generate()
 
         // Determine orientation of current subchannel
         auto subchannel_rods = getSubChannelRods(i);
-        Point subchannel_side = getRodPosition(subchannel_rods[0]) + getRodPosition(subchannel_rods[1]);
+        Point subchannel_side =
+            getRodPosition(subchannel_rods[0]) + getRodPosition(subchannel_rods[1]);
         Point base_center_orientation = {1, 1};
 
         // Get rotation angle for current subchannel
         Real dot_prod = 0;
         for (unsigned int lp = 0; lp < 2; lp++)
           dot_prod += base_center_orientation(lp) * subchannel_side(lp);
-        auto theta = std::acos(dot_prod / (base_center_orientation.norm() * subchannel_side.norm()));
+        auto theta =
+            std::acos(dot_prod / (base_center_orientation.norm() * subchannel_side.norm()));
         if (subchannel_side(0) > 0)
           theta = 2. * libMesh::pi - theta;
-        theta = trunc((theta + (libMesh::pi/6.0)) / (libMesh::pi/3.0)) * libMesh::pi/3.0;
+        theta = trunc((theta + (libMesh::pi / 6.0)) / (libMesh::pi / 3.0)) * libMesh::pi / 3.0;
 
         if (_verbose)
         {
@@ -675,7 +691,6 @@ DetailedTriSubChannelMeshGenerator::generate()
   } // i
   if (_verbose)
     _console << "Point counter: " << point_counter << std::endl;
-
 
   int element_counter = 0;
   unsigned int elem_id = 0;
@@ -767,7 +782,6 @@ DetailedTriSubChannelMeshGenerator::generate()
   return mesh_base;
 }
 
-
 Point
 DetailedTriSubChannelMeshGenerator::rotatePoint(Point b, Real theta)
 {
@@ -775,7 +789,7 @@ DetailedTriSubChannelMeshGenerator::rotatePoint(Point b, Real theta)
   // Building rotation matrix
   std::vector<std::vector<Real>> A;
   A.resize(3);
-  for (std::vector<Real> a: A)
+  for (std::vector<Real> a : A)
   {
     a.resize(3);
   }
@@ -786,9 +800,9 @@ DetailedTriSubChannelMeshGenerator::rotatePoint(Point b, Real theta)
 
   // Rotating vector
   Point rotated_vector = Point(0.0, 0.0, 0.0);
-  for (unsigned int i = 0; i<3; i++)
+  for (unsigned int i = 0; i < 3; i++)
   {
-    for (unsigned int j = 0; j<3; j++)
+    for (unsigned int j = 0; j < 3; j++)
     {
       rotated_vector(i) += A[i][j] * b(j);
     }
@@ -802,7 +816,7 @@ DetailedTriSubChannelMeshGenerator::translatePoint(Point b, Point translation_ve
 {
   // Translating point
   Point translated_vector = Point(0.0, 0.0, 0.0);
-  for (unsigned int i = 0; i<3; i++)
+  for (unsigned int i = 0; i < 3; i++)
   {
     translated_vector(i) = b(i) + translation_vector(i);
   }

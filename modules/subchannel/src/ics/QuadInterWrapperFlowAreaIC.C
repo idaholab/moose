@@ -9,7 +9,10 @@ QuadInterWrapperFlowAreaIC::validParams()
   return params;
 }
 
-QuadInterWrapperFlowAreaIC::QuadInterWrapperFlowAreaIC(const InputParameters & params) : QuadInterWrapperBaseIC(params) {}
+QuadInterWrapperFlowAreaIC::QuadInterWrapperFlowAreaIC(const InputParameters & params)
+  : QuadInterWrapperBaseIC(params)
+{
+}
 
 Real
 QuadInterWrapperFlowAreaIC::value(const Point & p)

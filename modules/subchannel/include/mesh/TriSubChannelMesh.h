@@ -23,7 +23,6 @@ public:
   virtual bool pinMeshExist() const override { return _pin_mesh_exist; }
   virtual bool ductMeshExist() const override { return _duct_mesh_exist; }
 
-
   virtual const Real & getDuctToRodGap() const { return _duct_to_rod_gap; }
 
   /**
@@ -133,7 +132,7 @@ public:
   /**
    * Function that return the vector with the maps to the nodes
    */
-   virtual const std::vector<Node *> getDuctNodes() const override {return _duct_nodes;}
+  virtual const std::vector<Node *> getDuctNodes() const override { return _duct_nodes; }
 
 protected:
   /// number of rings of fuel rods
