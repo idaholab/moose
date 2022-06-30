@@ -1583,8 +1583,9 @@ AutomaticMortarGeneration::computeNodalGeometry()
     Point nodal_normal;
     for (const auto & norm_and_weight : normals_and_weights_vec)
       nodal_normal += norm_and_weight.first * norm_and_weight.second;
+    nodal_normal = nodal_normal.unit();
 
-    _secondary_node_to_nodal_normal[_mesh.node_ptr(node_id)] = nodal_normal.unit();
+    _secondary_node_to_nodal_normal[_mesh.node_ptr(node_id)] = nodal_normal;
 
     Point nodal_tangent_one;
     Point nodal_tangent_two;
@@ -1594,27 +1595,46 @@ AutomaticMortarGeneration::computeNodalGeometry()
     _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)][1] = nodal_tangent_two;
   }
 }
+
 void
 AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal,
                                                       Point & nodal_tangent_one,
                                                       Point & nodal_tangent_two) const
 {
-  Point unit_normal = nodal_normal.unit();
+  mooseAssert(MooseUtils::absoluteFuzzyEqual(nodal_normal.norm(), 1),
+              "The input nodal normal should have unity norm");
+
+  const Real nx = nodal_normal(0);
+  const Real ny = nodal_normal(1);
+  const Real nz = nodal_normal(2);
+
   // See Lopes DS, Silva MT, Ambrosio JA. Tangent vectors to a 3-D surface normal: A geometric tool
   // to find orthogonal vectors based on the Householder transformation. Computer-Aided Design. 2013
   // Mar 1;45(3):683-94.
-  const Point h_vector(
-      std::max(unit_normal(0) - 1.0, unit_normal(0) + 1.0), unit_normal(1), unit_normal(2));
+  if (nx >= 0)
+  {
+    // tangent
+    nodal_tangent_one(0) = -ny;
+    nodal_tangent_one(1) = 1 - ny * ny / (nx + 1);
+    nodal_tangent_one(2) = -ny * nz / (nx + 1);
 
-  const Real h = h_vector.norm();
+    // binormal
+    nodal_tangent_two(0) = -nz;
+    nodal_tangent_two(1) = -ny * nz / (nx + 1);
+    nodal_tangent_two(2) = 1 - nz * nz / (nx + 1);
+  }
+  else
+  {
+    // tangent
+    nodal_tangent_one(0) = ny;
+    nodal_tangent_one(1) = 1 + ny * ny / (nx - 1);
+    nodal_tangent_one(2) = ny * nz / (nx - 1);
 
-  nodal_tangent_one(0) = -2.0 * h_vector(0) * h_vector(1) / (h * h);
-  nodal_tangent_one(1) = 1.0 - 2.0 * h_vector(1) * h_vector(1) / (h * h);
-  nodal_tangent_one(2) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
-
-  nodal_tangent_two(0) = -2.0 * h_vector(0) * h_vector(2) / (h * h);
-  nodal_tangent_two(1) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
-  nodal_tangent_two(2) = 1.0 - 2.0 * h_vector(2) * h_vector(2) / (h * h);
+    // binormal
+    nodal_tangent_two(0) = nz;
+    nodal_tangent_two(1) = ny * nz / (nx - 1);
+    nodal_tangent_two(2) = 1 + nz * nz / (nx - 1);
+  }
 }
 // Project secondary nodes onto their corresponding primary elements for each primary/secondary
 // pair.
