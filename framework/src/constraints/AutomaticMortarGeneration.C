@@ -1755,9 +1755,14 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             if (std::abs(F) < _newton_tolerance)
               break;
 
-            Real dxi2 = -F.value() / F.derivatives();
+            if (F.derivatives())
+            {
+              Real dxi2 = -F.value() / F.derivatives();
 
-            xi2_dn += dxi2;
+              xi2_dn += dxi2;
+            }
+            else
+              current_iterate = max_iterates;
           } while (++current_iterate < max_iterates);
 
           Real xi2 = xi2_dn.value();
@@ -1912,12 +1917,9 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
       }          // r-loop
 
       if (!projection_succeeded && _debug)
-      {
         _console << "Failed to find primary Elem into which secondary node "
                  << static_cast<const Point &>(*secondary_node) << " was projected." << std::endl
                  << std::endl;
-        ;
-      }
     } // loop over side nodes
   }   // end loop over lower-dimensional elements
 }
