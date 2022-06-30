@@ -45,4 +45,11 @@
     cli_args = "Mesh/inactive='missingNode modifyNode' --mesh-only"
     requirement = "The system shall error if the node position and node id arrays do not match in size"
   []
+  [failure_overspecified]
+    type = RunException
+    input = test3.i
+    cli_args = 'Mesh/modifNode/new_position="-1 0 0 0 1 0 0 2 0" --mesh-only'
+    expect_err = "You must specify either 'shift_position' or 'new_position'! You have specified either both or none"
+    requirement = "The system shall error if both shifts and positions are specified"
+  []
 []

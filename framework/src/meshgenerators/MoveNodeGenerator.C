@@ -24,7 +24,7 @@ MoveNodeGenerator::validParams()
 
   params.addParam<std::vector<Point>>("new_position", "New position in vector space");
   params.addParam<std::vector<Point>>("shift_position",
-    "Shifts to apply to the position in vector space");
+                                      "Shifts to apply to the position in vector space");
 
   params.addClassDescription("Modifies the position of one or more nodes");
 
@@ -39,8 +39,8 @@ MoveNodeGenerator::MoveNodeGenerator(const InputParameters & parameters)
     _shift_position(nullptr)
 {
   if (isParamValid("shift_position") == isParamValid("new_position"))
-    mooseError("You must specify either 'shift_position' or 'new_position'!; "
-      "you have specified either both or none");
+    mooseError("You must specify either 'shift_position' or 'new_position'! "
+               "You have specified either both or none");
 
   if (isParamValid("new_position"))
   {
