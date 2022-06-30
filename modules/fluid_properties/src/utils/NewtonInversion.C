@@ -88,8 +88,9 @@ NewtonSolve2D(const Real & f,
 
     jacobian << df_dx, df_dy, //fill jacobian
                 dg_dx, dg_dy;
-    // std::cout << "Jacobian = " <<jacobian <<std::endl;
-    // std::cout <<"Jacobian Inverse = " <<jacobian.inverse() <<std::endl;
+
+    // checkNaNs(jacobian, num_nans_jacobian);
+    // checkNaNs(jacobian.inverse(), num_nans_inverse);
 
     function << new_f, new_g; //fill function
     next_vec = current_vec - (jacobian.inverse() * ( function - target)); //2D Newton Method
@@ -103,6 +104,9 @@ NewtonSolve2D(const Real & f,
     if (iteration > 100)
       mooseError("2D Newton Solve, Convergence Failed");
   }
+  // outputWarnings(num_nans_jacobian, false);
+  // outputWarnings(num_nans_inverse, true);
+
   x_final = current_vec[0]; //returned p
   y_final = current_vec[1]; //returned y
 }

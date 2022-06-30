@@ -106,6 +106,12 @@ protected:
                      unsigned int ncol,
                      const std::vector<Real> & vec,
                      std::vector<std::vector<Real>> & mat);
+
+  void checkNaNs(Real min, Real max, unsigned int i, Real & variable, unsigned int & num_nans);
+
+  void checkOutofBounds(Real min, Real max, Real & variable, unsigned int & num_out_bounds);
+
+  void outputWarnings(Real num_nans, Real num_out_bounds, std::string variable_set, std::string p_or_T, unsigned int number_points);
 };
 
 #pragma GCC diagnostic pop
