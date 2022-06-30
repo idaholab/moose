@@ -308,6 +308,73 @@ public:
   /// resolve all optional properties
   virtual void resolveOptionalProperties();
 
+  /**
+   * Retrieve the property deduced from the name \p name for the specified \p material_data
+   */
+  template <typename T>
+  const MaterialProperty<T> & getMaterialProperty(const std::string & name,
+                                                  MaterialData & material_data);
+
+  /**
+   * Retrieve the property named "name" without any deduction for the specified \p material_data
+   */
+  template <typename T>
+  const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name,
+                                                        MaterialData & material_data);
+
+  /**
+   * Retrieve the ADMaterialProperty named "name" for the specified \p material_data
+   */
+  template <typename T>
+  const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name,
+                                                      MaterialData & material_data);
+
+  /**
+   * Retrieve the old property deduced from the name \p name for the specified \p material_data
+   */
+  template <typename T>
+  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name,
+                                                     MaterialData & material_data);
+
+  /**
+   * Retrieve the older property deduced from the name \p name for the specified \p material_data
+   */
+  template <typename T>
+  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name,
+                                                       MaterialData & material_data);
+
+  /**
+   * Retrieve the old property named \p name without any deduction for the specified \p
+   * material_data
+   */
+  template <typename T>
+  const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name,
+                                                           MaterialData & material_data);
+
+  /**
+   * Retrieve the older property named \p name without any deduction for the specified \p
+   * material_data
+   */
+  template <typename T>
+  const MaterialProperty<T> & getMaterialPropertyOlderByName(const MaterialPropertyName & name,
+                                                             MaterialData & material_data);
+
+  /**
+   * Retrieve the material property whether AD or not for the specified \p material_data. This
+   * overload is used when the \p is_ad is true
+   */
+  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  const ADMaterialProperty<T> & getGenericMaterialProperty(const std::string & name,
+                                                           MaterialData & material_data);
+
+  /**
+   * Retrieve the material property whether AD or not for the specified \p material_data. This
+   * overload is used when the \p is_ad is false
+   */
+  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
+  const MaterialProperty<T> & getGenericMaterialProperty(const std::string & name,
+                                                         MaterialData & material_data);
+
 protected:
   /// Parameters of the object with this interface
   const InputParameters & _mi_params;
@@ -477,72 +544,28 @@ template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-
-  return getMaterialPropertyByName<T>(prop_name);
+  return getMaterialProperty<T>(name, *_material_data);
 }
 
 template <typename T>
 const ADMaterialProperty<T> &
 MaterialPropertyInterface::getADMaterialProperty(const std::string & name)
 {
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant
-  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-
-  return getADMaterialPropertyByName<T>(prop_name);
+  return getADMaterialProperty<T>(name, *_material_data);
 }
 
 template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 {
-  if (!_stateful_allowed)
-    mooseError("Stateful material properties not allowed for this object."
-               " Old property for \"",
-               name,
-               "\" was requested.");
-
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-
-  return getMaterialPropertyOldByName<T>(prop_name);
+  return getMaterialPropertyOld<T>(name, *_material_data);
 }
 
 template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 {
-  if (!_stateful_allowed)
-    mooseError("Stateful material properties not allowed for this object."
-               " Older property for \"",
-               name,
-               "\" was requested.");
-
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-
-  return getMaterialPropertyOlderByName<T>(prop_name);
+  return getMaterialPropertyOlder<T>(name, *_material_data);
 }
 
 // General version for types that do not accept default values
@@ -582,24 +605,7 @@ template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name_in)
 {
-  const auto name = _get_suffix.empty()
-                        ? static_cast<const std::string &>(name_in)
-                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
-  checkExecutionStage();
-  checkMaterialProperty(name);
-
-  // mark property as requested
-  markMatPropRequested(name);
-
-  // Update the boolean flag.
-  _get_material_property_called = true;
-
-  _material_property_dependencies.insert(_material_data->getPropertyId(name));
-
-  // Update consumed properties in MaterialPropertyDebugOutput
-  addConsumedPropertyName(_mi_moose_object_name, name);
-
-  return _material_data->getProperty<T>(name);
+  return getMaterialPropertyByName<T>(name_in, *_material_data);
 }
 
 template <typename T>
@@ -630,44 +636,14 @@ template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyName & name_in)
 {
-  const auto name = _get_suffix.empty()
-                        ? static_cast<const std::string &>(name_in)
-                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
-
-  if (!_stateful_allowed)
-    mooseError("Stateful material properties not allowed for this object."
-               " Old property for \"",
-               name,
-               "\" was requested.");
-
-  // mark property as requested
-  markMatPropRequested(name);
-
-  _material_property_dependencies.insert(_material_data->getPropertyId(name));
-
-  return _material_data->getPropertyOld<T>(name);
+  return getMaterialPropertyOldByName<T>(name_in, *_material_data);
 }
 
 template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialPropertyName & name_in)
 {
-  const auto name = _get_suffix.empty()
-                        ? static_cast<const std::string &>(name_in)
-                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
-
-  if (!_stateful_allowed)
-    mooseError("Stateful material properties not allowed for this object."
-               " Older property for \"",
-               name,
-               "\" was requested.");
-
-  // mark property as requested
-  markMatPropRequested(name);
-
-  _material_property_dependencies.insert(_material_data->getPropertyId(name));
-
-  return _material_data->getPropertyOlder<T>(name);
+  return getMaterialPropertyOlderByName<T>(name_in, *_material_data);
 }
 
 template <typename T>
@@ -794,4 +770,166 @@ MaterialPropertyInterface::genericOptionalMaterialPropertyHelper(const std::stri
   auto & optional_property = proxy->value();
   _optional_property_proxies.push_back(std::move(proxy));
   return optional_property;
+}
+
+template <typename T>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialProperty(const std::string & name,
+                                               MaterialData & material_data)
+{
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant
+  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+
+  return this->getMaterialPropertyByName<T>(prop_name, material_data);
+}
+
+template <typename T>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name_in,
+                                                     MaterialData & material_data)
+{
+  const auto name = _get_suffix.empty()
+                        ? static_cast<const std::string &>(name_in)
+                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
+
+  checkExecutionStage();
+  checkMaterialProperty(name);
+
+  // mark property as requested
+  markMatPropRequested(name);
+
+  // Update the boolean flag.
+  _get_material_property_called = true;
+
+  // Does the material data used here matter?
+  _material_property_dependencies.insert(material_data.getPropertyId(name));
+
+  // Update consumed properties in MaterialPropertyDebugOutput
+  addConsumedPropertyName(_mi_moose_object_name, name);
+
+  return material_data.getProperty<T>(name);
+}
+
+template <typename T>
+const ADMaterialProperty<T> &
+MaterialPropertyInterface::getADMaterialProperty(const std::string & name,
+                                                 MaterialData & material_data)
+{
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant
+  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+  else
+  {
+    // Does the material data used here matter?
+    _material_property_dependencies.insert(material_data.getPropertyId(prop_name));
+
+    return material_data.getADProperty<T>(prop_name);
+  }
+}
+
+template <typename T>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name,
+                                                  MaterialData & material_data)
+{
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant
+  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+  else
+    return getMaterialPropertyOldByName<T>(prop_name, material_data);
+}
+
+template <typename T>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name,
+                                                    MaterialData & material_data)
+{
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant
+  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+  else
+    return getMaterialPropertyOlderByName<T>(prop_name, material_data);
+}
+
+template <typename T>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyName & name_in,
+                                                        MaterialData & material_data)
+{
+  const auto name = _get_suffix.empty()
+                        ? static_cast<const std::string &>(name_in)
+                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
+
+  if (!_stateful_allowed)
+    mooseError("Stateful material properties not allowed for this object."
+               " Old property for \"",
+               name,
+               "\" was requested.");
+
+  // mark property as requested
+  markMatPropRequested(name);
+
+  _material_property_dependencies.insert(material_data.getPropertyId(name));
+
+  return material_data.getPropertyOld<T>(name);
+}
+
+template <typename T>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialPropertyName & name_in,
+                                                          MaterialData & material_data)
+{
+  const auto name = _get_suffix.empty()
+                        ? static_cast<const std::string &>(name_in)
+                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
+
+  if (!_stateful_allowed)
+    mooseError("Stateful material properties not allowed for this object."
+               " Older property for \"",
+               name,
+               "\" was requested.");
+
+  // mark property as requested
+  markMatPropRequested(name);
+
+  _material_property_dependencies.insert(material_data.getPropertyId(name));
+
+  return material_data.getPropertyOlder<T>(name);
+}
+
+template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type>
+const ADMaterialProperty<T> &
+MaterialPropertyInterface::getGenericMaterialProperty(const std::string & name,
+                                                      MaterialData & material_data)
+{
+  return getADMaterialProperty<T>(name, material_data);
+}
+
+/**
+ * Retrieve the material property whether AD or not for the specified \p material_data. This
+ * overload is used when the \p is_ad is false
+ */
+template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getGenericMaterialProperty(const std::string & name,
+                                                      MaterialData & material_data)
+{
+  return getMaterialProperty<T>(name, material_data);
 }
