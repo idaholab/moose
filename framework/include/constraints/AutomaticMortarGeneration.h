@@ -305,7 +305,8 @@ public:
   /**
    * @return A vector of iterators that point to the lower dimensional secondary elements and their
    * associated mortar segment elements that would have nonzero values for a Lagrange shape function
-   * associated with the provided node
+   * associated with the provided node. This method may return an empty container if the node is
+   * away from the mortar mesh
    */
   std::vector<MortarFilterIter> secondariesToMortarSegments(const Node & node) const;
 

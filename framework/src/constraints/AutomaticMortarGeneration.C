@@ -2238,7 +2238,7 @@ AutomaticMortarGeneration::secondariesToMortarSegments(const Node & node) const
 {
   auto secondary_it = _nodes_to_secondary_elem_map.find(node.id());
   if (secondary_it == _nodes_to_secondary_elem_map.end())
-    mooseError("end of secondary map in associatedMortarSegments");
+    return {};
 
   const auto & secondary_elems = secondary_it->second;
   std::vector<MortarFilterIter> ret(secondary_elems.size());
