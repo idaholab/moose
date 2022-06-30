@@ -99,7 +99,15 @@ Syntax::clearTaskDependencies()
 const std::vector<std::string> &
 Syntax::getSortedTask()
 {
-  return _tasks.getSortedValues();
+  try
+  {
+    return _tasks.getSortedValues();
+  }
+  catch (CyclicDependencyException<std::string> & e)
+  {
+    const auto cycle = e.getCyclicDependencies();
+    mooseError("Cyclic graph detected: ", MooseUtils::join(cycle, " <- "));
+  }
 }
 
 const std::vector<std::vector<std::string>> &
