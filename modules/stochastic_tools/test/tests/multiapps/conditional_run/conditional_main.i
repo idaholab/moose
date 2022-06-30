@@ -17,7 +17,6 @@
     input_files = 'sub.i'
     mode = batch-reset
     should_run_reporter = conditional/need_sample
-    execute_on = timestep_end
   []
 []
 
@@ -49,7 +48,7 @@
     sampler_vars = 'val1 val2'
     sampler_var_indices = '0 1'
     parallel_type = ROOT
-    execute_on = 'timestep_begin'
+    execute_on = 'initial timestep_begin'
   []
 []
 
