@@ -24,7 +24,8 @@ MultiAppDetailedSolutionTransferBase::MultiAppDetailedSolutionTransferBase(
 void
 MultiAppDetailedSolutionTransferBase::execute()
 {
-  TIME_SECTION("MultiAppDetailedSolutionBaseTransfer::execute()", 5, "Transferring subchannel solutions");
+  TIME_SECTION(
+      "MultiAppDetailedSolutionBaseTransfer::execute()", 5, "Transferring subchannel solutions");
   _console << "********** Executing **********" << std::endl;
   getAppInfo();
 

@@ -38,8 +38,7 @@ QuadInterWrapperMesh::QuadInterWrapperMesh(const QuadInterWrapperMesh & other_me
     _pin_mesh_exist(other_mesh._pin_mesh_exist)
 {
   if (_nx < 2 && _ny < 2)
-    mooseError(name(),
-               ": The number of assemblies cannot be less than 1 in both directions. ");
+    mooseError(name(), ": The number of assemblies cannot be less than 1 in both directions. ");
 }
 
 std::unique_ptr<MooseMesh>

@@ -12,11 +12,10 @@ QuadInterWrapperPowerIC::validParams()
 {
   InputParameters params = QuadInterWrapperBaseIC::validParams();
   params.addParam<Real>("power", 0.0, "[W]");
-  params.addParam<std::string>(
-      "filename",
-      "file_was_not_found",
-      "name of power profile .txt file (should be a single column). It's "
-      "a Radial Power Profile. [UnitLess]");
+  params.addParam<std::string>("filename",
+                               "file_was_not_found",
+                               "name of power profile .txt file (should be a single column). It's "
+                               "a Radial Power Profile. [UnitLess]");
   params.addParam<FunctionName>(
       "axial_heat_rate",
       "1.0",
@@ -86,7 +85,6 @@ QuadInterWrapperPowerIC::QuadInterWrapperPowerIC(const InputParameters & params)
   _ref_power = _power_dis * fpin_power;
   // Convert the actual pin power to a linear heat rate [W/m]
   _ref_qprime = _ref_power / heated_length;
-
 }
 
 void
@@ -112,7 +110,7 @@ QuadInterWrapperPowerIC::initialSetup()
     Point p1(0, 0, z1 - unheated_length_entry);
     Point p2(0, 0, z2 - unheated_length_entry);
     // cycle through pins to estimate the total power of each pin
-    if (z2>unheated_length_entry && z2 <= unheated_length_entry + heated_length)
+    if (z2 > unheated_length_entry && z2 <= unheated_length_entry + heated_length)
     {
       for (unsigned int i_pin = 0; i_pin < (ny - 1) * (nx - 1); i_pin++)
       {
@@ -150,7 +148,8 @@ QuadInterWrapperPowerIC::value(const Point & p)
     auto i_pin = _mesh.getPinIndexFromPoint(p);
     {
       if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
-        return _ref_qprime(i_pin) * _assembly_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
+        return _ref_qprime(i_pin) * _assembly_power_correction(i_pin) *
+               _axial_heat_rate.value(_t, P);
       else
         return 0.0;
     }
@@ -173,5 +172,4 @@ QuadInterWrapperPowerIC::value(const Point & p)
     else
       return 0.0;
   }
-
 }
