@@ -27,6 +27,9 @@
       type = 'Exodiff'
       input = 'test3.i'
       exodiff = 'test3_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      mesh_mode = replicated
 
       detail = 'in a mesh with a single first order element moved by shifts.'
     []
@@ -48,7 +51,7 @@
   [failure_overspecified]
     type = RunException
     input = test3.i
-    cli_args = 'Mesh/modifNode/new_position="-1 0 0 0 1 0 0 2 0" --mesh-only'
+    cli_args = 'Mesh/modifyNode/new_position="-1 0 0 0 1 0 0 2 0" --mesh-only'
     expect_err = "You must specify either 'shift_position' or 'new_position'! You have specified either both or none"
     requirement = "The system shall error if both shifts and positions are specified"
   []
