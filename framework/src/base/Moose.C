@@ -437,6 +437,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("CreateDisplacedProblemAction", "Mesh");
   registerSyntax("DisplayGhostingAction", "Mesh");
   registerSyntax("AddMeshGeneratorAction", "Mesh/*");
+  syntax.registerSyntaxType("Mesh/*", "MeshGeneratorName");
 
   registerSyntax("AddFunctionAction", "Functions/*");
   syntax.registerSyntaxType("Functions/*", "FunctionName");
@@ -444,7 +445,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("GlobalParamsAction", "GlobalParams");
 
   registerSyntax("AddDistributionAction", "Distributions/*");
+  syntax.registerSyntaxType("Distributions/*", "DistributionName");
+
   registerSyntax("AddSamplerAction", "Samplers/*");
+  syntax.registerSyntaxType("Samplers/*", "SamplerName");
 
   registerSyntax("SetupDebugAction", "Debug");
   registerSyntax("SetupResidualDebugAction", "Debug");
@@ -468,6 +472,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddInitialConditionAction", "ICs/*", "add_ic");
 
   registerSyntax("AddMaterialAction", "Materials/*");
+  syntax.registerSyntaxType("Materials/*", "MaterialName");
 
   registerSyntax("AddPostprocessorAction", "Postprocessors/*");
   syntax.registerSyntaxType("Postprocessors/*", "PostprocessorName");
@@ -493,6 +498,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("ReadExecutorParamsAction", "Executors/*");
   registerSyntax("SetupTimeStepperAction", "Executioner/TimeStepper");
   registerSyntax("SetupTimeIntegratorAction", "Executioner/TimeIntegrator");
+  syntax.registerSyntaxType("Executors/*", "ExecutorName");
 
   registerSyntax("SetupQuadratureAction", "Executioner/Quadrature");
   registerSyntax("SetupPredictorAction", "Executioner/Predictor");
