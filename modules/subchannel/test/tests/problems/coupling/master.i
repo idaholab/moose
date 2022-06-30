@@ -212,17 +212,15 @@ P_out = 101325 # Pa
 [Transfers]
   [Tpin] # send pin surface temperature to bison,
     type = MultiAppUserObjectTransfer2
-    multi_app = SLAVE
-    direction = to_multiapp
+    to_multi_app = SLAVE
     variable = Pin_surface_temperature
     user_object = Tpin_avg_uo
   []
 #
   [from_SLAVE] # send heat flux from BISON to subchannel
     type = MultiAppUserObjectTransfer2
-    direction = from_multiapp
+    from_multi_app = SLAVE
     variable = q_prime
-    multi_app = SLAVE
     user_object = q_prime_uo
     execute_on = 'timestep_end'
   []
