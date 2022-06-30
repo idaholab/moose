@@ -1032,9 +1032,9 @@ private:
   std::vector<std::string> _ray_aux_data_names;
 
   /// Map from registered Ray name to ID
-  std::unordered_map<std::string, RayID> _registered_ray_map;
+  std::unordered_map<std::string, RayID> & _registered_ray_map;
   /// Map from registered Ray ID to name
-  std::unordered_map<RayID, std::string> _reverse_registered_ray_map;
+  std::vector<std::string> & _reverse_registered_ray_map;
 
   /// Storage for the cached traces
   std::vector<TraceData> _cached_traces;

@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'nearest_point_layered_side_diffusive_flux_average.i'
+    exodiff = 'nearest_point_layered_side_diffusive_flux_average_out.e'
+    requirement = 'The system shall compute layered side averages of the diffusive flux that are computed based on the flux values closest to a list of points'
+    design = 'NearestPointLayeredSideDiffusiveFluxAverage.md'
+    issues = '#21258'
+  [../]
+[]

@@ -39,7 +39,7 @@ mu = 1
   [Reac]
     type = ADMatReaction
     variable = u
-    mob_name = L
+    reaction_rate = L
   []
   [Visc]
     type = ADTimeDerivative

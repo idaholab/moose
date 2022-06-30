@@ -42,5 +42,5 @@ public:
   static InputParameters validParams();
 
 protected:
-  void generateRays() override;
+  void generateRays() override {}
 };

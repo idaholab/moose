@@ -13,67 +13,66 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = SMALL
     add_variables = true
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_theta]
+  [stress_theta]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_theta]
+  [stress_theta]
     type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
     variable = stress_theta
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     #Material constants selected to match isotropic lambda and shear modulus case
     type = ADComputeElasticityTensor
     C_ijkl = '1022726 113636 113636 1022726 454545'
     fill_method = axisymmetric_rz
-  [../]
-  [./elastic_stress]
+  []
+  [elastic_stress]
     type = ADComputeLinearElasticStress
-  [../]
+  []
 []
 
 [BCs]
 # pin particle along symmetry planes
-  [./no_disp_r]
+  [no_disp_r]
     type = DirichletBC
     variable = disp_r
     boundary = left
     value = 0.0
-  [../]
+  []
 
-  [./no_disp_z]
+  [no_disp_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
 # exterior and internal pressures
-  [./exterior_pressure_r]
+  [exterior_pressure_r]
     type = ADPressure
     variable = disp_r
     boundary = right
-    component = 0
-    constant = 200000
-  [../]
+    factor = 200000
+  []
 []
 
 [Debug]
@@ -81,10 +80,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -112,25 +111,25 @@
   dtmax = 5e6
   dtmin = 1
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
     optimal_iterations = 6
     iteration_window = 0
     linear_iteration_ratio = 100
-  [../]
+  []
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Outputs]

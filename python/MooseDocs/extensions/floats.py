@@ -176,11 +176,16 @@ class RenderFloat(components.RenderComponent):
         style = latex.parse_style(token)
 
         width = style.get('width', None)
-        if width and token(0).name == 'Image':
-            token(0).set('style', 'width:{};'.format(width))
+        if width and token(1).name == 'Image':
+            token(1)['style'] = 'width:{};'.format(width)
 
         if style.get('text-align', None) == 'center':
             latex.Command(env, 'centering')
+
+        if token['bottom']:
+            cap = token(0)
+            cap.parent = None
+            cap.parent = token
 
         return env
 
@@ -198,7 +203,7 @@ class RenderFloatCaption(components.RenderComponent):
     def createLatex(self, parent, token, page):
         caption = latex.Command(parent, 'caption')
         if token['key']:
-            latex.Command(caption, 'label', string=token['key'], escape=True)
+            latex.Command(caption, 'label', string=token['key'], escape=False)
         return caption
 
 class RenderFloatReference(core.RenderShortcutLink):
@@ -251,5 +256,5 @@ class RenderFloatReference(core.RenderShortcutLink):
         prefix = float_node.get('prefix', None)
         prefix = '' if prefix is None else prefix.title()
         latex.String(parent, content=prefix + '~', escape=False)
-        latex.Command(parent, 'ref', string=token['label'])
+        latex.Command(parent, 'ref', string=token['label'], escape=False)
         return parent

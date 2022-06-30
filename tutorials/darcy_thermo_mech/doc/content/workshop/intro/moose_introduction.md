@@ -24,6 +24,22 @@ Multi-physics Object Oriented Simulation Environment
 
 !---
 
+## MOOSE By The Numbers
+
+- 145 contributors
+- 40,000 commits
+- 5000 unique visitors per month
+- ~6 new Discussion participants per week
+- 1240 citations for the MOOSE papers
+
+  - Most cited paper in Elsevier Software-X
+  - More than 500 publications using MOOSE
+
+- 30M tests per week
+
+
+!---
+
 ## MOOSE Team
 
 !media darcy_thermo_mech/moose_team.png style=width:85%;margin-left:auto;margin-right:auto;display:block;
@@ -45,6 +61,11 @@ Multi-physics Object Oriented Simulation Environment
 - Mesh adaptivity (refinement and coarsening)
 - Massively parallel (MPI and threads)
 - User code agnostic of dimension, parallelism, shape functions, etc.
+- Operating Systems:
+
+  - Mac OSX
+  - Linux
+  - Windows (WSL)
 
 !---
 
@@ -90,3 +111,15 @@ Multi-physics Object Oriented Simulation Environment
 !---
 
 !media darcy_thermo_mech/moose_add_del.png style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
+
+!---
+
+## License
+
+- LGPL 2.1
+- Does not limit what you can do with your application
+
+  - Can license/sell your application as closed source
+
+- Modifications to the library itself (or the modules) are open source
+- New contributions are automatically LGPL 2.1

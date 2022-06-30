@@ -508,9 +508,10 @@ TEST_F(RankTwoTensorTest, ADConversion)
   generic_reg = MetaPhysicL::raw_value(generic_ad);
 }
 
-TEST_F(RankTwoTensorTest, mixedProductIjJklm)
+TEST_F(RankTwoTensorTest, timesIMMJKL)
 {
-  const RankFourTensor computed_val = _unsymmetric1.mixedProductIjJklm(_r4);
+  usingTensorIndices(i_, j_, k_, l_, m_);
+  const RankFourTensor computed_val = _unsymmetric1.times<i_, m_, m_, j_, k_, l_>(_r4);
   RankFourTensor expected_val;
   expected_val.fillFromInputVector(
       {274, 278, 282, 286, 290, 294, 298, 302, 306, 310, 314, 318, 322, 326, 330, 334, 338,
@@ -527,9 +528,10 @@ TEST_F(RankTwoTensorTest, mixedProductIjJklm)
           EXPECT_NEAR(expected_val(i, j, k, l), computed_val(i, j, k, l), 1e-5);
 }
 
-TEST_F(RankTwoTensorTest, mixedProductJmIjkl)
+TEST_F(RankTwoTensorTest, timesMLIMJK)
 {
-  const RankFourTensor computed_val = _unsymmetric1.mixedProductJmIjkl(_r4);
+  usingTensorIndices(i_, j_, k_, l_, m_);
+  const RankFourTensor computed_val = _unsymmetric1.times<m_, l_, i_, m_, j_, k_>(_r4);
   RankFourTensor expected_val;
   expected_val.fillFromInputVector(
       {78,    -168, 277,  84,    -183, 302,   90,    -198, 327,   96,    -213, 352,   102,  -228,
@@ -547,9 +549,10 @@ TEST_F(RankTwoTensorTest, mixedProductJmIjkl)
           EXPECT_EQ(expected_val(i, j, k, l), computed_val(i, j, k, l));
 }
 
-TEST_F(RankTwoTensorTest, mixedProductJkIjlm)
+TEST_F(RankTwoTensorTest, timesMJIMKL)
 {
-  const RankFourTensor computed_val = _unsymmetric1.mixedProductJkIjlm(_r4);
+  usingTensorIndices(i_, j_, k_, l_, m_);
+  const RankFourTensor computed_val = _unsymmetric1.times<m_, j_, i_, m_, k_, l_>(_r4);
   RankFourTensor expected_val;
   expected_val.fillFromInputVector(
       {78,    84,    90,   96,   102,  108,  114,  120,  126,  -168,  -183,  -198,  -213,  -228,
@@ -567,9 +570,9 @@ TEST_F(RankTwoTensorTest, mixedProductJkIjlm)
           EXPECT_EQ(expected_val(i, j, k, l), computed_val(i, j, k, l));
 }
 
-TEST_F(RankTwoTensorTest, mixedProductIjJkl)
+TEST_F(RankTwoTensorTest, contraction)
 {
-  const RankThreeTensor computed_val = _unsymmetric1.mixedProductIjJkl(_r3);
+  const RankThreeTensor computed_val = _unsymmetric1.contraction(_r3);
   RankThreeTensor expected_val;
   expected_val.fillFromInputVector({94,  98,  102, 106, 110, 114, 118, 122, 126,
                                     104, 109, 114, 119, 124, 129, 134, 139, 144,

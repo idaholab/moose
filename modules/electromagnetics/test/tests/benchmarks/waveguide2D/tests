@@ -1,0 +1,21 @@
+[Tests]
+  [test]
+    type = 'Exodiff'
+    input = 'waveguide2D_test.i'
+    exodiff = 'waveguide2D_test_out.e'
+    requirement = 'The system shall be able to simulate a 2D electric field waveguide with boundary conditions for wave launching, absorption, and conducting walls for scalar field variables.'
+    design = 'ADMatReaction.md EMRobinBC.md benchmarks/WaveguideTransmission.md'
+    verification = 'benchmarks/WaveguideTransmission.md'
+    issues = '#21098'
+  []
+  [absorbing_error]
+    type = 'RunException'
+    input = 'waveguide2D_test.i'
+    prereq = test
+    cli_args = 'BCs/port_real/mode=absorbing'
+    expect_err = 'In port_real, mode was set to Absorbing, while an incoming'
+    requirement = 'The system shall present an error to the user whenever the mode of operation for EMRobinBC is set to absorbing, but incoming wave information is supplied.'
+    design = 'EMRobinBC.md'
+    issues = '#21100'
+  []
+[]

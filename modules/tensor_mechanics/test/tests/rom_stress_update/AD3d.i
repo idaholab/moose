@@ -51,23 +51,20 @@ stress_unit = 'Pa'
   [pressure_x]
     type = ADPressure
     variable = disp_x
-    component = 0
     boundary = right
-    constant = ${p}
+    factor = ${p}
   []
   [pressure_y]
     type = ADPressure
     variable = disp_y
-    component = 1
     boundary = top
-    constant = -${p}
+    factor = -${p}
   []
   [pressure_z]
     type = ADPressure
     variable = disp_z
-    component = 2
     boundary = front
-    constant = -${p}
+    factor = -${p}
   []
 []
 

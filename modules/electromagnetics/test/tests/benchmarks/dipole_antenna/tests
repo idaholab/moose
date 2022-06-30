@@ -1,0 +1,22 @@
+[Tests]
+  [time_harmonic]
+    type = Exodiff
+    input = 'dipole.i'
+    exodiff = 'dipole_out.e'
+    cli_args = 'Mesh/refine/refinement=0'
+    requirement = 'The system shall calculate the static far field pattern of a half-wave dipole antenna.'
+    design = 'benchmarks/DipoleAntenna.md'
+    verification = 'benchmarks/DipoleAntenna.md'
+    issues = '#21086'
+  []
+  [transient]
+    type = Exodiff
+    input = 'dipole_transient.i'
+    exodiff = 'dipole_transient_out.e'
+    cli_args = 'Executioner/num_steps=10'
+    requirement = 'The system shall calculate the transient far field pattern of a half-wave dipole antenna.'
+    design = 'benchmarks/DipoleAntenna.md'
+    verification = 'benchmarks/DipoleAntenna.md'
+    issues = '#21086'
+  []
+[]

@@ -201,7 +201,8 @@ ActionWarehouse::getActionListByName(const std::string & task) const
 bool
 ActionWarehouse::hasActions(const std::string & task) const
 {
-  return _action_blocks.find(task) != _action_blocks.end();
+  auto it = _action_blocks.find(task);
+  return it != _action_blocks.end() && !it->second.empty();
 }
 
 void

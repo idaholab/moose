@@ -39,8 +39,21 @@ PorousFlowMaterial::PorousFlowMaterial(const InputParameters & parameters)
 void
 PorousFlowMaterial::initialSetup()
 {
-  if (_nodal_material)
-    _material_data->onlyResizeIfSmaller(true);
+  if (!_nodal_material)
+    return;
+
+  _material_data->onlyResizeIfSmaller(true);
+  auto & storage = _material_data->getMaterialPropertyStorage();
+  if (!storage.hasStatefulProperties())
+    return;
+
+  auto & stateful_prop_id_to_prop_id = storage.statefulProps();
+  for (const auto i : index_range(stateful_prop_id_to_prop_id))
+  {
+    const auto prop_id = stateful_prop_id_to_prop_id[i];
+    if (_supplied_prop_ids.count(prop_id))
+      _supplied_old_prop_ids.push_back(i);
+  }
 }
 
 void
@@ -113,8 +126,30 @@ PorousFlowMaterial::sizeNodalProperties()
    * On boundary materials, the number of nodes may be larger than the number of
    * qps on the face of the element, in which case the remaining entries in the
    * material properties storage will be zero.
+   *
+   * \author lindsayad: MooseArray currently has the unfortunate side effect that if your new size
+   * is greater than the current size, then we clear the whole data structure. Consequently this
+   * call has the potential to clear material property evaluations done earlier in the material
+   * dependency chain. So instead we selectively resize just our own properties and not everyone's
    */
-  _material_data->resize(std::max(_current_elem->n_nodes(), _qrule->n_points()));
+  // _material_data->resize(std::max(_current_elem->n_nodes(), _qrule->n_points()));
+
+  const auto new_size = std::max(_current_elem->n_nodes(), _qrule->n_points());
+  auto & storage = _material_data->getMaterialPropertyStorage();
+  auto & props = _material_data->props();
+  auto & props_old = _material_data->propsOld();
+  auto & props_older = _material_data->propsOlder();
+
+  for (const auto prop_id : _supplied_prop_ids)
+    props[prop_id]->resize(new_size);
+
+  for (const auto prop_id : _supplied_old_prop_ids)
+    props_old[prop_id]->resize(new_size);
+
+  if (storage.hasOlderProperties())
+    for (const auto prop_id : _supplied_old_prop_ids)
+      if (auto * const older_prop = props_older[prop_id])
+        older_prop->resize(new_size);
 }
 
 unsigned

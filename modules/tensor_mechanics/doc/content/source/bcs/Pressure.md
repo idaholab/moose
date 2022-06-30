@@ -12,8 +12,8 @@ the direction in which to apply the traction.
 The boundary condition is typically applied to the displaced mesh.
 
 The magnitude of the `Pressure` boundary condition can be specified as either a
-scalar (use the input parameter `factor`), a `function` parameter, or a `Postprocessor`
-name.
+scalar (use the input parameter `factor`, which defaults to 1.0), a `function` parameter, or a `Postprocessor`
+name.  If more than one of these are given, they are multiplied by one another.
 
 !alert note title=Can Be Created with the Pressure Action
 A set of +`Pressure`+ boundary conditions applied to multiple variables in multiple

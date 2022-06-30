@@ -1,4 +1,9 @@
-{% set build = 2 %}
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   petsc/
+#   libmesh-vtk/
+#   libmesh/
+{% set build = 3 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "4.0.1" %}
 
@@ -12,7 +17,8 @@ source:
 build:
   number: {{ build }}
   string: {{ strbuild }}
-  skip: True  # [win]
+  skip: True                    # [win]
+  pin_depends: strict
   run_exports:
     - {{ pin_subpackage('moose-mpich', max_pin='x.x') }}
 
@@ -29,6 +35,7 @@ requirements:
     - libtool                   # [unix]
     - make                      # [unix]
     - gnuconfig                 # [arm64]
+    - openssl <3
   host: []
   run:
     - {{ base_mpich }}
@@ -37,13 +44,18 @@ requirements:
     - {{ base_mpifort }}
     - {{ moose_hdf5 }}
     - {{ moose_ld64 }}          # [osx]
-    - autoconf                  # [osx]
-    - automake                  # [osx]
-    - libtool                   # [osx]
-    - make                      # [osx]
+    - {{ moose_libxt }}         # [linux]
+    - {{ moose_libsm }}         # [linux]
+    - {{ moose_libx11 }}        # [linux]
+    - {{ moose_libice }}        # [linux]
+    - {{ moose_libxext }}       # [linux]
+    - {{ moose_mesa_libgl }}    # [linux]
+    - {{ moose_xorg_x11 }}      # [linux]
+    - {{ moose_libglu }}        # [linux]
+    - {{ moose_mesalib }}       # [linux]
     - openssl <3
-    - setuptools <60
     - mpi 1.0 mpich
+
 test:
   commands:
     - test -f $PREFIX/etc/conda/activate.d/activate_moose-mpich.sh

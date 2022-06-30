@@ -1,13 +1,13 @@
 [Tests]
-  [./material_tensor_avg_test]
+  [material_tensor_avg_test]
     type = 'CSVDiff'
     input = 'material_tensor_average_test.i'
     csvdiff = 'material_tensor_average_test_out.csv'
     requirement = 'The system shall be able to compute the volume average of rank two tensor component.'
     design = 'MaterialTensorAverage.md'
     issues = '#15424'
-  [../]
-  [./material_tensor_avg_AD_test]
+  []
+  [material_tensor_avg_AD_test]
     type = 'CSVDiff'
     input = 'material_tensor_average_test.i'
     csvdiff = 'material_tensor_average_AD_test_out.csv'
@@ -15,5 +15,14 @@
     cli_args = 'Materials/stress/type=ADComputeFiniteStrainElasticStress Materials/elasticity_tensor/type=ADComputeElasticityTensor Modules/TensorMechanics/Master/all/use_automatic_differentiation=true Outputs/file_base=material_tensor_average_AD_test_out Postprocessors/szz_avg/type=ADMaterialTensorAverage Postprocessors/szz_int/type=ADMaterialTensorIntegral'
     design = 'MaterialTensorAverage.md'
     issues = '#15424'
-  [../]
+  []
+
+  [normal_displacement]
+    type = 'Exodiff'
+    input = 'normal_boundary_displacement.i'
+    exodiff = 'normal_boundary_displacement_out.e'
+    requirement = 'The system shall compute normal displacements on a surface for checking correct application of penalty boundary conditions.'
+    design = 'NormalBoundaryDisplacement.md'
+    issues = '#16346'
+  []
 []

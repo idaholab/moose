@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = 'Exodiff'
+    input = 'ReflectionTest.i'
+    exodiff = 'ReflectionTest_out.e'
+    requirement = 'The system shall be able to simulate the field result of an incoming wave reflected on a biased surface and properly absorb the reflected wave in a boundary condition.'
+    design = 'EMRobinBC.md'
+    issues = '#21098'
+  []
+[]
