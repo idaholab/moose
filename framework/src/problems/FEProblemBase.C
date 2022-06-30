@@ -63,6 +63,7 @@
 #include "MultiAppTransfer.h"
 #include "TransientMultiApp.h"
 #include "ElementUserObject.h"
+#include "DomainUserObject.h"
 #include "NodalUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
@@ -3571,13 +3572,14 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     auto isuo = std::dynamic_pointer_cast<InternalSideUserObject>(user_object);
     auto iuob = std::dynamic_pointer_cast<InterfaceUserObjectBase>(user_object);
     auto nuo = std::dynamic_pointer_cast<NodalUserObject>(user_object);
+    auto duo = std::dynamic_pointer_cast<DomainUserObject>(user_object);
     auto guo = std::dynamic_pointer_cast<GeneralUserObject>(user_object);
     auto tguo = std::dynamic_pointer_cast<ThreadedGeneralUserObject>(user_object);
 
     // Account for displaced mesh use
     if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
     {
-      if (euo || nuo)
+      if (euo || nuo || duo)
         _reinit_displaced_elem = true;
       else if (suo)
         // shouldn't we add isuo
@@ -3910,7 +3912,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
   query.clone()
       .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
                                    Interfaces::InternalSideUserObject |
-                                   Interfaces::InterfaceUserObject)
+                                   Interfaces::InterfaceUserObject | Interfaces::DomainUserObject)
       .queryInto(userobjs);
 
   std::vector<UserObject *> tgobjs;
@@ -3970,6 +3972,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InterfaceUserObject));
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::DomainUserObject));
   }
 
   // Execute NodalUserObjects
