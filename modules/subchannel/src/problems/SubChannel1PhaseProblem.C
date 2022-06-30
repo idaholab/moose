@@ -240,9 +240,9 @@ SubChannel1PhaseProblem::converged()
 PetscScalar
 SubChannel1PhaseProblem::computeInterpolationCoefficients(const std::string interp_type,
                                                           PetscScalar Peclet){
-  if(interp_type.compare("upwind") != 0){
+  if (interp_type.compare("upwind") != 0){
     return 1.0;
-  } else if(interp_type.compare("downwind") != 0){
+  } else if (interp_type.compare("downwind") != 0){
     return 0.0;
   } else if (interp_type.compare("central_difference") != 0){
     return 0.5;
@@ -460,7 +460,7 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
     }
     MatAssemblyBegin(mc_sumWij_mat,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(mc_sumWij_mat,MAT_FINAL_ASSEMBLY);
-    if(_segregated_bool)
+    if (_segregated_bool)
     {
       Vec loc_prod; VecDuplicate(amc_sys_mdot_rhs,&loc_prod);
       populateVectorFromDense<libMesh::DenseMatrix<Real>>(Wij_vec, _Wij, first_node, last_node, _n_gaps);
@@ -571,7 +571,7 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
     if (_verbose_subchannel)
       _console << "Block: " << iblock << " - Mass conservation matrix assembled" << std::endl;
 
-    if(_segregated_bool)
+    if (_segregated_bool)
     {
       KSP ksploc; PC  pc;
       Vec sol; VecDuplicate(mc_axial_convection_rhs, &sol);
@@ -660,7 +660,7 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
         PetscScalar base_value = _beta * 0.5 * Sij;
 
         // Bottom values
-        if(iz == first_node)
+        if (iz == first_node)
         {
           PetscScalar value_tl = -1.0 * base_value/(Si_in + Sj_in) * ((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j));
           PetscInt row = i_gap + _n_gaps * iz_ind;
@@ -691,7 +691,7 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
     }
     MatAssemblyBegin(amc_turbulent_cross_flows_mat,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(amc_turbulent_cross_flows_mat,MAT_FINAL_ASSEMBLY);
-    if(_segregated_bool)
+    if (_segregated_bool)
     {
       populateVectorFromHandle<SolutionHandle *>(prod, _mdot_soln, first_node, last_node, _n_channels);
       MatMult(amc_turbulent_cross_flows_mat, prod, Wij_vec);
@@ -1058,7 +1058,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
     VecAXPY(amc_sys_mdot_rhs, 1.0, amc_friction_force_rhs);
     VecAXPY(amc_sys_mdot_rhs, 1.0, amc_gravity_rhs);
 
-    if(_segregated_bool)
+    if (_segregated_bool)
     {
       // Assembly the matrix system
       populateVectorFromHandle<SolutionHandle *>(prod, _mdot_soln, first_node, last_node, _n_channels);
@@ -1135,7 +1135,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
           // We will need to update this later if we allow non-uniform refinements in the axial direction
           PetscScalar Pe = 0.5;
           auto alpha = computeInterpolationCoefficients("central_difference", Pe);
-          if(iz == last_node)
+          if (iz == last_node)
           {
             _P_soln->set(node_in, (*_P_soln)(node_out) +(*_DP_soln)(node_out)/2.0);
           }
@@ -1187,7 +1187,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
             MatSetValues(amc_pressure_force_mat,1,&row,1,&col,&value,INSERT_VALUES);
           }
 
-          if(_segregated_bool)
+          if (_segregated_bool)
           {
             auto dp_out = (*_DP_soln)(node_out);
             PetscScalar value_v = -1.0 * dp_out;
@@ -1201,7 +1201,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
       MatAssemblyBegin(amc_pressure_force_mat,MAT_FINAL_ASSEMBLY);
       MatAssemblyEnd(amc_pressure_force_mat,MAT_FINAL_ASSEMBLY);
 
-      if(_segregated_bool)
+      if (_segregated_bool)
       {
         KSP ksploc; PC  pc;
         Vec sol; VecDuplicate(amc_pressure_force_rhs, &sol);
@@ -1269,7 +1269,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
             PetscScalar value = 1.0 * S_interp;
             MatSetValues(amc_pressure_force_mat,1,&row,1,&col,&value,INSERT_VALUES);
 
-            if(_segregated_bool)
+            if (_segregated_bool)
             {
               auto dp_in = (*_DP_soln)(node_in);
               auto dp_out = (*_DP_soln)(node_out);
@@ -1288,7 +1288,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
       if (_verbose_subchannel)
         _console << "Block: " << iblock << " - Axial momentum pressure force matrix assembled" << std::endl;
 
-      if(_segregated_bool)
+      if (_segregated_bool)
       {
         KSP ksploc; PC  pc;
         Vec sol; VecDuplicate(amc_pressure_force_rhs, &sol);
@@ -1652,7 +1652,7 @@ SubChannel1PhaseProblem::computeh(int iblock)
     VecAXPY(hc_sys_h_rhs, 1.0, hc_cross_derivative_rhs);
     VecAXPY(hc_sys_h_rhs, 1.0, hc_added_heat_rhs);
 
-    if(_segregated_bool || (! _monolithic_thermal_bool))
+    if (_segregated_bool || (! _monolithic_thermal_bool))
     {
       // Assembly the matrix system
       KSP ksploc; PC  pc;
@@ -2004,7 +2004,7 @@ SubChannel1PhaseProblem::computeWij(int iblock)
     VecAXPY(cmc_sys_Wij_rhs, 1.0, cmc_advective_derivative_rhs);
     VecAXPY(cmc_sys_Wij_rhs, 1.0, cmc_friction_force_rhs);
 
-    if(_segregated_bool)
+    if (_segregated_bool)
     {
       // Assembly the matrix system
       Vec sol_holder_P; createPetscVector(sol_holder_P, _block_size * _n_gaps);
@@ -2205,7 +2205,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // Assembling cross fluxes matrix
   computeWij(iblock);
   // If monolithic solve - Assembling enthalpy matrix
-  if(_monolithic_thermal_bool) computeh(iblock);
+  if (_monolithic_thermal_bool) computeh(iblock);
 
   if (_verbose_subchannel)
   {
@@ -2233,7 +2233,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     mat_array[Q*field_num+2] = NULL;
   }
   _console << "Term 3" << std::endl;
-  if(_monolithic_thermal_bool)
+  if (_monolithic_thermal_bool)
   {
     mat_array[Q*field_num+3] = NULL;
   }
@@ -2286,7 +2286,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   ierr = MatAssemblyBegin(mat_array[Q*field_num+1],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
   ierr = MatAssemblyEnd(mat_array[Q*field_num+1],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
   mat_array[Q*field_num+2] = NULL;
-  if(_monolithic_thermal_bool)
+  if (_monolithic_thermal_bool)
   {
     mat_array[Q*field_num+3] = NULL;
   }
@@ -2447,7 +2447,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   //ierr = MatScale(mat_array[Q*field_num+2], -1.0); CHKERRQ(ierr);
   ierr = MatAssemblyBegin(mat_array[Q*field_num+2],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
   ierr = MatAssemblyEnd(mat_array[Q*field_num+2],MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
-  if(_monolithic_thermal_bool)
+  if (_monolithic_thermal_bool)
   {
     mat_array[Q*field_num+3] = NULL;
   }
@@ -2544,7 +2544,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     _console << "Cross mom ok." << std::endl;
 
   // Energy conservation
-  if(_monolithic_thermal_bool)
+  if (_monolithic_thermal_bool)
   {
     field_num = 3;
     mat_array[Q*field_num+0] = NULL;
@@ -2833,7 +2833,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     }
   }
 
-  if(_monolithic_thermal_bool)
+  if (_monolithic_thermal_bool)
   {
     Vec sol_h;
     ierr = VecDuplicate(cmc_sys_Wij_rhs,&sol_h); CHKERRQ(ierr);
@@ -2990,7 +2990,7 @@ SubChannel1PhaseProblem::externalSolve()
         }
         auto T_L2norm_old_block = _T_soln->L2norm();
 
-        if(_segregated_bool)
+        if (_segregated_bool)
         {
           computeWijFromSolve(iblock);
           if (_compute_power)

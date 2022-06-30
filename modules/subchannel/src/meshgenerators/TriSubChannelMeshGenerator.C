@@ -301,10 +301,10 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   // Constructing pins to channels mao
   for (unsigned int loc_rod = 0; loc_rod < _nrods; loc_rod++)
   {
-    for(unsigned int i = 0; i < _n_channels; i++)
+    for (unsigned int i = 0; i < _n_channels; i++)
     {
       bool rod_in_sc = false;
-      for(unsigned int j : _subchannel_to_rod_map[i])
+      for (unsigned int j : _subchannel_to_rod_map[i])
       {
         if (j == loc_rod)
           rod_in_sc = true;

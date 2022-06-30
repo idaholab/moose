@@ -45,7 +45,7 @@ QuadInterWrapperPowerIC::QuadInterWrapperPowerIC(const InputParameters & params)
 
   _console << "Power file: " << _filename << std::endl;
 
-  if(_filename.compare("file_was_not_found"))
+  if (_filename.compare("file_was_not_found"))
   {
     inFile.open(_filename);
     if (!inFile)
@@ -66,7 +66,7 @@ QuadInterWrapperPowerIC::QuadInterWrapperPowerIC(const InputParameters & params)
     _numberoflines = (ny - 1) * (nx - 1);
   }
 
-  if(_filename.compare("file_was_not_found"))
+  if (_filename.compare("file_was_not_found"))
   {
     inFile.open(_filename);
     int i(0);
