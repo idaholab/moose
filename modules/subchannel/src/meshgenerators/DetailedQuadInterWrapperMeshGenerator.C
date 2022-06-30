@@ -40,7 +40,7 @@ DetailedQuadInterWrapperMeshGenerator::DetailedQuadInterWrapperMeshGenerator(
     _side_bypass_length(getParam<Real>("side_bypass")),
     _block_id(getParam<unsigned int>("block_id"))
 {
-  std::cout << "Side bypass length: " << _side_bypass_length << std::endl;
+  _console << "Side bypass length: " << _side_bypass_length << std::endl;
   // Changing nx and ny from assemblies to channel numbering
   _nx += 1;
   _ny += 1;

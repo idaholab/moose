@@ -638,7 +638,7 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
     MatAXPY(amc_sys_mdot_mat, 1.0, amc_friction_force_mat, UNKNOWN_NONZERO_PATTERN);
     MatAssemblyBegin(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY); MatAssemblyEnd(amc_sys_mdot_mat,MAT_FINAL_ASSEMBLY);
     if (_verbose_subchannel)
-      std::cout << "Block: " << iblock << " - Linear momentum conservation matrix assembled" << std::endl;
+      _console << "Block: " << iblock << " - Linear momentum conservation matrix assembled" << std::endl;
     // RHS
     VecAXPY(amc_sys_mdot_rhs, 1.0, amc_time_derivative_rhs);
     VecAXPY(amc_sys_mdot_rhs, 1.0, amc_advective_derivative_rhs);
@@ -1069,7 +1069,7 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
   {
     initializeSolution();
     if (_verbose_subchannel)
-      std::cout << "Solution initialized" << std::endl;
+      _console << "Solution initialized" << std::endl;
   }
   while ((P_error > _P_tol && P_it < P_it_max))
   {
@@ -1120,18 +1120,18 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
           {
             implicitPetscSolve(iblock);
             if (_verbose_subchannel)
-              std::cout << "Done with main solve." << std::endl;
+              _console << "Done with main solve." << std::endl;
             if (_compute_power)
             {
               if (_verbose_subchannel)
-                std::cout << "Starting enthalpy solve." << std::endl;
+                _console << "Starting enthalpy solve." << std::endl;
               computeh(iblock);
               if (_verbose_subchannel)
-                std::cout << "Done with enthalpy solve." << std::endl;
+                _console << "Done with enthalpy solve." << std::endl;
               computeT(iblock);
             }
             if (_verbose_subchannel)
-              std::cout << "Done with thermal solve." << std::endl;
+              _console << "Done with thermal solve." << std::endl;
           }
         }
 
@@ -1142,7 +1142,7 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
           computeMu(iblock);
 
         if (_verbose_subchannel)
-          std::cout << "Done updating thermophysical properties." << std::endl;
+          _console << "Done updating thermophysical properties." << std::endl;
 
         auto T_L2norm_new = _T_soln->L2norm();
         T_block_error =
@@ -1156,8 +1156,8 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
     _console << "P_error :" << P_error << std::endl;
     if (_verbose_subchannel)
     {
-      std::cout << "Iteration:  " << P_it << std::endl;
-      std::cout << "Maximum iterations: " << P_it_max << std::endl;
+      _console << "Iteration:  " << P_it << std::endl;
+      _console << "Maximum iterations: " << P_it_max << std::endl;
     }
   }
   // update old crossflow matrix
