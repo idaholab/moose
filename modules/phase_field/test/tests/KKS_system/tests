@@ -89,12 +89,12 @@
     []
   []
 
-  [kks_example_nested]
+  [kks_example_multiphase_nested]
     type = 'Exodiff'
-    input = 'kks_example_nested.i'
-    exodiff = 'kks_example_nested.e'
-    issues = '#19981'
-    design = 'KKSPhaseConcentrationMaterial.md KKSPhaseConcentrationDerivatives.md NestedKKSACBulkC.md NestedKKSACBulkF.md NestedKKSSplitCHCRes.md'
-    requirement = 'The nested solve of Kim-Kim-Suzuki shall yield the correct results with non-linear phase free energies'
+    input = 'kks_example_multiphase_nested.i'
+    exodiff = 'kks_example_multiphase_nested.e'
+    issues = '#21358'
+    design = 'KKSPhaseConcentrationMultiPhaseMaterial.md KKSPhaseConcentrationMultiPhaseDerivatives.md NestKKSMultiACBulkC.md NestKKSMultiACBulkF.md NestKKSSplitCHCRes.md'
+    requirement = 'The nested solve of multiphase Kim-Kim-Suzuki models shall yield the correct results with non-linear phase free energies'
   []
 []

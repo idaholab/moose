@@ -15,7 +15,7 @@
 
 /**
  * KKSACBulkBase child class for the phase concentration term
- * \f$ - \sum_j \frac{dF_1}{dc_1} \frac{dh_j}{d\eta_i} (c_j) \f$
+ * \f$ - \frac{\partial F_1}{\partial c_1} \sum_j \frac{\partial h_j}{\partial \eta_i} (c_j) \f$
  * in the the Allen-Cahn bulk residual.
  *
  * The non-linear variable for this Kernel is the order parameter 'eta_i'.

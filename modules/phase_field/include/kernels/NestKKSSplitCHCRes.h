@@ -13,19 +13,15 @@
 #include "JvarMapInterface.h"
 #include "Kernel.h"
 
-// Forward Declarations
-
 /**
- * SplitCHBulk child class that takes all the necessary data from a
- * KKSBaseMaterial.
- * We calculate \f$ \frac{\partial F_a}{\partial c_a} \f$.
+ * In the KKS split form for the term \f$ \frac{\partial F_1}{\partial c_1} - \mu \f$.
  * This takes advantage of the KKS identity
  *
- * \f$ dF/dc = dF_a/dc_a (= dF_b/dc_b) \f$
+ * \f$ \frac{\partial F}{\partial c} = \frac{\partial F_i}{\partial c_i} \f$
  *
  * The non-linear variable for this Kernel is the concentration 'c'.
- * The user picks one phase free energy \f$ F_a \f$ (f_base) and its
- * corresponding phase concentration \f$ c_a \f$
+ * The user picks one phase free energy \f$ F_1 \f$ (f_base) and its
+ * corresponding phase concentration \f$ c_1 \f$
  */
 
 class NestKKSSplitCHCRes : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
