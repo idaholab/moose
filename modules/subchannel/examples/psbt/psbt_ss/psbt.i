@@ -41,7 +41,6 @@ P_out = 4.923e6 # Pa
   segregated = true
   staggered_pressure = false
   monolithic_thermal = false
-  discretization = "central_difference"
   # P_tol = 1e-11
 []
 
@@ -181,4 +180,3 @@ P_out = 4.923e6 # Pa
     variable = 'mdot SumWij P DP h T rho mu q_prime S'
   []
 []
-
