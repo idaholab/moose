@@ -6263,6 +6263,8 @@ FEProblemBase::updateMortarMesh()
 {
   TIME_SECTION("updateMortarMesh", 5, "Updating Mortar Mesh");
 
+  FloatingPointExceptionGuard fpe_guard(_app);
+
   _mortar_data.update();
 }
 
