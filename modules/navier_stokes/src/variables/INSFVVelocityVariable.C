@@ -65,6 +65,41 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 }
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
+
+const ADReal &
+INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const
+{
+  if (_two_term_boundary_expansion)
+    if (isFullyDevelopedFlowFace(fi))
+    {
+      const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
+      const Elem * const elem = std::get<0>(tup);
+      const Point vector_to_face = std::get<2>(tup) ? (fi.faceCentroid() - fi.elemCentroid())
+                                                    : (fi.faceCentroid() - fi.neighborCentroid());
+
+      _temp_face_value = uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem);
+
+      return _temp_face_value;
+    }
+
+  return INSFVVariable::getExtrapolatedBoundaryFaceValue(fi);
+}
+
+const VectorValue<ADReal> &
+INSFVVelocityVariable::uncorrectedAdGradSln(const FaceInfo & fi, const bool correct_skewness) const
+{
+  if (_two_term_boundary_expansion)
+    if (isFullyDevelopedFlowFace(fi))
+    {
+      const auto & cell_gradient = adGradSln(&fi.elem(), correct_skewness);
+      const auto normal = fi.normal();
+      _temp_face_unc_gradient = cell_gradient - (cell_gradient * normal) * normal;
+      return _temp_face_unc_gradient;
+    }
+
+  return INSFVVariable::uncorrectedAdGradSln(fi, correct_skewness);
+}
+
 const VectorValue<ADReal> &
 INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness) const
 {
@@ -185,7 +220,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
             // Will be nice in C++17 we'll get a returned reference from this method
             fdf_grad_centroid_coeffs.emplace_back();
             auto & current_coeffs = fdf_grad_centroid_coeffs.back();
-            const auto normal = surface_vector / (fi->faceArea() * coord);
+            const auto normal = fi->normal();
             for (const auto i : make_range(lm_dim))
               for (const auto j : make_range(lm_dim))
               {
@@ -327,34 +362,6 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
       A.lu_solve(b, x);
       for (const auto lm_dim_index : make_range(lm_dim))
         grad(lm_dim_index) = x(lm_dim_index);
-
-      // Cache the face value information
-      for (const auto ebf_index : make_range(num_ebfs))
-        _face_to_value.emplace(ebf_faces[ebf_index].first, x(lm_dim + ebf_index));
-
-      if (_cache_face_gradients && !correct_skewness)
-      {
-        // Cache the extrapolated face gradient information
-        auto it = ebf_faces.begin();
-        for (const auto fdf_index : make_range(num_fdf_faces))
-        {
-          it = std::find_if(it,
-                            ebf_faces.end(),
-                            [](const std::pair<const FaceInfo *, bool> & in) { return in.second; });
-          mooseAssert(it != ebf_faces.end(), "We should have found a fully developed flow face");
-
-          const auto starting_index =
-              static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
-
-          auto pr = _face_to_unc_grad.emplace(it->first, VectorValue<ADReal>());
-          mooseAssert(pr.second, "We should have inserted a new face gradient");
-          for (const auto lm_index : make_range(lm_dim))
-            pr.first->second(lm_index) = x(starting_index + lm_index);
-
-          // increment the iterator so we don't find the same element again
-          ++it;
-        }
-      }
     }
 
     if (_cache_cell_gradients && !correct_skewness)
@@ -374,13 +381,6 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
                 "being used");
     const_cast<INSFVVelocityVariable *>(this)->_two_term_boundary_expansion = false;
     const auto & grad = adGradSln(elem, correct_skewness);
-
-    // We failed to compute the extrapolated boundary faces with two-term expansion and callers of
-    // this method may be relying on those values (e.g. if the caller is
-    // getExtrapolatedBoundaryFaceValue) so we populate them here with one-term expansion, e.g. we
-    // set the boundary face values to the cell centroid value
-    for (const auto & ebf_face_pr : ebf_faces)
-      _face_to_value.emplace(ebf_face_pr.first, elem_value);
 
     // Two term boundary expansion should only fail at domain corners. We want to keep trying it at
     // other boundary locations

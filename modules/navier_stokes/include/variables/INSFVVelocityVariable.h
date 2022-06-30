@@ -25,5 +25,20 @@ public:
   using INSFVVariable::adGradSln;
   const VectorValue<ADReal> & adGradSln(const Elem * const elem,
                                         bool correct_skewness = false) const override;
+
+  /**
+   * @return the uncorrected surface gradient on face \p fi
+   */
+  using INSFVVariable::uncorrectedAdGradSln;
+  const VectorValue<ADReal> &
+  uncorrectedAdGradSln(const FaceInfo & fi, const bool correct_skewness = false) const override;
+
+protected:
+  /**
+   * @return the extrapolated value on the boundary face associated with \p fi
+   */
+  using INSFVVariable::getExtrapolatedBoundaryFaceValue;
+  const ADReal & getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const override;
+
 #endif
 };

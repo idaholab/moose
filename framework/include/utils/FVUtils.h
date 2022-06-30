@@ -22,6 +22,13 @@ namespace Moose
 namespace FV
 {
 
+/*
+ * This function infers based on elements if the faceinfo between them
+ * belongs to the element or not.
+ * @param elem Reference to an element
+ * @param neighbor Reference to the neighbor of the element
+ * @return If the element (first argument) is the owner of the faceinfo between the two elements
+ */
 bool elemHasFaceInfo(const Elem & elem, const Elem * const neighbor);
 
 template <typename ActionFunctor>

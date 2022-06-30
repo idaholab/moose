@@ -565,8 +565,6 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
   _temp_face_value =
       Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, correct_skewness));
 
-  std::cout << "Face value " << _temp_face_value << std::endl;
-
   return _temp_face_value;
 }
 

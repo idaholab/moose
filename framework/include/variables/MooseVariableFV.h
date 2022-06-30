@@ -296,8 +296,8 @@ public:
    * gradients does
    * @param face The face for which to retrieve the gradient.
    */
-  const VectorValue<ADReal> & adGradSln(const FaceInfo & fi,
-                                        const bool correct_skewness = false) const;
+  virtual const VectorValue<ADReal> & adGradSln(const FaceInfo & fi,
+                                                const bool correct_skewness = false) const;
 
   /**
    * Retrieve (or potentially compute) the uncorrected gradient on the provided face. This
@@ -308,8 +308,8 @@ public:
    * is done in \p adGradSln(const FaceInfo & fi)
    * @param face The face for which to retrieve the gradient
    */
-  const VectorValue<ADReal> & uncorrectedAdGradSln(const FaceInfo & fi,
-                                                   const bool correct_skewness = false) const;
+  virtual const VectorValue<ADReal> &
+  uncorrectedAdGradSln(const FaceInfo & fi, const bool correct_skewness = false) const;
 
   /**
    * Retrieve the solution value at a boundary face. If we're using a one term Taylor series
@@ -518,6 +518,11 @@ protected:
    */
   std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
 
+  /**
+   * @return the extrapolated value on the boundary face associated with \p fi
+   */
+  virtual const ADReal & getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const;
+
 private:
   using MooseVariableField<OutputType>::evaluate;
   using MooseVariableField<OutputType>::evaluateGradient;
@@ -539,11 +544,6 @@ private:
   DotType evaluateDot(const ElemArg & elem, unsigned int) const override final;
   DotType evaluateDot(const FaceArg & face, unsigned int) const override final;
   DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int) const override final;
-
-  /**
-   * @return the extrapolated value on the boundary face associated with \p fi
-   */
-  const ADReal & getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const;
 
 public:
   const MooseArray<OutputType> & nodalValueArray() const override
