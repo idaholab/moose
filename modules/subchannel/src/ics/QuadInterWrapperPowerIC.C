@@ -43,7 +43,7 @@ QuadInterWrapperPowerIC::QuadInterWrapperPowerIC(const InputParameters & params)
   double vin;
   ifstream inFile;
 
-  std::cout << "Power file: " << _filename << std::endl;
+  _console << "Power file: " << _filename << std::endl;
 
   if(_filename.compare("file_was_not_found"))
   {

@@ -255,7 +255,7 @@ QuadInterWrapperMeshGenerator::QuadInterWrapperMeshGenerator(const InputParamete
   for (auto & pin : _pin_to_chan_map)
     pin.shrink_to_fit();
 
-  std::cout << "Inter-wrapper quad mesh initialized" << std::endl;
+  _console << "Inter-wrapper quad mesh initialized" << std::endl;
 }
 
 std::unique_ptr<MeshBase>
@@ -351,7 +351,7 @@ QuadInterWrapperMeshGenerator::generate()
   sch_mesh->_gij_map = _gij_map;
   sch_mesh->_subch_type = _subch_type;
 
-  std::cout << "Inter-wrapper quad mesh generated" << std::endl;
+  _console << "Inter-wrapper quad mesh generated" << std::endl;
 
   return mesh_base;
 }
