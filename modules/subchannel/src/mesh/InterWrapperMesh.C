@@ -27,10 +27,10 @@ InterWrapperMesh::InterWrapperMesh(const InterWrapperMesh & other_mesh)
 
 void
 InterWrapperMesh::generateZGrid(Real unheated_length_entry,
-                              Real heated_length,
-                              Real unheated_length_exit,
-                              unsigned int n_cells,
-                              std::vector<Real> & z_grid)
+                                Real heated_length,
+                                Real unheated_length_exit,
+                                unsigned int n_cells,
+                                std::vector<Real> & z_grid)
 {
   Real L = unheated_length_entry + heated_length + unheated_length_exit;
   Real dz = L / n_cells;

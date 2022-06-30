@@ -11,7 +11,9 @@ TriInterWrapperMesh::validParams()
   return params;
 }
 
-TriInterWrapperMesh::TriInterWrapperMesh(const InputParameters & params) : InterWrapperMesh(params) {}
+TriInterWrapperMesh::TriInterWrapperMesh(const InputParameters & params) : InterWrapperMesh(params)
+{
+}
 
 TriInterWrapperMesh::TriInterWrapperMesh(const TriInterWrapperMesh & other_mesh)
   : InterWrapperMesh(other_mesh),
@@ -97,9 +99,9 @@ TriInterWrapperMesh::pinIndex(const Point & /*p*/) const
 
 void
 TriInterWrapperMesh::rodPositions(std::vector<Point> & positions,
-                                unsigned int nrings,
-                                Real assembly_pitch,
-                                Point center)
+                                  unsigned int nrings,
+                                  Real assembly_pitch,
+                                  Point center)
 {
   /// Defining parameters
   // distance: it is the distance to the next rod
@@ -120,11 +122,12 @@ TriInterWrapperMesh::rodPositions(std::vector<Point> & positions,
     {
       k = k + 1;
       theta1 = fmod(theta + 1.0e-10, pi / 3.0);
-      distance = std::sqrt((pow(i * assembly_pitch, 2) + pow(theta1 / dtheta * assembly_pitch, 2) -
-                            2.0 * i * assembly_pitch * (theta1 / dtheta * assembly_pitch) * std::cos(pi / 3.0)));
-      theta_corrected = std::acos(
-          1.0 / (i * assembly_pitch) / distance / 2.0 *
-          (std::pow(i * assembly_pitch, 2) + std::pow(distance, 2) - std::pow(theta1 / dtheta * assembly_pitch, 2)));
+      distance = std::sqrt(
+          (pow(i * assembly_pitch, 2) + pow(theta1 / dtheta * assembly_pitch, 2) -
+           2.0 * i * assembly_pitch * (theta1 / dtheta * assembly_pitch) * std::cos(pi / 3.0)));
+      theta_corrected = std::acos(1.0 / (i * assembly_pitch) / distance / 2.0 *
+                                  (std::pow(i * assembly_pitch, 2) + std::pow(distance, 2) -
+                                   std::pow(theta1 / dtheta * assembly_pitch, 2)));
       if (theta1 < 1.0e-6)
       {
         theta_corrected = theta;

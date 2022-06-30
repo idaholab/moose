@@ -8,9 +8,9 @@
 class TriInterWrapperWettedPerimIC : public TriInterWrapperBaseIC
 {
 public:
-    TriInterWrapperWettedPerimIC(const InputParameters & params);
-    Real value(const Point & p) override;
+  TriInterWrapperWettedPerimIC(const InputParameters & params);
+  Real value(const Point & p) override;
 
 public:
-    static InputParameters validParams();
+  static InputParameters validParams();
 };

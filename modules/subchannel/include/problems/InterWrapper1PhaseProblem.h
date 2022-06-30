@@ -28,9 +28,12 @@ public:
   virtual void initialSetup() override;
 
 protected:
-
   /// Standard return structure for reusing in implicit/explicit formulations
-  struct StructPetscMatVec{ Mat A; Vec x;};
+  struct StructPetscMatVec
+  {
+    Mat A;
+    Vec x;
+  };
 
   /// Returns friction factor
   virtual double computeFrictionFactor(double Re) = 0;
@@ -268,8 +271,6 @@ protected:
   PetscScalar max_sumWij;
   PetscScalar max_sumWij_new;
   PetscScalar correction_factor = 1.0;
-
-
 
 public:
   static InputParameters validParams();

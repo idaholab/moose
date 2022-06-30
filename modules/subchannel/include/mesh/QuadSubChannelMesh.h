@@ -23,10 +23,10 @@ public:
 
   // Duct functions not applicable to quad channel
   // Over-writing to avoid abstract template definition in this class
-  virtual Node * getChanNodeFromDuct(Node *) override {return nullptr;}
-  virtual Node * getDuctNodeFromChannel(Node *) override {return nullptr;}
-  virtual Node * getChannelNodeFromDuct(Node *) override {return nullptr;}
-  virtual const std::vector<Node *> getDuctNodes() const override {return std::vector<Node *>();}
+  virtual Node * getChanNodeFromDuct(Node *) override { return nullptr; }
+  virtual Node * getDuctNodeFromChannel(Node *) override { return nullptr; }
+  virtual Node * getChannelNodeFromDuct(Node *) override { return nullptr; }
+  virtual const std::vector<Node *> getDuctNodes() const override { return std::vector<Node *>(); }
 
   virtual const unsigned int & getNumOfChannels() const override { return _n_channels; }
   virtual const unsigned int & getNumOfGapsPerLayer() const override { return _n_gaps; }

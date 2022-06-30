@@ -20,7 +20,7 @@ MultiAppInterWrapperSolutionTransfer::MultiAppInterWrapperSolutionTransfer(
 
 Node *
 MultiAppInterWrapperSolutionTransfer::getFromNode(const InterWrapperMesh & from_mesh,
-                                              const Point & src_node)
+                                                  const Point & src_node)
 {
   unsigned int sch_idx = from_mesh.channelIndex(src_node);
   unsigned iz = from_mesh.getZIndex(src_node);
