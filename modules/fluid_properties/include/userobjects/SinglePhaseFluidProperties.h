@@ -155,9 +155,8 @@ public:
   propfunc(cv, v, e)
   propfunc(mu, v, e)
   propfunc(k, v, e)
-  propfuncWithDefault(s, v, e) 
+  propfuncWithDefault(s, v, e)
   propfunc(s, h, p)
-  propfunc(T, h, p)
   propfunc(rho, p, s)
   propfunc(e, v, h)
   propfuncWithDefault(s, p, T)
@@ -193,11 +192,11 @@ public:
 #undef propfuncWithDefault
 #undef propfuncAD
 
-      /**
-       * Fluid name
-       * @return string representing fluid name
-       */
-      virtual std::string fluidName() const;
+  /**
+   * Fluid name
+   * @return string representing fluid name
+   */
+  virtual std::string fluidName() const;
 
   /**
    * Molar mass [kg/mol]
