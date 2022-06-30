@@ -1507,14 +1507,14 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
         // those calculations have not yet been implemented in Assembly
         _ad_second_u[qp] += _ad_dof_values[i] * (*_current_second_phi)[i][qp];
 
-      if (_need_ad_u_dot && _time_integrator)
+      if (_need_ad_u_dot && _time_integrator && _time_integrator->dt())
       {
         _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
         if (_need_ad_u_dotdot)
           _ad_u_dotdot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dotdot[i];
       }
 
-      if (_need_ad_grad_u_dot && _time_integrator)
+      if (_need_ad_grad_u_dot && _time_integrator && _time_integrator->dt())
       {
         // The latter check here is for handling the fact that we have not yet implemented
         // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
