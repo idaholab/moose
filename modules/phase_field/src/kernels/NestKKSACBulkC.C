@@ -72,7 +72,7 @@ NestKKSACBulkC::NestKKSACBulkC(const InputParameters & parameters)
           &getMaterialPropertyDerivative<Real>("cp" + _Fa_name, _ci_names[m * 2], _ci_names[n * 2]);
   }
 
-  // _d2Fadcadarg is computed in KKSPhaseConcentrationMaterial
+  // _d2Fadcadarg are computed in KKSPhaseConcentrationMaterial
   for (unsigned int m = 0; m < _num_c; ++m)
   {
     _d2Fadcadarg[m].resize(_n_args);

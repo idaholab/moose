@@ -17,7 +17,7 @@ NestKKSACBulkF::validParams()
   InputParameters params = KKSACBulkBase::validParams();
   params.addClassDescription("KKS model kernel (part 1 of 2) for the Bulk Allen-Cahn. This "
                              "includes all terms NOT dependent on chemical potential.");
-  params.addRequiredCoupledVar("global_cs", "Global concentrations, for example, c, b.");
+  params.addRequiredCoupledVar("global_cs", "The interpolated concentrations c, b, etc");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "ci_names",
       "Phase concentrations. These must have the same order as Fj_names and global_cs, for "

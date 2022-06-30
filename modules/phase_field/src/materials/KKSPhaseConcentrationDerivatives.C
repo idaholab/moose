@@ -166,7 +166,7 @@ KKSPhaseConcentrationDerivatives::computeQpProperties()
       x_eta[m] += A(m, n) * k_eta[n];
   }
 
-  // assign the values in x_eta to _prop_dcidetaj
+  // assign the values in x_eta to _dcideta
   for (unsigned int m = 0; m < _num_c; ++m)
   {
     for (unsigned int n = 0; n < 2; ++n)
