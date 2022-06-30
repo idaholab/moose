@@ -313,9 +313,9 @@ DetailedTriSubChannelMeshGenerator::generate()
 
   if (_verbose)
   {
-    std::cout << "Points per center: " << points_per_center << std::endl;
-    std::cout << "Points per side: " << points_per_side << std::endl;
-    std::cout << "Points per corner: " << points_per_corner << std::endl;
+    _console << "Points per center: " << points_per_center << std::endl;
+    _console << "Points per side: " << points_per_side << std::endl;
+    _console << "Points per corner: " << points_per_corner << std::endl;
   }
 
   // Compute the number of elements (Prism6) which combined base creates the sub-channel
@@ -325,9 +325,9 @@ DetailedTriSubChannelMeshGenerator::generate()
   const unsigned int elems_per_side = 2 * theta_res_square / 4 + 4;
   if (_verbose)
   {
-    std::cout << "Elems per center: " << elems_per_center << std::endl;
-    std::cout << "Elems per side: " << elems_per_side << std::endl;
-    std::cout << "Elems per corner: " << elems_per_corner << std::endl;
+    _console << "Elems per center: " << elems_per_center << std::endl;
+    _console << "Elems per side: " << elems_per_side << std::endl;
+    _console << "Elems per corner: " << elems_per_corner << std::endl;
   }
 
   // specify number and type of sub-channel
@@ -346,9 +346,9 @@ DetailedTriSubChannelMeshGenerator::generate()
   }
   if (_verbose)
   {
-    std::cout << "Centers: " << n_center << std::endl;
-    std::cout << "Sides: " << n_side << std::endl;
-    std::cout << "Corners: " << n_corner << std::endl;
+    _console << "Centers: " << n_center << std::endl;
+    _console << "Sides: " << n_side << std::endl;
+    _console << "Corners: " << n_corner << std::endl;
   }
 
   // Compute the total number of points and elements.
@@ -358,15 +358,15 @@ DetailedTriSubChannelMeshGenerator::generate()
       n_corner * elems_per_corner + n_side * elems_per_side + n_center * elems_per_center;
   if (_verbose)
   {
-    std::cout << "Points per level: " << points_per_level << std::endl;
-    std::cout << "Elements per level: " << elems_per_level << std::endl;
+    _console << "Points per level: " << points_per_level << std::endl;
+    _console << "Elements per level: " << elems_per_level << std::endl;
   }
   const unsigned int n_points = points_per_level * (_n_cells + 1);
   const unsigned int n_elems = elems_per_level * _n_cells;
   if (_verbose)
   {
-    std::cout << "Number of points: " << n_points << std::endl;
-    std::cout << "Number of elements: " << n_elems << std::endl;
+    _console << "Number of points: " << n_points << std::endl;
+    _console << "Number of elements: " << n_elems << std::endl;
   }
   mesh_base->reserve_nodes(n_points);
   mesh_base->reserve_elem(n_elems);
@@ -545,12 +545,12 @@ DetailedTriSubChannelMeshGenerator::generate()
         {
           if (z == 0)
           {
-            std::cout << "Subchannel Position: " << p0 << std::endl;
+            _console << "Subchannel Position: " << p0 << std::endl;
             auto rods = getSubChannelRods(i);
             for (auto r : rods)
-              std::cout << r << " ";
-            std::cout << std::endl;
-            std::cout << "Theta: " << theta / libMesh::pi * 180. << std::endl;
+              _console << r << " ";
+            _console << std::endl;
+            _console << "Theta: " << theta / libMesh::pi * 180. << std::endl;
           }
         }
 
@@ -561,7 +561,7 @@ DetailedTriSubChannelMeshGenerator::generate()
           if (_verbose)
           {
             if (z == 0)
-              std::cout << i << " - " << new_point << std::endl;
+              _console << i << " - " << new_point << std::endl;
           }
           mesh_base->add_point(new_point, node_id++);
           point_counter += 1;
@@ -597,12 +597,12 @@ DetailedTriSubChannelMeshGenerator::generate()
         {
           if (z == 0)
           {
-            std::cout << "Subchannel Position: " << p0 << std::endl;
+            _console << "Subchannel Position: " << p0 << std::endl;
             auto rods = getSubChannelRods(i);
             for (auto r : rods)
-              std::cout << r << " ";
-            std::cout << std::endl;
-            std::cout << "Theta: " << theta * 180 / libMesh::pi << std::endl;
+              _console << r << " ";
+            _console << std::endl;
+            _console << "Theta: " << theta * 180 / libMesh::pi << std::endl;
           }
         }
 
@@ -613,7 +613,7 @@ DetailedTriSubChannelMeshGenerator::generate()
           if (_verbose)
           {
             if (z == 0)
-              std::cout << i << " - " << new_point << std::endl;
+              _console << i << " - " << new_point << std::endl;
           }
           mesh_base->add_point(new_point, node_id++);
           point_counter += 1;
@@ -649,12 +649,12 @@ DetailedTriSubChannelMeshGenerator::generate()
         {
           if (z == 0)
           {
-            std::cout << "Subchannel Position: " << p0 << std::endl;
+            _console << "Subchannel Position: " << p0 << std::endl;
             auto rods = getSubChannelRods(i);
             for (auto r : rods)
-              std::cout << r << " ";
-            std::cout << std::endl;
-            std::cout << "Theta: " << theta * 180 / libMesh::pi << std::endl;
+              _console << r << " ";
+            _console << std::endl;
+            _console << "Theta: " << theta * 180 / libMesh::pi << std::endl;
           }
         }
 
@@ -665,7 +665,7 @@ DetailedTriSubChannelMeshGenerator::generate()
           if (_verbose)
           {
             if (z == 0)
-              std::cout << i << " - " << new_point << std::endl;
+              _console << i << " - " << new_point << std::endl;
           }
           mesh_base->add_point(new_point, node_id++);
           point_counter += 1;
@@ -674,7 +674,7 @@ DetailedTriSubChannelMeshGenerator::generate()
     }
   } // i
   if (_verbose)
-    std::cout << "Point counter: " << point_counter << std::endl;
+    _console << "Point counter: " << point_counter << std::endl;
 
 
   int element_counter = 0;
@@ -693,7 +693,7 @@ DetailedTriSubChannelMeshGenerator::generate()
       elems_per_channel = elems_per_corner;
       points_per_channel = points_per_corner;
       if (_verbose)
-        std::cout << "Corner" << std::endl;
+        _console << "Corner" << std::endl;
     }
     else if (subch_type == EChannelType::EDGE)
     {
@@ -701,7 +701,7 @@ DetailedTriSubChannelMeshGenerator::generate()
       elems_per_channel = elems_per_side;
       points_per_channel = points_per_side;
       if (_verbose)
-        std::cout << "Edge" << std::endl;
+        _console << "Edge" << std::endl;
     }
     else if (subch_type == EChannelType::CENTER)
     {
@@ -709,7 +709,7 @@ DetailedTriSubChannelMeshGenerator::generate()
       elems_per_channel = elems_per_center;
       points_per_channel = points_per_center;
       if (_verbose)
-        std::cout << "Center" << std::endl;
+        _console << "Center" << std::endl;
     }
     for (unsigned int iz = 0; iz < _n_cells; iz++)
     {
@@ -730,7 +730,7 @@ DetailedTriSubChannelMeshGenerator::generate()
         elem = mesh_base->add_elem(elem);
 
         if (_verbose)
-          std::cout << "Node 0: " << *mesh_base->node_ptr(indx1) << std::endl;
+          _console << "Node 0: " << *mesh_base->node_ptr(indx1) << std::endl;
 
         elem->set_node(0) = mesh_base->node_ptr(indx1);
         elem->set_node(1) = mesh_base->node_ptr(indx1 + i + 1);
@@ -756,12 +756,12 @@ DetailedTriSubChannelMeshGenerator::generate()
     }
   }
   if (_verbose)
-    std::cout << "Element counter: " << element_counter << std::endl;
+    _console << "Element counter: " << element_counter << std::endl;
   boundary_info.sideset_name(0) = "inlet";
   boundary_info.sideset_name(1) = "outlet";
   mesh_base->subdomain_name(_block_id) = name();
   if (_verbose)
-    std::cout << "Mesh assembly done" << std::endl;
+    _console << "Mesh assembly done" << std::endl;
   mesh_base->prepare_for_use();
 
   return mesh_base;
@@ -809,6 +809,3 @@ DetailedTriSubChannelMeshGenerator::translatePoint(Point b, Point translation_ve
 
   return translated_vector;
 }
-
-
-
