@@ -49,6 +49,10 @@ P_out = 2.0e5 # Pa
   []
   [q_prime]
   []
+  [q_prime_duct]
+  []
+  [Tduct]
+  []
   [mu]
   []
 []
@@ -73,6 +77,10 @@ P_out = 2.0e5 # Pa
   compute_power = true
   T_tol = 1.0e-7
   P_tol = 1.0e-7
+  implicit = false
+  segregated = true
+  staggered_pressure = false
+  monolithic_thermal = false
 []
 
 [ICs]
