@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "SolidPropertiesMaterial.h"
+#include "Material.h"
 
 class ThermalSolidProperties;
 

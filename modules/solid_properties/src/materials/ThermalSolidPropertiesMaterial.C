@@ -15,7 +15,7 @@ registerMooseObject("SolidPropertiesApp", ThermalSolidPropertiesMaterial);
 InputParameters
 ThermalSolidPropertiesMaterial::validParams()
 {
-  InputParameters params = SolidPropertiesMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("temperature", "Temperature");
   params.addRequiredParam<UserObjectName>("sp", "The name of the user object for solid properties");
   params.addParam<std::string>(
@@ -27,7 +27,7 @@ ThermalSolidPropertiesMaterial::validParams()
 }
 
 ThermalSolidPropertiesMaterial::ThermalSolidPropertiesMaterial(const InputParameters & parameters)
-  : SolidPropertiesMaterial(parameters),
+  : Material(parameters),
     _temperature(coupledValue("temperature")),
 
     _cp(declareProperty<Real>(getParam<std::string>("cp_name"))),
