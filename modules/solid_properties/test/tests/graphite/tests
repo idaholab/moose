@@ -3,8 +3,7 @@
     type = Exodiff
     input = 'test_451.i'
     exodiff = 'test_451_out.e'
-    requirement = "This test demonstrates correct input file syntax for "
-      "declaring H-451 graphite properties and their usage in providing thermal materials."
+    requirement = "The system shall compute thermal properties for H-451 graphite."
     design = 'ThermalGraphiteProperties.md ThermalSolidPropertiesMaterial.md'
     issues = '#12284'
   []

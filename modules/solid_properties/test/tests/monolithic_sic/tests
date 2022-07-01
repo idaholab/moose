@@ -3,9 +3,7 @@
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
-    requirement = "This test demonstrates correct input file syntax for "
-      "declaring silicon carbide properties and their usage in providing "
-      "thermal materials."
+    requirement = "The system shall compute thermal properties for monolithic silicon carbide."
     design = 'ThermalMonolithicSiCProperties.md ThermalSolidPropertiesMaterial.md'
     issues = '#12284'
   []

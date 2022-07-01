@@ -3,9 +3,7 @@
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
-    requirement = "This test demonstrates correct input file syntax for "
-      "declaring thermal solid properties with parsed functions and their usage "
-      "in providing thermal materials."
+    requirement = "The system shall compute thermal properties as functions of temperature."
     design = 'ThermalFunctionSolidProperties.md ThermalSolidProperties.md'
     issues = '#12284'
   []
