@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ComputeIncrementalStrainBase.h"
+#include "FactorizedRankTwoTensor.h"
 
 /**
  * ComputeFiniteStrain defines a strain increment and rotation increment, for finite strains.

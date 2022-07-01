@@ -219,27 +219,10 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
 
     case DecompMethod::EigenSolution:
     {
-      std::vector<Real> e_value(3);
-      RankTwoTensor e_vector;
-
-      RankTwoTensor Chat = _Fhat[_qp].transpose() * _Fhat[_qp];
-      Chat.symmetricEigenvaluesEigenvectors(e_value, e_vector);
-
-      const Real lambda1 = std::sqrt(e_value[0]);
-      const Real lambda2 = std::sqrt(e_value[1]);
-      const Real lambda3 = std::sqrt(e_value[2]);
-
-      const auto N1 = RankTwoTensor::selfOuterProduct(e_vector.column(0));
-      const auto N2 = RankTwoTensor::selfOuterProduct(e_vector.column(1));
-      const auto N3 = RankTwoTensor::selfOuterProduct(e_vector.column(2));
-
-      const RankTwoTensor Uhat = N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
-      const RankTwoTensor invUhat(Uhat.inverse());
-
-      rotation_increment = _Fhat[_qp] * invUhat;
-
-      total_strain_increment =
-          N1 * std::log(lambda1) + N2 * std::log(lambda2) + N3 * std::log(lambda3);
+      FactorizedRankTwoTensor Chat = RankTwoTensor::transposeTimes(_Fhat[_qp]);
+      FactorizedRankTwoTensor Uhat = MathUtils::sqrt(Chat);
+      rotation_increment = _Fhat[_qp] * Uhat.inverse().get();
+      total_strain_increment = MathUtils::log(Uhat).get();
       break;
     }
 

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADComputeIncrementalStrainBase.h"
+#include "FactorizedRankTwoTensor.h"
 
 #define usingComputeFiniteStrainMembers                                                            \
   usingComputeIncrementalStrainBaseMembers;                                                        \
@@ -32,6 +33,7 @@ public:
 
 protected:
   using ADR2 = Moose::GenericType<R2, true>;
+  using FADR2 = FactorizedRankTwoTensorTempl<ADR2>;
 
   virtual void computeQpStrain();
   virtual void computeQpIncrements(ADR2 & e, ADRankTwoTensor & r);
