@@ -23,15 +23,15 @@ constitute an endorsement of the accuracy of those correlations.
 This module provides solid properties for different solids, organized according to
 the overall type of property. The overall design of this module is as follows:
 
-1. *User objects* contain functions to compute various solid properties in terms
+1. *UserObjects* contain functions to compute various solid properties in terms
    of dependent quantities (temperature, porosity, etc.). Different "categories" of
-   solid properties are grouped together into different user objects. For example,
+   solid properties are grouped together into different userobjects. For example,
    common solid properties used in thermal simulations (specific heat, thermal conductivity),
    are provided by derived classes of the [ThermalSolidProperties](/userobjects/ThermalSolidProperties.md)
-   user object. Mechanics properties (Youngs modulus, Poisson ratio), would be provided by
-   a separate "family" of user objects.
-2. *Materials* call these user object functions to compute the material properties at
-   quadrature points. Like the user objects, these materials are grouped into "categories."
+   userobject. Mechanics properties (Youngs modulus, Poisson ratio), would be provided by
+   a separate "family" of userobjects.
+2. *Materials* call these userobject functions to compute the material properties at
+   quadrature points. Like the userobjects, these materials are grouped into "categories."
    For example, common solid properties for thermal simulations are evaluated by the
    [ThermalSolidPropertiesMaterial](/materials/ThermalSolidPropertiesMaterial.md).
 
@@ -60,7 +60,7 @@ Userobjects available in the Solid Properties module that provide thermal proper
 - [stainless steel alloy 316](/ThermalSS316Properties.md)
 - [using functions](/ThermalFunctionSolidProperties.md)
 
-An example will be provided later on this page for creating a new solid material user object.
+An example will be provided later on this page for creating a new solid userobject.
 
 Then, in the [ThermalSolidPropertiesMaterial](/materials/ThermalSolidPropertiesMaterial.md) material,
 the `computeQpProperties` method evaluates the thermal conductivity, isobaric specific heat, and density at
@@ -96,7 +96,7 @@ present quadrature point.
 
 ### Input file syntax
 
-The user objects defining the material properties are set up in the `UserObjects` block.  For
+The userobjects defining the material properties are set up in the `UserObjects` block.  For
 example, to use stainless steel 316 thermal properties to provide the thermal conductivity in
 the `HeatDiffusion` kernel above, the input file syntax would be:
 
@@ -115,14 +115,14 @@ the input file is:
 
 ## Creating additional solids
 
-New solids can be added by inheriting from the user object base class appropriate
+New solids can be added by inheriting from the userobject base class appropriate
 to the formulation and overriding the methods that describe the solid properties.
 
 For example, suppose new thermal solid properties were desired for granite.
-The first step is to create a user object named `ThermalGraniteProperties` by
+The first step is to create a userobject named `ThermalGraniteProperties` by
 inheriting from [ThermalSolidProperties](/userobjects/ThermalSolidProperties.md) and
 overriding all methods that you would like to implement.
-The header file for your new user object indicates all methods that will be defined.
+The header file for your new userobject indicates all methods that will be defined.
 
 !listing! language=cpp
 #pragma once
