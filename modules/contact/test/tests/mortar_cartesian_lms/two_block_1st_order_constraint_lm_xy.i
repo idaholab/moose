@@ -3,8 +3,8 @@
   volumetric_locking_correction = true
 []
 
-theta = 0
-velocity = -0.05
+theta = 60
+velocity = 0.15
 
 [Mesh]
   [left_block]
@@ -93,20 +93,11 @@ velocity = -0.05
 []
 
 [Variables]
-  # [normal_lm]
-  #   block = 'secondary_lower'
-  #   use_dual = true
-  # []
   [lm_x]
     block = 'secondary_lower'
     use_dual = true
   []
   [lm_y]
-    block = 'secondary_lower'
-    use_dual = true
-  []
-  # Not used, dummy
-  [lm_z]
     block = 'secondary_lower'
     use_dual = true
   []
@@ -184,7 +175,7 @@ velocity = -0.05
 []
 
 [Constraints]
-  [normal_px]
+  [weighted_gap_lm]
     type = ComputeWeightedGapLMMechanicalContact
     primary_boundary = '23'
     secondary_boundary = '11'
@@ -192,8 +183,7 @@ velocity = -0.05
     secondary_subdomain = 'secondary_lower'
     lm_x = lm_x
     lm_y = lm_y
-
-    variable = lm_z # This can be anything really
+    variable = lm_x # This can be anything really
     disp_x = disp_x
     disp_y = disp_y
     use_displaced_mesh = true
@@ -249,8 +239,8 @@ velocity = -0.05
   line_search = none
 
   dt = 0.1
-  dtmin = 0.001
-  end_time = 0.4
+  dtmin = 0.1
+  end_time = 1.0
 
   l_max_its = 100
 
