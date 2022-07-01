@@ -24,10 +24,10 @@ the overall type of property.
 ## Thermal properties
 
 Thermal properties (density, specific heat, and thermal conductivity) are computed by
-userobjects inheriting from the `ThermalSolidProperties` base class. This class
+userobjects inheriting from the [ThermalSolidProperties](/userobjects/ThermalSolidProperties.md) base class. This class
 defines functions to compute these three material properties and their derivatives with respect to temperature.
 
-Then, in the `ThermalSolidProperties` material, the `computeQpProperties` method calculates a number of properties at
+Then, in the [ThermalSolidProperties](/userobjects/ThermalSolidProperties.md) user object, the `computeQpProperties` method calculates a number of properties at
 the quadrature points using the values of `_temperature[_qp]` and the functions provided by
 the selected userobject.
 For flexibility, a custom name may be provided for each of these three properties.
@@ -42,7 +42,7 @@ The calculation of material properties is divided into several different methods
 
 An example is provided below for creating a new solid material providing thermal properties.
 
-Materials available in the SolidProperties module that provide thermal properties
+Materials available in the Solid Properties module that provide thermal properties
 are:
 
 - [graphite](/ThermalGraphiteProperties.md)
@@ -86,7 +86,7 @@ thermal conductivity and its derivative), `const` references to the material pro
 The names `_k` and `_dk_dT` are arbitrary, and may be selected as desired per application.
 
 The desired material properties are then obtained in the constructor in the source file
-according to the name of those properties defined in `ThermalSolidPropertiesMaterial` (which
+according to the name of those properties defined in [ThermalSolidPropertiesMaterial](/materials/ThermalSolidPropertiesMaterial.md) (which
 may be customized to be different from `k_solid`, `rho_solid`, and `cp_solid`). Here, the
 default name of `"k_solid"` is used.
 
@@ -125,8 +125,8 @@ be added to separate applications for more custom usage. These can then be
 used in an identical manner as all other solid property userobjects.
 
 For example, suppose new thermal solid properties were desired for a material named `GorillaGlue` in
-the Navier-Stokes module. Begin from an empty material inheriting from `ThermalSolidProperties`.
-Override all methods in `ThermalSolidProperties` that you would like to imlement custom `GorillaGlue`
+the Navier-Stokes module. Begin from an empty material inheriting from [ThermalSolidProperties](/userobjects/ThermalSolidProperties.md).
+Override all methods in [ThermalSolidProperties](/userobjects/ThermalSolidProperties.md) that you would like to imlement custom `GorillaGlue`
 properties for. The header file for your new material indicates all methods that will be defined.
 
 !listing language=cpp
