@@ -121,7 +121,7 @@
 # controls for nonlinear iterations
   nl_max_its = 15
   nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-12
+  nl_abs_tol = 2e-12
 
 # time control
   start_time = 0.0
