@@ -22,7 +22,9 @@ MoveNodeGenerator::validParams()
 
   params.addRequiredParam<std::vector<dof_id_type>>("node_id", "Id of modified node");
 
-  params.addRequiredParam<std::vector<Point>>("new_position", "New position in vector space");
+  params.addParam<std::vector<Point>>("new_position", "New position in vector space");
+  params.addParam<std::vector<Point>>("shift_position",
+                                      "Shifts to apply to the position in vector space");
 
   params.addClassDescription("Modifies the position of one or more nodes");
 
@@ -33,10 +35,28 @@ MoveNodeGenerator::MoveNodeGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _node_id(getParam<std::vector<dof_id_type>>("node_id")),
-    _new_position(getParam<std::vector<Point>>("new_position"))
+    _new_position(nullptr),
+    _shift_position(nullptr)
 {
-  if (_node_id.size() != _new_position.size())
-    paramError("node_id", "Must be the same length as 'new_position'.");
+  if (isParamValid("shift_position") == isParamValid("new_position"))
+    mooseError("You must specify either 'shift_position' or 'new_position'! "
+               "You have specified either both or none");
+
+  if (isParamValid("new_position"))
+  {
+    _new_position = &getParam<std::vector<Point>>("new_position");
+
+    if (_node_id.size() != _new_position->size())
+      paramError("node_id", "Must be the same length as 'new_position'.");
+  }
+
+  if (isParamValid("shift_position"))
+  {
+    _shift_position = &getParam<std::vector<Point>>("shift_position");
+
+    if (_node_id.size() != _shift_position->size())
+      paramError("node_id", "Must be the same length as 'shift_position'.");
+  }
 }
 
 std::unique_ptr<MeshBase>
@@ -53,7 +73,14 @@ MoveNodeGenerator::generate()
     // change the position of the acquired node
     if (node)
     {
-      node->assign(_new_position[i]);
+      if (_new_position)
+        node->assign((*_new_position)[i]);
+      else
+      {
+        Point pt((*node)(0), (*node)(1), (*node)(2));
+        node->assign(pt + (*_shift_position)[i]);
+      }
+
       ++num_found;
     }
 
