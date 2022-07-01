@@ -11,16 +11,6 @@
 
 #include "ThreadedGeneralUserObject.h"
 
-// Forward Declarations
-
-// The default DualReal size allows functions of many more variables than
-// common in the SolidProperties module. This makes the computations much
-// slower than necessary, so use a smaller definition in the SolidProperties
-// module, FPDualReal, which is suitable for up to five variables.
-// This is useful for the cases where we wish to use AD to compute the derivatives
-// rather than hand-coding them in derived classes.
-typedef DualNumber<Real, DNDerivativeSize<5>> FPDualReal;
-
 class SolidProperties : public ThreadedGeneralUserObject
 {
 public:
