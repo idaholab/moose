@@ -25,6 +25,7 @@ ReferenceElementJacobianDamper::validParams()
   params.addRequiredCoupledVar("displacements", "The nonlinear displacement variables");
   params.addParam<Real>(
       "max_increment", 0.1, "The maximum permissible incremental Jacobian per Newton iteration");
+  params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }
 
@@ -39,6 +40,10 @@ ReferenceElementJacobianDamper::ReferenceElementJacobianDamper(const InputParame
     _ndisp(coupledComponents("displacements")),
     _disp_num(coupledIndices("displacements"))
 {
+  if (getParam<bool>("use_displaced_mesh"))
+    paramError("use_displaced_mesh",
+               "ReferenceElementJacobianDamper needs to act on an undisplaced mesh.");
+
   _grad_phi.resize(_ndisp);
   for (auto i : make_range(_ndisp))
     _grad_phi[i] = &_sys.getFieldVariable<Real>(_tid, _disp_num[i]).gradPhi();
