@@ -25,7 +25,7 @@ the overall type of property.
 
 Thermal properties (density, specific heat, and thermal conductivity) are computed by
 userobjects inheriting from the [ThermalSolidProperties](/userobjects/ThermalSolidProperties.md) base class. This class
-defines functions to compute these three material properties and their derivatives with respect to temperature.
+defines functions to compute these three material properties as a function of temperature.
 
 Then, in the [ThermalSolidProperties](/userobjects/ThermalSolidProperties.md) user object, the `computeQpProperties` method calculates a number of properties at
 the quadrature points using the values of `_temperature[_qp]` and the functions provided by
@@ -61,7 +61,7 @@ All solid properties materials can be accessed in MOOSE objects through the usua
 interface. The following example provides a detailed explanation of the steps involved to use the
 solid properties materials in other MOOSE objects, and the syntax required in the input file.
 
-This example is for a problem where thermal conductivity and its derivative are needed in a kernel.
+This example is for a problem where thermal conductivity is needed in a kernel.
 An example input file syntax using this kernel and the Solid Properties module is also provided.
 Similar steps would be followed for other material properties.
 
@@ -70,7 +70,7 @@ Similar steps would be followed for other material properties.
 To access the solid properties defined in the Solid Properties module in a MOOSE object, the source
 code of the object must include the following lines of code.
 
-Suppose we would like to use the thermal conductivity and its derivative in a
+Suppose we would like to use the thermal conductivity in a
 kernel named `HeatDiffusion` that inherits from the `Kernel` class.
 You simply need to add the desired material properties to the class members:
 
@@ -79,11 +79,11 @@ You simply need to add the desired material properties to the class members:
 Once your MOOSE object inherits from the `DerivativeMaterialInterface` class, you can now
 use material properties provided by the Solid Properties module. In the header file of the
 MOOSE object where a solid material property is needed (in this case, the
-thermal conductivity and its derivative), `const` references to the material properties are required:
+thermal conductivity), `const` references to the material properties are required:
 
 !listing modules/solid_properties/test/include/kernels/HeatDiffusion.h start=/// thermal end=};
 
-The names `_k` and `_dk_dT` are arbitrary, and may be selected as desired per application.
+The name `_k` is arbitrary, and may be selected as desired per application.
 
 The desired material properties are then obtained in the constructor in the source file
 according to the name of those properties defined in [ThermalSolidPropertiesMaterial](/materials/ThermalSolidPropertiesMaterial.md) (which

@@ -16,7 +16,7 @@ class ThermalSolidProperties;
 /**
  * Computes solid thermal properties as a function of temperature.
  */
-class ThermalSolidPropertiesMaterial : public SolidPropertiesMaterial
+class ThermalSolidPropertiesMaterial : public Material
 {
 public:
   static InputParameters validParams();
@@ -29,15 +29,6 @@ protected:
   /// Temperature
   const VariableValue & _temperature;
 
-  /// Name of the isobaric specific heat
-  const std::string _cp_name;
-
-  /// Name of the thermal conductivity
-  const std::string _k_name;
-
-  /// Name of the density
-  const std::string _rho_name;
-
   /// Isobaric specific heat capacity
   MaterialProperty<Real> & _cp;
 
@@ -46,15 +37,6 @@ protected:
 
   /// Density
   MaterialProperty<Real> & _rho;
-
-  /// Derivative of isobaric specific heat capacity w.r.t. temperature
-  MaterialProperty<Real> & _dcp_dT;
-
-  /// Derivative of thermal conductivity w.r.t. temperature
-  MaterialProperty<Real> & _dk_dT;
-
-  /// Derivative of density w.r.t. temperature
-  MaterialProperty<Real> & _drho_dT;
 
   /// Solid properties
   const ThermalSolidProperties & _sp;

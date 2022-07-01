@@ -30,16 +30,9 @@ ThermalSolidPropertiesMaterial::ThermalSolidPropertiesMaterial(const InputParame
   : SolidPropertiesMaterial(parameters),
     _temperature(coupledValue("temperature")),
 
-    _cp_name(getParam<std::string>("cp_name")),
-    _k_name(getParam<std::string>("k_name")),
-    _rho_name(getParam<std::string>("rho_name")),
-
-    _cp(declareProperty<Real>(_cp_name)),
-    _k(declareProperty<Real>(_k_name)),
-    _rho(declareProperty<Real>(_rho_name)),
-    _dcp_dT(declareProperty<Real>("d" + _cp_name + "_dT")),
-    _dk_dT(declareProperty<Real>("d" + _k_name + "_dT")),
-    _drho_dT(declareProperty<Real>("d" + _rho_name + "_dT")),
+    _cp(declareProperty<Real>(getParam<std::string>("cp_name"))),
+    _k(declareProperty<Real>(getParam<std::string>("k_name"))),
+    _rho(declareProperty<Real>(getParam<std::string>("rho_name"))),
 
     _sp(getUserObject<ThermalSolidProperties>("sp"))
 {
@@ -48,7 +41,7 @@ ThermalSolidPropertiesMaterial::ThermalSolidPropertiesMaterial(const InputParame
 void
 ThermalSolidPropertiesMaterial::computeQpProperties()
 {
-  _sp.cp_from_T(_temperature[_qp], _cp[_qp], _dcp_dT[_qp]);
-  _sp.k_from_T(_temperature[_qp], _k[_qp], _dk_dT[_qp]);
-  _sp.rho_from_T(_temperature[_qp], _rho[_qp], _drho_dT[_qp]);
+  _cp[_qp] = _sp.cp_from_T(_temperature[_qp]);
+  _k[_qp] = _sp.k_from_T(_temperature[_qp]);
+  _rho[_qp] = _sp.rho_from_T(_temperature[_qp]);
 }
