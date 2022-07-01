@@ -17,8 +17,6 @@
  */
 class ThermalSS316Properties : public ThermalSolidProperties
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 public:
   static InputParameters validParams();
 

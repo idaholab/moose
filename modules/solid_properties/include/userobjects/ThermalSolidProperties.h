@@ -67,8 +67,6 @@ public:
 
   ThermalSolidProperties(const InputParameters & parameters);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
   // clang-format off
 
   /**
@@ -111,5 +109,3 @@ public:
       mooseError(std::forward<Args>(args)...);
   }
 };
-
-#pragma GCC diagnostic pop
