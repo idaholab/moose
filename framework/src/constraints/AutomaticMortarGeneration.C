@@ -1611,30 +1611,30 @@ AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal
   // See Lopes DS, Silva MT, Ambrosio JA. Tangent vectors to a 3-D surface normal: A geometric tool
   // to find orthogonal vectors based on the Householder transformation. Computer-Aided Design. 2013
   // Mar 1;45(3):683-94.
-  if (nx >= 0)
-  {
-    // tangent
-    nodal_tangent_one(0) = -ny;
-    nodal_tangent_one(1) = 1 - ny * ny / (nx + 1);
-    nodal_tangent_one(2) = -ny * nz / (nx + 1);
+  const Point h_vector(std::max(nx - 1.0, nx + 1.0), ny, nz);
 
-    // binormal
-    nodal_tangent_two(0) = -nz;
-    nodal_tangent_two(1) = -ny * nz / (nx + 1);
-    nodal_tangent_two(2) = 1 - nz * nz / (nx + 1);
-  }
-  else
+  if (std::abs(h_vector(0)) < TOLERANCE)
   {
-    // tangent
-    nodal_tangent_one(0) = ny;
-    nodal_tangent_one(1) = 1 + ny * ny / (nx - 1);
-    nodal_tangent_one(2) = ny * nz / (nx - 1);
+    nodal_tangent_one(0) = 0;
+    nodal_tangent_one(1) = 1;
+    nodal_tangent_one(2) = 0;
 
-    // binormal
-    nodal_tangent_two(0) = nz;
-    nodal_tangent_two(1) = ny * nz / (nx - 1);
-    nodal_tangent_two(2) = 1 + nz * nz / (nx - 1);
+    nodal_tangent_two(0) = 0;
+    nodal_tangent_two(1) = 0;
+    nodal_tangent_two(2) = -1;
+
+    return;
   }
+
+  const Real h = h_vector.norm();
+
+  nodal_tangent_one(0) = -2.0 * h_vector(0) * h_vector(1) / (h * h);
+  nodal_tangent_one(1) = 1.0 - 2.0 * h_vector(1) * h_vector(1) / (h * h);
+  nodal_tangent_one(2) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
+
+  nodal_tangent_two(0) = -2.0 * h_vector(0) * h_vector(2) / (h * h);
+  nodal_tangent_two(1) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
+  nodal_tangent_two(2) = 1.0 - 2.0 * h_vector(2) * h_vector(2) / (h * h);
 }
 // Project secondary nodes onto their corresponding primary elements for each primary/secondary
 // pair.
