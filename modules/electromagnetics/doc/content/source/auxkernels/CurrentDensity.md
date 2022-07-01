@@ -18,8 +18,9 @@ where
 - $\vec{E}$ is the electric field.
 
 The electric field can be determined either directly via an electromagnetic field
-calculation (in which case, the `electrostatic` parameter should be set to `false`),
-or calculated via the electrostatic potential $V$, where
+calculation (in which case, the [!param](/AuxKernels/CurrentDensity/electrostatic) 
+parameter should be set to `false`), or calculated via the electrostatic potential 
+$V$, where
 
 \begin{equation}
   \vec{E} = -\nabla V.
@@ -27,7 +28,8 @@ or calculated via the electrostatic potential $V$, where
 
 Note that calculation via the electrostatic potential is the default behavior.
 MOOSE errors will be thrown if the inappropriate coupled variable is provided,
-given the setting for the `electrostatic` boolean parameter.
+given the setting for the [!param](/AuxKernels/CurrentDensity/electrostatic) 
+boolean parameter.
 
 ## Example Input File Syntax
 

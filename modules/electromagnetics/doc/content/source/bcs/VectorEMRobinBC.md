@@ -53,12 +53,12 @@ generally applied in free space, but any function can be applied through the
 
 !style halign=left
 It is important to note that when used as an absorber (strictly absorbing means
-`mode = absorbing` and zero incoming wave but a port also has an absorbing
-component), care must be taken in setting the shape of the truncation boundary as
-well as the distance from the scattering object. Boundaries as close as $0.3
-\lambda$ away from the object was shown in [!citep](jin-fem), and several
-wavelengths were used in the [DipoleAntenna.md] for VectorEMRobinBC. Also, this
-boundary condition is best applied on spherical boundaries (as a result of its
+[!param](/BCs/VectorEMRobinBC/mode) is set to `absorbing` and zero incoming wave 
+but a port also has an absorbing component), care must be taken in setting the 
+shape of the truncation boundary as well as the distance from the scattering object. 
+Boundaries as close as $0.3 \lambda$ away from the object was shown in [!citep](jin-fem), 
+and several wavelengths were used in the [DipoleAntenna.md] for VectorEMRobinBC. Also, 
+this boundary condition is best applied on spherical boundaries (as a result of its
 origin from the Sommerfeld condition, which was derived for spherical boundaries).
 Of course, it is also valid on any non-spherical smooth surface with a trade-off
 in accuracy.
