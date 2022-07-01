@@ -2345,6 +2345,19 @@ NSFVAction::checkICParameterErrors()
   auto vvalue = getParam<std::vector<FunctionName>>("initial_velocity");
   if (vvalue.size() != 3)
     mooseError("The number of velocity components in the NSFVAction initial condition is not 3!");
+
+  // Dont define initial conditions if using external variables
+  if (parameters().isParamSetByUser("initial_velocity") && !_create_velocity)
+    paramError("initial_velocity",
+               "Velocity is defined externally of NavierStokesFV, so should the inital conditions");
+
+  if (parameters().isParamSetByUser("initial_pressure") && !_create_pressure)
+    paramError("initial_pressure",
+               "Pressure is defined externally of NavierStokesFV, so should the inital condition");
+
+  if (parameters().isParamSetByUser("initial_temperature") && !_create_fluid_temperature)
+    paramError("initial_temperature",
+               "T_fluid is defined externally of NavierStokesFV, so should the inital condition");
 }
 
 void
