@@ -14,7 +14,9 @@ excluding any dependence on temperature.
 ## Range of Validity
 
 The range of validity of this userobject depends on the correlations provided
-by the user. Note that arbitrary units can be specified with this userobject.
+by the user. Note that arbitrary units can be specified with this userobject
+as long as they are consistent with the units of the other objects (e.g. kernels,
+boundary conditions, etc.) where the user object functions are used.
 
 ## Example Input File Syntax
 

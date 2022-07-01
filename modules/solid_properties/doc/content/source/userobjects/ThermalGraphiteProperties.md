@@ -12,7 +12,7 @@ userobject, the applicability ranges of the correlations are unique to
 each grade.
 
 Many of the graphite grades encapsulated in this userobject are coke-based.
-Because many coke-based graphite grades show approximately the same specified heat,
+Because many coke-based graphite grades show approximately the same specific heat,
 it is a reasonable approximation to use the same $C_p$ correlation from
 [!cite](butland) for many different grades [!cite](baker).
 

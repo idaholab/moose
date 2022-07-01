@@ -13,8 +13,7 @@ HeatDiffusion::validParams()
 
 HeatDiffusion::HeatDiffusion(const InputParameters & parameters) :
     Kernel(parameters),
-    _k(getMaterialProperty<Real>("k_solid")),
-    _dk_dT(getMaterialProperty<Real>("dk_solid_dT"))
+    _k(getMaterialProperty<Real>("k_solid"))
 {
 }
 
@@ -27,5 +26,6 @@ HeatDiffusion::computeQpResidual()
 Real
 HeatDiffusion::computeQpJacobian()
 {
-  return (_k[_qp] * _grad_phi[_j][_qp] + _dk_dT[_qp] * _phi[_j][_qp] * _grad_u[_qp]) * _grad_test[_i][_qp];
+  // neglects contribution of derivatives in thermal conductivity
+  return _k[_qp] * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }

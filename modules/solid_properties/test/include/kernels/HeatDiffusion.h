@@ -15,15 +15,10 @@ public:
   static InputParameters validParams();
 
 protected:
-  /// Compute weak form residual
   virtual Real computeQpResidual() override;
 
-  /// Compute Jacobian of weak form residual
   virtual Real computeQpJacobian() override;
 
   /// thermal conductivity
   const MaterialProperty<Real> & _k;
-
-  /// derivative of thermal conductivity with respect to temperature
-  const MaterialProperty<Real> & _dk_dT;
 };
