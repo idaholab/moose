@@ -17,7 +17,7 @@
        caption=MOOSE input file formatting.
 
 [VSCode](https://code.visualstudio.com/) is a text editor developed by Microsoft with a flexible plugin structure.
-VSCode superseedes Atom. To customize VSCode for MOOSE development the [MOOSE Language Support](https://marketplace.visualstudio.com/items?itemName=DanielSchwen.moose-language-support) extension has been developed.
+VSCode supersedes Atom. To customize VSCode for MOOSE development the [MOOSE Language Support](https://marketplace.visualstudio.com/items?itemName=DanielSchwen.moose-language-support) extension has been developed.
 
 ## Setting up VSCode
 
