@@ -1,13 +1,25 @@
 [Tests]
- [./damper_exodus]
-   type = 'Exodiff'
-   input = 'cube_load.i'
-   exodiff = 'cube_load_out.e'
- [../]
- [./damper_verify]
-   type = 'RunApp'
-   input = 'cube_load.i'
-   expect_out = '9 Nonlinear'
-   prereq = 'damper_exodus'
- [../]
+  issues = '#21397'
+  design = 'source/dampers/ElementJacobianDamper.md source/dampers/ReferenceElementJacobianDamper.md'
+  [damper_exodus]
+    type = 'Exodiff'
+    input = 'cube_load.i'
+    exodiff = 'cube_load_out.e'
+    requirement = "The module shall be able to apply a damper on the displaced mesh to limit the "
+                  "element Jacobian change over nonlinear iterations."
+  []
+  [damper_verify]
+    type = 'RunApp'
+    input = 'cube_load.i'
+    expect_out = '9 Nonlinear'
+    prereq = 'damper_exodus'
+    requirement = "The element Jacobian damper shall be able to apply a partial nonlinear update."
+  []
+  [ref_damper]
+    type = 'Exodiff'
+    input = 'cube_load_undisplaced.i'
+    exodiff = 'cube_load_undisplaced_out.e'
+    requirement = "The module shall be able to apply a damper on the undisplaced mesh to limit the "
+                  "element Jacobian change over nonlinear iterations."
+  []
 []
