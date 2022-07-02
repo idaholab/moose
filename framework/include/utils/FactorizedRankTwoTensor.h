@@ -196,8 +196,9 @@ namespace MathUtils
         const auto Ma = R2T::selfOuterProduct(A.eigvecs().column(a));                              \
         const auto Mb = R2T::selfOuterProduct(A.eigvecs().column(b));                              \
                                                                                                    \
-        Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);                                   \
-        Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);                                   \
+        usingTensorIndices(i_, j_, k_, l_);                                                        \
+        Gab = Ma.template times<i_, k_, j_, l_>(Mb) + Ma.template times<i_, l_, j_, k_>(Mb);       \
+        Gba = Mb.template times<i_, k_, j_, l_>(Ma) + Mb.template times<i_, l_, j_, k_>(Ma);       \
                                                                                                    \
         Real theta_ab;                                                                             \
         if (!MooseUtils::absoluteFuzzyEqual(A.eigvals()[a], A.eigvals()[b]))                       \
