@@ -453,7 +453,6 @@ MultiAppNearestNodeTransfer::execute()
             Moose::VarFieldType::VAR_FIELD_STANDARD);
         System & from_sys = from_var.sys().system();
         dof_id_type from_dof = _cached_dof_ids[pid][qp];
-        // outgoing_evals[qp] = (*from_sys.solution)(_cached_dof_ids[pid][qp]);
         outgoing_evals[qp] = (*from_sys.solution)(from_dof);
       }
     }

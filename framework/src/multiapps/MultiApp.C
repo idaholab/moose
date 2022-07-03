@@ -763,9 +763,9 @@ MultiApp::appPostprocessorValue(unsigned int app, const std::string & name)
 }
 
 NumericVector<Number> &
-MultiApp::appTransferVector(unsigned int app, std::string /*var_name*/)
+MultiApp::appTransferVector(unsigned int app, std::string var_name)
 {
-  return appProblemBase(app).getAuxiliarySystem().solution();
+  return *(appProblemBase(app).getSystem(var_name).solution);
 }
 
 bool
