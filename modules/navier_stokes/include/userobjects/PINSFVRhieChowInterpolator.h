@@ -38,9 +38,8 @@ protected:
 
   /// The thread 0 copy of the porosity functor held by the subproblem. Initially this functor
   /// should be provided by a functor material property or function. We then perform repeated
-  /// interpolations and reconstructions and then reassign the resulting smoothed field to this
-  /// functor and other thread's copies of this functor
-  Moose::Functor<ADReal> & _eps;
+  /// interpolations and reconstructions to create the resulting smoothed field
+  const Moose::Functor<ADReal> & _eps;
 
   /// All the thread copies of the problem's porosity functor
   std::vector<const Moose::Functor<ADReal> *> _epss;

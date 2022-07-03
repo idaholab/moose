@@ -154,6 +154,8 @@ protected:
   const bool _porous_medium_treatment;
   /// The name of the functor for the porosity field
   const MooseFunctorName _porosity_name;
+  /// The name of the functor for the smoothed porosity field
+  const MooseFunctorName _smooth_porosity_name;
   /// Switch to enable friction correction for the porous medium momentum
   /// equations
   const bool _use_friction_correction;
