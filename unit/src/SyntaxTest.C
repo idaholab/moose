@@ -116,3 +116,21 @@ TEST_F(SyntaxTest, deprecatedCustomMessage)
   const std::string message = _syntax.deprecatedActionSyntaxMessage("TopBlock");
   EXPECT_EQ(message, "Replace [TopBlock] with [NewBlock].");
 }
+
+TEST(CyclicSyntaxTest, cyclic)
+{
+  Syntax syntax;
+  syntax.registerTaskName("a");
+  syntax.registerTaskName("b");
+  syntax.addDependency("a", "b");
+  syntax.addDependency("b", "a");
+  try
+  {
+    syntax.getSortedTask();
+    FAIL() << "missing expected error";
+  }
+  catch (std::runtime_error & e)
+  {
+    EXPECT_TRUE(std::string(e.what()).find("a <- b") != std::string::npos);
+  }
+}
