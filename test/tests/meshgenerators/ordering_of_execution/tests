@@ -13,15 +13,5 @@
 
       detail = "without restriction to the order of the supplied inputs with"
     []
-
-    [depend_with_force_prepare]
-      type = 'Exodiff'
-      input = 'depend_with_force_prepare.i'
-      cli_args = '--mesh-only depend_with_force_prepare_out.e'
-      exodiff = 'depend_with_force_prepare_out.e'
-      recover = false
-
-      detail = "a forced mesh preparation step."
-    []
   []
 []
