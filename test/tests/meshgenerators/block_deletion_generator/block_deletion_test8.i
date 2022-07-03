@@ -18,7 +18,7 @@
     top_right = '4 4 1'
   []
   [interior_nodeset]
-    type = GenerateBoundingBoxNodeSet
+    type = BoundingBoxNodeSetGenerator
     input = SubdomainBoundingBox1
     new_boundary = interior_ns
     bottom_left = '2 2 0'

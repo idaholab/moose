@@ -15,6 +15,14 @@
       detail = 'from 2D quads to 3D hexes,'
     []
 
+    [tri_test]
+      type = 'Exodiff'
+      input = 'extruder_tri.i'
+      exodiff = 'out_tri.e'
+
+      detail = "2D triangular elements;"
+    []
+
     [new_subdomains]
       type = 'Exodiff'
       input = 'extrude_remap_layer1.i'
