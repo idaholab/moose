@@ -1,5 +1,11 @@
 # Setup Atom Editor for MOOSE
 
+!alert warning
+The Atom project will be [sunsetted on December 15th, 2022](https://github.blog/2022-06-08-sunsetting-atom/).
+Please transition to a different editor. Many MOOSE team members and most application developers have
+migrated to [VSCode](VSCode.md), and we offer an extension for MOOSE development that now exceeds the
+capabilities of the corresponding Atom plugins.
+
 !media media/atom_screenshot.png
        style=width:300px;padding-left:20px;float:right;
        caption=Screenshot of Atom in action.
