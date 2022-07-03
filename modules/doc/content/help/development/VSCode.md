@@ -27,7 +27,7 @@ well as the installed extensions.
 
 ### First Steps
 
-- On macOS +Start VSCode+ for the first time press +`F1`+ (or +`Cmd-Shift-P`+) and type `Shell Command: Install 'code' command in PATH`. Press enter. This activates the
+- On macOS, +Start VSCode+ for the first time, then press +`F1`+ (or +`Cmd-Shift-P`+) and type `Shell Command: Install 'code' command in PATH`. Press enter. This activates the
   `code` shell command for use from a terminal.
 - On Linux the shell command is automatically installed.
 - +Close VSCode+. From now on we will _only_ start it from the command line using the `code`
@@ -35,17 +35,17 @@ well as the installed extensions.
 
 ## Important commands
 
-- +`Cmd-Shift-P`+ opens the command palette. Every available Atom command can be accessed by typing a
+- +`Cmd-Shift-P`+ opens the command palette. Every available command can be accessed by typing a
   few letters here. The dropdown list shows the keyboard shortcuts.
 - +`Cmd-P`+ opens a file anywhere in the current project tree (i.e. below the directory in which you
-  issued the `atom .` command. No need to know the precise path or even the precise spelling of the
+  issued the `code .` command. No need to know the precise path or even the precise spelling of the
   filename!
 
 ## Extensions
 
 
 The following extensions should be installed to effectively develop MOOSE based codes and edit MOOSE
-input files using Atom
+input files using VSCode
 
 - [MOOSE Language Support](https://marketplace.visualstudio.com/items?itemName=DanielSchwen.moose-language-support): Syntax highlighting, automatic
   indentation, document outlines, mouse hover info, formatting, and auto-completion for MOOSE input files, C++ code snippets for all MOOSE systems, and
@@ -81,4 +81,4 @@ The following settings are recommended to pass the MOOSE GitHub CI pre-checks:
 }
 ```
 
-The `editor.formatOnSave` , `files.insertFinalNewline` , and  `files.trimTrailingWhitespace` options are helpful to avoid getting a failing precheck. The `C_Cpp.default.includePath` settings ensure that includes installed with Conda/Mamba are found. The _Atom One Dark_ theme is available as an extension and provides teh familiar Atom colors. [GitLens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens) is an extension that provides extensive git integration.
+The `editor.formatOnSave` , `files.insertFinalNewline` , and  `files.trimTrailingWhitespace` options are helpful to avoid failing the automated code check in MOOSE's test suite. The `C_Cpp.default.includePath` settings ensure that includes installed with Conda/Mamba are found. The _Atom One Dark_ theme is available as an extension and provides the familiar Atom colors. [GitLens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens) is an extension that provides extensive git integration.
