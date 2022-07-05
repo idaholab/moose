@@ -1636,6 +1636,7 @@ AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal
   nodal_tangent_two(1) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
   nodal_tangent_two(2) = 1.0 - 2.0 * h_vector(2) * h_vector(2) / (h * h);
 }
+
 // Project secondary nodes onto their corresponding primary elements for each primary/secondary
 // pair.
 void
@@ -2243,7 +2244,7 @@ AutomaticMortarGeneration::writeGeometryToFile()
   // Finish assembly.
   _nodal_normals_system->solution->close();
 
-  std::set<std::string> sys_names = {"nodal_geometry"};
+  std::set<std::string> sys_names = {"nodal_normals"};
 
   // Write the nodal normals to file
   ExodusII_IO nodal_normals_writer(_mesh);

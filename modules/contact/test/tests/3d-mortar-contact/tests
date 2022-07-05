@@ -122,4 +122,16 @@
     abs_zero = 1.0e-5
     max_parallel = 8
   []
+  [half_sphere_nodal_geometry]
+    type = 'Exodiff'
+    exodiff = 'nodal_geometry_only.e'
+    input = 'half_sphere_nodal_geometry.i'
+    min_ad_size = 100
+    valgrind = 'heavy'
+    requirement = 'The system shall generate consistent mortar nodal geometry (normal and tangent vectors)'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-5
+    allow_warnings = true
+    max_parallel = 1
+  []
 []
