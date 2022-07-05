@@ -16,7 +16,7 @@ velocity = 0.1
     ymax = 0
     nx = 1
     ny = 3
-    elem_type = QUAD4
+    elem_type = QUAD8
   []
   [left_block_sidesets]
     type = RenameBoundaryGenerator
@@ -44,7 +44,7 @@ velocity = 0.1
     ymax = 0
     nx = 1
     ny = 2
-    elem_type = QUAD4
+    elem_type = QUAD8
   []
   [right_block_sidesets]
     type = RenameBoundaryGenerator
@@ -95,10 +95,12 @@ velocity = 0.1
 [Variables]
   [lm_x]
     block = 'secondary_lower'
+    order=SECOND
     use_dual = true
   []
   [lm_y]
     block = 'secondary_lower'
+    order=SECOND
     use_dual = true
   []
 []
@@ -241,6 +243,9 @@ velocity = 0.1
   petsc_options_iname = '-mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = '1e-5          NONZERO               1e-10'
 
+  # petsc_options_iname = ' -pc_hypre_type -pc_hypre_boomeramg_max_iter'
+  # petsc_options_value = '  boomeramg      1'
+
   line_search = none
 
   dt = 0.1
@@ -256,7 +261,7 @@ velocity = 0.1
 
 [Outputs]
   exodus = false
-  file_base = './output/1st_order_${theta}_degree_out'
+  file_base = './output/2nd_order_${theta}_degree_QUAD8_out'
   [comp]
     type = CSV
     show = 'tot_lin_it tot_nonlin_it'

@@ -3,8 +3,8 @@
   volumetric_locking_correction = true
 []
 
-theta = 60
-velocity = 0.15
+theta = 0
+velocity = 0.1
 
 [Mesh]
   [left_block]
@@ -236,6 +236,9 @@ velocity = 0.15
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu superlu_dist 1e-5          NONZERO               1e-10'
 
+  # petsc_options_iname = '-pc_type -pc_hypre_type'
+  # petsc_options_value = 'hypre boomeramg'
+
   line_search = none
 
   dt = 0.1
@@ -250,7 +253,7 @@ velocity = 0.15
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
   file_base = './output/1st_order_${theta}_degree_out'
   [comp]
     type = CSV
