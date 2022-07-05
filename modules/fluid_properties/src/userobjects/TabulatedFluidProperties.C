@@ -54,10 +54,10 @@ TabulatedFluidProperties::validParams()
   params.addParam<bool>("save_file", true, "Whether to save the csv fluid properties file");
   params.addParam<bool>("construct_pT_from_ve",
                         false,
-                        "If the loopup table (p, T) as functions of (v, e) should be constructed.");
+                        "If the lookup table (p, T) as functions of (v, e) should be constructed.");
   params.addParam<bool>("construct_pT_from_vh",
                         true,
-                        "If the loopup table (p, T) as functions of (v, h) should be constructed.");
+                        "If the lookup table (p, T) as functions of (v, h) should be constructed.");
   params.addRangeCheckedParam<unsigned int>(
       "num_v",
       100,
@@ -93,7 +93,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _num_T(getParam<unsigned int>("num_T")),
     _num_p(getParam<unsigned int>("num_p")),
     _save_file(getParam<bool>("save_file")),
-    _fp(getUserObject<SinglePhaseFluidProperties>("fp")),
+    _fp(isParamValid("fp") ? &getUserObject<SinglePhaseFluidProperties>("fp") : nullptr),
     _interpolated_properties_enum(getParam<MultiMooseEnum>("interpolated_properties")),
     _interpolated_properties(),
     _interpolate_density(false),
@@ -120,6 +120,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _inversion_interpolation_order(getParam<unsigned int>("pt_ve_inversion_interpolation_order")),
     _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds"))
 {
+  // Check that initial guess (used in Newton Method) is within min and max values
   checkInitialGuess();
   // Sanity check on minimum and maximum temperatures and pressures
   if (_temperature_max <= _temperature_min)
@@ -342,13 +343,19 @@ TabulatedFluidProperties::inverseDistance(const std::vector<Real> & value,
 std::string
 TabulatedFluidProperties::fluidName() const
 {
-  return _fp.fluidName();
+  if (_fp)
+    return _fp->fluidName();
+  else
+    return "TabulationFromFile";
 }
 
 Real
 TabulatedFluidProperties::molarMass() const
 {
-  return _fp.molarMass();
+  if (_fp)
+    return _fp->molarMass();
+  else
+    mooseError("Molar Mass not specified.");
 }
 
 Real
@@ -378,8 +385,6 @@ TabulatedFluidProperties::v_from_p_T(
     checkInputVariables(pressure, temperature);
     _property_ipol[_density_idx]->sampleValueAndDerivatives(
         pressure, temperature, rho, drho_dp, drho_dT);
-    Real fp_rho = 0, fp_drho_dp = 0, fp_drho_dT = 0;
-    _fp.rho_from_p_T(pressure, temperature, fp_rho, fp_drho_dp, fp_drho_dT);
   }
   else
   {
@@ -641,7 +646,13 @@ TabulatedFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
     return _property_ipol[_cp_idx]->sample(pressure, temperature);
   }
   else
-    return _fp.cp_from_p_T(pressure, temperature);
+  {
+    if (_fp)
+      return _fp->cp_from_p_T(pressure, temperature);
+    else
+      paramError("interpolated_properties",
+                 "No data to interpolate for specific heat capacity at constant pressure.");
+  }
 }
 
 void
@@ -652,11 +663,15 @@ TabulatedFluidProperties::cp_from_p_T(
   {
     checkInputVariables(pressure, temperature);
     _property_ipol[_cp_idx]->sampleValueAndDerivatives(pressure, temperature, cp, dcp_dp, dcp_dT);
-    Real fp_cp = 0, fp_dcp_dp = 0, fp_dcp_dT = 0;
-    _fp.cp_from_p_T(pressure, temperature, fp_cp, fp_dcp_dp, fp_dcp_dT);
   }
   else
-    _fp.cp_from_p_T(pressure, temperature, cp, dcp_dp, dcp_dT);
+  {
+    if (_fp)
+      _fp->cp_from_p_T(pressure, temperature, cp, dcp_dp, dcp_dT);
+    else
+      paramError("interpolated_properties",
+                 "No data to interpolate for specific heat capacity at constant pressure.");
+  }
 }
 
 Real
@@ -668,7 +683,13 @@ TabulatedFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
     return _property_ipol[_cv_idx]->sample(pressure, temperature);
   }
   else
-    return _fp.cv_from_p_T(pressure, temperature);
+  {
+    if (_fp)
+      return _fp->cv_from_p_T(pressure, temperature);
+    else
+      paramError("interpolated_properties",
+                 "No data to interpolate for specific heat capacity at constant volume.");
+  }
 }
 
 void
@@ -681,7 +702,13 @@ TabulatedFluidProperties::cv_from_p_T(
     _property_ipol[_cv_idx]->sampleValueAndDerivatives(pressure, temperature, cv, dcv_dp, dcv_dT);
   }
   else
-    _fp.cv_from_p_T(pressure, temperature, cv, dcv_dp, dcv_dT);
+  {
+    if (_fp)
+      _fp->cv_from_p_T(pressure, temperature, cv, dcv_dp, dcv_dT);
+    else
+      paramError("interpolated_properties",
+                 "No data to interpolate for specific heat capacity at constant volume.");
+  }
 }
 
 Real
@@ -782,19 +809,28 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Rea
 std::vector<Real>
 TabulatedFluidProperties::henryCoefficients() const
 {
-  return _fp.henryCoefficients();
+  if (_fp)
+    return _fp->henryCoefficients();
+  else
+    mooseError("henryCoefficients not specified.");
 }
 
 Real
 TabulatedFluidProperties::vaporPressure(Real temperature) const
 {
-  return _fp.vaporPressure(temperature);
+  if (_fp)
+    return _fp->vaporPressure(temperature);
+  else
+    mooseError("vaporPres not specified.");
 }
 
 void
 TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const
 {
-  _fp.vaporPressure(temperature, psat, dpsat_dT);
+  if (_fp)
+    _fp->vaporPressure(temperature, psat, dpsat_dT);
+  else
+    mooseError("vaporPressure not specified.");
 }
 
 Real
@@ -1161,17 +1197,35 @@ TabulatedFluidProperties::generateTabulatedData()
     if (_interpolated_properties[i] == "k")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-          _properties[i][p * _num_T + t] = _fp.k_from_p_T(_pressure[p], _temperature[t]);
+        {
+          if (_fp)
+            _properties[i][p * _num_T + t] = _fp->k_from_p_T(_pressure[p], _temperature[t]);
+          else
+            paramError("interpolated_properties",
+                       "No data to interpolate for thermal conductivity.");
+        }
 
     if (_interpolated_properties[i] == "cv")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-          _properties[i][p * _num_T + t] = _fp.cv_from_p_T(_pressure[p], _temperature[t]);
+        {
+          if (_fp)
+            _properties[i][p * _num_T + t] = _fp->cv_from_p_T(_pressure[p], _temperature[t]);
+          else
+            paramError("interpolated_properties",
+                       "No data to interpolate for specific heat capacity at constant volume.");
+        }
 
     if (_interpolated_properties[i] == "cp")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-          _properties[i][p * _num_T + t] = _fp.cp_from_p_T(_pressure[p], _temperature[t]);
+        {
+          if (_fp)
+            _properties[i][p * _num_T + t] = _fp->cp_from_p_T(_pressure[p], _temperature[t]);
+          else
+            paramError("interpolated_properties",
+                       "No data to interpolate for specific heat capacity at constant pressure.");
+        }
 
     if (_interpolated_properties[i] == "entropy")
       for (unsigned int p = 0; p < _num_p; ++p)

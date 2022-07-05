@@ -216,13 +216,11 @@ protected:
   void checkInputVariables(T & pressure, T & temperature) const;
 
   /**
-<<<<<<< HEAD
-  *Check initial guess for Newton Method
-  */
+   * Checks initial guess for Newton Method
+   */
   virtual void checkInitialGuess() const;
 
   /**
-=======
    * Checks initial guess for Newton Method
    */
   virtual void checkInitialGuess() const;
@@ -236,7 +234,6 @@ protected:
                                           Real accuracy_tolerance);
 
   /**
->>>>>>> 9fde525054 (fixup! Added checkNaNs routine to TabBicubicFP and TabBilinearFP. If nans exist, set variable to be constant as min or max, depending on where nans exist. Also added a checkOutofBounds routine to set variable to be constant at min or max depending on where variable is out of bounds. Added T_from_p_h routine using Newton Method. Added s_from_p_h routine which uses T_from_p_h, then finds s_from_p_T. Added feature to TabBicubicFP and TabBilinearFP which allows user to choose to generate (p,T) from both (v,e) and (v,h) or choose one or the other. Added routine to TFP to check the initial guesses for p and T that are used in Newton's Mehotd. If these guesses are outside the range for max/min of p and T, routine produces an error and informs the user. Ref #20101)
    * Generates a table of fluid properties by looping over pressure and temperature
    * and calculating properties using the FluidProperties UserObject _fp.
    */
@@ -272,7 +269,7 @@ protected:
   const bool _save_file;
 
   /// SinglePhaseFluidPropertiesPT UserObject
-  const SinglePhaseFluidProperties & _fp;
+  const SinglePhaseFluidProperties * const _fp;
 
   /// List of required column names to be read
   const std::vector<std::string> _required_columns{"pressure", "temperature"};
