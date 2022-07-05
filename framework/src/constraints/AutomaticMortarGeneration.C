@@ -697,18 +697,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       auto & msm_set = it->second;
       msm_set.erase(msm_elem);
       if (msm_set.empty())
-      {
         _secondary_elems_to_mortar_segments.erase(it);
-        for (const auto & nd : msinfo.secondary_elem->node_ref_range())
-        {
-          auto & nd_secondary_elem_vec = libmesh_map_find(_nodes_to_secondary_elem_map, nd.id());
-          auto vec_it = std::find(
-              nd_secondary_elem_vec.begin(), nd_secondary_elem_vec.end(), msinfo.secondary_elem);
-          mooseAssert(vec_it != nd_secondary_elem_vec.end(),
-                      "We should have found the secondary element");
-          nd_secondary_elem_vec.erase(vec_it);
-        }
-      }
 
       // Erase msinfo
       _msm_elem_to_info.erase(msm_elem);
@@ -2259,21 +2248,24 @@ AutomaticMortarGeneration::secondariesToMortarSegments(const Node & node) const
     return {};
 
   const auto & secondary_elems = secondary_it->second;
-  std::vector<MortarFilterIter> ret(secondary_elems.size());
+  std::vector<MortarFilterIter> ret;
+  ret.reserve(secondary_elems.size());
 
   for (const auto i : index_range(secondary_elems))
   {
     auto * const secondary_elem = secondary_elems[i];
     auto msm_it = _secondary_elems_to_mortar_segments.find(secondary_elem);
     if (msm_it == _secondary_elems_to_mortar_segments.end())
-      mooseError("end of mortar segment map in associatedMortarSegments");
+      // We may have removed this element key from this map
+      continue;
+
     mooseAssert(secondary_elem->active(),
                 "We loop over active elements when building the mortar segment mesh, so we golly "
                 "well hope this is active.");
     mooseAssert(!msm_it->second.empty(),
                 "We should have removed all secondaries from this map if they do not have any "
                 "mortar segments associated with them.");
-    ret[i] = msm_it;
+    ret.push_back(msm_it);
   }
 
   return ret;
