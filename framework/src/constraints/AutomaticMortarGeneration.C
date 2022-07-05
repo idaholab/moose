@@ -416,7 +416,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // just made it <= and put this condition in to handle equality different. It probably could be
     // done with a tolerance but the the toleranced equality is already handled later when we drop
     // segments with small volume.
-    info = &libmesh_map_find(_msm_elem_to_info, current_mortar_segment);
     if (info->xi1_a == xi1 || xi1 == info->xi1_b)
       continue;
 
