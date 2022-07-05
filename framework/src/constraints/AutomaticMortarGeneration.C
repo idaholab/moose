@@ -2155,9 +2155,12 @@ AutomaticMortarGeneration::writeGeometryToFile()
                                     : static_cast<SubProblem &>(problem);
   auto & nodal_normals_es = subproblem.es();
 
+  const std::string nodal_normals_sys_name = "nodal_normals";
+
   if (!_nodal_normals_system)
   {
-    _nodal_normals_system = &nodal_normals_es.template add_system<ExplicitSystem>("nodal_normals");
+    _nodal_normals_system =
+        &nodal_normals_es.template add_system<ExplicitSystem>(nodal_normals_sys_name);
     _nnx_var_num = _nodal_normals_system->add_variable("nodal_normal_x", FEType(FIRST, LAGRANGE)),
     _nny_var_num = _nodal_normals_system->add_variable("nodal_normal_y", FEType(FIRST, LAGRANGE));
     _nnz_var_num = _nodal_normals_system->add_variable("nodal_normal_z", FEType(FIRST, LAGRANGE));
@@ -2234,7 +2237,7 @@ AutomaticMortarGeneration::writeGeometryToFile()
   // Finish assembly.
   _nodal_normals_system->solution->close();
 
-  std::set<std::string> sys_names = {"nodal_normals"};
+  std::set<std::string> sys_names = {nodal_normals_sys_name};
 
   // Write the nodal normals to file
   ExodusII_IO nodal_normals_writer(_mesh);
