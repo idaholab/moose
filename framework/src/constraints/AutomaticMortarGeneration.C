@@ -514,7 +514,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
           "This situation can indicate there are very oblique projections between primary (mortar) "
           "and secondary (non-mortar) surfaces for a good problem set up. It can also mean your "
           "time step is too large. This message is only printed once."));
-      break;
+      continue;
     }
 
     // Make an Elem on the left
