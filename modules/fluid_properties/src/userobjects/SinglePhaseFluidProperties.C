@@ -17,14 +17,16 @@ SinglePhaseFluidProperties::validParams()
   params.addCustomTypeParam<std::string>(
       "fp_type", "single-phase-fp", "FPType", "Type of the fluid property object");
   params.addRangeCheckedParam<Real>("tolerance", 1e-8, "tolerance > 0", "Tolerance for 2D Newton variable set conversion");
-  params.addRangeCheckedParam<Real>("T_initial_guess",
-                        400,
-                        "T_initial_guess > 0",
-                        "Temperature initial guess for Newton Method variable set conversion");
-  params.addRangeCheckedParam<Real>("p_initial_guess",
-                                    2e5,
-                                    "p_initial_guess > 0",
-                                    "Pressure initial guess for Newton Method variable set conversion");
+  params.addRangeCheckedParam<Real>(
+      "T_initial_guess",
+      400,
+      "T_initial_guess > 0",
+      "Temperature initial guess for Newton Method variable set conversion");
+  params.addRangeCheckedParam<Real>(
+      "p_initial_guess",
+      2e5,
+      "p_initial_guess > 0",
+      "Pressure initial guess for Newton Method variable set conversion");
 
   return params;
 }

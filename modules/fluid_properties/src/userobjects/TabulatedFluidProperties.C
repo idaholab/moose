@@ -530,9 +530,13 @@ TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
     rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT);
   };
   Real T = NewtonMethod::NewtonSolve(pressure, rho, _T_initial_guess, _tolerance, lambda);
-  //check for nans
+  // check for nans
   if (std::isnan(T))
-    mooseError("Conversion from pressure (p = ", pressure, ") and density (rho = ", rho, ") failed to converge.");
+    mooseError("Conversion from pressure (p = ",
+               pressure,
+               ") and density (rho = ",
+               rho,
+               ") failed to converge.");
   return T;
 }
 
@@ -1068,13 +1072,15 @@ Real
 TabulatedFluidProperties::T_from_p_h(Real pressure, Real h) const
 {
   auto lambda = [&](Real pressure, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
-  {
-    h_from_p_T(pressure, current_T, new_h, dh_dp, dh_dT);
-  };
+  { h_from_p_T(pressure, current_T, new_h, dh_dp, dh_dT); };
   Real T = NewtonMethod::NewtonSolve(pressure, h, _T_initial_guess, _tolerance, lambda);
-  //check for nans
+  // check for nans
   if (std::isnan(T))
-    mooseError("Conversion from enthalpy (h = ", h, ") and pressure (p = ", pressure, ") failed to converge.");
+    mooseError("Conversion from enthalpy (h = ",
+               h,
+               ") and pressure (p = ",
+               pressure,
+               ") failed to converge.");
   return T;
 }
 
@@ -1273,18 +1279,17 @@ TabulatedFluidProperties::checkInitialGuess() const
   {
     if (_error_on_out_of_bounds)
       paramError("Pressure Initial Guess " + Moose::stringify(_p_initial_guess) +
-                           " is outside the range of tabulated pressure (" +
-                           Moose::stringify(_pressure_min) + ", " +
-                           Moose::stringify(_pressure_max) + ").");
+                 " is outside the range of tabulated pressure (" + Moose::stringify(_pressure_min) +
+                 ", " + Moose::stringify(_pressure_max) + ").");
   }
 
   if (_T_initial_guess < _temperature_min || _T_initial_guess > _temperature_max)
   {
     if (_error_on_out_of_bounds)
       paramError("Temperature Initial Guess " + Moose::stringify(_T_initial_guess) +
-                         " is outside the range of tabulated temperature (" +
-                         Moose::stringify(_temperature_min) + ", " +
-                         Moose::stringify(_temperature_max) + ").");
+                 " is outside the range of tabulated temperature (" +
+                 Moose::stringify(_temperature_min) + ", " + Moose::stringify(_temperature_max) +
+                 ").");
   }
 }
 
