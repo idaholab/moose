@@ -85,8 +85,13 @@ MultiAppNearestNodeTransfer::execute()
   // Get the bounding boxes for the "from" domains.
   std::vector<BoundingBox> bboxes;
   if (isParamValid("source_boundary"))
-    bboxes = getFromBoundingBoxes(
-        _from_meshes[0]->getBoundaryID(getParam<BoundaryName>("source_boundary")));
+  {
+    if (_from_meshes.size())
+      bboxes = getFromBoundingBoxes(
+          _from_meshes[0]->getBoundaryID(getParam<BoundaryName>("source_boundary")));
+    else
+      bboxes = getFromBoundingBoxes(Moose::INVALID_BOUNDARY_ID);
+  }
   else
     bboxes = getFromBoundingBoxes();
 
