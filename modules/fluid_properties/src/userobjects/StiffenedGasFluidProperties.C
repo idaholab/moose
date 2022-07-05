@@ -141,10 +141,7 @@ StiffenedGasFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, 
   }
 }
 
-Real StiffenedGasFluidProperties::cp_from_v_e(Real, Real) const
-{
-  return _cp;
-}
+Real StiffenedGasFluidProperties::cp_from_v_e(Real, Real) const { return _cp; }
 
 void
 StiffenedGasFluidProperties::cp_from_v_e(
@@ -155,10 +152,7 @@ StiffenedGasFluidProperties::cp_from_v_e(
   dcp_de = 0.0;
 }
 
-Real StiffenedGasFluidProperties::cv_from_v_e(Real, Real) const
-{
-  return _cv;
-}
+Real StiffenedGasFluidProperties::cv_from_v_e(Real, Real) const { return _cv; }
 
 void
 StiffenedGasFluidProperties::cv_from_v_e(
@@ -169,10 +163,7 @@ StiffenedGasFluidProperties::cv_from_v_e(
   dcv_de = 0.0;
 }
 
-Real StiffenedGasFluidProperties::mu_from_v_e(Real, Real) const
-{
-  return _mu;
-}
+Real StiffenedGasFluidProperties::mu_from_v_e(Real, Real) const { return _mu; }
 
 void
 StiffenedGasFluidProperties::mu_from_v_e(
@@ -183,10 +174,7 @@ StiffenedGasFluidProperties::mu_from_v_e(
   dmu_de = 0.0;
 }
 
-Real StiffenedGasFluidProperties::k_from_v_e(Real, Real) const
-{
-  return _k;
-}
+Real StiffenedGasFluidProperties::k_from_v_e(Real, Real) const { return _k; }
 
 void
 StiffenedGasFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const
@@ -464,15 +452,9 @@ StiffenedGasFluidProperties::s_from_T_v(Real T, Real v, Real & s, Real & ds_dT, 
   ds_dv = ds_dv_e + ds_de_v * de_dv_T;
 }
 
-Real StiffenedGasFluidProperties::cv_from_T_v(Real /*T*/, Real /*v*/) const
-{
-  return _cv;
-}
+Real StiffenedGasFluidProperties::cv_from_T_v(Real /*T*/, Real /*v*/) const { return _cv; }
 
-Real StiffenedGasFluidProperties::e_spndl_from_v(Real /*v*/) const
-{
-  return _e_c;
-}
+Real StiffenedGasFluidProperties::e_spndl_from_v(Real /*v*/) const { return _e_c; }
 
 void
 StiffenedGasFluidProperties::v_e_spndl_from_T(Real /*T*/, Real & v, Real & e) const

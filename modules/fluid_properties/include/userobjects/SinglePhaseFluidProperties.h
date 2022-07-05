@@ -192,11 +192,11 @@ public:
 #undef propfuncWithDefault
 #undef propfuncAD
 
-  /**
-   * Fluid name
-   * @return string representing fluid name
-   */
-  virtual std::string fluidName() const;
+      /**
+       * Fluid name
+       * @return string representing fluid name
+       */
+      virtual std::string fluidName() const;
 
   /**
    * Molar mass [kg/mol]

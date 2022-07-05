@@ -88,7 +88,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
     std::vector<std::vector<Real>> p_from_v_e(_num_v);
     std::vector<std::vector<Real>> T_from_v_e(_num_v);
 
-    unsigned int num_p_nans_ve = 0, num_T_nans_ve = 0, num_p_out_bounds_ve = 0, num_T_out_bounds_ve = 0;
+    unsigned int num_p_nans_ve = 0, num_T_nans_ve = 0, num_p_out_bounds_ve = 0,
+                 num_T_out_bounds_ve = 0;
 
     for (unsigned int i = 0; i < _num_v; ++i)
     {
@@ -107,7 +108,7 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         /// check for NaNs in p interpolation
         checkNaNs(_pressure_min, _pressure_max, i, p_ve, num_p_nans_ve);
         /// check for NaNs in p interpolation
-        checkNaNs( _temperature_min, _temperature_max, i, T_ve,num_T_nans_ve);
+        checkNaNs(_temperature_min, _temperature_max, i, T_ve, num_T_nans_ve);
 
         /// replace out of bounds pressure values with pmax or pmin
         checkOutofBounds(_pressure_min, _pressure_max, p_ve, num_p_out_bounds_ve);
@@ -119,14 +120,14 @@ TabulatedBicubicFluidProperties::constructInterpolation()
       }
     }
 
-    outputWarnings(num_p_nans_ve, num_p_out_bounds_ve, "(v,e)", "pressure", _num_e*_num_v);
-    outputWarnings(num_T_nans_ve, num_T_out_bounds_ve, "(v,e)", "temperature", _num_e*_num_v);
+    outputWarnings(num_p_nans_ve, num_p_out_bounds_ve, "(v,e)", "pressure", _num_e * _num_v);
+    outputWarnings(num_T_nans_ve, num_T_out_bounds_ve, "(v,e)", "temperature", _num_e * _num_v);
 
-     // the bicubic interpolation object are init'ed now
+    // the bicubic interpolation object are init'ed now
     _p_from_v_e_ipol =
-       libmesh_make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, p_from_v_e);
+        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, p_from_v_e);
     _T_from_v_e_ipol =
-       libmesh_make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, T_from_v_e);
+        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, T_from_v_e);
   }
 
   if (_construct_pT_from_vh)
@@ -150,7 +151,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
     std::vector<std::vector<Real>> p_from_v_h(_num_v);
     std::vector<std::vector<Real>> T_from_v_h(_num_v);
 
-    unsigned int num_p_nans_vh = 0, num_T_nans_vh = 0, num_p_out_bounds_vh = 0, num_T_out_bounds_vh = 0;
+    unsigned int num_p_nans_vh = 0, num_T_nans_vh = 0, num_p_out_bounds_vh = 0,
+                 num_T_out_bounds_vh = 0;
 
     for (unsigned int i = 0; i < _num_v; ++i)
     {
@@ -165,7 +167,7 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         /// check for NaNs in p interpolation
         checkNaNs(_pressure_min, _pressure_max, i, p_vh, num_p_nans_vh);
         /// check for NaNs in p interpolation
-        checkNaNs( _temperature_min, _temperature_max, i, T_vh, num_T_nans_vh);
+        checkNaNs(_temperature_min, _temperature_max, i, T_vh, num_T_nans_vh);
 
         /// replace out of bounds pressure values with pmax or pmin
         checkOutofBounds(_pressure_min, _pressure_max, p_vh, num_p_out_bounds_vh);
@@ -177,14 +179,14 @@ TabulatedBicubicFluidProperties::constructInterpolation()
       }
     }
 
-    outputWarnings(num_p_nans_vh, num_p_out_bounds_vh, "(v,h)", "pressure", _num_e*_num_v);
-    outputWarnings(num_T_nans_vh, num_T_out_bounds_vh, "(v,h)", "temperature", _num_e*_num_v);
+    outputWarnings(num_p_nans_vh, num_p_out_bounds_vh, "(v,h)", "pressure", _num_e * _num_v);
+    outputWarnings(num_T_nans_vh, num_T_out_bounds_vh, "(v,h)", "temperature", _num_e * _num_v);
 
     // the bicubic interpolation object are init'ed now
     _p_from_v_h_ipol =
-       libmesh_make_unique<BicubicInterpolation>(_specific_volume, _enthalpy, p_from_v_h);
+        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _enthalpy, p_from_v_h);
     _T_from_v_h_ipol =
-       libmesh_make_unique<BicubicInterpolation>(_specific_volume, _enthalpy, T_from_v_h);
+        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _enthalpy, T_from_v_h);
   }
 }
 
@@ -207,21 +209,25 @@ TabulatedBicubicFluidProperties::reshapeData2D(unsigned int nrow,
 }
 
 void
-TabulatedBicubicFluidProperties::checkNaNs(Real min, Real max, unsigned int i, Real & variable, unsigned int & num_nans)
+TabulatedBicubicFluidProperties::checkNaNs(
+    Real min, Real max, unsigned int i, Real & variable, unsigned int & num_nans)
 {
   /// replace nan values with pmax or pmin
   if (std::isnan(variable))
   {
-    if (_specific_volume[i] > ((_v_min + _v_max) / 2) )
+    if (_specific_volume[i] > ((_v_min + _v_max) / 2))
       variable = min;
-    else if (_specific_volume[i] < ((_v_min + _v_max) / 2) )
+    else if (_specific_volume[i] < ((_v_min + _v_max) / 2))
       variable = max;
     num_nans++;
   }
 }
 
 void
-TabulatedBicubicFluidProperties::checkOutofBounds(Real min, Real max, Real & variable, unsigned int & num_out_bounds)
+TabulatedBicubicFluidProperties::checkOutofBounds(Real min,
+                                                  Real max,
+                                                  Real & variable,
+                                                  unsigned int & num_out_bounds)
 {
   if (variable < min)
   {
@@ -236,18 +242,32 @@ TabulatedBicubicFluidProperties::checkOutofBounds(Real min, Real max, Real & var
 }
 
 void
-TabulatedBicubicFluidProperties::outputWarnings(Real num_nans, Real num_out_bounds, std::string variable_set, std::string p_or_T, unsigned int number_points)
+TabulatedBicubicFluidProperties::outputWarnings(Real num_nans,
+                                                Real num_out_bounds,
+                                                std::string variable_set,
+                                                std::string p_or_T,
+                                                unsigned int number_points)
 {
   if (num_nans)
-    mooseWarning("while creating ", variable_set, " interpolation tables, ",
+    mooseWarning("while creating ",
+                 variable_set,
+                 " interpolation tables, ",
                  num_nans,
-                 " NaNs were computed for ", p_or_T , " during ", variable_set, " to p,T inversions.");
+                 " NaNs were computed for ",
+                 p_or_T,
+                 " during ",
+                 variable_set,
+                 " to p,T inversions.");
   if (num_out_bounds)
-    mooseWarning("while creating ", variable_set, " interpolation tables, ",
+    mooseWarning("while creating ",
+                 variable_set,
+                 " interpolation tables, ",
                  num_out_bounds,
                  " of ",
                  number_points,
-                 " computed ", p_or_T, " values were out of user defined range.");
+                 " computed ",
+                 p_or_T,
+                 " values were out of user defined range.");
   if (num_nans || num_out_bounds)
     mooseWarning("NaNs and out-of-bounds values were replaced with user-defined range, forcing a "
                  "constant value for the interpolated quantities in that domain");
