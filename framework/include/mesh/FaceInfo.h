@@ -10,9 +10,10 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "ElemInfo.h"
 
-#include "libmesh/point.h"
 #include "libmesh/vector_value.h"
+#include "libmesh/remote_elem.h"
 
 #include <map>
 #include <set>
@@ -34,7 +35,7 @@ class Node;
 class FaceInfo
 {
 public:
-  FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor);
+  FaceInfo(const ElemInfo * elem_info, unsigned int side);
 
   /// This enum is used to indicate which side(s) of a face a particular
   /// variable is defined on.  This is important for certain BC-related finite
@@ -63,30 +64,62 @@ public:
   const Point & normal() const { return _normal; }
 
   /// Returns true if this face resides on the mesh boundary.
-  bool isBoundary() const { return (_neighbor == nullptr); }
+  bool isBoundary() const { return (_elem_info->elem()->neighbor_ptr(_elem_side_id) == nullptr); }
+
+  bool facesRemote() const
+  {
+    return (_elem_info->elem()->neighbor_ptr(_elem_side_id) == remote_elem);
+  }
 
   /// Returns the coordinates of the face centroid.
   const Point & faceCentroid() const { return _face_centroid; }
 
   ///@{
-  /// Returns the coordinates of the approximate face centroid
-  /// (intersection of the face and the line between the cell centroids)
-  /// in case of skewed meshes.
-  const Point & rIntersection() const { return _r_intersection; }
+  /// Returns the skewness-correction vector (vector between the approximate and real face
+  /// centroids).
+  const Point skewnessCorrectionVector() const
+  {
+    if (!_neighbor_info)
+      mooseError("The neighbor info does not exist so the double-sided skewness-correction vector "
+                 "cannot be returned!");
+
+    Point r_intersection =
+        _elem_info->centroid() +
+        (((_face_centroid - _elem_info->centroid()) * _normal) / (_e_cn * _normal)) * _e_cn;
+
+    return _face_centroid - r_intersection;
+  }
+
+  const Point singleSidedSkewnessCorrectionVector(bool elem_side = true) const
+  {
+    if (!_neighbor_info && !elem_side)
+      mooseError("The neighbor info does not exist so the single-sided skewness-correction vector "
+                 "cannot be returned from the neighbor side!");
+    if (elem_side)
+      return _face_centroid - _r_cf;
+    else
+      return _face_centroid - _r_nf;
+  }
   ///@}
 
   ///@{
   /// Returns the elem and neighbor elements adjacent to the face.
   /// If a face is on a mesh boundary, the neighborPtr
   /// will return nullptr - the elem will never be null.
-  const Elem & elem() const { return *_elem; }
-  const Elem * neighborPtr() const { return _neighbor; }
+  const Elem & elem() const { return *(_elem_info->elem()); }
+  const Elem * elemPtr() const { return _elem_info->elem(); }
   const Elem & neighbor() const
   {
-    if (!_neighbor)
+    if (!_neighbor_info)
       mooseError("FaceInfo object 'const Elem & neighbor()' is called but neighbor element pointer "
                  "is null. This occurs for faces at the domain boundary");
-    return *_neighbor;
+    return *(_neighbor_info->elem());
+  }
+  const Elem * neighborPtr() const
+  {
+    if (!_neighbor_info)
+      return nullptr;
+    return _neighbor_info->elem();
   }
   ///@}
 
@@ -96,15 +129,25 @@ public:
   /// - i.e. the vector from the elem element centroid to the face centroid is
   /// doubled in length.  The tip of this new vector is the neighbor centroid.
   /// This is important for FV dirichlet BCs.
-  const Point & elemCentroid() const { return _elem_centroid; }
-  const Point & neighborCentroid() const { return _neighbor_centroid; }
+  const Point & elemCentroid() const { return _elem_info->centroid(); }
+  const Point & neighborCentroid() const
+  {
+    if (!_neighbor_info)
+      mooseError("You are requesting the centroid of an invalid neighbor!");
+    return _neighbor_info->centroid();
+  }
   ///@}
 
   ///@{
   /// Returns the elem and neighbor subdomain IDs. If no neighbor element exists, then
   /// an invalid ID is returned for the neighbor subdomain ID.
-  SubdomainID elemSubdomainID() const { return _elem_subdomain_id; }
-  SubdomainID neighborSubdomainID() const { return _neighbor_subdomain_id; }
+  SubdomainID elemSubdomainID() const { return _elem_info->subdomain_id(); }
+  SubdomainID neighborSubdomainID() const
+  {
+    if (!_neighbor_info)
+      return Elem::invalid_subdomain_id;
+    return _neighbor_info->subdomain_id();
+  }
   ///@}
 
   ///@{
@@ -124,16 +167,42 @@ public:
   }
   /// Mutably returns which side(s) the given variable is defined on for this face.
   VarFaceNeighbors & faceType(const std::string & var_name) { return _face_types_by_var[var_name]; }
+
+  bool varDefinedOnElem(const std::string & var_name) const
+  {
+    auto it = _face_types_by_var.find(var_name);
+    if (it == _face_types_by_var.end())
+      mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
+
+    const VarFaceNeighbors & ft = faceType(var_name);
+    return (ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM);
+  }
+
+  bool varDefinedOnNeighbor(const std::string & var_name) const
+  {
+    auto it = _face_types_by_var.find(var_name);
+    if (it == _face_types_by_var.end())
+      mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
+
+    const VarFaceNeighbors & ft = faceType(var_name);
+    return (ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM);
+  }
+
   const std::set<BoundaryID> & boundaryIDs() const { return _boundary_ids; }
 
   /// Returns the set of boundary ids for all boundaries that include this face.
   std::set<BoundaryID> & boundaryIDs() { return _boundary_ids; }
 
   /// Return the element volume
-  Real elemVolume() const { return _elem_volume; }
+  Real elemVolume() const { return _elem_info->volume(); }
 
   /// Return the neighbor volume
-  Real neighborVolume() const { return _neighbor_volume; }
+  Real neighborVolume() const
+  {
+    if (!_neighbor_info)
+      mooseError("You are requesting the volume of an invalid neighbor!");
+    return _neighbor_info->volume();
+  }
 
   /// Return the geometric weighting factor
   Real gC() const { return _gc; }
@@ -142,20 +211,54 @@ public:
    * @return the distance vector drawn from centroid C to F, or in terms of MOOSE implementation,
    * the distance vector obtained from subtracting the element centroid from the neighbor centroid
    */
-  const RealVectorValue & dCF() const { return _d_cf; }
+  const Point & dCN() const
+  {
+    if (!_neighbor_info)
+      mooseError(
+          "The neighbor info does not exist so the cell-neighbor vector cannot be returned!");
+    return _d_cn;
+  }
 
   /**
    * @return the magnitude of the distance vector between centroids C and F, or in terms of MOOSE
    * implementation, the magnitude of the distance vector between neighbor and element centroids
    */
-  Real dCFMag() const { return _d_cf_mag; }
+  Real dCNMag() const
+  {
+    if (!_neighbor_info)
+      mooseError(
+          "The neighbor info does not exist so the cell-neighbor distance cannot be returned!");
+    return _d_cn_mag;
+  }
+
+  Real cellCenterToFaceDistance(bool elem_side = true) const
+  {
+    if (!_neighbor_info && !elem_side)
+      mooseError("The neighbor info does not exist so the distance to the face cannot be returned "
+                 "from the neighbor side!");
+    if (elem_side)
+      return _r_cf_mag;
+    else
+      return _r_nf_mag;
+  }
+
+  const Point & cellCenterToFaceVector(bool elem_side = true) const
+  {
+    if (!_neighbor_info && !elem_side)
+      mooseError("The neighbor info does not exist so the vector to the face cannot be returned "
+                 "from the neighbor side!");
+    if (elem_side)
+      return _r_cf;
+    else
+      return _r_nf;
+  }
 
   /**
    * @return the normalized (e.g. unit) distance vector drawn from centroid C to F, or in terms of
    * MOOSE implementation, the normalized (e.g. unit) distance vector obtained from subtracting the
    * element centroid from the neighbor centroid
    */
-  const RealVectorValue & eCF() const { return _e_cf; }
+  const Point & eCN() const { return _e_cn; }
 
   /**
    * @return the ID of the processor that owns this object
@@ -168,55 +271,40 @@ public:
    */
   const std::pair<dof_id_type, unsigned int> & id() const { return _id; }
 
+  /**
+   * Takes the ElemInfo of the neighbor cell and computes interpolation weights
+   * together with other quantities used to generate spatial operators.
+   */
+  void computeCoefficients(const ElemInfo * const neighbor_info);
+
 private:
+  /// the elem and neighbor elems
+  const ElemInfo * _elem_info;
+  const ElemInfo * _neighbor_info;
+
   Real _face_coord = 0;
   Point _normal;
 
   const processor_id_type _processor_id;
   const std::pair<dof_id_type, unsigned int> _id;
 
-  /// the elem and neighbor elems
-  const Elem * const _elem;
-  const Elem * const _neighbor;
-
-  /// the elem subdomain id
-  const SubdomainID _elem_subdomain_id;
-
   /// the elem local side id
   const unsigned int _elem_side_id;
+  unsigned int _neighbor_side_id;
 
-  const Point _elem_centroid;
-  const Real _elem_volume;
-
-  /// A unique_ptr to the face element built from \p _elem and \p _elem_side_id
-  std::unique_ptr<Elem> _face;
-
-  const Real _face_area;
-  const Point _face_centroid;
-
-  /// Whether neighbor is non-null and non-remote
-  const bool _valid_neighbor;
-
-  /// the neighbor subdoman id
-  const SubdomainID _neighbor_subdomain_id;
-
-  /// the neighbor local side ide
-  const unsigned int _neighbor_side_id;
-
-  const Point _neighbor_centroid;
-  const Real _neighbor_volume;
+  Real _face_area;
+  Point _face_centroid;
 
   /// the distance vector between neighbor and element centroids
-  const RealVectorValue _d_cf;
+  Point _d_cn;
+  Point _r_nf;
+  Point _r_cf;
+  Point _e_cn;
 
   /// the distance norm between neighbor and element centroids
-  const Real _d_cf_mag;
-
-  /// The unit normal vector pointing from element center C to element center F
-  const RealVectorValue _e_cf;
-
-  /// The vector to the intersection of d_{CF} and the face.
-  Point _r_intersection;
+  Real _d_cn_mag;
+  Real _r_nf_mag;
+  Real _r_cf_mag;
 
   /// Geometric weighting factor for face value interpolation
   Real _gc;
