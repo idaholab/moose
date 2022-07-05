@@ -591,10 +591,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_interior_node_right->set_unique_id(new_interior_id_right + node_unique_id_offset);
     }
 
-    const auto secondary_volume = secondary_elem->volume();
-    const bool add_right = !(new_elem_right->volume() / secondary_volume < TOLERANCE);
-    const bool add_left = !(new_elem_left->volume() / secondary_volume < TOLERANCE);
-
     // If orientation 2 was valid, swap the left and right primaries.
     if (orientation2_valid)
       std::swap(left_primary_elem, right_primary_elem);
@@ -616,7 +612,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       mooseError("MortarSegmentInfo not found for current_mortar_segment.");
     MortarSegmentInfo current_msinfo = msm_it->second;
 
-    if (add_left)
+    // add_left
     {
       Elem * msm_new_elem = _mortar_segment_mesh->add_elem(new_elem_left.release());
 
@@ -645,7 +641,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       mortar_segment_set.insert(msm_new_elem);
     }
 
-    if (add_right)
+    // add_right
     {
       Elem * msm_new_elem = _mortar_segment_mesh->add_elem(new_elem_right.release());
 
