@@ -359,12 +359,23 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   ADReal tangential_dof_residual = tangential_pressure_value;
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-
+if ( _dof_to_normal_vector[dof](0) > _dof_to_normal_vector[dof](1))
+{
   // Associate constraint residual with lm_x
   _assembly.processResidualAndJacobian(
       normal_dof_residual, dof_index_x, _vector_tags, _matrix_tags);
   // Associate null tangential pressure residual with lm_y
   _assembly.processResidualAndJacobian(
       tangential_dof_residual, dof_index_y, _vector_tags, _matrix_tags);
+}
+else
+{
+  // Associate constraint residual with lm_y
+  _assembly.processResidualAndJacobian(
+      normal_dof_residual, dof_index_y, _vector_tags, _matrix_tags);
+  // Associate null tangential pressure residual with lm_x
+  _assembly.processResidualAndJacobian(
+      tangential_dof_residual, dof_index_x, _vector_tags, _matrix_tags);
+}
 #endif
 }
