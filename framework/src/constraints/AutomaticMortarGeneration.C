@@ -1767,6 +1767,9 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
               xi2_dn += dxi2;
             }
             else
+              // It's possible that the nodal normal is completely orthogonal to the primary
+              // surface, in which case the derivative is 0. We know in this case that the
+              // projection should be a failure
               current_iterate = max_iterates;
           } while (++current_iterate < max_iterates);
 
@@ -2066,6 +2069,9 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
             if (std::abs(F) < _newton_tolerance)
               break;
 
+            // Unlike for projection of nodal normals onto primary surfaces, we should never have a
+            // case where the nodal normal is completely orthogonal to the secondary surface, so we
+            // do not have to guard against F.derivatives() == 0 here
             Real dxi1 = -F.value() / F.derivatives();
 
             xi1_dn += dxi1;
