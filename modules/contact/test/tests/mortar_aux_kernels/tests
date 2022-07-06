@@ -90,9 +90,9 @@
                   'these computations in the definition of mortar normal contact constraints in an '
                   'asymmetric problem for a short simulation.'
   []
-  [block-dynamics-aux-fretting-wear-test-quick-no-projection]
+  [block-dynamics-aux-fretting-wear-test-quick-multiple-projections]
     type = 'Exodiff'
-    exodiff = 'block-dynamics-aux-fretting-wear-test-quick-no-projection_out.e'
+    exodiff = 'block-dynamics-aux-fretting-wear-test-quick-multiple-projections_out.e'
     input = 'block-dynamics-aux-fretting-wear-test.i'
     rel_err = 1.0e-3
     abs_zero = 1.0e-4
@@ -102,13 +102,15 @@
     map = False
     partial = True
     ad_indexing_type = 'global'
-    cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-no-project.e Executioner/end_time=0.15 '
-               'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick-no-projection_out'
+    cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-multiple-projections.e '
+               'Executioner/end_time=0.15 '
+               'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick-multiple-projections_out'
     requirement = 'Contact module shall compute nodal wear depth values in accordance with Archard '
                   'equation and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '
-                  'asymmetric problem for a short simulation where secondary elements/nodes may not '
-                  'project onto the primary surface.'
+                  'asymmetric problem for a short simulation where secondary elements/nodes may '
+                  'project in an oblique manner and where sidesets only span the possible contact '
+                  'patch area. '
   []
   [block-dynamics-aux-fretting-wear-test-action-quick]
     type = 'Exodiff'
