@@ -85,7 +85,7 @@ public:
   static constexpr unsigned int full_index[6][2] = {{0, 0}, {1, 1}, {2, 2}, {1, 2}, {0, 2}, {0, 1}};
 
   // Reverse tensor indices in the Mandel/Voigt representation
-  static constexpr unsigned int reverse_index[3][3] = {{1, 6, 5}, {6, 2, 4}, {5, 4, 3}};
+  static constexpr unsigned int reverse_index[3][3] = {{0, 5, 4}, {5, 1, 3}, {4, 3, 2}};
 
   /// returns the 1 or sqrt(2) prefactor in the Mandel notation for the index i ranging from 0-5.
   static constexpr Real mandelFactor(unsigned int i) { return i < Ndim ? 1.0 : MathUtils::sqrt2; }
@@ -594,16 +594,15 @@ SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(
 
     // projection tensor
     SymmetricRankFourTensorTempl<T> proj_pos;
-    SymmetricRankFourTensorTempl<T> Gab, Gba;
 
-    for (unsigned int a = 0; a < N; ++a)
+    for (unsigned int a = 0; a < Ndim; ++a)
     {
       const auto Ma = SymmetricRankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
       proj_pos += d[a] * Ma.outerProduct(Ma);
     }
 
-    for (unsigned int a = 0; a < N; ++a)
-      for (unsigned int b = 0; b < a; ++b)
+    for (const auto a : make_range(Ndim))
+      for (const auto b : make_range(a))
       {
         const auto Ma = SymmetricRankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
         const auto Mb = SymmetricRankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
@@ -633,8 +632,8 @@ SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(
     return proj_pos;
   }
   else
-    static_assert("positiveProjectionEigenDecomposition is only available for ordered tensor "
-                  "component types");
+    mooseError("positiveProjectionEigenDecomposition is only available for ordered tensor "
+               "component types");
 }
 
 template <typename T>
@@ -653,7 +652,7 @@ SymmetricRankTwoTensorTempl<T>::sin3Lode(const T & r0, const T & r0_value) const
                       -1.0);
   }
   else
-    static_assert("sin3Lode is only available for ordered tensor component types");
+    mooseError("sin3Lode is only available for ordered tensor component types");
 }
 
 template <typename T>
@@ -670,5 +669,5 @@ SymmetricRankTwoTensorTempl<T>::dsin3Lode(const T & r0) const
               dsecondInvariant() * thirdInvariant() * 1.5 / std::pow(bar, 2.5));
   }
   else
-    static_assert("dsin3Lode is only available for ordered tensor component types");
+    mooseError("dsin3Lode is only available for ordered tensor component types");
 }

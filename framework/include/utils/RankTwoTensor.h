@@ -1470,8 +1470,8 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
     }
 
     usingTensorIndices(i_, j_, k_, l_);
-    for (auto a : make_range(N))
-      for (auto b : make_range(a))
+    for (const auto a : make_range(N))
+      for (const auto b : make_range(a))
       {
         const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
         const auto Mb = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
@@ -1490,8 +1490,8 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
     return proj_pos;
   }
   else
-    static_assert("positiveProjectionEigenDecomposition is only available for ordered tensor "
-                  "component types");
+    mooseError("positiveProjectionEigenDecomposition is only available for ordered tensor "
+               "component types");
 }
 
 template <typename T>
@@ -1510,7 +1510,7 @@ RankTwoTensorTempl<T>::sin3Lode(const T & r0, const T & r0_value) const
                       -1.0);
   }
   else
-    static_assert("sin3Lode is only available for ordered tensor component types");
+    mooseError("sin3Lode is only available for ordered tensor component types");
 }
 
 template <typename T>
@@ -1528,7 +1528,7 @@ RankTwoTensorTempl<T>::dsin3Lode(const T & r0) const
               1.5 * dsecondInvariant() * thirdInvariant() / std::pow(bar, 2.5));
   }
   else
-    static_assert("dsin3Lode is only available for ordered tensor component types");
+    mooseError("dsin3Lode is only available for ordered tensor component types");
 }
 
 template <typename T>
@@ -1559,7 +1559,7 @@ RankTwoTensorTempl<T>::d2sin3Lode(const T & r0) const
     return deriv;
   }
   else
-    static_assert("d2sin3Lode is only available for ordered tensor component types");
+    mooseError("d2sin3Lode is only available for ordered tensor component types");
 }
 
 template <typename T>

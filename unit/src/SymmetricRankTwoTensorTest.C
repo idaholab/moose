@@ -120,8 +120,8 @@ TEST_F(SymmetricRankTwoTensorTest, ddet)
   auto uddet = RankTwoTensor(_m3).ddet();
   auto sddet = RankTwoTensor(_m3.ddet());
 
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
+  for (const auto i : make_range(3))
+    for (const auto j : make_range(3))
       EXPECT_NEAR(uddet(i, j), sddet(i, j), 1e-5);
 }
 
@@ -378,6 +378,33 @@ TEST_F(SymmetricRankTwoTensorTest, d2thirdInvariant)
   auto A = _m3.d2thirdInvariant();
   auto B = RankTwoTensor(_m3).d2thirdInvariant();
   EXPECT_NEAR((RankFourTensor(A) - B).L2norm(), 0.0, 1e-9);
+}
+
+TEST_F(SymmetricRankTwoTensorTest, fullAccessOperator)
+{
+  auto A = _m3;
+  auto B = RankTwoTensor(_m3);
+
+  for (const auto i : make_range(3))
+    for (const auto j : make_range(3))
+      EXPECT_NEAR(A(i, j), B(i, j), 1e-9);
+}
+
+TEST_F(SymmetricRankTwoTensorTest, positiveProjectionEigenDecomposition)
+{
+  std::vector<Real> Aeigval;
+  RankTwoTensorTempl<Real> Aeigvec;
+  auto A = RankFourTensor(_m3.positiveProjectionEigenDecomposition(Aeigval, Aeigvec));
+
+  std::vector<Real> Beigval;
+  RankTwoTensorTempl<Real> Beigvec;
+  auto B = RankTwoTensor(_m3).positiveProjectionEigenDecomposition(Beigval, Beigvec);
+
+  EXPECT_NEAR((Beigvec - Aeigvec).L2norm(), 0.0, 1e-9);
+  EXPECT_NEAR(Aeigval[0], Beigval[0], 1e-9);
+  EXPECT_NEAR(Aeigval[1], Beigval[1], 1e-9);
+  EXPECT_NEAR(Aeigval[2], Beigval[2], 1e-9);
+  EXPECT_NEAR((A - B).L2norm(), 0.0, 1e-9);
 }
 
 TEST_F(SymmetricRankTwoTensorTest, print)
