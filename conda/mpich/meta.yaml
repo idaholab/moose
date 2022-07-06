@@ -55,6 +55,7 @@ requirements:
     - {{ moose_mesalib }}       # [linux]
     - openssl <3
     - mpi 1.0 mpich
+    - cmake
 
 test:
   commands:
