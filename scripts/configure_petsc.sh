@@ -97,10 +97,11 @@ function configure_petsc()
     fi
   fi
 
-  # For Apple Silicon (arm64) manual builds be sure to set FFLAGS for mumps, otherwise it will fail to build correctly
+  # For Apple Silicon (arm64) manual builds be sure to set FFLAGS for mumps to use the proper arch,
+  # otherwise it will fail to build correctly
   MUMPS_STR=""
   if [[ `uname -p` == "arm" ]] && [[ $(uname) == Darwin ]] && [[ $PETSC_ARCH == arch-moose ]]; then
-    MUMPS_STR="FFLAGS=$FFLAGS"
+    MUMPS_STR="FFLAGS="-march=armv8.3-a""
   fi
 
   cd $PETSC_DIR
