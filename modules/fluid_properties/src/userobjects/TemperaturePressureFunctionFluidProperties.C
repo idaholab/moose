@@ -28,12 +28,17 @@ TemperaturePressureFunctionFluidProperties::validParams()
 
 TemperaturePressureFunctionFluidProperties::TemperaturePressureFunctionFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters),
-    _k_function(getFunction("k")),
-    _rho_function(getFunction("rho")),
-    _mu_function(getFunction("mu")),
     _cp(getParam<Real>("cp")),
     _cv(getParam<Real>("cv"))
 {
+}
+
+void
+TemperaturePressureFunctionFluidProperties::initialSetup()
+{
+  _k_function = &getFunction("k");
+  _rho_function = &getFunction("rho");
+  _mu_function = &getFunction("mu");
 }
 
 std::string
@@ -57,7 +62,7 @@ TemperaturePressureFunctionFluidProperties::T_from_p_h(Real /* p */, Real h) con
 Real
 TemperaturePressureFunctionFluidProperties::T_from_p_rho(Real /* p */, Real/* rho */) const
 {
-  mooseError("not implamented");
+  mooseError("not implemented");
   return 0;
 
 }
@@ -93,7 +98,7 @@ TemperaturePressureFunctionFluidProperties::k_from_v_e(Real v, Real e) const
 Real
 TemperaturePressureFunctionFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
-  return _rho_function.value(0, Point(temperature, pressure, 0));
+  return _rho_function->value(0, Point(temperature, pressure, 0));
 }
 
 void
@@ -101,7 +106,7 @@ TemperaturePressureFunctionFluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   rho = rho_from_p_T(pressure, temperature);
-  const RealVectorValue grad_function = _rho_function.gradient(0, Point(temperature, pressure, 0));
+  const RealVectorValue grad_function = _rho_function->gradient(0, Point(temperature, pressure, 0));
   drho_dT = grad_function(0);
   drho_dp = grad_function(1);
 }
@@ -111,7 +116,7 @@ TemperaturePressureFunctionFluidProperties::rho_from_p_T(
     const DualReal & pressure, const DualReal & temperature, DualReal & rho, DualReal & drho_dp, DualReal & drho_dT) const
 {
   rho = rho_from_p_T(pressure, temperature);
-  const RealVectorValue grad_function = _rho_function.gradient(0, Point(temperature.value(), pressure.value(), 0));
+  const RealVectorValue grad_function = _rho_function->gradient(0, Point(temperature.value(), pressure.value(), 0));
   drho_dT = grad_function(0);
   drho_dp = grad_function(1);
 }
@@ -211,7 +216,7 @@ TemperaturePressureFunctionFluidProperties::cv_from_p_T(
 Real
 TemperaturePressureFunctionFluidProperties::mu_from_p_T(Real pressure, Real temperature) const
 {
-  return _mu_function.value(0, Point(temperature, pressure, 0));
+  return _mu_function->value(0, Point(temperature, pressure, 0));
 }
 
 void
@@ -219,7 +224,7 @@ TemperaturePressureFunctionFluidProperties::mu_from_p_T(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
   mu = mu_from_p_T(pressure, temperature);
-  const RealVectorValue grad_function = _mu_function.gradient(0, Point(temperature, pressure, 0));
+  const RealVectorValue grad_function = _mu_function->gradient(0, Point(temperature, pressure, 0));
   dmu_dT = grad_function(0);
   dmu_dp = grad_function(1);
 }
@@ -227,7 +232,7 @@ TemperaturePressureFunctionFluidProperties::mu_from_p_T(
 Real
 TemperaturePressureFunctionFluidProperties::k_from_p_T(Real pressure, Real temperature) const
 {
-  return _k_function.value(0, Point(temperature, pressure, 0));
+  return _k_function->value(0, Point(temperature, pressure, 0));
 }
 
 void
@@ -235,7 +240,7 @@ TemperaturePressureFunctionFluidProperties::k_from_p_T(
     Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
   k = k_from_p_T(pressure, temperature);
-  const RealVectorValue grad_function = _k_function.gradient(0, Point(temperature, pressure, 0));
+  const RealVectorValue grad_function = _k_function->gradient(0, Point(temperature, pressure, 0));
   dk_dT = grad_function(0);
   dk_dp = grad_function(1);
 }

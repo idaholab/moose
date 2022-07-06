@@ -299,14 +299,17 @@ public:
   using SinglePhaseFluidProperties::p_from_v_e;
 
 protected:
+
+  void initialSetup() override;
+
   /// function defining thermal conductivity as a function of temperature
-  const Function & _k_function;
+  const Function * _k_function;
 
   /// function defining density as a function of temperature
-  const Function & _rho_function;
+  const Function * _rho_function;
 
   /// function defining dynamic viscosity as a function of temperature
-  const Function & _mu_function;
+  const Function * _mu_function;
 
   /// constant isobaric specific heat
   const Real & _cp;
