@@ -30,12 +30,11 @@ requirements:
     - {{ base_mpifort }}
     - {{ moose_hdf5 }}
     - {{ moose_ld64 }}          # [osx]
-    - cmake
     - make
-    - libtool                   # [arm64]
-    - autoconf                  # [arm64]
-    - automake 1.16.1           # [arm64]
-    - m4                        # [arm64]
+    - libtool
+    - autoconf
+    - automake 1.16.1
+    - m4
     - openssl <3
   host: []
   run:
@@ -47,10 +46,10 @@ requirements:
     - {{ moose_ld64 }}          # [osx]
     - cmake
     - make
-    - libtool                   # [arm64]
-    - autoconf                  # [arm64]
-    - automake 1.16.1           # [arm64]
-    - m4                        # [arm64]
+    - libtool
+    - autoconf
+    - automake 1.16.1
+    - m4
     - {{ moose_libxt }}         # [linux]
     - {{ moose_libsm }}         # [linux]
     - {{ moose_libx11 }}        # [linux]
