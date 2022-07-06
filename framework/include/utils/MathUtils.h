@@ -272,19 +272,19 @@ template <typename T, typename T2>
 T
 smootherStep(T x, T2 start, T2 end, bool derivative = false)
 {
-  if (end == start)
+  mooseAssert("start < end", "Start value must be lower than end value for smootherStep");
+  if (x <= start)
     return 0.0;
-  x = clamp((x - start) / (end - start), 0.0, 1.0);
-  if (x == 0.0)
-    return 0.0;
-  if (derivative)
+  else if (x >= end)
   {
-    if (x == 1.0)
+    if (derivative)
       return 0.0;
-    return 30.0 * Utility::pow<2>(x) * (x * (x - 2.0) + 1.0) / (end - start);
+    else
+      return 1.0;
   }
-  if (x == 1.0)
-    return 1.0;
+  x = (x - start) / (end - start);
+  if (derivative)
+    return 30.0 * Utility::pow<2>(x) * (x * (x - 2.0) + 1.0) / (end - start);
   return Utility::pow<3>(x) * (x * (x * 6.0 - 15.0) + 10.0);
 }
 
