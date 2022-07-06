@@ -1754,8 +1754,8 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
                  ++n)
               x2 +=
                   Moose::fe_lagrange_1D_shape(order, n, xi2_dn) * primary_elem_candidate->point(n);
-            auto u = x2 - (*secondary_node);
-            auto F = u(0) * nodal_normal(1) - u(1) * nodal_normal(0);
+            const auto u = x2 - (*secondary_node);
+            const auto F = u(0) * nodal_normal(1) - u(1) * nodal_normal(0);
 
             if (std::abs(F) < _newton_tolerance)
               break;
@@ -1775,8 +1775,12 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
 
           Real xi2 = xi2_dn.value();
 
-          // Check whether the projection worked.
-          if ((current_iterate < max_iterates) && (std::abs(xi2) <= 1. + _xi_tolerance))
+          // Check whether the projection worked. The last condition checks for obliqueness of the
+          // projection
+          if ((current_iterate < max_iterates) && (std::abs(xi2) <= 1. + _xi_tolerance) &&
+              (std::abs(
+                   (primary_elem_candidate->point(0) - primary_elem_candidate->point(1)).unit() *
+                   nodal_normal) < 0.75))
           {
             // If xi2 == +1 or -1 then this secondary node mapped directly to a node on the primary
             // surface. This isn't as unlikely as you might think, it will happen if the meshes
@@ -2045,6 +2049,8 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
           auto && order = secondary_elem_candidate->default_order();
           unsigned int current_iterate = 0, max_iterates = 10;
 
+          VectorValue<DualNumber<Real>> normals(0);
+
           // Newton iteration loop - this to converge in 1 iteration when it
           // succeeds, and possibly two iterations when it converges to a
           // xi outside the reference element. I don't know any reason why it should
@@ -2052,7 +2058,6 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
           do
           {
             VectorValue<DualNumber<Real>> x1(0);
-            VectorValue<DualNumber<Real>> normals(0);
             for (MooseIndex(secondary_elem_candidate->n_nodes()) n = 0;
                  n < secondary_elem_candidate->n_nodes();
                  ++n)
@@ -2062,9 +2067,9 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
               normals += phi * nodal_normals[n];
             }
 
-            auto u = x1 - (*primary_node);
+            const auto u = x1 - (*primary_node);
 
-            auto F = u(0) * normals(1) - u(1) * normals(0);
+            const auto F = u(0) * normals(1) - u(1) * normals(0);
 
             if (std::abs(F) < _newton_tolerance)
               break;
@@ -2075,12 +2080,17 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
             Real dxi1 = -F.value() / F.derivatives();
 
             xi1_dn += dxi1;
+
+            normals = 0;
           } while (++current_iterate < max_iterates);
 
           Real xi1 = xi1_dn.value();
 
-          // Check for convergence to a valid solution...
-          if ((current_iterate < max_iterates) && (std::abs(xi1) <= 1. + _xi_tolerance))
+          // Check for convergence to a valid solution... The last condition checks for obliqueness
+          // of the projection
+          if ((current_iterate < max_iterates) && (std::abs(xi1) <= 1. + _xi_tolerance) &&
+              (std::abs((primary_side_elem->point(0) - primary_side_elem->point(1)).unit() *
+                        MetaPhysicL::raw_value(normals).unit()) < 0.75))
           {
             if (std::abs(std::abs(xi1) - 1.) < _xi_tolerance)
             {
