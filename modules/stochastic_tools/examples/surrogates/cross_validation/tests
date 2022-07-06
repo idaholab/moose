@@ -1,0 +1,31 @@
+[Tests]
+  design = 'Surrogates/index.md'
+  issues = '#21399'
+  [cross_validate]
+    requirement = "The system shall test results for cross validating surrogate models for the comparison example "
+    [uniform]
+      type = CSVDiff
+      input = uniform_train_and_cv.i
+      allow_test_objects = true
+      cli_args = "Samplers/pr_sampler/num_rows=6
+                  Trainers/pr_max/max_degree=1
+                  Trainers/pr_max/cv_n_trials=3
+                  Trainers/pr_max/cv_splits=2
+                  pr_sub:Mesh/nx=5"
+      csvdiff = "uniform_train_and_cv_out_cv_scores_0002.csv"
+      detail = "with uniform parameter distributions "
+    []
+    [normal]
+      type = CSVDiff
+      input = normal_train_and_cv.i
+      allow_test_objects = true
+      cli_args = "Samplers/pr_sampler/num_rows=6
+                  Trainers/pr_max/max_degree=1
+                  Trainers/pr_max/cv_n_trials=3
+                  Trainers/pr_max/cv_splits=2
+                  pr_sub:Mesh/nx=5"
+      csvdiff = "normal_train_and_cv_out_cv_scores_0002.csv"
+      detail = "and with normally distributed parameters."
+    []
+  []
+[]

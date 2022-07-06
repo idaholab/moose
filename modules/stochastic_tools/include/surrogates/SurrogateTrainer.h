@@ -16,6 +16,8 @@
 #include "Sampler.h"
 #include "RestartableDataIO.h"
 #include "StochasticToolsApp.h"
+#include "SurrogateModelInterface.h"
+#include "MooseRandom.h"
 
 class TrainingDataBase;
 template <typename T>
@@ -106,7 +108,7 @@ SurrogateTrainerBase::declareModelDataHelper(const std::string & data_name)
  * Here data referenced with getTrainingData will correspond to the the value of the
  * data in a sampler row.
  */
-class SurrogateTrainer : public SurrogateTrainerBase
+class SurrogateTrainer : public SurrogateTrainerBase, public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
@@ -161,6 +163,16 @@ private:
    */
   void checkIntegrity() const;
 
+  /*
+   * Main model training method - called during crossValidate() and for final model training.
+   */
+  void executeTraining();
+
+  /*
+   * Call if cross-validation is turned on.
+   */
+  Real crossValidate();
+
   /// Sampler data for the current row
   std::vector<Real> _row_data;
 
@@ -172,6 +184,30 @@ private:
 
   /// Vector of reporter names and their corresponding values (to be filled by getTrainingData)
   std::unordered_map<ReporterName, std::shared_ptr<TrainingDataBase>> _training_data;
+
+  /**
+   * Variables related to cross validation.
+   */
+  ///@{
+  /// Vector of indices to skip during executeTraining()
+  std::vector<dof_id_type> _skip_indices;
+  /// Type of cross validation to perform - for now, just 'none' (no CV) or 'k_fold'
+  const MooseEnum & _cv_type;
+  /// Number of splits (k) to split sampler data into.
+  const unsigned int & _n_splits;
+  /// Number of repeated trials of cross validation to perform.
+  const unsigned int & _cv_n_trials;
+  /// Seed used for _cv_generator.
+  const unsigned int & _cv_seed;
+  /// Random number generator used for shuffling sampler rows during splitting.
+  MooseRandom _cv_generator;
+  /// SurrogateModel used to evaluate model error relative to test points.
+  const SurrogateModel * _cv_surrogate;
+  /// Set to true if cross validation is being performed, controls behavior in execute().
+  const bool _doing_cv;
+  /// Vector of RMSE scores from each CV trial - can be grabbed by VPP or Reporter.
+  std::vector<Real> & _cv_trial_scores;
+  ///@}
 };
 
 template <typename T>
@@ -188,6 +224,11 @@ SurrogateTrainer::getTrainingData(const ReporterName & rname)
   }
   else
   {
+    if (_doing_cv && !(_training_data.empty() && std::is_same<T, Real>::value))
+      paramError("cv_type",
+                 "Cross validation currently only supports sampler data as predictors and a single "
+                 "value for response data, as such 'getTrainingData' should only be called once "
+                 "with Real type.");
     const std::vector<T> & rval = getReporterValueByName<std::vector<T>>(rname);
     _training_data[rname] = std::make_shared<TrainingData<T>>(rval);
     return std::dynamic_pointer_cast<TrainingData<T>>(_training_data[rname])->get();

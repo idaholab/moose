@@ -93,6 +93,14 @@ PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters &
 }
 
 void
+PolynomialRegressionTrainer::preTrain()
+{
+  _matrix.zero();
+  for (unsigned int r = 0; r < _rhs.size(); ++r)
+    _rhs[r].zero();
+}
+
+void
 PolynomialRegressionTrainer::train()
 {
   // Caching the different powers of data to accelerate the assembly of the
@@ -112,19 +120,15 @@ PolynomialRegressionTrainer::train()
 
   for (unsigned int i = 0; i < _n_poly_terms; ++i)
   {
-    std::vector<unsigned int> i_powers(_power_matrix[i]);
-
     Real i_value(1.0);
     for (unsigned int ii = 0; ii < _n_dims; ++ii)
-      i_value *= data_pow(ii, i_powers[ii]);
+      i_value *= data_pow(ii, _power_matrix[i][ii]);
 
     for (unsigned int j = 0; j < _n_poly_terms; ++j)
     {
-      std::vector<unsigned int> j_powers(_power_matrix[j]);
-
       Real j_value(1.0);
       for (unsigned int jj = 0; jj < _n_dims; ++jj)
-        j_value *= data_pow(jj, j_powers[jj]);
+        j_value *= data_pow(jj, _power_matrix[j][jj]);
 
       _matrix(i, j) += i_value * j_value;
     }
