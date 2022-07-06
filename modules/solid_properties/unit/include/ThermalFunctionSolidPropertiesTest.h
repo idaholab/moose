@@ -16,7 +16,10 @@
 class ThermalFunctionSolidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  ThermalFunctionSolidPropertiesTest() : MooseObjectUnitTest("SolidPropertiesApp") { buildObjects(); }
+  ThermalFunctionSolidPropertiesTest() : MooseObjectUnitTest("SolidPropertiesApp")
+  {
+    buildObjects();
+  }
 
 protected:
   void buildObjects()

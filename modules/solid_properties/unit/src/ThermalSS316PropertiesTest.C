@@ -60,4 +60,3 @@ TEST_F(ThermalSS316PropertiesTest, rho)
   REL_TEST(_sp->rho_from_T(T), 7863.415, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_sp->rho_from_T, T, REL_TOL_DERIVATIVE);
 }
-

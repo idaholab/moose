@@ -10,10 +10,8 @@ HeatDiffusion::validParams()
   return params;
 }
 
-
-HeatDiffusion::HeatDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _k(getMaterialProperty<Real>("k_solid"))
+HeatDiffusion::HeatDiffusion(const InputParameters & parameters)
+  : Kernel(parameters), _k(getMaterialProperty<Real>("k_solid"))
 {
 }
 

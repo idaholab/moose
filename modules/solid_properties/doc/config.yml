@@ -4,11 +4,12 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+
 Extensions:
     MooseDocs.extensions.navigation:
-        name: solid_properties
+        name: MOOSE Solid Properties Module
         repo: https://github.com/idaholab/moose
-        home: /modules/solid_properties
+        home: /modules/solid_properties/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/solid_properties
         remove: !include framework/doc/remove.yml

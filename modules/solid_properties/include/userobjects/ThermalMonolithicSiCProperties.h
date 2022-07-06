@@ -21,7 +21,7 @@ public:
 
   ThermalMonolithicSiCProperties(const InputParameters & parameters);
 
-   virtual Real k_from_T(const Real & T) const override;
+  virtual Real k_from_T(const Real & T) const override;
 
   virtual void k_from_T(const Real & T, Real & k, Real & dk_dT) const override;
   virtual void k_from_T(const DualReal & T, DualReal & k, DualReal & dk_dT) const override;

@@ -15,7 +15,10 @@
 class ThermalCompositeSiCPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  ThermalCompositeSiCPropertiesTest() : MooseObjectUnitTest("SolidPropertiesApp") { buildObjects(); }
+  ThermalCompositeSiCPropertiesTest() : MooseObjectUnitTest("SolidPropertiesApp")
+  {
+    buildObjects();
+  }
 
 protected:
   void buildObjects()
