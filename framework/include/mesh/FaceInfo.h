@@ -63,14 +63,6 @@ public:
   /// Returns the unit normal vector for the face oriented outward from the face's elem element.
   const Point & normal() const { return _normal; }
 
-  /// Returns true if this face resides on the mesh boundary.
-  bool isBoundary() const { return (_elem_info->elem()->neighbor_ptr(_elem_side_id) == nullptr); }
-
-  bool facesRemote() const
-  {
-    return (_elem_info->elem()->neighbor_ptr(_elem_side_id) == remote_elem);
-  }
-
   /// Returns the coordinates of the face centroid.
   const Point & faceCentroid() const { return _face_centroid; }
 
@@ -79,10 +71,6 @@ public:
   /// centroids).
   const Point skewnessCorrectionVector() const
   {
-    if (!_neighbor_info)
-      mooseError("The neighbor info does not exist so the double-sided skewness-correction vector "
-                 "cannot be returned!");
-
     Point r_intersection =
         _elem_info->centroid() +
         (((_face_centroid - _elem_info->centroid()) * _normal) / (_e_cn * _normal)) * _e_cn;
@@ -141,26 +129,6 @@ public:
   }
   /// Mutably returns which side(s) the given variable is defined on for this face.
   VarFaceNeighbors & faceType(const std::string & var_name) { return _face_types_by_var[var_name]; }
-
-  bool varDefinedOnElem(const std::string & var_name) const
-  {
-    auto it = _face_types_by_var.find(var_name);
-    if (it == _face_types_by_var.end())
-      mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
-
-    const VarFaceNeighbors & ft = faceType(var_name);
-    return (ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM);
-  }
-
-  bool varDefinedOnNeighbor(const std::string & var_name) const
-  {
-    auto it = _face_types_by_var.find(var_name);
-    if (it == _face_types_by_var.end())
-      mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
-
-    const VarFaceNeighbors & ft = faceType(var_name);
-    return (ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM);
-  }
 
   const std::set<BoundaryID> & boundaryIDs() const { return _boundary_ids; }
 

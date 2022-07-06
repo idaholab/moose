@@ -1326,9 +1326,7 @@ private:
   /// ElemInfo object storing additional information for elements (e.g. volume, centroid)
   mutable std::vector<ElemInfo> _internal_elem_info;
   /// Map storing the ElemInfo-s of the ghost elements
-  mutable std::unordered_map<std::pair<const Elem *, unsigned int>, ElemInfo>
-      _elem_to_ghost_info;
-
+  mutable std::unordered_map<std::pair<const Elem *, unsigned int>, ElemInfo> _elem_to_ghost_info;
   /// Map connecting elems with their corresponding ElemInfo
   mutable std::unordered_map<const Elem *, unsigned int> _elem_to_elem_info;
 
@@ -1345,8 +1343,9 @@ private:
 
   /**
    * Builds the face info vector that stores meta-data needed for looping over and doing
-   * calculations based on mesh faces and elements in a finite-volume setting.
-   * We build face information only upon request and only if the
+   * calculations based on mesh faces and elements in a finite volume setting.
+   * We also build a vector of elem info objects which cache volumes and centroids for elements.
+   * We build finite volume information only upon request and only if the
    * \p _finite_volume_info_dirty flag is false, either because this method has yet to be called or
    * because someone called \p update() indicating the mesh has changed. Face information is only
    * requested by getters that should appear semantically const. Consequently this method must

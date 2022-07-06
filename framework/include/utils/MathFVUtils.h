@@ -461,10 +461,8 @@ interpCoeffs(const Limiter<T> & limiter,
              const bool fi_elem_is_upwind)
 {
   // Using beta, w_f, g nomenclature from Greenshields
-  const auto beta = limiter(phi_upwind,
-                            phi_downwind,
-                            grad_phi_upwind,
-                            fi_elem_is_upwind ? fi.dCN() : Point(-fi.dCN()));
+  const auto beta = limiter(
+      phi_upwind, phi_downwind, grad_phi_upwind, fi_elem_is_upwind ? fi.dCN() : Point(-fi.dCN()));
 
   const auto w_f = fi_elem_is_upwind ? fi.gC() : (1. - fi.gC());
 

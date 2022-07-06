@@ -3195,7 +3195,7 @@ MooseMesh::buildFiniteVolumeInfo() const
   // We use a counter, to speed up this process (the same ordering will be used
   // in the loop below). For users who want to access the ElemInfo based on
   // Elem*, we prepare a map connecting the Elem* and the index in the ElemInfo
-  // vector. 
+  // vector.
   unsigned int counter = 0;
   for (const Elem * elem : as_range(begin, end))
   {
@@ -3241,8 +3241,8 @@ MooseMesh::buildFiniteVolumeInfo() const
         std::set<boundary_id_type> & boundary_ids = fi.boundaryIDs();
         boundary_ids.clear();
 
-        // We initialize the weights/other information in faceInfo. If the neighbor does not exist 
-        // or is remote (so when we are on some sort of mesh boundary), we initiualize the ghost 
+        // We initialize the weights/other information in faceInfo. If the neighbor does not exist
+        // or is remote (so when we are on some sort of mesh boundary), we initiualize the ghost
         // cell and use it to compute the weights corresponding to the faceInfo.
         if (!neighbor || neighbor == remote_elem)
         {
@@ -3259,9 +3259,9 @@ MooseMesh::buildFiniteVolumeInfo() const
 
         if (fi.neighborPtr())
         {
-          auto it = side_map.find(Keytype(fi.neighborPtr(), fi.neighborSideID()));
-          if (it != side_map.end())
-            boundary_ids.insert(it->second.begin(), it->second.end());
+          auto rit = side_map.find(Keytype(fi.neighborPtr(), fi.neighborSideID()));
+          if (rit != side_map.end())
+            boundary_ids.insert(rit->second.begin(), rit->second.end());
         }
       }
     }
