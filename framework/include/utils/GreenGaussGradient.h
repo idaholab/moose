@@ -222,11 +222,6 @@ greenGaussGradient(const ElemArg & elem_arg,
                 "being used");
     const auto grad = greenGaussGradient(elem_arg, functor, false, mesh);
 
-    // We failed to compute the extrapolated boundary faces with two-term expansion and callers of
-    // this method may be relying on those values (e.g. if the caller is
-    // getExtrapolatedBoundaryFaceValue) so we populate them here with one-term expansion, e.g. we
-    // set the boundary face values to the cell centroid value
-
     return grad;
   }
 }

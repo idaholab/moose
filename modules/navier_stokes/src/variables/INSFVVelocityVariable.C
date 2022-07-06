@@ -69,35 +69,33 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 const ADReal &
 INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const
 {
-  if (_two_term_boundary_expansion)
-    if (isFullyDevelopedFlowFace(fi))
-    {
-      const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
-      const Elem * const elem = std::get<0>(tup);
-      const Point vector_to_face = std::get<2>(tup) ? (fi.faceCentroid() - fi.elemCentroid())
-                                                    : (fi.faceCentroid() - fi.neighborCentroid());
+  if (_two_term_boundary_expansion && isFullyDevelopedFlowFace(fi))
+  {
+    const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
+    const Elem * const elem = std::get<0>(tup);
+    const Point vector_to_face = std::get<2>(tup) ? (fi.faceCentroid() - fi.elemCentroid())
+                                                  : (fi.faceCentroid() - fi.neighborCentroid());
 
-      _temp_face_value = uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem);
+    _temp_face_value = uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem);
 
-      return _temp_face_value;
-    }
-
-  return INSFVVariable::getExtrapolatedBoundaryFaceValue(fi);
+    return _temp_face_value;
+  }
+  else
+    return INSFVVariable::getExtrapolatedBoundaryFaceValue(fi);
 }
 
 const VectorValue<ADReal> &
 INSFVVelocityVariable::uncorrectedAdGradSln(const FaceInfo & fi, const bool correct_skewness) const
 {
-  if (_two_term_boundary_expansion)
-    if (isFullyDevelopedFlowFace(fi))
-    {
-      const auto & cell_gradient = adGradSln(&fi.elem(), correct_skewness);
-      const auto normal = fi.normal();
-      _temp_face_unc_gradient = cell_gradient - (cell_gradient * normal) * normal;
-      return _temp_face_unc_gradient;
-    }
-
-  return INSFVVariable::uncorrectedAdGradSln(fi, correct_skewness);
+  if (_two_term_boundary_expansion && isFullyDevelopedFlowFace(fi))
+  {
+    const auto & cell_gradient = adGradSln(&fi.elem(), correct_skewness);
+    const auto normal = fi.normal();
+    _temp_face_unc_gradient = cell_gradient - (cell_gradient * normal) * normal;
+    return _temp_face_unc_gradient;
+  }
+  else
+    return INSFVVariable::uncorrectedAdGradSln(fi, correct_skewness);
 }
 
 const VectorValue<ADReal> &

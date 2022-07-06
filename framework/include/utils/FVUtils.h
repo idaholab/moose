@@ -22,11 +22,12 @@ namespace Moose
 namespace FV
 {
 
-/*
+/**
  * This function infers based on elements if the faceinfo between them
- * belongs to the element or not.
+ * belongs to the element or not. This function should have the same logic as the
+ * one descibed in MooseMesh::buildFaceInfo().
  * @param elem Reference to an element
- * @param neighbor Reference to the neighbor of the element
+ * @param neighbor Pointer to the neighbor of the element
  * @return If the element (first argument) is the owner of the faceinfo between the two elements
  */
 bool elemHasFaceInfo(const Elem & elem, const Elem * const neighbor);
@@ -49,7 +50,8 @@ loopOverElemFaceInfo(const Elem & elem,
 
     std::set<const Elem *> neighbors;
 
-    bool inactive_neighbor_detected = candidate_neighbor ? !candidate_neighbor->active() : false;
+    const bool inactive_neighbor_detected =
+        candidate_neighbor ? !candidate_neighbor->active() : false;
 
     // See MooseMesh::buildFaceInfo for corresponding checks/additions of FaceInfo
     if (inactive_neighbor_detected)
@@ -141,7 +143,7 @@ determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & 
                                         << " does not exist on or only on the neighbor side of the "
                                            "face despite what the FaceInfo is telling us.");
 
-  bool one_is_elem =
+  const bool one_is_elem =
       ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM;
   const Elem * const elem_one = one_is_elem ? &fi.elem() : fi.neighborPtr();
   mooseAssert(elem_one, "This elem should be non-null!");
