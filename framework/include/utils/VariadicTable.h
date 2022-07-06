@@ -166,25 +166,16 @@ public:
   }
 
 protected:
-  // Just some handy typedefs for the following two functions
-  typedef decltype(&std::right) right_type;
-  typedef decltype(&std::left) left_type;
-
   // Attempts to figure out the correct justification for the data
-  // If it's a floating point value
-  template <typename T,
-            typename = typename std::enable_if<
-                std::is_arithmetic<typename std::remove_reference<T>::type>::value>::type>
-  static right_type justify(int /*firstchoice*/)
-  {
-    return std::right;
-  }
-
-  // Otherwise
   template <typename T>
-  static left_type justify(long /*secondchoice*/)
+  static auto justify(int /*firstchoice*/)
   {
-    return std::left;
+    if constexpr (std::is_arithmetic<typename std::remove_reference<T>::type>::value)
+      // If it's a floating point value
+      return std::right;
+    else
+      // Otherwise
+      return std::left;
   }
 
   /**
@@ -198,25 +189,9 @@ protected:
    */
 
   /**
-   *  This ends the recursion
-   */
-  template <typename TupleType, typename StreamType>
-  void print_each(TupleType &&,
-                  StreamType & /*stream*/,
-                  std::integral_constant<
-                      size_t,
-                      std::tuple_size<typename std::remove_reference<TupleType>::type>::value>)
-  {
-  }
-
-  /**
    * This gets called on each item
    */
-  template <std::size_t I,
-            typename TupleType,
-            typename StreamType,
-            typename = typename std::enable_if<
-                I != std::tuple_size<typename std::remove_reference<TupleType>::type>::value>::type>
+  template <std::size_t I, typename TupleType, typename StreamType>
   void print_each(TupleType && t, StreamType & stream, std::integral_constant<size_t, I>)
   {
     auto & val = std::get<I>(t);
@@ -260,8 +235,9 @@ protected:
     if (!_precision.empty())
       stream.precision(original_precision);
 
-    // Recursive call to print the next item
-    print_each(std::forward<TupleType>(t), stream, std::integral_constant<size_t, I + 1>());
+    // Recursive call to print the next item (if there are any left)
+    if constexpr (I + 1 != std::tuple_size<typename std::remove_reference<TupleType>::type>::value)
+      print_each(std::forward<TupleType>(t), stream, std::integral_constant<size_t, I + 1>());
   }
 
   /**

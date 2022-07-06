@@ -34,15 +34,13 @@ public:
    * Retrieve the property through a given input parameter key with a fallback
    * to getting it by name
    */
-  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
-  const ADMaterialProperty<T> & getGenericMaterialProperty(const std::string & name)
+  template <typename T, bool is_ad>
+  const auto & getGenericMaterialProperty(const std::string & name)
   {
-    return getADMaterialProperty<T>(name);
-  }
-  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
-  const MaterialProperty<T> & getGenericMaterialProperty(const std::string & name)
-  {
-    return getMaterialProperty<T>(name);
+    if constexpr (is_ad)
+      return getADMaterialProperty<T>(name);
+    else
+      return getMaterialProperty<T>(name);
   }
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);

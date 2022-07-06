@@ -49,15 +49,13 @@ public:
   /**
    * Retrieve the face material property whether AD or not
    */
-  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
-  const ADMaterialProperty<T> & getGenericFaceMaterialProperty(const std::string & name)
+  template <typename T, bool is_ad>
+  const auto & getGenericFaceMaterialProperty(const std::string & name)
   {
-    return getFaceADMaterialProperty<T>(name);
-  }
-  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
-  const MaterialProperty<T> & getGenericFaceMaterialProperty(const std::string & name)
-  {
-    return getFaceMaterialProperty<T>(name);
+    if constexpr (is_ad)
+      return getFaceADMaterialProperty<T>(name);
+    else
+      return getFaceMaterialProperty<T>(name);
   }
 
 protected:

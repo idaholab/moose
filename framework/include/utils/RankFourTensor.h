@@ -254,15 +254,6 @@ public:
    * This returns A_ijkl such that C_ijkl*A_klmn = de_im de_jn
    * i.e. the general rank four inverse
    */
-  template <typename T2 = T,
-            typename std::enable_if<(RankFourTensorTempl<T2>::N4 * sizeof(T2) >
-                                     EIGEN_STACK_ALLOCATION_LIMIT),
-                                    int>::type = 0>
-  RankFourTensorTempl<T> inverse() const;
-  template <typename T2 = T,
-            typename std::enable_if<(RankFourTensorTempl<T2>::N4 * sizeof(T2) <=
-                                     EIGEN_STACK_ALLOCATION_LIMIT),
-                                    int>::type = 0>
   RankFourTensorTempl<T> inverse() const;
 
   /**
@@ -704,14 +695,9 @@ RankFourTensorTempl<T>::fillSymmetric21FromInputVector(const T2 & input)
 }
 
 template <typename T>
-template <typename T2,
-          typename std::enable_if<(RankFourTensorTempl<T2>::N4 * sizeof(T2) >
-                                   EIGEN_STACK_ALLOCATION_LIMIT),
-                                  int>::type>
 RankFourTensorTempl<T>
 RankFourTensorTempl<T>::inverse() const
 {
-  // Allocate on the heap if you're going to exceed the stack size limit
 
   // The inverse of a 3x3x3x3 in the C_ijkl*A_klmn = de_im de_jn sense is
   // simply the inverse of the 9x9 matrix of the tensor entries.
@@ -719,37 +705,26 @@ RankFourTensorTempl<T>::inverse() const
   // storage)
 
   RankFourTensorTempl<T> result;
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> mat(9, 9);
-  for (auto i : make_range(9 * 9))
-    mat(i) = _vals[i];
 
-  mat = mat.inverse();
+  if constexpr (RankFourTensorTempl<T>::N4 * sizeof(T) > EIGEN_STACK_ALLOCATION_LIMIT)
+  {
+    // Allocate on the heap if you're going to exceed the stack size limit
+    Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> mat(9, 9);
+    for (auto i : make_range(9 * 9))
+      mat(i) = _vals[i];
 
-  for (auto i : make_range(9 * 9))
-    result._vals[i] = mat(i);
+    mat = mat.inverse();
 
-  return result;
-}
-
-template <typename T>
-template <typename T2,
-          typename std::enable_if<(RankFourTensorTempl<T2>::N4 * sizeof(T2) <=
-                                   EIGEN_STACK_ALLOCATION_LIMIT),
-                                  int>::type>
-RankFourTensorTempl<T>
-RankFourTensorTempl<T>::inverse() const
-{
-  // Allocate on the stack if small enough
-
-  // The inverse of a 3x3x3x3 in the C_ijkl*A_klmn = de_im de_jn sense is
-  // simply the inverse of the 9x9 matrix of the tensor entries.
-  // So all we need to do is inverse _vals (with the appropriate row-major
-  // storage)
-
-  RankFourTensorTempl<T> result;
-  const Eigen::Map<const Eigen::Matrix<T, 9, 9, Eigen::RowMajor>> mat(&_vals[0]);
-  Eigen::Map<Eigen::Matrix<T, 9, 9, Eigen::RowMajor>> res(&result._vals[0]);
-  res = mat.inverse();
+    for (auto i : make_range(9 * 9))
+      result._vals[i] = mat(i);
+  }
+  else
+  {
+    // Allocate on the stack if small enough
+    const Eigen::Map<const Eigen::Matrix<T, 9, 9, Eigen::RowMajor>> mat(&_vals[0]);
+    Eigen::Map<Eigen::Matrix<T, 9, 9, Eigen::RowMajor>> res(&result._vals[0]);
+    res = mat.inverse();
+  }
 
   return result;
 }
