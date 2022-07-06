@@ -32,11 +32,11 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
 
   // Compute the face-normals
   unsigned int dim = _elem_info->elem()->dim();
-  Point vector_to_face = _face_centroid - _elem_info->centroid();
+  const auto r_cf = _face_centroid - _elem_info->centroid();
 
   // For 1D elements, this is simple
   if (dim == 1)
-    _normal = vector_to_face / vector_to_face.norm();
+    _normal = r_cf / r_cf.norm();
   // For 2D elements, this is equally simple, we just need to make sure that
   // the normal points in the right direction.
   else if (dim == 2)
@@ -44,7 +44,7 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
     Point side = face->node_ref(0) - face->node_ref(1);
     _normal = Point(-side(1), side(0));
     _normal /= _normal.norm();
-    if (_normal * vector_to_face < 0.0)
+    if (_normal * r_cf < 0.0)
       _normal *= -1.0;
   }
   // In 3D we need to use the vector product
@@ -54,11 +54,9 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
     Point side_2 = face->node_ref(0) - face->node_ref(2);
     _normal = side_1.cross(side_2);
     _normal /= _normal.norm();
-    if (_normal * _r_cf < 0.0)
+    if (_normal * r_cf < 0.0)
       _normal *= -1.0;
   }
-  _r_cf_mag = vector_to_face * _normal;
-  _r_cf = _r_cf_mag * _normal;
 }
 
 void
@@ -67,15 +65,16 @@ FaceInfo::computeCoefficients(const ElemInfo * const neighbor_info)
   mooseAssert(neighbor_info,
               "We need a neighbor if we want to compute interpolation coefficients!");
   _neighbor_info = neighbor_info;
-  _neighbor_side_id = _neighbor_info->elem()->which_neighbor_am_i(_elem_info->elem());
+
+  if (_neighbor_info->isGhost())
+    _neighbor_side_id = std::numeric_limits<unsigned int>::max();
+  else
+    _neighbor_side_id = _neighbor_info->elem()->which_neighbor_am_i(_elem_info->elem());
 
   // Setup quantities used for the approximation of the spatial derivatives
   _d_cn = _neighbor_info->centroid() - _elem_info->centroid();
   _d_cn_mag = _d_cn.norm();
   _e_cn = _d_cn / _d_cn_mag;
-
-  _r_nf_mag = -(_face_centroid - _neighbor_info->centroid()) * _normal;
-  _r_nf = -_r_nf_mag * _normal;
 
   Point r_intersection =
       _elem_info->centroid() +

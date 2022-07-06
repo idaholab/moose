@@ -45,7 +45,7 @@ gradUDotNormal(const T &
 #else
 
   // Orthogonal contribution
-  auto orthogonal = (neighbor_value - elem_value) / face_info.dCFMag();
+  auto orthogonal = (neighbor_value - elem_value) / face_info.dCNMag();
 
   return orthogonal; // TO-DO for local indexing: add non-orthogonal contribution
 #endif

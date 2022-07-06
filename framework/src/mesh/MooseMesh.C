@@ -3183,6 +3183,7 @@ MooseMesh::buildFiniteVolumeInfo() const
 
   _elem_to_elem_info.clear();
   _internal_elem_info.clear();
+  _elem_to_ghost_info.clear();
 
   // by performing the element ID comparison check in the below loop, we are ensuring that we never
   // double count face contributions. If a face lies along a process boundary, the only process that
@@ -3192,14 +3193,23 @@ MooseMesh::buildFiniteVolumeInfo() const
   auto end = getMesh().active_elements_end();
 
   // We use a counter, to speed up this process (the same ordering will be used
-  // in the loop below) For users who want to access the ElemInfo based on
+  // in the loop below). For users who want to access the ElemInfo based on
   // Elem*, we prepare a map connecting the Elem* and the index in the ElemInfo
-  // vector
+  // vector. 
   unsigned int counter = 0;
   for (const Elem * elem : as_range(begin, end))
   {
+    // We fill the vector with the real ElemInfo-s and the corresponding map first
     _internal_elem_info.emplace_back(elem);
     _elem_to_elem_info.emplace(elem, counter++);
+
+    // Then we fill a map with the ElemInfo shells for the ghost elements
+    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    {
+      const Elem * neighbor = elem->neighbor_ptr(side);
+      if (!neighbor || neighbor == remote_elem)
+        _elem_to_ghost_info.try_emplace(std::make_pair(elem, side));
+    }
   }
 
   // Restart the counter to be able to access the ElemInfo-s directly
@@ -3231,10 +3241,16 @@ MooseMesh::buildFiniteVolumeInfo() const
         std::set<boundary_id_type> & boundary_ids = fi.boundaryIDs();
         boundary_ids.clear();
 
-        // We initialize the weights/other information in faceInfo. We need these
-        // for the computation of spatial differential operators in a finite volume
-        // setting
-        if (neighbor)
+        // We initialize the weights/other information in faceInfo. If the neighbor does not exist 
+        // or is remote (so when we are on some sort of mesh boundary), we initiualize the ghost 
+        // cell and use it to compute the weights corresponding to the faceInfo.
+        if (!neighbor || neighbor == remote_elem)
+        {
+          auto & ghost_cell = _elem_to_ghost_info[std::make_pair(elem, side)];
+          ghost_cell.initialize(_internal_elem_info[counter], fi);
+          fi.computeCoefficients(&ghost_cell);
+        }
+        else
           fi.computeCoefficients(&_internal_elem_info[_elem_to_elem_info.find(neighbor)->second]);
 
         auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));

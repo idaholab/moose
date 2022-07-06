@@ -179,9 +179,9 @@ private:
       const auto linear_interp_gradient =
           fi.gC() * elem_gradient + (1 - fi.gC()) * this->gradient(neighbor_arg);
       return linear_interp_gradient +
-             Moose::outer_product(((*this)(neighbor_arg) - (*this)(elem_arg)) / fi.dCFMag() -
-                                      linear_interp_gradient * fi.eCF(),
-                                  fi.eCF());
+             Moose::outer_product(((*this)(neighbor_arg) - (*this)(elem_arg)) / fi.dCNMag() -
+                                      linear_interp_gradient * fi.eCN(),
+                                  fi.eCN());
     }
 
     // One term expansion

@@ -1139,7 +1139,7 @@ public:
   void setCoordData(const MooseMesh & other_mesh);
 
   /**
-   * Mark the face information as dirty
+   * Mark the finite volume information as dirty
    */
   void finiteVolumeInfoDirty() { _finite_volume_info_dirty = true; }
 
@@ -1325,6 +1325,9 @@ private:
 
   /// ElemInfo object storing additional information for elements (e.g. volume, centroid)
   mutable std::vector<ElemInfo> _internal_elem_info;
+  /// Map storing the ElemInfo-s of the ghost elements
+  mutable std::unordered_map<std::pair<const Elem *, unsigned int>, ElemInfo>
+      _elem_to_ghost_info;
 
   /// Map connecting elems with their corresponding ElemInfo
   mutable std::unordered_map<const Elem *, unsigned int> _elem_to_elem_info;
@@ -1336,9 +1339,6 @@ private:
   /// Map from elem-side pair to FaceInfo
   mutable std::unordered_map<std::pair<const Elem *, unsigned int>, FaceInfo *>
       _elem_side_to_face_info;
-
-  mutable std::unordered_map<Elem *, Real> _elem_volumes;
-  mutable std::unordered_map<Elem *, Point> _elem_centroids;
 
   // true if the _face_info member needs to be rebuilt/updated.
   mutable bool _finite_volume_info_dirty = true;
