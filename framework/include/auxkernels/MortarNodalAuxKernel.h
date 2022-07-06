@@ -46,6 +46,7 @@ protected:
   using AuxKernelTempl<ComputeValueType>::_var;
   using AuxKernelTempl<ComputeValueType>::computeValue;
   using AuxKernelTempl<ComputeValueType>::uOld;
+
   /// Whether we're computing on the displaced mesh
   const bool _displaced;
 

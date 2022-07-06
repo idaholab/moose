@@ -48,7 +48,9 @@ MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     MortarExecutorInterface(
         *this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     MortarConsumerInterface(this),
-    _displaced(this->template getParam<bool>("use_displaced_mesh")),
+    _displaced(parameters.isParamSetByUser("use_displaced_mesh")
+                   ? this->template getParam<bool>("use_displaced_mesh")
+                   : true),
     _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _msm_volume(0),
     _incremental(this->template getParam<bool>("incremental")),
