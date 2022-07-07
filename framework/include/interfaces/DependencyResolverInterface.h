@@ -17,6 +17,7 @@
 
 // MOOSE includes
 #include "DependencyResolver.h"
+#include "MooseUtils.h"
 
 /**
  * Interface for sorting dependent vectors of objects.
@@ -120,10 +121,10 @@ DependencyResolverInterface::cyclicDependencyError(CyclicDependencyException<T2>
   std::ostringstream oss;
 
   oss << header << ":\n";
-  const auto & adjacency_lists = e.getCyclicDependencies();
-  for (const auto & [object, object_adjacencies] : adjacency_lists)
-    for (const auto & adjacent_object : object_adjacencies)
-      oss << static_cast<T>(object)->name() << " -> " << static_cast<T>(adjacent_object)->name()
-          << "\n";
+  const auto cycle = e.getCyclicDependencies();
+  std::vector<std::string> names(cycle.size());
+  for (const auto i : index_range(cycle))
+    names[i] = static_cast<T>(cycle[i])->name();
+  oss << MooseUtils::join(names, " <- ");
   mooseError(oss.str());
 }

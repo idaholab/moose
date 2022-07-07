@@ -1,4 +1,4 @@
 - [Debugging Jacobian entries](development/analyze_jacobian.md)
-- [Setup Atom Editor for MOOSE](development/Atom_Editor.md)
+- [Setup VScode for MOOSE](development/VSCode.md)
 - [Setup Jupyter python notebooks](development/jupyter.md)
 - [Reducing compile times with ccache](development/ccache.md)
