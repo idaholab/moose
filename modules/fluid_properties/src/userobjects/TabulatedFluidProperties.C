@@ -907,7 +907,7 @@ TabulatedFluidProperties::T_from_v_e(const DualReal & v, const DualReal & e) con
 Real
 TabulatedFluidProperties::c_from_v_e(Real v, Real e) const
 {
-  if (_construct_pT_from_ve)
+  if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling c_from_v_e.");
   Real p = _p_from_v_e_ipol->sample(v, e);
   Real T = _T_from_v_e_ipol->sample(v, e);
@@ -947,7 +947,7 @@ TabulatedFluidProperties::c_from_v_e(const DualReal & v, const DualReal & e) con
 Real
 TabulatedFluidProperties::cp_from_v_e(Real v, Real e) const
 {
-  if (_construct_pT_from_ve)
+  if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling cp_from_v_e.");
   Real p = _p_from_v_e_ipol->sample(v, e);
   Real T = _T_from_v_e_ipol->sample(v, e);
@@ -972,7 +972,7 @@ TabulatedFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, 
 Real
 TabulatedFluidProperties::cv_from_v_e(Real v, Real e) const
 {
-  if (_construct_pT_from_ve)
+  if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling cv_from_v_e.");
   Real p = _p_from_v_e_ipol->sample(v, e);
   Real T = _T_from_v_e_ipol->sample(v, e);
@@ -997,7 +997,7 @@ TabulatedFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, 
 Real
 TabulatedFluidProperties::mu_from_v_e(Real v, Real e) const
 {
-  if (_construct_pT_from_ve)
+  if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling mu_from_v_e.");
   Real p = _p_from_v_e_ipol->sample(v, e);
   Real T = _T_from_v_e_ipol->sample(v, e);
@@ -1023,7 +1023,7 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, 
 Real
 TabulatedFluidProperties::k_from_v_e(Real v, Real e) const
 {
-  if (_construct_pT_from_ve)
+  if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling k_from_v_e.");
   Real T = _T_from_v_e_ipol->sample(v, e);
   Real p = _p_from_v_e_ipol->sample(v, e);

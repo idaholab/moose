@@ -58,7 +58,7 @@ and so on.
 
 Alternatively, from the input internal energy and volume TFP can determine various parameters (p,T,g,c,cp,cv,k, and mu from (v,e)).
 
-We convert to (v,e) by creating v, e, and h grids. The grids are created by filling points using volume[j]=_v_min + j * dv for specific volume and
+We convert to (v,e) by creating (v,e) and (v,h) grids. The grids are created by filling points using volume[j]=_v_min + j * dv for specific volume and
 energy[j]=_e_min + j * de for j=0 to number of points.
 These grids are then filled and (p,T) data are matched to the grid points. The h and e grids use the same number of grid points.
 

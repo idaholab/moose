@@ -221,19 +221,6 @@ protected:
   virtual void checkInitialGuess() const;
 
   /**
-   * Checks initial guess for Newton Method
-   */
-  virtual void checkInitialGuess() const;
-
-  /**
-   * Checks accuracy of interpolation compared to fp
-   */
-  virtual void checkInterpolationAccuracy(Real tabulated_result,
-                                          Real fp_result,
-                                          Real difference,
-                                          Real accuracy_tolerance);
-
-  /**
    * Generates a table of fluid properties by looping over pressure and temperature
    * and calculating properties using the FluidProperties UserObject _fp.
    */
