@@ -66,9 +66,10 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
-const ADReal &
+ADReal
 INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const
 {
+  ADReal boundary_value;
   if (_two_term_boundary_expansion && isFullyDevelopedFlowFace(fi))
   {
     const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
@@ -76,26 +77,28 @@ INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) con
     const Point vector_to_face = std::get<2>(tup) ? (fi.faceCentroid() - fi.elemCentroid())
                                                   : (fi.faceCentroid() - fi.neighborCentroid());
 
-    _temp_face_value = uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem);
-
-    return _temp_face_value;
+    boundary_value = uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem);
   }
   else
-    return INSFVVariable::getExtrapolatedBoundaryFaceValue(fi);
+    boundary_value = INSFVVariable::getExtrapolatedBoundaryFaceValue(fi);
+
+  return boundary_value;
 }
 
-const VectorValue<ADReal> &
+VectorValue<ADReal>
 INSFVVelocityVariable::uncorrectedAdGradSln(const FaceInfo & fi, const bool correct_skewness) const
 {
+  VectorValue<ADReal> unc_grad;
   if (_two_term_boundary_expansion && isFullyDevelopedFlowFace(fi))
   {
     const auto & cell_gradient = adGradSln(&fi.elem(), correct_skewness);
-    const auto normal = fi.normal();
-    _temp_face_unc_gradient = cell_gradient - (cell_gradient * normal) * normal;
-    return _temp_face_unc_gradient;
+    const auto & normal = fi.normal();
+    unc_grad = cell_gradient - (cell_gradient * normal) * normal;
   }
   else
-    return INSFVVariable::uncorrectedAdGradSln(fi, correct_skewness);
+    unc_grad = INSFVVariable::uncorrectedAdGradSln(fi, correct_skewness);
+
+  return unc_grad;
 }
 
 const VectorValue<ADReal> &
@@ -133,25 +136,29 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
     // gradient, so we have a system of equations to solve. Here is the system:
     //
     // \nabla \phi_C - \frac{1}{V} \sum_{ebf} \phi_{ebf} \vec{S_f} =
-    //   \frac{1}{V} \sum_{of} \phi_{of} \vec{S_f}                                            eqn. 1
+    //   \frac{1}{V} \sum_{of} \phi_{of} \vec{S_f}                                            eqn.
+    //   1
     //
-    // \phi_{ebf} - \vec{d_{Cf}} \cdot \nabla \phi_C = \phi_C                                 eqn. 2
+    // \phi_{ebf} - \vec{d_{Cf}} \cdot \nabla \phi_C = \phi_C                                 eqn.
+    // 2
     //
     // where $C$ refers to the cell centroid, $ebf$ refers to an extrapolated boundary face, $of$
     // refers to "other faces", e.g. non-ebf faces, and $f$ is a general face. $d_{Cf}$ is the
     // vector drawn from the element centroid to the face centroid, and $\vec{S_f}$ is the surface
     // vector, e.g. the face area times the outward facing normal
     //
-    // NOTE: On fully developed flow boundaries, we modify our equation set slightly. In equation 2,
-    // $\nabla \phi_C$ is replaced with $\nabla \phi_{ebf,fdf}$ where $fdf$ denotes fully developed
-    // flow. Moreover, we introduce a third equation:
+    // NOTE: On fully developed flow boundaries, we modify our equation set slightly. In equation
+    // 2,
+    // $\nabla \phi_C$ is replaced with $\nabla \phi_{ebf,fdf}$ where $fdf$ denotes fully
+    // developed flow. Moreover, we introduce a third equation:
     //
-    // \nabla \phi_{ebf,fdf} - \nabla \phi_C + (\nabla \phi_C \cdot \hat{n}) \hat{n} = 0      eqn. 3
+    // \nabla \phi_{ebf,fdf} - \nabla \phi_C + (\nabla \phi_C \cdot \hat{n}) \hat{n} = 0      eqn.
+    // 3
     //
     // These modifications correspond to Moukalled's equations 15.140 and 15.141, but with
     // $\hat{e_b}$ replaced with $\hat{n}$ because we believe the equation as written doesn't
-    // reflect the intent of the text, which is to guarantee a zero normal gradient in the direction
-    // of the surface normal
+    // reflect the intent of the text, which is to guarantee a zero normal gradient in the
+    // direction of the surface normal
 
     // ebf eqns: element gradient coefficients, e.g. eqn. 2, LHS term 2 coefficient. *Note* that
     // each element of the std::vector could correspond to a cell centroid gradient or to a face
@@ -166,8 +173,8 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
     // elem grad eqns: rhs b value, e.g. eqn. 1 RHS
     VectorValue<ADReal> grad_b = 0;
 
-    // eqn. 3 coefficients for cell centroid gradient, e.g. the coefficients that fall out of term 2
-    // on the LHS of eqn. 3
+    // eqn. 3 coefficients for cell centroid gradient, e.g. the coefficients that fall out of term
+    // 2 on the LHS of eqn. 3
     std::vector<TensorValue<Real>> fdf_grad_centroid_coeffs;
 
     const unsigned int lm_dim = LIBMESH_DIM;
@@ -380,8 +387,8 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
     const_cast<INSFVVelocityVariable *>(this)->_two_term_boundary_expansion = false;
     const auto & grad = adGradSln(elem, correct_skewness);
 
-    // Two term boundary expansion should only fail at domain corners. We want to keep trying it at
-    // other boundary locations
+    // Two term boundary expansion should only fail at domain corners. We want to keep trying it
+    // at other boundary locations
     const_cast<INSFVVelocityVariable *>(this)->_two_term_boundary_expansion = true;
     return grad;
   }

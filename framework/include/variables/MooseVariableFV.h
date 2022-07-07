@@ -296,8 +296,8 @@ public:
    * gradients does
    * @param face The face for which to retrieve the gradient.
    */
-  virtual const VectorValue<ADReal> & adGradSln(const FaceInfo & fi,
-                                                const bool correct_skewness = false) const;
+  virtual VectorValue<ADReal> adGradSln(const FaceInfo & fi,
+                                        const bool correct_skewness = false) const;
 
   /**
    * Retrieve (or potentially compute) the uncorrected gradient on the provided face. This
@@ -308,8 +308,8 @@ public:
    * is done in \p adGradSln(const FaceInfo & fi)
    * @param face The face for which to retrieve the gradient
    */
-  virtual const VectorValue<ADReal> &
-  uncorrectedAdGradSln(const FaceInfo & fi, const bool correct_skewness = false) const;
+  virtual VectorValue<ADReal> uncorrectedAdGradSln(const FaceInfo & fi,
+                                                   const bool correct_skewness = false) const;
 
   /**
    * Retrieve the solution value at a boundary face. If we're using a one term Taylor series
@@ -317,7 +317,7 @@ public:
    * then we will compute the gradient if necessary to help us interpolate from the element centroid
    * value to the face
    */
-  const ADReal & getBoundaryFaceValue(const FaceInfo & fi) const;
+  ADReal getBoundaryFaceValue(const FaceInfo & fi) const;
 
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
   {
@@ -480,8 +480,7 @@ public:
    * @param fi The face information object
    * @return The face value on the internal face associated with \p fi
    */
-  const ADReal & getInternalFaceValue(const FaceInfo & fi,
-                                      const bool correct_skewness = false) const;
+  ADReal getInternalFaceValue(const FaceInfo & fi, const bool correct_skewness = false) const;
 
   using FunctorArg = typename Moose::ADType<OutputType>::type;
   using typename Moose::FunctorBase<FunctorArg>::ValueType;
@@ -509,7 +508,7 @@ protected:
   /**
    * @return the Dirichlet value on the boundary face associated with \p fi
    */
-  virtual const ADReal & getDirichletBoundaryFaceValue(const FaceInfo & fi) const;
+  virtual ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi) const;
 
   /**
    * Returns whether this is an extrapolated boundary face. An extrapolated boundary face is
@@ -521,7 +520,7 @@ protected:
   /**
    * @return the extrapolated value on the boundary face associated with \p fi
    */
-  virtual const ADReal & getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const;
+  virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const;
 
 private:
   using MooseVariableField<OutputType>::evaluate;
@@ -646,15 +645,6 @@ protected:
   /// A member to hold the cell gradient when not caching, used to return a reference (due to
   /// expensive ADReal copy)
   mutable VectorValue<ADReal> _temp_cell_gradient;
-
-  /// A member to hold the uncorrected face gradient when not caching, used to return a reference
-  mutable VectorValue<ADReal> _temp_face_unc_gradient;
-
-  /// A member to hold the face gradient when not caching, used to return a reference
-  mutable VectorValue<ADReal> _temp_face_gradient;
-
-  /// A member to hold the face value when not caching, used to return a reference
-  mutable ADReal _temp_face_value;
 
   /// Whether to cache cell gradients
   const bool _cache_cell_gradients;
