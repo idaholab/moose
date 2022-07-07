@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os, sys
+import json
 import inspect
 
 class Factory:
@@ -109,3 +110,35 @@ class Factory:
                 print("        " + params.getDescription(key))
 
         print("**END YAML DATA**")
+
+    def printJSON(self, root_node_name):
+        print("**START JSON DATA**")
+
+        syntax = {
+            'blocks': {
+                root_node_name: {
+                    'star': {
+                        'subblock_types' : { name : {
+                            'name': name,
+                            'parameters': { key: {
+                                'name': key,
+                                'required': self.validParams(name).isRequired(key),
+                                'default': self.validParams(name).valid[key] if self.validParams(name).isValid(key) else '',
+                                'type': self.validParams(name).basicType(key),
+                                'description': self.validParams(name).getDescription(key)
+                            } for key, value in self.validParams(name).desc.items() }
+                        } for name, object in self.objects.items() }
+                    }
+                }
+            },
+            'global': {
+                'associated_types' : {
+                    "TestName": [ "Tests/*" ]
+                },
+                'parameters': [],
+                'registered_apps': []
+            }
+        }
+        print(json.dumps(syntax, sort_keys=True, indent=4))
+
+        print("**END JSON DATA**")
