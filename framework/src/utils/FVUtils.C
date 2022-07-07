@@ -18,6 +18,10 @@ namespace FV
 bool
 elemHasFaceInfo(const Elem & elem, const Elem * const neighbor)
 {
+  // The face info belongs to elem:
+  //  * at all mesh boundaries (i.e. where there is no neighbor)
+  //  * if the element faces a neighbor which is on a lower refinement level
+  //  * if the element is active and it has a lower ID than its neighbor
   if (!neighbor)
     return true;
   else if (elem.level() != neighbor->level())

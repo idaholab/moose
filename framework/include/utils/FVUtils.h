@@ -24,8 +24,7 @@ namespace FV
 
 /**
  * This function infers based on elements if the faceinfo between them
- * belongs to the element or not. This function should have the same logic as the
- * one descibed in MooseMesh::buildFaceInfo().
+ * belongs to the element or not.
  * @param elem Reference to an element
  * @param neighbor Pointer to the neighbor of the element
  * @return If the element (first argument) is the owner of the faceinfo between the two elements

@@ -735,7 +735,7 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
 #endif
 
   // Use a pointer to choose the right reference
-  auto unc_grad = uncorrectedAdGradSln(fi, correct_skewness);
+  auto face_grad = uncorrectedAdGradSln(fi, correct_skewness);
 
   auto tup = Moose::FV::determineElemOneAndTwo(fi, *this);
   const Elem * const elem_one = std::get<0>(tup);
@@ -753,9 +753,9 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   // perform the correction. Note that direction is important here because we have a minus sign.
   // Neighbor has to be neighbor, and elem has to be elem. Hence all the elem_is_elem_one logic
   // above
-  unc_grad += ((neighbor_value - elem_value) / fi.dCFMag() - unc_grad * fi.eCF()) * fi.eCF();
+  face_grad += ((neighbor_value - elem_value) / fi.dCFMag() - face_grad * fi.eCF()) * fi.eCF();
 
-  return unc_grad;
+  return face_grad;
 }
 
 template <typename OutputType>
