@@ -13,11 +13,12 @@
 #include "Function.h"
 
 /**
- * Fluid properties provided as multipul-variable functions of temperature, pressure that are parameterized
- * in time, where $t$ is used to indicate temperature and &p& is used to indicate pressure.
- * This source is made so it is allowed to take in both specific volume, internal energy formulations
- * and temperature, pressure formulations. The Density, Viscosity and thermal conductivity time derivative
- * are found by taking the gradient by using pressure and temperature as inputs.
+ * Fluid properties provided as multipul-variable functions of temperature, pressure that are
+ * parameterized in time, where $t$ is used to indicate temperature and &p& is used to indicate
+ * pressure. This source is made so it is allowed to take in both specific volume, internal energy
+ * formulations and temperature, pressure formulations. The Density, Viscosity and thermal
+ * conductivity time derivative are found by taking the gradient by using pressure and temperature
+ * as inputs.
  *
  */
 class TemperaturePressureFunctionFluidProperties : public SinglePhaseFluidProperties
@@ -44,30 +45,30 @@ public:
   virtual Real T_from_v_e(Real v, Real e) const override;
 
   /**
-  * Pressure from pressure and specific enthalpy
-  *
-  * @param[in] p          pressure (Pa)
-  * @param[out] h       specific enthalpy (J/kg)
-  * @return temperature (Pa)
-  */
+   * Pressure from pressure and specific enthalpy
+   *
+   * @param[in] p          pressure (Pa)
+   * @param[out] h       specific enthalpy (J/kg)
+   * @return temperature (Pa)
+   */
   virtual Real T_from_p_h(Real p, Real h) const override;
 
   /**
-  * Pressure from pressure and specific enthalpy
-  *
-  * @param[in] p          pressure (Pa)
-  * @param[out] rho       density (kg/m$^3$)
-  * @return temperature (Pa)
-  */
+   * Pressure from pressure and specific enthalpy
+   *
+   * @param[in] p          pressure (Pa)
+   * @param[out] rho       density (kg/m$^3$)
+   * @return temperature (Pa)
+   */
   virtual Real T_from_p_rho(Real p, Real rho) const;
 
   /**
-  * Pressure from specific volume and specific internal energy
-  *
-  * @param[in] v   specific volume (m$^3$/kg)
-  * @param[in] e   specific internal energy (J/kg)
-  * @return pressure (Pa)
-  */
+   * Pressure from specific volume and specific internal energy
+   *
+   * @param[in] v   specific volume (m$^3$/kg)
+   * @param[in] e   specific internal energy (J/kg)
+   * @return pressure (Pa)
+   */
   virtual Real p_from_v_e(Real v, Real e) const override;
 
   /**
@@ -124,8 +125,13 @@ public:
    * @param[out] drho_dp   derivative of density w.r.t. pressure
    * @param[out] drho_dT   derivative of density w.r.t. temperature
    */
-  virtual void rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
-  virtual void rho_from_p_T(const DualReal & pressure, const DualReal & temperature, DualReal & rho, DualReal & drho_dp, DualReal & drho_dT) const override;
+  virtual void
+  rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
+  virtual void rho_from_p_T(const DualReal & pressure,
+                            const DualReal & temperature,
+                            DualReal & rho,
+                            DualReal & drho_dp,
+                            DualReal & drho_dT) const override;
 
   /**
    * Specific volume from pressure and temperature
@@ -278,28 +284,28 @@ public:
    * @param[out] dmu_dp   derivative of viscosity wrt pressure
    * @param[out] dmu_dT   derivative of viscosity wrt temperature
    */
-  virtual void mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
+  virtual void
+  mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
 
   // This is done to avoid hiding the AD implementations from the template
   // with the regular implementations defined here
-  using SinglePhaseFluidProperties::e_from_p_T;
   using SinglePhaseFluidProperties::beta_from_p_T;
-  using SinglePhaseFluidProperties::h_from_p_T;
-  using SinglePhaseFluidProperties::rho_from_p_T;
-  using SinglePhaseFluidProperties::k_from_p_T;
-  using SinglePhaseFluidProperties::mu_from_p_T;
-  using SinglePhaseFluidProperties::cv_from_p_T;
   using SinglePhaseFluidProperties::cp_from_p_T;
-  using SinglePhaseFluidProperties::v_from_p_T;
-  using SinglePhaseFluidProperties::k_from_v_e;
-  using SinglePhaseFluidProperties::mu_from_v_e;
-  using SinglePhaseFluidProperties::cv_from_v_e;
   using SinglePhaseFluidProperties::cp_from_v_e;
-  using SinglePhaseFluidProperties::T_from_v_e;
+  using SinglePhaseFluidProperties::cv_from_p_T;
+  using SinglePhaseFluidProperties::cv_from_v_e;
+  using SinglePhaseFluidProperties::e_from_p_T;
+  using SinglePhaseFluidProperties::h_from_p_T;
+  using SinglePhaseFluidProperties::k_from_p_T;
+  using SinglePhaseFluidProperties::k_from_v_e;
+  using SinglePhaseFluidProperties::mu_from_p_T;
+  using SinglePhaseFluidProperties::mu_from_v_e;
   using SinglePhaseFluidProperties::p_from_v_e;
+  using SinglePhaseFluidProperties::rho_from_p_T;
+  using SinglePhaseFluidProperties::T_from_v_e;
+  using SinglePhaseFluidProperties::v_from_p_T;
 
 protected:
-
   void initialSetup() override;
 
   /// function defining thermal conductivity as a function of temperature

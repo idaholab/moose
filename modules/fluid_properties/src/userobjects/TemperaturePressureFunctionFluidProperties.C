@@ -21,15 +21,15 @@ TemperaturePressureFunctionFluidProperties::validParams()
 
   params.addRequiredRangeCheckedParam<Real>("cp", "cp > 0", "Constant isobaric specific heat");
   params.addRequiredRangeCheckedParam<Real>("cv", "cv > 0", "Constant isochoric specific heat");
-  params.addClassDescription("Single phase fluid properties that allows to provide thermal "
-                             "conductivity, density, and viscosity as function of temperature and pressure.");
+  params.addClassDescription(
+      "Single phase fluid properties that allows to provide thermal "
+      "conductivity, density, and viscosity as function of temperature and pressure.");
   return params;
 }
 
-TemperaturePressureFunctionFluidProperties::TemperaturePressureFunctionFluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidProperties(parameters),
-    _cp(getParam<Real>("cp")),
-    _cv(getParam<Real>("cv"))
+TemperaturePressureFunctionFluidProperties::TemperaturePressureFunctionFluidProperties(
+    const InputParameters & parameters)
+  : SinglePhaseFluidProperties(parameters), _cp(getParam<Real>("cp")), _cv(getParam<Real>("cv"))
 {
 }
 
@@ -59,17 +59,21 @@ TemperaturePressureFunctionFluidProperties::T_from_p_h(Real /* p */, Real h) con
   return h / _cp;
 }
 
-Real
-TemperaturePressureFunctionFluidProperties::T_from_p_rho(Real /* p */, Real/* rho */) const
+Real TemperaturePressureFunctionFluidProperties::T_from_p_rho(Real /* p */, Real /* rho */) const
 {
   mooseError("not implemented");
   return 0;
-
 }
 
-Real TemperaturePressureFunctionFluidProperties::cp_from_v_e(Real /*v*/, Real /*e*/) const { return _cp; }
+Real TemperaturePressureFunctionFluidProperties::cp_from_v_e(Real /*v*/, Real /*e*/) const
+{
+  return _cp;
+}
 
-Real TemperaturePressureFunctionFluidProperties::cv_from_v_e(Real /* v */, Real /* e */) const { return _cv; }
+Real TemperaturePressureFunctionFluidProperties::cv_from_v_e(Real /* v */, Real /* e */) const
+{
+  return _cv;
+}
 
 Real
 TemperaturePressureFunctionFluidProperties::p_from_v_e(Real v, Real e) const
@@ -112,11 +116,15 @@ TemperaturePressureFunctionFluidProperties::rho_from_p_T(
 }
 
 void
-TemperaturePressureFunctionFluidProperties::rho_from_p_T(
-    const DualReal & pressure, const DualReal & temperature, DualReal & rho, DualReal & drho_dp, DualReal & drho_dT) const
+TemperaturePressureFunctionFluidProperties::rho_from_p_T(const DualReal & pressure,
+                                                         const DualReal & temperature,
+                                                         DualReal & rho,
+                                                         DualReal & drho_dp,
+                                                         DualReal & drho_dT) const
 {
   rho = rho_from_p_T(pressure, temperature);
-  const RealVectorValue grad_function = _rho_function->gradient(0, Point(temperature.value(), pressure.value(), 0));
+  const RealVectorValue grad_function =
+      _rho_function->gradient(0, Point(temperature.value(), pressure.value(), 0));
   drho_dT = grad_function(0);
   drho_dp = grad_function(1);
 }
@@ -185,7 +193,8 @@ TemperaturePressureFunctionFluidProperties::beta_from_p_T(Real pressure, Real te
   return -drho_dT / rho;
 }
 
-Real TemperaturePressureFunctionFluidProperties::cp_from_p_T(Real /* pressure */, Real /* temperature */) const
+Real TemperaturePressureFunctionFluidProperties::cp_from_p_T(Real /* pressure */,
+                                                             Real /* temperature */) const
 {
   return _cp;
 }
@@ -199,7 +208,8 @@ TemperaturePressureFunctionFluidProperties::cp_from_p_T(
   dcp_dT = 0.0;
 }
 
-Real TemperaturePressureFunctionFluidProperties::cv_from_p_T(Real /* pressure */, Real /* temperature */) const
+Real TemperaturePressureFunctionFluidProperties::cv_from_p_T(Real /* pressure */,
+                                                             Real /* temperature */) const
 {
   return _cv;
 }
