@@ -6,44 +6,44 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#include "FussionAppTestApp.h"
-#include "FussionAppApp.h"
+#include "FusionTestApp.h"
+#include "FusionApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 #include "ModulesApp.h"
 
 InputParameters
-FussionAppTestApp::validParams()
+FusionTestApp::validParams()
 {
-  InputParameters params = FussionAppApp::validParams();
+  InputParameters params = FusionApp::validParams();
   return params;
 }
 
-FussionAppTestApp::FussionAppTestApp(InputParameters parameters) : MooseApp(parameters)
+FusionTestApp::FusionTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  FussionAppTestApp::registerAll(
+  FusionTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
-FussionAppTestApp::~FussionAppTestApp() {}
+FusionTestApp::~FusionTestApp() {}
 
 void
-FussionAppTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+FusionTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  FussionAppApp::registerAll(f, af, s);
+  FusionApp::registerAll(f, af, s);
   if (use_test_objs)
   {
-    Registry::registerObjectsTo(f, {"FussionAppTestApp"});
-    Registry::registerActionsTo(af, {"FussionAppTestApp"});
+    Registry::registerObjectsTo(f, {"FusionTestApp"});
+    Registry::registerActionsTo(af, {"FusionTestApp"});
   }
 }
 
 void
-FussionAppTestApp::registerApps()
+FusionTestApp::registerApps()
 {
-  registerApp(FussionAppApp);
-  registerApp(FussionAppTestApp);
+  registerApp(FusionApp);
+  registerApp(FusionTestApp);
 }
 
 /***************************************************************************************************
@@ -51,12 +51,12 @@ FussionAppTestApp::registerApps()
  **************************************************************************************************/
 // External entry point for dynamic application loading
 extern "C" void
-FussionAppTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+FusionTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  FussionAppTestApp::registerAll(f, af, s);
+  FusionTestApp::registerAll(f, af, s);
 }
 extern "C" void
-FussionAppTestApp__registerApps()
+FusionTestApp__registerApps()
 {
-  FussionAppTestApp::registerApps();
+  FusionTestApp::registerApps();
 }

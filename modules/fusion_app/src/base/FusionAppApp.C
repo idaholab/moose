@@ -1,11 +1,11 @@
-#include "FussionAppApp.h"
+#include "FusionApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "ModulesApp.h"
 #include "MooseSyntax.h"
 
 InputParameters
-FussionAppApp::validParams()
+FusionApp::validParams()
 {
   InputParameters params = MooseApp::validParams();
 
@@ -15,39 +15,39 @@ FussionAppApp::validParams()
   return params;
 }
 
-FussionAppApp::FussionAppApp(InputParameters parameters) : MooseApp(parameters)
+FusionApp::FusionApp(InputParameters parameters) : MooseApp(parameters)
 {
-  FussionAppApp::registerAll(_factory, _action_factory, _syntax);
+  FusionApp::registerAll(_factory, _action_factory, _syntax);
 }
 
-FussionAppApp::~FussionAppApp() {}
+FusionApp::~FusionApp() {}
 
 void
-FussionAppApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
+FusionApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
   ModulesApp::registerAll(f, af, syntax);
-  Registry::registerObjectsTo(f, {"FussionAppApp"});
-  Registry::registerActionsTo(af, {"FussionAppApp"});
+  Registry::registerObjectsTo(f, {"FusionApp"});
+  Registry::registerActionsTo(af, {"FusionApp"});
 
   /* register custom execute flags, action syntax, etc. here */
 }
 
 void
-FussionAppApp::registerApps()
+FusionApp::registerApps()
 {
-  registerApp(FussionAppApp);
+  registerApp(FusionApp);
 }
 
 /***************************************************************************************************
  *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
  **************************************************************************************************/
 extern "C" void
-FussionAppApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+FusionApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  FussionAppApp::registerAll(f, af, s);
+  FusionApp::registerAll(f, af, s);
 }
 extern "C" void
-FussionAppApp__registerApps()
+FusionApp__registerApps()
 {
-  FussionAppApp::registerApps();
+  FusionApp::registerApps();
 }
