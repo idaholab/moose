@@ -532,3 +532,19 @@ TEST_F(SymmetricRankTwoTensorTest, fillFromScalarVariable)
         << "Failed with unexpected error message: " << msg;
   }
 }
+
+TEST_F(SymmetricRankTwoTensorTest, sin3Lode)
+{
+  // secondInvariant of _m3 is  98.33333
+
+  const auto s = _m3.sin3Lode(200, 999);
+  EXPECT_NEAR(s, 999, 1e-9);
+
+  const auto sA = _m3.sin3Lode(0, 999);
+  const auto sB = RankTwoTensor(_m3).sin3Lode(0, 999);
+  EXPECT_NEAR(sA, sB, 1e-9);
+
+  const auto dA = RankTwoTensor(_m3.dsin3Lode(0));
+  const auto dB = RankTwoTensor(_m3).dsin3Lode(0);
+  EXPECT_NEAR((dA - dB).L2norm(), 0.0, 1e-9);
+}

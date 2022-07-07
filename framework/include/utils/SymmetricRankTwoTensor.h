@@ -244,7 +244,8 @@ public:
   SymmetricRankTwoTensorTempl<T> transpose() const;
 
   /// sets _vals to a, and returns _vals
-  SymmetricRankTwoTensorTempl<T> & operator=(const SymmetricRankTwoTensorTempl<T> & a);
+  template <typename T2>
+  SymmetricRankTwoTensorTempl<T> & operator=(const SymmetricRankTwoTensorTempl<T2> & a);
 
   /**
    * Assignment-from-scalar operator.  Used only to zero out vectors.
@@ -665,9 +666,31 @@ SymmetricRankTwoTensorTempl<T>::dsin3Lode(const T & r0) const
     if (bar <= r0)
       return SymmetricRankTwoTensorTempl<T>();
     else
-      return (dthirdInvariant() * -1.5 * std::sqrt(3.0) / std::pow(bar, 1.5) -
-              dsecondInvariant() * thirdInvariant() * 1.5 / std::pow(bar, 2.5));
+      return -1.5 * std::sqrt(3.0) *
+             (dthirdInvariant() / std::pow(bar, 1.5) -
+              1.5 * dsecondInvariant() * thirdInvariant() / std::pow(bar, 2.5));
   }
   else
     mooseError("dsin3Lode is only available for ordered tensor component types");
+}
+
+template <typename T>
+template <typename T2>
+SymmetricRankTwoTensorTempl<T> &
+SymmetricRankTwoTensorTempl<T>::operator=(const SymmetricRankTwoTensorTempl<T2> & a)
+{
+  for (const auto i : make_range(N))
+    (*this)(i) = a(i);
+  return *this;
+}
+
+// non-member operators
+
+template <typename T, typename Scalar>
+inline typename std::enable_if_t<
+    ScalarTraits<Scalar>::value,
+    SymmetricRankTwoTensorTempl<typename CompareTypes<T, Scalar>::supertype>>
+operator*(const Scalar & factor, const SymmetricRankTwoTensorTempl<T> & t)
+{
+  return t * factor;
 }
