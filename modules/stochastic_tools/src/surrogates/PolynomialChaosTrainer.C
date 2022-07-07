@@ -18,19 +18,17 @@ PolynomialChaosTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
   params.addClassDescription("Computes and evaluates polynomial chaos surrogate model.");
-  params.addRequiredParam<ReporterName>(
-      "response", "Reporter value of response results, can be vpp with <vpp_name>/<vector_name>.");
   params.addRequiredParam<unsigned int>("order", "Maximum polynomial order.");
   params.addRequiredParam<std::vector<DistributionName>>(
       "distributions", "Names of the distributions samples were taken from.");
 
+  params.suppressParameter<MooseEnum>("response_type");
   return params;
 }
 
 PolynomialChaosTrainer::PolynomialChaosTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-    _pvals(getSamplerData()),
-    _rval(getTrainingData<Real>(getParam<ReporterName>("response"))),
+    _predictor_row(getPredictorData()),
     _order(declareModelData<unsigned int>("_order", getParam<unsigned int>("order"))),
     _ndim(declareModelData<unsigned int>("_ndim", _sampler.getNumberOfCols())),
     _tuple(declareModelData<std::vector<std::vector<unsigned int>>>(
@@ -45,6 +43,11 @@ PolynomialChaosTrainer::PolynomialChaosTrainer(const InputParameters & parameter
   if (_ndim != _sampler.getNumberOfCols())
     paramError("distributions",
                "Sampler number of columns does not match number of inputted distributions.");
+
+  if (_quad_sampler && (!_pvals.empty() || _pcols.size() != _sampler.getNumberOfCols()))
+    paramError("sampler",
+               "QuadratureSampler must use all Sampler columns for training, and cannot be"
+               " used with other Reporters - otherwise, quadrature integration does not work.");
 
   // Make polynomials
   for (const auto & nm : getParam<std::vector<DistributionName>>("distributions"))
@@ -61,12 +64,12 @@ PolynomialChaosTrainer::train()
   // Evaluate polynomials to avoid duplication
   for (unsigned int d = 0; d < _ndim; ++d)
     for (unsigned int i = 0; i < _order; ++i)
-      poly_val(d, i) = _poly[d]->compute(i, _pvals[d]);
+      poly_val(d, i) = _poly[d]->compute(i, _predictor_row[d]);
 
   // Loop over coefficients
   for (std::size_t i = 0; i < _ncoeff; ++i)
   {
-    Real val = _rval;
+    Real val = *_rval;
     // Loop over parameters
     for (std::size_t d = 0; d < _ndim; ++d)
       val *= poly_val(d, _tuple[i][d]);
@@ -84,5 +87,5 @@ PolynomialChaosTrainer::postTrain()
 
   if (!_quad_sampler)
     for (std::size_t i = 0; i < _ncoeff; ++i)
-      _coeff[i] /= _sampler.getNumberOfRows();
+      _coeff[i] /= getCurrentSampleSize();
 }

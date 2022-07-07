@@ -9,7 +9,14 @@
       allow_test_objects = true
       cli_args =  "Trainers/train/cv_surrogate='surrogate'"
       csvdiff = 'train_and_cv_out_cv_scores_0002.csv'
-      detail = 'for a 1-dimensional polynomial regression surrogate'
+      detail = 'for a 1-dimensional polynomial regression surrogate with Real'
+    []
+    [cv_vector_real]
+      type = CSVDiff
+      input = poly_reg_vec.i
+      allow_test_objects = true
+      csvdiff = 'poly_reg_vec_out_cv_scores_0002.csv'
+      detail = ' and std::vector<Real> response types.'
     []
     [surr-error]
       type = RunException

@@ -20,12 +20,6 @@ LibtorchANNTrainer::validParams()
 
   params.addClassDescription("Trains a simple neural network using libtorch.");
 
-  MooseEnum data_type("real=0 vector_real=1", "real");
-  params.addRequiredParam<ReporterName>(
-      "response",
-      "Reporter value of response results, can be vpp with <vpp_name>/<vector_name> or sampler "
-      "column with 'sampler/col_<index>'.");
-  params.addParam<MooseEnum>("response_type", data_type, "Response data type.");
   params.addRangeCheckedParam<unsigned int>(
       "num_batches", 1, "1<=num_batches", "Number of batches.");
   params.addRangeCheckedParam<unsigned int>(
@@ -56,13 +50,13 @@ LibtorchANNTrainer::validParams()
   params.addParam<unsigned int>(
       "seed", 11, "Random number generator seed for stochastic optimizers.");
 
+  params.suppressParameter<MooseEnum>("response_type");
   return params;
 }
 
 LibtorchANNTrainer::LibtorchANNTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-    _sampler_row(getSamplerData()),
-    _response(getTrainingData<Real>(getParam<ReporterName>("response"))),
+    _predictor_row(getPredictorData()),
     _num_batches(getParam<unsigned int>("num_batches")),
     _num_epocs(getParam<unsigned int>("num_epochs")),
     _rel_loss_tol(getParam<Real>("rel_loss_tol")),
@@ -95,19 +89,19 @@ void
 LibtorchANNTrainer::preTrain()
 {
   // Resize to number of sample points
-  _flattened_data.resize(_sampler.getNumberOfLocalRows() * _sampler.getNumberOfCols());
-  _flattened_response.resize(_sampler.getNumberOfLocalRows());
+  _flattened_data.clear();
+  _flattened_response.clear();
+  _flattened_data.reserve(getLocalSampleSize() * _n_dims);
+  _flattened_response.reserve(getLocalSampleSize());
 }
 
 void
 LibtorchANNTrainer::train()
 {
-  unsigned int num_parameters = _sampler.getNumberOfCols();
+  for (auto & p : _predictor_row)
+    _flattened_data.push_back(p);
 
-  for (unsigned int i = 0; i < num_parameters; ++i)
-    _flattened_data[_local_row * num_parameters + i] = _sampler_row[i];
-
-  _flattened_response[_local_row] = _response;
+  _flattened_response.push_back(*_rval);
 }
 
 void
@@ -199,6 +193,7 @@ LibtorchANNTrainer::postTrain()
       if (epoch % _print_epoch_loss == 0 || epoch == 1)
         _console << "Epoch: " << epoch << " | Loss: " << COLOR_GREEN << epoch_loss << COLOR_DEFAULT
                  << " | Rel. loss: " << COLOR_GREEN << rel_loss << COLOR_DEFAULT << std::endl;
+
     epoch += 1;
   }
 
