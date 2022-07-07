@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 #include "MathFVUtils.h"
 #include "FaceInfo.h"
+#include "ElemInfo.h"
 #include "UpwindLimiter.h"
 #include "AppFactory.h"
 #include "libmesh/elem.h"
@@ -33,12 +34,14 @@ TEST(LimitersTest, limitVector)
   auto app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
   ReplicatedMesh mesh(app->comm(), /*dim=*/2);
   MeshTools::Generation::build_square(mesh, 2, 2);
-  auto * const elem = mesh.elem_ptr(0);
-  for (const auto s : elem->side_index_range())
-    if (elem->neighbor_ptr(s))
+  ElemInfo ei(mesh.elem_ptr(0));
+
+  for (const auto s : ei.elem()->side_index_range())
+    if (ei.elem()->neighbor_ptr(s))
     {
-      auto * const neighbor = elem->neighbor_ptr(s);
-      FaceInfo fi(elem, s, neighbor);
+      FaceInfo fi(&ei, s);
+      ElemInfo ni(ei.elem()->neighbor_ptr(s));
+      fi.computeCoefficients(&ni);
       auto result = interpolate(limiter, upwind, downwind, &grad, fi, true);
       for (const auto d : make_range(unsigned(LIBMESH_DIM)))
         EXPECT_EQ(result(d), 1);

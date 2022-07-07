@@ -115,7 +115,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
         auto face = Moose::FV::makeCDFace(fi);
         const RealVectorValue uf(functor(face));
         const Point surface_vector = fi.normal() * fi.faceArea();
-        auto product = (uf * fi.dCF()) * surface_vector;
+        auto product = (uf * fi.dCN()) * surface_vector;
 
         container[fi.elem().id()] += product * fi.gC() / fi.elemVolume();
         if (fi.neighborPtr())

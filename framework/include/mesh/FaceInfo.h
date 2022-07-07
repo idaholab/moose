@@ -145,19 +145,19 @@ public:
   Real gC() const { return _gc; }
 
   /**
-   * @return the distance vector drawn from centroid C to F, or in terms of MOOSE implementation,
+   * @return the distance vector drawn from centroid C to N, or in terms of MOOSE implementation,
    * the distance vector obtained from subtracting the element centroid from the neighbor centroid
    */
   const Point & dCN() const { return _d_cn; }
 
   /**
-   * @return the magnitude of the distance vector between centroids C and F, or in terms of MOOSE
+   * @return the magnitude of the distance vector between centroids C and N, or in terms of MOOSE
    * implementation, the magnitude of the distance vector between neighbor and element centroids
    */
   Real dCNMag() const { return _d_cn_mag; }
 
   /**
-   * @return the normalized (e.g. unit) distance vector drawn from centroid C to F, or in terms of
+   * @return the normalized (e.g. unit) distance vector drawn from centroid C to N, or in terms of
    * MOOSE implementation, the normalized (e.g. unit) distance vector obtained from subtracting the
    * element centroid from the neighbor centroid
    */
