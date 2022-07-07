@@ -740,10 +740,12 @@ class TestHarness:
                 for jobs, dag, thread_lock in self.scheduler.retrieveDAGs():
                     original_dag = dag.getOriginalDAG()
                     total_time = float(0.0)
+                    tester = None
                     for tester in dag.topological_sort(original_dag):
                         if not tester.isSkip():
                             total_time += tester.getTiming()
-                    tester_dirs[tester.getTestDir()] = (tester_dirs.get(tester.getTestDir(), 0) + total_time)
+                    if tester is not None:
+                        tester_dirs[tester.getTestDir()] = (tester_dirs.get(tester.getTestDir(), 0) + total_time)
                 for k, v in tester_dirs.items():
                     rel_spec_path = f'{os.path.sep}'.join(k.split(os.path.sep)[-2:])
                     dag_table.append([f'{rel_spec_path}{os.path.sep}{self._infiles[0]}', f'{v:.3f}'])
