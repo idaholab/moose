@@ -81,6 +81,12 @@ public:
   static constexpr unsigned int N = Ndim + (Ndim * (Ndim - 1)) / 2;
   ///@}
 
+  // Full tensor indices in the Mandel/Voigt representation
+  static constexpr unsigned int full_index[6][2] = {{0, 0}, {1, 1}, {2, 2}, {1, 2}, {0, 2}, {0, 1}};
+
+  // Reverse tensor indices in the Mandel/Voigt representation
+  static constexpr unsigned int reverse_index[3][3] = {{0, 5, 4}, {5, 1, 3}, {4, 3, 2}};
+
   /// returns the 1 or sqrt(2) prefactor in the Mandel notation for the index i ranging from 0-5.
   static constexpr Real mandelFactor(unsigned int i) { return i < Ndim ? 1.0 : MathUtils::sqrt2; }
 
@@ -176,8 +182,23 @@ public:
    */
   void fillFromScalarVariable(const VariableValue & scalar_variable);
 
-  /// Gets the value for the index specified.  Takes index = 0,1,2,3,4,5
+  /// Gets the raw value for the index specified.  Takes index = 0,1,2,3,4,5
   inline T & operator()(unsigned int i) { return _vals[i]; }
+
+  /**
+   * Gets the raw value for the index specified.  Takes index = 0,1,2
+   * used for const
+   */
+  inline T operator()(unsigned int i) const { return _vals[i]; }
+
+  /**
+   * Gets the value for the index specified.  Takes index = 0,1,2
+   */
+  inline T operator()(unsigned int i, unsigned int j) const
+  {
+    const auto a = reverse_index[i][j];
+    return _vals[a] / mandelFactor(a);
+  }
 
   /// get the specified row of the tensor
   VectorValue<T> row(const unsigned int n) const;
@@ -210,12 +231,6 @@ public:
   void zero();
 
   /**
-   * Gets the value for the index specified.  Takes index = 0,1,2
-   * used for const
-   */
-  inline T operator()(unsigned int i) const { return _vals[i]; }
-
-  /**
    * rotates the tensor data given a rank two tensor rotation tensor
    * _vals[i][j] = R_ij * R_jl * _vals[k][l]
    * @param R rotation matrix as a TypeTensor
@@ -229,7 +244,8 @@ public:
   SymmetricRankTwoTensorTempl<T> transpose() const;
 
   /// sets _vals to a, and returns _vals
-  SymmetricRankTwoTensorTempl<T> & operator=(const SymmetricRankTwoTensorTempl<T> & a);
+  template <typename T2>
+  SymmetricRankTwoTensorTempl<T> & operator=(const SymmetricRankTwoTensorTempl<T2> & a);
 
   /**
    * Assignment-from-scalar operator.  Used only to zero out vectors.
@@ -305,11 +321,7 @@ public:
   SymmetricRankFourTensorTempl<T> outerProduct(const SymmetricRankTwoTensorTempl<T> & a) const;
 
   /// return positive projection tensor of eigen-decomposition
-  template <typename T2 = T>
-  typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
-  positiveProjectionEigenDecomposition(std::vector<T> &, RankTwoTensorTempl<T> &) const;
-  template <typename T2 = T>
-  typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
+  SymmetricRankFourTensorTempl<T>
   positiveProjectionEigenDecomposition(std::vector<T> &, RankTwoTensorTempl<T> &) const;
 
   /// returns A_ij - de_ij*tr(A)/3, where A are the _vals
@@ -358,12 +370,7 @@ public:
    * This is to gaurd against precision-loss errors.
    * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
    */
-  template <typename T2 = T>
-  typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, T>::type
-  sin3Lode(const T & r0, const T & r0_value) const;
-  template <typename T2 = T>
-  typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, T>::type
-  sin3Lode(const T & r0, const T & r0_value) const;
+  T sin3Lode(const T & r0, const T & r0_value) const;
 
   /**
    * d(sin3Lode)/dA_ij
@@ -371,12 +378,7 @@ public:
    * This is to gaurd against precision-loss errors.
    * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
    */
-  template <typename T2 = T>
-  typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, SymmetricRankTwoTensorTempl<T>>::type
-  dsin3Lode(const T & r0) const;
-  template <typename T2 = T>
-  typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankTwoTensorTempl<T>>::type
-  dsin3Lode(const T & r0) const;
+  SymmetricRankTwoTensorTempl<T> dsin3Lode(const T & r0) const;
 
   /**
    * Denote the _vals[i][j] by A_ij, then
@@ -570,8 +572,7 @@ SymmetricRankTwoTensorTempl<T>::operator!=(const SymmetricRankTwoTensorTempl<T2>
 }
 
 template <typename T>
-template <typename T2>
-typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
+SymmetricRankFourTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(
     std::vector<T> & eigval, RankTwoTensorTempl<T> & eigvec) const
 {
@@ -579,98 +580,117 @@ SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(
   // C. Miehe and M. Lambrecht, Commun. Numer. Meth. Engng 2001; 17:337~353
 
   // Compute eigenvectors and eigenvalues of this tensor
-  this->symmetricEigenvaluesEigenvectors(eigval, eigvec);
-
-  // Separate out positive and negative eigen values
-  std::array<T, N> epos;
-  std::array<T, N> d;
-  for (unsigned int i = 0; i < N; ++i)
+  if (MooseUtils::IsLikeReal<T>::value)
   {
-    epos[i] = (std::abs(eigval[i]) + eigval[i]) / 2.0;
-    d[i] = 0 < eigval[i] ? 1.0 : 0.0;
-  }
+    this->symmetricEigenvaluesEigenvectors(eigval, eigvec);
 
-  // projection tensor
-  SymmetricRankFourTensorTempl<T> proj_pos;
-  SymmetricRankFourTensorTempl<T> Gab, Gba;
+    // Separate out positive and negative eigen values
+    std::array<T, N> epos;
+    std::array<T, N> d;
+    for (unsigned int i = 0; i < N; ++i)
+    {
+      epos[i] = (std::abs(eigval[i]) + eigval[i]) / 2.0;
+      d[i] = 0 < eigval[i] ? 1.0 : 0.0;
+    }
 
-  for (unsigned int a = 0; a < N; ++a)
-  {
-    const auto Ma = SymmetricRankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
-    proj_pos += d[a] * Ma.outerProduct(Ma);
-  }
+    // projection tensor
+    SymmetricRankFourTensorTempl<T> proj_pos;
 
-  for (unsigned int a = 0; a < N; ++a)
-    for (unsigned int b = 0; b < a; ++b)
+    for (unsigned int a = 0; a < Ndim; ++a)
     {
       const auto Ma = SymmetricRankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
-      const auto Mb = SymmetricRankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
-
-      Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);
-      Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);
-
-      T theta_ab;
-      if (!MooseUtils::relativeFuzzyEqual(eigval[a], eigval[b]))
-        theta_ab = 0.5 * (epos[a] - epos[b]) / (eigval[a] - eigval[b]);
-      else
-        theta_ab = 0.25 * (d[a] + d[b]);
-
-      proj_pos += theta_ab * (Gab + Gba);
+      proj_pos += d[a] * Ma.outerProduct(Ma);
     }
-  return proj_pos;
+
+    for (const auto a : make_range(Ndim))
+      for (const auto b : make_range(a))
+      {
+        const auto Ma = SymmetricRankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
+        const auto Mb = SymmetricRankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
+
+        SymmetricRankFourTensorTempl<T> Gabba(SymmetricRankFourTensorTempl<T>::initNone);
+        for (const auto aa : make_range(N))
+          for (const auto bb : make_range(N))
+          {
+            const auto i = SymmetricRankFourTensorTempl<T>::full_index[aa][bb][0];
+            const auto j = SymmetricRankFourTensorTempl<T>::full_index[aa][bb][1];
+            const auto k = SymmetricRankFourTensorTempl<T>::full_index[aa][bb][2];
+            const auto l = SymmetricRankFourTensorTempl<T>::full_index[aa][bb][3];
+
+            Gabba(aa, bb) = (Ma(i, k) * Mb(j, l) + Ma(i, l) * Mb(j, k) + Ma(j, l) * Mb(i, k) +
+                             Ma(j, k) * Mb(i, l)) *
+                            SymmetricRankFourTensorTempl<T>::mandelFactor(aa, bb);
+          }
+
+        T theta_ab;
+        if (!MooseUtils::relativeFuzzyEqual(eigval[a], eigval[b]))
+          theta_ab = 0.5 * (epos[a] - epos[b]) / (eigval[a] - eigval[b]);
+        else
+          theta_ab = 0.25 * (d[a] + d[b]);
+
+        proj_pos += theta_ab * Gabba;
+      }
+    return proj_pos;
+  }
+  else
+    mooseError("positiveProjectionEigenDecomposition is only available for ordered tensor "
+               "component types");
 }
 
 template <typename T>
-template <typename T2>
-typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
-SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> &,
-                                                                     RankTwoTensorTempl<T> &) const
-{
-  mooseError(
-      "positiveProjectionEigenDecomposition is only available for ordered tensor component types");
-}
-
-template <typename T>
-template <typename T2>
-typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, T>::type
+T
 SymmetricRankTwoTensorTempl<T>::sin3Lode(const T & r0, const T & r0_value) const
 {
-  T bar = secondInvariant();
-  if (bar <= r0)
-    // in this case the Lode angle is not defined
-    return r0_value;
+  if (MooseUtils::IsLikeReal<T>::value)
+  {
+    T bar = secondInvariant();
+    if (bar <= r0)
+      // in this case the Lode angle is not defined
+      return r0_value;
+    else
+      // the min and max here gaurd against precision-loss when bar is tiny but nonzero.
+      return std::max(std::min(thirdInvariant() * -1.5 * std::sqrt(3.0) / std::pow(bar, 1.5), 1.0),
+                      -1.0);
+  }
   else
-    // the min and max here gaurd against precision-loss when bar is tiny but nonzero.
-    return std::max(std::min(-1.5 * std::sqrt(3.0) * thirdInvariant() / std::pow(bar, 1.5), 1.0),
-                    -1.0);
+    mooseError("sin3Lode is only available for ordered tensor component types");
 }
 
 template <typename T>
-template <typename T2>
-typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, T>::type
-SymmetricRankTwoTensorTempl<T>::sin3Lode(const T &, const T &) const
-{
-  mooseError("sin3Lode is only available for ordered tensor component types");
-}
-
-template <typename T>
-template <typename T2>
-typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, SymmetricRankTwoTensorTempl<T>>::type
+SymmetricRankTwoTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::dsin3Lode(const T & r0) const
 {
-  T bar = secondInvariant();
-  if (bar <= r0)
-    return SymmetricRankTwoTensorTempl<T>();
+  if (MooseUtils::IsLikeReal<T>::value)
+  {
+    T bar = secondInvariant();
+    if (bar <= r0)
+      return SymmetricRankTwoTensorTempl<T>();
+    else
+      return -1.5 * std::sqrt(3.0) *
+             (dthirdInvariant() / std::pow(bar, 1.5) -
+              1.5 * dsecondInvariant() * thirdInvariant() / std::pow(bar, 2.5));
+  }
   else
-    return -1.5 * std::sqrt(3.0) *
-           (dthirdInvariant() / std::pow(bar, 1.5) -
-            1.5 * dsecondInvariant() * thirdInvariant() / std::pow(bar, 2.5));
+    mooseError("dsin3Lode is only available for ordered tensor component types");
 }
 
 template <typename T>
 template <typename T2>
-typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankTwoTensorTempl<T>>::type
-SymmetricRankTwoTensorTempl<T>::dsin3Lode(const T &) const
+SymmetricRankTwoTensorTempl<T> &
+SymmetricRankTwoTensorTempl<T>::operator=(const SymmetricRankTwoTensorTempl<T2> & a)
 {
-  mooseError("dsin3Lode is only available for ordered tensor component types");
+  for (const auto i : make_range(N))
+    (*this)(i) = a(i);
+  return *this;
+}
+
+// non-member operators
+
+template <typename T, typename Scalar>
+inline typename std::enable_if_t<
+    ScalarTraits<Scalar>::value,
+    SymmetricRankTwoTensorTempl<typename CompareTypes<T, Scalar>::supertype>>
+operator*(const Scalar & factor, const SymmetricRankTwoTensorTempl<T> & t)
+{
+  return t * factor;
 }

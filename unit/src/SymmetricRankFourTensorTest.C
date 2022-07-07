@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SymmetricRankFourTensorTest.h"
+#include "SymmetricRankFourTensorImplementation.h"
 #include "SymmetricRankTwoTensor.h"
 #include "RankTwoTensor.h"
 #include "RotationMatrix.h"
@@ -15,7 +16,9 @@
 #include "ADReal.h"
 
 #include "libmesh/int_range.h"
+
 #include "metaphysicl/raw_type.h"
+#include "metaphysicl/dualnumberarray.h"
 
 TEST_F(SymmetricRankFourTensorTest, ADConversion)
 {
@@ -282,4 +285,22 @@ TEST_F(SymmetricRankFourTensorTest, invSym)
   auto A = _s2.invSymm();
   auto B = RankFourTensor(_s2).invSymm();
   EXPECT_NEAR((RankFourTensor(A) - B).L2norm(), 0.0, 1e-9);
+}
+
+TEST_F(SymmetricRankFourTensorTest, bignum)
+{
+  constexpr std::size_t derivative_size = 1000;
+  typedef NumberArray<derivative_size, Real> DNDerivativeType;
+  typedef DualNumber<Real, DNDerivativeType, /*allow_skiping_derivatives=*/true> ADBig;
+
+  SymmetricRankFourTensorTempl<ADBig> A = _s2;
+  SymmetricRankFourTensorTempl<ADReal> B = _s2;
+  SymmetricRankFourTensorTempl<Real> C = _s2;
+
+  const auto iA = MetaPhysicL::raw_value(A.invSymm());
+  const auto iB = MetaPhysicL::raw_value(B.invSymm());
+  const auto iC = MetaPhysicL::raw_value(C.invSymm());
+
+  EXPECT_NEAR(MetaPhysicL::raw_value((iA - iB).L2norm()), 0.0, 1e-9);
+  EXPECT_NEAR(MetaPhysicL::raw_value((iB - iC).L2norm()), 0.0, 1e-9);
 }

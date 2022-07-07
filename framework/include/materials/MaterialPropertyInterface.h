@@ -78,15 +78,13 @@ public:
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   template <typename T>
   const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name);
-  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
-  const ADMaterialProperty<T> & getGenericMaterialProperty(const std::string & name)
+  template <typename T, bool is_ad>
+  const auto & getGenericMaterialProperty(const std::string & name)
   {
-    return getADMaterialProperty<T>(name);
-  }
-  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
-  const MaterialProperty<T> & getGenericMaterialProperty(const std::string & name)
-  {
-    return getMaterialProperty<T>(name);
+    if constexpr (is_ad)
+      return getADMaterialProperty<T>(name);
+    else
+      return getMaterialProperty<T>(name);
   }
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
@@ -105,15 +103,13 @@ public:
   const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name);
   template <typename T>
   const ADMaterialProperty<T> & getADMaterialPropertyByName(const MaterialPropertyName & name);
-  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
-  const ADMaterialProperty<T> & getGenericMaterialPropertyByName(const std::string & name)
+  template <typename T, bool is_ad>
+  const auto & getGenericMaterialPropertyByName(const std::string & name)
   {
-    return getADMaterialPropertyByName<T>(name);
-  }
-  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
-  const MaterialProperty<T> & getGenericMaterialPropertyByName(const std::string & name)
-  {
-    return getMaterialPropertyByName<T>(name);
+    if constexpr (is_ad)
+      return getADMaterialPropertyByName<T>(name);
+    else
+      return getMaterialPropertyByName<T>(name);
   }
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
@@ -260,25 +256,21 @@ public:
   ///@}
 
   ///@{ generic hasMaterialProperty helper
-  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  template <typename T, bool is_ad>
   bool hasGenericMaterialProperty(const std::string & name)
   {
-    return hasADMaterialProperty<T>(name);
+    if constexpr (is_ad)
+      return hasADMaterialProperty<T>(name);
+    else
+      return hasMaterialProperty<T>(name);
   }
-  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
-  bool hasGenericMaterialProperty(const std::string & name)
-  {
-    return hasMaterialProperty<T>(name);
-  }
-  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  template <typename T, bool is_ad>
   bool hasGenericMaterialPropertyByName(const std::string & name)
   {
-    return hasADMaterialPropertyByName<T>(name);
-  }
-  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
-  bool hasGenericMaterialPropertyByName(const std::string & name)
-  {
-    return hasMaterialPropertyByName<T>(name);
+    if constexpr (is_ad)
+      return hasADMaterialPropertyByName<T>(name);
+    else
+      return hasMaterialPropertyByName<T>(name);
   }
   ///@}
 
@@ -359,22 +351,6 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const MaterialPropertyName & name,
                                                              MaterialData & material_data);
 
-  /**
-   * Retrieve the material property whether AD or not for the specified \p material_data. This
-   * overload is used when the \p is_ad is true
-   */
-  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
-  const ADMaterialProperty<T> & getGenericMaterialProperty(const std::string & name,
-                                                           MaterialData & material_data);
-
-  /**
-   * Retrieve the material property whether AD or not for the specified \p material_data. This
-   * overload is used when the \p is_ad is false
-   */
-  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
-  const MaterialProperty<T> & getGenericMaterialProperty(const std::string & name,
-                                                         MaterialData & material_data);
-
 protected:
   /// Parameters of the object with this interface
   const InputParameters & _mi_params;
@@ -432,15 +408,13 @@ protected:
   const ADMaterialProperty<T> * defaultADMaterialProperty(const std::string & name);
 
   ///@{ generic default material property helper
-  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
-  const ADMaterialProperty<T> * defaultGenericMaterialProperty(const std::string & name)
+  template <typename T, bool is_ad>
+  const auto * defaultGenericMaterialProperty(const std::string & name)
   {
-    return defaultADMaterialProperty<T>(name);
-  }
-  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
-  const MaterialProperty<T> * defaultGenericMaterialProperty(const std::string & name)
-  {
-    return defaultMaterialProperty<T>(name);
+    if constexpr (is_ad)
+      return defaultADMaterialProperty<T>(name);
+    else
+      return defaultMaterialProperty<T>(name);
   }
   ///@}
 
@@ -912,24 +886,4 @@ MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialProperty
   _material_property_dependencies.insert(material_data.getPropertyId(name));
 
   return material_data.getPropertyOlder<T>(name);
-}
-
-template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type>
-const ADMaterialProperty<T> &
-MaterialPropertyInterface::getGenericMaterialProperty(const std::string & name,
-                                                      MaterialData & material_data)
-{
-  return getADMaterialProperty<T>(name, material_data);
-}
-
-/**
- * Retrieve the material property whether AD or not for the specified \p material_data. This
- * overload is used when the \p is_ad is false
- */
-template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type>
-const MaterialProperty<T> &
-MaterialPropertyInterface::getGenericMaterialProperty(const std::string & name,
-                                                      MaterialData & material_data)
-{
-  return getMaterialProperty<T>(name, material_data);
 }

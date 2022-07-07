@@ -1181,10 +1181,8 @@ public:
    * tensor.
    * @return The fourth order positive projection tensor.
    */
-  template <typename T2 = T>
-  RankFourTensorTempl<T>
-  positiveProjectionEigenDecomposition(std::vector<T> & eigvals,
-                                       RankTwoTensorTempl<T> & eigvecs) const;
+  RankFourTensorTempl<T> positiveProjectionEigenDecomposition(std::vector<T> &,
+                                                              RankTwoTensorTempl<T> &) const;
 
   /**
    * @brief Return the deviatoric part of this tensor \f$ A_{ij} - \frac{1}{3} A_{kk} \delta_{ij}
@@ -1245,7 +1243,6 @@ public:
    * This is to gaurd against precision-loss errors.
    * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
    */
-  template <typename T2 = T>
   T sin3Lode(const T & r0, const T & r0_value) const;
 
   /**
@@ -1254,7 +1251,6 @@ public:
    * This is to gaurd against precision-loss errors.
    * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
    */
-  template <typename T2 = T>
   RankTwoTensorTempl<T> dsin3Lode(const T & r0) const;
 
   /**
@@ -1263,7 +1259,6 @@ public:
    * This is to gaurd against precision-loss errors.
    * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
    */
-  template <typename T2 = T>
   RankFourTensorTempl<T> d2sin3Lode(const T & r0) const;
 
   /**
@@ -1446,12 +1441,11 @@ RankTwoTensorTempl<T>::operator/(const T2 & b) const
 }
 
 template <typename T>
-template <typename T2>
 RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eigval,
                                                             RankTwoTensorTempl<T> & eigvec) const
 {
-  if constexpr (MooseUtils::IsLikeReal<T2>::value)
+  if constexpr (MooseUtils::IsLikeReal<T>::value)
   {
     // Compute eigenvectors and eigenvalues of this tensor
     this->symmetricEigenvaluesEigenvectors(eigval, eigvec);
@@ -1476,8 +1470,8 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
     }
 
     usingTensorIndices(i_, j_, k_, l_);
-    for (auto a : make_range(N))
-      for (auto b : make_range(a))
+    for (const auto a : make_range(N))
+      for (const auto b : make_range(a))
       {
         const auto Ma = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(a));
         const auto Mb = RankTwoTensorTempl<T>::selfOuterProduct(eigvec.column(b));
@@ -1501,11 +1495,10 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
 }
 
 template <typename T>
-template <typename T2>
 T
 RankTwoTensorTempl<T>::sin3Lode(const T & r0, const T & r0_value) const
 {
-  if constexpr (MooseUtils::IsLikeReal<T2>::value)
+  if constexpr (MooseUtils::IsLikeReal<T>::value)
   {
     T bar = secondInvariant();
     if (bar <= r0)
@@ -1521,11 +1514,10 @@ RankTwoTensorTempl<T>::sin3Lode(const T & r0, const T & r0_value) const
 }
 
 template <typename T>
-template <typename T2>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::dsin3Lode(const T & r0) const
 {
-  if constexpr (MooseUtils::IsLikeReal<T2>::value)
+  if constexpr (MooseUtils::IsLikeReal<T>::value)
   {
     T bar = secondInvariant();
     if (bar <= r0)
@@ -1540,11 +1532,10 @@ RankTwoTensorTempl<T>::dsin3Lode(const T & r0) const
 }
 
 template <typename T>
-template <typename T2>
 RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::d2sin3Lode(const T & r0) const
 {
-  if constexpr (MooseUtils::IsLikeReal<T2>::value)
+  if constexpr (MooseUtils::IsLikeReal<T>::value)
   {
     T bar = secondInvariant();
     if (bar <= r0)
