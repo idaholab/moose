@@ -36,7 +36,8 @@ public:
    * enforce both periodic and non-periodic constraints
    * @param debug whether to output mortar segment mesh exodus file for debugging purposes
    * @param correct_edge_dropping edge dropping treatment selection
-   * @param minimum_projection_angle minimum projection angle allowed for building mortar segment mesh
+   * @param minimum_projection_angle minimum projection angle allowed for building mortar segment
+   * mesh
    */
   void createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
                              const std::pair<SubdomainID, SubdomainID> & subdomain_key,
