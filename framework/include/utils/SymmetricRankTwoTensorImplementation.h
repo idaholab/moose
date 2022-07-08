@@ -363,14 +363,6 @@ SymmetricRankTwoTensorTempl<T>::zero()
 
 template <typename T>
 SymmetricRankTwoTensorTempl<T> &
-SymmetricRankTwoTensorTempl<T>::operator=(const SymmetricRankTwoTensorTempl<T> & a)
-{
-  std::copy(a._vals.begin(), a._vals.end(), _vals.begin());
-  return *this;
-}
-
-template <typename T>
-SymmetricRankTwoTensorTempl<T> &
 SymmetricRankTwoTensorTempl<T>::operator+=(const SymmetricRankTwoTensorTempl<T> & a)
 {
   for (std::size_t i = 0; i < N; ++i)

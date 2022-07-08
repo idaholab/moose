@@ -3191,46 +3191,15 @@ MooseMesh::buildFaceInfo() const
   for (auto it = begin; it != end; ++it)
   {
     const Elem * elem = *it;
-    const dof_id_type elem_id = elem->id();
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       // get the neighbor element
       const Elem * neighbor = elem->neighbor_ptr(side);
 
-      // We want to create a face object in all of the following cases:
-      //
-      //  * at all mesh boundaries (i.e. where there is no neighbor)
-      //
-      //  * when the following three conditions are met:
-      //
-      //     - the neighbor is active - this means we aren't looking at a face
-      //       between an active element and an inactive (pre-refined version)
-      //       of a neighbor
-      //
-      //     - the neighbor has the same refinement level as the element's level
-      //
-      //     - the neighbor has a higher ID than the element - this ensures
-      //       that when we revisit the same face when the neighbor is the
-      //       element and vice versa, we only create a face info object once
-      //       instead of twice.
-      //
-      //  * when the following two conditions are met:
-      //
-      //     - the neighbor is active - this means we aren't looking at a face
-      //       between an active element and an inactive (pre-refined version)
-      //       of a neighbor
-      //
-      //     - the neighbor has a lower refinement level than the element's
-      //       level - this ensures we only create face info objects for the
-      //       more finely divided version of a face when dealing with hanging
-      //       nodes caused by unequal refinement on both sides of a face.  We
-      //       need to make sure that the sum of all face areas of face info
-      //       objects is exactly equal to the shared interface area between all
-      //       mesh cells (and no larger)
-      if (!neighbor ||
-          (neighbor->active() && (neighbor->level() == elem->level()) &&
-           (elem_id < neighbor->id())) ||
-          (neighbor->level() < elem->level()))
+      // Check if the FaceInfo shall belong to the element. If yes,
+      // create and initialize the FaceInfo. We need this to ensure that
+      // we do not duplicate FaceInfo-s.
+      if (Moose::FV::elemHasFaceInfo(*elem, neighbor))
       {
         mooseAssert(!neighbor || (neighbor->level() < elem->level() ? neighbor->active() : true),
                     "If the neighbor is coarser than the element, we expect that the neighbor must "

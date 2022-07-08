@@ -64,8 +64,6 @@ CavityPressureAction::act()
 
   for (unsigned int i = 0; i < ndisp; ++i)
   {
-    if (_use_ad)
-      params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];
     if (!save_in.empty())
       params.set<std::vector<AuxVariableName>>("save_in") = {save_in[i]};

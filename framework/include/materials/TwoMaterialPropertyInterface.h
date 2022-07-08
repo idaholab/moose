@@ -49,15 +49,13 @@ public:
   /**
    * Retrieve the neighbor material property whether AD or not
    */
-  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
-  const ADMaterialProperty<T> & getGenericNeighborMaterialProperty(const std::string & name)
+  template <typename T, bool is_ad>
+  const auto & getGenericNeighborMaterialProperty(const std::string & name)
   {
-    return getADMaterialProperty<T>(name, *_neighbor_material_data);
-  }
-  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
-  const MaterialProperty<T> & getGenericNeighborMaterialProperty(const std::string & name)
-  {
-    return getMaterialProperty<T>(name, *_neighbor_material_data);
+    if constexpr (is_ad)
+      return getADMaterialProperty<T>(name, *_neighbor_material_data);
+    else
+      return getMaterialProperty<T>(name, *_neighbor_material_data);
   }
 
 protected:

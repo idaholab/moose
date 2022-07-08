@@ -73,6 +73,15 @@ public:
   static constexpr unsigned int N2 = N * N;
   ///@}
 
+  // Full tensor indices in the Mandel/Voigt representation
+  static constexpr unsigned int full_index[6][6][4] = {
+      {{0, 0, 0, 0}, {0, 0, 1, 1}, {0, 0, 2, 2}, {0, 0, 1, 2}, {0, 0, 0, 2}, {0, 0, 0, 1}},
+      {{1, 1, 0, 0}, {1, 1, 1, 1}, {1, 1, 2, 2}, {1, 1, 1, 2}, {1, 1, 0, 2}, {1, 1, 0, 1}},
+      {{2, 2, 0, 0}, {2, 2, 1, 1}, {2, 2, 2, 2}, {2, 2, 1, 2}, {2, 2, 0, 2}, {2, 2, 0, 1}},
+      {{1, 2, 0, 0}, {1, 2, 1, 1}, {1, 2, 2, 2}, {1, 2, 1, 2}, {1, 2, 0, 2}, {1, 2, 0, 1}},
+      {{0, 2, 0, 0}, {0, 2, 1, 1}, {0, 2, 2, 2}, {0, 2, 1, 2}, {0, 2, 0, 2}, {0, 2, 0, 1}},
+      {{0, 1, 0, 0}, {0, 1, 1, 1}, {0, 1, 2, 2}, {0, 1, 1, 2}, {0, 1, 0, 2}, {0, 1, 0, 1}}};
+
   /// returns the 1, sqrt(2), or 2 prefactor in the Mandel notation for the indices i,j ranging from 0-5.
   static constexpr Real mandelFactor(unsigned int i, unsigned int j)
   {
@@ -245,15 +254,6 @@ public:
    * This returns A_ijkl such that C_ijkl*A_klmn = 0.5*(de_im de_jn + de_in de_jm)
    * This routine assumes that C_ijkl = C_jikl = C_ijlk
    */
-  template <typename T2 = T,
-            typename std::enable_if<(SymmetricRankFourTensorTempl<T2>::N2 * sizeof(T2) >
-                                     EIGEN_STACK_ALLOCATION_LIMIT),
-                                    int>::type = 0>
-  SymmetricRankFourTensorTempl<T> invSymm() const;
-  template <typename T2 = T,
-            typename std::enable_if<(SymmetricRankFourTensorTempl<T2>::N2 * sizeof(T2) <=
-                                     EIGEN_STACK_ALLOCATION_LIMIT),
-                                    int>::type = 0>
   SymmetricRankFourTensorTempl<T> invSymm() const;
 
   /**
@@ -545,36 +545,28 @@ SymmetricRankFourTensorTempl<T>::fillSymmetric21FromInputVector(const T2 & input
 }
 
 template <typename T>
-template <typename T2,
-          typename std::enable_if<(SymmetricRankFourTensorTempl<T2>::N2 * sizeof(T2) >
-                                   EIGEN_STACK_ALLOCATION_LIMIT),
-                                  int>::type>
 SymmetricRankFourTensorTempl<T>
 SymmetricRankFourTensorTempl<T>::invSymm() const
 {
   SymmetricRankFourTensorTempl<T> result(initNone);
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> mat(N, N);
-  for (const auto i : make_range(N))
-    for (const auto j : make_range(N))
-      mat(i, j) = (*this)(i, j);
-  mat = mat.inverse();
-  for (const auto i : make_range(N))
-    for (const auto j : make_range(N))
-      result(i, j) = mat(i, j);
-  return result;
-}
 
-template <typename T>
-template <typename T2,
-          typename std::enable_if<(SymmetricRankFourTensorTempl<T2>::N2 * sizeof(T2) <=
-                                   EIGEN_STACK_ALLOCATION_LIMIT),
-                                  int>::type>
-SymmetricRankFourTensorTempl<T>
-SymmetricRankFourTensorTempl<T>::invSymm() const
-{
-  SymmetricRankFourTensorTempl<T> result(initNone);
-  const Eigen::Map<const Eigen::Matrix<T, N, N, Eigen::RowMajor>> mat(&_vals[0]);
-  Eigen::Map<Eigen::Matrix<T, N, N, Eigen::RowMajor>> res(&result._vals[0]);
-  res = mat.inverse();
+  if constexpr (SymmetricRankFourTensorTempl<T>::N2 * sizeof(T) > EIGEN_STACK_ALLOCATION_LIMIT)
+  {
+    Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> mat(N, N);
+    for (const auto i : make_range(N))
+      for (const auto j : make_range(N))
+        mat(i, j) = (*this)(i, j);
+    mat = mat.inverse();
+    for (const auto i : make_range(N))
+      for (const auto j : make_range(N))
+        result(i, j) = mat(i, j);
+  }
+  else
+  {
+    const Eigen::Map<const Eigen::Matrix<T, N, N, Eigen::RowMajor>> mat(&_vals[0]);
+    Eigen::Map<Eigen::Matrix<T, N, N, Eigen::RowMajor>> res(&result._vals[0]);
+    res = mat.inverse();
+  }
+
   return result;
 }

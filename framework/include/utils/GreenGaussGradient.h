@@ -31,8 +31,6 @@ namespace FV
  * extrapolated boundary face values. If this is true, then an implicit system has to be solved. If
  * false, then the cell center value will be used as the extrapolated boundary face value
  * @param mesh The mesh on which we are computing the gradient
- * @param face_to_value_cache An optional parameter. If provided, we will add face to
- * face-evaluations computed in this function to the map
  * @return The computed cell gradient
  */
 template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
@@ -40,8 +38,7 @@ VectorValue<T>
 greenGaussGradient(const ElemArg & elem_arg,
                    const FunctorBase<T> & functor,
                    const bool two_term_boundary_expansion,
-                   const MooseMesh & mesh,
-                   std::unordered_map<const FaceInfo *, T> * const face_to_value_cache = nullptr)
+                   const MooseMesh & mesh)
 {
   mooseAssert(elem_arg.elem, "This should be non-null");
   const auto coord_type = mesh.getCoordSystem(elem_arg.elem->subdomain_id());
@@ -49,9 +46,8 @@ greenGaussGradient(const ElemArg & elem_arg,
 
   T elem_value = functor(elem_arg);
 
-  // We'll save off the extrapolated boundary faces (ebf) for later assignment to the cache (these
-  // are the keys)
-  std::vector<const FaceInfo *> ebf_faces;
+  // We'll count the extrapolated boundaries
+  unsigned int num_ebfs = 0;
 
   try
   {
@@ -90,7 +86,7 @@ greenGaussGradient(const ElemArg & elem_arg,
                            &volume,
                            &elem_value,
                            &elem_arg,
-                           &ebf_faces,
+                           &num_ebfs,
                            &ebf_grad_coeffs,
                            &ebf_b,
                            &grad_ebf_coeffs,
@@ -113,7 +109,7 @@ greenGaussGradient(const ElemArg & elem_arg,
       {
         if (two_term_boundary_expansion)
         {
-          ebf_faces.push_back(fi);
+          num_ebfs += 1;
 
           // eqn. 2
           ebf_grad_coeffs.push_back(-1. * (elem_has_info
@@ -171,12 +167,6 @@ greenGaussGradient(const ElemArg & elem_arg,
         "We have not yet implemented the correct translation from gradient to divergence for "
         "spherical coordinates yet.");
 
-    mooseAssert(
-        ebf_faces.size() < UINT_MAX,
-        "You've created a mystical element that has more faces than can be held by unsigned "
-        "int. I applaud you.");
-    const auto num_ebfs = static_cast<unsigned int>(ebf_faces.size());
-
     // test for simple case
     if (num_ebfs == 0)
       grad = grad_b;
@@ -220,11 +210,6 @@ greenGaussGradient(const ElemArg & elem_arg,
       A.lu_solve(b, x);
       for (const auto i : make_range(Moose::dim))
         grad(i) = x(i);
-
-      // Optionally cache the face value information
-      if (face_to_value_cache)
-        for (const auto j : make_range(num_ebfs))
-          face_to_value_cache->emplace(ebf_faces[j], x(Moose::dim + j));
     }
 
     return grad;
@@ -235,15 +220,7 @@ greenGaussGradient(const ElemArg & elem_arg,
     mooseAssert(two_term_boundary_expansion,
                 "I believe we should only get singular systems when two-term boundary expansion is "
                 "being used");
-    const auto grad = greenGaussGradient(elem_arg, functor, false, mesh, face_to_value_cache);
-
-    // We failed to compute the extrapolated boundary faces with two-term expansion and callers of
-    // this method may be relying on those values (e.g. if the caller is
-    // getExtrapolatedBoundaryFaceValue) so we populate them here with one-term expansion, e.g. we
-    // set the boundary face values to the cell centroid value
-    if (face_to_value_cache)
-      for (auto * const ebf_face : ebf_faces)
-        face_to_value_cache->emplace(ebf_face, elem_value);
+    const auto grad = greenGaussGradient(elem_arg, functor, false, mesh);
 
     return grad;
   }
@@ -260,8 +237,6 @@ greenGaussGradient(const ElemArg & elem_arg,
  * extrapolated boundary face values. If this is true, then an implicit system has to be solved. If
  * false, then the cell center value will be used as the extrapolated boundary face value
  * @param mesh The mesh on which we are computing the gradient
- * @param face_to_value_cache An optional parameter. If provided, we will add face to
- * face-evaluations computed in this function to the map
  * @return The computed cell gradient
  */
 template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
@@ -269,8 +244,7 @@ VectorValue<T>
 greenGaussGradient(const FaceArg & face_arg,
                    const FunctorBase<T> & functor,
                    const bool two_term_boundary_expansion,
-                   const MooseMesh & mesh,
-                   std::unordered_map<const FaceInfo *, T> * const face_to_value_cache = nullptr)
+                   const MooseMesh & mesh)
 {
   mooseAssert(face_arg.fi, "We should have a face info to compute a face gradient");
   const auto & fi = *(face_arg.fi);
@@ -281,10 +255,10 @@ greenGaussGradient(const FaceArg & face_arg,
   if (!is_extrapolated)
   {
     // Compute the gradients in the two cells on both sides of the face
-    const auto & grad_elem = greenGaussGradient(
-        elem_arg, functor, two_term_boundary_expansion, mesh, face_to_value_cache);
-    const auto & grad_neighbor = greenGaussGradient(
-        neighbor_arg, functor, two_term_boundary_expansion, mesh, face_to_value_cache);
+    const auto & grad_elem =
+        greenGaussGradient(elem_arg, functor, two_term_boundary_expansion, mesh);
+    const auto & grad_neighbor =
+        greenGaussGradient(neighbor_arg, functor, two_term_boundary_expansion, mesh);
 
     VectorValue<T> face_gradient;
     Moose::FV::interpolate(

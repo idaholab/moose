@@ -2,36 +2,19 @@
   design = 'MooseVariableFV.md'
   issues = '#18009'
 
-  [full_caching]
+  [cell_gradient_caching]
     type = 'Exodiff'
     input = 'fv_caching.i'
     exodiff = 'fv_caching_out.e'
-    requirement = 'The system shall be able to solve a finite volume problem while caching all variable values and gradients.'
-    cli_args = 'GlobalParams/cache_face_values=true GlobalParams/cache_face_gradients=true'
-    ad_indexing_type = 'global'
-  []
-  [no_face_value_caching]
-    type = 'Exodiff'
-    input = 'fv_caching.i'
-    exodiff = 'no_caching_face_value.e'
-    requirement = 'The system shall be able to solve a finite volume problem without caching face values, except at extrapolated boundary faces.'
-    cli_args = 'Outputs/file_base=no_caching_face_value GlobalParams/cache_face_values=false'
-    ad_indexing_type = 'global'
-  []
-  [face_gradient_caching]
-    type = 'Exodiff'
-    input = 'fv_caching.i'
-    exodiff = 'no_caching_face_gradients.e'
-    requirement = 'The system shall be able to solve a finite volume problem without caching face gradients, except at extrapolated boundary faces.'
-    cli_args = 'Outputs/file_base=no_caching_face_gradients GlobalParams/cache_face_gradients=false'
+    requirement = 'The system shall be able to solve a finite volume problem while caching variable gradients at cell centers.'
     ad_indexing_type = 'global'
   []
   [no_caching]
     type = 'Exodiff'
     input = 'fv_caching.i'
-    exodiff = 'no_caching_face.e'
-    requirement = 'The system shall be able to solve a finite volume problem without caching face values or gradients, except at extrapolated boundary faces.'
-    cli_args = 'Outputs/file_base=no_caching_face'
+    exodiff = 'no_caching.e'
+    requirement = 'The system shall be able to solve a finite volume problem without caching any solution-related quantities.'
+    cli_args = 'Outputs/file_base=no_caching GlobalParams/cache_cell_gradients=false'
     ad_indexing_type = 'global'
   []
 []
