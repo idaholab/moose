@@ -80,6 +80,14 @@ MortarConsumerInterface::validParams()
                         false,
                         "Whether we should ghost point neighbors of secondary face elements, and "
                         "consequently also their mortar interface couples.");
+  params.addParam<Real>(
+      "minimum_projection_angle",
+      40.0,
+      "Parameter to control which angle (in degrees) is admissible for the creation of mortar "
+      "segments.  If set to a value close to zero, very oblique projections are allowed, which "
+      "can result in mortar segments solving physics not meaningfully, and overprojection of "
+      "primary nodes onto the mortar segment mesh in extreme cases. This parameter is mostly "
+      "intended for mortar mesh debugging purposes in two dimensions.");
 
   return params;
 }
@@ -118,7 +126,8 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
       displaced,
       moose_object->getParam<bool>("periodic"),
       moose_object->getParam<bool>("debug_mesh"),
-      moose_object->getParam<bool>("correct_edge_dropping"));
+      moose_object->getParam<bool>("correct_edge_dropping"),
+      moose_object->getParam<Real>("minimum_projection_angle"));
 
   _amg = &_mci_fe_problem.getMortarInterface(
       std::make_pair(_primary_id, _secondary_id),

@@ -47,8 +47,6 @@
 using namespace libMesh;
 using MetaPhysicL::DualNumber;
 
-const std::string AutomaticMortarGeneration::system_name = "Nodal Normals";
-
 AutomaticMortarGeneration::AutomaticMortarGeneration(
     MooseApp & app,
     MeshBase & mesh_in,
@@ -57,7 +55,8 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     bool on_displaced,
     bool periodic,
     const bool debug,
-    const bool correct_edge_dropping)
+    const bool correct_edge_dropping,
+    const Real minimum_projection_angle)
   : ConsoleStreamInterface(app),
     _app(app),
     _mesh(mesh_in),
@@ -65,7 +64,8 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     _on_displaced(on_displaced),
     _periodic(periodic),
     _distributed(!_mesh.is_replicated()),
-    _correct_edge_dropping(correct_edge_dropping)
+    _correct_edge_dropping(correct_edge_dropping),
+    _minimum_projection_angle(minimum_projection_angle)
 {
   _primary_secondary_boundary_id_pairs.push_back(boundary_key);
   _primary_requested_boundary_ids.insert(boundary_key.first);
@@ -706,6 +706,18 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       _mortar_segment_mesh->delete_elem(msm_elem);
     }
   }
+
+  std::unordered_set<Node *> msm_connected_nodes;
+
+  // Deleting elements may produce isolated nodes.
+  // Loops for identifying and removing such nodes from mortar segment mesh.
+  for (const auto & element : _mortar_segment_mesh->element_ptr_range())
+    for (auto & n : element->node_ref_range())
+      msm_connected_nodes.insert(&n);
+
+  for (const auto & node : _mortar_segment_mesh->node_ptr_range())
+    if (!msm_connected_nodes.count(node))
+      _mortar_segment_mesh->delete_node(node);
 
 #ifdef DEBUG
   // Verify that all segments without primary contribution have been deleted
@@ -1780,7 +1792,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
           if ((current_iterate < max_iterates) && (std::abs(xi2) <= 1. + _xi_tolerance) &&
               (std::abs(
                    (primary_elem_candidate->point(0) - primary_elem_candidate->point(1)).unit() *
-                   nodal_normal) < 0.75))
+                   nodal_normal) < std::cos(_minimum_projection_angle * libMesh::pi / 180)))
           {
             // If xi2 == +1 or -1 then this secondary node mapped directly to a node on the primary
             // surface. This isn't as unlikely as you might think, it will happen if the meshes
@@ -2090,7 +2102,8 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
           // of the projection
           if ((current_iterate < max_iterates) && (std::abs(xi1) <= 1. + _xi_tolerance) &&
               (std::abs((primary_side_elem->point(0) - primary_side_elem->point(1)).unit() *
-                        MetaPhysicL::raw_value(normals).unit()) < 0.75))
+                        MetaPhysicL::raw_value(normals).unit()) <
+               std::cos(_minimum_projection_angle * libMesh::pi / 180.0)))
           {
             if (std::abs(std::abs(xi1) - 1.) < _xi_tolerance)
             {

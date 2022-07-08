@@ -73,7 +73,8 @@ public:
                             bool on_displaced,
                             bool periodic,
                             const bool debug,
-                            const bool correct_edge_dropping);
+                            const bool correct_edge_dropping,
+                            const Real minimum_projection_angle);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -504,6 +505,12 @@ private:
   /// Flag to enable regressed treatment of edge dropping where all LM DoFs on edge dropping element
   /// are strongly set to 0.
   bool _correct_edge_dropping;
+
+  /// Parameter to control which angle (in degrees) is admissible for the creation of mortar segments.
+  /// If set to a value close to zero, very oblique projections are allowed, which can result in mortar
+  /// segments solving physics not meaningfully and overprojection of primary nodes onto the mortar
+  /// segment mesh in extreme cases. This parameter is mostly intended for mortar mesh debugging purposes in 2D.
+  Real _minimum_projection_angle;
 };
 
 inline const std::pair<BoundaryID, BoundaryID> &
