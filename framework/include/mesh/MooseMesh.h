@@ -1328,7 +1328,7 @@ private:
   /// Map storing the ElemInfo-s of the ghost elements
   mutable std::unordered_map<std::pair<const Elem *, unsigned int>, ElemInfo> _elem_to_ghost_info;
   /// Map connecting elems with their corresponding ElemInfo
-  mutable std::unordered_map<const Elem *, unsigned int> _elem_to_elem_info;
+  mutable std::unordered_map<const Elem *, dof_id_type> _elem_to_elem_info;
 
   /// Holds only those \p FaceInfo objects that have \p processor_id equal to this process's id,
   /// e.g. the local \p FaceInfo objects

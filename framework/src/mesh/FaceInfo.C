@@ -67,7 +67,7 @@ FaceInfo::computeCoefficients(const ElemInfo * const neighbor_info)
   _neighbor_info = neighbor_info;
 
   if (_neighbor_info->isGhost())
-    _neighbor_side_id = std::numeric_limits<unsigned int>::max();
+    _neighbor_side_id = libMesh::invalid_uint;
   else
     _neighbor_side_id = _neighbor_info->elem()->which_neighbor_am_i(_elem_info->elem());
 
@@ -82,4 +82,14 @@ FaceInfo::computeCoefficients(const ElemInfo * const neighbor_info)
 
   // For interpolation coefficients
   _gc = (_neighbor_info->centroid() - r_intersection).norm() / _d_cn_mag;
+}
+
+Point
+FaceInfo::skewnessCorrectionVector() const
+{
+  const Point r_intersection =
+      _elem_info->centroid() +
+      (((_face_centroid - _elem_info->centroid()) * _normal) / (_e_cn * _normal)) * _e_cn;
+
+  return _face_centroid - r_intersection;
 }

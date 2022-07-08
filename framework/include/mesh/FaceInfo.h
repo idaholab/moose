@@ -35,7 +35,7 @@ class Node;
 class FaceInfo
 {
 public:
-  FaceInfo(const ElemInfo * elem_info, unsigned int side);
+  FaceInfo(const ElemInfo * const elem_info, const unsigned int side);
 
   /// This enum is used to indicate which side(s) of a face a particular
   /// variable is defined on.  This is important for certain BC-related finite
@@ -66,18 +66,9 @@ public:
   /// Returns the coordinates of the face centroid.
   const Point & faceCentroid() const { return _face_centroid; }
 
-  ///@{
   /// Returns the skewness-correction vector (vector between the approximate and real face
   /// centroids).
-  const Point skewnessCorrectionVector() const
-  {
-    Point r_intersection =
-        _elem_info->centroid() +
-        (((_face_centroid - _elem_info->centroid()) * _normal) / (_e_cn * _normal)) * _e_cn;
-
-    return _face_centroid - r_intersection;
-  }
-  ///@}
+  Point skewnessCorrectionVector() const;
 
   ///@{
   /// Returns the elem and neighbor elements adjacent to the face.
@@ -85,13 +76,7 @@ public:
   /// will return nullptr - the elem will never be null.
   const Elem & elem() const { return *(_elem_info->elem()); }
   const Elem * elemPtr() const { return _elem_info->elem(); }
-  const Elem & neighbor() const
-  {
-    if (!_neighbor_info->elem())
-      mooseError("FaceInfo object 'const Elem & neighbor()' is called but neighbor element pointer "
-                 "is null. This occurs for faces at the domain boundary");
-    return *(_neighbor_info->elem());
-  }
+  const Elem & neighbor() const;
   const Elem * neighborPtr() const { return _neighbor_info->elem(); }
   ///@}
 
@@ -120,13 +105,7 @@ public:
   ///@}
 
   /// Returns which side(s) the given variable is defined on for this face.
-  VarFaceNeighbors faceType(const std::string & var_name) const
-  {
-    auto it = _face_types_by_var.find(var_name);
-    if (it == _face_types_by_var.end())
-      mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
-    return it->second;
-  }
+  VarFaceNeighbors faceType(const std::string & var_name) const;
   /// Mutably returns which side(s) the given variable is defined on for this face.
   VarFaceNeighbors & faceType(const std::string & var_name) { return _face_types_by_var[var_name]; }
 
@@ -182,7 +161,7 @@ public:
 
 private:
   /// the elem and neighbor elems
-  const ElemInfo * _elem_info;
+  const ElemInfo * const _elem_info;
   const ElemInfo * _neighbor_info;
 
   Real _face_coord = 0;
@@ -214,3 +193,21 @@ private:
   /// the set of boundary ids that this face is associated with
   std::set<BoundaryID> _boundary_ids;
 };
+
+inline const Elem &
+FaceInfo::neighbor() const
+{
+  if (!_neighbor_info->elem())
+    mooseError("FaceInfo object 'const Elem & neighbor()' is called but neighbor element pointer "
+               "is null. This occurs for faces at the domain boundary");
+  return *(_neighbor_info->elem());
+}
+
+inline FaceInfo::VarFaceNeighbors
+FaceInfo::faceType(const std::string & var_name) const
+{
+  auto it = _face_types_by_var.find(var_name);
+  if (it == _face_types_by_var.end())
+    mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
+  return it->second;
+}

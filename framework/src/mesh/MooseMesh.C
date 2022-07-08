@@ -3196,7 +3196,7 @@ MooseMesh::buildFiniteVolumeInfo() const
   // in the loop below). For users who want to access the ElemInfo based on
   // Elem*, we prepare a map connecting the Elem* and the index in the ElemInfo
   // vector.
-  unsigned int counter = 0;
+  dof_id_type counter = 0;
   for (const Elem * elem : as_range(begin, end))
   {
     // We fill the vector with the real ElemInfo-s and the corresponding map first
@@ -3216,7 +3216,6 @@ MooseMesh::buildFiniteVolumeInfo() const
   counter = 0;
   for (const Elem * elem : as_range(begin, end))
   {
-    const Elem * elem = *it;
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       // get the neighbor element
