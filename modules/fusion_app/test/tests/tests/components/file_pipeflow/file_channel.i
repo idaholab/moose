@@ -10,12 +10,18 @@ rho = 0.164 # kg/m3, helium, gas, ~300 K
 mfr = ${fparse rho*vel*width * height} # mass flow rate \rho u A. A = 0.004,
 D_h = ${fparse (4*area)/wetted_perimeter}
 
+[Closures]
+  [my_closures]
+    type = Closures1PhaseNone
+  []
+[]
+
 [GlobalParams]
   gravity_vector = '0 0 -9.81'
   initial_T = ${T_in}
   initial_p = ${p_out}
   initial_vel = 0
-  closures = none
+  closures = my_closures
 []
 
 [Functions]
@@ -26,7 +32,7 @@ D_h = ${fparse (4*area)/wetted_perimeter}
   []
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [h2]
     type = IdealGasFluidProperties
     gamma = 1.667   # (cp/cv) cv: 3117.0, cp: 5195.0 (J/kg/K)
@@ -37,40 +43,25 @@ D_h = ${fparse (4*area)/wetted_perimeter}
 []
 
 [Materials]
-  [f_wall_mat]
-    type = ConstantMaterial
-    property_name = 'f_D'
-    derivative_vars = 'rhoA rhouA rhoEA'
-    value = 0.164 # kg/m3, helium, gas, ~300 K
-  []
-
-  [Re_mat]
-    type = ParsedMaterial
-    f_name = 'Re'
-    function = 'rho * abs(vel) * D_h / mu'
-    material_property_names = 'rho vel D_h mu'
-  []
-
-  [Pr_mat]
-    type = PrandtlNumberMaterial
-    cp = cp
+  [fD_material]
+    type = ADWallFrictionChurchillMaterial
+    rho = rho
+    vel = vel
+    D_h = D_h
     mu = mu
-    k = k
+    f_D = 'f_D'
   []
 
-  [Nu_mat]
-    type = ParsedMaterial
-    f_name = "Nu"
-    function = '0.023 * pow(Re, 4 / 5) * pow(Pr, 0.3)' # Page 29 of RELAP Manul
-    material_property_names = 'Re Pr T'
-  []
-
-  [Hw_mat]
-    # Computes convective heat transfer coefficient from Nusselt number
-    type = ConvectiveHeatTransferCoefficientMaterial
-    Nu = Nu
+  [Hw_material]
+    type = ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial
+    rho = rho
+    vel = vel
+    D_h = D_h
     k = k
-    D_h = ${D_h}
+    mu = mu
+    cp = cp
+    T = T
+    T_wall = T_wall
   []
 []
 
@@ -79,35 +70,13 @@ D_h = ${fparse (4*area)/wetted_perimeter}
     family = MONOMIAL
     order = CONSTANT
   []
-
-  [Re]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-
-  [Nu]
-    family = MONOMIAL
-    order = CONSTANT
-  []
 []
 
 [AuxKernels]
   [Hw_aux]
-    type = MaterialRealAux
+    type = ADMaterialRealAux
     variable = Hw
     property = Hw
-  []
-
-  [Re_aux]
-    type = MaterialRealAux
-    variable = Re
-    property = Re
-  []
-
-  [Nu_aux]
-    type = MaterialRealAux
-    variable = Nu
-    property = Nu
   []
 []
 
@@ -162,6 +131,7 @@ D_h = ${fparse (4*area)/wetted_perimeter}
   type = Transient
   start_time = 0
   end_time = 0.1
+  solve_type = Newton
   [TimeStepper]
     type = IterationAdaptiveDT
     dt = 0.01
