@@ -34,11 +34,11 @@ applications with mathematical expressions.
 \begin{equation}
   y =
   \begin{cases}
-    0 & u < B_{lower}  \\
-    1 & u > B_{higher} \\
+    0 & u <= B_{lower}  \\
+    1 & u >= B_{higher} \\
     6x^5 - 15 x^4 + 10x^3 & \text{Otherwise}
   \end{cases}
 \end{equation}
 This method ensures a smooth transition from 0 to 1 between the two bounds, while also ensuring the first and second derivatives are zero at the two bounds.
 Use of this method is especially useful when transitioning between two non-smooth regimes.
-The derivative with respect to the passed value $u$ is returned using the optional derivative bool.
+The derivative with respect to the passed value $u$ is returned using the optional derivative bool. Note that if $u = B_{lower} = B_{higher}$, then zero will be returned.
