@@ -127,6 +127,8 @@ function configure_petsc()
       --with-fortran-bindings=0 \
       --with-sowing=0 \
       --with-64-bit-indices \
+      --download-superlu_dist-cmake-arguments=-DXSDK_ENABLE_Fortran=OFF \
+      --download-strumpack-cmake-arguments=-DXSDK_ENABLE_Fortran=OFF \
       "$@"
 
   return $?
