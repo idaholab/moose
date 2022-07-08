@@ -2144,6 +2144,8 @@ public:
    */
   bool identifyVariableGroupsInNL() const { return _identify_variable_groups_in_nl; }
 
+  BoundaryName & getMasterBoundaryName() { return _master_bdry_name; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2570,6 +2572,8 @@ private:
 
   /// Number of steps in a grid sequence
   unsigned int _num_grid_steps;
+
+  BoundaryName _master_bdry_name;
 
   /// Whether to trust the user coupling matrix no matter what. See
   /// https://github.com/idaholab/moose/issues/16395 for detailed background

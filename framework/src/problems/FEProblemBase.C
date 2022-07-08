@@ -273,6 +273,9 @@ FEProblemBase::validParams()
                         "True to turn on a check that no state presents during the evaluation of "
                         "user objects and aux kernels");
 
+  params.addParam<BoundaryName>("master_bdry_name",
+                                "Boundary name in master subapp wants to transfer data from/to. ");
+
   params.addPrivateParam<MooseMesh *>("mesh");
 
   params.declareControllable("solve");
@@ -412,6 +415,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dotdot_old_requested(false),
     _has_mortar(false),
     _num_grid_steps(0),
+    _master_bdry_name(isParamValid("master_bdry_name") ? getParam<BoundaryName>("master_bdry_name")
+                                                       : ""),
     _print_execution_on(),
     _identify_variable_groups_in_nl(getParam<bool>("identify_variable_groups_in_nl"))
 {
