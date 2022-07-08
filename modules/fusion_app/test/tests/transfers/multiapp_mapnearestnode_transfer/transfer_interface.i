@@ -189,7 +189,3 @@
     variable = from_sub_elemental_var
   []
 []
-
-[Problem]
-  type = FusionProblem
-[]

@@ -76,7 +76,3 @@
     args = 'temp'
   []
 []
-
-[Problem]
-  type = FusionProblem
-[]

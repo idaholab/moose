@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "DisplacedProblem.h"
-#include "FusionProblem.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
@@ -95,11 +95,11 @@ MultiAppMapNearestNodeTransfer::execute()
       vec_bdry_ids.push_back(Moose::ANY_BOUNDARY_ID);
       continue;
     }
-    auto & fusion_problem = dynamic_cast<FusionProblem &>(_multi_app->appProblemBase(i_app));
+    auto & fe_problem = _multi_app->appProblemBase(i_app);
     // If this subapp has set boundary name which it wants to associate with
-    if (fusion_problem.getMasterBoundaryName() != "")
+    if (fe_problem.getMasterBoundaryName() != "")
     {
-      auto & bdryname = fusion_problem.getMasterBoundaryName();
+      auto & bdryname = fe_problem.getMasterBoundaryName();
       // Get Boundary ID out of it
       vec_bdry_ids.push_back(master_mesh.getBoundaryID(bdryname));
     }
