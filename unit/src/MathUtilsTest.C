@@ -190,3 +190,23 @@ TEST(MathUtilsTest, linearInterpolation)
       8.0,
       1e-5);
 }
+
+TEST(MathUtilsTest, smootherStep)
+{
+  const auto start = 1.0;
+  const auto end = 1.5;
+  const auto x = 1.2;
+  const auto smoothed = (x - start) / (end - start);
+  const auto val = Utility::pow<3>(smoothed) * (smoothed * (smoothed * 6.0 - 15.0) + 10.0);
+  const auto deriv =
+      30.0 * Utility::pow<2>(smoothed) * (smoothed * (smoothed - 2.0) + 1.0) / (end - start);
+  EXPECT_NEAR(MathUtils::smootherStep<MathUtils::ComputeType::value>(0., start, end), 0, 1e-5);
+  EXPECT_NEAR(MathUtils::smootherStep<MathUtils::ComputeType::value>(2., start, end), 1, 1e-5);
+  EXPECT_NEAR(
+      MathUtils::smootherStep<MathUtils::ComputeType::derivative>(0., start, end), 0., 1e-5);
+  EXPECT_NEAR(
+      MathUtils::smootherStep<MathUtils::ComputeType::derivative>(2., start, end), 0., 1e-5);
+  EXPECT_NEAR(MathUtils::smootherStep<MathUtils::ComputeType::value>(x, start, end), val, 1e-5);
+  EXPECT_NEAR(
+      MathUtils::smootherStep<MathUtils::ComputeType::derivative>(x, start, end), deriv, 1e-5);
+}

@@ -288,6 +288,33 @@ smootherStep(T x, T2 start, T2 end, bool derivative = false)
   return Utility::pow<3>(x) * (x * (x * 6.0 - 15.0) + 10.0);
 }
 
+enum class ComputeType
+{
+  value,
+  derivative
+};
+
+template <ComputeType compute_type, typename X, typename S, typename E>
+auto
+smootherStep(const X & x, const S & start, const E & end)
+{
+  mooseAssert("start < end", "Start value must be lower than end value for smootherStep");
+  if (x <= start)
+    return 0.0;
+  else if (x >= end)
+  {
+    if constexpr (compute_type == ComputeType::derivative)
+      return 0.0;
+    if constexpr (compute_type == ComputeType::value)
+      return 1.0;
+  }
+  const auto u = (x - start) / (end - start);
+  if constexpr (compute_type == ComputeType::derivative)
+    return 30.0 * Utility::pow<2>(u) * (u * (u - 2.0) + 1.0) / (end - start);
+  if constexpr (compute_type == ComputeType::value)
+    return Utility::pow<3>(u) * (u * (u * 6.0 - 15.0) + 10.0);
+}
+
 /**
  * Helper function templates to set a variable to zero.
  * Specializations may have to be implemented (for examples see
@@ -337,12 +364,6 @@ mooseSetToZero(std::vector<Real> & vec)
  * @return a data structure holding entries representing the complete multi index
  */
 std::vector<std::vector<unsigned int>> multiIndex(unsigned int dim, unsigned int order);
-
-enum class ComputeType
-{
-  value,
-  derivative
-};
 
 template <ComputeType compute_type, typename X, typename X1, typename X2, typename Y1, typename Y2>
 auto
