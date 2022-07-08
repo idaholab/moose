@@ -338,6 +338,23 @@ mooseSetToZero(std::vector<Real> & vec)
  */
 std::vector<std::vector<unsigned int>> multiIndex(unsigned int dim, unsigned int order);
 
+enum class ComputeType
+{
+  value,
+  derivative
+};
+
+template <ComputeType compute_type, typename X, typename X1, typename X2, typename Y1, typename Y2>
+auto
+linearInterpolation(const X & x, const X1 & x1, const X2 & x2, const Y1 & y1, const Y2 & y2)
+{
+  const auto m = (y2 - y1) / (x2 - x1);
+  if constexpr (compute_type == ComputeType::derivative)
+    return m;
+  if constexpr (compute_type == ComputeType::value)
+    return m * (x - x1) + y1;
+}
+
 } // namespace MathUtils
 
 /// A helper function for MathUtils::multiIndex

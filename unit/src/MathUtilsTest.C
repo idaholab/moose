@@ -178,3 +178,15 @@ TEST(MathUtilsTest, multiIndex)
     for (unsigned int c = 0; c < mi_32[0].size(); c++)
       EXPECT_EQ(mi_32[r][c], mi_32_answer[r][c]);
 }
+
+TEST(MathUtilsTest, linearInterpolation)
+{
+  EXPECT_NEAR(
+      MathUtils::linearInterpolation<MathUtils::ComputeType::value>(0.15, 0.1, 0.2, 0.4, 1.2),
+      0.8,
+      1e-5);
+  EXPECT_NEAR(
+      MathUtils::linearInterpolation<MathUtils::ComputeType::derivative>(0.15, 0.1, 0.2, 0.4, 1.2),
+      8.0,
+      1e-5);
+}
