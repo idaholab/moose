@@ -696,6 +696,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
                   "We should have found the element");
       auto & msm_set = it->second;
       msm_set.erase(msm_elem);
+      // We may be creating nodes with only one element neighbor where before this removal there
+      // were two. But the nodal normal used in computations will reflect the two-neighbor geometry.
+      // For a lower-d secondary mesh corner, that will imply the corner node will have a tilted
+      // normal vector (same for tangents) despite the mortar segment mesh not including its
+      // vertical neighboring element. It is the secondary element neighbors (not mortar segment
+      // mesh neighbors) that determine the nodal normal field.
       if (msm_set.empty())
         _secondary_elems_to_mortar_segments.erase(it);
 
@@ -1609,6 +1615,9 @@ AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal
   // Mar 1;45(3):683-94.
   const Point h_vector(std::max(nx - 1.0, nx + 1.0), ny, nz);
 
+  // Avoid singularity of the equations at the end of routine by providing the solution to
+  // (nx,ny,nz)=(-1,0,0) Normal/tangent fields can be visualized by outputting nodal geometry mesh
+  // on a spherical problem.
   if (std::abs(h_vector(0)) < TOLERANCE)
   {
     nodal_tangent_one(0) = 0;
