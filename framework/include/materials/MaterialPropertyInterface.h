@@ -310,6 +310,7 @@ public:
 
   /**
    * Retrieve the property deduced from the name \p name for the specified \p material_data
+   * that can be defined on element, face and neighboring face.
    */
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name,

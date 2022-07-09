@@ -850,6 +850,14 @@ public:
   std::set<SubdomainID> getBoundaryConnectedBlocks(const BoundaryID bid) const;
 
   /**
+   * Get the list of subdomains associated with the given boundary of its secondary side.
+   *
+   * @param bid The boundary ID you want to get the subdomain IDs for.
+   * @return All subdomain IDs associated with given boundary ID
+   */
+  std::set<SubdomainID> getBoundaryConnectedSecondaryBlocks(const BoundaryID bid) const;
+
+  /**
    * Get the list of subdomains contacting the given boundary.
    *
    * @param bid The boundary ID you want to get the subdomain IDs for.

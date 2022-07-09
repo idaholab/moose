@@ -24,10 +24,13 @@ void changeBoundaryId(MeshBase & mesh,
                       const libMesh::boundary_id_type new_id,
                       bool delete_prev);
 
-std::vector<libMesh::boundary_id_type>
-getBoundaryIDs(const libMesh::MeshBase & mesh,
-               const std::vector<BoundaryName> & boundary_name,
-               bool generate_unknown);
+std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
+                                       const std::vector<BoundaryName> & boundary_name,
+                                       bool generate_unknown);
+
+std::set<BoundaryID> getBoundaryIDSet(const libMesh::MeshBase & mesh,
+                                      const std::vector<BoundaryName> & boundary_name,
+                                      bool generate_unknown);
 
 /**
  * Gets the boundary ID associated with the given BoundaryName.

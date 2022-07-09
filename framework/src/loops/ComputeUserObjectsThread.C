@@ -245,20 +245,21 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
   if (!(neighbor->active()))
     return;
 
-  std::vector<UserObject *> userobjs;
-  queryBoundary(Interfaces::InterfaceUserObject, bnd_id, userobjs);
+  std::vector<UserObject *> interface_objs;
+  queryBoundary(Interfaces::InterfaceUserObject, bnd_id, interface_objs);
 
-  bool should_execute = !userobjs.empty();
-
-  if (!should_execute && !_domain_objs.empty())
+  bool has_domain_objs = false;
+  if (!_domain_objs.empty())
     for (const auto * const domain_uo : _domain_objs)
       if (domain_uo->shouldExecuteOnInterface())
       {
-        should_execute = true;
+        has_domain_objs = true;
         break;
       }
 
-  if (!should_execute)
+  // if we do not have any interface user objects and domain user objects on the current
+  // interface
+  if (interface_objs.empty() && !has_domain_objs)
     return;
 
   _fe_problem.prepareFace(elem, _tid);
@@ -280,7 +281,7 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
   // with the current element and side
   _fe_problem.reinitMaterialsInterface(bnd_id, _tid);
 
-  for (const auto & uo : userobjs)
+  for (const auto & uo : interface_objs)
     uo->execute();
 
   for (auto & uo : _domain_objs)

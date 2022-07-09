@@ -28,6 +28,18 @@ class Elem;
 class QBase;
 }
 
+/**
+ * This user object allows related evaluations on elements, boundaries, internal sides,
+ * interfaces in one single place. DomainUserObject is still block restrictable.
+ * While evaluations on elements, boundaries and internal sides always happen,
+ * a parameter 'interface_boundaries' needs to be set to invoke evaluations on interfaces.
+ * We require this parameter for interface evaluations because we want to enforce sanity
+ * checks on coupling variables that are not defined on the domain this user object works on
+ * but only are available on the other side of the interfaces. All sides of an interface must
+ * connect with the subdomain of DomainUserObject.
+ * With this user object, evaluations that would have to be put into ElementUserObject,
+ * SideUserObject, InternalSideUserObject, and InterfaceUserObject separately may be combined.
+ */
 class DomainUserObject : public UserObject,
                          public BlockRestrictable,
                          public ThreeMaterialPropertyInterface,
@@ -101,10 +113,18 @@ protected:
   /**
    * Routes through to \p Coupleable::getFieldVar, but also inserts the return variable into a set
    * of field variables to check on interface-connected blocks, as opposed to our blocks, when
-   * performing our block-restriction integrity check
+   * performing our block-restriction integrity check.
+   * The argument \p interfaces is optional specifying on what interfaces the variable is expected
+   * to be available, i.e. the field variable is defined over elements out side of the domain but
+   * connecting the subdomain with the interface. Default value means that the variable should be
+   * available on all interfaces.
+   * Note: a field variable on interface is not required to be defined on the subdomain of this
+   *       domain user object.
    */
-  const MooseVariableFieldBase * getInterfaceFieldVar(const std::string & var_name,
-                                                      unsigned int comp);
+  const MooseVariableFieldBase *
+  getInterfaceFieldVar(const std::string & var_name,
+                       unsigned int comp,
+                       const std::set<BoundaryID> * interfaces = nullptr);
 
   /// the Moose mesh
   MooseMesh & _mesh;
@@ -144,11 +164,8 @@ protected:
   /// The set of boundary IDs on which this object should perform \p executeOnInterface
   std::set<BoundaryID> _interface_bnd_ids;
 
-  /// The set of blocks connected to our blocks through the \p _interface_bnd_ids data member
-  std::set<SubdomainID> _interface_connected_blocks;
-
-  /// The set of variables we wish to evaluate on the interface connected blocks
-  std::set<const MooseVariableFieldBase *> _interface_vars;
+  /// The set of blocks connected to our blocks through boundaries of the \p _interface_bnd_ids data member
+  std::map<BoundaryID, std::set<SubdomainID>> _interface_connected_blocks;
 
 private:
   void setVolumeData();
@@ -179,6 +196,9 @@ private:
   /// An array representing coordinate system volume modifications. Unity for Cartesian, 2piR for
   /// RZ, 4piR^2 for spherical
   const MooseArray<Real> & _coord;
+
+  /// A map storing the set of boundaries where variables we wish to evaluate
+  std::map<VariableName, std::set<BoundaryID>> _var_interfaces;
 };
 
 inline void
