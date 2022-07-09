@@ -125,25 +125,22 @@ public:
   ADMaterialProperty<T> & declareADPropertyByName(const std::string & prop_name);
   template <typename T>
   ADMaterialProperty<T> & declareADProperty(const std::string & name);
-  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
-  ADMaterialProperty<T> & declareGenericProperty(const std::string & prop_name)
+
+  template <typename T, bool is_ad>
+  auto & declareGenericProperty(const std::string & prop_name)
   {
-    return declareADProperty<T>(prop_name);
+    if constexpr (is_ad)
+      return declareADProperty<T>(prop_name);
+    else
+      return declareProperty<T>(prop_name);
   }
-  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
-  MaterialProperty<T> & declareGenericProperty(const std::string & prop_name)
+  template <typename T, bool is_ad>
+  auto & declareGenericPropertyByName(const std::string & prop_name)
   {
-    return declareProperty<T>(prop_name);
-  }
-  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
-  ADMaterialProperty<T> & declareGenericPropertyByName(const std::string & prop_name)
-  {
-    return declareADPropertyByName<T>(prop_name);
-  }
-  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
-  MaterialProperty<T> & declareGenericPropertyByName(const std::string & prop_name)
-  {
-    return declarePropertyByName<T>(prop_name);
+    if constexpr (is_ad)
+      return declareADPropertyByName<T>(prop_name);
+    else
+      return declarePropertyByName<T>(prop_name);
   }
   ///@}
 

@@ -26,6 +26,10 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     _c_is_implicit(_c_parameters.have_parameter<bool>("implicit")
                        ? _c_parameters.get<bool>("implicit")
                        : true),
+    _c_allow_element_to_nodal_coupling(
+        _c_parameters.have_parameter<bool>("_allow_nodal_to_elemental_coupling")
+            ? _c_parameters.get<bool>("_allow_nodal_to_elemental_coupling")
+            : false),
     _c_tid(_c_parameters.get<THREAD_ID>("_tid")),
     _zero(_c_fe_problem._zero[_c_tid]),
     _phi_zero(_c_fe_problem._phi_zero[_c_tid]),
@@ -220,7 +224,7 @@ Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned i
                  ". This is not currently supported");
   }
 
-  if (!(vars_vector[comp])->isNodal() && _c_nodal)
+  if (!(vars_vector[comp])->isNodal() && _c_nodal && !_c_allow_element_to_nodal_coupling)
     mooseError(_c_name, ": cannot couple elemental variables into nodal objects");
 
   return true;

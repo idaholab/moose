@@ -20,6 +20,7 @@
 #include "SwapBackSentinel.h"
 #include "FEProblem.h"
 #include "MaterialBase.h"
+#include "DomainUserObject.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -52,7 +53,7 @@ ComputeUserObjectsThread::subdomainChanged()
   // for the current thread get block objects for the current subdomain and *all* side objects
   std::vector<UserObject *> objs;
   querySubdomain(Interfaces::ElementUserObject | Interfaces::InternalSideUserObject |
-                     Interfaces::InterfaceUserObject,
+                     Interfaces::InterfaceUserObject | Interfaces::DomainUserObject,
                  objs);
 
   std::vector<UserObject *> side_objs;
@@ -106,6 +107,7 @@ ComputeUserObjectsThread::subdomainChanged()
   querySubdomain(Interfaces::InterfaceUserObject, _interface_user_objects);
   querySubdomain(Interfaces::ElementUserObject, _element_objs);
   querySubdomain(Interfaces::ShapeElementUserObject, _shape_element_objs);
+  querySubdomain(Interfaces::DomainUserObject, _domain_objs);
 }
 
 void
@@ -121,6 +123,12 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
 
   for (const auto & uo : _element_objs)
     uo->execute();
+
+  for (auto & uo : _domain_objs)
+  {
+    uo->preExecuteOnElement();
+    uo->executeOnElement();
+  }
 
   // UserObject Jacobians
   if (_fe_problem.currentlyComputingJacobian() && _shape_element_objs.size() > 0)
@@ -147,7 +155,7 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
 {
   std::vector<UserObject *> userobjs;
   queryBoundary(Interfaces::SideUserObject, bnd_id, userobjs);
-  if (userobjs.size() == 0)
+  if (userobjs.size() == 0 && _domain_objs.size() == 0)
     return;
 
   _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
@@ -164,6 +172,12 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
 
   for (const auto & uo : userobjs)
     uo->execute();
+
+  for (auto & uo : _domain_objs)
+  {
+    uo->preExecuteOnBoundary();
+    uo->executeOnBoundary();
+  }
 
   // UserObject Jacobians
   std::vector<ShapeSideUserObject *> shapers;
@@ -194,7 +208,7 @@ ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
   // Get the global id of the element and the neighbor
   const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
 
-  if (_internal_side_objs.size() == 0)
+  if (_internal_side_objs.size() == 0 && _domain_objs.size() == 0)
     return;
   if (!((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
         (neighbor->level() < elem->level())))
@@ -214,6 +228,13 @@ ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
   for (const auto & uo : _internal_side_objs)
     if (!uo->blockRestricted() || uo->hasBlocks(neighbor->subdomain_id()))
       uo->execute();
+
+  for (auto & uo : _domain_objs)
+    if (!uo->blockRestricted() || uo->hasBlocks(neighbor->subdomain_id()))
+    {
+      uo->preExecuteOnInternalSide();
+      uo->executeOnInternalSide();
+    }
 }
 
 void
@@ -221,12 +242,23 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
 {
   // Pointer to the neighbor we are currently working on.
   const Elem * neighbor = elem->neighbor_ptr(side);
+  if (!(neighbor->active()))
+    return;
 
   std::vector<UserObject *> userobjs;
   queryBoundary(Interfaces::InterfaceUserObject, bnd_id, userobjs);
-  if (_interface_user_objects.size() == 0)
-    return;
-  if (!(neighbor->active()))
+
+  bool should_execute = !userobjs.empty();
+
+  if (!should_execute && !_domain_objs.empty())
+    for (const auto * const domain_uo : _domain_objs)
+      if (domain_uo->shouldExecuteOnInterface())
+      {
+        should_execute = true;
+        break;
+      }
+
+  if (!should_execute)
     return;
 
   _fe_problem.prepareFace(elem, _tid);
@@ -250,6 +282,13 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
 
   for (const auto & uo : userobjs)
     uo->execute();
+
+  for (auto & uo : _domain_objs)
+    if (uo->shouldExecuteOnInterface())
+    {
+      uo->preExecuteOnInterface();
+      uo->executeOnInterface();
+    }
 }
 
 void

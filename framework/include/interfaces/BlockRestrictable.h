@@ -194,7 +194,7 @@ public:
    *
    * @param variable The variable to check against.
    */
-  void checkVariable(const MooseVariableFieldBase & variable) const;
+  virtual void checkVariable(const MooseVariableFieldBase & variable) const;
 
 protected:
   /// Pointer to the MaterialData class for this object

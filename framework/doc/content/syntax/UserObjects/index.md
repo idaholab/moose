@@ -30,6 +30,8 @@ and use the interface without the use of dynamic casts.
    within the mesh on each execution flag.
 - +SideUserObject+: "execute" is called for each +side+, that is on a boundary, within the mesh
    on each execution flag.
+- +DomainUserObject+: this object is capable of executing all the operations of
+  a +ElementUserObject+, +InternalSideUserObject+, and +SideUserObject+
 
 ## Restartable Data
 

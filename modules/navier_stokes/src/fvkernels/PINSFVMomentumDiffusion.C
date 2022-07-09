@@ -45,12 +45,17 @@ PINSFVMomentumDiffusion::computeStrongResidual()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   using namespace Moose::FV;
 
+  const bool has_elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+                         _face_type == FaceInfo::VarFaceNeighbors::BOTH);
+  const bool has_neighbor = (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
+                             _face_type == FaceInfo::VarFaceNeighbors::BOTH);
+
   const auto elem_face = elemFromFace();
   const auto neighbor_face = neighborFromFace();
   const auto mu_elem = _mu(elem_face);
   const auto mu_neighbor = _mu(neighbor_face);
-  const auto eps_elem = _eps(elem_face);
-  const auto eps_neighbor = _eps(neighbor_face);
+  const auto eps_elem = has_elem ? _eps(elem_face) : _eps(neighbor_face);
+  const auto eps_neighbor = has_neighbor ? _eps(neighbor_face) : _eps(elem_face);
 
   // Compute the diffusion driven by the velocity gradient
   // Interpolate viscosity divided by porosity on the face
@@ -61,8 +66,7 @@ PINSFVMomentumDiffusion::computeStrongResidual()
   auto dudn =
       _var.gradient(Moose::FV::makeCDFace(*_face_info, faceArgSubdomains())) * _face_info->normal();
 
-  if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
-      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  if (has_elem)
   {
     const auto dof_number = _face_info->elem().dof_number(_sys.number(), _var.number(), 0);
     // A gradient is a linear combination of degrees of freedom so it's safe to straight-up index
@@ -70,8 +74,7 @@ PINSFVMomentumDiffusion::computeStrongResidual()
     _ae = dudn.derivatives()[dof_number];
     _ae *= -mu_face;
   }
-  if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
-      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  if (has_neighbor)
   {
     const auto dof_number = _face_info->neighbor().dof_number(_sys.number(), _var.number(), 0);
     _an = dudn.derivatives()[dof_number];
@@ -83,7 +86,10 @@ PINSFVMomentumDiffusion::computeStrongResidual()
 
   // Get the face porosity gradient separately
   const auto & grad_eps_face =
-      MetaPhysicL::raw_value(_eps.gradient(Moose::FV::makeCDFace(*_face_info)));
+      (has_elem && has_neighbor)
+          ? MetaPhysicL::raw_value(_eps.gradient(Moose::FV::makeCDFace(*_face_info)))
+          : MetaPhysicL::raw_value(_eps.gradient(
+                makeElemArg(has_elem ? &_face_info->elem() : _face_info->neighborPtr())));
 
   const auto coeff_elem = mu_elem / eps_elem * _var(elem_face);
   const auto coeff_neighbor = mu_neighbor / eps_neighbor * _var(neighbor_face);

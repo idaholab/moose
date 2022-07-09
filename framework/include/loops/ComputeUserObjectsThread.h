@@ -22,6 +22,7 @@ class InternalSideUserObject;
 class ElementUserObject;
 class ShapeElementUserObject;
 class InterfaceUserObject;
+class DomainUserObject;
 
 // libMesh forward declarations
 namespace libMesh
@@ -78,6 +79,7 @@ private:
   std::vector<InterfaceUserObject *> _interface_user_objects;
   std::vector<ElementUserObject *> _element_objs;
   std::vector<ShapeElementUserObject *> _shape_element_objs;
+  std::vector<DomainUserObject *> _domain_objs;
 };
 
 // determine when we need to run user objects based on whether any initial conditions or aux

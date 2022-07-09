@@ -6,7 +6,7 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Source Code](source/index.md exact=True) - MOOSE source documentation
 
-[Doxygen](http://www.mooseframework.com/docs/doxygen/moose/classes.html) - MOOSE Doxygen
+[Doxygen](https://mooseframework.org/docs/doxygen/moose/classes.html) - MOOSE Doxygen
 
 [Build System](/build_system.md) - How the hierarchical `make` system functions in MOOSE
 

@@ -209,28 +209,10 @@ ADComputeFiniteStrainTempl<R2, R4>::computeQpIncrements(ADR2 & total_strain_incr
 
     case DecompMethod::EigenSolution:
     {
-      std::vector<ADReal> e_value(3);
-      ADRankTwoTensor e_vector;
-
-      const auto Chat = _Fhat[_qp].transpose() * _Fhat[_qp];
-      Chat.symmetricEigenvaluesEigenvectors(e_value, e_vector);
-
-      const auto lambda1 = std::sqrt(e_value[0]);
-      const auto lambda2 = std::sqrt(e_value[1]);
-      const auto lambda3 = std::sqrt(e_value[2]);
-
-      // outer product of a vector with itself is guaranteed to be symmetric
-      const auto N1 = ADR2::selfOuterProduct(e_vector.column(0));
-      const auto N2 = ADR2::selfOuterProduct(e_vector.column(1));
-      const auto N3 = ADR2::selfOuterProduct(e_vector.column(2));
-
-      const ADRankTwoTensor Uhat(N1 * lambda1 + N2 * lambda2 + N3 * lambda3);
-      const ADRankTwoTensor invUhat(Uhat.inverse());
-
-      rotation_increment = _Fhat[_qp] * invUhat;
-
-      total_strain_increment =
-          N1 * std::log(lambda1) + N2 * std::log(lambda2) + N3 * std::log(lambda3);
+      FADR2 Chat = ADR2::transposeTimes(_Fhat[_qp]);
+      FADR2 Uhat = MathUtils::sqrt(Chat);
+      rotation_increment = _Fhat[_qp] * Uhat.inverse().template get<ADRankTwoTensor>();
+      total_strain_increment = MathUtils::log(Uhat).template get<ADR2>();
       break;
     }
 

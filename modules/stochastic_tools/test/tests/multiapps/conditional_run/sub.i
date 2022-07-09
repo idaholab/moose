@@ -15,10 +15,6 @@
     type = ADDiffusion
     variable = u
   []
-  [time]
-    type = ADTimeDerivative
-    variable = u
-  []
 []
 
 [BCs]
@@ -44,8 +40,8 @@
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 1
-  dt = 0.25
+  type = Steady
   solve_type = NEWTON
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 []

@@ -31,5 +31,8 @@ protected:
   const std::vector<dof_id_type> _node_id;
 
   /// The new position(s) of the node
-  const std::vector<Point> _new_position;
+  const std::vector<Point> * _new_position;
+
+  /// The shift(s) to apply to each node
+  const std::vector<Point> * _shift_position;
 };

@@ -171,7 +171,6 @@ CSV::output(const ExecFlagType & type)
   // Output each VectorPostprocessor's data to a file
   if (_write_vector_table)
   {
-
     // The VPP table will not write the same data twice, so to get the symlinks correct
     // for EXEC_FINAL (when other flags exist) whenever files are written the names must
     // be stored. These stored names are then used outside of this loop when the EXEC_FINAL call is

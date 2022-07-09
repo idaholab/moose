@@ -1170,6 +1170,9 @@ protected:
   /// True if implicit value is required
   bool _c_is_implicit;
 
+  // Argument to allow element-to-nodal coupling
+  const bool _c_allow_element_to_nodal_coupling;
+
   /// Thread ID of the thread using this object
   THREAD_ID _c_tid;
 

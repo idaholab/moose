@@ -38,6 +38,10 @@ MultiAppConservativeTransfer::validParams()
                         "If set to true, the transfer skips adjustment when from or to "
                         "postprocessor values are either zero or have different signs. If set to "
                         "false, an error is thrown when encountering these conditions.");
+  params.addParamNamesToGroup("from_postprocessors_to_be_preserved "
+                              "to_postprocessors_to_be_preserved allow_skipped_adjustment",
+                              "Conservative transfer");
+
   return params;
 }
 
