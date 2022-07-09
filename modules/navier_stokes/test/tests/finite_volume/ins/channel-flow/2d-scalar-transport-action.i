@@ -60,10 +60,6 @@ cp=1
     passive_scalar_coupled_source = U
     passive_scalar_coupled_source_coeff = 0.1
 
-    initial_velocity = '1 1 0'
-    initial_pressure = 0.0
-    initial_temperature = 0.0
-
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
     momentum_inlet_function = '1 0'

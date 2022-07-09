@@ -71,6 +71,8 @@ public:
 
   virtual const VariableGradient & coupledNeighborGradient(const std::string & var_name,
                                                            unsigned int comp = 0) const;
+  virtual std::vector<const VariableGradient *>
+  coupledNeighborGradients(const std::string & var_name) const;
   virtual const VariableGradient & coupledNeighborGradientOld(const std::string & var_name,
                                                               unsigned int comp = 0) const;
   virtual const VariableGradient & coupledNeighborGradientOlder(const std::string & var_name,

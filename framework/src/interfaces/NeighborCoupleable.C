@@ -169,6 +169,14 @@ NeighborCoupleable::coupledNeighborGradient(const std::string & var_name, unsign
   return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
 }
 
+std::vector<const VariableGradient *>
+NeighborCoupleable::coupledNeighborGradients(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp)
+  { return &coupledNeighborGradient(var_name, comp); };
+  return coupledVectorHelper<const VariableGradient *>(var_name, func);
+}
+
 const VariableGradient &
 NeighborCoupleable::coupledNeighborGradientOld(const std::string & var_name,
                                                unsigned int comp) const

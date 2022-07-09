@@ -89,8 +89,10 @@ void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
     _row_data.clear();
   }
 
-  // Reinitialize app to original state prior to solve, if a solve has occured
-  if (_solved_once)
+  // Reinitialize app to original state prior to solve, if a solve has occured.
+  // Since the app is reinitialized in the solve step either way, we skip this
+  // for batch-reset mode.
+  if (_solved_once && _mode != StochasticTools::MultiAppMode::BATCH_RESET)
     initialSetup();
 
   if (isParamValid("should_run_reporter"))
@@ -176,6 +178,24 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
       continue;
     }
 
+    // Given that we don't initialize in preTransfer for batch-reset mode, we need
+    // a different logic for resetting the apps for every sample:
+    // - batch-restore: after (re-)initializing the problem, we only need to restore
+    //   starting from the second sample
+    if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+    {
+      if (i != _rank_config.first_local_sim_index)
+        restore();
+    }
+    // - batch-reset: we don't need to initialize for the first sample in the first
+    //   solve. After that, we initialize every time. This is mainly to avoid unnecessary
+    //   initializations for cases when the multiapp does not need to be executed (conditional runs)
+    else
+    {
+      if (i != _rank_config.first_local_sim_index || _solved_once)
+        initialSetup();
+    }
+
     for (auto & transfer : to_transfers)
     {
       transfer->setGlobalRowIndex(i);
@@ -193,17 +213,6 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     }
 
     _local_batch_app_index++;
-
-    if (i < _rank_config.first_local_sim_index + _rank_config.num_local_sims - 1)
-    {
-      if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
-        restore();
-      else
-      {
-        resetApp(_local_batch_app_index + i, target_time);
-        initialSetup();
-      }
-    }
   }
   _local_batch_app_index = 0;
 
@@ -243,6 +252,7 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
     // sampler data and combine them to get full command line option strings.
     updateRowData(_mode == StochasticTools::MultiAppMode::NORMAL ? local_app
                                                                  : _local_batch_app_index);
+
     const std::vector<std::string> & full_args_name =
         MooseUtils::split(FullSolveMultiApp::getCommandLineArgsParamHelper(local_app), ";");
     args = sampledCommandLineArgs(_row_data, full_args_name);

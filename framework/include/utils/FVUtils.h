@@ -21,6 +21,16 @@ namespace Moose
 {
 namespace FV
 {
+
+/**
+ * This function infers based on elements if the faceinfo between them
+ * belongs to the element or not.
+ * @param elem Reference to an element
+ * @param neighbor Pointer to the neighbor of the element
+ * @return If the element (first argument) is the owner of the faceinfo between the two elements
+ */
+bool elemHasFaceInfo(const Elem & elem, const Elem * const neighbor);
+
 template <typename ActionFunctor>
 void
 loopOverElemFaceInfo(const Elem & elem,
@@ -35,22 +45,15 @@ loopOverElemFaceInfo(const Elem & elem,
   {
     const Elem * const candidate_neighbor = elem.neighbor_ptr(side);
 
-    bool elem_has_info;
+    bool elem_has_info = elemHasFaceInfo(elem, candidate_neighbor);
 
     std::set<const Elem *> neighbors;
 
+    const bool inactive_neighbor_detected =
+        candidate_neighbor ? !candidate_neighbor->active() : false;
+
     // See MooseMesh::buildFaceInfo for corresponding checks/additions of FaceInfo
-    if (!candidate_neighbor)
-    {
-      neighbors.insert(candidate_neighbor);
-      elem_has_info = true;
-    }
-    else if (elem.level() != candidate_neighbor->level())
-    {
-      neighbors.insert(candidate_neighbor);
-      elem_has_info = candidate_neighbor->level() < elem.level();
-    }
-    else if (!candidate_neighbor->active())
+    if (inactive_neighbor_detected)
     {
       // We must be next to an element that has been refined
       mooseAssert(candidate_neighbor->has_children(), "We should have children");
@@ -67,17 +70,9 @@ loopOverElemFaceInfo(const Elem & elem,
                       "We shouldn't have greater than a face mismatch level of one");
           neighbors.insert(child);
         }
-
-      elem_has_info = false;
     }
     else
-    {
       neighbors.insert(candidate_neighbor);
-
-      // Both elements are active and they are on the same level, so which one has the info is
-      // determined by the lower ID
-      elem_has_info = elem.id() < candidate_neighbor->id();
-    }
 
     for (const Elem * const neighbor : neighbors)
     {
@@ -147,7 +142,7 @@ determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & 
                                         << " does not exist on or only on the neighbor side of the "
                                            "face despite what the FaceInfo is telling us.");
 
-  bool one_is_elem =
+  const bool one_is_elem =
       ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM;
   const Elem * const elem_one = one_is_elem ? &fi.elem() : fi.neighborPtr();
   mooseAssert(elem_one, "This elem should be non-null!");

@@ -82,34 +82,34 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
 
   const auto face = Moose::FV::makeCDFace(*_face_info, faceArgSubdomains());
 
-  const auto & grad_u = _u_var->adGradSln(*_face_info);
+  const auto grad_u = _u_var->adGradSln(*_face_info);
   // Compute the dot product of the strain rate tensor and the normal vector
   // aka (grad_v + grad_v^T) * n_hat
   ADReal norm_strain_rate = grad_u(_axis_index) * _normal(0);
-  const ADRealVectorValue * grad_v = nullptr;
-  const ADRealVectorValue * grad_w = nullptr;
+  ADRealVectorValue grad_v;
+  ADRealVectorValue grad_w;
   if (_dim >= 2)
   {
-    grad_v = &_v_var->adGradSln(*_face_info);
-    norm_strain_rate += (*grad_v)(_axis_index)*_normal(1);
+    grad_v = _v_var->adGradSln(*_face_info);
+    norm_strain_rate += grad_v(_axis_index) * _normal(1);
     if (_dim >= 3)
     {
-      grad_w = &_w_var->adGradSln(*_face_info);
-      norm_strain_rate += (*grad_w)(_axis_index)*_normal(2);
+      grad_w = _w_var->adGradSln(*_face_info);
+      norm_strain_rate += grad_w(_axis_index) * _normal(2);
     }
   }
-  const ADRealVectorValue & var_grad = _index == 0 ? grad_u : (_index == 1 ? *grad_v : *grad_w);
+  const ADRealVectorValue & var_grad = _index == 0 ? grad_u : (_index == 1 ? grad_v : grad_w);
   norm_strain_rate += var_grad * _normal;
 
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
   if (_dim >= 2)
   {
     symmetric_strain_tensor_norm +=
-        2.0 * Utility::pow<2>((*grad_v)(1)) + Utility::pow<2>((*grad_v)(0) + grad_u(1));
+        2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
     if (_dim >= 3)
-      symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>((*grad_w)(2)) +
-                                      Utility::pow<2>(grad_u(2) + (*grad_w)(0)) +
-                                      Utility::pow<2>((*grad_v)(2) + (*grad_w)(1));
+      symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
+                                      Utility::pow<2>(grad_u(2) + grad_w(0)) +
+                                      Utility::pow<2>(grad_v(2) + grad_w(1));
   }
 
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);

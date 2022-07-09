@@ -85,8 +85,13 @@ MultiAppNearestNodeTransfer::execute()
   // Get the bounding boxes for the "from" domains.
   std::vector<BoundingBox> bboxes;
   if (isParamValid("source_boundary"))
-    bboxes = getFromBoundingBoxes(
-        _from_meshes[0]->getBoundaryID(getParam<BoundaryName>("source_boundary")));
+  {
+    if (_from_meshes.size())
+      bboxes = getFromBoundingBoxes(
+          _from_meshes[0]->getBoundaryID(getParam<BoundaryName>("source_boundary")));
+    else
+      bboxes = getFromBoundingBoxes(Moose::INVALID_BOUNDARY_ID);
+  }
   else
     bboxes = getFromBoundingBoxes();
 
@@ -453,7 +458,6 @@ MultiAppNearestNodeTransfer::execute()
             Moose::VarFieldType::VAR_FIELD_STANDARD);
         System & from_sys = from_var.sys().system();
         dof_id_type from_dof = _cached_dof_ids[pid][qp];
-        // outgoing_evals[qp] = (*from_sys.solution)(_cached_dof_ids[pid][qp]);
         outgoing_evals[qp] = (*from_sys.solution)(from_dof);
       }
     }

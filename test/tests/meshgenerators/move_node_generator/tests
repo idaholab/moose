@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#18577'
+  issues = '#18577 #21468'
   design = 'meshgenerators/MoveNodeGenerator.md'
 
   [generate]
@@ -21,7 +21,17 @@
       input = 'test2.i'
       exodiff = 'test2_out.e'
 
-      detail = 'in a Cartesian 3D mesh.'
+      detail = 'in a Cartesian 3D mesh'
+    []
+    [shift]
+      type = 'Exodiff'
+      input = 'test3.i'
+      exodiff = 'test3_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      mesh_mode = replicated
+
+      detail = 'in a mesh with a single first order element moved by shifts.'
     []
   []
   [failure_missing]
@@ -37,5 +47,12 @@
     expect_err = "Must be the same length as 'new_position'."
     cli_args = "Mesh/inactive='missingNode modifyNode' --mesh-only"
     requirement = "The system shall error if the node position and node id arrays do not match in size"
+  []
+  [failure_overspecified]
+    type = RunException
+    input = test3.i
+    cli_args = 'Mesh/modifyNode/new_position="-1 0 0 0 1 0 0 2 0" --mesh-only'
+    expect_err = "You must specify either 'shift_position' or 'new_position'! You have specified either both or none"
+    requirement = "The system shall error if both shifts and positions are specified"
   []
 []

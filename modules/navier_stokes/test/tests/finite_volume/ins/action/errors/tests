@@ -241,4 +241,31 @@
     expect_err = "The number of friction coefficients for block\(s\): 2 is not the same as the number of requested friction types!"
     ad_indexing_type = 'global'
   []
+  [initial_conditions]
+    requirement = "The system shall throw an error if"
+    [velocity]
+      type = 'RunException'
+      input = 2d-rc-error-action.i
+      detail = 'an initial condition is provided for velocities when they are defined outside of the action'
+      cli_args = "Variables/inactive='pressure T_fluid scalar' Modules/NavierStokesFV/velocity_variable='vel_x vel_y' Modules/NavierStokesFV/block=1"
+      expect_err = "Velocity is defined externally of NavierStokesFV, so should the inital conditions"
+      ad_indexing_type = 'global'
+    []
+    [pressure]
+      type = 'RunException'
+      input = 2d-rc-error-action.i
+      detail = 'an initial condition is provided for pressure when it is defined outside of the action'
+      cli_args = "Variables/inactive='vel_x vel_y T_fluid scalar' Modules/NavierStokesFV/pressure_variable='pressure' Modules/NavierStokesFV/block=1"
+      expect_err = "Pressure is defined externally of NavierStokesFV, so should the inital condition"
+      ad_indexing_type = 'global'
+    []
+    [temperature]
+      type = 'RunException'
+      input = 2d-rc-error-action.i
+      detail = 'an initial condition is provided for temperature when it is defined outside of the action'
+      cli_args = "Variables/T_f/type=INSFVEnergyVariable Modules/NavierStokesFV/fluid_temperature_variable='T_f'"
+      expect_err = "T_fluid is defined externally of NavierStokesFV, so should the inital condition"
+      ad_indexing_type = 'global'
+    []
+  []
 []

@@ -197,6 +197,8 @@ protected:
   /// processes. If dependency resolver memory usage shows up in profiling, we can consider making
   /// this a container of reference wrappers
   std::vector<T> _insertion_order;
+  /// Data member for storing nodes that appear circularly in the graph
+  T _circular_node = T{};
 
   friend class CyclicDependencyException<T>;
 };
@@ -286,6 +288,7 @@ DependencyResolver<T>::dfs()
   _sorted_vector.clear();
   _visited.clear();
   _rec_stack.clear();
+  _circular_node = T{};
 
   for (auto & n : _adj)
   {
@@ -305,7 +308,13 @@ DependencyResolver<T>::dfs()
         break;
     }
   if (!roots_found)
+  {
     is_cyclic = true;
+    // Create a cycle graph
+    for (auto & n : _insertion_order)
+      if (dfsFromNode(n))
+        break;
+  }
 
   if (is_cyclic)
     throw CyclicDependencyException<T>("cyclic graph detected", *this);
@@ -431,9 +440,17 @@ DependencyResolver<T>::dfsFromNode(const T & root)
   for (auto & i : _inv_adj[root])
   {
     if (!_visited.at(i) && dfsFromNode(i))
+    {
       cyclic = true;
+      break;
+    }
     else if (_rec_stack.at(i))
+    {
+      _circular_node = i;
+      _sorted_vector.push_back(i);
       cyclic = true;
+      break;
+    }
   }
 
   _sorted_vector.push_back(root);
@@ -446,31 +463,27 @@ class CyclicDependencyException : public std::runtime_error
 {
 public:
   CyclicDependencyException(const std::string & error, const DependencyResolver<T> & graph) throw()
-    : runtime_error(error), _cyclic_items(graph._adj)
+    : runtime_error(error)
   {
-  }
-
-  CyclicDependencyException(const std::string & error,
-                            const std::map<T, std::list<T>> & cyclic_items) throw()
-    : runtime_error(error), _cyclic_items(cyclic_items)
-  {
-  }
-
-  CyclicDependencyException(const std::string & error,
-                            std::map<T, std::list<T>> && cyclic_items) throw()
-    : runtime_error(error), _cyclic_items(std::move(cyclic_items))
-  {
+    const auto & sorted = graph._sorted_vector;
+    auto first_occurence = std::find(sorted.begin(), sorted.end(), graph._circular_node);
+    if (first_occurence == sorted.end())
+      mooseError("We must have at least one occurence of the circular node");
+    auto second_occurence = std::find(first_occurence + 1, sorted.end(), graph._circular_node);
+    if (second_occurence == sorted.end())
+      mooseError("We must have two occurences of the circular node");
+    _cyclic_graph = std::vector<T>(first_occurence, second_occurence + 1);
   }
 
   CyclicDependencyException(const CyclicDependencyException & e) throw()
-    : runtime_error(e), _cyclic_items(e._cyclic_items)
+    : runtime_error(e), _cyclic_graph(e._cyclic_graph)
   {
   }
 
   ~CyclicDependencyException() throw() {}
 
-  const std::map<T, std::list<T>> & getCyclicDependencies() const { return _cyclic_items; }
+  const std::vector<T> & getCyclicDependencies() const { return _cyclic_graph; }
 
 private:
-  std::map<T, std::list<T>> _cyclic_items;
+  std::vector<T> _cyclic_graph;
 };
