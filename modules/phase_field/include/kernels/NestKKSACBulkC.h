@@ -15,7 +15,7 @@
 
 /**
  * KKSACBulkBase child class for the phase concentration difference term
- * \f$ \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \f$
+ * \f$ \frac{dh}{d\eta}\frac{\partial F_a}{\partial c_a}(c_a-c_b) \f$
  * in the the Allen-Cahn bulk residual.
  *
  * The non-linear variable for this Kernel is the order parameter 'eta'.
