@@ -15,7 +15,7 @@
 
 /**
  * KKSMultiACBulkBase child class for the free energy term
- * \f$ \sum_j \frac{\partial h_j}{\partial \eta_i} F_j + w_i \frac{dg}{d\eta_i}
+ * \f$ \sum_j \frac{\partial h_j}{\partial \eta_i} F_j + w_i \frac{dg_i}{d\eta_i}
  * \f$ in the the Allen-Cahn bulk residual.
  *
  * The non-linear variable for this Kernel is the order parameter \f$ eta_i \f$.
