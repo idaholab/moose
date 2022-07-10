@@ -447,7 +447,7 @@ AssemblyMeshGenerator::generate()
   unsigned int ptid_int = (*_build_mesh)->get_elem_integer_index(pin_type_id_name);
   unsigned int rid_int = (*_build_mesh)->get_elem_integer_index(region_id_name);
 
-  unsigned int atid_int, pid_int;
+  unsigned int atid_int, pid_int = 0;
   if (!(*_build_mesh)->has_elem_integer(assembly_type_id_name))
     atid_int = (*_build_mesh)->add_elem_integer(assembly_type_id_name);
   else

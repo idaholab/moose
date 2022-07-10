@@ -10,6 +10,7 @@
 #include "CoreMeshGenerator.h"
 
 #include "MooseApp.h"
+#include "MooseMeshUtils.h"
 #include "Factory.h"
 #include "libmesh/elem.h"
 

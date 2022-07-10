@@ -395,7 +395,7 @@ PinMeshGenerator::generate()
   std::string region_id_name = "region_id";
   std::string pin_type_id_name = "pin_type_id";
   std::string plane_id_name = "plane_id";
-  unsigned int rid, ptid, pid;
+  unsigned int rid, ptid, pid = 0;
 
   if (!(*_build_mesh)->has_elem_integer(region_id_name))
     rid = (*_build_mesh)->add_elem_integer(region_id_name);
