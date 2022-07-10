@@ -803,20 +803,20 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
 
         if (m == (subdomain_rings[k] - 1))
         {
-          if (create_interface_boundaries && k != (subdomain_rings.size() - 1))
-          {
-            if (subdomain_rings[0] == 0)
-              boundary_info.add_side(elem_Quad4, 2, k + 1 + boundary_id_shift);
-            else
-              boundary_info.add_side(elem_Quad4, 2, k + 2 + boundary_id_shift);
-          }
-          else
+          if (k == (subdomain_rings.size() - 1))
           {
             boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID);
             if (i <= angle_number / 2)
               boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID + side_index);
             else
               boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID_ALT + side_index);
+          }
+          else if (create_interface_boundaries)
+          {
+            if (subdomain_rings[0] == 0)
+              boundary_info.add_side(elem_Quad4, 2, k + 1 + boundary_id_shift);
+            else
+              boundary_info.add_side(elem_Quad4, 2, k + 2 + boundary_id_shift);
           }
         }
       }
