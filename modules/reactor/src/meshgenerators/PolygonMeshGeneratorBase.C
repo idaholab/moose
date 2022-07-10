@@ -342,7 +342,8 @@ PolygonMeshGeneratorBase::buildSlice(
                   num_sectors_per_side,
                   azimuthal_tangent,
                   block_id_shift,
-                  create_interface_boundaries,
+                  create_interface_boundaries ||
+                      ((!has_rings) && (!has_ducts) && (background_intervals == 1)),
                   boundary_id_shift,
                   (!has_rings) && (!has_ducts) && (background_intervals == 1),
                   side_index);
