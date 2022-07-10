@@ -56,10 +56,10 @@ protected:
   bool _has_duct_block_names;
 
   ///Optional vector used to set the block names of the assembly background elements
-  std::vector<SubdomainName> _background_block_name;
+  std::vector<std::string> _background_block_name;
 
   ///Optional 2-D vector used to set the block names of the assembly duct elements
-  std::vector<std::vector<SubdomainName>> _duct_block_names;
+  std::vector<std::vector<std::string>> _duct_block_names;
 
   ///Whether this mesh should be extruded to 3-D, making it the final structure in the reactor mesh
   const bool _extrude;

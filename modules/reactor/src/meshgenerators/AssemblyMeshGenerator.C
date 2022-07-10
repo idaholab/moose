@@ -54,11 +54,11 @@ AssemblyMeshGenerator::validParams()
       "The region id for the ducts from innermost to outermost, to set region_id "
       "extra-element integer.");
 
-  params.addParam<std::vector<std::vector<SubdomainName>>>(
+  params.addParam<std::vector<std::vector<std::string>>>(
       "background_block_name",
       "The block names for the assembly background regions");
 
-  params.addParam<std::vector<std::vector<SubdomainName>>>(
+  params.addParam<std::vector<std::vector<std::string>>>(
       "duct_block_names",
       "The block names for the assembly duct regions from innermost to outermost");
 
@@ -178,7 +178,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   if (isParamValid("background_block_name"))
   {
     _has_background_block_name = true;
-    _background_block_name = getParam<std::vector<SubdomainName>>("duct_block_name");
+    _background_block_name = getParam<std::vector<std::string>>("background_block_name");
     if (_background_region_id.size() != _background_block_name.size())
         mooseError("The size of background_block_name must match the size of background_region_id");
   }
@@ -188,7 +188,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   if (isParamValid("duct_block_names"))
   {
     _has_duct_block_names = true;
-    _duct_block_names = getParam<std::vector<std::vector<SubdomainName>>>("duct_block_names");
+    _duct_block_names = getParam<std::vector<std::vector<std::string>>>("duct_block_names");
     if (_duct_region_ids.size() != _duct_block_names.size())
         mooseError("The size of duct_block_names must match the size of duct_region_ids");
     for (const auto i : make_range(_duct_region_ids.size()))
@@ -344,6 +344,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 
       declareMeshProperty("background_region_ids", _background_region_id);
       declareMeshProperty("duct_region_ids", _duct_region_ids);
+      declareMeshProperty("background_block_names", _background_block_name);
+      declareMeshProperty("duct_block_names", _duct_block_names);
     }
   }
 
@@ -470,8 +472,8 @@ AssemblyMeshGenerator::generate()
 
     if(_pin_region_id_map.find(pt_id) != _pin_region_id_map.end())
     {
-      const dof_id_type base_rid = elem->get_extra_integer(rid_int);
       // Pin type element, swap subdomains if necessary
+      const dof_id_type base_rid = elem->get_extra_integer(rid_int);
       const auto radial_idx = std::find(_pin_region_id_map[pt_id][0].begin(),
                                         _pin_region_id_map[pt_id][0].end(),
                                         base_rid) - _pin_region_id_map[pt_id][0].begin();

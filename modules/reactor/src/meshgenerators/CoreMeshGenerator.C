@@ -18,7 +18,7 @@ registerMooseObject("ReactorApp", CoreMeshGenerator);
 InputParameters
 CoreMeshGenerator::validParams()
 {
-  auto params = MeshGenerator::validParams();
+  auto params = ReactorGeometryMeshBuilderBase::validParams();
 
   params.addRequiredParam<std::vector<MeshGeneratorName>>(
       "inputs", "The AssemblyMeshGenerators that form the components of the assembly.");
@@ -51,41 +51,29 @@ CoreMeshGenerator::validParams()
 }
 
 CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
+  : ReactorGeometryMeshBuilderBase(parameters),
     _inputs(getParam<std::vector<MeshGeneratorName>>("inputs")),
     _empty_key(getParam<MeshGeneratorName>("dummy_assembly_name")),
     _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern")),
     _extrude(getParam<bool>("extrude"))
 {
-  /* Below, we get the ReactorMeshParams info from one of the pin inputs.
-     The reactor params gives the axial info if we are to extrude as well as the assembly pitch
-     that the pin pattern is to be checked against.
-     We then create the PatternedMesh subgenerators and pass the parameter info needed for the
-     inputs. Finally, if the mesh is to be extruded we create the FancyExtruderGenerator
-     subgenerator and the PlaneIDMeshGenerator subgenerator to handle this.
-  */
-  MeshGeneratorName _reactor_params =
+  // Initialize name_id_map and current_block_id from ReactorMeshParams object stored
+  // in pin input
+  MeshGeneratorName reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
+  initializeReactorMeshParams(reactor_params);
 
-  // Ensure that the user has supplied the correct info for conformal mesh generation
-  if (!hasMeshProperty("mesh_dimensions", _reactor_params) ||
-      !hasMeshProperty("mesh_geometry", _reactor_params))
-    mooseError("The reactor_params input must be a ReactorMeshParams type MeshGenerator\n Please "
-               "check that a valid definition and name of ReactorMeshParams has been provided to "
-               "the input PinMeshGenerators.");
-  else
-  {
-    _geom_type = getMeshProperty<std::string>("mesh_geometry", _reactor_params);
-    _mesh_dimensions = getMeshProperty<int>("mesh_dimensions", _reactor_params);
-  }
-  if (_extrude && getMeshProperty<unsigned int>("mesh_dimensions", _reactor_params) != 3)
+  _geom_type = getReactorParam<std::string>("mesh_geometry");
+  _mesh_dimensions = getReactorParam<int>("mesh_dimensions");
+
+  if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasMeshProperty("top_boundary_id", _reactor_params) ||
-                   !hasMeshProperty("bottom_boundary_id", _reactor_params)))
+  if (_extrude && (!hasReactorParam("top_boundary_id") ||
+                   !hasReactorParam("bottom_boundary_id")))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
-  if (!hasMeshProperty("radial_boundary_id", _reactor_params))
+  if (!hasReactorParam("radial_boundary_id"))
     mooseError("radial_boundary_id must be provided in ReactorMeshParams for CoreMeshGenerators");
 
   std::size_t empty_pattern_loc = 0;
@@ -120,7 +108,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     // create a dummy assembly that is 1 assembly sized element that will get deleted later
     if (make_empty)
     {
-      Real pitch = getMeshProperty<Real>("assembly_pitch", _reactor_params);
+      Real pitch = getReactorParam<Real>("assembly_pitch");
 
       auto params = _app.getFactory().getValidParams("PolygonConcentricCircleMeshGenerator");
       params.set<unsigned int>("num_sides") = 4;
@@ -200,7 +188,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             "HexagonConcentricCircleAdaptiveBoundaryMeshGenerator");
 
         params.set<Real>("hexagon_size") =
-            getMeshProperty<Real>("assembly_pitch", _reactor_params) / 2.0;
+            getReactorParam<Real>("assembly_pitch") / 2.0;
         params.set<std::vector<unsigned int>>("num_sectors_per_side") =
             std::vector<unsigned int>(6, 2);
         params.set<std::vector<unsigned int>>("sides_to_adapt") = std::vector<unsigned int>{0};
@@ -231,7 +219,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       }
 
       const auto radial_boundary =
-          getMeshProperty<boundary_id_type>("radial_boundary_id", _reactor_params);
+          getReactorParam<boundary_id_type>("radial_boundary_id");
       params.set<boundary_id_type>("external_boundary_id") = radial_boundary;
       params.set<std::string>("external_boundary_name") = "outer_core";
 
@@ -250,56 +238,75 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     _build_mesh = &addMeshSubgenerator("BlockDeletionGenerator", name() + "_deleted", params);
   }
 
-  // transferring reactor parameters to core mesh
-  declareMeshProperty("reactor_params_name", std::string(_reactor_params));
-
   for (auto assembly : _inputs)
   {
     if (assembly != _empty_key)
     {
-      std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> pin_map =
+      std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> pin_region_id_map =
           getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
-              "pin_id_map", assembly);
-      for (auto pin = pin_map.begin(); pin != pin_map.end(); ++pin)
+              "pin_region_id_map", assembly);
+      for (auto pin = pin_region_id_map.begin(); pin != pin_region_id_map.end(); ++pin)
       {
-        if (_id_map.find(pin->first) == _id_map.end())
-          _id_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
+        if (_pin_region_id_map.find(pin->first) == _pin_region_id_map.end())
+          _pin_region_id_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
               pin->first, pin->second));
-        else if (pin->second != _id_map.find(pin->first)->second)
+        else if (pin->second != _pin_region_id_map.find(pin->first)->second)
           mooseError("Multiple region definitions for the same pin type. Check pin_type ids.\n");
+      }
+      std::map<subdomain_id_type, std::vector<std::vector<std::string>>> pin_block_name_map =
+          getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<std::string>>>>(
+              "pin_block_name_map", assembly);
+      for (auto pin = pin_block_name_map.begin(); pin != pin_block_name_map.end(); ++pin)
+      {
+        if (_pin_block_name_map.find(pin->first) == _pin_block_name_map.end())
+          _pin_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
+              pin->first, pin->second));
+        else if (pin->second != _pin_block_name_map.find(pin->first)->second)
+          mooseError("Multiple block name definitions for the same pin type. Check pin_type names.\n");
       }
 
       if (_geom_type == "Hex")
       {
         subdomain_id_type assembly_type =
             getMeshProperty<subdomain_id_type>("assembly_type_id", assembly);
-        if (_background_id_map.find(assembly_type) == _background_id_map.end())
+        if (_background_region_id_map.find(assembly_type) == _background_region_id_map.end())
         {
-          std::vector<subdomain_id_type> background_regions =
+          std::vector<subdomain_id_type> background_region_ids =
               getMeshProperty<std::vector<subdomain_id_type>>("background_region_ids", assembly);
-          std::vector<std::vector<subdomain_id_type>> duct_regions =
+          std::vector<std::vector<subdomain_id_type>> duct_region_ids =
               getMeshProperty<std::vector<std::vector<subdomain_id_type>>>("duct_region_ids",
                                                                            assembly);
-          _background_id_map.insert(std::pair<subdomain_id_type, std::vector<subdomain_id_type>>(
-              assembly_type, background_regions));
-          _duct_id_map.insert(
+          _background_region_id_map.insert(std::pair<subdomain_id_type, std::vector<subdomain_id_type>>(
+              assembly_type, background_region_ids));
+          _duct_region_id_map.insert(
               std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
-                  assembly_type, duct_regions));
+                  assembly_type, duct_region_ids));
+
+          std::vector<std::string> background_block_names =
+              getMeshProperty<std::vector<std::string>>("background_block_names", assembly);
+          std::vector<std::vector<std::string>> duct_block_names =
+              getMeshProperty<std::vector<std::vector<std::string>>>("duct_block_names",
+                                                                     assembly);
+          _background_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::string>>(
+              assembly_type, background_block_names));
+          _duct_block_name_map.insert(
+              std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
+                  assembly_type, duct_block_names));
         }
       }
     }
   }
-  declareMeshProperty("pin_id_map", _id_map);
+  declareMeshProperty("pin_id_map", _pin_region_id_map);
 
-  declareMeshProperty("assembly_pitch", getMeshProperty<Real>("assembly_pitch", _reactor_params));
+  declareMeshProperty("assembly_pitch", getReactorParam<Real>("assembly_pitch"));
 
   if (_extrude && _mesh_dimensions == 3)
   {
     std::vector<Real> axial_boundaries =
-        getMeshProperty<std::vector<Real>>("axial_boundaries", _reactor_params);
-    const auto top_boundary = getMeshProperty<boundary_id_type>("top_boundary_id", _reactor_params);
+        getReactorParam<std::vector<Real>>("axial_boundaries");
+    const auto top_boundary = getReactorParam<boundary_id_type>("top_boundary_id");
     const auto bottom_boundary =
-        getMeshProperty<boundary_id_type>("bottom_boundary_id", _reactor_params);
+        getReactorParam<boundary_id_type>("bottom_boundary_id");
     {
       declareMeshProperty("extruded", true);
       auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
@@ -308,7 +315,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           _empty_pos ? name() + "_deleted" : name() + "_pattern";
       params.set<Point>("direction") = Point(0, 0, 1);
       params.set<std::vector<unsigned int>>("num_layers") =
-          getMeshProperty<std::vector<unsigned int>>("axial_mesh_intervals", _reactor_params);
+          getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals");
       params.set<std::vector<Real>>("heights") = axial_boundaries;
       params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
       params.set<boundary_id_type>("top_boundary") = top_boundary;
@@ -353,76 +360,99 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 CoreMeshGenerator::generate()
 {
+  // Re-initialize name_id_map and current_block_id from ReactorMeshParams object
+  // in case variables have been modified between constructor and this method
+  initializeReactorMeshParams();
+
   // This generate() method will be called once the subgenerators that we depend on are
-  // called. This is where we set the region ids and element integers.
+  // called. This is where we swap region ids and subdomain ids/names for extruded
+  // geometries.
+
   if (_extrude)
   {
     // swap the region ids on the subdomain ids to the correct ones
     // for their axial layer
-    std::string plane_id_name = "plane_id";
+    // Define all extra element names and integers
     std::string pin_type_id_name = "pin_type_id";
     std::string assembly_type_id_name = "assembly_type_id";
+    std::string plane_id_name = "plane_id";
+    std::string region_id_name = "region_id";
+
+    if (!(*_build_mesh)->has_elem_integer(region_id_name))
+      mooseError("Expected mesh inputs to have the extra integer id: region_id.\n");
 
     unsigned int ptid_int = (*_build_mesh)->get_elem_integer_index(pin_type_id_name);
     unsigned int atid_int = (*_build_mesh)->get_elem_integer_index(assembly_type_id_name);
     unsigned int pid_int = (*_build_mesh)->get_elem_integer_index(plane_id_name);
+    unsigned int rid_int = (*_build_mesh)->get_elem_integer_index(region_id_name);
 
     for (auto & elem : (*_build_mesh)->active_element_ptr_range())
     {
       dof_id_type z_id = elem->get_extra_integer(pid_int);
       dof_id_type pt_id = elem->get_extra_integer(ptid_int);
-      subdomain_id_type r_id = elem->subdomain_id();
+      dof_id_type base_rid = elem->get_extra_integer(rid_int);
 
-      // Going through the elements in the mesh checking the pin_type_ids to axial
-      // region ids
-      if (_id_map.find(pt_id) == _id_map.end())
+      if (_pin_region_id_map.find(pt_id) != _pin_region_id_map.end())
       {
-        // element is in an assembly duct or background region since it doesn't have a pin type id
-        // that matches one in the map. What region it is in the periphery is then stored in the
-        // pt_id
-        dof_id_type at_id = elem->get_extra_integer(atid_int);
-        unsigned int peripheral_index = (UINT16_MAX - 1) - pt_id;
-        if (peripheral_index == 0)
-          // background region
-          elem->subdomain_id() = _background_id_map.find(at_id)->second[z_id];
-        else
-          // duct region
-          elem->subdomain_id() = _duct_id_map.find(at_id)->second[z_id][peripheral_index - 1];
+        // Pin type element, swap subdomains if necessary
+        const auto radial_idx = std::find(_pin_region_id_map[pt_id][0].begin(),
+                                          _pin_region_id_map[pt_id][0].end(),
+                                          base_rid) - _pin_region_id_map[pt_id][0].begin();
+        const auto elem_rid = _pin_region_id_map[pt_id][z_id][radial_idx];
+
+        // swap region ids if they are different
+        if (elem_rid != base_rid)
+        {
+          elem->set_extra_integer(rid_int, elem_rid);
+          bool has_block_names = !_pin_block_name_map[pt_id].empty();
+          auto elem_block_name = (has_block_names ? _pin_block_name_map[pt_id][z_id][radial_idx] :
+                                  _block_name_prefix + std::to_string(elem_rid));
+          if (elem->type() == TRI3 || elem->type() == PRISM6)
+            elem_block_name += "_TRI";
+          const auto elem_block_id = getBlockId(elem_block_name, elem_rid);
+          elem->subdomain_id() = elem_block_id;
+          (*_build_mesh)->subdomain_name(elem_block_id) = elem_block_name;
+        }
       }
       else
       {
-        // region is in a pin so grab the different axial region ids and swap them
-        // since during extrusion all regions are given the same ID as the 2D layer
-        for (const auto i : make_range((_id_map.at(pt_id))[0].size()))
+        // element is in an assembly duct or background region since it doesn't
+        // have a pin type id that matches one in the map. Infer peripheral index
+        // from pin_type
+        dof_id_type at_id = elem->get_extra_integer(atid_int);
+        unsigned int peripheral_idx = (UINT16_MAX - 1) - pt_id;
+        bool is_background_region = peripheral_idx == 0;
+        const auto elem_rid = (is_background_region ?
+                               _background_region_id_map[at_id][z_id] :
+                               _duct_region_id_map[at_id][z_id][peripheral_idx - 1]);
+
+        // Swap region ids if they are different
+        if (elem_rid != base_rid)
         {
-          // swap subdomain region ids if they are different
-          if (r_id == _id_map.at(pt_id)[0][i] &&
-              _id_map.at(pt_id)[0][i] != _id_map.at(pt_id)[z_id][i])
-            elem->subdomain_id() = _id_map.at(pt_id)[z_id][i];
+          SubdomainName elem_block_name;
+          if (is_background_region)
+          {
+            bool has_background_block_name = !_background_block_name_map[at_id].empty();
+            elem_block_name = (has_background_block_name ?
+                               _background_block_name_map[at_id][z_id] :
+                               _block_name_prefix + std::to_string(elem_rid));
+          }
+          else
+          {
+            bool has_duct_block_names = !_duct_block_name_map[at_id].empty();
+            elem_block_name = (has_duct_block_names ?
+                               _duct_block_name_map[at_id][z_id][peripheral_idx - 1] :
+                               _block_name_prefix + std::to_string(elem_rid));
+          }
+          if (elem->type() == TRI3 || elem->type() == PRISM6)
+            elem_block_name += "_TRI";
+          const auto elem_block_id = getBlockId(elem_block_name, elem_rid);
+          elem->subdomain_id() = elem_block_id;
+          (*_build_mesh)->subdomain_name(elem_block_id) = elem_block_name;
         }
       }
     }
   }
-
-  std::string region_id_name = "region_id";
-  if (!(*_build_mesh)->has_elem_integer(region_id_name))
-  {
-    mooseError("Expected mesh inputs to have the extra integer id: region_id.\n");
-  }
-
-  unsigned int rid = (*_build_mesh)->get_elem_integer_index(region_id_name);
-
-  std::map<subdomain_id_type, std::string> subdomain_name_map;
-  for (auto & elem : (*_build_mesh)->active_element_ptr_range())
-  {
-    elem->set_extra_integer(rid, elem->subdomain_id());
-
-    if (subdomain_name_map.find(elem->subdomain_id()) == subdomain_name_map.end())
-      subdomain_name_map.insert(std::pair<subdomain_id_type, std::string>(
-          elem->subdomain_id(), std::to_string(elem->subdomain_id())));
-  }
-
-  (*_build_mesh)->set_subdomain_name_map() = subdomain_name_map;
 
   // Sideset 10000 does not get stitched properly when BlockDeletionGenerator
   // is used for deleting dummy assemblies. This block copies missing sides
