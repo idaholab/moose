@@ -92,6 +92,8 @@ PatternedHexMeshGenerator::validParams()
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
                                                 "external_boundary_id>0",
                                                 "Optional customized external boundary id.");
+  params.addParam<bool>(
+      "create_interface_boundaries", true, "Whether the interface boundaries are created.");
   params.addParam<std::string>("external_boundary_name",
                                "Optional customized external boundary name.");
   params.addParamNamesToGroup("background_block_id background_block_name duct_block_ids "
@@ -139,6 +141,7 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     _external_boundary_name(isParamValid("external_boundary_name")
                                 ? getParam<std::string>("external_boundary_name")
                                 : std::string()),
+    _create_interface_boundaries(getParam<bool>("create_interface_boundaries")),
     _hexagon_size_style(
         getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
     _pattern_pitch_meta(declareMeshProperty("pattern_pitch_meta", 0.0)),
@@ -536,7 +539,8 @@ PatternedHexMeshGenerator::generate()
                             num_sectors_per_side_array,
                             peripheral_duct_intervals,
                             rotation_angle,
-                            mesh_type);
+                            mesh_type,
+                            _create_interface_boundaries);
 
           if (extra_dist_shift != 0)
             cutOffHexDeform(*tmp_peripheral_mesh, orientation, y_max_0, y_max_n, y_min, mesh_type);

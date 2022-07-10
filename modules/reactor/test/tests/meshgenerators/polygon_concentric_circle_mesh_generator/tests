@@ -71,6 +71,22 @@
     requirement ='The system shall generate a hexagon mesh with rings and ducts.'
     recover = false
   []
+  [full_no_interfaces]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_full_no_interface.e'
+    cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
+                Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
+                Mesh/gen/duct_block_ids="1500 1600" Mesh/gen/duct_block_names="inner_duct outer_duct"
+                Mesh/gen/duct_sizes_style="apothem"
+                Mesh/gen/create_interface_boundaries=false
+                --mesh-only "poly_2d_full_no_interface.e"'
+    requirement ='The system shall generate a hexagon mesh with rings and ducts and without interface boundaries defined.'
+    recover = false
+  []
   [full_biasing]
     type = 'Exodiff'
     input = 'poly_2d.i'
@@ -461,6 +477,19 @@
       cli_args = 'Mesh/gen/center_quad_factor=0.5'
       expect_err = 'this parameter is only applicable if quad_center_elements is set true.'
       detail = 'center_quad_factor is provided for triangular center elements.'
+    []
+    [err_unneeded_interface_params]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                  Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
+                  Mesh/gen/uniform_mesh_on_sides=true
+                  Mesh/gen/interface_boundary_names="int1 int2"
+                  Mesh/gen/create_interface_boundaries=false
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'If set false, neither interface_boundary_names nor interface_boundary_id_shift should be set as they are not used.'
+      detail ='interface boundaries related parameters are provided but create_interface_boundaries is set false.'
     []
   []
 []
