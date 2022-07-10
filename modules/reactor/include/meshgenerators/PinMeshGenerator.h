@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "MeshGenerator.h"
+#include "ReactorGeometryMeshBuilderBase.h"
 
 /**
  * Mesh generator for defining a reactor pin with background and duct regions, with the option to be
  * 2-D or 3-D.
  */
-class PinMeshGenerator : public MeshGenerator
+class PinMeshGenerator : public ReactorGeometryMeshBuilderBase
 {
 public:
   static InputParameters validParams();
@@ -25,9 +25,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  ///The ReactorMeshParams object that is storing the reactor global information for this reactor geometry mesh
-  const MeshGeneratorName _reactor_params;
-
   ///The id number for this pin type
   const subdomain_id_type _pin_type;
 
@@ -46,8 +43,14 @@ protected:
   ///The number of mesh intervals in a radial division starting from the center
   std::vector<unsigned int> _intervals;
 
-  ///2-D vector used to set both the block id and "region_id" extra-element integer of the pin mesh elements
+  ///2-D vector used to set "region_id" extra-element integer of the pin mesh elements
   std::vector<std::vector<subdomain_id_type>> _region_ids;
+
+  ///Whether block names have been provided by user
+  bool _has_block_names;
+
+  ///2-D vector used to set block names of pin mesh elements
+  std::vector<std::vector<SubdomainName>> _block_names;
 
   ///The type of geometry that is being described (Square or Hex, declared in the ReactorMeshParams object)
   std::string _mesh_geometry;

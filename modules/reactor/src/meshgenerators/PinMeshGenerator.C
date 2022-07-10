@@ -52,9 +52,14 @@ PinMeshGenerator::validParams()
       "size:"
       "((length(ring_radii) + length(duct_halfpitch) + 1");
 
+  params.addParam<std::vector<std::vector<SubdomainName>>>(
+      "block_names",
+      "Block names for each radial and axial zone. "
+      "Inner indexing is radial zones (pin/background/duct), outer indexing is axial");
+
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "region_ids",
-      "IDs for each radial and axial zone for assignment of block id and region_id extra element "
+      "IDs for each radial and axial zone for assignment of region_id extra element "
       "id. "
       "Inner indexing is radial zones (pin/background/duct), outer indexing is axial");
 
@@ -82,8 +87,7 @@ PinMeshGenerator::validParams()
 }
 
 PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
-    _reactor_params(getParam<MeshGeneratorName>("reactor_params")),
+  : ReactorGeometryMeshBuilderBase(parameters),
     _pin_type(getParam<subdomain_id_type>("pin_type")),
     _pitch(getParam<Real>("pitch")),
     _num_sectors(getParam<unsigned int>("num_sectors")),
@@ -98,29 +102,17 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _extrude(getParam<bool>("extrude")),
     _quad_center(getParam<bool>("quad_center_elements"))
 {
-  declareMeshProperty("pitch", _pitch);
+  // Initialize name_id_map and current_block_id from ReactorMeshParams object
+  initializeReactorMeshParams(getParam<MeshGeneratorName>("reactor_params"));
 
-  // Ensure that the user has supplied the correct info for conformal mesh generation
-  if (getMeshByName(_reactor_params) != nullptr)
-    mooseError("The reactor_params mesh is not of the correct type");
+  _mesh_dimensions = getReactorParam<int>("mesh_dimensions");
+  _mesh_geometry = getReactorParam<std::string>("mesh_geometry");
 
-  if (!hasMeshProperty("mesh_dimensions", _reactor_params) ||
-      !hasMeshProperty("mesh_geometry", _reactor_params))
-    mooseError("The reactor_params input must be a ReactorMeshParams type MeshGenerator\n Please "
-               "check that a valid definition and name of ReactorMeshParams has been provided.");
-  else
-  {
-    _mesh_dimensions = getMeshProperty<int>("mesh_dimensions", _reactor_params);
-    _mesh_geometry = getMeshProperty<std::string>("mesh_geometry", _reactor_params);
-  }
-  if (!_quad_center && _intervals[0] != 1)
-    mooseError("The number of mesh intervals in the ring region must be one if "
-               "quad_center_elements is not true");
   if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasMeshProperty("top_boundary_id", _reactor_params) ||
-                   !hasMeshProperty("bottom_boundary_id", _reactor_params)))
+  if (_extrude && (!hasReactorParam("top_boundary_id") ||
+                   !hasReactorParam("bottom_boundary_id")))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
 
@@ -139,155 +131,144 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   {
     mooseError("Region IDs must be assigned with parameter region_ids");
   }
+  if (isParamValid("block_names"))
+  {
+    _has_block_names = true;
+    _block_names = getParam<std::vector<std::vector<SubdomainName>>>("block_names");
+    if (_region_ids.size() != _block_names.size())
+        mooseError("The size of block_names must match the size of region_ids");
+    for (const auto i : make_range(_region_ids.size()))
+      if (_region_ids[i].size() != _block_names[i].size())
+        mooseError("The size of block_names must match the size of region_ids");
+  }
+  else
+    _has_block_names = false;
 
   // Define all id variables used in the pin
   std::vector<unsigned int> ring_intervals;
   std::vector<subdomain_id_type> ring_blk_ids;
+  std::vector<SubdomainName> ring_blk_names;
   unsigned int background_intervals = 1;
-  std::vector<subdomain_id_type> background_ids;
+  std::vector<subdomain_id_type> background_blk_ids;
+  std::vector<SubdomainName> background_blk_names;
   std::vector<unsigned int> duct_intervals;
-  std::vector<subdomain_id_type> duct_ids;
+  std::vector<subdomain_id_type> duct_blk_ids;
+  std::vector<SubdomainName> duct_blk_names;
 
   for (const auto i : make_range(_intervals.size()))
   {
+    const auto region_id = _region_ids[0][i];
+    const auto block_name = (_has_block_names ? _block_names[0][i] :
+                             _block_name_prefix + std::to_string(region_id));
+    const auto block_id = getBlockId(block_name, region_id);
+
     if (i < _ring_radii.size())
     {
       ring_intervals.push_back(_intervals[i]);
-      ring_blk_ids.push_back(_region_ids[0][i]);
+      ring_blk_ids.push_back(block_id);
+      ring_blk_names.push_back(block_name);
     }
     else if (i > _ring_radii.size())
     {
       duct_intervals.push_back(_intervals[i]);
-      duct_ids.push_back(_region_ids[0][i]);
+      duct_blk_ids.push_back(block_id);
+      duct_blk_names.push_back(block_name);
     }
     else
     {
       background_intervals = _intervals[i];
-      background_ids.push_back(_region_ids[0][i]);
+      background_blk_ids.push_back(block_id);
+      background_blk_names.push_back(block_name);
     }
   }
   if (ring_intervals.size() > 0)
   {
     if (ring_intervals.front() != 1)
-      ring_blk_ids.insert(ring_blk_ids.begin(), ring_blk_ids.front());
+    {
+      // If quad center elements, copy element at beginning of block names and
+      // block ids. Otherwise add "_TRI" suffix to block names and generate new
+      // block id
+      if (_quad_center)
+      {
+        ring_blk_ids.insert(ring_blk_ids.begin(), ring_blk_ids.front());
+        ring_blk_names.insert(ring_blk_names.begin(), ring_blk_names.front());
+      }
+      else
+      {
+        const auto region_id = _region_ids[0][0];
+        const auto block_name = ring_blk_names.front() + "_TRI";
+        const auto block_id = getBlockId(block_name, region_id);
+        ring_blk_ids.insert(ring_blk_ids.begin(), block_id);
+        ring_blk_names.insert(ring_blk_names.begin(), block_name);
+      }
+    }
   }
   else if (background_intervals > 1)
   {
-    background_ids.insert(background_ids.begin(), background_ids.front());
+    // If quad center elements, copy element at beginning of block names and
+    // block ids. Otherwise add "_TRI" suffix to block names and generate new
+    // block id
+    if (_quad_center)
+    {
+      background_blk_ids.insert(background_blk_ids.begin(), background_blk_ids.front());
+      background_blk_names.insert(background_blk_names.begin(), background_blk_names.front());
+    }
+    else
+    {
+      const auto region_id = _region_ids[0][_ring_radii.size()];
+      const auto block_name = background_blk_names.front() + "_TRI";
+      const auto block_id = getBlockId(block_name, region_id);
+      background_blk_ids.insert(background_blk_ids.begin(), block_id);
+      background_blk_names.insert(background_blk_names.begin(), block_name);
+    }
   }
 
-  if (_mesh_geometry == "Square")
+  // Generate Cartesian/hex pin using PolygonConcentricCircleMeshGenerator
   {
+    // Get and assign parameters for the main geometry feature of the Pin
+    // which is created with a PolygonConcentricCircleMeshGenerator subgenerator
+    auto params = _app.getFactory().getValidParams("PolygonConcentricCircleMeshGenerator");
+    params.set<bool>("preserve_volumes") = true;
+    params.set<bool>("quad_center_elements") = _quad_center;
+    params.set<MooseEnum>("polygon_size_style") = "apothem";
+    params.set<Real>("polygon_size") = _pitch / 2.0;
+    params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
+    params.set<std::string>("external_boundary_name") = "outer_pin_" + std::to_string(_pin_type);
+    params.set<bool>("flat_side_up") = true;
+
+    const auto num_sides = (_mesh_geometry == "Square") ? 4 : 6;
+    params.set<unsigned int>("num_sides") = num_sides;
+    params.set<std::vector<unsigned int>>("num_sectors_per_side") =
+        std::vector<unsigned int>(num_sides, _num_sectors);
+
+    params.set<boundary_id_type>("interface_boundary_id_shift") =
+        30000; // need to shift interface boundaries to avoid clashing
+               // with default IDs for PatternedMeshGenerator
+
+    if (ring_intervals.size() > 0)
     {
-      // Get and assign parameters for the main geometry feature of the Pin
-      // which is created with a PolygonConcentricCircleMeshGenerator subgenerator
-      auto params = _app.getFactory().getValidParams("PolygonConcentricCircleMeshGenerator");
-
-      params.set<unsigned int>("num_sides") = 4; // Cartesian geometry so pin are given a square box
-      params.set<std::vector<unsigned int>>("num_sectors_per_side") =
-          std::vector<unsigned int>(4, _num_sectors);
-      params.set<bool>("preserve_volumes") = true;
-      params.set<bool>("quad_center_elements") = _quad_center;
-
-      if (ring_intervals.size() > 0)
-      {
-        params.set<std::vector<Real>>("ring_radii") = _ring_radii;
-        params.set<std::vector<subdomain_id_type>>("ring_block_ids") = ring_blk_ids;
-        params.set<std::vector<unsigned int>>("ring_intervals") = ring_intervals;
-      }
-
-      params.set<std::vector<subdomain_id_type>>("background_block_ids") = background_ids;
-      params.set<unsigned int>("background_intervals") = background_intervals;
-
-      if (duct_intervals.size() > 0)
-      {
-        params.set<MooseEnum>("duct_sizes_style") = "apothem";
-        params.set<std::vector<Real>>("duct_sizes") = _duct_halfpitch;
-        params.set<std::vector<subdomain_id_type>>("duct_block_ids") = duct_ids;
-        params.set<std::vector<unsigned int>>("duct_intervals") = duct_intervals;
-      }
-
-      params.set<MooseEnum>("polygon_size_style") = "apothem";
-      params.set<Real>("polygon_size") = _pitch / 2.0;
-      params.set<bool>("flat_side_up") = true;
-      params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
-      params.set<boundary_id_type>("interface_boundary_id_shift") =
-          30000; // need to shift interface boundaries to avoid clashing
-                 // with default IDs for PatternedMeshGenerator
-
-      addMeshSubgenerator("PolygonConcentricCircleMeshGenerator", name() + "_circle", params);
+      params.set<std::vector<Real>>("ring_radii") = _ring_radii;
+      params.set<std::vector<subdomain_id_type>>("ring_block_ids") = ring_blk_ids;
+      params.set<std::vector<SubdomainName>>("ring_block_names") = ring_blk_names;
+      params.set<std::vector<unsigned int>>("ring_intervals") = ring_intervals;
     }
 
-    // Define boundary IDs so that there are unified boundaries for use in patterned MeshGenerator
-    // if this pin is to be used in an AssemblyMeshGenerator
+    params.set<std::vector<subdomain_id_type>>("background_block_ids") = background_blk_ids;
+    params.set<std::vector<SubdomainName>>("background_block_names") = background_blk_names;
+    params.set<unsigned int>("background_intervals") = background_intervals;
+
+    if (duct_intervals.size() > 0)
     {
-      auto params = _app.getFactory().getValidParams("SideSetsFromNormalsGenerator");
-
-      params.set<MeshGeneratorName>("input") = name() + "_circle";
-      params.set<std::vector<Point>>("normals") = {
-          {1, 0, 0},
-          {-1, 0, 0},
-          {0, 1, 0},
-          {0, -1, 0}}; // normal directions over which to define boundaries
-      params.set<bool>("fixed_normal") = true;
-      params.set<bool>("replace") = false;
-      params.set<std::vector<BoundaryName>>("new_boundary") = {
-          "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
-
-      _build_mesh = &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_bds", params);
+      params.set<MooseEnum>("duct_sizes_style") = "apothem";
+      params.set<std::vector<Real>>("duct_sizes") = _duct_halfpitch;
+      params.set<std::vector<subdomain_id_type>>("duct_block_ids") = duct_blk_ids;
+      params.set<std::vector<SubdomainName>>("duct_block_names") = duct_blk_names;
+      params.set<std::vector<unsigned int>>("duct_intervals") = duct_intervals;
     }
-    {
-      auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
 
-      params.set<MeshGeneratorName>("input") = name() + "_bds";
-      params.set<std::vector<BoundaryName>>("old_boundary") = {
-          "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
-      auto external_boundary_name = "outer_pin_" + std::to_string(_pin_type);
-      params.set<std::vector<BoundaryName>>("new_boundary") =
-          std::vector<BoundaryName>(4, external_boundary_name);
-
-      _build_mesh = &addMeshSubgenerator("RenameBoundaryGenerator", name() + "_2D", params);
-    }
+    addMeshSubgenerator("PolygonConcentricCircleMeshGenerator", name() + "_2D", params);
   }
-  else
-  {
-    // Hex geometry
-    {
-      auto params = _app.getFactory().getValidParams("PolygonConcentricCircleMeshGenerator");
-      params.set<unsigned int>("num_sides") = 6;
-      params.set<std::vector<unsigned int>>("num_sectors_per_side") =
-          std::vector<unsigned int>(6, _num_sectors);
-      params.set<bool>("preserve_volumes") = true;
-      params.set<bool>("quad_center_elements") = _quad_center;
-      params.set<boundary_id_type>("external_boundary_id") =
-          20000 +
-          _pin_type; // The boundary id for pins as set by the Reactor Geometry Meshing convention
-      params.set<std::string>("external_boundary_name") = "outer_pin_" + std::to_string(_pin_type);
 
-      if (ring_intervals.size() > 0)
-      {
-        params.set<std::vector<Real>>("ring_radii") = _ring_radii;
-        params.set<std::vector<subdomain_id_type>>("ring_block_ids") = ring_blk_ids;
-        params.set<std::vector<unsigned int>>("ring_intervals") = ring_intervals;
-      }
-
-      params.set<std::vector<subdomain_id_type>>("background_block_ids") = background_ids;
-      params.set<unsigned int>("background_intervals") = background_intervals;
-
-      if (duct_intervals.size() > 0)
-      {
-        params.set<MooseEnum>("duct_sizes_style") = "apothem";
-        params.set<std::vector<Real>>("duct_sizes") = _duct_halfpitch;
-        params.set<std::vector<subdomain_id_type>>("duct_block_ids") = duct_ids;
-        params.set<std::vector<unsigned int>>("duct_intervals") = duct_intervals;
-      }
-      params.set<MooseEnum>("polygon_size_style") = "apothem";
-      params.set<Real>("polygon_size") = _pitch / 2.0;
-
-      _build_mesh =
-          &addMeshSubgenerator("PolygonConcentricCircleMeshGenerator", name() + "_2D", params);
-    }
-  }
   // Remove extra sidesets created by PolygonConcentricCircleMeshGenerator
   {
     auto params = _app.getFactory().getValidParams("BoundaryDeletionGenerator");
@@ -299,8 +280,6 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     for (int i = 0; i < num_sides; i++)
       boundaries_to_delete.insert(boundaries_to_delete.end(),
                                   {std::to_string(10001 + i), std::to_string(15001 + i)});
-    if (num_sides == 4)
-      boundaries_to_delete.push_back(std::to_string(20000 + _pin_type));
     params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
 
     _build_mesh = &addMeshSubgenerator("BoundaryDeletionGenerator", name() + "_del_bds", params);
@@ -334,16 +313,13 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       {_pin_type, _region_ids}};
   declareMeshProperty("pin_region_ids", id_map);
 
-  // transferring reactor parameters and PolygonConcentricCircleMeshGenerator parameters to pin mesh
-  declareMeshProperty("reactor_params_name", std::string(_reactor_params));
-
   if (_extrude && _mesh_dimensions == 3)
   {
     std::vector<Real> axial_boundaries =
-        getMeshProperty<std::vector<Real>>("axial_boundaries", _reactor_params);
-    const auto top_boundary = getMeshProperty<boundary_id_type>("top_boundary_id", _reactor_params);
+        getReactorParam<std::vector<Real>>("axial_boundaries");
+    const auto top_boundary = getReactorParam<boundary_id_type>("top_boundary_id");
     const auto bottom_boundary =
-        getMeshProperty<boundary_id_type>("bottom_boundary_id", _reactor_params);
+        getReactorParam<boundary_id_type>("bottom_boundary_id");
     {
       declareMeshProperty("extruded", true);
       auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
@@ -351,7 +327,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<MeshGeneratorName>("input") = name() + "_del_bds";
       params.set<Point>("direction") = Point(0, 0, 1);
       params.set<std::vector<unsigned int>>("num_layers") =
-          getMeshProperty<std::vector<unsigned int>>("axial_mesh_intervals", _reactor_params);
+          getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals");
       params.set<std::vector<Real>>("heights") = axial_boundaries;
       params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
       params.set<boundary_id_type>("top_boundary") = top_boundary;
@@ -389,63 +365,69 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   }
   else
     declareMeshProperty("extruded", false);
+
+  // Save updates to name id map to ReactorMeshParams object
+  updateReactorMeshParams();
 }
 
 std::unique_ptr<MeshBase>
 PinMeshGenerator::generate()
 {
-  // This generate() method will be called once the subgenerators that we depend on are
-  // called. This is where we set the region ids and element integers.
-  if (_extrude)
-  {
-    // swap the region ids on the subdomain ids to the correct ones
-    // for their axial layer
-    std::string plane_id_name = "plane_id";
-    unsigned int pid_int = (*_build_mesh)->get_elem_integer_index(plane_id_name);
-    for (const auto i : make_range(_region_ids[0].size()))
-    {
-      subdomain_id_type region = _region_ids[0][i];
-      for (const auto & elem : as_range((*_build_mesh)->active_subdomain_elements_begin(region),
-                                        (*_build_mesh)->active_subdomain_elements_end(region)))
-      {
-        dof_id_type z_id = elem->get_extra_integer(pid_int);
-        subdomain_id_type r_id = _region_ids[std::size_t(z_id)][i];
-
-        // only swap if necessary
-        if (r_id != region)
-          elem->subdomain_id() = r_id;
-      }
-    }
-  }
-
-  // Add region IDs to the mesh as element integers
+  // Add region id and pin type id to the mesh as element integers
   std::string region_id_name = "region_id";
-  unsigned int rid;
+  std::string pin_type_id_name = "pin_type_id";
+  std::string plane_id_name = "plane_id";
+  unsigned int rid, ptid, pid;
+
   if (!(*_build_mesh)->has_elem_integer(region_id_name))
     rid = (*_build_mesh)->add_elem_integer(region_id_name);
   else
     rid = (*_build_mesh)->get_elem_integer_index(region_id_name);
-
-  std::string pin_type_id_name = "pin_type_id";
-  unsigned int ptid = 0;
   if (!(*_build_mesh)->has_elem_integer(pin_type_id_name))
     ptid = (*_build_mesh)->add_elem_integer(pin_type_id_name);
   else
     ptid = (*_build_mesh)->get_elem_integer_index(pin_type_id_name);
+  if (_extrude)
+    pid = (*_build_mesh)->get_elem_integer_index(plane_id_name);
 
-  // set element names to element IDs to overwrite conflicting assignment from subgenerators
-  std::map<subdomain_id_type, std::string> subdomain_name_map;
-  for (auto & elem : (*_build_mesh)->active_element_ptr_range())
+  // Get region id and block information of elements defined by RGMB so far
+  const auto name_id_map = getReactorParam<std::map<std::string, std::pair<subdomain_id_type, dof_id_type>>>("name_id_map");
+  for (auto it = name_id_map.begin(); it != name_id_map.end(); ++it)
   {
-    elem->set_extra_integer(ptid, _pin_type);
-    elem->set_extra_integer(rid, elem->subdomain_id());
+    const auto base_block_id = it->second.first;
+    subdomain_id_type base_region_id = it->second.second;
+    const auto base_block_name = it->first;
+    const auto region_id_idx = std::find(_region_ids[0].begin(), _region_ids[0].end(), base_region_id) - _region_ids[0].begin();
 
-    if (subdomain_name_map.find(elem->subdomain_id()) == subdomain_name_map.end())
-      subdomain_name_map.insert(std::pair<subdomain_id_type, std::string>(
-          elem->subdomain_id(), std::to_string(elem->subdomain_id())));
+    // Loop through all elements by subdomain id and set extra element integers.
+    // Also swap the region ids on the subdomain ids to the correct ones for their
+    // axial layer if necessary
+    for (const auto & elem : as_range((*_build_mesh)->active_subdomain_elements_begin(base_block_id),
+                                      (*_build_mesh)->active_subdomain_elements_end(base_block_id)))
+    {
+      dof_id_type z_id = _extrude ? elem->get_extra_integer(pid) : 0;
+
+      const subdomain_id_type elem_region_id = _region_ids[std::size_t(z_id)][region_id_idx];
+      // Set element integers
+      elem->set_extra_integer(rid, elem_region_id);
+      elem->set_extra_integer(ptid, _pin_type);
+
+      // Update block ids and names if they differ axially
+      if (elem_region_id != base_region_id)
+      {
+        auto elem_block_name = (_has_block_names ? _block_names[std::size_t(z_id)][region_id_idx] :
+                                _block_name_prefix + std::to_string(elem_region_id));
+        if (elem->type() == TRI3 || elem->type() == PRISM6)
+          elem_block_name += "_TRI";
+        const auto elem_block_id = getBlockId(elem_block_name, elem_region_id);
+        elem->subdomain_id() = elem_block_id;
+        (*_build_mesh)->subdomain_name(elem_block_id) = elem_block_name;
+      }
+    }
   }
 
-  (*_build_mesh)->set_subdomain_name_map() = subdomain_name_map;
+  // Update values name_id_map and current_block_id in RGMBBase to ReactorMeshParams
+  updateReactorMeshParams();
 
   return std::move(*_build_mesh);
 }

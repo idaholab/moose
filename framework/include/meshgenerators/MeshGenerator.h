@@ -69,6 +69,14 @@ protected:
   T & declareMeshProperty(const std::string & data_name, const T & init_value);
 
   /**
+   * Method for writing out attribute of mesh meta-data for a mesh generator that
+   * is not the one that is currently being operated on
+   */
+  template <typename T>
+  T & declareMeshProperty(const std::string & mg_name, const std::string & data_name,
+                          const T & init_value);
+
+  /**
    * Takes the name of a MeshGeneratorName parameter and then gets a pointer to the
    * Mesh that MeshGenerator is going to create.
    *
@@ -198,6 +206,28 @@ T &
 MeshGenerator::declareMeshProperty(const std::string & data_name, const T & init_value)
 {
   T & data = declareMeshProperty<T>(data_name);
+  data = init_value;
+
+  return data;
+}
+
+template <typename T>
+T &
+MeshGenerator::declareMeshProperty(const std::string & mg_name, const std::string & data_name,
+                                   const T & init_value)
+{
+  std::string full_name =
+      std::string(MeshMetaDataInterface::SYSTEM) + "/" + mg_name + "/" + data_name;
+
+  // Here we will create the RestartableData even though we may not use this instance.
+  // If it's already in use, the App will return a reference to the existing instance and we'll
+  // return that one instead. We might refactor this to have the app create the RestartableData
+  // at a later date.
+  auto data_ptr = std::make_unique<RestartableData<T>>(full_name, nullptr);
+  auto & restartable_data_ref = static_cast<RestartableData<T> &>(_app.registerRestartableData(
+      full_name, std::move(data_ptr), 0, true, MooseApp::MESH_META_DATA));
+
+  T & data = restartable_data_ref.set();
   data = init_value;
 
   return data;

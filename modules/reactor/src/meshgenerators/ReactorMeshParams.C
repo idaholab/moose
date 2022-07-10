@@ -66,6 +66,9 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   this->declareMeshProperty("axial_mesh_intervals", _axial_mesh_intervals);
   this->declareMeshProperty("assembly_pitch", _assembly_pitch);
 
+  this->declareMeshProperty("name_id_map", _name_id_map);
+  this->declareMeshProperty("current_block_id", _current_block_id);
+
   if (isParamValid("top_boundary_id"))
   {
     _top_boundary = getParam<boundary_id_type>("top_boundary_id");
