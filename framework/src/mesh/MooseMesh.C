@@ -3182,7 +3182,6 @@ MooseMesh::buildFiniteVolumeInfo() const
   _elem_side_to_face_info.clear();
 
   _elem_to_elem_info.clear();
-  _internal_elem_info.clear();
   _elem_to_ghost_info.clear();
 
   // by performing the element ID comparison check in the below loop, we are ensuring that we never
@@ -3192,16 +3191,12 @@ MooseMesh::buildFiniteVolumeInfo() const
   auto begin = getMesh().active_elements_begin();
   auto end = getMesh().active_elements_end();
 
-  // We use a counter, to speed up this process (the same ordering will be used
-  // in the loop below). For users who want to access the ElemInfo based on
-  // Elem*, we prepare a map connecting the Elem* and the index in the ElemInfo
-  // vector.
-  dof_id_type counter = 0;
+  // We prepare a map connecting the Elem* and the corresponding ElemInfo
+  // for the active elements.
   for (const Elem * elem : as_range(begin, end))
   {
     // We fill the vector with the real ElemInfo-s and the corresponding map first
-    _internal_elem_info.emplace_back(elem);
-    _elem_to_elem_info.emplace(elem, counter++);
+    _elem_to_elem_info.emplace(elem, elem);
 
     // Then we fill a map with the ElemInfo shells for the ghost elements
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
@@ -3212,8 +3207,6 @@ MooseMesh::buildFiniteVolumeInfo() const
     }
   }
 
-  // Restart the counter to be able to access the ElemInfo-s directly
-  counter = 0;
   for (const Elem * elem : as_range(begin, end))
   {
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
@@ -3231,7 +3224,7 @@ MooseMesh::buildFiniteVolumeInfo() const
                     "be active.");
 
         // We construct the faceInfo using the elementinfo and side index
-        _all_face_info.emplace_back(&_internal_elem_info[counter], side);
+        _all_face_info.emplace_back(&_elem_to_elem_info[elem], side);
 
         auto & fi = _all_face_info.back();
 
@@ -3246,11 +3239,11 @@ MooseMesh::buildFiniteVolumeInfo() const
         if (!neighbor || neighbor == remote_elem)
         {
           auto & ghost_cell = _elem_to_ghost_info[std::make_pair(elem, side)];
-          ghost_cell.initialize(_internal_elem_info[counter], fi);
+          ghost_cell.initialize(_elem_to_elem_info[elem], fi);
           fi.computeCoefficients(&ghost_cell);
         }
         else
-          fi.computeCoefficients(&_internal_elem_info[_elem_to_elem_info.find(neighbor)->second]);
+          fi.computeCoefficients(&_elem_to_elem_info[neighbor]);
 
         auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
         if (lit != side_map.end())
@@ -3264,7 +3257,6 @@ MooseMesh::buildFiniteVolumeInfo() const
         }
       }
     }
-    counter += 1;
   }
 
   // Build the local face info and elem_side to face info maps. We need to do this after
