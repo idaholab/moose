@@ -63,7 +63,7 @@ protected:
    * @return reference to parameter is defined in ReactorMeshParams metadata
    */
   template <typename T>
-  const T & getReactorParam(const std::string param_name);
+  const T & getReactorParam(const std::string & param_name);
 
   ///The ReactorMeshParams object that is storing the reactor global information for this reactor geometry mesh
   MeshGeneratorName _reactor_params;
@@ -78,3 +78,10 @@ protected:
   ///Prefix to use for block names if block names not provided by user
   const std::string _block_name_prefix = "RGMB_BLOCK_";
 };
+
+template <typename T>
+const T &
+ReactorGeometryMeshBuilderBase::getReactorParam(const std::string & param_name)
+{
+  return getMeshProperty<T>(param_name, _reactor_params);
+}

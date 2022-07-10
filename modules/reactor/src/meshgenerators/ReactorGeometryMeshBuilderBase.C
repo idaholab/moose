@@ -93,10 +93,3 @@ ReactorGeometryMeshBuilderBase::hasReactorParam(const std::string param_name)
 {
   return hasMeshProperty(param_name, _reactor_params);
 }
-
-template <typename T>
-const T &
-ReactorGeometryMeshBuilderBase::getReactorParam(const std::string param_name)
-{
-  return getMeshProperty<T>(param_name, _reactor_params);
-}
