@@ -50,7 +50,7 @@ protected:
   bool _has_block_names;
 
   ///2-D vector used to set block names of pin mesh elements
-  std::vector<std::vector<SubdomainName>> _block_names;
+  std::vector<std::vector<std::string>> _block_names;
 
   ///The type of geometry that is being described (Square or Hex, declared in the ReactorMeshParams object)
   std::string _mesh_geometry;

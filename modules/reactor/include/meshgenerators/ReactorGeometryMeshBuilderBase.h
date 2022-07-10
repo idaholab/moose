@@ -30,9 +30,17 @@ protected:
   initializeReactorMeshParams(const std::string reactor_param_name);
 
   /**
-   * Updates values of ReactorMeshParams object meta data for use by future
-   * RGMB mesh generators
+   * Initializes and checks validity of ReactorMeshParams mesh generator object.
+   * This overloaded function should be called if iniitalizeReactorMeshParams
+   * has already been called before
    */
+  void
+  initializeReactorMeshParams();
+
+   /**
+    * Updates values of ReactorMeshParams object meta data for use by future
+    * RGMB mesh generators
+    */
   void updateReactorMeshParams();
 
   /**

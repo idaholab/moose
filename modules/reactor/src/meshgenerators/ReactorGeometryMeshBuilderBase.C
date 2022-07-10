@@ -27,7 +27,9 @@ ReactorGeometryMeshBuilderBase::ReactorGeometryMeshBuilderBase(const InputParame
 void
 ReactorGeometryMeshBuilderBase::initializeReactorMeshParams(const std::string reactor_param_name)
 {
-  _reactor_params = reactor_param_name;
+  bool first_call = _reactor_params != reactor_param_name;
+  if(first_call)
+    _reactor_params = reactor_param_name;
 
   // Ensure that the user has supplied a valid ReactorMeshParams object
   if (getMeshByName(_reactor_params) != nullptr)
@@ -43,7 +45,14 @@ ReactorGeometryMeshBuilderBase::initializeReactorMeshParams(const std::string re
   _name_id_map = getReactorParam<std::map<std::string, std::pair<subdomain_id_type, dof_id_type>>>("name_id_map");
 
   // Set reactor_params_name metadata for use by future mesh generators
-  declareMeshProperty("reactor_params_name", std::string(_reactor_params));
+  if (first_call)
+    declareMeshProperty("reactor_params_name", std::string(_reactor_params));
+}
+
+void
+ReactorGeometryMeshBuilderBase::initializeReactorMeshParams()
+{
+  initializeReactorMeshParams(_reactor_params);
 }
 
 void

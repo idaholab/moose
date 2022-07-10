@@ -52,7 +52,7 @@ PinMeshGenerator::validParams()
       "size:"
       "((length(ring_radii) + length(duct_halfpitch) + 1");
 
-  params.addParam<std::vector<std::vector<SubdomainName>>>(
+  params.addParam<std::vector<std::vector<std::string>>>(
       "block_names",
       "Block names for each radial and axial zone. "
       "Inner indexing is radial zones (pin/background/duct), outer indexing is axial");
@@ -102,6 +102,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _extrude(getParam<bool>("extrude")),
     _quad_center(getParam<bool>("quad_center_elements"))
 {
+  declareMeshProperty("pitch", _pitch);
+
   // Initialize name_id_map and current_block_id from ReactorMeshParams object
   initializeReactorMeshParams(getParam<MeshGeneratorName>("reactor_params"));
 
@@ -134,7 +136,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   if (isParamValid("block_names"))
   {
     _has_block_names = true;
-    _block_names = getParam<std::vector<std::vector<SubdomainName>>>("block_names");
+    _block_names = getParam<std::vector<std::vector<std::string>>>("block_names");
     if (_region_ids.size() != _block_names.size())
         mooseError("The size of block_names must match the size of region_ids");
     for (const auto i : make_range(_region_ids.size()))
@@ -202,25 +204,35 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
         ring_blk_names.insert(ring_blk_names.begin(), block_name);
       }
     }
+    // Add _TRI suffix if only one radial region and tri center elements
+    else if (!_quad_center)
+      ring_blk_names[0] += "_TRI";
   }
-  else if (background_intervals > 1)
+  else
   {
-    // If quad center elements, copy element at beginning of block names and
-    // block ids. Otherwise add "_TRI" suffix to block names and generate new
-    // block id
-    if (_quad_center)
+    if (background_intervals > 1)
     {
-      background_blk_ids.insert(background_blk_ids.begin(), background_blk_ids.front());
-      background_blk_names.insert(background_blk_names.begin(), background_blk_names.front());
+      // If quad center elements, copy element at beginning of block names and
+      // block ids. Otherwise add "_TRI" suffix to block names and generate new
+      // block id
+      if (_quad_center)
+      {
+        background_blk_ids.insert(background_blk_ids.begin(), background_blk_ids.front());
+        background_blk_names.insert(background_blk_names.begin(), background_blk_names.front());
+      }
+      else
+      {
+        const auto region_id = _region_ids[0][0];
+        const auto block_name = background_blk_names.front() + "_TRI";
+        const auto block_id = getBlockId(block_name, region_id);
+        background_blk_ids.insert(background_blk_ids.begin(), block_id);
+        background_blk_names.insert(background_blk_names.begin(), block_name);
+      }
     }
-    else
-    {
-      const auto region_id = _region_ids[0][_ring_radii.size()];
-      const auto block_name = background_blk_names.front() + "_TRI";
-      const auto block_id = getBlockId(block_name, region_id);
-      background_blk_ids.insert(background_blk_ids.begin(), block_id);
-      background_blk_names.insert(background_blk_names.begin(), block_name);
-    }
+    // Add _TRI suffix if only one background region and tri center elements
+    // and no ring regions
+    else if (!_quad_center)
+      background_blk_names[0] += "_TRI";
   }
 
   // Generate Cartesian/hex pin using PolygonConcentricCircleMeshGenerator
@@ -234,7 +246,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     params.set<Real>("polygon_size") = _pitch / 2.0;
     params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
     params.set<std::string>("external_boundary_name") = "outer_pin_" + std::to_string(_pin_type);
-    params.set<bool>("flat_side_up") = true;
+    bool flat_side_up = (_mesh_geometry == "Square");
+    params.set<bool>("flat_side_up") = flat_side_up;
 
     const auto num_sides = (_mesh_geometry == "Square") ? 4 : 6;
     params.set<unsigned int>("num_sides") = num_sides;
@@ -308,10 +321,14 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     declareMeshProperty("max_radius_meta",
                         getMeshProperty<Real>("max_radius_meta", name() + "_2D"));
 
-  // id swap info after extrusion
-  std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> id_map{
+  // Store pin region ids and block names for id swap after extrusion if needed
+  // by future mesh generators
+  std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> region_id_map{
       {_pin_type, _region_ids}};
-  declareMeshProperty("pin_region_ids", id_map);
+  declareMeshProperty("pin_region_ids", region_id_map);
+  std::map<subdomain_id_type, std::vector<std::vector<std::string>>> block_name_map;
+  block_name_map[_pin_type] = _block_names;
+  declareMeshProperty("pin_block_names", block_name_map);
 
   if (_extrude && _mesh_dimensions == 3)
   {
@@ -373,6 +390,10 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 PinMeshGenerator::generate()
 {
+  // Re-initialize name_id_map and current_block_id from ReactorMeshParams object
+  // in case variables have been modified between constructor and this method
+  initializeReactorMeshParams();
+
   // Add region id and pin type id to the mesh as element integers
   std::string region_id_name = "region_id";
   std::string pin_type_id_name = "pin_type_id";
@@ -397,7 +418,7 @@ PinMeshGenerator::generate()
     const auto base_block_id = it->second.first;
     subdomain_id_type base_region_id = it->second.second;
     const auto base_block_name = it->first;
-    const auto region_id_idx = std::find(_region_ids[0].begin(), _region_ids[0].end(), base_region_id) - _region_ids[0].begin();
+    const unsigned int radial_idx = std::find(_region_ids[0].begin(), _region_ids[0].end(), base_region_id) - _region_ids[0].begin();
 
     // Loop through all elements by subdomain id and set extra element integers.
     // Also swap the region ids on the subdomain ids to the correct ones for their
@@ -407,7 +428,7 @@ PinMeshGenerator::generate()
     {
       dof_id_type z_id = _extrude ? elem->get_extra_integer(pid) : 0;
 
-      const subdomain_id_type elem_region_id = _region_ids[std::size_t(z_id)][region_id_idx];
+      const subdomain_id_type elem_region_id = _region_ids[std::size_t(z_id)][radial_idx];
       // Set element integers
       elem->set_extra_integer(rid, elem_region_id);
       elem->set_extra_integer(ptid, _pin_type);
@@ -415,7 +436,7 @@ PinMeshGenerator::generate()
       // Update block ids and names if they differ axially
       if (elem_region_id != base_region_id)
       {
-        auto elem_block_name = (_has_block_names ? _block_names[std::size_t(z_id)][region_id_idx] :
+        auto elem_block_name = (_has_block_names ? _block_names[std::size_t(z_id)][radial_idx] :
                                 _block_name_prefix + std::to_string(elem_region_id));
         if (elem->type() == TRI3 || elem->type() == PRISM6)
           elem_block_name += "_TRI";
