@@ -49,7 +49,7 @@ ReactorGeometryMeshBuilderBase::hasReactorParam(const std::string param_name)
 }
 
 SubdomainID
-ReactorGeometryMeshBuilderBase::next_free_id(MeshBase & input_mesh)
+ReactorGeometryMeshBuilderBase::nextFreeId(MeshBase & input_mesh)
 {
   // Call this to get most up to date block id information
   input_mesh.cache_elem_data();

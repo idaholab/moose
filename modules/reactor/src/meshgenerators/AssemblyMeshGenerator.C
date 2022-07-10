@@ -457,7 +457,7 @@ AssemblyMeshGenerator::generate()
     plane_id_int = getElemIntegerFromMesh(*(*_build_mesh), plane_id_name, true);
 
   // Get next free block ID in mesh in case subdomain ids need to be remapped
-  auto next_block_id = next_free_id(*(*(_build_mesh)));
+  auto next_block_id = nextFreeId(*(*(_build_mesh)));
   std::map<std::string, SubdomainID> rgmb_name_id_map;
 
   // Loop through all mesh elements and set region ids and reassign block IDs/names

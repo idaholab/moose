@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MeshGenerator.h"
+#include "libmesh/elem.h"
 
 /**
  * A base class that contains common members for Reactor Geometry Mesh Builder mesh generators.
@@ -26,7 +27,7 @@ public:
    * a block ID in the mesh that is not currently in use
    * @param input mesh over which to compute next free block id
    */
-  SubdomainID next_free_id(MeshBase & input_mesh);
+  SubdomainID nextFreeId(MeshBase & input_mesh);
 
 protected:
   /**

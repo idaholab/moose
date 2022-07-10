@@ -39,7 +39,13 @@ If the pin is extruded to three dimensions the top-most boundary ID must be assi
 
 !listing modules/reactor/test/tests/meshgenerators/pin_mesh_generator/pin_only.i block=Mesh
 
-!media reactor/meshgenerators/pin_mesh_generator.png style=width:60%;
+Resulting mesh block layout:
+
+!media reactor/meshgenerators/pin_mesh_generator.png style=width:40%;
+
+Resulting "region_id" extra element integer layout
+
+!media reactor/meshgenerators/pin_mesh_generator_rid.png style=width:40%;
 
 !syntax parameters /Mesh/PinMeshGenerator
 
