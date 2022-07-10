@@ -48,26 +48,6 @@ ReactorGeometryMeshBuilderBase::hasReactorParam(const std::string param_name)
   return hasMeshProperty(param_name, _reactor_params);
 }
 
-SubdomainID
-ReactorGeometryMeshBuilderBase::nextFreeId(MeshBase & input_mesh)
-{
-  // Call this to get most up to date block id information
-  input_mesh.cache_elem_data();
-
-  std::set<SubdomainID> preexisting_subdomain_ids;
-  input_mesh.subdomain_ids(preexisting_subdomain_ids);
-  if (preexisting_subdomain_ids.empty())
-    return 0;
-  else
-  {
-    const auto highest_subdomain_id =
-        *std::max_element(preexisting_subdomain_ids.begin(), preexisting_subdomain_ids.end());
-    mooseAssert(highest_subdomain_id < std::numeric_limits<SubdomainID>::max(),
-                "A SubdomainID with max possible value was found");
-    return highest_subdomain_id + 1;
-  }
-}
-
 unsigned int
 ReactorGeometryMeshBuilderBase::getElemIntegerFromMesh(MeshBase & input_mesh,
                                                        std::string id_name,

@@ -237,6 +237,32 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
     _build_mesh = &addMeshSubgenerator("BlockDeletionGenerator", name() + "_deleted", params);
   }
+  // Remove outer assembly sidesets created during assembly generation
+  {
+    // Get outer boundaries of all constituent assemblies based on assembly_type,
+    // skipping all dummy assemblies
+    std::vector<BoundaryName> boundaries_to_delete = {};
+    for (const auto & pattern_x : _pattern)
+    {
+      for (const auto & pattern_idx : pattern_x)
+      {
+        const auto assembly_name = _inputs[pattern_idx];
+        if (assembly_name == _empty_key)
+          continue;
+        const auto assembly_id = getMeshProperty<subdomain_id_type>("assembly_type", assembly_name);
+        const BoundaryName boundary_name = "outer_assembly_" + std::to_string(assembly_id);
+        if (std::find(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name) ==
+            boundaries_to_delete.end())
+          boundaries_to_delete.push_back(boundary_name);
+      }
+    }
+    auto params = _app.getFactory().getValidParams("BoundaryDeletionGenerator");
+
+    params.set<MeshGeneratorName>("input") = _empty_pos ? name() + "_deleted" : name() + "_pattern";
+    params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
+
+    _build_mesh = &addMeshSubgenerator("BoundaryDeletionGenerator", name() + "_delbds", params);
+  }
 
   for (auto assembly : _inputs)
   {
@@ -274,6 +300,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             getMeshProperty<subdomain_id_type>("assembly_type_id", assembly);
         if (_background_region_id_map.find(assembly_type) == _background_region_id_map.end())
         {
+          // Store region ids and block names associated with duct and background regions for each
+          // assembly, in case block names need to be recovered from region ids after
+          // multiple assemblies have been stitched together into a core
           std::vector<subdomain_id_type> background_region_ids =
               getMeshProperty<std::vector<subdomain_id_type>>("background_region_ids", assembly);
           std::vector<std::vector<subdomain_id_type>> duct_region_ids =
@@ -312,8 +341,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       declareMeshProperty("extruded", true);
       auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
 
-      params.set<MeshGeneratorName>("input") =
-          _empty_pos ? name() + "_deleted" : name() + "_pattern";
+      params.set<MeshGeneratorName>("input") = name() + "_delbds";
       params.set<Point>("direction") = Point(0, 0, 1);
       params.set<std::vector<unsigned int>>("num_layers") =
           getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals");
@@ -383,7 +411,7 @@ CoreMeshGenerator::generate()
     plane_id_int = getElemIntegerFromMesh(*(*_build_mesh), plane_id_name, true);
 
   // Get next free block ID in mesh in case subdomain ids need to be remapped
-  auto next_block_id = nextFreeId(*(*(_build_mesh)));
+  auto next_block_id = MooseMeshUtils::getNextFreeSubdomainID(*(*(_build_mesh)));
   std::map<std::string, SubdomainID> rgmb_name_id_map;
 
   // Loop through all mesh elements and set region ids and reassign block IDs/names

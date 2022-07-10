@@ -195,7 +195,12 @@ PatternedMeshGenerator::mergeSubdomainNameMaps(
   // Check if one SubdomainName is shared by more than one subdomain ids
   std::set<SubdomainName> main_subdomain_map_name_list;
   for (auto const & id_name_pair : main_subdomain_map)
-    main_subdomain_map_name_list.emplace(id_name_pair.second);
-  if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
-    paramError("inputs", "The input meshes contain subdomain name maps with conflicts.");
+  {
+    const auto name_to_insert = id_name_pair.second;
+    if (main_subdomain_map_name_list.find(name_to_insert) != main_subdomain_map_name_list.end())
+      paramError("inputs",
+                 "The input meshes both contain subdomain name " + name_to_insert +
+                     " that correspond to conflicting subdomain ids.");
+    main_subdomain_map_name_list.emplace(name_to_insert);
+  }
 }

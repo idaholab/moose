@@ -117,6 +117,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 
   _geom_type = getReactorParam<std::string>("mesh_geometry");
   _mesh_dimensions = getReactorParam<int>("mesh_dimensions");
+  declareMeshProperty("assembly_type", _assembly_type);
 
   if (_extrude && _mesh_dimensions != 3)
     paramError("extrude",
@@ -356,6 +357,30 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     }
   }
 
+  // Remove outer pin sidesets created by PolygonConcentricCircleMeshGenerator
+  {
+    // Get outer boundaries of all constituent pins based on pin_type
+    std::vector<BoundaryName> boundaries_to_delete = {};
+    for (const auto & pattern_x : _pattern)
+    {
+      for (const auto & pattern_idx : pattern_x)
+      {
+        const auto pin_name = _inputs[pattern_idx];
+        const auto pin_id = getMeshProperty<subdomain_id_type>("pin_type", pin_name);
+        const BoundaryName boundary_name = "outer_pin_" + std::to_string(pin_id);
+        if (std::find(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name) ==
+            boundaries_to_delete.end())
+          boundaries_to_delete.push_back(boundary_name);
+      }
+    }
+    auto params = _app.getFactory().getValidParams("BoundaryDeletionGenerator");
+
+    params.set<MeshGeneratorName>("input") = name() + "_pattern";
+    params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
+
+    _build_mesh = &addMeshSubgenerator("BoundaryDeletionGenerator", name() + "_delbds", params);
+  }
+
   for (auto pinMG : _inputs)
   {
     std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> region_id_map =
@@ -386,7 +411,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       declareMeshProperty("extruded", true);
       auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
 
-      params.set<MeshGeneratorName>("input") = name() + "_pattern";
+      params.set<MeshGeneratorName>("input") = name() + "_delbds";
       params.set<Point>("direction") = Point(0, 0, 1);
       params.set<std::vector<unsigned int>>("num_layers") =
           getMeshProperty<std::vector<unsigned int>>("axial_mesh_intervals", _reactor_params);
@@ -457,7 +482,7 @@ AssemblyMeshGenerator::generate()
     plane_id_int = getElemIntegerFromMesh(*(*_build_mesh), plane_id_name, true);
 
   // Get next free block ID in mesh in case subdomain ids need to be remapped
-  auto next_block_id = nextFreeId(*(*(_build_mesh)));
+  auto next_block_id = MooseMeshUtils::getNextFreeSubdomainID(*(*(_build_mesh)));
   std::map<std::string, SubdomainID> rgmb_name_id_map;
 
   // Loop through all mesh elements and set region ids and reassign block IDs/names

@@ -22,13 +22,6 @@ public:
 
   ReactorGeometryMeshBuilderBase(const InputParameters & parameters);
 
-  /**
-   * Checks input mesh and returns max(block ID) + 1, which represents
-   * a block ID in the mesh that is not currently in use
-   * @param input mesh over which to compute next free block id
-   */
-  SubdomainID nextFreeId(MeshBase & input_mesh);
-
 protected:
   /**
    * Initializes extra element integer from id name for a given mesh and throws an error

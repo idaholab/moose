@@ -143,4 +143,11 @@ bool isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec);
  * @return whether all the Points are in a same plane
  */
 bool isCoPlanar(const std::vector<Point> vec_pts);
+
+/**
+ * Checks input mesh and returns max(block ID) + 1, which represents
+ * a block ID in the mesh that is not currently in use
+ * @param input mesh over which to compute next free block id
+ */
+SubdomainID getNextFreeSubdomainID(MeshBase & input_mesh);
 }

@@ -12,6 +12,7 @@
 #include "ReactorGeometryMeshBuilderBase.h"
 #include <cmath>
 #include "MooseApp.h"
+#include "MooseMeshUtils.h"
 #include "Factory.h"
 #include "libmesh/elem.h"
 
@@ -104,6 +105,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _quad_center(getParam<bool>("quad_center_elements"))
 {
   declareMeshProperty("pitch", _pitch);
+  declareMeshProperty("pin_type", _pin_type);
 
   // Initialize ReactorMeshParams object
   initializeReactorMeshParams(getParam<MeshGeneratorName>("reactor_params"));
@@ -414,7 +416,7 @@ PinMeshGenerator::generate()
     plane_id_int = getElemIntegerFromMesh(*(*_build_mesh), plane_id_name, true);
 
   // Get next free block ID in mesh in case subdomain ids need to be remapped
-  auto next_block_id = nextFreeId(*(*(_build_mesh)));
+  auto next_block_id = MooseMeshUtils::getNextFreeSubdomainID(*(*(_build_mesh)));
   std::map<std::string, SubdomainID> rgmb_name_id_map;
 
   // Loop through all elements and set regions ids, pin type id, and radial idx.
