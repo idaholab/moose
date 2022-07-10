@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "InputParameters.h"
+#include "MooseEnum.h"
 #include "MultiMooseEnum.h"
 #include "Conversion.h"
 #include "gtest/gtest.h"
@@ -180,6 +181,27 @@ TEST(InputParameters, applyParameter)
   p2.set<MultiMooseEnum>("enum") = "bar";
   p1.applyParameter(p2, "enum");
   EXPECT_TRUE(p1.get<MultiMooseEnum>("enum").contains("bar"));
+}
+
+TEST(InputParameters, applyParametersVector)
+{
+  MooseEnum types("foo bar");
+
+  InputParameters p1 = emptyInputParameters();
+  p1.addRequiredParam<std::vector<MooseEnum>>("enum", std::vector<MooseEnum>(1, types), "testing");
+
+  InputParameters p2 = emptyInputParameters();
+  p2.addRequiredParam<std::vector<MooseEnum>>("enum", std::vector<MooseEnum>(1, types), "testing");
+
+  MooseEnum set("foo bar", "bar");
+  p2.set<std::vector<MooseEnum>>("enum") = std::vector<MooseEnum>(1, set);
+
+  EXPECT_FALSE(p1.isParamValid("enum"));
+  EXPECT_TRUE(p2.isParamValid("enum"));
+
+  p1.applyParameters(p2);
+
+  EXPECT_TRUE(p1.get<std::vector<MooseEnum>>("enum")[0] == "bar");
 }
 
 TEST(InputParameters, applyParameters)
