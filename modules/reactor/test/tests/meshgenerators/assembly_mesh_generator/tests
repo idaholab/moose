@@ -5,13 +5,13 @@
     requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types'
     type = 'Exodiff'
     input = 'assembly_only.i'
-    cli_args = "--mesh-only assembly_only_in.e"
+    cli_args = "Outputs/file_base=assembly_only_in"
     exodiff = 'assembly_only_in.e'
     recover = false
   []
   [hex_ID_conflict]
-    requirement = 'The system shall throw an error if there is conflict in region ID / block name pairing'
-    type = 'RunException'
+    requirement = 'The system shall allow for multiple region IDs to be mapped to a specific block name'
+    type = 'Exodiff'
     input = 'assembly_only.i'
     cli_args = "Mesh/rmp/geom='Hex'
                 Mesh/rmp/assembly_pitch=7.10315
@@ -26,9 +26,9 @@
                 Mesh/amg/background_block_name='BLK3 BLK16'
                 Mesh/amg/duct_halfpitch='3.5'
                 Mesh/amg/duct_region_ids='7; 17'
-                Mesh/amg/duct_intervals='1'                 
-                --mesh-only assembly_ductIDs_in.e"
-    expect_err = "Provided region id 6 for block name BLK3 does not match the one that was provided in an earlier mapping - 3"
+                Mesh/amg/duct_intervals='1'
+                Outputs/file_base=assembly_ductIDs_conflict"
+    exodiff = assembly_ductIDs_conflict.e
     recover = false
   []
   [hex_ductIDs]
@@ -46,8 +46,8 @@
                 Mesh/amg/background_region_id='6 16'
                 Mesh/amg/duct_halfpitch='3.5'
                 Mesh/amg/duct_region_ids='7; 17'
-                Mesh/amg/duct_intervals='1'                 
-                --mesh-only assembly_ductIDs_in.e"
+                Mesh/amg/duct_intervals='1'
+                Outputs/file_base=assembly_ductIDs_in"
     exodiff = 'assembly_ductIDs_in.e'
     recover = false
   []

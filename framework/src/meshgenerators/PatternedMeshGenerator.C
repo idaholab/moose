@@ -152,16 +152,10 @@ PatternedMeshGenerator::generate()
 
       // Define a reference map variable for subdomain map
       auto & main_subdomain_map = _row_meshes[i]->set_subdomain_name_map();
-      // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+      // Retrieve subdomain name map from the mesh to be stitched and merge into the main
       // subdomain map
       const auto & increment_subdomain_map = cell_mesh.get_subdomain_name_map();
-      main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
-      // Check if one SubdomainName is shared by more than one subdomain ids
-      std::set<SubdomainName> main_subdomain_map_name_list;
-      for (auto const & id_name_pair : main_subdomain_map)
-        main_subdomain_map_name_list.emplace(id_name_pair.second);
-      if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
-        paramError("inputs", "The input meshes contain subdomain name maps with conflicts.");
+      mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
 
       _row_meshes[i]->stitch_meshes(cell_mesh,
                                     right,
@@ -179,20 +173,29 @@ PatternedMeshGenerator::generate()
   {
     // Define a reference map variable for subdomain map
     auto & main_subdomain_map = _row_meshes[0]->set_subdomain_name_map();
-    // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+    // Retrieve subdomain name map from the mesh to be stitched and merge into the main
     // subdomain map
     const auto & increment_subdomain_map = _row_meshes[i]->get_subdomain_name_map();
-    main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
-    // Check if one SubdomainName is shared by more than one subdomain ids
-    std::set<SubdomainName> main_subdomain_map_name_list;
-    for (auto const & id_name_pair : main_subdomain_map)
-      main_subdomain_map_name_list.emplace(id_name_pair.second);
-    if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
-      paramError("inputs", "The input meshes contain subdomain name maps with conflicts.");
+    mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
 
     _row_meshes[0]->stitch_meshes(
         *_row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
   }
 
   return dynamic_pointer_cast<MeshBase>(_row_meshes[0]);
+}
+
+void
+PatternedMeshGenerator::mergeSubdomainNameMaps(
+    std::map<subdomain_id_type, std::string> & main_subdomain_map,
+    const std::map<subdomain_id_type, std::string> & increment_subdomain_map)
+{
+  // Insert secondary subdomain map into main subdomain map
+  main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+  // Check if one SubdomainName is shared by more than one subdomain ids
+  std::set<SubdomainName> main_subdomain_map_name_list;
+  for (auto const & id_name_pair : main_subdomain_map)
+    main_subdomain_map_name_list.emplace(id_name_pair.second);
+  if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
+    paramError("inputs", "The input meshes contain subdomain name maps with conflicts.");
 }

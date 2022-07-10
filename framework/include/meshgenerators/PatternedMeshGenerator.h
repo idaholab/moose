@@ -47,6 +47,11 @@ protected:
   /// Holds a mesh for each row, these will be stitched together in the end
   std::vector<std::unique_ptr<ReplicatedMesh>> _row_meshes;
 
+  /// Merges the subdomain name maps between two meshes
+  void
+  mergeSubdomainNameMaps(std::map<subdomain_id_type, std::string> & main_subdomain_map,
+                         const std::map<subdomain_id_type, std::string> & increment_subdomain_map);
+
   Real _x_width;
   Real _y_width;
   Real _z_width;

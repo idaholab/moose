@@ -24,10 +24,30 @@
   []
 []
 
+[AuxVariables]
+  [region_id]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [region_id]
+    type = ExtraElementIDAux
+    variable = region_id
+    extra_id_name = region_id
+  []
+[]
+
 [Problem]
   solve = false
 []
 
 [Outputs]
   exodus = true
+  execute_on = timestep_end
+[]
+
+[Executioner]
+  type = Steady
 []

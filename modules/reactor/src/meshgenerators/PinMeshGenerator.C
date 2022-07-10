@@ -105,7 +105,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 {
   declareMeshProperty("pitch", _pitch);
 
-  // Initialize name_id_map and current_block_id from ReactorMeshParams object
+  // Initialize ReactorMeshParams object
   initializeReactorMeshParams(getParam<MeshGeneratorName>("reactor_params"));
 
   _mesh_dimensions = getReactorParam<int>("mesh_dimensions");
@@ -125,6 +125,13 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 
   if (isParamValid("region_ids"))
   {
+    unsigned int n_axial_levels =
+        (_mesh_dimensions == 3)
+            ? getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals").size()
+            : 1;
+    if (_region_ids.size() != n_axial_levels)
+      mooseError("The size of region IDs must be equal to the number of axial levels as defined in "
+                 "the ReactorMeshParams object");
     if (_region_ids[0].size() != (_ring_radii.size() + _duct_halfpitch.size() + 1))
       mooseError("The number of region IDs given needs to be one more than the number of "
                  "ring_radii + the number of duct_radii\n");
@@ -156,13 +163,15 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   std::vector<unsigned int> duct_intervals;
   std::vector<subdomain_id_type> duct_blk_ids;
   std::vector<SubdomainName> duct_blk_names;
+  // Initial block id used to define radial regions of pin
+  unsigned int pin_block_id_start = 10000;
+  // Use special block id to designate TRI elements
+  unsigned int pin_block_id_tri = pin_block_id_start - 1;
 
   for (const auto i : make_range(_intervals.size()))
   {
-    const auto region_id = _region_ids[0][i];
-    const auto block_name =
-        (_has_block_names ? _block_names[0][i] : _block_name_prefix + std::to_string(region_id));
-    const auto block_id = getBlockId(block_name, region_id);
+    const auto block_name = "RGMB_PIN" + std::to_string(_pin_type) + "_R" + std::to_string(i);
+    const auto block_id = pin_block_id_start + i;
 
     if (i < _ring_radii.size())
     {
@@ -197,16 +206,18 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       }
       else
       {
-        const auto region_id = _region_ids[0][0];
         const auto block_name = ring_blk_names.front() + "_TRI";
-        const auto block_id = getBlockId(block_name, region_id);
+        const auto block_id = pin_block_id_tri;
         ring_blk_ids.insert(ring_blk_ids.begin(), block_id);
         ring_blk_names.insert(ring_blk_names.begin(), block_name);
       }
     }
     // Add _TRI suffix if only one radial region and tri center elements
     else if (!_quad_center)
+    {
+      ring_blk_ids[0] = pin_block_id_tri;
       ring_blk_names[0] += "_TRI";
+    }
   }
   else
   {
@@ -222,9 +233,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       }
       else
       {
-        const auto region_id = _region_ids[0][0];
         const auto block_name = background_blk_names.front() + "_TRI";
-        const auto block_id = getBlockId(block_name, region_id);
+        const auto block_id = pin_block_id_tri;
         background_blk_ids.insert(background_blk_ids.begin(), block_id);
         background_blk_names.insert(background_blk_names.begin(), block_name);
       }
@@ -232,7 +242,10 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     // Add _TRI suffix if only one background region and tri center elements
     // and no ring regions
     else if (!_quad_center)
+    {
+      background_blk_ids[0] = pin_block_id_tri;
       background_blk_names[0] += "_TRI";
+    }
   }
 
   // Generate Cartesian/hex pin using PolygonConcentricCircleMeshGenerator
@@ -253,10 +266,6 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     params.set<unsigned int>("num_sides") = num_sides;
     params.set<std::vector<unsigned int>>("num_sectors_per_side") =
         std::vector<unsigned int>(num_sides, _num_sectors);
-
-    params.set<boundary_id_type>("interface_boundary_id_shift") =
-        30000; // need to shift interface boundaries to avoid clashing
-               // with default IDs for PatternedMeshGenerator
 
     if (ring_intervals.size() > 0)
     {
@@ -380,79 +389,74 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   }
   else
     declareMeshProperty("extruded", false);
-
-  // Save updates to name id map to ReactorMeshParams object
-  updateReactorMeshParams();
 }
 
 std::unique_ptr<MeshBase>
 PinMeshGenerator::generate()
 {
-  // Re-initialize name_id_map and current_block_id from ReactorMeshParams object
-  // in case variables have been modified between constructor and this method
-  initializeReactorMeshParams();
+  // This generate() method will be called once the subgenerators that we depend on
+  // have been called. This is where we reassign subdomain ids/names according to what
+  // the user has provided, and also where we set region_id, pin_type_id, and radial_id
+  // extra element integers
 
-  // Add region id and pin type id to the mesh as element integers
+  // Add region id, pin type id, and radial id to the mesh as element integers
   std::string region_id_name = "region_id";
   std::string pin_type_id_name = "pin_type_id";
   std::string plane_id_name = "plane_id";
-  unsigned int rid, ptid, pid = 0;
+  std::string radial_id_name = "radial_id";
+  const std::string default_block_name = "RGMB_PIN" + std::to_string(_pin_type);
 
-  if (!(*_build_mesh)->has_elem_integer(region_id_name))
-    rid = (*_build_mesh)->add_elem_integer(region_id_name);
-  else
-    rid = (*_build_mesh)->get_elem_integer_index(region_id_name);
-  if (!(*_build_mesh)->has_elem_integer(pin_type_id_name))
-    ptid = (*_build_mesh)->add_elem_integer(pin_type_id_name);
-  else
-    ptid = (*_build_mesh)->get_elem_integer_index(pin_type_id_name);
+  auto region_id_int = getElemIntegerFromMesh(*(*_build_mesh), region_id_name);
+  auto radial_id_int = getElemIntegerFromMesh(*(*_build_mesh), radial_id_name);
+  auto pin_type_id_int = getElemIntegerFromMesh(*(*_build_mesh), pin_type_id_name);
+  unsigned int plane_id_int = 0;
   if (_extrude)
-    pid = (*_build_mesh)->get_elem_integer_index(plane_id_name);
+    plane_id_int = getElemIntegerFromMesh(*(*_build_mesh), plane_id_name, true);
 
-  // Get region id and block information of elements defined by RGMB so far
-  const auto name_id_map =
-      getReactorParam<std::map<std::string, std::pair<subdomain_id_type, dof_id_type>>>(
-          "name_id_map");
-  for (auto it = name_id_map.begin(); it != name_id_map.end(); ++it)
+  // Get next free block ID in mesh in case subdomain ids need to be remapped
+  auto next_block_id = next_free_id(*(*(_build_mesh)));
+  std::map<std::string, SubdomainID> rgmb_name_id_map;
+
+  // Loop through all elements and set regions ids, pin type id, and radial idx.
+  // These element integers are also used to infer the block name for the region,
+  // and block IDs/names will be reassigned on the pin mesh if necessary
+  for (auto & elem : (*_build_mesh)->active_element_ptr_range())
   {
-    const auto base_block_id = it->second.first;
-    subdomain_id_type base_region_id = it->second.second;
-    const auto base_block_name = it->first;
-    const unsigned int radial_idx =
-        std::find(_region_ids[0].begin(), _region_ids[0].end(), base_region_id) -
-        _region_ids[0].begin();
+    const auto base_block_id = elem->subdomain_id();
+    const auto base_block_name = (*_build_mesh)->subdomain_name(base_block_id);
 
-    // Loop through all elements by subdomain id and set extra element integers.
-    // Also swap the region ids on the subdomain ids to the correct ones for their
-    // axial layer if necessary
-    for (const auto & elem :
-         as_range((*_build_mesh)->active_subdomain_elements_begin(base_block_id),
-                  (*_build_mesh)->active_subdomain_elements_end(base_block_id)))
-    {
-      dof_id_type z_id = _extrude ? elem->get_extra_integer(pid) : 0;
+    // Check if block name has correct prefix
+    std::string prefix = "RGMB_PIN" + std::to_string(_pin_type) + "_R";
+    if (!(base_block_name.find(prefix, 0) == 0))
+      continue;
+    // Radial index is integer value of substring after prefix
+    std::string radial_str = base_block_name.substr(prefix.length());
 
-      const subdomain_id_type elem_region_id = _region_ids[std::size_t(z_id)][radial_idx];
-      // Set element integers
-      elem->set_extra_integer(rid, elem_region_id);
-      elem->set_extra_integer(ptid, _pin_type);
+    // Filter out _TRI suffix if needed
+    const std::string suffix = "_TRI";
+    const std::size_t found = radial_str.find(suffix);
+    if (found != std::string::npos)
+      radial_str.replace(found, suffix.length(), "");
+    const unsigned int radial_idx = std::stoi(radial_str);
 
-      // Update block ids and names if they differ axially
-      if (elem_region_id != base_region_id)
-      {
-        auto elem_block_name =
-            (_has_block_names ? _block_names[std::size_t(z_id)][radial_idx]
-                              : _block_name_prefix + std::to_string(elem_region_id));
-        if (elem->type() == TRI3 || elem->type() == PRISM6)
-          elem_block_name += "_TRI";
-        const auto elem_block_id = getBlockId(elem_block_name, elem_region_id);
-        elem->subdomain_id() = elem_block_id;
-        (*_build_mesh)->subdomain_name(elem_block_id) = elem_block_name;
-      }
-    }
+    // Region id is inferred from z_id and radial_idx
+    dof_id_type z_id = _extrude ? elem->get_extra_integer(plane_id_int) : 0;
+    const subdomain_id_type elem_region_id = _region_ids[std::size_t(z_id)][radial_idx];
+
+    // Set element integers
+    elem->set_extra_integer(region_id_int, elem_region_id);
+    elem->set_extra_integer(pin_type_id_int, _pin_type);
+    elem->set_extra_integer(radial_id_int, radial_idx);
+
+    // Set element block name and block id
+    auto elem_block_name = default_block_name;
+    if (_has_block_names)
+      elem_block_name += "_" + _block_names[std::size_t(z_id)][radial_idx];
+    if (elem->type() == TRI3 || elem->type() == PRISM6)
+      elem_block_name += "_TRI";
+    updateElementBlockNameId(
+        *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
   }
-
-  // Update values name_id_map and current_block_id in RGMBBase to ReactorMeshParams
-  updateReactorMeshParams();
 
   return std::move(*_build_mesh);
 }

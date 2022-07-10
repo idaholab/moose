@@ -58,10 +58,20 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern")),
     _extrude(getParam<bool>("extrude"))
 {
-  // Initialize name_id_map and current_block_id from ReactorMeshParams object stored
-  // in pin input
   MeshGeneratorName reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
+  // Check that MG name for reactor params is consistent across all assemblies
+  for (unsigned int i = 1; i < _inputs.size(); i++)
+  {
+    // Skip if assembly name is equal to dummy assembly name
+    if (_inputs[i] == _empty_key)
+      continue;
+    if (getMeshProperty<std::string>("reactor_params_name", _inputs[i]) != reactor_params)
+      mooseError("The name of all reactor_params objects should be identical across all pins in "
+                 "the input assemblies.\n");
+  }
+
+  // Initialize ReactorMeshParams object stored in pin input
   initializeReactorMeshParams(reactor_params);
 
   _geom_type = getReactorParam<std::string>("mesh_geometry");
@@ -117,17 +127,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<Real>("polygon_size") = pitch / 2.0;
       params.set<std::vector<subdomain_id_type>>("background_block_ids") =
           std::vector<subdomain_id_type>{UINT16_MAX - 1};
+      params.set<bool>("flat_side_up") = true;
 
-      addMeshSubgenerator(
-          "PolygonConcentricCircleMeshGenerator", std::string(_empty_key) + "_circle", params);
-
-      // Rotate assembly to be square rather than diamond
-      params = _app.getFactory().getValidParams("TransformGenerator");
-      params.set<MeshGeneratorName>("input") = std::string(_empty_key) + "_circle";
-      params.set<MooseEnum>("transform") = 4;
-      params.set<RealVectorValue>("vector_value") = RealVectorValue(0, 0, 45);
-
-      addMeshSubgenerator("TransformGenerator", std::string(_empty_key), params);
+      addMeshSubgenerator("PolygonConcentricCircleMeshGenerator", std::string(_empty_key), params);
     }
     {
       auto params = _app.getFactory().getValidParams("CartesianIDPatternedMeshGenerator");
@@ -359,98 +361,86 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 CoreMeshGenerator::generate()
 {
-  // Re-initialize name_id_map and current_block_id from ReactorMeshParams object
-  // in case variables have been modified between constructor and this method
-  initializeReactorMeshParams();
-
   // This generate() method will be called once the subgenerators that we depend on are
-  // called. This is where we swap region ids and subdomain ids/names for extruded
-  // geometries.
+  // called. This is where we reassign subdomain ids/names in case they were merged
+  // when stitching assemblies into the core. This is also where we set region_id extra
+  // element integers, which has not been set yet for extruded geometries
 
+  // Define all extra element names and integers
+  std::string pin_type_id_name = "pin_type_id";
+  std::string assembly_type_id_name = "assembly_type_id";
+  std::string plane_id_name = "plane_id";
+  std::string region_id_name = "region_id";
+  std::string radial_id_name = "radial_id";
+  const std::string default_block_name = "RGMB_CORE";
+
+  auto pin_type_id_int = getElemIntegerFromMesh(*(*_build_mesh), pin_type_id_name, true);
+  auto assembly_type_id_int = getElemIntegerFromMesh(*(*_build_mesh), assembly_type_id_name, true);
+  auto radial_id_int = getElemIntegerFromMesh(*(*_build_mesh), radial_id_name, true);
+  auto region_id_int = getElemIntegerFromMesh(*(*_build_mesh), region_id_name, true);
+  unsigned int plane_id_int = 0;
   if (_extrude)
+    plane_id_int = getElemIntegerFromMesh(*(*_build_mesh), plane_id_name, true);
+
+  // Get next free block ID in mesh in case subdomain ids need to be remapped
+  auto next_block_id = next_free_id(*(*(_build_mesh)));
+  std::map<std::string, SubdomainID> rgmb_name_id_map;
+
+  // Loop through all mesh elements and set region ids and reassign block IDs/names
+  // if they were merged during assembly stitching
+  for (auto & elem : (*_build_mesh)->active_element_ptr_range())
   {
-    // swap the region ids on the subdomain ids to the correct ones
-    // for their axial layer
-    // Define all extra element names and integers
-    std::string pin_type_id_name = "pin_type_id";
-    std::string assembly_type_id_name = "assembly_type_id";
-    std::string plane_id_name = "plane_id";
-    std::string region_id_name = "region_id";
+    dof_id_type z_id = _extrude ? elem->get_extra_integer(plane_id_int) : 0;
+    dof_id_type pin_type_id = elem->get_extra_integer(pin_type_id_int);
 
-    if (!(*_build_mesh)->has_elem_integer(region_id_name))
-      mooseError("Expected mesh inputs to have the extra integer id: region_id.\n");
-
-    unsigned int ptid_int = (*_build_mesh)->get_elem_integer_index(pin_type_id_name);
-    unsigned int atid_int = (*_build_mesh)->get_elem_integer_index(assembly_type_id_name);
-    unsigned int pid_int = (*_build_mesh)->get_elem_integer_index(plane_id_name);
-    unsigned int rid_int = (*_build_mesh)->get_elem_integer_index(region_id_name);
-
-    for (auto & elem : (*_build_mesh)->active_element_ptr_range())
+    if (_pin_region_id_map.find(pin_type_id) != _pin_region_id_map.end())
     {
-      dof_id_type z_id = elem->get_extra_integer(pid_int);
-      dof_id_type pt_id = elem->get_extra_integer(ptid_int);
-      dof_id_type base_rid = elem->get_extra_integer(rid_int);
+      // Pin type element, get region ID from pin_type, z_id, and radial_idx
+      const dof_id_type radial_idx = elem->get_extra_integer(radial_id_int);
+      const auto elem_rid = _pin_region_id_map[pin_type_id][z_id][radial_idx];
+      elem->set_extra_integer(region_id_int, elem_rid);
 
-      if (_pin_region_id_map.find(pt_id) != _pin_region_id_map.end())
+      // Set element block name and block id
+      bool has_block_names = !_pin_block_name_map[pin_type_id].empty();
+      auto elem_block_name = default_block_name;
+      if (has_block_names)
+        elem_block_name += "_" + _pin_block_name_map[pin_type_id][z_id][radial_idx];
+      if (elem->type() == TRI3 || elem->type() == PRISM6)
+        elem_block_name += "_TRI";
+      updateElementBlockNameId(
+          *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
+    }
+    else
+    {
+      // element is in an assembly duct or background region since it doesn't
+      // have a pin type id that matches one in the map. Infer peripheral index
+      // from pin_type and region id from assembly_type_id, z_id, and peripheral_index
+      dof_id_type assembly_type_id = elem->get_extra_integer(assembly_type_id_int);
+      unsigned int peripheral_idx = (UINT16_MAX - 1) - pin_type_id;
+      bool is_background_region = peripheral_idx == 0;
+      const auto elem_rid =
+          (is_background_region ? _background_region_id_map[assembly_type_id][z_id]
+                                : _duct_region_id_map[assembly_type_id][z_id][peripheral_idx - 1]);
+      elem->set_extra_integer(region_id_int, elem_rid);
+
+      // Set element block name and block id
+      auto elem_block_name = default_block_name;
+      if (is_background_region)
       {
-        // Pin type element, swap subdomains if necessary
-        const auto radial_idx = std::find(_pin_region_id_map[pt_id][0].begin(),
-                                          _pin_region_id_map[pt_id][0].end(),
-                                          base_rid) -
-                                _pin_region_id_map[pt_id][0].begin();
-        const auto elem_rid = _pin_region_id_map[pt_id][z_id][radial_idx];
-
-        // swap region ids if they are different
-        if (elem_rid != base_rid)
-        {
-          elem->set_extra_integer(rid_int, elem_rid);
-          bool has_block_names = !_pin_block_name_map[pt_id].empty();
-          auto elem_block_name = (has_block_names ? _pin_block_name_map[pt_id][z_id][radial_idx]
-                                                  : _block_name_prefix + std::to_string(elem_rid));
-          if (elem->type() == TRI3 || elem->type() == PRISM6)
-            elem_block_name += "_TRI";
-          const auto elem_block_id = getBlockId(elem_block_name, elem_rid);
-          elem->subdomain_id() = elem_block_id;
-          (*_build_mesh)->subdomain_name(elem_block_id) = elem_block_name;
-        }
+        bool has_background_block_name = !_background_block_name_map[assembly_type_id].empty();
+        if (has_background_block_name)
+          elem_block_name += "_" + _background_block_name_map[assembly_type_id][z_id];
       }
       else
       {
-        // element is in an assembly duct or background region since it doesn't
-        // have a pin type id that matches one in the map. Infer peripheral index
-        // from pin_type
-        dof_id_type at_id = elem->get_extra_integer(atid_int);
-        unsigned int peripheral_idx = (UINT16_MAX - 1) - pt_id;
-        bool is_background_region = peripheral_idx == 0;
-        const auto elem_rid =
-            (is_background_region ? _background_region_id_map[at_id][z_id]
-                                  : _duct_region_id_map[at_id][z_id][peripheral_idx - 1]);
-
-        // Swap region ids if they are different
-        if (elem_rid != base_rid)
-        {
-          SubdomainName elem_block_name;
-          if (is_background_region)
-          {
-            bool has_background_block_name = !_background_block_name_map[at_id].empty();
-            elem_block_name =
-                (has_background_block_name ? _background_block_name_map[at_id][z_id]
-                                           : _block_name_prefix + std::to_string(elem_rid));
-          }
-          else
-          {
-            bool has_duct_block_names = !_duct_block_name_map[at_id].empty();
-            elem_block_name =
-                (has_duct_block_names ? _duct_block_name_map[at_id][z_id][peripheral_idx - 1]
-                                      : _block_name_prefix + std::to_string(elem_rid));
-          }
-          if (elem->type() == TRI3 || elem->type() == PRISM6)
-            elem_block_name += "_TRI";
-          const auto elem_block_id = getBlockId(elem_block_name, elem_rid);
-          elem->subdomain_id() = elem_block_id;
-          (*_build_mesh)->subdomain_name(elem_block_id) = elem_block_name;
-        }
+        bool has_duct_block_names = !_duct_block_name_map[assembly_type_id].empty();
+        if (has_duct_block_names)
+          elem_block_name += "_" + _duct_block_name_map[assembly_type_id][z_id][peripheral_idx - 1];
       }
+      if (elem->type() == TRI3 || elem->type() == PRISM6)
+        elem_block_name += "_TRI";
+      updateElementBlockNameId(
+          *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
     }
   }
 
