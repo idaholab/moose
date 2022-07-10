@@ -113,8 +113,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasReactorParam("top_boundary_id") ||
-                   !hasReactorParam("bottom_boundary_id")))
+  if (_extrude && (!hasReactorParam("top_boundary_id") || !hasReactorParam("bottom_boundary_id")))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
 
@@ -138,7 +137,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _has_block_names = true;
     _block_names = getParam<std::vector<std::vector<std::string>>>("block_names");
     if (_region_ids.size() != _block_names.size())
-        mooseError("The size of block_names must match the size of region_ids");
+      mooseError("The size of block_names must match the size of region_ids");
     for (const auto i : make_range(_region_ids.size()))
       if (_region_ids[i].size() != _block_names[i].size())
         mooseError("The size of block_names must match the size of region_ids");
@@ -160,8 +159,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   for (const auto i : make_range(_intervals.size()))
   {
     const auto region_id = _region_ids[0][i];
-    const auto block_name = (_has_block_names ? _block_names[0][i] :
-                             _block_name_prefix + std::to_string(region_id));
+    const auto block_name =
+        (_has_block_names ? _block_names[0][i] : _block_name_prefix + std::to_string(region_id));
     const auto block_id = getBlockId(block_name, region_id);
 
     if (i < _ring_radii.size())
@@ -332,11 +331,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 
   if (_extrude && _mesh_dimensions == 3)
   {
-    std::vector<Real> axial_boundaries =
-        getReactorParam<std::vector<Real>>("axial_boundaries");
+    std::vector<Real> axial_boundaries = getReactorParam<std::vector<Real>>("axial_boundaries");
     const auto top_boundary = getReactorParam<boundary_id_type>("top_boundary_id");
-    const auto bottom_boundary =
-        getReactorParam<boundary_id_type>("bottom_boundary_id");
+    const auto bottom_boundary = getReactorParam<boundary_id_type>("bottom_boundary_id");
     {
       declareMeshProperty("extruded", true);
       auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
@@ -412,19 +409,24 @@ PinMeshGenerator::generate()
     pid = (*_build_mesh)->get_elem_integer_index(plane_id_name);
 
   // Get region id and block information of elements defined by RGMB so far
-  const auto name_id_map = getReactorParam<std::map<std::string, std::pair<subdomain_id_type, dof_id_type>>>("name_id_map");
+  const auto name_id_map =
+      getReactorParam<std::map<std::string, std::pair<subdomain_id_type, dof_id_type>>>(
+          "name_id_map");
   for (auto it = name_id_map.begin(); it != name_id_map.end(); ++it)
   {
     const auto base_block_id = it->second.first;
     subdomain_id_type base_region_id = it->second.second;
     const auto base_block_name = it->first;
-    const unsigned int radial_idx = std::find(_region_ids[0].begin(), _region_ids[0].end(), base_region_id) - _region_ids[0].begin();
+    const unsigned int radial_idx =
+        std::find(_region_ids[0].begin(), _region_ids[0].end(), base_region_id) -
+        _region_ids[0].begin();
 
     // Loop through all elements by subdomain id and set extra element integers.
     // Also swap the region ids on the subdomain ids to the correct ones for their
     // axial layer if necessary
-    for (const auto & elem : as_range((*_build_mesh)->active_subdomain_elements_begin(base_block_id),
-                                      (*_build_mesh)->active_subdomain_elements_end(base_block_id)))
+    for (const auto & elem :
+         as_range((*_build_mesh)->active_subdomain_elements_begin(base_block_id),
+                  (*_build_mesh)->active_subdomain_elements_end(base_block_id)))
     {
       dof_id_type z_id = _extrude ? elem->get_extra_integer(pid) : 0;
 
@@ -436,8 +438,9 @@ PinMeshGenerator::generate()
       // Update block ids and names if they differ axially
       if (elem_region_id != base_region_id)
       {
-        auto elem_block_name = (_has_block_names ? _block_names[std::size_t(z_id)][radial_idx] :
-                                _block_name_prefix + std::to_string(elem_region_id));
+        auto elem_block_name =
+            (_has_block_names ? _block_names[std::size_t(z_id)][radial_idx]
+                              : _block_name_prefix + std::to_string(elem_region_id));
         if (elem->type() == TRI3 || elem->type() == PRISM6)
           elem_block_name += "_TRI";
         const auto elem_block_id = getBlockId(elem_block_name, elem_region_id);

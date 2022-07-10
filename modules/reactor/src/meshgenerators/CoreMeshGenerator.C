@@ -69,8 +69,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasReactorParam("top_boundary_id") ||
-                   !hasReactorParam("bottom_boundary_id")))
+  if (_extrude && (!hasReactorParam("top_boundary_id") || !hasReactorParam("bottom_boundary_id")))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
   if (!hasReactorParam("radial_boundary_id"))
@@ -187,8 +186,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
         auto params = _app.getFactory().getValidParams(
             "HexagonConcentricCircleAdaptiveBoundaryMeshGenerator");
 
-        params.set<Real>("hexagon_size") =
-            getReactorParam<Real>("assembly_pitch") / 2.0;
+        params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
         params.set<std::vector<unsigned int>>("num_sectors_per_side") =
             std::vector<unsigned int>(6, 2);
         params.set<std::vector<unsigned int>>("sides_to_adapt") = std::vector<unsigned int>{0};
@@ -218,8 +216,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             std::vector<MeshGeneratorName>{_empty_key};
       }
 
-      const auto radial_boundary =
-          getReactorParam<boundary_id_type>("radial_boundary_id");
+      const auto radial_boundary = getReactorParam<boundary_id_type>("radial_boundary_id");
       params.set<boundary_id_type>("external_boundary_id") = radial_boundary;
       params.set<std::string>("external_boundary_name") = "outer_core";
 
@@ -248,8 +245,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       for (auto pin = pin_region_id_map.begin(); pin != pin_region_id_map.end(); ++pin)
       {
         if (_pin_region_id_map.find(pin->first) == _pin_region_id_map.end())
-          _pin_region_id_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
-              pin->first, pin->second));
+          _pin_region_id_map.insert(
+              std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
+                  pin->first, pin->second));
         else if (pin->second != _pin_region_id_map.find(pin->first)->second)
           mooseError("Multiple region definitions for the same pin type. Check pin_type ids.\n");
       }
@@ -259,10 +257,12 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       for (auto pin = pin_block_name_map.begin(); pin != pin_block_name_map.end(); ++pin)
       {
         if (_pin_block_name_map.find(pin->first) == _pin_block_name_map.end())
-          _pin_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(
-              pin->first, pin->second));
+          _pin_block_name_map.insert(
+              std::pair<subdomain_id_type, std::vector<std::vector<std::string>>>(pin->first,
+                                                                                  pin->second));
         else if (pin->second != _pin_block_name_map.find(pin->first)->second)
-          mooseError("Multiple block name definitions for the same pin type. Check pin_type names.\n");
+          mooseError(
+              "Multiple block name definitions for the same pin type. Check pin_type names.\n");
       }
 
       if (_geom_type == "Hex")
@@ -276,8 +276,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           std::vector<std::vector<subdomain_id_type>> duct_region_ids =
               getMeshProperty<std::vector<std::vector<subdomain_id_type>>>("duct_region_ids",
                                                                            assembly);
-          _background_region_id_map.insert(std::pair<subdomain_id_type, std::vector<subdomain_id_type>>(
-              assembly_type, background_region_ids));
+          _background_region_id_map.insert(
+              std::pair<subdomain_id_type, std::vector<subdomain_id_type>>(assembly_type,
+                                                                           background_region_ids));
           _duct_region_id_map.insert(
               std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
                   assembly_type, duct_region_ids));
@@ -285,8 +286,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           std::vector<std::string> background_block_names =
               getMeshProperty<std::vector<std::string>>("background_block_names", assembly);
           std::vector<std::vector<std::string>> duct_block_names =
-              getMeshProperty<std::vector<std::vector<std::string>>>("duct_block_names",
-                                                                     assembly);
+              getMeshProperty<std::vector<std::vector<std::string>>>("duct_block_names", assembly);
           _background_block_name_map.insert(std::pair<subdomain_id_type, std::vector<std::string>>(
               assembly_type, background_block_names));
           _duct_block_name_map.insert(
@@ -302,11 +302,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
   if (_extrude && _mesh_dimensions == 3)
   {
-    std::vector<Real> axial_boundaries =
-        getReactorParam<std::vector<Real>>("axial_boundaries");
+    std::vector<Real> axial_boundaries = getReactorParam<std::vector<Real>>("axial_boundaries");
     const auto top_boundary = getReactorParam<boundary_id_type>("top_boundary_id");
-    const auto bottom_boundary =
-        getReactorParam<boundary_id_type>("bottom_boundary_id");
+    const auto bottom_boundary = getReactorParam<boundary_id_type>("bottom_boundary_id");
     {
       declareMeshProperty("extruded", true);
       auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
@@ -397,7 +395,8 @@ CoreMeshGenerator::generate()
         // Pin type element, swap subdomains if necessary
         const auto radial_idx = std::find(_pin_region_id_map[pt_id][0].begin(),
                                           _pin_region_id_map[pt_id][0].end(),
-                                          base_rid) - _pin_region_id_map[pt_id][0].begin();
+                                          base_rid) -
+                                _pin_region_id_map[pt_id][0].begin();
         const auto elem_rid = _pin_region_id_map[pt_id][z_id][radial_idx];
 
         // swap region ids if they are different
@@ -405,8 +404,8 @@ CoreMeshGenerator::generate()
         {
           elem->set_extra_integer(rid_int, elem_rid);
           bool has_block_names = !_pin_block_name_map[pt_id].empty();
-          auto elem_block_name = (has_block_names ? _pin_block_name_map[pt_id][z_id][radial_idx] :
-                                  _block_name_prefix + std::to_string(elem_rid));
+          auto elem_block_name = (has_block_names ? _pin_block_name_map[pt_id][z_id][radial_idx]
+                                                  : _block_name_prefix + std::to_string(elem_rid));
           if (elem->type() == TRI3 || elem->type() == PRISM6)
             elem_block_name += "_TRI";
           const auto elem_block_id = getBlockId(elem_block_name, elem_rid);
@@ -422,9 +421,9 @@ CoreMeshGenerator::generate()
         dof_id_type at_id = elem->get_extra_integer(atid_int);
         unsigned int peripheral_idx = (UINT16_MAX - 1) - pt_id;
         bool is_background_region = peripheral_idx == 0;
-        const auto elem_rid = (is_background_region ?
-                               _background_region_id_map[at_id][z_id] :
-                               _duct_region_id_map[at_id][z_id][peripheral_idx - 1]);
+        const auto elem_rid =
+            (is_background_region ? _background_region_id_map[at_id][z_id]
+                                  : _duct_region_id_map[at_id][z_id][peripheral_idx - 1]);
 
         // Swap region ids if they are different
         if (elem_rid != base_rid)
@@ -433,16 +432,16 @@ CoreMeshGenerator::generate()
           if (is_background_region)
           {
             bool has_background_block_name = !_background_block_name_map[at_id].empty();
-            elem_block_name = (has_background_block_name ?
-                               _background_block_name_map[at_id][z_id] :
-                               _block_name_prefix + std::to_string(elem_rid));
+            elem_block_name =
+                (has_background_block_name ? _background_block_name_map[at_id][z_id]
+                                           : _block_name_prefix + std::to_string(elem_rid));
           }
           else
           {
             bool has_duct_block_names = !_duct_block_name_map[at_id].empty();
-            elem_block_name = (has_duct_block_names ?
-                               _duct_block_name_map[at_id][z_id][peripheral_idx - 1] :
-                               _block_name_prefix + std::to_string(elem_rid));
+            elem_block_name =
+                (has_duct_block_names ? _duct_block_name_map[at_id][z_id][peripheral_idx - 1]
+                                      : _block_name_prefix + std::to_string(elem_rid));
           }
           if (elem->type() == TRI3 || elem->type() == PRISM6)
             elem_block_name += "_TRI";
@@ -458,11 +457,13 @@ CoreMeshGenerator::generate()
   // is used for deleting dummy assemblies. This block copies missing sides
   // into sideset 10000 from sideset "outer_core"
   BoundaryInfo & boundary_info = (*_build_mesh)->get_boundary_info();
-  boundary_id_type source_id = MooseMeshUtils::getBoundaryIDs(**_build_mesh, {"outer_core"}, true)[0];
+  boundary_id_type source_id =
+      MooseMeshUtils::getBoundaryIDs(**_build_mesh, {"outer_core"}, true)[0];
   boundary_id_type target_id = 10000;
   const auto sideset_map = boundary_info.get_sideset_map();
 
-  for (const auto & [elem, id_pair] : sideset_map) {
+  for (const auto & [elem, id_pair] : sideset_map)
+  {
     const auto side_id = id_pair.first;
     const auto sideset_id = id_pair.second;
 

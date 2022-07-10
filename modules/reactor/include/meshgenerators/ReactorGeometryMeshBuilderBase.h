@@ -26,21 +26,19 @@ protected:
    * Initializes and checks validity of ReactorMeshParams mesh generator object
    * @param name of ReactorMeshParams mesh generator
    */
-  void
-  initializeReactorMeshParams(const std::string reactor_param_name);
+  void initializeReactorMeshParams(const std::string reactor_param_name);
 
   /**
    * Initializes and checks validity of ReactorMeshParams mesh generator object.
    * This overloaded function should be called if iniitalizeReactorMeshParams
    * has already been called before
    */
-  void
-  initializeReactorMeshParams();
+  void initializeReactorMeshParams();
 
-   /**
-    * Updates values of ReactorMeshParams object meta data for use by future
-    * RGMB mesh generators
-    */
+  /**
+   * Updates values of ReactorMeshParams object meta data for use by future
+   * RGMB mesh generators
+   */
   void updateReactorMeshParams();
 
   /**
@@ -50,8 +48,7 @@ protected:
    * @param region id
    * @return block id
    */
-  dof_id_type
-  getBlockId(const std::string block_name, const dof_id_type region_id);
+  dof_id_type getBlockId(const std::string block_name, const dof_id_type region_id);
 
   /**
    * Checks whether parameter is defined in ReactorMeshParams metadata
@@ -66,8 +63,7 @@ protected:
    * @return reference to parameter is defined in ReactorMeshParams metadata
    */
   template <typename T>
-  const T &
-  getReactorParam(const std::string param_name);
+  const T & getReactorParam(const std::string param_name);
 
   ///The ReactorMeshParams object that is storing the reactor global information for this reactor geometry mesh
   MeshGeneratorName _reactor_params;

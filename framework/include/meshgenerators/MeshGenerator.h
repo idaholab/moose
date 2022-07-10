@@ -73,7 +73,8 @@ protected:
    * is not the one that is currently being operated on
    */
   template <typename T>
-  T & declareMeshProperty(const std::string & mg_name, const std::string & data_name,
+  T & declareMeshProperty(const std::string & mg_name,
+                          const std::string & data_name,
                           const T & init_value);
 
   /**
@@ -213,7 +214,8 @@ MeshGenerator::declareMeshProperty(const std::string & data_name, const T & init
 
 template <typename T>
 T &
-MeshGenerator::declareMeshProperty(const std::string & mg_name, const std::string & data_name,
+MeshGenerator::declareMeshProperty(const std::string & mg_name,
+                                   const std::string & data_name,
                                    const T & init_value)
 {
   std::string full_name =

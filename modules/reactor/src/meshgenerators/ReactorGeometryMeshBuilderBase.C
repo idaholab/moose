@@ -13,8 +13,8 @@ InputParameters
 ReactorGeometryMeshBuilderBase::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addClassDescription(
-      "A base class that contains common members and methods for Reactor Geometry Mesh Builder mesh generators.");
+  params.addClassDescription("A base class that contains common members and methods for Reactor "
+                             "Geometry Mesh Builder mesh generators.");
 
   return params;
 }
@@ -28,7 +28,7 @@ void
 ReactorGeometryMeshBuilderBase::initializeReactorMeshParams(const std::string reactor_param_name)
 {
   bool first_call = _reactor_params != reactor_param_name;
-  if(first_call)
+  if (first_call)
     _reactor_params = reactor_param_name;
 
   // Ensure that the user has supplied a valid ReactorMeshParams object
@@ -42,7 +42,8 @@ ReactorGeometryMeshBuilderBase::initializeReactorMeshParams(const std::string re
 
   // Set parameters related to block name and block / region id mapping
   _current_block_id = getReactorParam<subdomain_id_type>("current_block_id");
-  _name_id_map = getReactorParam<std::map<std::string, std::pair<subdomain_id_type, dof_id_type>>>("name_id_map");
+  _name_id_map = getReactorParam<std::map<std::string, std::pair<subdomain_id_type, dof_id_type>>>(
+      "name_id_map");
 
   // Set reactor_params_name metadata for use by future mesh generators
   if (first_call)
@@ -70,7 +71,10 @@ ReactorGeometryMeshBuilderBase::getBlockId(const std::string block_name,
   {
     // Block name exists in map, verify region_id matches one in map and return block_id
     if (_name_id_map[block_name].second != region_id)
-      mooseError("Provided region id ", region_id, " for block name ", block_name,
+      mooseError("Provided region id ",
+                 region_id,
+                 " for block name ",
+                 block_name,
                  " does not match the one that was provided in an earlier mapping - ",
                  _name_id_map[block_name].second);
     return _name_id_map[block_name].first;

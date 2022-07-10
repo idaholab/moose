@@ -55,8 +55,7 @@ AssemblyMeshGenerator::validParams()
       "extra-element integer.");
 
   params.addParam<std::vector<std::vector<std::string>>>(
-      "background_block_name",
-      "The block names for the assembly background regions");
+      "background_block_name", "The block names for the assembly background regions");
 
   params.addParam<std::vector<std::vector<std::string>>>(
       "duct_block_names",
@@ -117,8 +116,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     paramError("extrude",
                "This is a 2 dimensional mesh, you cannot extrude it. Check you ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasReactorParam("top_boundary_id") ||
-                   !hasReactorParam("bottom_boundary_id")))
+  if (_extrude && (!hasReactorParam("top_boundary_id") || !hasReactorParam("bottom_boundary_id")))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
 
@@ -180,7 +178,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     _has_background_block_name = true;
     _background_block_name = getParam<std::vector<std::string>>("background_block_name");
     if (_background_region_id.size() != _background_block_name.size())
-        mooseError("The size of background_block_name must match the size of background_region_id");
+      mooseError("The size of background_block_name must match the size of background_region_id");
   }
   else
     _has_background_block_name = false;
@@ -190,7 +188,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     _has_duct_block_names = true;
     _duct_block_names = getParam<std::vector<std::vector<std::string>>>("duct_block_names");
     if (_duct_region_ids.size() != _duct_block_names.size())
-        mooseError("The size of duct_block_names must match the size of duct_region_ids");
+      mooseError("The size of duct_block_names must match the size of duct_region_ids");
     for (const auto i : make_range(_duct_region_ids.size()))
       if (_duct_region_ids[i].size() != _duct_block_names[i].size())
         mooseError("The size of duct_block_names must match the size of duct_region_ids");
@@ -258,14 +256,14 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
           "cell"; // give elems IDs relative to position in assembly
       params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
       params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
-      params.set<Real>("hexagon_size") =
-          getReactorParam<Real>("assembly_pitch") / 2.0;
+      params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
       params.set<MooseEnum>("hexagon_size_style") = "apothem";
       params.set<unsigned int>("background_intervals") = _background_intervals;
 
       const auto background_region_id = _background_region_id[0];
-      const auto background_block_name = (_has_background_block_name ? _background_block_name[0] :
-                                          _block_name_prefix + std::to_string(background_region_id));
+      const auto background_block_name =
+          (_has_background_block_name ? _background_block_name[0]
+                                      : _block_name_prefix + std::to_string(background_region_id));
       const auto background_block_id = getBlockId(background_block_name, background_region_id);
       params.set<subdomain_id_type>("background_block_id") = background_block_id;
       params.set<SubdomainName>("background_block_name") = background_block_name;
@@ -278,8 +276,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         for (std::size_t duct_it = 0; duct_it < _duct_region_ids[0].size(); ++duct_it)
         {
           const auto duct_region_id = _duct_region_ids[0][duct_it];
-          const auto duct_block_name = (_has_duct_block_names ? _duct_block_names[0][duct_it] :
-                                        _block_name_prefix + std::to_string(duct_region_id));
+          const auto duct_block_name =
+              (_has_duct_block_names ? _duct_block_names[0][duct_it]
+                                     : _block_name_prefix + std::to_string(duct_region_id));
           const auto duct_block_id = getBlockId(duct_block_name, duct_region_id);
           duct_block_ids.push_back(duct_block_id);
           duct_block_names.push_back(duct_block_name);
@@ -309,8 +308,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
             "node_id_background_meta",
             getMeshProperty<unsigned int>("node_id_background_meta", name() + "_pattern"));
       if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
-        declareMeshProperty("pattern_pitch_meta",
-                            getReactorParam<Real>("assembly_pitch"));
+        declareMeshProperty("pattern_pitch_meta", getReactorParam<Real>("assembly_pitch"));
       if (hasMeshProperty("azimuthal_angle_meta", name() + "_pattern"))
         declareMeshProperty(
             "azimuthal_angle_meta",
@@ -354,8 +352,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> region_id_map =
         getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>>(
             "pin_region_ids", pinMG);
-    _pin_region_id_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
-        region_id_map.begin()->first, region_id_map.begin()->second));
+    _pin_region_id_map.insert(
+        std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
+            region_id_map.begin()->first, region_id_map.begin()->second));
     std::map<subdomain_id_type, std::vector<std::vector<std::string>>> block_name_map =
         getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<std::string>>>>(
             "pin_block_names", pinMG);
@@ -462,7 +461,9 @@ AssemblyMeshGenerator::generate()
   }
 
   // Get region id and block information of elements defined by RGMB so far
-  auto name_id_map = getReactorParam<std::map<std::string, std::pair<subdomain_id_type, dof_id_type>>>("name_id_map");
+  auto name_id_map =
+      getReactorParam<std::map<std::string, std::pair<subdomain_id_type, dof_id_type>>>(
+          "name_id_map");
 
   for (auto & elem : (*_build_mesh)->active_element_ptr_range())
   {
@@ -470,13 +471,14 @@ AssemblyMeshGenerator::generate()
     const dof_id_type pt_id = elem->get_extra_integer(ptid_int);
     const dof_id_type z_id = _extrude ? elem->get_extra_integer(pid_int) : 0;
 
-    if(_pin_region_id_map.find(pt_id) != _pin_region_id_map.end())
+    if (_pin_region_id_map.find(pt_id) != _pin_region_id_map.end())
     {
       // Pin type element, swap subdomains if necessary
       const dof_id_type base_rid = elem->get_extra_integer(rid_int);
       const auto radial_idx = std::find(_pin_region_id_map[pt_id][0].begin(),
                                         _pin_region_id_map[pt_id][0].end(),
-                                        base_rid) - _pin_region_id_map[pt_id][0].begin();
+                                        base_rid) -
+                              _pin_region_id_map[pt_id][0].begin();
       const auto elem_rid = _pin_region_id_map[pt_id][z_id][radial_idx];
 
       // swap region ids if they are different
@@ -484,8 +486,8 @@ AssemblyMeshGenerator::generate()
       {
         elem->set_extra_integer(rid_int, elem_rid);
         bool has_block_names = !_pin_block_name_map[pt_id].empty();
-        auto elem_block_name = (has_block_names ? _pin_block_name_map[pt_id][z_id][radial_idx] :
-                                _block_name_prefix + std::to_string(elem_rid));
+        auto elem_block_name = (has_block_names ? _pin_block_name_map[pt_id][z_id][radial_idx]
+                                                : _block_name_prefix + std::to_string(elem_rid));
         if (elem->type() == TRI3 || elem->type() == PRISM6)
           elem_block_name += "_TRI";
         const auto elem_block_id = getBlockId(elem_block_name, elem_rid);
@@ -500,17 +502,16 @@ AssemblyMeshGenerator::generate()
       const auto base_block_id = elem->subdomain_id();
       const auto base_block_name = (*_build_mesh)->subdomain_name(base_block_id);
       subdomain_id_type base_rid = (name_id_map[base_block_name]).second;
-      const auto peripheral_idx = std::find(_peripheral_region_ids.begin(),
-                                            _peripheral_region_ids.end(),
-                                            base_rid) - _peripheral_region_ids.begin();
+      const auto peripheral_idx =
+          std::find(_peripheral_region_ids.begin(), _peripheral_region_ids.end(), base_rid) -
+          _peripheral_region_ids.begin();
       bool is_background_region = peripheral_idx == 0;
 
       subdomain_id_type pin_type = UINT16_MAX - 1 - peripheral_idx;
       elem->set_extra_integer(ptid_int, pin_type);
 
-      const auto elem_rid = (is_background_region ?
-                             _background_region_id[z_id] :
-                             _duct_region_ids[z_id][peripheral_idx - 1]);
+      const auto elem_rid = (is_background_region ? _background_region_id[z_id]
+                                                  : _duct_region_ids[z_id][peripheral_idx - 1]);
       elem->set_extra_integer(rid_int, elem_rid);
 
       // swap region ids if they are different
@@ -518,13 +519,12 @@ AssemblyMeshGenerator::generate()
       {
         SubdomainName elem_block_name;
         if (is_background_region)
-          elem_block_name = (_has_background_block_name ?
-                             _background_block_name[z_id] :
-                             _block_name_prefix + std::to_string(elem_rid));
+          elem_block_name =
+              (_has_background_block_name ? _background_block_name[z_id]
+                                          : _block_name_prefix + std::to_string(elem_rid));
         else
-          elem_block_name = (_has_duct_block_names ?
-                             _duct_block_names[z_id][peripheral_idx - 1] :
-                             _block_name_prefix + std::to_string(elem_rid));
+          elem_block_name = (_has_duct_block_names ? _duct_block_names[z_id][peripheral_idx - 1]
+                                                   : _block_name_prefix + std::to_string(elem_rid));
 
         if (elem->type() == TRI3 || elem->type() == PRISM6)
           elem_block_name += "_TRI";
