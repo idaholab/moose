@@ -13,6 +13,7 @@
 #include "MooseMeshUtils.h"
 #include "Factory.h"
 #include "libmesh/elem.h"
+#include "ReactorGeometryMeshBuilderBase.h"
 
 registerMooseObject("ReactorApp", CoreMeshGenerator);
 

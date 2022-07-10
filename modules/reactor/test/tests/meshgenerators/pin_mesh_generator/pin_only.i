@@ -17,7 +17,6 @@
     pitch = 1.42063
     num_sectors = 4
     region_ids='1 2 3 4'
-    ring_radii = '0.3385 0.3705 0.4665'
 
     mesh_intervals = '1 1 1 1'
     quad_center_elements = false

@@ -18,28 +18,36 @@
     recover = false
   []
   [hex]
-    requirement = 'The system shall generate a 3D hexagonal core mesh with empty lattice positions'
+    requirement = 'The system shall generate a 3D hexagonal core mesh with empty lattice positions and explicit block name specification'
     type = 'Exodiff'
     input = 'core.i'
     cli_args = "Mesh/rmp/geom='Hex'
                 Mesh/rmp/assembly_pitch=7.10315
+                Mesh/rmp/axial_regions='1.0 1.0'
+                Mesh/rmp/axial_mesh_intervals='1 1'
                 Mesh/pin1/quad_center_elements=false
-                Mesh/pin1/region_ids='11 12 13'
+                Mesh/pin1/region_ids='11 12 13; 111 112 113'
+                Mesh/pin1/block_names='P1_R11 P1_R12 P1_R13; P1_R111 P1_R112 P1_R113'
                 Mesh/pin2/quad_center_elements=false
                 Mesh/pin2/mesh_intervals=1
-                Mesh/pin2/region_ids='21'
+                Mesh/pin2/region_ids='21; 121'
+                Mesh/pin2/block_names='P2_R21; P2_R121'
                 Mesh/pin3/quad_center_elements=false
-                Mesh/pin3/region_ids='31 32'
+                Mesh/pin3/region_ids='31 32; 131 132'
+                Mesh/pin3/block_names='P3_R31 P3_R32; P3_R131 P3_R132'
                 Mesh/amg1/pattern='  0   0; 0   0   0; 0   0'
                 Mesh/amg1/background_intervals=1
-                Mesh/amg1/background_region_id=41
+                Mesh/amg1/background_region_id='41 141'
+                Mesh/amg1/background_block_name='A1_R41 A1_R141'
                 Mesh/amg2/inputs='pin1 pin3'
                 Mesh/amg2/pattern='  0   0; 0   1   0; 0   0'
-                Mesh/amg2/background_region_id=51
+                Mesh/amg2/background_region_id='51 151'
+                Mesh/amg2/background_block_name='A2_R51 A2_R151'
                 Mesh/amg2/background_intervals=1
-                Mesh/amg2/duct_region_ids=52
+                Mesh/amg2/duct_region_ids='52; 152'
+                Mesh/amg2/duct_block_names='A2_R52; A2_R152'
                 Mesh/amg2/duct_halfpitch='3.5'
-                Mesh/amg2/duct_intervals='1' 
+                Mesh/amg2/duct_intervals='1'
                 Mesh/cmg/inputs='amg1 amg2 empty'                
                 Mesh/cmg/pattern='  2 1; 1 0 2 ; 2 1'
                 Outputs/file_base=core_hex_in"

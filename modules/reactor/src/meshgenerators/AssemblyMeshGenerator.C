@@ -9,6 +9,7 @@
 
 #include "AssemblyMeshGenerator.h"
 
+#include "ReactorGeometryMeshBuilderBase.h"
 #include "MooseApp.h"
 #include "Factory.h"
 #include "libmesh/elem.h"
@@ -54,8 +55,8 @@ AssemblyMeshGenerator::validParams()
       "The region id for the ducts from innermost to outermost, to set region_id "
       "extra-element integer.");
 
-  params.addParam<std::vector<std::vector<std::string>>>(
-      "background_block_name", "The block names for the assembly background regions");
+  params.addParam<std::vector<std::string>>("background_block_name",
+                                            "The block names for the assembly background regions");
 
   params.addParam<std::vector<std::vector<std::string>>>(
       "duct_block_names",

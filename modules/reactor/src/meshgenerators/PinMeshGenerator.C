@@ -9,6 +9,7 @@
 
 #include "PinMeshGenerator.h"
 
+#include "ReactorGeometryMeshBuilderBase.h"
 #include <cmath>
 #include "MooseApp.h"
 #include "Factory.h"
