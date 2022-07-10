@@ -47,6 +47,7 @@ Transfer::validParams()
   params.registerBase("Transfer");
 
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+  params.addParamNamesToGroup("_called_legacy_params", "Advanced");
 
   params.declareControllable("enable");
   return params;
