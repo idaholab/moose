@@ -1054,7 +1054,7 @@ SubProblem::initialSetup()
     for (const auto & pr : functors)
       if (pr.second->wrapsNull())
         mooseError("No functor ever provided with name '",
-                   removeSubstring(pr.first, "wraps_"),
+                   MooseUtils::removeSubstring(pr.first, "wraps_"),
                    "', which was requested by '",
                    MooseUtils::join(libmesh_map_find(_functor_to_requestors, pr.first), ","),
                    "'.");

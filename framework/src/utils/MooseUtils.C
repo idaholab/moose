@@ -1305,6 +1305,26 @@ template std::deque<MaterialBase *>
 buildRequiredMaterials(const std::array<const MortarNodalAuxKernelTempl<RealVectorValue> *, 1> &,
                        const std::vector<std::shared_ptr<MaterialBase>> &,
                        bool);
+
+void
+removeSubstring(std::string & main, const std::string & sub)
+{
+  std::string::size_type n = sub.length();
+  for (std::string::size_type i = main.find(sub); i != std::string::npos; i = main.find(sub))
+    main.erase(i, n);
+}
+
+std::string
+removeSubstring(const std::string & main, const std::string & sub)
+{
+  std::string copy_main = main;
+  std::string::size_type n = sub.length();
+  for (std::string::size_type i = copy_main.find(sub); i != std::string::npos;
+       i = copy_main.find(sub))
+    copy_main.erase(i, n);
+  return copy_main;
+}
+
 } // MooseUtils namespace
 
 std::string
@@ -1373,23 +1393,4 @@ getLatestCheckpointFileHelper(const std::list<std::string> & checkpoint_files,
   }
 
   return keep_extension ? max_file : max_base;
-}
-
-void
-removeSubstring(std::string & main, const std::string & sub)
-{
-  std::string::size_type n = sub.length();
-  for (std::string::size_type i = main.find(sub); i != std::string::npos; i = main.find(sub))
-    main.erase(i, n);
-}
-
-std::string
-removeSubstring(const std::string & main, const std::string & sub)
-{
-  std::string copy_main = main;
-  std::string::size_type n = sub.length();
-  for (std::string::size_type i = copy_main.find(sub); i != std::string::npos;
-       i = copy_main.find(sub))
-    copy_main.erase(i, n);
-  return copy_main;
 }

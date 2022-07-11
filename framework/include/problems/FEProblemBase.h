@@ -751,9 +751,7 @@ public:
    * @param tid The thread id
    * @param swap_stateful Whether to swap stateful material properties between \p MaterialData and
    * \p MaterialPropertyStorage
-   * @param execute_stateful Whether to execute material objects that have stateful properties. This
-   * should be \p false when for example executing material objects for mortar contexts in which
-   * stateful properties don't make sense
+   * @param reinit_mats Optional list of Material objects to compue (otherwise use all materials)
    */
   void reinitMaterialsFace(SubdomainID blk_id,
                            THREAD_ID tid,
@@ -766,9 +764,7 @@ public:
    * @param tid The thread id
    * @param swap_stateful Whether to swap stateful material properties between \p MaterialData and
    * \p MaterialPropertyStorage
-   * @param execute_stateful Whether to execute material objects that have stateful properties. This
-   * should be \p false when for example executing material objects for mortar contexts in which
-   * stateful properties don't make sense
+   * @param reinit_mats Optional list of Material objects to compue (otherwise use all materials)
    */
   void reinitMaterialsNeighbor(SubdomainID blk_id,
                                THREAD_ID tid,
@@ -781,9 +777,7 @@ public:
    * @param tid The thread id
    * @param swap_stateful Whether to swap stateful material properties between \p MaterialData and
    * \p MaterialPropertyStorage
-   * @param execute_stateful Whether to execute material objects that have stateful properties. This
-   * should be \p false when for example executing material objects for mortar contexts in which
-   * stateful properties don't make sense
+   * @param reinit_mats Optional list of Material objects to compue (otherwise use all materials)
    */
   void reinitMaterialsBoundary(BoundaryID boundary_id,
                                THREAD_ID tid,
@@ -2088,6 +2082,9 @@ protected:
   MaterialWarehouse _discrete_materials;  // Materials that the user must compute
   MaterialWarehouse _all_materials; // All materials for error checking and MaterialData storage
   ///@}
+
+  /// All material objects that need to be called to provide the currently requested material properties
+  std::deque<MaterialBase *> _active_materials;
 
   ///@{
   // Indicator Warehouses

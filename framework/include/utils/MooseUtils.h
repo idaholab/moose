@@ -1065,8 +1065,6 @@ get(const std::shared_ptr<T> & s)
   return s.get();
 }
 
-} // MooseUtils namespace
-
 /**
  * find, erase, length algorithm for removing a substring from a string
  */
@@ -1076,3 +1074,26 @@ void removeSubstring(std::string & main, const std::string & sub);
  * find, erase, length algorithm for removing a substring from a copy of a string
  */
 std::string removeSubstring(const std::string & main, const std::string & sub);
+
+/*
+ * Check if a set intersection is empty. Relies on sets being sorted.
+ */
+template <typename T>
+bool
+emptyIntersection(const std::set<T> & a, const std::set<T> & b)
+{
+  auto i = a.begin();
+  auto j = b.begin();
+  while (i != a.end() && j != b.end())
+  {
+    if (*i == *j)
+      return false;
+    else if (*i < *j)
+      ++i;
+    else
+      ++j;
+  }
+  return true;
+}
+
+} // MooseUtils namespace

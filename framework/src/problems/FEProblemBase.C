@@ -3287,6 +3287,16 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   needed_mat_props.insert(current_active_material_properties.begin(),
                           current_active_material_properties.end());
 
+  // find all materials that provide the required properties
+  _active_materials.clear();
+  if (_materials.hasActiveBlockObjects(blk_id, tid))
+    for (const auto & mat : _materials.getActiveBlockObjects(blk_id, tid))
+    {
+      const auto & supplied_props = mat->getSuppliedPropIDs();
+      if (!MooseUtils::emptyIntersection(supplied_props, needed_mat_props))
+        _active_materials.push_back(mat.get());
+    }
+
   setActiveElementalMooseVariables(needed_moose_vars, tid);
   setActiveMaterialProperties(needed_mat_props, tid);
 }
@@ -3308,7 +3318,7 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
       _material_data[tid]->reset(_discrete_materials.getActiveBlockObjects(blk_id, tid));
 
     if (_materials.hasActiveBlockObjects(blk_id, tid))
-      _material_data[tid]->reinit(_materials.getActiveBlockObjects(blk_id, tid));
+      _material_data[tid]->reinit(_active_materials);
   }
 }
 
@@ -6990,10 +7000,10 @@ FEProblemBase::checkDependMaterialsHelper(
         // Check whether these materials are an AD pair
         auto outer_mat_type = outer_mat->type();
         auto inner_mat_type = inner_mat->type();
-        removeSubstring(outer_mat_type, "<RESIDUAL>");
-        removeSubstring(outer_mat_type, "<JACOBIAN>");
-        removeSubstring(inner_mat_type, "<RESIDUAL>");
-        removeSubstring(inner_mat_type, "<JACOBIAN>");
+        MooseUtils::removeSubstring(outer_mat_type, "<RESIDUAL>");
+        MooseUtils::removeSubstring(outer_mat_type, "<JACOBIAN>");
+        MooseUtils::removeSubstring(inner_mat_type, "<RESIDUAL>");
+        MooseUtils::removeSubstring(inner_mat_type, "<JACOBIAN>");
         if (outer_mat_type == inner_mat_type && outer_mat_type != outer_mat->type() &&
             inner_mat_type != inner_mat->type())
           continue;

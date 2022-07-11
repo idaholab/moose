@@ -1006,7 +1006,7 @@ Parser::buildFullTree(const std::string & search_string)
 
             // Remove <RESIDUAL> append for AD objects
             std::string obj_name = moose_obj->first;
-            removeSubstring(obj_name, "<RESIDUAL>");
+            MooseUtils::removeSubstring(obj_name, "<RESIDUAL>");
 
             if (!action_obj_params.collapseSyntaxNesting())
               name = act_name.substr(0, pos - 1) + obj_name;
