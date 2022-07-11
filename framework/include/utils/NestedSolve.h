@@ -22,6 +22,8 @@
 #include <Eigen/Dense>
 #include <unsupported/Eigen/NonLinearOptimization>
 
+#include "EigenADReal.h"
+
 /**
  * Internal use namespace that contains template helpers to map each residual
  * type to its corresponding Jacobian type.
