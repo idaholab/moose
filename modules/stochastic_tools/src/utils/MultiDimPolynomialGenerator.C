@@ -13,7 +13,9 @@ namespace StochasticTools
 {
 
 std::vector<std::vector<unsigned int>>
-MultiDimPolynomialGenerator::generateTuple(const unsigned int ndim, const unsigned int order)
+MultiDimPolynomialGenerator::generateTuple(const unsigned int ndim,
+                                           const unsigned int order,
+                                           const bool include_bias)
 {
   // Compute full tensor tuple
   std::vector<std::vector<unsigned int>> tuple_1d(ndim);
@@ -23,6 +25,7 @@ MultiDimPolynomialGenerator::generateTuple(const unsigned int ndim, const unsign
     for (unsigned int i = 0; i < order; ++i)
       tuple_1d[d][i] = i;
   }
+
   CartesianProduct<unsigned int> tensor_tuple(tuple_1d);
 
   // Remove polynomials that exceed the maximum order
@@ -36,6 +39,10 @@ MultiDimPolynomialGenerator::generateTuple(const unsigned int ndim, const unsign
   }
 
   std::sort(tuple.begin(), tuple.end(), sortTuple);
+
+  if (!include_bias)
+    tuple.erase(tuple.begin()); // Erase intercept terms.
+
   return tuple;
 }
 
