@@ -38,6 +38,11 @@ public:
    * Construct with a file name
    */
   GriddedData(std::string file_name);
+  GriddedData(const std::vector<Real> & x_axis,
+              const std::vector<Real> & y_axis,
+              const std::vector<Real> & z_axis,
+              const std::vector<Real> & t_axis,
+              const std::vector<Real> & fcn);
 
   virtual ~GriddedData() = default;
 
@@ -136,4 +141,6 @@ private:
    * to the end of output_vec
    */
   void splitToRealVec(const std::string & input_string, std::vector<Real> & output_vec);
+
+  void updateGrid(unsigned int & dim, const std::vector<Real> & axis_i, const int axis_index);
 };
