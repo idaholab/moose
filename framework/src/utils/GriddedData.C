@@ -57,6 +57,60 @@ GriddedData::GriddedData(std::string file_name)
   parse(_dim, _axes, _grid, _fcn, _step, file_name);
 }
 
+GriddedData::GriddedData(const std::vector<Real> & x_axis,
+                         const std::vector<Real> & y_axis,
+                         const std::vector<Real> & z_axis,
+                         const std::vector<Real> & t_axis,
+                         const std::vector<Real> & fcn)
+  : _fcn(fcn)
+{
+  _axes.resize(0);
+  _dim = 0;
+  if (!x_axis.empty())
+    updateGrid(_dim, x_axis, 0);
+
+  if (!y_axis.empty())
+    updateGrid(_dim, y_axis, 1);
+
+  if (!z_axis.empty())
+    updateGrid(_dim, z_axis, 2);
+
+  if (!t_axis.empty())
+    updateGrid(_dim, t_axis, 3);
+
+  if (_dim == 0)
+    mooseError("All axis vectors passed to GriddedData constructor were found empty");
+
+  // step is useful in evaluateFcn
+  _step.resize(_dim);
+  _step[0] = 1; // this is actually not used
+  for (unsigned int i = 1; i < _dim; ++i)
+    _step[i] = _step[i - 1] * _grid[i - 1].size();
+
+  unsigned int num_data_pt = 1;
+  for (unsigned int i = 0; i < _dim; ++i)
+    num_data_pt *= _grid[i].size();
+
+  if (num_data_pt != _fcn.size())
+    mooseError("According to the provided axes and function values, number of data points is ",
+               num_data_pt,
+               " but ",
+               _fcn.size(),
+               " function values were given by user");
+}
+
+void
+GriddedData::updateGrid(unsigned int & dim, const std::vector<Real> & axis_i, const int axis_index)
+{
+  if (axis_i.size() != 0)
+  {
+    dim += 1;
+    _axes.push_back(axis_index);
+    _grid.resize(_dim); // add another dimension to the grid
+    _grid[_dim - 1].resize(0);
+    _grid[_dim - 1] = axis_i;
+  }
+}
 unsigned int
 GriddedData::getDim()
 {
