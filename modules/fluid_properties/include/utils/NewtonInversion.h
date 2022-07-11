@@ -12,6 +12,12 @@
 #include "libmesh/utility.h"
 #include <functional>
 
+// This file performs a Newton solve in 1D and 2D. In 1D, solve fails to converge
+// and error outputs if it takes more than 100 iterations. In 2D, if more than 100
+// iterations occur, save results references and set convergence to false. Applications
+// using 2D Newton Solve will need to write routines to take care of values where this
+// occurs. See TabulatedBicubicFluidProperties for example (routine checkOutofBounds).
+
 namespace NewtonMethod
 {
   /**
@@ -47,6 +53,7 @@ namespace NewtonMethod
                      Real & x_final,
                      Real & y_final,
                      const Real & tolerance,
+                     bool & converged,
                      std::function<void(Real, Real, Real &, Real &, Real &)> const & func1,
                      std::function<void(Real, Real, Real &, Real &, Real &)> const & func2);
 

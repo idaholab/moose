@@ -47,6 +47,9 @@ TabulatedBilinearFluidProperties::constructInterpolation()
         std::make_unique<BilinearInterpolation>(_pressure, _temperature, data_matrix);
   }
 
+  bool conversion_succeeded = true;
+  unsigned int fail_counter_ve = 0;
+  unsigned int fail_counter_vh = 0;
   // Create specific volume (v) grid
   if (_construct_pT_from_ve || _construct_pT_from_vh)
   {
@@ -91,28 +94,51 @@ TabulatedBilinearFluidProperties::constructInterpolation()
         for (unsigned int j = 0; j < _num_e; ++j)
         {
           Real p_ve, T_ve;
-          _fp->p_T_from_v_e(_specific_volume[i],
-                            _internal_energy[j],
-                            _p_initial_guess,
-                            _T_initial_guess,
-                            p_ve,
-                            T_ve);
+          // Using an input fluid property instead of the tabulation will get more exact inversions
+          if (_fp)
+            _fp->p_T_from_v_e(_specific_volume[i],
+                              _internal_energy[j],
+                              _p_initial_guess,
+                              _T_initial_guess,
+                              p_ve,
+                              T_ve,
+                              conversion_succeeded);
+          else
+          {
+            // The inversion may step outside of the domain of definition of the interpolations,
+            // which are restricted to the range of the input CSV file
+            const bool old_error_behavior = _error_on_out_of_bounds;
+            _error_on_out_of_bounds = false;
+            p_T_from_v_e(_specific_volume[i],
+                         _internal_energy[j],
+                         _p_initial_guess,
+                         _T_initial_guess,
+                         p_ve,
+                         T_ve,
+                         conversion_succeeded);
+            _error_on_out_of_bounds = old_error_behavior;
+            // track number of times convergence failed
+            if (!conversion_succeeded)
+              ++fail_counter_ve;
+          }
 
-          /// check for NaNs in p interpolation
+          // check for NaNs in p interpolation
           checkNaNs(_pressure_min, _pressure_max, i, p_ve, num_p_nans_ve);
-          /// check for NaNs in p interpolation
+          // check for NaNs in p interpolation
           checkNaNs(_temperature_min, _temperature_max, i, T_ve, num_T_nans_ve);
 
-          /// replace out of bounds pressure values with pmax or pmin
+          // replace out of bounds pressure values with pmax or pmin
           checkOutofBounds(_pressure_min, _pressure_max, p_ve, num_p_out_bounds_ve);
-          /// replace out of bounds temperature values with Tmax or Tmin
+          // replace out of bounds temperature values with Tmax or Tmin
           checkOutofBounds(_temperature_min, _temperature_max, T_ve, num_T_out_bounds_ve);
 
           p_from_v_e(i, j) = p_ve;
           T_from_v_e(i, j) = T_ve;
         }
       }
-
+      // warn users about Newton Method for inversion convergence failures
+      if (fail_counter_ve)
+        mooseWarning("Convergence of inversion from (v,e) failed ", fail_counter_ve, " times. Out of bound values set to pressure, temperature min or max.");
       outputWarnings(num_p_nans_ve, num_p_out_bounds_ve, "(v,e)", "pressure", _num_e * _num_v);
       outputWarnings(num_T_nans_ve, num_T_out_bounds_ve, "(v,e)", "temperature", _num_e * _num_v);
 
@@ -151,23 +177,49 @@ TabulatedBilinearFluidProperties::constructInterpolation()
         for (unsigned int j = 0; j < _num_e; ++j)
         {
           Real p_vh, T_vh;
-          _fp->p_T_from_v_h(
-              _specific_volume[i], _enthalpy[j], _p_initial_guess, _T_initial_guess, p_vh, T_vh);
+          if (_fp)
+            _fp->p_T_from_v_h(_specific_volume[i],
+                              _enthalpy[j],
+                              _p_initial_guess,
+                              _T_initial_guess,
+                              p_vh,
+                              T_vh,
+                              conversion_succeeded);
+          else
+          {
+            // The inversion may step outside of the domain of definition of the interpolations,
+            // which are restricted to the range of the input CSV file
+            const bool old_error_behavior = _error_on_out_of_bounds;
+            _error_on_out_of_bounds = false;
+            p_T_from_v_h(_specific_volume[i],
+                         _enthalpy[j],
+                         _p_initial_guess,
+                         _T_initial_guess,
+                         p_vh,
+                         T_vh,
+                         conversion_succeeded);
+            _error_on_out_of_bounds = old_error_behavior;
+            // track number of times convergence failed
+            if (!conversion_succeeded)
+              ++fail_counter_vh;
+          }
 
-          /// check for NaNs in p interpolation
+          // check for NaNs in p interpolation
           checkNaNs(_pressure_min, _pressure_max, i, p_vh, num_p_nans_vh);
-          /// check for NaNs in p interpolation
+          // check for NaNs in p interpolation
           checkNaNs(_temperature_min, _temperature_max, i, T_vh, num_T_nans_vh);
 
-          /// replace out of bounds pressure values with pmax or pmin
+          // replace out of bounds pressure values with pmax or pmin
           checkOutofBounds(_pressure_min, _pressure_max, p_vh, num_p_out_bounds_vh);
-          /// replace out of bounds temperature values with Tmax or Tmin
+          // replace out of bounds temperature values with Tmax or Tmin
           checkOutofBounds(_temperature_min, _temperature_max, T_vh, num_T_out_bounds_vh);
           p_from_v_h(i, j) = p_vh;
           T_from_v_h(i, j) = T_vh;
         }
       }
-
+      // warn users about Newton Method for inversion convergence failures
+      if (fail_counter_vh)
+        mooseWarning("Convergence for inversion from (v,h) failed ", fail_counter_vh, " times.");
       outputWarnings(num_p_nans_vh, num_p_out_bounds_vh, "(v,h)", "pressure", _num_e * _num_v);
       outputWarnings(num_T_nans_vh, num_T_out_bounds_vh, "(v,h)", "temperature", _num_e * _num_v);
 
@@ -197,7 +249,7 @@ void
 TabulatedBilinearFluidProperties::checkNaNs(
     Real min, Real max, unsigned int i, Real & variable, unsigned int & num_nans)
 {
-  /// replace nan values with pmax or pmin
+  // replace nan values with pmax or pmin
   if (std::isnan(variable))
   {
     if (_specific_volume[i] > ((_v_min + _v_max) / 2))

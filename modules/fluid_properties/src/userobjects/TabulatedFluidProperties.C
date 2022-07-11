@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TabulatedFluidProperties.h"
-#include "BidimensionalInterpolation.h"
 #include "MooseUtils.h"
 #include "Conversion.h"
 #include "KDTree.h"
@@ -45,8 +44,8 @@ TabulatedFluidProperties::validParams()
       "num_T", 100, "num_T > 0", "Number of points to divide temperature range. Default is 100");
   params.addRangeCheckedParam<unsigned int>(
       "num_p", 100, "num_p > 0", "Number of points to divide pressure range. Default is 100");
-  params.addRequiredParam<UserObjectName>("fp", "The name of the FluidProperties UserObject");
-  MultiMooseEnum properties("density enthalpy internal_energy viscosity k cv cp entropy",
+  params.addParam<UserObjectName>("fp", "The name of the FluidProperties UserObject");
+  MultiMooseEnum properties("density enthalpy internal_energy viscosity k c cv cp entropy",
                             "density enthalpy internal_energy viscosity");
   params.addParam<MultiMooseEnum>("interpolated_properties",
                                   properties,
@@ -101,6 +100,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _interpolate_internal_energy(false),
     _interpolate_viscosity(false),
     _interpolate_k(false),
+    _interpolate_c(false),
     _interpolate_cp(false),
     _interpolate_cv(false),
     _interpolate_entropy(false),
@@ -109,12 +109,14 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _internal_energy_idx(0),
     _viscosity_idx(0),
     _k_idx(0),
+    _c_idx(0),
     _cp_idx(0),
     _cv_idx(0),
     _entropy_idx(0),
     _csv_reader(_file_name, &_communicator),
     _construct_pT_from_ve(getParam<bool>("construct_pT_from_ve")),
     _construct_pT_from_vh(getParam<bool>("construct_pT_from_vh")),
+    _initial_setup_done(false),
     _num_v(getParam<unsigned int>("num_v")),
     _num_e(getParam<unsigned int>("num_e")),
     _inversion_interpolation_order(getParam<unsigned int>("pt_ve_inversion_interpolation_order")),
@@ -135,6 +137,10 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
 void
 TabulatedFluidProperties::initialSetup()
 {
+  if (_initial_setup_done)
+    return ;
+  _initial_setup_done = true;
+
   // Check to see if _file_name supplied exists. If it does, that data
   // will be used. If it does not exist, data will be generated and then
   // written to _file_name.
@@ -304,6 +310,11 @@ TabulatedFluidProperties::initialSetup()
     {
       _interpolate_k = true;
       _k_idx = i;
+    }
+    if (_interpolated_properties[i] == "c")
+    {
+      _interpolate_c = true;
+      _c_idx = i;
     }
     if (_interpolated_properties[i] == "cp")
     {
@@ -625,20 +636,37 @@ TabulatedFluidProperties::mu_from_p_T(
 Real
 TabulatedFluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
-  if (_fp)
-    return _fp->c_from_p_T(pressure, temperature);
+  if (_interpolate_c)
+  {
+    checkInputVariables(pressure, temperature);
+    return _property_ipol[_c_idx]->sample(pressure, temperature);
+  }
   else
-    paramError("interpolated_properties", "No data to interpolate for specific heat capacity.");
+  {
+    if (_fp)
+      return _fp->c_from_p_T(pressure, temperature);
+    else
+      paramError("interpolated_properties", "No data to interpolate for speed of sound.");
+  }
 }
 
 void
 TabulatedFluidProperties::c_from_p_T(
     Real pressure, Real temperature, Real & c, Real & dc_dp, Real & dc_dT) const
 {
-  if (_fp)
-    _fp->c_from_p_T(pressure, temperature, c, dc_dp, dc_dT);
+  if (_interpolate_c)
+  {
+    checkInputVariables(pressure, temperature);
+    _property_ipol[_c_idx]->sampleValueAndDerivatives(
+        pressure, temperature, c, dc_dp, dc_dT);
+  }
   else
-    paramError("interpolated_properties", "No data to interpolate for specific heat capacity.");
+  {
+    if (_fp)
+      _fp->c_from_p_T(pressure, temperature, c, dc_dp, dc_dT);
+    else
+      paramError("interpolated_properties", "No data to interpolate for speed of sound.");
+  }
 }
 
 Real
@@ -1051,22 +1079,24 @@ TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
   Real p0 = _p_initial_guess;
   Real T0 = _T_initial_guess;
   Real p, T;
-  p_T_from_v_e(v, e, p0, T0, p, T);
+  bool conversion_succeeded;
+  p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
   const Real s = s_from_p_T(p, T);
   const Real h = h_from_p_T(p, T);
   // this is simple the definition of Gibbs free energy
   return h - T * s;
 }
 
-// Real
-// TabulatedFluidProperties::T_from_h_s(Real h, Real s) const
-// {
-//   Real p0 = _p_initial_guess;
-//   Real T0 = _T_initial_guess;
-//   Real p, T;
-//   p_T_from_h_s(h, s, p0, T0, p, T);
-//   return T;
-// }
+Real
+TabulatedFluidProperties::T_from_h_s(Real h, Real s) const
+{
+  Real p0 = _p_initial_guess;
+  Real T0 = _T_initial_guess;
+  Real p, T;
+  bool conversion_succeeded;
+  p_T_from_h_s(h, s, p0, T0, p, T, conversion_succeeded);
+  return T;
+}
 
 Real
 TabulatedFluidProperties::T_from_p_h(Real pressure, Real h) const
@@ -1209,6 +1239,17 @@ TabulatedFluidProperties::generateTabulatedData()
           else
             paramError("interpolated_properties",
                        "No data to interpolate for thermal conductivity.");
+        }
+
+    if (_interpolated_properties[i] == "c")
+      for (unsigned int p = 0; p < _num_p; ++p)
+        for (unsigned int t = 0; t < _num_T; ++t)
+        {
+          if (_fp)
+            _properties[i][p * _num_T + t] = _fp->c_from_p_T(_pressure[p], _temperature[t]);
+          else
+            paramError("interpolated_properties",
+                       "No data to interpolate for speed of sound.");
         }
 
     if (_interpolated_properties[i] == "cv")

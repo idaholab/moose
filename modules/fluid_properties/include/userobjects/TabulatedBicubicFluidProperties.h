@@ -11,7 +11,7 @@
 
 #include "TabulatedFluidProperties.h"
 
-class SinglePhaseFluidPropertiesPT;
+class SinglePhaseFluidProperties;
 class BicubicInterpolation;
 
 #pragma GCC diagnostic push
@@ -107,15 +107,30 @@ protected:
                      const std::vector<Real> & vec,
                      std::vector<std::vector<Real>> & mat);
 
+  /**
+  * If Newton Method jacobian produces NaNs, set variable to min or max depending on situation
+  * @param min minimum value of variable
+  * @param max maximum value of variable
+  * @param variable variable of interest (pressure or temperature)
+  * @param num_nans track number of nans produced
+  */
   void checkNaNs(Real min, Real max, unsigned int i, Real & variable, unsigned int & num_nans);
-
+  /**
+  * If values go out of user defined range during Newton Method inversion, set variable to min or max depending on situation
+  * @param min minimum value of variable
+  * @param max maximum value of variable
+  * @param variable variable of interest (pressure or temperature)
+  * @param num_out_bounds track number of values out of user defined bounds
+  */
   void checkOutofBounds(Real min, Real max, Real & variable, unsigned int & num_out_bounds);
-
+  // If values go out of user defined range or NaNs are produced during
+  // Newton Method inversion, produce warnings to inform the user
   void outputWarnings(Real num_nans,
                       Real num_out_bounds,
                       std::string variable_set,
                       std::string p_or_T,
                       unsigned int number_points);
+
 };
 
 #pragma GCC diagnostic pop
