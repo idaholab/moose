@@ -12,7 +12,7 @@
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
 
-#include "libmesh/replicated_mesh.h"
+#include "libmesh/unstructured_mesh.h"
 
 registerMooseObject("MooseApp", StitchedMeshGenerator);
 
@@ -55,16 +55,16 @@ std::unique_ptr<MeshBase>
 StitchedMeshGenerator::generate()
 {
   // We put the first mesh in a local pointer
-  std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[0]);
-  if (!mesh)
-    mooseError("StitchedMeshGenerator is not implemented for distributed meshes");
+  std::unique_ptr<UnstructuredMesh> mesh = dynamic_pointer_cast<UnstructuredMesh>(*_mesh_ptrs[0]);
+  if (!mesh) // This should never happen until libMesh implements on-the-fly-Elem mesh types
+    mooseError("StitchedMeshGenerator is only implemented for unstructured meshes");
 
   // Reserve spaces for the other meshes (no need to store the first one another time)
-  std::vector<std::unique_ptr<ReplicatedMesh>> meshes(_mesh_ptrs.size() - 1);
+  std::vector<std::unique_ptr<UnstructuredMesh>> meshes(_mesh_ptrs.size() - 1);
 
   // Read in all of the other meshes
   for (MooseIndex(_mesh_ptrs) i = 1; i < _mesh_ptrs.size(); ++i)
-    meshes[i - 1] = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]);
+    meshes[i - 1] = dynamic_pointer_cast<UnstructuredMesh>(*_mesh_ptrs[i]);
 
   // Stitch all the meshes to the first one
   for (MooseIndex(meshes) i = 0; i < meshes.size(); i++)
