@@ -50,16 +50,30 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         std::make_unique<BicubicInterpolation>(_pressure, _temperature, data_matrix);
   }
 
+  bool conversion_succeeded = true;
+  unsigned int fail_counter_ve = 0;
+  unsigned int fail_counter_vh = 0;
   // Create specific volume (v) grid
   if (_construct_pT_from_ve || _construct_pT_from_vh)
   {
-    // extreme values of specific volume for the grid bounds
-    Real v1 = v_from_p_T(_pressure_min, _temperature_min);
-    Real v2 = v_from_p_T(_pressure_max, _temperature_min);
-    Real v3 = v_from_p_T(_pressure_min, _temperature_max);
-    Real v4 = v_from_p_T(_pressure_max, _temperature_max);
-    _v_min = std::min({v1, v2, v3, v4});
-    _v_max = std::max({v1, v2, v3, v4});
+    if (_fp)
+    {
+      // extreme values of specific volume for the grid bounds
+      Real v1 = v_from_p_T(_pressure_min, _temperature_min);
+      Real v2 = v_from_p_T(_pressure_max, _temperature_min);
+      Real v3 = v_from_p_T(_pressure_min, _temperature_max);
+      Real v4 = v_from_p_T(_pressure_max, _temperature_max);
+      _v_min = std::min({v1, v2, v3, v4});
+      _v_max = std::max({v1, v2, v3, v4});
+    }
+    // if csv exists, get max and min values from csv file
+    else
+    {
+      Real rho_max = * max_element(_properties[_density_idx].begin() , _properties[_density_idx].end());
+      Real rho_min = * min_element(_properties[_density_idx].begin() , _properties[_density_idx].end());
+      _v_max = 1 / rho_min;
+      _v_min = 1 / rho_max;
+    }
     Real dv = (_v_max - _v_min) / ((Real)_num_v - 1);
 
     // Create v grid for interpolation
@@ -70,6 +84,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
 
   if (_construct_pT_from_ve)
   {
+    if (_fp)
+    {
     // extreme values of internal energy for the grid bounds
     Real e1 = e_from_p_T(_pressure_min, _temperature_min);
     Real e2 = e_from_p_T(_pressure_max, _temperature_min);
@@ -77,6 +93,13 @@ TabulatedBicubicFluidProperties::constructInterpolation()
     Real e4 = e_from_p_T(_pressure_max, _temperature_max);
     _e_min = std::min({e1, e2, e3, e4});
     _e_max = std::max({e1, e2, e3, e4});
+    }
+    // if csv exists, get max and min values from csv file
+    else
+    {
+      _e_max = *max_element(_properties[_internal_energy_idx].begin() , _properties[_internal_energy_idx].end());
+      _e_min = *min_element(_properties[_internal_energy_idx].begin() , _properties[_internal_energy_idx].end());
+    }
     Real de = (_e_max - _e_min) / ((Real)_num_e - 1);
 
     // Create e grid for interpolation
@@ -98,28 +121,52 @@ TabulatedBicubicFluidProperties::constructInterpolation()
       for (unsigned int j = 0; j < _num_e; ++j)
       {
         Real p_ve, T_ve;
-        _fp->p_T_from_v_e(_specific_volume[i],
-                          _internal_energy[j],
-                          _p_initial_guess,
-                          _T_initial_guess,
-                          p_ve,
-                          T_ve);
+        // Using an input fluid property instead of the tabulation will get more exact inversions
+        if (_fp)
+          _fp->p_T_from_v_e(_specific_volume[i],
+                            _internal_energy[j],
+                            _p_initial_guess,
+                            _T_initial_guess,
+                            p_ve,
+                            T_ve,
+                            conversion_succeeded);
+        else
+        {
+          // The inversion may step outside of the domain of definition of the interpolations,
+          // which are restricted to the range of the input CSV file
+          const bool old_error_behavior = _error_on_out_of_bounds;
+          _error_on_out_of_bounds = false;
+          p_T_from_v_e(_specific_volume[i],
+                       _internal_energy[j],
+                       _p_initial_guess,
+                       _T_initial_guess,
+                       p_ve,
+                       T_ve,
+                       conversion_succeeded);
+          _error_on_out_of_bounds = old_error_behavior;
+          // track number of times convergence failed
+          if (!conversion_succeeded)
+            ++fail_counter_ve;
+        }
 
-        /// check for NaNs in p interpolation
+        // check for NaNs in p interpolation
         checkNaNs(_pressure_min, _pressure_max, i, p_ve, num_p_nans_ve);
-        /// check for NaNs in p interpolation
+        // check for NaNs in p interpolation
         checkNaNs(_temperature_min, _temperature_max, i, T_ve, num_T_nans_ve);
 
-        /// replace out of bounds pressure values with pmax or pmin
+        // replace out of bounds pressure values with pmax or pmin
         checkOutofBounds(_pressure_min, _pressure_max, p_ve, num_p_out_bounds_ve);
-        /// replace out of bounds temperature values with Tmax or Tmin
+        // replace out of bounds temperature values with Tmax or Tmin
         checkOutofBounds(_temperature_min, _temperature_max, T_ve, num_T_out_bounds_ve);
 
         p_from_v_e[i][j] = p_ve;
         T_from_v_e[i][j] = T_ve;
       }
     }
-
+    // warn users about Newton Method for inversion convergence failures
+    if (fail_counter_ve)
+      mooseWarning("Convergence of inversion from (v,e) failed ", fail_counter_ve, " times. Out of bound values set to pressure, temperature min or max.");
+    //output warning if nans or values out of bounds
     outputWarnings(num_p_nans_ve, num_p_out_bounds_ve, "(v,e)", "pressure", _num_e * _num_v);
     outputWarnings(num_T_nans_ve, num_T_out_bounds_ve, "(v,e)", "temperature", _num_e * _num_v);
 
@@ -132,13 +179,22 @@ TabulatedBicubicFluidProperties::constructInterpolation()
 
   if (_construct_pT_from_vh)
   {
-    // extreme values of enthalpy for the grid bounds
-    Real h1 = h_from_p_T(_pressure_min, _temperature_min);
-    Real h2 = h_from_p_T(_pressure_max, _temperature_min);
-    Real h3 = h_from_p_T(_pressure_min, _temperature_max);
-    Real h4 = h_from_p_T(_pressure_max, _temperature_max);
-    _h_min = std::min({h1, h2, h3, h4});
-    _h_max = std::max({h1, h2, h3, h4});
+    if (_fp)
+    {
+      // extreme values of enthalpy for the grid bounds
+      Real h1 = h_from_p_T(_pressure_min, _temperature_min);
+      Real h2 = h_from_p_T(_pressure_max, _temperature_min);
+      Real h3 = h_from_p_T(_pressure_min, _temperature_max);
+      Real h4 = h_from_p_T(_pressure_max, _temperature_max);
+      _h_min = std::min({h1, h2, h3, h4});
+      _h_max = std::max({h1, h2, h3, h4});
+    }
+    // if csv exists, get max and min values from csv file
+    else
+    {
+      _h_max = *max_element(_properties[_enthalpy_idx].begin() , _properties[_enthalpy_idx].end());
+      _h_min = *min_element(_properties[_enthalpy_idx].begin() , _properties[_enthalpy_idx].end());
+    }
     Real dh = (_h_max - _h_min) / ((Real)_num_e - 1);
 
     // Create h grid for interpolation
@@ -161,24 +217,52 @@ TabulatedBicubicFluidProperties::constructInterpolation()
       for (unsigned int j = 0; j < _num_e; ++j)
       {
         Real p_vh, T_vh;
-        _fp->p_T_from_v_h(
-            _specific_volume[i], _enthalpy[j], _p_initial_guess, _T_initial_guess, p_vh, T_vh);
+        // Using an input fluid property instead of the tabulation will get more exact inversions
+        if (_fp)
+          _fp->p_T_from_v_h(_specific_volume[i],
+                            _enthalpy[j],
+                            _p_initial_guess,
+                            _T_initial_guess,
+                            p_vh,
+                            T_vh,
+                            conversion_succeeded);
+        else
+        {
+          // The inversion may step outside of the domain of definition of the interpolations,
+          // which are restricted to the range of the input CSV file
+          const bool old_error_behavior = _error_on_out_of_bounds;
+          _error_on_out_of_bounds = false;
+          p_T_from_v_h(_specific_volume[i],
+                       _enthalpy[j],
+                       _p_initial_guess,
+                       _T_initial_guess,
+                       p_vh,
+                       T_vh,
+                       conversion_succeeded);
+          _error_on_out_of_bounds = old_error_behavior;
+          // track number of times convergence failed
+          if (!conversion_succeeded)
+            ++fail_counter_vh;
+        }
 
-        /// check for NaNs in p interpolation
+        // check for NaNs in p interpolation
         checkNaNs(_pressure_min, _pressure_max, i, p_vh, num_p_nans_vh);
-        /// check for NaNs in p interpolation
+        // check for NaNs in p interpolation
         checkNaNs(_temperature_min, _temperature_max, i, T_vh, num_T_nans_vh);
 
-        /// replace out of bounds pressure values with pmax or pmin
+        // replace out of bounds pressure values with pmax or pmin
         checkOutofBounds(_pressure_min, _pressure_max, p_vh, num_p_out_bounds_vh);
-        /// replace out of bounds temperature values with Tmax or Tmin
+        // replace out of bounds temperature values with Tmax or Tmin
         checkOutofBounds(_temperature_min, _temperature_max, T_vh, num_T_out_bounds_vh);
 
         p_from_v_h[i][j] = p_vh;
         T_from_v_h[i][j] = T_vh;
       }
     }
-
+    // warn users about Newton Method for inversion convergence failures
+    if (fail_counter_vh)
+      mooseWarning("Convergence for inversion from (v,h) failed ", fail_counter_vh, " times.");
+    // output warnings if nans our values out of bounds
     outputWarnings(num_p_nans_vh, num_p_out_bounds_vh, "(v,h)", "pressure", _num_e * _num_v);
     outputWarnings(num_T_nans_vh, num_T_out_bounds_vh, "(v,h)", "temperature", _num_e * _num_v);
 
@@ -212,7 +296,6 @@ void
 TabulatedBicubicFluidProperties::checkNaNs(
     Real min, Real max, unsigned int i, Real & variable, unsigned int & num_nans)
 {
-  /// replace nan values with pmax or pmin
   if (std::isnan(variable))
   {
     if (_specific_volume[i] > ((_v_min + _v_max) / 2))

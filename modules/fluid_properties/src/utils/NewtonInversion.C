@@ -17,7 +17,11 @@
 #include <ctime>
 #include <math.h>
 
-///This file solves for z using Newton's Method when given x and y inputs
+// This file performs a Newton solve in 1D and 2D. In 1D, solve fails to converge
+// and error outputs if it takes more than 100 iterations. In 2D, if more than 100
+// iterations occur, save results references and set convergence to false. Applications
+// using 2D Newton Solve will need to write routines to take care of values where this
+// occurs. See TabulatedBicubicFluidProperties for example (routine checkOutofBounds).
 
 namespace NewtonMethod
 {
@@ -60,9 +64,11 @@ NewtonSolve2D(const Real & f,
               Real & x_final,
               Real & y_final,
               const Real & tolerance,
+              bool & converged,
               std::function<void(Real, Real, Real &, Real &, Real &)> const & func1,
               std::function<void(Real, Real, Real &, Real &, Real &)> const & func2)
 {
+  converged = false;
   RealEigenMatrix jacobian(2,2); //Compute Jacobian
 
   RealEigenVector current_vec(2);//initialize current_vec with initial guess
@@ -80,35 +86,33 @@ NewtonSolve2D(const Real & f,
   Real res2 = 1;
   Real residual = 1;
 
-  while (residual > tolerance) //tol instead of 1e-8
+  while (residual > tolerance) //iterate until residual is smaller than tolerance reached
   {
     Real new_f, df_dx, df_dy, new_g, dg_dx, dg_dy;
     func1(current_vec[0], current_vec[1], new_f, df_dx, df_dy); //get new h and derivatives
     func2(current_vec[0], current_vec[1], new_g, dg_dx, dg_dy); //get new s and derivatives
-
     jacobian << df_dx, df_dy, //fill jacobian
                 dg_dx, dg_dy;
-
-    // checkNaNs(jacobian, num_nans_jacobian);
-    // checkNaNs(jacobian.inverse(), num_nans_inverse);
 
     function << new_f, new_g; //fill function
     next_vec = current_vec - (jacobian.inverse() * ( function - target)); //2D Newton Method
     res1 = (current_vec[0] - next_vec[0]); //update residual 1
     res2 = (current_vec[1] - next_vec[1]); //update residual 2
     residual = pow(pow(res1, 2) + pow(res2, 2), 0.5); //update residual
-
     current_vec = next_vec; //update current_vec for next iteration
     ++iteration; //update iteration;
 
     if (iteration > 100)
-      mooseError("2D Newton Solve, Convergence Failed");
+    {
+      x_final = current_vec[0];
+      y_final = current_vec[1];
+      return;
+    }
   }
-  // outputWarnings(num_nans_jacobian, false);
-  // outputWarnings(num_nans_inverse, true);
-
+  // save solution to x_final and y_final
   x_final = current_vec[0]; //returned p
   y_final = current_vec[1]; //returned y
+  converged = true; // convergence successful
 }
 
 } //namespace NewtonMethod

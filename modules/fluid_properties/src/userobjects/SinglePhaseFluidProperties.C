@@ -70,7 +70,8 @@ SinglePhaseFluidProperties::s_from_v_e(Real v, Real e) const
   Real p0 = _p_initial_guess;
   Real T0 = _T_initial_guess;
   Real p, T;
-  p_T_from_v_e(v, e, p0, T0, p, T);
+  bool conversion_succeeded = true;
+  p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
   const Real s = s_from_p_T(p, T);
   return s;
 }
@@ -81,7 +82,8 @@ SinglePhaseFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, R
   Real p0 = _p_initial_guess;
   Real T0 = _T_initial_guess;
   Real p, T;
-  p_T_from_v_e(v, e, p0, T0, p, T);
+  bool conversion_succeeded = true;
+  p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
   s = s_from_p_T(p, T);
   ds_dv = p / T;
   ds_de = 1 / T;
@@ -505,7 +507,8 @@ SinglePhaseFluidProperties::p_T_from_v_e(const Real & v, //v value
                                          const Real & p0,//initial guess
                                          const Real & T0,//intial guess
                                          Real & p, //returned pressure
-                                         Real & T //returned temperature
+                                         Real & T, //returned temperature
+                                         bool & conversion_succeeded
                                          ) const
 {
   auto v_lambda = [&](Real pressure, Real temperature, Real & new_v, Real & dv_dp, Real & dv_dT)
@@ -516,17 +519,18 @@ SinglePhaseFluidProperties::p_T_from_v_e(const Real & v, //v value
   {
     e_from_p_T(pressure, temperature, new_e, de_dp, de_dT);
   };
-  NewtonMethod::NewtonSolve2D(v, e, p0, T0, p, T, _tolerance, v_lambda, e_lambda);
+  NewtonMethod::NewtonSolve2D(v, e, p0, T0, p, T, _tolerance, conversion_succeeded, v_lambda, e_lambda);
 }
 
 void
 SinglePhaseFluidProperties::p_T_from_v_h(const Real & v, //v value
-                                       const Real & h, //e value
-                                       const Real & p0,//initial guess
-                                       const Real & T0,//intial guess
-                                       Real & p, //returned pressure
-                                       Real & T //returned temperature
-                                       ) const
+                                        const Real & h, //e value
+                                        const Real & p0,//initial guess
+                                        const Real & T0,//intial guess
+                                        Real & p, //returned pressure
+                                        Real & T, //returned temperature
+                                        bool & conversion_succeeded
+                                        ) const
 {
   auto v_lambda = [&](Real pressure, Real temperature, Real & new_v, Real & dv_dp, Real & dv_dT)
   {
@@ -536,17 +540,18 @@ SinglePhaseFluidProperties::p_T_from_v_h(const Real & v, //v value
   {
     h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT);
   };
-  NewtonMethod::NewtonSolve2D(v, h, p0, T0, p, T, _tolerance, v_lambda, h_lambda);
+  NewtonMethod::NewtonSolve2D(v, h, p0, T0, p, T, _tolerance, conversion_succeeded, v_lambda, h_lambda);
 }
 
 void
 SinglePhaseFluidProperties::p_T_from_h_s(const Real & h, //h value
-                                      const Real & s, //s value
-                                      const Real & p0,//initial guess
-                                      const Real & T0,//intial guess
-                                      Real & p, //returned pressure
-                                      Real & T //returned temperature
-                                      ) const
+                                         const Real & s, //s value
+                                         const Real & p0,//initial guess
+                                         const Real & T0,//intial guess
+                                         Real & p, //returned pressure
+                                         Real & T, //returned temperature
+                                         bool & conversion_succeeded
+                                         ) const
 {
   auto h_lambda = [&](Real pressure, Real temperature, Real & new_h, Real & dh_dp, Real & dh_dT)
   {
@@ -556,7 +561,7 @@ SinglePhaseFluidProperties::p_T_from_h_s(const Real & h, //h value
   {
     s_from_p_T(pressure, temperature, new_s, ds_dp, ds_dT);
   };
-  NewtonMethod::NewtonSolve2D(h, s, p0, T0, p, T, _tolerance, h_lambda, s_lambda);
+  NewtonMethod::NewtonSolve2D(h, s, p0, T0, p, T, _tolerance, conversion_succeeded, h_lambda, s_lambda);
 }
 
 Real
@@ -565,7 +570,8 @@ SinglePhaseFluidProperties::p_from_h_s(Real h, Real s) const
   Real p0 = _p_initial_guess;
   Real T0 = _T_initial_guess;
   Real p, T;
-  p_T_from_h_s(h, s, p0, T0, p, T);
+  bool conversion_succeeded = true;
+  p_T_from_h_s(h, s, p0, T0, p, T, conversion_succeeded);
   return p;
 }
 
@@ -575,7 +581,8 @@ SinglePhaseFluidProperties::p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, R
   Real p0 = _p_initial_guess;
   Real T0 = _T_initial_guess;
   Real T;
-  p_T_from_h_s(h, s, p0, T0, p, T);
+  bool conversion_succeeded = true;
+  p_T_from_h_s(h, s, p0, T0, p, T, conversion_succeeded);
   dp_dh = rho_from_p_T(p, T);
   dp_ds = -T * rho_from_p_T(p, T);
 }

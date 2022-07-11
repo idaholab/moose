@@ -339,11 +339,13 @@ public:
    * @param[out] Temperature (K)
    */
   virtual void p_T_from_v_e(const Real & v,
-                           const Real & e,
-                           const Real & p0,
-                           const Real & T0,
-                           Real & p,
-                           Real & T) const;
+                            const Real & e,
+                            const Real & p0,
+                            const Real & T0,
+                            Real & p,
+                            Real & T,
+                            bool & conversion_succeeded
+                            ) const;
 
  /**
   * Determines (p,T) from (v,h) using Newton Solve in 2D
@@ -361,8 +363,9 @@ public:
                            const Real & p0,
                            const Real & T0,
                            Real & p,
-                           Real & T
-                         ) const;
+                           Real & T,
+                           bool & conversion_succeeded
+                           ) const;
   /**
   * Determines (p,T) from (h,s) using Newton Solve in 2D
   * Useful for inversion of state variables
@@ -379,7 +382,8 @@ public:
                             const Real & p0,
                             const Real & T0,
                             Real & p,
-                            Real & T
+                            Real & T,
+                            bool & conversion_succeeded
                             ) const;
 
   // virtual Real p_from_h_s(Real h, Real s) const;
