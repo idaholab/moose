@@ -28,7 +28,7 @@
     boundary = 'outer_bdy'
     holes = 'hole_1
              hole_2'
-    add_nodes_per_boundary_segment = 4
+    add_nodes_per_boundary_segment = 3
     refine_boundary = false
     desired_area = 0.05
   []

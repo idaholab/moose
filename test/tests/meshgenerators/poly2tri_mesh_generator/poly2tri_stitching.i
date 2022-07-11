@@ -46,7 +46,7 @@
                     false'
     refine_holes = 'false
                     false'
-    add_nodes_per_boundary_segment = 4
+    add_nodes_per_boundary_segment = 3
     refine_boundary = false
     desired_area = 0.05
   []
