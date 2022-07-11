@@ -643,7 +643,6 @@
     type = 'RunException'
     expect_err = "unused parameter 'Mesh/unused_param'"
     input = 'unused_param_test.i'
-    allow_unused = true
 
     requirement = 'The system shall report a warning when an unused parameter is provided through the input file or an Action.'
     issues = '#709 #759 #4101'
@@ -654,7 +653,6 @@
     expect_err = "unused parameter 'Executioner/unused_param'"
     input = 'unused_param_test.i'
     cli_args = 'Executioner/unused_param=true'
-    allow_unused = true
 
     requirement = 'The system shall report a warning when an unused parameter is supplied on the command line.'
     issues = '#709 #759 #4101'
