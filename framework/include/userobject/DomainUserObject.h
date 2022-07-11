@@ -116,9 +116,9 @@ protected:
    * performing our block-restriction integrity check.
    * The argument \p interfaces is optional specifying on what interfaces the variable is expected
    * to be available, i.e. the field variable is defined over elements out side of the domain but
-   * connecting the subdomain with the interface. Default value means that the variable should be
+   * connecting the subdomain with the interfaces. Default value means that the variable should be
    * available on all interfaces.
-   * Note: a field variable on interface is not required to be defined on the subdomain of this
+   * Note: a field variable on interfaces is not required to be defined on the subdomain of this
    *       domain user object.
    */
   const MooseVariableFieldBase *

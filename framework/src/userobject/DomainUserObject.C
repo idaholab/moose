@@ -123,7 +123,7 @@ DomainUserObject::checkVariable(const MooseVariableFieldBase & variable) const
     auto & bnd_ids = it->second;
     for (const auto bnd_id : bnd_ids)
     {
-      const auto & connected_blocks = _interface_connected_blocks.at(bnd_id);
+      const auto & connected_blocks = libmesh_map_find(_interface_connected_blocks, bnd_id);
       for (const auto & bid : connected_blocks)
         if (!variable.hasBlocks(bid))
           mooseError("Variable '",
