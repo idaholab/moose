@@ -54,6 +54,8 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
   // Reference to all boundary restricted AuxKernels for the current thread
   const auto & boundary_kernels = _storage.getActiveBoundaryObjects(_tid);
 
+  printExecutionInformation();
+
   for (const auto & belem : range)
   {
     const Elem * elem = belem->_elem;
@@ -147,6 +149,20 @@ template <typename AuxKernelType>
 void
 ComputeElemAuxBcsThread<AuxKernelType>::join(const ComputeElemAuxBcsThread & /*y*/)
 {
+}
+
+template <typename AuxKernelType>
+void
+ComputeElemAuxBcsThread<AuxKernelType>::printExecutionInformation() const
+{
+  if (_problem.shouldPrintExecution())
+  {
+    auto console = _problem.console();
+    console << "Executing boundary restricted auxkernels on boundary elements " << std::endl;
+    console << "Ordering" << std::endl;
+    console << _storage.activeObjectsToString() << std::endl;
+    console << "They are executed in that order on the sides these kernels are defined on." << std::endl;
+  }
 }
 
 template class ComputeElemAuxBcsThread<AuxKernel>;

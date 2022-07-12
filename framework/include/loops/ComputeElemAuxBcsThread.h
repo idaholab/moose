@@ -44,4 +44,9 @@ protected:
   const std::vector<std::vector<MooseVariableFEBase *>> & _aux_vars;
 
   bool _need_materials;
+
+  /**
+   * Print information about the loop, mostly order of execution of objects
+   */
+  virtual void printExecutionInformation() const;
 };

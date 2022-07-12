@@ -72,15 +72,6 @@ ComputeJacobianThread::computeJacobian()
 
   if (_fe_problem.haveFV())
   {
-    std::vector<FVElementalKernel *> kernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .template condition<AttribSystem>("FVElementalKernel")
-        .template condition<AttribSubdomains>(_subdomain)
-        .template condition<AttribThread>(_tid)
-        .template condition<AttribMatrixTags>(_tags)
-        .queryInto(kernels);
-
     for (auto kernel : kernels)
       if (kernel->isImplicit())
         kernel->computeJacobian();
@@ -160,14 +151,14 @@ ComputeJacobianThread::subdomainChanged()
 
   if (_fe_problem.haveFV())
   {
-    std::vector<FVElementalKernel *> fv_kernels;
+    _fv_kernels.clear();
     _fe_problem.theWarehouse()
         .query()
         .template condition<AttribSystem>("FVElementalKernel")
         .template condition<AttribSubdomains>(_subdomain)
         .template condition<AttribThread>(_tid)
-        .queryInto(fv_kernels);
-    for (const auto fv_kernel : fv_kernels)
+        .queryInto(_fv_kernels);
+    for (const auto fv_kernel : _fv_kernels)
     {
       const auto & fv_mv_deps = fv_kernel->getMooseVariableDependencies();
       needed_moose_vars.insert(fv_mv_deps.begin(), fv_mv_deps.end());
@@ -346,4 +337,46 @@ ComputeJacobianThread::post()
 void
 ComputeJacobianThread::join(const ComputeJacobianThread & /*y*/)
 {
+}
+
+void
+ComputeJacobianThread::printExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution())
+  {
+    auto console = _fe_problem.console();
+    console << "Beginning Elemental loop to compute Jacobian" << std::endl;
+    console << "Execution order on each element:" << std::endl;
+    if (_kernels.size())
+      console << "- kernels on element quadrature points" << std::endl;
+    // TODO Add finite volume elemental kernels
+    if (_integrated_bcs.size())
+      console << "- integrated boundary conditions on element side quadrature points" << std::endl;
+    if (_dg_kernels.size())
+      console << "- DG kernels on element side quadrature points" << std::endl;
+    if (_interface_kernels.size())
+      console << "- interface kernels on element side quadrature points" << std::endl;
+
+    if (_kernels.size())
+    {
+      console << "Ordering of kernels (on elements they are respectively defined on):" << std::endl;
+      console << _kernels.activeObjectsToString() << std::endl;
+    }
+    // TODO Add finite volume elemental kernels
+    if (_dg_kernels.size())
+    {
+      console << "Ordering of DG kernels (on sides they are respectively defined on):" << std::endl;
+      console << _dg_kernels.activeObjectsToString() << std::endl;
+    }
+    if (_integrated_bcs.size())
+    {
+      console << "Ordering of boundary conditions (on sides they are respectively defined on):" << std::endl;
+      console << _integrated_bcs.activeObjectsToString() << std::endl;
+    }
+    if (_interface_kernels.size())
+    {
+      console << "Ordering of interface kernels (on interface sides they are respectively defined on):" << std::endl;
+      console << _interface_kernels.activeObjectsToString() << std::endl;
+    }
+  }
 }
