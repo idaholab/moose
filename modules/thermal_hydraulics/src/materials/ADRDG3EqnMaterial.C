@@ -61,6 +61,11 @@ ADRDG3EqnMaterial::ADRDG3EqnMaterial(const InputParameters & parameters)
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
+  _U_vars.resize(THM3Eqn::N_CONS_VAR);
+  _U_vars[THM3Eqn::CONS_VAR_RHOA] = _rhoA_var;
+  _U_vars[THM3Eqn::CONS_VAR_RHOUA] = _rhouA_var;
+  _U_vars[THM3Eqn::CONS_VAR_RHOEA] = _rhoEA_var;
+  _U_vars[THM3Eqn::CONS_VAR_AREA] = _A_var;
 }
 
 void
@@ -91,43 +96,7 @@ ADRDG3EqnMaterial::computeQpProperties()
 std::vector<ADReal>
 ADRDG3EqnMaterial::computeElementPrimitiveVariables(const Elem * elem) const
 {
-  // get the cell-average conserved variables
-  ADReal A, rhoA, rhouA, rhoEA;
-  if (_is_implicit)
-  {
-    A = _A_var->getElementalValue(elem);
-    rhoA = _rhoA_var->getElementalValue(elem);
-    rhouA = _rhouA_var->getElementalValue(elem);
-    rhoEA = _rhoEA_var->getElementalValue(elem);
-
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-    std::vector<dof_id_type> dof_indices;
-
-    _rhoA_var->dofMap().dof_indices(elem, dof_indices, _rhoA_var->number());
-    Moose::derivInsert(rhoA.derivatives(), dof_indices[0], 1.0);
-
-    _rhouA_var->dofMap().dof_indices(elem, dof_indices, _rhouA_var->number());
-    Moose::derivInsert(rhouA.derivatives(), dof_indices[0], 1.0);
-
-    _rhoEA_var->dofMap().dof_indices(elem, dof_indices, _rhoEA_var->number());
-    Moose::derivInsert(rhoEA.derivatives(), dof_indices[0], 1.0);
-#else
-    mooseError("Only global AD indexing is supported.");
-#endif
-  }
-  else
-  {
-    A = _A_var->getElementalValueOld(elem);
-    rhoA = _rhoA_var->getElementalValueOld(elem);
-    rhouA = _rhouA_var->getElementalValueOld(elem);
-    rhoEA = _rhoEA_var->getElementalValueOld(elem);
-  }
-
-  // compute primitive variables
-  std::vector<ADReal> U(THM3Eqn::N_CONS_VAR, 0.0);
-  U[THM3Eqn::CONS_VAR_RHOA] = rhoA;
-  U[THM3Eqn::CONS_VAR_RHOUA] = rhouA;
-  U[THM3Eqn::CONS_VAR_RHOEA] = rhoEA;
-  U[THM3Eqn::CONS_VAR_AREA] = A;
+  const auto U =
+      FlowModel1PhaseUtils::getElementalSolutionVector<true>(elem, _U_vars, _is_implicit);
   return FlowModel1PhaseUtils::computePrimitiveSolutionVector<true>(U, _fp);
 }

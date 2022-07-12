@@ -11,6 +11,9 @@
 
 #include "SinglePhaseFluidProperties.h"
 #include "THMIndices3Eqn.h"
+#include "MooseVariable.h"
+
+#include "libmesh/elem.h"
 
 namespace FlowModel1PhaseUtils
 {
@@ -76,4 +79,52 @@ computeConservativeSolutionVector(const std::vector<GenericReal<is_ad>> & W,
   return U;
 }
 
+/**
+ * Gets the elemental conservative solution vector
+ *
+ * @param[in] elem         Element
+ * @param[in] U_vars       Vector of conservative variable pointers
+ * @param[in] is_implicit  Is implicit?
+ */
+template <bool is_ad>
+std::vector<GenericReal<is_ad>>
+getElementalSolutionVector(const Elem * elem,
+                           const std::vector<MooseVariable *> & U_vars,
+                           bool is_implicit)
+{
+  mooseAssert(elem, "The supplied element is a nullptr.");
+
+  std::vector<GenericReal<is_ad>> U(THM3Eqn::N_CONS_VAR, 0.0);
+
+  if (is_implicit)
+  {
+    for (unsigned int i = 0; i < THM3Eqn::N_CONS_VAR; i++)
+    {
+      mooseAssert(U_vars[i], "The supplied variable is a nullptr.");
+      U[i] = U_vars[i]->getElementalValue(elem);
+    }
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+    std::vector<dof_id_type> dof_indices;
+
+    const std::vector<unsigned int> ind = {
+        THM3Eqn::CONS_VAR_RHOA, THM3Eqn::CONS_VAR_RHOUA, THM3Eqn::CONS_VAR_RHOEA};
+    for (unsigned int j = 0; j < ind.size(); j++)
+    {
+      const auto i = ind[j];
+      U_vars[i]->dofMap().dof_indices(elem, dof_indices, U_vars[i]->number());
+      Moose::derivInsert(U[i].derivatives(), dof_indices[0], 1.0);
+    }
+#else
+    mooseError("Only global AD indexing is supported.");
+#endif
+  }
+  else
+  {
+    for (unsigned int i = 0; i < THM3Eqn::N_CONS_VAR; i++)
+      U[i] = U_vars[i]->getElementalValueOld(elem);
+  }
+
+  return U;
+}
 }
