@@ -87,6 +87,9 @@ public:
   /// update the cached _property_name member
   void updatePropertyName();
 
+  /// make a property not required
+  void setOptional() { _required = false; }
+
 private:
   void parseDerivative(const std::string &);
   void parseDependentSymbols(const std::string &);

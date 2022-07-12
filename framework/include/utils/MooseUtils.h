@@ -979,6 +979,11 @@ buildRequiredMaterials(const Consumers & mat_consumers,
                        const std::vector<std::shared_ptr<MaterialBase>> & mats,
                        const bool allow_stateful);
 
+std::deque<MaterialBase *>
+buildRequiredMaterials(std::set<unsigned int> & consumer_needed_mat_props,
+                       const std::vector<std::shared_ptr<MaterialBase>> & mats,
+                       const bool allow_stateful);
+
 /**
  * Utility class template for a semidynamic vector with a maximum size N
  * and a chosen dynamic size. This container avoids heap allocation and

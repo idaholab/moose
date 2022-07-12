@@ -57,7 +57,7 @@ FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     _value(nullptr),
     _parent(rhs._parent),
     _property_name(rhs._property_name),
-    _required(false)
+    _required(rhs._required)
 {
 }
 
@@ -71,7 +71,7 @@ FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     _value(nullptr),
     _parent(parent),
     _property_name(rhs._property_name),
-    _required(false)
+    _required(rhs._required)
 {
 }
 

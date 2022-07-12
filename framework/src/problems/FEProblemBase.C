@@ -3265,12 +3265,20 @@ FEProblemBase::setActiveMaterials(SubdomainID blk_id, THREAD_ID tid)
   // find all materials that provide the required properties
   const auto & needed_mat_props = getActiveMaterialProperties(tid);
   _active_materials[tid].clear();
+  _console << "setActiveMaterials(" << blk_id << ", " << tid << ")" << std::endl;
   if (_materials.hasActiveBlockObjects(blk_id, tid))
     for (const auto & mat : _materials.getActiveBlockObjects(blk_id, tid))
     {
       const auto & supplied_props = mat->getSuppliedPropIDs();
       if (!MooseUtils::emptyIntersection(supplied_props, needed_mat_props))
+      {
         _active_materials[tid].push_back(mat.get());
+        _console << "YES: " << mat->name() << std::endl;
+      }
+      else
+      {
+        _console << "NO:  " << mat->name() << std::endl;
+      }
     }
 }
 
@@ -3281,10 +3289,7 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   std::set<unsigned int> needed_mat_props;
 
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
-  {
     _all_materials.updateVariableDependency(needed_moose_vars, tid);
-    _all_materials.updateBlockMatPropDependency(blk_id, needed_mat_props, tid);
-  }
 
   const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
   for (const auto & id : ids)
@@ -3303,9 +3308,14 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   needed_mat_props.insert(current_active_material_properties.begin(),
                           current_active_material_properties.end());
 
+  if (_materials.hasActiveBlockObjects(blk_id, tid))
+    _active_materials[tid] = MooseUtils::buildRequiredMaterials(
+        needed_mat_props, _materials.getActiveBlockObjects(blk_id, tid), true);
+  else
+    _active_materials[tid].clear();
+
   setActiveElementalMooseVariables(needed_moose_vars, tid);
   setActiveMaterialProperties(needed_mat_props, tid);
-  setActiveMaterials(blk_id, tid);
 }
 
 void
@@ -3324,8 +3334,7 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
     if (_discrete_materials.hasActiveBlockObjects(blk_id, tid))
       _material_data[tid]->reset(_discrete_materials.getActiveBlockObjects(blk_id, tid));
 
-    if (_materials.hasActiveBlockObjects(blk_id, tid))
-      _material_data[tid]->reinit(_active_materials[tid]);
+    _material_data[tid]->reinit(_active_materials[tid]);
   }
 }
 

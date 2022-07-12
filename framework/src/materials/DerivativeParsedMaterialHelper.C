@@ -118,6 +118,7 @@ DerivativeParsedMaterialHelperTempl<is_ad>::recurseMatProps(
     // otherwise add it to _mat_prop_descriptors
     FunctionMaterialPropertyDescriptor<is_ad> mpd(parent_mpd);
     mpd.addDerivative(derivative_symbol);
+    mpd.setOptional();
 
     // create a new symbol name for it
     std::string newvarname = _dmatvar_base + Moose::stringify(_dmatvar_index++);

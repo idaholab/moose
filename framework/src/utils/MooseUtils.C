@@ -1239,20 +1239,12 @@ prettyCppType(const std::string & cpp_type)
   return s;
 }
 
-template <typename Consumers>
 std::deque<MaterialBase *>
-buildRequiredMaterials(const Consumers & mat_consumers,
+buildRequiredMaterials(std::set<unsigned int> & needed_mat_props,
                        const std::vector<std::shared_ptr<MaterialBase>> & mats,
                        const bool allow_stateful)
 {
   std::deque<MaterialBase *> required_mats;
-
-  std::unordered_set<unsigned int> needed_mat_props;
-  for (const auto & consumer : mat_consumers)
-  {
-    const auto & mp_deps = consumer->getMatPropDependencies();
-    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
-  }
 
   // A predicate of calling this function is that these materials come in already sorted by
   // dependency with the front of the container having no other material dependencies and following
@@ -1291,6 +1283,22 @@ buildRequiredMaterials(const Consumers & mat_consumers,
   }
 
   return required_mats;
+}
+
+template <typename Consumers>
+std::deque<MaterialBase *>
+buildRequiredMaterials(const Consumers & mat_consumers,
+                       const std::vector<std::shared_ptr<MaterialBase>> & mats,
+                       const bool allow_stateful)
+{
+  std::set<unsigned int> needed_mat_props;
+  for (const auto & consumer : mat_consumers)
+  {
+    const auto & mp_deps = consumer->getMatPropDependencies();
+    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+  }
+
+  return buildRequiredMaterials(needed_mat_props, mats, allow_stateful);
 }
 
 template std::deque<MaterialBase *>
