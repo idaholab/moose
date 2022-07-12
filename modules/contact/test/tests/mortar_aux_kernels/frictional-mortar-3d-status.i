@@ -448,7 +448,6 @@ offset = 0.00
 
 [Outputs]
   exodus = true
-  csv = true
 []
 
 [Preconditioning]

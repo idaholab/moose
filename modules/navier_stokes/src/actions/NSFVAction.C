@@ -2345,22 +2345,42 @@ NSFVAction::checkICParameterErrors()
   auto vvalue = getParam<std::vector<FunctionName>>("initial_velocity");
   if (vvalue.size() != 3)
     mooseError("The number of velocity components in the NSFVAction initial condition is not 3!");
+
+  // Dont define initial conditions if using external variables
+  if (parameters().isParamSetByUser("initial_velocity") && !_create_velocity)
+    paramError("initial_velocity",
+               "Velocity is defined externally of NavierStokesFV, so should the inital conditions");
+
+  if (parameters().isParamSetByUser("initial_pressure") && !_create_pressure)
+    paramError("initial_pressure",
+               "Pressure is defined externally of NavierStokesFV, so should the inital condition");
+
+  if (parameters().isParamSetByUser("initial_temperature") && !_create_fluid_temperature)
+    paramError("initial_temperature",
+               "T_fluid is defined externally of NavierStokesFV, so should the inital condition");
 }
 
 void
 NSFVAction::checkBoundaryParameterErrors()
 {
-  if (_outlet_boundaries.size() != _momentum_outlet_types.size())
-    paramError("momentum_outlet_types",
-               "Size is not the same as the number of outlet boundaries in 'outlet_boundaries'");
+  checkSizeFriendParams(_outlet_boundaries.size(),
+                        _momentum_outlet_types.size(),
+                        "outlet_boundaries",
+                        "momentum_outlet_types",
+                        "outlet boundaries");
 
-  if (_wall_boundaries.size() > 0 && _wall_boundaries.size() != _momentum_wall_types.size())
-    paramError("momentum_wall_types",
-               "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
+  if (_wall_boundaries.size() > 0)
+    checkSizeFriendParams(_wall_boundaries.size(),
+                          _momentum_wall_types.size(),
+                          "wall_boundaries",
+                          "momentum_wall_types",
+                          "wall boundaries");
 
-  if (_inlet_boundaries.size() != _momentum_inlet_types.size())
-    paramError("momentum_inlet_types",
-               "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
+  checkSizeFriendParams(_inlet_boundaries.size(),
+                        _momentum_inlet_types.size(),
+                        "inlet_boundaries",
+                        "momentum_inlet_types",
+                        "inlet boundaries");
 
   unsigned int num_dir_dependent_bcs = 0;
   unsigned int num_flux_bc_postprocessors = 0;
@@ -2372,15 +2392,17 @@ NSFVAction::checkBoundaryParameterErrors()
       num_flux_bc_postprocessors += 1;
   }
 
-  if (_momentum_inlet_function.size() != num_dir_dependent_bcs * _dim)
-    paramError("momentum_inlet_function",
-               "Size is not the same as the number of direction dependent boundaries in "
-               "'inlet_boundaries' times the mesh dimension");
+  checkSizeParam(_momentum_inlet_function.size(),
+                 "momentum_inlet_function",
+                 num_dir_dependent_bcs * _dim,
+                 "direction dependent directions",
+                 "'inlet_boundaries' times the mesh dimension");
 
-  if (_flux_inlet_pps.size() != num_flux_bc_postprocessors)
-    paramError("flux_inlet_pps",
-               "The number of flux postprocessors is not equal to the number of flux types in "
-               "'inlet_boundaries'!");
+  checkSizeParam(_flux_inlet_pps.size(),
+                 "flux_inlet_pps",
+                 num_flux_bc_postprocessors,
+                 "flux types",
+                 "'inlet_boundaries'");
 
   unsigned int num_pressure_outlets = 0;
   for (unsigned int enum_ind = 0; enum_ind < _outlet_boundaries.size(); ++enum_ind)
@@ -2388,9 +2410,11 @@ NSFVAction::checkBoundaryParameterErrors()
         _momentum_outlet_types[enum_ind] == "fixed-pressure-zero-gradient")
       num_pressure_outlets += 1;
 
-  if (_pressure_function.size() != num_pressure_outlets)
-    paramError("pressure_function",
-               "Size is not the same as the number of pressure outlet boundaries!");
+  checkSizeParam(_pressure_function.size(),
+                 "pressure_function",
+                 num_pressure_outlets,
+                 "pressure outlet boundaries",
+                 "'fixed-pressure/fixed-pressure-zero-gradient'");
 
   if (_compressibility == "incompressible" && _has_flow_equations)
     if (num_pressure_outlets == 0 && !(getParam<bool>("pin_pressure")))
@@ -2399,17 +2423,23 @@ NSFVAction::checkBoundaryParameterErrors()
 
   if (_has_energy_equation)
   {
-    if (_inlet_boundaries.size() != _energy_inlet_types.size())
-      paramError("energy_inlet_types",
-                 "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
+    checkSizeFriendParams(_inlet_boundaries.size(),
+                          _energy_inlet_types.size(),
+                          "inlet_boundaries",
+                          "energy_inlet_types",
+                          "inlet boundaries");
 
-    if (_energy_inlet_types.size() != _energy_inlet_function.size())
-      paramError("energy_inlet_function",
-                 "Size is not the same as the number of boundaries in 'energy_inlet_types'");
+    checkSizeFriendParams(_energy_inlet_types.size(),
+                          _energy_inlet_function.size(),
+                          "energy_inlet_types",
+                          "energy_inlet_function",
+                          "boundaries");
 
-    if (_wall_boundaries.size() != _energy_wall_types.size())
-      paramError("energy_wall_types",
-                 "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
+    checkSizeFriendParams(_wall_boundaries.size(),
+                          _energy_wall_types.size(),
+                          "wall_boundaries",
+                          "energy_wall_types",
+                          "wall boundaries");
 
     unsigned int num_fixed_energy_walls = 0;
     for (unsigned int enum_ind = 0; enum_ind < _energy_wall_types.size(); ++enum_ind)
@@ -2417,23 +2447,28 @@ NSFVAction::checkBoundaryParameterErrors()
           _energy_wall_types[enum_ind] == "heatflux")
         num_fixed_energy_walls += 1;
 
-    if (_wall_boundaries.size() > 0 && (_energy_wall_function.size() != num_fixed_energy_walls))
-      paramError("energy_wall_function",
-                 "Size " + std::to_string(_energy_wall_function.size()) +
-                     " is not the same as the number of Dirichlet/Neumann conditions in "
-                     "'energy_wall_types' (" +
-                     std::to_string(num_fixed_energy_walls) + ")");
+    if (_wall_boundaries.size() > 0)
+      checkSizeParam(_energy_wall_function.size(),
+                     "energy_wall_function",
+                     num_fixed_energy_walls,
+                     "Dirichlet/Neumann conditions",
+                     "'energy_wall_types'");
   }
   if (_has_scalar_equation)
   {
-    if (_inlet_boundaries.size() != _passive_scalar_inlet_types.size())
-      paramError("passive_scalar_inlet_types",
-                 "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
-
-    if (_passive_scalar_inlet_types.size() != _passive_scalar_inlet_function.size())
-      paramError(
-          "passive_scalar_inlet_function",
-          "Size is not the same as the number of boundaries in 'passive_scalar_inlet_types'");
+    if (_inlet_boundaries.size())
+    {
+      checkSizeFriendParams(_inlet_boundaries.size(),
+                            _passive_scalar_inlet_types.size(),
+                            "inlet_boundaries",
+                            "passive_scalar_inlet_types",
+                            "inlet boundaries");
+      checkSizeFriendParams(_passive_scalar_inlet_types.size(),
+                            _passive_scalar_inlet_function.size(),
+                            "passive_scalar_inlet_types",
+                            "passive_scalar_inlet_function",
+                            "boundaries");
+    }
   }
 }
 
@@ -2543,6 +2578,37 @@ NSFVAction::checkDependentParameterError(const std::string main_parameter,
       paramError(param,
                  "This parameter should not be given by the user with the corresponding " +
                      main_parameter + " setting!");
+}
+
+void
+NSFVAction::checkSizeFriendParams(const unsigned int param_vector_1_size,
+                                  const unsigned int param_vector_2_size,
+                                  const std::string & param_name_1,
+                                  const std::string & param_name_2,
+                                  const std::string & object_name_1) const
+{
+  // param 1 is the reference
+  if (param_vector_1_size != param_vector_2_size)
+    paramError(param_name_2,
+               "Size (" + std::to_string(param_vector_2_size) +
+                   ") is not the same as the "
+                   "number of " +
+                   object_name_1 + " in '" + param_name_1 + "' (" +
+                   std::to_string(param_vector_1_size) + ")");
+}
+
+void
+NSFVAction::checkSizeParam(const unsigned int param_vector_size,
+                           const std::string & param_name,
+                           const unsigned int size_wanted,
+                           const std::string & object_name,
+                           const std::string & size_source_explanation) const
+{
+  if (param_vector_size != size_wanted)
+    paramError(param_name,
+               "Size (" + std::to_string(param_vector_size) +
+                   ") is not the same as the number of " + object_name + " in " +
+                   size_source_explanation + " (" + std::to_string(size_wanted) + ")");
 }
 
 void

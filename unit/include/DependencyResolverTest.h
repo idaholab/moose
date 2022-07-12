@@ -26,6 +26,12 @@ protected:
     _resolver.insertDependency("d", "c");
 
     // There are no items in the same "set" so the ordering will be strict
+    _strict_ordering.addNode("a");
+    _strict_ordering.addNode("b");
+    _strict_ordering.addNode("c");
+    _strict_ordering.addNode("d");
+    _strict_ordering.addNode("e");
+    _strict_ordering.addNode("f");
     _strict_ordering.insertDependency("e", "b");
     _strict_ordering.insertDependency("a", "e");
     _strict_ordering.insertDependency("d", "a");

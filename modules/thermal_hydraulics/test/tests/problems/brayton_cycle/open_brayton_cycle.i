@@ -328,6 +328,7 @@ p_ambient = 1e5
     type = FunctionValuePostprocessor
     function = motor_power_fn
     execute_on = 'INITIAL TIMESTEP_END'
+    indirect_dependencies = 'motor_torque shaft:omega'
   []
 
   [generator_torque]
@@ -340,6 +341,7 @@ p_ambient = 1e5
     type = FunctionValuePostprocessor
     function = generator_power_fn
     execute_on = 'INITIAL TIMESTEP_END'
+    indirect_dependencies = 'generator_torque shaft:omega'
   []
 
   [shaft_speed]
@@ -414,22 +416,12 @@ p_ambient = 1e5
   scheme = 'bdf2'
 
   end_time = ${t3}
-  [TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 0.01
-    optimal_iterations = 5
-    iteration_window = 1
-    growth_factor = 1.1
-    cutback_factor = 0.9
-  []
-  dtmin = 1e-5
-
-  steady_state_detection = true
-  steady_state_start_time = ${t2}
+  dt = 0.1
+  abort_on_solve_fail = true
 
   solve_type = NEWTON
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-50
+  nl_abs_tol = 1e-11
   nl_max_its = 15
 
   l_tol = 1e-4
@@ -437,7 +429,6 @@ p_ambient = 1e5
 []
 
 [Outputs]
-  exodus = true
   [csv]
     type = CSV
     file_base = 'open_brayton_cycle'

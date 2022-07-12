@@ -69,6 +69,7 @@ INSFVMomentumAdvection::computeQpResidual()
     const auto uf = _var(ssf);
     const Real duf_du = uf.derivatives()[dof_number];
     const auto coeff = _normal * v * rhof / epsf;
+
     if (sided_elem == &_face_info->elem())
       _ae = coeff * duf_du;
     else

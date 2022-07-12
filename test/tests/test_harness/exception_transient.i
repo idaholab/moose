@@ -55,7 +55,3 @@
   dtmin = 0.005
   solve_type = 'PJFNK'
 []
-
-[Outputs]
-  exodus = true
-[]

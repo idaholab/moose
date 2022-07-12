@@ -546,7 +546,8 @@ FiniteStrainHyperElasticViscoPlastic::updateFlowRate()
 void
 FiniteStrainHyperElasticViscoPlastic::computeQpJacobian()
 {
-  _tan_mod = _fe.mixedProductIkJl(_fe) * _dpk2_dfe;
+  usingTensorIndices(i_, j_, k_, l_);
+  _tan_mod = _fe.times<i_, k_, j_, l_>(_fe) * _dpk2_dfe;
   _pk2_fet = _pk2[_qp] * _fe.transpose();
   _fe_pk2 = _fe * _pk2[_qp];
 

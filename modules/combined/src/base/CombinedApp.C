@@ -15,6 +15,7 @@
 
 #include "ChemicalReactionsApp.h"
 #include "ContactApp.h"
+#include "ElectromagneticsApp.h"
 #include "FluidPropertiesApp.h"
 #include "FsiApp.h"
 #include "FunctionalExpansionToolsApp.h"
@@ -70,6 +71,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
   ChemicalReactionsApp::registerAll(f, af, s);
   ContactApp::registerAll(f, af, s);
+  ElectromagneticsApp::registerAll(f, af, s);
   ExternalPetscSolverApp::registerAll(f, af, s);
   FluidPropertiesApp::registerAll(f, af, s);
   FsiApp::registerAll(f, af, s);

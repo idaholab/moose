@@ -18,13 +18,16 @@ warn_new = 90
 require_total = 81
 
 [chemical_reactions]
-require_total = 93
+require_total = 92
 
 [contact]
 require_total = 87
 
 [combined]
 require_total = 37
+
+[electromagnetics]
+require_total = 95
 
 [external_petsc_solver]
 require_total = 86
@@ -33,7 +36,7 @@ require_total = 86
 require_total = 84
 
 [fsi]
-require_total = 91
+require_total = 90
 
 [functional_expansion_tools]
 require_total = 83

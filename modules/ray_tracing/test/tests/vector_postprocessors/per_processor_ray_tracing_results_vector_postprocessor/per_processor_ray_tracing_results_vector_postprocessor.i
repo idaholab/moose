@@ -189,7 +189,3 @@
 [Problem]
   solve = false
 []
-
-[Outputs]
-  exodus = true
-[]

@@ -20,8 +20,10 @@
     []
   []
   [bounds]
+    design = 'PowerLawCreepStressUpdate.md'
     requirement = 'The system shall gracefully correct for out of bounds guess from the radial '
                   'return mapping algorithm '
+    issues = '#9659 #20290'
     [high]
       type = RunApp
       input = 'nonad_bounds.i'
@@ -29,7 +31,6 @@
       allow_test_objects = true
       cli_args = 'Executioner/num_steps=1 Materials/creep/initial_guess=100'
       expect_out = 'Scalar greater than maximum'
-      skip = 'Requires fix in MetaPhysicL for std::pow of ADReals with integer powers'
     []
     [low]
       type = RunApp

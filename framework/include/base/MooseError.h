@@ -21,20 +21,18 @@
 #include <tuple>
 #include <type_traits>
 
-// these functions allow streaming tuples to ostreams
+// this function allows streaming tuples to ostreams
 template <size_t n, typename... T>
-typename std::enable_if<(n >= sizeof...(T))>::type
-print_tuple(std::ostream &, const std::tuple<T...> &)
-{
-}
-template <size_t n, typename... T>
-typename std::enable_if<(n < sizeof...(T))>::type
+void
 print_tuple(std::ostream & os, const std::tuple<T...> & tup)
 {
-  if (n != 0)
-    os << ", ";
-  os << std::get<n>(tup);
-  print_tuple<n + 1>(os, tup);
+  if constexpr (n < sizeof...(T))
+  {
+    if (n != 0)
+      os << ", ";
+    os << std::get<n>(tup);
+    print_tuple<n + 1>(os, tup);
+  }
 }
 template <typename... T>
 std::ostream &

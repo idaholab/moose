@@ -73,7 +73,3 @@
   solve_type = 'PJFNK'
   nl_rel_tol = 1e-10
 []
-
-[Outputs]
-  exodus = true
-[]

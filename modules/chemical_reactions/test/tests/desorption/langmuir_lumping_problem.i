@@ -95,5 +95,4 @@
 
 [Outputs]
   file_base = langmuir_lumping_problem
-  exodus = true
 []

@@ -145,7 +145,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  csv = true
   [./out]
     type = Exodus
     elemental_as_nodal = true

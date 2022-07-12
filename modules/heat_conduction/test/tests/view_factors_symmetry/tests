@@ -1,17 +1,21 @@
 [Tests]
   issues = '#13918 #15843 #16954'
   design = 'RadiationTransferAction.md ViewFactorRayBC.md'
-  [./cavity_with_pillars]
+  [cavity_with_pillars]
     type = CSVDiff
     input = 'cavity_with_pillars.i'
     csvdiff = 'cavity_with_pillars_out.csv'
     requirement = 'The system shall support ensure that symmetry boundary conditions provide exactly the same answer as unfolding the problem about its axis of symmetry.'
-  [../]
+    #see 21185
+    allow_warnings = true
+  []
 
-  [./cavity_with_pillars_symmetry_bc]
+  [cavity_with_pillars_symmetry_bc]
     type = CSVDiff
     input = 'cavity_with_pillars_symmetry_bc.i'
     csvdiff = 'cavity_with_pillars_symmetry_bc_out.csv'
     requirement = 'The system shall support symmetry boundary conditions for view factor calculations.'
-  [../]
+    #see 21185
+    allow_warnings = true
+  []
 []

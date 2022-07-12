@@ -44,6 +44,9 @@ std::unique_ptr<MeshBase>
 SmoothMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> old_mesh = std::move(_input);
+  if (!old_mesh->is_replicated())
+    mooseError("SmoothMeshGenerator is not implemented for distributed meshes");
+
   auto mesh = dynamic_pointer_cast<ReplicatedMesh>(old_mesh);
 
   LaplaceMeshSmoother lms(static_cast<UnstructuredMesh &>(*mesh));

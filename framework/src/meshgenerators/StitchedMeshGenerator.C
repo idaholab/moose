@@ -56,6 +56,8 @@ StitchedMeshGenerator::generate()
 {
   // We put the first mesh in a local pointer
   std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[0]);
+  if (!mesh)
+    mooseError("StitchedMeshGenerator is not implemented for distributed meshes");
 
   // Reserve spaces for the other meshes (no need to store the first one another time)
   std::vector<std::unique_ptr<ReplicatedMesh>> meshes(_mesh_ptrs.size() - 1);

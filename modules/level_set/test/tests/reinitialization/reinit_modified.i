@@ -72,6 +72,3 @@
     growth_factor = 5
   [../]
 []
-
-[Outputs]
-[]

@@ -61,6 +61,3 @@
     variable = u
   []
 []
-
-[Outputs]
-[]

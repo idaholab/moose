@@ -104,5 +104,4 @@
 
 [Outputs]
   file_base = pbp_out
-  exodus = true
 []

@@ -17,6 +17,7 @@
 
 // MOOSE includes
 #include "DependencyResolver.h"
+#include "MooseUtils.h"
 
 /**
  * Interface for sorting dependent vectors of objects.
@@ -46,60 +47,84 @@ public:
   static void sort(typename std::vector<T> & vector);
 
   /**
-   * A helper method for cyclic errors.
+   * Given a vector, sort using the depth-first search
    */
   template <typename T>
-  static void cyclicDependencyError(CyclicDependencyException<T> & e, const std::string & header);
+  static void sortDFS(typename std::vector<T> & vector);
+
+  /**
+   * A helper method for cyclic errors.
+   */
+  template <typename T, typename T2>
+  static void cyclicDependencyError(CyclicDependencyException<T2> & e, const std::string & header);
 };
 
 template <typename T>
 void
 DependencyResolverInterface::sort(typename std::vector<T> & vector)
 {
-  DependencyResolver<T> resolver;
-
-  typename std::vector<T>::iterator start = vector.begin();
-  typename std::vector<T>::iterator end = vector.end();
-
-  for (typename std::vector<T>::iterator iter = start; iter != end; ++iter)
-  {
-    const std::set<std::string> & requested_items = (*iter)->getRequestedItems();
-
-    for (typename std::vector<T>::iterator iter2 = start; iter2 != end; ++iter2)
-    {
-      if (iter == iter2)
-        continue;
-
-      const std::set<std::string> & supplied_items = (*iter2)->getSuppliedItems();
-
-      std::set<std::string> intersect;
-      std::set_intersection(requested_items.begin(),
-                            requested_items.end(),
-                            supplied_items.begin(),
-                            supplied_items.end(),
-                            std::inserter(intersect, intersect.end()));
-
-      // If the intersection isn't empty then there is a dependency here
-      if (!intersect.empty())
-        resolver.insertDependency(*iter, *iter2);
-    }
-  }
-
-  // Sort based on dependencies
-  std::stable_sort(start, end, resolver);
+  sortDFS(vector);
 }
 
 template <typename T>
 void
-DependencyResolverInterface::cyclicDependencyError(CyclicDependencyException<T> & e,
+DependencyResolverInterface::sortDFS(typename std::vector<T> & vector)
+{
+  if (vector.size() <= 1)
+    return;
+
+  /**
+   * Class that represents the dependency as a graph
+   */
+  DependencyResolver<T> graph;
+
+  // Map of suppliers: what is supplied -> by what object
+  std::multimap<std::string, T> suppliers_map;
+  for (auto & v : vector)
+  {
+    for (const auto & supplied_item : v->getSuppliedItems())
+    {
+      suppliers_map.emplace(supplied_item, v);
+      graph.addNode(v);
+    }
+  }
+
+  // build the dependency graph
+  for (auto & v : vector)
+  {
+    for (const auto & requested_item : v->getRequestedItems())
+    {
+      const auto & [begin_it, end_it] = suppliers_map.equal_range(requested_item);
+      if (begin_it == end_it)
+        graph.addNode(v);
+      else
+        for (const auto & [supplier_name, supplier_object] : as_range(begin_it, end_it))
+        {
+          libmesh_ignore(supplier_name);
+          if (supplier_object == v)
+            // We allow an object to have a circular dependency within itself; e.g. we choose to
+            // trust a developer knows what they are doing within a single object
+            continue;
+          graph.addEdge(supplier_object, v);
+        }
+    }
+  }
+
+  vector = graph.dfs();
+}
+
+template <typename T, typename T2>
+void
+DependencyResolverInterface::cyclicDependencyError(CyclicDependencyException<T2> & e,
                                                    const std::string & header)
 {
   std::ostringstream oss;
 
   oss << header << ":\n";
-  const typename std::multimap<T, T> & depends = e.getCyclicDependencies();
-  for (typename std::multimap<T, T>::const_iterator it = depends.begin(); it != depends.end(); ++it)
-    oss << (static_cast<T>(it->first))->name() << " -> " << (static_cast<T>(it->second))->name()
-        << "\n";
+  const auto cycle = e.getCyclicDependencies();
+  std::vector<std::string> names(cycle.size());
+  for (const auto i : index_range(cycle))
+    names[i] = static_cast<T>(cycle[i])->name();
+  oss << MooseUtils::join(names, " <- ");
   mooseError(oss.str());
 }

@@ -1,4 +1,4 @@
-# NSFVAction
+# NavierStokesFV Action
 
 !syntax description /Modules/NavierStokesFV/NSFVAction
 
@@ -12,5 +12,9 @@ This action is triggered with */Modules/NavierStokesFV* input syntax.
 For more information, visit [NavierStokesFV](/Modules/NavierStokesFV/index.md).
 
 ## Example Input File Syntax
+
+In this example, the equations, the wall/inlet/outlet boundary conditions and their parameters are all set automatically by the `NavierStokesFV` action.
+
+!listing test/tests/finite_volume/ins/channel-flow/2d-rc-ambient-convection-action.i block=Modules/NavierStokesFV
 
 !syntax parameters /Modules/NavierStokesFV

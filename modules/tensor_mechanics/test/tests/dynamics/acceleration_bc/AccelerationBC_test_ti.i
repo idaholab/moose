@@ -237,7 +237,6 @@
 
 [Outputs]
   file_base = "AccelerationBC_test_out"
-  csv = true
   exodus = true
   perf_graph = true
 []

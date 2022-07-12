@@ -34,7 +34,7 @@ MultiAppMeshFunctionTransfer::validParams()
   InputParameters params = MultiAppConservativeTransfer::validParams();
   params.addClassDescription(
       "Transfers field data at the MultiApp position using solution the finite element function "
-      "from the master application, via a 'libMesh::MeshFunction' object.");
+      "from the main/parent application, via a 'libMesh::MeshFunction' object.");
 
   params.addParam<bool>(
       "error_on_miss",

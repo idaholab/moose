@@ -122,5 +122,4 @@
     type = Exodus
     hide = lambda
   []
-  csv = true
 []

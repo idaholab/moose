@@ -235,5 +235,4 @@
 [Outputs]
   file_base = ex01
   exodus = true
-  csv = true
 []

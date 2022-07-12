@@ -42,7 +42,3 @@
   petsc_options_value = 'hypre boomeramg'
   l_max_its = 10
 []
-
-[Outputs]
-  exodus = true
-[]

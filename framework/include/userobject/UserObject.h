@@ -50,7 +50,8 @@ class UserObject : public MooseObject,
                    protected MeshChangedInterface,
                    protected ScalarCoupleable,
                    protected PerfGraphInterface,
-                   protected FunctorInterface
+                   protected FunctorInterface,
+                   public DependencyResolverInterface
 {
 public:
   static InputParameters validParams();
@@ -187,10 +188,16 @@ public:
    */
   virtual bool needThreadedCopy() const { return false; }
 
+  const std::set<std::string> & getRequestedItems() override { return _depend_uo; }
+
+  const std::set<std::string> & getSuppliedItems() override { return _supplied_uo; }
+
 protected:
   virtual void addPostprocessorDependencyHelper(const PostprocessorName & name) const override;
   virtual void
   addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & name) const override;
+  virtual void addUserObjectDependencyHelper(const UserObject & uo) const override;
+  void addReporterDependencyHelper(const ReporterName & reporter_name) override;
 
   /// Reference to the Subproblem for this user object
   SubProblem & _subproblem;
@@ -207,13 +214,15 @@ protected:
 
   const bool _duplicate_initial_execution;
 
-private:
-  virtual void addUserObjectDependencyHelper(const UserObject & uo) const override final;
+  /// Depend UserObjects that to be used both for determining user object sorting and by AuxKernel
+  /// for finding the full UO dependency
+  mutable std::set<std::string> _depend_uo;
 
+private:
   UserObject * _primary_thread_copy = nullptr;
 
-  /// Depend UserObjects that to be used by AuxKernel for finding the full UO dependency
-  mutable std::set<UserObjectName> _depend_uo;
+  /// A name of the "supplied" user objects, which is just this object
+  std::set<std::string> _supplied_uo;
 };
 
 template <typename T1, typename T2>

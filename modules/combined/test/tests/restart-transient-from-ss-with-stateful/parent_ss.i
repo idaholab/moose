@@ -90,7 +90,6 @@
 [Outputs]
   perf_graph = true
   color = true
-  csv = true
   exodus = true
 
   [checkpoint]

@@ -132,7 +132,6 @@
     num_points = 100
     variable = 'temperature'
     sort_by = id
-    outputs = csv
   []
   [x_0_25]
     type = LineValueSampler
@@ -141,7 +140,6 @@
     num_points = 100
     variable = 'temperature'
     sort_by = id
-    outputs = csv
   []
 []
 

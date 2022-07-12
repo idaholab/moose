@@ -76,7 +76,6 @@
 
 [Outputs]
   exodus = true
-  csv = true
   [screen]
     type = Console
     execute_postprocessors_on= "timestep_end timestep_begin"

@@ -249,7 +249,3 @@ x_sep = 35
     postprocessor = cfl_dt
   [../]
 []
-
-[Outputs]
-  exodus = true
-[]

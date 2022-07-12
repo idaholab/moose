@@ -247,6 +247,7 @@ dt = 1.e-3
     type = FunctionValuePostprocessor
     function = energy_conservation_fcn
     execute_on = 'timestep_end'
+    indirect_dependencies = 'E_tot E_change S_energy'
   []
 []
 

@@ -1099,12 +1099,12 @@ ParallelStudy<WorkType, ParallelDataType>::moveWorkToBuffer(const work_iterator 
   // Can move directly into the work buffer on thread 0 when we're not executing work
   if (!_currently_executing_work && tid == 0)
   {
-    if (_work_buffer->capacity() < _work_buffer->capacity() + size)
-      _work_buffer->setCapacity(_work_buffer->capacity() + size);
+    if (_work_buffer->capacity() < _work_buffer->size() + size)
+      _work_buffer->setCapacity(_work_buffer->size() + size);
     _local_work_started += size;
   }
   else
-    _temp_threaded_work[tid].reserve(_temp_threaded_work[tid].capacity() + size);
+    _temp_threaded_work[tid].reserve(_temp_threaded_work[tid].size() + size);
 
   // Move the objects
   if (!_currently_executing_work && tid == 0)
@@ -1142,8 +1142,8 @@ ParallelStudy<WorkType, ParallelDataType>::moveContinuingWorkToBuffer(const work
     moveWorkError(MoveWorkError::CONTINUING_DURING_EXECUTING_WORK);
 
   const auto size = std::distance(begin, end);
-  if (_work_buffer->capacity() < _work_buffer->capacity() + size)
-    _work_buffer->setCapacity(_work_buffer->capacity() + size);
+  if (_work_buffer->capacity() < _work_buffer->size() + size)
+    _work_buffer->setCapacity(_work_buffer->size() + size);
 
   for (auto it = begin; it != end; ++it)
     _work_buffer->move(*it);

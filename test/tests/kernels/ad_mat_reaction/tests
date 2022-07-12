@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#13484 #13744'
+  design = 'ADMatReaction.md'
+  [./ad_mat_reaction]
+    type = 'Exodiff'
+    input = 'ad_mat_reaction.i'
+    exodiff = 'ad_mat_reaction_out.e'
+    requirement = 'The system shall provide an ability to solve a steady-state diffusion-reaction problem, where the reaction term has a material property reaction rate.'
+  [../]
+  [./ad_mat_reaction_jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_mat_reaction.i'
+    difference_tol = 1e-7
+    requirement = 'The system shall calculate the correct Jacobian of ADMatReaction using automatic differentiation.'
+  [../]
+[]

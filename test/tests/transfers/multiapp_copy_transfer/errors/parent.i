@@ -56,7 +56,3 @@
     to_multi_app = sub
   [../]
 []
-
-[Outputs]
-  exodus = true
-[]

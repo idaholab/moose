@@ -144,7 +144,6 @@
 []
 
 [Outputs]
-  csv = true
   console = true
   [./out]
     type = Exodus
@@ -157,15 +156,13 @@
     vel_x = vel_x
     vel_y = vel_y
     boundary = 'bottom'
-    outputs = 'console csv'
-    execute_on = 'timestep_end'
+    outputs = 'console'    execute_on = 'timestep_end'
   [../]
   [./flow_out]
     type = VolumetricFlowRate
     vel_x = vel_x
     vel_y = vel_y
     boundary = 'top'
-    outputs = 'console csv'
-    execute_on = 'timestep_end'
+    outputs = 'console'    execute_on = 'timestep_end'
   [../]
 []

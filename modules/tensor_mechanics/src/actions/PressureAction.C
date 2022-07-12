@@ -84,17 +84,12 @@ PressureAction::act()
     params.set<Real>("alpha") =
         isParamValid("alpha") ? getParam<Real>("alpha") : getParam<Real>("hht_alpha");
 
-    if (_use_ad)
-      params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];
 
     if (_has_save_in_vars[i])
       params.set<std::vector<AuxVariableName>>("save_in") = _save_in_vars[i];
 
-    if (_use_ad)
-      params.set<Real>("constant") = getParam<Real>("factor");
-    else
-      params.set<Real>("factor") = getParam<Real>("factor");
+    params.set<Real>("factor") = getParam<Real>("factor");
     _problem->addBoundaryCondition(kernel_name, unique_kernel_name, params);
   }
 }

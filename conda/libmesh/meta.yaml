@@ -1,7 +1,7 @@
-# Do not use jinja templating (A physical change to this file is required to trigger a build)
-{% set build = 0 %}
+{% set build = 2 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "2022.06.06" %}
+{% set vtk_friendly_version = "9.1" %}
 
 package:
   name: moose-libmesh
@@ -17,23 +17,21 @@ build:
   skip: true                                            # [win]
   script_env:
     - MOOSE_JOBS
+    - vtk_friendly_version={{ vtk_friendly_version }}
 
 requirements:
   build:
-    - libtool                                           # [arm64]
-    - autoconf                                          # [arm64]
-    - automake                                          # [arm64]
-    - make                                              # [arm64]
-    - m4                                                # [arm64]
-    - pkg-config
-    - {{ moose_libmesh_vtk }}
+    - {{ moose_mpich }}
     - {{ moose_petsc }}
-
+    - {{ moose_libmesh_vtk }}
+    - pkg-config
+    - libpng
   run:
-    - pkg-config
-    - {{ moose_libmesh_vtk }}
+    - {{ moose_mpich }}
     - {{ moose_petsc }}
-    - {{ moose_libpng }}
+    - {{ moose_libmesh_vtk }}
+    - pkg-config
+    - setuptools <60
 
 test:
   commands:
@@ -47,7 +45,9 @@ test:
 about:
   home: http://libmesh.github.io/
   license: LGPL
-  summary: 'The libMesh library provides a framework for the numerical simulation of partial differential equations using arbitrary unstructured discretizations on serial and parallel platforms'
+  summary: >
+    The libMesh library provides a framework for the numerical simulation of partial differential
+    equations using arbitrary unstructured discretizations on serial and parallel platforms
 
 extra:
   recipe-maintainers:

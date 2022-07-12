@@ -71,7 +71,6 @@
 
 [Outputs]
   file_base = 'first_order'
-  exodus = true
   [./csv]
     type = CSV
     show = 'u'

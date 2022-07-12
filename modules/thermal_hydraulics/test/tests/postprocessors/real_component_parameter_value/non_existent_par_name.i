@@ -121,7 +121,3 @@
     order = SECOND
   []
 []
-
-[Outputs]
-  csv = true
-[]

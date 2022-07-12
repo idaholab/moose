@@ -1,5 +1,6 @@
 [Mesh]
   file = 2-lines.e
+  allow_renumbering = false
 []
 
 [Variables]

@@ -110,7 +110,6 @@
 []
 
 [Outputs]
-  exodus = true
   [map]
     type = ParaviewComponentAnnotationMap
   []

@@ -487,6 +487,7 @@ MooseApp::MooseApp(InputParameters parameters)
   _the_warehouse->registerAttribute<AttribInterfaces>("interfaces", 0);
   _the_warehouse->registerAttribute<AttribSysNum>("sys_num", libMesh::invalid_uint);
   _the_warehouse->registerAttribute<AttribResidualObject>("residual_object");
+  _the_warehouse->registerAttribute<AttribSorted>("sorted");
 
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -963,6 +964,7 @@ MooseApp::setupOptions()
     {
       _syntax.registerTaskName("mesh_only", true);
       _syntax.addDependency("mesh_only", "setup_mesh_complete");
+      _syntax.addDependency("determine_system_type", "mesh_only");
       _action_warehouse.setFinalTask("mesh_only");
     }
     else if (isParamValid("split_mesh"))
@@ -970,6 +972,7 @@ MooseApp::setupOptions()
       _split_mesh = true;
       _syntax.registerTaskName("split_mesh", true);
       _syntax.addDependency("split_mesh", "setup_mesh_complete");
+      _syntax.addDependency("determine_system_type", "split_mesh");
       _action_warehouse.setFinalTask("split_mesh");
     }
     _action_warehouse.build();
@@ -2027,7 +2030,7 @@ MooseApp::createMeshGeneratorOrder()
                    "spelling mistake or forget to include it "
                    "in your input file?");
 
-      resolver.insertDependency(it.second, depend_it->second);
+      resolver.addEdge(depend_it->second, it.second);
     }
   }
 

@@ -14,8 +14,6 @@ diff=1.1
     initial_condition = 1
     type = MooseVariableFVReal
     face_interp_method = 'skewness-corrected'
-    cache_face_gradients = false
-    cache_face_values = true
   [../]
 []
 
@@ -62,7 +60,6 @@ diff=1.1
 []
 
 [Outputs]
-  exodus = true
   csv = true
 []
 

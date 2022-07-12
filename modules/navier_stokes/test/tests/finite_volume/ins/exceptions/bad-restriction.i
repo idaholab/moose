@@ -257,8 +257,3 @@ restricted_blocks = '1'
   line_search = 'none'
   nl_rel_tol = 1e-12
 []
-
-[Outputs]
-  exodus = true
-  csv = true
-[]

@@ -1,0 +1,23 @@
+[Tests]
+  issues = "#13744"
+  design = "ADMatCoupledForce.md"
+  [fe_result]
+    type = Exodiff
+    input = 'fe_test.i'
+    exodiff = 'fe_test_out.e'
+    requirement = "The system shall provide a source term proportional to the value of a coupled variable with a material property prefactor."
+  []
+  [jacobians]
+    requirement = "The system shall provide a source term proportional to the value of"
+    [aux]
+      type = 'PetscJacobianTester'
+      input = 'aux_test.i'
+      detail = 'an aux variable with a material property prefactor and shall be able to produce the exact Jacobian.'
+    []
+    [fe]
+      type = 'PetscJacobianTester'
+      input = 'fe_test.i'
+      detail = 'an finite element primary variable with a material property prefactor and shall be able to produce the exact Jacobian.'
+    []
+  []
+[]

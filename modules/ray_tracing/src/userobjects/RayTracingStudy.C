@@ -137,6 +137,12 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
 #endif
 
     _threaded_elem_side_builders(libMesh::n_threads()),
+
+    _registered_ray_map(
+        declareRestartableData<std::unordered_map<std::string, RayID>>("registered_ray_map")),
+    _reverse_registered_ray_map(
+        declareRestartableData<std::vector<std::string>>("reverse_registered_ray_map")),
+
     _threaded_cached_traces(libMesh::n_threads()),
 
     _num_cached(libMesh::n_threads(), 0),
@@ -539,9 +545,12 @@ void
 RayTracingStudy::registeredRaySetup()
 {
   // First, clear the objects associated with each Ray on each thread
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    for (auto & set : _threaded_ray_object_registration[tid])
-      set.clear();
+  const auto num_rays = _registered_ray_map.size();
+  for (auto & entry : _threaded_ray_object_registration)
+  {
+    entry.clear();
+    entry.resize(num_rays);
+  }
 
   const auto rtos = getRayTracingObjects();
 
@@ -1307,15 +1316,14 @@ RayTracingStudy::registerRay(const std::string & name)
   // the unique IDs, but it would require a sync point which isn't there right now
   libmesh_parallel_only(comm());
 
-  if (_registered_ray_map.count(name))
-    mooseError("A ray with the name \"", name, "\" is already registered");
+  const auto & it = _registered_ray_map.find(name);
+  if (it != _registered_ray_map.end())
+    return it->second;
 
-  const auto next_id = _threaded_ray_object_registration[0].size();
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _threaded_ray_object_registration[tid].emplace_back();
-  _registered_ray_map.emplace(name, next_id);
-  _reverse_registered_ray_map.emplace(next_id, name);
-  return next_id;
+  const auto id = _reverse_registered_ray_map.size();
+  _registered_ray_map.emplace(name, id);
+  _reverse_registered_ray_map.push_back(name);
+  return id;
 }
 
 RayID
@@ -1346,9 +1354,8 @@ RayTracingStudy::registeredRayName(const RayID ray_id) const
   if (!_use_ray_registration)
     mooseError("Should not use registeredRayName() with Ray registration disabled");
 
-  const auto search = _reverse_registered_ray_map.find(ray_id);
-  if (search != _reverse_registered_ray_map.end())
-    return search->second;
+  if (_reverse_registered_ray_map.size() > ray_id)
+    return _reverse_registered_ray_map[ray_id];
 
   mooseError("Attempted to obtain name of registered Ray with ID ",
              ray_id,

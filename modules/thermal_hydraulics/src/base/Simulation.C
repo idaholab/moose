@@ -138,15 +138,13 @@ Simulation::initSimulation()
   DependencyResolver<std::shared_ptr<Component>> dependency_resolver;
   for (const auto & comp : _components)
   {
-    dependency_resolver.addItem(comp);
+    dependency_resolver.addNode(comp);
     for (const auto & dep : comp->getDependencies())
-    {
       if (hasComponent(dep))
-        dependency_resolver.insertDependency(comp, _comp_by_name[dep]);
-    }
+        dependency_resolver.addEdge(_comp_by_name[dep], comp);
   }
 
-  std::sort(_components.begin(), _components.end(), dependency_resolver);
+  _components = dependency_resolver.dfs();
 }
 
 void

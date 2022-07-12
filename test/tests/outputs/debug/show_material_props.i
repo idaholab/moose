@@ -74,7 +74,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  exodus = true
   [./debug] # This is only a test, you should turn this on via [Debug] block
     type = MaterialPropertyDebugOutput
   [../]

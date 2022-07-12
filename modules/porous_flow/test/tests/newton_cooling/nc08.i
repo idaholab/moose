@@ -179,7 +179,6 @@
 [Outputs]
   file_base = nc08
   execute_on = timestep_end
-  exodus = true
   [along_line]
     type = CSV
     execute_vector_postprocessors_on = timestep_end

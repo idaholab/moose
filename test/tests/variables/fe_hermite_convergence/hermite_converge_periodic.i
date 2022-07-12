@@ -128,6 +128,5 @@
 [Outputs]
   execute_on = 'timestep_end'
   exodus = true
-  csv = true
   print_mesh_changed_info = true
 []

@@ -94,6 +94,3 @@
     variable = K_prime
   []
 []
-
-[Outputs]
-[]

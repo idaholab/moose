@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#13754 #21487'
+  design = 'MultiAppCopyTransfer.md'
+
+  [transfer]
+    requirement = "The system shall support the transfer of an auxiliary field variable to a primary variable between identical meshes:"
+    [from_sub_to_parent]
+      type = Exodiff
+      input = from_sub.i
+      exodiff = 'from_sub_out.e'
+      recover = false # uses output on final
+
+      detail = 'from a sub-application and'
+    []
+
+    [to_sub_to_parent]
+      type = Exodiff
+      input = to_sub.i
+      exodiff = 'to_sub_out_sub0.e'
+      recover = false # uses output on final
+
+      detail = 'to a sub-application.'
+    []
+  []
+[]

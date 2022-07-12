@@ -409,7 +409,6 @@
 [Outputs]
   execute_on = 'initial timestep_end'
   file_base = heat04
-  exodus = true
   [csv]
     type = CSV
   []

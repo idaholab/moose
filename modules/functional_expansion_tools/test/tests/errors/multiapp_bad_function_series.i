@@ -113,10 +113,6 @@
   fixed_point_abs_tol = 1e-9
 []
 
-[Outputs]
-  exodus = true
-[]
-
 [MultiApps]
   [./FXTransferApp]
     type = TransientMultiApp

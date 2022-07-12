@@ -28,6 +28,9 @@
 #include <exception>
 
 template <typename T>
+class CyclicDependencyException;
+
+template <typename T>
 class DependencyResolverComparator
 {
 public:
@@ -54,41 +57,67 @@ private:
   const std::vector<T> & _original_order;
 };
 
+/**
+ * Class that represents the dependecy as a graph
+ */
 template <typename T>
 class DependencyResolver
 {
 public:
-  DependencyResolver() {}
+  DependencyResolver() = default;
+  ~DependencyResolver() = default;
 
-  ~DependencyResolver() {}
+  /**
+   * Add a node 'a' to the graph
+   */
+  void addNode(const T & a);
+
+  /**
+   * Add an edge between nodes 'a' and 'b'
+   */
+  void addEdge(const T & a, const T & b);
+
+  /**
+   * Remove an edge between nodes 'a' and 'b'
+   */
+  void removeEdge(const T & a, const T & b);
+
+  /**
+   * Remove edges drawn from 'a'
+   */
+  void removeEdgesInvolving(const T & a);
 
   /**
    * Insert a dependency pair - the first value or the "key" depends on the second value or the
    * "value"
    */
-  void insertDependency(const T & key, const T & value);
+  void insertDependency(const T & key, const T & value) { addEdge(value, key); }
 
   /**
-   * Delete a dependency (only the edge) between items in the resolver. If either item is orphaned
-   * due to the deletion of the edge, the items are inserted into the independent items set so they
-   * will still come out when running the resolver.
+   * Delete a dependency (only the edge) between items in the resolver
    */
-  void deleteDependency(const T & key, const T & value);
+  void deleteDependency(const T & key, const T & value) { removeEdge(value, key); }
 
   /**
-   * Removes dependencies of the given key. Does not fixup the graph or change indpendent items.
+   * Removes dependencies of the given key
    */
-  void deleteDependenciesOfKey(const T & key);
+  void deleteDependenciesOfKey(const T & key) { removeEdgesInvolving(key); }
 
   /**
    * Add an independent item to the set
    */
-  void addItem(const T & value);
+  void addItem(const T & value) { addNode(value); }
 
   /**
    * Clear Items from the resolver
    */
   void clear();
+
+  /**
+   * Do depth-first search from root nodes to obtain order in which graph nodes should be
+   * "executed".
+   */
+  const std::vector<T> & dfs();
 
   /**
    * Returns a vector of sets that represent dependency resolved values.  Items in the same
@@ -103,7 +132,7 @@ public:
    * can't
    * be represented in a single vector.  This isn't a problem in practice though.
    */
-  const std::vector<T> & getSortedValues();
+  const std::vector<T> & getSortedValues() { return dfs(); }
 
   /**
    * Return true if key depends on value.
@@ -126,509 +155,335 @@ public:
   /**
    * Returns a list of all values that a given key depends on
    */
-  const std::list<T> getAncestors(const T & key);
+  std::list<T> getAncestors(const T & key);
 
   /**
-   * Returns the number of unique items stored in the dependency resolver.
+   * Returns the number of unique items stored in the dependency resolver. lindsayad comment: does
+   * it really return the number of *unique* items?
    */
-  std::size_t size() const;
+  std::size_t size() const { return _sorted_vector.size(); }
 
-  bool operator()(const T & a, const T & b);
+protected:
+  /**
+   * depth first search from a root node, searching for a specific item
+   * @param root The node we start from
+   * @param item The node we are searching for
+   */
+  bool dependsOnFromNode(const T & root, const T & item);
 
   /**
-   * Enumeration used to implement the coloring-based depth-first search (DFS) algorithm described
-   * in https://www.geeksforgeeks.org/detect-cycle-direct-graph-using-colors/. The algorithm
-   * searches for back-edges. A back-edge is an edge that points from a node to itself or from one
-   * of a node's descendents (determined through DFS) to itself. The meaning of the colors used in
-   * this algorithm are:
-   * WHITE : Node is not processed yet. Initially, all nodes are WHITE.
-   * GRAY: Node is being processed (DFS for this node has started, but not finished which means that
-   * all descendants (in DFS tree) of this node are not processed yet (or this node is in the
-   * function call stack)
-   * BLACK : Node and all its descendants are processed.
+   * Perform a depth-first-search from the specified \p root node. Populates _visited and
+   * _sorted_vector data members
+   * @return whether a cyclic graph was detected while performing the depth-first-search from the \p
+   * root node
    */
-  enum Color
-  {
-    BLACK,
-    WHITE,
-    GRAY
-  };
+  bool dfsFromNode(const T & root);
 
-private:
-  /**
-   * Indicates whether any cyclic dependency is detected when descending a directed graph from this
-   * node. This is a depth-first search (DFS) algorithm based on
-   * https://www.geeksforgeeks.org/detect-cycle-direct-graph-using-colors/
-   * @param node The node in the directed graph from which to begin descent
-   * @return whether any cyclic dependency was discovered while descending from the node
-   */
-  bool hasCycle(const T & node);
-
-  /**
-   * Helper classes for returning only keys or values in an iterator format
-   */
-  template <typename map_type>
-  class key_iterator;
-
-  template <typename map_type>
-  class value_iterator;
-
-  /// This is our main data structure a multimap that contains any number of dependencies in a key = value format
-  std::multimap<T, T> _depends;
-
-  /// Used to avoid duplicate tracking of identical insertions of dependencies
-  std::set<std::pair<T, T>> _unique_deps;
-
-  /// Extra items that need to come out in the sorted list but contain no dependencies
-  std::vector<T> _independent_items;
-
-  // A vector retaining the order in which items were added to the
-  // resolver, to disambiguate ordering of items with no
-  // mutual interdependencies
-  std::vector<T> _ordering_vector;
-
-  /// A map used to implement the depth-first search algorithm, based on
-  /// https://www.geeksforgeeks.org/detect-cycle-direct-graph-using-colors/, for use in detecting
-  /// cyclic dependencies
-  std::map<T, Color> _colors;
-
+  /// adjacency lists (from leaves to roots)
+  std::map<T, std::list<T>> _adj;
+  /// adjacency lists (from roots to leaves)
+  std::map<T, std::list<T>> _inv_adj;
+  /// vector of visited nodes
+  std::map<T, bool> _visited;
+  /// recursive stack
+  std::map<T, bool> _rec_stack;
+  /// "sorted" vector of nodes
+  std::vector<T> _sorted_vector;
   /// The sorted vector of sets
   std::vector<std::vector<T>> _ordered_items;
+  /// Container for keeping track of the insertion order. We will use this to determine iteration
+  /// order because it is essential that iteration order be sync'd across multiple
+  /// processes. Iterating over maps with pointer keys, for example, can be out of sync on multiple
+  /// processes. If dependency resolver memory usage shows up in profiling, we can consider making
+  /// this a container of reference wrappers
+  std::vector<T> _insertion_order;
+  /// Data member for storing nodes that appear circularly in the graph
+  T _circular_node = T{};
 
-  /// The sorted vector (if requested)
-  std::vector<T> _ordered_items_vector;
+  friend class CyclicDependencyException<T>;
 };
 
-template <typename T>
-class CyclicDependencyException : public std::runtime_error
-{
-public:
-  CyclicDependencyException(const std::string & error,
-                            const std::multimap<T, T> & cyclic_items) throw()
-    : runtime_error(error), _cyclic_items(cyclic_items)
-  {
-  }
-
-  CyclicDependencyException(const CyclicDependencyException & e) throw()
-    : runtime_error(e), _cyclic_items(e._cyclic_items)
-  {
-  }
-
-  ~CyclicDependencyException() throw() {}
-
-  const std::multimap<T, T> & getCyclicDependencies() const { return _cyclic_items; }
-
-private:
-  std::multimap<T, T> _cyclic_items;
-};
-
-/**
- * Helper class definitions
- */
-template <typename T>
-template <typename map_type>
-class DependencyResolver<T>::key_iterator : public map_type::iterator
-{
-public:
-  typedef typename map_type::iterator map_iterator;
-  typedef typename map_iterator::value_type::first_type key_type;
-
-  key_iterator(const map_iterator & other) : map_type::iterator(other){};
-
-  key_type & operator*() { return map_type::iterator::operator*().first; }
-};
-
-template <typename T>
-template <typename map_type>
-class DependencyResolver<T>::value_iterator : public map_type::iterator
-{
-public:
-  typedef typename map_type::iterator map_iterator;
-  typedef typename map_iterator::value_type::second_type value_type;
-
-  value_iterator(const map_iterator & other) : map_type::iterator(other){};
-
-  value_type & operator*() { return map_type::iterator::operator*().second; }
-};
-
-/**
- * DependencyResolver class definitions
- */
 template <typename T>
 void
-DependencyResolver<T>::insertDependency(const T & key, const T & value)
+DependencyResolver<T>::addNode(const T & a)
 {
-  auto k = std::make_pair(key, value);
-  if (_unique_deps.count(k) > 0)
-    return;
-  _unique_deps.insert(k);
-  auto insert_it = _depends.insert(k);
-
-  for (auto & pr : _colors)
-    pr.second = WHITE;
-  _colors.emplace(key, WHITE);
-  _colors.emplace(value, WHITE);
-  if (hasCycle(key))
+#ifndef NDEBUG
+  bool new_adj_insertion = false, new_inv_insertion = false;
+#endif
+  if (_adj.find(a) == _adj.end())
   {
-    decltype(_depends) depends_copy(_depends);
-    _depends.erase(insert_it);
-
-    throw CyclicDependencyException<T>(
-        "DependencyResolver: attempt to insert dependency will result in cyclic graph",
-        depends_copy);
-  }
-  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), key) == _ordering_vector.end())
-    _ordering_vector.push_back(key);
-  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) == _ordering_vector.end())
-    _ordering_vector.push_back(value);
-}
-
-template <typename T>
-bool
-DependencyResolver<T>::hasCycle(const T & root)
-{
-  // Catch as reference since we'll modify this value
-  auto & root_color = libmesh_map_find(_colors, root);
-  root_color = GRAY;
-
-  auto [first, last] = _depends.equal_range(root);
-  for (auto & val : as_range(first, last))
-  {
-    const auto & adj = val.second;
-    // We'll copy since its a builtin and we don't need to modify this value
-    const auto color_adj = libmesh_map_find(_colors, adj);
-
-    if (color_adj == GRAY)
-      // We're in the act of processing this node which means that we've now encountered this node
-      // twice during descent and we have a cycle
-      return true;
-
-    // We are not currently processing (GRAY) nor have we already processed (BLACK) the adjacent
-    // node, so we continue to descend
-    if (color_adj == WHITE && hasCycle(adj))
-      return true;
+#ifndef NDEBUG
+    new_adj_insertion = true;
+#endif
+    _adj[a] = {};
+    _insertion_order.push_back(a);
   }
 
-  // We did not encounter any cycles while descending from this node
-  root_color = BLACK;
-
-  return false;
+  if (_inv_adj.find(a) == _inv_adj.end())
+  {
+#ifndef NDEBUG
+    new_inv_insertion = true;
+#endif
+    _inv_adj[a] = {};
+  }
+  mooseAssert(new_adj_insertion == new_inv_insertion,
+              "We should have symmetric behavior between adjacent and inverse-adjacent "
+              "insertion/non-insertion.");
 }
 
 template <typename T>
 void
-DependencyResolver<T>::deleteDependency(const T & key, const T & value)
+DependencyResolver<T>::addEdge(const T & a, const T & b)
 {
-  std::pair<const int, int> k = std::make_pair(key, value);
-  _unique_deps.erase(k);
+  addNode(a);
+  addNode(b);
 
-  // We don't want to remove every entry in the multimap with this key. We need to find the exact
-  // entry (e.g. the key/value pair).
-  auto eq_range = _depends.equal_range(key);
-  for (auto it = eq_range.first; it != eq_range.second; ++it)
-    if (*it == k)
-    {
-      _depends.erase(it);
-      break;
-    }
-
-  // Now that we've removed the dependency, we need to see if either one of the items is orphaned.
-  // If it is, we'll need to add those items to the independent set.
-  if (_depends.find(key) == _depends.end())
-    addItem(key);
-
-  bool found = false;
-  for (auto pair_it : _depends)
-    if (pair_it.second == value)
-    {
-      found = true;
-      break;
-    }
-
-  if (!found)
-    addItem(value);
+  _adj[a].push_back(b);
+  _inv_adj[b].push_back(a);
 }
 
 template <typename T>
 void
-DependencyResolver<T>::deleteDependenciesOfKey(const T & key)
+DependencyResolver<T>::removeEdge(const T & a, const T & b)
 {
-  auto eq_range = _depends.equal_range(key);
-  _depends.erase(eq_range.first, eq_range.second);
+  auto remove_item = [](auto & list, const auto & item)
+  {
+    auto it = std::find(list.begin(), list.end(), item);
+    mooseAssert(it != list.end(), "We should have this item");
+    list.erase(it);
+  };
+  remove_item(_adj[a], b);
+  remove_item(_inv_adj[b], a);
 }
 
 template <typename T>
 void
-DependencyResolver<T>::addItem(const T & value)
+DependencyResolver<T>::removeEdgesInvolving(const T & a)
 {
-  if (std::find(_independent_items.begin(), _independent_items.end(), value) ==
-      _independent_items.end())
-    _independent_items.push_back(value);
-  if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) == _ordering_vector.end())
-    _ordering_vector.push_back(value);
+  const auto & inv_adjs = _inv_adj[a];
+  for (const auto & inv_adj : inv_adjs)
+  {
+    auto & adj = _adj[inv_adj];
+    auto it = std::find(adj.begin(), adj.end(), a);
+    mooseAssert(it != adj.end(), "Should have reciprocity");
+    adj.erase(it);
+  }
+
+  _inv_adj[a].clear();
 }
 
 template <typename T>
 void
 DependencyResolver<T>::clear()
 {
-  _depends.clear();
-  _independent_items.clear();
-  _ordering_vector.clear();
-  _ordered_items.clear();
-  _ordered_items_vector.clear();
+  _adj.clear();
+  _inv_adj.clear();
+  _insertion_order.clear();
+}
+
+template <typename T>
+const std::vector<T> &
+DependencyResolver<T>::dfs()
+{
+  _sorted_vector.clear();
+  _visited.clear();
+  _rec_stack.clear();
+  _circular_node = T{};
+
+  for (auto & n : _adj)
+  {
+    _visited[n.first] = false;
+    _rec_stack[n.first] = false;
+  }
+
+  bool is_cyclic = false;
+  // If there are no adjacencies, then all nodes are both roots and leaves
+  bool roots_found = _adj.empty();
+  for (auto & n : _insertion_order)
+    if (_adj[n].size() == 0)
+    {
+      roots_found = true;
+      is_cyclic = dfsFromNode(n);
+      if (is_cyclic)
+        break;
+    }
+  if (!roots_found)
+  {
+    is_cyclic = true;
+    // Create a cycle graph
+    for (auto & n : _insertion_order)
+      if (dfsFromNode(n))
+        break;
+  }
+
+  if (is_cyclic)
+    throw CyclicDependencyException<T>("cyclic graph detected", *this);
+
+  return _sorted_vector;
 }
 
 template <typename T>
 const std::vector<std::vector<T>> &
 DependencyResolver<T>::getSortedValuesSets()
 {
-  // Use the original ordering for ordering subvectors
-  DependencyResolverComparator<T> comp(_ordering_vector);
-
-  /**
-   * Make a copy of the map to work on since:
-   * 1) we will remove values from the map
-   * 2) We need the copy to be sorted in an unambiguous order.
-   */
-  typedef std::multimap<T, T, DependencyResolverComparator<T>> dep_multimap;
-  dep_multimap depends(_depends.begin(), _depends.end(), comp);
-
-  // Build up a set of all keys in depends that have nothing depending on them,
-  // and put it in the orphans set.
-  std::set<T> nodepends;
-
-  std::set<T> all;
-  std::set<T> dependees;
-  for (auto & entry : depends)
-  {
-    dependees.insert(entry.second);
-    all.insert(entry.first);
-    all.insert(entry.second);
-  }
-
-  std::set<T> orphans;
-  std::set_difference(all.begin(),
-                      all.end(),
-                      dependees.begin(),
-                      dependees.end(),
-                      std::inserter(orphans, orphans.end()));
-
-  // Remove items from _independent_items if they actually appear in depends
-  for (auto siter = _independent_items.begin(); siter != _independent_items.end();)
-  {
-    T key = *siter;
-    bool founditem = false;
-    for (auto i2 : depends)
-    {
-      if (i2.first == key || i2.second == key)
-      {
-        founditem = true;
-        break;
-      }
-    }
-    if (founditem)
-      siter = _independent_items.erase(siter); // post increment to maintain a valid iterator
-    else
-      ++siter;
-  }
-
-  /* Clear the ordered items vector */
   _ordered_items.clear();
 
-  // Put the independent items into the first set in _ordered_items
-  std::vector<T> next_set(_independent_items.begin(), _independent_items.end());
+  const auto & flat_sorted = dfs();
 
-  /* Topological Sort */
-  while (!depends.empty())
+  std::vector<T> current_group;
+  for (const auto & object : flat_sorted)
   {
-    /* Work with sets since set_difference doesn't always work properly with multi_map due
-     * to duplicate keys
-     */
-    std::set<T, DependencyResolverComparator<T>> keys(
-        typename DependencyResolver<T>::template key_iterator<dep_multimap>(depends.begin()),
-        typename DependencyResolver<T>::template key_iterator<dep_multimap>(depends.end()),
-        comp);
-
-    std::set<T, DependencyResolverComparator<T>> values(
-        typename DependencyResolver<T>::template value_iterator<dep_multimap>(depends.begin()),
-        typename DependencyResolver<T>::template value_iterator<dep_multimap>(depends.end()),
-        comp);
-
-    std::vector<T> current_set(next_set);
-    next_set.clear();
-
-    /* This set difference creates a set of items that have no dependencies in the depend map*/
-    std::set<T, DependencyResolverComparator<T>> difference(comp);
-
-    std::set_difference(values.begin(),
-                        values.end(),
-                        keys.begin(),
-                        keys.end(),
-                        std::inserter(difference, difference.end()),
-                        comp);
-
-    /* Now remove items from the temporary map that have been "resolved" */
-    if (!difference.empty())
+    if (current_group.empty())
     {
-      for (auto iter = depends.begin(); iter != depends.end();)
-      {
-        if (difference.find(iter->second) != difference.end())
-        {
-          T key = iter->first;
-          depends.erase(iter++); // post increment to maintain a valid iterator
+      current_group.push_back(object);
+      continue;
+    }
 
-          // If the item is at the end of a dependency chain (by being an orphan) AND
-          // is not still in the depends map because it still has another unresolved link
-          // insert it into the next_set
-          if (orphans.find(key) != orphans.end() && depends.find(key) == depends.end())
-            next_set.push_back(key);
-        }
-        else
-          ++iter;
-      }
-      /* Add the current set of resolved items to the ordered vector */
-      current_set.insert(current_set.end(), difference.begin(), difference.end());
-      _ordered_items.push_back(current_set);
+    const auto & prev_adj_list = _adj[current_group.back()];
+    const bool depends_on_prev =
+        std::find(prev_adj_list.begin(), prev_adj_list.end(), object) != prev_adj_list.end();
+
+    if (depends_on_prev)
+    {
+      _ordered_items.push_back({object});
+      auto & finalized_group = _ordered_items.back();
+      // Swap the current-group into the back of our ordered items container, and now our newest
+      // object becomes the current group
+      finalized_group.swap(current_group);
     }
     else
-    {
-
-      /* If the last set difference was empty but there are still items that haven't come out then
-       * there is a cyclic dependency somewhere in the map.
-       */
-      if (!depends.empty())
-      {
-        std::ostringstream oss;
-        oss << "Cyclic dependency detected in the Dependency Resolver.  Remaining items are:\n";
-        for (auto j : depends)
-          oss << j.first << " -> " << j.second << "\n";
-        // Return a multimap without a weird comparator, to avoid
-        // dangling reference problems and for backwards compatibility
-        std::multimap<T, T> cyclic_deps(depends.begin(), depends.end());
-        throw CyclicDependencyException<T>(oss.str(), cyclic_deps);
-      }
-    }
+      current_group.push_back(object);
   }
 
-  if (next_set.empty())
-  {
-    if (!_independent_items.empty() || !depends.empty())
-      mooseError("DependencyResolver error: next_set shouldn't be empty!");
-  }
-  else
-  {
-    _ordered_items.push_back(next_set);
-  }
+  if (!current_group.empty())
+    _ordered_items.push_back(std::move(current_group));
 
   return _ordered_items;
-}
-
-template <typename T>
-const std::vector<T> &
-DependencyResolver<T>::getSortedValues()
-{
-  _ordered_items_vector.clear();
-
-  getSortedValuesSets();
-
-  for (auto subset : _ordered_items)
-    std::copy(subset.begin(), subset.end(), std::back_inserter(_ordered_items_vector));
-
-  return _ordered_items_vector;
 }
 
 template <typename T>
 bool
 DependencyResolver<T>::dependsOn(const T & key, const T & value)
 {
-  if (key == value)
-    return true;
+  if (_adj.find(value) == _adj.end())
+    return false;
 
-  // recursively call dependsOn on all the things that key depends on
-  auto ret = _depends.equal_range(key);
-  for (auto it = ret.first; it != ret.second; ++it)
-    if (dependsOn(it->second, value))
-      return true;
+  for (auto & n : _adj)
+    _visited[n.first] = false;
 
-  // No dependencies were found,
-  // or the key is not in the tree (so it has no dependencies).
-  // In this latter case, the only way that key depends on value is if key == value,
-  // but we've already checked that
-  return false;
+  return dependsOnFromNode(key, value);
 }
 
 template <typename T>
 bool
 DependencyResolver<T>::dependsOn(const std::vector<T> & keys, const T & value)
 {
-  for (auto key : keys)
-    if (dependsOn(key, value))
+  if (_adj.find(value) == _adj.end())
+    return false;
+
+  for (auto & n : _adj)
+    _visited[n.first] = false;
+
+  for (const auto & key : keys)
+    if (dependsOnFromNode(key, value))
       return true;
+
   return false;
 }
 
 template <typename T>
-const std::list<T>
+std::list<T>
 DependencyResolver<T>::getAncestors(const T & key)
 {
-  std::list<T> ancestors = {key};
-  std::unordered_set<T> unique_values;
+  std::vector<T> ret_vec;
+  // Our sorted vector is our work vector but we also return references to it. So we have to make
+  // sure at the end that we restore the original data we had in it
+  ret_vec.swap(_sorted_vector);
 
-  auto it = ancestors.begin();
-  while (it != ancestors.end())
-  {
-    auto ret = _depends.equal_range(*it);
+  for (auto & n : _adj)
+    _visited[n.first] = false;
 
-    for (auto it_range = ret.first; it_range != ret.second; ++it_range)
-    {
-      auto & item = it_range->second;
-      if (unique_values.find(item) == unique_values.end())
-      {
-        ancestors.push_back(item);
-        unique_values.insert(item);
-      }
-    }
+  dfsFromNode(key);
 
-    ++it;
-  }
+  ret_vec.swap(_sorted_vector);
+  mooseAssert(ret_vec.back() == key, "Our key should be the back of the vector");
 
-  return ancestors;
-}
-
-template <typename T>
-std::size_t
-DependencyResolver<T>::size() const
-{
-  return _ordering_vector.size();
+  return {ret_vec.begin(), ret_vec.end()};
 }
 
 template <typename T>
 bool
-DependencyResolver<T>::operator()(const T & a, const T & b)
+DependencyResolver<T>::dependsOnFromNode(const T & root, const T & item)
 {
-  if (_ordered_items_vector.empty())
-    getSortedValues();
-
-  auto a_it = std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), a);
-  auto b_it = std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), b);
-
-  /**
-   * It's possible that a and/or b are not in the resolver in which case
-   *  we want those values to come out first.  However, we need to make
-   *  sure that we maintain strict weak ordering so we'll compare b_it first,
-   *  which will return false for a_it < b_it and b_it < a_it when both values
-   *  are not in the ordered_items vector.
-   */
-  if (b_it == _ordered_items_vector.end())
-    return false;
-  if (a_it == _ordered_items_vector.end())
+  if (root == item)
     return true;
-  else
-    /**
-     * Compare the iterators.  Users sometime fail to state all their
-     * items' dependencies, but do introduce dependant items only after
-     * the items they depended on; this preserves that sorting.
-     */
-    return a_it < b_it;
+
+  _visited[root] = true;
+
+  auto & my_dependencies = _inv_adj[root];
+
+  for (auto & i : my_dependencies)
+    if (!_visited.at(i) && dependsOnFromNode(i, item))
+      return true;
+
+  return false;
 }
+
+template <typename T>
+bool
+DependencyResolver<T>::dfsFromNode(const T & root)
+{
+  bool cyclic = false;
+  _visited[root] = true;
+  _rec_stack[root] = true;
+
+  for (auto & i : _inv_adj[root])
+  {
+    if (!_visited.at(i) && dfsFromNode(i))
+    {
+      cyclic = true;
+      break;
+    }
+    else if (_rec_stack.at(i))
+    {
+      _circular_node = i;
+      _sorted_vector.push_back(i);
+      cyclic = true;
+      break;
+    }
+  }
+
+  _sorted_vector.push_back(root);
+  _rec_stack[root] = false;
+  return cyclic;
+}
+
+template <typename T>
+class CyclicDependencyException : public std::runtime_error
+{
+public:
+  CyclicDependencyException(const std::string & error, const DependencyResolver<T> & graph) throw()
+    : runtime_error(error)
+  {
+    const auto & sorted = graph._sorted_vector;
+    auto first_occurence = std::find(sorted.begin(), sorted.end(), graph._circular_node);
+    if (first_occurence == sorted.end())
+      mooseError("We must have at least one occurence of the circular node");
+    auto second_occurence = std::find(first_occurence + 1, sorted.end(), graph._circular_node);
+    if (second_occurence == sorted.end())
+      mooseError("We must have two occurences of the circular node");
+    _cyclic_graph = std::vector<T>(first_occurence, second_occurence + 1);
+  }
+
+  CyclicDependencyException(const CyclicDependencyException & e) throw()
+    : runtime_error(e), _cyclic_graph(e._cyclic_graph)
+  {
+  }
+
+  ~CyclicDependencyException() throw() {}
+
+  const std::vector<T> & getCyclicDependencies() const { return _cyclic_graph; }
+
+private:
+  std::vector<T> _cyclic_graph;
+};

@@ -93,7 +93,6 @@ a=1
 []
 
 [Outputs]
-  exodus = true
   csv = true
 []
 

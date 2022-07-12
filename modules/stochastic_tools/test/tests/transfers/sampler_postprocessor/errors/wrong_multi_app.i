@@ -64,7 +64,3 @@
   num_steps = 5
   dt = 0.01
 []
-
-[Outputs]
-  csv = true
-[]

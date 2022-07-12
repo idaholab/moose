@@ -296,7 +296,7 @@ public:
    * gradients does
    * @param face The face for which to retrieve the gradient.
    */
-  const VectorValue<ADReal> & adGradSln(const FaceInfo & fi,
+  virtual VectorValue<ADReal> adGradSln(const FaceInfo & fi,
                                         const bool correct_skewness = false) const;
 
   /**
@@ -308,7 +308,7 @@ public:
    * is done in \p adGradSln(const FaceInfo & fi)
    * @param face The face for which to retrieve the gradient
    */
-  const VectorValue<ADReal> & uncorrectedAdGradSln(const FaceInfo & fi,
+  virtual VectorValue<ADReal> uncorrectedAdGradSln(const FaceInfo & fi,
                                                    const bool correct_skewness = false) const;
 
   /**
@@ -317,7 +317,7 @@ public:
    * then we will compute the gradient if necessary to help us interpolate from the element centroid
    * value to the face
    */
-  const ADReal & getBoundaryFaceValue(const FaceInfo & fi) const;
+  ADReal getBoundaryFaceValue(const FaceInfo & fi) const;
 
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
   {
@@ -480,8 +480,7 @@ public:
    * @param fi The face information object
    * @return The face value on the internal face associated with \p fi
    */
-  const ADReal & getInternalFaceValue(const FaceInfo & fi,
-                                      const bool correct_skewness = false) const;
+  ADReal getInternalFaceValue(const FaceInfo & fi, const bool correct_skewness = false) const;
 
   using FunctorArg = typename Moose::ADType<OutputType>::type;
   using typename Moose::FunctorBase<FunctorArg>::ValueType;
@@ -509,7 +508,7 @@ protected:
   /**
    * @return the Dirichlet value on the boundary face associated with \p fi
    */
-  virtual const ADReal & getDirichletBoundaryFaceValue(const FaceInfo & fi) const;
+  virtual ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi) const;
 
   /**
    * Returns whether this is an extrapolated boundary face. An extrapolated boundary face is
@@ -517,6 +516,11 @@ protected:
    * some approximation for the boundary face value using the adjacent cell centroid information
    */
   std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
+
+  /**
+   * @return the extrapolated value on the boundary face associated with \p fi
+   */
+  virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const;
 
 private:
   using MooseVariableField<OutputType>::evaluate;
@@ -539,11 +543,6 @@ private:
   DotType evaluateDot(const ElemArg & elem, unsigned int) const override final;
   DotType evaluateDot(const FaceArg & face, unsigned int) const override final;
   DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int) const override final;
-
-  /**
-   * @return the extrapolated value on the boundary face associated with \p fi
-   */
-  const ADReal & getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const;
 
 public:
   const MooseArray<OutputType> & nodalValueArray() const override
@@ -640,34 +639,12 @@ protected:
   /// A cache for storing gradients on elements
   mutable std::unordered_map<const Elem *, VectorValue<ADReal>> _elem_to_grad;
 
-  /// A cache for storing uncorrected gradients on faces
-  mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_unc_grad;
-
-  /// A cache that maps from faces to face values
-  mutable std::unordered_map<const FaceInfo *, ADReal> _face_to_value;
-
   /// Whether to use a two term expansion for computing boundary face values
   bool _two_term_boundary_expansion;
 
   /// A member to hold the cell gradient when not caching, used to return a reference (due to
   /// expensive ADReal copy)
   mutable VectorValue<ADReal> _temp_cell_gradient;
-
-  /// A member to hold the uncorrected face gradient when not caching, used to return a reference
-  mutable VectorValue<ADReal> _temp_face_unc_gradient;
-
-  /// A member to hold the face gradient when not caching, used to return a reference
-  mutable VectorValue<ADReal> _temp_face_gradient;
-
-  /// A member to hold the face value when not caching, used to return a reference
-  mutable ADReal _temp_face_value;
-
-  /// Whether to cache the gradients the first time they are computed on a cell face. Caching avoids
-  /// redundant calculation, but can increase the memory cost substantially
-  const bool _cache_face_gradients;
-
-  /// Whether to cache face values or re-compute them every time
-  const bool _cache_face_values;
 
   /// Whether to cache cell gradients
   const bool _cache_cell_gradients;
@@ -684,9 +661,6 @@ private:
    */
   template <typename FaceCallingArg>
   DotType evaluateFaceDotHelper(const FaceCallingArg & face) const;
-
-  /// A cache for storing gradients on faces
-  mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_grad;
 };
 
 template <typename OutputType>

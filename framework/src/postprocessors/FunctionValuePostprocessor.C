@@ -40,7 +40,7 @@ FunctionValuePostprocessor::FunctionValuePostprocessor(const InputParameters & p
 {
   const auto & indirect_dependencies =
       getParam<std::vector<PostprocessorName>>("indirect_dependencies");
-  _depend_vars.insert(indirect_dependencies.begin(), indirect_dependencies.end());
+  _depend_uo.insert(indirect_dependencies.begin(), indirect_dependencies.end());
 }
 
 void

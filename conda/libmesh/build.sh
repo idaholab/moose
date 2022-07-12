@@ -64,19 +64,13 @@ else
     export LDFLAGS="-Wl,-S"
 fi
 
-if [[ $mpi == "openmpi" ]]; then
-  export OMPI_MCA_plm=isolated
-  export OMPI_MCA_rmaps_base_oversubscribe=yes
-  export OMPI_MCA_btl_vader_single_copy_mechanism=none
-elif [[ $mpi == "moose-mpich" ]]; then
-  export HYDRA_LAUNCHER=fork
-fi
+export HYDRA_LAUNCHER=fork
 
 source $SRC_DIR/configure_libmesh.sh
 export INSTALL_BINARY="${SRC_DIR}/build-aux/install-sh -C"
 LIBMESH_DIR=${PREFIX}/libmesh \
   configure_libmesh --with-vtk-lib=${BUILD_PREFIX}/libmesh-vtk/lib \
-                    --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${SHORT_VTK_NAME} \
+                    --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${vtk_friendly_version} \
                     $*
 
 CORES=${MOOSE_JOBS:-2}

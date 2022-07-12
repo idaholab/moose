@@ -3,10 +3,8 @@ rho=1.1
 advected_interp_method='average'
 velocity_interp_method='rc'
 
-pressure_face_gradient_caching = true
-velocity_face_gradient_caching = true
-pressure_face_value_caching = true
-velocity_face_value_caching = true
+pressure_cell_gradient_caching = true
+velocity_cell_gradient_caching = true
 
 [Mesh]
   [gen]
@@ -42,25 +40,21 @@ velocity_face_value_caching = true
   [u]
     type = INSFVVelocityVariable
     initial_condition = 1
-    cache_face_gradients = ${velocity_face_gradient_caching}
-    cache_face_values = ${velocity_face_value_caching}
+    cache_cell_gradients = ${velocity_cell_gradient_caching}
   []
   [v]
     type = INSFVVelocityVariable
     initial_condition = 1e-6
-    cache_face_gradients = ${velocity_face_gradient_caching}
-    cache_face_values = ${velocity_face_value_caching}
+    cache_cell_gradients = ${velocity_cell_gradient_caching}
   []
   [w]
     type = INSFVVelocityVariable
     initial_condition = 1e-6
-    cache_face_gradients = ${velocity_face_gradient_caching}
-    cache_face_values = ${velocity_face_value_caching}
+    cache_cell_gradients = ${velocity_cell_gradient_caching}
   []
   [pressure]
     type = INSFVPressureVariable
-    cache_face_gradients = ${pressure_face_gradient_caching}
-    cache_face_values = ${pressure_face_value_caching}
+    cache_cell_gradients = ${pressure_cell_gradient_caching}
   []
 []
 
@@ -208,5 +202,4 @@ velocity_face_value_caching = true
   hide = 'physical'
   perf_graph = true
   exodus = true
-  csv = true
 []

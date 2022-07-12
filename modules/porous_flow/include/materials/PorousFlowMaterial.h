@@ -79,4 +79,7 @@ protected:
   const VariableName _saturation_variable_name;
   const VariableName _temperature_variable_name;
   const VariableName _mass_fraction_variable_name;
+
+  /// stateful material property ids that this material supplies
+  std::vector<unsigned int> _supplied_old_prop_ids;
 };

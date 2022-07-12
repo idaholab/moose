@@ -125,7 +125,6 @@
 
 [Outputs]
   exodus = true
-  csv = true
   [out]
     type = Checkpoint
     num_files = 1

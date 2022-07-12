@@ -45,7 +45,3 @@
     damping = 0.9
   [../]
 []
-
-[Outputs]
-  exodus = true
-[]

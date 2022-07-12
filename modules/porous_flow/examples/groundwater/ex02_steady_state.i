@@ -151,6 +151,7 @@
   [baseflow_l_per_m_per_day]
     type = FunctionValuePostprocessor
     function = baseflow_rate
+    indirect_dependencies = 'baseflow_kg dt'
   []
 []
 
@@ -186,4 +187,3 @@
     type = CSV
   []
 []
-

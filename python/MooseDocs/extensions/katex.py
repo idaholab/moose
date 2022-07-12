@@ -247,13 +247,13 @@ class RenderEquation(components.RenderComponent):
         return parent
 
     def createLatex(self, parent, token, page):
-        if token.name == 'LatexInlineEquation':
+        if token['inline']:
             latex.String(parent, content='${}$'.format(token['tex']), escape=False)
         else:
             cmd = 'equation' if token['number'] else 'equation*'
             env = latex.Environment(parent, cmd)
             if token['label']:
-                latex.Command(env, 'label', string=token['label'], end='\n')
+                latex.Command(env, 'label', string=token['label'], end='\n', escape=False)
             latex.String(env, content=token['tex'], escape=False)
 
         return parent
@@ -264,7 +264,7 @@ class RenderEquationLink(core.RenderShortcutLink):
         key = token['key']
         if key in page.get('labels'):
             latex.String(parent, content=self.extension['prefix'] + '~', escape=False)
-            latex.Command(parent, 'eqref', string=key)
+            latex.Command(parent, 'eqref', string=key, escape=False)
             return parent
         return core.RenderShortcutLink.createLatex(self, parent, token, page)
 
@@ -304,5 +304,5 @@ class RenderEquationReference(core.RenderShortcutLink):
     def createLatex(self, parent, token, page):
         key = token['label']
         latex.String(parent, content=self.extension['prefix'] + '~', escape=False)
-        latex.Command(parent, 'eqref', string=key)
+        latex.Command(parent, 'eqref', string=key, escape=False)
         return parent

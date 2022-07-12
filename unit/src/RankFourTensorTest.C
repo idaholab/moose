@@ -8,11 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "RankFourTensorTest.h"
+#include "RankFourTensorImplementation.h"
 #include "RankThreeTensor.h"
 #include "MooseTypes.h"
 #include "ADReal.h"
 
 #include "metaphysicl/raw_type.h"
+#include "metaphysicl/dualnumberarray.h"
 
 #include <sstream>
 
@@ -353,9 +355,25 @@ TEST_F(RankFourTensorTest, printReal)
   EXPECT_EQ(ss.str(), gold);
 }
 
-TEST_F(RankFourTensorTest, mixedProductIjklJ)
+TEST_F(RankFourTensorTest, contractionI)
 {
-  const RankThreeTensor computed_val = _r4.mixedProductIjklJ(_v);
+  usingTensorIndices(i_, j_, k_, l_);
+  const RankThreeTensor computed_val = _r4.contraction<i_>(_v);
+  RankThreeTensor expected_val;
+  expected_val.fillFromInputVector({222, 228, 234, 240, 246, 252, 258, 264, 270,
+                                    276, 282, 288, 294, 300, 306, 312, 318, 324,
+                                    330, 336, 342, 348, 354, 360, 366, 372, 378},
+                                   RankThreeTensor::general);
+  for (unsigned int k = 0; k < 3; ++k)
+    for (unsigned int j = 0; j < 3; ++j)
+      for (unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(expected_val(i, j, k), computed_val(i, j, k), 1e-5);
+}
+
+TEST_F(RankFourTensorTest, contractionJ)
+{
+  usingTensorIndices(i_, j_, k_, l_);
+  const RankThreeTensor computed_val = _r4.contraction<j_>(_v);
   RankThreeTensor expected_val;
   expected_val.fillFromInputVector({78,  84,  90,  96,  102, 108, 114, 120, 126,
                                     240, 246, 252, 258, 264, 270, 276, 282, 288,
@@ -367,16 +385,35 @@ TEST_F(RankFourTensorTest, mixedProductIjklJ)
         EXPECT_NEAR(expected_val(i, j, k), computed_val(i, j, k), 1e-5);
 }
 
-TEST_F(RankFourTensorTest, mixedProductIjklI)
+TEST_F(RankFourTensorTest, bignum)
 {
-  const RankThreeTensor computed_val = _r4.mixedProductIjklI(_v);
-  RankThreeTensor expected_val;
-  expected_val.fillFromInputVector({222, 228, 234, 240, 246, 252, 258, 264, 270,
-                                    276, 282, 288, 294, 300, 306, 312, 318, 324,
-                                    330, 336, 342, 348, 354, 360, 366, 372, 378},
-                                   RankThreeTensor::general);
-  for (unsigned int k = 0; k < 3; ++k)
-    for (unsigned int j = 0; j < 3; ++j)
-      for (unsigned int i = 0; i < 3; ++i)
-        EXPECT_NEAR(expected_val(i, j, k), computed_val(i, j, k), 1e-5);
+  RankFourTensor tensor(
+      {0.37187984, 0.1205132,  0.20604735, 0.37231474, 0.43842493, 0.70315511, 0.4290739,
+       0.13976259, 0.09908869, 0.30118635, 0.77499901, 0.27357056, 0.60135915, 0.23465929,
+       0.22293769, 0.19040275, 0.27290676, 0.74815661, 0.28154392, 0.60755658, 0.03619608,
+       0.3624321,  0.11706153, 0.17841735, 0.97943584, 0.09110013, 0.46637981, 0.03828105,
+       0.33870729, 0.32737051, 0.77580343, 0.24627582, 0.78159833, 0.9107652,  0.25967326,
+       0.78975337, 0.16262543, 0.39379351, 0.76695509, 0.06725889, 0.05830972, 0.35663544,
+       0.30705526, 0.10678273, 0.86049446, 0.35409874, 0.11516089, 0.19278114, 0.13198504,
+       0.59468892, 0.56816644, 0.12003418, 0.22053863, 0.0982336,  0.62431929, 0.71956444,
+       0.21428326, 0.44609002, 0.41339009, 0.42191298, 0.48892364, 0.62091132, 0.18801674,
+       0.70655228, 0.19426012, 0.46781494, 0.71600797, 0.60481787, 0.70137889, 0.03859477,
+       0.77192629, 0.32630718, 0.75514572, 0.40633981, 0.8421178,  0.75133872, 0.18673922,
+       0.74648423, 0.89100271, 0.74446494, 0.65905056},
+      RankFourTensor::general);
+
+  constexpr std::size_t derivative_size = 1000;
+  typedef NumberArray<derivative_size, Real> DNDerivativeType;
+  typedef DualNumber<Real, DNDerivativeType, /*allow_skiping_derivatives=*/true> ADBig;
+
+  RankFourTensorTempl<ADBig> A = tensor;
+  RankFourTensorTempl<ADReal> B = tensor;
+  RankFourTensorTempl<Real> C = tensor;
+
+  const auto iA = MetaPhysicL::raw_value(A.inverse());
+  const auto iB = MetaPhysicL::raw_value(B.inverse());
+  const auto iC = MetaPhysicL::raw_value(C.inverse());
+
+  EXPECT_NEAR(MetaPhysicL::raw_value((iA - iB).L2norm()), 0.0, 1e-9);
+  EXPECT_NEAR(MetaPhysicL::raw_value((iB - iC).L2norm()), 0.0, 1e-9);
 }

@@ -91,6 +91,3 @@ vector_val3= ${fparse vector_val0 * 1000}
     type = SamplerReceiver
   []
 []
-
-[Outputs]
-[]

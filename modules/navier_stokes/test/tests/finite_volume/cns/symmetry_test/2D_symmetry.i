@@ -247,7 +247,3 @@ angle = 45
     postprocessor = cfl_dt
   []
 []
-
-[Outputs]
-  exodus = true
-[]

@@ -80,6 +80,3 @@
     value_type = max
   []
 []
-
-[Outputs]
-[]

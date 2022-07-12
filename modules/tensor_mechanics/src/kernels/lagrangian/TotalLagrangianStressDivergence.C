@@ -111,8 +111,7 @@ TotalLagrangianStressDivergence::eigenstrainJacobianComponent(unsigned int cvar,
     total_deigen += (*deigen_darg)[_qp];
 
   // This kernel needs a switch on large versus small deformations
-  RankTwoTensor A;
-  RankTwoTensor B;
+  RankTwoTensor A, B;
   if (_large_kinematics)
   {
     A = RankTwoTensor::Identity();
@@ -124,7 +123,9 @@ TotalLagrangianStressDivergence::eigenstrainJacobianComponent(unsigned int cvar,
     B = _def_grad[_qp];
   }
 
-  RankFourTensor U = 0.5 * (A.mixedProductIkJl(B.transpose()) + A.mixedProductIlJk(B.transpose()));
+  usingTensorIndices(i_, j_, k_, l_);
+  const auto U =
+      0.5 * (A.times<i_, k_, j_, l_>(B.transpose()) + A.times<i_, l_, j_, k_>(B.transpose()));
 
   return -(C * U * total_deigen).doubleContraction(grad_test) * phi;
 }

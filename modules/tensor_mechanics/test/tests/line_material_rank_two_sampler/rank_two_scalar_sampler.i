@@ -128,6 +128,5 @@
 
 [Outputs]
   file_base = rank_two_scalar_sampler_out
-  exodus = true
   csv = true
 []

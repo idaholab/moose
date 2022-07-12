@@ -245,7 +245,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this)),
     _cli_args(getParam<std::vector<std::string>>("cli_args")),
     _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
-    _solve_step_timer(registerTimedSection("solveStep", 3, "Taking Step")),
+    _solve_step_timer(registerTimedSection("solveStep", 3, "Executing MultiApps", false)),
     _init_timer(registerTimedSection("init", 3, "Initializing MultiApp")),
     _backup_timer(registerTimedSection("backup", 3, "Backing Up MultiApp")),
     _restore_timer(registerTimedSection("restore", 3, "Restoring MultiApp")),
@@ -763,9 +763,9 @@ MultiApp::appPostprocessorValue(unsigned int app, const std::string & name)
 }
 
 NumericVector<Number> &
-MultiApp::appTransferVector(unsigned int app, std::string /*var_name*/)
+MultiApp::appTransferVector(unsigned int app, std::string var_name)
 {
-  return appProblemBase(app).getAuxiliarySystem().solution();
+  return *(appProblemBase(app).getSystem(var_name).solution);
 }
 
 bool

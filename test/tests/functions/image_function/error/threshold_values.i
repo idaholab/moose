@@ -39,7 +39,3 @@
   num_steps = 1
   dt = 0.1
 []
-
-[Outputs]
-  exodus = true
-[]

@@ -49,10 +49,6 @@
   nl_rel_tol = 1e-12
 []
 
-[Outputs]
-  exodus = true
-[]
-
 [MultiApps]
   [pp_sub_0]
     app_type = MooseTestApp

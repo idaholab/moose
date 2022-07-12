@@ -260,5 +260,4 @@ restricted_blocks = '1'
 
 [Outputs]
   exodus = true
-  csv = true
 []

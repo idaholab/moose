@@ -6,6 +6,7 @@
     input = 'side_value_sampler.i'
     csvdiff = 'side_value_sampler_vpp_csv_side_sample_0001.csv'
     requirement = 'The system shall be capable of sampling one or more field variables along a side/boundary at each quadrature point along the side.'
+    allow_warnings = true # parsed sideset generation isn't fully supported on distributed meshes
   []
   [internal]
     type = 'CSVDiff'
@@ -13,5 +14,6 @@
     csvdiff = 'side_value_sampler_vpp_csv_internal_sample_0001.csv'
     requirement = 'The system shall be capable of sampling one or more field variables along an internal side at each quadrature point along the side.'
     cli_args = 'VectorPostprocessors/inactive=side_sample'
+    allow_warnings = true # parsed sideset generation isn't fully supported on distributed meshes
   []
 []

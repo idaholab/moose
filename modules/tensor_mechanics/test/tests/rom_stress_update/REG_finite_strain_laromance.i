@@ -117,5 +117,4 @@
   # print_nonlinear_converged_reason = false
   # print_linear_residuals = false
   perf_graph = true
-  exodus = true
 []

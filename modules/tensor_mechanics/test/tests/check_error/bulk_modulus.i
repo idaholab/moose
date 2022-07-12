@@ -68,7 +68,3 @@
   num_steps = 2
   end_time = 2.0
 []
-
-[Outputs]
-  exodus = true
-[]

@@ -52,6 +52,3 @@
     execute_on = 'initial'
   []
 []
-
-[Outputs]
-[]

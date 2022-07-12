@@ -40,6 +40,3 @@
 [Controls/stochastic]
   type = SamplerReceiver
 []
-
-[Outputs]
-[]

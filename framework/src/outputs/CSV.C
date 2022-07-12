@@ -39,6 +39,8 @@ CSV::validParams()
       false,
       "Enable/disable the creation of a _LATEST symlink for vector postprocessor data.");
 
+  params.addParamNamesToGroup("sort_columns align delimiter precision", "Table formatting");
+  params.addParamNamesToGroup("create_latest_symlink create_final_symlink", "Symbolic links");
   // Suppress unused parameters
   params.suppressParameter<unsigned int>("padding");
 
@@ -169,7 +171,6 @@ CSV::output(const ExecFlagType & type)
   // Output each VectorPostprocessor's data to a file
   if (_write_vector_table)
   {
-
     // The VPP table will not write the same data twice, so to get the symlinks correct
     // for EXEC_FINAL (when other flags exist) whenever files are written the names must
     // be stored. These stored names are then used outside of this loop when the EXEC_FINAL call is

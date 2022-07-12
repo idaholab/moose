@@ -424,5 +424,4 @@
 
 [Outputs]
   exodus = false
-  csv = true
 []

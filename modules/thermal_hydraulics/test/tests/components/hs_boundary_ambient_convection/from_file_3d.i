@@ -104,5 +104,4 @@ E_change = ${fparse scale * heat_flux_integral * t}
     show = 'E_change_relerr'
     execute_on = 'FINAL'
   []
-  exodus = true
 []
