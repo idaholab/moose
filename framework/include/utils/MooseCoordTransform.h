@@ -64,16 +64,11 @@ public:
   libMesh::Point operator()(const libMesh::Point & point) const;
 
   /**
-   * Set how much this coordinate system origin is translated from the canonical/reference
-   * coordinate system origin. The translation vector itself should be in reference frame
-   * coordinates, e.g. if this API is being used to set the translation of a multi-app based on the
-   * multi-app parameter \p positions, then a point from \p positions should be passed to the main
-   * application's \p MooseCoordTransform::operator() in order to get the translation in the
-   * reference frame
-   *
-   * In other words, application of \p translation to any point in our domain will give us the
-   * corresponding point in the reference frame. Similarly to the \p setRotation with angles API,
-   * this represents a forward transformation from our domain to the reference domain
+   * Set how much our domain should be translated in order to match a reference frame. In practice
+   * we choose the parent application to be the reference frame with respect to translation, e.g.
+   * the parent application origin is the reference frame origin, and we set the translation vectors
+   * of child applications to the multiapp positions parameter. Similarly to the \p setRotation with
+   * angles API, this represents a forward transformation from our domain to the reference domain
    */
   void setTranslationVector(const libMesh::Point & translation);
 
@@ -123,7 +118,8 @@ public:
    * describe how points in our domain should be rotated in order to arrive back in the reference
    * frame. For instance, in 2D your mesh may appear 90 degrees rotated (around the z-axis) with
    * respect to the reference frame. In such a case, the angle set you should provide to this
-   * function is {90, 0, 0}
+   * function is {-90, 0, 0}, e.g. provide forward transformation angles that will map points from
+   * your domain to the reference domain
    *
    * If our coordinate system is RZ, then only certain values of alpha, beta, and gamma will be
    * accepted such that the radial and axial coordinates are rotated onto Cartesian axes and the

@@ -317,10 +317,10 @@ Point
 MooseCoordTransform::operator()(const Point & point) const
 {
   Point ret(point);
-  if (_rotate)
-    ret = (*_rotate) * ret;
   if (_scale)
     ret = (*_scale) * ret;
+  if (_rotate)
+    ret = (*_rotate) * ret;
 
   // If this shows up in profiling we can make _translation a pointer
   ret += _translation;

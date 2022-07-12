@@ -89,11 +89,14 @@ transformation information held by the `MooseCoordTransform` class is the
 corresponds to the translation vector set in the `MooseCoordTransform` object of
 the sub-application. The `alpha_rotation`, `beta_rotation`, `gamma_rotation`,
 and `positions` parameters essentially describe forward transformations of the
-mesh domain described by the MOOSE `Mesh` block to a reference domain. The sequence of
+mesh domain described by the MOOSE `Mesh` block to a reference domain. Following
+the ordering
+[here](https://docs.microsoft.com/en-us/dotnet/desktop/winforms/advanced/why-transformation-order-is-significant?view=netframeworkdesktop-4.8),
+the sequence of
 transformations applied in the `MooseCoordTransform` class is:
 
-1. rotation
-2. scaling
+1. scaling
+2. rotation
 3. translation
 4. coordinate collapsing
 

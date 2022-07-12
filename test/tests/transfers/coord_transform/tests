@@ -11,6 +11,12 @@
     type = Exodiff
     input = main-app.i
     exodiff = main-app_out.e
-    requirement = 'The system shall be able to transfer information from a scaled, rotated, translated application into another application and reproduce the results from an equivalent single-application simulation.'
+    requirement = 'The system shall be able to transfer information from a scaled, rotated, translated application into another application and reproduce the results from an equivalent single-application simulation with the transforms applied in the sub application.'
+  []
+  [transform-main-multi-app]
+    type = Exodiff
+    input = transform-main-main-app.i
+    exodiff = transform-main-main-app_out.e
+    requirement = 'The system shall be able to transfer information from a scaled, rotated, translated application into another application and reproduce the results from an equivalent single-application simulation with the transforms applied in the main application.'
   []
 []

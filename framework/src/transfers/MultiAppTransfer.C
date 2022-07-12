@@ -269,9 +269,6 @@ fillInfo(MultiApp & multi_app,
          std::vector<Point> & positions,
          std::vector<MooseCoordTransform *> & transforms)
 {
-  auto & main_problem = multi_app.problemBase();
-  auto & main_transform = main_problem.coordTransform();
-
   for (unsigned int i_app = 0; i_app < multi_app.numGlobalApps(); i_app++)
   {
     if (!multi_app.hasLocalApp(i_app))
@@ -280,7 +277,7 @@ fillInfo(MultiApp & multi_app,
     auto & subapp_problem = multi_app.appProblemBase(i_app);
     const auto position = multi_app.position(i_app);
     auto & subapp_transform = subapp_problem.coordTransform();
-    subapp_transform.setTranslationVector(main_transform(position));
+    subapp_transform.setTranslationVector(position);
 
     map.push_back(i_app);
     problems.push_back(&subapp_problem);
