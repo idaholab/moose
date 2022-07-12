@@ -2412,9 +2412,8 @@ NSFVAction::checkBoundaryParameterErrors()
 
   // index into _momentum_inlet_function
   unsigned int k = 0;
-  for (unsigned int j = 0; j < _momentum_inlet_types.size(); ++j)
+  for (const auto & type : _momentum_inlet_types)
   {
-    const auto & type = _momentum_inlet_types[j];
     if (type != "fixed-velocity" && type != "fixed-pressure")
       continue;
 

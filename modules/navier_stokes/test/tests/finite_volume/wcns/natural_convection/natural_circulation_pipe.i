@@ -54,6 +54,7 @@ gamma = 1.4
     momentum_inlet_function = '${fparse p0 + head}'
     energy_inlet_types = 'fixed-temperature'
     energy_inlet_function = '${T0}'
+    energy_scaling = 1e-5
     wall_boundaries = 'left right'
     momentum_wall_types = 'slip slip'
     energy_wall_types = 'heatflux heatflux'
@@ -85,14 +86,14 @@ gamma = 1.4
   petsc_options_iname = '-pc_type -sub_pc_factor_shift_type'
   petsc_options_value = 'lu        NONZERO'
   nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-4
+  nl_abs_tol = 1e-6
   end_time = 1e4
   [TimeStepper]
     type = IterationAdaptiveDT
     dt = 0.1
-    growth_factor = 4
+    growth_factor = 2
     iteration_window = 2
-    optimal_iterations = 5
+    optimal_iterations = 6
   []
 []
 
