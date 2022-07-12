@@ -999,7 +999,7 @@ MooseMesh::cacheInfo()
   _higher_d_elem_side_to_lower_d_elem.clear();
 
   // TODO: Thread this!
-  for (const auto & elem : getMesh().element_ptr_range())
+  for (const auto & elem : getMesh().active_local_element_ptr_range())
   {
     SubdomainID subdomain_id = elem->subdomain_id();
     const Elem * ip_elem = elem->interior_parent();
