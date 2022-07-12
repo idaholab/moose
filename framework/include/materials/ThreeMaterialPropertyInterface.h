@@ -13,6 +13,14 @@
 
 // Forward Declarations
 class MaterialData;
+
+/**
+ * This interface is designed currently for DomainUserObject where material properties
+ * on element, face and neighboring face may all required. It can be used in the future
+ * by objects having similar requirements as DomainUserObject. The base interface
+ * TwoMaterialPropertyInterface only provides functions to retrieve material properties
+ * on sides of its primary side (face) and its secondary side (neighbor).
+ */
 class ThreeMaterialPropertyInterface : public TwoMaterialPropertyInterface
 {
 public:

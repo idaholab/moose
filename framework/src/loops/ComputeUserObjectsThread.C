@@ -56,6 +56,11 @@ ComputeUserObjectsThread::subdomainChanged()
                      Interfaces::InterfaceUserObject | Interfaces::DomainUserObject,
                  objs);
 
+  _query.clone()
+      .condition<AttribThread>(_tid)
+      .condition<AttribInterfaces>(Interfaces::DomainUserObject)
+      .queryInto(_all_domain_objs);
+
   std::vector<UserObject *> side_objs;
   _query.clone()
       .condition<AttribThread>(_tid)
@@ -104,7 +109,6 @@ ComputeUserObjectsThread::subdomainChanged()
   _fe_problem.prepareMaterials(_subdomain, _tid);
 
   querySubdomain(Interfaces::InternalSideUserObject, _internal_side_objs);
-  querySubdomain(Interfaces::InterfaceUserObject, _interface_user_objects);
   querySubdomain(Interfaces::ElementUserObject, _element_objs);
   querySubdomain(Interfaces::ShapeElementUserObject, _shape_element_objs);
   querySubdomain(Interfaces::DomainUserObject, _domain_objs);
@@ -245,20 +249,22 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
   if (!(neighbor->active()))
     return;
 
-  std::vector<UserObject *> userobjs;
-  queryBoundary(Interfaces::InterfaceUserObject, bnd_id, userobjs);
+  std::vector<UserObject *> interface_objs;
+  queryBoundary(Interfaces::InterfaceUserObject, bnd_id, interface_objs);
 
-  bool should_execute = !userobjs.empty();
+  bool has_domain_objs = false;
+  // we need to check all domain user objects because a domain user object may not be active
+  // on the current subdomain but should be executed on the interface that it attaches to
+  for (const auto * const domain_uo : _all_domain_objs)
+    if (domain_uo->shouldExecuteOnInterface())
+    {
+      has_domain_objs = true;
+      break;
+    }
 
-  if (!should_execute && !_domain_objs.empty())
-    for (const auto * const domain_uo : _domain_objs)
-      if (domain_uo->shouldExecuteOnInterface())
-      {
-        should_execute = true;
-        break;
-      }
-
-  if (!should_execute)
+  // if we do not have any interface user objects and domain user objects on the current
+  // interface
+  if (interface_objs.empty() && !has_domain_objs)
     return;
 
   _fe_problem.prepareFace(elem, _tid);
@@ -280,10 +286,10 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
   // with the current element and side
   _fe_problem.reinitMaterialsInterface(bnd_id, _tid);
 
-  for (const auto & uo : userobjs)
+  for (const auto & uo : interface_objs)
     uo->execute();
 
-  for (auto & uo : _domain_objs)
+  for (auto & uo : _all_domain_objs)
     if (uo->shouldExecuteOnInterface())
     {
       uo->preExecuteOnInterface();

@@ -24,10 +24,32 @@ void changeBoundaryId(MeshBase & mesh,
                       const libMesh::boundary_id_type new_id,
                       bool delete_prev);
 
-std::vector<libMesh::boundary_id_type>
-getBoundaryIDs(const libMesh::MeshBase & mesh,
-               const std::vector<BoundaryName> & boundary_name,
-               bool generate_unknown);
+/**
+ * Gets the boundary IDs with their names.
+ *
+ * The ordering of the returned boundary ID vector matches the vector of the boundary
+ * names in \p boundary_name.
+ * When a boundary name is not available in the mesh, if \p generate_unknown is true
+ * a non-existant boundary ID will be returned, otherwise a BoundaryInfo::invalid_id
+ * will be returned.
+ */
+std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
+                                       const std::vector<BoundaryName> & boundary_name,
+                                       bool generate_unknown);
+
+/**
+ * Gets the boundary IDs into a set with their names.
+ *
+ * Because libMesh allows the same boundary to have multiple different boundary names,
+ * the size of the returned boundary ID set may be smaller than the size of the bounndary
+ * name vector.
+ * When a boundary name is not available in the mesh, if \p generate_unknown is true
+ * a non-existant boundary ID will be returned, otherwise a BoundaryInfo::invalid_id
+ * will be returned.
+ */
+std::set<BoundaryID> getBoundaryIDSet(const libMesh::MeshBase & mesh,
+                                      const std::vector<BoundaryName> & boundary_name,
+                                      bool generate_unknown);
 
 /**
  * Gets the boundary ID associated with the given BoundaryName.

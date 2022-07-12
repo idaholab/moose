@@ -80,6 +80,7 @@ private:
   std::vector<ElementUserObject *> _element_objs;
   std::vector<ShapeElementUserObject *> _shape_element_objs;
   std::vector<DomainUserObject *> _domain_objs;
+  std::vector<DomainUserObject *> _all_domain_objs;
 };
 
 // determine when we need to run user objects based on whether any initial conditions or aux
