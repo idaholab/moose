@@ -11,15 +11,15 @@ The `PinMeshGenerator` object generates square or hexagonal reactor geometry pin
 This pin may be extruded to three dimensions by setting [!param](/Mesh/PinMeshGenerator/extrude) to 'true', however such extruded pins cannot be used as input to `AssemblyMeshGenerator`. Instead, 2-D pins must be inputted to `AssemblyMeshGenerator` and [!param](/Mesh/AssemblyMeshGenerator/extrude) should be set to 'true' at the `AssemblyMeshGenerator` definition to extrude the assembly to 3-D.
 
 
-The `PinMeshGenerator` object automates the use and functionality of the [`PolygonConcentricCircleMeshGenerator`](PolygonConcentricCircleMeshGenerator.md) and, if extruding to three dimensions, the [`FancyExtruderGenerator'](FancyExtruderGenerator.md) through the use of the `MeshSubgenerator` functionality and supporting functionality from [`TransformGenerator`](TransformGenerator.md), [`RenameBoundaryGenerator`](RenameBoundaryGenerator.md), and [`PlaneIDMeshGenerator`](PlaneIDMeshGenerator.md). In addition to the functionality of the `MeshGenerators` used, this object also automates block ID assignment and boundary ID and name assignment.
+The `PinMeshGenerator` object automates the use and functionality of the [`PolygonConcentricCircleMeshGenerator`](PolygonConcentricCircleMeshGenerator.md) and, if extruding to three dimensions, the [`FancyExtruderGenerator`](FancyExtruderGenerator.md) through the use of the `MeshSubgenerator` functionality and supporting functionality from [`TransformGenerator`](TransformGenerator.md), [`RenameBoundaryGenerator`](RenameBoundaryGenerator.md), and [`PlaneIDMeshGenerator`](PlaneIDMeshGenerator.md). In addition to the functionality of the `MeshGenerators` used, this object also automates block ID assignment and boundary ID and name assignment.
 
 The `PinMeshGenerator` object adopts much of the existing input structure of [`PolygonConcentricCircleMeshGenerator`](PolygonConcentricCircleMeshGenerator.md) but uses parameters that are more typical for reactor design.
 
 ## Region ID, Block ID, and Block Name Information
 
-The [!param](/Mesh/PinMeshGenerator/region_ids) parameter provides a map of region_id values to assign to zones in the pin mesh. Each row in this map corresponds to a single axial layer of the pin and contains individual entries corresponding to the radial zones within the pin, starting from the centermost region and extending radially outward. The number of columns (entries in the row) should be identical to the number of rings + 1 (background region) + number of ducts. The required number of rows is dependent on the number of axial layers in the pin. For 2D pins, a single row of entries should be provided. For 3D pins, multiple rows must be provided (one for each axial layer). For 3D pins, the top row corresponds to the bottom of the pin cell.
+The [!param](/Mesh/PinMeshGenerator/region_ids) parameter provides a map of "region_id" values to assign to zones in the pin mesh. Each row in this map corresponds to a single axial layer of the pin and contains individual entries corresponding to the radial zones within the pin, starting from the centermost region and extending radially outward. The number of columns (entries in the row) should be identical to the number of rings + 1 (background region) + number of ducts. The required number of rows is dependent on the number of axial layers in the pin. For 2D pins, a single row of entries should be provided. For 3D pins, multiple rows must be provided (one for each axial layer). For 3D pins, the top row corresponds to the bottom of the pin cell.
 
-The region_ids parameter entries can conveniently be selected to match material ids to be assigned to each region of the problem. Using the same value in multiple entries of the region_id parameter will effectively assign elements in multiple zones to the same region_id.
+The region_ids parameter entries can conveniently be selected to match material ids to be assigned to each region of the problem. Using the same value in multiple entries of the [!param](/Mesh/PinMeshGenerator/region_ids) parameter will effectively assign elements in multiple zones to the same region_id.
 
 Region IDs are mapped to the mesh as an extra element integer, where the integer value for each mesh element will match the information provided in [!param](/Mesh/PinMeshGenerator/region_ids). For ease of use, block ids are generated automatically by the mesh generator, and for users who require element identification by block name, the optional parameter [!param](/Mesh/PinMeshGenerator/block_names) can be defined to set block names in the same manner as [!param](/Mesh/PinMeshGenerator/region_ids). In the resulting mesh, each block name will be prepended with the prefix `RGMB_PIN<pin_type_id>_`, where `<pin_type_id>` is the pin ID provided by the user through [!param](/Mesh/PinMeshGenerator/pin_type). If block names are not provided by the user, block names will be assigned automatically to have the name `RGMB_PIN<pin_type_id>`. Regardless of whether block names are provided are not, the suffix `_TRI` is automatically added to the block name for all triangular elements in the central pin mesh elements when [!param](/Mesh/PinMeshGenerator/quad_center_elements) is set to false. This is to ensure that quadrilateral elements and triangular elements that might otherwise share the same region ID are mapped to separate block names.
 
@@ -39,11 +39,11 @@ If the pin is extruded to three dimensions the top-most boundary ID must be assi
 
 !listing modules/reactor/test/tests/meshgenerators/pin_mesh_generator/pin_only.i block=Mesh
 
-Resulting mesh block layout:
+This is the resulting mesh block layout, where by default a single block is assigned to the triangular elements and another block is assigned to the quadrilateral elements:
 
 !media reactor/meshgenerators/pin_mesh_generator.png style=width:40%;
 
-Resulting "region_id" extra element integer layout
+This is the resulting "region_id" extra element integer layout, which was chosen by setting the region IDs for each radial region within the pin:
 
 !media reactor/meshgenerators/pin_mesh_generator_rid.png style=width:40%;
 

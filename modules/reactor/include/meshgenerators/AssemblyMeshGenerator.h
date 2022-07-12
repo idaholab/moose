@@ -46,7 +46,7 @@ protected:
   ///Vector used to set the "region_id" extra-element integer of the assembly background elements
   std::vector<subdomain_id_type> _background_region_id;
 
-  ///2-D vector used to set the "region_id" extra-element integer of the assembly duct elements
+  ///2-D vector (axial outer indexing, radial inner indexing) used to set the "region_id" extra-element integer of the assembly duct elements
   std::vector<std::vector<subdomain_id_type>> _duct_region_ids;
 
   ///Whether block names for assembly background elements have been provided by user
@@ -58,7 +58,7 @@ protected:
   ///Optional vector used to set the block names of the assembly background elements
   std::vector<std::string> _background_block_name;
 
-  ///Optional 2-D vector used to set the block names of the assembly duct elements
+  ///Optional 2-D vector (axial outer indexing, radial inner indexing) used to set the block names of the assembly duct elements
   std::vector<std::vector<std::string>> _duct_block_names;
 
   ///Whether this mesh should be extruded to 3-D, making it the final structure in the reactor mesh
@@ -76,10 +76,10 @@ protected:
   ///The region ids of peripheral regions in the 2D mesh. This includes the assembly background region and ducts
   std::vector<subdomain_id_type> _peripheral_region_ids;
 
-  ///A mapping of region IDs and pin-type IDs that are used to allow for extrusion in an ReactorGeometry MeshGenerator
+  ///A mapping from pin-type IDs to region IDs used when assigning region IDs during the pin stitching stage
   std::map<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>> _pin_region_id_map;
 
-  ///A mapping of block names and pin-type IDs that are used to allow for extrusion in an ReactorGeometry MeshGenerator
+  ///A mapping from pin-type IDs to block names used when assigning block names during the pin stitching stage
   std::map<subdomain_id_type, std::vector<std::vector<std::string>>> _pin_block_name_map;
 
   ///The ID of the assembly outer boundary, equal to the assembly type ID + 2000

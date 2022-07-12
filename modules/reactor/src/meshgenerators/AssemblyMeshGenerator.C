@@ -369,8 +369,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         const auto pin_name = _inputs[pattern_idx];
         const auto pin_id = getMeshProperty<subdomain_id_type>("pin_type", pin_name);
         const BoundaryName boundary_name = "outer_pin_" + std::to_string(pin_id);
-        if (std::find(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name) ==
-            boundaries_to_delete.end())
+        if (!std::count(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name))
           boundaries_to_delete.push_back(boundary_name);
       }
     }
@@ -461,7 +460,7 @@ AssemblyMeshGenerator::generate()
 {
   // This generate() method will be called once the subgenerators that we depend on are
   // called. This is where we reassign subdomain ids/name in case they were merged when
-  // stithing pins into an assembly. This is also where we set region_id and
+  // stitching pins into an assembly. This is also where we set region_id and
   // assembly_type_id element integers.
 
   // Define all extra element names and integers
@@ -494,9 +493,10 @@ AssemblyMeshGenerator::generate()
     const dof_id_type pin_type_id = elem->get_extra_integer(pin_type_id_int);
     const dof_id_type z_id = _extrude ? elem->get_extra_integer(plane_id_int) : 0;
 
+    // Element is part of a pin mesh
     if (_pin_region_id_map.find(pin_type_id) != _pin_region_id_map.end())
     {
-      // Pin type element, get region ID from pin_type, z_id, and radial_idx
+      // Get region ID from pin_type, z_id, and radial_idx
       const dof_id_type radial_idx = elem->get_extra_integer(radial_id_int);
       const auto elem_rid = _pin_region_id_map[pin_type_id][z_id][radial_idx];
       elem->set_extra_integer(region_id_int, elem_rid);

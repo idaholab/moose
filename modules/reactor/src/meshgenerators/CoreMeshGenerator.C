@@ -252,8 +252,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           continue;
         const auto assembly_id = getMeshProperty<subdomain_id_type>("assembly_type", assembly_name);
         const BoundaryName boundary_name = "outer_assembly_" + std::to_string(assembly_id);
-        if (std::find(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name) ==
-            boundaries_to_delete.end())
+        if (!std::count(boundaries_to_delete.begin(), boundaries_to_delete.end(), boundary_name))
           boundaries_to_delete.push_back(boundary_name);
       }
     }
@@ -279,7 +278,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
               std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
                   pin->first, pin->second));
         else if (pin->second != _pin_region_id_map.find(pin->first)->second)
-          mooseError("Multiple region definitions for the same pin type. Check pin_type ids.\n");
+          mooseError("Multiple region id definitions for the same pin type. Check pin_type ids.\n");
       }
       std::map<subdomain_id_type, std::vector<std::vector<std::string>>> pin_block_name_map =
           getMeshProperty<std::map<subdomain_id_type, std::vector<std::vector<std::string>>>>(

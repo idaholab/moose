@@ -150,9 +150,9 @@ PatternedMeshGenerator::generate()
       // Move the mesh into the right spot.  -i because we are starting at the top
       MeshTools::Modification::translate(cell_mesh, deltax, -deltay, 0);
 
-      // Define a reference map variable for subdomain map
+      // Subdomain map is aggregated on each row first. This retrieves a writable reference
       auto & main_subdomain_map = _row_meshes[i]->set_subdomain_name_map();
-      // Retrieve subdomain name map from the mesh to be stitched and merge into the main
+      // Retrieve subdomain name map from the mesh to be stitched and merge into the row's
       // subdomain map
       const auto & increment_subdomain_map = cell_mesh.get_subdomain_name_map();
       mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
@@ -171,7 +171,8 @@ PatternedMeshGenerator::generate()
   // We're going to stitch them all to row 0 (which is the real mesh)
   for (MooseIndex(_pattern) i = 1; i < _pattern.size(); i++)
   {
-    // Define a reference map variable for subdomain map
+    // Get a writeable reference subdomain-name map for the main mesh to which the other rows are
+    // stitched
     auto & main_subdomain_map = _row_meshes[0]->set_subdomain_name_map();
     // Retrieve subdomain name map from the mesh to be stitched and merge into the main
     // subdomain map

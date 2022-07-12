@@ -93,7 +93,7 @@ PatternedHexMeshGenerator::validParams()
                                                 "external_boundary_id>0",
                                                 "Optional customized external boundary id.");
   params.addParam<bool>(
-      "create_interface_boundaries", true, "Whether the interface boundaries are created.");
+      "create_interface_boundaries", true, "Whether the interface boundary sidesets are created.");
   params.addParam<std::string>("external_boundary_name",
                                "Optional customized external boundary name.");
   params.addParamNamesToGroup("background_block_id background_block_name duct_block_ids "

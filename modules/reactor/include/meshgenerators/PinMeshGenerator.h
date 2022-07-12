@@ -43,13 +43,13 @@ protected:
   ///The number of mesh intervals in a radial division starting from the center
   std::vector<unsigned int> _intervals;
 
-  ///2-D vector used to set "region_id" extra-element integer of the pin mesh elements
+  ///2-D vector (axial outer indexing, radial inner indexing) used to set "region_id" extra-element integer of the pin mesh elements
   std::vector<std::vector<subdomain_id_type>> _region_ids;
 
   ///Whether block names have been provided by user
   bool _has_block_names;
 
-  ///2-D vector used to set block names of pin mesh elements
+  ///2-D vector (axial outer indexing, radial inner indexing) used to set block names of pin mesh elements
   std::vector<std::vector<std::string>> _block_names;
 
   ///The type of geometry that is being described (Square or Hex, declared in the ReactorMeshParams object)

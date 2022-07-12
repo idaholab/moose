@@ -147,7 +147,7 @@ bool isCoPlanar(const std::vector<Point> vec_pts);
 /**
  * Checks input mesh and returns max(block ID) + 1, which represents
  * a block ID in the mesh that is not currently in use
- * @param input mesh over which to compute next free block id
+ * @param input mesh over which to compute the next free block id
  */
 SubdomainID getNextFreeSubdomainID(MeshBase & input_mesh);
 }

@@ -50,17 +50,17 @@ ReactorGeometryMeshBuilderBase::hasReactorParam(const std::string param_name)
 
 unsigned int
 ReactorGeometryMeshBuilderBase::getElemIntegerFromMesh(MeshBase & input_mesh,
-                                                       std::string id_name,
+                                                       std::string extra_int_name,
                                                        bool should_exist)
 {
-  if (input_mesh.has_elem_integer(id_name))
-    return input_mesh.get_elem_integer_index(id_name);
+  if (input_mesh.has_elem_integer(extra_int_name))
+    return input_mesh.get_elem_integer_index(extra_int_name);
   else
   {
     if (should_exist)
-      mooseError("Expected extruded mesh to have " + id_name + " extra integers");
+      mooseError("Expected extruded mesh to have " + extra_int_name + " extra integers");
     else
-      return input_mesh.add_elem_integer(id_name);
+      return input_mesh.add_elem_integer(extra_int_name);
   }
 }
 

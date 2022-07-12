@@ -14,7 +14,7 @@ The `AssemblyMeshGenerator` object adopts much of the existing input structure o
 
 ## Region ID, Block ID, and Block Name Information
 
-The [!param](/Mesh/AssemblyMeshGenerator/background_region_id) and [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids) parameters are used to identify regions within the assembly. This functionality is intended for easy identification of regions within the mesh that will have the same properties, such as material assignments, and this region ID will be assigned as an extra element integer.
+The [!param](/Mesh/AssemblyMeshGenerator/background_region_id) and [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids) parameters are used to identify regions within the assembly around the lattice of fuel pins. This functionality is intended for easy identification of regions within the mesh that will have the same properties, such as material assignments, and this region ID will be assigned as an extra element integer.
 
 The user defined ID assignment using [!param](/Mesh/AssemblyMeshGenerator/background_region_id) is given as a 1-D vector of size `A`, where `A` is the number of axial levels. This vector defines the background block IDs (single value per axial layer) starting from the bottom axial layer and ending with the top axial layer. Similarly, [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids) is given as an `A` by `D` vector, where `D` is the number of duct intervals per axial layer. This vector assignment starts from the innermost duct region of the bottom axial layer, and extends out first radially and then axially.
 
@@ -22,7 +22,7 @@ For ease of use, block ids are generated automatically by the mesh generator, an
 
 ## Reporting ID Information
 
-As mentioned above, the `AssemblyMeshGenerator` object will tag all elements (that do not belong to one of the constituent pins) with the extra integer reporting ID named "region_id" with the value equal to their region ID.
+As mentioned above, the `AssemblyMeshGenerator` object will tag all elements (that do not belong to one of the constituent pins) with the extra integer reporting ID named "region_id" with the value equal to the assembly region ID.
 
 The `AssemblyMeshGenerator` object also automatically tags all elements in the mesh with the [!param](/Mesh/AssemblyMeshGenerator/assembly_type) using the extra_integer name "assembly_type_id" and, if extruded, elements in each axial layer are tagged the axial layers using the name "plane_id". The pins composing the assembly are also tagged via [`CartesianIDPatternedMeshGenerator`](CartesianIDPatternedMeshGenerator.md) or [`HexIDPatternedMeshGenerator`](HexIDPatternedMeshGenerator.md), using the "cell" assignment type, with the extra integer name "pin_id".
 
@@ -36,11 +36,11 @@ If the assembly is extruded to three dimensions the top-most boundary ID must be
 
 !listing modules/reactor/test/tests/meshgenerators/assembly_mesh_generator/assembly_only.i block=Mesh
 
-Resulting mesh block layout:
+This is the resulting mesh block layout, where by default a single block is assigned to the triangular elements and another block is assigned to the quadrilateral elements:
 
 !media reactor/meshgenerators/assembly_mesh_generator.png style=width:40%;
 
-Resulting "region_id" extra element integer layout
+This is the resulting "region_id" extra element integer layout, which was chosen by setting the region IDs for each of the constituent pins:
 
 !media reactor/meshgenerators/assembly_mesh_generator_rid.png style=width:40%;
 

@@ -48,7 +48,7 @@ protected:
   std::vector<std::unique_ptr<ReplicatedMesh>> _row_meshes;
 
   /**
-   * Merges the subdomain name maps between two meshes, throws error
+   * Merges the subdomain name maps between two meshes, throws an error
    * if input maps contain shared subdomain name with conflicting subdomain ids
    *
    * @param   subdomain id-name map that is being merged into
