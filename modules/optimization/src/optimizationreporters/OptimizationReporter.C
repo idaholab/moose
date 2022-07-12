@@ -1,6 +1,6 @@
 #include "OptimizationReporter.h"
 
-// this is a base class but is only called directly by a test object
+// this is a base class but is only called in a testing input file
 registerMooseObject("isopodTestApp", OptimizationReporter);
 
 InputParameters
@@ -126,4 +126,11 @@ OptimizationReporter::setMisfitToSimulatedValues()
 {
   for (size_t i = 0; i < _measurement_values.size(); ++i)
     _misfit_values[i] = _simulation_values[i];
+}
+
+void
+OptimizationReporter::setSimuilationValuesForTesting(std::vector<Real> & data)
+{
+  _simulation_values.clear();
+  _simulation_values = data;
 }

@@ -37,4 +37,5 @@ protected:
 private:
   void readMeasurementsFromFile();
   void readMeasurementsFromInput();
+  void setSimuilationValuesForTesting(std::vector<Real> & data);
 };

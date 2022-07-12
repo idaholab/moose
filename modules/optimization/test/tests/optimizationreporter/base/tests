@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#34'
+  design = 'OptimizationReporter/index.md'
+  requirement = "The system shall correctly read in "
+  [input]
+    type = JSONDiff
+    input = optRep_fromInput.i
+    jsondiff = optRep_fromInput_out.json
+    allow_test_objects = true
+    detail = "parameter data from the input file and and measurment data from the input file."
+  []
+  [csv]
+    type = JSONDiff
+    input = optRep_fromCsv.i
+    jsondiff = optRep_fromCsv_out.json
+    allow_test_objects = true
+    detail = "parameter data from the input file and and measurment data from a CSV file."
+   []
+[]

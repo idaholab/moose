@@ -1,11 +1,12 @@
 #pragma once
 
 #include "OptimizationData.h"
-
-#include "OptimizeSolve.h"
+#include "DataIO.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
-#include "DataIO.h"
+// friends
+#include "OptimizeSolve.h"
+#include "OptimizationReporterTest.h"
 
 class OptimizationReporter : public OptimizationData
 {
@@ -91,4 +92,7 @@ protected:
 
 private:
   friend class OptimizeSolve;
+  friend class OptimizationReporterTest;
+
+  void setSimuilationValuesForTesting(std::vector<Real> & data);
 };
