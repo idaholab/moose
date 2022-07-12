@@ -40,6 +40,8 @@ SetupDebugAction::validParams()
   params.addParam<bool>("show_mesh_meta_data", false, "Print out the available mesh meta data");
   params.addParam<bool>(
       "show_reporters", false, "Print out information about the declared and requested Reporters");
+  params.addParam<bool>(
+      "show_execution_order", true, "Print out information about the execution of each object");
   params.addDeprecatedParam<bool>(
       "pid_aux",
       "Add a AuxVariable named \"pid\" that shows the processors and partitioning",
@@ -108,6 +110,12 @@ SetupDebugAction::act()
     const std::string type = "ReporterDebugOutput";
     auto params = _factory.getValidParams(type);
     _problem->addOutput(type, "_moose_reporter_debug_output", params);
+  }
+
+  // Print execution information
+  if (getParam<bool>("show_execution_order"))
+  {
+    _problem->setExecutionPrinting(true);
   }
 
   // Add pid aux

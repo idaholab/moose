@@ -25,7 +25,8 @@ Problem::Problem(const InputParameters & parameters)
     PerfGraphInterface(this),
     _cli_option_found(false),
     _color_output(false),
-    _termination_requested(false)
+    _termination_requested(false),
+    _print_execution(false)
 {
 }
 
