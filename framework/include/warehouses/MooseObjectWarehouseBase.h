@@ -21,7 +21,6 @@
 
 // Forward declarations
 class MooseVariableFieldBase;
-class MaterialWarehouse;
 
 /**
  * A base storage container for MooseObjects.
