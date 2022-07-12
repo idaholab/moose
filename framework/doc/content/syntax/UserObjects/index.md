@@ -29,9 +29,13 @@ and use the interface without the use of dynamic casts.
 - +InternalSideUserObject+: "execute" is called for each +side+, that is not on a boundary,
    within the mesh on each execution flag.
 - +SideUserObject+: "execute" is called for each +side+, that is on a boundary, within the mesh
-   on each execution flag.
+   on each execution flag. If the boundary is internal within the mesh, only variables, material
+   properties, etc. at the primal side of the boundary are available.
+- +InterfaceUserObject+: "execute" is called for each +side+, that is on an internal boundary,
+   within the mesh on each execution flag. Variables, material properties, etc. at both the primary
+   and the secondary side of the internal boundary are available.
 - +DomainUserObject+: this object is capable of executing all the operations of
-  a +ElementUserObject+, +InternalSideUserObject+, and +SideUserObject+
+  a +ElementUserObject+, +InternalSideUserObject+, +SideUserObject+ and +InterfaceUserObject+.
 
 ## Restartable Data
 

@@ -64,49 +64,74 @@ DomainUserObject::DomainUserObject(const InputParameters & parameters)
   if (isParamValid("interface_boundaries"))
   {
     const auto & interface_boundaries = getParam<std::vector<BoundaryName>>("interface_boundaries");
-    const auto & interface_bnd_ids_vec = _mesh.getBoundaryIDs(interface_boundaries);
-    _interface_bnd_ids =
-        std::set<BoundaryID>(interface_bnd_ids_vec.begin(), interface_bnd_ids_vec.end());
+    _interface_bnd_ids = MooseMeshUtils::getBoundaryIDSet(_mesh, interface_boundaries, false);
 
     for (const auto interface_bnd_id : _interface_bnd_ids)
     {
-      const auto & interface_connected_blocks = _mesh.getInterfaceConnectedBlocks(interface_bnd_id);
-      for (const auto interface_connected_block : interface_connected_blocks)
-      {
-        if (hasBlocks(interface_connected_block))
-          // we're operating on this block
-          continue;
+      // check on which side the interface is connected with the subdomain of this domain user
+      // object
+      const auto & primary_connected_blocks = _mesh.getBoundaryConnectedBlocks(interface_bnd_id);
+      bool has_full_primary_connection = true;
+      for (const auto interface_connected_block : primary_connected_blocks)
+        if (!hasBlocks(interface_connected_block))
+          has_full_primary_connection = false;
 
-        // these are blocks connected to our blocks
-        _interface_connected_blocks.insert(interface_connected_block);
-      }
+      const auto & secondary_connected_blocks =
+          _mesh.getBoundaryConnectedSecondaryBlocks(interface_bnd_id);
+      bool has_full_secondary_connection = true;
+      for (const auto interface_connected_block : secondary_connected_blocks)
+        if (!hasBlocks(interface_connected_block))
+          has_full_secondary_connection = false;
+
+      // we push the subdomains on the other side for the interface
+      if (has_full_primary_connection)
+        _interface_connected_blocks[interface_bnd_id] = secondary_connected_blocks;
+      else if (has_full_secondary_connection)
+        _interface_connected_blocks[interface_bnd_id] = primary_connected_blocks;
+      else
+        paramError("interface_boundaries",
+                   "Not all sides in the interface with ID ",
+                   interface_bnd_id,
+                   " is connected with the domain of the domain user object ",
+                   name());
     }
   }
 }
 
 const MooseVariableFieldBase *
-DomainUserObject::getInterfaceFieldVar(const std::string & var_name, const unsigned int comp)
+DomainUserObject::getInterfaceFieldVar(const std::string & var_name,
+                                       const unsigned int comp,
+                                       const std::set<BoundaryID> * interfaces)
 {
   const auto * const field_var = getFieldVar(var_name, comp);
   mooseAssert(field_var, "We should not be able to return a null variable");
-  _interface_vars.insert(field_var);
+  if (interfaces)
+    _var_interfaces[field_var->name()] = *interfaces;
+  else
+    _var_interfaces[field_var->name()] = _interface_bnd_ids;
   return field_var;
 }
 
 void
 DomainUserObject::checkVariable(const MooseVariableFieldBase & variable) const
 {
-  if (_interface_vars.count(&variable))
+  auto it = _var_interfaces.find(variable.name());
+  if (it != _var_interfaces.end())
   {
     // we could have done this check in the constructor but to be consistent with other block
     // restrictable checks, we'll do it here
-    for (const auto connected_block : _interface_connected_blocks)
-      if (!variable.hasBlocks(connected_block))
-        mooseError("Variable '",
-                   variable.name(),
-                   "' is not defined on the interface connected block '",
-                   _mesh.getSubdomainName(connected_block),
-                   "'");
+    auto & bnd_ids = it->second;
+    for (const auto bnd_id : bnd_ids)
+    {
+      const auto & connected_blocks = libmesh_map_find(_interface_connected_blocks, bnd_id);
+      for (const auto & bid : connected_blocks)
+        if (!variable.hasBlocks(bid))
+          mooseError("Variable '",
+                     variable.name(),
+                     "' is not defined on the interface connected block '",
+                     _mesh.getSubdomainName(bid),
+                     "'");
+    }
   }
   else
     BlockRestrictable::checkVariable(variable);

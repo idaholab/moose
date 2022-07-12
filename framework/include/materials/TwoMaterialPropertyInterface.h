@@ -13,6 +13,12 @@
 
 // Forward Declarations
 class MaterialData;
+
+/**
+ * This interface is designed for DGKernel, InternalSideUserObject, InterfaceUserObject,
+ * where material properties on a side of both its primary side (face) and its secondary side
+ * (neighbor) all required.
+ */
 class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 {
 public:

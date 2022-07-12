@@ -2962,6 +2962,17 @@ MooseMesh::getBoundaryConnectedBlocks(const BoundaryID bid) const
 }
 
 std::set<SubdomainID>
+MooseMesh::getBoundaryConnectedSecondaryBlocks(const BoundaryID bid) const
+{
+  std::set<SubdomainID> subdomain_ids;
+  for (const auto & it : _neighbor_subdomain_boundary_ids)
+    if (it.second.find(bid) != it.second.end())
+      subdomain_ids.insert(it.first);
+
+  return subdomain_ids;
+}
+
+std::set<SubdomainID>
 MooseMesh::getInterfaceConnectedBlocks(const BoundaryID bid) const
 {
   std::set<SubdomainID> subdomain_ids = getBoundaryConnectedBlocks(bid);

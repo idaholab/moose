@@ -116,6 +116,15 @@ getBoundaryIDs(const libMesh::MeshBase & mesh,
   return ids;
 }
 
+std::set<BoundaryID>
+getBoundaryIDSet(const libMesh::MeshBase & mesh,
+                 const std::vector<BoundaryName> & boundary_name,
+                 bool generate_unknown)
+{
+  auto boundaries = getBoundaryIDs(mesh, boundary_name, generate_unknown);
+  return std::set<BoundaryID>(boundaries.begin(), boundaries.end());
+}
+
 std::vector<subdomain_id_type>
 getSubdomainIDs(const libMesh::MeshBase & mesh, const std::vector<SubdomainName> & subdomain_name)
 {
