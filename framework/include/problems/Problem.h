@@ -40,7 +40,22 @@ public:
    * Check of termination has been requested. This should be called by
    * transient Executioners in the keepGoing() member.
    */
-  virtual bool isSolveTerminationRequested() { return _termination_requested; };
+  virtual bool isSolveTerminationRequested() const { return _termination_requested; };
+
+  /**
+   * Check whether the problem should output execution orders
+   */
+  bool shouldPrintExecution() const { return _print_execution; };
+
+  /**
+   * Set the status of execution printing
+   */
+  void setExecutionPrinting(bool print_execution) {_print_execution = print_execution; };
+
+  /**
+   * Return console handle
+   */
+  const ConsoleStream & console() const { return _console; }
 
 protected:
   /// True if the CLI option is found
@@ -51,4 +66,7 @@ protected:
 
   /// True if termination of the solve has been requested
   bool _termination_requested;
+
+  /// True if order of executions will be output
+  bool _print_execution;
 };
