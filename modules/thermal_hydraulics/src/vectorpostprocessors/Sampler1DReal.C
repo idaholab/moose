@@ -73,6 +73,7 @@ Sampler1DRealTempl<is_ad>::execute()
   needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
+  SubdomainID blk_id = Elem::invalid_subdomain_id;
   ConstElemRange & elem_range = *(_mesh.getActiveLocalElementRange());
   for (typename ConstElemRange::const_iterator el = elem_range.begin(); el != elem_range.end();
        ++el)
@@ -92,7 +93,14 @@ Sampler1DRealTempl<is_ad>::execute()
     // Set up Sentinel class so that, even if reinitMaterials() throws, we
     // still remember to swap back during stack unwinding.
     SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
-    _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
+
+    const auto new_blk_id = elem->subdomain_id();
+    if (blk_id != new_blk_id)
+    {
+      blk_id = new_blk_id;
+      _fe_problem.setActiveMaterials(blk_id, _tid);
+    }
+    _fe_problem.reinitMaterials(blk_id, _tid);
 
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     {

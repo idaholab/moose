@@ -65,6 +65,7 @@ ComputeDiracThread::subdomainChanged()
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+  _fe_problem.setActiveMaterials(_subdomain, _tid);
 
   // If users pass a empty vector or a full size of vector,
   // we take all kernels

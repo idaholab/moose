@@ -736,6 +736,8 @@ public:
                                     const std::string & name,
                                     InputParameters & parameters);
 
+  virtual void setActiveMaterials(SubdomainID blk_id, THREAD_ID tid);
+
   /**
    * Add the MooseVariables that the current materials depend on to the dependency list.
    *
@@ -2084,7 +2086,7 @@ protected:
   ///@}
 
   /// All material objects that need to be called to provide the currently requested material properties
-  std::deque<MaterialBase *> _active_materials;
+  std::vector<std::deque<MaterialBase *>> _active_materials;
 
   ///@{
   // Indicator Warehouses
