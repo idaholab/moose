@@ -159,7 +159,7 @@
     issues = '#20586'
     requirement = 'The system shall be able to populate auxiliary variables using the residual components of nonlinear array variables.'
     exodiff = 'tag-array-var_out.e'
-    design = 'TagVectorArrayAux.md'
+    design = 'TagVectorArrayVariableAux.md'
   []
   [multiple_component_tag_interface]
     type = 'Exodiff'

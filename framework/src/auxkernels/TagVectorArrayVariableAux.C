@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TagVectorArrayAux.h"
+#include "TagVectorArrayVariableAux.h"
 
-registerMooseObject("MooseApp", TagVectorArrayAux);
+registerMooseObject("MooseApp", TagVectorArrayVariableAux);
 
 InputParameters
-TagVectorArrayAux::validParams()
+TagVectorArrayVariableAux::validParams()
 {
   InputParameters params = TagAuxBase<ArrayAuxKernel>::validParams();
 
@@ -23,7 +23,7 @@ TagVectorArrayAux::validParams()
   return params;
 }
 
-TagVectorArrayAux::TagVectorArrayAux(const InputParameters & parameters)
+TagVectorArrayVariableAux::TagVectorArrayVariableAux(const InputParameters & parameters)
   : TagAuxBase<ArrayAuxKernel>(parameters), _v(coupledVectorTagArrayDofValue("v", "vector_tag"))
 {
   if (getArrayVar("v", 0)->feType() != _var.feType())
@@ -37,7 +37,7 @@ TagVectorArrayAux::TagVectorArrayAux(const InputParameters & parameters)
 }
 
 void
-TagVectorArrayAux::compute()
+TagVectorArrayVariableAux::compute()
 {
   const auto n_local_dofs = _var.numberOfDofs();
   _local_sol.resize(n_local_dofs);

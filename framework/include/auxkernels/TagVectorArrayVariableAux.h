@@ -16,12 +16,12 @@
  * Couple a tagged vector, and return its evaluations at degree of freedom indices corresponding to
  * the coupled array variable
  */
-class TagVectorArrayAux : public TagAuxBase<ArrayAuxKernel>
+class TagVectorArrayVariableAux : public TagAuxBase<ArrayAuxKernel>
 {
 public:
   static InputParameters validParams();
 
-  TagVectorArrayAux(const InputParameters & parameters);
+  TagVectorArrayVariableAux(const InputParameters & parameters);
 
 protected:
   void compute() override;

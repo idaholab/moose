@@ -13,7 +13,7 @@
 
 [AuxKernels]
   [u_tag]
-    type = TagVectorArrayAux
+    type = TagVectorArrayVariableAux
     variable = u_tag
     v = u
     vector_tag = 'nontime'
