@@ -1,5 +1,8 @@
 #include "OptimizationReporter.h"
 
+// this is a base class but is only called directly by a test object
+registerMooseObject("isopodTestApp", OptimizationReporter);
+
 InputParameters
 OptimizationReporter::validParams()
 {

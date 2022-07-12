@@ -1,6 +1,6 @@
 #include "QuadraticMinimize.h"
 
-registerMooseObject("isopodApp", QuadraticMinimize);
+registerMooseObject("isopodTestApp", QuadraticMinimize);
 
 InputParameters
 QuadraticMinimize::validParams()

@@ -6,6 +6,7 @@
     cli_args = "Executioner/tao_solver=TAONM"
     input = quadratic_minimize.i
     csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
+    allow_test_objects = True
     requirement = "Use TAONM solver, not as accurate"
   []
   [quadratic_taobncg]
@@ -17,6 +18,7 @@
     " Executioner/petsc_options_value='1e-4 1e-2'"
     input = quadratic_minimize.i
     csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
+    allow_test_objects = True
     requirement = "Use bounded conjugate gradient solver"
   []
   [quadratic_taontr]
@@ -28,6 +30,7 @@
     input = quadratic_minimize.i
     csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
     skip = "Hessian to be implemented"
+    allow_test_objects = True
     requirement = "Use TAONTR solver, exact"
   []
   [quadratic_multi]
@@ -36,6 +39,7 @@
     max_threads = 1
     input = qm_multi_param.i
     csvdiff = qm_multi_param_out_OptimizationReporter_0001.csv
+    allow_test_objects = True
     requirement = "Solve with multiple parameters."
   []
 []
