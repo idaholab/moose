@@ -1,12 +1,29 @@
 [Tests]
   design = 'SideAverageValue.md'
-  issues = '#9103'
+  issues = '#9103 #21566'
 
-  [./test]
+  [test]
     type = RunException
     input = side_no_boundary.i
     expect_err = "missing required parameter 'Postprocessors/avg/boundary'"
 
     requirement = "The system shall error if the boundary is not specified when computing the average value of a variable on a boundary."
-  [../]
+  []
+
+  [lower_d_test]
+    type = RunApp
+    input = lower_d_side_boundary.i
+    cli_args = "Postprocessors/avg/variable='lambdab'"
+    mesh_mode = replicated
+    requirement = "The system shall check if the lower-d variable is properly defined on a boundary."
+  []
+
+  [lower_d_test_error]
+    type = RunException
+    input = lower_d_side_boundary.i
+    cli_args = "Postprocessors/avg/variable='lambda'"
+    mesh_mode = replicated
+    expect_err="'avg' of type 'SideAverageValue' depends on variable\(s\) 'lambda'."
+    requirement = "The system shall error if the lower-d variable is not properly defined on a boundary."
+  []
 []

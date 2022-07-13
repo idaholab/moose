@@ -178,7 +178,7 @@ protected:
   /// Momentum/mass inlet flux postprocessors for potential coupling between applications
   const std::vector<PostprocessorName> _flux_inlet_pps;
   /// Velocity function names at velocity inlet boundaries
-  const std::vector<FunctionName> _momentum_inlet_function;
+  const std::vector<std::vector<FunctionName>> _momentum_inlet_function;
   /// Velocity outlet types (pressure/mass-outflow/momentum-outflow)
   const MultiMooseEnum _momentum_outlet_types;
   /// Velocity wall types (symmetry/noslip/slip/wallfunction)

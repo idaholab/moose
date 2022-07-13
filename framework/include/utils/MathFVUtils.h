@@ -258,7 +258,7 @@ skewCorrectedLinearInterpolation(const T & value1,
   const auto coeffs = interpCoeffs(InterpMethod::SkewCorrectedAverage, fi, one_is_elem);
 
   auto value = (coeffs.first * value1 + coeffs.second * value2) +
-               face_gradient * (fi.faceCentroid() - fi.rIntersection());
+               face_gradient * fi.skewnessCorrectionVector();
   return value;
 }
 
@@ -461,10 +461,8 @@ interpCoeffs(const Limiter<T> & limiter,
              const bool fi_elem_is_upwind)
 {
   // Using beta, w_f, g nomenclature from Greenshields
-  const auto beta = limiter(phi_upwind,
-                            phi_downwind,
-                            grad_phi_upwind,
-                            fi_elem_is_upwind ? fi.dCF() : RealVectorValue(-fi.dCF()));
+  const auto beta = limiter(
+      phi_upwind, phi_downwind, grad_phi_upwind, fi_elem_is_upwind ? fi.dCN() : Point(-fi.dCN()));
 
   const auto w_f = fi_elem_is_upwind ? fi.gC() : (1. - fi.gC());
 

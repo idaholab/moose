@@ -48,5 +48,5 @@ FVOrthogonalDiffusion::computeQpResidual()
                          true);
 
   return -coeff_interface * (_diff_quant_neighbor[_qp] - _diff_quant_elem[_qp]) /
-         _face_info->dCFMag();
+         _face_info->dCNMag();
 }

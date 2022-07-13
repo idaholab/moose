@@ -86,4 +86,10 @@
     requirement = 'The system shall issue a warning when a "discrete" material\'s "reset" method is '
                   'not defined.'
   []
+
+  [block_restricted]
+    type = RunApp
+    input='block_restricted.i'
+    requirement = 'The system shall allow block-restricted discrete material without producing a false positive cyclic dependency error.'
+  []
 []

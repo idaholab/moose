@@ -753,7 +753,7 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   // perform the correction. Note that direction is important here because we have a minus sign.
   // Neighbor has to be neighbor, and elem has to be elem. Hence all the elem_is_elem_one logic
   // above
-  face_grad += ((neighbor_value - elem_value) / fi.dCFMag() - face_grad * fi.eCF()) * fi.eCF();
+  face_grad += ((neighbor_value - elem_value) / fi.dCNMag() - face_grad * fi.eCN()) * fi.eCN();
 
   return face_grad;
 }
