@@ -1,0 +1,13 @@
+[Tests]
+  design = 'meshgenerators/SymmetryTransformerGenerator.md'
+  issues = ' #21578'
+
+  [plane_symmetry]
+    type = 'Exodiff'
+    input = '.i'
+    exodiff = 'simple_in.e'
+    requirement = "The system shall include the ability to mirror a finite element mesh and stitch the mirrored mesh with the starting mesh."
+    cli_args = '--mesh-only'
+    recover = false
+  []
+[]
