@@ -83,17 +83,6 @@ MultiAppNearestNodeTransfer::execute()
 
   getAppInfo();
 
-  if (!_from_transforms.empty() && !_to_transforms.empty())
-  {
-    const auto & ex_from_transform = *_from_transforms[0];
-    const auto & ex_to_transform = *_to_transforms[0];
-
-    for (auto * const from_transform : _from_transforms)
-      from_transform->setDestinationCoordinateSystem(ex_to_transform);
-    for (auto * const to_transform : _to_transforms)
-      to_transform->setDestinationCoordinateSystem(ex_from_transform);
-  }
-
   // Get the bounding boxes for the "from" domains.
   std::vector<BoundingBox> bboxes;
   if (isParamValid("source_boundary"))
@@ -665,7 +654,6 @@ MultiAppNearestNodeTransfer::execute()
 
   if (_fixed_meshes)
     _neighbors_cached = true;
-
 
   postExecute();
 }

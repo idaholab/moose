@@ -258,6 +258,17 @@ MultiAppTransfer::getAppInfo()
     else
       _from_meshes.push_back(&_from_problems[i]->mesh());
   }
+
+  if (!_from_transforms.empty() && !_to_transforms.empty())
+  {
+    const auto & ex_from_transform = *_from_transforms[0];
+    const auto & ex_to_transform = *_to_transforms[0];
+
+    for (auto * const from_transform : _from_transforms)
+      from_transform->setDestinationCoordinateSystem(ex_to_transform);
+    for (auto * const to_transform : _to_transforms)
+      to_transform->setDestinationCoordinateSystem(ex_from_transform);
+  }
 }
 
 namespace
