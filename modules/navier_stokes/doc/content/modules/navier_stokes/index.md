@@ -47,4 +47,6 @@ Table definitions:
   data to faces. A summary of limiter options can be found in
   [Limiters/index.md]
 
+For an itroductory slideshow on the implementation of the Finite Volume Navier Stokes solvers in MOOSE click [here](slides/index.md)
+
 !syntax complete groups=NavierStokesApp
