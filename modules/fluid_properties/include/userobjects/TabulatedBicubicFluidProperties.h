@@ -125,11 +125,13 @@ protected:
   void checkOutofBounds(Real min, Real max, Real & variable, unsigned int & num_out_bounds);
   // If values go out of user defined range or NaNs are produced during
   // Newton Method inversion, produce warnings to inform the user
-  void outputWarnings(Real num_nans,
-                      Real num_out_bounds,
-                      std::string variable_set,
-                      std::string p_or_T,
-                      unsigned int number_points);
+  void outputWarnings(unsigned int num_nans_p,
+                      unsigned int num_nans_T,
+                      unsigned int num_out_bounds_p,
+                      unsigned int num_out_bounds_T,
+                      unsigned int convergence_failures,
+                      unsigned int number_points,
+                      std::string variable_set);
 
 };
 
