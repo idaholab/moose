@@ -179,8 +179,7 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
 
   auto compute = [&](const NestedSolve::Value<> & guess,
                      NestedSolve::Value<> & residual,
-                     NestedSolve::Jacobian<> & jacobian)
-  {
+                     NestedSolve::Jacobian<> & jacobian) {
     for (unsigned int m = 0; m < _num_c * 2; ++m)
       (*_prop_ci[m])[_qp] = guess(m);
 
@@ -222,7 +221,7 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
   _iter[_qp] = _nested_solve.getIterations();
 
   if (_nested_solve.getState() == NestedSolve::State::NOT_CONVERGED)
-    mooseError("Nested Newton iteration did not converge.");
+    mooseException("Nested Newton iteration did not converge.");
 
   // assign solution to ci
   for (unsigned int m = 0; m < _num_c * 2; ++m)
