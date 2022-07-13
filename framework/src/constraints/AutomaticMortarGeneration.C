@@ -1612,8 +1612,8 @@ AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal
 
   // See Lopes DS, Silva MT, Ambrosio JA. Tangent vectors to a 3-D surface normal: A geometric tool
   // to find orthogonal vectors based on the Householder transformation. Computer-Aided Design. 2013
-  // Mar 1;45(3):683-94.
-  const Point h_vector(std::max(nx - 1.0, nx + 1.0), ny, nz);
+  // Mar 1;45(3):683-94. We choose one definition of h_vector and deal with special case.
+  const Point h_vector(nx + 1.0, ny, nz);
 
   // Avoid singularity of the equations at the end of routine by providing the solution to
   // (nx,ny,nz)=(-1,0,0) Normal/tangent fields can be visualized by outputting nodal geometry mesh

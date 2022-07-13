@@ -10,10 +10,8 @@
 #include "MortarNodalAuxKernel.h"
 #include "MooseVariableField.h"
 #include "MortarUtils.h"
-
+#include "MooseUtils.h"
 #include "libmesh/quadrature.h"
-
-#include <limits>
 
 namespace
 {
@@ -36,6 +34,7 @@ MortarNodalAuxKernelTempl<ComputeValueType>::validParams()
   params.set<bool>("ghost_point_neighbors") = true;
   params.suppressParameter<std::vector<BoundaryName>>("boundary");
   params.suppressParameter<std::vector<SubdomainName>>("block");
+  params.set<bool>("use_displaced_mesh") = true;
   params.addParam<bool>(
       "incremental", false, "Whether to accumulate mortar auxiliary kernel value");
   return params;
@@ -48,9 +47,7 @@ MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     MortarExecutorInterface(
         *this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     MortarConsumerInterface(this),
-    _displaced(parameters.isParamSetByUser("use_displaced_mesh")
-                   ? this->template getParam<bool>("use_displaced_mesh")
-                   : true),
+    _displaced(this->template getParam<bool>("use_displaced_mesh")),
     _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _msm_volume(0),
     _incremental(this->template getParam<bool>("incremental")),
@@ -112,17 +109,20 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
   // If the node doesn't have corresponding mortar segments, force the value assigned in this step
   // to be zero. This can be useful when nodes initially do not project but will project at a
   // different stage of the simulation
-  if (total_volume == 0)
-    total_volume = std::numeric_limits<Real>::max();
+
+  if (MooseUtils::relativeFuzzyEqual(total_volume, 0.0))
+    value = 0;
+  else
+    value /= total_volume;
 
   // Allow mortar auxiliary kernels to compute quantities incrementally
   if (!_incremental)
-    _var.setNodalValue(value / total_volume);
+    _var.setNodalValue(value);
   else
   {
     mooseAssert(_u_old.size() == 1,
                 "Expected 1 value in MortarNodalAuxKernel, but got " << _u_old.size());
-    _var.setNodalValue(value / total_volume + _u_old[0]);
+    _var.setNodalValue(value + _u_old[0]);
   }
 }
 

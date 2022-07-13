@@ -35,36 +35,18 @@ offset = -0.045
   []
 []
 
-[Kernels]
-  [DynamicTensorMechanics]
-    displacements = 'disp_x disp_y'
-    generate_output = 'stress_xx stress_yy'
-    strain = FINITE
-    block = '1 2'
-    zeta = 1.0
+[Modules/TensorMechanics/DynamicMaster]
+  [all]
+    add_variables = true
     hht_alpha = 0.0
-  []
-  [inertia_x]
-    type = InertialForce
-    variable = disp_x
-    velocity = vel_x
-    acceleration = accel_x
-    beta = 0.25
-    gamma = 0.5
-    alpha = 0
-    eta = 0.0
+    newmark_beta = 0.25
+    newmark_gamma = 0.5
+    mass_damping_coefficient = 0.0
+    stiffness_damping_coefficient = 1.0
+    generate_output = 'stress_xx stress_yy'
     block = '1 2'
-  []
-  [inertia_y]
-    type = InertialForce
-    variable = disp_y
-    velocity = vel_y
-    acceleration = accel_y
-    beta = 0.25
-    gamma = 0.5
-    alpha = 0
-    eta = 0.0
-    block = '1 2'
+    strain = FINITE
+    density = density
   []
 []
 
@@ -85,10 +67,6 @@ offset = -0.045
     type = ComputeFiniteStrainElasticStress
     block = '1 2'
   []
-  [strain]
-    type = ComputeFiniteStrain
-    block = '1 2'
-  []
   [density]
     type = GenericConstantMaterial
     block = '1 2'
@@ -103,24 +81,6 @@ offset = -0.045
   []
   [gap_vel]
     block = '3'
-  []
-  [vel_x]
-    block = '1 2'
-  []
-  [accel_x]
-    block = '1 2'
-  []
-  [vel_y]
-    block = '1 2'
-  []
-  [accel_y]
-    block = '1 2'
-  []
-  [vel_z]
-    block = '1 2'
-  []
-  [accel_z]
-    block = '1 2'
   []
 []
 
@@ -147,36 +107,6 @@ offset = -0.045
     energy_wear_coefficient = 1.0e-6
     normal_pressure = normal_normal_lm
     execute_on = 'TIMESTEP_END'
-  []
-  [accel_x]
-    type = NewmarkAccelAux
-    variable = accel_x
-    displacement = disp_x
-    velocity = vel_x
-    beta = 0.25
-    execute_on = 'linear timestep_end'
-  []
-  [vel_x]
-    type = NewmarkVelAux
-    variable = vel_x
-    acceleration = accel_x
-    gamma = 0.5
-    execute_on = 'linear timestep_end'
-  []
-  [accel_y]
-    type = NewmarkAccelAux
-    variable = accel_y
-    displacement = disp_y
-    velocity = vel_y
-    beta = 0.25
-    execute_on = 'linear timestep_end'
-  []
-  [vel_y]
-    type = NewmarkVelAux
-    variable = vel_y
-    acceleration = accel_y
-    gamma = 0.5
-    execute_on = 'linear timestep_end'
   []
 []
 
