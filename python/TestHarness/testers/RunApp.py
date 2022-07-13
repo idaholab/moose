@@ -161,7 +161,7 @@ class RunApp(Tester):
         if '--error' not in cli_args and (not specs["allow_warnings"] or options.error):
             cli_args.append('--error')
 
-        if '--error-unused' not in cli_args and (not specs["allow_unused"] or options.error_unused):
+        if '--error-unused' not in cli_args and options.error_unused:
             cli_args.append('--error-unused')
 
         if '--error-unused' not in cli_args and '--warn-unused' not in cli_args and (specs["allow_unused"] or options.warn_unused):
