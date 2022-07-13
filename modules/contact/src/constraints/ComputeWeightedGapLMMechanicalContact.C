@@ -119,7 +119,8 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
         mooseError("Normal contact constraints only support elemental variables of CONSTANT order");
 }
 
-ADReal ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType)
+ADReal
+ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType)
 {
   mooseError("We should never call computeQpResidual for ComputeWeightedGapLMMechanicalContact");
 }
@@ -194,6 +195,15 @@ ComputeWeightedGapLMMechanicalContact::computeQpIProperties()
 }
 
 void
+ComputeWeightedGapLMMechanicalContact::timestepSetup()
+{
+  _dof_to_old_normal_vector.clear();
+
+  for (auto & map_pr : _dof_to_normal_vector)
+    _dof_to_old_normal_vector.emplace(map_pr);
+}
+
+void
 ComputeWeightedGapLMMechanicalContact::residualSetup()
 {
   _dof_to_weighted_gap.clear();
@@ -213,7 +223,11 @@ ComputeWeightedGapLMMechanicalContact::computeResidual(const Moose::MortarType m
   if (mortar_type != Moose::MortarType::Lower)
     return;
 
-  mooseAssert(_lm_vars[0], "LM variable is null");
+  for (const auto i : index_range(_lm_vars))
+  {
+    mooseAssert(_lm_vars[i], "LM variable is null");
+    libmesh_ignore(i);
+  }
 
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
@@ -355,27 +369,63 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   ADReal tangential_pressure_value =
       lm_x * _dof_to_tangent_vectors[dof][0](0) + lm_y * _dof_to_tangent_vectors[dof][0](1);
 
+  ADReal tangential_pressure_value_dir;
+
+  if (_has_disp_z)
+  {
+    normal_pressure_value += lm_z * _dof_to_normal_vector[dof](2);
+    tangential_pressure_value += lm_z * _dof_to_tangent_vectors[dof][0](2);
+    tangential_pressure_value_dir = lm_x * _dof_to_tangent_vectors[dof][1](0) +
+                                    lm_y * _dof_to_tangent_vectors[dof][1](1) +
+                                    lm_z * _dof_to_tangent_vectors[dof][1](2);
+  }
+
   ADReal normal_dof_residual = std::min(normal_pressure_value, weighted_gap * c);
   ADReal tangential_dof_residual = tangential_pressure_value;
 
+  // Get index for normal constraint.
+  // We do this to get a decent Jacobian structure, which is key for the use of iterative solvers.
+  // Using old normal vector to avoid changes in the Jacobian structure within one time step
+
+  Real nx, ny, nz;
+  // Intially, use the current normal vector
+  if (_dof_to_old_normal_vector[dof].norm() < TOLERANCE)
+  {
+    nx = _dof_to_normal_vector[dof](0);
+    ny = _dof_to_normal_vector[dof](1);
+    nz = _dof_to_normal_vector[dof](2);
+  }
+  else
+  {
+    nx = _dof_to_old_normal_vector[dof](0);
+    ny = _dof_to_old_normal_vector[dof](1);
+    nz = _dof_to_old_normal_vector[dof](2);
+  }
+  unsigned int component_normal = 0;
+  if (std::abs(ny) > 0.57735)
+    component_normal = 1;
+  else if (std::abs(nz) > 0.57735)
+    component_normal = 2;
+
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-if ( _dof_to_normal_vector[dof](0) > _dof_to_normal_vector[dof](1))
-{
-  // Associate constraint residual with lm_x
+
   _assembly.processResidualAndJacobian(
-      normal_dof_residual, dof_index_x, _vector_tags, _matrix_tags);
-  // Associate null tangential pressure residual with lm_y
+      normal_dof_residual,
+      component_normal == 0 ? dof_index_x : (component_normal == 1 ? dof_index_y : dof_index_z),
+      _vector_tags,
+      _matrix_tags);
+
   _assembly.processResidualAndJacobian(
-      tangential_dof_residual, dof_index_y, _vector_tags, _matrix_tags);
-}
-else
-{
-  // Associate constraint residual with lm_y
-  _assembly.processResidualAndJacobian(
-      normal_dof_residual, dof_index_y, _vector_tags, _matrix_tags);
-  // Associate null tangential pressure residual with lm_x
-  _assembly.processResidualAndJacobian(
-      tangential_dof_residual, dof_index_x, _vector_tags, _matrix_tags);
-}
+      tangential_dof_residual,
+      (component_normal == 0 || component_normal == 2) ? dof_index_y : dof_index_x,
+      _vector_tags,
+      _matrix_tags);
+
+  if (_has_disp_z)
+    _assembly.processResidualAndJacobian(
+        tangential_pressure_value_dir,
+        (component_normal == 0 || component_normal == 1) ? dof_index_z : dof_index_x,
+        _vector_tags,
+        _matrix_tags);
 #endif
 }

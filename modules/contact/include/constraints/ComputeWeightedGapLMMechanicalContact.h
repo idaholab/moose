@@ -51,6 +51,7 @@ protected:
    */
   virtual void computeQpIProperties();
 
+  void timestepSetup() override;
   /**
    * Method called from \p post(). Used to enforce node-associated constraints. E.g. for the base \p
    * ComputeWeightedGapLMMechanicalContact we enforce the zero-penetration constraint in this method
@@ -115,6 +116,9 @@ protected:
 
   /// A map from node to normal vector (2D)
   std::unordered_map<const DofObject *, RealVectorValue> _dof_to_normal_vector;
+
+  /// A map from node to normal vector (2D) - old
+  std::unordered_map<const DofObject *, RealVectorValue> _dof_to_old_normal_vector;
 
   /// A map from node to tangent vector (2D for now)
   std::unordered_map<const DofObject *, std::array<RealVectorValue, 2>> _dof_to_tangent_vectors;

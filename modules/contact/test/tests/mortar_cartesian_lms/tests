@@ -13,4 +13,14 @@
     ad_indexing_type = 'global'
     requirement = 'Contact module shall solve a two-dimensional frictionless problem with Cartesian Lagrange multipliers.'
   []
+  [frictionless-mortar-3d]
+    type = 'Exodiff'
+    exodiff = 'frictionless-mortar-3d_out.e'
+    input = 'frictionless-mortar-3d.i'
+    rel_err = 5.0e-4
+    max_parallel = 4
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall solve a three-dimensional frictionless problem with Cartesian Lagrange multipliers.'
+  []
 []
