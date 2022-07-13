@@ -136,11 +136,8 @@ TabulatedBilinearFluidProperties::constructInterpolation()
           T_from_v_e(i, j) = T_ve;
         }
       }
-      // warn users about Newton Method for inversion convergence failures
-      if (fail_counter_ve)
-        mooseWarning("Convergence of inversion from (v,e) failed ", fail_counter_ve, " times. Out of bound values set to pressure, temperature min or max.");
-      outputWarnings(num_p_nans_ve, num_p_out_bounds_ve, "(v,e)", "pressure", _num_e * _num_v);
-      outputWarnings(num_T_nans_ve, num_T_out_bounds_ve, "(v,e)", "temperature", _num_e * _num_v);
+      //output warning if nans or values out of bounds
+      outputWarnings(num_p_nans_ve, num_T_nans_ve, num_p_out_bounds_ve, num_T_out_bounds_ve, fail_counter_ve, _num_e * _num_v, "(v,e)");
 
       // the bicubic interpolation object are init'ed now
       _p_from_v_e_ipol =
@@ -217,11 +214,8 @@ TabulatedBilinearFluidProperties::constructInterpolation()
           T_from_v_h(i, j) = T_vh;
         }
       }
-      // warn users about Newton Method for inversion convergence failures
-      if (fail_counter_vh)
-        mooseWarning("Convergence for inversion from (v,h) failed ", fail_counter_vh, " times.");
-      outputWarnings(num_p_nans_vh, num_p_out_bounds_vh, "(v,h)", "pressure", _num_e * _num_v);
-      outputWarnings(num_T_nans_vh, num_T_out_bounds_vh, "(v,h)", "temperature", _num_e * _num_v);
+      // output warnings if nans our values out of bounds
+      outputWarnings(num_p_nans_vh, num_T_nans_vh, num_p_out_bounds_vh, num_T_out_bounds_vh, fail_counter_vh, _num_e * _num_v, "(v,h)");
 
       _p_from_v_h_ipol =
          libmesh_make_unique<BilinearInterpolation>(_specific_volume, _enthalpy, p_from_v_h);
@@ -279,33 +273,35 @@ TabulatedBilinearFluidProperties::checkOutofBounds(Real min,
 }
 
 void
-TabulatedBilinearFluidProperties::outputWarnings(Real num_nans,
-                                                 Real num_out_bounds,
-                                                 std::string variable_set,
-                                                 std::string p_or_T,
-                                                 unsigned int number_points)
+TabulatedBilinearFluidProperties::outputWarnings(unsigned int num_nans_p,
+                                                 unsigned int num_nans_T,
+                                                 unsigned int num_out_bounds_p,
+                                                 unsigned int num_out_bounds_T,
+                                                 unsigned int convergence_failures,
+                                                 unsigned int number_points,
+                                                 std::string variable_set)
 {
-  if (num_nans)
-    mooseWarning("while creating ",
-                 variable_set,
-                 " interpolation tables, ",
-                 num_nans,
-                 " NaNs were computed for ",
-                 p_or_T,
-                 " during ",
-                 variable_set,
-                 " to p,T inversions.");
-  if (num_out_bounds)
-    mooseWarning("while creating ",
-                 variable_set,
-                 " interpolation tables, ",
-                 num_out_bounds,
-                 " of ",
-                 number_points,
-                 " computed ",
-                 p_or_T,
-                 " values were out of user defined range.");
-  if (num_nans || num_out_bounds)
-    mooseWarning("NaNs and out-of-bounds values were replaced with user-defined range, forcing a "
-                 "constant value for the interpolated quantities in that domain");
+ // make string variables before mooseWarning
+ std::string while_creating = "While creating (p,T) from " + variable_set + " interpolation tables,\n";
+ std::string warning_message = while_creating;
+ std::string converge_fails = "Inversion to (p,T) from " + variable_set + " failed " + std::to_string(convergence_failures) + " times\n";
+ std::string p_nans = "- " + std::to_string(num_nans_p) + " nans generated out of "+ std::to_string(number_points) + " points for pressure\n";
+ std::string T_nans = "- " + std::to_string(num_nans_T) + " nans generated out of " + std::to_string(number_points) + " points for temperature\n";
+ std::string p_oob = "- " + std::to_string(num_out_bounds_p) + " of " + std::to_string(number_points) + " pressure values were out of user defined bounds\n";
+ std::string T_oob = "- " + std::to_string(num_out_bounds_T) + " of " + std::to_string(number_points) + " temperature values were out of user defined bounds\n";
+ std::string outcome = "If these issues occurred, the pressure and temperature values were cast as constants to their respective min and max values.\n";
+ //if any of these do not exist, do not want to print them
+ if (convergence_failures)
+   warning_message += converge_fails;
+ if (num_nans_p)
+   warning_message += p_nans;
+ if (num_nans_T)
+   warning_message += T_nans;
+ if (num_out_bounds_p)
+   warning_message += p_oob;
+ if (num_out_bounds_T)
+   warning_message += T_oob;
+ // print warning
+ if (num_nans_p || num_nans_T || num_out_bounds_p || num_out_bounds_T || convergence_failures)
+   mooseWarning(warning_message + outcome);
 }
