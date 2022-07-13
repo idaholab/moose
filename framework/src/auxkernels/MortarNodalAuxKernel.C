@@ -34,9 +34,14 @@ MortarNodalAuxKernelTempl<ComputeValueType>::validParams()
   params.set<bool>("ghost_point_neighbors") = true;
   params.suppressParameter<std::vector<BoundaryName>>("boundary");
   params.suppressParameter<std::vector<SubdomainName>>("block");
-  params.set<bool>("use_displaced_mesh") = true;
   params.addParam<bool>(
       "incremental", false, "Whether to accumulate mortar auxiliary kernel value");
+
+  // We should probably default use_displaced_mesh to true. If no displaced mesh exists
+  // FEProblemBase::addKernel will automatically correct it to false. However,
+  // this will still prompt a call from AugmentSparsityOnInterface to get a displaced
+  // mortar interface since object._use_displaced_mesh = true.
+
   return params;
 }
 

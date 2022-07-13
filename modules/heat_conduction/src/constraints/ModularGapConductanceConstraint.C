@@ -39,11 +39,10 @@ ModularGapConductanceConstraint::validParams()
                                    "End point for line defining cylindrical axis");
   params.addParam<RealVectorValue>("sphere_origin", "Origin for sphere geometry");
 
-  // we should default use_displaced_mesh to true. if no displaced mesh exists
-  // FEProblemBase::addConstraint will automatically correect it to false. However,
-  // this will trigger a bug in MortarData::getMortarInterface, which will still
-  // try to look up the interface for the displaced mesh. So for now we rely on
-  // the manual setting and the consistency check below.
+  // We should default use_displaced_mesh to true. If no displaced mesh exists
+  // FEProblemBase::addConstraint will automatically correct it to false. However,
+  // this will still prompt a call from AugmentSparsityOnInterface to get a displaced
+  // mortar interface since object._use_displaced_mesh = true.
 
   return params;
 }
