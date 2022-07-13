@@ -12,7 +12,7 @@
 #include "SinglePhaseFluidProperties.h"
 
 /**
- * Fluid properties for 2LiF-BeF2 (LeadBismuth) \cite richard.
+ *  Fluid properties for (Lead) \cite Fazio.
  */
 class LeadBismuthFluidProperties : public SinglePhaseFluidProperties
 {
@@ -37,6 +37,7 @@ public:
    * @param[in] e   specific internal energy (J/kg)
    * @return pressure (Pa)
    */
+  using SinglePhaseFluidProperties::p_from_v_e;
   virtual Real p_from_v_e(Real v, Real e) const override;
 
   /**
@@ -180,6 +181,11 @@ public:
    */
   virtual void
   rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
+  virtual void rho_from_p_T(const DualReal & p,
+                            const DualReal & T,
+                            DualReal & rho,
+                            DualReal & drho_dp,
+                            DualReal & drho_dT) const override;
 
   /**
    * Specific volume from pressure and temperature
@@ -189,7 +195,6 @@ public:
    * @return specific volume (m$^3$/kg)
    */
   virtual Real v_from_p_T(Real p, Real T) const override;
-  virtual DualReal v_from_p_T(const DualReal & p, const DualReal & T) const override;
 
   /**
    * Specific volume and its derivatives from pressure and temperature
@@ -334,6 +339,23 @@ public:
    */
   virtual void
   mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
+
+  /**
+   * Bulk Modulus from pressure and temperature
+   *
+   * @param p   pressure (Pa)
+   * @param T   temperature (K)
+   * @return Bulk Modules (N/m^2)
+   */
+  virtual Real bulk_modulus_from_p_T(Real p, Real T) const;
+  /**
+   * Speed of Sound from specific volume and specific internal energy
+   *
+   * @param[in] v   specific volume (m$^3$/kg)
+   * @param[in] e   specific internal energy (J/kg)
+   * @return [out] c speed of sound (m/s)
+   */
+  virtual Real c_from_v_e(Real v, Real e) const override;
 
 private:
   const Real _T_mo;

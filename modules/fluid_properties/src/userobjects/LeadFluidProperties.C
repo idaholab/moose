@@ -16,23 +16,13 @@ LeadFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addParam<Real>("T_mo", 600.6, "Melting Point of Lead");
-  // params.addRangeCheckedParam<Real>(
-  //     "drho_dp",
-  //     1.7324E-7,
-  //     "drho_dp > 0.0",
-  //     "derivative of density with respect to pressure (at constant temperature)");
-  // params.addClassDescription("Fluid properties for Lead");
+  params.addClassDescription("Fluid properties for Lead");
+
   return params;
 }
 
 LeadFluidProperties::LeadFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters), _T_mo(getParam<Real>("T_mo"))
-// _drho_dp(getParam<Real>("drho_dp")),
-// _drho_dT(-0.4884),
-// _p_atm(101325.0),
-// _cp(2416.0),
-// _c0(2413.0),
-// _dp_dT_at_constant_v(-_drho_dT / _drho_dp)
 {
 }
 
@@ -46,6 +36,30 @@ Real
 LeadFluidProperties::molarMass() const
 {
   return 207.2;
+}
+
+Real
+LeadFluidProperties::bulk_modulus_from_p_T(Real /*p*/, Real T) const
+{
+  return (43.50 - 1.552e-2 * T + 1.622e-6 * T * T) * 10e8;
+}
+
+Real
+LeadFluidProperties::c_from_v_e(Real v, Real e) const
+{
+  Real Temperature = T_from_v_e(v, e);
+  Real pressure = p_from_v_e(v, e);
+  return std::sqrt(bulk_modulus_from_p_T(pressure, Temperature) /
+                   rho_from_p_T(pressure, Temperature));
+}
+
+DualReal
+LeadFluidProperties::c_from_v_e(const DualReal & v, const DualReal & e) const
+{
+  auto Temperature = T_from_v_e(v, e);
+  auto pressure = p_from_v_e(v, e);
+  return std::sqrt(bulk_modulus_from_p_T(pressure.value(), Temperature.value()) /
+                   rho_from_p_T(pressure, Temperature));
 }
 
 Real
@@ -196,7 +210,7 @@ LeadFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & d
   Real dh_dp, dv_dp, dh_dT, dv_dT, v, h;
   h_from_p_T(p, T, h, dh_dp, dh_dT);
   v_from_p_T(p, T, v, dv_dp, dv_dT);
-  e = h_from_p_T(v, e);
+  e = e_from_p_T(p, T);
   de_dp = dh_dp - v - dv_dp * p;
   de_dT = dh_dT - dv_dT * p;
 }
@@ -205,6 +219,17 @@ Real
 LeadFluidProperties::e_from_p_rho(Real p, Real rho) const
 {
   return e_from_p_T(p, T_from_p_rho(p, rho));
+}
+
+void
+LeadFluidProperties::e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const
+{
+  e = e_from_p_rho(p, rho);
+  Real epsilon = 1e-8;
+  Real e_p_plus = e_from_p_rho(p * (1 + epsilon), rho);
+  Real e_rho_plus = e_from_p_rho(p, rho * (1 + epsilon));
+  de_dp = (e_p_plus - e) / epsilon / p;
+  de_drho = (e_rho_plus - e) / epsilon / rho;
 }
 
 Real
@@ -250,8 +275,8 @@ LeadFluidProperties::cp_from_p_T(
 {
   cp = cp_from_p_T(pressure, temperature);
   dcp_dp = 0;
-  dcp_dT = -4.923e-2 + 2 * 1.55e-5 * temperature +
-           2 * 1.524e+6 / temperature / temperature / temperature;
+  dcp_dT = -4.923e-2 + 2 * 1.544e-5 * temperature +
+           2 * 1.524e6 / temperature / temperature / temperature;
 }
 
 Real
@@ -259,7 +284,7 @@ LeadFluidProperties::cp_from_v_e(Real v, Real e) const
 {
   Real temperature = T_from_v_e(v, e);
   return 176.2 - 4.923e-2 * temperature + 1.544e-5 * temperature * temperature -
-         1.524e+6 / temperature / temperature;
+         1.524e6 / temperature / temperature;
 }
 
 void
@@ -268,10 +293,10 @@ LeadFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real 
   Real temperature, dT_dv, dT_de;
   T_from_v_e(v, e, temperature, dT_dv, dT_de);
   cp = cp_from_v_e(v, e);
-  dcp_dv = -4.923e-2 * dT_dv + 2 * dT_dv * 1.554e-5 * temperature +
+  dcp_dv = -4.923e-2 * dT_dv + 2 * dT_dv * 1.544e-5 * temperature +
            2 * dT_dv * 1.524e+6 / temperature / temperature / temperature;
 
-  dcp_de = -4.923e-2 * dT_de + 2 * dT_de * 1.554e-5 * temperature +
+  dcp_de = -4.923e-2 * dT_de + 2 * dT_de * 1.544e-5 * temperature +
            2 * dT_de * 1.524e+6 / temperature / temperature / temperature;
 }
 
@@ -302,7 +327,7 @@ LeadFluidProperties::cv_from_p_T(Real p, Real T, Real & cv, Real & dcv_dp, Real 
 {
   Real cp, dcp_dp, dcp_dT;
   cp_from_p_T(p, T, cp, dcp_dp, dcp_dT);
-  cv = cv_from_p_T(p, T);
+  cv = cp;
   dcv_dp = dcp_dp;
   dcv_dT = dcp_dT;
 }
