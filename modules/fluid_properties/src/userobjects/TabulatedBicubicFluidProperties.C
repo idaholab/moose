@@ -149,10 +149,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
             ++fail_counter_ve;
         }
 
-        // check for NaNs in p interpolation
-        checkNaNs(_pressure_min, _pressure_max, i, p_ve, num_p_nans_ve);
-        // check for NaNs in p interpolation
-        checkNaNs(_temperature_min, _temperature_max, i, T_ve, num_T_nans_ve);
+        // check for NaNs in Newton Method
+        checkNaNs(_pressure_min, _pressure_max, _temperature_min, _temperature_max, i, p_ve, T_ve, num_p_nans_ve, num_T_nans_ve);
 
         // replace out of bounds pressure values with pmax or pmin
         checkOutofBounds(_pressure_min, _pressure_max, p_ve, num_p_out_bounds_ve);
@@ -241,10 +239,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
             ++fail_counter_vh;
         }
 
-        // check for NaNs in p interpolation
-        checkNaNs(_pressure_min, _pressure_max, i, p_vh, num_p_nans_vh);
-        // check for NaNs in p interpolation
-        checkNaNs(_temperature_min, _temperature_max, i, T_vh, num_T_nans_vh);
+        // check for NaNs in Newton Method
+        checkNaNs(_pressure_min, _pressure_max, _temperature_min, _temperature_max, i, p_vh, T_vh, num_p_nans_vh, num_T_nans_vh);
 
         // replace out of bounds pressure values with pmax or pmin
         checkOutofBounds(_pressure_min, _pressure_max, p_vh, num_p_out_bounds_vh);
@@ -285,16 +281,33 @@ TabulatedBicubicFluidProperties::reshapeData2D(unsigned int nrow,
 }
 
 void
-TabulatedBicubicFluidProperties::checkNaNs(
-    Real min, Real max, unsigned int i, Real & variable, unsigned int & num_nans)
+TabulatedBicubicFluidProperties::checkNaNs(Real min_1,
+                                           Real max_1,
+                                           Real min_2,
+                                           Real max_2,
+                                           unsigned int i,
+                                           Real & variable_1,
+                                           Real & variable_2,
+                                           unsigned int & num_nans_1,
+                                           unsigned int & num_nans_2)
 {
-  if (std::isnan(variable))
+  // replace nan values with pmax or pmin
+  if (std::isnan(variable_1))
   {
     if (_specific_volume[i] > ((_v_min + _v_max) / 2))
-      variable = min;
+      variable_1 = min_1;
     else if (_specific_volume[i] < ((_v_min + _v_max) / 2))
-      variable = max;
-    num_nans++;
+      variable_1 = max_1;
+    num_nans_1++;
+  }
+  // replace nan values with Tmax or Tmin
+  if (std::isnan(variable_2))
+  {
+    if (_specific_volume[i] > ((_v_min + _v_max) / 2))
+      variable_2 = max_2;
+    else if (_specific_volume[i] < ((_v_min + _v_max) / 2))
+      variable_2 = min_2;
+    num_nans_2++;
   }
 }
 
