@@ -78,6 +78,7 @@ MooseCoordTransform::setUpDirection(const Direction up_direction)
 
   _rotate = std::make_unique<RealTensorValue>(
       RealTensorValue::extrinsic_rotation_matrix(alpha, beta, gamma));
+  computeRS();
 
   if (negative_radii)
     mooseError("Rotation yields negative radial values");
@@ -116,6 +117,7 @@ MooseCoordTransform::setRotation(const Real alpha, const Real beta, const Real g
 
   _rotate = std::make_unique<RealTensorValue>(
       RealTensorValue::extrinsic_rotation_matrix(alpha, beta, gamma));
+  computeRS();
 
   if (must_rotate_axes && !axes_rotated)
     mooseError("Unsupported manual angle prescription in 'MooseCoordTransform::setRotation'");
@@ -128,6 +130,7 @@ MooseCoordTransform::setLengthUnit(const MooseUnits & length_unit)
   const auto scale = Real(_length_unit / MooseUnits("m"));
   _scale =
       std::make_unique<RealTensorValue>(RealTensorValue(scale, 0, 0, 0, scale, 0, 0, 0, scale));
+  computeRS();
 }
 
 void
@@ -290,6 +293,7 @@ MooseCoordTransform::MooseCoordTransform(const MooseCoordTransform & other)
     _scale = std::make_unique<RealTensorValue>(*other._scale);
   if (other._rotate)
     _rotate = std::make_unique<RealTensorValue>(*other._rotate);
+  computeRS();
 }
 
 MooseCoordTransform &
@@ -307,20 +311,46 @@ MooseCoordTransform::operator=(const MooseCoordTransform & other)
 
   if (other._scale)
     _scale = std::make_unique<RealTensorValue>(*other._scale);
+  else
+    _scale.reset();
   if (other._rotate)
     _rotate = std::make_unique<RealTensorValue>(*other._rotate);
+  else
+    _rotate.reset();
+
+  computeRS();
 
   return *this;
+}
+
+void
+MooseCoordTransform::computeRS()
+{
+  if (_scale || _rotate)
+  {
+    _rs = std::make_unique<RealTensorValue>(RealTensorValue(1, 0, 0, 0, 1, 0, 0, 0, 1));
+
+    if (_scale)
+      *_rs = *_scale * *_rs;
+    if (_rotate)
+      *_rs = *_rotate * *_rs;
+
+    _rs_inverse = std::make_unique<RealTensorValue>(_rs->inverse());
+  }
+  else
+  {
+    _rs.reset();
+    _rs_inverse.reset();
+  }
 }
 
 Point
 MooseCoordTransform::operator()(const Point & point) const
 {
   Point ret(point);
-  if (_scale)
-    ret = (*_scale) * ret;
-  if (_rotate)
-    ret = (*_rotate) * ret;
+  // Apply scaling and then rotation
+  if (_rs)
+    ret = (*_rs) * ret;
 
   // If this shows up in profiling we can make _translation a pointer
   ret += _translation;
@@ -364,6 +394,28 @@ MooseCoordTransform::operator()(const Point & point) const
     ret = 0;
     ret(_destination_r_axis) = r;
   }
+
+  return ret;
+}
+
+Point
+MooseCoordTransform::mapBack(const Point & point) const
+{
+  Point ret(point);
+
+  // inverse translate
+  ret -= _translation;
+
+  // inverse rotate and then inverse scale
+  if (_rs_inverse)
+    ret = (*_rs_inverse) * ret;
+
+  // Finally, coordinate system conversions
+  if ((_coord_type == Moose::COORD_XYZ && (_destination_coord_type == Moose::COORD_RZ ||
+                                           _destination_coord_type == Moose::COORD_RSPHERICAL)) ||
+      (_coord_type == Moose::COORD_RZ && _destination_coord_type == Moose::COORD_RSPHERICAL))
+    mooseError("Coordinate collapsing occurred in going to the reference space. There is no unique "
+               "return mapping");
 
   return ret;
 }

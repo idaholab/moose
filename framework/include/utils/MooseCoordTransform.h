@@ -52,8 +52,8 @@ public:
   /**
    * Transforms a point from our domain into the reference domain. The sequence of transformations
    * applied is:
-   * 1. Rotation
-   * 2. Scaling
+   * 1. Scaling
+   * 2. Rotation
    * 3. Translation
    * 4. Potential collapse of XYZ coordinates into RZ or RSPHERICAL coordinates depending on the
    *    destination coordinate system (if there is no destination coordinate system or the
@@ -62,6 +62,16 @@ public:
    * @return The corresponding position in the reference domain
    */
   libMesh::Point operator()(const libMesh::Point & point) const;
+
+  /**
+   * Inverse transform from the reference space to our space. This will error if coordinate
+   * collapsing would occur in \p operator(). When doing inversion we invert the order of
+   * operations, e.g. we will perform
+   * 1. invert translation
+   * 2. invert rotation
+   * 3. invert scaling
+   */
+  libMesh::Point mapBack(const libMesh::Point & point) const;
 
   /**
    * Set how much our domain should be translated in order to match a reference frame. In practice
@@ -149,6 +159,11 @@ public:
   void setCoordinateSystem(Moose::CoordinateSystemType system_type,
                            Direction rz_symmetry_axis = INVALID);
 
+  /**
+   * Compute the RS and (RS)^{-1} matrices
+   */
+  void computeRS();
+
 private:
   /**
    * If the coordinate system type is RZ, then we return the provided argument. Otherwise we return
@@ -162,6 +177,12 @@ private:
 
   /// Represents a forward rotation transformation from our domain to the reference frame domain
   std::unique_ptr<libMesh::RealTensorValue> _rotate;
+
+  /// Represents the product of rotation and scaling transformations
+  std::unique_ptr<libMesh::RealTensorValue> _rs;
+
+  /// Represents the inverse of the product of rotation and scaling transformations
+  std::unique_ptr<libMesh::RealTensorValue> _rs_inverse;
 
   /// Describes a forward translation transformation from our domain to the reference frame domain
   libMesh::Point _translation;
