@@ -289,7 +289,7 @@ TabulatedBilinearFluidProperties::outputWarnings(unsigned int num_nans_p,
  std::string T_nans = "- " + std::to_string(num_nans_T) + " nans generated out of " + std::to_string(number_points) + " points for temperature\n";
  std::string p_oob = "- " + std::to_string(num_out_bounds_p) + " of " + std::to_string(number_points) + " pressure values were out of user defined bounds\n";
  std::string T_oob = "- " + std::to_string(num_out_bounds_T) + " of " + std::to_string(number_points) + " temperature values were out of user defined bounds\n";
- std::string outcome = "If these issues occurred, the pressure and temperature values were cast as constants to their respective min and max values.\n";
+ std::string outcome = "The pressure and temperature values were replaced with their respective user-defined min and max values.\n";
  //if any of these do not exist, do not want to print them
  if (convergence_failures)
    warning_message += converge_fails;
