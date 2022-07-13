@@ -231,6 +231,8 @@ protected:
    * Calls assert on thread id.
    */
   void checkThreadID(THREAD_ID tid) const;
+
+  friend class MaterialWarehouse;
 };
 
 template <typename T>
