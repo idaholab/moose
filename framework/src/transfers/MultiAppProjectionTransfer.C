@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
+#include "MooseCoordTransform.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/linear_implicit_system.h"
@@ -270,7 +271,7 @@ MultiAppProjectionTransfer::execute()
             for (unsigned int qp = 0; qp < qrule.n_points() && !qp_hit; qp++)
             {
               Point qpt = xyz[qp];
-              if (bboxes[from0 + i_from].contains_point(qpt + _to_positions[i_to]))
+              if (bboxes[from0 + i_from].contains_point((*_to_transforms[i_to])(qpt)))
                 qp_hit = true;
             }
           }
@@ -285,7 +286,7 @@ MultiAppProjectionTransfer::execute()
             for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
             {
               Point qpt = xyz[qp];
-              outgoing_qps[i_proc].push_back(qpt + _to_positions[i_to]);
+              outgoing_qps[i_proc].push_back((*_to_transforms[i_to])(qpt));
             }
           }
         }
@@ -379,7 +380,7 @@ MultiAppProjectionTransfer::execute()
         if (local_bboxes[i_from].contains_point(qpt))
         {
           outgoing_evals_ids[pid][qp].first =
-              (*local_meshfuns[i_from])(qpt - _from_positions[i_from]);
+              (*local_meshfuns[i_from])(_from_transforms[i_from]->mapBack(qpt));
           if (_current_direction == FROM_MULTIAPP)
             outgoing_evals_ids[pid][qp].second = _from_local2global_map[i_from];
         }
@@ -493,7 +494,6 @@ MultiAppProjectionTransfer::execute()
 
   if (_fixed_meshes)
     _qps_cached = true;
-
 
   postExecute();
 }
