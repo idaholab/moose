@@ -1,4 +1,4 @@
-TemperaturePressureFunctionFluidProperties# Test implementation of TemperaturePressureFunctionFluidProperties properties by comparison to analytical functions.
+# Test implementation of TemperaturePressureFunctionFluidProperties properties by comparison to analytical functions.
 
 [Mesh]
   type = GeneratedMesh
