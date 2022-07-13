@@ -41,7 +41,14 @@
       input = 'stateful_property.i'
       exodiff = 'stateful_property_out.e stateful_property_out.e-s002 stateful_property_out.e-s003 '
                 'stateful_property_out.e-s004'
-      detail = 'and stateful material properties properly initialized.'
+      detail = 'and stateful material properties properly initialized,'
+    []
+
+    [neumann]
+      type = 'Exodiff'
+      input = 'neumann.i'
+      exodiff = 'neumann_out.e neumann_out.e-s002 neumann_out.e-s003 neumann_out.e-s004'
+      detail = ', and with integrated BC on the moving boundary.'
     []
   []
 

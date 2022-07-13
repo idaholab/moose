@@ -194,7 +194,11 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
         // If the neighbor has a different subdomain ID, then this side should be added to
         // the moving boundary
         if (neighbor->subdomain_id() != elem->subdomain_id())
+        {
           bnd_info.add_side(elem, side, _moving_boundary_id);
+          unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
+          bnd_info.add_side(neighbor, neighbor_side, _moving_boundary_id);
+        }
         // Otherwise remove this side and the neighbor side from the boundary.
         else
         {
