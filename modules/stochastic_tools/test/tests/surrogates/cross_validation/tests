@@ -1,0 +1,22 @@
+[Tests]
+  issues = '#21399'
+  design = 'Surrogates/index.md'
+  [cross_validate]
+    requirement = 'The system shall demonstrate cross validation '
+    [csv_check]
+      type = CSVDiff
+      input = train_and_cv.i
+      allow_test_objects = true
+      cli_args =  "Trainers/train/cv_surrogate='surrogate'"
+      csvdiff = 'train_and_cv_out_cv_scores_0002.csv'
+      detail = 'for a 1-dimensional polynomial regression surrogate'
+    []
+    [surr-error]
+      type = RunException
+      input = train_and_cv.i
+      allow_test_objects = true
+      expect_err = "To perform cross-validation, the option cv_surrogate needs to be specified to provide a Surrogate object for training and evaluation."
+      detail = ' and throw an error if a SurrogateModel is not provided.'
+    []
+  []
+[]

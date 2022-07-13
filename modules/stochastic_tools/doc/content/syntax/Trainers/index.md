@@ -14,6 +14,8 @@ through the rows of a given [sampler](Samplers/index.md), specified by the
 
 !listing SurrogateTrainer.C re=void\sSurrogateTrainer::execute.*?^}
 
+!listing SurrogateTrainer.C re=void\sSurrogateTrainer::executeTraining.*?^}
+
 The method will execute once per execution flag (see [SetupInterface.md]) on each processor.
 There are three virtual functions that derived class can and should override:
 
@@ -64,7 +66,15 @@ data initialization.
 The training data system leverages the [restart/Restartable.md] within MOOSE. As such, the data
 store can be of an arbitrary type and is automatically used for restarting simulations.
 
-## Output Mdoel Data
+## Enabling Cross Validation
+
+K-fold cross validation options for `SurrogateTrainer` are in development. The current implementation requires a [Sampler](Samplers/index.md), `SurrogateTrainer`, and [SurrogateModel](Surrogates/index.md) to be defined in the input file. At the beginning of `execute()`, the trainer will shuffle and partition the rows of the provided [Sampler](Samplers/index.md) into $k$ folds. Then, in a loop over each fold, it will train the linked [SurrogateModel](Surrogates/index.md) and evaluate it for the test set. Training is performed using the same `preTrain()`, `train()`, and `postTrain()` methods as before. To make an existing trainer compatible with cross validation, `preTrain()` must reset the state of the trainer and clear any essential data related to prior training sets - for example, in [PolynomialRegressionTrainer.md] a linear system is assembled in the training loop and solved at the end in `postTrain()`. To enable cross validation, `preTrain()` was changed to reset the linear system.
+
+!listing PolynomialRegressionTrainer.C re=void\sPolynomialRegressionTrainer.*?}
+
+For an example of this system in use, see [/examples/cross_validation.md]
+
+## Output Model Data
 
 Training model data can be output to a binary file using the [SurrogateTrainerOutput.md] object.
 

@@ -68,7 +68,8 @@ PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters &
         StochasticTools::MultiDimPolynomialGenerator::generateTuple(_n_dims, _max_degree + 1))),
     _n_poly_terms(_power_matrix.size()),
     _matrix(_n_poly_terms, _n_poly_terms),
-    _rhs(1, DenseVector<Real>(_n_poly_terms, 0.0))
+    _rhs(1, DenseVector<Real>(_n_poly_terms, 0.0)),
+    _r_sum(1, 0.0)
 {
   const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
   for (unsigned int i = 0; i < pnames.size(); ++i)
@@ -90,6 +91,29 @@ PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters &
   // Check if we have enough data points to solve the problem
   if (_sampler.getNumberOfRows() <= _n_poly_terms)
     mooseError("Number of data points must be greater than the number of terms in the polynomial.");
+
+  // Creating calculators needed for feature standardization.
+  _calculators.resize(_n_poly_terms * 3);
+  for (const auto & term : make_range(_n_poly_terms))
+  {
+    _calculators[3 * term] = StochasticTools::makeCalculator(MooseEnumItem("mean"), *this);
+    _calculators[3 * term + 1] = StochasticTools::makeCalculator(MooseEnumItem("stddev"), *this);
+    _calculators[3 * term + 2] = StochasticTools::makeCalculator(MooseEnumItem("sum"), *this);
+  }
+}
+
+void
+PolynomialRegressionTrainer::preTrain()
+{
+  _matrix.zero();
+  for (unsigned int r = 0; r < _rhs.size(); ++r)
+    _rhs[r].zero();
+
+  /// Init calculators.
+  for (auto & calc : _calculators)
+    calc->initializeCalculator();
+
+  _r_sum.assign(1, 0.0);
 }
 
 void
@@ -108,26 +132,29 @@ PolynomialRegressionTrainer::train()
   // Emplace new values if necessary
   if (_rvecval)
     for (unsigned int r = _rhs.size(); r < _rvecval->size(); ++r)
+    {
       _rhs.emplace_back(_n_poly_terms, 0.0);
+      _r_sum.emplace_back(0.0);
+    }
 
   for (unsigned int i = 0; i < _n_poly_terms; ++i)
   {
-    std::vector<unsigned int> i_powers(_power_matrix[i]);
-
     Real i_value(1.0);
     for (unsigned int ii = 0; ii < _n_dims; ++ii)
-      i_value *= data_pow(ii, i_powers[ii]);
+      i_value *= data_pow(ii, _power_matrix[i][ii]);
 
     for (unsigned int j = 0; j < _n_poly_terms; ++j)
     {
-      std::vector<unsigned int> j_powers(_power_matrix[j]);
-
       Real j_value(1.0);
       for (unsigned int jj = 0; jj < _n_dims; ++jj)
-        j_value *= data_pow(jj, j_powers[jj]);
+        j_value *= data_pow(jj, _power_matrix[j][jj]);
 
       _matrix(i, j) += i_value * j_value;
     }
+
+    // Update calculators.
+    for (unsigned int c = i * 3; c < (i + 1) * 3; ++c)
+      _calculators[c]->updateCalculator(i_value);
 
     if (_rval)
       _rhs[0](i) += i_value * (*_rval);
@@ -135,6 +162,12 @@ PolynomialRegressionTrainer::train()
       for (unsigned int r = 0; r < _rvecval->size(); ++r)
         _rhs[r](i) += i_value * (*_rvecval)[r];
   }
+
+  if (_rval)
+    _r_sum[0] += (*_rval);
+  else if (_rvecval)
+    for (unsigned int r = 0; r < _rvecval->size(); ++r)
+      _r_sum[r] += (*_rvecval)[r];
 
   // Adding penalty term for Ridge regularization
   if (_regression_type == "ridge")
@@ -156,11 +189,51 @@ PolynomialRegressionTrainer::postTrain()
   for (auto & it : _rhs)
     gatherSum(it.get_values());
 
+  // Gather response sums.
+  gatherSum(_r_sum);
+
+  // Finalize calculators.
+  for (auto & calc : _calculators)
+    calc->finalizeCalculator(true);
+
+  std::vector<Real> mu(_n_poly_terms);
+  std::vector<Real> sig(_n_poly_terms);
+  std::vector<Real> sum_pf(_n_poly_terms);
+
+  for (unsigned int i = 0; i < _n_poly_terms; ++i)
+  {
+    // To handle intercept, use mu = 0, sig = 1.
+    mu[i] = i > 0 ? _calculators[3 * i]->getValue() : 0.0;
+    sig[i] = i > 0 ? _calculators[3 * i + 1]->getValue() : 1.0;
+    sum_pf[i] = _calculators[3 * i + 2]->getValue();
+  }
+
+  // Transform _matrix and _rhs to match standardized features.
+  const Real n = sum_pf[0]; // Sum of intercept term = n.
+  for (unsigned int i = 0; i < _n_poly_terms; ++i)
+  {
+    for (unsigned int j = 0; j < _n_poly_terms; ++j)
+    {
+      _matrix(i, j) -= (mu[j] * sum_pf[i] + mu[i] * sum_pf[j]);
+      _matrix(i, j) += n * mu[i] * mu[j];
+      _matrix(i, j) /= (sig[i] * sig[j]);
+    }
+    for (unsigned int r = 0; r < _rhs.size(); ++r)
+      _rhs[r](i) = (_rhs[r](i) - mu[i] * _r_sum[r]) / sig[i];
+  }
+
   DenseVector<Real> sol;
   _coeff.resize(_rhs.size());
   for (unsigned int r = 0; r < _rhs.size(); ++r)
   {
     _matrix.lu_solve(_rhs[r], sol);
     _coeff[r] = sol.get_values();
+
+    // Transform coefficients to match unstandardized features.
+    for (unsigned int i = 1; i < _n_poly_terms; ++i)
+    {
+      _coeff[r][i] /= sig[i];
+      _coeff[r][0] -= _coeff[r][i] * mu[i];
+    }
   }
 }

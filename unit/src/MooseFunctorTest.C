@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 #include "MooseFunctor.h"
 #include "FaceInfo.h"
+#include "ElemInfo.h"
 #include "VectorComponentFunctor.h"
 #include "GreenGaussGradient.h"
 #include "MeshGeneratorMesh.h"
@@ -85,7 +86,12 @@ TEST(MooseFunctorTest, testArgs)
   neighbor->set_node(0) = &node1;
   neighbor->set_node(1) = &node2;
   elem->set_neighbor(1, neighbor.get());
-  FaceInfo fi(elem.get(), 1, neighbor.get());
+
+  ElemInfo ei(elem.get());
+  ElemInfo ni(neighbor.get());
+  FaceInfo fi(&ei, 1);
+  fi.computeCoefficients(&ni);
+
   QGauss qrule(1, CONSTANT);
 
   auto elem_arg = ElemArg{elem.get(), false};

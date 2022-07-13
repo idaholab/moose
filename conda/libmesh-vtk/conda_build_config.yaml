@@ -1,5 +1,5 @@
 moose_mpich:
-  - moose-mpich 4.0.1 build_4
+  - moose-mpich 4.0.2 build_0
 
 moose_python:
   - python 3.9

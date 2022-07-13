@@ -27,6 +27,7 @@
     input = 'initial_adaptivity_test.i'
     exodiff = 'initial_adaptivity_test_out.e'
     abs_zero = 1e-08
+    rel_err = 6e-06
     group = 'adaptive'
     max_parallel = 3
 

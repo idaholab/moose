@@ -382,7 +382,7 @@ MooseMesh::update()
   cacheInfo();
   buildElemIDInfo();
 
-  _face_info_dirty = true;
+  _finite_volume_info_dirty = true;
 }
 
 void
@@ -1001,7 +1001,6 @@ MooseMesh::cacheInfo()
   // TODO: Thread this!
   for (const auto & elem : getMesh().element_ptr_range())
   {
-    SubdomainID subdomain_id = elem->subdomain_id();
     const Elem * ip_elem = elem->interior_parent();
 
     if (ip_elem)
@@ -1017,6 +1016,16 @@ MooseMesh::cacheInfo()
       }
     }
 
+    for (unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
+    {
+      Node & node = *elem->node_ptr(nd);
+      _block_node_list[node.id()].insert(elem->subdomain_id());
+    }
+  }
+
+  for (const auto & elem : getMesh().active_local_element_ptr_range())
+  {
+    SubdomainID subdomain_id = elem->subdomain_id();
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
       std::vector<BoundaryID> boundaryids = getBoundaryIDs(elem, side);
@@ -1033,12 +1042,6 @@ MooseMesh::cacheInfo()
         if (neighbor_subdomain_id != subdomain_id)
           _sub_to_neighbor_subs[subdomain_id].insert(neighbor_subdomain_id);
       }
-    }
-
-    for (unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
-    {
-      Node & node = *elem->node_ptr(nd);
-      _block_node_list[node.id()].insert(elem->subdomain_id());
     }
   }
 
@@ -2962,6 +2965,17 @@ MooseMesh::getBoundaryConnectedBlocks(const BoundaryID bid) const
 }
 
 std::set<SubdomainID>
+MooseMesh::getBoundaryConnectedSecondaryBlocks(const BoundaryID bid) const
+{
+  std::set<SubdomainID> subdomain_ids;
+  for (const auto & it : _neighbor_subdomain_boundary_ids)
+    if (it.second.find(bid) != it.second.end())
+      subdomain_ids.insert(it.first);
+
+  return subdomain_ids;
+}
+
+std::set<SubdomainID>
 MooseMesh::getInterfaceConnectedBlocks(const BoundaryID bid) const
 {
   std::set<SubdomainID> subdomain_ids = getBoundaryConnectedBlocks(bid);
@@ -3154,11 +3168,11 @@ MooseMesh::getPointLocator() const
 }
 
 void
-MooseMesh::buildFaceInfo() const
+MooseMesh::buildFiniteVolumeInfo() const
 {
-  if (!_face_info_dirty)
+  if (!_finite_volume_info_dirty)
     return;
-  _face_info_dirty = false;
+  _finite_volume_info_dirty = false;
 
   using Keytype = std::pair<const Elem *, unsigned short int>;
 
@@ -3181,6 +3195,9 @@ MooseMesh::buildFaceInfo() const
   _all_face_info.clear();
   _elem_side_to_face_info.clear();
 
+  _elem_to_elem_info.clear();
+  _elem_to_ghost_info.clear();
+
   // by performing the element ID comparison check in the below loop, we are ensuring that we never
   // double count face contributions. If a face lies along a process boundary, the only process that
   // will contribute to both sides of the face residuals/Jacobians will be the process that owns the
@@ -3188,9 +3205,24 @@ MooseMesh::buildFaceInfo() const
   auto begin = getMesh().active_elements_begin();
   auto end = getMesh().active_elements_end();
 
-  for (auto it = begin; it != end; ++it)
+  // We prepare a map connecting the Elem* and the corresponding ElemInfo
+  // for the active elements.
+  for (const Elem * elem : as_range(begin, end))
   {
-    const Elem * elem = *it;
+    // We fill the vector with the real ElemInfo-s and the corresponding map first
+    _elem_to_elem_info.emplace(elem, elem);
+
+    // Then we fill a map with the ElemInfo shells for the ghost elements
+    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    {
+      const Elem * neighbor = elem->neighbor_ptr(side);
+      if (!neighbor || neighbor == remote_elem)
+        _elem_to_ghost_info.try_emplace(std::make_pair(elem, side));
+    }
+  }
+
+  for (const Elem * elem : as_range(begin, end))
+  {
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       // get the neighbor element
@@ -3204,7 +3236,9 @@ MooseMesh::buildFaceInfo() const
         mooseAssert(!neighbor || (neighbor->level() < elem->level() ? neighbor->active() : true),
                     "If the neighbor is coarser than the element, we expect that the neighbor must "
                     "be active.");
-        _all_face_info.emplace_back(elem, side, neighbor);
+
+        // We construct the faceInfo using the elementinfo and side index
+        _all_face_info.emplace_back(&_elem_to_elem_info[elem], side);
 
         auto & fi = _all_face_info.back();
 
@@ -3212,6 +3246,18 @@ MooseMesh::buildFaceInfo() const
         // in the face info.
         std::set<boundary_id_type> & boundary_ids = fi.boundaryIDs();
         boundary_ids.clear();
+
+        // We initialize the weights/other information in faceInfo. If the neighbor does not exist
+        // or is remote (so when we are on some sort of mesh boundary), we initiualize the ghost
+        // cell and use it to compute the weights corresponding to the faceInfo.
+        if (!neighbor || neighbor == remote_elem)
+        {
+          auto & ghost_cell = _elem_to_ghost_info[std::make_pair(elem, side)];
+          ghost_cell.initialize(_elem_to_elem_info[elem], fi);
+          fi.computeCoefficients(&ghost_cell);
+        }
+        else
+          fi.computeCoefficients(&_elem_to_elem_info[neighbor]);
 
         auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
         if (lit != side_map.end())
@@ -3248,7 +3294,7 @@ MooseMesh::buildFaceInfo() const
 const FaceInfo *
 MooseMesh::faceInfo(const Elem * elem, unsigned int side) const
 {
-  buildFaceInfo();
+  buildFiniteVolumeInfo();
 
   auto it = _elem_side_to_face_info.find(std::make_pair(elem, side));
 
@@ -3264,18 +3310,14 @@ MooseMesh::faceInfo(const Elem * elem, unsigned int side) const
 void
 MooseMesh::computeFaceInfoFaceCoords()
 {
-  if (_face_info_dirty)
+  if (_finite_volume_info_dirty)
     mooseError("Trying to compute face-info coords when the information is dirty");
 
   for (auto & fi : _all_face_info)
   {
     // get elem & neighbor elements, and set subdomain ids
-    const Elem & elem_elem = fi.elem();
-    const Elem * neighbor_elem = fi.neighborPtr();
-    SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
-    SubdomainID neighbor_subdomain_id = Elem::invalid_subdomain_id;
-    if (neighbor_elem && neighbor_elem != remote_elem)
-      neighbor_subdomain_id = neighbor_elem->subdomain_id();
+    const SubdomainID elem_subdomain_id = fi.elemSubdomainID();
+    const SubdomainID neighbor_subdomain_id = fi.neighborSubdomainID();
 
     coordTransformFactor(
         *this, elem_subdomain_id, fi.faceCentroid(), fi.faceCoord(), neighbor_subdomain_id);
@@ -3319,17 +3361,12 @@ MooseMesh::deleteRemoteElements()
 void
 MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & moose_vars)
 {
-  buildFaceInfo();
+  buildFiniteVolumeInfo();
 
   for (FaceInfo & face : _all_face_info)
   {
-    // get elem & neighbor elements, and set subdomain ids
-    const Elem & elem_elem = face.elem();
-    const Elem * const neighbor_elem = face.neighborPtr();
-    const SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
-    const SubdomainID neighbor_subdomain_id = (neighbor_elem && neighbor_elem != remote_elem)
-                                                  ? neighbor_elem->subdomain_id()
-                                                  : Elem::invalid_subdomain_id;
+    const SubdomainID elem_subdomain_id = face.elemSubdomainID();
+    const SubdomainID neighbor_subdomain_id = face.neighborSubdomainID();
 
     // loop through vars
     for (unsigned int j = 0; j < moose_vars.size(); ++j)

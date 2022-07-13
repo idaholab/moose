@@ -190,7 +190,7 @@ Exodus::outputSetup()
     // This makes the face information out-of-date on process 0 for distributed meshes, e.g.
     // elements will have neighbors that they didn't previously have
     if ((this->processor_id() == 0) && !lm_mesh.is_replicated())
-      moose_mesh.faceInfoDirty();
+      moose_mesh.finiteVolumeInfoDirty();
   };
   serialize(_problem_ptr->mesh());
 

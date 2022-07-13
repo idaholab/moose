@@ -12,6 +12,9 @@
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
 #include "MultiDimPolynomialGenerator.h"
+#include "Calculators.h"
+
+typedef StochasticTools::Calculator<std::vector<Real>, Real> RealCalculator;
 
 class PolynomialRegressionTrainer : public SurrogateTrainer
 {
@@ -19,6 +22,8 @@ public:
   static InputParameters validParams();
 
   PolynomialRegressionTrainer(const InputParameters & parameters);
+
+  virtual void preTrain() override;
 
   virtual void train() override;
 
@@ -65,4 +70,10 @@ private:
   DenseMatrix<Real> _matrix;
   std::vector<DenseVector<Real>> _rhs;
   ///@}
+
+  /// Calculators used in standardizing polynomial features.
+  std::vector<std::unique_ptr<RealCalculator>> _calculators;
+
+  /// Calculator used to sum response values.
+  std::vector<Real> _r_sum;
 };
