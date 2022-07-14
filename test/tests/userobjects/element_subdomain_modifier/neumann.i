@@ -25,12 +25,19 @@
     block_name = void
     top_right = '1 1 0'
   []
-  [interface]
+  [interface_12]
     type = SideSetsBetweenSubdomainsGenerator
     input = void_domain
     primary_block = 1
     paired_block = 2
-    new_boundary = 'phase_interface'
+    new_boundary = 'phase_interface_12'
+  []
+  [interface_21]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = interface_21
+    primary_block = 2
+    paired_block = 1
+    new_boundary = 'phase_interface_21'
   []
 []
 
@@ -42,7 +49,8 @@
     criterion_type = BELOW
     threshold = 9
     subdomain_id = 2
-    moving_boundary_name = 'phase_interface'
+    moving_boundary_name = 'phase_interface_21'
+    complement_moving_boundary_name = 'phase_interface_12'
     apply_initial_conditions = false
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
@@ -67,10 +75,11 @@
     block = 'material'
   []
 []
+
 [BCs]
   [flux]
     type = NeumannBC
-    boundary = 'phase_interface'
+    boundary = 'phase_interface_12'
     variable = phi
     value = -5e-3
   []
@@ -102,7 +111,7 @@
   [surface_flux]
     type = SideDiffusiveFluxAverage
     variable = phi
-    boundary = 'phase_interface'
+    boundary = 'phase_interface_12'
     diffusivity = 1e-5
   []
 []

@@ -19,12 +19,6 @@ ThresholdElementSubdomainModifier::validParams()
   params.addParam<MooseEnum>("criterion_type",
                              MooseEnum("BELOW EQUAL ABOVE", "ABOVE"),
                              "Criterion to use for the threshold");
-  params.addRequiredParam<SubdomainID>("subdomain_id",
-                                       "The subdomain ID of the element when the criterion is met");
-  params.addParam<SubdomainID>(
-      "complement_subdomain_id",
-      "The subdomain ID of the element when the criterion is not met. If not provided, the element "
-      "subdomain ID will not be modified if the criterion is not met.");
   return params;
 }
 
@@ -32,11 +26,7 @@ ThresholdElementSubdomainModifier::ThresholdElementSubdomainModifier(
     const InputParameters & parameters)
   : ElementSubdomainModifier(parameters),
     _threshold(getParam<Real>("threshold")),
-    _criterion_type(getParam<MooseEnum>("criterion_type").getEnum<CriterionType>()),
-    _subdomain_id(getParam<SubdomainID>("subdomain_id")),
-    _complement_subdomain_id(isParamValid("complement_subdomain_id")
-                                 ? getParam<SubdomainID>("complement_subdomain_id")
-                                 : std::numeric_limits<SubdomainID>::max())
+    _criterion_type(getParam<MooseEnum>("criterion_type").getEnum<CriterionType>())
 {
 }
 

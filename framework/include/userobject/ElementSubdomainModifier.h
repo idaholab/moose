@@ -38,14 +38,6 @@ protected:
     return _moving_boundary_id;
   }
 
-  // The name of the moving boundary that this object creates/modifies.
-  const BoundaryName movingBoundaryName() const
-  {
-    if (!_moving_boundary_specified)
-      mooseError("no moving boundary specified");
-    return _moving_boundary_name;
-  }
-
   // Range of the elements who changed their subdomain ID
   ConstElemRange & movedElemsRange() const { return *_moved_elems_range; }
 
@@ -55,9 +47,19 @@ protected:
   // Pointer to the displaced problem
   DisplacedProblem * _displaced_problem;
 
+  /// Target subdomain ID
+  const SubdomainID _subdomain_id;
+  const SubdomainID _complement_subdomain_id;
+
+  /// The Id of the moving boundary
+  BoundaryID _moving_boundary_id;
+
+  /// The Id of the complement moving boundary
+  BoundaryID _complement_moving_boundary_id;
+
 private:
   // Set the name of the moving boundary. Create the nodeset/sideset if not exist.
-  void setMovingBoundaryName(MooseMesh & mesh);
+  void setMovingBoundaryName(MooseMesh & mesh, const BoundaryName name, BoundaryID & id);
 
   // Update the moving boundary (both the underlying sideset and nodeset)
   void updateBoundaryInfo(MooseMesh & mesh, const std::vector<const Elem *> & moved_elems);
@@ -102,15 +104,12 @@ private:
   // Range of the boundary nodes on the moved elements
   std::unique_ptr<ConstBndNodeRange> _moved_bnd_nodes_range;
 
-  // Whether to re-apply ICs on moved elements and moved nodes
-  const bool _apply_ic;
-
   /// Whether a moving boundary name is provided
   const bool _moving_boundary_specified;
 
-  /// The name of the moving boundary
-  BoundaryName _moving_boundary_name;
+  /// Whether a complement moving boundary name is provided
+  const bool _complement_moving_boundary_specified;
 
-  /// The Id of the moving boundary
-  BoundaryID _moving_boundary_id;
+  // Whether to re-apply ICs on moved elements and moved nodes
+  const bool _apply_ic;
 };

@@ -31,8 +31,4 @@ private:
 
   /// Criterion type
   const enum class CriterionType { Below, Equal, Above } _criterion_type;
-
-  /// Target subdomain ID
-  const SubdomainID _subdomain_id;
-  const SubdomainID _complement_subdomain_id;
 };

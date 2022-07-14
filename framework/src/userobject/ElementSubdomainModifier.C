@@ -26,10 +26,22 @@ ElementSubdomainModifier::validParams()
   params.addParam<bool>("apply_initial_conditions",
                         true,
                         "Whether to apply initial conditions on the moved nodes and elements");
+  params.addRequiredParam<SubdomainID>("subdomain_id",
+                                       "The subdomain ID of the element when the criterion is met");
+  params.addParam<SubdomainID>(
+      "complement_subdomain_id",
+      "The subdomain ID of the element when the criterion is not met. If not provided, the element "
+      "subdomain ID will not be modified if the criterion is not met.");
   params.addParam<BoundaryName>(
       "moving_boundary_name",
-      "Boundary to modify when an element is moved. A boundary with the provided name will be "
+      "Boundary to modify when an element is moved. The boundary will be a one-sided side set on "
+      "the subdomain specified by subdomain_id. A boundary with the provided name will be "
       "created if not already exists on the mesh.");
+  params.addParam<BoundaryName>(
+      "complement_moving_boundary_name",
+      "Complement boundary to modify when an element is moved. The boundary will be a one-sided "
+      "side set on the complement subdomain specified by complement_subdomain_id. A boundary with "
+      "the provided name will be created if not already exists on the mesh.");
   params.set<bool>("use_displaced_mesh") = false;
   params.suppressParameter<bool>("use_displaced_mesh");
   return params;
@@ -38,9 +50,17 @@ ElementSubdomainModifier::validParams()
 ElementSubdomainModifier::ElementSubdomainModifier(const InputParameters & parameters)
   : ElementUserObject(parameters),
     _displaced_problem(_fe_problem.getDisplacedProblem().get()),
-    _apply_ic(getParam<bool>("apply_initial_conditions")),
-    _moving_boundary_specified(isParamValid("moving_boundary_name"))
+    _subdomain_id(getParam<SubdomainID>("subdomain_id")),
+    _complement_subdomain_id(isParamValid("complement_subdomain_id")
+                                 ? getParam<SubdomainID>("complement_subdomain_id")
+                                 : std::numeric_limits<SubdomainID>::max()),
+    _moving_boundary_specified(isParamValid("moving_boundary_name")),
+    _complement_moving_boundary_specified(isParamValid("complement_moving_boundary_name")),
+    _apply_ic(getParam<bool>("apply_initial_conditions"))
 {
+  if (_complement_moving_boundary_specified && !_moving_boundary_specified)
+    paramError("complement_moving_boundary_name",
+               "A complement moving boundary name is specified without a moving boundary name.");
 }
 
 void
@@ -48,23 +68,37 @@ ElementSubdomainModifier::initialSetup()
 {
   if (_moving_boundary_specified)
   {
-    _moving_boundary_name = getParam<BoundaryName>("moving_boundary_name");
-    setMovingBoundaryName(_mesh);
+    const BoundaryName moving_boundary_name = getParam<BoundaryName>("moving_boundary_name");
+    setMovingBoundaryName(_mesh, moving_boundary_name, _moving_boundary_id);
     if (_displaced_problem)
-      setMovingBoundaryName(_displaced_problem->mesh());
+      setMovingBoundaryName(_displaced_problem->mesh(), moving_boundary_name, _moving_boundary_id);
+
+    // Set/create the complement moving boundary
+    if (_complement_moving_boundary_specified)
+    {
+      const BoundaryName complement_moving_boundary_name =
+          getParam<BoundaryName>("complement_moving_boundary_name");
+      setMovingBoundaryName(_mesh, complement_moving_boundary_name, _complement_moving_boundary_id);
+      if (_displaced_problem)
+        setMovingBoundaryName(_displaced_problem->mesh(),
+                              complement_moving_boundary_name,
+                              _complement_moving_boundary_id);
+    }
   }
 }
 
 void
-ElementSubdomainModifier::setMovingBoundaryName(MooseMesh & mesh)
+ElementSubdomainModifier::setMovingBoundaryName(MooseMesh & mesh,
+                                                const BoundaryName name,
+                                                BoundaryID & id)
 {
   // We only need one boundary to modify. Create a dummy vector just to use the API.
-  const std::vector<BoundaryID> boundary_ids = mesh.getBoundaryIDs({{_moving_boundary_name}}, true);
+  const std::vector<BoundaryID> boundary_ids = mesh.getBoundaryIDs({{name}}, true);
   mooseAssert(boundary_ids.size() == 1, "Expect exactly one boundary ID.");
-  _moving_boundary_id = boundary_ids[0];
-  mesh.setBoundaryName(_moving_boundary_id, _moving_boundary_name);
-  mesh.getMesh().get_boundary_info().sideset_name(_moving_boundary_id) = _moving_boundary_name;
-  mesh.getMesh().get_boundary_info().nodeset_name(_moving_boundary_id) = _moving_boundary_name;
+  id = boundary_ids[0];
+  mesh.setBoundaryName(_moving_boundary_id, name);
+  mesh.getMesh().get_boundary_info().sideset_name(_moving_boundary_id) = name;
+  mesh.getMesh().get_boundary_info().nodeset_name(_moving_boundary_id) = name;
 }
 
 void
@@ -196,8 +230,11 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
         if (neighbor->subdomain_id() != elem->subdomain_id())
         {
           bnd_info.add_side(elem, side, _moving_boundary_id);
-          unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
-          bnd_info.add_side(neighbor, neighbor_side, _moving_boundary_id);
+          if (_complement_moving_boundary_specified)
+          {
+            unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
+            bnd_info.add_side(neighbor, neighbor_side, _complement_moving_boundary_id);
+          }
         }
         // Otherwise remove this side and the neighbor side from the boundary.
         else
