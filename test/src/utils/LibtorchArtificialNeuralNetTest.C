@@ -58,7 +58,7 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
   // This is our prediction for the test input
   torch::Tensor prediction = nn->forward(input);
   // We compute the loss
-  torch::Tensor loss = torch::mse_loss(prediction.reshape({prediction.size(0)}), output);
+  torch::Tensor loss = torch::mse_loss(prediction, output);
   // We propagate the error back to compute gradient
   loss.backward();
   // We update the weights using the computed gradients
@@ -67,7 +67,7 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
   optimizer.zero_grad();
   prediction = nn->forward(input);
 
-  _console << "My prediction: " << prediction << std::endl;
+  _console << "My prediction: " << prediction.item<double>() << std::endl;
 
 #endif
 }
