@@ -36,6 +36,10 @@ Poly2TriMeshGenerator::validParams()
                                 "How many more nodes to add in each outer boundary segment.");
   params.addParam<bool>(
       "refine_boundary", true, "Whether to allow automatically refining the outer boundary.");
+
+  params.addParam<subdomain_id_type>("block_id", 0, "Subdomain id to set on new triangles.");
+  params.addParam<SubdomainName>("block_name", "Subdomain name to set on new triangles.");
+
   params.addParam<bool>("smooth_triangulation",
                         false,
                         "Whether to do Laplacian mesh smoothing on the generated triangles.");
@@ -70,6 +74,7 @@ Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
     _bdy_ptr(getMesh("boundary")),
     _add_nodes_per_boundary_segment(getParam<unsigned int>("add_nodes_per_boundary_segment")),
     _refine_bdy(getParam<bool>("refine_boundary")),
+    _block_id(getParam<subdomain_id_type>("block_id")),
     _smooth_tri(getParam<bool>("smooth_triangulation")),
     _hole_ptrs(getMeshes("holes")),
     _stitch_holes(getParam<std::vector<bool>>("stitch_holes")),
@@ -129,21 +134,31 @@ Poly2TriMeshGenerator::generate()
 
   poly2tri.triangulate();
 
-  // I do not trust Laplacian mesh smoothing not to invert elements
-  // near reentrant corners.  Eventually we'll add better smoothing
-  // options, but even those might have failure cases.  Better to
-  // always do an extra loop here than to ever let users try to run on
-  // a degenerate mesh.
-  if (_smooth_tri)
+  if (_smooth_tri || _block_id)
     for (auto elem : mesh->element_ptr_range())
     {
       mooseAssert(elem->type() == TRI3, "Unexpected non-Tri3 found in triangulation");
-      auto cross_prod = (elem->point(1) - elem->point(0)).cross(elem->point(2) - elem->point(0));
 
-      if (cross_prod(2) <= 0)
-        mooseError("Inverted element found in triangulation.\n"
-                   "Laplacian smoothing can create these at reentrant corners; disable it?");
+      elem->subdomain_id() = _block_id;
+
+      // I do not trust Laplacian mesh smoothing not to invert
+      // elements near reentrant corners.  Eventually we'll add better
+      // smoothing options, but even those might have failure cases.
+      // Better to always do extra tests here than to ever let users
+      // try to run on a degenerate mesh.
+      if (_smooth_tri)
+      {
+        auto cross_prod = (elem->point(1) - elem->point(0)).cross(elem->point(2) - elem->point(0));
+
+        if (cross_prod(2) <= 0)
+          mooseError("Inverted element found in triangulation.\n"
+                     "Laplacian smoothing can create these at reentrant corners; disable it?");
+      }
     }
+
+  // Assign new subdomain name, if provided
+  if (isParamValid("block_name"))
+    mesh->subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
 
   const bool use_binary_search = (_algorithm == "BINARY");
 

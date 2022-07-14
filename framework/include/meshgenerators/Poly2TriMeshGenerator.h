@@ -35,6 +35,9 @@ protected:
   /// Whether to allow automatically refining the outer boundary
   const bool _refine_bdy;
 
+  /// What subdomain_id to set on the generated triangles
+  const bool _block_id;
+
   /// Whether to do Laplacian mesh smoothing on the generated triangles
   const bool _smooth_tri;
 
