@@ -17,7 +17,7 @@ template <bool is_ad>
 InputParameters
 ComputeMeanThermalExpansionFunctionEigenstrainTempl<is_ad>::validParams()
 {
-  InputParameters params = ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::validParams();
+  InputParameters params = ComputeMeanThermalExpansionEigenstrainBaseTempl<is_ad>::validParams();
   params.addClassDescription("Computes eigenstrain due to thermal expansion using a function that "
                              "describes the mean thermal expansion as a function of temperature");
   params.addRequiredParam<FunctionName>(
