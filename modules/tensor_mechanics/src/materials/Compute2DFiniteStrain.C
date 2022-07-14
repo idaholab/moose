@@ -79,7 +79,14 @@ Compute2DFiniteStrain::computeProperties()
     _deformation_gradient[_qp] = A;
     _deformation_gradient[_qp].addIa(1.0);
 
+    // deformation gradient midpoint
+    _def_grad_mid[_qp].setToIdentity();
+    _def_grad_mid[_qp] += 0.5*(A + Fbar);
+
     A -= Fbar; // very nearly A = gradU - gradUold
+
+    // _f_bar = dDU/dX_o
+    _f_bar[_qp] = A;
 
     Fbar.addIa(1.0); // Fbar = ( I + gradUold)
 
