@@ -1,65 +1,77 @@
 [Tests]
-  [./constant]
+  [constant]
     issues = '#13634'
-    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
-    requirement = 'The system shall compute an eigenstrain due to '
-                  'thermal expansion using a function that describes a constant mean and instantaneous '
-                  'thermal expansion'
-    [./finite]
+    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md '
+             'ComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
+    requirement = 'The system shall compute an eigenstrain due to thermal expansion using a function '
+                  'that describes a constant mean and instantaneous thermal expansion'
+    [finite]
       type = CSVDiff
       input = 'finite_const.i'
       csvdiff = 'finite_const_out.csv'
       detail = 'using finite strain formulation'
-    [../]
-    [./small_const]
+    []
+    [small_const]
       type = CSVDiff
       input = 'small_const.i'
       csvdiff = 'small_const_out.csv'
       detail = 'using small strain formulation'
-    [../]
-  [../]
-  [./linear]
+    []
+  []
+  [linear]
     issues = '#13634'
-    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
-    requirement = 'The system shall compute an eigenstrain due to '
-                  'thermal expansion using a function that describes a mean and instantaneous '
-                  'thermal expansion with a linear relationship to temperature'
-    [./finite]
+    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md '
+             'ComputeInstantaneousThermalExpansionFunctionEigenstrain.md'
+    requirement = 'The system shall compute an eigenstrain due to thermal expansion using a function '
+                  'that describes a mean and instantaneous thermal expansion with a linear '
+                  'relationship to temperature'
+    [finite]
       type = CSVDiff
       input = 'finite_linear.i'
       csvdiff = 'finite_linear_out.csv'
       detail = 'using finite strain formulation'
-    [../]
-    [./small_const]
+    []
+    [small_const]
       type = CSVDiff
       input = 'small_linear.i'
       csvdiff = 'small_linear_out.csv'
       detail = 'using small strain formulation'
-    [../]
-  [../]
-  [./individual]
-    issues = '#13634 #14595'
-    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md ComputeInstantaneousThermalExpansionFunctionEigenstrain.md ComputeDilatationThermalExpansionFunctionEigenstrain.md'
+    []
+  []
+  [individual]
+    issues = '#13634 #14595 #21412'
+    design = 'ComputeMeanThermalExpansionFunctionEigenstrain.md '
+             'ComputeInstantaneousThermalExpansionFunctionEigenstrain.md '
+             'ComputeDilatationThermalExpansionFunctionEigenstrain.md'
     requirement = 'The system shall compute an eigenstrain due and allow a smooth transition from
-                   negative to positive strain across the reference temperature and compare favorably
+   '
+                  '                negative to positive strain across the reference temperature and '
+                  'compare favorably
                    to hand calculations'
-    [./mean]
+    [mean]
       type = CSVDiff
       input = 'mean.i'
       csvdiff = 'mean_out.csv'
       detail = 'using a mean thermal expansion coefficient'
-    [../]
-    [./instantaneous]
+    []
+    [mean_scaling]
+      type = CSVDiff
+      input = 'mean.i'
+      cli_args = 'Outputs/file_base=mean_scaling_out Materials/thermal_expansion_strain/thermal_expansion_scale_factor=1.1'
+      csvdiff = 'mean_scaling_out.csv'
+      detail = 'using a mean thermal expansion coefficient with a scaling factor for sensitivity studies'
+    []
+    [instantaneous]
       type = CSVDiff
       input = 'instantaneous.i'
       csvdiff = 'instantaneous_out.csv'
       detail = 'using a instantaneous thermal expansion coefficient'
-    [../]
-    [./dilatation]
+    []
+    [dilatation]
       type = CSVDiff
       input = 'dilatation.i'
       csvdiff = 'dilatation_out.csv'
       detail = 'using a dilatation thermal expansion coefficient'
-    [../]
-  [../]
+    []
+  []
 []
