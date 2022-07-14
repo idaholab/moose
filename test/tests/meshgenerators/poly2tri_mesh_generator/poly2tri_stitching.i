@@ -7,7 +7,7 @@
               0.0 2.0 0.0'
     loop = true
   []
-  [./hole_1_sbd_0]
+  [./hole_1]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 3
@@ -17,12 +17,7 @@
     ymin = -0.1
     ymax = 0.1
   []
-  [./hole_1]
-    type = SubdomainIDGenerator
-    input = hole_1_sbd_0
-    subdomain_id = 1 # Exodus dislikes quad ids matching tri ids
-  []
-  [./hole_2_sbd_0]
+  [./hole_2]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 3
@@ -31,11 +26,6 @@
     xmax = 0.5
     ymin = -0.1
     ymax = 0.1
-  []
-  [./hole_2]
-    type = SubdomainIDGenerator
-    input = hole_2_sbd_0
-    subdomain_id = 1
   []
   [./triang]
     type = Poly2TriMeshGenerator
@@ -49,6 +39,8 @@
     add_nodes_per_boundary_segment = 3
     refine_boundary = false
     desired_area = 0.05
+    block_id = 1
+    block_name = "triangles"
   []
 []
 
