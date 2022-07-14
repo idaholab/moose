@@ -60,6 +60,13 @@ public:
 protected:
   const NumericVector<Number> & _soln;
 
+  /// Print information about the loop, mostly order of execution of objects
+  void printExecutionInformation() const override;
+
+  /// Format output of vector of UOs
+  template <typename T>
+  void printVectorOrdering(std::vector<T *> uos, std::string name) const;
+
 private:
   template <typename T>
   void querySubdomain(Interfaces iface, std::vector<T> & results)

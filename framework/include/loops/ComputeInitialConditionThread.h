@@ -28,6 +28,9 @@ public:
   void join(const ComputeInitialConditionThread & /*y*/);
 
 protected:
+  /// Print information about the loop, mostly order of execution of objects
+  void printExecutionInformation() const;
+
   FEProblemBase & _fe_problem;
   THREAD_ID _tid;
 };

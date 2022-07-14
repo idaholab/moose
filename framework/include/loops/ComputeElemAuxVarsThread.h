@@ -39,6 +39,9 @@ public:
   void join(const ComputeElemAuxVarsThread & /*y*/);
 
 protected:
+  // Print list of objects executed and in which order
+  void printExecutionInformation() const override;
+
   AuxiliarySystem & _aux_sys;
 
   /// Storage object containing active AuxKernel objects

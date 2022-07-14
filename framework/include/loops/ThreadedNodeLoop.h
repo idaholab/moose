@@ -72,9 +72,7 @@ protected:
   FEProblemBase & _fe_problem;
   THREAD_ID _tid;
 
-  /**
-   * Print information about the loop, mostly order of execution of objects
-   */
+  /// Print information about the loop, mostly order of execution of objects
   virtual void printExecutionInformation() const {};
 };
 
@@ -100,8 +98,8 @@ ThreadedNodeLoop<RangeType, IteratorType>::operator()(const RangeType & range)
     ParallelUniqueId puid;
     _tid = puid.id;
 
-    printExecutionInformation();
     pre();
+    printExecutionInformation();
 
     for (IteratorType nd = range.begin(); nd != range.end(); ++nd)
     {

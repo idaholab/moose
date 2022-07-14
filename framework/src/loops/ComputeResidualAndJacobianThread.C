@@ -115,3 +115,62 @@ ComputeResidualAndJacobianThread::determineResidualObjects()
         .queryInto(_fv_kernels);
   }
 }
+
+void
+ComputeResidualAndJacobianThread::printExecutionInformation() const
+{
+  // Number of objects executing is approximated by size of warehouses
+  int num_objects = _kernels.size() + _fv_kernels.size() + _integrated_bcs.size() +
+                    _dg_kernels.size() + _interface_kernels.size();
+  if (_fe_problem.shouldPrintExecution() && num_objects > 0)
+  {
+    auto console = _fe_problem.console();
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Beginning Elemental loop to compute residual and Jacobian on " << execute_on
+            << std::endl;
+    console << "[DBG] Execution order on each element:" << std::endl;
+    if (_kernels.hasActiveObjects())
+      console << "[DBG] - kernels on element quadrature points" << std::endl;
+    if (_fv_kernels.size())
+      console << "[DBG] - finite volume elemental kernels on element" << std::endl;
+    if (_integrated_bcs.hasActiveObjects())
+      console << "[DBG] - integrated boundary conditions on element side quadrature points"
+              << std::endl;
+    if (_dg_kernels.hasActiveObjects())
+      console << "[DBG] - DG kernels on element side quadrature points" << std::endl;
+    if (_interface_kernels.hasActiveObjects())
+      console << "[DBG] - interface kernels on element side quadrature points" << std::endl;
+
+    if (_kernels.hasActiveObjects())
+    {
+      console << "[DBG] Ordering of kernels" << std::endl;
+      console << "[DBG] " << _kernels.activeObjectsToString() << std::endl;
+    }
+    if (_fv_kernels.size())
+    {
+      console << "[DBG] Ordering of FV elemental kernels:" << std::endl;
+      std::string fvkernels =
+          std::accumulate(_fv_kernels.begin() + 1,
+                          _fv_kernels.end(),
+                          _fv_kernels[0]->name(),
+                          [](const std::string & str_out, FVElementalKernel * kernel)
+                          { return str_out + " " + kernel->name(); });
+      console << "[DBG] " << fvkernels << std::endl;
+    }
+    if (_dg_kernels.hasActiveObjects())
+    {
+      console << "[DBG] Ordering of DG kernels:" << std::endl;
+      console << "[DBG] " << _dg_kernels.activeObjectsToString() << std::endl;
+    }
+    if (_integrated_bcs.hasActiveObjects())
+    {
+      console << "[DBG] Ordering of boundary conditions:" << std::endl;
+      console << "[DBG] " << _integrated_bcs.activeObjectsToString() << std::endl;
+    }
+    if (_interface_kernels.hasActiveObjects())
+    {
+      console << "[DBG] Ordering of interface kernels:" << std::endl;
+      console << "[DBG] " << _interface_kernels.activeObjectsToString() << std::endl;
+    }
+  }
+}

@@ -37,6 +37,7 @@ ComputeThreadedGeneralUserObjectsThread::operator()(const GeneralUserObjectRange
 {
   try
   {
+    printExecutionInformation(range);
     for (auto it = range.begin(); it != range.end(); ++it)
     {
       auto & tguo = *it;
@@ -46,5 +47,22 @@ ComputeThreadedGeneralUserObjectsThread::operator()(const GeneralUserObjectRange
   catch (MooseException & e)
   {
     caughtMooseException(e);
+  }
+}
+
+void
+ComputeThreadedGeneralUserObjectsThread::printExecutionInformation(
+    const GeneralUserObjectRange & range) const
+{
+  if (_fe_problem.shouldPrintExecution() && range.size())
+  {
+    auto console = _fe_problem.console();
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Executing General User Objects on " << execute_on << std::endl;
+    console << "[DBG] Order of execution:" << std::endl;
+    std::string threaded_uos = "";
+    for (auto it = range.begin(); it != range.end(); ++it)
+      threaded_uos += (*it)->name() + " ";
+    console << "[DBG] " << threaded_uos << std::endl;
   }
 }

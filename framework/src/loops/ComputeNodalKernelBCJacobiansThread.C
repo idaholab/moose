@@ -141,3 +141,19 @@ void
 ComputeNodalKernelBCJacobiansThread::join(const ComputeNodalKernelBCJacobiansThread & /*y*/)
 {
 }
+
+void
+ComputeNodalKernelBCJacobiansThread::printExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution() && _nkernel_warehouse->hasActiveBoundaryObjects())
+  {
+    auto console = _fe_problem.console();
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Computing nodal kernel & boundary conditions contribution to the Jacobian on "
+               "boundary nodes on "
+            << execute_on << std::endl;
+    // TODO: Seems to be only nodal kernels?
+    console << "[DBG] Ordering on boundaries they are defined on:" << std::endl;
+    console << "[DBG] " << _nkernel_warehouse->activeObjectsToString() << std::endl;
+  }
+}

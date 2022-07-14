@@ -112,6 +112,9 @@ public:
   virtual void caughtMooseException(MooseException &) {}
 
 protected:
+  /// Print list of objects executed and in which order
+  virtual void printExecutionInformation() const {};
+
   FEProblemBase & _fe_problem;
   MooseMesh & _mesh;
   const std::set<TagID> & _tags;
@@ -218,6 +221,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
       _tid = bypass_threading ? 0 : puid.id;
 
       pre();
+      printExecutionInformation();
 
       _subdomain = Moose::INVALID_BLOCK_ID;
       _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
@@ -341,6 +345,9 @@ private:
   static void emptyDifferenceTest(const std::set<unsigned int> & requested,
                                   const std::set<unsigned int> & supplied,
                                   std::set<unsigned int> & difference);
+
+  /// Print list of objects executed and in which order
+  void printExecutionInformation() const override;
 
   /// Variables
   std::set<MooseVariableFieldBase *> _fv_vars;
@@ -970,5 +977,25 @@ ComputeFVFluxRJThread<RangeType>::postFace(const FaceInfo & /*fi*/)
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     _fe_problem.addCachedResidual(_tid);
     _fe_problem.addCachedJacobian(_tid);
+  }
+}
+
+template <typename RangeType, typename AttributeTagType>
+void
+ComputeFVFluxThread<RangeType, AttributeTagType>::printExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution() && _fv_flux_kernels.size())
+  {
+    auto console = _fe_problem.console();
+    console << "Beginning finite volume flux kernels loop" << std::endl;
+
+    console << "Flux kernels, in any order, (on the faces they are defined on):" << std::endl;
+    std::string fv_flux_kernels =
+        std::accumulate(_fv_flux_kernels.begin(),
+                        _fv_flux_kernels.end(),
+                        std::string(""),
+                        [](const std::string & str_out, FVFluxKernel * kernel)
+                        { return str_out + " " + kernel->name(); });
+    console << fv_flux_kernels << std::endl;
   }
 }

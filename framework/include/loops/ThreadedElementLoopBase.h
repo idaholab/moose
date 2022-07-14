@@ -166,9 +166,7 @@ protected:
   /// The subdomain for the last neighbor
   SubdomainID _old_neighbor_subdomain;
 
-  /**
-   * Print information about the loop, mostly order of execution of objects
-   */
+  /// Print information about the loop, mostly order of execution of objects
   virtual void printExecutionInformation() const {};
 
 private:
@@ -209,8 +207,8 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
       ParallelUniqueId puid;
       _tid = bypass_threading ? 0 : puid.id;
 
-      printExecutionInformation();
       pre();
+      printExecutionInformation();
 
       _subdomain = Moose::INVALID_BLOCK_ID;
       _neighbor_subdomain = Moose::INVALID_BLOCK_ID;

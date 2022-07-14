@@ -43,6 +43,9 @@ protected:
   void accumulate() override;
   void determineResidualObjects() override;
 
+  /// Print information about the loop, mostly order of execution of objects
+  void printExecutionInformation() const override;
+
   /// the tags denoting the vectors we want our residual objects to fill
   const std::set<TagID> & _vector_tags;
 

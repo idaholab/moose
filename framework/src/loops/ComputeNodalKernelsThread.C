@@ -98,3 +98,17 @@ void
 ComputeNodalKernelsThread::join(const ComputeNodalKernelsThread & /*y*/)
 {
 }
+
+void
+ComputeNodalKernelsThread::printExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution() && _nkernel_warehouse->hasActiveObjects())
+  {
+    auto console = _fe_problem.console();
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Computing nodal kernels contribution to residual on nodes on " << execute_on
+            << std::endl;
+    console << "[DBG] Ordering of the nodal kernels on the nodes they are defined on:" << std::endl;
+    console << "[DBG] " << _nkernel_warehouse->activeObjectsToString() << std::endl;
+  }
+}

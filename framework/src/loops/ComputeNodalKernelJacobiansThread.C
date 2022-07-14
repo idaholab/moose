@@ -138,3 +138,17 @@ void
 ComputeNodalKernelJacobiansThread::join(const ComputeNodalKernelJacobiansThread & /*y*/)
 {
 }
+
+void
+ComputeNodalKernelJacobiansThread::printExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution() && _nkernel_warehouse->hasActiveObjects())
+  {
+    auto console = _fe_problem.console();
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Executing nodal kernels contribution to Jacobian on nodes on " << execute_on
+            << std::endl;
+    console << "[DBG] Ordering of the nodal kernels on the nodes they are defined on:" << std::endl;
+    console << "[DBG] " << _nkernel_warehouse->activeObjectsToString() << std::endl;
+  }
+}

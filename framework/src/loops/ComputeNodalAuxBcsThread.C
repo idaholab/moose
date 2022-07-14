@@ -83,6 +83,21 @@ ComputeNodalAuxBcsThread<AuxKernelType>::join(const ComputeNodalAuxBcsThread & /
 {
 }
 
+template <typename AuxKernelType>
+void
+ComputeNodalAuxBcsThread<AuxKernelType>::printExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution() && _storage.hasActiveObjects())
+  {
+    auto console = _fe_problem.console();
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Executing nodal auxiliary kernels on boundary nodes on " << execute_on
+            << std::endl;
+    console << "[DBG] Ordering of the kernels on each boundary they are defined on:" << std::endl;
+    console << "[DBG] " << _storage.activeObjectsToString() << std::endl;
+  }
+}
+
 template class ComputeNodalAuxBcsThread<AuxKernel>;
 template class ComputeNodalAuxBcsThread<VectorAuxKernel>;
 template class ComputeNodalAuxBcsThread<ArrayAuxKernel>;

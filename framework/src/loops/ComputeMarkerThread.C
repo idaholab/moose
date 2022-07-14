@@ -108,3 +108,16 @@ void
 ComputeMarkerThread::join(const ComputeMarkerThread & /*y*/)
 {
 }
+
+void
+ComputeMarkerThread::printExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution() && _marker_whs.hasActiveObjects())
+  {
+    auto console = _fe_problem.console();
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Beginning elemental loop to compute Markers on " << execute_on << std::endl;
+    console << "[DBG] Execution order on each element:" << std::endl;
+    console << "[DBG] " << _marker_whs.activeObjectsToString() << std::endl;
+  }
+}

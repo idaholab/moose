@@ -22,6 +22,7 @@
 #include "MaterialBase.h"
 #include "DomainUserObject.h"
 #include "AuxiliarySystem.h"
+#include "MooseTypes.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -320,4 +321,92 @@ ComputeUserObjectsThread::post()
 void
 ComputeUserObjectsThread::join(const ComputeUserObjectsThread & /*y*/)
 {
+}
+
+void
+ComputeUserObjectsThread::printExecutionInformation() const
+{
+  // Gather all user objects that may execute
+  std::vector<ShapeSideUserObject *> shapers;
+  const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
+      Interfaces::ShapeSideUserObject, Moose::ANY_BOUNDARY_ID, shapers);
+
+  std::vector<UserObject *> side_uos;
+  const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
+      Interfaces::SideUserObject, Moose::ANY_BOUNDARY_ID, side_uos);
+
+  std::vector<const UserObject *> domain_interface_uos;
+  for (const auto * const domain_uo : _domain_objs)
+    if (domain_uo->shouldExecuteOnInterface())
+      domain_interface_uos.push_back(domain_uo);
+
+  // Approximation of the number of user objects currently executing
+  int num_objects = _element_objs.size() + _domain_objs.size() + _shape_element_objs.size() +
+                    side_uos.size() + shapers.size() + _internal_side_objs.size() +
+                    _interface_user_objects.size() + domain_interface_uos.size();
+
+  if (_fe_problem.shouldPrintExecution() && num_objects > 0)
+  {
+    auto console = _fe_problem.console();
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Computing elemental user objects on " << execute_on << std::endl;
+    console << "[DBG] Execution order on each element:" << std::endl;
+    // onElement
+    if (_element_objs.size())
+      console << "[DBG] - element user objects" << std::endl;
+    if (_domain_objs.size())
+      console << "[DBG] - domain user objects" << std::endl;
+    if (_fe_problem.currentlyComputingJacobian() && _shape_element_objs.size())
+      console << "[DBG] - element user objects contributing to the Jacobian" << std::endl;
+
+    // onBoundary
+    if (side_uos.size())
+      console << "[DBG] - side user objects" << std::endl;
+    if (_domain_objs.size())
+      console << "[DBG] - domain user objects executing on sides" << std::endl;
+    if (_fe_problem.currentlyComputingJacobian() && shapers.size())
+      console << "[DBG] - side user objects contributing to the Jacobian" << std::endl;
+
+    // onInternalSide
+    if (_internal_side_objs.size())
+      console << "[DBG] - internal side user objects" << std::endl;
+    if (_domain_objs.size())
+      console << "[DBG] - domain user objects executing on internal sides" << std::endl;
+
+    // onInterface
+    if (_interface_user_objects.size())
+      console << "[DBG] - interface user objects" << std::endl;
+    if (domain_interface_uos.size())
+      console << "[DBG] - domain user objects executing at interfaces" << std::endl;
+
+    // Output specific ordering of objects
+    printVectorOrdering<ElementUserObject>(_element_objs, "element user objects");
+    printVectorOrdering<DomainUserObject>(_domain_objs, "domain user objects");
+    if (_fe_problem.currentlyComputingJacobian())
+      printVectorOrdering<ShapeElementUserObject>(
+          _shape_element_objs, "element user objects contributing to the Jacobian");
+    printVectorOrdering<UserObject>(side_uos, "side user objects");
+    if (_fe_problem.currentlyComputingJacobian())
+      printVectorOrdering<ShapeSideUserObject>(shapers,
+                                               "side user objects contributing to the Jacobian");
+    printVectorOrdering<InternalSideUserObject>(_internal_side_objs, "internal side user objects");
+    printVectorOrdering<InterfaceUserObject>(_interface_user_objects, "interface user objects");
+    console << "[DBG] Only user objects active on local element/sides are executed" << std::endl;
+  }
+}
+
+template <typename T>
+void
+ComputeUserObjectsThread::printVectorOrdering(std::vector<T *> uos, std::string name) const
+{
+  if (uos.size())
+  {
+    auto console = _fe_problem.console();
+    const auto make_name = [](const std::string & str_out, T * uo)
+    { return str_out + " " + uo->name(); };
+
+    console << "[DBG] Ordering of " + name + ":" << std::endl;
+    std::string uos_names = std::accumulate(uos.begin() + 1, uos.end(), uos[0]->name(), make_name);
+    console << "[DBG] " << uos_names << std::endl;
+  }
 }

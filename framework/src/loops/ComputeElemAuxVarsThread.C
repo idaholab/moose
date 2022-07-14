@@ -162,6 +162,22 @@ ComputeElemAuxVarsThread<AuxKernelType>::join(const ComputeElemAuxVarsThread & /
 {
 }
 
+template <typename AuxKernelType>
+void
+ComputeElemAuxVarsThread<AuxKernelType>::printExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution() && _aux_kernels.hasActiveObjects())
+  {
+    auto console = _fe_problem.console();
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Executing auxiliary kernels on elements on " << execute_on << std::endl;
+    console << "[DBG] Ordering" << std::endl;
+    console << "[DBG] " << _aux_kernels.activeObjectsToString() << std::endl;
+    console << "[DBG] They are executed in that order on the elements these kernels are defined on."
+            << std::endl;
+  }
+}
+
 template class ComputeElemAuxVarsThread<AuxKernel>;
 template class ComputeElemAuxVarsThread<VectorAuxKernel>;
 template class ComputeElemAuxVarsThread<ArrayAuxKernel>;

@@ -22,7 +22,7 @@ template <typename AuxKernelType>
 class ComputeElemAuxBcsThread
 {
 public:
-  ComputeElemAuxBcsThread(FEProblemBase & problem,
+  ComputeElemAuxBcsThread(FEProblemBase & fe_problem,
                           const MooseObjectWarehouse<AuxKernelType> & storage,
                           const std::vector<std::vector<MooseVariableFEBase *>> & vars,
                           bool need_materials);
@@ -34,7 +34,7 @@ public:
   void join(const ComputeElemAuxBcsThread & /*y*/);
 
 protected:
-  FEProblemBase & _problem;
+  FEProblemBase & _fe_problem;
   AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
 
@@ -45,8 +45,6 @@ protected:
 
   bool _need_materials;
 
-  /**
-   * Print information about the loop, mostly order of execution of objects
-   */
-  virtual void printExecutionInformation() const;
+  /// Print information about the loop, mostly order of execution of objects
+  void printExecutionInformation() const;
 };

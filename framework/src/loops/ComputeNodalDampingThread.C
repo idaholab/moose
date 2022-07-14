@@ -71,3 +71,17 @@ ComputeNodalDampingThread::join(const ComputeNodalDampingThread & y)
   if (y._damping < _damping)
     _damping = y._damping;
 }
+
+void
+ComputeNodalDampingThread::printExecutionInformation() const
+{
+  const auto & damper_wh = _nl.getNodalDamperWarehouse();
+  if (_fe_problem.shouldPrintExecution() && damper_wh.hasActiveObjects())
+  {
+    auto console = _fe_problem.console();
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Executing nodal dampers on " << execute_on << std::endl;
+    console << "[DBG] Ordering of the dampers on the blocks they are defined on:" << std::endl;
+    console << "[DBG] " << damper_wh.activeObjectsToString() << std::endl;
+  }
+}

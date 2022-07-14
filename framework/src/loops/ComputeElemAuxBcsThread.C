@@ -20,12 +20,12 @@
 
 template <typename AuxKernelType>
 ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(
-    FEProblemBase & problem,
+    FEProblemBase & fe_problem,
     const MooseObjectWarehouse<AuxKernelType> & storage,
     const std::vector<std::vector<MooseVariableFEBase *>> & vars,
     bool need_materials)
-  : _problem(problem),
-    _aux_sys(problem.getAuxiliarySystem()),
+  : _fe_problem(fe_problem),
+    _aux_sys(fe_problem.getAuxiliarySystem()),
     _storage(storage),
     _aux_vars(vars),
     _need_materials(need_materials)
@@ -36,7 +36,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(
 template <typename AuxKernelType>
 ComputeElemAuxBcsThread<AuxKernelType>::ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x,
                                                                 Threads::split /*split*/)
-  : _problem(x._problem),
+  : _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
     _storage(x._storage),
     _aux_vars(x._aux_vars),
@@ -64,9 +64,9 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
     SubdomainID last_did = Elem::invalid_subdomain_id;
 
     // need to update the boundary ID in assembly
-    _problem.setCurrentBoundaryID(boundary_id, _tid);
+    _fe_problem.setCurrentBoundaryID(boundary_id, _tid);
 
-    if (elem->processor_id() == _problem.processor_id())
+    if (elem->processor_id() == _fe_problem.processor_id())
     {
       // prepare variables
       for (auto * var : _aux_vars[_tid])
@@ -80,16 +80,16 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
         auto did = elem->subdomain_id();
         if (did != last_did)
         {
-          _problem.subdomainSetup(did, _tid);
+          _fe_problem.subdomainSetup(did, _tid);
           last_did = did;
         }
-        _problem.setCurrentSubdomainID(elem, _tid);
-        _problem.prepare(elem, _tid);
-        _problem.reinitElemFace(elem, side, boundary_id, _tid);
+        _fe_problem.setCurrentSubdomainID(elem, _tid);
+        _fe_problem.prepare(elem, _tid);
+        _fe_problem.reinitElemFace(elem, side, boundary_id, _tid);
 
-        const Elem * lower_d_elem = _problem.mesh().getLowerDElem(elem, side);
+        const Elem * lower_d_elem = _fe_problem.mesh().getLowerDElem(elem, side);
         if (lower_d_elem)
-          _problem.reinitLowerDElem(lower_d_elem, _tid);
+          _fe_problem.reinitLowerDElem(lower_d_elem, _tid);
 
         const Elem * neighbor = elem->neighbor_ptr(side);
 
@@ -98,13 +98,14 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
         // ghosting
         bool compute_interface =
             neighbor && neighbor->active() &&
-            _problem.getInterfaceMaterialsWarehouse().hasActiveBoundaryObjects(boundary_id, _tid);
+            _fe_problem.getInterfaceMaterialsWarehouse().hasActiveBoundaryObjects(boundary_id,
+                                                                                  _tid);
 
         // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
         // still remember to swap back during stack unwinding.
-        SwapBackSentinel sentinel(_problem, &FEProblem::swapBackMaterialsFace, _tid);
+        SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
         SwapBackSentinel neighbor_sentinel(
-            _problem, &FEProblem::swapBackMaterialsNeighbor, _tid, compute_interface);
+            _fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid, compute_interface);
 
         if (_need_materials)
         {
@@ -114,17 +115,17 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
             const std::set<unsigned int> & mp_deps = aux->getMatPropDependencies();
             needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
           }
-          _problem.setActiveMaterialProperties(needed_mat_props, _tid);
+          _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
-          _problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+          _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
 
-          _problem.reinitMaterialsBoundary(boundary_id, _tid);
+          _fe_problem.reinitMaterialsBoundary(boundary_id, _tid);
 
           if (compute_interface)
           {
-            _problem.reinitNeighbor(elem, side, _tid);
-            _problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
-            _problem.reinitMaterialsInterface(boundary_id, _tid);
+            _fe_problem.reinitNeighbor(elem, side, _tid);
+            _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+            _fe_problem.reinitMaterialsInterface(boundary_id, _tid);
           }
         }
 
@@ -132,7 +133,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
           aux->compute();
 
         if (_need_materials)
-          _problem.clearActiveMaterialProperties(_tid);
+          _fe_problem.clearActiveMaterialProperties(_tid);
       }
 
       // update the solution vector
@@ -155,13 +156,16 @@ template <typename AuxKernelType>
 void
 ComputeElemAuxBcsThread<AuxKernelType>::printExecutionInformation() const
 {
-  if (_problem.shouldPrintExecution())
+  if (_fe_problem.shouldPrintExecution() && _storage.hasActiveObjects())
   {
-    auto console = _problem.console();
-    console << "Executing boundary restricted auxkernels on boundary elements " << std::endl;
-    console << "Ordering" << std::endl;
-    console << _storage.activeObjectsToString() << std::endl;
-    console << "They are executed in that order on the sides these kernels are defined on." << std::endl;
+    auto console = _fe_problem.console();
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "[DBG] Executing boundary restricted auxkernels on boundary elements on "
+            << execute_on << std::endl;
+    console << "[DBG] Ordering" << std::endl;
+    console << "[DBG] " << _storage.activeObjectsToString() << std::endl;
+    console << "[DBG] They are executed in that order on the sides these kernels are defined on."
+            << std::endl;
   }
 }
 
