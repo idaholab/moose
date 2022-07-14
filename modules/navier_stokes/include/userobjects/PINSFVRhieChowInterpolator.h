@@ -41,8 +41,15 @@ protected:
   /// interpolations and reconstructions to create the resulting smoothed field
   const Moose::Functor<ADReal> & _eps;
 
+  /// The smoothed porosity functor/field. After we construct this functor/field we assign it to the
+  /// subproblem's porosity functor
+  CellCenteredMapFunctor<ADReal, std::unordered_map<dof_id_type, ADReal>> _smoothed_eps;
+
   /// All the thread copies of the problem's porosity functor
   std::vector<const Moose::Functor<ADReal> *> _epss;
+
+  /// All the thread copies of the problem's smoothed porosity functor
+  std::vector<const Moose::Functor<ADReal> *> _smoothed_epss;
 
   /// The number of interpolations and reconstructions that should be performed on the porosity
   /// functor/field. One smoothing layer corresponds to one interpolation and one reconstruction
@@ -56,10 +63,6 @@ protected:
   /// a Green-Gauss gradient
   std::vector<const FaceInfo *> _geometric_fi;
 
-  /// The smoothed porosity functor/field. After we construct this functor/field we assign it to the
-  /// subproblem's porosity functor
-  CellCenteredMapFunctor<ADReal, std::unordered_map<dof_id_type, ADReal>> _smoothed_eps;
-
 private:
   /**
    * called during the first \p residualSetup and upon \p meshChanged, this method performs the
@@ -71,5 +74,8 @@ private:
 inline const Moose::FunctorBase<ADReal> &
 PINSFVRhieChowInterpolator::epsilon(const THREAD_ID tid) const
 {
-  return *_epss[tid];
+  if (!_smoothing_layers)
+    return *_epss[tid];
+  else
+    return *_smoothed_epss[tid];
 }

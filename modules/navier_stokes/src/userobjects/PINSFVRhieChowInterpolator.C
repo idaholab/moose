@@ -40,9 +40,10 @@ PINSFVRhieChowInterpolator::validParams()
 PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & params)
   : INSFVRhieChowInterpolator(params),
     _eps(getFunctor<ADReal>(NS::porosity)),
+    _smoothed_eps(_moose_mesh, NS::smoothed_porosity),
     _epss(libMesh::n_threads(), nullptr),
-    _smoothing_layers(getParam<unsigned short>("smoothing_layers")),
-    _smoothed_eps(_moose_mesh, NS::smoothed_porosity)
+    _smoothed_epss(libMesh::n_threads(), nullptr),
+    _smoothing_layers(getParam<unsigned short>("smoothing_layers"))
 {
   if (_smoothing_layers && _eps.wrapsType<MooseVariableBase>())
     paramError(
@@ -58,7 +59,14 @@ PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & p
   const auto porosity_name = deduceFunctorName(NS::porosity);
 
   for (const auto tid : make_range(libMesh::n_threads()))
+  {
     _epss[tid] = &UserObject::_subproblem.getFunctor<ADReal>(porosity_name, tid, name());
+
+    // Smoothed porosity is only an envelope at this point, it will be set during pinsfvSetup()
+    UserObject::_subproblem.addFunctor(NS::smoothed_porosity, _smoothed_eps, tid);
+    _smoothed_epss[tid] =
+        &UserObject::_subproblem.getFunctor<ADReal>(NS::smoothed_porosity, tid, name());
+  }
 }
 
 void
