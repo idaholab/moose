@@ -26,13 +26,12 @@ computational cost dramatically, especially if fluid properties are calculated a
 
 The expected file format for the tabulated fluid properties is now described.  The first line must be
 the header containing the required column names *pressure* and *temperature*, and also any number of
-the fluid properties that TabulatedFluidProperties understands. These are: *density*, *enthalpy*,
-*internal_energy*, *viscosity*, *k* (the thermal conductivity), *cp* (the isobaric specific heat
-capacity), *cv* (the isochoric specific heat capacity), and *entropy*.
+the fluid properties that TabulatedFluidProperties understands. These are: *density*, *enthalpy*, *v* (specific_volume),
+*internal_energy*, *viscosity*, *k* (the thermal conductivity), g (gibbs free energy), *cp* (the isobaric specific heat
+capacity), *cv* (the isochoric specific heat capacity), *c* (speed of sound in fluid), and *entropy*.
 
 !alert note
-The order is not important, although having pressure and temperature first makes the data easier
-for a human to read.
+The order is not important, although having pressure and temperature first makes the data easier for a human to read.
 
 The data in the pressure and temperature columns *must* be monotonically increasing. This file format
 does require duplication of the pressure and temperature data - each pressure value must be included
@@ -56,11 +55,12 @@ and so on.
 
 ### Alternative variable sets
 
-Alternatively, from the input internal energy and volume TFP can determine various parameters (p,T,g,c,cp,cv,k, and mu from (v,e)).
+Alternatively, from the input internal energy and volume TFP can determine various parameters (p,T,g,c,cp,cv,k, and mu from (v,e) or (v,h)). There are also a few other fluid properties from other variable sets that can be determined (e(p,rho), T(p,rho), T(p,h), s(h,p)).
 
 We convert to (v,e) by creating (v,e) and (v,h) grids. The grids are created by filling points using volume[j]=_v_min + j * dv for specific volume and
 energy[j]=_e_min + j * de for j=0 to number of points.
-These grids are then filled and (p,T) data are matched to the grid points. The h and e grids use the same number of grid points.
+(p,T) data is then calculated by performing Newton's Method using NewtonInversion.C.
+Note that sometimes pressure and temperature values can be outside the user-defined range during this variable set inversion. When this is the case, the (p,T) values are replaced with their respective minimum and maximum values.
 
 The bounds are determined by the maximums and minimums of the input parameters.
 
@@ -82,7 +82,7 @@ The input file syntax necessary to achieve this is
 or
 !listing modules/fluid_properties/test/tests/tabulated/tabulated_v_e.i block=Modules
 
-The "tabulated_v_e.i" input file is to be used if ICs are v and e. If ICs are (p,T), "tabulated.i" should be used.
+The "tabulated_v_e.i" input file is to be used if (v,e) variable set used. If variable set is (p,T), "tabulated.i" should be used.
 
 ### Writing data file
 
