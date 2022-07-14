@@ -28,6 +28,8 @@ public:
   /// perform per-element computation/initialization
   void computeProperties() override;
 
+  static MooseEnum decompositionType();
+
 protected:
   /// function type for the external UMAT function
   typedef void (*umat_t)(Real STRESS[],
@@ -241,4 +243,14 @@ protected:
 
   /// parameter to assist with the transition to 1-based indexing
   const bool _use_one_based_indexing;
+
+private:
+  enum class DecompMethod
+  {
+    TaylorExpansion,
+    EigenSolution,
+    HughesWinget
+  };
+
+  const DecompMethod _decomposition_method;
 };

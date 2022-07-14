@@ -18,6 +18,12 @@
 
 #define QUOTE(macro) stringifyName(macro)
 
+MooseEnum
+AbaqusUMATStress::decompositionType()
+{
+  return MooseEnum("TaylorExpansion EigenSolution HughesWinget", "TaylorExpansion");
+}
+
 registerMooseObject("TensorMechanicsApp", AbaqusUMATStress);
 
 InputParameters
@@ -41,6 +47,9 @@ AbaqusUMATStress::validParams()
   params.addCoupledVar("external_fields",
                        "The external fields that can be used in the UMAT subroutine");
   params.addParam<std::vector<MaterialPropertyName>>("external_properties", "");
+  params.addParam<MooseEnum>("decomposition_method",
+			     AbaqusUMATStress::decompositionType(),
+                             "Method to calcualte the strain kinematics.");
   return params;
 }
 
@@ -80,7 +89,8 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _number_external_properties(_external_property_names.size()),
     _external_properties(_number_external_properties),
     _external_properties_old(_number_external_properties),
-    _use_one_based_indexing(getParam<bool>("use_one_based_indexing"))
+    _use_one_based_indexing(getParam<bool>("use_one_based_indexing")),
+    _decomposition_method(getParam<MooseEnum>("decomposition_method").getEnum<DecompMethod>())
 {
   if (!_use_one_based_indexing)
     mooseDeprecated(
@@ -190,11 +200,16 @@ AbaqusUMATStress::computeQpStress()
   static const std::array<std::pair<unsigned int, unsigned int>, 6> component{
       {{0, 0}, {1, 1}, {2, 2}, {0, 1}, {0, 2}, {1, 2}}};
 
+  // rotate old stress if HughesWinget
+  RankTwoTensor stress_old = _stress_old[_qp];
+  if (_decomposition_method == DecompMethod::HughesWinget)
+    stress_old.rotate(_rotation_increment[_qp]);
+
   for (const auto i : make_range(_aqNTENS))
   {
     const auto a = component[i].first;
     const auto b = component[i].second;
-    _aqSTRESS[i] = _stress_old[_qp](a, b);
+    _aqSTRESS[i] = stress_old(a, b);
     _aqSTRAN[i] = _total_strain_old[_qp](a, b) * strain_factor[i];
     _aqDSTRAN[i] = _strain_increment[_qp](a, b) * strain_factor[i];
   }
@@ -302,8 +317,9 @@ AbaqusUMATStress::computeQpStress()
   _stress[_qp] = RankTwoTensor(
       _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[5], _aqSTRESS[4], _aqSTRESS[3]);
 
-  // Rotate the stress state to the current configuration
-  _stress[_qp].rotate(_rotation_increment[_qp]);
+  // Rotate the stress state to the current configuration, unless HughesWinget
+  if (_decomposition_method != DecompMethod::HughesWinget)
+    _stress[_qp].rotate(_rotation_increment[_qp]);
 
   // Build Jacobian matrix from UMAT's Voigt non-standard order to fourth order tensor.
   const unsigned int N = Moose::dim;
