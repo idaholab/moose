@@ -1,0 +1,20 @@
+[Tests]
+  [quad_interwrapper]
+    type = Exodiff
+    input = quad_interwrapper.i
+    exodiff = quad_interwrapper_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+  []
+  [tri_interwrapper]
+    type = Exodiff
+    input = tri_interwrapper.i
+    exodiff = tri_interwrapper_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+  []
+[]

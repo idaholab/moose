@@ -1,8 +1,26 @@
 [Tests]
-  [psbt_transient]
+  [psbt_transient_explicit]
     type = Exodiff
     input = psbt.i
     exodiff = psbt_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+  []
+  [psbt_transient_implicit]
+    type = Exodiff
+    input = psbt_implicit.i
+    exodiff = psbt_implicit_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+  []
+  [psbt_transient_monolithic]
+    type = Exodiff
+    input = psbt_monolithic.i
+    exodiff = psbt_monolithic_out.e
     custom_cmp = 'test.exodiff'
     method = '!DBG'
     valgrind = NONE
