@@ -1,6 +1,6 @@
 #pragma once
-
 #include "InitialCondition.h"
+#include "QuadSubChannelBaseIC.h"
 
 class QuadInterWrapperMesh;
 
