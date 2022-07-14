@@ -2043,6 +2043,16 @@ public:
    */
   bool failNextNonlinearConvergenceCheck() const { return _fail_next_nonlinear_convergence_check; }
 
+  /*
+   * Set the status of execution printing
+   */
+  void setExecutionPrinting(bool print_execution) { _print_execution = print_execution; };
+
+  /**
+   * Check whether the problem should output execution orders at this time
+   */
+  bool shouldPrintExecution() const;
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2434,8 +2444,13 @@ private:
   /// Flag used to indicate whether we are computing the scaling Residual
   bool _computing_scaling_residual = false;
 
+<<<<<<< HEAD
   /// Flag used to indicate whether we are doing the uo/aux state check in execute
   bool _checking_uo_aux_state = false;
+=======
+  /// True if order of executions will be output
+  bool _print_execution;
+>>>>>>> f68643037a (Move execution output from Problem to FEProblemBase as Problem isnt accessed directly currently)
 };
 
 using FVProblemBase = FEProblemBase;
