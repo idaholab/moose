@@ -386,7 +386,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_mortar(false),
     _num_grid_steps(0),
     _displaced_neighbor_ref_pts("invert_elem_phys use_undisplaced_ref unset", "unset"),
-    _print_execution(false)
+    _print_execution_on()
 {
   //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
   //  things that we setup early in the simulation actually get their derivative vectors initalized.
@@ -7951,8 +7951,7 @@ FEProblemBase::currentNlSysNum() const
 bool
 FEProblemBase::shouldPrintExecution() const
 {
-  // Check execute on
-  if (true) // _current_execute_on_flag)
+  if (_print_execution_on.contains(_current_execute_on_flag))
     return true;
   else
     return false;
