@@ -2307,6 +2307,9 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
 PetscErrorCode
 SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 {
+  // bool &wr = const_cast <bool &> (_monolithic_thermal_bool);
+  // wr = false;
+  bool lag_block_thermal_solve = true;
   Vec b_nest, x_nest; /* approx solution, RHS, exact solution */
   Mat A_nest;         /* linear system matrix */
   KSP ksp;            /* linear solver context */
@@ -2315,8 +2318,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   PetscInt Q = _monolithic_thermal_bool ? 4 : 3;
   std::vector<Mat> mat_array(Q * Q);
   std::vector<Vec> vec_array(Q);
-  //  Mat            mat_array[Q*Q];
-  //  Vec            vec_array[Q];
 
   /// Initializing flags
   bool _axial_mass_flow_tight_coupling = true;
@@ -2345,7 +2346,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   if (_verbose_subchannel)
   {
     _console << "Starting nested system." << std::endl;
-    _console << Q << std::endl;
+    _console << "Number of simultaneous variables: " << Q << std::endl;
   }
   // Mass conservation
   PetscInt field_num = 0;
@@ -2377,7 +2378,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   {
     mat_array[Q * field_num + 2] = NULL;
   }
-  _console << "Term 3" << std::endl;
   if (_monolithic_thermal_bool)
   {
     mat_array[Q * field_num + 3] = NULL;
@@ -2503,133 +2503,135 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     mat_array[Q * field_num + 1] = NULL;
   }
   //  mat_array[Q*field_num+1] = NULL;
-  if (false)
-  {
-    unsigned int last_node = (iblock + 1) * _block_size;
-    unsigned int first_node = iblock * _block_size + 1;
-    populateVectorFromHandle<SolutionHandle *>(
-        prod, _mdot_soln, first_node, last_node, _n_channels);
-    Vec ls;
-    VecDuplicate(amc_sys_mdot_rhs, &ls);
-    MatMult(amc_sys_mdot_mat, prod, ls);
-
-    KSP ksploc;
-    PC pc;
-    Vec sol;
-    VecDuplicate(amc_pressure_force_rhs, &sol);
-    KSPCreate(PETSC_COMM_WORLD, &ksploc);
-    KSPSetOperators(ksploc, amc_pressure_force_mat, amc_pressure_force_mat);
-    KSPGetPC(ksploc, &pc);
-    PCSetType(pc, PCJACOBI);
-    KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
-    KSPSetFromOptions(ksploc);
-    VecAXPY(amc_pressure_force_rhs, 1.0, ls);
-    KSPSolve(ksploc, amc_pressure_force_rhs, sol);
-    KSPDestroy(&ksploc);
-    VecDestroy(&ls);
-
-    Vec sol_holder_P;
-    createPetscVector(sol_holder_P, _block_size * _n_gaps);
-    ierr = MatMult(cmc_pressure_force_mat, sol, sol_holder_P);
-    CHKERRQ(ierr);
-    ierr = VecAXPY(sol_holder_P, -1.0, cmc_pressure_force_rhs);
-    CHKERRQ(ierr);
-
-    Vec diag_Wij;
-    ierr = VecDuplicate(cmc_sys_Wij_rhs, &diag_Wij);
-    CHKERRQ(ierr);
-    ierr = MatGetDiagonal(cmc_sys_Wij_mat, diag_Wij);
-    CHKERRQ(ierr);
-    VecPointwiseDivide(sol_holder_P, sol_holder_P, diag_Wij);
-
-    Vec sumWij_loc;
-    ierr = VecDuplicate(mc_axial_convection_rhs, &sumWij_loc);
-    CHKERRQ(ierr);
-    ierr = VecSet(sumWij_loc, 0.0);
-    CHKERRQ(ierr);
-
-    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-    {
-      auto iz_ind = iz - first_node;
-      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-      {
-        PetscScalar sumWij = 0.0;
-        // Calculate sum of crossflow into channel i from channels j around i
-        unsigned int counter = 0;
-        for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
-        {
-          auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-          unsigned int i_ch_loc = chans.first;
-          PetscInt row_vec = i_ch_loc + _n_channels * iz_ind;
-          PetscScalar loc_Wij_value;
-          VecGetValues(sol_holder_P, 1, &row_vec, &loc_Wij_value);
-          sumWij += _subchannel_mesh.getCrossflowSign(i_ch, counter) * loc_Wij_value;
-          counter++;
-        }
-        PetscInt row_vec = i_ch + _n_channels * iz_ind;
-        VecSetValues(sumWij_loc, 1, &row_vec, &sumWij, INSERT_VALUES);
-      }
-    }
-
-    populateVectorFromHandle<SolutionHandle *>(
-        prod, _mdot_soln, first_node, last_node, _n_channels);
-    VecAbs(prod);
-    VecAbs(sumWij_loc);
-    VecPointwiseDivide(sumWij_loc, sumWij_loc, prod);
-
-    // VecView(sumWij_loc, PETSC_VIEWER_STDOUT_WORLD);
-    PetscScalar max_value;
-    // VecMax(sumWij_loc, NULL, &max_value);
-    VecMean(sumWij_loc, &max_value);
-    if (_verbose_subchannel)
-      _console << "Max val: " << max_value << std::endl;
-
-    Vec Wij_new_loc, Wij_old_loc;
-    ierr = VecDuplicate(cmc_sys_Wij_rhs, &Wij_old_loc);
-    CHKERRQ(ierr);
-    ierr = VecDuplicate(cmc_sys_Wij_rhs, &Wij_new_loc);
-    CHKERRQ(ierr);
-    populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-        Wij_old_loc, _Wij_old, first_node, last_node, _n_gaps);
-    populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-        Wij_new_loc, _Wij, first_node, last_node, _n_gaps);
-    VecAXPY(Wij_new_loc, -1.0, Wij_old_loc);
-    PetscScalar loc_sum_vec;
-    VecAbs(Wij_new_loc);
-    VecMean(Wij_new_loc, &loc_sum_vec);
-    max_value *= (std::exp(100 * loc_sum_vec) - 1.0);
-
-    // VecView(sol_holder_P, PETSC_VIEWER_STDOUT_WORLD);
-    VecAbs(sol_holder_P);
-    VecScale(sol_holder_P, max_value);
-
-    ierr = MatDiagonalSet(cmc_sys_Wij_mat, sol_holder_P, ADD_VALUES);
-    CHKERRQ(ierr);
-
-    VecDestroy(&sol);
-    VecDestroy(&sol_holder_P);
-    VecDestroy(&diag_Wij);
-    VecDestroy(&sumWij_loc);
-    VecDestroy(&Wij_new_loc);
-    VecDestroy(&Wij_old_loc);
-
-    //    PetscScalar relaxation_factor = 0.5;
-    //    Vec diag_Wij;
-    //    ierr = VecDuplicate(cmc_sys_Wij_rhs,&diag_Wij); CHKERRQ(ierr);
-    //    ierr = MatGetDiagonal(cmc_sys_Wij_mat,diag_Wij); CHKERRQ(ierr);
-    //    ierr = VecScale(diag_Wij, 1.0/relaxation_factor); CHKERRQ(ierr);
-    //    ierr = MatDiagonalSet(cmc_sys_Wij_mat, diag_Wij, ADD_VALUES); CHKERRQ(ierr);
-    //    populateVectorFromDense<libMesh::DenseMatrix<Real>>(Wij_vec, _Wij_old, first_node,
-    //    last_node, _n_gaps); ierr = VecScale(diag_Wij, (1.0-relaxation_factor)); CHKERRQ(ierr);
-    //    ierr = VecPointwiseMult(Wij_vec, Wij_vec, diag_Wij); CHKERRQ(ierr);
-    //    VecDestroy(&diag_Wij);
-  }
-  if (false)
-  {
-    PetscScalar local_shift = -1.0;
-    ierr = MatShift(cmc_sys_Wij_mat, local_shift);
-    CHKERRQ(ierr);
-  }
+  // Strong regularization - May affect results
+  // Use with caution - deactivated by default
+  // if (false)
+  // {
+  //   unsigned int last_node = (iblock + 1) * _block_size;
+  //   unsigned int first_node = iblock * _block_size + 1;
+  //   populateVectorFromHandle<SolutionHandle *>(
+  //       prod, _mdot_soln, first_node, last_node, _n_channels);
+  //   Vec ls;
+  //   VecDuplicate(amc_sys_mdot_rhs, &ls);
+  //   MatMult(amc_sys_mdot_mat, prod, ls);
+  //
+  //   KSP ksploc;
+  //   PC pc;
+  //   Vec sol;
+  //   VecDuplicate(amc_pressure_force_rhs, &sol);
+  //   KSPCreate(PETSC_COMM_WORLD, &ksploc);
+  //   KSPSetOperators(ksploc, amc_pressure_force_mat, amc_pressure_force_mat);
+  //   KSPGetPC(ksploc, &pc);
+  //   PCSetType(pc, PCJACOBI);
+  //   KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
+  //   KSPSetFromOptions(ksploc);
+  //   VecAXPY(amc_pressure_force_rhs, 1.0, ls);
+  //   KSPSolve(ksploc, amc_pressure_force_rhs, sol);
+  //   KSPDestroy(&ksploc);
+  //   VecDestroy(&ls);
+  //
+  //   Vec sol_holder_P;
+  //   createPetscVector(sol_holder_P, _block_size * _n_gaps);
+  //   ierr = MatMult(cmc_pressure_force_mat, sol, sol_holder_P);
+  //   CHKERRQ(ierr);
+  //   ierr = VecAXPY(sol_holder_P, -1.0, cmc_pressure_force_rhs);
+  //   CHKERRQ(ierr);
+  //
+  //   Vec diag_Wij;
+  //   ierr = VecDuplicate(cmc_sys_Wij_rhs, &diag_Wij);
+  //   CHKERRQ(ierr);
+  //   ierr = MatGetDiagonal(cmc_sys_Wij_mat, diag_Wij);
+  //   CHKERRQ(ierr);
+  //   VecPointwiseDivide(sol_holder_P, sol_holder_P, diag_Wij);
+  //
+  //   Vec sumWij_loc;
+  //   ierr = VecDuplicate(mc_axial_convection_rhs, &sumWij_loc);
+  //   CHKERRQ(ierr);
+  //   ierr = VecSet(sumWij_loc, 0.0);
+  //   CHKERRQ(ierr);
+  //
+  //   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+  //   {
+  //     auto iz_ind = iz - first_node;
+  //     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+  //     {
+  //       PetscScalar sumWij = 0.0;
+  //       // Calculate sum of crossflow into channel i from channels j around i
+  //       unsigned int counter = 0;
+  //       for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
+  //       {
+  //         auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+  //         unsigned int i_ch_loc = chans.first;
+  //         PetscInt row_vec = i_ch_loc + _n_channels * iz_ind;
+  //         PetscScalar loc_Wij_value;
+  //         VecGetValues(sol_holder_P, 1, &row_vec, &loc_Wij_value);
+  //         sumWij += _subchannel_mesh.getCrossflowSign(i_ch, counter) * loc_Wij_value;
+  //         counter++;
+  //       }
+  //       PetscInt row_vec = i_ch + _n_channels * iz_ind;
+  //       VecSetValues(sumWij_loc, 1, &row_vec, &sumWij, INSERT_VALUES);
+  //     }
+  //   }
+  //
+  //   populateVectorFromHandle<SolutionHandle *>(
+  //       prod, _mdot_soln, first_node, last_node, _n_channels);
+  //   VecAbs(prod);
+  //   VecAbs(sumWij_loc);
+  //   VecPointwiseDivide(sumWij_loc, sumWij_loc, prod);
+  //
+  //   // VecView(sumWij_loc, PETSC_VIEWER_STDOUT_WORLD);
+  //   PetscScalar max_value;
+  //   // VecMax(sumWij_loc, NULL, &max_value);
+  //   VecMean(sumWij_loc, &max_value);
+  //   if (_verbose_subchannel)
+  //     _console << "Max val: " << max_value << std::endl;
+  //
+  //   Vec Wij_new_loc, Wij_old_loc;
+  //   ierr = VecDuplicate(cmc_sys_Wij_rhs, &Wij_old_loc);
+  //   CHKERRQ(ierr);
+  //   ierr = VecDuplicate(cmc_sys_Wij_rhs, &Wij_new_loc);
+  //   CHKERRQ(ierr);
+  //   populateVectorFromDense<libMesh::DenseMatrix<Real>>(
+  //       Wij_old_loc, _Wij_old, first_node, last_node, _n_gaps);
+  //   populateVectorFromDense<libMesh::DenseMatrix<Real>>(
+  //       Wij_new_loc, _Wij, first_node, last_node, _n_gaps);
+  //   VecAXPY(Wij_new_loc, -1.0, Wij_old_loc);
+  //   PetscScalar loc_sum_vec;
+  //   VecAbs(Wij_new_loc);
+  //   VecMean(Wij_new_loc, &loc_sum_vec);
+  //   max_value *= (std::exp(100 * loc_sum_vec) - 1.0);
+  //
+  //   // VecView(sol_holder_P, PETSC_VIEWER_STDOUT_WORLD);
+  //   VecAbs(sol_holder_P);
+  //   VecScale(sol_holder_P, max_value);
+  //
+  //   ierr = MatDiagonalSet(cmc_sys_Wij_mat, sol_holder_P, ADD_VALUES);
+  //   CHKERRQ(ierr);
+  //
+  //   VecDestroy(&sol);
+  //   VecDestroy(&sol_holder_P);
+  //   VecDestroy(&diag_Wij);
+  //   VecDestroy(&sumWij_loc);
+  //   VecDestroy(&Wij_new_loc);
+  //   VecDestroy(&Wij_old_loc);
+  //
+  //   //    PetscScalar relaxation_factor = 0.5;
+  //   //    Vec diag_Wij;
+  //   //    ierr = VecDuplicate(cmc_sys_Wij_rhs,&diag_Wij); CHKERRQ(ierr);
+  //   //    ierr = MatGetDiagonal(cmc_sys_Wij_mat,diag_Wij); CHKERRQ(ierr);
+  //   //    ierr = VecScale(diag_Wij, 1.0/relaxation_factor); CHKERRQ(ierr);
+  //   //    ierr = MatDiagonalSet(cmc_sys_Wij_mat, diag_Wij, ADD_VALUES); CHKERRQ(ierr);
+  //   //    populateVectorFromDense<libMesh::DenseMatrix<Real>>(Wij_vec, _Wij_old, first_node,
+  //   //    last_node, _n_gaps); ierr = VecScale(diag_Wij, (1.0-relaxation_factor)); CHKERRQ(ierr);
+  //   //    ierr = VecPointwiseMult(Wij_vec, Wij_vec, diag_Wij); CHKERRQ(ierr);
+  //   //    VecDestroy(&diag_Wij);
+  // }
+  // if (false)
+  // {
+  //   PetscScalar local_shift = -1.0;
+  //   ierr = MatShift(cmc_sys_Wij_mat, local_shift);
+  //   CHKERRQ(ierr);
+  // }
 
   ierr = MatAssemblyBegin(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
   CHKERRQ(ierr);
@@ -2675,94 +2677,95 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   }
 
   // Automated relaxation for cross flows
-  if (false)
-  {
-    PetscScalar safety_factor = 0.5;
-    Vec sol_holder_P;
-    createPetscVector(sol_holder_P, _block_size * _n_gaps);
-    Vec sol_holder_W;
-    createPetscVector(sol_holder_W, _block_size * _n_gaps);
-    populateVectorFromHandle<SolutionHandle *>(
-        prodp, _P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels);
-    populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-        Wij_vec, _Wij, first_node, last_node, _n_gaps);
-
-    Vec diag_Wij;
-    ierr = VecDuplicate(cmc_sys_Wij_rhs, &diag_Wij);
-    CHKERRQ(ierr);
-    ierr = MatGetDiagonal(cmc_sys_Wij_mat, diag_Wij);
-    CHKERRQ(ierr);
-    // VecView(diag_Wij, PETSC_VIEWER_STDOUT_WORLD);
-    ierr = VecScale(diag_Wij, -1.0);
-    CHKERRQ(ierr);
-    ierr = MatDiagonalSet(cmc_sys_Wij_mat, diag_Wij, ADD_VALUES);
-    CHKERRQ(ierr);
-    ierr = VecScale(diag_Wij, -1.0);
-    CHKERRQ(ierr);
-
-    MatMult(cmc_sys_Wij_mat, Wij_vec, sol_holder_W);
-    VecAXPY(sol_holder_W, -1.0, cmc_sys_Wij_rhs);
-    VecAbs(sol_holder_W);
-    MatMult(cmc_pressure_force_mat, prodp, sol_holder_P);
-    VecAXPY(sol_holder_P, -1.0, cmc_pressure_force_rhs);
-    VecAbs(sol_holder_W);
-    VecAXPY(sol_holder_W, 1.0, sol_holder_P);
-
-    PetscScalar min_mdot = 1.0;
-    populateVectorFromHandle<SolutionHandle *>(
-        prod, _mdot_soln, first_node, last_node, _n_channels);
-    ierr = VecAbs(prod);
-    CHKERRQ(ierr);
-    ierr = VecMin(prod, NULL, &min_mdot);
-    CHKERRQ(ierr);
-    min_mdot *= safety_factor;
-    min_mdot += 1e-10;
-    ierr = VecScale(sol_holder_W, 1.0 / min_mdot);
-
-    Vec unit_vector;
-    ierr = VecDuplicate(cmc_sys_Wij_rhs, &unit_vector);
-    CHKERRQ(ierr);
-    ierr = VecSet(unit_vector, 1.0);
-    CHKERRQ(ierr);
-    ierr = VecAXPY(diag_Wij, 1e-10, unit_vector);
-    CHKERRQ(ierr);
-    ierr = VecPointwiseDivide(sol_holder_W, sol_holder_W, diag_Wij);
-    CHKERRQ(ierr);
-
-    PetscScalar constraint_max;
-    PetscInt max_pos;
-    Vec abs_diag_Wij;
-    ierr = VecDuplicate(cmc_sys_Wij_rhs, &abs_diag_Wij);
-    CHKERRQ(ierr);
-    ierr = VecCopy(diag_Wij, abs_diag_Wij);
-    CHKERRQ(ierr);
-    ierr = VecAbs(abs_diag_Wij);
-    CHKERRQ(ierr);
-    ierr = VecPointwiseDivide(sol_holder_W, sol_holder_W, abs_diag_Wij);
-    CHKERRQ(ierr);
-    ierr = VecMax(sol_holder_W, &max_pos, &constraint_max);
-    CHKERRQ(ierr);
-
-    PetscScalar diag_value;
-    ierr = VecGetValues(diag_Wij, 1, &max_pos, &diag_value);
-    CHKERRQ(ierr);
-    PetscScalar scaling = diag_value * constraint_max;
-    if (_verbose_subchannel)
-    {
-      _console << "Max constraint: " << constraint_max << std::endl;
-      _console << "Diagonal value: " << diag_value << std::endl;
-    }
-    if (_verbose_subchannel)
-      _console << "Relaxation diagonal factor for Wij: " << scaling << std::endl;
-    ierr = MatShift(mat_array[Q * field_num + 2], -1.0 * std::abs(scaling));
-    CHKERRQ(ierr);
-
-    VecDestroy(&sol_holder_P);
-    VecDestroy(&sol_holder_W);
-    VecDestroy(&diag_Wij);
-    VecDestroy(&unit_vector);
-    VecDestroy(&abs_diag_Wij);
-  }
+  // Also strong residual - may affect results
+  // if (false)
+  // {
+  //   PetscScalar safety_factor = 0.5;
+  //   Vec sol_holder_P;
+  //   createPetscVector(sol_holder_P, _block_size * _n_gaps);
+  //   Vec sol_holder_W;
+  //   createPetscVector(sol_holder_W, _block_size * _n_gaps);
+  //   populateVectorFromHandle<SolutionHandle *>(
+  //       prodp, _P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels);
+  //   populateVectorFromDense<libMesh::DenseMatrix<Real>>(
+  //       Wij_vec, _Wij, first_node, last_node, _n_gaps);
+  //
+  //   Vec diag_Wij;
+  //   ierr = VecDuplicate(cmc_sys_Wij_rhs, &diag_Wij);
+  //   CHKERRQ(ierr);
+  //   ierr = MatGetDiagonal(cmc_sys_Wij_mat, diag_Wij);
+  //   CHKERRQ(ierr);
+  //   // VecView(diag_Wij, PETSC_VIEWER_STDOUT_WORLD);
+  //   ierr = VecScale(diag_Wij, -1.0);
+  //   CHKERRQ(ierr);
+  //   ierr = MatDiagonalSet(cmc_sys_Wij_mat, diag_Wij, ADD_VALUES);
+  //   CHKERRQ(ierr);
+  //   ierr = VecScale(diag_Wij, -1.0);
+  //   CHKERRQ(ierr);
+  //
+  //   MatMult(cmc_sys_Wij_mat, Wij_vec, sol_holder_W);
+  //   VecAXPY(sol_holder_W, -1.0, cmc_sys_Wij_rhs);
+  //   VecAbs(sol_holder_W);
+  //   MatMult(cmc_pressure_force_mat, prodp, sol_holder_P);
+  //   VecAXPY(sol_holder_P, -1.0, cmc_pressure_force_rhs);
+  //   VecAbs(sol_holder_W);
+  //   VecAXPY(sol_holder_W, 1.0, sol_holder_P);
+  //
+  //   PetscScalar min_mdot = 1.0;
+  //   populateVectorFromHandle<SolutionHandle *>(
+  //       prod, _mdot_soln, first_node, last_node, _n_channels);
+  //   ierr = VecAbs(prod);
+  //   CHKERRQ(ierr);
+  //   ierr = VecMin(prod, NULL, &min_mdot);
+  //   CHKERRQ(ierr);
+  //   min_mdot *= safety_factor;
+  //   min_mdot += 1e-10;
+  //   ierr = VecScale(sol_holder_W, 1.0 / min_mdot);
+  //
+  //   Vec unit_vector;
+  //   ierr = VecDuplicate(cmc_sys_Wij_rhs, &unit_vector);
+  //   CHKERRQ(ierr);
+  //   ierr = VecSet(unit_vector, 1.0);
+  //   CHKERRQ(ierr);
+  //   ierr = VecAXPY(diag_Wij, 1e-10, unit_vector);
+  //   CHKERRQ(ierr);
+  //   ierr = VecPointwiseDivide(sol_holder_W, sol_holder_W, diag_Wij);
+  //   CHKERRQ(ierr);
+  //
+  //   PetscScalar constraint_max;
+  //   PetscInt max_pos;
+  //   Vec abs_diag_Wij;
+  //   ierr = VecDuplicate(cmc_sys_Wij_rhs, &abs_diag_Wij);
+  //   CHKERRQ(ierr);
+  //   ierr = VecCopy(diag_Wij, abs_diag_Wij);
+  //   CHKERRQ(ierr);
+  //   ierr = VecAbs(abs_diag_Wij);
+  //   CHKERRQ(ierr);
+  //   ierr = VecPointwiseDivide(sol_holder_W, sol_holder_W, abs_diag_Wij);
+  //   CHKERRQ(ierr);
+  //   ierr = VecMax(sol_holder_W, &max_pos, &constraint_max);
+  //   CHKERRQ(ierr);
+  //
+  //   PetscScalar diag_value;
+  //   ierr = VecGetValues(diag_Wij, 1, &max_pos, &diag_value);
+  //   CHKERRQ(ierr);
+  //   PetscScalar scaling = diag_value * constraint_max;
+  //   if (_verbose_subchannel)
+  //   {
+  //     _console << "Max constraint: " << constraint_max << std::endl;
+  //     _console << "Diagonal value: " << diag_value << std::endl;
+  //   }
+  //   if (_verbose_subchannel)
+  //     _console << "Relaxation diagonal factor for Wij: " << scaling << std::endl;
+  //   ierr = MatShift(mat_array[Q * field_num + 2], -1.0 * std::abs(scaling));
+  //   CHKERRQ(ierr);
+  //
+  //   VecDestroy(&sol_holder_P);
+  //   VecDestroy(&sol_holder_W);
+  //   VecDestroy(&diag_Wij);
+  //   VecDestroy(&unit_vector);
+  //   VecDestroy(&abs_diag_Wij);
+  // }
 
   //  MatGetRowMaxAbs(cmc_sys_Wij_mat, cmc_sys_Wij_rhs, NULL);
   //  VecView(cmc_sys_Wij_rhs, PETSC_VIEWER_STDOUT_WORLD);
@@ -2782,6 +2785,11 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     ierr = MatAssemblyEnd(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     CHKERRQ(ierr);
     ierr = MatDuplicate(hc_sys_h_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 3]);
+    if (lag_block_thermal_solve)
+    {
+      ierr = MatZeroEntries(mat_array[Q * field_num + 3]);
+      ierr = MatShift(mat_array[Q * field_num + 3], 1.0);
+    }
     CHKERRQ(ierr);
     ierr = MatAssemblyBegin(mat_array[Q * field_num + 3], MAT_FINAL_ASSEMBLY);
     CHKERRQ(ierr);
@@ -2790,15 +2798,21 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     ierr = VecDuplicate(hc_sys_h_rhs, &vec_array[field_num]);
     CHKERRQ(ierr);
     ierr = VecCopy(hc_sys_h_rhs, vec_array[field_num]);
+    if (lag_block_thermal_solve)
+    {
+      ierr = VecZeroEntries(vec_array[field_num]);
+      ierr = VecShift(vec_array[field_num], 1.0);
+    }
     CHKERRQ(ierr);
+
+    if (_verbose_subchannel)
+      _console << "Energy ok." << std::endl;
   }
-  if (_verbose_subchannel)
-    _console << "Energy ok." << std::endl;
 
   // Relaxing linear system
+  // Weaker relaxation
   if (true)
   {
-
     // Estimating cross-flow resistances to achieve realizable solves
     populateVectorFromHandle<SolutionHandle *>(
         prod, _mdot_soln, first_node, last_node, _n_channels);
@@ -3167,36 +3181,76 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
   if (_monolithic_thermal_bool)
   {
-    Vec sol_h;
-    ierr = VecDuplicate(cmc_sys_Wij_rhs, &sol_h);
-    CHKERRQ(ierr);
-    ierr = VecCopy(loc_vecs[3], sol_h);
-    CHKERRQ(ierr);
-    PetscScalar * sol_h_array;
-    VecGetArray(sol_h, &sol_h_array);
-
-    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+    if (lag_block_thermal_solve)
     {
-      auto iz_ind = iz - first_node;
-      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+      KSP ksploc;
+      PC pc;
+      Vec sol;
+      VecDuplicate(hc_sys_h_rhs, &sol);
+      KSPCreate(PETSC_COMM_WORLD, &ksploc);
+      KSPSetOperators(ksploc, hc_sys_h_mat, hc_sys_h_mat);
+      KSPGetPC(ksploc, &pc);
+      PCSetType(pc, PCJACOBI);
+      KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
+      KSPSetFromOptions(ksploc);
+      KSPSolve(ksploc, hc_sys_h_rhs, sol);
+      PetscScalar * xx;
+      VecGetArray(sol, &xx);
+
+      for (unsigned int iz = first_node; iz < last_node + 1; iz++)
       {
-        auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-
-        if (sol_h_array[iz_ind * _n_channels + i_ch] < 0)
+        auto iz_ind = iz - first_node;
+        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
         {
-          _console << "Wij = : " << _Wij << "\n";
-          mooseError(name(),
-                     " : Calculation of negative Enthalpy h_out = : ",
-                     sol_h_array[iz_ind * _n_channels + i_ch],
-                     " Axial Level= : ",
-                     iz);
-        }
-        _h_soln->set(node_out, sol_h_array[iz_ind * _n_channels + i_ch]);
-      }
-    }
+          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
 
-    ierr = VecDestroy(&sol_h);
-    CHKERRQ(ierr);
+          if (xx[iz_ind * _n_channels + i_ch] < 0)
+          {
+            _console << "Wij = : " << _Wij << "\n";
+            mooseError(name(),
+                       " : Calculation of negative Enthalpy h_out = : ",
+                       xx[iz_ind * _n_channels + i_ch],
+                       " Axial Level= : ",
+                       iz);
+          }
+          _h_soln->set(node_out, xx[iz_ind * _n_channels + i_ch]);
+        }
+      }
+      KSPDestroy(&ksploc);
+      VecDestroy(&sol);
+    }
+    else
+    {
+      Vec sol_h;
+      ierr = VecDuplicate(hc_sys_h_rhs, &sol_h);
+      CHKERRQ(ierr);
+      ierr = VecCopy(loc_vecs[3], sol_h);
+      CHKERRQ(ierr);
+      PetscScalar * sol_h_array;
+      VecGetArray(sol_h, &sol_h_array);
+
+      for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+      {
+        auto iz_ind = iz - first_node;
+        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+        {
+          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+          PetscScalar value = sol_h_array[iz_ind * _n_channels + i_ch];
+          _h_soln->set(node_out, value);
+
+          if (value < 0)
+          {
+            mooseError(name(),
+                       " : Calculation of negative Enthalpy h_out = : ",
+                       value,
+                       " Axial Level= : ",
+                       iz);
+          }
+        }
+      }
+      ierr = VecDestroy(&sol_h);
+      CHKERRQ(ierr);
+    }
   }
 
   // Populating sum_Wij
@@ -3343,29 +3397,30 @@ SubChannel1PhaseProblem::externalSolve()
         }
         else
         {
+          implicitPetscSolve(iblock);
+          if (_verbose_subchannel)
+            _console << "Done with main solve." << std::endl;
           if (_monolithic_thermal_bool)
           {
-            implicitPetscSolve(iblock);
+            // Enthalpy is already solved from the monolithic solve
             computeT(iblock);
           }
           else
           {
-            implicitPetscSolve(iblock);
             if (_verbose_subchannel)
-              _console << "Done with main solve." << std::endl;
+              _console << "Starting thermal solve." << std::endl;
             if (_compute_power)
             {
-              if (_verbose_subchannel)
-                _console << "Starting enthalpy solve." << std::endl;
               computeh(iblock);
-              if (_verbose_subchannel)
-                _console << "Done with enthalpy solve." << std::endl;
               computeT(iblock);
             }
             if (_verbose_subchannel)
               _console << "Done with thermal solve." << std::endl;
           }
         }
+
+        if (_verbose_subchannel)
+          _console << "Start updating thermophysical properties." << std::endl;
 
         if (_compute_density)
           computeRho(iblock);

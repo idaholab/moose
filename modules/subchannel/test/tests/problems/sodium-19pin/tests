@@ -1,8 +1,26 @@
 [Tests]
-  [test1]
+  [test_explicit]
     type = Exodiff
     input = test19.i
     exodiff = test19_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+  []
+  [test_implicit]
+    type = Exodiff
+    input = test19_implicit.i
+    exodiff = test19_implicit_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+  []
+  [test_monolithic]
+    type = Exodiff
+    input = test19_monolithic.i
+    exodiff = test19_monolithic_out.e
     custom_cmp = 'test.exodiff'
     method = '!DBG'
     valgrind = NONE

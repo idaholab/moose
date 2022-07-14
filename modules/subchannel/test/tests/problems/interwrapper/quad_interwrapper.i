@@ -1,22 +1,58 @@
-T_in = 359.15
-# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+T_in = 360.0
+mass_flux_in = ${fparse 1e+4 * 17.0 / 3600.}
 P_out = 4.923e6 # Pa
 
-[QuadSubChannelMesh]
-  [sub_channel]
-    type = QuadSubChannelMeshGenerator
-    nx = 6
-    ny = 6
-    n_cells = 10
-    pitch = 0.0126
-    rod_diameter = 0.00950
-    gap = 0.00095 # the half gap between sub-channel assemblies
-    heated_length = 3.658
-    spacer_z = '0.0'
-    spacer_k = '0.0'
+[QuadInterWrapperMesh]
+    [sub_channel]
+      type = QuadInterWrapperMeshGenerator
+      nx = 5
+      ny = 5
+      n_cells = 10
+      assembly_pitch = 0.2
+      assembly_side_x = 0.18
+      assembly_side_y = 0.18
+      side_bypass = 0.001
+      heated_length = 3.0
+    []
+[]
+
+
+[AuxVariables]
+  [mdot]
+    block = sub_channel
+  []
+  [SumWij]
+    block = sub_channel
+  []
+  [P]
+    block = sub_channel
+  []
+  [DP]
+    block = sub_channel
+  []
+  [h]
+    block = sub_channel
+  []
+  [T]
+    block = sub_channel
+  []
+  [rho]
+    block = sub_channel
+  []
+  [mu]
+    block = sub_channel
+  []
+  [S]
+    block = sub_channel
+  []
+  [w_perim]
+    block = sub_channel
+  []
+  [q_prime]
+    block = sub_channel
   []
 []
+
 
 [Modules]
   [FluidProperties]
@@ -26,34 +62,40 @@ P_out = 4.923e6 # Pa
   []
 []
 
+
 [SubChannel]
-  type = LiquidWaterSubChannel1PhaseProblem
-  n_blocks = 1
+  type = LiquidWaterInterWrapper1PhaseProblem
   fp = water
-  beta = 0.006
-  CT = 2.0
+  n_blocks = 1
+  beta = 0.08
+  CT = 2.6
+  P_tol = 1e-6
+  T_tol = 1e-6
   compute_density = true
   compute_viscosity = true
-  compute_power = true
+  compute_power = false
   P_out = ${P_out}
+  implicit = false
+  segregated = true
+  staggered_pressure = false
+  monolithic_thermal = false
 []
+
 
 [ICs]
   [S_IC]
-    type = QuadFlowAreaIC
+    type = QuadInterWrapperFlowAreaIC
     variable = S
   []
 
   [w_perim_IC]
-    type = QuadWettedPerimIC
+    type = QuadInterWrapperWettedPerimIC
     variable = w_perim
   []
 
   [q_prime_IC]
-    type = QuadPowerIC
+    type = QuadInterWrapperPowerIC
     variable = q_prime
-    power = 3.44e6 # W
-    filename = "power_profile.txt" #type in name of file that describes power profile
   []
 
   [T_ic]
@@ -105,6 +147,7 @@ P_out = 4.923e6 # Pa
   []
 []
 
+
 [AuxKernels]
   [T_in_bc]
     type = ConstantAux
@@ -123,36 +166,15 @@ P_out = 4.923e6 # Pa
   []
 []
 
+
 [Outputs]
   exodus = true
-  [Temp_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = T
-    execute_on = TIMESTEP_END
-    file_base = "Temp_Out.txt"
-    height = 3.658
-  []
-  [mdot_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = TIMESTEP_END
-    file_base = "mdot_Out.txt"
-    height = 3.658
-  []
-  [mdot_In_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = TIMESTEP_END
-    file_base = "mdot_In.txt"
-    height = 0.0
-  []
+  checkpoint = false
 []
 
+
 [Executioner]
-  type = Transient
+  type = Steady
   nl_rel_tol = 0.9
   l_tol = 0.9
-  start_time = 0.0
-  end_time = 8
-  dt = 1.0
 []

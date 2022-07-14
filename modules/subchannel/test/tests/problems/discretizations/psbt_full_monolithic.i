@@ -1,3 +1,7 @@
+# #Note #Read #Info
+# Difference with psbt_monolithic.i
+# Now the temperature is integrated to the monolithic solve
+
 T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
@@ -12,9 +16,58 @@ P_out = 4.923e6 # Pa
     pitch = 0.0126
     rod_diameter = 0.00950
     gap = 0.00095 # the half gap between sub-channel assemblies
-    heated_length = 3.658
+    heated_length = 1.0
     spacer_z = '0.0'
     spacer_k = '0.0'
+  []
+
+  [fuel_pins]
+    type = QuadPinMeshGenerator
+    input = sub_channel
+    nx = 6
+    ny = 6
+    n_cells = 10
+    pitch = 0.0126
+    heated_length = 1.0
+  []
+[]
+
+[AuxVariables]
+  [mdot]
+    block = sub_channel
+  []
+  [SumWij]
+    block = sub_channel
+  []
+  [P]
+    block = sub_channel
+  []
+  [DP]
+    block = sub_channel
+  []
+  [h]
+    block = sub_channel
+  []
+  [T]
+    block = sub_channel
+  []
+  [Tpin]
+    block = fuel_pins
+  []
+  [rho]
+    block = sub_channel
+  []
+  [mu]
+    block = sub_channel
+  []
+  [S]
+    block = sub_channel
+  []
+  [w_perim]
+    block = sub_channel
+  []
+  [q_prime]
+    block = fuel_pins
   []
 []
 
@@ -28,14 +81,20 @@ P_out = 4.923e6 # Pa
 
 [SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
-  n_blocks = 1
   fp = water
+  n_blocks = 1
   beta = 0.006
   CT = 2.0
-  compute_density = true
-  compute_viscosity = true
+  compute_density = false
+  compute_viscosity = false
   compute_power = true
   P_out = ${P_out}
+  implicit = true
+  segregated = false
+  monolithic_thermal = true
+  staggered_pressure = false
+  interpolation_scheme = 'central_difference'
+  verbose_subchannel = false
 []
 
 [ICs]
@@ -53,7 +112,7 @@ P_out = 4.923e6 # Pa
     type = QuadPowerIC
     variable = q_prime
     power = 3.44e6 # W
-    filename = "power_profile.txt" #type in name of file that describes power profile
+    filename = "power_profile.txt" #type in name of file that describes radial power profile
   []
 
   [T_ic]
@@ -128,31 +187,28 @@ P_out = 4.923e6 # Pa
   [Temp_Out_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = T
-    execute_on = TIMESTEP_END
+    execute_on = final
     file_base = "Temp_Out.txt"
     height = 3.658
   []
   [mdot_Out_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = mdot
-    execute_on = TIMESTEP_END
+    execute_on = final
     file_base = "mdot_Out.txt"
     height = 3.658
   []
   [mdot_In_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = mdot
-    execute_on = TIMESTEP_END
+    execute_on = final
     file_base = "mdot_In.txt"
     height = 0.0
   []
 []
 
 [Executioner]
-  type = Transient
+  type = Steady
   nl_rel_tol = 0.9
   l_tol = 0.9
-  start_time = 0.0
-  end_time = 8
-  dt = 1.0
 []
