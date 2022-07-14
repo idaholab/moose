@@ -16,11 +16,7 @@ rho=1
 [Mesh]
   [file]
     type = FileMeshGenerator
-    # file = wedge_4x6.e
     file = wedge_8x12.e
-    # file = wedge_16x24.e
-    # file = wedge_32x48.e
-    # file = wedge_64x96.e
   []
 []
 
@@ -46,23 +42,6 @@ rho=1
   [lambda]
     family = SCALAR
     order = FIRST
-  []
-[]
-
-[AuxVariables]
-  [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-  []
-[]
-
-[AuxKernels]
-  [mag]
-    type = VectorMagnitudeAux
-    variable = U
-    x = vel_x
-    y = vel_y
   []
 []
 
@@ -124,7 +103,6 @@ rho=1
 []
 
 [FVBCs]
-
   [no_slip_x]
     type = INSFVNoSlipWallBC
     variable = vel_x
@@ -155,16 +133,16 @@ rho=1
 []
 
 [Functions]
-[./f_theta]
-  # Non-dimensional solution values f(eta), 0 <= eta <= 1 for
-  # alpha=15 deg, Re=30.  Note: this introduces an input file
-  # ordering dependency: this Function must appear *before* the two
-  # functions below which use it since apparently proper dependency
-  # resolution is not done in this scenario.
-  type = PiecewiseLinear
-  data_file = 'f.csv'
-  format = 'columns'
-[../]
+  [f_theta]
+    # Non-dimensional solution values f(eta), 0 <= eta <= 1 for
+    # alpha=15 deg, Re=30.  Note: this introduces an input file
+    # ordering dependency: this Function must appear *before* the two
+    # functions below which use it since apparently proper dependency
+    # resolution is not done in this scenario.
+    type = PiecewiseLinear
+    data_file = 'f.csv'
+    format = 'columns'
+  []
   [vel_x_exact]
     type = WedgeFunction
     var_num = 0
@@ -188,11 +166,10 @@ rho=1
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_NEWTON]
     type = SMP
-    full = true
     solve_type = NEWTON
-  [../]
+  []
 []
 
 [Executioner]

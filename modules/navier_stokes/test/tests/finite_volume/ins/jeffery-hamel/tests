@@ -1,15 +1,12 @@
 [Tests]
-  [jeffery]
-    issues = '#21133'
-    design = 'insfv.md'
-    requirement = 'The system shall be able to solve Jeffery-Hamel flow using the finite volume method in a 2D wedge and compare to the analytical solution '
-    [./wedge_dirichlet]
-      type = 'Exodiff'
-      input = 'wedge_dirichlet_vol_PA.i'
-      exodiff = 'wedge_dirichlet_vol_PA_out.e'
-      allow_test_objects = true
-      detail = 'with pressure Dirichlet boundary conditions'
-      ad_indexing_type = global
-    [../]
+  issues = '#21133'
+  design = 'insfv.md'
+  [wedge_dirichlet]
+    type = 'Exodiff'
+    input = 'wedge_dirichlet_vol_PA.i'
+    exodiff = 'wedge_dirichlet_vol_PA_out.e'
+    allow_test_objects = true
+    requirement = 'The system shall be able to solve Jeffery-Hamel flow using the finite volume method in a 2D wedge and compare to the analytical solution with Dirichlet boundary conditions'
+    ad_indexing_type = global
   []
 []
