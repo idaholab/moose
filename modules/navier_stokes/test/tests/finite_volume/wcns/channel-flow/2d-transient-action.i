@@ -76,8 +76,8 @@ inlet_v = 0.001
 [Materials]
   [const_functor]
     type = ADGenericFunctorMaterial
-    prop_names = 'cp k dcp_dt mu'
-    prop_values = '${cp} ${k} 0 ${mu}'
+    prop_names = 'cp k mu'
+    prop_values = '${cp} ${k} ${mu}'
   []
   [rho]
     type = RhoFromPTFunctorMaterial

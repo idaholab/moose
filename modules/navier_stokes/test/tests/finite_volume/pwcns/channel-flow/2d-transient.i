@@ -161,7 +161,6 @@ velocity_interp_method='rc'
     type = PINSFVEnergyTimeDerivative
     variable = T_fluid
     cp = ${cp}
-    dcp_dt = 'dcp_dt'
     rho = ${rho}
     drho_dt = 'drho_dt'
     is_solid = false
