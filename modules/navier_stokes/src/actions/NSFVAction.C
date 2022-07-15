@@ -489,8 +489,8 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _turbulence_handling(getParam<MooseEnum>("turbulence_handling")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
     _porosity_name(getParam<MooseFunctorName>("porosity")),
-    _smooth_porosity_functor_name(isParamValid("smoothing_layers") ? NS::smoothed_porosity
-                                                                   : _porosity_name),
+    _smooth_porosity_functor_name(isParamValid("porosity_smoothing_layers") ? NS::smoothed_porosity
+                                                                            : _porosity_name),
     _use_friction_correction(isParamValid("use_friction_correction")
                                  ? getParam<bool>("use_friction_correction")
                                  : false),

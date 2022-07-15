@@ -58,7 +58,7 @@
     type = 'Exodiff'
     input = 2d-rc-epsjump.i
     exodiff = reconstructed.e
-    cli_args = "Outputs/file_base=reconstructed UserObjects/rc/smoothing_layers=20 AuxVariables/active='' ICs/inactive='porosity_1 porosity_2 porosity_continuous'"
+    cli_args = "Outputs/file_base=reconstructed GlobalParams/porosity=smoothed_porosity UserObjects/rc/smoothing_layers=20 AuxVariables/active='' ICs/inactive='porosity_1 porosity_2 porosity_continuous'"
     ad_indexing_type = 'global'
     requirement = 'The system shall exhibit a monotonic pressure profile when a number of reconstructions (essentially smoothing) are applied to the porosity.'
   []
