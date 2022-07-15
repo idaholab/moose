@@ -1788,9 +1788,9 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
               xi2_dn += dxi2;
             }
             else
-              // It's possible that the nodal normal is completely orthogonal to the primary
-              // surface, in which case the derivative is 0. We know in this case that the
-              // projection should be a failure
+              // It's possible that the secondary surface nodal normal is completely orthogonal to
+              // the primary surface normal, in which case the derivative is 0. We know in this case
+              // that the projection should be a failure
               current_iterate = max_iterates;
           } while (++current_iterate < max_iterates);
 
