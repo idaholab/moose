@@ -24,6 +24,4 @@ protected:
   const Moose::Functor<ADReal> & _rho;
   /// the heat conductivity
   const Moose::Functor<ADReal> & _cp;
-  /// the time derivative of the heat conductivity
-  const Moose::Functor<ADReal> & _cp_dot;
 };

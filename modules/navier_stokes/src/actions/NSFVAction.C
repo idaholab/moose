@@ -984,18 +984,7 @@ NSFVAction::addINSEnergyTimeKernels()
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
     if (_problem->hasFunctor(NS::time_deriv(_density_name), /*thread_id=*/0))
       params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-    if (_problem->hasFunctor(NS::time_deriv(_specific_heat_name), /*thread_id=*/0))
-      params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
     params.set<bool>("is_solid") = false;
-  }
-  else
-  {
-    // check if the name of the specific heat is just a constant, if it is,
-    // we automatically assign a zero timederivative
-    if (MooseUtils::parsesToReal(_specific_heat_name))
-      params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = "0";
-    else
-      params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
   }
 
   _problem->addFVKernel(kernel_type, kernel_name, params);
@@ -2071,7 +2060,6 @@ NSFVAction::addWCNSEnergyTimeKernels()
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
   params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-  params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
 
   if (_porous_medium_treatment)
   {
