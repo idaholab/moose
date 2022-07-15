@@ -128,7 +128,6 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
       dist0 = 1.0e+5;
 
       _subchannel_to_rod_map[k].push_back(_rods_in_rings[i - 1][0]);
-      unsigned int l0 = 0;
 
       for (unsigned int l = 0; l < _rods_in_rings[i - 1].size(); l++)
       {
@@ -138,7 +137,6 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
         if (dist < dist0)
         {
           _subchannel_to_rod_map[k][2] = _rods_in_rings[i - 1][l];
-          l0 = l;
           dist0 = dist;
         } // if
       }   // l
@@ -195,7 +193,6 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
       else
       {
         dist0 = 1.0e+5;
-        unsigned int l0 = 0;
         _subchannel_to_rod_map[k].push_back(_rods_in_rings[i + 1][0]);
         for (unsigned int l = 0; l < _rods_in_rings[i + 1].size(); l++)
         {
@@ -205,7 +202,6 @@ DetailedTriSubChannelMeshGenerator::DetailedTriSubChannelMeshGenerator(
           {
             _subchannel_to_rod_map[k][2] = _rods_in_rings[i + 1][l];
             dist0 = dist;
-            l0 = l;
           } // if
         }   // l
 

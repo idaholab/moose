@@ -7,6 +7,8 @@
     method = '!DBG'
     valgrind = NONE
     recover = false
+    abs_zero = 5e-6
+    max_threads = 1
   []
   [tri_interwrapper]
     type = Exodiff
@@ -16,5 +18,7 @@
     method = '!DBG'
     valgrind = NONE
     recover = false
+    abs_zero = 5e-6
+    max_threads = 1
   []
 []

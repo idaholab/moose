@@ -1,4 +1,5 @@
 #include "QuadInterWrapperFlowAreaIC.h"
+#include "QuadInterWrapperMesh.h"
 
 registerMooseObject("SubChannelApp", QuadInterWrapperFlowAreaIC);
 
