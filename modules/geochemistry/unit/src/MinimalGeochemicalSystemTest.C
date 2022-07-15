@@ -1654,7 +1654,26 @@ TEST(PertinentGeochemicalSystemTest, addKineticRateExceptions)
 
   try
   {
-    KineticRateUserDescription rate("Ca++", 1.0, 2.0, true, {"H2O"}, {3.0}, 4.0, 5.0, 6.0, 7.0);
+    KineticRateUserDescription rate("Ca++",
+                                    1.0,
+                                    2.0,
+                                    true,
+                                    0.0,
+                                    0.0,
+                                    0.0,
+                                    {"H2O"},
+                                    {3.0},
+                                    {0.0},
+                                    {0.0},
+                                    4.0,
+                                    5.0,
+                                    6.0,
+                                    7.0,
+                                    DirectionChoiceEnum::BOTH,
+                                    "H2O",
+                                    0.0,
+                                    -1.0,
+                                    0.0);
     model.addKineticRate(rate);
     FAIL() << "Missing expected exception.";
   }
@@ -1670,8 +1689,26 @@ TEST(PertinentGeochemicalSystemTest, addKineticRateExceptions)
 
   try
   {
-    KineticRateUserDescription rate(
-        "CH4(aq)", 1.0, 2.0, true, {"H2O", "H++"}, {3.0, 1.0}, 4.0, 5.0, 6.0, 7.0);
+    KineticRateUserDescription rate("CH4(aq)",
+                                    1.0,
+                                    2.0,
+                                    true,
+                                    0.0,
+                                    0.0,
+                                    0.0,
+                                    {"H2O", "H++"},
+                                    {3.0, 1.0},
+                                    {0.0, 0.0},
+                                    {0.0, 0.0},
+                                    4.0,
+                                    5.0,
+                                    6.0,
+                                    7.0,
+                                    DirectionChoiceEnum::BOTH,
+                                    "H2O",
+                                    0.0,
+                                    -1.0,
+                                    0.0);
     model.addKineticRate(rate);
     FAIL() << "Missing expected exception.";
   }
@@ -1701,12 +1738,22 @@ TEST(PertinentGeochemicalSystemTest, addKineticRate)
                                   1.0,
                                   2.0,
                                   true,
+                                  0.0,
+                                  0.0,
+                                  0.0,
                                   {"H2O", "OH-", "O2(aq)", "CO2(aq)", "CaCO3"},
                                   {3.0, 3.1, 3.2, 3.3, 3.4},
+                                  {0.0, 0.0, 0.0, 0.0, 0.0},
+                                  {0.0, 0.0, 0.0, 0.0, 0.0},
                                   4.0,
                                   5.0,
                                   6.0,
-                                  7.0);
+                                  7.0,
+                                  DirectionChoiceEnum::BOTH,
+                                  "H2O",
+                                  0.0,
+                                  -1.0,
+                                  0.0);
   model.addKineticRate(rate);
 
   const ModelGeochemicalDatabase & mgd = model.modelGeochemicalDatabase();
@@ -1730,7 +1777,26 @@ TEST(PertinentGeochemicalSystemTest, addKineticRate)
   EXPECT_EQ(mgd.kin_rate[0].description.activation_energy, 6.0);
   EXPECT_EQ(mgd.kin_rate[0].description.one_over_T0, 7.0);
 
-  KineticRateUserDescription ratec("Calcite", 7.0, 6.0, false, {"H+"}, {-3.0}, 5.0, 4.0, 3.0, 2.0);
+  KineticRateUserDescription ratec("Calcite",
+                                   7.0,
+                                   6.0,
+                                   false,
+                                   0.0,
+                                   0.0,
+                                   0.0,
+                                   {"H+"},
+                                   {-3.0},
+                                   {0.0},
+                                   {0.0},
+                                   5.0,
+                                   4.0,
+                                   3.0,
+                                   2.0,
+                                   DirectionChoiceEnum::BOTH,
+                                   "H2O",
+                                   0.0,
+                                   -1.0,
+                                   0.0);
   model.addKineticRate(ratec);
 
   EXPECT_EQ(mgd.kin_rate.size(), (std::size_t)2);
