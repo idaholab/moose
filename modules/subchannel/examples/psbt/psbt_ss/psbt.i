@@ -29,12 +29,12 @@ P_out = 4.923e6 # Pa
 [SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
-  n_blocks = 1
+  n_blocks = 5
   beta = 0.006
   CT = 1.0 #2.0
-  compute_density = true
-  compute_viscosity = true
-  compute_power = true
+  compute_density = false
+  compute_viscosity = false
+  compute_power = false
   P_out = ${P_out}
 # Change the defaults
   implicit = true

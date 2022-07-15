@@ -1,4 +1,5 @@
 T_in = 359.15
+# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
 
@@ -21,7 +22,7 @@ P_out = 4.923e6 # Pa
     input = sub_channel
     nx = 6
     ny = 6
-    n_cells = 3
+    n_cells = 10
     pitch = 0.0126
     heated_length = 1.0
   []
@@ -79,14 +80,18 @@ P_out = 4.923e6 # Pa
   fp = water
   n_blocks = 1
   beta = 0.006
-  CT = 0.5
+  CT = 2.0
   compute_density = true
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
   implicit = true
   segregated = true
-  verbose_subchannel = true
+  monolithic_thermal = false
+  staggered_pressure = false
+  interpolation_scheme = 'central_difference'
+  P_tol = 1e-04
+  T_tol = 1e-04
 []
 
 [ICs]

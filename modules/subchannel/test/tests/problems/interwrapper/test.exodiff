@@ -1,0 +1,8 @@
+COORDINATES
+TIME STEPS
+NODAL VARIABLES
+	DP relative 1e-3
+	P relative 1e-3
+	S relative 1e-3
+	mdot relative 1e-3
+	w_perim relative 1e-3

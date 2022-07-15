@@ -309,7 +309,7 @@ InterWrapper1PhaseProblem::populateVectorFromDense(Vec & x,
   PetscScalar * xx;
   ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
-  for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
+  for (unsigned int iz = first_axial_level; iz < last_axial_level; iz++)
   {
     unsigned int iz_ind = iz - first_axial_level;
     for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)

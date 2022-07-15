@@ -119,7 +119,7 @@ P_out = 4.923e6 # Pa
 [SubChannel]
     type = LiquidMetalInterWrapper1PhaseProblem
     fp = sodium
-    n_blocks = 1
+    n_blocks = 10
     beta = 0.1
     P_out = 2.0e5
     CT = 1.0
@@ -128,10 +128,11 @@ P_out = 4.923e6 # Pa
     compute_power = false
     P_tol = 1.0e-6
     T_tol = 1.0e-6
-    implicit = false
+    implicit = true
     segregated = true
     staggered_pressure = false
     monolithic_thermal = false
+    interpolation_scheme = 'central_difference'
 []
 
 
