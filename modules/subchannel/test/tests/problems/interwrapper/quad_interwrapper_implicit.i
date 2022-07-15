@@ -1,103 +1,102 @@
-T_in = 660
-mass_flux_in = ${fparse 1e+6 * 300.00 / 36000.*0.5}
-P_out = 2.0e5 # Pa
+T_in = 360.0
+mass_flux_in = ${fparse 1e+4 * 17.0 / 3600.}
+P_out = 4.923e6 # Pa
 
-[GlobalParams]
-  nrings = 3
-  n_cells = 5
-  flat_to_flat = 0.056
-  heated_length = 0.2
-  pitch = 0.012
+[QuadInterWrapperMesh]
+    [sub_channel]
+      type = QuadInterWrapperMeshGenerator
+      nx = 5
+      ny = 5
+      n_cells = 10
+      assembly_pitch = 0.2
+      assembly_side_x = 0.18
+      assembly_side_y = 0.18
+      side_bypass = 0.001
+      heated_length = 3.0
+    []
 []
 
-[TriSubChannelMesh]
-  [subchannel]
-    type = TriSubChannelMeshGenerator
-    rod_diameter = 0.01
-    dwire = 0.002
-    hwire = 0.0833
-    spacer_z = '0'
-    spacer_k = '5.0'
-  []
-  [duct]
-    type = TriDuctMeshGenerator
-    input = subchannel
-  []
-[]
 
 [AuxVariables]
   [mdot]
+    block = sub_channel
   []
   [SumWij]
+    block = sub_channel
   []
   [P]
+    block = sub_channel
   []
   [DP]
+    block = sub_channel
   []
   [h]
+    block = sub_channel
   []
   [T]
+    block = sub_channel
   []
   [rho]
-  []
-  [S]
-  []
-  [Sij]
-  []
-  [w_perim]
-  []
-  [q_prime]
-  []
-  [q_prime_duct]
-  []
-  [Tduct]
+    block = sub_channel
   []
   [mu]
+    block = sub_channel
+  []
+  [S]
+    block = sub_channel
+  []
+  [w_perim]
+    block = sub_channel
+  []
+  [q_prime]
+    block = sub_channel
   []
 []
 
+
 [Modules]
   [FluidProperties]
-    [sodium]
-       type = PBSodiumFluidProperties
+    [water]
+      type = Water97FluidProperties
     []
   []
 []
 
-[Problem]
-  type = LiquidMetalSubChannel1PhaseProblem
-  fp = sodium
-  n_blocks = 5
-  beta = 0.1
-  P_out = 2.0e5
-  CT = 1.0
+
+[SubChannel]
+  type = LiquidWaterInterWrapper1PhaseProblem
+  fp = water
+  n_blocks = 10
+  beta = 0.08
+  CT = 2.6
+  P_tol = 1e-6
+  T_tol = 1e-6
   compute_density = true
   compute_viscosity = true
-  compute_power = true
-  # T_tol = 1.0e-4
-  # P_tol = 1.0e-4
+  compute_power = false
+  P_out = ${P_out}
   implicit = true
   segregated = true
   staggered_pressure = false
   monolithic_thermal = false
+  interpolation_scheme = 'central_difference'
 []
+
 
 [ICs]
   [S_IC]
-    type = TriFlowAreaIC
+    type = QuadInterWrapperFlowAreaIC
     variable = S
   []
 
   [w_perim_IC]
-    type = TriWettedPerimIC
+    type = QuadInterWrapperWettedPerimIC
     variable = w_perim
   []
 
-   [q_prime_IC]
-    type = TriPowerIC
+  [q_prime_IC]
+    type = QuadInterWrapperPowerIC
     variable = q_prime
-    power = 5.000e5 # W
-    filename = "pin_power_profile19.txt"
   []
 
   [T_ic]
@@ -109,7 +108,7 @@ P_out = 2.0e5 # Pa
   [P_ic]
     type = ConstantIC
     variable = P
-    value = ${P_out}
+    value = 0.0
   []
 
   [DP_ic]
@@ -117,29 +116,29 @@ P_out = 2.0e5 # Pa
     variable = DP
     value = 0.0
   []
-    [Viscosity_ic]
+
+  [Viscosity_ic]
     type = ViscosityIC
     variable = mu
     p = ${P_out}
     T = T
-    fp = sodium
+    fp = water
   []
-
 
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = P
+    p = ${P_out}
     T = T
-    fp = sodium
+    fp = water
   []
 
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = P
+    p = ${P_out}
     T = T
-    fp = sodium
+    fp = water
   []
 
   [mdot_ic]
@@ -149,14 +148,8 @@ P_out = 2.0e5 # Pa
   []
 []
 
+
 [AuxKernels]
-  [P_out_bc]
-    type = ConstantAux
-    variable = P
-    boundary = outlet
-    value = ${P_out}
-    execute_on = 'timestep_begin'
-  []
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -174,9 +167,12 @@ P_out = 2.0e5 # Pa
   []
 []
 
+
 [Outputs]
   exodus = true
+  checkpoint = false
 []
+
 
 [Executioner]
   type = Steady

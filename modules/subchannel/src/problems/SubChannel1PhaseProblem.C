@@ -325,7 +325,7 @@ SubChannel1PhaseProblem::populateVectorFromDense(Vec & x,
   PetscScalar * xx;
   ierr = VecGetArray(x, &xx);
   CHKERRQ(ierr);
-  for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
+  for (unsigned int iz = first_axial_level; iz < last_axial_level; iz++)
   {
     unsigned int iz_ind = iz - first_axial_level;
     for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
@@ -502,8 +502,6 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
       VecDuplicate(amc_sys_mdot_rhs, &loc_prod);
       populateVectorFromDense<libMesh::DenseMatrix<Real>>(
           Wij_vec, _Wij, first_node, last_node, _n_gaps);
-      PetscInt p, q;
-      MatGetSize(mc_sumWij_mat, &p, &q);
       MatMult(mc_sumWij_mat, Wij_vec, loc_prod);
       PetscScalar * xx;
       VecGetArray(loc_prod, &xx);
@@ -2143,10 +2141,12 @@ SubChannel1PhaseProblem::computeWij(int iblock)
       createPetscVector(sol_holder_P, _block_size * _n_gaps);
       Vec sol_holder_W;
       createPetscVector(sol_holder_W, _block_size * _n_gaps);
+      Vec loc_holder_Wij;
+      createPetscVector(loc_holder_Wij, _block_size * _n_gaps);
       populateVectorFromHandle<SolutionHandle *>(
           prodp, _P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels);
       populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-          Wij_vec, _Wij, first_node, last_node, _n_gaps);
+          loc_holder_Wij, _Wij, first_node, last_node, _n_gaps);
 
       MatMult(cmc_sys_Wij_mat, Wij_vec, sol_holder_W);
       VecAXPY(sol_holder_W, -1.0, cmc_sys_Wij_rhs);
@@ -2167,6 +2167,7 @@ SubChannel1PhaseProblem::computeWij(int iblock)
 
       VecDestroy(&sol_holder_P);
       VecDestroy(&sol_holder_W);
+      VecDestroy(&loc_holder_Wij);
     }
   }
 }
@@ -3345,7 +3346,7 @@ SubChannel1PhaseProblem::externalSolve()
   unsigned int P_it_max;
 
   if (_segregated_bool)
-    P_it_max = 2 * _n_blocks;
+    P_it_max = 20 * _n_blocks;
   else
     P_it_max = 100;
 

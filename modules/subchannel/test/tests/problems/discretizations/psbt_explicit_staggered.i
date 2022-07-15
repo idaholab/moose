@@ -78,7 +78,7 @@ P_out = 4.923e6 # Pa
 [SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
-  n_blocks = 1
+  n_blocks = 3
   beta = 0.006
   CT = 2.0
   compute_density = true
