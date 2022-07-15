@@ -4,7 +4,7 @@ P_out = 2.0e5 # Pa
 
 [GlobalParams]
   nrings = 3
-  n_cells = 20
+  n_cells = 5
   flat_to_flat = 0.056
   heated_length = 0.2
   pitch = 0.012
@@ -74,8 +74,8 @@ P_out = 2.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  T_tol = 1.0e-7
-  P_tol = 1.0e-7
+  T_tol = 1.0e-4
+  P_tol = 1.0e-4
   implicit = true
   segregated = true
   staggered_pressure = false

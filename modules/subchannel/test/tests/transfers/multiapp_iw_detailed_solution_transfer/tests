@@ -3,9 +3,8 @@
     type = Exodiff
     input = quad_iw.i
     exodiff = 'quad_iw_out.e quad_iw_out_viz0.e'
-    custom_cmp = 'test.exodiff'
-    method = '!DBG'
-    valgrind = NONE
     recover = false
+    abs_zero = 5e-6
+    max_threads = 1
   []
 []

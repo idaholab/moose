@@ -7,11 +7,11 @@ P_out = 4.923e6 # Pa
     type = QuadSubChannelMeshGenerator
     nx = 6
     ny = 6
-    n_cells = 10
+    n_cells = 3
     pitch = 0.0126
     rod_diameter = 0.00950
     gap = 0.00095 # the half gap between sub-channel assemblies
-    heated_length = 3.658
+    heated_length = 1.0
     spacer_z = '0.0'
     spacer_k = '0.0'
   []
@@ -37,6 +37,8 @@ P_out = 4.923e6 # Pa
   P_out = ${P_out}
   implicit = true
   segregated = true
+  P_tol = 1e-04
+  T_tol = 1e-04
 []
 
 [ICs]

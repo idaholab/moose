@@ -3,7 +3,7 @@
     type = DetailedQuadInterWrapperMeshGenerator
     nx = 5
     ny = 5
-    n_cells = 10
+    n_cells = 3
     assembly_pitch = 0.2
     assembly_side_x = 0.18
     assembly_side_y = 0.18

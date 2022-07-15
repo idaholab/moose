@@ -8,7 +8,7 @@ P_out = 4.923e6 # Pa
     type = QuadSubChannelMeshGenerator
     nx = 6
     ny = 6
-    n_cells = 10
+    n_cells = 3
     pitch = 0.0126
     rod_diameter = 0.00950
     gap = 0.00095 # the half gap between sub-channel assemblies
@@ -90,6 +90,8 @@ P_out = 4.923e6 # Pa
   monolithic_thermal = false
   staggered_pressure = false
   interpolation_scheme = 'central_difference'
+  P_tol = 1e-04
+  T_tol = 1e-04
 []
 
 [ICs]
