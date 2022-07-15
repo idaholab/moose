@@ -7,12 +7,12 @@ P_out = 4.923e6 # Pa
       type = QuadInterWrapperMeshGenerator
       nx = 5
       ny = 5
-      n_cells = 3
+      n_cells = 10
       assembly_pitch = 0.2
       assembly_side_x = 0.18
       assembly_side_y = 0.18
       side_bypass = 0.001
-      heated_length = 1.0
+      heated_length = 3.0
     []
 []
 
@@ -69,10 +69,10 @@ P_out = 4.923e6 # Pa
   n_blocks = 1
   beta = 0.08
   CT = 2.6
-  P_tol = 1e-4
-  T_tol = 1e-4
-  compute_density = true
-  compute_viscosity = true
+  P_tol = 1e-6
+  T_tol = 1e-6
+  compute_density = false
+  compute_viscosity = false
   compute_power = false
   P_out = ${P_out}
   implicit = false

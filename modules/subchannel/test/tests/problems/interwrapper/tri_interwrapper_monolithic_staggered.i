@@ -123,15 +123,16 @@ P_out = 4.923e6 # Pa
     beta = 0.1
     P_out = 2.0e5
     CT = 1.0
-    compute_density = true
-    compute_viscosity = true
+    compute_density = false
+    compute_viscosity = false
     compute_power = false
     P_tol = 1.0e-6
     T_tol = 1.0e-6
-    implicit = false
-    segregated = true
-    staggered_pressure = false
+    implicit = true
+    segregated = false
+    staggered_pressure = true
     monolithic_thermal = false
+    interpolation_scheme = 'central_difference'
 []
 
 
