@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InitialCondition.h"
+#include "TriSubChannelBaseIC.h"
 
 class TriInterWrapperMesh;
 
