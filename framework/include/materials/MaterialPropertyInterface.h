@@ -17,34 +17,12 @@
 #include "MooseObjectName.h"
 #include "InputParameters.h"
 #include "SubProblem.h"
+#include "DeferredMaterialPropertyResolutionInterface.h"
 
 // Forward declarations
 class MooseObject;
 class FEProblemBase;
-
-/**
- * Helper class for deferred getting of material properties after the construction
- * phase for materials. This enables "optional material properties" in materials.
- * It works by returning a reference to a pointer to a material property (rather
- * than a reference to the property value). The pointer will be set to point to
- * either an existing material property or to nullptr if the requested property
- * does not exist.
- */
-template <class M>
-class OptionalMaterialPropertyProxyBase
-{
-public:
-  OptionalMaterialPropertyProxyBase(const std::string & name, MaterialPropState state)
-    : _name(name), _state(state)
-  {
-  }
-  virtual ~OptionalMaterialPropertyProxyBase() {}
-  virtual void resolve(M & material) = 0;
-
-protected:
-  const std::string _name;
-  const MaterialPropState _state;
-};
+class MaterialPropertyInterface;
 
 /**
  * \class MaterialPropertyInterface
@@ -56,7 +34,7 @@ protected:
  * must be inherited following these two classes for the material property checks
  * to operate correctly.
  */
-class MaterialPropertyInterface
+class MaterialPropertyInterface : public DeferredMaterialPropertyResolutionInterface
 {
 public:
   MaterialPropertyInterface(const MooseObject * moose_object,
@@ -286,9 +264,6 @@ public:
     return _material_property_dependencies;
   }
 
-  /// resolve all optional properties
-  virtual void resolveOptionalProperties();
-
   /**
    * Retrieve the generic property named "name" for the specified \p material_data
    */
@@ -363,6 +338,9 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const MaterialPropertyName & name,
                                                              MaterialData & material_data);
+
+  /// resolve all deferred properties (optional and zero properties)
+  virtual void resolveDeferredProperties();
 
 protected:
   /// Parameters of the object with this interface
@@ -462,6 +440,9 @@ protected:
   /// The set of material properties (as given by their IDs) that _this_ object depends on
   std::set<unsigned int> _material_property_dependencies;
 
+  /// store all names of properties obtained through getGenerizZeroMaterialProperty to mark them as requoired, iff they exist
+  std::vector<std::string> _zero_material_properties;
+
   const MaterialPropertyName _get_suffix;
 
 private:
@@ -484,47 +465,9 @@ private:
   /// Storage for the boundary ids created by BoundaryRestrictable
   const std::set<BoundaryID> & _mi_boundary_ids;
 
-  /// optional material properties
-  std::vector<std::unique_ptr<OptionalMaterialPropertyProxyBase<MaterialPropertyInterface>>>
-      _optional_property_proxies;
-};
-
-template <class M, typename T, bool is_ad>
-class OptionalMaterialPropertyProxy : public OptionalMaterialPropertyProxyBase<M>
-{
-public:
-  OptionalMaterialPropertyProxy(const std::string & name, MaterialPropState state)
-    : OptionalMaterialPropertyProxyBase<M>(name, state)
-  {
-  }
-  const GenericOptionalMaterialProperty<T, is_ad> & value() const { return _value; }
-  void resolve(M & mpi) override
-  {
-    if (mpi.template hasGenericMaterialProperty<T, is_ad>(this->_name))
-      switch (this->_state)
-      {
-        case MaterialPropState::CURRENT:
-          _value.set(&mpi.template getGenericMaterialProperty<T, is_ad>(this->_name));
-          break;
-
-        case MaterialPropState::OLD:
-          if constexpr (is_ad)
-            mooseError("Old material properties are not available as AD");
-          else
-            _value.set(&mpi.template getMaterialPropertyOld<T>(this->_name));
-          break;
-
-        case MaterialPropState::OLDER:
-          if constexpr (is_ad)
-            mooseError("Older material properties are not available as AD");
-          else
-            _value.set(&mpi.template getMaterialPropertyOlder<T>(this->_name));
-          break;
-      }
-  }
-
-private:
-  GenericOptionalMaterialProperty<T, is_ad> _value;
+  /// deferred resolution material properties
+  std::vector<std::unique_ptr<DeferredMaterialPropertyProxyBase<MaterialPropertyInterface>>>
+      _deferred_property_proxies;
 };
 
 template <typename T, bool is_ad>
@@ -685,6 +628,10 @@ template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> &
 MaterialPropertyInterface::getGenericZeroMaterialPropertyByName(const std::string & prop_name)
 {
+  // TODO: this schema has been broken for a long time. This call is also uses by UserObjects, which
+  // are constructed _before_ materials are constructed. The following conditional will always
+  // return false for those.
+
   // if found return the requested property
   if (hasGenericMaterialPropertyByName<T, is_ad>(prop_name))
     return getGenericMaterialPropertyByName<T, is_ad>(prop_name);
@@ -701,6 +648,11 @@ MaterialPropertyInterface::getGenericZeroMaterialPropertyByName(const std::strin
   // set values for all qpoints to zero
   for (unsigned int qp = 0; qp < nqp; ++qp)
     MathUtils::mooseSetToZero(zero[qp]);
+
+  // mark this property as potentially needed by the current object
+  _deferred_property_proxies.push_back(
+      std::make_unique<DeferredMaterialPropertyProxy<MaterialPropertyInterface, T, is_ad>>(
+          prop_name, MaterialPropState::CURRENT));
 
   return zero;
 }
@@ -749,10 +701,10 @@ const GenericOptionalMaterialProperty<T, is_ad> &
 MaterialPropertyInterface::genericOptionalMaterialPropertyHelper(const std::string & name,
                                                                  MaterialPropState state)
 {
-  auto proxy = std::make_unique<OptionalMaterialPropertyProxy<MaterialPropertyInterface, T, is_ad>>(
+  auto proxy = std::make_unique<DeferredMaterialPropertyProxy<MaterialPropertyInterface, T, is_ad>>(
       name, state);
   auto & optional_property = proxy->value();
-  _optional_property_proxies.push_back(std::move(proxy));
+  _deferred_property_proxies.push_back(std::move(proxy));
   return optional_property;
 }
 

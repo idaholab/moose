@@ -145,37 +145,6 @@ public:
   ///@}
 
   /**
-   * Return a material property that is initialized to zero by default and does
-   * not need to (but can) be declared by another material.
-   */
-  template <typename T, bool is_ad>
-  const GenericMaterialProperty<T, is_ad> &
-  getGenericZeroMaterialProperty(const std::string & name);
-  template <typename T, bool is_ad>
-  const GenericMaterialProperty<T, is_ad> &
-  getGenericZeroMaterialPropertyByName(const std::string & prop_name);
-
-  /**
-   * Return a constant zero anonymous material property
-   */
-  template <typename T, bool is_ad>
-  const GenericMaterialProperty<T, is_ad> & getGenericZeroMaterialProperty();
-
-  /// for backwards compatibility
-  template <typename T, typename... Ts>
-  const MaterialProperty<T> & getZeroMaterialProperty(Ts... args)
-  {
-    return getGenericZeroMaterialProperty<T, false>(args...);
-  }
-
-  /// for backwards compatibility
-  template <typename T, typename... Ts>
-  const MaterialProperty<T> & getZeroMaterialPropertyByName(Ts... args)
-  {
-    return getGenericZeroMaterialPropertyByName<T, false>(args...);
-  }
-
-  /**
    * Return a set of properties accessed with getMaterialProperty
    * @return A reference to the set of properties with calls to getMaterialProperty
    */
@@ -376,68 +345,6 @@ MaterialBase::declarePropertyOlder(const std::string & prop_name)
                       "getMaterialPropertyOlder (only) if a reference is required in this class."));
   registerPropName(prop_name, false, MaterialPropState::OLDER);
   return materialData().declarePropertyOlder<T>(prop_name);
-}
-
-template <typename T, bool is_ad>
-const GenericMaterialProperty<T, is_ad> &
-MaterialBase::getGenericZeroMaterialProperty(const std::string & name)
-{
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = name;
-  if (_pars.have_parameter<MaterialPropertyName>(name))
-    prop_name = _pars.get<MaterialPropertyName>(name);
-
-  return getGenericZeroMaterialPropertyByName<T, is_ad>(prop_name);
-}
-
-template <typename T, bool is_ad>
-const GenericMaterialProperty<T, is_ad> &
-MaterialBase::getGenericZeroMaterialPropertyByName(const std::string & prop_name)
-{
-  checkExecutionStage();
-  auto & preload_with_zero = materialData().getGenericProperty<T, is_ad>(prop_name);
-
-  _requested_props.insert(prop_name);
-  registerPropName(prop_name, true, MaterialPropState::CURRENT);
-  _fe_problem.markMatPropRequested(prop_name);
-
-  // Register this material on these blocks and boundaries as a zero property with relaxed
-  // consistency checking
-  for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
-    _fe_problem.storeSubdomainZeroMatProp(*it, prop_name);
-  for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end();
-       ++it)
-    _fe_problem.storeBoundaryZeroMatProp(*it, prop_name);
-
-  // set values for all qpoints to zero
-  // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
-  unsigned int nqp = _fe_problem.getMaxQps();
-  if (nqp > preload_with_zero.size())
-    preload_with_zero.resize(nqp);
-  for (unsigned int qp = 0; qp < nqp; ++qp)
-    MathUtils::mooseSetToZero(preload_with_zero[qp]);
-
-  return preload_with_zero;
-}
-
-template <typename T, bool is_ad>
-const GenericMaterialProperty<T, is_ad> &
-MaterialBase::getGenericZeroMaterialProperty()
-{
-  // static zero property storage
-  static GenericMaterialProperty<T, is_ad> zero;
-
-  // resize to accomodate maximum number of qpoints
-  // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
-  unsigned int nqp = _fe_problem.getMaxQps();
-  if (nqp > zero.size())
-    zero.resize(nqp);
-
-  // set values for all qpoints to zero
-  for (unsigned int qp = 0; qp < nqp; ++qp)
-    MathUtils::mooseSetToZero(zero[qp]);
-
-  return zero;
 }
 
 template <typename T>

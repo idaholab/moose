@@ -87,8 +87,6 @@ public:
   const MaterialProperty<T> & getNeighborMaterialPropertyByName(const std::string & prop_name);
   ///@}
 
-  using MaterialBase::getZeroMaterialProperty;
-
   virtual bool isBoundaryMaterial() const override { return true; }
 
   virtual const std::set<unsigned int> & getMatPropDependencies() const override

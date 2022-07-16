@@ -13,6 +13,7 @@
 #include "Assembly.h"
 #include "Executioner.h"
 #include "Transient.h"
+#include "MaterialPropertyInterface.h"
 
 #include "libmesh/quadrature.h"
 

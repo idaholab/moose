@@ -468,7 +468,7 @@ public:
 };
 
 template <class M, typename T, bool is_ad>
-class OptionalMaterialPropertyProxy;
+class DeferredMaterialPropertyProxy;
 
 /**
  * Wrapper around a material property pointer. Copying this wrapper is disabled
@@ -517,8 +517,8 @@ private:
   void set(const P * pointer) { _pointer = pointer; }
   const P * _pointer;
 
-  friend class OptionalMaterialPropertyProxy<Material, T, is_ad>;
-  friend class OptionalMaterialPropertyProxy<MaterialPropertyInterface, T, is_ad>;
+  friend class DeferredMaterialPropertyProxy<Material, T, is_ad>;
+  friend class DeferredMaterialPropertyProxy<MaterialPropertyInterface, T, is_ad>;
 };
 
 template <typename T>

@@ -980,7 +980,7 @@ buildRequiredMaterials(const Consumers & mat_consumers,
                        const bool allow_stateful);
 
 std::deque<MaterialBase *>
-buildRequiredMaterials(std::set<unsigned int> & consumer_needed_mat_props,
+buildRequiredMaterials(std::set<unsigned int> & needed_mat_props,
                        const std::vector<std::shared_ptr<MaterialBase>> & mats,
                        const bool allow_stateful);
 
