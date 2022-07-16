@@ -162,13 +162,25 @@ The building blocks in MOOSE for terms in the PDEs are +Kernels+ for FE or +FVKe
 
 The building blocks in MOOSE for boundary conditions are +BCs+ for FE or +FVBCs+ for FV:
 
-- Inlet Velocity, Temperature: $\text{FVFunctionDirichletBC}$
-- Outlet pressure: $\text{Something}$
+- Inlet Velocity: $\text{INSFVInletVelocityBC}$
+- Inlet Temperature: $\text{FVFunctionDirichletBC}$
+- Outlet pressure: $\text{INSFVOutletPRessureBC}$
 - Heatflux: $\text{FVFunctionNeumannBC}$
-- Freeslip: $\text{MomentumFreeSlipBC}$
+- Freeslip: $\text{INSFVNaturalFreeSlipBC}$
 - ...
 
-
 !style-end!
+
+!---
+
+# A Simple Example: Laminar Free Flow in a Channel
+
+!media navier_stokes/nsfv-channel-example.png style=width:100%;background:white;
+
+
+
+
+
+
 
 
