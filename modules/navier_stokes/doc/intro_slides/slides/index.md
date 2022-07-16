@@ -16,12 +16,12 @@ Main capabilities:
 
 Utilizies the following techniques:
 
-- Continuous Finite Element Discretization (maintained, but not intensely devleoped)
+- Continuous Finite Element Discretization (maintained, but not intensely developed)
 - Finite Volume Discretization (current development direction)
 
 !---
 
-# The Navier-Stokes equations
+# The Navier-Stokes equations ([!citet](radman2021development))
   style=font-size:26pt
 
 !style! fontsize=80%
@@ -29,12 +29,13 @@ Utilizies the following techniques:
 - Conservation of +mass+:
 
 !equation id=mass-eq
-\frac{\partial \rho}{\partial t} + \nabla \cdot \left( \rho \vec{u} \right)  = 0
+\frac{\partial \gamma \rho}{\partial t} + \nabla \cdot \left( \rho \vec{u} \right)  = 0
 
 - Conservation of (linear) +momentum+:
 
 !equation id=momentum-eq
-\frac{\partial \rho  \vec{u}}{\partial t} + \nabla \cdot \left(\gamma^{-1}  \rho \vec{u} \otimes \vec{u}\right) = -\gamma\nabla p + \gamma  \rho \vec{g} -  W  \vec{u}_I
+\frac{\partial \rho  \vec{u}}{\partial t} + \nabla \cdot \left(\gamma^{-1}  \rho \vec{u} \otimes \vec{u}\right)
+= \nabla \cdot \left(\gamma \mu_\text{eff} \left(\nabla\vec{u}_I + \left(\nabla \vec{u}_I\right)^T-\frac{2}{3}\nabla\cdot\vec{u}_I\mathbb{I}\right)\right) -\gamma\nabla p + \gamma  \rho \vec{g} -  W  \vec{u}_I
 
 !style-end!
 
@@ -53,6 +54,7 @@ Utilizies the following techniques:
 
 !style! fontsize=70%
 - $\rho = \rho(p,T)$ - density
+- $\mu_{eff}$ - effective dynamic viscosity (laminar + turbulent)
 - $p$ - pressure
 - $W$ - friction tensor (using correlations)
 !style-end!
@@ -149,6 +151,7 @@ Few Examples:
 !---
 
 # Building Input Files
+style=font-size:28pt
 
 The building blocks in MOOSE for terms in the PDEs are +Kernels+ for FE or +FVKernels+ for FV:
 
@@ -156,6 +159,9 @@ The building blocks in MOOSE for terms in the PDEs are +Kernels+ for FE or +FVKe
 !equation
 \underbrace{\frac{\partial \rho  \vec{u}}{\partial t}}_{\text{PINSFMomentumTimeDerivative}}
 + \underbrace{\nabla \cdot \left(\gamma^{-1}  \rho \vec{u} \otimes \vec{u}\right)}_{\text{PINSFVMomentumAdvection}} =
+
+!equation
+\underbrace{\nabla \cdot \left(\gamma \mu_\text{eff} \left(\nabla\vec{u}_I + \left(\nabla \vec{u}_I\right)^T-\frac{2}{3}\nabla\cdot\vec{u}_I\mathbb{I}\right)\right)}_{\text{PINSFVMomentumDiffusion}}
 \underbrace{-\gamma\nabla p}_{\text{PINSFVMomentumPressure}}
 + \underbrace{\gamma\rho \vec{g}}_{\text{PINSFVMomentumGravity~}}
 \underbrace{-  W  \vec{u}_I}_{\text{PINSFVMomentumFriction}}
@@ -174,13 +180,48 @@ The building blocks in MOOSE for boundary conditions are +BCs+ for FE or +FVBCs+
 !---
 
 # A Simple Example: Laminar Free Flow in a Channel
+style=font-size:26pt
 
 !media navier_stokes/nsfv-channel-example.png style=width:100%;background:white;
 
+Let us consider the following (fictional) material properties:
+
+- $\mu=1.1$ $\text{Pa}\cdot\text{s}$
+- $\rho=1.1$ $\frac{kg}{m^3}$
+
+!---
+
+# Detailed Input File
+style=font-size:26pt
+
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/2d-rc-no-slip.i
+
+!---
+
+# The Navier-Stokes Finite Folume Action
+style=font-size:26pt
+
+For the documentation of the action, click [here](NSFVAction.md)!
+
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/2d-rc-no-slip-action.i
+
+!---
+
+# Recommendations for Building Input Files
+style=font-size:28pt
+
+- Use Rhie-Chow interpolation for the advecting velocity
+
+  - Other interpolation techniques may lead to checker-boarding/instability
 
 
+- Start with first-order advected-interpolation schemes (e.g. upwind)
+- Make sure that the pressure is pinned for incompressible/weakly-compressible simulations in close-loop systems
+- For monolithic solvers (the default at the moment) use a variant of LU preconditioner
+- For complex monolithic systems monitor the residuals of every variable
 
 
+!---
 
 
 
