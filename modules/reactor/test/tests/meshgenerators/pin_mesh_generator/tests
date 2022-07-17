@@ -5,7 +5,8 @@
     requirement = 'The system shall generate a 2D square pin mesh with fuel, gap, clad, background regions'
     type = 'Exodiff'
     input = 'pin_only.i'
-    cli_args = "--mesh-only pin_only_in.e"
+    cli_args = "Mesh/pin1/ring_radii='0.3385 0.3705 0.4665'
+                Outputs/file_base=pin_only_in"
     exodiff = 'pin_only_in.e'
     recover = false
   []
@@ -18,21 +19,46 @@
                 Mesh/pin1/mesh_intervals='1 1'
                 Mesh/pin1/region_ids='1 2'
                 Mesh/pin1/ring_radii='0.4665'
-                --mesh-only pin_only_tri_in.e"
+                Outputs/file_base=pin_only_tri_in"
     exodiff = 'pin_only_tri_in.e'
     recover = false
   []
-  [tri_error]
-    requirement = 'The system shall throw an error when trying to generate a pin mesh with more than 1 radial region and tri center elements'
-    type = 'RunException'
+  [tri_intervals]
+    requirement = 'The system shall generate a pin mesh with more than 1 radial region and tri center elements'
+    type = 'Exodiff'
     input = 'pin_only.i'
     cli_args = "Mesh/pin1/quad_center_elements=false
                 Mesh/pin1/num_sectors=2
                 Mesh/pin1/mesh_intervals='2 1'
                 Mesh/pin1/region_ids='1 2'
                 Mesh/pin1/ring_radii='0.4665'
-                --mesh-only pin_only_tri_in.e"
-    expect_err = "The number of mesh intervals in the ring region must be one if quad_center_elements is not true"
+                Outputs/file_base=pin_only_tri_intervals_in"
+    exodiff = 'pin_only_tri_intervals_in.e'
+    recover = false
+  []
+  [quad_intervals]
+    requirement = 'The system shall generate a pin mesh with more than 1 radial region and quad center elements'
+    type = 'Exodiff'
+    input = 'pin_only.i'
+    cli_args = "Mesh/pin1/quad_center_elements=true
+                Mesh/pin1/num_sectors=2
+                Mesh/pin1/mesh_intervals='2 1'
+                Mesh/pin1/region_ids='1 2'
+                Mesh/pin1/ring_radii='0.4665'
+                Outputs/file_base=pin_only_quad_intervals_in"
+    exodiff = 'pin_only_quad_intervals_in.e'
+    recover = false
+  []
+  [background_tri_intervals]
+    requirement = 'The system shall generate a pin mesh with no radial region and more than 1 background intervals with tri center elements'
+    type = 'Exodiff'
+    input = 'pin_only.i'
+    cli_args = "Mesh/pin1/quad_center_elements=false
+                Mesh/pin1/num_sectors=2
+                Mesh/pin1/mesh_intervals='2'
+                Mesh/pin1/region_ids='3'
+                Outputs/file_base=pin_only_background_tri_intervals_in"
+    exodiff = 'pin_only_background_tri_intervals_in.e'
     recover = false
   []
   [hex]
@@ -44,7 +70,7 @@
                 Mesh/pin1/ring_radii='0.4665'
                 Mesh/pin1/region_ids='1 2'
                 Mesh/pin1/mesh_intervals='1 1'
-                --mesh-only pin_only_hex_in.e"
+                Outputs/file_base=pin_only_hex_in"
     exodiff = 'pin_only_hex_in.e'
     recover = false
   []
@@ -64,7 +90,7 @@
                 Mesh/pin1/mesh_intervals='1 1 1'
                 Mesh/pin1/quad_center_elements=false
                 Mesh/pin1/extrude=true
-                --mesh-only pin_only_hex_complex_in.e"
+                Outputs/file_base=pin_only_hex_complex_in"
     exodiff = 'pin_only_hex_complex_in.e'
     recover = false
   []

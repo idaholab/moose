@@ -150,6 +150,13 @@ PatternedMeshGenerator::generate()
       // Move the mesh into the right spot.  -i because we are starting at the top
       MeshTools::Modification::translate(cell_mesh, deltax, -deltay, 0);
 
+      // Subdomain map is aggregated on each row first. This retrieves a writable reference
+      auto & main_subdomain_map = _row_meshes[i]->set_subdomain_name_map();
+      // Retrieve subdomain name map from the mesh to be stitched and merge into the row's
+      // subdomain map
+      const auto & increment_subdomain_map = cell_mesh.get_subdomain_name_map();
+      mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
+
       _row_meshes[i]->stitch_meshes(cell_mesh,
                                     right,
                                     left,
@@ -163,8 +170,38 @@ PatternedMeshGenerator::generate()
   // Now stitch together the rows
   // We're going to stitch them all to row 0 (which is the real mesh)
   for (MooseIndex(_pattern) i = 1; i < _pattern.size(); i++)
+  {
+    // Get a writeable reference subdomain-name map for the main mesh to which the other rows are
+    // stitched
+    auto & main_subdomain_map = _row_meshes[0]->set_subdomain_name_map();
+    // Retrieve subdomain name map from the mesh to be stitched and merge into the main
+    // subdomain map
+    const auto & increment_subdomain_map = _row_meshes[i]->get_subdomain_name_map();
+    mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
+
     _row_meshes[0]->stitch_meshes(
         *_row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+  }
 
   return dynamic_pointer_cast<MeshBase>(_row_meshes[0]);
+}
+
+void
+PatternedMeshGenerator::mergeSubdomainNameMaps(
+    std::map<subdomain_id_type, std::string> & main_subdomain_map,
+    const std::map<subdomain_id_type, std::string> & increment_subdomain_map)
+{
+  // Insert secondary subdomain map into main subdomain map
+  main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+  // Check if one SubdomainName is shared by more than one subdomain ids
+  std::set<SubdomainName> main_subdomain_map_name_list;
+  for (auto const & id_name_pair : main_subdomain_map)
+  {
+    const auto name_to_insert = id_name_pair.second;
+    if (main_subdomain_map_name_list.find(name_to_insert) != main_subdomain_map_name_list.end())
+      paramError("inputs",
+                 "The input meshes both contain subdomain name " + name_to_insert +
+                     " that correspond to conflicting subdomain ids.");
+    main_subdomain_map_name_list.emplace(name_to_insert);
+  }
 }

@@ -83,6 +83,8 @@ protected:
   const bool _preserve_volumes;
   /// Shift in default subdomain IDs to avert potential conflicts
   const subdomain_id_type _block_id_shift;
+  /// Whether interface boundaries are created
+  const bool _create_interface_boundaries;
   /// Shift in default boundary IDs of interfaces to avert potential conflicts
   const boundary_id_type _interface_boundary_id_shift;
   /// Boundary ID of the mesh's external boundary

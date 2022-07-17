@@ -48,4 +48,7 @@ protected:
 
   ///Boundary id assigned to outer radial boundary of core mesh.
   boundary_id_type _radial_boundary;
+
+  // Map between RGMB element block names, block ids, and region ids
+  std::map<std::string, std::pair<subdomain_id_type, dof_id_type>> _name_id_map;
 };
