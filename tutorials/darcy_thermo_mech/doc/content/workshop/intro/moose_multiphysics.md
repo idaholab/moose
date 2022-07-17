@@ -18,8 +18,8 @@
 
   - Allows for "decoupling" of code
   - Leads to more reuse and less bugs
-  - +Challenging for FEM+: Shape functions, DOFs, Elements, QPs, Material Properties, Analytic
-    Functions, Global Integrals, Transferred Data and much more are needed in FEM assembly
+  - +Challenging for FEM/FVM+: Shape functions, DOFs, Elements, QPs, Material Properties, Analytic
+    Functions, Global Integrals, Transferred Data and much more are needed in FEM/FVM assembly
 
     The complexity makes computational science codes brittle and hard to reuse
 
@@ -49,7 +49,7 @@
 Actions\\
 AuxKernels\\
 Base\\
-BCs\\
+(FV)BCs\\
 Constraints\\
 Controls\\
 Dampers\\
@@ -64,8 +64,8 @@ Functions\\
 Geomsearch\\
 ICs\\
 Indicators\\
-InterfaceKernels\\
-Kernels\\
+(FV)InterfaceKernels\\
+(FV)Kernels\\
 LineSearches\\
 Markers\\
 Materials\\
@@ -103,20 +103,15 @@ VectorPostprocessors\\
 
 !---
 
-## Finite-Element Reactor Fuel Simulation
-
-!media darcy_thermo_mech/simulator.mp4 style=width:70%;margin-left:auto;margin-right:auto;display:block;
-
-!---
-
 ## MOOSE Physics Modules
 
 !style halign=center
 Chemical Reactions\\
 Contact\\
-Electromagnetics (coming soon)\\
+Electromagnetics\\
 External PETSc Solver\\
 Fluid Properties\\
+Fluid Structure Interaction\\
 Function Expansion Tools\\
 Geochemistry\\
 Heat Conduction\\

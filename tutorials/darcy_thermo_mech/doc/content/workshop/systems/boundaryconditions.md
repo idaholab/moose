@@ -1,6 +1,6 @@
 # Boundary Condition System
 
-System for computing residual contributions from boundary terms of a [!ac](PDE).
+System for computing residual contributions from boundary conditions of a [!ac](PDE).
 
 !---
 

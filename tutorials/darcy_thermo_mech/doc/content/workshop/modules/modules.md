@@ -26,7 +26,7 @@ contact forces.
 
 !---
 
-## Electromagnetics (coming soon)
+## Electromagnetics
 
 The Electromagnetics module provides components and models to simulate electromagnetic wave problems
 using MOOSE, and facilitate coupling of electromagnetic simulations to other physical domains.

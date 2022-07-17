@@ -1,7 +1,7 @@
-# Kernel System
+# (FV)Kernel System
 
-A system for computing the residual contribution from a volumetric term within a [!ac](PDE) using
-the Galerkin finite element method.
+A system for computing the residual contribution from a [!ac](PDE) term
+discretized using FEM or FVM.
 
 !---
 

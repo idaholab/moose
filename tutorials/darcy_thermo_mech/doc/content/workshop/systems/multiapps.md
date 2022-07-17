@@ -26,7 +26,7 @@ driving the simulation
 Each sub-app can solve for different physics from the main application
 
 - A sub-app can be another MOOSE application or could be an external application
-- A sub-app can have MultiApps, thus create a multi-level solve
+- A sub-app can have MultiApps, thus creating a multi-level solve
 
 !---
 

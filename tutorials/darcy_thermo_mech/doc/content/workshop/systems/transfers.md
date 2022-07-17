@@ -11,6 +11,37 @@ each sub-application should be able to solve on its own
 
 !---
 
+## Framework Transfer Classes
+
+- `MultiAppCloneReporterTransfer`: Declare and transfer reporter data from sub-application(s) to main application
+- `MultiAppCopyTransfer`: Copies variables (nonlinear and auxiliary) between multiapps that have identical meshes
+- `MultiAppInterpolationTransfer`: Transfers variables using mesh interpolation
+- `MultiAppMeshFunctionTransfer`: Transfers variables from sub-applications
+  using a parent application mesh-function object
+- `MultiAppNearestNodeTransfer`: Transfer the value to the target domain from the nearest node in the source domain
+- `MultiAppPostprocessorInterpolationTransfer`: Transfer postprocessor data from
+  sub-application into field data on the master application
+- `MultiAppPostprocessorToAuxScalarTransfer`: Transfers from a postprocessor to a scalar auxiliary variable
+- `MultiAppPostprocessorTransfer`: Transfers postprocessor data between the master application and sub-application(s)
+- `MultiAppProjectionTransfer`: Perform a L2 projection between a master and sub-application mesh of a field variable
+- `MultiAppReporterTransfer`: Transfers reporter data between two applications
+- `MultiAppScalarToAuxScalarTransfer`: Transfers data from a scalar variable to
+  an auxiliary scalar variable from different applications
+- `MultiAppUserObjectTransfer`: Samples a variable's value in the Parent app
+  domain at the point where the MultiApp is and copies that value into a post-processor in the MultiApp
+- `MultiAppVariableValueSamplePostprocessorTransfer`: Transfers field variable
+  values from parent application to a child application postprocessor or in the
+  reverse direction takes a postprocessor value from the nearest child
+  application to populate a parent application's field variable degrees of freedom
+- `MultiAppVariableValueSampleTransfer`: Transfers the value of a variable
+  within the master application at each sub-application position and transfers
+  the value to a field variable on the sub-application(s)
+- `MultiAppVectorPostprocessorTransfer`: This transfer distributes the N values
+                             of a VectorPostprocessor to Postprocessors located
+                             in N sub-apps or collects Postprocessor values from
+                             N sub-apps into a VectorPostprocessor
+
+
 ## Field Interpolation
 
 - An "interpolation" `Transfer` should be used when the domains have some overlapping geometry.
