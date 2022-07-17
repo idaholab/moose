@@ -1,4 +1,4 @@
-# The Navier-Stokes Module
+# The MOOSE Navier-Stokes Module
 
 !style halign=center fontsize=120%
 !datetime today format=%B %Y
@@ -6,23 +6,49 @@
 !---
 
 # Overview
+  style=font-size:28pt
+
+!style! fontsize=80%
+
+!row!
+!col! width=60%
 
 Main capabilities:
 
-- Incompressible fluid flows
-- Weakly-compressible fluid flows
-- Compressible fluid flows
-- Free flows and flows in porous media describing homogenized structures
+- Fluid types:
 
-Utilizies the following techniques:
+  - Incompressible
+  - Weakly-compressible
+  - Compressible
 
-- Continuous Finite Element Discretization (maintained, but not intensely developed)
-- Finite Volume Discretization (current development direction)
+- Flow regimes:
+
+  - Laminar
+  - Limited turbulence handling (mixing length)
+
+- Flow types:
+
+  - Free flows
+  - Flows in porous media describing homogenized structures
+
+!col-end!
+
+!col! width=40%
+
+Utilizes the following techniques:
+
+- Stabilized Continuous Finite Element Discretization (maintained, but not intensely developed) ([!cite](peterson2018overview))
+- Finite Volume Discretization (current development direction) ([!cite](lindsay2021improvement))
+
+!col-end!
+!row-end!
+
+!style-end!
 
 !---
 
-# The Navier-Stokes equations ([!citet](radman2021development))
-  style=font-size:26pt
+# The Porous Navier-Stokes equations  ([!cite](vafai2015handbook), [!cite](radman2021development))
+  style=font-size:24pt
 
 !style! fontsize=80%
 
@@ -69,7 +95,7 @@ Utilizies the following techniques:
 
 !---
 
-# The Navier-Stokes equations (contd.)
+# The Porous Navier-Stokes equations (contd.)
   style=font-size:26pt
 
 - These are supplemented by the conservarion of +energy+:
@@ -105,17 +131,17 @@ Utilizies the following techniques:
 
 !---
 
-# The Navier-Stokes equations (contd.)
+# The Porous Navier-Stokes equations (contd.)
   style=font-size:26pt
 
 The equations are extended with initial and boundary conditions:
 
 - Few examples:
 
-  - Inlet: $\vec{u}=\vec{u}_{inlet}, \quad T=T_{inlet}, \quad \vec{r} \in \partial\Omega_{inlet}$
-  - Outlet: $p = p_{outlet}, \quad \vec{r} \in \partial\Omega_{outlet}$
+  - Velocity Inlet: $\vec{u}=\vec{u}_{inlet}, \quad T=T_{inlet}, \quad \vec{r} \in \partial\Omega_{inlet}$
+  - Pressure Outlet: $p = p_{outlet}, \quad \vec{r} \in \partial\Omega_{outlet}$
   - No-slip, insulated walls: $\vec{u}=\vec{0}, \quad \kappa_f \nabla T \cdot \vec{n} = 0,  \quad \vec{r} \in \partial\Omega_{wall}$
-  - Heat flux on the walls: $\quad -\kappa_f \nabla T \big|_{\partial \Omega} \cdot \vec{n} = 0,  \quad \vec{r} \in \partial\Omega_{heated}$
+  - Heat flux on the walls: $\quad -\kappa_f \nabla T \big|_{\partial \Omega} \cdot \vec{n} = q^{\prime \prime},  \quad \vec{r} \in \partial\Omega_{heated}$
   - Free slip on walls: $\vec{u} \cdot \vec{n} = 0, \quad \vec{r} \in \partial\Omega_{slip}$
   - ...
 
@@ -157,7 +183,7 @@ The building blocks in MOOSE for terms in the PDEs are +Kernels+ for FE or +FVKe
 
 !style! fontsize=80%
 !equation
-\underbrace{\frac{\partial \rho  \vec{u}}{\partial t}}_{\text{PINSFMomentumTimeDerivative}}
+\underbrace{\frac{\partial \rho  \vec{u}}{\partial t}}_{\text{PINSFVMomentumTimeDerivative}}
 + \underbrace{\nabla \cdot \left(\gamma^{-1}  \rho \vec{u} \otimes \vec{u}\right)}_{\text{PINSFVMomentumAdvection}} =
 
 !equation
@@ -170,7 +196,7 @@ The building blocks in MOOSE for boundary conditions are +BCs+ for FE or +FVBCs+
 
 - Inlet Velocity: $\text{INSFVInletVelocityBC}$
 - Inlet Temperature: $\text{FVFunctionDirichletBC}$
-- Outlet pressure: $\text{INSFVOutletPRessureBC}$
+- Outlet pressure: $\text{INSFVOutletPressureBC}$
 - Heatflux: $\text{FVFunctionNeumannBC}$
 - Freeslip: $\text{INSFVNaturalFreeSlipBC}$
 - ...
@@ -187,7 +213,7 @@ style=font-size:26pt
 Let us consider the following (fictional) material properties:
 
 - $\mu=1.1$ $\text{Pa}\cdot\text{s}$
-- $\rho=1.1$ $\frac{kg}{m^3}$
+- $\rho=1.1$ $\frac{kg}{m^3}$ (we are using incompressible formulation in this case)
 
 !---
 
@@ -198,10 +224,11 @@ style=font-size:26pt
 
 !---
 
-# The Navier-Stokes Finite Folume Action
+# The Navier-Stokes Finite Volume Action
 style=font-size:26pt
 
-For the documentation of the action, click [here](NSFVAction.md)!
+A simplified syntax has been developed, it relies on the `Action` system in MOOSE.
+For the documentation of the corresponding action, click [here](NSFVAction.md)!
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/2d-rc-no-slip-action.i
 
@@ -210,6 +237,9 @@ For the documentation of the action, click [here](NSFVAction.md)!
 # Recommendations for Building Input Files
 style=font-size:28pt
 
+!style! fontsize=80%
+
+- If possible, use the Navier Stokes Finite Volume Action syntax
 - Use Rhie-Chow interpolation for the advecting velocity
 
   - Other interpolation techniques may lead to checker-boarding/instability
@@ -219,7 +249,10 @@ style=font-size:28pt
 - Make sure that the pressure is pinned for incompressible/weakly-compressible simulations in close-loop systems
 - For monolithic solvers (the default at the moment) use a variant of LU preconditioner
 - For complex monolithic systems monitor the residuals of every variable
+- Try to keep the number of elements relatively low (up to 1 million because LU preconditioner scales with $N^3$)
+- Try to utilize `porosity_smoothing_layers` or a higher value for the `consistent_scaling` if you encounter oscillatory behavior in case of simulations using porous medium
 
+!style-end!
 
 !---
 
