@@ -18,7 +18,7 @@ x_{n+1} &= x_n + \delta x_{n+1}
 
 ## Newton's Method in MOOSE
 
-The residual, $\vec{R}_i(u_h)$, as defined by [example_weak_residual] is a nonlinear system of equations,
+The residual, $\vec{R}_i(u_h)$, formed by discretizing PDEs is generally a nonlinear system of equations,
 
 !equation
 \vec{R}_i(u_h)=0, \qquad i=1,\ldots, N,
