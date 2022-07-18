@@ -17,11 +17,9 @@ rho=1.1
 [Modules]
   [NavierStokesFV]
     compressibility = 'incompressible'
-    porous_medium_treatment = false
-    add_energy_equation = false
 
-    density = 'rho'
-    dynamic_viscosity = 'mu'
+    density = ${rho}
+    dynamic_viscosity = ${mu}
 
     initial_velocity = '1 1 0'
     initial_pressure = 0.0
@@ -34,14 +32,6 @@ rho=1.1
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
     pressure_function = '0'
-  []
-[]
-
-[Materials]
-  [const]
-    type = ADGenericFunctorMaterial
-    prop_names = 'rho mu'
-    prop_values = '${rho} ${mu}'
   []
 []
 

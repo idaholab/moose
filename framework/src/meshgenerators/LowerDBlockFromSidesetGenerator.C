@@ -67,24 +67,9 @@ LowerDBlockFromSidesetGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   // Generate a new block id if one isn't supplied.
-  SubdomainID new_block_id;
-  if (isParamValid("new_block_id"))
-    new_block_id = getParam<SubdomainID>("new_block_id");
-  else
-  {
-    std::set<SubdomainID> preexisting_subdomain_ids;
-    mesh->subdomain_ids(preexisting_subdomain_ids);
-    if (preexisting_subdomain_ids.empty())
-      new_block_id = 0;
-    else
-    {
-      const auto highest_subdomain_id =
-          *std::max_element(preexisting_subdomain_ids.begin(), preexisting_subdomain_ids.end());
-      mooseAssert(highest_subdomain_id < std::numeric_limits<SubdomainID>::max(),
-                  "A SubdomainID with max possible value was found");
-      new_block_id = highest_subdomain_id + 1;
-    }
-  }
+  SubdomainID new_block_id = isParamValid("new_block_id")
+                                 ? getParam<SubdomainID>("new_block_id")
+                                 : MooseMeshUtils::getNextFreeSubdomainID(*mesh);
 
   // Make sure our boundary info and parallel counts are setup
   if (!mesh->is_prepared())
