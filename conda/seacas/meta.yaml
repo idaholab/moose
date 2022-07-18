@@ -1,0 +1,56 @@
+{% set build = "0" %}
+{% set seacas_version = "2022.05.16" %}
+{% set seacas_git_rev = "v2022-05-16" %}
+{% set strbuild = "build_" + build|string %}
+
+package:
+  name: moose-seacas
+  version: {{ seacas_version }}
+
+source:
+  git_url: https://github.com/sandialabs/seacas
+  git_rev: {{ seacas_git_rev }}
+  patches:
+    - use-curl-instead-of-wget.patch
+
+build:
+  number: {{ build }}
+  string: {{ strbuild }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - cmake
+    - make
+    - automake
+  run:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - python 3
+
+test:
+  commands:
+    - exodiff --version
+    - algebra
+    - explore
+    - grepos
+    - gjoin -v
+    - python $PREFIX/seacas/lib/tests/test_exodus3.py
+
+about:
+  home: https://github.com/sandialabs/seacas
+  license: BSD 3-clause
+  license_file: LICENSE
+  summary: >
+    The Sandia Engineering Analysis Code Access System (SEACAS) is a suite of
+    preprocessing, postprocessing, translation, and utility applications supporting
+    finite element analysis software using the Exodus database file format.
+
+extra:
+  recipe-maintainers:
+    - cticenhour
+    - milljm
+    - loganharbour
