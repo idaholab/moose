@@ -237,7 +237,7 @@ For the documentation of the corresponding action, click [here](NSFVAction.md)!
 # Recommendations for Building Input Files
 style=font-size:28pt
 
-!style! fontsize=80%
+!style! fontsize=70%
 
 - If possible, use the Navier Stokes Finite Volume Action syntax
 - Use Rhie-Chow interpolation for the advecting velocity
@@ -246,12 +246,17 @@ style=font-size:28pt
 
 
 - Start with first-order advected-interpolation schemes (e.g. upwind)
-- Make sure that the pressure is pinned for incompressible/weakly-compressible simulations in close-loop systems
+- Make sure that the pressure is pinned for incompressible/weakly-compressible simulations in closed systems
 - For monolithic solvers (the default at the moment) use a variant of LU preconditioner
 - For complex monolithic systems monitor the residuals of every variable
-- Try to keep the number of elements relatively low (up to 1 million because LU preconditioner scales with $N^3$)
+- Try to keep the number of elements relatively low (limited scaling with LU preconditioner$^*$).
+  Larger problems can be solved in a reasonable wall-time as segregated-solve techniques are introduced
 - Try to utilize `porosity_smoothing_layers` or a higher value for the `consistent_scaling` if you encounter oscillatory behavior in case of simulations using porous medium
 
+!style-end!
+
+!style! fontsize=60%
+$^*$ Because the complexity of the LU preconditioner is $N^3$ in the worst case scenario, its performance in general largely depends on the matrix sparsity pattern, and it is much more expensive compared with an iterative approach.
 !style-end!
 
 !---
