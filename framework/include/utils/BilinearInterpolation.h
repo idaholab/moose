@@ -66,6 +66,8 @@ public:
    */
   Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const override;
 
+  void sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const override;
+
   void
   getNeighborIndices(const std::vector<Real> & inArr, Real x, int & lowerX, int & upperX) const;
 

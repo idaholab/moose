@@ -55,7 +55,7 @@ TabulatedFluidProperties::validParams()
                         false,
                         "If the lookup table (p, T) as functions of (v, e) should be constructed.");
   params.addParam<bool>("construct_pT_from_vh",
-                        true,
+                        false,
                         "If the lookup table (p, T) as functions of (v, h) should be constructed.");
   params.addRangeCheckedParam<unsigned int>(
       "num_v",
@@ -266,9 +266,10 @@ TabulatedFluidProperties::initialSetup()
   }
   else
   {
+    if (!_fp)
+      mooseError("No csv file or fp object exist.");
     _console << name() + ": No tabulated properties file named " << _file_name << " exists.\n";
     _console << name() + ": Generating tabulated data\n";
-
     if (_save_file)
       _console << name() + ": Writing tabulated data to " << _file_name << "\n";
 
@@ -1317,21 +1318,15 @@ void
 TabulatedFluidProperties::checkInitialGuess() const
 {
   if (_p_initial_guess < _pressure_min || _p_initial_guess > _pressure_max)
-  {
-    if (_error_on_out_of_bounds)
-      paramError("Pressure Initial Guess " + Moose::stringify(_p_initial_guess) +
-                 " is outside the range of tabulated pressure (" + Moose::stringify(_pressure_min) +
-                 ", " + Moose::stringify(_pressure_max) + ").");
-  }
+    paramError("Pressure Initial Guess " + Moose::stringify(_p_initial_guess) +
+               " is outside the range of tabulated pressure (" + Moose::stringify(_pressure_min) +
+               ", " + Moose::stringify(_pressure_max) + ").");
 
   if (_T_initial_guess < _temperature_min || _T_initial_guess > _temperature_max)
-  {
-    if (_error_on_out_of_bounds)
-      paramError("Temperature Initial Guess " + Moose::stringify(_T_initial_guess) +
-                 " is outside the range of tabulated temperature (" +
-                 Moose::stringify(_temperature_min) + ", " + Moose::stringify(_temperature_max) +
-                 ").");
-  }
+    paramError("Temperature Initial Guess " + Moose::stringify(_T_initial_guess) +
+               " is outside the range of tabulated temperature (" +
+               Moose::stringify(_temperature_min) + ", " + Moose::stringify(_temperature_max) +
+               ").");
 }
 
 template void TabulatedFluidProperties::checkInputVariables(Real & pressure, Real & temperature) const;

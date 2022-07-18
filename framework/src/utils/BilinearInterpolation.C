@@ -87,30 +87,39 @@ BilinearInterpolation::sampleInternal(T & x1, T & x2) const
 
   // if point exactly found on a node do not interpolate
   if ((lx == ux) && (ly == uy))
+  {
+    // std::cout << "fQ11 =  " << fQ11 << std::endl;
     return fQ11;
+  }
 
   const auto & x = x1;
   const auto & y = x2;
   const Real & x_1 = _x1[lx];
   const Real & x_2 = _x1[ux];
-  const Real & y1 = _x2[ly];
-  const Real & y2 = _x2[uy];
+  const Real & y_1 = _x2[ly];
+  const Real & y_2 = _x2[uy];
 
   // if x1 lies exactly on an xAxis node do linear interpolation
   if (lx == ux)
-    return fQ11 + (fQ12 - fQ11) * (y - y1) / (y2 - y1);
+  {
+    // std::cout << "x1 on xAxis, fxy = " << " " << fQ11 + (fQ12 - fQ11) * (y - y_1) / (y_2 - y_1) << std::endl;
+    return fQ11 + (fQ12 - fQ11) * (y - y_1) / (y_2 - y_1);
+  }
 
   // if x2 lies exactly on an yAxis node do linear interpolation
 
   if (ly == uy)
+  {
+    // std::cout << "x2 on yAxis, fxy = " << " " << fQ11 + (fQ21 - fQ11) * (x - x_1) / (x_2 - x_1) << std::endl;
     return fQ11 + (fQ21 - fQ11) * (x - x_1) / (x_2 - x_1);
+  }
 
-  auto fxy = fQ11 * (x_2 - x) * (y2 - y);
-  fxy += fQ21 * (x - x_1) * (y2 - y);
-  fxy += fQ12 * (x_2 - x) * (y - y1);
-  fxy += fQ22 * (x - x_1) * (y - y1);
-  fxy /= ((x_2 - x_1) * (y2 - y1));
-
+  auto fxy = fQ11 * (x_2 - x) * (y_2 - y);
+  fxy += fQ21 * (x - x_1) * (y_2 - y);
+  fxy += fQ12 * (x_2 - x) * (y - y_1);
+  fxy += fQ22 * (x - x_1) * (y - y_1);
+  fxy /= ((x_2 - x_1) * (y_2 - y_1));
+  // std::cout << "fxy = " << " " << fxy << std::endl;
   return fxy;
 }
 
@@ -131,33 +140,38 @@ BilinearInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var
   const Real & fQ12 = _zSurface(uy, lx);
   const Real & fQ22 = _zSurface(uy, ux);
 
-  // if point exactly found on a node do not interpolate
-  if ((lx == ux) && (ly == uy))
-    return fQ11;
-
+  // // if point exactly found on a node do not interpolate
+  // if ((lx == ux) && (ly == uy))
+  //   auto fxy = fQ11;
+  // std::cout << lx << " " << ux << std::endl;
+  // std::cout << ly << " " << uy << std::endl;
   const auto & x = x1;
   const auto & y = x2;
   const Real & x_1 = _x1[lx];
   const Real & x_2 = _x1[ux];
-  const Real & y1 = _x2[ly];
-  const Real & y2 = _x2[uy];
+  const Real & y_1 = _x2[ly];
+  const Real & y_2 = _x2[uy];
+  // std::cout << "x =" << " " << x << std::endl;
+  // std::cout << "y =" << " " << y << std::endl;
+  // std::cout << "x_1 =" << " " << x_1 << std::endl;
+  // std::cout << "x_2 =" << " " << x_2 << std::endl;
+  // std::cout << "y_1 =" << " " << y_1 << std::endl;
+  // std::cout << "y_2 =" << " " << y_2 << std::endl;
 
-  // if x1 lies exactly on an xAxis node do linear interpolation
-  if (lx == ux)
-    return fQ11 + (fQ12 - fQ11) * (y - y1) / (y2 - y1);
+  // // if x1 lies exactly on an xAxis node do linear interpolation
+  // if (lx == ux)
+  //   auto fxy = fQ11 + (fQ12 - fQ11) * (y - y1) / (y2 - y1);
+  //
+  // // if x2 lies exactly on an yAxis node do linear interpolation
+  //
+  // if (ly == uy)
+  //   auto fxy = fQ11 + (fQ21 - fQ11) * (x - x_1) / (x2 - x_1);
 
-  // if x2 lies exactly on an yAxis node do linear interpolation
-
-  if (ly == uy)
-    return fQ11 + (fQ21 - fQ11) * (x - x_1) / (x2 - x_1);
-
-  auto fxy = fQ11 * (x2 - x) * (y2 - y);
-  fxy += fQ21 * (x - x_1) * (y2 - y);
-  fxy += fQ12 * (x_2 - x) * (y - y1);
-  fxy += fQ22 * (x - x_1) * (y - y1);
-  fxy /= ((x_2 - x_1) * (y2 - y1));
-
-  return fxy;
+  // auto fxy = fQ11 * (x2 - x) * (y2 - y);
+  // fxy += fQ21 * (x - x_1) * (y2 - y);
+  // fxy += fQ12 * (x_2 - x) * (y - y1);
+  // fxy += fQ22 * (x - x_1) * (y - y1);
+  // fxy /= ((x_2 - x_1) * (y2 - y1));
 
   //When derivative at one of nodes, return 0
   if ((ly == uy) && (lx == ux))
@@ -182,12 +196,11 @@ BilinearInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var
     //Derivative (w/ respect to x) for some point inside box
     else
     {
-      auto dfdx_xy = fQ11 * (x_2 - 1) * (y2 - y);
-      dfdx_xy += fQ21 * (1 - x_1) * (y2 - y);
-      dfdx_xy += fQ12 * (x_2 - 1) * (y - y1);
-      dfdx_xy += fQ22 * (1-x_1) * (y - y1);
-      dfdx_xy /= ((x_2 - x_1) * (y2 - y1));
-
+      auto dfdx_xy = fQ11 * (y - y_2);
+      dfdx_xy += fQ21 * (y_2 - y);
+      dfdx_xy += fQ12 * (y_1 - y);
+      dfdx_xy += fQ22 * (y - y_1);
+      dfdx_xy /= ((x_2 - x_1) * (y_2 - y_1));
       return dfdx_xy;
     }
   }
@@ -207,13 +220,22 @@ BilinearInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var
     else
     {
       //Derivative (w/ respect to y) for some point inside box
-      auto dfdy_xy = fQ11 * (x_2 - x) * (y2 - 1);
-      dfdy_xy += fQ21 * (x - x_1) * (y2 - 1);
-      dfdy_xy += fQ12 * (x_2 - x) * (1 - y1);
-      dfdy_xy += fQ22 * (x - x_1) * (1 - y1);
-      dfdy_xy /= ((x_2 - x_1) * (y2 - y1));
-
+      auto dfdy_xy = fQ11 * (x - x_2);
+      dfdy_xy += fQ21 * (x_1 - x);
+      dfdy_xy += fQ12 * (x_2 - x);
+      dfdy_xy += fQ22 * (x - x_1);
+      dfdy_xy /= ((x_2 - x_1) * (y_2 - y_1));
       return dfdy_xy;
     }
   }
+  else
+    mooseError("deriv_var must equal 1 or 2");
+}
+
+void BilinearInterpolation::sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const
+{
+  y = sample(x1, x2);
+  dy1 = sampleDerivative(x1, x2, 1);
+  dy2 = sampleDerivative(x1, x2, 2);
+  // std::cout << dy1 << " " << dy2 << std::endl;
 }
