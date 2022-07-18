@@ -146,7 +146,7 @@ public:
   /**
    * Check to see if a particular Tag exists by using Tag name
    */
-  bool vectorTagExists(const TagName & tag_name) const;
+  virtual bool vectorTagExists(const TagName & tag_name) const;
 
   /**
    * The total number of tags, which can be limited to the tag type

@@ -191,6 +191,16 @@ public:
    */
   void clearAllDofIndices();
 
+  /**
+   * Set the active vector tags for the variables
+   */
+  void setActiveVariableCoupleableVectorTags(const std::set<TagID> & vtags);
+
+  /**
+   * Set the active vector tags for the variables
+   */
+  void setActiveScalarVariableCoupleableVectorTags(const std::set<TagID> & vtags);
+
 protected:
   /// list of variable names
   std::vector<VariableName> _names;

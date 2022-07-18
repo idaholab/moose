@@ -15,6 +15,7 @@
 #include "SetupInterface.h"
 #include "MooseTypes.h"
 #include "MooseArray.h"
+#include "MooseError.h"
 
 #include "libmesh/fe_type.h"
 
@@ -153,6 +154,13 @@ public:
 
   virtual void clearAllDofIndices() { _dof_indices.clear(); }
 
+  /**
+   * Set the active vector tags
+   * @param vtags Additional vector tags that this variable will need to query at dof indices for,
+   * in addition to our own required solution tags
+   */
+  virtual void setActiveTags(const std::set<TagID> & vtags);
+
 protected:
   /// System this variable is part of
   SystemBase & _sys;
@@ -205,6 +213,12 @@ protected:
   /// If dual mortar approach is used
   bool _use_dual;
 };
+
+inline void
+MooseVariableBase::setActiveTags(const std::set<TagID> &)
+{
+  mooseError("setActiveTags must be overridden in derived classes.");
+}
 
 #define usingMooseVariableBaseMembers                                                              \
   using MooseVariableBase::_sys;                                                                   \
