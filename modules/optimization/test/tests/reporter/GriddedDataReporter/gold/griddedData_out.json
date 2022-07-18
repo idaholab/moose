@@ -1,0 +1,118 @@
+{
+    "reporters": {
+        "parameter_info": {
+            "type": "GriddedDataReporter",
+            "values": {
+                "axes": {
+                    "type": "std::vector<int>"
+                },
+                "dim": {
+                    "type": "unsigned int"
+                },
+                "grid": {
+                    "type": "std::vector<std::vector<double>>"
+                },
+                "parameter": {
+                    "type": "std::vector<double>"
+                },
+                "step": {
+                    "type": "std::vector<unsigned int>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "parameter_info": {
+                "axes": [
+                    0,
+                    1,
+                    3
+                ],
+                "dim": 3,
+                "grid": [
+                    [
+                        -4.0,
+                        4.0
+                    ],
+                    [
+                        -4.0,
+                        -0.01,
+                        0.01
+                    ],
+                    [
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "parameter": [
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    10.0,
+                    10.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    10.0,
+                    10.0
+                ],
+                "step": [
+                    1,
+                    2,
+                    6
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "parameter_info": {
+                "axes": [
+                    0,
+                    1,
+                    3
+                ],
+                "dim": 3,
+                "grid": [
+                    [
+                        -4.0,
+                        4.0
+                    ],
+                    [
+                        -4.0,
+                        -0.01,
+                        0.01
+                    ],
+                    [
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "parameter": [
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    10.0,
+                    10.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    10.0,
+                    10.0
+                ],
+                "step": [
+                    1,
+                    2,
+                    6
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

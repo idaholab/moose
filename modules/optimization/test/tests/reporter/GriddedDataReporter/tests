@@ -1,0 +1,8 @@
+[Tests]
+  [xyGrid]
+    requirement = "This tests that a reporter is able to read in a gridded data file and produce the appropriate grid from it that can be used in PiecewiseMultiInterpolation like functions."
+    type = JSONDiff
+    input = 'griddedData.i'
+    jsondiff= 'griddedData_out.json'
+  []
+[]
