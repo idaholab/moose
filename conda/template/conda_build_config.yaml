@@ -1,6 +1,9 @@
 moose_libmesh:
  - moose-libmesh 2022.06.06 build_3
 
+moose_python:
+ - python 3.9
+
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
   - /opt/MacOSX10.12.sdk                                    # [not arm64 and osx]

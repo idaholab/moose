@@ -20,10 +20,12 @@ build:
 requirements:
   build:
     - {{ moose_libmesh }}
+    - {{ moose_python }}
     - moose-tools
 
   run:
     - {{ moose_libmesh }}
+    - {{ moose_python }}
     - moose-tools
 
 test:
