@@ -117,6 +117,7 @@ public:
   virtual TagID getVectorTagID(const TagName & tag_name) const override;
   virtual TagName vectorTagName(const TagID tag_id) const override;
   virtual bool vectorTagExists(const TagID tag_id) const override;
+  virtual bool vectorTagExists(const TagName & tag_name) const override;
   virtual unsigned int
   numVectorTags(const Moose::VectorTagType type = Moose::VECTOR_TAG_ANY) const override;
   virtual const std::vector<VectorTag> &
