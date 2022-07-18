@@ -4,10 +4,10 @@ von_karman_const = 0.2
 D = 1
 rho = 1
 bulk_u = 1
-mu = ${fparse rho * bulk_u * D / Re}
+mu = '${fparse rho * bulk_u * D / Re}'
 
-advected_interp_method='upwind'
-velocity_interp_method='rc'
+advected_interp_method = 'upwind'
+velocity_interp_method = 'rc'
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -29,10 +29,10 @@ velocity_interp_method='rc'
     xmin = 0
     xmax = 5
     ymin = 0
-    ymax = ${fparse 0.5 * D}
+    ymax = '${fparse 0.5 * D}'
     nx = 20
     ny = 10
-    bias_y = ${fparse 1 / 1.2}
+    bias_y = '${fparse 1 / 1.2}'
   []
 []
 
@@ -225,8 +225,8 @@ velocity_interp_method='rc'
 [Materials]
   [total_viscosity]
     type = MixingLengthTurbulentViscosityMaterial
-    u = 'vel_x'                             #computes total viscosity = mu_t + mu
-    v = 'vel_y'                             #property is called total_viscosity
+    u = 'vel_x' #computes total viscosity = mu_t + mu
+    v = 'vel_y' #property is called total_viscosity
     mixing_length = 'mixing_length'
     mu = ${mu}
     rho = ${rho}
@@ -236,9 +236,8 @@ velocity_interp_method='rc'
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      200                lu           NONZERO'
-  line_search = 'none'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-12
 []
 

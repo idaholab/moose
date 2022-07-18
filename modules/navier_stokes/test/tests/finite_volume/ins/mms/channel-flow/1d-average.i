@@ -1,7 +1,7 @@
-mu=1.1
-rho=1.1
-advected_interp_method='average'
-velocity_interp_method='average'
+mu = 1.1
+rho = 1.1
+advected_interp_method = 'average'
+velocity_interp_method = 'average'
 
 [Mesh]
   [gen]
@@ -107,7 +107,8 @@ velocity_interp_method='average'
   []
   [forcing_u]
     type = ADParsedFunction
-    value = '(1/4)*pi^2*mu*sin((1/2)*x*pi) + pi*rho*sin((1/2)*x*pi)*cos((1/2)*x*pi) - 1/2*pi*sin((1/2)*x*pi)'
+    value = '(1/4)*pi^2*mu*sin((1/2)*x*pi) + pi*rho*sin((1/2)*x*pi)*cos((1/2)*x*pi) - '
+            '1/2*pi*sin((1/2)*x*pi)'
     vars = 'mu rho'
     vals = '${mu} ${rho}'
   []
@@ -126,9 +127,9 @@ velocity_interp_method='average'
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      100                lu           NONZERO'
-  []
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
+[]
 
 [Outputs]
   csv = true
@@ -140,18 +141,18 @@ velocity_interp_method='average'
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
-  [./L2u]
+  [L2u]
     type = ElementL2Error
     variable = u
     function = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
-  [./L2p]
+  []
+  [L2p]
     variable = pressure
     function = exact_p
     type = ElementL2Error
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
 []
