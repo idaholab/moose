@@ -35,7 +35,3 @@
 !include workshop/systems/transfers.md
 
 !---
-
-!include workshop/numerical/fvm_overview.md
-
-!---
