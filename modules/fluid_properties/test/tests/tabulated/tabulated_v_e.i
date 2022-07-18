@@ -112,18 +112,29 @@
 [Modules]
   [FluidProperties]
     [co2]
-      type = CO2FluidProperties
+      type = IdealGasFluidProperties
     []
     [tabulated]
       type = TabulatedBilinearFluidProperties
-      fp = co2
+      # type = TabulatedBicubicFluidProperties
+      # fp = co2
+      interpolated_properties = 'density enthalpy viscosity internal_energy k c cv cp entropy'
+      # fluid_property_file = fluid_properties.csv
+      save_file = true
       construct_pT_from_ve = true
-      fluid_property_file = fluid_properties.csv
+      construct_pT_from_vh = true
       error_on_out_of_bounds = false
-      num_v = 4
-      num_e = 4
-      num_p = 4
-      num_T = 4
+
+      # Tabulation range
+      temperature_min = 280
+      temperature_max = 600
+      pressure_min = 1e5
+      pressure_max = 7e5
+
+      # Newton parameters
+      tolerance = 1e-8
+      T_initial_guess = 310
+      p_initial_guess = 1.1e5
     []
   []
 []
@@ -131,8 +142,8 @@
 [Materials]
   [fp_mat_ve]
     type = FluidPropertiesMaterial
-    v = 0.0310899837399385
-    e = -3.079760e+04
+    v = 0.88617915
+    e = 310163
     fp = tabulated
   []
 []
@@ -199,7 +210,8 @@
 
 [Outputs]
   csv = true
-  file_base = tabulated_v_e_out
+  file_base = tabulated_v_e_bilinear_out
+  # file_base = tabulated_v_e_out
   execute_on = 'TIMESTEP_END'
   perf_graph = true
 []

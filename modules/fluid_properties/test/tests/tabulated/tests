@@ -25,6 +25,7 @@
                 Outputs/file_base=tabulated_v_e_out'
     rel_err = 1e-4
     threading = '!pthreads'
+    allow_warnings = true
   []
   [tabulated_v_e_bilinear]
     type = CSVDiff
@@ -34,5 +35,6 @@
                 Outputs/file_base=tabulated_v_e_bilinear_out'
     rel_err = 1e-4
     threading = '!pthreads'
+    allow_warnings = true
   []
 []

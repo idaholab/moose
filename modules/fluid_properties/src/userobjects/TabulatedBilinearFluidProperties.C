@@ -67,7 +67,7 @@ TabulatedBilinearFluidProperties::constructInterpolation()
     for (unsigned int j = 0; j < _num_v; ++j)
       _specific_volume[j] = _v_min + j * dv;
 
-    if (_construct_pT_from_vh)
+    if (_construct_pT_from_ve)
     {
       // extreme values of internal energy for the grid bounds
       Real e1 = e_from_p_T(_pressure_min, _temperature_min);

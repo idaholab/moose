@@ -109,9 +109,26 @@
       type = CO2FluidProperties
     [../]
     [./tabulated]
-      type = TabulatedBicubicFluidProperties
-      fp = co2
-      fluid_property_file = fluid_properties.csv
+      type = TabulatedBilinearFluidProperties
+      # type = TabulatedBicubicFluidProperties
+      # fp = co2
+      interpolated_properties = 'density enthalpy viscosity internal_energy k c cv cp entropy'
+      # fluid_property_file = fluid_properties.csv
+      save_file = true
+      construct_pT_from_ve = false
+      construct_pT_from_vh = false
+      error_on_out_of_bounds = false
+
+      # Tabulation range
+      temperature_min = 280
+      temperature_max = 600
+      pressure_min = 1e5
+      pressure_max = 7e5
+
+      # Newton parameters
+      tolerance = 1e-8
+      T_initial_guess = 310
+      p_initial_guess = 1.1e5
     [../]
   []
 []
@@ -182,7 +199,8 @@
 
 [Outputs]
   csv = true
-  file_base = tabulated_out
+  file_base = tabulated_bilinear_out
+  # file_base = tabulated_out
   execute_on = 'TIMESTEP_END'
   perf_graph = true
 []
