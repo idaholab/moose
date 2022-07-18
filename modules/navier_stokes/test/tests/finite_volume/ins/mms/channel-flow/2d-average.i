@@ -16,10 +16,6 @@ velocity_interp_method='average'
   []
 []
 
-[Problem]
-  fv_bcs_integrity_check = true
-[]
-
 [GlobalParams]
   rhie_chow_user_object = 'rc'
 []
