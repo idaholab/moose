@@ -15,6 +15,7 @@ source:
 build:
   number: {{ build }}  # [linux,osx]
   string: {{ strbuild }}
+  pin_depends: strict
   skip: true # [win]
 
 requirements:
