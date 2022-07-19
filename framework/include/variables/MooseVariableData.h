@@ -385,11 +385,6 @@ public:
   /**
    * Prepare dof indices and solution values for elemental auxiliary variables
    */
-  void prepareAux();
-
-  /**
-   * Prepare dof indices and solution values for elemental auxiliary variables
-   */
   void reinitAux();
 
   /**

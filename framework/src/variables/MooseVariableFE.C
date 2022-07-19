@@ -136,9 +136,9 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::prepareAux()
 {
-  _element_data->hasDofValues(false);
-  _neighbor_data->hasDofValues(false);
-  _lower_data->hasDofValues(false);
+  _element_data->prepareAux();
+  _neighbor_data->prepareAux();
+  _lower_data->prepareAux();
 }
 
 template <typename OutputType>

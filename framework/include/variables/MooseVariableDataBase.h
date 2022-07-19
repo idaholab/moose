@@ -123,6 +123,11 @@ public:
    */
   void setActiveTags(const std::set<TagID> & vtags);
 
+  /**
+   * Clear aux state
+   */
+  void prepareAux() { _has_dof_values = false; }
+
 protected:
   /**
    * insert a solution tag into our tag containers
