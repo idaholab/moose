@@ -17,10 +17,6 @@ two_term_boundary_expansion=true
   []
 []
 
-[Problem]
-  fv_bcs_integrity_check = true
-[]
-
 [GlobalParams]
   rhie_chow_user_object = 'rc'
 []

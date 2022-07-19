@@ -3,6 +3,7 @@
 #   petsc/
 #   libmesh-vtk/
 #   libmesh/
+#   template/
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "4.0.2" %}

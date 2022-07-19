@@ -22,7 +22,6 @@ velocity_interp_method='rc'
 []
 
 [Problem]
-  fv_bcs_integrity_check = true
   coord_type = 'RZ'
 []
 
