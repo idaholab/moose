@@ -6,10 +6,25 @@
   response = results/response_data:max:value
   cv_type = "k_fold"
   cv_splits = 5
-  cv_n_trials = 1000
+  cv_n_trials = 100
 []
 
 [Distributions]
+  [k_dist]
+    type = Uniform
+    lower_bound = 1
+    upper_bound = 10
+  []
+  [q_dist]
+    type = Uniform
+    lower_bound = 9000
+    upper_bound = 11000
+  []
+  [L_dist]
+    type = Uniform
+    lower_bound = 0.01
+    upper_bound = 0.05
+  []
   [Tinf_dist]
     type = Uniform
     lower_bound = 290
@@ -20,8 +35,8 @@
 [Samplers]
   [cv_sampler]
     type = LatinHypercube
-    distributions = 'Tinf_dist'
-    num_rows = 500
+    distributions = 'k_dist q_dist L_dist Tinf_dist'
+    num_rows = 1000
     execute_on = PRE_MULTIAPP_SETUP
   []
 []
@@ -38,7 +53,7 @@
   [pr_cmdline]
     type = MultiAppSamplerControl
     multi_app = cv_sub
-    param_names = 'BCs/right/value'
+    param_names = 'Materials/conductivity/prop_values Kernels/source/value Mesh/xmax BCs/right/value'
   []
 []
 
@@ -67,14 +82,14 @@
   [pr_max]
     type = PolynomialRegressionTrainer
     regression_type = "ols"
-    max_degree = 1
+    max_degree = 3
     cv_surrogate = "pr_surr"
     execute_on = timestep_end
   []
   [pc_max]
     type = PolynomialChaosTrainer
-    order = 1
-    distributions = "Tinf_dist"
+    order = 3
+    distributions = "k_dist q_dist L_dist Tinf_dist"
     cv_surrogate = "pc_surr"
     execute_on = timestep_end
   []
@@ -93,15 +108,15 @@
   []
   [ann_max]
     type = LibtorchANNTrainer
-    num_epochs = 40
-    num_batches =  10
-    num_neurons_per_layer = '64 32'
-    learning_rate = 0.01
-    rel_loss_tol = 1e-6
+    num_epochs = 100
+    num_batches = 5
+    num_neurons_per_layer = '64'
+    learning_rate = 1e-2
+    rel_loss_tol = 1e-4
     filename = mynet.pt
     read_from_file = false
     print_epoch_loss = 0
-    activation_function = 'relu relu'
+    activation_function = 'relu'
     cv_surrogate = "ann_surr"
   []
 []
@@ -109,9 +124,9 @@
 [Covariance]
   [rbf]
     type=SquaredExponentialCovariance
-    signal_variance = 1                        #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-3                      #A small amount of noise can help with numerical stability
-    length_factor = '0.38971'                  #Select a length factor for each parameter
+    noise_variance = 3.79e-6
+    signal_variance = 1                      #Use a signal variance of 1 in the kernel
+    length_factor = '5.34471 1.41191 5.90721 2.83723'                  #Select a length factor for each parameter
   []
 []
 
@@ -139,6 +154,8 @@
 []
 
 [Outputs]
-  csv = true
-  execute_on = FINAL
+  [out]
+    type = JSON
+    execute_on = FINAL
+  []
 []

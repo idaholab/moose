@@ -21,6 +21,7 @@ class PolynomialChaosTrainer : public SurrogateTrainer
 public:
   static InputParameters validParams();
   PolynomialChaosTrainer(const InputParameters & parameters);
+  virtual void preTrain() override;
   virtual void train() override;
   virtual void postTrain() override;
 

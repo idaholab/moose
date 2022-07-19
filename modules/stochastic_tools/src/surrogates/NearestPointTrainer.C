@@ -35,10 +35,16 @@ void
 NearestPointTrainer::preTrain()
 {
   for (auto & it : _sample_points)
+  {
     it.clear();
+    it.reserve(getLocalSampleSize());
+  }
 
   for (auto & it : _sample_results)
+  {
     it.clear();
+    it.reserve(getLocalSampleSize());
+  }
 }
 
 void
@@ -54,7 +60,6 @@ NearestPointTrainer::train()
   // Get responses
   if (_rval)
     _sample_results[0].push_back(*_rval);
-
   else if (_rvecval)
     for (auto r : make_range(_rvecval->size()))
       _sample_results[r].push_back((*_rvecval)[r]);

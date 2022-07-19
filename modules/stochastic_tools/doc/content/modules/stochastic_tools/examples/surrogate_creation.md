@@ -72,4 +72,4 @@ See [Surrogates](Surrogates/index.md) for more information on the `getModelData`
 
 !listing NearestPointSurrogate.C re=Real\sNearestPointSurrogate::evaluate.*?^}
 
-!listing NearestPointSurrogate.C re=Real\sNearestPointSurrogate::findNearestPoint.*?^}
+!listing NearestPointSurrogate.C re=unsigned int\sNearestPointSurrogate::findNearestPoint.*?^}

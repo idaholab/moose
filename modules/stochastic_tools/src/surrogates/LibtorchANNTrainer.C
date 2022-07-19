@@ -193,7 +193,6 @@ LibtorchANNTrainer::postTrain()
       if (epoch % _print_epoch_loss == 0 || epoch == 1)
         _console << "Epoch: " << epoch << " | Loss: " << COLOR_GREEN << epoch_loss << COLOR_DEFAULT
                  << " | Rel. loss: " << COLOR_GREEN << rel_loss << COLOR_DEFAULT << std::endl;
-
     epoch += 1;
   }
 

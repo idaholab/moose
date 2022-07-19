@@ -52,8 +52,13 @@ PolynomialChaosTrainer::PolynomialChaosTrainer(const InputParameters & parameter
   // Make polynomials
   for (const auto & nm : getParam<std::vector<DistributionName>>("distributions"))
     _poly.push_back(PolynomialQuadrature::makePolynomial(&getDistributionByName(nm)));
+}
 
-  _coeff.resize(_ncoeff, 0);
+void
+PolynomialChaosTrainer::preTrain()
+{
+  _coeff.clear();
+  _coeff.resize(_ncoeff, 0.0);
 }
 
 void

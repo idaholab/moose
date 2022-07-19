@@ -1,45 +1,43 @@
 [Tests]
   design = 'Surrogates/index.md'
   issues = '#21399'
-  [cross_validate]
-    requirement = "The system shall test results for cross validating surrogate models for the comparison example "
-    [uniform]
-      type = CSVDiff
-      input = uniform_train_and_cv.i
-      allow_test_objects = true
-      cli_args = "Samplers/pr_sampler/num_rows=12
-                  Trainers/pr_max/max_degree=1
-                  Trainers/pr_max/cv_n_trials=3
-                  Trainers/pr_max/cv_splits=2
-                  pr_sub:Mesh/nx=5"
-      csvdiff = "uniform_train_and_cv_out_cv_scores_0002.csv"
-      detail = "with uniform parameter distributions "
-    []
-    [normal]
-      type = CSVDiff
-      input = normal_train_and_cv.i
-      allow_test_objects = true
-      cli_args = "Samplers/pr_sampler/num_rows=12
-                  Trainers/pr_max/max_degree=1
-                  Trainers/pr_max/cv_n_trials=3
-                  Trainers/pr_max/cv_splits=2
-                  pr_sub:Mesh/nx=5"
-      csvdiff = "normal_train_and_cv_out_cv_scores_0002.csv"
-      detail = "and with normally distributed parameters."
-    []
-  []
+  requirement = "The system shall support cross validation for the comparison example "
   [cv_all]
-    requirement = "The system shall support cross validation for the comparison example "
-    type = CSVDiff
-    input = all_trainers_cv.i
+    type = JSONDiff
+    input = all_trainers_uniform_cv.i
+    libtorch = true
     allow_test_objects = true
     cli_args = "GlobalParams/cv_n_trials=3
                 GlobalParams/cv_splits=2
                 Samplers/cv_sampler/num_rows=10
+                Trainers/pr_max/max_degree=1
+                Trainers/pc_max/order=1
                 Trainers/ann_max/num_epochs=10
-                Trainers/ann_max/num_neurons_per_layer='8 4'
+                Trainers/ann_max/num_neurons_per_layer='8'
+                Outputs/out/execute_system_information_on=none
                 "
-    csvdiff = 'all_trainers_cv_out_cv_scores_0002.csv'
+    jsondiff = 'all_trainers_uniform_cv_out.json'
+    detail = "for all SurrogateTrainer types."
+  []
+  [cv_no_libtorch]
+    type = JSONDiff
+    input = all_trainers_uniform_cv.i
+    libtorch = false
+    allow_test_objects = true
+    cli_args = "GlobalParams/cv_n_trials=3
+                GlobalParams/cv_splits=2
+                Samplers/cv_sampler/num_rows=10
+                Trainers/pr_max/max_degree=1
+                Trainers/pc_max/order=1
+                Trainers/ann_max/num_epochs=10
+                Trainers/ann_max/num_neurons_per_layer='8'
+                Outputs/out/execute_system_information_on=none
+                Trainers/inactive=ann_max
+                Surrogates/inactive=ann_surr
+                Reporters/cv_scores/models='pr_surr pc_surr np_surr gp_surr'
+                Outputs/out/file_base='all_trainers_no_libtorch'
+                "
+    jsondiff = 'all_trainers_no_libtorch.json'
     detail = "for all SurrogateTrainer types."
   []
 []

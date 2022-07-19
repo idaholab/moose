@@ -28,5 +28,5 @@ protected:
   const std::vector<std::vector<Real>> & _sample_results;
 
 private:
-  Real findNearestPoint(const std::vector<Real> & x, const unsigned int r) const;
+  unsigned int findNearestPoint(const std::vector<Real> & x) const;
 };

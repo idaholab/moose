@@ -1,0 +1,27 @@
+{
+    "reporters": {
+        "cv_scores": {
+            "type": "CrossValidationScores",
+            "values": {
+                "surrogate": {
+                    "type": "std::vector<std::vector<double>>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "cv_scores": {
+                "surrogate": [
+                    [
+                        0.5624168879709655,
+                        0.4074370702456288,
+                        0.4084045946012922
+                    ]
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

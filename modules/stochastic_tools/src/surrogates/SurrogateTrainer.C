@@ -124,7 +124,6 @@ SurrogateTrainer::SurrogateTrainer(const InputParameters & parameters)
                  getParam<SamplerName>("sampler"),
                  "'");
 
-    _cv_trial_scores.resize(_cv_n_trials);
     _cv_generator.seed(0, _cv_seed);
   }
 
@@ -144,8 +143,7 @@ SurrogateTrainer::SurrogateTrainer(const InputParameters & parameters)
     _pcols.resize(_sampler.getNumberOfCols());
     std::iota(_pcols.begin(), _pcols.end(), 0);
   }
-  _n_dims = (_pvals.empty() && _pcols.empty()) ? _sampler.getNumberOfCols()
-                                               : (_pvals.size() + _pcols.size());
+  _n_dims = (_pvals.size() + _pcols.size());
 
   _predictor_data.resize(_n_dims);
 }
@@ -178,7 +176,15 @@ SurrogateTrainer::execute()
 {
   if (_doing_cv)
     for (const auto & trial : make_range(_cv_n_trials))
-      _cv_trial_scores[trial] = crossValidate();
+    {
+      std::vector<Real> trial_score = crossValidate();
+
+      // Expand _cv_trial_scores with more columns if necessary, then insert values.
+      for (unsigned int r = _cv_trial_scores.size(); r < trial_score.size(); ++r)
+        _cv_trial_scores.push_back(std::vector<Real>(_cv_n_trials, 0.0));
+      for (auto r : make_range(trial_score.size()))
+        _cv_trial_scores[r][trial] = trial_score[r];
+    }
 
   _current_sample_size = _sampler.getNumberOfRows();
   _local_sample_size = _sampler.getNumberOfLocalRows();
@@ -310,8 +316,7 @@ SurrogateTrainer::crossValidate()
         row_mse = evaluateModelError(*_cv_surrogate);
 
         // Expand split_mse if needed.
-        for (unsigned int r = split_mse.size(); r < row_mse.size(); ++r)
-          split_mse.emplace_back(0.0);
+        split_mse.resize(row_mse.size(), 0.0);
 
         // Increment errors
         for (unsigned int r = 0; r < split_mse.size(); ++r)
@@ -323,8 +328,7 @@ SurrogateTrainer::crossValidate()
     gatherSum(split_mse);
 
     // Expand cv_score if necessary.
-    for (unsigned int r = cv_score.size(); r < split_mse.size(); ++r)
-      cv_score.emplace_back(0.0);
+    cv_score.resize(split_mse.size(), 0.0);
 
     for (auto r : make_range(split_mse.size()))
       cv_score[r] += split_mse[r] / n_rows;

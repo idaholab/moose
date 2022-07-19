@@ -58,40 +58,34 @@
     type = StochasticReporter
     outputs = none
   []
-  [cv_scores]
-    type = CrossValidationScores
-    models = pr_surrogate
-    execute_on = FINAL
+  [eval]
+    type = EvaluateSurrogate
+    model = np_surrogate
+    response_type = vector_real
+    parallel_type = ROOT
+    execute_on = timestep_end
   []
 []
 
 [Trainers]
-  [pr_trainer]
-    type = PolynomialRegressionTrainer
-    regression_type = "ols"
-    sampler = sample
+  [np]
+    type = NearestPointTrainer
     response = results/data:T_vec:T
     response_type = vector_real
-    execute_on = timestep_end
-    max_degree = 1
-    cv_type = "k_fold"
-    cv_splits = 2
-    cv_n_trials = 3
-    cv_surrogate = pr_surrogate
-    cv_seed = 1
+    execute_on = initial
   []
 []
 
 [Surrogates]
-  [pr_surrogate]
-    type = PolynomialRegressionSurrogate
-    trainer = pr_trainer
+  [np_surrogate]
+    type = NearestPointSurrogate
+    trainer = np
   []
 []
 
 [Outputs]
   [out]
     type = JSON
-    execute_on = FINAL
+    execute_on = timestep_end
   []
 []
