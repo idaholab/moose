@@ -92,27 +92,40 @@ getBoundaryIDs(const libMesh::MeshBase & mesh,
       break;
     }
 
-    libMesh::boundary_id_type id;
-    std::istringstream ss(boundary_name[i]);
-
-    if (!(ss >> id) || !ss.eof())
+    // Check if boundary name duplicate exists and infer id from duplicate
+    bool has_duplicate = false;
+    for (unsigned int j = 0; j < i; j++)
     {
-      /**
-       * If the conversion from a name to a number fails, that means that this must be a named
-       * boundary.  We will look in the complete map for this sideset and create a new name/ID pair
-       * if requested.
-       */
-      if (generate_unknown &&
-          !MooseUtils::doesMapContainValue(sideset_map, std::string(boundary_name[i])) &&
-          !MooseUtils::doesMapContainValue(nodeset_map, std::string(boundary_name[i])))
-        id = ++max_boundary_id;
-      else
-        id = boundary_info.get_id_by_name(boundary_name[i]);
+      if (boundary_name[j] == boundary_name[i])
+      {
+        has_duplicate = true;
+        ids[i] = ids[j];
+        break;
+      }
     }
 
-    ids[i] = id;
-  }
+    if (!has_duplicate)
+    {
+      libMesh::boundary_id_type id;
+      std::istringstream ss(boundary_name[i]);
 
+      if (!(ss >> id) || !ss.eof())
+      {
+        /**
+         * If the conversion from a name to a number fails, that means that this must be a named
+         * boundary.  We will look in the complete map for this sideset and create a new name/ID
+         * pair if requested.
+         */
+        if (generate_unknown &&
+            !MooseUtils::doesMapContainValue(sideset_map, std::string(boundary_name[i])) &&
+            !MooseUtils::doesMapContainValue(nodeset_map, std::string(boundary_name[i])))
+          id = ++max_boundary_id;
+        else
+          id = boundary_info.get_id_by_name(boundary_name[i]);
+      }
+      ids[i] = id;
+    }
+  }
   return ids;
 }
 
