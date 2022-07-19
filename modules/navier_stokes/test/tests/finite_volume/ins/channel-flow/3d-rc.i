@@ -1,7 +1,7 @@
-mu=1.1
-rho=1.1
-advected_interp_method='average'
-velocity_interp_method='rc'
+mu = 1.1
+rho = 1.1
+advected_interp_method = 'average'
+velocity_interp_method = 'rc'
 
 [Mesh]
   [gen]
