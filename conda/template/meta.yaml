@@ -1,3 +1,6 @@
+# Do not alter <BUILD>, <VERSION>. These are template tokens altered
+# on the fly by the generate_recipe.py script. The only modifiable
+# item in template/ is the conda_build_config.yaml file
 {% set build = "<BUILD>" %}
 {% set version = "<VERSION>" %}
 {% set strbuild = "build_" + build|string %}
@@ -12,18 +15,19 @@ source:
 build:
   number: {{ build }}  # [linux,osx]
   string: {{ strbuild }}
+  pin_depends: strict
   skip: true # [win]
 
 requirements:
   build:
-    - {{ moose_ncrc_python }}
     - {{ moose_libmesh }}
-    - {{ moose_tools }}
+    - {{ moose_python }}
+    - moose-tools
 
   run:
-    - {{ moose_ncrc_python }}
     - {{ moose_libmesh }}
-    - {{ moose_tools }}
+    - {{ moose_python }}
+    - moose-tools
 
 test:
   commands:
