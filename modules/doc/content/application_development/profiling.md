@@ -11,34 +11,24 @@ applications on Mac systems.
 
 If your environment package from the MOOSE installation process has included Google's gperftools,
 you can skip this step.
-To install Google's gperftools on your own, our recommended procedure is to
-first install `libunwind`:
-
-```
-cd $HOME
-git clone git@github.com:libunwind/libunwind.git
-cd libunwind
-autoreconf -i
-./configure --prefix=$PWD/installed
-make -j$MOOSE_JOBS
-make install
-```
-
-and then the `gperftools` library:
+To install Google's gperftools on your own, perform the commands:
 
 ```
 cd $HOME
 git clone git@github.com:gperftools/gperftools.git
 cd gperftools
 ./autogen.sh
-CPPFLAGS=-I$HOME/libunwind/installed/include \
-LDFLAGS="-L$HOME/libunwind/installed/lib -Wl,-rpath,$HOME/libunwind/installed/lib" \
 ./configure --prefix=$PWD/installed --enable-frame-pointers
 make -j$MOOSE_JOBS
 make install
 ```
 
-The configuration option +--enable-frame-pointers+ is important for not degrading the performance when \emph{gperftools} is linked and profiling is turned on in calculations.
+The configuration option +--enable-frame-pointers+ is important for not
+degrading the performance when +gperftools+ is linked and profiling is
+turned on in calculations. It is important to note that if libunwind is linked
+into gperftools, then libunwind will be used to unwind stacktraces, which in our
+experience, is orders of magnitude slower than the builtin stack-unwinding capability
+of gperftools, at least when performing memory profiling.
 [This page](https://github.com/gperftools/gperftools/blob/master/INSTALL) has more explanations about this option.
 After this, gperftools is installed under +$HOME/gperftools/installed+ that you can let the environmental variable +GPERF_DIR+ point to.
 You could install gperftools in a different folder if desired.
