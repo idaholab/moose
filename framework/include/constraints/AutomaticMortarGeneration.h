@@ -256,7 +256,8 @@ public:
   /**
    * @return The mortar interface coupling
    */
-  const std::unordered_multimap<dof_id_type, dof_id_type> & mortarInterfaceCoupling() const
+  const std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>> &
+  mortarInterfaceCoupling() const
   {
     return _mortar_interface_coupling;
   }
@@ -419,7 +420,7 @@ private:
   /// explicitly declared when there is no primary_elem for a given
   /// mortar segment and you are using e.g.  a P^1-P^0 discretization
   /// which does not induce the coupling automatically.
-  std::unordered_multimap<dof_id_type, dof_id_type> _mortar_interface_coupling;
+  std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>> _mortar_interface_coupling;
 
   /// Container for storing the nodal normal vector associated with each secondary node.
   std::unordered_map<const Node *, Point> _secondary_node_to_nodal_normal;

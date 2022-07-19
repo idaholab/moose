@@ -1168,8 +1168,8 @@ AutomaticMortarGeneration::buildCouplingInformation()
     if (secondary_elem->processor_id() != _mesh.processor_id())
       // We want to keep information for nonlocal secondary element point neighbors for mortar nodal
       // aux kernels
-      _mortar_interface_coupling.emplace(secondary_elem->id(),
-                                         secondary_elem->interior_parent()->id());
+      _mortar_interface_coupling[secondary_elem->id()].insert(
+          secondary_elem->interior_parent()->id());
 
     // LowerPrimary
     coupling_info[secondary_elem->processor_id()].emplace_back(
@@ -1177,8 +1177,8 @@ AutomaticMortarGeneration::buildCouplingInformation()
     if (secondary_elem->processor_id() != _mesh.processor_id())
       // We want to keep information for nonlocal secondary element point neighbors for mortar nodal
       // aux kernels
-      _mortar_interface_coupling.emplace(secondary_elem->id(),
-                                         primary_elem->interior_parent()->id());
+      _mortar_interface_coupling[secondary_elem->id()].insert(
+          primary_elem->interior_parent()->id());
 
     // SecondaryLower
     coupling_info[secondary_elem->interior_parent()->processor_id()].emplace_back(
@@ -1203,7 +1203,7 @@ AutomaticMortarGeneration::buildCouplingInformation()
              const std::vector<std::pair<dof_id_type, dof_id_type>> & coupling_info)
   {
     for (auto [i, j] : coupling_info)
-      _mortar_interface_coupling.emplace(i, j);
+      _mortar_interface_coupling[i].insert(j);
   };
   TIMPI::push_parallel_vector_data(_mesh.comm(), coupling_info, action_functor);
 }

@@ -198,11 +198,15 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
         [this, p, &coupled_elements, null_mat, amg](const Elem * const elem_arg)
     {
       // Look up elem_arg in the mortar_interface_coupling data structure.
-      auto bounds = amg->mortarInterfaceCoupling().equal_range(elem_arg->id());
+      const auto & mic = amg->mortarInterfaceCoupling();
+      auto find_it = mic.find(elem_arg->id());
+      if (find_it == mic.end())
+        return;
 
-      for (const auto & pr : as_range(bounds))
+      const auto & coupled_set = find_it->second;
+
+      for (const auto coupled_elem_id : coupled_set)
       {
-        auto coupled_elem_id = pr.second;
         const Elem * coupled_elem = _mesh->elem_ptr(coupled_elem_id);
         mooseAssert(coupled_elem,
                     "The coupled element with id " << coupled_elem_id << " doesn't exist!");
@@ -242,10 +246,14 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
             // side isn't
             continue;
 
-          for (const auto & multimap_pr :
-               as_range(amg->mortarInterfaceCoupling().equal_range(elem->id())))
+          const auto & mic = amg->mortarInterfaceCoupling();
+          auto find_it = mic.find(elem->id());
+          if (find_it == mic.end())
+            continue;
+
+          const auto & coupled_set = find_it->second;
+          for (const auto coupled_elem_id : coupled_set)
           {
-            const auto coupled_elem_id = multimap_pr.second;
             auto * const coupled_elem = _mesh->elem_ptr(coupled_elem_id);
 
             if (coupled_elem->subdomain_id() != secondary_subdomain_id)
