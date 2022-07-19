@@ -245,23 +245,30 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
           for (const auto & multimap_pr :
                as_range(amg->mortarInterfaceCoupling().equal_range(elem->id())))
           {
-            const auto secondary_lower_elem_id = multimap_pr.second;
-            auto insert_pr = secondary_lower_elems_handled.insert(secondary_lower_elem_id);
+            const auto coupled_elem_id = multimap_pr.second;
+            auto * const coupled_elem = _mesh->elem_ptr(coupled_elem_id);
+
+            if (coupled_elem->subdomain_id() != secondary_subdomain_id)
+            {
+              // We support higher-d-secondary to higher-d-primary coupling now, e.g.
+              // if we get here, coupled_elem is not actually a secondary lower elem; it's a
+              // primary higher-d elem
+              mooseAssert(coupled_elem->dim() == elem->dim(), "These should be matching dim");
+              continue;
+            }
+
+            auto insert_pr = secondary_lower_elems_handled.insert(coupled_elem_id);
 
             // If insertion didn't happen, then we've already handled this element
             if (!insert_pr.second)
               continue;
-
-            auto * const secondary_lower_elem = _mesh->elem_ptr(secondary_lower_elem_id);
-            mooseAssert(secondary_lower_elem->subdomain_id() == secondary_subdomain_id,
-                        "This should be on the secondary subdomain.");
 
             // We've already ghosted the secondary lower-d element itself if it needed to be
             // outside of the _ghost_point_neighbors logic. But now we must make sure to ghost the
             // point neighbors of the secondary lower-d element and their mortar interface
             // couplings
             std::set<const Elem *> secondary_lower_elem_point_neighbors;
-            secondary_lower_elem->find_point_neighbors(secondary_lower_elem_point_neighbors);
+            coupled_elem->find_point_neighbors(secondary_lower_elem_point_neighbors);
 
             for (const Elem * const neigh : secondary_lower_elem_point_neighbors)
             {

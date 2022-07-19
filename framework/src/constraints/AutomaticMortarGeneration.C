@@ -730,38 +730,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
   }
 
-  // Loop over the msm_elem_to_info object and build a bi-directional
-  // multimap from secondary elements to the primary Elems which they are
-  // coupled to and vice-versa. This is used in the
-  // AugmentSparsityOnInterface functor to determine whether a given
-  // secondary Elem is coupled across the mortar interface to a primary
-  // element.
-  for (const auto & pr : _msm_elem_to_info)
-  {
-    const Elem * secondary_elem = pr.second.secondary_elem;
-    const Elem * primary_elem = pr.second.primary_elem;
-
-    // LowerSecondary
-    _mortar_interface_coupling.emplace(secondary_elem->id(),
-                                       secondary_elem->interior_parent()->id());
-    // SecondaryLower
-    _mortar_interface_coupling.emplace(secondary_elem->interior_parent()->id(),
-                                       secondary_elem->id());
-
-    // LowerPrimary
-    _mortar_interface_coupling.insert(
-        std::make_pair(secondary_elem->id(), primary_elem->interior_parent()->id()));
-    // PrimaryLower
-    _mortar_interface_coupling.insert(
-        std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
-
-    // SecondaryPrimary
-    _mortar_interface_coupling.insert(std::make_pair(secondary_elem->interior_parent()->id(),
-                                                     primary_elem->interior_parent()->id()));
-    // PrimarySecondary
-    _mortar_interface_coupling.insert(std::make_pair(primary_elem->interior_parent()->id(),
-                                                     secondary_elem->interior_parent()->id()));
-  }
+  buildCouplingInformation();
 }
 
 void
@@ -1163,6 +1132,25 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         msm_el->subdomain_id()--;
   }
 
+  buildCouplingInformation();
+
+  // Print mortar segment mesh statistics
+  if (_debug)
+  {
+    if (_mesh.n_processors() == 1)
+      msmStatistics();
+    else
+      mooseWarning("Mortar segment mesh statistics intended for debugging purposes in serial only, "
+                   "parallel will only provide statistics for local mortar segment mesh.");
+  }
+}
+
+void
+AutomaticMortarGeneration::buildCouplingInformation()
+{
+  std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, dof_id_type>>>
+      coupling_info;
+
   // Loop over the msm_elem_to_info object and build a bi-directional
   // multimap from secondary elements to the primary Elems which they are
   // coupled to and vice-versa. This is used in the
@@ -1175,36 +1163,49 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     const Elem * primary_elem = pr.second.primary_elem;
 
     // LowerSecondary
-    _mortar_interface_coupling.emplace(secondary_elem->id(),
-                                       secondary_elem->interior_parent()->id());
-    // SecondaryLower
-    _mortar_interface_coupling.emplace(secondary_elem->interior_parent()->id(),
-                                       secondary_elem->id());
+    coupling_info[secondary_elem->processor_id()].emplace_back(
+        secondary_elem->id(), secondary_elem->interior_parent()->id());
+    if (secondary_elem->processor_id() != _mesh.processor_id())
+      // We want to keep information for nonlocal secondary element point neighbors for mortar nodal
+      // aux kernels
+      _mortar_interface_coupling.emplace(secondary_elem->id(),
+                                         secondary_elem->interior_parent()->id());
 
     // LowerPrimary
-    _mortar_interface_coupling.insert(
-        std::make_pair(secondary_elem->id(), primary_elem->interior_parent()->id()));
-    // PrimaryLower
-    _mortar_interface_coupling.insert(
-        std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
+    coupling_info[secondary_elem->processor_id()].emplace_back(
+        secondary_elem->id(), primary_elem->interior_parent()->id());
+    if (secondary_elem->processor_id() != _mesh.processor_id())
+      // We want to keep information for nonlocal secondary element point neighbors for mortar nodal
+      // aux kernels
+      _mortar_interface_coupling.emplace(secondary_elem->id(),
+                                         primary_elem->interior_parent()->id());
+
+    // SecondaryLower
+    coupling_info[secondary_elem->interior_parent()->processor_id()].emplace_back(
+        secondary_elem->interior_parent()->id(), secondary_elem->id());
 
     // SecondaryPrimary
-    _mortar_interface_coupling.insert(std::make_pair(secondary_elem->interior_parent()->id(),
-                                                     primary_elem->interior_parent()->id()));
+    coupling_info[secondary_elem->interior_parent()->processor_id()].emplace_back(
+        secondary_elem->interior_parent()->id(), primary_elem->interior_parent()->id());
+
+    // PrimaryLower
+    coupling_info[primary_elem->interior_parent()->processor_id()].emplace_back(
+        primary_elem->interior_parent()->id(), secondary_elem->id());
+
     // PrimarySecondary
-    _mortar_interface_coupling.insert(std::make_pair(primary_elem->interior_parent()->id(),
-                                                     secondary_elem->interior_parent()->id()));
+    coupling_info[primary_elem->interior_parent()->processor_id()].emplace_back(
+        primary_elem->interior_parent()->id(), secondary_elem->interior_parent()->id());
   }
 
-  // Print mortar segment mesh statistics
-  if (_debug)
+  // Push the coupling information
+  auto action_functor =
+      [this](processor_id_type,
+             const std::vector<std::pair<dof_id_type, dof_id_type>> & coupling_info)
   {
-    if (_mesh.n_processors() == 1)
-      msmStatistics();
-    else
-      mooseWarning("Mortar segment mesh statistics intended for debugging purposes in serial only, "
-                   "parallel will only provide statistics for local mortar segment mesh.");
-  }
+    for (auto [i, j] : coupling_info)
+      _mortar_interface_coupling.emplace(i, j);
+  };
+  TIMPI::push_parallel_vector_data(_mesh.comm(), coupling_info, action_functor);
 }
 
 void

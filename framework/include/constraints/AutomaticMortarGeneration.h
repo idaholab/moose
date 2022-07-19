@@ -337,6 +337,11 @@ public:
   }
 
 private:
+  /**
+   * build the \p _mortar_interface_coupling data
+   */
+  void buildCouplingInformation();
+
   MooseApp & _app;
 
   // Reference to the mesh stored in equation_systems.
