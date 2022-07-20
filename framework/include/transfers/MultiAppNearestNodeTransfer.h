@@ -63,10 +63,6 @@ protected:
                                      bool nodal,
                                      bool constant);
 
-  void getLocalEntities(MooseMesh * mesh,
-                        std::vector<std::pair<Point, DofObject *>> & local_entities,
-                        bool nodal);
-
   /// If true then node connections will be cached
   bool _fixed_meshes;
 

@@ -801,50 +801,6 @@ MultiAppNearestNodeTransfer::getLocalEntitiesAndComponents(
   }
 }
 
-void
-MultiAppNearestNodeTransfer::getLocalEntities(
-    MooseMesh * mesh, std::vector<std::pair<Point, DofObject *>> & local_entities, bool is_nodal)
-{
-  mooseAssert(local_entities.empty(), "local_entities should be empty");
-  MeshBase & mesh_base = mesh->getMesh();
-
-  if (isParamValid("source_boundary"))
-  {
-    BoundaryID src_bnd_id = mesh->getBoundaryID(getParam<BoundaryName>("source_boundary"));
-    if (is_nodal)
-    {
-      const ConstBndNodeRange & bnd_nodes = *mesh->getBoundaryNodeRange();
-      for (const auto & bnode : bnd_nodes)
-        if (bnode->_bnd_id == src_bnd_id &&
-            bnode->_node->processor_id() == mesh_base.processor_id())
-          local_entities.emplace_back(*bnode->_node, bnode->_node);
-    }
-    else
-    {
-      const ConstBndElemRange & bnd_elems = *mesh->getBoundaryElementRange();
-      for (const auto & belem : bnd_elems)
-        if (belem->_bnd_id == src_bnd_id &&
-            belem->_elem->processor_id() == mesh_base.processor_id())
-          local_entities.emplace_back(belem->_elem->vertex_average(), belem->_elem);
-    }
-  }
-  else
-  {
-    if (is_nodal)
-    {
-      local_entities.reserve(mesh_base.n_local_nodes());
-      for (auto & node : mesh_base.local_node_ptr_range())
-        local_entities.emplace_back(*node, node);
-    }
-    else
-    {
-      local_entities.reserve(mesh_base.n_local_elem());
-      for (auto & elem : mesh_base.active_local_element_ptr_range())
-        local_entities.emplace_back(elem->vertex_average(), elem);
-    }
-  }
-}
-
 const std::vector<Node *> &
 MultiAppNearestNodeTransfer::getTargetLocalNodes(const unsigned int to_problem_id)
 {
