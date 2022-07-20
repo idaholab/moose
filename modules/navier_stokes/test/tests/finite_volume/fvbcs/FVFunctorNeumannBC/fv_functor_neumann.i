@@ -156,21 +156,21 @@ velocity_interp_method='rc'
   []
 
   [top_q]
-    type = FVFunctionNeumannBC
+    type = FVFunctorNeumannBC
     boundary = 'top'
     variable = T_fluid
-    function = 0.1
+    functor = 0.1
   []
 []
 
-[Functions]
-  [top_functor]
-    type = ADPiecewiseLinear
-    axis = x
-    x = '0 0.5 0.6 5'
-    y = '0 0   1   1'
-  []
-[]
+# [Functions]
+#   [top_functor]
+#     type = ADPiecewiseLinear
+#     axis = x
+#     x = '0 0.5 0.6 5'
+#     y = '0 0   1   1'
+#   []
+# []
 
 [Materials]
   [const_functor]
@@ -237,5 +237,5 @@ velocity_interp_method='rc'
 
 [Outputs]
   exodus = true
-  csv = true
+  # csv = true
 []
