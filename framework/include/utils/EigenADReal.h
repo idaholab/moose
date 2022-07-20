@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "ADReal.h"
 #include <Eigen/Core>
 
 namespace Eigen::internal
