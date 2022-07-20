@@ -26,6 +26,7 @@ protected:
   std::vector<Real> & _measurement_xcoord;
   std::vector<Real> & _measurement_ycoord;
   std::vector<Real> & _measurement_zcoord;
+  std::vector<Real> & _measurement_time;
   std::vector<Real> & _measurement_values;
   std::vector<Real> & _simulation_values;
   std::vector<Real> & _misfit_values;
@@ -38,4 +39,6 @@ private:
   void readMeasurementsFromFile();
   void readMeasurementsFromInput();
   void setSimuilationValuesForTesting(std::vector<Real> & data);
+
+  const MooseVariableFieldBase * const _var;
 };
