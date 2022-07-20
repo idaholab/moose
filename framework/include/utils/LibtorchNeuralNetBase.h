@@ -16,21 +16,20 @@
 namespace Moose
 {
 
-// This base class is meant to gather the functions and members common in
-// every libtorch-based class. Note, it already inherits from the torch::nn::Module
-// so this will manage the layers (submodules) of the derived classes as well.
-class LibtorchNeuralNetBase : public torch::nn::Module
+/**
+ * This base class is meant to gather the functions and members common in
+ * every neural network based on Libtorch.
+ */
+class LibtorchNeuralNetBase
 {
 public:
   // Virtual destructor
   virtual ~LibtorchNeuralNetBase() {}
 
-  // Overriding the function from NeuralNetBase
-  virtual void addLayer(const std::string & /*layer_name*/,
-                        const std::unordered_map<std::string, unsigned int> & /*parameters*/)
-  {
-    ::mooseError("You are calling the addLayer function of an unfunctional base class!");
-  }
+  // Evaluation function of the libtorch modules. Since there are considerable
+  // differences between self-built modules and modules read using a torch-script
+  // format, this serves as a common denominator between the two.
+  virtual torch::Tensor forward(torch::Tensor x) = 0;
 };
 
 }

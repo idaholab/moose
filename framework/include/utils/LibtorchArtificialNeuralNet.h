@@ -11,7 +11,7 @@
 
 #ifdef LIBTORCH_ENABLED
 
-#include "LibtorchNeuralNetBase.h"
+#include "LibtorchNeuralNet.h"
 #include "DataIO.h"
 #include "MultiMooseEnum.h"
 
@@ -19,7 +19,7 @@ namespace Moose
 {
 
 // A class that describes a simple feed-forward neural net.
-class LibtorchArtificialNeuralNet : public LibtorchNeuralNetBase
+class LibtorchArtificialNeuralNet : public LibtorchNeuralNet<torch::nn::Module>
 {
 public:
   /**
@@ -42,14 +42,14 @@ public:
    *                   describe the neural net layer architecture
    */
   virtual void addLayer(const std::string & layer_name,
-                        const std::unordered_map<std::string, unsigned int> & parameters) override;
+                        const std::unordered_map<std::string, unsigned int> & parameters);
 
   /**
    * Overriding the forward substitution function for the neural network, unfortunately
    * this cannot be const since it creates a graph in the background
    * @param x Input tensor for the evaluation
    */
-  torch::Tensor forward(torch::Tensor x);
+  virtual torch::Tensor forward(torch::Tensor x) override;
 
   /// Return the name of the neural network
   const std::string & name() const { return _name; }
