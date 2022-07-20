@@ -93,10 +93,14 @@ NewtonSolve2D(const Real & f,
     func2(current_vec[0], current_vec[1], new_g, dg_dx, dg_dy); //get new s and derivatives
     jacobian << df_dx, df_dy, //fill jacobian
                 dg_dx, dg_dy;
-    // std::cout << "jacobian" <<std::endl;
-    // std::cout << df_dx << " " << df_dy << std::endl;
-    // std::cout << dg_dx << " " << dg_dy << std::endl;
-    // std::cout << std::endl;
+    // if (std::isnan(df_dx) || std::isnan(df_dy) || std::isnan(dg_dx) || std::isnan(dg_dy))
+    // {
+    //   std::cout << "jacobian" <<std::endl;
+    //   std::cout << df_dx << " " << df_dy << std::endl;
+    //   std::cout << dg_dx << " " << dg_dy << std::endl;
+    //   std::cout << std::endl;
+    // }
+
     function << new_f, new_g; //fill function
     next_vec = current_vec - (jacobian.inverse() * ( function - target)); //2D Newton Method
     res1 = (current_vec[0] - next_vec[0]); //update residual 1
