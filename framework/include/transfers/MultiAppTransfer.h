@@ -136,6 +136,16 @@ protected:
   /// True if displaced mesh is used for the target mesh, otherwise false
   bool _displaced_target_mesh;
 
+  /// Extend bounding box by a factor in all directions
+  /// Non-zero values of this member may be necessary because the nearest bounding
+  /// box does not necessarily give you the closest node/element. It will depend
+  /// on the partition and geometry. A node/element will more likely find its
+  /// nearest source element/node by extending bounding boxes. If each of the
+  /// bounding boxes covers the entire domain, a node/element will be able to
+  /// find its nearest source element/node for sure,
+  /// but at the same time, more communication will be involved and can be expensive.
+  Real _bbox_extend_factor;
+
   ///@{
   /**
    * Return the bounding boxes of all the "from" domains, including all the domains not local to

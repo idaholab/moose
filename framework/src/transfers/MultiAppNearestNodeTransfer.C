@@ -47,9 +47,6 @@ MultiAppNearestNodeTransfer::validParams()
                         "no movement or adaptivity).  This will cache "
                         "nearest node neighbors to greatly speed up the "
                         "transfer.");
-
-  params.addParam<Real>(
-      "bbox_extend_factor", 0, "Expand bounding box by a factor in all the directions");
   return params;
 }
 
@@ -65,8 +62,7 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters &
         "cached_dof_ids")),
     _cached_from_inds(
         declareRestartableData<std::map<dof_id_type, unsigned int>>("cached_from_ids")),
-    _cached_qp_inds(declareRestartableData<std::map<dof_id_type, unsigned int>>("cached_qp_inds")),
-    _bbox_extend_factor(getParam<Real>("bbox_extend_factor"))
+    _cached_qp_inds(declareRestartableData<std::map<dof_id_type, unsigned int>>("cached_qp_inds"))
 {
   if (_to_var_names.size() != 1)
     paramError("variable", " Support single to-variable only");
@@ -95,31 +91,6 @@ MultiAppNearestNodeTransfer::execute()
   }
   else
     bboxes = getFromBoundingBoxes();
-
-  // Expand bounding boxes along all the directions by the same length
-  // Non-zero values of this member may be necessary because the nearest
-  // bounding box does not necessarily give you the closest node/element.
-  // It will depend on the partition and geometry. A node/element will more
-  // likely find its nearest source element/node by extending
-  // bounding boxes. If each of the bounding boxes covers the entire domain,
-  // a node/element will be able to find its nearest source element/node for sure,
-  // but at the same time, more communication will be involved and can be expensive.
-  for (auto & box : bboxes)
-  {
-    // libmesh set an invalid bounding box using this code
-    // for (unsigned int i=0; i<LIBMESH_DIM; i++)
-    // {
-    //   this->first(i)  =  std::numeric_limits<Real>::max();
-    //   this->second(i) = -std::numeric_limits<Real>::max();
-    // }
-    // If it is an invalid box, we should skip it
-    if (box.first(0) == std::numeric_limits<Real>::max())
-      continue;
-
-    auto width = box.second - box.first;
-    box.second += width * _bbox_extend_factor;
-    box.first -= width * _bbox_extend_factor;
-  }
 
   // Figure out how many "from" domains each processor owns.
   std::vector<unsigned int> froms_per_proc = getFromsPerProc();

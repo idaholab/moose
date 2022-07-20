@@ -47,13 +47,16 @@ MultiAppTransfer::validParams()
   params.addParam<bool>("displaced_target_mesh",
                         false,
                         "Whether or not to use the displaced mesh for the target mesh.");
+  params.addParam<Real>(
+      "bbox_extend_factor", 0, "Expand bounding box by a factor in all the directions");
   return params;
 }
 
 MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   : Transfer(parameters),
     _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
-    _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
+    _displaced_target_mesh(getParam<bool>("displaced_target_mesh")),
+    _bbox_extend_factor(getParam<Real>("bbox_extend_factor"))
 {
   // Get the multiapps from their names
   if (!isParamValid("multi_app"))
@@ -371,6 +374,39 @@ transformBoundingBox(BoundingBox & box, const MooseCoordTransform & transform)
   box.first = new_box_min;
   box.second = new_box_max;
 }
+
+template <typename T>
+void
+expandBoundingBoxes(const Real extension_factor, T & bboxes)
+{
+  if (!extension_factor)
+    return;
+
+  // Expand bounding boxes along all the directions by the same length
+  // Non-zero values of this member may be necessary because the nearest
+  // bounding box does not necessarily give you the closest node/element.
+  // It will depend on the partition and geometry. A node/element will more
+  // likely find its nearest source element/node by extending
+  // bounding boxes. If each of the bounding boxes covers the entire domain,
+  // a node/element will be able to find its nearest source element/node for sure,
+  // but at the same time, more communication will be involved and can be expensive.
+  for (auto & box : bboxes)
+  {
+    // libmesh set an invalid bounding box using this code
+    // for (unsigned int i=0; i<LIBMESH_DIM; i++)
+    // {
+    //   this->first(i)  =  std::numeric_limits<Real>::max();
+    //   this->second(i) = -std::numeric_limits<Real>::max();
+    // }
+    // If it is an invalid box, we should skip it
+    if (box.first(0) == std::numeric_limits<Real>::max())
+      continue;
+
+    auto width = box.second - box.first;
+    box.second += width * extension_factor;
+    box.first -= width * extension_factor;
+  }
+}
 }
 
 std::vector<BoundingBox>
@@ -399,6 +435,9 @@ MultiAppTransfer::getFromBoundingBoxes()
   std::vector<BoundingBox> bboxes(bb_points.size());
   for (unsigned int i = 0; i < bb_points.size(); i++)
     bboxes[i] = static_cast<BoundingBox>(bb_points[i]);
+
+  // possibly expand bounding boxes
+  expandBoundingBoxes(_bbox_extend_factor, bboxes);
 
   return bboxes;
 }
@@ -454,6 +493,9 @@ MultiAppTransfer::getFromBoundingBoxes(BoundaryID boundary_id)
   std::vector<BoundingBox> bboxes(bb_points.size());
   for (unsigned int i = 0; i < bb_points.size(); i++)
     bboxes[i] = static_cast<BoundingBox>(bb_points[i]);
+
+  // possibly expand bounding boxes
+  expandBoundingBoxes(_bbox_extend_factor, bboxes);
 
   return bboxes;
 }
