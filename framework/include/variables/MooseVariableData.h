@@ -372,20 +372,9 @@ public:
   void prepare();
 
   /**
-   * setter of _has_dof_values
-   * @param has_dof_values The boolean value we are setting _has_dof_values to
-   */
-  void hasDofValues(bool has_dof_values) { _has_dof_values = has_dof_values; }
-
-  /**
    * Prepare degrees of freedom for the current node
    */
   void reinitNode();
-
-  /**
-   * Prepare dof indices and solution values for elemental auxiliary variables
-   */
-  void prepareAux();
 
   /**
    * Prepare dof indices and solution values for elemental auxiliary variables
