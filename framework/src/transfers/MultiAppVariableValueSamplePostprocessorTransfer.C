@@ -107,8 +107,6 @@ MultiAppVariableValueSamplePostprocessorTransfer::cacheElemToPostprocessorData()
   if (!_directions.contains("from_multiapp"))
     return;
 
-  getAppInfo();
-
   // Cache the Multiapp position ID for every element.
   auto & mesh = _fe_problem.mesh().getMesh();
   unsigned int multiapp_pos_id = 0;
@@ -120,9 +118,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::cacheElemToPostprocessorData()
       unsigned int count = 0;
       for (unsigned int j = 0; j < getFromMultiApp()->numGlobalApps(); ++j)
       {
-        Real current_distance = (getFromMultiApp()->appProblemBase(j).coordTransform()(Point(0)) -
-                                 _fe_problem.mesh().coordTransform()(elem->true_centroid()))
-                                    .norm();
+        Real current_distance = (getFromMultiApp()->position(j) - elem->true_centroid()).norm();
         if (MooseUtils::absoluteFuzzyLessThan(current_distance, distance))
         {
           distance = current_distance;
@@ -169,8 +165,6 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
                5,
                "Transferring a variable to a postprocessor through sampling");
 
-  getAppInfo();
-
   switch (_current_direction)
   {
     case TO_MULTIAPP:
@@ -197,7 +191,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
 
         { // Get the value of the variable at the point where this multiapp is in the master domain
 
-          Point multi_app_position = getToMultiApp()->appProblemBase(i).coordTransform()(Point(0));
+          Point multi_app_position = getToMultiApp()->position(i);
 
           std::vector<Point> point_vec(1, multi_app_position);
 
