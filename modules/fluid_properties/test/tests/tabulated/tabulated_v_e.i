@@ -134,7 +134,7 @@
       # Newton parameters
       tolerance = 1e-8
       T_initial_guess = 310
-      p_initial_guess = 1.1e5
+      p_initial_guess = 1.8e5
     []
   []
 []
@@ -142,7 +142,7 @@
 [Materials]
   [fp_mat_ve]
     type = FluidPropertiesMaterial
-    v = 0.88617915
+    v = 0.4957
     e = 310163
     fp = tabulated
   []

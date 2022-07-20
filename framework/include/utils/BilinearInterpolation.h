@@ -25,7 +25,7 @@ class BidimensionalInterpolation;
  * function of two values e.g. z(x,y).  Supply Bilinearlinear with a
  * vector of x and a vector of y and a ColumnMajorMatrix of function
  * values, z, that correspond to the values in the vectors x and
- * y...and also a sample point (x1 and x2), and
+ * y...and also a sample point (s1 and s2), and
  * BilinearInterpolation will return the value of the function at the
  * sample point.  A simple example:
  *
@@ -34,7 +34,7 @@ class BidimensionalInterpolation;
  * z = [1 2]
  *     [3 4]
  *
- * with x1 = 1.5 and x2 = 1.5 returns a value of 2.5.
+ * with s1 = 1.5 and s2 = 1.5 returns a value of 2.5.
  */
 class BilinearInterpolation : public BidimensionalInterpolation
 {
@@ -55,26 +55,26 @@ public:
    * This function will take an independent variable input and will
    * return the dependent variable based on the generated fit.
    */
-  Real sample(const Real x1, const Real x2) const override;
-  ADReal sample(const ADReal & x1, const ADReal & x2) const override;
+  Real sample(const Real s1, const Real s2) const override;
+  ADReal sample(const ADReal & s1, const ADReal & s2) const override;
 
   /**
-   * Samples value and first derivatives at point (x1, x2)
+   * Samples value and first derivatives at point (s1, s2)
    * Use this function for speed when computing both value and derivatives,
    * as it minimizes the amount of time spent locating the point in the
    * tabulated data
    */
-  Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const override;
+  Real sampleDerivative(Real s1, Real s2, unsigned int deriv_var) const override;
 
-  void sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const override;
+  void sampleValueAndDerivatives(Real s1, Real s2, Real & y, Real & dy_ds1, Real & dy_ds2) const override;
 
   void
-  getNeighborIndices(const std::vector<Real> & inArr, Real x, int & lowerX, int & upperX) const;
+  getNeighborIndices(const std::vector<Real> & inArr, Real x, unsigned int & lowerX, unsigned int & upperX) const;
 
 private:
   /// sampleInternal only used by BilinearInterpolation, hence made private
   template <typename T>
-  T sampleInternal(T & x1, T & x2) const;
+  T sampleInternal(T & s1, T & s2) const;
 
   ColumnMajorMatrix _zSurface;
   static int _file_number;

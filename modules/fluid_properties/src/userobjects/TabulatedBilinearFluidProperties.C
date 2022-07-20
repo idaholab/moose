@@ -53,13 +53,24 @@ TabulatedBilinearFluidProperties::constructInterpolation()
   // Create specific volume (v) grid
   if (_construct_pT_from_ve || _construct_pT_from_vh)
   {
-    // extreme values of specific volume for the grid bounds
-    Real v1 = v_from_p_T(_pressure_min, _temperature_min);
-    Real v2 = v_from_p_T(_pressure_max, _temperature_min);
-    Real v3 = v_from_p_T(_pressure_min, _temperature_max);
-    Real v4 = v_from_p_T(_pressure_max, _temperature_max);
-    _v_min = std::min({v1, v2, v3, v4});
-    _v_max = std::max({v1, v2, v3, v4});
+    if (_fp)
+    {
+      // extreme values of specific volume for the grid bounds
+      Real v1 = v_from_p_T(_pressure_min, _temperature_min);
+      Real v2 = v_from_p_T(_pressure_max, _temperature_min);
+      Real v3 = v_from_p_T(_pressure_min, _temperature_max);
+      Real v4 = v_from_p_T(_pressure_max, _temperature_max);
+      _v_min = std::min({v1, v2, v3, v4});
+      _v_max = std::max({v1, v2, v3, v4});
+    }
+    // if csv exists, get max and min values from csv file
+    else
+    {
+      Real rho_max = * max_element(_properties[_density_idx].begin() , _properties[_density_idx].end());
+      Real rho_min = * min_element(_properties[_density_idx].begin() , _properties[_density_idx].end());
+      _v_max = 1 / rho_min;
+      _v_min = 1 / rho_max;
+    }
     Real dv = (_v_max - _v_min) / ((Real)_num_v - 1);
 
     // Create v grid for interpolation
@@ -69,6 +80,8 @@ TabulatedBilinearFluidProperties::constructInterpolation()
 
     if (_construct_pT_from_ve)
     {
+      if (_fp)
+      {
       // extreme values of internal energy for the grid bounds
       Real e1 = e_from_p_T(_pressure_min, _temperature_min);
       Real e2 = e_from_p_T(_pressure_max, _temperature_min);
@@ -76,6 +89,13 @@ TabulatedBilinearFluidProperties::constructInterpolation()
       Real e4 = e_from_p_T(_pressure_max, _temperature_max);
       _e_min = std::min({e1, e2, e3, e4});
       _e_max = std::max({e1, e2, e3, e4});
+      }
+      // if csv exists, get max and min values from csv file
+      else
+      {
+        _e_max = *max_element(_properties[_internal_energy_idx].begin() , _properties[_internal_energy_idx].end());
+        _e_min = *min_element(_properties[_internal_energy_idx].begin() , _properties[_internal_energy_idx].end());
+      }
       Real de = (_e_max - _e_min) / ((Real)_num_e - 1);
 
       // Create e grid for interpolation
@@ -116,6 +136,7 @@ TabulatedBilinearFluidProperties::constructInterpolation()
                          p_ve,
                          T_ve,
                          conversion_succeeded);
+           // std::cout << "p_ve = " << " " << p_ve << " " << "T_ve = " << " " << T_ve << std::endl;
             _error_on_out_of_bounds = old_error_behavior;
             // track number of times convergence failed
             if (!conversion_succeeded)
@@ -145,13 +166,22 @@ TabulatedBilinearFluidProperties::constructInterpolation()
 
     if (_construct_pT_from_vh)
     {
-      // extreme values of enthalpy for the grid bounds
-      Real h1 = h_from_p_T(_pressure_min, _temperature_min);
-      Real h2 = h_from_p_T(_pressure_max, _temperature_min);
-      Real h3 = h_from_p_T(_pressure_min, _temperature_max);
-      Real h4 = h_from_p_T(_pressure_max, _temperature_max);
-      _h_min = std::min({h1, h2, h3, h4});
-      _h_max = std::max({h1, h2, h3, h4});
+      if (_fp)
+      {
+        // extreme values of enthalpy for the grid bounds
+        Real h1 = h_from_p_T(_pressure_min, _temperature_min);
+        Real h2 = h_from_p_T(_pressure_max, _temperature_min);
+        Real h3 = h_from_p_T(_pressure_min, _temperature_max);
+        Real h4 = h_from_p_T(_pressure_max, _temperature_max);
+        _h_min = std::min({h1, h2, h3, h4});
+        _h_max = std::max({h1, h2, h3, h4});
+      }
+      // if csv exists, get max and min values from csv file
+      else
+      {
+        _h_max = *max_element(_properties[_enthalpy_idx].begin() , _properties[_enthalpy_idx].end());
+        _h_min = *min_element(_properties[_enthalpy_idx].begin() , _properties[_enthalpy_idx].end());
+      }
       Real dh = (_h_max - _h_min) / ((Real)_num_e - 1);
 
       // Create h grid for interpolation
