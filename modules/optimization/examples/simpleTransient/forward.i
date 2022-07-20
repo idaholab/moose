@@ -1,142 +1,115 @@
-# example similar to:
-#https://mooseframework.inl.gov/getting_started/examples_and_tutorials/tutorial03_verification/step04_mms.html
-#units kg,m,s,K
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 40
-  ny = 40
-  xmin = -50e-3
-  ymin = -50e-3
-  xmax = 50e-3
-  ymax = 50e-3
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    ny = 10
+    xmin = -1
+    xmax = 1
+    ymin = -1
+    ymax = 1
+  []
 []
 
 [Variables]
-  [temperature]
+  [u]
+  []
+[]
+
+[AuxVariables]
+  [source]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [source_aux]
+    type = ReporterNearestPointAux
+    variable = source
+    coord_x = src_values/coordx
+    coord_y = src_values/coordy
+    time = src_values/time
+    value = src_values/values
+    execute_on = 'initial timestep_begin'
+  []
+[]
+
+[VectorPostprocessors]
+  [src_values]
+    type = CSVReader
+    csv_file = source_params.csv
+    header = true
   []
 []
 
 [ICs]
-  [T_O]
-    type = ConstantIC
-    variable = temperature
-    value = 20
+  [initial]
+    type = FunctionIC
+    variable = u
+    function = exact
   []
 []
 
 [Kernels]
-  [T_time]
-    type = HeatConductionTimeDerivative
-    variable = temperature
-    density_name = 2000
-    specific_heat = 50
+  [dt]
+    type = TimeDerivative
+    variable = u
   []
-  [T_cond]
-    type = HeatConduction
-    variable = temperature
-    diffusion_coefficient = 6
+  [diff]
+    type = Diffusion
+    variable = u
   []
-  [T_source]
-    type = HeatSource
-    variable = temperature
-    function = source
-  []
-[]
-
-[Functions]
-  [source]
-    type = ParsedFunction
-    vars = 'A xo yo sx sy'
-    vals = '1e4 0e-3 0e-3  20e-3 20e-3'
-    value = 'A*exp(-((x-xo)*(x-xo)/2/sx/sx+(y-yo)*(y-yo)/2/sy/sy))*t'
+  [src]
+    type = CoupledForce
+    variable = u
+    v = source
   []
 []
 
 [BCs]
-  [left]
+  [dirichlet]
     type = DirichletBC
-    variable = temperature
-    boundary = left
-    value = 0
-  []
-  [right]
-    type = DirichletBC
-    variable = temperature
-    boundary = right
-    value = 0
-  []
-  [bottom]
-    type = DirichletBC
-    variable = temperature
-    boundary = bottom
-    value = 0
-  []
-  [top]
-    type = DirichletBC
-    variable = temperature
-    boundary = top
+    variable = u
+    boundary = 'left right top bottom'
     value = 0
   []
 []
 
-# [Materials]
-#   [steel]
-#     type = ADGenericConstantMaterial
-#     prop_names = thermal_conductivity
-#     prop_values = 5
-#   []
-#   [volumetric_heat]
-#     type = ADGenericFunctionMaterial
-#     prop_names = 'volumetric_heat'
-#     prop_values = volumetric_heat_func
-#   []
-# []
+[Functions]
+  [exact]
+    type = ParsedFunction
+    value = '2*exp(-2.0*(x - sin(2*pi*t))^2)*exp(-2.0*(y - cos(2*pi*t))^2)*cos((1/2)*x*pi)*cos((1/2)*y*pi)/pi'
+  []
+[]
 
 [Executioner]
   type = Transient
+
+  num_steps = 100
+  end_time = 1
+
   solve_type = NEWTON
-  nl_abs_tol = 1e-6
-  nl_rel_tol = 1e-8
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
-  dt = 1
-  end_time = 50
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
-[VectorPostprocessors]
-  #   [data_pt]
-  #     type = VppPointValueSampler
-  #     variable = temperature
-  #     reporter_name = measure_data
-  #   []
-  #Zach  This would probably be what the measurement data.
-  #can this be output to json?
-  [horizontal]
-    type = LineValueSampler
-    variable = 'temperature'
-    start_point = '-50e-3 0 0'
-    end_point = '50e-3 0 0'
-    num_points = 100
-    sort_by = x
-    outputs = json
+[Reporters]
+  [measured_data]
+    type = OptimizationData
+    measurement_file = mms_data.csv
+    file_xcoord = x
+    file_ycoord = y
+    file_zcoord = z
+    file_time = t
+    file_value = u
+    variable = u
+    execute_on = timestep_end
+    outputs = csv
   []
 []
 
-# [Reporters]
-#   [measure_data]
-#     type = OptimizationData
-#   []
-# []
-
 [Outputs]
-  # console = false
-  # json = true
   exodus = true
-  file_base = 'forward'
-  # [json]
-  #   type = JSON
-  #   execute_system_information_on = none
-  #   #file_base = 'var_in'
-  # []
+  console = false
 []
