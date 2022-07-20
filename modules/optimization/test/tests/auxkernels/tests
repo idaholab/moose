@@ -1,0 +1,71 @@
+[Tests]
+  [reporter_nearest_point]
+    design = 'ReporterNearestPointAux.md'
+    issues = '#42'
+    requirement = 'The system shall be able to compute a auxiliary varible based on data from reporter values with '
+    [x]
+      type = Exodiff
+      input = reporter_nearest_point.i
+      cli_args = 'AuxKernels/active=x Outputs/file_base=rnp_x'
+      exodiff = 'rnp_x.e'
+      detail = 'x-coordinate data;'
+    []
+    [xy]
+      type = Exodiff
+      input = reporter_nearest_point.i
+      cli_args = 'AuxKernels/active=xy Outputs/file_base=rnp_xy'
+      exodiff = 'rnp_xy.e'
+      detail = 'x- and y-coordinate data;'
+    []
+    [xyz]
+      type = Exodiff
+      input = reporter_nearest_point.i
+      cli_args = 'AuxKernels/active=xyz Outputs/file_base=rnp_xyz'
+      exodiff = 'rnp_xyz.e'
+      detail = 'x-, y-, and z-coordinate data;'
+    []
+    [xyzt]
+      type = Exodiff
+      input = reporter_nearest_point.i
+      cli_args = 'AuxKernels/active=xyzt Outputs/file_base=rnp_xyzt'
+      exodiff = 'rnp_xyzt.e'
+      detail = 'time, x-, y-, and z-coordinate data;'
+    []
+
+    [errorv]
+      type = RunException
+      input = reporter_nearest_point.i
+      cli_args = 'AuxKernels/active=errorv'
+      expect_err = 'Number of values must be greater than 0\.'
+      detail = 'error if no data is present;'
+    []
+    [errorx]
+      type = RunException
+      input = reporter_nearest_point.i
+      cli_args = 'AuxKernels/active=errorx'
+      expect_err = 'Number of x coordinates \(\d*\) does not match number of values \(\d*\).'
+      detail = 'error if x-coordinate data is wrong size;'
+    []
+    [errory]
+      type = RunException
+      input = reporter_nearest_point.i
+      cli_args = 'AuxKernels/active=errory'
+      expect_err = 'Number of y coordinates \(\d*\) does not match number of values \(\d*\).'
+      detail = 'error if y-coordinate data is wrong size;'
+    []
+    [errorz]
+      type = RunException
+      input = reporter_nearest_point.i
+      cli_args = 'AuxKernels/active=errorz'
+      expect_err = 'Number of z coordinates \(\d*\) does not match number of values \(\d*\).'
+      detail = 'error if z-coordinate data is wrong size;'
+    []
+    [errort]
+      type = RunException
+      input = reporter_nearest_point.i
+      cli_args = 'AuxKernels/active=errort'
+      expect_err = 'Number of times \(\d*\) does not match number of values \(\d*\).'
+      detail = 'error if time data is wrong size;'
+    []
+  []
+[]
