@@ -183,11 +183,13 @@ MultiAppNearestNodeTransfer::execute()
           if (node->n_dofs(sys_num, var_num) < 1)
             continue;
 
+          const auto transformed_node = to_transform(*node);
+
           // Find which bboxes might have the nearest node to this point.
           Real nearest_max_distance = std::numeric_limits<Real>::max();
           for (const auto & bbox : bboxes)
           {
-            Real distance = bboxMaxDistance(*node, bbox);
+            Real distance = bboxMaxDistance(transformed_node, bbox);
             if (distance < nearest_max_distance)
               nearest_max_distance = distance;
           }
@@ -198,14 +200,15 @@ MultiAppNearestNodeTransfer::execute()
           {
             for (unsigned int i_from = from0; i_from < from0 + froms_per_proc[i_proc]; i_from++)
             {
-              Real distance = bboxMinDistance(*node, bboxes[i_from]);
+              Real distance = bboxMinDistance(transformed_node, bboxes[i_from]);
 
-              if (distance <= nearest_max_distance || bboxes[i_from].contains_point(*node))
+              if (distance <= nearest_max_distance ||
+                  bboxes[i_from].contains_point(transformed_node))
               {
                 std::pair<unsigned int, dof_id_type> key(i_to, node->id());
                 // Record a local ID for each quadrature point
                 node_index_map[i_proc][key] = outgoing_qps[i_proc].size();
-                outgoing_qps[i_proc].push_back(to_transform(*node));
+                outgoing_qps[i_proc].push_back(transformed_node);
                 local_nodes_found.insert(node);
               }
             }
@@ -244,7 +247,7 @@ MultiAppNearestNodeTransfer::execute()
           // For constant monomial, we take the centroid of element
           if (is_constant)
           {
-            points.push_back(elem->vertex_average());
+            points.push_back(to_transform(elem->vertex_average()));
             point_ids.push_back(elem->id());
           }
 
@@ -252,7 +255,7 @@ MultiAppNearestNodeTransfer::execute()
           else
             for (auto & node : elem->node_ref_range())
             {
-              points.push_back(node);
+              points.push_back(to_transform(node));
               point_ids.push_back(node.id());
             }
 
@@ -284,7 +287,7 @@ MultiAppNearestNodeTransfer::execute()
                   if (node_index_map[i_proc].find(key) != node_index_map[i_proc].end())
                     continue;
                   node_index_map[i_proc][key] = outgoing_qps[i_proc].size();
-                  outgoing_qps[i_proc].push_back(to_transform(point));
+                  outgoing_qps[i_proc].push_back(point);
                   local_elems_found.insert(elem);
                 } // if distance
               }   // for i_from
