@@ -3,6 +3,9 @@
         "OptimizationReporter": {
             "type": "OptimizationReporter",
             "values": {
+                "measurement_time": {
+                    "type": "std::vector<double>"
+                },
                 "measurement_values": {
                     "type": "std::vector<double>"
                 },
@@ -36,6 +39,12 @@
     "time_steps": [
         {
             "OptimizationReporter": {
+                "measurement_time": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
                 "measurement_values": [
                     11.0,
                     12.0,
@@ -91,6 +100,12 @@
         },
         {
             "OptimizationReporter": {
+                "measurement_time": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
                 "measurement_values": [
                     11.0,
                     12.0,

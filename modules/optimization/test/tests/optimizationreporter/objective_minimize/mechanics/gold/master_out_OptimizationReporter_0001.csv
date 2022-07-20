@@ -1,2 +1,2 @@
-fy_right,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,simulation_values
-2000,8.09e-05,5,1,0,0,8.09e-05
+fy_right,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,simulation_values,measurement_time
+2000,8.09e-05,5,1,0,0,8.09e-05,0
