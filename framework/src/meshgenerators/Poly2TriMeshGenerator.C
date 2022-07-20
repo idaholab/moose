@@ -37,8 +37,10 @@ Poly2TriMeshGenerator::validParams()
   params.addParam<bool>(
       "refine_boundary", true, "Whether to allow automatically refining the outer boundary.");
 
-  params.addParam<subdomain_id_type>("block_id", 0, "Subdomain id to set on new triangles.");
-  params.addParam<SubdomainName>("block_name", "Subdomain name to set on new triangles.");
+  params.addParam<subdomain_id_type>(
+      "output_subdomain_id", 0, "Subdomain id to set on new triangles.");
+  params.addParam<SubdomainName>("output_subdomain_name",
+                                 "Subdomain name to set on new triangles.");
 
   params.addParam<bool>("smooth_triangulation",
                         false,
@@ -74,7 +76,7 @@ Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
     _bdy_ptr(getMesh("boundary")),
     _add_nodes_per_boundary_segment(getParam<unsigned int>("add_nodes_per_boundary_segment")),
     _refine_bdy(getParam<bool>("refine_boundary")),
-    _block_id(getParam<subdomain_id_type>("block_id")),
+    _output_subdomain_id(getParam<subdomain_id_type>("output_subdomain_id")),
     _smooth_tri(getParam<bool>("smooth_triangulation")),
     _hole_ptrs(getMeshes("holes")),
     _stitch_holes(getParam<std::vector<bool>>("stitch_holes")),
@@ -134,12 +136,12 @@ Poly2TriMeshGenerator::generate()
 
   poly2tri.triangulate();
 
-  if (_smooth_tri || _block_id)
+  if (_smooth_tri || _output_subdomain_id)
     for (auto elem : mesh->element_ptr_range())
     {
       mooseAssert(elem->type() == TRI3, "Unexpected non-Tri3 found in triangulation");
 
-      elem->subdomain_id() = _block_id;
+      elem->subdomain_id() = _output_subdomain_id;
 
       // I do not trust Laplacian mesh smoothing not to invert
       // elements near reentrant corners.  Eventually we'll add better
@@ -157,8 +159,8 @@ Poly2TriMeshGenerator::generate()
     }
 
   // Assign new subdomain name, if provided
-  if (isParamValid("block_name"))
-    mesh->subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
+  if (isParamValid("output_subdomain_name"))
+    mesh->subdomain_name(_output_subdomain_id) = getParam<SubdomainName>("output_subdomain_name");
 
   const bool use_binary_search = (_algorithm == "BINARY");
 
