@@ -409,6 +409,7 @@ TabulatedFluidProperties::v_from_p_T(
   v = 1.0 / rho;
   dv_dp = -drho_dp / (rho * rho);
   dv_dT = -drho_dT / (rho * rho);
+  // std::cout << "v(p,T)" << std::endl;
 }
 
 Real
@@ -493,6 +494,7 @@ TabulatedFluidProperties::e_from_p_T(
     checkInputVariables(pressure, temperature);
     _property_ipol[_internal_energy_idx]->sampleValueAndDerivatives(
         pressure, temperature, e, de_dp, de_dT);
+    // std::cout << "e(p,T)" << std::endl;
   }
   else
   {
