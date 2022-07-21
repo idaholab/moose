@@ -106,10 +106,10 @@ protected:
   MooseVariable * const _var;
 
   /// Reference to the secondary variable
-  MooseVariable & _secondary_var;
+  MooseVariableField<Real> & _secondary_var;
 
   /// Reference to the primary variable
-  MooseVariable & _primary_var;
+  MooseVariableField<Real> & _primary_var;
 
   /// Whether to compute primal residuals
   const bool _compute_primal_residuals;

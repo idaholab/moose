@@ -80,11 +80,11 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
              : nullptr),
     _secondary_var(
         isParamValid("secondary_variable")
-            ? _subproblem.getStandardVariable(_tid, parameters.getMooseType("secondary_variable"))
-            : _subproblem.getStandardVariable(_tid, parameters.getMooseType("primary_variable"))),
+            ? _sys.getActualFieldVariable<Real>(_tid, parameters.getMooseType("secondary_variable"))
+            : _sys.getActualFieldVariable<Real>(_tid, parameters.getMooseType("primary_variable"))),
     _primary_var(
         isParamValid("primary_variable")
-            ? _subproblem.getStandardVariable(_tid, parameters.getMooseType("primary_variable"))
+            ? _sys.getActualFieldVariable<Real>(_tid, parameters.getMooseType("primary_variable"))
             : _secondary_var),
 
     _compute_primal_residuals(getParam<bool>("compute_primal_residuals")),

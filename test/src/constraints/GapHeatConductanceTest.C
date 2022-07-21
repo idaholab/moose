@@ -118,10 +118,14 @@ GapHeatConductanceTest::computeJacobian(Moose::MortarType mortar_type)
       *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
   const auto & secondary_ip_lowerd_map =
       amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
-  const std::vector<const MooseVariable *> var_array = {&_secondary_var, &_primary_var};
+  const std::array<const MooseVariableField<Real> *, 2> secondary_side_var_array = {
+      &_secondary_var};
+  const std::array<const MooseVariableField<Real> *, 2> primary_side_var_array = {&_primary_var};
 
-  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, residuals, true);
-  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, residuals, false);
+  if (_secondary_var.feType().family == LAGRANGE)
+    trimInteriorNodeDerivatives(secondary_ip_lowerd_map, secondary_side_var_array, residuals, true);
+  if (_primary_var.feType().family == LAGRANGE)
+    trimInteriorNodeDerivatives(primary_ip_lowerd_map, primary_side_var_array, residuals, false);
   _assembly.processUnconstrainedResidualsAndJacobian(
       residuals, dof_indices, _vector_tags, _matrix_tags, scaling_factor);
 
