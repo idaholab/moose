@@ -7,7 +7,7 @@
 
     [wrong-activation]
       type = RunException
-      input = 'test.i'
+      input = 'test_ann.i'
       cli_args = 'VectorPostprocessors/test/activation_functions=sad'
       expect_err = 'Invalid option \"sad\" in MultiMooseEnum.  Valid options \(not case-sensitive\) are \"relu sigmoid elu gelu linear\".'
       detail = 'when encountering an unsupported activation function for the neural network.'
@@ -16,10 +16,19 @@
     []
     [wrong-activation-number]
       type = RunException
-      input = 'test.i'
+      input = 'test_ann.i'
       cli_args = "VectorPostprocessors/test/activation_functions='relu sigmoid elu'"
       expect_err = 'The number of activation functions should be either one or the same as the number of hidden layers'
       detail = 'when encountering the wrong number of activation functions.'
+      libtorch = true
+      allow_test_objects = True
+    []
+    [wrong-optimizer]
+      type = RunException
+      input = 'test_ann_trainer.i'
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='random'"
+      expect_err = 'Invalid option "random" in MooseEnum.'
+      detail = 'when encountering a non-supported optimizer during the training of neural nets.'
       libtorch = true
       allow_test_objects = True
     []
@@ -28,7 +37,7 @@
     requirement = 'The system shall be able to create and evaluate a neural network with'
     [relu]
       type = CSVDiff
-      input = 'test.i'
+      input = 'test_ann.i'
       csvdiff = 'relu_test_0001.csv'
       detail = 'relu activation functions.'
       cli_args = "Outputs/file_base=relu"
@@ -37,7 +46,7 @@
     []
     [sigmoid]
       type = CSVDiff
-      input = 'test.i'
+      input = 'test_ann.i'
       csvdiff = 'sigmoid_test_0001.csv'
       detail = 'sigmoid activation functions.'
       cli_args = "VectorPostprocessors/test/activation_functions='sigmoid sigmoid' Outputs/file_base=sigmoid"
@@ -46,7 +55,7 @@
     []
     [gelu]
       type = CSVDiff
-      input = 'test.i'
+      input = 'test_ann.i'
       csvdiff = 'gelu_test_0001.csv'
       detail = 'gelu activation functions.'
       cli_args = "VectorPostprocessors/test/activation_functions='gelu gelu' Outputs/file_base=gelu"
@@ -55,7 +64,7 @@
     []
     [elu]
       type = CSVDiff
-      input = 'test.i'
+      input = 'test_ann.i'
       csvdiff = 'elu_test_0001.csv'
       detail = 'elu activation functions.'
       cli_args = "VectorPostprocessors/test/activation_functions='elu elu' Outputs/file_base=elu"
@@ -64,10 +73,49 @@
     []
     [linear]
       type = CSVDiff
-      input = 'test.i'
+      input = 'test_ann.i'
       csvdiff = 'linear_test_0001.csv'
       detail = 'linear activation functions.'
       cli_args = "VectorPostprocessors/test/activation_functions='linear linear' Outputs/file_base=linear"
+      libtorch = true
+      allow_test_objects = True
+    []
+  []
+  [libtorch-nn-optimizer]
+    requirement = 'The system shall be able to train a neural network with'
+    [adagrad]
+      type = CSVDiff
+      input = 'test_ann_trainer.i'
+      csvdiff = 'adagrad_test_trainer_0001.csv'
+      detail = 'Adagrad optimizer.'
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adagrad' Outputs/file_base=adagrad"
+      libtorch = true
+      allow_test_objects = True
+    []
+    [adam]
+      type = CSVDiff
+      input = 'test_ann_trainer.i'
+      csvdiff = 'adam_test_trainer_0001.csv'
+      detail = 'Adam optimizer.'
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adam' Outputs/file_base=adam"
+      libtorch = true
+      allow_test_objects = True
+    []
+    [rmsprop]
+      type = CSVDiff
+      input = 'test_ann_trainer.i'
+      csvdiff = 'rmsprop_test_trainer_0001.csv'
+      detail = 'RMSprop optimizer.'
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='rmsprop' Outputs/file_base=rmsprop"
+      libtorch = true
+      allow_test_objects = True
+    []
+    [sgd]
+      type = CSVDiff
+      input = 'test_ann_trainer.i'
+      csvdiff = 'sgd_test_trainer_0001.csv'
+      detail = 'SGD optimizer.'
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='sgd' Outputs/file_base=sgd"
       libtorch = true
       allow_test_objects = True
     []

@@ -12,23 +12,21 @@
 #include "GeneralVectorPostprocessor.h"
 
 /**
- * A UserObject that tests the LibtorchTorchScriptNeuralNet.
+ * A UserObject that tests the LibtorchArtificialNeuralNetTrainer.
  */
-class LibtorchTorchScriptNeuralNetTest : public GeneralVectorPostprocessor
+class LibtorchArtificialNeuralNetTrainerTest : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  LibtorchTorchScriptNeuralNetTest(const InputParameters & params);
+  LibtorchArtificialNeuralNetTrainerTest(const InputParameters & params);
 
   virtual void initialize(){};
   virtual void execute(){};
   virtual void finalize(){};
 
 protected:
-  // We create vectors to store our parameters (x,y,z) and NN output
-  VectorPostprocessorValue & _x_values;
-  VectorPostprocessorValue & _y_values;
-  VectorPostprocessorValue & _z_values;
-  VectorPostprocessorValue & _nn_values;
+  // We create a vector to store the output of the neural net
+  VectorPostprocessorValue & _nn_values_1;
+  VectorPostprocessorValue & _nn_values_2;
 };

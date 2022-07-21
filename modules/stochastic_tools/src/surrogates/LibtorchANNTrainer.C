@@ -60,16 +60,13 @@ LibtorchANNTrainer::LibtorchANNTrainer(const InputParameters & parameters)
     _num_batches(getParam<unsigned int>("num_batches")),
     _num_epocs(getParam<unsigned int>("num_epochs")),
     _rel_loss_tol(getParam<Real>("rel_loss_tol")),
+    _response(getTrainingData<Real>(getParam<ReporterName>("response"))),
     _num_neurons_per_layer(declareModelData<std::vector<unsigned int>>(
         "num_neurons_per_layer", getParam<std::vector<unsigned int>>("num_neurons_per_layer"))),
-    _num_hidden_layers(
-        declareModelData<unsigned int>("num_hidden_layers", _num_neurons_per_layer.size())),
     _activation_function(declareModelData<std::vector<std::string>>(
         "activation_function", getParam<std::vector<std::string>>("activation_function"))),
     _filename(getParam<std::string>("filename")),
-    _read_from_file(getParam<bool>("read_from_file")),
-    _learning_rate(getParam<Real>("learning_rate")),
-    _print_epoch_loss(getParam<unsigned int>("print_epoch_loss"))
+    _read_from_file(getParam<bool>("read_from_file"))
 #ifdef LIBTORCH_ENABLED
     ,
     _nn(declareModelData<std::shared_ptr<Moose::LibtorchArtificialNeuralNet>>("nn"))
@@ -82,6 +79,14 @@ LibtorchANNTrainer::LibtorchANNTrainer(const InputParameters & parameters)
   // Fixing the RNG seed to make sure every experiment is the same.
   // Otherwise sampling / stochastic gradient descent would be different.
   torch::manual_seed(getParam<unsigned int>("seed"));
+
+  _optim_options.optimizer_type = "adam";
+  _optim_options.learning_rate = getParam<Real>("learning_rate");
+  _optim_options.num_epochs = getParam<unsigned int>("num_epochs");
+  _optim_options.num_batches = getParam<unsigned int>("num_batches");
+  _optim_options.rel_loss_tol = getParam<Real>("rel_loss_tol");
+  _optim_options.print_loss = getParam<unsigned int>("print_epoch_loss") > 0;
+  _optim_options.print_epoch_loss = getParam<unsigned int>("print_epoch_loss");
 #endif
 }
 
@@ -116,31 +121,9 @@ LibtorchANNTrainer::postTrain()
   unsigned int num_samples = _flattened_response.size();
   unsigned int num_inputs = _sampler.getNumberOfCols();
 
-  // The default data type in pytorch is float, while we use double in MOOSE.
-  // Therefore, in some cases we have to convert Tensors to double.
-  auto options = torch::TensorOptions().dtype(at::kDouble);
-  torch::Tensor data_tensor =
-      torch::from_blob(_flattened_data.data(), {num_samples, num_inputs}, options).to(at::kDouble);
-  torch::Tensor response_tensor =
-      torch::from_blob(_flattened_response.data(), {num_samples}, options).to(at::kDouble);
-
-  // We create a custom data loader which can be used to select samples for the in
-  // the training process. See the header file for the definition of this structure.
-  Moose::LibtorchDataset my_data(data_tensor, response_tensor);
-
-  // We initialize a data_loader for the training part.
-  unsigned int sample_per_batch = num_samples > _num_batches ? num_samples / _num_batches : 1;
-
-  auto data_set = my_data.map(torch::data::transforms::Stack<>());
-  auto data_loader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler>(
-      std::move(data_set), sample_per_batch);
-
   // We create a neural net (for the definition of the net see the header file)
   _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
       _filename, num_inputs, 1, _num_neurons_per_layer, _activation_function);
-
-  // Initialize the optimizer
-  torch::optim::Adam optimizer(_nn->parameters(), torch::optim::AdamOptions(_learning_rate));
 
   if (_read_from_file)
     try
@@ -153,48 +136,20 @@ LibtorchANNTrainer::postTrain()
       mooseError("The requested pytorch file could not be loaded.");
     }
 
-  Real rel_loss = 1.0;
-  Real initial_loss = 1.0;
-  Real epoch_loss = 0.0;
+  // The default data type in pytorch is float, while we use double in MOOSE.
+  // Therefore, in some cases we have to convert Tensors to double.
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  torch::Tensor data_tensor =
+      torch::from_blob(_flattened_data.data(), {num_samples, num_inputs}, options).to(at::kDouble);
+  torch::Tensor response_tensor =
+      torch::from_blob(_flattened_response.data(), {num_samples, 1}, options).to(at::kDouble);
 
-  // Begin training loop
-  unsigned int epoch = 1;
-  while (epoch <= _num_epocs && rel_loss > _rel_loss_tol)
-  {
-    epoch_loss = 0.0;
-    for (auto & batch : *data_loader)
-    {
-      // Reset gradients
-      optimizer.zero_grad();
+  // We create a custom data loader which can be used to select samples for the in
+  // the training process. See the header file for the definition of this structure.
+  Moose::LibtorchDataset my_data(data_tensor, response_tensor);
 
-      // Compute prediction
-      torch::Tensor prediction = _nn->forward(batch.data);
-
-      // Compute loss values using a MSE ( mean squared error)
-      torch::Tensor loss = torch::mse_loss(prediction.reshape({prediction.size(0)}), batch.target);
-
-      // Propagate error back
-      loss.backward();
-
-      // Use new gradients to update the parameters
-      optimizer.step();
-
-      epoch_loss += loss.item<double>();
-    }
-
-    epoch_loss = epoch_loss / _num_batches;
-
-    if (epoch == 1)
-      initial_loss = epoch_loss;
-
-    rel_loss = epoch_loss / initial_loss;
-
-    if (_print_epoch_loss)
-      if (epoch % _print_epoch_loss == 0 || epoch == 1)
-        _console << "Epoch: " << epoch << " | Loss: " << COLOR_GREEN << epoch_loss << COLOR_DEFAULT
-                 << " | Rel. loss: " << COLOR_GREEN << rel_loss << COLOR_DEFAULT << std::endl;
-    epoch += 1;
-  }
+  Moose::LibtorchArtificialNeuralNetTrainer trainer(_nn);
+  trainer.train(my_data, _optim_options);
 
 #endif
 }
