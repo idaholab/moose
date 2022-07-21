@@ -2303,6 +2303,15 @@ NSFVAction::checkGeneralControlErrors()
     paramError("consistent_scaling",
                "Consistent scaling should not be defined if friction correction is disabled!");
 
+  if (getParam<bool>("pin_pressure"))
+  {
+    checkDependentParameterError("pin_pressure", {"pinned_pressure_type"}, true);
+
+    MooseEnum pin_type = getParam<MooseEnum>("pinned_pressure_type");
+    checkDependentParameterError(
+        "pinned_pressure_type", {"pinned_pressure_point"}, pin_type == "point-value");
+  }
+
   if (!_has_energy_equation)
     checkDependentParameterError("add_energy_equation",
                                  {"energy_inlet_types",
@@ -2620,13 +2629,15 @@ NSFVAction::checkPassiveScalarParameterErrors()
 
 void
 NSFVAction::checkDependentParameterError(const std::string main_parameter,
-                                         const std::vector<std::string> dependent_parameters)
+                                         const std::vector<std::string> dependent_parameters,
+                                         const bool should_be_defined)
 {
   for (const auto & param : dependent_parameters)
-    if (_pars.isParamSetByUser(param))
+    if (_pars.isParamSetByUser(param) == !should_be_defined)
       paramError(param,
-                 "This parameter should not be given by the user with the corresponding " +
-                     main_parameter + " setting!");
+                 "This parameter should " + std::string(should_be_defined ? "" : "not") +
+                     " be given by the user with the corresponding " + main_parameter +
+                     " setting!");
 }
 
 void

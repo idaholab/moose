@@ -87,42 +87,16 @@ public:
   // throwing mooseError's from them instead of silently doing nothing (e.g.
   // reinitNodes, reinitAux, prepareLowerD, etc.).
 
-  virtual void prepare() override final
-  {
-    // mooseError("prepare not supported by MooseVariableFVBase");
-  }
-  virtual void prepareNeighbor() override final
-  {
-    // mooseError("prepareNeighbor not supported by MooseVariableFVBase");
-  }
-  virtual void prepareAux() override final
-  {
-    // mooseError("prepareAux not supported by MooseVariableFVBase");
-  }
-  virtual void reinitNode() override final
-  {
-    // mooseError("reinitNode not supported by MooseVariableFVBase");
-  }
-  virtual void reinitNodes(const std::vector<dof_id_type> & /*nodes*/) override final
-  {
-    // mooseError("reinitNodes not supported by MooseVariableFVBase");
-  }
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & /*nodes*/) override final
-  {
-    // mooseError("reinitNodesNeighbor not supported by MooseVariableFVBase");
-  }
-  virtual void reinitAux() override final
-  {
-    // mooseError("reinitAux not supported by MooseVariableFVBase");
-  }
-  virtual void reinitAuxNeighbor() override final
-  {
-    // mooseError("reinitAuxNeighbor not supported by MooseVariableFVBase");
-  }
-  virtual void prepareLowerD() override final
-  {
-    // mooseError("prepareLowerD not supported by MooseVariableFVBase");
-  }
+  virtual void prepare() override final {}
+  virtual void prepareNeighbor() override final {}
+  virtual void prepareAux() override final;
+  virtual void reinitNode() override final {}
+  virtual void reinitNodes(const std::vector<dof_id_type> & /*nodes*/) override final {}
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & /*nodes*/) override final {}
+  virtual void reinitAux() override final {}
+  virtual void reinitAuxNeighbor() override final {}
+  virtual void prepareLowerD() override final {}
+
   virtual const dof_id_type & nodalDofIndex() const override final
   {
     mooseError("nodalDofIndex not supported by MooseVariableFVBase");

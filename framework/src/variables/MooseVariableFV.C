@@ -913,6 +913,14 @@ MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg,
     return (*_sys.solutionUDot())(dof_index);
 }
 
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::prepareAux()
+{
+  _element_data->prepareAux();
+  _neighbor_data->prepareAux();
+}
+
 template class MooseVariableFV<Real>;
 // TODO: implement vector fv variable support. This will require some template
 // specializations for various member functions in this and the FV variable

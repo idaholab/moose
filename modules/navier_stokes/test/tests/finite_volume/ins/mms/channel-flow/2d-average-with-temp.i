@@ -1,9 +1,9 @@
-mu=1.1
-rho=1.1
-k=1.1
-cp=1.1
-advected_interp_method='average'
-velocity_interp_method='average'
+mu = 1.1
+rho = 1.1
+k = 1.1
+cp = 1.1
+advected_interp_method = 'average'
+velocity_interp_method = 'average'
 
 [Mesh]
   [gen]
@@ -203,7 +203,11 @@ velocity_interp_method='average'
   []
   [forcing_u]
     type = ADParsedFunction
-    value = '(1/2)*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - 1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) + (1/2)*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - 1/4*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
+    value = '(1/2)*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - '
+            '1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) + '
+            '(1/2)*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - '
+            'pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - '
+            '1/4*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
     vars = 'mu rho'
     vals = '${mu} ${rho}'
   []
@@ -219,7 +223,11 @@ velocity_interp_method='average'
   []
   [forcing_v]
     type = ADParsedFunction
-    value = '(5/16)*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + (1/4)*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + (3/2)*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
+    value = '(5/16)*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - '
+            'pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - '
+            '1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + '
+            '(1/4)*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + '
+            '(3/2)*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
     vars = 'mu rho'
     vals = '${mu} ${rho}'
   []
@@ -229,7 +237,8 @@ velocity_interp_method='average'
   []
   [forcing_p]
     type = ParsedFunction
-    value = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - 1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
+    value = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - '
+            '1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
     vars = 'rho'
     vals = '${rho}'
   []
@@ -239,7 +248,10 @@ velocity_interp_method='average'
   []
   [forcing_t]
     type = ParsedFunction
-    value = '-pi*cp*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*cp*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + (1/4)*pi*cp*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + (5/16)*pi^2*k*sin((1/4)*x*pi)*cos((1/2)*y*pi)'
+    value = '-pi*cp*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - '
+            '1/2*pi*cp*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + '
+            '(1/4)*pi*cp*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + '
+            '(5/16)*pi^2*k*sin((1/4)*x*pi)*cos((1/2)*y*pi)'
     vars = 'k rho cp'
     vals = '${k} ${rho} ${cp}'
   []
@@ -248,9 +260,8 @@ velocity_interp_method='average'
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      100                lu           NONZERO'
-  line_search = 'none'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
 []
 
 [Outputs]
@@ -263,32 +274,32 @@ velocity_interp_method='average'
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
-  [./L2u]
+  [L2u]
     type = ElementL2Error
     variable = u
     function = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
-  [./L2v]
+  []
+  [L2v]
     type = ElementL2Error
     variable = v
     function = exact_v
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
-  [./L2p]
+  []
+  [L2p]
     variable = pressure
     function = exact_p
     type = ElementL2Error
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
-  [./L2t]
+  []
+  [L2t]
     variable = temperature
     function = exact_t
     type = ElementL2Error
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
 []

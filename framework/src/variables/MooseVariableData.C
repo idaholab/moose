@@ -1756,13 +1756,6 @@ MooseVariableData<OutputType>::prepare()
 
 template <typename OutputType>
 void
-MooseVariableData<OutputType>::prepareAux()
-{
-  _has_dof_values = false;
-}
-
-template <typename OutputType>
-void
 MooseVariableData<OutputType>::reinitNode()
 {
   if (std::size_t n_dofs = _node->n_dofs(_sys.number(), _var_num))

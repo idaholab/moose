@@ -1,7 +1,7 @@
-mu=1.1
-rho=1.1
-advected_interp_method='average'
-velocity_interp_method='rc'
+mu = 1.1
+rho = 1.1
+advected_interp_method = 'average'
+velocity_interp_method = 'rc'
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -131,9 +131,8 @@ velocity_interp_method='rc'
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      200                lu           NONZERO'
-  line_search = 'none'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-12
 []
 

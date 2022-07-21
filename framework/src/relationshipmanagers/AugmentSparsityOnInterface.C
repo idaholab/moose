@@ -198,11 +198,15 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
         [this, p, &coupled_elements, null_mat, amg](const Elem * const elem_arg)
     {
       // Look up elem_arg in the mortar_interface_coupling data structure.
-      auto bounds = amg->mortarInterfaceCoupling().equal_range(elem_arg->id());
+      const auto & mic = amg->mortarInterfaceCoupling();
+      auto find_it = mic.find(elem_arg->id());
+      if (find_it == mic.end())
+        return;
 
-      for (const auto & pr : as_range(bounds))
+      const auto & coupled_set = find_it->second;
+
+      for (const auto coupled_elem_id : coupled_set)
       {
-        auto coupled_elem_id = pr.second;
         const Elem * coupled_elem = _mesh->elem_ptr(coupled_elem_id);
         mooseAssert(coupled_elem,
                     "The coupled element with id " << coupled_elem_id << " doesn't exist!");
@@ -242,26 +246,37 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
             // side isn't
             continue;
 
-          for (const auto & multimap_pr :
-               as_range(amg->mortarInterfaceCoupling().equal_range(elem->id())))
+          const auto & mic = amg->mortarInterfaceCoupling();
+          auto find_it = mic.find(elem->id());
+          if (find_it == mic.end())
+            continue;
+
+          const auto & coupled_set = find_it->second;
+          for (const auto coupled_elem_id : coupled_set)
           {
-            const auto secondary_lower_elem_id = multimap_pr.second;
-            auto insert_pr = secondary_lower_elems_handled.insert(secondary_lower_elem_id);
+            auto * const coupled_elem = _mesh->elem_ptr(coupled_elem_id);
+
+            if (coupled_elem->subdomain_id() != secondary_subdomain_id)
+            {
+              // We support higher-d-secondary to higher-d-primary coupling now, e.g.
+              // if we get here, coupled_elem is not actually a secondary lower elem; it's a
+              // primary higher-d elem
+              mooseAssert(coupled_elem->dim() == elem->dim(), "These should be matching dim");
+              continue;
+            }
+
+            auto insert_pr = secondary_lower_elems_handled.insert(coupled_elem_id);
 
             // If insertion didn't happen, then we've already handled this element
             if (!insert_pr.second)
               continue;
-
-            auto * const secondary_lower_elem = _mesh->elem_ptr(secondary_lower_elem_id);
-            mooseAssert(secondary_lower_elem->subdomain_id() == secondary_subdomain_id,
-                        "This should be on the secondary subdomain.");
 
             // We've already ghosted the secondary lower-d element itself if it needed to be
             // outside of the _ghost_point_neighbors logic. But now we must make sure to ghost the
             // point neighbors of the secondary lower-d element and their mortar interface
             // couplings
             std::set<const Elem *> secondary_lower_elem_point_neighbors;
-            secondary_lower_elem->find_point_neighbors(secondary_lower_elem_point_neighbors);
+            coupled_elem->find_point_neighbors(secondary_lower_elem_point_neighbors);
 
             for (const Elem * const neigh : secondary_lower_elem_point_neighbors)
             {
