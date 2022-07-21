@@ -13,6 +13,7 @@
 #include "Assembly.h"
 
 #include "libmesh/quadrature.h"
+#include "libmesh/enum_to_string.h"
 
 registerMooseObject("MooseApp", MooseVariableConstMonomial);
 
@@ -29,6 +30,12 @@ MooseVariableConstMonomial::validParams()
 MooseVariableConstMonomial::MooseVariableConstMonomial(const InputParameters & parameters)
   : MooseVariable(parameters)
 {
+  if (_fe_type.order != CONSTANT || _fe_type.family != MONOMIAL)
+    mooseError("This type is only meant for a CONSTANT "
+               "MONOMIAL finite element basis. You have requested a ",
+               Utility::enum_to_string(_fe_type.family),
+               " family and order ",
+               Utility::enum_to_string(Order(_fe_type.order)));
 }
 
 void
