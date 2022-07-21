@@ -9,6 +9,10 @@
 
 #pragma once
 
+// MOOSE includes
+#include "Moose.h"
+
+// C++ includes
 #include "libmesh/utility.h"
 #include <functional>
 
