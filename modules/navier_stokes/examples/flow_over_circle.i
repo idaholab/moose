@@ -1,5 +1,5 @@
-mu=7e-4
-rho=1
+mu=3.2215e-5
+rho=.081281
 velocity_interp_method = 'rc'
 advected_interp_method = 'upwind'
 [GlobalParams]
@@ -10,18 +10,24 @@ advected_interp_method = 'upwind'
     type = ConcentricCircleMeshGenerator
     num_sectors = 6
     radii = '0.2546 0.3368'
-    rings = '4 3 4'
+    rings = '4 3 7'
     has_outer_square = on
-    pitch = 1
+    pitch = 30
     #portion = left_half
     preserve_volumes = off
     smoothing_max_it = 3
   []
+  [move_mesh]
+    type = MoveNodeGenerator
+    input = ccmg
+    node_id = 2
+    new_position = '1 1 0'
+  []
   [side_sets_inlet]
-      type = SideSetsFromNormalsGenerator
-      input = ccmg
-      normals = '1 0 0'
-      new_boundary = '100'
+    type = SideSetsFromNormalsGenerator
+    input = move_mesh
+    normals = '1 0 0'
+    new_boundary = '100'
   []
   [rename_left]
     type = RenameBoundaryGenerator
@@ -32,20 +38,20 @@ advected_interp_method = 'upwind'
   [left]
     type = CartesianMeshGenerator
     dim = 2
-    dx = '5'
-    dy = '1'
-    ix = '20'
-    iy = '16'
+    dx = '34'
+    dy = '30'
+    ix = '22'
+    iy = '20'
   []
-  [move_it]
+  [move_it_1]
     type = TransformGenerator
     input = left
     transform = translate
-    vector_value = '-5.5 -0.5 0'
+    vector_value = '-49 -10 0'
   []
   [side_sets_outlet]
       type = SideSetsFromNormalsGenerator
-      input = move_it
+      input = move_it_1
       normals = '-1 0 0'
       new_boundary = '1000'
   []
@@ -55,14 +61,14 @@ advected_interp_method = 'upwind'
     old_boundary = 'right'
     new_boundary = '1001'
   []
-  [stitch]
+  [stitch_1]
     type = StitchedMeshGenerator
     inputs = 'rename_left rename_right'
     stitch_boundaries_pairs = '101 1001'
   []
   [side_sets_no_slip_top]
     type = SideSetsFromNormalsGenerator
-    input = stitch
+    input = stitch_1
     normals = '0 1 0'
     new_boundary = 'no_slip_top'
   []
@@ -95,6 +101,35 @@ advected_interp_method = 'upwind'
     input = rename_inlet
     old_boundary = '1000'
     new_boundary = 'outlet'
+  []
+  [top]
+    type = CartesianMeshGenerator
+    dim = 2
+    dx = '5'
+    dy = '1'
+    ix = '20'
+    iy = '22'
+  []
+  [combiner]
+    type = CombinerGenerator
+    inputs = 'top rename_outlet'
+  []
+  # [rename_top]
+  #   type = RenameBoundaryGenerator
+  #   input = top
+  #   old_boundary = 'top'
+  #   new_boundary = '10001'
+  # []
+  # [stitch_top]
+  #   type = StitchedMeshGenerator
+  #   inputs = 'rename_top rename_outlet'
+  #   stitch_boundaries_pairs = '10001 1000'
+  # []
+  [move_it_2]
+    type = TransformGenerator
+    input = combiner
+    transform = translate
+    vector_value = '-5 -10 0'
   []
   uniform_refine = 2
 []
