@@ -40,6 +40,7 @@ private:
   ValueType evaluate(const SingleSidedFaceArg &, unsigned int) const override final { return 0; }
   ValueType evaluate(const ElemQpArg &, unsigned int) const override final { return 0; }
   ValueType evaluate(const ElemSideQpArg &, unsigned int) const override final { return 0; }
+  ValueType evaluate(const ElemPointArg &, unsigned int) const override final { return 0; }
 };
 
 template <typename T>

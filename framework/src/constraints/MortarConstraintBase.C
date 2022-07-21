@@ -37,6 +37,8 @@ MortarConstraintBase::validParams()
                                       obj_params.get<SubdomainName>("secondary_subdomain");
                                   rm_params.set<SubdomainName>("primary_subdomain") =
                                       obj_params.get<SubdomainName>("primary_subdomain");
+                                  rm_params.set<bool>("ghost_higher_d_neighbors") =
+                                      obj_params.get<bool>("ghost_higher_d_neighbors");
                                 });
 
   params.addParam<VariableName>("secondary_variable", "Primal variable on secondary surface.");
@@ -100,6 +102,9 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _test_primary(_primary_var.phiFaceNeighbor()),
     _grad_test_secondary(_secondary_var.gradPhiFace()),
     _grad_test_primary(_primary_var.gradPhiFaceNeighbor()),
+    _interior_secondary_elem(_assembly.elem()),
+    _interior_primary_elem(_assembly.neighbor()),
+    _lower_secondary_elem(_assembly.lowerDElem()),
     _lower_primary_elem(_assembly.neighborLowerDElem()),
     _displaced(getParam<bool>("use_displaced_mesh"))
 {

@@ -150,6 +150,15 @@ protected:
   /// The shape function gradients corresponding to the primary interior primal variable
   const VariableTestGradient & _grad_test_primary;
 
+  /// the higher-dimensional secondary face element
+  const Elem * const & _interior_secondary_elem;
+
+  /// the higher-dimensional primary face element
+  const Elem * const & _interior_primary_elem;
+
+  /// the lower-dimensional secondary element
+  const Elem * const & _lower_secondary_elem;
+
   /// The primary face lower dimensional element (not the mortar element!). The mortar element
   /// lives on the secondary side of the mortar interface and *may* correspond to \p
   /// _lower_secondary_elem under the very specific circumstance that the nodes on the primary side

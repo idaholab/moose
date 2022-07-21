@@ -41,6 +41,8 @@ MortarConsumerInterface::validParams()
             obj_params.get<SubdomainName>("primary_subdomain");
         rm_params.set<bool>("ghost_point_neighbors") =
             obj_params.get<bool>("ghost_point_neighbors");
+        rm_params.set<bool>("ghost_higher_d_neighbors") =
+            obj_params.get<bool>("ghost_higher_d_neighbors");
       });
 
   params.addRequiredParam<BoundaryName>("primary_boundary",
@@ -80,6 +82,13 @@ MortarConsumerInterface::validParams()
                         false,
                         "Whether we should ghost point neighbors of secondary face elements, and "
                         "consequently also their mortar interface couples.");
+
+  params.addParam<bool>(
+      "ghost_higher_d_neighbors",
+      false,
+      "Whether we should ghost higher-dimensional neighbors. This is necessary when we are doing "
+      "second order mortar with finite volume primal variables, because in order for the method to "
+      "be second order we must use cell gradients, which couples in the neighbor cells.");
 
   return params;
 }
