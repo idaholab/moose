@@ -6,27 +6,26 @@ export INSTALL_PATH=${PREFIX}/seacas
 export BUILD=YES
 export GNU_PARALLEL=NO
 export H5VERSION=V112
+export JOBS=${MOOSE_JOBS:-2}
 
-# If on macOS, set COMPILER to clang and don't enable X11
+# If on macOS, set COMPILER to clang
 if [[ $(uname) == Darwin ]]; then
     export COMPILER=clang
-    X11_STR="-DTPL_ENABLE_X11=OFF"
 else
     export COMPILER=gcc
-    X11_STR="-DTPL_ENABLE_X11=ON"
 fi
 
 # Install third party libraries
 ./install-tpl.sh
 
-# Setup build location and configure there
+# Setup build location and configure there.
+# Disable X11 support, as xorg-libx11 is not adequate and causes build failures on macOS or Linux.
 mkdir build
 cd build
-../cmake-config $X11_STR
+../cmake-config -DTPL_ENABLE_X11=OFF
 
 # Make and install
-CORES=${MOOSE_JOBS:-2}
-make -j $CORES
+make -j $JOBS
 make install
 
 # Set a SEACAS_DIR environment variable for users who might need it, and add SEACAS bins to the PATH.

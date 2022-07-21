@@ -16,6 +16,8 @@ source:
 build:
   number: {{ build }}
   string: {{ strbuild }}
+  script_env:
+    - MOOSE_JOBS
 
 requirements:
   build:
