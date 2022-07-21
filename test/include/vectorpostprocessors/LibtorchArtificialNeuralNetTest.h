@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "GeneralVectorPostprocessor.h"
 
 /**
  * A UserObject that tests the LibtorchArtificialNeuralNet.
  */
-class LibtorchArtificialNeuralNetTest : public GeneralUserObject
+class LibtorchArtificialNeuralNetTest : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
@@ -24,4 +24,8 @@ public:
   virtual void initialize(){};
   virtual void execute(){};
   virtual void finalize(){};
+
+protected:
+  // We create a vector to store the output of the neural net
+  VectorPostprocessorValue & _nn_values;
 };

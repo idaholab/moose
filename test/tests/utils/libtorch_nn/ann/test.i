@@ -5,7 +5,7 @@
   []
 []
 
-[UserObjects]
+[VectorPostprocessors]
   [test]
     type = LibtorchArtificialNeuralNetTest
     activation_functions = 'relu relu'
@@ -18,4 +18,8 @@
 
 [Executioner]
   type = Steady
+[]
+
+[Outputs]
+  csv = true
 []

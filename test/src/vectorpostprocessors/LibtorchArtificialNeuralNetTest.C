@@ -13,14 +13,13 @@
 #endif
 
 #include "LibtorchArtificialNeuralNetTest.h"
-#include "ThreadedGeneralUserObject.h"
 
 registerMooseObject("MooseTestApp", LibtorchArtificialNeuralNetTest);
 
 InputParameters
 LibtorchArtificialNeuralNetTest::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
 
   params.addParam<std::vector<std::string>>(
       "activation_functions", std::vector<std::string>({"relu"}), "Test activation functions");
@@ -29,7 +28,7 @@ LibtorchArtificialNeuralNetTest::validParams()
 }
 
 LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputParameters & params)
-  : GeneralUserObject(params)
+  : GeneralVectorPostprocessor(params), _nn_values(declareVector("nn_values"))
 {
 #ifdef LIBTORCH_ENABLED
 
@@ -57,17 +56,18 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
   torch::Tensor output = at::ones({1}, at::kDouble);
   // This is our prediction for the test input
   torch::Tensor prediction = nn->forward(input);
+  // We save our first prediction
+  _nn_values.push_back(prediction.item<double>());
   // We compute the loss
   torch::Tensor loss = torch::mse_loss(prediction, output);
   // We propagate the error back to compute gradient
   loss.backward();
   // We update the weights using the computed gradients
   optimizer.step();
-
-  optimizer.zero_grad();
+  // Obtain another prediction
   prediction = nn->forward(input);
-
-  _console << "My prediction: " << prediction.item<double>() << std::endl;
+  // We save our second prediction
+  _nn_values.push_back(prediction.item<double>());
 
 #endif
 }

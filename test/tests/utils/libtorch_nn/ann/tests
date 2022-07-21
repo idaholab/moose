@@ -8,7 +8,7 @@
     [wrong-activation]
       type = RunException
       input = 'test.i'
-      cli_args = 'UserObjects/test/activation_functions=sad'
+      cli_args = 'VectorPostprocessors/test/activation_functions=sad'
       expect_err = 'Invalid option \"sad\" in MultiMooseEnum.  Valid options \(not case-sensitive\) are \"relu sigmoid elu gelu linear\".'
       detail = 'when encountering an unsupported activation function for the neural network.'
       libtorch = true
@@ -17,7 +17,7 @@
     [wrong-activation-number]
       type = RunException
       input = 'test.i'
-      cli_args = "UserObjects/test/activation_functions='relu sigmoid elu'"
+      cli_args = "VectorPostprocessors/test/activation_functions='relu sigmoid elu'"
       expect_err = 'The number of activation functions should be either one or the same as the number of hidden layers'
       detail = 'when encountering the wrong number of activation functions.'
       libtorch = true
@@ -27,46 +27,47 @@
   [libtorch-nn-activation]
     requirement = 'The system shall be able to create and evaluate a neural network with'
     [relu]
-      type = RunApp
+      type = CSVDiff
       input = 'test.i'
-      expect_out = 'My prediction\: -0\.1977'
+      csvdiff = 'relu_test_0001.csv'
       detail = 'relu activation functions.'
+      cli_args = "Outputs/file_base=relu"
       libtorch = true
       allow_test_objects = True
     []
     [sigmoid]
-      type = RunApp
+      type = CSVDiff
       input = 'test.i'
-      expect_out = 'My prediction\: -0\.12259'
+      csvdiff = 'sigmoid_test_0001.csv'
       detail = 'sigmoid activation functions.'
-      cli_args = "UserObjects/test/activation_functions='sigmoid sigmoid'"
+      cli_args = "VectorPostprocessors/test/activation_functions='sigmoid sigmoid' Outputs/file_base=sigmoid"
       libtorch = true
       allow_test_objects = True
     []
     [gelu]
-      type = RunApp
+      type = CSVDiff
       input = 'test.i'
-      expect_out = 'My prediction\: -0\.1649'
+      csvdiff = 'gelu_test_0001.csv'
       detail = 'gelu activation functions.'
-      cli_args = "UserObjects/test/activation_functions='gelu gelu'"
+      cli_args = "VectorPostprocessors/test/activation_functions='gelu gelu' Outputs/file_base=gelu"
       libtorch = true
       allow_test_objects = True
     []
     [elu]
-      type = RunApp
+      type = CSVDiff
       input = 'test.i'
-      expect_out = 'My prediction\: -0\.077503'
+      csvdiff = 'elu_test_0001.csv'
       detail = 'elu activation functions.'
-      cli_args = "UserObjects/test/activation_functions='elu elu'"
+      cli_args = "VectorPostprocessors/test/activation_functions='elu elu' Outputs/file_base=elu"
       libtorch = true
       allow_test_objects = True
     []
     [linear]
-      type = RunApp
+      type = CSVDiff
       input = 'test.i'
-      expect_out = 'My prediction\: -0\.054844'
+      csvdiff = 'linear_test_0001.csv'
       detail = 'linear activation functions.'
-      cli_args = "UserObjects/test/activation_functions='linear linear'"
+      cli_args = "VectorPostprocessors/test/activation_functions='linear linear' Outputs/file_base=linear"
       libtorch = true
       allow_test_objects = True
     []

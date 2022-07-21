@@ -39,8 +39,7 @@ template class LibtorchNeuralNet<torch::jit::script::Module>;
 
 // The forward function for a self-defined module will de defined on a case-by-case basis
 template <typename T>
-torch::Tensor
-LibtorchNeuralNet<T>::forward(torch::Tensor /*x*/)
+torch::Tensor LibtorchNeuralNet<T>::forward(torch::Tensor /*x*/)
 {
   ::mooseError("The evaluate function is not implemented for LibtorchNeuralNet! Override your "
                "function in the derived classes!");

@@ -26,6 +26,8 @@ public:
   virtual void finalize(){};
 
 protected:
+
+  // We create vectors to store our parameters (x,y,z) and NN output
   VectorPostprocessorValue & _x_values;
   VectorPostprocessorValue & _y_values;
   VectorPostprocessorValue & _z_values;
