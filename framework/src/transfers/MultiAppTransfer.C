@@ -262,6 +262,9 @@ MultiAppTransfer::getAppInfo()
 
   if (!_from_transforms.empty() && !_to_transforms.empty())
   {
+    // set the destination coordinate systems for each transform for the purposes of determining
+    // coordinate collapsing. For example if TO is XYZ and FROM is RZ, then TO will have its XYZ
+    // coordinates collapsed into RZ and FROM will have a no-op for coordinate collapsing
     const auto & ex_from_transform = *_from_transforms[0];
     const auto & ex_to_transform = *_to_transforms[0];
 
