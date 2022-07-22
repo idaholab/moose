@@ -36,13 +36,29 @@
       recover = false
       detail = "or a 2D input mesh"
     []
+    [subboundary_1d]
+      type = 'Exodiff'
+      input = 'poly2tri_from_1d_sbdids.i'
+      cli_args = '--mesh-only'
+      exodiff = 'poly2tri_from_1d_sbdids_in.e'
+      recover = false
+      detail = "or a specified subset"
+    []
+    [subdomain_2d]
+      type = 'Exodiff'
+      input = 'poly2tri_from_2d_bcids.i'
+      cli_args = '--mesh-only'
+      exodiff = 'poly2tri_from_2d_bcids_in.e'
+      recover = false
+      detail = "in either case"
+    []
     [with_holes]
       type = 'Exodiff'
       input = 'poly2tri_with_holes.i'
       cli_args = '--mesh-only'
       exodiff = 'poly2tri_with_holes_in.e'
       recover = false
-      detail = "respecting any specified interior 'hole' meshes"
+      detail = "while respecting any specified interior 'hole' meshes"
     []
     [stitching]
       type = 'Exodiff'
