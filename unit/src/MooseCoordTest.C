@@ -100,6 +100,11 @@ TEST(MooseCoordTest, testRotations)
 
   transform.setCoordinateSystem(Moose::COORD_RZ, x);
   transform.setRotation(0, 90, 0);
+  {
+    // test copy operations
+    auto dup = transform;
+    transform = dup;
+  }
   compare_points(transform(ypt), zpt);
   compare_points(transform(xpt), xpt);
 }
