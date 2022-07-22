@@ -71,26 +71,36 @@ ADRDG3EqnMaterial::ADRDG3EqnMaterial(const InputParameters & parameters)
 void
 ADRDG3EqnMaterial::computeQpProperties()
 {
-  // compute primitive variables from the cell-average solution
-  std::vector<ADReal> U_avg(THM3Eqn::N_CONS_VAR, 0.0);
-  U_avg[THM3Eqn::CONS_VAR_RHOA] = _rhoA_avg[_qp];
-  U_avg[THM3Eqn::CONS_VAR_RHOUA] = _rhouA_avg[_qp];
-  U_avg[THM3Eqn::CONS_VAR_RHOEA] = _rhoEA_avg[_qp];
-  U_avg[THM3Eqn::CONS_VAR_AREA] = _A_avg[_qp];
-  auto W = FlowModel1PhaseUtils::computePrimitiveSolutionVector<true>(U_avg, _fp);
+  if (_scheme == None)
+  {
+    const auto A_ratio = _A_linear[_qp] / _A_avg[_qp];
+    _rhoA[_qp] = _rhoA_avg[_qp] * A_ratio;
+    _rhouA[_qp] = _rhouA_avg[_qp] * A_ratio;
+    _rhoEA[_qp] = _rhoEA_avg[_qp] * A_ratio;
+  }
+  else
+  {
+    // compute primitive variables from the cell-average solution
+    std::vector<ADReal> U_avg(THM3Eqn::N_CONS_VAR, 0.0);
+    U_avg[THM3Eqn::CONS_VAR_RHOA] = _rhoA_avg[_qp];
+    U_avg[THM3Eqn::CONS_VAR_RHOUA] = _rhouA_avg[_qp];
+    U_avg[THM3Eqn::CONS_VAR_RHOEA] = _rhoEA_avg[_qp];
+    U_avg[THM3Eqn::CONS_VAR_AREA] = _A_avg[_qp];
+    auto W = FlowModel1PhaseUtils::computePrimitiveSolutionVector<true>(U_avg, _fp);
 
-  // compute and apply slopes to primitive variables
-  const auto slopes = getElementSlopes(_current_elem);
-  const auto delta_x = (_q_point[_qp] - _current_elem->vertex_average()) * _dir[_qp];
-  for (unsigned int m = 0; m < THM3Eqn::N_PRIM_VAR; m++)
-    W[m] = W[m] + slopes[m] * delta_x;
+    // compute and apply slopes to primitive variables
+    const auto slopes = getElementSlopes(_current_elem);
+    const auto delta_x = (_q_point[_qp] - _current_elem->vertex_average()) * _dir[_qp];
+    for (unsigned int m = 0; m < THM3Eqn::N_PRIM_VAR; m++)
+      W[m] = W[m] + slopes[m] * delta_x;
 
-  // compute reconstructed conservative variables
-  const auto U =
-      FlowModel1PhaseUtils::computeConservativeSolutionVector<true>(W, _A_linear[_qp], _fp);
-  _rhoA[_qp] = U[THM3Eqn::CONS_VAR_RHOA];
-  _rhouA[_qp] = U[THM3Eqn::CONS_VAR_RHOUA];
-  _rhoEA[_qp] = U[THM3Eqn::CONS_VAR_RHOEA];
+    // compute reconstructed conservative variables
+    const auto U =
+        FlowModel1PhaseUtils::computeConservativeSolutionVector<true>(W, _A_linear[_qp], _fp);
+    _rhoA[_qp] = U[THM3Eqn::CONS_VAR_RHOA];
+    _rhouA[_qp] = U[THM3Eqn::CONS_VAR_RHOUA];
+    _rhoEA[_qp] = U[THM3Eqn::CONS_VAR_RHOEA];
+  }
 }
 
 std::vector<ADReal>
