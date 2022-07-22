@@ -185,7 +185,7 @@ calculateRate(const std::vector<Real> & promoting_indices,
     case DirectionChoiceEnum::DEATH:
       break; // no dependence on 1 - ap_over_k
   }
-  const Real rate_no_theta_term = rate; // needed for derivative calcs when theta_term == 1
+  // const Real rate_no_theta_term = rate; // needed for derivative calcs when theta_term == 1
   rate *= (description.eta == 0.0)
               ? 1.0
               : ((theta_term == 1.0) ? 0.0 : std::pow(std::abs(1.0 - theta_term), description.eta));
@@ -216,7 +216,7 @@ calculateRate(const std::vector<Real> & promoting_indices,
   }
 
   // Derivatives of the promoting-species numerators (ignore all derivatives of activity
-  // coefficients, so
+  // coefficients), so
   // d(molality^P) / dmolality = P * molality^P / molality  , and
   // d(activity^P)/d(molality) = P activity^(P-1) d(activity)/d(molality) = P activity^(P-1)
   // activity_product  = P * activity^P / molality
@@ -243,7 +243,8 @@ calculateRate(const std::vector<Real> & promoting_indices,
   // Derivatives of the promoting-species denominators (ignore all derivatives of activity
   // coefficients) so
   // d((molality^P + K)^(-u))/d(molality) = -u (molality^P + K)^(-u) / (molality^P + K) * P *
-  // molality^P / molality d((activity^P + K)^(-u))/d(molality) = -u (activity^P + K)^(-u) /
+  // molality^P / molality
+  // d((activity^P + K)^(-u))/d(molality) = -u (activity^P + K)^(-u) /
   // (activity^P + K) * P * activity^P / molality
   for (unsigned i = 0; i < num_basis; ++i)
   {
@@ -272,7 +273,7 @@ calculateRate(const std::vector<Real> & promoting_indices,
     {
       if (basis_species_gas[i] || eqm_stoichiometry(j, i) == 0.0)
         continue;
-      else if (eqm_species_name[j] == "H+" || eqm_species_name[j] == "OH-")
+      else if (eqm_species_gas[j] || eqm_species_name[j] == "H+" || eqm_species_name[j] == "OH-")
         drate_dmol[i] -= promoting_monod_indices[index] * promoting_indices[index] *
                          std::pow(eqm_activity[j], promoting_indices[index]) * rate *
                          eqm_stoichiometry(j, i) /
@@ -293,12 +294,12 @@ calculateRate(const std::vector<Real> & promoting_indices,
   if (theta_term != 1.0)
     deriv_ap_term =
         description.eta * rate / std::abs(1 - theta_term) * (-description.theta) * theta_term;
-  else // theta_term = 1, so rate = 0
+  else // theta_term = 1, so rate = 0 (unless eta = 0 too)
   {
     if (description.eta > 1)
       deriv_ap_term = 0.0;
     else if (description.eta == 1.0)
-      deriv_ap_term = rate_no_theta_term * description.theta * theta_term;
+      deriv_ap_term = 0.0; // rate_no_theta_term * description.theta * theta_term;
     else if (description.eta == 0.0)
       deriv_ap_term = 0.0;
     else

@@ -69,6 +69,12 @@ GeochemicalSolver::setMaxInitialResidual(Real max_initial_residual)
 }
 
 Real
+GeochemicalSolver::getMaxInitialResidual() const
+{
+  return _max_initial_residual;
+}
+
+Real
 GeochemicalSolver::computeResidual(const GeochemicalSystem & egs,
                                    DenseVector<Real> & residual,
                                    const DenseVector<Real> & mole_additions) const
@@ -408,9 +414,9 @@ GeochemicalSolver::solveSystem(GeochemicalSystem & egs,
       try
       {
         // before swapping, remove any basis mole_additions that came from kinetics.  The
-        // following loop, combined with the above egs.addToBulkMoles(mole_additions), where
+        // following loop over i, combined with the above egs.addToBulkMoles(mole_additions), where
         // mole_additions = _input_mole_additions + kinetic_additions, means that the bulk
-        // moles in eg will have only been incremented by _input_mole_additions.  Hence,
+        // moles in egs will have only been incremented by _input_mole_additions.  Hence,
         // _input_mole_additions can be set to zero in preparation for the next solve in the new
         // basis.
         // NOTE: if _input_mole_additions depend on molalities, this approach introduces error,

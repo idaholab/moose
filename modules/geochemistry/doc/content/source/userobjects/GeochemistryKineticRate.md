@@ -24,7 +24,7 @@ This is a rather complicated equation, and simple examples are given below.  In 
 - $K_{\alpha}$ (units: mol.kg$^{-1}$) is a half-saturation constant.
 - $Q$ is the [activity product](geochemistry_nomenclature.md) defined by the kinetic species' reaction in the database file
 - $K$ is the reaction's equilibrium constant defined in the database file.  This may be modified if the `GeochemistryKineticRate` object is used to model biologically-catalysed reactions.  When a microbe catalyses one mole of the reaction, it captures $E_{c}$ Joules of energy (units: J).  This means $K = K_{\mathrm{database}} - E_{c}/(RT\ln 10)$.
-- $\theta$ and $\eta$ are dimensionless exponents
+- $\theta$ and $\eta$ are dimensionless exponents.  If $\eta = 0$ then $\left|1 - \left(Q/K\right)^{\theta}\right|^{\eta} = 1$ irrespective of the value of $Q$, $K$ and $\theta$.
 - $E_{a}$ (units: J.mol$^{-1}$) is the activation energy
 - $R=8.314472\,$J.K$^{-1}$.mol$^{-1}$ is the gas constant
 - $T_{0}$ (units: K) is a reference temperature

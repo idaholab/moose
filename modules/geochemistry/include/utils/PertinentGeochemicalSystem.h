@@ -37,6 +37,23 @@ struct SurfaceComplexationInfo
 
 /**
  * A single rate expression for the kinetic species with index kinetic_species_index.
+ * @param kinetic_species_index index of the kinetic species that is governed by this rate
+ * @param promoting_indices the kinetic rate is multiplied by the produce over all basis and
+ * equilibrium species of m^promoting_indices / (m^promoting_indices +
+ * promoting_half_saturation^promoting_indices)^promoting_monod_indices, where m is the molality or
+ * activity of the species
+ * @param promoting_monod_indices the kinetic rate is multiplied by the produce over all basis and
+ * equilibrium species of m^promoting_indices / (m^promoting_indices +
+ * promoting_half_saturation^promoting_indices)^promoting_monod_indices, where m is the molality or
+ * activity of the species
+ * @param promoting_half_saturation the kinetic rate is multiplied by the produce over all basis and
+ * equilibrium species of m^promoting_indices / (m^promoting_indices +
+ * promoting_half_saturation^promoting_indices)^promoting_monod_indices, where m is the molality or
+ * activity of the species
+ * @param progeny_index the index of the basis or equilibrium species in the current basis that is
+ * produced by the kinetic reaction (usually this is 0, and description.progeny_efficiency = 0, so
+ * there are no progeny effects)
+ * @param description the KineticRateUserDescription of this rate
  */
 struct KineticRateDefinition
 {

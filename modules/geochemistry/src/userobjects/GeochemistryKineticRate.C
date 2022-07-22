@@ -27,8 +27,9 @@ GeochemistryKineticRate::validParams()
       "area_quantity > 0.0",
       "The surface area of the kinetic species in m^2 (if multiply_by_mass = false) or the "
       "specific surface area of the kinetic species in m^2/g (if multiply_by_mass = true)");
-  params.addParam<bool>(
-      "multiply_by_mass", false, "The rate is multiplied by the kinetic_species mass");
+  params.addParam<bool>("multiply_by_mass",
+                        false,
+                        "Whether the rate should be multiplied by the kinetic_species mass");
   params.addParam<Real>("kinetic_molal_index",
                         0.0,
                         "The rate is multiplied by kinetic_species_molality^kinetic_molal_index / "
@@ -78,13 +79,11 @@ GeochemistryKineticRate::validParams()
       "set to zero so that precipitation will be prevented.  precipitation = if Q > K then "
       "precipitation will occur, and when Q < K then the rate will be set to zero so that "
       "dissolution will be prevented.  raw = the rate will not depend on sgn(1 - (Q/K)), which "
-      "means "
-      "dissolution will occur if intrinsic_rate_constant > 0, and precipitation will occur when "
-      "intrinsic_rate_constant < 0.  death = the rate will not depend on sgn(1 - (Q/K)), which "
-      "means "
-      "dissolution will occur if intrinsic_rate_constant > 0, and precipitation will occur when "
-      "intrinsic_rate_constant < 0, and, in addition, no reactants will be produced or consumed by "
-      "this kinetic reaction (only the kinetic species mass will change).");
+      "means dissolution will occur if intrinsic_rate_constant > 0, and precipitation will occur "
+      "when intrinsic_rate_constant < 0.  death = the rate will not depend on sgn(1 - (Q/K)), "
+      "which means dissolution will occur if intrinsic_rate_constant > 0, and precipitation will "
+      "occur when intrinsic_rate_constant < 0, and, in addition, no reactants will be produced or "
+      "consumed by this kinetic reaction (only the kinetic species mass will change).");
   params.addParam<std::string>(
       "non_kinetic_biological_catalyst",
       "H2O",
@@ -108,8 +107,9 @@ GeochemistryKineticRate::validParams()
       "mol of reaction turnover.  Specifically, for each mole of kinetic reaction, the microbe "
       "will produce m moles of ATP via a reaction such as ADP + PO4--- -> ATP + H2O, with "
       "free-energy change G (usually around 45 kJ/mol).  Then, energy_captured = m * G.  For "
-      "non-biologically-catalysed reactions, this should be zero.  This means log10K = "
-      "log10K_with_no_energy_+captured - energy_captured / R / T_in_Kelvin / ln(10)");
+      "non-biologically-catalysed reactions, this should be zero.  The impact of energy_captured "
+      "is that the reaction's equilibrium constant is K_database * exp(-energy_captured / R / "
+      "T_in_Kelvin)");
   params.addClassDescription(
       "User object that defines a kinetic rate.  Note that more than one rate can be prescribed to "
       "a single kinetic_species: the sum the individual rates defines the overall rate.  "
@@ -119,7 +119,7 @@ GeochemistryKineticRate::validParams()
       "grams) * kinetic_molality^kinetic_molal_index / (kinetic_molality^kinetic_molal_index + "
       "kinetic_half_saturation^kinetic_molal_index)^kinetic_monod_index * "
       "(product_over_promoting_species m^promoting_index / (m^promoting_index + "
-      "promoting_half_saturation)^promoting_monod_index) * |1 - (Q/K)^theta|^eta * "
+      "promoting_half_saturation^promiting_index)^promoting_monod_index) * |1 - (Q/K)^theta|^eta * "
       "exp(activation_energy / R * (1/T0 - 1/T)) * Direction(1 - (Q/K)).  Please see the markdown "
       "documentation for examples");
 

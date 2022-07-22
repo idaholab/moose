@@ -236,6 +236,45 @@ TEST(GeochemicalSolverTest, exception)
   }
 }
 
+/// Check set/getMaxInitialResidual
+TEST(GeochemicalSolverTest, setgetMaxInitialResidual)
+{
+  ModelGeochemicalDatabase mgd = model_simplest.modelGeochemicalDatabase();
+  GeochemicalSystem egs(mgd,
+                        ac_solver,
+                        is_solver,
+                        swapper2,
+                        {},
+                        {},
+                        "H+",
+                        {"H2O", "H+"},
+                        {1.75, 3.0},
+                        cu2,
+                        cm2,
+                        25,
+                        0,
+                        1E-20,
+                        {},
+                        {},
+                        {});
+  GeochemicalSolver solver(mgd.basis_species_name.size(),
+                           mgd.kin_species_name.size(),
+                           is_solver,
+                           1.0,
+                           0.1,
+                           100,
+                           99.0,
+                           0.1,
+                           1,
+                           {},
+                           1.0,
+                           10,
+                           true);
+  EXPECT_EQ(solver.getMaxInitialResidual(), 99.0);
+  solver.setMaxInitialResidual(123.0);
+  EXPECT_EQ(solver.getMaxInitialResidual(), 123.0);
+}
+
 /// Solve super-simple case
 TEST(GeochemicalSolverTest, solve1)
 {

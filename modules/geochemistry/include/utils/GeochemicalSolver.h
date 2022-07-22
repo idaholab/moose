@@ -92,6 +92,9 @@ public:
   /// Set value for max_initial_residual
   void setMaxInitialResidual(Real max_initial_residual);
 
+  /// Get value for max_initial_residual
+  Real getMaxInitialResidual() const;
+
   /// Sets the value of _ramp_max_ionic_strength
   void setRampMaxIonicStrength(unsigned ramp_max_ionic_strength);
 
