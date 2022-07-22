@@ -10,6 +10,7 @@
 #include "Poly2TriMeshGenerator.h"
 
 #include "CastUniquePointer.h"
+#include "MooseMeshUtils.h"
 #include "MooseUtils.h"
 
 #include "libmesh/elem.h"
@@ -30,7 +31,11 @@ Poly2TriMeshGenerator::validParams()
   MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
 
   params.addRequiredParam<MeshGeneratorName>(
-      "boundary", "The MeshGenerator that defines the mesh outer boundary.");
+      "boundary", "The input MeshGenerator that defines the output mesh outer boundary.");
+  params.addParam<std::vector<BoundaryName>>(
+      "input_boundary_names", "2D-input-mesh boundaries defining the output mesh outer boundary");
+  params.addParam<std::vector<SubdomainName>>(
+      "input_subdomain_names", "1D-input-mesh subdomains defining the output mesh outer boundary");
   params.addParam<unsigned int>("add_nodes_per_boundary_segment",
                                 0,
                                 "How many more nodes to add in each outer boundary segment.");
@@ -97,11 +102,57 @@ Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 Poly2TriMeshGenerator::generate()
 {
-  // We put the boundary mesh in a local pointer
+  // Put the boundary mesh in a local pointer
   std::unique_ptr<UnstructuredMesh> mesh = dynamic_pointer_cast<UnstructuredMesh>(_bdy_ptr);
 
+  // Get ready to triangulate the line segments we extract from it
   Poly2TriTriangulator poly2tri(*mesh);
   poly2tri.triangulation_type() = TriangulatorInterface::PSLG;
+
+  // If we're using a user-requested subset of boundaries on that
+  // mesh, get their ids.
+  std::set<std::size_t> bdy_ids;
+
+  if (isParamValid("input_boundary_names"))
+  {
+    if (isParamValid("input_subdomain_names"))
+      paramError(
+          "input_subdomain_names",
+          "input_boundary_names and input_subdomain_names cannot both specify an outer boundary.");
+
+    auto _boundary_names = getParam<std::vector<BoundaryName>>("input_boundary_names");
+    for (const auto & name : _boundary_names)
+    {
+      auto bcid = MooseMeshUtils::getBoundaryID(name, *mesh);
+      if (bcid == BoundaryInfo::invalid_id)
+        paramError("input_boundary_names", name, " is not a valid boundary name");
+
+      bdy_ids.insert(bcid);
+    }
+  }
+
+  if (isParamValid("input_subdomain_names"))
+  {
+    auto _subdomain_names = getParam<std::vector<SubdomainName>>("input_subdomain_names");
+
+    auto _subdomain_ids = MooseMeshUtils::getSubdomainIDs(*mesh, _subdomain_names);
+
+    // Check that the requested subdomains exist in the mesh
+    std::set<SubdomainID> subdomains;
+    mesh->subdomain_ids(subdomains);
+
+    for (auto i : index_range(_subdomain_ids))
+    {
+      if (_subdomain_ids[i] == Moose::INVALID_BLOCK_ID || !subdomains.count(_subdomain_ids[i]))
+        paramError(
+            "input_subdomain_names", _subdomain_names[i], " was not found in the boundary mesh");
+
+      bdy_ids.insert(_subdomain_ids[i]);
+    }
+  }
+
+  if (!bdy_ids.empty())
+    poly2tri.set_outer_boundary_ids(bdy_ids);
 
   poly2tri.set_interpolate_boundary_points(_add_nodes_per_boundary_segment);
   poly2tri.set_refine_boundary_allowed(_refine_bdy);
