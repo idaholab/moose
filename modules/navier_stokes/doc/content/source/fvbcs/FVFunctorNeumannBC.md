@@ -4,6 +4,8 @@
 
 # Description
 
+This object is equivalent to [FVNeumannBC.md] with the exception that the
+constant `value` parameter is replaced by the `functor` parameter.
 
 !syntax parameters /FVBCs/FVFunctorNeumannBC
 

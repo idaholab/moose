@@ -1,0 +1,11 @@
+[Tests]
+  [FVFunctorConvectiveHeatFlux]
+    issues = '#21632'
+    design = 'FVFunctorConvectiveHeatFlux.md'
+    requirement = 'The system shall provide a convective heat flux boundary condition which uses functors as heat transfer coefficients and far-field temperature values'
+    type = Exodiff
+    input = fv_functor_convective_heat_flux.i
+    exodiff = 'fv_functor_convective_heat_flux_out.e'
+    ad_indexing_type = 'global'
+  []
+[]

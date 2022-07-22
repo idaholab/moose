@@ -28,5 +28,5 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   const Moose::Functor<ADReal> & _functor;
-  const Real _factor;
+  const Moose::Functor<ADReal> & _factor;
 };

@@ -12,8 +12,9 @@
 #include "FVFluxBC.h"
 
 /**
- * Neumann boundary (== inflow) condition for finite volume scheme
- * where the inflow is given as a functor
+ * Robin boundary condition (temperatures) for finite volume scheme between
+ * a solid and fluid where the temperatures and heat transfer coefficient
+ * is given as a functor
  */
 class FVFunctorConvectiveHeatFluxBC : public FVFluxBC
 {
@@ -25,15 +26,15 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// Walltemperature variable
+  /// Wall temperature functor
   const Moose::Functor<ADReal> & _T_wall;
 
-  /// Far-field temperature variable
+  /// Far-field temperature functor
   const Moose::Functor<ADReal> & _T_infinity;
 
-  /// Convective heat transfer coefficient
+  /// Convective heat transfer coefficient functor
   const Moose::Functor<ADReal> & _htc;
 
+  /// Boolean specifying if domain is solid or fluid
   const bool _is_solid;
-  // unsigned int _t
 };
