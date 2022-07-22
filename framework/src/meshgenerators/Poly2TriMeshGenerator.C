@@ -15,6 +15,7 @@
 
 #include "libmesh/elem.h"
 #include "libmesh/int_range.h"
+#include "libmesh/mesh_modification.h"
 #include "libmesh/mesh_serializer.h"
 #include "libmesh/mesh_triangle_holes.h"
 #include "libmesh/parsed_function.h"
@@ -46,6 +47,11 @@ Poly2TriMeshGenerator::validParams()
       "output_subdomain_id", 0, "Subdomain id to set on new triangles.");
   params.addParam<SubdomainName>("output_subdomain_name",
                                  "Subdomain name to set on new triangles.");
+
+  params.addParam<boundary_id_type>(
+      "output_boundary_id", 0, "Boundary id to set on new outer boundary.");
+  params.addParam<std::vector<boundary_id_type>>(
+      "hole_boundary_ids", "Boundary ids to set on holes.  Numbered up from 1 by default.");
 
   params.addParam<bool>("smooth_triangulation",
                         false,
@@ -222,12 +228,47 @@ Poly2TriMeshGenerator::generate()
   // want to pick a new ID on hole N that doesn't conflict with any
   // IDs on hole M < N (or with the IDs on the new triangulation)
 
-  // The new triangulation assigns BCID i+1 to hole i ... but we can't
-  // even use this for mesh stitching, because we can't be sure it
-  // isn't also already in use on the hole's mesh and so we won't be
-  // able to safely clear it afterwards.
+  // The new triangulation by default assigns BCID i+1 to hole i ...
+  // but we can't even use this for mesh stitching, because we can't
+  // be sure it isn't also already in use on the hole's mesh and so we
+  // won't be able to safely clear it afterwards.
+  const boundary_id_type end_bcid = _hole_ptrs.size() + 1;
+  boundary_id_type new_hole_bcid = end_bcid;
 
-  boundary_id_type new_hole_bcid = _hole_ptrs.size();
+  // We might be overriding the default bcid numbers.  We have to be
+  // careful about how we renumber, though.  We pick unused temporary
+  // numbers because e.g. "0->2, 2->0" is impossible to do
+  // sequentially, but "0->N, 2->N+2, N->2, N+2->0" works.
+  if (isParamValid("output_boundary_id"))
+    libMesh::MeshTools::Modification::change_boundary_id(*mesh, 0, end_bcid);
+
+  if (isParamValid("hole_boundary_ids"))
+  {
+    auto _hole_boundary_ids = getParam<std::vector<boundary_id_type>>("hole_boundary_ids");
+
+    if (_hole_boundary_ids.size() != _hole_ptrs.size())
+      paramError("hole_boundary_ids", "Need one hole_boundary_ids entry per hole, if specified.");
+
+    for (auto h : index_range(_hole_ptrs))
+      libMesh::MeshTools::Modification::change_boundary_id(*mesh, h + 1, h + 1 + end_bcid);
+
+    for (auto h : index_range(_hole_ptrs))
+    {
+      libMesh::MeshTools::Modification::change_boundary_id(
+          *mesh, h + 1 + end_bcid, _hole_boundary_ids[h]);
+      new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(_hole_boundary_ids[h] + 1));
+    }
+  }
+
+  if (isParamValid("output_boundary_id"))
+  {
+    const boundary_id_type output_boundary_id = getParam<boundary_id_type>("output_boundary_id");
+
+    libMesh::MeshTools::Modification::change_boundary_id(*mesh, end_bcid, output_boundary_id);
+
+    new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(output_boundary_id + 1));
+  }
+
   bool doing_stitching = false;
 
   for (auto hole_i : index_range(_hole_ptrs))
@@ -237,14 +278,13 @@ Poly2TriMeshGenerator::generate()
     const std::set<boundary_id_type> & local_hole_bcids = hole_boundary_info.get_boundary_ids();
 
     if (!local_hole_bcids.empty())
-      new_hole_bcid = std::max(new_hole_bcid, *local_hole_bcids.rbegin());
+      new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(*local_hole_bcids.rbegin() + 1));
     hole_mesh.comm().max(new_hole_bcid);
 
     if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
       doing_stitching = true;
   }
 
-  new_hole_bcid++;
   const boundary_id_type inner_bcid = new_hole_bcid + 1;
 
   // libMesh mesh stitching still requires a serialized mesh, and it's
