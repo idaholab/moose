@@ -99,7 +99,7 @@
     error_on_miss = true
     # extend the bounding box slightly since a transformed node
     # may miss the bounding box by machine precision
-    bbox_extend_factor = 0.1
+    bbox_factor = 1.1
   []
   [from_sub_elem]
     type = MultiAppMeshFunctionTransfer
@@ -118,7 +118,7 @@
     error_on_miss = true
     # extend the bounding box slightly since a transformed node
     # may miss the bounding box by machine precision
-    bbox_extend_factor = 0.1
+    bbox_factor = 1.1
   []
   [to_sub_elem]
     type = MultiAppMeshFunctionTransfer
