@@ -185,6 +185,7 @@
     issues = '#16948'
     ad_indexing_type = 'global'
     design = 'NSFVEnergyAmbientConvection.md'
+    valgrind = none
   []
   [ambient-convection-action]
     type = 'CSVDiff'
@@ -194,6 +195,7 @@
     issues = '#19472'
     ad_indexing_type = 'global'
     design = 'NSFVEnergyAmbientConvection.md'
+    valgrind = none
   []
   [triangles]
     requirement = 'The system shall be able to run incompressible Navier-Stokes channel-flow simulations with'
