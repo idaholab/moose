@@ -36,10 +36,15 @@ class LibtorchArtificialNeuralNetTrainer
 public:
   LibtorchArtificialNeuralNetTrainer(std::shared_ptr<LibtorchNeuralNet<torch::nn::Module>> nn);
 
-  virtual void train(LibtorchDataset & dataset, const LibtorchTrainingOptions & options);
+  virtual void train(LibtorchDataset & dataset,
+                     const LibtorchTrainingOptions & options,
+                     const Parallel::Communicator & comm);
 
 protected:
   void setupOptimizer(const LibtorchTrainingOptions & options);
+
+  unsigned int computeBatchSize(unsigned int num_samples, unsigned int num_batches);
+  unsigned int computeLocalBatchSize(unsigned int batch_size, unsigned int num_ranks, unsigned int rank);
 
   std::shared_ptr<LibtorchNeuralNet<torch::nn::Module>> _nn;
   std::unique_ptr<torch::optim::Optimizer> _optimizer;

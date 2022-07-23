@@ -67,9 +67,10 @@ ifeq ($(ENABLE_LIBTORCH),true)
   ifneq ($(wildcard $(LIBTORCH_DIR)/lib/$(LIBTORCH_LIB)),)
     # Enabling parts that have pytorch dependencies
     libmesh_CXXFLAGS += -DLIBTORCH_ENABLED
+		libmesh_CXXFLAGS += -DUSE_C10D_MPI
 
     # Adding the include directories, we use -isystem to silence the warning coming from
-	# libtorch (which would cause errors in the testing phase)
+	  # libtorch (which would cause errors in the testing phase)
     libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include/torch/csrc/api/include
     libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include
 

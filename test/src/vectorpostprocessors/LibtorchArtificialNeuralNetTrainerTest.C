@@ -28,7 +28,11 @@ LibtorchArtificialNeuralNetTrainerTest::validParams()
   params.addRequiredParam<unsigned int>("num_epochs", "The number of epochs we want to simulate.");
   params.addRequiredParam<unsigned int>(
       "num_batches", "The number of batches we want to split out training data into.");
+  params.addRequiredParam<unsigned int>("num_samples",
+                                        "The number of samples we want to use for training.");
   params.addRequiredParam<Real>("learning_rate", "The learning rate for the gradient descent.");
+  params.addRequiredParam<std::vector<unsigned int>>("hidden_layers", "The architecture of the hidden layers.");
+  params.addRequiredParam<std::vector<Real>>("monitor_point", "The point where we want to monitor the results.");
   return params;
 }
 
@@ -44,23 +48,29 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
 
   unsigned int num_inputs = 3;
   unsigned int num_outputs = 2;
-  unsigned int num_samples = 5;
+  unsigned int num_samples = getParam<unsigned int>("num_samples");
+  std::vector<unsigned int> hidden_layers =  getParam<std::vector<unsigned int>>("hidden_layers");
 
-  std::vector<unsigned int> num_neurons_per_layer({4, 4});
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> nn =
       std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-          "test", num_inputs, num_outputs, num_neurons_per_layer);
+          "test", num_inputs, num_outputs, hidden_layers);
 
   std::vector<Real> data;
   std::vector<Real> results;
 
   for (const auto sample_index : make_range(num_samples))
   {
+    std::vector<Real> sample;
     for (const auto input_index : make_range(num_inputs))
-      data.push_back(sample_index * input_index);
+    {
+      data.push_back(Real(sample_index) / Real(num_samples) + Real(input_index) / Real(num_inputs));
+      sample.push_back(Real(sample_index) / Real(num_samples) + Real(input_index) / Real(num_inputs));
+    }
+
+    std::cout << Moose::stringify(sample) << std::endl;
 
     for (const auto result_index : make_range(num_outputs))
-      results.push_back(2 * sample_index * result_index + 5);
+      results.push_back(result_index+sample[0]*sample[1]*sample[2]);
   }
 
   auto options = torch::TensorOptions().dtype(at::kDouble);
@@ -77,13 +87,13 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
   optim_options.learning_rate = getParam<Real>("learning_rate");
   optim_options.num_epochs = getParam<unsigned int>("num_epochs");
   optim_options.num_batches = getParam<unsigned int>("num_batches");
-  optim_options.rel_loss_tol = 1e-6;
+  optim_options.rel_loss_tol = 1e-8;
   optim_options.print_loss = true;
   optim_options.print_epoch_loss = 20;
 
-  trainer.train(dataset, optim_options);
+  trainer.train(dataset, optim_options, comm());
 
-  std::vector<Real> test({0.0, 1.0, 2.0});
+  std::vector<Real> test(getParam<std::vector<Real>>("monitor_point"));
   torch::Tensor test_tensor = torch::from_blob(test.data(), {1, 3}, options).to(at::kDouble);
   auto prediction = nn->forward(test_tensor);
 
