@@ -164,6 +164,12 @@ public:
    */
   void computeRS();
 
+  /**
+   * @return whether the coordinate transformation object modifies an incoming point, e.g. whether
+   * the transformation is anything other than the identity matrix
+   */
+  bool isIdentity() const;
+
 private:
   /**
    * If the coordinate system type is RZ, then we return the provided argument. Otherwise we return

@@ -451,3 +451,32 @@ MooseCoordTransform::setDestinationCoordinateSystem(
                "called with a Point argument, we do not know what subdomain we are on and "
                "consequently we do not know what coordinate collapse to apply.");
 }
+
+bool
+MooseCoordTransform::isIdentity() const
+{
+  if (_rs)
+    for (const auto i : make_range(Moose::dim))
+      for (const auto j : make_range(Moose::dim))
+      {
+        const auto matrix_elem = (*_rs)(i, j);
+        if (i == j)
+        {
+          if (!MooseUtils::absoluteFuzzyEqual(matrix_elem, 1))
+            return false;
+        }
+        else if (!MooseUtils::absoluteFuzzyEqual(matrix_elem, 0))
+          return false;
+      }
+
+  for (const auto i : make_range(Moose::dim))
+    if (!MooseUtils::absoluteFuzzyEqual(_translation(i), 0))
+      return false;
+
+  if ((_coord_type == Moose::COORD_XYZ && (_destination_coord_type == Moose::COORD_RZ ||
+                                           _destination_coord_type == Moose::COORD_RSPHERICAL)) ||
+      (_coord_type == Moose::COORD_RZ && _destination_coord_type == Moose::COORD_RSPHERICAL))
+    return false;
+
+  return true;
+}
