@@ -199,7 +199,7 @@ offset = 0.00
 
 [Constraints]
   [weighted_gap_lm]
-    type = ComputeWeightedGapLMMechanicalContact
+    type = ComputeWeightedGapCartesianLMMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -213,11 +213,10 @@ offset = 0.00
     disp_z = disp_z
     use_displaced_mesh = true
     correct_edge_dropping = true
-    interpolate_normals = false
     c = 1e+02
   []
   [normal_x]
-    type = NormalMortarMechanicalContact
+    type = CartesianMortarMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -228,10 +227,9 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    interpolate_normals = false
   []
   [normal_y]
-    type = NormalMortarMechanicalContact
+    type = CartesianMortarMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -242,10 +240,9 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    interpolate_normals = false
   []
   [normal_z]
-    type = NormalMortarMechanicalContact
+    type = CartesianMortarMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -256,7 +253,6 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    interpolate_normals = false
   []
 []
 

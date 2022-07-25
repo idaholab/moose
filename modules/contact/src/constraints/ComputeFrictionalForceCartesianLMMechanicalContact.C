@@ -39,7 +39,7 @@ assignVarsInParamsFriction(const InputParameters & params_in)
 InputParameters
 ComputeFrictionalForceCartesianLMMechanicalContact::validParams()
 {
-  InputParameters params = ComputeWeightedGapLMMechanicalContact::validParams();
+  InputParameters params = ComputeWeightedGapCartesianLMMechanicalContact::validParams();
   params.addClassDescription("Computes mortar frictional forces.");
   params.addParam<Real>("c_t", 1e0, "Numerical parameter for tangential constraints");
   params.addParam<Real>(
@@ -53,7 +53,7 @@ ComputeFrictionalForceCartesianLMMechanicalContact::validParams()
 
 ComputeFrictionalForceCartesianLMMechanicalContact::
     ComputeFrictionalForceCartesianLMMechanicalContact(const InputParameters & parameters)
-  : ComputeWeightedGapLMMechanicalContact(assignVarsInParamsFriction(parameters)),
+  : ComputeWeightedGapCartesianLMMechanicalContact(assignVarsInParamsFriction(parameters)),
     _c_t(getParam<Real>("c_t")),
     _secondary_x_dot(adCoupledDot("disp_x")),
     _primary_x_dot(adCoupledNeighborValueDot("disp_x")),
@@ -72,7 +72,9 @@ ComputeFrictionalForceCartesianLMMechanicalContact::
 void
 ComputeFrictionalForceCartesianLMMechanicalContact::computeQpProperties()
 {
-  ComputeWeightedGapLMMechanicalContact::computeQpProperties();
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+
+  ComputeWeightedGapCartesianLMMechanicalContact::computeQpProperties();
 
   // Trim derivatives
   const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
@@ -110,12 +112,14 @@ ComputeFrictionalForceCartesianLMMechanicalContact::computeQpProperties()
     relative_velocity = {sec_x_dot - prim_x_dot, sec_y_dot - prim_y_dot, 0.0};
 
   _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
+
+#endif
 }
 
 void
 ComputeFrictionalForceCartesianLMMechanicalContact::computeQpIProperties()
 {
-  ComputeWeightedGapLMMechanicalContact::computeQpIProperties();
+  ComputeWeightedGapCartesianLMMechanicalContact::computeQpIProperties();
 
   const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
   // Get the _dof_to_weighted_tangential_velocity map
@@ -135,7 +139,7 @@ ComputeFrictionalForceCartesianLMMechanicalContact::computeQpIProperties()
 void
 ComputeFrictionalForceCartesianLMMechanicalContact::residualSetup()
 {
-  ComputeWeightedGapLMMechanicalContact::residualSetup();
+  ComputeWeightedGapCartesianLMMechanicalContact::residualSetup();
   _dof_to_weighted_tangential_velocity.clear();
 }
 
@@ -243,6 +247,7 @@ void
 ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
     const DofObject * const dof)
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   const auto & weighted_gap = *_weighted_gap_ptr;
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
@@ -256,7 +261,7 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
   Moose::derivInsert(lm_x.derivatives(), dof_index_x, 1.);
   Moose::derivInsert(lm_y.derivatives(), dof_index_y, 1.);
 
-  dof_id_type dof_index_z;
+  dof_id_type dof_index_z(-1);
   ADReal lm_z;
   if (_has_disp_z)
   {
@@ -348,17 +353,15 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
   // We do this to get a decent Jacobian structure, which is key for the use of iterative solvers.
   // Using old normal vector to avoid changes in the Jacobian structure within one time step
 
-  Real nx, ny, nz;
+  Real ny, nz;
   // Intially, use the current normal vector
   if (_dof_to_old_normal_vector[dof].norm() < TOLERANCE)
   {
-    nx = _dof_to_normal_vector[dof](0);
     ny = _dof_to_normal_vector[dof](1);
     nz = _dof_to_normal_vector[dof](2);
   }
   else
   {
-    nx = _dof_to_old_normal_vector[dof](0);
     ny = _dof_to_old_normal_vector[dof](1);
     nz = _dof_to_old_normal_vector[dof](2);
   }
@@ -368,7 +371,6 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
   else if (std::abs(nz) > 0.57735)
     component_normal = 2;
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processResidualAndJacobian(
       normal_dof_residual,
       component_normal == 0 ? dof_index_x : (component_normal == 1 ? dof_index_y : dof_index_z),

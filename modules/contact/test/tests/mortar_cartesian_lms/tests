@@ -19,7 +19,7 @@
     input = 'frictionless-mortar-3d.i'
     rel_err = 5.0e-4
     max_parallel = 4
-    min_ad_size = '50'
+    min_ad_size = '100'
     ad_indexing_type = 'global'
     requirement = 'Contact module shall solve a three-dimensional frictionless problem with Cartesian Lagrange multipliers.'
   []
@@ -41,6 +41,7 @@
     abs_zero = 1.0e-4
     max_parallel = 4
     min_ad_size = '50'
+    method = 'opt'
     ad_indexing_type = 'global'
     requirement = 'Contact module shall solve a cylinder-on-plane plane strain frictional problem with Cartesian Lagrange multipliers.'
   []

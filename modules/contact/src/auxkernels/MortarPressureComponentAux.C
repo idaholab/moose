@@ -18,13 +18,11 @@ MortarPressureComponentAux::validParams()
   InputParameters params = AuxKernel::validParams();
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
 
-  params.addClassDescription("This class transforms the Cartesian Lagrange multiplier vector to local coordinates and outputs each individual component along the normal or tangential direction.");
-  params.addRequiredCoupledVar(
-      "lm_var_x",
-      "Lagrange multiplier variable along the x direction.");
-  params.addRequiredCoupledVar(
-      "lm_var_y",
-      "Lagrange multiplier variable along the y direction.");
+  params.addClassDescription(
+      "This class transforms the Cartesian Lagrange multiplier vector to local coordinates and "
+      "outputs each individual component along the normal or tangential direction.");
+  params.addRequiredCoupledVar("lm_var_x", "Lagrange multiplier variable along the x direction.");
+  params.addRequiredCoupledVar("lm_var_y", "Lagrange multiplier variable along the y direction.");
   params.addCoupledVar(
       "lm_var_z",
       "Lagrange multiplier variable along the z direction (only exist for 3D problems).");
@@ -44,7 +42,7 @@ MortarPressureComponentAux::MortarPressureComponentAux(const InputParameters & p
   : AuxKernel(params),
     _lm_var_x(&coupledValueLower("lm_var_x")),
     _lm_var_y(&coupledValueLower("lm_var_y")),
-    _lm_var_z(params.isParamValid("lm_var_z")? &coupledValueLower("lm_var_z"):nullptr),
+    _lm_var_z(params.isParamValid("lm_var_z") ? &coupledValueLower("lm_var_z") : nullptr),
     _fe_problem(*params.get<FEProblemBase *>("_fe_problem_base")),
     _primary_id(_fe_problem.mesh().getBoundaryID(getParam<BoundaryName>("primary_boundary"))),
     _secondary_id(_fe_problem.mesh().getBoundaryID(getParam<BoundaryName>("secondary_boundary"))),
@@ -53,8 +51,7 @@ MortarPressureComponentAux::MortarPressureComponentAux(const InputParameters & p
 {
   // Only consider nodal quantities
   if (!isNodal())
-    mooseError(
-        "MortarPressureComponent auxiliary kernel can only be used with nodal kernels.");
+    mooseError("MortarPressureComponent auxiliary kernel can only be used with nodal kernels.");
 
   if (!_use_displaced_mesh)
     paramError("use_displaced_mesh",
@@ -89,14 +86,14 @@ MortarPressureComponentAux::MortarPressureComponentAux(const InputParameters & p
 Real
 MortarPressureComponentAux::computeValue()
 {
-
   // A node id may correspond to more than one lower-d elements on the secondary surface.
   // However, we are looping over nodes below, so we will locate the correct geometry
   const Elem * lower_dimensional_element =
       libmesh_map_find(_mortar_generation_object->nodesToSecondaryElem(), _current_node->id())[0];
 
   // Get the nodal normals for this element
-  const auto & nodal_normals = _mortar_generation_object->getNodalNormals(*lower_dimensional_element);
+  const auto & nodal_normals =
+      _mortar_generation_object->getNodalNormals(*lower_dimensional_element);
 
   // Get nodal tangents for this element
   const auto & nodal_tangents =
@@ -115,7 +112,8 @@ MortarPressureComponentAux::computeValue()
     }
   }
 
-  Point lm_vector_value((*_lm_var_x)[_qp], (*_lm_var_y)[_qp], _lm_var_z == nullptr ? 0.0 : (*_lm_var_z)[_qp]);
+  Point lm_vector_value(
+      (*_lm_var_x)[_qp], (*_lm_var_y)[_qp], _lm_var_z == nullptr ? 0.0 : (*_lm_var_z)[_qp]);
 
   Real pressure_component_value = 0.0;
 

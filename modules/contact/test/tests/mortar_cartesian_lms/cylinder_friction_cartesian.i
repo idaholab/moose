@@ -147,12 +147,6 @@
   [_dt]
     type = TimestepSize
   []
-  [num_lin_it]
-    type = NumLinearIterations
-  []
-  [num_nonlin_it]
-    type = NumNonlinearIterations
-  []
 []
 
 [BCs]
@@ -298,14 +292,13 @@
     disp_x = disp_x
     disp_y = disp_y
     use_displaced_mesh = true
-    interpolate_normals = false
     correct_edge_dropping = false
     mu = 0.4
     c_t = 1.0e6
     c = 1.0e6
   []
   [x]
-    type = NormalMortarMechanicalContact
+    type = CartesianMortarMechanicalContact
     primary_boundary = '2'
     secondary_boundary = '3'
     primary_subdomain = '10000'
@@ -316,10 +309,9 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = false
-    interpolate_normals = false
   []
   [y]
-    type = NormalMortarMechanicalContact
+    type = CartesianMortarMechanicalContact
     primary_boundary = '2'
     secondary_boundary = '3'
     primary_subdomain = '10000'
@@ -330,7 +322,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = false
-    interpolate_normals = false
   []
 
 []

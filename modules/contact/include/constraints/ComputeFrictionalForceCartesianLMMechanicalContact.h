@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ComputeWeightedGapLMMechanicalContact.h"
+#include "ComputeWeightedGapCartesianLMMechanicalContact.h"
 
 #include <unordered_map>
 
@@ -18,7 +18,7 @@
  * zero-penetration mechanical contact conditions
  */
 class ComputeFrictionalForceCartesianLMMechanicalContact
-  : public ComputeWeightedGapLMMechanicalContact
+  : public ComputeWeightedGapCartesianLMMechanicalContact
 {
 public:
   static InputParameters validParams();

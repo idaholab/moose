@@ -226,12 +226,11 @@ refine = 3
     disp_y = disp_y
     use_displaced_mesh = true
     correct_edge_dropping = true
-    interpolate_normals = false
     mu = 1.0
     c_t = 1.0e5
   []
   [normal_x]
-    type = NormalMortarMechanicalContact
+    type = CartesianMortarMechanicalContact
     primary_boundary = '23'
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
@@ -242,10 +241,9 @@ refine = 3
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    interpolate_normals = false
   []
   [normal_y]
-    type = NormalMortarMechanicalContact
+    type = CartesianMortarMechanicalContact
     primary_boundary = '23'
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
@@ -256,7 +254,6 @@ refine = 3
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    interpolate_normals = false
   []
 []
 

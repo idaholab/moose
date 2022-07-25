@@ -102,7 +102,6 @@ protected:
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;
 
-protected:
   /// Pointer to the lagrange multipler variable. nullptr if none
   MooseVariable * const _var;
 

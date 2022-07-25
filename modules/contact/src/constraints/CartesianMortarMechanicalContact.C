@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NormalMortarMechanicalContact.h"
+#include "CartesianMortarMechanicalContact.h"
 
-registerMooseObject("ContactApp", NormalMortarMechanicalContact);
+registerMooseObject("ContactApp", CartesianMortarMechanicalContact);
 
 InputParameters
-NormalMortarMechanicalContact::validParams()
+CartesianMortarMechanicalContact::validParams()
 {
   InputParameters params = ADMortarLagrangeConstraint::validParams();
 
@@ -22,16 +22,22 @@ NormalMortarMechanicalContact::validParams()
   params.addClassDescription(
       "This class is used to apply normal contact forces using lagrange multipliers");
   params.set<bool>("compute_lm_residual") = false;
+  params.set<bool>("interpolate_normals") = false;
   return params;
 }
 
-NormalMortarMechanicalContact::NormalMortarMechanicalContact(const InputParameters & parameters)
+CartesianMortarMechanicalContact::CartesianMortarMechanicalContact(
+    const InputParameters & parameters)
   : ADMortarLagrangeConstraint(parameters), _component(getParam<MooseEnum>("component"))
 {
+  if (_interpolate_normals)
+    paramError("interpolate_normals",
+               "This version of normal mechanical contact does not allow mortar interpolation of "
+               "geometry vectors");
 }
 
 ADReal
-NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
+CartesianMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
   switch (type)
   {
@@ -46,25 +52,13 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // normals).
       // Get the _dof_to_weighted_gap map
 
-      if (_interpolate_normals)
-        return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
-      else
-      {
-        const auto normal_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
-        return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[normal_index](_component);
-      }
+      return _test_secondary[_i][_qp] * _lambda[_qp];
 
     case Moose::MortarType::Primary:
       // The normal vector is signed according to the secondary face, so we need to introduce a
       // negative sign here
 
-      if (_interpolate_normals)
-        return -_test_primary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
-      else
-      {
-        const auto normal_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
-        return -_test_primary[_i][_qp] * _lambda[_qp] * _normals[normal_index](_component);
-      }
+      return -_test_primary[_i][_qp] * _lambda[_qp];
 
     default:
       return 0;
