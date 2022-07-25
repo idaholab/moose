@@ -35,6 +35,9 @@ LibtorchArtificialNeuralNetTrainerTest::validParams()
                                                      "The architecture of the hidden layers.");
   params.addRequiredParam<std::vector<Real>>("monitor_point",
                                              "The point where we want to monitor the results.");
+  params.addRequiredParam<unsigned int>(
+      "max_processes",
+      "The maximum number of parallel processes we want to use to train the neural network.");
   return params;
 }
 
@@ -87,7 +90,7 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
       torch::from_blob(results.data(), {num_samples, num_outputs}, options).to(at::kDouble);
 
   Moose::LibtorchDataset dataset(data_tensor, response_tensor);
-  Moose::LibtorchArtificialNeuralNetTrainer trainer(nn);
+  Moose::LibtorchArtificialNeuralNetTrainer trainer(nn, comm());
 
   Moose::LibtorchTrainingOptions optim_options;
   optim_options.optimizer_type = getParam<std::string>("optimizer_type");
@@ -97,8 +100,9 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
   optim_options.rel_loss_tol = 1e-8;
   optim_options.print_loss = true;
   optim_options.print_epoch_loss = 20;
+  optim_options.parallel_processes = getParam<unsigned int>("max_processes");
 
-  trainer.train(dataset, optim_options, comm());
+  trainer.train(dataset, optim_options);
 
   std::vector<Real> test(getParam<std::vector<Real>>("monitor_point"));
   torch::Tensor test_tensor = torch::from_blob(test.data(), {1, 3}, options).to(at::kDouble);

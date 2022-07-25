@@ -16,8 +16,8 @@ namespace Moose
 {
 
 LibtorchArtificialNeuralNetTrainer::LibtorchArtificialNeuralNetTrainer(
-    std::shared_ptr<LibtorchNeuralNet<torch::nn::Module>> nn)
-  : _nn(nn)
+    std::shared_ptr<LibtorchNeuralNet<torch::nn::Module>> nn, const Parallel::Communicator & comm)
+  : _nn(nn), _comm(comm)
 {
 }
 
@@ -76,13 +76,12 @@ LibtorchArtificialNeuralNetTrainer::setupOptimizer(const LibtorchTrainingOptions
 
 void
 LibtorchArtificialNeuralNetTrainer::train(LibtorchDataset & dataset,
-                                          const LibtorchTrainingOptions & options,
-                                          const Parallel::Communicator & comm)
+                                          const LibtorchTrainingOptions & options)
 {
   auto t_begin = MPI_Wtime();
 
-  int rank = comm.rank();
-  int num_ranks = comm.size();
+  int num_ranks = std::min(_comm.size(), options.parallel_processes);
+  int rank = _comm.rank() >= (unsigned int)num_ranks ? 0 : _comm.rank();
 
   auto num_samples = dataset.size().value();
 
@@ -116,14 +115,19 @@ LibtorchArtificialNeuralNetTrainer::train(LibtorchDataset & dataset,
       // Reset gradients
       _optimizer->zero_grad();
 
-      // Compute prediction
-      torch::Tensor prediction = _nn->forward(batch.data);
+      if (rank < num_ranks)
+      {
+        // Compute prediction
+        torch::Tensor prediction = _nn->forward(batch.data);
 
-      // Compute loss values using a MSE ( mean squared error)
-      torch::Tensor loss = torch::mse_loss(prediction, batch.target);
+        // Compute loss values using a MSE ( mean squared error)
+        torch::Tensor loss = torch::mse_loss(prediction, batch.target);
 
-      // Propagate error back
-      loss.backward();
+        // Propagate error back
+        loss.backward();
+
+        epoch_loss += loss.item<double>();
+      }
 
       for (auto & param : _nn->named_parameters())
       {
@@ -132,18 +136,16 @@ LibtorchArtificialNeuralNetTrainer::train(LibtorchDataset & dataset,
                       param.value().grad().numel(),
                       MPI_DOUBLE,
                       MPI_SUM,
-                      comm.get());
+                      _comm.get());
 
         param.value().grad().data() = param.value().grad().data() / num_ranks;
       }
 
       // Use new gradients to update the parameters
       _optimizer->step();
-
-      epoch_loss += loss.item<double>();
     }
 
-    MPI_Allreduce(MPI_IN_PLACE, &epoch_loss, 1, MPI_DOUBLE, MPI_SUM, comm.get());
+    MPI_Allreduce(MPI_IN_PLACE, &epoch_loss, 1, MPI_DOUBLE, MPI_SUM, _comm.get());
 
     epoch_loss = epoch_loss / options.num_batches / num_ranks;
 
