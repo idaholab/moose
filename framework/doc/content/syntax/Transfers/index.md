@@ -56,7 +56,7 @@ calculations that utilize the scalar variable, regardless of how this scalar is 
 approach allows the sub-application input file to run in union of independent from the parent without
 modification, which is useful for development and testing.
 
-## Coordinate transformations
+## Coordinate transformations id=coord-transform
 
 Different applications may use different setups. For example a neutronics
 simulation may be performed in Cartesian 3D space whereas a fuel performance
@@ -64,9 +64,9 @@ calculation may be performed using a 2D axisymmetric coordinate
 system. Communicating information between these different configurations can be
 difficult. One mechanism MOOSE provides for making this communication simpler is
 the `MooseCoordTransform` class. Each `MooseApp` instance holds a coordinate
-transformation object in its `FEProblemBase` object. Users may specify
+transformation object in its `MooseMesh` object. Users may specify
 transformation information about their simulation setup on a per-application
-basis in the input file `Problem` block. The [!param](/Mesh/GeneratedMesh/coord_type)
+basis in the input file `Mesh` block. The [!param](/Mesh/GeneratedMesh/coord_type)
 parameter specifies the coordinate system type, e.g. XYZ, RZ, or
 RSPHERICAL. [Euler angles](https://en.wikipedia.org/wiki/Euler_angles) are
 available to describe extrinsic rotations. The convention MOOSE uses for
@@ -134,10 +134,20 @@ if both (1, 0, 0) and (0, 1, 0) points (or any combination of $\sqrt{x^2+y^2}=1$
 points) exist. We are considering how best to handle these situations moving
 forward. One option would be to average the field data from equivalent points.
 
+Framework transfer classes that support the coordinate transformation
+processes described here are:
+
+- [MultiAppInterpolationTransfer.md]
+- [MultiAppMeshFunctionTransfer.md]
+- [MultiAppNearestNodeTransfer.md]
+- [MultiAppPostprocessorInterpolationTransfer.md]
+- [MultiAppProjectionTransfer.md]
+- [MultiAppUserObjectTransfer.md]
+
 ### Examples
 
 Let's consider an example. The below listing shows coordinate transformation
-given in the `Problem` block of a sub-application:
+given in the `Mesh` block of a sub-application:
 
 !listing transfers/coord_transform/sub-app.i block=Mesh
 
@@ -146,7 +156,7 @@ y-axis becomes a point on the x-axis) should be applied to
 the sub-application's domain in order to map to the reference domain (which the user has
 chosen to correspond to the main application domain). Additionally, the user
 wishes for the coordinate transformation object to know that one unit of mesh
-length corresponds to 20 centimeters. This information from the sub-application's `Problem` block
+length corresponds to 20 centimeters. This information from the sub-application's `Mesh` block
 combined with the translation vector described by the `positions` parameter in
 the main application `MultiApp` block
 
