@@ -403,7 +403,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
         }
 
         if (_error_on_miss && !point_found)
-          mooseError("Point not found! ", (*_to_transforms[i_to])(*node));
+          mooseError("Point not found in the reference space! ", (*_to_transforms[i_to])(*node));
 
         dof_id_type dof = node->dof_number(sys_num, var_num, 0);
         solution->set(dof, best_val);
@@ -479,7 +479,8 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
           }
 
           if (_error_on_miss && !point_found)
-            mooseError("Point not found! ", (*_to_transforms[i_to])(elem->vertex_average()));
+            mooseError("Point not found in the reference space! ",
+                       (*_to_transforms[i_to])(elem->vertex_average()));
 
           // Get the value for a dof
           dof_id_type dof = elem->dof_number(sys_num, var_num, offset);
