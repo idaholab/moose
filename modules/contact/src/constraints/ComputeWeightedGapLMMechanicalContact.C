@@ -49,7 +49,6 @@ ComputeWeightedGapLMMechanicalContact::validParams()
   params.addCoupledVar("disp_z", "The z displacement variable");
   params.addParam<Real>(
       "c", 1e6, "Parameter for balancing the size of the gap and contact pressure");
-
   params.addRequiredCoupledVar("lm_x",
                                "Mechanical contact Lagrange multiplier along the x Cartesian axis");
   params.addRequiredCoupledVar(
@@ -166,10 +165,7 @@ ComputeWeightedGapLMMechanicalContact::computeQpProperties()
     gap_vec(2).derivatives() = prim_z->derivatives() - sec_z->derivatives();
 
   // Compute integration point quantities
-  if (_interpolate_normals)
-    _qp_gap = gap_vec * (_normals[_qp] * _JxW_msm[_qp] * _coord[_qp]);
-  else
-    _qp_gap_nodal = gap_vec * (_JxW_msm[_qp] * _coord[_qp]);
+  _qp_gap_nodal = gap_vec * (_JxW_msm[_qp] * _coord[_qp]);
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
