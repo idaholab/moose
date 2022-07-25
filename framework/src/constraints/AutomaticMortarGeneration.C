@@ -1850,10 +1850,13 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
                                                                          secondary_val);
                   }
 
-              // Sanity check
               if (!found_match)
-                mooseError("Could not associate primary/secondary neighbors on either side of "
-                           "secondary_node.");
+              {
+                // There could be coincident nodes and this might be a bad primary candidate (see
+                // issue #21680). Instead of giving up, let's try continuing
+                rejected_primary_elem_candidates.insert(primary_elem_candidate);
+                continue;
+              }
 
               // We need to handle the case where we've exactly projected a secondary node onto a
               // primary node, but our secondary node is at one of the secondary face endpoints and
@@ -1894,10 +1897,8 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             break; // out of e-loop
           }
           else
-          {
             // The current secondary_node is not in this Elem, so keep track of the rejects.
             rejected_primary_elem_candidates.insert(primary_elem_candidate);
-          }
         }
 
         if (projection_succeeded)
