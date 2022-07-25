@@ -11,18 +11,21 @@ export JOBS=${MOOSE_JOBS:-2}
 # If on macOS, set COMPILER to clang
 if [[ $(uname) == Darwin ]]; then
     export COMPILER=clang
+    BUILD_LD_EXT=dylib
 else
     export COMPILER=gcc
+    BUILD_LD_EXT=so
 fi
 
 # Install third party libraries
 ./install-tpl.sh
 
 # Setup build location and configure there.
-# Disable X11 support, as xorg-libx11 is not adequate and causes build failures on macOS or Linux.
 mkdir build
 cd build
-../cmake-config -DTPL_ENABLE_X11=OFF
+../cmake-config \
+    -DTPL_X11_LIBRARIES=${BUILD_PREFIX}/lib/libX11.${BUILD_LD_EXT} \
+    -DTPL_X11_INCLUDE_DIRS=${BUILD_PREFIX}/include
 
 # Make and install
 make -j $JOBS

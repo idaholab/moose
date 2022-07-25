@@ -25,6 +25,7 @@ requirements:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - {{ compiler('fortran') }}
+    - xorg-libx11
     - cmake
     - make
     - automake
@@ -32,6 +33,7 @@ requirements:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - {{ compiler('fortran') }}
+    - xorg-libx11
     - python 3
 
 test:
@@ -42,6 +44,7 @@ test:
     - grepos
     - gjoin -v
     - python $PREFIX/seacas/lib/tests/test_exodus3.py
+    - blot --help || test $? -eq 1
 
 about:
   home: https://github.com/sandialabs/seacas
