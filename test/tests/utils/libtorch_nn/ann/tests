@@ -88,36 +88,42 @@
       input = 'test_ann_trainer.i'
       csvdiff = 'adagrad_test_trainer_0001.csv'
       detail = 'Adagrad optimizer.'
-      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adagrad' Outputs/file_base=adagrad"
+      cli_args = "VectorPostprocessors/test_trainer/num_epochs=2500 VectorPostprocessors/test_trainer/optimizer_type='adagrad' Outputs/file_base=adagrad"
       libtorch = true
       allow_test_objects = True
+      rel_err = 1e-2
     []
     [adam]
       type = CSVDiff
       input = 'test_ann_trainer.i'
       csvdiff = 'adam_test_trainer_0001.csv'
       detail = 'Adam optimizer.'
-      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adam' Outputs/file_base=adam"
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adam' Outputs/file_base='adam'"
       libtorch = true
       allow_test_objects = True
+      rel_err = 1e-2
     []
     [rmsprop]
       type = CSVDiff
       input = 'test_ann_trainer.i'
       csvdiff = 'rmsprop_test_trainer_0001.csv'
       detail = 'RMSprop optimizer.'
-      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='rmsprop' Outputs/file_base=rmsprop"
+      cli_args = "VectorPostprocessors/test_trainer/learning_rate=1e-4 VectorPostprocessors/test_trainer/num_samples=1280 VectorPostprocessors/test_trainer/num_epochs=10000 VectorPostprocessors/test_trainer/optimizer_type='rmsprop' Outputs/file_base='rmsprop'"
       libtorch = true
       allow_test_objects = True
+      rel_err = 1e-2
+      heavy = true
     []
     [sgd]
       type = CSVDiff
       input = 'test_ann_trainer.i'
       csvdiff = 'sgd_test_trainer_0001.csv'
       detail = 'SGD optimizer.'
-      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='sgd' Outputs/file_base=sgd"
+      cli_args = "VectorPostprocessors/test_trainer/learning_rate=1e-2 VectorPostprocessors/test_trainer/num_samples=1280 VectorPostprocessors/test_trainer/num_epochs=20000 VectorPostprocessors/test_trainer/optimizer_type='sgd' Outputs/file_base='sgd'"
       libtorch = true
       allow_test_objects = True
+      rel_err = 1e-2
+      heavy = true
     []
   []
 []

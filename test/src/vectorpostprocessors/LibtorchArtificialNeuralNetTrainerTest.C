@@ -31,8 +31,10 @@ LibtorchArtificialNeuralNetTrainerTest::validParams()
   params.addRequiredParam<unsigned int>("num_samples",
                                         "The number of samples we want to use for training.");
   params.addRequiredParam<Real>("learning_rate", "The learning rate for the gradient descent.");
-  params.addRequiredParam<std::vector<unsigned int>>("hidden_layers", "The architecture of the hidden layers.");
-  params.addRequiredParam<std::vector<Real>>("monitor_point", "The point where we want to monitor the results.");
+  params.addRequiredParam<std::vector<unsigned int>>("hidden_layers",
+                                                     "The architecture of the hidden layers.");
+  params.addRequiredParam<std::vector<Real>>("monitor_point",
+                                             "The point where we want to monitor the results.");
   return params;
 }
 
@@ -49,7 +51,7 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
   unsigned int num_inputs = 3;
   unsigned int num_outputs = 2;
   unsigned int num_samples = getParam<unsigned int>("num_samples");
-  std::vector<unsigned int> hidden_layers =  getParam<std::vector<unsigned int>>("hidden_layers");
+  std::vector<unsigned int> hidden_layers = getParam<std::vector<unsigned int>>("hidden_layers");
 
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> nn =
       std::make_shared<Moose::LibtorchArtificialNeuralNet>(
@@ -64,13 +66,18 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
     for (const auto input_index : make_range(num_inputs))
     {
       data.push_back(Real(sample_index) / Real(num_samples) + Real(input_index) / Real(num_inputs));
-      sample.push_back(Real(sample_index) / Real(num_samples) + Real(input_index) / Real(num_inputs));
+      sample.push_back(Real(sample_index) / Real(num_samples) +
+                       Real(input_index) / Real(num_inputs));
     }
 
-    std::cout << Moose::stringify(sample) << std::endl;
-
     for (const auto result_index : make_range(num_outputs))
-      results.push_back(result_index+sample[0]*sample[1]*sample[2]);
+    {
+      Real radius = sqrt(sample[0] * sample[0] + sample[1] * sample[1] + sample[2] * sample[2]);
+      if (radius < 1.4)
+        results.push_back(0.0 + Real(result_index) / Real(num_outputs));
+      else
+        results.push_back(1.0 + Real(result_index) / Real(num_outputs));
+    }
   }
 
   auto options = torch::TensorOptions().dtype(at::kDouble);

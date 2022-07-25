@@ -8,12 +8,12 @@
 [VectorPostprocessors]
   [test_trainer]
     type = LibtorchArtificialNeuralNetTrainerTest
-    optimizer_type = adam
-    num_epochs = 5000
-    num_batches = 20
-    num_samples = 4000
-    learning_rate = 1e-5
-    hidden_layers = '108 108 64'
+    optimizer_type = adagrad
+    num_epochs = 2500
+    num_batches = 2
+    num_samples = 640
+    learning_rate = 1e-1
+    hidden_layers = '27 16'
     monitor_point = '0.5 0.8333333333 1.16666666666666'
   []
 []
