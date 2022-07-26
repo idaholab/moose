@@ -295,17 +295,10 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     // Find derivative when on interval between two nodes
     if (y == y1)
     {
-      if (ly == uy && lx == ux)
-      {
-
-      }
-      else
-      {
       auto dfdx_ly = (fQ21 - fQ11) / (x2 - x1);
       if (std::isnan(dfdx_ly))
         std::cout << "nan!!!! dfdx_uy" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
       return dfdx_ly;
-      }
     }
     else if (y == y2)
     {
@@ -496,9 +489,14 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     mooseError("deriv_var must equal 1 or 2");
 }
 
-// Real BilinearInterpolation::derivativefunction()
+// Real BilinearInterpolation::derivativefunction(Real fQ11, Real fQ21, Real fQ12, Real fQ22, Real x, Real x1, Real x2, Real y, Real y1, Real y2, auto & df)
 // {
-//
+//   df = fQ11 * (x - x2);
+//   df += fQ21 * (x1 - x);
+//   df += fQ12 * (x2 - x);
+//   df += fQ22 * (x - x1);
+//   df /= ((x2 - x1) * (y2 - y1));
+//   return df;
 // }
 
 void BilinearInterpolation::sampleValueAndDerivatives(Real s1, Real s2, Real & y, Real & dy_ds1, Real & dy_ds2) const
