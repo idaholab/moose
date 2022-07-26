@@ -135,8 +135,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   const Real & fQ12 = _zSurface(uy, lx);
   const Real & fQ22 = _zSurface(uy, ux);
 
-  // std::cout << "x index" << lx << " " << ux << std::endl;
-  // std::cout << "y index" << ly << " " << uy << std::endl;
   const auto & x = s1;
   const auto & y = s2;
   const Real & x1 = _x1[lx];
@@ -146,7 +144,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
 
   if ((lx == 0) && (ly == 0)) // if at bottom left node, take average slope of four boxes
   {
-    // std::cout << "lx = " << lx << " " << "ly = " << ly <<std::endl;
     const auto & fQ13 = _zSurface(ly + 1, lx); // fQ at (x1,y3)
     const auto & fQ31 = _zSurface(ly, lx + 1); //fQ at (x3,y1)
     const auto & fQ33 = _zSurface(ly + 1, lx + 1); //fQ at (x3,y3)
@@ -160,9 +157,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ13 * (y1 - y);
       dfdx += fQ33 * (y - y1);
       dfdx /= ((x3 - x1) * (y3 - y1));
-      if (std::isnan(dfdx))
-        std::cout << "nan!!!! " << "lx = " << lx << " " << "ly = " << ly <<std::endl;
-      // std::cout << "at bottom left node, dfdx = " << dfdx / 4 << std::endl;
       return dfdx / 4;
     }
     else if (deriv_var == 2)
@@ -173,8 +167,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ33 * (x - x1);
       dfdy /= ((x3 - x1) * (y3 - y1));
       if (std::isnan(dfdy))
-        std::cout << "nan!!!! " << "lx = " << lx << " " << "ly = " << ly <<std::endl;
-      // std::cout << "at bottom left node, dfdy = " << dfdy / 4 << std::endl;
       return dfdy / 4;
     }
     else
@@ -182,7 +174,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   }
   else if ((ly == 0) && (ux == 99)) // if at bottom right node
   {
-    // std::cout << "ux = " << ux << " " << "ly = " << ly <<std::endl;
     const auto & fQ01 = _zSurface(ly, lx - 1); // fQ at (x0,y1)
     const auto & fQ03 = _zSurface(ly + 1, lx - 1); // fQ at (x0,y3)
     const auto & fQ23 = _zSurface(ly + 1, lx); // fQ at (x2,y3)
@@ -196,9 +187,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ03 * (y1 - y);
       dfdx += fQ23 * (y - y1);
       dfdx /= ((x2 - x0) * (y3 - y1));
-      if (std::isnan(dfdx))
-        std::cout << "nan!!!! " << "ux = " << ux << " " << "ly = " << ly <<std::endl;
-      // std::cout << "at bottom right node, dfdx = " << dfdx / 4 << std::endl;
       return dfdx / 4;
     }
     else if (deriv_var == 2)
@@ -208,9 +196,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ03 * (x2 - x);
       dfdy += fQ23 * (x - x0);
       dfdy /= ((x2 - x0) * (y3 - y1));
-      if (std::isnan(dfdy))
-        std::cout << "nan!!!! " << "ux = " << ux << " " << "ly = " << ly <<std::endl;
-      // std::cout << "at bottom right node, dfdy = " << dfdy / 4 << std::endl;
       return dfdy / 4;
     }
     else
@@ -218,7 +203,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   }
   else if ((uy == 99) && (lx == 0)) // if at top left node
   {
-    // std::cout << "lx = " << lx << " " << "uy = " << uy <<std::endl;
     const auto & fQ10 = _zSurface(ly - 1, lx); // fQ at (x1,y0)
     const auto & fQ30 = _zSurface(ly + 1, lx + 1); // fQ at (x3,y0)
     const auto & fQ32 = _zSurface(ly, lx + 1); // fQ at (x3,y2)
@@ -232,9 +216,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ12 * (y0 - y);
       dfdx += fQ32 * (y - y0);
       dfdx /= ((x3 - x1) * (y2 - y0));
-      if (std::isnan(dfdx))
-        std::cout << "nan!!!! " << "lx = " << lx << " " << "uy = " << uy <<std::endl;
-      // std::cout << "at top left node, dfdx = " << dfdx / 4 << std::endl;
       return dfdx / 4;
     }
     else if (deriv_var == 2)
@@ -244,9 +225,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ12 * (x3 - x);
       dfdy += fQ32 * (x - x1);
       dfdy /= ((x3 - x1) * (y2 - y0));
-      if (std::isnan(dfdy))
-        std::cout << "nan!!!! " << "lx = " << lx << " " << "uy = " << uy <<std::endl;
-      // std::cout << "at top left node, dfdy = " << dfdy / 4 << std::endl;
       return dfdy / 4;
     }
     else
@@ -254,7 +232,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   }
   else if ((uy == 99) && (ux == 99)) // if at top right node
   {
-    // std::cout << "ux = " << ux << " " << "uy = " << uy <<std::endl;
     const auto & fQ00 = _zSurface(ly - 1, lx - 1); // fQ at (x0,y0)
     const auto & fQ20 = _zSurface(ly - 1, lx); // fQ at (x2,y0)
     const auto & fQ02 = _zSurface(ly, lx - 1); // fQ at (x0,y2)
@@ -268,8 +245,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ02 * (y0 - y);
       dfdx += fQ22 * (y - y0);
       dfdx /= ((x2 - x0) * (y2 - y0));
-      if (std::isnan(dfdx))
-        std::cout << "nan!!!! " << "ux = " << ux << " " << "uy = " << uy <<std::endl;
       return dfdx / 4;
     }
     else if (deriv_var == 2)
@@ -279,9 +254,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ02 * (x2 - x);
       dfdy += fQ22 * (x - x0);
       dfdy /= ((x2 - x0) * (y2 - y0));
-      if (std::isnan(dfdy))
-        std::cout << "nan!!!! " << "ux = " << ux << " " << "uy = " << uy <<std::endl;
-      // std::cout << "at top right node, dfdy = " << dfdy / 4 << std::endl;
       return dfdy / 4;
     }
     else
@@ -306,8 +278,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ01 * (y0 - y);
       dfdx += fQ31 * (y - y0);
       dfdx /= ((x3 - x0) * (y1 - y0));
-      if (std::isnan(dfdx))
-        std::cout << "nan!!!! " << "ux = " << ux << " " << "uy = " << uy <<std::endl;
       return dfdx / 4;
     }
     else if (deriv_var == 2)
@@ -317,9 +287,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ01 * (x3 - x);
       dfdy += fQ31 * (x - x0);
       dfdy /= ((x3 - x0) * (y1 - y0));
-      if (std::isnan(dfdy))
-        std::cout << "nan!!!! " << "ux = " << ux << " " << "uy = " << uy <<std::endl;
-      // std::cout << "at top right node, dfdy = " << dfdy / 4 << std::endl;
       return dfdy / 4;
     }
     else
@@ -343,8 +310,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ03 * (y1 - y);
       dfdx += fQ33 * (y - y1);
       dfdx /= ((x3 - x0) * (y3 - y1));
-      if (std::isnan(dfdx))
-        std::cout << "nan!!!! " << "ux = " << ux << " " << "uy = " << uy <<std::endl;
       return dfdx / 4;
     }
     else if (deriv_var == 2)
@@ -354,8 +319,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ03 * (x3 - x);
       dfdy += fQ33 * (x - x0);
       dfdy /= ((x3 - x0) * (y3 - y1));
-      if (std::isnan(dfdy))
-        std::cout << "nan!!!! " << "ux = " << ux << " " << "uy = " << uy <<std::endl;
       return dfdy / 4;
     }
     else
@@ -367,20 +330,11 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     // Find derivative when on interval between two nodes
     if (y == y1)
     {
-      auto dfdx_ly = (fQ21 - fQ11) / (x2 - x1);
-      if (std::isnan(dfdx_ly))
-        std::cout << "nan!!!! dfdx_uy" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
-      return dfdx_ly;
+      return (fQ21 - fQ11) / (x2 - x1);
     }
     else if (y == y2)
     {
-      // std::cout << "y==uy" <<std::endl;
-      auto dfdx_uy = (fQ22 - fQ12) / (x2 - x1);
-      // std::cout << "fQ22 - fQ12 = " << fQ22 - fQ12 << std::endl;
-      // std::cout << "x2 - x1 = " << x2 - x1 << std::endl;
-      if (std::isnan(dfdx_uy))
-        std::cout << "nan!!!! dfdx_uy" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
-      return dfdx_uy;
+      return (fQ22 - fQ12) / (x2 - x1);
     }
     else if ((lx == ux) && lx > 0 && ux < _x1.size() - 1)
     {
@@ -398,17 +352,12 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx_a += fQ02 * (y1 - y);
       dfdx_a += fQ12 * (y - y1);
       dfdx_a /= ((x1 - x0) * (y2 - y1));
-      if (std::isnan(dfdx_a))
-        std::cout << "nan!!!! lx==ux, dfdx_a" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
 
       auto dfdx_b = fQ11 * (y - y2);
       dfdx_b += fQ31 * (y2 - y);
       dfdx_b += fQ12 * (y1 - y);
       dfdx_b += fQ32 * (y - y1);
       dfdx_b /= ((x3 - x1) * (y2 - y1));
-      if (std::isnan(dfdx_b))
-        std::cout << "nan!!!! lx==ux, dfdx_b" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
-      // std::cout << "expanded grid occurs, derivative = " << 0.5 * (dfdx_a + dfdx_b) << std::endl;
       return 0.5 * (dfdx_a + dfdx_b);
     }
     else if ((lx == ux) && lx == 0)
@@ -423,16 +372,12 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ12 * (y1 - y);
       dfdx += fQ32 * (y - y1);
       dfdx /= ((x3 - x1) * (y2 - y1));
-      if (std::isnan(dfdx))
-        std::cout << "nan!!!! lx == 0, lx==ux, dfdx" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
-      // std::cout << "lx = 0, dfdx =  " << 0.5 * dfdx << std::endl;
       return 0.5 * dfdx;
     }
     else if ((lx == ux) && (ux == 99))
     {
       const auto & fQ01 = _zSurface(ly, ux - 1); // new lx at ly
       const auto & fQ02 = _zSurface(uy, ux - 1); // new lx at uy
-
       const Real & x0 = _x1[ux - 1]; // lx value
 
       auto dfdx = fQ01 * (y - y2);
@@ -440,9 +385,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ02 * (y1 - y);
       dfdx += fQ12 * (y - y1);
       dfdx /= ((x1 - x0) * (y2 - y1));
-      if (std::isnan(dfdx))
-        std::cout << "nan!!!! ux == 99, lx==ux, dfdx" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
-      // std::cout << "ux = 99, dfdx =  " << 0.5 * dfdx << std::endl;
       return 0.5 * dfdx;
     }
     // Derivative (w/ respect to x) for some point inside box
@@ -453,9 +395,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx_xy += fQ12 * (y1 - y);
       dfdx_xy += fQ22 * (y - y1);
       dfdx_xy /= ((x2 - x1) * (y2 - y1));
-      if (std::isnan(dfdx_xy))
-        std::cout << "nan!!!! dfdx_xy" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
-      // std::cout << "dfdx_xy = " << dfdx_xy << std::endl;
       return dfdx_xy;
     }
   }
@@ -464,21 +403,11 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   {
     if (x == x1) //if x equal to x1 node
     {
-      // std::cout << "x==lx" <<std::endl;
-      auto dfdy_lx = (fQ12 - fQ11) / (y2 - y1);
-      if (std::isnan(dfdy_lx))
-        std::cout << "nan!!!! dfdy_lx" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
-      // std::cout << "fQ12 - fQ11 = " << fQ12 - fQ11 << std::endl;
-      // std::cout << "y2 - y1 = " << y2 - y1 << std::endl;
-      return dfdy_lx;
+      return (fQ12 - fQ11) / (y2 - y1);
     }
     else if (x == x2) // if x equal to x2 node
     {
-      // std::cout << "x==ux" <<std::endl;
-      auto dfdy_ux = (fQ22 - fQ21) / (y2 - y1);
-      if (std::isnan(dfdy_ux))
-        std::cout << "nan!!!! dfdy_ux" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
-      return dfdy_ux;
+      return (fQ22 - fQ21) / (y2 - y1);
     }
     else if ((ly == uy) && ly > 0 && uy < _x2.size() - 1)
     {
@@ -487,7 +416,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       const auto & fQ20 = _zSurface(ly - 1, ux); // new uy at lx
       const auto & fQ13 = _zSurface(ly + 1, lx); // new ly at ux
       const auto & fQ23 = _zSurface(ly + 1, ux); // new uy at ux
-
       const Real & y0 = _x2[ly - 1];
       const Real & y3 = _x2[ly + 1];
 
@@ -496,17 +424,12 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy_a += fQ11 * (x2 - x);
       dfdy_a += fQ21 * (x - x1);
       dfdy_a /= ((x2 - x1) * (y1 - y0));
-      if (std::isnan(dfdy_a))
-        std::cout << "nan!!!! ly==uy, dfdy_a" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
 
       auto dfdy_b = fQ11 * (x - x2);
       dfdy_b += fQ21 * (x1 - x);
       dfdy_b += fQ13 * (x2 - x);
       dfdy_b += fQ23 * (x - x1);
       dfdy_b /= ((x2 - x1) * (y3 - y1));
-      if (std::isnan(dfdy_b))
-        std::cout << "nan!!!! ly==uy, dfdy_b" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
-      // std::cout << "expanded grid occurs, derivative = " << 0.5 * (dfdy_a + dfdy_b) << std::endl;
       return 0.5 * (dfdy_a + dfdy_b);
     }
     else if ((ly == uy) && ly == 0)
@@ -521,16 +444,12 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ13 * (x2 - x);
       dfdy += fQ23 * (x - x1);
       dfdy /= ((x2 - x1) * (y3 - y1));
-      if (std::isnan(dfdy))
-        std::cout << "nan!!!! ly==uy, ly=0, dfdy" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
-      // std::cout << "ly = 0, dfdy =  " << 0.5 * dfdy << std::endl;
       return 0.5 * dfdy;
     }
     else if ((ly == uy) && (uy == 99))
     {
       const auto & fQ10 = _zSurface(ly - 1, lx); // new ly at lx
       const auto & fQ20 = _zSurface(ly - 1, ux); // new ly at ux
-
       const Real & y0 = _x2[ly - 1]; // lx value
 
       auto dfdy = fQ10 * (x - x2);
@@ -538,9 +457,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ11 * (x2 - x);
       dfdy += fQ21 * (x - x1);
       dfdy /= ((x2 - x1) * (y1 - y0));
-      if (std::isnan(dfdy))
-        std::cout << "nan!!!! ly==uy, ly=99, dfdy" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
-      // std::cout << "uy = 99, dfdy =  " << 0.5 * dfdy << std::endl;
       return 0.5 * dfdy;
     }
     else
@@ -551,9 +467,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy_xy += fQ12 * (x2 - x);
       dfdy_xy += fQ22 * (x - x1);
       dfdy_xy /= ((x2 - x1) * (y2 - y1));
-      if (std::isnan(dfdy_xy))
-        std::cout << "nan!!!!  dfdy_xy" << " " << "lx = " << lx << " " << "ux = " << ux << " " << "ly = " << ly << " " << "uy = " << uy <<std::endl;
-      // std::cout << "dfdy_xy = " << dfdy_xy << std::endl;
       return dfdy_xy;
     }
   }
@@ -561,23 +474,9 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     mooseError("deriv_var must equal 1 or 2");
 }
 
-// Real BilinearInterpolation::derivativefunction(Real fQ11, Real fQ21, Real fQ12, Real fQ22, Real x, Real x1, Real x2, Real y, Real y1, Real y2, auto & df)
-// {
-//   df = fQ11 * (x - x2);
-//   df += fQ21 * (x1 - x);
-//   df += fQ12 * (x2 - x);
-//   df += fQ22 * (x - x1);
-//   df /= ((x2 - x1) * (y2 - y1));
-//   return df;
-// }
-
 void BilinearInterpolation::sampleValueAndDerivatives(Real s1, Real s2, Real & y, Real & dy_ds1, Real & dy_ds2) const
 {
   y = sample(s1, s2);
-  // std::cout << "wrt x1 " << std::endl;
   dy_ds1 = sampleDerivative(s1, s2, 1);
-  // std::cout << "wrt x2 " << std::endl;
   dy_ds2 = sampleDerivative(s1, s2, 2);
-  // std::cout << "sample " << " " << y << std::endl;
-  // std::cout << "sampleValueAndDerivatives " << " " << dy_dx1 << " " << dy_dx2 << std::endl;
 }
