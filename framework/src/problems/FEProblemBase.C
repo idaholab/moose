@@ -838,13 +838,7 @@ FEProblemBase::initialSetup()
                                        _bnd_material_props,
                                        _neighbor_material_props,
                                        _assembly);
-      /**
-       * The ComputeMaterialObjectThread object now allocates memory as needed for the material
-       * storage system.
-       * This cannot be done with threads. The first call to this object bypasses threading by
-       * calling the object directly. The subsequent call can be called with threads.
-       */
-      cmt(elem_range, true);
+      Threads::parallel_reduce(elem_range, cmt);
 
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
           _neighbor_material_props.hasStatefulProperties())
