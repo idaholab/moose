@@ -42,6 +42,11 @@ public:
   bool meshesAreCoincident() const { return _all_points_are_coincident; }
 
   /**
+   * Returns true if the primary and secondary boundaries are aligned
+   */
+  bool meshesAreAligned() const { return _meshes_are_aligned; }
+
+  /**
    * Returns the list of element IDs on the primary boundary
    */
   const std::vector<dof_id_type> & getPrimaryBoundaryElemIDs() const { return _primary_elem_ids; }
@@ -95,4 +100,6 @@ protected:
   std::map<dof_id_type, dof_id_type> _node_id_map;
   /// Flag that all quadrature points are coincident between boundaries
   bool _all_points_are_coincident;
+  /// Flag that meshes are aligned
+  bool _meshes_are_aligned;
 };

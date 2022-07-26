@@ -44,6 +44,7 @@ MeshAlignment2D2D::initialize(
                       secondary_node_points);
 
   _all_points_are_coincident = true;
+  std::vector<unsigned int> primary_element_pairing_count(_primary_elem_ids.size(), 0);
 
   // Build the element mapping
   if (primary_side_points.size() > 0 && secondary_side_points.size() > 0)
@@ -66,8 +67,16 @@ MeshAlignment2D2D::initialize(
 
       _elem_id_map.insert({primary_elem_id, secondary_elem_id});
       _elem_id_map.insert({secondary_elem_id, primary_elem_id});
+
+      primary_element_pairing_count[i_primary]++;
     }
   }
+
+  // Check if meshes are aligned: all primary boundary elements have exactly one pairing
+  _meshes_are_aligned = true;
+  for (std::size_t i_primary = 0; i_primary < _primary_elem_ids.size(); i_primary++)
+    if (primary_element_pairing_count[i_primary] != 1)
+      _meshes_are_aligned = false;
 
   // Build the node mapping
   if (primary_node_points.size() > 0 && secondary_node_points.size() > 0)
