@@ -52,7 +52,7 @@
     type = CheckFiles
     input = train.i
     check_files = 'train_out_train.rd mynet.pt'
-    cli_args = "Trainers/train/read_from_file=false Trainers/train/rel_loss_tol=0.1"
+    cli_args = "Trainers/train/read_from_file=false"
     allow_test_objects = true
     libtorch = true
     prereq = retrain

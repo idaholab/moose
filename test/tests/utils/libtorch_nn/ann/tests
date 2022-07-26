@@ -108,7 +108,7 @@
       input = 'test_ann_trainer.i'
       csvdiff = 'rmsprop_test_trainer_0001.csv'
       detail = 'RMSprop optimizer.'
-      cli_args = "VectorPostprocessors/test_trainer/learning_rate=1e-4 VectorPostprocessors/test_trainer/num_samples=1280 VectorPostprocessors/test_trainer/num_epochs=10000 VectorPostprocessors/test_trainer/optimizer_type='rmsprop' Outputs/file_base='rmsprop'"
+      cli_args = "VectorPostprocessors/test_trainer/learning_rate=8e-4 VectorPostprocessors/test_trainer/num_samples=1280 VectorPostprocessors/test_trainer/num_epochs=10000 VectorPostprocessors/test_trainer/optimizer_type='rmsprop' Outputs/file_base='rmsprop'"
       libtorch = true
       allow_test_objects = True
       rel_err = 1e-2

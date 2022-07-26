@@ -49,6 +49,8 @@ LibtorchANNTrainer::validParams()
       "Epoch training loss printing. 0 - no printing, 1 - every epoch, 10 - every 10th epoch.");
   params.addParam<unsigned int>(
       "seed", 11, "Random number generator seed for stochastic optimizers.");
+  params.addParam<unsigned int>(
+      "max_processes", 1, "The maximum number of parallel processes that the trainer will use.");
 
   params.suppressParameter<MooseEnum>("response_type");
   return params;
@@ -87,6 +89,7 @@ LibtorchANNTrainer::LibtorchANNTrainer(const InputParameters & parameters)
   _optim_options.rel_loss_tol = getParam<Real>("rel_loss_tol");
   _optim_options.print_loss = getParam<unsigned int>("print_epoch_loss") > 0;
   _optim_options.print_epoch_loss = getParam<unsigned int>("print_epoch_loss");
+  _optim_options.parallel_processes = getParam<unsigned int>("max_processes");
 #endif
 }
 
@@ -148,8 +151,8 @@ LibtorchANNTrainer::postTrain()
   // the training process. See the header file for the definition of this structure.
   Moose::LibtorchDataset my_data(data_tensor, response_tensor);
 
-  Moose::LibtorchArtificialNeuralNetTrainer trainer(_nn);
-  trainer.train(my_data, _optim_options, comm());
+  Moose::LibtorchArtificialNeuralNetTrainer<> trainer(_nn, comm());
+  trainer.train(my_data, _optim_options);
 
 #endif
 }

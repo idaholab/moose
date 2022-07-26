@@ -90,7 +90,7 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
       torch::from_blob(results.data(), {num_samples, num_outputs}, options).to(at::kDouble);
 
   Moose::LibtorchDataset dataset(data_tensor, response_tensor);
-  Moose::LibtorchArtificialNeuralNetTrainer trainer(nn, comm());
+  Moose::LibtorchArtificialNeuralNetTrainer<> trainer(nn, comm());
 
   Moose::LibtorchTrainingOptions optim_options;
   optim_options.optimizer_type = getParam<std::string>("optimizer_type");
