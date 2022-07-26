@@ -68,6 +68,22 @@ public:
   dof_id_type getNeighborNodeID(const dof_id_type & node_id) const;
 
 protected:
+  /**
+   * Extracts various boundary information
+   *
+   * @param[in] boundary_info  Vector of tuples of element ID and side ID on boundary
+   * @param[out] elem_ids      Vector of element IDs
+   * @param[out] side_points   Vector of side centroids
+   * @param[out] node_ids      Vector of node IDs
+   * @param[out] node_points   Vector of node points
+   */
+  void extractBoundaryInfo(
+      const std::vector<std::tuple<dof_id_type, unsigned short int>> & boundary_info,
+      std::vector<dof_id_type> & elem_ids,
+      std::vector<Point> & side_points,
+      std::vector<dof_id_type> & node_ids,
+      std::vector<Point> & node_points) const;
+
   /// Mesh
   const MooseMesh & _mesh;
 

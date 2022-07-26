@@ -23,62 +23,25 @@ MeshAlignment2D2D::initialize(
     const std::vector<std::tuple<dof_id_type, unsigned short int>> & secondary_boundary_info)
 {
   // Extract primary boundary info
-  _primary_elem_ids.clear();
   std::vector<Point> primary_side_points;
   std::vector<dof_id_type> primary_node_ids;
   std::vector<Point> primary_node_points;
-  for (const auto & elem_id_and_side : primary_boundary_info)
-  {
-    auto elem_id = std::get<0>(elem_id_and_side);
-    auto side = std::get<1>(elem_id_and_side);
-    const Elem * elem = _mesh.elemPtr(elem_id);
-    const Elem * side_elem = elem->build_side_ptr(side).release();
-    const Point side_center = side_elem->vertex_average();
-    for (const auto j : side_elem->node_index_range())
-    {
-      const Node & node = side_elem->node_ref(j);
-      const auto node_id = node.id();
-      if (std::find(primary_node_ids.begin(), primary_node_ids.end(), node_id) ==
-          primary_node_ids.end())
-      {
-        primary_node_ids.push_back(node_id);
-        primary_node_points.push_back(node);
-      }
-    }
-    delete side_elem;
-
-    _primary_elem_ids.push_back(elem_id);
-    primary_side_points.push_back(side_center);
-  }
+  extractBoundaryInfo(primary_boundary_info,
+                      _primary_elem_ids,
+                      primary_side_points,
+                      primary_node_ids,
+                      primary_node_points);
 
   // Extract secondary boundary info
   std::vector<dof_id_type> secondary_elem_ids;
   std::vector<Point> secondary_side_points;
   std::vector<dof_id_type> secondary_node_ids;
   std::vector<Point> secondary_node_points;
-  for (const auto & elem_id_and_side : secondary_boundary_info)
-  {
-    auto elem_id = std::get<0>(elem_id_and_side);
-    auto side = std::get<1>(elem_id_and_side);
-    const Elem * elem = _mesh.elemPtr(elem_id);
-    const Elem * side_elem = elem->build_side_ptr(side).release();
-    const Point side_center = side_elem->vertex_average();
-    for (const auto j : side_elem->node_index_range())
-    {
-      const Node & node = side_elem->node_ref(j);
-      const auto node_id = node.id();
-      if (std::find(secondary_node_ids.begin(), secondary_node_ids.end(), node_id) ==
-          secondary_node_ids.end())
-      {
-        secondary_node_ids.push_back(node_id);
-        secondary_node_points.push_back(node);
-      }
-    }
-    delete side_elem;
-
-    secondary_elem_ids.push_back(elem_id);
-    secondary_side_points.push_back(side_center);
-  }
+  extractBoundaryInfo(secondary_boundary_info,
+                      secondary_elem_ids,
+                      secondary_side_points,
+                      secondary_node_ids,
+                      secondary_node_points);
 
   _all_points_are_coincident = true;
 
@@ -128,6 +91,44 @@ MeshAlignment2D2D::initialize(
       _node_id_map.insert({primary_node_id, secondary_node_id});
       _node_id_map.insert({secondary_node_id, primary_node_id});
     }
+  }
+}
+
+void
+MeshAlignment2D2D::extractBoundaryInfo(
+    const std::vector<std::tuple<dof_id_type, unsigned short int>> & boundary_info,
+    std::vector<dof_id_type> & elem_ids,
+    std::vector<Point> & side_points,
+    std::vector<dof_id_type> & node_ids,
+    std::vector<Point> & node_points) const
+{
+  elem_ids.clear();
+  side_points.clear();
+  node_ids.clear();
+  node_points.clear();
+
+  for (const auto & elem_id_and_side : boundary_info)
+  {
+    auto elem_id = std::get<0>(elem_id_and_side);
+    elem_ids.push_back(elem_id);
+
+    auto side = std::get<1>(elem_id_and_side);
+    const Elem * elem = _mesh.elemPtr(elem_id);
+    const Elem * side_elem = elem->build_side_ptr(side).release();
+    const Point side_center = side_elem->vertex_average();
+    side_points.push_back(side_center);
+
+    for (const auto j : side_elem->node_index_range())
+    {
+      const Node & node = side_elem->node_ref(j);
+      const auto node_id = node.id();
+      if (std::find(node_ids.begin(), node_ids.end(), node_id) == node_ids.end())
+      {
+        node_ids.push_back(node_id);
+        node_points.push_back(node);
+      }
+    }
+    delete side_elem;
   }
 }
 
