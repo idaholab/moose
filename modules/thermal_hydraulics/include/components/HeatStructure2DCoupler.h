@@ -9,13 +9,12 @@
 
 #pragma once
 
-#include "BoundaryBase.h"
-#include "MeshAlignment2D2D.h"
+#include "HeatStructure2DCouplerBase.h"
 
 /**
  * Couples boundaries of two 2D heat structures via a heat transfer coefficient
  */
-class HeatStructure2DCoupler : public BoundaryBase
+class HeatStructure2DCoupler : public HeatStructure2DCouplerBase
 {
 public:
   HeatStructure2DCoupler(const InputParameters & parameters);
@@ -23,20 +22,7 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
-  virtual void init() override;
   virtual void check() const override;
-
-  /// Primary and secondary heat structure names
-  const std::vector<std::string> _hs_names;
-  /// Primary and secondary heat structure boundaries
-  const std::vector<BoundaryName> _hs_boundaries;
-
-  /// Mesh alignment
-  MeshAlignment2D2D _mesh_alignment;
-  /// Flag for each heat structure being HeatStructurePlate
-  std::vector<bool> _is_plate;
-  /// Flag for each heat structure deriving from HeatStructureCylindricalBase
-  std::vector<bool> _is_cylindrical;
 
 public:
   static InputParameters validParams();
