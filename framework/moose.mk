@@ -12,12 +12,43 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
 	libmesh_LDFLAGS += -headerpad_max_install_names
 endif
 
-#
-# Verify Conda
-#
-CONDA_RESULT:=$(shell bash -c "$(MOOSE_DIR)/scripts/verify_conda_libmesh.py $(MOOSE_DIR)")
-ifneq ($(CONDA_RESULT),0)
- $(error Build failed)
+$(info Checking if conda packages exist...)
+#check if conda exists on the system, then run checks if it does.
+check_conda := $(shell conda list 2> /dev/null | grep "moose-libmesh \|moose-petsc"; echo 0)
+
+ifneq ($(check_conda),0)
+
+ #libmesh conda check
+ $(info Checking if libmesh version is up to date...)
+ conda_libmesh_status := $(shell awk '{print $$2}' <<< '$(check_conda)')
+ conda_libmesh_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/libmesh/meta.yaml | cut -f 2 -d "\"")
+ ifneq ($(conda_libmesh_status),$(conda_libmesh_file))
+  $(warning The moose-libmesh conda package is out of date compared to the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
+ endif
+ #build number check
+ conda_libmesh_status := $(shell awk '{print $$3}' <<< '$(check_conda)')
+ libmesh_file_1 := $(shell grep "strbuild = \"" $(MOOSE_DIR)/conda/libmesh/meta.yaml | cut -f 2 -d "\"" )
+ libmesh_file_2 := $(shell grep "set build = " $(MOOSE_DIR)/conda/libmesh/meta.yaml | cut -f 5 -d " " )
+ libmesh_file := $(libmesh_file_1)$(libmesh_file_2)
+ ifneq ($(libmesh_file),$(conda_libmesh_status))	
+ 	$(warning The moose-libmesh conda package build number does match the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
+ endif
+
+ #petsc conda check
+ $(info Checking if petsc version is up to date...)
+ conda_petsc_status := $(shell awk '{print $$6}' <<< '$(check_conda)')
+ conda_petsc_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/petsc/meta.yaml | cut -f 2 -d "\"")
+ ifneq ($(conda_petsc_status),$(conda_petsc_file))
+  $(warning The moose-petsc conda package is out of date compared to the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
+ endif
+ #build number check
+ conda_petsc_status := $(shell awk '{print $$7}' <<< '$(check_conda)')
+ petsc_file_1 := $(shell grep "strbuild = \"" $(MOOSE_DIR)/conda/petsc/meta.yaml | cut -f 2 -d "\"" )
+ petsc_file_2 := $(shell grep "set build = " $(MOOSE_DIR)/conda/petsc/meta.yaml | cut -f 5 -d " " )
+ petsc_file := $(petsc_file_1)$(petsc_file_2)
+ ifneq ($(petsc_file),$(conda_petsc_status))	
+ 	$(warning The moose-petsc conda package build number does match the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
+ endif
 endif
 
 #
