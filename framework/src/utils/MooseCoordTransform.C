@@ -453,7 +453,7 @@ MooseCoordTransform::setDestinationCoordinateSystem(
 }
 
 bool
-MooseCoordTransform::isIdentity() const
+MooseCoordTransform::hasNonTranslationTransformation() const
 {
   if (_rs)
     for (const auto i : make_range(Moose::dim))
@@ -463,20 +463,29 @@ MooseCoordTransform::isIdentity() const
         if (i == j)
         {
           if (!MooseUtils::absoluteFuzzyEqual(matrix_elem, 1))
-            return false;
+            return true;
         }
         else if (!MooseUtils::absoluteFuzzyEqual(matrix_elem, 0))
-          return false;
+          return true;
       }
-
-  for (const auto i : make_range(Moose::dim))
-    if (!MooseUtils::absoluteFuzzyEqual(_translation(i), 0))
-      return false;
 
   if ((_coord_type == Moose::COORD_XYZ && (_destination_coord_type == Moose::COORD_RZ ||
                                            _destination_coord_type == Moose::COORD_RSPHERICAL)) ||
       (_coord_type == Moose::COORD_RZ && _destination_coord_type == Moose::COORD_RSPHERICAL))
+    return true;
+
+  return false;
+}
+
+bool
+MooseCoordTransform::isIdentity() const
+{
+  if (hasNonTranslationTransformation())
     return false;
+
+  for (const auto i : make_range(Moose::dim))
+    if (!MooseUtils::absoluteFuzzyEqual(_translation(i), 0))
+      return false;
 
   return true;
 }

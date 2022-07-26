@@ -91,28 +91,28 @@
 
 [Transfers]
   [from_sub]
-    type = MultiAppCopyransfer
+    type = MultiAppCopyTransfer
     from_multi_app = sub
     source_variable = v
     variable = v
     execute_on = 'timestep_begin'
   []
   [from_sub_elem]
-    type = MultiAppCopyransfer
+    type = MultiAppCopyTransfer
     from_multi_app = sub
     source_variable = v_elem
     variable = v_elem
     execute_on = 'timestep_begin'
   []
   [to_sub]
-    type = MultiAppCopyransfer
+    type = MultiAppCopyTransfer
     to_multi_app = sub
     source_variable = w
     variable = w
     execute_on = 'timestep_begin'
   []
   [to_sub_elem]
-    type = MultiAppCopyransfer
+    type = MultiAppCopyTransfer
     to_multi_app = sub
     source_variable = w_elem
     variable = w_elem

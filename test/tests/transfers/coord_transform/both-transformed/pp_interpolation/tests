@@ -4,8 +4,7 @@
   [both-transformed]
     type = RunException
     input = main-app.i
-    exodiff = 'main-app_out.e'
     requirement = 'The system shall report a warning when transferring a variable (for main app) and postprocessor (for subapp) for applications that both have non-identity transformations into the reference space.'
-    expect_err = 'Coordinate transfers are not supported for transfers from a main app variable/field to subapp postprocessors'
+    expect_err = 'Non-translation coordinate transformation capabilities are not implemented in MultiAppVariableValueSamplePostprocessorTransfer'
   []
 []

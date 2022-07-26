@@ -133,7 +133,9 @@ MultiAppFieldTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from
       mooseError("The meshes must be identical to utilize MultiAppCopyTransfer.");
 
     if (!to_problem.coordTransform().isIdentity() || !from_problem.coordTransform().isIdentity())
-      mooseError("Non-identity transformations cannot be used with MultiAppCopyTransfer");
+      mooseDoOnce(mooseWarning("Non-identity transformations used with MultiAppCopyTransfer which "
+                               "is predicated on having exact mesh copies. If you did this on "
+                               "purpose, hopefully you know what you're doing"));
 
     // Transfer node dofs
     for (const auto & node : as_range(to_mesh.local_nodes_begin(), to_mesh.local_nodes_end()))

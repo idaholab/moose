@@ -170,6 +170,13 @@ public:
    */
   bool isIdentity() const;
 
+  /**
+   * @return whether there are any transformations other than translation in the transform. We have
+   * this method because translation has always been supported natively by the multiapp transfer
+   * system through the 'positions' parameter
+   */
+  bool hasNonTranslationTransformation() const;
+
 private:
   /**
    * If the coordinate system type is RZ, then we return the provided argument. Otherwise we return
