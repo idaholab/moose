@@ -11,6 +11,7 @@
 
 #include "BoundaryBase.h"
 #include "MeshAlignment2D2D.h"
+#include "HeatStructureBase.h"
 
 /**
  * Couples boundaries of two 2D heat structures
@@ -35,6 +36,8 @@ protected:
   std::vector<bool> _is_plate;
   /// Flag for each heat structure deriving from HeatStructureCylindricalBase
   std::vector<bool> _is_cylindrical;
+  /// Heat structure side types for each boundary
+  std::vector<HeatStructureSideType> _hs_side_types;
 
 public:
   static InputParameters validParams();

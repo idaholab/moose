@@ -58,6 +58,11 @@ HeatStructure2DCouplerBase::init()
 
     if (primary_hs.hasBoundary(_hs_boundaries[0]) && secondary_hs.hasBoundary(_hs_boundaries[1]))
     {
+      // Get the heat structure types
+      _hs_side_types.resize(2);
+      _hs_side_types[0] = primary_hs.getHeatStructureSideType(_hs_boundaries[0]);
+      _hs_side_types[1] = secondary_hs.getHeatStructureSideType(_hs_boundaries[1]);
+
       // Initialize the alignment mapping
       _mesh_alignment.initialize(primary_hs.getBoundaryInfo(_hs_boundaries[0]),
                                  secondary_hs.getBoundaryInfo(_hs_boundaries[1]));
