@@ -41,15 +41,7 @@ MultiAppMeshFunctionTransfer::validParams()
       "error_on_miss",
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
-  params.addRangeCheckedParam<Real>(
-      "bbox_factor",
-      1,
-      "bbox_factor>0",
-      "Multiply bounding box width (in all directions) by the prescribed factor. Values less than "
-      "1 will shrink the bounding box; values greater than 1 will enlarge the bounding box. It is "
-      "generally not advised to ever shrink the bounding box. On the other hand it may be helpful "
-      "to enlarge the bounding box. Larger bounding boxes will lead to more accurate determination "
-      "of the closest node/element with the tradeoff of more communication.");
+  MultiAppTransfer::addBBoxFactorParam(params);
   return params;
 }
 

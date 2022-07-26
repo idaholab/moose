@@ -50,6 +50,20 @@ MultiAppTransfer::validParams()
   return params;
 }
 
+void
+MultiAppTransfer::addBBoxFactorParam(InputParameters & params)
+{
+  params.addRangeCheckedParam<Real>(
+      "bbox_factor",
+      1 + TOLERANCE,
+      "bbox_factor>0",
+      "Multiply bounding box width (in all directions) by the prescribed factor. Values less than "
+      "1 will shrink the bounding box; values greater than 1 will enlarge the bounding box. It is "
+      "generally not advised to ever shrink the bounding box. On the other hand it may be helpful "
+      "to enlarge the bounding box. Larger bounding boxes will lead to more accurate determination "
+      "of the closest node/element with the tradeoff of more communication.");
+}
+
 MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   : Transfer(parameters),
     _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),

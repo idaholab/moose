@@ -111,6 +111,11 @@ public:
   virtual const std::vector<ExecFlagType> & execFlags() const;
 
 protected:
+  /**
+   * Add the bounding box factor parameter to the supplied input parameters
+   */
+  static void addBBoxFactorParam(InputParameters & params);
+
   /// Deprecated class attribute for compatibility with the apps
   std::shared_ptr<MultiApp> _multi_app;
 
