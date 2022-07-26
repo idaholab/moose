@@ -24,16 +24,34 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     _num_inputs(num_inputs),
     _num_outputs(num_outputs),
     _num_neurons_per_layer(num_neurons_per_layer),
-    _num_hidden_layers(num_neurons_per_layer.size()),
     _activation_function(MultiMooseEnum("relu sigmoid elu gelu linear", "relu"))
 {
   _activation_function = activation_function;
 
   // Check if the number of activation functions matches the number of hidden layers
-  if ((_activation_function.size() != 1) && (_activation_function.size() != _num_hidden_layers))
+  if ((_activation_function.size() != 1) &&
+      (_activation_function.size() != _num_neurons_per_layer.size()))
     mooseError("The number of activation functions should be either one or the same as the number "
                "of hidden layers");
   constructNeuralNetwork();
+}
+
+LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
+    const Moose::LibtorchArtificialNeuralNet & nn)
+  : _name(nn.name()),
+    _num_inputs(nn.numInputs()),
+    _num_outputs(nn.numOutputs()),
+    _num_neurons_per_layer(nn.numNeuronsPerLayer()),
+    _activation_function(nn.activationFunctions())
+{
+  constructNeuralNetwork();
+
+  const auto & from_params = nn.named_parameters();
+  auto to_params = this->named_parameters();
+  for (unsigned int param_i : make_range(from_params.size()))
+  {
+    to_params[param_i].value().data() = from_params[param_i].value().data();
+  }
 }
 
 void
@@ -41,7 +59,7 @@ LibtorchArtificialNeuralNet::constructNeuralNetwork()
 {
   // Adding hidden layers
   unsigned int inp_neurons = _num_inputs;
-  for (unsigned int i = 0; i < _num_hidden_layers; ++i)
+  for (unsigned int i = 0; i < numHiddenLayers(); ++i)
   {
     std::unordered_map<std::string, unsigned int> parameters = {
         {"inp_neurons", inp_neurons}, {"out_neurons", _num_neurons_per_layer[i]}};

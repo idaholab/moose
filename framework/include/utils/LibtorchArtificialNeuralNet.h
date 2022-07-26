@@ -36,6 +36,12 @@ public:
                               const std::vector<std::string> & activation_function = {"relu"});
 
   /**
+   * Copy construct an artificial neural network
+   * @param nn The neural network which needs to be copied
+   */
+  LibtorchArtificialNeuralNet(const Moose::LibtorchArtificialNeuralNet & nn);
+
+  /**
    * Add layers to the neural network
    * @param layer_name The name of the layer to be added
    * @param parameters A map of parameter names and the corresponding values which
@@ -58,7 +64,7 @@ public:
   /// Return the number of neurons on the output layer
   unsigned int numOutputs() const { return _num_outputs; }
   /// Return the number of hidden layers
-  unsigned int numHiddenLayers() const { return _num_hidden_layers; }
+  unsigned int numHiddenLayers() const { return _num_neurons_per_layer.size(); }
   /// Return the hidden layer architecture
   const std::vector<unsigned int> & numNeuronsPerLayer() const { return _num_neurons_per_layer; }
   /// Return the multi enum containing the activation functions
@@ -79,8 +85,6 @@ protected:
   const unsigned int _num_outputs;
   /// Hidden layer architecture
   const std::vector<unsigned int> _num_neurons_per_layer;
-  /// Number of hidden layers in the neural network
-  const unsigned int _num_hidden_layers;
   /// Activation functions (either one for all hidden layers or one for every layer
   /// separately)
   MultiMooseEnum _activation_function;

@@ -39,7 +39,7 @@ the number of expected input and output neurons, an expected hideen-layer-struct
 the activation functions for the layers. If no activation function is given,
 `relu` is used for every hidden neuron:
 
-!listing test/src/utils/LibtorchArtificialNeuralNetTest.C start=Define neurons end=activation_functions include-end=true
+!listing test/src/vectorpostprocessors/LibtorchArtificialNeuralNetTest.C start=Define neurons end=activation_functions include-end=true
 
 For training a neural network, we need to initialize an optimizer (ADAM in this case),
 then supply known input-output combinations for the function-to-be-approximated
@@ -47,7 +47,7 @@ and let the optimizer set the parameters of the neural network to ensure that th
 answer supplied by the neural network is as close to the supplied values as possible.
 Once step in this optimization process is shown below:
 
-!listing test/src/utils/LibtorchArtificialNeuralNetTest.C start=Create an Adam optimizer end=optimizer.step(); include-end=true
+!listing test/src/vectorpostprocessors/LibtorchArtificialNeuralNetTest.C start=Create an Adam optimizer end=optimizer.step(); include-end=true
 
 
 For more detailed instructions on training a neural network, visit the Stochastic Tools module!

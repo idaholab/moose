@@ -210,7 +210,7 @@ ifeq ($(MOOSE_UNITY),true)
 
 srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
 
-moose_non_unity := %/base %/utils
+moose_non_unity := %/base %/utils %/controls
 
 unity_src_dir := $(FRAMEWORK_DIR)/build/unity_src
 

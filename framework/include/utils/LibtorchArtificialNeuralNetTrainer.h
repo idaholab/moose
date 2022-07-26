@@ -248,8 +248,9 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::train(LibtorchDataset & dataset,
 
       // To enable the parallel training, we compute the gradients of the neural net parameters
       // using backpropagation at each process and then average the gradients across processes.
-      // For this we sum the data on every processor and then divide it by the active processor numbers.
-      // Note: We need to zero out the gradients for inactive processors (which are beyond the predefined limit)
+      // For this we sum the data on every processor and then divide it by the active processor
+      // numbers. Note: We need to zero out the gradients for inactive processors (which are beyond
+      // the predefined limit)
       for (auto & param : _nn->named_parameters())
       {
         if (real_rank > used_rank)
@@ -288,17 +289,20 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::train(LibtorchDataset & dataset,
                    << std::endl;
 
     epoch += 1;
-    if (options.print_loss && used_rank == 0)
-      Moose::out << "Neural net training time: " << COLOR_GREEN << (t_end - t_begin)
-                 << COLOR_DEFAULT << " s" << std::endl;
   }
+  // This is used to measure the training time. Would not like to inherit from
+  // PerfGraphInterface. Other objects can time this process from the outside.
+  auto t_end = MPI_Wtime();
 
-  // Explicitly instantiate for Random and Sequential samplers
-  template class LibtorchArtificialNeuralNetTrainer<
-      torch::data::samplers::DistributedRandomSampler>;
+  if (options.print_loss && used_rank == 0)
+    Moose::out << "Neural net training time: " << COLOR_GREEN << (t_end - t_begin) << COLOR_DEFAULT
+               << " s" << std::endl;
+}
+// Explicitly instantiate for Random and Sequential samplers
+template class LibtorchArtificialNeuralNetTrainer<torch::data::samplers::DistributedRandomSampler>;
 
-  template class LibtorchArtificialNeuralNetTrainer<
-      torch::data::samplers::DistributedSequentialSampler>;
+template class LibtorchArtificialNeuralNetTrainer<
+    torch::data::samplers::DistributedSequentialSampler>;
 }
 
 #endif
