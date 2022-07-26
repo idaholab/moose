@@ -288,7 +288,79 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       mooseError("deriv_var must equal 1 or 2");
   }
 
+  else if ((uy == 99) && (ly == uy) && (ux == lx)) // when along top bound and ux=lx, uy=ly
+  {
+    const auto & fQ00 = _zSurface(uy - 1, lx - 1); // fQ at (x0,y0)
+    const auto & fQ01 = _zSurface(uy, lx - 1); // fQ at (x0,y1)
+    const auto & fQ30 = _zSurface(uy - 1, lx + 1); // fQ at (x3,y0)
+    const auto & fQ31 = _zSurface(uy, lx + 1); // fQ at (x3,y1)
 
+    const Real & x0 = _x1[lx - 1]; // lx value
+    const Real & x3 = _x1[lx + 1]; // ux value
+    const Real & y0 = _x2[ly - 1]; // ly value
+
+    if (deriv_var == 1)
+    {
+      auto dfdx = fQ00 * (y - y1);
+      dfdx += fQ30 * (y1 - y);
+      dfdx += fQ01 * (y0 - y);
+      dfdx += fQ31 * (y - y0);
+      dfdx /= ((x3 - x0) * (y1 - y0));
+      if (std::isnan(dfdx))
+        std::cout << "nan!!!! " << "ux = " << ux << " " << "uy = " << uy <<std::endl;
+      return dfdx / 4;
+    }
+    else if (deriv_var == 2)
+    {
+      auto dfdy = fQ00 * (x - x3);
+      dfdy += fQ30 * (x0 - x);
+      dfdy += fQ01 * (x3 - x);
+      dfdy += fQ31 * (x - x0);
+      dfdy /= ((x3 - x0) * (y1 - y0));
+      if (std::isnan(dfdy))
+        std::cout << "nan!!!! " << "ux = " << ux << " " << "uy = " << uy <<std::endl;
+      // std::cout << "at top right node, dfdy = " << dfdy / 4 << std::endl;
+      return dfdy / 4;
+    }
+    else
+      mooseError("deriv_var must equal 1 or 2");
+  }
+  else if ((uy == 0) && (ly == uy) && (ux == lx)) // when along bottom bound and ux=lx, uy=ly
+  {
+    const auto & fQ01 = _zSurface(ly, lx - 1); // fQ at (x0,y1)
+    const auto & fQ03 = _zSurface(ly + 1, lx - 1); // fQ at (x0,y3)
+    const auto & fQ31 = _zSurface(ly, lx + 1); // fQ at (x3,y1)
+    const auto & fQ33 = _zSurface(ly + 1, lx + 1); // fQ at (x3,y3)
+
+    const Real & x0 = _x1[lx - 1]; // lx value
+    const Real & x3 = _x1[lx + 1]; // ux value
+    const Real & y3 = _x2[ly + 1]; // uy value
+
+    if (deriv_var == 1)
+    {
+      auto dfdx = fQ01 * (y - y3);
+      dfdx += fQ31 * (y3 - y);
+      dfdx += fQ03 * (y1 - y);
+      dfdx += fQ33 * (y - y1);
+      dfdx /= ((x3 - x0) * (y3 - y1));
+      if (std::isnan(dfdx))
+        std::cout << "nan!!!! " << "ux = " << ux << " " << "uy = " << uy <<std::endl;
+      return dfdx / 4;
+    }
+    else if (deriv_var == 2)
+    {
+      auto dfdy = fQ01 * (x - x3);
+      dfdy += fQ31 * (x0 - x);
+      dfdy += fQ03 * (x3 - x);
+      dfdy += fQ33 * (x - x0);
+      dfdy /= ((x3 - x0) * (y3 - y1));
+      if (std::isnan(dfdy))
+        std::cout << "nan!!!! " << "ux = " << ux << " " << "uy = " << uy <<std::endl;
+      return dfdy / 4;
+    }
+    else
+      mooseError("deriv_var must equal 1 or 2");
+  }
   // calculate derivative wrt to x
   if (deriv_var == 1)
   {
