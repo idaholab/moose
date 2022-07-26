@@ -66,6 +66,8 @@ public:
    */
   Real sampleDerivative(Real s1, Real s2, unsigned int deriv_var) const override;
 
+  // Real derivativefunction(Real fQ11, Real fQ21, Real fQ12, Real fQ22, Real x, Real x1, Real x2, Real y, Real y1, Real y2, auto & df);
+
   void sampleValueAndDerivatives(Real s1, Real s2, Real & y, Real & dy_ds1, Real & dy_ds2) const override;
 
   void

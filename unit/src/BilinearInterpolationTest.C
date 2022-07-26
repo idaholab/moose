@@ -10,7 +10,7 @@
 #include "gtest/gtest.h"
 
 #include "BilinearInterpolation.h"
-
+// WIP
 const double tol = 1e-8;
 
 TEST(BilinearInterpolationTest, sample)
