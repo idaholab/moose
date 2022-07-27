@@ -8,25 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "HeatStructure2DCoupler.h"
-#include "HeatStructurePlate.h"
 #include "HeatStructureCylindricalBase.h"
-#include "THMMesh.h"
 
 registerMooseObject("ThermalHydraulicsApp", HeatStructure2DCoupler);
 
 InputParameters
 HeatStructure2DCoupler::validParams()
 {
-  InputParameters params = BoundaryBase::validParams();
+  InputParameters params = HeatStructure2DCouplerBase::validParams();
 
-  params.addRequiredParam<std::string>("primary_heat_structure",
-                                       "The first heat structure to couple");
-  params.addRequiredParam<std::string>("secondary_heat_structure",
-                                       "The second heat structure to couple");
-  params.addRequiredParam<BoundaryName>("primary_boundary",
-                                        "The boundary of the first heat structure to couple");
-  params.addRequiredParam<BoundaryName>("secondary_boundary",
-                                        "The boundary of the second heat structure to couple");
   params.addRequiredParam<FunctionName>("heat_transfer_coefficient",
                                         "Heat transfer coefficient function [W/(m^2-K)]");
 
@@ -37,100 +27,23 @@ HeatStructure2DCoupler::validParams()
 }
 
 HeatStructure2DCoupler::HeatStructure2DCoupler(const InputParameters & parameters)
-  : BoundaryBase(parameters),
-
-    _hs_names({getParam<std::string>("primary_heat_structure"),
-               getParam<std::string>("secondary_heat_structure")}),
-    _hs_boundaries(
-        {getParam<BoundaryName>("primary_boundary"), getParam<BoundaryName>("secondary_boundary")}),
-
-    _mesh_alignment(_mesh),
-    _is_plate({false, false}),
-    _is_cylindrical({false, false})
+  : HeatStructure2DCouplerBase(parameters)
 {
-  addDependency(_hs_names[0]);
-  addDependency(_hs_names[1]);
-}
-
-void
-HeatStructure2DCoupler::init()
-{
-  BoundaryBase::init();
-
-  if (hasComponentByName<HeatStructureBase>(_hs_names[0]) &&
-      hasComponentByName<HeatStructureBase>(_hs_names[1]) && !_mesh.isDistributedMesh())
-  {
-    const HeatStructureBase & primary_hs = getComponentByName<HeatStructureBase>(_hs_names[0]);
-    const HeatStructureBase & secondary_hs = getComponentByName<HeatStructureBase>(_hs_names[1]);
-
-    if (primary_hs.hasBoundary(_hs_boundaries[0]) && secondary_hs.hasBoundary(_hs_boundaries[1]))
-    {
-      // Initialize the alignment mapping
-      _mesh_alignment.initialize(primary_hs.getBoundaryInfo(_hs_boundaries[0]),
-                                 secondary_hs.getBoundaryInfo(_hs_boundaries[1]));
-
-      // Add entries to sparsity pattern for coupling
-      for (const auto & elem_id : _mesh_alignment.getPrimaryBoundaryElemIDs())
-      {
-        const auto neighbor_elem_id = _mesh_alignment.getNeighborElemID(elem_id);
-        if (neighbor_elem_id != DofObject::invalid_id)
-          _sim.augmentSparsity(elem_id, neighbor_elem_id);
-      }
-    }
-  }
-
-  for (unsigned int i = 0; i < 2; i++)
-  {
-    if (hasComponentByName<HeatStructurePlate>(_hs_names[i]))
-      _is_plate[i] = true;
-    if (hasComponentByName<HeatStructureCylindricalBase>(_hs_names[i]))
-      _is_cylindrical[i] = true;
-  }
 }
 
 void
 HeatStructure2DCoupler::check() const
 {
-  BoundaryBase::check();
+  HeatStructure2DCouplerBase::check();
 
-  for (unsigned int i = 0; i < 2; i++)
-  {
-    checkComponentOfTypeExistsByName<HeatStructureBase>(_hs_names[i]);
-
-    if (hasComponentByName<HeatStructureBase>(_hs_names[i]))
-    {
-      const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_names[i]);
-      if (!hs.hasBoundary(_hs_boundaries[i]))
-        logError("The heat structure '",
-                 _hs_names[i],
-                 "' does not have the boundary '",
-                 _hs_boundaries[i],
-                 "'.");
-
-      if ((!_is_plate[i]) && (!_is_cylindrical[i]))
-        logError("The type of the heat structure '",
-                 _hs_names[i],
-                 "' is not 'HeatStructurePlate' or inherited from 'HeatStructureCylindricalBase'.");
-    }
-  }
-
-  if ((_is_plate[0] && _is_cylindrical[1]) || (_is_cylindrical[0] && _is_plate[1]))
-    logError("The coupled heat structures must have the same type.");
-
-  if (_mesh.isDistributedMesh())
-    logError("HeatStructure2DCoupler does not work with a distributed mesh.");
-  else if (!_mesh_alignment.meshesAreCoincident())
+  if (!_mesh_alignment.meshesAreCoincident())
     logError("The primary and secondary boundaries must have coincident meshes.");
-
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  logError("HeatStructure2DCoupler only works with global AD indexing.");
-#endif
 }
 
 void
 HeatStructure2DCoupler::addMooseObjects()
 {
-  BoundaryBase::addMooseObjects();
+  HeatStructure2DCouplerBase::addMooseObjects();
 
   for (unsigned int i = 0; i < 2; i++)
   {

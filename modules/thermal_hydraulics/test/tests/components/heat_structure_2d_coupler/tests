@@ -102,7 +102,7 @@
         Components/hs3/inner_radius=0.7
         Postprocessors/E_tot/axis_dir='1 0 0'
         Postprocessors/E_tot/axis_point='0 0 0'"
-      expect_err = "HeatStructure2DCoupler does not work with a distributed mesh"
+      expect_err = "HeatStructure2DCouplerBase does not work with a distributed mesh"
       mesh_mode = 'distributed'
 
       detail = 'the parallel mesh type is distributed.'
