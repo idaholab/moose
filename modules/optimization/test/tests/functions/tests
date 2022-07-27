@@ -1,69 +1,69 @@
 [Tests]
-  [reporter_nearest_point]
-    design = 'ReporterNearestPointAux.md'
+  [vector_nearest_point]
+    design = 'VectorNearestPointFunction.md'
     issues = '#42'
     requirement = 'The system shall be able to compute a auxiliary varible based on data from reporter values with '
     [x]
       type = Exodiff
-      input = reporter_nearest_point.i
-      cli_args = 'AuxKernels/active=x Outputs/file_base=rnp_x'
+      input = vector_nearest_point.i
+      cli_args = 'Functions/active=xx AuxKernels/val_aux/function=xx Outputs/file_base=rnp_x'
       exodiff = 'rnp_x.e'
       detail = 'x-coordinate data;'
     []
     [xy]
       type = Exodiff
-      input = reporter_nearest_point.i
-      cli_args = 'AuxKernels/active=xy Outputs/file_base=rnp_xy'
+      input = vector_nearest_point.i
+      cli_args = 'Functions/active=xy AuxKernels/val_aux/function=xy Outputs/file_base=rnp_xy'
       exodiff = 'rnp_xy.e'
       detail = 'x- and y-coordinate data;'
     []
     [xyz]
       type = Exodiff
-      input = reporter_nearest_point.i
-      cli_args = 'AuxKernels/active=xyz Outputs/file_base=rnp_xyz'
+      input = vector_nearest_point.i
+      cli_args = 'Functions/active=xyz AuxKernels/val_aux/function=xyz Outputs/file_base=rnp_xyz'
       exodiff = 'rnp_xyz.e'
       detail = 'x-, y-, and z-coordinate data;'
     []
     [xyzt]
       type = Exodiff
-      input = reporter_nearest_point.i
-      cli_args = 'AuxKernels/active=xyzt Outputs/file_base=rnp_xyzt'
+      input = vector_nearest_point.i
+      cli_args = 'Functions/active=xyzt AuxKernels/val_aux/function=xyzt Outputs/file_base=rnp_xyzt'
       exodiff = 'rnp_xyzt.e'
       detail = 'time, x-, y-, and z-coordinate data;'
     []
 
     [errorv]
       type = RunException
-      input = reporter_nearest_point.i
-      cli_args = 'AuxKernels/active=errorv'
-      expect_err = 'Number of values must be greater than 0\.'
-      detail = 'error if no data is present;'
+      input = vector_nearest_point.i
+      cli_args = 'Functions/active=errorv AuxKernels/val_aux/function=errorv'
+      expect_err = 'Size of value vector \(\d*\) does not match number of coordinates specified \(\d*\).'
+      detail = 'error value vector is wrong size;'
     []
     [errorx]
       type = RunException
-      input = reporter_nearest_point.i
-      cli_args = 'AuxKernels/active=errorx'
+      input = vector_nearest_point.i
+      cli_args = 'Functions/active=errorx AuxKernels/val_aux/function=errorx'
       expect_err = 'Number of x coordinates \(\d*\) does not match number of values \(\d*\).'
       detail = 'error if x-coordinate data is wrong size;'
     []
     [errory]
       type = RunException
-      input = reporter_nearest_point.i
-      cli_args = 'AuxKernels/active=errory'
+      input = vector_nearest_point.i
+      cli_args = 'Functions/active=errory AuxKernels/val_aux/function=errory'
       expect_err = 'Number of y coordinates \(\d*\) does not match number of values \(\d*\).'
       detail = 'error if y-coordinate data is wrong size;'
     []
     [errorz]
       type = RunException
-      input = reporter_nearest_point.i
-      cli_args = 'AuxKernels/active=errorz'
+      input = vector_nearest_point.i
+      cli_args = 'Functions/active=errorz AuxKernels/val_aux/function=errorz'
       expect_err = 'Number of z coordinates \(\d*\) does not match number of values \(\d*\).'
       detail = 'error if z-coordinate data is wrong size;'
     []
     [errort]
       type = RunException
-      input = reporter_nearest_point.i
-      cli_args = 'AuxKernels/active=errort'
+      input = vector_nearest_point.i
+      cli_args = 'Functions/active=errort AuxKernels/val_aux/function=errort'
       expect_err = 'Number of times \(\d*\) does not match number of values \(\d*\).'
       detail = 'error if time data is wrong size;'
     []

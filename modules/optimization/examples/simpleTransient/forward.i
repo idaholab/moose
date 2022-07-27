@@ -16,25 +16,6 @@
   []
 []
 
-[AuxVariables]
-  [source]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [source_aux]
-    type = ReporterNearestPointAux
-    variable = source
-    coord_x = src_values/coordx
-    coord_y = src_values/coordy
-    time = src_values/time
-    value = src_values/values
-    execute_on = 'initial timestep_begin'
-  []
-[]
-
 [VectorPostprocessors]
   [src_values]
     type = CSVReader
@@ -61,9 +42,9 @@
     variable = u
   []
   [src]
-    type = CoupledForce
+    type = BodyForce
     variable = u
-    v = source
+    function = source
   []
 []
 
@@ -80,6 +61,13 @@
   [exact]
     type = ParsedFunction
     value = '2*exp(-2.0*(x - sin(2*pi*t))^2)*exp(-2.0*(y - cos(2*pi*t))^2)*cos((1/2)*x*pi)*cos((1/2)*y*pi)/pi'
+  []
+  [source]
+    type = VectorNearestPointFunction
+    coord_x = src_values/coordx
+    coord_y = src_values/coordy
+    time = src_values/time
+    value = src_values/values
   []
 []
 

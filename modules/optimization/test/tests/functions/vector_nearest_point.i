@@ -16,68 +16,70 @@
 []
 
 [AuxKernels]
-  active = 'xyzt'
-  [x]
-    type = ReporterNearestPointAux
+  [val_aux]
+    type = FunctionAux
     variable = val
-    coord_x = 'values1D/coordx'
-    value = 'values1D/value'
+    function = 'xyzt'
     execute_on = 'initial timestep_end'
   []
+[]
+
+[Functions]
+  active = 'xyzt'
+  [xx]
+    type = VectorNearestPointFunction
+    coord_x = 'values1D/coordx'
+    value = 'values1D/value'
+  []
   [xy]
-    type = ReporterNearestPointAux
-    variable = val
+    type = VectorNearestPointFunction
     coord_x = 'values2D/coordx'
     coord_y = 'values2D/coordy'
     value = 'values2D/value'
-    execute_on = 'initial timestep_end'
   []
   [xyz]
-    type = ReporterNearestPointAux
-    variable = val
+    type = VectorNearestPointFunction
     coord_x = 'values3D/coordx'
     coord_y = 'values3D/coordy'
     coord_z = 'values3D/coordz'
     value = 'values3D/value'
-    execute_on = 'initial timestep_end'
   []
   [xyzt]
-    type = ReporterNearestPointAux
-    variable = val
+    type = VectorNearestPointFunction
     coord_x = 'values4D/coordx'
     coord_y = 'values4D/coordy'
     coord_z = 'values4D/coordz'
     time = 'values4D/time'
     value = 'values4D/value'
-    execute_on = 'initial timestep_end'
   []
 
   [errorv]
-    type = ReporterNearestPointAux
-    variable = val
-    value = 'empty/val'
+    type = VectorNearestPointFunction
+    coord_x = 'values4D/coordx'
+    value = 'values1D/val'
   []
   [errorx]
-    type = ReporterNearestPointAux
-    variable = val
+    type = VectorNearestPointFunction
     coord_x = 'values1D/coordx'
+    coord_y = 'values4D/coordx'
     value = 'values4D/value'
   []
   [errory]
-    type = ReporterNearestPointAux
-    variable = val
+    type = VectorNearestPointFunction
+    coord_x = 'values4D/coordx'
     coord_y = 'values1D/coordx'
     value = 'values4D/value'
   []
   [errorz]
-    type = ReporterNearestPointAux
+    type = VectorNearestPointFunction
     variable = val
+    coord_x = 'values4D/coordx'
     coord_z = 'values1D/coordx'
     value = 'values4D/value'
   []
   [errort]
-    type = ReporterNearestPointAux
-    variable = val
+    type = VectorNearestPointFunction
+    coord_x = 'values4D/coordx'
     time = 'values1D/coordx'
     value = 'values4D/value'
   []
@@ -127,15 +129,6 @@
                           0.00 1.00 2.00 3.00 4.00 5.00 6.00 7.00
                           8.00 9.00 10.0 11.0 12.0 13.0 14.0 15.0
                           16.0 17.0 18.0 19.0 20.0 21.0 22.0 23.0'
-  []
-[]
-
-[VectorPostprocessors]
-  [empty]
-    type = PointValueSampler
-    variable = 'val'
-    points = ''
-    sort_by = 'x'
   []
 []
 
