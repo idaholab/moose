@@ -45,7 +45,8 @@ apt-get install -y \
   emacs \
   libgtest-dev \
   sudo \
-  update-motd
+  update-motd \
+  rsync
 
 # Clear cache
 rm -rf /var/lib/apt/lists/*
