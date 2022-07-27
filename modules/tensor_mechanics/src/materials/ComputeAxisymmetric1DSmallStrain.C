@@ -11,11 +11,13 @@
 #include "UserObject.h"
 
 registerMooseObject("TensorMechanicsApp", ComputeAxisymmetric1DSmallStrain);
+registerMooseObject("TensorMechanicsApp", ADComputeAxisymmetric1DSmallStrain);
 
+template <bool is_ad>
 InputParameters
-ComputeAxisymmetric1DSmallStrain::validParams()
+ComputeAxisymmetric1DSmallStrainTempl<is_ad>::validParams()
 {
-  InputParameters params = Compute1DSmallStrain::validParams();
+  InputParameters params = Generic1DSmallStrain<is_ad>::validParams();
   params.addClassDescription("Compute a small strain in an Axisymmetric 1D problem");
   params.addParam<UserObjectName>("subblock_index_provider",
                                   "SubblockIndexProvider user object name");
@@ -25,14 +27,18 @@ ComputeAxisymmetric1DSmallStrain::validParams()
   return params;
 }
 
-ComputeAxisymmetric1DSmallStrain::ComputeAxisymmetric1DSmallStrain(
+template <bool is_ad>
+ComputeAxisymmetric1DSmallStrainTempl<is_ad>::ComputeAxisymmetric1DSmallStrainTempl(
     const InputParameters & parameters)
-  : Compute1DSmallStrain(parameters),
-    _subblock_id_provider(isParamValid("subblock_index_provider")
-                              ? &getUserObject<SubblockIndexProvider>("subblock_index_provider")
-                              : nullptr),
+  : Generic1DSmallStrain<is_ad>(parameters),
+    _subblock_id_provider(
+        isParamValid("subblock_index_provider")
+            ? &this->template getUserObject<SubblockIndexProvider>("subblock_index_provider")
+            : nullptr),
     _has_out_of_plane_strain(isCoupled("out_of_plane_strain")),
-    _out_of_plane_strain(_has_out_of_plane_strain ? coupledValue("out_of_plane_strain") : _zero),
+    _out_of_plane_strain(_has_out_of_plane_strain
+                             ? this->template coupledGenericValue<is_ad>("out_of_plane_strain")
+                             : this->template genericZeroValue<is_ad>()),
     _has_scalar_out_of_plane_strain(isCoupledScalar("scalar_out_of_plane_strain"))
 {
   if (_has_out_of_plane_strain && _has_scalar_out_of_plane_strain)
@@ -43,21 +49,28 @@ ComputeAxisymmetric1DSmallStrain::ComputeAxisymmetric1DSmallStrain(
     const auto nscalar_strains = coupledScalarComponents("scalar_out_of_plane_strain");
     _scalar_out_of_plane_strain.resize(nscalar_strains);
     for (unsigned int i = 0; i < nscalar_strains; ++i)
-      _scalar_out_of_plane_strain[i] = &coupledScalarValue("scalar_out_of_plane_strain", i);
+    {
+      if constexpr (is_ad)
+        _scalar_out_of_plane_strain[i] = &adCoupledScalarValue("scalar_out_of_plane_strain", i);
+      else
+        _scalar_out_of_plane_strain[i] = &coupledScalarValue("scalar_out_of_plane_strain", i);
+    }
   }
 }
 
+template <bool is_ad>
 void
-ComputeAxisymmetric1DSmallStrain::initialSetup()
+ComputeAxisymmetric1DSmallStrainTempl<is_ad>::initialSetup()
 {
-  ComputeStrainBase::initialSetup();
+  GenericComputeStrainBase<is_ad>::initialSetup();
 
   if (getBlockCoordSystem() != Moose::COORD_RZ)
     mooseError("The coordinate system must be set to RZ for Axisymmetric geometries.");
 }
 
-Real
-ComputeAxisymmetric1DSmallStrain::computeStrainYY()
+template <bool is_ad>
+GenericReal<is_ad>
+ComputeAxisymmetric1DSmallStrainTempl<is_ad>::computeStrainYY()
 {
   if (_has_scalar_out_of_plane_strain)
     return (*_scalar_out_of_plane_strain[getCurrentSubblockIndex()])[0];
@@ -65,8 +78,9 @@ ComputeAxisymmetric1DSmallStrain::computeStrainYY()
     return _out_of_plane_strain[_qp];
 }
 
-Real
-ComputeAxisymmetric1DSmallStrain::computeStrainZZ()
+template <bool is_ad>
+GenericReal<is_ad>
+ComputeAxisymmetric1DSmallStrainTempl<is_ad>::computeStrainZZ()
 {
   if (!MooseUtils::absoluteFuzzyEqual(_q_point[_qp](0), 0.0))
     return (*_disp[0])[_qp] / _q_point[_qp](0);

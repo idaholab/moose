@@ -10,28 +10,39 @@
 #pragma once
 
 #include "Compute1DSmallStrain.h"
+#include "ADCompute1DSmallStrain.h"
 #include "SubblockIndexProvider.h"
+
+// select the appropriate class based on the is_ad boolean parameter
+template <bool is_ad>
+using Generic1DSmallStrain =
+    typename std::conditional<is_ad, ADCompute1DSmallStrain, Compute1DSmallStrain>::type;
+
+template <bool is_ad>
+using GenericComputeStrainBase =
+    typename std::conditional<is_ad, ADComputeStrainBase, ComputeStrainBase>::type;
 
 /**
  * ComputeAxisymmetric1DSmallStrain defines small strains in an Axisymmetric 1D problem.
- * The COORD_TYPE in the Problem block must be set to RZ.
+ * The COORD_TYPE in the Mesh block must be set to RZ.
  */
-class ComputeAxisymmetric1DSmallStrain : public Compute1DSmallStrain
+template <bool is_ad>
+class ComputeAxisymmetric1DSmallStrainTempl : public Generic1DSmallStrain<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ComputeAxisymmetric1DSmallStrain(const InputParameters & parameters);
+  ComputeAxisymmetric1DSmallStrainTempl(const InputParameters & parameters);
 
   void initialSetup() override;
 
 protected:
   /// Computes the strain_yy for axisymmetric problems
-  Real computeStrainYY() override;
+  GenericReal<is_ad> computeStrainYY() override;
 
   /// Computes the strain_zz for axisymmetric problems, where
   ///  \f$ \epsilon_{\theta} = \frac{u_r}{r} \f$
-  Real computeStrainZZ() override;
+  GenericReal<is_ad> computeStrainZZ() override;
 
   /// gets its subblock index for current element
   unsigned int getCurrentSubblockIndex() const
@@ -46,11 +57,26 @@ protected:
   const bool _has_out_of_plane_strain;
 
   /// The out-of-plane strain variable
-  const VariableValue & _out_of_plane_strain;
+  const GenericVariableValue<is_ad> & _out_of_plane_strain;
 
   /// Whether out-of-plane strain scalar variables are coupled
   const bool _has_scalar_out_of_plane_strain;
 
   /// The out-of-plane strain scalar variables
-  std::vector<const VariableValue *> _scalar_out_of_plane_strain;
+  std::vector<const GenericVariableValue<is_ad> *> _scalar_out_of_plane_strain;
+
+  using Material::_current_elem;
+  using Material::_q_point;
+  using Material::_qp;
+  using Material::coupledScalarComponents;
+  using Material::getBlockCoordSystem;
+  using Material::isCoupled;
+  using Material::isCoupledScalar;
+  using Material::isParamValid;
+  using GenericComputeStrainBase<is_ad>::_disp;
+  using GenericComputeStrainBase<is_ad>::coupledScalarValue;
+  using GenericComputeStrainBase<is_ad>::adCoupledScalarValue;
 };
+
+typedef ComputeAxisymmetric1DSmallStrainTempl<false> ComputeAxisymmetric1DSmallStrain;
+typedef ComputeAxisymmetric1DSmallStrainTempl<true> ADComputeAxisymmetric1DSmallStrain;

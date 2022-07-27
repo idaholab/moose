@@ -11,11 +11,13 @@
 #include "UserObject.h"
 
 registerMooseObject("TensorMechanicsApp", ComputeAxisymmetric1DFiniteStrain);
+registerMooseObject("TensorMechanicsApp", ADComputeAxisymmetric1DFiniteStrain);
 
+template <bool is_ad>
 InputParameters
-ComputeAxisymmetric1DFiniteStrain::validParams()
+ComputeAxisymmetric1DFiniteStrainTempl<is_ad>::validParams()
 {
-  InputParameters params = Compute1DFiniteStrain::validParams();
+  InputParameters params = Generic1DFiniteStrain<is_ad>::validParams();
   params.addClassDescription("Compute a strain increment and rotation increment for finite strains "
                              "in an axisymmetric 1D problem");
   params.addParam<UserObjectName>("subblock_index_provider",
@@ -26,17 +28,21 @@ ComputeAxisymmetric1DFiniteStrain::validParams()
   return params;
 }
 
-ComputeAxisymmetric1DFiniteStrain::ComputeAxisymmetric1DFiniteStrain(
+template <bool is_ad>
+ComputeAxisymmetric1DFiniteStrainTempl<is_ad>::ComputeAxisymmetric1DFiniteStrainTempl(
     const InputParameters & parameters)
-  : Compute1DFiniteStrain(parameters),
+  : Generic1DFiniteStrain<is_ad>(parameters),
     _disp_old_0(coupledValueOld("displacements", 0)),
-    _subblock_id_provider(isParamValid("subblock_index_provider")
-                              ? &getUserObject<SubblockIndexProvider>("subblock_index_provider")
-                              : nullptr),
+    _subblock_id_provider(
+        isParamValid("subblock_index_provider")
+            ? &this->template getUserObject<SubblockIndexProvider>("subblock_index_provider")
+            : nullptr),
     _has_out_of_plane_strain(isCoupled("out_of_plane_strain")),
-    _out_of_plane_strain(_has_out_of_plane_strain ? coupledValue("out_of_plane_strain") : _zero),
+    _out_of_plane_strain(_has_out_of_plane_strain
+                             ? this->template coupledGenericValue<is_ad>("out_of_plane_strain")
+                             : this->template genericZeroValue<is_ad>()),
     _out_of_plane_strain_old(_has_out_of_plane_strain ? coupledValueOld("out_of_plane_strain")
-                                                      : _zero),
+                                                      : this->template genericZeroValue<false>()),
     _has_scalar_out_of_plane_strain(isCoupledScalar("scalar_out_of_plane_strain"))
 {
   if (_has_out_of_plane_strain && _has_scalar_out_of_plane_strain)
@@ -47,25 +53,32 @@ ComputeAxisymmetric1DFiniteStrain::ComputeAxisymmetric1DFiniteStrain(
     const auto nscalar_strains = coupledScalarComponents("scalar_out_of_plane_strain");
     _scalar_out_of_plane_strain.resize(nscalar_strains);
     _scalar_out_of_plane_strain_old.resize(nscalar_strains);
+
     for (unsigned int i = 0; i < nscalar_strains; ++i)
     {
-      _scalar_out_of_plane_strain[i] = &coupledScalarValue("scalar_out_of_plane_strain", i);
+      if constexpr (is_ad)
+        _scalar_out_of_plane_strain[i] = &adCoupledScalarValue("scalar_out_of_plane_strain", i);
+      else
+        _scalar_out_of_plane_strain[i] = &coupledScalarValue("scalar_out_of_plane_strain", i);
+
       _scalar_out_of_plane_strain_old[i] = &coupledScalarValueOld("scalar_out_of_plane_strain", i);
     }
   }
 }
 
+template <bool is_ad>
 void
-ComputeAxisymmetric1DFiniteStrain::initialSetup()
+ComputeAxisymmetric1DFiniteStrainTempl<is_ad>::initialSetup()
 {
-  ComputeIncrementalStrainBase::initialSetup();
+  GenericComputeIncrementalStrainBase<is_ad>::initialSetup();
 
   if (getBlockCoordSystem() != Moose::COORD_RZ)
     mooseError("The coordinate system must be set to RZ for Axisymmetric geometries.");
 }
 
-Real
-ComputeAxisymmetric1DFiniteStrain::computeGradDispYY()
+template <bool is_ad>
+GenericReal<is_ad>
+ComputeAxisymmetric1DFiniteStrainTempl<is_ad>::computeGradDispYY()
 {
   if (_has_scalar_out_of_plane_strain)
     return std::exp((*_scalar_out_of_plane_strain[getCurrentSubblockIndex()])[0]) - 1.0;
@@ -73,8 +86,9 @@ ComputeAxisymmetric1DFiniteStrain::computeGradDispYY()
     return std::exp(_out_of_plane_strain[_qp]) - 1.0;
 }
 
+template <bool is_ad>
 Real
-ComputeAxisymmetric1DFiniteStrain::computeGradDispYYOld()
+ComputeAxisymmetric1DFiniteStrainTempl<is_ad>::computeGradDispYYOld()
 {
   if (_has_scalar_out_of_plane_strain)
     return std::exp((*_scalar_out_of_plane_strain_old[getCurrentSubblockIndex()])[0]) - 1.0;
@@ -82,8 +96,9 @@ ComputeAxisymmetric1DFiniteStrain::computeGradDispYYOld()
     return std::exp(_out_of_plane_strain_old[_qp]) - 1.0;
 }
 
-Real
-ComputeAxisymmetric1DFiniteStrain::computeGradDispZZ()
+template <bool is_ad>
+GenericReal<is_ad>
+ComputeAxisymmetric1DFiniteStrainTempl<is_ad>::computeGradDispZZ()
 {
   if (!MooseUtils::absoluteFuzzyEqual(_q_point[_qp](0), 0.0))
     return (*_disp[0])[_qp] / _q_point[_qp](0);
@@ -91,8 +106,9 @@ ComputeAxisymmetric1DFiniteStrain::computeGradDispZZ()
     return 0.0;
 }
 
+template <bool is_ad>
 Real
-ComputeAxisymmetric1DFiniteStrain::computeGradDispZZOld()
+ComputeAxisymmetric1DFiniteStrainTempl<is_ad>::computeGradDispZZOld()
 {
   if (!MooseUtils::absoluteFuzzyEqual(_q_point[_qp](0), 0.0))
     return _disp_old_0[_qp] / _q_point[_qp](0);
