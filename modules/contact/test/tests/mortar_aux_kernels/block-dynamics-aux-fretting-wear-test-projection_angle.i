@@ -6,7 +6,7 @@ offset = -0.045
 []
 
 [Mesh]
-  file = long-bottom-block-1elem-blocks.e
+  file = long-bottom-block-1elem-blocks-multiple-projections-lowerd.e
 []
 
 [Variables]
@@ -136,6 +136,8 @@ offset = -0.045
     secondary_subdomain = 3
     disp_x = disp_x
     disp_y = disp_y
+    debug_mesh = true
+    minimum_projection_angle = 0.0
   []
   [worn_depth]
     type = MortarArchardsLawAux
@@ -149,6 +151,8 @@ offset = -0.045
     energy_wear_coefficient = 1.0e-6
     normal_pressure = normal_lm
     execute_on = 'TIMESTEP_END'
+    debug_mesh = true
+    minimum_projection_angle = 0.0
   []
   [accel_x]
     type = NewmarkAccelAux
@@ -203,6 +207,8 @@ offset = -0.045
     capture_tolerance = 1.0e-5
     newmark_beta = 0.25
     newmark_gamma = 0.5
+    debug_mesh = true
+    minimum_projection_angle = 0.0
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -216,6 +222,8 @@ offset = -0.045
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
+    debug_mesh = true
+    minimum_projection_angle = 0.0
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -229,6 +237,8 @@ offset = -0.045
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
+    debug_mesh = true
+    minimum_projection_angle = 0.0
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
@@ -242,6 +252,8 @@ offset = -0.045
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
+    debug_mesh = true
+    minimum_projection_angle = 0.0
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
@@ -255,6 +267,8 @@ offset = -0.045
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = false
+    debug_mesh = true
+    minimum_projection_angle = 0.0
   []
 []
 
@@ -287,7 +301,7 @@ offset = -0.045
 
 [Executioner]
   type = Transient
-  end_time = 0.5
+  end_time = 0.0
   dt = 0.05
   dtmin = .002
   solve_type = 'NEWTON'

@@ -1393,7 +1393,8 @@ public:
       bool on_displaced,
       bool periodic,
       const bool debug,
-      const bool correct_edge_dropping);
+      const bool correct_edge_dropping,
+      const Real minimum_projection_angle);
 
   const AutomaticMortarGeneration &
   getMortarInterface(const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,

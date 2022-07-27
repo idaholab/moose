@@ -6260,6 +6260,8 @@ FEProblemBase::updateMortarMesh()
 {
   TIME_SECTION("updateMortarMesh", 5, "Updating Mortar Mesh");
 
+  FloatingPointExceptionGuard fpe_guard(_app);
+
   _mortar_data.update();
 }
 
@@ -6270,7 +6272,8 @@ FEProblemBase::createMortarInterface(
     bool on_displaced,
     bool periodic,
     const bool debug,
-    const bool correct_edge_dropping)
+    const bool correct_edge_dropping,
+    const Real minimum_projection_angle)
 {
   _has_mortar = true;
 
@@ -6281,7 +6284,8 @@ FEProblemBase::createMortarInterface(
                                               on_displaced,
                                               periodic,
                                               debug,
-                                              correct_edge_dropping);
+                                              correct_edge_dropping,
+                                              minimum_projection_angle);
   else
     return _mortar_data.createMortarInterface(primary_secondary_boundary_pair,
                                               primary_secondary_subdomain_pair,
@@ -6289,7 +6293,8 @@ FEProblemBase::createMortarInterface(
                                               on_displaced,
                                               periodic,
                                               debug,
-                                              correct_edge_dropping);
+                                              correct_edge_dropping,
+                                              minimum_projection_angle);
 }
 
 const AutomaticMortarGeneration &
