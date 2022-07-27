@@ -33,7 +33,7 @@ NodalVariableValue::NodalVariableValue(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
-    _node_ptr(_mesh.getMesh().query_node_ptr(getParam<unsigned int>("nodeid"))),
+    _node_ptr(nullptr),
     _scale_factor(getParam<Real>("scale_factor"))
 {
   // This class may be too dangerous to use if renumbering is enabled,
@@ -41,7 +41,12 @@ NodalVariableValue::NodalVariableValue(const InputParameters & parameters)
   // numbering.
   if (_mesh.getMesh().allow_renumbering())
     mooseError("NodalVariableValue should only be used when node renumbering is disabled.");
+}
 
+void
+NodalVariableValue::initialSetup()
+{
+  _node_ptr = _mesh.getMesh().query_node_ptr(getParam<unsigned int>("nodeid"));
   bool found_node_ptr = _node_ptr;
   _communicator.max(found_node_ptr);
 
