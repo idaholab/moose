@@ -21,7 +21,6 @@ ADBoundaryFlux3EqnBC::validParams()
   params.addClassDescription(
       "Boundary conditions for the 1-D, 1-phase, variable-area Euler equations");
 
-  params.addRequiredCoupledVar("A_elem", "Cross-sectional area, elemental");
   params.addRequiredCoupledVar("A_linear", "Cross-sectional area, linear");
   params.addRequiredCoupledVar("rhoA", "Conserved variable: rho*A");
   params.addRequiredCoupledVar("rhouA", "Conserved variable: rho*u*A");
@@ -35,12 +34,11 @@ ADBoundaryFlux3EqnBC::validParams()
 ADBoundaryFlux3EqnBC::ADBoundaryFlux3EqnBC(const InputParameters & parameters)
   : ADOneDIntegratedBC(parameters),
 
-    _A_elem(adCoupledValue("A_elem")),
     _A_linear(adCoupledValue("A_linear")),
 
-    _rhoA(adCoupledValue("rhoA")),
-    _rhouA(adCoupledValue("rhouA")),
-    _rhoEA(adCoupledValue("rhoEA")),
+    _rhoA(getADMaterialProperty<Real>("rhoA")),
+    _rhouA(getADMaterialProperty<Real>("rhouA")),
+    _rhoEA(getADMaterialProperty<Real>("rhoEA")),
 
     _rhoA_var(coupled("rhoA")),
     _rhouA_var(coupled("rhouA")),
@@ -56,12 +54,10 @@ ADBoundaryFlux3EqnBC::ADBoundaryFlux3EqnBC(const InputParameters & parameters)
 ADReal
 ADBoundaryFlux3EqnBC::computeQpResidual()
 {
-  const std::vector<ADReal> U = {_rhoA[_qp], _rhouA[_qp], _rhoEA[_qp], _A_elem[_qp]};
+  const std::vector<ADReal> U = {_rhoA[_qp], _rhouA[_qp], _rhoEA[_qp], _A_linear[_qp]};
   const auto & flux = _flux.getFlux(_current_side, _current_elem->id(), U, {_normal, 0, 0});
 
-  // Note that the ratio A_linear / A_elem is necessary because A_elem is passed
-  // to the flux function, but A_linear is to be used on the boundary.
-  return flux[_equation_index] * _A_linear[_qp] / _A_elem[_qp] * _normal * _test[_i][_qp];
+  return flux[_equation_index] * _normal * _test[_i][_qp];
 }
 
 std::map<unsigned int, unsigned int>

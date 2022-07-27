@@ -56,11 +56,4 @@
     expect_err = "The connected channels must be parallel at the junction"
     ad_indexing_type = 'global'
   []
-
-  [warn:slope_reconstruction_used]
-    type = 'RunException'
-    input = 'junction_one_to_one_1phase.i'
-    cli_args = 'GlobalParams/rdg_slope_reconstruction=minmod'
-    expect_err = "JunctionOneToOne1Phase cannot perform slope reconstruction"
-  []
 []

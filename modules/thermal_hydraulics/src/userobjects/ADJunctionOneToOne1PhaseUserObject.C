@@ -9,6 +9,8 @@
 
 #include "ADJunctionOneToOne1PhaseUserObject.h"
 #include "THMIndices3Eqn.h"
+#include "FlowModel1PhaseUtils.h"
+#include "SinglePhaseFluidProperties.h"
 #include "ADNumericalFlux3EqnBase.h"
 #include "Numerics.h"
 #include "metaphysicl/parallel_numberarray.h"
@@ -30,11 +32,18 @@ InputParameters
 ADJunctionOneToOne1PhaseUserObject::validParams()
 {
   InputParameters params = ADFlowJunctionUserObject::validParams();
+  params += SlopeReconstruction1DInterface<true>::validParams();
 
-  params.addRequiredCoupledVar("A", "Cross-sectional area of connected flow channels");
+  params.addRequiredCoupledVar(
+      "A_elem", "Piecewise constant cross-sectional area of connected flow channels");
+  params.addRequiredCoupledVar("A_linear",
+                               "Piecewise linear cross-sectional area of connected flow channels");
   params.addRequiredCoupledVar("rhoA", "rho*A of the connected flow channels");
   params.addRequiredCoupledVar("rhouA", "rhou*A of the connected flow channels");
   params.addRequiredCoupledVar("rhoEA", "rhoE*A of the connected flow channels");
+
+  params.addRequiredParam<UserObjectName>("fluid_properties",
+                                          "Name of fluid properties user object");
 
   params.addRequiredParam<UserObjectName>("numerical_flux", "Numerical flux user object name");
 
@@ -49,11 +58,16 @@ ADJunctionOneToOne1PhaseUserObject::validParams()
 ADJunctionOneToOne1PhaseUserObject::ADJunctionOneToOne1PhaseUserObject(
     const InputParameters & params)
   : ADFlowJunctionUserObject(params),
+    SlopeReconstruction1DInterface<true>(this),
 
-    _A(adCoupledValue("A")),
-    _rhoA(adCoupledValue("rhoA")),
-    _rhouA(adCoupledValue("rhouA")),
-    _rhoEA(adCoupledValue("rhoEA")),
+    _A_linear(adCoupledValue("A_linear")),
+
+    _A_var(getVar("A_elem", 0)),
+    _rhoA_var(getVar("rhoA", 0)),
+    _rhouA_var(getVar("rhouA", 0)),
+    _rhoEA_var(getVar("rhoEA", 0)),
+
+    _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties")),
 
     _numerical_flux(getUserObject<ADNumericalFlux3EqnBase>("numerical_flux")),
 
@@ -61,16 +75,27 @@ ADJunctionOneToOne1PhaseUserObject::ADJunctionOneToOne1PhaseUserObject(
 
     _dir(getMaterialProperty<RealVectorValue>("direction")),
 
-    _solutions(_n_connections),
+    _primitive_solutions(_n_connections),
+    _neighbor_primitive_solutions(_n_connections),
+
     _fluxes(_n_connections),
     _dof_indices(_n_connections, std::vector<dof_id_type>(THM3Eqn::N_EQ, 0)),
 
     _elem_ids(_n_connections),
     _local_side_ids(_n_connections),
 
-    _areas(_n_connections),
-    _directions(_n_connections)
+    _areas_linear(_n_connections),
+    _directions(_n_connections),
+    _positions(_n_connections),
+    _neighbor_positions(_n_connections),
+    _delta_x(_n_connections),
+    _has_neighbor(_n_connections)
 {
+  _U_vars.resize(THM3Eqn::N_CONS_VAR);
+  _U_vars[THM3Eqn::CONS_VAR_RHOA] = _rhoA_var;
+  _U_vars[THM3Eqn::CONS_VAR_RHOUA] = _rhouA_var;
+  _U_vars[THM3Eqn::CONS_VAR_RHOEA] = _rhoEA_var;
+  _U_vars[THM3Eqn::CONS_VAR_AREA] = _A_var;
 }
 
 void
@@ -78,9 +103,13 @@ ADJunctionOneToOne1PhaseUserObject::initialize()
 {
   _connection_indices.clear();
 
-  std::vector<ADReal> zero(THM3Eqn::N_CONS_VAR, ADReal(0.));
-  for (auto & s : _solutions)
-    s = zero;
+  // Broadcasts require vectors on all processes to have the same size
+  std::vector<ADReal> zero(THM3Eqn::N_PRIM_VAR, ADReal(0.));
+  for (unsigned int c = 0; c < _n_connections; c++)
+  {
+    _primitive_solutions[c] = zero;
+    _neighbor_primitive_solutions[c] = zero;
+  }
 }
 
 void
@@ -99,21 +128,37 @@ ADJunctionOneToOne1PhaseUserObject::execute()
     _dof_indices[c][varname_eq_index_pair.second] = dofs[0];
   }
 
-  // Store solution vector for connection
-  std::vector<ADReal> U(THM3Eqn::N_CONS_VAR, ADReal(0.));
-  U[THM3Eqn::CONS_VAR_RHOA] = _rhoA[0];
-  U[THM3Eqn::CONS_VAR_RHOUA] = _rhouA[0];
-  U[THM3Eqn::CONS_VAR_RHOEA] = _rhoEA[0];
-  U[THM3Eqn::CONS_VAR_AREA] = _A[0];
-  _solutions[c] = U;
+  // Store primitive solution vectors for connection
+  const auto U_avg =
+      FlowModel1PhaseUtils::getElementalSolutionVector<true>(_current_elem, _U_vars, _is_implicit);
+  _primitive_solutions[c] = FlowModel1PhaseUtils::computePrimitiveSolutionVector<true>(U_avg, _fp);
+
+  // Get the neighbor solution and position. There should be one neighbor, unless
+  // there is only one element in the subdomain. Because broadcasting requires
+  // data sizes to be allocated on all processes, we cannot work with a vector
+  // of a size not known upfront, so we work with a single neighbor and have
+  // a flag that states whether there is one or zero neighbors.
+  std::vector<std::vector<GenericReal<true>>> W_neighbor;
+  std::vector<Point> x_neighbor;
+  getNeighborPrimitiveVariables(_current_elem, W_neighbor, x_neighbor);
+  if (W_neighbor.size() == 1)
+  {
+    _neighbor_primitive_solutions[c] = W_neighbor[0];
+    _neighbor_positions[c] = x_neighbor[0];
+    _has_neighbor[c] = true;
+  }
+  else
+    _has_neighbor[c] = false;
 
   // Store element ID and local side ID for connection
   _elem_ids[c] = _current_elem->id();
   _local_side_ids[c] = _current_side;
 
-  // Store direction and area of channel at junction (used for error-checking)
-  _areas[c] = _A[0];
+  // Store direction, area, and position of channel at junction
+  _areas_linear[c] = _A_linear[0];
   _directions[c] = _dir[0];
+  _positions[c] = _q_point[0];
+  _delta_x[c] = (_positions[c] - _current_elem->vertex_average()) * _directions[c];
 }
 
 void
@@ -128,41 +173,95 @@ ADJunctionOneToOne1PhaseUserObject::threadJoin(const UserObject & uo)
     const unsigned int c = junction_uo._connection_indices[i];
 
     _dof_indices[c] = junction_uo._dof_indices[c];
-    _solutions[c] = junction_uo._solutions[c];
+    _primitive_solutions[c] = junction_uo._primitive_solutions[c];
+    _neighbor_primitive_solutions[c] = junction_uo._neighbor_primitive_solutions[c];
     _elem_ids[c] = junction_uo._elem_ids[c];
     _local_side_ids[c] = junction_uo._local_side_ids[c];
-    _areas[c] = junction_uo._areas[c];
+    _areas_linear[c] = junction_uo._areas_linear[c];
     _directions[c] = junction_uo._directions[c];
+    _positions[c] = junction_uo._positions[c];
+    _neighbor_positions[c] = junction_uo._neighbor_positions[c];
+    _delta_x[c] = junction_uo._delta_x[c];
+    _has_neighbor[c] = junction_uo._has_neighbor[c];
   }
 }
 
 void
 ADJunctionOneToOne1PhaseUserObject::finalize()
 {
+  for (unsigned int i = 0; i < _n_connections; i++)
+  {
+    processor_id_type owner_proc = _processor_ids[i];
+    comm().broadcast(_primitive_solutions[i], owner_proc, true);
+    comm().broadcast(_neighbor_primitive_solutions[i], owner_proc, true);
+    comm().broadcast(_elem_ids[i], owner_proc, true);
+    comm().broadcast(_local_side_ids[i], owner_proc, true);
+    comm().broadcast(_areas_linear[i], owner_proc, true);
+    comm().broadcast(_directions[i], owner_proc, true);
+    comm().broadcast(_positions[i], owner_proc, true);
+    comm().broadcast(_neighbor_positions[i], owner_proc, true);
+    comm().broadcast(_delta_x[i], owner_proc, true);
+
+    // Vectors of bools are special, so we must broadcast a single bool instead
+    bool has_neighbor = _has_neighbor[i];
+    comm().broadcast(has_neighbor, owner_proc, true);
+    _has_neighbor[i] = has_neighbor;
+  }
+
   // Check direction compatibility
   if (!THM::areParallelVectors(_directions[0], _directions[1]))
     mooseError(_junction_name, ": The connected channels must be parallel at the junction.");
 
-  for (unsigned int i = 0; i < _n_connections; i++)
+  const auto & W0_avg = _primitive_solutions[0];
+  const auto & W1_avg = _primitive_solutions[1];
+
+  // Multiplier for possibly different coordinate systems
+  const Real dir_mult = _directions[0] * _directions[1];
+  auto W0_ref = W0_avg;
+  auto W1_ref = W1_avg;
+  W0_ref[THM3Eqn::PRIM_VAR_VELOCITY] *= dir_mult;
+  W1_ref[THM3Eqn::PRIM_VAR_VELOCITY] *= dir_mult;
+
+  std::vector<std::vector<GenericReal<true>>> W_neighbor0;
+  std::vector<Point> x_neighbor0;
+  if (_has_neighbor[0])
   {
-    processor_id_type owner_proc = _processor_ids[i];
-    comm().broadcast(_elem_ids[i], owner_proc, true);
-    comm().broadcast(_local_side_ids[i], owner_proc, true);
-    comm().broadcast(_solutions[i], owner_proc, true);
-    comm().broadcast(_directions[i], owner_proc, true);
+    W_neighbor0.push_back(_neighbor_primitive_solutions[0]);
+    x_neighbor0.push_back(_neighbor_positions[0]);
   }
 
-  // Apply transformation to first connection's reference frame
-  const Real n_direction1 = _directions[0] * _directions[1];
-  _solutions[1][THM3Eqn::CONS_VAR_RHOUA] *= n_direction1;
+  std::vector<std::vector<GenericReal<true>>> W_neighbor1;
+  std::vector<Point> x_neighbor1;
+  if (_has_neighbor[1])
+  {
+    W_neighbor1.push_back(_neighbor_primitive_solutions[1]);
+    x_neighbor1.push_back(_neighbor_positions[1]);
+  }
 
-  _fluxes[0] = _numerical_flux.getFlux(
-      _local_side_ids[0], _elem_ids[0], true, _solutions[0], _solutions[1], _normal[0]);
+  const auto slopes0 = getBoundaryElementSlopes(
+      W0_avg, _positions[0], _directions[0], W_neighbor0, x_neighbor0, W1_ref);
+  const auto slopes1 = getBoundaryElementSlopes(
+      W1_avg, _positions[1], _directions[1], W_neighbor1, x_neighbor1, W0_ref);
 
-  _fluxes[1] = _numerical_flux.getFlux(
-      _local_side_ids[0], _elem_ids[0], false, _solutions[0], _solutions[1], _normal[0]);
-  _fluxes[1][THM3Eqn::CONS_VAR_RHOA] *= n_direction1;
-  _fluxes[1][THM3Eqn::CONS_VAR_RHOEA] *= n_direction1;
+  auto W0 = W0_avg;
+  auto W1 = W1_avg;
+  for (unsigned int m = 0; m < THM3Eqn::N_PRIM_VAR; m++)
+  {
+    W0[m] = W0_avg[m] + slopes0[m] * _delta_x[0];
+    W1[m] = W1_avg[m] + slopes1[m] * _delta_x[1];
+  }
+
+  auto U0 =
+      FlowModel1PhaseUtils::computeConservativeSolutionVector<true>(W0, _areas_linear[0], _fp);
+  auto U1 =
+      FlowModel1PhaseUtils::computeConservativeSolutionVector<true>(W1, _areas_linear[1], _fp);
+  U1[THM3Eqn::CONS_VAR_RHOUA] *= dir_mult;
+
+  _fluxes[0] = _numerical_flux.getFlux(_local_side_ids[0], _elem_ids[0], true, U0, U1, _normal[0]);
+
+  _fluxes[1] = _numerical_flux.getFlux(_local_side_ids[0], _elem_ids[0], false, U0, U1, _normal[0]);
+  _fluxes[1][THM3Eqn::CONS_VAR_RHOA] *= dir_mult;
+  _fluxes[1][THM3Eqn::CONS_VAR_RHOEA] *= dir_mult;
 }
 
 const std::vector<ADReal> &
@@ -171,4 +270,12 @@ ADJunctionOneToOne1PhaseUserObject::getFlux(const unsigned int & connection_inde
   Threads::spin_mutex::scoped_lock lock(_spin_mutex);
 
   return _fluxes[connection_index];
+}
+
+std::vector<ADReal>
+ADJunctionOneToOne1PhaseUserObject::computeElementPrimitiveVariables(const Elem * elem) const
+{
+  const auto U =
+      FlowModel1PhaseUtils::getElementalSolutionVector<true>(elem, _U_vars, _is_implicit);
+  return FlowModel1PhaseUtils::computePrimitiveSolutionVector<true>(U, _fp);
 }
