@@ -35,6 +35,7 @@
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/enum_to_string.h"
 #include "libmesh/statistics.h"
+#include "libmesh/equation_systems.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -355,9 +356,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // Associate this MSM elem with the MortarSegmentInfo.
     _msm_elem_to_info.emplace(new_elem_ptr, msinfo);
-    _secondary_ip_sub_ids.insert(msinfo.secondary_elem->interior_parent()->subdomain_id());
-    if (msinfo.primary_elem)
-      _primary_ip_sub_ids.insert(msinfo.primary_elem->interior_parent()->subdomain_id());
 
     // Maintain the mapping between secondary elems and mortar segment elems contained within them.
     // Initially, only the original secondary_elem is present.
@@ -631,10 +629,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
       // Add new msinfo objects to the map.
       _msm_elem_to_info.emplace(msm_new_elem, new_msinfo_left);
-      _secondary_ip_sub_ids.insert(
-          new_msinfo_left.secondary_elem->interior_parent()->subdomain_id());
-      if (new_msinfo_left.primary_elem)
-        _primary_ip_sub_ids.insert(new_msinfo_left.primary_elem->interior_parent()->subdomain_id());
 
       // We need to insert new_elem_left in
       // the mortar_segment_set for this secondary_elem.
@@ -656,11 +650,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_msinfo_right.primary_elem = right_primary_elem;
 
       _msm_elem_to_info.emplace(msm_new_elem, new_msinfo_right);
-      _secondary_ip_sub_ids.insert(
-          new_msinfo_right.secondary_elem->interior_parent()->subdomain_id());
-      if (new_msinfo_right.primary_elem)
-        _primary_ip_sub_ids.insert(
-            new_msinfo_right.primary_elem->interior_parent()->subdomain_id());
 
       mortar_segment_set.insert(msm_new_elem);
     }
@@ -710,6 +699,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
       // Remove element from mortar segment mesh
       _mortar_segment_mesh->delete_elem(msm_elem);
+    }
+    else
+    {
+      _secondary_ip_sub_ids.insert(msinfo.secondary_elem->interior_parent()->subdomain_id());
+      _primary_ip_sub_ids.insert(msinfo.primary_elem->interior_parent()->subdomain_id());
     }
   }
 
@@ -1190,8 +1184,8 @@ AutomaticMortarGeneration::buildCouplingInformation()
     coupling_info[secondary_elem->processor_id()].emplace_back(
         secondary_elem->id(), secondary_elem->interior_parent()->id());
     if (secondary_elem->processor_id() != _mesh.processor_id())
-      // We want to keep information for nonlocal secondary element point neighbors for mortar nodal
-      // aux kernels
+      // We want to keep information for nonlocal lower-dimensional secondary element point
+      // neighbors for mortar nodal aux kernels
       _mortar_interface_coupling[secondary_elem->id()].insert(
           secondary_elem->interior_parent()->id());
 
@@ -1199,10 +1193,18 @@ AutomaticMortarGeneration::buildCouplingInformation()
     coupling_info[secondary_elem->processor_id()].emplace_back(
         secondary_elem->id(), primary_elem->interior_parent()->id());
     if (secondary_elem->processor_id() != _mesh.processor_id())
-      // We want to keep information for nonlocal secondary element point neighbors for mortar nodal
-      // aux kernels
+      // We want to keep information for nonlocal lower-dimensional secondary element point
+      // neighbors for mortar nodal aux kernels
       _mortar_interface_coupling[secondary_elem->id()].insert(
           primary_elem->interior_parent()->id());
+
+    // Lower-LowerDimensionalPrimary
+    coupling_info[secondary_elem->processor_id()].emplace_back(secondary_elem->id(),
+                                                               primary_elem->id());
+    if (secondary_elem->processor_id() != _mesh.processor_id())
+      // We want to keep information for nonlocal lower-dimensional secondary element point
+      // neighbors for mortar nodal aux kernels
+      _mortar_interface_coupling[secondary_elem->id()].insert(primary_elem->id());
 
     // SecondaryLower
     coupling_info[secondary_elem->interior_parent()->processor_id()].emplace_back(
@@ -2207,6 +2209,12 @@ AutomaticMortarGeneration::writeGeometryToFile()
 
   if (!_nodal_normals_system)
   {
+    for (const auto s : make_range(nodal_normals_es.n_systems()))
+      if (!nodal_normals_es.get_system(s).is_initialized())
+        // This is really early on in the simulation and the systems have not been initialized. We
+        // thus need to avoid calling reinit on systems that haven't even had their first init yet
+        return;
+
     _nodal_normals_system =
         &nodal_normals_es.template add_system<ExplicitSystem>(nodal_normals_sys_name);
     _nnx_var_num = _nodal_normals_system->add_variable("nodal_normal_x", FEType(FIRST, LAGRANGE)),

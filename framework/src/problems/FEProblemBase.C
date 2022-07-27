@@ -912,16 +912,6 @@ FEProblemBase::initialSetup()
   if (_displaced_problem && _mortar_data.hasDisplacedObjects())
     _displaced_problem->updateMesh();
 
-  // Build the mortar segment meshes for a couple reasons:
-  // 1) Get the ghosting correct for both static and dynamic meshes
-  // 2) Make sure the mortar mesh is built for mortar constraints that live on the static mesh
-  //
-  // It is worth-while to note that mortar meshes that live on a dynamic mesh will be built
-  // during residual and Jacobian evaluation because when displacements are solution variables
-  // the mortar mesh will move and change during the course of a non-linear solve. We DO NOT
-  // redo ghosting during non-linear solve, so for purpose 1) the below call has to be made
-  updateMortarMesh();
-
   // Possibly reinit one more time to get ghosting correct
   reinitBecauseOfGhostingOrNewGeomObjects();
 
@@ -4114,7 +4104,7 @@ FEProblemBase::reportMooseObjectDependency(MooseObject * /*a*/, MooseObject * /*
 }
 
 void
-FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
+FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects(const bool mortar_changed)
 {
   TIME_SECTION("reinitBecauseOfGhostingOrNewGeomObjects",
                3,
@@ -4123,11 +4113,11 @@ FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
   // Need to see if _any_ processor has ghosted elems or geometry objects.
   bool needs_reinit = !_ghosted_elems.empty();
   needs_reinit = needs_reinit || !_geometric_search_data._nearest_node_locators.empty() ||
-                 _mortar_data.hasObjects();
+                 (_mortar_data.hasObjects() && mortar_changed);
   needs_reinit =
       needs_reinit || (_displaced_problem &&
                        (!_displaced_problem->geomSearchData()._nearest_node_locators.empty() ||
-                        _mortar_data.hasDisplacedObjects()));
+                        (_mortar_data.hasDisplacedObjects() && mortar_changed)));
   _communicator.max(needs_reinit);
 
   if (needs_reinit)
@@ -5134,6 +5124,17 @@ FEProblemBase::init()
 
   _nl->init();
   _aux->init();
+
+  // Build the mortar segment meshes, if they haven't been already, for a couple reasons:
+  // 1) Get the ghosting correct for both static and dynamic meshes
+  // 2) Make sure the mortar mesh is built for mortar constraints that live on the static mesh
+  //
+  // It is worth-while to note that mortar meshes that live on a dynamic mesh will be built
+  // during residual and Jacobian evaluation because when displacements are solution variables
+  // the mortar mesh will move and change during the course of a non-linear solve. We DO NOT
+  // redo ghosting during non-linear solve, so for purpose 1) the below call has to be made
+  if (!_mortar_data.initialized())
+    updateMortarMesh();
 
   {
     TIME_SECTION("EquationSystems::Init", 2, "Initializing Equation Systems");
@@ -6581,7 +6582,7 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   // mortar mesh discretization will depend necessarily on the displaced mesh being re-displaced
   updateMortarMesh();
 
-  reinitBecauseOfGhostingOrNewGeomObjects();
+  reinitBecauseOfGhostingOrNewGeomObjects(/*mortar_changed=*/true);
 
   // We need to create new storage for the new elements and copy stateful properties from the old
   // elements.

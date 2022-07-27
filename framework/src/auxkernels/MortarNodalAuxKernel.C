@@ -49,8 +49,6 @@ template <typename ComputeValueType>
 MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     const InputParameters & parameters)
   : AuxKernelTempl<ComputeValueType>(setBoundaryParam(parameters)),
-    MortarExecutorInterface(
-        *this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     MortarConsumerInterface(this),
     _displaced(this->template getParam<bool>("use_displaced_mesh")),
     _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
@@ -64,7 +62,7 @@ MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
 
 template <typename ComputeValueType>
 void
-MortarNodalAuxKernelTempl<ComputeValueType>::mortarSetup()
+MortarNodalAuxKernelTempl<ComputeValueType>::initialSetup()
 {
   std::array<const MortarNodalAuxKernelTempl<ComputeValueType> *, 1> consumers = {{this}};
 

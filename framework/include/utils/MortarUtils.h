@@ -64,18 +64,19 @@ void projectQPoints3d(const Elem * msm_elem,
  */
 template <typename Iterators, typename Consumers, typename ActionFunctor>
 void
-loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
-                       Assembly & assembly,
-                       SubProblem & subproblem,
-                       FEProblemBase & fe_problem,
-                       const AutomaticMortarGeneration & amg,
-                       const bool displaced,
-                       const Consumers & consumers,
-                       const THREAD_ID tid,
-                       std::map<SubdomainID, std::deque<MaterialBase *>> secondary_ip_sub_to_mats,
-                       std::map<SubdomainID, std::deque<MaterialBase *>> primary_ip_sub_to_mats,
-                       std::deque<MaterialBase *> secondary_boundary_mats,
-                       const ActionFunctor act)
+loopOverMortarSegments(
+    const Iterators & secondary_elems_to_mortar_segments,
+    Assembly & assembly,
+    SubProblem & subproblem,
+    FEProblemBase & fe_problem,
+    const AutomaticMortarGeneration & amg,
+    const bool displaced,
+    const Consumers & consumers,
+    const THREAD_ID tid,
+    const std::map<SubdomainID, std::deque<MaterialBase *>> & secondary_ip_sub_to_mats,
+    const std::map<SubdomainID, std::deque<MaterialBase *>> & primary_ip_sub_to_mats,
+    const std::deque<MaterialBase *> & secondary_boundary_mats,
+    const ActionFunctor act)
 {
   const auto & primary_secondary_boundary_id_pair = amg.primarySecondaryBoundaryIDPair();
 

@@ -2159,8 +2159,10 @@ protected:
 
   /**
    * Call when it is possible that the needs for ghosted elements has changed.
+   * @param mortar_changed Whether an update of mortar data has been requested since the last
+   * EquationSystems (re)initialization
    */
-  void reinitBecauseOfGhostingOrNewGeomObjects();
+  void reinitBecauseOfGhostingOrNewGeomObjects(bool mortar_changed = false);
 
   /**
    * Helper for setting the "_subproblem" and "_sys" parameters in addObject() and

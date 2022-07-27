@@ -173,10 +173,6 @@ MortarData::update()
   for (auto & mortar_pair : _displaced_mortar_interfaces)
     update(mortar_pair.second);
 
-  if (!_mortar_initd)
-    for (auto * const mei_obj : _mei_objs)
-      mei_obj->mortarSetup();
-
   _mortar_initd = true;
 }
 

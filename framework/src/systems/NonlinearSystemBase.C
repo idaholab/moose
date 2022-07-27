@@ -290,49 +290,47 @@ NonlinearSystemBase::initialSetup()
   {
     TIME_SECTION("mortarSetup", 2, "Initializing Mortar Interfaces");
 
-    // go over mortar interfaces and construct functors
-    const auto & undisplaced_mortar_interfaces =
-        _fe_problem.getMortarInterfaces(/*displaced=*/false);
-    for (const auto & mortar_interface : undisplaced_mortar_interfaces)
+    auto create_mortar_functors = [this](const bool displaced)
     {
-      const auto primary_secondary_boundary_pair = mortar_interface.first;
-      if (!_constraints.hasActiveMortarConstraints(primary_secondary_boundary_pair, false))
-        continue;
+      // go over mortar interfaces and construct functors
+      const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
+      for (const auto & mortar_interface : mortar_interfaces)
+      {
+        const auto primary_secondary_boundary_pair = mortar_interface.first;
+        if (!_constraints.hasActiveMortarConstraints(primary_secondary_boundary_pair, displaced))
+          continue;
 
-      const auto & mortar_generation_object = mortar_interface.second;
+        const auto & mortar_generation_object = mortar_interface.second;
 
-      auto & mortar_constraints = _constraints.getActiveMortarConstraints(
-          primary_secondary_boundary_pair, /*displaced=*/false);
+        auto & mortar_constraints =
+            _constraints.getActiveMortarConstraints(primary_secondary_boundary_pair, displaced);
 
-      _undisplaced_mortar_functors.emplace(primary_secondary_boundary_pair,
-                                           ComputeMortarFunctor(mortar_constraints,
-                                                                mortar_generation_object,
-                                                                _fe_problem,
-                                                                _fe_problem,
-                                                                /*displaced=*/false));
-    }
+        auto params = _factory.getValidParams("ComputeMortarFunctor");
+        params.set<SubProblem *>("_subproblem") =
+            displaced ? static_cast<SubProblem *>(_fe_problem.getDisplacedProblem().get())
+                      : static_cast<SubProblem *>(&_fe_problem);
+        params.set<bool>("use_displaced_mesh") = displaced;
+        params.set<const std::vector<std::shared_ptr<MortarConstraintBase>> *>(
+            "mortar_constraints") = &mortar_constraints;
+        params.set<const AutomaticMortarGeneration *>("amg") = &mortar_generation_object;
+        const std::string name = "mortar_functor_" +
+                                 std::to_string(primary_secondary_boundary_pair.first) +
+                                 std::to_string(primary_secondary_boundary_pair.second) +
+                                 (displaced ? "_displaced" : "_undisplaced");
 
-    const auto & displaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/true);
-    for (const auto & mortar_interface : displaced_mortar_interfaces)
-    {
-      mooseAssert(_fe_problem.getDisplacedProblem(),
-                  "Cannot create displaced mortar functors when the displaced problem is null");
-      const auto primary_secondary_boundary_pair = mortar_interface.first;
-      if (!_constraints.hasActiveMortarConstraints(primary_secondary_boundary_pair, true))
-        continue;
+        auto & mortar_functors =
+            displaced ? _displaced_mortar_functors : _undisplaced_mortar_functors;
 
-      const auto & mortar_generation_object = mortar_interface.second;
+        auto [it, inserted] = mortar_functors.emplace(
+            primary_secondary_boundary_pair,
+            _factory.create<ComputeMortarFunctor>("ComputeMortarFunctor", name, params));
+        if (inserted)
+          it->second->initialSetup();
+      }
+    };
 
-      auto & mortar_constraints = _constraints.getActiveMortarConstraints(
-          primary_secondary_boundary_pair, /*displaced=*/true);
-
-      _displaced_mortar_functors.emplace(primary_secondary_boundary_pair,
-                                         ComputeMortarFunctor(mortar_constraints,
-                                                              mortar_generation_object,
-                                                              *_fe_problem.getDisplacedProblem(),
-                                                              _fe_problem,
-                                                              /*displaced=*/true));
-    }
+    create_mortar_functors(false);
+    create_mortar_functors(true);
   }
 
   if (_automatic_scaling)
@@ -3476,10 +3474,10 @@ NonlinearSystemBase::mortarConstraints(const Moose::ComputeType compute_type)
   try
   {
     for (auto & map_pr : _undisplaced_mortar_functors)
-      map_pr.second(compute_type);
+      (*map_pr.second)(compute_type);
 
     for (auto & map_pr : _displaced_mortar_functors)
-      map_pr.second(compute_type);
+      (*map_pr.second)(compute_type);
   }
   catch (MetaPhysicL::LogicError &)
   {

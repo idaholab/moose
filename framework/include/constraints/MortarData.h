@@ -112,6 +112,11 @@ public:
    */
   void dontNotifyWhenMortarSetup(MortarExecutorInterface * mei);
 
+  /**
+   * @return whether we have performed an initial mortar mesh construction
+   */
+  bool initialized() const { return _mortar_initd; }
+
 private:
   /**
    * Builds mortar segment mesh from specific AutomaticMortarGeneration object

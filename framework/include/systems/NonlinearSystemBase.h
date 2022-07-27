@@ -689,7 +689,6 @@ public:
   std::size_t requiredDerivativeSize() const { return _required_derivative_size; }
 #endif
 
-public:
   FEProblemBase & _fe_problem;
   System & _sys;
   // FIXME: make these protected and create getters/setters
@@ -985,11 +984,11 @@ private:
   void setupScalingData();
 
   /// Functors for computing undisplaced mortar constraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, std::shared_ptr<ComputeMortarFunctor>>
       _undisplaced_mortar_functors;
 
   /// Functors for computing displaced mortar constraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, std::shared_ptr<ComputeMortarFunctor>>
       _displaced_mortar_functors;
 
 #ifndef MOOSE_SPARSE_AD
