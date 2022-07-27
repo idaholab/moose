@@ -55,10 +55,9 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
 {
   // We first check if the input parameters make sense and throw errors if different parameter
   // combinations are not allowed
-  throwGenericError("filename",
-                    {"num_neurons_per_layer", "activation_function"},
-                    !getParam<bool>("torch_script_format"));
-  throwGenericError("filename", {"num_neurons_per_layer"}, getParam<bool>("torch_script_format"));
+  conditionalParameterError("filename",
+                            {"num_neurons_per_layer", "activation_function"},
+                            !getParam<bool>("torch_script_format"));
 
 #ifdef LIBTORCH_ENABLED
   // If the user wants to read the neural net from file, we do it. We can read it from a
@@ -157,9 +156,10 @@ LibtorchNeuralNetControl::loadControlNeuralNet(
 #endif
 
 void
-LibtorchNeuralNetControl::throwGenericError(const std::string & param_name,
-                                            const std::vector<std::string> & conditional_params,
-                                            bool should_be_defined)
+LibtorchNeuralNetControl::conditionalParameterError(
+    const std::string & param_name,
+    const std::vector<std::string> & conditional_params,
+    bool should_be_defined)
 {
   if (parameters().isParamSetByUser(param_name))
     for (const auto & param : conditional_params)

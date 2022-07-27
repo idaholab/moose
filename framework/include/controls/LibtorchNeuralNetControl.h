@@ -30,9 +30,9 @@ public:
 #endif
 
 protected:
-  void throwGenericError(const std::string & param_name,
-                         const std::vector<std::string> & conditional_param,
-                         bool should_be_defined);
+  void conditionalParameterError(const std::string & param_name,
+                                 const std::vector<std::string> & conditional_param,
+                                 bool should_be_defined = true);
 
   std::vector<Real> _old_response;
   std::vector<Real> _current_response;

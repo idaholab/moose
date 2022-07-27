@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#19571'
+  design = 'LibtorchNeuralNetControl.md'
+  [read-torch-script]
+    type = CSVDiff
+    input = read_torchscript_control.i
+    csvdiff = read_torchscript_control_csv_T_reporter_0026.csv
+    requirement = "The system shall be able to read a neural network fro ma torchscript file and use it to control a transient process."
+    libtorch = true
+  []
+[]
