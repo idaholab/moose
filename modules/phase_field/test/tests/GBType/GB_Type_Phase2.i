@@ -318,6 +318,5 @@
 [Outputs]
   exodus = true
   perf_graph = true
-  csv = true
   file_base='output/Dev_Ag_SiC_output'
 []
