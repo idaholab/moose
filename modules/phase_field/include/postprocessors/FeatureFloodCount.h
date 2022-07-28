@@ -310,20 +310,7 @@ public:
 
     FeatureData duplicate() const { return FeatureData(*this); }
 
-#ifndef __INTEL_COMPILER
-    /**
-     * 2016-07-14
-     * The INTEL compiler we are currently using (2013 with GCC 4.8) appears to have a bug
-     * introduced by the addition of the Point member in this structure. Even though it supports
-     * move semantics on other non-POD types like libMesh::BoundingBox, it fails to compile this
-     * class with the "centroid" member. Specifically, it supports the move operation into the
-     * vector type but fails to work with the bracket operator on std::map and the std::sort
-     * algorithm used in this class. It does work with std::map::emplace() but that syntax is much
-     * less appealing and still doesn't work around the issue. For now, I'm allowing the copy
-     * constructor to be called where it shouldn't so that this class works under the Intel compiler
-     * but there may be a degradation in performance in that case. */
   private:
-#endif
     ///@{
     /**
      * We do not expect these objects to ever be copied. This is important since they are stored in
