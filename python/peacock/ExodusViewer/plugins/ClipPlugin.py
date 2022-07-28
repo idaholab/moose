@@ -136,7 +136,7 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         qobject.setOrientation(QtCore.Qt.Horizontal)
         qobject.setRange(0, self._increments)
-        qobject.setSliderPosition(self._increments/2)
+        qobject.setSliderPosition(self._increments//2)
         qobject.setProperty('cache', ['ClipDirection'])
         qobject.valueChanged.connect(self._callbackClipSlider)
         qobject.setEnabled(False)
