@@ -117,9 +117,11 @@ A_small = 0.5
   num_steps = 5
   abort_on_solve_fail = true
 
-  solve_type = 'PJFNK'
-  nl_rel_tol = 0
-  nl_abs_tol = 1e-6
+  solve_type = NEWTON
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
   nl_max_its = 10
 
   l_tol = 1e-3

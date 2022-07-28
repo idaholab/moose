@@ -57,6 +57,9 @@ protected:
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fp;
 
+  /// Solution variables vector
+  std::vector<MooseVariable *> _U_vars;
+
   /// Number of slopes
   static const unsigned int _n_slopes = 3;
   /// Indices for slope array
