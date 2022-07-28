@@ -43,6 +43,12 @@ protected:
 
   std::vector<PostprocessorName> _response_names, _postprocessor_names;
 
+  /// Shifting constants for the responses
+  std::vector<Real> _response_shift_coeffs;
+
+  /// Shifting constants for the responses
+  std::vector<Real> _response_normalization_coeffs;
+
 #ifdef LIBTORCH_ENABLED
   /// Pointer to the neural net object which is supposed to be used to control
   /// the input values

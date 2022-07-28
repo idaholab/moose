@@ -25,6 +25,14 @@ LibtorchNeuralNetControl::validParams()
                                                     "The input parameter(s) to control.");
   params.addRequiredParam<std::vector<PostprocessorName>>(
       "responses", "The responses (prostprocessors) which are used for the control.");
+  params.addParam<std::vector<Real>>(
+      "response_shift_coeffs",
+      "A shift constant which will be used to shift the response values. This is used for the "
+      "manipulation of the neural net inputs for better training efficiency.");
+  params.addParam<std::vector<Real>>(
+      "response_normalization_coeffs",
+      "A normalization constant which will be used to divide the response values. This is used for "
+      "the manipulation of the neural net inputs for better training efficiency.");
   params.addRequiredParam<std::vector<PostprocessorName>>(
       "postprocessors", "The postprocessors which stores the control values.");
   params.addParam<std::string>("filename",
@@ -58,6 +66,25 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
   conditionalParameterError("filename",
                             {"num_neurons_per_layer", "activation_function"},
                             !getParam<bool>("torch_script_format"));
+
+  if (isParamValid("response_shift_coeffs"))
+  {
+    _response_shift_coeffs = getParam<std::vector<Real>>("response_shift_coeffs");
+    if (_response_names.size() != _response_shift_coeffs.size())
+      paramError("response_shift_coeffs",
+                 "The number of shift factors is not the same as the number of responses!");
+
+    _response_normalization_coeffs = getParam<std::vector<Real>>("response_normalization_coeffs");
+    if (_response_names.size() != _response_normalization_coeffs.size())
+      paramError(
+          "response_normalization_coeffs",
+          "The number of normalization coefficients is not the same as the number of responses!");
+  }
+  else
+  {
+    _response_shift_coeffs = std::vector<Real>(_response_names.size(), 0.0);
+    _response_normalization_coeffs = std::vector<Real>(_response_names.size(), 1.0);
+  }
 
 #ifdef LIBTORCH_ENABLED
   // If the user wants to read the neural net from file, we do it. We can read it from a
@@ -123,6 +150,16 @@ LibtorchNeuralNetControl::execute()
     std::vector<Real> raw_input(_current_response);
     if (use_old_response)
       raw_input.insert(raw_input.end(), _old_response.begin(), _old_response.end());
+
+    for (unsigned int resp_i = 0; resp_i < n_responses; ++resp_i)
+    {
+      raw_input[resp_i] = (raw_input[resp_i] - _response_shift_coeffs[resp_i]) /
+                          _response_normalization_coeffs[resp_i];
+      if (use_old_response)
+        raw_input[resp_i + n_responses] =
+            (raw_input[resp_i + n_responses] - _response_shift_coeffs[resp_i]) /
+            _response_normalization_coeffs[resp_i];
+    }
 
     auto options = torch::TensorOptions().dtype(at::kDouble);
     torch::Tensor input_tensor =
