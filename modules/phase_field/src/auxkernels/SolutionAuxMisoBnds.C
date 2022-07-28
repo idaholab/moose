@@ -12,7 +12,7 @@
 #include "SolutionUserObject.h"
 #include "BndsCalculator.h"
 
-registerMooseObject("labmouseApp", SolutionAuxMisoBnds);
+registerMooseObject("PhaseFieldApp", SolutionAuxMisoBnds);
 
 InputParameters
 SolutionAuxMisoBnds::validParams()
