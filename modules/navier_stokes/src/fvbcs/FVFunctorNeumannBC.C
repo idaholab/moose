@@ -10,7 +10,7 @@
 #include "FVFunctorNeumannBC.h"
 #include "Function.h"
 
-registerMooseObject("MooseApp", FVFunctorNeumannBC);
+registerMooseObject("NavierStokesApp", FVFunctorNeumannBC);
 
 InputParameters
 FVFunctorNeumannBC::validParams()

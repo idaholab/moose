@@ -14,7 +14,7 @@
 /**
  * Robin boundary condition (temperatures) for finite volume scheme between
  * a solid and fluid where the temperatures and heat transfer coefficient
- * is given as a functor
+ * are given as a functors
  */
 class FVFunctorConvectiveHeatFluxBC : public FVFluxBC
 {

@@ -4,9 +4,9 @@
 
 # Description
 
-This boundary condition computes convective heat flux $q'' = H \cdot (T - T_{inf})$, where $H$ is convective heat transfer coefficient,
+This boundary condition computes convective heat flux $q'' = h \cdot (T - T_{inf})$, where $H$ is convective heat transfer coefficient,
 $T$ is the temperature, and $T_{inf}$ is far field temperature. Both $H$ and $T_{inf}$ are coupled as functors.
-The domain can be specified as either a fluid or a solid using $is_solid$. For a solid domain, the equation above is applied.
+The domain of the variable can be specified as either a fluid or a solid using $is\_solid$. For a solid domain, the equation above is applied.
 For a fluid domain, the negative of the heat flux is applied. This allows for easier implementation of a double Robin
 boundary condition.
 

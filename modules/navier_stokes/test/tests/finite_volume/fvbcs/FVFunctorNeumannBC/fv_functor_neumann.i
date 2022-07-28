@@ -27,8 +27,8 @@ velocity_interp_method='rc'
     xmax = 5
     ymin = -1
     ymax = 1
-    nx = 50
-    ny = 16
+    nx = 25
+    ny = 8
   []
 []
 
