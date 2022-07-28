@@ -247,7 +247,6 @@ void
 ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
     const DofObject * const dof)
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   const auto & weighted_gap = *_weighted_gap_ptr;
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
@@ -371,6 +370,7 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
   else if (std::abs(nz) > 0.57735)
     component_normal = 2;
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processResidualAndJacobian(
       normal_dof_residual,
       component_normal == 0 ? dof_index_x : (component_normal == 1 ? dof_index_y : dof_index_z),

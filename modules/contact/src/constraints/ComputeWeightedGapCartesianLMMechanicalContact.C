@@ -337,7 +337,6 @@ ComputeWeightedGapCartesianLMMechanicalContact::incorrectEdgeDroppingPost(
 void
 ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const DofObject * const dof)
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   const auto & weighted_gap = *_weighted_gap_ptr;
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
 
@@ -399,6 +398,8 @@ ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const Dof
     component_normal = 1;
   else if (std::abs(nz) > 0.57735)
     component_normal = 2;
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
 
   _assembly.processResidualAndJacobian(
       normal_dof_residual,

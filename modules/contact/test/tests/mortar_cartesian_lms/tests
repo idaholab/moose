@@ -1,5 +1,5 @@
 [Tests]
-  design = 'constraints/ComputeWeightedGapLMMechanicalContact.md'
+  design = 'constraints/ComputeFrictionalForceCartesianLMMechanicalContact.md constraints/ComputeWeightedGapCartesianLMMechanicalContact.md'
   issues = '#21641'
   [frictionless-weighted-gap-lm]
     type = 'Exodiff'
@@ -22,6 +22,16 @@
     min_ad_size = '100'
     ad_indexing_type = 'global'
     requirement = 'Contact module shall solve a three-dimensional frictionless problem with Cartesian Lagrange multipliers.'
+  []
+  [frictionless-mortar-3d-friction]
+    type = 'Exodiff'
+    exodiff = 'frictionless-mortar-3d-friction_out.e'
+    input = 'frictionless-mortar-3d-friction.i'
+    rel_err = 5.0e-4
+    max_parallel = 4
+    min_ad_size = '100'
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall solve a three-dimensional frictional problem with Cartesian Lagrange multipliers.'
   []
   [two_block_1st_order_constraint_lm_xy_friction]
     type = 'Exodiff'
