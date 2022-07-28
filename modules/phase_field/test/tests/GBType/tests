@@ -1,0 +1,18 @@
+[Tests]
+  [./phase1]
+    type = 'Exodiff'
+    input = 'GB_Type_Phase1'
+    exodiff = 'EBSD_PC_Pre_Growth.e'
+    issues = '#21704'
+    design = 'ComputeGBMisoType.md'
+    requirement = 'The system shall output GB type for all GBs.'
+  [../]
+  [./phase2]
+    type = 'Exodiff'
+    input = 'diagonal.i'
+    exodiff = 'Dev_Ag_SiC_output.e'
+    issues = '#21704'
+    design = 'SolutionAuxMisoBnds.md'
+    requirement = 'The system shall assign local diffusivity.'
+  [../]
+[]
