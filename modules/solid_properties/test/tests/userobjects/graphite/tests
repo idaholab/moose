@@ -1,8 +1,8 @@
 [Tests]
   [test_451]
     type = Exodiff
-    input = 'test_451.i'
-    exodiff = 'test_451_out.e'
+    input = 'graphite_451.i'
+    exodiff = 'graphite_451_out.e'
     requirement = "The system shall compute thermal properties for H-451 graphite."
     design = 'ThermalGraphiteProperties.md ThermalSolidPropertiesMaterial.md'
     issues = '#12284'

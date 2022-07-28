@@ -1,8 +1,8 @@
 [Tests]
   [test]
     type = Exodiff
-    input = 'test.i'
-    exodiff = 'test_out.e'
+    input = 'monolithic_sic.i'
+    exodiff = 'monolithic_sic_out.e'
     requirement = "The system shall compute thermal properties for monolithic silicon carbide."
     design = 'ThermalMonolithicSiCProperties.md ThermalSolidPropertiesMaterial.md'
     issues = '#12284'

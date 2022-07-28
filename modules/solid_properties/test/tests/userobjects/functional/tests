@@ -1,8 +1,8 @@
 [Tests]
   [test]
     type = Exodiff
-    input = 'test.i'
-    exodiff = 'test_out.e'
+    input = 'functional.i'
+    exodiff = 'functional_out.e'
     requirement = "The system shall compute thermal properties as functions of temperature."
     design = 'ThermalFunctionSolidProperties.md ThermalSolidProperties.md'
     issues = '#12284'
