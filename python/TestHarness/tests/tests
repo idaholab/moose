@@ -27,13 +27,6 @@
     requirement = "TestHarness shall report a failure when encountering differential result"
     issues = '#8373'
   [../]
-  [./jsondiff]
-    type = PythonUnitTest
-    input = test_JSONDiff.py
-    requirement = "TestHarness shall report a failure when encountering differential result in a JSON file"
-    issues = '#11323'
-    required_python_packages = deepdiff
-  [../]
   [./diff_gold]
     type = PythonUnitTest
     input = test_DiffGold.py
@@ -244,11 +237,11 @@
     requirement = "TestHarness shall perform a test after all other tests have passed if specified to do so"
     issues = '#15230'
   []
-  [test_failed_json]
+  [schema_expect_err]
     type = PythonUnitTest
-    input = test_FailedJSON.py
-    requirement = "TestHarness shall test for a valid json output dump"
-    issues = '#21967'
+    input = test_SchemaDiff.py
+    requirement = "TestHarness shall report multiple failures resulting from SchemaDiff operations."
+    required_python_packages = 'deepdiff xmltodict'
   []
   [test_show_last_results]
     type = PythonUnitTest
