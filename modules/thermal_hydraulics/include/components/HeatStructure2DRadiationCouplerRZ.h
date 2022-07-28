@@ -12,17 +12,25 @@
 #include "HeatStructure2DCouplerBase.h"
 
 /**
- * Couples boundaries of two 2D heat structures via a heat transfer coefficient
+ * Couples boundaries of two 2D cylindrical heat structures via radiation
  */
-class HeatStructure2DCoupler : public HeatStructure2DCouplerBase
+class HeatStructure2DRadiationCouplerRZ : public HeatStructure2DCouplerBase
 {
 public:
-  HeatStructure2DCoupler(const InputParameters & parameters);
+  HeatStructure2DRadiationCouplerRZ(const InputParameters & parameters);
 
   virtual void addMooseObjects() override;
 
 protected:
+  virtual void init() override;
   virtual void check() const override;
+
+  /// Emissivities for the primary and secondary sides
+  const std::vector<Real> _emissivities;
+  /// View factors for the primary and secondary sides
+  std::vector<Real> _view_factors;
+  /// Perimeters for the primary and secondary sides
+  std::vector<Real> _perimeters;
 
 public:
   static InputParameters validParams();
