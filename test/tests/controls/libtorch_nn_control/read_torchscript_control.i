@@ -98,9 +98,6 @@ cp = 1.0
     parameters = "Kernels/anti_source/value"
     postprocessors = "control_value"
     responses = 'T_max'
-    filename = 'model_2.pt'
-    torch_script_format = true
-    use_old_response = true
   []
 []
 

@@ -11,6 +11,7 @@
 
 #ifdef LIBTORCH_ENABLED
 
+#include "MooseError.h"
 #include <torch/torch.h>
 
 namespace Moose
