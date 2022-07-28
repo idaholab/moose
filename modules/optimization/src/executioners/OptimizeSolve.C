@@ -139,6 +139,11 @@ OptimizeSolve::taoSolve()
   ierr = TaoSetFromOptions(_tao);
   CHKERRQ(ierr);
 
+  // Backup multiapps so transient problems start with the same initial condition
+  _problem.backupMultiApps(EXEC_FORWARD);
+  _problem.backupMultiApps(EXEC_ADJOINT);
+  _problem.backupMultiApps(EXEC_HOMOGENEOUS_FORWARD);
+
   // Solve optimization
   ierr = TaoSolve(_tao);
   CHKERRQ(ierr);
@@ -301,8 +306,10 @@ Real
 OptimizeSolve::objectiveFunction()
 {
   _form_function->updateParameters(*_parameters.get());
+
   _problem.execute(EXEC_FORWARD);
   bool multiapp_passed = true;
+  _problem.restoreMultiApps(EXEC_FORWARD);
   if (!_problem.execMultiApps(EXEC_FORWARD))
     multiapp_passed = false;
   if (_solve_on.contains(EXEC_FORWARD))
@@ -316,11 +323,14 @@ void
 OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 {
   _form_function->updateParameters(*_parameters.get());
+
   _problem.execute(EXEC_ADJOINT);
+  _problem.restoreMultiApps(EXEC_ADJOINT);
   if (!_problem.execMultiApps(EXEC_ADJOINT))
     mooseError("Adjoint solve multiapp failed!");
   if (_solve_on.contains(EXEC_ADJOINT))
     _inner_solve->solve();
+
   _grad_iterate++;
   _form_function->computeGradient(gradient);
 }
@@ -337,6 +347,7 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
   _form_function->updateParameters(s);
 
   _problem.execute(EXEC_HOMOGENEOUS_FORWARD);
+  _problem.restoreMultiApps(EXEC_HOMOGENEOUS_FORWARD);
   if (!_problem.execMultiApps(EXEC_HOMOGENEOUS_FORWARD))
     mooseError("Homogeneous forward solve multiapp failed!");
   if (_solve_on.contains(EXEC_HOMOGENEOUS_FORWARD))
@@ -345,6 +356,7 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
   _form_function->setMisfitToSimulatedValues();
 
   _problem.execute(EXEC_ADJOINT);
+  _problem.restoreMultiApps(EXEC_ADJOINT);
   if (!_problem.execMultiApps(EXEC_ADJOINT))
     mooseError("Adjoint solve multiapp failed!");
   if (_solve_on.contains(EXEC_ADJOINT))
