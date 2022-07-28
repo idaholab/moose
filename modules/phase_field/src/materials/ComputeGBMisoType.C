@@ -11,7 +11,7 @@
 #include "SolutionUserObject.h"
 #include <fstream>
 
-registerMooseObject("labmouseApp", ComputeGBMisoType);
+registerMooseObject("PhaseFieldApp", ComputeGBMisoType);
 
 InputParameters
 ComputeGBMisoType::validParams()
