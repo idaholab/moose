@@ -370,6 +370,8 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
   else if (std::abs(nz) > 0.57735)
     component_normal = 2;
 
+  libmesh_ignore(component_normal);
+
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processResidualAndJacobian(
       normal_dof_residual,
