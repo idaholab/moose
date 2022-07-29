@@ -29,9 +29,9 @@
     return result;                                                                                 \
   }                                                                                                \
                                                                                                    \
-/**
- * Adds function definitions with not implemented error. These functions should be overriden in
- * derived classes where required. AD versions are constructed automatically using propfuncAD.
+/**                                                                                                \
+ * Adds function definitions with not implemented error. These functions should be overriden in    \
+ * derived classes where required. AD versions are constructed automatically using propfuncAD.     \
  */
 #define propfunc(want)                                                                             \
   virtual Real want##_from_T(const Real &) const                                                   \
