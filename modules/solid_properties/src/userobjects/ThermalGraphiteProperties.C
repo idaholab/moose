@@ -62,24 +62,6 @@ ThermalGraphiteProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) c
   }
 }
 
-void
-ThermalGraphiteProperties::cp_from_T(const DualReal & T, DualReal & cp, DualReal & dcp_dT) const
-{
-  cp = ThermalSolidProperties::cp_from_T(T);
-
-  switch (_grade)
-  {
-    case GraphiteGrade::H_451:
-    {
-      dcp_dT = 4184.0 * (-2.42667e-6 + 90.2725 / Utility::pow<2>(T) + 86898.6 / Utility::pow<3>(T) -
-                         4.77927e7 / Utility::pow<4>(T) + 5.74752e9 / Utility::pow<5>(T));
-      break;
-    }
-    default:
-      mooseError("Unhandled GraphiteGrade enum!");
-  }
-}
-
 Real
 ThermalGraphiteProperties::k_from_T(const Real & T) const
 {
@@ -109,23 +91,6 @@ ThermalGraphiteProperties::k_from_T(const Real & T, Real & k, Real & dk_dT) cons
   }
 }
 
-void
-ThermalGraphiteProperties::k_from_T(const DualReal & T, DualReal & k, DualReal & dk_dT) const
-{
-  k = ThermalSolidProperties::k_from_T(T);
-
-  switch (_grade)
-  {
-    case GraphiteGrade::H_451:
-    {
-      dk_dT = 6.56496e-5 * T - 1.24890e-1;
-      break;
-    }
-    default:
-      mooseError("Unhandled GraphiteGrade enum!");
-  }
-}
-
 Real
 ThermalGraphiteProperties::rho_from_T(const Real & /* T */) const
 {
@@ -136,12 +101,5 @@ void
 ThermalGraphiteProperties::rho_from_T(const Real & T, Real & rho, Real & drho_dT) const
 {
   rho = rho_from_T(T);
-  drho_dT = 0.0;
-}
-
-void
-ThermalGraphiteProperties::rho_from_T(const DualReal & T, DualReal & rho, DualReal & drho_dT) const
-{
-  rho = ThermalSolidProperties::rho_from_T(T);
   drho_dT = 0.0;
 }

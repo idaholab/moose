@@ -38,13 +38,6 @@ ThermalSS316Properties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) cons
   dcp_dT = 0.1816;
 }
 
-void
-ThermalSS316Properties::cp_from_T(const DualReal & T, DualReal & cp, DualReal & dcp_dT) const
-{
-  cp = ThermalSolidProperties::cp_from_T(T);
-  dcp_dT = 0.1816;
-}
-
 Real
 ThermalSS316Properties::k_from_T(const Real & T) const
 {
@@ -58,13 +51,6 @@ ThermalSS316Properties::k_from_T(const Real & T, Real & k, Real & dk_dT) const
   dk_dT = -1.4602e-5 * T + 0.02716;
 }
 
-void
-ThermalSS316Properties::k_from_T(const DualReal & T, DualReal & k, DualReal & dk_dT) const
-{
-  k = ThermalSolidProperties::k_from_T(T);
-  dk_dT = -1.4602e-5 * T + 0.02716;
-}
-
 Real
 ThermalSS316Properties::rho_from_T(const Real & T) const
 {
@@ -75,12 +61,5 @@ void
 ThermalSS316Properties::rho_from_T(const Real & T, Real & rho, Real & drho_dT) const
 {
   rho = rho_from_T(T);
-  drho_dT = -8.908e-5 * T - 0.4297;
-}
-
-void
-ThermalSS316Properties::rho_from_T(const DualReal & T, DualReal & rho, DualReal & drho_dT) const
-{
-  rho = ThermalSolidProperties::rho_from_T(T);
   drho_dT = -8.908e-5 * T - 0.4297;
 }

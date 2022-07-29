@@ -29,15 +29,6 @@
     return result;                                                                                 \
   }                                                                                                \
                                                                                                    \
-  virtual void want##_from_T(const DualReal & T, DualReal & val, DualReal & d##want##dT) const     \
-  {                                                                                                \
-    solidPropError(__PRETTY_FUNCTION__, " derivative derivatives not implemented.");               \
-    Real dummy, tmp;                                                                               \
-    val = want##_from_T(T);                                                                        \
-    want##_from_T(T.value(), dummy, tmp);                                                          \
-    d##want##dT = tmp;                                                                             \
-  }
-
 /**
  * Adds function definitions with not implemented error. These functions should be overriden in
  * derived classes where required. AD versions are constructed automatically using propfuncAD.

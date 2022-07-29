@@ -24,17 +24,14 @@ public:
   virtual Real k_from_T(const Real & T) const override;
 
   virtual void k_from_T(const Real & T, Real & k, Real & dk_dT) const override;
-  virtual void k_from_T(const DualReal & T, DualReal & k, DualReal & dk_dT) const override;
 
   virtual Real cp_from_T(const Real & T) const override;
 
   virtual void cp_from_T(const Real & T, Real & cp, Real & dcp_dT) const override;
-  virtual void cp_from_T(const DualReal & T, DualReal & cp, DualReal & dcp_dT) const override;
 
   virtual Real rho_from_T(const Real & T) const override;
 
   virtual void rho_from_T(const Real & T, Real & rho, Real & drho_dT) const override;
-  virtual void rho_from_T(const DualReal & T, DualReal & rho, DualReal & drho_dT) const override;
 
 protected:
   /// enumeration for selecting the thermal conductivity model

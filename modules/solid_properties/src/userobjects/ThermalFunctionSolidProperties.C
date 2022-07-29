@@ -44,20 +44,6 @@ ThermalFunctionSolidProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_
   dcp_dT = _cp_function.timeDerivative(T);
 }
 
-void
-ThermalFunctionSolidProperties::cp_from_T(const DualReal & T,
-                                          DualReal & cp,
-                                          DualReal & dcp_dT) const
-{
-  cp = ThermalSolidProperties::cp_from_T(T);
-
-  solidPropError(__PRETTY_FUNCTION__, " derivative derivatives not implemented.");
-
-  Real dummy, tmp;
-  ThermalSolidProperties::cp_from_T(T.value(), dummy, tmp);
-  dcp_dT = tmp;
-}
-
 Real
 ThermalFunctionSolidProperties::k_from_T(const Real & T) const
 {
@@ -71,18 +57,6 @@ ThermalFunctionSolidProperties::k_from_T(const Real & T, Real & k, Real & dk_dT)
   dk_dT = _k_function.timeDerivative(T);
 }
 
-void
-ThermalFunctionSolidProperties::k_from_T(const DualReal & T, DualReal & k, DualReal & dk_dT) const
-{
-  k = ThermalSolidProperties::k_from_T(T);
-
-  solidPropError(__PRETTY_FUNCTION__, " derivative derivatives not implemented.");
-
-  Real dummy, tmp;
-  ThermalSolidProperties::k_from_T(T.value(), dummy, tmp);
-  dk_dT = tmp;
-}
-
 Real
 ThermalFunctionSolidProperties::rho_from_T(const Real & T) const
 {
@@ -94,18 +68,4 @@ ThermalFunctionSolidProperties::rho_from_T(const Real & T, Real & rho, Real & dr
 {
   rho = rho_from_T(T);
   drho_dT = _rho_function.timeDerivative(T);
-}
-
-void
-ThermalFunctionSolidProperties::rho_from_T(const DualReal & T,
-                                           DualReal & rho,
-                                           DualReal & drho_dT) const
-{
-  rho = ThermalSolidProperties::rho_from_T(T);
-
-  solidPropError(__PRETTY_FUNCTION__, " derivative derivatives not implemented.");
-
-  Real dummy, tmp;
-  ThermalSolidProperties::rho_from_T(T.value(), dummy, tmp);
-  drho_dT = tmp;
 }

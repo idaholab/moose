@@ -46,15 +46,6 @@ ThermalMonolithicSiCProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_
   dcp_dT = 0.3772 - 1.58518e-4 * T + 6.3892e7 / Utility::pow<3>(T);
 }
 
-void
-ThermalMonolithicSiCProperties::cp_from_T(const DualReal & T,
-                                          DualReal & cp,
-                                          DualReal & dcp_dT) const
-{
-  cp = ThermalSolidProperties::cp_from_T(T);
-  dcp_dT = 0.3772 - 1.58518e-4 * T + 6.3892e7 / Utility::pow<3>(T);
-}
-
 Real
 ThermalMonolithicSiCProperties::k_from_T(const Real & T) const
 {
@@ -91,28 +82,6 @@ ThermalMonolithicSiCProperties::k_from_T(const Real & T, Real & k, Real & dk_dT)
   }
 }
 
-void
-ThermalMonolithicSiCProperties::k_from_T(const DualReal & T, DualReal & k, DualReal & dk_dT) const
-{
-  k = ThermalSolidProperties::k_from_T(T);
-
-  switch (_k_model)
-  {
-    case ThermalConductivityModel::SNEAD:
-    {
-      dk_dT = -1.0 / Utility::pow<2>(-0.0003 + 1.05e-5 * T) * 1.05e-5;
-      break;
-    }
-    case ThermalConductivityModel::STONE:
-    {
-      dk_dT = -1.11e-7 * Utility::pow<2>(T) + 3.08E-4 * T - 0.214;
-      break;
-    }
-    default:
-      mooseError("Unhandled MooseEnum in ThermalMonolithicSiCProperties!");
-  }
-}
-
 Real
 ThermalMonolithicSiCProperties::rho_from_T(const Real & /* T */) const
 {
@@ -123,14 +92,5 @@ void
 ThermalMonolithicSiCProperties::rho_from_T(const Real & T, Real & rho, Real & drho_dT) const
 {
   rho = rho_from_T(T);
-  drho_dT = 0.0;
-}
-
-void
-ThermalMonolithicSiCProperties::rho_from_T(const DualReal & T,
-                                           DualReal & rho,
-                                           DualReal & drho_dT) const
-{
-  rho = ThermalSolidProperties::rho_from_T(T);
   drho_dT = 0.0;
 }

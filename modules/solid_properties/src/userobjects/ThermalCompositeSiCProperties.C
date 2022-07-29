@@ -40,13 +40,6 @@ ThermalCompositeSiCProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_d
   dcp_dT = 0.3772 - 1.58518e-4 * T + 6.3892e7 / Utility::pow<3>(T);
 }
 
-void
-ThermalCompositeSiCProperties::cp_from_T(const DualReal & T, DualReal & cp, DualReal & dcp_dT) const
-{
-  cp = ThermalSolidProperties::cp_from_T(T);
-  dcp_dT = 0.3772 - 1.58518e-4 * T + 6.3892e7 / Utility::pow<3>(T);
-}
-
 Real
 ThermalCompositeSiCProperties::k_from_T(const Real & T) const
 {
@@ -61,13 +54,6 @@ ThermalCompositeSiCProperties::k_from_T(const Real & T, Real & k, Real & dk_dT) 
   dk_dT = -6.84e-11 * Utility::pow<3>(T) + 2.205e-7 * Utility::pow<2>(T) - 2.2e-4 * T + 0.061;
 }
 
-void
-ThermalCompositeSiCProperties::k_from_T(const DualReal & T, DualReal & k, DualReal & dk_dT) const
-{
-  k = ThermalSolidProperties::k_from_T(T);
-  dk_dT = -6.84e-11 * Utility::pow<3>(T) + 2.205e-7 * Utility::pow<2>(T) - 2.2e-4 * T + 0.061;
-}
-
 Real
 ThermalCompositeSiCProperties::rho_from_T(const Real & /* T */) const
 {
@@ -78,14 +64,5 @@ void
 ThermalCompositeSiCProperties::rho_from_T(const Real & T, Real & rho, Real & drho_dT) const
 {
   rho = rho_from_T(T);
-  drho_dT = 0.0;
-}
-
-void
-ThermalCompositeSiCProperties::rho_from_T(const DualReal & T,
-                                          DualReal & rho,
-                                          DualReal & drho_dT) const
-{
-  rho = ThermalSolidProperties::rho_from_T(T);
   drho_dT = 0.0;
 }
