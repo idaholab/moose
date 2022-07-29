@@ -43,7 +43,6 @@ class MooseUnits
   };
 
 public:
-  MooseUnits();
   MooseUnits(const std::string & unit_string);
   MooseUnits(Real f) : _factor(f), _shift(), _base() {}
   MooseUnits(Real f, Real s, std::vector<std::pair<MooseUnits::BaseUnit, int>> b)

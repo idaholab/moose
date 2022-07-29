@@ -392,12 +392,6 @@
                                             "num_calls": 2,
                                             "time": 3.117e-06
                                         },
-                                        "FEProblem::setCoordSystem": {
-                                            "level": 5,
-                                            "memory": 0,
-                                            "num_calls": 2,
-                                            "time": 6.421e-06
-                                        },
                                         "level": 4,
                                         "memory": 2,
                                         "num_calls": 4,

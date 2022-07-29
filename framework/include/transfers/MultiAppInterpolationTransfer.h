@@ -15,6 +15,7 @@
 
 #include "libmesh/mesh_base.h"
 
+class MooseCoordTransform;
 namespace libMesh
 {
 template <unsigned int>
@@ -34,30 +35,17 @@ public:
   virtual void execute() override;
 
 protected:
-  /**
-   * Return the nearest node to the point p.
-   * @param p The point you want to find the nearest node to.
-   * @param distance This will hold the distance between the returned node and p
-   * @param nodes_begin - iterator to the beginning of the node list
-   * @param nodes_end - iterator to the end of the node list
-   * @return The Node closest to point p.
-   */
-  Node * getNearestNode(const Point & p,
-                        Real & distance,
-                        const MeshBase::const_node_iterator & nodes_begin,
-                        const MeshBase::const_node_iterator & nodes_end);
-
   void
   fillSourceInterpolationPoints(FEProblemBase & from_problem,
                                 const MooseVariableFieldBase & from_var,
-                                const Point & from_app_position,
+                                const MooseCoordTransform & from_app_transform,
                                 std::unique_ptr<InverseDistanceInterpolation<Moose::dim>> & idi);
 
   void
   interpolateTargetPoints(FEProblemBase & to_problem,
                           MooseVariableFieldBase & to_var,
                           NumericVector<Real> & to_solution,
-                          const Point & to_app_position,
+                          const MooseCoordTransform & to_app_transform,
                           const std::unique_ptr<InverseDistanceInterpolation<Moose::dim>> & idi);
 
   void

@@ -1,0 +1,10 @@
+[Tests]
+  design = 'Transfers/index.md'
+  issues = '#12293'
+  [multi-app]
+    type = Exodiff
+    input = 3d-xyz.i
+    exodiff = '3d-xyz_out.e 3d-xyz_out_sub0.e'
+    requirement = 'The system shall be able to transfer information between three-dimensional and two-dimensional axisymmetric simulations in which the cylinder axis lies along the z-axis in three-dimensional space.'
+  []
+[]

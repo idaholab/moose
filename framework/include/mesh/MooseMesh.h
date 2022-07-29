@@ -38,6 +38,8 @@
 class Assembly;
 class RelationshipManager;
 class MooseVariableBase;
+class MooseCoordTransform;
+class MooseUnits;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1118,6 +1120,11 @@ public:
   Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const;
 
   /**
+   * Get the map from subdomain ID to coordinate system type, e.g. xyz, rz, or r-spherical
+   */
+  const std::map<SubdomainID, Moose::CoordinateSystemType> & getCoordSystem() const;
+
+  /**
    * Set the coordinate system for the provided blocks to \p coord_sys
    */
   void setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys);
@@ -1150,6 +1157,17 @@ public:
    * Mark the finite volume information as dirty
    */
   void finiteVolumeInfoDirty() { _finite_volume_info_dirty = true; }
+
+  /**
+   * @return the coordinate transformation object that describes how to transform this problem's
+   * coordinate system into the canonical/reference coordinate system
+   */
+  MooseCoordTransform & coordTransform();
+
+  /**
+   * @return the length unit of this mesh provided through the coordinate transformation object
+   */
+  const MooseUnits & lengthUnit() const;
 
 protected:
   /// Deprecated (DO NOT USE)
@@ -1523,9 +1541,20 @@ private:
   /// Storage for RZ axis selection
   unsigned int _rz_coord_axis;
 
+  /// A coordinate transformation object that describes how to transform this problem's coordinate
+  /// system into the canonical/reference coordinate system
+  std::unique_ptr<MooseCoordTransform> _coord_transform;
+
   template <typename T>
   struct MeshType;
 };
+
+inline MooseCoordTransform &
+MooseMesh::coordTransform()
+{
+  mooseAssert(_coord_transform, "The coordinate transformation object is null.");
+  return *_coord_transform;
+}
 
 template <>
 struct MooseMesh::MeshType<ReplicatedMesh>

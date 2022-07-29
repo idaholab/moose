@@ -175,13 +175,18 @@ FEProblemBase::validParams()
   ///    be set for the whole domain
   /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
   /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
-  params.addParam<std::vector<SubdomainName>>("block", "Block IDs for the coordinate systems");
+  params.addDeprecatedParam<std::vector<SubdomainName>>(
+      "block", "Block IDs for the coordinate systems", "Please use 'Mesh/block' instead");
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
   MooseEnum rz_coord_axis("X=0 Y=1", "Y");
-  params.addParam<MultiMooseEnum>(
-      "coord_type", coord_types, "Type of the coordinate system per block param");
-  params.addParam<MooseEnum>(
-      "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
+  params.addDeprecatedParam<MultiMooseEnum>("coord_type",
+                                            coord_types,
+                                            "Type of the coordinate system per block param",
+                                            "Please use 'Mesh/coord_type' instead");
+  params.addDeprecatedParam<MooseEnum>("rz_coord_axis",
+                                       rz_coord_axis,
+                                       "The rotation axis (X | Y) for axisymetric coordinates",
+                                       "Please use 'Mesh/rz_coord_axis' instead");
   params.addParam<bool>(
       "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
   params.addParam<bool>(
@@ -388,9 +393,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   _eq.parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 
-  setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
-                 getParam<MultiMooseEnum>("coord_type"));
-  setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
+  if (parameters.isParamSetByUser("coord_type"))
+    setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
+                   getParam<MultiMooseEnum>("coord_type"));
+  if (parameters.isParamSetByUser("rz_coord_axis"))
+    setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
 
   if (isParamValid("restart_file_base"))
   {
@@ -7519,6 +7526,12 @@ FEProblemBase::jacobianSetup()
   SubProblem::jacobianSetup();
   if (_displaced_problem)
     _displaced_problem->jacobianSetup();
+}
+
+MooseCoordTransform &
+FEProblemBase::coordTransform()
+{
+  return mesh().coordTransform();
 }
 
 template <typename T>
