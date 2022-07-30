@@ -2941,12 +2941,16 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     CHKERRQ(ierr);
     PetscScalar relax_factor;
     VecAbs(_Wij_loc_vec);
-#if !PETSC_VERSION_LESS_THAN(3,16,0)
-    VecMean(_Wij_loc_vec, &relax_factor);
-#else
+// #if !PETSC_VERSION_LESS_THAN(3,16,0)
+//     VecMean(_Wij_loc_vec, &relax_factor);
+// #else
     VecSum(_Wij_loc_vec, &relax_factor);
-    relax_factor /= _block_size * _n_gaps;
-#endif
+    {
+      PetscInt global_size;
+      VecGetSize(_Wij_loc_vec, &global_size);
+      relax_factor /= global_size;
+    }
+// #endif
     relax_factor = relax_factor / max_sumWij + 0.5;
     if (_verbose_subchannel)
       _console << "Relax base value: " << relax_factor << std::endl;
