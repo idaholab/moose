@@ -1118,18 +1118,18 @@ SubChannel1PhaseProblem::computeDP(int iblock)
     MatAssemblyBegin(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
     // Matrix
-#if !PETSC_VERSION_LESS_THAN(3, 15, 0)
-    MatAXPY(amc_sys_mdot_mat, 1.0, amc_time_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    MatAssemblyBegin(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(amc_sys_mdot_mat, 1.0, amc_advective_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    MatAssemblyBegin(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(amc_sys_mdot_mat, 1.0, amc_cross_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    MatAssemblyBegin(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(amc_sys_mdot_mat, 1.0, amc_friction_force_mat, UNKNOWN_NONZERO_PATTERN);
-#else
+// #if !PETSC_VERSION_LESS_THAN(3, 15, 0)
+//     MatAXPY(amc_sys_mdot_mat, 1.0, amc_time_derivative_mat, UNKNOWN_NONZERO_PATTERN);
+//     MatAssemblyBegin(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
+//     MatAssemblyEnd(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
+//     MatAXPY(amc_sys_mdot_mat, 1.0, amc_advective_derivative_mat, UNKNOWN_NONZERO_PATTERN);
+//     MatAssemblyBegin(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
+//     MatAssemblyEnd(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
+//     MatAXPY(amc_sys_mdot_mat, 1.0, amc_cross_derivative_mat, UNKNOWN_NONZERO_PATTERN);
+//     MatAssemblyBegin(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
+//     MatAssemblyEnd(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
+//     MatAXPY(amc_sys_mdot_mat, 1.0, amc_friction_force_mat, UNKNOWN_NONZERO_PATTERN);
+// #else
     MatAXPY(amc_sys_mdot_mat, 1.0, amc_time_derivative_mat, DIFFERENT_NONZERO_PATTERN);
     MatAssemblyBegin(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
@@ -1140,7 +1140,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
     MatAssemblyBegin(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
     MatAXPY(amc_sys_mdot_mat, 1.0, amc_friction_force_mat, DIFFERENT_NONZERO_PATTERN);
-#endif
+// #endif
     MatAssemblyBegin(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
     if (_verbose_subchannel)
@@ -1752,15 +1752,15 @@ SubChannel1PhaseProblem::computeh(int iblock)
     MatAssemblyBegin(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     // Matrix
-#if !PETSC_VERSION_LESS_THAN(3, 15, 0)
-    MatAXPY(hc_sys_h_mat, 1.0, hc_time_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    MatAssemblyBegin(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(hc_sys_h_mat, 1.0, hc_advective_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    MatAssemblyBegin(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(hc_sys_h_mat, 1.0, hc_cross_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-#else
+// #if !PETSC_VERSION_LESS_THAN(3, 15, 0)
+//     MatAXPY(hc_sys_h_mat, 1.0, hc_time_derivative_mat, UNKNOWN_NONZERO_PATTERN);
+//     MatAssemblyBegin(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
+//     MatAssemblyEnd(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
+//     MatAXPY(hc_sys_h_mat, 1.0, hc_advective_derivative_mat, UNKNOWN_NONZERO_PATTERN);
+//     MatAssemblyBegin(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
+//     MatAssemblyEnd(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
+//     MatAXPY(hc_sys_h_mat, 1.0, hc_cross_derivative_mat, UNKNOWN_NONZERO_PATTERN);
+// #else
     MatAXPY(hc_sys_h_mat, 1.0, hc_time_derivative_mat, DIFFERENT_NONZERO_PATTERN);
     MatAssemblyBegin(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
@@ -1768,7 +1768,7 @@ SubChannel1PhaseProblem::computeh(int iblock)
     MatAssemblyBegin(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAXPY(hc_sys_h_mat, 1.0, hc_cross_derivative_mat, DIFFERENT_NONZERO_PATTERN);
-#endif
+// #endif
     MatAssemblyBegin(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     if (_verbose_subchannel)
@@ -2138,15 +2138,15 @@ SubChannel1PhaseProblem::computeWij(int iblock)
     MatAssemblyBegin(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
     // Matrix
-#if !PETSC_VERSION_LESS_THAN(3, 15, 0)
-    MatAXPY(cmc_sys_Wij_mat, 1.0, cmc_time_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    MatAssemblyBegin(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(cmc_sys_Wij_mat, 1.0, cmc_advective_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    MatAssemblyBegin(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
-    MatAXPY(cmc_sys_Wij_mat, 1.0, cmc_friction_force_mat, UNKNOWN_NONZERO_PATTERN);
-#else
+// #if !PETSC_VERSION_LESS_THAN(3, 15, 0)
+//     MatAXPY(cmc_sys_Wij_mat, 1.0, cmc_time_derivative_mat, UNKNOWN_NONZERO_PATTERN);
+//     MatAssemblyBegin(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
+//     MatAssemblyEnd(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
+//     MatAXPY(cmc_sys_Wij_mat, 1.0, cmc_advective_derivative_mat, UNKNOWN_NONZERO_PATTERN);
+//     MatAssemblyBegin(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
+//     MatAssemblyEnd(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
+//     MatAXPY(cmc_sys_Wij_mat, 1.0, cmc_friction_force_mat, UNKNOWN_NONZERO_PATTERN);
+// #else
     MatAXPY(cmc_sys_Wij_mat, 1.0, cmc_time_derivative_mat, DIFFERENT_NONZERO_PATTERN);
     MatAssemblyBegin(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
@@ -2154,7 +2154,7 @@ SubChannel1PhaseProblem::computeWij(int iblock)
     MatAssemblyBegin(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
     MatAXPY(cmc_sys_Wij_mat, 1.0, cmc_friction_force_mat, DIFFERENT_NONZERO_PATTERN);
-#endif
+// #endif
     MatAssemblyBegin(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
     if (_verbose_subchannel)
