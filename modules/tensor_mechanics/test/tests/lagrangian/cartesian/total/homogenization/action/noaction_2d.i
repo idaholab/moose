@@ -3,9 +3,8 @@
 [GlobalParams]
   displacements = 'disp_x disp_y'
   large_kinematics = false
-  constraint_types = 'stress strain stress'
-  ndim = 2
   macro_gradient = hvar
+  homogenization_constraint = homogenization
 []
 
 [Mesh]
@@ -27,10 +26,11 @@
 []
 
 [UserObjects]
-  [integrator]
-    type = HomogenizationConstraintIntegral
-    targets = 'stress11 strain22 stress12'
-    execute_on = 'initial linear'
+  [homogenization]
+    type = HomogenizationConstraint
+    constraint_types = 'stress none none stress strain none none none none'
+    targets = 'stress11 stress12 strain22'
+    execute_on = 'INITIAL LINEAR NONLINEAR'
   []
 []
 
@@ -268,7 +268,6 @@
   [enforce]
     type = HomogenizationConstraintScalarKernel
     variable = hvar
-    integrator = integrator
   []
 []
 
@@ -380,5 +379,6 @@
 []
 
 [Outputs]
+  file_base = 2d
   exodus = true
 []

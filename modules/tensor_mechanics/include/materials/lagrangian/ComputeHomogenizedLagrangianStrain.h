@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Material.h"
+#include "HomogenizationConstraint.h"
 
 /// Calculate the tensor corresponding to homogenization gradient
 ///
@@ -26,15 +27,15 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
-private:
-  virtual RankTwoTensor calculateTensorContribution();
-
 protected:
-  /// Number of displacements
-  const unsigned int _ndisp;
+  /// The base name for material properties
+  const std::string _base_name;
 
-  /// Flag for large kinematics
-  const bool _large_kinematics;
+  /// The homogenization constraint userobject
+  const HomogenizationConstraint & _constraint;
+
+  /// Constraint map
+  const Homogenization::ConstraintMap & _cmap;
 
   /// ScalarVariable with the field
   const VariableValue & _macro_gradient;

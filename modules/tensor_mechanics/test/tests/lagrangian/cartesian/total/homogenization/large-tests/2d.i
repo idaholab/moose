@@ -1,11 +1,10 @@
-# 2D test with just strain control
+# 2D with mixed conditions on stress/strain
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
   large_kinematics = true
-  constraint_types = 'strain strain strain strain'
-  ndim = 2
   macro_gradient = hvar
+  homogenization_constraint = homogenization
 []
 
 [Mesh]
@@ -244,10 +243,11 @@
 []
 
 [UserObjects]
-  [integrator]
-    type = HomogenizationConstraintIntegral
-    targets = 'strain11 strain22 strain21 strain12'
-    execute_on = 'initial linear'
+  [homogenization]
+    type = HomogenizationConstraint
+    constraint_types = ${constraint_types}
+    targets = ${targets}
+    execute_on = 'INITIAL LINEAR NONLINEAR'
   []
 []
 
@@ -268,7 +268,6 @@
   [enforce]
     type = HomogenizationConstraintScalarKernel
     variable = hvar
-    integrator = integrator
   []
 []
 
@@ -281,7 +280,6 @@
     type = ParsedFunction
     value = '-2.0e-1*t'
   []
-
   [strain12]
     type = ParsedFunction
     value = '1.0e-1*t'
@@ -289,6 +287,22 @@
   [strain21]
     type = ParsedFunction
     value = '-1.5e-1*t'
+  []
+  [stress11]
+    type = ParsedFunction
+    value = '4.0e2*t'
+  []
+  [stress22]
+    type = ParsedFunction
+    value = '-2.0e2*t'
+  []
+  [stress12]
+    type = ParsedFunction
+    value = '1.0e2*t'
+  []
+  [stress21]
+    type = ParsedFunction
+    value = '-1.5e2*t'
   []
 []
 
@@ -353,13 +367,6 @@
   []
   [compute_homogenization_gradient]
     type = ComputeHomogenizedLagrangianStrain
-  []
-[]
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
   []
 []
 
@@ -468,7 +475,7 @@
 
   l_max_its = 2
   l_tol = 1e-14
-  nl_max_its = 10
+  nl_max_its = 30
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-10
 
@@ -479,6 +486,5 @@
 []
 
 [Outputs]
-  exodus = false
   csv = true
 []

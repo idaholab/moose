@@ -1,11 +1,11 @@
-# 2D test with just strain control
+# 3D test with just mixed stress strain control
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   large_kinematics = true
   constraint_types = 'stress strain strain strain stress strain strain strain strain'
-  ndim = 3
   macro_gradient = hvar
+  homogenization_constraint = homogenization
 []
 
 [Mesh]
@@ -249,10 +249,10 @@
 []
 
 [UserObjects]
-  [integrator]
-    type = HomogenizationConstraintIntegral
+  [homogenization]
+    type = HomogenizationConstraint
     targets = 'stress11 strain21 strain31 strain12 stress22 strain32 strain13 strain23 strain33'
-    execute_on = 'initial linear'
+    execute_on = 'INITIAL LINEAR NONLINEAR'
   []
 []
 
@@ -278,7 +278,6 @@
   [enforce]
     type = HomogenizationConstraintScalarKernel
     variable = hvar
-    integrator = integrator
   []
 []
 
@@ -447,5 +446,6 @@
 []
 
 [Outputs]
+  file_base = 3d
   exodus = true
 []
