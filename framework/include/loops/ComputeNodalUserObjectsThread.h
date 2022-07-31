@@ -31,7 +31,7 @@ public:
   void join(const ComputeNodalUserObjectsThread & /*y*/);
 
   /// Print information about the loop, mostly order of execution of objects
-  void printExecutionInformation() const override;
+  void printGeneralExecutionInformation() const override;
 
 private:
   const TheWarehouse::Query _query;

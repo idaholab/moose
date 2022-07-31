@@ -73,7 +73,7 @@ ComputeNodalDampingThread::join(const ComputeNodalDampingThread & y)
 }
 
 void
-ComputeNodalDampingThread::printExecutionInformation() const
+ComputeNodalDampingThread::printGeneralExecutionInformation() const
 {
   const auto & damper_wh = _nl.getNodalDamperWarehouse();
   if (_fe_problem.shouldPrintExecution() && damper_wh.hasActiveObjects())

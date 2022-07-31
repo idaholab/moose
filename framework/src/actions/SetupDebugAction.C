@@ -42,7 +42,9 @@ SetupDebugAction::validParams()
   params.addParam<bool>(
       "show_reporters", false, "Print out information about the declared and requested Reporters");
 
-  const ExecFlagEnum print_on = MooseUtils::getDefaultExecFlagEnum();
+  ExecFlagEnum print_on = MooseUtils::getDefaultExecFlagEnum();
+  print_on.addAvailableFlags(EXEC_TRANSFER);
+  print_on.addAvailableFlags(EXEC_FAILED);
   params.addParam<ExecFlagEnum>(
       "show_execution_order",
       print_on,

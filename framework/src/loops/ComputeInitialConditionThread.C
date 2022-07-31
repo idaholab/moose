@@ -31,7 +31,7 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
   _tid = puid.id;
 
   const InitialConditionWarehouse & warehouse = _fe_problem.getInitialConditionWarehouse();
-  printExecutionInformation();
+  printGeneralExecutionInformation();
 
   // Iterate over all the elements in the range
   for (const auto & elem : range)
@@ -109,7 +109,7 @@ ComputeInitialConditionThread::join(const ComputeInitialConditionThread & /*y*/)
 }
 
 void
-ComputeInitialConditionThread::printExecutionInformation() const
+ComputeInitialConditionThread::printGeneralExecutionInformation() const
 {
   const InitialConditionWarehouse & ic_wh = _fe_problem.getInitialConditionWarehouse();
   if (_fe_problem.shouldPrintExecution() && ic_wh.hasActiveObjects())

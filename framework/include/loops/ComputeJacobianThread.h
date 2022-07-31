@@ -83,5 +83,8 @@ protected:
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id);
 
   // Print list of objects executed and in which order
-  void printExecutionInformation() const override;
+  void printGeneralExecutionInformation() const override;
+
+  // Print list of specific objects executed and in which order
+  void printBlockExecutionInformation() const override;
 };

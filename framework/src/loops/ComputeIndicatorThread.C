@@ -191,16 +191,22 @@ ComputeIndicatorThread::join(const ComputeIndicatorThread & /*y*/)
 }
 
 void
-ComputeIndicatorThread::printExecutionInformation() const
+ComputeIndicatorThread::printGeneralExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution() && _indicator_whs.hasActiveObjects())
   {
     auto console = _fe_problem.console();
     console << "[DBG] Executing indicators on elements " << std::endl;
-    console << "[DBG] Ordering:" << std::endl;
-    console << "[DBG] " << _indicator_whs.activeObjectsToString() << std::endl;
-    console
-        << "[DBG] They are executed in that order on the elements the indicators are defined on."
-        << std::endl;
+  }
+}
+
+void
+ComputeIndicatorThread::printBlockExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution() && _indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
+  {
+    auto console = _fe_problem.console();
+    console << "[DBG] Ordering on block " << _subdomain << std::endl;
+    // console << "[DBG] " << _indicator_whs.activeObjectsToString() << std::endl;
   }
 }

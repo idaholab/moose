@@ -111,7 +111,7 @@ ComputeNodalUserObjectsThread::join(const ComputeNodalUserObjectsThread & /*y*/)
 }
 
 void
-ComputeNodalUserObjectsThread::printExecutionInformation() const
+ComputeNodalUserObjectsThread::printGeneralExecutionInformation() const
 {
   // Get all nodal UOs
   std::vector<NodalUserObject *> nodal_uos;
@@ -128,7 +128,7 @@ ComputeNodalUserObjectsThread::printExecutionInformation() const
     console << "[DBG] Ordering on nodes:" << std::endl;
     console << "[DBG] - boundary restricted user objects" << std::endl;
     console << "[DBG] - block restricted user objects" << std::endl;
-    console << "[DBG] UOs executed on each node will differ based on these restrictions"
+    console << "[DBG] Nodal UOs executed on each node will differ based on these restrictions"
             << std::endl;
   }
 }

@@ -35,7 +35,7 @@ public:
 
 protected:
   /// Print information about the loop, mostly order of execution of objects
-  void printExecutionInformation() const override;
+  void printGeneralExecutionInformation() const override;
 
   AuxiliarySystem & _aux_sys;
 

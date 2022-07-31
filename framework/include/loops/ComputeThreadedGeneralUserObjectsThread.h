@@ -52,7 +52,7 @@ public:
 
 protected:
   /// Print information about the loop, mostly order of execution of objects
-  void printExecutionInformation(const GeneralUserObjectRange & range) const;
+  void printGeneralExecutionInformation(const GeneralUserObjectRange & range) const;
 
   /// FEProblem running this thread
   FEProblemBase & _fe_problem;

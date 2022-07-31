@@ -338,33 +338,37 @@ ComputeJacobianThread::join(const ComputeJacobianThread & /*y*/)
 }
 
 void
-ComputeJacobianThread::printExecutionInformation() const
+ComputeJacobianThread::printGeneralExecutionInformation() const
 {
-  // Number of objects executing is approximated by size of warehouses
-  int num_objects = _kernels.size() + _fv_kernels.size() + _integrated_bcs.size() +
-                    _dg_kernels.size() + _interface_kernels.size();
-  if (_fe_problem.shouldPrintExecution() && num_objects > 0)
+  if (_fe_problem.shouldPrintExecution())
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Beginning Elemental loop to compute Jacobian on " << execute_on << std::endl;
     console << "[DBG] Execution order on each element:" << std::endl;
-    if (_kernels.hasActiveObjects())
-      console << "[DBG] - kernels on element quadrature points" << std::endl;
-    if (_fv_kernels.size())
-      console << "[DBG] - finite volume elemental kernels on element" << std::endl;
-    if (_integrated_bcs.hasActiveObjects())
-      console << "[DBG] - integrated boundary conditions on element side quadrature points"
-              << std::endl;
-    if (_dg_kernels.hasActiveObjects())
-      console << "[DBG] - DG kernels on element side quadrature points" << std::endl;
-    if (_interface_kernels.hasActiveObjects())
-      console << "[DBG] - interface kernels on element side quadrature points" << std::endl;
+    console << "[DBG] - kernels on element quadrature points" << std::endl;
+    console << "[DBG] - finite volume elemental kernels on element" << std::endl;
+    console << "[DBG] - integrated boundary conditions on element side quadrature points"
+        << std::endl;
+    console << "[DBG] - DG kernels on element side quadrature points" << std::endl;
+    console << "[DBG] - interface kernels on element side quadrature points" << std::endl;
+  }
+}
 
+void
+ComputeJacobianThread::printBlockExecutionInformation() const
+{
+  // Number of objects executing is approximated by size of warehouses
+  int num_objects = _kernels.size() + _fv_kernels.size() + _integrated_bcs.size() +
+                    _dg_kernels.size() + _interface_kernels.size();
+  auto console = _fe_problem.console();
+  if (_fe_problem.shouldPrintExecution() && num_objects > 0)
+  {
+    console << "[DBG] Ordering of Jacobian Objects on block " << _subdomain << std::endl;
     if (_kernels.hasActiveObjects())
     {
       console << "[DBG] Ordering of kernels:" << std::endl;
-      console << _kernels.activeObjectsToString() << std::endl;
+      console << "[DBG] " << _kernels.activeObjectsToString() << std::endl;
     }
     if (_fv_kernels.size())
     {
@@ -392,6 +396,7 @@ ComputeJacobianThread::printExecutionInformation() const
       console << "[DBG] Ordering of interface kernels:" << std::endl;
       console << "[DBG] " << _interface_kernels.activeObjectsToString() << std::endl;
     }
-    console << "[DBG] Only objects on local block/sideset are executed in each list" << std::endl;
   }
+  else
+    console << "[DBG] No Objects contributing to Jacobian on block " << _subdomain << std::endl;
 }

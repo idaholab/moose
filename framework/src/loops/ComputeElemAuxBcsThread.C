@@ -54,7 +54,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
   // Reference to all boundary restricted AuxKernels for the current thread
   const auto & boundary_kernels = _storage.getActiveBoundaryObjects(_tid);
 
-  printExecutionInformation();
+  printGeneralExecutionInformation();
 
   for (const auto & belem : range)
   {
@@ -74,6 +74,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
 
       // Locate the AuxKernel objects for the current BoundaryID
       const auto iter = boundary_kernels.find(boundary_id);
+      printBoundaryExecutionInformation(boundary_id, iter->second);
 
       if (iter != boundary_kernels.end() && !(iter->second.empty()))
       {
@@ -154,7 +155,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::join(const ComputeElemAuxBcsThread & /*y
 
 template <typename AuxKernelType>
 void
-ComputeElemAuxBcsThread<AuxKernelType>::printExecutionInformation() const
+ComputeElemAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution() && _storage.hasActiveObjects())
   {
@@ -162,10 +163,26 @@ ComputeElemAuxBcsThread<AuxKernelType>::printExecutionInformation() const
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Executing boundary restricted auxkernels on boundary elements on "
             << execute_on << std::endl;
-    console << "[DBG] Ordering" << std::endl;
-    console << "[DBG] " << _storage.activeObjectsToString() << std::endl;
-    console << "[DBG] They are executed in that order on the sides these kernels are defined on."
-            << std::endl;
+  }
+}
+
+template <typename AuxKernelType>
+void
+ComputeElemAuxBcsThread<AuxKernelType>::printBoundaryExecutionInformation(
+      unsigned int boundary_id,
+      std::vector<std::shared_ptr<AuxKernelType> > kernels) const
+{
+  if (_fe_problem.shouldPrintExecution() && _storage.hasActiveObjects())
+  {
+    auto console = _fe_problem.console();
+    console << "[DBG] Ordering on boundary " << boundary_id << std::endl;
+    std::string list_kernels =
+        std::accumulate(kernels.begin() + 1,
+                        kernels.end(),
+                        kernels[0]->name(),
+                        [](const std::string & str_out, std::shared_ptr<AuxKernelType> kernel)
+                        { return str_out + " " + kernel->name(); });
+    console << "[DBG] " << list_kernels << std::endl;
   }
 }
 

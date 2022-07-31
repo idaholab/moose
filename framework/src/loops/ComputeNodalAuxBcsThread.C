@@ -85,7 +85,7 @@ ComputeNodalAuxBcsThread<AuxKernelType>::join(const ComputeNodalAuxBcsThread & /
 
 template <typename AuxKernelType>
 void
-ComputeNodalAuxBcsThread<AuxKernelType>::printExecutionInformation() const
+ComputeNodalAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution() && _storage.hasActiveObjects())
   {

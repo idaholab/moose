@@ -46,8 +46,11 @@ public:
   void join(const ComputeIndicatorThread & /*y*/);
 
 protected:
-  /// Print list of objects executed and in which order
-  void printExecutionInformation() const override;
+  /// Print general information about the loop when it executes
+  void printGeneralExecutionInformation() const override;
+
+  // Print list of specific objects executed and in which order
+  void printBlockExecutionInformation() const override;
 
   FEProblemBase & _fe_problem;
   AuxiliarySystem & _aux_sys;

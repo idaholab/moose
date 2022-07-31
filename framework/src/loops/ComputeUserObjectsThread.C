@@ -324,74 +324,89 @@ ComputeUserObjectsThread::join(const ComputeUserObjectsThread & /*y*/)
 }
 
 void
-ComputeUserObjectsThread::printExecutionInformation() const
+ComputeUserObjectsThread::printGeneralExecutionInformation() const
 {
-  // Gather all user objects that may execute
-  std::vector<ShapeSideUserObject *> shapers;
-  const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
-      Interfaces::ShapeSideUserObject, Moose::ANY_BOUNDARY_ID, shapers);
-
-  std::vector<UserObject *> side_uos;
-  const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
-      Interfaces::SideUserObject, Moose::ANY_BOUNDARY_ID, side_uos);
-
-  std::vector<const UserObject *> domain_interface_uos;
-  for (const auto * const domain_uo : _domain_objs)
-    if (domain_uo->shouldExecuteOnInterface())
-      domain_interface_uos.push_back(domain_uo);
-
-  // Approximation of the number of user objects currently executing
-  int num_objects = _element_objs.size() + _domain_objs.size() + _shape_element_objs.size() +
-                    side_uos.size() + shapers.size() + _internal_side_objs.size() +
-                    _interface_user_objects.size() + domain_interface_uos.size();
-
-  if (_fe_problem.shouldPrintExecution() && num_objects > 0)
+  if (_fe_problem.shouldPrintExecution())
   {
+    // Gather all user objects that may execute
+    std::vector<ShapeSideUserObject *> shapers;
+    const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
+        Interfaces::ShapeSideUserObject, Moose::ANY_BOUNDARY_ID, shapers);
+
+    std::vector<UserObject *> side_uos;
+    const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
+        Interfaces::SideUserObject, Moose::ANY_BOUNDARY_ID, side_uos);
+
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Computing elemental user objects on " << execute_on << std::endl;
-    console << "[DBG] Execution order on each element:" << std::endl;
+    console << "[DBG] Execution order of objects types on each element then its sides:" << std::endl;
     // onElement
-    if (_element_objs.size())
-      console << "[DBG] - element user objects" << std::endl;
-    if (_domain_objs.size())
-      console << "[DBG] - domain user objects" << std::endl;
-    if (_fe_problem.currentlyComputingJacobian() && _shape_element_objs.size())
-      console << "[DBG] - element user objects contributing to the Jacobian" << std::endl;
+    console << "[DBG] - element user objects" << std::endl;
+    console << "[DBG] - domain user objects" << std::endl;
+    console << "[DBG] - element user objects contributing to the Jacobian" << std::endl;
 
     // onBoundary
-    if (side_uos.size())
-      console << "[DBG] - side user objects" << std::endl;
-    if (_domain_objs.size())
-      console << "[DBG] - domain user objects executing on sides" << std::endl;
-    if (_fe_problem.currentlyComputingJacobian() && shapers.size())
-      console << "[DBG] - side user objects contributing to the Jacobian" << std::endl;
+    console << "[DBG] - side user objects" << std::endl;
+    console << "[DBG] - domain user objects executing on sides" << std::endl;
+    console << "[DBG] - side user objects contributing to the Jacobian" << std::endl;
 
     // onInternalSide
-    if (_internal_side_objs.size())
-      console << "[DBG] - internal side user objects" << std::endl;
-    if (_domain_objs.size())
-      console << "[DBG] - domain user objects executing on internal sides" << std::endl;
+    console << "[DBG] - internal side user objects" << std::endl;
+    console << "[DBG] - domain user objects executing on internal sides" << std::endl;
 
     // onInterface
-    if (_interface_user_objects.size())
-      console << "[DBG] - interface user objects" << std::endl;
-    if (domain_interface_uos.size())
-      console << "[DBG] - domain user objects executing at interfaces" << std::endl;
+    console << "[DBG] - interface user objects" << std::endl;
+    console << "[DBG] - domain user objects executing at interfaces" << std::endl;
+  }
+}
 
-    // Output specific ordering of objects
-    printVectorOrdering<ElementUserObject>(_element_objs, "element user objects");
-    printVectorOrdering<DomainUserObject>(_domain_objs, "domain user objects");
-    if (_fe_problem.currentlyComputingJacobian())
-      printVectorOrdering<ShapeElementUserObject>(
-          _shape_element_objs, "element user objects contributing to the Jacobian");
-    printVectorOrdering<UserObject>(side_uos, "side user objects");
-    if (_fe_problem.currentlyComputingJacobian())
-      printVectorOrdering<ShapeSideUserObject>(shapers,
-                                               "side user objects contributing to the Jacobian");
-    printVectorOrdering<InternalSideUserObject>(_internal_side_objs, "internal side user objects");
-    printVectorOrdering<InterfaceUserObject>(_interface_user_objects, "interface user objects");
-    console << "[DBG] Only user objects active on local element/sides are executed" << std::endl;
+void
+ComputeUserObjectsThread::printBlockExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution())
+  {
+    // Gather all user objects that may execute
+    std::vector<ShapeSideUserObject *> shapers;
+    const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
+        Interfaces::ShapeSideUserObject, Moose::ANY_BOUNDARY_ID, shapers);
+
+    std::vector<UserObject *> side_uos;
+    const_cast<ComputeUserObjectsThread *>(this)->queryBoundary(
+        Interfaces::SideUserObject, Moose::ANY_BOUNDARY_ID, side_uos);
+
+    std::vector<const UserObject *> domain_interface_uos;
+    for (const auto * const domain_uo : _domain_objs)
+      if (domain_uo->shouldExecuteOnInterface())
+        domain_interface_uos.push_back(domain_uo);
+
+    // Approximation of the number of user objects currently executing
+    int num_objects = _element_objs.size() + _domain_objs.size() + _shape_element_objs.size() +
+                      side_uos.size() + shapers.size() + _internal_side_objs.size() +
+                      _interface_user_objects.size() + domain_interface_uos.size();
+
+    auto console = _fe_problem.console();
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+
+    if (num_objects > 0)
+    {
+      console << "[DBG] Ordering of User Objects on block " << _subdomain << std::endl;
+      // Output specific ordering of objects
+      printVectorOrdering<ElementUserObject>(_element_objs, "element user objects");
+      printVectorOrdering<DomainUserObject>(_domain_objs, "domain user objects");
+      if (_fe_problem.currentlyComputingJacobian())
+        printVectorOrdering<ShapeElementUserObject>(
+            _shape_element_objs, "element user objects contributing to the Jacobian");
+      printVectorOrdering<UserObject>(side_uos, "side user objects");
+      if (_fe_problem.currentlyComputingJacobian())
+        printVectorOrdering<ShapeSideUserObject>(shapers,
+                                                 "side user objects contributing to the Jacobian");
+      printVectorOrdering<InternalSideUserObject>(_internal_side_objs, "internal side user objects");
+      printVectorOrdering<InterfaceUserObject>(_interface_user_objects, "interface user objects");
+      console << "[DBG] Only user objects active on local element/sides are executed" << std::endl;
+    }
+    else
+      console << "[DBG] No User Objects on block " << _subdomain << std::endl;
   }
 }
 

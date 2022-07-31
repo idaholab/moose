@@ -76,7 +76,7 @@ ComputeElemDampingThread::join(const ComputeElemDampingThread & y)
 }
 
 void
-ComputeElemDampingThread::printExecutionInformation() const
+ComputeElemDampingThread::printGeneralExecutionInformation() const
 {
   const auto damper_wh = _nl.getElementDamperWarehouse();
   if (_fe_problem.shouldPrintExecution() && damper_wh.hasActiveObjects())
@@ -84,12 +84,17 @@ ComputeElemDampingThread::printExecutionInformation() const
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Beginning Elemental loop to compute damping on " << execute_on << std::endl;
+  }
+}
 
-    if (damper_wh.hasActiveObjects())
-    {
-      console << "[DBG] Ordering of dampers (on elements they are respectively defined on):"
-              << std::endl;
-      console << "[DBG] " << damper_wh.activeObjectsToString() << std::endl;
-    }
+void
+ComputeElemDampingThread::printBlockExecutionInformation() const
+{
+  const auto damper_wh = _nl.getElementDamperWarehouse();
+  if (_fe_problem.shouldPrintExecution() && damper_wh.hasActiveObjects())
+  {
+    auto console = _fe_problem.console();
+    console << "[DBG] Ordering of dampers on block: " << _subdomain << std::endl;
+    // console << "[DBG] " << damper_wh.activeObjectsToString() << std::endl;
   }
 }

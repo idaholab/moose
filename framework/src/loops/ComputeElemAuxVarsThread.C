@@ -164,17 +164,25 @@ ComputeElemAuxVarsThread<AuxKernelType>::join(const ComputeElemAuxVarsThread & /
 
 template <typename AuxKernelType>
 void
-ComputeElemAuxVarsThread<AuxKernelType>::printExecutionInformation() const
+ComputeElemAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution() && _aux_kernels.hasActiveObjects())
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Executing auxiliary kernels on elements on " << execute_on << std::endl;
-    console << "[DBG] Ordering" << std::endl;
-    console << "[DBG] " << _aux_kernels.activeObjectsToString() << std::endl;
-    console << "[DBG] They are executed in that order on the elements these kernels are defined on."
-            << std::endl;
+  }
+}
+
+template <typename AuxKernelType>
+void
+ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution() && _aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
+  {
+    auto console = _fe_problem.console();
+    console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
+    // console << "[DBG] " << _aux_kernels.activeObjectsToString() << std::endl;
   }
 }
 

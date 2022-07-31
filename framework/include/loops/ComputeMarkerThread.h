@@ -38,8 +38,11 @@ public:
   void join(const ComputeMarkerThread & /*y*/);
 
 protected:
-  /// Print information about the loop, mostly order of execution of objects
-  void printExecutionInformation() const override;
+  /// Print information about the loop
+  void printGeneralExecutionInformation() const override;
+
+  /// Print information about ordering of objects on each block
+  void printBlockExecutionInformation() const override;
 
   FEProblemBase & _fe_problem;
   AuxiliarySystem & _aux_sys;

@@ -143,7 +143,7 @@ ComputeNodalKernelBCJacobiansThread::join(const ComputeNodalKernelBCJacobiansThr
 }
 
 void
-ComputeNodalKernelBCJacobiansThread::printExecutionInformation() const
+ComputeNodalKernelBCJacobiansThread::printGeneralExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution() && _nkernel_warehouse->hasActiveBoundaryObjects())
   {

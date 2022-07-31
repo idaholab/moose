@@ -37,7 +37,7 @@ ComputeThreadedGeneralUserObjectsThread::operator()(const GeneralUserObjectRange
 {
   try
   {
-    printExecutionInformation(range);
+    printGeneralExecutionInformation(range);
     for (auto it = range.begin(); it != range.end(); ++it)
     {
       auto & tguo = *it;
@@ -51,7 +51,7 @@ ComputeThreadedGeneralUserObjectsThread::operator()(const GeneralUserObjectRange
 }
 
 void
-ComputeThreadedGeneralUserObjectsThread::printExecutionInformation(
+ComputeThreadedGeneralUserObjectsThread::printGeneralExecutionInformation(
     const GeneralUserObjectRange & range) const
 {
   if (_fe_problem.shouldPrintExecution() && range.size())

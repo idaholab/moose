@@ -45,6 +45,10 @@ protected:
 
   bool _need_materials;
 
-  /// Print information about the loop, mostly order of execution of objects
-  void printExecutionInformation() const;
+  // Print list of object types executed and in which order
+  void printGeneralExecutionInformation() const;
+
+  // Print list of specific objects executed and in which order
+  void printBoundaryExecutionInformation(unsigned int boundary_id,
+                                         std::vector<std::shared_ptr<AuxKernelType> > kernels) const;
 };

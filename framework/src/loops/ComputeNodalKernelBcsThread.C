@@ -99,7 +99,7 @@ ComputeNodalKernelBcsThread::join(const ComputeNodalKernelBcsThread & /*y*/)
 }
 
 void
-ComputeNodalKernelBcsThread::printExecutionInformation() const
+ComputeNodalKernelBcsThread::printGeneralExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution() && _nkernel_warehouse->hasActiveObjects())
   {

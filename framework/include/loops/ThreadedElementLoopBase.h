@@ -166,8 +166,14 @@ protected:
   /// The subdomain for the last neighbor
   SubdomainID _old_neighbor_subdomain;
 
-  /// Print information about the loop, mostly order of execution of objects
-  virtual void printExecutionInformation() const {};
+  /// Print information about the loop ordering
+  virtual void printGeneralExecutionInformation() const {};
+
+  /// Print information about the particular ordering of objects on each block
+  virtual void printBlockExecutionInformation() const {};
+
+  /// Keep track of which blocks the execution ordering was printed on
+  std::set<SubdomainID> printed_on;
 
 private:
   /**
@@ -208,7 +214,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
       _tid = bypass_threading ? 0 : puid.id;
 
       pre();
-      printExecutionInformation();
+      printGeneralExecutionInformation();
 
       _subdomain = Moose::INVALID_BLOCK_ID;
       _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
@@ -225,7 +231,10 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
         _old_subdomain = _subdomain;
         _subdomain = elem->subdomain_id();
         if (_subdomain != _old_subdomain)
+        {
           subdomainChanged();
+          printBlockExecutionInformation();
+        }
 
         onElement(elem);
 

@@ -60,8 +60,11 @@ public:
 protected:
   const NumericVector<Number> & _soln;
 
-  /// Print information about the loop, mostly order of execution of objects
-  void printExecutionInformation() const override;
+  /// Print general information about the loop, like the ordering of class of objects
+  void printGeneralExecutionInformation() const override;
+
+  /// Print information about the loop, mostly order of execution of particular objects
+  void printBlockExecutionInformation() const override;
 
   /// Format output of vector of UOs
   template <typename T>

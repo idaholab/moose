@@ -37,8 +37,8 @@ public:
   void join(const ComputeNodalKernelsThread & /*y*/);
 
 protected:
-  /// Print information about the loop, mostly order of execution of objects
-  void printExecutionInformation() const override;
+  /// Print execution order of object types in the loop
+  void printGeneralExecutionInformation() const override;
 
   FEProblemBase & _fe_problem;
 
