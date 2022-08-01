@@ -16,22 +16,22 @@
 /**
  * Visualize the location of grain boundaries in a polycrystalline simulation.
  */
-class ComputeGBMisoType : public Material
+class ComputeGBMisorientationType : public Material
 {
 public:
   static InputParameters validParams();
 
-  ComputeGBMisoType(const InputParameters & parameters);
+  ComputeGBMisorientationType(const InputParameters & parameters);
 
 protected:
   /// Necessary override. This is where the property values are set.
   virtual void computeQpProperties() override;
 
-  // Function to read the miso angle form a file
+  // Function to read the Misorientation angle form a file
   void readFile();
-  // Function to output total line number of miso angle file
+  // Function to output total line number of Misorientation angle file
   virtual unsigned int getTotalLineNum() const;
-  // Function to output specific line number in miso angle file
+  // Function to output specific line number in Misorientation angle file
   virtual unsigned int getLineNum(unsigned int, unsigned int);
   // Function to get the GB type for triple junctions
   virtual Real getTripleJunctionType(std::vector<unsigned int>, std::vector<Real>);
@@ -42,9 +42,9 @@ protected:
   /// EBSD reader user object
   const EBSDReader & _ebsd_reader;
 
-  // Parameters to read the miso angle file
+  // Parameters to read the Misorientation angle file
   FileName _file_name;
-  std::vector<Real> _miso_angles;
+  std::vector<Real> _misorientation_angles;
 
   // order parameters
   const unsigned int _op_num;

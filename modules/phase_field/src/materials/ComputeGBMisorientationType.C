@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeGBMisoType.h"
+#include "ComputeGBMisorientationType.h"
 #include "SolutionUserObject.h"
 #include <fstream>
 
-registerMooseObject("PhaseFieldApp", ComputeGBMisoType);
+registerMooseObject("PhaseFieldApp", ComputeGBMisorientationType);
 
 InputParameters
-ComputeGBMisoType::validParams()
+ComputeGBMisorientationType::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Calculate types of grain boundaries in a polycrystalline sample");
@@ -28,7 +28,7 @@ ComputeGBMisoType::validParams()
   return params;
 }
 
-ComputeGBMisoType::ComputeGBMisoType(const InputParameters & parameters)
+ComputeGBMisorientationType::ComputeGBMisorientationType(const InputParameters & parameters)
   : Material(parameters),
     _grain_tracker(getUserObject<GrainTracker>("grain_tracker")),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
@@ -42,7 +42,7 @@ ComputeGBMisoType::ComputeGBMisoType(const InputParameters & parameters)
 }
 
 void
-ComputeGBMisoType::computeQpProperties()
+ComputeGBMisorientationType::computeQpProperties()
 {
 
   // Find out the number of boundary unique_id and save them
@@ -53,7 +53,7 @@ ComputeGBMisoType::computeQpProperties()
   const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
   for (auto & unique_id : op_to_grains)
   {
-    val_index+=1;
+    val_index += 1;
     if (unique_id == FeatureFloodCount::invalid_id)
       continue;
 
@@ -77,20 +77,20 @@ ComputeGBMisoType::computeQpProperties()
     }
     case 2:
     {
-      // get type by miso angle
-      _gb_type[_qp] = ((_miso_angles[getLineNum(gb_pairs[0], gb_pairs[1])] < _angle_threshold) ? 1 : 2);
+      // get type by Misorientation angle
+      _gb_type[_qp] =
+          ((_misorientation_angles[getLineNum(gb_pairs[0], gb_pairs[1])] < _angle_threshold) ? 1 : 2);
       break;
     }
     default:
-    // get continuous type at triple junction
+      // get continuous type at triple junction
       _gb_type[_qp] = getTripleJunctionType(gb_pairs, gb_op_pairs);
   }
-
 }
 
-// Read the miso angle file
+// Read the Misorientation angle file
 void
-ComputeGBMisoType::readFile()
+ComputeGBMisorientationType::readFile()
 {
   // Read in Euler angles from _file_name
   std::ifstream inFile(_file_name.c_str());
@@ -100,41 +100,44 @@ ComputeGBMisoType::readFile()
   // Loop over misorientation angles
   Real a;
   while (inFile >> a)
-    _miso_angles.push_back(a);
+    _misorientation_angles.push_back(a);
 }
 
-// Function to output total line number of miso angle file
+// Function to output total line number of Misorientation angle file
 unsigned int
-ComputeGBMisoType::getTotalLineNum() const
+ComputeGBMisorientationType::getTotalLineNum() const
 {
-  return _miso_angles.size();
+  return _misorientation_angles.size();
 }
 
-// Function to output specific line number in miso angle file
+// Function to output specific line number in Misorientation angle file
 unsigned int
-ComputeGBMisoType::getLineNum(unsigned int grain_i, unsigned int grain_j)
+ComputeGBMisorientationType::getLineNum(unsigned int grain_i, unsigned int grain_j)
 {
-  if (grain_i > grain_j) return grain_j + (grain_i - 1) * grain_i / 2;
-  else return grain_i + (grain_j - 1) * grain_j / 2;
+  if (grain_i > grain_j)
+    return grain_j + (grain_i - 1) * grain_i / 2;
+  else
+    return grain_i + (grain_j - 1) * grain_j / 2;
 }
 
 // Function to calculate the GB type in Triple junction
 Real
-ComputeGBMisoType::getTripleJunctionType(std::vector<unsigned int> gb_pairs,
+ComputeGBMisorientationType::getTripleJunctionType(std::vector<unsigned int> gb_pairs,
                                          std::vector<Real> gb_op_pairs)
 {
   unsigned int lagb_num = 0;
   unsigned int hagb_num = 0;
   Real ratio_base = 0.0;
   Real ratio_lagb = 0.0;
-  for (unsigned int i=1; i<gb_pairs.size(); ++i){
-    for (unsigned int j=0; j<i; ++j){
-      ratio_base += (gb_op_pairs[i]*gb_op_pairs[i]
-                    *gb_op_pairs[j]*gb_op_pairs[j]);
-      if (_miso_angles[getLineNum(gb_pairs[j], gb_pairs[i])] < _angle_threshold) {
+  for (unsigned int i = 1; i < gb_pairs.size(); ++i)
+  {
+    for (unsigned int j = 0; j < i; ++j)
+    {
+      ratio_base += (gb_op_pairs[i] * gb_op_pairs[i] * gb_op_pairs[j] * gb_op_pairs[j]);
+      if (_misorientation_angles[getLineNum(gb_pairs[j], gb_pairs[i])] < _angle_threshold)
+      {
         lagb_num += 1;
-        ratio_lagb += (gb_op_pairs[i]*gb_op_pairs[i]
-                      *gb_op_pairs[j]*gb_op_pairs[j]);
+        ratio_lagb += (gb_op_pairs[i] * gb_op_pairs[i] * gb_op_pairs[j] * gb_op_pairs[j]);
       }
       else
         hagb_num += 1;
@@ -145,5 +148,5 @@ ComputeGBMisoType::getTripleJunctionType(std::vector<unsigned int> gb_pairs,
   else if (hagb_num == 0)
     return 1;
   else
-    return 2 - ratio_lagb/ratio_base;
+    return 2 - ratio_lagb / ratio_base;
 }
