@@ -36,7 +36,7 @@
   [ebsd_mesh]
     type = EBSDMeshGenerator
     # Two Parallel Grains
-    filename = 'EBSD_TwoGrains.txt'
+    filename = 'EBSD_ThreeGrains.txt'
     uniform_refine = 1
   []
 []
@@ -227,7 +227,7 @@
     type = ComputeGBMisoType
     ebsd_reader = ebsd_reader
     grain_tracker = grain_tracker
-    file_name = 'MisoAngle_2grs.txt'
+    file_name = 'MisoAngle_3grs.txt'
     output_properties = 'gb_type'
     outputs = exodus
   [../]
@@ -322,5 +322,5 @@
      type = Exodus
      execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  file_base = 'output/EBSD_PC_Pre_Growth'
+  file_base = 'Phase1_output'
 []

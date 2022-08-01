@@ -18,7 +18,7 @@ InputParameters
 SolutionAuxMisoBnds::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription("Creates fields by using information from a SolutionUserObject.");
+  params.addClassDescription("Calculate location of grain boundaries by using information from a SolutionUserObject.");
   params.addRequiredParam<UserObjectName>("solution", "The name of the SolutionUserObject");
   params.addParam<std::string>("from_gb_type",
                                "The name of the variable to extract from the file");

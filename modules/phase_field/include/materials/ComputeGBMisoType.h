@@ -51,7 +51,7 @@ protected:
   const std::vector<const VariableValue *> _vals;
 
   // the max value of LAGB
-  const Real _angle_max;
+  const Real _angle_threshold;
 
   /// precalculated element value
   ADMaterialProperty<Real> & _gb_type;

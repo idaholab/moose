@@ -30,7 +30,7 @@
 
 
 [Mesh]
-  file = 'output/EBSD_PC_Pre_Growth.e'
+  file = 'Phase1_output.e'
 []
 
 [GlobalParams]
@@ -41,7 +41,7 @@
 [UserObjects]
   [./initial_grains]
     type = SolutionUserObject
-    mesh = 'output/EBSD_PC_Pre_Growth.e'
+    mesh = 'Phase1_output.e'
     timestep = LATEST
   [../]
   [./grain_tracker]
@@ -207,12 +207,6 @@
     variable = cx_AEH
     args = 'bnds'
   [../]
-  [./Diff_x_AEH] # calculate the effictive diffution?
-    type = HomogenizedHeatConduction
-    diffusion_coefficient = D_Scaling
-    variable = cx_AEH
-    component = 0 # for x axis
-  [../]
 []
 
 [Materials]
@@ -279,16 +273,6 @@
   [../]
 []
 
-[Postprocessors]
-  [./D_x_AEH] #Effective thermal conductivity in x-direction from AEH
-    type = HomogenizedThermalConductivity
-    variable = cx_AEH
-    temp_x = cx_AEH
-    component = 0
-    diffusion_coefficient = D_Scaling
-  [../]
-[]
-
 # It converges faster if all the residuals are at the same magnitude
 [Debug]
   show_var_residual_norms = true
@@ -311,12 +295,12 @@
   nl_max_its = 50
   l_tol = 1e-04
   l_abs_tol = 1e-50
-  nl_abs_tol = 1e-20
+  nl_abs_tol = 1e-10
   nl_rel_tol = 1e-10
 []
 
 [Outputs]
   exodus = true
   perf_graph = true
-  file_base='output/Dev_Ag_SiC_output'
+  file_base='Phase2_output'
 []
