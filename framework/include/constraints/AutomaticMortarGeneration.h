@@ -94,11 +94,6 @@ public:
   void computeNodalGeometry();
 
   /**
-   * Debug method for writing normal and tangent vectors out to file for visualization.
-   */
-  void writeGeometryToFile();
-
-  /**
    * Project secondary nodes (find xi^(2) values) to the closest points on
    * the primary surface.
    * Inputs:
@@ -339,15 +334,21 @@ public:
     return _nodes_to_secondary_elem_map;
   }
 
+  /**
+   * initialize mortar-mesh based output
+   */
+  void initOutput();
+
 private:
   /**
    * build the \p _mortar_interface_coupling data
    */
   void buildCouplingInformation();
 
+  /// The Moose app
   MooseApp & _app;
 
-  // Reference to the mesh stored in equation_systems.
+  /// Reference to the mesh stored in equation_systems.
   MeshBase & _mesh;
 
   /// The boundary ids corresponding to all the secondary surfaces.
@@ -475,22 +476,6 @@ private:
   /// Whether to print debug output
   const bool _debug;
 
-  ///@{
-  /** Member variables for geometry debug output */
-  libMesh::System * _nodal_normals_system = nullptr;
-  unsigned int _nnx_var_num;
-  unsigned int _nny_var_num;
-  unsigned int _nnz_var_num;
-
-  unsigned int _t1x_var_num;
-  unsigned int _t1y_var_num;
-  unsigned int _t1z_var_num;
-
-  unsigned int _t2x_var_num;
-  unsigned int _t2y_var_num;
-  unsigned int _t2z_var_num;
-  ///@}
-
   /// Whether this object is on the displaced mesh
   const bool _on_displaced;
 
@@ -517,6 +502,8 @@ private:
   /// segments solving physics not meaningfully and overprojection of primary nodes onto the mortar
   /// segment mesh in extreme cases. This parameter is mostly intended for mortar mesh debugging purposes in 2D.
   const Real _minimum_projection_angle;
+
+  friend class MortarNodalGeometryOutput;
 };
 
 inline const std::pair<BoundaryID, BoundaryID> &
