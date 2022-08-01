@@ -24,7 +24,7 @@ ComputeGBMisoType::validParams()
   params.addRequiredCoupledVarWithAutoBuild(
       "v", "var_name_base", "op_num", "Array of coupled variables");
   params.addRequiredParam<FileName>("file_name", "Misorientation angle data file name");
-  params.addParam<Real>("angle_max", 15, "Max Misorientation angle");
+  params.addParam<Real>("angle_threshold", 15, "Max LAGB Misorientation angle");
   return params;
 }
 
@@ -35,7 +35,7 @@ ComputeGBMisoType::ComputeGBMisoType(const InputParameters & parameters)
     _file_name(getParam<FileName>("file_name")),
     _op_num(coupledComponents("v")),
     _vals(coupledValues("v")),
-    _angle_max(getParam<Real>("angle_max")),
+    _angle_threshold(getParam<Real>("angle_threshold")),
     _gb_type(declareADProperty<Real>("gb_type"))
 {
   readFile();
@@ -78,7 +78,7 @@ ComputeGBMisoType::computeQpProperties()
     case 2:
     {
       // get type by miso angle
-      _gb_type[_qp] = ((_miso_angles[getLineNum(gb_pairs[0], gb_pairs[1])] < _angle_max) ? 1 : 2);
+      _gb_type[_qp] = ((_miso_angles[getLineNum(gb_pairs[0], gb_pairs[1])] < _angle_threshold) ? 1 : 2);
       break;
     }
     default:
@@ -131,7 +131,7 @@ ComputeGBMisoType::getTripleJunctionType(std::vector<unsigned int> gb_pairs,
     for (unsigned int j=0; j<i; ++j){
       ratio_base += (gb_op_pairs[i]*gb_op_pairs[i]
                     *gb_op_pairs[j]*gb_op_pairs[j]);
-      if (_miso_angles[getLineNum(gb_pairs[j], gb_pairs[i])] < _angle_max) {
+      if (_miso_angles[getLineNum(gb_pairs[j], gb_pairs[i])] < _angle_threshold) {
         lagb_num += 1;
         ratio_lagb += (gb_op_pairs[i]*gb_op_pairs[i]
                       *gb_op_pairs[j]*gb_op_pairs[j]);
