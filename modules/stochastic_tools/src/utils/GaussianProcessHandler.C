@@ -44,18 +44,22 @@ GaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix & training_p
                                               const RealEigenMatrix & training_data,
                                               MooseEnum opt_type,
                                               std::string tao_options,
-                                              bool show_tao)
+                                              bool show_tao, const Real & tol_ADAM)
 {
   _K.resize(training_params.rows(), training_params.rows());
 
   // This already accounts for future addition of an ADAM optimizes
   if (opt_type == "tao")
+  {
     if (tuneHyperParamsTAO(training_params, training_data, tao_options, show_tao))
       ::mooseError("PETSc/TAO error in hyperparameter tuning.");
+  }
+  else if (opt_type == "adam")
+    tuneHyperParamsADAM(training_params, training_data, tol_ADAM);
 
   _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
 
-  // Compute the Cholesly decomposition and inverse action of the covariance matrix
+  // Compute the Cholesky decomposition and inverse action of the covariance matrix
   setupStoredMatrices(training_data);
 
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
@@ -79,6 +83,7 @@ GaussianProcessHandler::generateTuningMap(const std::vector<std::string> params_
   bool lower_bounds_specified = false;
   if (min_vector.size())
     lower_bounds_specified = true;
+    
   if (max_vector.size())
     upper_bounds_specified = true;
 
@@ -243,6 +248,107 @@ GaussianProcessHandler::formFunctionGradient(Tao /*tao*/,
   log_likelihood += -_training_data->rows() * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
   *f = log_likelihood;
+}
+
+void
+GaussianProcessHandler::tuneHyperParamsADAM(const RealEigenMatrix & training_params,
+                                            const RealEigenMatrix & training_data,
+                                            const Real & tol)
+{
+  libMesh::PetscVector<Number> theta(_tao_comm, _num_tunable);
+  _training_params = &training_params;
+  _training_data = &training_data;
+  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+  mapToPetscVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
+  Real b1;
+  Real b2;
+  Real eps;
+  Real alpha;
+  b1 = 0.9; b2 = 0.999; alpha = 0.01; eps = 1e-7; // Internal params for ADAM; set to the recommended values in the paper
+  std::vector<Real> m0;
+  std::vector<Real> v0;
+  for (unsigned int ii = 0; ii < _num_tunable; ++ii)
+  {
+    m0.push_back(0.0);
+    v0.push_back(0.0);
+  }
+  Real new_val;
+  Real m_hat;
+  Real v_hat;
+  Real diff;
+  diff = 100;
+  Real prev;
+  prev = getLossADAM();
+  Real store_loss;
+  int jj;
+  jj = 0;
+  std::vector<Real> grad1;
+
+  while (diff > tol)
+  {
+    ++jj;
+    grad1 = getGradientADAM();
+    for (unsigned int ii = 0; ii < _num_tunable; ++ii)
+    {
+      m0[ii] = b1 * m0[ii] + (1 - b1) * grad1[ii];
+      v0[ii] = b2 * v0[ii] + (1 - b2) * grad1[ii] * grad1[ii];
+      m_hat = m0[ii] / (1 - std::pow(b1, jj));
+      v_hat = v0[ii] / (1 - std::pow(b2, jj));
+      new_val = theta(ii) - alpha * m_hat / (std::pow(v_hat, 0.5) + eps);
+      if (new_val < 0.01) // constrain params on the lower side
+        new_val = 0.01;
+      theta.set(ii,new_val);
+    }
+    petscVecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
+    _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+    store_loss = getLossADAM();
+    diff = std::abs(prev - store_loss);
+    prev = store_loss;
+  }
+  theta.print();
+}
+
+Real
+GaussianProcessHandler::getLossADAM()
+{
+  _covariance_function->computeCovarianceMatrix(_K, *_training_params, *_training_params, true);
+  setupStoredMatrices(*_training_data);
+  Real log_likelihood = 0;
+  log_likelihood += -(_training_data->transpose() * _K_results_solve)(0, 0);
+  log_likelihood += -std::log(_K.determinant());
+  log_likelihood += -_training_data->rows() * std::log(2 * M_PI);
+  log_likelihood = -log_likelihood / 2;
+  return log_likelihood;
+}
+
+std::vector<Real>
+GaussianProcessHandler::getGradientADAM()
+{
+  RealEigenMatrix dKdhp(_training_params->rows(), _training_params->rows());
+  RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
+  std::vector<Real> grad_vec;
+  grad_vec.resize(_num_tunable);
+  int count;
+  count = 1;
+  for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
+  {
+    std::string hyper_param_name = iter->first;
+    for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
+    {
+      _covariance_function->computedKdhyper(dKdhp, *_training_params, hyper_param_name, ii);
+      RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
+      Real grad1 = -tmp.trace() / 2.0;
+      if (hyper_param_name.compare("length_factor") == 0)
+      {
+        grad_vec[count] = grad1;
+        ++count;
+      } else
+      {
+        grad_vec[0] = grad1;
+      }
+    }
+  }
+  return grad_vec;
 }
 
 void

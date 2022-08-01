@@ -34,9 +34,11 @@ GaussianProcessTrainer::validParams()
   params.addParam<bool>(
       "standardize_data", true, "Standardize (center and scale) training data (y values)");
   // Already preparing to use ADAM here
-  MooseEnum tuning_type("tao none", "none");
+  MooseEnum tuning_type("tao adam none", "none");
   params.addParam<MooseEnum>(
       "tuning_algorithm", tuning_type, "Hyper parameter optimizaton algorithm");
+  params.addParam<Real>(
+      "tol_ADAM", 0.001, "Tolerance value for ADAM optimization");
   params.addParam<std::string>("tao_options",
                                "Command line options for PETSc/TAO hyperparameter optimization");
   params.addParam<bool>("show_tao", "Switch to show TAO solver results");
@@ -58,11 +60,24 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
     _do_tuning(isParamValid("tune_parameters")),
-    _tuning_algorithm(getParam<MooseEnum>("tuning_algorithm"))
+    _tuning_algorithm(getParam<MooseEnum>("tuning_algorithm")),
+    _tol_ADAM(getParam<Real>("tol_ADAM")),
+    _sampler_row(getSamplerData()),
+    _rval(getTrainingData<Real>(getParam<ReporterName>("response"))),
+    _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
+    _pcols(getParam<std::vector<unsigned int>>("predictor_cols")),
+    _n_params((_pvals.empty() && _pcols.empty()) ? _sampler.getNumberOfCols()
+                                                 : (_pvals.size() + _pcols.size()))
 {
   if (_do_tuning && _tuning_algorithm == "none")
     paramError("tuning_algorithm",
                "No tuning algorithm is selected for the hyper parameter optimization!");
+
+  // if (_tuning_algorithm == "adam")
+  // {
+  //   if (!isParamValid("tuning_min") || !isParamValid("tuning_max"))
+  //     mooseError("tuning_min and tuning_max need to be specified for ADAM optimizer.");
+  // }
 
   std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
   // Error Checking
@@ -139,5 +154,5 @@ GaussianProcessTrainer::postTrain()
       _training_data,
       _tuning_algorithm,
       isParamValid("tao_options") ? getParam<std::string>("tao_options") : "",
-      isParamValid("show_tao") ? getParam<bool>("show_tao") : false);
+      isParamValid("show_tao") ? getParam<bool>("show_tao") : false, _tol_ADAM);
 }

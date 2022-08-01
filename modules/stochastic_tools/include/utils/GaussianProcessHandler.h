@@ -56,7 +56,7 @@ public:
                              const RealEigenMatrix & training_data,
                              MooseEnum opt_type,
                              std::string tao_options = "",
-                             bool show_tao = false);
+                             bool show_tao = false, const Real & tol_ADAM = 0.001);
 
   /**
    * Sets up the Cholesky decomposition and inverse action of the covariance matrix.
@@ -121,8 +121,19 @@ public:
   static PetscErrorCode
   formFunctionGradientWrapper(Tao tao, Vec theta, PetscReal * f, Vec Grad, void * ptr);
 
-  // Computes Gradient of the loss function
+  // Computes Gradient of the loss function for TAO usage
   void formFunctionGradient(Tao tao, Vec theta, PetscReal * f, Vec Grad);
+
+  // Computes the loss function for ADAM usage
+  Real getLossADAM();
+
+  // Tune hyperparameters using ADAM
+  void tuneHyperParamsADAM(const RealEigenMatrix & training_params,
+                           const RealEigenMatrix & training_data,
+                           const Real & tol);
+
+  // Computes Gradient of the loss function for ADAM usage
+  std::vector<Real> getGradientADAM();
 
   /// Function used to convert the hyperparameter maps in this object to
   /// Petsc vectors

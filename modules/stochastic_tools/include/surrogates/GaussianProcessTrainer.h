@@ -62,7 +62,12 @@ private:
   /// Enum which contains the hyper parameter optimizaton type requested by the user
   MooseEnum _tuning_algorithm;
 
-  /*
+  /// Tolerance for ADAM optimization
+  Real _tol_ADAM;
+
+  /// Data from the current sampler row
+  const std::vector<Real> & _sampler_row;
+
   /// Response value
   const Real & _rval;
 

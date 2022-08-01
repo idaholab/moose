@@ -54,7 +54,7 @@
       allow_test_objects = true
       csvdiff = 'GP_squared_exponential_tuned_out_samp_avg_0002.csv GP_squared_exponential_tuned_out_results_0002.csv GP_squared_exponential_tuned_out_hyperparams_0002.csv'
       petsc_version = '>=3.10.0'
-      detail = 'a squared exponential kernel;'
+      detail = 'a squared exponential kernel using TAO;'
     []
     [GP_exponential_tuned]
       type = CSVDiff
@@ -62,7 +62,7 @@
       allow_test_objects = true
       csvdiff = 'GP_exponential_tuned_out_samp_avg_0002.csv GP_exponential_tuned_out_results_0002.csv GP_exponential_tuned_out_hyperparams_0002.csv'
       petsc_version = '>=3.10.0'
-      detail = 'an exponential kernel;'
+      detail = 'an exponential kernel using TAO;'
     []
     [GP_Matern_half_int_tuned]
       type = CSVDiff
@@ -70,7 +70,29 @@
       allow_test_objects = true
       csvdiff = 'GP_Matern_half_int_tuned_out_samp_avg_0002.csv GP_Matern_half_int_tuned_out_results_0002.csv GP_Matern_half_int_tuned_out_hyperparams_0002.csv'
       petsc_version = '>=3.10.0'
-      detail = 'a Matern half integer kernel;'
+      detail = 'a Matern half integer kernel using TAO;'
+    []
+
+    [GP_squared_exponential_tuned_adam]
+      type = CSVDiff
+      input = GP_squared_exponential_tuned_adam.i
+      allow_test_objects = true
+      csvdiff = 'GP_squared_exponential_tuned_adam_out_samp_avg_0002.csv GP_squared_exponential_tuned_adam_out_results_0002.csv GP_squared_exponential_tuned_adam_out_hyperparams_0002.csv'
+      detail = 'a squared exponential kernel using ADAM;'
+    []
+    [GP_exponential_tuned_adam]
+      type = CSVDiff
+      input = GP_exponential_tuned_adam.i
+      allow_test_objects = true
+      csvdiff = 'GP_exponential_tuned_adam_out_samp_avg_0002.csv GP_exponential_tuned_adam_out_results_0002.csv GP_exponential_tuned_adam_out_hyperparams_0002.csv'
+      detail = 'an exponential kernel using TAO;'
+    []
+    [GP_Matern_half_int_tuned_adam]
+      type = CSVDiff
+      input = GP_Matern_half_int_tuned_adam.i
+      allow_test_objects = true
+      csvdiff = 'GP_Matern_half_int_tuned_adam_out_samp_avg_0002.csv GP_Matern_half_int_tuned_adam_out_results_0002.csv GP_Matern_half_int_tuned_adam_out_hyperparams_0002.csv'
+      detail = 'a Matern half integer kernel using TAO;'
     []
   []
   [errors]
