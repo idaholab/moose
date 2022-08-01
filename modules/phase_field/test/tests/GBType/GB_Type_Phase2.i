@@ -181,20 +181,20 @@
   [../]
   [./bnds_LAGB]
     # Calculate the bnds for specific GB type
-    type = SolutionAuxMisoBnds
+    type = SolutionAuxMisorientationBoundary
     variable = bnds_LAGB
     gb_type_order = 1
     solution = initial_grains
-    from_gb_type = gb_type
+    from_variable = gb_type
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./bnds_HAGB]
     # Calculate the bnds for specific GB type
-    type = SolutionAuxMisoBnds
+    type = SolutionAuxMisorientationBoundary
     variable = bnds_HAGB
     gb_type_order = 2
     solution = initial_grains
-    from_gb_type = gb_type
+    from_variable = gb_type
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
 []

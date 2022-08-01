@@ -9,9 +9,7 @@
 
 #pragma once
 
-#include "AuxKernel.h"
-
-class SolutionUserObject;
+#include "SolutionAux.h"
 
 /**
  * AuxKernel for reading a solution from file.
@@ -19,17 +17,12 @@ class SolutionUserObject;
  * via a SolutionUserObject. It is possible to scale and add a constant to the
  * solution read.
  */
-class SolutionAuxMisoBnds : public AuxKernel
+class SolutionAuxMisorientationBoundary : public SolutionAux
 {
 public:
   static InputParameters validParams();
 
-  SolutionAuxMisoBnds(const InputParameters & parameters);
-
-  /**
-   * Sets up the variable name for extraction from the SolutionUserObject
-   */
-  virtual void initialSetup() override;
+  SolutionAuxMisorientationBoundary(const InputParameters & parameters);
 
 protected:
   /**
@@ -39,15 +32,6 @@ protected:
    * @ return The desired value of the solution for the current node or element
    */
   virtual Real computeValue() override;
-
-  /// Reference to the SolutionUserObject storing the solution
-  const SolutionUserObject & _solution_object;
-
-  /// The variable name of interest
-  std::string _var_name_gb_type;
-
-  /// Flag for directly grabbing the data based on the dof
-  bool _direct;
 
   // The grain boundary type to calculate bnds parameter
   Real _gb_type_order;

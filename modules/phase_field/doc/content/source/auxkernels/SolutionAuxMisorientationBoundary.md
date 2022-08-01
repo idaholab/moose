@@ -1,4 +1,4 @@
-# SolutionAuxMisoBnds
+# SolutionAuxMisorientationBoundary
 
 This AuxKernel computes the value $v$ as
 
@@ -15,7 +15,6 @@ s = |t_{specific}-t_{imported}|
 
 where $t_{imported}$ is the GB type imported from a [SolutionUserObject](/SolutionUserObject.md) and the $t_{specific}$ is the specific GB type to calculate $bnds$ parameter. When used with order parameters of the polycrystalline grain growth model, the resulting field for $\chi$ is $<1$ in grain boundaries with specific GB type and $1$ in grain interiors and other grain boundaries.
 
-!syntax parameters /AuxKernels/SolutionAuxMisoBnds
+!syntax parameters /AuxKernels/SolutionAuxMisorientationBoundary
 
-!syntax inputs /AuxKernels/SolutionAuxMisoBnds
-
+!syntax inputs /AuxKernels/SolutionAuxMisorientationBoundary
