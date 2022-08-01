@@ -11,7 +11,7 @@ P_out = 4.923e6 # Pa
       assembly_pitch = 0.2
       assembly_side_x = 0.18
       assembly_side_y = 0.18
-      side_bypass = 0.001
+      side_bypass = 0.01
       heated_length = 3.0
     []
 []
@@ -66,9 +66,9 @@ P_out = 4.923e6 # Pa
 [SubChannel]
   type = LiquidWaterInterWrapper1PhaseProblem
   fp = water
-  n_blocks = 1
+  n_blocks = 10
   beta = 0.08
-  CT = 2.6
+  CT = 0.5
   P_tol = 1e-6
   T_tol = 1e-6
   compute_density = true
