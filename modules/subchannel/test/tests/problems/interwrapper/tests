@@ -9,7 +9,6 @@
     recover = false
     abs_zero = 5e-6
     max_threads = 1
-    cli_args = '-ksp_rtol 1e-3'
   []
   [quad_interwrapper_implicit]
     type = Exodiff
