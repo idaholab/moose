@@ -10,17 +10,6 @@
     abs_zero = 5e-6
     max_threads = 1
   []
-  [quad_interwrapper_implicit]
-    type = Exodiff
-    input = quad_interwrapper_implicit.i
-    exodiff = quad_interwrapper_implicit_out.e
-    custom_cmp = 'test.exodiff'
-    method = '!DBG'
-    valgrind = NONE
-    recover = false
-    abs_zero = 5e-6
-    max_threads = 1
-  []
   [quad_interwrapper_monolithic]
     type = Exodiff
     input = quad_interwrapper_monolithic.i
