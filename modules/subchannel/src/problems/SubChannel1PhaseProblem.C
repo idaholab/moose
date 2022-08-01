@@ -2941,7 +2941,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     CHKERRQ(ierr);
     PetscScalar relax_factor;
     VecAbs(_Wij_loc_vec);
-#if !PETSC_VERSION_LESS_THAN(3,16,0)
+#if !PETSC_VERSION_LESS_THAN(3, 16, 0)
     VecMean(_Wij_loc_vec, &relax_factor);
 #else
     VecSum(_Wij_loc_vec, &relax_factor);

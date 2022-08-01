@@ -2565,7 +2565,7 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     // VecView(sumWij_loc, PETSC_VIEWER_STDOUT_WORLD);
     PetscScalar max_value;
     // VecMax(sumWij_loc, NULL, &max_value);
-#if !PETSC_VERSION_LESS_THAN(3,16,0)
+#if !PETSC_VERSION_LESS_THAN(3, 16, 0)
     VecMean(sumWij_loc, &max_value);
 #else
     VecSum(sumWij_loc, &max_value);
@@ -2585,7 +2585,7 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     VecAXPY(Wij_new_loc, -1.0, Wij_old_loc);
     PetscScalar loc_sum_vec;
     VecAbs(Wij_new_loc);
-#if !PETSC_VERSION_LESS_THAN(3,16,0)
+#if !PETSC_VERSION_LESS_THAN(3, 16, 0)
     VecMean(Wij_new_loc, &loc_sum_vec);
 #else
     VecSum(Wij_new_loc, &loc_sum_vec);
