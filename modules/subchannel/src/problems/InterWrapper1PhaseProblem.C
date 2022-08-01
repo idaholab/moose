@@ -2565,16 +2565,16 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     // VecView(sumWij_loc, PETSC_VIEWER_STDOUT_WORLD);
     PetscScalar max_value;
     // VecMax(sumWij_loc, NULL, &max_value);
-#if !PETSC_VERSION_LESS_THAN(3, 16, 0)
-    VecMean(sumWij_loc, &max_value);
-#else
+// #if !PETSC_VERSION_LESS_THAN(3,16,0)
+//     VecMean(sumWij_loc, &max_value);
+// #else
     VecSum(sumWij_loc, &max_value);
     {
       PetscInt global_size;
       VecGetSize(sumWij_loc, &global_size);
       max_value /= global_size;
     }
-#endif
+// #endif
     _console << "Max val: " << max_value << std::endl;
 
     Vec Wij_new_loc, Wij_old_loc;
@@ -2589,16 +2589,16 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     VecAXPY(Wij_new_loc, -1.0, Wij_old_loc);
     PetscScalar loc_sum_vec;
     VecAbs(Wij_new_loc);
-#if !PETSC_VERSION_LESS_THAN(3, 16, 0)
-    VecMean(Wij_new_loc, &loc_sum_vec);
-#else
+// #if !PETSC_VERSION_LESS_THAN(3,16,0)
+//     VecMean(Wij_new_loc, &loc_sum_vec);
+// #else
     VecSum(Wij_new_loc, &loc_sum_vec);
     {
       PetscInt global_size;
       VecGetSize(Wij_new_loc, &global_size);
       loc_sum_vec /= global_size;
     }
-#endif
+// #endif
     max_value *= (std::exp(100 * loc_sum_vec) - 1.0);
 
     // VecView(sol_holder_P, PETSC_VIEWER_STDOUT_WORLD);
@@ -2878,16 +2878,16 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
     CHKERRQ(ierr);
     PetscScalar relax_factor;
     VecAbs(_Wij_loc_vec);
-#if !PETSC_VERSION_LESS_THAN(3, 16, 0)
-    VecMean(_Wij_loc_vec, &relax_factor);
-#else
+// #if !PETSC_VERSION_LESS_THAN(3, 16, 0)
+//     VecMean(_Wij_loc_vec, &relax_factor);
+// #else
     VecSum(_Wij_loc_vec, &relax_factor);
     {
       PetscInt global_size;
       VecGetSize(_Wij_loc_vec, &global_size);
       relax_factor /= global_size;
     }
-#endif
+// #endif
 
     relax_factor = relax_factor / max_sumWij + 0.5;
     _console << "Relax base value: " << relax_factor << std::endl;
