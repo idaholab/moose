@@ -22,6 +22,9 @@ public:
 
   ThermalSS316Properties(const InputParameters & parameters);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
   virtual Real k_from_T(const Real & T) const override;
 
   virtual void k_from_T(const Real & T, Real & k, Real & dk_dT) const override;
@@ -34,3 +37,5 @@ public:
 
   virtual void rho_from_T(const Real & T, Real & rho, Real & drho_dT) const override;
 };
+
+#pragma GCC diagnostic pop

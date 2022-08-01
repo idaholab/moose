@@ -26,6 +26,9 @@ public:
 
   ThermalFunctionSolidProperties(const InputParameters & parameters);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
   virtual Real k_from_T(const Real & T) const override;
 
   virtual void k_from_T(const Real & T, Real & k, Real & dk_dT) const override;
@@ -48,3 +51,5 @@ protected:
   /// Function providing the density as a function of temperature
   const Function & _rho_function;
 };
+
+#pragma GCC diagnostic pop

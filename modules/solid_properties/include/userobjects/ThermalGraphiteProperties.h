@@ -21,6 +21,9 @@ public:
 
   ThermalGraphiteProperties(const InputParameters & parameters);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
   virtual Real k_from_T(const Real & T) const override;
 
   virtual void k_from_T(const Real & T, Real & k, Real & dk_dT) const override;
@@ -43,3 +46,5 @@ protected:
   /// constant density
   const Real & _rho_const;
 };
+
+#pragma GCC diagnostic pop
