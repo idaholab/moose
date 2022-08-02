@@ -8,8 +8,12 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SideIntegralVariablePostprocessor.h"
+#include "MathFVUtils.h"
 
 #include "metaphysicl/raw_type.h"
+
+using namespace Moose;
+using namespace FV;
 
 registerMooseObject("MooseApp", SideIntegralVariablePostprocessor);
 
@@ -43,7 +47,8 @@ SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(
 Real
 SideIntegralVariablePostprocessor::computeFaceInfoIntegral(const FaceInfo * const fi)
 {
-  return MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*fi));
+  return MetaPhysicL::raw_value(
+      (*_fv_variable)(makeCDFace(*fi, faceArgSubdomains(*_fv_variable, *fi))));
 }
 
 Real
