@@ -56,8 +56,6 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
 void
 LibtorchDRLControl::execute()
 {
-  std::cout << _nn << std::endl;
-
 #ifdef LIBTORCH_ENABLED
   if (_nn)
   {

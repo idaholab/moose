@@ -11,7 +11,7 @@
 
 // files that contain torch includes
 #ifdef LIBTORCH_ENABLED
-#include "LibtorchNeuralNetControlTrainer.h"
+#include "LibtorchDRLControlTrainer.h"
 #endif
 
 // MOOSE includes
@@ -35,6 +35,6 @@ protected:
   const std::string _control_name;
 
 #ifdef LIBTORCH_ENABLED
-  const LibtorchNeuralNetControlTrainer & _trainer;
+  const LibtorchDRLControlTrainer & _trainer;
 #endif
 };

@@ -30,7 +30,7 @@ LibtorchNeuralNetControlTransfer::LibtorchNeuralNetControlTransfer(
   : MultiAppTransfer(parameters),
     SurrogateModelInterface(this),
     _control_name(getParam<std::string>("control_name")),
-    _trainer(getSurrogateTrainerByName<LibtorchNeuralNetControlTrainer>(
+    _trainer(getSurrogateTrainerByName<LibtorchDRLControlTrainer>(
         getParam<UserObjectName>("trainer_name")))
 {
 }
