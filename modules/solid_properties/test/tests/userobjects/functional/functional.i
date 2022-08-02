@@ -13,39 +13,6 @@
   []
 []
 
-[AuxVariables]
-  [cp]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [k]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [rho]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [cp]
-    type = MaterialRealAux
-    variable = cp
-    property = cp_solid
-  []
-  [k]
-    type = MaterialRealAux
-    variable = k
-    property = k_solid
-  []
-  [rho]
-    type = MaterialRealAux
-    variable = rho
-    property = rho_solid
-  []
-[]
-
 [Modules]
   [SolidProperties]
     [func]
@@ -62,6 +29,8 @@
     type = ThermalSolidPropertiesMaterial
     sp = func
     temperature = u
+    output_properties = 'thermal_conductivity density specific_heat'
+    outputs = exodus
   []
 []
 
