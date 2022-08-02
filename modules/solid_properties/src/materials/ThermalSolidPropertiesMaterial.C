@@ -19,11 +19,15 @@ ThermalSolidPropertiesMaterial::validParams()
   InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("temperature", "Temperature");
   params.addRequiredParam<UserObjectName>("sp", "The name of the user object for solid properties");
-  params.addParam<std::string>(
-      SolidPropertiesNames::specific_heat, SolidPropertiesNames::specific_heat, "Name to be used for the isobaric specific heat");
-  params.addParam<std::string>(
-      SolidPropertiesNames::thermal_conductivity, SolidPropertiesNames::thermal_conductivity, "Name to be used for the thermal conductivity");
-  params.addParam<std::string>(SolidPropertiesNames::density, SolidPropertiesNames::density, "Name to be used for the density");
+  params.addParam<std::string>(SolidPropertiesNames::specific_heat,
+                               SolidPropertiesNames::specific_heat,
+                               "Name to be used for the isobaric specific heat");
+  params.addParam<std::string>(SolidPropertiesNames::thermal_conductivity,
+                               SolidPropertiesNames::thermal_conductivity,
+                               "Name to be used for the thermal conductivity");
+  params.addParam<std::string>(SolidPropertiesNames::density,
+                               SolidPropertiesNames::density,
+                               "Name to be used for the density");
   params.addClassDescription("Computes solid thermal properties as a function of temperature");
   return params;
 }
