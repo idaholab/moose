@@ -9,6 +9,7 @@
 
 #include "ThermalSolidPropertiesMaterial.h"
 #include "ThermalSolidProperties.h"
+#include "SolidPropertiesNames.h"
 
 registerMooseObject("SolidPropertiesApp", ThermalSolidPropertiesMaterial);
 
@@ -19,9 +20,10 @@ ThermalSolidPropertiesMaterial::validParams()
   params.addRequiredCoupledVar("temperature", "Temperature");
   params.addRequiredParam<UserObjectName>("sp", "The name of the user object for solid properties");
   params.addParam<std::string>(
-      "cp_name", "cp_solid", "Name to be used for the isobaric specific heat");
-  params.addParam<std::string>("k_name", "k_solid", "Name to be used for the thermal conductivity");
-  params.addParam<std::string>("rho_name", "rho_solid", "Name to be used for the density");
+      SolidPropertiesNames::specific_heat, SolidPropertiesNames::specific_heat, "Name to be used for the isobaric specific heat");
+  params.addParam<std::string>(
+      SolidPropertiesNames::thermal_conductivity, SolidPropertiesNames::thermal_conductivity, "Name to be used for the thermal conductivity");
+  params.addParam<std::string>(SolidPropertiesNames::density, SolidPropertiesNames::density, "Name to be used for the density");
   params.addClassDescription("Computes solid thermal properties as a function of temperature");
   return params;
 }
@@ -30,9 +32,9 @@ ThermalSolidPropertiesMaterial::ThermalSolidPropertiesMaterial(const InputParame
   : Material(parameters),
     _temperature(coupledValue("temperature")),
 
-    _cp(declareProperty<Real>(getParam<std::string>("cp_name"))),
-    _k(declareProperty<Real>(getParam<std::string>("k_name"))),
-    _rho(declareProperty<Real>(getParam<std::string>("rho_name"))),
+    _cp(declareProperty<Real>(getParam<std::string>(SolidPropertiesNames::specific_heat))),
+    _k(declareProperty<Real>(getParam<std::string>(SolidPropertiesNames::thermal_conductivity))),
+    _rho(declareProperty<Real>(getParam<std::string>(SolidPropertiesNames::density))),
 
     _sp(getUserObject<ThermalSolidProperties>("sp"))
 {
