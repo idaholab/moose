@@ -47,7 +47,7 @@ conductivity over 300 K $\le$ T $\le$ 1800 K with the Snead correlation
 
 ## Example Input File Syntax
 
-!listing modules/solid_properties/test/tests/monolithic_sic/test.i
+!listing modules/solid_properties/test/tests/userobjects/monolithic_sic/monolithic_sic.i
   start=Modules
   end=Kernels
 

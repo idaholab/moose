@@ -20,7 +20,7 @@ boundary conditions, etc.) where the userobject functions are used.
 
 ## Example Input File Syntax
 
-!listing modules/solid_properties/test/tests/functional/test.i
+!listing modules/solid_properties/test/tests/userobjects/functional/functional.i
   start=Modules
   end=Kernels
 

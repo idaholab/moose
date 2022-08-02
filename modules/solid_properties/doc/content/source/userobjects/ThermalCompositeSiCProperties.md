@@ -41,7 +41,7 @@ over an unspecified range [!cite](stone).
 
 ## Example Input File Syntax
 
-!listing modules/solid_properties/test/tests/composite_sic/test.i
+!listing modules/solid_properties/test/tests/userobjects/composite_sic/composite_sic.i
   start=Modules
   end=Kernels
 

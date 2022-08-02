@@ -49,7 +49,7 @@ Density is taken as a constant value; a default value is provided based on
 
 ## Example Input File Syntax
 
-!listing modules/solid_properties/test/tests/graphite/test_451.i
+!listing modules/solid_properties/test/tests/userobjects/graphite/graphite_451.i
   start=Modules
   end=Kernels
 
