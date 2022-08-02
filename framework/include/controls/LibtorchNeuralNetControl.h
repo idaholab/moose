@@ -34,20 +34,28 @@ protected:
                                  const std::vector<std::string> & conditional_param,
                                  bool should_be_defined = true);
 
-  std::vector<Real> _old_response;
+  std::vector<std::vector<Real>> _old_responses;
   std::vector<Real> _current_response;
-
-  bool _executed_once;
 
   std::vector<std::string> _control_names;
 
-  std::vector<PostprocessorName> _response_names, _postprocessor_names;
+  std::vector<PostprocessorName> _response_names;
+  std::vector<PostprocessorName> _action_postprocessor_names;
+
+  /// Number of timesteps to use as the input data from the reporter
+  unsigned int _input_timesteps;
+
+  /// Number of timesteps to use as the input data from the reporter
+  bool _initialized;
 
   /// Shifting constants for the responses
-  std::vector<Real> _response_shift_coeffs;
+  std::vector<Real> _response_shift_factors;
 
   /// Shifting constants for the responses
-  std::vector<Real> _response_normalization_coeffs;
+  std::vector<Real> _response_scaling_factors;
+
+  /// Shifting constants for the responses
+  std::vector<Real> _action_scaling_factors;
 
 #ifdef LIBTORCH_ENABLED
   /// Pointer to the neural net object which is supposed to be used to control

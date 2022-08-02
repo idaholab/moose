@@ -17,48 +17,13 @@ registerMooseObject("MooseApp", LibtorchDRLControl);
 InputParameters
 LibtorchDRLControl::validParams()
 {
-  InputParameters params = Control::validParams();
+  InputParameters params = LibtorchNeuralNetControl::validParams();
   params.addClassDescription(
       "Sets the value of a 'Real' input parameter (or postprocessor) based on a Proportional "
       "Integral Derivative control of a postprocessor to match a target a target value.");
-  params.addRequiredParam<std::vector<std::string>>("parameters",
-                                                    "The input parameter(s) to control.");
-  params.addRequiredParam<std::vector<PostprocessorName>>(
-      "responses", "The responses (prostprocessors) which are used for the control.");
-  params.addRequiredParam<std::vector<PostprocessorName>>(
-      "action_postprocessors", "The postprocessors which stores the control (action) values.");
   params.addRequiredParam<std::vector<PostprocessorName>>(
       "log_probability_postprocessors",
       "The postprocessors which stores the log probability of the action/control values.");
-  params.addParam<std::vector<Real>>(
-      "response_shift_factors",
-      "A shift constant which will be used to shift the response values. This is used for the "
-      "manipulation of the neural net inputs for better training efficiency.");
-  params.addParam<std::vector<Real>>(
-      "response_scaling_factors",
-      "A normalization constant which will be used to divide the response values. This is used for "
-      "the manipulation of the neural net inputs for better training efficiency.");
-  params.addParam<std::string>("filename",
-                               "Define if the neural net is supposed to be loaded from a file.");
-  params.addParam<bool>("torch_script_format",
-                        false,
-                        "If we want to load the neural net using the torch-script format.");
-  params.addParam<unsigned int>(
-      "input_timesteps",
-      1,
-      "Number of time steps to use in the input data, if larger than 1, "
-      "data from the previous timesteps will be used as inputs in the training.");
-  params.addParam<std::vector<unsigned int>>("num_neurons_per_layer",
-                                             "The number of neurons on each hidden layer.");
-  params.addParam<std::vector<std::string>>(
-      "activation_function",
-      "The type of activation functions to use. It is either one value "
-      "or one value per hidden layer.");
-
-  params.addParam<std::vector<Real>>(
-      "action_scaling_factors",
-      "Scale factor that multiplies to the NN output to obtain a physically meaningful value.");
-
   params.addRequiredParam<std::vector<Real>>(
       "action_standard_deviations", "Standard deviation value used while sampling the actions.");
 
@@ -66,63 +31,14 @@ LibtorchDRLControl::validParams()
 }
 
 LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
-  : Control(parameters),
-    _control_names(getParam<std::vector<std::string>>("parameters")),
-    _response_names(getParam<std::vector<PostprocessorName>>("responses")),
-    _action_postprocessor_names(getParam<std::vector<PostprocessorName>>("action_postprocessors")),
+  : LibtorchNeuralNetControl(parameters),
     _log_probability_postprocessor_names(
         getParam<std::vector<PostprocessorName>>("log_probability_postprocessors")),
-    _input_timesteps(getParam<unsigned int>("input_timesteps")),
-    _initialized(false),
-    _action_scaling_factors(getParam<std::vector<Real>>("action_scaling_factors")),
     _action_std(getParam<std::vector<Real>>("action_standard_deviations"))
 {
-  // We first check if the input parameters make sense and throw errors if different parameter
-  // combinations are not allowed
-  conditionalParameterError("filename",
-                            {"num_neurons_per_layer", "activation_function"},
-                            !getParam<bool>("torch_script_format"));
-
-  if (isParamValid("response_shift_factors"))
-  {
-    _response_shift_factors = getParam<std::vector<Real>>("response_shift_factors");
-    if (_response_names.size() != _response_shift_factors.size())
-      paramError("response_shift_factors",
-                 "The number of shift factors is not the same as the number of responses!");
-  }
-  else
-    _response_shift_factors = std::vector<Real>(_response_names.size(), 0.0);
-
-  if (isParamValid("response_scaling_factors"))
-  {
-    _response_scaling_factors = getParam<std::vector<Real>>("response_scaling_factors");
-    if (_response_names.size() != _response_scaling_factors.size())
-      paramError(
-          "response_scaling_factors",
-          "The number of normalization coefficients is not the same as the number of responses!");
-  }
-  else
-    _response_scaling_factors = std::vector<Real>(_response_names.size(), 1.0);
-
-  if (isParamValid("action_scaling_factors"))
-  {
-    _action_scaling_factors = getParam<std::vector<Real>>("action_scaling_factors");
-    if (_control_names.size() != _action_scaling_factors.size())
-      paramError("action_scaling_factors",
-                 "The number of normalization coefficients is not the same as the number of "
-                 "controlled parameters!");
-  }
-  else
-    _action_scaling_factors = std::vector<Real>(_control_names.size(), 1.0);
-
   if (_control_names.size() != _action_std.size())
     paramError(
         "action_standard_deviations",
-        "Nunmber of action_postprocessors does not match the number of controlled parameters.");
-
-  if (_control_names.size() != _action_postprocessor_names.size())
-    paramError(
-        "action_postprocessors",
         "Nunmber of action_postprocessors does not match the number of controlled parameters.");
 
   if (_control_names.size() != _log_probability_postprocessor_names.size())
@@ -133,54 +49,15 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
 #ifdef LIBTORCH_ENABLED
   _std = torch::eye(_control_names.size());
   for (unsigned int i = 0; i < _control_names.size(); ++i)
-  {
     _std[i][i] = _action_std[i];
-  }
-
-  // If the user wants to read the neural net from file, we do it. We can read it from a
-  // torchscript file, or we can create a shell and read back the parameters
-  if (parameters.isParamSetByUser("filename"))
-  {
-    std::string filename = getParam<std::string>("filename");
-    if (getParam<bool>("torch_script_format"))
-    {
-      _nn = std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(filename);
-    }
-    else
-    {
-      unsigned int multiplier = getParam<bool>("use_old_responses") ? 2 : 1;
-      unsigned int num_inputs = _response_names.size() * multiplier;
-      unsigned int num_outputs = _control_names.size();
-      std::vector<unsigned int> num_neurons_per_layer =
-          getParam<std::vector<unsigned int>>("num_neurons_per_layer");
-      std::vector<std::string> activation_functions =
-          parameters.isParamSetByUser("activation_function")
-              ? getParam<std::vector<std::string>>("activation_function")
-              : std::vector<std::string>({"relu"});
-      getParam<std::vector<unsigned int>>("num_neurons_per_layer");
-      auto nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-          filename, num_inputs, num_outputs, num_neurons_per_layer, activation_functions);
-
-      try
-      {
-        torch::load(nn, filename);
-        _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(*nn);
-        _console << "Loaded requested .pt file." << std::endl;
-      }
-      catch (...)
-      {
-        mooseError("The requested pytorch parameter file could not be loaded. Make sure the "
-                   "dimensions of the generated neural net are the same as the dimensions of the "
-                   "parameters in the input file!");
-      }
-    }
-  }
 #endif
 }
 
 void
 LibtorchDRLControl::execute()
 {
+  std::cout << _nn << std::endl;
+
 #ifdef LIBTORCH_ENABLED
   if (_nn)
   {
@@ -257,13 +134,6 @@ LibtorchDRLControl::execute()
 }
 
 #ifdef LIBTORCH_ENABLED
-void
-LibtorchDRLControl::loadControlNeuralNet(
-    const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & input_nn)
-{
-  _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(*input_nn);
-}
-
 torch::Tensor
 LibtorchDRLControl::computeLogProbability(const torch::Tensor & action,
                                           const torch::Tensor & output_tensor)
@@ -275,16 +145,3 @@ LibtorchDRLControl::computeLogProbability(const torch::Tensor & action,
          std::log(std::sqrt(2.0 * M_PI));
 }
 #endif
-
-void
-LibtorchDRLControl::conditionalParameterError(const std::string & param_name,
-                                              const std::vector<std::string> & conditional_params,
-                                              bool should_be_defined)
-{
-  if (parameters().isParamSetByUser(param_name))
-    for (const auto & param : conditional_params)
-      if (parameters().isParamSetByUser(param) != should_be_defined)
-        paramError(param,
-                   "This parameter should " + std::string(should_be_defined ? "" : "not") +
-                       " be defined when " + param_name + " is defined!");
-}

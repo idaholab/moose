@@ -26,24 +26,25 @@ LibtorchNeuralNetControl::validParams()
   params.addRequiredParam<std::vector<PostprocessorName>>(
       "responses", "The responses (prostprocessors) which are used for the control.");
   params.addParam<std::vector<Real>>(
-      "response_shift_coeffs",
+      "response_shift_factors",
       "A shift constant which will be used to shift the response values. This is used for the "
       "manipulation of the neural net inputs for better training efficiency.");
   params.addParam<std::vector<Real>>(
-      "response_normalization_coeffs",
+      "response_scaling_factors",
       "A normalization constant which will be used to divide the response values. This is used for "
       "the manipulation of the neural net inputs for better training efficiency.");
   params.addRequiredParam<std::vector<PostprocessorName>>(
-      "postprocessors", "The postprocessors which stores the control values.");
+      "action_postprocessors", "The postprocessors which stores the control (action) values.");
   params.addParam<std::string>("filename",
                                "Define if the neural net is supposed to be loaded from a file.");
   params.addParam<bool>("torch_script_format",
                         false,
                         "If we want to load the neural net using the torch-script format.");
-  params.addParam<bool>("use_old_response",
-                        false,
-                        "If we want to use the old responses besides the current responses to "
-                        "ealuate the neural network.");
+  params.addParam<unsigned int>(
+      "input_timesteps",
+      1,
+      "Number of time steps to use in the input data, if larger than 1, "
+      "data from the previous timesteps will be used as inputs in the training.");
   params.addParam<std::vector<unsigned int>>("num_neurons_per_layer",
                                              "The number of neurons on each hidden layer.");
   params.addParam<std::vector<std::string>>(
@@ -51,15 +52,21 @@ LibtorchNeuralNetControl::validParams()
       "The type of activation functions to use. It is either one value "
       "or one value per hidden layer.");
 
+  params.addParam<std::vector<Real>>(
+      "action_scaling_factors",
+      "Scale factor that multiplies to the NN output to obtain a physically meaningful value.");
+
   return params;
 }
 
 LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & parameters)
   : Control(parameters),
-    _executed_once(false),
     _control_names(getParam<std::vector<std::string>>("parameters")),
     _response_names(getParam<std::vector<PostprocessorName>>("responses")),
-    _postprocessor_names(getParam<std::vector<PostprocessorName>>("postprocessors"))
+    _action_postprocessor_names(getParam<std::vector<PostprocessorName>>("action_postprocessors")),
+    _input_timesteps(getParam<unsigned int>("input_timesteps")),
+    _initialized(false),
+    _action_scaling_factors(getParam<std::vector<Real>>("action_scaling_factors"))
 {
   // We first check if the input parameters make sense and throw errors if different parameter
   // combinations are not allowed
@@ -67,24 +74,42 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
                             {"num_neurons_per_layer", "activation_function"},
                             !getParam<bool>("torch_script_format"));
 
-  if (isParamValid("response_shift_coeffs"))
+  if (isParamValid("response_shift_factors"))
   {
-    _response_shift_coeffs = getParam<std::vector<Real>>("response_shift_coeffs");
-    if (_response_names.size() != _response_shift_coeffs.size())
-      paramError("response_shift_coeffs",
+    _response_shift_factors = getParam<std::vector<Real>>("response_shift_factors");
+    if (_response_names.size() != _response_shift_factors.size())
+      paramError("response_shift_factors",
                  "The number of shift factors is not the same as the number of responses!");
+  }
+  else
+    _response_shift_factors = std::vector<Real>(_response_names.size(), 0.0);
 
-    _response_normalization_coeffs = getParam<std::vector<Real>>("response_normalization_coeffs");
-    if (_response_names.size() != _response_normalization_coeffs.size())
+  if (isParamValid("response_scaling_factors"))
+  {
+    _response_scaling_factors = getParam<std::vector<Real>>("response_scaling_factors");
+    if (_response_names.size() != _response_scaling_factors.size())
       paramError(
-          "response_normalization_coeffs",
+          "response_scaling_factors",
           "The number of normalization coefficients is not the same as the number of responses!");
   }
   else
+    _response_scaling_factors = std::vector<Real>(_response_names.size(), 1.0);
+
+  if (isParamValid("action_scaling_factors"))
   {
-    _response_shift_coeffs = std::vector<Real>(_response_names.size(), 0.0);
-    _response_normalization_coeffs = std::vector<Real>(_response_names.size(), 1.0);
+    _action_scaling_factors = getParam<std::vector<Real>>("action_scaling_factors");
+    if (_control_names.size() != _action_scaling_factors.size())
+      paramError("action_scaling_factors",
+                 "The number of normalization coefficients is not the same as the number of "
+                 "controlled parameters!");
   }
+  else
+    _action_scaling_factors = std::vector<Real>(_control_names.size(), 1.0);
+
+  if (_control_names.size() != _action_postprocessor_names.size())
+    paramError(
+        "action_postprocessors",
+        "Nunmber of action_postprocessors does not match the number of controlled parameters.");
 
 #ifdef LIBTORCH_ENABLED
   // If the user wants to read the neural net from file, we do it. We can read it from a
@@ -134,51 +159,59 @@ LibtorchNeuralNetControl::execute()
 #ifdef LIBTORCH_ENABLED
   if (_nn)
   {
-    bool use_old_response = getParam<bool>("use_old_response");
     unsigned int n_responses = _response_names.size();
+    unsigned int n_controls = _control_names.size();
+    unsigned int num_old_timesteps = _input_timesteps - 1;
 
     _current_response.clear();
-    for (unsigned int resp_i = 0; resp_i < _response_names.size(); ++resp_i)
-      _current_response.push_back(getPostprocessorValueByName(_response_names[resp_i]));
+    for (unsigned int resp_i = 0; resp_i < n_responses; ++resp_i)
+      _current_response.push_back(
+          (getPostprocessorValueByName(_response_names[resp_i]) - _response_shift_factors[resp_i]) *
+          _response_scaling_factors[resp_i]);
 
-    if (use_old_response && !_executed_once)
+    if (!_initialized)
     {
-      _old_response = _current_response;
-      _executed_once = true;
+      _old_responses.clear();
+      for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
+        _old_responses.push_back(_current_response);
+      _initialized = true;
     }
 
     std::vector<Real> raw_input(_current_response);
-    if (use_old_response)
-      raw_input.insert(raw_input.end(), _old_response.begin(), _old_response.end());
-
-    for (unsigned int resp_i = 0; resp_i < n_responses; ++resp_i)
-    {
-      raw_input[resp_i] = (raw_input[resp_i] - _response_shift_coeffs[resp_i]) /
-                          _response_normalization_coeffs[resp_i];
-      if (use_old_response)
-        raw_input[resp_i + n_responses] =
-            (raw_input[resp_i + n_responses] - _response_shift_coeffs[resp_i]) /
-            _response_normalization_coeffs[resp_i];
-    }
+    for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
+      raw_input.insert(
+          raw_input.end(), _old_responses[step_i].begin(), _old_responses[step_i].end());
 
     auto options = torch::TensorOptions().dtype(at::kDouble);
     torch::Tensor input_tensor =
-        torch::from_blob(raw_input.data(), {1, (use_old_response ? 2 : 1) * n_responses}, options)
+        torch::from_blob(raw_input.data(), {1, _input_timesteps * n_responses}, options)
             .to(at::kDouble);
 
-    torch::Tensor output_tensor = _nn->forward(input_tensor);
+    torch::Tensor action = _nn->forward(input_tensor);
 
-    std::vector<Real> converted_output = {output_tensor.data_ptr<Real>(),
-                                          output_tensor.data_ptr<Real>() + output_tensor.size(1)};
+    std::vector<Real> converted_action = {action.data_ptr<Real>(),
+                                          action.data_ptr<Real>() + action.size(1)};
 
-    for (unsigned int control_i = 0; control_i < _control_names.size(); ++control_i)
+    for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     {
-      setControllableValueByName<Real>(_control_names[control_i], converted_output[control_i]);
-      _fe_problem.setPostprocessorValueByName(_postprocessor_names[control_i],
-                                              converted_output[control_i]);
+      // we scale the controllable value for physically meaningful control action
+      setControllableValueByName<Real>(_control_names[control_i],
+                                       converted_action[control_i] *
+                                           _action_scaling_factors[control_i]);
+      // save action values to postprocessor
+      // we do not scale the action value here. it will be used and reported directly for training
+      _fe_problem.setPostprocessorValueByName(_action_postprocessor_names[control_i],
+                                              converted_action[control_i]);
     }
 
-    _old_response = _current_response;
+    for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
+    {
+      if (step_i == num_old_timesteps - 1)
+        _old_responses[0] = _current_response;
+      else
+        _old_responses[(num_old_timesteps - 1) - step_i] =
+            _old_responses[(num_old_timesteps - 1) - step_i - 1];
+    }
   }
 #endif
 }

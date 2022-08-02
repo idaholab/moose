@@ -96,7 +96,7 @@ cp = 1.0
   [src_control]
     type = LibtorchNeuralNetControl
     parameters = "Kernels/anti_source/value"
-    postprocessors = "control_value"
+    action_postprocessors = "control_value"
     responses = 'T_max'
   []
 []

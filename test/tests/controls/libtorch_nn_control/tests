@@ -8,7 +8,7 @@
       csvdiff = torch_script_read_T_reporter_0026.csv
       cli_args = "Controls/src_control/filename='model_2.pt'
                   Controls/src_control/torch_script_format=true
-                  Controls/src_control/use_old_response=true
+                  Controls/src_control/input_timesteps=2
                   Outputs/file_base='torch_script_read'"
       requirement = "The system shall be able to read a neural network from a torchscript file and use it to control a transient process."
       libtorch = true
@@ -20,7 +20,7 @@
       input = read_torchscript_control.i
       cli_args = "Controls/src_control/filename='model_2.pt'
                   Controls/src_control/torch_script_format=true
-                  Controls/src_control/use_old_response=true
+                  Controls/src_control/input_timesteps=2
                   Controls/src_control/num_neurons_per_layer='3 3'"
       expect_err = "This parameter should not be defined when filename is defined!"
       requirement = "The system shall throw an error if forbidden parameters are defined while reading a neural network from a torchscript file."
