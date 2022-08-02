@@ -27,7 +27,8 @@ SolutionAuxMisorientationBoundary::validParams()
   return params;
 }
 
-SolutionAuxMisorientationBoundary::SolutionAuxMisorientationBoundary(const InputParameters & parameters)
+SolutionAuxMisorientationBoundary::SolutionAuxMisorientationBoundary(
+    const InputParameters & parameters)
   : SolutionAux(parameters),
     _gb_type_order(getParam<Real>("gb_type_order")),
     _op_num(coupledComponents("v")),
@@ -55,8 +56,7 @@ SolutionAuxMisorientationBoundary::computeValue()
     if (isNodal())
       output_gb_type = _solution_object.pointValue(_t, *_current_node, _var_name);
     else
-      output_gb_type =
-          _solution_object.pointValue(_t, _current_elem->vertex_average(), _var_name);
+      output_gb_type = _solution_object.pointValue(_t, _current_elem->vertex_average(), _var_name);
   }
 
   // generate different GB boundary parameters

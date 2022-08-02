@@ -79,7 +79,8 @@ ComputeGBMisorientationType::computeQpProperties()
     {
       // get type by Misorientation angle
       _gb_type[_qp] =
-          ((_misorientation_angles[getLineNum(gb_pairs[0], gb_pairs[1])] < _angle_threshold) ? 1 : 2);
+          ((_misorientation_angles[getLineNum(gb_pairs[0], gb_pairs[1])] < _angle_threshold) ? 1
+                                                                                             : 2);
       break;
     }
     default:
@@ -123,7 +124,7 @@ ComputeGBMisorientationType::getLineNum(unsigned int grain_i, unsigned int grain
 // Function to calculate the GB type in Triple junction
 Real
 ComputeGBMisorientationType::getTripleJunctionType(std::vector<unsigned int> gb_pairs,
-                                         std::vector<Real> gb_op_pairs)
+                                                   std::vector<Real> gb_op_pairs)
 {
   unsigned int lagb_num = 0;
   unsigned int hagb_num = 0;
