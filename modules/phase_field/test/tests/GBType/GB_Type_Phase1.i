@@ -224,10 +224,10 @@
   [../]
   [./GB_type]
     # The new developed Miso Bnds Aux Kernel
-    type = ComputeGBMisorientationType
+    type = ComputeGBMisoType
     ebsd_reader = ebsd_reader
     grain_tracker = grain_tracker
-    file_name = 'MisorientationAngle_3grs.txt'
+    file_name = 'MisoAngle_3grs.txt'
     output_properties = 'gb_type'
     outputs = exodus
   [../]
