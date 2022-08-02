@@ -27,7 +27,8 @@ public:
   SideIntegralVariablePostprocessor(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpIntegral() override;
+  Real computeQpIntegral() override;
+  Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 
   /// Holds the solution at current quadrature points
   const VariableValue & _u;
