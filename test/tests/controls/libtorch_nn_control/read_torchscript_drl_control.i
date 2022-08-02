@@ -1,13 +1,12 @@
 pi = 3.14159265359
-period = 1
-num_steps = 200
-dt = ${fparse period/num_steps}
-cp = 5.0
+period = 0.25
+diff_coeff = 0.5
+cp = 1.0
 
 [Functions]
   [src_func]
     type = ParsedFunction
-    value = "20*sin(2*${pi}/${period}*t)"
+    value = "sin(${pi}/${period}*t)"
   []
 []
 
@@ -15,10 +14,10 @@ cp = 5.0
   [msh]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 100
+    nx = 20
     xmin = -0.5
     xmax = 0.5
-    ny = 100
+    ny = 20
     ymin = -0.5
     ymax = 0.5
   []
@@ -32,14 +31,15 @@ cp = 5.0
 
 [Variables]
   [T]
-    initial_condition = 0
+    initial_condition = 1
   []
 []
 
 [Kernels]
   [diffusion]
-    type = Diffusion
+    type = CoefDiffusion
     variable = T
+    coef = ${diff_coeff}
   []
   [source]
     type = BodyForce
@@ -71,8 +71,8 @@ cp = 5.0
 
 [Executioner]
   type = Transient
-  num_steps = ${num_steps}
-  dt = ${dt}
+  num_steps = 25
+  dt = 0.1
   solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
@@ -84,37 +84,41 @@ cp = 5.0
   [T_max]
     type = NodalExtremeValue
     variable = T
-    value_type = max
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [T_min]
-    type = NodalExtremeValue
-    variable = T
-    value_type = min
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [control_value]
     type = Receiver
     execute_on = 'INITIAL TIMESTEP_END'
   []
+  [log_prob_control]
+    type = Receiver
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+  []
 []
 
 [Controls]
   [src_control]
-    type = LibtorchNeuralNetControl
+    type = LibtorchDRLControl
     parameters = "Kernels/anti_source/value"
-    postprocessors = "control_value"
-    responses = 'T_max T_min'
-    response_shift_coeffs = '0.25 -0.06'
-    response_normalization_coeffs = '0.25 0.012'
-    use_old_response = true
+    action_postprocessors = "control_value"
+    log_probability_postprocessors = "log_prob_control"
+    responses = 'T_max'
+    input_timesteps = 2
+
+    response_scaling_factors = 1.0
+    response_shift_factors = 0.0
+    action_scaling_factors = 1.0
+    action_standard_deviations = 0.01
+
+    filename = 'model_2.pt'
+    torch_script_format = true
   []
 []
 
 [Reporters]
   [T_reporter]
     type = AccumulateReporter
-    reporters = 'T_max/value T_min/value control_value/value'
+    reporters = 'T_max/value control_value/value log_prob_control/value'
   []
 []
 

@@ -40,8 +40,8 @@ LibtorchNeuralNetControlTrainer::validParams()
   params.addRequiredParam<std::vector<FunctionName>>(
       "response_constraints", "Constraints on the postprocessor values in the response reporters.");
 
-  params.addRequiredParam<Real>(
-      "emulator_learning_rate", 1e-3, "Learning rate (relaxation) for the emulator training.");
+  params.addRequiredParam<Real>("emulator_learning_rate",
+                                "Learning rate (relaxation) for the emulator training.");
   params.addRequiredParam<unsigned int>("num_emulator_batches",
                                         "Number of batches for the emulator training.");
   params.addRequiredParam<unsigned int>("num_emulator_epochs",
@@ -55,7 +55,6 @@ LibtorchNeuralNetControlTrainer::validParams()
       "or one value per hidden layer.");
 
   params.addRequiredParam<Real>("control_learning_rate",
-                                1e-3,
                                 "Learning rate (relaxation) for the control neural net training.");
   params.addRequiredParam<unsigned int>("num_control_epochs",
                                         "Number of epochs for the control neural net training.");
@@ -89,15 +88,15 @@ LibtorchNeuralNetControlTrainer::LibtorchNeuralNetControlTrainer(const InputPara
     _response_names(getParam<std::vector<ReporterName>>("response_reporter")),
     _response_constraints(getParam<std::vector<FunctionName>>("response_constraints")),
     _control_names(getParam<std::vector<ReporterName>>("control_reporter")),
-    _num_emulator_batches(getParam<unsigned int>("no_emulator_batches")),
-    _num_emulator_epochs(getParam<unsigned int>("no_emulator_epocs")),
+    _num_emulator_batches(getParam<unsigned int>("num_emulator_batches")),
+    _num_emulator_epochs(getParam<unsigned int>("num_emulator_epochs")),
     _num_emulator_neurons_per_layer(
-        getParam<std::vector<unsigned int>>("no_emulator_neurons_per_layer")),
+        getParam<std::vector<unsigned int>>("num_emulator_neurons_per_layer")),
     _emulator_learning_rate(getParam<Real>("emulator_learning_rate")),
-    _num_control_epochs(getParam<unsigned int>("no_control_epocs")),
-    _num_control_loops(getParam<unsigned int>("no_control_loops")),
+    _num_control_epochs(getParam<unsigned int>("num_control_epochs")),
+    _num_control_loops(getParam<unsigned int>("num_control_loops")),
     _num_control_neurons_per_layer(
-        getParam<std::vector<unsigned int>>("no_control_neurons_per_layer")),
+        getParam<std::vector<unsigned int>>("num_control_neurons_per_layer")),
     _control_learning_rate(getParam<Real>("control_learning_rate")),
     _filename(getParam<std::string>("filename")),
     _use_old_response(getParam<bool>("use_old_response"))
