@@ -76,8 +76,8 @@ protected:
   bool & _neighbors_cached;
   std::map<processor_id_type, std::vector<unsigned int>> & _cached_froms;
   std::map<processor_id_type, std::vector<dof_id_type>> & _cached_dof_ids;
-  std::map<dof_id_type, unsigned int> & _cached_from_inds;
-  std::map<dof_id_type, unsigned int> & _cached_qp_inds;
+  std::map<std::pair<unsigned int, dof_id_type>, unsigned int> & _cached_from_inds;
+  std::map<std::pair<unsigned int, dof_id_type>, unsigned int> & _cached_qp_inds;
 
 private:
   /// Target local nodes for receiving a nodal variable

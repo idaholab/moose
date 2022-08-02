@@ -62,8 +62,11 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters &
     _cached_dof_ids(declareRestartableData<std::map<processor_id_type, std::vector<dof_id_type>>>(
         "cached_dof_ids")),
     _cached_from_inds(
-        declareRestartableData<std::map<dof_id_type, unsigned int>>("cached_from_ids")),
-    _cached_qp_inds(declareRestartableData<std::map<dof_id_type, unsigned int>>("cached_qp_inds"))
+        declareRestartableData<std::map<std::pair<unsigned int, dof_id_type>, unsigned int>>(
+            "cached_from_ids")),
+    _cached_qp_inds(
+        declareRestartableData<std::map<std::pair<unsigned int, dof_id_type>, unsigned int>>(
+            "cached_qp_inds"))
 {
   if (_to_var_names.size() != 1)
     paramError("variable", " Support single to-variable only");
@@ -98,7 +101,7 @@ MultiAppNearestNodeTransfer::execute()
 
   ////////////////////
   // For every point in the local "to" domain, figure out which "from" domains
-  // might contain it's nearest neighbor, and send that point to the processors
+  // might contain its nearest neighbor, and send that point to the processors
   // that own those "from" domains.
   //
   // How do we know which "from" domains might contain the nearest neighbor, you
@@ -524,7 +527,7 @@ MultiAppNearestNodeTransfer::execute()
             if (evals.second[2 * qp_ind] >= min_dist)
               continue;
 
-            // If we made it here, we are going set a new value and
+            // If we made it here, we are going to set a new value and
             // distance because we found one that was closer.
             min_dist = evals.second[2 * qp_ind];
             best_val = evals.second[2 * qp_ind + 1];
@@ -532,15 +535,16 @@ MultiAppNearestNodeTransfer::execute()
             if (_fixed_meshes)
             {
               // Cache these indices.
-              _cached_from_inds[node->id()] = pid;
-              _cached_qp_inds[node->id()] = qp_ind;
+              _cached_from_inds[std::make_pair(i_to, node->id())] = pid;
+              _cached_qp_inds[std::make_pair(i_to, node->id())] = qp_ind;
             }
           }
         }
 
         else
         {
-          best_val = incoming_evals[_cached_from_inds[node->id()]][_cached_qp_inds[node->id()]];
+          best_val = incoming_evals[_cached_from_inds[std::make_pair(i_to, node->id())]]
+                                   [_cached_qp_inds[std::make_pair(i_to, node->id())]];
         }
 
         dof_id_type dof = node->dof_number(sys_num, var_num, 0);
@@ -609,14 +613,15 @@ MultiAppNearestNodeTransfer::execute()
               if (_fixed_meshes)
               {
                 // Cache these indices.
-                _cached_from_inds[point_id] = pid;
-                _cached_qp_inds[point_id] = qp_ind;
+                _cached_from_inds[std::make_pair(i_to, point_id)] = pid;
+                _cached_qp_inds[std::make_pair(i_to, point_id)] = qp_ind;
               } // if _fixed_meshes
             }   // i_from
           }     //
           else
           {
-            best_val = incoming_evals[_cached_from_inds[point_id]][_cached_qp_inds[point_id]];
+            best_val = incoming_evals[_cached_from_inds[std::make_pair(i_to, point_id)]]
+                                     [_cached_qp_inds[std::make_pair(i_to, point_id)]];
           }
           dof_id_type dof = elem->dof_number(sys_num, var_num, offset);
           solution->set(dof, best_val);
