@@ -107,9 +107,11 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
     _action_scaling_factors = std::vector<Real>(_control_names.size(), 1.0);
 
   if (_control_names.size() != _action_postprocessor_names.size())
-    paramError(
-        "action_postprocessors",
-        "Nunmber of action_postprocessors does not match the number of controlled parameters.");
+    paramError("action_postprocessors",
+               "Number of action_postprocessors " +
+                   std::to_string(_action_postprocessor_names.size()) +
+                   " does not match the number of controlled parameters " +
+                   std::to_string(_control_names.size()) + ".");
 
 #ifdef LIBTORCH_ENABLED
   // If the user wants to read the neural net from file, we do it. We can read it from a

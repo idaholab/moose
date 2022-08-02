@@ -58,26 +58,24 @@ LibtorchDRLControlTrainer::validParams()
   params.addRequiredParam<std::vector<unsigned int>>(
       "num_critic_neurons_per_layer", "Number of neurons per layer in the emulator neural net.");
   params.addParam<std::vector<std::string>>(
-      "critic_activation_function",
+      "critic_activation_functions",
       std::vector<std::string>({"relu"}),
       "The type of activation functions to use in the emulator neural net. It is either one value "
       "or one value per hidden layer.");
 
   params.addRequiredParam<Real>("control_learning_rate",
                                 "Learning rate (relaxation) for the control neural net training.");
-  params.addRequiredParam<unsigned int>("num_control_epochs",
-                                        "Number of epochs for the control neural net training.");
   params.addRequiredParam<std::vector<unsigned int>>("num_control_neurons_per_layer",
                                                      "Number of neurons per layer.");
   params.addParam<std::vector<std::string>>(
-      "control_activation_function",
+      "control_activation_functions",
       std::vector<std::string>({"relu"}),
       "The type of activation functions to use in the control neural net. It "
       "is either one value "
       "or one value per hidden layer.");
 
   params.addParam<std::string>(
-      "filename", "net.pt", "Filename used to output the neural net parameters.");
+      "filename_base", "mynet", "Filename used to output the neural net parameters.");
 
   params.addParam<unsigned int>(
       "seed", 11, "Random number generator seed for stochastic optimizers.");
@@ -97,9 +95,7 @@ LibtorchDRLControlTrainer::validParams()
                         "Decay factor for calculating the return. This accounts for decreased "
                         "reward values from the later steps.");
 
-  params.addParam<bool>(
-      "shift_output", false, "If the controller value needs to be shifted by one.");
-
+  params.addParam<bool>("read_from_file", false, "Something here");
   return params;
 }
 
@@ -126,12 +122,17 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _decay_factor(getParam<Real>("decay_factor")),
     _action_std(getParam<std::vector<Real>>("action_standard_deviations")),
     _filename_base(getParam<std::string>("filename_base")),
-    _read_from_file(getParam<bool>("read_from_file")),
-    _shift_output(getParam<bool>("shift_output"))
+    _read_from_file(getParam<bool>("read_from_file"))
 {
 
   if (_response_names.size() == 0)
     mooseError("The number of reponses reporters should be more than 0!");
+
+  if (_control_names.size() == 0)
+    mooseError("The number of control reporters should be more than 0!");
+
+  if (_log_probability_names.size() == 0)
+    mooseError("The number of log probability reporters should be more than 0!");
 
   if (isParamValid("response_shift_factors"))
   {
@@ -153,15 +154,6 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   }
   else
     _response_scaling_factors = std::vector<Real>(_response_names.size(), 1.0);
-
-  if (_response_names.size() == 0)
-    mooseError("The number of reponses reporters should be more than 0!");
-
-  if (_control_names.size() == 0)
-    mooseError("The number of control reporters should be more than 0!");
-
-  if (_log_probability_names.size() == 0)
-    mooseError("The number of log probability reporters should be more than 0!");
 
   // Dimension of the input/output data
   _input_data.resize(_num_inputs);

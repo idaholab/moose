@@ -145,9 +145,6 @@ protected:
   /// MOOSE or python runs for retraining and further manipulation)
   bool _read_from_file;
 
-  /// If the control values need to be shifted by one
-  bool _shift_output;
-
 #ifdef LIBTORCH_ENABLED
   /// Pointer to the control neural net object (initialized as null)
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _control_nn;

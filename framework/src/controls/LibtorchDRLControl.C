@@ -37,9 +37,9 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
     _action_std(getParam<std::vector<Real>>("action_standard_deviations"))
 {
   if (_control_names.size() != _action_std.size())
-    paramError(
-        "action_standard_deviations",
-        "Nunmber of action_postprocessors does not match the number of controlled parameters.");
+    paramError("action_standard_deviations",
+               "Nunmber of action_standard_deviations does not match the number of controlled "
+               "parameters.");
 
   if (_control_names.size() != _log_probability_postprocessor_names.size())
     paramError("log_probability_postprocessors",
