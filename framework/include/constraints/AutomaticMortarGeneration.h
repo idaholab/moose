@@ -504,6 +504,7 @@ private:
   const Real _minimum_projection_angle;
 
   friend class MortarNodalGeometryOutput;
+  friend class AugmentSparsityOnInterface;
 };
 
 inline const std::pair<BoundaryID, BoundaryID> &

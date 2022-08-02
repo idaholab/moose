@@ -1397,10 +1397,21 @@ public:
       const bool correct_edge_dropping,
       const Real minimum_projection_angle);
 
+  ///@{
+  /**
+   * Return the undisplaced or displaced mortar generation object associated with the provided
+   * boundaries and subdomains
+   */
   const AutomaticMortarGeneration &
   getMortarInterface(const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
                      const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
                      bool on_displaced) const;
+
+  AutomaticMortarGeneration &
+  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
+                     const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
+                     bool on_displaced);
+  ///@}
 
   const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
   getMortarInterfaces(bool on_displaced) const;

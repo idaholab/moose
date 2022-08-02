@@ -135,6 +135,16 @@ MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundar
   }
 }
 
+AutomaticMortarGeneration &
+MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
+                               const std::pair<SubdomainID, SubdomainID> & subdomain_key,
+                               bool on_displaced)
+{
+  return const_cast<AutomaticMortarGeneration &>(
+      const_cast<const MortarData *>(this)->getMortarInterface(
+          boundary_key, subdomain_key, on_displaced));
+}
+
 void
 MortarData::update()
 {

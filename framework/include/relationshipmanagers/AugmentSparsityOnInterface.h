@@ -68,6 +68,8 @@ public:
 
   virtual bool operator>=(const RelationshipManager & other) const override;
 
+  void delete_remote_elements() override;
+
 protected:
   virtual void internalInitWithMesh(const MeshBase &) override;
 
@@ -124,8 +126,14 @@ protected:
   SubdomainID _secondary_subdomain_id = Moose::INVALID_BLOCK_ID;
 
   /// the mortar mesh generation object
-  const AutomaticMortarGeneration * _amg = nullptr;
+  AutomaticMortarGeneration * _amg = nullptr;
 
-  // null matrix for generating full variable coupling
+  /// null matrix for generating full variable coupling
   const CouplingMatrix * const _null_mat = nullptr;
+
+  /// map from secondary element id to its iterator in the mortar mesh generation object's secondary-to-mortar-segments map
+  std::unordered_map<
+      dof_id_type,
+      std::unordered_map<const Elem *, std::set<Elem *, CompareDofObjectsByID>>::iterator>
+      _secondary_ids_to_its;
 };

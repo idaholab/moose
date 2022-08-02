@@ -6315,6 +6315,16 @@ FEProblemBase::getMortarInterface(
       primary_secondary_boundary_pair, primary_secondary_subdomain_pair, on_displaced);
 }
 
+AutomaticMortarGeneration &
+FEProblemBase::getMortarInterface(
+    const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
+    const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
+    bool on_displaced)
+{
+  return _mortar_data.getMortarInterface(
+      primary_secondary_boundary_pair, primary_secondary_subdomain_pair, on_displaced);
+}
+
 const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
 FEProblemBase::getMortarInterfaces(bool on_displaced) const
 {

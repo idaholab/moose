@@ -74,12 +74,62 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const AugmentSparsityOnIn
 }
 
 void
+AugmentSparsityOnInterface::fillDataMembers()
+{
+  // We ask the user to pass boundary names instead of ids to our constraint object.  However, We
+  // are unable to get the boundary ids from boundary names until we've attached the MeshBase object
+  // to the MooseMesh
+  _generating_mesh = !_moose_mesh->getMeshPtr();
+  _primary_boundary_id = _generating_mesh ? Moose::INVALID_BOUNDARY_ID
+                                          : _moose_mesh->getBoundaryID(_primary_boundary_name);
+  _secondary_boundary_id = _generating_mesh ? Moose::INVALID_BOUNDARY_ID
+                                            : _moose_mesh->getBoundaryID(_secondary_boundary_name);
+  _primary_subdomain_id = _generating_mesh ? Moose::INVALID_BLOCK_ID
+                                           : _moose_mesh->getSubdomainID(_primary_subdomain_name);
+  _secondary_subdomain_id = _generating_mesh
+                                ? Moose::INVALID_BLOCK_ID
+                                : _moose_mesh->getSubdomainID(_secondary_subdomain_name);
+
+  _amg = _app.getExecutioner() ? &_app.getExecutioner()->feProblem().getMortarInterface(
+                                     std::make_pair(_primary_boundary_id, _secondary_boundary_id),
+                                     std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),
+                                     _use_displaced_mesh)
+                               : nullptr;
+}
+
+void
 AugmentSparsityOnInterface::mesh_reinit()
 {
-  // This might eventually be where the mortar segment mesh and all the other data
-  // structures get rebuilt?
-
   RelationshipManager::mesh_reinit();
+
+  fillDataMembers();
+
+  if (!_amg)
+    return;
+
+  _secondary_ids_to_its.clear();
+  auto & secondaries_to_msms = _amg->_secondary_elems_to_mortar_segments;
+  for (auto it = secondaries_to_msms.begin(); it != secondaries_to_msms.end(); ++it)
+  {
+    const Elem * const secondary = it->first;
+    if (secondary->processor_id() != _mesh->processor_id())
+      _secondary_ids_to_its[secondary->id()] = it;
+  }
+}
+
+void
+AugmentSparsityOnInterface::delete_remote_elements()
+{
+  RelationshipManager::delete_remote_elements();
+
+  if (!_amg)
+    return;
+
+  auto & secondaries_to_msms = _amg->_secondary_elems_to_mortar_segments;
+  for (auto & pr : _secondary_ids_to_its)
+    secondaries_to_msms.erase(pr.second);
+
+  _secondary_ids_to_its.clear();
 }
 
 void
@@ -115,7 +165,11 @@ AugmentSparsityOnInterface::ghostMortarInterfaceCouplings(const processor_id_typ
                 "The coupled element with id " << coupled_elem_id << " doesn't exist!");
 
     if (coupled_elem->processor_id() != p)
-      coupled_elements.insert(std::make_pair(coupled_elem, _null_mat));
+    {
+      coupled_elements.emplace(coupled_elem, _null_mat);
+      if (coupled_elem->subdomain_id() == _secondary_subdomain_id)
+        _secondary_ids_to_its.erase(coupled_elem->id());
+    }
   }
 }
 
@@ -183,7 +237,12 @@ AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(const process
       for (const Elem * const neigh : secondary_lower_elem_point_neighbors)
       {
         if (neigh->processor_id() != p)
+        {
+          mooseAssert(neigh->subdomain_id() == _secondary_subdomain_id,
+                      "Ensuring correctness of erasures from secondary-to-msms map");
+          _secondary_ids_to_its.erase(neigh->id());
           coupled_elements.emplace(neigh, _null_mat);
+        }
 
         ghostMortarInterfaceCouplings(p, neigh, coupled_elements);
       }
@@ -243,33 +302,14 @@ AugmentSparsityOnInterface::ghostHigherDNeighbors(const processor_id_type p,
 
       for (const auto & neighbor : active_neighbors)
         if (neighbor->processor_id() != p)
+        {
+          mooseAssert(
+              neighbor->subdomain_id() != _secondary_subdomain_id,
+              "Ensure that we aren't missing potential erasures from the secondary-to-msms map");
           coupled_elements.emplace(neighbor, _null_mat);
+        }
     }
   }
-}
-
-void
-AugmentSparsityOnInterface::fillDataMembers()
-{
-  // We ask the user to pass boundary names instead of ids to our constraint object.  However, We
-  // are unable to get the boundary ids from boundary names until we've attached the MeshBase object
-  // to the MooseMesh
-  _generating_mesh = !_moose_mesh->getMeshPtr();
-  _primary_boundary_id = _generating_mesh ? Moose::INVALID_BOUNDARY_ID
-                                          : _moose_mesh->getBoundaryID(_primary_boundary_name);
-  _secondary_boundary_id = _generating_mesh ? Moose::INVALID_BOUNDARY_ID
-                                            : _moose_mesh->getBoundaryID(_secondary_boundary_name);
-  _primary_subdomain_id = _generating_mesh ? Moose::INVALID_BLOCK_ID
-                                           : _moose_mesh->getSubdomainID(_primary_subdomain_name);
-  _secondary_subdomain_id = _generating_mesh
-                                ? Moose::INVALID_BLOCK_ID
-                                : _moose_mesh->getSubdomainID(_secondary_subdomain_name);
-
-  _amg = _app.getExecutioner() ? &_app.getExecutioner()->feProblem().getMortarInterface(
-                                     std::make_pair(_primary_boundary_id, _secondary_boundary_id),
-                                     std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),
-                                     _use_displaced_mesh)
-                               : nullptr;
 }
 
 void
