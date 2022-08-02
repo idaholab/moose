@@ -21,7 +21,7 @@ base_mpifort:
 
 moose_ld64:                                                 # [osx]
   - ld64 609                                                # [not arm64 and osx]
-  - ld64_osx-arm64 609                                      # [arm64]
+  - ld64_osx-arm64 530                                      # [arm64]
 
 moose_hdf5:
   - hdf5 1.12.1 mpi_mpich_hfd824e9_4                        # [not arm64 and osx]

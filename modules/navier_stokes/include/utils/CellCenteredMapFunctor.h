@@ -56,6 +56,7 @@ public:
   using SingleSidedFaceArg = Moose::SingleSidedFaceArg;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
+  using ElemPointArg = Moose::ElemPointArg;
 
   CellCenteredMapFunctor(const MooseMesh & mesh, const std::string & name)
     : Moose::FunctorBase<T>(name), _mesh(mesh)
@@ -159,6 +160,13 @@ private:
       return neighbor_value +
              this->gradient(neighbor_arg) * (fi.faceCentroid() - fi.neighborCentroid());
     }
+  }
+
+  ValueType evaluate(const ElemPointArg & elem_point, const unsigned int state) const override final
+  {
+    return (*this)(elem_point.makeElem(), state) +
+           (elem_point.point - elem_point.elem->vertex_average()) *
+               this->gradient(elem_point.makeElem(), state);
   }
 
   using Moose::FunctorBase<T>::evaluateGradient;

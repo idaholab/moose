@@ -362,9 +362,11 @@ protected:
 
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
+  using ElemPointArg = Moose::ElemPointArg;
 
   ValueType evaluate(const ElemQpArg & elem_qp, unsigned int state) const override final;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
+  ValueType evaluate(const ElemPointArg & elem_point, unsigned int state) const override final;
 
   GradientType evaluateGradient(const ElemQpArg & elem_qp, unsigned int state) const override final;
   GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,

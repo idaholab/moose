@@ -134,10 +134,7 @@ public:
   {
     // mooseError("computeNodalValues not supported by MooseVariableFVBase");
   }
-  virtual const std::vector<dof_id_type> & dofIndicesLower() const override final
-  {
-    mooseError("dofIndicesLower not supported by MooseVariableFVBase");
-  }
+  virtual const std::vector<dof_id_type> & dofIndicesLower() const override final;
 
   unsigned int numberOfDofs() const override final { return _element_data->numberOfDofs(); }
 
@@ -750,6 +747,14 @@ MooseVariableFV<OutputType>::setActiveTags(const std::set<TagID> & vtags)
 {
   _element_data->setActiveTags(vtags);
   _neighbor_data->setActiveTags(vtags);
+}
+
+template <typename OutputType>
+const std::vector<dof_id_type> &
+MooseVariableFV<OutputType>::dofIndicesLower() const
+{
+  static const std::vector<dof_id_type> empty;
+  return empty;
 }
 
 template <>

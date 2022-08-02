@@ -11,6 +11,8 @@
 #include "Function.h"
 #include "Assembly.h"
 
+using namespace Moose;
+
 registerMooseObject("MooseTestApp", GapHeatConductanceTest);
 
 InputParameters
@@ -29,6 +31,10 @@ GapHeatConductanceTest::validParams()
       "secondary_mms_function", 0, "An mms function to apply to the secondary side");
   params.addParam<FunctionName>(
       "primary_mms_function", 0, "An mms function to apply to the primary side");
+  params.addParam<bool>("functor_evals_for_primal",
+                        false,
+                        "Whether to perform elem-point functor evaluations of the primal variables "
+                        "as opposed to indexing pre-evaluated quadrature point data");
   return params;
 }
 
@@ -37,24 +43,25 @@ GapHeatConductanceTest::GapHeatConductanceTest(const InputParameters & parameter
     _secondary_gap_conductance(getADMaterialProperty<Real>("secondary_gap_conductance")),
     _primary_gap_conductance(getNeighborADMaterialProperty<Real>("primary_gap_conductance")),
     _secondary_mms_function(getFunction<Real>("secondary_mms_function")),
-    _primary_mms_function(getFunctionByName<Real>(getParam<FunctionName>("primary_mms_function")))
+    _primary_mms_function(getFunctionByName<Real>(getParam<FunctionName>("primary_mms_function"))),
+    _functor_evals_for_primal(getParam<bool>("functor_evals_for_primal"))
 {
 }
 
 ADReal
-GapHeatConductanceTest::computeQpResidual(Moose::MortarType type)
+GapHeatConductanceTest::computeQpResidual(MortarType type)
 {
   switch (type)
   {
-    case Moose::MortarType::Secondary:
+    case MortarType::Secondary:
       return (_lambda[_qp] + _secondary_mms_function.value(_t, _phys_points_secondary[_qp])) *
              _test_secondary[_i][_qp];
 
-    case Moose::MortarType::Primary:
+    case MortarType::Primary:
       return (-_lambda[_qp] + _primary_mms_function.value(_t, _phys_points_primary[_qp])) *
              _test_primary[_i][_qp];
 
-    case Moose::MortarType::Lower:
+    case MortarType::Lower:
     {
       ADReal heat_transfer_coeff(0);
       auto gap = (_phys_points_secondary[_qp] - _phys_points_primary[_qp]).norm();
@@ -64,8 +71,16 @@ GapHeatConductanceTest::computeQpResidual(Moose::MortarType type)
       heat_transfer_coeff =
           (0.5 * (_secondary_gap_conductance[_qp] + _primary_gap_conductance[_qp])) / gap;
 
-      return _test[_i][_qp] *
-             (_lambda[_qp] - heat_transfer_coeff * (_u_secondary[_qp] - _u_primary[_qp]));
+      const auto u_secondary =
+          _functor_evals_for_primal
+              ? _secondary_var(
+                    ElemPointArg({_interior_secondary_elem, _phys_points_secondary[_qp], false}))
+              : _u_secondary[_qp];
+      const auto u_primary = _functor_evals_for_primal
+                                 ? _primary_var(ElemPointArg(
+                                       {_interior_primary_elem, _phys_points_primary[_qp], false}))
+                                 : _u_primary[_qp];
+      return _test[_i][_qp] * (_lambda[_qp] - heat_transfer_coeff * (u_secondary - u_primary));
     }
 
     default:
@@ -74,12 +89,12 @@ GapHeatConductanceTest::computeQpResidual(Moose::MortarType type)
 }
 
 void
-GapHeatConductanceTest::computeJacobian(Moose::MortarType mortar_type)
+GapHeatConductanceTest::computeJacobian(MortarType mortar_type)
 {
   std::vector<DualReal> residuals;
   size_t test_space_size = 0;
-  typedef Moose::ConstraintJacobianType JType;
-  typedef Moose::MortarType MType;
+  typedef ConstraintJacobianType JType;
+  typedef MortarType MType;
   std::vector<JType> jacobian_types;
   std::vector<dof_id_type> dof_indices;
   Real scaling_factor = 1;
@@ -118,10 +133,14 @@ GapHeatConductanceTest::computeJacobian(Moose::MortarType mortar_type)
       *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
   const auto & secondary_ip_lowerd_map =
       amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
-  const std::vector<const MooseVariable *> var_array = {&_secondary_var, &_primary_var};
+  const std::array<const MooseVariableField<Real> *, 2> secondary_side_var_array = {
+      &_secondary_var};
+  const std::array<const MooseVariableField<Real> *, 2> primary_side_var_array = {&_primary_var};
 
-  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, residuals, true);
-  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, residuals, false);
+  if (_secondary_var.feType().family == LAGRANGE)
+    trimInteriorNodeDerivatives(secondary_ip_lowerd_map, secondary_side_var_array, residuals, true);
+  if (_primary_var.feType().family == LAGRANGE)
+    trimInteriorNodeDerivatives(primary_ip_lowerd_map, primary_side_var_array, residuals, false);
   _assembly.processUnconstrainedResidualsAndJacobian(
       residuals, dof_indices, _vector_tags, _matrix_tags, scaling_factor);
 
@@ -160,15 +179,10 @@ GapHeatConductanceTest::computeJacobian(Moose::MortarType mortar_type)
 
       // Derivatives are offset by the variable number
       std::vector<size_t> ad_offsets{
-          Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element),
-          Moose::adOffset(jvar,
-                          _sys.getMaxVarNDofsPerElem(),
-                          Moose::ElementType::Neighbor,
-                          _sys.system().n_vars()),
-          Moose::adOffset(jvar,
-                          _sys.getMaxVarNDofsPerElem(),
-                          Moose::ElementType::Lower,
-                          _sys.system().n_vars())};
+          adOffset(jvar, _sys.getMaxVarNDofsPerElem(), ElementType::Element),
+          adOffset(
+              jvar, _sys.getMaxVarNDofsPerElem(), ElementType::Neighbor, _sys.system().n_vars()),
+          adOffset(jvar, _sys.getMaxVarNDofsPerElem(), ElementType::Lower, _sys.system().n_vars())};
       std::vector<size_t> shape_space_sizes{jvariable.dofIndices().size(),
                                             jvariable.dofIndicesNeighbor().size(),
                                             jvariable.dofIndicesLower().size()};
