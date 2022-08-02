@@ -478,45 +478,78 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
   // special rendering logic for quoted strings that go over maxlen:
   if (_kind == Kind::String && quote != "" && max > 0)
   {
-    // strip outer quotes - will will add back our own for each line
-    std::string unquoted = _val.substr(1, _val.size() - 2);
-
-    // iterate over the string in chunks of size "max"
-    size_t pos = 0;
-    while (pos + max < unquoted.size())
+    if (_val.find('\n') == std::string::npos)
     {
-      // to avoid splitting words, walk backwards from the "max" sized chunk boundary to find a
-      // space character
-      size_t boundary = pos + max;
-      while (boundary > pos && !charIn(unquoted[boundary], " \t"))
-        boundary--;
+      // strip outer quotes - will will add back our own for each line
+      std::string unquoted = _val.substr(1, _val.size() - 2);
 
-      // if we didn't find a space, just fall back to the original max sized chunk boundary and
-      // split the word anyway
-      if (boundary == pos)
-        boundary = pos + max;
+      // iterate over the string in chunks of size "max"
+      size_t pos = 0;
+      while (pos + max < unquoted.size())
+      {
+        // to avoid splitting words, walk backwards from the "max" sized chunk boundary to find a
+        // space character
+        size_t boundary = pos + max;
+        while (boundary > pos && !charIn(unquoted[boundary], " \t"))
+          boundary--;
 
-      // shift the boundary to after the space character (instead of before it) unless that would
-      // make the index beyond the string length.
-      boundary = std::min(boundary + 1, unquoted.size());
+        // if we didn't find a space, just fall back to the original max sized chunk boundary and
+        // split the word anyway
+        if (boundary == pos)
+          boundary = pos + max;
 
-      // add the leading indentation and newline - skip it for the first first chunk of a string
-      // because it should go on the same line as the "=",
-      if (pos > 0)
-        s += "\n" + strRepeat(" ", prefix_len);
+        // shift the boundary to after the space character (instead of before it) unless that would
+        // make the index beyond the string length.
+        boundary = std::min(boundary + 1, unquoted.size());
 
-      // add the quoted chunk to our string text
-      s += quote + unquoted.substr(pos, boundary - pos) + quote;
-      pos = boundary;
+        // add the leading indentation and newline - skip it for the first first chunk of a string
+        // because it should go on the same line as the "=",
+        if (pos > 0)
+          s += "\n" + strRepeat(" ", prefix_len);
+
+        // add the quoted chunk to our string text
+        s += quote + unquoted.substr(pos, boundary - pos) + quote;
+        pos = boundary;
+      }
+
+      // add any remaining partial chunk of the string value
+      if (pos < unquoted.size())
+      {
+        // again only add leading newline and indentation for greater chunks after the first.
+        if (pos > 0)
+          s += "\n" + strRepeat(" ", prefix_len);
+        s += quote + unquoted.substr(pos, std::string::npos) + quote;
+      }
     }
-
-    // add any remaining partial chunk of the string value
-    if (pos < unquoted.size())
+    else
     {
-      // again only add leading newline and indentation for greater chunks after the first.
-      if (pos > 0)
-        s += "\n" + strRepeat(" ", prefix_len);
-      s += quote + unquoted.substr(pos, std::string::npos) + quote;
+      // if the first character in the string is a space we right align, otherwise we left align
+      bool align_right = _val[1] == ' ';
+      const auto str_indent = s.length() - 1;
+
+      // first line is always added as is
+      std::size_t start = 0;
+      std::size_t end = _val.find('\n', start);
+      s += _val.substr(start, end - start + 1);
+      const auto first_size = end;
+
+      // remaining lines
+      do
+      {
+        start = end + 1;
+        end = _val.find('\n', start);
+        if (end == std::string::npos)
+          end = _val.length() - 1;
+
+        // remove leading whitespace
+        while (_val[start] == ' ' || _val[start] == '\t')
+          ++start;
+
+        int line_indent = align_right ? (str_indent + first_size - (end - start)) : str_indent + 1;
+        if (line_indent > 0)
+          s += std::string(line_indent, ' ');
+        s += _val.substr(start, end - start + 1);
+      } while (end < _val.length() - 1);
     }
   }
   else if (_val.size() == 0)
