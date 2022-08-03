@@ -1397,11 +1397,11 @@ public:
       const bool correct_edge_dropping,
       const Real minimum_projection_angle);
 
-  ///@{
   /**
    * Return the undisplaced or displaced mortar generation object associated with the provided
    * boundaries and subdomains
    */
+  ///@{
   const AutomaticMortarGeneration &
   getMortarInterface(const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
                      const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
@@ -1426,11 +1426,11 @@ public:
    */
   void setRestartFile(const std::string & file_name);
 
-  ///@{
   /**
    * Return a reference to the material property storage
    * @return A const reference to the material property storage
    */
+  ///@{
   const MaterialPropertyStorage & getMaterialPropertyStorage() { return _material_props; }
   const MaterialPropertyStorage & getBndMaterialPropertyStorage() { return _bnd_material_props; }
   const MaterialPropertyStorage & getNeighborMaterialPropertyStorage()
@@ -1439,10 +1439,10 @@ public:
   }
   ///@}
 
-  ///@{
   /**
    * Return indicator/marker storage.
    */
+  ///@{
   const MooseObjectWarehouse<Indicator> & getIndicatorWarehouse() { return _indicators; }
   const MooseObjectWarehouse<InternalSideIndicator> & getInternalSideIndicatorWarehouse()
   {
