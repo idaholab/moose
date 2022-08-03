@@ -24,43 +24,22 @@
 #include "libmesh/point.h"
 #include "libmesh/mesh_base.h"
 
-registerMooseObject("MooseApp", ComputeMortarFunctor);
-
-InputParameters
-ComputeMortarFunctor::validParams()
-{
-  auto params = MooseObject::validParams();
-  params += SetupInterface::validParams();
-  params += MeshChangedInterface::validParams();
-  params.addRequiredParam<const AutomaticMortarGeneration *>(
-      "amg", "The automatic mortar generation object");
-  params.addRequiredParam<const std::vector<std::shared_ptr<MortarConstraintBase>> *>(
-      "mortar_constraints", "The mortar constraints this functor acts on.");
-  params.addRequiredParam<bool>("use_displaced_mesh",
-                                "Whether this functor is acting on the displaced mesh.");
-  params.registerBase("ComputeMortarFunctor");
-  return params;
-}
-
-ComputeMortarFunctor::ComputeMortarFunctor(const InputParameters & params)
-  : MooseObject(params),
-    SetupInterface(this),
-    _amg(*getCheckedPointerParam<const AutomaticMortarGeneration *>("amg")),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _displaced(getParam<bool>("use_displaced_mesh")),
+ComputeMortarFunctor::ComputeMortarFunctor(
+    const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
+    const AutomaticMortarGeneration & amg,
+    SubProblem & subproblem,
+    FEProblemBase & fe_problem,
+    bool displaced)
+  : _amg(amg),
+    _subproblem(subproblem),
+    _fe_problem(fe_problem),
+    _displaced(displaced),
     _assembly(_subproblem.assembly(0))
 {
   // Construct the mortar constraints we will later loop over
-  for (auto mc :
-       *getCheckedPointerParam<const std::vector<std::shared_ptr<MortarConstraintBase>> *>(
-           "mortar_constraints"))
+  for (auto mc : mortar_constraints)
     _mortar_constraints.push_back(mc.get());
-}
 
-void
-ComputeMortarFunctor::initialSetup()
-{
   Moose::Mortar::setupMortarMaterials(_mortar_constraints,
                                       _fe_problem,
                                       _amg,

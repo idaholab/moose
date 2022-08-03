@@ -984,11 +984,11 @@ private:
   void setupScalingData();
 
   /// Functors for computing undisplaced mortar constraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>, std::shared_ptr<ComputeMortarFunctor>>
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
       _undisplaced_mortar_functors;
 
   /// Functors for computing displaced mortar constraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>, std::shared_ptr<ComputeMortarFunctor>>
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
       _displaced_mortar_functors;
 
 #ifndef MOOSE_SPARSE_AD

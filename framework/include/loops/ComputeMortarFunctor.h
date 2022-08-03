@@ -10,9 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
-#include "SetupInterface.h"
 #include "MortarExecutorInterface.h"
-#include "MooseObject.h"
 
 #include "libmesh/libmesh_common.h"
 
@@ -32,21 +30,20 @@ class FEGenericBase;
 typedef FEGenericBase<Real> FEBase;
 }
 
-class ComputeMortarFunctor : public MooseObject,
-                             public SetupInterface,
-                             public MortarExecutorInterface
+class ComputeMortarFunctor : public MortarExecutorInterface
 {
 public:
-  static InputParameters validParams();
-
-  ComputeMortarFunctor(const InputParameters & params);
+  ComputeMortarFunctor(
+      const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
+      const AutomaticMortarGeneration & amg,
+      SubProblem & subproblem,
+      FEProblemBase & fe_problem,
+      bool displaced);
 
   /**
    * Loops over the mortar segment mesh and computes the residual/Jacobian
    */
   void operator()(Moose::ComputeType compute_type);
-
-  void initialSetup() override;
 
 private:
   /// The mortar constraints to loop over when on each element. These must be

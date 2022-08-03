@@ -305,27 +305,17 @@ NonlinearSystemBase::initialSetup()
         auto & mortar_constraints =
             _constraints.getActiveMortarConstraints(primary_secondary_boundary_pair, displaced);
 
-        auto params = _factory.getValidParams("ComputeMortarFunctor");
-        params.set<SubProblem *>("_subproblem") =
-            displaced ? static_cast<SubProblem *>(_fe_problem.getDisplacedProblem().get())
-                      : static_cast<SubProblem *>(&_fe_problem);
-        params.set<bool>("use_displaced_mesh") = displaced;
-        params.set<const std::vector<std::shared_ptr<MortarConstraintBase>> *>(
-            "mortar_constraints") = &mortar_constraints;
-        params.set<const AutomaticMortarGeneration *>("amg") = &mortar_generation_object;
-        const std::string name = "mortar_functor_" +
-                                 std::to_string(primary_secondary_boundary_pair.first) +
-                                 std::to_string(primary_secondary_boundary_pair.second) +
-                                 (displaced ? "_displaced" : "_undisplaced");
+        auto & subproblem = displaced
+                                ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                                : static_cast<SubProblem &>(_fe_problem);
 
         auto & mortar_functors =
             displaced ? _displaced_mortar_functors : _undisplaced_mortar_functors;
 
-        auto [it, inserted] = mortar_functors.emplace(
+        mortar_functors.emplace(
             primary_secondary_boundary_pair,
-            _factory.create<ComputeMortarFunctor>("ComputeMortarFunctor", name, params));
-        if (inserted)
-          it->second->initialSetup();
+            ComputeMortarFunctor(
+                mortar_constraints, mortar_generation_object, subproblem, _fe_problem, displaced));
       }
     };
 
@@ -3474,10 +3464,10 @@ NonlinearSystemBase::mortarConstraints(const Moose::ComputeType compute_type)
   try
   {
     for (auto & map_pr : _undisplaced_mortar_functors)
-      (*map_pr.second)(compute_type);
+      map_pr.second(compute_type);
 
     for (auto & map_pr : _displaced_mortar_functors)
-      (*map_pr.second)(compute_type);
+      map_pr.second(compute_type);
   }
   catch (MetaPhysicL::LogicError &)
   {
