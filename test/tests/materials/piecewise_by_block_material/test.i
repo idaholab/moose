@@ -70,7 +70,7 @@
 [Postprocessors]
   # to trigger on boundary element computations
   [flux]
-    type = ADSideDiffusiveFluxIntegral
+    type = ADNonFunctorSideDiffusiveFluxIntegral
     boundary = left
     variable = v
     diffusivity = 'coeff'
