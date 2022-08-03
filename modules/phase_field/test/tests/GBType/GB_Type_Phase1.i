@@ -109,18 +109,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./ghost_regions]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./active_bounds_elemental]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./pid]
-    family = MONOMIAL
-    order = CONSTANT
-  []
 []
 
 [Kernels]
@@ -182,25 +170,6 @@
     variable = ebsd_numbers
     execute_on = 'initial timestep_end'
   [../]
-  [./ghosted_entities]
-    type = FeatureFloodCountAux
-    variable = ghost_regions
-    flood_counter = grain_tracker
-    field_display = GHOSTED_ENTITIES
-    execute_on = 'initial timestep_end'
-  [../]
-  [./active_bounds_elemental]
-    type = FeatureFloodCountAux
-    variable = active_bounds_elemental
-    field_display = ACTIVE_BOUNDS
-    execute_on = 'initial timestep_end'
-    flood_counter = grain_tracker
-  [../]
-  [./pid_aux]
-    type = ProcessorIDAux
-    variable = pid
-    execute_on = 'initial timestep_end'
-  []
 []
 
 [BCs]

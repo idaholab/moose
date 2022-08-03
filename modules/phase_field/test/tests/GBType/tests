@@ -4,7 +4,7 @@
     input = 'GB_Type_Phase1.i'
     exodiff = 'Phase1_output.e'
     issues = '#21704'
-    design = 'ComputeGBMisoType.md'
+    design = 'ComputeGBMisorientationType.md'
     requirement = 'The system shall output GB type for all GBs.'
   [../]
   [./phase2]
@@ -12,7 +12,7 @@
     input = 'GB_Type_Phase2.i'
     exodiff = 'Phase2_output.e'
     issues = '#21704'
-    design = 'SolutionAuxMisoBnds.md'
+    design = 'SolutionAuxMisorientationBoundary.md'
     requirement = 'The system shall assign local diffusivity.'
   [../]
 []
