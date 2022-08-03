@@ -12,7 +12,6 @@ from TestHarness import util
 import json, os
 
 class SchemaDiff(RunApp):
-    import deepdiff
     from deepdiff.operator import BaseOperator
     @staticmethod
     def validParams():
@@ -33,6 +32,17 @@ class SchemaDiff(RunApp):
         elif 'xmltodict' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' xmltodict'
         
+
+     # Check if python is available
+    '''def checkRunnable(self, options):
+        try:
+            import xmltodict, deepdiff
+            assert xmltodict, deepdiff
+            return True
+        except Exception:
+            self.addCaveats('skipped (no python)')
+            return False'''
+
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.getTestDir(), self.specs['schemadiff'])
@@ -126,6 +136,7 @@ class SchemaDiff(RunApp):
 
     class testcompare(BaseOperator):
         def __init__(self, rel_err,types,regex_paths=None):
+            #BaseOperator.__init__(self)
             self.rel_err = rel_err
             #next two members are necessary for deepdiff constructor to work
             self.regex_paths = regex_paths
