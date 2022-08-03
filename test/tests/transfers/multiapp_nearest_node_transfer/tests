@@ -90,7 +90,7 @@
     type = 'Exodiff'
     input = 'target_boundary_parent.i'
     exodiff = 'target_boundary_parent_out.e target_boundary_parent_out_sub0.e target_boundary_parent_out_sub1.e'
-    cli_args = 'Transfers/target_boundary/bbox_extend_factor=0.1'
+    cli_args = 'Transfers/target_boundary/bbox_factor=1.1'
     issues = '#18730'
     requirement = "The system shall support target boundary transfer when use multiple mpi ranks"
   [../]

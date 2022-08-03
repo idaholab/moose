@@ -1,6 +1,7 @@
 # Whether or not to do a Unity build
 MOOSE_UNITY ?= true
 MOOSE_HEADER_SYMLINKS ?= true
+SHELL := /bin/bash
 
 # We ignore this in the contrib folder because we will set up the include
 # directories manually later
@@ -15,13 +16,12 @@ endif
 $(info Checking if conda packages exist...)
 #check if conda exists on the system, then run checks if it does.
 check_conda := $(shell conda list 2> /dev/null | grep "moose-libmesh \|moose-petsc"; echo 0)
-
 ifneq ($(check_conda),0)
 
  #libmesh conda check
  $(info Checking if libmesh version is up to date...)
  conda_libmesh_status := $(shell awk '{print $$2}' <<< '$(check_conda)')
- conda_libmesh_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/libmesh/meta.yaml | cut -f 2 -d "\"")
+ conda_libmesh_file := $(shell grep " version = \"" $(MOOSE_DIR)/conda/libmesh/meta.yaml | cut -f 2 -d "\"")
  ifneq ($(conda_libmesh_status),$(conda_libmesh_file))
   $(warning The moose-libmesh conda package is out of date compared to the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
  endif
@@ -37,7 +37,7 @@ ifneq ($(check_conda),0)
  #petsc conda check
  $(info Checking if petsc version is up to date...)
  conda_petsc_status := $(shell awk '{print $$6}' <<< '$(check_conda)')
- conda_petsc_file := $(shell grep "version = \"" $(MOOSE_DIR)/conda/petsc/meta.yaml | cut -f 2 -d "\"")
+ conda_petsc_file := $(shell grep " version = \"" $(MOOSE_DIR)/conda/petsc/meta.yaml | cut -f 2 -d "\"")
  ifneq ($(conda_petsc_status),$(conda_petsc_file))
   $(warning The moose-petsc conda package is out of date compared to the current version of MOOSE. Please run "conda update --all" in your MOOSE environment.)
  endif

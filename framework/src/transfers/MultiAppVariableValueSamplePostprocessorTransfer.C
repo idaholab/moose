@@ -17,6 +17,7 @@
 #include "MultiApp.h"
 #include "AuxiliarySystem.h"
 #include "MooseUtils.h"
+#include "MooseCoordTransform.h"
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
@@ -165,6 +166,12 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
                5,
                "Transferring a variable to a postprocessor through sampling");
 
+  getAppInfo();
+  if (_fe_problem.coordTransform().hasNonTranslationTransformation())
+    mooseDoOnce(mooseWarning(
+        "Non-translation coordinate transformation capabilities are not implemented in "
+        "MultiAppVariableValueSamplePostprocessorTransfer"));
+
   switch (_current_direction)
   {
     case TO_MULTIAPP:
@@ -222,8 +229,15 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
         }
 
         if (getToMultiApp()->hasLocalApp(i))
+        {
+          if (getToMultiApp()->appProblemBase(i).coordTransform().hasNonTranslationTransformation())
+            mooseDoOnce(mooseWarning(
+                "Non-translation coordinate transformation capabilities are not implemented in "
+                "MultiAppVariableValueSamplePostprocessorTransfer"));
+
           getToMultiApp()->appProblemBase(i).setPostprocessorValueByName(_postprocessor_name,
                                                                          value);
+        }
       }
 
       break;
@@ -238,7 +252,16 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
       std::vector<Real> pp_values(n_subapps, std::numeric_limits<Real>::max());
       for (const auto i : make_range(n_subapps))
         if (getFromMultiApp()->hasLocalApp(i))
+        {
+          if (getFromMultiApp()
+                  ->appProblemBase(i)
+                  .coordTransform()
+                  .hasNonTranslationTransformation())
+            mooseDoOnce(mooseWarning(
+                "Non-translation coordinate transformation capabilities are not implemented in "
+                "MultiAppVariableValueSamplePostprocessorTransfer"));
           pp_values[i] = getFromMultiApp()->appPostprocessorValue(i, _postprocessor_name);
+        }
 
       // Gather all the multiapps postprocessor values that we need
       std::unordered_map<processor_id_type, std::vector<unsigned int>> postprocessor_queries;

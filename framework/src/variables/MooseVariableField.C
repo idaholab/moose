@@ -333,6 +333,16 @@ MooseVariableField<OutputType>::evaluateDot(const ElemSideQpArg &, unsigned int)
 
 #endif
 
+template <typename OutputType>
+typename MooseVariableField<OutputType>::ValueType
+MooseVariableField<OutputType>::evaluate(const ElemPointArg & elem_point,
+                                         const unsigned int state) const
+{
+  return (*this)(elem_point.makeElem(), state) +
+         (elem_point.point - elem_point.elem->vertex_average()) *
+             this->gradient(elem_point.makeElem(), state);
+}
+
 template <>
 typename MooseVariableField<RealEigenVector>::ValueType
 MooseVariableField<RealEigenVector>::evaluate(const ElemQpArg &, unsigned int) const
@@ -347,6 +357,15 @@ MooseVariableField<RealEigenVector>::evaluate(const ElemSideQpArg &, unsigned in
 {
   mooseError(
       "MooseVariableField::evaluate(ElemSideQpArg &, unsigned int) overload not implemented for "
+      "array variables");
+}
+
+template <>
+typename MooseVariableField<RealEigenVector>::ValueType
+MooseVariableField<RealEigenVector>::evaluate(const ElemPointArg &, unsigned int) const
+{
+  mooseError(
+      "MooseVariableField::evaluate(ElemPointArg &, unsigned int) overload not implemented for "
       "array variables");
 }
 

@@ -45,6 +45,16 @@ public:
   FunctionName getInitialT() const;
 
   /**
+   * Gets the heat structure side type of the provided boundary
+   *
+   * An error is thrown if the supplied boundary name does not exist in this
+   * component or if the boundary is interior.
+   *
+   * @param[in] boundary_name   Boundary name for which to get heat structure side type
+   */
+  HeatStructureSideType getHeatStructureSideType(const BoundaryName & boundary_name) const;
+
+  /**
    * Gets the perimeter of one unit of this heat structure on the specified side
    *
    * @param[in] side   Side of the heat structure corresponding to desired perimeter

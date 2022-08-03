@@ -152,7 +152,7 @@ ADReal Grashof(ADReal beta,
  * @return Laplace number
  */
 Real Laplace(Real surf_tension, Real delta_rho, Real gravity_magnitude);
-ADReal Laplace(ADReal surf_tension, ADReal delta_rho, ADReal gravity_magnitude);
+ADReal Laplace(ADReal surf_tension, ADReal delta_rho, Real gravity_magnitude);
 
 /**
  * Compute viscosity number (or coefficient)
@@ -167,11 +167,8 @@ ADReal Laplace(ADReal surf_tension, ADReal delta_rho, ADReal gravity_magnitude);
  */
 Real viscosityNumber(
     Real viscosity, Real surf_tension, Real rho_k, Real delta_rho, Real gravity_magnitude);
-ADReal viscosityNumber(ADReal viscosity,
-                       ADReal surf_tension,
-                       ADReal rho_k,
-                       ADReal delta_rho,
-                       ADReal gravity_magnitude);
+ADReal viscosityNumber(
+    ADReal viscosity, ADReal surf_tension, ADReal rho_k, ADReal delta_rho, Real gravity_magnitude);
 
 /**
  * Compute wall heat transfer coefficient
@@ -205,6 +202,15 @@ void
 vel_from_arhoA_arhouA(Real arhoA, Real arhouA, Real & vel, Real & dvel_darhoA, Real & dvel_darhouA);
 
 /**
+ * Computes velocity from alpha*rho*A and alpha*rho*u*A
+ *
+ * @param arhoA           alpha*rho*A
+ * @param arhouA          alpha*rho*u*A
+ * @return velocity
+ */
+ADReal vel_from_arhoA_arhouA(ADReal arhoA, ADReal arhouA);
+
+/**
  * Derivative of velocity w.r.t. alpha*rho*A
  *
  * @param[in] arhoA    alpha*rho*A
@@ -235,6 +241,16 @@ void rho_from_arhoA_alpha_A(
     Real arhoA, Real alpha, Real A, Real & rho, Real & drho_darhoA, Real & drho_dalpha);
 
 /**
+ * Computes density from alpha*rho*A, alpha, and area.
+ *
+ * @param[in] arhoA   alpha*rho*A
+ * @param[in] alpha   volume fraction
+ * @param[in] A       area
+ * @returns density
+ */
+ADReal rho_from_arhoA_alpha_A(ADReal arhoA, ADReal alpha, ADReal A);
+
+/**
  * Computes specific volume and its derivatives from rho*A, and area.
  *
  * @param[in] rhoA        rho*A
@@ -248,7 +264,7 @@ void v_from_rhoA_A(Real rhoA, Real A, Real & v, Real & dv_drhoA);
  *
  * @param[in] rhoA   rho*A
  * @param[in] A      area
- * @return v         specific volume
+ * @returns specific volume
  */
 ADReal v_from_rhoA_A(ADReal rhoA, ADReal A);
 
@@ -263,6 +279,16 @@ ADReal v_from_rhoA_A(ADReal rhoA, ADReal A);
  */
 void
 v_from_arhoA_alpha_A(Real arhoA, Real alpha, Real A, Real & v, Real & dv_darhoA, Real & dv_dalpha);
+
+/**
+ * Computes specific volume and its derivatives from alpha*rho*A, volume fraction, and area.
+ *
+ * @param[in] arhoA        alpha*rho*A
+ * @param[in] alpha        volume fraction
+ * @param[in] A            area
+ * @returns specific volume
+ */
+ADReal v_from_arhoA_alpha_A(ADReal arhoA, ADReal alpha, ADReal A);
 
 /**
  * Computes specific volume and its derivative with respect to density
@@ -325,6 +351,15 @@ ADReal e_from_arhoA_arhouA_arhoEA(ADReal arhoA, ADReal arhouA, ADReal arhoEA);
 void e_from_E_vel(Real E, Real vel, Real & e, Real & de_dE, Real & de_dvel);
 
 /**
+ * Computes specific internal energy from specific total energy and velocity
+ *
+ * @param[in] E          specific total energy
+ * @param[in] vel        velocity
+ * @returns specific internal energy
+ */
+ADReal e_from_E_vel(ADReal E, ADReal vel);
+
+/**
  * Derivative of specific internal energy wrt density of the phase (rhoA or arhoA)
  *
  * @param arhoA - density equation solution variable: alpha*rho*A
@@ -358,6 +393,15 @@ Real de_darhoEA(Real arhoA);
  * @param[out] dE_darhoEA   derivative of specific total energy w.r.t. alpha*rho*E*A
  */
 void E_from_arhoA_arhoEA(Real arhoA, Real arhoEA, Real & E, Real & dE_darhoA, Real & dE_darhoEA);
+
+/**
+ * Computes specific total energy from alpha*rho*A and alpha*rho*E*A
+ *
+ * @param[in] arhoA         alpha*rho*A
+ * @param[in] arhoEA        alpha*rho*E*A
+ * @returns specific total energy
+ */
+ADReal E_from_arhoA_arhoEA(ADReal arhoA, ADReal arhoEA);
 
 /**
  * Computes specific total energy and its derivatives from specific internal energy and velocity

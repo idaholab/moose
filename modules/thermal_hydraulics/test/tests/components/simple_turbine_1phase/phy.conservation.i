@@ -153,8 +153,8 @@
   scheme = bdf2
 
   start_time = 0
-  dt = 1
-  num_steps = 30
+  end_time = 10
+  dt = 0.5
 
   abort_on_solve_fail = true
 

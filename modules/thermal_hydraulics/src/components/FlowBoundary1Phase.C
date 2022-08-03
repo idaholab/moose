@@ -53,7 +53,6 @@ FlowBoundary1Phase::addWeakBC3Eqn()
   params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
   params.set<Real>("normal") = _normal;
   params.set<UserObjectName>("boundary_flux") = _boundary_uo_name;
-  params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
   params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
   params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
   params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};

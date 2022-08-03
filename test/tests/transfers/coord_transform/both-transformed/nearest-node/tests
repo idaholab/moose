@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#12293'
+  design = 'Transfers/index.md'
+  [both-transformed]
+    type = Exodiff
+    input = main-app.i
+    exodiff = 'main-app_out.e main-app_out_sub0.e'
+    requirement = 'The system shall be able to map nearest node transfers between main and sub applications that both have non-identity transformations into the reference space.'
+  []
+[]

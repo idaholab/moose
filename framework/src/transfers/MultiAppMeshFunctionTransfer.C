@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
+#include "MooseCoordTransform.h"
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
@@ -40,6 +41,7 @@ MultiAppMeshFunctionTransfer::validParams()
       "error_on_miss",
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
+  MultiAppTransfer::addBBoxFactorParam(params);
   return params;
 }
 
@@ -63,7 +65,6 @@ MultiAppMeshFunctionTransfer::execute()
   // loop over the vector of variables and make the transfer one by one
   for (unsigned int i = 0; i < _var_size; ++i)
     transferVariable(i);
-
 
   postExecute();
 }
@@ -103,6 +104,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     auto & fe_type = to_sys->variable_type(var_num);
     bool is_constant = fe_type.order == CONSTANT;
     bool is_nodal = fe_type.family == LAGRANGE;
+    const auto & to_transform = *_to_transforms[i_to];
 
     if (fe_type.order > FIRST && !is_nodal)
       mooseError("We don't currently support second order or higher elemental variable ");
@@ -126,7 +128,8 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
           for (unsigned int i_from = from0; i_from < from0 + froms_per_proc[i_proc] && !point_found;
                ++i_from)
           {
-            if (bboxes[i_from].contains_point(*node + _to_positions[i_to]))
+            auto transformed_node = to_transform(*node);
+            if (bboxes[i_from].contains_point(transformed_node))
             {
               // <system id, node id>
               std::pair<unsigned int, dof_id_type> key(i_to, node->id());
@@ -134,7 +137,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
               // point id is counted from zero
               point_index_map[i_proc][key] = outgoing_points[i_proc].size();
               // map pid to points
-              outgoing_points[i_proc].push_back(*node + _to_positions[i_to]);
+              outgoing_points[i_proc].push_back(std::move(transformed_node));
               point_found = true;
             }
           }
@@ -185,14 +188,15 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
                  i_from < from0 + froms_per_proc[i_proc] && !point_found;
                  ++i_from)
             {
-              if (bboxes[i_from].contains_point(point + _to_positions[i_to]))
+              auto transformed_point = to_transform(point);
+              if (bboxes[i_from].contains_point(transformed_point))
               {
                 std::pair<unsigned int, dof_id_type> key(i_to, point_ids[offset]);
                 if (point_index_map[i_proc].find(key) != point_index_map[i_proc].end())
                   continue;
 
                 point_index_map[i_proc][key] = outgoing_points[i_proc].size();
-                outgoing_points[i_proc].push_back(point + _to_positions[i_to]);
+                outgoing_points[i_proc].push_back(std::move(transformed_point));
                 point_found = true;
               } // if
             }   // i_from
@@ -285,7 +289,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
         {
           // Use mesh funciton to compute interpolation values
           vals_ids_for_incoming_points[i_pt].first =
-              (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
+              (*local_meshfuns[i_from])(_from_transforms[i_from]->mapBack(pt));
           // Record problem ID as well
           switch (_current_direction)
           {
@@ -391,7 +395,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
         }
 
         if (_error_on_miss && !point_found)
-          mooseError("Point not found! ", *node + _to_positions[i_to]);
+          mooseError("Point not found in the reference space! ", (*_to_transforms[i_to])(*node));
 
         dof_id_type dof = node->dof_number(sys_num, var_num, 0);
         solution->set(dof, best_val);
@@ -467,7 +471,8 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
           }
 
           if (_error_on_miss && !point_found)
-            mooseError("Point not found! ", elem->vertex_average() + _to_positions[i_to]);
+            mooseError("Point not found in the reference space! ",
+                       (*_to_transforms[i_to])(elem->vertex_average()));
 
           // Get the value for a dof
           dof_id_type dof = elem->dof_number(sys_num, var_num, offset);
