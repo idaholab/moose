@@ -30,7 +30,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
 
 - #### command not found: conda
 
-  You have yet to install conda, or your path to it is incorrect or not set. You will need to recall how you installed conda. Our instructions ask to have Miniconda3 installed to your home directory: `~/mambaforge3`. Which requires you to set your PATH accordingly:
+  You have yet to install conda, or your path to it is incorrect or not set. You will need to recall how you installed conda. Our instructions ask to have Mambaforge3 installed to your home directory: `~/mambaforge3`. Which requires you to set your PATH accordingly:
 
   ```bash
   export PATH=~/mambaforge3/bin:$PATH
@@ -107,7 +107,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
   !alert note title=mamba init
   When using `mambaforge3` you might also need to perform a `mamba init` in order to properly use the
   `mamba` command to install packages. We recommend this as an alternative to conda, as mamba can take
-  advantage of multiple cores to perform tasks. This means it will generally be faster at performing
+  advantage of multiple cores to perform tasks. This means mamba will generally be faster at performing
   installations than standard conda. Otherwise, they are interchangeable.
 
 - #### Your issue not listed

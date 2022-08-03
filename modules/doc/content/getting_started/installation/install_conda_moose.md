@@ -7,25 +7,16 @@ For this, execute the following command and +restart your terminal session+.
 mamba init
 ```
 
-Next, create a unique conda environment for moose, named `moose`, and attempt to activate it:
+Next, create a unique conda environment for moose, named `moose`, and install the moose dependency
+packages:
 
 ```bash
-mamba create --name moose -q -y
-mamba activate moose
+mamba create -n moose moose-tools moose-libmesh
 ```
 
-Within the `moose` environment, install the necessary packages:
+After the installation completes, activate the new environment:
 
 ```bash
-mamba install moose-tools moose-libmesh
-```
-
-Once the packages are installed, the `moose` environment needs to be deactivated and
-reactivated to ensure that the environmental variables in the installed
-packages are set properly.
-
-```bash
-mamba deactivate
 mamba activate moose
 ```
 
