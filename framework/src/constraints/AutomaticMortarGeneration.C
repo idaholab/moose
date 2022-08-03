@@ -55,13 +55,14 @@ public:
   static InputParameters validParams()
   {
     auto params = Output::validParams();
-    params.addRequiredParam<AutomaticMortarGeneration *>("amg",
-                                                         "The automatic mortar generation object.");
+    params.addPrivateParam<AutomaticMortarGeneration *>("_amg", nullptr);
+    params.addPrivateParam<MooseApp *>("_moose_app", nullptr);
+    params.set<std::string>("_type") = "MortarNodalGeometryOutput";
     return params;
   };
 
   MortarNodalGeometryOutput(const InputParameters & params)
-    : Output(params), _amg(*getCheckedPointerParam<AutomaticMortarGeneration *>("amg"))
+    : Output(params), _amg(*getCheckedPointerParam<AutomaticMortarGeneration *>("_amg"))
   {
   }
 
@@ -200,8 +201,6 @@ private:
   ///@}
 };
 
-registerMooseObject("MooseApp", MortarNodalGeometryOutput);
-
 AutomaticMortarGeneration::AutomaticMortarGeneration(
     MooseApp & app,
     MeshBase & mesh_in,
@@ -241,16 +240,16 @@ AutomaticMortarGeneration::initOutput()
   if (!_debug)
     return;
 
-  auto & factory = _app.getFactory();
-  auto output_params = factory.getValidParams("MortarNodalGeometryOutput");
-  output_params.set<AutomaticMortarGeneration *>("amg") = this;
-  _app.feProblem().addOutput(
-      "MortarNodalGeometryOutput",
+  _output_params = std::make_unique<InputParameters>(MortarNodalGeometryOutput::validParams());
+  _output_params->set<AutomaticMortarGeneration *>("_amg") = this;
+  _output_params->set<FEProblemBase *>("_fe_problem_base") = &_app.feProblem();
+  _output_params->set<MooseApp *>("_moose_app") = &_app;
+  _output_params->set<std::string>("_object_name") =
       "mortar_nodal_geometry_" +
-          std::to_string(_primary_secondary_boundary_id_pairs.front().first) +
-          std::to_string(_primary_secondary_boundary_id_pairs.front().second) + "_" +
-          (_on_displaced ? "displaced" : "undisplaced"),
-      output_params);
+      std::to_string(_primary_secondary_boundary_id_pairs.front().first) +
+      std::to_string(_primary_secondary_boundary_id_pairs.front().second) + "_" +
+      (_on_displaced ? "displaced" : "undisplaced");
+  _app.getOutputWarehouse().addOutput(std::make_shared<MortarNodalGeometryOutput>(*_output_params));
 }
 
 void

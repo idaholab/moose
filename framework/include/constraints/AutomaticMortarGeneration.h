@@ -503,6 +503,9 @@ private:
   /// segment mesh in extreme cases. This parameter is mostly intended for mortar mesh debugging purposes in 2D.
   const Real _minimum_projection_angle;
 
+  /// Storage for the input parameters used by the mortar nodal geometry output
+  std::unique_ptr<InputParameters> _output_params;
+
   friend class MortarNodalGeometryOutput;
   friend class AugmentSparsityOnInterface;
 };
