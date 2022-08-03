@@ -13,7 +13,7 @@ import xmltodict, json, deepdiff, os
 from deepdiff.operator import BaseOperator
 
 
-        
+
 class SchemaDiff(RunApp):
 
     @staticmethod
@@ -80,7 +80,7 @@ class SchemaDiff(RunApp):
                     self.setStatus(self.fail, 'INVALID SCHEMA(S) PROVIDED')
 
                 #Break after testing both to provide both errors in the log if both are applicable
-                if not test_dict or not gold_dict: 
+                if not test_dict or not gold_dict:
                     break
                 #Output err and break if gold and test filetypes are different
                 if gold_dict[1] != test_dict[1]:
@@ -150,7 +150,7 @@ class SchemaDiff(RunApp):
                             continue
                         x = float(split1[i])
                         y = float(split2[i])
-                        if x != y: 
+                        if x != y:
                             if abs(x-y) > self.rel_err:
                                 return False
                     return True #if the values in the pseudo-list are different, but all fall within the accepted rel_err, the list is skipped for diffing.
