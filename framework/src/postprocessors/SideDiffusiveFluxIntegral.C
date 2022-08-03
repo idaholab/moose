@@ -12,9 +12,6 @@
 
 #include "metaphysicl/raw_type.h"
 
-using namespace Moose;
-using namespace FV;
-
 registerMooseObject("MooseApp", SideDiffusiveFluxIntegral);
 registerMooseObject("MooseApp", ADSideDiffusiveFluxIntegral);
 registerMooseObject("MooseApp", SideVectorDiffusivityFluxIntegral);
@@ -54,7 +51,7 @@ SideDiffusiveFluxIntegralTempl<is_ad, T>::SideDiffusiveFluxIntegralTempl(
                         ? &getGenericMaterialProperty<T, is_ad>("diffusivity")
                         : nullptr),
     _functor_diffusion_coef(isParamValid("functor_diffusivity")
-                                ? &getFunctor<GenericType<T, is_ad>>("functor_diffusivity")
+                                ? &getFunctor<Moose::GenericType<T, is_ad>>("functor_diffusivity")
                                 : nullptr)
 {
   if (_fv && !isParamValid("functor_diffusivity"))
@@ -69,14 +66,15 @@ Real
 SideDiffusiveFluxIntegralTempl<is_ad, T>::computeFaceInfoIntegral(const FaceInfo * const fi)
 {
   // Get the gradient of the variable on the face
-  const auto grad_u = MetaPhysicL::raw_value(
-      _fv_variable->gradient(makeCDFace(*fi, faceArgSubdomains(*_fv_variable, *fi))));
+  const auto grad_u = MetaPhysicL::raw_value(_fv_variable->gradient(
+      Moose::FV::makeCDFace(*fi, Moose::FV::faceArgSubdomains(*_fv_variable, *fi))));
   ;
 
   // FIXME Get the diffusion coefficient on the face, see #16809
-  return -diffusivityGradientProduct(grad_u,
-                                     MetaPhysicL::raw_value((*_functor_diffusion_coef)(makeCDFace(
-                                         *fi, faceArgSubdomains(*_functor_diffusion_coef, *fi))))) *
+  return -diffusivityGradientProduct(
+             grad_u,
+             MetaPhysicL::raw_value((*_functor_diffusion_coef)(Moose::FV::makeCDFace(
+                 *fi, Moose::FV::faceArgSubdomains(*_functor_diffusion_coef, *fi))))) *
          (_fv_variable->hasBlocks(fi->elemSubdomainID()) ? fi->normal() : Point(-fi->normal()));
 }
 

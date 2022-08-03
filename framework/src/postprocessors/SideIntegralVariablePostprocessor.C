@@ -12,9 +12,6 @@
 
 #include "metaphysicl/raw_type.h"
 
-using namespace Moose;
-using namespace FV;
-
 registerMooseObject("MooseApp", SideIntegralVariablePostprocessor);
 
 InputParameters
@@ -47,8 +44,8 @@ SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(
 Real
 SideIntegralVariablePostprocessor::computeFaceInfoIntegral(const FaceInfo * const fi)
 {
-  return MetaPhysicL::raw_value(
-      (*_fv_variable)(makeCDFace(*fi, faceArgSubdomains(*_fv_variable, *fi))));
+  return MetaPhysicL::raw_value((*_fv_variable)(
+      Moose::FV::makeCDFace(*fi, Moose::FV::faceArgSubdomains(*_fv_variable, *fi))));
 }
 
 Real
