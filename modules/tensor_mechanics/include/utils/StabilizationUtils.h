@@ -14,7 +14,6 @@ namespace StabilizationUtils
 template <typename Functor>
 auto
 elementAverage(const Functor & f, const MooseArray<Real> & JxW, const MooseArray<Real> & coord)
-    -> decltype(f(std::declval<unsigned int>()))
 {
   using ret_type = decltype(f(std::declval<unsigned int>()));
   ret_type avg;
