@@ -475,8 +475,8 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
   auto quote = quoteChar(_val);
   int max = maxlen - prefix_len - 1;
 
-  // special rendering logic for quoted strings that go over maxlen:
-  if (_kind == Kind::String && quote != "" && max > 0)
+  // special rendering logic for double quoted strings that go over maxlen:
+  if (_kind == Kind::String && quote == "\"" && max > 0)
   {
     if (_val.find('\n') == std::string::npos)
     {
