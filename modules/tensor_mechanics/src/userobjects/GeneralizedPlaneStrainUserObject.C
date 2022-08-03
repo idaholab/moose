@@ -125,9 +125,9 @@ GeneralizedPlaneStrainUserObject::execute()
     // diagonal jacobian, integral of C(2, 2, 2, 2) for COORD_XYZ
     _jacobian[subblock_id] += _JxW[_qp] * _coord[_qp] *
                               _Jacobian_mult[_qp](_scalar_out_of_plane_strain_direction,
-                                          _scalar_out_of_plane_strain_direction,
-                                          _scalar_out_of_plane_strain_direction,
-                                          _scalar_out_of_plane_strain_direction);
+                                                  _scalar_out_of_plane_strain_direction,
+                                                  _scalar_out_of_plane_strain_direction,
+                                                  _scalar_out_of_plane_strain_direction);
   }
 }
 
