@@ -10,12 +10,10 @@
 from RunApp import RunApp
 from TestHarness import util
 import json, os
-from deepdiff.operator import BaseOperator
-
-
 
 class SchemaDiff(RunApp):
-
+    import deepdiff
+    from deepdiff.operator import BaseOperator
     @staticmethod
     def validParams():
         params = RunApp.validParams()
@@ -29,22 +27,12 @@ class SchemaDiff(RunApp):
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
         if self.specs['required_python_packages'] is None:
-             self.specs['required_python_packages'] = 'deepdiff xmltodict'
+            self.specs['required_python_packages'] = 'deepdiff xmltodict'
         elif 'deepdiff' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' deepdiff'
         elif 'xmltodict' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' xmltodict'
-
-     # Check if python is available
-    def checkRunnable(self, options):
-        try:
-            import xmltodict, deepdiff
-            assert xmltodict, deepdiff
-            return True
-        except Exception:
-            self.addCaveats('skipped (no python)')
-            return False
-
+        
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.getTestDir(), self.specs['schemadiff'])
@@ -112,7 +100,6 @@ class SchemaDiff(RunApp):
             return xmltodict.parse(f.read())
 
     def import_json(self,filepath):
-        import xmltodict
         with open(filepath,"r") as f:
             return json.loads(f.read())
 

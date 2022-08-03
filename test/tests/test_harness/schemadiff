@@ -1,7 +1,7 @@
 [Tests]
   [schema_xmldiff]
     type = SchemaDiff
-    input = schema_out.i
+    input = schema.i
     schemadiff = schema_out.xml
   []
   [schema_jsondiff]
@@ -13,7 +13,7 @@
     type = SchemaDiff
     input = schemadiff.i
     schemadiff = schemadiff_out.json
-    gold_file = xml_out.xml
+    gold_file = schema_out.xml
   []
   [schema_invalid]
     type = SchemaDiff
@@ -23,7 +23,7 @@
   []
   [schema_invalid_xml]
     type = SchemaDiff
-    input = schema_out.i
+    input = schema.i
     schemadiff = schema_out.xml
     gold_file = invalid.xml
   []
