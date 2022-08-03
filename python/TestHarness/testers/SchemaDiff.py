@@ -12,7 +12,6 @@ from TestHarness import util
 import json, os
 
 class SchemaDiff(RunApp):
-    from deepdiff.operator import BaseOperator
     @staticmethod
     def validParams():
         params = RunApp.validParams()
@@ -31,17 +30,6 @@ class SchemaDiff(RunApp):
             self.specs['required_python_packages'] += ' deepdiff'
         elif 'xmltodict' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' xmltodict'
-
-
-     # Check if python is available
-    '''def checkRunnable(self, options):
-        try:
-            import xmltodict, deepdiff
-            assert xmltodict, deepdiff
-            return True
-        except Exception:
-            self.addCaveats('skipped (no python)')
-            return False'''
 
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
@@ -115,6 +103,38 @@ class SchemaDiff(RunApp):
 
     def do_deepdiff(self,orig, comp, rel_err, exclude_values:list=None):
         import deepdiff
+        from deepdiff.operator import BaseOperator
+        class testcompare(BaseOperator):
+            def __init__(self, rel_err,types,regex_paths=None):
+                self.rel_err = rel_err
+                #next two members are necessary for deepdiff constructor to work
+                self.regex_paths = regex_paths
+                self.types = types
+            def give_up_diffing(self,level, diff_instance):
+                try:
+                    if level.t1 != level.t2:
+                        x = float(level.t1)
+                        y = float(level.t2)
+                        if abs(x-y) > self.rel_err:
+                            return False
+                    return True #if the two items are the same, you can stop evaluating them.
+                except ValueError: #try comparing them iteratively if the schema value acts as a pseudo-list.
+                    try:
+                        split1 = level.t1.split(" ")
+                        split2 = level.t2.split(" ")
+                        if len(split1) != len(split2):
+                            return False
+                        for i in range(len(split1)):
+                            if not split1[i] and not split2[i]: #if the two values are both just an empty str, continue.
+                                continue
+                            x = float(split1[i])
+                            y = float(split2[i])
+                            if x != y:
+                                if abs(x-y) > self.rel_err:
+                                    return False
+                        return True #if the values in the pseudo-list are different, but all fall within the accepted rel_err, the list is skipped for diffing.
+                    except ValueError:
+                        return False
         to_exclude = []
         if exclude_values:
             for value in exclude_values:
@@ -123,7 +143,7 @@ class SchemaDiff(RunApp):
                     for path in search["matched_paths"]:
                         to_exclude.append(path)
 
-        return deepdiff.DeepDiff(orig,comp,exclude_paths=to_exclude,custom_operators=[self.testcompare(types=[str,float],rel_err=rel_err)]).pretty()
+        return deepdiff.DeepDiff(orig,comp,exclude_paths=to_exclude,custom_operators=[testcompare(types=[str,float],rel_err=rel_err)]).pretty()
 
     def load_file(self, path1):
         try:
@@ -134,36 +154,6 @@ class SchemaDiff(RunApp):
             except:
                 return False
 
-    class testcompare(BaseOperator):
-        def __init__(self, rel_err,types,regex_paths=None):
-            #BaseOperator.__init__(self)
-            self.rel_err = rel_err
-            #next two members are necessary for deepdiff constructor to work
-            self.regex_paths = regex_paths
-            self.types = types
-        def give_up_diffing(self,level, diff_instance):
-            try:
-                if level.t1 != level.t2:
-                    x = float(level.t1)
-                    y = float(level.t2)
-                    if abs(x-y) > self.rel_err:
-                        return False
-                return True #if the two items are the same, you can stop evaluating them.
-            except ValueError: #try comparing them iteratively if the schema value acts as a pseudo-list.
-                try:
-                    split1 = level.t1.split(" ")
-                    split2 = level.t2.split(" ")
-                    if len(split1) != len(split2):
-                        return False
-                    for i in range(len(split1)):
-                        if not split1[i] and not split2[i]: #if the two values are both just an empty str, continue.
-                            continue
-                        x = float(split1[i])
-                        y = float(split2[i])
-                        if x != y:
-                            if abs(x-y) > self.rel_err:
-                                return False
-                    return True #if the values in the pseudo-list are different, but all fall within the accepted rel_err, the list is skipped for diffing.
-                except ValueError:
-                    return False
+    
+    
 
