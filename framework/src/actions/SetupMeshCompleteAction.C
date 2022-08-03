@@ -104,13 +104,9 @@ SetupMeshCompleteAction::act()
       // Must make sure to create the mortar meshes to build our data structures that ensure we will
       // keep the correct elements in the mesh around
       _problem->updateMortarMesh();
-      _mesh->getMesh().reinit_ghosting_functors();
       _mesh->deleteRemoteElements();
       if (_displaced_mesh)
-      {
-        _displaced_mesh->getMesh().reinit_ghosting_functors();
         _displaced_mesh->deleteRemoteElements();
-      }
     }
   }
   else
