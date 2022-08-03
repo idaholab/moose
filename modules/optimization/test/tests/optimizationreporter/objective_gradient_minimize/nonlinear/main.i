@@ -19,36 +19,22 @@
   type = ObjectiveGradientMinimize
   parameter_names = 'heat_source'
   num_values = '1'
-  initial_condition = '000'
+  initial_condition = '0'
   lower_bounds = '0.1'
   upper_bounds = '10000'
   measurement_points = '0.2 0.2 0
                         0.8 0.6 0
                         0.2 1.4 0
                         0.8 1.8 0'
-# measurement_values = '0.05994 0.13986 0.13986 0.05994' # Linear,    homogeneous    BC with 333 heat source 1000+500T
-# measurement_values = '1.95994 1.83986 1.43986 1.15994' # Linear,    nonhomogeneous BC with 333 heat source 1000+500T
-# measurement_values = '1.94205 1.80256 1.41459 1.15274' # nonlinear, nonhomogeneous BC with 333 heat source 1000+500T
-  measurement_values = '1.98404 1.91076 1.56488 1.23863' # nonlinear, nonhomogeneous BC with 333 heat source 10+500T
+  measurement_values = '1.98404 1.91076 1.56488 1.23863'
 []
 
 [Executioner]
   type = Optimize
-## THE FOLLOWING IS FOR REDUCED NEWTON METHOD WITH MATRIX-FREE HESSIAN
   tao_solver = taonls
   petsc_options_iname = '-tao_gttol -tao_max_it -tao_nls_pc_type -tao_nls_ksp_type'
   petsc_options_value = ' 1e-5       5           none             cg'
   verbose = true
-## THE FOLLOWING IS FOR LIMITED MEMORY BFGS
-#  tao_solver = taolmvm
-#  petsc_options_iname = '-tao_gatol'
-#  petsc_options_value = '1e-12'
-#  verbose = true
-## THE FOLLOWING IS FOR LIMITED MEMORY BFGS
-#  tao_solver = taolmvm
-#  petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'  # GRADIENT CHECK
-#  petsc_options_value=' 3           true         true               false            0.0001        0.0001'
-#  petsc_options = '-tao_test_gradient_view'
 []
 
 [MultiApps]
