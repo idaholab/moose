@@ -9,7 +9,7 @@
 
 from RunApp import RunApp
 from TestHarness import util
-import xmltodict, json, deepdiff, os
+import json, deepdiff, os
 from deepdiff.operator import BaseOperator
 
 
@@ -34,6 +34,16 @@ class SchemaDiff(RunApp):
             self.specs['required_python_packages'] += ' deepdiff'
         elif 'xmltodict' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' xmltodict'
+
+     # Check if xmltodict is available
+    def checkRunnable(self, options):
+        try:
+            import xmltodict
+            assert xmltodict
+            return True
+        except Exception:
+            self.addCaveats('skipped (no xmltodict)')
+            return False
 
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
