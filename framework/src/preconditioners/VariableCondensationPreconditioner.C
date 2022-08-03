@@ -103,6 +103,9 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
   if (_lm_var_names.size() != _primary_var_names.size())
     paramError("coupled_variable", "coupled_variable should have the same size as the variable.");
 
+  if (!_mesh.getMesh().is_replicated())
+    mooseError("The VariableCondensationPreconditioner cannot be used with DistributedMesh");
+
   // get variable ids from the variable names
   for (const auto & var_name : _lm_var_names)
   {
