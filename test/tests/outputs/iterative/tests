@@ -54,9 +54,9 @@
     [../]
   []
   [./vtk]
-    type = 'XMLDiff'
+    type = 'SchemaDiff'
     input = 'iterative_vtk.i'
-    xmldiff = 'iterative_vtk_out_003_0.vtu'
+    schemadiff = 'iterative_vtk_out_003_0.vtu'
 
     # This test relies on number of residuals being the same, so run it serially
     max_parallel = 1

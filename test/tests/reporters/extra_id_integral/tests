@@ -4,25 +4,25 @@
   [test]
     requirement = 'The system shall be able to report the variable integral parsed by extra IDs to the JSON format:'
     [default]
-      type = 'JSONDiff'
+      type = 'SchemaDiff'
       input = 'extra_id_integral.i'
-      jsondiff = 'extra_id_integral_default.json'
+      schemadiff = 'extra_id_integral_default.json'
       cli_args = "Outputs/file_base='extra_id_integral_default'"
       detail = 'single variable integral with single extra ID'
       recover = false
     []
     [multi_ids]
-      type = 'JSONDiff'
+      type = 'SchemaDiff'
       input = 'extra_id_integral.i'
-      jsondiff = 'extra_id_integral_multi_ids.json'
+      schemadiff = 'extra_id_integral_multi_ids.json'
       cli_args = "Reporters/extra_id_integral/id_name='assembly_id pin_id' Outputs/file_base='extra_id_integral_multi_ids'"
       detail = 'single variable integral with multiple extra IDs'
       recover = false
     []
     [multi_ids_multi_vars]
-      type = 'JSONDiff'
+      type = 'SchemaDiff'
       input = 'extra_id_integral.i'
-      jsondiff = 'extra_id_integral_multi_vars.json'
+      schemadiff = 'extra_id_integral_multi_vars.json'
       cli_args = "Reporters/extra_id_integral/id_name='assembly_id pin_id' Reporters/extra_id_integral/variable='value1 value2' Outputs/file_base='extra_id_integral_multi_vars'"
       detail = 'multiple variable integrals with multiple extra IDs'
       recover = false

@@ -3,10 +3,10 @@
   issues = '#16055 #20467'
 
   [constant_reporter]
-    type = 'JSONDiff'
+    type = 'SchemaDiff'
     input = 'constant_reporter.i'
-    jsondiff = 'constant_reporter_out.json'
-    skip_keys = 'type'
+    schemadiff = 'constant_reporter_out.json'
+    ignored_items = 'type'
     requirement = 'The system shall be able to produce arbitrary integer, real number, dof_id_types and string scalar/vector values for use in other calculations.'
   []
   [errors]

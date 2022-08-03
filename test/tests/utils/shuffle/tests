@@ -3,9 +3,9 @@
   issues = '#14830'
 
   [swap]
-    type = JSONDiff
+    type = SchemaDiff
     input = shuffle.i
-    jsondiff = swap_out.json
+    schemadiff = swap_out.json
     cli_args = 'Reporters/test/test_type=swap Outputs/file_base=swap_out'
     allow_test_objects = true
     max_parallel = 3 # test written for up to 3 processors
@@ -15,9 +15,9 @@
   []
 
   [serial]
-    type = JSONDiff
+    type = SchemaDiff
     input = shuffle.i
-    jsondiff = shuffle_out.json
+    schemadiff = shuffle_out.json
     cli_args = 'Reporters/test/test_type=shuffle Outputs/file_base=shuffle_out'
     allow_test_objects = true
     max_parallel = 3 # test written for up to 3 processors
@@ -27,9 +27,9 @@
   []
 
   [resample]
-    type = JSONDiff
+    type = SchemaDiff
     input = shuffle.i
-    jsondiff = resample_out.json
+    schemadiff = resample_out.json
     cli_args = 'Reporters/test/test_type=resample Outputs/file_base=resample_out'
     allow_test_objects = true
     max_parallel = 3 # test written for up to 3 processors

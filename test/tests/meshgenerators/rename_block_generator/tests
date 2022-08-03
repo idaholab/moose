@@ -6,68 +6,68 @@
     requirement = 'The system shall be able to rename or renumber mesh blocks by:'
 
     [all_ids]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'rename_block.i'
       cli_args = 'Mesh/rename/old_block="0 1 3 2"
                   Mesh/rename/new_block="1 2 4 3"
                   Outputs/file_base=all_ids_out'
-      jsondiff = 'all_ids_out.json'
+      schemadiff = 'all_ids_out.json'
 
       detail = 'identifying both old and new blocks by ID,'
     []
 
     [old_ids_new_names]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'rename_block.i'
       cli_args = 'Mesh/rename/old_block="0 1"
                   Mesh/rename/new_block="new_bottom new_right"
                   Outputs/file_base=old_ids_new_names_out'
-      jsondiff = 'old_ids_new_names_out.json'
+      schemadiff = 'old_ids_new_names_out.json'
 
       detail = 'identifying old blocks by ID and new blocks by name,'
     []
 
     [old_names_new_ids]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'rename_block.i'
       cli_args = 'Mesh/rename/old_block="block0 block1"
                   Mesh/rename/new_block="10 0"
                   Outputs/file_base=old_names_new_ids_out'
-      jsondiff = 'old_names_new_ids_out.json'
+      schemadiff = 'old_names_new_ids_out.json'
 
       detail = 'identifying old blocks by name and new blocks by ID, and'
     []
 
     [all_names]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'rename_block.i'
       cli_args = 'Mesh/rename/old_block="block0 block1 block2 block3"
                   Mesh/rename/new_block="new_block0 new_block1 new_block2 new_block3"
                   Outputs/file_base=all_names_out'
-      jsondiff = 'all_names_out.json'
+      schemadiff = 'all_names_out.json'
 
       detail = 'identifying both old and new blocks by name,'
     []
 
     [mixed]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'rename_block.i'
       cli_args = 'Mesh/rename/old_block="block0 2 block1 3"
                   Mesh/rename/new_block="10 new_block2 new_block1 4"
                   Outputs/file_base=mixed_out'
-      jsondiff = 'mixed_out.json'
+      schemadiff = 'mixed_out.json'
 
       detail = 'and by identifying blocks by both id and name.'
     []
   []
 
   [merge]
-    type = JSONDiff
+    type = SchemaDiff
     input = 'rename_block.i'
     cli_args = 'Mesh/rename/old_block="block0 3 2 block1"
                 Mesh/rename/new_block="block0_and_block3 block0_and_block3 2 2"
                 Outputs/file_base=merge_out'
-    jsondiff = 'merge_out.json'
+    schemadiff = 'merge_out.json'
 
     requirement = 'The system shall be able to merge blocks in a mesh.'
   []
@@ -101,24 +101,24 @@
     requirement = 'The system shall be able to rename or renumber mesh blocks using old syntax by'
 
     [id]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'rename_block.i'
       cli_args = '--allow-warnings
                   Mesh/rename/old_block_id="0 1 3 2"
                   Mesh/rename/new_block_id="1 2 4 3"
                   Outputs/file_base=deprecated_id'
-      jsondiff = 'deprecated_id.json'
+      schemadiff = 'deprecated_id.json'
 
       detail = 'identifying blocks by ID'
     []
     [name]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'rename_block.i'
       cli_args = '--allow-warnings
                   Mesh/rename/old_block_name="block0 block1"
                   Mesh/rename/new_block_name="foo bar"
                   Outputs/file_base=deprecated_name'
-      jsondiff = 'deprecated_name.json'
+      schemadiff = 'deprecated_name.json'
 
       detail = 'identifying blocks by name'
     []
