@@ -3,7 +3,7 @@
 #   template/ (must contain any python major.minor version this
 #              package is building. Usually the latest version.)
 {% set build = 0 %}
-{% set version = "2022.07.18" %}
+{% set version = "2022.08.03" %}
 
 package:
   name: moose-tools
@@ -41,6 +41,7 @@ requirements:
     - openssl
     - setuptools
     - graphviz
+    - xmltodict
 
 test:
   commands:
@@ -60,6 +61,7 @@ test:
     - pylatexenc
     - jinja2
     - deepdiff
+    - xmltodict
 
 about:
   home: https://mooseframework.org/
