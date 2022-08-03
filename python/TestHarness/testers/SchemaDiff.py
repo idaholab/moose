@@ -21,6 +21,7 @@ class SchemaDiff(RunApp):
         params = RunApp.validParams()
         params.addRequiredParam('schemadiff',   [], "A list of XML or JSON files to compare.")
         params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/). This only needs to be set if the gold file is in a non-standard location.")
+        params.addParam('gold_file',      None, "Specify the file in the gold_dir that the output should be compared against. This only needs to be set if the gold file uses a different file name than the output file.")
         params.addParam('ignored_items',  [], "Items in the schema that the differ to ignore. These can be keys or values, i.e. for \"foo\": \"bar\", either foo or bar can be chosen to be selected. Note that entering a value located inside a list will skip the whole list.")
         params.addParam('rel_err',       5.5e-6, "Relative error value allowed in comparisons. If rel_err value is set to 0, it will work on the absolute difference between the values")
         return params
@@ -54,15 +55,15 @@ class SchemaDiff(RunApp):
         # Loop over every file
         for file in specs['schemadiff']:
 
-            # Error if gold file does not exist
-            if not os.path.exists(os.path.join(self.getTestDir(), specs['gold_dir'], file)):
+            gold_file = specs['gold_file'] if specs['gold_file'] else file
+            if not os.path.exists(os.path.join(self.getTestDir(), specs['gold_dir'], gold_file)):
                 output += "File Not Found: " + os.path.join(self.getTestDir(), specs['gold_dir'], file)
                 self.setStatus(self.fail, 'MISSING GOLD FILE')
                 break
 
             # Perform diff
             else:
-                gold = os.path.join(self.getTestDir(), specs['gold_dir'], file)
+                gold = os.path.join(self.getTestDir(), specs['gold_dir'], gold_file)
                 test = os.path.join(self.getTestDir(), file)
                 # We always ignore the header_type attribute, since it was
                 # introduced in VTK 7 and doesn't seem to be important as
@@ -81,9 +82,13 @@ class SchemaDiff(RunApp):
                 #Break after testing both to provide both errors in the log if both are applicable
                 if not test_dict or not gold_dict: 
                     break
-
+                #Output err and break if gold and test filetypes are different
+                if gold_dict[1] != test_dict[1]:
+                    output += "Schema Files of Different Types: \nTest: " + test +"\nGold: " + gold
+                    self.setStatus(self.fail, 'INVALID SCHEMA(S) PROVIDED')
+                    break
                 # Get the results of the diff
-                diff = self.do_deepdiff(gold_dict, test_dict, specs['rel_err'], specs['ignored_items'])
+                diff = self.do_deepdiff(gold_dict[0], test_dict[0], specs['rel_err'], specs['ignored_items'])
                 if diff:
                     output += "Schema difference detected.\nFile 1: " + gold + "\nFile 2: " + test + "\nErrors:\n"
                     output += diff
@@ -113,10 +118,10 @@ class SchemaDiff(RunApp):
 
     def load_file(self, path1):
         try:
-            return self.import_xml(path1)
+            return (self.import_xml(path1), 1)
         except:
             try:
-                return self.import_json(path1)
+                return (self.import_json(path1),2)
             except:
                 return False
 
@@ -138,6 +143,8 @@ class SchemaDiff(RunApp):
                 try:
                     split1 = level.t1.split(" ")
                     split2 = level.t2.split(" ")
+                    if len(split1) != len(split2):
+                        return False
                     for i in range(len(split1)):
                         if not split1[i] and not split2[i]: #if the two values are both just an empty str, continue.
                             continue
