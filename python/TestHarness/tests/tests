@@ -244,4 +244,10 @@
     requirement = "TestHarnes shall perform a test after all other tests have passed if specified to do so"
     issues = '#15230'
   []
+  [schema_expect_err]
+    type = PythonUnitTest
+    input = test_SchemaDiff.py
+    requirement = "TestHarness shall report multiple failures resulting from SchemaDiff operations."
+    required_python_packages = 'deepdiff xmltodict'
+  []
 []
