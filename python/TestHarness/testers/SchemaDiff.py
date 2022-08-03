@@ -31,7 +31,7 @@ class SchemaDiff(RunApp):
             self.specs['required_python_packages'] += ' deepdiff'
         elif 'xmltodict' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' xmltodict'
-        
+
 
      # Check if python is available
     '''def checkRunnable(self, options):
@@ -166,3 +166,4 @@ class SchemaDiff(RunApp):
                     return True #if the values in the pseudo-list are different, but all fall within the accepted rel_err, the list is skipped for diffing.
                 except ValueError:
                     return False
+
