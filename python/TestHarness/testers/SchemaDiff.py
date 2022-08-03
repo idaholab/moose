@@ -9,7 +9,7 @@
 
 from RunApp import RunApp
 from TestHarness import util
-import json, deepdiff, os
+import json, os
 from deepdiff.operator import BaseOperator
 
 
@@ -35,14 +35,14 @@ class SchemaDiff(RunApp):
         elif 'xmltodict' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' xmltodict'
 
-     # Check if xmltodict is available
+     # Check if python is available
     def checkRunnable(self, options):
         try:
-            import xmltodict
-            assert xmltodict
+            import xmltodict, deepdiff
+            assert xmltodict, deepdiff
             return True
         except Exception:
-            self.addCaveats('skipped (no xmltodict)')
+            self.addCaveats('skipped (no python)')
             return False
 
     def prepare(self, options):
@@ -51,7 +51,6 @@ class SchemaDiff(RunApp):
     def processResults(self, moose_dir, options, output):
         output += self.testFileOutput(moose_dir, options, output)
         self.testExitCodes(moose_dir, options, output)
-
         # Skip
         specs = self.specs
 
@@ -108,14 +107,17 @@ class SchemaDiff(RunApp):
         return output
 
     def import_xml(self,filepath):
+        import xmltodict
         with open(filepath,"r") as f:
             return xmltodict.parse(f.read())
 
     def import_json(self,filepath):
+        import xmltodict
         with open(filepath,"r") as f:
             return json.loads(f.read())
 
     def do_deepdiff(self,orig, comp, rel_err, exclude_values:list=None):
+        import deepdiff
         to_exclude = []
         if exclude_values:
             for value in exclude_values:
