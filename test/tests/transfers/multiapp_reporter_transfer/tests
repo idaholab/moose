@@ -35,10 +35,10 @@
   []
 
   [reporter]
-    type = JSONDiff
+    type = SchemaDiff
     input = main.i
-    jsondiff = 'main_out.json main_out_sub0_out.json'
-    skip_keys = 'part number_of_parts'
+    schemadiff = 'main_out.json main_out_sub0_out.json'
+    ignored_items = 'part number_of_parts'
 
     requirement = "The system shall support the ability to transfer integer, real, vector, and string reporter data."
   []
@@ -77,20 +77,20 @@
   [clone]
     requirement = "The system shall support declaring reporter value clone on a main application and transferring sub-application data into it "
     [serial]
-      type = JSONDiff
+      type = SchemaDiff
       input = clone.i
       cli_args = 'Outputs/file_base=clone_serial'
-      jsondiff = 'clone_serial.json'
-      skip_keys = 'part number_of_parts'
+      schemadiff = 'clone_serial.json'
+      ignored_items = 'part number_of_parts'
       max_parallel = 1
 
       detail = 'in serial and'
     []
     [parallel]
-      type = JSONDiff
+      type = SchemaDiff
       input = clone.i
-      jsondiff = 'clone_out.json clone_out.json.1 clone_out.json.2 clone_out.json.3 clone_out.json.4 clone_out.json.5'
-      skip_keys = 'part number_of_parts'
+      schemadiff = 'clone_out.json clone_out.json.1 clone_out.json.2 clone_out.json.3 clone_out.json.4 clone_out.json.5'
+      ignored_items = 'part number_of_parts'
       min_parallel = 6
       max_parallel = 6
 
@@ -101,10 +101,10 @@
   [clone_type]
     requirement = 'If processors do not contain a sub-application and reporter clone transfer is requested, the system shall '
     [type_specified]
-      type = JSONDiff
+      type = SchemaDiff
       input = clone_type.i
-      jsondiff = 'clone_type_out.json clone_type_out.json.1 clone_type_out.json.2 clone_type_out.json.3 clone_type_out.json.4 clone_type_out.json.5'
-      skip_keys = 'part number_of_parts'
+      schemadiff = 'clone_type_out.json clone_type_out.json.1 clone_type_out.json.2 clone_type_out.json.3 clone_type_out.json.4 clone_type_out.json.5'
+      ignored_items = 'part number_of_parts'
       min_parallel = 6
       max_parallel = 6
       detail = 'be able to transfer if reporter types are specified and'

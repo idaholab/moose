@@ -2,9 +2,9 @@
   issues = '#16543'
   design = 'JSONOutput.md'
   [test]
-    type = JSONDiff
+    type = SchemaDiff
     input = vpp_as_reporter.i
-    jsondiff = vpp_as_reporter_out.json
+    schemadiff = vpp_as_reporter_out.json
 
     requirement = "The system shall support the ability to output vector aggregate calculations to JSON format."
   []

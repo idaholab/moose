@@ -3,10 +3,10 @@
   issues = '#18469 #20467'
 
   [accumulate_reporter]
-    type = 'JSONDiff'
+    type = 'SchemaDiff'
     input = 'accumulate_reporter.i'
-    jsondiff = 'accumulate_reporter_out.json'
-    skip_keys = 'type'
+    schemadiff = 'accumulate_reporter_out.json'
+    ignored_items = 'type'
     requirement = 'The system shall be able to accumulate reporter values over time steps into a vector reporter value.'
   []
 []

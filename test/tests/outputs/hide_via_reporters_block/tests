@@ -2,9 +2,9 @@
   design = "Reporters/index.md"
   issues = "#16666"
   [test]
-    type = JSONDiff
+    type = SchemaDiff
     input = reporter.i
-    jsondiff = reporter_out.json
+    schemadiff = reporter_out.json
 
     requirement = "The system shall support the ability to control the output of an aggregate calculation via a parameter of the object itself."
   []

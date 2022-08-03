@@ -10,7 +10,10 @@
 from RunApp import RunApp
 from TestHarness import util
 import xmltodict, json, deepdiff, os
+from deepdiff.operator import BaseOperator
 
+
+        
 class SchemaDiff(RunApp):
 
     @staticmethod
@@ -18,16 +21,22 @@ class SchemaDiff(RunApp):
         params = RunApp.validParams()
         params.addRequiredParam('schemadiff',   [], "A list of XML or JSON files to compare.")
         params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/). This only needs to be set if the gold file is in a non-standard location.")
-        params.addParam('ignored_items',  [], "Items in the schema that the differ to ignore. These can be keys or values, i.e. for \"foo\": \"bar\", either foo or bar can be chosen to be selected.")
+        params.addParam('ignored_items',  [], "Items in the schema that the differ to ignore. These can be keys or values, i.e. for \"foo\": \"bar\", either foo or bar can be chosen to be selected. Note that entering a value located inside a list will skip the whole list.")
+        params.addParam('rel_err',       5.5e-6, "Relative error value allowed in comparisons. If rel_err value is set to 0, it will work on the absolute difference between the values")
         return params
 
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
+        if self.specs['required_python_packages'] is None:
+             self.specs['required_python_packages'] = 'deepdiff xmltodict'
+        elif 'deepdiff' not in self.specs['required_python_packages']:
+            self.specs['required_python_packages'] += ' deepdiff'
+        elif 'xmltodict' not in self.specs['required_python_packages']:
+            self.specs['required_python_packages'] += ' xmltodict'
 
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.getTestDir(), self.specs['schemadiff'])
-
     def processResults(self, moose_dir, options, output):
         output += self.testFileOutput(moose_dir, options, output)
         self.testExitCodes(moose_dir, options, output)
@@ -74,7 +83,7 @@ class SchemaDiff(RunApp):
                     break
 
                 # Get the results of the diff
-                diff = self.do_deepdiff(gold_dict, test_dict, specs['ignored_items'])
+                diff = self.do_deepdiff(gold_dict, test_dict, specs['rel_err'], specs['ignored_items'])
                 if diff:
                     output += "Schema difference detected.\nFile 1: " + gold + "\nFile 2: " + test + "\nErrors:\n"
                     output += diff
@@ -91,7 +100,7 @@ class SchemaDiff(RunApp):
         with open(filepath,"r") as f:
             return json.loads(f.read())
 
-    def do_deepdiff(self,orig, comp, exclude_values:list=None):
+    def do_deepdiff(self,orig, comp, rel_err, exclude_values:list=None):
         to_exclude = []
         if exclude_values:
             for value in exclude_values:
@@ -100,7 +109,7 @@ class SchemaDiff(RunApp):
                     for path in search["matched_paths"]:
                         to_exclude.append(path)
 
-        return deepdiff.DeepDiff(orig,comp,exclude_paths=to_exclude).pretty()
+        return deepdiff.DeepDiff(orig,comp,exclude_paths=to_exclude,custom_operators=[self.testcompare(types=[str,float],rel_err=rel_err)]).pretty()
 
     def load_file(self, path1):
         try:
@@ -110,3 +119,33 @@ class SchemaDiff(RunApp):
                 return self.import_json(path1)
             except:
                 return False
+
+    class testcompare(BaseOperator):
+        def __init__(self, rel_err,types,regex_paths=None):
+            self.rel_err = rel_err
+            #next two members are necessary for deepdiff constructor to work
+            self.regex_paths = regex_paths
+            self.types = types
+        def give_up_diffing(self,level, diff_instance):
+            try:
+                if level.t1 != level.t2:
+                    x = float(level.t1)
+                    y = float(level.t2)
+                    if abs(x-y) > self.rel_err:
+                        return False
+                return True #if the two items are the same, you can stop evaluating them.
+            except ValueError: #try comparing them iteratively if the schema value acts as a pseudo-list.
+                try:
+                    split1 = level.t1.split(" ")
+                    split2 = level.t2.split(" ")
+                    for i in range(len(split1)):
+                        if not split1[i] and not split2[i]: #if the two values are both just an empty str, continue.
+                            continue
+                        x = float(split1[i])
+                        y = float(split2[i])
+                        if x != y: 
+                            if abs(x-y) > self.rel_err:
+                                return False
+                    return True #if the values in the pseudo-list are different, but all fall within the accepted rel_err, the list is skipped for diffing.
+                except ValueError:
+                    return False

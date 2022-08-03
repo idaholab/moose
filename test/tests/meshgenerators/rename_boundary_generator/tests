@@ -6,75 +6,75 @@
     requirement = 'The system shall be able to rename or renumber mesh boundaries by:'
 
     [all_ids]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'rename_boundary.i'
       cli_args = 'Mesh/rename/old_boundary="0 1 3 2"
                   Mesh/rename/new_boundary="1 2 4 3"
                   Outputs/file_base=all_ids_out'
-      jsondiff = 'all_ids_out.json'
+      schemadiff = 'all_ids_out.json'
 
       detail = 'identifying both old and new boundaries by ID,'
     []
 
     [old_ids_new_names]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'rename_boundary.i'
       cli_args = 'Mesh/rename/old_boundary="0 1"
                   Mesh/rename/new_boundary="new_bottom new_right"
                   Outputs/file_base=old_ids_new_names_out'
-      jsondiff = 'old_ids_new_names_out.json'
+      schemadiff = 'old_ids_new_names_out.json'
 
       detail = 'identifying old boundaries by ID and new boundaries by name,'
     []
 
     [old_names_new_ids]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'rename_boundary.i'
       cli_args = 'Mesh/rename/old_boundary="bottom left"
                   Mesh/rename/new_boundary="10 0"
                   Outputs/file_base=old_names_new_ids_out'
-      jsondiff = 'old_names_new_ids_out.json'
+      schemadiff = 'old_names_new_ids_out.json'
 
       detail = 'identifying old boundaries by name and new boundaries by ID, and'
     []
 
     [all_names]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'rename_boundary.i'
       cli_args = 'Mesh/rename/old_boundary="bottom right left top"
                   Mesh/rename/new_boundary="new_bottom new_right new_left new_top"
                   Outputs/file_base=all_names_out'
-      jsondiff = 'all_names_out.json'
+      schemadiff = 'all_names_out.json'
 
       detail = 'identifying both old and new boundaries by name,'
     []
 
     [mixed]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'rename_boundary.i'
       cli_args = 'Mesh/rename/old_boundary="bottom 2 right 3"
                   Mesh/rename/new_boundary="10 new_left new_right 4"
                   Outputs/file_base=mixed_out'
-      jsondiff = 'mixed_out.json'
+      schemadiff = 'mixed_out.json'
 
       detail = 'identifying boundaries by both id and name,'
     []
 
     [identical_name_and_id]
-      type = JSONDiff
+      type = SchemaDiff
       input = 'name_and_id.i'
-      jsondiff = 'name_and_id_out.json'
+      schemadiff = 'name_and_id_out.json'
       detail = 'and by changing both id and name for old boundaries where the id and name match.'
     []
   []
 
   [merge]
-    type = JSONDiff
+    type = SchemaDiff
     input = 'rename_boundary.i'
     cli_args = 'Mesh/rename/old_boundary="bottom 1 2 left"
                 Mesh/rename/new_boundary="top_and_bottom top_and_bottom 2 2"
                 Outputs/file_base=merge_out'
-    jsondiff = 'merge_out.json'
+    schemadiff = 'merge_out.json'
 
     requirement = 'The system shall be able to merge boundaries in a mesh.'
   []

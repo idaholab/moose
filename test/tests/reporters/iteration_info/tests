@@ -5,32 +5,32 @@
     requirement = "The system shall include the ability to report iteration information:"
 
     [default]
-      type = JSONDiff
+      type = SchemaDiff
       input = iteration_info.i
-      jsondiff = iteration_info_out.json
+      schemadiff = iteration_info_out.json
       recover = false # iteration info changes with --recover
-      skip_keys = 'part number_of_parts'
+      ignored_items = 'part number_of_parts'
 
       detail = "that outputs all information be default;"
     []
 
     [limit]
-      type = JSONDiff
+      type = SchemaDiff
       input = iteration_info.i
-      jsondiff = limit_out.json
+      schemadiff = limit_out.json
       cli_args = 'Reporters/iteration_info/items=time timestep Outputs/file_base=limit_out'
       recover = false # iteration info changes with --recover
-      skip_keys = 'part number_of_parts'
+      ignored_items = 'part number_of_parts'
 
       detail = "that outputs specific information;"
     []
 
     [steady]
-      type = JSONDiff
+      type = SchemaDiff
       input = iteration_info_steady.i
-      jsondiff = iteration_info_steady_out.json
+      schemadiff = iteration_info_steady_out.json
       recover = false # iteration info changes with --recover
-      skip_keys = 'part number_of_parts'
+      ignored_items = 'part number_of_parts'
 
       detail = "automatically disables items based on execution;"
     []

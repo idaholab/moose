@@ -32,8 +32,8 @@
 
      [./diff_serial_mesh]
        # Check that actual solution, requires serial due to VTK parallel output
-       type = XMLDiff
-       xmldiff = 'vtk_diff_out_005.pvtu vtk_diff_out_005_0.vtu'
+       type = SchemaDiff
+       schemadiff = 'vtk_diff_out_005.pvtu vtk_diff_out_005_0.vtu'
        input = vtk_diff.i
        max_parallel = 1
        vtk = true
@@ -43,8 +43,8 @@
      [../]
      [./diff_serial_mesh_parallel]
        # Check that actual solution, in parallel with serial mesh
-       type = XMLDiff
-       xmldiff = 'vtk_diff_serial_mesh_parallel_out_005.pvtu vtk_diff_serial_mesh_parallel_out_005_0.vtu vtk_diff_serial_mesh_parallel_out_005_1.vtu'
+       type = SchemaDiff
+       schemadiff = 'vtk_diff_serial_mesh_parallel_out_005.pvtu vtk_diff_serial_mesh_parallel_out_005_0.vtu vtk_diff_serial_mesh_parallel_out_005_1.vtu'
        input = vtk_diff_serial_mesh_parallel.i
        max_parallel = 2
        min_parallel = 2
@@ -55,8 +55,8 @@
      [../]
      [./diff_parallel_mesh]
        # Check that actual solution, in parallel with parallel mesh
-       type = XMLDiff
-       xmldiff = 'vtk_diff_parallel_mesh_out_005.pvtu vtk_diff_parallel_mesh_out_005_0.vtu vtk_diff_parallel_mesh_out_005_1.vtu'
+       type = SchemaDiff
+       schemadiff = 'vtk_diff_parallel_mesh_out_005.pvtu vtk_diff_parallel_mesh_out_005_0.vtu vtk_diff_parallel_mesh_out_005_1.vtu'
        input = vtk_diff.i
        max_parallel = 2
        min_parallel = 2
