@@ -111,7 +111,7 @@ loopOverMortarSegments(
   // segments
   for (const auto elem_to_msm : secondary_elems_to_mortar_segments)
   {
-    const Elem * secondary_face_elem = elem_to_msm->first;
+    const Elem * secondary_face_elem = subproblem.mesh().getMesh().elem_ptr(elem_to_msm->first);
     // Set the secondary interior parent and side ids
     const Elem * secondary_ip = secondary_face_elem->interior_parent();
     unsigned int secondary_side_id = secondary_ip->which_side_am_i(secondary_face_elem);

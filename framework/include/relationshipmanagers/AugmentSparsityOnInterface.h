@@ -52,13 +52,6 @@ public:
   }
 
   /**
-   * According to the base class docs, "We call mesh_reinit() whenever
-   * the relevant Mesh has changed, but before remote elements on a
-   * distributed mesh are deleted."
-   */
-  virtual void mesh_reinit() override;
-
-  /**
    * Update the cached _lower_to_upper map whenever our Mesh has been
    * redistributed.  We'll be lazy and just recalculate from scratch.
    */
@@ -67,8 +60,6 @@ public:
   std::string getInfo() const override;
 
   virtual bool operator>=(const RelationshipManager & other) const override;
-
-  void delete_remote_elements() override;
 
 protected:
   virtual void internalInitWithMesh(const MeshBase &) override;
@@ -130,10 +121,4 @@ protected:
 
   /// null matrix for generating full variable coupling
   const CouplingMatrix * const _null_mat = nullptr;
-
-  /// map from secondary element id to its iterator in the mortar mesh generation object's secondary-to-mortar-segments map
-  std::unordered_map<
-      dof_id_type,
-      std::unordered_map<const Elem *, std::set<Elem *, CompareDofObjectsByID>>::iterator>
-      _secondary_ids_to_its;
 };

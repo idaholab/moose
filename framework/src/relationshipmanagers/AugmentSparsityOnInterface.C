@@ -98,41 +98,6 @@ AugmentSparsityOnInterface::fillDataMembers()
 }
 
 void
-AugmentSparsityOnInterface::mesh_reinit()
-{
-  RelationshipManager::mesh_reinit();
-
-  fillDataMembers();
-
-  if (!_amg)
-    return;
-
-  _secondary_ids_to_its.clear();
-  auto & secondaries_to_msms = _amg->_secondary_elems_to_mortar_segments;
-  for (auto it = secondaries_to_msms.begin(); it != secondaries_to_msms.end(); ++it)
-  {
-    const Elem * const secondary = it->first;
-    if (secondary->processor_id() != _mesh->processor_id())
-      _secondary_ids_to_its[secondary->id()] = it;
-  }
-}
-
-void
-AugmentSparsityOnInterface::delete_remote_elements()
-{
-  RelationshipManager::delete_remote_elements();
-
-  if (!_amg)
-    return;
-
-  auto & secondaries_to_msms = _amg->_secondary_elems_to_mortar_segments;
-  for (auto & pr : _secondary_ids_to_its)
-    secondaries_to_msms.erase(pr.second);
-
-  _secondary_ids_to_its.clear();
-}
-
-void
 AugmentSparsityOnInterface::internalInitWithMesh(const MeshBase &)
 {
 }
@@ -165,11 +130,7 @@ AugmentSparsityOnInterface::ghostMortarInterfaceCouplings(const processor_id_typ
                 "The coupled element with id " << coupled_elem_id << " doesn't exist!");
 
     if (coupled_elem->processor_id() != p)
-    {
       coupled_elements.emplace(coupled_elem, _null_mat);
-      if (coupled_elem->subdomain_id() == _secondary_subdomain_id)
-        _secondary_ids_to_its.erase(coupled_elem->id());
-    }
   }
 }
 
@@ -237,12 +198,7 @@ AugmentSparsityOnInterface::ghostLowerDSecondaryElemPointNeighbors(const process
       for (const Elem * const neigh : secondary_lower_elem_point_neighbors)
       {
         if (neigh->processor_id() != p)
-        {
-          mooseAssert(neigh->subdomain_id() == _secondary_subdomain_id,
-                      "Ensuring correctness of erasures from secondary-to-msms map");
-          _secondary_ids_to_its.erase(neigh->id());
           coupled_elements.emplace(neigh, _null_mat);
-        }
 
         ghostMortarInterfaceCouplings(p, neigh, coupled_elements);
       }

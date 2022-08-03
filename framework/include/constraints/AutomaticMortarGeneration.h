@@ -297,7 +297,7 @@ public:
   bool incorrectEdgeDropping() const { return !_correct_edge_dropping; }
 
   using MortarFilterIter =
-      std::unordered_map<const Elem *, std::set<Elem *, CompareDofObjectsByID>>::const_iterator;
+      std::unordered_map<dof_id_type, std::set<Elem *, CompareDofObjectsByID>>::const_iterator;
 
   /**
    * @return A vector of iterators that point to the lower dimensional secondary elements and their
@@ -310,7 +310,7 @@ public:
   /**
    * @return the lower dimensional secondary elements and their associated mortar segment elements
    */
-  const std::unordered_map<const Elem *, std::set<Elem *, CompareDofObjectsByID>> &
+  const std::unordered_map<dof_id_type, std::set<Elem *, CompareDofObjectsByID>> &
   secondariesToMortarSegments() const
   {
     return _secondary_elems_to_mortar_segments;
@@ -444,7 +444,7 @@ private:
   /// We maintain a mapping from lower-dimensional secondary elements in the original mesh to (sets
   /// of) elements in mortar_segment_mesh.  This allows us to quickly determine which elements need
   /// to be split.
-  std::unordered_map<const Elem *, std::set<Elem *, CompareDofObjectsByID>>
+  std::unordered_map<dof_id_type, std::set<Elem *, CompareDofObjectsByID>>
       _secondary_elems_to_mortar_segments;
 
   /// All the secondary interior parent subdomain IDs associated with the mortar mesh

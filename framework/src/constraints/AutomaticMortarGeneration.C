@@ -531,7 +531,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // Maintain the mapping between secondary elems and mortar segment elems contained within them.
     // Initially, only the original secondary_elem is present.
-    _secondary_elems_to_mortar_segments[secondary_elem].insert(new_elem_ptr);
+    _secondary_elems_to_mortar_segments[secondary_elem->id()].insert(new_elem_ptr);
   }
 
   // 2.) Insert new nodes from primary side and split mortar segments as necessary.
@@ -556,7 +556,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_pt += Moose::fe_lagrange_1D_shape(order, n, xi1) * secondary_elem->point(n);
 
     // Find the current mortar segment that will have to be split.
-    auto & mortar_segment_set = _secondary_elems_to_mortar_segments[secondary_elem];
+    auto & mortar_segment_set = _secondary_elems_to_mortar_segments[secondary_elem->id()];
     Elem * current_mortar_segment = nullptr;
     MortarSegmentInfo * info = nullptr;
 
@@ -852,7 +852,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
         std::abs(msinfo.xi2_b) > 1.0 + TOLERANCE)
     {
       // Erase from secondary to msms map
-      auto it = _secondary_elems_to_mortar_segments.find(msinfo.secondary_elem);
+      auto it = _secondary_elems_to_mortar_segments.find(msinfo.secondary_elem->id());
       mooseAssert(it != _secondary_elems_to_mortar_segments.end(),
                   "We should have found the element");
       auto & msm_set = it->second;
@@ -1020,7 +1020,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         continue;
 
       auto [secondary_elem_to_msm_map_it, insertion_happened] =
-          _secondary_elems_to_mortar_segments.emplace(secondary_side_elem,
+          _secondary_elems_to_mortar_segments.emplace(secondary_side_elem->id(),
                                                       std::set<Elem *, CompareDofObjectsByID>{});
       libmesh_ignore(insertion_happened);
       auto & secondary_to_msm_element_set = secondary_elem_to_msm_map_it->second;
@@ -2376,7 +2376,7 @@ AutomaticMortarGeneration::secondariesToMortarSegments(const Node & node) const
   for (const auto i : index_range(secondary_elems))
   {
     auto * const secondary_elem = secondary_elems[i];
-    auto msm_it = _secondary_elems_to_mortar_segments.find(secondary_elem);
+    auto msm_it = _secondary_elems_to_mortar_segments.find(secondary_elem->id());
     if (msm_it == _secondary_elems_to_mortar_segments.end())
       // We may have removed this element key from this map
       continue;
