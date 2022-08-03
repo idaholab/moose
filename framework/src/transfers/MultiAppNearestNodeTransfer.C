@@ -352,8 +352,13 @@ MultiAppNearestNodeTransfer::execute()
 
       if (_fixed_meshes)
       {
-        _cached_froms[pid].resize(qps.second.size());
-        _cached_dof_ids[pid].resize(qps.second.size());
+        auto & froms = _cached_froms[pid];
+        froms.resize(qps.second.size());
+        std::fill(froms.begin(), froms.end(), libMesh::invalid_uint);
+
+        auto & dof_ids = _cached_dof_ids[pid];
+        dof_ids.resize(qps.second.size());
+        std::fill(dof_ids.begin(), dof_ids.end(), DofObject::invalid_id);
       }
 
       std::vector<Real> & outgoing_evals = processor_outgoing_evals[pid];
@@ -432,11 +437,19 @@ MultiAppNearestNodeTransfer::execute()
 
       for (unsigned int qp = 0; qp < outgoing_evals.size(); qp++)
       {
-        MooseVariableFEBase & from_var = _from_problems[problem_from.second[qp]]->getVariable(
-            0,
-            _from_var_name,
-            Moose::VarKindType::VAR_ANY,
-            Moose::VarFieldType::VAR_FIELD_STANDARD);
+        const auto from_problem = problem_from.second[qp];
+        if (from_problem == libMesh::invalid_uint)
+        {
+          mooseAssert(_cached_dof_ids[pid][qp] == DofObject::invalid_id,
+                      "The state of the from problem and dof id should match.");
+          continue;
+        }
+
+        MooseVariableFEBase & from_var =
+            _from_problems[from_problem]->getVariable(0,
+                                                      _from_var_name,
+                                                      Moose::VarKindType::VAR_ANY,
+                                                      Moose::VarFieldType::VAR_FIELD_STANDARD);
         System & from_sys = from_var.sys().system();
         dof_id_type from_dof = _cached_dof_ids[pid][qp];
         outgoing_evals[qp] = (*from_sys.solution)(from_dof);
