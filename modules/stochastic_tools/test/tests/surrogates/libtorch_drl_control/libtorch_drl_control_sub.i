@@ -69,8 +69,8 @@
     type = DRLRewardFunction
     design_function = design_function
     observed_value = center_temp_tend
-    c1 = 1000
-    c2 = 1
+    c1 = 1
+    c2 = 10
     # execute_on = 'TIMESTEP_END'
   []
 []
@@ -94,8 +94,8 @@
   nl_rel_tol = 1e-8
 
   start_time = 0.0
-  end_time = 7200.0
-  dt = 1800.0
+  end_time = 86400
+  dt = 900.0
   dtmin = 1e-4
 []
 
@@ -105,7 +105,7 @@
     type = PointValue
     variable = temp
     point = '3.5 0.0 0.0'
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
   [center_temp_tend]
     type = PointValue
@@ -116,29 +116,27 @@
   [env_temp]
     type = FunctionValuePostprocessor
     function = temp_env
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
   [reward]
     type = FunctionValuePostprocessor
     function = reward_function
     execute_on = 'INITIAL TIMESTEP_END'
-    indirect_dependencies = 'center_temp_tend'
+    indirect_dependencies = 'center_temp_tend env_temp'
   []
   # received control signal
   [left_flux]
     type = Receiver
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
   [log_prob_left_flux]
     type = Receiver
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
 [Reporters]
   [T_reporter]
     type = AccumulateReporter
-    reporters = 'center_temp/value env_temp/value reward/value left_flux/value '
+    reporters = 'center_temp_tend/value env_temp/value reward/value left_flux/value '
                 'log_prob_left_flux/value'
   []
 []
@@ -152,13 +150,13 @@
     responses = 'center_temp env_temp'
 
     # keep consistent with LibtorchDRLControlTrainer
-    input_timesteps = 1
+    input_timesteps = 2
     response_scaling_factors = '0.03 0.03'
     response_shift_factors = '270 270'
-    action_standard_deviations = '1'
-    action_scaling_factors = 200
+    action_standard_deviations = '0.1'
+    action_scaling_factors = 100
 
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    execute_on = 'TIMESTEP_BEGIN'
   []
 []
 

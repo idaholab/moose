@@ -96,6 +96,7 @@ LibtorchDRLControlTrainer::validParams()
                         "reward values from the later steps.");
 
   params.addParam<bool>("read_from_file", false, "Something here");
+  params.addParam<bool>("shift_outputs", true, "Something here");
   return params;
 }
 
@@ -122,7 +123,8 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _decay_factor(getParam<Real>("decay_factor")),
     _action_std(getParam<std::vector<Real>>("action_standard_deviations")),
     _filename_base(getParam<std::string>("filename_base")),
-    _read_from_file(getParam<bool>("read_from_file"))
+    _read_from_file(getParam<bool>("read_from_file")),
+    _shift_outputs(getParam<bool>("shift_outputs"))
 {
 
   if (_response_names.size() == 0)
@@ -198,6 +200,7 @@ LibtorchDRLControlTrainer::postTrain()
   getOutputDataFromReporter(_output_data, _control_names);
   getOutputDataFromReporter(_log_probability_data, _log_probability_names);
   getRewardDataFromReporter(_reward_data, _reward_name);
+
   // Calculate return from the reward
   computeDiscountedRewards();
 
@@ -208,12 +211,20 @@ LibtorchDRLControlTrainer::postTrain()
   {
     // Transform input/output/return data to torch::Tensor
     convertDataToTensor(_input_data, _input_tensor);
+
+    // std::cout << _input_tensor << std::endl;
     // scale the input data
     convertDataToTensor(_output_data, _output_tensor);
+
+    // std::cout << _output_tensor << std::endl;
     // we do not scale output_data for training
     convertDataToTensor(_log_probability_data, _log_probability_tensor);
+
+    // std::cout << _log_probability_tensor << std::endl;
     convertDataToTensor(
         _return_data, _return_tensor, true); // discard the gradient info for return data
+
+    // std::cout << _return_tensor << std::endl;
 
     // We train the controller using the emulator to get a good control strategy
     trainController();
@@ -222,6 +233,18 @@ LibtorchDRLControlTrainer::postTrain()
     // We also reset the counter and number of samples
     resetData();
   }
+}
+
+Real
+LibtorchDRLControlTrainer::averageEpisodeReward()
+{
+  _average_episode_reward = 0.0;
+
+  if (_reward_data.size())
+    _average_episode_reward =
+        std::reduce(_reward_data.begin(), _reward_data.end()) / _reward_data.size();
+
+  return _average_episode_reward;
 }
 
 void
@@ -242,7 +265,6 @@ LibtorchDRLControlTrainer::getInputDataFromReporter(
         [this, &rep_i](Real value) -> Real
         { return (value - _response_shift_factors[rep_i]) * _response_scaling_factors[rep_i]; });
 
-    // Account for the number of input time steps
     for (unsigned int start_step = 0; start_step < num_timesteps; start_step++)
     {
       unsigned int row = reporter_names.size() * start_step + rep_i;
@@ -250,9 +272,9 @@ LibtorchDRLControlTrainer::getInputDataFromReporter(
         data[row].push_back(reporter_data[0]);
 
       data[row].insert(data[row].end(),
-                       reporter_data.begin() + start_step,
+                       reporter_data.begin(),
                        reporter_data.begin() + start_step + reporter_data.size() -
-                           (num_timesteps - 1));
+                           (num_timesteps - 1) - _shift_outputs);
     }
   }
 }
@@ -261,13 +283,13 @@ void
 LibtorchDRLControlTrainer::getOutputDataFromReporter(
     std::vector<std::vector<Real>> & data, const std::vector<ReporterName> & reporter_names)
 {
-  // Get input data from reporter
   for (unsigned int rep_i = 0; rep_i < reporter_names.size(); rep_i++)
   {
     const std::vector<Real> & reporter_data =
         getReporterValueByName<std::vector<Real>>(reporter_names[rep_i]);
 
-    data[rep_i].insert(data[rep_i].end(), reporter_data.begin(), reporter_data.end());
+    data[rep_i].insert(
+        data[rep_i].end(), reporter_data.begin() + _shift_outputs, reporter_data.end());
   }
 }
 
@@ -278,7 +300,7 @@ LibtorchDRLControlTrainer::getRewardDataFromReporter(std::vector<Real> & data,
   const std::vector<Real> & reporter_data =
       getReporterValueByName<std::vector<Real>>(reporter_name);
 
-  data.insert(data.end(), reporter_data.begin(), reporter_data.end());
+  data.insert(data.end(), reporter_data.begin() + _shift_outputs, reporter_data.end());
 }
 
 void
@@ -290,16 +312,13 @@ LibtorchDRLControlTrainer::computeDiscountedRewards()
 
   getRewardDataFromReporter(reward_data_per_sim, _reward_name);
 
-  // calculate reward-to-go
   Real discounted_reward = 0;
-  // Iterate through all rewards in the episode. We go backwards for smoother calculation of each
-  // discounted return
+
   for (int i = reward_data_per_sim.size() - 1; i >= 0; --i)
   {
     discounted_reward = reward_data_per_sim[i] + discounted_reward * _decay_factor;
     return_data_per_sim.insert(return_data_per_sim.begin(), discounted_reward);
   }
-  // append the reward-per-simulation to the _return_data
   _return_data.insert(_return_data.end(), return_data_per_sim.begin(), return_data_per_sim.end());
 }
 
@@ -308,55 +327,35 @@ LibtorchDRLControlTrainer::trainController()
 {
 
 #ifdef LIBTORCH_ENABLED
-  // Initialize the actor optimizer
   torch::optim::Adam actor_optimizer(_control_nn->parameters(),
                                      torch::optim::AdamOptions(_control_learning_rate));
 
-  // Initialize the critic optimizer
   torch::optim::Adam critic_optimizer(_critic_nn->parameters(),
                                       torch::optim::AdamOptions(_critic_learning_rate));
 
-  // evaludate value
   auto value = evaluateValue(_input_tensor).detach();
-  // evaludate advantage
+
   auto advantage = _return_tensor - value;
 
-  // One of the only tricks I use that isn't in the pseudocode. Normalizing advantages isn't
-  // theoretically necessary, but in practice it decreases the variance of our advantages and makes
-  // convergence much more stable and faster.I added this because solving some environments was too
-  // unstable without it.
-  // advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10);
+  advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10);
 
-  // Begin training
   for (unsigned int epoch = 0; epoch < _num_epochs; ++epoch)
   {
-    // evaluate current value and log probability of action
     value = evaluateValue(_input_tensor);
     auto curr_log_probability = evaluateAction(_input_tensor, _output_tensor);
 
-    // Calculate the ratio pi_theta(a_t | s_t) / pi_theta_k(a_t | s_t) NOTE: we just subtract the
-    // logs, which is the same as dividing the values and then canceling the log with e^log. For why
-    // we use log probabilities instead of actual probabilities, here's a great explanation:
-    // https://cs.stackexchange.com/questions/70518/why-do-we-use-the-log-in-gradient-based-reinforcement-algorithms
-    // TL;DR makes gradient ascent easier behind the scenes.
     auto ratio = (curr_log_probability - _log_probability_tensor).exp();
 
-    // calculate surrogate losses
     auto surr1 = ratio * advantage;
     auto surr2 = torch::clamp(ratio, 1.0 - _clip_param, 1.0 + _clip_param) * advantage;
 
-    // Calculate actor and critic losses. NOTE: we take the negative min of the surrogate losses
-    // because we're trying to maximize the performance function, but Adam minimizes the loss. So
-    // minimizing the negative performance function maximizes it.
     auto actor_loss = -torch::min(surr1, surr2).mean();
     auto critic_loss = torch::mse_loss(value, _return_tensor);
 
-    // Calculate gradients and perform backward propagation for actor (control) network
     actor_optimizer.zero_grad();
     actor_loss.backward();
     actor_optimizer.step();
 
-    // Calculate gradients and perform backward propagation for critic network
     critic_optimizer.zero_grad();
     critic_loss.backward();
     critic_optimizer.step();
@@ -389,7 +388,7 @@ LibtorchDRLControlTrainer::convertDataToTensor(std::vector<std::vector<Real>> & 
 
     if (i == 0)
       tensor_data = input_row;
-    else // Concatenate tensors horizontally
+    else
       tensor_data = torch::cat({tensor_data, input_row}, 1);
   }
 
@@ -420,13 +419,10 @@ LibtorchDRLControlTrainer::evaluateValue(const torch::Tensor & input)
 torch::Tensor
 LibtorchDRLControlTrainer::evaluateAction(const torch::Tensor & input, const torch::Tensor & output)
 {
-  // Logarithmic probability of taken action, given the current distribution.
   torch::Tensor var = torch::matmul(_std, _std);
 
-  // Use the updated actor model to compute new action
   torch::Tensor action = _control_nn->forward(input);
 
-  // calculate and return the current probability value
   return -((action - output) * (action - output)) / (2 * var) - torch::log(_std) -
          std::log(std::sqrt(2 * M_PI));
 }
@@ -448,6 +444,5 @@ LibtorchDRLControlTrainer::resetData()
   _reward_data.clear();
   _return_data.clear();
 
-  // Reset counter
   _update_counter = _update_frequency;
 }

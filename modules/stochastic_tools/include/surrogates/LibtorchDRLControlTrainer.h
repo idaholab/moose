@@ -32,6 +32,8 @@ public:
 
   void trainController();
 
+  Real averageEpisodeReward();
+
 #ifdef LIBTORCH_ENABLED
   const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & controlNeuralNet() const
   {
@@ -47,8 +49,7 @@ protected:
   void getOutputDataFromReporter(std::vector<std::vector<Real>> & data,
                                  const std::vector<ReporterName> & reporter_names);
 
-  void getRewardDataFromReporter(std::vector<Real> & data,
-                                 const ReporterName & reporter_name);
+  void getRewardDataFromReporter(std::vector<Real> & data, const ReporterName & reporter_name);
 
   // function to convert input/output data from std::vector to torch::tensor
   // detatch - whether to keep the gradient info, default is to keep the gradient info
@@ -144,6 +145,10 @@ protected:
   /// file or not. This can be used to load existing torch files (from previous
   /// MOOSE or python runs for retraining and further manipulation)
   bool _read_from_file;
+
+  bool _shift_outputs;
+
+  Real _average_episode_reward;
 
 #ifdef LIBTORCH_ENABLED
   /// Pointer to the control neural net object (initialized as null)

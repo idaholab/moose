@@ -87,13 +87,21 @@ LibtorchDRLControl::execute()
         torch::from_blob(raw_input.data(), {1, _input_timesteps * n_responses}, options)
             .to(at::kDouble);
 
+    std::cout << "Input" << std::endl;
+    std::cout << input_tensor << std::endl;
     torch::Tensor output_tensor = _nn->forward(input_tensor);
 
     // sample control value (action) from Gaussian distribution
     torch::Tensor action = at::normal(output_tensor, _std);
 
+    std::cout << "Output" << std::endl;
+    std::cout << action << std::endl;
+
     // compute log probability
     torch::Tensor log_probability = computeLogProbability(action, output_tensor);
+
+    std::cout << "Logprob" << std::endl;
+    std::cout << log_probability << std::endl;
 
     // convert data
     std::vector<Real> converted_action = {action.data_ptr<Real>(),
