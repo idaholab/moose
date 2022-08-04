@@ -37,7 +37,8 @@ struct Token
         const std::string & val,
         const std::string & name,
         size_t offset = 0,
-        int line = 0);
+        int line = 0,
+        int column = 0);
   /// str returns a human-friendly string representation of the token.
   std::string str() const;
 
@@ -55,6 +56,10 @@ struct Token
   /// character) on which the beginning of the token was found - this is redundant with the offset
   /// combined with a reference to the original input, but is here for convenience.
   int line;
+  /// column is the char position after the preceeding \n (or beginning of the file) at which
+  /// the beginning of the token was found - this is redundant with the offset
+  /// combined with a reference to the original input, but is here for convenience.
+  int column;
 };
 
 class Lexer;

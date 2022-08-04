@@ -48,7 +48,7 @@ lineCount(const std::string & input)
 std::string
 tokTypeName(TokType t)
 {
-  // clang-format off
+// clang-format off
   #define tokcase(type) case TokType::type: return #type;
   switch (t)
     {
@@ -70,8 +70,13 @@ tokTypeName(TokType t)
   // clang-format on
 }
 
-Token::Token(TokType t, const std::string & val, const std::string & name, size_t offset, int line)
-  : type(t), val(val), name(name), offset(offset), line(line)
+Token::Token(TokType t,
+             const std::string & val,
+             const std::string & name,
+             size_t offset,
+             int line,
+             int column)
+  : type(t), val(val), name(name), offset(offset), line(line), column(column)
 {
 }
 
@@ -121,7 +126,12 @@ void
 Lexer::emit(TokType type)
 {
   auto substr = _input.substr(_start, _pos - _start);
-  _tokens.push_back(Token(type, substr, _name, _start, _line_count));
+  auto column = _input.rfind('\n', _start - 1);
+  if (column == std::string::npos)
+    column = _start;
+  else
+    column = _start - column;
+  _tokens.push_back(Token(type, substr, _name, _start, _line_count, column));
   _line_count += lineCount(substr);
   _start = _pos;
 }
