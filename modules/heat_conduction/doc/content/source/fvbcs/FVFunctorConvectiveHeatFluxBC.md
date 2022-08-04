@@ -4,14 +4,22 @@
 
 # Description
 
-This boundary condition computes convective heat flux $q'' = h \cdot (T - T_{inf})$, where $H$ is convective heat transfer coefficient,
-$T$ is the temperature, and $T_{inf}$ is far field temperature. Both $H$ and $T_{inf}$ are coupled as functors.
+This boundary condition computes convective heat flux $q'' = h \cdot (T - T_{bulk})$, where $h$ is the convective heat transfer coefficient,
+$T$ is the temperature, and $T_{bulk}$ is the far-field temperature. Both $h$ and $T_{bulk}$ are functors, which enables various spatial, variable and other dependences.
 The domain of the variable can be specified as either a fluid or a solid using $is\_solid$. For a solid domain, the equation above is applied.
 For a fluid domain, the negative of the heat flux is applied. This allows for easier implementation of a double Robin
 boundary condition.
 
-See [CoupledConvectiveHeatFluxBC](CoupledConvectiveHeatFluxBC.md) for a similar boundary condition coupled to variables, and see [FunctorThermalResistanceBC](FunctorThermalResistanceBC.md) for a combined conduction, convection, and radiative boundary condition
- with functor material properties.
+Similar objects:
+- [CoupledConvectiveHeatFluxBC](CoupledConvectiveHeatFluxBC.md) for a similar boundary condition coupled to variables, for finite elements
+- [FunctorThermalResistanceBC](FunctorThermalResistanceBC.md) for a combined conduction, convection, and radiative boundary condition, with a constant outside ambient temperature
+
+# Example syntax
+
+In this example, the `FVFunctorConvectiveHeatFluxBC` boundary condition forms a convective boundary condition between
+the fluid and the solid. While both variables are defined on the same domain, convection only happens on the boundary.
+
+!listing fv_functor_convective_heat_flux/fv_functor_convective_heat_flux.i block=Mesh FVBCs
 
 !syntax parameters /FVBCs/FVFunctorConvectiveHeatFluxBC
 

@@ -18,9 +18,9 @@ FVFunctorConvectiveHeatFluxBC::validParams()
   InputParameters params = FVFluxBC::validParams();
   params.addClassDescription(
       "Convective heat transfer boundary condition with temperature and heat "
-      "transfer coefficent given by functors.");
-  params.addRequiredParam<MooseFunctorName>("T_wall", "Functor for wall temperature");
-  params.addRequiredParam<MooseFunctorName>("T_infinity", "Functor for far-field temperature");
+      "transfer coefficient given by functors.");
+  params.addRequiredParam<MooseFunctorName>("T_solid", "Functor for wall temperature");
+  params.addRequiredParam<MooseFunctorName>("T_bulk", "Functor for far-field temperature");
   params.addRequiredParam<MooseFunctorName>("heat_transfer_coefficient",
                                             "Functor for heat transfer coefficient");
   params.addRequiredParam<bool>("is_solid", "Whether this kernel acts on the solid temperature");
@@ -30,8 +30,8 @@ FVFunctorConvectiveHeatFluxBC::validParams()
 
 FVFunctorConvectiveHeatFluxBC::FVFunctorConvectiveHeatFluxBC(const InputParameters & parameters)
   : FVFluxBC(parameters),
-    _T_wall(getFunctor<ADReal>("T_wall")),
-    _T_infinity(getFunctor<ADReal>("T_infinity")),
+    _T_solid(getFunctor<ADReal>("T_solid")),
+    _T_bulk(getFunctor<ADReal>("T_bulk")),
     _htc(getFunctor<ADReal>("heat_transfer_coefficient")),
     _is_solid(getParam<bool>("is_solid"))
 {
@@ -42,8 +42,8 @@ FVFunctorConvectiveHeatFluxBC::computeQpResidual()
 {
   if (_is_solid)
     return -_htc(singleSidedFaceArg()) *
-           (_T_infinity(singleSidedFaceArg()) - _T_wall(singleSidedFaceArg()));
+           (_T_bulk(singleSidedFaceArg()) - _T_solid(singleSidedFaceArg()));
   else
     return _htc(singleSidedFaceArg()) *
-           (_T_infinity(singleSidedFaceArg()) - _T_wall(singleSidedFaceArg()));
+           (_T_bulk(singleSidedFaceArg()) - _T_solid(singleSidedFaceArg()));
 }

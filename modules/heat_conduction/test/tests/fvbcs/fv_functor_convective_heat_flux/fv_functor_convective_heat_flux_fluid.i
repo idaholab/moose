@@ -2,9 +2,21 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 5
+    nx = 6
     ny = 5
     xmax = 2
+    subdomain_ids = '0 0 0 1 1 1
+                     0 0 0 1 1 1
+                     0 0 0 1 1 1
+                     0 0 0 1 1 1
+                     0 0 0 1 1 1'
+  []
+
+  [remove]
+    type = BlockDeletionGenerator
+    input = gen
+    block = 0
+    new_boundary = interface
   []
 []
 
@@ -16,24 +28,17 @@
 []
 
 [AuxVariables]
-  [T_wall]
+  [T_solid]
     type = MooseVariableFVReal
-    initial_condition = 1
-  []
-[]
-
-[AuxKernels]
-  [wall_temp]
-    type = ConstantAux
-    variable = T_wall
-    value = 1
+    initial_condition = 0
   []
 []
 
 [FVKernels]
-  [diff_left]
+  [diff_fluid]
     type = FVDiffusion
     variable = T_fluid
+    block = 1
     coeff = 4
   []
   [gradient_creating]
@@ -43,19 +48,19 @@
 []
 
 [FVBCs]
-  [top]
+  [interface_fluid]
     type = FVFunctorConvectiveHeatFluxBC
-    boundary = 'top'
+    boundary = 'interface'
     variable = T_fluid
-    T_infinity = T_fluid
-    T_wall = T_wall
+    T_bulk = T_fluid
+    T_solid = T_solid
     is_solid = false
     heat_transfer_coefficient = 'htc'
   []
-  [other]
+  [left]
     type = FVDirichletBC
+    boundary = 'right'
     variable = T_fluid
-    boundary = 'bottom'
     value = 0
   []
 []

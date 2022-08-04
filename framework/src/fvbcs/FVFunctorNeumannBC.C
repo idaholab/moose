@@ -10,13 +10,13 @@
 #include "FVFunctorNeumannBC.h"
 #include "Function.h"
 
-registerMooseObject("NavierStokesApp", FVFunctorNeumannBC);
+registerMooseObject("MooseApp", FVFunctorNeumannBC);
 
 InputParameters
 FVFunctorNeumannBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
-  params.addClassDescription("Neumann boundary condition for finite volume method.");
+  params.addClassDescription("Neumann boundary condition for the finite volume method.");
   params.addParam<MooseFunctorName>("factor",
                                     1.,
                                     "A factor in the form of a functor for multiplying the "

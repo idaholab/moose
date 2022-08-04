@@ -27,10 +27,10 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   /// Wall temperature functor
-  const Moose::Functor<ADReal> & _T_wall;
+  const Moose::Functor<ADReal> & _T_solid;
 
   /// Far-field temperature functor
-  const Moose::Functor<ADReal> & _T_infinity;
+  const Moose::Functor<ADReal> & _T_bulk;
 
   /// Convective heat transfer coefficient functor
   const Moose::Functor<ADReal> & _htc;

@@ -6,6 +6,7 @@
 
 This object is equivalent to [FVNeumannBC.md] with the exception that the
 constant `value` parameter is replaced by the `functor` parameter.
+The `functor` may be a variable, a function or a functor material property.
 
 !syntax parameters /FVBCs/FVFunctorNeumannBC
 
