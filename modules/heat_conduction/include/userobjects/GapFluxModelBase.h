@@ -25,7 +25,7 @@ public:
   /**
    * Cache geometry-related information from the mortar constraint
    */
-  virtual const ADReal
+  virtual ADReal
   computeFluxInternal(const ModularGapConductanceConstraint & mortar_constraint) const;
 
   /**
@@ -42,4 +42,9 @@ protected:
   mutable ADReal _surface_integration_factor;
   mutable ADReal _adjusted_length;
   mutable ADReal _normal_pressure;
+
+  /// The secondary quadrature point location
+  mutable Moose::ElemPointArg _secondary_point;
+  /// The primary quadrature point location
+  mutable Moose::ElemPointArg _primary_point;
 };
