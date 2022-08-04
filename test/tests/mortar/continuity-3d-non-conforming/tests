@@ -137,6 +137,7 @@
                   'the same.'
     map = False
     partial = True
+    min_parallel = 2
   []
   [continuity_penalty_sphere_hex20_ad]
     type = 'Exodiff'
