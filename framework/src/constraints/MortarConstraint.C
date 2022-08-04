@@ -141,9 +141,6 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
     for (MooseIndex(3) type_index = 0; type_index < 3; ++type_index)
     {
       const auto jacobian_type = jacobian_types[type_index];
-      // There's no actual coupling between secondary and primary dofs
-      if ((jacobian_type == JType::SecondaryPrimary) || (jacobian_type == JType::PrimarySecondary))
-        continue;
 
       prepareMatrixTagLower(_assembly, ivar, jvar, jacobian_type);
 
