@@ -1,19 +1,33 @@
 [Block]
-[./right]
+[./increase]
 type = TestAlignment
-xy_data = "   0 0.0
-1 1.0
-10 3.0
-100 2.0
-1000 4.0"
+xy_data = "0 0.0
+           1 1.0
+           10 3.0
+           100 2.0
+           1000 4.0"
 [../]
-[./left]
+[./increase2]
 type = TestAlignment
-xy_data = "100 1.0
-200 12.0
-300 313.0
-400 4514.0
-500 45615.0"
+xy_data = " 0 0.0
+            1 11.0
+           10 33.0
+          100 22.30
+         1000 42.210"
+[../]
+[./decrease]
+            type = TestAlignment
+            xy_data = "100 1.0
+                       200 12.0
+                       300 313.0
+                       400 4514.0
+                       500 45615.0"
+[../]
+[./decrease2]
+             type = TestAlignment
+             xy_data = "100 1.0
+  200 12.0
+                        500 45615.0"
 [../]
 [./no_reflow]
 type = TestReflow

@@ -525,15 +525,12 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
     }
     else
     {
-      // if the first character in the string is a space we right align, otherwise we left align
-      bool align_right = _val[1] == ' ';
-      const auto str_indent = s.length() - 1;
+      const int delta_indent = prefix_len - tokens()[2].column;
 
       // first line is always added as is
       std::size_t start = 0;
       std::size_t end = _val.find('\n', start);
       s += _val.substr(start, end - start + 1);
-      const auto first_size = end;
 
       // remaining lines
       do
@@ -544,12 +541,22 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
           end = _val.length() - 1;
 
         // remove leading whitespace
+        const auto old_start = start;
         while (_val[start] == ' ' || _val[start] == '\t')
           ++start;
 
-        int line_indent = align_right ? (str_indent + first_size - (end - start)) : str_indent + 1;
-        if (line_indent > 0)
-          s += std::string(line_indent, ' ');
+        // correct indentation
+        if (delta_indent < 0)
+        {
+          if (old_start - delta_indent - 1 < start)
+            start = old_start - delta_indent - 1;
+        }
+        else
+        {
+          start = old_start;
+          s += std::string(delta_indent + 1, ' ');
+        }
+
         s += _val.substr(start, end - start + 1);
       } while (end < _val.length() - 1);
     }
@@ -939,7 +946,8 @@ parseField(Parser * p, Node * n)
   else if (valtok->type == TokType::Error)
     p->error(*valtok, valtok->val);
   else
-    p->error(*valtok, "missing value for field '" + fieldtok.val + "' - found '" + valtok->val + "'");
+    p->error(*valtok,
+             "missing value for field '" + fieldtok.val + "' - found '" + valtok->val + "'");
   n->addChild(field);
 }
 
