@@ -1,0 +1,5 @@
+# Function that is 1 for all x, and data that is unity and defined on T axis for -1<=t<=1
+AXIS T
+-1 1
+DATA
+1 1

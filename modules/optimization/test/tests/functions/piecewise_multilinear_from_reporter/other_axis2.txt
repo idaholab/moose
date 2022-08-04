@@ -1,0 +1,5 @@
+# Function that is 1 for all x, and data is defined on T axis only for t>=1
+AXIS T
+1 2
+DATA
+1 10

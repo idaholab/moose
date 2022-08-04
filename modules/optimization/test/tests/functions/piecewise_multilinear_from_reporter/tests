@@ -1,11 +1,50 @@
 [Tests]
-  issues = '#2476'
-  design = 'source/functions/PiecewiseMultilinear.md'
+  issues = '#47'
+  [./oneDa]
+    type = 'CSVDiff'
+    input = 'oneDa.i'
+    csvdiff = 'oneDa.csv'
+    abs_zero = 1E-8
+    requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation on a 1D domain."
+  [../]
+  [./oneDb]
+    type = 'CSVDiff'
+    input = 'oneDb.i'
+    csvdiff = 'oneDb.csv'
+    abs_zero = 1E-8
+    requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation on a 1D domain that compares to an equivalent known function."
+  [../]
+
+  [./time]
+    type = 'CSVDiff'
+    input = 'time.i'
+    csvdiff = 'time.csv'
+    abs_zero = 1E-8
+    requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation of time-dependent data."
+  [../]
+
   [./twoDa]
     type = 'CSVDiff'
     input = 'twoDa.i'
     csvdiff = 'twoDa.csv'
     abs_zero = 1E-8
     requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation on a 2D domain."
+  [../]
+  [./twoDb]
+    type = 'Exodiff'
+    input = 'twoDb.i'
+    exodiff = 'twoDb.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation on a 2D domain that compares to an equivalent known function."
+  [../]
+
+  [./fourDa]
+    type = 'Exodiff'
+    input = 'fourDa.i'
+    exodiff = 'fourDa.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation on a 3D domain with time-dependent data."
   [../]
 []

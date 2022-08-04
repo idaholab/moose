@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PiecewiseMultilinearFromReporter.h"
-#include "GriddedData.h"
 
 registerMooseObject("isopodApp", PiecewiseMultilinearFromReporter);
 
@@ -92,7 +91,7 @@ PiecewiseMultilinearFromReporter::sampleInternal(const MooseADWrapper<GridPoint,
           // unusual "end condition" case. weight by 0.5 because we will encounter this twice
           weight *= 0.5;
       }
-    f += _gridded_data->evaluateFcn(arg) * weight;
+    f += evaluateFcn(arg) * weight;
   }
 
   /*

@@ -11,9 +11,6 @@
 
 #include "PiecewiseMultiInterpolationFromReporter.h"
 
-// Forward declarations
-class GriddedData;
-
 /**
  * This is a copy of PiecewiseMultilinear except
  * it is derived from PiecewiseMultiInterpolationFromReporters
@@ -25,6 +22,7 @@ class GriddedData;
  */
 class PiecewiseMultilinearFromReporter : public PiecewiseMultiInterpolationFromReporter
 {
+
 public:
   static InputParameters validParams();
 

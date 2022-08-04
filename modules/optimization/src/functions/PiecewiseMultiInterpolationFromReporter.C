@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PiecewiseMultiInterpolationFromReporter.h"
-#include "GriddedData.h"
 
 InputParameters
 PiecewiseMultiInterpolationFromReporter::validParams()
@@ -16,21 +15,27 @@ PiecewiseMultiInterpolationFromReporter::validParams()
   InputParameters params = Function::validParams();
 
   params.addClassDescription(
-      "Apply a point load defined by Reporter. This is a copy from PiecewiseMultiInterpolation.");
+      "This is very similar to PiecewiseMultiInterpolation.  However, it uses a "
+      "GriddedDataReporter to get its grid and axes data.  The values from at each grid point can "
+      "be obtained from the GriddedDataReporter or a seperate reporter.");
 
+  params.addRequiredParam<ReporterName>("grid_name",
+                                        "reporter from GriddedDataReporter containing grid.  This "
+                                        "uses the reporter syntax <reporter>/<name>.");
+  params.addRequiredParam<ReporterName>("axes_name",
+                                        "reporter from GriddedDataReporter containing axes.  This "
+                                        "uses the reporter syntax <reporter>/<name>.");
   params.addRequiredParam<ReporterName>(
-      "x_coord_name",
-      "reporter x-coordinate name.  This uses the reporter syntax <reporter>/<name>.");
+      "step_name",
+      "reporter from GriddedDataReporter containing step vector for striding the grid.  This "
+      "uses the reporter syntax <reporter>/<name>.");
   params.addRequiredParam<ReporterName>(
-      "y_coord_name",
-      "reporter y-coordinate name.  This uses the reporter syntax <reporter>/<name>.");
-  params.addRequiredParam<ReporterName>(
-      "z_coord_name",
-      "reporter z-coordinate name.  This uses the reporter syntax <reporter>/<name>.");
-  params.addRequiredParam<ReporterName>(
-      "time_name", "reporter time name.  This uses the reporter syntax <reporter>/<name>.");
-  params.addRequiredParam<ReporterName>(
-      "value_name", "reporter value name.  This uses the reporter syntax <reporter>/<name>.");
+      "dim_name",
+      "reporter from GriddedDataReporter containing grid dimension.  This "
+      "uses the reporter syntax <reporter>/<name>.");
+  params.addRequiredParam<ReporterName>("values_name",
+                                        "reporter containing value for each point in the grid.  "
+                                        "This uses the reporter syntax <reporter>/<name>.");
 
   return params;
 }
@@ -39,15 +44,13 @@ PiecewiseMultiInterpolationFromReporter::PiecewiseMultiInterpolationFromReporter
     const InputParameters & parameters)
   : Function(parameters),
     ReporterInterface(this),
-    _values(getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_REPLICATED)),
-    _x_coord(getReporterValue<std::vector<Real>>("x_coord_name", REPORTER_MODE_REPLICATED)),
-    _y_coord(getReporterValue<std::vector<Real>>("y_coord_name", REPORTER_MODE_REPLICATED)),
-    _z_coord(getReporterValue<std::vector<Real>>("z_coord_name", REPORTER_MODE_REPLICATED)),
-    _time(getReporterValue<std::vector<Real>>("time_name", REPORTER_MODE_REPLICATED))
+    _grid(getReporterValue<std::vector<std::vector<Real>>>("grid_name", REPORTER_MODE_REPLICATED)),
+    _axes(getReporterValue<std::vector<int>>("axes_name", REPORTER_MODE_REPLICATED)),
+    _step(getReporterValue<std::vector<unsigned int>>("step_name", REPORTER_MODE_REPLICATED)),
+    _dim(getReporterValue<unsigned int>("dim_name", REPORTER_MODE_REPLICATED)),
+    _values(getReporterValue<std::vector<Real>>("values_name", REPORTER_MODE_REPLICATED))
 {
 }
-
-PiecewiseMultiInterpolationFromReporter::~PiecewiseMultiInterpolationFromReporter() {}
 
 template <bool is_ad>
 MooseADWrapper<PiecewiseMultiInterpolationFromReporter::GridPoint, is_ad>
@@ -125,10 +128,6 @@ PiecewiseMultiInterpolationFromReporter::getNeighborIndices(std::vector<Real> in
 void
 PiecewiseMultiInterpolationFromReporter::initialSetup()
 {
-  _gridded_data = (std::make_unique<GriddedData>(_x_coord, _y_coord, _z_coord, _time, _values));
-  _dim = (_gridded_data->getDim());
-  _gridded_data->getAxes(_axes);
-  _gridded_data->getGrid(_grid);
   for (unsigned int i = 0; i < _dim; ++i)
     for (unsigned int j = 1; j < _grid[i].size(); ++j)
       if (_grid[i][j - 1] >= _grid[i][j])
@@ -142,4 +141,22 @@ PiecewiseMultiInterpolationFromReporter::initialSetup()
     mooseError("PiecewiseMultiInterpolationFromReporter needs the AXES to be independent.  Check "
                "the AXIS lines in "
                "your data file.");
+}
+
+Real
+PiecewiseMultiInterpolationFromReporter::evaluateFcn(const GridIndex & ijk) const
+{
+  if (ijk.size() != _dim)
+    mooseError(
+        "Gridded data evaluateFcn called with ", ijk.size(), " arguments, but expected ", _dim);
+  unsigned int index = ijk[0];
+  for (unsigned int i = 1; i < _dim; ++i)
+    index += ijk[i] * _step[i];
+  if (index >= _values.size())
+    mooseError("Gridded data evaluateFcn attempted to access index ",
+               index,
+               " of function, but it contains only ",
+               _values.size(),
+               " entries");
+  return _values[index];
 }

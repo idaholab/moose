@@ -1,16 +1,18 @@
-# PiecewiseMultilinear function tests in 2D
+# PiecewiseMultilinear function tests for time-dependent data
 # See [Functions] block for a description of the tests
-# The functions are compared with ParsedFunctions using postprocessors
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
+  dim = 3
   xmin = 0
   xmax = 1
-  nx = 6
+  nx = 1
   ymin = 0
   ymax = 1
-  ny = 6
+  ny = 1
+  zmin = 0
+  zmax = 1
+  nz = 1
 []
 
 [Variables]
@@ -25,30 +27,31 @@
   [../]
 []
 
+
 [AuxVariables]
-  [./bilinear1_var]
+  [./time1_var]
   [../]
 []
 
 [AuxKernels]
-  [./bilinear1_AuxK]
+  [./time1_AuxK]
     type = FunctionAux
-    variable = bilinear1_var
-    function = bilinear1_fcn
+    variable = time1_var
+    function = time1_fcn
   [../]
 []
 
 [Reporters]
   [gridData]
     type = GriddedDataReporter
-    data_file = 'twoD1.txt'
+    data_file = 'time1.txt'
     outputs = none
   []
 []
 
 [Functions]
-# This is just f = 1 + 2x + 3y
-  [./bilinear1_fcn]
+# This increases linearly: f = t
+  [./time1_fcn]
     type = PiecewiseMultilinearFromReporter
     values_name = 'gridData/parameter'
     grid_name = 'gridData/grid'
@@ -56,29 +59,30 @@
     step_name = 'gridData/step'
     dim_name = 'gridData/dim'
   [../]
-  [./bilinear1_answer]
+  [./time1_answer]
     type = ParsedFunction
-    value = 1+2*x+3*y
+    value = t
   [../]
 []
 
 [Postprocessors]
-  [./bilinear1_pp]
+  [./time1_pp]
     type = NodalL2Error
-    function = bilinear1_answer
-    variable = bilinear1_var
+    function = time1_answer
+    variable = time1_var
   [../]
 []
 
+
 [Executioner]
   type = Transient
-  dt = 1
+  dt = 0.1
   end_time = 1
 []
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = twoDa
+  file_base = time
   hide = dummy
   csv = true
 []

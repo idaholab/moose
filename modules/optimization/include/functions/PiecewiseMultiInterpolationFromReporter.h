@@ -9,17 +9,16 @@
 
 #pragma once
 
+#include "MooseUtils.h"
 #include "Function.h"
-#include "GriddedData.h"
 #include "ReporterInterface.h"
 /**
- * Note: this is copied from MOOSE Framework PiecewiseMultiInterpolation
- * The GriddedData is initialized from a Reporter and not a file.
- * Uses GriddedData to define data on a grid,
- * and does linear interpolation on that data to
- * provide function values.
- * Gridded data can be 1D, 2D, 3D or 4D.
- * See GriddedData for examples of file format.
+ * Note: this is similar to MOOSE Framework PiecewiseMultiInterpolation
+ * The grid and axes are read in from a GriddedData reporter
+ * and not GriddedData object is used.  The values can be read in from the griddedData reporter or
+ * be supplied by a seperate reporter.  There is one value per grid point. Linear interpolation of
+ * the values provides function values. The grid from the GriddedDataReporter can be 1D, 2D, 3D or
+ * 4D.
  */
 class PiecewiseMultiInterpolationFromReporter : public Function, public ReporterInterface
 {
@@ -32,9 +31,6 @@ public:
 
   PiecewiseMultiInterpolationFromReporter(const InputParameters & parameters);
 
-  // Necessary for using forward declaration of GriddedData in std::unique_ptr
-  virtual ~PiecewiseMultiInterpolationFromReporter();
-
   using Function::value;
   /**
    * Given t and p, return the interpolated value.
@@ -43,9 +39,10 @@ public:
   virtual ADReal value(const ADReal & t, const ADPoint & p) const override;
 
 protected:
-  typedef GriddedData::GridPoint GridPoint;
-  typedef GriddedData::ADGridPoint ADGridPoint;
-  typedef GriddedData::GridIndex GridIndex;
+  typedef MooseUtils::SemidynamicVector<Real, 4> GridPoint;
+  typedef MooseUtils::SemidynamicVector<ADReal, 4> ADGridPoint;
+  typedef MooseUtils::SemidynamicVector<unsigned int, 4> GridIndex;
+  Real evaluateFcn(const GridIndex & ijk) const;
 
   /// convert cartesian+time coordinates into grid coordinates
   template <bool is_ad>
@@ -60,22 +57,27 @@ protected:
   virtual Real sample(const GridPoint & pt) const = 0;
   virtual ADReal sample(const ADGridPoint & pt) const;
 
-  /// object to provide function evaluations at points on the grid
-  std::unique_ptr<GriddedData> _gridded_data;
-  /// dimension of the grid
-  unsigned int _dim;
+  /// the grid from GriddedDataReporter
+  const std::vector<std::vector<Real>> & _grid;
 
   /**
+   * From GriddedDataReporter
    * _axes specifies how to embed the grid into the MOOSE coordinate frame
    * if _axes[i] = 0 then the i_th axes of the grid lies along the MOOSE x direction
    * if _axes[i] = 1 then the i_th axes of the grid lies along the MOOSE y direction
    * if _axes[i] = 2 then the i_th axes of the grid lies along the MOOSE z direction
    * if _axes[i] = 3 then the i_th axes of the grid lies along the MOOSE time direction
    */
-  std::vector<int> _axes;
+  const std::vector<int> & _axes;
 
-  /// the grid
-  std::vector<std::vector<Real>> _grid;
+  /// stride through grid dimensions
+  const std::vector<unsigned int> & _step;
+
+  /// dimension of the grid
+  const unsigned int & _dim;
+
+  /// values at each xyzt grid point
+  const std::vector<Real> & _values;
 
   /**
    * Operates on monotonically increasing in_arr.
@@ -93,16 +95,4 @@ protected:
                           unsigned int & lower_x,
                           unsigned int & upper_x) const;
   void virtual initialSetup() override;
-
-private:
-  /// values at each xyz coordinate
-  const std::vector<Real> & _values;
-  /// x coordinate
-  const std::vector<Real> & _x_coord;
-  /// y coordinate
-  const std::vector<Real> & _y_coord;
-  ///z coordinate
-  const std::vector<Real> & _z_coord;
-  ///time
-  const std::vector<Real> & _time;
 };

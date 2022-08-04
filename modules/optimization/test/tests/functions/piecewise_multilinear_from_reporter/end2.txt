@@ -1,0 +1,5 @@
+# Function that is 1 for all x>=0, due to data only being defined on x<=0
+AXIS X
+-2 0
+DATA
+10 1

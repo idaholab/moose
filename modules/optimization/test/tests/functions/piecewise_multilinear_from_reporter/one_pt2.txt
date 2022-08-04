@@ -1,0 +1,5 @@
+# Function that is 1 for all x, due to only one point being defined on X at x=1
+AXIS X
+1
+DATA
+1

@@ -1,0 +1,5 @@
+# Linear function f = x
+AXIS X
+-1 3
+DATA
+-1 3

@@ -1,0 +1,5 @@
+# Function that is 1 for all x<=2, due to data only being defined on x>2
+AXIS X
+4 5
+DATA
+1 10

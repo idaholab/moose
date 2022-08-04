@@ -1,16 +1,18 @@
 # PiecewiseMultilinear function tests in 2D
-# See [Functions] block for a description of the tests
-# The functions are compared with ParsedFunctions using postprocessors
-
+# The spatial grid is 1<=x<=5 and 1<=y<=5
+# At t<=1 a disk of radius 0.5 sits at (x,y)=(1.45,1.45): it has f=1.  Elsewhere f=0
+# At t>=0 a disk of radius 0.5 sits at (x,y)=(4,55,4,55): it has f=1.  Elsewhere f=0
+# The disks' centers were chosen specially so that the disk partially sits outside the grid
+# which illustrates the extrapolation process used by GriddedData and PiecewiseMultilinear
 [Mesh]
   type = GeneratedMesh
   dim = 2
   xmin = 0
-  xmax = 1
-  nx = 6
+  xmax = 6
+  nx = 60
   ymin = 0
-  ymax = 1
-  ny = 6
+  ymax = 6
+  ny = 60
 []
 
 [Variables]
@@ -25,30 +27,30 @@
   [../]
 []
 
+
 [AuxVariables]
-  [./bilinear1_var]
+  [./moving_disk_var]
   [../]
 []
 
 [AuxKernels]
-  [./bilinear1_AuxK]
+  [./moving_disk_AuxK]
     type = FunctionAux
-    variable = bilinear1_var
-    function = bilinear1_fcn
+    variable = moving_disk_var
+    function = moving_disk_fcn
   [../]
 []
 
 [Reporters]
   [gridData]
     type = GriddedDataReporter
-    data_file = 'twoD1.txt'
+    data_file = 'twoD2.txt'
     outputs = none
   []
 []
 
 [Functions]
-# This is just f = 1 + 2x + 3y
-  [./bilinear1_fcn]
+  [./moving_disk_fcn]
     type = PiecewiseMultilinearFromReporter
     values_name = 'gridData/parameter'
     grid_name = 'gridData/grid'
@@ -56,29 +58,19 @@
     step_name = 'gridData/step'
     dim_name = 'gridData/dim'
   [../]
-  [./bilinear1_answer]
-    type = ParsedFunction
-    value = 1+2*x+3*y
-  [../]
 []
 
-[Postprocessors]
-  [./bilinear1_pp]
-    type = NodalL2Error
-    function = bilinear1_answer
-    variable = bilinear1_var
-  [../]
-[]
 
 [Executioner]
   type = Transient
-  dt = 1
-  end_time = 1
+  dt = 0.5
+  end_time = 10
 []
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = twoDa
+  file_base = twoDb
   hide = dummy
+  exodus = true
   csv = true
 []
