@@ -105,7 +105,6 @@
                   'the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
-    ad_indexing_type = global
   []
   [continuity_penalty_tet10]
     type = 'Exodiff'
@@ -116,7 +115,6 @@
                   'the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
-    ad_indexing_type = global
   []
   [continuity_penalty_sphere_hex8]
     type = 'Exodiff'
@@ -128,7 +126,6 @@
                   'the same.'
     map = False
     partial = True
-    ad_indexing_type = global
   []
   [continuity_penalty_sphere_hex20]
     type = 'Exodiff'
@@ -140,8 +137,6 @@
                   'the same.'
     map = False
     partial = True
-    ad_indexing_type = global
-    min_parallel = 2
   []
   [continuity_penalty_sphere_hex20_ad]
     type = 'Exodiff'
@@ -152,6 +147,7 @@
                   'mortar method with and without automatic differentiation.'
     map = False
     partial = True
+    ad_indexing_type = global
     min_parallel = 2
   []
 []
