@@ -38,40 +38,6 @@ public:
   virtual ~RestartableDataIO() = default;
 
   /**
-   * Tell the Resurrector to use Ascii formatted data instead of the default binary format.
-   */
-  void useAsciiExtension();
-
-  /**
-   * Perform a restart of the libMesh Equation Systems from a file.
-   */
-  void restartEquationSystemsObject();
-
-  /**
-   * Write out the restartable data.
-   */
-  void writeRestartableData(const std::string & base_file_name,
-                            const RestartableDataMap & restartable_datas);
-
-  void writeRestartableDataPerProc(const std::string & base_file_name,
-                                   const RestartableDataMaps & restartable_data);
-
-  /**
-   * Read restartable data header to verify that we are restarting on the correct number of
-   * processors and threads.
-   */
-  bool readRestartableDataHeader(bool per_proc_id, const std::string & suffix = "");
-  bool readRestartableDataHeaderFromFile(const std::string & recover_file, bool per_proc_id);
-
-  /**
-   * Read the restartable data.
-   */
-  void readRestartableData(const RestartableDataMaps & restartable_datas,
-                           const DataNames & _recoverable_data_names);
-  void readRestartableData(const RestartableDataMap & restartable_data,
-                           const DataNames & _recoverable_data_names,
-                           unsigned int tid = 0);
-  /**
    * Create a Backup for the current system.
    */
   std::shared_ptr<Backup> createBackup();
@@ -81,21 +47,21 @@ public:
    */
   void restoreBackup(std::shared_ptr<Backup> backup, bool for_restart = false);
 
-  std::string getESFileExtension(bool is_binary) const
-  {
-    return is_binary ? ES_BINARY_EXT : ES_ASCII_EXT;
-  }
-
-  std::string getRestartableDataExt() const { return RESTARTABLE_DATA_EXT; }
-
   ///@{
   /*
    * Enable/Disable errors to allow meta data to be created/loaded on different number or processors
    *
    * See LoadSurrogateModelAction for use case
    */
-  void setErrorOnLoadWithDifferentNumberOfProcessors(bool value);
-  void setErrorOnLoadWithDifferentNumberOfThreads(bool value);
+  void setErrorOnLoadWithDifferentNumberOfProcessors(bool value)
+  {
+    _error_on_different_number_of_processors = value;
+  }
+
+  void setErrorOnLoadWithDifferentNumberOfThreads(bool value)
+  {
+    _error_on_different_number_of_threads = value;
+  }
   ///@}
 
 private:
@@ -127,18 +93,8 @@ private:
   /// Pointer to the FEProblemBase when serializing/deserializing system data
   FEProblemBase * _fe_problem_ptr;
 
-  /// Boolean to indicate that the restartable data header has been read
-  bool _is_header_read;
-
-  /// name of the file extension that we restart from
-  bool _use_binary_ext;
-
-  /// A vector of file handles, one per thread
-  std::vector<std::shared_ptr<std::ifstream>> _in_file_handles;
-
   static constexpr auto RESTARTABLE_DATA_EXT = ".rd";
-  static constexpr auto ES_BINARY_EXT = ".xdr";
-  static constexpr auto ES_ASCII_EXT = ".xda";
+  static constexpr auto CURRENT_BACKUP_FILE_VERSION = 3;
 
   /// Error check controls
   bool _error_on_different_number_of_processors = true;

@@ -1236,10 +1236,7 @@ getLatestCheckpointFileHelper(const std::list<std::string> & checkpoint_files,
   // Loop through all possible files and store the newest
   for (const auto & cp_file : checkpoint_files)
   {
-    if (find_if(extensions.begin(),
-                extensions.end(),
-                [cp_file](const std::string & ext)
-                { return MooseUtils::hasExtension(cp_file, ext); }) != extensions.end())
+    if (MooseUtils::hasExtension(cp_file, "rd"))
     {
       struct stat stats;
       stat(cp_file.c_str(), &stats);
@@ -1258,36 +1255,29 @@ getLatestCheckpointFileHelper(const std::list<std::string> & checkpoint_files,
 
   // Loop through all of the newest files according the number in the file name
   int max_file_num = -1;
-  std::string max_base;
   std::string max_file;
 
-  pcrecpp::RE re_file_num(".*?(\\d+)(?:_mesh)?$"); // Pull out the embedded number from the file
+  pcrecpp::RE re_file_num(".*?(\\d+)\\.rd$"); // Pull out the embedded number from the file
 
   // Now, out of the newest files find the one with the largest number in it
   for (const auto & res_file : newest_restart_files)
   {
-    auto dot_pos = res_file.find_last_of(".");
-    auto the_base = res_file.substr(0, dot_pos);
     int file_num = 0;
 
-    re_file_num.FullMatch(the_base, &file_num);
+    re_file_num.FullMatch(res_file, &file_num);
 
     if (file_num > max_file_num)
     {
       max_file_num = file_num;
-      max_base = the_base;
       max_file = res_file;
     }
   }
 
   // Error if nothing was located
   if (max_file_num == -1)
-  {
-    max_base.clear();
-    max_file.clear();
-  }
+    mooseError("No checkpint file found!");
 
-  return keep_extension ? max_file : max_base;
+  return keep_extension ? max_file : MooseUtils::stripExtension(max_file);
 }
 
 void

@@ -1223,6 +1223,9 @@ MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
   FEProblemBase & fe_problem = feProblem();
 
   RestartableDataIO rdio(fe_problem);
+
+  std::cout << "Restoring backup! " << for_restart << std::endl;
+
   rdio.restoreBackup(backup, for_restart);
 }
 
@@ -1651,6 +1654,7 @@ std::list<std::string>
 MooseApp::getCheckpointFiles() const
 {
   auto checkpoint_dirs = getCheckpointDirectories();
+
   return MooseUtils::getFilesInDirs(checkpoint_dirs);
 }
 

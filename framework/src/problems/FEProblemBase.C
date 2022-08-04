@@ -454,6 +454,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     std::string restart_file_base = getParam<FileNameNoExtension>("restart_file_base");
     restart_file_base = MooseUtils::convertLatestCheckpoint(restart_file_base);
     setRestartFile(restart_file_base);
+    std::cout << "restart_file_base: " << restart_file_base << std::endl;
   }
 
   // // Generally speaking, the mesh is prepared for use, and consequently remote elements are deleted
@@ -772,10 +773,22 @@ FEProblemBase::initialSetup()
     {
       TIME_SECTION("restartFromFile", 3, "Restarting From File");
 
-      _restart_io->readRestartableDataHeader(true);
-      _restart_io->restartEquationSystemsObject();
+      // _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
 
-      _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
+      // Read the backup from file
+
+      std::string backup_file_name =
+          _app.getRestartRecoverFileBase() + _restart_io->getRestartableDataExt();
+
+      std::ifstream backup_file;
+      backup_file.open(backup_file_name, std::ios::in | std::ios::binary);
+      auto backup = std::make_shared<Backup>();
+      dataLoad(backup_file, backup, nullptr);
+      backup_file.close();
+
+      //      _app.setBackupObject(backup);
+      //      _app.restoreCachedBackup();
+      _app.restore(backup, _app.isRestarting());
 
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
           _neighbor_material_props.hasStatefulProperties())

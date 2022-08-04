@@ -148,12 +148,6 @@ Checkpoint::output()
   MeshBase & mesh = _es_ptr->get_mesh();
   CheckpointIO io(mesh, _binary);
 
-  // Set libHilbert renumbering flag to false.  We don't support
-  // N-to-M restarts regardless, and if we're *never* going to do
-  // N-to-M restarts then libHilbert is just unnecessary computation
-  // and communication.
-  const bool renumber = false;
-
   // Create checkpoint file structure
   CheckpointFileNames curr_file_struct;
 
@@ -179,14 +173,13 @@ Checkpoint::output()
     }
   }
 
-  // Write the system data, using ENCODE vs WRITE based on ascii vs binary format
-  _es_ptr->write(curr_file_struct.system,
-                 EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA |
-                     EquationSystems::WRITE_PARALLEL_FILES,
-                 renumber);
-
-  // Write the restartable data
-  _restartable_data_io.writeRestartableDataPerProc(curr_file_struct.restart, _restartable_data);
+  // Write out the backup
+  auto backup = _app.backup();
+  std::ofstream backup_file;
+  const std::string backup_filename(curr_file_struct.restart);
+  backup_file.open(backup_filename, std::ios::out | std::ios::binary);
+  dataStore(backup_file, backup, nullptr);
+  backup_file.close();
 
   // Remove old checkpoint files
   updateCheckpointFiles(curr_file_struct);
@@ -195,6 +188,8 @@ Checkpoint::output()
 void
 Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
 {
+  return;
+
   // Update the list of stored files
   _file_names.push_back(file_struct);
 
