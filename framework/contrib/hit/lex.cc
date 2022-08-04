@@ -48,7 +48,7 @@ lineCount(const std::string & input)
 std::string
 tokTypeName(TokType t)
 {
-// clang-format off
+  // clang-format off
   #define tokcase(type) case TokType::type: return #type;
   switch (t)
     {
@@ -76,7 +76,7 @@ Token::Token(TokType t, const std::string & val, const std::string & name, size_
 }
 
 std::string
-Token::str()
+Token::str() const
 {
   if (type == TokType::String || type == TokType::Error)
     return tokTypeName(type) + ":" + val;
@@ -200,7 +200,7 @@ Lexer::backup()
   _pos = std::max(_start, _pos - _width);
 }
 
-std::string
+const std::string &
 Lexer::input()
 {
   return _input;

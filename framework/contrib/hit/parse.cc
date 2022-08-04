@@ -18,6 +18,8 @@
 namespace hit
 {
 
+static const Token EOFToken{TokType::EOF, "", ""};
+
 std::string
 quoteChar(const std::string & s)
 {
@@ -736,32 +738,32 @@ public:
   size_t pos() { return _pos; }
   std::vector<Token> & tokens() { return _tokens; }
 
-  Token next()
+  const Token & next()
   {
     if (_pos >= _tokens.size())
     {
       _pos++;
-      return Token{TokType::EOF, "", _name, _input.size()};
+      return EOFToken;
     }
-    auto tok = _tokens[_pos];
+    const auto & tok = _tokens[_pos];
     _pos++;
     return tok;
   }
   void backup() { _pos--; }
-  Token peek()
+  const Token & peek()
   {
-    auto tok = next();
+    const auto & tok = next();
     backup();
     return tok;
   }
-  void error(Token loc, const std::string & msg)
+  void error(const Token & loc, const std::string & msg)
   {
     throw ParseError(_name + ":" + std::to_string(loc.line) + ": " + msg);
   }
 
-  Token require(TokType t, const std::string & err_msg)
+  const Token & require(TokType t, const std::string & err_msg)
   {
-    auto tok = next();
+    const auto & tok = next();
     if (tok.type == TokType::Error)
       error(tok, tok.val);
     else if (tok.type != t)
@@ -804,13 +806,13 @@ void parseExitPath(Parser * p, Node * n);
 void
 parseExitPath(Parser * p, Node * n)
 {
-  auto secOpenToks = p->scope()->tokens();
+  const auto & secOpenToks = p->scope()->tokens();
 
-  auto tok = p->next();
+  const auto & tok = p->next();
   if (tok.type != TokType::LeftBracket)
     p->error(secOpenToks[0], "missing closing '[]' for section");
 
-  auto path = p->require(TokType::Path, "malformed section close, expected PATH");
+  const auto & path = p->require(TokType::Path, "malformed section close, expected PATH");
   p->require(TokType::RightBracket, "expected ']'");
 
   auto s = n->children().back();
@@ -829,7 +831,7 @@ parseEnterPath(Parser * p, Node * n)
 {
   p->ignore();
   p->require(TokType::LeftBracket, "");
-  auto tok = p->require(TokType::Path, "invalid path in section header");
+  const auto & tok = p->require(TokType::Path, "invalid path in section header");
   p->require(TokType::RightBracket, "missing ']'");
   if (tok.val == "./" || tok.val == "")
     p->error(tok, "empty section name - did you mean '../'?");
@@ -844,8 +846,8 @@ parseSectionBody(Parser * p, Node * n)
 {
   while (true)
   {
-    auto tok = p->next();
-    auto next = p->peek();
+    const auto & tok = p->next();
+    const auto & next = p->peek();
     p->backup();
     if (tok.type == TokType::BlankLine)
     {
@@ -879,14 +881,14 @@ void
 parseField(Parser * p, Node * n)
 {
   p->ignore();
-  auto fieldtok = p->require(TokType::Ident, "unexpected token for field");
+  const auto & fieldtok = p->require(TokType::Ident, "unexpected token for field");
   p->require(TokType::Equals, "missing '='");
 
   Node * field = nullptr;
-  auto valtok = p->next();
-  if (valtok.type == TokType::Number)
+  auto * valtok = &p->next();
+  if (valtok->type == TokType::Number)
   {
-    std::string s = valtok.val;
+    std::string s = valtok->val;
     Field::Kind kind = Field::Kind::Int;
     try
     {
@@ -902,21 +904,21 @@ parseField(Parser * p, Node * n)
 
     field = p->emit(new Field(fieldtok.val, kind, s));
   }
-  else if (valtok.type == TokType::String)
+  else if (valtok->type == TokType::String)
   {
     bool v = false;
-    bool isbool = toBool(valtok.val, &v);
+    bool isbool = toBool(valtok->val, &v);
     if (isbool)
-      field = p->emit(new Field(fieldtok.val, Field::Kind::Bool, valtok.val));
+      field = p->emit(new Field(fieldtok.val, Field::Kind::Bool, valtok->val));
     else
     {
       std::string strval;
-      std::string quote = quoteChar(valtok.val);
+      std::string quote = quoteChar(valtok->val);
       while (true)
       {
-        if (valtok.type == TokType::String)
+        if (valtok->type == TokType::String)
         {
-          auto s = valtok.val;
+          auto s = valtok->val;
           if (quote != "")
             s = s.substr(1, s.size() - 2);
           strval += s;
@@ -924,20 +926,20 @@ parseField(Parser * p, Node * n)
 
         if (p->peek().type != TokType::BlankLine && p->peek().type != TokType::String)
         {
-          if (valtok.type == TokType::BlankLine)
+          if (valtok->type == TokType::BlankLine)
             p->backup();
           break;
         }
-        valtok = p->next();
+        valtok = &p->next();
       }
       strval = quote + strval + quote;
       field = p->emit(new Field(fieldtok.val, Field::Kind::String, strval));
     }
   }
-  else if (valtok.type == TokType::Error)
-    p->error(valtok, valtok.val);
+  else if (valtok->type == TokType::Error)
+    p->error(*valtok, valtok->val);
   else
-    p->error(valtok, "missing value for field '" + fieldtok.val + "' - found '" + valtok.val + "'");
+    p->error(*valtok, "missing value for field '" + fieldtok.val + "' - found '" + valtok->val + "'");
   n->addChild(field);
 }
 
@@ -945,7 +947,7 @@ void
 parseComment(Parser * p, Node * n)
 {
   p->ignore();
-  auto tok = p->next();
+  const auto & tok = p->next();
   bool isinline = false;
   if (tok.type == TokType::Comment)
     isinline = false;
