@@ -68,14 +68,12 @@ SideDiffusiveFluxIntegralTempl<is_ad, T>::computeFaceInfoIntegral(const FaceInfo
   // Get the gradient of the variable on the face
   const auto grad_u = MetaPhysicL::raw_value(_fv_variable->gradient(
       Moose::FV::makeCDFace(*fi, Moose::FV::faceArgSubdomains(*_fv_variable, *fi))));
-  ;
 
-  // FIXME Get the diffusion coefficient on the face, see #16809
   return -diffusivityGradientProduct(
              grad_u,
              MetaPhysicL::raw_value((*_functor_diffusion_coef)(Moose::FV::makeCDFace(
                  *fi, Moose::FV::faceArgSubdomains(*_functor_diffusion_coef, *fi))))) *
-         (_fv_variable->hasBlocks(fi->elemSubdomainID()) ? fi->normal() : Point(-fi->normal()));
+         _normals[_qp];
 }
 
 template <bool is_ad, typename T>
