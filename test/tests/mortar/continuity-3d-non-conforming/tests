@@ -143,11 +143,11 @@
     ad_indexing_type = global
     min_parallel = 2
   []
-  [continuity_penalty_sphere_hex20_non_ad]
+  [continuity_penalty_sphere_hex20_ad]
     type = 'Exodiff'
     input = 'continuity_penalty_sphere_hex20.i'
     exodiff = 'continuity_penalty_sphere_hex20_out.e'
-    cli_args = 'Constraints/mortar/type=RegularPenaltyEqualValueConstraint'
+    cli_args = 'Constraints/mortar/type=ADPenaltyEqualValueConstraint'
     requirement = 'The system shall be able to produce the same result using the penalty-based '
                   'mortar method with and without automatic differentiation.'
     map = False
