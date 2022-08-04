@@ -39,13 +39,13 @@ public:
   /// We train our neural networks in the postTrain() method
   virtual void postTrain() override;
 
-  /// The condensed training function
-  void trainController();
-
   /// Function which computes the average reward of the currently stored rewards
   Real averageEpisodeReward();
 
 #ifdef LIBTORCH_ENABLED
+  /// The condensed training function
+  void trainController();
+
   const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & controlNeuralNet() const
   {
     return _control_nn;
@@ -80,6 +80,7 @@ protected:
    */
   void getRewardDataFromReporter(std::vector<Real> & data, const ReporterName & reporter_name);
 
+#ifdef LIBTORCH_ENABLED
   /**
    * Function to convert input/output data from std::vector<std::vector> to torch::tensor
    * @param vector_data The input data in vector-vectors format
@@ -114,6 +115,8 @@ protected:
    * @return The estimated value for the logarithmic probability
    */
   torch::Tensor evaluateAction(const torch::Tensor & input, const torch::Tensor & output);
+
+#endif
 
   /// Compute the return value by discounting the rewards
   void computeDiscountedRewards();

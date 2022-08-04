@@ -1,10 +1,10 @@
 #pragma once
 
 #ifdef LIBTORCH_ENABLED
-#include "LibtorchNeuralNetControl.h"
 #include "LibtorchArtificialNeuralNet.h"
 #endif
 
+#include "LibtorchNeuralNetControl.h"
 #include "Control.h"
 
 /**

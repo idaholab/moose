@@ -240,6 +240,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
 void
 LibtorchDRLControlTrainer::postTrain()
 {
+#ifdef LIBTORCH_ENABLED
   // Extract data from the reporters
   getInputDataFromReporter(_input_data, _response_names, _input_timesteps);
   getOutputDataFromReporter(_output_data, _control_names);
@@ -267,6 +268,7 @@ LibtorchDRLControlTrainer::postTrain()
     // We clean the training data after contoller update and reset the counter
     resetData();
   }
+#endif
 }
 
 Real
@@ -276,7 +278,7 @@ LibtorchDRLControlTrainer::averageEpisodeReward()
 
   if (_reward_data.size())
     _average_episode_reward =
-        std::reduce(_reward_data.begin(), _reward_data.end()) / _reward_data.size();
+        std::accumulate(_reward_data.begin(), _reward_data.end(), 0.0) / _reward_data.size();
 
   return _average_episode_reward;
 }
@@ -292,7 +294,7 @@ LibtorchDRLControlTrainer::getInputDataFromReporter(
     std::vector<Real> reporter_data =
         getReporterValueByName<std::vector<Real>>(reporter_names[rep_i]);
 
-    // We shoft and scale the inputs to get better training efficiency
+    // We shift and scale the inputs to get better training efficiency
     std::transform(
         reporter_data.begin(),
         reporter_data.end(),
@@ -341,6 +343,7 @@ LibtorchDRLControlTrainer::getRewardDataFromReporter(std::vector<Real> & data,
   data.insert(data.end(), reporter_data.begin() + _shift_outputs, reporter_data.end());
 }
 
+#ifdef LIBTORCH_ENABLED
 void
 LibtorchDRLControlTrainer::computeDiscountedRewards()
 {
@@ -364,8 +367,6 @@ LibtorchDRLControlTrainer::computeDiscountedRewards()
 void
 LibtorchDRLControlTrainer::trainController()
 {
-
-#ifdef LIBTORCH_ENABLED
   // Define the optimizers for the training
   torch::optim::Adam actor_optimizer(_control_nn->parameters(),
                                      torch::optim::AdamOptions(_control_learning_rate));
@@ -422,10 +423,8 @@ LibtorchDRLControlTrainer::trainController()
   // want to continue training
   torch::save(_control_nn, _control_nn->name());
   torch::save(_critic_nn, _critic_nn->name());
-#endif
 }
 
-#ifdef LIBTORCH_ENABLED
 void
 LibtorchDRLControlTrainer::convertDataToTensor(std::vector<std::vector<Real>> & vector_data,
                                                torch::Tensor & tensor_data,
