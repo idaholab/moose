@@ -49,9 +49,11 @@ LibtorchNeuralNetControlTransfer::execute()
 
     case TO_MULTIAPP:
 
+      // Get the control neural net from the trainer
       const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & trainer_nn =
           _trainer.controlNeuralNet();
 
+      // Get the control object from the other app
       FEProblemBase & app_problem = _multi_app->appProblemBase(0);
       auto & control_warehouse = app_problem.getControlWarehouse();
       const auto & control_ref = control_warehouse.getActiveObject(_control_name);
@@ -61,6 +63,7 @@ LibtorchNeuralNetControlTransfer::execute()
       if (!control_object)
         mooseError("Couldn't cast Control object to LibtorchNeuralNetrControl!");
 
+      // Copy and the neural net and execute it to get the initial values
       control_object->loadControlNeuralNet(trainer_nn);
       control_object->execute();
 

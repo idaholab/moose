@@ -147,10 +147,10 @@ LibtorchANNTrainer::postTrain()
   torch::Tensor response_tensor =
       torch::from_blob(_flattened_response.data(), {num_samples, 1}, options).to(at::kDouble);
 
-  // We create a custom data loader which can be used to select samples for the in
-  // the training process. See the header file for the definition of this structure.
+  // We create a custom data set from our converted data
   Moose::LibtorchDataset my_data(data_tensor, response_tensor);
 
+  // We create atrainer for our neral net and train it with the dataset
   Moose::LibtorchArtificialNeuralNetTrainer<> trainer(_nn, comm());
   trainer.train(my_data, _optim_options);
 

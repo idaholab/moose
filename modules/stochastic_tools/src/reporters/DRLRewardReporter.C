@@ -18,7 +18,6 @@ DRLRewardReporter::validParams()
   params += SurrogateModelInterface::validParams();
 
   params.addClassDescription("Reporter containing the reward values of a DRL controller trainer.");
-
   params.addRequiredParam<UserObjectName>(
       "drl_trainer_name", "The name of the RDL controller trainer which computes the rewards.");
 

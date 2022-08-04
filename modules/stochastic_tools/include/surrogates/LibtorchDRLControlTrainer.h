@@ -206,6 +206,9 @@ protected:
   /// Switch to enable the standardization of the advantages
   bool _standardize_advantage;
 
+  /// The frequency the loss should be printed
+  unsigned int _loss_print_frequency;
+
 #ifdef LIBTORCH_ENABLED
   /// Pointer to the control (or actor) neural net object
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _control_nn;

@@ -18,12 +18,9 @@ DRLRewardFunction::validParams()
   InputParameters params = Function::validParams();
 
   params.addRequiredParam<FunctionName>("design_function", "The desired value to reach.");
-
   params.addRequiredParam<PostprocessorName>(
       "observed_value", "The name of the Postprocessor that contains the observed value.");
-
   params.addParam<Real>("c1", 10, "1st coefficient in the reward function.");
-
   params.addParam<Real>("c2", 1, "2nd coefficient in the reward function.");
 
   return params;

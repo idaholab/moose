@@ -28,13 +28,11 @@ public:
   virtual void execute() override;
 
 protected:
-  /**
-   * The trainer object which contains the information about the neural net.
-   */
-
+  /// The name of the control object on the other app where we want to copy our neural net
   const std::string _control_name;
 
 #ifdef LIBTORCH_ENABLED
+  /// The trainer object which will contains the control neural net
   const LibtorchDRLControlTrainer & _trainer;
 #endif
 };

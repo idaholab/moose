@@ -115,7 +115,7 @@ LibtorchDRLControl::execute()
       setControllableValueByName<Real>(_control_names[control_i],
                                        converted_action[control_i] *
                                            _action_scaling_factors[control_i]);
-      // Save action values to postprocessor. We do not scale the action value here. it will be used
+      // Save action values to postprocessor. We do not scale the action value here, it will be used
       // and reported directly for training
       _fe_problem.setPostprocessorValueByName(_action_postprocessor_names[control_i],
                                               converted_action[control_i]);

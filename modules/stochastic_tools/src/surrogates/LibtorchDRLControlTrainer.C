@@ -105,6 +105,10 @@ LibtorchDRLControlTrainer::validParams()
       "standardize_advantage",
       true,
       "Switch to enable the shifting and normalization of the advantages in the PPO algorithm.");
+  params.addParam<unsigned int>("loss_print_frequency",
+                                10,
+                                "The frequency which is used to print the loss values. If 0, the "
+                                "loss values are not printed.");
   return params;
 }
 
@@ -132,7 +136,8 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _filename_base(getParam<std::string>("filename_base")),
     _read_from_file(getParam<bool>("read_from_file")),
     _shift_outputs(getParam<bool>("shift_outputs")),
-    _standardize_advantage(getParam<bool>("standardize_advantage"))
+    _standardize_advantage(getParam<bool>("standardize_advantage")),
+    _loss_print_frequency(getParam<unsigned int>("loss_print_frequency"))
 {
 
   if (_response_names.size() == 0)
@@ -176,11 +181,12 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   // Otherwise sampling / stochastic gradient descent would be different.
   torch::manual_seed(getParam<unsigned int>("seed"));
 
+  // Convert the user input standard deviations to a diagonal tensor
   _std = torch::eye(_control_names.size());
   for (unsigned int i = 0; i < _control_names.size(); ++i)
     _std[i][i] = _action_std[i];
 
-  // Initializing and saving the control neural net so that the control can grab it right away
+  // Initializing the control neural net so that the control can grab it right away
   _control_nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
       _filename_base + "_control.net",
       _num_inputs,
@@ -188,6 +194,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       _num_control_neurons_per_layer,
       getParam<std::vector<std::string>>("control_activation_functions"));
 
+  // We read parameters for the control neural net if it is requested
   if (_read_from_file)
   {
     try
@@ -211,6 +218,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       _num_critic_neurons_per_layer,
       getParam<std::vector<std::string>>("critic_activation_functions"));
 
+  // We read parameters for the critic neural net if it is requested
   if (_read_from_file)
   {
     try
@@ -232,13 +240,13 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
 void
 LibtorchDRLControlTrainer::postTrain()
 {
-  // Store data from the reporter
+  // Extract data from the reporters
   getInputDataFromReporter(_input_data, _response_names, _input_timesteps);
   getOutputDataFromReporter(_output_data, _control_names);
   getOutputDataFromReporter(_log_probability_data, _log_probability_names);
   getRewardDataFromReporter(_reward_data, _reward_name);
 
-  // Calculate return from the reward
+  // Calculate return from the reward (discounting the reward)
   computeDiscountedRewards();
 
   _update_counter--;
@@ -248,21 +256,15 @@ LibtorchDRLControlTrainer::postTrain()
   {
     // Transform input/output/return data to torch::Tensor
     convertDataToTensor(_input_data, _input_tensor);
-
-    // scale the input data
     convertDataToTensor(_output_data, _output_tensor);
-
-    // we do not scale output_data for training
     convertDataToTensor(_log_probability_data, _log_probability_tensor);
-
-    convertDataToTensor(
-        _return_data, _return_tensor, true); // discard the gradient info for return data
+    // Discard (detach) the gradient info for return data
+    convertDataToTensor(_return_data, _return_tensor, true);
 
     // We train the controller using the emulator to get a good control strategy
     trainController();
 
-    // We clean the training data after contoller update
-    // We also reset the counter and number of samples
+    // We clean the training data after contoller update and reset the counter
     resetData();
   }
 }
@@ -290,6 +292,7 @@ LibtorchDRLControlTrainer::getInputDataFromReporter(
     std::vector<Real> reporter_data =
         getReporterValueByName<std::vector<Real>>(reporter_names[rep_i]);
 
+    // We shoft and scale the inputs to get better training efficiency
     std::transform(
         reporter_data.begin(),
         reporter_data.end(),
@@ -297,6 +300,7 @@ LibtorchDRLControlTrainer::getInputDataFromReporter(
         [this, &rep_i](Real value) -> Real
         { return (value - _response_shift_factors[rep_i]) * _response_scaling_factors[rep_i]; });
 
+    // Fill the corresponding containers
     for (unsigned int start_step = 0; start_step < num_timesteps; start_step++)
     {
       unsigned int row = reporter_names.size() * start_step + rep_i;
@@ -320,6 +324,7 @@ LibtorchDRLControlTrainer::getOutputDataFromReporter(
     const std::vector<Real> & reporter_data =
         getReporterValueByName<std::vector<Real>>(reporter_names[rep_i]);
 
+    // Fill the corresponding containers
     data[rep_i].insert(
         data[rep_i].end(), reporter_data.begin() + _shift_outputs, reporter_data.end());
   }
@@ -332,25 +337,27 @@ LibtorchDRLControlTrainer::getRewardDataFromReporter(std::vector<Real> & data,
   const std::vector<Real> & reporter_data =
       getReporterValueByName<std::vector<Real>>(reporter_name);
 
+  // Fill the corresponding container
   data.insert(data.end(), reporter_data.begin() + _shift_outputs, reporter_data.end());
 }
 
 void
 LibtorchDRLControlTrainer::computeDiscountedRewards()
 {
-  // get reward data from one simulation
+  // Get reward data from one simulation
   std::vector<Real> reward_data_per_sim;
   std::vector<Real> return_data_per_sim;
-
   getRewardDataFromReporter(reward_data_per_sim, _reward_name);
 
+  // Discount the reward to get the return value
   Real discounted_reward = 0;
-
   for (int i = reward_data_per_sim.size() - 1; i >= 0; --i)
   {
     discounted_reward = reward_data_per_sim[i] + discounted_reward * _decay_factor;
     return_data_per_sim.insert(return_data_per_sim.begin(), discounted_reward);
   }
+
+  // Save the return values
   _return_data.insert(_return_data.end(), return_data_per_sim.begin(), return_data_per_sim.end());
 }
 
@@ -359,32 +366,42 @@ LibtorchDRLControlTrainer::trainController()
 {
 
 #ifdef LIBTORCH_ENABLED
+  // Define the optimizers for the training
   torch::optim::Adam actor_optimizer(_control_nn->parameters(),
                                      torch::optim::AdamOptions(_control_learning_rate));
 
   torch::optim::Adam critic_optimizer(_critic_nn->parameters(),
                                       torch::optim::AdamOptions(_critic_learning_rate));
 
+  // Compute the approximate value (return) from the critic neural net and use it to compute an
+  // advantage
   auto value = evaluateValue(_input_tensor).detach();
-
   auto advantage = _return_tensor - value;
 
+  // If requested, standardize the advantage
   if (_standardize_advantage)
     advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10);
 
   for (unsigned int epoch = 0; epoch < _num_epochs; ++epoch)
   {
+    // Get the approximate return from the neural net again (this one does have an associated
+    // gradient)
     value = evaluateValue(_input_tensor);
+    // Get the approximate logarithmic action probability using the control neural net
     auto curr_log_probability = evaluateAction(_input_tensor, _output_tensor);
 
+    // Prepare the ratio by using the e^(logx-logy)=x/y expression
     auto ratio = (curr_log_probability - _log_probability_tensor).exp();
 
+    // Use clamping for limiting
     auto surr1 = ratio * advantage;
     auto surr2 = torch::clamp(ratio, 1.0 - _clip_param, 1.0 + _clip_param) * advantage;
 
+    // Compute loss values for the critic and the control neural net
     auto actor_loss = -torch::min(surr1, surr2).mean();
     auto critic_loss = torch::mse_loss(value, _return_tensor);
 
+    // Update the weights in the neural nets
     actor_optimizer.zero_grad();
     actor_loss.backward();
     actor_optimizer.step();
@@ -394,14 +411,17 @@ LibtorchDRLControlTrainer::trainController()
     critic_optimizer.step();
 
     // print loss per epoch
-    if (epoch % 10 == 0)
-      _console << "Epoch: " << epoch << " | Actor Loss: " << COLOR_GREEN
-               << actor_loss.item<double>() << " | Critic Loss: " << critic_loss.item<double>()
-               << COLOR_DEFAULT << std::endl;
+    if (_loss_print_frequency)
+      if (epoch % _loss_print_frequency == 0)
+        _console << "Epoch: " << epoch << " | Actor Loss: " << COLOR_GREEN
+                 << actor_loss.item<double>() << COLOR_DEFAULT << " | Critic Loss: " << COLOR_GREEN
+                 << critic_loss.item<double>() << COLOR_DEFAULT << std::endl;
   }
 
-  // Save the controller neural net so our controller can read it
+  // Save the controller neural net so our controller can read it, we also save the critic if we
+  // want to continue training
   torch::save(_control_nn, _control_nn->name());
+  torch::save(_critic_nn, _critic_nn->name());
 #endif
 }
 
@@ -454,8 +474,8 @@ LibtorchDRLControlTrainer::evaluateAction(const torch::Tensor & input, const tor
 {
   torch::Tensor var = torch::matmul(_std, _std);
 
+  // Compute an action and get it's logarithmic proability based on an assumed Gaussian distribution
   torch::Tensor action = _control_nn->forward(input);
-
   return -((action - output) * (action - output)) / (2 * var) - torch::log(_std) -
          std::log(std::sqrt(2 * M_PI));
 }
