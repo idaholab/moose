@@ -67,10 +67,9 @@ ifeq ($(ENABLE_LIBTORCH),true)
   ifneq ($(wildcard $(LIBTORCH_DIR)/lib/$(LIBTORCH_LIB)),)
     # Enabling parts that have pytorch dependencies
     libmesh_CXXFLAGS += -DLIBTORCH_ENABLED
-		libmesh_CXXFLAGS += -DUSE_C10D_MPI
 
     # Adding the include directories, we use -isystem to silence the warning coming from
-	  # libtorch (which would cause errors in the testing phase)
+    # libtorch (which would cause errors in the testing phase)
     libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include/torch/csrc/api/include
     libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include
 
@@ -210,7 +209,12 @@ ifeq ($(MOOSE_UNITY),true)
 
 srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
 
-moose_non_unity := %/base %/utils %/controls
+moose_non_unity := %/base %/utils
+
+# Add additional non-unity directories if libtorch is enabled
+ifeq ($(ENABLE_LIBTORCH),true)
+  moose_non_unity += %/controls
+endif
 
 unity_src_dir := $(FRAMEWORK_DIR)/build/unity_src
 

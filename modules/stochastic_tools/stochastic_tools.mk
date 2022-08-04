@@ -1,3 +1,3 @@
 ifeq ($(ENABLE_LIBTORCH),true)
-  app_non_unity_dirs = %src/surrogates %src/transfers %src/reporters
+  app_non_unity_dirs = %src/surrogates %src/transfers %src/reporters %src/controls
 endif

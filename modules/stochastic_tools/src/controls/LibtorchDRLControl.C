@@ -19,11 +19,11 @@ LibtorchDRLControl::validParams()
 {
   InputParameters params = LibtorchNeuralNetControl::validParams();
   params.addClassDescription(
-      "Sets the value of a 'Real' input parameter (or postprocessor) based on a Proportional "
-      "Integral Derivative control of a postprocessor to match a target a target value.");
+      "Sets the value of multiple 'Real' input parameters and postprocessors based on a Deep "
+      "Reinforcement Learning (DRL) neural network trained using a PPO algorithm.");
   params.addRequiredParam<std::vector<PostprocessorName>>(
       "log_probability_postprocessors",
-      "The postprocessors which stores the log probability of the action/control values.");
+      "The postprocessors which store the log probability of the action/control values.");
   params.addRequiredParam<std::vector<Real>>(
       "action_standard_deviations", "Standard deviation value used while sampling the actions.");
 
@@ -38,15 +38,17 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
 {
   if (_control_names.size() != _action_std.size())
     paramError("action_standard_deviations",
-               "Nunmber of action_standard_deviations does not match the number of controlled "
+               "Number of action_standard_deviations does not match the number of controlled "
                "parameters.");
 
   if (_control_names.size() != _log_probability_postprocessor_names.size())
     paramError("log_probability_postprocessors",
-               "Nunmber of log_probability_postprocessors does not match the number of controlled "
+               "Number of log_probability_postprocessors does not match the number of controlled "
                "parameters.");
 
 #ifdef LIBTORCH_ENABLED
+  // We convert and store the user-supplied standard deviations into a tensor which can be easily
+  // used by routines in libtorch
   _std = torch::eye(_control_names.size());
   for (unsigned int i = 0; i < _control_names.size(); ++i)
     _std[i][i] = _action_std[i];
@@ -63,12 +65,15 @@ LibtorchDRLControl::execute()
     unsigned int n_controls = _control_names.size();
     unsigned int num_old_timesteps = _input_timesteps - 1;
 
+    // Fill a vector with the current values of the responses
     _current_response.clear();
     for (unsigned int resp_i = 0; resp_i < n_responses; ++resp_i)
       _current_response.push_back(
           (getPostprocessorValueByName(_response_names[resp_i]) - _response_shift_factors[resp_i]) *
           _response_scaling_factors[resp_i]);
 
+    // If this is the first time this control is called and we need to use older values, fill up the
+    // needed old values using the initial values
     if (!_initialized)
     {
       _old_responses.clear();
@@ -77,6 +82,7 @@ LibtorchDRLControl::execute()
       _initialized = true;
     }
 
+    // Convert the input to a tensor so that we can call the neural net on it
     std::vector<Real> raw_input(_current_response);
     for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
       raw_input.insert(
@@ -87,23 +93,15 @@ LibtorchDRLControl::execute()
         torch::from_blob(raw_input.data(), {1, _input_timesteps * n_responses}, options)
             .to(at::kDouble);
 
-    std::cout << "Input" << std::endl;
-    std::cout << input_tensor << std::endl;
     torch::Tensor output_tensor = _nn->forward(input_tensor);
 
-    // sample control value (action) from Gaussian distribution
+    // Sample control value (action) from Gaussian distribution
     torch::Tensor action = at::normal(output_tensor, _std);
 
-    std::cout << "Output" << std::endl;
-    std::cout << action << std::endl;
-
-    // compute log probability
+    // Compute log probability
     torch::Tensor log_probability = computeLogProbability(action, output_tensor);
 
-    std::cout << "Logprob" << std::endl;
-    std::cout << log_probability << std::endl;
-
-    // convert data
+    // Convert data
     std::vector<Real> converted_action = {action.data_ptr<Real>(),
                                           action.data_ptr<Real>() + action.size(1)};
 
@@ -113,20 +111,22 @@ LibtorchDRLControl::execute()
 
     for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     {
-      // we scale the controllable value for physically meaningful control action
+      // We scale the controllable value for physically meaningful control action
       setControllableValueByName<Real>(_control_names[control_i],
                                        converted_action[control_i] *
                                            _action_scaling_factors[control_i]);
-      // save action values to postprocessor
-      // we do not scale the action value here. it will be used and reported directly for training
+      // Save action values to postprocessor. We do not scale the action value here. it will be used
+      // and reported directly for training
       _fe_problem.setPostprocessorValueByName(_action_postprocessor_names[control_i],
                                               converted_action[control_i]);
 
-      // save log probability values to postprocessor
+      // Save log probability values to postprocessor
       _fe_problem.setPostprocessorValueByName(_log_probability_postprocessor_names[control_i],
                                               converted_log_probability[control_i]);
     }
 
+    // We add the curent solution to the old solutions and move everything in there one step
+    // backward
     for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
     {
       if (step_i == num_old_timesteps - 1)

@@ -18,7 +18,7 @@
 namespace Moose
 {
 
-// A class that describes a simple feed-forward neural net.
+// A class that describes a torch-script-based neural network.
 class LibtorchTorchScriptNeuralNet : public LibtorchNeuralNet<torch::jit::script::Module>
 {
 public:

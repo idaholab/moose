@@ -18,23 +18,22 @@ InputParameters
 LibtorchNeuralNetControl::validParams()
 {
   InputParameters params = Control::validParams();
-  params.addClassDescription(
-      "Sets the value of a 'Real' input parameter (or postprocessor) based on a Proportional "
-      "Integral Derivative control of a postprocessor to match a target a target value.");
+  params.addClassDescription("Sets the value of multiple 'Real' input parameters and "
+                             "postprocessors using a neural network.");
   params.addRequiredParam<std::vector<std::string>>("parameters",
                                                     "The input parameter(s) to control.");
   params.addRequiredParam<std::vector<PostprocessorName>>(
       "responses", "The responses (prostprocessors) which are used for the control.");
   params.addParam<std::vector<Real>>(
       "response_shift_factors",
-      "A shift constant which will be used to shift the response values. This is used for the "
+      "Constants which will be used to shift the response values. This is used for the "
       "manipulation of the neural net inputs for better training efficiency.");
   params.addParam<std::vector<Real>>(
       "response_scaling_factors",
-      "A normalization constant which will be used to divide the response values. This is used for "
+      "Constants which will be used to multiply the shifted response values. This is used for "
       "the manipulation of the neural net inputs for better training efficiency.");
   params.addRequiredParam<std::vector<PostprocessorName>>(
-      "action_postprocessors", "The postprocessors which stores the control (action) values.");
+      "action_postprocessors", "The postprocessors which store the control (action) values.");
   params.addParam<std::string>("filename",
                                "Define if the neural net is supposed to be loaded from a file.");
   params.addParam<bool>("torch_script_format",
@@ -44,7 +43,7 @@ LibtorchNeuralNetControl::validParams()
       "input_timesteps",
       1,
       "Number of time steps to use in the input data, if larger than 1, "
-      "data from the previous timesteps will be used as inputs in the training.");
+      "data from the previous timesteps will be used as well as inputs in the training.");
   params.addParam<std::vector<unsigned int>>("num_neurons_per_layer",
                                              "The number of neurons on each hidden layer.");
   params.addParam<std::vector<std::string>>(
@@ -54,7 +53,7 @@ LibtorchNeuralNetControl::validParams()
 
   params.addParam<std::vector<Real>>(
       "action_scaling_factors",
-      "Scale factor that multiplies to the NN output to obtain a physically meaningful value.");
+      "Scale factor that multiplies the NN output to obtain a physically meaningful value.");
 
   return params;
 }
@@ -165,12 +164,15 @@ LibtorchNeuralNetControl::execute()
     unsigned int n_controls = _control_names.size();
     unsigned int num_old_timesteps = _input_timesteps - 1;
 
+    // Gather the current response values values
     _current_response.clear();
     for (unsigned int resp_i = 0; resp_i < n_responses; ++resp_i)
       _current_response.push_back(
           (getPostprocessorValueByName(_response_names[resp_i]) - _response_shift_factors[resp_i]) *
           _response_scaling_factors[resp_i]);
 
+    // If we need old responses and this is the initial timestep, we fill up the old
+    // values with the initial value
     if (!_initialized)
     {
       _old_responses.clear();
@@ -179,6 +181,7 @@ LibtorchNeuralNetControl::execute()
       _initialized = true;
     }
 
+    // We convert the standard vectors to libtorch tensors
     std::vector<Real> raw_input(_current_response);
     for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
       raw_input.insert(
@@ -189,6 +192,7 @@ LibtorchNeuralNetControl::execute()
         torch::from_blob(raw_input.data(), {1, _input_timesteps * n_responses}, options)
             .to(at::kDouble);
 
+    // Evaluate the neural network to get the control values then convert it back to vectors
     torch::Tensor action = _nn->forward(input_tensor);
 
     std::vector<Real> converted_action = {action.data_ptr<Real>(),
@@ -196,16 +200,18 @@ LibtorchNeuralNetControl::execute()
 
     for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     {
-      // we scale the controllable value for physically meaningful control action
+      // We scale the controllable value for physically meaningful control action
       setControllableValueByName<Real>(_control_names[control_i],
                                        converted_action[control_i] *
                                            _action_scaling_factors[control_i]);
-      // save action values to postprocessor
-      // we do not scale the action value here. it will be used and reported directly for training
+      // Save action values to postprocessors. We do not scale the action value here.
+      // It will be used and reported directly for training
       _fe_problem.setPostprocessorValueByName(_action_postprocessor_names[control_i],
                                               converted_action[control_i]);
     }
 
+    // We add the curent solution to the old solutions and move everything in there one step
+    // backward
     for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
     {
       if (step_i == num_old_timesteps - 1)

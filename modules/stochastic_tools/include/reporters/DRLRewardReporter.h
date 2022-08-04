@@ -13,6 +13,7 @@
 #include "GeneralReporter.h"
 #include "SurrogateModelInterface.h"
 
+/// Reporter which saves the reward values from a Deep Reinforcement Learning controller trainer
 class DRLRewardReporter : public GeneralReporter, public SurrogateModelInterface
 {
 public:
@@ -23,6 +24,8 @@ public:
   virtual void execute() override;
 
 protected:
+  /// The reward values which will be saved
   Real & _reward;
+  /// The DRL trainer which computes the reward values
   LibtorchDRLControlTrainer & _trainer;
 };

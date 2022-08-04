@@ -12,6 +12,7 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
+/// A simple reward function which uses c1*|x-x_target|+c2
 class DRLRewardFunction : public Function, protected FunctionInterface
 {
 public:
@@ -19,26 +20,18 @@ public:
 
   DRLRewardFunction(const InputParameters & parameters);
 
-  // using Function::value;
   virtual Real value(Real t, const Point & p) const override;
   virtual ADReal value(const ADReal & t, const ADPoint & p) const override;
 
 protected:
-  /// value we would like to reach (can be time and spatial dependent)
+  /// Value we would like to reach (can be time and spatial dependent)
   const Function & _design_function;
 
-  /// postprocessor containing the observed value
+  /// Postprocessor containing the observed value
   const PostprocessorName & _observed_pp_name;
   const PostprocessorValue & _observed_value;
 
-  /*
-    /// postprocessor containing the action value
-    const PostprocessorName & _action_pp_name;
-    const PostprocessorValue & _action_value;
-  */
-
-  /// coefficients in the reward function, c1 - c2
-  /// c1 * exp(-c2 * abs(diff))
+  /// Coefficients for the reward function
   const Real & _c1;
   const Real & _c2;
 };

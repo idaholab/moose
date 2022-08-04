@@ -17,11 +17,10 @@ DRLRewardReporter::validParams()
   InputParameters params = GeneralReporter::validParams();
   params += SurrogateModelInterface::validParams();
 
-  params.addClassDescription("Reporter with constant values to be accessed by other objects, can "
-                             "be modified using transfers.");
+  params.addClassDescription("Reporter containing the reward values of a DRL controller trainer.");
 
   params.addRequiredParam<UserObjectName>(
-      "drl_trainer_name", "The name of the RDL trainer which computes the rewards.");
+      "drl_trainer_name", "The name of the RDL controller trainer which computes the rewards.");
 
   return params;
 }

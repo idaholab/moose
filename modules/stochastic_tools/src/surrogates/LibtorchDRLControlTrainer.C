@@ -95,8 +95,16 @@ LibtorchDRLControlTrainer::validParams()
                         "Decay factor for calculating the return. This accounts for decreased "
                         "reward values from the later steps.");
 
-  params.addParam<bool>("read_from_file", false, "Something here");
-  params.addParam<bool>("shift_outputs", true, "Something here");
+  params.addParam<bool>(
+      "read_from_file", false, "Switch to read the neural network parameters from a file.");
+  params.addParam<bool>(
+      "shift_outputs",
+      true,
+      "If we would like to shift the outputs the realign the input-output pairs.");
+  params.addParam<bool>(
+      "standardize_advantage",
+      true,
+      "Switch to enable the shifting and normalization of the advantages in the PPO algorithm.");
   return params;
 }
 
@@ -110,7 +118,6 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _num_inputs(_input_timesteps * _response_names.size()),
     _num_outputs(_control_names.size()),
     _num_epochs(getParam<unsigned int>("num_epochs")),
-    _num_batches(getParam<unsigned int>("num_batches")),
     _num_critic_neurons_per_layer(
         getParam<std::vector<unsigned int>>("num_critic_neurons_per_layer")),
     _critic_learning_rate(getParam<Real>("critic_learning_rate")),
@@ -124,7 +131,8 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _action_std(getParam<std::vector<Real>>("action_standard_deviations")),
     _filename_base(getParam<std::string>("filename_base")),
     _read_from_file(getParam<bool>("read_from_file")),
-    _shift_outputs(getParam<bool>("shift_outputs"))
+    _shift_outputs(getParam<bool>("shift_outputs")),
+    _standardize_advantage(getParam<bool>("standardize_advantage"))
 {
 
   if (_response_names.size() == 0)
@@ -179,7 +187,21 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       _num_outputs,
       _num_control_neurons_per_layer,
       getParam<std::vector<std::string>>("control_activation_functions"));
-  torch::save(_control_nn, _control_nn->name());
+
+  if (_read_from_file)
+  {
+    try
+    {
+      torch::load(_control_nn, _control_nn->name());
+      _console << "Loaded requested .pt file." << std::endl;
+    }
+    catch (...)
+    {
+      mooseError("The requested pytorch file could not be loaded for the control neural net.");
+    }
+  }
+  else
+    torch::save(_control_nn, _control_nn->name());
 
   // Initialize the critic neural net
   _critic_nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
@@ -188,6 +210,21 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       1,
       _num_critic_neurons_per_layer,
       getParam<std::vector<std::string>>("critic_activation_functions"));
+
+  if (_read_from_file)
+  {
+    try
+    {
+      torch::load(_critic_nn, _critic_nn->name());
+      _console << "Loaded requested .pt file." << std::endl;
+    }
+    catch (...)
+    {
+      mooseError("The requested pytorch file could not be loaded for the critic neural net.");
+    }
+  }
+  else
+    torch::save(_critic_nn, _critic_nn->name());
 
 #endif
 }
@@ -212,19 +249,14 @@ LibtorchDRLControlTrainer::postTrain()
     // Transform input/output/return data to torch::Tensor
     convertDataToTensor(_input_data, _input_tensor);
 
-    // std::cout << _input_tensor << std::endl;
     // scale the input data
     convertDataToTensor(_output_data, _output_tensor);
 
-    // std::cout << _output_tensor << std::endl;
     // we do not scale output_data for training
     convertDataToTensor(_log_probability_data, _log_probability_tensor);
 
-    // std::cout << _log_probability_tensor << std::endl;
     convertDataToTensor(
         _return_data, _return_tensor, true); // discard the gradient info for return data
-
-    // std::cout << _return_tensor << std::endl;
 
     // We train the controller using the emulator to get a good control strategy
     trainController();
@@ -337,7 +369,8 @@ LibtorchDRLControlTrainer::trainController()
 
   auto advantage = _return_tensor - value;
 
-  advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10);
+  if (_standardize_advantage)
+    advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-10);
 
   for (unsigned int epoch = 0; epoch < _num_epochs; ++epoch)
   {

@@ -44,14 +44,13 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     _num_neurons_per_layer(nn.numNeuronsPerLayer()),
     _activation_function(nn.activationFunctions())
 {
+  // We construct the NN architecture
   constructNeuralNetwork();
-
+  // We fill it up with the current parameter values
   const auto & from_params = nn.named_parameters();
   auto to_params = this->named_parameters();
   for (unsigned int param_i : make_range(from_params.size()))
-  {
     to_params[param_i].value().data() = from_params[param_i].value().data();
-  }
 }
 
 void
