@@ -49,7 +49,7 @@ GeneralizedPlaneStrainUserObject::validParams()
       "pressure_factor",
       "Scale factor applied to prescribed out-of-plane pressure (both material and function)");
   params.addParam<std::string>("base_name", "Material properties base name");
-  params.set<ExecFlagEnum>("execute_on") = EXEC_LINEAR;
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
 
   return params;
 }
