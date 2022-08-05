@@ -53,6 +53,11 @@ Poly2TriMeshGenerator::validParams()
   params.addParam<std::vector<boundary_id_type>>(
       "hole_boundary_ids", "Boundary ids to set on holes.  Numbered up from 1 by default.");
 
+  params.addParam<bool>(
+      "verify_holes",
+      true,
+      "Verify holes do not intersect boundary or each other.  Asymptotically costly.");
+
   params.addParam<bool>("smooth_triangulation",
                         false,
                         "Whether to do Laplacian mesh smoothing on the generated triangles.");
@@ -89,6 +94,7 @@ Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
     _refine_bdy(getParam<bool>("refine_boundary")),
     _output_subdomain_id(getParam<subdomain_id_type>("output_subdomain_id")),
     _smooth_tri(getParam<bool>("smooth_triangulation")),
+    _verify_holes(getParam<bool>("verify_holes")),
     _hole_ptrs(getMeshes("holes")),
     _stitch_holes(getParam<std::vector<bool>>("stitch_holes")),
     _refine_holes(getParam<std::vector<bool>>("refine_holes")),
@@ -162,6 +168,7 @@ Poly2TriMeshGenerator::generate()
 
   poly2tri.set_interpolate_boundary_points(_add_nodes_per_boundary_segment);
   poly2tri.set_refine_boundary_allowed(_refine_bdy);
+  poly2tri.set_verify_hole_boundaries(_verify_holes);
 
   poly2tri.desired_area() = _desired_area;
   poly2tri.minimum_angle() = 0; // Not yet supported

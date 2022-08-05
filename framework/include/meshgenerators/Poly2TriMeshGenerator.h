@@ -41,6 +41,9 @@ protected:
   /// Whether to do Laplacian mesh smoothing on the generated triangles
   const bool _smooth_tri;
 
+  /// Whether to verify holes do not intersect boundary or each other
+  const bool _verify_holes;
+
   /// Holds pointers to the pointers to input meshes defining holes
   const std::vector<std::unique_ptr<MeshBase> *> _hole_ptrs;
 
