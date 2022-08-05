@@ -308,7 +308,8 @@ public:
   std::vector<MortarFilterIter> secondariesToMortarSegments(const Node & node) const;
 
   /**
-   * @return the lower dimensional secondary elements and their associated mortar segment elements
+   * @return the lower dimensional secondary element ids and their associated mortar segment
+   * elements
    */
   const std::unordered_map<dof_id_type, std::set<Elem *, CompareDofObjectsByID>> &
   secondariesToMortarSegments() const
