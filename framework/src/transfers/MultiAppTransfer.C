@@ -193,6 +193,11 @@ void
 MultiAppTransfer::initialSetup()
 {
   getAppInfo();
+
+  if (_from_multi_app)
+    _from_multi_app->addAssociatedTransfer(*this);
+  if (_to_multi_app)
+    _to_multi_app->addAssociatedTransfer(*this);
 }
 
 void

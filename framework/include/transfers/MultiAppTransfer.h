@@ -109,6 +109,12 @@ public:
   /// Whether the transfer owns a non-null to_multi_app
   bool hasToMultiApp() const { return !(!_to_multi_app); }
 
+  /**
+   * This method will fill information into the convenience member variables
+   * (_to_problems, _from_meshes, etc.)
+   */
+  void getAppInfo();
+
 protected:
   /**
    * Add the bounding box factor parameter to the supplied input parameters
@@ -117,12 +123,6 @@ protected:
 
   /// Deprecated class attribute for compatibility with the apps
   std::shared_ptr<MultiApp> _multi_app;
-
-  /**
-   * This method will fill information into the convenience member variables
-   * (_to_problems, _from_meshes, etc.)
-   */
-  void getAppInfo();
 
   std::vector<FEProblemBase *> _to_problems;
   std::vector<FEProblemBase *> _from_problems;

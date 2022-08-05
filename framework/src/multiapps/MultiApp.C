@@ -27,6 +27,7 @@
 #include "NonlinearSystemBase.h"
 #include "DelimitedFileReader.h"
 #include "MooseCoordTransform.h"
+#include "MultiAppTransfer.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
@@ -521,6 +522,9 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
     _reset_happened = true;
     for (auto & app : _reset_apps)
       resetApp(app);
+
+    for (auto * const transfer : _associated_transfers)
+      transfer->getAppInfo();
   }
 
   // Now move any apps that should be moved
@@ -1090,4 +1094,10 @@ Point
 MultiApp::transformedPosition(const unsigned int app)
 {
   return appProblemBase(app).coordTransform()(Point(0));
+}
+
+void
+MultiApp::addAssociatedTransfer(MultiAppTransfer & transfer)
+{
+  _associated_transfers.push_back(&transfer);
 }

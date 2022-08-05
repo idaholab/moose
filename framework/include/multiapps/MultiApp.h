@@ -25,6 +25,7 @@ class FEProblem;
 class Executioner;
 class MooseApp;
 class Backup;
+class MultiAppTransfer;
 
 // libMesh forward declarations
 namespace libMesh
@@ -347,6 +348,11 @@ public:
    */
   bool usingPositions() const { return _use_positions; }
 
+  /**
+   * Add a transfer that is associated with this multiapp
+   */
+  void addAssociatedTransfer(MultiAppTransfer & transfer);
+
 protected:
   /// function that provides cli_args to subapps
   virtual std::vector<std::string> cliArgs() const { return _cli_args; }
@@ -537,6 +543,9 @@ protected:
 
   /// The app configuration resulting from calling init
   LocalRankConfig _rank_config;
+
+  /// Transfers associated with this multiapp
+  std::vector<MultiAppTransfer *> _associated_transfers;
 
   ///Timers
   const PerfID _solve_step_timer;
