@@ -6,5 +6,7 @@
     exodiff = 'main_out.e'
     issues = '#20962'
     requirement = "The system shall be able to cache nearest node mappings with multiple target subapps."
+    # see #21783
+    max_parallel = 12
   []
 []
