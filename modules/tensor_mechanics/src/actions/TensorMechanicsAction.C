@@ -495,6 +495,7 @@ TensorMechanicsAction::act()
       params.set<MultiMooseEnum>("constraint_types") = _constraint_types;
       params.set<std::vector<FunctionName>>("targets") = _targets;
       params.set<bool>("large_kinematics") = _lk_large_kinematics;
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
       params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
 
       _problem->addUserObject("HomogenizationConstraintIntegral", _integrator_name, params);
