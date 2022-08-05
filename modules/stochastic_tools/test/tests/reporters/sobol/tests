@@ -3,17 +3,17 @@
   issues = '#15558'
 
   [sobol]
-    type = JSONDiff
+    type = SchemaDiff
     input = sobol.i
-    jsondiff = sobol_out.json
+    schemadiff = sobol_out.json
     allow_test_objects = true
 
     requirement = "The system shall support the ability to compute first, second, and total-effect Sobol sensitivity indices with a reporter."
   []
   [sobol_vec]
-    type = JSONDiff
+    type = SchemaDiff
     input = sobol_main.i
-    jsondiff = sobol_main_out.json
+    schemadiff = sobol_main_out.json
     allow_test_objects = true
 
     requirement = "The system shall support the ability to compute Sobol sensitivity indices for vector-type data."

@@ -161,9 +161,9 @@
     []
 
     [3tile_json_export]
-      type = 'JSONDiff'
+      type = 'SchemaDiff'
       input = '3tile.i'
-      jsondiff = '3tile_json_export.json'
+      schemadiff = '3tile_json_export.json'
       detail = 'for a variety of overlapping tiles and two overlapping partitions, and be able to export the model data to a JSON file.'
       petsc_version = '>=3.9.0'
       cli_args = 'Materials/rom_stress_prediction/export_model=3tile_json_export.json'

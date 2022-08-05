@@ -6,18 +6,18 @@
     requirement = 'The system shall be capable of computing the statistics of a data vector that'
 
     [replicated]
-      type = 'JSONDiff'
+      type = 'SchemaDiff'
       input = 'statistics.i'
-      jsondiff = 'statistics_out.json'
+      schemadiff = 'statistics_out.json'
       allow_test_objects = true
 
       detail = 'is replicated and'
     []
 
     [distributed]
-      type = 'JSONDiff'
+      type = 'SchemaDiff'
       input = 'statistics_distributed.i'
-      jsondiff = 'statistics_distributed_out.json'
+      schemadiff = 'statistics_distributed_out.json'
       min_parallel = 3
       max_parallel = 3
       allow_test_objects = true
@@ -27,9 +27,9 @@
   []
 
   [reporter]
-    type = JSONDiff
+    type = SchemaDiff
     input = statistics_main.i
-    jsondiff = statistics_main_out.json
+    schemadiff = statistics_main_out.json
     requirement = 'The system shall be capable of computing the statistics from vector reporter values.'
   []
 []

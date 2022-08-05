@@ -6,24 +6,24 @@
     requirement = "The system shall support computing bias corrected and accelerated confidence level intervals of statistics"
 
     [basic]
-      type = JSONDiff
+      type = SchemaDiff
       input = bca.i
-      jsondiff = bca_out.json
+      schemadiff = bca_out.json
 
       detail = "of a vector of data"
     []
     [vector]
-      type = JSONDiff
+      type = SchemaDiff
       input = bca_main.i
-      jsondiff = bca_main_out.json
+      schemadiff = bca_main_out.json
 
       detail = "of a vector of vector data"
     []
 
     [replicated]
-      type = JSONDiff
+      type = SchemaDiff
       input = bca_distributed.i
-      jsondiff = bca_distributed_out.json
+      schemadiff = bca_distributed_out.json
       cli_args = "VectorPostprocessors/data/parallel_type=replicated"
       min_parallel = 3
       max_parallel = 3
@@ -33,9 +33,9 @@
     []
 
     [distributed]
-      type = JSONDiff
+      type = SchemaDiff
       input = bca_distributed.i
-      jsondiff = bca_distributed_out.json
+      schemadiff = bca_distributed_out.json
       min_parallel = 3
       max_parallel = 3
       allow_test_objects = true

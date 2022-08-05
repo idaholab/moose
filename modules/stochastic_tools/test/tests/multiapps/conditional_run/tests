@@ -5,9 +5,9 @@
   [conditional]
     requirement = "The system shall be able to control whether a sub-app is run for a certain sample"
     [function]
-      type = JSONDiff
+      type = SchemaDiff
       input = conditional_main.i
-      jsondiff = 'conditional_main_out.json'
+      schemadiff = 'conditional_main_out.json'
       detail = 'with a parsed function dependent on time and sampler values;'
     []
     [error]

@@ -4,18 +4,18 @@
   [no_change]
     requirement = "The system shall support generating random samples of data"
     [constant]
-      type = JSONDiff
+      type = SchemaDiff
       input = main.i
-      jsondiff = main_constant_size_out.json
+      schemadiff = main_constant_size_out.json
       allow_test_objects = true
       cli_args = "Samplers/dynamic/increment_rows=0 Outputs/file_base=main_constant_size_out"
 
       detail = "that remain constant in size and"
     []
     [dynamic]
-      type = JSONDiff
+      type = SchemaDiff
       input = main.i
-      jsondiff = main_out.json
+      schemadiff = main_out.json
       allow_test_objects = true
 
       detail = "that are dynamic in size."

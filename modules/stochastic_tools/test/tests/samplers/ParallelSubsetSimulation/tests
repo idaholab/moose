@@ -4,10 +4,10 @@
 
   [pss1]
     requirement = 'The system shall include an Parallel Subset Simulation method for sampling distribution data.'
-    type = 'JSONDiff'
+    type = 'SchemaDiff'
     skip_keys = 'number_of_parts part'
     input = 'pss.i'
-    jsondiff = 'pss_out.json'
+    schemadiff = 'pss_out.json'
   []
   [pss_errors]
     requirement = 'The system shall throw an error when '

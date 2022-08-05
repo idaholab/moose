@@ -4,10 +4,10 @@
   requirement = "The sytem shall use stochastic methods on a thermomechanics model to "
 
   [lhs_stats]
-    type = JSONDiff
+    type = SchemaDiff
     input = lhs_uniform.i
     cli_args = 'Samplers/sample/num_rows=10 Outputs/out/execute_system_information_on=none'
-    jsondiff = 'lhs_uniform_out.json'
+    schemadiff = 'lhs_uniform_out.json'
     detail = "sample and compute statistics, "
     method = opt # a bit too slow for debug
   []
@@ -28,10 +28,10 @@
     detail = "train a polynomial chaos surrogate, and "
   []
   [poly_chaos_uniform]
-    type = JSONDiff
+    type = SchemaDiff
     input = poly_chaos_uniform.i
     cli_args = 'Samplers/sample/num_rows=10 Outputs/out/execute_system_information_on=none'
-    jsondiff = 'poly_chaos_uniform_out.json'
+    schemadiff = 'poly_chaos_uniform_out.json'
     allow_test_objects = true
     detail = "evaluate a polynomial chaos surrogate."
     prereq = poly_chaos_train_uniform

@@ -5,24 +5,24 @@
   [parameter_study]
     requirement = "The system shall include an example demonstrating a stochastic parameter study using"
     [basic]
-      type = JSONDiff
+      type = SchemaDiff
       input = main.i
       cli_args = 'Samplers/hypercube/num_rows=10 Reporters/results/parallel_type=ROOT Outputs/out/execute_system_information_on=none'
-      jsondiff = main_out.json
+      schemadiff = main_out.json
       detail = "basic postprocessor values;"
     []
     [transient]
-      type = JSONDiff
+      type = SchemaDiff
       input = main_time.i
       cli_args = 'Samplers/hypercube/num_rows=10 Reporters/results/parallel_type=ROOT Outputs/out/execute_system_information_on=none'
-      jsondiff = main_time_out.json
+      schemadiff = main_time_out.json
       detail = "time dependent and vector quantities;"
     []
     [vector]
-      type = JSONDiff
+      type = SchemaDiff
       input = main_vector.i
       cli_args = 'Samplers/hypercube/num_rows=10 Reporters/results/parallel_type=ROOT Outputs/out/execute_system_information_on=none'
-      jsondiff = main_vector_out.json
+      schemadiff = main_vector_out.json
       abs_zero = 1e-5
       detail = "time dependence with accumulative reporter;"
     []

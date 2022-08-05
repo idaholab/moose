@@ -5,33 +5,33 @@
   [transfer]
     requirement = "The system shall support the ability to transfer reporter data from each sub-application for a set of stochastic data "
     [normal]
-      type = JSONDiff
+      type = SchemaDiff
       input = main.i
-      jsondiff = main_out.json
+      schemadiff = main_out.json
 
-      detail = "in normal mode, "
+      detail = "in normal mode, " 
     []
     [batch]
-      type = JSONDiff
+      type = SchemaDiff
       input = main_batch.i
-      jsondiff = 'main_batch_out.json'
+      schemadiff = 'main_batch_out.json'
 
       detail = 'in batch mode, '
     []
     [distributed]
-      type = JSONDiff
+      type = SchemaDiff
       input = main.i
       cli_args = 'Reporters/storage/parallel_type=DISTRIBUTED Outputs/file_base=main_parallel'
-      jsondiff = 'main_parallel.json main_parallel.json.1 main_parallel.json.2 main_parallel.json.3'
+      schemadiff = 'main_parallel.json main_parallel.json.1 main_parallel.json.2 main_parallel.json.3'
       min_parallel = 4
       max_parallel = 4
 
       detail = 'with distributed output, '
     []
     [more_cpus]
-      type = JSONDiff
+      type = SchemaDiff
       input = main_small.i
-      jsondiff = 'main_small_out.json'
+      schemadiff = 'main_small_out.json'
       min_parallel = 4
 
       detail = 'with more processors than samples, '

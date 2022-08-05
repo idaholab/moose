@@ -31,38 +31,38 @@
     requirement = 'The system shall compute relevant statistics with polynomial chaos expansion '
                   'including '
     [legendre_moment_calculation]
-      type = JSONDiff
+      type = SchemaDiff
       input = main_2d_quad_moment.i
       allow_test_objects = true
-      jsondiff = 'main_2d_quad_moment_out.json'
+      schemadiff = 'main_2d_quad_moment_out.json'
       detail = 'statistical moments with Legendre polynomials, '
     []
     [hermite_moment_calculation]
-      type = JSONDiff
+      type = SchemaDiff
       input = main_2dnorm_quad_moment.i
       allow_test_objects = true
-      jsondiff = 'main_2dnorm_quad_moment_out.json'
+      schemadiff = 'main_2dnorm_quad_moment_out.json'
       detail = 'statistical moments with Hermite polynomials, '
     []
     [legendre_local_sensitivity]
-      type = JSONDiff
+      type = SchemaDiff
       input = main_2d_quad_locs.i
       allow_test_objects = true
-      jsondiff = 'main_2d_quad_locs_out.json'
+      schemadiff = 'main_2d_quad_locs_out.json'
       detail = 'sampler and user defined local sensitivities with Legendre polynomials, '
     []
     [hermite_local_sensitivity]
-      type = JSONDiff
+      type = SchemaDiff
       input = main_2dnorm_quad_locs.i
       allow_test_objects = true
-      jsondiff = 'main_2dnorm_quad_locs_out.json'
+      schemadiff = 'main_2dnorm_quad_locs_out.json'
       detail = 'sampler and user defined local sensitivities with Hermite polynomials, and '
     []
     [sobol]
-      type = JSONDiff
+      type = SchemaDiff
       input = sobol.i
       allow_test_objects = true
-      jsondiff = 'sobol_out.json'
+      schemadiff = 'sobol_out.json'
       detail = 'Sobol sensitivity indices.'
     []
   []
@@ -72,19 +72,19 @@
     requirement = 'The system shall include the ability to use sparse grid methods to evaluate '
                   'polynomial chaos expansion coefficients including '
     [smolyak_sobol]
-      type = JSONDiff
+      type = SchemaDiff
       input = sobol.i
       allow_test_objects = true
       cli_args = 'Samplers/sample/sparse_grid=smolyak Outputs/file_base=smolyak'
-      jsondiff = 'smolyak.json'
+      schemadiff = 'smolyak.json'
       detail = 'Smolyak and '
     []
     [clenshaw_curtis_sobol]
-      type = JSONDiff
+      type = SchemaDiff
       input = sobol.i
       allow_test_objects = true
       cli_args = 'Samplers/sample/sparse_grid=clenshaw-curtis Outputs/file_base=clenshaw_curtis'
-      jsondiff = 'clenshaw_curtis.json'
+      schemadiff = 'clenshaw_curtis.json'
       detail = 'Clenshaw-Curtis methods.'
     []
   []

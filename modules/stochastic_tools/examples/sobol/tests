@@ -3,10 +3,10 @@
   issues = '#14933 #15558'
 
   [stats]
-    type = JSONDiff
+    type = SchemaDiff
     input = main.i
     cli_args = 'Samplers/hypercube_a/num_rows=10 Samplers/hypercube_b/num_rows=10 Outputs/out/execute_system_information_on=none'
-    jsondiff = 'main_out.json'
+    schemadiff = 'main_out.json'
 
     requirement = "The system shall include an example demonstrating the computation of Sobol sensitivity analysis."
 

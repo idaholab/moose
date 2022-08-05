@@ -13,9 +13,9 @@
       detail = "trained with replicated stochastic data and"
     []
     [evaluate]
-      type = JSONDiff
+      type = SchemaDiff
       input = evaluate.i
-      jsondiff = evaluate_out.json
+      schemadiff = evaluate_out.json
       prereq = surrogate/train # Creates data files that this test uses
       allow_warnings = true
       detail = "evaluated separately (with replicated data);"
@@ -32,9 +32,9 @@
       detail = "trained with distributed stochastic data and"
     []
     [evaluate_distributed]
-      type = JSONDiff
+      type = SchemaDiff
       input = evaluate.i
-      jsondiff = evaluate_out.json
+      schemadiff = evaluate_out.json
       prereq = surrogate/train_distributed # Creates data files that this test uses
       allow_warnings = true
       detail = "evaluated separately (with distributed data);"
@@ -52,19 +52,19 @@
       detail = "trained with distributed stochastic data;"
     []
     [evaluate_two_ranks]
-      type = JSONDiff
+      type = SchemaDiff
       input = evaluate.i
-      jsondiff = evaluate_out.json
+      schemadiff = evaluate_out.json
       prereq = surrogate/train_three_ranks # Creates data files that this test uses
       max_parallel = 2
 
       detail = "evaluated separately with a different number of processors;"
     []
     [evaluate_and_train]
-      type = JSONDiff
+      type = SchemaDiff
       input = train_and_evaluate.i
       cli_args = 'Outputs/file_base=evaluate_out'
-      jsondiff = evaluate_out.json
+      schemadiff = evaluate_out.json
       allow_test_objects = true
 
       detail = "and be trained and evaluated in memory with a single input file."

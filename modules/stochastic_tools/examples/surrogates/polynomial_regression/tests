@@ -34,20 +34,20 @@
   [evaluate]
     requirement = "The system shall test results for evaluating surrogate models for the comparison example "
     [uniform]
-      type = JSONDiff
+      type = SchemaDiff
       input = uniform_surr.i
       allow_test_objects = true
       cli_args = "Samplers/sample/num_rows=5 Outputs/out/execute_system_information_on=none"
-      jsondiff = "uniform_surr_out.json"
+      schemadiff = "uniform_surr_out.json"
       method = opt
       detail = "with uniform parameter distributions "
     []
     [normal]
-      type = JSONDiff
+      type = SchemaDiff
       input = normal_surr.i
       allow_test_objects = true
       cli_args = "Samplers/sample/num_rows=5 Outputs/out/execute_system_information_on=none"
-      jsondiff = "normal_surr_out.json"
+      schemadiff = "normal_surr_out.json"
       method = opt
       detail = "and with normally distributed parameters."
     []

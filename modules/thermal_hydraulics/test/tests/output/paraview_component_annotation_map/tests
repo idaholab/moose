@@ -1,8 +1,8 @@
 [Tests]
   [test]
-    type = JSONDiff
+    type = SchemaDiff
     input = 'test.i'
-    jsondiff = 'test_map.json'
+    schemadiff = 'test_map.json'
     ad_indexing_type = 'global'
   []
 []

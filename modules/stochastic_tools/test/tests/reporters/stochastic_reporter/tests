@@ -5,9 +5,9 @@
   [sr]
     requirement = "The system shall support the ability to use transferred reporter data to "
     [stats]
-      type = JSONDiff
+      type = SchemaDiff
       input = stats.i
-      jsondiff = stats_out.json
+      schemadiff = stats_out.json
 
       detail = "compute statistics."
     []

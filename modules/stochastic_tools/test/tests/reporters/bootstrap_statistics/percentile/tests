@@ -6,16 +6,16 @@
     requirement = "The system shall support computing percentile confidence level intervals of statistics"
 
     [basic]
-      type = JSONDiff
+      type = SchemaDiff
       input = percentile.i
-      jsondiff = percentile_out.json
+      schemadiff = percentile_out.json
 
       detail = "of a vector of data"
     []
     [vector]
-      type = JSONDiff
+      type = SchemaDiff
       input = percentile_main.i
-      jsondiff = percentile_main_out.json
+      schemadiff = percentile_main_out.json
 
       detail = "of a vector of vector data"
     []
@@ -23,9 +23,9 @@
     # These two tests are restricted to 3 processors because the Test VPP creates unique data
     # depending on the number of cores used
     [replicated]
-      type = JSONDiff
+      type = SchemaDiff
       input = percentile_distributed.i
-      jsondiff = percentile_distributed_out.json
+      schemadiff = percentile_distributed_out.json
       cli_args = "VectorPostprocessors/data/parallel_type=replicated"
       min_parallel = 3
       max_parallel = 3
@@ -35,9 +35,9 @@
     []
 
     [distributed]
-      type = JSONDiff
+      type = SchemaDiff
       input = percentile_distributed.i
-      jsondiff = percentile_distributed_out.json
+      schemadiff = percentile_distributed_out.json
       prereq = percentile/replicated
       min_parallel = 3
       max_parallel = 3
