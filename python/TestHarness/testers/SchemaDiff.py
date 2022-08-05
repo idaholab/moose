@@ -139,8 +139,12 @@ class SchemaDiff(RunApp):
         if exclude_values:
             for value in exclude_values:
                 search = orig | deepdiff.search.grep(value, case_sensitive=True)
+                search2 = comp | deepdiff.search.grep(value, case_sensitive=True)
                 if search:
                     for path in search["matched_paths"]:
+                        to_exclude.append(path)
+                if search2:
+                    for path in search2["matched_paths"]:
                         to_exclude.append(path)
 
         return deepdiff.DeepDiff(orig,comp,exclude_paths=to_exclude,custom_operators=[testcompare(types=[str,float],rel_err=rel_err)]).pretty()
