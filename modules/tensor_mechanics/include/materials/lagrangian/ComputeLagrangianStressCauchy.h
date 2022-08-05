@@ -43,6 +43,6 @@ protected:
   const MaterialProperty<RankTwoTensor> & _inv_df;
   /// Inverse deformation gradient
   const MaterialProperty<RankTwoTensor> & _inv_def_grad;
-  /// Volume change
-  const MaterialProperty<Real> & _detJ;
+  /// Deformation gradient
+  const MaterialProperty<RankTwoTensor> & _F;
 };

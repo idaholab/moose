@@ -48,12 +48,12 @@ ComputeNeoHookeanStress::computeQpPK2Stress()
   // Large deformation = nonlinear strain
   if (_large_kinematics)
   {
-    RankTwoTensor Cinv = (2.0 * _E[_qp] + RankTwoTensor::Identity()).inverse();
-    _S[_qp] =
-        (_lambda[_qp] * log(_detJ[_qp]) - _mu[_qp]) * Cinv + _mu[_qp] * RankTwoTensor::Identity();
-    _C[_qp] = -2.0 * (_lambda[_qp] * log(_detJ[_qp]) - _mu[_qp]) *
-                  Cinv.times<i_, k_, j_, l_>(Cinv.transpose()) +
-              _lambda[_qp] * Cinv.times<i_, j_, k_, l_>(Cinv);
+    RankTwoTensor Cinv = (2 * _E[_qp] + RankTwoTensor::Identity()).inverse();
+    _S[_qp] = (_lambda[_qp] * log(_F[_qp].det()) - _mu[_qp]) * Cinv +
+              _mu[_qp] * RankTwoTensor::Identity();
+    _C[_qp] =
+        -2 * (_lambda[_qp] * log(_F[_qp].det()) - _mu[_qp]) * Cinv.times<i_, k_, l_, j_>(Cinv) +
+        _lambda[_qp] * Cinv.times<i_, j_, k_, l_>(Cinv);
   }
   // Small deformations = linear strain
   else

@@ -7,15 +7,15 @@
 The `UpdatedLagrangianStressDivergence` kernel calculates the stress equilibrium
 residual in the current configuration using the `cauchy_stress` (the
 Cauchy stress).  This kernel provides the residual
-for Cartesian coordinates and the user needs to add one kernel 
-for each dimension of the problem.  Alternatively, the 
+for Cartesian coordinates and the user needs to add one kernel
+for each dimension of the problem.  Alternatively, the
 [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md)
 simplifies the process of adding the required kernels and setting up the
 input parameters.
 
 ## Residual, Jacobian, and stabilization
 
-For large deformation kinematics the kernel applies the residual 
+For large deformation kinematics the kernel applies the residual
 \begin{equation}
       R^{\alpha}=\int_{v}\sigma_{ik}\phi_{i,k}^{\alpha}dv
 \end{equation}
@@ -27,13 +27,13 @@ where $\sigma_{ik}$ is the Cauchy stress,
 \begin{equation}
       T_{ijkl} = \frac{\partial \sigma_{ij}}{\partial \Delta l_{kl}}
 \end{equation}
-with 
+with
 \begin{equation}
       \Delta l_{kl} = \Delta F_{kM} F^{-1}_{Ml}
 \end{equation}
 the incremental spatial velocity gradient,
 $\phi_{i,j}^{\alpha}$ are the test function gradients (with respect to the current
-coordinates) and 
+coordinates) and
 \begin{equation}
      g_{ij}^{\beta} = \frac{dF_{iK}}{d\Upsilon^{\beta}} F_{Kj}^{-1}
 \end{equation}
@@ -44,7 +44,7 @@ For the unstabilized case
 \end{equation}
 with $\psi_{i,j}^{\beta}$ the trial function gradients with respect to the current coordinates.
 
-The residual and Jacobian degenerate to 
+The residual and Jacobian degenerate to
 \begin{equation}
       R^{\alpha}=\int_{v}s_{ij}\phi_{i,j}^{\alpha}dv
 \end{equation}
@@ -62,7 +62,7 @@ with $\varepsilon_{kl}$ the small strain and
 \end{equation}
 for the unstabilized case.
 The `large_kinematics` flag controls the kinematic theory.
-For this kernel `use_displaced_mesh` must be set to `true` if 
+For this kernel `use_displaced_mesh` must be set to `true` if
 `large_kinematics` is `true` so that the volume integrals and
 gradients are with respect to the current coordinates.
 
@@ -106,7 +106,7 @@ modified strains applied these become for small deformations
 \begin{equation}
       g_{ij}^{\beta}=\psi_{i,j}^{\beta}-\frac{1}{3}\left(\psi_{kk}^{\beta}-\bar{\psi}_{kk}^{\beta}\right)\delta_{ij}
 \end{equation}
-with 
+with
 \begin{equation}
       \bar{\psi}_{i,j}^{\beta}=\frac{1}{v}\int_{v}\psi_{i,j}^{\beta}dv
 \end{equation}
@@ -114,7 +114,7 @@ and for large deformations
 \begin{equation}
       g_{iJ}^{\beta}=\left[\psi_{i,j}^{\beta}-\frac{1}{3}\delta_{ij}\left(\psi_{k,k}^{\beta}-\bar{\psi}_{k,k}^{\beta}\right)\right]
 \end{equation}
-with 
+with
 \begin{equation}
       \bar{\psi}_{i,j}^{\beta}=\frac{1}{V}\int_{V}\psi_{i,K}^{\beta}dV\bar{F}_{Kj}^{-1}
 \end{equation}
@@ -134,7 +134,7 @@ if `large_kinematics` is also `true`.  The kernel enforces this condition with a
 The following illustrates manually including 3D stress equilibrium with the total Lagrangian formulation, using
 large deformation kinematics.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/updated/patch/large_patch.i
+!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/updated/patch/large_patch.i
          block=Kernels
 
 !syntax parameters /Kernels/UpdatedLagrangianStressDivergence

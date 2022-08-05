@@ -333,7 +333,6 @@ TensorMechanicsAction::act()
     {
       if (_lagrangian_kernels)
         paramError("Plane formulation not available with Lagrangian kernels");
-      ;
 
       if (_use_ad)
         paramError("use_automatic_differentiation", "AD not setup for use with PlaneStrain");
@@ -930,7 +929,16 @@ TensorMechanicsAction::actGatherActionParameters()
 void
 TensorMechanicsAction::actLagrangianKernelStrain()
 {
-  std::string type = "ComputeLagrangianStrain";
+  std::string type;
+  if (_coord_system == Moose::COORD_XYZ)
+    type = "ComputeLagrangianStrain";
+  else if (_coord_system == Moose::COORD_RZ)
+    type = "ComputeLagrangianStrainAxisymmetricCylindrical";
+  else if (_coord_system == Moose::COORD_RSPHERICAL)
+    type = "ComputeLagrangianStrainCentrosymmetricSpherical";
+  else
+    mooseError("Unsupported coordinate system");
+
   auto params = _factory.getValidParams(type);
 
   if (isParamValid("strain_base_name"))
@@ -1062,17 +1070,43 @@ TensorMechanicsAction::getKernelType()
 {
   if (_lagrangian_kernels)
   {
-    if (_coord_system != Moose::COORD_XYZ)
-      mooseError("Lagrangian kernel system can only be used in Cartesian "
-                 "coordinates");
-    if (_lk_homogenization)
-      return "HomogenizedTotalLagrangianStressDivergence";
-    else if (_lk_formulation == LKFormulation::Total)
-      return "TotalLagrangianStressDivergence";
-    else if (_lk_formulation == LKFormulation::Updated)
-      return "UpdatedLagrangianStressDivergence";
+    std::string type;
+    if (_coord_system == Moose::COORD_XYZ)
+    {
+      if (_lk_homogenization)
+        type = "HomogenizedTotalLagrangianStressDivergence";
+      else if (_lk_formulation == LKFormulation::Total)
+        type = "TotalLagrangianStressDivergence";
+      else if (_lk_formulation == LKFormulation::Updated)
+        type = "UpdatedLagrangianStressDivergence";
+      else
+        mooseError("Unknown formulation type");
+    }
+    else if (_coord_system == Moose::COORD_RZ)
+    {
+      if (_lk_homogenization)
+        mooseError("The Lagrangian mechanics kernels do not yet support homogenization in "
+                   "coordinate systems other than Cartesian.");
+      else if (_lk_formulation == LKFormulation::Total)
+        type = "TotalLagrangianStressDivergenceAxisymmetricCylindrical";
+      else if (_lk_formulation == LKFormulation::Updated)
+        mooseError("The Lagrangian mechanics kernels do not yet support the updated Lagrangian "
+                   "formulation in RZ coordinates.");
+    }
+    else if (_coord_system == Moose::COORD_RSPHERICAL)
+    {
+      if (_lk_homogenization)
+        mooseError("The Lagrangian mechanics kernels do not yet support homogenization in "
+                   "coordinate systems other than Cartesian.");
+      else if (_lk_formulation == LKFormulation::Total)
+        type = "TotalLagrangianStressDivergenceCentrosymmetricSpherical";
+      else if (_lk_formulation == LKFormulation::Updated)
+        mooseError("The Lagrangian mechanics kernels do not yet support the updated Lagrangian "
+                   "formulation in RZ coordinates.");
+    }
     else
-      mooseError("Unknown formulation type");
+      mooseError("Unsupported coordinate system");
+    return type;
   }
   else
   {
