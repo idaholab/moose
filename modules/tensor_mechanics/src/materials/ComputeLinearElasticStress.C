@@ -29,7 +29,12 @@ ComputeLinearElasticStress::ComputeLinearElasticStress(const InputParameters & p
 void
 ComputeLinearElasticStress::initialSetup()
 {
-  if (hasBlockMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
+  // _base_name + "unstabilized_deformation_gradient" is only declared if we're
+  // using the Lagrangian kernels.  It's okay to invoke this small strain
+  // material if you are using that kernel system and the
+  // ComputeLagrangianWrappedStress wrapper
+  if (hasBlockMaterialProperty<RankTwoTensor>(_base_name + "strain_increment") &&
+      !hasBlockMaterialProperty<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient"))
     mooseError("This linear elastic stress calculation only works for small strains; use "
                "ComputeFiniteStrainElasticStress for simulations using incremental and finite "
                "strains.");
