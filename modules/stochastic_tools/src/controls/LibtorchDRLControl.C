@@ -12,7 +12,7 @@
 #include "LibtorchArtificialNeuralNet.h"
 #include "Transient.h"
 
-registerMooseObject("MooseApp", LibtorchDRLControl);
+registerMooseObject("StochasticToolsApp", LibtorchDRLControl);
 
 InputParameters
 LibtorchDRLControl::validParams()

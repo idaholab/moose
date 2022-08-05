@@ -18,6 +18,10 @@ LibtorchNeuralNetControlTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params += SurrogateModelInterface::validParams();
+
+  params.addClassDescription("Copies a neural network from a trainer object on the main app to a "
+                             "LibtorchNeuralNetControl object on the subapp.");
+
   params.addRequiredParam<UserObjectName>("trainer_name",
                                           "Trainer object that contains the neural networks."
                                           " for different samples.");

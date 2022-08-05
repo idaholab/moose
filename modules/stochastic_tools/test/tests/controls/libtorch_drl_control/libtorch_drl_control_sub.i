@@ -44,7 +44,7 @@
 [BCs]
   [left_flux]
     type = ADNeumannBC
-    value = 1e3 # W/m^2
+    value = 0.0
     boundary = 'left'
     variable = temp
   []
@@ -71,7 +71,6 @@
     observed_value = center_temp_tend
     c1 = 1
     c2 = 10
-    # execute_on = 'TIMESTEP_END'
   []
 []
 
@@ -95,12 +94,11 @@
 
   start_time = 0.0
   end_time = 86400
-  dt = 900.0
+  dt = 1800.0
   dtmin = 1e-4
 []
 
 [Postprocessors]
-  # temperature observations
   [center_temp]
     type = PointValue
     variable = temp
@@ -124,7 +122,6 @@
     execute_on = 'INITIAL TIMESTEP_END'
     indirect_dependencies = 'center_temp_tend env_temp'
   []
-  # received control signal
   [left_flux]
     type = Receiver
   []

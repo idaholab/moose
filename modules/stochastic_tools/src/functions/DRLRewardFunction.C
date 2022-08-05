@@ -17,6 +17,9 @@ DRLRewardFunction::validParams()
 {
   InputParameters params = Function::validParams();
 
+  params.addClassDescription("Evaluates a reward function for a process which is controlled by a "
+                             "Deep Reinforcement Lerning based surrogate.");
+
   params.addRequiredParam<FunctionName>("design_function", "The desired value to reach.");
   params.addRequiredParam<PostprocessorName>(
       "observed_value", "The name of the Postprocessor that contains the observed value.");

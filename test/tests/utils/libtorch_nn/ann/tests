@@ -92,13 +92,14 @@
       libtorch = true
       allow_test_objects = True
       rel_err = 1e-2
+      heavy = true
     []
     [adam]
       type = CSVDiff
       input = 'test_ann_trainer.i'
       csvdiff = 'adam_test_trainer_0001.csv'
       detail = 'Adam optimizer.'
-      cli_args = "VectorPostprocessors/test_trainer/learning_rate=1e-2 VectorPostprocessors/test_trainer/num_epochs=2000 VectorPostprocessors/test_trainer/optimizer_type='adam' Outputs/file_base='adam'"
+      cli_args = "VectorPostprocessors/test_trainer/learning_rate=1e-4 VectorPostprocessors/test_trainer/num_epochs=1000 VectorPostprocessors/test_trainer/optimizer_type='adam' Outputs/file_base='adam'"
       libtorch = true
       allow_test_objects = True
       rel_err = 1e-2

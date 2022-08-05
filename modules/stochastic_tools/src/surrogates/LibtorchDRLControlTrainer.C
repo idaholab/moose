@@ -274,8 +274,6 @@ LibtorchDRLControlTrainer::postTrain()
 Real
 LibtorchDRLControlTrainer::averageEpisodeReward()
 {
-  _average_episode_reward = 0.0;
-
   if (_reward_data.size())
     _average_episode_reward =
         std::accumulate(_reward_data.begin(), _reward_data.end(), 0.0) / _reward_data.size();

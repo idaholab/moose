@@ -42,11 +42,12 @@
     log_probability_reporter = 'results/log_prob_left_flux'
     reward_reporter = 'results/reward'
 
-    # Parameters for the control neural net
-    num_epochs = 1000
+    num_epochs = 10
     num_batches = 1
-    update_frequency = 40
+    update_frequency = 2
     decay_factor = 0.0
+
+    loss_print_frequency = 3
 
     critic_learning_rate = 0.0005
     num_critic_neurons_per_layer = '64 27'
@@ -54,13 +55,12 @@
     control_learning_rate = 0.0005
     num_control_neurons_per_layer = '64 27'
 
-    # keep consistent with LibtorchNNControl
+    # keep consistent with LibtorchNeuralNetControl
     input_timesteps = 2
     response_scaling_factors = '0.03 0.03'
     response_shift_factors = '270 270'
     action_standard_deviations = '0.1'
 
-    # General data
     read_from_file = false
   []
 []
@@ -81,11 +81,10 @@
 
 [Executioner]
   type = Transient
-  num_steps = 2000 # Number of training iterations
+  num_steps = 4
 []
 
 [Outputs]
-  file_base = output/train_out
+  file_base =train_out
   csv = true
-  # execute_on = 'FINAL'
 []

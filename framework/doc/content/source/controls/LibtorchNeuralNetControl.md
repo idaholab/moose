@@ -1,5 +1,7 @@
 # LibtorchNeuralNetControl
 
+!syntax description /Controls/LibtorchNeuralNetControl
+
 ## Overview
 
 This object can be used to control a process with multiple control parameters determined using a neural network.
@@ -39,8 +41,6 @@ outputs of the neural net can be scaled too using [!param](/Controls/LibtorchNeu
 For the full input file, see:
 
 !listing controls/libtorch_nn_control/read_torchscript_control.i
-
-Within MOOSE a torchscipt-based neural network can be created using the name of the torch-script file:
 
 !syntax parameters /Controls/LibtorchNeuralNetControl
 
