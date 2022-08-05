@@ -1471,6 +1471,12 @@ private:
                             int child,
                             int child_side);
 
+  /**
+   * Update the coordinate transformation object based on our coordinate system data. The coordinate
+   * transformation will be created if it hasn't been already
+   */
+  void updateCoordTransform();
+
   /// Holds mappings for volume to volume and parent side to child side
   std::map<std::pair<int, ElemType>, std::vector<std::vector<QpMap>>> _elem_type_to_refinement_map;
 
@@ -1544,6 +1550,9 @@ private:
   /// A coordinate transformation object that describes how to transform this problem's coordinate
   /// system into the canonical/reference coordinate system
   std::unique_ptr<MooseCoordTransform> _coord_transform;
+
+  /// Whether the coordinate system has been set
+  bool _coord_system_set;
 
   template <typename T>
   struct MeshType;

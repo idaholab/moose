@@ -160,6 +160,11 @@ public:
                            Direction rz_symmetry_axis = INVALID);
 
   /**
+   * Set our coordinate system based on the MooseMesh coordinate system data
+   */
+  void setCoordinateSystem(const MooseMesh & mesh);
+
+  /**
    * Compute the RS and (RS)^{-1} matrices
    */
   void computeRS();

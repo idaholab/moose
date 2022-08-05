@@ -152,6 +152,30 @@ MooseCoordTransform::setCoordinateSystem(const Moose::CoordinateSystemType coord
     _r_axis = X;
 }
 
+void
+MooseCoordTransform::setCoordinateSystem(const MooseMesh & mesh)
+{
+  const auto & params = mesh.parameters();
+
+  // If we have multiple different coordinate system types in our problem, we
+  // take note of it because that can cause issues if there is a non-Cartesian
+  // destination coordinate system
+  const auto & coord_sys = mesh.getCoordSystem();
+  std::unordered_set<Moose::CoordinateSystemType> coord_types;
+  auto map_it = coord_sys.begin();
+  // It's possible that the mesh is not in a complete state
+  if (map_it == coord_sys.end())
+    setCoordinateSystem(Moose::COORD_XYZ);
+  else
+    setCoordinateSystem(
+        map_it->second,
+        Direction(static_cast<unsigned int>(int(params.get<MooseEnum>("rz_coord_axis")))));
+  for (; map_it != coord_sys.end(); ++map_it)
+    coord_types.insert(map_it->second);
+
+  _has_different_coord_sys = coord_types.size() > 1;
+}
+
 InputParameters
 MooseCoordTransform::validParams()
 {
@@ -214,27 +238,12 @@ MooseCoordTransform::MooseCoordTransform(const MooseMesh & mesh)
     _has_different_coord_sys(false),
     _length_unit(std::string("1*m"))
 {
+  //
+  // coordinate system transformation
+  //
+  setCoordinateSystem(mesh);
+
   const auto & params = mesh.parameters();
-
-  //
-  // coordinate system transformation. If we have multiple different coordinate system types in our
-  // problem, we take note of it because that can cause issues if there is a non-Cartesian
-  // destination coordinate system
-  //
-  const auto & coord_sys = mesh.getCoordSystem();
-  std::unordered_set<Moose::CoordinateSystemType> coord_types;
-  auto map_it = coord_sys.begin();
-  // It's possible that the mesh is not in a complete state
-  if (map_it == coord_sys.end())
-    setCoordinateSystem(Moose::COORD_XYZ);
-  else
-    setCoordinateSystem(
-        map_it->second,
-        Direction(static_cast<unsigned int>(int(params.get<MooseEnum>("rz_coord_axis")))));
-  for (; map_it != coord_sys.end(); ++map_it)
-    coord_types.insert(map_it->second);
-
-  _has_different_coord_sys = coord_types.size() > 1;
 
   //
   // rotation

@@ -196,7 +196,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _allow_remote_element_removal(true),
     _need_ghost_ghosted_boundaries(true),
     _is_displaced(false),
-    _rz_coord_axis(1) // default to RZ rotation around y-axis
+    _rz_coord_axis(getParam<MooseEnum>("rz_coord_axis")),
+    _coord_system_set(false)
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
@@ -233,7 +234,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _allow_remote_element_removal(other_mesh._allow_remote_element_removal),
     _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries),
     _coord_sys(other_mesh._coord_sys),
-    _rz_coord_axis(other_mesh._rz_coord_axis)
+    _rz_coord_axis(other_mesh._rz_coord_axis),
+    _coord_system_set(other_mesh._coord_system_set)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
@@ -269,6 +271,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     for (std::size_t j = 0; j < _bounds[i].size(); ++j)
       _bounds[i][j] = other_mesh._bounds[i][j];
   }
+
+  updateCoordTransform();
 }
 
 MooseMesh::~MooseMesh()
@@ -359,11 +363,15 @@ MooseMesh::prepare(bool)
     _communicator.set_union(_mesh_sideset_ids);
   }
 
-  setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
-                 getParam<MultiMooseEnum>("coord_type"));
-  setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
-
-  _coord_transform = std::make_unique<MooseCoordTransform>(*this);
+  if (!_coord_system_set)
+    setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
+                   getParam<MultiMooseEnum>("coord_type"));
+  else if (_pars.isParamSetByUser("coord_type"))
+    mooseError(
+        "Trying to set coordinate system type information based on the user input file, but "
+        "the coordinate system type information has already been set programmatically! "
+        "Either remove your coordinate system type information from the input file, or contact "
+        "your application developer");
 
   detectOrthogonalDimRanges();
 
@@ -3484,6 +3492,10 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
                      "' does not have a coordinate system specified.");
     }
   }
+
+  _coord_system_set = true;
+
+  updateCoordTransform();
 }
 
 Moose::CoordinateSystemType
@@ -3506,6 +3518,17 @@ void
 MooseMesh::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 {
   _rz_coord_axis = rz_coord_axis;
+
+  updateCoordTransform();
+}
+
+void
+MooseMesh::updateCoordTransform()
+{
+  if (!_coord_transform)
+    _coord_transform = std::make_unique<MooseCoordTransform>(*this);
+  else
+    _coord_transform->setCoordinateSystem(*this);
 }
 
 unsigned int
