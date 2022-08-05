@@ -5,7 +5,7 @@
   [ais]
     requirement = 'The system shall include an Adaptive Importance Sampling method for sampling distribution data.'
     type = 'SchemaDiff'
-    skip_keys = 'number_of_parts part'
+    ignored_items = 'number_of_parts part'
     input = 'ais.i'
     schemadiff = 'ais_out.json'
   []

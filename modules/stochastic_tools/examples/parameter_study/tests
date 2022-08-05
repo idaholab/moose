@@ -23,7 +23,6 @@
       input = main_vector.i
       cli_args = 'Samplers/hypercube/num_rows=10 Reporters/results/parallel_type=ROOT Outputs/out/execute_system_information_on=none'
       schemadiff = main_vector_out.json
-      abs_zero = 1e-5
       detail = "time dependence with accumulative reporter;"
     []
   []
