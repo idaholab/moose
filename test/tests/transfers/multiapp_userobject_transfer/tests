@@ -11,6 +11,7 @@
       exodiff = 'parent_out.e parent_out_sub_app0.e parent_out_sub_app1.e'
 
       detail = "to a parent application from sub-applications,"
+      allow_warnings = true
     []
 
     [from_sub_nearest_sub_app]
@@ -19,6 +20,7 @@
       exodiff = 'main_nearest_sub_app_out.e'
 
       detail = "to a parent application from the nearest sub-applications,"
+      allow_warnings = true
     []
 
     [to_sub]
@@ -27,6 +29,7 @@
       exodiff = 'tosub_parent_out.e tosub_parent_out_sub_app0.e tosub_parent_out_sub_app1.e'
 
       detail = "from a parent application to sub-applications,"
+      allow_warnings = true
     []
     [to_sub_displaced]
       type = 'Exodiff'
@@ -34,6 +37,7 @@
       exodiff = 'tosub_displaced_parent_out.e tosub_displaced_parent_out_sub_app0.e'
 
       detail = "from a parent application to sub-applications that have a deformed mesh, and"
+      allow_warnings = true
     []
 
     [3d_1d]

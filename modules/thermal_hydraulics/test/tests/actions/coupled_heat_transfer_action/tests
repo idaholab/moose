@@ -12,6 +12,7 @@
       ad_indexing_type = 'global'
 
       detail = 'Without sub-app positions provided.'
+      allow_warnings = true
     []
     [with_positions]
       type = Exodiff
@@ -22,6 +23,7 @@
       ad_indexing_type = 'global'
 
       detail = 'With sub-app positions provided.'
+      allow_warnings = true
     []
     [multiple_phases]
       type = Exodiff
@@ -43,6 +45,7 @@
       ad_indexing_type = 'global'
 
       detail = 'With multiple phases.'
+      allow_warnings = true
     []
   []
 
@@ -53,5 +56,6 @@
     expect_err = "The direction given by the parameter 'orientation' must be aligned with the x, y, or z axis"
 
     requirement = 'The system shall report an error for the coupled heat transfer action if the mesh is not aligned with the x, y, or z axis.'
+    allow_warnings = true
   []
 []

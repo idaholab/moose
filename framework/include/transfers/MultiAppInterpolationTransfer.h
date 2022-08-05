@@ -66,4 +66,7 @@ protected:
   std::vector<SubdomainName> _exclude_gap_blocks;
   // How small we can consider two points are identical
   Real _distance_tol;
+
+private:
+  bool usesMooseCoordTransform() const override { return true; }
 };

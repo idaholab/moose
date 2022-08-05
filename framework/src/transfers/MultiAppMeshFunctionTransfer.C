@@ -60,8 +60,6 @@ MultiAppMeshFunctionTransfer::execute()
   TIME_SECTION(
       "MultiAppMeshFunctionTransfer::execute()", 5, "Transferring variables via a mesh function");
 
-  getAppInfo();
-
   // loop over the vector of variables and make the transfer one by one
   for (unsigned int i = 0; i < _var_size; ++i)
     transferVariable(i);

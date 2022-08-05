@@ -190,6 +190,12 @@ MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 }
 
 void
+MultiAppTransfer::initialSetup()
+{
+  getAppInfo();
+}
+
+void
 MultiAppTransfer::getAppInfo()
 {
   // I would like to do all of this in initialSetup, but it will fail with
@@ -271,10 +277,28 @@ MultiAppTransfer::getAppInfo()
     const auto & ex_from_transform = *_from_transforms[0];
     const auto & ex_to_transform = *_to_transforms[0];
 
+    auto check_transform_compatibility = [this](const MooseCoordTransform & transform)
+    {
+      if (transform.hasNonTranslationTransformation() && !usesMooseCoordTransform())
+        mooseDoOnce(
+            mooseWarning("'",
+                         name(),
+                         "' of type '",
+                         type(),
+                         "' has non-translation transformations but it does not leverage the "
+                         "'MooseCoordTransform' class. Your data transfers may be inaccurate"));
+    };
+
     for (auto * const from_transform : _from_transforms)
+    {
       from_transform->setDestinationCoordinateSystem(ex_to_transform);
+      check_transform_compatibility(*from_transform);
+    }
     for (auto * const to_transform : _to_transforms)
+    {
       to_transform->setDestinationCoordinateSystem(ex_from_transform);
+      check_transform_compatibility(*to_transform);
+    }
   }
 }
 
@@ -293,13 +317,16 @@ fillInfo(MultiApp & multi_app,
       continue;
 
     auto & subapp_problem = multi_app.appProblemBase(i_app);
-    const auto position = multi_app.position(i_app);
     auto & subapp_transform = subapp_problem.coordTransform();
-    subapp_transform.setTranslationVector(position);
+    if (multi_app.usingPositions())
+    {
+      const auto position = multi_app.position(i_app);
+      subapp_transform.setTranslationVector(position);
+      positions.push_back(position);
+    }
 
     map.push_back(i_app);
     problems.push_back(&subapp_problem);
-    positions.push_back(position);
     transforms.push_back(&subapp_transform);
   }
 

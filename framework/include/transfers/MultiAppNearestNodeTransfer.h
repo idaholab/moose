@@ -80,6 +80,8 @@ protected:
   std::map<std::pair<unsigned int, dof_id_type>, unsigned int> & _cached_qp_inds;
 
 private:
+  bool usesMooseCoordTransform() const override { return true; }
+
   /// Target local nodes for receiving a nodal variable
   std::vector<Node *> _target_local_nodes;
 

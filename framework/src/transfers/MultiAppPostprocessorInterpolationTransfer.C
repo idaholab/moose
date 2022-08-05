@@ -80,8 +80,6 @@ MultiAppPostprocessorInterpolationTransfer::execute()
                5,
                "Transferring/interpolating postprocessors");
 
-  getAppInfo();
-
   switch (_current_direction)
   {
     case TO_MULTIAPP:

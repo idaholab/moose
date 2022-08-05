@@ -81,8 +81,6 @@ MultiAppNearestNodeTransfer::execute()
   TIME_SECTION(
       "MultiAppNearestNodeTransfer::execute()", 5, "Transferring variables based on nearest nodes");
 
-  getAppInfo();
-
   // Get the bounding boxes for the "from" domains.
   std::vector<BoundingBox> bboxes;
   if (isParamValid("source_boundary"))

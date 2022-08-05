@@ -63,6 +63,7 @@
     input = parent_userobject.i
     exodiff = 'parent_userobject_out.e parent_userobject_out_sub_app0.e parent_userobject_out_sub_app1.e'
     requirement = 'The system shall support conservative transfers in MultiAppUserObjectTransfer'
+    allow_warnings = true
   [../]
 
   [./userobject_transfer_csv]
@@ -71,6 +72,7 @@
     csvdiff = 'parent_userobject_out_to_nearest_point_0001.csv parent_userobject_out_to_nearest_point_element_0001.csv'
     prereq = userobject_transfer
     requirement = 'The system shall be able to output the adjusting values in conservative transfers for MultiAppUserObjectTransfer'
+    allow_warnings = true
   [../]
 
   [./negative_adjuster]

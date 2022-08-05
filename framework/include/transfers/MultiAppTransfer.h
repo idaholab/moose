@@ -40,6 +40,8 @@ public:
    */
   void variableIntegrityCheck(const AuxVariableName & var_name) const;
 
+  void initialSetup() override;
+
   /**
    * Use this getter to obtain the MultiApp for transfers with a single direction
    */
@@ -196,6 +198,12 @@ protected:
                      const std::string & param_name = "") const;
 
 private:
+  /**
+   * Whether this transfer handles non-translation-based transformations, e.g. whether it uses the
+   * \p MooseCoordTransform object
+   */
+  virtual bool usesMooseCoordTransform() const { return false; }
+
   /// The MultiApps this Transfer is transferring data to or from
   std::shared_ptr<MultiApp> _from_multi_app;
   std::shared_ptr<MultiApp> _to_multi_app;

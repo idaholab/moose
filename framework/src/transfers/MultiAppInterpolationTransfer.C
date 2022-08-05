@@ -412,7 +412,6 @@ MultiAppInterpolationTransfer::execute()
   TIME_SECTION("MultiAppInterpolationTransfer::execute()",
                5,
                "Transferring variables based on node interpolation");
-  getAppInfo();
 
   const FEProblemBase & fe_problem =
       hasFromMultiApp() ? getFromMultiApp()->problemBase() : getToMultiApp()->problemBase();

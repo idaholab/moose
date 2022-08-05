@@ -84,8 +84,6 @@ MultiAppProjectionTransfer::initialSetup()
 {
   MultiAppConservativeTransfer::initialSetup();
 
-  getAppInfo();
-
   _proj_sys.resize(_to_problems.size(), NULL);
 
   for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
@@ -195,8 +193,6 @@ MultiAppProjectionTransfer::execute()
 {
   TIME_SECTION(
       "MultiAppProjectionTransfer::execute()", 5, "Transferring variables through projection");
-
-  getAppInfo();
 
   ////////////////////
   // We are going to project the solutions by solving some linear systems.  In
