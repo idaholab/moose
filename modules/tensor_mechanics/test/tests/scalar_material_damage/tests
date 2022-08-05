@@ -1,5 +1,5 @@
 [Tests]
-  design = '/ComputeDamageStress.md /ScalarMaterialDamage.md /ComputeMultipleInelasticStress.md'
+  design = '/ComputeDamageStress.md /ScalarMaterialDamage.md /ComputeMultipleInelasticStress.md /NonLocalDamage.md'
   issues = '#11041'
   [scalar_damage_material]
     type = 'CSVDiff'
@@ -139,5 +139,20 @@
     issues = '#20722'
     cli_args = 'Materials/stress/damage_model=damage_index'
     allow_warnings = True
+  []
+  [nonlocal_damage_model]
+    type = 'CSVDiff'
+    input = 'nonlocal_scalar_damage.i'
+    csvdiff = 'nonlocal_scalar_damage_out.csv'
+    abs_zero = 1.e-6
+    requirement = "The system shall calculate the effect of damage on the stress of a nonlocal damage model."
+  []
+  [ad_nonlocal_damage_model]
+    type = 'CSVDiff'
+    input = 'ad_nonlocal_scalar_damage.i'
+    csvdiff = 'ad_nonlocal_scalar_damage_out.csv'
+    abs_zero = 1.e-6
+    requirement = "The system shall calculate the effect of damage on the stress of a nonlocal damage model. "
+    "When using automatic differentiation."
   []
 []
