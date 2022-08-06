@@ -141,6 +141,12 @@ where all fields are optional and the sorting section is also optional.  If the
 sorting section is present, you can have as many patterns as you want, but each
 pattern section must have 'section' and 'order' fields.
 
+Note that single `'` and double `"` quotes behave differently when auto-formatting input files with `hit format`.
+Single quotes strings will not be reformatted, while double quoted strings are reindented
+and reflowed. *Multiline strings* will only be reindented through inserting or removing spaces on the lines
+following the first line, to match any changes in indentation of the first line. *Single line strings*
+will be reflowed according to the set `line_length`.
+
 ## `hit merge` - Combining input files
 
 ```
