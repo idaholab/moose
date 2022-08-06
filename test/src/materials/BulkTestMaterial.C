@@ -39,6 +39,9 @@ BulkTestMaterial::BulkTestMaterial(const InputParameters & parameters)
 void
 BulkTestMaterial::computeProperties()
 {
+  if (!_bulk_uo.outputReady())
+    return;
+
   const auto index = _bulk_uo.getIndex(_current_elem->id());
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)

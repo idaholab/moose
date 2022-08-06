@@ -152,6 +152,9 @@ public:
   /// get a reference to the input data
   const InputVector & getInputData() const { return _input_data; }
 
+  /// check if teh output is fully computed and ready to be fetched
+  bool outputReady() const { return _output_ready; }
+
   /// get the index for the first qp of a specified element (other qps are at the following indices)
   std::size_t getIndex(dof_id_type elem_id) const
   {
@@ -162,7 +165,11 @@ public:
   }
 
   /// data structures are initialized here
-  virtual void initialize() final { _index = 0; }
+  virtual void initialize() final
+  {
+    _index = 0;
+    _output_ready = false;
+  }
 
   /// All data is automatically gathered here
   virtual void execute() final
@@ -208,6 +215,8 @@ public:
     _input_data.resize(_index);
     _output_data.resize(_index);
     bulkCompute();
+
+    _output_ready = true;
   }
 
   /// Input data, utilized in bulkCompute()
@@ -226,4 +235,8 @@ public:
   std::map<dof_id_type, std::size_t> _index_map;
 
   friend struct GatherVariable;
+
+private:
+  /// flag that indicates if _output_data has been fully computed
+  bool _output_ready;
 };
