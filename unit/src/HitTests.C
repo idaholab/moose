@@ -475,7 +475,7 @@ TEST(HitTests, RenderCases)
        "foo=\"hello my name is joe and I work in a button factory\"",
        "foo = \"hello my name is joe \"\n      \"and I work in a \"\n      \"button factory\"",
        28},
-      {"dont't reflow single quoted long string",
+      {"don't reflow single quoted long string",
        "foo='hello my name is joe and I work in a button factory'",
        "foo = 'hello my name is joe and I work in a button factory'",
        28},

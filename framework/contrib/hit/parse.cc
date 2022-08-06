@@ -504,7 +504,7 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
         // make the index beyond the string length.
         boundary = std::min(boundary + 1, unquoted.size());
 
-        // add the leading indentation and newline - skip it for the first first chunk of a string
+        // add the leading indentation and newline - skip it for the first chunk of a string
         // because it should go on the same line as the "=",
         if (pos > 0)
           s += "\n" + strRepeat(" ", prefix_len);
