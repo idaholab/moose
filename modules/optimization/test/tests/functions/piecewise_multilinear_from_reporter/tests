@@ -1,50 +1,68 @@
 [Tests]
   issues = '#47'
-  [./oneDa]
-    type = 'CSVDiff'
-    input = 'oneDa.i'
-    csvdiff = 'oneDa.csv'
-    abs_zero = 1E-8
-    requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation on a 1D domain."
-  [../]
-  [./oneDb]
-    type = 'CSVDiff'
-    input = 'oneDb.i'
-    csvdiff = 'oneDb.csv'
-    abs_zero = 1E-8
-    requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation on a 1D domain that compares to an equivalent known function."
+  [interp]
+    requirement ="The PiecewiseMultilinearFromReporter object shall perform"
+    [./except1]
+      type = 'RunException'
+      input = 'twoDa.i'
+      cli_args = "Functions/bilinear1_fcn/values_name='exception/tooManyParams'"
+      expect_err = "Gridded data evaluateFcn grid contains 9 grid entries, but the values_name reporter contains 10 entries.  These must be the same."
+      max_parallel = 1
+      detail = " error if the number of requested functions differ than the number available from the file."
+    [../]
+    [./oneDa]
+      type = 'CSVDiff'
+      input = 'oneDa.i'
+      csvdiff = 'oneDa.csv'
+      abs_zero = 1E-8
+      detail = " interpolation on a 1D domain."
+    [../]
+    [./oneDb]
+      type = 'CSVDiff'
+      input = 'oneDb.i'
+      csvdiff = 'oneDb.csv'
+      abs_zero = 1E-8
+      detail = " interpolation on a 1D domain that compares to an equivalent known function."
+    [../]
+
+    [./time]
+      type = 'CSVDiff'
+      input = 'time.i'
+      csvdiff = 'time.csv'
+      abs_zero = 1E-8
+      detail = " interpolation of time-dependent data."
+    [../]
+
+    [./twoDa]
+      type = 'CSVDiff'
+      input = 'twoDa.i'
+      csvdiff = 'twoDa.csv'
+      abs_zero = 1E-8
+      detail = " interpolation on a 2D domain."
+    [../]
+    [./twoDb]
+      type = 'Exodiff'
+      input = 'twoDb.i'
+      exodiff = 'twoDb.e'
+      rel_err = 1E-5
+      use_old_floor = True
+      detail = " interpolation on a 2D domain that compares to an equivalent known function."
+    [../]
+
+    [./fourDa]
+      type = 'Exodiff'
+      input = 'fourDa.i'
+      exodiff = 'fourDa.e'
+      rel_err = 1E-5
+      use_old_floor = True
+      detail = " interpolation on a 3D domain with time-dependent data."
+    [../]
   [../]
 
-  [./time]
-    type = 'CSVDiff'
-    input = 'time.i'
-    csvdiff = 'time.csv'
-    abs_zero = 1E-8
-    requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation of time-dependent data."
-  [../]
-
-  [./twoDa]
-    type = 'CSVDiff'
-    input = 'twoDa.i'
-    csvdiff = 'twoDa.csv'
-    abs_zero = 1E-8
-    requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation on a 2D domain."
-  [../]
-  [./twoDb]
+  [./twoD_const]
     type = 'Exodiff'
-    input = 'twoDb.i'
-    exodiff = 'twoDb.e'
-    rel_err = 1E-5
-    use_old_floor = True
-    requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation on a 2D domain that compares to an equivalent known function."
-  [../]
-
-  [./fourDa]
-    type = 'Exodiff'
-    input = 'fourDa.i'
-    exodiff = 'fourDa.e'
-    rel_err = 1E-5
-    use_old_floor = True
-    requirement = "The PiecewiseMultilinearFromReporter object shall perform interpolation on a 3D domain with time-dependent data."
+    input = 'twoD_const.i'
+    exodiff = 'twoD_const.e'
+    requirement = "The PiecewiseMulticonstantFromReporter object shall perform constant interpolation on a 2D domain."
   [../]
 []

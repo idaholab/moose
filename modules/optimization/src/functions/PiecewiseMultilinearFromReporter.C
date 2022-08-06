@@ -16,11 +16,10 @@ PiecewiseMultilinearFromReporter::validParams()
 {
   InputParameters params = PiecewiseMultiInterpolationFromReporter::validParams();
   params.addClassDescription(
-      "This is a copy of PiecewiseMultilinear which performs linear interpolation on 1D, 2D, 3D or "
-      "4D "
-      "data, except it is derived from PiecewiseMultiInterpolationFromReporter. If a point lies "
-      "outside the data range, the appropriate end "
-      "value is used.");
+      "This is a copy of PiecewiseMultilinear except it uses a GriddedDataReporter to get the grid "
+      "data and does not use a griddedData object.  It performs linear interpolation on 1D, 2D, "
+      "3D or 4D data, except it is derived from PiecewiseMultiInterpolationFromReporter. If a "
+      "point lies outside the data range, the appropriate end value is used.");
   params.addParam<Real>(
       "epsilon", 1e-12, "Finite differencing parameter for gradient and time derivative");
   return params;

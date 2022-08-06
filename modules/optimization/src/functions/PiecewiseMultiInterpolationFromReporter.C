@@ -139,13 +139,24 @@ PiecewiseMultiInterpolationFromReporter::initialSetup()
   std::set<int> s(_axes.begin(), _axes.end());
   if (s.size() != _dim)
     mooseError("PiecewiseMultiInterpolationFromReporter needs the AXES to be independent.  Check "
-               "the AXIS lines in "
-               "your data file.");
+               "the axes_name reporter in "
+               "your GriddedDataReporter file.");
 }
 
 Real
 PiecewiseMultiInterpolationFromReporter::evaluateFcn(const GridIndex & ijk) const
 {
+  unsigned int gridEntries = 1;
+  for (unsigned int i = 0; i < _dim; ++i)
+    gridEntries *= _grid[i].size();
+
+  if (gridEntries != _values.size())
+    mooseError("Gridded data evaluateFcn grid contains ",
+               gridEntries,
+               " grid entries, but the values_name reporter contains ",
+               _values.size(),
+               " entries.  These must be the same.");
+
   if (ijk.size() != _dim)
     mooseError(
         "Gridded data evaluateFcn called with ", ijk.size(), " arguments, but expected ", _dim);
