@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#20712'
+  design = 'source/kernels/lagrangian/TotalLagrangianStressDivergenceAxisymmetricCylindrical.md '
+           'source/kernels/lagrangian/TotalLagrangianStressDivergenceCentrosymmetricSpherical.md'
+  [small]
+    type = Exodiff
+    input = 'small.i'
+    exodiff = 'small_out.e'
+    requirement = "Small strain uniaxial patch test in 2D axisymmetric RZ coordinates passes"
+    abs_zero = 1e-6
+  []
+  [large]
+    type = Exodiff
+    input = 'large.i'
+    exodiff = 'large_out.e'
+    requirement = "Large strain uniaxial patch test in 2D axisymmetric RZ coordinates passes"
+    abs_zero = 1e-6
+  []
+[]

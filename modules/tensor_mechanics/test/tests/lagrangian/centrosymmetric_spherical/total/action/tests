@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#20712'
+  design = 'source/actions/TensorMechanicsAction.md'
+  [action_small_unstabilized]
+    type = Exodiff
+    input = 'action.i'
+    exodiff = 'small_unstabilized.e'
+    abs_zero = 1e-6
+    requirement = "Action produces identical results for small deformations/without stabilization in "
+                  "axisymmetric RZ coordinates"
+    cli_args = "Outputs/file_base=small_unstabilized Modules/TensorMechanics/Master/all/strain=SMALL "
+               "Modules/TensorMechanics/Master/all/volumetric_locking_correction=false "
+               "Materials/compute_stress/large_kinematics=false"
+  []
+  [action_large_unstabilized]
+    type = Exodiff
+    input = 'action.i'
+    exodiff = 'large_unstabilized.e'
+    abs_zero = 1e-6
+    requirement = "Action produces identical results for large deformations/without stabilization in "
+                  "axisymmetric RZ coordinates"
+    cli_args = "Outputs/file_base=large_unstabilized "
+               "Modules/TensorMechanics/Master/all/strain=FINITE "
+               "Modules/TensorMechanics/Master/all/volumetric_locking_correction=false "
+               "Materials/compute_stress/large_kinematics=true"
+  []
+[]

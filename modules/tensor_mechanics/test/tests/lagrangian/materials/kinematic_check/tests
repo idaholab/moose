@@ -1,0 +1,9 @@
+[Tests]
+  issues = '#21720'
+  design = 'source/materials/lagrangian/ComputeLagrangianWrappedStress.md'
+  [./runs_with_small_strain_model]
+    type = RunApp
+    input = 'strain_check.i'
+    requirement = "The Lagrangian kernels can use a small strain elastic update with a large kinematics formulation"
+  [../]
+[]
