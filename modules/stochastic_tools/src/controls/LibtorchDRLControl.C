@@ -26,6 +26,7 @@ LibtorchDRLControl::validParams()
       "The postprocessors which store the log probability of the action/control values.");
   params.addRequiredParam<std::vector<Real>>(
       "action_standard_deviations", "Standard deviation value used while sampling the actions.");
+  params.addParam<unsigned int>("seed", 11, "Seed for the random number generator.");
 
   return params;
 }
@@ -47,6 +48,11 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
                "parameters.");
 
 #ifdef LIBTORCH_ENABLED
+
+  // Fixing the RNG seed to make sure every experiment is the same.
+  if (isParamValid("seed"))
+    torch::manual_seed(getParam<unsigned int>("seed"));
+
   // We convert and store the user-supplied standard deviations into a tensor which can be easily
   // used by routines in libtorch
   _std = torch::eye(_control_names.size());

@@ -124,8 +124,7 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
     }
     else
     {
-      unsigned int multiplier = getParam<bool>("use_old_responses") ? 2 : 1;
-      unsigned int num_inputs = _response_names.size() * multiplier;
+      unsigned int num_inputs = _response_names.size() * _input_timesteps;
       unsigned int num_outputs = _control_names.size();
       std::vector<unsigned int> num_neurons_per_layer =
           getParam<std::vector<unsigned int>>("num_neurons_per_layer");

@@ -1,12 +1,28 @@
 [Tests]
-  issues = "#19571"
-  design = "DRLRewardFunction.md LibtorchDRLControl.md LibtorchDRLControlTrainer.md LibtorchNeuralNetControlTransfer.md"
-
-  [train]
-    requirement = 'The system shall be able to train a controller based on the Proximal Policy Optimization algorithm.'
-    type = CSVDiff
-    input = libtorch_drl_control_trainer.i
-    csvdiff = 'train_out.csv'
-    libtorch = true
+  [run]
+    requirement = "The system shall be able to "
+    issues = '#19571'
+    design = 'LibtorchDRLControl.md'
+    [read-parameters]
+      type = CSVDiff
+      input = libtorch_drl_control.i
+      csvdiff = parameter_read.csv
+      cli_args = "Controls/src_control/filename='mynet_control.net'
+                  Controls/src_control/torch_script_format=false
+                  Controls/src_control/input_timesteps=2
+                  Controls/src_control/num_neurons_per_layer='64 27'
+                  Controls/src_control/activation_function='relu'
+                  Outputs/file_base='parameter_read'"
+      detail = "read a neural network from a parameter file and use it to control a transient process."
+      libtorch = true
+    []
+    [without-nn]
+      type = CSVDiff
+      input = libtorch_drl_control.i
+      csvdiff = run_wo_nn.csv
+      cli_args = "Outputs/file_base='run_wo_nn'"
+      detail = "run with a DRL controller without having a neural net initialized in it."
+      libtorch = true
+    []
   []
 []
