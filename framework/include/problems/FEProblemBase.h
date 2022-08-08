@@ -1397,10 +1397,21 @@ public:
       const bool correct_edge_dropping,
       const Real minimum_projection_angle);
 
+  /**
+   * Return the undisplaced or displaced mortar generation object associated with the provided
+   * boundaries and subdomains
+   */
+  ///@{
   const AutomaticMortarGeneration &
   getMortarInterface(const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
                      const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
                      bool on_displaced) const;
+
+  AutomaticMortarGeneration &
+  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
+                     const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
+                     bool on_displaced);
+  ///@}
 
   const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
   getMortarInterfaces(bool on_displaced) const;
@@ -1415,11 +1426,11 @@ public:
    */
   void setRestartFile(const std::string & file_name);
 
-  ///@{
   /**
    * Return a reference to the material property storage
    * @return A const reference to the material property storage
    */
+  ///@{
   const MaterialPropertyStorage & getMaterialPropertyStorage() { return _material_props; }
   const MaterialPropertyStorage & getBndMaterialPropertyStorage() { return _bnd_material_props; }
   const MaterialPropertyStorage & getNeighborMaterialPropertyStorage()
@@ -1428,10 +1439,10 @@ public:
   }
   ///@}
 
-  ///@{
   /**
    * Return indicator/marker storage.
    */
+  ///@{
   const MooseObjectWarehouse<Indicator> & getIndicatorWarehouse() { return _indicators; }
   const MooseObjectWarehouse<InternalSideIndicator> & getInternalSideIndicatorWarehouse()
   {
@@ -2159,8 +2170,10 @@ protected:
 
   /**
    * Call when it is possible that the needs for ghosted elements has changed.
+   * @param mortar_changed Whether an update of mortar data has been requested since the last
+   * EquationSystems (re)initialization
    */
-  void reinitBecauseOfGhostingOrNewGeomObjects();
+  void reinitBecauseOfGhostingOrNewGeomObjects(bool mortar_changed = false);
 
   /**
    * Helper for setting the "_subproblem" and "_sys" parameters in addObject() and

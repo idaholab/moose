@@ -33,6 +33,8 @@ public:
   virtual void execute() override {}
   virtual Real getValue() override;
 
+  void initialSetup() override;
+
 protected:
   MooseMesh & _mesh;
   std::string _var_name;

@@ -31,7 +31,7 @@ public:
    */
   void compute() override;
 
-  void mortarSetup() override;
+  void initialSetup() override;
 
 protected:
   void precalculateValue() override final;

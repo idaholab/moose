@@ -23,14 +23,7 @@ class MaterialBase;
 class MortarExecutorInterface
 {
 public:
-  MortarExecutorInterface(FEProblemBase & fe_problem);
-  MortarExecutorInterface(MortarExecutorInterface && other);
-  virtual ~MortarExecutorInterface() = default;
-
-  /**
-   * Called on this object when the mesh changes
-   */
-  virtual void mortarSetup() = 0;
+  MortarExecutorInterface() = default;
 
 protected:
   /**
@@ -53,7 +46,4 @@ protected:
   /// face
   std::deque<MaterialBase *> _secondary_boundary_mats;
   ///@}
-
-private:
-  MortarData & _mortar_data;
 };

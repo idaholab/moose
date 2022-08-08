@@ -64,18 +64,19 @@ void projectQPoints3d(const Elem * msm_elem,
  */
 template <typename Iterators, typename Consumers, typename ActionFunctor>
 void
-loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
-                       Assembly & assembly,
-                       SubProblem & subproblem,
-                       FEProblemBase & fe_problem,
-                       const AutomaticMortarGeneration & amg,
-                       const bool displaced,
-                       const Consumers & consumers,
-                       const THREAD_ID tid,
-                       std::map<SubdomainID, std::deque<MaterialBase *>> secondary_ip_sub_to_mats,
-                       std::map<SubdomainID, std::deque<MaterialBase *>> primary_ip_sub_to_mats,
-                       std::deque<MaterialBase *> secondary_boundary_mats,
-                       const ActionFunctor act)
+loopOverMortarSegments(
+    const Iterators & secondary_elems_to_mortar_segments,
+    Assembly & assembly,
+    SubProblem & subproblem,
+    FEProblemBase & fe_problem,
+    const AutomaticMortarGeneration & amg,
+    const bool displaced,
+    const Consumers & consumers,
+    const THREAD_ID tid,
+    const std::map<SubdomainID, std::deque<MaterialBase *>> & secondary_ip_sub_to_mats,
+    const std::map<SubdomainID, std::deque<MaterialBase *>> & primary_ip_sub_to_mats,
+    const std::deque<MaterialBase *> & secondary_boundary_mats,
+    const ActionFunctor act)
 {
   const auto & primary_secondary_boundary_id_pair = amg.primarySecondaryBoundaryIDPair();
 
@@ -110,7 +111,7 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
   // segments
   for (const auto elem_to_msm : secondary_elems_to_mortar_segments)
   {
-    const Elem * secondary_face_elem = elem_to_msm->first;
+    const Elem * secondary_face_elem = subproblem.mesh().getMesh().elem_ptr(elem_to_msm->first);
     // Set the secondary interior parent and side ids
     const Elem * secondary_ip = secondary_face_elem->interior_parent();
     unsigned int secondary_side_id = secondary_ip->which_side_am_i(secondary_face_elem);

@@ -689,7 +689,6 @@ public:
   std::size_t requiredDerivativeSize() const { return _required_derivative_size; }
 #endif
 
-public:
   FEProblemBase & _fe_problem;
   System & _sys;
   // FIXME: make these protected and create getters/setters

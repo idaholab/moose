@@ -48,6 +48,7 @@
     input = 'dual-soln-continuity-vcp.i'
     exodiff = 'dual-soln-continuity_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case with the first order dual basis using VCP.'
+    mesh_mode = 'replicated'
   []
   [vcp-2nd-order]
     type = 'Exodiff'
@@ -55,5 +56,6 @@
     exodiff = 'dual-soln-continuity-2nd-order_out.e'
     cli_args = 'Mesh/second_order=true Variables/T/order=SECOND Variables/lambda/order=SECOND Outputs/file_base=dual-soln-continuity-2nd-order_out'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case with the second order dual basis using VCP.'
+    mesh_mode = 'replicated'
   []
 []

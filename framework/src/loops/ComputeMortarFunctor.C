@@ -30,8 +30,7 @@ ComputeMortarFunctor::ComputeMortarFunctor(
     SubProblem & subproblem,
     FEProblemBase & fe_problem,
     bool displaced)
-  : MortarExecutorInterface(fe_problem),
-    _amg(amg),
+  : _amg(amg),
     _subproblem(subproblem),
     _fe_problem(fe_problem),
     _displaced(displaced),
@@ -40,11 +39,7 @@ ComputeMortarFunctor::ComputeMortarFunctor(
   // Construct the mortar constraints we will later loop over
   for (auto mc : mortar_constraints)
     _mortar_constraints.push_back(mc.get());
-}
 
-void
-ComputeMortarFunctor::mortarSetup()
-{
   Moose::Mortar::setupMortarMaterials(_mortar_constraints,
                                       _fe_problem,
                                       _amg,
@@ -67,14 +62,17 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type)
        it != secondary_elems_to_mortar_segments.end();
        ++it)
   {
-    auto * const secondary_elem = it->first;
-    mooseAssert(secondary_elem->active(),
-                "We loop over active elements when building the mortar segment mesh, so we golly "
-                "well hope this is active.");
+    auto * const secondary_elem = _subproblem.mesh().getMesh().query_elem_ptr(it->first);
 
-    if (secondary_elem->processor_id() == _subproblem.processor_id() && !it->second.empty())
+    if (secondary_elem && secondary_elem->processor_id() == _subproblem.processor_id() &&
+        !it->second.empty())
+    {
       // This is local and the mortar segment set isn't empty, so include
       iterators.push_back(it);
+      mooseAssert(secondary_elem->active(),
+                  "We loop over active elements when building the mortar segment mesh, so we golly "
+                  "well hope this is active.");
+    }
   }
 
   auto act_functor = [this, &num_cached, compute_type]()
