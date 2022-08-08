@@ -87,7 +87,7 @@ HomogenizedTotalLagrangianStressDivergence::computeBaseJacobian()
 Real
 HomogenizedTotalLagrangianStressDivergence::materialBaseJacobian()
 {
-  return _dpk1[_qp].contractionKl(_indices[_h].first, _indices[_h].second, testGrad(_component));
+  return _dpk1[_qp].contractionKl(_indices[_h].first, _indices[_h].second, gradTest(_alpha));
 }
 
 Real
@@ -108,10 +108,10 @@ Real
 HomogenizedTotalLagrangianStressDivergence::sdConstraintJacobianStrain()
 {
   Real value = 0.0;
-  if (_indices[_h].first == _component)
-    value += 0.5 * trialGrad(_component)(_indices[_h].first, _indices[_h].second);
-  if (_indices[_h].second == _component)
-    value += 0.5 * trialGrad(_component)(_indices[_h].second, _indices[_h].first);
+  if (_indices[_h].first == _alpha)
+    value += 0.5 * gradTrial(_alpha)(_indices[_h].first, _indices[_h].second);
+  if (_indices[_h].second == _alpha)
+    value += 0.5 * gradTrial(_alpha)(_indices[_h].second, _indices[_h].first);
   return value;
 }
 
@@ -120,8 +120,8 @@ HomogenizedTotalLagrangianStressDivergence::ldConstraintJacobianStrain()
 {
   unsigned int i = _indices[_h].first;
   unsigned int j = _indices[_h].second;
-  if (i == _component)
-    return trialGrad(_component)(i, j);
+  if (i == _alpha)
+    return gradTrial(_alpha)(i, j);
   else
     return 0;
 }
@@ -129,5 +129,5 @@ HomogenizedTotalLagrangianStressDivergence::ldConstraintJacobianStrain()
 Real
 HomogenizedTotalLagrangianStressDivergence::materialConstraintJacobianStress()
 {
-  return _dpk1[_qp].contractionIj(_indices[_h].first, _indices[_h].second, trialGrad(_component));
+  return _dpk1[_qp].contractionIj(_indices[_h].first, _indices[_h].second, gradTrial(_alpha));
 }

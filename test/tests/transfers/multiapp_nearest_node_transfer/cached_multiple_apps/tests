@@ -1,0 +1,12 @@
+[Tests]
+  design = 'transfers/MultiAppNearestNodeTransfer.md'
+  [caching_to_multiple_subapps]
+    type = Exodiff
+    input = 'main.i'
+    exodiff = 'main_out.e'
+    issues = '#20962'
+    requirement = "The system shall be able to cache nearest node mappings with multiple target subapps."
+    # see #21783
+    max_parallel = 12
+  []
+[]

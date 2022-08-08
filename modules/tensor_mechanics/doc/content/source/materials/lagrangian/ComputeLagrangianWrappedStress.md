@@ -23,7 +23,7 @@ wrapper applies the objective integration described in the
 object to convert the engineering stress provided by the MOOSE material
 to the Cauchy and Piola-Kirchhoff stresses needed by the Lagrangian kernels.
 This process is adequate for most materials, but will not produce the
-expected results for anisotropic materials or for materials "natively" 
+expected results for anisotropic materials or for materials "natively"
 providing a large deformation stress update, like crystal plasticity.
 For this materials users should consider writing a custom wrapper or
 transitioning the material model to inherit from the new
@@ -31,15 +31,15 @@ material system [base classes](NewMaterialSystem.md).
 
 ## Example Input File Syntax
 
-The user provides only the name of the stress and Jacobian `MaterialProperty` 
+The user provides only the name of the stress and Jacobian `MaterialProperty`
 produced by the MOOSE material.  For most situations the default values
-are sufficient and the user doesn't have to provide any parameters for the 
+are sufficient and the user doesn't have to provide any parameters for the
 object.
 
 The following example wraps a simple J2 plasticity model for use with the new
 kernels.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/updated/cross_material/correctness/plastic_j2.i
+!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/updated/cross_material/correctness/plastic_j2.i
          block=Materials
 
 !syntax parameters /Materials/ComputeLagrangianWrappedStress

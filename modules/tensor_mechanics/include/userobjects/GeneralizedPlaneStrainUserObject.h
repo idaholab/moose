@@ -35,7 +35,7 @@ protected:
   /// Base name of the material system
   const std::string _base_name;
 
-  const MaterialProperty<RankFourTensor> & _Cijkl;
+  const MaterialProperty<RankFourTensor> & _Jacobian_mult;
 
   /// The stress tensor
   const MaterialProperty<RankTwoTensor> & _stress;

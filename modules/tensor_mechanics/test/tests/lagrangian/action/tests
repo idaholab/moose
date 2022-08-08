@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#20281'
   [./without_correction]
+    issues = '#20281'
     type = RunApp
     input = 'simple_test.i'
     design = 'source/actions/TensorMechanicsAction.md'
@@ -8,11 +8,19 @@
     cli_args = "Modules/TensorMechanics/Master/all/volumetric_locking_correction=false"
   [../]
   [./with_correction]
+    issues = '#20281'
     type = RunException
     input = 'simple_test.i'
     design = 'source/actions/TensorMechanicsAction.md'
     requirement = "Cannot run second order problem with stabilization"
     cli_args = "Modules/TensorMechanics/Master/all/volumetric_locking_correction=true"
     expect_err = "Volumetric locking correction should not be used for higher-order elements."
+  [../]
+  [./homogenization_block_restriction]
+    issues = '#21716'
+    type = RunApp
+    input = 'homogenization_block.i'
+    design = 'source/actions/TensorMechanicsAction.md'
+    requirement = "Homogenization system can be block restricted"
   [../]
 []

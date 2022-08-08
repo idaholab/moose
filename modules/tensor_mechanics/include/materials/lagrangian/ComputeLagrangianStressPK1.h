@@ -44,6 +44,4 @@ protected:
   const MaterialProperty<RankTwoTensor> & _inv_df;
   /// Deformation gradient
   const MaterialProperty<RankTwoTensor> & _F;
-  /// Volume change
-  const MaterialProperty<Real> & _detJ;
 };

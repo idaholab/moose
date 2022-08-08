@@ -3,7 +3,7 @@
 [libMesh] by default is compiled with [VTK] when using our moose-libmesh Conda package. However, if you are attempting to build your own version of libMesh with VTK support, the easiest way to do so, is to install all the dependencies via Conda, and then run the `./update_and_rebuild_libmesh.sh` script:
 
 ```bash
-conda create --name custom-libmesh moose-petsc moose-libmesh-vtk
+conda create -n custom-libmesh moose-petsc moose-libmesh-vtk
 conda activate custom-libmesh
 cd ~/projects/moose/scripts
 ./update_and_rebuild_libmesh.sh
