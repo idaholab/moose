@@ -359,6 +359,7 @@ StandardType<RadialAverage::QPData>::StandardType(const RadialAverage::QPData * 
 } // namespace TIMPI
 
 StandardType<RadialAverage::QPData>::StandardType(const StandardType<RadialAverage::QPData> & t)
+  : DataType(t._datatype)
 {
 #ifdef LIBMESH_HAVE_MPI
   libmesh_call_mpi(MPI_Type_dup(t._datatype, &_datatype));
