@@ -1,0 +1,11 @@
+[Tests]
+  desgin = "LibtorchNeuralNetControlTransfer.md"
+  issues = '#19571'
+  [torch-parameters]
+    type = CSVDiff
+    input = libtorch_drl_control_trainer.i
+    csvdiff = 'train_out_nn_parameters_0003.csv train_out_runner0_nn_param_pp_0049.csv'
+    requirement = "The system shall be able to transfer an artificial neural network between a trainer object and a control object residing on different apps."
+    libtorch = true
+  []
+[]

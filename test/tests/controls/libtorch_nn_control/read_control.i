@@ -108,10 +108,16 @@ cp = 1.0
   []
 []
 
-[Outputs]
-  [csv]
-    type = CSV
+[VectorPostprocessors]
+  inactive = 'nn_parameters'
+  [nn_parameters]
+    type = LibtorchArtificialNeuralNetParameters
+    control_name = src_control
     execute_on = FINAL
   []
-  exodus = true
+[]
+
+[Outputs]
+  csv = true
+  execute_on = FINAL
 []

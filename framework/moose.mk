@@ -213,7 +213,7 @@ moose_non_unity := %/base %/utils
 
 # Add additional non-unity directories if libtorch is enabled
 ifeq ($(ENABLE_LIBTORCH),true)
-  moose_non_unity += %/controls
+  moose_non_unity += %/controls %/vectorpostprocessors
 endif
 
 unity_src_dir := $(FRAMEWORK_DIR)/build/unity_src

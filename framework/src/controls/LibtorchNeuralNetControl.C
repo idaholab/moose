@@ -119,9 +119,7 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
   {
     std::string filename = getParam<std::string>("filename");
     if (getParam<bool>("torch_script_format"))
-    {
       _nn = std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(filename);
-    }
     else
     {
       unsigned int num_inputs = _response_names.size() * _input_timesteps;
@@ -132,15 +130,14 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
           parameters.isParamSetByUser("activation_function")
               ? getParam<std::vector<std::string>>("activation_function")
               : std::vector<std::string>({"relu"});
-      getParam<std::vector<unsigned int>>("num_neurons_per_layer");
       auto nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
           filename, num_inputs, num_outputs, num_neurons_per_layer, activation_functions);
 
+      torch::load(nn, filename);
       try
       {
         torch::load(nn, filename);
         _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(*nn);
-        _console << "Loaded requested .pt file." << std::endl;
       }
       catch (...)
       {

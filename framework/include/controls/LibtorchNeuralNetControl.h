@@ -32,6 +32,9 @@ public:
    * when copying the neural network from a main app which trains it.
    */
   void loadControlNeuralNet(const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & input_nn);
+
+  /// Return a pointer to the stored neural network
+  const std::shared_ptr<Moose::LibtorchNeuralNetBase> controlNeuralNet() { return _nn; }
 #endif
 
 protected:
