@@ -284,7 +284,7 @@ void
 FeatureFloodCount::initialize()
 {
   // Clear the feature marking maps and region counters and other data structures
-  for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
+  for (const auto map_num : make_range(_maps_size))
   {
     _feature_maps[map_num].clear();
     _partial_feature_sets[map_num].clear();
@@ -363,7 +363,7 @@ FeatureFloodCount::execute()
       if (elem->processor_id() == rank)
       {
         if (hasBoundary(boundary_id))
-          for (MooseIndex(_vars) var_num = 0; var_num < _vars.size(); ++var_num)
+          for (const auto var_num : index_range(_vars))
             flood(elem, var_num);
       }
     }
@@ -375,17 +375,17 @@ FeatureFloodCount::execute()
       // Loop over elements or nodes
       if (_is_elemental)
       {
-        for (MooseIndex(_vars) var_num = 0; var_num < _vars.size(); ++var_num)
+        for (const auto var_num : index_range(_vars))
           flood(current_elem, var_num);
       }
       else
       {
         auto n_nodes = current_elem->n_vertices();
-        for (MooseIndex(n_nodes) i = 0; i < n_nodes; ++i)
+        for (const auto i : make_range(n_nodes))
         {
           const Node * current_node = current_elem->node_ptr(i);
 
-          for (MooseIndex(_vars) var_num = 0; var_num < _vars.size(); ++var_num)
+          for (const auto var_num : index_range(_vars))
             flood(current_node, var_num);
         }
       }
@@ -440,7 +440,7 @@ FeatureFloodCount::communicateAndMerge()
     if (is_merging_processor)
       recv_buffers.reserve(_app.n_processors());
 
-    for (MooseIndex(n_merging_procs) i = 0; i < n_merging_procs; ++i)
+    for (const auto i : make_range(n_merging_procs))
     {
       serialize(send_buffers[0], i);
 
@@ -583,7 +583,7 @@ FeatureFloodCount::sortAndLabel()
    * with each feature's _var_index.
    */
   unsigned int feature_offset = 0;
-  for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
+  for (const auto map_num : make_range(_maps_size))
   {
     // Skip empty map checks
     if (_feature_counts_per_map[map_num] == 0)
@@ -605,7 +605,7 @@ FeatureFloodCount::sortAndLabel()
 #endif
 
   // Label the features with an ID based on the sorting (processor number independent value)
-  for (MooseIndex(_feature_sets) i = 0; i < _feature_sets.size(); ++i)
+  for (const auto i : index_range(_feature_sets))
     if (_feature_sets[i]._id == invalid_id)
       _feature_sets[i]._id = i;
 }
@@ -630,7 +630,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::size_t> & local_to
   // Build the offsets vector
   unsigned int globalsize = 0;
   std::vector<int> offsets(_n_procs); // Type is signed for use with the MPI API
-  for (MooseIndex(offsets) i = 0; i < offsets.size(); ++i)
+  for (const auto i : index_range(offsets))
   {
     offsets[i] = globalsize;
     globalsize += counts[i];
@@ -660,8 +660,7 @@ void
 FeatureFloodCount::buildFeatureIdToLocalIndices(unsigned int max_id)
 {
   _feature_id_to_local_index.assign(max_id + 1, invalid_size_t);
-  for (MooseIndex(_feature_sets) feature_index = 0; feature_index < _feature_sets.size();
-       ++feature_index)
+  for (const auto feature_index : index_range(_feature_sets))
   {
     if (_feature_sets[feature_index]._status != Status::INACTIVE)
     {
@@ -1084,7 +1083,7 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers, un
 
   auto rank = processor_id();
 
-  for (MooseIndex(serialized_buffers) proc_id = 0; proc_id < serialized_buffers.size(); ++proc_id)
+  for (const auto proc_id : index_range(serialized_buffers))
   {
     /**
      * Usually we have the local processor data already in the _partial_feature_sets data structure.
@@ -1117,7 +1116,7 @@ FeatureFloodCount::mergeSets()
   TIME_SECTION("mergeSets", 3, "Merging Sets");
 
   // When working with _distribute_merge_work all of the maps will be empty except for one
-  for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
+  for (const auto map_num : make_range(_maps_size))
   {
     for (auto it1 = _partial_feature_sets[map_num].begin();
          it1 != _partial_feature_sets[map_num].end();
@@ -1188,7 +1187,7 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
   unsigned int feature_offset = 0;
   // Set the member feature count to zero and start counting the actual features
   _feature_count = 0;
-  for (MooseIndex(_maps_size) map_num = 0; map_num < _partial_feature_sets.size(); ++map_num)
+  for (const auto map_num : index_range(_partial_feature_sets))
   {
     for (auto & feature : _partial_feature_sets[map_num])
     {
@@ -1258,7 +1257,7 @@ FeatureFloodCount::areFeaturesMergeable(const FeatureData & f1, const FeatureDat
 void
 FeatureFloodCount::updateFieldInfo()
 {
-  for (MooseIndex(_feature_sets) i = 0; i < _feature_sets.size(); ++i)
+  for (const auto i : index_range(_feature_sets))
   {
     auto & feature = _feature_sets[i];
 
@@ -1497,7 +1496,7 @@ FeatureFloodCount::expandPointHalos()
 
         // Get the nodes on a current element so that we can add in point neighbors
         auto n_nodes = elem->n_vertices();
-        for (MooseIndex(n_nodes) i = 0; i < n_nodes; ++i)
+        for (const auto i : make_range(n_nodes))
         {
           const Node * current_node = elem->node_ptr(i);
 
@@ -1545,8 +1544,7 @@ FeatureFloodCount::expandEdgeHalos(unsigned int num_layers_to_expand)
   {
     for (auto & feature : list_ref)
     {
-      for (MooseIndex(num_layers_to_expand) halo_level = 0; halo_level < num_layers_to_expand;
-           ++halo_level)
+      for (unsigned short halo_level = 0; halo_level < num_layers_to_expand; ++halo_level)
       {
         /**
          * Create a copy of the halo set so that as we insert new ids into the
@@ -1602,7 +1600,7 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem,
   MeshBase & mesh = _mesh.getMesh();
 
   // Loop over all neighbors (at the the same level as the current element)
-  for (MooseIndex(elem->n_neighbors()) i = 0; i < elem->n_neighbors(); ++i)
+  for (const auto i : make_range(elem->n_neighbors()))
   {
     const Elem * neighbor_ancestor = nullptr;
     bool topological_neighbor = false;
@@ -1802,7 +1800,7 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & feature) const
     {
       Elem * elem = _mesh.elemPtr(entity);
 
-      for (MooseIndex(elem->n_nodes()) node_n = 0; node_n < elem->n_nodes(); ++node_n)
+      for (const auto node_n : make_range(elem->n_nodes()))
       {
         auto iters = _periodic_node_map.equal_range(elem->node_id(node_n));
 
@@ -2158,7 +2156,7 @@ FeatureFloodCount::FeatureData::mergeBBoxes(std::vector<BoundingBox> & bboxes,
   {
     std::ostringstream oss;
     oss << "LHS BBoxes:\n";
-    for (MooseIndex(_bboxes) i = 0; i < _bboxes.size(); ++i)
+    for (const auto i : make_range(_bboxes.size()))
       oss << "Max: " << _bboxes[i].max() << " Min: " << _bboxes[i].min() << '\n';
 
     ::mooseError("No Bounding Boxes Expanded - This is a catastrophic error!\n", oss.str());
@@ -2246,7 +2244,7 @@ updateBBoxExtremesHelper(BoundingBox & bbox, const Point & node)
 void
 updateBBoxExtremesHelper(BoundingBox & bbox, const Elem & elem)
 {
-  for (MooseIndex(elem.n_nodes()) node_n = 0; node_n < elem.n_nodes(); ++node_n)
+  for (const auto node_n : make_range(elem.n_nodes()))
     updateBBoxExtremesHelper(bbox, *(elem.node_ptr(node_n)));
 }
 

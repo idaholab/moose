@@ -519,7 +519,7 @@ GrainTracker::trackGrains()
     if (_verbosity_level > 0)
     {
       _console << "\nGrain Tracker Status:";
-      for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
+      for (const auto map_num : make_range(_maps_size))
       {
         _console << "\nGrains active index " << map_num << ": " << map_sizes[map_num] << " -> "
                  << _feature_counts_per_map[map_num];
@@ -543,9 +543,7 @@ GrainTracker::trackGrains()
     std::vector<std::size_t> new_grain_index_to_existing_grain_index(_feature_sets.size(),
                                                                      invalid_size_t);
 
-    for (MooseIndex(_feature_sets_old) old_grain_index = 0;
-         old_grain_index < _feature_sets_old.size();
-         ++old_grain_index)
+    for (const auto old_grain_index : index_range(_feature_sets_old))
     {
       auto & old_grain = _feature_sets_old[old_grain_index];
 
@@ -646,9 +644,7 @@ GrainTracker::trackGrains()
     }
 
     // Mark all resolved grain matches
-    for (MooseIndex(new_grain_index_to_existing_grain_index) new_index = 0;
-         new_index < new_grain_index_to_existing_grain_index.size();
-         ++new_index)
+    for (const auto new_index : index_range(new_grain_index_to_existing_grain_index))
     {
       auto curr_index = new_grain_index_to_existing_grain_index[new_index];
 
@@ -679,7 +675,7 @@ GrainTracker::trackGrains()
      *         for any new grain which means it can't be marked inactive in the loop above.
      */
     // Case 1 (new grains in _feature_sets):
-    for (MooseIndex(_feature_sets) grain_num = 0; grain_num < _feature_sets.size(); ++grain_num)
+    for (const auto grain_num : index_range(_feature_sets))
     {
       auto & grain = _feature_sets[grain_num];
 
@@ -769,9 +765,7 @@ GrainTracker::trackGrains()
                      << COLOR_DEFAULT;
 
           std::vector<std::size_t> old_grain_indices;
-          for (MooseIndex(_feature_sets_old) old_grain_index = 0;
-               old_grain_index < _feature_sets_old.size();
-               ++old_grain_index)
+          for (const auto old_grain_index : index_range(_feature_sets_old))
           {
             auto & old_grain = _feature_sets_old[old_grain_index];
 
@@ -949,11 +943,11 @@ GrainTracker::remapGrains()
     }
 
     // Make sure that all split pieces of any grain are on the same OP
-    for (MooseIndex(_feature_sets) i = 0; i < _feature_sets.size(); ++i)
+    for (const auto i : index_range(_feature_sets))
     {
       auto & grain1 = _feature_sets[i];
 
-      for (MooseIndex(_feature_sets) j = 0; j < _feature_sets.size(); ++j)
+      for (const auto j : index_range(_feature_sets))
       {
         auto & grain2 = _feature_sets[j];
         if (i == j)
@@ -1006,8 +1000,7 @@ GrainTracker::remapGrains()
                      << ", remapping to another variable\n"
                      << COLOR_DEFAULT;
 
-          for (MooseIndex(_max_remap_recursion_depth) max = 0; max <= _max_remap_recursion_depth;
-               ++max)
+          for (const auto max : make_range(0, _max_remap_recursion_depth + 1))
             if (max < _max_remap_recursion_depth)
             {
               if (attemptGrainRenumber(grain1, 0, max))
@@ -1045,8 +1038,7 @@ GrainTracker::remapGrains()
                        << grain2._id << " (variable index: " << grain1._var_index << ")\n"
                        << COLOR_DEFAULT;
 
-            for (MooseIndex(_max_remap_recursion_depth) max = 0; max <= _max_remap_recursion_depth;
-                 ++max)
+            for (const auto max : make_range(0, _max_remap_recursion_depth + 1))
             {
               if (max < _max_remap_recursion_depth)
               {
@@ -1204,7 +1196,7 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
    *        __/  0  \___/
    *
    */
-  for (MooseIndex(_feature_sets) i = 0; i < _feature_sets.size(); ++i)
+  for (const auto i : index_range(_feature_sets))
   {
     auto & other_grain = _feature_sets[i];
 
@@ -1240,7 +1232,7 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
    * parameter corresponding to this grain, we need to put them in the list or the grain  tracker
    * won't realize that those vars are available for remapping.
    */
-  for (MooseIndex(_vars) var_index = 0; var_index < _reserve_op_index; ++var_index)
+  for (const auto var_index : make_range(_reserve_op_index))
   {
     // Don't put an entry in for matching variable indices (i.e. we can't remap to ourselves)
     if (grain._var_index == var_index)
@@ -1550,7 +1542,7 @@ GrainTracker::updateFieldInfo()
 {
   TIME_SECTION("updateFieldInfo", 3, "Updating Field Info");
 
-  for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
+  for (const auto map_num : make_range(_maps_size))
     _feature_maps[map_num].clear();
 
   std::map<dof_id_type, Real> tmp_map;
@@ -1605,8 +1597,7 @@ GrainTracker::updateFieldInfo()
         if (insert_pair.second)
         {
           // insert the reserve op numbers (if appropriate)
-          for (MooseIndex(_n_reserve_ops) reserve_index = 0; reserve_index < _n_reserve_ops;
-               ++reserve_index)
+          for (const auto reserve_index : make_range(_n_reserve_ops))
             vec_ref[reserve_index] = _reserve_grain_first_index + reserve_index;
         }
         vec_ref[grain._var_index] = grain._id;
@@ -1644,7 +1635,7 @@ GrainTracker::communicateHaloMap()
       counts.resize(_n_procs);
 
       // Loop over the _halo_ids "field" and build minimal lists for all of the other ranks
-      for (MooseIndex(_halo_ids) var_index = 0; var_index < _halo_ids.size(); ++var_index)
+      for (const auto var_index : index_range(_halo_ids))
       {
         for (const auto & entity_pair : _halo_ids[var_index])
         {
