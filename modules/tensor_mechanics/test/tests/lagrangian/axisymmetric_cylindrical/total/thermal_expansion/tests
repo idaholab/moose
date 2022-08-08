@@ -1,0 +1,45 @@
+[Tests]
+  issues = '#20712'
+  design = 'source/kernels/lagrangian/TotalLagrangianStressDivergenceAxisymmetricCylindrical.md '
+           'source/kernels/lagrangian/TotalLagrangianStressDivergenceCentrosymmetricSpherical.md'
+  [jacobian_small_no_stab]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 5e-6
+    difference_tol = 1E10
+    run_sim = true
+    cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false"
+    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for small displacements in 2D '
+                  'axisymmetric cylindrical coordinates, no stabilization, including cross-terms'
+  []
+  [jacobian_large_no_stab]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 5e-6
+    difference_tol = 1E10
+    run_sim = true
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false"
+    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 2D '
+                  'axisymmetric cylindrical coordinates, no stabilization, including cross-terms'
+  []
+  [jacobian_small_with_stab]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 5e-6
+    difference_tol = 1E10
+    run_sim = true
+    cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true"
+    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for small displacements in 2D '
+                  'axisymmetric cylindrical coordinates, with stabilization, including cross-terms'
+  []
+  [jacobian_large_with_stab]
+    type = PetscJacobianTester
+    input = 'jactest.i'
+    ratio_tol = 5e-6
+    difference_tol = 1E10
+    run_sim = true
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
+    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 2D '
+                  'axisymmetric cylindrical coordinates, with stabilization, including cross-terms'
+  []
+[]

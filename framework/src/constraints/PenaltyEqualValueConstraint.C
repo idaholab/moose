@@ -10,11 +10,13 @@
 #include "PenaltyEqualValueConstraint.h"
 
 registerMooseObject("MooseApp", PenaltyEqualValueConstraint);
+registerMooseObject("MooseApp", ADPenaltyEqualValueConstraint);
 
+template <bool is_ad>
 InputParameters
-PenaltyEqualValueConstraint::validParams()
+PenaltyEqualValueConstraintTempl<is_ad>::validParams()
 {
-  InputParameters params = ADMortarConstraint::validParams();
+  InputParameters params = MortarConstraintTempl<is_ad>::validParams();
   params.addClassDescription(
       "PenaltyEqualValueConstraint enforces solution continuity between secondary and "
       "primary sides of a mortar interface using a penalty approach (no Lagrange multipliers "
@@ -26,13 +28,17 @@ PenaltyEqualValueConstraint::validParams()
   return params;
 }
 
-PenaltyEqualValueConstraint::PenaltyEqualValueConstraint(const InputParameters & parameters)
-  : ADMortarConstraint(parameters), _penalty_value(getParam<Real>("penalty_value"))
+template <bool is_ad>
+PenaltyEqualValueConstraintTempl<is_ad>::PenaltyEqualValueConstraintTempl(
+    const InputParameters & parameters)
+  : MortarConstraintTempl<is_ad>(parameters),
+    _penalty_value(this->template getParam<Real>("penalty_value"))
 {
 }
 
-ADReal
-PenaltyEqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
+template <bool is_ad>
+GenericReal<is_ad>
+PenaltyEqualValueConstraintTempl<is_ad>::computeQpResidual(Moose::MortarType mortar_type)
 {
   switch (mortar_type)
   {
@@ -56,3 +62,50 @@ PenaltyEqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
       return 0;
   }
 }
+
+template <>
+ADReal
+PenaltyEqualValueConstraintTempl<true>::computeQpJacobian(
+    Moose::ConstraintJacobianType /*jacobian_type*/, unsigned int /*jvar*/)
+{
+  mooseError("ADPenaltyEqualValueConstraint does not implement manual Jacobian calculation.");
+}
+
+template <>
+Real
+PenaltyEqualValueConstraintTempl<false>::computeQpJacobian(
+    Moose::ConstraintJacobianType jacobian_type, unsigned int jvar)
+{
+  typedef Moose::ConstraintJacobianType JType;
+
+  switch (jacobian_type)
+  {
+    case JType::SecondarySecondary:
+      if (jvar == _secondary_var.number())
+        return (*_phi)[_j][_qp] * _penalty_value * _test_secondary[_i][_qp];
+      break;
+
+    case JType::SecondaryPrimary:
+      if (jvar == _primary_var.number())
+        return -(*_phi)[_j][_qp] * _penalty_value * _test_secondary[_i][_qp];
+      break;
+
+    case JType::PrimarySecondary:
+      if (jvar == _secondary_var.number())
+        return -(*_phi)[_j][_qp] * _penalty_value * _test_primary[_i][_qp];
+      break;
+
+    case JType::PrimaryPrimary:
+      if (jvar == _primary_var.number())
+        return (*_phi)[_j][_qp] * _penalty_value * _test_primary[_i][_qp];
+      break;
+
+    default:
+      return 0;
+  }
+
+  return 0;
+}
+
+template class PenaltyEqualValueConstraintTempl<false>;
+template class PenaltyEqualValueConstraintTempl<true>;

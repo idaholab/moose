@@ -35,6 +35,7 @@ protected:
 private:
   /// Calculate the displacement-scalar part of the off-diagonal Jacobian
   Real computeBaseJacobian();
+
   /// Calculate the scalar-base part of the off-diagonal Jacobian
   //    Properly this would belong in the ScalarKernel, but as it varies
   //    by element it's best to put it here
@@ -45,6 +46,7 @@ private:
 
   /// Small deformation scalar-displacement component for strain constraints
   Real sdConstraintJacobianStrain();
+
   /// Large deformation scalar-displacement component for strain constraints
   Real ldConstraintJacobianStrain();
 

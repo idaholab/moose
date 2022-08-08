@@ -147,8 +147,6 @@ GeneralizedPlaneStrainAction::act()
     if (parameters().isParamSetByUser("pressure_factor"))
       params.set<Real>("pressure_factor") = getParam<Real>("pressure_factor");
 
-    params.set<ExecFlagEnum>("execute_on") = EXEC_LINEAR;
-
     _problem->addUserObject(uo_type, uo_name, params);
   }
 

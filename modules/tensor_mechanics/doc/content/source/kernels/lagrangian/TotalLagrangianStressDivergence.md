@@ -7,8 +7,8 @@
 The `TotalLagrangianStressDivergence` kernel calculates the stress equilibrium
 residual in the reference configuration using the `pk1_stress` (the
 1st Piola-Kirchhoff stress).  This kernel provides the residual
-for Cartesian coordinates and the user needs to add one kernel 
-for each dimension of the problem.  Alternatively, the 
+for Cartesian coordinates and the user needs to add one kernel
+for each dimension of the problem.  Alternatively, the
 [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md)
 simplifies the process of adding the required kernels and setting up the
 input parameters.
@@ -16,10 +16,10 @@ input parameters.
 ## Residual, Jacobian, and stabilization
 
 For large deformation kinematics the kernel applies the residual giving the weak
-form of the divergence of the 1st Piola Kirchhoff stress with respect to the 
+form of the divergence of the 1st Piola Kirchhoff stress with respect to the
 reference coordinates
 \begin{equation}
-      R^{\alpha}=\int_{V}P_{iK}\phi_{i,K}^{\alpha}dV 
+      R^{\alpha}=\int_{V}P_{iK}\phi_{i,K}^{\alpha}dV
 \end{equation}
 with the corresponding Jacobian
 \begin{equation}
@@ -30,9 +30,9 @@ where $P_{iK}$ is the first Piola-Kirchhoff stress,
       T_{iJkL}^{\prime}=\frac{dP_{iJ}}{dF_{kL}}
 \end{equation}
 $\phi_{i,J}^{\alpha}$ are the test function gradients (with respect to the reference
-coordinates) and 
+coordinates) and
 \begin{equation}
-      G_{iJ}^{\beta}=\frac{dF_{iJ}}{d\Upsilon^{\beta}} 
+      G_{iJ}^{\beta}=\frac{dF_{iJ}}{d\Upsilon^{\beta}}
 \end{equation}
 with $\Upsilon^\beta$ the discrete (nodal) displacements.
 For the unstabilized case
@@ -41,7 +41,7 @@ For the unstabilized case
 \end{equation}
 with $\psi_{i,J}^{\beta}$ the trial function gradients with respect to the reference coordinates.
 
-The residual and Jacobian degenerate to 
+The residual and Jacobian degenerate to
 \begin{equation}
       R^{\alpha}=\int_{v}s_{ij}\phi_{i,j}^{\alpha}dv
 \end{equation}
@@ -76,17 +76,17 @@ modified strains applied these become for small deformations
 \begin{equation}
       g_{ij}^{\beta}=\psi_{i,j}^{\beta}-\frac{1}{3}\left(\psi_{kk}^{\beta}-\bar{\psi}_{kk}^{\beta}\right)\delta_{ij}
 \end{equation}
-with 
+with
 \begin{equation}
       \bar{\psi}_{i,j}^{\beta}=\frac{1}{v}\int_{v}\psi_{i,j}^{\beta}dv
 \end{equation}
 and for large deformations
 \begin{equation}
-     G_{iJ}^{\beta} = \left(\frac{\det\bar{F}}{\det F}\right)^{1/3}\left[\psi_{i,J}^{\beta}-\frac{1}{3}F_{iJ}\left(F_{Lk}^{-1}\psi_{k,L}^{\beta}-\bar{F}_{Lk}^{-1}\bar{\psi}_{k,L}^{\beta}\right)\right] 
+     G_{iJ}^{\beta} = \left(\frac{\det\bar{F}}{\det F}\right)^{1/3}\left[\psi_{i,J}^{\beta}-\frac{1}{3}F_{iJ}\left(F_{Lk}^{-1}\psi_{k,L}^{\beta}-\bar{F}_{Lk}^{-1}\bar{\psi}_{k,L}^{\beta}\right)\right]
 \end{equation}
-with 
+with
 \begin{equation}
-    \bar{\psi}_{i,J}^{\beta}=\frac{1}{V}\int_{V}\psi_{i,J}^{\beta}dV 
+    \bar{\psi}_{i,J}^{\beta}=\frac{1}{V}\int_{V}\psi_{i,J}^{\beta}dV
 \end{equation}
 and $\bar{F}$ the average deformation gradient, defined in the [stabilization system documentation](/tensor_mechanics/Stabilization.md).
 
@@ -95,7 +95,7 @@ and $\bar{F}$ the average deformation gradient, defined in the [stabilization sy
 The following illustrates manually including 3D stress equilibrium with the total Lagrangian formulation, using
 large deformation kinematics.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/total/patch/large_patch.i
+!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/patch/large_patch.i
          block=Kernels
 
 !syntax parameters /Kernels/TotalLagrangianStressDivergence

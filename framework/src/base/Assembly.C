@@ -4240,11 +4240,25 @@ Assembly::cacheJacobianMortar()
                            jvar->dofIndices(),
                            tag);
 
+        cacheJacobianBlock(jacobianBlockMortar(Moose::SecondaryPrimary, i, j, tag),
+                           *ivar,
+                           *jvar,
+                           ivar->dofIndices(),
+                           jvar->dofIndicesNeighbor(),
+                           tag);
+
         cacheJacobianBlock(jacobianBlockMortar(Moose::PrimaryLower, i, j, tag),
                            *ivar,
                            *jvar,
                            ivar->dofIndicesNeighbor(),
                            jvar->dofIndicesLower(),
+                           tag);
+
+        cacheJacobianBlock(jacobianBlockMortar(Moose::PrimarySecondary, i, j, tag),
+                           *ivar,
+                           *jvar,
+                           ivar->dofIndicesNeighbor(),
+                           jvar->dofIndices(),
                            tag);
 
         cacheJacobianBlock(jacobianBlockMortar(Moose::PrimaryPrimary, i, j, tag),

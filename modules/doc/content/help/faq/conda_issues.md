@@ -30,10 +30,10 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
 
 - #### command not found: conda
 
-  You have yet to install conda, or your path to it is incorrect or not set. You will need to recall how you installed conda. Our instructions ask to have Miniconda3 installed to your home directory: `~/miniconda3`. Which requires you to set your PATH accordingly:
+  You have yet to install conda, or your path to it is incorrect or not set. You will need to recall how you installed conda. Our instructions ask to have Mambaforge3 installed to your home directory: `~/mambaforge3`. Which requires you to set your PATH accordingly:
 
   ```bash
-  export PATH=~/miniconda3/bin:$PATH
+  export PATH=~/mambaforge3/bin:$PATH
   ```
 
   With PATH set, try to run again, what ever command you were initially attempting.
@@ -66,7 +66,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
   It could also mean you have an older version of Conda, or that the environment you are trying to activate is somewhere other than where conda thinks it should be, or simply missing / not yet created. Unfortunately, much of what can be diagnosed, is going to be beyond the scope of this document, and better left to the support teams at [Conda](https://docs.conda.io/en/latest/help-support.html). What we can attempt, is to create a new environment and go from there:
 
   ```bash
-  conda create --name testing --quiet --yes
+  conda create -n testing -q -y
   ```
 
   The above should create an empty environment. Try and activate it:
@@ -104,14 +104,20 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
 
   +Hint:+ For Linux, this will most likely be `conda init bash`. For Macintosh, this can either be bash or zsh.
 
+  !alert note title=mamba init
+  When using `mambaforge3` you might also need to perform a `mamba init` in order to properly use the
+  `mamba` command to install packages. We recommend this as an alternative to conda, as mamba can take
+  advantage of multiple cores to perform tasks. This means mamba will generally be faster at performing
+  installations than standard conda. Otherwise, they are interchangeable.
+
 - #### Your issue not listed
 
   The quick fix-attempt, is to re-install the moose-packages:
 
   ```bash
   conda deactivate
-  conda remove moose --all --yes
-  conda create moose moose-libmesh moose-tools
+  conda env remove -n moose
+  conda create -n moose moose-libmesh moose-tools
   ```
 
   If the above re-install method ultimately failed, it is time to submit your errors to the [discussion forum](faq/discussion_forum.md).
