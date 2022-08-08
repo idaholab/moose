@@ -218,9 +218,9 @@ PolycrystalUserObjectBase::prepareDataForTransfer()
   _num_chunks = std::min(_app.n_processors(), total_items);
 
   /**
-   * Here we are resizing our datastructures that we normally size upon construction. This is too
+   * Here we are resizing our data structures that we normally size upon construction. This is to
    * support the parallel merge capability that's in the FeatureFloodCount class. We'll need to undo
-   * this latter, there are a few assumptions built on the sizes of these data structures.
+   * this later, there are a few assumptions built on the sizes of these data structures.
    *
    * See FeatureFloodCount::consolidateMergedFeatures for the "un-sizing" of these structures.
    */
@@ -288,7 +288,7 @@ void
 PolycrystalUserObjectBase::mergeSets()
 {
   // When working with _distribute_merge_work all of the maps will be empty except for one
-  for (MooseIndex(_maps_size) map_num = 0; map_num < _partial_feature_sets.size(); ++map_num)
+  for (const auto map_num : index_range(_partial_feature_sets))
   {
     /**
      * With initial conditions we know the grain IDs of every grain (even partial grains). We can
