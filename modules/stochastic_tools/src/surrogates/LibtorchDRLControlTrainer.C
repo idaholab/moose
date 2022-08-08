@@ -50,7 +50,6 @@ LibtorchDRLControlTrainer::validParams()
                                 "Number of rows to ignore from training. We usually skip the 1st "
                                 "row from the reporter since it contains only initial values.");
 
-  params.addRequiredParam<unsigned int>("num_batches", "Number of batches for the training.");
   params.addRequiredParam<unsigned int>("num_epochs", "Number of epochs for the training.");
 
   params.addRequiredParam<Real>("critic_learning_rate",

@@ -26,7 +26,7 @@ LibtorchDRLControl::validParams()
       "The postprocessors which store the log probability of the action/control values.");
   params.addRequiredParam<std::vector<Real>>(
       "action_standard_deviations", "Standard deviation value used while sampling the actions.");
-  params.addParam<unsigned int>("seed", 11, "Seed for the random number generator.");
+  params.addParam<unsigned int>("seed", "Seed for the random number generator.");
 
   return params;
 }

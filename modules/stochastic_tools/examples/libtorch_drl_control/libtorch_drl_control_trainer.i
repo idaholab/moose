@@ -26,10 +26,10 @@
   [r_transfer]
     type = MultiAppReporterTransfer
     from_multi_app = runner
-    to_reporters = 'results/center_temp results/env_temp results/reward results/left_flux '
-                   'results/log_prob_left_flux'
+    to_reporters = 'results/center_temp results/env_temp results/reward results/top_flux '
+                   'results/log_prob_top_flux'
     from_reporters = 'T_reporter/center_temp_tend:value T_reporter/env_temp:value T_reporter/reward:value '
-                     'T_reporter/left_flux:value T_reporter/log_prob_left_flux:value'
+                     'T_reporter/top_flux:value T_reporter/log_prob_top_flux:value'
   []
 []
 
@@ -38,21 +38,20 @@
     type = LibtorchDRLControlTrainer
     sampler = dummy
     response_reporter = 'results/center_temp results/env_temp'
-    control_reporter = 'results/left_flux'
-    log_probability_reporter = 'results/log_prob_left_flux'
+    control_reporter = 'results/top_flux'
+    log_probability_reporter = 'results/log_prob_top_flux'
     reward_reporter = 'results/reward'
 
-    num_epochs = 10
-    num_batches = 1
-    update_frequency = 2
-    decay_factor = 0.0
+    num_epochs = 1000
+    update_frequency = 20
+    decay_factor = 0.01
 
-    loss_print_frequency = 3
+    loss_print_frequency = 10
 
-    critic_learning_rate = 0.0005
+    critic_learning_rate = 0.001
     num_critic_neurons_per_layer = '64 27'
 
-    control_learning_rate = 0.0005
+    control_learning_rate = 0.001
     num_control_neurons_per_layer = '64 27'
 
     # keep consistent with LibtorchNeuralNetControl
@@ -61,6 +60,8 @@
     response_shift_factors = '270 270'
     action_standard_deviations = '0.1'
 
+    standardize_advantage = false
+
     read_from_file = false
   []
 []
@@ -68,7 +69,7 @@
 [Reporters]
   [results]
     type = ConstantReporter
-    real_vector_names = 'center_temp env_temp reward left_flux log_prob_left_flux'
+    real_vector_names = 'center_temp env_temp reward top_flux log_prob_top_flux'
     real_vector_values = '0; 0; 0; 0; 0;'
     outputs = csv
     execute_on = timestep_begin
@@ -81,10 +82,10 @@
 
 [Executioner]
   type = Transient
-  num_steps = 4
+  num_steps = 400
 []
 
 [Outputs]
-  file_base =train_out
+  file_base = output/train_out
   csv = true
 []
