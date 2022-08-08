@@ -10,31 +10,31 @@
 #pragma once
 
 #include "Material.h"
-#include "BulkMaterialTest.h"
+#include "BatchMaterialTest.h"
 #include "RankTwoTensor.h"
 
 /**
- * Test material that goes with BulkMaterialTest
+ * Test material that goes with BatchMaterialTest
  */
-class BulkTestMaterial : public Material
+class BatchTestMaterial : public Material
 {
 public:
   static InputParameters validParams();
 
-  BulkTestMaterial(const InputParameters & parameters);
+  BatchTestMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties() override;
+  void computeProperties() override;
 
-  // used only for checking the bulk computation
+  // used only for checking the batch computation
   const VariableValue & _var1;
   const MaterialProperty<RankTwoTensor> & _prop1;
   const MaterialProperty<Real> & _prop2;
 
-  // output bulk result as property
+  // output batch result as property
   MaterialProperty<Real> & _prop_out;
 
-  // coupling the bulk computation result
-  const BulkMaterialTest & _bulk_uo;
-  const BulkMaterialTest::OutputVector & _output;
+  // coupling the batch computation result
+  const BatchMaterialTest & _batch_uo;
+  const BatchMaterialTest::OutputVector & _output;
 };

@@ -9,33 +9,29 @@
 
 #pragma once
 
-#include "BulkMaterial.h"
+#include "BatchMaterial.h"
 
-/// This declares an instantiation of the BulkMaterial template for a computation that
+/// This declares an instantiation of the BatchMaterial template for a computation that
 /// outputs a single Real number on each quadrature point and requires data from one variable,
 /// a RankTwoTensor material property, and a Real material property.
-typedef BulkMaterial<
+typedef BatchMaterial<
     // tuple representation
-    TupleStd,
+    BatchMaterialUtils::TupleStd,
     // output data type
     Real,
     // gathered input data types:
-    GatherVariable,
-    GatherMatProp<RankTwoTensor>,
-    GatherMatProp<Real>>
+    BatchMaterialUtils::GatherVariable,
+    BatchMaterialUtils::GatherMatProp<RankTwoTensor>,
+    BatchMaterialUtils::GatherMatProp<Real>>
 
-    BulkMaterialTestParent;
+    BatchMaterialTestParent;
 
-class BulkMaterialTest : public BulkMaterialTestParent
+class BatchMaterialTest : public BatchMaterialTestParent
 {
 public:
   static InputParameters validParams();
 
-  BulkMaterialTest(const InputParameters & params);
+  BatchMaterialTest(const InputParameters & params);
 
-  virtual void bulkCompute();
-
-  // /// access the serialized bulk data providedby the parent class
-  // using BulkMaterialTestParent::_input_data;
-  // using BulkMaterialTestParent::_output_data;
+  void batchCompute() override;
 };

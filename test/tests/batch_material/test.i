@@ -39,8 +39,8 @@
 []
 
 [UserObjects]
-  [bulk]
-    type = BulkMaterialTest
+  [batch]
+    type = BatchMaterialTest
     var1 = v
     prop1 = tensor
     prop2 = number
@@ -61,18 +61,18 @@
   []
 
   [test]
-    type = BulkTestMaterial
+    type = BatchTestMaterial
     var1 = v
     prop1 = tensor
     prop2 = number
-    bulk_uo = bulk
+    batch_uo = batch
   []
 []
 
 [Postprocessors]
   [average]
     type = ElementAverageMaterialProperty
-    mat_prop = bulk_out
+    mat_prop = batch_out
   []
 []
 

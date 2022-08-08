@@ -7,23 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "BulkMaterialTest.h"
+#include "BatchMaterialTest.h"
 #include "libmesh/int_range.h"
 
-registerMooseObject("MooseTestApp", BulkMaterialTest);
+registerMooseObject("MooseTestApp", BatchMaterialTest);
 
 InputParameters
-BulkMaterialTest::validParams()
+BatchMaterialTest::validParams()
 {
-  auto params = BulkMaterialTestParent::validParams();
+  auto params = BatchMaterialTestParent::validParams();
   params.addCoupledVar("var1", "A coupled variable");
   params.addRequiredParam<MaterialPropertyName>("prop1", "A RankTwoTensor property");
   params.addRequiredParam<MaterialPropertyName>("prop2", "A Real property");
   return params;
 }
 
-BulkMaterialTest::BulkMaterialTest(const InputParameters & params)
-  : BulkMaterialTestParent(
+BatchMaterialTest::BatchMaterialTest(const InputParameters & params)
+  : BatchMaterialTestParent(
         params,
         // here we pass in the parameter names of the variable and the two material properties
         // in the same order as in the template parameter pack
@@ -34,7 +34,7 @@ BulkMaterialTest::BulkMaterialTest(const InputParameters & params)
 }
 
 void
-BulkMaterialTest::bulkCompute()
+BatchMaterialTest::batchCompute()
 {
   // simple test computation
   for (const auto i : index_range(_input_data))
