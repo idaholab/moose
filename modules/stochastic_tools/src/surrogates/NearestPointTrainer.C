@@ -17,20 +17,6 @@ NearestPointTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
   params.addClassDescription("Loops over and saves sample values for [NearestPointSurrogate.md].");
-  params.addRequiredParam<ReporterName>(
-      "response",
-      "Reporter value of response results, can be vpp with <vpp_name>/<vector_name> or sampler "
-      "column with 'sampler/col_<index>'.");
-  params.addParam<std::vector<ReporterName>>(
-      "predictors",
-      std::vector<ReporterName>(),
-      "Reporter values used as the independent random variables, If 'predictors' and "
-      "'predictor_cols' are both empty, all sampler columns are used.");
-  params.addParam<std::vector<unsigned int>>(
-      "predictor_cols",
-      std::vector<unsigned int>(),
-      "Sampler columns used as the independent random variables, If 'predictors' and "
-      "'predictor_cols' are both empty, all sampler columns are used.");
 
   return params;
 }
@@ -38,49 +24,53 @@ NearestPointTrainer::validParams()
 NearestPointTrainer::NearestPointTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
     _sample_points(declareModelData<std::vector<std::vector<Real>>>("_sample_points")),
-    _sampler_row(getSamplerData()),
-    _response(getTrainingData<Real>(getParam<ReporterName>("response"))),
-    _predictor_cols(getParam<std::vector<unsigned int>>("predictor_cols"))
+    _sample_results(declareModelData<std::vector<std::vector<Real>>>("_sample_results")),
+    _predictor_row(getPredictorData())
 {
-  for (const ReporterName & rname : getParam<std::vector<ReporterName>>("predictors"))
-    _predictors.push_back(&getTrainingData<Real>(rname));
-
-  // If predictors and predictor_cols are empty, use all sampler columns
-  if (_predictors.empty() && _predictor_cols.empty())
-  {
-    _predictor_cols.resize(_sampler.getNumberOfCols());
-    std::iota(_predictor_cols.begin(), _predictor_cols.end(), 0);
-  }
-
-  // Resize sample points to number of predictors
-  _sample_points.resize(_predictors.size() + _predictor_cols.size() + 1);
+  _sample_points.resize(_n_dims);
+  _sample_results.resize(1);
 }
 
 void
 NearestPointTrainer::preTrain()
 {
-  // Resize to number of sample points
   for (auto & it : _sample_points)
-    it.resize(_sampler.getNumberOfLocalRows());
+  {
+    it.clear();
+    it.reserve(getLocalSampleSize());
+  }
+
+  for (auto & it : _sample_results)
+  {
+    it.clear();
+    it.reserve(getLocalSampleSize());
+  }
 }
 
 void
 NearestPointTrainer::train()
 {
-  unsigned int d = 0;
-  // Get predictors from reporter values
-  for (const auto & val : _predictors)
-    _sample_points[d++][_local_row] = *val;
-  // Get predictors from sampler
-  for (const auto & col : _predictor_cols)
-    _sample_points[d++][_local_row] = _sampler_row[col];
+  if (_rvecval && (_sample_results.size() != _rvecval->size()))
+    _sample_results.resize(_rvecval->size());
 
-  _sample_points.back()[_local_row] = _response;
+  // Get predictors from reporter values
+  for (auto d : make_range(_n_dims))
+    _sample_points[d].push_back(_predictor_row[d]);
+
+  // Get responses
+  if (_rval)
+    _sample_results[0].push_back(*_rval);
+  else if (_rvecval)
+    for (auto r : make_range(_rvecval->size()))
+      _sample_results[r].push_back((*_rvecval)[r]);
 }
 
 void
 NearestPointTrainer::postTrain()
 {
   for (auto & it : _sample_points)
+    _communicator.allgather(it);
+
+  for (auto & it : _sample_results)
     _communicator.allgather(it);
 }

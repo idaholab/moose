@@ -18,9 +18,9 @@ To perform cross validation, a [SurrogateModel](Surrogates/index.md) must be inc
 - [!param](/Trainers/PolynomialRegressionTrainer/cv_surrogate): The `SurrogateModel` object to use for evaluating error compared to the test data for each split.
 - [!param](/Trainers/PolynomialRegressionTrainer/cv_type): The type of cross-validation to perform. Currently, the only options are `none` or `k_fold`.
 
-The following input file snippet provides an example of performing repeated 5-fold cross validation for 100 trials using a [PolynomialRegressionTrainer.md] and [PolynomialRegressionSurrogate.md], for the example one-dimensional heat conduction model used in [/examples/surrogate_training.md].  Please refer to the documentation for this model type for details on other options.
+The following input file snippet provides an example of performing repeated 5-fold cross validation for 100 trials using a [PolynomialRegressionTrainer.md] and [PolynomialRegressionSurrogate.md], for the example one-dimensional heat conduction model used in [/examples/surrogate_training.md]. Please refer to the documentation for this model type for details on other options. It is also important to note that the values in `GlobalParams` could have been set in `Trainers/pr_max` instead.
 
-!listing stochastic_tools/examples/surrogates/cross_validation/uniform_train_and_cv.i block=Distributions Samplers Trainers Surrogates
+!listing stochastic_tools/examples/surrogates/cross_validation/all_trainers_uniform_cv.i block=GlobalParams Distributions Samplers Trainers Surrogates remove=Trainers/pc_max Trainers/np_max Trainers/gp_max Trainers/ann_max Surrogates/pc_surr Surrogates/np_surr Surrogates/gp_surr Surrogates/ann_surr replace=['num_rows = 1000','num_rows = 6560']
 
 ## Results and Analysis
 
@@ -64,3 +64,31 @@ The cross validation results for this learning problem are significantly more pe
 If high surrogate accuracy is needed for parameters in the tails of the probability distributions, this may indicate improvements are needed in the modeling or sampling procedure. This is a good example of a case where cross validation can be invaluable in properly assessing deficiencies in a model.
 
 !media stochastic_tools/surrogates/cross_validation/cv_normal_1dheat.svg id=cv_normal style=width:70% caption=Distribution of RMSE reported from 10000 repetitions of 5-fold cross validation for the example problem in [Training a Surrogate Model](/examples/surrogate_training.md).
+
+### Other surrogate model types
+
+Cross-validation can be used to characterize differences in predictive accuracy between different types of surrogate models. For demonstration, the analysis of the preceding sections were repeated for several other Surrogate types. However, because the cost of repeated cross-validation for large datasets is more significant for some models, only 100 repetitions of cross-validation were performed with 1000 Latin Hypercube samples. This was sufficient to reveal useful differences between model types.
+
+The following model types were used:
+
+- Third degree [PolynomialRegression](source/surrogates/PolynomialRegressionTrainer.md).
+- Third degree [PolynomialChaos](source/surrogates/PolynomialChaos.md).
+- [GaussianProcess](source/surrogates/GaussianProcessTrainer.md), with a [SquaredExponentialCovariance](source/surrogates/SquaredExponentialCovariance.md) function. Length scales for each input parameter were chosen by first performing hyperparameter tuning with a reduced training data set.
+- [LibtorchANN](source/surrogates/LibtorchANNTrainer.md), with a single hidden layer and 64 neurons.
+- [NearestPoint](source/surrogates/NearestPointTrainer.md).
+
+The following listing summarizes the Surrogate types considered in this comparison, along with the required control parameters.
+
+!listing stochastic_tools/examples/surrogates/cross_validation/all_trainers_uniform_cv.i block=GlobalParams Trainers Covariance
+
+RMSE scores for each model type were accumulated over 100 repeated trials of 5-fold cross validation, for only uniform parameter distributions. In the following table, the results are summarized by a simple mean and standard deviation of the RMSE across all trials.
+
+!table id=all_trainers_uniform caption=Mean and standard deviation of RMSE scores for all model types, obtained for 100 repeated cross validation trials with uniform parameter distributions.
+| Moment          | Polynomial Regression  | Polynomial Chaos     | Nearest Point | Gaussian Process   | Libtorch ANN |
+| :-              | -         | -           | -         | -           | -         |
+| $\mu_{RMSE}$    | 0.278     | 30.727      | 3.724     | 0.207       | 0.189     |
+| $\sigma_{RMSE}$  | 0.004   | 1.141     | 0.066    |  0.007     | 0.019    |
+
+[!ref](all_trainers_uniform) summarizes the model comparison results with uniform parameter distributions. An immediately striking observation is that the RMSE for the Polynomial Chaos model was two orders of magnitude greater (roughly 10% of the mean $T_{max}$) than that observed with several of the other models. This is expected, as Polynomial Chaos is known to be poor for single-predictor evaluations, and is primarily used to provide an effective means to characterize statistical moments of a response (see [PolynomialChaos](source/surrogates/PolynomialChaos.md)). Otherwise, NearestPoint has significantly greater validation error compared to the other model types. This is also expected, because NearestPoint (a piecewise constant model) is generally a poor approximation.
+
+For the more sophisticated model types, the mean RMSE across the trial set was comparable and low, indicating that any of these models would be similarly effective as a surrogate for this problem. However, it is important to note that the Libtorch neural network showed greater variability in validation error than either the Polynomial Regression or Gaussian Process models for this problem - $\left( \frac{\sigma}{\mu} \right)_{ANN} \approx 0.1$, compared to $\left( \frac{\sigma}{\mu} \right)_{PR} \approx 0.01$ and $\left( \frac{\sigma}{\mu} \right)_{GP} \approx 0.03$. This indicates that the neural network was more sensitive to variations in the training set than these other models. This could be caused by several factors, such as overfitting, and may indicate a need to better tune the parameters used to define the model.

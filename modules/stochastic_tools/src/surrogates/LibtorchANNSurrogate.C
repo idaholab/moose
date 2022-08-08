@@ -40,7 +40,6 @@ LibtorchANNSurrogate::evaluate(const std::vector<Real> &
   Real val(0.0);
 
 #ifdef LIBTORCH_ENABLED
-
   // Check whether input point has same dimensionality as training data
   mooseAssert(_nn->numInputs() == x.size(),
               "Input point does not match dimensionality of training data.");

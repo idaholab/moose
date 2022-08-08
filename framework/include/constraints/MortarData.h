@@ -58,6 +58,15 @@ public:
                      bool on_displaced) const;
 
   /**
+   * Non-const getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary
+   * and subdomain keys. If the AutomaticMortarGeneration object does not yet exist, then we error
+   */
+  AutomaticMortarGeneration &
+  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
+                     const std::pair<SubdomainID, SubdomainID> & /*subdomain_key*/,
+                     bool on_displaced);
+
+  /**
    * Return all automatic mortar generation objects on either the displaced or undisplaced mesh
    */
   const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
@@ -111,6 +120,11 @@ public:
    * called as soon as the mortar mesh has been generated for the first time
    */
   void dontNotifyWhenMortarSetup(MortarExecutorInterface * mei);
+
+  /**
+   * @return whether we have performed an initial mortar mesh construction
+   */
+  bool initialized() const { return _mortar_initd; }
 
 private:
   /**

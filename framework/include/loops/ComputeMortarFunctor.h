@@ -45,8 +45,6 @@ public:
    */
   void operator()(Moose::ComputeType compute_type);
 
-  void mortarSetup() override;
-
 private:
   /// The mortar constraints to loop over when on each element. These must be
   /// pointers to the base class otherwise the compiler will fail to compile

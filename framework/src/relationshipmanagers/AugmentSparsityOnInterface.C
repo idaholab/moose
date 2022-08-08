@@ -46,6 +46,14 @@ AugmentSparsityOnInterface::validParams()
       "Whether we should ghost higher-dimensional neighbors. This is necessary when we are doing "
       "second order mortar with finite volume primal variables, because in order for the method to "
       "be second order we must use cell gradients, which couples in the neighbor cells.");
+
+  // We want to wait until our mortar mesh has been built before trying to delete remote elements.
+  // And our mortar mesh cannot be built until the entire mesh has been generated. By setting this
+  // parameter to false we will make sure that any prepare_for_use calls during the mesh generation
+  // phase will not delete remote elements *and* we will set a flag on the moose mesh saying that we
+  // need to delete remote elements after the addition of late geometric ghosting functors
+  // (including this ghosting functor)
+  params.set<bool>("attach_geometric_early") = false;
   return params;
 }
 
@@ -74,12 +82,27 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const AugmentSparsityOnIn
 }
 
 void
-AugmentSparsityOnInterface::mesh_reinit()
+AugmentSparsityOnInterface::fillDataMembers()
 {
-  // This might eventually be where the mortar segment mesh and all the other data
-  // structures get rebuilt?
+  // We ask the user to pass boundary names instead of ids to our constraint object.  However, We
+  // are unable to get the boundary ids from boundary names until we've attached the MeshBase object
+  // to the MooseMesh
+  _generating_mesh = !_moose_mesh->getMeshPtr();
+  _primary_boundary_id = _generating_mesh ? Moose::INVALID_BOUNDARY_ID
+                                          : _moose_mesh->getBoundaryID(_primary_boundary_name);
+  _secondary_boundary_id = _generating_mesh ? Moose::INVALID_BOUNDARY_ID
+                                            : _moose_mesh->getBoundaryID(_secondary_boundary_name);
+  _primary_subdomain_id = _generating_mesh ? Moose::INVALID_BLOCK_ID
+                                           : _moose_mesh->getSubdomainID(_primary_subdomain_name);
+  _secondary_subdomain_id = _generating_mesh
+                                ? Moose::INVALID_BLOCK_ID
+                                : _moose_mesh->getSubdomainID(_secondary_subdomain_name);
 
-  RelationshipManager::mesh_reinit();
+  _amg = _app.getExecutioner() ? &_app.getExecutioner()->feProblem().getMortarInterface(
+                                     std::make_pair(_primary_boundary_id, _secondary_boundary_id),
+                                     std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),
+                                     _use_displaced_mesh)
+                               : nullptr;
 }
 
 void
@@ -115,7 +138,7 @@ AugmentSparsityOnInterface::ghostMortarInterfaceCouplings(const processor_id_typ
                 "The coupled element with id " << coupled_elem_id << " doesn't exist!");
 
     if (coupled_elem->processor_id() != p)
-      coupled_elements.insert(std::make_pair(coupled_elem, _null_mat));
+      coupled_elements.emplace(coupled_elem, _null_mat);
   }
 }
 
@@ -243,33 +266,14 @@ AugmentSparsityOnInterface::ghostHigherDNeighbors(const processor_id_type p,
 
       for (const auto & neighbor : active_neighbors)
         if (neighbor->processor_id() != p)
+        {
+          mooseAssert(
+              neighbor->subdomain_id() != _secondary_subdomain_id,
+              "Ensure that we aren't missing potential erasures from the secondary-to-msms map");
           coupled_elements.emplace(neighbor, _null_mat);
+        }
     }
   }
-}
-
-void
-AugmentSparsityOnInterface::fillDataMembers()
-{
-  // We ask the user to pass boundary names instead of ids to our constraint object.  However, We
-  // are unable to get the boundary ids from boundary names until we've attached the MeshBase object
-  // to the MooseMesh
-  _generating_mesh = !_moose_mesh->getMeshPtr();
-  _primary_boundary_id = _generating_mesh ? Moose::INVALID_BOUNDARY_ID
-                                          : _moose_mesh->getBoundaryID(_primary_boundary_name);
-  _secondary_boundary_id = _generating_mesh ? Moose::INVALID_BOUNDARY_ID
-                                            : _moose_mesh->getBoundaryID(_secondary_boundary_name);
-  _primary_subdomain_id = _generating_mesh ? Moose::INVALID_BLOCK_ID
-                                           : _moose_mesh->getSubdomainID(_primary_subdomain_name);
-  _secondary_subdomain_id = _generating_mesh
-                                ? Moose::INVALID_BLOCK_ID
-                                : _moose_mesh->getSubdomainID(_secondary_subdomain_name);
-
-  _amg = _app.getExecutioner() ? &_app.getExecutioner()->feProblem().getMortarInterface(
-                                     std::make_pair(_primary_boundary_id, _secondary_boundary_id),
-                                     std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),
-                                     _use_displaced_mesh)
-                               : nullptr;
 }
 
 void
