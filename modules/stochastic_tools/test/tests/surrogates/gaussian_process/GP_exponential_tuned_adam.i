@@ -17,7 +17,7 @@
 [Samplers]
   [train_sample]
     type = MonteCarlo
-    num_rows = 10
+    num_rows = 20
     distributions = 'k_dist q_dist'
     execute_on = PRE_MULTIAPP_SETUP
   []
@@ -98,7 +98,9 @@
     response = results/data:avg:value
     tune_parameters = 'signal_variance length_factor'
     tuning_algorithm = 'adam'
-    tol_ADAM = 0.0001
+    iter_ADAM = 1000
+    batch_size = 20
+    learningRate_ADAM = 0.005
   []
 []
 
@@ -114,8 +116,8 @@
     type=ExponentialCovariance
     gamma = 2                                 #Define the exponential factor
     signal_variance = 1                       #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
-    length_factor = '0.551133 0.551133'       #Select a length factor for each parameter (k and q)
+    noise_variance = 1e-6                     #A small amount of noise can help with numerical stability
+    length_factor = '1.0 1.0'       #Select a length factor for each parameter (k and q)
   []
 []
 

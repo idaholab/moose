@@ -52,11 +52,15 @@ public:
    * @param tao_options Additional options if TAO is used for parameter optimization.
    * @param show_tao Switch to show details of TAO optimization.
    */
-  void setupCovarianceMatrix(const RealEigenMatrix & training_params,
-                             const RealEigenMatrix & training_data,
-                             MooseEnum opt_type,
-                             std::string tao_options = "",
-                             bool show_tao = false, const Real & tol_ADAM = 0.001);
+  void
+  setupCovarianceMatrix(RealEigenMatrix training_params, // const RealEigenMatrix & training_params
+                        RealEigenMatrix training_data,
+                        MooseEnum opt_type,
+                        std::string tao_options = "",
+                        bool show_tao = false,
+                        const unsigned int & iter_ADAM = 1000,
+                        const unsigned int * batch_size = nullptr,
+                        const Real & learningRate_ADAM = 0.001);
 
   /**
    * Sets up the Cholesky decomposition and inverse action of the covariance matrix.
@@ -105,8 +109,8 @@ public:
    * @param tao_options Additional options for TAO.
    * @param show_tao Switch to show details of TAO optimization.
    */
-  PetscErrorCode tuneHyperParamsTAO(const RealEigenMatrix & training_params,
-                                    const RealEigenMatrix & training_data,
+  PetscErrorCode tuneHyperParamsTAO(RealEigenMatrix training_params,
+                                    RealEigenMatrix training_data,
                                     std::string tao_options = "",
                                     bool show_tao = false);
 
@@ -124,13 +128,15 @@ public:
   // Computes Gradient of the loss function for TAO usage
   void formFunctionGradient(Tao tao, Vec theta, PetscReal * f, Vec Grad);
 
+  // Tune hyperparameters using ADAM
+  void tuneHyperParamsADAM(RealEigenMatrix training_params,
+                           RealEigenMatrix training_data,
+                           const unsigned int & iter,
+                           const unsigned int & batch_size,
+                           const Real & learningRate);
+
   // Computes the loss function for ADAM usage
   Real getLossADAM();
-
-  // Tune hyperparameters using ADAM
-  void tuneHyperParamsADAM(const RealEigenMatrix & training_params,
-                           const RealEigenMatrix & training_data,
-                           const Real & tol);
 
   // Computes Gradient of the loss function for ADAM usage
   std::vector<Real> getGradientADAM();
@@ -234,10 +240,13 @@ protected:
   Eigen::LLT<RealEigenMatrix> _K_cho_decomp;
 
   /// Paramaters (x) used for training, along with statistics
-  const RealEigenMatrix * _training_params;
+  RealEigenMatrix * _training_params;
 
   /// Data (y) used for training
-  const RealEigenMatrix * _training_data;
+  RealEigenMatrix * _training_data;
+
+  /// The batch size for ADAM optimization
+  unsigned int _batch_size;
 };
 
 } // StochasticTools namespac

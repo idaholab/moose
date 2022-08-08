@@ -37,8 +37,9 @@ GaussianProcessTrainer::validParams()
   MooseEnum tuning_type("tao adam none", "none");
   params.addParam<MooseEnum>(
       "tuning_algorithm", tuning_type, "Hyper parameter optimizaton algorithm");
-  params.addParam<Real>(
-      "tol_ADAM", 0.001, "Tolerance value for ADAM optimization");
+  params.addParam<unsigned int>("iter_ADAM", 1000, "Tolerance value for ADAM optimization");
+  params.addParam<unsigned int>("batch_size", "The batch size for ADAM optimization");
+  params.addParam<Real>("learningRate_ADAM", 0.001, "The learning rate for ADAM optimization");
   params.addParam<std::string>("tao_options",
                                "Command line options for PETSc/TAO hyperparameter optimization");
   params.addParam<bool>("show_tao", "Switch to show TAO solver results");
@@ -61,7 +62,9 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _standardize_data(getParam<bool>("standardize_data")),
     _do_tuning(isParamValid("tune_parameters")),
     _tuning_algorithm(getParam<MooseEnum>("tuning_algorithm")),
-    _tol_ADAM(getParam<Real>("tol_ADAM")),
+    _iter_ADAM(getParam<unsigned int>("iter_ADAM")),
+    _batch_size(isParamValid("batch_size") ? &getParam<unsigned int>("batch_size") : nullptr),
+    _learningRate_ADAM(getParam<Real>("learningRate_ADAM")),
     _sampler_row(getSamplerData()),
     _rval(getTrainingData<Real>(getParam<ReporterName>("response"))),
     _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
@@ -69,18 +72,37 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _n_params((_pvals.empty() && _pcols.empty()) ? _sampler.getNumberOfCols()
                                                  : (_pvals.size() + _pcols.size()))
 {
+  const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
+  for (unsigned int i = 0; i < pnames.size(); ++i)
+    _pvals[i] = &getTrainingData<Real>(pnames[i]);
+
+  // If predictors and predictor_cols are empty, use all sampler columns
+  if (_pvals.empty() && _pcols.empty())
+  {
+    _pcols.resize(_sampler.getNumberOfCols());
+    std::iota(_pcols.begin(), _pcols.end(), 0);
+  }
+
+  // Error Checking
   if (_do_tuning && _tuning_algorithm == "none")
     paramError("tuning_algorithm",
                "No tuning algorithm is selected for the hyper parameter optimization!");
 
-  // if (_tuning_algorithm == "adam")
-  // {
-  //   if (!isParamValid("tuning_min") || !isParamValid("tuning_max"))
-  //     mooseError("tuning_min and tuning_max need to be specified for ADAM optimizer.");
-  // }
+  if (isParamValid("batch_size") && _tuning_algorithm == "tao")
+    mooseError("Mini-batch sampling is not compatible with the TAO optimization library. Please "
+               "use ADAM optimization.");
+
+  if (!isParamValid("batch_size") && _tuning_algorithm == "adam")
+    paramError("batch_size", "ADAM requires the batch size to be specified.");
+
+  if (isParamValid("batch_size"))
+  {
+    if (_sampler.getNumberOfRows() < (*_batch_size))
+      paramError("batch_size", "Batch size cannot be greater than the training data set size.");
+  }
 
   std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
-  // Error Checking
+
   if (isParamValid("tuning_min") &&
       (getParam<std::vector<Real>>("tuning_min").size() != tune_parameters.size()))
     mooseError("tuning_min size does not match tune_parameters");
@@ -154,5 +176,8 @@ GaussianProcessTrainer::postTrain()
       _training_data,
       _tuning_algorithm,
       isParamValid("tao_options") ? getParam<std::string>("tao_options") : "",
-      isParamValid("show_tao") ? getParam<bool>("show_tao") : false, _tol_ADAM);
+      isParamValid("show_tao") ? getParam<bool>("show_tao") : false,
+      _iter_ADAM,
+      _batch_size,
+      _learningRate_ADAM);
 }

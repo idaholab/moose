@@ -17,15 +17,17 @@
 [Samplers]
   [train_sample]
     type = MonteCarlo
-    num_rows = 10
+    num_rows = 20
     distributions = 'k_dist q_dist'
     execute_on = PRE_MULTIAPP_SETUP
+    seed = 100
   []
   [test_sample]
     type = MonteCarlo
     num_rows = 100
     distributions = 'k_dist q_dist'
     execute_on = PRE_MULTIAPP_SETUP
+    seed = 100
   []
 []
 
@@ -85,6 +87,11 @@
     gp_name = 'GP_avg'
     execute_on = final
   []
+  [data]
+    type = SamplerData
+    sampler = test_sample
+    execute_on = 'initial timestep_end'
+  []
 []
 
 [Trainers]
@@ -98,7 +105,9 @@
     response = results/data:avg:value
     tune_parameters = 'signal_variance length_factor'
     tuning_algorithm = 'adam'
-    tol_ADAM = 0.0001
+    iter_ADAM = 1000
+    batch_size = 20
+    learningRate_ADAM = 0.005
   []
 []
 
@@ -113,7 +122,7 @@
   [covar]
     type=SquaredExponentialCovariance
     signal_variance = 1.0                       #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
+    noise_variance = 1e-6                     #A small amount of noise can help with numerical stability
     length_factor = '1.0 1.0'         #Select a length factor for each parameter (k and q)
   []
 []
