@@ -12,10 +12,8 @@
 #include "SolutionAux.h"
 
 /**
- * AuxKernel for reading a solution from file.
- * Creates a function that extracts values from a solution read from a file,
- * via a SolutionUserObject. It is possible to scale and add a constant to the
- * solution read.
+ * AuxKernel for reading a solution from file and visualize the location of
+ * grain boundaries for specific grain boundary type.
  */
 class SolutionAuxMisorientationBoundary : public SolutionAux
 {
@@ -29,11 +27,11 @@ protected:
    * Computes a value for a node or element depending on the type of kernel,
    * it also uses the 'direct' flag to extract values based on the dof if the
    * flag is set to true.
-   * @ return The desired value of the solution for the current node or element
+   * @ return the visualization for the location of specific grain boundaries.
    */
   virtual Real computeValue() override;
 
-  // The grain boundary type to calculate bnds parameter
+  /// The grain boundary type to calculate bnds parameter
   Real _gb_type_order;
 
   const unsigned int _op_num;
