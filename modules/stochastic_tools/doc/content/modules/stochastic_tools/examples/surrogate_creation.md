@@ -10,6 +10,8 @@ Building a surrogate model requires the creation of two objects: SurrogateTraine
 
 This example will go over the creation of [NearestPointTrainer](NearestPointTrainer.md). [Trainers](Trainers/index.md) are derived from `SurrogateTrainer` which performs a loop over the training data and calls virtual functions that derived classes are meant to override to perform the proper training.
 
+This example makes use of `SurrogateTrainer` input parameters, API functions, and protected member variables for gathering and accessing common types of training data. For further details on these features, see [Trainers System](Trainers/index.md).
+
 ### validParams
 
 The trainer requires the input of a sampler, so that it understands how many data points are included and how they are distributed across processors. The trainer also needs the predictor and response values from the full-order model which are stored in a [vector postprocessor](VectorPostprocessors/index.md) or [reporter](Reporters/index.md).
@@ -18,27 +20,29 @@ The trainer requires the input of a sampler, so that it understands how many dat
 
 !listing NearestPointTrainer.C re=InputParameters\sNearestPointTrainer::validParams.*?^}
 
+By default, classes inheriting from `SurrogateTrainer` support `Real` and `std::vector<Real>` response types. For responses of these types, a [Reporter](Reporters/index.md) can be specified using the [!param](/Trainers/PolynomialRegressionTrainer/response) and [!param](/Trainers/PolynomialRegressionTrainer/response_type) input parameters. Additionally, child classes can support predictor data as a combination of `Sampler` columns as well as `Reporter` values - these options can be controlled using the [!param](/Trainers/PolynomialRegressionTrainer/response) and [!param](/Trainers/PolynomialRegressionTrainer/response_type) input parameters.
+
+Classes derived from `SurrogateTrainer` also support $k$-fold cross-validation. For details on the input parameters for this capability, see [Cross Validation](cross_validation.md). To ensure compatibility with these features, some extra considerations are needed during implementation of a new `Trainer`. These will be discussed in the following sections.
+
 ### Constructor
 
-All trainers are based on SurrogateTrainer, which provides the necessary interface for saving the surrogate model data and gathering response/predictor data. All the data meant to be saved and gathered is defined in the constructor of the training object. In [NearestPointTrainer](NearestPointTrainer.md), the variable `_sample_points` is declared as the necessary surrogate data, see [Trainers](Trainers/index.md) for more information on declaring model data. The variables `_response`, `_predictors`, and `_predictor_cols` refer to the data being used for training. `_response` and `_predictors` are in the form of reporter values and gathered through the `getTrainingData` API. `_predictor_cols` refer to the sampler column being used for training.
+All trainers are based on SurrogateTrainer, which provides the necessary interface for saving the surrogate model data and gathering response/predictor. Any additional data meant to be saved and gathered is defined in the constructor of the training object. In [NearestPointTrainer](NearestPointTrainer.md), the variables `_sample_points` and `_sample_results` are declared as the necessary surrogate data, see [Trainers](Trainers/index.md) for more information on declaring model data. Because we will use several default inputs to retrieve training data, we only need to resize these variables for the number of dimensions in the training data. Each processor will contain a portion of the samples and results. We will gather all the samples in `postTrain()`.
 
 !listing NearestPointTrainer.C re=NearestPointTrainer::NearestPointTrainer.*?^}
 
-The member variables `_sample_points`, `_response`, `_predictors`, and `_predictor_cols` are defined in the header file:
+The member variables `_sample_points`, `_sample_results`, and `_predictor_row` are defined in the header file:
 
 !listing NearestPointTrainer.h start=protected end=}; include-start=False
 
 ### preTrain
 
-`preTrain()` is called before the sampler loop. For [NearestPointTrainer.md], we resize `_sample_points` appropriately:
+`preTrain()` is called before the sampler loop. This is typically used to initialize variables and allocate memory. For [NearestPointTrainer.md], we will explicitly clear `_sample_points` and `_sample_results`. This is done because the implementation of $k$-fold cross-valdiation used in `SurrogateTrainer` requires that `preTrain()` resets the state of the trainer and clears any essential data related to prior training sets (for further details, see [Trainers System](Trainers/index.md)).
 
 !listing NearestPointTrainer.C re=void\sNearestPointTrainer::preTrain.*?^}
 
-Note that `getNumberOfLocalRows()` is used to size the array, this is so that each processor contains a portion of the samples and results. We will gather all samples in `postTrain()`.
-
 ### train
 
-`train()` is where the actual training occurs. This function is called during the sampler loop for each row, at which time the member variables `_row`, `_local_row`, and ones gathered with `getTrainingData` are updated:
+`train()` is where the actual training occurs. This function is called during the sampler loop for each row, at which time the member variables `_row`, `_local_row`, and ones gathered with `getTrainingData` are updated. In [NearestPointTrainer.md], we will `push_back` predictor and response data as appropriate. Using `push_back` is convenient because some samples may be skipped (due to non-convergence, or intentionally during cross-validation).
 
 !listing NearestPointTrainer.C re=void\sNearestPointTrainer::train.*?^}
 
@@ -67,3 +71,5 @@ See [Surrogates](Surrogates/index.md) for more information on the `getModelData`
 `evaluate` is a public member function required for all surrogate models. This is where surrogate model is actually used. `evaluate` takes in parameter values and returns the surrogate's estimation of the quantity of interest. See [EvaluateSurrogate](EvaluateSurrogate.C) for an example on how the `evaluate` function is used.
 
 !listing NearestPointSurrogate.C re=Real\sNearestPointSurrogate::evaluate.*?^}
+
+!listing NearestPointSurrogate.C re=unsigned int\sNearestPointSurrogate::findNearestPoint.*?^}

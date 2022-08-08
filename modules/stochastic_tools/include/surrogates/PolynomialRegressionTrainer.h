@@ -30,22 +30,8 @@ public:
   virtual void postTrain() override;
 
 private:
-  /// Data from the current sampler row
-  const std::vector<Real> & _sampler_row;
-
-  /// Response value
-  const Real * const _rval;
-  /// Vector response value
-  const std::vector<Real> * const _rvecval;
-
-  /// Predictor values from reporters
-  std::vector<const Real *> _pvals;
-
-  /// Columns from sampler for predictors
-  std::vector<unsigned int> _pcols;
-
-  /// Number of dimensions.
-  const unsigned int _n_dims;
+  /// Data from the current predictor row
+  const std::vector<Real> & _predictor_row;
 
   /// Types for the polynomial regression
   const MooseEnum & _regression_type;

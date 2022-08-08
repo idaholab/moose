@@ -24,15 +24,9 @@ protected:
   /// Map containing sample points and the results
   std::vector<std::vector<Real>> & _sample_points;
 
-  /// Data from the current sampler row
-  const std::vector<Real> & _sampler_row;
+  /// Container for results (y values).
+  std::vector<std::vector<Real>> & _sample_results;
 
-  /// Response value
-  const Real & _response;
-
-  /// Columns from sampler for predictors
-  std::vector<unsigned int> _predictor_cols;
-
-  /// Predictor values from reporters
-  std::vector<const Real *> _predictors;
+  /// Data from the current predictor row
+  const std::vector<Real> & _predictor_row;
 };

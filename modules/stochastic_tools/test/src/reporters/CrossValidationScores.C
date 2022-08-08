@@ -29,7 +29,7 @@ CrossValidationScores::CrossValidationScores(const InputParameters & parameters)
   for (const auto & mn : getParam<std::vector<UserObjectName>>("models"))
   {
     _models.push_back(&getSurrogateModelByName(mn));
-    _cv_scores.push_back(&declareValueByName<std::vector<Real>>(mn));
+    _cv_scores.push_back(&declareValueByName<std::vector<std::vector<Real>>>(mn));
   }
 }
 
@@ -37,5 +37,5 @@ void
 CrossValidationScores::execute()
 {
   for (unsigned int m = 0; m < _models.size(); ++m)
-    (*_cv_scores[m]) = _models[m]->getModelData<std::vector<Real>>("cv_scores");
+    (*_cv_scores[m]) = _models[m]->getModelData<std::vector<std::vector<Real>>>("cv_scores");
 }

@@ -47,6 +47,8 @@
 []
 
 [Outputs]
-  csv = true
-  execute_on = FINAL
+  [out]
+    type = JSON
+    execute_on = FINAL
+  []
 []
