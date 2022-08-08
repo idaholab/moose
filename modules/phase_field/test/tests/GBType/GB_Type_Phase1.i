@@ -196,7 +196,6 @@
     type = ComputeGBMisorientationType
     ebsd_reader = ebsd_reader
     grain_tracker = grain_tracker
-    file_name = 'MisorientationAngle_3grs.txt'
     output_properties = 'gb_type'
     outputs = exodus
   [../]
