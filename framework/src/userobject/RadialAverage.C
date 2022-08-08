@@ -1,13 +1,14 @@
-/**********************************************************************/
-/*                     DO NOT MODIFY THIS HEADER                      */
-/* MAGPIE - Mesoscale Atomistic Glue Program for Integrated Execution */
-/*                                                                    */
-/*            Copyright 2017 Battelle Energy Alliance, LLC            */
-/*                        ALL RIGHTS RESERVED                         */
-/**********************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "RadialGreensConvolution.h"
-#include "ThreadedRadialGreensConvolutionLoop.h"
+#include "RadialAverage.h"
+#include "ThreadedRadialAverageLoop.h"
 #include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
 
@@ -19,28 +20,23 @@
 #include <iterator>
 #include <algorithm>
 
-registerMooseObject("MagpieApp", RadialGreensConvolution);
+registerMooseObject("MooseApp", RadialAverage);
 
-// specialization for PointListAdaptor<RadialGreensConvolution::QPData>
+// specialization for PointListAdaptor<RadialAverage::QPData>
 template <>
 const Point &
-PointListAdaptor<RadialGreensConvolution::QPData>::getPoint(
-    const RadialGreensConvolution::QPData & item) const
+PointListAdaptor<RadialAverage::QPData>::getPoint(const RadialAverage::QPData & item) const
 {
   return item._q_point;
 }
 
 InputParameters
-RadialGreensConvolution::validParams()
+RadialAverage::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
-  params.addClassDescription("Perform a radial Green's function convolution");
-  params.addCoupledVar("v", "Variable to gather");
-  params.addRequiredParam<FunctionName>(
-      "function",
-      "Green's function (distance is substituted for x) without geometrical attenuation");
-  params.addRequiredParam<Real>("r_cut", "Cut-off radius for the Green's function");
-  params.addParam<bool>("normalize", false, "Normalize the Green's function integral to one");
+  params.addClassDescription("Perform a radial equal weight average of a material property");
+  params.addRequiredParam<std::string>("material_name", "Name of the material to average.");
+  params.addRequiredParam<Real>("r_cut", "Cut-off radius for the averaging");
 
   // we run this object once at the beginning of the timestep by default
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
@@ -53,15 +49,11 @@ RadialGreensConvolution::validParams()
   return params;
 }
 
-RadialGreensConvolution::RadialGreensConvolution(const InputParameters & parameters)
+RadialAverage::RadialAverage(const InputParameters & parameters)
   : ElementUserObject(parameters),
-    _v(coupledValue("v")),
-    _v_var(coupled("v")),
-    _function(getFunction("function")),
+    _v_name(getParam<std::string>("material_name")),
+    _v(getMaterialProperty<Real>(_v_name)),
     _r_cut(getParam<Real>("r_cut")),
-    _normalize(getParam<bool>("normalize")),
-    _dim(_mesh.dimension()),
-    _correction_integral(100),
     _dof_map(_fe_problem.getNonlinearSystemBase().dofMap()),
     _update_communication_lists(false),
     _my_pid(processor_id()),
@@ -69,107 +61,23 @@ RadialGreensConvolution::RadialGreensConvolution(const InputParameters & paramet
     _perf_updatelists(registerTimedSection("updateCommunicationLists", 3)),
     _perf_finalize(registerTimedSection("finalize", 2))
 {
-  // collect mesh periodicity data
-  for (unsigned int i = 0; i < _dim; ++i)
-  {
-    _periodic[i] = _mesh.isRegularOrthogonal() && _mesh.isTranslatedPeriodic(_v_var, i);
-
-    _periodic_min[i] = _mesh.getMinInDimension(i);
-    _periodic_max[i] = _mesh.getMaxInDimension(i);
-    _periodic_vector[i](i) = _mesh.dimensionWidth(i);
-
-    // we could allow this, but then we'd have to search over more than just the nearest periodic
-    // neighbors
-    if (_periodic[i] && 2.0 * _r_cut > _periodic_vector[i](i))
-      paramError(
-          "r_cut",
-          "The cut-off radius cannot be larger than half the periodic size of the simulation cell");
-  }
 }
 
 void
-RadialGreensConvolution::initialSetup()
+RadialAverage::initialSetup()
 {
-  // Get a pointer to the PeriodicBoundaries buried in libMesh
-  _pbs = _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries();
-
   // set up processor boundary node list
   meshChanged();
 }
 
 void
-RadialGreensConvolution::initialize()
+RadialAverage::initialize()
 {
   _qp_data.clear();
-
-  /* compute the dimensional correction
-   *
-   *  |---__
-   *  |     / .
-   *  |  R/  | .
-   *  | /   h|  \ r_cut
-   *  |______|__|____
-   *         r
-   *
-   * Out of plane (2D) and out of line (1D) 3D contributions to the convolution
-   * are not naturally captured by the 1D or 2D numerical integration of QP neighborhood.
-   * At every Qp an integration in the h direction needs to be performed.
-   * We can pre-tabulate this integral.
-   */
-  if (_dim < 3)
-  {
-    const Real dr = _r_cut / _correction_integral.size();
-    for (unsigned int i = 0; i < _correction_integral.size(); ++i)
-    {
-      const Real r = i * dr;
-      const Real h = std::sqrt(_r_cut * _r_cut - r * r);
-      const unsigned int hsteps = std::ceil(h / dr);
-      const Real dh = h / hsteps;
-
-      _correction_integral[i] = 0.0;
-
-      // for r = 0 we skip the first bin of the integral!
-      if (i == 0)
-        _zero_dh = dh;
-
-      for (unsigned int j = i > 0 ? 0 : 1; j < hsteps; ++j)
-      {
-        const Real h1 = j * dh;
-        const Real h2 = h1 + dh;
-
-        // we evaluate the Green's function at the geometric middle of the height interval
-        // and assume it to be constant.
-        const Real R2 = r * r + h1 * h2;
-        const Real G = _function.value(_t, Point(std::sqrt(R2), 0.0, 0.0));
-
-        // We integrate the geometric attenuation analytically over the interval [h1, h2).
-        _correction_integral[i] += G * attenuationIntegral(h1, h2, r, _dim);
-      }
-    }
-  }
-}
-
-Real
-RadialGreensConvolution::attenuationIntegral(Real h1, Real h2, Real r, unsigned int dim) const
-{
-  if (dim == 2)
-  {
-    // in 2D we need to return the above and below plane contribution (hence 2.0 * ...)
-    if (r > 0.0)
-      // integral 1/(h^2+r^2) dh = 1/r*atan(h/r)|
-      return 2.0 * 1.0 / (4.0 * libMesh::pi * r) * (std::atan(h2 / r) - std::atan(h1 / r));
-    else
-      // integral 1/h^2 dh = -1/h|
-      return 2.0 * 1.0 / (4.0 * libMesh::pi) * (-1.0 / h2 + 1.0 / h1);
-  }
-  else
-    // dim = 1, we multiply the attenuation by 2pi*h (1/2 * 2pi/4pi = 0.25)
-    // integral h/(h^2+r^2) dh = 1/2 * ln(h^2+r^2)|
-    return 0.25 * (std::log(h2 * h2 + r * r) - std::log(h1 * h1 + r * r));
 }
 
 void
-RadialGreensConvolution::execute()
+RadialAverage::execute()
 {
   auto id = _current_elem->id();
 
@@ -178,29 +86,20 @@ RadialGreensConvolution::execute()
     _qp_data.emplace_back(_q_point[qp], id, qp, _JxW[qp] * _coord[qp], _v[qp]);
 
   // make sure the result map entry for the current element is sized correctly
-  auto i = _convolution.find(id);
-  if (i == _convolution.end())
-    _convolution.insert(std::make_pair(id, std::vector<Real>(_qrule->n_points())));
+  auto i = _average.find(id);
+  if (i == _average.end())
+    _average.insert(std::make_pair(id, std::vector<Real>(_qrule->n_points())));
   else
     i->second.resize(_qrule->n_points());
 }
 
 void
-RadialGreensConvolution::finalize()
+RadialAverage::finalize()
 {
   TIME_SECTION(_perf_finalize);
 
   // the first chunk of data is always the local data - remember its size
   unsigned int local_size = _qp_data.size();
-
-  // if normalization is requested we need to integrate the current variable field
-  Real source_integral = 0.0;
-  if (_normalize)
-  {
-    for (const auto & qpd : _qp_data)
-      source_integral += qpd._volume * qpd._value;
-    gatherSum(source_integral);
-  }
 
   // communicate the qp data list if n_proc > 1
   if (_app.n_processors() > 1)
@@ -304,140 +203,36 @@ RadialGreensConvolution::finalize()
   mooseAssert(_kd_tree != nullptr, "KDTree was not properly initialized.");
   _kd_tree->buildIndex();
 
-  // result map entry
-  const auto end_it = _convolution.end();
-  auto it = end_it;
-
   // build thread loop functor
-  ThreadedRadialGreensConvolutionLoop rgcl(*this);
+  ThreadedRadialAverageLoop rgcl(*this);
 
   // run threads
   auto local_range_begin = _qp_data.begin();
   auto local_range_end = local_range_begin;
   std::advance(local_range_end, local_size);
   Threads::parallel_reduce(QPDataRange(local_range_begin, local_range_end), rgcl);
-
-  Real convolution_integral = rgcl.convolutionIntegral();
-
-  // if normalization is requested we need to communicate the convolution result
-  // and normalize the result entries
-  if (_normalize)
-  {
-    gatherSum(convolution_integral);
-
-    // we may not need to or may not be able to normalize
-    if (convolution_integral == 0.0)
-    {
-      if (source_integral == 0.0)
-        return;
-      mooseError("Unable to normalize Green's function. Is it all zero?");
-    }
-
-    // normalize result entries
-    for (auto & re : _convolution)
-      for (auto & ri : re.second)
-        ri *= source_integral / convolution_integral;
-  }
-
-  // make it a differential result
-  it = end_it;
-  for (unsigned int i = 0; i < local_size; ++i)
-  {
-    const auto & local_qp = _qp_data[i];
-
-    // Look up result map iterator only if we enter a new element. this saves a bunch
-    // of map lookups because same element entries are consecutive in the _qp_data vector.
-    if (it == end_it || it->first != local_qp._elem_id)
-      it = _convolution.find(local_qp._elem_id);
-
-    it->second[local_qp._qp] -= local_qp._volume * local_qp._value;
-  }
 }
 
 void
-RadialGreensConvolution::threadJoin(const UserObject & y)
+RadialAverage::threadJoin(const UserObject & y)
 {
-  const RadialGreensConvolution & uo = static_cast<const RadialGreensConvolution &>(y);
+  const RadialAverage & uo = static_cast<const RadialAverage &>(y);
   _qp_data.insert(_qp_data.begin(), uo._qp_data.begin(), uo._qp_data.end());
-  _convolution.insert(uo._convolution.begin(), uo._convolution.end());
+  _average.insert(uo._average.begin(), uo._average.end());
 }
 
 void
-RadialGreensConvolution::insertNotLocalPointNeighbors(dof_id_type node)
+RadialAverage::insertNotLocalPointNeighbors(dof_id_type node)
 {
   mooseAssert(!_nodes_to_elem_map[node].empty(), "Node not found in _nodes_to_elem_map");
 
   for (const auto * elem : _nodes_to_elem_map[node])
-    if (elem->processor_id() != _my_pid)
+    if (elem->processor_id() != _my_pid && elem->active())
       _point_neighbors.insert(elem);
 }
 
 void
-RadialGreensConvolution::insertNotLocalPeriodicPointNeighbors(dof_id_type node,
-                                                              const Node * reference)
-{
-  mooseAssert(!_nodes_to_elem_map[node].empty(), "Node not found in _nodes_to_elem_map");
-
-  const Node * first = _mesh.nodePtr(node);
-  for (const auto * elem : _nodes_to_elem_map[node])
-    if (elem->processor_id() != _my_pid)
-      _periodic_point_neighbors.emplace(elem, first, reference);
-}
-
-void
-RadialGreensConvolution::findNotLocalPeriodicPointNeighbors(const Node * first)
-{
-  auto iters = _periodic_node_map.equal_range(first->id());
-  auto it = iters.first;
-
-  // no periodic copies
-  if (it == iters.second)
-    return;
-
-  // insert first periodic neighbor
-  insertNotLocalPeriodicPointNeighbors(it->second, first);
-  ++it;
-
-  // usual case, node was on the face of a periodic boundary (and not on its edge or corner)
-  if (it == iters.second)
-    return;
-
-  // number of periodic directions
-  unsigned int periodic_dirs = 1;
-  std::set<dof_id_type> nodes;
-  nodes.insert(iters.first->second); // probably not necessary
-
-  // insert remaining periodic copies
-  do
-  {
-    nodes.insert(it->second);
-    it++;
-    periodic_dirs++;
-  } while (it != iters.second);
-
-  // now jump periodic_dirs-1 times from those nodes to their periodic copies
-  for (unsigned int i = 1; i < periodic_dirs; ++i)
-  {
-    std::set<dof_id_type> new_nodes;
-    for (auto node : nodes)
-    {
-      // periodic copies of the set members we already inserted
-      auto new_iters = _periodic_node_map.equal_range(node);
-
-      // insert the ids of the periodic copies of the node
-      for (it = new_iters.first; it != new_iters.second; ++it)
-        new_nodes.insert(it->second);
-    }
-    nodes.insert(new_nodes.begin(), new_nodes.end());
-  }
-
-  // add all jumped to nodes
-  for (auto node : nodes)
-    insertNotLocalPeriodicPointNeighbors(node, first);
-}
-
-void
-RadialGreensConvolution::meshChanged()
+RadialAverage::meshChanged()
 {
   TIME_SECTION(_perf_meshchanged);
 
@@ -446,9 +241,6 @@ RadialGreensConvolution::meshChanged()
 
   // get a fresh point locator
   _point_locator = _mesh.getPointLocator();
-
-  // rebuild periodic node map (this is the heaviest part by far)
-  _mesh.buildPeriodicNodeMap(_periodic_node_map, _v_var, _pbs);
 
   // Build a new node to element map
   _nodes_to_elem_map.clear();
@@ -477,21 +269,13 @@ RadialGreensConvolution::meshChanged()
               insertNotLocalPointNeighbors((*it)->node_id(n));
         }
       }
-      else
-      {
-        // find periodic node neighbors and
-        for (unsigned int n = 0; n < (*it)->n_nodes(); ++n)
-          if ((*it)->is_node_on_side(n, s))
-            findNotLocalPeriodicPointNeighbors((*it)->node_ptr(n));
-      }
     }
-
   // request communication list update
   _update_communication_lists = true;
 }
 
 void
-RadialGreensConvolution::updateCommunicationLists()
+RadialAverage::updateCommunicationLists()
 {
   TIME_SECTION(_perf_updatelists);
 
@@ -514,42 +298,23 @@ RadialGreensConvolution::updateCommunicationLists()
   for (auto elem : _point_neighbors)
   {
     ret_matches.clear();
-    Point centroid = elem->centroid();
+    Point centroid = elem->vertex_average();
     const Real r_cut2 = _r_cut + elem->hmax() / 2.0;
-    kd_tree->radiusSearch(&(centroid(0)), r_cut2 * r_cut2, ret_matches, search_params);
+    kd_tree->radiusSearch(&(centroid(0)), r_cut2, ret_matches, search_params);
     for (auto & match : ret_matches)
       _communication_lists[elem->processor_id()].insert(match.first);
   }
 
-  // iterate over periodic point neighbor elements
-  for (auto tuple : _periodic_point_neighbors)
-  {
-    const auto * elem = std::get<0>(tuple);
-    const auto * first = std::get<1>(tuple);
-    const auto * second = std::get<2>(tuple);
-
-    Point centroid = elem->centroid() - (*first - *second);
-
-    const Real r_cut2 = _r_cut + elem->hmax() / 2.0;
-
-    ret_matches.clear();
-    kd_tree->radiusSearch(&(centroid(0)), r_cut2 * r_cut2, ret_matches, search_params);
-    for (auto & match : ret_matches)
-      _communication_lists[elem->processor_id()].insert(match.first);
-  }
-
-  // request fulfilled
   _update_communication_lists = false;
 }
 
 namespace TIMPI
 {
 
-StandardType<RadialGreensConvolution::QPData>::StandardType(
-    const RadialGreensConvolution::QPData * example)
+StandardType<RadialAverage::QPData>::StandardType(const RadialAverage::QPData * example)
 {
   // We need an example for MPI_Address to use
-  static const RadialGreensConvolution::QPData p;
+  static const RadialAverage::QPData p;
   if (!example)
     example = &p;
 
@@ -568,7 +333,7 @@ StandardType<RadialGreensConvolution::QPData>::StandardType(
   int blocklengths[] = {1, 1, 1, 1, 1};
   MPI_Aint displs[5], start;
 
-  libmesh_call_mpi(MPI_Get_address(const_cast<RadialGreensConvolution::QPData *>(example), &start));
+  libmesh_call_mpi(MPI_Get_address(const_cast<RadialAverage::QPData *>(example), &start));
   libmesh_call_mpi(MPI_Get_address(const_cast<Point *>(&example->_q_point), &displs[0]));
   libmesh_call_mpi(MPI_Get_address(const_cast<dof_id_type *>(&example->_elem_id), &displs[1]));
   libmesh_call_mpi(MPI_Get_address(const_cast<short *>(&example->_qp), &displs[2]));
@@ -584,8 +349,7 @@ StandardType<RadialGreensConvolution::QPData>::StandardType(
   libmesh_call_mpi(MPI_Type_commit(&tmptype));
 
   // resize the structure type to account for padding, if any
-  libmesh_call_mpi(
-      MPI_Type_create_resized(tmptype, 0, sizeof(RadialGreensConvolution::QPData), &_datatype));
+  libmesh_call_mpi(MPI_Type_create_resized(tmptype, 0, sizeof(RadialAverage::QPData), &_datatype));
   libmesh_call_mpi(MPI_Type_free(&tmptype));
 
   this->commit();
@@ -594,8 +358,7 @@ StandardType<RadialGreensConvolution::QPData>::StandardType(
 }
 } // namespace TIMPI
 
-StandardType<RadialGreensConvolution::QPData>::StandardType(
-    const StandardType<RadialGreensConvolution::QPData> & t)
+StandardType<RadialAverage::QPData>::StandardType(const StandardType<RadialAverage::QPData> & t)
 {
 #ifdef LIBMESH_HAVE_MPI
   libmesh_call_mpi(MPI_Type_dup(t._datatype, &_datatype));

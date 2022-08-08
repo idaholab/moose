@@ -1,15 +1,18 @@
-/**********************************************************************/
-/*                     DO NOT MODIFY THIS HEADER                      */
-/* MAGPIE - Mesoscale Atomistic Glue Program for Integrated Execution */
-/*                                                                    */
-/*            Copyright 2017 Battelle Energy Alliance, LLC            */
-/*                        ALL RIGHTS RESERVED                         */
-/**********************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
 
 #include "ElementUserObject.h"
 #include "DataIO.h"
+#include "PointListAdaptor.h"
+#include "Function.h"
 
 #include "libmesh/data_type.h"
 
@@ -22,19 +25,19 @@
 
 using namespace TIMPI;
 
-class ThreadedRadialGreensConvolutionLoop;
+class ThreadedRadialAverageLoop;
 
 /**
  * Gather and communicate a full list of all quadrature points and the values of
- * a selected variable at each point. Use a KD-Tree to integrate the weighted
- * neighborhood of each QP to obtain the convolution.
+ * a selected variable at each point. Use a KD-Tree to get the weighted spatial
+ * average of a material property.
  */
-class RadialGreensConvolution : public ElementUserObject
+class RadialAverage : public ElementUserObject
 {
 public:
   static InputParameters validParams();
 
-  RadialGreensConvolution(const InputParameters & parameters);
+  RadialAverage(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 
@@ -66,51 +69,25 @@ public:
   };
 
   using Result = std::map<dof_id_type, std::vector<Real>>;
-  const Result & getConvolution() const { return _convolution; }
+  const Result & getAverage() const { return _average; }
 
 protected:
-  Real attenuationIntegral(Real h1, Real h2, Real r, unsigned int dim) const;
   void insertNotLocalPointNeighbors(dof_id_type);
-  void insertNotLocalPeriodicPointNeighbors(dof_id_type, const Node *);
-  void findNotLocalPeriodicPointNeighbors(const Node *);
   void updateCommunicationLists();
 
-  /// variable field to be gathered
-  const VariableValue & _v;
+  /// material name to get gethered
+  std::string _v_name;
+  /// material to be gathered
+  const MaterialProperty<Real> & _v;
 
-  /// index of field variable
-  unsigned int _v_var;
-
-  /// Green's function
-  const Function & _function;
-
-  /// Green's function cut-off radius
+  /// cut-off radius
   const Real _r_cut;
-
-  /// Normalize the Green's function to one to make the integral of the convolution
-  /// the same as the integral of the original data.
-  const bool _normalize;
-
-  /// mesh dimension
-  unsigned int _dim;
-
-  /// greens function integral table for correction of lower dimensional convolutions
-  std::vector<Real> _correction_integral;
 
   /// gathered data
   std::vector<QPData> _qp_data;
 
-  /// convolution result
-  Result _convolution;
-
-  /// is the mesh translated periodic in a given cardinal direction
-  std::array<bool, LIBMESH_DIM> _periodic;
-
-  ///@{ periodic size per component
-  std::array<Real, LIBMESH_DIM> _periodic_min;
-  std::array<Real, LIBMESH_DIM> _periodic_max;
-  std::array<Point, LIBMESH_DIM> _periodic_vector;
-  ///@}
+  /// average result
+  Result _average;
 
   using KDTreeType = nanoflann::KDTreeSingleIndexAdaptor<
       nanoflann::L2_Simple_Adaptor<Real, PointListAdaptor<QPData>>,
@@ -125,9 +102,6 @@ protected:
 
   /// DOF map
   const DofMap & _dof_map;
-
-  /// A pointer to the periodic boundary constraints object
-  PeriodicBoundaries * _pbs;
 
   /// PointLocator for finding topological neighbors
   std::unique_ptr<PointLocatorBase> _point_locator;
@@ -159,22 +133,22 @@ protected:
   PerfID _perf_finalize;
   //@}
 
-  friend class ThreadedRadialGreensConvolutionLoop;
+  friend class ThreadedRadialAverageLoop;
 };
 
 template <>
-const Point & PointListAdaptor<RadialGreensConvolution::QPData>::getPoint(
-    const RadialGreensConvolution::QPData & item) const;
+const Point &
+PointListAdaptor<RadialAverage::QPData>::getPoint(const RadialAverage::QPData & item) const;
 
 namespace TIMPI
 {
 
 template <>
-class StandardType<RadialGreensConvolution::QPData> : public DataType
+class StandardType<RadialAverage::QPData> : public DataType
 {
 public:
-  explicit StandardType(const RadialGreensConvolution::QPData * example = nullptr);
-  StandardType(const StandardType<RadialGreensConvolution::QPData> & t);
+  explicit StandardType(const RadialAverage::QPData * example = nullptr);
+  StandardType(const StandardType<RadialAverage::QPData> & t);
   ~StandardType() { this->free(); }
 };
 } // namespace TIMPI
