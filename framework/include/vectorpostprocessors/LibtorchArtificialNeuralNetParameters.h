@@ -31,9 +31,10 @@ public:
   virtual void finalize(){};
 
 protected:
-
+#ifdef LIBTORCH_ENABLED
   /// Fill the vector psotprocessor values with the parameters
   void fillParameterValues(const std::shared_ptr<torch::nn::Module> & ann);
+#endif
 
   /// The name of the control objects which hold the neural networks
   std::string _control_name;

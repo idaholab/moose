@@ -16,7 +16,8 @@
  * A VectorPostprocessor which can print the parameter values of a
  * LibtorchArtificialNeuralNetwork from within a DRL Trainer object.
  */
-class DRLControlNeuralNetParameters : public LibtorchArtificialNeuralNetParameters, public SurrogateModelInterface
+class DRLControlNeuralNetParameters : public LibtorchArtificialNeuralNetParameters,
+                                      public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();

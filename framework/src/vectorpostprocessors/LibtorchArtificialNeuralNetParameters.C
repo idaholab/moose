@@ -62,11 +62,11 @@ LibtorchArtificialNeuralNetParameters::execute()
 #endif
 }
 
+#ifdef LIBTORCH_ENABLED
 void
 LibtorchArtificialNeuralNetParameters::fillParameterValues(
     const std::shared_ptr<torch::nn::Module> & ann)
 {
-#ifdef LIBTORCH_ENABLED
 
   const auto & ann_params = ann->named_parameters();
 
@@ -81,6 +81,5 @@ LibtorchArtificialNeuralNetParameters::fillParameterValues(
     for (unsigned int value_i : make_range(max_size))
       _nn_parameter_values.push_back(flattened_tensor[value_i][0].item<double>());
   }
-
-#endif
 }
+#endif

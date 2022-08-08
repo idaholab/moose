@@ -1,6 +1,6 @@
 [Tests]
-  desgin = "LibtorchNeuralNetControlTransfer.md"
   issues = '#19571'
+  design = 'LibtorchNeuralNetControlTransfer.md'
   [torch-parameters]
     type = CSVDiff
     input = libtorch_drl_control_trainer.i
