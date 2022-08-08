@@ -14,9 +14,9 @@
 /**
  * This is a copy of PiecewiseMulticonstant except
  * it is derived from PiecewiseMultiInterpolationFromReporters
- * WHICH gets manages its own gridded data that it gets form a
- * GriddedDataReporter
- * Uses GriddedData to define data on a grid,
+ * which manages its own gridded data that it gets from a
+ * GriddedDataReporter.
+ * Uses gridded data to define data on a grid,
  * and does linear interpolation on that data to
  * provide function values.
  * Gridded data can be 1D, 2D, 3D or 4D.

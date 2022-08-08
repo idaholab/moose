@@ -8,7 +8,7 @@
       cli_args = "Functions/bilinear1_fcn/values_name='exception/tooManyParams'"
       expect_err = "Gridded data evaluateFcn grid contains 9 grid entries, but the values_name reporter contains 10 entries.  These must be the same."
       max_parallel = 1
-      detail = " error if the number of requested functions differ than the number available from the file."
+      detail = " error if the number of values in the reporter differs from the number of grid points."
     [../]
     [./oneDa]
       type = 'CSVDiff'
@@ -58,11 +58,21 @@
       detail = " interpolation on a 3D domain with time-dependent data."
     [../]
   [../]
-
-  [./twoD_const]
-    type = 'Exodiff'
-    input = 'twoD_const.i'
-    exodiff = 'twoD_const.e'
-    requirement = "The PiecewiseMulticonstantFromReporter object shall perform constant interpolation on a 2D domain."
-  [../]
+  [const]
+    requirement ="The PiecewiseMulticonstantFromReporter object shall perform"
+    [twoD_const]
+      type = 'Exodiff'
+      input = 'twoD_const.i'
+      exodiff = 'twoD_const.e'
+      detail = " constant interpolation on a 2D domain."
+    []
+    [exception]
+      type = 'RunException'
+      input = 'twoD_const.i'
+      cli_args = "Functions/const_fcn/direction='left left left'"
+      expect_err = "Parameter direction must have a size identical to 2"
+      max_parallel = 1
+      detail = " an error if the directions vector is different than the problem dimension."
+    []
+  []
 []

@@ -64,22 +64,34 @@
   [../]
 []
 
+[Reporters]
+  [gridData]
+    type = GriddedDataReporter
+    data_file = 'twoD_const.txt'
+    outputs = none
+  []
+[]
+
 
 [Functions]
-  [./const_fcn]
-    type = PiecewiseMulticonstant
+  [const_fcn]
+    type = PiecewiseMulticonstantFromReporter
     direction = 'left right'
-    data_file = twoD_const.txt
-  [../]
+    values_name = 'gridData/parameter'
+    grid_name = 'gridData/grid'
+    axes_name = 'gridData/axes'
+    step_name = 'gridData/step'
+    dim_name = 'gridData/dim'
+  []
 
-  [./const_ref]
+  [const_ref]
     type = ParsedFunction
     value = '
             ix := if(x < 0.5, 0, if(x < 1, 1, 2));
             iy := if(y > 0, 2, if(y > -0.5, 1, 0));
             iy * 3 + ix
             '
-  [../]
+  []
 []
 
 

@@ -16,8 +16,7 @@ PiecewiseMultiInterpolationFromReporter::validParams()
 
   params.addClassDescription(
       "This is very similar to PiecewiseMultiInterpolation.  However, it uses a "
-      "GriddedDataReporter to get its grid and axes data.  The values from at each grid point can "
-      "be obtained from the GriddedDataReporter or a seperate reporter.");
+      "GriddedDataReporter to get grid and axes data.");
 
   params.addRequiredParam<ReporterName>("grid_name",
                                         "reporter from GriddedDataReporter containing grid.  This "

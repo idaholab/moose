@@ -14,11 +14,11 @@
 #include "ReporterInterface.h"
 /**
  * Note: this is similar to MOOSE Framework PiecewiseMultiInterpolation
- * The grid and axes are read in from a GriddedData reporter
- * and not GriddedData object is used.  The values can be read in from the griddedData reporter or
- * be supplied by a seperate reporter.  There is one value per grid point. Linear interpolation of
- * the values provides function values. The grid from the GriddedDataReporter can be 1D, 2D, 3D or
- * 4D.
+ * The grid, axes, and (function values) are read in from a GriddedDataReporter.
+ * The function values can be read in from the GriddedDataReporter or
+ * be supplied by a seperate reporter.  There is one function value per grid point. Linear
+ * interpolation of the values provides function values. The grid from the GriddedDataReporter can
+ * be 1D, 2D, 3D or 4D.
  */
 class PiecewiseMultiInterpolationFromReporter : public Function, public ReporterInterface
 {
