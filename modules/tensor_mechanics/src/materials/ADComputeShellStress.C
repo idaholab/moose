@@ -42,7 +42,7 @@ ADComputeShellStress::ADComputeShellStress(const InputParameters & parameters)
   _stress.resize(_t_points.size());
   _stress_old.resize(_t_points.size());
   _strain_increment.resize(_t_points.size());
-  _rotation_matrix.resize(_t_points.size());
+  _covariant_transformation_matrix.resize(_t_points.size());
   _global_stress.resize(_t_points.size());
   for (unsigned int t = 0; t < _t_points.size(); ++t)
   {
@@ -54,8 +54,8 @@ ADComputeShellStress::ADComputeShellStress(const InputParameters & parameters)
     _strain_increment[t] =
         &getADMaterialProperty<RankTwoTensor>("strain_increment_t_points_" + std::to_string(t));
     // rotation matrix and stress for output purposes only
-    _rotation_matrix[t] =
-        &getMaterialProperty<RankTwoTensor>("rotation_t_points_" + std::to_string(t));
+    _covariant_transformation_matrix[t] = &getMaterialProperty<RankTwoTensor>(
+        "covariant_transformation_t_points_" + std::to_string(t));
     _global_stress[t] =
         &declareProperty<RankTwoTensor>("global_stress_t_points_" + std::to_string(t));
   }
@@ -80,7 +80,7 @@ ADComputeShellStress::computeQpProperties()
     for (unsigned int ii = 0; ii < 3; ++ii)
       for (unsigned int jj = 0; jj < 3; ++jj)
         _unrotated_stress(ii, jj) = MetaPhysicL::raw_value((*_stress[i])[_qp](ii, jj));
-    (*_global_stress[i])[_qp] =
-        (*_rotation_matrix[i])[_qp].transpose() * _unrotated_stress * (*_rotation_matrix[i])[_qp];
+    (*_global_stress[i])[_qp] = (*_covariant_transformation_matrix[i])[_qp].transpose() *
+                                _unrotated_stress * (*_covariant_transformation_matrix[i])[_qp];
   }
 }
