@@ -192,6 +192,7 @@ protected:
 
   static RankFourTensor _identityTensor;
 };
+
 typedef StressUpdateBaseTempl<false> StressUpdateBase;
 typedef StressUpdateBaseTempl<true> ADStressUpdateBase;
 

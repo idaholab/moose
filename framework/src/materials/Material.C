@@ -161,6 +161,11 @@ Material::getMaterialByName(const std::string & name, bool no_warn, bool no_dep)
     // retrieves this discrete material
     const auto & discrete_requested = discrete_mat.getRequestedItems();
     _requested_props.insert(discrete_requested.begin(), discrete_requested.end());
+
+    // Insert the properties requested by the discrete material into the host material
+    const auto & discrete_requested_props = discrete_mat.getMatPropDependencies();
+    _material_property_dependencies.insert(discrete_requested_props.begin(),
+                                           discrete_requested_props.end());
   }
 
   return discrete_mat;

@@ -34,8 +34,5 @@ ResolveOptionalMaterialPropertiesAction::act()
   mooseAssert(_problem, "Problem doesn't exist");
 
   for (auto dmpri : _app.getInterfaceObjects<DeferredMaterialPropertyResolutionInterface>())
-  {
-    std::cout << "Resolving deferred stuff..\n";
     dmpri->resolveDeferredProperties();
-  }
 }

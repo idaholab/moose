@@ -3272,7 +3272,7 @@ FEProblemBase::setActiveMaterials(SubdomainID blk_id, THREAD_ID tid)
     _active_materials[tid].clear();
 
   _active_materials[tid].clear();
-  _console << "setActiveMaterials(" << blk_id << ", " << tid << ")" << std::endl;
+  // _console << "setActiveMaterials(" << blk_id << ", " << tid << ")" << std::endl;
   if (_materials.hasActiveBlockObjects(blk_id, tid))
     for (const auto & mat : _materials.getActiveBlockObjects(blk_id, tid))
     {
@@ -3280,11 +3280,11 @@ FEProblemBase::setActiveMaterials(SubdomainID blk_id, THREAD_ID tid)
       if (!MooseUtils::emptyIntersection(supplied_props, needed_mat_props))
       {
         _active_materials[tid].push_back(mat.get());
-        _console << "YES: " << mat->name() << std::endl;
+        // _console << "YES: " << mat->name() << std::endl;
       }
       else
       {
-        _console << "NO:  " << mat->name() << std::endl;
+        // _console << "NO:  " << mat->name() << std::endl;
       }
     }
 }

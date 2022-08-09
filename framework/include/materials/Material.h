@@ -157,7 +157,7 @@ public:
   getMaterialByName(const std::string & name, bool no_warn = false, bool no_dep = false);
 
   /// resolve all deferred properties (optional and zero properties)
-  virtual void resolveDeferredProperties();
+  void resolveDeferredProperties() override;
 
   ///@{ Optional material property getters
 private:

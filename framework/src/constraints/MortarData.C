@@ -120,8 +120,8 @@ MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundar
   if (on_displaced)
   {
     if (_displaced_mortar_interfaces.find(boundary_key) == _displaced_mortar_interfaces.end())
-      mooseError(
-          "The requested displaced mortar interface AutomaticMortarGeneration object does not yet exist!");
+      mooseError("The requested displaced mortar interface AutomaticMortarGeneration object does "
+                 "not yet exist!");
 
     return _displaced_mortar_interfaces.at(boundary_key);
   }
