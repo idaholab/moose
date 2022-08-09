@@ -5,7 +5,7 @@
     type = RunException
     input = main-app.i
     requirement = 'The system shall output a warning if a transfer that only matches node ids is used in combinated with a coordinate transformation.'
-    expect_err = "'to_sub' of type 'MultiAppCopyTransfer' has non-translation transformations but it does not leverage the 'MooseCoordTransform' class. Your data transfers may be inaccurate"
+    expect_err = "Transfer 'to_sub' of type 'MultiAppCopyTransfer' has non-translation transformations but it does not implement coordinate transformations using the 'MooseCoordTransform' class. Your data transfers will not be performed in the expected transformed frame"
     mesh_mode = replicated
   []
 []
