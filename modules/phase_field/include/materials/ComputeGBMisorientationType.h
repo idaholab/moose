@@ -32,18 +32,18 @@ protected:
   /// Function to obtain line number for a given grain pair
   virtual unsigned int getLineNum(unsigned int grain_i, unsigned int grain_j);
   /// Function to get the GB type for triple junctions
-  virtual Real getTripleJunctionType(std::vector<unsigned int> gb_pairs,
-                                     std::vector<Real> gb_op_pairs);
+  virtual Real getTripleJunctionType();
   /// Function to convert symmetry matrix to quaternion form
-  void rotationSymmetryToQuaternion(const double O[3][3], double q[4]);
+  void rotationSymmetryToQuaternion(const double O[3][3], Eigen::Quaternion<Real> & q);
   /// Function to define the symmetry operator
-  void defineSymmetryOperator(double *** sym);
-  /// Function to convert grain Euler Angle orientation to quaternion vector
-  void eulerOrientationToQuaternion(int grain_id);
+  void defineSymmetryOperator();
   /// Function to multiply quaternions and update
-  void getQuaternionProduct(const double qi[4], const double qj[4], double q[4]);
+  void getQuaternionProduct(const Eigen::Quaternion<Real> qi,
+                            const Eigen::Quaternion<Real> qj,
+                            Eigen::Quaternion<Real> & q);
   /// Function to return the misorientation of two quaternions
-  double getMisorientationFromQuaternion(const double qi[4], const double qj[4]);
+  double getMisorientationFromQuaternion(const Eigen::Quaternion<Real> qi,
+                                         const Eigen::Quaternion<Real> qj);
   /// Get the Misorientation angle
   void getMisorientationAngles();
 
@@ -56,6 +56,10 @@ protected:
   /// Parameters to calculate the Misorientation angle file
   std::vector<double> _misorientation_angles;
 
+  /// parameters to store the EBSD id and corresponding value on GB
+  std::vector<unsigned int> _gb_pairs;
+  std::vector<Real> _gb_op_pairs;
+
   /// order parameters
   const unsigned int _op_num;
   const std::vector<const VariableValue *> _vals;
@@ -64,10 +68,10 @@ protected:
   const Real _angle_threshold;
 
   /// The parameters to calculate the misorientation
-  double ** sym_quat;
-  int o_sym = 24;
-  std::vector<std::vector<double>> euler_angle;
-  std::vector<std::vector<double>> quat_angle;
+  std::vector<Eigen::Quaternion<Real>> sym_quat;
+  int _o_sym = 24;
+  std::vector<EulerAngles> _euler_angle;
+  std::vector<Eigen::Quaternion<Real>> _quat_angle;
 
   /// precalculated element value
   ADMaterialProperty<Real> & _gb_type;
