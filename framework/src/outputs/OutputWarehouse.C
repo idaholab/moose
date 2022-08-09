@@ -90,7 +90,7 @@ OutputWarehouse::subdomainSetup()
 }
 
 void
-OutputWarehouse::addOutput(std::shared_ptr<Output> & output)
+OutputWarehouse::addOutput(std::shared_ptr<Output> const output)
 {
   _all_ptrs.push_back(output);
 

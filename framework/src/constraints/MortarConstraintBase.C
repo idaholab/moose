@@ -41,6 +41,24 @@ MortarConstraintBase::validParams()
                                       obj_params.get<bool>("ghost_higher_d_neighbors");
                                 });
 
+  // If the LM is ever a Lagrange variable, we will attempt to obtain its dof indices from the
+  // process that owns the node. However, in order for the dof indices to get set for the Lagrange
+  // variable, the process that owns the node needs to have local copies of any lower-d elements
+  // that have the connected node. Note that the geometric ghosting done here is different than that
+  // done by the AugmentSparsityOnInterface RM, even when ghost_point_neighbors is true. The latter
+  // ghosts equal-manifold lower-dimensional secondary element point neighbors and their interface
+  // couplings. This ghosts lower-dimensional point neighbors of higher-dimensional elements.
+  // Neither is guaranteed to be a superset of the other. For instance ghosting of lower-d point
+  // neighbors (AugmentSparsityOnInterface with ghost_point_neighbors = true) is only guaranteed to
+  // ghost those lower-d point neighbors on *processes that own lower-d elements*. And you may have
+  // a process that only owns higher-dimensionsional elements
+  //
+  // Note that in my experience it is only important for the higher-d lower-d point neighbors to be
+  // ghosted when forming sparsity patterns and so I'm putting this here instead of at the
+  // MortarConsumerInterface level
+  params.addRelationshipManager("GhostHigherDLowerDPointNeighbors",
+                                Moose::RelationshipManagerType::GEOMETRIC);
+
   params.addParam<VariableName>("secondary_variable", "Primal variable on secondary surface.");
   params.addParam<VariableName>(
       "primary_variable",

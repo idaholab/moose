@@ -52,13 +52,6 @@ public:
   }
 
   /**
-   * According to the base class docs, "We call mesh_reinit() whenever
-   * the relevant Mesh has changed, but before remote elements on a
-   * distributed mesh are deleted."
-   */
-  virtual void mesh_reinit() override;
-
-  /**
    * Update the cached _lower_to_upper map whenever our Mesh has been
    * redistributed.  We'll be lazy and just recalculate from scratch.
    */
@@ -124,8 +117,8 @@ protected:
   SubdomainID _secondary_subdomain_id = Moose::INVALID_BLOCK_ID;
 
   /// the mortar mesh generation object
-  const AutomaticMortarGeneration * _amg = nullptr;
+  AutomaticMortarGeneration * _amg = nullptr;
 
-  // null matrix for generating full variable coupling
+  /// null matrix for generating full variable coupling
   const CouplingMatrix * const _null_mat = nullptr;
 };

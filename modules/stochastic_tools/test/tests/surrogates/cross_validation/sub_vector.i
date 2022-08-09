@@ -1,9 +1,13 @@
+L = 1
+
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 100
-  xmax = 1
-  elem_type = EDGE3
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 1
+    nx = 100
+    xmax = ${L}
+    elem_type = EDGE3
+  []
 []
 
 [Variables]
@@ -14,7 +18,7 @@
 []
 
 [Kernels]
-  [diffusion]
+  [diff]
     type = MatDiffusion
     variable = T
     diffusivity = k
@@ -22,7 +26,7 @@
   [source]
     type = BodyForce
     variable = T
-    value = 1.0
+    value = 10000
   []
 []
 
@@ -45,18 +49,17 @@
 
 [Executioner]
   type = Steady
-  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Postprocessors]
-  [max]
-    type = NodalExtremeValue
+[VectorPostprocessors]
+  [T_vec]
+    type = LineValueSampler
     variable = T
-    value_type = max
+    start_point = '0 0 0'
+    end_point = '${L} 0 0'
+    num_points = 10
+    sort_by = x
   []
-[]
-
-[Outputs]
 []

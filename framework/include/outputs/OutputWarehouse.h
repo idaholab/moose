@@ -43,7 +43,7 @@ public:
    * It is the responsibility of the OutputWarehouse to delete the output objects
    * add using this method
    */
-  void addOutput(std::shared_ptr<Output> & output);
+  void addOutput(std::shared_ptr<Output> output);
 
   /**
    * Get a complete set of all output object names

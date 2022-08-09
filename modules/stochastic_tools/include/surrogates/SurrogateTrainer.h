@@ -148,19 +148,47 @@ protected:
   const std::vector<Real> & getSamplerData() const { return _row_data; };
 
   /*
+   * Get a reference to the predictor row data
+   */
+  const std::vector<Real> & getPredictorData() const { return _predictor_data; };
+
+  /*
    * Get current sample size (this is recalculated to reflect the number of skipped samples)
    */
   unsigned int getCurrentSampleSize() const { return _current_sample_size; };
 
+  /*
+   * Get current local sample size (recalculated to reflect number of skipped samples)
+   */
+  unsigned int getLocalSampleSize() const { return _local_sample_size; };
+
   // TRAINING_DATA_END
 
+  /*
+   * Evaluate CV error using _cv_surrogate and appropriate predictor row.
+   */
+  virtual std::vector<Real> evaluateModelError(const SurrogateModel & surr);
+
+  // TRAINING_DATA_MEMBERS
+  ///@{
   /// Sampler being used for training
   Sampler & _sampler;
-
   /// During training loop, this is the row index of the data
   dof_id_type _row;
   /// During training loop, this is the local row index of the data
   dof_id_type _local_row;
+  /// Response value
+  const Real * _rval;
+  /// Vector response value
+  const std::vector<Real> * _rvecval;
+  /// Predictor values from reporters
+  std::vector<const Real *> _pvals;
+  /// Columns from sampler for predictors
+  std::vector<unsigned int> _pcols;
+  /// Dimension of predictor data - either _sampler.getNumberOfCols() or _pvals.size() + _pcols.size().
+  unsigned int _n_dims;
+  ///@}
+  // TRAINING_DATA_MEMBERS_END
 
 private:
   /*
@@ -176,10 +204,18 @@ private:
   /*
    * Call if cross-validation is turned on.
    */
-  Real crossValidate();
+  std::vector<Real> crossValidate();
+
+  /*
+   * Update predictor row (uses both Sampler and Reporter values, according to _pvals and _pcols)
+   */
+  void updatePredictorRow();
 
   /// Sampler data for the current row
   std::vector<Real> _row_data;
+
+  /// Predictor data for current row - can be combination of Sampler and Reporter values.
+  std::vector<Real> _predictor_data;
 
   /// Whether or not we are skipping samples that have unconverged solutions
   const bool _skip_unconverged;
@@ -190,10 +226,13 @@ private:
   /// Number of samples used to train the model.
   unsigned int _current_sample_size;
 
+  /// Number of samples (locally) used to train the model.
+  unsigned int _local_sample_size;
+
   /// Vector of reporter names and their corresponding values (to be filled by getTrainingData)
   std::unordered_map<ReporterName, std::shared_ptr<TrainingDataBase>> _training_data;
 
-  /**
+  /*
    * Variables related to cross validation.
    */
   ///@{
@@ -213,8 +252,8 @@ private:
   const SurrogateModel * _cv_surrogate;
   /// Set to true if cross validation is being performed, controls behavior in execute().
   const bool _doing_cv;
-  /// Vector of RMSE scores from each CV trial - can be grabbed by VPP or Reporter.
-  std::vector<Real> & _cv_trial_scores;
+  /// RMSE scores from each CV trial - can be grabbed by VPP or Reporter.
+  std::vector<std::vector<Real>> & _cv_trial_scores;
   ///@}
 };
 
@@ -232,11 +271,6 @@ SurrogateTrainer::getTrainingData(const ReporterName & rname)
   }
   else
   {
-    if (_doing_cv && !(_training_data.empty() && std::is_same<T, Real>::value))
-      paramError("cv_type",
-                 "Cross validation currently only supports sampler data as predictors and a single "
-                 "value for response data, as such 'getTrainingData' should only be called once "
-                 "with Real type.");
     const std::vector<T> & rval = getReporterValueByName<std::vector<T>>(rname);
     _training_data[rname] = std::make_shared<TrainingData<T>>(rval);
     return std::dynamic_pointer_cast<TrainingData<T>>(_training_data[rname])->get();

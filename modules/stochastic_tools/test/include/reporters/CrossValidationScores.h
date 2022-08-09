@@ -21,7 +21,7 @@ public:
 
 protected:
   /// Storage for cross-validation scores
-  std::vector<std::vector<Real> *> _cv_scores;
+  std::vector<std::vector<std::vector<Real>> *> _cv_scores;
 
   /// Model to extract CV values from.
   std::vector<const SurrogateModel *> _models;

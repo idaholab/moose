@@ -44,6 +44,25 @@ SurrogateTrainer::validParams()
                         "True to skip samples where the multiapp did not converge, "
                         "'stochastic_reporter' is required to do this.");
 
+  // Common Training Data
+  MooseEnum data_type("real=0 vector_real=1", "real");
+  params.addRequiredParam<ReporterName>(
+      "response",
+      "Reporter value of response results, can be vpp with <vpp_name>/<vector_name> or sampler "
+      "column with 'sampler/col_<index>'.");
+  params.addParam<MooseEnum>("response_type", data_type, "Response data type.");
+  params.addParam<std::vector<ReporterName>>(
+      "predictors",
+      std::vector<ReporterName>(),
+      "Reporter values used as the independent random variables, If 'predictors' and "
+      "'predictor_cols' are both empty, all sampler columns are used.");
+  params.addParam<std::vector<unsigned int>>(
+      "predictor_cols",
+      std::vector<unsigned int>(),
+      "Sampler columns used as the independent random variables, If 'predictors' and "
+      "'predictor_cols' are both empty, all sampler columns are used.");
+  // End Common Training Data
+
   MooseEnum cv_type("none=0 k_fold=1", "none");
   params.addParam<MooseEnum>(
       "cv_type",
@@ -67,6 +86,10 @@ SurrogateTrainer::SurrogateTrainer(const InputParameters & parameters)
   : SurrogateTrainerBase(parameters),
     SurrogateModelInterface(this),
     _sampler(getSampler("sampler")),
+    _rval(nullptr),
+    _rvecval(nullptr),
+    _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
+    _pcols(getParam<std::vector<unsigned int>>("predictor_cols")),
     _row_data(_sampler.getNumberOfCols()),
     _skip_unconverged(getParam<bool>("skip_unconverged_samples")),
     _converged(nullptr),
@@ -75,7 +98,7 @@ SurrogateTrainer::SurrogateTrainer(const InputParameters & parameters)
     _cv_n_trials(getParam<unsigned int>("cv_n_trials")),
     _cv_seed(getParam<unsigned int>("cv_seed")),
     _doing_cv(_cv_type != "none"),
-    _cv_trial_scores(declareModelData<std::vector<Real>>("cv_scores"))
+    _cv_trial_scores(declareModelData<std::vector<std::vector<Real>>>("cv_scores"))
 {
   if (_skip_unconverged)
   {
@@ -101,13 +124,28 @@ SurrogateTrainer::SurrogateTrainer(const InputParameters & parameters)
                  getParam<SamplerName>("sampler"),
                  "'");
 
-    if (type() != "PolynomialRegressionTrainer")
-      paramWarning("cv_type",
-                   "Cross validation has only been verified for PolynomialRegressionTrainer");
-
-    _cv_trial_scores.resize(_cv_n_trials);
     _cv_generator.seed(0, _cv_seed);
   }
+
+  // Get TrainingData for responses and predictors
+  if (getParam<MooseEnum>("response_type") == 0)
+    _rval = &getTrainingData<Real>(getParam<ReporterName>("response"));
+  else if (getParam<MooseEnum>("response_type") == 1)
+    _rvecval = &getTrainingData<std::vector<Real>>(getParam<ReporterName>("response"));
+
+  const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
+  for (unsigned int i = 0; i < pnames.size(); ++i)
+    _pvals[i] = &getTrainingData<Real>(pnames[i]);
+
+  // If predictors and predictor_cols are empty, use all sampler columns
+  if (_pvals.empty() && _pcols.empty())
+  {
+    _pcols.resize(_sampler.getNumberOfCols());
+    std::iota(_pcols.begin(), _pcols.end(), 0);
+  }
+  _n_dims = (_pvals.size() + _pcols.size());
+
+  _predictor_data.resize(_n_dims);
 }
 
 void
@@ -138,9 +176,18 @@ SurrogateTrainer::execute()
 {
   if (_doing_cv)
     for (const auto & trial : make_range(_cv_n_trials))
-      _cv_trial_scores[trial] = crossValidate();
+    {
+      std::vector<Real> trial_score = crossValidate();
+
+      // Expand _cv_trial_scores with more columns if necessary, then insert values.
+      for (unsigned int r = _cv_trial_scores.size(); r < trial_score.size(); ++r)
+        _cv_trial_scores.push_back(std::vector<Real>(_cv_n_trials, 0.0));
+      for (auto r : make_range(trial_score.size()))
+        _cv_trial_scores[r][trial] = trial_score[r];
+    }
 
   _current_sample_size = _sampler.getNumberOfRows();
+  _local_sample_size = _sampler.getNumberOfLocalRows();
   executeTraining();
 }
 
@@ -188,6 +235,8 @@ SurrogateTrainer::executeTraining()
     for (auto & pair : _training_data)
       pair.second->setCurrentIndex((pair.second->isDistributed() ? _local_row : _row));
 
+    updatePredictorRow();
+
     if ((!_skip_unconverged || *_converged) &&
         std::find(_skip_indices.begin(), _skip_indices.end(), _row) == _skip_indices.end())
       train();
@@ -198,15 +247,10 @@ SurrogateTrainer::executeTraining()
   postTrain();
 }
 
-Real
+std::vector<Real>
 SurrogateTrainer::crossValidate()
 {
-  Real cv_score = 0;
-
-  // Get reference to response data
-  // FIXME: assuming response data is from a single value from training data
-  const auto & rval =
-      std::dynamic_pointer_cast<TrainingData<Real>>(_training_data.begin()->second)->get();
+  std::vector<Real> cv_score(1, 0.0);
 
   // Get skipped indices for each split
   dof_id_type n_rows = _sampler.getNumberOfRows();
@@ -244,11 +288,15 @@ SurrogateTrainer::crossValidate()
         split_ids_buffer.begin(), split_ids_buffer.end(), _sampler.getLocalRowEnd());
     _skip_indices.insert(_skip_indices.begin(), first, last);
 
+    _local_sample_size = _sampler.getNumberOfLocalRows() - _skip_indices.size();
+
     // Train the model
     executeTraining();
 
     // Evaluate the model
-    Real split_mse = 0;
+    std::vector<Real> split_mse(1, 0.0);
+    std::vector<Real> row_mse(1, 0.0);
+
     auto skipped_row = _skip_indices.begin();
 
     for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
@@ -256,20 +304,74 @@ SurrogateTrainer::crossValidate()
       const std::vector<Real> row = _sampler.getNextLocalRow();
       if (skipped_row != _skip_indices.end() && p == *skipped_row)
       {
+        for (unsigned int i = 0; i < _row_data.size(); ++i)
+          _row_data[i] = row[i];
+
         for (auto & pair : _training_data)
           pair.second->setCurrentIndex(
               (pair.second->isDistributed() ? p - _sampler.getLocalRowBegin() : p));
-        // FIXME: assuming the the only predictor data is from sampler rows
-        Real model_eval = _cv_surrogate->evaluate(row);
-        split_mse += MathUtils::pow(model_eval - rval, 2);
+
+        updatePredictorRow();
+
+        row_mse = evaluateModelError(*_cv_surrogate);
+
+        // Expand split_mse if needed.
+        split_mse.resize(row_mse.size(), 0.0);
+
+        // Increment errors
+        for (unsigned int r = 0; r < split_mse.size(); ++r)
+          split_mse[r] += row_mse[r];
+
         skipped_row++;
       }
     }
     gatherSum(split_mse);
-    cv_score += split_mse / n_rows;
+
+    // Expand cv_score if necessary.
+    cv_score.resize(split_mse.size(), 0.0);
+
+    for (auto r : make_range(split_mse.size()))
+      cv_score[r] += split_mse[r] / n_rows;
 
     _skip_indices.clear();
   }
 
-  return std::sqrt(cv_score);
+  for (auto r : make_range(cv_score.size()))
+    cv_score[r] = std::sqrt(cv_score[r]);
+
+  return cv_score;
+}
+
+std::vector<Real>
+SurrogateTrainer::evaluateModelError(const SurrogateModel & surr)
+{
+  std::vector<Real> error(1, 0.0);
+
+  if (_rval)
+  {
+    Real model_eval = surr.evaluate(_predictor_data);
+    error[0] = MathUtils::pow(model_eval - (*_rval), 2);
+  }
+  else if (_rvecval)
+  {
+    error.resize(_rvecval->size());
+
+    // Evaluate for vector response.
+    std::vector<Real> model_eval(error.size());
+    surr.evaluate(_predictor_data, model_eval);
+    for (auto r : make_range(_rvecval->size()))
+      error[r] = MathUtils::pow(model_eval[r] - (*_rvecval)[r], 2);
+  }
+
+  return error;
+}
+
+void
+SurrogateTrainer::updatePredictorRow()
+{
+  unsigned int d = 0;
+  for (const auto & val : _pvals)
+    _predictor_data[d++] = *val;
+  for (const auto & col : _pcols)
+    _predictor_data[d++] = _row_data[col];
 }
