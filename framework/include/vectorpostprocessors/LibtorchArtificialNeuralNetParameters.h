@@ -26,9 +26,9 @@ public:
 
   LibtorchArtificialNeuralNetParameters(const InputParameters & params);
 
-  virtual void initialize(){};
+  virtual void initialize() override {};
   virtual void execute() override;
-  virtual void finalize(){};
+  virtual void finalize() override {};
 
 protected:
 #ifdef LIBTORCH_ENABLED

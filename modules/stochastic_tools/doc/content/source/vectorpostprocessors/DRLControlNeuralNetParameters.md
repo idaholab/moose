@@ -1,6 +1,6 @@
 # DRLControlNeuralNetParameters
 
-Converts the parameters of a [LibtorchArtificialNeuralNetwork.md] within a [LibtorchDRLControlTrainer.md]
+Converts the parameters of a [LibtorchArtificialNeuralNet.md] within a [LibtorchDRLControlTrainer.md]
 into a vector which can be used for the visaluiation of the evolution of different parameters over the
 training process.
 

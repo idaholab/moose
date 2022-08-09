@@ -4,6 +4,7 @@ Parameter Studies, Statistics, and Sensitivity Analysis:
 - Example 2: [modules/stochastic_tools/examples/parameter_study.md]
 - Example 3: [modules/stochastic_tools/examples/nonlin_parameter_study.md]
 - Example 4: [modules/stochastic_tools/examples/sobol.md]
+- Example 5: [modules/stochastic_tools/examples/libtorch_drl_control.md]
 
 Surrogate Models:
 

@@ -13,17 +13,17 @@ Stochastic tools Module or read from a file in case it was trained previously in
 The following example show how to use a neural network, trained by an external application, for the control
 of a transient diffusion problem. The kernels describing the problem are defined below:
 
-!listing controls/libtorch_nn_control/read_torchscript_control.i block=Kernels
+!listing controls/libtorch_nn_control/read_control.i block=Kernels
 
 We would like to control the value of `anti_source` based on tha maximum temperature of the system using a neural network.
 For this we first define a `Postprocessor` which can determine the maximum temperature:
 
-!listing controls/libtorch_nn_control/read_torchscript_control.i block=Postprocessors
+!listing controls/libtorch_nn_control/read_control.i block=Postprocessors
 
 The `control_value` postprocessor is responsible for storing the value of the control signal for visualization purposes.
 As a next step, we create a `Control` object which reads a neural network from a torch-script file:
 
-!listing controls/libtorch_nn_control/read_torchscript_control.i block=Controls
+!listing controls/libtorch_nn_control/read_control.i block=Controls
 
 Note that there are two options to read a neural network. If the
 [!param](/Controls/LibtorchNeuralNetControl/torch_script_format) is set to `true`, the user
@@ -40,7 +40,7 @@ outputs of the neural net can be scaled too using [!param](/Controls/LibtorchNeu
 
 For the full input file, see:
 
-!listing controls/libtorch_nn_control/read_torchscript_control.i
+!listing controls/libtorch_nn_control/read_control.i
 
 !syntax parameters /Controls/LibtorchNeuralNetControl
 

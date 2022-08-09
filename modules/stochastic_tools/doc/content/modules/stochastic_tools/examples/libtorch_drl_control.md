@@ -2,12 +2,16 @@
 
 The following example showcases how to set up a Deep Reinforcement Learning (DRL)
 training sequence for the generation of neural-net-based controllers of simulations
-with MOOSE applications.
+with MOOSE applications. We employ a Proximal Policy Optimization (PPO) 
+(see [!cite](schulman2017proximal) for more information) to train our neural nets.
 
-# Problem Statement
+## Problem Statement
 
 In this example we would like to design a DRL-based controller for the air conditioning of a
 room. The room in this problem is a 2D box presented below:
+
+!media problem_statement.png style=display:block;margin-left:auto;margin-right:auto;width:40%; 
+       id=problem_setup caption=Problem setup for the DRL control example.
 
 The control problem can then be defined as follows: Try to ensure that the temperature at the
 sensor position is as close to $297~K$ as possible. For this, we are allowed to use
@@ -15,10 +19,10 @@ the current and past values of the temperature at the sensor together with the c
 of the environment temperature. Furthermore, we assume the following:
 
 - The density of the air is: $\rho = 1.184~\frac{kg}{m^3}$
-- The specific heat of the air is: $\c_p = 1000 \frac{J}{kg~K}$
+- The specific heat of the air is: $c_p = 1000 \frac{J}{kg~K}$
 - The effective thermal condictivity (increased to account for mixing effects) is: $k = 0.5 \frac{W}{m~K}$
 - The environment temperature is is handled as a Dirichlet boundary condition with a value of:
-  $T_\mathrm{end}(t)~[K]=273+15*\sin{\left(\frac{\pi t}{86400}\right)}$
+  $T_\mathrm{env}(t)~[K]=273+15*\sin{\left(\frac{\pi t}{86400}\right)}$
 - The airconditioniner is modeled as a Neumann boundary condition on the top with given heatflux
 
 ## Input Files
@@ -81,7 +85,7 @@ The input for the main application start with the definition of a `Sampler`. In 
 do not aim to train a controller which can adapt to random model parameters, so the we just
 define a dummy sampler which does not rely on random numbers.
 
-!listing examples/libtorch_drl_control/libtorch_drl_control_traoner.i block=Samplers
+!listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i block=Samplers
 
 In case we wpuld like to increase the
 flexibility of the learner, this sampler can be switched to something that can scan the
@@ -89,19 +93,51 @@ uncertain input parameter space.
 
 Following this, a `MultiApp` is created to run the subapplication many times for data generation:
 
-!listing examples/libtorch_drl_control/libtorch_drl_control_traoner.i block=MultiApps
+!listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i block=MultiApps
 
 We also require transfers between the application. We need the pull the data of the
 simulations from the `MultiApp` and we can use a [MultiAppReporterTransfer.md] to do it.
 
-!listing examples/libtorch_drl_control/libtorch_drl_control_traoner.i block=Transfers
+!listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i block=Transfers
 
 The neural network trained by [LibtorchDRLControlTrainer.md] needs to be transferred to the
 control object in the sub-application. We can do this using [LibtorchNeuralNetControlTransfer.md].
 
 Finally, we can set up our trainer object for the problem:
 
-!listing examples/libtorch_drl_control/libtorch_drl_control_traoner.i block=Trainers
+!listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i block=Trainers
 
+The trainer object will need the names of the reporters containing the responses (input of the neural net)
+of the system together with the control signals, control signal logarithmic probabilities and the rewards.
+When these are set, we can define the architecture of the critic and control neural nets 
+(see [!cite](schulman2017proximal) for more information on these) using 
+[!param](/Trainers/LibtorchDRLControlTrainer/num_critic_neurons_per_layer) and 
+[!param](/Trainers/LibtorchDRLControlTrainer/num_control_neurons_per_layer).
+For defining the corresponding learning rates, we use 
+[!param](/Trainers/LibtorchDRLControlTrainer/critic_learning_rate),
+[!param](/Trainers/LibtorchDRLControlTrainer/control_learning_rate).
+Then, we copy paste the input/output standardization options from the Control in the subapp.
+Additionally, we can select to standardize the advantage function which makes 
+convergence more robust in certain scenarios. 
 
+Lastly, we request 1000 epochs for training the neural networks in each iteration and 
+we collect data from 20 simulations on the subapps every timestep of the main app. 
+Then we can set the iteration number by setting the timesteps below:
 
+!listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i block=Executioner
+
+Which means that we run 400 problems altogether and update the neural network after 
+every 20 simulation.
+
+The entire trainer input file is presented below:
+
+!listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i
+
+## Results
+
+!plot scatter
+  id=reward caption=The evolution of the reward values over the iteration.
+  filename=examples/libtorch_drl_control/gold/reward.csv
+  data=[{'x':'time', 'y':'reward/average_reward'}]
+  layout={'xaxis':{'type':'linear', 'title':'Number of simulations'},
+          'yaxis':{'type':'linear','title':'Average Episodic Reward'}}
