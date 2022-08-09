@@ -57,7 +57,7 @@
    # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
    # petsc_options_value='1 true true false 1e-8 0.1'
    # petsc_options = '-tao_test_gradient_view'
-   # verbose = true
+   verbose = true
 []
 [AuxVariables]
   [temperature_forward]
@@ -135,5 +135,6 @@
 []
 
 [Outputs]
+  console=false
   csv=true
 []

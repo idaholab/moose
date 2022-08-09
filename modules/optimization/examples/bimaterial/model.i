@@ -117,14 +117,14 @@
     index = 0
     vectorpostprocessor = vector_pp
     vector_name = diffusivity_values
-    execute_on = 'initial linear'
+    execute_on = 'linear'
   []
   [d_top]
     type = VectorPostprocessorComponent
     index = 1
     vectorpostprocessor = vector_pp
     vector_name = diffusivity_values
-    execute_on = 'initial linear'
+    execute_on = 'linear'
   []
   [T_top]
     type = PointValue

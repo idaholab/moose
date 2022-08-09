@@ -202,14 +202,12 @@
     variable = gradient
     execute_on = 'final'
     block=bottom
-    outputs=grad_bottom
   []
   [grad_top] #compute the integral of the gradient variable on the bottom block (second parameter)
     type = ElementIntegralVariablePostprocessor
     variable = gradient
     execute_on = 'final'
     block=top
-    outputs=grad_top
   []
   ############
 []
@@ -232,7 +230,7 @@
   solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
-  nl_forced_iters = 1
+  nl_forced_its = 1
   line_search=none
   nl_abs_tol=1e-8
 []
