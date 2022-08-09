@@ -40,12 +40,13 @@
 /modules/electromagnetics @cticenhour
 /modules/external_petsc_solver @fdkong
 /modules/fluid_properties @joshuahansel
-/modules/fsi @fdkong
+/modules/fsi @lindsayad
 /modules/functional_expansion_tools @lindsayad
+/modules/heat_conduction @lindsayad
 /modules/navier_stokes @lindsayad @GiudGiud
 /modules/phase_field @dschwen
 /modules/ray_tracing @loganharbour
-/modules/rdg @joshuahansel
+/modules/rdg @joshuahansel @lindsayad
 /modules/stochastic_tools @zachmprince
 /modules/tensor_mechanics @bwspenc @dschwen @jiangwen84
 /modules/thermal_hydraulics @joshuahansel
