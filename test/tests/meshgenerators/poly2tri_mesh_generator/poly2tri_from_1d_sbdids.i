@@ -29,7 +29,7 @@
     boundary = 'both_bdy'
     input_subdomain_names = 1 # only the right half
     refine_boundary = true
-    desired_area = 0.1
+    desired_area = 0.2
   []
 []
 

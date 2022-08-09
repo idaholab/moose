@@ -33,7 +33,7 @@
     boundary = 'both_2d'
     input_boundary_names = 1 # only the right half
     refine_boundary = true
-    desired_area = 0.1
+    desired_area = 0.2
   []
 []
 
