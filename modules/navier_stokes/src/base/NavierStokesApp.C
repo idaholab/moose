@@ -89,6 +89,15 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerTask("add_navier_stokes_materials", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_materials", "add_material");
   addTaskDependency("add_master_action_material", "add_navier_stokes_materials");
+
+  // register tasks for copying variables
+  registerTask("navier_stokes_check_copy_nodal_vars", /*is_required=*/false);
+  addTaskDependency("navier_stokes_check_copy_nodal_vars", "check_copy_nodal_vars");
+  addTaskDependency("setup_mesh", "navier_stokes_check_copy_nodal_vars");
+
+  registerTask("navier_stokes_copy_nodal_vars", /*is_required=*/false);
+  addTaskDependency("navier_stokes_copy_nodal_vars", "copy_nodal_vars");
+  addTaskDependency("add_material", "navier_stokes_copy_nodal_vars");
 }
 
 void

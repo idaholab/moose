@@ -9,6 +9,10 @@ rho = 1.1
   []
 []
 
+[Debug]
+  show_actions = true
+[]
+
 [Modules]
   [NavierStokesFV]
     compressibility = 'incompressible'
@@ -17,9 +21,6 @@ rho = 1.1
 
     density = 'rho'
     dynamic_viscosity = 'mu'
-
-    initial_velocity = '1 1 0'
-    initial_pressure = 0.0
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'

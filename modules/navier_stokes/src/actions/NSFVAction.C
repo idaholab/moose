@@ -26,8 +26,8 @@ registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_bcs");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_material");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_pps");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_materials");
-registerMooseAction("NavierStokesApp", NSFVAction, "check_copy_nodal_vars");
-registerMooseAction("NavierStokesApp", NSFVAction, "copy_nodal_vars");
+registerMooseAction("NavierStokesApp", NSFVAction, "navier_stokes_check_copy_nodal_vars");
+registerMooseAction("NavierStokesApp", NSFVAction, "navier_stokes_copy_nodal_vars");
 
 InputParameters
 NSFVAction::validParams()
@@ -759,9 +759,9 @@ NSFVAction::act()
 
   if (getParam<bool>("initialize_variables_from_mesh_file"))
   {
-    if (_current_task == "check_copy_nodal_vars")
+    if (_current_task == "navier_stokes_check_copy_nodal_vars")
       _app.setExodusFileRestart(true);
-    else if (_current_task == "copy_nodal_vars")
+    else if (_current_task == "navier_stokes_copy_nodal_vars")
     {
       SystemBase & system = _problem->getNonlinearSystemBase();
 
