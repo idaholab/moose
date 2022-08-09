@@ -140,12 +140,6 @@ PatternedMeshGenerator::generate()
   if (_z_width == 0)
     _z_width = bbox.max()(2) - bbox.min()(2);
 
-  // Initialize all outer boundary locations
-  Real min_x = std::numeric_limits<Real>::max();
-  Real max_x = std::numeric_limits<Real>::lowest();
-  Real min_y = std::numeric_limits<Real>::max();
-  Real max_y = std::numeric_limits<Real>::lowest();
-
   // Build each row mesh
   for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
     for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
@@ -159,26 +153,7 @@ PatternedMeshGenerator::generate()
         _row_meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(clone);
 
         MeshTools::Modification::translate(*_row_meshes[i], deltax, -deltay, 0);
-        if (i == 0)
-        {
-          // Compute min x and max y outer boundary from top left tile
-          for (const auto & elem : _row_meshes[i]->active_element_ptr_range())
-          {
-            const Node * const * elem_nodes = elem->get_nodes();
-            unsigned int n_nodes = elem->n_nodes();
-            for (unsigned int n = 0; n < n_nodes; ++n)
-            {
-              Point p(*elem_nodes[n]);
-              if (p(0) < min_x)
-                min_x = p(0);
-              if (p(1) > max_y)
-                max_y = p(1);
-            }
-          }
-          // Set max x and min y outer boundary from pattern information
-          max_x = min_x + _pattern[i].size() * _x_width;
-          min_y = max_y - _pattern.size() * _y_width;
-        }
+
         continue;
       }
 
@@ -238,6 +213,14 @@ PatternedMeshGenerator::generate()
   // Remove existing outer boundary information
   for (unsigned int i = 0; i < ids.size(); i++)
     boundary_info.remove_id(ids[i]);
+
+  // Redefine bounding box for patterned mesh and generate outer boundary
+  // locations
+  bbox = MeshTools::create_bounding_box(*_row_meshes[0]);
+  Real min_x = bbox.min()(0);
+  Real max_x = bbox.max()(0);
+  Real min_y = bbox.min()(1);
+  Real max_y = bbox.max()(1);
 
   // Set outer boundary nodes and sides
   for (const auto & elem : _row_meshes[0]->active_element_ptr_range())
