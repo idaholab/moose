@@ -38,11 +38,6 @@ public:
    * Construct with a file name
    */
   GriddedData(std::string file_name);
-  GriddedData(const std::vector<Real> & x_axis,
-              const std::vector<Real> & y_axis,
-              const std::vector<Real> & z_axis,
-              const std::vector<Real> & t_axis,
-              const std::vector<Real> & fcn);
 
   virtual ~GriddedData() = default;
 
