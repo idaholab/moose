@@ -53,7 +53,7 @@ NSFVAction::validParams()
   params.addParam<bool>("initialize_variables_from_mesh_file",
                         false,
                         "Determines if the variables that are added by the action are initialized "
-                        "from the mesh file");
+                        "from the mesh file (only for Exodus format)");
   params.addParam<std::string>(
       "initial_from_file_timestep",
       "LATEST",
@@ -71,8 +71,7 @@ NSFVAction::validParams()
   params.addParam<bool>("add_scalar_equation", false, "True to add advected scalar(s) equation");
 
   params.addParamNamesToGroup("compressibility porous_medium_treatment turbulence_handling "
-                              "add_flow_equations add_energy_equation add_scalar_equation "
-                              "initialize_variables_from_mesh_file",
+                              "add_flow_equations add_energy_equation add_scalar_equation ",
                               "General control");
 
   params.addParam<std::vector<std::string>>(
@@ -493,7 +492,8 @@ NSFVAction::validParams()
       "Boundary condition");
 
   params.addParamNamesToGroup(
-      "initial_pressure initial_velocity initial_temperature initial_scalar_variables",
+      "initial_pressure initial_velocity initial_temperature initial_scalar_variables "
+      "initialize_variables_from_mesh_file initial_from_file_timestep",
       "Initial condition");
 
   return params;
@@ -759,9 +759,6 @@ NSFVAction::act()
 
   if (getParam<bool>("initialize_variables_from_mesh_file"))
   {
-    if (getParam<bool>("pin_pressure"))
-      mooseError("does it work to load scalar variable from exodus??");
-
     if (_current_task == "check_copy_nodal_vars")
       _app.setExodusFileRestart(true);
     else if (_current_task == "copy_nodal_vars")
@@ -777,6 +774,10 @@ NSFVAction::act()
           system.addVariableToCopy(_velocity_name[d],
                                    _velocity_name[d],
                                    getParam<std::string>("initial_from_file_timestep"));
+
+      if (getParam<bool>("pin_pressure"))
+        system.addVariableToCopy(
+            "lambda", "lambda", getParam<std::string>("initial_from_file_timestep"));
 
       if (_turbulence_handling == "mixing-length")
         _problem->getAuxiliarySystem().addVariableToCopy(
@@ -2454,6 +2455,13 @@ NSFVAction::checkICParameterErrors()
   if (parameters().isParamSetByUser("initial_temperature") && !_create_fluid_temperature)
     paramError("initial_temperature",
                "T_fluid is defined externally of NavierStokesFV, so should the inital condition");
+
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    checkDependentParameterError("initialize_variables_from_mesh_file",
+                                 {"initial_velocity",
+                                  "initial_pressure",
+                                  "initial_temperature",
+                                  "initial_scalar_variables"});
 }
 
 void
