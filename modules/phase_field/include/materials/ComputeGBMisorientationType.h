@@ -68,7 +68,7 @@ protected:
   const Real _angle_threshold;
 
   /// The parameters to calculate the misorientation
-  std::vector<Eigen::Quaternion<Real>> sym_quat;
+  std::vector<Eigen::Quaternion<Real>> _sym_quat;
   int _o_sym = 24;
   std::vector<EulerAngles> _euler_angle;
   std::vector<Eigen::Quaternion<Real>> _quat_angle;

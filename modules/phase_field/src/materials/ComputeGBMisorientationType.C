@@ -167,7 +167,7 @@ void
 ComputeGBMisorientationType::defineSymmetryOperator()
 {
   // grow by number of symmetric operators
-  sym_quat.resize(_o_sym);
+  _sym_quat.resize(_o_sym);
 
   // cubic symmetry
   double sym_rotation[24][3][3] = {
@@ -186,7 +186,7 @@ ComputeGBMisorientationType::defineSymmetryOperator()
 
   // initialize global operator
   for (int o = 0; o < _o_sym; o++)
-    rotationSymmetryToQuaternion(sym_rotation[o], sym_quat[o]);
+    rotationSymmetryToQuaternion(sym_rotation[o], _sym_quat[o]);
 }
 
 // Function to multiply quaternions and update
@@ -217,8 +217,8 @@ ComputeGBMisorientationType::getMisorientationFromQuaternion(const Eigen::Quater
   {
     for (int o2 = 0; o2 < _o_sym; o2++)
     {
-      getQuaternionProduct(sym_quat[o1], qi, qib);
-      getQuaternionProduct(sym_quat[o2], qj, qjb);
+      getQuaternionProduct(_sym_quat[o1], qi, qib);
+      getQuaternionProduct(_sym_quat[o2], qj, qjb);
 
       // j-grain conjugate quaternion
       qjb.x() = -qjb.x();
