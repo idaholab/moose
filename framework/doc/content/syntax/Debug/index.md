@@ -4,16 +4,85 @@
 
 The `[Debug]` input file block is designed to contain options to enable debugging tools for a
 simulation. For example, the input file snippet below demonstrates how to enable the material
-property debugging tool. A complete list of the available options is provided below.
+property debugging tool. This tool automatically outputs material properties as fields in the
+[outputs/Exodus.md] file.
+A complete list of the available options is provided in [#debug-params].
 
 !listing show_material_props_debug.i block=Debug
 
+## Residual outputs for debugging nonlinear convergence issues
+
+When solving multi-variable or multi-physics problems, it is often the case that the residual for a
+single variable is more problematic to converge than for the others. This may be because the underlying
+physics are tougher to solve, or because there are issues with the kernels for that variable!
+
+MOOSE provides two convenient debug boolean options to examine the convergence of nonlinear residuals:
+
+- [!param](/Debug/show_var_residual_norms) shows the residual norms for each nonlinear variable (more like equation actually). The equation with the highest residual is the least converged. This is the norm after scaling if
+equation scaling, automatic or not, is used.
+
+- [!param](/Debug/show_top_residuals) shows the residual norms only for the least converged equation/variable.
+
+
+Helpful information on debugging numerical convergence issues is provided in the [numerical troubleshooting page](failed_solves.md).
+
+## Execution ordering output
+
+### Ordering of the problem set-up
+
+MOOSE parses the input file and executes numerous [Actions](/syntax/Actions/index.md) which progressively
+load/build the mesh, create the variables, kernels, boundary conditions, output objects etc.
+The ordering of this process may be shown using the [!param](/Debug/show_actions) parameter.
+
+Most `Actions` are executed during initialization, but this option is also able to report on the execution of
+`Actions` during the solve.
+
+!alert note
+The dependencies of each `Action` should be declared in the source code of each `Action`. This enables MOOSE
+to perform automatic dependency resolution to correctly order them.
+
+!alert note
+For the automatic ordering of the mesh generators, please refer to the
+[mesh documentation page](syntax/Mesh/index.md).
+
+### Solve and execution ordering
+
+Nearly every solve in MOOSE consists in a succession of operations on every nodes, quadrature points,
+elements and elements' faces. These operations may be for example to compute the contribution of a
+kernel/boundary condition/others to the residual, Jacobian, etc.
+
+The MOOSE `Debug` system offers the [!param](/Debug/show_execution_order) parameter to output the
+order of execution of each of these objects in those loops. This order may depend on local block/boundary
+restrictions, local or global dependency resolutions.
+
+This parameter is most helpful to understand if `AuxKernels`, `UserObjects` and other systems which can
+interact in arbitrarily complex ways on a group of variables are indeed executed in the order desired
+by the modeler. If problematic, object execution may be reordered using various boolean parameters, `execute_on` flags and other manual dependency declarations.
+
+## Other useful outputs available in other systems
+
+The `[Debug]` system is not the only system that provides useful debugging information. We summarize
+these other helpful resources below:
+
+- to debug [MultiApps](/syntax/MultiApps/index.md) and [Transfers](/syntax/Transfers/index.md)-related
+issues, the `FEProblem` parameter [!param](/Problem/FEProblem/verbose_multiapps) shows a helpful summary of
+transfers executed and important metadata about each `Transfer`.
+
+- to debug linear system convergence issues, numerous parameters may be passed to PETSc to make it more verbose.
+They are summarized on this [page about debugging numerical issues](failed_solves.md) and in the [PETSc manual](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
+
+
+!alert note
+There are currently no convenient debugging options or tools for `MultiApps`-based fixed point iteration problems.
+Use the [!param](/Executioner/fixed_point_min_its), [!param](/Executioner/fixed_point_max_its) and
+[!param](/Executioner/accept_on_max_fixed_point_iteration) to output at the desired fixed point iteration.
+
+
+## Parameters list
+
 !syntax parameters /Debug id=debug-params
 
-
-!! Describe and include an example of how to use the Debug system.
-
-!! The following lines automatically list syntax associated with the system
+## Syntax list
 
 !syntax list /Debug objects=True actions=False subsystems=False
 
