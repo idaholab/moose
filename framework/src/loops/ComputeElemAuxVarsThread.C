@@ -181,8 +181,13 @@ ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation() const
   if (_fe_problem.shouldPrintExecution() && _aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
     auto console = _fe_problem.console();
+    const std::vector<std::shared_ptr<AuxKernelType>> & kernels =
+        _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
+    std::string aux_kernels_list = "";
+    for (const auto & kernel : kernels)
+      aux_kernels_list += kernel->name() + "";
     console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
-    // console << "[DBG] " << _aux_kernels.activeObjectsToString() << std::endl;
+    console << aux_kernels_list<< std::endl;
   }
 }
 

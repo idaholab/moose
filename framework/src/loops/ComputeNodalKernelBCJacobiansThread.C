@@ -152,7 +152,6 @@ ComputeNodalKernelBCJacobiansThread::printGeneralExecutionInformation() const
     console << "[DBG] Computing nodal kernel & boundary conditions contribution to the Jacobian on "
                "boundary nodes on "
             << execute_on << std::endl;
-    // TODO: Seems to be only nodal kernels?
     console << "[DBG] Ordering on boundaries they are defined on:" << std::endl;
     console << "[DBG] " << _nkernel_warehouse->activeObjectsToString() << std::endl;
   }

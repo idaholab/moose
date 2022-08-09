@@ -196,7 +196,7 @@ ComputeIndicatorThread::printGeneralExecutionInformation() const
   if (_fe_problem.shouldPrintExecution() && _indicator_whs.hasActiveObjects())
   {
     auto console = _fe_problem.console();
-    console << "[DBG] Executing indicators on elements " << std::endl;
+    console << "[DBG] Executing indicators on elements then on internal sides" << std::endl;
   }
 }
 
@@ -206,7 +206,32 @@ ComputeIndicatorThread::printBlockExecutionInformation() const
   if (_fe_problem.shouldPrintExecution() && _indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
   {
     auto console = _fe_problem.console();
-    console << "[DBG] Ordering on block " << _subdomain << std::endl;
-    // console << "[DBG] " << _indicator_whs.activeObjectsToString() << std::endl;
+    {
+      std::string active_indicators_string = "";
+      const std::vector<std::shared_ptr<Indicator>> & indicators =
+          _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
+      for (const auto & indicator : indicators)
+        if (indicator->isActive())
+        active_indicators_string += indicator->name() + " ";
+      if (!active_indicators_string.empty())
+      {
+        console << "[DBG] Ordering of element indicators on block " << _subdomain << std::endl;
+        console << active_indicators_string << std::endl;
+      }
+    }
+    {
+      std::string active_indicators_string = "";
+      const std::vector<std::shared_ptr<InternalSideIndicator>> & indicators =
+          _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
+      for (const auto & indicator : indicators)
+        if (indicator->isActive())
+        active_indicators_string += indicator->name() + " ";
+      if (!active_indicators_string.empty())
+      {
+        console << "[DBG] Ordering of element internal sides indicators on block " << _subdomain <<
+            std::endl;
+        console << active_indicators_string << std::endl;
+      }
+    }
   }
 }
