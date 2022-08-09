@@ -291,7 +291,7 @@ private:
 class AttribPreAux : public Attribute
 {
 public:
-  typedef unsigned int Key;
+  typedef int Key;
   void setFrom(Key k)
   {
     _vals.clear();
@@ -299,9 +299,8 @@ public:
   }
 
   AttribPreAux(TheWarehouse & w) : Attribute(w, "pre_aux") {}
-  AttribPreAux(TheWarehouse & w, unsigned int val) : Attribute(w, "pre_aux") { _vals.insert(val); }
-  AttribPreAux(TheWarehouse & w, const std::set<unsigned int> & vals)
-    : Attribute(w, "pre_aux"), _vals(vals)
+  AttribPreAux(TheWarehouse & w, Key val) : Attribute(w, "pre_aux") { _vals.insert(val); }
+  AttribPreAux(TheWarehouse & w, const std::set<Key> & vals) : Attribute(w, "pre_aux"), _vals(vals)
   {
   }
   virtual void initFrom(const MooseObject * obj) override;
@@ -311,7 +310,7 @@ public:
   clonefunc(AttribPreAux);
 
 private:
-  std::set<unsigned int> _vals;
+  std::set<Key> _vals;
 };
 
 /// TODO: delete this later - it is a temporary hack for dealing with inter-system dependencies
@@ -323,7 +322,7 @@ private:
 class AttribPostAux : public Attribute
 {
 public:
-  typedef unsigned int Key;
+  typedef int Key;
   void setFrom(Key k)
   {
     _vals.clear();
@@ -331,11 +330,8 @@ public:
   }
 
   AttribPostAux(TheWarehouse & w) : Attribute(w, "post_aux") {}
-  AttribPostAux(TheWarehouse & w, unsigned int val) : Attribute(w, "post_aux")
-  {
-    _vals.insert(val);
-  }
-  AttribPostAux(TheWarehouse & w, const std::set<unsigned int> & vals)
+  AttribPostAux(TheWarehouse & w, Key val) : Attribute(w, "post_aux") { _vals.insert(val); }
+  AttribPostAux(TheWarehouse & w, const std::set<Key> & vals)
     : Attribute(w, "post_aux"), _vals(vals)
   {
   }
@@ -346,7 +342,7 @@ public:
   clonefunc(AttribPostAux);
 
 private:
-  std::set<unsigned int> _vals;
+  std::set<Key> _vals;
 };
 
 class AttribName : public Attribute
