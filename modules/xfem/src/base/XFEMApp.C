@@ -88,7 +88,7 @@ XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 }
 
 void
-XFEMApp::registerExecFlags(Factory & factory)
+XFEMApp::registerExecFlags(Factory &)
 {
   mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }

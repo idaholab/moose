@@ -63,7 +63,7 @@ LevelSetApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory
   Registry::registerActionsTo(action_factory, {"LevelSetApp"});
 }
 void
-LevelSetApp::registerExecFlags(Factory & factory)
+LevelSetApp::registerExecFlags(Factory &)
 {
   mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
