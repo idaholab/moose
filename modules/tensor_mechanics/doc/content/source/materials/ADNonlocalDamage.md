@@ -1,4 +1,4 @@
-# AD Nonlocal Damage
+# ADNonlocal Damage
 
 !syntax description /Materials/ADNonlocalDamage
 

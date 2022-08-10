@@ -1,4 +1,4 @@
-# Nonlocal Damage
+# NonlocalDamage
 
 !syntax description /Materials/NonlocalDamage
 

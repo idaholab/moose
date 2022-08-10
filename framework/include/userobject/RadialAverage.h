@@ -77,7 +77,7 @@ protected:
 
   /// material name to get averaged
   std::string _averaged_material_name;
-  /// material to be gathered
+  /// material to be averaged
   const MaterialProperty<Real> & _averaged_material;
 
   /// cut-off radius
@@ -98,28 +98,17 @@ protected:
   /// spatial index (nanoflann guarantees this to be threadsafe under read-only operations)
   std::unique_ptr<KDTreeType> _kd_tree;
 
-  Real _zero_dh;
-
   /// DOF map
   const DofMap & _dof_map;
 
   /// PointLocator for finding topological neighbors
   std::unique_ptr<PointLocatorBase> _point_locator;
 
-  /**
-   * The data structure which is a list of nodes that are constrained to other nodes
-   * based on the imposed periodic boundary conditions.
-   */
-  std::multimap<dof_id_type, dof_id_type> _periodic_node_map;
-
   /// The data structure used to find neighboring elements give a node ID
   std::vector<std::vector<const Elem *>> _nodes_to_elem_map;
 
   // list of direct point neighbor elements of the current processor domain
   std::set<const Elem *> _point_neighbors;
-
-  // list of periodic point neighbor elements of the current processor domain
-  std::set<std::tuple<const Elem *, const Node *, const Node *>> _periodic_point_neighbors;
 
   /// QPData indices to send to the various processors
   std::vector<std::set<std::size_t>> _communication_lists;

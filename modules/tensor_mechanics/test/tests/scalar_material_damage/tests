@@ -145,6 +145,7 @@
     input = 'nonlocal_scalar_damage.i'
     csvdiff = 'nonlocal_scalar_damage_out.csv'
     abs_zero = 1.e-6
+    recover = false
     requirement = "The system shall calculate the effect of damage on the stress of a nonlocal damage model."
     issues = '#21786'
   []
@@ -153,6 +154,7 @@
     input = 'ad_nonlocal_scalar_damage.i'
     csvdiff = 'ad_nonlocal_scalar_damage_out.csv'
     abs_zero = 1.e-6
+    recover = false
     requirement = "The system shall calculate the effect of damage on the stress of a nonlocal damage model. "
     "When using automatic differentiation."
     issues = '#21786'
