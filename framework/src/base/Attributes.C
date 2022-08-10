@@ -32,7 +32,7 @@
 
 #include <algorithm>
 
-const ExecFlagType AttribExecOns::EXEC_ALL = defineExecFlag("ALL");
+const ExecFlagType AttribExecOns::EXEC_ALL = registerExecFlag("ALL");
 
 std::ostream &
 operator<<(std::ostream & os, Interfaces & iface)

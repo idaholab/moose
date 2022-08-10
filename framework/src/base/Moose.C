@@ -24,23 +24,23 @@
 
 #include <unistd.h>
 
-const ExecFlagType EXEC_NONE = defineExecFlag("NONE");
-const ExecFlagType EXEC_INITIAL = defineExecFlag("INITIAL");
-const ExecFlagType EXEC_LINEAR = defineExecFlag("LINEAR");
-const ExecFlagType EXEC_NONLINEAR = defineExecFlag("NONLINEAR");
-const ExecFlagType EXEC_TIMESTEP_END = defineExecFlag("TIMESTEP_END");
-const ExecFlagType EXEC_TIMESTEP_BEGIN = defineExecFlag("TIMESTEP_BEGIN");
-const ExecFlagType EXEC_FINAL = defineExecFlag("FINAL");
-const ExecFlagType EXEC_FORCED = defineExecFlag("FORCED");
-const ExecFlagType EXEC_FAILED = defineExecFlag("FAILED");
-const ExecFlagType EXEC_CUSTOM = defineExecFlag("CUSTOM");
-const ExecFlagType EXEC_SUBDOMAIN = defineExecFlag("SUBDOMAIN");
-const ExecFlagType EXEC_ALWAYS = defineExecFlag("ALWAYS");
-const ExecFlagType EXEC_PRE_DISPLACE = defineExecFlag("PRE_DISPLACE");
-const ExecFlagType EXEC_SAME_AS_MULTIAPP = defineExecFlag("SAME_AS_MULTIAPP");
-const ExecFlagType EXEC_PRE_MULTIAPP_SETUP = defineExecFlag("PRE_MULTIAPP_SETUP");
-const ExecFlagType EXEC_TRANSFER = defineExecFlag("TRANSFER");
-const ExecFlagType EXEC_PRE_KERNELS = defineExecFlag("PRE_KERNELS");
+const ExecFlagType EXEC_NONE = registerExecFlag("NONE");
+const ExecFlagType EXEC_INITIAL = registerExecFlag("INITIAL");
+const ExecFlagType EXEC_LINEAR = registerExecFlag("LINEAR");
+const ExecFlagType EXEC_NONLINEAR = registerExecFlag("NONLINEAR");
+const ExecFlagType EXEC_TIMESTEP_END = registerExecFlag("TIMESTEP_END");
+const ExecFlagType EXEC_TIMESTEP_BEGIN = registerExecFlag("TIMESTEP_BEGIN");
+const ExecFlagType EXEC_FINAL = registerExecFlag("FINAL");
+const ExecFlagType EXEC_FORCED = registerExecFlag("FORCED");
+const ExecFlagType EXEC_FAILED = registerExecFlag("FAILED");
+const ExecFlagType EXEC_CUSTOM = registerExecFlag("CUSTOM");
+const ExecFlagType EXEC_SUBDOMAIN = registerExecFlag("SUBDOMAIN");
+const ExecFlagType EXEC_ALWAYS = registerExecFlag("ALWAYS");
+const ExecFlagType EXEC_PRE_DISPLACE = registerExecFlag("PRE_DISPLACE");
+const ExecFlagType EXEC_SAME_AS_MULTIAPP = registerExecFlag("SAME_AS_MULTIAPP");
+const ExecFlagType EXEC_PRE_MULTIAPP_SETUP = registerExecFlag("PRE_MULTIAPP_SETUP");
+const ExecFlagType EXEC_TRANSFER = registerExecFlag("TRANSFER");
+const ExecFlagType EXEC_PRE_KERNELS = registerExecFlag("PRE_KERNELS");
 
 namespace Moose
 {

@@ -10,4 +10,4 @@
 #include "MooseTestAppTypes.h"
 #include "ExecFlagRegistry.h"
 
-const ExecFlagType EXEC_JUST_GO = defineExecFlag("JUST_GO");
+const ExecFlagType EXEC_JUST_GO = registerExecFlag("JUST_GO");

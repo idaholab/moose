@@ -57,4 +57,4 @@ private:
 }
 }
 
-#define defineExecFlag(flag) moose::internal::getExecFlagRegistry().registerFlag(flag)
+#define registerExecFlag(flag) moose::internal::getExecFlagRegistry().registerFlag(flag)
