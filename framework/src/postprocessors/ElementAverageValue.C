@@ -44,7 +44,6 @@ ElementAverageValue::getValue()
 {
   Real integral = ElementIntegralVariablePostprocessor::getValue();
 
-
   return integral / _volume;
 }
 
