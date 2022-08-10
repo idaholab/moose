@@ -68,7 +68,8 @@ PolycrystalUserObjectBase::PolycrystalUserObjectBase(const InputParameters & par
     _op_num(_vars.size()),
     _coloring_algorithm(getParam<MooseEnum>("coloring_algorithm")),
     _colors_assigned(false),
-    _output_adjacency_matrix(getParam<bool>("output_adjacency_matrix"))
+    _output_adjacency_matrix(getParam<bool>("output_adjacency_matrix")),
+    _num_chunks(FeatureFloodCount::invalid_proc_id)
 {
   mooseAssert(_single_map_mode, "Do not turn off single_map_mode with this class");
 }
@@ -155,6 +156,92 @@ PolycrystalUserObjectBase::execute()
   }
 }
 
+processor_id_type
+PolycrystalUserObjectBase::numberOfDistributedMergeHelpers() const
+{
+  mooseAssert(_num_chunks != FeatureFloodCount::invalid_proc_id,
+              "prepareDataForTransfer() hasn't been called yet");
+
+  return _num_chunks;
+}
+
+void
+PolycrystalUserObjectBase::prepareDataForTransfer()
+{
+  FeatureFloodCount::prepareDataForTransfer();
+
+  /**
+   * With this class, all of the partial features are crammed into a single "outer" entry in our
+   * data structure because we don't know the variable assignments during the initial condition
+   * (that is the whole point of this class!). However, what we do know is _the_ feature number
+   * that each piece belongs to, which is even more useful for merging. However, with extensive
+   * testing on larger problems, even ordering optimally ordering these pieces is far too much
+   * work for a single core to process. In order create a scalable algorithm, we'll first order
+   * our data, then break it into complete chunks for several processors to work on concurrently.
+   *
+   * After sorting the data structure, it'll look something like this on some rank:
+   * _partial_feature_sets (showing the unique_id and fake variable number):
+   * 0     0 0 0 1 1 1 3 4 4 4 4 4 6 6 ...
+   *
+   * We may very well have gaps in our numbering. This is a local view on one rank.
+   * We'd like to transform the data into something like the following
+   * 0     0 0 0 1 1 1         <- First 3 items here (even when we don't have all features)
+   * 1     3 4 4 4 4 4         <- Next 3 items here
+   * 2     6 6 ...             <- Next 3 or remainder (linear partitioning)
+   *
+   * The way to break up this work is to simply break it into min(n_features, n_procs) chunks.
+   * e.g. If we have 70 features and 8 cores, we'll partition the work into 8 chunks. In the
+   * odd case where we have more processors than features (e.g. 100 processors merging 10 features),
+   * we'll use end up using a subset of the available cores.
+   *
+   * To get all this started we just need the number of features, but we don't normally know
+   * that until we've merged everything together... sigh... Wait! We can fall back on our
+   * sorted data structure though and figure out before we sort and merge. We'll need
+   * one more parallel communication, that won't hurt anything, right?!
+   */
+  _partial_feature_sets[0].sort();
+
+  // Get the largest ID seen on any rank
+  auto largest_id = _partial_feature_sets[0].back()._id;
+  _communicator.max(largest_id);
+  mooseAssert(largest_id != invalid_size_t, "Largest ID should not be invalid");
+
+  /**
+   * With this class there are no guarentees that our IDs have a contiguous zero-based numbering.
+   * However, for many of the common derived classes they do (generated grain structures).
+   * If we have holes in our numbering, we might not get an even partition, but it shouldn't break.
+   * We just need the best guess at a total number (before we can actually count) which should
+   * be bounded by the largest_id + 1.
+   */
+  auto total_items = largest_id + 1;
+
+  _num_chunks = std::min(_app.n_processors(), total_items);
+
+  /**
+   * Here we are resizing our data structures that we normally size upon construction. This is to
+   * support the parallel merge capability that's in the FeatureFloodCount class. We'll need to undo
+   * this later, there are a few assumptions built on the sizes of these data structures.
+   *
+   * See FeatureFloodCount::consolidateMergedFeatures for the "un-sizing" of these structures.
+   */
+  _partial_feature_sets.resize(_num_chunks);
+  _feature_counts_per_map.resize(_num_chunks);
+
+  for (auto it = _partial_feature_sets[0].begin(); it != _partial_feature_sets[0].end();
+       /* No increment on it*/)
+  {
+    auto chunk = MooseUtils::linearPartitionChunk(total_items, _num_chunks, it->_id);
+
+    if (chunk)
+    {
+      _partial_feature_sets[chunk].emplace_back(std::move(*it));
+      it = _partial_feature_sets[0].erase(it); // it is incremented here!
+    }
+    else
+      ++it;
+  }
+}
+
 void
 PolycrystalUserObjectBase::finalize()
 {
@@ -200,29 +287,47 @@ PolycrystalUserObjectBase::finalize()
 void
 PolycrystalUserObjectBase::mergeSets()
 {
-  /**
-   * With initial conditions we know the grain IDs of every grain (even partial grains). We can use
-   * this information to put all mergeable features adjacent to one and other in the list so that
-   * merging is simply O(n).
-   */
-  _partial_feature_sets[0].sort();
-
-  auto it1 = _partial_feature_sets[0].begin();
-  auto it_end = _partial_feature_sets[0].end();
-  while (it1 != it_end)
+  // When working with _distribute_merge_work all of the maps will be empty except for one
+  for (const auto map_num : index_range(_partial_feature_sets))
   {
-    auto it2 = it1;
-    if (++it2 == it_end)
-      break;
+    /**
+     * With initial conditions we know the grain IDs of every grain (even partial grains). We can
+     * use this information to put all mergeable features adjacent to one and other in the list so
+     * that merging is simply O(n).
+     */
+    _partial_feature_sets[map_num].sort();
 
-    if (areFeaturesMergeable(*it1, *it2))
+    auto it1 = _partial_feature_sets[map_num].begin();
+    auto it_end = _partial_feature_sets[map_num].end();
+    while (it1 != it_end)
     {
-      it1->merge(std::move(*it2));
-      _partial_feature_sets[0].erase(it2);
+      auto it2 = it1;
+      if (++it2 == it_end)
+        break;
+
+      if (areFeaturesMergeable(*it1, *it2))
+      {
+        it1->merge(std::move(*it2));
+        _partial_feature_sets[map_num].erase(it2);
+      }
+      else
+        ++it1; // Only increment if we have a mismatch
     }
-    else
-      ++it1; // Only increment if we have a mismatch
   }
+}
+
+void
+PolycrystalUserObjectBase::restoreOriginalDataStructures(std::vector<std::list<FeatureData>> & orig)
+{
+  // Move all the data back into the first list
+  auto & master_list = orig[0];
+  for (MooseIndex(_maps_size) map_num = 1; map_num < orig.size(); ++map_num)
+  {
+    master_list.splice(master_list.end(), orig[map_num]);
+    orig[map_num].clear();
+  }
+
+  orig.resize(1);
 }
 
 bool
