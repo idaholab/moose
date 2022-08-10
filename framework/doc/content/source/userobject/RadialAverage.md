@@ -10,8 +10,8 @@ This can be used for nonlocal damage models in the `TensorMechanics` module
 where the damage_index that is used for computing the damage stress is average
 over a certain radius. This can help alleviate mesh sensitivity in certain
 cases. This can be accomplished by running the RadialAverage object on a local
-damage material property. Then using the [NonlocalDamage] model in conjunction
-with the [ComputeDamageStress] the damage index used for updating the stress is
+damage material property. Then using the `NonlocalDamage` model in conjunction
+with the `ComputeDamageStress` the damage index used for updating the stress is
 averaged over a certain radius.
 
 ## Design
