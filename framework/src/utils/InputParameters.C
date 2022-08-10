@@ -16,6 +16,8 @@
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
 
+#include "libmesh/utility.h"
+
 #include "pcrecpp.h"
 
 #include <cmath>
@@ -842,6 +844,8 @@ InputParameters::applyParameter(const InputParameters & common,
     remove(common_name);
     _values[common_name] = common._values.find(common_name)->second->clone();
     set_attributes(common_name, false);
+    _params[common_name]._set_by_add_param =
+        libmesh_map_find(common._params, common_name)._set_by_add_param;
   }
 
   // Enable deprecated message printing
