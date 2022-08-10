@@ -1090,12 +1090,6 @@ MultiApp::preRunInputFile()
 {
 }
 
-Point
-MultiApp::transformedPosition(const unsigned int app)
-{
-  return appProblemBase(app).coordTransform()(Point(0));
-}
-
 void
 MultiApp::addAssociatedTransfer(MultiAppTransfer & transfer)
 {

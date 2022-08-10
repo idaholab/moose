@@ -296,14 +296,6 @@ public:
   const Point & position(unsigned int app) { return _positions[app]; }
 
   /**
-   * The transformed physical position of a global App number, e.g. the result of passing the origin
-   * in the application mesh domain to the application's coordinate transformation object
-   * @param app The global app number you want the transformed position for.
-   * @return the transformed position
-   */
-  Point transformedPosition(unsigned int app);
-
-  /**
    * "Reset" the App corresponding to the global App number
    * passed in.  "Reset" means that the App will be deleted
    * and recreated.  The time for the new App will be set

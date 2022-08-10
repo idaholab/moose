@@ -112,13 +112,15 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       idi->set_field_variables(field_vars);
 
       {
-        const auto & to_coord_transform = getFromMultiApp()->problemBase().coordTransform();
+        mooseAssert(_to_transforms.size() == 1, "There should only be one transform here");
+        const auto & to_coord_transform = *_to_transforms[0];
         for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
         {
           if (getFromMultiApp()->hasLocalApp(i) && getFromMultiApp()->isRootProcessor())
           {
-            src_pts.push_back(
-                to_coord_transform.mapBack(getFromMultiApp()->transformedPosition(i)));
+            // Evaluation of the _from_transform at the origin yields the transformed position of
+            // the from multi-app
+            src_pts.push_back(to_coord_transform.mapBack((*_from_transforms[i])(Point(0))));
             src_vals.push_back(getFromMultiApp()->appPostprocessorValue(i, _postprocessor));
           }
         }

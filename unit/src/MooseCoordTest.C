@@ -34,6 +34,7 @@ TEST(MooseCoordTest, testRotations)
   const Point minus_xpt(-1, 0, 0);
   const Point minus_ypt(0, -1, 0);
   const Point minus_zpt(0, 0, -1);
+  MultiCoordTransform multi_transform(transform);
 
   auto error_checking = [&transform](const auto up_direction, const auto & error_string)
   {
@@ -57,28 +58,28 @@ TEST(MooseCoordTest, testRotations)
 
   transform.setCoordinateSystem(Moose::COORD_RZ, y);
   transform.setUpDirection(x);
-  compare_points(transform(xpt), ypt);
+  compare_points(multi_transform(xpt), ypt);
 
   transform.setCoordinateSystem(Moose::COORD_RZ, y);
   transform.setUpDirection(y);
-  compare_points(transform(xpt), xpt);
+  compare_points(multi_transform(xpt), xpt);
 
   transform.setCoordinateSystem(Moose::COORD_RZ, y);
   transform.setUpDirection(z);
-  compare_points(transform(xpt), xpt);
-  compare_points(transform(ypt), minus_zpt);
+  compare_points(multi_transform(xpt), xpt);
+  compare_points(multi_transform(ypt), minus_zpt);
 
   transform.setCoordinateSystem(Moose::COORD_RZ, x);
   error_checking(x, "Rotation yields negative radial values");
-  compare_points(transform(ypt), minus_xpt);
+  compare_points(multi_transform(ypt), minus_xpt);
 
   transform.setCoordinateSystem(Moose::COORD_RZ, x);
   transform.setUpDirection(y);
-  compare_points(transform(xpt), xpt);
+  compare_points(multi_transform(xpt), xpt);
 
   transform.setCoordinateSystem(Moose::COORD_RZ, x);
   error_checking(z, "Rotation yields negative radial values");
-  compare_points(transform(ypt), minus_zpt);
+  compare_points(multi_transform(ypt), minus_zpt);
 
   auto error_angles_checking =
       [&transform](const auto alpha, const auto beta, const auto gamma, const auto & error_string)
@@ -105,18 +106,22 @@ TEST(MooseCoordTest, testRotations)
     auto dup = transform;
     transform = dup;
   }
-  compare_points(transform(ypt), zpt);
-  compare_points(transform(xpt), xpt);
+  compare_points(multi_transform(ypt), zpt);
+  compare_points(multi_transform(xpt), xpt);
 }
 
 TEST(MooseCoordTest, testCoordCollapse)
 {
-  MooseCoordTransform xyz{};
-  xyz.setCoordinateSystem(Moose::COORD_XYZ);
-  MooseCoordTransform rz{};
-  rz.setCoordinateSystem(Moose::COORD_RZ, MooseCoordTransform::Y);
-  MooseCoordTransform rsph{};
-  rsph.setCoordinateSystem(Moose::COORD_RSPHERICAL);
+  MooseCoordTransform single_app_xyz{};
+  single_app_xyz.setCoordinateSystem(Moose::COORD_XYZ);
+  MooseCoordTransform single_app_rz{};
+  single_app_rz.setCoordinateSystem(Moose::COORD_RZ, MooseCoordTransform::Y);
+  MooseCoordTransform single_app_rsph{};
+  single_app_rsph.setCoordinateSystem(Moose::COORD_RSPHERICAL);
+  MultiCoordTransform xyz(single_app_xyz);
+  MultiCoordTransform rz(single_app_rz);
+  MultiCoordTransform rsph(single_app_rsph);
+
   const Real sqrt2 = std::sqrt(2.);
   const Real sqrt3 = std::sqrt(3.);
   const Point xyz_pt(1, 1, 1);

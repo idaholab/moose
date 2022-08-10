@@ -15,7 +15,7 @@
 
 #include "libmesh/mesh_base.h"
 
-class MooseCoordTransform;
+class MultiCoordTransform;
 namespace libMesh
 {
 template <unsigned int>
@@ -38,14 +38,14 @@ protected:
   void
   fillSourceInterpolationPoints(FEProblemBase & from_problem,
                                 const MooseVariableFieldBase & from_var,
-                                const MooseCoordTransform & from_app_transform,
+                                const MultiCoordTransform & from_app_transform,
                                 std::unique_ptr<InverseDistanceInterpolation<Moose::dim>> & idi);
 
   void
   interpolateTargetPoints(FEProblemBase & to_problem,
                           MooseVariableFieldBase & to_var,
                           NumericVector<Real> & to_solution,
-                          const MooseCoordTransform & to_app_transform,
+                          const MultiCoordTransform & to_app_transform,
                           const std::unique_ptr<InverseDistanceInterpolation<Moose::dim>> & idi);
 
   void

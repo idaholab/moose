@@ -113,7 +113,7 @@ void
 MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
     FEProblemBase & from_problem,
     const MooseVariableFieldBase & from_var,
-    const MooseCoordTransform & from_app_transform,
+    const MultiCoordTransform & from_app_transform,
     std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi)
 {
   MeshBase * from_mesh = NULL;
@@ -265,7 +265,7 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
     FEProblemBase & to_problem,
     MooseVariableFieldBase & to_var,
     NumericVector<Real> & to_solution,
-    const MooseCoordTransform & to_app_transform,
+    const MultiCoordTransform & to_app_transform,
     const std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi)
 {
   // Moose system
@@ -439,7 +439,8 @@ MultiAppInterpolationTransfer::execute()
       const auto & from_var = from_problem.getVariable(
           0, _from_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
 
-      fillSourceInterpolationPoints(from_problem, from_var, from_problem.coordTransform(), idi);
+      mooseAssert(_from_transforms.size() == 1, "This should be size 1");
+      fillSourceInterpolationPoints(from_problem, from_var, *_from_transforms[0], idi);
 
       // We have only set local values - prepare for use by gathering remote gata
       idi->prepare_for_use();
@@ -457,8 +458,7 @@ MultiAppInterpolationTransfer::execute()
 
           auto & to_solution = getToMultiApp()->appTransferVector(i, _to_var_name);
 
-          interpolateTargetPoints(
-              to_problem, to_var, to_solution, to_problem.coordTransform(), idi);
+          interpolateTargetPoints(to_problem, to_var, to_solution, *_to_transforms[i], idi);
         }
       }
 
@@ -478,7 +478,7 @@ MultiAppInterpolationTransfer::execute()
                                                            Moose::VarKindType::VAR_ANY,
                                                            Moose::VarFieldType::VAR_FIELD_STANDARD);
 
-          fillSourceInterpolationPoints(from_problem, from_var, from_problem.coordTransform(), idi);
+          fillSourceInterpolationPoints(from_problem, from_var, *_from_transforms[i], idi);
         }
       }
 
@@ -490,7 +490,8 @@ MultiAppInterpolationTransfer::execute()
 
       auto & to_solution = *to_var.sys().system().solution;
 
-      interpolateTargetPoints(to_problem, to_var, to_solution, to_problem.coordTransform(), idi);
+      mooseAssert(_to_transforms.size() == 1, "This should be size 1");
+      interpolateTargetPoints(to_problem, to_var, to_solution, *_to_transforms[0], idi);
 
       break;
     }

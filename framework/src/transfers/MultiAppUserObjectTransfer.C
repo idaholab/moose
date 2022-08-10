@@ -166,7 +166,9 @@ MultiAppUserObjectTransfer::execute()
 
           const UserObject & user_object =
               getToMultiApp()->problemBase().getUserObjectBase(_user_object_name);
-          const auto & from_transform = getToMultiApp()->problemBase().coordTransform();
+          mooseAssert(_from_transforms.size() == 1, "This should have size 1");
+          const auto & from_transform = *_from_transforms[0];
+          const auto & to_transform = *_to_transforms[i];
 
           if (is_nodal)
           {
@@ -184,8 +186,8 @@ MultiAppUserObjectTransfer::execute()
                 dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
                 swapper.forceSwap();
-                Real from_value = user_object.spatialValue(from_transform.mapBack(
-                    getToMultiApp()->appProblemBase(i).coordTransform()(*node)));
+                Real from_value =
+                    user_object.spatialValue(from_transform.mapBack(to_transform(*node)));
                 swapper.forceSwap();
 
                 solution.set(dof, from_value);
@@ -234,8 +236,8 @@ MultiAppUserObjectTransfer::execute()
                 dof_id_type dof = elem->dof_number(sys_num, var_num, offset++);
 
                 swapper.forceSwap();
-                Real from_value = user_object.spatialValue(from_transform.mapBack(
-                    getToMultiApp()->appProblemBase(i).coordTransform()(point)));
+                Real from_value =
+                    user_object.spatialValue(from_transform.mapBack(to_transform(point)));
                 swapper.forceSwap();
 
                 solution.set(dof, from_value);
@@ -253,7 +255,8 @@ MultiAppUserObjectTransfer::execute()
     case FROM_MULTIAPP:
     {
       FEProblemBase & to_problem = getFromMultiApp()->problemBase();
-      const auto & to_transform = to_problem.coordTransform();
+      mooseAssert(_to_transforms.size() == 1, "This should only be size one");
+      const auto & to_transform = *_to_transforms[0];
       MooseVariableFEBase & to_var = to_problem.getVariable(
           0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
       SystemBase & to_system_base = to_var.sys();
@@ -435,7 +438,7 @@ MultiAppUserObjectTransfer::execute()
             if (sub_app == static_cast<unsigned int>(-1))
               continue;
 
-            const auto & from_transform = _multi_app->appProblemBase(sub_app).coordTransform();
+            const auto & from_transform = *_from_transforms[sub_app];
             const auto & user_object = _multi_app->appUserObjectBase(sub_app, _user_object_name);
 
             dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
@@ -502,8 +505,7 @@ MultiAppUserObjectTransfer::execute()
             if (sub_app == static_cast<unsigned int>(-1))
               continue;
 
-            const auto & from_transform =
-                getFromMultiApp()->appProblemBase(sub_app).coordTransform();
+            const auto & from_transform = *_from_transforms[sub_app];
             const auto & user_object =
                 getFromMultiApp()->appUserObjectBase(sub_app, _user_object_name);
 

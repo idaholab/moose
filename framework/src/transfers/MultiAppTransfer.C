@@ -15,7 +15,6 @@
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
-#include "MooseCoordTransform.h"
 
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/mesh_tools.h"
@@ -230,7 +229,8 @@ MultiAppTransfer::getAppInfo()
   {
     _to_problems.push_back(&_from_multi_app->problemBase());
     _to_positions.push_back(Point(0., 0., 0.));
-    _to_transforms.push_back(&_from_multi_app->problemBase().coordTransform());
+    _to_transforms.push_back(
+        std::make_unique<MultiCoordTransform>(_from_multi_app->problemBase().coordTransform()));
 
     getFromMultiAppInfo();
   }
@@ -239,7 +239,8 @@ MultiAppTransfer::getAppInfo()
   {
     _from_problems.push_back(&_to_multi_app->problemBase());
     _from_positions.push_back(Point(0., 0., 0.));
-    _from_transforms.push_back(&_to_multi_app->problemBase().coordTransform());
+    _from_transforms.push_back(
+        std::make_unique<MultiCoordTransform>(_to_multi_app->problemBase().coordTransform()));
 
     getToMultiAppInfo();
   }
@@ -282,7 +283,7 @@ MultiAppTransfer::getAppInfo()
     const auto & ex_from_transform = *_from_transforms[0];
     const auto & ex_to_transform = *_to_transforms[0];
 
-    auto check_transform_compatibility = [this](const MooseCoordTransform & transform)
+    auto check_transform_compatibility = [this](const MultiCoordTransform & transform)
     {
       if (transform.hasNonTranslationTransformation() && !usesMooseCoordTransform())
         mooseWarning("Transfer '",
@@ -294,12 +295,12 @@ MultiAppTransfer::getAppInfo()
                      "will not be performed in the expected transformed frame");
     };
 
-    for (auto * const from_transform : _from_transforms)
+    for (auto & from_transform : _from_transforms)
     {
       from_transform->setDestinationCoordinateSystem(ex_to_transform);
       check_transform_compatibility(*from_transform);
     }
-    for (auto * const to_transform : _to_transforms)
+    for (auto & to_transform : _to_transforms)
     {
       to_transform->setDestinationCoordinateSystem(ex_from_transform);
       check_transform_compatibility(*to_transform);
@@ -314,7 +315,7 @@ fillInfo(MultiApp & multi_app,
          std::vector<unsigned int> & map,
          std::vector<FEProblemBase *> & problems,
          std::vector<Point> & positions,
-         std::vector<MooseCoordTransform *> & transforms)
+         std::vector<std::unique_ptr<MultiCoordTransform>> & transforms)
 {
   for (unsigned int i_app = 0; i_app < multi_app.numGlobalApps(); i_app++)
   {
@@ -323,16 +324,16 @@ fillInfo(MultiApp & multi_app,
 
     auto & subapp_problem = multi_app.appProblemBase(i_app);
     auto & subapp_transform = subapp_problem.coordTransform();
-    if (multi_app.usingPositions())
-    {
-      const auto position = multi_app.position(i_app);
-      subapp_transform.setTranslationVector(position);
-      positions.push_back(position);
-    }
 
     map.push_back(i_app);
     problems.push_back(&subapp_problem);
-    transforms.push_back(&subapp_transform);
+    transforms.push_back(std::make_unique<MultiCoordTransform>(subapp_transform));
+    if (multi_app.usingPositions())
+    {
+      const auto position = multi_app.position(i_app);
+      transforms.back()->setTranslationVector(position);
+      positions.push_back(position);
+    }
   }
 
   if (transforms.empty())
@@ -342,7 +343,7 @@ fillInfo(MultiApp & multi_app,
   const auto first_transform = transforms[0]->coordinateSystem();
   std::for_each(transforms.begin() + 1,
                 transforms.end(),
-                [first_transform](const auto * const transform_obj)
+                [first_transform](const auto & transform_obj)
                 {
                   if (transform_obj->coordinateSystem() != first_transform)
                     mooseError("Coordinate systems must be consistent between multiapps");
@@ -372,7 +373,7 @@ MultiAppTransfer::getFromMultiAppInfo()
 namespace
 {
 void
-transformBoundingBox(BoundingBox & box, const MooseCoordTransform & transform)
+transformBoundingBox(BoundingBox & box, const MultiCoordTransform & transform)
 {
   const Real min_x = box.first(0);
   const Real max_x = box.second(0);
