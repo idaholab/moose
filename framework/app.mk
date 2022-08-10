@@ -106,11 +106,10 @@ app_non_unity_srcfiles := $(shell find $(non_unity_srcsubdirs) -maxdepth 1 \( -t
 srcfiles    := $(app_unity_srcfiles) $(app_non_unity_srcfiles)
 endif
 
-
-
-csrcfiles   := $(shell find $(SRC_DIRS) -name "*.c")
-fsrcfiles   := $(shell find $(SRC_DIRS) -name "*.f")
-f90srcfiles := $(shell find $(SRC_DIRS) -name "*.f90")
+all_files   := $(shell find $(SRC_DIRS) -type f)
+csrcfiles   := $(filter %.c, $(all_files))
+fsrcfiles   := $(filter %.f, $(all_files))
+f90srcfiles := $(filter %.f90, $(all_files))
 
 # object files
 ifeq ($(LIBRARY_SUFFIX),yes)
@@ -124,10 +123,12 @@ f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
 
 app_objects := $(objects) $(cobjects) $(fobjects) $(f90objects) $(ADDITIONAL_APP_OBJECTS)
 
-test_srcfiles    := $(shell find $(TEST_SRC_DIRS) -regex "[^\#~]*\.C" $(find_excludes) 2>/dev/null)
-test_csrcfiles   := $(shell find $(TEST_SRC_DIRS) -name "*.c" 2>/dev/null)
-test_fsrcfiles   := $(shell find $(TEST_SRC_DIRS) -name "*.f" 2>/dev/null)
-test_f90srcfiles := $(shell find $(TEST_SRC_DIRS) -name "*.f90" 2>/dev/null)
+all_test_files   := $(shell find $(TEST_SRC_DIRS) -type f -print0 2>/dev/null)
+test_srcfiles    := $(filter-out '$(find_excludes) #%.C ~%.C', $(filter %.C, $(all_test_files)))
+test_csrcfiles   := $(filter %.c, $(all_test_files))
+test_fsrcfiles   := $(filter %.f, $(all_test_files))
+test_f90srcfiles := $(filter %.f90, $(all_test_files))
+
 ifeq ($(LIBRARY_SUFFIX),yes)
   test_objects:= $(patsubst %.C, %_with$(app_LIB_SUFFIX).$(obj-suffix), $(test_srcfiles))
 else
@@ -154,10 +155,11 @@ $(excluded_objects): $(moose_config_symlink)
 endif
 
 # plugin files
-plugfiles   := $(shell find $(PLUGIN_DIR) -regex "[^\#~]*\.C" 2>/dev/null)
-cplugfiles  := $(shell find $(PLUGIN_DIR) -name "*.c" 2>/dev/null)
-fplugfiles  := $(shell find $(PLUGIN_DIR) -name "*.f" 2>/dev/null)
-f90plugfiles:= $(shell find $(PLUGIN_DIR) -name "*.f90" 2>/dev/null)
+all_plugins := $(shell find $(PLUGIN_DIR) -type f -print0 2>/dev/null)
+plugfiles   := $(filter-out '#%.C ~%.C', $(filter %.C, $(all_plugins)))
+cplugfiles  := $(filter %.c, $(all_plugins))
+fplugfiles  := $(filter %.f, $(all_plugins))
+f90plugfiles:= $(filter %.f90, $(all_plugins))
 
 # plugins
 plugins	    := $(patsubst %.C, %-$(METHOD).plugin, $(plugfiles))

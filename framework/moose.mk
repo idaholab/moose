@@ -63,8 +63,9 @@ moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/pugixml
 # pcre
 #
 pcre_DIR       := $(FRAMEWORK_DIR)/contrib/pcre
-pcre_srcfiles  := $(shell find $(pcre_DIR) -name "*.cc")
-pcre_csrcfiles := $(shell find $(pcre_DIR) -name "*.c")
+all_pcre_files := $(shell find $(pcre_DIR) -type f)
+pcre_srcfiles  := $(filter %.cc, $(all_pcre_files))
+pcre_csrcfiles := $(filter %.c, $(all_pcre_files))
 pcre_objects   := $(patsubst %.cc, %.$(obj-suffix), $(pcre_srcfiles))
 pcre_objects   += $(patsubst %.c, %.$(obj-suffix), $(pcre_csrcfiles))
 pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD).la
@@ -311,21 +312,27 @@ app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_uniqu
 
 unity_srcfiles += $(app_unity_srcfiles)
 
-moose_srcfiles    := $(app_unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -maxdepth 1 -regex "[^\#~]*\.C") $(shell find $(filter-out %/src,$(moose_SRC_DIRS)) -regex "[^\#~]*\.C")
+moose_srcfiles  := $(app_unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -maxdepth 1 -regex "[^\#~]*\.C") $(shell find $(filter-out %/src,$(moose_SRC_DIRS)) -regex "[^\#~]*\.C")
 
 else # Non-Unity
-moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -regex "[^\#~]*\.C")
+moose_srcfiles  := $(shell find $(moose_SRC_DIRS) -regex "[^\#~]*\.C")
 endif
 
 # source files
-moose_csrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.c")
-moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.f")
-moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name "*.f90")
+moose_csrcfiles := $(shell find $(moose_SRC_DIRS) -name "*.c")
 # object files
 moose_objects	:= $(patsubst %.C, %.$(obj-suffix), $(moose_srcfiles))
 moose_objects	+= $(patsubst %.c, %.$(obj-suffix), $(moose_csrcfiles))
-moose_objects   += $(patsubst %.f, %.$(obj-suffix), $(moose_fsrcfiles))
-moose_objects   += $(patsubst %.f90, %.$(obj-suffix), $(moose_f90srcfiles))
+
+# MOOSE does not and will likely not contain any straight "c" nor "Fortran" files
+# these rules are here in case that changes, but are normally disabled
+## source files
+#moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.f")
+#moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name "*.f90")
+## object files
+#moose_objects	 += $(patsubst %.f, %.$(obj-suffix), $(moose_fsrcfiles))
+#moose_objects	 += $(patsubst %.f90, %.$(obj-suffix), $(moose_f90srcfiles))
+
 # dependency files
 moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
               $(patsubst %.c, %.$(obj-suffix).d, $(moose_csrcfiles))
