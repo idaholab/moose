@@ -25,7 +25,8 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
                                   bool on_displaced,
                                   bool periodic,
                                   const bool debug,
-                                  const bool correct_edge_dropping)
+                                  const bool correct_edge_dropping,
+                                  const Real minimum_projection_angle)
 {
   _mortar_subdomain_coverage.insert(subdomain_key.first);
   _mortar_subdomain_coverage.insert(subdomain_key.second);
@@ -68,7 +69,8 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
                                                                      on_displaced,
                                                                      periodic,
                                                                      debug,
-                                                                     correct_edge_dropping));
+                                                                     correct_edge_dropping,
+                                                                     minimum_projection_angle));
   }
   else
   {
@@ -100,7 +102,8 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
                                                            on_displaced,
                                                            periodic,
                                                            debug,
-                                                           correct_edge_dropping));
+                                                           correct_edge_dropping,
+                                                           minimum_projection_angle));
   }
 
   // See whether to query the mesh

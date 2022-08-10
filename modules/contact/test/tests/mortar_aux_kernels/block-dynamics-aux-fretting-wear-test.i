@@ -148,7 +148,7 @@ offset = -0.045
     friction_coefficient = 0.5
     energy_wear_coefficient = 1.0e-6
     normal_pressure = normal_lm
-    execute_on = 'LINEAR NONLINEAR'
+    execute_on = 'TIMESTEP_END'
   []
   [accel_x]
     type = NewmarkAccelAux

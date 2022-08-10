@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MultiAppUserObjectTransfer.h"
+#include "MooseCoordTransform.h"
 
 #include <limits>
 
@@ -112,6 +113,8 @@ MultiAppUserObjectTransfer::execute()
   TIME_SECTION(
       "MultiAppUserObjectTransfer::execute()", 5, "Performing transfer with a user object");
 
+  getAppInfo();
+
   switch (_current_direction)
   {
     case TO_MULTIAPP:
@@ -163,6 +166,7 @@ MultiAppUserObjectTransfer::execute()
 
           const UserObject & user_object =
               getToMultiApp()->problemBase().getUserObjectBase(_user_object_name);
+          const auto & from_transform = getToMultiApp()->problemBase().coordTransform();
 
           if (is_nodal)
           {
@@ -180,7 +184,8 @@ MultiAppUserObjectTransfer::execute()
                 dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
                 swapper.forceSwap();
-                Real from_value = user_object.spatialValue(*node + getToMultiApp()->position(i));
+                Real from_value = user_object.spatialValue(from_transform.mapBack(
+                    getToMultiApp()->appProblemBase(i).coordTransform()(*node)));
                 swapper.forceSwap();
 
                 solution.set(dof, from_value);
@@ -229,7 +234,8 @@ MultiAppUserObjectTransfer::execute()
                 dof_id_type dof = elem->dof_number(sys_num, var_num, offset++);
 
                 swapper.forceSwap();
-                Real from_value = user_object.spatialValue(point + getToMultiApp()->position(i));
+                Real from_value = user_object.spatialValue(from_transform.mapBack(
+                    getToMultiApp()->appProblemBase(i).coordTransform()(point)));
                 swapper.forceSwap();
 
                 solution.set(dof, from_value);
@@ -247,6 +253,7 @@ MultiAppUserObjectTransfer::execute()
     case FROM_MULTIAPP:
     {
       FEProblemBase & to_problem = getFromMultiApp()->problemBase();
+      const auto & to_transform = to_problem.coordTransform();
       MooseVariableFEBase & to_var = to_problem.getVariable(
           0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
       SystemBase & to_system_base = to_var.sys();
@@ -260,7 +267,6 @@ MultiAppUserObjectTransfer::execute()
                   "MultiAppUserObjectTransfer only works with ReplicatedMesh!");
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
-
 
       // EquationSystems & to_es = to_sys.get_equation_systems();
 
@@ -429,7 +435,7 @@ MultiAppUserObjectTransfer::execute()
             if (sub_app == static_cast<unsigned int>(-1))
               continue;
 
-            const auto & app_position = _multi_app->position(sub_app);
+            const auto & from_transform = _multi_app->appProblemBase(sub_app).coordTransform();
             const auto & user_object = _multi_app->appUserObjectBase(sub_app, _user_object_name);
 
             dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
@@ -437,7 +443,7 @@ MultiAppUserObjectTransfer::execute()
             Real from_value = 0;
             {
               Moose::ScopedCommSwapper swapper(getFromMultiApp()->comm());
-              from_value = user_object.spatialValue(*node - app_position);
+              from_value = user_object.spatialValue(from_transform.mapBack(to_transform(*node)));
             }
 
             if (from_value == std::numeric_limits<Real>::infinity())
@@ -496,7 +502,8 @@ MultiAppUserObjectTransfer::execute()
             if (sub_app == static_cast<unsigned int>(-1))
               continue;
 
-            const auto & app_position = getFromMultiApp()->position(sub_app);
+            const auto & from_transform =
+                getFromMultiApp()->appProblemBase(sub_app).coordTransform();
             const auto & user_object =
                 getFromMultiApp()->appUserObjectBase(sub_app, _user_object_name);
 
@@ -505,7 +512,7 @@ MultiAppUserObjectTransfer::execute()
             Real from_value = 0;
             {
               Moose::ScopedCommSwapper swapper(getFromMultiApp()->comm());
-              from_value = user_object.spatialValue(point - app_position);
+              from_value = user_object.spatialValue(from_transform.mapBack(to_transform(point)));
             }
 
             if (from_value == std::numeric_limits<Real>::infinity())

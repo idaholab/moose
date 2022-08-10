@@ -14,6 +14,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MultiApp.h"
+#include "MooseCoordTransform.h"
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/numeric_vector.h"
@@ -82,6 +83,8 @@ MultiAppPostprocessorInterpolationTransfer::execute()
                5,
                "Transferring/interpolating postprocessors");
 
+  getAppInfo();
+
   switch (_current_direction)
   {
     case TO_MULTIAPP:
@@ -114,11 +117,13 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       idi->set_field_variables(field_vars);
 
       {
+        const auto & to_coord_transform = getFromMultiApp()->problemBase().coordTransform();
         for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
         {
           if (getFromMultiApp()->hasLocalApp(i) && getFromMultiApp()->isRootProcessor())
           {
-            src_pts.push_back(getFromMultiApp()->position(i));
+            src_pts.push_back(
+                to_coord_transform.mapBack(getFromMultiApp()->transformedPosition(i)));
             src_vals.push_back(getFromMultiApp()->appPostprocessorValue(i, _postprocessor));
           }
         }
@@ -201,5 +206,4 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       break;
     }
   }
-
 }

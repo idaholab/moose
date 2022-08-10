@@ -2034,7 +2034,21 @@ MooseApp::createMeshGeneratorOrder()
     }
   }
 
-  _ordered_generators = resolver.getSortedValuesSets();
+  try
+  {
+    _ordered_generators = resolver.getSortedValuesSets();
+  }
+  catch (CyclicDependencyException<std::shared_ptr<MeshGenerator>> & e)
+  {
+    const auto & cycle = e.getCyclicDependencies();
+    std::vector<std::string> names;
+    names.reserve(cycle.size());
+    for (const auto & mg : cycle)
+      names.push_back(mg->name());
+
+    mooseError("Cyclic dependencies detected in mesh generation: ",
+               MooseUtils::join(names, " <- "));
+  }
 
   if (_ordered_generators.size())
   {

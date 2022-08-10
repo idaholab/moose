@@ -664,7 +664,7 @@
     input = 'unused_param_test.i'
     allow_unused = true
 
-    requirement = 'The system shall report a warning when allow_unused = true has been set in the test spec.'
+    requirement = 'The system shall include the option to report a warning instead of an error for an unused parameter set in input.'
     issues = '#709 #759 #4101'
   [../]
   
@@ -674,7 +674,7 @@
     input = 'unused_param_test.i'
     cli_args = '--warn-unused'
 
-    requirement = 'The system shall report a warning when --warn-unused has been set in the cli_args'
+    requirement = 'The system shall include the option to report a warning instead of an error for an unused parameter set in command line arguments'
     issues = '#709 #759 #4101'
   [../]
 

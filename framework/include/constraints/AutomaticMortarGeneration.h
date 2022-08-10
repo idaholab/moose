@@ -73,7 +73,8 @@ public:
                             bool on_displaced,
                             bool periodic,
                             const bool debug,
-                            const bool correct_edge_dropping);
+                            const bool correct_edge_dropping,
+                            const Real minimum_projection_angle);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -256,7 +257,8 @@ public:
   /**
    * @return The mortar interface coupling
    */
-  const std::unordered_multimap<dof_id_type, dof_id_type> & mortarInterfaceCoupling() const
+  const std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>> &
+  mortarInterfaceCoupling() const
   {
     return _mortar_interface_coupling;
   }
@@ -305,7 +307,8 @@ public:
   /**
    * @return A vector of iterators that point to the lower dimensional secondary elements and their
    * associated mortar segment elements that would have nonzero values for a Lagrange shape function
-   * associated with the provided node
+   * associated with the provided node. This method may return an empty container if the node is
+   * away from the mortar mesh
    */
   std::vector<MortarFilterIter> secondariesToMortarSegments(const Node & node) const;
 
@@ -337,6 +340,11 @@ public:
   }
 
 private:
+  /**
+   * build the \p _mortar_interface_coupling data
+   */
+  void buildCouplingInformation();
+
   MooseApp & _app;
 
   // Reference to the mesh stored in equation_systems.
@@ -414,7 +422,7 @@ private:
   /// explicitly declared when there is no primary_elem for a given
   /// mortar segment and you are using e.g.  a P^1-P^0 discretization
   /// which does not induce the coupling automatically.
-  std::unordered_multimap<dof_id_type, dof_id_type> _mortar_interface_coupling;
+  std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>> _mortar_interface_coupling;
 
   /// Container for storing the nodal normal vector associated with each secondary node.
   std::unordered_map<const Node *, Point> _secondary_node_to_nodal_normal;
@@ -502,7 +510,13 @@ private:
 
   /// Flag to enable regressed treatment of edge dropping where all LM DoFs on edge dropping element
   /// are strongly set to 0.
-  bool _correct_edge_dropping;
+  const bool _correct_edge_dropping;
+
+  /// Parameter to control which angle (in degrees) is admissible for the creation of mortar segments.
+  /// If set to a value close to zero, very oblique projections are allowed, which can result in mortar
+  /// segments solving physics not meaningfully and overprojection of primary nodes onto the mortar
+  /// segment mesh in extreme cases. This parameter is mostly intended for mortar mesh debugging purposes in 2D.
+  const Real _minimum_projection_angle;
 };
 
 inline const std::pair<BoundaryID, BoundaryID> &

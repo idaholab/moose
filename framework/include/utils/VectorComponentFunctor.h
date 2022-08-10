@@ -78,6 +78,12 @@ private:
     return _vector(elem_side_qp, state)(_component);
   }
 
+  ValueType evaluate(const Moose::ElemPointArg & elem_point,
+                     const unsigned int state) const override final
+  {
+    return _vector(elem_point, state)(_component);
+  }
+
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const Moose::ElemArg & elem_arg,
                                 const unsigned int state) const override final

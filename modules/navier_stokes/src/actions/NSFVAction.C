@@ -130,14 +130,18 @@ NSFVAction::validParams()
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, 0), "The gravitational acceleration vector.");
 
-  MultiMooseEnum mom_inlet_types("fixed-velocity flux-velocity flux-mass");
+  MultiMooseEnum mom_inlet_types("fixed-velocity flux-velocity flux-mass fixed-pressure");
   params.addParam<MultiMooseEnum>("momentum_inlet_types",
                                   mom_inlet_types,
                                   "Types of inlet boundaries for the momentum equation.");
 
-  params.addParam<std::vector<FunctionName>>("momentum_inlet_function",
-                                             std::vector<FunctionName>(),
-                                             "Functions for inlet boundary velocities");
+  params.addParam<std::vector<std::vector<FunctionName>>>(
+      "momentum_inlet_function",
+      std::vector<std::vector<FunctionName>>(),
+      "Functions for inlet boundary velocities or pressures (for fixed-pressure option). Provide a "
+      "double vector where the leading dimension corresponds to the number of fixed-velocity and "
+      "fixed-pressure entries in momentum_inlet_types and the second index runs either over "
+      "dimensions for fixed-velocity boundaries or is a single function name for pressure inlets.");
   params.addParam<std::vector<PostprocessorName>>(
       "flux_inlet_pps",
       std::vector<PostprocessorName>(),
@@ -513,7 +517,8 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
     _momentum_inlet_types(getParam<MultiMooseEnum>("momentum_inlet_types")),
     _flux_inlet_pps(getParam<std::vector<PostprocessorName>>("flux_inlet_pps")),
-    _momentum_inlet_function(getParam<std::vector<FunctionName>>("momentum_inlet_function")),
+    _momentum_inlet_function(
+        getParam<std::vector<std::vector<FunctionName>>>("momentum_inlet_function")),
     _momentum_outlet_types(getParam<MultiMooseEnum>("momentum_outlet_types")),
     _momentum_wall_types(getParam<MultiMooseEnum>("momentum_wall_types")),
     _energy_inlet_types(getParam<MultiMooseEnum>("energy_inlet_types")),
@@ -1601,6 +1606,7 @@ void
 NSFVAction::addINSInletBC()
 {
   unsigned int flux_bc_counter = 0;
+  unsigned int velocity_pressure_counter = 0;
   for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
   {
     if (_momentum_inlet_types[bc_ind] == "fixed-velocity")
@@ -1612,10 +1618,23 @@ NSFVAction::addINSInletBC()
       for (unsigned int d = 0; d < _dim; ++d)
       {
         params.set<NonlinearVariableName>("variable") = _velocity_name[d];
-        params.set<FunctionName>("function") = _momentum_inlet_function[bc_ind * _dim + d];
+        params.set<FunctionName>("function") =
+            _momentum_inlet_function[velocity_pressure_counter][d];
 
         _problem->addFVBC(bc_type, _velocity_name[d] + "_" + _inlet_boundaries[bc_ind], params);
       }
+      ++velocity_pressure_counter;
+    }
+    else if (_momentum_inlet_types[bc_ind] == "fixed-pressure")
+    {
+      const std::string bc_type = "INSFVOutletPressureBC";
+      InputParameters params = _factory.getValidParams(bc_type);
+      params.set<NonlinearVariableName>("variable") = _pressure_name;
+      params.set<FunctionName>("function") = _momentum_inlet_function[velocity_pressure_counter][0];
+      params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+
+      _problem->addFVBC(bc_type, _pressure_name + "_" + _inlet_boundaries[bc_ind], params);
+      ++velocity_pressure_counter;
     }
     else if (_momentum_inlet_types[bc_ind] == "flux-mass" ||
              _momentum_inlet_types[bc_ind] == "flux-velocity")
@@ -1663,6 +1682,9 @@ NSFVAction::addINSInletBC()
 
         _problem->addFVBC(bc_type, _pressure_name + "_" + _inlet_boundaries[bc_ind], params);
       }
+
+      // need to increment flux_bc_counter
+      ++flux_bc_counter;
     }
   }
 }
@@ -2281,6 +2303,15 @@ NSFVAction::checkGeneralControlErrors()
     paramError("consistent_scaling",
                "Consistent scaling should not be defined if friction correction is disabled!");
 
+  if (getParam<bool>("pin_pressure"))
+  {
+    checkDependentParameterError("pin_pressure", {"pinned_pressure_type"}, true);
+
+    MooseEnum pin_type = getParam<MooseEnum>("pinned_pressure_type");
+    checkDependentParameterError(
+        "pinned_pressure_type", {"pinned_pressure_point"}, pin_type == "point-value");
+  }
+
   if (!_has_energy_equation)
     checkDependentParameterError("add_energy_equation",
                                  {"energy_inlet_types",
@@ -2383,6 +2414,7 @@ NSFVAction::checkBoundaryParameterErrors()
                         "inlet boundaries");
 
   unsigned int num_dir_dependent_bcs = 0;
+  unsigned int num_pressure_inlet_bcs = 0;
   unsigned int num_flux_bc_postprocessors = 0;
   for (const auto & type : _momentum_inlet_types)
   {
@@ -2390,13 +2422,39 @@ NSFVAction::checkBoundaryParameterErrors()
       num_dir_dependent_bcs += 1;
     else if (type == "flux-velocity" || type == "flux-mass")
       num_flux_bc_postprocessors += 1;
+    else if (type == "fixed-pressure")
+      num_pressure_inlet_bcs += 1;
   }
 
   checkSizeParam(_momentum_inlet_function.size(),
                  "momentum_inlet_function",
-                 num_dir_dependent_bcs * _dim,
-                 "direction dependent directions",
-                 "'inlet_boundaries' times the mesh dimension");
+                 num_dir_dependent_bcs + num_pressure_inlet_bcs,
+                 "fixed-velocity and fixed-pressure entries",
+                 "momentum_inlet_types");
+
+  // index into _momentum_inlet_function
+  unsigned int k = 0;
+  for (const auto & type : _momentum_inlet_types)
+  {
+    if (type != "fixed-velocity" && type != "fixed-pressure")
+      continue;
+
+    if (type == "fixed-velocity")
+      checkSizeParam(_momentum_inlet_function[k].size(),
+                     "momentum_inlet_function",
+                     _dim,
+                     "entries ",
+                     " the momentum_inlet_types subvector for fixed-velocity inlet: " +
+                         _inlet_boundaries[k]);
+    else if (type == "fixed-pressure")
+      checkSizeParam(_momentum_inlet_function[k].size(),
+                     "momentum_inlet_function",
+                     1,
+                     "entries ",
+                     " the momentum_inlet_types subvector for fixed-pressure inlet: " +
+                         _inlet_boundaries[k]);
+    ++k;
+  }
 
   checkSizeParam(_flux_inlet_pps.size(),
                  "flux_inlet_pps",
@@ -2571,13 +2629,15 @@ NSFVAction::checkPassiveScalarParameterErrors()
 
 void
 NSFVAction::checkDependentParameterError(const std::string main_parameter,
-                                         const std::vector<std::string> dependent_parameters)
+                                         const std::vector<std::string> dependent_parameters,
+                                         const bool should_be_defined)
 {
   for (const auto & param : dependent_parameters)
-    if (_pars.isParamSetByUser(param))
+    if (_pars.isParamSetByUser(param) == !should_be_defined)
       paramError(param,
-                 "This parameter should not be given by the user with the corresponding " +
-                     main_parameter + " setting!");
+                 "This parameter should " + std::string(should_be_defined ? "" : "not") +
+                     " be given by the user with the corresponding " + main_parameter +
+                     " setting!");
 }
 
 void
@@ -2593,7 +2653,7 @@ NSFVAction::checkSizeFriendParams(const unsigned int param_vector_1_size,
                "Size (" + std::to_string(param_vector_2_size) +
                    ") is not the same as the "
                    "number of " +
-                   object_name_1 + " in '" + param_name_1 + "' (" +
+                   object_name_1 + " in '" + param_name_1 + "' (size " +
                    std::to_string(param_vector_1_size) + ")");
 }
 
@@ -2608,7 +2668,7 @@ NSFVAction::checkSizeParam(const unsigned int param_vector_size,
     paramError(param_name,
                "Size (" + std::to_string(param_vector_size) +
                    ") is not the same as the number of " + object_name + " in " +
-                   size_source_explanation + " (" + std::to_string(size_wanted) + ")");
+                   size_source_explanation + " (size " + std::to_string(size_wanted) + ")");
 }
 
 void

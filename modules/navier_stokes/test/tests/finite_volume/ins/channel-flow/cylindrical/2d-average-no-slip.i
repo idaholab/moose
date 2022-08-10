@@ -1,7 +1,7 @@
-mu=1
-rho=1
-advected_interp_method='average'
-velocity_interp_method='average'
+mu = 1
+rho = 1
+advected_interp_method = 'average'
+velocity_interp_method = 'average'
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -30,7 +30,6 @@ velocity_interp_method='average'
 []
 
 [Problem]
-  fv_bcs_integrity_check = true
   coord_type = 'RZ'
 []
 
@@ -172,9 +171,8 @@ velocity_interp_method='average'
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      100                lu           NONZERO'
-  line_search = 'none'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-12
 []
 

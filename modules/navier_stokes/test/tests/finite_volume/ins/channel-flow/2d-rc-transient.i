@@ -12,8 +12,8 @@ p_outlet = 10
 h_fs = 0.01
 
 # Numerical scheme
-advected_interp_method='average'
-velocity_interp_method='rc'
+advected_interp_method = 'average'
+velocity_interp_method = 'rc'
 
 [Mesh]
   [gen]
@@ -26,10 +26,6 @@ velocity_interp_method='rc'
     nx = 50
     ny = 20
   []
-[]
-
-[Problem]
-  fv_bcs_integrity_check = true
 []
 
 [GlobalParams]
@@ -169,7 +165,7 @@ velocity_interp_method='rc'
   [inlet-T]
     type = FVNeumannBC
     variable = T_fluid
-    value = ${fparse u_inlet * rho * cp * T_inlet}
+    value = '${fparse u_inlet * rho * cp * T_inlet}'
     boundary = 'left'
   []
 
@@ -257,8 +253,8 @@ velocity_interp_method='rc'
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      100                lu           NONZERO'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   line_search = 'none'
   nl_rel_tol = 7e-13
   dt = 0.4

@@ -339,6 +339,12 @@ DisplacedProblem::vectorTagExists(const TagID tag_id) const
   return _mproblem.vectorTagExists(tag_id);
 }
 
+bool
+DisplacedProblem::vectorTagExists(const TagName & tag_name) const
+{
+  return _mproblem.vectorTagExists(tag_name);
+}
+
 unsigned int
 DisplacedProblem::numVectorTags(const Moose::VectorTagType type /* = Moose::VECTOR_TAG_ANY */) const
 {

@@ -28,7 +28,13 @@ If the core is extruded to three dimensions the top-most boundary ID must be ass
 
 !listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core.i block=Mesh
 
-!media reactor/meshgenerators/core_mesh_generator.png style=width:60%;
+This is the resulting mesh block layout, where by default a single block is assigned to all of the quadrilateral elements in the mesh:
+
+!media reactor/meshgenerators/core_mesh_generator.png style=width:40%;
+
+This is the resulting "region_id" extra element integer layout, which was chosen by setting the region IDs for each of the constituent pins and assemblies:
+
+!media reactor/meshgenerators/core_mesh_generator_rid.png style=width:40%;
 
 !syntax parameters /Mesh/CoreMeshGenerator
 

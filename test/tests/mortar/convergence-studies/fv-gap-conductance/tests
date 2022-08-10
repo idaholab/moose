@@ -1,0 +1,25 @@
+[Tests]
+  design = 'Constraints/index.md'
+  issues = '#21599'
+  [fv]
+    requirement = 'The system shall be able to perform gap heat transfer to couple conduction equations, on either side of the mortar interface, discretized with the finite volume method with'
+    [first_order]
+      type = PythonUnitTest
+      input = 'lm-spatial.py'
+      test_case = 'TestGapConductanceFirstOrder'
+      detail = 'first order accuracy'
+      required_python_packages = 'sympy pandas matplotlib'
+      method = '!dbg'
+      ad_indexing_type = 'global'
+    []
+    [second_order]
+      type = PythonUnitTest
+      input = 'lm-spatial.py'
+      test_case = 'TestGapConductanceSecondOrder'
+      detail = 'second order accuracy'
+      required_python_packages = 'sympy pandas matplotlib'
+      method = '!dbg'
+      ad_indexing_type = 'global'
+    []
+  []
+[]

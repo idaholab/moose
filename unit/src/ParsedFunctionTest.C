@@ -125,6 +125,17 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   dot_traditional = f.timeDerivative(0, xyz[0]);
   dot_functor = f_wrapped.dot(elem_side_qp, 0);
   test_eq();
+
+  // Test elem_point overloads
+  const Point test_point(0.5, 0.5, 0.5);
+  const auto elem_point = Moose::ElemPointArg{elem, test_point, false};
+  f_traditional = f.value(0, test_point);
+  f_functor = f_wrapped(elem_point, 0);
+  gradient_traditional = f.gradient(0, test_point);
+  gradient_functor = f_wrapped.gradient(elem_point, 0);
+  dot_traditional = f.timeDerivative(0, test_point);
+  dot_functor = f_wrapped.dot(elem_point, 0);
+  test_eq();
 }
 
 TEST_F(ParsedFunctionTest, advancedConstructor)

@@ -4,9 +4,9 @@ von_karman_const = 0.2
 D = 1
 rho = 1
 bulk_u = 1
-mu = ${fparse rho * bulk_u * D / Re}
+mu = '${fparse rho * bulk_u * D / Re}'
 
-advected_interp_method='upwind'
+advected_interp_method = 'upwind'
 
 [Mesh]
   [gen]
@@ -15,10 +15,10 @@ advected_interp_method='upwind'
     xmin = 0
     xmax = 5
     ymin = 0
-    ymax = ${fparse 0.5 * D}
+    ymax = '${fparse 0.5 * D}'
     nx = 20
     ny = 10
-    bias_y = ${fparse 1 / 1.2}
+    bias_y = '${fparse 1 / 1.2}'
   []
 []
 
@@ -54,7 +54,7 @@ advected_interp_method='upwind'
     von_karman_const = ${von_karman_const}
     mixing_length_delta = 1e9
     mixing_length_walls = 'top bottom'
-    mixing_length_aux_execute_on ='initial'
+    mixing_length_aux_execute_on = 'initial'
 
     momentum_advection_interpolation = ${advected_interp_method}
     mass_advection_interpolation = ${advected_interp_method}
@@ -65,9 +65,8 @@ advected_interp_method='upwind'
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      200                lu           NONZERO'
-  line_search = 'none'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-12
 []
 

@@ -68,6 +68,7 @@ protected:
   using FaceFn = std::function<T(const Moose::SingleSidedFaceArg &, const unsigned int &)>;
   using ElemQpFn = std::function<T(const Moose::ElemQpArg &, const unsigned int &)>;
   using ElemSideQpFn = std::function<T(const Moose::ElemSideQpArg &, const unsigned int &)>;
+  using ElemPointFn = std::function<T(const Moose::ElemPointArg &, const unsigned int &)>;
 
   ValueType evaluate(const Moose::ElemArg & elem_arg, unsigned int state) const override;
   ValueType evaluate(const Moose::ElemFromFaceArg & elem_from_face,
@@ -76,6 +77,7 @@ protected:
   ValueType evaluate(const Moose::SingleSidedFaceArg & face, unsigned int state) const override;
   ValueType evaluate(const Moose::ElemQpArg & elem_qp, unsigned int state) const override;
   ValueType evaluate(const Moose::ElemSideQpArg & elem_side_qp, unsigned int state) const override;
+  ValueType evaluate(const Moose::ElemPointArg & elem_point, unsigned int state) const override;
 
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const Moose::ElemArg & elem_arg, unsigned int) const override;
@@ -107,6 +109,9 @@ private:
 
   /// Functors that will evaluate elements at side quadrature points
   std::unordered_map<SubdomainID, ElemSideQpFn> _elem_side_qp_functor;
+
+  /// Functors that return evaluations at an arbitrary physical point in an element
+  std::unordered_map<SubdomainID, ElemPointFn> _elem_point_functor;
 
   /// The mesh that this functor operates on
   const MooseMesh & _mesh;
@@ -149,6 +154,7 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
     _face_functor.emplace(block_id, my_lammy);
     _elem_qp_functor.emplace(block_id, my_lammy);
     _elem_side_qp_functor.emplace(block_id, my_lammy);
+    _elem_point_functor.emplace(block_id, my_lammy);
   };
 
   for (const auto block_id : block_ids)
@@ -282,6 +288,21 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemSideQpArg & elem_sid
     subdomainErrorMessage(sub_id);
 
   return it->second(elem_side_qp, state);
+}
+
+template <typename T>
+typename PiecewiseByBlockLambdaFunctor<T>::ValueType
+PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemPointArg & elem_point_arg,
+                                           unsigned int state) const
+{
+  const Elem * const elem = elem_point_arg.elem;
+  mooseAssert(elem && elem != libMesh::remote_elem,
+              "The element must be non-null and non-remote in functor material properties");
+  auto it = _elem_point_functor.find(elem->subdomain_id());
+  if (it == _elem_point_functor.end())
+    subdomainErrorMessage(elem->subdomain_id());
+
+  return it->second(elem_point_arg, state);
 }
 
 template <typename T>

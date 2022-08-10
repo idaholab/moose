@@ -121,8 +121,27 @@ MaterialWarehouse::updateActive(THREAD_ID tid /*=0*/)
 void
 MaterialWarehouse::sort(THREAD_ID tid /*=0*/)
 {
-  MooseObjectWarehouse<MaterialBase>::sort(tid);
-  _neighbor_materials.sort(tid);
-  _face_materials.sort(tid);
-  _interface_materials.sort(tid);
+  checkThreadID(tid);
+
+  for (auto & object_pair : _all_block_objects[tid])
+    sortHelper(object_pair.second);
+  for (auto & object_pair : _all_boundary_objects[tid])
+    sortHelper(object_pair.second);
+
+  for (auto & object_pair : _neighbor_materials._all_block_objects[tid])
+    sortHelper(object_pair.second);
+  for (auto & object_pair : _neighbor_materials._all_boundary_objects[tid])
+    sortHelper(object_pair.second);
+
+  for (auto & object_pair : _face_materials._all_block_objects[tid])
+    sortHelper(object_pair.second);
+  for (auto & object_pair : _face_materials._all_boundary_objects[tid])
+    sortHelper(object_pair.second);
+
+  for (auto & object_pair : _interface_materials._all_block_objects[tid])
+    sortHelper(object_pair.second);
+  for (auto & object_pair : _interface_materials._all_boundary_objects[tid])
+    sortHelper(object_pair.second);
+
+  updateActive(tid);
 }

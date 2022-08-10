@@ -175,13 +175,18 @@ FEProblemBase::validParams()
   ///    be set for the whole domain
   /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
   /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
-  params.addParam<std::vector<SubdomainName>>("block", "Block IDs for the coordinate systems");
+  params.addDeprecatedParam<std::vector<SubdomainName>>(
+      "block", "Block IDs for the coordinate systems", "Please use 'Mesh/block' instead");
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
   MooseEnum rz_coord_axis("X=0 Y=1", "Y");
-  params.addParam<MultiMooseEnum>(
-      "coord_type", coord_types, "Type of the coordinate system per block param");
-  params.addParam<MooseEnum>(
-      "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
+  params.addDeprecatedParam<MultiMooseEnum>("coord_type",
+                                            coord_types,
+                                            "Type of the coordinate system per block param",
+                                            "Please use 'Mesh/coord_type' instead");
+  params.addDeprecatedParam<MooseEnum>("rz_coord_axis",
+                                       rz_coord_axis,
+                                       "The rotation axis (X | Y) for axisymetric coordinates",
+                                       "Please use 'Mesh/rz_coord_axis' instead");
   params.addParam<bool>(
       "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
   params.addParam<bool>(
@@ -388,9 +393,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   _eq.parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 
-  setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
-                 getParam<MultiMooseEnum>("coord_type"));
-  setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
+  if (parameters.isParamSetByUser("coord_type"))
+    setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
+                   getParam<MultiMooseEnum>("coord_type"));
+  if (parameters.isParamSetByUser("rz_coord_axis"))
+    setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
 
   if (isParamValid("restart_file_base"))
   {
@@ -838,13 +845,7 @@ FEProblemBase::initialSetup()
                                        _bnd_material_props,
                                        _neighbor_material_props,
                                        _assembly);
-      /**
-       * The ComputeMaterialObjectThread object now allocates memory as needed for the material
-       * storage system.
-       * This cannot be done with threads. The first call to this object bypasses threading by
-       * calling the object directly. The subsequent call can be called with threads.
-       */
-      cmt(elem_range, true);
+      Threads::parallel_reduce(elem_range, cmt);
 
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
           _neighbor_material_props.hasStatefulProperties())
@@ -6266,6 +6267,8 @@ FEProblemBase::updateMortarMesh()
 {
   TIME_SECTION("updateMortarMesh", 5, "Updating Mortar Mesh");
 
+  FloatingPointExceptionGuard fpe_guard(_app);
+
   _mortar_data.update();
 }
 
@@ -6276,7 +6279,8 @@ FEProblemBase::createMortarInterface(
     bool on_displaced,
     bool periodic,
     const bool debug,
-    const bool correct_edge_dropping)
+    const bool correct_edge_dropping,
+    const Real minimum_projection_angle)
 {
   _has_mortar = true;
 
@@ -6287,7 +6291,8 @@ FEProblemBase::createMortarInterface(
                                               on_displaced,
                                               periodic,
                                               debug,
-                                              correct_edge_dropping);
+                                              correct_edge_dropping,
+                                              minimum_projection_angle);
   else
     return _mortar_data.createMortarInterface(primary_secondary_boundary_pair,
                                               primary_secondary_subdomain_pair,
@@ -6295,7 +6300,8 @@ FEProblemBase::createMortarInterface(
                                               on_displaced,
                                               periodic,
                                               debug,
-                                              correct_edge_dropping);
+                                              correct_edge_dropping,
+                                              minimum_projection_angle);
 }
 
 const AutomaticMortarGeneration &
@@ -7520,6 +7526,12 @@ FEProblemBase::jacobianSetup()
   SubProblem::jacobianSetup();
   if (_displaced_problem)
     _displaced_problem->jacobianSetup();
+}
+
+MooseCoordTransform &
+FEProblemBase::coordTransform()
+{
+  return mesh().coordTransform();
 }
 
 template <typename T>

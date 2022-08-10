@@ -37,7 +37,7 @@
     [sigmoid]
       type = RunApp
       input = 'test.i'
-      expect_out = 'My prediction\: -0\.1226'
+      expect_out = 'My prediction\: -0\.12259'
       detail = 'sigmoid activation functions.'
       cli_args = "UserObjects/test/activation_functions='sigmoid sigmoid'"
       libtorch = true
@@ -55,7 +55,7 @@
     [elu]
       type = RunApp
       input = 'test.i'
-      expect_out = 'My prediction\: 0\.01 \*\n\-7\.7504'
+      expect_out = 'My prediction\: -0\.077503'
       detail = 'elu activation functions.'
       cli_args = "UserObjects/test/activation_functions='elu elu'"
       libtorch = true
@@ -64,7 +64,7 @@
     [linear]
       type = RunApp
       input = 'test.i'
-      expect_out = 'My prediction\: 0\.01 \*\n\-5\.4844'
+      expect_out = 'My prediction\: -0\.054844'
       detail = 'linear activation functions.'
       cli_args = "UserObjects/test/activation_functions='linear linear'"
       libtorch = true

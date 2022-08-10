@@ -1,0 +1,9 @@
+[Tests]
+  [coincident]
+    type = RunApp
+    input = test.i
+    requirement = 'The system shall be able to construct a mortar mesh when coincident nodes exist on one or more mortar boundaries.'
+    design = 'Constraints/index.md'
+    issues = '#21680'
+  []
+[]

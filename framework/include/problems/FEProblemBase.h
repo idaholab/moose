@@ -82,6 +82,7 @@ class VectorPostprocessor;
 class MooseFunctionBase;
 template <typename>
 class FunctionTempl;
+class MooseCoordTransform;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1393,7 +1394,8 @@ public:
       bool on_displaced,
       bool periodic,
       const bool debug,
-      const bool correct_edge_dropping);
+      const bool correct_edge_dropping,
+      const Real minimum_projection_angle);
 
   const AutomaticMortarGeneration &
   getMortarInterface(const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
@@ -1986,7 +1988,16 @@ public:
     _computing_scaling_residual = computing_scaling_residual;
   }
 
+  /**
+   * @return whether we are currently computing a residual for automatic scaling purposes
+   */
   bool computingScalingResidual() const override final { return _computing_scaling_residual; }
+
+  /**
+   * @return the coordinate transformation object that describes how to transform this problem's
+   * coordinate system into the canonical/reference coordinate system
+   */
+  MooseCoordTransform & coordTransform();
 
 protected:
   /// Create extra tagged vectors and matrices

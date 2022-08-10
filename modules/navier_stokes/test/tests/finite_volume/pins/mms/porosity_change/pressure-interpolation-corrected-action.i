@@ -52,7 +52,7 @@ forch=1.1
 
     inlet_boundaries = 'left top bottom'
     momentum_inlet_types = 'fixed-velocity fixed-velocity fixed-velocity'
-    momentum_inlet_function = 'exact_u exact_v exact_u exact_v exact_u exact_v'
+    momentum_inlet_function = 'exact_u exact_v; exact_u exact_v; exact_u exact_v'
 
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'

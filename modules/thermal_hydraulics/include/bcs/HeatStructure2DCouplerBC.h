@@ -9,14 +9,12 @@
 
 #pragma once
 
-#include "ADIntegratedBC.h"
-
-class MeshAlignment2D2D;
+#include "HeatStructure2DCouplerBCBase.h"
 
 /**
  * Applies BC for HeatStructure2DCoupler for plate heat structure
  */
-class HeatStructure2DCouplerBC : public ADIntegratedBC
+class HeatStructure2DCouplerBC : public HeatStructure2DCouplerBCBase
 {
 public:
   HeatStructure2DCouplerBC(const InputParameters & parameters);
@@ -26,15 +24,6 @@ public:
 protected:
   /// Heat transfer coefficient
   const Function & _htc;
-  /// Variable number of the variable to transfer
-  const unsigned int _coupled_variable_number;
-  /// Mesh alignment object
-  const MeshAlignment2D2D & _mesh_alignment;
-
-  /// Nonlinear system
-  const SystemBase & _nl_sys;
-  /// Solution vector
-  const NumericVector<Number> * const & _serialized_solution;
 
 public:
   static InputParameters validParams();

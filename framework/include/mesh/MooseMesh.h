@@ -18,6 +18,7 @@
 #include "MooseHashing.h"
 #include "MooseApp.h"
 #include "FaceInfo.h"
+#include "ElemInfo.h"
 
 #include <memory> //std::unique_ptr
 #include <unordered_map>
@@ -37,6 +38,8 @@
 class Assembly;
 class RelationshipManager;
 class MooseVariableBase;
+class MooseCoordTransform;
+class MooseUnits;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1066,7 +1069,7 @@ public:
   /// Accessor for local \p FaceInfo objects.
   const std::vector<const FaceInfo *> & faceInfo() const
   {
-    buildFaceInfo();
+    buildFiniteVolumeInfo();
     return _face_info;
   }
   /// Accessor for the local FaceInfo object on the side of one element. Returns null if ghosted.
@@ -1074,7 +1077,7 @@ public:
   /// Accessor for all \p FaceInfo objects.
   const std::vector<FaceInfo> & allFaceInfo() const
   {
-    buildFaceInfo();
+    buildFiniteVolumeInfo();
     return _all_face_info;
   }
   ///@}
@@ -1117,6 +1120,11 @@ public:
   Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const;
 
   /**
+   * Get the map from subdomain ID to coordinate system type, e.g. xyz, rz, or r-spherical
+   */
+  const std::map<SubdomainID, Moose::CoordinateSystemType> & getCoordSystem() const;
+
+  /**
    * Set the coordinate system for the provided blocks to \p coord_sys
    */
   void setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys);
@@ -1146,9 +1154,20 @@ public:
   void setCoordData(const MooseMesh & other_mesh);
 
   /**
-   * Mark the face information as dirty
+   * Mark the finite volume information as dirty
    */
-  void faceInfoDirty() { _face_info_dirty = true; }
+  void finiteVolumeInfoDirty() { _finite_volume_info_dirty = true; }
+
+  /**
+   * @return the coordinate transformation object that describes how to transform this problem's
+   * coordinate system into the canonical/reference coordinate system
+   */
+  MooseCoordTransform & coordTransform();
+
+  /**
+   * @return the length unit of this mesh provided through the coordinate transformation object
+   */
+  const MooseUnits & lengthUnit() const;
 
 protected:
   /// Deprecated (DO NOT USE)
@@ -1330,6 +1349,11 @@ private:
   /// FaceInfo objects accessible from this process
   mutable std::vector<FaceInfo> _all_face_info;
 
+  /// Map storing the ElemInfo-s of the ghost elements
+  mutable std::unordered_map<std::pair<const Elem *, unsigned int>, ElemInfo> _elem_to_ghost_info;
+  /// Map connecting elems with their corresponding ElemInfo
+  mutable std::unordered_map<const Elem *, ElemInfo> _elem_to_elem_info;
+
   /// Holds only those \p FaceInfo objects that have \p processor_id equal to this process's id,
   /// e.g. the local \p FaceInfo objects
   mutable std::vector<const FaceInfo *> _face_info;
@@ -1339,18 +1363,20 @@ private:
       _elem_side_to_face_info;
 
   // true if the _face_info member needs to be rebuilt/updated.
-  mutable bool _face_info_dirty = true;
+  mutable bool _finite_volume_info_dirty = true;
 
   /**
    * Builds the face info vector that stores meta-data needed for looping over and doing
-   * calculations based on mesh faces. We build face information only upon request and only if the
-   * \p _face_info_dirty flag is false, either because this method has yet to be called or
+   * calculations based on mesh faces and elements in a finite volume setting.
+   * We also build a vector of elem info objects which cache volumes and centroids for elements.
+   * We build finite volume information only upon request and only if the
+   * \p _finite_volume_info_dirty flag is false, either because this method has yet to be called or
    * because someone called \p update() indicating the mesh has changed. Face information is only
    * requested by getters that should appear semantically const. Consequently this method must
    * also be marked const and so we make it and all associated face information data private to
    * prevent misuse
    */
-  void buildFaceInfo() const;
+  void buildFiniteVolumeInfo() const;
 
   /**
    * A map of vectors indicating which dimensions are periodic in a regular orthogonal mesh for
@@ -1515,9 +1541,20 @@ private:
   /// Storage for RZ axis selection
   unsigned int _rz_coord_axis;
 
+  /// A coordinate transformation object that describes how to transform this problem's coordinate
+  /// system into the canonical/reference coordinate system
+  std::unique_ptr<MooseCoordTransform> _coord_transform;
+
   template <typename T>
   struct MeshType;
 };
+
+inline MooseCoordTransform &
+MooseMesh::coordTransform()
+{
+  mooseAssert(_coord_transform, "The coordinate transformation object is null.");
+  return *_coord_transform;
+}
 
 template <>
 struct MooseMesh::MeshType<ReplicatedMesh>

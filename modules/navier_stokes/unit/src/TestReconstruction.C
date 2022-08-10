@@ -25,6 +25,7 @@
 #include "MooseTypes.h"
 #include "CellCenteredMapFunctor.h"
 #include "Reconstructions.h"
+#include "MooseUtils.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/tensor_value.h"
@@ -104,7 +105,8 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
 
     CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
         up_weller(*mesh, "up_weller");
-    std::unordered_map<dof_id_type, RealVectorValue> up_moukalled;
+    CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
+        up_moukalled(*mesh, "up_moukalled");
     CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
         up_tano(*mesh, "up_tano");
 
@@ -115,7 +117,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
         auto face = Moose::FV::makeCDFace(fi);
         const RealVectorValue uf(functor(face));
         const Point surface_vector = fi.normal() * fi.faceArea();
-        auto product = (uf * fi.dCF()) * surface_vector;
+        auto product = (uf * fi.dCN()) * surface_vector;
 
         container[fi.elem().id()] += product * fi.gC() / fi.elemVolume();
         if (fi.neighborPtr())
@@ -146,11 +148,18 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
       auto elem_arg = Moose::ElemArg{elem, false};
       const RealVectorValue analytic(u(elem_arg));
 
-      auto compute_elem_error = [elem_id, current_h, &analytic](auto & container, auto & error)
+      auto compute_elem_error =
+          [elem_id, current_h, elem, &analytic](auto & container, auto & error)
       {
         auto & current = libmesh_map_find(container, elem_id);
         const auto diff = analytic - current;
         error += diff * diff * current_h * current_h;
+
+        // Test CellCenteredMapFunctor ElemPointArg overload
+        const auto elem_point_eval =
+            container(Moose::ElemPointArg({elem, elem->vertex_average(), false}));
+        for (const auto d : make_range(Moose::dim))
+          EXPECT_TRUE(MooseUtils::absoluteFuzzyEqual(current(d), elem_point_eval(d)));
       };
 
       compute_elem_error(up_weller, weller_error);
