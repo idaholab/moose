@@ -9,6 +9,8 @@
 
 #include "ExecFlagRegistry.h"
 
+#include <mutex>
+
 #include "MooseUtils.h"
 
 namespace moose
@@ -29,17 +31,10 @@ const ExecFlagType &
 ExecFlagRegistry::registerFlag(const std::string & name)
 {
   const auto name_upper = MooseUtils::toUpper(name);
-
-  {
-    std::shared_lock lock(_flags_mutex);
-    if (_flags.contains(name))
-      mooseError("The exec flag ", name_upper, "is already registered");
-  }
-
-  {
-    std::unique_lock lock(_flags_mutex);
-    return _flags.addAvailableFlags(ExecFlagType(name_upper, _flags.getNextValidID()));
-  }
+  std::unique_lock lock(_flags_mutex);
+  if (_flags.contains(name))
+    mooseError("The exec flag ", name_upper, "is already registered");
+  return _flags.addAvailableFlags(ExecFlagType(name_upper, _flags.getNextValidID()));
 }
 
 }
