@@ -52,15 +52,15 @@
 [CoupledHeatTransfers]
   [right]
     boundary = right
-    T_fluid = T_fluid
+    T_fluid = 'T_fluid'
     T = T
     T_wall = T_wall
-    htc = htc
+    htc = 'htc'
     direction = y
     num_layers = 10
     multi_app = thm
-    T_fluid_user_object = T_uo
-    htc_user_object = Hw_uo
+    T_fluid_user_objects = 'T_uo'
+    htc_user_objects = 'Hw_uo'
   []
 []
 

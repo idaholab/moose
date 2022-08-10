@@ -28,18 +28,30 @@ CoupledHeatTransferAction::validParams()
   params.addRequiredParam<VariableName>("T", "Solid side temperature variable");
   params.addRequiredParam<VariableName>(
       "T_wall", "Variable on the flow channel side into which to transfer the solid temperature");
-  params.addRequiredParam<VariableName>(
-      "T_fluid", "Variable on the solid side into which to transfer the fluid temperature");
-  params.addRequiredParam<VariableName>(
-      "htc", "Variable on the solid side into which to transfer the heat transfer coefficient");
+  params.addRequiredParam<std::vector<VariableName>>(
+      "T_fluid", "Variable(s) on the solid side into which to transfer the fluid temperature(s)");
+  params.addRequiredParam<std::vector<VariableName>>(
+      "htc",
+      "Variable(s) on the solid side into which to transfer the heat transfer coefficient(s)");
+  params.addParam<std::vector<UserObjectName>>(
+      "T_fluid_user_objects", "Spatial user object(s) holding the fluid temperature values");
+  params.addParam<std::vector<UserObjectName>>(
+      "htc_user_objects", "Spatial user object(s) holding the heat transfer coefficient values");
+  params.addDeprecatedParam<UserObjectName>(
+      "T_fluid_user_object",
+      "Spatial user object holding the fluid temperature values",
+      "This parameter is deprecated in favor of 'T_fluid_user_objects' (just add an 's' to "
+      "parameter name).");
+  params.addDeprecatedParam<UserObjectName>(
+      "htc_user_object",
+      "Spatial user object holding the heat transfer coefficient values",
+      "This parameter is deprecated in favor of 'htc_user_objects' (just add an 's' to parameter "
+      "name).");
+
   MooseEnum directions("x y z");
   params.addRequiredParam<MooseEnum>("direction", directions, "The direction of the layers.");
   params.addRequiredParam<unsigned int>("num_layers", "The number of layers.");
   params.addRequiredParam<std::string>("multi_app", "The name of the multi-app.");
-  params.addRequiredParam<UserObjectName>(
-      "T_fluid_user_object", "Spatial user object holding the fluid temperature values");
-  params.addRequiredParam<UserObjectName>(
-      "htc_user_object", "Spatial user object holding the heat transfer coefficient values");
 
   params.addParam<std::vector<Point>>(
       "positions", "Sub-app positions. Each set of 3 values represents a Point.");
@@ -52,18 +64,41 @@ CoupledHeatTransferAction::validParams()
 
 CoupledHeatTransferAction::CoupledHeatTransferAction(const InputParameters & params)
   : Action(params),
+
     _boundary(getParam<std::vector<BoundaryName>>("boundary")),
-    _solid_temp_var_name(getParam<VariableName>("T")),
-    _fluid_temp_var_name(getParam<VariableName>("T_fluid")),
-    _wall_temp_var_name(getParam<VariableName>("T_wall")),
-    _htc_var_name(getParam<VariableName>("htc")),
+
+    _T_solid_var_name(getParam<VariableName>("T")),
+    _T_wall_var_name(getParam<VariableName>("T_wall")),
+    _T_fluid_var_names(getParam<std::vector<VariableName>>("T_fluid")),
+    _htc_var_names(getParam<std::vector<VariableName>>("htc")),
+
+    _n_phases(_T_fluid_var_names.size()),
+
     _direction_enum(getParam<MooseEnum>("direction")),
     _num_layers(getParam<unsigned int>("num_layers")),
-    _T_avg_user_object_name(name() + "_T_avg_uo"),
-    _th_T_fluid_user_object_name(getParam<UserObjectName>("T_fluid_user_object")),
-    _th_htc_user_object_name(getParam<UserObjectName>("htc_user_object")),
+
+    _T_wall_user_object_name(name() + "_T_avg_uo"),
+
     _multi_app_name(getParam<std::string>("multi_app"))
 {
+  if (isParamValid("T_fluid_user_objects"))
+    _T_fluid_user_object_names = getParam<std::vector<UserObjectName>>("T_fluid_user_objects");
+  else if (isParamValid("T_fluid_user_object"))
+    _T_fluid_user_object_names = {getParam<UserObjectName>("T_fluid_user_object")};
+  else
+    mooseError("The parameter 'T_fluid_user_objects' must be specified.");
+
+  if (isParamValid("htc_user_objects"))
+    _htc_user_object_names = getParam<std::vector<UserObjectName>>("htc_user_objects");
+  else if (isParamValid("htc_user_object"))
+    _htc_user_object_names = {getParam<UserObjectName>("htc_user_object")};
+  else
+    mooseError("The parameter 'htc_user_objects' must be specified.");
+
+  if (_htc_var_names.size() != _n_phases || _T_fluid_user_object_names.size() != _n_phases ||
+      _htc_user_object_names.size() != _n_phases)
+    mooseError("The parameters 'T_fluid', 'htc', 'T_fluid_user_objects', and 'htc_user_objects' "
+               "must have the same numbers of elements.");
 }
 
 void
@@ -80,13 +115,16 @@ CoupledHeatTransferAction::act()
 void
 CoupledHeatTransferAction::addBCs()
 {
-  const std::string class_name = "CoupledConvectiveHeatFluxBC";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<NonlinearVariableName>("variable") = _solid_temp_var_name;
-  params.set<std::vector<BoundaryName>>("boundary") = {_boundary};
-  params.set<std::vector<VariableName>>("T_infinity") = {_fluid_temp_var_name};
-  params.set<std::vector<VariableName>>("htc") = {_htc_var_name};
-  _problem->addBoundaryCondition(class_name, name() + "_bc", params);
+  for (unsigned int k = 0; k < _n_phases; k++)
+  {
+    const std::string class_name = "CoupledConvectiveHeatFluxBC";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<NonlinearVariableName>("variable") = _T_solid_var_name;
+    params.set<std::vector<BoundaryName>>("boundary") = {_boundary};
+    params.set<std::vector<VariableName>>("T_infinity") = {_T_fluid_var_names[k]};
+    params.set<std::vector<VariableName>>("htc") = {_htc_var_names[k]};
+    _problem->addBoundaryCondition(class_name, name() + "_bc" + std::to_string(k), params);
+  }
 }
 
 void
@@ -114,11 +152,11 @@ CoupledHeatTransferAction::addUserObjects()
   // Solid temperature spatial user object
   {
     InputParameters params = class_params;
-    params.set<std::vector<VariableName>>("variable") = {_solid_temp_var_name};
+    params.set<std::vector<VariableName>>("variable") = {_T_solid_var_name};
     params.set<MooseEnum>("direction") = _direction_enum;
     params.set<unsigned int>("num_layers") = _num_layers;
     params.set<std::vector<BoundaryName>>("boundary") = {_boundary};
-    _problem->addUserObject(class_name, _T_avg_user_object_name, params);
+    _problem->addUserObject(class_name, _T_wall_user_object_name, params);
   }
 }
 
@@ -130,8 +168,8 @@ CoupledHeatTransferAction::addTransfers()
     const std::string class_name = "MultiAppUserObjectTransfer";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<MultiAppName>("to_multi_app") = _multi_app_name;
-    params.set<UserObjectName>("user_object") = {_T_avg_user_object_name};
-    params.set<std::vector<AuxVariableName>>("variable") = {_wall_temp_var_name};
+    params.set<UserObjectName>("user_object") = {_T_wall_user_object_name};
+    params.set<std::vector<AuxVariableName>>("variable") = {_T_wall_var_name};
     _problem->addTransfer(class_name, name() + "_T_solid_transfer", params);
   }
 
@@ -140,20 +178,23 @@ CoupledHeatTransferAction::addTransfers()
   // choice than MultiAppUserObjectTransfer, but it has been noted that for
   // large meshes, MultiAppNearestNodeTransfer is slower than
   // MultiAppUserObjectTransfer.
+  for (unsigned int k = 0; k < _n_phases; k++)
   {
-    const std::string class_name = "MultiAppUserObjectTransfer";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<MultiAppName>("from_multi_app") = _multi_app_name;
-    params.set<UserObjectName>("user_object") = {_th_T_fluid_user_object_name};
-    params.set<std::vector<AuxVariableName>>("variable") = {_fluid_temp_var_name};
-    _problem->addTransfer(class_name, name() + "_T_fluid_transfer", params);
-  }
-  {
-    const std::string class_name = "MultiAppUserObjectTransfer";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<MultiAppName>("from_multi_app") = _multi_app_name;
-    params.set<UserObjectName>("user_object") = _th_htc_user_object_name;
-    params.set<std::vector<AuxVariableName>>("variable") = {_htc_var_name};
-    _problem->addTransfer(class_name, name() + "_htc_transfer", params);
+    {
+      const std::string class_name = "MultiAppUserObjectTransfer";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<MultiAppName>("from_multi_app") = _multi_app_name;
+      params.set<UserObjectName>("user_object") = _T_fluid_user_object_names[k];
+      params.set<std::vector<AuxVariableName>>("variable") = {_T_fluid_var_names[k]};
+      _problem->addTransfer(class_name, name() + "_T_fluid_transfer" + std::to_string(k), params);
+    }
+    {
+      const std::string class_name = "MultiAppUserObjectTransfer";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<MultiAppName>("from_multi_app") = _multi_app_name;
+      params.set<UserObjectName>("user_object") = _htc_user_object_names[k];
+      params.set<std::vector<AuxVariableName>>("variable") = {_htc_var_names[k]};
+      _problem->addTransfer(class_name, name() + "_htc_transfer" + std::to_string(k), params);
+    }
   }
 }
