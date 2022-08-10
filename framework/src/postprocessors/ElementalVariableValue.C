@@ -58,7 +58,6 @@ ElementalVariableValue::getValue()
       value += u[i];
     value /= n;
   }
-
-
+  gatherSum(value);
   return value;
 }
