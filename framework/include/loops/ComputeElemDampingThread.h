@@ -40,9 +40,6 @@ protected:
   // Print list of objects executed and in which order
   void printGeneralExecutionInformation() const override;
 
-  // Print list of specific objects executed and in which order
-  void printBlockExecutionInformation() const override;
-
   Real _damping;
   NonlinearSystemBase & _nl;
   const MooseObjectWarehouse<ElementDamper> & _element_dampers;

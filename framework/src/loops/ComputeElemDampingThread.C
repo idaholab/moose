@@ -83,18 +83,9 @@ ComputeElemDampingThread::printGeneralExecutionInformation() const
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
-    console << "[DBG] Beginning Elemental loop to compute damping on " << execute_on << std::endl;
-  }
-}
-
-void
-ComputeElemDampingThread::printBlockExecutionInformation() const
-{
-  const auto damper_wh = _nl.getElementDamperWarehouse();
-  if (_fe_problem.shouldPrintExecution() && damper_wh.hasActiveObjects())
-  {
-    auto console = _fe_problem.console();
-    console << "[DBG] Ordering of dampers on block: " << _subdomain << std::endl;
-    // console << "[DBG] " << damper_wh.activeObjectsToString() << std::endl;
+    console << "[DBG] Beginning elemental loop to compute damping on " << execute_on << std::endl;
+    // Dampers are currently not block restricted
+    console << "[DBG] Ordering of dampers " << std::endl;
+    console << "[DBG] " << damper_wh.activeObjectsToString() << std::endl;
   }
 }
