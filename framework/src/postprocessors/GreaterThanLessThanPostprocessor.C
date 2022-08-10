@@ -110,4 +110,3 @@ GreaterThanLessThanPostprocessor::finalize()
 {
   gatherSum(_count);
 }
-

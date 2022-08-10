@@ -72,4 +72,3 @@ InterfaceDiffusiveFluxAverageTempl<is_ad>::threadJoin(const UserObject & y)
 
 template class InterfaceDiffusiveFluxAverageTempl<false>;
 template class InterfaceDiffusiveFluxAverageTempl<true>;
-

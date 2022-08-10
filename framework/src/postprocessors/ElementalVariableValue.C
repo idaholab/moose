@@ -62,5 +62,3 @@ ElementalVariableValue::getValue()
 
   return value;
 }
-
-

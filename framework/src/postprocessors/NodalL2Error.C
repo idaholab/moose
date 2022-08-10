@@ -59,4 +59,3 @@ NodalL2Error::finalize()
 {
   gatherSum(_integral_value);
 }
-

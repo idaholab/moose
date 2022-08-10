@@ -58,4 +58,3 @@ NodalL2Norm::finalize()
 {
   gatherSum(_sum_of_squares);
 }
-

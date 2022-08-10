@@ -76,5 +76,3 @@ SideAverageMaterialPropertyTempl<is_ad>::threadJoin(const UserObject & y)
 
 template class SideAverageMaterialPropertyTempl<false>;
 template class SideAverageMaterialPropertyTempl<true>;
-
-

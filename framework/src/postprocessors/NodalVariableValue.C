@@ -69,4 +69,3 @@ NodalVariableValue::getValue()
 
   return _scale_factor * value;
 }
-

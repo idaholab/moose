@@ -61,4 +61,3 @@ ElementAverageValue::finalize()
 {
   gatherSum(_volume);
 }
-

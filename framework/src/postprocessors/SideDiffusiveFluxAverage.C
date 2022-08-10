@@ -80,5 +80,3 @@ SideDiffusiveFluxAverageTempl<is_ad>::threadJoin(const UserObject & y)
 
 template class SideDiffusiveFluxAverageTempl<false>;
 template class SideDiffusiveFluxAverageTempl<true>;
-
-

@@ -66,4 +66,3 @@ SideAverageValue::finalize()
 {
   gatherSum(_volume);
 }
-

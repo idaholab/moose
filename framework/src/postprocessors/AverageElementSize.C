@@ -59,4 +59,3 @@ AverageElementSize::finalize()
   gatherSum(_total_size);
   gatherSum(_elems);
 }
-

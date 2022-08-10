@@ -75,6 +75,3 @@ ElementAverageMaterialPropertyTempl<is_ad>::threadJoin(const UserObject & y)
 
 template class ElementAverageMaterialPropertyTempl<false>;
 template class ElementAverageMaterialPropertyTempl<true>;
-
-
-

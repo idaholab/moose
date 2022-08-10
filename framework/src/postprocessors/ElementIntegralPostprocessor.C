@@ -63,4 +63,3 @@ ElementIntegralPostprocessor::finalize()
 {
   gatherSum(_integral_value);
 }
-
