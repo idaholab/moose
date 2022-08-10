@@ -115,6 +115,9 @@ protected:
   /// Print list of objects executed and in which order
   virtual void printGeneralExecutionInformation() const {};
 
+  /// Print list of objects executed and in which order
+  virtual void printBlockExecutionInformation() const {};
+
   FEProblemBase & _fe_problem;
   MooseMesh & _mesh;
   const std::set<TagID> & _tags;
@@ -236,7 +239,10 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
         _old_subdomain = _subdomain;
         _subdomain = elem.subdomain_id();
         if (_subdomain != _old_subdomain)
+        {
           subdomainChanged();
+          printBlockExecutionInformation();
+        }
 
         _old_neighbor_subdomain = _neighbor_subdomain;
         if (const Elem * const neighbor = (*faceinfo)->neighborPtr())
@@ -248,7 +254,10 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
           _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
 
         if (_neighbor_subdomain != _old_neighbor_subdomain)
+        {
           neighborSubdomainChanged();
+          printBlockExecutionInformation();
+        }
 
         onFace(**faceinfo);
         // Cache data now because onBoundary may clear it. E.g. there was a nasty bug for two
@@ -346,8 +355,10 @@ private:
                                   const std::set<unsigned int> & supplied,
                                   std::set<unsigned int> & difference);
 
-  /// Print list of objects executed and in which order
+  /// Print a short message informating about loop beginning
   void printGeneralExecutionInformation() const override;
+  /// Print list of objects executed and in which order
+  void printBlockExecutionInformation() const override;
 
   /// Variables
   std::set<MooseVariableFieldBase *> _fv_vars;
@@ -987,9 +998,20 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printGeneralExecutionInformati
   if (_fe_problem.shouldPrintExecution() && _fv_flux_kernels.size())
   {
     auto console = _fe_problem.console();
-    console << "Beginning finite volume flux kernels loop" << std::endl;
+    auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    console << "Beginning finite volume flux kernels loop on " << execute_on << std::endl;
+  }
+}
 
-    console << "Flux kernels, in any order, (on the faces they are defined on):" << std::endl;
+template <typename RangeType, typename AttributeTagType>
+void
+ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation() const
+{
+  if (_fe_problem.shouldPrintExecution() && _fv_flux_kernels.size())
+  {
+    auto console = _fe_problem.console();
+    console << "Flux kernels on block " << _subdomain << " and neighbor "
+            << _neighbor_subdomain << std::endl;
     std::string fv_flux_kernels =
         std::accumulate(_fv_flux_kernels.begin(),
                         _fv_flux_kernels.end(),
