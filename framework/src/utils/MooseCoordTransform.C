@@ -342,7 +342,8 @@ MultiCoordTransform::MultiCoordTransform(const MooseCoordTransform & single_app_
     _translation(),
     _destination_coord_type(Moose::COORD_XYZ),
     _destination_r_axis(MooseCoordTransform::INVALID),
-    _destination_z_axis(MooseCoordTransform::INVALID)
+    _destination_z_axis(MooseCoordTransform::INVALID),
+    _skip_coordinate_collapsing(false)
 {
 }
 
@@ -356,6 +357,9 @@ MultiCoordTransform::operator()(const Point & point) const
 
   // If this shows up in profiling we can make _translation a pointer
   ret += _translation;
+
+  if (_skip_coordinate_collapsing)
+    return ret;
 
   // Finally, coordinate system conversions
   if (_single_app_transform._coord_type == Moose::COORD_XYZ &&
@@ -415,6 +419,9 @@ MultiCoordTransform::mapBack(const Point & point) const
   // inverse rotate and then inverse scale
   if (_single_app_transform._rs_inverse)
     ret = (*_single_app_transform._rs_inverse) * ret;
+
+  if (_skip_coordinate_collapsing)
+    return ret;
 
   // Finally, coordinate system conversions
   if ((_single_app_transform._coord_type == Moose::COORD_XYZ &&
@@ -499,4 +506,10 @@ MultiCoordTransform::isIdentity() const
       return false;
 
   return true;
+}
+
+void
+MultiCoordTransform::skipCoordinateCollapsing(const bool skip_coordinate_collapsing)
+{
+  _skip_coordinate_collapsing = skip_coordinate_collapsing;
 }

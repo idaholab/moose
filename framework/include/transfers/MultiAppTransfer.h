@@ -103,6 +103,11 @@ public:
       return "Parent";
   }
 
+  /**
+   * Add the option to skip coordinate collapsing in coordinate transformation operations
+   */
+  static void addSkipCoordCollapsingParam(InputParameters & params);
+
   /// Whether the transfer owns a non-null from_multi_app
   bool hasFromMultiApp() const { return !(!_from_multi_app); }
 

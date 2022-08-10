@@ -236,6 +236,11 @@ public:
    */
   Moose::CoordinateSystemType coordinateSystem() const { return _single_app_transform._coord_type; }
 
+  /**
+   * set whether coordinate collapsing operations should be skipped
+   */
+  void skipCoordinateCollapsing(bool skip_coordinate_collapsing);
+
 private:
   /// A reference to the \p MooseCoordTransform object that describes scaling and rotation
   /// transformations from our domain to the reference domain, e.g. transformations that "occur"
@@ -253,4 +258,7 @@ private:
   /// If the destination coordinate system is RZ, the Cartesian axis corresponding to the
   /// axial/axis-of-symmetry coordinate
   MooseCoordTransform::Direction _destination_z_axis;
+
+  /// whether coordinate collapsing operations should be skipped
+  bool _skip_coordinate_collapsing;
 };

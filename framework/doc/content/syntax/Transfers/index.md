@@ -142,6 +142,7 @@ processes described here are:
 - [MultiAppNearestNodeTransfer.md]
 - [MultiAppPostprocessorInterpolationTransfer.md]
 - [MultiAppProjectionTransfer.md]
+- [MultiAppUserObjectTransfer.md]
 
 ### Examples
 

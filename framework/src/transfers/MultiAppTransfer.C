@@ -63,6 +63,16 @@ MultiAppTransfer::addBBoxFactorParam(InputParameters & params)
       "of the closest node/element with the tradeoff of more communication.");
 }
 
+void
+MultiAppTransfer::addSkipCoordCollapsingParam(InputParameters & params)
+{
+  params.addParam<bool>("skip_coordinate_collapsing",
+                        false,
+                        "Whether to skip coordinate collapsing when performing mapping and inverse "
+                        "mapping coordinate transformation operations. This parameter should only "
+                        "be set by users who really know what they're doing.");
+}
+
 MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   : Transfer(parameters),
     _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
@@ -224,6 +234,10 @@ MultiAppTransfer::getAppInfo()
   _to_local2global_map.clear();
   _from_local2global_map.clear();
 
+  const bool skip_coordinate_collapsing = isParamValid("skip_coordinate_collapsing")
+                                              ? getParam<bool>("skip_coordinate_collapsing")
+                                              : false;
+
   // Build the vectors for to problems, from problems, and subapps positions.
   if (_current_direction == FROM_MULTIAPP)
   {
@@ -231,6 +245,7 @@ MultiAppTransfer::getAppInfo()
     _to_positions.push_back(Point(0., 0., 0.));
     _to_transforms.push_back(
         std::make_unique<MultiCoordTransform>(_from_multi_app->problemBase().coordTransform()));
+    _to_transforms.back()->skipCoordinateCollapsing(skip_coordinate_collapsing);
 
     getFromMultiAppInfo();
   }
@@ -241,6 +256,7 @@ MultiAppTransfer::getAppInfo()
     _from_positions.push_back(Point(0., 0., 0.));
     _from_transforms.push_back(
         std::make_unique<MultiCoordTransform>(_to_multi_app->problemBase().coordTransform()));
+    _from_transforms.back()->skipCoordinateCollapsing(skip_coordinate_collapsing);
 
     getToMultiAppInfo();
   }
@@ -315,7 +331,8 @@ fillInfo(MultiApp & multi_app,
          std::vector<unsigned int> & map,
          std::vector<FEProblemBase *> & problems,
          std::vector<Point> & positions,
-         std::vector<std::unique_ptr<MultiCoordTransform>> & transforms)
+         std::vector<std::unique_ptr<MultiCoordTransform>> & transforms,
+         const bool skip_coordinate_collapsing)
 {
   for (unsigned int i_app = 0; i_app < multi_app.numGlobalApps(); i_app++)
   {
@@ -328,10 +345,12 @@ fillInfo(MultiApp & multi_app,
     map.push_back(i_app);
     problems.push_back(&subapp_problem);
     transforms.push_back(std::make_unique<MultiCoordTransform>(subapp_transform));
+    auto & transform = *transforms.back();
+    transform.skipCoordinateCollapsing(skip_coordinate_collapsing);
     if (multi_app.usingPositions())
     {
       const auto position = multi_app.position(i_app);
-      transforms.back()->setTranslationVector(position);
+      transform.setTranslationVector(position);
       positions.push_back(position);
     }
   }
@@ -357,7 +376,13 @@ MultiAppTransfer::getToMultiAppInfo()
   if (!_to_multi_app)
     mooseError("There is no to_multiapp to get info from");
 
-  fillInfo(*_to_multi_app, _to_local2global_map, _to_problems, _to_positions, _to_transforms);
+  fillInfo(*_to_multi_app,
+           _to_local2global_map,
+           _to_problems,
+           _to_positions,
+           _to_transforms,
+           isParamValid("skip_coordinate_collapsing") ? getParam<bool>("skip_coordinate_collapsing")
+                                                      : false);
 }
 
 void
@@ -366,8 +391,13 @@ MultiAppTransfer::getFromMultiAppInfo()
   if (!_from_multi_app)
     mooseError("There is no from_multiapp to get info from");
 
-  fillInfo(
-      *_from_multi_app, _from_local2global_map, _from_problems, _from_positions, _from_transforms);
+  fillInfo(*_from_multi_app,
+           _from_local2global_map,
+           _from_problems,
+           _from_positions,
+           _from_transforms,
+           isParamValid("skip_coordinate_collapsing") ? getParam<bool>("skip_coordinate_collapsing")
+                                                      : false);
 }
 
 namespace
