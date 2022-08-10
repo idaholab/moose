@@ -2,13 +2,16 @@
 
 !syntax description /UserObjects/RadialAverage
 
-Given a material property and a radius for averaging. The RadialAverage object
+Given a material property and a radius for averaging, the RadialAverage object
 computes the spatial average value of the property over the radius.
 
 ## Applications
 This can be used for nonlocal damage models where the damage_index that is used
 for computing the damage stress is average over a certain radius. This can help
-alleviate mesh sensitivity in certain cases.
+alleviate mesh sensitivity in certain cases. This can be accomplished by running
+the RadialAverage object on a local damage material property. Then using the
+[NonlocalDamage](/NonlocalDamage.md) model in conjunction with the [ComputeDamageStress](/ComputeDamageStress.md) the damage
+index used for updating the stress is averaged over a certain radius.
 
 ## Design
 
@@ -26,7 +29,7 @@ works in two stages.
         [nanoflann](https://github.com/jlblancoc/nanoflann) library bundled with
         libMesh)
 
-    3. a loop over all QPs is performed and at each QP a $r_{cut}$ (`r_cut`)
+    3. a loop over all QPs is performed and at each QP a (`radius`)
         radius search in the KD-tree is performed
 
     4. the results from the search are used to spatially averaged

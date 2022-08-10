@@ -36,7 +36,7 @@ RadialAverage::validParams()
   InputParameters params = ElementUserObject::validParams();
   params.addClassDescription("Perform a radial equal weight average of a material property");
   params.addRequiredParam<std::string>("material_name", "Name of the material to average.");
-  params.addRequiredParam<Real>("r_cut", "Cut-off radius for the averaging");
+  params.addRequiredParam<Real>("radius", "Cut-off radius for the averaging");
 
   // we run this object once at the beginning of the timestep by default
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
@@ -51,9 +51,9 @@ RadialAverage::validParams()
 
 RadialAverage::RadialAverage(const InputParameters & parameters)
   : ElementUserObject(parameters),
-    _v_name(getParam<std::string>("material_name")),
-    _v(getMaterialProperty<Real>(_v_name)),
-    _r_cut(getParam<Real>("r_cut")),
+    _averaged_material_name(getParam<std::string>("material_name")),
+    _averaged_material(getMaterialProperty<Real>(_averaged_material_name)),
+    _radius(getParam<Real>("radius")),
     _dof_map(_fe_problem.getNonlinearSystemBase().dofMap()),
     _update_communication_lists(false),
     _my_pid(processor_id()),
@@ -83,7 +83,7 @@ RadialAverage::execute()
 
   // collect all QP data
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-    _qp_data.emplace_back(_q_point[qp], id, qp, _JxW[qp] * _coord[qp], _v[qp]);
+    _qp_data.emplace_back(_q_point[qp], id, qp, _JxW[qp] * _coord[qp], _averaged_material[qp]);
 
   // make sure the result map entry for the current element is sized correctly
   auto i = _average.find(id);
@@ -286,7 +286,7 @@ RadialAverage::updateCommunicationLists()
   // build KD-Tree using local qpoint data
   const unsigned int max_leaf_size = 20; // slightly affects runtime
   auto point_list = PointListAdaptor<QPData>(_qp_data.begin(), _qp_data.end());
-  auto kd_tree = libmesh_make_unique<KDTreeType>(
+  auto kd_tree = std::make_unique<KDTreeType>(
       LIBMESH_DIM, point_list, nanoflann::KDTreeSingleIndexAdaptorParams(max_leaf_size));
   mooseAssert(kd_tree != nullptr, "KDTree was not properly initialized.");
   kd_tree->buildIndex();
@@ -299,8 +299,8 @@ RadialAverage::updateCommunicationLists()
   {
     ret_matches.clear();
     Point centroid = elem->vertex_average();
-    const Real r_cut2 = _r_cut + elem->hmax() / 2.0;
-    kd_tree->radiusSearch(&(centroid(0)), r_cut2, ret_matches, search_params);
+    const Real radius2 = _radius + elem->hmax() / 2.0;
+    kd_tree->radiusSearch(&(centroid(0)), radius2, ret_matches, search_params);
     for (auto & match : ret_matches)
       _communication_lists[elem->processor_id()].insert(match.first);
   }

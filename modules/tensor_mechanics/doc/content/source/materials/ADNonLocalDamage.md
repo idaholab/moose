@@ -1,28 +1,19 @@
-# Scalar Material Damage
+# AD Nonlocal Damage
 
-!syntax description /Materials/ADNonLocalDamage
+!syntax description /Materials/ADNonlocalDamage
 
 ## Description
 
-`ADNonLocalDamage` is a model to define the effect of damage on the stress and stiffness in a continuum damage mechanics setting. It does not directly compute the stress, but must be used in conjunction with [ComputeDamageStress](/ComputeDamageStress.md).
-
-This model is a scalar damage model in which the stress $\boldsymbol{\sigma}$ is computed as a function of the damage $d$, the original stiffness of the material $\mathbb{C}$ and the elastic strain $\boldsymbol{\varepsilon}$:
-
-\begin{equation}
-    \boldsymbol{\sigma} = (1 - d)\ \mathbb{C} : \boldsymbol{\varepsilon}
-\end{equation}
-
-The damage variable $d$ itself is computed as a nonlocal extension of an
-external scalar damage model defined by the `local_damage_model`
-and `average_UO` input parameters. Where `average_UO` is a RadialAverage user
-object that defines the nonlocal averaging properties. The damage value is
-delayed by a single `execte_on` (timestep or nonlinear).
+`ADNonlocalDamage` is a model to define the effect of damage on the stress and
+stiffness in a continuum damage mechanics setting. Uses automatic
+differentiation material properties. Similar to the [`NonlocalDamage`](/NonlocalDamage.md) object except that the
+material properties generated can be used with automatic differentiation.
 
 
-!syntax parameters /Materials/ADNonLocalDamage
+!syntax parameters /Materials/ADNonlocalDamage
 
-!syntax inputs /Materials/ADNonLocalDamage
+!syntax inputs /Materials/ADNonlocalDamage
 
-!syntax children /Materials/ADNonLocalDamage
+!syntax children /Materials/ADNonlocalDamage
 
 !bibtex bibliography

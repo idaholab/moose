@@ -70,7 +70,7 @@ NonLocalDamageTempl<is_ad>::updateQpDamageIndex()
     _average_damage = _average.find(_current_elem->id());
     _prev_elem = _current_elem;
   }
-  // Make sure that we find the new element if not return 0
+  // Check that we found the new element
   if (_average_damage != _average.end())
     // return max of the old damage or new average damage
     _damage_index[_qp] = std::max(_average_damage->second[_qp], _damage_index_old[_qp]);

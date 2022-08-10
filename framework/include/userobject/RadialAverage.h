@@ -75,13 +75,13 @@ protected:
   void insertNotLocalPointNeighbors(dof_id_type);
   void updateCommunicationLists();
 
-  /// material name to get gethered
-  std::string _v_name;
+  /// material name to get averaged
+  std::string _averaged_material_name;
   /// material to be gathered
-  const MaterialProperty<Real> & _v;
+  const MaterialProperty<Real> & _averaged_material;
 
   /// cut-off radius
-  const Real _r_cut;
+  const Real _radius;
 
   /// gathered data
   std::vector<QPData> _qp_data;
