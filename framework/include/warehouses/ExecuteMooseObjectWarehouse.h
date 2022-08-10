@@ -43,9 +43,6 @@ public:
    * @param object A shared pointer to the object being added
    */
   void addObject(std::shared_ptr<T> object, THREAD_ID tid = 0, bool recurse = true) override;
-  void addObjectMask(std::shared_ptr<T> object,
-                     THREAD_ID tid = 0,
-                     std::uint16_t flag_mask = std::numeric_limits<std::uint16_t>::max());
 
   ///@{
   /**
@@ -206,31 +203,13 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object,
                                           THREAD_ID tid,
                                           bool /*recurse*/)
 {
-  addObjectMask(object, tid, 0xFFFF);
-}
-
-template <typename T>
-void
-ExecuteMooseObjectWarehouse<T>::addObjectMask(std::shared_ptr<T> object,
-                                              THREAD_ID tid,
-                                              std::uint16_t flag_mask)
-{
   // Update list of all objects
   MooseObjectWarehouse<T>::addObject(object, tid);
 
   // Update the execute flag lists of objects
-  std::shared_ptr<SetupInterface> ptr = std::dynamic_pointer_cast<SetupInterface>(object);
-  if (ptr)
-  {
-    MooseEnumIterator iter = ptr->getExecuteOnEnum().begin();
-    for (; iter != ptr->getExecuteOnEnum().end(); ++iter)
-    {
-
-      auto masked_flag = static_cast<std::uint16_t>(iter->id()) & flag_mask;
-      if (masked_flag != 0)
-        _execute_objects[*iter].addObject(object, tid);
-    }
-  }
+  if (const std::shared_ptr<SetupInterface> ptr = std::dynamic_pointer_cast<SetupInterface>(object))
+    for (const auto & flag : ptr->getExecuteOnEnum())
+      _execute_objects[flag].addObject(object, tid);
   else
     mooseError("The object being added (",
                object->name(),

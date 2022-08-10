@@ -229,7 +229,6 @@ void registerActions(Syntax & syntax, ActionFactory & action_factory);
 void registerActions(Syntax & syntax,
                      ActionFactory & action_factory,
                      const std::set<std::string> & obj_labels);
-void registerExecFlags(Factory & factory);
 
 void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
 

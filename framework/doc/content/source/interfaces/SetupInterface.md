@@ -103,8 +103,7 @@ flag (`EXEC_ADAPT_MESH`).
 
 !listing modules/level_set/include/base/LevelSetTypes.h
 
-This new global must be defined, which occurs in the corresponding source file. When
-defining the new flags with a name and optionally an integer value.
+This new global must be defined, which occurs in the corresponding source file using the `defineExecFlag()` macro defined in `ExecFlagRegistry.h`.
 
 !listing modules/level_set/src/base/LevelSetTypes.C
 

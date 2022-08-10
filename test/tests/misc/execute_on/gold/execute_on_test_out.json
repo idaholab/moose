@@ -1,0 +1,98 @@
+{
+    "reporters": {
+        "custom": {
+            "type": "CurrentExecFlagReporter",
+            "values": {
+                "exec_flag": {
+                    "type": "std::string"
+                }
+            }
+        },
+        "initial": {
+            "type": "CurrentExecFlagReporter",
+            "values": {
+                "exec_flag": {
+                    "type": "std::string"
+                }
+            }
+        },
+        "linear": {
+            "type": "CurrentExecFlagReporter",
+            "values": {
+                "exec_flag": {
+                    "type": "std::string"
+                }
+            }
+        },
+        "nonlinear": {
+            "type": "CurrentExecFlagReporter",
+            "values": {
+                "exec_flag": {
+                    "type": "std::string"
+                }
+            }
+        },
+        "timestep_begin": {
+            "type": "CurrentExecFlagReporter",
+            "values": {
+                "exec_flag": {
+                    "type": "std::string"
+                }
+            }
+        },
+        "timestep_end": {
+            "type": "CurrentExecFlagReporter",
+            "values": {
+                "exec_flag": {
+                    "type": "std::string"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "custom": {
+                "exec_flag": ""
+            },
+            "initial": {
+                "exec_flag": "INITIAL"
+            },
+            "linear": {
+                "exec_flag": ""
+            },
+            "nonlinear": {
+                "exec_flag": ""
+            },
+            "time": 0.0,
+            "time_step": 0,
+            "timestep_begin": {
+                "exec_flag": ""
+            },
+            "timestep_end": {
+                "exec_flag": ""
+            }
+        },
+        {
+            "custom": {
+                "exec_flag": ""
+            },
+            "initial": {
+                "exec_flag": "INITIAL"
+            },
+            "linear": {
+                "exec_flag": "LINEAR"
+            },
+            "nonlinear": {
+                "exec_flag": "NONLINEAR"
+            },
+            "time": 1.0,
+            "time_step": 1,
+            "timestep_begin": {
+                "exec_flag": "TIMESTEP_BEGIN"
+            },
+            "timestep_end": {
+                "exec_flag": "TIMESTEP_END"
+            }
+        }
+    ]
+}

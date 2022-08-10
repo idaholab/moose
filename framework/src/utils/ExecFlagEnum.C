@@ -15,10 +15,10 @@ ExecFlagEnum::ExecFlagEnum() : MultiMooseEnum() {}
 ExecFlagEnum::ExecFlagEnum(const MultiMooseEnum & other) : MultiMooseEnum(other) {}
 ExecFlagEnum::ExecFlagEnum(const ExecFlagEnum & other) : MultiMooseEnum(other) {}
 
-void
+const ExecFlagType &
 ExecFlagEnum::addAvailableFlags(const ExecFlagType & flag)
 {
-  addEnumerationItem(flag);
+  return addEnumerationItem(flag);
 }
 
 void

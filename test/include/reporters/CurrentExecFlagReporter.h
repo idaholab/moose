@@ -9,17 +9,17 @@
 
 #pragma once
 
-#include "AuxKernel.h"
+#include "GeneralReporter.h"
 
-class CheckCurrentExecAux : public AuxKernel
+class CurrentExecFlagReporter : public GeneralReporter
 {
 public:
   static InputParameters validParams();
-
-  CheckCurrentExecAux(const InputParameters & parameters);
+  CurrentExecFlagReporter(const InputParameters & parameters);
+  virtual void initialize() override {}
+  virtual void finalize() override {}
+  virtual void execute() override;
 
 protected:
-  virtual Real computeValue();
-
-  const FEProblemBase & _problem;
+  std::string & _exec_flag;
 };

@@ -11,6 +11,7 @@
 
 #include "MooseHashing.h"
 #include "TheWarehouse.h"
+#include "Moose.h"
 
 #include <ostream>
 #include <tuple>
@@ -129,7 +130,10 @@ public:
 class AttribExecOns : public Attribute
 {
 public:
-  typedef unsigned int Key;
+  /// Execute flag that is used to represent all flags when querying AttribExecOns
+  static const ExecFlagType EXEC_ALL;
+
+  typedef int Key;
   void setFrom(Key k)
   {
     _vals.clear();
@@ -137,9 +141,10 @@ public:
   }
 
   AttribExecOns(TheWarehouse & w) : Attribute(w, "exec_ons") {}
-  AttribExecOns(TheWarehouse & w, unsigned int exec_flag) : Attribute(w, "exec_ons")
+  AttribExecOns(TheWarehouse & w, const int id) : Attribute(w, "exec_ons"), _vals({id}) {}
+  AttribExecOns(TheWarehouse & w, const ExecFlagType & exec_flag)
+    : Attribute(w, "exec_ons"), _vals({exec_flag.id()})
   {
-    _vals.push_back(exec_flag);
   }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
@@ -148,7 +153,7 @@ public:
   clonefunc(AttribExecOns);
 
 private:
-  std::vector<unsigned int> _vals;
+  std::vector<int> _vals;
 };
 
 class AttribSubdomains : public Attribute

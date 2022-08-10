@@ -115,7 +115,7 @@ StochasticToolsApp::requiresTorch(const MooseObject &
 void
 StochasticToolsApp::registerExecFlags(Factory & /*factory*/)
 {
-  mooseDeprecated("use registerAll instead of registerExecFlags");
+  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void
