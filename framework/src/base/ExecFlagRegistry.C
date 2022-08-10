@@ -32,8 +32,8 @@ ExecFlagRegistry::registerFlag(const std::string & name)
 {
   const auto name_upper = MooseUtils::toUpper(name);
   std::unique_lock lock(_flags_mutex);
-  if (_flags.contains(name))
-    mooseError("The exec flag ", name_upper, "is already registered");
+  if (_flags.find(name_upper) != _flags.items().end())
+    mooseError("The exec flag ", name_upper, " is already registered");
   return _flags.addAvailableFlags(ExecFlagType(name_upper, _flags.getNextValidID()));
 }
 
