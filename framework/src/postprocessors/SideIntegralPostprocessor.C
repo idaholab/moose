@@ -38,6 +38,7 @@ SideIntegralPostprocessor::execute()
 Real
 SideIntegralPostprocessor::getValue()
 {
+  gatherSum(_integral_value);
   return _integral_value;
 }
 
@@ -69,5 +70,5 @@ SideIntegralPostprocessor::computeIntegral()
 void
 SideIntegralPostprocessor::finalize()
 {
-  gatherSum(_integral_value);
+  return;
 }

@@ -43,7 +43,7 @@ Real
 ElementAverageValue::getValue()
 {
   Real integral = ElementIntegralVariablePostprocessor::getValue();
-
+  gatherSum(_volume);
   return integral / _volume;
 }
 
@@ -58,5 +58,5 @@ ElementAverageValue::threadJoin(const UserObject & y)
 void
 ElementAverageValue::finalize()
 {
-  gatherSum(_volume);
+  return;
 }
