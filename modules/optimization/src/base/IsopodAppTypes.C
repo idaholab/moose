@@ -1,6 +1,9 @@
 #include "IsopodAppTypes.h"
-#include "MooseEnumItem.h"
+#include "ExecFlagRegistry.h"
 
-const ExecFlagType EXEC_FORWARD("FORWARD");
-const ExecFlagType EXEC_ADJOINT("ADJOINT");
-const ExecFlagType EXEC_HOMOGENEOUS_FORWARD("HOMOGENEOUS_FORWARD");
+namespace IsopodAppTypes
+{
+const ExecFlagType EXEC_FORWARD = registerExecFlag("FORWARD");
+const ExecFlagType EXEC_ADJOINT = registerExecFlag("ADJOINT");
+const ExecFlagType EXEC_HOMOGENEOUS_FORWARD = registerExecFlag("HOMOGENEOUS_FORWARD");
+}

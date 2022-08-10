@@ -13,8 +13,13 @@ OptimizeSolve::validParams()
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
-  exec_enum.addAvailableFlags(EXEC_NONE, EXEC_FORWARD, EXEC_ADJOINT, EXEC_HOMOGENEOUS_FORWARD);
-  exec_enum = {EXEC_FORWARD, EXEC_ADJOINT, EXEC_HOMOGENEOUS_FORWARD};
+  exec_enum.addAvailableFlags(EXEC_NONE,
+                              IsopodAppTypes::EXEC_FORWARD,
+                              IsopodAppTypes::EXEC_ADJOINT,
+                              IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD);
+  exec_enum = {IsopodAppTypes::EXEC_FORWARD,
+               IsopodAppTypes::EXEC_ADJOINT,
+               IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD};
   params.addParam<ExecFlagEnum>(
       "solve_on", exec_enum, "List of flags indicating when inner system solve should occur.");
   return params;
@@ -140,9 +145,9 @@ OptimizeSolve::taoSolve()
   CHKERRQ(ierr);
 
   // Backup multiapps so transient problems start with the same initial condition
-  _problem.backupMultiApps(EXEC_FORWARD);
-  _problem.backupMultiApps(EXEC_ADJOINT);
-  _problem.backupMultiApps(EXEC_HOMOGENEOUS_FORWARD);
+  _problem.backupMultiApps(IsopodAppTypes::EXEC_FORWARD);
+  _problem.backupMultiApps(IsopodAppTypes::EXEC_ADJOINT);
+  _problem.backupMultiApps(IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD);
 
   // Solve optimization
   ierr = TaoSolve(_tao);
@@ -307,12 +312,12 @@ OptimizeSolve::objectiveFunction()
 {
   _form_function->updateParameters(*_parameters.get());
 
-  _problem.execute(EXEC_FORWARD);
+  _problem.execute(IsopodAppTypes::EXEC_FORWARD);
   bool multiapp_passed = true;
-  _problem.restoreMultiApps(EXEC_FORWARD);
-  if (!_problem.execMultiApps(EXEC_FORWARD))
+  _problem.restoreMultiApps(IsopodAppTypes::EXEC_FORWARD);
+  if (!_problem.execMultiApps(IsopodAppTypes::EXEC_FORWARD))
     multiapp_passed = false;
-  if (_solve_on.contains(EXEC_FORWARD))
+  if (_solve_on.contains(IsopodAppTypes::EXEC_FORWARD))
     _inner_solve->solve();
 
   _obj_iterate++;
@@ -324,11 +329,11 @@ OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 {
   _form_function->updateParameters(*_parameters.get());
 
-  _problem.execute(EXEC_ADJOINT);
-  _problem.restoreMultiApps(EXEC_ADJOINT);
-  if (!_problem.execMultiApps(EXEC_ADJOINT))
+  _problem.execute(IsopodAppTypes::EXEC_ADJOINT);
+  _problem.restoreMultiApps(IsopodAppTypes::EXEC_ADJOINT);
+  if (!_problem.execMultiApps(IsopodAppTypes::EXEC_ADJOINT))
     mooseError("Adjoint solve multiapp failed!");
-  if (_solve_on.contains(EXEC_ADJOINT))
+  if (_solve_on.contains(IsopodAppTypes::EXEC_ADJOINT))
     _inner_solve->solve();
 
   _grad_iterate++;
@@ -341,25 +346,25 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
   // What happens for material inversion when the Hessian
   // is dependent on the parameters? Deal with it later???
   // see notes on how this needs to change for Material inversion
-  if (_problem.hasMultiApps() && !_problem.hasMultiApps(EXEC_HOMOGENEOUS_FORWARD))
+  if (_problem.hasMultiApps() && !_problem.hasMultiApps(IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD))
     mooseError("Hessian based optimization algorithms require a sub-app with:\n"
                "   execute_on = HOMOGENEOUS_FORWARD");
   _form_function->updateParameters(s);
 
-  _problem.execute(EXEC_HOMOGENEOUS_FORWARD);
-  _problem.restoreMultiApps(EXEC_HOMOGENEOUS_FORWARD);
-  if (!_problem.execMultiApps(EXEC_HOMOGENEOUS_FORWARD))
+  _problem.execute(IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD);
+  _problem.restoreMultiApps(IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD);
+  if (!_problem.execMultiApps(IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD))
     mooseError("Homogeneous forward solve multiapp failed!");
-  if (_solve_on.contains(EXEC_HOMOGENEOUS_FORWARD))
+  if (_solve_on.contains(IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD))
     _inner_solve->solve();
 
   _form_function->setMisfitToSimulatedValues();
 
-  _problem.execute(EXEC_ADJOINT);
-  _problem.restoreMultiApps(EXEC_ADJOINT);
-  if (!_problem.execMultiApps(EXEC_ADJOINT))
+  _problem.execute(IsopodAppTypes::EXEC_ADJOINT);
+  _problem.restoreMultiApps(IsopodAppTypes::EXEC_ADJOINT);
+  if (!_problem.execMultiApps(IsopodAppTypes::EXEC_ADJOINT))
     mooseError("Adjoint solve multiapp failed!");
-  if (_solve_on.contains(EXEC_ADJOINT))
+  if (_solve_on.contains(IsopodAppTypes::EXEC_ADJOINT))
     _inner_solve->solve();
 
   _form_function->computeGradient(Hs);
