@@ -137,7 +137,9 @@ satisfactory resolution.
 !template item key=information-management
 !! information-management-begin
 The core framework in its entirety will be made publicly available on an appropriate repository
-hosting site. Backups and security services will be provided by the hosting service.
+hosting site. Day-to-day backups and security services will be provided by the hosting service. More
+information about MOOSE backups of the public repository on [!ac](INL)-hosted services can be found
+on the following page: [sqa/github_backup.md]
 !! information-management-finish
 !template-end!
 
