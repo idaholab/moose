@@ -10,8 +10,8 @@ air_effective_k = 0.5 # W/(m K)
     xmax = 7.0
     ymin = 0.0
     ymax = 5.0
-    nx = 70
-    ny = 50
+    nx = 35
+    ny = 25
   []
 []
 
@@ -116,38 +116,43 @@ air_effective_k = 0.5 # W/(m K)
 []
 
 [Controls]
-  inactive = src_control_final
+  inactive = 'src_control src_control_final'
   [src_control]
     type = LibtorchDRLControl
     parameters = "BCs/top_flux/value"
     action_postprocessors = "top_flux"
     log_probability_postprocessors = "log_prob_top_flux"
-    responses = 'center_temp env_temp'
+    responses = 'center_temp_tend env_temp'
 
     # keep consistent with LibtorchDRLControlTrainer
-    input_timesteps = 1
+    input_timesteps = 2
     response_scaling_factors = '0.03 0.03'
-    response_shift_factors = '270 270'
-    action_standard_deviations = '0.1'
-    action_scaling_factors = 100
+    response_shift_factors = '290 290'
+    action_standard_deviations = '0.02'
+    
+    action_scaling_factors = 200
 
     execute_on = 'TIMESTEP_BEGIN'
   []
   [src_control_final]
     type = LibtorchNeuralNetControl
 
-    filename = mynet_control.net
-    num_neurons_per_layer = '128 64 27'
+    filename = 'mynet_control.net'
+    num_neurons_per_layer = '16 6'
     activation_function = 'relu'
 
     parameters = "BCs/top_flux/value"
     action_postprocessors = "top_flux"
-    responses = 'center_temp env_temp'
+    log_probability_postprocessors = "log_prob_top_flux"
+    responses = 'center_temp_tend env_temp'
 
-    input_timesteps = 1
+    # keep consistent with LibtorchDRLControlTrainer
+    input_timesteps = 2
     response_scaling_factors = '0.03 0.03'
-    response_shift_factors = '270 270'
-    action_scaling_factors = 50
+    response_shift_factors = '290 290'
+    action_standard_deviations = '0.02'
+    
+    action_scaling_factors = 200
 
     execute_on = 'TIMESTEP_BEGIN'
   []
@@ -157,8 +162,9 @@ air_effective_k = 0.5 # W/(m K)
   type = Transient
   solve_type = 'NEWTON'
 
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
+  line_search = 'none'
 
   nl_rel_tol = 1e-7
 

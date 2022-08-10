@@ -141,3 +141,14 @@ The entire trainer input file is presented below:
   data=[{'x':'time', 'y':'reward/average_reward'}]
   layout={'xaxis':{'type':'linear', 'title':'Number of simulations'},
           'yaxis':{'type':'linear','title':'Average Episodic Reward'}}
+
+!plot scatter
+  id=results caption=The evolution of the reward values over the iteration.
+  filename=examples/libtorch_drl_control/gold/results.csv
+  data=[{'x':'time', 'y':'controlled', 'name':'Controlled'}, 
+        {'x':'time', 'y':'uncontrolled', 'name':'Uncontrolled'}, 
+        {'x':'time', 'y':'env', 'name':'Environment'}, 
+        {'x':'time', 'y':'target', 'name':'Target'}]
+  layout={'xaxis':{'type':'linear', 'title':'Time (s)'},
+          'yaxis':{'type':'linear','title':'Temperature (K)'}}
+
