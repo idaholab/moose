@@ -2,6 +2,7 @@
 set -eu
 
 git clean -xfd
+git submodule update --init moose
 cp -R pyhit $SP_DIR/
 cd src
 make bindings
