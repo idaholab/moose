@@ -27,6 +27,7 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject & y) override;
+  virtual void finalize() override;
   virtual Real getValue() override;
 
 protected:

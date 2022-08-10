@@ -52,9 +52,15 @@ SideAverageMaterialPropertyTempl<is_ad>::getValue()
 {
   const Real integral = SideIntegralMaterialPropertyTempl<is_ad>::getValue();
 
-  SideIntegralMaterialPropertyTempl<is_ad>::gatherSum(_area);
 
   return integral / _area;
+}
+
+template <bool is_ad>
+void
+SideAverageMaterialPropertyTempl<is_ad>::finalize()
+{
+  SideIntegralMaterialPropertyTempl<is_ad>::gatherSum(_area);
 }
 
 template <bool is_ad>
@@ -70,3 +76,5 @@ SideAverageMaterialPropertyTempl<is_ad>::threadJoin(const UserObject & y)
 
 template class SideAverageMaterialPropertyTempl<false>;
 template class SideAverageMaterialPropertyTempl<true>;
+
+

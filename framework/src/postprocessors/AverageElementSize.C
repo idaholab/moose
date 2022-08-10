@@ -41,8 +41,6 @@ AverageElementSize::execute()
 Real
 AverageElementSize::getValue()
 {
-  gatherSum(_total_size);
-  gatherSum(_elems);
 
   return _total_size / _elems;
 }
@@ -54,3 +52,11 @@ AverageElementSize::threadJoin(const UserObject & y)
   _total_size += pps._total_size;
   _elems += pps._elems;
 }
+
+void
+AverageElementSize::finalize()
+{
+  gatherSum(_total_size);
+  gatherSum(_elems);
+}
+

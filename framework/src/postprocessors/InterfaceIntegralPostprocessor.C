@@ -45,7 +45,6 @@ Real
 InterfaceIntegralPostprocessor::getValue()
 {
   InterfacePostprocessor::getValue();
-  gatherSum(_integral_value);
   return _integral_value;
 }
 
@@ -66,3 +65,10 @@ InterfaceIntegralPostprocessor::computeIntegral()
     sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
   return sum;
 }
+
+void
+InterfaceIntegralPostprocessor::finalize()
+{
+  gatherSum(_integral_value);
+}
+

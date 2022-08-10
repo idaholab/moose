@@ -66,7 +66,7 @@ NodalVariableValue::getValue()
   if (_node_ptr && _node_ptr->processor_id() == processor_id())
     value = _subproblem.getStandardVariable(_tid, _var_name).getNodalValue(*_node_ptr);
 
-  gatherSum(value);
 
   return _scale_factor * value;
 }
+

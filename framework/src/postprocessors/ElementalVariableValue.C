@@ -59,7 +59,8 @@ ElementalVariableValue::getValue()
     value /= n;
   }
 
-  gatherSum(value);
 
   return value;
 }
+
+

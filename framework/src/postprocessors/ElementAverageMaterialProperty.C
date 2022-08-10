@@ -52,9 +52,14 @@ ElementAverageMaterialPropertyTempl<is_ad>::getValue()
 {
   const Real integral = ElementIntegralMaterialPropertyTempl<is_ad>::getValue();
 
-  ElementIntegralMaterialPropertyTempl<is_ad>::gatherSum(_volume);
-
   return integral / _volume;
+}
+
+template <bool is_ad>
+void
+ElementAverageMaterialPropertyTempl<is_ad>::finalize()
+{
+  ElementIntegralMaterialPropertyTempl<is_ad>::gatherSum(_volume);
 }
 
 template <bool is_ad>
@@ -70,3 +75,6 @@ ElementAverageMaterialPropertyTempl<is_ad>::threadJoin(const UserObject & y)
 
 template class ElementAverageMaterialPropertyTempl<false>;
 template class ElementAverageMaterialPropertyTempl<true>;
+
+
+

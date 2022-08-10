@@ -57,9 +57,15 @@ SideDiffusiveFluxAverageTempl<is_ad>::getValue()
 {
   Real integral = SideDiffusiveFluxIntegralTempl<is_ad, Real>::getValue();
 
-  this->gatherSum(_volume);
 
   return integral / _volume;
+}
+
+template <bool is_ad>
+void
+SideDiffusiveFluxAverageTempl<is_ad>::finalize()
+{
+  this->gatherSum(_volume);
 }
 
 template <bool is_ad>
@@ -74,3 +80,5 @@ SideDiffusiveFluxAverageTempl<is_ad>::threadJoin(const UserObject & y)
 
 template class SideDiffusiveFluxAverageTempl<false>;
 template class SideDiffusiveFluxAverageTempl<true>;
+
+
