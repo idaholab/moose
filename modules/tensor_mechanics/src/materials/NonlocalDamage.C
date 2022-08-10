@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NonLocalDamage.h"
+#include "NonlocalDamage.h"
 
-registerMooseObject("MooseApp", NonLocalDamage);
-registerMooseObject("MooseApp", ADNonLocalDamage);
+registerMooseObject("MooseApp", NonlocalDamage);
+registerMooseObject("MooseApp", ADNonlocalDamage);
 
 template <bool is_ad>
 InputParameters
-NonLocalDamageTempl<is_ad>::validParams()
+NonlocalDamageTempl<is_ad>::validParams()
 {
   InputParameters params = ScalarDamageBaseTempl<is_ad>::validParams();
   params.addClassDescription(
@@ -28,7 +28,7 @@ NonLocalDamageTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-NonLocalDamageTempl<is_ad>::NonLocalDamageTempl(const InputParameters & parameters)
+NonlocalDamageTempl<is_ad>::NonlocalDamageTempl(const InputParameters & parameters)
   : ScalarDamageBaseTempl<is_ad>(parameters),
     GuaranteeConsumer(this),
     _average(this->template getUserObject<RadialAverage>("average_UO").getAverage()),
@@ -38,7 +38,7 @@ NonLocalDamageTempl<is_ad>::NonLocalDamageTempl(const InputParameters & paramete
 }
 template <bool is_ad>
 void
-NonLocalDamageTempl<is_ad>::initialSetup()
+NonlocalDamageTempl<is_ad>::initialSetup()
 {
   _local_damage_model = dynamic_cast<ScalarDamageBaseTempl<is_ad> *>(
       &this->getMaterialByName(_local_damage_model_name));
@@ -46,19 +46,19 @@ NonLocalDamageTempl<is_ad>::initialSetup()
   if (!_local_damage_model)
     this->template paramError("damage_model",
                               "Damage Model " + _local_damage_model_name +
-                                  " is not compatible with NonLocalDamage model");
+                                  " is not compatible with NonlocalDamage model");
 }
 
 template <bool is_ad>
 void
-NonLocalDamageTempl<is_ad>::initQpStatefulProperties()
+NonlocalDamageTempl<is_ad>::initQpStatefulProperties()
 {
   ScalarDamageBaseTempl<is_ad>::initQpStatefulProperties();
 }
 
 template <bool is_ad>
 void
-NonLocalDamageTempl<is_ad>::updateQpDamageIndex()
+NonlocalDamageTempl<is_ad>::updateQpDamageIndex()
 {
   // First update underlying local damage model
   _local_damage_model->getQpDamageIndex(_qp);
@@ -81,5 +81,5 @@ NonLocalDamageTempl<is_ad>::updateQpDamageIndex()
     _damage_index[_qp] = std::max(0.0, _damage_index_old[_qp]);
 }
 
-template class NonLocalDamageTempl<false>;
-template class NonLocalDamageTempl<true>;
+template class NonlocalDamageTempl<false>;
+template class NonlocalDamageTempl<true>;

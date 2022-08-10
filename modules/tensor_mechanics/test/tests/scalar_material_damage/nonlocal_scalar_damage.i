@@ -13,17 +13,6 @@
   elem_type = HEX8
 []
 
-# [AuxVariables]
-#   [local_damage_index]
-#     order = CONSTANT
-#     family = MONOMIAL
-#   []
-#   [nonlocal_damage_index]
-#     order = CONSTANT
-#     family = MONOMIAL
-#   []
-# []
-
 [Modules/TensorMechanics/Master]
   [all]
     strain = SMALL
@@ -33,20 +22,6 @@
   []
 []
 
-# [AuxKernels]
-#   [local_damage_index]
-#     type = MaterialRealAux
-#     variable = local_damage
-#     property = local_damage
-#     execute_on = timestep_end
-#   []
-#   [nonlocal_damage_index]
-#     type = MaterialRealAux
-#     variable = nonlocal_damage
-#     property = nonlocal_damage
-#     execute_on = timestep_end
-#   []
-# []
 
 [BCs]
   [symmy]
@@ -88,7 +63,7 @@
     material_name = local_damage
     execute_on = "INITIAL timestep_end"
     block = 0
-    r_cut = 0.3
+    radius = 0.3
   []
 []
 
@@ -104,7 +79,7 @@
     damage_index_name = local_damage
   []
   [damage]
-    type = NonLocalDamage
+    type = NonlocalDamage
     average_UO = ele_avg
     local_damage_model = local_damage
     damage_index_name = nonlocal_damage

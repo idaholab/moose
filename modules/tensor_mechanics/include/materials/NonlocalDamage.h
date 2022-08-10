@@ -18,12 +18,12 @@
  * Scalar damage model that defines the damage parameter using a material property
  */
 template <bool is_ad>
-class NonLocalDamageTempl : public ScalarDamageBaseTempl<is_ad>, public GuaranteeConsumer
+class NonlocalDamageTempl : public ScalarDamageBaseTempl<is_ad>, public GuaranteeConsumer
 {
 public:
   static InputParameters validParams();
 
-  NonLocalDamageTempl(const InputParameters & parameters);
+  NonlocalDamageTempl(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 
@@ -61,5 +61,5 @@ protected:
   ///@}
 };
 
-typedef NonLocalDamageTempl<false> NonLocalDamage;
-typedef NonLocalDamageTempl<true> ADNonLocalDamage;
+typedef NonlocalDamageTempl<false> NonlocalDamage;
+typedef NonlocalDamageTempl<true> ADNonlocalDamage;
