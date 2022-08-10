@@ -41,6 +41,12 @@ CoupledHeatTransferAction::validParams()
   params.addRequiredParam<UserObjectName>(
       "htc_user_object", "Spatial user object holding the heat transfer coefficient values");
 
+  params.addParam<std::vector<Point>>(
+      "positions", "Sub-app positions. Each set of 3 values represents a Point.");
+  params.addParam<FileName>(
+      "positions_file",
+      "Name of file containing sub-app positions. Each set of 3 values represents a Point.");
+
   return params;
 }
 
@@ -86,13 +92,34 @@ CoupledHeatTransferAction::addBCs()
 void
 CoupledHeatTransferAction::addUserObjects()
 {
-  const std::string class_name = "LayeredSideAverage";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<std::vector<VariableName>>("variable") = {_solid_temp_var_name};
-  params.set<MooseEnum>("direction") = _direction_enum;
-  params.set<unsigned int>("num_layers") = _num_layers;
-  params.set<std::vector<BoundaryName>>("boundary") = {_boundary};
-  _problem->addUserObject(class_name, _T_avg_user_object_name, params);
+  // Use NearestPointLayeredSideAverage if the user supplied sub-app positions;
+  // else, use LayeredSideAverage, which assumes a single sub-app position at (0,0,0).
+  std::string class_name;
+  InputParameters class_params = emptyInputParameters();
+  if (isParamValid("positions") || isParamValid("positions_file"))
+  {
+    class_name = "NearestPointLayeredSideAverage";
+    class_params = _factory.getValidParams(class_name);
+    if (isParamValid("positions"))
+      class_params.set<std::vector<Point>>("points") = getParam<std::vector<Point>>("positions");
+    if (isParamValid("positions_file"))
+      class_params.set<FileName>("points_file") = getParam<FileName>("positions_file");
+  }
+  else
+  {
+    class_name = "LayeredSideAverage";
+    class_params = _factory.getValidParams(class_name);
+  }
+
+  // Solid temperature spatial user object
+  {
+    InputParameters params = class_params;
+    params.set<std::vector<VariableName>>("variable") = {_solid_temp_var_name};
+    params.set<MooseEnum>("direction") = _direction_enum;
+    params.set<unsigned int>("num_layers") = _num_layers;
+    params.set<std::vector<BoundaryName>>("boundary") = {_boundary};
+    _problem->addUserObject(class_name, _T_avg_user_object_name, params);
+  }
 }
 
 void

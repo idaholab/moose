@@ -1,8 +1,27 @@
 [Tests]
-  [action]
-    type = Exodiff
-    input = 'master.i'
-    exodiff = 'master_out.e master_out_thm0_out.e'
-    ad_indexing_type = 'global'
+  design = 'CoupledHeatTransferAction.md'
+  issues = '#21818'
+
+  [test]
+    requirement = 'The system shall be able to couple solid heat conduction region to a 1-D flow channel via convective heat transfer'
+
+    [without_positions]
+      type = Exodiff
+      input = 'master.i'
+      exodiff = 'master_out.e master_out_thm0_out.e'
+      ad_indexing_type = 'global'
+
+      detail = 'Without sub-app positions provided.'
+    []
+    [with_positions]
+      type = Exodiff
+      input = 'master.i'
+      cli_args = "CoupledHeatTransfers/right/positions='0 0 0'"
+      prereq = 'test/without_positions'
+      exodiff = 'master_out.e master_out_thm0_out.e'
+      ad_indexing_type = 'global'
+
+      detail = 'With sub-app positions provided.'
+    []
   []
 []
