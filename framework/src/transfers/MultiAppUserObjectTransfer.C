@@ -332,8 +332,8 @@ MultiAppUserObjectTransfer::execute()
                 if (!getFromMultiApp()->hasLocalApp(i))
                   continue;
 
-                BoundingBox app_box = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh);
-                transformBoundingBox(app_box, *_from_transforms[i]);
+                BoundingBox app_box = getFromMultiApp()->getBoundingBox(
+                    i, _displaced_source_mesh, _from_transforms[i].get());
 
                 if (app_box.contains_point(transformed_node))
                   ++node_found_in_sub_app;
@@ -395,8 +395,8 @@ MultiAppUserObjectTransfer::execute()
                 if (!getFromMultiApp()->hasLocalApp(i))
                   continue;
 
-                BoundingBox app_box = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh);
-                transformBoundingBox(app_box, *_from_transforms[i]);
+                BoundingBox app_box = getFromMultiApp()->getBoundingBox(
+                    i, _displaced_source_mesh, _from_transforms[i].get());
 
                 if (app_box.contains_point(point))
                   ++elem_found_in_sub_app;
@@ -625,8 +625,8 @@ MultiAppUserObjectTransfer::findSubAppToTransferFrom(const Point & p)
     if (!_multi_app->hasLocalApp(i))
       continue;
 
-    BoundingBox app_box = _multi_app->getBoundingBox(i, _displaced_source_mesh);
-    transformBoundingBox(app_box, *_from_transforms[i]);
+    BoundingBox app_box =
+        _multi_app->getBoundingBox(i, _displaced_source_mesh, _from_transforms[i].get());
 
     if (_skip_bbox_check || app_box.contains_point(p))
       return static_cast<unsigned int>(i);

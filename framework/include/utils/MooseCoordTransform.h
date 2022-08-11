@@ -241,6 +241,11 @@ public:
    */
   void skipCoordinateCollapsing(bool skip_coordinate_collapsing);
 
+  /**
+   * whether coordinate collapsing operations should be skipped
+   */
+  bool skipCoordinateCollapsing() const { return _skip_coordinate_collapsing; }
+
 private:
   /// A reference to the \p MooseCoordTransform object that describes scaling and rotation
   /// transformations from our domain to the reference domain, e.g. transformations that "occur"

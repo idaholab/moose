@@ -26,6 +26,7 @@ class Executioner;
 class MooseApp;
 class Backup;
 class MultiAppTransfer;
+class MultiCoordTransform;
 
 // libMesh forward declarations
 namespace libMesh
@@ -211,8 +212,11 @@ public:
    * the geometry around the axis to create the 3D geometry).
    * @param app The global app number you want to get the bounding box for
    * @param displaced_mesh True if the bounding box is retrieved for the displaced mesh, other false
+   * @param coord_transform An optional coordinate transformation object
    */
-  virtual BoundingBox getBoundingBox(unsigned int app, bool displaced_mesh);
+  virtual BoundingBox getBoundingBox(unsigned int app,
+                                     bool displaced_mesh,
+                                     const MultiCoordTransform * coord_transform = nullptr);
 
   /**
    * Get the FEProblemBase this MultiApp is part of.
@@ -344,6 +348,12 @@ public:
    * Add a transfer that is associated with this multiapp
    */
   void addAssociatedTransfer(MultiAppTransfer & transfer);
+
+  /**
+   * Transform a bounding box according to the transformations in the provided coordinate
+   * transformation object
+   */
+  static void transformBoundingBox(BoundingBox & box, const MultiCoordTransform & transform);
 
 protected:
   /// function that provides cli_args to subapps

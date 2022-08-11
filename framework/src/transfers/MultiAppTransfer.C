@@ -403,41 +403,7 @@ MultiAppTransfer::getFromMultiAppInfo()
 void
 MultiAppTransfer::transformBoundingBox(BoundingBox & box, const MultiCoordTransform & transform)
 {
-  const Real min_x = box.first(0);
-  const Real max_x = box.second(0);
-  const Real min_y = box.first(1);
-  const Real max_y = box.second(1);
-  const Real min_z = box.first(2);
-  const Real max_z = box.second(2);
-
-  std::array<Point, 8> box_corners = {{Point(min_x, min_y, min_z),
-                                       Point(max_x, min_y, min_z),
-                                       Point(min_x, max_y, min_z),
-                                       Point(max_x, max_y, min_z),
-                                       Point(min_x, min_y, max_z),
-                                       Point(max_x, min_y, max_z),
-                                       Point(min_x, max_y, max_z),
-                                       Point(max_x, max_y, max_z)}};
-
-  // transform each corner
-  for (auto & corner : box_corners)
-    corner = transform(corner);
-
-  // Create new bounding box
-  Point new_box_min = box_corners[0];
-  Point new_box_max = new_box_min;
-  for (const auto p : make_range(1, 8))
-    for (const auto d : make_range(Moose::dim))
-    {
-      const Point & pt = box_corners[p];
-      if (new_box_min(d) > pt(d))
-        new_box_min(d) = pt(d);
-
-      if (new_box_max(d) < pt(d))
-        new_box_max(d) = pt(d);
-    }
-  box.first = new_box_min;
-  box.second = new_box_max;
+  MultiApp::transformBoundingBox(box, transform);
 }
 
 namespace
