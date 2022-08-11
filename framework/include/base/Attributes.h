@@ -153,7 +153,7 @@ public:
   clonefunc(AttribExecOns);
 
 private:
-  std::vector<int> _vals;
+  std::vector<Key> _vals;
 };
 
 class AttribSubdomains : public Attribute
