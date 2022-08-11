@@ -30,7 +30,18 @@
     rel_err = 1.0e-4
     abs_zero = 5.0e-7
   []
-
+  [aniso_creep_x_3d_no_trafo]
+    type = 'CSVDiff'
+    input = 'aniso_creep_x_3d.i'
+    csvdiff = aniso_creep_x_3d_no_trafo_out.csv
+    cli_args = "Materials/trial_creep_two/use_transformation=false Outputs/file_base=aniso_creep_x_3d_no_trafo_out"
+    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios '
+                  'along the X direction using hand-coded Jacobians when no transformation is used to rotate '
+                  'the Hill tensor for small deformation.'
+    min_parallel = 2
+    rel_err = 1.0e-4
+    abs_zero = 5.0e-7
+  []
   [ad_aniso_creep_y_3d]
     type = 'CSVDiff'
     input = 'ad_aniso_creep_y_3d.i'
