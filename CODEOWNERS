@@ -24,14 +24,14 @@
 /framework/*/materials/Derivative* @dschwen
 /framework/*/materials/Parsed* @dschwen
 /framework/*/multiapps @GiudGiud
-/framework/*/preconditioners @fdkong
+/framework/*/preconditioners @lindsayad
 /framework/*/problems/EigenProblem* @fdkong
 /framework/*/relationshipmanagers @lindsayad
 /framework/*/reporters @loganharbour @zachmprince
 /framework/*/samplers @zachmprince
 /framework/*/systems/NonlinearEigenSystem* @fdkong
 /framework/*/transfers @GiudGiud
-/framework/*/utils/PetscSupport* @fdkong
+/framework/*/utils/PetscSupport* @lindsayad
 /framework/*/utils/SlepcSupport* @fdkong
 /framework/*/utils/Units* @dschwen
 
@@ -39,7 +39,7 @@
 /modules/doc/content/getting_started/installation @milljm @loganharbour @cticenhour
 /modules/doc/content/newsletter @cticenhour
 /modules/electromagnetics @cticenhour
-/modules/external_petsc_solver @fdkong
+/modules/external_petsc_solver @lindsayad
 /modules/fluid_properties @joshuahansel
 /modules/fsi @lindsayad
 /modules/functional_expansion_tools @lindsayad
