@@ -189,17 +189,6 @@ MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
     mooseError("Cannot find variable ", var_name, " for ", name(), " Transfer");
 }
 
-const std::vector<ExecFlagType> &
-MultiAppTransfer::execFlags() const
-{
-  mooseDeprecated(
-      "The execFlags() methods is being removed because MOOSE has been updated to use a "
-      "ExecFlagEnum for execute flags. The current flags should be retrieved from "
-      "the \"exeucte_on\" parameters of your object or by using the \"_execute_enum\" "
-      "reference to the parameter or the getExecuteOnEnum() method.");
-  return _exec_flags;
-}
-
 void
 MultiAppTransfer::getAppInfo()
 {

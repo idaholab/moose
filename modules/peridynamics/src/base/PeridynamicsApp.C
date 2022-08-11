@@ -90,7 +90,7 @@ PeridynamicsApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_
 void
 PeridynamicsApp::registerExecFlags(Factory & /*factory*/)
 {
-  mooseDeprecated("use registerAll instead of registerExecFlags");
+  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

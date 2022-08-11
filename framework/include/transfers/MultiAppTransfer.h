@@ -107,9 +107,6 @@ public:
   /// Whether the transfer owns a non-null to_multi_app
   bool hasToMultiApp() const { return !(!_to_multi_app); }
 
-  /// Return the execution flags, handling "same_as_multiapp"
-  virtual const std::vector<ExecFlagType> & execFlags() const;
-
 protected:
   /**
    * Add the bounding box factor parameter to the supplied input parameters

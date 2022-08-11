@@ -6,83 +6,58 @@
 []
 
 [Variables]
-  [./u]
-    order = FIRST
-    family = LAGRANGE
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
-[AuxVariables]
-  [./initial]
-  [../]
-  [./timestep_begin]
-  [../]
-  [./timestep_end]
-  [../]
-  [./nonlinear]
-  [../]
-  [./linear]
-  [../]
-  [./custom]
-    initial_condition = 999
-  [../]
-[]
-
-[AuxKernels]
-  [./initial]
-    type = CheckCurrentExecAux
-    variable = initial
+[Reporters]
+  [initial]
+    type = CurrentExecFlagReporter
     execute_on = initial
-  [../]
-  [./timestep_begin]
-    type = CheckCurrentExecAux
-    variable = timestep_begin
+  []
+  [timestep_begin]
+    type = CurrentExecFlagReporter
     execute_on = timestep_begin
-  [../]
-  [./timestep_end]
-    type = CheckCurrentExecAux
-    variable = timestep_end
+  []
+  [timestep_end]
+    type = CurrentExecFlagReporter
     execute_on = timestep_end
-  [../]
-  [./nonlinear]
-    type = CheckCurrentExecAux
-    variable = nonlinear
+  []
+  [nonlinear]
+    type = CurrentExecFlagReporter
     execute_on = nonlinear
-  [../]
-  [./linear]
-    type = CheckCurrentExecAux
-    variable = linear
+  []
+  [linear]
+    type = CurrentExecFlagReporter
     execute_on = linear
-  [../]
-  [./custom]
-    # this kernel will be never executed by Steady, so the initial value of this variable is not going to change
-    type = CheckCurrentExecAux
-    variable = custom
+  []
+  [custom]
+    type = CurrentExecFlagReporter
     execute_on = custom
-  [../]
+  []
 []
 
 [Executioner]
@@ -90,5 +65,8 @@
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type = JSON
+    execute_system_information_on = NONE
+  []
 []

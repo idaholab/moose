@@ -116,8 +116,8 @@ groupUserObjects(TheWarehouse & w,
   // controlling the force_preic, force_preaux and force_postaux input parameters.
   //
 
-  std::map<T *, std::set<unsigned int>> pre_aux_dependencies;
-  std::map<T *, std::set<unsigned int>> post_aux_dependencies;
+  std::map<T *, std::set<int>> pre_aux_dependencies;
+  std::map<T *, std::set<int>> post_aux_dependencies;
   // This map is used to indicate, after all dependencies have
   // been looked through, whether the UO has been flagged to
   // execute on EXEC_INITIAL, either through a dependency or
