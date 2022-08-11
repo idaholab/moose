@@ -47,6 +47,7 @@ MultiAppPostprocessorInterpolationTransfer::validParams()
                         "then the radius is taken as the max distance between "
                         "points.");
 
+  MultiAppTransfer::addSkipCoordCollapsingParam(params);
   return params;
 }
 
