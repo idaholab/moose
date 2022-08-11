@@ -343,7 +343,7 @@ advected_interp_method = 'upwind'
     constant_expressions = '${rho} 1 ${fparse 2 * .2546} ${mu}'
     pp_names = ''
   []
-  [Strouhal_Number_PVS]
+  [St_PVS]
     type = ParsedPostprocessor
     function = '.285 + (-1.3897/sqrt(rho*U*D/mu)) + 1.8061/(rho*U*D/mu)'
     constant_names = 'rho U D mu'
@@ -352,10 +352,17 @@ advected_interp_method = 'upwind'
   []
   [Frequency]
     type = ParsedPostprocessor
-    function = '((0.198*U)/9)*(1-(19.7/(rho*U*D/mu)))'
+    function = '((0.198*U)/D)*(1-(19.7/(rho*U*D/mu)))'
     constant_names = 'rho U D mu'
     constant_expressions = '${rho} 1 ${fparse 2 * .2546} ${mu}'
     pp_names = ''
+  []
+  [Frequency_PVS]
+    type = ParsedPostprocessor
+    function = 'St_PVS*U/D'
+    constant_names = 'U D'
+    constant_expressions = '1 ${fparse 2 * .2546}'
+    pp_names = 'St_PVS'
   []
   [element_44146_x]
     type = ElementalVariableValue
