@@ -82,4 +82,20 @@
                   'CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, DFGRD1, NOEL, NPT, and '
                   'KINC, when shear deformation (causing nontrivial rotation kinematics) is present. '
   []
+  [print_shear_defgrad]
+    type = 'RunApp'
+    input = 'print_shear_defgrad.i'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    expect_out ='DFGRD1_ 1 1    1.0000000\n DFGRD1_ 1 2    0.5000000\n DFGRD1_ 1 3   [ -]0.0000000\n '
+                'DFGRD1_ 2 1   [ -]0.0000000\n DFGRD1_ 2 2    1.0000000\n DFGRD1_ 2 3   [ -]0.0000000\n '
+                'DFGRD1_ 3 1   [ -]0.0000000\n DFGRD1_ 3 2   [ -]0.0000000\n DFGRD1_ 3 3    1.0000000\n '
+                'DROT_ 1 1    0.9921623\n DROT_ 1 2    0.1249561\n DROT_ 1 3   [ -]0.0000000\n '
+                'DROT_ 2 1   -0.1249561\n DROT_ 2 2    0.9921623\n DROT_ 2 3   [ -]0.0000000\n '
+                'DROT_ 3 1   [ -]0.0000000\n DROT_ 3 2   [ -]0.0000000\n DROT_ 3 3    1.0000000\n '
+
+    requirement = 'The Abaqus UMAT interface shall pass the correct values for the deformation gradient DFGRD1 '
+                  'and the rotation increment DROT, accounting for the fact, that the calling C++ code is row major'
+                  'and the called Fortran code is column major.'
+  []
 []
