@@ -207,7 +207,7 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object,
   MooseObjectWarehouse<T>::addObject(object, tid);
 
   // Update the execute flag lists of objects
-  if (const std::shared_ptr<SetupInterface> ptr = std::dynamic_pointer_cast<SetupInterface>(object))
+  if (const auto ptr = std::dynamic_pointer_cast<SetupInterface>(object))
     for (const auto & flag : ptr->getExecuteOnEnum())
       _execute_objects[flag].addObject(object, tid);
   else
