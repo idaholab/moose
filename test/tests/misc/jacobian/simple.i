@@ -37,7 +37,6 @@
   [./diffu]
     type = WrongJacobianDiffusion
     variable = u
-    error = factor
     jfactor = 0.0
   [../]
   [./diffu2]
