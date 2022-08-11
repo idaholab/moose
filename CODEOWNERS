@@ -23,13 +23,14 @@
 /framework/*/linesearches @lindsayad
 /framework/*/materials/Derivative* @dschwen
 /framework/*/materials/Parsed* @dschwen
+/framework/*/multiapps @GiudGiud
 /framework/*/preconditioners @fdkong
 /framework/*/problems/EigenProblem* @fdkong
 /framework/*/relationshipmanagers @lindsayad
 /framework/*/reporters @loganharbour @zachmprince
 /framework/*/samplers @zachmprince
 /framework/*/systems/NonlinearEigenSystem* @fdkong
-/framework/*/transfers @fdkong
+/framework/*/transfers @GiudGiud
 /framework/*/utils/PetscSupport* @fdkong
 /framework/*/utils/SlepcSupport* @fdkong
 /framework/*/utils/Units* @dschwen
