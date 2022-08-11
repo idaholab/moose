@@ -708,6 +708,13 @@ FancyExtruderGenerator::generate()
     }
   }
 
+  // Update the value of next_unique_id based on newly created nodes and elements
+  // Note: Number of element layers is one less than number of node layers
+  unsigned int total_new_node_layers = total_num_layers * order;
+  unsigned int new_unique_ids = orig_unique_ids + (total_new_node_layers - 1) * orig_elem +
+                                total_new_node_layers * orig_nodes;
+  mesh->set_next_unique_id(new_unique_ids);
+
   // Copy all the subdomain/sideset/nodeset name maps to the extruded mesh
   if (!input_subdomain_map.empty())
     mesh->set_subdomain_name_map().insert(input_subdomain_map.begin(), input_subdomain_map.end());
