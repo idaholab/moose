@@ -1,5 +1,5 @@
-mu=3.2215e-5
-rho=0.081281
+mu=3.2215e-3
+rho=1
 velocity_interp_method = 'rc'
 advected_interp_method = 'upwind'
 
@@ -311,7 +311,7 @@ advected_interp_method = 'upwind'
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-12
   nl_max_its = 10
-  end_time = 5
+  end_time = 15
   dtmax = 1
   scheme = 'bdf2'
   [TimeStepper]
@@ -342,5 +342,29 @@ advected_interp_method = 'upwind'
     constant_names = 'rho U D mu'
     constant_expressions = '${rho} 1 ${fparse 2 * .2546} ${mu}'
     pp_names = ''
+  []
+  [Strouhal_Number_PVS]
+    type = ParsedPostprocessor
+    function = '.285 + (-1.3897/sqrt(rho*U*D/mu)) + 1.8061/(rho*U*D/mu)'
+    constant_names = 'rho U D mu'
+    constant_expressions = '${rho} 1 ${fparse 2 * .2546} ${mu}'
+    pp_names = ''
+  []
+  [Frequency]
+    type = ParsedPostprocessor
+    function = '((0.198*U)/9)*(1-(19.7/(rho*U*D/mu)))'
+    constant_names = 'rho U D mu'
+    constant_expressions = '${rho} 1 ${fparse 2 * .2546} ${mu}'
+    pp_names = ''
+  []
+  [element_44146_x]
+    type = ElementalVariableValue
+    variable = 'vel_x'
+    elementid = 44146
+  []
+  [element_44146_y]
+    type = ElementalVariableValue
+    variable = 'vel_y'
+    elementid = 44146
   []
 []
