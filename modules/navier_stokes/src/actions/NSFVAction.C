@@ -16,6 +16,7 @@
 #include "MooseObject.h"
 #include "NonlinearSystemBase.h"
 #include "RelationshipManager.h"
+#include "AuxiliarySystem.h"
 
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_variables");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_user_objects");
@@ -25,6 +26,8 @@ registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_bcs");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_material");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_pps");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_materials");
+registerMooseAction("NavierStokesApp", NSFVAction, "navier_stokes_check_copy_nodal_vars");
+registerMooseAction("NavierStokesApp", NSFVAction, "navier_stokes_copy_nodal_vars");
 
 InputParameters
 NSFVAction::validParams()
@@ -47,6 +50,16 @@ NSFVAction::validParams()
   params.addParam<bool>(
       "porous_medium_treatment", false, "Whether to use porous medium kernels or not.");
 
+  params.addParam<bool>("initialize_variables_from_mesh_file",
+                        false,
+                        "Determines if the variables that are added by the action are initialized "
+                        "from the mesh file (only for Exodus format)");
+  params.addParam<std::string>(
+      "initial_from_file_timestep",
+      "LATEST",
+      "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
+      "for a given variable. (Default: LATEST)");
+
   MooseEnum turbulence_type("mixing-length none", "none");
   params.addParam<MooseEnum>(
       "turbulence_handling",
@@ -58,7 +71,7 @@ NSFVAction::validParams()
   params.addParam<bool>("add_scalar_equation", false, "True to add advected scalar(s) equation");
 
   params.addParamNamesToGroup("compressibility porous_medium_treatment turbulence_handling "
-                              "add_flow_equations add_energy_equation add_scalar_equation",
+                              "add_flow_equations add_energy_equation add_scalar_equation ",
                               "General control");
 
   params.addParam<std::vector<std::string>>(
@@ -479,7 +492,8 @@ NSFVAction::validParams()
       "Boundary condition");
 
   params.addParamNamesToGroup(
-      "initial_pressure initial_velocity initial_temperature initial_scalar_variables",
+      "initial_pressure initial_velocity initial_temperature initial_scalar_variables "
+      "initialize_variables_from_mesh_file initial_from_file_timestep",
       "Initial condition");
 
   return params;
@@ -742,6 +756,54 @@ NSFVAction::act()
 
     addBoundaryPostprocessors();
   }
+
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+  {
+    if (_current_task == "navier_stokes_check_copy_nodal_vars")
+      _app.setExodusFileRestart(true);
+    else if (_current_task == "navier_stokes_copy_nodal_vars")
+    {
+      SystemBase & system = _problem->getNonlinearSystemBase();
+
+      if (_create_pressure)
+        system.addVariableToCopy(
+            _pressure_name, _pressure_name, getParam<std::string>("initial_from_file_timestep"));
+
+      if (_create_velocity)
+        for (unsigned int d = 0; d < _dim; ++d)
+          system.addVariableToCopy(_velocity_name[d],
+                                   _velocity_name[d],
+                                   getParam<std::string>("initial_from_file_timestep"));
+
+      if (getParam<bool>("pin_pressure"))
+        system.addVariableToCopy(
+            "lambda", "lambda", getParam<std::string>("initial_from_file_timestep"));
+
+      if (_turbulence_handling == "mixing-length")
+        _problem->getAuxiliarySystem().addVariableToCopy(
+            NS::mixing_length,
+            NS::mixing_length,
+            getParam<std::string>("initial_from_file_timestep"));
+
+      if (_has_energy_equation && _create_fluid_temperature)
+        system.addVariableToCopy(_fluid_temperature_name,
+                                 _fluid_temperature_name,
+                                 getParam<std::string>("initial_from_file_timestep"));
+
+      if (_has_scalar_equation)
+        for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
+        {
+          bool create_me = true;
+          if (_create_scalar_variable.size())
+            if (!_create_scalar_variable[name_i])
+              create_me = false;
+          if (create_me)
+            system.addVariableToCopy(_passive_scalar_names[name_i],
+                                     _passive_scalar_names[name_i],
+                                     getParam<std::string>("initial_from_file_timestep"));
+        }
+    }
+  }
 }
 
 void
@@ -877,6 +939,10 @@ NSFVAction::addRhieChowUserObjects()
 void
 NSFVAction::addINSInitialConditions()
 {
+  // do not set initial conditions if we load from file
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    return;
+
   InputParameters params = _factory.getValidParams("FunctionIC");
   auto vvalue = getParam<std::vector<FunctionName>>("initial_velocity");
 
@@ -2389,6 +2455,13 @@ NSFVAction::checkICParameterErrors()
   if (parameters().isParamSetByUser("initial_temperature") && !_create_fluid_temperature)
     paramError("initial_temperature",
                "T_fluid is defined externally of NavierStokesFV, so should the inital condition");
+
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    checkDependentParameterError("initialize_variables_from_mesh_file",
+                                 {"initial_velocity",
+                                  "initial_pressure",
+                                  "initial_temperature",
+                                  "initial_scalar_variables"});
 }
 
 void
