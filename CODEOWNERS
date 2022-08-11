@@ -53,6 +53,8 @@
 /modules/xfem @bwspenc @jiangwen84
 
 /scripts/hpc_proxy.pac @loganharbour
-/scripts/configure_petsc.sh @fdkong
-/scripts/update_and_rebuild_petsc.sh @fdkong
-/scripts/update_and_rebuild_petsc_alt.sh @fdkong
+/scripts/configure_petsc.sh @cticenhour @milljm @loganharbour
+/scripts/update_and_rebuild_petsc.sh @cticenhour @milljm @loganharbour
+/scripts/update_and_rebuild_petsc_alt.sh @cticenhour @milljm @loganharbour
+/scripts/configure_libmesh.sh @cticenhour @milljm @loganharbour
+/scripts/update_and_rebuild_libmesh.sh @cticenhour @milljm @loganharbour
