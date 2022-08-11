@@ -5,6 +5,7 @@
     exodiff = master_out.e
     recover = false
     mesh_mode = 'replicated'
+    allow_warnings = true
   []
   [slave]
     type = Exodiff
@@ -12,5 +13,6 @@
     exodiff = master_out_SLAVE0.e
     recover = false
     mesh_mode = 'replicated'
+    allow_warnings = true
   []
 []
