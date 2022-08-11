@@ -75,16 +75,16 @@ template <bool is_ad>
 void
 GeneralizedRadialReturnStressUpdateTempl<is_ad>::initQpStatefulProperties()
 {
-  _effective_inelastic_strain[this->_qp] = 0.0;
-  _inelastic_strain_rate[this->_qp] = 0.0;
+  _effective_inelastic_strain[_qp] = 0.0;
+  _inelastic_strain_rate[_qp] = 0.0;
 }
 
 template <bool is_ad>
 void
 GeneralizedRadialReturnStressUpdateTempl<is_ad>::propagateQpStatefulPropertiesRadialReturn()
 {
-  _effective_inelastic_strain[this->_qp] = _effective_inelastic_strain_old[this->_qp];
-  _inelastic_strain_rate[this->_qp] = _inelastic_strain_rate_old[this->_qp];
+  _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
+  _inelastic_strain_rate[_qp] = _inelastic_strain_rate_old[_qp];
 }
 
 template <bool is_ad>
@@ -152,7 +152,7 @@ GeneralizedRadialReturnStressUpdateTempl<is_ad>::computeReferenceResidual(
     const GenericReal<is_ad> & /*residual*/,
     const GenericReal<is_ad> & /*scalar_effective_inelastic_strain*/)
 {
-  mooseError("ADGeneralizedRadialReturnStressUpdate::computeReferenceResidual must be implemented "
+  mooseError("GeneralizedRadialReturnStressUpdate::computeReferenceResidual must be implemented "
              "by child classes");
 
   return 0.0;
@@ -172,14 +172,13 @@ GeneralizedRadialReturnStressUpdateTempl<is_ad>::computeTimeStepLimit()
 {
 
   // Add a new criterion including numerical integration error
-  Real scalar_inelastic_strain_incr =
-      MetaPhysicL::raw_value(_effective_inelastic_strain[this->_qp]) -
-      _effective_inelastic_strain_old[this->_qp];
+  Real scalar_inelastic_strain_incr = MetaPhysicL::raw_value(_effective_inelastic_strain[_qp]) -
+                                      _effective_inelastic_strain_old[_qp];
 
   if (MooseUtils::absoluteFuzzyEqual(scalar_inelastic_strain_incr, 0.0))
     return std::numeric_limits<Real>::max();
 
-  return std::min(this->_dt * _max_inelastic_increment / scalar_inelastic_strain_incr,
+  return std::min(_dt * _max_inelastic_increment / scalar_inelastic_strain_incr,
                   computeIntegrationErrorTimeStep());
 }
 
@@ -190,9 +189,8 @@ GeneralizedRadialReturnStressUpdateTempl<is_ad>::outputIterationSummary(
 {
   if (iter_output)
   {
-    *iter_output << "At element " << this->_current_elem->id() << " _qp=" << this->_qp
-                 << " Coordinates " << this->_q_point[this->_qp]
-                 << " block=" << this->_current_elem->subdomain_id() << '\n';
+    *iter_output << "At element " << _current_elem->id() << " _qp=" << _qp << " Coordinates "
+                 << _q_point[_qp] << " block=" << _current_elem->subdomain_id() << '\n';
   }
   GeneralizedReturnMappingSolutionTempl<is_ad>::outputIterationSummary(iter_output, total_it);
 }
@@ -211,3 +209,6 @@ GeneralizedRadialReturnStressUpdateTempl<is_ad>::isBlockDiagonal(const Anisotrop
 
   return true;
 }
+
+template class GeneralizedRadialReturnStressUpdateTempl<false>;
+template class GeneralizedRadialReturnStressUpdateTempl<true>;

@@ -408,3 +408,6 @@ GeneralizedReturnMappingSolutionTempl<is_ad>::outputIterationSummary(
                  << MetaPhysicL::raw_value(_initial_residual) << " to "
                  << MetaPhysicL::raw_value(_residual) << " in '" << _svrms_name << "'.\n";
 }
+
+template class GeneralizedReturnMappingSolutionTempl<false>;
+template class GeneralizedReturnMappingSolutionTempl<true>;

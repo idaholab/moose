@@ -60,3 +60,6 @@ AnisotropicReturnCreepStressUpdateBaseTempl<is_ad>::computeStrainFinalize(
 {
   _creep_strain[this->_qp] = _creep_strain_old[this->_qp] + inelasticStrainIncrement;
 }
+
+template class AnisotropicReturnCreepStressUpdateBaseTempl<false>;
+template class AnisotropicReturnCreepStressUpdateBaseTempl<true>;

@@ -1,5 +1,5 @@
 [Tests]
-  design = 'ADHillCreepStressUpdate.md'
+  design = 'HillCreepStressUpdate.md'
   issues = '#16016'
   [anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test]
     type = 'Exodiff'

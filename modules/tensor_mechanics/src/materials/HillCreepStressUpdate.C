@@ -72,11 +72,11 @@ HillCreepStressUpdateTempl<is_ad>::computeStressInitialize(
     const GenericRankFourTensor<is_ad> & elasticity_tensor)
 {
   if (_has_temp)
-    _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[this->_qp]));
+    _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));
 
   _two_shear_modulus = 2.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
 
-  _exp_time = std::pow(this->_t - _start_time, _m_exponent);
+  _exp_time = std::pow(_t - _start_time, _m_exponent);
 }
 
 template <bool is_ad>
@@ -97,12 +97,12 @@ HillCreepStressUpdateTempl<is_ad>::computeResidual(
   if (!this->_use_transformation)
   {
     // Hill constants, some constraints apply
-    const Real & F = _hill_constants[this->_qp][0];
-    const Real & G = _hill_constants[this->_qp][1];
-    const Real & H = _hill_constants[this->_qp][2];
-    const Real & L = _hill_constants[this->_qp][3];
-    const Real & M = _hill_constants[this->_qp][4];
-    const Real & N = _hill_constants[this->_qp][5];
+    const Real & F = _hill_constants[_qp][0];
+    const Real & G = _hill_constants[_qp][1];
+    const Real & H = _hill_constants[_qp][2];
+    const Real & L = _hill_constants[_qp][3];
+    const Real & M = _hill_constants[_qp][4];
+    const Real & N = _hill_constants[_qp][5];
 
     qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
     qsigma_square += G * (stress_new(2) - stress_new(0)) * (stress_new(2) - stress_new(0));
@@ -114,7 +114,7 @@ HillCreepStressUpdateTempl<is_ad>::computeResidual(
   else
   {
     GenericDenseVector<is_ad> Ms(6);
-    (*_hill_tensor)[this->_qp].vector_mult(Ms, stress_new);
+    (*_hill_tensor)[_qp].vector_mult(Ms, stress_new);
     qsigma_square = Ms.dot(stress_new);
   }
 
@@ -124,9 +124,9 @@ HillCreepStressUpdateTempl<is_ad>::computeResidual(
   const GenericReal<is_ad> creep_rate =
       _coefficient * std::pow(qsigma_square, _n_exponent) * _exponential * _exp_time;
 
-  this->_inelastic_strain_rate[this->_qp] = MetaPhysicL::raw_value(creep_rate);
+  this->_inelastic_strain_rate[_qp] = MetaPhysicL::raw_value(creep_rate);
   // Return iteration difference between creep strain and inelastic strain multiplier
-  return creep_rate * this->_dt - delta_gamma;
+  return creep_rate * _dt - delta_gamma;
 }
 
 template <bool is_ad>
@@ -151,12 +151,12 @@ HillCreepStressUpdateTempl<is_ad>::computeDerivative(
   if (!this->_use_transformation)
   {
     // Hill constants, some constraints apply
-    const Real & F = _hill_constants[this->_qp][0];
-    const Real & G = _hill_constants[this->_qp][1];
-    const Real & H = _hill_constants[this->_qp][2];
-    const Real & L = _hill_constants[this->_qp][3];
-    const Real & M = _hill_constants[this->_qp][4];
-    const Real & N = _hill_constants[this->_qp][5];
+    const Real & F = _hill_constants[_qp][0];
+    const Real & G = _hill_constants[_qp][1];
+    const Real & H = _hill_constants[_qp][2];
+    const Real & L = _hill_constants[_qp][3];
+    const Real & M = _hill_constants[_qp][4];
+    const Real & N = _hill_constants[_qp][5];
 
     // Equivalent deviatoric stress function.
     qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
@@ -169,7 +169,7 @@ HillCreepStressUpdateTempl<is_ad>::computeDerivative(
   else
   {
     GenericDenseVector<is_ad> Ms(6);
-    (*_hill_tensor)[this->_qp].vector_mult(Ms, stress_new);
+    (*_hill_tensor)[_qp].vector_mult(Ms, stress_new);
     qsigma_square = Ms.dot(stress_new);
   }
 
@@ -181,7 +181,7 @@ HillCreepStressUpdateTempl<is_ad>::computeDerivative(
   const GenericReal<is_ad> creep_rate_derivative =
       -_coefficient * 1.5 * _two_shear_modulus * _n_exponent *
       std::pow(qsigma_square, _n_exponent - 1.0) * _exponential * _exp_time;
-  return (creep_rate_derivative * this->_dt - 1.0);
+  return (creep_rate_derivative * _dt - 1.0);
 }
 
 template <bool is_ad>
@@ -196,12 +196,12 @@ HillCreepStressUpdateTempl<is_ad>::computeStrainFinalize(
   if (!this->_use_transformation)
   {
     // Hill constants, some constraints apply
-    const Real & F = _hill_constants[this->_qp][0];
-    const Real & G = _hill_constants[this->_qp][1];
-    const Real & H = _hill_constants[this->_qp][2];
-    const Real & L = _hill_constants[this->_qp][3];
-    const Real & M = _hill_constants[this->_qp][4];
-    const Real & N = _hill_constants[this->_qp][5];
+    const Real & F = _hill_constants[_qp][0];
+    const Real & G = _hill_constants[_qp][1];
+    const Real & H = _hill_constants[_qp][2];
+    const Real & L = _hill_constants[_qp][3];
+    const Real & M = _hill_constants[_qp][4];
+    const Real & N = _hill_constants[_qp][5];
 
     // Equivalent deviatoric stress function.
     qsigma_square = F * (stress(1, 1) - stress(2, 2)) * (stress(1, 1) - stress(2, 2));
@@ -214,7 +214,7 @@ HillCreepStressUpdateTempl<is_ad>::computeStrainFinalize(
   else
   {
     GenericDenseVector<is_ad> Ms(6);
-    (*_hill_tensor)[this->_qp].vector_mult(Ms, stress_dev);
+    (*_hill_tensor)[_qp].vector_mult(Ms, stress_dev);
     qsigma_square = Ms.dot(stress_dev);
   }
 
@@ -225,7 +225,7 @@ HillCreepStressUpdateTempl<is_ad>::computeStrainFinalize(
     AnisotropicReturnCreepStressUpdateBaseTempl<is_ad>::computeStrainFinalize(
         inelasticStrainIncrement, stress, stress_dev, delta_gamma);
 
-    this->_effective_inelastic_strain[this->_qp] = this->_effective_inelastic_strain_old[this->_qp];
+    this->_effective_inelastic_strain[_qp] = this->_effective_inelastic_strain_old[_qp];
 
     return;
   }
@@ -236,12 +236,12 @@ HillCreepStressUpdateTempl<is_ad>::computeStrainFinalize(
   if (!this->_use_transformation)
   {
     // Hill constants, some constraints apply
-    const Real & F = _hill_constants[this->_qp][0];
-    const Real & G = _hill_constants[this->_qp][1];
-    const Real & H = _hill_constants[this->_qp][2];
-    const Real & L = _hill_constants[this->_qp][3];
-    const Real & M = _hill_constants[this->_qp][4];
-    const Real & N = _hill_constants[this->_qp][5];
+    const Real & F = _hill_constants[_qp][0];
+    const Real & G = _hill_constants[_qp][1];
+    const Real & H = _hill_constants[_qp][2];
+    const Real & L = _hill_constants[_qp][3];
+    const Real & M = _hill_constants[_qp][4];
+    const Real & N = _hill_constants[_qp][5];
 
     inelasticStrainIncrement(0, 0) =
         prefactor * (H * (stress(0, 0) - stress(1, 1)) - G * (stress(2, 2) - stress(0, 0)));
@@ -261,7 +261,7 @@ HillCreepStressUpdateTempl<is_ad>::computeStrainFinalize(
   {
     GenericDenseVector<is_ad> inelastic_strain_increment(6);
     GenericDenseVector<is_ad> Ms(6);
-    (*_hill_tensor)[this->_qp].vector_mult(Ms, stress_dev);
+    (*_hill_tensor)[_qp].vector_mult(Ms, stress_dev);
 
     for (unsigned int i = 0; i < 6; i++)
       inelastic_strain_increment(i) = Ms(i) * prefactor;
@@ -278,8 +278,7 @@ HillCreepStressUpdateTempl<is_ad>::computeStrainFinalize(
   AnisotropicReturnCreepStressUpdateBaseTempl<is_ad>::computeStrainFinalize(
       inelasticStrainIncrement, stress, stress_dev, delta_gamma);
 
-  this->_effective_inelastic_strain[this->_qp] =
-      this->_effective_inelastic_strain_old[this->_qp] + delta_gamma;
+  this->_effective_inelastic_strain[_qp] = this->_effective_inelastic_strain_old[_qp] + delta_gamma;
 }
 
 template <bool is_ad>
@@ -306,7 +305,7 @@ HillCreepStressUpdateTempl<is_ad>::computeStressFinalize(
 
   if (std::abs(stress_dif) > TOLERANCE * TOLERANCE)
     this->_max_integration_error_time_step =
-        this->_dt / (stress_dif / elasticity_value / this->_max_integration_error);
+        _dt / (stress_dif / elasticity_value / this->_max_integration_error);
   else
     this->_max_integration_error_time_step = std::numeric_limits<Real>::max();
 }

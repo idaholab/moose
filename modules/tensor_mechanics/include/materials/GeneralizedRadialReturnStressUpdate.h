@@ -120,6 +120,11 @@ public:
   bool isBlockDiagonal(const AnisotropyMatrixReal & A);
 
 protected:
+  using Material::_current_elem;
+  using Material::_dt;
+  using Material::_q_point;
+  using Material::_qp;
+
   virtual void initQpStatefulProperties() override;
 
   /**
@@ -166,6 +171,15 @@ protected:
                                      const GenericRankTwoTensor<is_ad> & stress,
                                      const GenericDenseVector<is_ad> & stress_dev,
                                      const GenericReal<is_ad> & delta_gamma) = 0;
+
+  /*
+   * Method that determines the tangent calculation method. For anisotropic creep only models, the
+   * tangent calculation method is ELASTIC for now
+   */
+  virtual TangentCalculationMethod getTangentCalculationMethod() override
+  {
+    return TangentCalculationMethod::ELASTIC;
+  }
 
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
