@@ -45,7 +45,6 @@
   # Use a constant damping parameter
   [./diffusion_damp]
     type = ConstantDamper
-    variable = diffusion
     damping = 0.9
   [../]
 []
