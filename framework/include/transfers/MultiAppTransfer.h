@@ -126,6 +126,12 @@ protected:
    */
   static void addBBoxFactorParam(InputParameters & params);
 
+  /**
+   * Transform a bounding box according to the transformations in the provided coordinate
+   * transformation object
+   */
+  static void transformBoundingBox(BoundingBox & box, const MultiCoordTransform & transform);
+
   /// Deprecated class attribute for compatibility with the apps
   std::shared_ptr<MultiApp> _multi_app;
 

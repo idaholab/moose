@@ -400,10 +400,8 @@ MultiAppTransfer::getFromMultiAppInfo()
                                                       : false);
 }
 
-namespace
-{
 void
-transformBoundingBox(BoundingBox & box, const MultiCoordTransform & transform)
+MultiAppTransfer::transformBoundingBox(BoundingBox & box, const MultiCoordTransform & transform)
 {
   const Real min_x = box.first(0);
   const Real max_x = box.second(0);
@@ -442,6 +440,8 @@ transformBoundingBox(BoundingBox & box, const MultiCoordTransform & transform)
   box.second = new_box_max;
 }
 
+namespace
+{
 template <typename T>
 void
 extendBoundingBoxes(const Real factor, T & bboxes)

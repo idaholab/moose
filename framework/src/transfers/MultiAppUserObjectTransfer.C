@@ -324,6 +324,8 @@ MultiAppUserObjectTransfer::execute()
 
             if (node->n_dofs(to_sys_num, to_var_num) > 0)
             {
+              const auto transformed_node = to_transform(*node);
+
               unsigned int node_found_in_sub_app = 0;
               for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
               {
@@ -331,25 +333,20 @@ MultiAppUserObjectTransfer::execute()
                   continue;
 
                 BoundingBox app_box = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh);
+                transformBoundingBox(app_box, *_from_transforms[i]);
 
-                if (app_box.contains_point(*node))
+                if (app_box.contains_point(transformed_node))
                   ++node_found_in_sub_app;
               }
 
               if (node_found_in_sub_app == 0)
-              {
-                Point n = *node;
                 mooseError("MultiAppUserObjectTransfer: Parent app node ",
-                           n,
+                           transformed_node,
                            " not found within the bounding box of any of the sub applications.");
-              }
               else if (node_found_in_sub_app > 1)
-              {
-                Point n = *node;
                 mooseError("MultiAppUserObjectTransfer: Parent app node ",
-                           n,
+                           transformed_node,
                            " found within the bounding box of two or more sub applications.");
-              }
             }
           }
         }
@@ -373,12 +370,12 @@ MultiAppUserObjectTransfer::execute()
             // grap sample points
             // for constant shape function, we take the element centroid
             if (is_constant)
-              points.push_back(elem->vertex_average());
+              points.push_back(to_transform(elem->vertex_average()));
             // for higher order method, we take all nodes of element
             // this works for the first order L2 Lagrange.
             else
               for (auto & node : elem->node_ref_range())
-                points.push_back(node);
+                points.push_back(to_transform(node));
 
             auto n_points = points.size();
             unsigned int n_comp = elem->n_comp(to_sys_num, to_var_num);
@@ -399,6 +396,7 @@ MultiAppUserObjectTransfer::execute()
                   continue;
 
                 BoundingBox app_box = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh);
+                transformBoundingBox(app_box, *_from_transforms[i]);
 
                 if (app_box.contains_point(point))
                   ++elem_found_in_sub_app;
@@ -434,7 +432,8 @@ MultiAppUserObjectTransfer::execute()
 
           if (node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
           {
-            const auto sub_app = findSubAppToTransferFrom(*node);
+            const auto transformed_node = to_transform(*node);
+            const auto sub_app = findSubAppToTransferFrom(transformed_node);
 
             // Check to see if a sub-app was found
             if (sub_app == static_cast<unsigned int>(-1))
@@ -448,16 +447,13 @@ MultiAppUserObjectTransfer::execute()
             Real from_value = 0;
             {
               Moose::ScopedCommSwapper swapper(getFromMultiApp()->comm());
-              from_value = user_object.spatialValue(from_transform.mapBack(to_transform(*node)));
+              from_value = user_object.spatialValue(from_transform.mapBack(transformed_node));
             }
 
             if (from_value == std::numeric_limits<Real>::infinity())
-            {
-              Point n = *node;
               mooseError("MultiAppUserObjectTransfer: Point corresponding to parent app node at (",
-                         n,
+                         transformed_node,
                          ") not found in the sub application.");
-            }
             to_solution->set(dof, from_value);
           }
         }
@@ -482,12 +478,12 @@ MultiAppUserObjectTransfer::execute()
           // grap sample points
           // for constant shape function, we take the element centroid
           if (is_constant)
-            points.push_back(elem->vertex_average());
+            points.push_back(to_transform(elem->vertex_average()));
           // for higher order method, we take all nodes of element
           // this works for the first order L2 Lagrange.
           else
             for (auto & node : elem->node_ref_range())
-              points.push_back(node);
+              points.push_back(to_transform(node));
 
           auto n_points = points.size();
           unsigned int n_comp = elem->n_comp(to_sys_num, to_var_num);
@@ -630,6 +626,7 @@ MultiAppUserObjectTransfer::findSubAppToTransferFrom(const Point & p)
       continue;
 
     BoundingBox app_box = _multi_app->getBoundingBox(i, _displaced_source_mesh);
+    transformBoundingBox(app_box, *_from_transforms[i]);
 
     if (_skip_bbox_check || app_box.contains_point(p))
       return static_cast<unsigned int>(i);
