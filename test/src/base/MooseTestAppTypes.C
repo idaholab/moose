@@ -8,6 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseTestAppTypes.h"
-#include "MooseEnumItem.h"
+#include "ExecFlagRegistry.h"
 
-const ExecFlagType EXEC_JUST_GO("JUST_GO");
+const ExecFlagType EXEC_JUST_GO = registerExecFlag("JUST_GO");

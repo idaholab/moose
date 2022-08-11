@@ -50,6 +50,7 @@
 #include "CommonOutputAction.h"
 #include "CastUniquePointer.h"
 #include "NullExecutor.h"
+#include "ExecFlagRegistry.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -381,6 +382,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _master_displaced_mesh(isParamValid("_master_displaced_mesh")
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
+    _execute_flags(moose::internal::getExecFlagRegistry().getFlags()),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _executing_mesh_generators(false),
     _popped_final_mesh_generator(false)
@@ -479,8 +481,8 @@ MooseApp::MooseApp(InputParameters parameters)
   _the_warehouse->registerAttribute<AttribBoundaries>("boundaries", 0);
   _the_warehouse->registerAttribute<AttribThread>("thread", 0);
   _the_warehouse->registerAttribute<AttribPreIC>("pre_ic", 0);
-  _the_warehouse->registerAttribute<AttribPreAux>("pre_aux", 0);
-  _the_warehouse->registerAttribute<AttribPostAux>("post_aux", 0);
+  _the_warehouse->registerAttribute<AttribPreAux>("pre_aux");
+  _the_warehouse->registerAttribute<AttribPostAux>("post_aux");
   _the_warehouse->registerAttribute<AttribName>("name", "dummy");
   _the_warehouse->registerAttribute<AttribSystem>("system", "dummy");
   _the_warehouse->registerAttribute<AttribVar>("variable", -1);
@@ -630,14 +632,6 @@ void
 MooseApp::setupOptions()
 {
   TIME_SECTION("setupOptions", 5, "Setting Up Options");
-
-  // MOOSE was updated to have the ability to register execution flags in similar fashion as
-  // objects. However, this change requires all *App.C/h files to be updated with the new
-  // registerExecFlags method. To avoid breaking all applications the default MOOSE flags
-  // are added if nothing has been added to this point. In the future this could go away or
-  // perhaps be a warning.
-  if (_execute_flags.items().empty())
-    Moose::registerExecFlags(_factory);
 
   // Print the header, this is as early as possible
   auto hdr = header();
@@ -2336,27 +2330,6 @@ MooseApp::createMinimalApp()
   }
 
   _action_warehouse.build();
-}
-
-void
-MooseApp::addExecFlag(const ExecFlagType & flag)
-{
-  if (flag.id() == MooseEnumItem::INVALID_ID)
-  {
-    // It is desired that users when creating ExecFlagTypes should not worry about needing
-    // to assign a name and an ID. However, the ExecFlagTypes created by users are global
-    // constants and the ID to be assigned can't be known at construction time of this global
-    // constant, it is only known when it is added to this object (ExecFlagEnum). Therefore,
-    // this const cast allows the ID to be set after construction. This was the lesser of two
-    // evils: const_cast or friend class with mutable members.
-    ExecFlagType & non_const_flag = const_cast<ExecFlagType &>(flag);
-    auto it = _execute_flags.find(flag.name());
-    if (it != _execute_flags.items().end())
-      non_const_flag.setID(it->id());
-    else
-      non_const_flag.setID(_execute_flags.getNextValidID());
-  }
-  _execute_flags.addAvailableFlags(flag);
 }
 
 bool

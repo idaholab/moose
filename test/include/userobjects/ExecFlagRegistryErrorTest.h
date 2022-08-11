@@ -9,17 +9,19 @@
 
 #pragma once
 
-#include "AuxKernel.h"
+#include "GeneralUserObject.h"
 
-class CheckCurrentExecAux : public AuxKernel
+/**
+ * A UserObject that tests errors produced by the ExecFlagRegistry.
+ */
+class ExecFlagRegistryErrorTest : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  CheckCurrentExecAux(const InputParameters & parameters);
+  ExecFlagRegistryErrorTest(const InputParameters & params);
 
-protected:
-  virtual Real computeValue();
-
-  const FEProblemBase & _problem;
+  void initialize() override{};
+  void execute() override{};
+  void finalize() override{};
 };
