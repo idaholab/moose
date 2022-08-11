@@ -1,5 +1,5 @@
 [Tests]
-    issues = '21786'
+    issues = '#21786'
     design = '/RadialAverage.md'
 
     [./radial_average]
