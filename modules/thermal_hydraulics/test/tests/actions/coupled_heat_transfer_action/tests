@@ -23,5 +23,26 @@
 
       detail = 'With sub-app positions provided.'
     []
+    [multiple_phases]
+      type = Exodiff
+      input = 'master.i'
+      cli_args = "
+        AuxVariables/kappa/family=MONOMIAL
+        AuxVariables/kappa/order=CONSTANT
+        AuxVariables/kappa/initial_condition=0
+        CoupledHeatTransfers/right/T_fluid='T_fluid T_fluid'
+        CoupledHeatTransfers/right/htc='htc htc'
+        CoupledHeatTransfers/right/kappa='kappa kappa'
+        CoupledHeatTransfers/right/T_fluid_user_objects='T_uo T_uo'
+        CoupledHeatTransfers/right/htc_user_objects='Hw_uo Hw_uo'
+        CoupledHeatTransfers/right/kappa_user_objects='kappa_uo kappa_uo'
+        MultiApps/thm/input_files=sub_2phase.i
+        Outputs/show='T T_fluid htc T_wall_avg T_fluid_avg htc_avg'"
+      prereq = 'test/with_positions'
+      exodiff = 'master_out.e master_out_thm0_out.e'
+      ad_indexing_type = 'global'
+
+      detail = 'With multiple phases.'
+    []
   []
 []

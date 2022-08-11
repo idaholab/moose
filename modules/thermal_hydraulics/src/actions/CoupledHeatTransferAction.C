@@ -33,6 +33,8 @@ CoupledHeatTransferAction::validParams()
   params.addRequiredParam<std::vector<VariableName>>(
       "htc",
       "Variable(s) on the solid side into which to transfer the heat transfer coefficient(s)");
+  params.addParam<std::vector<VariableName>>(
+      "kappa", "Variables on the solid side into which to transfer the wall contact fractions");
   params.addParam<std::vector<UserObjectName>>(
       "T_fluid_user_objects", "Spatial user object(s) holding the fluid temperature values");
   params.addParam<std::vector<UserObjectName>>(
@@ -47,6 +49,8 @@ CoupledHeatTransferAction::validParams()
       "Spatial user object holding the heat transfer coefficient values",
       "This parameter is deprecated in favor of 'htc_user_objects' (just add an 's' to parameter "
       "name).");
+  params.addParam<std::vector<UserObjectName>>(
+      "kappa_user_objects", "Spatial user object(s) holding the wall contact fraction values");
 
   MooseEnum directions("x y z");
   params.addRequiredParam<MooseEnum>("direction", directions, "The direction of the layers.");
@@ -99,6 +103,27 @@ CoupledHeatTransferAction::CoupledHeatTransferAction(const InputParameters & par
       _htc_user_object_names.size() != _n_phases)
     mooseError("The parameters 'T_fluid', 'htc', 'T_fluid_user_objects', and 'htc_user_objects' "
                "must have the same numbers of elements.");
+
+  if (_n_phases == 1)
+  {
+    if (isParamValid("kappa") || isParamValid("kappa_user_objects"))
+      mooseError("If there is only one phase (e.g., only one element in 'T_fluid'), then the "
+                 "parameters 'kappa' and 'kappa_user_objects' must not be provided.");
+  }
+  else
+  {
+    if (!isParamValid("kappa") || !isParamValid("kappa_user_objects"))
+      mooseError("If there is more than one phase (e.g., more than one element in 'T_fluid'), then "
+                 "the parameters 'kappa' and 'kappa_user_objects' must be provided.");
+    else
+    {
+      _kappa_var_names = getParam<std::vector<VariableName>>("kappa");
+      _kappa_user_object_names = getParam<std::vector<UserObjectName>>("kappa_user_objects");
+      if (_kappa_var_names.size() != _n_phases || _kappa_user_object_names.size() != _n_phases)
+        mooseError("The parameters 'kappa' and 'kappa_user_objects' must have the same number of "
+                   "elements as 'T_fluid'.");
+    }
+  }
 }
 
 void
@@ -123,6 +148,8 @@ CoupledHeatTransferAction::addBCs()
     params.set<std::vector<BoundaryName>>("boundary") = {_boundary};
     params.set<std::vector<VariableName>>("T_infinity") = {_T_fluid_var_names[k]};
     params.set<std::vector<VariableName>>("htc") = {_htc_var_names[k]};
+    if (_n_phases > 1)
+      params.set<std::vector<VariableName>>("scale_factor") = {_kappa_var_names[k]};
     _problem->addBoundaryCondition(class_name, name() + "_bc" + std::to_string(k), params);
   }
 }
@@ -196,5 +223,14 @@ CoupledHeatTransferAction::addTransfers()
       params.set<std::vector<AuxVariableName>>("variable") = {_htc_var_names[k]};
       _problem->addTransfer(class_name, name() + "_htc_transfer" + std::to_string(k), params);
     }
-  }
+    if (_n_phases > 1)
+    {
+      const std::string class_name = "MultiAppUserObjectTransfer";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<MultiAppName>("from_multi_app") = _multi_app_name;
+      params.set<UserObjectName>("user_object") = _kappa_user_object_names[k];
+      params.set<std::vector<AuxVariableName>>("variable") = {_kappa_var_names[k]};
+      _problem->addTransfer(class_name, name() + "_kappa_transfer" + std::to_string(k), params);
+    }
+    }
 }

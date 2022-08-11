@@ -45,6 +45,9 @@ protected:
   /// Variable(s) on the solid side into which to transfer the heat transfer coefficient(s)
   const std::vector<VariableName> _htc_var_names;
 
+  /// Variables on the solid side into which to transfer the wall contact fractions
+  std::vector<VariableName> _kappa_var_names;
+
   /// Number of fluid phases
   const unsigned int _n_phases;
 
@@ -62,6 +65,9 @@ protected:
 
   /// Spatial user object(s) holding the heat transfer coefficient values
   std::vector<UserObjectName> _htc_user_object_names;
+
+  /// Spatial user objects holding the wall contact fraction values
+  std::vector<UserObjectName> _kappa_user_object_names;
 
   /// Name of the THM multi-app
   MultiAppName _multi_app_name;
