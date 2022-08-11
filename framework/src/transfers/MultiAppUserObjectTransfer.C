@@ -170,7 +170,7 @@ MultiAppUserObjectTransfer::execute()
               getToMultiApp()->problemBase().getUserObjectBase(_user_object_name);
           mooseAssert(_from_transforms.size() == 1, "This should have size 1");
           const auto & from_transform = *_from_transforms[0];
-          const auto & to_transform = *_to_transforms[i];
+          const auto & to_transform = *_to_transforms[getToMultiApp()->localAppNumber(i)];
 
           if (is_nodal)
           {
@@ -333,7 +333,9 @@ MultiAppUserObjectTransfer::execute()
                   continue;
 
                 BoundingBox app_box = getFromMultiApp()->getBoundingBox(
-                    i, _displaced_source_mesh, _from_transforms[i].get());
+                    i,
+                    _displaced_source_mesh,
+                    _from_transforms[getFromMultiApp()->localAppNumber(i)].get());
 
                 if (app_box.contains_point(transformed_node))
                   ++node_found_in_sub_app;
@@ -396,7 +398,9 @@ MultiAppUserObjectTransfer::execute()
                   continue;
 
                 BoundingBox app_box = getFromMultiApp()->getBoundingBox(
-                    i, _displaced_source_mesh, _from_transforms[i].get());
+                    i,
+                    _displaced_source_mesh,
+                    _from_transforms[getFromMultiApp()->localAppNumber(i)].get());
 
                 if (app_box.contains_point(point))
                   ++elem_found_in_sub_app;
@@ -439,7 +443,8 @@ MultiAppUserObjectTransfer::execute()
             if (sub_app == static_cast<unsigned int>(-1))
               continue;
 
-            const auto & from_transform = *_from_transforms[sub_app];
+            const auto & from_transform =
+                *_from_transforms[getFromMultiApp()->localAppNumber(sub_app)];
             const auto & user_object = _multi_app->appUserObjectBase(sub_app, _user_object_name);
 
             dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
@@ -503,7 +508,8 @@ MultiAppUserObjectTransfer::execute()
             if (sub_app == static_cast<unsigned int>(-1))
               continue;
 
-            const auto & from_transform = *_from_transforms[sub_app];
+            const auto & from_transform =
+                *_from_transforms[getFromMultiApp()->localAppNumber(sub_app)];
             const auto & user_object =
                 getFromMultiApp()->appUserObjectBase(sub_app, _user_object_name);
 
@@ -597,7 +603,11 @@ MultiAppUserObjectTransfer::findSubAppToTransferFrom(const Point & p)
 
     for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
     {
-      auto & app_position = _multi_app->position(i);
+      if (!_multi_app->hasLocalApp(i))
+        continue;
+
+      // Obtain the possibly transformed app position by querying the transform with the origin
+      const auto app_position = (*_from_transforms[getFromMultiApp()->localAppNumber(i)])(Point(0));
 
       auto distance = (p - app_position).norm();
 
@@ -625,8 +635,8 @@ MultiAppUserObjectTransfer::findSubAppToTransferFrom(const Point & p)
     if (!_multi_app->hasLocalApp(i))
       continue;
 
-    BoundingBox app_box =
-        _multi_app->getBoundingBox(i, _displaced_source_mesh, _from_transforms[i].get());
+    BoundingBox app_box = _multi_app->getBoundingBox(
+        i, _displaced_source_mesh, _from_transforms[getFromMultiApp()->localAppNumber(i)].get());
 
     if (_skip_bbox_check || app_box.contains_point(p))
       return static_cast<unsigned int>(i);

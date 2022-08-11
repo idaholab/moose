@@ -523,6 +523,9 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
     for (auto & app : _reset_apps)
       resetApp(app);
 
+    // If we reset an application, then we delete the old objects, including the coordinate
+    // transformation classes. Consequently we need to reset the coordinate transformation classes
+    // in the associated transfer classes
     for (auto * const transfer : _associated_transfers)
       transfer->getAppInfo();
   }
@@ -825,7 +828,7 @@ MultiApp::appTransferVector(unsigned int app, std::string var_name)
 }
 
 bool
-MultiApp::hasLocalApp(unsigned int global_app)
+MultiApp::hasLocalApp(unsigned int global_app) const
 {
   if (_has_an_app && global_app >= _first_local_app &&
       global_app <= _first_local_app + (_my_num_apps - 1))
@@ -1145,4 +1148,14 @@ void
 MultiApp::addAssociatedTransfer(MultiAppTransfer & transfer)
 {
   _associated_transfers.push_back(&transfer);
+}
+
+unsigned int
+MultiApp::localAppNumber(const unsigned int global_app) const
+{
+  mooseAssert(
+      hasLocalApp(global_app),
+      "We must have the local app in order for this computation to make sense and be valid");
+
+  return cast_int<unsigned int>(global_app - _first_local_app);
 }

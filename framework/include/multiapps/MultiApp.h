@@ -284,7 +284,13 @@ public:
    * @param global_app The global app number in question
    * @return True if the global app is on this processor
    */
-  bool hasLocalApp(unsigned int global_app);
+  bool hasLocalApp(unsigned int global_app) const;
+
+  /**
+   * @return the local app number corresponding to the supplied global app number. We will assert
+   * that we have the local app before computing the local app number
+   */
+  unsigned int localAppNumber(unsigned int global_app) const;
 
   /**
    * Get the local MooseApp object
