@@ -25,14 +25,14 @@
 /framework/*/materials/Parsed* @dschwen
 /framework/*/multiapps @GiudGiud
 /framework/*/preconditioners @lindsayad
-/framework/*/problems/EigenProblem* @fdkong
+/framework/*/problems/EigenProblem* @lindsayad
 /framework/*/relationshipmanagers @lindsayad
 /framework/*/reporters @loganharbour @zachmprince
 /framework/*/samplers @zachmprince
-/framework/*/systems/NonlinearEigenSystem* @fdkong
+/framework/*/systems/NonlinearEigenSystem* @lindsayad
 /framework/*/transfers @GiudGiud
 /framework/*/utils/PetscSupport* @lindsayad
-/framework/*/utils/SlepcSupport* @fdkong
+/framework/*/utils/SlepcSupport* @lindsayad
 /framework/*/utils/Units* @dschwen
 
 /modules/contact @bwspenc @lindsayad
