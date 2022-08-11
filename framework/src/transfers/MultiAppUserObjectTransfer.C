@@ -630,7 +630,7 @@ MultiAppUserObjectTransfer::findSubAppToTransferFrom(const Point & p)
 
   // This loop counts _down_ so that it can preserve legacy behavior of the
   // last sub-app "winning" to be able to set the value at this point
-  for (int i = _multi_app->numGlobalApps(); i >= 0; i--)
+  for (int i = _multi_app->numGlobalApps() - 1; i >= 0; i--)
   {
     if (!_multi_app->hasLocalApp(i))
       continue;
