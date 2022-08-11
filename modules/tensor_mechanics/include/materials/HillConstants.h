@@ -17,12 +17,13 @@
  * This class defines a Hill tensor material object with a given base name.
  */
 
-class HillConstants : public Material
+template <bool is_ad>
+class HillConstantsTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  HillConstants(const InputParameters & parameters);
+  HillConstantsTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
@@ -38,12 +39,12 @@ protected:
   const bool _use_large_rotation;
 
   /// Rotation up to current step "n" to compute Hill tensor
-  ADMaterialProperty<RankTwoTensor> * _rotation_total_hill;
+  GenericMaterialProperty<RankTwoTensor, is_ad> * _rotation_total_hill;
   /// Rotation up to "n - 1" (previous) step to compute Hill tensor
   const MaterialProperty<RankTwoTensor> * _rotation_total_hill_old;
 
   /// Strain increment material property
-  const ADMaterialProperty<RankTwoTensor> * _rotation_increment;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> * _rotation_increment;
 
   /// Hill constants for orthotropic inelasticity
   const std::vector<Real> _hill_constants_input;
@@ -79,3 +80,6 @@ protected:
   // Initial rigid body rotation of the structural element
   RotationTensor _rigid_body_rotation_tensor;
 };
+
+typedef HillConstantsTempl<false> HillConstants;
+typedef HillConstantsTempl<true> ADHillConstants;

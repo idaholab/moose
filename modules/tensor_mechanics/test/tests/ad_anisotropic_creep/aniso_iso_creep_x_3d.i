@@ -33,10 +33,6 @@
 []
 
 [AuxVariables]
-  [temperature]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [hydrostatic_stress]
     order = CONSTANT
     family = MONOMIAL
@@ -68,73 +64,60 @@
 []
 
 [AuxKernels]
-  [temperature]
-    type = ConstantAux
-    variable = temperature
-    value = 50
-  []
   [hydrostatic_stress]
-    type = ADRankTwoScalarAux
+    type = RankTwoScalarAux
     variable = hydrostatic_stress
     rank_two_tensor = stress
     scalar_type = Hydrostatic
   []
   [creep_strain_xx]
-    type = ADRankTwoAux
+    type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_xx
     index_i = 0
     index_j = 0
   []
   [creep_strain_xy]
-    type = ADRankTwoAux
+    type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_xy
     index_i = 0
     index_j = 1
   []
   [creep_strain_yy]
-    type = ADRankTwoAux
+    type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_yy
     index_i = 1
     index_j = 1
   []
   [creep_strain_zz]
-    type = ADRankTwoAux
+    type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_zz
     index_i = 2
     index_j = 2
   []
   [creep_strain_xz]
-    type = ADRankTwoAux
+    type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_xz
     index_i = 0
     index_j = 2
   []
   [creep_strain_yz]
-    type = ADRankTwoAux
+    type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_yz
     index_i = 1
     index_j = 2
   []
   [sigma_xx]
-    type = ADRankTwoAux
+    type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 1
     index_j = 1
-  []
-[]
-
-[ICs]
-  [temp]
-    type = ConstantIC
-    variable = temperature
-    value = 50.0
   []
 []
 
@@ -144,68 +127,37 @@
     x = '0 1.0e-9 1.0'
     y = '0 -4e1 -4e1'
   []
-  [F]
-    type = PiecewiseLinear
-    x = '-1000 10000'
-    y = '0.5 0.5'
-  []
-  [G]
-    type = PiecewiseLinear
-    x = '-1000 10000'
-    y = '0.5 0.5'
-  []
-  [H]
-    type = PiecewiseLinear
-    x = '-1000 10000'
-    y = '0.5 0.5'
-  []
-  [L]
-    type = PiecewiseLinear
-    x = '-1000 10000'
-    y = '1.5 1.5'
-  []
-  [M]
-    type = PiecewiseLinear
-    x = '-1000 10000'
-    y = '1.5 1.5'
-  []
-  [N]
-    type = PiecewiseLinear
-    x = '-1000 10000'
-    y = '1.5 1.5'
-  []
 []
 
 [Modules/TensorMechanics/Master]
   [all]
     strain = FINITE
     generate_output = 'elastic_strain_xx stress_xx'
-    use_automatic_differentiation = true
     add_variables = true
   []
 []
 
 [Materials]
   [elasticity_tensor]
-    type = ADComputeIsotropicElasticityTensor
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 700
     poissons_ratio = 0.0
   []
 
   [elastic_strain]
-    type = ADComputeMultipleInelasticStress
-    inelastic_models = 'trial_creep_aniso_iso'
+    type = ComputeMultipleInelasticStress
+    # inelastic_models = 'trial_creep_iso'
     max_iterations = 50
   []
-  [hill_constants]
-    type = ADHillConstants
+
+  [hill_tensor]
+    type = HillConstants
     # F G H L M N
     hill_constants = "0.5 0.5 0.5 1.5 1.5 1.5"
-    function_names = 'F G H L M N'
-    temperature = temperature
   []
+
   [trial_creep_aniso_iso]
-    type = ADHillCreepStressUpdate
+    type = HillCreepStressUpdate
     coefficient = 1e-16
     n_exponent = 9
     m_exponent = 0
@@ -218,25 +170,37 @@
     max_integration_error = 1.0
   []
 
+  [trial_creep_iso]
+    type = PowerLawCreepStressUpdate
+    coefficient = 1e-16
+    n_exponent = 9
+    m_exponent = 0
+    activation_energy = 0
+    # F G H L M N
+    max_inelastic_increment = 0.00003
+    relative_tolerance = 1e-16
+    absolute_tolerance = 1e-16
+    internal_solve_output_on = never
+  []
 []
 
 [BCs]
   [no_disp_x]
-    type = ADDirichletBC
+    type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
   []
 
   [no_disp_y]
-    type = ADDirichletBC
+    type = DirichletBC
     variable = disp_y
     boundary = 100
     value = 0.0
   []
 
   [no_disp_z]
-    type = ADDirichletBC
+    type = DirichletBC
     variable = disp_z
     boundary = 101
     value = 0.0
@@ -261,7 +225,7 @@
   nl_rel_tol = 1e-13
   nl_abs_tol = 1.0e-14
   l_max_its = 90
-  num_steps = 50
+  num_steps = 10
   dt = 5.0e-4
   start_time = 0
   automatic_scaling = true

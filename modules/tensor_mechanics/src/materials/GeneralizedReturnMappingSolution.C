@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADGeneralizedReturnMappingSolution.h"
+#include "GeneralizedReturnMappingSolution.h"
 
 #include "Moose.h"
 #include "MooseEnum.h"
@@ -23,8 +23,9 @@
 #include <cmath>
 #include <memory>
 
+template <bool is_ad>
 InputParameters
-ADGeneralizedReturnMappingSolution::validParams()
+GeneralizedReturnMappingSolutionTempl<is_ad>::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<Real>(
@@ -51,8 +52,8 @@ ADGeneralizedReturnMappingSolution::validParams()
                               "Debug");
   return params;
 }
-
-ADGeneralizedReturnMappingSolution::ADGeneralizedReturnMappingSolution(
+template <bool is_ad>
+GeneralizedReturnMappingSolutionTempl<is_ad>::GeneralizedReturnMappingSolutionTempl(
     const InputParameters & parameters)
   : _check_range(false),
     _line_search(true),
@@ -74,25 +75,29 @@ ADGeneralizedReturnMappingSolution::ADGeneralizedReturnMappingSolution(
 {
 }
 
-ADReal
-ADGeneralizedReturnMappingSolution::minimumPermissibleValue(
-    const ADDenseVector & /*effective_trial_stress*/) const
+template <bool is_ad>
+GenericReal<is_ad>
+GeneralizedReturnMappingSolutionTempl<is_ad>::minimumPermissibleValue(
+    const GenericDenseVector<is_ad> & /*effective_trial_stress*/) const
 {
   return std::numeric_limits<Real>::lowest();
 }
 
-ADReal
-ADGeneralizedReturnMappingSolution::maximumPermissibleValue(
-    const ADDenseVector & /*effective_trial_stress*/) const
+template <bool is_ad>
+GenericReal<is_ad>
+GeneralizedReturnMappingSolutionTempl<is_ad>::maximumPermissibleValue(
+    const GenericDenseVector<is_ad> & /*effective_trial_stress*/) const
 {
   return std::numeric_limits<Real>::max();
 }
 
+template <bool is_ad>
 void
-ADGeneralizedReturnMappingSolution::returnMappingSolve(const ADDenseVector & stress_dev,
-                                                       const ADDenseVector & stress_new,
-                                                       ADReal & scalar,
-                                                       const ConsoleStream & console)
+GeneralizedReturnMappingSolutionTempl<is_ad>::returnMappingSolve(
+    const GenericDenseVector<is_ad> & stress_dev,
+    const GenericDenseVector<is_ad> & stress_new,
+    GenericReal<is_ad> & scalar,
+    const ConsoleStream & console)
 {
   // construct the stringstream here only if the debug level is set to ALL
   std::unique_ptr<std::stringstream> iter_output =
@@ -151,24 +156,25 @@ ADGeneralizedReturnMappingSolution::returnMappingSolve(const ADDenseVector & str
   }
 }
 
-typename ADGeneralizedReturnMappingSolution::SolveState
-ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & stress_dev,
-                                                  const ADDenseVector & stress_new,
-                                                  ADReal & delta_gamma,
-                                                  std::stringstream * iter_output)
+template <bool is_ad>
+typename GeneralizedReturnMappingSolutionTempl<is_ad>::SolveState
+GeneralizedReturnMappingSolutionTempl<is_ad>::internalSolve(
+    const GenericDenseVector<is_ad> & stress_dev,
+    const GenericDenseVector<is_ad> & stress_new,
+    GenericReal<is_ad> & delta_gamma,
+    std::stringstream * iter_output)
 {
   delta_gamma = initialGuess(stress_dev);
-  ADReal scalar_old = delta_gamma;
-  ADReal scalar_increment = 0.0;
-  const ADReal min_permissible_scalar = minimumPermissibleValue(stress_dev);
-  const ADReal max_permissible_scalar = maximumPermissibleValue(stress_dev);
-  ADReal scalar_upper_bound = max_permissible_scalar;
-  ADReal scalar_lower_bound = min_permissible_scalar;
+  GenericReal<is_ad> scalar_old = delta_gamma;
+  GenericReal<is_ad> scalar_increment = 0.0;
+  const GenericReal<is_ad> min_permissible_scalar = minimumPermissibleValue(stress_dev);
+  const GenericReal<is_ad> max_permissible_scalar = maximumPermissibleValue(stress_dev);
+  GenericReal<is_ad> scalar_upper_bound = max_permissible_scalar;
+  GenericReal<is_ad> scalar_lower_bound = min_permissible_scalar;
   _iteration = 0;
 
   _initial_residual = _residual = computeResidual(stress_dev, stress_new, delta_gamma);
 
-  ADReal residual_old = _residual;
   Real init_resid_sign = MathUtils::sign(MetaPhysicL::raw_value(_residual));
   Real reference_residual =
       computeReferenceResidual(stress_dev, stress_new, _residual, delta_gamma);
@@ -264,7 +270,6 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & stress_d
     outputIterationStep(iter_output, stress_dev, delta_gamma, reference_residual);
 
     ++_iteration;
-    residual_old = _residual;
     scalar_old = delta_gamma;
     _residual_history[_iteration % _num_resids] = MetaPhysicL::raw_value(_residual);
   }
@@ -278,17 +283,20 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & stress_d
   return SolveState::SUCCESS;
 }
 
+template <bool is_ad>
 bool
-ADGeneralizedReturnMappingSolution::converged(const ADReal & ad_residual, const Real & reference)
+GeneralizedReturnMappingSolutionTempl<is_ad>::converged(const GenericReal<is_ad> & ad_residual,
+                                                        const Real & reference)
 {
   const Real residual = MetaPhysicL::raw_value(ad_residual);
   return (std::abs(residual) <= _absolute_tolerance ||
           std::abs(residual / reference) <= _relative_tolerance);
 }
 
+template <bool is_ad>
 bool
-ADGeneralizedReturnMappingSolution::convergedAcceptable(const unsigned int it,
-                                                        const Real & reference)
+GeneralizedReturnMappingSolutionTempl<is_ad>::convergedAcceptable(const unsigned int it,
+                                                                  const Real & reference)
 {
   // Require that we have at least done _num_resids evaluations before we allow for
   // acceptable convergence
@@ -308,13 +316,15 @@ ADGeneralizedReturnMappingSolution::convergedAcceptable(const unsigned int it,
   return converged(_residual / _acceptable_multiplier, reference);
 }
 
+template <bool is_ad>
 void
-ADGeneralizedReturnMappingSolution::checkPermissibleRange(ADReal & scalar,
-                                                          ADReal & scalar_increment,
-                                                          const ADReal & scalar_old,
-                                                          const ADReal min_permissible_scalar,
-                                                          const ADReal max_permissible_scalar,
-                                                          std::stringstream * iter_output)
+GeneralizedReturnMappingSolutionTempl<is_ad>::checkPermissibleRange(
+    GenericReal<is_ad> & scalar,
+    GenericReal<is_ad> & scalar_increment,
+    const GenericReal<is_ad> & scalar_old,
+    const GenericReal<is_ad> min_permissible_scalar,
+    const GenericReal<is_ad> max_permissible_scalar,
+    std::stringstream * iter_output)
 {
   if (scalar > max_permissible_scalar)
   {
@@ -337,13 +347,14 @@ ADGeneralizedReturnMappingSolution::checkPermissibleRange(ADReal & scalar,
   }
 }
 
+template <bool is_ad>
 void
-ADGeneralizedReturnMappingSolution::updateBounds(const ADReal & scalar,
-                                                 const ADReal & residual,
-                                                 const Real init_resid_sign,
-                                                 ADReal & scalar_upper_bound,
-                                                 ADReal & scalar_lower_bound,
-                                                 std::stringstream * iter_output)
+GeneralizedReturnMappingSolutionTempl<is_ad>::updateBounds(const GenericReal<is_ad> & scalar,
+                                                           const GenericReal<is_ad> & residual,
+                                                           const Real init_resid_sign,
+                                                           GenericReal<is_ad> & scalar_upper_bound,
+                                                           GenericReal<is_ad> & scalar_lower_bound,
+                                                           std::stringstream * iter_output)
 {
   // Update upper/lower bounds as applicable
   if (residual * init_resid_sign < 0.0 && scalar < scalar_upper_bound)
@@ -364,12 +375,13 @@ ADGeneralizedReturnMappingSolution::updateBounds(const ADReal & scalar,
     scalar_lower_bound = scalar;
 }
 
+template <bool is_ad>
 void
-ADGeneralizedReturnMappingSolution::outputIterationStep(
+GeneralizedReturnMappingSolutionTempl<is_ad>::outputIterationStep(
     std::stringstream * iter_output,
-    const ADDenseVector & effective_trial_stress,
-    const ADReal & scalar,
-    const ADReal reference_residual)
+    const GenericDenseVector<is_ad> & effective_trial_stress,
+    const GenericReal<is_ad> & scalar,
+    const GenericReal<is_ad> reference_residual)
 {
   if (iter_output)
   {
@@ -386,9 +398,10 @@ ADGeneralizedReturnMappingSolution::outputIterationStep(
   }
 }
 
+template <bool is_ad>
 void
-ADGeneralizedReturnMappingSolution::outputIterationSummary(std::stringstream * iter_output,
-                                                           const unsigned int total_it)
+GeneralizedReturnMappingSolutionTempl<is_ad>::outputIterationSummary(
+    std::stringstream * iter_output, const unsigned int total_it)
 {
   if (iter_output)
     *iter_output << "In " << total_it << " iterations the residual went from "
