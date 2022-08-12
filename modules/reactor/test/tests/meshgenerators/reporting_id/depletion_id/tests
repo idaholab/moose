@@ -16,4 +16,11 @@
     requirement = 'The system shall support the generation of plane depletion IDs for 2D reactor cores with skipped materials'
     recover = false
   []
+  [subpin]
+    type = 'Exodiff'
+    input = 'sub_pin_depletion_id.i'
+    exodiff = 'sub_pin_depletion_id_out.e'
+    requirement = 'The system shall support the generation of sub-pin level depletion IDs'
+    recover = false
+  []
 []
