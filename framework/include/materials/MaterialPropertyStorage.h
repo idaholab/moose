@@ -249,6 +249,9 @@ public:
   /// creating a new ID if it hasn't already been created.
   unsigned int getPropertyId(const std::string & prop_name);
 
+  /// Returns the prop_name for the given property ID, erroring if the property does not exist.
+  std::string getPropertyName(unsigned int prop_id);
+
   unsigned int retrievePropertyId(const std::string & prop_name) const;
 
   bool isStatefulProp(const std::string & prop_name) const

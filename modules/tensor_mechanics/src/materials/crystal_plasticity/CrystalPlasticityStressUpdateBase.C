@@ -410,6 +410,9 @@ CrystalPlasticityStressUpdateBase::calculateShearStress(
     const RankTwoTensor & inverse_eigenstrain_deformation_grad,
     const unsigned int & num_eigenstrains)
 {
+  if (_current_elem->id() == 1 && _qp == 1)
+    _console << "Update _tau" << std::endl;
+
   if (!num_eigenstrains)
   {
     for (const auto i : make_range(_number_slip_systems))

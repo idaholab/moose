@@ -176,6 +176,18 @@ public:
   }
 
   /**
+   * Wrapper for MaterialStorage::getPropertyName. Allows classes with a MaterialData object
+   * (i.e. MaterialPropertyInterface) to access material property names.
+   * @param prop_id The ID of the material property
+   *
+   * @return An string holding the name for the property ID passed in as prop_id
+   */
+  std::string getPropertyName(unsigned int prop_id) const
+  {
+    return _storage.getPropertyName(prop_id);
+  }
+
+  /**
    * Set _resize_only_if_smaller to perform a non-destructive resize. Setting this
    * flag to true means that resize(n) will not decrease the size of _material_data
    * if n is smaller than the size of the material data object.

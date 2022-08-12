@@ -44,7 +44,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_block_ids(block_ids),
     _mi_boundary_ids(boundary_ids)
 {
-  moose_object->getMooseApp().registerInterfaceObject(*this);
+  moose_object->getMooseApp().registerInterfaceObject(*this, _mi_tid);
 
   // Set the MaterialDataType flag
   if (_mi_params.isParamValid("_material_data_type"))
@@ -306,6 +306,7 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_w
       _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid, no_warn);
 
   checkBlockAndBoundaryCompatibility(discrete);
+  _discrete_materials.insert(discrete.get());
   return *discrete;
 }
 

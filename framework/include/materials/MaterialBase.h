@@ -160,7 +160,7 @@ public:
    * Get the prop ids corresponding to \p declareProperty
    * @return A reference to the set of properties with calls to \p declareProperty
    */
-  const std::set<unsigned int> & getSuppliedPropIDs() { return _supplied_prop_ids; }
+  const std::set<unsigned int> & getSuppliedPropIDs() const { return _supplied_prop_ids; }
 
   void checkStatefulSanity() const;
 
@@ -203,6 +203,7 @@ public:
 
   void setFaceInfo(const FaceInfo & fi) { _face_info = &fi; }
 
+  std::string getPropertyName(unsigned int prop_id);
 protected:
   /**
    * Users must override this method.

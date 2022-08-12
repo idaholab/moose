@@ -894,7 +894,7 @@ public:
    * This should be called within the constructor of the interface in interest.
    */
   template <class T>
-  void registerInterfaceObject(T & interface);
+  void registerInterfaceObject(T & interface, const THREAD_ID tid = 0);
 
   /**
    * Gets the registered interface objects for a given interface.
@@ -903,6 +903,14 @@ public:
    */
   template <class T>
   const std::vector<T *> & getInterfaceObjects() const;
+
+  /**
+   * Gets the registered interface objects for a given interface for a given thread.
+   *
+   * For this to work, the interface must register itself using registerInterfaceObject.
+   */
+  template <class T>
+  const std::vector<T *> & getInterfaceObjects(const THREAD_ID tid) const;
 
   static void addAppParam(InputParameters & params);
 
@@ -1304,6 +1312,9 @@ private:
 
   /// Registration for interface objects
   std::map<std::type_index, std::unique_ptr<InterfaceRegistryObjectsBase>> _interface_registry;
+  /// Registration for interface objects by thread
+  std::vector<std::map<std::type_index, std::unique_ptr<InterfaceRegistryObjectsBase>>>
+      _threaded_interface_registry;
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;
@@ -1327,24 +1338,33 @@ MooseApp::getParam(const std::string & name) const
 
 template <class T>
 void
-MooseApp::registerInterfaceObject(T & interface)
+MooseApp::registerInterfaceObject(T & interface, const THREAD_ID tid)
 {
   static_assert(!std::is_base_of<MooseObject, T>::value, "T is not an interface");
 
-  InterfaceRegistryObjects<T> * registry = nullptr;
-  auto it = _interface_registry.find(typeid(T));
-  if (it == _interface_registry.end())
+  auto registerToMap = [&](auto & registry_map)
   {
-    auto new_registry = std::make_unique<InterfaceRegistryObjects<T>>();
-    registry = new_registry.get();
-    _interface_registry.emplace(typeid(T), std::move(new_registry));
-  }
-  else
-    registry = static_cast<InterfaceRegistryObjects<T> *>(it->second.get());
+    InterfaceRegistryObjects<T> * registry = nullptr;
+    auto it = registry_map.find(typeid(T));
+    if (it == registry_map.end())
+    {
+      auto new_registry = std::make_unique<InterfaceRegistryObjects<T>>();
+      registry = new_registry.get();
+      registry_map.emplace(typeid(T), std::move(new_registry));
+    }
+    else
+      registry = static_cast<InterfaceRegistryObjects<T> *>(it->second.get());
 
-  mooseAssert(std::count(registry->_objects.begin(), registry->_objects.end(), &interface) == 0,
-              "Interface already registered");
-  registry->_objects.push_back(&interface);
+    mooseAssert(std::count(registry->_objects.begin(), registry->_objects.end(), &interface) == 0,
+                "Interface already registered");
+    registry->_objects.push_back(&interface);
+  };
+
+  registerToMap(_interface_registry);
+  if (tid < _threaded_interface_registry.size())
+    registerToMap(_threaded_interface_registry[tid]);
+  else
+    mooseError("Invalid thread ID in registerInterfaceObject");
 }
 
 template <class T>
@@ -1355,6 +1375,21 @@ MooseApp::getInterfaceObjects() const
 
   const auto it = _interface_registry.find(typeid(T));
   if (it != _interface_registry.end())
+    return static_cast<InterfaceRegistryObjects<T> *>(it->second.get())->_objects;
+  const static std::vector<T *> empty;
+  return empty;
+}
+
+template <class T>
+const std::vector<T *> &
+MooseApp::getInterfaceObjects(const THREAD_ID tid) const
+{
+  static_assert(!std::is_base_of<MooseObject, T>::value, "T is not an interface");
+  if (tid >= _threaded_interface_registry.size())
+    mooseError("Invalid thread ID in getInterfaceObjects");
+
+  const auto it = _threaded_interface_registry[tid].find(typeid(T));
+  if (it != _threaded_interface_registry[tid].end())
     return static_cast<InterfaceRegistryObjects<T> *>(it->second.get())->_objects;
   const static std::vector<T *> empty;
   return empty;

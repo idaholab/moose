@@ -403,6 +403,18 @@ MaterialPropertyStorage::getPropertyId(const std::string & prop_name)
   return id;
 }
 
+std::string
+MaterialPropertyStorage::getPropertyName(unsigned int prop_id)
+{
+  auto it = std::find_if(_prop_ids.begin(),
+                         _prop_ids.end(),
+                         [&](const auto & pair) { return pair.second == prop_id; });
+
+  if (it == _prop_ids.end())
+    mooseError("Property ID ", prop_id, " not found.");
+  return it->first;
+}
+
 unsigned int
 MaterialPropertyStorage::retrievePropertyId(const std::string & prop_name) const
 {

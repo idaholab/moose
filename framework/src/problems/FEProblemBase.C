@@ -114,6 +114,8 @@
 
 #include "metaphysicl/dualnumber.h"
 
+#include <algorithm>
+
 // Anonymous namespace for helper function
 namespace
 {
@@ -832,6 +834,38 @@ FEProblemBase::initialSetup()
         _materials.sort(tid);
         _interface_materials.sort(tid);
       }
+
+      // check that no discrete properties are accessed without a corrsponding getMaterial call
+      for (const auto & mpi : _app.getInterfaceObjects<MaterialPropertyInterface>(tid))
+        for (const auto & dmat : _discrete_materials.getObjects(tid))
+          if (!MooseUtils::emptyIntersection(mpi->getMatPropDependencies(),
+                                             dmat->getSuppliedPropIDs()) &&
+              mpi->getRequestedDiscreteMaterials().count(dmat.get()) == 0)
+          {
+            std::set<unsigned int> ids;
+            std::set_intersection(mpi->getMatPropDependencies().begin(),
+                                  mpi->getMatPropDependencies().end(),
+                                  dmat->getSuppliedPropIDs().begin(),
+                                  dmat->getSuppliedPropIDs().end(),
+                                  std::inserter(ids, ids.begin()));
+            std::vector<std::string> names;
+            std::transform(ids.begin(),
+                           ids.end(),
+                           std::back_inserter(names),
+                           [&](auto id) { return dmat->getPropertyName(id); });
+
+            mooseError(
+                mpi->_mi_params.blockLocation(),
+                " '",
+                mpi->_mi_params.blockFullpath(),
+                "' is requesting discrete material properties ",
+                Moose::stringify(names, ", ", "'"),
+                " without requesting the providing "
+                "object '",
+                dmat->name(),
+                "' with getMaterial. Discrete materials need to be called explicitly to update "
+                "their properties, and they will otherwise contain undefined values.");
+          }
     }
 
     {
@@ -3280,11 +3314,11 @@ FEProblemBase::setActiveMaterials(SubdomainID blk_id, THREAD_ID tid)
       if (!MooseUtils::emptyIntersection(supplied_props, needed_mat_props))
       {
         _active_materials[tid].push_back(mat.get());
-        // _console << "YES: " << mat->name() << std::endl;
+        _console << "YES: " << mat->name() << std::endl;
       }
       else
       {
-        // _console << "NO:  " << mat->name() << std::endl;
+        _console << "NO:  " << mat->name() << std::endl;
       }
     }
 }

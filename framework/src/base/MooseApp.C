@@ -387,7 +387,8 @@ MooseApp::MooseApp(InputParameters parameters)
     _execute_flags(moose::internal::getExecFlagRegistry().getFlags()),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _executing_mesh_generators(false),
-    _popped_final_mesh_generator(false)
+    _popped_final_mesh_generator(false),
+    _threaded_interface_registry(libMesh::n_threads())
 {
 #ifdef HAVE_GPERFTOOLS
   if (isUltimateMaster())

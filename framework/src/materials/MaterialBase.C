@@ -221,3 +221,9 @@ MaterialBase::checkExecutionStage()
     mooseError("Material properties must be retrieved during material object construction to "
                "ensure correct dependency resolution.");
 }
+
+std::string
+MaterialBase::getPropertyName(unsigned int prop_id)
+{
+  return materialData().getPropertyName(prop_id);
+}

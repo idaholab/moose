@@ -206,6 +206,12 @@ public:
   MaterialBase & getMaterialByName(const std::string & name, bool no_warn = false);
   ///@}
 
+  /// all requested discrete materials
+  const std::set<const MaterialBase *> & getRequestedDiscreteMaterials()
+  {
+    return _discrete_materials;
+  }
+
   ///@{
   /**
    * Check if the material property exists
@@ -342,7 +348,9 @@ public:
   /// resolve all deferred properties (optional and zero properties)
   virtual void resolveDeferredProperties();
 
-protected:
+  /// retrieve the material data type used by the underlying object
+  Moose::MaterialDataType getMaterialDataType() { return _material_data_type; }
+
   /// Parameters of the object with this interface
   const InputParameters & _mi_params;
 
@@ -352,6 +360,7 @@ protected:
   /// The "complete" name of the object that this interface belongs for material property output
   const MooseObjectName _mi_moose_object_name;
 
+protected:
   /// The type of data
   Moose::MaterialDataType _material_data_type;
 
@@ -468,6 +477,9 @@ private:
   /// deferred resolution material properties
   std::vector<std::unique_ptr<DeferredMaterialPropertyProxyBase<MaterialPropertyInterface>>>
       _deferred_property_proxies;
+
+  /// store all getMaterial calls to ensure that discrete material properties are only used if a corresponding getMaterial call was made
+  std::set<const MaterialBase *> _discrete_materials;
 };
 
 template <typename T, bool is_ad>
