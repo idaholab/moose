@@ -167,9 +167,14 @@ AbaqusUMATStress::computeProperties()
 void
 AbaqusUMATStress::computeQpStress()
 {
-  const Real * myDFGRD0 = &(_Fbar_old[_qp](0, 0));
-  const Real * myDFGRD1 = &(_Fbar[_qp](0, 0));
-  const Real * myDROT = &(_rotation_increment[_qp](0, 0));
+  // C uses row-major, whereas Fortran uses column major
+  // therefore, all unsymmetric matrices must be transposed before passing them to Fortran
+  RankTwoTensor FBar_old_fortran = _Fbar_old[_qp].transpose();
+  RankTwoTensor FBar_fortran = _Fbar[_qp].transpose();
+  RankTwoTensor DROT_fortran = _rotation_increment[_qp].transpose();
+  const Real * myDFGRD0 = &(FBar_old_fortran(0, 0));
+  const Real * myDFGRD1 = &(FBar_fortran(0, 0));
+  const Real * myDROT = &(DROT_fortran(0, 0));
 
   // copy because UMAT does not guarantee constness
   for (const auto i : make_range(9))
