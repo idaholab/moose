@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CoupledHeatTransferAction.h"
+#include "DiscreteLineSegmentInterface.h"
 #include "FEProblem.h"
 
 registerMooseAction("ThermalHydraulicsApp", CoupledHeatTransferAction, "add_bc");
@@ -53,8 +54,28 @@ CoupledHeatTransferAction::validParams()
       "kappa_user_objects", "Spatial user object(s) holding the wall contact fraction values");
 
   MooseEnum directions("x y z");
-  params.addRequiredParam<MooseEnum>("direction", directions, "The direction of the layers.");
-  params.addRequiredParam<unsigned int>("num_layers", "The number of layers.");
+  params.addDeprecatedParam<MooseEnum>(
+      "direction",
+      directions,
+      "The direction of the layers.",
+      "The usage of 'direction' and 'num_layers' is deprecated. Use 'position', 'orientation', "
+      "'rotation', 'length', and 'n_elems' instead. The latter parameters correspond to the "
+      "parameters of the same names in the coupled flow channel component.");
+  params.addDeprecatedParam<unsigned int>(
+      "num_layers",
+      "The number of layers.",
+      "The usage of 'direction' and 'num_layers' is deprecated. Use 'position', 'orientation', "
+      "'rotation', 'length', and 'n_elems' instead. The latter parameters correspond to the "
+      "parameters of the same names in the coupled flow channel component.");
+
+  params.addParam<Point>("position", "Start position of axis in 3-D space [m]");
+  params.addParam<RealVectorValue>(
+      "orientation",
+      "Direction of axis from start position to end position (no need to normalize)");
+  params.addParam<Real>("rotation", 0.0, "Angle of rotation about the x-axis [degrees]");
+  params.addParam<std::vector<Real>>("length", "Length of each axial section [m]");
+  params.addParam<std::vector<unsigned int>>("n_elems", "Number of elements in each axial section");
+
   params.addRequiredParam<std::string>("multi_app", "The name of the multi-app.");
 
   params.addParam<std::vector<Point>>(
@@ -77,9 +98,6 @@ CoupledHeatTransferAction::CoupledHeatTransferAction(const InputParameters & par
     _htc_var_names(getParam<std::vector<VariableName>>("htc")),
 
     _n_phases(_T_fluid_var_names.size()),
-
-    _direction_enum(getParam<MooseEnum>("direction")),
-    _num_layers(getParam<unsigned int>("num_layers")),
 
     _T_wall_user_object_name(name() + "_T_avg_uo"),
 
@@ -180,9 +198,31 @@ CoupledHeatTransferAction::addUserObjects()
   {
     InputParameters params = class_params;
     params.set<std::vector<VariableName>>("variable") = {_T_solid_var_name};
-    params.set<MooseEnum>("direction") = _direction_enum;
-    params.set<unsigned int>("num_layers") = _num_layers;
     params.set<std::vector<BoundaryName>>("boundary") = {_boundary};
+    if (isParamValid("direction") && isParamValid("num_layers"))
+    {
+      params.set<MooseEnum>("direction") = getParam<MooseEnum>("direction");
+      params.set<unsigned int>("num_layers") = getParam<unsigned int>("num_layers");
+    }
+    else if (isParamValid("position") && isParamValid("orientation") && isParamValid("length") &&
+             isParamValid("n_elems"))
+    {
+      const auto & position = getParam<Point>("position");
+      const auto & orientation = getParam<RealVectorValue>("orientation");
+      const auto & rotation = getParam<Real>("rotation");
+      const auto & lengths = getParam<std::vector<Real>>("length");
+      const auto & n_elems = getParam<std::vector<unsigned int>>("n_elems");
+
+      params.set<MooseEnum>("direction") =
+          DiscreteLineSegmentInterface::getAlignmentAxis(orientation);
+      params.set<std::vector<Real>>("bounds") =
+          DiscreteLineSegmentInterface::getElementBoundaryCoordinates(
+              position, orientation, rotation, lengths, n_elems);
+    }
+    else
+      mooseError(
+          "The parameters 'position', 'orientation', 'length', and 'n_elems' must be provided.");
+
     _problem->addUserObject(class_name, _T_wall_user_object_name, params);
   }
 }
@@ -232,5 +272,5 @@ CoupledHeatTransferAction::addTransfers()
       params.set<std::vector<AuxVariableName>>("variable") = {_kappa_var_names[k]};
       _problem->addTransfer(class_name, name() + "_kappa_transfer" + std::to_string(k), params);
     }
-    }
+  }
 }

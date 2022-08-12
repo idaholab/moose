@@ -51,12 +51,6 @@ protected:
   /// Number of fluid phases
   const unsigned int _n_phases;
 
-  /// The MooseEnum direction the layers are going in
-  const MooseEnum _direction_enum;
-
-  /// Number of layers to split the mesh into
-  const unsigned int _num_layers;
-
   /// User object name with solid temperature
   const UserObjectName _T_wall_user_object_name;
 

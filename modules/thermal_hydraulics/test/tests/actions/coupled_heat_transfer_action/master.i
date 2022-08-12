@@ -56,11 +56,14 @@
     T = T
     T_wall = T_wall
     htc = 'htc'
-    direction = y
-    num_layers = 10
     multi_app = thm
     T_fluid_user_objects = 'T_uo'
     htc_user_objects = 'Hw_uo'
+
+    position = '0 0 0'
+    orientation = '0 1 0'
+    length = 1
+    n_elems = 10
   []
 []
 

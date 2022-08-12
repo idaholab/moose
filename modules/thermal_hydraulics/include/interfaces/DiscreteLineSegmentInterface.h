@@ -52,17 +52,20 @@ public:
    */
   Point computeReferencePointFromRealPoint(const Point & p) const;
 
+  /**
+   * Gets an axis MooseEnum for the axis the component is aligned with.
+   *
+   * If the axis does not align with the x, y, or z axis, then an invalid
+   * MooseEnum is returned.
+   */
+  MooseEnum getAlignmentAxis() const;
+
+  /**
+   * Gets the element boundary coordinates for the aligned axis.
+   */
+  std::vector<Real> getElementBoundaryCoordinates() const;
+
 protected:
-  /**
-   * Computes the direction transformation tensor
-   */
-  RealTensorValue computeDirectionTransformationTensor() const;
-
-  /**
-   * Computes the rotation transformation tensor
-   */
-  RealTensorValue computeXRotationTransformationTensor() const;
-
   /// Start position of axis in 3-D space
   const Point & _position;
   /// Unnormalized direction of axis from start position to end position
@@ -100,4 +103,61 @@ protected:
 
 public:
   static InputParameters validParams();
+
+  /**
+   * Computes the direction transformation tensor
+   *
+   * @param[in] dir   Direction vector
+   */
+  static RealTensorValue computeDirectionTransformationTensor(const RealVectorValue & dir);
+
+  /**
+   * Computes the rotation transformation tensor
+   *
+   * @param[in] rotation   Rotation about the x-axis, in degrees
+   */
+  static RealTensorValue computeXRotationTransformationTensor(const Real & rotation);
+
+  /**
+   * Computes point in 3-D space from a point in reference space.
+   *
+   * @param[in] p   Point in reference space
+   */
+  static Point computeRealPointFromReferencePoint(const Point & p,
+                                                  const RealVectorValue & position,
+                                                  const RealTensorValue & R,
+                                                  const RealTensorValue & Rx);
+
+  /**
+   * Computes point in reference space from a point in 3-D space.
+   *
+   * @param[in] p   Point in 3-D space
+   */
+  static Point computeReferencePointFromRealPoint(const Point & p,
+                                                  const RealVectorValue & position,
+                                                  const RealTensorValue & R_inv,
+                                                  const RealTensorValue & Rx_inv);
+
+  /**
+   * Gets an axis MooseEnum for the axis the component is aligned with.
+   *
+   * If the axis does not align with the x, y, or z axis, then an invalid
+   * MooseEnum is returned.
+   */
+  static MooseEnum getAlignmentAxis(const RealVectorValue & dir);
+
+  /**
+   * Gets the element boundary coordinates for the aligned axis.
+   *
+   * @param[in] position     Start position of axis in 3-D space
+   * @param[in] orientation  Direction of axis from start position to end position
+   * @param[in] rotation     Angle of rotation about the x-axis, in degrees
+   * @param[in] lengths      Length of each axial section
+   * @param[in] n_elems      Number of elements in each axial section
+   */
+  static std::vector<Real> getElementBoundaryCoordinates(const RealVectorValue & position,
+                                                         const RealVectorValue & orientation,
+                                                         const Real & rotation,
+                                                         const std::vector<Real> & lengths,
+                                                         const std::vector<unsigned int> & n_elems);
 };

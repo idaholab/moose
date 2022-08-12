@@ -11,6 +11,7 @@
 #include "MooseObject.h"
 #include "MooseEnum.h"
 #include "MooseUtils.h"
+#include "Numerics.h"
 
 InputParameters
 DiscreteLineSegmentInterface::validParams()
@@ -39,8 +40,8 @@ DiscreteLineSegmentInterface::DiscreteLineSegmentInterface(const MooseObject * m
     _n_elems(moose_object->parameters().get<std::vector<unsigned int>>("n_elems")),
     _n_elem(std::accumulate(_n_elems.begin(), _n_elems.end(), 0)),
     _n_sections(_lengths.size()),
-    _R(computeDirectionTransformationTensor()),
-    _Rx(computeXRotationTransformationTensor()),
+    _R(computeDirectionTransformationTensor(_dir)),
+    _Rx(computeXRotationTransformationTensor(_rotation)),
     _R_inv(_R.inverse()),
     _Rx_inv(_Rx.inverse()),
     _moose_object_name_dlsi(moose_object->name())
@@ -48,10 +49,11 @@ DiscreteLineSegmentInterface::DiscreteLineSegmentInterface(const MooseObject * m
 }
 
 RealTensorValue
-DiscreteLineSegmentInterface::computeDirectionTransformationTensor() const
+DiscreteLineSegmentInterface::computeDirectionTransformationTensor(const RealVectorValue & dir)
 {
-  Real theta = acos(_dir(2));
-  Real aphi = atan2(_dir(1), _dir(0));
+  const auto dir_normalized = dir / dir.norm();
+  const Real theta = acos(dir_normalized(2));
+  const Real aphi = atan2(dir_normalized(1), dir_normalized(0));
   return RealTensorValue(
       RealVectorValue(cos(aphi) * sin(theta), -sin(aphi), -cos(aphi) * cos(theta)),
       RealVectorValue(sin(aphi) * sin(theta), cos(aphi), -sin(aphi) * cos(theta)),
@@ -59,12 +61,12 @@ DiscreteLineSegmentInterface::computeDirectionTransformationTensor() const
 }
 
 RealTensorValue
-DiscreteLineSegmentInterface::computeXRotationTransformationTensor() const
+DiscreteLineSegmentInterface::computeXRotationTransformationTensor(const Real & rotation)
 {
-  Real rotation_rad = M_PI * _rotation / 180.;
-  RealVectorValue Rx_x(1., 0., 0.);
-  RealVectorValue Rx_y(0., cos(rotation_rad), -sin(rotation_rad));
-  RealVectorValue Rx_z(0., sin(rotation_rad), cos(rotation_rad));
+  const Real rotation_rad = M_PI * rotation / 180.;
+  const RealVectorValue Rx_x(1., 0., 0.);
+  const RealVectorValue Rx_y(0., cos(rotation_rad), -sin(rotation_rad));
+  const RealVectorValue Rx_z(0., sin(rotation_rad), cos(rotation_rad));
   return RealTensorValue(Rx_x, Rx_y, Rx_z);
 }
 
@@ -87,13 +89,107 @@ DiscreteLineSegmentInterface::computeAxialCoordinate(const Point & p) const
 }
 
 Point
+DiscreteLineSegmentInterface::computeRealPointFromReferencePoint(const Point & p,
+                                                                 const RealVectorValue & position,
+                                                                 const RealTensorValue & R,
+                                                                 const RealTensorValue & Rx)
+{
+  return R * (Rx * p) + position;
+}
+
+Point
 DiscreteLineSegmentInterface::computeRealPointFromReferencePoint(const Point & p) const
 {
-  return _R * (_Rx * p) + _position;
+  return computeRealPointFromReferencePoint(p, _position, _R, _Rx);
+}
+
+Point
+DiscreteLineSegmentInterface::computeReferencePointFromRealPoint(const Point & p,
+                                                                 const RealVectorValue & position,
+                                                                 const RealTensorValue & R_inv,
+                                                                 const RealTensorValue & Rx_inv)
+{
+  return Rx_inv * R_inv * (p - position);
 }
 
 Point
 DiscreteLineSegmentInterface::computeReferencePointFromRealPoint(const Point & p) const
 {
-  return _Rx_inv * _R_inv * (p - _position);
+  return computeReferencePointFromRealPoint(p, _position, _R_inv, _Rx_inv);
+}
+
+MooseEnum
+DiscreteLineSegmentInterface::getAlignmentAxis(const RealVectorValue & dir)
+{
+  MooseEnum axis("x y z");
+  if (THM::areParallelVectors(dir, RealVectorValue(1, 0, 0)))
+    axis = "x";
+  else if (THM::areParallelVectors(dir, RealVectorValue(0, 1, 0)))
+    axis = "y";
+  else if (THM::areParallelVectors(dir, RealVectorValue(0, 0, 1)))
+    axis = "z";
+
+  return axis;
+}
+
+MooseEnum
+DiscreteLineSegmentInterface::getAlignmentAxis() const
+{
+  return getAlignmentAxis(_dir);
+}
+
+std::vector<Real>
+DiscreteLineSegmentInterface::getElementBoundaryCoordinates(
+    const RealVectorValue & position,
+    const RealVectorValue & orientation,
+    const Real & rotation,
+    const std::vector<Real> & lengths,
+    const std::vector<unsigned int> & n_elems)
+{
+  const auto axis = getAlignmentAxis(orientation);
+
+  unsigned int d;
+  if (axis == "x")
+    d = 0;
+  else if (axis == "y")
+    d = 1;
+  else if (axis == "z")
+    d = 2;
+  else
+    mooseError("Invalid axis.");
+
+  const auto R = computeDirectionTransformationTensor(orientation);
+  const auto Rx = computeXRotationTransformationTensor(rotation);
+
+  const unsigned int n_elems_total = std::accumulate(n_elems.begin(), n_elems.end(), 0);
+  const unsigned int n_sections = lengths.size();
+
+  unsigned int i_section_start = 0;
+  Real section_start_ref_position = 0.0;
+  std::vector<Real> element_boundary_coordinates(n_elems_total + 1);
+  element_boundary_coordinates[0] =
+      computeRealPointFromReferencePoint(Point(0, 0, 0), position, R, Rx)(d);
+  for (unsigned int j = 0; j < n_sections; ++j)
+  {
+    const Real section_dx = lengths[j] / n_elems[j];
+    for (unsigned int k = 0; k < n_elems[j]; ++k)
+    {
+      const unsigned int i = i_section_start + k + 1;
+      const Real ref_position = section_start_ref_position + section_dx * k;
+      const Point ref_point = Point(ref_position, 0, 0);
+      element_boundary_coordinates[i] =
+          computeRealPointFromReferencePoint(ref_point, position, R, Rx)(d);
+    }
+
+    section_start_ref_position += lengths[j];
+    i_section_start += n_elems[j];
+  }
+
+  return element_boundary_coordinates;
+}
+
+std::vector<Real>
+DiscreteLineSegmentInterface::getElementBoundaryCoordinates() const
+{
+  return getElementBoundaryCoordinates(_position, _dir, _rotation, _lengths, _n_elems);
 }
