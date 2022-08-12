@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/TriPinHexAssemblyGenerator.md'
-  issues = '#20949'
+  issues = '#20949 #21908'
   [tri_pin]
     type = 'Exodiff'
     input = 'tri_pin.i'
@@ -24,6 +24,15 @@
     requirement ='The system shall be able to generate a tri-pin assembly mesh by specifying the apothem size.'
     recover = false
   []
+
+  [tri_pin_id]
+    type = 'Exodiff'
+    input = 'tri_pin_id.i'
+    exodiff = 'tri_pin_id_out.e'
+    requirement ='The system shall be able to generate a tri-pin assembly mesh with ring and sector Ids.'
+    recover = false
+  []
+
   [tri_pin_dup]
     type = 'Exodiff'
     input = 'tri_pin_dup.i'

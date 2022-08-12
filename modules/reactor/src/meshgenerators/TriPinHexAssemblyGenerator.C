@@ -71,6 +71,7 @@ TriPinHexAssemblyGenerator::validParams()
   params.addParamNamesToGroup("ring_block_ids ring_block_names background_block_ids "
                               "background_block_names external_boundary_id external_boundary_name",
                               "Customized Subdomain/Boundary ids/names");
+  addRingAndSectorIDParams(params);
   params.addClassDescription(
       "This TriPinHexAssemblyGenerator object generates a hexagonal assembly "
       "mesh with three circular pins in a triangle at the center.");
@@ -304,6 +305,22 @@ TriPinHexAssemblyGenerator::generate()
                                            _background_intervals,
                                            block_ids_new[i],
                                            _node_id_background_meta));
+    // add sector ids
+    if (isParamValid("sector_id_name"))
+      setSectorExtraIDs(*meshes[i],
+                        getParam<std::string>("sector_id_name"),
+                        4,
+                        std::vector<unsigned int>(4, _num_sectors_per_side));
+    // add ring ids
+    if (isParamValid("ring_id_name") && _has_rings[i])
+      setRingExtraIDs(*meshes[i],
+                      getParam<std::string>("ring_id_name"),
+                      4,
+                      std::vector<unsigned int>(4, _num_sectors_per_side),
+                      _ring_intervals[i],
+                      getParam<MooseEnum>("ring_id_assign_type") == "ring_wise",
+                      false);
+
     if (!_pin_id_name.empty())
       meshes[i]->add_elem_integer(_pin_id_name, true, _pin_id_values[i]);
     if (i > 0)
