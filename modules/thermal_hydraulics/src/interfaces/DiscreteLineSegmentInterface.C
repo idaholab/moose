@@ -33,7 +33,7 @@ DiscreteLineSegmentInterface::validParams()
 DiscreteLineSegmentInterface::DiscreteLineSegmentInterface(const MooseObject * moose_object)
   : _position(moose_object->parameters().get<Point>("position")),
     _dir_unnormalized(moose_object->parameters().get<RealVectorValue>("orientation")),
-    _dir(_dir_unnormalized / _dir_unnormalized.norm()),
+    _dir(initializeDirectionVector(_dir_unnormalized)),
     _rotation(moose_object->parameters().get<Real>("rotation")),
     _lengths(moose_object->parameters().get<std::vector<Real>>("length")),
     _length(std::accumulate(_lengths.begin(), _lengths.end(), 0.0)),
@@ -48,9 +48,21 @@ DiscreteLineSegmentInterface::DiscreteLineSegmentInterface(const MooseObject * m
 {
 }
 
+RealVectorValue
+DiscreteLineSegmentInterface::initializeDirectionVector(const RealVectorValue & dir_unnormalized)
+{
+  if (!MooseUtils::absoluteFuzzyEqual(dir_unnormalized.norm(), 0.0))
+    return dir_unnormalized / dir_unnormalized.norm();
+  else
+    mooseError("The parameter 'orientation' must not be the zero vector.");
+}
+
 RealTensorValue
 DiscreteLineSegmentInterface::computeDirectionTransformationTensor(const RealVectorValue & dir)
 {
+  if (MooseUtils::absoluteFuzzyEqual(dir.norm(), 0.0))
+    mooseError("The direction vector must not be the zero vector.");
+
   const auto dir_normalized = dir / dir.norm();
   const Real theta = acos(dir_normalized(2));
   const Real aphi = atan2(dir_normalized(1), dir_normalized(0));

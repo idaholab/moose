@@ -101,6 +101,14 @@ protected:
   /// Name of the MOOSE object
   const std::string _moose_object_name_dlsi;
 
+private:
+  /**
+   * Computes a normalized direction vector or reports an error if the zero vector is provided
+   *
+   * @param[in] dir_unnormalized   Unnormalized direction vector
+   */
+  static RealVectorValue initializeDirectionVector(const RealVectorValue & dir_unnormalized);
+
 public:
   static InputParameters validParams();
 
