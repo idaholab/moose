@@ -1,8 +1,14 @@
 [Tests]
   [test]
-    type = Exodiff
-    input = 'monolithic_sic.i'
-    exodiff = 'monolithic_sic_out.e'
+    type = CSVDiff
+    input = '../thermal_solid_properties.i'
+    cli_args = "
+      solid_properties_class=ThermalMonolithicSiCProperties
+      file_base=monolithic_sic
+      T_min=200
+      T_max=2400
+      Modules/SolidProperties/sp/thermal_conductivity_model=SNEAD"
+    csvdiff = 'monolithic_sic_vpp_0000.csv'
     requirement = "The system shall compute thermal properties for monolithic silicon carbide."
     design = 'ThermalMonolithicSiCProperties.md ThermalSolidPropertiesMaterial.md'
     issues = '#12284'

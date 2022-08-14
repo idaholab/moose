@@ -100,18 +100,53 @@ The userobjects defining the material properties are set up in the `UserObjects`
 example, to use stainless steel 316 thermal properties to provide the thermal conductivity in
 the `HeatDiffusion` kernel above, the input file syntax would be:
 
-!listing modules/solid_properties/test/tests/userobjects/stainless_steel_316/stainless_steel_316.i
-  start=Modules
-  end=Kernels
+```
+[Modules]
+  [SolidProperties]
+    [steel]
+      type = ThermalSS316Properties
+    []
+  []
+[]
+
+[Materials]
+  [sp_mat]
+    type = ThermalSolidPropertiesMaterial
+    temperature = T
+    sp = steel
+    output_properties = 'thermal_conductivity density specific_heat'
+    outputs = exodus
+  []
+[]
+```
 
 Due to the consistent interface for solid properties, a different solid can be substituted in the
 input file be changing the type of the userobject. For example, to set thermal properties
 with a general functional dependence instead, the solid property module section of
 the input file is:
 
-!listing modules/solid_properties/test/tests/userobjects/functional/functional.i
-  start=Modules
-  end=Kernels
+```
+[Modules]
+  [SolidProperties]
+    [func]
+      type = ThermalFunctionSolidProperties
+      rho = '1000.0'
+      cp = '200*t+150.0'
+      k = '2.0*exp(-100.0/(2.0+t))+1.0'
+    []
+  []
+[]
+
+[Materials]
+  [sp_mat]
+    type = ThermalSolidPropertiesMaterial
+    sp = func
+    temperature = u
+    output_properties = 'thermal_conductivity density specific_heat'
+    outputs = exodus
+  []
+[]
+```
 
 ## Creating additional solids
 

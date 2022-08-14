@@ -1,8 +1,13 @@
 [Tests]
   [test]
-    type = Exodiff
-    input = 'composite_sic.i'
-    exodiff = 'composite_sic_out.e'
+    type = CSVDiff
+    input = '../thermal_solid_properties.i'
+    cli_args = "
+      solid_properties_class=ThermalCompositeSiCProperties
+      file_base=composite_sic
+      T_min=200
+      T_max=2400"
+    csvdiff = 'composite_sic_vpp_0000.csv'
     requirement = "The system shall compute thermal properties for composite silicon carbide."
     design = 'ThermalCompositeSiCProperties.md ThermalSolidPropertiesMaterial.md'
     issues = '#12284'

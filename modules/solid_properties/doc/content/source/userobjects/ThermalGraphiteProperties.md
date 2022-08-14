@@ -47,12 +47,6 @@ Density is taken as a constant value; a default value is provided based on
 \rho=1850.0
 \end{equation}
 
-## Example Input File Syntax
-
-!listing modules/solid_properties/test/tests/userobjects/graphite/graphite_451.i
-  start=Modules
-  end=Kernels
-
 !syntax parameters /Modules/SolidProperties/ThermalGraphiteProperties
 
 !syntax inputs /Modules/SolidProperties/ThermalGraphiteProperties

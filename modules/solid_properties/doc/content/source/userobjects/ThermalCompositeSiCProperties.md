@@ -39,12 +39,6 @@ This userobject is valid for estimating isobaric
 specific heat over 200 K $\le$ T $\le$ 2400 K, and for estimating thermal
 over an unspecified range [!cite](stone).
 
-## Example Input File Syntax
-
-!listing modules/solid_properties/test/tests/userobjects/composite_sic/composite_sic.i
-  start=Modules
-  end=Kernels
-
 !syntax parameters /Modules/SolidProperties/ThermalCompositeSiCProperties
 
 !syntax inputs /Modules/SolidProperties/ThermalCompositeSiCProperties

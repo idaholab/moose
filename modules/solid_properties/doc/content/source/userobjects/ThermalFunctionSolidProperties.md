@@ -18,12 +18,6 @@ by the user. Note that arbitrary units can be specified with this userobject
 as long as they are consistent with the units of the other objects (e.g. kernels,
 boundary conditions, etc.) where the userobject functions are used.
 
-## Example Input File Syntax
-
-!listing modules/solid_properties/test/tests/userobjects/functional/functional.i
-  start=Modules
-  end=Kernels
-
 !syntax parameters /Modules/SolidProperties/ThermalFunctionSolidProperties
 
 !syntax inputs /Modules/SolidProperties/ThermalFunctionSolidProperties

@@ -42,12 +42,6 @@ fit is 0.9995.
 
 The properties are valid for 25$\degree$C $\le$ T $\le$ 1300$\degree$C.
 
-## Example Input File Syntax
-
-!listing modules/solid_properties/test/tests/userobjects/stainless_steel_316/stainless_steel_316.i
-  start=Modules
-  end=Kernels
-
 !syntax parameters /Modules/SolidProperties/ThermalSS316Properties
 
 !syntax inputs /Modules/SolidProperties/ThermalSS316Properties

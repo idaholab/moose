@@ -45,12 +45,6 @@ conductivity over 300 K $\le$ T $\le$ 1800 K with the Snead correlation
 [!cite](snead) and over an unspecified range for the Stone correlation
 [!cite](stone).
 
-## Example Input File Syntax
-
-!listing modules/solid_properties/test/tests/userobjects/monolithic_sic/monolithic_sic.i
-  start=Modules
-  end=Kernels
-
 !syntax parameters /Modules/SolidProperties/ThermalMonolithicSiCProperties
 
 !syntax inputs /Modules/SolidProperties/ThermalMonolithicSiCProperties
