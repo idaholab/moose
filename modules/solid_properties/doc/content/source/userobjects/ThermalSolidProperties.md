@@ -1,10 +1,6 @@
 # ThermalSolidProperties
 
-!syntax description /Modules/SolidProperties/ThermalSolidProperties
-
-## Description
-
-This userobject is the base class for providing thermal solid properties
+This is the base class for providing thermal solid properties
 as a function of temperature.
 This class defines functions to compute the following thermal properties
 as a function of temperature:
@@ -22,11 +18,5 @@ are also available:
 
 To create a new userobject providing thermal properties, derive from this
 userobject and specify implementations of the above functions.
-
-!syntax parameters /Modules/SolidProperties/ThermalSolidProperties
-
-!syntax inputs /Modules/SolidProperties/ThermalSolidProperties
-
-!syntax children /Modules/SolidProperties/ThermalSolidProperties
 
 !bibtex bibliography

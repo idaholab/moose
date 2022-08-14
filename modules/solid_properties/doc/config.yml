@@ -9,7 +9,7 @@ Extensions:
     MooseDocs.extensions.navigation:
         name: MOOSE Solid Properties Module
         repo: https://github.com/idaholab/moose
-        home: /modules/solid_properties/index.md
+        home: modules/solid_properties/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/solid_properties
         remove: !include framework/doc/remove.yml
