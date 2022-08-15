@@ -1,0 +1,9 @@
+[Tests]
+  [test]
+    type = RunApp
+    input = test.i
+    design = BatchMaterial.md
+    issues = '#21225'
+    requirement = 'The batch material system shall provide the capability for gathering and serializing variable and material property values for batch property computation.'
+  []
+[]
