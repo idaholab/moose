@@ -6,5 +6,6 @@
     requirement = 'The system shall be able to solve anisotropic diffusion problems using the FV method'
     design = 'FVAnisotropicDiffusion.md'
     issues = '#21832'
-  [../]
+    ad_indexing_type = 'global'
+  []
 []
