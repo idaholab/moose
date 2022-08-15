@@ -773,14 +773,6 @@ public:
   bool getFPTrapFlag() const { return _trap_fpe; }
 
   /**
-   * WARNING: This is an internal method for MOOSE, if you need the add new ExecFlagTypes then
-   * use the registerExecFlag macro as done in Moose.C/h.
-   *
-   * @param flag The flag to add as available to the app level ExecFlagEnum.
-   */
-  void addExecFlag(const ExecFlagType & flag);
-
-  /**
    * Returns a Boolean indicating whether a RelationshipManater exists with the same name.
    */
   bool hasRelationshipManager(const std::string & name) const;
@@ -1286,7 +1278,7 @@ private:
   std::shared_ptr<Backup> _cached_backup;
 
   /// Execution flags for this App
-  ExecFlagEnum _execute_flags;
+  const ExecFlagEnum & _execute_flags;
 
   /// Whether to turn on automatic scaling by default
   const bool _automatic_automatic_scaling;

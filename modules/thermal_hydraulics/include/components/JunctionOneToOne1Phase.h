@@ -23,11 +23,15 @@ class JunctionOneToOne1Phase : public FlowJunction1Phase
 public:
   JunctionOneToOne1Phase(const InputParameters & params);
 
+  virtual void init() override;
   virtual void check() const override;
   virtual void addMooseObjects() override;
 
 protected:
   virtual void setupMesh() override;
+
+  /// Slope reconstruction option
+  MooseEnum _slope_reconstruction;
 
 public:
   static InputParameters validParams();

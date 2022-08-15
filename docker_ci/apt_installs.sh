@@ -44,7 +44,9 @@ apt-get install -y \
   libboost-all-dev \
   emacs \
   libgtest-dev \
-  sudo
+  sudo \
+  update-motd \
+  rsync
 
 # Clear cache
 rm -rf /var/lib/apt/lists/*

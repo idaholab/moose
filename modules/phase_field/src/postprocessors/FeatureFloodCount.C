@@ -226,8 +226,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
                                : _real_zero),
     _halo_ids(_maps_size),
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL"),
-    _is_primary(processor_id() == 0),
-    _distribute_merge_work(_app.n_processors() >= _maps_size && _maps_size > 1)
+    _is_primary(processor_id() == 0)
 {
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
@@ -397,6 +396,12 @@ FeatureFloodCount::execute()
   }
 }
 
+processor_id_type
+FeatureFloodCount::numberOfDistributedMergeHelpers() const
+{
+  return _app.n_processors() >= _maps_size ? _maps_size : 1;
+}
+
 void
 FeatureFloodCount::communicateAndMerge()
 {
@@ -428,21 +433,23 @@ FeatureFloodCount::communicateAndMerge()
    * After each of those processors has merged that information, it'll be sent to the primary
    * processor where final consolidation will occur.
    */
-  if (_distribute_merge_work)
+  const auto n_merging_procs = numberOfDistributedMergeHelpers();
+
+  if (n_merging_procs > 1)
   {
     auto rank = processor_id();
-    bool is_merging_processor = rank < _n_vars;
+    bool is_merging_processor = rank < n_merging_procs;
 
     if (is_merging_processor)
       recv_buffers.reserve(_app.n_processors());
 
-    for (MooseIndex(_n_vars) i = 0; i < _n_vars; ++i)
+    for (MooseIndex(n_merging_procs) i = 0; i < n_merging_procs; ++i)
     {
       serialize(send_buffers[0], i);
 
       /**
-       * Send the data from all processors to the first _n_vars processors to create a complete
-       * global feature maps for each variable.
+       * Send the data from all processors to the first 'n_merging_procs' processors to create a
+       * complete global feature maps for each variable.
        */
       _communicator.gather_packed_range(i,
                                         (void *)(nullptr),
@@ -465,16 +472,15 @@ FeatureFloodCount::communicateAndMerge()
     // Setup a new communicator for doing merging communication operations
     Parallel::Communicator merge_comm;
 
-    // TODO: Update to MPI_UNDEFINED when libMesh bug is fixed.
-    _communicator.split(is_merging_processor ? 0 : 1, rank, merge_comm);
+    _communicator.split(is_merging_processor ? 0 : MPI_UNDEFINED, rank, merge_comm);
 
     if (is_merging_processor)
     {
       /**
-       * The FeatureFloodCount and derived algorithms rely on having the data structures intact on
-       * all non-zero ranks. This is because local-only information (local entities) is never
-       * communicated and thus must remain intact. However, the distributed merging will destroy
-       * that information. The easiest thing to do is to swap out the data structure while
+       * The FeatureFloodCount and derived objects rely on having the original data structures
+       * intact on all non-zero ranks. This is because local-only information (local entities) is
+       * never communicated and thus must remain intact. However, the distributed merging will
+       * destroy that information. The easiest thing to do is to swap out the data structure while
        * we perform the distributed merge work.
        */
       std::vector<std::list<FeatureData>> tmp_data(_partial_feature_sets.size());
@@ -553,6 +559,9 @@ FeatureFloodCount::communicateAndMerge()
       consolidateMergedFeatures();
     }
   }
+
+  if (!_is_primary)
+    restoreOriginalDataStructures(_partial_feature_sets);
 
   // Make sure that feature count is communicated to all ranks
   _communicator.broadcast(_feature_count);
@@ -1163,24 +1172,26 @@ FeatureFloodCount::mergeSets()
 void
 FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>> * saved_data)
 {
-  TIME_SECTION("consilidateMergedFeatures", 3, "Consolidating Merged Features");
+  TIME_SECTION("consolidateMergedFeatures", 3, "Consolidating Merged Features");
 
   /**
    * Now that the merges are complete we need to adjust the centroid, and halos.
    * Additionally, To make several of the sorting and tracking algorithms more straightforward,
    * we will move the features into a flat vector. Finally we can count the final number of
    * features and find the max local index seen on any processor
+   *
    * Note: This is all occurring on rank 0 only!
    */
   mooseAssert(_is_primary,
               "cosolidateMergedFeatures() may only be called on the primary processor");
+  mooseAssert(saved_data == nullptr || saved_data->size() == _partial_feature_sets.size(),
+              "Data structure size mismatch");
 
   // Offset where the current set of features with the same variable id starts in the flat vector
   unsigned int feature_offset = 0;
   // Set the member feature count to zero and start counting the actual features
   _feature_count = 0;
-
-  for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
+  for (MooseIndex(_maps_size) map_num = 0; map_num < _partial_feature_sets.size(); ++map_num)
   {
     for (auto & feature : _partial_feature_sets[map_num])
     {
@@ -1220,6 +1231,19 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
 
     // Clean up the "moved" objects
     _partial_feature_sets[map_num].clear();
+    if (saved_data)
+      (*saved_data)[map_num].clear();
+  }
+
+  // We may have resided our data structures for the communicateAndMerge step. We'll restore the
+  // original size here just in case we need to loop over the assumed size (i.e. _maps_size)
+  // elsewhere in this or derived objects.
+  if (_partial_feature_sets.size() != _maps_size)
+  {
+    _partial_feature_sets.resize(_maps_size);
+
+    _feature_counts_per_map[0] = _feature_count;
+    _feature_counts_per_map.resize(_maps_size);
   }
 
   /**
@@ -2245,3 +2269,5 @@ areElemListsMergeable(const std::list<dof_id_type> & elem_list1,
 // Constants
 const std::size_t FeatureFloodCount::invalid_size_t = std::numeric_limits<std::size_t>::max();
 const unsigned int FeatureFloodCount::invalid_id = std::numeric_limits<unsigned int>::max();
+const processor_id_type FeatureFloodCount::invalid_proc_id =
+    std::numeric_limits<processor_id_type>::max();

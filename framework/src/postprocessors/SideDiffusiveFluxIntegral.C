@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SideDiffusiveFluxIntegral.h"
+#include "MathFVUtils.h"
 
 #include "metaphysicl/raw_type.h"
 
@@ -29,9 +30,14 @@ InputParameters
 SideDiffusiveFluxIntegralTempl<is_ad, T>::validParams()
 {
   InputParameters params = SideIntegralVariablePostprocessor::validParams();
-  params.addRequiredParam<MaterialPropertyName>(
+  params.addParam<MaterialPropertyName>(
       "diffusivity",
-      "The name of the diffusivity material property that will be used in the flux computation.");
+      "The name of the diffusivity material property that will be used in the flux computation. "
+      "This must be provided if the variable is of finite element type");
+  params.addParam<MooseFunctorName>(
+      "functor_diffusivity",
+      "The name of the diffusivity functor that will be used in the flux computation. This must be "
+      "provided if the variable is of finite volume type");
   params.addClassDescription(
       "Computes the integral of the diffusive flux over the specified boundary");
   return params;
@@ -41,31 +47,42 @@ template <bool is_ad, typename T>
 SideDiffusiveFluxIntegralTempl<is_ad, T>::SideDiffusiveFluxIntegralTempl(
     const InputParameters & parameters)
   : SideIntegralVariablePostprocessor(parameters),
-    _diffusivity(getParam<MaterialPropertyName>("diffusivity")),
-    _diffusion_coef(getGenericMaterialProperty<T, is_ad>(_diffusivity))
+    _diffusion_coef(isParamValid("diffusivity")
+                        ? &getGenericMaterialProperty<T, is_ad>("diffusivity")
+                        : nullptr),
+    _functor_diffusion_coef(isParamValid("functor_diffusivity")
+                                ? &getFunctor<Moose::GenericType<T, is_ad>>("functor_diffusivity")
+                                : nullptr)
 {
+  if (_fv && !isParamValid("functor_diffusivity"))
+    mooseError(
+        "For a finite volume variable, the parameter 'functor_diffusivity' must be provided");
+  if (!_fv && !isParamValid("diffusivity"))
+    mooseError("For a finite element variable, the parameter 'diffusivity' must be provided");
+}
+
+template <bool is_ad, typename T>
+Real
+SideDiffusiveFluxIntegralTempl<is_ad, T>::computeFaceInfoIntegral(const FaceInfo * const fi)
+{
+  // Get the gradient of the variable on the face
+  const auto grad_u = MetaPhysicL::raw_value(_fv_variable->gradient(
+      Moose::FV::makeCDFace(*fi, Moose::FV::faceArgSubdomains(*_fv_variable, *fi))));
+
+  return -diffusivityGradientProduct(
+             grad_u,
+             MetaPhysicL::raw_value((*_functor_diffusion_coef)(Moose::FV::makeCDFace(
+                 *fi, Moose::FV::faceArgSubdomains(*_functor_diffusion_coef, *fi))))) *
+         _normals[_qp];
 }
 
 template <bool is_ad, typename T>
 Real
 SideDiffusiveFluxIntegralTempl<is_ad, T>::computeQpIntegral()
 {
-  if (_fv)
-  {
-    // Get the face info
-    const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
-    mooseAssert(fi, "We should have a face info");
-
-    // Get the gradient of the variable on the face
-    const auto & grad_u = MetaPhysicL::raw_value(_fv_variable->adGradSln(*fi));
-
-    // FIXME Get the diffusion coefficient on the face, see #16809
-    return -diffusivityGradientProduct(grad_u, MetaPhysicL::raw_value(_diffusion_coef[_qp])) *
-           _normals[_qp];
-  }
-  else
-    return -diffusivityGradientProduct(_grad_u[_qp], MetaPhysicL::raw_value(_diffusion_coef[_qp])) *
-           _normals[_qp];
+  return -diffusivityGradientProduct(_grad_u[_qp],
+                                     MetaPhysicL::raw_value((*_diffusion_coef)[_qp])) *
+         _normals[_qp];
 }
 
 template <bool is_ad, typename T>

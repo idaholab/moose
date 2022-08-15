@@ -888,6 +888,16 @@ public:
    */
   void clearAllDofIndices();
 
+  /**
+   * Set the active vector tags for the variables
+   */
+  void setActiveVariableCoupleableVectorTags(const std::set<TagID> & vtags, THREAD_ID tid);
+
+  /**
+   * Set the active vector tags for the scalar variables
+   */
+  void setActiveScalarVariableCoupleableVectorTags(const std::set<TagID> & vtags, THREAD_ID tid);
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.

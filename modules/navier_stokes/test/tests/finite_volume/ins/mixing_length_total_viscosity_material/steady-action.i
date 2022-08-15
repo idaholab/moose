@@ -7,7 +7,7 @@ Re = 100
 
 rho = 1
 bulk_u = 1
-mu = ${fparse rho * bulk_u * 2 * H / Re}
+mu = '${fparse rho * bulk_u * 2 * H / Re}'
 
 [Mesh]
   [gen]
@@ -45,7 +45,7 @@ mu = ${fparse rho * bulk_u * 2 * H / Re}
     von_karman_const = ${von_karman_const}
     mixing_length_delta = 0.5
     mixing_length_walls = 'top'
-    mixing_length_aux_execute_on ='initial'
+    mixing_length_aux_execute_on = 'initial'
 
     momentum_advection_interpolation = 'upwind'
     mass_advection_interpolation = 'upwind'
@@ -55,9 +55,8 @@ mu = ${fparse rho * bulk_u * 2 * H / Re}
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      200                lu           NONZERO'
-  line_search = 'none'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-12
 []
 

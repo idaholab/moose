@@ -5,9 +5,9 @@
     type = 'Exodiff'
     input = 'continuity_sphere_hex8.i'
     exodiff = 'continuity_sphere_hex8_out.e'
-    requirement = 'The system shall be able to produce the expected result for a solution continuity test '
-                  'case using the mortar method on a HEX8 mesh with curved geometry, e.g. the primal '
-                  'variable values across the mortar interface shall be the same.'
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the mortar method on a HEX8 mesh with curved geometry, e.g. the '
+                  'primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
     ad_indexing_type = global
@@ -19,8 +19,8 @@
     # heavy = True
     input = 'continuity_sphere_hex27.i'
     exodiff = 'continuity_sphere_hex27_out.e'
-    requirement = 'The system shall be able to produce the expected result for a solution continuity test '
-                  'case using the mortar method on a HEX27 mesh with curved geometry, e.g. the '
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the mortar method on a HEX27 mesh with curved geometry, e.g. the '
                   'primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
@@ -32,8 +32,8 @@
     input = 'continuity_sphere_hex27.i'
     exodiff = 'mortar_segment_mesh.e'
     cli_args = 'Constraints/mortar/debug_mesh=true Outputs/exodus=false'
-    requirement = 'The system shall generate a debug mortar mesh the parameter debug_mesh is passed to a '
-                  'mortar constraint'
+    requirement = 'The system shall generate a debug mortar mesh the parameter debug_mesh is passed '
+                  'to a mortar constraint'
     min_ad_size = 200
     max_parallel = 1 # Serial needed for debugging mesh
   []
@@ -41,9 +41,9 @@
     type = 'Exodiff'
     input = 'continuity_tet4.i'
     exodiff = 'continuity_tet4_out.e'
-    requirement = 'The system shall be able to produce the expected result for a solution continuity test '
-                  'case using the mortar method on a TET4 conforming mesh, e.g. the primal variable '
-                  'values across the mortar interface shall be the same.'
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the mortar method on a TET4 conforming mesh, e.g. the primal '
+                  'variable values across the mortar interface shall be the same.'
     map = False
     partial = True
     ad_indexing_type = global
@@ -53,9 +53,9 @@
     min_ad_size = 100
     input = 'continuity_tet10.i'
     exodiff = 'continuity_tet10_out.e'
-    requirement = 'The system shall be able to produce the expected result for a solution continuity test '
-                  'case using the mortar method on a TET10 conforming mesh, e.g. the primal variable '
-                  'values across the mortar interface shall be the same.'
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the mortar method on a TET10 conforming mesh, e.g. the primal '
+                  'variable values across the mortar interface shall be the same.'
     map = False
     partial = True
     ad_indexing_type = global
@@ -64,8 +64,8 @@
     type = 'Exodiff'
     input = 'continuity_non_conforming_tet.i'
     exodiff = 'continuity_non_conforming_tet_out.e'
-    requirement = 'The system shall be able to produce the expected result for a solution continuity test '
-                  'case using the mortar method on a TET4 non-conforming mesh, e.g. the primal '
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the mortar method on a TET4 non-conforming mesh, e.g. the primal '
                   'variable values across the mortar interface shall be the same.'
     map = False
     partial = True
@@ -75,9 +75,9 @@
     type = 'Exodiff'
     input = 'continuity_mixed.i'
     exodiff = 'continuity_mixed_out.e'
-    requirement = 'The system shall be able to produce the expected result for a solution continuity test '
-                  'case using the mortar method on a mesh with mixed element types, e.g. the primal '
-                  'variable values across the mortar interface shall be the same.'
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the mortar method on a mesh with mixed element types, e.g. the '
+                  'primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
     ad_indexing_type = global
@@ -87,60 +87,68 @@
     min_ad_size = 200
     input = 'continuity_sphere_hex20.i'
     exodiff = 'continuity_sphere_hex20_out.e'
-    requirement = 'The system shall be able to produce the expected result for a solution continuity test '
-                  'case using the mortar method on a HEX20 mesh with curved geometry, e.g. the '
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the mortar method on a HEX20 mesh with curved geometry, e.g. the '
                   'primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
     ad_indexing_type = global
     min_parallel = 2
   []
-
 
   [continuity_penalty_tet4]
     type = 'Exodiff'
     input = 'continuity_penalty_tet4.i'
     exodiff = 'continuity_penalty_tet4_out.e'
-    requirement = 'The system shall be able to produce the expected result for a solution continuity test '
-                  'case using the penalty-based mortar method on a TET4 conforming mesh, e.g. the primal variable '
-                  'values across the mortar interface shall be the same.'
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the penalty-based mortar method on a TET4 conforming mesh, e.g. '
+                  'the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
-    ad_indexing_type = global
   []
   [continuity_penalty_tet10]
     type = 'Exodiff'
     input = 'continuity_penalty_tet10.i'
     exodiff = 'continuity_penalty_tet10_out.e'
-    requirement = 'The system shall be able to produce the expected result for a solution continuity test '
-                  'case using the penalty-based mortar method on a TET10 conforming mesh, e.g. the primal variable '
-                  'values across the mortar interface shall be the same.'
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the penalty-based mortar method on a TET10 conforming mesh, e.g. '
+                  'the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
-    ad_indexing_type = global
   []
   [continuity_penalty_sphere_hex8]
     type = 'Exodiff'
     input = 'continuity_penalty_sphere_hex8.i'
     exodiff = 'continuity_penalty_sphere_hex8_out.e'
-    requirement = 'The system shall be able to produce the expected result for a solution continuity test '
-                  'case using the penalty-based mortar method on a HEX8 mesh with curved geometry, e.g. the primal '
-                  'variable values across the mortar interface shall be the same.'
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the penalty-based mortar method on a HEX8 mesh with curved '
+                  'geometry, e.g. the primal variable values across the mortar interface shall be '
+                  'the same.'
     map = False
     partial = True
-    ad_indexing_type = global
   []
   [continuity_penalty_sphere_hex20]
     type = 'Exodiff'
     input = 'continuity_penalty_sphere_hex20.i'
     exodiff = 'continuity_penalty_sphere_hex20_out.e'
-    requirement = 'The system shall be able to produce the expected result for a solution continuity test '
-                  'case using the penalty-based mortar method on a HEX20 mesh with curved geometry, e.g. the '
-                  'primal variable values across the mortar interface shall be the same.'
+    requirement = 'The system shall be able to produce the expected result for a solution continuity '
+                  'test case using the penalty-based mortar method on a HEX20 mesh with curved '
+                  'geometry, e.g. the primal variable values across the mortar interface shall be '
+                  'the same.'
+    map = False
+    partial = True
+    min_parallel = 2
+  []
+  [continuity_penalty_sphere_hex20_ad]
+    type = 'Exodiff'
+    input = 'continuity_penalty_sphere_hex20.i'
+    exodiff = 'continuity_penalty_sphere_hex20_out.e'
+    cli_args = 'Constraints/mortar/type=ADPenaltyEqualValueConstraint'
+    requirement = 'The system shall be able to produce the same result using the penalty-based '
+                  'mortar method with and without automatic differentiation.'
     map = False
     partial = True
     ad_indexing_type = global
     min_parallel = 2
   []
-
 []

@@ -4,5 +4,5 @@ If you wish to remove the moose environment at any time, you may do so using the
 
 ```bash
 conda deactivate   # if 'moose' was currently activated
-conda remove --name moose --all
+conda env remove -n moose
 ```

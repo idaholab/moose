@@ -63,6 +63,8 @@ protected:
   const boundary_id_type _external_boundary_id;
   /// Boundary name of mesh's external boundary
   const std::string _external_boundary_name;
+  /// Whether interface boundaries are created
+  const bool _create_interface_boundaries;
   /// Style of the polygon size parameter
   const PolygonSizeStyle _hexagon_size_style;
   /// Pitch size of the input assembly mesh

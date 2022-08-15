@@ -1,0 +1,30 @@
+[Tests]
+  issues = '#21399'
+  design = 'Surrogates/index.md'
+  [cross_validate]
+    requirement = 'The system shall demonstrate cross validation '
+    [cv_real]
+      type = JSONDiff
+      input = train_and_cv.i
+      allow_test_objects = true
+      cli_args =  "Trainers/train/cv_surrogate='surrogate' Outputs/out/execute_system_information_on=none"
+      jsondiff = 'train_and_cv_out.json'
+      detail = 'for a 1-dimensional polynomial regression surrogate with Real'
+    []
+    [cv_vector_real]
+      type = JSONDiff
+      input = poly_reg_vec.i
+      allow_test_objects = true
+      cli_args = 'Outputs/out/execute_system_information_on=none'
+      jsondiff = 'poly_reg_vec_out.json'
+      detail = ' and std::vector<Real> response types.'
+    []
+    [surr-error]
+      type = RunException
+      input = train_and_cv.i
+      allow_test_objects = true
+      expect_err = "To perform cross-validation, the option cv_surrogate needs to be specified to provide a Surrogate object for training and evaluation."
+      detail = ' and throw an error if a SurrogateModel is not provided.'
+    []
+  []
+[]

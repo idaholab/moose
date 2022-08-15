@@ -36,11 +36,8 @@ public:
   virtual void postTrain() override;
 
 private:
-  /// Data from the current sampler row
-  const std::vector<Real> & _sampler_row;
-
-  /// Response value
-  const Real & _response;
+  /// Data from the current predictor row
+  const std::vector<Real> & _predictor_row;
 
   /// The gathered data in a flattened form to be able to convert easily to torch::Tensor.
   std::vector<Real> _flattened_data;

@@ -12,9 +12,6 @@
 // MOOSE includes
 #include "MultiMooseEnum.h"
 
-// Forward declarations
-class ExecFlagEnum;
-
 /**
  * A MultiMooseEnum object to hold "execute_on" flags.
  *
@@ -40,7 +37,7 @@ public:
    */
   template <typename... Args>
   void addAvailableFlags(const ExecFlagType & flag, Args... flags);
-  void addAvailableFlags(const ExecFlagType & flag);
+  const ExecFlagType & addAvailableFlags(const ExecFlagType & flag);
   ///@}
 
   ///@{

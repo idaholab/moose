@@ -24,12 +24,6 @@ function configure_petsc()
     echo "$PETSC_DIR=PETSC_DIR does not exist"
     exit 1
   fi
-  # Apple Silicon has an issue building shared libraries
-  if [[ `uname -p` == "arm" ]]; then
-    SHARED=0
-  else
-    SHARED=1
-  fi
 
   # Use --with-make-np if MOOSE_JOBS is given
   MAKE_NP_STR=""
@@ -60,8 +54,7 @@ function configure_petsc()
     # Set path delimiter
     IFS=:
     for p in $HDF5_PATHS; do
-      # When first instance of hdf5 header is found, report finding, set HDF5_STR,
-      # and break
+      # When first instance of hdf5 header is found, report finding, set HDF5_STR, and break
       loc=$(find "$p" -name 'hdf5.h' -print -quit 2>/dev/null)
       if [ ! -z "$loc" ]; then
         echo "INFO: HDF5 header location was found at: $loc"
@@ -80,37 +73,40 @@ function configure_petsc()
     HDF5_STR="--download-hdf5=1"
     HDF5_FORTRAN_STR="--download-hdf5-fortran-bindings=0"
     echo "INFO: HDF5 library not detected, opting to download via PETSc..."
-    # If on Apple Silicon (arm64), PETSc needs to be patched using git in order
-    # to properly configure HDF5
-    if [[ `uname -p` == "arm" ]] && [[ $(uname) == Darwin ]]; then
-      echo "INFO: Apple Silicon detected, checking for ARM patches..."
-      # Check to see if patch marker file exists in PETSC_DIR. If not, perform
-      # patch and create patch marker file. If so, skip patch and report.
-      patch_file=$(find "$PETSC_DIR" -name '.patched' -print -quit 2>/dev/null)
-      if [ -z "$patch_file" ]; then
+  fi
+
+  # If manually building PETSc on Apple Silicon (arm64), several adjustments need to be made to
+  # properly configure PETSc for this platform
+  MUMPS_ARM_STR=""
+  if [[ `uname -p` == "arm" ]] && [[ $(uname) == Darwin ]] && [[ $PETSC_ARCH == arch-moose ]]; then
+    echo "INFO: Apple Silicon detected, checking to see if PETSc ARM patches need to be applied..."
+    # First check to see if patch marker file exists in PETSC_DIR due to a previous build. If not,
+    # perform patch and create patch marker file. If so, skip patch and report.
+    patch_file=$(find "$PETSC_DIR" -name '.patched' -print -quit 2>/dev/null)
+    if [ -z "$patch_file" ]; then
+      # If an HDF5 download is requested, patch PETSc to properly configure it
+      if [ "$HDF5_STR" == "--download-hdf5=1" ]; then
          echo "INFO: Patching PETSc to support HDF5 download and installation on ARM..."
          git apply $PETSC_DIR/../scripts/apple-silicon-hdf5-autogen.patch
          touch $PETSC_DIR/.patched
-      elif [ ! -z "$patch_file" ]; then
-         echo "INFO: ARM patches already applied, proceeding to PETSc configure..."
+      else
+        echo "INFO: No ARM patches required, proceeding to PETSc configure..."
       fi
+    elif [ ! -z "$patch_file" ]; then
+      echo "INFO: Applicable ARM patches already applied, proceeding to PETSc configure..."
     fi
-  fi
-
-  # For Apple Silicon (arm64) manual builds be sure to set FFLAGS for mumps to use the proper arch,
-  # otherwise it will fail to build correctly
-  MUMPS_STR=""
-  if [[ `uname -p` == "arm" ]] && [[ $(uname) == Darwin ]] && [[ $PETSC_ARCH == arch-moose ]]; then
-    MUMPS_STR="FFLAGS="-march=armv8.3-a""
+    # Finally, be sure to set FFLAGS for mumps to use the proper arch, otherwise it will fail to
+    # build correctly
+    MUMPS_ARM_STR="FFLAGS="-march=armv8.3-a""
   fi
 
   cd $PETSC_DIR
   python ./configure --download-hypre=1 \
-      --with-shared-libraries=$SHARED \
+      --with-shared-libraries=1 \
       "$HDF5_STR" \
       "$HDF5_FORTRAN_STR" \
       "$MAKE_NP_STR" \
-      "$MUMPS_STR" \
+      "$MUMPS_ARM_STR" \
       --with-debugging=no \
       --download-fblaslapack=1 \
       --download-metis=1 \

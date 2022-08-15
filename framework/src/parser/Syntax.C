@@ -105,7 +105,7 @@ Syntax::getSortedTask()
   }
   catch (CyclicDependencyException<std::string> & e)
   {
-    const auto cycle = e.getCyclicDependencies();
+    const auto & cycle = e.getCyclicDependencies();
     mooseError("Cyclic dependencies detected: ", MooseUtils::join(cycle, " <- "));
   }
 }

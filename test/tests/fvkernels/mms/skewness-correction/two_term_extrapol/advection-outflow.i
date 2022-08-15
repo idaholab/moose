@@ -16,8 +16,6 @@ a=1
   [./v]
     type = MooseVariableFVReal
     face_interp_method = 'skewness-corrected'
-    cache_face_gradients = false
-    cache_face_values = true
   [../]
 []
 

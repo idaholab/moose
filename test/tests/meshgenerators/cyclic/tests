@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#21743'
+  design = 'Mesh/index.md'
+  [error]
+    type = RunException
+    input = cyclic.i
+    expect_err = 'Cyclic dependencies detected in mesh generation: no_slip_bottom <- rename_extension <- stitch_4 <- create_fused_top_sideset_r <- stitch_6 <- no_slip_top <- no_slip_bottom'
+    requirement = 'The system shall be able to give a clear error message about a cyclic graph in mesh generation.'
+  []
+[]

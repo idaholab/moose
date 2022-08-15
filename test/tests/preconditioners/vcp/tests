@@ -7,6 +7,7 @@
     csvdiff = 'vcp_test_out.csv'
     requirement = "The system shall converge when using the VCP interface with AMG as the "
                   "preconditioner."
+    mesh_mode = 'replicated'
   []
   [condense_amg_test_dinv]
     type = 'CSVDiff'
@@ -15,6 +16,7 @@
     cli_args = 'Preconditioning/vcp/is_lm_coupling_diagonal=false'
     requirement = "The system shall converge while computing the full inverse of the coupling "
                   "matrix."
+    mesh_mode = 'replicated'
   []
   [no-condense_amg_test]
     type = 'CSVDiff'

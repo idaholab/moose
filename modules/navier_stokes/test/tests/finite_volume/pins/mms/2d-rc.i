@@ -1,7 +1,7 @@
-mu=1.1
-rho=1.1
-advected_interp_method='average'
-velocity_interp_method='rc'
+mu = 1.1
+rho = 1.1
+advected_interp_method = 'average'
+velocity_interp_method = 'rc'
 
 [Mesh]
   [gen]
@@ -14,10 +14,6 @@ velocity_interp_method='rc'
     nx = 8
     ny = 8
   []
-[]
-
-[Problem]
-  fv_bcs_integrity_check = true
 []
 
 [Variables]
@@ -169,7 +165,11 @@ velocity_interp_method='rc'
   []
   [forcing_u]
     type = ADParsedFunction
-    value = '0.5*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - 0.625*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) + 0.625*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - 1.25*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - 0.2*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
+    value = '0.5*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - '
+            '0.625*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) + '
+            '0.625*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - '
+            '1.25*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - '
+            '0.2*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
     vars = 'mu rho'
     vals = '${mu} ${rho}'
   []
@@ -179,7 +179,11 @@ velocity_interp_method='rc'
   []
   [forcing_v]
     type = ADParsedFunction
-    value = '0.3125*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - 1.25*pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 0.625*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + 0.3125*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + 1.2*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
+    value = '0.3125*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - '
+            '1.25*pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - '
+            '0.625*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + '
+            '0.3125*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + '
+            '1.2*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
     vars = 'mu rho'
     vals = '${mu} ${rho}'
   []
@@ -189,7 +193,8 @@ velocity_interp_method='rc'
   []
   [forcing_p]
     type = ParsedFunction
-    value = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - 1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
+    value = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - '
+            '1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
     vars = 'rho'
     vals = '${rho}'
   []

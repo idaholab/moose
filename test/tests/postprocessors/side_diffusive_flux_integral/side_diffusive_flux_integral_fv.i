@@ -6,74 +6,65 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
 []
 
 [FVKernels]
-  [./diff]
+  [diff]
     type = FVDiffusion
     variable = u
     coeff = 1
-  [../]
+  []
 []
 
 [FVBCs]
-  [./left]
+  [left]
     type = FVDirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = FVDirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./mat_props]
-    type = GenericConstantMaterial
-    block = 0
-    prop_names = diffusivity
-    prop_values = 2
-  [../]
-
-  [./mat_props_bnd]
-    type = GenericConstantMaterial
-    boundary = right
+  [mat_props]
+    type = GenericFunctorMaterial
     prop_names = diffusivity
     prop_values = 1
-  [../]
+  []
 
-  [./mat_props_vector]
-    type = GenericConstantVectorMaterial
-    boundary = 'right top'
+  [mat_props_vector]
+    type = GenericVectorFunctorMaterial
     prop_names = diffusivity_vec
     prop_values = '1 1.5 1'
-  [../]
+  []
 []
 
 [Postprocessors]
   inactive = 'avg_flux_top'
-  [./avg_flux_right]
+  [avg_flux_right]
     # Computes flux integral on the boundary, which should be -1
     type = SideDiffusiveFluxAverage
     variable = u
     boundary = right
-    diffusivity = diffusivity
-  [../]
-  [./avg_flux_top]
+    functor_diffusivity = diffusivity
+  []
+  [avg_flux_top]
     type = SideVectorDiffusivityFluxIntegral
     variable = u
     boundary = top
-    diffusivity = diffusivity_vec
-  [../]
+    functor_diffusivity = diffusivity_vec
+  []
 []
 
 [Executioner]

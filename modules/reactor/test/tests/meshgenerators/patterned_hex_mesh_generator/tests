@@ -3,6 +3,7 @@
   issues = '#18628 #20148 #20514'
   [hexagon_boundary]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'patterned_2d.i'
     exodiff = 'patterned_hex.e'
     cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/background_block_id=25
@@ -15,6 +16,24 @@
                 Mesh/pattern/uniform_mesh_on_sides=true
                 --mesh-only "patterned_hex.e"'
     requirement ='The system shall stitch hexagon meshes to form a large mesh with hexagon boundary.'
+    recover = false
+  []
+  [hexagon_boundary_no_interface]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'patterned_2d.i'
+    exodiff = 'patterned_hex_no_interface.e'
+    cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/background_block_id=25
+                Mesh/pattern/background_block_name="assem_block"
+                Mesh/pattern/hexagon_size=18
+                Mesh/pattern/duct_sizes=17
+                Mesh/pattern/duct_intervals=1
+                Mesh/pattern/duct_block_ids=30
+                Mesh/pattern/duct_block_names="duct_block"
+                Mesh/pattern/uniform_mesh_on_sides=true
+                Mesh/pattern/create_interface_boundaries=false
+                --mesh-only "patterned_hex_no_interface.e"'
+    requirement ='The system shall stitch hexagon meshes to form a large mesh with hexagon boundary and without interface boundaries defined.'
     recover = false
   []
   [none_boundary]

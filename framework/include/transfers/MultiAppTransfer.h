@@ -17,6 +17,7 @@
 #include "libmesh/bounding_box.h"
 
 class MooseMesh;
+class MooseCoordTransform;
 
 /**
  * Base class for all MultiAppTransfer objects.
@@ -106,10 +107,12 @@ public:
   /// Whether the transfer owns a non-null to_multi_app
   bool hasToMultiApp() const { return !(!_to_multi_app); }
 
-  /// Return the execution flags, handling "same_as_multiapp"
-  virtual const std::vector<ExecFlagType> & execFlags() const;
-
 protected:
+  /**
+   * Add the bounding box factor parameter to the supplied input parameters
+   */
+  static void addBBoxFactorParam(InputParameters & params);
+
   /// Deprecated class attribute for compatibility with the apps
   std::shared_ptr<MultiApp> _multi_app;
 
@@ -127,11 +130,23 @@ protected:
   std::vector<MooseMesh *> _from_meshes;
   std::vector<Point> _to_positions;
   std::vector<Point> _from_positions;
+  std::vector<MooseCoordTransform *> _to_transforms;
+  std::vector<MooseCoordTransform *> _from_transforms;
 
   /// True if displaced mesh is used for the source mesh, otherwise false
   bool _displaced_source_mesh;
   /// True if displaced mesh is used for the target mesh, otherwise false
   bool _displaced_target_mesh;
+
+  /// Extend (or contract) bounding box by a factor in all directions
+  /// Greater than one values of this member may be necessary because the nearest bounding
+  /// box does not necessarily give you the closest node/element. It will depend
+  /// on the partition and geometry. A node/element will more likely find its
+  /// nearest source element/node by extending bounding boxes. If each of the
+  /// bounding boxes covers the entire domain, a node/element will be able to
+  /// find its nearest source element/node for sure,
+  /// but at the same time, more communication will be involved and can be expensive.
+  Real _bbox_factor;
 
   ///@{
   /**

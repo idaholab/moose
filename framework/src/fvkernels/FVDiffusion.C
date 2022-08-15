@@ -65,9 +65,7 @@ FVDiffusion::computeQpResidual()
 {
   auto dudn = gradUDotNormal();
 
-  // Eventually, it will be nice to offer automatic-switching triggered by
-  // input parameters to change between different interpolation methods for
-  // this.
+  // Perform weighted-average or central differencing (CD) interpolation of k
   const auto k = _coeff(Moose::FV::makeCDFace(*_face_info, faceArgSubdomains()));
 
   return -1 * k * dudn;

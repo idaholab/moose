@@ -98,10 +98,7 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
 
   if (use_test_objs)
   {
-    auto & syntax = s;  // for resiterSyntax macros
-    auto & factory = f; // for resiterSyntax macros
-
-    registerExecFlag(EXEC_JUST_GO);
+    auto & syntax = s; // for resiterSyntax macros
 
     registerSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
     registerSyntaxTask("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");

@@ -243,6 +243,13 @@ FunctionTempl<T>::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned in
 }
 
 template <typename T>
+typename FunctionTempl<T>::ValueType
+FunctionTempl<T>::evaluate(const ElemPointArg & elem_point_arg, const unsigned int state) const
+{
+  return value(getTime(state), elem_point_arg.point);
+}
+
+template <typename T>
 typename FunctionTempl<T>::GradientType
 FunctionTempl<T>::evaluateGradient(const ElemArg & elem_arg, const unsigned int state) const
 {
@@ -299,6 +306,14 @@ FunctionTempl<T>::evaluateGradient(const ElemSideQpArg & elem_side_qp,
 }
 
 template <typename T>
+typename FunctionTempl<T>::GradientType
+FunctionTempl<T>::evaluateGradient(const ElemPointArg & elem_point_arg,
+                                   const unsigned int state) const
+{
+  return gradient(getTime(state), elem_point_arg.point);
+}
+
+template <typename T>
 typename FunctionTempl<T>::DotType
 FunctionTempl<T>::evaluateDot(const ElemArg & elem_arg, const unsigned int state) const
 {
@@ -351,6 +366,13 @@ FunctionTempl<T>::evaluateDot(const ElemSideQpArg & elem_side_qp, const unsigned
   mooseAssert(qp < _current_elem_side_qp_functor_xyz.size(),
               "The requested " << qp << " is outside our xyz size");
   return timeDerivative(getTime(state), _current_elem_side_qp_functor_xyz[qp]);
+}
+
+template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(const ElemPointArg & elem_point_arg, const unsigned int state) const
+{
+  return timeDerivative(getTime(state), elem_point_arg.point);
 }
 
 template <typename T>

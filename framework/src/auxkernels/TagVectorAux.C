@@ -23,7 +23,7 @@ TagVectorAux::validParams()
 TagVectorAux::TagVectorAux(const InputParameters & parameters)
   : TagAuxBase<AuxKernel>(parameters),
     _v(coupledVectorTagValue("v", "vector_tag")),
-    _v_var(*getVar("v", 0))
+    _v_var(*getFieldVar("v", 0))
 {
   if (_v_var.feType() != _var.feType())
     paramError("variable",

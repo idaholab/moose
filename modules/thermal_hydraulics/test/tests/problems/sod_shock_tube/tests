@@ -7,7 +7,7 @@
       Executioner/TimeIntegrator/order=2
       Outputs/file_base=sod_shock_tube_erk2_heavy
       Outputs/execute_on=final'
-    abs_zero = 1e-10
+    abs_zero = 1e-8
     rel_err = 1e-5
     heavy = true
     recover = false

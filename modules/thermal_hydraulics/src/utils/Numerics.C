@@ -153,6 +153,12 @@ vel_from_arhoA_arhouA(Real arhoA, Real arhouA, Real & vel, Real & dvel_darhoA, R
   dvel_darhouA = 1.0 / arhoA;
 }
 
+ADReal
+vel_from_arhoA_arhouA(ADReal arhoA, ADReal arhouA)
+{
+  return arhouA / arhoA;
+}
+
 Real
 dvel_darhoA(Real arhoA, Real arhouA)
 {
@@ -175,6 +181,12 @@ rho_from_arhoA_alpha_A(
   drho_dalpha = -arhoA / (alpha * alpha * A);
 }
 
+ADReal
+rho_from_arhoA_alpha_A(ADReal arhoA, ADReal alpha, ADReal A)
+{
+  return arhoA / (alpha * A);
+}
+
 void
 v_from_rhoA_A(Real rhoA, Real A, Real & v, Real & dv_drhoA)
 {
@@ -194,6 +206,12 @@ v_from_arhoA_alpha_A(Real arhoA, Real alpha, Real A, Real & v, Real & dv_darhoA,
   v = (alpha * A) / arhoA;
   dv_darhoA = -(alpha * A) / (arhoA * arhoA);
   dv_dalpha = A / arhoA;
+}
+
+ADReal
+v_from_arhoA_alpha_A(ADReal arhoA, ADReal alpha, ADReal A)
+{
+  return (alpha * A) / arhoA;
 }
 
 void
@@ -244,6 +262,11 @@ e_from_E_vel(Real E, Real vel, Real & e, Real & de_dE, Real & de_dvel)
   de_dE = 1;
   de_dvel = -vel;
 }
+ADReal
+e_from_E_vel(ADReal E, ADReal vel)
+{
+  return E - 0.5 * vel * vel;
+}
 
 Real
 de_darhoA(Real arhoA, Real arhouA, Real arhoEA)
@@ -269,6 +292,11 @@ E_from_arhoA_arhoEA(Real arhoA, Real arhoEA, Real & E, Real & dE_darhoA, Real & 
   E = arhoEA / arhoA;
   dE_darhoA = -arhoEA / (arhoA * arhoA);
   dE_darhoEA = 1.0 / arhoA;
+}
+ADReal
+E_from_arhoA_arhoEA(ADReal arhoA, ADReal arhoEA)
+{
+  return arhoEA / arhoA;
 }
 
 void

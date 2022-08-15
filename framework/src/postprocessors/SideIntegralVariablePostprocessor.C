@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SideIntegralVariablePostprocessor.h"
+#include "MathFVUtils.h"
 
 #include "metaphysicl/raw_type.h"
 
@@ -36,17 +37,19 @@ SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(
     _fv(_fv_variable)
 {
   addMooseVariableDependency(&mooseVariableField());
+
+  _qp_integration = !_fv;
+}
+
+Real
+SideIntegralVariablePostprocessor::computeFaceInfoIntegral(const FaceInfo * const fi)
+{
+  return MetaPhysicL::raw_value((*_fv_variable)(
+      Moose::FV::makeCDFace(*fi, Moose::FV::faceArgSubdomains(*_fv_variable, *fi))));
 }
 
 Real
 SideIntegralVariablePostprocessor::computeQpIntegral()
 {
-  if (_fv)
-  {
-    const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
-    mooseAssert(fi, "We should have an fi");
-    return MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*fi));
-  }
-  else
-    return _u[_qp];
+  return _u[_qp];
 }

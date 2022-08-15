@@ -59,19 +59,6 @@
                   'constraint and output the mortar segment mesh for debugging purposes'
     max_parallel = 1
   []
-  [frictionless-mortar-3d-debug-mesh-geometry]
-    type = 'Exodiff'
-    input = 'frictionless-mortar-3d.i'
-    min_ad_size = 100
-    exodiff = 'nodal_geometry_only.e'
-    mesh_mode = 'REPLICATED'
-    cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Constraints/normal_lm/debug_mesh=true '
-               'Constraints/normal_x/debug_mesh=true Constraints/normal_y/debug_mesh=true '
-               'Constraints/normal_z/debug_mesh=true Outputs/exodus=false Problem/solve=false'
-    requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
-                  'constraint and output the normal and tangent vector fields for debugging purposes'
-    max_parallel = 1
-  []
   [frictional-mortar-3d]
     type = 'Exodiff'
     input = 'frictional-mortar-3d.i'
@@ -121,5 +108,17 @@
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
     max_parallel = 8
+  []
+  [half_sphere_nodal_geometry]
+    type = 'Exodiff'
+    exodiff = 'nodal_geometry_only.e'
+    input = 'half_sphere_nodal_geometry.i'
+    min_ad_size = 100
+    valgrind = 'heavy'
+    requirement = 'The system shall generate consistent mortar nodal geometry (normal and tangent vectors) on a spherical surface'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-5
+    allow_warnings = true
+    max_parallel = 1
   []
 []

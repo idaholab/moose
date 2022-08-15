@@ -81,13 +81,6 @@ public:
    */
   Real evaluateFcn(const GridIndex & ijk);
 
-private:
-  unsigned int _dim;
-  std::vector<int> _axes;
-  std::vector<std::vector<Real>> _grid;
-  std::vector<Real> _fcn;
-  std::vector<unsigned int> _step;
-
   /**
    * parse the file_name extracting information.
    * Here is an example file:
@@ -114,13 +107,19 @@ private:
    * 1 -3 -5 -6.898
    * # end of file
    */
-  void parse(unsigned int & dim,
-             std::vector<int> & axes,
-             std::vector<std::vector<Real>> & grid,
-             std::vector<Real> & f,
-             std::vector<unsigned int> & step,
-             std::string file_name);
+  static void parse(unsigned int & dim,
+                    std::vector<int> & axes,
+                    std::vector<std::vector<Real>> & grid,
+                    std::vector<Real> & f,
+                    std::vector<unsigned int> & step,
+                    std::string file_name);
 
+private:
+  unsigned int _dim;
+  std::vector<int> _axes;
+  std::vector<std::vector<Real>> _grid;
+  std::vector<Real> _fcn;
+  std::vector<unsigned int> _step;
   /**
    * Extracts the next line from file_stream that is:
    *  - not empty
@@ -128,12 +127,14 @@ private:
    * Returns true if such a line was found,
    * otherwise returns false
    */
-  bool getSignificantLine(std::ifstream & file_stream, std::string & line);
+  static bool getSignificantLine(std::ifstream & file_stream, std::string & line);
 
   /**
    * Splits an input_string using space as the separator
    * Converts the resulting items to Real, and adds these
    * to the end of output_vec
    */
-  void splitToRealVec(const std::string & input_string, std::vector<Real> & output_vec);
+  static void splitToRealVec(const std::string & input_string, std::vector<Real> & output_vec);
+
+  void updateGrid(unsigned int & dim, const std::vector<Real> & axis_i, const int axis_index);
 };

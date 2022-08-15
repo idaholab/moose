@@ -54,6 +54,9 @@ protected:
   virtual ValueAndDerivative<is_ad>
   meanThermalExpansionCoefficient(const ValueAndDerivative<is_ad> & temperature) = 0;
 
+  /// Scalar multiplier applied to the strain for sensitivity studies and debugging.
+  const Real _thermal_expansion_scale_factor;
+
   using ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::_qp;
 };
 

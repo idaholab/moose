@@ -20,10 +20,6 @@ velocity_interp_method='rc'
   []
 []
 
-[Problem]
-  fv_bcs_integrity_check = true
-[]
-
 [GlobalParams]
   # retain behavior at time of test creation
   two_term_boundary_expansion = false

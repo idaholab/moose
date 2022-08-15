@@ -206,15 +206,20 @@ GeneratedMeshGenerator::generate()
 
   // rename and shift boundaries
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
-  const auto & mesh_boundary_ids = boundary_info.get_boundary_ids();
+
+  // Copy, since we're modifying the container mid-iteration
+  const auto mesh_boundary_ids = boundary_info.get_boundary_ids();
   for (auto rit = mesh_boundary_ids.rbegin(); rit != mesh_boundary_ids.rend(); ++rit)
   {
-    boundary_info.sideset_name(*rit + _boundary_id_offset) =
-        _boundary_name_prefix + boundary_info.sideset_name(*rit);
-    boundary_info.nodeset_name(*rit + _boundary_id_offset) =
-        _boundary_name_prefix + boundary_info.nodeset_name(*rit);
+    const std::string old_sideset_name = boundary_info.sideset_name(*rit);
+    const std::string old_nodeset_name = boundary_info.nodeset_name(*rit);
 
     MeshTools::Modification::change_boundary_id(*mesh, *rit, *rit + _boundary_id_offset);
+
+    boundary_info.sideset_name(*rit + _boundary_id_offset) =
+        _boundary_name_prefix + old_sideset_name;
+    boundary_info.nodeset_name(*rit + _boundary_id_offset) =
+        _boundary_name_prefix + old_nodeset_name;
   }
 
   // Apply the bias if any exists

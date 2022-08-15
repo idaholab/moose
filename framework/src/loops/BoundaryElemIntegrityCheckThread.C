@@ -77,7 +77,20 @@ BoundaryElemIntegrityCheckThread::operator()(const ConstBndElemRange & range)
         .queryInto(objs);
     for (const auto & uo : objs)
       if (uo->checkVariableBoundaryIntegrity())
-        boundaryIntegrityCheckError(*uo, uo->checkAllVariables(*elem), bnd_name);
+      {
+        auto leftover_vars = uo->checkAllVariables(*elem);
+        if (!leftover_vars.empty())
+        {
+          const auto neighbor = elem->neighbor_ptr(side);
+          const bool upwind_elem = !neighbor || elem->id() < neighbor->id();
+          const Elem * lower_d_elem =
+              upwind_elem ? mesh.getLowerDElem(elem, side)
+                          : mesh.getLowerDElem(neighbor, neighbor->which_neighbor_am_i(elem));
+          if (lower_d_elem)
+            leftover_vars = uo->checkVariables(*lower_d_elem, leftover_vars);
+        }
+        boundaryIntegrityCheckError(*uo, leftover_vars, bnd_name);
+      }
 
     auto check = [elem, boundary_id, &bnd_name, tid, &mesh, side](const auto & warehouse)
     {
@@ -94,7 +107,11 @@ BoundaryElemIntegrityCheckThread::operator()(const ConstBndElemRange & range)
           auto leftover_vars = bnd_object->checkAllVariables(*elem);
           if (!leftover_vars.empty())
           {
-            const Elem * const lower_d_elem = mesh.getLowerDElem(elem, side);
+            const auto neighbor = elem->neighbor_ptr(side);
+            const bool upwind_elem = !neighbor || elem->id() < neighbor->id();
+            const Elem * lower_d_elem =
+                upwind_elem ? mesh.getLowerDElem(elem, side)
+                            : mesh.getLowerDElem(neighbor, neighbor->which_neighbor_am_i(elem));
             if (lower_d_elem)
               leftover_vars = bnd_object->checkVariables(*lower_d_elem, leftover_vars);
           }

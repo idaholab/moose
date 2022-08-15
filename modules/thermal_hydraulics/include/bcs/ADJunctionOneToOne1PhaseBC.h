@@ -35,11 +35,6 @@ protected:
   /// 1-phase one-to-one junction user object
   const ADJunctionOneToOne1PhaseUserObject & _junction_uo;
 
-  /// Cross-sectional area, elemental
-  const ADVariableValue & _A_elem;
-  /// Cross-sectional area, linear
-  const ADVariableValue & _A_linear;
-
   /// rho*A coupled variable index
   const unsigned int _rhoA_jvar;
   /// rho*u*A coupled variable index

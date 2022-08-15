@@ -3,9 +3,10 @@
 #   petsc/
 #   libmesh-vtk/
 #   libmesh/
-{% set build = 4 %}
+#   template/
+{% set build = 1 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "4.0.1" %}
+{% set version = "4.0.2" %}
 
 package:
   name: moose-mpich
@@ -61,6 +62,7 @@ requirements:
     - {{ moose_mesalib }}       # [linux]
     - openssl <3
     - mpi 1.0 mpich
+    - clang-format-12
 
 test:
   commands:

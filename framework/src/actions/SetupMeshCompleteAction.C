@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "Adaptivity.h"
 #include "MooseApp.h"
+#include "FEProblemBase.h"
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "prepare_mesh");
 
@@ -100,6 +101,9 @@ SetupMeshCompleteAction::act()
     // geometric ghosting functor and/or we have a displaced mesh
     if (_mesh->needsRemoteElemDeletion())
     {
+      // Must make sure to create the mortar meshes to build our data structures that ensure we will
+      // keep the correct elements in the mesh around
+      _problem->updateMortarMesh();
       _mesh->deleteRemoteElements();
       if (_displaced_mesh)
         _displaced_mesh->deleteRemoteElements();

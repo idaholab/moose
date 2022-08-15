@@ -23,14 +23,14 @@ cell-average values as a function of time.
 The `constraint_types` parameters controls the type of constraint (deformation or stress) for each input.
 The [homogenization system](Homogenization.md) documentation lists the order of these inputs
 for each problem dimension/type.
-The `large_kinematics` flag controls whether the constraints are on the deformation gradient or 
+The `large_kinematics` flag controls whether the constraints are on the deformation gradient or
 1st Piola Kirchhoff stress (`true`) or the engineering strain and stress (`false`).
 
 !alert warning
-This object should be run with `execute_on = 'initial linear'` to provide the 
+This object should be run with `execute_on = 'initial linear'` to provide the
 updated integral values when required by the kernels.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/total/homogenization/large-tests/3d-stress.i
+!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d-stress.i
          block=UserObjects
 
 !syntax parameters /UserObjects/HomogenizationConstraintIntegral

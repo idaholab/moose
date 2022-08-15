@@ -221,12 +221,12 @@ namespace Moose
 const size_t constMaxQpsPerElem = 216;
 
 // These are used by MooseVariableData and MooseVariableDataFV
-enum SolutionState
+enum SolutionState : int
 {
-  Current,
-  Old,
-  Older,
-  PreviousNL
+  Current = 0,
+  Old = 1,
+  Older = 2,
+  PreviousNL = -1
 };
 // These are used by MooseVariableData and MooseVariableDataFV
 enum GeometryType

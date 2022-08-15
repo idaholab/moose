@@ -73,7 +73,8 @@ public:
                             bool on_displaced,
                             bool periodic,
                             const bool debug,
-                            const bool correct_edge_dropping);
+                            const bool correct_edge_dropping,
+                            const Real minimum_projection_angle);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -91,11 +92,6 @@ public:
    * efficient way to do it anyway.
    */
   void computeNodalGeometry();
-
-  /**
-   * Debug method for writing normal and tangent vectors out to file for visualization.
-   */
-  void writeGeometryToFile();
 
   /**
    * Project secondary nodes (find xi^(2) values) to the closest points on
@@ -256,7 +252,8 @@ public:
   /**
    * @return The mortar interface coupling
    */
-  const std::unordered_multimap<dof_id_type, dof_id_type> & mortarInterfaceCoupling() const
+  const std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>> &
+  mortarInterfaceCoupling() const
   {
     return _mortar_interface_coupling;
   }
@@ -300,19 +297,21 @@ public:
   bool incorrectEdgeDropping() const { return !_correct_edge_dropping; }
 
   using MortarFilterIter =
-      std::unordered_map<const Elem *, std::set<Elem *, CompareDofObjectsByID>>::const_iterator;
+      std::unordered_map<dof_id_type, std::set<Elem *, CompareDofObjectsByID>>::const_iterator;
 
   /**
    * @return A vector of iterators that point to the lower dimensional secondary elements and their
    * associated mortar segment elements that would have nonzero values for a Lagrange shape function
-   * associated with the provided node
+   * associated with the provided node. This method may return an empty container if the node is
+   * away from the mortar mesh
    */
   std::vector<MortarFilterIter> secondariesToMortarSegments(const Node & node) const;
 
   /**
-   * @return the lower dimensional secondary elements and their associated mortar segment elements
+   * @return the lower dimensional secondary element ids and their associated mortar segment
+   * elements
    */
-  const std::unordered_map<const Elem *, std::set<Elem *, CompareDofObjectsByID>> &
+  const std::unordered_map<dof_id_type, std::set<Elem *, CompareDofObjectsByID>> &
   secondariesToMortarSegments() const
   {
     return _secondary_elems_to_mortar_segments;
@@ -336,10 +335,21 @@ public:
     return _nodes_to_secondary_elem_map;
   }
 
+  /**
+   * initialize mortar-mesh based output
+   */
+  void initOutput();
+
 private:
+  /**
+   * build the \p _mortar_interface_coupling data
+   */
+  void buildCouplingInformation();
+
+  /// The Moose app
   MooseApp & _app;
 
-  // Reference to the mesh stored in equation_systems.
+  /// Reference to the mesh stored in equation_systems.
   MeshBase & _mesh;
 
   /// The boundary ids corresponding to all the secondary surfaces.
@@ -414,7 +424,7 @@ private:
   /// explicitly declared when there is no primary_elem for a given
   /// mortar segment and you are using e.g.  a P^1-P^0 discretization
   /// which does not induce the coupling automatically.
-  std::unordered_multimap<dof_id_type, dof_id_type> _mortar_interface_coupling;
+  std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>> _mortar_interface_coupling;
 
   /// Container for storing the nodal normal vector associated with each secondary node.
   std::unordered_map<const Node *, Point> _secondary_node_to_nodal_normal;
@@ -435,7 +445,7 @@ private:
   /// We maintain a mapping from lower-dimensional secondary elements in the original mesh to (sets
   /// of) elements in mortar_segment_mesh.  This allows us to quickly determine which elements need
   /// to be split.
-  std::unordered_map<const Elem *, std::set<Elem *, CompareDofObjectsByID>>
+  std::unordered_map<dof_id_type, std::set<Elem *, CompareDofObjectsByID>>
       _secondary_elems_to_mortar_segments;
 
   /// All the secondary interior parent subdomain IDs associated with the mortar mesh
@@ -467,22 +477,6 @@ private:
   /// Whether to print debug output
   const bool _debug;
 
-  ///@{
-  /** Member variables for geometry debug output */
-  libMesh::System * _nodal_normals_system = nullptr;
-  unsigned int _nnx_var_num;
-  unsigned int _nny_var_num;
-  unsigned int _nnz_var_num;
-
-  unsigned int _t1x_var_num;
-  unsigned int _t1y_var_num;
-  unsigned int _t1z_var_num;
-
-  unsigned int _t2x_var_num;
-  unsigned int _t2y_var_num;
-  unsigned int _t2z_var_num;
-  ///@}
-
   /// Whether this object is on the displaced mesh
   const bool _on_displaced;
 
@@ -502,7 +496,19 @@ private:
 
   /// Flag to enable regressed treatment of edge dropping where all LM DoFs on edge dropping element
   /// are strongly set to 0.
-  bool _correct_edge_dropping;
+  const bool _correct_edge_dropping;
+
+  /// Parameter to control which angle (in degrees) is admissible for the creation of mortar segments.
+  /// If set to a value close to zero, very oblique projections are allowed, which can result in mortar
+  /// segments solving physics not meaningfully and overprojection of primary nodes onto the mortar
+  /// segment mesh in extreme cases. This parameter is mostly intended for mortar mesh debugging purposes in 2D.
+  const Real _minimum_projection_angle;
+
+  /// Storage for the input parameters used by the mortar nodal geometry output
+  std::unique_ptr<InputParameters> _output_params;
+
+  friend class MortarNodalGeometryOutput;
+  friend class AugmentSparsityOnInterface;
 };
 
 inline const std::pair<BoundaryID, BoundaryID> &

@@ -12,6 +12,7 @@
 #include "MooseArray.h"
 #include "MooseTypes.h"
 #include "MeshChangedInterface.h"
+#include "MooseVariableDataBase.h"
 
 #include "libmesh/tensor_tools.h"
 #include "libmesh/vector_value.h"
@@ -39,7 +40,7 @@ class QBase;
 }
 
 template <typename OutputType>
-class MooseVariableDataFV : public MeshChangedInterface
+class MooseVariableDataFV : public MooseVariableDataBase<OutputType>, public MeshChangedInterface
 {
 public:
   // type for gradient, second and divergence of template class OutputType
@@ -67,10 +68,12 @@ public:
   typedef MooseArray<OutputData> DoFValue;
 
   MooseVariableDataFV(const MooseVariableFV<OutputType> & var,
-                      const SystemBase & sys,
+                      SystemBase & sys,
                       THREAD_ID tid,
                       Moose::ElementType element_type,
                       const Elem * const & elem);
+
+  bool isNodal() const override { return false; }
 
   /**
    * Returns whether this data structure needs automatic differentiation calculations
@@ -115,18 +118,6 @@ public:
   void prepareIC();
 
   //////////////////////////////////// Solution getters /////////////////////////////////////
-
-  /**
-   * Local solution getter
-   * @param state The state of the simulation: current, old, older, previous nl
-   */
-  const FieldVariableValue & sln(Moose::SolutionState state) const;
-
-  /**
-   * Local solution gradient getter
-   * @param state The state of the simulation: current, old, older, previous nl
-   */
-  const FieldVariableGradient & gradSln(Moose::SolutionState state) const;
 
   /**
    * Local time derivative of solution gradient getter
@@ -215,30 +206,16 @@ public:
   ///////////////////////////// dof indices ///////////////////////////////////////////////
 
   void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) const;
-  const std::vector<dof_id_type> & dofIndices() const { return initDofIndices(); }
-  unsigned int numberOfDofs() const { return initDofIndices().size(); }
+  const std::vector<dof_id_type> & dofIndices() const;
+  unsigned int numberOfDofs() const;
   void clearDofIndices()
   {
     _dof_indices.clear();
     _prev_elem = nullptr;
   }
 
-  /**
-   * Set the current local DOF values to the input vector
-   */
-  void insert(NumericVector<Number> & residual);
-
-  /**
-   * Add the current local DOF values to the input vector
-   */
-  void add(NumericVector<Number> & residual);
-
   /////////////////////////// DoF value getters /////////////////////////////////////
 
-  const DoFValue & dofValues() const;
-  const DoFValue & dofValuesOld() const;
-  const DoFValue & dofValuesOlder() const;
-  const DoFValue & dofValuesPreviousNL() const;
   const DoFValue & dofValuesDot() const;
   const DoFValue & dofValuesDotOld() const;
   const DoFValue & dofValuesDotDot() const;
@@ -264,27 +241,8 @@ public:
    */
   void computeIncrementAtQps(const NumericVector<Number> & increment_vec);
 
-  /////////////////////////////// Tags ///////////////////////////////////////////////////
-
-  const FieldVariableValue & vectorTagValue(TagID tag)
-  {
-    _need_vector_tag_u[tag] = true;
-    return _vector_tag_u[tag];
-  }
-  const FieldVariableValue & matrixTagValue(TagID tag)
-  {
-    _need_matrix_tag_u[tag] = true;
-    return _matrix_tag_u[tag];
-  }
-
   /// checks if a Dirichlet BC exists on this face
   bool hasDirichletBC() const { return _has_dirichlet_bc; }
-
-  /**
-   * The oldest solution state that is requested for this variable
-   * (0 = current, 1 = old, 2 = older, etc).
-   */
-  unsigned int oldestSolutionStateRequested() const;
 
   void meshChanged() override;
 
@@ -296,55 +254,21 @@ private:
    * values as they're referred to here in this class). These methods are only truly meaningful
    * for nodal basis families
    */
-  void fetchDoFValues();
   void fetchADDoFValues();
-  void zeroSizeDofValues();
 
   /**
    * Helper method that tells us whether it's safe to compute _ad_u_dot
    */
   bool safeToComputeADUDot() const;
 
-  /// A const reference to the owning MooseVariableFE object
-  const MooseVariableFV<OutputType> & _var;
-
   const FEType & _fe_type;
 
   const unsigned int _var_num;
 
-  const std::string & _var_name;
-
-  const SystemBase & _sys;
-
-  const SubProblem & _subproblem;
-
-  THREAD_ID _tid;
-
   const Assembly & _assembly;
-
-  const DofMap & _dof_map;
 
   /// The element type this object is storing data for. This is either Element, Neighbor, or Lower
   Moose::ElementType _element_type;
-
-  /// Number of components of the associated variable
-  unsigned int _count;
-
-  /// The dof indices for the current element
-  mutable std::vector<dof_id_type> _dof_indices;
-
-  mutable std::vector<bool> _need_vector_tag_dof_u;
-  mutable std::vector<bool> _need_matrix_tag_dof_u;
-
-  // Dof values of tagged vectors
-  std::vector<DoFValue> _vector_tags_dof_u;
-  // Dof values of the diagonal of tagged matrices
-  std::vector<DoFValue> _matrix_tags_dof_u;
-
-  std::vector<FieldVariableValue> _vector_tag_u;
-  mutable std::vector<bool> _need_vector_tag_u;
-  std::vector<FieldVariableValue> _matrix_tag_u;
-  mutable std::vector<bool> _need_matrix_tag_u;
 
   /// Continuity type of the variable
   FEContinuity _continuity;
@@ -354,28 +278,6 @@ private:
 
   /// A zero AD variable
   const DualReal _ad_zero;
-
-  /// u flags
-  mutable bool _need_u_old;
-  mutable bool _need_u_older;
-  mutable bool _need_u_previous_nl;
-
-  /// u dot flags
-  mutable bool _need_u_dot;
-  mutable bool _need_u_dotdot;
-  mutable bool _need_u_dot_old;
-  mutable bool _need_u_dotdot_old;
-  mutable bool _need_du_dot_du;
-  mutable bool _need_du_dotdot_du;
-
-  /// gradient flags
-  mutable bool _need_grad_old;
-  mutable bool _need_grad_older;
-  mutable bool _need_grad_previous_nl;
-
-  /// gradient dot flags
-  mutable bool _need_grad_dot;
-  mutable bool _need_grad_dotdot;
 
   /// SolutionState second_u flags
   mutable bool _need_second;
@@ -396,49 +298,6 @@ private:
   mutable bool _need_ad_grad_u;
   mutable bool _need_ad_grad_u_dot;
   mutable bool _need_ad_second_u;
-
-  /// local solution flags
-  mutable bool _need_dof_values;
-  mutable bool _need_dof_values_old;
-  mutable bool _need_dof_values_older;
-  mutable bool _need_dof_values_previous_nl;
-  mutable bool _need_dof_values_dot;
-  mutable bool _need_dof_values_dotdot;
-  mutable bool _need_dof_values_dot_old;
-  mutable bool _need_dof_values_dotdot_old;
-  mutable bool _need_dof_du_dot_du;
-  mutable bool _need_dof_du_dotdot_du;
-
-  /// local solution values
-  DoFValue _dof_values;
-  DoFValue _dof_values_old;
-  DoFValue _dof_values_older;
-  DoFValue _dof_values_previous_nl;
-
-  /// nodal values of u_dot
-  DoFValue _dof_values_dot;
-  /// nodal values of u_dotdot
-  DoFValue _dof_values_dotdot;
-  /// nodal values of u_dot_old
-  DoFValue _dof_values_dot_old;
-  /// nodal values of u_dotdot_old
-  DoFValue _dof_values_dotdot_old;
-  /// nodal values of derivative of u_dot wrt u
-  MooseArray<Number> _dof_du_dot_du;
-  /// nodal values of derivative of u_dotdot wrt u
-  MooseArray<Number> _dof_du_dotdot_du;
-
-  /// u
-  FieldVariableValue _u;
-  FieldVariableValue _u_old;
-  FieldVariableValue _u_older;
-  FieldVariableValue _u_previous_nl;
-
-  /// grad_u
-  FieldVariableGradient _grad_u;
-  FieldVariableGradient _grad_u_old;
-  FieldVariableGradient _grad_u_older;
-  FieldVariableGradient _grad_u_previous_nl;
 
   /// grad_u dots
   FieldVariableGradient _grad_u_dot;
@@ -496,15 +355,7 @@ private:
   /// used to keep track of when dof indices are out of date
   mutable const Elem * _prev_elem = nullptr;
 
-  const std::vector<dof_id_type> & initDofIndices() const
-  {
-    if (_prev_elem != _elem)
-    {
-      _dof_map.dof_indices(_elem, _dof_indices, _var_num);
-      _prev_elem = _elem;
-    }
-    return _dof_indices;
-  }
+  const std::vector<dof_id_type> & initDofIndices();
 
   /// if this variable has a dirichlet bc defined on a particular face
   bool _has_dirichlet_bc;
@@ -517,6 +368,56 @@ private:
 
   /// A dummy ADReal variable
   ADReal _ad_real_dummy = 0;
+
+  using MooseVariableDataBase<OutputType>::_var;
+  using MooseVariableDataBase<OutputType>::_sys;
+  using MooseVariableDataBase<OutputType>::_subproblem;
+  using MooseVariableDataBase<OutputType>::_need_vector_tag_dof_u;
+  using MooseVariableDataBase<OutputType>::_need_matrix_tag_dof_u;
+  using MooseVariableDataBase<OutputType>::_vector_tags_dof_u;
+  using MooseVariableDataBase<OutputType>::_matrix_tags_dof_u;
+  using MooseVariableDataBase<OutputType>::_vector_tag_u;
+  using MooseVariableDataBase<OutputType>::_need_vector_tag_u;
+  using MooseVariableDataBase<OutputType>::_vector_tag_grad;
+  using MooseVariableDataBase<OutputType>::_need_vector_tag_grad;
+  using MooseVariableDataBase<OutputType>::_matrix_tag_u;
+  using MooseVariableDataBase<OutputType>::_need_matrix_tag_u;
+  using MooseVariableDataBase<OutputType>::_dof_indices;
+  using MooseVariableDataBase<OutputType>::_has_dof_values;
+  using MooseVariableDataBase<OutputType>::fetchDoFValues;
+  using MooseVariableDataBase<OutputType>::assignNodalValue;
+  using MooseVariableDataBase<OutputType>::zeroSizeDofValues;
+  using MooseVariableDataBase<OutputType>::_solution_tag;
+  using MooseVariableDataBase<OutputType>::_old_solution_tag;
+  using MooseVariableDataBase<OutputType>::_older_solution_tag;
+  using MooseVariableDataBase<OutputType>::_previous_nl_solution_tag;
+  using MooseVariableDataBase<OutputType>::_dof_map;
+  using MooseVariableDataBase<OutputType>::_need_u_dot;
+  using MooseVariableDataBase<OutputType>::_need_u_dotdot;
+  using MooseVariableDataBase<OutputType>::_need_u_dot_old;
+  using MooseVariableDataBase<OutputType>::_need_u_dotdot_old;
+  using MooseVariableDataBase<OutputType>::_need_du_dot_du;
+  using MooseVariableDataBase<OutputType>::_need_du_dotdot_du;
+  using MooseVariableDataBase<OutputType>::_need_grad_dot;
+  using MooseVariableDataBase<OutputType>::_need_grad_dotdot;
+  using MooseVariableDataBase<OutputType>::_need_dof_values_dot;
+  using MooseVariableDataBase<OutputType>::_need_dof_values_dotdot;
+  using MooseVariableDataBase<OutputType>::_need_dof_values_dot_old;
+  using MooseVariableDataBase<OutputType>::_need_dof_values_dotdot_old;
+  using MooseVariableDataBase<OutputType>::_need_dof_du_dot_du;
+  using MooseVariableDataBase<OutputType>::_need_dof_du_dotdot_du;
+  using MooseVariableDataBase<OutputType>::_dof_values_dot;
+  using MooseVariableDataBase<OutputType>::_dof_values_dotdot;
+  using MooseVariableDataBase<OutputType>::_dof_values_dot_old;
+  using MooseVariableDataBase<OutputType>::_dof_values_dotdot_old;
+  using MooseVariableDataBase<OutputType>::_dof_du_dot_du;
+  using MooseVariableDataBase<OutputType>::_dof_du_dotdot_du;
+  using MooseVariableDataBase<OutputType>::_tid;
+  using MooseVariableDataBase<OutputType>::_nodal_value_dot;
+  using MooseVariableDataBase<OutputType>::_nodal_value_dotdot;
+  using MooseVariableDataBase<OutputType>::_nodal_value_dot_old;
+  using MooseVariableDataBase<OutputType>::_nodal_value_dotdot_old;
+  using MooseVariableDataBase<OutputType>::_required_vector_tags;
 };
 
 /////////////////////// General template definitions //////////////////////////////////////
@@ -566,4 +467,18 @@ MooseVariableDataFV<OutputType>::adUDotDot() const
     _need_u_dotdot = true;
 
   return _ad_u_dotdot;
+}
+
+template <typename OutputType>
+const std::vector<dof_id_type> &
+MooseVariableDataFV<OutputType>::dofIndices() const
+{
+  return const_cast<MooseVariableDataFV<OutputType> *>(this)->initDofIndices();
+}
+
+template <typename OutputType>
+unsigned int
+MooseVariableDataFV<OutputType>::numberOfDofs() const
+{
+  return dofIndices().size();
 }

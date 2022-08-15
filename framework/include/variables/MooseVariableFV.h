@@ -87,42 +87,16 @@ public:
   // throwing mooseError's from them instead of silently doing nothing (e.g.
   // reinitNodes, reinitAux, prepareLowerD, etc.).
 
-  virtual void prepare() override final
-  {
-    // mooseError("prepare not supported by MooseVariableFVBase");
-  }
-  virtual void prepareNeighbor() override final
-  {
-    // mooseError("prepareNeighbor not supported by MooseVariableFVBase");
-  }
-  virtual void prepareAux() override final
-  {
-    // mooseError("prepareAux not supported by MooseVariableFVBase");
-  }
-  virtual void reinitNode() override final
-  {
-    // mooseError("reinitNode not supported by MooseVariableFVBase");
-  }
-  virtual void reinitNodes(const std::vector<dof_id_type> & /*nodes*/) override final
-  {
-    // mooseError("reinitNodes not supported by MooseVariableFVBase");
-  }
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & /*nodes*/) override final
-  {
-    // mooseError("reinitNodesNeighbor not supported by MooseVariableFVBase");
-  }
-  virtual void reinitAux() override final
-  {
-    // mooseError("reinitAux not supported by MooseVariableFVBase");
-  }
-  virtual void reinitAuxNeighbor() override final
-  {
-    // mooseError("reinitAuxNeighbor not supported by MooseVariableFVBase");
-  }
-  virtual void prepareLowerD() override final
-  {
-    // mooseError("prepareLowerD not supported by MooseVariableFVBase");
-  }
+  virtual void prepare() override final {}
+  virtual void prepareNeighbor() override final {}
+  virtual void prepareAux() override final;
+  virtual void reinitNode() override final {}
+  virtual void reinitNodes(const std::vector<dof_id_type> & /*nodes*/) override final {}
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & /*nodes*/) override final {}
+  virtual void reinitAux() override final {}
+  virtual void reinitAuxNeighbor() override final {}
+  virtual void prepareLowerD() override final {}
+
   virtual const dof_id_type & nodalDofIndex() const override final
   {
     mooseError("nodalDofIndex not supported by MooseVariableFVBase");
@@ -160,10 +134,7 @@ public:
   {
     // mooseError("computeNodalValues not supported by MooseVariableFVBase");
   }
-  virtual const std::vector<dof_id_type> & dofIndicesLower() const override final
-  {
-    mooseError("dofIndicesLower not supported by MooseVariableFVBase");
-  }
+  virtual const std::vector<dof_id_type> & dofIndicesLower() const override final;
 
   unsigned int numberOfDofs() const override final { return _element_data->numberOfDofs(); }
 
@@ -220,6 +191,10 @@ public:
   const FieldVariableValue & vectorTagValue(TagID tag) const override
   {
     return _element_data->vectorTagValue(tag);
+  }
+  const DoFValue & vectorTagDofValue(TagID tag) const override
+  {
+    return _element_data->vectorTagDofValue(tag);
   }
   const FieldVariableValue & matrixTagValue(TagID tag)
   {
@@ -494,6 +469,8 @@ public:
   template <typename FaceCallingArg>
   ADReal getInternalFaceValue(const FaceCallingArg & face) const;
 
+  void setActiveTags(const std::set<TagID> & vtags) override;
+
 protected:
   /**
    * @return whether \p fi is an internal face for this variable
@@ -762,6 +739,22 @@ typename MooseVariableFV<OutputType>::DotType
 MooseVariableFV<OutputType>::evaluateDot(const SingleSidedFaceArg & face, unsigned int) const
 {
   return evaluateFaceDotHelper(face);
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::setActiveTags(const std::set<TagID> & vtags)
+{
+  _element_data->setActiveTags(vtags);
+  _neighbor_data->setActiveTags(vtags);
+}
+
+template <typename OutputType>
+const std::vector<dof_id_type> &
+MooseVariableFV<OutputType>::dofIndicesLower() const
+{
+  static const std::vector<dof_id_type> empty;
+  return empty;
 }
 
 template <>

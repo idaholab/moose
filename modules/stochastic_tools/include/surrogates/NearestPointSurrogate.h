@@ -18,8 +18,15 @@ public:
   NearestPointSurrogate(const InputParameters & parameters);
   using SurrogateModel::evaluate;
   virtual Real evaluate(const std::vector<Real> & x) const override;
+  virtual void evaluate(const std::vector<Real> & x, std::vector<Real> & y) const override;
 
 protected:
-  /// Array containing sample points and the results
+  /// Array containing sample points
   const std::vector<std::vector<Real>> & _sample_points;
+
+  /// Array containing results
+  const std::vector<std::vector<Real>> & _sample_results;
+
+private:
+  unsigned int findNearestPoint(const std::vector<Real> & x) const;
 };

@@ -1,7 +1,7 @@
 [Tests]
   issues = "#14933"
   design = "NearestPointTrainer.md NearestPointSurrogate.md"
-  
+
   [nearest_point]
     requirement = 'The system shall create a surrogate that evaluates the closes point from training data by '
     [train]
@@ -34,5 +34,12 @@
       csvdiff = 'evaluate_out_results_0002.csv'
       detail = 'using explictly specified predictors.'
     []
+  []
+  [vector]
+    type = JSONDiff
+    input = np_vec.i
+    jsondiff = 'np_vec_out.json'
+    cli_args = 'Outputs/out/execute_system_information_on=none'
+    requirement = 'The sytem shall be able to create nearest point surrogates with vector-type response.'
   []
 []

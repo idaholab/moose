@@ -1,0 +1,16 @@
+[Tests]
+  [plane_strain]
+    type = 'Exodiff'
+    input = 'plane_strain.i'
+    exodiff = 'plane_strain_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+  []
+  [generalized_plane_strain]
+    type = 'Exodiff'
+    input = 'generalized_plane_strain.i'
+    exodiff = 'generalized_plane_strain_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+  []
+[]

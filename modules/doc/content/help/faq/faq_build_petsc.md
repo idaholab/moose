@@ -6,7 +6,7 @@ PETSc is supplied by our Conda installation. However, if you wish to build and u
 By building your own PETSc, it will be necessary to build your own libMesh as well. It is advisable to operate in an entirely new Conda environment for the sake of keeping your environment sane:
 
 ```bash
-conda create --name custom-petsc moose-mpich
+conda create -n custom-petsc moose-mpich
 conda activate custom-petsc
 cd ~/projects/moose/scripts
 ./update_and_rebuild_petsc.sh

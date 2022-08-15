@@ -69,7 +69,7 @@ MooseEnumBase::addEnumerationNames(const std::string & names)
     addEnumerationName(raw_name);
 }
 
-void
+const MooseEnumItem &
 MooseEnumBase::addEnumerationName(const std::string & raw_name)
 {
   // Make sure the option is not malformed
@@ -95,7 +95,7 @@ MooseEnumBase::addEnumerationName(const std::string & raw_name)
   else
     value = getNextValidID();
 
-  addEnumerationName(name_value[0], value);
+  return addEnumerationName(name_value[0], value);
 }
 
 int
@@ -107,17 +107,18 @@ MooseEnumBase::getNextValidID() const
   return ++value;
 }
 
-void
+const MooseEnumItem &
 MooseEnumBase::addEnumerationName(const std::string & name, const int & value)
 {
-  addEnumerationItem(MooseEnumItem(name, value));
+  return addEnumerationItem(MooseEnumItem(name, value));
 }
 
-void
+const MooseEnumItem &
 MooseEnumBase::addEnumerationItem(const MooseEnumItem & item)
 {
-  if (_items.count(item) > 0) // do nothing for identical insertions
-    return;
+  const auto & item_it = find(item);
+  if (item_it != _items.end()) // do nothing for identical insertions
+    return *item_it;
 
   if (find(item.id()) != _items.end())
     mooseError("The supplied id ",
@@ -128,7 +129,7 @@ MooseEnumBase::addEnumerationItem(const MooseEnumItem & item)
   if (find(item.name()) != _items.end())
     mooseError("The name '", item.name(), "' already exists in the enumeration.");
 
-  _items.insert(item);
+  return *_items.insert(item).first;
 }
 
 void
@@ -189,9 +190,11 @@ MooseEnumBase::find(int id) const
 std::set<MooseEnumItem>::const_iterator
 MooseEnumBase::find(const MooseEnumItem & other) const
 {
+  const auto upper = MooseUtils::toUpper(other.name());
   return std::find_if(_items.begin(),
                       _items.end(),
-                      [&other](MooseEnumItem const & item) { return item.id() == other.id(); });
+                      [&other, &upper](MooseEnumItem const & item)
+                      { return item.id() == other.id() && item.name() == upper; });
 }
 
 MooseEnumBase &

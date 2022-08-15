@@ -16,7 +16,7 @@ JouleHeatingHeatGeneratedAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Compute heat generated from Joule heating "
-                             "$(d\\vv{P}/d\\vv{V} = \\vv{E}^2 \\sigma )$.");
+                             "$(d\\vec{P}/d\\vec{V} = \\vec{E}^2 \\sigma )$.");
   params.addRequiredCoupledVar("elec", "Electric potential for joule heating.");
   params.addParam<MaterialPropertyName>(
       "electrical_conductivity",

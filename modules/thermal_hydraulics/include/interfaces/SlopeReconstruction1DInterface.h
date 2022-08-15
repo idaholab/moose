@@ -54,6 +54,17 @@ public:
 
 protected:
   /**
+   * Gets the primitive solution vector and position of neighbor(s)
+   *
+   * @param[in] elem   Element for which to get slopes
+   * @param[in] W_neighbor   Primitive solution vector for each neighbor
+   * @param[in] x_neighbor   Position for each neighbor
+   */
+  void getNeighborPrimitiveVariables(const Elem * elem,
+                                     std::vector<std::vector<GenericReal<is_ad>>> & W_neighbor,
+                                     std::vector<Point> & x_neighbor) const;
+
+  /**
    * Gets limited slopes for the primitive variables in the 1-D direction
    *
    * @param[in] elem   Element for which to get slopes
@@ -61,6 +72,44 @@ protected:
    * @returns Vector of slopes for the element in the 1-D direction
    */
   std::vector<GenericReal<is_ad>> getElementSlopes(const Elem * elem) const;
+
+  /**
+   * Gets limited slopes for the primitive variables in the 1-D direction for boundary element
+   *
+   * @param[in] W_elem       Primitive solution for element
+   * @param[in] x_elem       Position for element
+   * @param[in] dir          Direction for element
+   * @param[in] W_neighbor   Primitive solution vector for each neighbor
+   * @param[in] x_neighbor   Position for each neighbor
+   * @param[in] W_boundary   Primitive solution vector for boundary
+   *
+   * @returns Vector of slopes for the element in the 1-D direction
+   */
+  std::vector<GenericReal<is_ad>>
+  getBoundaryElementSlopes(const std::vector<GenericReal<is_ad>> & W_elem,
+                           const Point & x_elem,
+                           const RealVectorValue & dir,
+                           std::vector<std::vector<GenericReal<is_ad>>> W_neighbor,
+                           std::vector<Point> x_neighbor,
+                           const std::vector<GenericReal<is_ad>> & W_boundary) const;
+
+  /**
+   * Gets limited slopes for the primitive variables in the 1-D direction
+   *
+   * @param[in] W_elem       Primitive solution for element
+   * @param[in] x_elem       Position for element
+   * @param[in] dir          Direction for element
+   * @param[in] W_neighbor   Primitive solution vector for each neighbor
+   * @param[in] x_neighbor   Position for each neighbor
+   *
+   * @returns Vector of slopes for the element in the 1-D direction
+   */
+  std::vector<GenericReal<is_ad>>
+  getElementSlopes(const std::vector<GenericReal<is_ad>> & W_elem,
+                   const Point & x_elem,
+                   const RealVectorValue & dir,
+                   const std::vector<std::vector<GenericReal<is_ad>>> & W_neighbor,
+                   const std::vector<Point> & x_neighbor) const;
 
   /**
    * Computes the cell-average primitive variable values for an element
@@ -144,59 +193,111 @@ SlopeReconstruction1DInterface<is_ad>::SlopeReconstruction1DInterface(
 }
 
 template <bool is_ad>
-std::vector<GenericReal<is_ad>>
-SlopeReconstruction1DInterface<is_ad>::getElementSlopes(const Elem * elem) const
+void
+SlopeReconstruction1DInterface<is_ad>::getNeighborPrimitiveVariables(
+    const Elem * elem,
+    std::vector<std::vector<GenericReal<is_ad>>> & W_neighbor,
+    std::vector<Point> & x_neighbor) const
 {
-  // Determine flow channel direction
-  const RealVectorValue dir_unnormalized = elem->node_ref(1) - elem->node_ref(0);
-  const RealVectorValue dir = dir_unnormalized / dir_unnormalized.norm();
-
-  std::vector<const Elem *> neighbors(_n_side, nullptr);
+  W_neighbor.clear();
+  x_neighbor.clear();
   for (unsigned int i_side = 0; i_side < _n_side; i_side++)
   {
     auto neighbor = elem->neighbor_ptr(i_side);
     if (neighbor && (neighbor->processor_id() == _moose_object->processor_id()))
-      neighbors[i_side] = neighbor;
+    {
+      x_neighbor.push_back(neighbor->vertex_average());
+      W_neighbor.push_back(computeElementPrimitiveVariables(neighbor));
+    }
+  }
+}
+
+template <bool is_ad>
+std::vector<GenericReal<is_ad>>
+SlopeReconstruction1DInterface<is_ad>::getElementSlopes(const Elem * elem) const
+{
+  mooseAssert(elem, "The supplied element is a nullptr.");
+
+  const auto W_elem = computeElementPrimitiveVariables(elem);
+  const Point x_elem = elem->vertex_average();
+  const RealVectorValue dir = (elem->node_ref(1) - elem->node_ref(0)).unit();
+
+  std::vector<Point> x_neighbor;
+  std::vector<std::vector<GenericReal<is_ad>>> W_neighbor;
+  getNeighborPrimitiveVariables(elem, W_neighbor, x_neighbor);
+
+  return getElementSlopes(W_elem, x_elem, dir, W_neighbor, x_neighbor);
+}
+
+template <bool is_ad>
+std::vector<GenericReal<is_ad>>
+SlopeReconstruction1DInterface<is_ad>::getBoundaryElementSlopes(
+    const std::vector<GenericReal<is_ad>> & W_elem,
+    const Point & x_elem,
+    const RealVectorValue & dir,
+    std::vector<std::vector<GenericReal<is_ad>>> W_neighbor,
+    std::vector<Point> x_neighbor,
+    const std::vector<GenericReal<is_ad>> & W_boundary) const
+{
+  if (W_neighbor.size() == 1)
+  {
+    W_neighbor.push_back(W_boundary);
+
+    // The boundary point will be assumed to be the same distance away as neighbor
+    const Point dx = x_elem - x_neighbor[0];
+    const Point x_boundary = x_elem + dx;
+    x_neighbor.push_back(x_boundary);
   }
 
-  // get this element's position and solution
-  const Point x_elem = elem->vertex_average();
-  const auto W_elem = computeElementPrimitiveVariables(elem);
+  return getElementSlopes(W_elem, x_elem, dir, W_neighbor, x_neighbor);
+}
+
+template <bool is_ad>
+std::vector<GenericReal<is_ad>>
+SlopeReconstruction1DInterface<is_ad>::getElementSlopes(
+    const std::vector<GenericReal<is_ad>> & W_elem,
+    const Point & x_elem,
+    const RealVectorValue & dir,
+    const std::vector<std::vector<GenericReal<is_ad>>> & W_neighbor,
+    const std::vector<Point> & x_neighbor) const
+{
+  mooseAssert(x_neighbor.size() == W_neighbor.size(),
+              "Neighbor positions size must equal neighbor solutions size.");
 
   // get the number of slopes to be stored
   const unsigned int n_slopes = W_elem.size();
 
-  // neighbor positions and solutions, if any
-  std::vector<Point> x_neighbor(_n_side);
-  std::vector<std::vector<GenericReal<is_ad>>> W_neighbor(_n_side);
-
-  // one-sided slopes on each side
-  std::vector<std::vector<GenericReal<is_ad>>> slopes_one_sided(
-      _n_side, std::vector<GenericReal<is_ad>>(n_slopes, 0.0));
-
-  // flags indicating whether each side is a boundary
-  std::vector<bool> side_is_boundary(_n_side, false);
-
-  // loop over the sides to compute the one-sided slopes
-  for (unsigned int i_side = 0; i_side < _n_side; i_side++)
+  // compute one-sided slope(s)
+  std::vector<std::vector<GenericReal<is_ad>>> slopes_one_sided;
+  for (unsigned int i = 0; i < W_neighbor.size(); i++)
   {
-    if (neighbors[i_side] != nullptr)
-    {
-      x_neighbor[i_side] = neighbors[i_side]->vertex_average();
-      W_neighbor[i_side] = computeElementPrimitiveVariables(neighbors[i_side]);
+    const Real dx = (x_elem - x_neighbor[i]) * dir;
 
-      // compute change in position along flow channel direction
-      const Real dx = (x_elem - x_neighbor[i_side]) * dir;
+    std::vector<GenericReal<is_ad>> slopes(n_slopes, 0.0);
+    for (unsigned int m = 0; m < n_slopes; m++)
+      slopes[m] = (W_elem[m] - W_neighbor[i][m]) / dx;
 
-      for (unsigned int m = 0; m < n_slopes; m++)
-        slopes_one_sided[i_side][m] = (W_elem[m] - W_neighbor[i_side][m]) / dx;
-    }
-    else
-      side_is_boundary[i_side] = true;
+    slopes_one_sided.push_back(slopes);
   }
 
-  // determine is cell is an interior cell
-  const bool is_interior_cell = (!side_is_boundary[0] && !side_is_boundary[1]);
+  // Fill in any missing one-sided slopes and compute central slope
+  std::vector<GenericReal<is_ad>> slopes_central(n_slopes, 0.0);
+  if (W_neighbor.size() == 2)
+  {
+    const Real dx = (x_neighbor[0] - x_neighbor[1]) * dir;
+    for (unsigned int m = 0; m < n_slopes; m++)
+      slopes_central[m] = (W_neighbor[0][m] - W_neighbor[1][m]) / dx;
+  }
+  else if (W_neighbor.size() == 1)
+  {
+    slopes_one_sided.push_back(slopes_one_sided[0]);
+    slopes_central = slopes_one_sided[0];
+  }
+  else // only one element; use zero slopes
+  {
+    slopes_one_sided.push_back(slopes_central);
+    slopes_one_sided.push_back(slopes_central);
+  }
 
   // vector for the (possibly limited) slopes
   std::vector<GenericReal<is_ad>> slopes_limited(n_slopes, 0.0);
@@ -210,49 +311,21 @@ SlopeReconstruction1DInterface<is_ad>::getElementSlopes(const Elem * elem) const
 
     // full reconstruction; no limitation
     case Full:
-    {
-      for (unsigned int m = 0; m < n_slopes; m++)
-      {
-        // For 1-D, the current element falls into 1 of 4 categories:
-        // 1) interior cell
-        // 2) left boundary cell (side 0 is boundary)
-        // 3) right boundary cell (side 1 is boundary)
-        // 4) left AND right boundary cell (there is a single cell in mesh)
-        if ((!side_is_boundary[0]) && (!side_is_boundary[1]))
-        {
-          // compute change in position along flow channel direction
-          const Real dx = (x_neighbor[0] - x_neighbor[1]) * dir;
 
-          // use central slope
-          slopes_limited[m] = (W_neighbor[0][m] - W_neighbor[1][m]) / dx;
-        }
-        else if (side_is_boundary[0])
-          // side 0 is boundary; use side 1 slope
-          slopes_limited[m] = slopes_one_sided[1][m];
-        else if (side_is_boundary[1])
-          // side 1 is boundary; use side 0 slope
-          slopes_limited[m] = slopes_one_sided[0][m];
-        else
-          // single cell in mesh; no slope
-          slopes_limited[m] = 0.0;
-      }
-    }
-    break;
+      slopes_limited = slopes_central;
+      break;
 
     // minmod limiter
     case Minmod:
 
-      if (is_interior_cell)
+      for (unsigned int m = 0; m < n_slopes; m++)
       {
-        for (unsigned int m = 0; m < n_slopes; m++)
+        if ((slopes_one_sided[0][m] * slopes_one_sided[1][m]) > 0.0)
         {
-          if ((slopes_one_sided[0][m] * slopes_one_sided[1][m]) > 0.0)
-          {
-            if (std::abs(slopes_one_sided[0][m]) < std::abs(slopes_one_sided[1][m]))
-              slopes_limited[m] = slopes_one_sided[0][m];
-            else
-              slopes_limited[m] = slopes_one_sided[1][m];
-          }
+          if (std::abs(slopes_one_sided[0][m]) < std::abs(slopes_one_sided[1][m]))
+            slopes_limited[m] = slopes_one_sided[0][m];
+          else
+            slopes_limited[m] = slopes_one_sided[1][m];
         }
       }
       break;
@@ -260,57 +333,43 @@ SlopeReconstruction1DInterface<is_ad>::getElementSlopes(const Elem * elem) const
     // MC (monotonized central-difference) limiter
     case MC:
 
-      if (is_interior_cell)
+      for (unsigned int m = 0; m < n_slopes; m++)
       {
-        // compute change in position along flow channel direction
-        const Real dx = (x_neighbor[0] - x_neighbor[1]) * dir;
-
-        std::vector<GenericReal<is_ad>> slopes_central(n_slopes, 0.0);
-        for (unsigned int m = 0; m < n_slopes; m++)
-          slopes_central[m] = (W_neighbor[0][m] - W_neighbor[1][m]) / dx;
-
-        for (unsigned int m = 0; m < n_slopes; m++)
-        {
-          if (slopes_central[m] > 0.0 && slopes_one_sided[0][m] > 0.0 &&
-              slopes_one_sided[1][m] > 0.0)
-            slopes_limited[m] = std::min(
-                slopes_central[m], 2.0 * std::min(slopes_one_sided[0][m], slopes_one_sided[1][m]));
-          else if (slopes_central[m] < 0.0 && slopes_one_sided[0][m] < 0.0 &&
-                   slopes_one_sided[1][m] < 0.0)
-            slopes_limited[m] = std::max(
-                slopes_central[m], 2.0 * std::max(slopes_one_sided[0][m], slopes_one_sided[1][m]));
-        }
+        if (slopes_central[m] > 0.0 && slopes_one_sided[0][m] > 0.0 && slopes_one_sided[1][m] > 0.0)
+          slopes_limited[m] = std::min(
+              slopes_central[m], 2.0 * std::min(slopes_one_sided[0][m], slopes_one_sided[1][m]));
+        else if (slopes_central[m] < 0.0 && slopes_one_sided[0][m] < 0.0 &&
+                 slopes_one_sided[1][m] < 0.0)
+          slopes_limited[m] = std::max(
+              slopes_central[m], 2.0 * std::max(slopes_one_sided[0][m], slopes_one_sided[1][m]));
       }
       break;
 
     // superbee limiter
     case Superbee:
 
-      if (is_interior_cell)
+      for (unsigned int m = 0; m < n_slopes; m++)
       {
-        for (unsigned int m = 0; m < n_slopes; m++)
-        {
-          GenericReal<is_ad> slope1 = 0.0;
-          GenericReal<is_ad> slope2 = 0.0;
+        GenericReal<is_ad> slope1 = 0.0;
+        GenericReal<is_ad> slope2 = 0.0;
 
-          // calculate slope1 with minmod
-          if (slopes_one_sided[1][m] > 0.0 && slopes_one_sided[0][m] > 0.0)
-            slope1 = std::min(slopes_one_sided[1][m], 2.0 * slopes_one_sided[0][m]);
-          else if (slopes_one_sided[1][m] < 0.0 && slopes_one_sided[0][m] < 0.0)
-            slope1 = std::max(slopes_one_sided[1][m], 2.0 * slopes_one_sided[0][m]);
+        // calculate slope1 with minmod
+        if (slopes_one_sided[1][m] > 0.0 && slopes_one_sided[0][m] > 0.0)
+          slope1 = std::min(slopes_one_sided[1][m], 2.0 * slopes_one_sided[0][m]);
+        else if (slopes_one_sided[1][m] < 0.0 && slopes_one_sided[0][m] < 0.0)
+          slope1 = std::max(slopes_one_sided[1][m], 2.0 * slopes_one_sided[0][m]);
 
-          // calculate slope2 with minmod
-          if (slopes_one_sided[1][m] > 0.0 && slopes_one_sided[0][m] > 0.0)
-            slope2 = std::min(2.0 * slopes_one_sided[1][m], slopes_one_sided[0][m]);
-          else if (slopes_one_sided[1][m] < 0.0 && slopes_one_sided[0][m] < 0.0)
-            slope2 = std::max(2.0 * slopes_one_sided[1][m], slopes_one_sided[0][m]);
+        // calculate slope2 with minmod
+        if (slopes_one_sided[1][m] > 0.0 && slopes_one_sided[0][m] > 0.0)
+          slope2 = std::min(2.0 * slopes_one_sided[1][m], slopes_one_sided[0][m]);
+        else if (slopes_one_sided[1][m] < 0.0 && slopes_one_sided[0][m] < 0.0)
+          slope2 = std::max(2.0 * slopes_one_sided[1][m], slopes_one_sided[0][m]);
 
-          // calculate slope with maxmod
-          if (slope1 > 0.0 && slope2 > 0.0)
-            slopes_limited[m] = std::max(slope1, slope2);
-          else if (slope1 < 0.0 && slope2 < 0.0)
-            slopes_limited[m] = std::min(slope1, slope2);
-        }
+        // calculate slope with maxmod
+        if (slope1 > 0.0 && slope2 > 0.0)
+          slopes_limited[m] = std::max(slope1, slope2);
+        else if (slope1 < 0.0 && slope2 < 0.0)
+          slopes_limited[m] = std::min(slope1, slope2);
       }
       break;
 
@@ -318,6 +377,5 @@ SlopeReconstruction1DInterface<is_ad>::getElementSlopes(const Elem * elem) const
       mooseError("Unknown slope reconstruction scheme");
       break;
   }
-
   return slopes_limited;
 }

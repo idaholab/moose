@@ -3,9 +3,9 @@ rho = 1
 k = 1
 cp = 1
 alpha = 1
-rayleigh=1e3
-hot_temp=${rayleigh}
-temp_ref=${fparse hot_temp / 2.}
+rayleigh = 1e3
+hot_temp = ${rayleigh}
+temp_ref = '${fparse hot_temp / 2.}'
 
 [Mesh]
   [gen]
@@ -72,8 +72,8 @@ temp_ref=${fparse hot_temp / 2.}
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      300                lu           NONZERO'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-12
 []
 

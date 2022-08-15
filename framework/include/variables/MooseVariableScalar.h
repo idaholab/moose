@@ -82,6 +82,8 @@ public:
    */
   unsigned int oldestSolutionStateRequested() const;
 
+  void setActiveTags(const std::set<TagID> & vtags) override { _required_vector_tags = vtags; }
+
 protected:
   /// The value of scalar variable
   VariableValue _u;
@@ -136,4 +138,7 @@ private:
    *        number of dofs per node or the number of dofs per elem
    */
   void computeAD(bool nodal_ordering);
+
+  /// The set of vector tags we need to evaluate
+  std::set<TagID> _required_vector_tags;
 };

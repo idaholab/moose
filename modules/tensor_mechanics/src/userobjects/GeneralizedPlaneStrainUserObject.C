@@ -49,7 +49,7 @@ GeneralizedPlaneStrainUserObject::validParams()
       "pressure_factor",
       "Scale factor applied to prescribed out-of-plane pressure (both material and function)");
   params.addParam<std::string>("base_name", "Material properties base name");
-  params.set<ExecFlagEnum>("execute_on") = EXEC_LINEAR;
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
 
   return params;
 }
@@ -58,7 +58,7 @@ GeneralizedPlaneStrainUserObject::GeneralizedPlaneStrainUserObject(
     const InputParameters & parameters)
   : ElementUserObject(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _Cijkl(getMaterialProperty<RankFourTensor>(_base_name + "elasticity_tensor")),
+    _Jacobian_mult(getMaterialProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _subblock_id_provider(nullptr),
     _out_of_plane_pressure_function(parameters.isParamSetByUser("out_of_plane_pressure_function")
@@ -124,10 +124,10 @@ GeneralizedPlaneStrainUserObject::execute()
 
     // diagonal jacobian, integral of C(2, 2, 2, 2) for COORD_XYZ
     _jacobian[subblock_id] += _JxW[_qp] * _coord[_qp] *
-                              _Cijkl[_qp](_scalar_out_of_plane_strain_direction,
-                                          _scalar_out_of_plane_strain_direction,
-                                          _scalar_out_of_plane_strain_direction,
-                                          _scalar_out_of_plane_strain_direction);
+                              _Jacobian_mult[_qp](_scalar_out_of_plane_strain_direction,
+                                                  _scalar_out_of_plane_strain_direction,
+                                                  _scalar_out_of_plane_strain_direction,
+                                                  _scalar_out_of_plane_strain_direction);
   }
 }
 

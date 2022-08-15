@@ -90,6 +90,7 @@ public:
   /// Constants used for invalid indices set to the max value of std::size_t type
   static const std::size_t invalid_size_t;
   static const unsigned int invalid_id;
+  static const processor_id_type invalid_proc_id;
   ///@}
 
   /// Returns a const vector to the coupled variable pointers
@@ -309,20 +310,7 @@ public:
 
     FeatureData duplicate() const { return FeatureData(*this); }
 
-#ifndef __INTEL_COMPILER
-    /**
-     * 2016-07-14
-     * The INTEL compiler we are currently using (2013 with GCC 4.8) appears to have a bug
-     * introduced by the addition of the Point member in this structure. Even though it supports
-     * move semantics on other non-POD types like libMesh::BoundingBox, it fails to compile this
-     * class with the "centroid" member. Specifically, it supports the move operation into the
-     * vector type but fails to work with the bracket operator on std::map and the std::sort
-     * algorithm used in this class. It does work with std::map::emplace() but that syntax is much
-     * less appealing and still doesn't work around the issue. For now, I'm allowing the copy
-     * constructor to be called where it shouldn't so that this class works under the Intel compiler
-     * but there may be a degradation in performance in that case. */
   private:
-#endif
     ///@{
     /**
      * We do not expect these objects to ever be copied. This is important since they are stored in
@@ -432,16 +420,17 @@ protected:
 
   /**
    * This routine uses the local flooded data to build up the local feature data structures
-   * (_feature_sets). This routine does not perform any communication so the _feature_sets data
-   * structure will only contain information from the local processor after calling this routine.
-   * Any existing data in the _feature_sets structure is destroyed by calling this routine.
+   * (_partial feature_sets). This routine does not perform any communication so the
+   * _partial_feature_sets data structure will only contain information from the local processor
+   * after calling this routine. Any existing data in the _partial_feature_sets structure is
+   * destroyed by calling this routine.
    *
-   * _feature_sets layout:
+   * _partial_feature_sets layout:
    * The outer vector is sized to one when _single_map_mode == true, otherwise it is sized for the
    * number of coupled variables. The inner list represents the flooded regions (local only after
    * this call but fully populated after parallel communication and stitching).
    */
-  void prepareDataForTransfer();
+  virtual void prepareDataForTransfer();
 
   /**
    * This routines packs the _partial_feature_sets data into a structure suitable for parallel
@@ -466,6 +455,13 @@ protected:
   virtual void mergeSets();
 
   /**
+   * This method consolidates all of the merged information from _partial_feature_sets into
+   * the _feature_sets vectors.
+   */
+  virtual void
+  consolidateMergedFeatures(std::vector<std::list<FeatureData>> * saved_data = nullptr);
+
+  /**
    * Method for determining whether two features are mergeable. This routine exists because
    * derived classes may need to override this function rather than use the mergeable method
    * in the FeatureData object.
@@ -473,10 +469,20 @@ protected:
   virtual bool areFeaturesMergeable(const FeatureData & f1, const FeatureData & f2) const;
 
   /**
+   * Returns a number indicating the number of merge helpers when running in parallel based
+   * on certain implementer decided criteria. This is a communication versus computation
+   * trade-off that we are almost always willing to make except for small problems. The
+   * decision however may be more complicated for some derived classes.
+   */
+  virtual processor_id_type numberOfDistributedMergeHelpers() const;
+
+  /**
    * This routine handles all of the serialization, communication and deserialization of the data
    * structures containing FeatureData objects.
    */
   void communicateAndMerge();
+
+  virtual void restoreOriginalDataStructures(std::vector<std::list<FeatureData>> &) {}
 
   /**
    * Sort and assign ids to features based on their position in the container after sorting.
@@ -755,17 +761,8 @@ private:
     container.reserve(size);
   }
 
-  /**
-   * This method consolidates all of the merged information from _partial_feature_sets into
-   * the _feature_sets vectors.
-   */
-  void consolidateMergedFeatures(std::vector<std::list<FeatureData>> * saved_data = nullptr);
-
   /// The data structure for maintaining entities to flood during discovery
   std::deque<const DofObject *> _entity_queue;
-
-  /// Keeps track of whether we are distributing the merge work
-  const bool _distribute_merge_work;
 };
 
 template <>

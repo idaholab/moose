@@ -16,6 +16,7 @@
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
 #include "MultiApp.h"
+#include "MooseCoordTransform.h"
 
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/meshfree_interpolation.h"
@@ -112,7 +113,7 @@ void
 MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
     FEProblemBase & from_problem,
     const MooseVariableFieldBase & from_var,
-    const Point & from_app_position,
+    const MooseCoordTransform & from_app_transform,
     std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi)
 {
   MeshBase * from_mesh = NULL;
@@ -202,7 +203,7 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
       // Push value and point to KDTree
       dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
       src_vals.push_back(from_solution(from_dof));
-      src_pts.push_back(*from_node + translate + from_app_position);
+      src_pts.push_back(from_app_transform(*from_node) + translate);
     }
   }
   else
@@ -253,7 +254,7 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
       {
         dof_id_type from_dof = from_elem->dof_number(from_sys_num, from_var_num, offset++);
         src_vals.push_back(from_solution(from_dof));
-        src_pts.push_back(point + translate + from_app_position);
+        src_pts.push_back(from_app_transform(point) + translate);
       }
     }
   }
@@ -264,7 +265,7 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
     FEProblemBase & to_problem,
     MooseVariableFieldBase & to_var,
     NumericVector<Real> & to_solution,
-    const Point & to_app_position,
+    const MooseCoordTransform & to_app_transform,
     const std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi)
 {
   // Moose system
@@ -338,7 +339,7 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
       }
 
       pts.clear();
-      pts.push_back(*node + translate + to_app_position);
+      pts.push_back(to_app_transform(*node) + translate);
       vals.resize(1);
 
       idi->interpolate_field_data({_to_var_name}, pts, vals);
@@ -391,7 +392,7 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
       for (const auto & point : points)
       {
         pts.clear();
-        pts.push_back(point + translate + to_app_position);
+        pts.push_back(to_app_transform(point) + translate);
         vals.resize(1);
 
         idi->interpolate_field_data({_to_var_name}, pts, vals);
@@ -411,6 +412,7 @@ MultiAppInterpolationTransfer::execute()
   TIME_SECTION("MultiAppInterpolationTransfer::execute()",
                5,
                "Transferring variables based on node interpolation");
+  getAppInfo();
 
   const FEProblemBase & fe_problem =
       hasFromMultiApp() ? getFromMultiApp()->problemBase() : getToMultiApp()->problemBase();
@@ -437,9 +439,8 @@ MultiAppInterpolationTransfer::execute()
       FEProblemBase & from_problem = getToMultiApp()->problemBase();
       const auto & from_var = from_problem.getVariable(
           0, _from_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
-      const Point from_app_position(0);
 
-      fillSourceInterpolationPoints(from_problem, from_var, from_app_position, idi);
+      fillSourceInterpolationPoints(from_problem, from_var, from_problem.coordTransform(), idi);
 
       // We have only set local values - prepare for use by gathering remote gata
       idi->prepare_for_use();
@@ -450,7 +451,6 @@ MultiAppInterpolationTransfer::execute()
         {
           auto & to_problem = getToMultiApp()->appProblemBase(i);
           Moose::ScopedCommSwapper swapper(to_problem.comm().get());
-          const auto to_app_position = getToMultiApp()->position(i);
           auto & to_var = to_problem.getVariable(0,
                                                  _to_var_name,
                                                  Moose::VarKindType::VAR_ANY,
@@ -458,7 +458,8 @@ MultiAppInterpolationTransfer::execute()
 
           auto & to_solution = getToMultiApp()->appTransferVector(i, _to_var_name);
 
-          interpolateTargetPoints(to_problem, to_var, to_solution, to_app_position, idi);
+          interpolateTargetPoints(
+              to_problem, to_var, to_solution, to_problem.coordTransform(), idi);
         }
       }
 
@@ -473,13 +474,12 @@ MultiAppInterpolationTransfer::execute()
         {
           auto & from_problem = getFromMultiApp()->appProblemBase(i);
           Moose::ScopedCommSwapper swapper(from_problem.comm().get());
-          const auto from_app_position = getFromMultiApp()->position(i);
           const auto & from_var = from_problem.getVariable(0,
                                                            _from_var_name,
                                                            Moose::VarKindType::VAR_ANY,
                                                            Moose::VarFieldType::VAR_FIELD_STANDARD);
 
-          fillSourceInterpolationPoints(from_problem, from_var, from_app_position, idi);
+          fillSourceInterpolationPoints(from_problem, from_var, from_problem.coordTransform(), idi);
         }
       }
 
@@ -491,9 +491,7 @@ MultiAppInterpolationTransfer::execute()
 
       auto & to_solution = *to_var.sys().system().solution;
 
-      const Point to_app_position(0);
-
-      interpolateTargetPoints(to_problem, to_var, to_solution, to_app_position, idi);
+      interpolateTargetPoints(to_problem, to_var, to_solution, to_problem.coordTransform(), idi);
 
       break;
     }

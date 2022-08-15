@@ -110,10 +110,7 @@ class InputParameters;
 #define registerNamedSplit(obj, name) registerNamedObject(obj, name)
 #define registerNamedOutput(obj, name) registerNamedObject(obj, name)
 #define registerNamedControl(obj, name) registerNamedObject(obj, name)
-#define registerNamedPartitioner(obj, name) registerNamedObject(obj, name)
-
-// Execute on flag registration
-#define registerExecFlag(flag) factory.regExecFlag(flag)
+#define registerNamedPartitioner(obj, name) registerNamedObject(obj, name);
 
 /**
  * alias to wrap shared pointer type
@@ -336,12 +333,6 @@ public:
    * Get a list of all constructed Moose Object types
    */
   std::vector<std::string> getConstructedObjects() const;
-
-  /**
-   * Add a new flag to the app.
-   * @param flag The flag to add as available to the app level ExecFlagEnum.
-   */
-  void regExecFlag(const ExecFlagType & flag);
 
   MooseApp & app() { return _app; }
 

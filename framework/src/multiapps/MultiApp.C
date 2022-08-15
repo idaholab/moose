@@ -26,6 +26,7 @@
 #include "Conversion.h"
 #include "NonlinearSystemBase.h"
 #include "DelimitedFileReader.h"
+#include "MooseCoordTransform.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
@@ -1083,4 +1084,10 @@ MultiApp::globalAppToLocal(unsigned int global_app)
 void
 MultiApp::preRunInputFile()
 {
+}
+
+Point
+MultiApp::transformedPosition(const unsigned int app)
+{
+  return appProblemBase(app).coordTransform()(Point(0));
 }

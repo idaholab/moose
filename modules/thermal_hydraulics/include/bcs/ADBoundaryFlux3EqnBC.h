@@ -31,15 +31,13 @@ protected:
    */
   std::map<unsigned int, unsigned int> getIndexMapping() const;
 
-  /// Cross-sectional area, elemental
-  const ADVariableValue & _A_elem;
   /// Cross-sectional area, linear
   const ADVariableValue & _A_linear;
 
-  // coupled variables
-  const ADVariableValue & _rhoA;
-  const ADVariableValue & _rhouA;
-  const ADVariableValue & _rhoEA;
+  // conservative variables
+  const ADMaterialProperty<Real> & _rhoA;
+  const ADMaterialProperty<Real> & _rhouA;
+  const ADMaterialProperty<Real> & _rhoEA;
 
   // coupled variable indices
   const unsigned int _rhoA_var;

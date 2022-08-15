@@ -114,9 +114,10 @@ VectorPostprocessors\\
 !style halign=center
 Chemical Reactions\\
 Contact\\
-Electromagnetics (coming soon)\\
+Electromagnetics\\
 External PETSc Solver\\
 Fluid Properties\\
+Fluid Structure Interaction (FSI)\\
 Function Expansion Tools\\
 Geochemistry\\
 Heat Conduction\\

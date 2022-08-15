@@ -15,3 +15,4 @@ Surrogate Models:
 - Example 10: [modules/stochastic_tools/examples/pod_rb_surrogate.md]
 - Example 11: [modules/stochastic_tools/examples/combined_example_2d_trans_diff.md]
 - Example 12: [examples/gaussian_process_surrogate.md]
+- Example 13: [modules/stochastic_tools/examples/cross_validation.md]

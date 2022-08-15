@@ -175,13 +175,18 @@ FEProblemBase::validParams()
   ///    be set for the whole domain
   /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
   /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
-  params.addParam<std::vector<SubdomainName>>("block", "Block IDs for the coordinate systems");
+  params.addDeprecatedParam<std::vector<SubdomainName>>(
+      "block", "Block IDs for the coordinate systems", "Please use 'Mesh/block' instead");
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
   MooseEnum rz_coord_axis("X=0 Y=1", "Y");
-  params.addParam<MultiMooseEnum>(
-      "coord_type", coord_types, "Type of the coordinate system per block param");
-  params.addParam<MooseEnum>(
-      "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
+  params.addDeprecatedParam<MultiMooseEnum>("coord_type",
+                                            coord_types,
+                                            "Type of the coordinate system per block param",
+                                            "Please use 'Mesh/coord_type' instead");
+  params.addDeprecatedParam<MooseEnum>("rz_coord_axis",
+                                       rz_coord_axis,
+                                       "The rotation axis (X | Y) for axisymetric coordinates",
+                                       "Please use 'Mesh/rz_coord_axis' instead");
   params.addParam<bool>(
       "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
   params.addParam<bool>(
@@ -388,9 +393,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   _eq.parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 
-  setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
-                 getParam<MultiMooseEnum>("coord_type"));
-  setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
+  if (parameters.isParamSetByUser("coord_type"))
+    setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
+                   getParam<MultiMooseEnum>("coord_type"));
+  if (parameters.isParamSetByUser("rz_coord_axis"))
+    setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
 
   if (isParamValid("restart_file_base"))
   {
@@ -838,13 +845,7 @@ FEProblemBase::initialSetup()
                                        _bnd_material_props,
                                        _neighbor_material_props,
                                        _assembly);
-      /**
-       * The ComputeMaterialObjectThread object now allocates memory as needed for the material
-       * storage system.
-       * This cannot be done with threads. The first call to this object bypasses threading by
-       * calling the object directly. The subsequent call can be called with threads.
-       */
-      cmt(elem_range, true);
+      Threads::parallel_reduce(elem_range, cmt);
 
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
           _neighbor_material_props.hasStatefulProperties())
@@ -910,16 +911,6 @@ FEProblemBase::initialSetup()
   // know which dofs we need ghosted when we call EquationSystems::reinit
   if (_displaced_problem && _mortar_data.hasDisplacedObjects())
     _displaced_problem->updateMesh();
-
-  // Build the mortar segment meshes for a couple reasons:
-  // 1) Get the ghosting correct for both static and dynamic meshes
-  // 2) Make sure the mortar mesh is built for mortar constraints that live on the static mesh
-  //
-  // It is worth-while to note that mortar meshes that live on a dynamic mesh will be built
-  // during residual and Jacobian evaluation because when displacements are solution variables
-  // the mortar mesh will move and change during the course of a non-linear solve. We DO NOT
-  // redo ghosting during non-linear solve, so for purpose 1) the below call has to be made
-  updateMortarMesh();
 
   // Possibly reinit one more time to get ghosting correct
   reinitBecauseOfGhostingOrNewGeomObjects();
@@ -4113,7 +4104,7 @@ FEProblemBase::reportMooseObjectDependency(MooseObject * /*a*/, MooseObject * /*
 }
 
 void
-FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
+FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects(const bool mortar_changed)
 {
   TIME_SECTION("reinitBecauseOfGhostingOrNewGeomObjects",
                3,
@@ -4122,11 +4113,11 @@ FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
   // Need to see if _any_ processor has ghosted elems or geometry objects.
   bool needs_reinit = !_ghosted_elems.empty();
   needs_reinit = needs_reinit || !_geometric_search_data._nearest_node_locators.empty() ||
-                 _mortar_data.hasObjects();
+                 (_mortar_data.hasObjects() && mortar_changed);
   needs_reinit =
       needs_reinit || (_displaced_problem &&
                        (!_displaced_problem->geomSearchData()._nearest_node_locators.empty() ||
-                        _mortar_data.hasDisplacedObjects()));
+                        (_mortar_data.hasDisplacedObjects() && mortar_changed)));
   _communicator.max(needs_reinit);
 
   if (needs_reinit)
@@ -5133,6 +5124,17 @@ FEProblemBase::init()
 
   _nl->init();
   _aux->init();
+
+  // Build the mortar segment meshes, if they haven't been already, for a couple reasons:
+  // 1) Get the ghosting correct for both static and dynamic meshes
+  // 2) Make sure the mortar mesh is built for mortar constraints that live on the static mesh
+  //
+  // It is worth-while to note that mortar meshes that live on a dynamic mesh will be built
+  // during residual and Jacobian evaluation because when displacements are solution variables
+  // the mortar mesh will move and change during the course of a non-linear solve. We DO NOT
+  // redo ghosting during non-linear solve, so for purpose 1) the below call has to be made
+  if (!_mortar_data.initialized())
+    updateMortarMesh();
 
   {
     TIME_SECTION("EquationSystems::Init", 2, "Initializing Equation Systems");
@@ -6266,6 +6268,8 @@ FEProblemBase::updateMortarMesh()
 {
   TIME_SECTION("updateMortarMesh", 5, "Updating Mortar Mesh");
 
+  FloatingPointExceptionGuard fpe_guard(_app);
+
   _mortar_data.update();
 }
 
@@ -6276,7 +6280,8 @@ FEProblemBase::createMortarInterface(
     bool on_displaced,
     bool periodic,
     const bool debug,
-    const bool correct_edge_dropping)
+    const bool correct_edge_dropping,
+    const Real minimum_projection_angle)
 {
   _has_mortar = true;
 
@@ -6287,7 +6292,8 @@ FEProblemBase::createMortarInterface(
                                               on_displaced,
                                               periodic,
                                               debug,
-                                              correct_edge_dropping);
+                                              correct_edge_dropping,
+                                              minimum_projection_angle);
   else
     return _mortar_data.createMortarInterface(primary_secondary_boundary_pair,
                                               primary_secondary_subdomain_pair,
@@ -6295,7 +6301,8 @@ FEProblemBase::createMortarInterface(
                                               on_displaced,
                                               periodic,
                                               debug,
-                                              correct_edge_dropping);
+                                              correct_edge_dropping,
+                                              minimum_projection_angle);
 }
 
 const AutomaticMortarGeneration &
@@ -6303,6 +6310,16 @@ FEProblemBase::getMortarInterface(
     const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
     const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
     bool on_displaced) const
+{
+  return _mortar_data.getMortarInterface(
+      primary_secondary_boundary_pair, primary_secondary_subdomain_pair, on_displaced);
+}
+
+AutomaticMortarGeneration &
+FEProblemBase::getMortarInterface(
+    const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
+    const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
+    bool on_displaced)
 {
   return _mortar_data.getMortarInterface(
       primary_secondary_boundary_pair, primary_secondary_subdomain_pair, on_displaced);
@@ -6575,7 +6592,7 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   // mortar mesh discretization will depend necessarily on the displaced mesh being re-displaced
   updateMortarMesh();
 
-  reinitBecauseOfGhostingOrNewGeomObjects();
+  reinitBecauseOfGhostingOrNewGeomObjects(/*mortar_changed=*/true);
 
   // We need to create new storage for the new elements and copy stateful properties from the old
   // elements.
@@ -7520,6 +7537,12 @@ FEProblemBase::jacobianSetup()
   SubProblem::jacobianSetup();
   if (_displaced_problem)
     _displaced_problem->jacobianSetup();
+}
+
+MooseCoordTransform &
+FEProblemBase::coordTransform()
+{
+  return mesh().coordTransform();
 }
 
 template <typename T>

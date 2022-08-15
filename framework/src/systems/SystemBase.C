@@ -1592,6 +1592,19 @@ SystemBase::clearAllDofIndices()
     var_warehouse.clearAllDofIndices();
 }
 
+void
+SystemBase::setActiveVariableCoupleableVectorTags(const std::set<TagID> & vtags, THREAD_ID tid)
+{
+  _vars[tid].setActiveVariableCoupleableVectorTags(vtags);
+}
+
+void
+SystemBase::setActiveScalarVariableCoupleableVectorTags(const std::set<TagID> & vtags,
+                                                        THREAD_ID tid)
+{
+  _vars[tid].setActiveScalarVariableCoupleableVectorTags(vtags);
+}
+
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
                                                                     const std::string & var_name);
 

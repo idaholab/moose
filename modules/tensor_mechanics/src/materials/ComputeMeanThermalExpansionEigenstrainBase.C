@@ -17,13 +17,20 @@ ComputeMeanThermalExpansionEigenstrainBaseTempl<is_ad>::validParams()
   InputParameters params = ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::validParams();
   params.addClassDescription("Base class for models that compute eigenstrain due to mean"
                              "thermal expansion as a function of temperature");
+  params.addParam<Real>("thermal_expansion_scale_factor",
+                        1.0,
+                        "Scaling factor on the thermal expansion strain. This input parameter can "
+                        "be used to perform sensitivity analysis on thermal expansion.");
+  params.addParamNamesToGroup("thermal_expansion_scale_factor", "Advanced");
+
   return params;
 }
 
 template <bool is_ad>
 ComputeMeanThermalExpansionEigenstrainBaseTempl<
     is_ad>::ComputeMeanThermalExpansionEigenstrainBaseTempl(const InputParameters & parameters)
-  : ComputeThermalExpansionEigenstrainBaseTempl<is_ad>(parameters)
+  : ComputeThermalExpansionEigenstrainBaseTempl<is_ad>(parameters),
+    _thermal_expansion_scale_factor(this->template getParam<Real>("thermal_expansion_scale_factor"))
 {
 }
 
@@ -58,7 +65,7 @@ ComputeMeanThermalExpansionEigenstrainBaseTempl<is_ad>::computeThermalStrain()
   auto thermal_strain =
       (thexp_T - thexp_stress_free_temperature) / (1.0 + thexp_stress_free_temperature);
 
-  return thermal_strain;
+  return _thermal_expansion_scale_factor * thermal_strain;
 }
 
 template class ComputeMeanThermalExpansionEigenstrainBaseTempl<false>;

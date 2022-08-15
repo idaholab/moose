@@ -116,6 +116,15 @@ getBoundaryIDs(const libMesh::MeshBase & mesh,
   return ids;
 }
 
+std::set<BoundaryID>
+getBoundaryIDSet(const libMesh::MeshBase & mesh,
+                 const std::vector<BoundaryName> & boundary_name,
+                 bool generate_unknown)
+{
+  auto boundaries = getBoundaryIDs(mesh, boundary_name, generate_unknown);
+  return std::set<BoundaryID>(boundaries.begin(), boundaries.end());
+}
+
 std::vector<subdomain_id_type>
 getSubdomainIDs(const libMesh::MeshBase & mesh, const std::vector<SubdomainName> & subdomain_name)
 {
@@ -290,5 +299,25 @@ isCoPlanar(const std::vector<Point> vec_pts)
   }
   // If all the points are collinear, they are also coplanar
   return true;
+}
+
+SubdomainID
+getNextFreeSubdomainID(MeshBase & input_mesh)
+{
+  // Call this to get most up to date block id information
+  input_mesh.cache_elem_data();
+
+  std::set<SubdomainID> preexisting_subdomain_ids;
+  input_mesh.subdomain_ids(preexisting_subdomain_ids);
+  if (preexisting_subdomain_ids.empty())
+    return 0;
+  else
+  {
+    const auto highest_subdomain_id =
+        *std::max_element(preexisting_subdomain_ids.begin(), preexisting_subdomain_ids.end());
+    mooseAssert(highest_subdomain_id < std::numeric_limits<SubdomainID>::max(),
+                "A SubdomainID with max possible value was found");
+    return highest_subdomain_id + 1;
+  }
 }
 }

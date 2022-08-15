@@ -37,8 +37,8 @@ public:
    * | 0 | 0 1 0 | 0 1 0 2 1 0 | 0 1 0 2 1 0 3 2 1 0 |
    * | 0 | 0 0 1 | 0 0 1 0 1 2 | 0 0 1 0 1 2 0 1 2 3 |
    */
-  static std::vector<std::vector<unsigned int>> generateTuple(unsigned int n_dims,
-                                                              unsigned int max_degree);
+  static std::vector<std::vector<unsigned int>>
+  generateTuple(unsigned int n_dims, unsigned int max_degree, bool include_bias = true);
 
   /// Tuple sorter function
   static bool sortTuple(const std::vector<unsigned int> & first,

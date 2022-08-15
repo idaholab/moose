@@ -77,7 +77,10 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
     _ge_old(),
     _J_map(),
     _J_map_old(),
-    _rotation_matrix(),
+    _covariant_transformation_matrix(),
+    _covariant_transformation_matrix_old(),
+    _contravariant_transformation_matrix(),
+    _contravariant_transformation_matrix_old(),
     _total_global_strain(),
     _sol(_nonlinear_sys.currentSolution()),
     _sol_old(_nonlinear_sys.solutionOld())
@@ -123,7 +126,10 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
   _dxyz_dxi_old.resize(_t_points.size());
   _dxyz_deta_old.resize(_t_points.size());
   _dxyz_dzeta_old.resize(_t_points.size());
-  _rotation_matrix.resize(_t_points.size());
+  _covariant_transformation_matrix.resize(_t_points.size());
+  _covariant_transformation_matrix_old.resize(_t_points.size());
+  _contravariant_transformation_matrix.resize(_t_points.size());
+  _contravariant_transformation_matrix_old.resize(_t_points.size());
   _total_global_strain.resize(_t_points.size());
 
   _transformation_matrix = &declareADProperty<RankTwoTensor>("transformation_matrix_element");
@@ -153,7 +159,14 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
     _dxyz_dzeta_old[i] =
         &getMaterialPropertyOldByName<RealVectorValue>("dxyz_dzeta_t_points_" + std::to_string(i));
     // Create rotation matrix and total strain global for output purposes only
-    _rotation_matrix[i] = &declareProperty<RankTwoTensor>("rotation_t_points_" + std::to_string(i));
+    _covariant_transformation_matrix[i] =
+        &declareProperty<RankTwoTensor>("covariant_transformation_t_points_" + std::to_string(i));
+    _covariant_transformation_matrix_old[i] = &getMaterialPropertyOldByName<RankTwoTensor>(
+        "covariant_transformation_t_points_" + std::to_string(i));
+    _contravariant_transformation_matrix[i] = &declareProperty<RankTwoTensor>(
+        "contravariant_transformation_t_points_" + std::to_string(i));
+    _contravariant_transformation_matrix_old[i] = &getMaterialPropertyOldByName<RankTwoTensor>(
+        "contravariant_transformation_t_points_" + std::to_string(i));
     _total_global_strain[i] =
         &declareProperty<RankTwoTensor>("total_global_strain_t_points_" + std::to_string(i));
   }
@@ -172,6 +185,9 @@ ADComputeIncrementalShellStrain::initQpStatefulProperties()
         "ADComputeIncrementalShellStrain: Shell element is implemented only for 2D elements");
   if (_current_elem->n_nodes() != 4)
     mooseError("ADComputeIncrementalShellStrain: Shell element needs to have exactly four nodes.");
+  if (_qrule->get_points().size() != 4)
+    mooseError("ADComputeIncrementalShellStrain: Shell element needs to have exactly four "
+               "quadrature points.");
   computeGMatrix();
   computeBMatrix();
 }
@@ -205,6 +221,9 @@ ADComputeIncrementalShellStrain::computeProperties()
       (*_dxyz_deta[j])[i] = (*_dxyz_deta_old[j])[i];
       (*_dxyz_dzeta[j])[i] = (*_dxyz_dzeta_old[j])[i];
       (*_B[j])[i] = (*_B_old[j])[i];
+      (*_covariant_transformation_matrix[j])[i] = (*_covariant_transformation_matrix_old[j])[i];
+      (*_contravariant_transformation_matrix[j])[i] =
+          (*_contravariant_transformation_matrix_old[j])[i];
     }
   }
 
@@ -237,8 +256,9 @@ ADComputeIncrementalShellStrain::computeProperties()
       for (unsigned int ii = 0; ii < 3; ++ii)
         for (unsigned int jj = 0; jj < 3; ++jj)
           _unrotated_total_strain(ii, jj) = MetaPhysicL::raw_value((*_total_strain[j])[i](ii, jj));
-      (*_total_global_strain[j])[i] = (*_rotation_matrix[j])[i].transpose() *
-                                      _unrotated_total_strain * (*_rotation_matrix[j])[i];
+      (*_total_global_strain[j])[i] = (*_contravariant_transformation_matrix[j])[i] *
+                                      _unrotated_total_strain *
+                                      (*_contravariant_transformation_matrix[j])[i].transpose();
     }
   }
 }
@@ -285,7 +305,8 @@ ADComputeIncrementalShellStrain::computeGMatrix()
     (*_dxyz_dxi[t])[_qp] = c;
     (*_dxyz_deta[t])[_qp] = c;
     (*_dxyz_dzeta[t])[_qp] = c;
-    (*_rotation_matrix[t])[_qp] = d;
+    (*_covariant_transformation_matrix[t])[_qp] = d;
+    (*_contravariant_transformation_matrix[t])[_qp] = d;
   }
 
   // calculating derivatives of shape function in physical space (dphi/dx, dphi/dy, dphi/dz) at
@@ -342,7 +363,10 @@ ADComputeIncrementalShellStrain::computeGMatrix()
 
       ADRankTwoTensor gmninv_temp = gmn.inverse();
       (*_J_map[j])[i] = std::sqrt(gmn.det());
-      (*_rotation_matrix[j])[i] = J;
+      (*_covariant_transformation_matrix[j])[i] = J;
+
+      (*_contravariant_transformation_matrix[j])[i] =
+          (*_covariant_transformation_matrix[j])[i].inverse();
 
       Real normx = std::sqrt(J(0, 0) * J(0, 0) + J(0, 1) * J(0, 1) + J(0, 2) * J(0, 2));
       Real normy = std::sqrt(J(1, 0) * J(1, 0) + J(1, 1) * J(1, 1) + J(1, 2) * J(1, 2));
