@@ -8,6 +8,7 @@
       T_min=200
       T_max=2400"
     csvdiff = 'composite_sic_vpp_0000.csv'
+    mesh_mode = 'replicated' # LineMaterialRealSampler does not work with distributed mesh
     requirement = "The system shall compute thermal properties for composite silicon carbide."
     design = 'ThermalCompositeSiCProperties.md ThermalSolidPropertiesMaterial.md'
     issues = '#12284'
