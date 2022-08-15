@@ -195,11 +195,15 @@ AbaqusUMATStress::computeQpStress()
   static const std::array<std::pair<unsigned int, unsigned int>, 6> component{
       {{0, 0}, {1, 1}, {2, 2}, {0, 1}, {0, 2}, {1, 2}}};
 
+  // The old stress must be rotated with the rotation increment
+  auto stress_old_rotated = _stress_old[_qp];
+  stress_old_rotated.rotate(_rotation_increment[_qp]);
+
   for (const auto i : make_range(_aqNTENS))
   {
     const auto a = component[i].first;
     const auto b = component[i].second;
-    _aqSTRESS[i] = _stress_old[_qp](a, b);
+    _aqSTRESS[i] = stress_old_rotated(a, b);
     _aqSTRAN[i] = _total_strain_old[_qp](a, b) * strain_factor[i];
     _aqDSTRAN[i] = _strain_increment[_qp](a, b) * strain_factor[i];
   }
@@ -306,9 +310,6 @@ AbaqusUMATStress::computeQpStress()
   // (commercial software)
   _stress[_qp] = RankTwoTensor(
       _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[5], _aqSTRESS[4], _aqSTRESS[3]);
-
-  // Rotate the stress state to the current configuration
-  _stress[_qp].rotate(_rotation_increment[_qp]);
 
   // Build Jacobian matrix from UMAT's Voigt non-standard order to fourth order tensor.
   const unsigned int N = Moose::dim;
