@@ -114,8 +114,6 @@ the `HeatDiffusion` kernel above, the input file syntax would be:
     type = ThermalSolidPropertiesMaterial
     temperature = T
     sp = steel
-    output_properties = 'thermal_conductivity density specific_heat'
-    outputs = exodus
   []
 []
 ```
@@ -142,8 +140,6 @@ the input file is:
     type = ThermalSolidPropertiesMaterial
     sp = func
     temperature = u
-    output_properties = 'thermal_conductivity density specific_heat'
-    outputs = exodus
   []
 []
 ```
