@@ -120,6 +120,8 @@ LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & para
     _qrule(_subproblem.assembly(_tid).qRule()),
     _q_point(_subproblem.assembly(_tid).qPoints())
 {
+  _mesh.errorIfDistributedMesh("LineMaterialSamplerBase");
+
   std::vector<std::string> material_property_names = getParam<std::vector<std::string>>("property");
   for (unsigned int i = 0; i < material_property_names.size(); ++i)
   {
