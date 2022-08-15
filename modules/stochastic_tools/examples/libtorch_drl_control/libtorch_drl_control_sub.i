@@ -116,7 +116,7 @@ air_effective_k = 0.5 # W/(m K)
 []
 
 [Controls]
-  inactive = 'src_control src_control_final'
+  inactive = 'src_control_final'
   [src_control]
     type = LibtorchDRLControl
     parameters = "BCs/top_flux/value"

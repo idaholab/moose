@@ -39,8 +39,9 @@ public:
   /// We train our neural networks in the postTrain() method
   virtual void postTrain() override;
 
-  /// Function which computes the average reward of the currently stored rewards
-  Real averageEpisodeReward();
+  /// Function which returns the current average episodic reward. It is only updated at
+  /// at the end of every episode.
+  Real averageEpisodeReward() { return _average_episode_reward; }
 
 #ifdef LIBTORCH_ENABLED
   /// The condensed training function
@@ -79,6 +80,9 @@ protected:
    * @param reporter_names The name of the reporter which need to be extracted
    */
   void getRewardDataFromReporter(std::vector<Real> & data, const ReporterName & reporter_name);
+
+  /// Compute the average eposiodic reward
+  void computeAverageEpisodeReward();
 
 #ifdef LIBTORCH_ENABLED
   /**

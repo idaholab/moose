@@ -254,6 +254,9 @@ LibtorchDRLControlTrainer::postTrain()
   // Only update the NNs when
   if (_update_counter == 0)
   {
+    // We compute the average reward first
+    computeAverageEpisodeReward();
+
     // Transform input/output/return data to torch::Tensor
     convertDataToTensor(_input_data, _input_tensor);
     convertDataToTensor(_output_data, _output_tensor);
@@ -270,14 +273,12 @@ LibtorchDRLControlTrainer::postTrain()
 #endif
 }
 
-Real
-LibtorchDRLControlTrainer::averageEpisodeReward()
+void
+LibtorchDRLControlTrainer::computeAverageEpisodeReward()
 {
   if (_reward_data.size())
     _average_episode_reward =
         std::accumulate(_reward_data.begin(), _reward_data.end(), 0.0) / _reward_data.size();
-
-  return _average_episode_reward;
 }
 
 void
