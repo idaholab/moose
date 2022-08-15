@@ -68,7 +68,7 @@ FVAnisotropicDiffusion::computeQpResidual()
   const auto face_elem = elemFromFace();
   const auto face_neighbor = neighborFromFace();
   const auto & grad_T = _var.adGradSln(*_face_info, _var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
-  for (std::size_t i = 0; i < LIBMESH_DIM; i++)
+  for (const auto i : make_range(Moose::dim))
   {
     ADReal k_face_inv;
     Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
