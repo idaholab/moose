@@ -136,13 +136,6 @@ KKSPhaseConcentrationMultiPhaseDerivatives::computeQpProperties()
       A((m + 1) * _num_j - 1, m * _num_j + n) = (*_prop_hj[n])[_qp];
   }
 
-  // // then assign the elements in A that come from the concentration conservation equations
-  // for (unsigned int m = 0; m < _num_c; ++m)
-  // {
-  //   for (unsigned int n = 0; n < _num_j; ++n)
-  //     A((m + 1) * _num_j - 1, m * _num_j + n) = (*_prop_hj[n])[_qp];
-  // }
-
   A = A.inverse();
 
   // solve linear system of constraint derivatives wrt b for computing dcidb
