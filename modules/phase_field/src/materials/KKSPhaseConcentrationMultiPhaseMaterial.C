@@ -174,7 +174,8 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
 
   auto compute = [&](const NestedSolve::Value<> & guess,
                      NestedSolve::Value<> & residual,
-                     NestedSolve::Jacobian<> & jacobian) {
+                     NestedSolve::Jacobian<> & jacobian)
+  {
     for (unsigned int m = 0; m < _num_c * _num_j; ++m)
       (*_prop_ci[m])[_qp] = guess(m);
 
