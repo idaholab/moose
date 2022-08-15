@@ -461,5 +461,7 @@ PinMeshGenerator::generate()
         *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
   }
 
+  (*_build_mesh)->find_neighbors();
+
   return std::move(*_build_mesh);
 }
