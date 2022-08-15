@@ -67,17 +67,18 @@ FVAnisotropicDiffusion::computeQpResidual()
   ADReal r = 0;
   const auto face_elem = elemFromFace();
   const auto face_neighbor = neighborFromFace();
-  const auto & grad_T = _var.adGradSln(*_face_info, _var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+  const auto & grad_T = _var.adGradSln(
+      *_face_info, _var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+  ADRealVectorValue k_face_inv, k_elem_inv, k_neigh_inv;
   for (const auto i : make_range(Moose::dim))
   {
-    ADReal k_face_inv;
-    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                           k_face_inv,
-                           1.0 / _coeff(face_elem)(i),
-                           1.0 / _coeff(face_neighbor)(i),
-                           *_face_info,
-                           true);
-    r += _normal(i) * grad_T(i) / k_face_inv;
+    k_elem_inv(i) = 1.0 / _coeff(face_elem)(i);
+    k_neigh_inv(i) = 1.0 / _coeff(face_neighbor)(i);
   }
+
+  Moose::FV::interpolate(
+      Moose::FV::InterpMethod::Average, k_face_inv, k_elem_inv, k_neigh_inv, *_face_info, true);
+  for (const auto i : make_range(Moose::dim))
+    r += _normal(i) * grad_T(i) / k_face_inv(i);
   return -r;
 }
