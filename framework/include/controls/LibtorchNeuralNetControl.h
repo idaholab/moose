@@ -1,7 +1,6 @@
 #pragma once
 
 #ifdef LIBTORCH_ENABLED
-#include "LibtorchNeuralNet.h"
 #include "LibtorchArtificialNeuralNet.h"
 #endif
 

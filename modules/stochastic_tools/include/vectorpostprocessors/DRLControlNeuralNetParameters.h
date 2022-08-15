@@ -23,9 +23,7 @@ public:
   static InputParameters validParams();
   DRLControlNeuralNetParameters(const InputParameters & params);
 
-  virtual void initialize(){};
   virtual void execute() override;
-  virtual void finalize(){};
 
 protected:
   /// The name of the DRL trainer objects which hold the neural networks

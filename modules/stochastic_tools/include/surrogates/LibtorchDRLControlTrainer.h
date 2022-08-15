@@ -25,7 +25,7 @@
  * https://medium.com/analytics-vidhya/coding-ppo-from-scratch-with-pytorch-part-1-4-613dfc1b14c8
  * https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html
  */
-class LibtorchDRLControlTrainer : public SurrogateTrainer
+class LibtorchDRLControlTrainer : public SurrogateTrainerBase
 {
 public:
   static InputParameters validParams();
@@ -33,11 +33,7 @@ public:
   /// construct using input parameters
   LibtorchDRLControlTrainer(const InputParameters & parameters);
 
-  virtual void preTrain() override {}
-  virtual void train() override {}
-
-  /// We train our neural networks in the postTrain() method
-  virtual void postTrain() override;
+  virtual void execute() override;
 
   /// Function which returns the current average episodic reward. It is only updated at
   /// at the end of every episode.

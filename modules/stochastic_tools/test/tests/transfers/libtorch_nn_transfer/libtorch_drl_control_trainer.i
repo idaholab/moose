@@ -36,14 +36,12 @@
 [Trainers]
   [nn_trainer]
     type = LibtorchDRLControlTrainer
-    sampler = dummy
     response_reporter = 'results/center_temp results/env_temp'
     control_reporter = 'results/left_flux'
     log_probability_reporter = 'results/log_prob_left_flux'
     reward_reporter = 'results/reward'
 
     num_epochs = 10
-    num_batches = 1
     update_frequency = 2
     decay_factor = 0.0
 

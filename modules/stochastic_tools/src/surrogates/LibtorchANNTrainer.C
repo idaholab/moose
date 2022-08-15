@@ -59,10 +59,6 @@ LibtorchANNTrainer::validParams()
 LibtorchANNTrainer::LibtorchANNTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
     _predictor_row(getPredictorData()),
-    _num_batches(getParam<unsigned int>("num_batches")),
-    _num_epocs(getParam<unsigned int>("num_epochs")),
-    _rel_loss_tol(getParam<Real>("rel_loss_tol")),
-    _response(getTrainingData<Real>(getParam<ReporterName>("response"))),
     _num_neurons_per_layer(declareModelData<std::vector<unsigned int>>(
         "num_neurons_per_layer", getParam<std::vector<unsigned int>>("num_neurons_per_layer"))),
     _activation_function(declareModelData<std::vector<std::string>>(

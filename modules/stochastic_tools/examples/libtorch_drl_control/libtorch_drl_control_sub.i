@@ -129,7 +129,6 @@ air_effective_k = 0.5 # W/(m K)
     response_scaling_factors = '0.03 0.03'
     response_shift_factors = '290 290'
     action_standard_deviations = '0.02'
-    
     action_scaling_factors = 200
 
     execute_on = 'TIMESTEP_BEGIN'
@@ -151,7 +150,6 @@ air_effective_k = 0.5 # W/(m K)
     response_scaling_factors = '0.03 0.03'
     response_shift_factors = '290 290'
     action_standard_deviations = '0.02'
-    
     action_scaling_factors = 200
 
     execute_on = 'TIMESTEP_BEGIN'

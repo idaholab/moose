@@ -21,7 +21,7 @@ registerMooseObject("StochasticToolsApp", LibtorchDRLControlTrainer);
 InputParameters
 LibtorchDRLControlTrainer::validParams()
 {
-  InputParameters params = SurrogateTrainer::validParams();
+  InputParameters params = SurrogateTrainerBase::validParams();
 
   params.addClassDescription("Trains a simple neural network controller using libtorch.");
 
@@ -112,7 +112,7 @@ LibtorchDRLControlTrainer::validParams()
 }
 
 LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & parameters)
-  : SurrogateTrainer(parameters),
+  : SurrogateTrainerBase(parameters),
     _response_names(getParam<std::vector<ReporterName>>("response_reporter")),
     _control_names(getParam<std::vector<ReporterName>>("control_reporter")),
     _log_probability_names(getParam<std::vector<ReporterName>>("log_probability_reporter")),
@@ -237,7 +237,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
 }
 
 void
-LibtorchDRLControlTrainer::postTrain()
+LibtorchDRLControlTrainer::execute()
 {
 #ifdef LIBTORCH_ENABLED
   // Extract data from the reporters

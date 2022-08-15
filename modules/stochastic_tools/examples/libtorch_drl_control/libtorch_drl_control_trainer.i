@@ -36,7 +36,6 @@
 [Trainers]
   [nn_trainer]
     type = LibtorchDRLControlTrainer
-    sampler = dummy
     response_reporter = 'results/center_temp results/env_temp'
     control_reporter = 'results/top_flux'
     log_probability_reporter = 'results/log_prob_top_flux'

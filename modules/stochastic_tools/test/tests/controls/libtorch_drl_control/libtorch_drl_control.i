@@ -84,9 +84,29 @@
 []
 
 [Controls]
+  inactive = src_control_empty
   [src_control]
     seed = 11
+    type = LibtorchDRLControl
+    parameters = "BCs/left_flux/value"
+    action_postprocessors = "left_flux"
+    log_probability_postprocessors = "log_prob_left_flux"
+    responses = 'center_temp env_temp'
 
+    input_timesteps = 2
+    response_scaling_factors = '0.03 0.03'
+    response_shift_factors = '270 270'
+    action_standard_deviations = '0.1'
+    action_scaling_factors = 200
+
+    filename='mynet_control.net'
+    torch_script_format=false
+    num_neurons_per_layer='16 6'
+    activation_function='relu'
+
+    execute_on = 'TIMESTEP_BEGIN'
+  []
+  [src_control_empty]
     type = LibtorchDRLControl
     parameters = "BCs/left_flux/value"
     action_postprocessors = "left_flux"
