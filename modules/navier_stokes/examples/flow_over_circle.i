@@ -293,14 +293,6 @@ advected_interp_method = 'upwind'
   []
 []
 
-[Preconditioning]
-  [SMP]
-    type = SMP
-    full = true
-    solve_type = 'NEWTON'
-  []
-[]
-
 [Executioner]
   type = Transient
   dtmin = 1e-5
