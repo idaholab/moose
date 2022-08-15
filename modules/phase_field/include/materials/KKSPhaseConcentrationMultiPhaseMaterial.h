@@ -30,9 +30,6 @@ protected:
   /// Number of global concentrations
   const unsigned int _num_c;
 
-  /// Phase parameters
-  const std::vector<VariableName> _eta_names;
-
   /// Number of phase parameters
   const unsigned int _num_j;
 

@@ -46,7 +46,6 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
   : DerivativeMaterialInterface<Material>(parameters),
     _prop_c(coupledValues("global_cs")),
     _num_c(coupledComponents("global_cs")),
-    _eta_names(coupledNames("all_etas")),
     _num_j(coupledComponents("all_etas")),
     _hj_names(getParam<std::vector<MaterialPropertyName>>("hj_names")),
     _prop_hj(_num_j),
@@ -195,12 +194,13 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
         residual((m + 1) * _num_j - 1) += (*_prop_hj[l])[_qp] * (*_prop_ci[m * _num_j + l])[_qp];
     }
 
-    // initialize all terms in jacobian to be zero
-    for (unsigned int m = 0; m < _num_j * _num_c; ++m)
-    {
-      for (unsigned int n = 0; n < _num_j * _num_c; ++n)
-        jacobian(m, n) = 0;
-    }
+    // // initialize all terms in jacobian to be zero
+    // for (unsigned int m = 0; m < _num_j * _num_c; ++m)
+    // {
+    //   for (unsigned int n = 0; n < _num_j * _num_c; ++n)
+    //     jacobian(m, n) = 0;
+    // }
+    jacobian.setZero();
 
     // fill in the non-zero terms in jacobian
     for (unsigned int m = 0; m < _num_c; ++m)

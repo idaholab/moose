@@ -111,12 +111,13 @@ KKSPhaseConcentrationMultiPhaseDerivatives::computeQpProperties()
   // declare Jacobian matrix A
   Eigen::MatrixXd A(_num_c * _num_j, _num_c * _num_j);
 
-  // initialize all elements in A to be zero
-  for (unsigned int m = 0; m < _num_j * _num_c; ++m)
-  {
-    for (unsigned int n = 0; n < _num_j * _num_c; ++n)
-      A(m, n) = 0;
-  }
+  // // initialize all elements in A to be zero
+  // for (unsigned int m = 0; m < _num_j * _num_c; ++m)
+  // {
+  //   for (unsigned int n = 0; n < _num_j * _num_c; ++n)
+  //     A(m, n) = 0;
+  // }
+  A.setZero();
 
   // fill in the non-zero elements in A
   for (unsigned int m = 0; m < _num_c; ++m)
@@ -135,13 +136,6 @@ KKSPhaseConcentrationMultiPhaseDerivatives::computeQpProperties()
     for (unsigned int n = 0; n < _num_j; ++n)
       A((m + 1) * _num_j - 1, m * _num_j + n) = (*_prop_hj[n])[_qp];
   }
-
-  // // then assign the elements in A that come from the concentration conservation equations
-  // for (unsigned int m = 0; m < _num_c; ++m)
-  // {
-  //   for (unsigned int n = 0; n < _num_j; ++n)
-  //     A((m + 1) * _num_j - 1, m * _num_j + n) = (*_prop_hj[n])[_qp];
-  // }
 
   A = A.inverse();
 
