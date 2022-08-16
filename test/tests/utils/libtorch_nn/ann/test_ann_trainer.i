@@ -9,7 +9,7 @@
   [test_trainer]
     type = LibtorchArtificialNeuralNetTrainerTest
     optimizer_type = adam
-    num_epochs = 1000
+    num_epochs = 100
     num_batches = 20
     num_samples = 1000
     learning_rate = 1e-4
