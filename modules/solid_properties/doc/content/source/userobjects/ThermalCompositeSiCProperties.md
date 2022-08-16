@@ -36,7 +36,7 @@ over four different crystal structures at room temperature [!cite](snead) as
 ## Range of Validity
 
 This userobject is valid for estimating isobaric
-specific heat over 200 K $\le$ T $\le$ 2400 K, and for estimating thermal
+specific heat over 200 K $\le$ T $\le$ 2400 K, and for estimating thermal conductivity
 over an unspecified range [!cite](stone).
 
 !syntax parameters /Modules/SolidProperties/ThermalCompositeSiCProperties

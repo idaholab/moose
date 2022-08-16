@@ -20,7 +20,7 @@ it is a reasonable approximation to use the same $C_p$ correlation from
 
 ### H-451
 
-H-451 graphite is a near-isotropic, artifical graphite based on
+H-451 graphite is a near-isotropic, artificial graphite based on
 petroleum coke. H-451 graphite is commonly used for reflectors in nuclear
 applications.
 

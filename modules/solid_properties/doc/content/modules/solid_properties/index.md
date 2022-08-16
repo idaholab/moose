@@ -119,7 +119,7 @@ the `HeatDiffusion` kernel above, the input file syntax would be:
 ```
 
 Due to the consistent interface for solid properties, a different solid can be substituted in the
-input file be changing the type of the userobject. For example, to set thermal properties
+input file by changing the type of the userobject. For example, to set thermal properties
 with a general functional dependence instead, the solid property module section of
 the input file is:
 
