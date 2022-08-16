@@ -28,9 +28,9 @@
     exodiff = 'fancy_extruder_with_interface_boundaries_in.e'
     recover = false
 
-    requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap subdomain IDs'
+    requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap interface boundaries'
     design = 'FancyExtruderGenerator.md'
-    #issues = '#13276 #3554 #5634'
+    issues = '#21852'
   []
   [test_bias]
     type = 'Exodiff'
@@ -42,11 +42,12 @@
 
     requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, with biased axial element sizes, and swap subdomain IDs'
     design = 'FancyExtruderGenerator.md'
-    #issues = '#13276 #3554 #5634'
+    issues = '#21852'
   []
   [prepare_mesh]
     type = 'RunApp'
     input = need-neighbors.i
+    
     requirement = 'The system shall make sure the mesh is prepared after a mesh generator has indicated the mesh is not prepared and before running a solve.'
     issues = '#15944 #15936 #15823'
     design = 'FancyExtruderGenerator.md'
@@ -90,6 +91,7 @@
     input = gen_extrude.i
     cli_args = 'Mesh/extrude/heights="1 2 -3" --mesh-only'
     expect_err = "Cannot have both positive and negative heights!"
+
     requirement = "The system shall error if missing a consistent positive or negative extrusion direction."
     design = "FancyExtruderGenerator.md"
     issues = "#21273"
@@ -99,6 +101,8 @@
     input = fancy_extruder_with_boundary_swap.i
     exodiff = 'fancy_extruder_with_boundary_swap_in.e'
     cli_args = '--mesh-only'
+    recover = false
+
     requirement = 'The system shall be able to retain and swap boundary ids during extrusion.'
     design = 'FancyExtruderGenerator.md'
     issues = '#21852'
