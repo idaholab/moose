@@ -71,8 +71,10 @@ FVAnisotropicDiffusion::computeQpResidual()
       *_face_info, _var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
   ADRealVectorValue k_face_inv, k_elem_inv, k_neigh_inv;
   const auto k_elem = _coeff(face_elem), k_neighbor = _coeff(face_neighbor);
-  for (const auto i : make_range(Moose::dim))
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
+    mooseAssert(k_elem(i) != 0, "Diffusion coefficient is equal to zero");
+    mooseAssert(k_neighbor(i) != 0, "Diffusion coefficient is equal to zero");
     k_elem_inv(i) = 1.0 / k_elem(i);
     k_neigh_inv(i) = 1.0 / k_neighbor(i);
   }
