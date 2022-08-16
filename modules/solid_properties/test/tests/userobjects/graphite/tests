@@ -9,7 +9,7 @@
       T_max=3500
       Modules/SolidProperties/sp/grade=H_451"
     csvdiff = 'graphite_451_vpp_0000.csv'
-    mesh_mode = 'replicated' # LineMaterialRealSampler does not work with distributed mesh
+    mesh_mode = 'replicated' # see #21865
     requirement = "The system shall compute thermal properties for H-451 graphite."
     design = 'ThermalGraphiteProperties.md ThermalSolidPropertiesMaterial.md'
     issues = '#12284'
