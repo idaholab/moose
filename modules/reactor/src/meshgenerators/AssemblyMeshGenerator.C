@@ -162,9 +162,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   {
     if ((_background_region_id.size() == 0) || _background_intervals == 0)
       mooseError("Hexagonal assemblies must have a background region defined");
-    if (assembly_pitch < _pattern.size() * base_pitch)
-      mooseError(
-          "Assembly pitch must be larger than the number of assembly rows times the pin pitch");
+    if (assembly_pitch / std::sin(M_PI / 3.0) < _pattern.size() * base_pitch)
+      mooseError("Hexagonal diameter of assembly must be larger than the number of assembly rows "
+                 "times the pin pitch");
     // Check size of background region id matches number of axial levels
     if (_background_region_id.size() != n_axial_levels)
       mooseError("The size of background_region_id must be equal to the number of axial levels as "
@@ -545,5 +545,8 @@ AssemblyMeshGenerator::generate()
           *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
     }
   }
+
+  (*_build_mesh)->find_neighbors();
+
   return std::move(*_build_mesh);
 }

@@ -503,5 +503,7 @@ CoreMeshGenerator::generate()
     }
   }
 
+  (*_build_mesh)->find_neighbors();
+
   return std::move(*_build_mesh);
 }
