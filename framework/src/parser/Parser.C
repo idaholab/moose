@@ -702,6 +702,10 @@ Parser::parse(const std::vector<std::string> & input_filenames)
   for (auto & msg : bw.errors)
     _errmsg += msg + "\n";
 
+  // Print parse errors related to brace expansion early
+  if (_errmsg.size() > 0)
+    mooseError(_errmsg);
+
   // There are a few order dependent actions that have to be built first in
   // order for the parser and application to function properly:
   //
@@ -1482,7 +1486,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 
   // All of the parameters for this object have been extracted.  See if there are any errors
   if (!error_stream.str().empty())
-    mooseError(error_stream.str());
+    mooseError(_errmsg + error_stream.str());
 
   // Here we will see if there are any auto build vectors that need to be created
   std::map<std::string, std::pair<std::string, std::string>> auto_build_vectors =
