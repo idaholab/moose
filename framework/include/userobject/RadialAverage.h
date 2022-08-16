@@ -30,7 +30,9 @@ class ThreadedRadialAverageLoop;
 /**
  * Gather and communicate a full list of all quadrature points and the values of
  * a selected variable at each point. Use a KD-Tree to get the weighted spatial
- * average of a material property.
+ * average of a material property. This code borrows heavily from
+ * RadialGreensConvolution in MAGPIE. This code does not include support for
+ * periodic BCs, but RadialGreensConvolution shows how that can be supported.
  */
 class RadialAverage : public ElementUserObject
 {
