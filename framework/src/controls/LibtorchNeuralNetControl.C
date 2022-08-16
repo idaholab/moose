@@ -8,8 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LibtorchNeuralNetControl.h"
+
+#ifdef LIBTORCH_ENABLED
 #include "LibtorchTorchScriptNeuralNet.h"
-#include "LibtorchArtificialNeuralNet.h"
+#endif
+
 #include "Transient.h"
 
 registerMooseObject("MooseApp", LibtorchNeuralNetControl);

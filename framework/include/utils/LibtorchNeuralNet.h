@@ -47,13 +47,7 @@ torch::Tensor LibtorchNeuralNet<T>::forward(torch::Tensor /*x*/)
 
 // The forward function for a torch-script-based module will be always the one in this definition
 template <>
-torch::Tensor
-LibtorchNeuralNet<torch::jit::script::Module>::forward(torch::Tensor x)
-{
-  std::vector<torch::jit::IValue> inputs;
-  inputs.push_back(x);
-  return torch::jit::script::Module::forward(inputs).toTensor();
-}
+torch::Tensor LibtorchNeuralNet<torch::jit::script::Module>::forward(torch::Tensor x);
 
 }
 
