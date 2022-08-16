@@ -306,6 +306,7 @@ advected_interp_method = 'upwind'
   end_time = 15
   dtmax = 1
   scheme = 'bdf2'
+  solve_type = 'NEWTON'
   [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1e-5
