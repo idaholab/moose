@@ -24,8 +24,8 @@ protected:
   void buildObjects()
   {
     InputParameters uo_pars1 = _factory.getValidParams("ThermalMonolithicSiCProperties");
-    _fe_problem->addUserObject("ThermalMonolithicSiCProperties", "sp1", uo_pars1);
     uo_pars1.set<MooseEnum>("thermal_conductivity_model") = "SNEAD";
+    _fe_problem->addUserObject("ThermalMonolithicSiCProperties", "sp1", uo_pars1);
     _sp1 = &_fe_problem->getUserObject<ThermalMonolithicSiCProperties>("sp1");
 
     InputParameters uo_pars2 = _factory.getValidParams("ThermalMonolithicSiCProperties");
