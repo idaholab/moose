@@ -32,10 +32,6 @@ protected:
 
   std::vector<RankTwoTensor> _Fhat;
 
-  MaterialProperty<RankTwoTensor> & _def_grad_mid;
-  MaterialProperty<RankTwoTensor> & _f_bar;
-
-private:
   enum class DecompMethod
   {
     TaylorExpansion,
@@ -44,4 +40,9 @@ private:
   };
 
   const DecompMethod _decomposition_method;
+
+  const bool _use_hw;
+
+  MaterialProperty<RankTwoTensor> * _def_grad_mid;
+  MaterialProperty<RankTwoTensor> * _f_bar;
 };

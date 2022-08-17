@@ -43,8 +43,8 @@ AbaqusUMATStress::validParams()
                        "The external fields that can be used in the UMAT subroutine");
   params.addParam<std::vector<MaterialPropertyName>>("external_properties", "");
   params.addParam<MooseEnum>("decomposition_method",
-			     ComputeFiniteStrain::decompositionType(),
-                             "Method to calcualte the strain kinematics.");
+                             ComputeFiniteStrain::decompositionType(),
+                             "Method to calculate the strain kinematics.");
   return params;
 }
 

@@ -36,9 +36,10 @@ ComputeFiniteStrain::validParams()
 ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters)
   : ComputeIncrementalStrainBase(parameters),
     _Fhat(_fe_problem.getMaxQps()),
-    _def_grad_mid(declareProperty<RankTwoTensor>(_base_name + "def_grad_mid")),
-    _f_bar(declareProperty<RankTwoTensor>(_base_name + "f_bar")),
-    _decomposition_method(getParam<MooseEnum>("decomposition_method").getEnum<DecompMethod>())
+    _decomposition_method(getParam<MooseEnum>("decomposition_method").getEnum<DecompMethod>()),
+    _use_hw(_decomposition_method == DecompMethod::HughesWinget),
+    _def_grad_mid(_use_hw ? &declareProperty<RankTwoTensor>(_base_name + "def_grad_mid") : nullptr),
+    _f_bar(_use_hw ? &declareProperty<RankTwoTensor>(_base_name + "f_bar") : nullptr)
 {
 }
 
@@ -61,15 +62,19 @@ ComputeFiniteStrain::computeProperties()
     _deformation_gradient[_qp] = A;
     _deformation_gradient[_qp].addIa(1.0);
 
-    // deformation gradient midpoint
-    _def_grad_mid[_qp].setToIdentity();
-    _def_grad_mid[_qp] += 0.5*(A + Fbar);
+    // deformation gradient midpoint (for Hughes-Winget kinematics)
+    if (_use_hw)
+    {
+      (*_def_grad_mid)[_qp].setToIdentity();
+      (*_def_grad_mid)[_qp] += 0.5 * (A + Fbar);
+    }
 
     // A = gradU - gradUold
     A -= Fbar;
 
-    //_f_bar = dDu/Dx_o
-    _f_bar[_qp] = A;
+    //_f_bar = dDu/Dx_o (for Hughes-Winget kinematics)
+    if (_use_hw)
+      (*_f_bar)[_qp] = A;
 
     // Fbar = ( I + gradUold)
     Fbar.addIa(1.0);
@@ -114,7 +119,8 @@ ComputeFiniteStrain::computeQpStrain()
 {
   RankTwoTensor total_strain_increment;
 
-  // three ways to calculate these increments: TaylorExpansion(default), EigenSolution, or HughesWinget
+  // three ways to calculate these increments: TaylorExpansion(default), EigenSolution, or
+  // HughesWinget
   computeQpIncrements(total_strain_increment, _rotation_increment[_qp]);
 
   _strain_increment[_qp] = total_strain_increment;
@@ -130,12 +136,12 @@ ComputeFiniteStrain::computeQpStrain()
   // if HughesWinget, rotate old strains here
   RankTwoTensor mechanical_strain_old = _mechanical_strain_old[_qp];
   RankTwoTensor total_strain_old = _total_strain_old[_qp];
-  if (_decomposition_method == DecompMethod::HughesWinget)
+  if (_use_hw)
   {
-    mechanical_strain_old =
-      _rotation_increment[_qp] * _mechanical_strain_old[_qp] * _rotation_increment[_qp].transpose();
-    total_strain_old = 
-      _rotation_increment[_qp] * _total_strain_old[_qp] * _rotation_increment[_qp].transpose();
+    mechanical_strain_old = _rotation_increment[_qp] * _mechanical_strain_old[_qp] *
+                            _rotation_increment[_qp].transpose();
+    total_strain_old =
+        _rotation_increment[_qp] * _total_strain_old[_qp] * _rotation_increment[_qp].transpose();
   }
 
   // Update strain in intermediate configuration
@@ -143,7 +149,7 @@ ComputeFiniteStrain::computeQpStrain()
   _total_strain[_qp] = total_strain_old + total_strain_increment;
 
   // Rotate strain to current configuration, unless HughesWinget
-  if (_decomposition_method != DecompMethod::HughesWinget)
+  if (!_use_hw)
   {
     _mechanical_strain[_qp] =
         _rotation_increment[_qp] * _mechanical_strain[_qp] * _rotation_increment[_qp].transpose();
@@ -251,16 +257,16 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
 
     case DecompMethod::HughesWinget:
     {
-      const RankTwoTensor G = _f_bar[_qp] * _def_grad_mid[_qp].inverse();
+      const RankTwoTensor G = (*_f_bar)[_qp] * (*_def_grad_mid)[_qp].inverse();
 
-      total_strain_increment = 0.5*(G + G.transpose());
-      const RankTwoTensor W = 0.5*(G - G.transpose());
+      total_strain_increment = 0.5 * (G + G.transpose());
+      const RankTwoTensor W = 0.5 * (G - G.transpose());
 
       RankTwoTensor Q_1(RankTwoTensor::initIdentity);
       RankTwoTensor Q_2(RankTwoTensor::initIdentity);
 
-      Q_1 -= 0.5*W;
-      Q_2 += 0.5*W;
+      Q_1 -= 0.5 * W;
+      Q_2 += 0.5 * W;
 
       rotation_increment = Q_1.inverse() * Q_2;
 
@@ -268,7 +274,7 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
     }
 
     default:
-      mooseError("ComputeFiniteStrain Error: Pass valid decomposition type: TaylorExpansio, "
+      mooseError("ComputeFiniteStrain Error: Pass valid decomposition type: TaylorExpansion, "
                  "EigenSolution, or HughesWinget.");
   }
 }
