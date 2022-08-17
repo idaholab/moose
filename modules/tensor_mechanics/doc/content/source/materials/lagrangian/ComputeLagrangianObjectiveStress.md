@@ -141,14 +141,14 @@ The Green-Naghdi objective rate is defined by
   Q_{ik} = \Omega_{ik} = \dot{R}_{ij} R_{kj}.
 \end{equation}
 
-We provide two forms of the discrete Green-Naghdi rate. The first form can be specified by `objective_rate = incremental_green_naghdi` which approximates the rate in an incremental form assuming the difference between the current rotation and the rotation at the beginning of the time step is still a rotation. The second form can be specified by `objective_rate = green_naghdi` which uses exponential map to properly integrate the rotation.
+The Green-Naghdi rate can be specified by `objective_rate = green_naghdi`.
 
 Let $U^0$ be the derivative tensor of the Truesdell rate, the associated derivative tensor of the Green-Naghdi rate can be written as
 \begin{equation}
   U_{ijkl} = U^0_{ijpq} \frac{\partial\Delta\Omega_{pq}}{\partial\Delta l_{kl}}.
 \end{equation}
 
-Chain rule further expands as
+The chain rule further expands this as
 \begin{equation}
   \frac{\partial\Delta\Omega_{pq}}{\partial\Delta l_{kl}} = \frac{\partial\Delta\Omega_{pq}}{\partial R_{or}} \frac{\partial R_{or}}{\partial F_{st}} \frac{\partial F_{st}}{\partial \Delta l_{kl}},
 \end{equation}
