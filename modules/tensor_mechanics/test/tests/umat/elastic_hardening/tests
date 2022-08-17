@@ -8,8 +8,7 @@
     exodiff = 'linear_strain_hardening_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
-                  'constitutive models, with support for stateful properties'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for stateful properties'
   []
 
   [total_strain_error]
@@ -29,21 +28,18 @@
     exodiff = 'elastic_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in '
-                  'Fortran77 as constitutive models, with support for finite strain elastic material '
-                  'models'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in Fortran77 as constitutive models, with support for finite strain elastic material models'
   []
 
   [elastic_small]
     type = 'Exodiff'
     input = 'elastic.i'
-    cli_args = "Materials/active='umat' Modules/TensorMechanics/Master/all/strain=SMALL Modules/TensorMechanics/Master/all/incremental=true Outputs/file_base=elastic_small"
+    cli_args = "Materials/active='umat' Modules/TensorMechanics/Master/all/strain=SMALL "
+               "Modules/TensorMechanics/Master/all/incremental=true Outputs/file_base=elastic_small"
     exodiff = 'elastic_small.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in '
-                  'Fortran77 as constitutive models, with support for small strain elastic material '
-                  'models'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in Fortran77 as constitutive models, with support for small strain elastic material models'
   []
 
   [elastic_C]
@@ -53,26 +49,23 @@
     exodiff = 'elastic_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in '
-                  'C/C++ as constitutive models, with support for finite strain elastic material '
-                  'models'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in C/C++ as constitutive models, with support for finite strain elastic material models'
   []
   [elastic_reference]
     type = 'Exodiff'
     input = 'elastic.i'
     cli_args = "Materials/active='elastic stress'"
     exodiff = 'elastic_out.e'
-    requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE '
-                  'material models for finite strain elasticity'
+    requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE material models for finite strain elasticity'
   []
 
   [elastic_small_reference]
     type = 'Exodiff'
     input = 'elastic.i'
-    cli_args = "Materials/active='elastic stress' Materials/stress/type=ComputeLinearElasticStress Modules/TensorMechanics/Master/all/strain=SMALL Outputs/file_base=elastic_small"
+    cli_args = "Materials/active='elastic stress' Materials/stress/type=ComputeLinearElasticStress "
+               "Modules/TensorMechanics/Master/all/strain=SMALL Outputs/file_base=elastic_small"
     exodiff = 'elastic_small.e'
-    requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE '
-                  'material models for small strain elasticity'
+    requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE material models for small strain elasticity'
   []
 
   [elastic_incremental]
@@ -82,8 +75,17 @@
     exodiff = 'elastic_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
-                  'constitutive models, with support for incremental strain elastic material models'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for incremental strain elastic material models'
     issues = '#18843'
+  []
+
+  [elastic_new_system_vlc]
+    type = PetscJacobianTester
+    input = 'elastic_new_system.i'
+    run_sim = true
+    ratio_tol = 5E-7
+    difference_tol = 1E10
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials through the new Lagrangian mechanics kernels, and the Jacobian should be exact with volumetric locking correction'
+    issues = '#21842'
   []
 []

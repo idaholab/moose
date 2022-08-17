@@ -19,11 +19,13 @@
 #define QUOTE(macro) stringifyName(macro)
 
 registerMooseObject("TensorMechanicsApp", AbaqusUMATStress);
+registerMooseObject("TensorMechanicsApp", ComputeLagrangianAbaqusUMATStress);
 
+template <bool new_system>
 InputParameters
-AbaqusUMATStress::validParams()
+AbaqusUMATStressTempl<new_system>::validParams()
 {
-  InputParameters params = ComputeStressBase::validParams();
+  InputParameters params = AbaqusUMATStressBase<new_system>::validParams();
   params.addClassDescription("Coupling material to use Abaqus UMAT models in MOOSE");
   params.addRequiredParam<FileName>(
       "plugin", "The path to the compiled dynamic library for the plugin you want to use");
@@ -48,39 +50,47 @@ AbaqusUMATStress::validParams()
 #error "The METHOD preprocessor symbol must be supplied by the build system."
 #endif
 
-AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
-  : ComputeStressBase(parameters),
-    _plugin(getParam<FileName>("plugin")),
+template <bool new_system>
+AbaqusUMATStressTempl<new_system>::AbaqusUMATStressTempl(const InputParameters & parameters)
+  : AbaqusUMATStressBase<new_system>(parameters),
+    _plugin(this->template getParam<FileName>("plugin")),
     _library(_plugin + std::string("-") + QUOTE(METHOD) + ".plugin"),
     _umat(_library.getFunction<umat_t>("umat_")),
-    _aqNSTATV(getParam<unsigned int>("num_state_vars")),
+    _aqNSTATV(this->template getParam<unsigned int>("num_state_vars")),
     _aqSTATEV(_aqNSTATV),
-    _aqPROPS(getParam<std::vector<Real>>("constant_properties")),
+    _aqPROPS(this->template getParam<std::vector<Real>>("constant_properties")),
     _aqNPROPS(_aqPROPS.size()),
-    _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
-    _total_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
-    _strain_increment(getOptionalMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
-    _jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
-    _Fbar(getOptionalMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _Fbar_old(getOptionalMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _state_var(declareProperty<std::vector<Real>>(_base_name + "state_var")),
-    _state_var_old(getMaterialPropertyOld<std::vector<Real>>(_base_name + "state_var")),
-    _elastic_strain_energy(declareProperty<Real>(_base_name + "elastic_strain_energy")),
-    _plastic_dissipation(declareProperty<Real>(_base_name + "plastic_dissipation")),
-    _creep_dissipation(declareProperty<Real>(_base_name + "creep_dissipation")),
-    _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit")),
-    _rotation_increment(
-        getOptionalMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
-    _temperature(coupledValue("temperature")),
-    _temperature_old(coupledValueOld("temperature")),
-    _external_fields(coupledValues("external_fields")),
-    _external_fields_old(coupledValuesOld("external_fields")),
+    _total_strain_old(
+        this->template getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
+    _strain_increment(
+        this->template getOptionalMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
+    _jacobian_mult(this->template declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
+    _Fbar(this->template getOptionalMaterialProperty<RankTwoTensor>(_base_name +
+                                                                    "deformation_gradient")),
+    _Fbar_old(this->template getOptionalMaterialPropertyOld<RankTwoTensor>(_base_name +
+                                                                           "deformation_gradient")),
+    _state_var(this->template declareProperty<std::vector<Real>>(_base_name + "state_var")),
+    _state_var_old(
+        this->template getMaterialPropertyOld<std::vector<Real>>(_base_name + "state_var")),
+    _elastic_strain_energy(
+        this->template declareProperty<Real>(_base_name + "elastic_strain_energy")),
+    _plastic_dissipation(this->template declareProperty<Real>(_base_name + "plastic_dissipation")),
+    _creep_dissipation(this->template declareProperty<Real>(_base_name + "creep_dissipation")),
+    _material_timestep(
+        this->template declareProperty<Real>(_base_name + "material_timestep_limit")),
+    _rotation_increment(this->template getOptionalMaterialProperty<RankTwoTensor>(
+        _base_name + "rotation_increment")),
+    _temperature(this->coupledValue("temperature")),
+    _temperature_old(this->coupledValueOld("temperature")),
+    _external_fields(this->coupledValues("external_fields")),
+    _external_fields_old(this->coupledValuesOld("external_fields")),
     _number_external_fields(_external_fields.size()),
-    _external_property_names(getParam<std::vector<MaterialPropertyName>>("external_properties")),
+    _external_property_names(
+        this->template getParam<std::vector<MaterialPropertyName>>("external_properties")),
     _number_external_properties(_external_property_names.size()),
     _external_properties(_number_external_properties),
     _external_properties_old(_number_external_properties),
-    _use_one_based_indexing(getParam<bool>("use_one_based_indexing"))
+    _use_one_based_indexing(this->template getParam<bool>("use_one_based_indexing"))
 {
   if (!_use_one_based_indexing)
     mooseDeprecated(
@@ -92,8 +102,10 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
   // get material properties
   for (std::size_t i = 0; i < _number_external_properties; ++i)
   {
-    _external_properties[i] = &getMaterialProperty<Real>(_external_property_names[i]);
-    _external_properties_old[i] = &getMaterialPropertyOld<Real>(_external_property_names[i]);
+    _external_properties[i] =
+        &this->template getMaterialProperty<Real>(_external_property_names[i]);
+    _external_properties_old[i] =
+        &this->template getMaterialPropertyOld<Real>(_external_property_names[i]);
   }
 
   // Read mesh dimension and size UMAT arrays (we always size for full 3D)
@@ -114,24 +126,26 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
   _aqDPRED.resize(_number_external_fields + _number_external_properties);
 }
 
+template <bool new_system>
 void
-AbaqusUMATStress::initialSetup()
+AbaqusUMATStressTempl<new_system>::initialSetup()
 {
   // The _Fbar, _Fbar_old, and _rotation_increment optional properties are only available when an
   // incremental strain formulation is used. If they are not avaliable we advide the user to
   // select an incremental formulation.
   if (!_strain_increment || !_Fbar || !_Fbar_old || !_rotation_increment)
     mooseError("AbaqusUMATStress '",
-               name(),
+               this->name(),
                "': Incremental strain quantities are not available. You likely are using a total "
                "strain formulation. Specify `incremental = true` in the tensor mechanics action, "
                "or use ComputeIncrementalSmallStrain in your input file.");
 }
 
+template <bool new_system>
 void
-AbaqusUMATStress::initQpStatefulProperties()
+AbaqusUMATStressTempl<new_system>::initQpStatefulProperties()
 {
-  ComputeStressBase::initQpStatefulProperties();
+  AbaqusUMATStressBase<new_system>::initQpStatefulProperties();
 
   // Initialize state variable vector
   _state_var[_qp].resize(_aqNSTATV);
@@ -139,8 +153,9 @@ AbaqusUMATStress::initQpStatefulProperties()
     _state_var[_qp][i] = 0.0;
 }
 
+template <bool new_system>
 void
-AbaqusUMATStress::computeProperties()
+AbaqusUMATStressTempl<new_system>::computeProperties()
 {
   // current element "number"
   _aqNOEL = _current_elem->id() + (_use_one_based_indexing ? 1 : 0);
@@ -159,13 +174,14 @@ AbaqusUMATStress::computeProperties()
 
   // Fill unused characters with spaces (Fortran)
   std::fill(_aqCMNAME, _aqCMNAME + 80, ' ');
-  std::memcpy(_aqCMNAME, name().c_str(), name().size());
+  std::memcpy(_aqCMNAME, this->name().c_str(), this->name().size());
 
-  ComputeStressBase::computeProperties();
+  AbaqusUMATStressBase<new_system>::computeProperties();
 }
 
+template <bool new_system>
 void
-AbaqusUMATStress::computeQpStress()
+AbaqusUMATStressTempl<new_system>::computeQpStressHelper()
 {
   const Real * myDFGRD0 = &(_Fbar_old[_qp](0, 0));
   const Real * myDFGRD1 = &(_Fbar[_qp](0, 0));
@@ -299,11 +315,17 @@ AbaqusUMATStress::computeQpStress()
   // Get new stress tensor - UMAT should update stress
   // Account for difference in vector order convention: yz, xz, xy (MOOSE)  vs xy, xz, yz
   // (commercial software)
-  _stress[_qp] = RankTwoTensor(
-      _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[5], _aqSTRESS[4], _aqSTRESS[3]);
+  if constexpr (new_system)
+    this->_small_stress[_qp] = RankTwoTensor(
+        _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[5], _aqSTRESS[4], _aqSTRESS[3]);
+  else
+  {
+    this->_stress[_qp] = RankTwoTensor(
+        _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[5], _aqSTRESS[4], _aqSTRESS[3]);
 
-  // Rotate the stress state to the current configuration
-  _stress[_qp].rotate(_rotation_increment[_qp]);
+    // Rotate the stress state to the current configuration
+    this->_stress[_qp].rotate(_rotation_increment[_qp]);
+  }
 
   // Build Jacobian matrix from UMAT's Voigt non-standard order to fourth order tensor.
   const unsigned int N = Moose::dim;
@@ -315,13 +337,30 @@ AbaqusUMATStress::computeQpStress()
       for (const auto k : make_range(N))
         for (const auto l : make_range(N))
         {
-          if (i == j)
-            _jacobian_mult[_qp](i, j, k, l) =
-                k == l ? _aqDDSDDE[i * ntens + k] : _aqDDSDDE[i * ntens + k + nskip + l];
+          if constexpr (new_system)
+          {
+            if (i == j)
+              this->_small_jacobian[_qp](i, j, k, l) =
+                  k == l ? _aqDDSDDE[i * ntens + k] : _aqDDSDDE[i * ntens + k + nskip + l];
+            else
+              // i!=j
+              this->_small_jacobian[_qp](i, j, k, l) =
+                  k == l ? _aqDDSDDE[(nskip + i + j) * ntens + k]
+                         : _aqDDSDDE[(nskip + i + j) * ntens + k + nskip + l];
+          }
           else
-            // i!=j
-            _jacobian_mult[_qp](i, j, k, l) =
-                k == l ? _aqDDSDDE[(nskip + i + j) * ntens + k]
-                       : _aqDDSDDE[(nskip + i + j) * ntens + k + nskip + l];
+          {
+            if (i == j)
+              _jacobian_mult[_qp](i, j, k, l) =
+                  k == l ? _aqDDSDDE[i * ntens + k] : _aqDDSDDE[i * ntens + k + nskip + l];
+            else
+              // i!=j
+              _jacobian_mult[_qp](i, j, k, l) =
+                  k == l ? _aqDDSDDE[(nskip + i + j) * ntens + k]
+                         : _aqDDSDDE[(nskip + i + j) * ntens + k + nskip + l];
+          }
         }
 }
+
+template class AbaqusUMATStressTempl<false>;
+template class AbaqusUMATStressTempl<true>;

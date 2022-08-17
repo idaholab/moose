@@ -10,17 +10,61 @@
 #pragma once
 
 #include "ComputeStressBase.h"
+#include "ComputeLagrangianObjectiveStress.h"
 #include "DynamicLibraryLoader.h"
+
+// forward declaration
+template <bool>
+class AbaqusUMATStressBase;
+
+// Shim for the old system
+template <>
+class AbaqusUMATStressBase</*new_system = */ false> : public ComputeStressBase
+{
+public:
+  static InputParameters validParams() { return ComputeStressBase::validParams(); }
+
+  AbaqusUMATStressBase(const InputParameters & params)
+    : ComputeStressBase(params),
+      _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress"))
+  {
+  }
+
+protected:
+  virtual void computeQpStress() { computeQpStressHelper(); }
+  virtual void computeQpStressHelper() = 0;
+  const MaterialProperty<RankTwoTensor> & _stress_old;
+};
+
+// Shim for the new system
+template <>
+class AbaqusUMATStressBase</*new_system = */ true> : public ComputeLagrangianObjectiveStress
+{
+public:
+  static InputParameters validParams() { return ComputeLagrangianObjectiveStress::validParams(); }
+
+  AbaqusUMATStressBase(const InputParameters & params)
+    : ComputeLagrangianObjectiveStress(params),
+      _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "cauchy_stress"))
+  {
+  }
+
+protected:
+  virtual void computeQpSmallStress() { computeQpStressHelper(); }
+  virtual void computeQpStressHelper() = 0;
+  const MaterialProperty<RankTwoTensor> & _stress_old;
+};
 
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
  */
-class AbaqusUMATStress : public ComputeStressBase
+template <bool new_system>
+class AbaqusUMATStressTempl : public AbaqusUMATStressBase<new_system>
 {
 public:
   static InputParameters validParams();
 
-  AbaqusUMATStress(const InputParameters & parameters);
+  AbaqusUMATStressTempl(const InputParameters & parameters);
 
   /// check optional material properties for consistency
   void initialSetup() override;
@@ -195,9 +239,8 @@ protected:
   std::vector<Real> _aqDPRED;
 
   void initQpStatefulProperties() override;
-  void computeQpStress() override;
+  void computeQpStressHelper();
 
-  const MaterialProperty<RankTwoTensor> & _stress_old;
   const MaterialProperty<RankTwoTensor> & _total_strain_old;
   const OptionalMaterialProperty<RankTwoTensor> & _strain_increment;
 
@@ -241,4 +284,16 @@ protected:
 
   /// parameter to assist with the transition to 1-based indexing
   const bool _use_one_based_indexing;
+
+  using AbaqusUMATStressBase<new_system>::_base_name;
+  using AbaqusUMATStressBase<new_system>::_qp;
+  using AbaqusUMATStressBase<new_system>::_q_point;
+  using AbaqusUMATStressBase<new_system>::_current_elem;
+  using AbaqusUMATStressBase<new_system>::_t;
+  using AbaqusUMATStressBase<new_system>::_dt;
+  using AbaqusUMATStressBase<new_system>::_t_step;
+  using AbaqusUMATStressBase<new_system>::_stress_old;
 };
+
+typedef AbaqusUMATStressTempl<false> AbaqusUMATStress;
+typedef AbaqusUMATStressTempl<true> ComputeLagrangianAbaqusUMATStress;
