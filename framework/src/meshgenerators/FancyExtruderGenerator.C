@@ -104,6 +104,13 @@ FancyExtruderGenerator::validParams()
 
   params.addParam<std::vector<std::vector<boundary_id_type>>>("downward_boundary_ids",
                                                               "Downward interface boundary ids.");
+  params.addParamNamesToGroup(
+      "top_boundary bottom_boundary upward_boundary_source_blocks upward_boundary_ids "
+      "downward_boundary_source_blocks downward_boundary_ids",
+      "Boundary Assignment");
+  params.addParamNamesToGroup(
+      "subdomain_swaps boundary_swaps elem_integer_names_to_swap elem_integers_swaps",
+      "ID Swap");
 
   return params;
 }

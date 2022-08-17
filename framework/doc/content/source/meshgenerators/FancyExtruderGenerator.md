@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `FancyExtruderGenerator` adds more customization options over the [MeshExtruderGenerator](MeshExtruderGenerator.md). This mesh generator is also capable of fixing faulty elements on-the-fly during extrusion.
+The `FancyExtruderGenerator` adds more customization options over the [MeshExtruderGenerator](MeshExtruderGenerator.md). This mesh generator is also capable of fixing inverted elements on-the-fly during extrusion.
 
 ## Multiple Elevations
 

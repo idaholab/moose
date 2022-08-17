@@ -8,7 +8,7 @@
     type = FancyExtruderGenerator
     input = fmg
     heights = '1 2 3'
-    num_layers = '1 2 3'
+    num_layers = '1 2 1'
     direction = '0 0 1'
     bottom_boundary = '100'
     top_boundary = '200'
