@@ -109,8 +109,7 @@ FancyExtruderGenerator::validParams()
       "downward_boundary_source_blocks downward_boundary_ids",
       "Boundary Assignment");
   params.addParamNamesToGroup(
-      "subdomain_swaps boundary_swaps elem_integer_names_to_swap elem_integers_swaps",
-      "ID Swap");
+      "subdomain_swaps boundary_swaps elem_integer_names_to_swap elem_integers_swaps", "ID Swap");
 
   return params;
 }
