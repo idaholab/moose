@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SolidPropertiesApp.h"
+#include "HeatConductionApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -50,6 +51,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 void
 SolidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
+  HeatConductionApp::registerAll(f, af, s);
   Registry::registerObjectsTo(f, {"SolidPropertiesApp"});
   Registry::registerActionsTo(af, {"SolidPropertiesApp"});
   associateSyntaxInner(s, af);

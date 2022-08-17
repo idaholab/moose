@@ -63,6 +63,10 @@ ifeq ($(NAVIER_STOKES),yes)
         RDG                         := yes
 endif
 
+ifeq ($(SOLID_PROPERTIES),yes)
+        HEAT_CONDUCTION             := yes
+endif
+
 ifeq ($(CONTACT),yes)
         TENSOR_MECHANICS            := yes
 endif
@@ -181,13 +185,6 @@ ifeq ($(RICHARDS),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
-ifeq ($(SOLID_PROPERTIES),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_properties
-  APPLICATION_NAME   := solid_properties
-  SUFFIX             := sp
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
 ifeq ($(STOCHASTIC_TOOLS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/stochastic_tools
   APPLICATION_NAME   := stochastic_tools
@@ -204,6 +201,14 @@ ifeq ($(HEAT_CONDUCTION),yes)
   APPLICATION_NAME   := heat_conduction
   DEPEND_MODULES     := ray_tracing
   SUFFIX             := hc
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(SOLID_PROPERTIES),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_properties
+  APPLICATION_NAME   := solid_properties
+  DEPEND_MODULES     := heat_conduction
+  SUFFIX             := sp
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
