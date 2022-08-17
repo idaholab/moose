@@ -57,7 +57,7 @@
     input = 'grain_tracker_advanced_op.i'
     expect_err = "Unable to find a valid grain to op coloring"
     recover = false # No solve
-    cli_args = 'UserObjects/voronoi/coloring_algorithm=jp GlobalParams/op_num=7 Outputs/csv=false'
+    cli_args = 'UserObjects/voronoi/coloring_algorithm=jp GlobalParams/op_num=6 Outputs/csv=false'
 
     requirement = "The PolycrystalUserObject base class shall error when a valid coloring cannot be found "
                   "when using the built-in PETSc based stochastic algorithms."
