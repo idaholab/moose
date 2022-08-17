@@ -4,7 +4,7 @@
   [elastic_shear_reference]
     type = 'Exodiff'
     input = 'elastic_shear.i'
-    cli_args = "Executioner/dt='1.0' Outputs/interval='10'"
+    cli_args = "Executioner/dt='1.0' Outputs/interval='10' GlobalParams/decomposition_method=HughesWinget"
     exodiff = 'elastic_shear_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
@@ -15,7 +15,7 @@
   [elastic_shear]
     type = 'Exodiff'
     input = 'elastic_shear.i'
-    cli_args = "Executioner/dt='10.0'"
+    cli_args = "Executioner/dt='10.0' GlobalParams/decomposition_method=HughesWinget"
     exodiff = 'elastic_shear_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
