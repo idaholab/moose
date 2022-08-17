@@ -150,7 +150,7 @@ HomogenizationConstraint::computeJacobian()
   for (auto && [indices1, constraint1] : _cmap)
   {
     auto && [i, j] = indices1;
-    auto && [ctype, ctarget] = constraint1;
+    auto && ctype = constraint1.first;
     for (auto && indices2 : _cmap)
     {
       auto && [a, b] = indices2.first;
