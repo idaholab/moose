@@ -76,6 +76,7 @@ ComputeSimoHughesJ2PlasticityStress::computeQpPK1Stress()
   const Real K = ElasticityTensorTools::getIsotropicBulkModulus(_elasticity_tensor[_qp]);
   const auto I = RankTwoTensor::Identity();
   const auto Fit = _F[_qp].inverse().transpose();
+  const auto detJ = _F[_qp].det();
 
   // Update configuration
   RankTwoTensor f = _inv_df[_qp].inverse();
@@ -127,14 +128,14 @@ ComputeSimoHughesJ2PlasticityStress::computeQpPK1Stress()
   _ep[_qp] = _ep_old[_qp] + delta_ep;
   _be[_qp] -= 2. / 3. * delta_ep * _be[_qp].trace() * _Np[_qp];
   s = G * _be[_qp].deviatoric();
-  RankTwoTensor tau = (K * (_detJ[_qp] * _detJ[_qp] - 1) / 2) * I + s;
+  RankTwoTensor tau = (K * (detJ * detJ - 1) / 2) * I + s;
   _pk1_stress[_qp] = tau * Fit;
 
   // Compute the consistent tangent, i.e. the derivative of the PK1 stress w.r.t. the deformation
   // gradient.
   if (_fe_problem.currentlyComputingJacobian())
   {
-    RankFourTensor d_tau_d_F = K * _detJ[_qp] * _detJ[_qp] * I.times<i, j, k, l>(Fit) +
+    RankFourTensor d_tau_d_F = K * detJ * detJ * I.times<i, j, k, l>(Fit) +
                                G * (_d_be_d_F - I.times<i, j, k, l>(I) * _d_be_d_F / 3);
     _pk1_jacobian[_qp] = Fit.times<m, j, i, m, k, l>(d_tau_d_F) - Fit.times<k, j, i, l>(tau * Fit);
   }
