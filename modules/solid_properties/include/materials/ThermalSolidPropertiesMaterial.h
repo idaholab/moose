@@ -16,28 +16,32 @@ class ThermalSolidProperties;
 /**
  * Computes solid thermal properties as a function of temperature.
  */
-class ThermalSolidPropertiesMaterial : public Material
+template <bool is_ad>
+class ThermalSolidPropertiesMaterialTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  ThermalSolidPropertiesMaterial(const InputParameters & parameters);
+  ThermalSolidPropertiesMaterialTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
 
   /// Temperature
-  const VariableValue & _temperature;
+  const GenericVariableValue<is_ad> & _temperature;
 
   /// Isobaric specific heat capacity
-  MaterialProperty<Real> & _cp;
+  GenericMaterialProperty<Real, is_ad> & _cp;
 
   /// Thermal conductivity
-  MaterialProperty<Real> & _k;
+  GenericMaterialProperty<Real, is_ad> & _k;
 
   /// Density
-  MaterialProperty<Real> & _rho;
+  GenericMaterialProperty<Real, is_ad> & _rho;
 
   /// Solid properties
   const ThermalSolidProperties & _sp;
 };
+
+typedef ThermalSolidPropertiesMaterialTempl<false> ThermalSolidPropertiesMaterial;
+typedef ThermalSolidPropertiesMaterialTempl<true> ADThermalSolidPropertiesMaterial;
