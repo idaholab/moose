@@ -14,6 +14,7 @@
 #include "MooseVariable.h"
 #include "RankTwoTensorForward.h"
 #include "Coupleable.h"
+#include "BlockRestrictable.h"
 
 // Forward Declarations
 class FEProblemBase;
@@ -23,7 +24,9 @@ class MooseMesh;
  * This class implements a damper that limits the change in the Jacobian of elements without relying
  * on having the displaced mesh
  */
-class ReferenceElementJacobianDamper : public GeneralDamper, public Coupleable
+class ReferenceElementJacobianDamper : public GeneralDamper,
+                                       public Coupleable,
+                                       public BlockRestrictable
 {
 public:
   static InputParameters validParams();

@@ -228,7 +228,7 @@ public:
      * Located the overlapping bounding box between this Feature and the
      * other Feature and expands that overlapping box accordingly.
      */
-    void expandBBox(const FeatureData & rhs);
+    void mergeBBoxes(std::vector<BoundingBox> & bboxes, bool physical_intersection);
 
     /**
      * Merges another Feature Data into this one. This method leaves rhs
