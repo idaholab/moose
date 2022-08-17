@@ -22,7 +22,7 @@ The `constraint_types` parameters controls the type of constraint (deformation o
 The [homogenization system](Homogenization.md) documentation lists the order of these inputs
 for each problem dimension/type.  
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d-stress.i
+!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d.i
          block=Kernels
 
 !syntax parameters /Kernels/HomogenizedTotalLagrangianStressDivergence
