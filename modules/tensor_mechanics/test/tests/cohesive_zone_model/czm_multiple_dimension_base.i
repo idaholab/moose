@@ -1,25 +1,25 @@
 [Mesh]
-  [./msh]
+  [msh]
     type = GeneratedMeshGenerator
   []
-  [./subdomain_1]
+  [subdomain_1]
     type = SubdomainBoundingBoxGenerator
     input = msh
     bottom_left = '0 0 0'
     block_id = 1
     top_right = '0.5 1 1'
   []
-  [./subdomain_2]
+  [subdomain_2]
     type = SubdomainBoundingBoxGenerator
     input = subdomain_1
     bottom_left = '0.5 0 0'
     block_id = 2
     top_right = '1 1 1'
   []
-  [./breakmesh]
+  [breakmesh]
     input = subdomain_2
     type = BreakMeshByBlockGenerator
-  [../]
+  []
   [add_side_sets]
     input = breakmesh
     type = SideSetsFromNormalsGenerator
@@ -32,6 +32,7 @@
     fixed_normal = true
     new_boundary = 'y0 y1 x0 x1 z0 z1'
   []
+  use_checkpoint_mesh = false
 []
 
 [GlobalParams]
@@ -39,86 +40,86 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = SMALL
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_yz stress_xz stress_xy'
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/CohesiveZoneMaster]
-  [./czm1]
+  [czm1]
     boundary = 'interface'
     generate_output = 'traction_x traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z normal_jump tangent_jump'
-  [../]
+  []
 []
 
 [BCs]
-  [./left_x]
+  [left_x]
     type = DirichletBC
     variable = disp_x
     preset = false
     boundary = x0
     value = 0.0
-  [../]
-  [./left_y]
+  []
+  [left_y]
     type = DirichletBC
     variable = disp_y
     preset = false
     boundary = x0
     value = 0.0
-  [../]
-  [./left_z]
+  []
+  [left_z]
     type = DirichletBC
     variable = disp_z
     preset = false
     boundary = x0
     value = 0.0
-  [../]
-  [./right_x]
+  []
+  [right_x]
     type = FunctionDirichletBC
     variable = disp_x
     preset = false
     boundary = x1
-  [../]
-  [./right_y]
+  []
+  [right_y]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
     boundary = x1
-  [../]
-  [./right_z]
+  []
+  [right_z]
     type = FunctionDirichletBC
     variable = disp_z
     preset = false
     boundary = x1
-  [../]
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeElasticityTensor
     block = '1 2'
     fill_method = symmetric_isotropic
     C_ijkl = '0.3 0.5e8'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
     block = '1 2'
-  [../]
-  [./czm_mat]
+  []
+  [czm_mat]
     type = PureElasticTractionSeparation
     boundary = 'interface'
     normal_stiffness = 10
     tangent_stiffness = 5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -139,7 +140,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []

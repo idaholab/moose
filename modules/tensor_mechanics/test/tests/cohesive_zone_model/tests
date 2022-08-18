@@ -1,12 +1,6 @@
 [Tests]
   [czm_framework]
-    design = 'source/materials/cohesive_zone_model/PureElasticTractionSeparation.md '
-             'source/materials/cohesive_zone_model/CZMComputeDisplacementJumpSmallStrain.md '
-             'source/materials/cohesive_zone_model/CZMComputeGlobalTractionSmallStrain.md '
-             'source/interfacekernels/CZMInterfaceKernelSmallStrain.md  '
-             'source/materials/cohesive_zone_model/CZMComputeDisplacementJumpTotalLagrangian.md '
-             'source/materials/cohesive_zone_model/CZMComputeGlobalTractionTotalLagrangian.md '
-             'source/interfacekernels/CZMInterfaceKernelTotalLagrangian.md '
+    design = 'source/materials/cohesive_zone_model/PureElasticTractionSeparation.md source/materials/cohesive_zone_model/CZMComputeDisplacementJumpSmallStrain.md source/materials/cohesive_zone_model/CZMComputeGlobalTractionSmallStrain.md source/interfacekernels/CZMInterfaceKernelSmallStrain.md  source/materials/cohesive_zone_model/CZMComputeDisplacementJumpTotalLagrangian.md source/materials/cohesive_zone_model/CZMComputeGlobalTractionTotalLagrangian.md source/interfacekernels/CZMInterfaceKernelTotalLagrangian.md '
     issues = '#11546 #14527 #17156 #18611'
     requirement = "The system shall be able to use the small strain and total lagrangian cohesive "
                   "zone model formulation, demonstrate an exact jacobian, and use the parent action "
@@ -25,7 +19,6 @@
                  "Materials/stress/type=ADComputeLinearElasticStress "
                  "Outputs/file_base=czm_jacobian_small_strain_out Outputs/exodus=true"
       mesh_mode = 'REPLICATED'
-      recover = false
       detail = "The small strain cohesive zone model shall converge quadratically when using the "
                "hand-coded Jacobian"
     []
@@ -41,7 +34,6 @@
                  "normal_jump tangent_jump' Outputs/file_base=czm_jacobian_total_lagrangian_out "
                  "Outputs/exodus=true"
       mesh_mode = 'REPLICATED'
-      recover = false
       detail = "The finite strain cohesive zone model shall converge quadratically when using the "
                "hand-coded Jacobian"
     []
@@ -59,7 +51,6 @@
                  "Materials/stress/type=ADComputeLinearElasticStress "
                  "Outputs/file_base=czm_small_strain_incremental_out Outputs/exodus=true"
       mesh_mode = 'REPLICATED'
-      recover = false
       detail = "The small strain cohesive zone model shall return the same results of the total "
                "formulation when using an incremental material"
       allow_test_objects = true
@@ -76,7 +67,6 @@
                  "normal_jump tangent_jump' Outputs/file_base=czm_total_lagrangian_incremental_out "
                  "Outputs/exodus=true"
       mesh_mode = 'REPLICATED'
-      recover = false
       detail = "The finite strain cohesive zone model shall return the same results of the total "
                "formulation when using an incremental material"
       allow_test_objects = true
@@ -89,7 +79,6 @@
                "materials for different boundaries"
       cli_args = "Modules/TensorMechanics/CohesiveZoneMaster/strain=FINITE"
       mesh_mode = 'REPLICATED'
-      recover = false
       allow_test_objects = true
     []
     [multiple_action_different_strain]
@@ -101,20 +90,17 @@
       cli_args = "Modules/TensorMechanics/CohesiveZoneMaster/czm_ik_012/strain=FINITE "
                  "Modules/TensorMechanics/CohesiveZoneMaster/czm_ik_23/strain=SMALL"
       mesh_mode = 'REPLICATED'
-      recover = false
       allow_test_objects = true
     []
     [czm_multiple_action_overlapping_boundary]
       type = RunException
       input = 'czm_multiple_action_and_materials.i'
-      expect_err = 'The boundary restrictions in the CohesiveZoneAction actions must be '
-                   'non-overlapping.'
+      expect_err = 'The boundary restrictions in the CohesiveZoneAction actions must be non-overlapping.'
       detail = "The system shall error out when overlapping boundaries are provided in different "
                "blocks of the CohesiveZoneAction"
       cli_args = "Modules/TensorMechanics/CohesiveZoneMaster/czm_ik_012/boundary='Block0_Block1' "
                  "Modules/TensorMechanics/CohesiveZoneMaster/czm_ik_23/boundary='Block0_Block1'"
       mesh_mode = 'REPLICATED'
-      recover = false
       allow_test_objects = true
     []
     [multiple_action_common_outputs]
@@ -130,7 +116,6 @@
                  "Modules/TensorMechanics/CohesiveZoneMaster/material_output_order=FIRST "
                  "Outputs/file_base=czm_multiple_action_common_output_out"
       mesh_mode = 'REPLICATED'
-      recover = false
       allow_test_objects = true
     []
     [czm_multiple_action_additional_outputs_on_different_block]
@@ -146,7 +131,6 @@
                  "rmal_jump tangent_jump' "
                  "Outputs/file_base=czm_multiple_action_additional_outputs_on_different_block_out"
       mesh_mode = 'REPLICATED'
-      recover = false
       allow_test_objects = true
     []
     [multiple_action_differnt_outputs_orders_on_different_block]
@@ -159,22 +143,15 @@
                  "Outputs/file_base=czm_multiple_action_differnt_outputs_orders_on_different_block_ou"
                  "t"
       mesh_mode = 'REPLICATED'
-      recover = false
       allow_test_objects = true
     []
     [action_3D_small_strain_normal]
       type = Exodiff
       input = czm_multiple_dimension_base.i
       exodiff = czm_action_3D_small_strain_normal_out.e
-      cli_args = 'BCs/right_x/function=1*t BCs/right_y/function=0*t BCs/right_z/function=0*t '
-                 'Outputs/out/file_base=czm_action_3D_small_strain_normal_out Mesh/msh/nx=2 '
-                 'Mesh/msh/ny=2 Mesh/msh/nz=2 Mesh/msh/dim=3'
-      detail = 'The system shall allow for cohesive zone laws to represent the traction-separation '
-               'behavior at an interface between two bodies represented by continuum elements in 3D '
-               'using the PureElasticTractionSeparation model, and only compute a normal gap under '
-               'purely normal loading.'
+      cli_args = 'BCs/right_x/function=1*t BCs/right_y/function=0*t BCs/right_z/function=0*t Outputs/out/file_base=czm_action_3D_small_strain_normal_out Mesh/msh/nx=2 Mesh/msh/ny=2 Mesh/msh/nz=2 Mesh/msh/dim=3'
+      detail = 'The system shall allow for cohesive zone laws to represent the traction-separation behavior at an interface between two bodies represented by continuum elements in 3D using the PureElasticTractionSeparation model, and only compute a normal gap under purely normal loading.'
       mesh_mode = 'REPLICATED'
-      recover = false
       abs_zero = 1e-6
     []
     [action_2D_small_strain_normal]
@@ -187,12 +164,8 @@
                  "Mesh/subdomain_2/top_right='1 1 0' GlobalParams/displacements='disp_x disp_y' "
                  "Modules/TensorMechanics/CohesiveZoneMaster/czm1/displacements='disp_x disp_y' "
                  "Materials/czm_mat/displacements='disp_x disp_y'"
-      detail = 'The system shall allow for cohesive zone laws to represent the traction-separation '
-               'behavior at an interface between two bodies represented by continuum elements in 2D '
-               'using an elastic traction sepration law, and only compute a normal gap under purely '
-               'normal loading when using the small strain formulation.'
+      detail = 'The system shall allow for cohesive zone laws to represent the traction-separation behavior at an interface between two bodies represented by continuum elements in 2D using an elastic traction sepration law, and only compute a normal gap under purely normal loading when using the small strain formulation.'
       mesh_mode = 'REPLICATED'
-      recover = false
       abs_zero = 1e-6
     []
     [action_1D_small_strain_normal]
@@ -207,27 +180,16 @@
                  "Modules/TensorMechanics/CohesiveZoneMaster/czm1/generate_output='traction_x "
                  "normal_traction tangent_traction jump_x normal_jump tangent_jump' "
                  "Materials/czm_mat/displacements='disp_x'"
-      detail = 'The system shall allow for cohesive zone laws to represent the traction-separation '
-               'behavior at an interface between two bodies represented by continuum elements in 1D '
-               'using an elastic traction sepration law, and only compute a normal gap under purely '
-               'normal loading when using the small strain formulation.'
+      detail = 'The system shall allow for cohesive zone laws to represent the traction-separation behavior at an interface between two bodies represented by continuum elements in 1D using an elastic traction sepration law, and only compute a normal gap under purely normal loading when using the small strain formulation.'
       mesh_mode = 'REPLICATED'
-      recover = false
     []
     [action_3D_total_lagrangian_normal]
       type = Exodiff
       input = czm_multiple_dimension_base.i
       exodiff = czm_action_3D_total_lagrangian_normal_out.e
-      cli_args = 'BCs/right_x/function=1*t BCs/right_y/function=0*t BCs/right_z/function=0*t '
-                 'Outputs/out/file_base=czm_action_3D_total_lagrangian_normal_out Mesh/msh/nx=2 '
-                 'Mesh/msh/ny=2 Mesh/msh/nz=2 Mesh/msh/dim=3 '
-                 'Modules/TensorMechanics/CohesiveZoneMaster/czm1/strain=FINITE'
-      detail = 'The system shall allow for cohesive zone laws to represent the traction-separation '
-               'behavior at an interface between two bodies represented by continuum elements in 3D '
-               'using an elastic traction sepration law, and only compute a normal gap under purely '
-               'normal loading when using the total Lagrangian formulation.'
+      cli_args = 'BCs/right_x/function=1*t BCs/right_y/function=0*t BCs/right_z/function=0*t Outputs/out/file_base=czm_action_3D_total_lagrangian_normal_out Mesh/msh/nx=2 Mesh/msh/ny=2 Mesh/msh/nz=2 Mesh/msh/dim=3 Modules/TensorMechanics/CohesiveZoneMaster/czm1/strain=FINITE'
+      detail = 'The system shall allow for cohesive zone laws to represent the traction-separation behavior at an interface between two bodies represented by continuum elements in 3D using an elastic traction sepration law, and only compute a normal gap under purely normal loading when using the total Lagrangian formulation.'
       mesh_mode = 'REPLICATED'
-      recover = false
       abs_zero = 1e-6
     []
     [action_2D_total_lagrangian_normal]
@@ -241,12 +203,8 @@
                  "Modules/TensorMechanics/CohesiveZoneMaster/czm1/displacements='disp_x disp_y' "
                  "Materials/czm_mat/displacements='disp_x disp_y'  "
                  "Modules/TensorMechanics/CohesiveZoneMaster/czm1/strain=FINITE"
-      detail = 'The system shall allow for cohesive zone laws to represent the traction-separation '
-               'behavior at an interface between two bodies represented by continuum elements in 2D '
-               'using an elastic traction sepration law, and only compute a normal gap under purely '
-               'normal loading when using the total Lagrangian formulation.'
+      detail = 'The system shall allow for cohesive zone laws to represent the traction-separation behavior at an interface between two bodies represented by continuum elements in 2D using an elastic traction sepration law, and only compute a normal gap under purely normal loading when using the total Lagrangian formulation.'
       mesh_mode = 'REPLICATED'
-      recover = false
       abs_zero = 1e-6
     []
     [action_1D_total_lagrangian_normal]
@@ -262,12 +220,8 @@
                  "normal_traction tangent_traction jump_x normal_jump tangent_jump' "
                  "Materials/czm_mat/displacements='disp_x' "
                  "Modules/TensorMechanics/CohesiveZoneMaster/czm1/strain=FINITE"
-      detail = 'The system shall allow for cohesive zone laws to represent the traction-separation '
-               'behavior at an interface between two bodies represented by continuum elements in 1D '
-               'using an elastic traction sepration law, and only compute a normal gap under purely '
-               'normal loading when using the total Lagrangian formulation.'
+      detail = 'The system shall allow for cohesive zone laws to represent the traction-separation behavior at an interface between two bodies represented by continuum elements in 1D using an elastic traction sepration law, and only compute a normal gap under purely normal loading when using the total Lagrangian formulation.'
       mesh_mode = 'REPLICATED'
-      recover = false
     []
     [czm_incremental_stretch_rotate_total_lagrangian]
       type = Exodiff
@@ -278,7 +232,6 @@
       detail = "The CZMInterfaceKernelTotalLagrangian should properly account for large area changes "
                "and interface rotations when using an incremental material."
       mesh_mode = 'REPLICATED'
-      recover = false
       allow_test_objects = true
     []
     [czm_total_stretch_rotate_total_lagrangian]
@@ -289,14 +242,12 @@
       detail = "The CZMInterfaceKernelTotalLagrangian should properly account for large area changes "
                "and interface rotations when using a total strain material."
       mesh_mode = 'REPLICATED'
-      recover = false
     []
   []
 
   [bilinear_mixed_mode]
     design = 'source/materials/cohesive_zone_model/BiLinearMixedModeTraction.md'
-    requirement = 'The system shall be able to model decohesion of composites using cohesive zone '
-                  'model'
+    requirement = 'The system shall be able to model decohesion of composites using cohesive zone model'
     issues = '#18611 #18763'
     [normal]
       type = Exodiff
@@ -317,7 +268,8 @@
       type = Exodiff
       input = 'bilinear_mixed.i'
       exodiff = bilinear_mixed_shear_out.e
-      cli_args = "Outputs/file_base=bilinear_mixed_shear_out BCs/fix_top/variable=disp_y BCs/top/variable=disp_x"
+      cli_args = "Outputs/file_base=bilinear_mixed_shear_out BCs/fix_top/variable=disp_y "
+                 "BCs/top/variable=disp_x"
       abs_zero = 1e-6
       detail = "under mode II loading."
     []
@@ -333,7 +285,8 @@
       type = Exodiff
       input = 'bilinear_mixed.i'
       exodiff = bilinear_mixed_normal_power_law_out.e
-      cli_args = "Materials/czm/mixed_mode_criterion=POWER_LAW Outputs/file_base=bilinear_mixed_normal_power_law_out"
+      cli_args = "Materials/czm/mixed_mode_criterion=POWER_LAW "
+                 "Outputs/file_base=bilinear_mixed_normal_power_law_out"
       abs_zero = 1e-6
       detail = "under mode I loading with power law propagation criterion."
     []
@@ -360,9 +313,8 @@
                  "normal_jump tangent_jump' Modules/TensorMechanics/Master/all/strain=SMALL  "
                  "Modules/TensorMechanics/Master/all/use_finite_deform_jacobian=false "
                  "Materials/stress/type=ADComputeLinearElasticStress "
-                 "Outputs/file_base=czm_jacobian_3DC_out Outputs/exodus=true"
+                 "Outputs/file_base=czm_jacobian_3DC_out"
       mesh_mode = 'REPLICATED'
-      recover = false
       detail = "The system shall converge quadratically when using the handcoded Jacobian of the 3DC "
                "traction separation model"
     []
@@ -374,11 +326,10 @@
                  "Materials/czm_mat/normal_gap_at_maximum_normal_traction=1 "
                  "Materials/czm_mat/tangential_gap_at_maximum_shear_traction=1 "
                  "Materials/czm_mat/maximum_normal_traction=10 "
-                 "Materials/czm_mat/maximum_shear_traction=7 Outputs/file_base=czm_jacobian_3DC_out "
-                 "BCs/right_x/function=1*t BCs/right_y/function=0*t BCs/right_z/function=0*t "
-                 "Outputs/out/file_base=3DC_normal_load_out"
+                 "Materials/czm_mat/maximum_shear_traction=7 BCs/right_x/function=1*t "
+                 "BCs/right_y/function=0*t BCs/right_z/function=0*t "
+                 "Outputs/file_base=3DC_normal_load_out"
       mesh_mode = 'REPLICATED'
-      recover = false
       detail = "The 3DC traction separation shall produce only a normal traction when a normal "
                "displacement jump is applied."
       abs_zero = 1e-6
@@ -391,12 +342,10 @@
                  "Materials/czm_mat/normal_gap_at_maximum_normal_traction=1 "
                  "Materials/czm_mat/tangential_gap_at_maximum_shear_traction=1 "
                  "Materials/czm_mat/maximum_normal_traction=10 "
-                 "Materials/czm_mat/maximum_shear_traction=7 Outputs/file_base=czm_jacobian_3DC_out "
-                 "BCs/right_x/function=0*t BCs/right_y/function=1*t BCs/right_z/function=0*t "
-                 "Outputs/out/file_base=czm_3DC_load_shear_y_out Executioner/dt=0.25  "
-                 "Outputs/out/file_base=3DC_shear_load_y_out"
+                 "Materials/czm_mat/maximum_shear_traction=7 BCs/right_x/function=0*t "
+                 "BCs/right_y/function=1*t BCs/right_z/function=0*t Executioner/dt=0.25  "
+                 "Outputs/file_base=3DC_shear_load_y_out"
       mesh_mode = 'REPLICATED'
-      recover = false
       detail = "The 3DC traction separation shall produce only a shear traction y when a only a "
                "displacement jump along y is applied."
       abs_zero = 1e-6
@@ -409,12 +358,10 @@
                  "Materials/czm_mat/normal_gap_at_maximum_normal_traction=1 "
                  "Materials/czm_mat/tangential_gap_at_maximum_shear_traction=1 "
                  "Materials/czm_mat/maximum_normal_traction=10 "
-                 "Materials/czm_mat/maximum_shear_traction=7 Outputs/file_base=czm_jacobian_3DC_out "
-                 "BCs/right_x/function=0*t BCs/right_y/function=0*t BCs/right_z/function=1*t "
-                 "Outputs/out/file_base=czm_3DC_load_shear_z_out Executioner/dt=0.25 "
-                 "Executioner/dt=0.25  Outputs/out/file_base=3DC_shear_load_z_out"
+                 "Materials/czm_mat/maximum_shear_traction=7 BCs/right_x/function=0*t "
+                 "BCs/right_y/function=0*t BCs/right_z/function=1*t Executioner/dt=0.25 "
+                 "Outputs/file_base=3DC_shear_load_z_out"
       mesh_mode = 'REPLICATED'
-      recover = false
       detail = "The 3DC traction separation shall produce only a shear traction z when a only a "
                "displacement jump along z is applied."
       abs_zero = 1e-6

@@ -39,6 +39,7 @@
     input = top_node
     new_boundary = bottom_node
   []
+  use_checkpoint_mesh = false
 []
 
 [GlobalParams]

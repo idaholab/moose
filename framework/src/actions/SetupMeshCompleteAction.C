@@ -63,7 +63,7 @@ SetupMeshCompleteAction::act()
      * file based restart and we need uniform refinements, we'll have to postpone
      * those refinements until after the solution has been read in.
      */
-    if (_app.getExodusFileRestart() == false && _app.isRecovering() == false)
+    if (_app.getExodusFileRestart() == false && _mesh->useCheckpointMesh() == false)
     {
       TIME_SECTION("uniformRefine", 2, "Uniformly Refining");
 

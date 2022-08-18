@@ -510,6 +510,9 @@ public:
    */
   bool skipRefineWhenUseSplit() const { return _skip_refine_when_use_split; }
 
+  /// Whether we want to use the checkpoint mesh during recover
+  bool useCheckpointMesh() const { return _app.isRecovering() && _use_checkpoint_mesh; }
+
   /**
    * This will add the boundary ids to be ghosted to this processor
    */
@@ -1219,6 +1222,9 @@ protected:
 
   /// Whether or not skip remote deletion and repartition after uniform refinements
   bool _skip_deletion_repartition_after_refine;
+
+  /// Whether to use the checkpoint mesh during recover
+  const bool _use_checkpoint_mesh;
 
   /// true if mesh is changed (i.e. after adaptivity step)
   bool _is_changed;

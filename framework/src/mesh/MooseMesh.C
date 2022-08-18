@@ -147,6 +147,11 @@ MooseMesh::validParams()
                         true,
                         "True to skip uniform refinements when using a pre-split mesh.");
 
+  params.addParam<bool>("use_checkpoint_mesh",
+                        true,
+                        "True to use the checkpoint mesh during recover. If set to false, the mesh "
+                        "will be regenerated during recover.");
+
   params += MooseAppCoordTransform::validParams();
 
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
@@ -156,9 +161,9 @@ MooseMesh::validParams()
   params.registerBase("MooseMesh");
 
   // groups
-  params.addParamNamesToGroup(
-      "dim nemesis patch_update_strategy construct_node_list_from_side_list patch_size",
-      "Advanced");
+  params.addParamNamesToGroup("dim nemesis patch_update_strategy "
+                              "construct_node_list_from_side_list patch_size use_checkpoint_mesh",
+                              "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
   return params;
@@ -179,6 +184,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _uniform_refine_level(0),
     _skip_refine_when_use_split(getParam<bool>("skip_refine_when_use_split")),
     _skip_deletion_repartition_after_refine(false),
+    _use_checkpoint_mesh(getParam<bool>("use_checkpoint_mesh")),
     _is_nemesis(getParam<bool>("nemesis")),
     _node_to_elem_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
@@ -221,6 +227,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _uniform_refine_level(other_mesh.uniformRefineLevel()),
     _skip_refine_when_use_split(other_mesh._skip_refine_when_use_split),
     _skip_deletion_repartition_after_refine(other_mesh._skip_deletion_repartition_after_refine),
+    _use_checkpoint_mesh(other_mesh._use_checkpoint_mesh),
     _is_nemesis(false),
     _node_to_elem_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
@@ -2361,7 +2368,7 @@ MooseMesh::init()
 
   TIME_SECTION("init", 2);
 
-  if (_app.isRecovering() && _allow_recovery && _app.isUltimateMaster())
+  if (useCheckpointMesh() && _allow_recovery && _app.isUltimateMaster())
   {
     // Some partitioners are not idempotent.  Some recovery data
     // files require partitioning to match mesh partitioning.  This

@@ -6,27 +6,27 @@
 # The mesh is composed of two, single-elemnt blocks
 
 [Mesh]
-  [./msh]
-  type = GeneratedMeshGenerator
-  dim = 3
-  nx = 1
-  ny = 1
-  nz = 2
-  xmin = -0.5
-  xmax = 0.5
-  ymin = -0.5
-  ymax = 0.5
-  zmin = -1
-  zmax = 1
+  [msh]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 1
+    ny = 1
+    nz = 2
+    xmin = -0.5
+    xmax = 0.5
+    ymin = -0.5
+    ymax = 0.5
+    zmin = -1
+    zmax = 1
   []
-  [./new_block]
+  [new_block]
     type = SubdomainBoundingBoxGenerator
     input = msh
     block_id = 1
     bottom_left = '-0.5 -0.5 0'
     top_right = '0.5 0.5 0.5'
   []
-  [./split]
+  [split]
     type = BreakMeshByBlockGenerator
     input = new_block
   []
@@ -42,6 +42,7 @@
     fixed_normal = true
     new_boundary = 'y0 y1 x0 x1 z0 z1'
   []
+  use_checkpoint_mesh = false
 []
 
 [GlobalParams]
@@ -49,44 +50,44 @@
 []
 
 [Functions]
-  [./stretch]
+  [stretch]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 300'
-  [../]
+  []
 []
 
 [BCs]
-  [./fix_x]
+  [fix_x]
     type = DirichletBC
     preset = true
     value = 0.0
     boundary = x0
     variable = disp_x
-  [../]
-  [./fix_y]
+  []
+  [fix_y]
     type = DirichletBC
     preset = true
     value = 0.0
     boundary = y0
     variable = disp_y
-  [../]
-  [./fix_z]
+  []
+  [fix_z]
     type = DirichletBC
     preset = true
     value = 0.0
     boundary = z0
     variable = disp_z
-  [../]
-  [./back_z]
+  []
+  [back_z]
     type = FunctionNeumannBC
     boundary = z1
     variable = disp_z
     use_displaced_mesh = false
     function = stretch
-  [../]
+  []
 
-  [./rotate_x]
+  [rotate_x]
     type = DisplacementAboutAxis
     boundary = 'x0 y0 z0 z1'
     function = '90.'
@@ -96,8 +97,8 @@
     component = 0
     variable = disp_x
     angular_velocity = true
-  [../]
-  [./rotate_y]
+  []
+  [rotate_y]
     type = DisplacementAboutAxis
     boundary = 'x0 y0 z0 z1'
     function = '90.'
@@ -107,8 +108,8 @@
     component = 1
     variable = disp_y
     angular_velocity = true
-  [../]
-  [./rotate_z]
+  []
+  [rotate_z]
     type = DisplacementAboutAxis
     boundary = 'x0 y0 z0 z1'
     function = '90.'
@@ -118,66 +119,63 @@
     component = 2
     variable = disp_z
     angular_velocity = true
-  [../]
+  []
 []
 
-
-
 [Modules/TensorMechanics/CohesiveZoneMaster]
-  [./czm_ik]
+  [czm_ik]
     boundary = 'interface'
     strain = FINITE
-    generate_output='traction_x traction_y traction_z jump_x jump_y jump_z normal_traction tangent_traction normal_jump tangent_jump pk1_traction_x pk1_traction_y pk1_traction_z'
-  [../]
+    generate_output = 'traction_x traction_y traction_z jump_x jump_y jump_z normal_traction tangent_traction normal_jump tangent_jump pk1_traction_x pk1_traction_y pk1_traction_z'
+  []
 []
 
 [Controls]
-  [./c1]
+  [c1]
     type = TimePeriod
     enable_objects = 'BCs::fix_x BCs::fix_y BCs::fix_z BCs::back_z'
     disable_objects = 'BCs::rotate_x BCs::rotate_y BCs::rotate_z'
     start_time = '0'
     end_time = '1'
-  [../]
+  []
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
+  [TensorMechanics]
+    [Master]
+      [all]
         strain = FINITE
         add_variables = true
         use_finite_deform_jacobian = true
         use_automatic_differentiation = true
         generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_xz'
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
-
 [Materials]
-  [./stress]
+  [stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e3
     poissons_ratio = 0.3
-  [../]
-  [./czm_mat]
+  []
+  [czm_mat]
     type = PureElasticTractionSeparation
     boundary = 'interface'
     normal_stiffness = 10000
     tangent_stiffness = 7000
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -197,5 +195,5 @@
 
 [Outputs]
   exodus = true
-  csv =true
+  csv = true
 []
