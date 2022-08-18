@@ -129,7 +129,6 @@ l = 4
     cp = cp
     rho = rho
     drho_dt = drho_dt
-    dcp_dt = 0
   []
   [temp_conduction]
     type = FVDiffusion

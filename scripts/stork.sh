@@ -124,7 +124,7 @@ if [[ "$kind" == "app" ]]; then
     cp $MOOSE_DIR/.gitignore $dir/
 
     dir="$PWD/$dir"
-    (cd $dir && git init && git add * .clang-format .gitignore && git commit -m"Initial files")
+    (cd $dir && git init && git branch -m main && git add * .clang-format .gitignore && git commit -m"Initial files")
 
     echo "MOOSE app created in '$dir'"
     echo ""
