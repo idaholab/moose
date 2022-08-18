@@ -24,7 +24,9 @@ NodalConstraint::validParams()
   params.addParam<MooseEnum>("formulation",
                              formulationtype,
                              "Formulation used to calculate constraint - penalty or kinematic.");
-  params.addParam<NonlinearVariableName>("variable_secondary", "The name of the variable for the secondary nodes, if it is different from the primary nodes' variable");
+  params.addParam<NonlinearVariableName>("variable_secondary",
+                                         "The name of the variable for the secondary nodes, if it "
+                                         "is different from the primary nodes' variable");
   return params;
 }
 
@@ -34,8 +36,11 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters)
     NeighborMooseVariableInterface<Real>(
         this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
-    _var_secondary(_sys.getFieldVariable<Real>(_tid, isParamValid("variable_secondary") ?
-                parameters.get<NonlinearVariableName>("variable_secondary") : parameters.get<NonlinearVariableName>("variable"))),
+    _var_secondary(_sys.getFieldVariable<Real>(
+        _tid,
+        isParamValid("variable_secondary")
+            ? parameters.get<NonlinearVariableName>("variable_secondary")
+            : parameters.get<NonlinearVariableName>("variable"))),
     _u_secondary(_var_secondary.dofValuesNeighbor()),
     _u_primary(_var.dofValues())
 {
@@ -100,7 +105,6 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
   std::vector<dof_id_type> secondarydof = _var_secondary.dofIndicesNeighbor();
   std::vector<dof_id_type> primarydof = _var.dofIndices();
 
-
   DenseMatrix<Number> Kee(primarydof.size(), primarydof.size());
   DenseMatrix<Number> Ken(primarydof.size(), secondarydof.size());
   DenseMatrix<Number> Kne(secondarydof.size(), primarydof.size());
@@ -147,7 +151,8 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
                 computeQpJacobian(Moose::SecondarySecondary);
         break;
     }
-    _assembly.cacheJacobian(secondarydof[_i], secondarydof[_i], value * _var_secondary.scalingFactor());
+    _assembly.cacheJacobian(
+        secondarydof[_i], secondarydof[_i], value * _var_secondary.scalingFactor());
   }
 }
 
