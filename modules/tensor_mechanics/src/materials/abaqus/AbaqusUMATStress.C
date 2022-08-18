@@ -60,6 +60,8 @@ AbaqusUMATStressTempl<new_system>::AbaqusUMATStressTempl(const InputParameters &
     _aqSTATEV(_aqNSTATV),
     _aqPROPS(this->template getParam<std::vector<Real>>("constant_properties")),
     _aqNPROPS(_aqPROPS.size()),
+    _stress_old(this->template getMaterialPropertyOld<RankTwoTensor>(
+        _base_name + (new_system ? "cauchy_stress" : "stress"))),
     _total_strain_old(
         this->template getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
     _strain_increment(

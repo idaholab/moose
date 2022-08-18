@@ -24,16 +24,11 @@ class AbaqusUMATStressBase</*new_system = */ false> : public ComputeStressBase
 public:
   static InputParameters validParams() { return ComputeStressBase::validParams(); }
 
-  AbaqusUMATStressBase(const InputParameters & params)
-    : ComputeStressBase(params),
-      _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress"))
-  {
-  }
+  AbaqusUMATStressBase(const InputParameters & params) : ComputeStressBase(params) {}
 
 protected:
   virtual void computeQpStress() { computeQpStressHelper(); }
   virtual void computeQpStressHelper() = 0;
-  const MaterialProperty<RankTwoTensor> & _stress_old;
 };
 
 // Shim for the new system
@@ -43,16 +38,11 @@ class AbaqusUMATStressBase</*new_system = */ true> : public ComputeLagrangianObj
 public:
   static InputParameters validParams() { return ComputeLagrangianObjectiveStress::validParams(); }
 
-  AbaqusUMATStressBase(const InputParameters & params)
-    : ComputeLagrangianObjectiveStress(params),
-      _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "cauchy_stress"))
-  {
-  }
+  AbaqusUMATStressBase(const InputParameters & params) : ComputeLagrangianObjectiveStress(params) {}
 
 protected:
   virtual void computeQpSmallStress() { computeQpStressHelper(); }
   virtual void computeQpStressHelper() = 0;
-  const MaterialProperty<RankTwoTensor> & _stress_old;
 };
 
 /**
@@ -239,8 +229,9 @@ protected:
   std::vector<Real> _aqDPRED;
 
   void initQpStatefulProperties() override;
-  void computeQpStressHelper();
+  void computeQpStressHelper() override;
 
+  const MaterialProperty<RankTwoTensor> & _stress_old;
   const MaterialProperty<RankTwoTensor> & _total_strain_old;
   const OptionalMaterialProperty<RankTwoTensor> & _strain_increment;
 
@@ -292,7 +283,6 @@ protected:
   using AbaqusUMATStressBase<new_system>::_t;
   using AbaqusUMATStressBase<new_system>::_dt;
   using AbaqusUMATStressBase<new_system>::_t_step;
-  using AbaqusUMATStressBase<new_system>::_stress_old;
 };
 
 typedef AbaqusUMATStressTempl<false> AbaqusUMATStress;
