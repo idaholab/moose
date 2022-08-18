@@ -369,7 +369,7 @@ expensive may be good candidates for computing the residual and Jacobian togethe
 ## Reusing preconditioners id=reuse_preconditioners
 
 The simple version of GRMES and other iterative methods converge only very
-slowly.  To improve convergence PETSc and other iterative solver packages
+slowly.  To improve convergence, PETSc and other iterative solver packages
 apply a [preconditioner](https://en.wikipedia.org/wiki/Preconditioner) to the
 system of equations/sparse matrix before applying the iterative solver.
 
@@ -421,14 +421,10 @@ configure PETSc and MOOSE to solve the equations with this combination:
   nl_abs_tol = 1e-10
 ```
 
-This solver strategy can be very efficient when solving a problem on a 
-desktop or workstation computer (i.e. not on a cluster).  However, it
-is a heuristic -- the efficiency of the approach and the optimal value
-of `reuse_preconditioner_max_its` will vary greatly depending on the type of
-physics you are solving and on how quickly the structure of the problem
-changes from load step to load step.
-
-On larger machines reusing the AMG preconditioner provided by BoomerAMG
-may be a way to increase the efficiency of the overall simulation.  Again,
-this is a heuristic and the effectiveness of the approach and good values
-of `reuse_preconditioner_max_its` are going to vary.
+This solver strategy can be very effective when the system Jacobian
+does not change very much from nonlinear iteration to nonlinear iteration
+and/or from time step to time step.  The heuristic is also most effective
+when the cost of solving the linearized system is a large fraction of
+the total simulation time.  As such, it can be especially beneficial
+when using an expensive preconditioner, like a direct solver, as shown
+in this example.
