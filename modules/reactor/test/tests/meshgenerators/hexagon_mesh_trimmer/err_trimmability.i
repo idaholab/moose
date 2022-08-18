@@ -1,5 +1,4 @@
 [Mesh]
-  final_generator = trim
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2

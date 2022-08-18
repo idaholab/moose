@@ -12,8 +12,8 @@
 #include "MooseEnum.h"
 
 /**
- * This HexagonMeshTrimmer object takes in a polygon/hexagon concentric circle mesh and
- * renames blocks on a user-defined azimuthal segment / wedge of the mesh.
+ * This HexagonMeshTrimmer object takes in a hexagonal assembly or core mesh and perform peripheral
+ * and/or center trimming on it.
  */
 class HexagonMeshTrimmer : public PolygonMeshGeneratorBase
 {
@@ -27,13 +27,13 @@ public:
 protected:
   /// Input mesh to be modified
   const MeshGeneratorName _input_name;
-  /// Peripheral regions that need to be trimmed
+  /// Index of the peripheral regions to be trimmed (see moosedocs for indexing scheme)
   std::vector<unsigned short> _trim_peripheral_region;
   /// Name of the section formed by peripheral trimming
   const BoundaryName _peripheral_trimming_section_boundary;
-  /// Sector number to remain
+  /// Number of remaining sectors
   const unsigned int _center_trim_sector_number;
-  /// Starting Sector to remain after
+  /// Index of the sector to start trimming from (counter-clockwise direction)
   const unsigned int _trimming_start_sector;
   /// Name of the section formed by center trimming
   const BoundaryName _center_trimming_section_boundary;

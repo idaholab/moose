@@ -52,7 +52,7 @@ protected:
   const BoundaryName _external_boundary_name;
   /// Reference to input mesh pointer
   std::unique_ptr<MeshBase> & _input;
-  /// MeshMetaData: whether the paeripheral area of the generated mesh can be trimmed by PolygonMeshTrimmer
+  /// MeshMetaData: whether the peripheral area of the generated mesh can be trimmed by PolygonMeshTrimmer
   const bool & _hexagon_peripheral_trimmability;
   /// MeshMetaData: whether the generated mesh can be trimmed through its center by PolygonMeshTrimmer
   bool & _hexagon_center_trimmability;

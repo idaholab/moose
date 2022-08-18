@@ -1,9 +1,8 @@
 [Mesh]
-  final_generator = trim
   [hex_1]
     type = PolygonConcentricCircleMeshGenerator
     num_sides = 6
-    num_sectors_per_side = '4 4 4 4 4 4'
+    num_sectors_per_side = '2 2 2 2 2 2'
     background_intervals = 2
     ring_radii = 4.0
     ring_intervals = 2

@@ -611,6 +611,7 @@ PatternedHexMeshGenerator::generate()
     }
   }
 
+  // Check if OUTER_SIDESET_ID is really the external boundary. Correct if needed.
   auto side_list = out_mesh->get_boundary_info().build_side_list();
   for (auto & sl : side_list)
   {
