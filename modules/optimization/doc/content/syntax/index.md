@@ -5,8 +5,8 @@ See below for complete lists of syntax for each of the module:
 - [MOOSE framework](syntax/framework.md)
 - [Heat Conduction](syntax/heat_conduction.md)
 - [Stochastic Tools](syntax/StochasticTools/index.md)
-- [Isopod](syntax/isopod.md)
+- [Optimization](syntax/Optimization/index.md)
 
-Below is a complete list of the syntax specific to isopod:
+Below is a complete list of the syntax specific to the optimization module:
 
-!syntax complete groups=isopodApp
+!syntax complete groups=OptimizationApp

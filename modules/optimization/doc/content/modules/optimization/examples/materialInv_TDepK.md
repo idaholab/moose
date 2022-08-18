@@ -1,8 +1,8 @@
-# Material Inversion Example: Constant Thermal Conductivity
+# Material Inversion Example: Temperature Dependent Thermal Conductivity
 
 ## Background
 
-Isopod provides a flexible framework for solve inverse optimization problems in MOOSE.  This page is part of a set of examples for different types of inverse optimization problems. 
+The MOOSE optimization module provides a flexible framework for solving inverse optimization problems in MOOSE.  This page is part of a set of examples for different types of inverse optimization problems.
 
 - [Theory](getting_started/InvOptTheory.md)
 - [Examples overview](examples/index.md)
@@ -10,7 +10,7 @@ Isopod provides a flexible framework for solve inverse optimization problems in 
 - [Example 2: Constant Thermal Conductivity](materialInv_ConstK.md)
 - [Example 3: Temperature Dependent Thermal Conductivity](materialInv_TDepK.md)
 
-# Example: Constant Thermal Conductivity id=sec:ConstMaterialInversion
+# Example: Temperature Dependent Thermal Conductivity id=sec:TDepMaterialInversion
 
 fixme Lynn
 

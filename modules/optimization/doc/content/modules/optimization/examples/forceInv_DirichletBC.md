@@ -2,7 +2,7 @@
 
 ## Background
 
-Isopod provides a flexible framework for solve inverse optimization problems in MOOSE.  This page is part of a set of examples for different types of inverse optimization problems. 
+The MOOSE optimization module provides a flexible framework for solving inverse optimization problems in MOOSE.  This page is part of a set of examples for different types of inverse optimization problems.
 
 - [Theory](getting_started/InvOptTheory.md)
 - [Examples overview](examples/index.md)

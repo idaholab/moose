@@ -1,33 +1,40 @@
 Applications:
-    isopod:
-        exe_directory: ${ROOT_DIR}
-        exe_name: isopod
+    optimization:
+        exe_directory: ${MOOSE_DIR}/modules/optimization
         app_types:
-            - isopodApp
-        content_directory: doc/content
+            - optimizationApp
+        content_directory: ${MOOSE_DIR}/modules/optimization/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+        log_missing_markdown: WARNING
 
 Documents:
-    software_requirements_specification: sqa/isopod_srs.md
-    software_design_description: sqa/isopod_sdd.md
-    software_test_plan: sqa/isopod_stp.md
-    requirements_traceablity_matrix: sqa/isopod_rtm.md
-    verification_validation_report: sqa/isopod_vvr.md
-    failure_analysis_report: sqa/isopod_vvr.md
-    log_safety_software_determination: WARNING
-    log_quality_level_determination: WARNING
-    log_enterprise_architecture_entry: WARNING
-    log_project_management_plan: WARNING
-    log_software_quality_plan: WARNING
-    log_configuration_management_plan: WARNING
-    log_asset_management_plan: WARNING
-    log_verification_validation_plan: WARNING
+    software_quality_plan: sqa/inl_records.md#software_quality_plan
+    enterprise_architecture_entry: sqa/inl_records.md#enterprise_architecture_entry
+    safety_software_determination: sqa/inl_records.md#safety_software_determination
+    quality_level_determination: sqa/inl_records.md#quality_level_determination
+    configuration_management_plan: sqa/inl_records.md#configuration_management_plan
+    asset_management_plan: sqa/inl_records.md#asset_management_plan
+    verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
+    software_requirements_specification: sqa/optimization_srs.md
+    software_design_description: sqa/optimization_sdd.md
+    software_test_plan: sqa/optimization_stp.md
+    requirements_traceablity_matrix: sqa/optimization_rtm.md
+    verification_validation_report: sqa/optimization_vvr.md
+    failure_analysis_report: sqa/optimization_far.md
+    software_library_list: sqa/optimization_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
     log_user_manual: WARNING
     log_theory_manual: WARNING
-    show_warning: false
 
 Requirements:
-    isopod:
+    optimization:
         directories:
-            - test/tests
+            - ${MOOSE_DIR}/modules/optimization
+        log_duplicate_requirement: WARNING
+        log_missing: WARNING
+        log_missing_requirement: WARNING
         log_testable: WARNING
-        show_warning: false

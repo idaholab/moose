@@ -2,7 +2,7 @@
 
 ## Background
 
-Isopod provides a flexible framework for solve inverse optimization problems in MOOSE.  This page is part of a set of examples for different types of inverse optimization problems. 
+The MOOSE optimization module provides a flexible framework for solving inverse optimization problems in MOOSE.  This page is part of a set of examples for different types of inverse optimization problems.
 
 - [Theory](getting_started/InvOptTheory.md)
 - [Examples overview](examples/index.md)
@@ -13,7 +13,7 @@ Isopod provides a flexible framework for solve inverse optimization problems in 
 
 # Example 1: Point Loads id=sec:invOptTheory
 
-In this example we are parameterizing the heat source intensity at the locations indicated by the $\bigcirc$ symbols in [figSetup] that will produce a temperature field that most closely matches the temperature measurements taken at the points indicated by the $\times$ symbols.  Dirichlet boundary conditions are applied to the entire boundary with T=300.  
+In this example we are parameterizing the heat source intensity at the locations indicated by the $\bigcirc$ symbols in [figSetup] that will produce a temperature field that most closely matches the temperature measurements taken at the points indicated by the $\times$ symbols.  Dirichlet boundary conditions are applied to the entire boundary with T=300.
 
 !media media/fig_setup.png
        style=width:40%;margin:auto;padding-top:2.5%;
@@ -28,7 +28,7 @@ Optimization problems are solved using the [MultiApps](MultiApps/index.md) syste
          id=fig:master_app
          caption=Main application optimization input for point load parameterization shown in [figSetup]
 
-The main application runs the optimization executioner and transfers data from the optimization executioner back and forth to the sub-apps that are running the "forward" and "adjoint" FE models.  Since no mesh or physics kernels are required on the main-app, we use the [StochasticTools](syntax/StochasticTools/index.md) action to set up all of the nullkernels, empty mesh, etc. needed to get a MOOSE simulation to run.  
+The main application runs the optimization executioner and transfers data from the optimization executioner back and forth to the sub-apps that are running the "forward" and "adjoint" FE models.  Since no mesh or physics kernels are required on the main-app, we use the [StochasticTools](syntax/StochasticTools/index.md) action to set up all of the nullkernels, empty mesh, etc. needed to get a MOOSE simulation to run.
 
 The [optimize](Optimize.md) executioner block, shown below, provides an interface with the [PETSc TAO](https://www.mcs.anl.gov/petsc/documentation/taosolvertable.html) optimization library. The optimization algorithm is selected with `tao_solver` with specific solver options set with `petsc_options`.
 
@@ -36,14 +36,14 @@ The [optimize](Optimize.md) executioner block, shown below, provides an interfac
 !listing test/tests/optimizationreporter/objective_gradient_minimize/point_loads/master.i
          block=Executioner
 
-The `Optimize` executioner requires a [OptimizationReporter](syntax/OptimizationReporter/index.md), shown below, to transfer data between the optimization executioner and the transfers used for communicating with the sub-apps.  The type of `OptimizationReporter` depends on the optimization algorithm, given by teh  
+The `Optimize` executioner requires a [OptimizationReporter](syntax/OptimizationReporter/index.md), shown below, to transfer data between the optimization executioner and the transfers used for communicating with the sub-apps.  The type of `OptimizationReporter` depends on the optimization algorithm, given by teh
 
 !listing test/tests/optimizationreporter/objective_gradient_minimize/point_loads/master.i
          block=OptimizationReporter
 
 
 
-The optimization executioner on the main app does not need a mesh or variables and uses the action to set-up a dummy mesh and variables.  
+The optimization executioner on the main app does not need a mesh or variables and uses the action to set-up a dummy mesh and variables.
 
 !media media/fig_forward.png
       style=width:60%;margin:auto;padding-top:2.5%;
