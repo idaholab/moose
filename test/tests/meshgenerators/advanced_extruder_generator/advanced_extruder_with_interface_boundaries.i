@@ -5,7 +5,7 @@
     file = mesh_2d.e
   []
   [extrude]
-    type = FancyExtruderGenerator
+    type = AdvancedExtruderGenerator
     input = fmg
     heights = '1 2 3'
     num_layers = '1 2 1'

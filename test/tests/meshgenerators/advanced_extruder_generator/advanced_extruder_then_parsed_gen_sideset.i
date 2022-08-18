@@ -9,7 +9,7 @@
   []
 
   [extrude]
-    type = FancyExtruderGenerator
+    type = AdvancedExtruderGenerator
     direction = '0 0 1'
     heights = '1 1 1'
     num_layers = '1 1 1'

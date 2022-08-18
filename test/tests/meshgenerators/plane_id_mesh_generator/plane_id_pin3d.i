@@ -10,7 +10,7 @@
     smoothing_max_it = 3
   []
   [pin3d]
-    type = FancyExtruderGenerator
+    type = AdvancedExtruderGenerator
     input = 'pin2d'
     heights = '5.0 5.0 5.0'
     direction = '0 0 1'

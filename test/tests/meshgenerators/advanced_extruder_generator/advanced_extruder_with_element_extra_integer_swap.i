@@ -10,7 +10,7 @@
     exodus_extra_element_integers = 'element_extra_integer_1 element_extra_integer_2'
   []
   [extrude]
-    type = FancyExtruderGenerator
+    type = AdvancedExtruderGenerator
     input = fmg
     heights = '1 2 3'
     num_layers = '1 2 3'

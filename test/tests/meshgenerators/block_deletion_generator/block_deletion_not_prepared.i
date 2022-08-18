@@ -10,7 +10,7 @@
                     2 2 2'
   []
   [feg]
-    type = FancyExtruderGenerator
+    type = AdvancedExtruderGenerator
     input = cmg
     direction = '0 0 1'
     heights = 1

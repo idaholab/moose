@@ -409,7 +409,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         getMeshProperty<boundary_id_type>("bottom_boundary_id", _reactor_params);
     {
       declareMeshProperty("extruded", true);
-      auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
+      auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
 
       params.set<MeshGeneratorName>("input") = name() + "_delbds";
       params.set<Point>("direction") = Point(0, 0, 1);
@@ -419,7 +419,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
       params.set<boundary_id_type>("top_boundary") = top_boundary;
 
-      addMeshSubgenerator("FancyExtruderGenerator", name() + "_extruded", params);
+      addMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
     }
 
     {

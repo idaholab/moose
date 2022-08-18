@@ -16,12 +16,12 @@
 /**
  * Extrudes a mesh to another dimension
  */
-class FancyExtruderGenerator : public MeshGenerator
+class AdvancedExtruderGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  FancyExtruderGenerator(const InputParameters & parameters);
+  AdvancedExtruderGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

@@ -349,7 +349,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     const auto bottom_boundary = getReactorParam<boundary_id_type>("bottom_boundary_id");
     {
       declareMeshProperty("extruded", true);
-      auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
+      auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
 
       params.set<MeshGeneratorName>("input") = name() + "_del_bds";
       params.set<Point>("direction") = Point(0, 0, 1);
@@ -358,7 +358,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<Real>>("heights") = axial_boundaries;
       params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
       params.set<boundary_id_type>("top_boundary") = top_boundary;
-      addMeshSubgenerator("FancyExtruderGenerator", name() + "_extruded", params);
+      addMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
     }
 
     {

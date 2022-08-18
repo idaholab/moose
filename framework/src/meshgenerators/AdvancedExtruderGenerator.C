@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FancyExtruderGenerator.h"
+#include "AdvancedExtruderGenerator.h"
 #include "MooseUtils.h"
 
 #include "libmesh/boundary_info.h"
@@ -34,10 +34,14 @@
 
 #include <numeric>
 
-registerMooseObject("MooseApp", FancyExtruderGenerator);
+registerMooseObject("MooseApp", AdvancedExtruderGenerator);
+registerMooseObjectRenamed("MooseApp",
+                           FancyExtruderGenerator,
+                           "02/18/2023 24:00",
+                           AdvancedExtruderGenerator);
 
 InputParameters
-FancyExtruderGenerator::validParams()
+AdvancedExtruderGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -114,7 +118,7 @@ FancyExtruderGenerator::validParams()
   return params;
 }
 
-FancyExtruderGenerator::FancyExtruderGenerator(const InputParameters & parameters)
+AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _heights(getParam<std::vector<Real>>("heights")),
@@ -282,7 +286,7 @@ FancyExtruderGenerator::FancyExtruderGenerator(const InputParameters & parameter
 }
 
 std::unique_ptr<MeshBase>
-FancyExtruderGenerator::generate()
+AdvancedExtruderGenerator::generate()
 {
   // Note: bulk of this code originally from libmesh mesh_modification.C
   // Original copyright: Copyright (C) 2002-2019 Benjamin S. Kirk, John W. Peterson, Roy H. Stogner
@@ -890,7 +894,9 @@ FancyExtruderGenerator::generate()
 }
 
 void
-FancyExtruderGenerator::swapNodesInElem(Elem * elem, const unsigned int nd1, const unsigned int nd2)
+AdvancedExtruderGenerator::swapNodesInElem(Elem * elem,
+                                           const unsigned int nd1,
+                                           const unsigned int nd2)
 {
   Node * n_temp = elem->node_ptr(nd1);
   elem->set_node(nd1) = elem->node_ptr(nd2);

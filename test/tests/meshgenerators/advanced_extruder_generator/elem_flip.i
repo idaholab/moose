@@ -16,7 +16,7 @@
     stitch_boundaries_pairs = 'bottom bottom'
   []
   [feg]
-    type = FancyExtruderGenerator
+    type = AdvancedExtruderGenerator
     input = stitch
     direction = '0 0 1'
     num_layers = 1
