@@ -24,6 +24,7 @@ NodalConstraint::validParams()
   params.addParam<MooseEnum>("formulation",
                              formulationtype,
                              "Formulation used to calculate constraint - penalty or kinematic.");
+  params.addParam<NonlinearVariableName>("variable_secondary", "The name of the variable for the secondary nodes, if it is different from the primary nodes' variable");
   return params;
 }
 
@@ -33,10 +34,13 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters)
     NeighborMooseVariableInterface<Real>(
         this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
-    _u_secondary(_var.dofValuesNeighbor()),
+    _var_secondary(_sys.getFieldVariable<Real>(_tid, isParamValid("variable_secondary") ?
+                parameters.get<NonlinearVariableName>("variable_secondary") : parameters.get<NonlinearVariableName>("variable"))),
+    _u_secondary(_var_secondary.dofValuesNeighbor()),
     _u_primary(_var.dofValues())
 {
   addMooseVariableDependency(&_var);
+  addMooseVariableDependency(&_var_secondary);
 
   MooseEnum temp_formulation = getParam<MooseEnum>("formulation");
   if (temp_formulation == "penalty")
@@ -54,7 +58,8 @@ NodalConstraint::computeResidual(NumericVector<Number> & residual)
     _weights.push_back(1.0);
 
   std::vector<dof_id_type> primarydof = _var.dofIndices();
-  std::vector<dof_id_type> secondarydof = _var.dofIndicesNeighbor();
+  std::vector<dof_id_type> secondarydof = _var_secondary.dofIndicesNeighbor();
+
   DenseVector<Number> re(primarydof.size());
   DenseVector<Number> neighbor_re(secondarydof.size());
 
@@ -69,7 +74,7 @@ NodalConstraint::computeResidual(NumericVector<Number> & residual)
       {
         case Moose::Penalty:
           re(_j) += computeQpResidual(Moose::Primary) * _var.scalingFactor();
-          neighbor_re(_i) += computeQpResidual(Moose::Secondary) * _var.scalingFactor();
+          neighbor_re(_i) += computeQpResidual(Moose::Secondary) * _var_secondary.scalingFactor();
           break;
         case Moose::Kinematic:
           // Transfer the current residual of the secondary node to the primary nodes
@@ -92,8 +97,9 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
     _weights.push_back(1.0);
 
   // Calculate the dense-block Jacobian entries
-  std::vector<dof_id_type> secondarydof = _var.dofIndicesNeighbor();
+  std::vector<dof_id_type> secondarydof = _var_secondary.dofIndicesNeighbor();
   std::vector<dof_id_type> primarydof = _var.dofIndices();
+
 
   DenseMatrix<Number> Kee(primarydof.size(), primarydof.size());
   DenseMatrix<Number> Ken(primarydof.size(), secondarydof.size());
@@ -125,7 +131,7 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
   }
   _assembly.cacheJacobianBlock(Kee, primarydof, primarydof, _var.scalingFactor());
   _assembly.cacheJacobianBlock(Ken, primarydof, secondarydof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Kne, secondarydof, primarydof, _var.scalingFactor());
+  _assembly.cacheJacobianBlock(Kne, secondarydof, primarydof, _var_secondary.scalingFactor());
 
   // Calculate and cache the diagonal secondary-secondary entries
   for (_i = 0; _i < secondarydof.size(); ++_i)
@@ -141,7 +147,7 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
                 computeQpJacobian(Moose::SecondarySecondary);
         break;
     }
-    _assembly.cacheJacobian(secondarydof[_i], secondarydof[_i], value * _var.scalingFactor());
+    _assembly.cacheJacobian(secondarydof[_i], secondarydof[_i], value * _var_secondary.scalingFactor());
   }
 }
 

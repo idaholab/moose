@@ -77,6 +77,8 @@ protected:
 
   MooseVariable & _var;
 
+  MooseVariable & _var_secondary;
+
   /// Value of the unknown variable this BC is action on
   const VariableValue & _u_secondary;
   /// node IDs connected to the primary node (secondary nodes)
