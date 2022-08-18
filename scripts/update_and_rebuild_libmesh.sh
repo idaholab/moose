@@ -66,7 +66,22 @@ fi
 # generate machine diagnostics and write it to the log
 $SCRIPT_DIR/diagnostics.sh > "$SCRIPT_DIR/$DIAGNOSTIC_LOG"
 
+# Checks whether or not LIBMESH_DIR is a child of the conda base
+function check_libmesh_dir_in_conda()
+{
+  type conda &> /dev/null || return
+  CONDA_BASE="$(conda info --base)" 2> /dev/null || return
+  LIBMESH_DIR_ABS="$(readlink -f $LIBMESH_DIR)" 2> /dev/null || return
+  if [[ "$LIBMESH_DIR_ABS" == "$CONDA_BASE"* ]]; then
+    echo "ERROR: LIBMESH_DIR=$LIBMESH_DIR exists within the conda base $CONDA_BASE"
+    echo "Exiting in order to stop you from overwriting your conda environment"
+    exit 1
+  fi
+}
+
 if [[ -n "$LIBMESH_DIR" ]]; then
+  check_libmesh_dir_in_conda
+
   echo "INFO: LIBMESH_DIR set - overriding default installed path"
   echo "INFO: No cleaning will be done in specified path"
   mkdir -p $LIBMESH_DIR
