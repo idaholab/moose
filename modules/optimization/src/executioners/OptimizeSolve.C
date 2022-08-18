@@ -1,5 +1,14 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "OptimizeSolve.h"
-#include "IsopodAppTypes.h"
+#include "OptimizationAppTypes.h"
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
@@ -9,17 +18,17 @@ OptimizeSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
   MooseEnum tao_solver_enum("taontr taobntr taobncg taonls taobnls taontl taobntl taolmvm "
-                            "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm ");
+                            "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm");
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
   exec_enum.addAvailableFlags(EXEC_NONE,
-                              IsopodAppTypes::EXEC_FORWARD,
-                              IsopodAppTypes::EXEC_ADJOINT,
-                              IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD);
-  exec_enum = {IsopodAppTypes::EXEC_FORWARD,
-               IsopodAppTypes::EXEC_ADJOINT,
-               IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD};
+                              OptimizationAppTypes::EXEC_FORWARD,
+                              OptimizationAppTypes::EXEC_ADJOINT,
+                              OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD);
+  exec_enum = {OptimizationAppTypes::EXEC_FORWARD,
+               OptimizationAppTypes::EXEC_ADJOINT,
+               OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD};
   params.addParam<ExecFlagEnum>(
       "solve_on", exec_enum, "List of flags indicating when inner system solve should occur.");
   return params;
@@ -31,7 +40,7 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     _solve_on(getParam<ExecFlagEnum>("solve_on")),
     _verbose(getParam<bool>("verbose")),
     _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
-    _parameters(libmesh_make_unique<libMesh::PetscVector<Number>>(_my_comm))
+    _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm))
 {
   if (libMesh::n_threads() > 1)
     mooseError("OptimizeSolve does not currently support threaded execution");
@@ -145,9 +154,9 @@ OptimizeSolve::taoSolve()
   CHKERRQ(ierr);
 
   // Backup multiapps so transient problems start with the same initial condition
-  _problem.backupMultiApps(IsopodAppTypes::EXEC_FORWARD);
-  _problem.backupMultiApps(IsopodAppTypes::EXEC_ADJOINT);
-  _problem.backupMultiApps(IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD);
+  _problem.backupMultiApps(OptimizationAppTypes::EXEC_FORWARD);
+  _problem.backupMultiApps(OptimizationAppTypes::EXEC_ADJOINT);
+  _problem.backupMultiApps(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD);
 
   // Solve optimization
   ierr = TaoSolve(_tao);
@@ -180,7 +189,7 @@ OptimizeSolve::getTaoSolutionStatus(std::vector<int> & tot_iters,
                                     std::vector<double> & f,
                                     std::vector<int> & tot_solves) const
 {
-  size_t num = _total_iterate_vec.size();
+  const auto num = _total_iterate_vec.size();
   tot_iters.resize(num);
   obj_iters.resize(num);
   grad_iters.resize(num);
@@ -191,7 +200,7 @@ OptimizeSolve::getTaoSolutionStatus(std::vector<int> & tot_iters,
   cnorm.resize(num);
   xdiff.resize(num);
 
-  for (size_t i = 0; i < num; ++i)
+  for (const auto i : make_range(num))
   {
     tot_iters[i] = _total_iterate_vec[i];
     obj_iters[i] = _obj_iterate_vec[i];
@@ -247,7 +256,6 @@ OptimizeSolve::monitor(Tao tao, void * ctx)
 PetscErrorCode
 OptimizeSolve::objectiveFunctionWrapper(Tao /*tao*/, Vec x, Real * objective, void * ctx)
 {
-
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
@@ -312,12 +320,12 @@ OptimizeSolve::objectiveFunction()
 {
   _form_function->updateParameters(*_parameters.get());
 
-  _problem.execute(IsopodAppTypes::EXEC_FORWARD);
+  _problem.execute(OptimizationAppTypes::EXEC_FORWARD);
   bool multiapp_passed = true;
-  _problem.restoreMultiApps(IsopodAppTypes::EXEC_FORWARD);
-  if (!_problem.execMultiApps(IsopodAppTypes::EXEC_FORWARD))
+  _problem.restoreMultiApps(OptimizationAppTypes::EXEC_FORWARD);
+  if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_FORWARD))
     multiapp_passed = false;
-  if (_solve_on.contains(IsopodAppTypes::EXEC_FORWARD))
+  if (_solve_on.contains(OptimizationAppTypes::EXEC_FORWARD))
     _inner_solve->solve();
 
   _obj_iterate++;
@@ -329,11 +337,11 @@ OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 {
   _form_function->updateParameters(*_parameters.get());
 
-  _problem.execute(IsopodAppTypes::EXEC_ADJOINT);
-  _problem.restoreMultiApps(IsopodAppTypes::EXEC_ADJOINT);
-  if (!_problem.execMultiApps(IsopodAppTypes::EXEC_ADJOINT))
+  _problem.execute(OptimizationAppTypes::EXEC_ADJOINT);
+  _problem.restoreMultiApps(OptimizationAppTypes::EXEC_ADJOINT);
+  if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_ADJOINT))
     mooseError("Adjoint solve multiapp failed!");
-  if (_solve_on.contains(IsopodAppTypes::EXEC_ADJOINT))
+  if (_solve_on.contains(OptimizationAppTypes::EXEC_ADJOINT))
     _inner_solve->solve();
 
   _grad_iterate++;
@@ -346,25 +354,26 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
   // What happens for material inversion when the Hessian
   // is dependent on the parameters? Deal with it later???
   // see notes on how this needs to change for Material inversion
-  if (_problem.hasMultiApps() && !_problem.hasMultiApps(IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD))
+  if (_problem.hasMultiApps() &&
+      !_problem.hasMultiApps(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD))
     mooseError("Hessian based optimization algorithms require a sub-app with:\n"
                "   execute_on = HOMOGENEOUS_FORWARD");
   _form_function->updateParameters(s);
 
-  _problem.execute(IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD);
-  _problem.restoreMultiApps(IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD);
-  if (!_problem.execMultiApps(IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD))
+  _problem.execute(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD);
+  _problem.restoreMultiApps(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD);
+  if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD))
     mooseError("Homogeneous forward solve multiapp failed!");
-  if (_solve_on.contains(IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD))
+  if (_solve_on.contains(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD))
     _inner_solve->solve();
 
   _form_function->setMisfitToSimulatedValues();
 
-  _problem.execute(IsopodAppTypes::EXEC_ADJOINT);
-  _problem.restoreMultiApps(IsopodAppTypes::EXEC_ADJOINT);
-  if (!_problem.execMultiApps(IsopodAppTypes::EXEC_ADJOINT))
+  _problem.execute(OptimizationAppTypes::EXEC_ADJOINT);
+  _problem.restoreMultiApps(OptimizationAppTypes::EXEC_ADJOINT);
+  if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_ADJOINT))
     mooseError("Adjoint solve multiapp failed!");
-  if (_solve_on.contains(IsopodAppTypes::EXEC_ADJOINT))
+  if (_solve_on.contains(OptimizationAppTypes::EXEC_ADJOINT))
     _inner_solve->solve();
 
   _form_function->computeGradient(Hs);
@@ -387,7 +396,7 @@ OptimizeSolve::variableBounds(Tao tao)
   libMesh::PetscVector<Number> xu(_my_comm, sz);
 
   // copy values from upper and lower bounds to xl and xu
-  for (unsigned int i = 0; i < sz; ++i)
+  for (const auto i : make_range(sz))
   {
     xl.set(i, lower_bounds[i]);
     xu.set(i, upper_bounds[i]);

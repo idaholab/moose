@@ -9,7 +9,7 @@
 
 #include "PiecewiseMulticonstantFromReporter.h"
 
-registerMooseObject("isopodApp", PiecewiseMulticonstantFromReporter);
+registerMooseObject("OptimizationApp", PiecewiseMulticonstantFromReporter);
 
 InputParameters
 PiecewiseMulticonstantFromReporter::validParams()
@@ -53,7 +53,7 @@ PiecewiseMulticonstantFromReporter::sample(const GridPoint & pt) const
   GridIndex left(_dim);
   GridIndex right(_dim);
   GridIndex arg(_dim);
-  for (unsigned int i = 0; i < _dim; ++i)
+  for (const auto i : make_range(_dim))
   {
     getNeighborIndices(_grid[i], pt[i], left[i], right[i]);
     if (_direction.get(i) == 0)

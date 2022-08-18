@@ -11,7 +11,7 @@
 #include "DelimitedFileReader.h"
 #include "GriddedData.h"
 
-registerMooseObject("isopodApp", GriddedDataReporter);
+registerMooseObject("OptimizationApp", GriddedDataReporter);
 
 InputParameters
 GriddedDataReporter::validParams()

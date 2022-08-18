@@ -6,7 +6,7 @@ classdef SOLVER < handle
         % MOOSE: executable as an atribute
         % as well as the total ndof
     end
-    
+
     methods
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % MOOSE: Change the argument to the name of the
@@ -28,22 +28,22 @@ classdef SOLVER < handle
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function obj = Solve(obj)
-            % MOOSE: Call the executable and set the 
+            % MOOSE: Call the executable and set the
             % displacement
-            
+
             %  FIXME LYNN % set current estimate of parameters and then solve..... will call moose with rhs= obj.Force
             % need to write the parameters .  convert parameters to force vector and solve.
             % multiply the parameters by the expansion matrix.
-            
+
             %this really just needs to write Force to file, call solve and then read in
             %the results into Displacement
             R1=1; %skip column names
             C1=0;
-            
+
             coordFilename = "zForwardInput/initialCoords.csv";
             data = csvread(coordFilename,R1,C1); % doing this to get coords
             data(:,5)=obj.Force;
-            
+
             %write header to file
             inputFilename = "zForwardInput/inputForces.csv";
             cHeader = {'x' 'y' 'z' 'id' 'value'}; %header
@@ -52,27 +52,27 @@ classdef SOLVER < handle
             fprintf(fid,'%s\n',textHeader);
             fclose(fid);
             dlmwrite(inputFilename,data,'-append');
-            
-            system('../../../isopod-opt -i ./forwardSolve.i > junk.txt');
-            
+
+            system('../../../optimization-opt -i ./forwardSolve.i > junk.txt');
+
             outputFilename="zForwardOutput/all_temperatures_0002.csv";
             data = csvread(outputFilename,R1,C1);
             obj.Displacement = data(:,5);
-            
+
             %obj.Displacement = obj.Stiffness\obj.Force;
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function sol = ForwardSolve(obj,rhs)
-            % MOOSE: write the rhs to a file and 
+            % MOOSE: write the rhs to a file and
             % run the excutable and set the displacement
 
             R1=1; %skip column names
             C1=0;
-            
+
             coordFilename = "zForwardInput/initialCoords.csv";
             data = csvread(coordFilename,R1,C1); % doing this to get coords
             data(:,5)=rhs;
-            
+
             %write header to file
             inputFilename = "zForwardInput/inputForces.csv";
             cHeader = {'x' 'y' 'z' 'id' 'value'}; %header
@@ -81,8 +81,8 @@ classdef SOLVER < handle
             fprintf(fid,'%s\n',textHeader);
             fclose(fid);
             dlmwrite(inputFilename,data,'-append');
-            
-            system('../../../isopod-opt -i ./forwardSolve.i > junk.txt');
+
+            system('../../../optimization-opt -i ./forwardSolve.i > junk.txt');
 
             outputFilename="zForwardOutput/all_temperatures_0002.csv";
             data = csvread(outputFilename,R1,C1);
@@ -94,11 +94,11 @@ classdef SOLVER < handle
             % MOOSE: Do the same as ForwardSolve
             R1=1; %skip column names
             C1=0;
-            
+
             coordFilename = "zAdjointInput/initialCoords.csv";
             data = csvread(coordFilename,R1,C1); % doing this to get coords
             data(:,5)=rhs;
-            
+
             %write header to file
             inputFilename = "zAdjointInput/inputForces.csv";
             cHeader = {'x' 'y' 'z' 'id' 'value'}; %header
@@ -108,7 +108,7 @@ classdef SOLVER < handle
             fclose(fid);
             dlmwrite(inputFilename,data,'-append');
 
-            system('../../../isopod-opt -i ./adjointSolve.i > junk.txt');
+            system('../../../optimization-opt -i ./adjointSolve.i > junk.txt');
 
             outputFilename="zAdjointOutput/all_temperatures_0002.csv";
             data = csvread(outputFilename,R1,C1);

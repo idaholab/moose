@@ -10,7 +10,7 @@
 #include "VectorPointSource.h"
 #include "MooseUtils.h"
 
-registerMooseObject("isopodApp", VectorPointSource);
+registerMooseObject("OptimizationApp", VectorPointSource);
 
 InputParameters
 VectorPointSource::validParams()

@@ -1,8 +1,8 @@
 [Mesh]
- [fmg]
-   type = FileMeshGenerator
-   file = halfSphere.e
- []
+  [fmg]
+    type = FileMeshGenerator
+    file = halfSphere.e
+  []
 []
 
 [Variables]
@@ -36,12 +36,12 @@
     value_name = misfit/misfit_values
   []
 []
+
 [Reporters]
   [misfit]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
-
 
 [BCs]
   [round]

@@ -9,18 +9,16 @@
 
 #pragma once
 
-#include "OptimizationReporter.h"
+#include "MooseApp.h"
 
-class ObjectiveMinimize : public OptimizationReporter
+class OptimizationApp : public MooseApp
 {
 public:
   static InputParameters validParams();
-  ObjectiveMinimize(const InputParameters & parameters);
-  virtual Real computeAndCheckObjective(bool solver_converged) override;
 
-protected:
-  virtual void updateParameters(const libMesh::PetscVector<Number> & x) override;
+  OptimizationApp(InputParameters parameters);
+  virtual ~OptimizationApp();
 
-private:
-  Real _bound_adjustment = 0.0;
+  static void registerApps();
+  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 };

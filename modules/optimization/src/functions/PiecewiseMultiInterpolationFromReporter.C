@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PiecewiseMultiInterpolationFromReporter.h"
+#include "libmesh/int_range.h"
 
 InputParameters
 PiecewiseMultiInterpolationFromReporter::validParams()
@@ -58,7 +59,7 @@ PiecewiseMultiInterpolationFromReporter::pointInGrid(const MooseADWrapper<Real, 
 {
   // convert the inputs to an input to the sample function using _axes
   MooseADWrapper<GridPoint, is_ad> point_in_grid(_dim);
-  for (unsigned int i = 0; i < _dim; ++i)
+  for (const auto i : make_range(_dim))
   {
     if (_axes[i] < 3)
       point_in_grid[i] = p(_axes[i]);
@@ -127,7 +128,7 @@ PiecewiseMultiInterpolationFromReporter::getNeighborIndices(std::vector<Real> in
 void
 PiecewiseMultiInterpolationFromReporter::initialSetup()
 {
-  for (unsigned int i = 0; i < _dim; ++i)
+  for (const auto i : make_range(_dim))
     for (unsigned int j = 1; j < _grid[i].size(); ++j)
       if (_grid[i][j - 1] >= _grid[i][j])
         mooseError("PiecewiseMultiInterpolationFromReporter needs monotonically-increasing axis "
@@ -146,7 +147,7 @@ Real
 PiecewiseMultiInterpolationFromReporter::evaluateFcn(const GridIndex & ijk) const
 {
   unsigned int gridEntries = 1;
-  for (unsigned int i = 0; i < _dim; ++i)
+  for (const auto i : make_range(_dim))
     gridEntries *= _grid[i].size();
 
   if (gridEntries != _values.size())
@@ -160,7 +161,7 @@ PiecewiseMultiInterpolationFromReporter::evaluateFcn(const GridIndex & ijk) cons
     mooseError(
         "Gridded data evaluateFcn called with ", ijk.size(), " arguments, but expected ", _dim);
   unsigned int index = ijk[0];
-  for (unsigned int i = 1; i < _dim; ++i)
+  for (const auto i : make_range(1u, _dim))
     index += ijk[i] * _step[i];
   if (index >= _values.size())
     mooseError("Gridded data evaluateFcn attempted to access index ",

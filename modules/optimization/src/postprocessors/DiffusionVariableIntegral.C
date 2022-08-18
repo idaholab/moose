@@ -9,7 +9,7 @@
 
 #include "DiffusionVariableIntegral.h"
 
-registerMooseObject("isopodApp", DiffusionVariableIntegral);
+registerMooseObject("OptimizationApp", DiffusionVariableIntegral);
 
 InputParameters
 DiffusionVariableIntegral::validParams()
@@ -21,7 +21,7 @@ DiffusionVariableIntegral::validParams()
                                "The name of the variable that this object operates on");
   params.addRequiredCoupledVar("variable2", "Variable being multiplied");
   params.addRequiredParam<MaterialPropertyName>("material_derivative",
-                                                "Material Derivative wrt parameterize");
+                                                "Material Derivative w.r.t. parameterize");
   return params;
 }
 

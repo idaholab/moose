@@ -10,7 +10,7 @@
 #include "OptimizationInfo.h"
 #include "Optimize.h"
 
-registerMooseObject("isopodApp", OptimizationInfo);
+registerMooseObject("OptimizationApp", OptimizationInfo);
 
 InputParameters
 OptimizationInfo::validParams()

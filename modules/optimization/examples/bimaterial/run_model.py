@@ -6,7 +6,7 @@ with open("pest_params.csv", "r") as f:
     ktop, kbot = f.readlines()[-1].strip().split(",")
 
 # then feed them to model.i
-subprocess.call(['../../isopod-opt', '-i', 'model.i', 'Outputs/csv=true', 'Materials/mat_top/prop_values=' + ktop, 'Materials/mat_bottom/prop_values=' + kbot])
+subprocess.call(['../../optimization-opt', '-i', 'model.i', 'Outputs/csv=true', 'Materials/mat_top/prop_values=' + ktop, 'Materials/mat_bottom/prop_values=' + kbot])
 
 # Now format the output as required by pest_instruction.ins
 with open("model_out.csv", "r") as f:

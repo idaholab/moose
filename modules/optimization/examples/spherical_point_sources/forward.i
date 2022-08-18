@@ -32,14 +32,14 @@
 []
 
 [DiracKernels]
-    [pt]
-      type = ReporterPointSource
-      variable = temperature
-      x_coord_name = 'point_source/x'
-      y_coord_name = 'point_source/y'
-      z_coord_name = 'point_source/z'
-      value_name = 'point_source/value'
-    []
+  [pt]
+    type = ReporterPointSource
+    variable = temperature
+    x_coord_name = 'point_source/x'
+    y_coord_name = 'point_source/y'
+    z_coord_name = 'point_source/z'
+    value_name = 'point_source/value'
+  []
 []
 
 [BCs]
@@ -66,7 +66,7 @@
   []
 []
 
-[Problem]#do we need this
+[Problem] #do we need this
   type = FEProblem
 []
 
@@ -83,7 +83,7 @@
   [point_source]
     type = ConstantVectorPostprocessor
     vector_names = 'x y z value'
-    value = '4 2.3  2.3  2.3  2.3;
+    value = '4   2.3  2.3  2.3  2.3;
              0   2.3 -2.3 -2.3  2.3;
              0   2.3  2.3 -2.3 -2.3;
              100 150  300  250  150'
@@ -99,12 +99,12 @@
 
 [Reporters]
   [measure_data]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
 
 [Outputs]
-  console = true #false
+  console = true
   exodus = true
   csv = true
   file_base = 'forward'

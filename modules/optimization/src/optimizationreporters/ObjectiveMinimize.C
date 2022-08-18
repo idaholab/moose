@@ -1,6 +1,16 @@
-#include "ObjectiveMinimize.h"
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
-registerMooseObject("isopodApp", ObjectiveMinimize);
+#include "ObjectiveMinimize.h"
+#include "libmesh/int_range.h"
+
+registerMooseObject("OptimizationApp", ObjectiveMinimize);
 
 InputParameters
 ObjectiveMinimize::validParams()
@@ -9,7 +19,8 @@ ObjectiveMinimize::validParams()
   return params;
 }
 
-ObjectiveMinimize::ObjectiveMinimize(const InputParameters & parameters) : OptimizationReporter(parameters)
+ObjectiveMinimize::ObjectiveMinimize(const InputParameters & parameters)
+  : OptimizationReporter(parameters)
 {
 }
 
@@ -31,7 +42,7 @@ ObjectiveMinimize::updateParameters(const libMesh::PetscVector<Number> & x)
 {
   _bound_adjustment = 0.0;
   dof_id_type n = 0;
-  for (unsigned int i = 0; i < _parameters.size(); ++i)
+  for (const auto i : index_range(_parameters))
   {
     for (auto & val : *_parameters[i])
     {
@@ -61,10 +72,9 @@ ObjectiveMinimize::updateParameters(const libMesh::PetscVector<Number> & x)
         _bound_adjustment += diff * diff;
       }
       else
-      {
         val = value_from_tao;
-      }
-      n++;
+
+      ++n;
     }
   }
 }

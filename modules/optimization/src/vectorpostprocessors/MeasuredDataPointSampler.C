@@ -35,7 +35,7 @@ MeasuredDataPointSampler::MeasuredDataPointSampler(const InputParameters & param
 
   _measured.resize(data.size());
   _diff.resize(data.size());
-  for (unsigned int i = 0; i < data.size(); ++i)
+  for (const auto i : index_range(data))
   {
     if (data[i].size() != _points.size())
       paramError("measured_values",
@@ -57,7 +57,7 @@ MeasuredDataPointSampler::finalize()
   if (_values.size() != _diff.size())
     mooseError("Internal error, inconsistent misfit and values size.");
 
-  for (unsigned int i = 0; i < _values.size(); ++i)
-    for (unsigned int j = 0; j < _points.size(); ++j)
+  for (const auto i : index_range(_values))
+    for (const auto j : index_range(_points))
       (*_diff[i])[j] = (*_values[i])[j] - (*_measured[i])[j];
 }

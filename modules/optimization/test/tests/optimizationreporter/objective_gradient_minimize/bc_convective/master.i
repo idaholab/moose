@@ -26,7 +26,7 @@
   initial_condition = '9'
   upper_bounds = '10'
   lower_bounds = '1'
-  measurement_points = '0.1  0    0
+  measurement_points = '0.1  0  0
                         0.1  0.1  0
                         0.1  0.2  0
                         0.1  0.3  0
@@ -36,7 +36,7 @@
                         0.1  0.7  0
                         0.1  0.8  0
                         0.1  0.9  0
-                        0.1  1    0
+                        0.1  1  0
                         0.1  1.1  0
                         0.1  1.2  0
                         0.1  1.3  0
@@ -76,10 +76,10 @@
   petsc_options_iname = '-tao_gatol' # -tao_fd_gradient -tao_fd_delta'
   petsc_options_value = '1e-4' #1e-1 '#true 1e-4'
 
-#   petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
-#   petsc_options_value='1 true true false 1e-6 0.1'
-#   petsc_options = '-tao_test_gradient_view'
-   verbose = true
+  #   petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
+  #   petsc_options_value='1 true true false 1e-6 0.1'
+  #   petsc_options = '-tao_test_gradient_view'
+  verbose = true
 []
 
 [MultiApps]
@@ -99,24 +99,25 @@
 
 [Transfers]
   #these are usually the same for all input files.
-    [fromForward]
-      type = MultiAppReporterTransfer
-      from_multi_app = forward
-      from_reporters = 'data_pt/temperature data_pt/temperature'
-      to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
-    []
-    [toAdjoint]
-      type = MultiAppReporterTransfer
-      to_multi_app = adjoint
-      from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
-      to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
-    []
-    [toForward_measument]
-      type = MultiAppReporterTransfer
-      to_multi_app = forward
-      from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
-      to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
-    []
+  [fromForward]
+    type = MultiAppReporterTransfer
+    from_multi_app = forward
+    from_reporters = 'data_pt/temperature data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+  []
+  [toAdjoint]
+    type = MultiAppReporterTransfer
+    to_multi_app = adjoint
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
+    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
+  []
+  [toForward_measument]
+    type = MultiAppReporterTransfer
+    to_multi_app = forward
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
+    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
+  []
+
   #these are different,
   # - to forward depends on teh parameter being changed
   # - from adjoint depends on the gradient being computed from the adjoint
@@ -135,10 +136,10 @@
     to_reporters = 'OptimizationReporter/adjoint'
   []
 
-#these are transferring data from subapp to subapp because the adjoint problem
-# needs the forward solution to compute the gradient.  Maybe this step could be
-# done on the main app.  The adjoint only passes the adjoint variable (whole mesh)
-# to the main app and the main app computes the gradient from this.
+  #these are transferring data from subapp to subapp because the adjoint problem
+  # needs the forward solution to compute the gradient.  Maybe this step could be
+  # done on the main app.  The adjoint only passes the adjoint variable (whole mesh)
+  # to the main app and the main app computes the gradient from this.
   [fromForward_temp]
     type = MultiAppCopyTransfer
     from_multi_app = forward

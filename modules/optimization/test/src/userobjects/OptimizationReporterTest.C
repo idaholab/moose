@@ -11,7 +11,7 @@
 #include "OptimizationReporterTest.h"
 #include "libmesh/petsc_vector.h"
 
-registerMooseObject("isopodTestApp", OptimizationReporterTest);
+registerMooseObject("OptimizationApp", OptimizationReporterTest);
 
 InputParameters
 OptimizationReporterTest::validParams()
@@ -38,7 +38,7 @@ OptimizationReporterTest::OptimizationReporterTest(const InputParameters & param
   : GeneralUserObject(params),
     _tol(1e-6),
     _my_comm(MPI_COMM_SELF),
-    _optSolverParameters(libmesh_make_unique<libMesh::PetscVector<Number>>(_my_comm))
+    _optSolverParameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm))
 {
 }
 

@@ -1,7 +1,17 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "OptimizationReporter.h"
+#include "libmesh/int_range.h"
 
 // this is a base class but is only called in a testing input file
-registerMooseObject("isopodTestApp", OptimizationReporter);
+registerMooseObject("OptimizationTestApp", OptimizationReporter);
 
 InputParameters
 OptimizationReporter::validParams()
@@ -54,7 +64,8 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
 
   _parameters.reserve(_nparam);
   unsigned int v = 0;
-  for (unsigned int i = 0; i < _parameter_names.size(); ++i)
+
+  for (const auto i : index_range(_parameter_names))
   {
     _parameters.push_back(
         &declareValueByName<std::vector<Real>>(_parameter_names[i], REPORTER_MODE_REPLICATED));
@@ -109,22 +120,20 @@ OptimizationReporter::computeAndCheckObjective(bool multiapp_passed)
 Real
 OptimizationReporter::computeObjective()
 {
-  for (size_t i = 0; i < _measurement_values.size(); ++i)
+  for (const auto i : index_range(_measurement_values))
     _misfit_values[i] = _simulation_values[i] - _measurement_values[i];
 
-  Real val = 0;
+  Real val = 0.0;
   for (auto & misfit : _misfit_values)
     val += misfit * misfit;
 
-  val = 0.5 * val;
-
-  return val;
+  return val * 0.5;
 }
 
 void
 OptimizationReporter::setMisfitToSimulatedValues()
 {
-  for (size_t i = 0; i < _measurement_values.size(); ++i)
+  for (const auto i : index_range(_measurement_values))
     _misfit_values[i] = _simulation_values[i];
 }
 

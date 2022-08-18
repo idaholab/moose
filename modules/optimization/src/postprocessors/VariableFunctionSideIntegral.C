@@ -9,7 +9,7 @@
 
 #include "VariableFunctionSideIntegral.h"
 
-registerMooseObject("isopodApp", VariableFunctionSideIntegral);
+registerMooseObject("OptimizationApp", VariableFunctionSideIntegral);
 
 InputParameters
 VariableFunctionSideIntegral::validParams()

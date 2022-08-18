@@ -11,7 +11,7 @@
 #include "DelimitedFileReader.h"
 #include "SystemBase.h"
 
-registerMooseObject("isopodApp", OptimizationData);
+registerMooseObject("OptimizationApp", OptimizationData);
 
 InputParameters
 OptimizationData::validParams()

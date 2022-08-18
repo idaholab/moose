@@ -1,6 +1,6 @@
 #include "MaterialScaledGradientVector.h"
 
-registerMooseObject("isopodApp", MaterialScaledGradientVector);
+registerMooseObject("OptimizationApp", MaterialScaledGradientVector);
 
 InputParameters
 MaterialScaledGradientVector::validParams()

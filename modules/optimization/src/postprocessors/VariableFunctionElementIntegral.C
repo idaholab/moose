@@ -10,7 +10,7 @@
 #include "VariableFunctionElementIntegral.h"
 #include "Function.h"
 
-registerMooseObject("isopodApp", VariableFunctionElementIntegral);
+registerMooseObject("OptimizationApp", VariableFunctionElementIntegral);
 
 InputParameters
 VariableFunctionElementIntegral::validParams()

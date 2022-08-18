@@ -1,11 +1,18 @@
-#include "OptimizeFullSolveMultiApp.h"
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// isopod
-#include "IsopodAppTypes.h"
+#include "OptimizeFullSolveMultiApp.h"
+#include "OptimizationAppTypes.h"
 
 #include "FEProblemBase.h"
 
-registerMooseObject("isopodApp", OptimizeFullSolveMultiApp);
+registerMooseObject("OptimizationApp", OptimizeFullSolveMultiApp);
 
 InputParameters
 OptimizeFullSolveMultiApp::validParams()
@@ -14,9 +21,9 @@ OptimizeFullSolveMultiApp::validParams()
   params.addClassDescription("This is FullSolveMultiApp with some extra flags registered.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
   exec_enum.addAvailableFlags(EXEC_NONE,
-                              IsopodAppTypes::EXEC_FORWARD,
-                              IsopodAppTypes::EXEC_ADJOINT,
-                              IsopodAppTypes::EXEC_HOMOGENEOUS_FORWARD);
+                              OptimizationAppTypes::EXEC_FORWARD,
+                              OptimizationAppTypes::EXEC_ADJOINT,
+                              OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD);
   params.addParam<ExecFlagEnum>(
       "execute_on", exec_enum, "List of flags indicating when this multiapp should solve.");
 

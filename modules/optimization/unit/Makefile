@@ -2,69 +2,44 @@
 ################### MOOSE Application Standard Makefile #######################
 ###############################################################################
 #
-# Required Environment variables (one of the following)
-# PACKAGES_DIR  - Location of the MOOSE redistributable package
-#
 # Optional Environment variables
-# MOOSE_DIR     - Root directory of the MOOSE project
-# FRAMEWORK_DIR - Location of the MOOSE framework
+# MOOSE_DIR        - Root directory of the MOOSE project
+# MODULE_DIR       - Location of the MOOSE modules directory
+# FRAMEWORK_DIR    - Location of the MOOSE framework
 #
 ###############################################################################
-# Use the MOOSE submodule if it exists and MOOSE_DIR is not set
-MOOSE_SUBMODULE    := $(CURDIR)/../moose
-ifneq ($(wildcard $(MOOSE_SUBMODULE)/framework/Makefile),)
-  MOOSE_DIR        ?= $(MOOSE_SUBMODULE)
-else
-  MOOSE_DIR        ?= $(shell dirname `pwd`)/../moose
-endif
+THIS_MODULE_DIR    ?= $(shell dirname `pwd`)
+MODULE_DIR         ?= $(shell dirname $(THIS_MODULE_DIR))
+MOOSE_DIR          ?= $(shell dirname $(MODULE_DIR))
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
+ADDITIONAL_CPPFLAGS += -Wall -Wextra
 ###############################################################################
+
+# Extra stuff for GTEST
+ADDITIONAL_INCLUDES	:= -isystem $(FRAMEWORK_DIR)/contrib/gtest
+ADDITIONAL_INCLUDES	:= -isystem $(MOOSE_DIR)/unit/include
+ADDITIONAL_LIBS 	  := $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
 
 # framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
-# set desired physics modules equal to 'yes' to enable them
-CHEMICAL_REACTIONS        := no
-CONTACT                   := no
-FLUID_PROPERTIES          := no
-HEAT_CONDUCTION           := no
-MISC                      := no
-NAVIER_STOKES             := no
-PHASE_FIELD               := no
-RDG                       := no
-RICHARDS                  := no
-SOLID_MECHANICS           := no
-STOCHASTIC_TOOLS          := yes
-TENSOR_MECHANICS          := no
-XFEM                      := no
-POROUS_FLOW               := no
-LEVEL_SET                 := no
+OPTIMIZATION		  := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
-# Extra stuff for GTEST
-ADDITIONAL_INCLUDES := -I$(FRAMEWORK_DIR)/contrib/gtest
-ADDITIONAL_LIBS     := $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
-
-# dep apps
-CURRENT_DIR        := $(shell pwd)
-APPLICATION_DIR    := $(CURRENT_DIR)/..
-APPLICATION_NAME   := isopod
-include            $(FRAMEWORK_DIR)/app.mk
-
-APPLICATION_DIR    := $(CURRENT_DIR)
-APPLICATION_NAME   := isopod-unit
-BUILD_EXEC         := yes
-
+APPLICATION_DIR  := $(shell pwd)
+APPLICATION_NAME := optimization-unit
+BUILD_EXEC       := yes
+app_BASE_DIR     :=
 DEP_APPS    ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 include $(FRAMEWORK_DIR)/app.mk
 
-# Find all the isopod unit test source files and include their dependencies.
-isopod_unit_srcfiles := $(shell find $(CURRENT_DIR)/src -name "*.C")
-isopod_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(isopod_unit_srcfiles))
--include $(isopod_unit_deps)
+# Find all the MOOSE unit test source files and include their dependencies.
+tensor_mechanics_unit_srcfiles := $(shell find $(APPLICATION_DIR)/src -name "*.C")
+tensor_mechanics_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(tensor_mechanics_unit_srcfiles))
+-include $(tensor_mechanics_unit_deps)
 
 ###############################################################################
 # Additional special case targets should be added here

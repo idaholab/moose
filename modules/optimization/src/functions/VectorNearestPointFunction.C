@@ -9,7 +9,7 @@
 
 #include "VectorNearestPointFunction.h"
 
-registerMooseObject("isopodApp", VectorNearestPointFunction);
+registerMooseObject("OptimizationApp", VectorNearestPointFunction);
 
 InputParameters
 VectorNearestPointFunction::validParams()

@@ -1,4 +1,12 @@
-// MOOSE includes
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "OptimizationMultiAppCommandLineControl.h"
 #include "MultiApp.h"
 
@@ -22,7 +30,7 @@ OptimizationMultiAppCommandLineControl::validParams()
   params.addRequiredParam<std::vector<std::string>>(
       "parameters",
       "A list of parameters (on the sub application) to control with values from "
-      "'parameter_names'.");
+      "'value_names'.");
 
   return params;
 }
@@ -55,7 +63,7 @@ void
 OptimizationMultiAppCommandLineControl::execute()
 {
   std::ostringstream oss;
-  for (unsigned int i = 0; i < _parameters.size(); ++i)
+  for (const auto i : index_range(_parameters))
   {
     ReporterName rname("OptimizationReporter", _value_names[i]);
     const std::vector<Real> & value =

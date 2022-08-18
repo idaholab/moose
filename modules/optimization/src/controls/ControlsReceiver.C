@@ -7,10 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
 #include "ControlsReceiver.h"
 
-registerMooseObject("isopodApp", ControlsReceiver);
+registerMooseObject("OptimizationApp", ControlsReceiver);
 
 InputParameters
 ControlsReceiver::validParams()

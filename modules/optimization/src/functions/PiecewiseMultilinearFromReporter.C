@@ -9,7 +9,7 @@
 
 #include "PiecewiseMultilinearFromReporter.h"
 
-registerMooseObject("isopodApp", PiecewiseMultilinearFromReporter);
+registerMooseObject("OptimizationApp", PiecewiseMultilinearFromReporter);
 
 InputParameters
 PiecewiseMultilinearFromReporter::validParams()
@@ -54,7 +54,7 @@ PiecewiseMultilinearFromReporter::sampleInternal(const MooseADWrapper<GridPoint,
    */
   GridIndex left(_dim);
   GridIndex right(_dim);
-  for (unsigned int i = 0; i < _dim; ++i)
+  for (const auto i : make_range(_dim))
     getNeighborIndices(_grid[i], MetaPhysicL::raw_value(pt[i]), left[i], right[i]);
 
   /*

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "isopodApp.h"
+#include "OptimizationApp.h"
 #include "gtest/gtest.h"
 
 // Moose includes
@@ -27,7 +27,7 @@ main(int argc, char ** argv)
   testing::InitGoogleTest(&argc, argv);
 
   MooseInit init(argc, argv);
-  registerApp(isopodApp);
+  registerApp(OptimizationApp);
   Moose::_throw_on_error = true;
 
   return RUN_ALL_TESTS();

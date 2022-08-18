@@ -1,0 +1,71 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "OptimizationApp.h"
+#include "HeatConductionApp.h"
+#include "StochasticToolsApp.h"
+#include "Moose.h"
+#include "AppFactory.h"
+#include "MooseSyntax.h"
+#include "ExecFlagRegistry.h"
+
+#include "OptimizationAppTypes.h"
+
+InputParameters
+OptimizationApp::validParams()
+{
+  InputParameters params = MooseApp::validParams();
+
+  // Do not use legacy DirichletBC, that is, set DirichletBC default for preset = true
+  params.set<bool>("use_legacy_material_output") = false;
+
+  return params;
+}
+
+OptimizationApp::OptimizationApp(InputParameters parameters) : MooseApp(parameters)
+{
+  OptimizationApp::registerAll(_factory, _action_factory, _syntax);
+}
+
+OptimizationApp::~OptimizationApp() {}
+
+void
+OptimizationApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  Registry::registerObjectsTo(f, {"OptimizationApp"});
+  Registry::registerActionsTo(af, {"OptimizationApp"});
+
+  auto & syntax = s;
+
+  // Form Function actions
+  registerSyntaxTask("AddOptimizationReporterAction", "OptimizationReporter", "add_reporter");
+
+  HeatConductionApp::registerAll(f, af, s);
+  StochasticToolsApp::registerAll(f, af, s);
+}
+
+void
+OptimizationApp::registerApps()
+{
+  registerApp(OptimizationApp);
+}
+
+/***************************************************************************************************
+ *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
+ **************************************************************************************************/
+extern "C" void
+OptimizationApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  OptimizationApp::registerAll(f, af, s);
+}
+extern "C" void
+OptimizationApp__registerApps()
+{
+  OptimizationApp::registerApps();
+}

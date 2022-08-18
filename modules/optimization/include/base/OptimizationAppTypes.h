@@ -9,17 +9,11 @@
 
 #pragma once
 
-#include "MooseApp.h"
+#include "Moose.h"
 
-class isopodTestApp : public MooseApp
+namespace OptimizationAppTypes
 {
-public:
-  static InputParameters validParams();
-
-  isopodTestApp(InputParameters parameters);
-  virtual ~isopodTestApp();
-
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
-};
-
+extern const ExecFlagType EXEC_FORWARD;
+extern const ExecFlagType EXEC_ADJOINT;
+extern const ExecFlagType EXEC_HOMOGENEOUS_FORWARD;
+}

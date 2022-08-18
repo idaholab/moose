@@ -9,7 +9,7 @@
 
 #include "ElementOptimizationSourceFunctionInnerProduct.h"
 
-registerMooseObject("isopodApp", ElementOptimizationSourceFunctionInnerProduct);
+registerMooseObject("OptimizationApp", ElementOptimizationSourceFunctionInnerProduct);
 
 InputParameters
 ElementOptimizationSourceFunctionInnerProduct::validParams()
