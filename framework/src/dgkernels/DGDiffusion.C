@@ -45,8 +45,7 @@ DGDiffusion::computeQpResidual(Moose::DGResidualType type)
   Real r = 0;
 
   const unsigned int elem_b_order = std::max((libMesh::Order)1, _var.order());
-  double h_elem =
-      _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
+  double h_elem = _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
 
   switch (type)
   {
@@ -80,8 +79,7 @@ DGDiffusion::computeQpJacobian(Moose::DGJacobianType type)
   Real r = 0;
 
   const unsigned int elem_b_order = std::max((libMesh::Order)1, _var.order());
-  double h_elem =
-      _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
+  double h_elem = _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
 
   switch (type)
   {
