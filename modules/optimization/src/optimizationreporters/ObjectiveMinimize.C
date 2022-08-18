@@ -49,24 +49,24 @@ ObjectiveMinimize::updateParameters(const libMesh::PetscVector<Number> & x)
       Real value_from_tao = x(n);
       if (hasBounds() && value_from_tao < _lower_bounds[n])
       {
-        mooseWarning("Tao Optimization Parameters out of bounds.  System will be solved using the "
-                     "lower bound and the objective will be altered accordingly."
-                     "\nTao Parameter Value = ",
-                     value_from_tao,
-                     ";  lower_bound = ",
-                     _lower_bounds[n]);
+        mooseInfo("Tao Optimization Parameters out of bounds.  System will be solved using the "
+                  "lower bound and the objective will be altered accordingly."
+                  "\nTao Parameter Value = ",
+                  value_from_tao,
+                  ";  lower_bound = ",
+                  _lower_bounds[n]);
         val = _lower_bounds[n];
         Real diff = value_from_tao - _lower_bounds[n];
         _bound_adjustment += diff * diff;
       }
       else if (hasBounds() && value_from_tao > _upper_bounds[n])
       {
-        mooseWarning("Tao Optimization Parameters out of bounds.  System will be solved using the "
-                     "upper bound and the objective will be altered accordingly."
-                     "\nTao Parameter Value = ",
-                     value_from_tao,
-                     ";  upper_bound = ",
-                     _upper_bounds[n]);
+        mooseInfo("Tao Optimization Parameters out of bounds.  System will be solved using the "
+                  "upper bound and the objective will be altered accordingly."
+                  "\nTao Parameter Value = ",
+                  value_from_tao,
+                  ";  upper_bound = ",
+                  _upper_bounds[n]);
         val = _upper_bounds[n];
         Real diff = value_from_tao - _upper_bounds[n];
         _bound_adjustment += diff * diff;

@@ -26,15 +26,16 @@
 #include "LevelSetTestApp.h"
 #include "MiscTestApp.h"
 #include "NavierStokesTestApp.h"
+#include "OptimizationTestApp.h"
 #include "PeridynamicsTestApp.h"
 #include "PhaseFieldTestApp.h"
 #include "PorousFlowTestApp.h"
-#include "RayTracingTestApp.h"
-#include "RichardsTestApp.h"
-#include "StochasticToolsTestApp.h"
 #include "PorousFlowTestApp.h"
+#include "RayTracingTestApp.h"
 #include "RdgTestApp.h"
 #include "ReactorTestApp.h"
+#include "RichardsTestApp.h"
+#include "StochasticToolsTestApp.h"
 #include "TensorMechanicsTestApp.h"
 #include "ThermalHydraulicsTestApp.h"
 #include "XFEMTestApp.h"
@@ -77,6 +78,7 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
     LevelSetTestApp::registerAll(f, af, s, use_test_objs);
     MiscTestApp::registerAll(f, af, s, use_test_objs);
     NavierStokesTestApp::registerAll(f, af, s, use_test_objs);
+    OptimizationTestApp::registerAll(f, af, s, use_test_objs);
     PeridynamicsTestApp::registerAll(f, af, s, use_test_objs);
     PhaseFieldTestApp::registerAll(f, af, s, use_test_objs);
     PorousFlowTestApp::registerAll(f, af, s, use_test_objs);
