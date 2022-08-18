@@ -91,8 +91,6 @@ VectorPostprocessor::getVectorNames() const
   return _vector_names;
 }
 
-// Explicit instantiation
-template class VectorPostprocessorContext<VectorPostprocessorValue>;
 const ReporterMode REPORTER_MODE_VPP_SCATTER("VPP_SCATTER");
 
 template <typename T>
@@ -147,3 +145,6 @@ VectorPostprocessorContext<T>::getScatterValueOld() const
 {
   return _scatter_value_old;
 }
+
+// Explicit instantiation
+template class VectorPostprocessorContext<VectorPostprocessorValue>;
