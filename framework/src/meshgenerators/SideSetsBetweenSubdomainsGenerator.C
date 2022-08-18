@@ -51,6 +51,10 @@ SideSetsBetweenSubdomainsGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
+  // Make sure that the mesh is prepared
+  if (!mesh->is_prepared())
+    mesh->find_neighbors();
+
   std::vector<subdomain_id_type> vec_primary_ids = MooseMeshUtils::getSubdomainIDs(
       *mesh,
       isParamValid("primary_block") ? getParam<std::vector<SubdomainName>>("primary_block")
