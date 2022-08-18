@@ -41,11 +41,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
       "AddSolidPropertiesAction", "Modules/SolidProperties/*", "add_solid_properties");
   registerMooseObjectTask("add_solid_properties", SolidProperties, false);
 
-  syntax.addDependency("add_solid_properties", "init_displaced_problem");
-  syntax.addDependency("add_aux_variable", "add_solid_properties");
-  syntax.addDependency("add_variable", "add_solid_properties");
-  syntax.addDependency("add_elemental_field_variable", "add_solid_properties");
-  syntax.addDependency("add_external_aux_variables", "add_solid_properties");
+  syntax.addDependency("add_solid_properties", "add_function");
+  syntax.addDependency("add_user_object", "add_solid_properties");
 }
 
 void
