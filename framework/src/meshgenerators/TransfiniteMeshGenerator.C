@@ -20,7 +20,7 @@ InputParameters
 TransfiniteMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
- 
+
   MooseEnum edge_type("LINE=1 CIRCARC=2 DISCRETE=3 PARSED=4");
 
   params.addRequiredParam<std::vector<Point>>("corners",
@@ -32,13 +32,13 @@ TransfiniteMeshGenerator::validParams()
   params.addRequiredParam<MooseEnum>("top", edge_type, "type of the top (y) boundary");
   params.addRequiredParam<MooseEnum>("bottom", edge_type, "type of the bottom (y) boundary");
 
-  //each edge has a different paramter according to its type    
+  //each edge has a different paramter according to its type
   params.addParam<std::string>("left_parameter", "", "Left side support parameter");
   params.addParam<std::string>("top_parameter", "", "Top side support parameter");
   params.addParam<std::string>("bottom_parameter", "",  "Bottom side support parameter");
   params.addParam<std::string>("right_parameter", "", "Right side support parameter");
 
-  //We need to know the number of points on opposite sides, and if no other parameter is available 
+  //We need to know the number of points on opposite sides, and if no other parameter is available
   //we shall assume them to be equally distributed
 
   params.addRequiredParam<unsigned int>("nx", "Number of nodes on horizontal edges, including corners");
@@ -58,7 +58,7 @@ TransfiniteMeshGenerator::TransfiniteMeshGenerator(const InputParameters & param
     _corners(getParam<std::vector<Point>>("corners")),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
-    _left_type(getParam<MooseEnum>("left")), //the types will have asserts and defaults such as equidistant lines 
+    _left_type(getParam<MooseEnum>("left")), //the types will have asserts and defaults such as equidistant lines
     _right_type(getParam<MooseEnum>("right")),
     _top_type(getParam<MooseEnum>("top")),
     _bottom_type(getParam<MooseEnum>("bottom")),
@@ -72,17 +72,17 @@ std::unique_ptr<MeshBase>
 TransfiniteMeshGenerator::generate()
 {
   auto mesh = buildMeshBaseObject();
-  
+
   mesh->set_mesh_dimension(2);
   mesh->set_spatial_dimension(2);
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
- 
+
   //explicitly assign corners since they will be used extensively
-  const Point V00=_corners[0]; 
-  const Point V10=_corners[1]; 
+  const Point V00=_corners[0];
+  const Point V10=_corners[1];
   const Point V11=_corners[2];
-  const Point V01=_corners[3]; 
-  
+  const Point V01=_corners[3];
+
   const unsigned total_nodes = _nx*_ny;
 
   std::vector<Point> edge_bottom; //parametrized via nx
@@ -95,7 +95,7 @@ TransfiniteMeshGenerator::generate()
   edge_left   =getEdge(V00, V01, _ny, _left_type  , _left_parameter);
   edge_right  =getEdge(V10, V11, _ny, _right_type , _right_parameter);
 
-  //Use for the parametrization on edge pairs, currently generated on the fly 
+  //Use for the parametrization on edge pairs, currently generated on the fly
   //on the [0,1] interval
   Real rx_coord, sy_coord;
 
@@ -107,58 +107,58 @@ TransfiniteMeshGenerator::generate()
   Real r1_basis, r2_basis, s1_basis, s2_basis;
   for (unsigned idx=0; idx<_nx; idx++)
   { //need more asserts here and possibly use the FP standards in MOOSE
-    rx_coord=double(idx)/double(_nx-1); 
+    rx_coord=double(idx)/double(_nx-1);
     r1_basis = 1-rx_coord;
     r2_basis = rx_coord;
 
     for (unsigned idy=0; idy<_ny; idy++)
-    { 
+    {
       sy_coord=double(idy)/double(_ny-1);
       s1_basis = 1-sy_coord;
       s2_basis = sy_coord;
-      
-      //this is the core of the algorithm and generates every internal point 
+
+      //this is the core of the algorithm and generates every internal point
       newPt=r1_basis*edge_right[idy] +r2_basis*edge_left[idy]+
             s1_basis*edge_bottom[idx]+s2_basis*edge_top[idx]-
             r1_basis* s1_basis *V00  -r1_basis*s2_basis*V01-
             r2_basis *s1_basis *V10  -r2_basis*s2_basis*V11;
-      
+
       nodes[node_id] = mesh->add_point(newPt, node_id);
       node_id++;
     }
   }
- 
+
   for (unsigned idx=0; idx<_nx-1; idx++)
-  { 
+  {
     for (unsigned idy=0; idy<_ny-1; idy++)
-    { 
+    {
       Elem * elem = mesh->add_elem(new Quad4);
       elem->set_node(0) = nodes[idy+idx*_ny];
       elem->set_node(1) = nodes[idy+(idx+1)*_ny];
       elem->set_node(2) = nodes[idy+1+(idx+1)*_ny];
       elem->set_node(3) = nodes[idy+1+idx*_ny];
       el_id++;
-      
+
       if (idy == 0) // add bottom boundary (boundary_id = 0)
         boundary_info.add_side(elem, 0, 0);
-       
+
       if (idx == _nx-2) // add right boundary (boundary_id = 3)
         boundary_info.add_side(elem, 1, 2);
-    
+
       if (idy == _ny-2) // add top boundary (boundary_id = 1)
         boundary_info.add_side(elem, 2, 1);
-       
+
       if (idx == 0 ) // add left boundary (boundary_id = 2)
         boundary_info.add_side(elem, 3, 3);
     }
   }
-  
+
   boundary_info.sideset_name(0) = "bottom";
   boundary_info.nodeset_name(0) = "bottom";
 
   boundary_info.sideset_name(3) = "right";
   boundary_info.nodeset_name(3) = "right";
-  
+
   boundary_info.sideset_name(1) = "top";
   boundary_info.nodeset_name(1) = "top";
 
@@ -170,10 +170,10 @@ TransfiniteMeshGenerator::generate()
 }
 
 std::vector<Point>
-TransfiniteMeshGenerator::getEdge(const Point & P1, const Point & P2, const unsigned int & np, 
+TransfiniteMeshGenerator::getEdge(const Point & P1, const Point & P2, const unsigned int & np,
 const MooseEnum & type, const std::string & parameter)
-{ 
-  std::vector<Point> edge; 
+{
+  std::vector<Point> edge;
   switch (type)
       {
        case 1:
@@ -200,40 +200,40 @@ const MooseEnum & type, const std::string & parameter)
                 edge.push_back(Point(x,y,0.0));
               };
           break;
-      case 3: 
+      case 3:
            {std::vector<std::string> string_points;
            MooseUtils::tokenize(parameter, string_points,1,"\n");
            for (unsigned iter=0; iter<string_points.size();iter++)
              { std::vector<Real> point_vals;
               bool status= MooseUtils::tokenizeAndConvert(string_points[iter],point_vals," ");
-              edge.push_back(Point(point_vals[0],point_vals[1],point_vals[2])); 
+              edge.push_back(Point(point_vals[0],point_vals[1],point_vals[2]));
               }
            }
           break;
-      case 4: 
+      case 4:
           std::cout<<"We don't support this yet \n";
           break;
       }
   return edge;
 }
 
-Real 
+Real
 TransfiniteMeshGenerator::getMapToReference(const Real & a, const Real & b, const Real & x) const
 {
   Real r =(x-a)/(b-a);
   return r;
 }
 
-Real 
+Real
 TransfiniteMeshGenerator::getMapFromReference(const Real & x, const Real & a, const Real & b) const
 {
  Real r=x*(b-a)+a;
  return r;
 }
 
-Real 
+Real
 TransfiniteMeshGenerator::computeRadius(const Point & P1, const Point & P2,const Point & P3 ) const
-  { 
+  {
     Point temp1=P1-P2;
     Real a2=temp1.norm_sq(); // a is the distance from P1 to P2, but we only it squared
     Point temp2=P3-P1;
@@ -243,7 +243,7 @@ TransfiniteMeshGenerator::computeRadius(const Point & P1, const Point & P2,const
     return rad;
   }
 
-  Real 
+  Real
   TransfiniteMeshGenerator::getAtan(const Real x, const Real y) const
   { //define quadrants
     const bool q1=(x>0 && y>0);
@@ -253,15 +253,15 @@ TransfiniteMeshGenerator::computeRadius(const Point & P1, const Point & P2,const
 
     Real angle=0.0;
     // compute angles via the inverse tangent
-    // however the quadrants do not provide sufficient info 
-    // and we need to involve normals info as well 
+    // however the quadrants do not provide sufficient info
+    // and we need to involve normals info as well
     if (q1) angle=std::atan(y/x);
     if (q2) angle=std::atan(y/x)+M_PI;
     if (q3) angle=std::atan(y/x)+M_PI;
     if (q4) angle=std::atan(y/x);
     return angle;
   }
-  
+
   Point
   TransfiniteMeshGenerator::computeOrigin(const Point & P1, const Point & P2,const Point & P3 ) const
   {
@@ -275,19 +275,19 @@ TransfiniteMeshGenerator::computeRadius(const Point & P1, const Point & P2,const
    }
    else
    {
-     a1=(2*P2(0) - 2*P1(0)); 
-     a2=(2*P2(1) - 2*P1(1)); 
+     a1=(2*P2(0) - 2*P1(0));
+     a2=(2*P2(1) - 2*P1(1));
      A=P2(1)*P2(1) - P1(0)*P1(0) + P2(0)*P2(0) - P1(1)*P1(1);
    }
-  //note we need to have two cases since it may happen that either P1,P2 or 
+  //note we need to have two cases since it may happen that either P1,P2 or
   // P1/P2,P3 are aligned with the system of coordinates
-  const Real b1=(2*P3(0) - 2*P2(0)); 
-  const Real b2=(2*P3(1) - 2*P2(1)); 
+  const Real b1=(2*P3(0) - 2*P2(0));
+  const Real b2=(2*P3(1) - 2*P2(1));
   const Real B=P3(1)*P3(1) - P2(0)*P2(0) + P3(0)*P3(0) - P2(1)*P2(1);
 
   const Real y0=(a1*b2)*(B/b2-A*b1/(a1*b2))/(a1*b2-a2*b1);
   const Real x0=(A-y0*a2)/a1;
-  
+
   //fill in and return the origin point
   Point P0=Point(x0,y0,0.0);
   return P0;
@@ -296,8 +296,8 @@ TransfiniteMeshGenerator::computeRadius(const Point & P1, const Point & P2,const
   Point
   TransfiniteMeshGenerator::computeMidPoint(const Point & P1, const Point & P2,const Real & height ) const
   {
-  
-  const Real xm=(P1(0)+P2(0))/2; 
+
+  const Real xm=(P1(0)+P2(0))/2;
   const Real ym=(P1(1)+P2(1))/2;
   //The arc can be inverted into the domain (concave) or outward (convex)
   //we use the convention that if the height is given as negative we seek a concave arc
@@ -306,8 +306,8 @@ TransfiniteMeshGenerator::computeRadius(const Point & P1, const Point & P2,const
   Point MidPoint;
 
   //this accounts for lines aligned with the system of coordinates
-  if (abs(P2(0)-P1(0))<1e-15) MidPoint=Point(xm+height, ym, 0.0);  
-  if (abs(P2(1)-P1(1))<1e-15) MidPoint=Point(xm, ym+height, 0.0); 
+  if (abs(P2(0)-P1(0))<1e-15) MidPoint=Point(xm+height, ym, 0.0);
+  if (abs(P2(1)-P1(1))<1e-15) MidPoint=Point(xm, ym+height, 0.0);
 
   //some of the cases are  not covered by this strategy and we need to use normals info
   //this is implemented and tested in the prototype and is soon to be updated
@@ -324,19 +324,19 @@ TransfiniteMeshGenerator::computeRadius(const Point & P1, const Point & P2,const
     Point P3_1=Point(x3_1,y3_1,0.0);
     Point P3_2=Point(x3_2,y3_2,0.0);
     auto select=std::signbit(height);
- 
+
     if (select)
      {
      if (P3_1.norm()>P3_2.norm()) MidPoint=P3_2;
         else MidPoint=P3_1;
      }
       else
-      {  
+      {
         if (P3_1.norm()>P3_2.norm()) MidPoint=P3_1;
        else MidPoint=P3_2;
      }
-  } 
+  }
   return MidPoint;
   }
-  
-  
+
+
