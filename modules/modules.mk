@@ -34,6 +34,7 @@ ifeq ($(ALL_MODULES),yes)
         RDG                         := yes
         REACTOR                     := yes
         RICHARDS                    := yes
+        SOLID_PROPERTIES            := yes
         STOCHASTIC_TOOLS            := yes
         TENSOR_MECHANICS            := yes
         THERMAL_HYDRAULICS          := yes
@@ -60,6 +61,10 @@ ifeq ($(NAVIER_STOKES),yes)
         FLUID_PROPERTIES            := yes
         HEAT_CONDUCTION             := yes
         RDG                         := yes
+endif
+
+ifeq ($(SOLID_PROPERTIES),yes)
+        HEAT_CONDUCTION             := yes
 endif
 
 ifeq ($(CONTACT),yes)
@@ -89,7 +94,7 @@ ifeq ($(XFEM),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow ray_tracing rdg reactor richards stochastic_tools tensor_mechanics thermal_hydraulics xfem"
+MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow ray_tracing rdg reactor richards solid_properties stochastic_tools tensor_mechanics thermal_hydraulics xfem"
 
 ################################################################################
 ########################## MODULE REGISTRATION #################################
@@ -196,6 +201,14 @@ ifeq ($(HEAT_CONDUCTION),yes)
   APPLICATION_NAME   := heat_conduction
   DEPEND_MODULES     := ray_tracing
   SUFFIX             := hc
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(SOLID_PROPERTIES),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_properties
+  APPLICATION_NAME   := solid_properties
+  DEPEND_MODULES     := heat_conduction
+  SUFFIX             := sp
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

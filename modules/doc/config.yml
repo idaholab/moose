@@ -21,6 +21,7 @@ Content:
     - modules/rdg/doc/content
     - modules/reactor/doc/content
     - modules/richards/doc/content
+    - modules/solid_properties/doc/content
     - modules/stochastic_tools/doc/content
     - modules/tensor_mechanics/doc/content
     - modules/thermal_hydraulics/doc/content
@@ -141,6 +142,7 @@ Extensions:
             rdg: !include modules/rdg/doc/sqa_rdg.yml
             reactor: !include modules/reactor/doc/sqa_reactor.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
+            solid_properties: !include modules/solid_properties/doc/sqa_solid_properties.yml
             fsi: !include modules/fsi/doc/sqa_fsi.yml
             thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thermal_hydraulics.yml
             porous_flow: !include modules/porous_flow/doc/sqa_porous_flow.yml

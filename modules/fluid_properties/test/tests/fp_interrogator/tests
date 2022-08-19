@@ -504,7 +504,7 @@ Surface tension:                                   1500  N/m'
     allow_warnings = true
     method = 'OPT'
     threading = '!pthreads'
-    expect_err = "fp_interrogator\: \(rho\,e\) has been specified\; T cannot be specified\."
+    expect_err = "\(rho\,e\) has been specified\; T cannot be specified\."
     cli_args = "FluidPropertiesInterrogator/T=300"
 
     requirement = "The fluid properties interrogator shall throw an error if an
@@ -519,7 +519,7 @@ Surface tension:                                   1500  N/m'
     allow_warnings = true
     method = 'OPT'
     threading = '!pthreads'
-    expect_err = "fp_interrogator\: For one-phase fluid properties\, you must provide one of the following
+    expect_err = "For one-phase fluid properties\, you must provide one of the following
 combinations of thermodynamic properties:"
 
     requirement = "The fluid properties interrogator shall throw an error if an

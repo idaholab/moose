@@ -263,7 +263,7 @@ NitrogenFluidProperties::vaporPressure(Real temperature) const
 void
 NitrogenFluidProperties::vaporPressure(Real, Real &, Real &) const
 {
-  mooseError(name(), ": vaporPressure() is not implemented");
+  mooseError("vaporPressure() is not implemented");
 }
 
 Real
