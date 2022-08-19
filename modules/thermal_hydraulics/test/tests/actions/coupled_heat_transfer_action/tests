@@ -45,4 +45,13 @@
       detail = 'With multiple phases.'
     []
   []
+
+  [misaligned]
+    type = RunException
+    input = 'master.i'
+    cli_args = "CoupledHeatTransfers/right/orientation='0.01 1 0'"
+    expect_err = "The direction given by the parameter 'orientation' must be aligned with the x, y, or z axis"
+
+    requirement = 'The system shall report an error for the coupled heat transfer action if the mesh is not aligned with the x, y, or z axis.'
+  []
 []

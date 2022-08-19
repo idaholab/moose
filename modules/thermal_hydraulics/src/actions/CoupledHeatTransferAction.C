@@ -142,6 +142,14 @@ CoupledHeatTransferAction::CoupledHeatTransferAction(const InputParameters & par
                    "elements as 'T_fluid'.");
     }
   }
+
+  if (isParamValid("orientation"))
+  {
+    const auto & orientation = getParam<RealVectorValue>("orientation");
+    if (!DiscreteLineSegmentInterface::getAlignmentAxis(orientation).isValid())
+      mooseError("The direction given by the parameter 'orientation' must be aligned with the x, "
+                 "y, or z axis.");
+  }
 }
 
 void
