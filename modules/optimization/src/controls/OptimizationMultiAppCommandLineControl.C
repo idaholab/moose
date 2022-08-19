@@ -10,7 +10,7 @@
 #include "OptimizationMultiAppCommandLineControl.h"
 #include "MultiApp.h"
 
-registerMooseObject("StochasticToolsApp", OptimizationMultiAppCommandLineControl);
+registerMooseObject("OptimizationApp", OptimizationMultiAppCommandLineControl);
 
 InputParameters
 OptimizationMultiAppCommandLineControl::validParams()

@@ -6,6 +6,7 @@ InputParameters
 MaterialScaledGradientVector::validParams()
 {
   InputParameters params = VectorAuxKernel::validParams();
+  params.addClassDescription("Output scaled gradient of a variable in vector format.");
   params.addRequiredCoupledVar("gradient_variable",
                                "The variable from which to compute the gradient");
   params.addParam<MaterialPropertyName>(

@@ -1,4 +1,5 @@
 [Tests]
+  issues = '#21885'
   [quadratic_taonm]
     type = CSVDiff
     max_threads = 1
@@ -13,9 +14,8 @@
     type = CSVDiff
     max_threads = 1
     rel_err = 1.0e-4
-    cli_args = "Executioner/tao_solver=TAOBNCG"
-    " Executioner/petsc_options_iname='-tao_gatol -tao_cg_delta_max'"
-    " Executioner/petsc_options_value='1e-4 1e-2'"
+    cli_args = "Executioner/tao_solver=TAOBNCG Executioner/petsc_options_iname='-tao_gatol "
+               "-tao_cg_delta_max' Executioner/petsc_options_value='1e-4 1e-2'"
     input = quadratic_minimize.i
     csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
     allow_test_objects = True
@@ -24,9 +24,9 @@
   [quadratic_taontr]
     type = CSVDiff
     max_threads = 1
-    cli_args = "Executioner/tao_solver=TAONTR"
-    " Executioner/petsc_options_iname='-tao_ntr_min_radius -tao_ntr_max_radius -tao_ntr_init_type -tao_ntr_pc_type'"
-    " Executioner/petsc_options_value='0 1e16 constant none'"
+    cli_args = "Executioner/tao_solver=TAONTR Executioner/petsc_options_iname='-tao_ntr_min_radius "
+               "-tao_ntr_max_radius -tao_ntr_init_type -tao_ntr_pc_type' "
+               "Executioner/petsc_options_value='0 1e16 constant none'"
     input = quadratic_minimize.i
     csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
     skip = "Hessian to be implemented"

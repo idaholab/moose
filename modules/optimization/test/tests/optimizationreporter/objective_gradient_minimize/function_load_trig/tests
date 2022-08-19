@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#21885'
+  design = 'OptimizationReporter.md'
   [function_load_grad_p1_taolmvm]
     type = CSVDiff
     max_threads = 1
@@ -8,5 +10,6 @@
     csvdiff = main_out_OptimizationReporter_0001.csv
     # steady solve
     recover = false
+    requirement = TODO
   []
 []

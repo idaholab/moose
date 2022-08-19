@@ -138,6 +138,18 @@ Applications:
         unregister:
             - framework/doc/unregister.yml
 
+    optimization:
+        exe_directory: modules/combined
+        app_types:
+            - OptimizationApp
+        content_directory: modules/optimization/doc/content
+        remove:
+            - framework/doc/remove.yml
+        unregister:
+            - framework/doc/unregister.yml
+        log_stub_files: WARNING
+        show_warning: false
+
     peridynamics:
         exe_directory: modules/combined
         app_types:
@@ -391,6 +403,10 @@ Requirements:
         show_warning: false
 
     navier_stokes:
+        directories:
+            - modules/navier_stokes
+
+    optimization:
         directories:
             - modules/navier_stokes
 

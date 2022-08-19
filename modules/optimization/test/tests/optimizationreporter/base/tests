@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#34'
+  issues = 'idaholab/isopod#34'
   design = 'OptimizationReporter/index.md'
   requirement = "The system shall correctly read in "
   [input]

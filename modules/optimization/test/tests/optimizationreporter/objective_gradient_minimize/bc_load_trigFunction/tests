@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#21885'
+  design = 'OptimizationMultiAppCommandLineControl.md'
   [taolmvm]
     requirement = "This tests optimization of the function a*sin(2*pi*b*(y+c))+d where c and d are "
                   "being parameterized for.  This function is also being applied to the left "

@@ -2,7 +2,7 @@ Applications:
     optimization:
         exe_directory: ${MOOSE_DIR}/modules/optimization
         app_types:
-            - optimizationApp
+            - OptimizationApp
         content_directory: ${MOOSE_DIR}/modules/optimization/doc/content
         unregister:
             - ${MOOSE_DIR}/framework/doc/unregister.yml

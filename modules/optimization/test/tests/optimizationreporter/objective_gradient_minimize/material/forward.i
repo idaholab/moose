@@ -136,7 +136,7 @@
 
 [Reporters]
   [measure_data]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
 
@@ -157,6 +157,6 @@
 [Outputs]
   console = false
   exodus = false
-  csv=false
+  csv = false
   file_base = 'forward'
 []

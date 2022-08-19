@@ -1,8 +1,8 @@
 [Tests]
+  issues = 'idaholab/isopod#42'
   [vector_point_source]
     design = 'VectorPointSource.md'
-    issues = '#42'
-    requirement = 'The system shall support point sources with locations, times, and values given by a vector values with'
+    requirement = 'The system shall support point sources with locations, times, and values given by a vector values with '
     [forward]
       type = CSVDiff
       input = vector_point_source.i

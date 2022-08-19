@@ -1,10 +1,12 @@
 [Tests]
+  issues = '#21885'
   [forward_solve]
     type = CSVDiff
     max_threads = 1
     input = forwardSolve.i
     csvdiff = zForwardOutput/all_temperatures_0002.csv
     mesh_mode = REPLICATED
+    requirement = TODO
   []
   [adjoint_solve]
     type = CSVDiff
@@ -12,5 +14,6 @@
     input = adjointSolve.i
     csvdiff = zAdjointOutput/all_temperatures_0002.csv
     mesh_mode = REPLICATED
+    requirement = TODO
   []
 []

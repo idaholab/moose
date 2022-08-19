@@ -11,12 +11,13 @@
 #include "OptimizationReporterTest.h"
 #include "libmesh/petsc_vector.h"
 
-registerMooseObject("OptimizationApp", OptimizationReporterTest);
+registerMooseObject("OptimizationTestApp", OptimizationReporterTest);
 
 InputParameters
 OptimizationReporterTest::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
+  params.addClassDescription("Tests the requesting of Reporter values.");
   params.addRequiredParam<std::vector<Real>>("values_to_set_parameters_to",
                                              "Testing that OptimizationReporter values can be set");
   params.addParam<std::vector<Real>>("expected_lower_bounds",

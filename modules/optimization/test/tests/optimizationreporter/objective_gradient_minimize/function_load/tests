@@ -1,8 +1,10 @@
 [Tests]
+  issues = '#21885'
+  design = 'OptimizationMultiAppCommandLineControl.md'
   [quadratic_function_load_grad_taolmvm]
-    requirement = "The function alpha*sin(C1+x*pi/2)*sin(C2+y*pi/2)+beta   This is nonlinear because "
-                  "C1 and C2 will show up in the adjoint  function that computes the gradient.  It "
-                  "takes 37 iterations which is a lot."
+    requirement = "The function $\alpha\sin(C1+x\pi/2)*\sin(C2+y*pi/2)+\beta$ is nonlinear because "
+                  "C1 and C2 will show up in the adjoint function that computes the gradient. It "
+                  "takes 37 iterations which is a lot." # TODO: fix
     type = CSVDiff
     max_threads = 1
     rel_err = 0.01

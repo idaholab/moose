@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#21885'
+  design = 'ObjectiveMinimize.md'
   [taolmvm]
     type = CSVDiff
     max_threads = 1
@@ -7,6 +9,7 @@
     csvdiff = main_out_receiver_0001.csv
     # steady solve
     recover = false
+    requirement = TODO1
   []
   [biasedMesh]
     type = CSVDiff
@@ -17,6 +20,7 @@
     cli_args = "Mesh/bias_x=1.2 Mesh/bias_y=1.2"
     # steady solve
     recover = false
+    requirement = TODO2
   []
   [fd_grad]
     type = CSVDiff
@@ -28,6 +32,7 @@
     csvdiff = main_out_receiver_0001.csv
     # steady solve
     recover = false
+    requirement = TODO3
   []
   [taonm]
     type = CSVDiff
@@ -39,5 +44,6 @@
     csvdiff = main_out_receiver_0001.csv
     # steady solve
     recover = false
+    requirement = TODO4
   []
 []

@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#21885'
+  design = 'OptimizeFullSolveMultiApp.md'
   [taonm_forwardOnly]
     type = CSVDiff
     max_threads = 1
@@ -7,5 +9,6 @@
     csvdiff = main_out_receiver_0001.csv
     # steady solve
     recover = false
+    requirement = TODO
   []
 []

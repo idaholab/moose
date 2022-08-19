@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#21885'
+  design = 'OptimizationMultiAppCommandLineControl.md'
   [iterOutput]
     requirement = "This tests that a linear and constant function can be scaled intwo seperate "
                   "functionNeumannBCs both applied to the same sideset using  two parsed functions.  "

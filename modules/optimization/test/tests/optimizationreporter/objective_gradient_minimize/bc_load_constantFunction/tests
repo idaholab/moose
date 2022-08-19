@@ -1,13 +1,14 @@
 [Tests]
+  issues = '#21885'
   [taolmvm]
-    requirement = "This tests that a function NeumannBC with a constant value parsed function can be "
-                  "parameterized."
     type = CSVDiff
     max_threads = 1
     rel_err = 0.01
     input = main.i
     csvdiff = main_out_receiver_0001.csv
-    # steady solve
     recover = false
+    requirement = "The system shall be able to parameterize a function NeumannBC with a constant "
+                  "value parsed function."
+    design = 'ConstantValuePostprocessor.md'
   []
 []

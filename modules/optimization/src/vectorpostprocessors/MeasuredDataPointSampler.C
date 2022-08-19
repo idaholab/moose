@@ -9,7 +9,7 @@
 
 #include "MeasuredDataPointSampler.h"
 
-registerMooseObject("MooseApp", MeasuredDataPointSampler);
+registerMooseObject("OptimizationApp", MeasuredDataPointSampler);
 
 InputParameters
 MeasuredDataPointSampler::validParams()

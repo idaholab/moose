@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#21885'
+  design = 'ReporterPointSource.md'
   [hessian]
     type = CSVDiff
     max_threads = 1
@@ -8,6 +10,7 @@
                "-tao_max_it -tao_nls_pc_type -tao_nls_ksp_type' "
                "Executioner/petsc_options_value='1e-5 10 none cg'"
     csvdiff = main_out_receiver_0001.csv
+    requirement = TODO1
     # steady solve
     recover = false
   []
@@ -19,6 +22,7 @@
     csvdiff = main_out_receiver_0001.csv
     # steady solve
     recover = false
+    requirement = TODO2
   []
   [adjointFDGradTest]
     type = CSVDiff
@@ -32,5 +36,6 @@
     #              " Executioner/petsc_options_value='true true true 0.0001 0.001'"
     csvdiff = main_out_receiver_0001.csv
     heavy = true
+    requirement = TODO3
   []
 []

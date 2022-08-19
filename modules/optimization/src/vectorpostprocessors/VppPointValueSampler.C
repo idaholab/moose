@@ -11,7 +11,7 @@
 
 #include <numeric>
 
-registerMooseObject("MooseApp", VppPointValueSampler);
+registerMooseObject("OptimizationApp", VppPointValueSampler);
 
 InputParameters
 VppPointValueSampler::validParams()

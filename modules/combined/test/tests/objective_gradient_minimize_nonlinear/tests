@@ -1,30 +1,29 @@
 [Tests]
   issues = '#25'
-  requirement = "The system shall invert for a constant heat source with a"
-                " temperature dependent thermal condutivity using" 
+  design = 'ObjectiveGradientMinimize.md'
+  requirement = "The system shall invert for a constant heat source with a temperature dependent "
+                "thermal condutivity using a"
   [BFGS]
-    detail      = " limited memory BFGS algorithm"
-    type        = CSVDiff
-    rel_err     = 0.1
-    abs_zero    = 0.5
-    input       = main.i
-    csvdiff     = main_out_OptimizationReporter_0001.csv
-    cli_args    = "Executioner/tao_solver=taolmvm"
+    detail = " limited memory BFGS algorithm"
+    type = CSVDiff
+    rel_err = 0.1
+    abs_zero = 0.5
+    input = main.i
+    csvdiff = main_out_OptimizationReporter_0001.csv
+    cli_args = "Executioner/tao_solver=taolmvm"
     max_threads = 1
     valgrind = none
-    # steady solve
     recover = false
   []
   [Newton]
-    detail      = " matrix free hessian and Newton algorithm"
-    type        = CSVDiff
-    rel_err     = 0.1
-    abs_zero    = 0.5
-    input       = main.i
-    csvdiff     = main_out_OptimizationReporter_0001.csv
-    cli_args    = "Executioner/tao_solver=taonls"
+    detail = " matrix free hessian and Newton algorithm"
+    type = CSVDiff
+    rel_err = 0.1
+    abs_zero = 0.5
+    input = main.i
+    csvdiff = main_out_OptimizationReporter_0001.csv
+    cli_args = "Executioner/tao_solver=taonls"
     max_threads = 1
-    # steady solve
     recover = false
   []
 []
