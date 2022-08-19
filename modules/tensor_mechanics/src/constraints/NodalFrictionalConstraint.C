@@ -51,6 +51,10 @@ NodalFrictionalConstraint::NodalFrictionalConstraint(const InputParameters & par
     _u_secondary_old(_var.dofValuesOldNeighbor()),
     _u_primary_old(_var.dofValuesOld())
 {
+  if (_var.number() != _var_secondary.number())
+    mooseError("NodalFrictionalConstraint: Primary variable must be identical to secondary "
+               "variabe. Different variables are currently not supported.");
+
   updateConstrainedNodes();
 
   MooseEnum temp_formulation = getParam<MooseEnum>("formulation");
