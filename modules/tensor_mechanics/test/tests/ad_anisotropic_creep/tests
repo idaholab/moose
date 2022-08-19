@@ -1,5 +1,5 @@
 [Tests]
-  design = 'ADHillCreepStressUpdate.md'
+  design = 'HillCreepStressUpdate.md'
   issues = '#16016'
   [anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test]
     type = 'Exodiff'
@@ -16,6 +16,28 @@
     csvdiff = ad_aniso_creep_x_3d_out.csv
     requirement = 'The system shall be capable of reproducing verification results of creep strain ratios '
                   'along the X direction.'
+    min_parallel = 2
+    rel_err = 1.0e-4
+    abs_zero = 5.0e-7
+  []
+  [aniso_creep_x_3d]
+    type = 'CSVDiff'
+    input = 'aniso_creep_x_3d.i'
+    csvdiff = aniso_creep_x_3d_out.csv
+    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios '
+                  'along the X direction using hand-coded Jacobians.'
+    min_parallel = 2
+    rel_err = 1.0e-4
+    abs_zero = 5.0e-7
+  []
+  [aniso_creep_x_3d_no_trafo]
+    type = 'CSVDiff'
+    input = 'aniso_creep_x_3d.i'
+    csvdiff = aniso_creep_x_3d_no_trafo_out.csv
+    cli_args = "Materials/trial_creep_two/use_transformation=false Outputs/file_base=aniso_creep_x_3d_no_trafo_out"
+    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios '
+                  'along the X direction using hand-coded Jacobians when no transformation is used to rotate '
+                  'the Hill tensor for small deformation.'
     min_parallel = 2
     rel_err = 1.0e-4
     abs_zero = 5.0e-7
@@ -53,7 +75,7 @@
     rel_err = 1.0e-5
     abs_zero = 1.0e-8
   []
-  [jac]
+  [jac_ad]
     type = 'PetscJacobianTester'
     input = 'ad_aniso_iso_creep_x_3d.i'
     run_sim = 'True'
@@ -69,6 +91,22 @@
     requirement = 'The system shall provide a perfect Jacobian while calculating large deformation '
                   'creep.'
   []
+  [jac]
+    type = 'PetscJacobianTester'
+    input = 'aniso_iso_creep_x_3d.i'
+    run_sim = 'True'
+    cli_args = "Executioner/num_steps=2 Outputs/active='' -snes_test_err 1e-12 "
+               "Materials/elastic_strain/inelastic_models='trial_creep_iso' "
+               "Materials/inactive='trial_creep_aniso_iso' "
+               "Materials/elasticity_tensor/poissons_ratio=0.25"
+    petsc_version = '>=3.9'
+    ratio_tol = 0.035
+    difference_tol = 0.35
+    only_final_jacobian = 'True'
+    issues = '#21824'
+    requirement = 'The system shall provide a reasonable Jacobian while calculating large deformation '
+                  'creep using the elasticity tensor as the tangent operator.'
+  []
   [ad_aniso_iso_aniso]
     type = 'CSVDiff'
     input = 'ad_aniso_iso_creep_x_3d.i'
@@ -82,6 +120,18 @@
     rel_err = 1.0e-4
     abs_zero = 1.0e-8
   []
+  [aniso_creep_integration_error]
+    type = 'CSVDiff'
+    input = 'aniso_creep_integration_error.i'
+    csvdiff = aniso_creep_integration_error_out.csv
+    requirement = 'The system shall be capable of enforcing a time step such that the creep rate '
+                  'integration error is controled by the user with the aid of a soft terminator when '
+                  'regular (non-AD) objects are used.'
+    heavy = true
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-8
+  []
+
   [ad_aniso_creep_integration_error]
     type = 'CSVDiff'
     input = 'ad_aniso_creep_integration_error.i'

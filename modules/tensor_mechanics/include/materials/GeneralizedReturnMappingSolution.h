@@ -19,13 +19,14 @@ class ConsoleStream;
  * Base class that provides capability for Newton generalized (anisotropic) return mapping
  * iterations on a single variable
  */
-class ADGeneralizedReturnMappingSolution
+template <bool is_ad>
+class GeneralizedReturnMappingSolutionTempl
 {
 public:
   static InputParameters validParams();
 
-  ADGeneralizedReturnMappingSolution(const InputParameters & parameters);
-  virtual ~ADGeneralizedReturnMappingSolution() {}
+  GeneralizedReturnMappingSolutionTempl(const InputParameters & parameters);
+  virtual ~GeneralizedReturnMappingSolutionTempl() {}
 
 protected:
   /**
@@ -34,23 +35,25 @@ protected:
    * @param scalar                 Inelastic strain increment magnitude being solved for
    * @param console                Console output
    */
-  void returnMappingSolve(const ADDenseVector & effective_trial_stress,
-                          const ADDenseVector & stress_new,
-                          ADReal & scalar,
+  void returnMappingSolve(const GenericDenseVector<is_ad> & effective_trial_stress,
+                          const GenericDenseVector<is_ad> & stress_new,
+                          GenericReal<is_ad> & scalar,
                           const ConsoleStream & console);
   /**
    * Compute the minimum permissible value of the scalar.  For some models, the magnitude
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual ADReal minimumPermissibleValue(const ADDenseVector & effective_trial_stress) const;
+  virtual GenericReal<is_ad>
+  minimumPermissibleValue(const GenericDenseVector<is_ad> & effective_trial_stress) const;
 
   /**
    * Compute the maximum permissible value of the scalar.  For some models, the magnitude
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual ADReal maximumPermissibleValue(const ADDenseVector & effective_trial_stress) const;
+  virtual GenericReal<is_ad>
+  maximumPermissibleValue(const GenericDenseVector<is_ad> & effective_trial_stress) const;
 
   /**
    * Compute an initial guess for the value of the scalar. For some cases, an
@@ -59,7 +62,11 @@ protected:
    * to perform initialization tasks.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual ADReal initialGuess(const ADDenseVector & /*effective_trial_stress*/) { return 0.0; }
+  virtual GenericReal<is_ad>
+  initialGuess(const GenericDenseVector<is_ad> & /*effective_trial_stress*/)
+  {
+    return 0.0;
+  }
 
   /**
    * Compute the residual for a predicted value of the scalar.  This residual should be
@@ -67,9 +74,10 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual ADReal computeResidual(const ADDenseVector & effective_trial_stress,
-                                 const ADDenseVector & stress_new,
-                                 const ADReal & delta_gamma) = 0;
+  virtual GenericReal<is_ad>
+  computeResidual(const GenericDenseVector<is_ad> & effective_trial_stress,
+                  const GenericDenseVector<is_ad> & stress_new,
+                  const GenericReal<is_ad> & delta_gamma) = 0;
 
   /**
    * Compute a reference quantity to be used for checking relative convergence. This should
@@ -77,19 +85,21 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeReferenceResidual(const ADDenseVector & effective_trial_stress,
-                                        const ADDenseVector & stress_new,
-                                        const ADReal & residual,
-                                        const ADReal & scalar_effective_inelastic_strain) = 0;
+  virtual Real
+  computeReferenceResidual(const GenericDenseVector<is_ad> & effective_trial_stress,
+                           const GenericDenseVector<is_ad> & stress_new,
+                           const GenericReal<is_ad> & residual,
+                           const GenericReal<is_ad> & scalar_effective_inelastic_strain) = 0;
 
-  virtual ADReal computeDerivative(const ADDenseVector & effective_trial_stress,
-                                   const ADDenseVector & stress_new,
-                                   const ADReal & scalar) = 0;
+  virtual GenericReal<is_ad>
+  computeDerivative(const GenericDenseVector<is_ad> & effective_trial_stress,
+                    const GenericDenseVector<is_ad> & stress_new,
+                    const GenericReal<is_ad> & scalar) = 0;
   /**
    * Finalize internal state variables for a model for a given iteration.
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual void iterationFinalize(ADReal /*scalar*/) {}
+  virtual void iterationFinalize(GenericReal<is_ad> /*scalar*/) {}
 
   /**
    * Output summary information for the convergence history of the model
@@ -118,9 +128,9 @@ protected:
    * @param reference              Current value of the reference quantity
    */
   virtual void outputIterationStep(std::stringstream * iter_output,
-                                   const ADDenseVector & effective_trial_stress,
-                                   const ADReal & scalar,
-                                   const ADReal reference_residual);
+                                   const GenericDenseVector<is_ad> & effective_trial_stress,
+                                   const GenericReal<is_ad> & scalar,
+                                   const GenericReal<is_ad> reference_residual);
 
   /**
    * Check to see whether the residual is within the convergence limits.
@@ -128,7 +138,7 @@ protected:
    * @param reference Current value of the reference quantity
    * @return Whether the model converged
    */
-  bool converged(const ADReal & residual, const Real & reference);
+  bool converged(const GenericReal<is_ad> & residual, const Real & reference);
 
 private:
   enum class InternalSolveOutput
@@ -171,8 +181,8 @@ private:
   unsigned int _iteration;
 
   ///@{ Residual values, kept as members to retain solver state for summary outputting
-  ADReal _initial_residual;
-  ADReal _residual;
+  GenericReal<is_ad> _initial_residual;
+  GenericReal<is_ad> _residual;
   ///@}
 
   /// MOOSE input name of the object performing the solve
@@ -185,9 +195,9 @@ private:
    * @param iter_output            Output stream -- if null, no output is produced
    * @return Whether the solution was successful
    */
-  SolveState internalSolve(const ADDenseVector & effective_trial_stress,
-                           const ADDenseVector & stress_new,
-                           ADReal & scalar,
+  SolveState internalSolve(const GenericDenseVector<is_ad> & effective_trial_stress,
+                           const GenericDenseVector<is_ad> & stress_new,
+                           GenericReal<is_ad> & scalar,
                            std::stringstream * iter_output = nullptr);
 
   /**
@@ -211,11 +221,11 @@ private:
    * @param max_permissible_scalar Maximum permissible value of scalar
    * @param iter_output            Output stream
    */
-  void checkPermissibleRange(ADReal & scalar,
-                             ADReal & scalar_increment,
-                             const ADReal & scalar_old,
-                             const ADReal min_permissible_scalar,
-                             const ADReal max_permissible_scalar,
+  void checkPermissibleRange(GenericReal<is_ad> & scalar,
+                             GenericReal<is_ad> & scalar_increment,
+                             const GenericReal<is_ad> & scalar_old,
+                             const GenericReal<is_ad> min_permissible_scalar,
+                             const GenericReal<is_ad> max_permissible_scalar,
                              std::stringstream * iter_output);
 
   /**
@@ -227,10 +237,13 @@ private:
    * @param scalar_lower_bound     Lower bound value of scalar
    * @param iter_output            Output stream
    */
-  void updateBounds(const ADReal & scalar,
-                    const ADReal & residual,
+  void updateBounds(const GenericReal<is_ad> & scalar,
+                    const GenericReal<is_ad> & residual,
                     const Real init_resid_sign,
-                    ADReal & scalar_upper_bound,
-                    ADReal & scalar_lower_bound,
+                    GenericReal<is_ad> & scalar_upper_bound,
+                    GenericReal<is_ad> & scalar_lower_bound,
                     std::stringstream * iter_output);
 };
+
+typedef GeneralizedReturnMappingSolutionTempl<false> GeneralizedReturnMappingSolution;
+typedef GeneralizedReturnMappingSolutionTempl<true> ADGeneralizedReturnMappingSolution;

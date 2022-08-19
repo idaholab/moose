@@ -25,6 +25,7 @@
 #include "libmesh/petsc_macro.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/parameters.h"
+#include "libmesh/dense_vector.h"
 
 // BOOST include
 #include "bitmask_operators.h"
@@ -421,7 +422,6 @@ struct ADType<VariableSecond>
 {
   typedef ADVariableSecond type;
 };
-
 } // namespace Moose
 
 /**
@@ -493,6 +493,9 @@ template <bool is_ad>
 using GenericVariableGradient = typename Moose::GenericType<VariableGradient, is_ad>;
 template <bool is_ad>
 using GenericVariableSecond = typename Moose::GenericType<VariableSecond, is_ad>;
+template <bool is_ad>
+using GenericDenseVector =
+    typename std::conditional<is_ad, DenseVector<ADReal>, DenseVector<Real>>::type;
 
 // Should be removed with #19439
 #define defineLegacyParams(ObjectType)                                                             \

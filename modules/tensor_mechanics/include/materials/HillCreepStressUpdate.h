@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADAnisotropicReturnCreepStressUpdateBase.h"
+#include "AnisotropicReturnCreepStressUpdateBase.h"
 
 /**
  * This class uses the stress update material for an anisotropic creep
@@ -26,29 +26,39 @@
  * damage constitutive model for anistropic materials", International Journal of Pressure Vessels
  * and Piping 88 (2011) 356--364.
  */
-
-class ADHillCreepStressUpdate : public ADAnisotropicReturnCreepStressUpdateBase
+template <bool is_ad>
+class HillCreepStressUpdateTempl : public AnisotropicReturnCreepStressUpdateBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ADHillCreepStressUpdate(const InputParameters & parameters);
+  HillCreepStressUpdateTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeStressInitialize(const ADDenseVector & stress_dev,
-                                       const ADDenseVector & stress,
-                                       const ADRankFourTensor & elasticity_tensor) override;
-  virtual ADReal computeResidual(const ADDenseVector & effective_trial_stress,
-                                 const ADDenseVector & stress_new,
-                                 const ADReal & scalar) override;
-  virtual ADReal computeDerivative(const ADDenseVector & effective_trial_stress,
-                                   const ADDenseVector & stress_new,
-                                   const ADReal & scalar) override;
+  using Material::_current_elem;
+  using Material::_dt;
+  using Material::_q_point;
+  using Material::_qp;
+  using Material::_t;
 
-  virtual Real computeReferenceResidual(const ADDenseVector & effective_trial_stress,
-                                        const ADDenseVector & stress_new,
-                                        const ADReal & residual,
-                                        const ADReal & scalar_effective_inelastic_strain) override;
+  virtual void
+  computeStressInitialize(const GenericDenseVector<is_ad> & stress_dev,
+                          const GenericDenseVector<is_ad> & stress,
+                          const GenericRankFourTensor<is_ad> & elasticity_tensor) override;
+  virtual GenericReal<is_ad>
+  computeResidual(const GenericDenseVector<is_ad> & effective_trial_stress,
+                  const GenericDenseVector<is_ad> & stress_new,
+                  const GenericReal<is_ad> & scalar) override;
+  virtual GenericReal<is_ad>
+  computeDerivative(const GenericDenseVector<is_ad> & effective_trial_stress,
+                    const GenericDenseVector<is_ad> & stress_new,
+                    const GenericReal<is_ad> & scalar) override;
+
+  virtual Real
+  computeReferenceResidual(const GenericDenseVector<is_ad> & effective_trial_stress,
+                           const GenericDenseVector<is_ad> & stress_new,
+                           const GenericReal<is_ad> & residual,
+                           const GenericReal<is_ad> & scalar_effective_inelastic_strain) override;
 
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
@@ -57,10 +67,10 @@ protected:
    * @param stress_dev Deviatoric partt of the Cauchy stresss tensor
    * @param delta_gamma Generalized radial return's plastic multiplier
    */
-  virtual void computeStrainFinalize(ADRankTwoTensor & inelasticStrainIncrement,
-                                     const ADRankTwoTensor & stress,
-                                     const ADDenseVector & stress_dev,
-                                     const ADReal & delta_gamma) override;
+  virtual void computeStrainFinalize(GenericRankTwoTensor<is_ad> & inelasticStrainIncrement,
+                                     const GenericRankTwoTensor<is_ad> & stress,
+                                     const GenericDenseVector<is_ad> & stress_dev,
+                                     const GenericReal<is_ad> & delta_gamma) override;
 
   /**
    * Perform any necessary steps to finalize state after return mapping iterations
@@ -69,14 +79,16 @@ protected:
    * @param stress Cauchy stresss tensor
    * @param stress_dev Deviatoric partt of the Cauchy stresss tensor
    */
-  virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
-                                     const ADReal & delta_gamma,
-                                     ADRankTwoTensor & stress,
-                                     const ADDenseVector & stress_dev,
-                                     const ADRankTwoTensor & stress_old,
-                                     const ADRankFourTensor & elasticity_tensor) override;
+  virtual void
+  computeStressFinalize(const GenericRankTwoTensor<is_ad> & inelasticStrainIncrement,
+                        const GenericReal<is_ad> & delta_gamma,
+                        GenericRankTwoTensor<is_ad> & stress,
+                        const GenericDenseVector<is_ad> & stress_dev,
+                        const GenericRankTwoTensor<is_ad> & stress_old,
+                        const GenericRankFourTensor<is_ad> & elasticity_tensor) override;
 
-  virtual ADReal initialGuess(const ADDenseVector & /*stress_dev*/) override;
+  virtual GenericReal<is_ad>
+  initialGuess(const GenericDenseVector<is_ad> & /*stress_dev*/) override;
 
   /**
    * Does the model require the elasticity tensor to be isotropic? Not in principle.
@@ -91,7 +103,7 @@ protected:
    */
   virtual Real computeIntegrationErrorTimeStep() override
   {
-    return _max_integration_error_time_step;
+    return this->_max_integration_error_time_step;
   }
 
   /// Flag to determine if temperature is supplied by the user
@@ -132,8 +144,11 @@ protected:
   const MaterialProperty<DenseMatrix<Real>> * _hill_tensor;
 
   /// Square of the q function for orthotropy
-  ADReal _qsigma;
+  GenericReal<is_ad> _qsigma;
 
   /// 2 * shear modulus
-  ADReal _two_shear_modulus;
+  GenericReal<is_ad> _two_shear_modulus;
 };
+
+typedef HillCreepStressUpdateTempl<false> HillCreepStressUpdate;
+typedef HillCreepStressUpdateTempl<true> ADHillCreepStressUpdate;

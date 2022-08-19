@@ -10,7 +10,7 @@
 #pragma once
 
 #include "StressUpdateBase.h"
-#include "ADGeneralizedReturnMappingSolution.h"
+#include "GeneralizedReturnMappingSolution.h"
 #include "MooseTypes.h"
 
 #include "libmesh/ignore_warnings.h"
@@ -49,14 +49,14 @@ typedef Eigen::Matrix<Real, 3, 3> AnisotropyMatrixRealBlock;
  * algorithm for anisotropic von Mises plasticity framed in material eigenspace. Int J Numer Methods
  * Eng. 2018. 116. 202 222
  */
-
-class ADGeneralizedRadialReturnStressUpdate : public ADStressUpdateBase,
-                                              public ADGeneralizedReturnMappingSolution
+template <bool is_ad>
+class GeneralizedRadialReturnStressUpdateTempl : public StressUpdateBaseTempl<is_ad>,
+                                                 public GeneralizedReturnMappingSolutionTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ADGeneralizedRadialReturnStressUpdate(const InputParameters & parameters);
+  GeneralizedRadialReturnStressUpdateTempl(const InputParameters & parameters);
 
   /**
    * A radial return (J2) mapping method is performed with return mapping
@@ -70,30 +70,31 @@ public:
    * @param elastic_strain_old            Old state of total elastic strain
    */
   virtual void
-  updateState(ADRankTwoTensor & strain_increment,
-              ADRankTwoTensor & inelastic_strain_increment,
-              const ADRankTwoTensor & rotation_increment,
-              ADRankTwoTensor & stress_new,
+  updateState(GenericRankTwoTensor<is_ad> & strain_increment,
+              GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+              const GenericRankTwoTensor<is_ad> & rotation_increment,
+              GenericRankTwoTensor<is_ad> & stress_new,
               const RankTwoTensor & stress_old,
-              const ADRankFourTensor & elasticity_tensor,
+              const GenericRankFourTensor<is_ad> & elasticity_tensor,
               const RankTwoTensor & elastic_strain_old,
               bool /*compute_full_tangent_operator = false*/,
               RankFourTensor & /*tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor*/)
       override;
 
-  virtual Real computeReferenceResidual(const ADDenseVector & effective_trial_stress,
-                                        const ADDenseVector & stress_new,
-                                        const ADReal & residual,
-                                        const ADReal & scalar_effective_inelastic_strain) override;
+  virtual Real
+  computeReferenceResidual(const GenericDenseVector<is_ad> & effective_trial_stress,
+                           const GenericDenseVector<is_ad> & stress_new,
+                           const GenericReal<is_ad> & residual,
+                           const GenericReal<is_ad> & scalar_effective_inelastic_strain) override;
 
-  virtual ADReal
-  minimumPermissibleValue(const ADDenseVector & /*effective_trial_stress*/) const override
+  virtual GenericReal<is_ad> minimumPermissibleValue(
+      const GenericDenseVector<is_ad> & /*effective_trial_stress*/) const override
   {
     return 0.0;
   }
 
-  virtual ADReal
-  maximumPermissibleValue(const ADDenseVector & effective_trial_stress) const override;
+  virtual GenericReal<is_ad>
+  maximumPermissibleValue(const GenericDenseVector<is_ad> & effective_trial_stress) const override;
 
   /**
    * Compute the limiting value of the time step for this material
@@ -119,6 +120,11 @@ public:
   bool isBlockDiagonal(const AnisotropyMatrixReal & A);
 
 protected:
+  using Material::_current_elem;
+  using Material::_dt;
+  using Material::_q_point;
+  using Material::_qp;
+
   virtual void initQpStatefulProperties() override;
 
   /**
@@ -136,9 +142,10 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param elasticityTensor     Elasticity tensor
    */
-  virtual void computeStressInitialize(const ADDenseVector & /*stress_dev*/,
-                                       const ADDenseVector & /*stress*/,
-                                       const ADRankFourTensor & /*elasticity_tensor*/) = 0;
+  virtual void
+  computeStressInitialize(const GenericDenseVector<is_ad> & /*stress_dev*/,
+                          const GenericDenseVector<is_ad> & /*stress*/,
+                          const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/) = 0;
 
   /**
    * Perform any necessary steps to finalize state after return mapping iterations
@@ -147,12 +154,12 @@ protected:
    * @param stress Cauchy stress
    * @param stress_dev Deviatoric part of Cauchy stress
    */
-  virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
-                                     const ADReal & delta_gamma,
-                                     ADRankTwoTensor & stress,
-                                     const ADDenseVector & /*stress_dev*/,
-                                     const ADRankTwoTensor & stress_old,
-                                     const ADRankFourTensor & elasticity_tensor) = 0;
+  virtual void computeStressFinalize(const GenericRankTwoTensor<is_ad> & inelasticStrainIncrement,
+                                     const GenericReal<is_ad> & delta_gamma,
+                                     GenericRankTwoTensor<is_ad> & stress,
+                                     const GenericDenseVector<is_ad> & /*stress_dev*/,
+                                     const GenericRankTwoTensor<is_ad> & stress_old,
+                                     const GenericRankFourTensor<is_ad> & elasticity_tensor) = 0;
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
@@ -160,16 +167,25 @@ protected:
    * @param stress_dev Deviatoric part of Cauchy stress
    * @param delta_gamma Plastic multiplier
    */
-  virtual void computeStrainFinalize(ADRankTwoTensor & inelasticStrainIncrement,
-                                     const ADRankTwoTensor & stress,
-                                     const ADDenseVector & stress_dev,
-                                     const ADReal & delta_gamma) = 0;
+  virtual void computeStrainFinalize(GenericRankTwoTensor<is_ad> & inelasticStrainIncrement,
+                                     const GenericRankTwoTensor<is_ad> & stress,
+                                     const GenericDenseVector<is_ad> & stress_dev,
+                                     const GenericReal<is_ad> & delta_gamma) = 0;
+
+  /*
+   * Method that determines the tangent calculation method. For anisotropic creep only models, the
+   * tangent calculation method is ELASTIC for now
+   */
+  virtual TangentCalculationMethod getTangentCalculationMethod() override
+  {
+    return TangentCalculationMethod::ELASTIC;
+  }
 
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
 
   /// Equivalent creep/plastic strain
-  ADMaterialProperty<Real> & _effective_inelastic_strain;
+  GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
 
   /// Equivalent creep/plastic strain rate: facilitates user's control of integration errors
@@ -188,3 +204,6 @@ protected:
   /// Whether to use fully transformed Hill's tensor due to rigid body or large deformation kinematic rotation
   const bool _use_transformation;
 };
+
+typedef GeneralizedRadialReturnStressUpdateTempl<false> GeneralizedRadialReturnStressUpdate;
+typedef GeneralizedRadialReturnStressUpdateTempl<true> ADGeneralizedRadialReturnStressUpdate;
