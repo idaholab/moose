@@ -183,30 +183,22 @@ CoupledHeatTransferAction::addBCs()
 void
 CoupledHeatTransferAction::addUserObjects()
 {
-  // Use NearestPointLayeredSideAverage if the user supplied sub-app positions;
-  // else, use LayeredSideAverage, which assumes a single sub-app position at (0,0,0).
-  std::string class_name;
-  InputParameters class_params = emptyInputParameters();
-  if (isParamValid("positions") || isParamValid("positions_file"))
-  {
-    class_name = "NearestPointLayeredSideAverage";
-    class_params = _factory.getValidParams(class_name);
-    if (isParamValid("positions"))
-      class_params.set<std::vector<Point>>("points") = getParam<std::vector<Point>>("positions");
-    if (isParamValid("positions_file"))
-      class_params.set<FileName>("points_file") = getParam<FileName>("positions_file");
-  }
-  else
-  {
-    class_name = "LayeredSideAverage";
-    class_params = _factory.getValidParams(class_name);
-  }
-
   // Solid temperature spatial user object
   {
-    InputParameters params = class_params;
+    const std::string class_name = "NearestPointLayeredSideAverage";
+    InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<VariableName>>("variable") = {_T_solid_var_name};
     params.set<std::vector<BoundaryName>>("boundary") = {_boundary};
+
+    // set sub-app positions
+    if (isParamValid("positions"))
+      params.set<std::vector<Point>>("points") = getParam<std::vector<Point>>("positions");
+    else if (isParamValid("positions_file"))
+      params.set<FileName>("points_file") = getParam<FileName>("positions_file");
+    else
+      params.set<std::vector<Point>>("points") = {Point(0, 0, 0)};
+
+    // set layers
     if (isParamValid("direction") && isParamValid("num_layers"))
     {
       params.set<MooseEnum>("direction") = getParam<MooseEnum>("direction");
