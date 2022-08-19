@@ -1,22 +1,21 @@
 [Tests]
   [constant_material]
-    requirement = "invert for a constant heat source with a constant thermal"
-                  " conductivity"
+    requirement = "invert for a constant heat source with a constant thermal conductivity"
     type = CSVDiff
     max_threads = 1
     rel_err = 0.01
-    input = master.i
-    csvdiff = master_out_OptimizationReporter_0001.csv
+    input = main.i
+    csvdiff = main_out_OptimizationReporter_0001.csv
     # steady solve
     recover = false
   []
   [t_dependent_material]
-    requirement = "invert for a constant heat source with a temperature"
-                  " dependent thermal condutivity"
+    requirement = "invert for a constant heat source with a temperature dependent thermal "
+                  "condutivity"
     type = CSVDiff
     max_threads = 1
     rel_err = 0.1
-    abs_zero=0.5
+    abs_zero = 0.5
     input = master_nonLinear.i
     csvdiff = master_nonLinear_out_OptimizationReporter_0001.csv
     # steady solve

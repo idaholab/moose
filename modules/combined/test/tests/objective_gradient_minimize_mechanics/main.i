@@ -28,37 +28,36 @@
   petsc_options_value = '1e-5 50 none cg'
   verbose = true
 
-#  type = Optimize
-#  tao_solver = taolmvm
-#  petsc_options_iname = '-tao_gatol -tao_grtol'
-#  petsc_options_value = '1e-6 1e-6'
-#  verbose = true
+  #  type = Optimize
+  #  tao_solver = taolmvm
+  #  petsc_options_iname = '-tao_gatol -tao_grtol'
+  #  petsc_options_value = '1e-6 1e-6'
+  #  verbose = true
 
-#  petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
-#  petsc_options_value='1 true true false 1e-3 0.1'
-#  petsc_options = '-tao_test_gradient_view'
+  #  petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
+  #  petsc_options_value='1 true true false 1e-3 0.1'
+  #  petsc_options = '-tao_test_gradient_view'
 []
-
 
 [MultiApps]
   [forward]
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
     execute_on = "FORWARD"
-    clone_master_mesh = true
+    clone_parent_mesh = true
   []
   [adjoint]
     type = OptimizeFullSolveMultiApp
     input_files = adjoint.i
     execute_on = "ADJOINT"
-    clone_master_mesh = true
+    clone_parent_mesh = true
   []
   # the forward problem has homogeneous boundary conditions so it can be reused here.
   [homogeneousForward]
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
     execute_on = "HOMOGENEOUS_FORWARD"
-    clone_master_mesh = true
+    clone_parent_mesh = true
   []
 []
 

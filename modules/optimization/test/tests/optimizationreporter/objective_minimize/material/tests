@@ -3,7 +3,7 @@
     type = CSVDiff
     max_threads = 1
     rel_err = 0.01
-    input = master.i
+    input = main.i
     csvdiff = bracket_bounds_receiver_0001.csv
     requirement = "Find conductivity that is bracketed by bounds"
     cli_args = " Outputs/file_base=bracket_bounds"
@@ -14,11 +14,11 @@
     type = CSVDiff
     max_threads = 1
     rel_err = 0.01
-    input = master.i
+    input = main.i
     csvdiff = lower_bounds_receiver_0001.csv
     requirement = "Best conductivity is lower bound"
-    cli_args = "OptimizationReporter/lower_bounds='6' OptimizationReporter/upper_bounds='10'"
-               " Outputs/file_base=lower_bounds"
+    cli_args = "OptimizationReporter/lower_bounds='6' OptimizationReporter/upper_bounds='10' "
+               "Outputs/file_base=lower_bounds"
     # steady solve
     recover = false
   []
@@ -26,10 +26,10 @@
     type = CSVDiff
     max_threads = 1
     rel_err = 0.01
-    input = master.i
+    input = main.i
     csvdiff = upper_bounds_receiver_0001.csv
-    cli_args = "OptimizationReporter/lower_bounds='1' OptimizationReporter/upper_bounds='3'"
-              " Outputs/file_base=upper_bounds"
+    cli_args = "OptimizationReporter/lower_bounds='1' OptimizationReporter/upper_bounds='3' "
+               "Outputs/file_base=upper_bounds"
     requirement = "Best conductivity is upper bound"
     # steady solve
     recover = false

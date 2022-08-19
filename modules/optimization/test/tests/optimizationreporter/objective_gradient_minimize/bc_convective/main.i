@@ -87,13 +87,13 @@
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
     execute_on = "FORWARD"
-    clone_master_mesh = true
+    clone_parent_mesh = true
   []
   [adjoint]
     type = OptimizeFullSolveMultiApp
     input_files = adjoint.i
     execute_on = "ADJOINT"
-    clone_master_mesh = true
+    clone_parent_mesh = true
   []
 []
 

@@ -11,7 +11,7 @@ read_df=pd.concat((pd.read_csv(f) for f in all_files))
 df = pd.concat([df,read_df],axis=1)
 print('df names=', list(df.columns),'   df shape=',list(df.shape))
 
-print("\n\n****************  master.i  ***************\n\n")
+print("\n\n****************  main.i  ***************\n\n")
 
 #    [OptimizationReporter]
 #      type = ObjectiveGradientMinimize

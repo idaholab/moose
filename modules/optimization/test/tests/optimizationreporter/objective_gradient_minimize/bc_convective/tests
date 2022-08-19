@@ -3,7 +3,7 @@
     type = CSVDiff
     max_threads = 1
     rel_err = 0.1
-    input = master.i
+    input = main.i
     csvdiff = forward_vertical_0001.csv
     # steady solve
     recover = false

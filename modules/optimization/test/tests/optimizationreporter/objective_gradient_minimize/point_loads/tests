@@ -3,11 +3,11 @@
     type = CSVDiff
     max_threads = 1
     rel_err = 0.1
-    input = master.i
-    cli_args = "Executioner/tao_solver=taonls"
-               " Executioner/petsc_options_iname='-tao_gttol -tao_max_it -tao_nls_pc_type -tao_nls_ksp_type'"
-               " Executioner/petsc_options_value='1e-5 10 none cg'"
-    csvdiff = master_out_receiver_0001.csv
+    input = main.i
+    cli_args = "Executioner/tao_solver=taonls Executioner/petsc_options_iname='-tao_gttol "
+               "-tao_max_it -tao_nls_pc_type -tao_nls_ksp_type' "
+               "Executioner/petsc_options_value='1e-5 10 none cg'"
+    csvdiff = main_out_receiver_0001.csv
     # steady solve
     recover = false
   []
@@ -15,8 +15,8 @@
     type = CSVDiff
     max_threads = 1
     rel_err = 0.1
-    input = master.i
-    csvdiff = master_out_receiver_0001.csv
+    input = main.i
+    csvdiff = main_out_receiver_0001.csv
     # steady solve
     recover = false
   []
@@ -24,13 +24,13 @@
     type = CSVDiff
     max_threads = 1
     rel_err = 0.1
-    input = master.i
-    cli_args = "Executioner/petsc_options_iname='-tao_fd_test -tao_fd_gradient -tao_fd_delta -tao_gatol'"
-               " Executioner/petsc_options_value='true true 0.0001 0.1'"
-#Fixme lynn I would like to use this to test the gradient, something like testJacobian
-#    cli_args = "Executioner/petsc_options_iname='-tao_fd_test -tao_fd_gradient -tao_test_gradient_view -tao_fd_delta -tao_gatol'"
-#              " Executioner/petsc_options_value='true true true 0.0001 0.001'"
-    csvdiff = master_out_receiver_0001.csv
+    input = main.i
+    cli_args = "Executioner/petsc_options_iname='-tao_fd_test -tao_fd_gradient -tao_fd_delta "
+               "-tao_gatol' Executioner/petsc_options_value='true true 0.0001 0.1'"
+    #Fixme lynn I would like to use this to test the gradient, something like testJacobian
+    #    cli_args = "Executioner/petsc_options_iname='-tao_fd_test -tao_fd_gradient -tao_test_gradient_view -tao_fd_delta -tao_gatol'"
+    #              " Executioner/petsc_options_value='true true true 0.0001 0.001'"
+    csvdiff = main_out_receiver_0001.csv
     heavy = true
   []
 []

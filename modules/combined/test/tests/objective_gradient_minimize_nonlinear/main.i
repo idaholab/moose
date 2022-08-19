@@ -42,29 +42,29 @@
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
     execute_on = FORWARD
-    clone_master_mesh = true
+    clone_parent_mesh = true
     reset_app = true
   []
   [homogeneous_forward]
     type = OptimizeFullSolveMultiApp
     input_files = homogeneous_forward.i
     execute_on = HOMOGENEOUS_FORWARD
-    clone_master_mesh = true
+    clone_parent_mesh = true
     reset_app = true
   []
   [adjoint]
     type = OptimizeFullSolveMultiApp
     input_files = adjoint.i
     execute_on = ADJOINT
-    clone_master_mesh = true
+    clone_parent_mesh = true
     reset_app = true
   []
 []
 
 [Transfers]
-## RUN FORWARD SIMULATION WITH CURRENT PARAMETERS AS FORCE,
-## AND EXTRACT SIMULATED VALUES AT MEASUREMENT POINTS
-## AS WELL AS TOTAL FIELD VARIABLE FOR NONLINEAR PURPOSES
+  ## RUN FORWARD SIMULATION WITH CURRENT PARAMETERS AS FORCE,
+  ## AND EXTRACT SIMULATED VALUES AT MEASUREMENT POINTS
+  ## AS WELL AS TOTAL FIELD VARIABLE FOR NONLINEAR PURPOSES
   [ParametersToForward]
     type = OptimizationParameterTransfer
     to_multi_app = forward
@@ -94,8 +94,8 @@
     source_variable = 'forwardT'
     variable = 'forwardT'
   []
-### RUN THE HOMOGENEOUS_FORWARD WITH CURRENT NONLINEAR STATE, PARAMTER_STEP,
-### AND EXTRACT SIMULATED DATA AT MEASURMENT POINTS
+  ### RUN THE HOMOGENEOUS_FORWARD WITH CURRENT NONLINEAR STATE, PARAMTER_STEP,
+  ### AND EXTRACT SIMULATED DATA AT MEASURMENT POINTS
   [CurrentStateToHomogeneousForwardNonlinear]
     type = MultiAppCopyTransfer
     to_multi_app = homogeneous_forward
@@ -125,8 +125,8 @@
     from_reporters = 'data_pt/T'
     to_reporters = 'OptimizationReporter/simulation_values'
   []
-### RUN THE ADJOINT WITH CURRENT NONLINEAR STATE, WITH MISFIT AS EXCITATION,
-### AND EXTRACT GRADIENT
+  ### RUN THE ADJOINT WITH CURRENT NONLINEAR STATE, WITH MISFIT AS EXCITATION,
+  ### AND EXTRACT GRADIENT
   [CurrentStateToAdjointNonlinear]
     type = MultiAppCopyTransfer
     to_multi_app = adjoint
@@ -154,11 +154,11 @@
 []
 
 [Reporters]
-   [optInfo]
-     type = OptimizationInfo
-   []
+  [optInfo]
+    type = OptimizationInfo
+  []
 []
 
 [Outputs]
-  csv=true
+  csv = true
 []

@@ -1,6 +1,3 @@
-# This tests that a function NeumannBC with a constant value
-# parsed function can be parameterized.
-
 [StochasticTools]
 []
 
@@ -8,35 +5,32 @@
   type = GeneratedMesh
   dim = 2
   nx = 10
-  ny = 20
-  xmax = 1
-  ymax = 2
-  bias_x = 1.1
-  bias_y = 1.1
+  ny = 2
+  xmin = 0.0
+  xmax = 5.0
+  ymin = 0.0
+  ymax = 1.0
 []
-
 
 [OptimizationReporter]
   type = ObjectiveGradientMinimize
-  parameter_names = 'p1 p2'
-  num_values = '1 1'
-  measurement_points = '0.2 0.2 0
-            0.8 0.6 0
-            0.2 1.4 0
-            0.8 1.8 0'
-  measurement_values = '199 214 154 129'
+  parameter_names = 'bc_right'
+  num_values = '1'
+  measurement_points = '5.0 1.0 0.0'
+  measurement_values = '80.9'
+  initial_condition = '100'
 []
 
 [Executioner]
   type = Optimize
   tao_solver = taolmvm
-  petsc_options_iname = '-tao_gatol'# -tao_cg_delta_max'
-  petsc_options_value = '1e-4'
-  # petsc_options_iname = '-tao_fd_gradient -tao_fd_delta -tao_gatol'
-  # petsc_options_value = 'true 0.0001 1e-4'
-   # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
-   # petsc_options_value='3 true true false 0.0001 0.0001'
-  # verbose = true
+  petsc_options_iname = '-tao_gatol -tao_max_it' #-tao_ls_type'
+  petsc_options_value = '1e-1 50' #unit'
+  # tao_solver = taonls
+  # petsc_options_iname = '-tao_gttol -tao_max_it -tao_nls_pc_type -tao_nls_ksp_type'
+  # petsc_options_value = '1e-5 50 none cg'
+
+  verbose = true
 []
 
 [MultiApps]
@@ -44,13 +38,13 @@
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
     execute_on = "FORWARD"
-    clone_master_mesh = true
+    clone_parent_mesh = true
   []
   [adjoint]
     type = OptimizeFullSolveMultiApp
     input_files = adjoint.i
     execute_on = "ADJOINT"
-    clone_master_mesh = true
+    clone_parent_mesh = true
   []
 []
 
@@ -59,8 +53,8 @@
   [fromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'data_pt/temperature data_pt/temperature'
-    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+    from_reporters = 'data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values'
   []
   [toAdjoint]
     type = MultiAppReporterTransfer
@@ -74,33 +68,32 @@
     from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
     to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
   []
-    #these are different,
-    # - to forward depends on teh parameter being changed
-    # - from adjoint depends on the gradient being computed from the adjoint
-    #NOTE:  the adjoint variable we are transferring is actually the gradient
-  [toforward]
+  #these are different,
+  # - to forward depends on teh parameter being changed
+  # - from adjoint depends on the gradient being computed from the adjoint
+  #NOTE:  the adjoint variable we are transferring is actually the gradient
+
+  [toForward]
     type = OptimizationParameterTransfer
     to_multi_app = forward
-    value_names = 'p1 p2'
-    parameters = 'Postprocessors/p1/value Postprocessors/p2/value'
+    value_names = 'bc_right'
+    parameters = 'BCs/right/value'
     to_control = parameterReceiver
   []
-  [fromadjoint]
+  [fromAdjoint]
     type = MultiAppReporterTransfer
     from_multi_app = adjoint
-    from_reporters = 'adjoint_bc/adjoint_bc'
+    from_reporters = 'adjoint_pt/adjoint_pt'
     to_reporters = 'OptimizationReporter/adjoint'
   []
 []
 
 [Reporters]
-  [receiver]
-    type = ConstantReporter
-    real_vector_names = measured
-    real_vector_values = '0'
-   []
+  [optInfo]
+    type = OptimizationInfo
+  []
 []
 
 [Outputs]
-  csv=true
+  csv = true
 []

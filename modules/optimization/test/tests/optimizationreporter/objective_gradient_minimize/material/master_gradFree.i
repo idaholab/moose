@@ -37,7 +37,7 @@
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
     execute_on = "FORWARD"
-    clone_master_mesh = true
+    clone_parent_mesh = true
     ignore_solve_not_converge = true #false
   []
 []
@@ -71,16 +71,15 @@
     type = ConstantReporter
     real_vector_names = measured
     real_vector_values = '0'
-   []
-   [optInfo]
-     type = OptimizationInfo
-     items = 'current_iterate'
-   []
+  []
+  [optInfo]
+    type = OptimizationInfo
+    items = 'current_iterate'
+  []
 []
-
 
 [Outputs]
   file_base = 'master_gradFree'
   console = false
-  csv=true
+  csv = true
 []

@@ -26,18 +26,17 @@
 [Executioner]
   type = Optimize
   tao_solver = TAONM
-  petsc_options_iname = '-tao_gatol'#
+  petsc_options_iname = '-tao_gatol' #
   petsc_options_value = '1e-4'
   verbose = true
 []
-
 
 [MultiApps]
   [forward]
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
     execute_on = "FORWARD"
-    clone_master_mesh = true
+    clone_parent_mesh = true
   []
 []
 

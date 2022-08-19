@@ -4,7 +4,7 @@ The `OptimizationReporter` block sets up a reporter used for communicating data 
 and the transfers to the sub-app Forward and adjoint solves.  Only one `OptimizationReporter` is allowed per main-app.
 Please refer to [examples/index.md] for examples.
 
-!listing test/tests/optimizationreporter/objective_gradient_minimize/point_loads/master.i
+!listing test/tests/optimizationreporter/objective_gradient_minimize/point_loads/main.i
          block=OptimizationReporter
 
 !syntax parameters /OptimizationReporter

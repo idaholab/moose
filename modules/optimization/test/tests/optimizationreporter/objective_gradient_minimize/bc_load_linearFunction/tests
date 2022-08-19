@@ -1,14 +1,14 @@
 [Tests]
   [iterOutput]
-    requirement = "This tests that a linear and constant function can be scaled in"
-                  "two seperate functionNeumannBCs both applied to the same sideset using "
-                  " two parsed functions.  The scale of the linear and constant functions "
-                  " are being parameterized. This is testing the iter output reporter."
+    requirement = "This tests that a linear and constant function can be scaled intwo seperate "
+                  "functionNeumannBCs both applied to the same sideset using  two parsed functions.  "
+                  "The scale of the linear and constant functions  are being parameterized. This is "
+                  "testing the iter output reporter."
     type = CSVDiff
     max_threads = 1
     rel_err = 0.0000001
-    input = master.i
-    csvdiff = master_out_optInfo_0001.csv
+    input = main.i
+    csvdiff = main_out_optInfo_0001.csv
     # steady solve
     recover = false
   []
@@ -17,9 +17,9 @@
     type = CSVDiff
     max_threads = 1
     rel_err = 0.01
-    input = master.i
+    input = main.i
     min_parallel = 2
-    csvdiff = master_out_OptimizationReporter_0001.csv
+    csvdiff = main_out_OptimizationReporter_0001.csv
     # steady solve
     recover = false
   []

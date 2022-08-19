@@ -12,7 +12,6 @@
   bias_y = 1.0
 []
 
-
 [OptimizationReporter]
   type = ObjectiveGradientMinimize
   parameter_names = 'bc_left bc_right'
@@ -37,36 +36,36 @@
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
     execute_on = "FORWARD"
-    clone_master_mesh = true
+    clone_parent_mesh = true
   []
   [adjoint]
     type = OptimizeFullSolveMultiApp
     input_files = adjoint.i
     execute_on = "ADJOINT"
-    clone_master_mesh = true
+    clone_parent_mesh = true
   []
 []
 
 [Transfers]
   #these are usually the same for all input files.
-    [fromForward]
-      type = MultiAppReporterTransfer
-      from_multi_app = forward
-      from_reporters = 'data_pt/temperature data_pt/temperature'
-      to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
-    []
-    [toAdjoint]
-      type = MultiAppReporterTransfer
-      to_multi_app = adjoint
-      from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
-      to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
-    []
-    [toForward_measument]
-      type = MultiAppReporterTransfer
-      to_multi_app = forward
-      from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
-      to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
-    []
+  [fromForward]
+    type = MultiAppReporterTransfer
+    from_multi_app = forward
+    from_reporters = 'data_pt/temperature data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+  []
+  [toAdjoint]
+    type = MultiAppReporterTransfer
+    to_multi_app = adjoint
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
+    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
+  []
+  [toForward_measument]
+    type = MultiAppReporterTransfer
+    to_multi_app = forward
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
+    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
+  []
   #these are different,
   # - to forward depends on teh parameter being changed
   # - from adjoint depends on the gradient being computed from the adjoint

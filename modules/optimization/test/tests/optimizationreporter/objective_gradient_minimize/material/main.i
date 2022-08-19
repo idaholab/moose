@@ -39,10 +39,10 @@
   # petsc_options_value = '1e-4'
   # petsc_options_iname = '-tao_fd_gradient -tao_fd_delta -tao_gatol'
   # petsc_options_value = 'true 0.0001 1e-4'
-   # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
-   # petsc_options_value='1            true         true               false            0.00001       0.0001'
-   petsc_options_iname='-tao_gatol'
-   petsc_options_value='0.0001'
+  # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
+  # petsc_options_value='1            true         true               false            0.00001       0.0001'
+  petsc_options_iname = '-tao_gatol'
+  petsc_options_value = '0.0001'
   verbose = true
 []
 
@@ -51,14 +51,14 @@
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
     execute_on = "FORWARD"
-    clone_master_mesh = true
+    clone_parent_mesh = true
     ignore_solve_not_converge = true #false
   []
   [adjoint]
     type = OptimizeFullSolveMultiApp
     input_files = adjoint.i
     execute_on = "ADJOINT"
-    clone_master_mesh = true
+    clone_parent_mesh = true
     ignore_solve_not_converge = false
   []
 []
@@ -123,16 +123,15 @@
     type = ConstantReporter
     real_vector_names = measured
     real_vector_values = '0'
-   []
-   [optInfo]
-     type = OptimizationInfo
-     items = 'current_iterate'
-   []
+  []
+  [optInfo]
+    type = OptimizationInfo
+    items = 'current_iterate'
+  []
 []
-
 
 [Outputs]
   file_base = 'master'
   console = true
-  csv=true
+  csv = true
 []

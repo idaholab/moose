@@ -4,8 +4,8 @@
     max_threads = 1
     rel_err = 1e-3
     abs_zero = 1e-1
-    input = master.i
-    csvdiff = master_out_OptimizationReporter_0001.csv
+    input = main.i
+    csvdiff = main_out_OptimizationReporter_0001.csv
     # steady solve
     recover = false
   []

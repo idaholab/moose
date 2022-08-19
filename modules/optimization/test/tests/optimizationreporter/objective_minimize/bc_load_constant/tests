@@ -3,8 +3,8 @@
     type = CSVDiff
     max_threads = 1
     rel_err = 0.01
-    input = master.i
-    csvdiff = master_out_receiver_0001.csv
+    input = main.i
+    csvdiff = main_out_receiver_0001.csv
     # steady solve
     recover = false
   []
