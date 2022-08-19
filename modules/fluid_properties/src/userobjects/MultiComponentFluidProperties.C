@@ -26,7 +26,7 @@ MultiComponentFluidProperties::~MultiComponentFluidProperties() {}
 std::string
 MultiComponentFluidProperties::fluidName() const
 {
-  mooseError(name(), ": fluidName() is not implemented");
+  mooseError("fluidName() is not implemented");
 }
 
 void
@@ -65,5 +65,5 @@ MultiComponentFluidProperties::rho_mu_from_p_T_X(Real pressure,
 const SinglePhaseFluidProperties &
 MultiComponentFluidProperties::getComponent(unsigned int) const
 {
-  mooseError(name(), ": getComponent() is not implemented");
+  mooseError("getComponent() is not implemented");
 }

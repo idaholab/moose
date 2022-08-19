@@ -61,7 +61,7 @@ TwoPhaseFluidProperties::TwoPhaseFluidProperties(const InputParameters & paramet
 Real
 TwoPhaseFluidProperties::T_triple() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
 
 DualReal
@@ -103,12 +103,12 @@ TwoPhaseFluidProperties::h_lat(const DualReal & p, const DualReal & T) const
 Real
 TwoPhaseFluidProperties::L_fusion() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
 
 Real TwoPhaseFluidProperties::sigma_from_T(Real /*T*/) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
 
 DualReal
@@ -125,7 +125,7 @@ TwoPhaseFluidProperties::sigma_from_T(const DualReal & T) const
 
 Real TwoPhaseFluidProperties::dsigma_dT_from_T(Real /*T*/) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
 
 #pragma GCC diagnostic pop

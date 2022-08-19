@@ -74,6 +74,9 @@ require_total = 65
 [richards]
 require_total = 97
 
+[solid_properties]
+require_total = 84
+
 [stochastic_tools]
 require_total = 88
 

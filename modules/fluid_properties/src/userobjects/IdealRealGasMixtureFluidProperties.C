@@ -273,7 +273,7 @@ IdealRealGasMixtureFluidProperties::c_from_p_T(Real p, Real T, const std::vector
   Real dp_dv_s = dp_dv - dp_dT * ds_dv / ds_dT;
 
   if (dp_dv_s >= 0)
-    mooseWarning(name(), ":c_from_p_T(), dp_dv_s = ", dp_dv_s, ". Should be negative.");
+    mooseWarning("c_from_p_T(), dp_dv_s = ", dp_dv_s, ". Should be negative.");
   return v * std::sqrt(-dp_dv_s);
 }
 
@@ -762,7 +762,7 @@ IdealRealGasMixtureFluidProperties::c_from_T_v(Real T, Real v, const std::vector
   Real dp_dv_s = dp_dv - dp_dT * ds_dv / ds_dT;
 
   if (dp_dv_s >= 0)
-    mooseWarning(name(), ":c_from_T_v(), dp_dv_s = ", dp_dv_s, ". Should be negative.");
+    mooseWarning("c_from_T_v(), dp_dv_s = ", dp_dv_s, ". Should be negative.");
   return v * std::sqrt(-dp_dv_s);
 }
 

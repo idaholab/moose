@@ -1,0 +1,16 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = '../thermal_solid_properties.i'
+    cli_args = "
+      solid_properties_class=ThermalSS316Properties
+      file_base=stainless_steel_316
+      T_min=298.15
+      T_max=1573.15"
+    csvdiff = 'stainless_steel_316_vpp_0000.csv'
+    mesh_mode = 'replicated' # see #21865
+    requirement = "The system shall compute thermal properties for stainless steel 316."
+    design = 'ThermalSS316Properties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  []
+[]

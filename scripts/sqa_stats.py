@@ -39,6 +39,7 @@ if __name__ == '__main__':
     data += mooseutils.compute_requirement_stats('modules/reactor')
     data += mooseutils.compute_requirement_stats('modules/richards')
     data += mooseutils.compute_requirement_stats('modules/solid_mechanics')
+    data += mooseutils.compute_requirement_stats('modules/solid_properties')
     data += mooseutils.compute_requirement_stats('modules/stochastic_tools')
     data += mooseutils.compute_requirement_stats('modules/tensor_mechanics')
     data += mooseutils.compute_requirement_stats('modules/xfem')

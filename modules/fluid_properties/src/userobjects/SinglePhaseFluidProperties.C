@@ -199,7 +199,7 @@ SinglePhaseFluidProperties::v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, R
 void
 SinglePhaseFluidProperties::beta_from_p_T(Real, Real, Real &, Real &, Real &) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
 
 Real
@@ -220,7 +220,7 @@ SinglePhaseFluidProperties::beta_from_p_T(Real p, Real T) const
 Real
 SinglePhaseFluidProperties::molarMass() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 std::string
@@ -232,37 +232,37 @@ SinglePhaseFluidProperties::fluidName() const
 Real
 SinglePhaseFluidProperties::criticalPressure() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::criticalTemperature() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::criticalDensity() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::criticalInternalEnergy() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::triplePointPressure() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::triplePointTemperature() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
@@ -275,7 +275,7 @@ void
 SinglePhaseFluidProperties::gamma_from_v_e(
     Real v, Real e, Real & gamma, Real & dgamma_dv, Real & dgamma_de) const
 {
-  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+  fluidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");
 
   dgamma_dv = 0.0;
   dgamma_de = 0.0;
@@ -292,7 +292,7 @@ void
 SinglePhaseFluidProperties::gamma_from_p_T(
     Real p, Real T, Real & gamma, Real & dgamma_dp, Real & dgamma_dT) const
 {
-  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+  fluidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");
 
   dgamma_dp = 0.0;
   dgamma_dT = 0.0;
@@ -301,19 +301,19 @@ SinglePhaseFluidProperties::gamma_from_p_T(
 
 Real SinglePhaseFluidProperties::vaporPressure(Real) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 std::vector<Real>
 SinglePhaseFluidProperties::henryCoefficients() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SinglePhaseFluidProperties::vaporPressure(Real T, Real & p, Real & dp_dT) const
 {
-  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+  fluidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");
 
   dp_dT = 0.0;
   p = vaporPressure(T);
@@ -336,13 +336,13 @@ SinglePhaseFluidProperties::vaporPressure(const DualReal & T) const
 
 Real SinglePhaseFluidProperties::vaporTemperature(Real) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SinglePhaseFluidProperties::vaporTemperature(Real p, Real & T, Real & dT_dp) const
 {
-  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+  fluidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");
 
   dT_dp = 0.0;
   T = vaporTemperature(p);
@@ -442,13 +442,13 @@ SinglePhaseFluidProperties::rho_mu_from_p_T(const DualReal & p,
 
 Real SinglePhaseFluidProperties::e_spndl_from_v(Real) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SinglePhaseFluidProperties::v_e_spndl_from_T(Real, Real &, Real &) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
