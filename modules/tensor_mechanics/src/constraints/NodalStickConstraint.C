@@ -42,7 +42,8 @@ NodalStickConstraint::NodalStickConstraint(const InputParameters & parameters)
     _penalty(getParam<Real>("penalty"))
 {
   if (_var.number() != _var_secondary.number())
-    mooseError("Primary variable must be identical to secondary variable. "
+    paramError("variable_secondary",
+               "Primary variable must be identical to secondary variable. "
                "Different variables are currently not supported.");
 
   updateConstrainedNodes();
