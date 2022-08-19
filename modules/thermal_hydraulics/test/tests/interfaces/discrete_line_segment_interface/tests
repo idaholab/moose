@@ -1,0 +1,29 @@
+[Tests]
+  design = 'DiscreteLineSegmentInterface.md'
+  issues = '#21818'
+
+  [compute_axial_coordinate]
+    type = Exodiff
+    input = 'discrete_line_segment_interface.i'
+    exodiff = 'discrete_line_segment_interface_out.e'
+    allow_test_objects = true
+    # 0 time steps taken
+    recover = false
+
+    requirement = 'The system shall provide an interface to compute an axial coordinate from an arbitrary spatial point.'
+  []
+
+  [error_reporting]
+    requirement = 'The system shall report an error for the discrete line segment interface'
+
+    [compute_axial_coordinate_invalid_axial_coord]
+      type = RunException
+      input = 'discrete_line_segment_interface.i'
+      cli_args = "AuxKernels/ax_coord_aux/length=5.0"
+      expect_err = "ax_coord_aux: The point \(x,y,z\)=\( 4.07033, -1.21099, -2.64835\) has an invalid axial coordinate \(5.5\). Valid axial coordinates are in the range \(0,5\)."
+      allow_test_objects = true
+
+      detail = 'if an invalid axial coordinate is provided.'
+    []
+  []
+[]

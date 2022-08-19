@@ -1,70 +1,113 @@
-# Coupled Heat Transfer Action
+# CoupledHeatTransferAction
 
 ## Description
 
-The `CoupledHeatTransferAction` action sets up all of the necessary objects for
-doing transfer between heat conduction and thermal hydraulics module. It should
-be used with the heat conduction problem in the master-app. It is setting up the following objects:
+This action creates many of the low-level objects needed to perform a convective
+heat transfer multiphysics coupling with a [1-D flow channel](component_groups/flow_channel.md).
+It assumes that the domain external to the flow channel is the master-app,
+and the application(s) containing the flow channel(s) are the sub-apps.
+Hereafter the external domain is referred to as the "solid side", and the flow
+channel is referred to as the "fluid side".
 
-- A convective boundary condition on the boundaries provided in the `boundary` parameter
-  using the heat transfer coefficient variable `htc` and the fluid temperature `T_fluid`.
-- A UserObject of type `LayeredSideAverage` operating on the solid temperature defined
-  in the `T` parameter, using a number of `num_layers` layers in the directions provided
-  in `direction`.
-- A `MultiAppUserObjectTransfer` to the sub-app defined in the `multi_app` parameter.
-  This will transfer the resulting solid surface temperature into the sub-app variable
-  provided in the `T_wall` parameter.
-- A `MultiAppUserObjectTransfer` from the sub-app defined in the `multi_app` parameter.
-  This will transfer the fluid temperature calculated in the sub-app by the user object defined by
-  `T_fluid_user_object` into the AuxVariable defined by `T_fluid`.
-- A `MultiAppUserObjectTransfer` from the sub-app defined in the `multi_app` parameter.
-  This will transfer the heat transfer coefficient calculated in the sub-app by the user object
-  defined by `htc_user_object` into the AuxVariable defined by `htc`.
+This action is suitable for coupling to either single-phase or multi-phase
+flow channels. The general formulation it uses for the heat fluxes *to* the solid
+side is
 
-To use this action, the following objects must be defined in the master-app input file:
+!equation id=solid_side_heat_flux
+q = \sum\limits_k \kappa_k \mathcal{H}_k (T_k - T) \eqc
 
-- `AuxVariables` for the fluid temperature and heat transfer coefficient.
+where $k$ is the fluid phase index, $T$ is the solid-side temperature, $T_k$ is the
+temperature of phase $k$, $\mathcal{H}_k$ is the heat transfer coefficient of
+phase $k$, and $\kappa_k$ is the wall contact fraction of phase $k$.
 
-!listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/master.i
-         block=AuxVariables
-         link=False
+The action creates the following MOOSE objects:
 
+- A [/CoupledConvectiveHeatFluxBC.md] on the boundaries provided in the
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/boundary) parameter,
+  which implements the heat flux boundary condition described by [solid_side_heat_flux].
+- A [/NearestPointLayeredSideAverage.md] user object to compute the average of
+  the solid-side temperature variable (specified by the
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/T) parameter) for
+  each axial layer, corresponding to each of the elements in the flow channel.
+  The layers are determined by the parameters
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/position),
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/orientation),
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/rotation),
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/length), and
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/n_elems),
+  which correspond to the parameters of the same names in the coupled flow
+  channel. These parameters should be copied from the sub input file.
+- A [/MultiAppUserObjectTransfer.md] to transfer the solid-side temperature
+  layer averages into the sub-app variable provided via the
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/T_wall) parameter.
+- A [/MultiAppUserObjectTransfer.md] to transfer each of the phase temperature
+  layer averages, provided by the user object(s) specified in the
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/T_fluid_user_objects)
+  parameter, into the master-app variables specified by the
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/T_fluid) parameter.
+- A [/MultiAppUserObjectTransfer.md] to transfer each of the phase heat transfer coefficient
+  layer averages, provided by the user object(s) specified in the
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/htc_user_objects)
+  parameter, into the master-app variables specified by the
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/htc) parameter.
+- If multi-phase, a [/MultiAppUserObjectTransfer.md] to transfer each of the phase wall contact fraction
+  layer averages, provided by the user object(s) specified in the
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/kappa_user_objects)
+  parameter, into the master-app variables specified by the
+  [!param](/CoupledHeatTransfers/CoupledHeatTransferAction/kappa) parameter.
 
-- `MultiApps` for the THM sub-app
+## Instructions for the Master Input File
 
-!listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/master.i
-         block=MultiApps
-         link=False
+The following must be defined in the master-app input file:
 
-The following must be defined in the THM sub-app:
+- `AuxVariables` for the fluid temperature(s), heat transfer coefficient(s), and
+  wall contact fractions (if multi-phase). For example,
 
-- `AuxVariables` for the heat transfer coefficient associated with a `ADMaterialRealAux` AuxKernel.
-  In THM, the heat transfer coefficient is defined as a material, but an AuxVariable is needed
-  for the transfers.
+  !listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/master.i
+           block=AuxVariables
+           link=False
 
-!listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/sub.i
-         block=AuxVariables
-         link=False
+  It is recommended that the FE type match that of the corresponding variables
+  in the coupled flow channel.
 
+- `MultiApps` for the flow-channel sub-app(s). For example,
 
- !listing tthermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/sub.i
-          block=AuxKernels
-          link=False
+  !listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/master.i
+           block=MultiApps
+           link=False
 
-- `LayeredAverage` user-objects for the fluid temperature and the heat transfer coefficient.
+## Instructions for the Sub Input File
 
-!listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/sub.i
-         block=UserObjects
-         link=False
+The following must be defined in the sub-app input file:
 
-- `HeatTransferFromExternalAppTemperature1Phase` component. If `T_ext` is not set, then the name of
-   solid surface temperature is `T_wall`.
+- `AuxVariables` for the fluid temperature(s), heat transfer coefficient(s), and
+  wall contact fractions (if multi-phase). For example, for THM's single-phase
+  flow model, the fluid temperature is already available as an aux variable, but
+  the wall heat transfer coefficient is an AD material property. Thus a [/MaterialRealAux.md]
+  must be created:
 
+  !listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/sub.i
+           block=AuxVariables
+           link=False
+
+  !listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/sub.i
+           block=AuxKernels
+           link=False
+
+- [/LayeredAverage.md] user objects for the fluid temperature(s), heat transfer coefficient(s),
+  and wall contact fractions (if multi-phase). For example,
+
+  !listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/sub.i
+           block=UserObjects
+           link=False
+
+- A component to implement the flow channel heat source corresponding to [solid_side_heat_flux].
+  For example, for THM's single-phase flow model, the [/HeatTransferFromExternalAppTemperature1Phase.md]
+  component is used.
 
 !syntax parameters /CoupledHeatTransfers/CoupledHeatTransferAction
 
 !syntax inputs /CoupledHeatTransfers/CoupledHeatTransferAction
-
 
 ## Example
 
@@ -72,6 +115,6 @@ Heat conduction input file:
 
 !listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/master.i
 
-THM input file:
+Flow channel input file:
 
 !listing thermal_hydraulics/test/tests/actions/coupled_heat_transfer_action/sub.i
