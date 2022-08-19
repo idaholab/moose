@@ -8,5 +8,6 @@
       exodiff = 'time_changing_test_out.e'
       recover = false
       requirement = 'The system shall will compute a radial average of a material that changes over time.'
+      max_parallel = 2 #See comment on issue #21786
     [../]
   []
