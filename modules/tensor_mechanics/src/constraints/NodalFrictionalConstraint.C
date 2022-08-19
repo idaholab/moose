@@ -53,7 +53,7 @@ NodalFrictionalConstraint::NodalFrictionalConstraint(const InputParameters & par
 {
   if (_var.number() != _var_secondary.number())
     mooseError("NodalFrictionalConstraint: Primary variable must be identical to secondary "
-               "variabe. Different variables are currently not supported.");
+               "variable. Different variables are currently not supported.");
 
   updateConstrainedNodes();
 
