@@ -101,9 +101,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     {
       // Found dummy assembly in input assembly names
       make_empty = true;
-      for (const auto i : make_range(_pattern.size()))
+      for (const auto i : index_range(_pattern))
       {
-        for (const auto j : make_range(_pattern[i].size()))
+        for (const auto j : index_range(_pattern[i]))
         {
           // Found dummy assembly in input lattice definition
           if (_pattern[i][j] == empty_pattern_loc)

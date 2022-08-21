@@ -128,7 +128,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
                "if using extruded geometry");
 
   Real base_pitch = 0.0;
-  for (const auto i : make_range(_inputs.size()))
+  for (const auto i : index_range(_inputs))
   {
     auto pin = _inputs[i];
     if (i == 0)
@@ -204,7 +204,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     _duct_block_names = getParam<std::vector<std::vector<std::string>>>("duct_block_names");
     if (_duct_region_ids.size() != _duct_block_names.size())
       mooseError("The size of duct_block_names must match the size of duct_region_ids");
-    for (const auto i : make_range(_duct_region_ids.size()))
+    for (const auto i : index_range(_duct_region_ids))
       if (_duct_region_ids[i].size() != _duct_block_names[i].size())
         mooseError("The size of duct_block_names must match the size of duct_region_ids");
   }

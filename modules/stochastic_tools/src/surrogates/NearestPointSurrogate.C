@@ -47,7 +47,7 @@ NearestPointSurrogate::evaluate(const std::vector<Real> & x, std::vector<Real> &
 
   unsigned int idx = findNearestPoint(x);
 
-  for (const auto & r : make_range(y.size()))
+  for (const auto & r : index_range(y))
     y[r] = _sample_results[r][idx];
 }
 
