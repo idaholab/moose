@@ -205,13 +205,13 @@ const MooseEnum & type, const std::string & parameter)
            MooseUtils::tokenize(parameter, string_points,1,"\n");
            for (unsigned iter=0; iter<string_points.size();iter++)
              { std::vector<Real> point_vals;
-              bool status= MooseUtils::tokenizeAndConvert(string_points[iter],point_vals," ");
+              MooseUtils::tokenizeAndConvert(string_points[iter],point_vals," ");
               edge.push_back(Point(point_vals[0],point_vals[1],point_vals[2]));
               }
            }
           break;
       case 4:
-          std::cout<<"We don't support this yet \n";
+          mooseError("This capability is not yet implemened");
           break;
       }
   return edge;
