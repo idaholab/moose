@@ -25,7 +25,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-
   // The corners of the domain
   const std::vector<Point> & _corners;
   const unsigned int _nx;
@@ -39,14 +38,17 @@ protected:
 
   // So far the intention is to read in paramters a strings and
   // typecast them after parsing and checking the edge type
-  const std::string  _left_parameter;
-  const std::string  _top_parameter;
-  const std::string  _bottom_parameter;
-  const std::string  _right_parameter;
+  const std::string _left_parameter;
+  const std::string _top_parameter;
+  const std::string _bottom_parameter;
+  const std::string _right_parameter;
 
-  //This is the main routine for constructing edges according to the user input
-  std::vector<Point>getEdge(const Point & P1, const Point & P2, const unsigned int & np,
-  const MooseEnum & type, const std::string & parameter);
+  // This is the main routine for constructing edges according to the user input
+  std::vector<Point> getEdge(const Point & P1,
+                             const Point & P2,
+                             const unsigned int & np,
+                             const MooseEnum & type,
+                             const std::string & parameter);
 
   // The following 3 routines are needed for generating arc circles given the user input
   // The input is expected to be the distance from a stright line at the middle of an edge
@@ -54,12 +56,12 @@ protected:
   Point computeOrigin(const Point & P1, const Point & P2, const Point & P3) const;
   Point computeMidPoint(const Point & P1, const Point & P2, const Real & dist) const;
 
-  //The following routines are necessary for the paramterization of opposite edges
-  //To assure we have the same parameterization on opposite edges we need to map it to
-  // a reference interval, i.e. [0, 1]
+  // The following routines are necessary for the paramterization of opposite edges
+  // To assure we have the same parameterization on opposite edges we need to map it to
+  //  a reference interval, i.e. [0, 1]
   Real getMapToReference(const Real & a, const Real & b, const Real & x) const;
   Real getMapFromReference(const Real & x, const Real & a, const Real & b) const;
-  //For a circle the paramterization is based on radians and we need to compute
-  // the angles spanned between 2 end vertices
+  // For a circle the paramterization is based on radians and we need to compute
+  //  the angles spanned between 2 end vertices
   Real getAtan(const Real x, const Real y) const;
 };
