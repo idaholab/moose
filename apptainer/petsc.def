@@ -6,8 +6,8 @@ From: ../../use_mpich.sif
 %files
     # make the MOOSE repository at-my-current-state available
     # for vetted versions of PETSc during %post
-    # <MOOSE_DIR> /usr/local/moose_src
-    ../../moose /usr/local/moose_src
+    # <MOOSE_DIR> /usr/local/tmp_moose_src
+    ../../moose /usr/local/tmp_moose_src
 
 %environment
     # PETSc
@@ -16,15 +16,14 @@ From: ../../use_mpich.sif
 
 %post
     # Build PETSc
-    umask 022
-    export MOOSE_JOBS=6
     export PETSC_PREFIX=/usr/local/petsc
-    cd /usr/local/moose_src/scripts
+    cd /usr/local/tmp_moose_src/scripts
+    echo -e "JOBS: $MOOSE_JOBS"
     ./update_and_rebuild_petsc.sh
 
     # Test PETSc
-    cd /usr/local/moose_src/petsc
+    cd /usr/local/tmp_moose_src/petsc
     make SLEPC_DIR=/usr/local/petsc PETSC_DIR=/usr/local/petsc PETSC_ARCH="" check
 
     # Clean Up
-    rm -rf /usr/local/moose_src
+    rm -rf /usr/local/tmp_moose_src

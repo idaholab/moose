@@ -4,25 +4,36 @@ BootStrap: localimage
 From: ../../libmesh.sif
 
 %files
-    # make the MOOSE repository at-my-current-state available
+    # make the MOOSE repository at-my-current-state available within container
     # for vetted versions of MOOSE during %post
-    # <MOOSE_DIR> /usr/local/moose_src
-    ../../moose /usr/local/moose_src
+    # <MOOSE_DIR> /usr/local/tmp_moose_src
+    ../../moose /usr/local/tmp_moose_src
 
 %environment
     export MOOSE_DIR=/usr/local/moose_src
+    export PATH=/usr/local/moose/bin:$PATH
 
 %post
     # Prepare a temp directory
     export TEMP_LOC=`mktemp -d /tmp/rocky_singularity.XXXXX`
 
-    # Build MOOSE modules
+    # `make install` target path
+    export MOOSE_PREFIX=/usr/local/moose
+
+    # Shallow Clone (specific to this container's purpose)
+    git clone --depth 1 file:///usr/local/tmp_moose_src /usr/local/moose_src
+    rm -rf /usr/local/tmp_moose_src
+
+    # Fix permissions during for `make install`
+    chmod -R o=u-w,g=u-w /usr/local/moose_src
     umask 022
+
+    # Build MOOSE modules
     export MOOSE_JOBS=32
-    echo "JOBS: $MOOSE_JOBS"
+    echo "JOBS: ${MOOSE_JOBS}"
     cd /usr/local/moose_src/
     patch -p0 < conda/moose/gap_heat_transfer_umat.patch
-    ./configure --prefix=/usr/local/moose
+    ./configure --prefix=${MOOSE_PREFIX}
     cd modules
     make -j ${MOOSE_JOBS:-6}
     export MOOSE_SKIP_DOCS=true
@@ -41,3 +52,6 @@ From: ../../libmesh.sif
     # Clean Up
     cd /usr/local/moose_src
     git clean -xfd
+    cd /usr/local/moose/
+    find . -type f -name "__pycache__" -exec rm -rf {} \;
+    rm -rf ${TEMP_LOC}

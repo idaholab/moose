@@ -6,21 +6,20 @@ From: ../../petsc.sif
 %files
     # make the MOOSE repository at-my-current-state available
     # for vetted versions of libMesh during %post
-    # <MOOSE_DIR> /usr/local/moose_src
-    ../../moose /usr/local/moose_src
+    # <MOOSE_DIR> /usr/local/tmp_moose_src
+    ../../moose /usr/local/tmp_moose_src
 
 %environment
+    # libMesh
     export LIBMESH_DIR=/usr/local/libmesh
 
 %post
     # Build libMesh
-    umask 022
-    export MOOSE_JOBS=${MOOSE_JOBS:-6}
+    export LIBMESH_DIR=/usr/local/libmesh
     export METHODS=opt
     echo -e "JOBS: $MOOSE_JOBS\nMETHODS: ${METHODS}"
-    cd /usr/local/moose_src/scripts
-    export LIBMESH_DIR=/usr/local/libmesh
+    cd /usr/local/tmp_moose_src/scripts
     ./update_and_rebuild_libmesh.sh
 
     # Clean Up
-    rm -rf /usr/local/moose_src
+    rm -rf /usr/local/tmp_moose_src
