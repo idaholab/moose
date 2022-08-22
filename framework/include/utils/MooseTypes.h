@@ -26,6 +26,7 @@
 #include "libmesh/boundary_info.h"
 #include "libmesh/parameters.h"
 #include "libmesh/dense_vector.h"
+#include "libmesh/int_range.h"
 
 // BOOST include
 #include "bitmask_operators.h"
@@ -963,3 +964,10 @@ extern const TagName PREVIOUS_NL_SOLUTION_TAG;
   {                                                                                                \
     __VA_ARGS__                                                                                    \
   }
+
+template <typename T>
+auto
+index_range(const T & sizable)
+{
+  return IntRange<decltype(sizable.size())>(0, sizable.size());
+}
