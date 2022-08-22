@@ -649,7 +649,7 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face)
   if (face.limiter_type == LimiterType::Upwind ||
       face.limiter_type == LimiterType::CentralDifference)
   {
-    for (const auto i : make_range(ret.size()))
+    for (const auto i : index_range(ret))
     {
       const auto &component_upwind = phi_upwind[i], component_downwind = phi_downwind[i];
       std::tie(coeff_upwind, coeff_downwind) = interpCoeffs(*limiter,
@@ -664,7 +664,7 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face)
   else
   {
     const auto grad_phi_upwind = functor.gradient(upwind_arg);
-    for (const auto i : make_range(ret.size()))
+    for (const auto i : index_range(ret))
     {
       const auto &component_upwind = phi_upwind[i], component_downwind = phi_downwind[i];
       const auto & grad = grad_phi_upwind[i];

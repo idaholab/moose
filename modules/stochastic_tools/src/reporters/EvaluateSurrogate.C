@@ -59,14 +59,14 @@ EvaluateSurrogate::EvaluateSurrogate(const InputParameters & parameters)
     paramError("evaluate_std",
                "Nmber of entries must be 1 or equal to the number of entries in 'model'.");
   _doing_std.resize(_model.size());
-  for (const auto i : make_range(_model.size()))
+  for (const auto i : index_range(_model))
     _doing_std[i] = estd.size() == 1 ? estd[0] == "true" : estd[i] == "true";
 
   _real_values.resize(_model.size(), nullptr);
   _real_std.resize(_model.size(), nullptr);
   _vector_real_values.resize(_model.size(), nullptr);
   _vector_real_std.resize(_model.size(), nullptr);
-  for (const auto i : make_range(_model.size()))
+  for (const auto i : index_range(_model))
   {
     const std::string rtype = _response_types.size() == 1 ? _response_types[0] : _response_types[i];
     if (rtype == "real")
@@ -95,7 +95,7 @@ EvaluateSurrogate::execute()
   for (const auto ind : make_range(_sampler.getNumberOfLocalRows()))
   {
     const std::vector<Real> data = _sampler.getNextLocalRow();
-    for (const auto m : make_range(_model.size()))
+    for (const auto m : index_range(_model))
     {
       if (_real_values[m] && _real_std[m])
         (*_real_values[m])[ind] = _model[m]->evaluate(data, (*_real_std[m])[ind]);

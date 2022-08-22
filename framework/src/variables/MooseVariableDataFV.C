@@ -787,11 +787,11 @@ MooseVariableDataFV<OutputType>::setDofValue(const OutputData & value, unsigned 
 
   auto & u = _vector_tag_u[_solution_tag];
   // Update the qp values as well
-  for (const auto qp : make_range(u.size()))
+  for (const auto qp : index_range(u))
     u[qp] = value;
 
   if (_need_ad_u)
-    for (const auto qp : make_range(_ad_u.size()))
+    for (const auto qp : index_range(_ad_u))
       _ad_u[qp] = value;
 }
 

@@ -12,6 +12,8 @@
 #include "Function.h"
 #include "MooseVariableFE.h"
 #include "Assembly.h"
+#include "libmesh/utility.h"
+#include "libmesh/int_range.h"
 
 registerMooseObject("MooseTestApp", DGDiffusionDomainUserObject);
 
@@ -70,7 +72,7 @@ DGDiffusionDomainUserObject::executeOnElement()
   auto & local_integrals = _elem_integrals[_current_elem->id()];
   local_integrals.resize(_test.size());
 
-  for (const auto i : make_range(_test.size()))
+  for (const auto i : index_range(_test))
     for (const auto qp : make_range(qRule().n_points()))
       local_integrals[i] += JxW()[qp] * coord()[qp] * _diff[qp] * _grad_u[qp] * _grad_test[i][qp];
 }
@@ -82,17 +84,17 @@ DGDiffusionDomainUserObject::executeOnBoundary()
   mooseAssert(local_integrals.size() == _test_face.size(),
               "These should be equal or we're in trouble.");
 
-  for (const auto i : make_range(_test_face.size()))
+  for (const auto i : index_range(_test_face))
     for (const auto qp : make_range(qRule().n_points()))
     {
       mooseAssert(_diff_face[qp] == _diff_face_by_name[qp], "API sanity check");
       mooseAssert(_diff_face[qp] == _diff_face_old[qp], "API sanity check");
       mooseAssert(_diff_face[qp] == _diff_face_older[qp], "API sanity check");
-      const unsigned int elem_b_order = _var.order();
-      const double h_elem =
-          _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
+      const int elem_b_order = std::max(libMesh::Order(1), _var.order());
+      const Real h_elem =
+          _current_elem_volume / _current_side_volume * 1.0 / Utility::pow<2>(elem_b_order);
 
-      Real fn = _func.value(_t, qPoints()[qp]);
+      const Real fn = _func.value(_t, qPoints()[qp]);
       Real r = 0;
       r -= (_diff_face[qp] * _grad_u[qp] * _normals[qp] * _test_face[i][qp]);
       r += _epsilon * (_u[qp] - fn) * MetaPhysicL::raw_value(_ad_diff_face[qp]) *
@@ -105,9 +107,9 @@ DGDiffusionDomainUserObject::executeOnBoundary()
 void
 DGDiffusionDomainUserObject::executeOnInternalSide()
 {
-  const unsigned int elem_b_order = _var.order();
-  const double h_elem =
-      _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
+  const int elem_b_order = std::max(libMesh::Order(1), _var.order());
+  const Real h_elem =
+      _current_elem_volume / _current_side_volume * 1.0 / Utility::pow<2>(elem_b_order);
 
   // elem
   {
@@ -115,10 +117,10 @@ DGDiffusionDomainUserObject::executeOnInternalSide()
     mooseAssert(local_integrals.size() == _test_face.size(),
                 "These should be equal or we're in trouble.");
 
-    for (const auto i : make_range(_test_face.size()))
+    for (const auto i : index_range(_test_face))
       for (const auto qp : make_range(qRule().n_points()))
       {
-        Real r = 0;
+        Real r = 0.0;
         r -= 0.5 *
              (_diff_face[qp] * _grad_u[qp] * _normals[qp] +
               _diff_neighbor[qp] * _grad_u_neighbor[qp] * _normals[qp]) *
@@ -136,10 +138,10 @@ DGDiffusionDomainUserObject::executeOnInternalSide()
     if (local_integrals.size() < _test_face_neighbor.size())
       local_integrals.resize(_test_face_neighbor.size());
 
-    for (const auto i : make_range(_test_face_neighbor.size()))
+    for (const auto i : index_range(_test_face_neighbor))
       for (const auto qp : make_range(qRule().n_points()))
       {
-        Real r = 0;
+        Real r = 0.0;
         r += 0.5 *
              (_diff_face[qp] * _grad_u[qp] * _normals[qp] +
               _diff_neighbor[qp] * _grad_u_neighbor[qp] * _normals[qp]) *
@@ -171,7 +173,7 @@ void
 DGDiffusionDomainUserObject::threadJoin(const UserObject & y)
 {
   const DGDiffusionDomainUserObject & dg_uo = dynamic_cast<const DGDiffusionDomainUserObject &>(y);
-  for (unsigned int i = 0; i < _elem_integrals.size(); i++)
+  for (const auto i : index_range(_elem_integrals))
   {
     auto & my_local_integrals = _elem_integrals[i];
     auto & their_local_integrals = dg_uo._elem_integrals[i];
