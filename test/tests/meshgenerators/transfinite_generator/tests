@@ -21,7 +21,7 @@
       type = 'Exodiff'
       input = 'arccircle_generator.i'
       cli_args = '--mesh-only'
-      exodiff = arccircle_generator_in.e'
+      exodiff = 'arccircle_generator_in.e'
       recover = false
 
       detail = 'resulting in a mesh with one arc circle side.'
