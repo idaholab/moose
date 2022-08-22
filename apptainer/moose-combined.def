@@ -21,6 +21,7 @@ From: ../../libmesh.sif
     export MOOSE_JOBS=32
     echo "JOBS: $MOOSE_JOBS"
     cd /usr/local/moose_src/
+    patch -p0 < conda/moose/gap_heat_transfer_umat.patch
     ./configure --prefix=/usr/local/moose
     cd modules
     make -j ${MOOSE_JOBS:-6}
@@ -35,4 +36,8 @@ From: ../../libmesh.sif
     cd ${TEMP_LOC}
     combined-opt --copy-inputs tests
     cd combined/tests
-    combined-opt --run -j ${MOOSE_JOBS:-6}
+    combined-opt --run -j ${MOOSE_JOBS:-6} -t
+
+    # Clean Up
+    cd /usr/local/moose_src
+    git clean -xfd
