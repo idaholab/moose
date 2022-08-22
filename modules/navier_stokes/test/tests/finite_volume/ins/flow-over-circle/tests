@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#21831'
+  design = 'insfv.md'
+  [2D_vortex_shedding]
+    type = 'Exodiff'
+    input = 'flow_over_circle.i'
+    exodiff = 'flow_over_circle_out.e'
+    allow_test_objects = true
+    requirement = 'The system shall be able to solve transient flow resulting in vortex shedding using the finite volume method in a standard tube'
+    ad_indexing_type = global
+  []
+[]
