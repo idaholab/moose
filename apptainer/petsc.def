@@ -1,0 +1,30 @@
+BootStrap: localimage
+# Any image which supplies a development stack with MPI available
+# From: <SIF_IMAGE>
+From: ../../use_mpich.sif
+
+%files
+    # make the MOOSE repository at-my-current-state available
+    # for vetted versions of PETSc during %post
+    # <MOOSE_DIR> /usr/local/moose_src
+    ../../moose /usr/local/moose_src
+
+%environment
+    # PETSc
+    export PETSC_DIR=/usr/local/petsc
+    export PETSC_ARCH=arch-moose
+
+%post
+    # Build PETSc
+    umask 022
+    export MOOSE_JOBS=6
+    export PETSC_PREFIX=/usr/local/petsc
+    cd /usr/local/moose_src/scripts
+    ./update_and_rebuild_petsc.sh
+
+    # Test PETSc
+    cd /usr/local/moose_src/petsc
+    make SLEPC_DIR=/usr/local/petsc PETSC_DIR=/usr/local/petsc PETSC_ARCH="" check
+
+    # Clean Up
+    rm -rf /usr/local/moose_src

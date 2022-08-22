@@ -1,0 +1,38 @@
+BootStrap: localimage
+# An image which supplies libMesh
+# From: <LIBMESH_IMAGE>
+From: ../../libmesh.sif
+
+%files
+    # make the MOOSE repository at-my-current-state available
+    # for vetted versions of MOOSE during %post
+    # <MOOSE_DIR> /usr/local/moose_src
+    ../../moose /usr/local/moose_src
+
+%environment
+    export MOOSE_DIR=/usr/local/moose_src
+
+%post
+    # Prepare a temp directory
+    export TEMP_LOC=`mktemp -d /tmp/rocky_singularity.XXXXX`
+
+    # Build MOOSE modules
+    umask 022
+    export MOOSE_JOBS=32
+    echo "JOBS: $MOOSE_JOBS"
+    cd /usr/local/moose_src/
+    ./configure --prefix=/usr/local/moose
+    cd modules
+    make -j ${MOOSE_JOBS:-6}
+    export MOOSE_SKIP_DOCS=true
+    make install -j ${MOOSE_JOBS:-6}
+
+    # Test MOOSE modules
+    ./run_tests -j ${MOOSE_JOBS:-6} -t
+
+    # Test make install copy-inputs
+    export PATH=/usr/local/moose/bin:$PATH
+    cd ${TEMP_LOC}
+    combined-opt --copy-inputs tests
+    cd combined/tests
+    combined-opt --run -j ${MOOSE_JOBS:-6}

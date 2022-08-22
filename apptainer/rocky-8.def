@@ -1,0 +1,75 @@
+BootStrap: yum
+OSVersion: 8
+MirrorURL: https://download.rockylinux.org/pub/rocky/%{OSVERSION}/BaseOS/$basearch/os/
+Include: yum
+
+%environment
+    export MOOSE_JOBS=6
+    export METHOD=opt
+    export METHODS=opt
+
+%post
+    # Prepare a temp directory
+    export TEMP_LOC=`mktemp -d /tmp/rocky_singularity.XXXXX`
+
+    yum -y groupinstall "Development Tools"
+    yum -y install vim tmux emacs wget rsync python3-devel python39 pinentry hostname libtirpc \
+                   libtirpc-devel redhat-lsb-core.x86_64 perl-IO-Compress perl-JSON perl-JSON-PP \
+                   xterm python3-pyyaml libX11-devel libXt-devel cmake mpich-devel
+
+    # EPEL repository (additional yum install commands below this point should denote the epel-release dependency)
+    yum -y install epel-release
+    yum -y install glpk-devel
+
+    # available in EPEL only
+    yum -y install patchelf
+
+    # Allow a custom initialization routine if the following files exist at /
+    touch ${SINGULARITY_ROOTFS}/none
+    cat <<'EOF' >> ${SINGULARITY_ROOTFS}/.singularity.d/env/90-environment.sh
+# If discovered, use these files as initialization routines
+if [ -f /init_env ]; then
+  file="/init_env"
+else
+  file="/none"
+fi
+action="${0##*/}"
+case "${action}" in
+shell)
+    if [ "${SINGULARITY_SHELL:-}" = "/bin/bash" ]; then
+        set -- --noprofile --rcfile $file
+    elif test -z "${SINGULARITY_SHELL:-}"; then
+        export SINGULARITY_SHELL=/bin/bash
+        set -- --noprofile --rcfile $file
+    fi
+    ;;
+exec)
+    export BASH_ENV="$file"
+    set -- /bin/bash --noprofile --rcfile $file -c "$*"
+    ;;
+run)
+    set -- /bin/bash --noprofile --rcfile $file
+esac
+EOF
+
+    # Create a pretty prompt (ensure last item sourced)
+    cat <<'EOF' > ${SINGULARITY_ROOTFS}/.singularity.d/env/99-zzz_prompt.sh
+PS1="\[\033[1;34m\][`basename ${APPTAINER_NAME:-$SINGULARITY_NAME} .sif`]\[\033[1;32m\][\w]\[\033[0m\]> "
+EOF
+
+    # Make python default to python3
+    alternatives --set python /usr/bin/python3
+
+    # We need git lfs
+    mkdir $TEMP_LOC/gitlfs
+    cd $TEMP_LOC/gitlfs
+    curl -L -O https://github.com/git-lfs/git-lfs/releases/download/v3.0.2/git-lfs-linux-amd64-v3.0.2.tar.gz
+    tar -xf git-lfs-linux-amd64-v3.0.2.tar.gz
+    ./install.sh
+
+    # Export paths to mpich for runtime environments
+    echo "export PATH=/usr/lib64/mpich/bin:\$PATH" >> ${SINGULARITY_ENVIRONMENT}
+
+    # Cleanup
+    yum clean all
+    rm -rf $TEMP_LOC

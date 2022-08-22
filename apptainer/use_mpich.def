@@ -1,0 +1,101 @@
+BootStrap: localimage
+# Any image which supplies a development stack with MPI available
+# From: <SIF_IMAGE>
+From: /fast/containers/03_MPI_Dependencies_InfiniBand.sif
+
+%files
+    # make the MOOSE repository at-my-current-state available
+    # for vetted versions of PETSc during %post
+    # <MOOSE_DIR> /usr/local/moose_src
+    ../../moose /usr/local/moose_src
+
+%environment
+    # Swap OpenMPI for MPICH
+    export PATH=${PATH//'/opt/mpi/openmpi-4.1.2/bin:'}
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH//'/opt/mpi/openmpi-4.1.2/lib:'}
+    export MANPATH=${MANPATH//'/opt/mpi/openmpi-4.1.2/share/man:'}
+    export MPI_ROOT=${MPI_ROOT//'/opt/mpi/openmpi-4.1.2'}
+    unset OPENMPI_DIR
+    export MPICH_DIR=/opt/mpi/mpich-3.4.3
+    export LD_LIBRARY_PATH=${MPICH_DIR}/lib:${LD_LIBRARY_PATH}
+    export MANPATH=${MPICH_DIR}/share/man:${MANPATH}
+    export PATH=${MPICH_DIR}/bin:${PATH}
+    export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
+
+    # PETSc
+    export PETSC_DIR=/usr/local/petsc
+    export PETSC_ARCH=arch-moose
+
+    # MOOSE_JOBS (temporary)
+    export MOOSE_JOBS=32
+
+%post
+    # Prepare a temp directory
+    export TEMP_LOC=`mktemp -d /tmp/rocky_singularity.XXXXX`
+
+    # Additional Installs
+    dnf install -y python3-pyyaml python3-devel python39 cmake diffutils bison flex libtirpc \
+                   libtirpc-devel zlib-devel rsync
+
+    # EPEL repository
+    yum -y install epel-release
+    yum -y install glpk-devel patchelf
+
+    # Make python default to python3
+    alternatives --set python /usr/bin/python3
+
+    # Swap OpenMPI for MPICH
+    export PATH=${PATH//'/opt/mpi/openmpi-4.1.2/bin:'}
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH//'/opt/mpi/openmpi-4.1.2/lib:'}
+    export MANPATH=${MANPATH//'/opt/mpi/openmpi-4.1.2/share/man:'}
+    export MPI_ROOT=${MPI_ROOT//'/opt/mpi/openmpi-4.1.2'}
+    unset OPENMPI_DIR
+    export MPICH_DIR=/opt/mpi/mpich-3.4.3
+    export LD_LIBRARY_PATH=${MPICH_DIR}/lib:${LD_LIBRARY_PATH}
+    export MANPATH=${MPICH_DIR}/share/man:${MANPATH}
+    export PATH=${MPICH_DIR}/bin:${PATH}
+    export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
+
+    # Allow a custom initialization routine if the following files exist at /
+    touch ${SINGULARITY_ROOTFS}/none
+    cat <<'EOF' >> ${SINGULARITY_ROOTFS}/.singularity.d/env/90-environment.sh
+# If discovered, use these files as initialization routines
+if [ -f /init_env ]; then
+  file="/init_env"
+else
+  file="/none"
+fi
+action="${0##*/}"
+case "${action}" in
+shell)
+    if [ "${SINGULARITY_SHELL:-}" = "/bin/bash" ]; then
+        set -- --noprofile --rcfile $file
+    elif test -z "${SINGULARITY_SHELL:-}"; then
+        export SINGULARITY_SHELL=/bin/bash
+        set -- --noprofile --rcfile $file
+    fi
+    ;;
+exec)
+    export BASH_ENV="$file"
+    set -- /bin/bash --noprofile --rcfile $file -c "$*"
+    ;;
+run)
+    set -- /bin/bash --noprofile --rcfile $file
+esac
+EOF
+
+    # Create a pretty prompt (ensure last item sourced)
+    cat <<'EOF' > ${SINGULARITY_ROOTFS}/.singularity.d/env/99-zzz_prompt.sh
+PS1="\[\033[1;34m\][`basename ${APPTAINER_NAME:-$SINGULARITY_NAME} .sif`]\[\033[1;32m\][\w]\[\033[0m\]> "
+EOF
+
+    # We need git lfs
+    mkdir ${TEMP_LOC}/gitlfs
+    cd ${TEMP_LOC}/gitlfs
+    curl -L -O https://github.com/git-lfs/git-lfs/releases/download/v3.0.2/git-lfs-linux-amd64-v3.0.2.tar.gz
+    tar -xf git-lfs-linux-amd64-v3.0.2.tar.gz
+    ./install.sh
+
+    # Clean Up
+    rm -rf ${TEMP_LOC}
+    rm -rf /usr/local/moose_src

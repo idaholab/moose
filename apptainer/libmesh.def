@@ -1,0 +1,26 @@
+BootStrap: localimage
+# An image which supplies PETSc
+# From: <PETSC_IMAGE>
+From: ../../petsc.sif
+
+%files
+    # make the MOOSE repository at-my-current-state available
+    # for vetted versions of libMesh during %post
+    # <MOOSE_DIR> /usr/local/moose_src
+    ../../moose /usr/local/moose_src
+
+%environment
+    export LIBMESH_DIR=/usr/local/libmesh
+
+%post
+    # Build libMesh
+    umask 022
+    export MOOSE_JOBS=${MOOSE_JOBS:-6}
+    export METHODS=opt
+    echo -e "JOBS: $MOOSE_JOBS\nMETHODS: ${METHODS}"
+    cd /usr/local/moose_src/scripts
+    export LIBMESH_DIR=/usr/local/libmesh
+    ./update_and_rebuild_libmesh.sh
+
+    # Clean Up
+    rm -rf /usr/local/moose_src
