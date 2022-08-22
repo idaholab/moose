@@ -45,7 +45,7 @@ public:
    */
   const std::shared_ptr<MultiApp> getMultiApp() const
   {
-    if (_from_multi_app && _to_multi_app)
+    if (_from_multi_app && _to_multi_app && _from_multi_app != _to_multi_app)
       mooseError("Unclear which app you want to retrieve from Transfer ", name());
     else if (_from_multi_app)
       return _from_multi_app;
