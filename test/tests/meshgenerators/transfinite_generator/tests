@@ -1,0 +1,30 @@
+[Tests]
+  issues = '#21903'
+  design = 'meshgenerators/TransfiniteGenerator.md'
+
+  [generate]
+    requirement = 'The system shall support the ability to create a mesh element-wise by specifying '
+                  'corners, edge types, generating parameters and/or point distribution, '	
+
+    [quadrilater]
+      type = 'Exodiff'
+      input = 'quadrilater_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'quadrilater_generator_in.e'
+      recover = false
+
+      detail = 'resulting in a quadrilateral mesh, or'
+
+    []
+
+    [arccircle]
+      type = 'Exodiff'
+      input = 'arccircle_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = arccircle_generator_in.e'
+      recover = false
+
+      detail = 'resulting in a mesh with one arc circle side.'
+    []
+  []
+[]
