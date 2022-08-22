@@ -221,3 +221,12 @@
    fun:KSPSolve_Private
    fun:KSPSolve
 }
+{
+   libtorch_jit
+   Memcheck:Cond
+   fun:*deregisterOperator*
+   fun:*deregisterDef*
+   fun:*RegisterOperators*
+   fun:*finalize
+   obj:*framework/contrib/libtorch/lib/libtorch_cpu.so
+}
