@@ -10,9 +10,11 @@
 #include "HillConstants.h"
 
 registerMooseObject("TensorMechanicsApp", HillConstants);
+registerMooseObject("TensorMechanicsApp", ADHillConstants);
 
+template <bool is_ad>
 InputParameters
-HillConstants::validParams()
+HillConstantsTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Build and rotate the Hill Tensor. It can be used with other Hill "
@@ -38,23 +40,28 @@ HillConstants::validParams()
       true,
       "Whether to rotate the Hill tensor (anisotropic parameters) to account for large kinematic "
       "rotations. It's recommended to set it to true if large displacements are to be expected.");
+  params.addParam<bool>("use_automatic_differentiation",
+                        false,
+                        "Whether thermal contact depends on automatic differentiation materials.");
   params.addCoupledVar("temperature", "Coupled temperature");
   return params;
 }
 
-HillConstants::HillConstants(const InputParameters & parameters)
+template <bool is_ad>
+HillConstantsTempl<is_ad>::HillConstantsTempl(const InputParameters & parameters)
   : Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _use_large_rotation(getParam<bool>("use_large_rotation")),
-    _rotation_total_hill(_use_large_rotation
-                             ? &declareADProperty<RankTwoTensor>(_base_name + "rotation_total_hill")
-                             : nullptr),
-    _rotation_total_hill_old(_use_large_rotation ? &getMaterialPropertyOldByName<RankTwoTensor>(
-                                                       _base_name + "rotation_total_hill")
-                                                 : nullptr),
-    _rotation_increment(_use_large_rotation
-                            ? &getADMaterialProperty<RankTwoTensor>("rotation_increment")
-                            : nullptr),
+    _rotation_total_hill(_use_large_rotation ? &declareGenericProperty<RankTwoTensor, is_ad>(
+                                                   _base_name + "rotation_total_hill")
+                                             : nullptr),
+    _rotation_total_hill_old(_use_large_rotation
+                                 ? &this->template getMaterialPropertyOldByName<RankTwoTensor>(
+                                       _base_name + "rotation_total_hill")
+                                 : nullptr),
+    _rotation_increment(_use_large_rotation ? &getGenericMaterialProperty<RankTwoTensor, is_ad>(
+                                                  "rotation_increment")
+                                            : nullptr),
     _hill_constants_input(getParam<std::vector<Real>>("hill_constants")),
     _hill_tensor(6, 6),
     _hill_constant_material(declareProperty<std::vector<Real>>(_base_name + "hill_constants")),
@@ -91,8 +98,9 @@ HillConstants::HillConstants(const InputParameters & parameters)
     rotateHillConstants(_hill_constants_input);
 }
 
+template <bool is_ad>
 void
-HillConstants::initQpStatefulProperties()
+HillConstantsTempl<is_ad>::initQpStatefulProperties()
 {
   if (_use_large_rotation)
   {
@@ -101,8 +109,9 @@ HillConstants::initQpStatefulProperties()
   }
 }
 
+template <bool is_ad>
 void
-HillConstants::computeQpProperties()
+HillConstantsTempl<is_ad>::computeQpProperties()
 {
   // Account for finite strain rotation influence on anisotropic coefficients
   if (_use_large_rotation)
@@ -145,8 +154,9 @@ HillConstants::computeQpProperties()
   }
 }
 
+template <bool is_ad>
 void
-HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_input)
+HillConstantsTempl<is_ad>::rotateHillConstants(const std::vector<Real> & hill_constants_input)
 {
   // Rotation due to rigid body motion and large deformation
   RankTwoTensor total_rotation_matrix;
@@ -199,3 +209,6 @@ HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_inpu
   _hill_tensor.left_multiply(transformation_matrix_n);
   _hill_tensor.right_multiply_transpose(transformation_matrix_n);
 }
+
+template class HillConstantsTempl<false>;
+template class HillConstantsTempl<true>;

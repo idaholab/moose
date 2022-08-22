@@ -154,7 +154,7 @@
   []
 
   [hill_tensor]
-    type = HillConstants
+    type = ADHillConstants
     # F G H L M N
     hill_constants = "0.5829856 0.364424 0.6342174 2.0691375 2.3492325 1.814589"
     base_name = trial_plasticity

@@ -1,4 +1,4 @@
-# Scalar Material Damage
+# CombinedScalarDamage
 
 !syntax description /Materials/CombinedScalarDamage
 

@@ -103,7 +103,7 @@
     absolute_tolerance = 1e-05
   []
   [hill_tensor]
-    type = HillConstants
+    type = ADHillConstants
     # F G H L M N
     hill_constants = "1.0 4.0 5.0 0.5 0.5 0.5"
     base_name = trial_plasticity
