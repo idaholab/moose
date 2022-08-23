@@ -113,9 +113,9 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   {
     if (_from_multi_app && (!_to_multi_app || _from_multi_app == _to_multi_app))
       _directions.push_back("from_multiapp");
-    else if (_to_multi_app && (!_from_multi_app || _from_multi_app == _to_multi_app))
+    if (_to_multi_app && (!_from_multi_app || _from_multi_app == _to_multi_app))
       _directions.push_back("to_multiapp");
-    else
+    if (_from_multi_app && _to_multi_app && _from_multi_app != _to_multi_app)
       _directions.push_back("between_multiapp");
 
     // So it's available in the next constructors
