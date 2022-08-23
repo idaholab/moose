@@ -61,11 +61,8 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
     _radius(getParam<Real>("radius")),
     _nodal(false)
 {
-  if (_directions.contains(TO_MULTIAPP))
-    mooseError("Can't interpolate to a MultiApp!");
-
   if (isParamValid("to_multi_app"))
-    mooseError("Bi-directional or MultiApp-to-MultiApp transfers are not implemented");
+    paramError("to_multi_app", "Unused parameter; only from-MultiApp transfers are implemented");
 
   auto & to_fe_type =
       getFromMultiApp()->problemBase().getStandardVariable(0, _to_var_name).feType();
