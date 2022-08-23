@@ -30,7 +30,7 @@ public:
 
 protected:
   using SideIntegralMaterialPropertyTempl<is_ad>::_integral_value;
-  /// Side set area 
+  /// Side set area
   Real _area;
 };
 

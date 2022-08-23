@@ -38,7 +38,7 @@ SideIntegralPostprocessor::execute()
 Real
 SideIntegralPostprocessor::getValue()
 {
-  
+
   return _integral_value;
 }
 

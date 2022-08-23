@@ -29,6 +29,7 @@ public:
   virtual void threadJoin(const UserObject & y) override;
   virtual Real getValue() override;
   virtual void finalize() override;
+
 protected:
   virtual Real computeQpIntegral() = 0;
   virtual Real computeIntegral();

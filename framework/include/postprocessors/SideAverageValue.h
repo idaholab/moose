@@ -29,6 +29,7 @@ public:
   virtual Real getValue() override;
   virtual void threadJoin(const UserObject & y) override;
   virtual void finalize() override;
+
 protected:
   virtual Real volume();
   Real _volume;
