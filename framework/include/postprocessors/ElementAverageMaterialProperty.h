@@ -31,6 +31,7 @@ public:
 protected:
   /// Domain volume
   Real _volume;
+  using ElementIntegralMaterialPropertyTempl<is_ad>::_integral_value;
 };
 
 typedef ElementAverageMaterialPropertyTempl<false> ElementAverageMaterialProperty;

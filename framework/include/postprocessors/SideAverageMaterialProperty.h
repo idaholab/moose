@@ -29,7 +29,8 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  /// Side set area
+  using SideIntegralMaterialPropertyTempl<is_ad>::_integral_value;
+  /// Side set area 
   Real _area;
 };
 

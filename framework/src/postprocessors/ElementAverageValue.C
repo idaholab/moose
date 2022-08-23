@@ -35,16 +35,20 @@ void
 ElementAverageValue::execute()
 {
   ElementIntegralVariablePostprocessor::execute();
-
   _volume += _current_elem_volume;
 }
 
 Real
 ElementAverageValue::getValue()
 {
-  Real integral = ElementIntegralVariablePostprocessor::getValue();
+  return _integral_value / _volume;
+}
+
+void
+ElementAverageValue::finalize()
+{
   gatherSum(_volume);
-  return integral / _volume;
+  gatherSum(_integral_value);
 }
 
 void
@@ -53,10 +57,4 @@ ElementAverageValue::threadJoin(const UserObject & y)
   ElementIntegralVariablePostprocessor::threadJoin(y);
   const ElementAverageValue & pps = static_cast<const ElementAverageValue &>(y);
   _volume += pps._volume;
-}
-
-void
-ElementAverageValue::finalize()
-{
-  return;
 }

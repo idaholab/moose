@@ -50,9 +50,7 @@ template <bool is_ad>
 Real
 ElementAverageMaterialPropertyTempl<is_ad>::getValue()
 {
-  const Real integral = ElementIntegralMaterialPropertyTempl<is_ad>::getValue();
-
-  return integral / _volume;
+  return _integral_value / _volume;
 }
 
 template <bool is_ad>
@@ -60,6 +58,7 @@ void
 ElementAverageMaterialPropertyTempl<is_ad>::finalize()
 {
   ElementIntegralMaterialPropertyTempl<is_ad>::gatherSum(_volume);
+  ElementIntegralMaterialPropertyTempl<is_ad>::gatherSum(_integral_value);
 }
 
 template <bool is_ad>
