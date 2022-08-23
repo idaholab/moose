@@ -84,12 +84,14 @@
   []
 []
 
-[Kernels]
-  [TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [all]
+    incremental = false
     save_in = 'saved_x saved_y'
     extra_vector_tags = 'ref'
     block = '1 2 3 4 5 6 7'
+    strain = SMALL
+    add_variables = false
   []
 []
 
@@ -183,26 +185,18 @@
     youngs_modulus = 1e10
     poissons_ratio = 0.0
   []
-  [stuff1_strain]
-    type = ComputeFiniteStrain
-    block = '1'
-  []
-  [stuff1_stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '1'
-  []
   [stuff2_elas_tens]
     type = ComputeIsotropicElasticityTensor
     block = '2 3 4 5 6 7'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   []
-  [stuff2_strain]
-    type = ComputeFiniteStrain
-    block = '2 3 4 5 6 7'
+  [stuff1_stress]
+    type = ComputeLinearElasticStress
+    block = '1'
   []
   [stuff2_stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ComputeLinearElasticStress
     block = '2 3 4 5 6 7'
   []
 []
@@ -212,7 +206,6 @@
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
-
   petsc_options_iname = '-pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
   petsc_options_value = 'NONZERO               1e-12                   1e-6'
 
@@ -220,6 +213,7 @@
   nl_abs_tol = 1e-7
   l_max_its = 5
   start_time = -0.1
+  nl_rel_tol = 1e-09
   end_time = 0.3 # 3.5
   l_tol = 1e-4
   dt = 0.1
@@ -285,7 +279,7 @@
 
 [Constraints]
   [weighted_gap_lm]
-    type = ComputeFrictionalForceCartesianLMMechanicalContact #ComputeCartesianLMFrictionMechanicalContact #ComputeFrictionalForceCartesianLMMechanicalContact
+    type = ComputeFrictionalForceCartesianLMMechanicalContact
     primary_boundary = 2
     secondary_boundary = 3
     primary_subdomain = 10000
