@@ -964,10 +964,3 @@ extern const TagName PREVIOUS_NL_SOLUTION_TAG;
   {                                                                                                \
     __VA_ARGS__                                                                                    \
   }
-
-template <typename T>
-auto
-index_range(const T & sizable)
-{
-  return IntRange<decltype(sizable.size())>(0, sizable.size());
-}

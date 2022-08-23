@@ -3,7 +3,7 @@
 #   template/
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "2022.08.05" %}
+{% set version = "2022.08.23" %}
 {% set vtk_friendly_version = "9.1" %}
 
 package:
