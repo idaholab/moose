@@ -54,7 +54,6 @@ RadialAverage::RadialAverage(const InputParameters & parameters)
     _averaged_material_name(getParam<std::string>("material_name")),
     _averaged_material(getMaterialProperty<Real>(_averaged_material_name)),
     _radius(getParam<Real>("radius")),
-    _dof_map(_fe_problem.getNonlinearSystemBase().dofMap()),
     _update_communication_lists(false),
     _my_pid(processor_id()),
     _perf_meshchanged(registerTimedSection("meshChanged", 3)),
@@ -126,7 +125,7 @@ RadialAverage::finalize()
     Parallel::MessageTag send_tag = _communicator.get_unique_tag(4711);
     std::vector<QPData> receive;
 
-    const auto item_type = StandardType<QPData>(&(_qp_data[0]));
+    const auto item_type = TIMPI::StandardType<QPData>(&(_qp_data[0]));
 
 #if 0
     // output local qp locations
@@ -238,9 +237,6 @@ RadialAverage::meshChanged()
 
   // get underlying libMesh mesh
   auto & mesh = _mesh.getMesh();
-
-  // get a fresh point locator
-  _point_locator = _mesh.getPointLocator();
 
   // Build a new node to element map
   _nodes_to_elem_map.clear();
@@ -356,7 +352,6 @@ StandardType<RadialAverage::QPData>::StandardType(const RadialAverage::QPData * 
 
 #endif // LIBMESH_HAVE_MPI
 }
-} // namespace TIMPI
 
 StandardType<RadialAverage::QPData>::StandardType(const StandardType<RadialAverage::QPData> & t)
   : DataType(t._datatype)
@@ -365,3 +360,5 @@ StandardType<RadialAverage::QPData>::StandardType(const StandardType<RadialAvera
   libmesh_call_mpi(MPI_Type_dup(t._datatype, &_datatype));
 #endif
 }
+
+} // namespace TIMPI

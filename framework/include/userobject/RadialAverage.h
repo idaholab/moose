@@ -23,13 +23,11 @@
 #include <memory>
 #include <tuple>
 
-using namespace TIMPI;
-
 class ThreadedRadialAverageLoop;
 
 /**
  * Gather and communicate a full list of all quadrature points and the values of
- * a selected variable at each point. Use a KD-Tree to get the weighted spatial
+ * a selected material property at each point. Use a KD-Tree to get the weighted spatial
  * average of a material property. This code borrows heavily from
  * RadialGreensConvolution in MAGPIE. This code does not include support for
  * periodic BCs, but RadialGreensConvolution shows how that can be supported.
@@ -100,12 +98,6 @@ protected:
   /// spatial index (nanoflann guarantees this to be threadsafe under read-only operations)
   std::unique_ptr<KDTreeType> _kd_tree;
 
-  /// DOF map
-  const DofMap & _dof_map;
-
-  /// PointLocator for finding topological neighbors
-  std::unique_ptr<PointLocatorBase> _point_locator;
-
   /// The data structure used to find neighboring elements give a node ID
   std::vector<std::vector<const Elem *>> _nodes_to_elem_map;
 
@@ -127,10 +119,6 @@ protected:
   friend class ThreadedRadialAverageLoop;
 };
 
-template <>
-const Point &
-PointListAdaptor<RadialAverage::QPData>::getPoint(const RadialAverage::QPData & item) const;
-
 namespace TIMPI
 {
 
@@ -142,4 +130,5 @@ public:
   StandardType(const StandardType<RadialAverage::QPData> & t);
   ~StandardType() { this->free(); }
 };
+
 } // namespace TIMPI
