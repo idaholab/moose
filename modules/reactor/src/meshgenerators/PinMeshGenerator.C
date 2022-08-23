@@ -148,7 +148,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _block_names = getParam<std::vector<std::vector<std::string>>>("block_names");
     if (_region_ids.size() != _block_names.size())
       mooseError("The size of block_names must match the size of region_ids");
-    for (const auto i : index_range(_region_ids))
+    for (const auto i : index_range_temp(_region_ids))
       if (_region_ids[i].size() != _block_names[i].size())
         mooseError("The size of block_names must match the size of region_ids");
   }
@@ -170,7 +170,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   // Use special block id to designate TRI elements
   unsigned int pin_block_id_tri = pin_block_id_start - 1;
 
-  for (const auto i : index_range(_intervals))
+  for (const auto i : index_range_temp(_intervals))
   {
     const auto block_name = "RGMB_PIN" + std::to_string(_pin_type) + "_R" + std::to_string(i);
     const auto block_id = pin_block_id_start + i;

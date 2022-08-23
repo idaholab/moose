@@ -967,7 +967,7 @@ extern const TagName PREVIOUS_NL_SOLUTION_TAG;
 
 template <typename T>
 auto
-index_range(const T & sizable)
+index_range_temp(const T & sizable)
 {
   return IntRange<decltype(sizable.size())>(0, sizable.size());
 }

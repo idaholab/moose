@@ -2156,7 +2156,7 @@ FeatureFloodCount::FeatureData::mergeBBoxes(std::vector<BoundingBox> & bboxes,
   {
     std::ostringstream oss;
     oss << "LHS BBoxes:\n";
-    for (const auto i : index_range(_bboxes))
+    for (const auto i : index_range_temp(_bboxes))
       oss << "Max: " << _bboxes[i].max() << " Min: " << _bboxes[i].min() << '\n';
 
     ::mooseError("No Bounding Boxes Expanded - This is a catastrophic error!\n", oss.str());

@@ -72,7 +72,7 @@ DGDiffusionDomainUserObject::executeOnElement()
   auto & local_integrals = _elem_integrals[_current_elem->id()];
   local_integrals.resize(_test.size());
 
-  for (const auto i : index_range(_test))
+  for (const auto i : index_range_temp(_test))
     for (const auto qp : make_range(qRule().n_points()))
       local_integrals[i] += JxW()[qp] * coord()[qp] * _diff[qp] * _grad_u[qp] * _grad_test[i][qp];
 }
@@ -84,7 +84,7 @@ DGDiffusionDomainUserObject::executeOnBoundary()
   mooseAssert(local_integrals.size() == _test_face.size(),
               "These should be equal or we're in trouble.");
 
-  for (const auto i : index_range(_test_face))
+  for (const auto i : index_range_temp(_test_face))
     for (const auto qp : make_range(qRule().n_points()))
     {
       mooseAssert(_diff_face[qp] == _diff_face_by_name[qp], "API sanity check");
@@ -117,7 +117,7 @@ DGDiffusionDomainUserObject::executeOnInternalSide()
     mooseAssert(local_integrals.size() == _test_face.size(),
                 "These should be equal or we're in trouble.");
 
-    for (const auto i : index_range(_test_face))
+    for (const auto i : index_range_temp(_test_face))
       for (const auto qp : make_range(qRule().n_points()))
       {
         Real r = 0.0;
@@ -138,7 +138,7 @@ DGDiffusionDomainUserObject::executeOnInternalSide()
     if (local_integrals.size() < _test_face_neighbor.size())
       local_integrals.resize(_test_face_neighbor.size());
 
-    for (const auto i : index_range(_test_face_neighbor))
+    for (const auto i : index_range_temp(_test_face_neighbor))
       for (const auto qp : make_range(qRule().n_points()))
       {
         Real r = 0.0;
@@ -173,7 +173,7 @@ void
 DGDiffusionDomainUserObject::threadJoin(const UserObject & y)
 {
   const DGDiffusionDomainUserObject & dg_uo = dynamic_cast<const DGDiffusionDomainUserObject &>(y);
-  for (const auto i : index_range(_elem_integrals))
+  for (const auto i : index_range_temp(_elem_integrals))
   {
     auto & my_local_integrals = _elem_integrals[i];
     auto & their_local_integrals = dg_uo._elem_integrals[i];

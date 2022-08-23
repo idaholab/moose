@@ -56,32 +56,32 @@ FunctorADConverterTempl<T>::FunctorADConverterTempl(const InputParameters & para
 
   // Check input names for overlaps, before possibly hitting a harder to
   // interpret error at functor definition
-  for (const auto i : index_range(reg_props_in))
-    for (const auto j : index_range(reg_props_in))
+  for (const auto i : index_range_temp(reg_props_in))
+    for (const auto j : index_range_temp(reg_props_in))
       if (reg_props_in[i] == ad_props_out[j])
         paramError("reg_props_in",
                    "Functor names may not overlap between reg_props_in and ad_props_out");
 
-  for (const auto i : index_range(reg_props_in))
-    for (const auto j : index_range(ad_props_in))
+  for (const auto i : index_range_temp(reg_props_in))
+    for (const auto j : index_range_temp(ad_props_in))
       if (reg_props_in[i] == reg_props_out[j])
         paramError("reg_props_in",
                    "Functor names may not overlap between reg_props_in and reg_props_out");
 
-  for (const auto i : index_range(ad_props_in))
-    for (const auto j : index_range(ad_props_in))
+  for (const auto i : index_range_temp(ad_props_in))
+    for (const auto j : index_range_temp(ad_props_in))
       if (ad_props_in[i] == reg_props_out[j])
         paramError("ad_props_in",
                    "Functor names may not overlap between ad_props_in and reg_props_out");
 
-  for (const auto i : index_range(ad_props_in))
-    for (const auto j : index_range(reg_props_in))
+  for (const auto i : index_range_temp(ad_props_in))
+    for (const auto j : index_range_temp(reg_props_in))
       if (ad_props_in[i] == ad_props_out[j])
         paramError("ad_props_in",
                    "Functor names may not overlap between ad_props_in and ad_props_out");
 
   // Define the AD functors
-  for (const auto i : index_range(reg_props_in))
+  for (const auto i : index_range_temp(reg_props_in))
   {
     const auto & reg_functor = getFunctor<T>(reg_props_in[i]);
     addFunctorProperty<typename Moose::ADType<T>::type>(
@@ -91,7 +91,7 @@ FunctorADConverterTempl<T>::FunctorADConverterTempl(const InputParameters & para
   }
 
   // Define the regular functors
-  for (const auto i : index_range(ad_props_in))
+  for (const auto i : index_range_temp(ad_props_in))
   {
     const auto & ad_functor = getFunctor<typename Moose::ADType<T>::type>(ad_props_in[i]);
     addFunctorProperty<T>(reg_props_out[i],

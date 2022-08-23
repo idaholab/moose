@@ -117,7 +117,7 @@ LowerDBlockFromSidesetGenerator::generate()
     std::unordered_map<processor_id_type, decltype(elements_to_send)> push_element_data;
     std::unordered_map<processor_id_type, decltype(connected_nodes)> push_node_data;
 
-    for (const auto pid : index_range(mesh->comm()))
+    for (const auto pid : index_range_temp(mesh->comm()))
       // Don't need to send to self
       if (pid != mesh->processor_id() && need_boundary_elems[pid])
       {
