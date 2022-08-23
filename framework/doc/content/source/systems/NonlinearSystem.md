@@ -368,7 +368,7 @@ expensive may be good candidates for computing the residual and Jacobian togethe
 
 ## Reusing preconditioners id=reuse_preconditioners
 
-The simple version of GRMES and other iterative methods converge only very
+The simple version of GMRES and other iterative methods converge only very
 slowly.  To improve convergence, PETSc and other iterative solver packages
 apply a [preconditioner](https://en.wikipedia.org/wiki/Preconditioner) to the
 system of equations/sparse matrix before applying the iterative solver.
