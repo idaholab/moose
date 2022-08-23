@@ -32,4 +32,5 @@ public:
 
 protected:
   Real _volume;
+  using SideDiffusiveFluxIntegralTempl<is_ad, Real>::_integral_value;
 };
