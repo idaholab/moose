@@ -18,7 +18,7 @@
       cli_args = '--mesh-only'
       recover = false
       expect_err = "Bad edge topology"
-      detail = "(returning errors"
+      detail = "returning errors if the polyline is not closed"
     []
     [multi_line]
       type = 'RunException'
@@ -26,7 +26,7 @@
       cli_args = '--mesh-only'
       recover = false
       expect_err = "Bad edge topology"
-      detail = "if no closed region is defined)"
+      detail = "returning errors if the polyline is disconnected"
     []
     [from_2d]
       type = 'Exodiff'
@@ -34,7 +34,7 @@
       cli_args = '--mesh-only'
       exodiff = 'poly2tri_from_2d_in.e'
       recover = false
-      detail = "or a 2D input mesh"
+      detail = "taking the boundary of a 2D input mesh"
     []
     [subboundary_1d]
       type = 'Exodiff'
@@ -42,7 +42,7 @@
       cli_args = '--mesh-only'
       exodiff = 'poly2tri_from_1d_sbdids_in.e'
       recover = false
-      detail = "or a specified subset"
+      detail = "taking a specified subset of a 2D input boundary"
     []
     [subdomain_2d]
       type = 'Exodiff'
@@ -50,7 +50,7 @@
       cli_args = '--mesh-only'
       exodiff = 'poly2tri_from_2d_bcids_in.e'
       recover = false
-      detail = "in either case"
+      detail = "taking a specified subset of an input polyline set"
     []
     [with_holes]
       type = 'Exodiff'
@@ -58,7 +58,7 @@
       cli_args = '--mesh-only'
       exodiff = 'poly2tri_with_holes_in.e'
       recover = false
-      detail = "while respecting any specified interior 'hole' meshes"
+      detail = "respecting any specified interior 'hole' meshes"
     []
     [stitching]
       type = 'Exodiff'
@@ -66,7 +66,7 @@
       cli_args = '--mesh-only'
       exodiff = 'poly2tri_stitching_in.e'
       recover = false
-      detail = "which can be selectively stitched into the final mesh"
+      detail = "selectively stitching 'hole' meshes into the final mesh"
     []
     [nested]
       type = 'Exodiff'

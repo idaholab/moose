@@ -18,7 +18,7 @@
       cli_args = '--mesh-only'
       exodiff = 'polyline_mesh_generator_loop_in.e'
       recover = false
-      detail = "which can be connected in a loop"
+      detail = "optionally connecting points in a loop"
     []
     [refine]
       type = 'Exodiff'
@@ -26,7 +26,7 @@
       cli_args = '--mesh-only'
       exodiff = 'polyline_mesh_generator_refine_in.e'
       recover = false
-      detail = "and refined either as an open-ended line"
+      detail = "refining a line if requested"
     []
     [loop_refine]
       type = 'Exodiff'
@@ -34,7 +34,7 @@
       cli_args = '--mesh-only'
       exodiff = 'polyline_mesh_generator_loop_refine_in.e'
       recover = false
-      detail = "or as a loop."
+      detail = "refining a loop if requested"
     []
   []
 []
