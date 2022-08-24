@@ -3839,6 +3839,7 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
     }
 
     obj->finalize();
+
     // These have to be stored piecemeal (with every call to this function) because general
     // postprocessors (which run last after other userobjects have been completed) might depend on
     // them being stored.  This wouldn't be a problem if all userobjects satisfied the dependency
@@ -3849,7 +3850,6 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
     {
       _reporter_data.finalize(obj->name());
       setPostprocessorValueByName(obj->name(), pp->getValue());
-
     }
 
     auto vpp = dynamic_cast<VectorPostprocessor *>(obj);
