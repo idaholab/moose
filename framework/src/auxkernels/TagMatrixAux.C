@@ -26,10 +26,7 @@ TagMatrixAux::TagMatrixAux(const InputParameters & parameters)
     _v(coupledMatrixTagValue("v", "matrix_tag")),
     _v_var(*getVar("v", 0))
 {
-  if (_v_var.feType() != _var.feType())
-    paramError("variable",
-               "The AuxVariable this AuxKernel is acting on has to have the same order and family "
-               "as the variable 'v'");
+  checkCoupledVariable(&_v_var, &_var);
 }
 
 Real
