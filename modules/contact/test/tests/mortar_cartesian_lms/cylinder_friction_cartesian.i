@@ -203,7 +203,7 @@
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
 
   petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
                   '-snes_linesearch_monitor'
@@ -215,7 +215,7 @@
   nl_rel_tol = 1e-09
   start_time = -0.1
   end_time = 0.3 # 3.5
-  l_tol = 1e-4
+  l_tol = 1e-8
   dt = 0.1
   dtmin = 0.001
 []
