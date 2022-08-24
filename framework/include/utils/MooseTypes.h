@@ -423,6 +423,14 @@ struct ADType<VariableSecond>
 {
   typedef ADVariableSecond type;
 };
+
+/**
+ * This is a helper function for cases when we want to use a default compile-time
+ * error with constexp-based if conditions.
+ */
+template <class T>
+constexpr std::false_type always_false{};
+
 } // namespace Moose
 
 /**

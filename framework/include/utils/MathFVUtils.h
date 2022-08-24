@@ -244,14 +244,6 @@ linearInterpolation(const T & value1,
 }
 
 /**
- * This is a helper function for the harmonic interpolation to ensure we throw a meaningful
- * compile-time error if the developer is trying to use harmonic interpolation on an
- * unsupported type
- */
-template <class T>
-constexpr std::false_type always_false{};
-
-/**
  * Computes the harmonic mean (1/(gc/value1+(1-gc)/value2)) of Reals, RealVectorValues and
  * RealTensorValues with accounting for the possibility that one or both of them are AD.
  * For tensors, we use a component-wise mean instead of the matrix-inverse based option.
@@ -274,7 +266,8 @@ harmonicInterpolation(const T1 & value1,
   const auto coeffs = interpCoeffs(InterpMethod::Average, fi, one_is_elem);
 
   // We check if the types are fit to compute the harmonic mean of. This is done compile-time
-  // using constexpr
+  // using constexpr. We start with Real/ADReal which is straightforward if the input values are
+  // positive.
   if constexpr (std::is_same<typename MetaPhysicL::RawType<T1>::value_type, Real>::value)
   {
     // The harmonic mean of mixed positive and negative numbers (and 0 as well) is not well-defined
@@ -283,10 +276,10 @@ harmonicInterpolation(const T1 & value1,
     mooseAssert(value2 > 0, "Input value 2 needs to be positive for harmonic interpolation!");
     return 1.0 / (coeffs.first / value1 + coeffs.second / value2);
   }
+  // For vectors (ADRealVectorValue, VectorValue), we take the component-wise harmonic mean
   else if constexpr (std::is_same<typename MetaPhysicL::RawType<T1>::value_type,
                                   RealVectorValue>::value)
   {
-    // For vectors, we take the component-wise harmonic mean
     typename libMesh::CompareTypes<T1, T2>::supertype result;
     for (const auto i : make_range(LIBMESH_DIM))
     {
@@ -300,6 +293,8 @@ harmonicInterpolation(const T1 & value1,
     }
     return result;
   }
+  // For tensors (ADRealTensorValue, TensorValue), similarly to the vectors,
+  // we take the component-wise harmonic mean instead of the matrix-inverse approach
   else if constexpr (std::is_same<typename MetaPhysicL::RawType<T1>::value_type,
                                   RealTensorValue>::value)
   {
@@ -317,11 +312,13 @@ harmonicInterpolation(const T1 & value1,
       }
     return result;
   }
+  // We ran out of options, harmonic mean is not supported for other types at the moment
   else
     // This line is supposed to throw an error when the user tries to compile this function with
     // types that are not supported. This is the reason we needed the always_false function. Hope as
     // C++ gets nicer, we can do this in a nicer way.
-    static_assert(always_false<T1>, "Harmonic interpolation is not implemented for the used type!");
+    static_assert(Moose::always_false<T1>,
+                  "Harmonic interpolation is not implemented for the used type!");
 }
 
 /**
