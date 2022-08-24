@@ -1,43 +1,53 @@
-{% set build = pr_num %}
+# Do not alter <VERSION>, <SKIP_DOCS>. These are template tokens altered
+# on the fly by civet recipes. The only modifiable item in moose/ is the
+# conda_build_config.yaml file (moose_libmesh)
+{% set VERSION = "<VERSION>" %}
+{% set SKIP_DOCS = "<SKIP_DOCS>" %}
+{% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "2020.12.08" %}
 
 package:
-  name: moose-opt
-  version: {{ version }}
+  name: moose
+  version: {{ VERSION }}
 
 source:
-  path: ../../../moose
+  - path: ../../../moose
+  - patches:
+      - gap_heat_transfer_umat.patch
 
 build:
-  number: {{ build }}  # [linux,osx]
+  number: {{ build }}
   string: {{ strbuild }}
   skip: true # [win]
+  pin_depends: strict
+  script_env:
+    - MOOSE_JOBS
+    - SKIP_DOCS={{ SKIP_DOCS }}
 
 requirements:
   build:
-    - moose-libmesh {{ moose_libmesh }}
-    - moose-petsc
-    - moose-mpich
-
-  host:
-    - moose-libmesh {{ moose_libmesh }}
-    - moose-petsc
-    - moose-mpich
+    - {{ moose_libmesh }}
+    - {{ moose_python }}
+    - moose-tools
 
   run:
-    - moose-libmesh {{ moose_libmesh }}
-    - moose-petsc
-    - moose-mpich
+    - {{ moose_libmesh }}
+    - {{ moose_python }}
+    - moose-tools
 
 test:
+  script: run_test.sh
   commands:
-    - test -f $PREFIX/moose/bin/moose_test-opt
+    - $PREFIX/moose/bin/combined-opt -h
+    - $PREFIX/bin/moose-opt -h
 
 about:
   home: https://mooseframework.org/
   license: LGPL 2.1
-  summary: 'The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a finite-element, multiphysics framework primarily developed by Idaho National Laboratory. This superficial module (moose) if a future placeholder for binary releases of MOOSE.'
+  summary: >
+   The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a finite-element,
+   multiphysics framework primarily developed by Idaho National Laboratory. This superficial module
+   (moose) if a future placeholder for binary releases of MOOSE.
 
 extra:
   recipe-maintainers:

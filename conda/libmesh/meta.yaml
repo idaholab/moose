@@ -1,7 +1,8 @@
 # Making a Change to this package?
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   template/
-{% set build = 0 %}
+#   moose/
+{% set build = 1 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "2022.08.05" %}
 {% set vtk_friendly_version = "9.1" %}
