@@ -105,11 +105,14 @@ AsymptoticExpansionHomogenizationElasticConstants::execute()
 Real
 AsymptoticExpansionHomogenizationElasticConstants::getValue()
 {
+  return (_integral_value / _volume);
+}
 
+void
+AsymptoticExpansionHomogenizationElasticConstants::finalize()
+{
   gatherSum(_integral_value);
   gatherSum(_volume);
-
-  return (_integral_value / _volume);
 }
 
 void

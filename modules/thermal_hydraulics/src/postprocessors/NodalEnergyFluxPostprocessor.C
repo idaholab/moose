@@ -41,8 +41,13 @@ NodalEnergyFluxPostprocessor::execute()
 PostprocessorValue
 NodalEnergyFluxPostprocessor::getValue()
 {
-  gatherSum(_value);
   return _value;
+}
+
+void
+NodalEnergyFluxPostprocessor::finalize()
+{
+  gatherSum(_value);
 }
 
 void
