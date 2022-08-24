@@ -22,7 +22,7 @@
   [right_2d]
     type = Poly2TriMeshGenerator
     boundary = 'right_bdy'
-    output_boundary_id = 1
+    output_boundary = 'right_outer'
   []
   [both_2d]
     type = CombinerGenerator
@@ -31,7 +31,7 @@
   [triang]
     type = Poly2TriMeshGenerator
     boundary = 'both_2d'
-    input_boundary_names = 1 # only the right half
+    input_boundary_names = 'right_outer' # only the right half
     refine_boundary = true
     desired_area = 0.2
   []

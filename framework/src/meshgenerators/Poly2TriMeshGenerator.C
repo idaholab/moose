@@ -43,15 +43,13 @@ Poly2TriMeshGenerator::validParams()
   params.addParam<bool>(
       "refine_boundary", true, "Whether to allow automatically refining the outer boundary.");
 
-  params.addParam<subdomain_id_type>(
-      "output_subdomain_id", 0, "Subdomain id to set on new triangles.");
   params.addParam<SubdomainName>("output_subdomain_name",
                                  "Subdomain name to set on new triangles.");
 
-  params.addParam<boundary_id_type>(
-      "output_boundary_id", 0, "Boundary id to set on new outer boundary.");
-  params.addParam<std::vector<boundary_id_type>>(
-      "hole_boundary_ids", "Boundary ids to set on holes.  Numbered up from 1 by default.");
+  params.addParam<BoundaryName>("output_boundary",
+                                "Boundary name to set on new outer boundary.  Default ID 0.");
+  params.addParam<std::vector<BoundaryName>>(
+      "hole_boundaries", "Boundary names to set on holes.  Default IDs are numbered up from 1.");
 
   params.addParam<bool>(
       "verify_holes",
@@ -92,7 +90,7 @@ Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
     _bdy_ptr(getMesh("boundary")),
     _add_nodes_per_boundary_segment(getParam<unsigned int>("add_nodes_per_boundary_segment")),
     _refine_bdy(getParam<bool>("refine_boundary")),
-    _output_subdomain_id(getParam<subdomain_id_type>("output_subdomain_id")),
+    _output_subdomain_id(0),
     _smooth_tri(getParam<bool>("smooth_triangulation")),
     _verify_holes(getParam<bool>("verify_holes")),
     _hole_ptrs(getMeshes("holes")),
@@ -137,7 +135,7 @@ Poly2TriMeshGenerator::generate()
     {
       auto bcid = MooseMeshUtils::getBoundaryID(name, *mesh);
       if (bcid == BoundaryInfo::invalid_id)
-        paramError("input_boundary_names", name, " is not a valid boundary name");
+        paramError("input_boundary_names", name, " is not a boundary name in the input mesh");
 
       bdy_ids.insert(bcid);
     }
@@ -200,6 +198,34 @@ Poly2TriMeshGenerator::generate()
 
   poly2tri.triangulate();
 
+  if (isParamValid("output_subdomain_name"))
+  {
+    auto output_subdomain_name = getParam<SubdomainName>("output_subdomain_name");
+    _output_subdomain_id = MooseMeshUtils::getSubdomainID(output_subdomain_name, *mesh);
+
+    if (_output_subdomain_id == Elem::invalid_subdomain_id)
+    {
+      // We'll probably need to make a new ID, then
+      _output_subdomain_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
+
+      // But check the hole meshes for our output subdomain name too
+      for (auto hole_ptr : _hole_ptrs)
+      {
+        auto possible_sbdid = MooseMeshUtils::getSubdomainID(output_subdomain_name, **hole_ptr);
+        // Huh, it was in one of them
+        if (possible_sbdid != Elem::invalid_subdomain_id)
+        {
+          _output_subdomain_id = possible_sbdid;
+          break;
+        }
+        _output_subdomain_id =
+            std::max(_output_subdomain_id, MooseMeshUtils::getNextFreeSubdomainID(**hole_ptr));
+      }
+
+      mesh->subdomain_name(_output_subdomain_id) = output_subdomain_name;
+    }
+  }
+
   if (_smooth_tri || _output_subdomain_id)
     for (auto elem : mesh->element_ptr_range())
     {
@@ -246,14 +272,15 @@ Poly2TriMeshGenerator::generate()
   // careful about how we renumber, though.  We pick unused temporary
   // numbers because e.g. "0->2, 2->0" is impossible to do
   // sequentially, but "0->N, 2->N+2, N->2, N+2->0" works.
-  if (isParamValid("output_boundary_id"))
+  if (isParamValid("output_boundary"))
     libMesh::MeshTools::Modification::change_boundary_id(*mesh, 0, end_bcid);
 
-  if (isParamValid("hole_boundary_ids"))
+  if (isParamValid("hole_boundaries"))
   {
-    auto _hole_boundary_ids = getParam<std::vector<boundary_id_type>>("hole_boundary_ids");
+    auto hole_boundaries = getParam<std::vector<BoundaryName>>("hole_boundaries");
+    auto hole_boundary_ids = MooseMeshUtils::getBoundaryIDs(*mesh, hole_boundaries, true);
 
-    if (_hole_boundary_ids.size() != _hole_ptrs.size())
+    if (hole_boundary_ids.size() != _hole_ptrs.size())
       paramError("hole_boundary_ids", "Need one hole_boundary_ids entry per hole, if specified.");
 
     for (auto h : index_range(_hole_ptrs))
@@ -262,18 +289,22 @@ Poly2TriMeshGenerator::generate()
     for (auto h : index_range(_hole_ptrs))
     {
       libMesh::MeshTools::Modification::change_boundary_id(
-          *mesh, h + 1 + end_bcid, _hole_boundary_ids[h]);
-      new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(_hole_boundary_ids[h] + 1));
+          *mesh, h + 1 + end_bcid, hole_boundary_ids[h]);
+      mesh->get_boundary_info().sideset_name(hole_boundary_ids[h]) = hole_boundaries[h];
+      new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(hole_boundary_ids[h] + 1));
     }
   }
 
-  if (isParamValid("output_boundary_id"))
+  if (isParamValid("output_boundary"))
   {
-    const boundary_id_type output_boundary_id = getParam<boundary_id_type>("output_boundary_id");
+    const BoundaryName output_boundary = getParam<BoundaryName>("output_boundary");
+    const std::vector<BoundaryID> output_boundary_id =
+        MooseMeshUtils::getBoundaryIDs(*mesh, {output_boundary}, true);
 
-    libMesh::MeshTools::Modification::change_boundary_id(*mesh, end_bcid, output_boundary_id);
+    libMesh::MeshTools::Modification::change_boundary_id(*mesh, end_bcid, output_boundary_id[0]);
+    mesh->get_boundary_info().sideset_name(output_boundary_id[0]) = output_boundary;
 
-    new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(output_boundary_id + 1));
+    new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(output_boundary_id[0] + 1));
   }
 
   bool doing_stitching = false;

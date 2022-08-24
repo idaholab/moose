@@ -39,7 +39,6 @@
     add_nodes_per_boundary_segment = 3
     refine_boundary = false
     desired_area = 0.05
-    output_subdomain_id = 1
     output_subdomain_name = "triangles"
   []
 []
