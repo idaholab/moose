@@ -26,14 +26,7 @@ TagVectorArrayVariableAux::validParams()
 TagVectorArrayVariableAux::TagVectorArrayVariableAux(const InputParameters & parameters)
   : TagAuxBase<ArrayAuxKernel>(parameters), _v(coupledVectorTagArrayDofValue("v", "vector_tag"))
 {
-  if (getArrayVar("v", 0)->feType() != _var.feType())
-    paramError("variable",
-               "The AuxVariable this AuxKernel is acting on has to have the same order and family "
-               "as the variable 'v'");
-  if (getArrayVar("v", 0)->count() != _var.count())
-    paramError("variable",
-               "The AuxVariable this AuxKernel is acting on has to have the same number of "
-               "components as the variable 'v'");
+  checkCoupledVariable(getArrayVar("v", 0), &_var);
 }
 
 void
