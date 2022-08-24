@@ -161,6 +161,8 @@ enum class InterpMethod
 {
   /// (elem+neighbor)/2
   Average,
+  /// 1/(gc/elem+(1-gc)/neighbor)
+  HarmonicAverage,
   /// (gc*elem+(1-gc)*neighbor)+gradient*(rf-rf')
   SkewCorrectedAverage,
   /// weighted
@@ -239,6 +241,87 @@ linearInterpolation(const T & value1,
               "average options!");
   const auto coeffs = interpCoeffs(interp_method, fi, one_is_elem);
   return coeffs.first * value1 + coeffs.second * value2;
+}
+
+/**
+ * This is a helper function for the harmonic interpolation to ensure we throw a meaningful
+ * compile-time error if the developer is trying to use harmonic interpolation on an
+ * unsupported type
+ */
+template <class T>
+constexpr std::false_type always_false{};
+
+/**
+ * Computes the harmonic mean (1/(gc/value1+(1-gc)/value2)) of Reals, RealVectorValues and
+ * RealTensorValues with accounting for the possibility that one or both of them are AD.
+ * For tensors, we use a component-wise mean instead of the matrix-inverse based option.
+ */
+template <typename T1, typename T2>
+typename libMesh::CompareTypes<T1, T2>::supertype
+harmonicInterpolation(const T1 & value1,
+                      const T2 & value2,
+                      const FaceInfo & fi,
+                      const bool one_is_elem)
+{
+  // We check if the base values of the given template types match, if not we throw a compile-time
+  // error
+  static_assert(std::is_same<typename MetaPhysicL::RawType<T1>::value_type,
+                             typename MetaPhysicL::RawType<T2>::value_type>::value,
+                "The input values for harmonic interpolation need to have the same raw-value!");
+
+  // Fetch the interpolation coefficients, we use the exact same coefficients as for a simple
+  // weighted average
+  const auto coeffs = interpCoeffs(InterpMethod::Average, fi, one_is_elem);
+
+  // We check if the types are fit to compute the harmonic mean of. This is done compile-time
+  // using constexpr
+  if constexpr (std::is_same<typename MetaPhysicL::RawType<T1>::value_type, Real>::value)
+  {
+    // The harmonic mean of mixed positive and negative numbers (and 0 as well) is not well-defined
+    // so we assert that the input values shall be positive.
+    mooseAssert(value1 > 0, "Input value 1 needs to be positive for harmonic interpolation!");
+    mooseAssert(value2 > 0, "Input value 2 needs to be positive for harmonic interpolation!");
+    return 1.0 / (coeffs.first / value1 + coeffs.second / value2);
+  }
+  else if constexpr (std::is_same<typename MetaPhysicL::RawType<T1>::value_type,
+                                  RealVectorValue>::value)
+  {
+    // For vectors, we take the component-wise harmonic mean
+    typename libMesh::CompareTypes<T1, T2>::supertype result;
+    for (const auto i : make_range(LIBMESH_DIM))
+    {
+      mooseAssert(value1(i) > 0,
+                  "Component " + std::string(i) +
+                      " of input value 1 needs to be positive for harmonic interpolation!");
+      mooseAssert(value2(i) > 0,
+                  "Component " + std::string(i) +
+                      " of input value 2 needs to be positive for harmonic interpolation!");
+      result(i) = 1.0 / (coeffs.first / value1(i) + coeffs.second / value2(i));
+    }
+    return result;
+  }
+  else if constexpr (std::is_same<typename MetaPhysicL::RawType<T1>::value_type,
+                                  RealTensorValue>::value)
+  {
+    typename libMesh::CompareTypes<T1, T2>::supertype result;
+    for (const auto i : make_range(LIBMESH_DIM))
+      for (const auto j : make_range(LIBMESH_DIM))
+      {
+        mooseAssert(value1(i, j) > 0,
+                    "Component (" + std::string(i) + "," + std::string(i) +
+                        ") of input value 1 needs to be positive for harmonic interpolation!");
+        mooseAssert(value2(i, j) > 0,
+                    "Component (" + std::string(i) + "," + std::string(i) +
+                        ") of input value 2 needs to be positive for harmonic interpolation!");
+        result(i, j) = 1.0 / (coeffs.first / value1(i, j) + coeffs.second / value2(i, j));
+      }
+    return result;
+  }
+  else
+    // This line is supposed to throw an error when the user tries to compile this function with
+    // types that are not supported. This is the reason we needed the always_false function. Hope as
+    // C++ gets nicer, we can do this in a nicer way.
+    static_assert(always_false<T1>, "Harmonic interpolation is not implemented for the used type!");
 }
 
 /**

@@ -18,7 +18,13 @@ FVDiffusion::validParams()
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription("Computes residual for diffusion operator for finite volume method.");
   params.addRequiredParam<MooseFunctorName>("coeff", "diffusion coefficient");
+  MooseEnum coeff_interp_method("average harmonic", "average");
+  params.addParam<MooseEnum>(
+      "coeff_interp_method",
+      coeff_interp_method,
+      "Switch that can select between face interpoaltion methods for diffusion coefficients.");
   params.set<unsigned short>("ghost_layers") = 2;
+
   return params;
 }
 
@@ -32,6 +38,12 @@ FVDiffusion::FVDiffusion(const InputParameters & params)
       "'--with-ad-indexing-type=global'. Note that global indexing is now the default "
       "configuration for AD indexing type.");
 #endif
+
+  const auto & interp_method = getParam<MooseEnum>("coeff_interp_method");
+  if (interp_method == "average")
+    _coeff_interp_method = Moose::FV::InterpMethod::Average;
+  else if (interp_method == "harmonic")
+    _coeff_interp_method = Moose::FV::InterpMethod::HarmonicAverage;
 
   if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
       (_tid == 0))
@@ -65,8 +77,18 @@ FVDiffusion::computeQpResidual()
 {
   auto dudn = gradUDotNormal();
 
-  // Perform weighted-average or central differencing (CD) interpolation of k
-  const auto k = _coeff(Moose::FV::makeCDFace(*_face_info, faceArgSubdomains()));
+  ADReal k;
+
+  if (_coeff_interp_method == Moose::FV::InterpMethod::Average)
+    k = _coeff(Moose::FV::makeCDFace(*_face_info, faceArgSubdomains()));
+  else
+  {
+    const auto face_elem = elemFromFace();
+    const auto face_neighbor = neighborFromFace();
+    ADReal k_elem(_coeff(face_elem));
+    ADReal k_neigh(_coeff(face_neighbor));
+    k = Moose::FV::harmonicInterpolation(k_elem, k_neigh, *_face_info, true);
+  }
 
   return -1 * k * dudn;
 }

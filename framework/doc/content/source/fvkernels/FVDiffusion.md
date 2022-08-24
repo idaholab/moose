@@ -18,8 +18,19 @@ order derivative term into a first order derivative integrated over a surface.
 
 where $\vec{n_f}$ is the surface normal on each side of the element considered.
 
+The diffusion coefficient can be interpolated to the surface using two approaches:
+
+- +Simple arithmetic average:+ $D_f = w_1 D_1 + (1-w_1) D_2$ (with $D_1$, $D_2$ being the diffusion
+  coefficient in the neighboring cells respectively)
+- +Simple harmonic average:+ $D_f = \frac{1}{\frac{w_1}{D_1} + \frac{w_2}{D_2}}$, which yields better results
+  if the diffusion coefficients are positive and discontinuous. This is due to the fact that this scheme preserves
+  flux continuity in the face-normal direction on orthogonal grids.
+
+The interpolation method can be set using the [!param](/FVKernels/FVDiffusion/coeff_interp_method) parameter.
+
 !alert note
-Unless specified otherwise using the `force_boundary_execution` or `boundaries_to_force`
+Unless specified otherwise using the [!param](/FVKernels/FVDiffusion/force_boundary_execution) or
+[!param](/FVKernels/FVDiffusion/boundaries_to_force)
 parameter, this kernel is not executed on variable boundaries. Unless a boundary condition is
 specified instead, this is equivalent to specifying a zero diffusive flux through the boundary.
 

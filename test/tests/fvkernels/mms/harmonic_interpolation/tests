@@ -1,0 +1,44 @@
+[Tests]
+  design = 'FVDiffusion.md'
+  issues = '#21923'
+  [average-tris]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestAverageTriangles
+    requirement = 'The system shall display first order convergence, when using a simple arithmetic average to determine the face values of discontinuous diffusion coefficients on a regular tri mesh.'
+    method = '!dbg'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+    valgrind = HEAVY
+  []
+  [average-quads]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestAverageQuads
+    requirement = 'The system shall display first order convergence, when using a simple arithmetic average to determine the face values of discontinuous diffusion coefficients on a quad mesh.'
+    method = '!dbg'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+    valgrind = HEAVY
+  []
+  [harmonic-tris]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestHarmonicTriangles
+    requirement = 'The system shall display close to second order (1.8ish) convergence, when using a simple harmonic average to determine the face values of discontinuous diffusion coefficients on a regular tri mesh.'
+    method = '!dbg'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+    valgrind = HEAVY
+  []
+  [harmonic-quads]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestHarmonicQuads
+    requirement = 'The system shall display second order convergence, when using a simple harmonic average to determine the face values of discontinuous diffusion coefficients on a quad mesh.'
+    method = '!dbg'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+    valgrind = HEAVY
+  []
+[]
