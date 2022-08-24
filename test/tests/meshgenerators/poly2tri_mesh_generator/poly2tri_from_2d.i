@@ -1,5 +1,5 @@
 [Mesh]
-  [./outer_bdy]
+  [outer_bdy]
     # Avoid squares here to make diagonal selection more well-defined
     type = ConcentricCircleMeshGenerator
     num_sectors = 4
@@ -8,7 +8,7 @@
     has_outer_square = false
     preserve_volumes = false
   []
-  [./triang]
+  [triang]
     type = Poly2TriMeshGenerator
     boundary = 'outer_bdy'
     refine_boundary = true
@@ -16,8 +16,4 @@
   []
 
   parallel_type = replicated  # for ConcentricCircleMeshGenerator
-[]
-
-[Outputs]
-  exodus = true
 []

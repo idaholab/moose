@@ -1,5 +1,5 @@
 [Mesh]
-  [./poly]
+  [poly]
     type = PolyLineMeshGenerator
     points = '-1.0 0.0 0.0
               1.0 1.0 1.0
@@ -8,8 +8,4 @@
     bcid0 = 123
     bcid1 = 456
   []
-[]
-
-[Outputs]
-  exodus = true
 []

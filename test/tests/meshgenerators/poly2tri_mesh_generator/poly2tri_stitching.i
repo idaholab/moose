@@ -1,5 +1,5 @@
 [Mesh]
-  [./outer_bdy]
+  [outer_bdy]
     type = PolyLineMeshGenerator
     points = '-1.0 0.0 0.0
               0.0 -1.0 0.0
@@ -7,7 +7,7 @@
               0.0 2.0 0.0'
     loop = true
   []
-  [./hole_1]
+  [hole_1]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 3
@@ -17,7 +17,7 @@
     ymin = -0.1
     ymax = 0.1
   []
-  [./hole_2]
+  [hole_2]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 3
@@ -27,7 +27,7 @@
     ymin = -0.1
     ymax = 0.1
   []
-  [./triang]
+  [triang]
     type = Poly2TriMeshGenerator
     boundary = 'outer_bdy'
     holes = 'hole_1
@@ -42,8 +42,4 @@
     output_subdomain_id = 1
     output_subdomain_name = "triangles"
   []
-[]
-
-[Outputs]
-  exodus = true
 []
