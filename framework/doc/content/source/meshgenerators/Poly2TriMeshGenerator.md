@@ -4,7 +4,7 @@
 
 ## Examples
 
-Using instances of the `PolyLineMeshGenerator` to create a boundary
+Using instances of the [PolyLineMeshGenerator.md] to create a boundary
 and a few holes, followed by a `Poly2TriMeshGenerator` object to
 triangulate the region between them, the [Mesh](/Mesh/index.md) block
 shown in the input file snippet below generates the final mesh shown
