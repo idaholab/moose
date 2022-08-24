@@ -13,6 +13,7 @@ import os
 import re
 import math
 import json
+import shutil
 import numpy as np
 import subprocess
 
@@ -77,6 +78,8 @@ def recursiveFindFile(current_path, p, executable):
 # Borrowed from Peacock
 def findExecutable(executable_option, method_option):
     if executable_option and os.path.exists(executable_option):
+        return executable_option
+    elif shutil.which(executable_option):
         return executable_option
     else:
         # search up directories until we find an executable, starting with the current directory
