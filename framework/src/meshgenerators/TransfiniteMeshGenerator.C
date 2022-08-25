@@ -87,6 +87,15 @@ TransfiniteMeshGenerator::generate()
   const Point V11 = _corners[2];
   const Point V01 = _corners[3];
 
+  //we construct a vector that mimics the normal only to account for inward and outward arcircles
+  //note we do not need to define inward directions since they would multiply the sign of the
+  //arc circle parameter, which if negative would give inward vectors
+  std::vector<Point > outward_vec(4);
+  outward_vec[0]=Point( 0.0, -1.0, 0.0);
+  outward_vec[1]=Point( 0.0,  1.0, 0.0);
+  outward_vec[2]=Point(-1.0,  0.0, 0.0);
+  outward_vec[3]=Point( 1.0,  0.0, 0.0);
+
   const unsigned total_nodes = _nx * _ny;
 
   std::vector<Point> edge_bottom; // parametrized via nx
@@ -94,10 +103,10 @@ TransfiniteMeshGenerator::generate()
   std::vector<Point> edge_left;   // parametrized via ny
   std::vector<Point> edge_right;  // parametrized via ny
 
-  edge_bottom = getEdge(V00, V10, _nx, _bottom_type, _bottom_parameter);
-  edge_top = getEdge(V01, V11, _nx, _top_type, _top_parameter);
-  edge_left = getEdge(V00, V01, _ny, _left_type, _left_parameter);
-  edge_right = getEdge(V10, V11, _ny, _right_type, _right_parameter);
+  edge_bottom = getEdge(V00, V10, _nx, _bottom_type, _bottom_parameter, outward_vec[0]);
+  edge_top = getEdge(V01, V11, _nx, _top_type, _top_parameter,outward_vec[1]);
+  edge_left = getEdge(V00, V01, _ny, _left_type, _left_parameter,outward_vec[2]);
+  edge_right = getEdge(V10, V11, _ny, _right_type, _right_parameter,outward_vec[3]);
 
   // Use for the parametrization on edge pairs, currently generated on the fly
   // on the [0,1] interval
@@ -177,7 +186,8 @@ TransfiniteMeshGenerator::getEdge(const Point & P1,
                                   const Point & P2,
                                   const unsigned int & np,
                                   const MooseEnum & type,
-                                  const std::string & parameter)
+                                  const std::string & parameter,
+                                  const Point & outward)
 {
   std::vector<Point> edge;
   switch (type)
@@ -195,13 +205,22 @@ TransfiniteMeshGenerator::getEdge(const Point & P1,
       {
         Real height = MooseUtils::convert<Real>(parameter, true);
         Real rx = double(iter) / double(np - 1);
-        Point P3 = computeMidPoint(P1, P2, height);
+        Point P3 = computeMidPoint(P1, P2, height, outward);
         Real rad = computeRadius(P1, P2, P3);
         Point P0 = computeOrigin(P1, P2, P3);
+        //need to shift to center of coordinates to find the corresponding radians
         Point x0 = (P1 - P0);
         Point x1 = (P2 - P0);
-        Real a = getAtan(x0(0), x0(1));
-        Real b = getAtan(x1(0), x1(1));
+        //The below function should be updated to take as an argument a Point
+        //and compute it in polar coordinates
+        Real a = getPolar(x0(0), x0(1));
+        Real b = getPolar(x1(0), x1(1));
+        //The case when the edge spans quadrants 1 and 4 requires special treament
+        //to periodically switch we compute the angle that needs added to one edge of the edge
+        //to identify the entire edge span
+        Real arclength=std::acos((x0(0)*x1(0)+x0(1)*x1(1))/x0.norm()/x1.norm());
+        //should use dot product above, but couldn't find it
+        if (abs(b-a)>M_PI) b=a+arclength;
         Real interval = getMapFromReference(rx, a, b);
         Real x = P0(0) + rad * std::cos(interval);
         Real y = P0(1) + rad * std::sin(interval);
@@ -254,7 +273,7 @@ TransfiniteMeshGenerator::computeRadius(const Point & P1, const Point & P2, cons
 }
 
 Real
-TransfiniteMeshGenerator::getAtan(const Real x, const Real y) const
+TransfiniteMeshGenerator::getPolar(const Real x, const Real y) const
 { // define quadrants
   const bool q1 = (x > 0 && y > 0);
   const bool q2 = (x < 0 && y > 0);
@@ -262,17 +281,19 @@ TransfiniteMeshGenerator::getAtan(const Real x, const Real y) const
   const bool q4 = (x > 0 && y < 0);
 
   Real angle = 0.0;
+  const Real xab=std::abs(x);
+  const Real yab=std::abs(y);
   // compute angles via the inverse tangent
   // however the quadrants do not provide sufficient info
   // and we need to involve normals info as well
   if (q1)
-    angle = std::atan(y / x);
+    angle = std::atan(yab / xab);
   if (q2)
-    angle = std::atan(y / x) + M_PI;
+    angle = M_PI-std::atan(yab / xab);
   if (q3)
-    angle = std::atan(y / x) + M_PI;
+    angle = M_PI+std::atan(yab / xab) ;
   if (q4)
-    angle = std::atan(y / x);
+    angle = 2*M_PI-std::atan(yab / xab);
   return angle;
 }
 
@@ -310,22 +331,21 @@ TransfiniteMeshGenerator::computeOrigin(const Point & P1, const Point & P2, cons
 Point
 TransfiniteMeshGenerator::computeMidPoint(const Point & P1,
                                           const Point & P2,
-                                          const Real & height) const
+                                          const Real & height,
+                                          const Point & outward) const
 {
-
   const Real xm = (P1(0) + P2(0)) / 2;
   const Real ym = (P1(1) + P2(1)) / 2;
   // The arc can be inverted into the domain (concave) or outward (convex)
   // we use the convention that if the height is given as negative we seek a concave arc
   // if "height" is positive then we seek a convex arc
   const Real dist = abs(height);
+  const int orient=(height >= 0) ? 1 : -1;
   Point MidPoint;
 
   // this accounts for lines aligned with the system of coordinates
-  if (abs(P2(0) - P1(0)) < 1e-15)
-    MidPoint = Point(xm + height, ym, 0.0);
-  if (abs(P2(1) - P1(1)) < 1e-15)
-    MidPoint = Point(xm, ym + height, 0.0);
+  if ((abs(P2(0) - P1(0)) < 1e-15) || (abs(P2(1) - P1(1)) < 1e-15))
+    MidPoint = Point(xm, ym , 0.0) + dist * orient* outward;
 
   // some of the cases are  not covered by this strategy and we need to use normals info
   // this is implemented and tested in the prototype and is soon to be updated
@@ -334,29 +354,18 @@ TransfiniteMeshGenerator::computeMidPoint(const Point & P1,
     // m is the slope of the line orthogonal to the midpoint
     const Real m = -(P2(0) - P1(0)) / (P2(1) - P1(1));
     // The equation to determine allows two solutions
-    const Real x3_1 = xm - sqrt(dist * (m * m + 1)) / (m * m + 1);
-    const Real x3_2 = xm + sqrt(dist * (m * m + 1)) / (m * m + 1);
+    const Real x_temp = sqrt(dist * (m * m + 1)) / (m * m + 1);
+    const Real factor=orient*outward(0)+m*orient*outward(1);
+    int direction=(factor >= 0) ? 1 : -1;
+    /*
+    std::cout << "******************\n\n";
+    std::cout<<"In midpoint orient "<<orient<<std::endl;
+    std::cout<<"X coord "<< orient*x_temp <<std::endl;
+    std::cout<<"Y coord "<< orient*x_temp*m <<std::endl;
+    std::cout << "******************\n\n";
+    */
+    MidPoint = Point(direction*x_temp + xm, direction*x_temp*m + ym, 0.0);
 
-    const Real y3_1 = ym + m * (x3_1 - xm);
-    const Real y3_2 = ym + m * (x3_2 - xm);
-    Point P3_1 = Point(x3_1, y3_1, 0.0);
-    Point P3_2 = Point(x3_2, y3_2, 0.0);
-    auto select = std::signbit(height);
-
-    if (select)
-    {
-      if (P3_1.norm() > P3_2.norm())
-        MidPoint = P3_2;
-      else
-        MidPoint = P3_1;
-    }
-    else
-    {
-      if (P3_1.norm() > P3_2.norm())
-        MidPoint = P3_1;
-      else
-        MidPoint = P3_2;
-    }
   }
   return MidPoint;
 }
