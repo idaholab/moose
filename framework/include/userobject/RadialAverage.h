@@ -19,9 +19,7 @@
 #include <set>
 #include <map>
 #include <vector>
-#include <array>
 #include <memory>
-#include <tuple>
 
 class ThreadedRadialAverageLoop;
 

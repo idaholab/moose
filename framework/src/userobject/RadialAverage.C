@@ -9,12 +9,12 @@
 
 #include "RadialAverage.h"
 #include "ThreadedRadialAverageLoop.h"
-#include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
 
 #include "libmesh/nanoflann.hpp"
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/mesh_tools.h"
+#include "libmesh/int_range.h"
 
 #include <list>
 #include <iterator>
@@ -133,16 +133,6 @@ RadialAverage::finalize()
 
     const auto item_type = TIMPI::StandardType<QPData>(&(_qp_data[0]));
 
-#if 0
-    // output local qp locations
-    // _console << name() << ' ' << receive.size() << '\n' << name() << std::flush;
-    for (auto item : _qp_data)
-      _console << name() << ' ' << _my_pid << ' '
-               << item._q_point(0) << ' '
-               << item._q_point(1) << ' '
-               << item._q_point(2) << std::flush;
-#endif
-
     // fill buffer and send structures
     for (auto i = beginIndex(non_zero_comm); i < non_zero_comm.size(); ++i)
     {
@@ -152,17 +142,7 @@ RadialAverage::finalize()
       // fill send buffer for transfer to pid
       send[i].reserve(list.size());
       for (const auto & item : list)
-      {
         send[i].push_back(_qp_data[item]);
-#if 0
-        // output sent qp locations
-        _console << name() << ' '
-                 << _qp_data[item]._q_point(0) << ' '
-                 << _qp_data[item]._q_point(1) << ' '
-                 << _qp_data[item]._q_point(2) << ' '
-                 << pid << std::flush;
-#endif
-      }
 
       // issue non-blocking send
       _communicator.send(pid, send[i], send_requests[i], send_tag);
@@ -180,16 +160,6 @@ RadialAverage::finalize()
       receive.resize(message_size);
       _communicator.receive(source_pid, receive, send_tag);
 
-#if 0
-      // output received qp locations
-      // _console << name() << ' ' << receive.size() << '\n' << name() << std::flush;
-      for (auto item : receive)
-        _console << name() << ' ' << source_pid << ' '
-                 << item._q_point(0) << ' '
-                 << item._q_point(1) << ' '
-                 << item._q_point(2) << std::flush;
-#endif
-
       // append communicated data
       _qp_data.insert(_qp_data.end(), receive.begin(), receive.end());
     }
@@ -197,15 +167,6 @@ RadialAverage::finalize()
     // wait until all send requests are at least buffered and we can destroy
     // the send buffers by going out of scope
     Parallel::wait(send_requests);
-  }
-
-  {
-    std::ofstream dbg1(std::to_string(_my_pid) + "comm.dat");
-    for (const auto & qd : _qp_data)
-    {
-      const auto p = qd._q_point;
-      dbg1 << p(0) << ' ' << p(1) << ' ' << p(2) << std::endl;
-    }
   }
 
   // build KD-Tree using data we just received
@@ -301,29 +262,14 @@ RadialAverage::updateCommunicationLists()
       _boundary_data_indices.insert(match.first);
   }
 
-  {
-    std::ofstream dbg1(std::to_string(_my_pid) + "bn.dat");
-    for (const auto & p : _boundary_nodes)
-      dbg1 << p(0) << ' ' << p(1) << ' ' << p(2) << std::endl;
-  }
-
-  {
-    std::ofstream dbg1(std::to_string(_my_pid) + "bnd.dat");
-    for (const auto i : _boundary_data_indices)
-    {
-      const auto p = _qp_data[i]._q_point;
-      dbg1 << p(0) << ' ' << p(1) << ' ' << p(2) << std::endl;
-    }
-  }
-
   // gather all processor bounding boxes (communicate as pairs)
   std::vector<std::pair<Point, Point>> pps(n_processors());
   const auto mybb = _mesh.getInflatedProcessorBoundingBox(0);
   std::pair<Point, Point> mypp = mybb;
   _communicator.allgather(mypp, pps);
 
-  // inflate all processor bounding boxes by radius + padding
-  const auto rpoint = Point(1, 1, 1) * (_radius + _padding);
+  // inflate all processor bounding boxes by radius (no padding)
+  const auto rpoint = Point(1, 1, 1) * _radius;
   std::vector<BoundingBox> bbs;
   for (const auto & pp : pps)
     bbs.emplace_back(pp.first - rpoint, pp.second + rpoint);
@@ -332,28 +278,13 @@ RadialAverage::updateCommunicationLists()
   std::vector<processor_id_type> candidate_procs;
   for (const auto pid : index_range(bbs))
     if (pid != _my_pid && bbs[pid].intersects(mypp))
-    {
       candidate_procs.push_back(pid);
-      std::cout << pid << std::endl;
-    }
 
   // go over all boundary data items and send them to the proc they overlap with
   for (const auto i : _boundary_data_indices)
     for (const auto pid : candidate_procs)
       if (bbs[pid].contains_point(_qp_data[i]._q_point))
         _communication_lists[pid].insert(i);
-
-  {
-    for (const auto pid : candidate_procs)
-    {
-      std::ofstream dbg1(std::to_string(_my_pid) + "to" + std::to_string(pid) + ".dat");
-      for (const auto i : _communication_lists[pid])
-      {
-        const auto p = _qp_data[i]._q_point;
-        dbg1 << p(0) << ' ' << p(1) << ' ' << p(2) << std::endl;
-      }
-    }
-  }
 
   // done
   _update_communication_lists = false;
