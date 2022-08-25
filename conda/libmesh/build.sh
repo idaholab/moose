@@ -31,7 +31,7 @@ if [[ $target_platform == osx-arm64 ]]; then
     cd ../timpi
     ./bootstrap
     cd ../netcdf/netcdf*
-    autoreconf
+    autoreconf -f -i
     cd ../../../
 fi
 
