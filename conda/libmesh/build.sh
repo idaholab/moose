@@ -23,18 +23,6 @@ function sed_replace(){
     fi
 }
 
-# Bootstrap libmesh and it's contribs
-if [[ $target_platform == osx-arm64 ]]; then
-    ./bootstrap
-    cd contrib/metaphysicl
-    ./bootstrap
-    cd ../timpi
-    ./bootstrap
-    cd ../netcdf/netcdf*
-    autoreconf -f -i
-    cd ../../../
-fi
-
 mkdir -p build; cd build
 
 if [[ $(uname) == Darwin ]]; then

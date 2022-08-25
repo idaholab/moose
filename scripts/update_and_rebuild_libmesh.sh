@@ -146,18 +146,6 @@ if [ -z "$PETSC_DIR" ]; then
   fi
 fi
 
-# If on osx-arm64, bootstrap libmesh and its contribs
-if [[ $(uname) == Darwin  ]] && [[ $(uname -m) == arm64 ]]; then
-    ./bootstrap
-    cd contrib/metaphysicl
-    ./bootstrap
-    cd ../timpi
-    ./bootstrap
-    cd ../netcdf/netcdf*
-    autoreconf
-    cd ../../../
-fi
-
 # If we're not going fast, remove the build directory and reconfigure
 if [ -z "$go_fast" ]; then
   if [[ -n "$LIBMESH_BUILD_DIR" ]]; then
