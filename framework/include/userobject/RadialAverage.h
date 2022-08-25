@@ -72,7 +72,6 @@ public:
   const Result & getAverage() const { return _average; }
 
 protected:
-  void insertNotLocalPointNeighbors(dof_id_type);
   void updateCommunicationLists();
 
   /// material name to get averaged
@@ -82,6 +81,9 @@ protected:
 
   /// cut-off radius
   const Real _radius;
+
+  /// communication padding distance
+  const Real _padding;
 
   /// gathered data
   std::vector<QPData> _qp_data;
@@ -101,8 +103,11 @@ protected:
   /// The data structure used to find neighboring elements give a node ID
   std::vector<std::vector<const Elem *>> _nodes_to_elem_map;
 
-  // list of direct point neighbor elements of the current processor domain
-  std::set<const Elem *> _point_neighbors;
+  /// set of direct point neighbor elements of the current processor domain
+  std::set<Point> _boundary_nodes;
+
+  /// set of all _qp_data indices that are within _radius of any _boundary_nodes
+  std::set<std::size_t> _boundary_data_indices;
 
   /// QPData indices to send to the various processors
   std::vector<std::set<std::size_t>> _communication_lists;

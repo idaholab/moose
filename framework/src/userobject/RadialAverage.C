@@ -37,6 +37,11 @@ RadialAverage::validParams()
   params.addClassDescription("Perform a radial equal weight average of a material property");
   params.addRequiredParam<std::string>("material_name", "Name of the material to average.");
   params.addRequiredParam<Real>("radius", "Cut-off radius for the averaging");
+  params.addParam<Real>(
+      "padding",
+      0.0,
+      "Padding for communication. This gets added to the radius when determining which QPs to send "
+      "to other processors. It should be of the order of the maximum element size.");
 
   // we run this object once at the beginning of the timestep by default
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
@@ -54,6 +59,7 @@ RadialAverage::RadialAverage(const InputParameters & parameters)
     _averaged_material_name(getParam<std::string>("material_name")),
     _averaged_material(getMaterialProperty<Real>(_averaged_material_name)),
     _radius(getParam<Real>("radius")),
+    _padding(getParam<Real>("padding")),
     _update_communication_lists(false),
     _my_pid(processor_id()),
     _perf_meshchanged(registerTimedSection("meshChanged", 3)),
@@ -81,7 +87,7 @@ RadialAverage::execute()
   auto id = _current_elem->id();
 
   // collect all QP data
-  for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
+  for (const auto qp : make_range(_qrule->n_points()))
     _qp_data.emplace_back(_q_point[qp], id, qp, _JxW[qp] * _coord[qp], _averaged_material[qp]);
 
   // make sure the result map entry for the current element is sized correctly
@@ -193,6 +199,15 @@ RadialAverage::finalize()
     Parallel::wait(send_requests);
   }
 
+  {
+    std::ofstream dbg1(std::to_string(_my_pid) + "comm.dat");
+    for (const auto & qd : _qp_data)
+    {
+      const auto p = qd._q_point;
+      dbg1 << p(0) << ' ' << p(1) << ' ' << p(2) << std::endl;
+    }
+  }
+
   // build KD-Tree using data we just received
   const unsigned int max_leaf_size = 20; // slightly affects runtime
   auto point_list = PointListAdaptor<QPData>(_qp_data.begin(), _qp_data.end());
@@ -221,16 +236,6 @@ RadialAverage::threadJoin(const UserObject & y)
 }
 
 void
-RadialAverage::insertNotLocalPointNeighbors(dof_id_type node)
-{
-  mooseAssert(!_nodes_to_elem_map[node].empty(), "Node not found in _nodes_to_elem_map");
-
-  for (const auto * elem : _nodes_to_elem_map[node])
-    if (elem->processor_id() != _my_pid && elem->active())
-      _point_neighbors.insert(elem);
-}
-
-void
 RadialAverage::meshChanged()
 {
   TIME_SECTION(_perf_meshchanged);
@@ -242,32 +247,27 @@ RadialAverage::meshChanged()
   _nodes_to_elem_map.clear();
   MeshTools::build_nodes_to_elem_map(_mesh.getMesh(), _nodes_to_elem_map);
 
-  // clear point neighbor set
-  _point_neighbors.clear();
+  // clear procesor boundary nodes set
+  _boundary_nodes.clear();
 
-  // my processor id
-  const auto my_pid = processor_id();
-
-  // iterate over active local elements
+  //
+  // iterate over active local elements and store all processor boundary node locations
+  //
   const auto end = mesh.active_local_elements_end();
   for (auto it = mesh.active_local_elements_begin(); it != end; ++it)
-    // find a face that faces either a boundary (nullptr) or a different processor
-    for (unsigned int s = 0; s < (*it)->n_sides(); ++s)
+    // find faces at a processor boundaries
+    for (const auto s : make_range((*it)->n_sides()))
     {
       const auto * neighbor = (*it)->neighbor_ptr(s);
-      if (neighbor)
-      {
-        if (neighbor->processor_id() != my_pid)
-        {
-          // add all face node touching elements directly
-          for (unsigned int n = 0; n < (*it)->n_nodes(); ++n)
-            if ((*it)->is_node_on_side(n, s))
-              insertNotLocalPointNeighbors((*it)->node_id(n));
-        }
-      }
+      if (neighbor && neighbor->processor_id() != _my_pid)
+        // add all nodes on the processor boundary
+        for (const auto n : make_range((*it)->n_nodes()))
+          if ((*it)->is_node_on_side(n, s))
+            _boundary_nodes.insert((*it)->node_ref(n));
+
+      // request communication list update
+      _update_communication_lists = true;
     }
-  // request communication list update
-  _update_communication_lists = true;
 }
 
 void
@@ -290,17 +290,72 @@ RadialAverage::updateCommunicationLists()
   std::vector<std::pair<std::size_t, Real>> ret_matches;
   nanoflann::SearchParams search_params;
 
-  // iterate over non periodic point neighbor elements
-  for (auto elem : _point_neighbors)
+  // iterate over all boundary nodes and collect all boundary-near data points
+  _boundary_data_indices.clear();
+  for (const auto & bn : _boundary_nodes)
   {
     ret_matches.clear();
-    Point centroid = elem->vertex_average();
-    const Real radius2 = _radius + elem->hmax() / 2.0;
-    kd_tree->radiusSearch(&(centroid(0)), radius2, ret_matches, search_params);
+    kd_tree->radiusSearch(
+        &(bn(0)), Utility::pow<2>(_radius + _padding), ret_matches, search_params);
     for (auto & match : ret_matches)
-      _communication_lists[elem->processor_id()].insert(match.first);
+      _boundary_data_indices.insert(match.first);
   }
 
+  {
+    std::ofstream dbg1(std::to_string(_my_pid) + "bn.dat");
+    for (const auto & p : _boundary_nodes)
+      dbg1 << p(0) << ' ' << p(1) << ' ' << p(2) << std::endl;
+  }
+
+  {
+    std::ofstream dbg1(std::to_string(_my_pid) + "bnd.dat");
+    for (const auto i : _boundary_data_indices)
+    {
+      const auto p = _qp_data[i]._q_point;
+      dbg1 << p(0) << ' ' << p(1) << ' ' << p(2) << std::endl;
+    }
+  }
+
+  // gather all processor bounding boxes (communicate as pairs)
+  std::vector<std::pair<Point, Point>> pps(n_processors());
+  const auto mybb = _mesh.getInflatedProcessorBoundingBox(0);
+  std::pair<Point, Point> mypp = mybb;
+  _communicator.allgather(mypp, pps);
+
+  // inflate all processor bounding boxes by radius + padding
+  const auto rpoint = Point(1, 1, 1) * (_radius + _padding);
+  std::vector<BoundingBox> bbs;
+  for (const auto & pp : pps)
+    bbs.emplace_back(pp.first - rpoint, pp.second + rpoint);
+
+  // get candidate processors (overlapping bounding boxes)
+  std::vector<processor_id_type> candidate_procs;
+  for (const auto pid : index_range(bbs))
+    if (pid != _my_pid && bbs[pid].intersects(mypp))
+    {
+      candidate_procs.push_back(pid);
+      std::cout << pid << std::endl;
+    }
+
+  // go over all boundary data items and send them to the proc they overlap with
+  for (const auto i : _boundary_data_indices)
+    for (const auto pid : candidate_procs)
+      if (bbs[pid].contains_point(_qp_data[i]._q_point))
+        _communication_lists[pid].insert(i);
+
+  {
+    for (const auto pid : candidate_procs)
+    {
+      std::ofstream dbg1(std::to_string(_my_pid) + "to" + std::to_string(pid) + ".dat");
+      for (const auto i : _communication_lists[pid])
+      {
+        const auto p = _qp_data[i]._q_point;
+        dbg1 << p(0) << ' ' << p(1) << ' ' << p(2) << std::endl;
+      }
+    }
+  }
+
+  // done
   _update_communication_lists = false;
 }
 

@@ -63,7 +63,7 @@
     material_name = local_damage_reg
     execute_on = "INITIAL timestep_end"
     block = 0
-    radius = 0.3
+    radius = 0.55
   []
 []
 

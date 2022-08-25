@@ -51,7 +51,7 @@
     material_name = local
     execute_on = "INITIAL timestep_end"
     block = 0
-    radius = 0.25
+    radius = 0.3
   []
 []
 
