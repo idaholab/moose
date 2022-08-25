@@ -6210,8 +6210,6 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   executeControls(EXEC_LINEAR);
 
-  _current_execute_on_flag = EXEC_NONE;
-
   _app.getOutputWarehouse().residualSetup();
 
   _safe_access_tagged_vectors = false;
@@ -6219,6 +6217,8 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   _current_nl_sys->computeResidualTags(tags);
 
   _safe_access_tagged_vectors = true;
+
+  _current_execute_on_flag = EXEC_NONE;
 }
 
 void
