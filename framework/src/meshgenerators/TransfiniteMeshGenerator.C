@@ -357,13 +357,7 @@ TransfiniteMeshGenerator::computeMidPoint(const Point & P1,
     const Real x_temp = sqrt(dist * (m * m + 1)) / (m * m + 1);
     const Real factor=orient*outward(0)+m*orient*outward(1);
     int direction=(factor >= 0) ? 1 : -1;
-    /*
-    std::cout << "******************\n\n";
-    std::cout<<"In midpoint orient "<<orient<<std::endl;
-    std::cout<<"X coord "<< orient*x_temp <<std::endl;
-    std::cout<<"Y coord "<< orient*x_temp*m <<std::endl;
-    std::cout << "******************\n\n";
-    */
+
     MidPoint = Point(direction*x_temp + xm, direction*x_temp*m + ym, 0.0);
 
   }
