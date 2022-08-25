@@ -19,12 +19,20 @@ InputParameters
 PolycrystalColoringICAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Random Voronoi tessellation polycrystal action");
+  params.addClassDescription("Action to create ICs for polycrystal variables from a UserObject");
   params.addRequiredParam<unsigned int>("op_num", "number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addRequiredParam<UserObjectName>("polycrystal_ic_uo", "Optional: TODO");
   params.addParam<std::vector<SubdomainName>>("block",
                                               "Block restriction for the initial condition");
+  params.addParam<bool>(
+      "linearized_interface", false, "Whether to use linearized interface or the standard model");
+  params.addParam<Real>("bound_value",
+                        5.0,
+                        "Bound value used to keep variable "
+                        "between +/-bound. Must be positive.");
+  params.addParamNamesToGroup("linearized_interface", "LinearizedInterface");
+  params.addParamNamesToGroup("bound_value", "LinearizedInterface");
 
   return params;
 }
@@ -32,7 +40,8 @@ PolycrystalColoringICAction::validParams()
 PolycrystalColoringICAction::PolycrystalColoringICAction(const InputParameters & params)
   : Action(params),
     _op_num(getParam<unsigned int>("op_num")),
-    _var_name_base(getParam<std::string>("var_name_base"))
+    _var_name_base(getParam<std::string>("var_name_base")),
+    _linearized_interface(getParam<bool>("linearized_interface"))
 {
 }
 
@@ -42,14 +51,24 @@ PolycrystalColoringICAction::act()
   // Loop through the number of order parameters
   for (unsigned int op = 0; op < _op_num; op++)
   {
-    // Set parameters for BoundingBoxIC
-    InputParameters poly_params = _factory.getValidParams("PolycrystalColoringIC");
+    std::string IC_type = "PolycrystalColoringIC";
+    if (_linearized_interface)
+      IC_type = "PolycrystalColoringICLinearizedInterface";
+
+    // Set parameters for IC
+    InputParameters poly_params = _factory.getValidParams(IC_type);
     poly_params.set<VariableName>("variable") = _var_name_base + Moose::stringify(op);
     poly_params.set<unsigned int>("op_index") = op;
     poly_params.applySpecificParameters(parameters(), {"polycrystal_ic_uo", "block"});
+    poly_params.set<UserObjectName>("polycrystal_ic_uo") =
+        getParam<UserObjectName>("polycrystal_ic_uo");
+    if (_linearized_interface)
+      poly_params.applySpecificParameters(parameters(),
+                                          {"polycrystal_ic_uo", "block", "bound_value"});
+    else
+      poly_params.applySpecificParameters(parameters(), {"polycrystal_ic_uo", "block"});
 
     // Add initial condition
-    _problem->addInitialCondition(
-        "PolycrystalColoringIC", "PolycrystalColoringIC_" + Moose::stringify(op), poly_params);
+    _problem->addInitialCondition(IC_type, IC_type + Moose::stringify(op), poly_params);
   }
 }

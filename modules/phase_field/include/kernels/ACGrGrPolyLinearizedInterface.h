@@ -9,21 +9,20 @@
 
 #pragma once
 
-#include "ACGrGrBase.h"
+#include "ACGrGrPoly.h"
 
 // Forward Declarations
 
 /**
  * This kernel calculates the residual for grain growth for a single phase,
- * poly-crystal system. A single material property gamma_asymm is used for
- * the prefactor of the cross-terms between order parameters.
+ * polycrystal system using the linearized interface grain growth model.
  */
-class ACGrGrPoly : public ACGrGrBase
+class ACGrGrPolyLinearizedInterface : public ACGrGrPoly
 {
 public:
   static InputParameters validParams();
 
-  ACGrGrPoly(const InputParameters & parameters);
+  ACGrGrPolyLinearizedInterface(const InputParameters & parameters);
 
 protected:
   virtual Real assignThisOp();
@@ -31,5 +30,12 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
+  const std::vector<MaterialPropertyName> _other_op_names;
+  const unsigned int _num_ops;
   const MaterialProperty<Real> & _gamma;
+  const MaterialProperty<Real> & _op;
+  const MaterialProperty<Real> & _dopdphi;
+
+  std::vector<const MaterialProperty<Real> *> _opj;
+  std::vector<const MaterialProperty<Real> *> _dopjdarg;
 };

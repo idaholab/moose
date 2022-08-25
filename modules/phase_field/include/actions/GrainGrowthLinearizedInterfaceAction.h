@@ -10,33 +10,20 @@
 #pragma once
 
 // MOOSE includes
-#include "Action.h"
+#include "GrainGrowthAction.h"
 
-#include "libmesh/fe_type.h"
+// Forward declaration
 
-class GrainGrowthAction : public Action
+class GrainGrowthLinearizedInterfaceAction : public GrainGrowthAction
 {
 public:
   static InputParameters validParams();
 
-  GrainGrowthAction(const InputParameters & params);
+  GrainGrowthLinearizedInterfaceAction(const InputParameters & params);
 
   virtual void act();
 
 protected:
-  void addVariables();
-  void addBnds(const std::string & name_base);
-
   /// number of variables and variable name base for variable creation
-  const unsigned int _op_num;
-  const std::string _var_name_base;
-
-  /// FEType for the variable being created
-  const FEType _fe_type;
-
-  /// Take initial values from file?
-  const bool _initial_from_file;
-
-  /// use AD objects where possible
-  const bool _use_ad;
+  const std::string _op_name_base;
 };
