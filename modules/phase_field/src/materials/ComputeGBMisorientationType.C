@@ -189,18 +189,6 @@ ComputeGBMisorientationType::defineSymmetryOperator()
     rotationSymmetryToQuaternion(sym_rotation[o], _sym_quat[o]);
 }
 
-// Function to multiply quaternions and update
-void
-ComputeGBMisorientationType::getQuaternionProduct(const Eigen::Quaternion<Real> qi,
-                                                  const Eigen::Quaternion<Real> qj,
-                                                  Eigen::Quaternion<Real> & q)
-{
-  q.w() = qi.w() * qj.w() - qi.x() * qj.x() - qi.y() * qj.y() - qi.z() * qj.z();
-  q.x() = qi.w() * qj.x() + qi.x() * qj.w() + qi.y() * qj.z() - qi.z() * qj.y();
-  q.y() = qi.w() * qj.y() - qi.x() * qj.z() + qi.y() * qj.w() + qi.z() * qj.x();
-  q.z() = qi.w() * qj.z() + qi.x() * qj.y() - qi.y() * qj.x() + qi.z() * qj.w();
-}
-
 // Function to return the misorientation of two quaternions
 double
 ComputeGBMisorientationType::getMisorientationFromQuaternion(const Eigen::Quaternion<Real> qi,
@@ -256,16 +244,16 @@ ComputeGBMisorientationType::getMisorientationAngles()
   _quat_angle.resize(grain_num);
 
   // Get Euler Angle of Orientation
-  for (const auto i: make_range(grain_num))
+  for (const auto i : make_range(grain_num))
   {
     auto grain_id = _ebsd_reader.getFeatureID(i);
     _euler_angle[grain_id] = _ebsd_reader.getEulerAngles(i);
     _quat_angle[grain_id] = _euler_angle[grain_id].toQuaternion();
   }
 
-  for (const auto j: make_range(std::make_unsigned_t<int>(1), grain_num))
+  for (const auto j : make_range(std::make_unsigned_t<int>(1), grain_num))
   {
-    for (const auto i: make_range(j))
+    for (const auto i : make_range(j))
     {
       Real theta = getMisorientationFromQuaternion(_quat_angle[i], _quat_angle[j]);
       _misorientation_angles.push_back(theta / libMesh::pi * 180);

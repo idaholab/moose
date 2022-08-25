@@ -37,10 +37,6 @@ protected:
   void rotationSymmetryToQuaternion(const double O[3][3], Eigen::Quaternion<Real> & q);
   /// Function to define the symmetry operator
   void defineSymmetryOperator();
-  /// Function to multiply quaternions and update
-  void getQuaternionProduct(const Eigen::Quaternion<Real> qi,
-                            const Eigen::Quaternion<Real> qj,
-                            Eigen::Quaternion<Real> & q);
   /// Function to return the misorientation of two quaternions
   double getMisorientationFromQuaternion(const Eigen::Quaternion<Real> qi,
                                          const Eigen::Quaternion<Real> qj);
