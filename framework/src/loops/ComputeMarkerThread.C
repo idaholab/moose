@@ -125,6 +125,8 @@ ComputeMarkerThread::printBlockExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution() && _marker_whs.hasActiveObjects())
   {
+    if (_blocks_visited.count(_subdomain))
+      return;
     auto console = _fe_problem.console();
     console << "[DBG] Execution order on block: " << _subdomain << std::endl;
     console << "[DBG] " << _marker_whs.activeObjectsToString() << std::endl;

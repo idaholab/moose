@@ -125,10 +125,12 @@ ComputeNodalUserObjectsThread::printGeneralExecutionInformation() const
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Computing nodal user objects on " << execute_on << std::endl;
+    mooseDoOnce(
     console << "[DBG] Ordering on nodes:" << std::endl;
     console << "[DBG] - boundary restricted user objects" << std::endl;
     console << "[DBG] - block restricted user objects" << std::endl;
     console << "[DBG] Nodal UOs executed on each node will differ based on these restrictions"
             << std::endl;
+    );
   }
 }

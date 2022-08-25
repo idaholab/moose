@@ -172,8 +172,11 @@ protected:
   /// Print information about the particular ordering of objects on each block
   virtual void printBlockExecutionInformation() const {};
 
-  /// Keep track of which blocks the execution ordering was printed on
-  std::set<SubdomainID> printed_on;
+  /// Keep track of which blocks were visited
+  std::set<SubdomainID> _blocks_visited;
+
+  /// Resets the set of blocks visited
+  virtual void clearBlocksVisited() { _blocks_visited.clear(); }
 
 private:
   /**
@@ -183,6 +186,7 @@ private:
    * type of loop where the logic will be different is when projecting stateful material properties
    */
   virtual bool shouldComputeInternalSide(const Elem & elem, const Elem & neighbor) const;
+
 };
 
 template <typename RangeType>
@@ -234,6 +238,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
         {
           subdomainChanged();
           printBlockExecutionInformation();
+          _blocks_visited.insert(_subdomain);
         }
 
         onElement(elem);
@@ -286,6 +291,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
       } // range
 
       post();
+      clearBlocksVisited();
     }
     catch (libMesh::LogicError & e)
     {

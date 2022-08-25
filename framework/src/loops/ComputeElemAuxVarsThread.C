@@ -180,6 +180,8 @@ ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution() && _aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
+    if (_blocks_visited.count(_subdomain))
+      return;
     auto console = _fe_problem.console();
     const std::vector<std::shared_ptr<AuxKernelType>> & kernels =
         _aux_kernels.getActiveBlockObjects(_subdomain, _tid);

@@ -123,6 +123,7 @@ ComputeResidualThread::printGeneralExecutionInformation() const
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Beginning elemental loop to compute residual on " << execute_on << std::endl;
+    mooseDoOnce(
     console << "[DBG] Execution order on each element:" << std::endl;
     console << "[DBG] - kernels on element quadrature points" << std::endl;
     console << "[DBG] - finite volume elemental kernels on element" << std::endl;
@@ -130,6 +131,7 @@ ComputeResidualThread::printGeneralExecutionInformation() const
         << std::endl;
     console << "[DBG] - DG kernels on element side quadrature points" << std::endl;
     console << "[DBG] - interface kernels on element side quadrature points" << std::endl;
+    );
   }
 }
 
@@ -142,6 +144,8 @@ ComputeResidualThread::printBlockExecutionInformation() const
   auto console = _fe_problem.console();
   if (_fe_problem.shouldPrintExecution() && num_objects > 0)
   {
+    if (_blocks_visited.count(_subdomain))
+      return;
     console << "[DBG] Ordering of Residual Objects on block " << _subdomain << std::endl;
     if (_kernels.hasActiveObjects())
     {
@@ -175,6 +179,7 @@ ComputeResidualThread::printBlockExecutionInformation() const
       console << "[DBG] " << _interface_kernels.activeObjectsToString() << std::endl;
     }
   }
-  else if (_fe_problem.shouldPrintExecution() && num_objects == 0)
+  else if (_fe_problem.shouldPrintExecution() && num_objects == 0 &&
+           _blocks_visited.count(_subdomain))
     console << "[DBG] No Active Residual Objects on block " << _subdomain << std::endl;
 }

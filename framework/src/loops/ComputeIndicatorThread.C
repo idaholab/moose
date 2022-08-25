@@ -209,6 +209,8 @@ ComputeIndicatorThread::printBlockExecutionInformation() const
 {
   if (_fe_problem.shouldPrintExecution())
   {
+    if (_blocks_visited.count(_subdomain))
+      return;
     auto console = _fe_problem.console();
     {
       std::string active_indicators_string = "";

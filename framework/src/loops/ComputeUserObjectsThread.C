@@ -340,6 +340,7 @@ ComputeUserObjectsThread::printGeneralExecutionInformation() const
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Computing elemental user objects on " << execute_on << std::endl;
+    mooseDoOnce(
     console << "[DBG] Execution order of objects types on each element then its sides:" << std::endl;
     // onElement
     console << "[DBG] - element user objects" << std::endl;
@@ -358,6 +359,7 @@ ComputeUserObjectsThread::printGeneralExecutionInformation() const
     // onInterface
     console << "[DBG] - interface user objects" << std::endl;
     console << "[DBG] - domain user objects executing at interfaces" << std::endl;
+    );
   }
 }
 
@@ -390,6 +392,8 @@ ComputeUserObjectsThread::printBlockExecutionInformation() const
 
     if (num_objects > 0)
     {
+      if (_blocks_visited.count(_subdomain))
+        return;
       console << "[DBG] Ordering of User Objects on block " << _subdomain << std::endl;
       // Output specific ordering of objects
       printVectorOrdering<ElementUserObject>(_element_objs, "element user objects");
@@ -405,7 +409,8 @@ ComputeUserObjectsThread::printBlockExecutionInformation() const
       printVectorOrdering<InterfaceUserObject>(_interface_user_objects, "interface user objects");
       console << "[DBG] Only user objects active on local element/sides are executed" << std::endl;
     }
-    else
+    else if (_fe_problem.shouldPrintExecution() && num_objects == 0 &&
+             _blocks_visited.count(_subdomain) == 0)
       console << "[DBG] No User Objects on block " << _subdomain << std::endl;
   }
 }
