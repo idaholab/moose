@@ -28,7 +28,7 @@ struct LibtorchTrainingOptions
 {
   /// The type of optimizer we want to use for training, adam is the default due to
   /// its robustness and fast convergence
-  MooseEnum optimizer_type = MooseEnum("adam adagrad rmsprop sgd", "adam");
+  MooseEnum optimizer_type = MooseEnum("adam=0 adagrad=1 rmsprop=2 sgd=3", "adam");
   /// Number of iterations we want to perform on the whole dataset
   unsigned int num_epochs = 1;
   /// Number of batches we want to split the dataset into
@@ -89,7 +89,7 @@ protected:
    * based on load-balancing considerations, the code can deviate from this by 1
    * @return The number of samples in the batches
    */
-  unsigned int computeBatchSize(unsigned int num_samples, unsigned int num_batches);
+  unsigned int computeBatchSize(const unsigned int num_samples, const unsigned int num_batches);
   /**
    * Computes the number of local samples. This practically splits the already computed batches
    * between MPI ranks. At the moment, this is a very simple logic but will change in the future
@@ -98,7 +98,7 @@ protected:
    * @param num_ranks The number of ranks associated with this batch
    * @return The number of samples in a batch which will be used locally to train the neural nets
    */
-  unsigned int computeLocalBatchSize(unsigned int batch_size, unsigned int num_ranks);
+  unsigned int computeLocalBatchSize(const unsigned int batch_size, const unsigned int num_ranks);
 
   /// Pointer to the neural network which is trained
   std::shared_ptr<LibtorchNeuralNet<torch::nn::Module>> _nn;
@@ -120,8 +120,8 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::LibtorchArtificialNeuralNetTrainer(
 
 template <typename Sampler>
 unsigned int
-LibtorchArtificialNeuralNetTrainer<Sampler>::computeBatchSize(unsigned int num_samples,
-                                                              unsigned int num_batches)
+LibtorchArtificialNeuralNetTrainer<Sampler>::computeBatchSize(const unsigned int num_samples,
+                                                              const unsigned int num_batches)
 {
   if (num_samples < num_batches)
     return 1;
@@ -129,14 +129,14 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::computeBatchSize(unsigned int num_s
     return num_samples / num_batches;
   else
   {
-    unsigned int sample_per_batch_1 = num_samples / num_batches;
-    unsigned int remainder_1 = num_samples % num_batches;
-    unsigned int sample_per_batch_2 = sample_per_batch_1 - 1;
-    unsigned int remainder_2 =
+    const unsigned int sample_per_batch_1 = num_samples / num_batches;
+    const unsigned int remainder_1 = num_samples % num_batches;
+    const unsigned int sample_per_batch_2 = sample_per_batch_1 - 1;
+    const unsigned int remainder_2 =
         num_samples - (num_samples / sample_per_batch_2) * sample_per_batch_2;
 
-    Real rel_remainder1 = Real(remainder_1) / Real(sample_per_batch_1);
-    Real rel_remainder2 = Real(remainder_2) / Real(sample_per_batch_2);
+    const Real rel_remainder1 = Real(remainder_1) / Real(sample_per_batch_1);
+    const Real rel_remainder2 = Real(remainder_2) / Real(sample_per_batch_2);
 
     return rel_remainder2 > rel_remainder1 ? sample_per_batch_2 : sample_per_batch_1;
   }
@@ -144,8 +144,8 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::computeBatchSize(unsigned int num_s
 
 template <typename Sampler>
 unsigned int
-LibtorchArtificialNeuralNetTrainer<Sampler>::computeLocalBatchSize(unsigned int batch_size,
-                                                                   unsigned int num_ranks)
+LibtorchArtificialNeuralNetTrainer<Sampler>::computeLocalBatchSize(const unsigned int batch_size,
+                                                                   const unsigned int num_ranks)
 {
   // If we have more processors than the number of samples in this batch, we error out. We
   // do not support idle processors at the moment (at least not this way).
@@ -161,14 +161,23 @@ template <typename Sampler>
 void
 LibtorchArtificialNeuralNetTrainer<Sampler>::setupOptimizer(const LibtorchTrainingOptions & options)
 {
-  if (options.optimizer_type == "adam")
-    _optimizer = std::make_unique<torch::optim::Adam>(_nn->parameters(), options.learning_rate);
-  else if (options.optimizer_type == "adagrad")
-    _optimizer = std::make_unique<torch::optim::Adagrad>(_nn->parameters(), options.learning_rate);
-  else if (options.optimizer_type == "rmsprop")
-    _optimizer = std::make_unique<torch::optim::RMSprop>(_nn->parameters(), options.learning_rate);
-  else if (options.optimizer_type == "sgd")
-    _optimizer = std::make_unique<torch::optim::SGD>(_nn->parameters(), options.learning_rate);
+  switch (options.optimizer_type)
+  {
+    case 0:
+      _optimizer = std::make_unique<torch::optim::Adam>(_nn->parameters(), options.learning_rate);
+      break;
+    case 1:
+      _optimizer =
+          std::make_unique<torch::optim::Adagrad>(_nn->parameters(), options.learning_rate);
+      break;
+    case 2:
+      _optimizer =
+          std::make_unique<torch::optim::RMSprop>(_nn->parameters(), options.learning_rate);
+      break;
+    case 3:
+      _optimizer = std::make_unique<torch::optim::SGD>(_nn->parameters(), options.learning_rate);
+      break;
+  }
 }
 
 template <typename Sampler>
@@ -178,7 +187,7 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::train(LibtorchDataset & dataset,
 {
   // This is used to measure the training time. Would not like to inherit from
   // PerfGraphInterface. Other objects can time this process from the outside.
-  auto t_begin = MPI_Wtime();
+  const auto t_begin = MPI_Wtime();
 
   /*
    * It might happen that we limit the number of processors that can be used for the praining
@@ -186,13 +195,13 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::train(LibtorchDataset & dataset,
    * as rank 0. This is necessary to avoid cases when the (number of MPI processes)*(num_batches)
    * exceeds the number of samples.
    */
-  int num_ranks = std::min(_comm.size(), options.parallel_processes);
+  const int num_ranks = std::min(_comm.size(), options.parallel_processes);
   // The real rank of the current process
-  int real_rank = _comm.rank();
+  const int real_rank = _comm.rank();
   // The capped rank (or used rank) of the current process.
-  int used_rank = real_rank < num_ranks ? real_rank : 0;
+  const int used_rank = real_rank < num_ranks ? real_rank : 0;
 
-  auto num_samples = dataset.size().value();
+  const auto num_samples = dataset.size().value();
 
   if (num_ranks * options.num_batches > num_samples)
     mooseError("The number of used processors* number of requestedf batches " +
@@ -200,10 +209,10 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::train(LibtorchDataset & dataset,
                " is greater than the number of samples used for the training!");
 
   // Compute the number of samples in each batch
-  unsigned int sample_per_batch = computeBatchSize(num_samples, options.num_batches);
+  const unsigned int sample_per_batch = computeBatchSize(num_samples, options.num_batches);
 
   // Compute the number of samples for this process
-  unsigned int sample_per_proc = computeLocalBatchSize(sample_per_batch, num_ranks);
+  const unsigned int sample_per_proc = computeLocalBatchSize(sample_per_batch, num_ranks);
 
   // Transform the dataset se that the loader has an easier time
   auto transformed_data_set = dataset.map(torch::data::transforms::Stack<>());
@@ -243,7 +252,7 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::train(LibtorchDataset & dataset,
       loss.backward();
 
       // If we are on a process whose rank is below the allowed limit, we actually collect the loss
-      if (real_rank <= used_rank)
+      if (real_rank == used_rank)
         epoch_loss += loss.item<double>();
 
       // To enable the parallel training, we compute the gradients of the neural net parameters
@@ -253,7 +262,7 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::train(LibtorchDataset & dataset,
       // the predefined limit)
       for (auto & param : _nn->named_parameters())
       {
-        if (real_rank > used_rank)
+        if (real_rank != used_rank)
           param.value().grad().data() = param.value().grad().data() * 0.0;
 
         MPI_Allreduce(MPI_IN_PLACE,
@@ -272,7 +281,7 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::train(LibtorchDataset & dataset,
 
     // We also reduce the loss value to make sure every process runs the same number of epochs and
     // does not exit the loop due to hitting the realtive error condition
-    MPI_Allreduce(MPI_IN_PLACE, &epoch_loss, 1, MPI_DOUBLE, MPI_SUM, _comm.get());
+    _comm.sum(epoch_loss);
 
     epoch_loss = epoch_loss / options.num_batches / num_ranks;
 

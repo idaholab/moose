@@ -76,7 +76,7 @@ LibtorchArtificialNeuralNet::constructNeuralNetwork()
 }
 
 torch::Tensor
-LibtorchArtificialNeuralNet::forward(torch::Tensor x)
+LibtorchArtificialNeuralNet::forward(torch::Tensor & x)
 {
   for (unsigned int i = 0; i < _weights.size() - 1; ++i)
   {

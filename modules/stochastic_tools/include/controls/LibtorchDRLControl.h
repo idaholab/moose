@@ -33,10 +33,10 @@ protected:
 #endif
 
   /// The name of postprocessors which will be used to save the logarithmic probabilities to.
-  std::vector<PostprocessorName> _log_probability_postprocessor_names;
+  const std::vector<PostprocessorName> _log_probability_postprocessor_names;
 
   /// Standard deviation for the actions, supplied by the user
-  std::vector<Real> _action_std;
+  const std::vector<Real> _action_std;
 
 #ifdef LIBTORCH_ENABLED
   /// Standard deviations converted to a 2D diagonal tensor that can be used by Libtorch routines.

@@ -58,15 +58,15 @@ protected:
   std::vector<std::vector<Real>> _old_responses;
 
   /// The names of the controllable parameters
-  std::vector<std::string> _control_names;
+  const std::vector<std::string> _control_names;
   /// Names of the postprocessors which contain the observations of the system
-  std::vector<PostprocessorName> _response_names;
+  const std::vector<PostprocessorName> _response_names;
   /// Names of the postprocessors which will store the resulting action values from this controller
-  std::vector<PostprocessorName> _action_postprocessor_names;
+  const std::vector<PostprocessorName> _action_postprocessor_names;
 
   /// Number of timesteps to use as input data from the reporters (this influences how many past
   /// results are used, e.g. the size of _old_responses)
-  unsigned int _input_timesteps;
+  const unsigned int _input_timesteps;
 
   /// Number of timesteps to use as the input data from the reporter
   bool _initialized;

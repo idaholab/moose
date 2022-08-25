@@ -2,7 +2,7 @@
   [linear]
     requirement = "The system shall be able to "
     issues = '#19571'
-    design = 'DRLRewardFunction.md'
+    design = 'ScaledAbsDifferenceDRLRewardFunction.md'
     [read-parameters]
       type = CSVDiff
       input = drl_reward.i

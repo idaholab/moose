@@ -28,21 +28,16 @@ LibtorchTorchScriptNeuralNet::loadNeuralNetwork(const std::string & filename)
   {
     torch::jit::script::Module * base = this;
     *base = torch::jit::load(filename);
-    _nn_loaded = true;
   }
   catch (const c10::Error & e)
   {
-    mooseError("Error while loading torchscript file!");
+    mooseError("Error while loading torchscript file "+filename+"!");
   }
 }
 
 torch::Tensor
-LibtorchTorchScriptNeuralNet::forward(torch::Tensor x)
+LibtorchTorchScriptNeuralNet::forward(torch::Tensor & x)
 {
-  if (!_nn_loaded)
-    mooseError("The neural network has not been loaded so it makes no sense to evaluate it. Call "
-               "loadNeuralNetwork() before using this function!");
-
   return LibtorchNeuralNet<torch::jit::script::Module>::forward(x);
 }
 

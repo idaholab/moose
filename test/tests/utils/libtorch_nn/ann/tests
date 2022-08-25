@@ -88,7 +88,9 @@
       input = 'test_ann_trainer.i'
       csvdiff = 'adagrad_test_trainer_0001.csv'
       detail = 'Adagrad optimizer.'
-      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adagrad' Outputs/file_base=adagrad"
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adagrad' 
+                  VectorPostprocessors/test_trainer/num_epochs=40
+                  Outputs/file_base=adagrad"
       libtorch = true
       allow_test_objects = True
       rel_err = 1e-5

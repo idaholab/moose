@@ -7,29 +7,31 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DRLRewardFunction.h"
-#include "FunctionInterface.h"
+#include "ScaledAbsDifferenceDRLRewardFunction.h"
 
-registerMooseObject("StochasticToolsApp", DRLRewardFunction);
+registerMooseObject("StochasticToolsApp", ScaledAbsDifferenceDRLRewardFunction);
 
 InputParameters
-DRLRewardFunction::validParams()
+ScaledAbsDifferenceDRLRewardFunction::validParams()
 {
   InputParameters params = Function::validParams();
 
-  params.addClassDescription("Evaluates a reward function for a process which is controlled by a "
+  params.addClassDescription("Evaluates a scaled absolute difference reward function for a process "
+                             "which is controlled by a "
                              "Deep Reinforcement Lerning based surrogate.");
 
   params.addRequiredParam<FunctionName>("design_function", "The desired value to reach.");
   params.addRequiredParam<PostprocessorName>(
       "observed_value", "The name of the Postprocessor that contains the observed value.");
+
   params.addParam<Real>("c1", 10, "1st coefficient in the reward function.");
   params.addParam<Real>("c2", 1, "2nd coefficient in the reward function.");
 
   return params;
 }
 
-DRLRewardFunction::DRLRewardFunction(const InputParameters & parameters)
+ScaledAbsDifferenceDRLRewardFunction::ScaledAbsDifferenceDRLRewardFunction(
+    const InputParameters & parameters)
   : Function(parameters),
     FunctionInterface(this),
     _design_function(getFunction("design_function")),
@@ -41,14 +43,14 @@ DRLRewardFunction::DRLRewardFunction(const InputParameters & parameters)
 }
 
 Real
-DRLRewardFunction::value(Real t, const Point & p) const
+ScaledAbsDifferenceDRLRewardFunction::value(Real t, const Point & p) const
 {
   Real design_value = _design_function.value(t, p);
   return -_c1 * std::abs(design_value - _observed_value) + _c2;
 }
 
 ADReal
-DRLRewardFunction::value(const ADReal & t, const ADPoint & p) const
+ScaledAbsDifferenceDRLRewardFunction::value(const ADReal & t, const ADPoint & p) const
 {
   ADReal design_value = _design_function.value(t, p);
   return -_c1 * std::abs(design_value - _observed_value) + _c2;

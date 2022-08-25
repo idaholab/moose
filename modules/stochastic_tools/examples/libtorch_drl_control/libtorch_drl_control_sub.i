@@ -59,7 +59,7 @@ air_effective_k = 0.5 # W/(m K)
     value = '297'
   []
   [reward_function]
-    type = DRLRewardFunction
+    type = ScaledAbsDifferenceDRLRewardFunction
     design_function = design_function
     observed_value = center_temp_tend
     c1 = 1

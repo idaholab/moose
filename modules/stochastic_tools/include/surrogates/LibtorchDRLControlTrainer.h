@@ -106,7 +106,7 @@ protected:
    * @param input The observation values (responses)
    * @return The estimated value
    */
-  torch::Tensor evaluateValue(const torch::Tensor & input);
+  torch::Tensor evaluateValue(torch::Tensor & input);
 
   /**
    * Function which evaluates the control net and then computes the logarithmic probability of the
@@ -114,18 +114,18 @@ protected:
    * @param input The observation values (responses)
    * @return The estimated value for the logarithmic probability
    */
-  torch::Tensor evaluateAction(const torch::Tensor & input, const torch::Tensor & output);
+  torch::Tensor evaluateAction(torch::Tensor & input, torch::Tensor & output);
 
 #endif
 
-  /// Compute the return value by discounting the rewards
-  void computeDiscountedRewards();
+  /// Compute the return value by discounting the rewards and summing them
+  void computeRewardToGo();
 
   /// Reset data after updating the neural network
   void resetData();
 
   /// Response reporter names
-  std::vector<ReporterName> _response_names;
+  const std::vector<ReporterName> _response_names;
 
   /// Shifting constants for the responses
   std::vector<Real> _response_shift_factors;
@@ -134,16 +134,16 @@ protected:
   std::vector<Real> _response_scaling_factors;
 
   /// Control reporter names
-  std::vector<ReporterName> _control_names;
+  const std::vector<ReporterName> _control_names;
 
   /// Log probability reporter names
-  std::vector<ReporterName> _log_probability_names;
+  const std::vector<ReporterName> _log_probability_names;
 
   /// Reward reporter name
-  ReporterName _reward_name;
+  const ReporterName _reward_name;
 
   /// Number of timesteps to fetch from the reporters to be the input of then eural nets
-  unsigned int _input_timesteps;
+  const unsigned int _input_timesteps;
 
   /// Number of inputs for the control and critic neural nets
   unsigned int _num_inputs;
@@ -160,19 +160,19 @@ protected:
   std::vector<Real> _return_data;
 
   /// Number of epochs for the training of the emulator
-  unsigned int _num_epochs;
+  const unsigned int _num_epochs;
 
   /// Number of neurons within the hidden layers in the critic neural net
-  std::vector<unsigned int> _num_critic_neurons_per_layer;
+  const std::vector<unsigned int> _num_critic_neurons_per_layer;
 
   /// The learning rate for the optimization algorithm for the critic
-  Real _critic_learning_rate;
+  const Real _critic_learning_rate;
 
   /// Number of neurons within the hidden layers in the control neural net
-  std::vector<unsigned int> _num_control_neurons_per_layer;
+  const std::vector<unsigned int> _num_control_neurons_per_layer;
 
   /// The learning rate for the optimization algorithm for the control
-  Real _control_learning_rate;
+  const Real _control_learning_rate;
 
   /// Number of transient simulation data to collect before updating the controller neural net.
   const unsigned int _update_frequency;
@@ -181,36 +181,36 @@ protected:
   unsigned int _update_counter;
 
   /// The clip parameter used while clamping the advantage value
-  Real _clip_param;
+  const Real _clip_param;
 
   /// Decaying factor that is used when calculating the return from the reward
   const Real _decay_factor;
 
   /// Standard deviation for the actions
-  std::vector<Real> _action_std;
+  const std::vector<Real> _action_std;
 
   /// Name of the pytorch output file. This is used for loading and storing
   /// already existing data
-  std::string _filename_base;
+  const std::string _filename_base;
 
   /// Switch indicating if an already existing neural net should be read from a
   /// file or not. This can be used to load existing torch files (from previous
   /// MOOSE runs for retraining and further manipulation)
-  bool _read_from_file;
+  const bool _read_from_file;
 
   /// Currently, the controls are executed after the user objects at initial in moose.
   /// So using a shift can realign the corresponding input-output values while reading the
   /// reporters
-  bool _shift_outputs;
+  const bool _shift_outputs;
 
   /// Storage for the current average episode reward
   Real _average_episode_reward;
 
   /// Switch to enable the standardization of the advantages
-  bool _standardize_advantage;
+  const bool _standardize_advantage;
 
   /// The frequency the loss should be printed
-  unsigned int _loss_print_frequency;
+  const unsigned int _loss_print_frequency;
 
 #ifdef LIBTORCH_ENABLED
   /// Pointer to the control (or actor) neural net object

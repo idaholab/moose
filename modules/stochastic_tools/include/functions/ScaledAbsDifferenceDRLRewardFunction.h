@@ -13,18 +13,18 @@
 #include "FunctionInterface.h"
 
 /// A simple reward function which uses c1*|x-x_target|+c2
-class DRLRewardFunction : public Function, protected FunctionInterface
+class ScaledAbsDifferenceDRLRewardFunction : public Function, protected FunctionInterface
 {
 public:
   static InputParameters validParams();
 
-  DRLRewardFunction(const InputParameters & parameters);
+  ScaledAbsDifferenceDRLRewardFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;
   virtual ADReal value(const ADReal & t, const ADPoint & p) const override;
 
 protected:
-  /// Value we would like to reach (can be time and spatial dependent)
+  /// Value we would like to reach (can be time and space dependent)
   const Function & _design_function;
 
   /// Postprocessor containing the observed value

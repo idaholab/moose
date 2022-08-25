@@ -30,7 +30,7 @@ public:
   virtual ~LibtorchNeuralNet() {}
 
   // Override the evaluate function
-  virtual torch::Tensor forward(torch::Tensor x) override;
+  virtual torch::Tensor forward(torch::Tensor & x) override;
 };
 
 // Ex[plicitly instantiate the two different libtorch module branches
@@ -39,7 +39,8 @@ template class LibtorchNeuralNet<torch::jit::script::Module>;
 
 // The forward function for a self-defined module will de defined on a case-by-case basis
 template <typename T>
-torch::Tensor LibtorchNeuralNet<T>::forward(torch::Tensor /*x*/)
+torch::Tensor
+LibtorchNeuralNet<T>::forward(torch::Tensor & /*x*/)
 {
   ::mooseError("The evaluate function is not implemented for LibtorchNeuralNet! Override your "
                "function in the derived classes!");
@@ -47,7 +48,7 @@ torch::Tensor LibtorchNeuralNet<T>::forward(torch::Tensor /*x*/)
 
 // The forward function for a torch-script-based module will be always the one in this definition
 template <>
-torch::Tensor LibtorchNeuralNet<torch::jit::script::Module>::forward(torch::Tensor x);
+torch::Tensor LibtorchNeuralNet<torch::jit::script::Module>::forward(torch::Tensor & x);
 
 }
 

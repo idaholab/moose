@@ -37,7 +37,7 @@ protected:
 #endif
 
   /// The name of the control objects which hold the neural networks
-  std::string _control_name;
+  const std::string _control_name;
   /// A vector which stores the parameters of the neural net
   VectorPostprocessorValue & _nn_parameter_values;
 };

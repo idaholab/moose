@@ -48,7 +48,7 @@ is defined to be a function of time. It is specified in the `Functions` block:
 
 This block contains the function definition for the target temperature and the reward function as well.
 For this experiment, we set the target temperature to be $297~K$, while the reward function
-defined in [DRLRewardFunction.md] is used for the training.
+defined in [ScaledAbsDifferenceDRLRewardFunction.md] is used for the training.
 
 Next, we set up the data collection using the `Postprocessors` and `Reporters` blocks:
 

@@ -247,7 +247,7 @@ LibtorchDRLControlTrainer::execute()
   getRewardDataFromReporter(_reward_data, _reward_name);
 
   // Calculate return from the reward (discounting the reward)
-  computeDiscountedRewards();
+  computeRewardToGo();
 
   _update_counter--;
 
@@ -343,7 +343,7 @@ LibtorchDRLControlTrainer::getRewardDataFromReporter(std::vector<Real> & data,
 
 #ifdef LIBTORCH_ENABLED
 void
-LibtorchDRLControlTrainer::computeDiscountedRewards()
+LibtorchDRLControlTrainer::computeRewardToGo()
 {
   // Get reward data from one simulation
   std::vector<Real> reward_data_per_sim;
@@ -461,13 +461,13 @@ LibtorchDRLControlTrainer::convertDataToTensor(std::vector<Real> & vector_data,
 }
 
 torch::Tensor
-LibtorchDRLControlTrainer::evaluateValue(const torch::Tensor & input)
+LibtorchDRLControlTrainer::evaluateValue(torch::Tensor & input)
 {
   return _critic_nn->forward(input);
 }
 
 torch::Tensor
-LibtorchDRLControlTrainer::evaluateAction(const torch::Tensor & input, const torch::Tensor & output)
+LibtorchDRLControlTrainer::evaluateAction(torch::Tensor & input, torch::Tensor & output)
 {
   torch::Tensor var = torch::matmul(_std, _std);
 

@@ -14,7 +14,7 @@ namespace Moose
 {
 template <>
 torch::Tensor
-LibtorchNeuralNet<torch::jit::script::Module>::forward(torch::Tensor x)
+LibtorchNeuralNet<torch::jit::script::Module>::forward(torch::Tensor & x)
 {
   std::vector<torch::jit::IValue> inputs;
   inputs.push_back(x);

@@ -31,22 +31,20 @@ public:
   /// Return the name of the neural network
   const std::string & filename() const { return _filename; }
 
-  /// Construct the neural network
-  void loadNeuralNetwork(const std::string & filename);
-
   /**
    * Overriding the forward substitution function for the neural network, unfortunately
    * this cannot be const since it creates a graph in the background
    * @param x Input tensor for the evaluation
    */
-  virtual torch::Tensor forward(torch::Tensor x) override;
+  virtual torch::Tensor forward(torch::Tensor & x) override;
 
 protected:
   /// Name of the torchscript containing the neural network
   const std::string _filename;
 
-  /// Switch to indicate if the neural network has been loaded or not
-  bool _nn_loaded;
+private:
+  /// Construct the neural network
+  void loadNeuralNetwork(const std::string & filename);
 };
 
 }

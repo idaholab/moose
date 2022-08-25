@@ -1,6 +1,6 @@
-# DRLRewardFunction
+# ScaledAbsDifferenceDRLRewardFunction
 
-!syntax description /Functions/DRLRewardFunction
+!syntax description /Functions/ScaledAbsDifferenceDRLRewardFunction
 
 ## Overview
 
@@ -13,8 +13,8 @@ where $C_1$ and $C_2$ constants can be determined by the user. Furthermore,
 $x_{current}$ is a measured data, typically supplied by a postprocessor. 
 For an example on how to use it in a DRL setting, see [LibtorchDRLControlTrainer.md].
 
-!syntax parameters /Functions/DRLRewardFunction
+!syntax parameters /Functions/ScaledAbsDifferenceDRLRewardFunction
 
-!syntax inputs /Functions/DRLRewardFunction
+!syntax inputs /Functions/ScaledAbsDifferenceDRLRewardFunction
 
-!syntax children /Functions/DRLRewardFunction
+!syntax children /Functions/ScaledAbsDifferenceDRLRewardFunction
