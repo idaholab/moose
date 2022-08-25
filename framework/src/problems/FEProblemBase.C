@@ -4106,12 +4106,15 @@ FEProblemBase::computeUserObjectByName(const ExecFlagType & type,
                                        const Moose::AuxGroup & group,
                                        const std::string & name)
 {
+  const auto old_exec_flag = _current_execute_on_flag;
+  _current_execute_on_flag = type;
   TheWarehouse::Query query = theWarehouse()
                                   .query()
                                   .condition<AttribSystem>("UserObject")
                                   .condition<AttribExecOns>(type)
                                   .condition<AttribName>(name);
   computeUserObjectsInternal(type, group, query);
+  _current_execute_on_flag = old_exec_flag;
 }
 
 void
