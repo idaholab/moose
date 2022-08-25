@@ -30,7 +30,7 @@
 
 
 [Mesh]
-  file = 'Phase1_output.e'
+  file = 'GB_Type_Phase1_out.e'
 []
 
 [GlobalParams]
@@ -41,7 +41,7 @@
 [UserObjects]
   [./initial_grains]
     type = SolutionUserObject
-    mesh = 'Phase1_output.e'
+    mesh = 'GB_Type_Phase1_out.e'
     timestep = LATEST
   [../]
   [./grain_tracker]
@@ -302,5 +302,4 @@
 [Outputs]
   exodus = true
   perf_graph = true
-  file_base='Phase2_output'
 []

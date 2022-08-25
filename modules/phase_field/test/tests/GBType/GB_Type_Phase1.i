@@ -282,13 +282,9 @@
 
 [Outputs]
   perf_graph = true
+  exodus = true
  [./console]
     type = Console
     max_rows = 10
   [../]
-  [./exodus]
-     type = Exodus
-     execute_on = 'INITIAL TIMESTEP_END'
-  [../]
-  file_base = 'Phase1_output'
 []

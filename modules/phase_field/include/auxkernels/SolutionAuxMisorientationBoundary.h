@@ -12,7 +12,7 @@
 #include "SolutionAux.h"
 
 /**
- * AuxKernel for reading a solution from file and visualize the location of
+ * AuxKernel for reading a solution from file and visualizing the location of
  * grain boundaries for specific grain boundary type.
  */
 class SolutionAuxMisorientationBoundary : public SolutionAux

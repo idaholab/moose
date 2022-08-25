@@ -206,7 +206,7 @@ double
 ComputeGBMisorientationType::getMisorientationFromQuaternion(const Eigen::Quaternion<Real> qi,
                                                              const Eigen::Quaternion<Real> qj)
 {
-  double miso0, misom = 2 * libMesh::pi;
+  Real miso0, misom = 2.0 * libMesh::pi;
   Eigen::Quaternion<Real> q, qib, qjb, qmin;
   qmin.w() = 0;
   qmin.x() = 0;
@@ -217,14 +217,14 @@ ComputeGBMisorientationType::getMisorientationFromQuaternion(const Eigen::Quater
   {
     for (int o2 = 0; o2 < _o_sym; o2++)
     {
-      getQuaternionProduct(_sym_quat[o1], qi, qib);
-      getQuaternionProduct(_sym_quat[o2], qj, qjb);
+      qib = _sym_quat[o1] * qi;
+      qjb = _sym_quat[o2] * qj;
 
       // j-grain conjugate quaternion
       qjb.x() = -qjb.x();
       qjb.y() = -qjb.y();
       qjb.z() = -qjb.z();
-      getQuaternionProduct(qib, qjb, q);
+      q = qib * qjb;
       miso0 = round(2 * std::acos(q.w()) * 1e5) / 1e5;
 
       if (miso0 > libMesh::pi)
@@ -251,23 +251,23 @@ ComputeGBMisorientationType::getMisorientationAngles()
   // Initialize symmetry operator as quaternion vectors
   defineSymmetryOperator();
   // Initialize parameters to calculate misorientation
-  int grain_num = _ebsd_reader.getGrainNum();
+  const auto grain_num = _ebsd_reader.getGrainNum();
   _euler_angle.resize(grain_num);
   _quat_angle.resize(grain_num);
 
   // Get Euler Angle of Orientation
-  for (int i = 0; i < grain_num; i++)
+  for (const auto i: make_range(grain_num))
   {
     auto grain_id = _ebsd_reader.getFeatureID(i);
     _euler_angle[grain_id] = _ebsd_reader.getEulerAngles(i);
     _quat_angle[grain_id] = _euler_angle[grain_id].toQuaternion();
   }
 
-  for (int j = 1; j < grain_num; j++)
+  for (const auto j: make_range(std::make_unsigned_t<int>(1), grain_num))
   {
-    for (int i = 0; i < j; i++)
+    for (const auto i: make_range(j))
     {
-      double theta = getMisorientationFromQuaternion(_quat_angle[i], _quat_angle[j]);
+      Real theta = getMisorientationFromQuaternion(_quat_angle[i], _quat_angle[j]);
       _misorientation_angles.push_back(theta / libMesh::pi * 180);
     }
   }
