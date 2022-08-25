@@ -166,19 +166,13 @@ offset = 0.00
     family = LAGRANGE
     order = FIRST
   []
-[]
-
-[AuxKernels]
-  [normal_lm]
-    type = MortarPressureComponentAux
-    variable = normal_lm
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    lm_var_x = lm_x
-    lm_var_y = lm_y
-    lm_var_z = lm_z
-    component = 'NORMAL'
-    boundary = 'top_bottom'
+  [tangent1_lm]
+    family = LAGRANGE
+    order = FIRST
+  []
+  [tangent2_lm]
+    family = LAGRANGE
+    order = FIRST
   []
 []
 
@@ -218,9 +212,23 @@ offset = 0.00
   []
 []
 
+[AuxKernels]
+  [tangent2_lm]
+    type = MortarPressureComponentAux
+    variable = tangent2_lm
+    primary_boundary = 'bottom_top'
+    secondary_boundary = 'top_bottom'
+    lm_var_x = lm_x
+    lm_var_y = lm_y
+    lm_var_z = lm_z
+    component = 'tangent2'
+    boundary = 'top_bottom'
+  []
+[]
+
 [Constraints]
   [weighted_gap_lm]
-    type = ComputeWeightedGapLMMechanicalContact
+    type = ComputeFrictionalForceCartesianLMMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -234,11 +242,12 @@ offset = 0.00
     disp_z = disp_z
     use_displaced_mesh = true
     correct_edge_dropping = true
-    interpolate_normals = false
     c = 1e+02
+    c_t = 1e+2
+    mu = 0.10
   []
   [normal_x]
-    type = NormalMortarMechanicalContact
+    type = CartesianMortarMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -249,10 +258,9 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    interpolate_normals = false
   []
   [normal_y]
-    type = NormalMortarMechanicalContact
+    type = CartesianMortarMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -263,10 +271,9 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    interpolate_normals = false
   []
   [normal_z]
-    type = NormalMortarMechanicalContact
+    type = CartesianMortarMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -277,7 +284,6 @@ offset = 0.00
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    interpolate_normals = false
   []
 []
 
@@ -321,14 +327,9 @@ offset = 0.00
 []
 
 [Preconditioning]
-  [vcp]
-    type = VCP
+  [smp]
+    type = SMP
     full = true
-    lm_variable = 'lm_x lm_y lm_z'
-    primary_variable = 'disp_x disp_y disp_z'
-    preconditioner = 'LU'
-    is_lm_coupling_diagonal = true
-    adaptive_condensation = true
   []
 []
 
@@ -338,8 +339,11 @@ offset = 0.00
   dt = .5
   dtmin = .01
   solve_type = 'NEWTON'
-  petsc_options_iname = '-mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = '1e-5          NONZERO               1e-10'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_view'
+
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_mffd_err -pc_factor_shift_type '
+                        '-pc_factor_shift_amount'
+  petsc_options_value = 'lu superlu_dist 1e-8          NONZERO               1e-15'
   l_max_its = 100
   nl_max_its = 30
   # nl_rel_tol = 1e-6
@@ -353,33 +357,16 @@ offset = 0.00
 []
 
 [Outputs]
-  perf_graph = true
-  exodus = true
+  exodus = false
   csv = true
-[]
-
-[Postprocessors]
-  active = 'num_nl cumulative contact'
-  [num_nl]
-    type = NumNonlinearIterations
-  []
-  [cumulative]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_nl
-  []
-  [contact]
-    type = ContactDOFSetSize
-    variable = lm_z
-    subdomain = 'secondary_lower'
-    execute_on = 'nonlinear timestep_end'
-  []
+  execute_on = 'FINAL'
 []
 
 [VectorPostprocessors]
-  [normal_lm]
+  [tangent2_lm]
     type = NodalValueSampler
     block = secondary_lower
-    variable = normal_lm
+    variable = tangent2_lm
     sort_by = 'id'
   []
 []

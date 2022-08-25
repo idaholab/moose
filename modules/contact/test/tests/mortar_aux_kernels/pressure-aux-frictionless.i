@@ -188,7 +188,7 @@
 
 [Constraints]
   [weighted_gap_lm]
-    type = ComputeWeightedGapLMMechanicalContact
+    type = ComputeWeightedGapCartesianLMMechanicalContact
     primary_boundary = '23'
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
@@ -203,7 +203,7 @@
     interpolate_normals = false
   []
   [normal_x]
-    type = NormalMortarMechanicalContact
+    type = CartesianMortarMechanicalContact
     primary_boundary = '23'
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
@@ -214,10 +214,9 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    interpolate_normals = false
   []
   [normal_y]
-    type = NormalMortarMechanicalContact
+    type = CartesianMortarMechanicalContact
     primary_boundary = '23'
     secondary_boundary = '11'
     primary_subdomain = 'primary_lower'
@@ -228,7 +227,6 @@
     use_displaced_mesh = true
     compute_lm_residuals = false
     correct_edge_dropping = true
-    interpolate_normals = false
   []
 []
 
@@ -243,7 +241,8 @@
   type = Transient
   solve_type = 'NEWTON'
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_mffd_err -pc_factor_shift_type '
+                        '-pc_factor_shift_amount'
   petsc_options_value = 'lu superlu_dist 1e-5          NONZERO               1e-10'
 
   line_search = none
@@ -270,6 +269,6 @@
     type = NodalValueSampler
     block = 'secondary_lower'
     variable = normal_lm
-    sort_by = 'y'
+    sort_by = 'id'
   []
 []

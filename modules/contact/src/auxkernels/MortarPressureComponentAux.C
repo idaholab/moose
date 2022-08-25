@@ -28,7 +28,7 @@ MortarPressureComponentAux::validParams()
       "Lagrange multiplier variable along the z direction (only exist for 3D problems).");
   params.addRequiredParam<MooseEnum>("component",
                                      MooseEnum("normal tangent1 tangent2"),
-                                     "Activate element when below or above the activate_value");
+                                     "The component of the Lagrange multiplier to compute.");
   params.addRequiredParam<BoundaryName>("primary_boundary",
                                         "The name of the primary boundary sideset.");
   params.addRequiredParam<BoundaryName>("secondary_boundary",
