@@ -17,4 +17,12 @@
                   'the value of reuse_preconditioner_max_its upon which the '
                   'system recalculates the preconditioner'
   []
+  [mesh_refinement]
+    type = CSVDiff
+    input = convergence.i
+    cli_args = "Executioner/reuse_preconditioner=true Outputs/csv/file_base=mesh_case Executioner/Adaptivity/start_time=5.0"
+    csvdiff = "mesh_case.csv"
+    requirement = 'A new preconditioner is formed if the system of equations changes '
+                  'for example here through mesh refinement'
+  []
 []

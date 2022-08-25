@@ -130,8 +130,10 @@ FEProblemSolve::validParams()
                         false,
                         "If true reuse the previously calculated "
                         "preconditioner for the linearized "
-                        "system across multiple solvers, "
-                        "controlled by reuse_preconditioner_max_its");
+                        "system across multiple solves "
+                        "spanning nonlinear iterations and time steps. "
+                        "The preconditioner resets as controlled by "
+                        "reuse_preconditioner_max_its");
   params.addParam<unsigned int>("reuse_preconditioner_max_its",
                                 25,
                                 "Reuse the previously calculated "

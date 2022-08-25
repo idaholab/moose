@@ -1,6 +1,6 @@
 # Simple 3D test with diffusion, setup to make sure
 # there is a sensible difference in the linear iteration
-# counts with resuse versus without resuse
+# counts with re-use versus without re-use
 
 [Variables]
   [u]
@@ -85,6 +85,14 @@
   dt = 1.0
   dtmin = 1.0
   end_time = 10.0
+
+  [./Adaptivity]
+    interval = 5
+    max_h_level = 1
+    start_time = 11.0
+    stop_time = 6.0
+  [../]
+
 []
 
 [Reporters/iteration_info]

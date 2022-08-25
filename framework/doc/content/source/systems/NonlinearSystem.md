@@ -387,9 +387,9 @@ as a preconditioner will typically converge to machine precision in a single
 iteration.  However, as noted above, factorizing the sparse system of equations
 for a large simulation is numerically expensive.
 
-One option is to reuse a preconditioner for many iterations of the 
-linear iterative solver.  The preconditioner can be carried over
-through nonlinear iterations and even across load steps.  MOOSE
+One option is to form a preconditioner once and then reuse it to solve
+the linearized system many times.  The preconditioner can be carried over
+through nonlinear iterations and even across time steps.  MOOSE
 allows the user to do this with the `reuse_preconditioner` flag.
 Setting
 
@@ -400,8 +400,12 @@ Setting
 
 in the `[Executioner]` block will reuse the same preconditioner until
 the number of linear iterations required to solve the linearized system of
-equations exceeds 20.  At that time the solution algorithm will reform
-the preconditioner and repeat the process.
+equations exceeds 20.   If the number of linear iterations exceeds 
+`reuse_preconditioner_max_its`
+the system does not immediately stop iterating on the current linearized
+system.  Instead it will continue until it either successfully solves
+the current system or reaches `l_max_its`.  It will then form a new 
+preconditioner for the next nonlinear iteration.
 
 Using these parameters in combination with a direct factorization of the
 system can be very efficient.  The following is an example of how to
@@ -410,15 +414,9 @@ configure PETSc and MOOSE to solve the equations with this combination:
 ```
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -ksp_type'
   petsc_options_value = 'lu superlu_dist gmres'
-  l_tol = 1e-8
-  l_max_its = 100
 
   reuse_preconditioner = true
   reuse_preconditioner_max_its = 20
-
-  nl_max_its = 10
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-10
 ```
 
 This solver strategy can be very effective when the system Jacobian
