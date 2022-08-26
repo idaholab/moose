@@ -117,7 +117,8 @@ ReadTripleIndex::ReadTripleIndex(const InputParameters & params)
   TripleIndexNumberVectorChecker(_long_tri, "long_tri", reference_values, true, false, 10.0);
 
   // check SubdomainID
-  TripleIndexNumberVectorChecker(_subid_tri, "subid_tri", reference_values, false, false, 10.0, 30.0);
+  TripleIndexNumberVectorChecker(
+      _subid_tri, "subid_tri", reference_values, false, false, 10.0, 30.0);
 
   // check BoundaryID
   TripleIndexNumberVectorChecker(_bid_tri, "bid_tri", reference_values, false, false, 10.0, 35.0);
