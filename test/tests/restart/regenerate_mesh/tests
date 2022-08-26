@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#21161'
+  design = 'DataIO.md Restartable.md'
+
+  [no_adaptivity]
+    type = Exodiff
+    input = no_adaptivity.i
+    exodiff = 'no_adaptivity_out.e'
+    requirement = 'The system shall be capable of using a regenerated mesh when recovering from a checkpoint.'
+  []
+
+  [adaptivity_error]
+    type = RunException
+    input = adaptivity_error.i
+    cli_args = '--recover'
+    recover = false
+    expect_err = 'Invalid Marker value detected:'
+    requirement = 'The system shall produce an error when the regenerated mesh does not match the mesh from the checkpoint.'
+  []
+[]
