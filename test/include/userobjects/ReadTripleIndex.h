@@ -51,4 +51,26 @@ protected:
       _vector_postprocessor_name_tri;
   const std::vector<std::vector<std::vector<OutputName>>> & _output_name_tri;
   const std::vector<std::vector<std::vector<MaterialPropertyName>>> & _material_property_name_tri;
+
+  template <typename T>
+  void
+  TripleIndexNumberVectorChecker(const std::vector<std::vector<std::vector<T>>> triple_index_vector,
+                                 const std::string vector_name,
+                                 const std::vector<std::vector<std::vector<Real>>> reference_values,
+                                 const bool index_flip = false,
+                                 const bool flip_direction = false,
+                                 const Real scale_factor = 1.0,
+                                 const Real offset_value = 0.0);
+
+  template <typename T>
+  void TripleIndexStringVectorChecker(
+      const T triple_index_vector,
+      const std::string vector_name,
+      const std::string prefix,
+      const std::vector<std::vector<std::vector<Real>>> reference_values);
 };
+
+void
+ReadTripleIndex::execute()
+{
+}
