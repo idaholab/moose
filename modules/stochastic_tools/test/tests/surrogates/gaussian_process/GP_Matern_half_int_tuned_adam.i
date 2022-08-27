@@ -98,9 +98,9 @@
     response = results/data:avg:value
     tune_parameters = 'signal_variance length_factor'
     tuning_algorithm = 'adam'
-    iter_ADAM = 1000
+    iter_adam = 1000
     batch_size = 20
-    learningRate_ADAM = 0.005
+    learning_rate_adam = 0.005
   []
 []
 

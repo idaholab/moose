@@ -78,21 +78,21 @@
       input = GP_squared_exponential_tuned_adam.i
       allow_test_objects = true
       csvdiff = 'GP_squared_exponential_tuned_adam_out_samp_avg_0002.csv GP_squared_exponential_tuned_adam_out_results_0002.csv GP_squared_exponential_tuned_adam_out_hyperparams_0002.csv'
-      detail = 'a squared exponential kernel using ADAM;'
+      detail = 'a squared exponential kernel using Adam;'
     []
     [GP_exponential_tuned_adam]
       type = CSVDiff
       input = GP_exponential_tuned_adam.i
       allow_test_objects = true
       csvdiff = 'GP_exponential_tuned_adam_out_samp_avg_0002.csv GP_exponential_tuned_adam_out_results_0002.csv GP_exponential_tuned_adam_out_hyperparams_0002.csv'
-      detail = 'an exponential kernel using ADAM;'
+      detail = 'an exponential kernel using Adam;'
     []
     [GP_Matern_half_int_tuned_adam]
       type = CSVDiff
       input = GP_Matern_half_int_tuned_adam.i
       allow_test_objects = true
       csvdiff = 'GP_Matern_half_int_tuned_adam_samp_avg_0002.csv GP_Matern_half_int_tuned_adam_results_0002.csv GP_Matern_half_int_tuned_adam_hyperparams_0002.csv'
-      detail = 'a Matern half integer kernel using ADAM;'
+      detail = 'a Matern half integer kernel using Adam;'
     []
     [GP_Matern_half_int_tuned_adam_minibatch]
       type = CSVDiff
@@ -100,7 +100,7 @@
       cli_args = "Trainers/GP_avg_trainer/batch_size=10 Outputs/out/file_base='GP_Matern_half_int_tuned_adam_minibatch'"
       allow_test_objects = true
       csvdiff = 'GP_Matern_half_int_tuned_adam_minibatch_samp_avg_0002.csv GP_Matern_half_int_tuned_adam_minibatch_results_0002.csv GP_Matern_half_int_tuned_adam_minibatch_hyperparams_0002.csv'
-      detail = 'a Matern half integer kernel using ADAM with mini-batch sampling;'
+      detail = 'a Matern half integer kernel using Adam with mini-batch sampling;'
     []
   []
   [errors]
@@ -112,25 +112,25 @@
       detail = 'the no optimization is selected while parameter tuning is required. '
       expect_err = "No tuning algorithm is selected for the hyper parameter optimization!"
     []
-    [optimization_adam1]
+    [optimization_adam_batch_tao]
       type = RunException
       input = GP_squared_exponential_tuned_adam.i
       cli_args = "Trainers/GP_avg_trainer/tuning_algorithm='tao'"
       detail = 'mini-batching is requested with the TAO optimization library. '
-      expect_err = "Mini-batch sampling is not compatible with the TAO optimization library. Please use ADAM optimization."
+      expect_err = "Mini-batch sampling is not compatible with the TAO optimization library. Please use Adam optimization."
     []
-    [optimization_adam2]
+    [optimization_adam_nobatch]
       type = RunException
       input = GP_squared_exponential_tuned.i
       cli_args = "Trainers/GP_avg_trainer/tuning_algorithm='adam'"
-      detail = 'the batch size is not specified for ADAM optimization. '
-      expect_err = "ADAM requires the batch size to be specified."
+      detail = 'the batch size is not specified for Adam optimization. '
+      expect_err = "Adam requires the batch size to be specified."
     []
-    [optimization_adam3]
+    [optimization_adam_batch_size]
       type = RunException
       input = GP_squared_exponential_tuned_adam.i
       cli_args = "Trainers/GP_avg_trainer/batch_size='100'"
-      detail = 'the batch size is greater than the training data set size for ADAM optimization. '
+      detail = 'the batch size is greater than the training data set size for Adam optimization. '
       expect_err = "Batch size cannot be greater than the training data set size."
     []
   []

@@ -48,19 +48,21 @@ public:
    *                        covariance matrix.
    * @param training_data The training data (y values) for the inversion of the
    *                      covariance matrix.
-   * @param opt_type The optimization algorithm for the hyperparameters.
-   * @param tao_options Additional options if TAO is used for parameter optimization.
-   * @param show_tao Switch to show details of TAO optimization.
+   * @param opt_type The optimization method.
+   * @param opts The optimizer options shown below.
    */
-  void
-  setupCovarianceMatrix(RealEigenMatrix training_params, // const RealEigenMatrix & training_params
-                        RealEigenMatrix training_data,
-                        MooseEnum opt_type,
-                        std::string tao_options = "",
-                        bool show_tao = false,
-                        const unsigned int & iter_ADAM = 1000,
-                        const unsigned int * batch_size = nullptr,
-                        const Real & learningRate_ADAM = 0.001);
+  struct GPOptimizerOptions
+  {
+    std::string tao_options;
+    bool show_optimization_details;
+    unsigned int iter_adam;
+    unsigned int batch_size;
+    Real learning_rate_adam;
+  };
+  void setupCovarianceMatrix(const RealEigenMatrix & training_params,
+                             const RealEigenMatrix & training_data,
+                             MooseEnum opt_type,
+                             GPOptimizerOptions opts);
 
   /**
    * Sets up the Cholesky decomposition and inverse action of the covariance matrix.
@@ -107,12 +109,12 @@ public:
    * @param training_data The training data (y values) for the inversion of the
    *                      covariance matrix.
    * @param tao_options Additional options for TAO.
-   * @param show_tao Switch to show details of TAO optimization.
+   * @param show_optimization_details Switch to show details of TAO or Adam optimization.
    */
-  PetscErrorCode tuneHyperParamsTAO(RealEigenMatrix training_params,
-                                    RealEigenMatrix training_data,
+  PetscErrorCode tuneHyperParamsTAO(const RealEigenMatrix & training_params,
+                                    const RealEigenMatrix & training_data,
                                     std::string tao_options = "",
-                                    bool show_tao = false);
+                                    bool verbose = false);
 
   /// Used to form initial guesses in the TAO optimization routines
   PetscErrorCode formInitialGuessTAO(Vec theta_vec);
@@ -128,18 +130,19 @@ public:
   // Computes Gradient of the loss function for TAO usage
   void formFunctionGradient(Tao tao, Vec theta, PetscReal * f, Vec Grad);
 
-  // Tune hyperparameters using ADAM
-  void tuneHyperParamsADAM(RealEigenMatrix training_params,
-                           RealEigenMatrix training_data,
-                           const unsigned int & iter,
+  // Tune hyperparameters using Adam
+  void tuneHyperParamsAdam(const RealEigenMatrix & training_params,
+                           const RealEigenMatrix & training_data,
+                           unsigned int iter,
                            const unsigned int & batch_size,
-                           const Real & learningRate);
+                           const Real & learning_rate,
+                           const bool & verbose);
 
-  // Computes the loss function for ADAM usage
-  Real getLossADAM();
+  // Computes the loss function for Adam usage
+  Real getLossAdam(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
 
-  // Computes Gradient of the loss function for ADAM usage
-  std::vector<Real> getGradientADAM();
+  // Computes Gradient of the loss function for Adam usage
+  std::vector<Real> getGradientAdam(RealEigenMatrix & inputs);
 
   /// Function used to convert the hyperparameter maps in this object to
   /// Petsc vectors
@@ -240,12 +243,12 @@ protected:
   Eigen::LLT<RealEigenMatrix> _K_cho_decomp;
 
   /// Paramaters (x) used for training, along with statistics
-  RealEigenMatrix * _training_params;
+  const RealEigenMatrix * _training_params;
 
   /// Data (y) used for training
-  RealEigenMatrix * _training_data;
+  const RealEigenMatrix * _training_data;
 
-  /// The batch size for ADAM optimization
+  /// The batch size for Adam optimization
   unsigned int _batch_size;
 };
 

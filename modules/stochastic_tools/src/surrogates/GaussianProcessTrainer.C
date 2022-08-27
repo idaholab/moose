@@ -33,16 +33,16 @@ GaussianProcessTrainer::validParams()
       "standardize_params", true, "Standardize (center and scale) training parameters (x values)");
   params.addParam<bool>(
       "standardize_data", true, "Standardize (center and scale) training data (y values)");
-  // Already preparing to use ADAM here
+  // Already preparing to use Adam here
   MooseEnum tuning_type("tao adam none", "none");
   params.addParam<MooseEnum>(
       "tuning_algorithm", tuning_type, "Hyper parameter optimizaton algorithm");
-  params.addParam<unsigned int>("iter_ADAM", 1000, "Tolerance value for ADAM optimization");
-  params.addParam<unsigned int>("batch_size", "The batch size for ADAM optimization");
-  params.addParam<Real>("learningRate_ADAM", 0.001, "The learning rate for ADAM optimization");
+  params.addParam<unsigned int>("iter_adam", 1000, "Tolerance value for Adam optimization");
+  params.addParam<unsigned int>("batch_size", "The batch size for Adam optimization");
+  params.addParam<Real>("learning_rate_adam", 0.001, "The learning rate for Adam optimization");
   params.addParam<std::string>("tao_options",
                                "Command line options for PETSc/TAO hyperparameter optimization");
-  params.addParam<bool>("show_tao", "Switch to show TAO solver results");
+  params.addParam<bool>("show_optimization_details", "Switch to show TAO or Adam solver results");
   params.addParam<std::vector<std::string>>("tune_parameters",
                                             "Select hyperparameters to be tuned");
   params.addParam<std::vector<Real>>("tuning_min", "Minimum allowable tuning value");
@@ -62,11 +62,10 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _standardize_data(getParam<bool>("standardize_data")),
     _do_tuning(isParamValid("tune_parameters")),
     _tuning_algorithm(getParam<MooseEnum>("tuning_algorithm")),
-    _iter_ADAM(getParam<unsigned int>("iter_ADAM")),
-    _batch_size(isParamValid("batch_size") ? &getParam<unsigned int>("batch_size") : nullptr),
-    _learningRate_ADAM(getParam<Real>("learningRate_ADAM")),
+    _iter_adam(getParam<unsigned int>("iter_adam")),
+    _batch_size(isParamValid("batch_size") ? getParam<unsigned int>("batch_size") : 0),
+    _learning_rate_adam(getParam<Real>("learning_rate_adam")),
     _sampler_row(getSamplerData()),
-    _rval(getTrainingData<Real>(getParam<ReporterName>("response"))),
     _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
     _pcols(getParam<std::vector<unsigned int>>("predictor_cols")),
     _n_params((_pvals.empty() && _pcols.empty()) ? _sampler.getNumberOfCols()
@@ -90,16 +89,14 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
 
   if (isParamValid("batch_size") && _tuning_algorithm == "tao")
     mooseError("Mini-batch sampling is not compatible with the TAO optimization library. Please "
-               "use ADAM optimization.");
+               "use Adam optimization.");
 
   if (!isParamValid("batch_size") && _tuning_algorithm == "adam")
-    paramError("batch_size", "ADAM requires the batch size to be specified.");
+    paramError("batch_size", "Adam requires the batch size to be specified.");
 
   if (isParamValid("batch_size"))
-  {
-    if (_sampler.getNumberOfRows() < (*_batch_size))
+    if (_sampler.getNumberOfRows() < _batch_size)
       paramError("batch_size", "Batch size cannot be greater than the training data set size.");
-  }
 
   std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
 
@@ -171,13 +168,14 @@ GaussianProcessTrainer::postTrain()
     _gp_handler.dataStandardizer().set(0, 1, _n_dims);
 
   // Setup the covariance
-  _gp_handler.setupCovarianceMatrix(
-      _training_params,
-      _training_data,
-      _tuning_algorithm,
-      isParamValid("tao_options") ? getParam<std::string>("tao_options") : "",
-      isParamValid("show_tao") ? getParam<bool>("show_tao") : false,
-      _iter_ADAM,
-      _batch_size,
-      _learningRate_ADAM);
+  StochasticTools::GaussianProcessHandler::GPOptimizerOptions opts;
+  opts.tao_options = isParamValid("tao_options") ? getParam<std::string>("tao_options") : "";
+  opts.show_optimization_details = isParamValid("show_optimization_details")
+                                       ? getParam<bool>("show_optimization_details")
+                                       : false;
+  opts.iter_adam = _iter_adam;
+  opts.batch_size = _batch_size;
+  opts.learning_rate_adam = _learning_rate_adam;
+
+  _gp_handler.setupCovarianceMatrix(_training_params, _training_data, _tuning_algorithm, opts);
 }

@@ -62,20 +62,21 @@ private:
   /// Enum which contains the hyper parameter optimizaton type requested by the user
   MooseEnum _tuning_algorithm;
 
-  /// Number of iterations for ADAM optimization
-  unsigned int _iter_ADAM;
+  /// Number of iterations for Adam optimization
+  unsigned int _iter_adam;
 
-  /// The batch size for ADAM optimization
-  const unsigned int * _batch_size;
+  /// The batch size for Adam optimization
+  unsigned int _batch_size;
 
-  /// Learning rate for ADAM optimization
-  Real _learningRate_ADAM;
+  /// Learning rate for Adam optimization
+  Real _learning_rate_adam;
 
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
 
-  /// Response value
+  /* /// Response value
   const Real & _rval;
+  */
 
   /// Predictor values from reporters
   std::vector<const Real *> _pvals;

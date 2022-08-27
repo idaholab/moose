@@ -45,8 +45,7 @@ have hyper parameters that need to be optimized to be able to get accurate
 predictions from the corresponding Gaussian Processes. We can optimize these
 parameters during the generation of the Covariance matrix:
 
-!listing GaussianProcessTrainer.C start=_gp_handler.setupCovarianceMatrix(
-                                  end=}
+!listing GaussianProcessTrainer.C start=_gp_handler.setupCovarianceMatrix( end=}
 
 Or by simply calling the optimizer:
 

@@ -142,9 +142,9 @@ The following options are available for tuning the hyperparameters:
 
   Relies on the TAO optimization library from PETSc. Several optimization algorithms are available from this library. Note that these algorithms perform deterministic optimization.
 
-- +Adaptive moment estimation (ADAM)+
+- +Adaptive moment estimation (Adam)+
 
-  Relies on the psuedocode provied in [!cite](kingma2014adam). ADAM permits stochastic optimization, wherein, a batch of the training data can be randomly chosen at each iteration.
+  Relies on the psuedocode provied in [!cite](kingma2014adam). Adam permits stochastic optimization, wherein, a batch of the training data can be randomly chosen at each iteration.
 
 !syntax parameters /Trainers/GaussianProcessTrainer
 
