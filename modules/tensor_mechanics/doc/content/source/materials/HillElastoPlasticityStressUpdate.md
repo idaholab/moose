@@ -1,6 +1,6 @@
 # Hill Elasto-Plasticity Stress Update
 
-!syntax description /Materials/ADHillElastoPlasticityStressUpdate
+!syntax description /Materials/HillElastoPlasticityStressUpdate
 
 ## Description
 
@@ -13,19 +13,19 @@ f = \frac{1}{2} \boldsymbol{\sigma}^{T} \boldsymbol{A} \boldsymbol{\sigma}^{T} -
 where $\boldsymbol{\sigma}$ is the Cauchy stress tensor in Voigt form, $\boldsymbol{A}$ is the anisotropy (Hill) tensor, and $\alpha$ is an internal parameter that can be used, for example, to prescribe strain hardening through a plasticity modulus. Note that the Hill tensor is defined as a six by six matrix using the following unitless constants: $F$, $G$, $H$, $L$, $M$ and $N$.
 
 !alert warning
-The combination of elastic isotropy and plastic anisotropy should be solved by the more efficient [ADHillPlasticityStressUpdate](/ADHillPlasticityStressUpdate.md) class.
+The combination of elastic isotropy and plastic anisotropy should be solved by the more efficient [HillPlasticityStressUpdate](/HillPlasticityStressUpdate.md) class.
 
 The effective plastic strain increment is obtained within the framework of a generalized (Hill plasticity) radial return mapping, see
-[ADGeneralizedRadialReturnStressUpdate](/ADGeneralizedRadialReturnStressUpdate.md).
+[GeneralizedRadialReturnStressUpdate](/GeneralizedRadialReturnStressUpdate.md).
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/ad_anisotropic_elastoplasticity/ad_aniso_plasticity_x_one.i block=Materials/trial_plasticity
+!listing modules/tensor_mechanics/test/tests/anisotropic_elastoplasticity/ad_aniso_plasticity_x_one.i block=Materials/trial_plasticity
 
-!syntax parameters /Materials/ADHillElastoPlasticityStressUpdate
+!syntax parameters /Materials/HillElastoPlasticityStressUpdate
 
-!syntax inputs /Materials/ADHillElastoPlasticityStressUpdate
+!syntax inputs /Materials/HillElastoPlasticityStressUpdate
 
-!syntax children /Materials/ADHillElastoPlasticityStressUpdate
+!syntax children /Materials/HillElastoPlasticityStressUpdate
 
 !bibtex bibliography
