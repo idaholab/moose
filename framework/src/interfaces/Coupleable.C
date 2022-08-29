@@ -1826,6 +1826,23 @@ Coupleable::coupledArrayDofValues(const std::string & var_name, unsigned int com
   return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
 }
 
+const ADVariableValue &
+Coupleable::adCoupledDofValues(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
+  if (!var)
+    return *getADDefaultValue(var_name);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adDofValues();
+  return var->adDofValuesNeighbor();
+}
+
 void
 Coupleable::validateExecutionerType(const std::string & name, const std::string & fn_name) const
 {

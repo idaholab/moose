@@ -159,6 +159,11 @@ public:
    */
   virtual const MooseArray<ADReal> & adDofValues() const = 0;
 
+  /**
+   * Return the AD neighbor dof values
+   */
+  virtual const MooseArray<ADReal> & adDofValuesNeighbor() const = 0;
+
   ///@{
   /**
    * Methods for retrieving values of variables at the nodes in a MooseArray for AuxKernelBase

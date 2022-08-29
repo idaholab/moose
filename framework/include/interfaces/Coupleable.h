@@ -1190,6 +1190,15 @@ protected:
   // coupled-dof-values-end
 
   /**
+   * Returns DOF value of a coupled variable for use in Automatic Differentiation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to an ADVariableValue for the DoFs of the coupled variable
+   */
+  virtual const ADVariableValue & adCoupledDofValues(const std::string & var_name,
+                                                     unsigned int comp = 0) const;
+
+  /**
    * method that returns _zero to RESIDUAL computing objects and _ad_zero to JACOBIAN
    * computing objects
    */
