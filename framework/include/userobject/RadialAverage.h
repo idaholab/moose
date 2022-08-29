@@ -19,17 +19,13 @@
 #include <set>
 #include <map>
 #include <vector>
-#include <array>
 #include <memory>
-#include <tuple>
-
-using namespace TIMPI;
 
 class ThreadedRadialAverageLoop;
 
 /**
  * Gather and communicate a full list of all quadrature points and the values of
- * a selected variable at each point. Use a KD-Tree to get the weighted spatial
+ * a selected material property at each point. Use a KD-Tree to get the weighted spatial
  * average of a material property. This code borrows heavily from
  * RadialGreensConvolution in MAGPIE. This code does not include support for
  * periodic BCs, but RadialGreensConvolution shows how that can be supported.
@@ -74,7 +70,6 @@ public:
   const Result & getAverage() const { return _average; }
 
 protected:
-  void insertNotLocalPointNeighbors(dof_id_type);
   void updateCommunicationLists();
 
   /// material name to get averaged
@@ -84,6 +79,9 @@ protected:
 
   /// cut-off radius
   const Real _radius;
+
+  /// communication padding distance
+  const Real _padding;
 
   /// gathered data
   std::vector<QPData> _qp_data;
@@ -100,17 +98,14 @@ protected:
   /// spatial index (nanoflann guarantees this to be threadsafe under read-only operations)
   std::unique_ptr<KDTreeType> _kd_tree;
 
-  /// DOF map
-  const DofMap & _dof_map;
-
-  /// PointLocator for finding topological neighbors
-  std::unique_ptr<PointLocatorBase> _point_locator;
-
   /// The data structure used to find neighboring elements give a node ID
   std::vector<std::vector<const Elem *>> _nodes_to_elem_map;
 
-  // list of direct point neighbor elements of the current processor domain
-  std::set<const Elem *> _point_neighbors;
+  /// set of nodes on the boundary of the current processor domain
+  std::set<Point> _boundary_nodes;
+
+  /// set of all _qp_data indices that are within _radius of any _boundary_nodes
+  std::set<std::size_t> _boundary_data_indices;
 
   /// QPData indices to send to the various processors
   std::vector<std::set<std::size_t>> _communication_lists;
@@ -127,10 +122,6 @@ protected:
   friend class ThreadedRadialAverageLoop;
 };
 
-template <>
-const Point &
-PointListAdaptor<RadialAverage::QPData>::getPoint(const RadialAverage::QPData & item) const;
-
 namespace TIMPI
 {
 
@@ -142,4 +133,5 @@ public:
   StandardType(const StandardType<RadialAverage::QPData> & t);
   ~StandardType() { this->free(); }
 };
+
 } // namespace TIMPI

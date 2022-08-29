@@ -50,7 +50,7 @@ ThreadedRadialAverageLoop::operator()(const QPDataRange & qpdata_range)
 
     ret_matches.clear();
     std::size_t n_result =
-        kd_tree->radiusSearch(&(local_qp._q_point(0)), radius, ret_matches, search_params);
+        kd_tree->radiusSearch(&(local_qp._q_point(0)), radius * radius, ret_matches, search_params);
     Real total_vol = 0.0;
     for (std::size_t j = 0; j < n_result; ++j)
     {
