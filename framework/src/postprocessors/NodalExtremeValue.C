@@ -87,6 +87,12 @@ NodalExtremeValue::execute()
 Real
 NodalExtremeValue::getValue()
 {
+  return _value;
+}
+
+void
+NodalExtremeValue::finalize()
+{
   switch (_type)
   {
     case MAX:
@@ -96,8 +102,6 @@ NodalExtremeValue::getValue()
       gatherProxyValueMin(_proxy_value, _value);
       break;
   }
-
-  return _value;
 }
 
 void

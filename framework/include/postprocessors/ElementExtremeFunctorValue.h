@@ -40,6 +40,7 @@ public:
   virtual void initialize() override;
   virtual void execute() override { computeValue(); }
   virtual Real getValue() override;
+  virtual void finalize() override;
   virtual void threadJoin(const UserObject & y) override;
 
 protected:

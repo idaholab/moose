@@ -30,7 +30,8 @@ ScalarVariable::validParams()
 ScalarVariable::ScalarVariable(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
-    _idx(getParam<unsigned int>("component"))
+    _idx(getParam<unsigned int>("component")),
+    _value(0)
 {
 }
 
@@ -49,13 +50,16 @@ ScalarVariable::getValue()
 {
   _var.reinit();
 
-  Real returnval = std::numeric_limits<Real>::max();
+  _value = std::numeric_limits<Real>::max();
   const DofMap & dof_map = _var.dofMap();
   const dof_id_type dof = _var.dofIndices()[_idx];
   if (dof >= dof_map.first_dof() && dof < dof_map.end_dof())
-    returnval = _var.sln()[_idx];
+    _value = _var.sln()[_idx];
+  return _value;
+}
 
-  gatherMin(returnval);
-
-  return returnval;
+void
+ScalarVariable::finalize()
+{
+  gatherMin(_value);
 }
