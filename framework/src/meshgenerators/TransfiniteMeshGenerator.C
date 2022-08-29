@@ -37,6 +37,17 @@ TransfiniteMeshGenerator::validParams()
   params.addParam<std::string>("bottom_parameter", "", "Bottom side support parameter");
   params.addParam<std::string>("right_parameter", "", "Right side support parameter");
 
+  params.addRangeCheckedParam<Real>(
+      "bias_x",
+      1.,
+      "bias_x>=0.5 & bias_x<=2",
+      "The amount by which to grow (or shrink) the cells in the x-direction.");
+  params.addRangeCheckedParam<Real>(
+      "bias_y",
+      1.,
+      "bias_y>=0.5 & bias_y<=2",
+      "The amount by which to grow (or shrink) the cells in the y-direction.");
+
   // We need to know the number of points on opposite sides, and if no other parameter is available
   // we shall assume them to be equally distributed
 
@@ -69,7 +80,9 @@ TransfiniteMeshGenerator::TransfiniteMeshGenerator(const InputParameters & param
         "left_parameter")), // so far we intend to allow different paramter types
     _top_parameter(getParam<std::string>("top_parameter")),
     _bottom_parameter(getParam<std::string>("bottom_parameter")),
-    _right_parameter(getParam<std::string>("right_parameter"))
+    _right_parameter(getParam<std::string>("right_parameter")),
+    _bias_x(getParam<Real>("bias_x")),
+    _bias_y(getParam<Real>("bias_y"))
 {
 }
 std::unique_ptr<MeshBase>
@@ -103,10 +116,10 @@ TransfiniteMeshGenerator::generate()
   std::vector<Point> edge_left;   // parametrized via ny
   std::vector<Point> edge_right;  // parametrized via ny
 
-  edge_bottom = getEdge(V00, V10, _nx, _bottom_type, _bottom_parameter, outward_vec[0]);
-  edge_top = getEdge(V01, V11, _nx, _top_type, _top_parameter,outward_vec[1]);
-  edge_left = getEdge(V00, V01, _ny, _left_type, _left_parameter,outward_vec[2]);
-  edge_right = getEdge(V10, V11, _ny, _right_type, _right_parameter,outward_vec[3]);
+  edge_bottom = getEdge(V00, V10, _nx, _bottom_type, _bottom_parameter, outward_vec[0], _bias_x);
+  edge_top = getEdge(V01, V11, _nx, _top_type, _top_parameter,outward_vec[1], _bias_x);
+  edge_left = getEdge(V00, V01, _ny, _left_type, _left_parameter,outward_vec[2], _bias_y);
+  edge_right = getEdge(V10, V11, _ny, _right_type, _right_parameter,outward_vec[3], _bias_y);
 
   // Use for the parametrization on edge pairs, currently generated on the fly
   // on the [0,1] interval
@@ -187,15 +200,21 @@ TransfiniteMeshGenerator::getEdge(const Point & P1,
                                   const unsigned int & np,
                                   const MooseEnum & type,
                                   const std::string & parameter,
-                                  const Point & outward)
+                                  const Point & outward,
+                                  const Real & bias)
 {
   std::vector<Point> edge;
+  std::vector<Real> param_vec;
+  Real edge_length=(P2-P1).norm();
+  param_vec=getParametrization(edge_length, np, bias);
+  Real rx;
+
   switch (type)
   {
     case 1:
       for (unsigned iter = 0; iter < np; iter++)
       {
-        Real rx = double(iter) / double(np - 1);
+        rx=param_vec[iter];
         Point newPt = P1 * (1.0 - rx) + P2 * rx;
         edge.push_back(newPt);
       };
@@ -204,7 +223,7 @@ TransfiniteMeshGenerator::getEdge(const Point & P1,
       for (unsigned iter = 0; iter < np; iter++)
       {
         Real height = MooseUtils::convert<Real>(parameter, true);
-        Real rx = double(iter) / double(np - 1);
+        rx = double(iter) / double(np - 1);
         Point P3 = computeMidPoint(P1, P2, height, outward);
         Real rad = computeRadius(P1, P2, P3);
         Point P0 = computeOrigin(P1, P2, P3);
@@ -213,13 +232,12 @@ TransfiniteMeshGenerator::getEdge(const Point & P1,
         Point x1 = (P2 - P0);
         //The below function should be updated to take as an argument a Point
         //and compute it in polar coordinates
-        Real a = getPolar(x0(0), x0(1));
-        Real b = getPolar(x1(0), x1(1));
+        Real a = getPolarAngle(x0);
+        Real b = getPolarAngle(x1);
         //The case when the edge spans quadrants 1 and 4 requires special treament
-        //to periodically switch we compute the angle that needs added to one edge of the edge
+        //to periodically switch we compute the angle that needs added to one edge
         //to identify the entire edge span
-        Real arclength=std::acos((x0(0)*x1(0)+x0(1)*x1(1))/x0.norm()/x1.norm());
-        //should use dot product above, but couldn't find it
+        Real arclength=std::acos((x0*x1)/x0.norm()/x1.norm());
         if (abs(b-a)>M_PI) b=a+arclength;
         Real interval = getMapFromReference(rx, a, b);
         Real x = P0(0) + rad * std::cos(interval);
@@ -247,7 +265,32 @@ TransfiniteMeshGenerator::getEdge(const Point & P1,
 }
 
 Real
-TransfiniteMeshGenerator::getMapToReference(const Real & a, const Real & b, const Real & x) const
+TransfiniteMeshGenerator::getPolarAngle(const Point & Px) const
+{
+  Real x = Px(0);
+  Real y = Px(1);
+  // define quadrants
+  const bool q1 = (x > 0 && y > 0);
+  const bool q2 = (x < 0 && y > 0);
+  const bool q3 = (x < 0 && y < 0);
+  const bool q4 = (x > 0 && y < 0);
+
+  Real angle = std::atan(std::abs(y) / std::abs(x));
+  // compute angles via the inverse tangent
+  // however the quadrants do not provide sufficient info
+  // and we need to involve normals info as well
+  if (q2)
+    angle = M_PI-angle;
+  if (q3)
+    angle = M_PI+angle;
+  if (q4)
+    angle = 2*M_PI-angle;
+
+  return angle;
+}
+
+Real
+TransfiniteMeshGenerator::getMapToReference(const Real & x, const Real & a, const Real & b) const
 {
   Real r = (x - a) / (b - a);
   return r;
@@ -260,6 +303,40 @@ TransfiniteMeshGenerator::getMapFromReference(const Real & x, const Real & a, co
   return r;
 }
 
+std::vector<Real>
+TransfiniteMeshGenerator::getParametrization(const Real & edge_length,
+                          const unsigned int & np,
+                          const Real & bias) const
+{
+  std::vector<Real> param_vec;
+  Real rx=0.0;
+
+  if (bias!=1.0)
+    {
+      Real step=0.0;
+      Real factor=edge_length * (1.0 - std::abs(bias)) /(1.0 - std::pow(std::abs(bias), np-1));
+      param_vec.push_back(rx);
+      for (unsigned iter = 1; iter < np; iter++)
+       {
+        step = step + factor * std::pow(bias, double(iter-1));
+        rx = getMapToReference(step, 0, edge_length);
+        param_vec.push_back(rx);
+        //std::cout<<"**************** " <<std::endl;
+        //std::cout<<"At iter "<<iter << " factr is "<<factr<<" rx "<<rx<<std::endl;
+       }
+    }
+  else
+    {
+     for (unsigned iter = 0; iter < np; iter++)
+       {
+       rx = double(iter) / double(np - 1);
+        param_vec.push_back(rx);
+       }
+     }
+  return param_vec;
+}
+
+
 Real
 TransfiniteMeshGenerator::computeRadius(const Point & P1, const Point & P2, const Point & P3) const
 {
@@ -270,31 +347,6 @@ TransfiniteMeshGenerator::computeRadius(const Point & P1, const Point & P2, cons
   Real dr = std::sqrt(b2 - a2 / 4.0);
   const Real rad = a2 / 8.0 / dr + dr / 2.0;
   return rad;
-}
-
-Real
-TransfiniteMeshGenerator::getPolar(const Real x, const Real y) const
-{ // define quadrants
-  const bool q1 = (x > 0 && y > 0);
-  const bool q2 = (x < 0 && y > 0);
-  const bool q3 = (x < 0 && y < 0);
-  const bool q4 = (x > 0 && y < 0);
-
-  Real angle = 0.0;
-  const Real xab=std::abs(x);
-  const Real yab=std::abs(y);
-  // compute angles via the inverse tangent
-  // however the quadrants do not provide sufficient info
-  // and we need to involve normals info as well
-  if (q1)
-    angle = std::atan(yab / xab);
-  if (q2)
-    angle = M_PI-std::atan(yab / xab);
-  if (q3)
-    angle = M_PI+std::atan(yab / xab) ;
-  if (q4)
-    angle = 2*M_PI-std::atan(yab / xab);
-  return angle;
 }
 
 Point
@@ -354,7 +406,7 @@ TransfiniteMeshGenerator::computeMidPoint(const Point & P1,
     // m is the slope of the line orthogonal to the midpoint
     const Real m = -(P2(0) - P1(0)) / (P2(1) - P1(1));
     // The equation to determine allows two solutions
-    const Real x_temp = sqrt(dist * (m * m + 1)) / (m * m + 1);
+    const Real x_temp = dist* sqrt((m * m + 1)) / (m * m + 1);
     const Real factor=orient*outward(0)+m*orient*outward(1);
     int direction=(factor >= 0) ? 1 : -1;
 

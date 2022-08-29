@@ -30,6 +30,8 @@ protected:
   const std::vector<Point> & _corners;
   const unsigned int _nx;
   const unsigned int _ny;
+  const Real _bias_x;
+  const Real _bias_y;
 
   // We allow different types
   const MooseEnum _left_type;
@@ -50,7 +52,8 @@ protected:
                              const unsigned int & np,
                              const MooseEnum & type,
                              const std::string & parameter,
-                             const Point & outward);
+                             const Point & outward,
+                             const Real & bias);
 
   // The following 3 routines are needed for generating arc circles given the user input
   // The input is expected to be the distance from a stright line at the middle of an edge
@@ -68,14 +71,16 @@ protected:
   // The following routines are necessary for the paramterization of opposite edges
   // To assure we have the same parameterization on opposite edges we need to map it to
   //  a reference interval, i.e. [0, 1]
-  Real getMapToReference(const Real & a,
-                        const Real & b,
-                        const Real & x) const;
+  Real getMapToReference(const Real & x,
+                        const Real & a,
+                        const Real & b) const;
   Real getMapFromReference(const Real & x,
                         const Real & a,
                         const Real & b) const;
   // For a circle the paramterization is based on radians and we need to compute
   //  the angles spanned between 2 end vertices
-  Real getPolar(const Real x,
-                const Real y) const;
+  Real getPolarAngle(const Point & P) const;           
+  std::vector<Real> getParametrization(const Real & edge_length,  
+                          const unsigned int & np, 
+                          const Real & bias) const;
 };
