@@ -43,18 +43,17 @@ ScalarVariable::initialize()
 void
 ScalarVariable::execute()
 {
-}
-
-Real
-ScalarVariable::getValue()
-{
   _var.reinit();
-
   _value = std::numeric_limits<Real>::max();
   const DofMap & dof_map = _var.dofMap();
   const dof_id_type dof = _var.dofIndices()[_idx];
   if (dof >= dof_map.first_dof() && dof < dof_map.end_dof())
     _value = _var.sln()[_idx];
+}
+
+Real
+ScalarVariable::getValue()  
+{
   return _value;
 }
 
