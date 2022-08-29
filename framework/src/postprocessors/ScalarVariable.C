@@ -52,7 +52,7 @@ ScalarVariable::execute()
 }
 
 Real
-ScalarVariable::getValue()  
+ScalarVariable::getValue()
 {
   return _value;
 }
