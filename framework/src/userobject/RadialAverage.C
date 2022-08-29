@@ -37,11 +37,12 @@ RadialAverage::validParams()
   params.addClassDescription("Perform a radial equal weight average of a material property");
   params.addRequiredParam<std::string>("material_name", "Name of the material to average.");
   params.addRequiredParam<Real>("radius", "Cut-off radius for the averaging");
-  params.addParam<Real>(
+  params.addRangeCheckedParam<Real>(
       "padding",
       0.0,
+      "padding >= 0",
       "Padding for communication. This gets added to the radius when determining which QPs to send "
-      "to other processors. It should be of the order of the maximum element size.");
+      "to other processors. Increase this gradually if inconsistent parallel results occur.");
 
   // we run this object once at the beginning of the timestep by default
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
@@ -50,7 +51,7 @@ RadialAverage::validParams()
   params.addRelationshipManager("ElementPointNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
                                     Moose::RelationshipManagerType::ALGEBRAIC);
-
+  params.addParamNamesToGroup("padding", "Advanced");
   return params;
 }
 
@@ -216,7 +217,7 @@ RadialAverage::meshChanged()
   //
   const auto end = mesh.active_local_elements_end();
   for (auto it = mesh.active_local_elements_begin(); it != end; ++it)
-    // find faces at a processor boundaries
+    // find faces at processor boundaries
     for (const auto s : make_range((*it)->n_sides()))
     {
       const auto * neighbor = (*it)->neighbor_ptr(s);

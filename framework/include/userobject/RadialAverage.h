@@ -101,7 +101,7 @@ protected:
   /// The data structure used to find neighboring elements give a node ID
   std::vector<std::vector<const Elem *>> _nodes_to_elem_map;
 
-  /// set of direct point neighbor elements of the current processor domain
+  /// set of nodes on the boundary of the current processor domain
   std::set<Point> _boundary_nodes;
 
   /// set of all _qp_data indices that are within _radius of any _boundary_nodes
