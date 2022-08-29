@@ -32,4 +32,25 @@
     requirement = 'The system shall be able to solve anisotropic plasticity and anisotropic '
                   'elastoplasticity problems with elastoplastic anisotropy'
   []
+  [ad_uniaxial_x_linear]
+    type = 'CSVDiff'
+    input = 'ad_uniaxial_x.i'
+    csvdiff = 'ad_uniaxial_x_out.csv'
+    heavy = true
+    requirement = 'Uniaxial tensile test run in x direction with anisotropic elasticity and linear strain hardening with automatic differentiation'
+  []
+  [ad_uniaxial_y_linear]
+    type = 'CSVDiff'
+    input = 'ad_uniaxial_y.i'
+    csvdiff = 'ad_uniaxial_y_out.csv'
+    heavy = true
+    requirement = 'Uniaxial tensile test run in y direction with anisotropic elasticity and linear strain hardening with automatic differentiation'
+  []
+  [ad_uniaxial_x_non_linear]
+    type = 'CSVDiff'
+    input = 'ad_uniaxial_x_non_linear.i'
+    csvdiff = 'ad_uniaxial_x_non_linear_out.csv'
+    heavy = true
+    requirement = 'Uniaxial tensile test run in x direction with anisotropic elasticity and non-linear strain hardening with automatic differentiation'
+  []
 []
