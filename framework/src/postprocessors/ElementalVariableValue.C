@@ -30,7 +30,8 @@ ElementalVariableValue::ElementalVariableValue(const InputParameters & parameter
   : GeneralPostprocessor(parameters),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
-    _element(_mesh.getMesh().query_elem_ptr(parameters.get<unsigned int>("elementid")))
+    _element(_mesh.getMesh().query_elem_ptr(parameters.get<unsigned int>("elementid"))),
+    _value(0)
 {
   // This class may be too dangerous to use if renumbering is enabled,
   // as the nodeid parameter obviously depends on a particular
@@ -38,12 +39,10 @@ ElementalVariableValue::ElementalVariableValue(const InputParameters & parameter
   if (_mesh.getMesh().allow_renumbering())
     mooseError("ElementalVariableValue should only be used when node renumbering is disabled.");
 }
-
-Real
-ElementalVariableValue::getValue()
+void
+ElementalVariableValue::execute()
 {
-  Real value = 0;
-
+  _value = 0;
   if (_element && (_element->processor_id() == processor_id()))
   {
     _fe_problem.setCurrentSubdomainID(_element, 0);
@@ -55,11 +54,19 @@ ElementalVariableValue::getValue()
     const VariableValue & u = var.sln();
     unsigned int n = u.size();
     for (unsigned int i = 0; i < n; i++)
-      value += u[i];
-    value /= n;
+      _value += u[i];
+    _value /= n;
   }
+}
 
-  gatherSum(value);
+Real
+ElementalVariableValue::getValue()
+{
+  return _value;
+}
 
-  return value;
+void
+ElementalVariableValue::finalize()
+{
+  gatherSum(_value);
 }

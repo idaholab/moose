@@ -90,6 +90,12 @@ ElementExtremeValue::computeQpValue()
 Real
 ElementExtremeValue::getValue()
 {
+  return _value;
+}
+
+void
+ElementExtremeValue::finalize()
+{
   switch (_type)
   {
     case MAX:
@@ -99,8 +105,6 @@ ElementExtremeValue::getValue()
       gatherProxyValueMin(_proxy_value, _value);
       break;
   }
-
-  return _value;
 }
 
 void

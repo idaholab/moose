@@ -27,6 +27,7 @@ public:
   virtual void execute();
   virtual Real getValue();
   virtual void threadJoin(const UserObject & y);
+  virtual void finalize();
 
 protected:
   virtual Real computeQpIntegral();

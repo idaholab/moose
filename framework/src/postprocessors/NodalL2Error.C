@@ -44,7 +44,6 @@ NodalL2Error::execute()
 Real
 NodalL2Error::getValue()
 {
-  gatherSum(_integral_value);
   return std::sqrt(_integral_value);
 }
 
@@ -53,4 +52,10 @@ NodalL2Error::threadJoin(const UserObject & y)
 {
   const NodalL2Error & pps = static_cast<const NodalL2Error &>(y);
   _integral_value += pps._integral_value;
+}
+
+void
+NodalL2Error::finalize()
+{
+  gatherSum(_integral_value);
 }

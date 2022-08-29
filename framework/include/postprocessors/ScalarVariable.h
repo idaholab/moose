@@ -24,8 +24,10 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual Real getValue() override;
+  virtual void finalize() override;
 
 protected:
   MooseVariableScalar & _var;
   unsigned int _idx;
+  Real _value;
 };

@@ -55,11 +55,15 @@ template <bool is_ad>
 Real
 SideDiffusiveFluxAverageTempl<is_ad>::getValue()
 {
-  Real integral = SideDiffusiveFluxIntegralTempl<is_ad, Real>::getValue();
+  return _integral_value / _volume;
+}
 
-  this->gatherSum(_volume);
-
-  return integral / _volume;
+template <bool is_ad>
+void
+SideDiffusiveFluxAverageTempl<is_ad>::finalize()
+{
+  SideDiffusiveFluxIntegralTempl<is_ad, Real>::gatherSum(_integral_value);
+  SideDiffusiveFluxIntegralTempl<is_ad, Real>::gatherSum(_volume);
 }
 
 template <bool is_ad>

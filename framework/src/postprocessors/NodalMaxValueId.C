@@ -57,8 +57,12 @@ NodalMaxValueId::execute()
 Real
 NodalMaxValueId::getValue()
 {
-  gatherProxyValueMax(_value, _node_id);
   return _node_id;
+}
+void
+NodalMaxValueId::finalize()
+{
+  gatherProxyValueMax(_value, _node_id);
 }
 
 void

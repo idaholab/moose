@@ -24,10 +24,12 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
+  virtual void finalize() override;
   virtual Real getValue() override;
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
+  using SideIntegralMaterialPropertyTempl<is_ad>::_integral_value;
   /// Side set area
   Real _area;
 };
