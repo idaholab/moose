@@ -34,8 +34,11 @@ InputParameters
 RadialAverage::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
-  params.addClassDescription("Perform a radial equal weight average of a material property");
-  params.addRequiredParam<std::string>("material_name", "Name of the material to average.");
+  params.addClassDescription("Perform a radial average of a material property");
+  params.addRequiredParam<MaterialPropertyName>("prop_name",
+                                                "Name of the material property to average");
+  MooseEnum weights_type("constant linear cosine", "linear");
+  params.addRequiredParam<MooseEnum>("weights", weights_type, "Distance based weight function");
   params.addRequiredParam<Real>("radius", "Cut-off radius for the averaging");
   params.addRangeCheckedParam<Real>(
       "padding",
@@ -57,8 +60,8 @@ RadialAverage::validParams()
 
 RadialAverage::RadialAverage(const InputParameters & parameters)
   : ElementUserObject(parameters),
-    _averaged_material_name(getParam<std::string>("material_name")),
-    _averaged_material(getMaterialProperty<Real>(_averaged_material_name)),
+    _weights_type(getParam<MooseEnum>("weights").getEnum<WeightsType>()),
+    _prop(getMaterialProperty<Real>("prop_name")),
     _radius(getParam<Real>("radius")),
     _padding(getParam<Real>("padding")),
     _update_communication_lists(false),
@@ -89,7 +92,7 @@ RadialAverage::execute()
 
   // collect all QP data
   for (const auto qp : make_range(_qrule->n_points()))
-    _qp_data.emplace_back(_q_point[qp], id, qp, _JxW[qp] * _coord[qp], _averaged_material[qp]);
+    _qp_data.emplace_back(_q_point[qp], id, qp, _JxW[qp] * _coord[qp], _prop[qp]);
 
   // make sure the result map entry for the current element is sized correctly
   auto i = _average.find(id);

@@ -72,10 +72,16 @@ public:
 protected:
   void updateCommunicationLists();
 
-  /// material name to get averaged
-  std::string _averaged_material_name;
+  /// distance based weight function
+  enum class WeightsType
+  {
+    CONSTANT,
+    LINEAR,
+    COSINE
+  } _weights_type;
+
   /// material to be averaged
-  const MaterialProperty<Real> & _averaged_material;
+  const MaterialProperty<Real> & _prop;
 
   /// cut-off radius
   const Real _radius;
