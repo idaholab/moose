@@ -72,10 +72,16 @@ public:
 protected:
   void updateCommunicationLists();
 
-  /// material name to get averaged
-  std::string _averaged_material_name;
+  /// distance based weight function
+  enum class WeightsType
+  {
+    CONSTANT,
+    LINEAR,
+    COSINE
+  } _weights_type;
+
   /// material to be averaged
-  const MaterialProperty<Real> & _averaged_material;
+  const MaterialProperty<Real> & _prop;
 
   /// cut-off radius
   const Real _radius;
@@ -110,6 +116,9 @@ protected:
   /// QPData indices to send to the various processors
   std::vector<std::set<std::size_t>> _communication_lists;
   bool _update_communication_lists;
+
+  /// processors to send (potentially empty) data to
+  std::vector<processor_id_type> _candidate_procs;
 
   processor_id_type _my_pid;
 

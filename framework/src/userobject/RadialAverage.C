@@ -34,8 +34,11 @@ InputParameters
 RadialAverage::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
-  params.addClassDescription("Perform a radial equal weight average of a material property");
-  params.addRequiredParam<std::string>("material_name", "Name of the material to average.");
+  params.addClassDescription("Perform a radial average of a material property");
+  params.addRequiredParam<MaterialPropertyName>("prop_name",
+                                                "Name of the material property to average");
+  MooseEnum weights_type("constant linear cosine", "linear");
+  params.addRequiredParam<MooseEnum>("weights", weights_type, "Distance based weight function");
   params.addRequiredParam<Real>("radius", "Cut-off radius for the averaging");
   params.addRangeCheckedParam<Real>(
       "padding",
@@ -57,8 +60,8 @@ RadialAverage::validParams()
 
 RadialAverage::RadialAverage(const InputParameters & parameters)
   : ElementUserObject(parameters),
-    _averaged_material_name(getParam<std::string>("material_name")),
-    _averaged_material(getMaterialProperty<Real>(_averaged_material_name)),
+    _weights_type(getParam<MooseEnum>("weights").getEnum<WeightsType>()),
+    _prop(getMaterialProperty<Real>("prop_name")),
     _radius(getParam<Real>("radius")),
     _padding(getParam<Real>("padding")),
     _update_communication_lists(false),
@@ -89,7 +92,7 @@ RadialAverage::execute()
 
   // collect all QP data
   for (const auto qp : make_range(_qrule->n_points()))
-    _qp_data.emplace_back(_q_point[qp], id, qp, _JxW[qp] * _coord[qp], _averaged_material[qp]);
+    _qp_data.emplace_back(_q_point[qp], id, qp, _JxW[qp] * _coord[qp], _prop[qp]);
 
   // make sure the result map entry for the current element is sized correctly
   auto i = _average.find(id);
@@ -120,24 +123,18 @@ RadialAverage::finalize()
         libMesh::n_threads() > 1)
       updateCommunicationLists();
 
-    // sparse send data (processor ID,)
-    std::vector<std::size_t> non_zero_comm;
-    for (auto i = beginIndex(_communication_lists); i < _communication_lists.size(); ++i)
-      if (!_communication_lists[i].empty())
-        non_zero_comm.push_back(i);
-
     // data structures for sparse point to point communication
-    std::vector<std::vector<QPData>> send(non_zero_comm.size());
-    std::vector<Parallel::Request> send_requests(non_zero_comm.size());
+    std::vector<std::vector<QPData>> send(_candidate_procs.size());
+    std::vector<Parallel::Request> send_requests(_candidate_procs.size());
     Parallel::MessageTag send_tag = _communicator.get_unique_tag(4711);
     std::vector<QPData> receive;
 
     const auto item_type = TIMPI::StandardType<QPData>(&(_qp_data[0]));
 
     // fill buffer and send structures
-    for (auto i = beginIndex(non_zero_comm); i < non_zero_comm.size(); ++i)
+    for (const auto i : index_range(_candidate_procs))
     {
-      const auto pid = non_zero_comm[i];
+      const auto pid = _candidate_procs[i];
       const auto & list = _communication_lists[pid];
 
       // fill send buffer for transfer to pid
@@ -150,8 +147,12 @@ RadialAverage::finalize()
     }
 
     // receive messages - we assume that we receive as many messages as we send!
-    for (auto i = beginIndex(non_zero_comm); i < non_zero_comm.size(); ++i)
+    // bounding box overlapp is transitive, but data exhange between overlapping procs could still
+    // be unidirectional!
+    for (const auto i : index_range(_candidate_procs))
     {
+      libmesh_ignore(i);
+
       // inspect incoming message
       Parallel::Status status(_communicator.probe(Parallel::any_source, send_tag));
       const auto source_pid = TIMPI::cast_int<processor_id_type>(status.source());
@@ -276,14 +277,14 @@ RadialAverage::updateCommunicationLists()
     bbs.emplace_back(pp.first - rpoint, pp.second + rpoint);
 
   // get candidate processors (overlapping bounding boxes)
-  std::vector<processor_id_type> candidate_procs;
+  _candidate_procs.clear();
   for (const auto pid : index_range(bbs))
     if (pid != _my_pid && bbs[pid].intersects(mypp))
-      candidate_procs.push_back(pid);
+      _candidate_procs.push_back(pid);
 
   // go over all boundary data items and send them to the proc they overlap with
   for (const auto i : _boundary_data_indices)
-    for (const auto pid : candidate_procs)
+    for (const auto pid : _candidate_procs)
       if (bbs[pid].contains_point(_qp_data[i]._q_point))
         _communication_lists[pid].insert(i);
 
