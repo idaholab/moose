@@ -3433,6 +3433,16 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
                           const MultiMooseEnum & coord_sys)
 {
   TIME_SECTION("setCoordSystem", 5, "Setting Coordinate System");
+  if (_pars.isParamSetByUser("block") && getParam<std::vector<SubdomainName>>("block") != blocks)
+    mooseError("Supplied blocks in the 'setCoordSystem' method do not match the value of the "
+               "'Mesh/block' parameter. Did you provide different parameter values for 'block' to "
+               "'Mesh' and 'Problem'?");
+  if (_pars.isParamSetByUser("coord_type") && getParam<MultiMooseEnum>("coord_type") != coord_sys)
+    mooseError(
+        "Supplied coordinate systems in the 'setCoordSystem' method do not match the value of the "
+        "'Mesh/coord_type' parameter. Did you provide different parameter values for 'coord_type' "
+        "to "
+        "'Mesh' and 'Problem'?");
 
   const std::set<SubdomainID> & subdomains = meshSubdomains();
   if (blocks.size() == 0)
