@@ -118,13 +118,17 @@ MaterialTimeStepPostprocessor::execute()
 Real
 MaterialTimeStepPostprocessor::getValue()
 {
-  gatherMin(_matl_value);
-  gatherSum(_count);
-
   if (_count == 0 || !_use_elements_changed)
     return _matl_value;
 
   return std::min(_dt * (Real)_elements_changed / (Real)_count, _matl_value);
+}
+
+void
+MaterialTimeStepPostprocessor::finalize()
+{
+  gatherMin(_matl_value);
+  gatherSum(_count);
 }
 
 void

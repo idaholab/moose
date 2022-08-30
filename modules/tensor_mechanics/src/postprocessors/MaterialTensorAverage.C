@@ -49,11 +49,15 @@ template <bool is_ad>
 Real
 MaterialTensorAverageTempl<is_ad>::getValue()
 {
-  const Real integral = MaterialTensorIntegralTempl<is_ad>::getValue();
+  return _integral_value / _volume;
+}
 
-  this->gatherSum(_volume);
-
-  return integral / _volume;
+template <bool is_ad>
+void
+MaterialTensorAverageTempl<is_ad>::finalize()
+{
+  MaterialTensorIntegralTempl<is_ad>::gatherSum(_volume);
+  MaterialTensorIntegralTempl<is_ad>::gatherSum(_integral_value);
 }
 
 template <bool is_ad>

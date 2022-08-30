@@ -27,11 +27,13 @@ public:
   ElementalVariableValue(const InputParameters & parameters);
 
   virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void execute() override;
   virtual Real getValue() override;
+  virtual void finalize() override;
 
 protected:
   MooseMesh & _mesh;
   std::string _var_name;
   Elem * _element;
+  Real _value;
 };

@@ -26,6 +26,7 @@ ThreadedRadialAverageLoop::operator()(const QPDataRange & qpdata_range)
   const auto radius = _radavg._radius;
   const auto & qp_data = _radavg._qp_data;
   const auto & kd_tree = _radavg._kd_tree;
+  const auto & weights_type = _radavg._weights_type;
 
   // tree search data structures
   std::vector<std::pair<std::size_t, Real>> ret_matches;
@@ -50,13 +51,28 @@ ThreadedRadialAverageLoop::operator()(const QPDataRange & qpdata_range)
 
     ret_matches.clear();
     std::size_t n_result =
-        kd_tree->radiusSearch(&(local_qp._q_point(0)), radius, ret_matches, search_params);
+        kd_tree->radiusSearch(&(local_qp._q_point(0)), radius * radius, ret_matches, search_params);
     Real total_vol = 0.0;
+    Real weight = 1.0;
     for (std::size_t j = 0; j < n_result; ++j)
     {
       const auto & other_qp = qp_data[ret_matches[j].first];
-      sum += other_qp._value * other_qp._volume;
-      total_vol += other_qp._volume;
+      switch (weights_type)
+      {
+        case RadialAverage::WeightsType::CONSTANT:
+          break;
+
+        case RadialAverage::WeightsType::LINEAR:
+          weight = radius - std::sqrt(ret_matches[j].second);
+          break;
+
+        case RadialAverage::WeightsType::COSINE:
+          weight = std::cos(std::sqrt(ret_matches[j].second) / radius * libMesh::pi) + 1.0;
+          break;
+      }
+
+      sum += other_qp._value * other_qp._volume * weight;
+      total_vol += other_qp._volume * weight;
     }
     sum /= total_vol;
   }

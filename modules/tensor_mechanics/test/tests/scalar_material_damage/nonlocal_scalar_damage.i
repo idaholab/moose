@@ -22,7 +22,6 @@
   []
 []
 
-
 [BCs]
   [symmy]
     type = DirichletBC
@@ -60,10 +59,10 @@
 [UserObjects]
   [ele_avg]
     type = RadialAverage
-    material_name = local_damage
+    prop_name = local_damage
+    weights = constant
     execute_on = "INITIAL timestep_end"
-    block = 0
-    radius = 0.3
+    radius = 0.55
   []
 []
 

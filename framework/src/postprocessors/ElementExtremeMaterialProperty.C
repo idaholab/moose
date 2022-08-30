@@ -94,6 +94,13 @@ template <bool is_ad>
 Real
 ElementExtremeMaterialPropertyTempl<is_ad>::getValue()
 {
+  return _value;
+}
+
+template <bool is_ad>
+void
+ElementExtremeMaterialPropertyTempl<is_ad>::finalize()
+{
   switch (_type)
   {
     case MAX:
@@ -103,8 +110,6 @@ ElementExtremeMaterialPropertyTempl<is_ad>::getValue()
       gatherMin(_value);
       break;
   }
-
-  return _value;
 }
 
 template <bool is_ad>

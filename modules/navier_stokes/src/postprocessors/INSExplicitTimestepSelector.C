@@ -96,8 +96,13 @@ INSExplicitTimestepSelector::execute()
 Real
 INSExplicitTimestepSelector::getValue()
 {
-  _communicator.min(_value);
   return _value;
+}
+
+void
+INSExplicitTimestepSelector::finalize()
+{
+  gatherMin(_value);
 }
 
 void

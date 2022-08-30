@@ -18,13 +18,14 @@
 [AuxVariables]
   [non_local_material]
     family = MONOMIAL
+    order = SECOND
   []
 []
 
 [AuxKernels]
   [non_local]
     type = RadialAverageAux
-    average_UO = ele_avg
+    average_UO = average
     variable = non_local_material
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
@@ -46,12 +47,12 @@
 []
 
 [UserObjects]
-  [ele_avg]
+  [average]
     type = RadialAverage
-    material_name = local
+    prop_name = local
+    weights = constant
     execute_on = "INITIAL timestep_end"
-    block = 0
-    radius = 0.25
+    radius = 0.3
   []
 []
 

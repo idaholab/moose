@@ -47,9 +47,13 @@ BondStatusConvergedPostprocessorPD::execute()
 Real
 BondStatusConvergedPostprocessorPD::getValue()
 {
-  gatherSum(_num_bond_status_updated);
-
   return _num_bond_status_updated;
+}
+
+void
+BondStatusConvergedPostprocessorPD::finalize()
+{
+  gatherSum(_num_bond_status_updated);
 }
 
 void

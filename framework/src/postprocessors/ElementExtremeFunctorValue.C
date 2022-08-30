@@ -107,6 +107,13 @@ template <bool is_ad>
 Real
 ElementExtremeFunctorValueTempl<is_ad>::getValue()
 {
+  return _value;
+}
+
+template <bool is_ad>
+void
+ElementExtremeFunctorValueTempl<is_ad>::finalize()
+{
   switch (_type)
   {
     case MAX:
@@ -116,8 +123,6 @@ ElementExtremeFunctorValueTempl<is_ad>::getValue()
       gatherProxyValueMin(_proxy_value, _value);
       break;
   }
-
-  return _value;
 }
 
 template <bool is_ad>

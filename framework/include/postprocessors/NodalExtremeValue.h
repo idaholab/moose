@@ -34,6 +34,7 @@ public:
   virtual void execute() override;
   virtual Real getValue() override;
   virtual void threadJoin(const UserObject & y) override;
+  virtual void finalize() override;
 
 protected:
   /// The extreme value type ("min" or "max")

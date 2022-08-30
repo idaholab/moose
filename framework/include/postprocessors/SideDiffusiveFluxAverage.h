@@ -26,9 +26,11 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
+  virtual void finalize() override;
   virtual Real getValue() override;
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
   Real _volume;
+  using SideDiffusiveFluxIntegralTempl<is_ad, Real>::_integral_value;
 };
