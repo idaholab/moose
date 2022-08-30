@@ -12,9 +12,10 @@
 #include "MultiAppTransfer.h"
 
 /**
- * Copies the values of a VectorPostprocessor from the Master to postprocessors
- * on each MultiApp
- * or collects the postprocessors on each MultiApp into a VectorPostprocessor
+ * Copies the values of a VectorPostprocessor from the parent application to postprocessors
+ * on each subapp of a MultiApp
+ * or collects the postprocessors on each subapp of a MultiApp into a VectorPostprocessor
+ * on the parent app
  */
 class MultiAppVectorPostprocessorTransfer : public MultiAppTransfer
 {
@@ -29,7 +30,12 @@ protected:
   virtual void executeToMultiapp();
   virtual void executeFromMultiapp();
 
+  /// Name of the postprocessor on the MultiApp
   const PostprocessorName & _sub_pp_name;
+
+  /// Name of the VectorPostprocessor on the parent app
   const VectorPostprocessorName & _master_vpp_name;
+
+  /// Specific vector to transfer among the vectors in the parent VPP
   const std::string & _vector_name;
 };
