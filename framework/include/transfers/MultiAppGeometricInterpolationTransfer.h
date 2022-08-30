@@ -25,12 +25,12 @@ class InverseDistanceInterpolation;
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
  */
-class MultiAppInterpolationTransfer : public MultiAppConservativeTransfer
+class MultiAppGeometricInterpolationTransfer : public MultiAppConservativeTransfer
 {
 public:
   static InputParameters validParams();
 
-  MultiAppInterpolationTransfer(const InputParameters & parameters);
+  MultiAppGeometricInterpolationTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 
