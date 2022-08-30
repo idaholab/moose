@@ -2524,8 +2524,7 @@ MooseMesh::init()
     // sub-apps need to just build their mesh like normal
     {
       TIME_SECTION("readRecoveredMesh", 2);
-      getMesh().read(_app.getRestartRecoverFileBase() + "_mesh." +
-                     _app.getRestartRecoverFileSuffix());
+      getMesh().read(_app.getRestartRecoverFileBase() + "-mesh.cpr");
     }
 
     getMesh().allow_renumbering(allow_renumbering_later);

@@ -45,9 +45,6 @@ Checkpoint::validParams()
       "cp",
       "This will be appended to the file_base to create the directory name for checkpoint files.");
 
-  // Advanced settings
-  params.addParam<bool>("binary", true, "Toggle the output of binary files");
-  params.addParamNamesToGroup("binary", "Advanced");
   return params;
 }
 
@@ -56,8 +53,6 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
     _is_autosave(getParam<AutosaveType>("is_autosave")),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
-    _binary(getParam<bool>("binary")),
-    _parallel_mesh(_problem_ptr->mesh().isDistributedMesh()),
     _restartable_data(_app.getRestartableData()),
     _restartable_data_io(RestartableDataIO(*_problem_ptr))
 {
@@ -146,14 +141,16 @@ Checkpoint::output()
 
   // Create the libMesh Checkpoint_IO object
   MeshBase & mesh = _es_ptr->get_mesh();
-  CheckpointIO io(mesh, _binary);
+  CheckpointIO io(mesh, true);
 
   // Create checkpoint file structure
   CheckpointFileNames curr_file_struct;
 
-  curr_file_struct.checkpoint = current_file + getMeshFileSuffix(_binary);
-  curr_file_struct.system = current_file + _restartable_data_io.getESFileExtension(_binary);
-  curr_file_struct.restart = current_file + _restartable_data_io.getRestartableDataExt();
+  std::ostringstream proc_id_string;
+  proc_id_string << processor_id();
+
+  curr_file_struct.checkpoint = current_file + "-mesh.cpr";
+  curr_file_struct.restart = current_file + "-restart-" + proc_id_string.str() + ".rd";
 
   // Write the checkpoint file
   io.write(curr_file_struct.checkpoint);
@@ -166,8 +163,8 @@ Checkpoint::output()
     {
       const RestartableDataMap & meta_data = map_pair.second.first;
       const std::string & suffix = map_pair.second.second;
-      const std::string filename(curr_file_struct.checkpoint + "/meta_data" + suffix +
-                                 _restartable_data_io.getRestartableDataExt());
+      const std::string filename(curr_file_struct.checkpoint + "/meta_data" + suffix + ".rd");
+
       curr_file_struct.restart_meta_data.emplace(filename);
       _restartable_data_io.writeRestartableData(filename, meta_data);
     }
@@ -188,8 +185,6 @@ Checkpoint::output()
 void
 Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
 {
-  return;
-
   // Update the list of stored files
   _file_names.push_back(file_struct);
 
@@ -202,47 +197,34 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     // Remove these filenames from the list
     _file_names.pop_front();
 
-    // Get thread and proc information
+    // Get proc information
     processor_id_type proc_id = processor_id();
 
-    // Delete checkpoint files (_mesh.cpr)
+    // Delete meta data and checkpoint files
     if (proc_id == 0)
     {
+      // Delete meta data files
       for (const auto & file_name : delete_files.restart_meta_data)
+      {
+        std::cout << "Deleting: " << file_name.c_str() << std::endl;
         remove(file_name.c_str());
+      }
+
       // This file may not exist so don't worry about checking for success
 
-      CheckpointIO::cleanup(delete_files.checkpoint, _parallel_mesh ? comm().size() : 1);
-
-      // Delete the system files (xdr and xdr.0000, ...)
-      const auto & file_name = delete_files.system;
-      int ret = remove(file_name.c_str());
-      if (ret != 0)
-        mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
+      std::cout << "Deleting Checkpoint: " << delete_files.checkpoint << std::endl;
+      CheckpointIO::cleanup(delete_files.checkpoint,
+                            _problem_ptr->mesh().isDistributedMesh() ? comm().size() : 1);
     }
 
+    // Delete restartable data
     {
-      std::ostringstream oss;
-      oss << delete_files.system << "." << std::setw(4) << std::setprecision(0) << std::setfill('0')
-          << proc_id;
-      std::string file_name = oss.str();
-      int ret = remove(file_name.c_str());
-      if (ret != 0)
-        mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
-    }
+      std::cout << "Deleting Restartable Data: " << delete_files.restart << std::endl;
 
-    // Remove the restart files (rd)
-    unsigned int n_threads = libMesh::n_threads();
-    for (THREAD_ID tid = 0; tid < n_threads; tid++)
-    {
-      std::ostringstream oss;
-      oss << delete_files.restart << "-" << proc_id;
-      if (n_threads > 1)
-        oss << "-" << tid;
-      std::string file_name = oss.str();
-      int ret = remove(file_name.c_str());
+      int ret = remove(delete_files.restart.c_str());
       if (ret != 0)
-        mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
+        mooseWarning(
+            "Error during the deletion of file '", delete_files.restart, "': ", std::strerror(ret));
     }
   }
 }

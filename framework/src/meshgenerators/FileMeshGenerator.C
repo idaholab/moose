@@ -116,14 +116,14 @@ FileMeshGenerator::generate()
 
     // we also read declared mesh meta data here if there is meta data file
     RestartableDataIO restartable(_app);
-    std::string fname = file_name + "/meta_data_mesh" + restartable.getRestartableDataExt();
+    std::string fname = file_name + "/meta_data_mesh.rd";
     if (MooseUtils::pathExists(fname))
     {
       restartable.setErrorOnLoadWithDifferentNumberOfProcessors(false);
       // get reference to mesh meta data (created by MooseApp)
       auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
-      if (restartable.readRestartableDataHeaderFromFile(fname, false))
-        restartable.readRestartableData(meta_data, DataNames());
+      if (MooseUtils::checkFileReadable(fname, false, false, false))
+        restartable.readRestartableData(fname, meta_data, DataNames());
     }
   }
 

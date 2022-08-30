@@ -502,22 +502,9 @@ public:
   void setRestartRecoverFileBase(const std::string & file_base)
   {
     if (file_base.empty())
-      _restart_recover_base = MooseUtils::getLatestAppCheckpointFileBase(getCheckpointFiles());
+      _restart_recover_base = MooseUtils::getLatestCheckpointFilePrefix(getCheckpointFiles());
     else
       _restart_recover_base = file_base;
-  }
-
-  /**
-   * The suffix for the recovery file.
-   */
-  std::string getRestartRecoverFileSuffix() const { return _restart_recover_suffix; }
-
-  /**
-   * mutator for recover_suffix
-   */
-  void setRestartRecoverFileSuffix(const std::string & file_suffix)
-  {
-    _restart_recover_suffix = file_suffix;
   }
 
   /**
@@ -653,7 +640,7 @@ public:
   /**
    * Return a reference to restartable data for the specific type flag.
    */
-  const RestartableDataMap & getRestartableDataMap(const RestartableDataMapName & name) const;
+  RestartableDataMap & getRestartableDataMap(const RestartableDataMapName & name);
 
   /**
    * @return Whether or not the restartable data has the given name registered.
@@ -920,16 +907,14 @@ public:
    *
    * These are MOOSE internal functions and should not be used otherwise.
    */
-  std::unordered_map<RestartableDataMapName,
-                     std::pair<RestartableDataMap, std::string>>::const_iterator
-  getRestartableDataMapBegin() const
+  std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>::iterator
+  getRestartableDataMapBegin()
   {
     return _restartable_meta_data.begin();
   }
 
-  std::unordered_map<RestartableDataMapName,
-                     std::pair<RestartableDataMap, std::string>>::const_iterator
-  getRestartableDataMapEnd() const
+  std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>::iterator
+  getRestartableDataMapEnd()
   {
     return _restartable_meta_data.end();
   }
@@ -1155,9 +1140,6 @@ protected:
 
   /// The base name to restart/recover from.  If blank then we will find the newest checkpoint file.
   std::string _restart_recover_base;
-
-  /// The file suffix to restart/recover from.  If blank then we will use the binary restart suffix.
-  std::string _restart_recover_suffix;
 
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
   bool _half_transient;

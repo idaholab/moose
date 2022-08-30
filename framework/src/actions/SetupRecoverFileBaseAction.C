@@ -64,12 +64,11 @@ SetupRecoverFileBaseAction::act()
          map_iter != _app.getRestartableDataMapEnd();
          ++map_iter)
     {
-      const RestartableDataMap & meta_data = map_iter->second.first;
+      RestartableDataMap & meta_data = map_iter->second.first;
       const std::string & suffix = map_iter->second.second;
-      std::string meta_suffix =
-          "_mesh." + _app.getRestartRecoverFileSuffix() + "/meta_data" + suffix;
-      if (restartable.readRestartableDataHeader(false, meta_suffix))
-        restartable.readRestartableData(meta_data, DataNames());
+      std::string meta_suffix = "-mesh.cpr/meta_data" + suffix;
+      if (MooseUtils::checkFileReadable(meta_suffix, false, false, false))
+        restartable.readRestartableData(meta_suffix, meta_data, DataNames());
     }
   }
 }

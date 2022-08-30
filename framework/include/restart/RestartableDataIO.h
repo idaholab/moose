@@ -47,9 +47,37 @@ public:
    */
   void restoreBackup(std::shared_ptr<Backup> backup, bool for_restart = false);
 
+  /**
+   * Writes restartable data into a binary file.
+   *
+   * This should only be used for the arbitrary restartable data maps (such as mesh meta data)
+   * The normal restart data is encaapsulated in the backup
+   *
+   * @param file_name The name of the file to read from
+   * @restartable_data The data to be written
+   */
+  void writeRestartableData(const std::string & file_name,
+                            const RestartableDataMap & restartable_data);
+
+  /**
+   * Reads restartable data from a binary file.
+   *
+   * This should only be used for the arbitrary restartable data maps (such as mesh meta data)
+   * The normal restart data is encaapsulated in the backup
+   *
+   * @param file_name The file name to read from
+   * @param restartable_data The data structure to read into
+   * @param filter_names The names of data to NOT read (used to filter out recover only variables
+   * during restart)
+   */
+  void readRestartableData(const std::string & file_name,
+                           RestartableDataMap & restartable_data,
+                           const DataNames & filter_names = {});
+
   ///@{
   /*
-   * Enable/Disable errors to allow meta data to be created/loaded on different number or processors
+   * Enable/Disable errors to allow meta data to be created/loaded on different number or
+   * processors
    *
    * See LoadSurrogateModelAction for use case
    */

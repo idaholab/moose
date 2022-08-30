@@ -231,11 +231,6 @@ MooseApp::validParams()
                                           "Continue the calculation.  If file_base is omitted then "
                                           "the most recent recovery file will be utilized");
 
-  params.addCommandLineParam<std::string>("recoversuffix",
-                                          "--recoversuffix [suffix]",
-                                          "Use a different file extension, other than cpr, "
-                                          "for a recovery file");
-
   params.addCommandLineParam<bool>("half_transient",
                                    "--half-transient",
                                    false,
@@ -389,7 +384,6 @@ MooseApp::MooseApp(InputParameters parameters)
 #else
     _trap_fpe(false),
 #endif
-    _restart_recover_suffix("cpr"),
     _half_transient(false),
     _check_input(getParam<bool>("check_input")),
     _multiapp_level(
@@ -958,14 +952,6 @@ MooseApp::setupOptions()
       // a dash then we are going to eventually find the newest recovery file to use
       if (!(recover_following_arg.empty() || (recover_following_arg.find('-') == 0)))
         _restart_recover_base = recover_following_arg;
-    }
-
-    // Optionally get command line argument following --recoversuffix
-    // on command line.  Currently this argument applies to both
-    // recovery and restart files.
-    if (isParamValid("recoversuffix"))
-    {
-      _restart_recover_suffix = getParam<std::string>("recoversuffix");
     }
 
     // Pass list of input files and optional text string if provided to parser
@@ -2602,8 +2588,8 @@ MooseApp::checkMetaDataIntegrity() const
 
 const RestartableDataMapName MooseApp::MESH_META_DATA = "MeshMetaData";
 
-const RestartableDataMap &
-MooseApp::getRestartableDataMap(const RestartableDataMapName & name) const
+RestartableDataMap &
+MooseApp::getRestartableDataMap(const RestartableDataMapName & name)
 {
   auto iter = _restartable_meta_data.find(name);
   if (iter == _restartable_meta_data.end())

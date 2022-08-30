@@ -27,9 +27,7 @@ RestartableDataIO::RestartableDataIO(FEProblemBase & fe_problem)
 RestartableDataIO::RestartableDataIO(MooseApp & moose_app, FEProblemBase * fe_problem_ptr)
   : PerfGraphInterface(moose_app.perfGraph(), "RestartableDataIO"),
     _moose_app(moose_app),
-    _fe_problem_ptr(fe_problem_ptr),
-    _is_header_read(false),
-    _use_binary_ext(true)
+    _fe_problem_ptr(fe_problem_ptr)
 {
 }
 
@@ -77,6 +75,39 @@ RestartableDataIO::restoreBackup(std::shared_ptr<Backup> backup, bool for_restar
       deserializeRestartableData(
           restartable_data_maps[tid], *backup->_restartable_data[tid], DataNames());
   }
+}
+
+void
+RestartableDataIO::writeRestartableData(const std::string & file_name,
+                                        const RestartableDataMap & restartable_data)
+
+{
+  std::ofstream out;
+
+  out.open(file_name.c_str(), std::ios::out | std::ios::binary);
+  if (out.fail())
+    mooseError("Unable to open file ", file_name);
+
+  serializeRestartableData(restartable_data, out);
+
+  out.close();
+}
+
+void
+RestartableDataIO::readRestartableData(const std::string & file_name,
+                                       RestartableDataMap & restartable_data,
+                                       const DataNames & filter_names)
+
+{
+  std::ifstream in;
+
+  in.open(file_name.c_str(), std::ios::in | std::ios::binary);
+  if (in.fail())
+    mooseError("Unable to open file ", file_name);
+
+  deserializeRestartableData(restartable_data, in, filter_names);
+
+  in.close();
 }
 
 void

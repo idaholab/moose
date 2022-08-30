@@ -759,14 +759,6 @@ FEProblemBase::initialSetup()
   // it may be necessary later.
   addAnyRedistributers();
 
-  // Restart/recovery code
-
-  if (_app.isRecovering() && (_app.isUltimateMaster() || _force_restart))
-  {
-    if (_app.getRestartRecoverFileSuffix() == "cpa")
-      _restart_io->useAsciiExtension();
-  }
-
   if (_app.isRestarting() || _app.isRecovering())
   {
     if (_app.isUltimateMaster() || _force_restart)
@@ -777,11 +769,14 @@ FEProblemBase::initialSetup()
 
       // Read the backup from file
 
-      std::string backup_file_name =
-          _app.getRestartRecoverFileBase() + _restart_io->getRestartableDataExt();
+      std::stringstream backup_file_name;
+      backup_file_name << _app.getRestartRecoverFileBase() << "-restart-" << processor_id()
+                       << ".rd";
+
+      std::cout << "opening backup file: " << backup_file_name.str() << std::endl;
 
       std::ifstream backup_file;
-      backup_file.open(backup_file_name, std::ios::in | std::ios::binary);
+      backup_file.open(backup_file_name.str(), std::ios::in | std::ios::binary);
       auto backup = std::make_shared<Backup>();
       dataLoad(backup_file, backup, nullptr);
       backup_file.close();
