@@ -321,8 +321,6 @@ TransfiniteMeshGenerator::getParametrization(const Real & edge_length,
         step = step + factor * std::pow(bias, double(iter-1));
         rx = getMapToReference(step, 0, edge_length);
         param_vec.push_back(rx);
-        //std::cout<<"**************** " <<std::endl;
-        //std::cout<<"At iter "<<iter << " factr is "<<factr<<" rx "<<rx<<std::endl;
        }
     }
   else
