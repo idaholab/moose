@@ -22,7 +22,7 @@ FVDiffusion::validParams()
   params.addParam<MooseEnum>(
       "coeff_interp_method",
       coeff_interp_method,
-      "Switch that can select between face interpolation methods for diffusion coefficients.");
+      "Switch that can select face interpolation method for diffusion coefficients.");
   params.set<unsigned short>("ghost_layers") = 2;
 
   return params;

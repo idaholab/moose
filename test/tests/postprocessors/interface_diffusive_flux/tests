@@ -1,8 +1,9 @@
 [Tests]
-  issues = '#17637'
+  issues = '#17637 #21923'
   design = 'InterfaceDiffusiveFluxAverage.md'
   [interface_diffusive_flux_integral]
-    requirement = "The system shall be able to compute the integral of the diffusive flux at an interface"
+    requirement = "The system shall be able to compute the integral of the diffusive flux at an "
+                  "interface"
     [fe]
       type = 'Exodiff'
       input = 'interface_diffusive_flux.i'
@@ -17,6 +18,17 @@
       exodiff = 'InterfaceDiffusiveFluxIntegral_fv.e'
       detail = 'and with finite volume variables.'
       cli_args = 'postprocessor_type=InterfaceDiffusiveFluxIntegral'
+      ad_indexing_type = 'global'
+    []
+    [fv-harmonic]
+      type = 'Exodiff'
+      input = 'interface_diffusive_flux_fv.i'
+      exodiff = 'InterfaceDiffusiveFluxIntegral_fv-harmonic.e'
+      detail = 'with finite volume variables and harmonic interpolation for the diffusion coefficient.'
+      cli_args = "postprocessor_type=InterfaceDiffusiveFluxIntegral
+                  FVInterfaceKernels/reaction/coeff_interp_method=harmonic
+                  Postprocessors/diffusive_flux/coeff_interp_method=harmonic
+                  Outputs/file_base='${raw ${postprocessor_type} _fv-harmonic}'"
       ad_indexing_type = 'global'
     []
   []

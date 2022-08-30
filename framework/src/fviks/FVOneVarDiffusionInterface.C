@@ -22,6 +22,11 @@ FVOneVarDiffusionInterface::validParams()
                                                 "The diffusion coefficient on the 1st subdomains");
   params.addRequiredParam<MaterialPropertyName>("coeff2",
                                                 "The diffusion coefficient on the 2nd subdomains");
+  MooseEnum coeff_interp_method("average harmonic", "harmonic");
+  params.addParam<MooseEnum>(
+      "coeff_interp_method",
+      coeff_interp_method,
+      "Switch that can select face interpolation method for diffusion coefficients.");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
@@ -35,6 +40,11 @@ FVOneVarDiffusionInterface::FVOneVarDiffusionInterface(const InputParameters & p
     paramError("variable2",
                name(),
                " is only designed to work with the same variable on both sides of an interface.");
+  const auto & interp_method = getParam<MooseEnum>("coeff_interp_method");
+  if (interp_method == "average")
+    _coeff_interp_method = Moose::FV::InterpMethod::Average;
+  else if (interp_method == "harmonic")
+    _coeff_interp_method = Moose::FV::InterpMethod::HarmonicAverage;
 }
 
 ADReal
@@ -46,12 +56,21 @@ FVOneVarDiffusionInterface::computeQpResidual()
   const auto & grad = var1().adGradSln(*_face_info);
 
   ADReal coef;
-  interpolate(Moose::FV::InterpMethod::Average,
-              coef,
-              coef_elem(elemFromFace()),
-              coef_neighbor(neighborFromFace()),
-              *_face_info,
-              true);
+  if (_coeff_interp_method == Moose::FV::InterpMethod::Average)
+    interpolate(Moose::FV::InterpMethod::Average,
+                coef,
+                coef_elem(elemFromFace()),
+                coef_neighbor(neighborFromFace()),
+                *_face_info,
+                true);
+  else
+  {
+    const auto face_elem = elemFromFace();
+    const auto face_neighbor = neighborFromFace();
+    ADReal k_elem(coef_elem(face_elem));
+    ADReal k_neigh(coef_neighbor(face_neighbor));
+    coef = Moose::FV::harmonicInterpolation(k_elem, k_neigh, *_face_info, true);
+  }
 
   return _normal * -coef * grad;
 }

@@ -22,6 +22,11 @@ FVDiffusionInterface::validParams()
                                                 "The diffusion coefficient on the 1st subdomain");
   params.addRequiredParam<MaterialPropertyName>("coeff2",
                                                 "The diffusion coefficient on the 2nd subdomain");
+  MooseEnum coeff_interp_method("average harmonic", "harmonic");
+  params.addParam<MooseEnum>(
+      "coeff_interp_method",
+      coeff_interp_method,
+      "Switch that can select face interpolation method for diffusion coefficients.");
   return params;
 }
 
@@ -30,6 +35,11 @@ FVDiffusionInterface::FVDiffusionInterface(const InputParameters & params)
     _coeff1(getFunctor<ADReal>("coeff1")),
     _coeff2(getFunctor<ADReal>("coeff2"))
 {
+  const auto & interp_method = getParam<MooseEnum>("coeff_interp_method");
+  if (interp_method == "average")
+    _coeff_interp_method = Moose::FV::InterpMethod::Average;
+  else if (interp_method == "harmonic")
+    _coeff_interp_method = Moose::FV::InterpMethod::HarmonicAverage;
 }
 
 ADReal
@@ -49,12 +59,21 @@ FVDiffusionInterface::computeQpResidual()
                                           -one_over_gradient_support;
 
   ADReal diffusivity;
-  interpolate(Moose::FV::InterpMethod::Average,
-              diffusivity,
-              coef_elem(elemFromFace()),
-              coef_neighbor(neighborFromFace()),
-              *_face_info,
-              true);
+  if (_coeff_interp_method == Moose::FV::InterpMethod::Average)
+    interpolate(Moose::FV::InterpMethod::Average,
+                diffusivity,
+                coef_elem(elemFromFace()),
+                coef_neighbor(neighborFromFace()),
+                *_face_info,
+                true);
+  else
+  {
+    const auto face_elem = elemFromFace();
+    const auto face_neighbor = neighborFromFace();
+    ADReal k_elem(coef_elem(face_elem));
+    ADReal k_neigh(coef_neighbor(face_neighbor));
+    diffusivity = Moose::FV::harmonicInterpolation(k_elem, k_neigh, *_face_info, true);
+  }
 
   return -diffusivity * _normal * gradient;
 }
