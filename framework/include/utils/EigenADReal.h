@@ -71,6 +71,7 @@ public:
   typedef ResScalar RhsPacket;
   typedef ResScalar ResPacket;
   typedef ResScalar AccPacket;
+  typedef ResScalar LhsPacket4Packing;
 };
 
 template <typename Index, typename DataMapper, bool ConjugateLhs, bool ConjugateRhs>
