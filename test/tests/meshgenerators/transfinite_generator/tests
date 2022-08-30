@@ -24,7 +24,17 @@
       exodiff = 'arccircle_generator_in.e'
       recover = false
 
-      detail = 'resulting in a mesh with an arc circle side.'
+      detail = 'resulting in a mesh with an arc circle side,'
+    []
+
+    [annular]
+      type = 'Exodiff'
+      input = 'annular_transf_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'annular_transf_generator_in.e'
+      recover = false
+
+      detail = 'or a section of an annulus.'
     []
 
     [discrete]

@@ -5,17 +5,16 @@
               10.0 -1.0 0.0
               11.0 5.0 0
               4.0 4.0 0'
-    nx = 8
-    ny = 6
-    bottom = LINE
+    nx = 12 
+    ny = 6 
     top = LINE
-    right = CIRCARC
+    bottom = CIRCARC
+    right = LINE
     left = LINE
-    right_parameter = '1.23'
+    bottom_parameter = '-1.23'              
   []
 []
 
 [Outputs]
   exodus = true
-  xda = true
 []
