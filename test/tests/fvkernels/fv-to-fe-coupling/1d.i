@@ -24,6 +24,7 @@
     type = FVDiffusion
     variable = fv
     coeff = fv_prop
+    coeff_interp_method = average
   []
   [coupled]
     type = FVCoupledForce

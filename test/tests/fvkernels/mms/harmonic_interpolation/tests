@@ -17,7 +17,7 @@
       type = PythonUnitTest
       input = 'test.py'
       test_case = TestAverageQuads
-      detail = 'first order convergence, when using a simple arithmetic average to determine the face values of discontinuous diffusion coefficients on a quad mesh.'
+      detail = 'when using a simple arithmetic average to determine the face values of discontinuous diffusion coefficients on a quad mesh.'
       method = '!dbg'
       ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'

@@ -18,11 +18,11 @@ FVDiffusion::validParams()
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription("Computes residual for diffusion operator for finite volume method.");
   params.addRequiredParam<MooseFunctorName>("coeff", "diffusion coefficient");
-  MooseEnum coeff_interp_method("average harmonic", "average");
+  MooseEnum coeff_interp_method("average harmonic", "harmonic");
   params.addParam<MooseEnum>(
       "coeff_interp_method",
       coeff_interp_method,
-      "Switch that can select between face interpoaltion methods for diffusion coefficients.");
+      "Switch that can select between face interpolation methods for diffusion coefficients.");
   params.set<unsigned short>("ghost_layers") = 2;
 
   return params;

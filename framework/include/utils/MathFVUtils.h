@@ -245,8 +245,14 @@ linearInterpolation(const T & value1,
 
 /**
  * Computes the harmonic mean (1/(gc/value1+(1-gc)/value2)) of Reals, RealVectorValues and
- * RealTensorValues with accounting for the possibility that one or both of them are AD.
+ * RealTensorValues while accounting for the possibility that one or both of them are AD.
  * For tensors, we use a component-wise mean instead of the matrix-inverse based option.
+ * @param value1 Reference to value1 in the (1/(gc/value1+(1-gc)/value2)) expression
+ * @param value2 Reference to value2 in the (1/(gc/value1+(1-gc)/value2)) expression
+ * @param fi Reference to the FaceInfo of the face on which the interpolation is requested
+ * @param one_is_elem Boolean indicating if the interpolation weight on FaceInfo belongs to the
+ * elementcorresponding to value1
+ * @return The interpolated value
  */
 template <typename T1, typename T2>
 typename libMesh::CompareTypes<T1, T2>::supertype
@@ -303,10 +309,10 @@ harmonicInterpolation(const T1 & value1,
       for (const auto j : make_range(LIBMESH_DIM))
       {
         mooseAssert(value1(i, j) > 0,
-                    "Component (" + std::string(i) + "," + std::string(i) +
+                    "Component (" + std::string(i) + "," + std::string(j) +
                         ") of input value 1 needs to be positive for harmonic interpolation!");
         mooseAssert(value2(i, j) > 0,
-                    "Component (" + std::string(i) + "," + std::string(i) +
+                    "Component (" + std::string(i) + "," + std::string(j) +
                         ") of input value 2 needs to be positive for harmonic interpolation!");
         result(i, j) = 1.0 / (coeffs.first / value1(i, j) + coeffs.second / value2(i, j));
       }
