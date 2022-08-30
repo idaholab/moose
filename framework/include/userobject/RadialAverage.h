@@ -117,6 +117,9 @@ protected:
   std::vector<std::set<std::size_t>> _communication_lists;
   bool _update_communication_lists;
 
+  /// processors to send (potentially empty) data to
+  std::vector<processor_id_type> _candidate_procs;
+
   processor_id_type _my_pid;
 
   //@{ PerfGraph identifiers
