@@ -425,8 +425,8 @@ struct ADType<VariableSecond>
 };
 
 /**
- * This is a helper function for cases when we want to use a default compile-time
- * error with constexp-based if conditions. The templating delays the triggering
+ * This is a helper variable template for cases when we want to use a default compile-time
+ * error with constexpr-based if conditions. The templating delays the triggering
  * of the static assertion until the template is instantiated.
  */
 template <class T>

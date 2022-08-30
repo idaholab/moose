@@ -30,15 +30,9 @@ The interpolation method can be set using the [!param](/FVKernels/FVDiffusion/co
 and is defaulted to `harmonic` due to its superior accuracy for discontinuous diffusion coefficients.
 Simple tests cases with discontinuous diffusion coefficients (see below)
 indicate that using harmonic interpolation yields a second-order accurate
-schems for orthogonal and 1D meshes and close to second-order (~1.8) accurate scheme for slighly
-non-orthogonal meshes. At the same time, using a simple arithmetic average for the inteprolation of
-discontinuous diffusion coefficients yiels a first order scheme.
-
-!alert note
-Unless specified otherwise using the [!param](/FVKernels/FVDiffusion/force_boundary_execution) or
-[!param](/FVKernels/FVDiffusion/boundaries_to_force)
-parameter, this kernel is not executed on variable boundaries. Unless a boundary condition is
-specified instead, this is equivalent to specifying a zero diffusive flux through the boundary.
+scheme for orthogonal and 1D meshes and close to second-order (~1.8) accurate scheme for slightly
+non-orthogonal meshes. At the same time, using a simple arithmetic average for the interpolation of
+discontinuous diffusion coefficients yields a first order scheme.
 
 !alert note
 This kernel leverages the automatic differentiation system, so the Jacobian is

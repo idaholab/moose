@@ -159,7 +159,7 @@ makeCDFace(const FaceInfo & fi, const bool correct_skewness = false)
 /// generically applicable.
 enum class InterpMethod
 {
-  /// (elem+neighbor)/2
+  /// gc*elem+(1-gc)*neighbor
   Average,
   /// 1/(gc/elem+(1-gc)/neighbor)
   HarmonicAverage,
@@ -287,7 +287,7 @@ harmonicInterpolation(const T1 & value1,
                                   RealVectorValue>::value)
   {
     typename libMesh::CompareTypes<T1, T2>::supertype result;
-    for (const auto i : make_range(LIBMESH_DIM))
+    for (const auto i : make_range(Moose::dim))
     {
       mooseAssert(value1(i) > 0,
                   "Component " + std::string(i) +
@@ -305,8 +305,8 @@ harmonicInterpolation(const T1 & value1,
                                   RealTensorValue>::value)
   {
     typename libMesh::CompareTypes<T1, T2>::supertype result;
-    for (const auto i : make_range(LIBMESH_DIM))
-      for (const auto j : make_range(LIBMESH_DIM))
+    for (const auto i : make_range(Moose::dim))
+      for (const auto j : make_range(Moose::dim))
       {
         mooseAssert(value1(i, j) > 0,
                     "Component (" + std::string(i) + "," + std::string(j) +
