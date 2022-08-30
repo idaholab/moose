@@ -66,11 +66,13 @@ MultiAppTransfer::addBBoxFactorParam(InputParameters & params)
 void
 MultiAppTransfer::addSkipCoordCollapsingParam(InputParameters & params)
 {
-  params.addParam<bool>("skip_coordinate_collapsing",
-                        false,
-                        "Whether to skip coordinate collapsing when performing mapping and inverse "
-                        "mapping coordinate transformation operations. This parameter should only "
-                        "be set by users who really know what they're doing.");
+  params.addParam<bool>(
+      "skip_coordinate_collapsing",
+      false,
+      "Whether to skip coordinate collapsing (translation and rotation are still performed, only "
+      "XYZ, RZ etc collapsing is skipped) when performing mapping and inverse "
+      "mapping coordinate transformation operations. This parameter should only "
+      "be set by users who really know what they're doing.");
 }
 
 MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
@@ -299,16 +301,23 @@ MultiAppTransfer::getAppInfo()
     const auto & ex_from_transform = *_from_transforms[0];
     const auto & ex_to_transform = *_to_transforms[0];
 
-    auto check_transform_compatibility = [this](const MultiAppCoordTransform & transform)
+    bool warning_output = false;
+    auto check_transform_compatibility =
+        [this, &warning_output](const MultiAppCoordTransform & transform)
     {
-      if (transform.hasNonTranslationTransformation() && !usesMooseAppCoordTransform())
-        mooseWarning("Transfer '",
-                     name(),
-                     "' of type '",
-                     type(),
-                     "' has non-translation transformations but it does not implement coordinate "
-                     "transformations using the 'MooseAppCoordTransform' class. Your data transfers "
-                     "will not be performed in the expected transformed frame");
+      if (!warning_output && transform.hasNonTranslationTransformation() &&
+          !usesMooseAppCoordTransform())
+      {
+        mooseWarning(
+            "Transfer '",
+            name(),
+            "' of type '",
+            type(),
+            "' has non-translation transformations but it does not implement coordinate "
+            "transformations using the 'MooseAppCoordTransform' class. Your data transfers "
+            "will not be performed in the expected transformed frame");
+        warning_output = true;
+      }
     };
 
     for (auto & from_transform : _from_transforms)
