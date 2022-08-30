@@ -116,10 +116,16 @@ protected:
   virtual void printGeneralExecutionInformation() const {};
 
   /// Print ordering of objects executed on each block
-  virtual void printBlockExecutionInformation() const {};
+  virtual void printBlockExecutionInformation() {};
 
   /// Print ordering of objects exected on each boundary
-  virtual void printBoundaryExecutionInformation(const BoundaryID /* bnd_id */) const {};
+  virtual void printBoundaryExecutionInformation(const BoundaryID /* bnd_id */) {};
+
+  /// Reset lists of blocks and boundaries for which execution printing has been done
+  void resetExecutionPrinting() {
+    _blocks_exec_printed.clear();
+    _boundaries_exec_printed.clear();
+  }
 
   FEProblemBase & _fe_problem;
   MooseMesh & _mesh;
@@ -138,6 +144,12 @@ protected:
 
   /// The subdomain for the last neighbor
   SubdomainID _old_neighbor_subdomain;
+
+  /// Set to keep track of blocks for which we have printed the execution pattern
+  std::set<std::pair<const SubdomainID, const SubdomainID>> _blocks_exec_printed;
+
+  /// Set to keep track of boundaries for which we have printed the execution pattern
+  std::set<BoundaryID> _boundaries_exec_printed;
 
   /// Holds caught runtime error messages
   std::string _error_message;
@@ -272,12 +284,18 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
 
         const std::set<BoundaryID> boundary_ids = (*faceinfo)->boundaryIDs();
         for (auto & it : boundary_ids)
+        {
+          printBoundaryExecutionInformation(it);
           onBoundary(**faceinfo, it);
+        }
 
         postFace(**faceinfo);
 
       } // range
       post();
+
+      // Clear execution printing sets to start printing on every block and boundary again
+      resetExecutionPrinting();
     }
     catch (libMesh::LogicError & e)
     {
@@ -350,6 +368,8 @@ protected:
   using ThreadedFaceLoop<RangeType>::_nl_system_num;
   using ThreadedFaceLoop<RangeType>::_subdomain;
   using ThreadedFaceLoop<RangeType>::_neighbor_subdomain;
+  using ThreadedFaceLoop<RangeType>::_blocks_exec_printed;
+  using ThreadedFaceLoop<RangeType>::_boundaries_exec_printed;
 
 private:
   void reinitVariables(const FaceInfo & fi);
@@ -363,10 +383,10 @@ private:
   virtual void printGeneralExecutionInformation() const override;
 
   /// Print ordering of objects executed on each block
-  virtual void printBlockExecutionInformation() const override;
+  virtual void printBlockExecutionInformation() override;
 
   /// Print ordering of objects exected on each boundary
-  virtual void printBoundaryExecutionInformation(const BoundaryID bnd_id) const override;
+  virtual void printBoundaryExecutionInformation(const BoundaryID bnd_id) override;
 
   /// Variables
   std::set<MooseVariableFieldBase *> _fv_vars;
@@ -1018,10 +1038,13 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printGeneralExecutionInformati
 
 template <typename RangeType, typename AttributeTagType>
 void
-ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation() const
+ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation()
 {
   if (_fe_problem.shouldPrintExecution() && _fv_flux_kernels.size())
   {
+    const auto block_pair = std::make_pair(_subdomain, _neighbor_subdomain);
+    if (_blocks_exec_printed.count(block_pair))
+      return;
     auto console = _fe_problem.console();
     console << "[DBG] Flux kernels on block " << _subdomain << " and neighbor "
             << _neighbor_subdomain << std::endl;
@@ -1032,14 +1055,17 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation
                         [](const std::string & str_out, FVFluxKernel * kernel)
                         { return str_out + " " + kernel->name(); });
     console << fv_flux_kernels << std::endl;
+    _blocks_exec_printed.insert(block_pair);
   }
 }
 
 template <typename RangeType, typename AttributeTagType>
 void
-ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformation(const BoundaryID bnd_id) const
+ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformation(const BoundaryID bnd_id)
 {
   if (!_fe_problem.shouldPrintExecution())
+    return;
+  if (_boundaries_exec_printed.count(bnd_id))
     return;
   std::vector<FVFluxBC *> bcs;
   _fe_problem.theWarehouse()
@@ -1085,4 +1111,5 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformat
                         { return str_out + " " + ik->name(); });
     console << fv_iks << std::endl;
   }
+  _boundaries_exec_printed.insert(bnd_id);
 }
