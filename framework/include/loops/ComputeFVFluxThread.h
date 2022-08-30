@@ -112,11 +112,14 @@ public:
   virtual void caughtMooseException(MooseException &) {}
 
 protected:
-  /// Print list of objects executed and in which order
+  /// Print list of object types executed and in which order
   virtual void printGeneralExecutionInformation() const {};
 
-  /// Print list of objects executed and in which order
+  /// Print ordering of objects executed on each block
   virtual void printBlockExecutionInformation() const {};
+
+  /// Print ordering of objects exected on each boundary
+  virtual void printBoundaryExecutionInformation(const BoundaryID /* bnd_id */) const {};
 
   FEProblemBase & _fe_problem;
   MooseMesh & _mesh;
@@ -256,6 +259,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
         if (_neighbor_subdomain != _old_neighbor_subdomain)
         {
           neighborSubdomainChanged();
+          // This is going to cause a lot more printing
           printBlockExecutionInformation();
         }
 
@@ -355,10 +359,14 @@ private:
                                   const std::set<unsigned int> & supplied,
                                   std::set<unsigned int> & difference);
 
-  /// Print a short message informating about loop beginning
-  void printGeneralExecutionInformation() const override;
-  /// Print list of objects executed and in which order
-  void printBlockExecutionInformation() const override;
+  /// Print list of object types executed and in which order
+  virtual void printGeneralExecutionInformation() const override;
+
+  /// Print ordering of objects executed on each block
+  virtual void printBlockExecutionInformation() const override;
+
+  /// Print ordering of objects exected on each boundary
+  virtual void printBoundaryExecutionInformation(const BoundaryID bnd_id) const override;
 
   /// Variables
   std::set<MooseVariableFieldBase *> _fv_vars;
@@ -999,7 +1007,12 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printGeneralExecutionInformati
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
-    console << "Beginning finite volume flux kernels loop on " << execute_on << std::endl;
+    console << "[DBG] Beginning finite volume flux objects loop on " << execute_on << std::endl;
+    mooseDoOnce(
+        console << "[DBG] Loop on faces (FaceInfo), objects ordered on each face: " << std::endl;
+        console << "[DBG] - (finite volume) flux kernels" << std::endl;
+        console << "[DBG] - (finite volume) flux boundary conditions" << std::endl;
+        console << "[DBG] - (finite volume) interface kernels" << std::endl;);
   }
 }
 
@@ -1010,14 +1023,66 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation
   if (_fe_problem.shouldPrintExecution() && _fv_flux_kernels.size())
   {
     auto console = _fe_problem.console();
-    console << "Flux kernels on block " << _subdomain << " and neighbor "
+    console << "[DBG] Flux kernels on block " << _subdomain << " and neighbor "
             << _neighbor_subdomain << std::endl;
     std::string fv_flux_kernels =
         std::accumulate(_fv_flux_kernels.begin(),
                         _fv_flux_kernels.end(),
-                        std::string(""),
+                        std::string("[DBG] "),
                         [](const std::string & str_out, FVFluxKernel * kernel)
                         { return str_out + " " + kernel->name(); });
     console << fv_flux_kernels << std::endl;
+  }
+}
+
+template <typename RangeType, typename AttributeTagType>
+void
+ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformation(const BoundaryID bnd_id) const
+{
+  if (!_fe_problem.shouldPrintExecution())
+    return;
+  std::vector<FVFluxBC *> bcs;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVFluxBC")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttributeTagType>(_tags)
+      .template condition<AttribBoundaries>(bnd_id)
+      .queryInto(bcs);
+
+  std::vector<FVInterfaceKernel *> iks;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVInterfaceKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttributeTagType>(_tags)
+      .template condition<AttribBoundaries>(bnd_id)
+      .queryInto(iks);
+
+  if (bcs.size())
+  {
+    auto console = _fe_problem.console();
+    console << "[DBG] FVBCs on boundary " << bnd_id << " between " << _subdomain << " and neighbor "
+            << _neighbor_subdomain << std::endl;
+    std::string fv_bcs =
+        std::accumulate(bcs.begin(),
+                        bcs.end(),
+                        std::string("[DBG] "),
+                        [](const std::string & str_out, FVFluxBC * bc)
+                        { return str_out + " " + bc->name(); });
+    console << fv_bcs << std::endl;
+  }
+  if (iks.size())
+  {
+    auto console = _fe_problem.console();
+    console << "[DBG] FVIks on boundary " << bnd_id << " between " << _subdomain << " and neighbor "
+            << _neighbor_subdomain << std::endl;
+    std::string fv_iks =
+        std::accumulate(iks.begin(),
+                        iks.end(),
+                        std::string("[DBG] "),
+                        [](const std::string & str_out, FVInterfaceKernel * ik)
+                        { return str_out + " " + ik->name(); });
+    console << fv_iks << std::endl;
   }
 }
