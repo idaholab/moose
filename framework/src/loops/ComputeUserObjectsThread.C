@@ -364,7 +364,7 @@ ComputeUserObjectsThread::printGeneralExecutionInformation() const
 }
 
 void
-ComputeUserObjectsThread::printBlockExecutionInformation() const
+ComputeUserObjectsThread::printBlockExecutionInformation()
 {
   if (_fe_problem.shouldPrintExecution())
   {
@@ -392,7 +392,7 @@ ComputeUserObjectsThread::printBlockExecutionInformation() const
 
     if (num_objects > 0)
     {
-      if (_blocks_visited.count(_subdomain))
+      if (_blocks_exec_printed.count(_subdomain))
         return;
       console << "[DBG] Ordering of User Objects on block " << _subdomain << std::endl;
       // Output specific ordering of objects
@@ -408,9 +408,10 @@ ComputeUserObjectsThread::printBlockExecutionInformation() const
       printVectorOrdering<InternalSideUserObject>(_internal_side_objs, "internal side user objects");
       printVectorOrdering<InterfaceUserObject>(_interface_user_objects, "interface user objects");
       console << "[DBG] Only user objects active on local element/sides are executed" << std::endl;
+      _blocks_exec_printed.insert(_subdomain);
     }
     else if (_fe_problem.shouldPrintExecution() && num_objects == 0 &&
-             _blocks_visited.count(_subdomain) == 0)
+             _blocks_exec_printed.count(_subdomain) == 0)
       console << "[DBG] No User Objects on block " << _subdomain << std::endl;
   }
 }

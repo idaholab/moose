@@ -176,11 +176,11 @@ ComputeElemAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() cons
 
 template <typename AuxKernelType>
 void
-ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation() const
+ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation()
 {
   if (_fe_problem.shouldPrintExecution() && _aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
-    if (_blocks_visited.count(_subdomain))
+    if (_blocks_exec_printed.count(_subdomain))
       return;
     auto console = _fe_problem.console();
     const std::vector<std::shared_ptr<AuxKernelType>> & kernels =
@@ -190,6 +190,8 @@ ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation() const
       aux_kernels_list += kernel->name() + "";
     console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
     console << "[DBG] " << aux_kernels_list<< std::endl;
+
+    _blocks_exec_printed.insert(_subdomain);
   }
 }
 

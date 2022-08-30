@@ -205,11 +205,11 @@ ComputeIndicatorThread::printGeneralExecutionInformation() const
 }
 
 void
-ComputeIndicatorThread::printBlockExecutionInformation() const
+ComputeIndicatorThread::printBlockExecutionInformation()
 {
   if (_fe_problem.shouldPrintExecution())
   {
-    if (_blocks_visited.count(_subdomain))
+    if (_blocks_exec_printed.count(_subdomain))
       return;
     auto console = _fe_problem.console();
     {
@@ -239,5 +239,6 @@ ComputeIndicatorThread::printBlockExecutionInformation() const
         console << "[DBG] " << active_indicators_string << std::endl;
       }
     }
+    _blocks_exec_printed.insert(_subdomain);
   }
 }

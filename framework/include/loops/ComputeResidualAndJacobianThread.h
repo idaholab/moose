@@ -47,7 +47,7 @@ protected:
   void printGeneralExecutionInformation() const override;
 
   // Print list of specific objects executed and in which order
-  void printBlockExecutionInformation() const override;
+  void printBlockExecutionInformation() override;
 
   /// the tags denoting the vectors we want our residual objects to fill
   const std::set<TagID> & _vector_tags;

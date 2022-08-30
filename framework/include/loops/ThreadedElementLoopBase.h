@@ -170,13 +170,13 @@ protected:
   virtual void printGeneralExecutionInformation() const {};
 
   /// Print information about the particular ordering of objects on each block
-  virtual void printBlockExecutionInformation() const {};
+  virtual void printBlockExecutionInformation(){};
 
   /// Keep track of which blocks were visited
-  std::set<SubdomainID> _blocks_visited;
+  std::set<SubdomainID> _blocks_exec_printed;
 
   /// Resets the set of blocks visited
-  virtual void clearBlocksVisited() { _blocks_visited.clear(); }
+  virtual void clearBlocksVisited() { _blocks_exec_printed.clear(); }
 
 private:
   /**
@@ -238,7 +238,6 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
         {
           subdomainChanged();
           printBlockExecutionInformation();
-          _blocks_visited.insert(_subdomain);
         }
 
         onElement(elem);

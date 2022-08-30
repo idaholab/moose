@@ -64,7 +64,7 @@ protected:
   void printGeneralExecutionInformation() const override;
 
   /// Print information about the loop, mostly order of execution of particular objects
-  void printBlockExecutionInformation() const override;
+  void printBlockExecutionInformation() override;
 
   /// Format output of vector of UOs
   template <typename T>

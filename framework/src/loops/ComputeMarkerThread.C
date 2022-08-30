@@ -121,14 +121,15 @@ ComputeMarkerThread::printGeneralExecutionInformation() const
 }
 
 void
-ComputeMarkerThread::printBlockExecutionInformation() const
+ComputeMarkerThread::printBlockExecutionInformation()
 {
   if (_fe_problem.shouldPrintExecution() && _marker_whs.hasActiveObjects())
   {
-    if (_blocks_visited.count(_subdomain))
+    if (_blocks_exec_printed.count(_subdomain))
       return;
     auto console = _fe_problem.console();
     console << "[DBG] Execution order on block: " << _subdomain << std::endl;
     console << "[DBG] " << _marker_whs.activeObjectsToString() << std::endl;
+    _blocks_exec_printed.insert(_subdomain);
   }
 }

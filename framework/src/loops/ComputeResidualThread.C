@@ -136,7 +136,7 @@ ComputeResidualThread::printGeneralExecutionInformation() const
 }
 
 void
-ComputeResidualThread::printBlockExecutionInformation() const
+ComputeResidualThread::printBlockExecutionInformation()
 {
   // Number of objects executing is approximated by size of warehouses
   int num_objects = _kernels.size() + _fv_kernels.size() + _integrated_bcs.size() +
@@ -144,7 +144,7 @@ ComputeResidualThread::printBlockExecutionInformation() const
   auto console = _fe_problem.console();
   if (_fe_problem.shouldPrintExecution() && num_objects > 0)
   {
-    if (_blocks_visited.count(_subdomain))
+    if (_blocks_exec_printed.count(_subdomain))
       return;
     console << "[DBG] Ordering of Residual Objects on block " << _subdomain << std::endl;
     if (_kernels.hasActiveObjects())
@@ -178,8 +178,9 @@ ComputeResidualThread::printBlockExecutionInformation() const
       console << "[DBG] Ordering of interface kernels:" << std::endl;
       console << "[DBG] " << _interface_kernels.activeObjectsToString() << std::endl;
     }
+    _blocks_exec_printed.insert(_subdomain);
   }
   else if (_fe_problem.shouldPrintExecution() && num_objects == 0 &&
-           _blocks_visited.count(_subdomain))
+           _blocks_exec_printed.count(_subdomain))
     console << "[DBG] No Active Residual Objects on block " << _subdomain << std::endl;
 }

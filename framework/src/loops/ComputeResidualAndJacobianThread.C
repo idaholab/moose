@@ -137,7 +137,7 @@ ComputeResidualAndJacobianThread::printGeneralExecutionInformation() const
 }
 
 void
-ComputeResidualAndJacobianThread::printBlockExecutionInformation() const
+ComputeResidualAndJacobianThread::printBlockExecutionInformation()
 {
   // Number of objects executing is approximated by size of warehouses
   int num_objects = _kernels.size() + _fv_kernels.size() + _integrated_bcs.size() +
@@ -145,7 +145,7 @@ ComputeResidualAndJacobianThread::printBlockExecutionInformation() const
   auto console = _fe_problem.console();
   if (_fe_problem.shouldPrintExecution() && num_objects > 0)
   {
-    if (_blocks_visited.count(_subdomain))
+    if (_blocks_exec_printed.count(_subdomain))
       return;
     console << "[DBG] Ordering of Residual & Jacobian Objects on block " << _subdomain << std::endl;
     if (_kernels.hasActiveObjects())
@@ -179,8 +179,9 @@ ComputeResidualAndJacobianThread::printBlockExecutionInformation() const
       console << "[DBG] Ordering of interface kernels:" << std::endl;
       console << "[DBG] " << _interface_kernels.activeObjectsToString() << std::endl;
     }
+    _blocks_exec_printed.insert(_subdomain);
   }
   else if (_fe_problem.shouldPrintExecution() && num_objects == 0 &&
-           _blocks_visited.count(_subdomain) == 0)
+           _blocks_exec_printed.count(_subdomain) == 0)
     console << "[DBG] No Active Residual & Jacobian Objects on block " << _subdomain << std::endl;
 }
