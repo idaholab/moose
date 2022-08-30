@@ -51,6 +51,10 @@ protected:
       _vector_postprocessor_name_tri;
   const std::vector<std::vector<std::vector<OutputName>>> & _output_name_tri;
   const std::vector<std::vector<std::vector<MaterialPropertyName>>> & _material_property_name_tri;
+  const std::vector<std::vector<std::vector<MaterialName>>> & _material_name_tri;
+  const std::vector<std::vector<std::vector<MooseFunctorName>>> & _moose_functor_name_tri;
+  const std::vector<std::vector<std::vector<DistributionName>>> & _distribution_name;
+  const std::vector<std::vector<std::vector<SamplerName>>> & _sampler_name;
 
   template <typename T>
   void

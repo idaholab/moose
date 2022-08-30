@@ -1908,8 +1908,7 @@ Parser::setTripleIndexParameter(
   // Get the full string assigned to the variable full_name
   std::string buffer = _root->param<std::string>(full_name);
 
-  // split vector at delim ;
-  // NOTE: the substrings are _not_ of type T yet
+  // split vector at delim | to get a series of 2D subvectors
   std::vector<std::string> first_tokenized_vector;
   std::vector<std::vector<std::string>> second_tokenized_vector;
   MooseUtils::tokenize(buffer, first_tokenized_vector, 1, "|");
@@ -1917,6 +1916,8 @@ Parser::setTripleIndexParameter(
   second_tokenized_vector.resize(first_tokenized_vector.size());
   for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
   {
+    // split each 2D subvector at delim ; to get 1D sub-subvectors
+    // NOTE: the 1D sub-subvectors are _not_ of type T yet
     MooseUtils::tokenize(first_tokenized_vector[j], second_tokenized_vector[j], 1, ";");
     param->set()[j].resize(second_tokenized_vector[j].size());
     for (unsigned k = 0; k < second_tokenized_vector[j].size(); ++k)
@@ -1934,12 +1935,15 @@ Parser::setTripleIndexParameter(
     global_block->remove(short_name);
     global_block->setTripleIndexParam<T>(short_name).resize(first_tokenized_vector.size());
     for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
+    {
+      global_block->setTripleIndexParam<T>(short_name)[j].resize(second_tokenized_vector[j].size());
       for (unsigned k = 0; k < second_tokenized_vector[j].size(); ++k)
       {
         global_block->setTripleIndexParam<T>(short_name)[j][k].resize(param->get()[j][k].size());
         for (unsigned int i = 0; i < param->get()[j][k].size(); ++i)
           global_block->setTripleIndexParam<T>(short_name)[j][k][i] = param->get()[j][k][i];
       }
+    }
   }
 }
 

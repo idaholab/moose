@@ -1,3 +1,7 @@
+[GlobalParams]
+  sampler_name_tri = 'sampler_name000 ; sampler_name010 sampler_name011 sampler_name012 ; sampler_name020 sampler_name021 | sampler_name100 sampler_name101 |  sampler_name200 sampler_name201 ; sampler_name210 ; sampler_name220 sampler_name221 sampler_name222'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -6,34 +10,34 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./triple_index]
+  [triple_index]
     type = ReadTripleIndex
     real_tri = ' 1.1 ; 2.1 2.2 2.3 ; 3.1 3.2 | 11.1 11.2 | 21.1 21.2 ; 22.1; 23.1 23.2 23.3'
     uint_tri = ' 11 ; 21 22 23 ; 31 32 | 111 112 | 211 212 ; 221; 231 232 233'
@@ -57,7 +61,10 @@
     vector_postprocessor_name_tri = 'vector_postprocessor_name000 ; vector_postprocessor_name010 vector_postprocessor_name011 vector_postprocessor_name012 ; vector_postprocessor_name020 vector_postprocessor_name021 | vector_postprocessor_name100 vector_postprocessor_name101 |  vector_postprocessor_name200 vector_postprocessor_name201 ; vector_postprocessor_name210 ; vector_postprocessor_name220 vector_postprocessor_name221 vector_postprocessor_name222'
     output_name_tri = 'output_name000 ; output_name010 output_name011 output_name012 ; output_name020 output_name021 | output_name100 output_name101 |  output_name200 output_name201 ; output_name210 ; output_name220 output_name221 output_name222'
     material_property_name_tri = 'material_property_name000 ; material_property_name010 material_property_name011 material_property_name012 ; material_property_name020 material_property_name021 | material_property_name100 material_property_name101 |  material_property_name200 material_property_name201 ; material_property_name210 ; material_property_name220 material_property_name221 material_property_name222'
-  [../]
+    material_name_tri = 'material_name000 ; material_name010 material_name011 material_name012 ; material_name020 material_name021 | material_name100 material_name101 |  material_name200 material_name201 ; material_name210 ; material_name220 material_name221 material_name222'
+    moose_functor_name_tri = 'moose_functor_name000 ; moose_functor_name010 moose_functor_name011 moose_functor_name012 ; moose_functor_name020 moose_functor_name021 | moose_functor_name100 moose_functor_name101 |  moose_functor_name200 moose_functor_name201 ; moose_functor_name210 ; moose_functor_name220 moose_functor_name221 moose_functor_name222'
+    distribution_name_tri = 'distribution_name000 ; distribution_name010 distribution_name011 distribution_name012 ; distribution_name020 distribution_name021 | distribution_name100 distribution_name101 |  distribution_name200 distribution_name201 ; distribution_name210 ; distribution_name220 distribution_name221 distribution_name222'
+  []
 []
 
 [Executioner]

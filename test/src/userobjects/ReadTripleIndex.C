@@ -58,6 +58,14 @@ ReadTripleIndex::validParams()
       "output_name_tri", "A triple-indexed vector of OutputName.");
   params.addRequiredParam<std::vector<std::vector<std::vector<MaterialPropertyName>>>>(
       "material_property_name_tri", "A triple-indexed vector of MaterialPropertyName.");
+  params.addRequiredParam<std::vector<std::vector<std::vector<MaterialName>>>>(
+      "material_name_tri", "A triple-indexed vector of MaterialName.");
+  params.addRequiredParam<std::vector<std::vector<std::vector<MooseFunctorName>>>>(
+      "moose_functor_name_tri", "A triple-indexed vector of MooseFunctorName.");
+  params.addRequiredParam<std::vector<std::vector<std::vector<DistributionName>>>>(
+      "distribution_name_tri", "A triple-indexed vector of DistributionName.");
+  params.addRequiredParam<std::vector<std::vector<std::vector<SamplerName>>>>(
+      "sampler_name_tri", "A triple-indexed vector of SamplerName.");
   return params;
 }
 
@@ -97,7 +105,14 @@ ReadTripleIndex::ReadTripleIndex(const InputParameters & params)
         getParam<std::vector<std::vector<std::vector<OutputName>>>>("output_name_tri")),
     _material_property_name_tri(
         getParam<std::vector<std::vector<std::vector<MaterialPropertyName>>>>(
-            "material_property_name_tri"))
+            "material_property_name_tri")),
+    _material_name_tri(
+        getParam<std::vector<std::vector<std::vector<MaterialName>>>>("material_name_tri")),
+    _moose_functor_name_tri(getParam<std::vector<std::vector<std::vector<MooseFunctorName>>>>(
+        "moose_functor_name_tri")),
+    _distribution_name(
+        getParam<std::vector<std::vector<std::vector<DistributionName>>>>("distribution_name_tri")),
+    _sampler_name(getParam<std::vector<std::vector<std::vector<SamplerName>>>>("sampler_name_tri"))
 {
   const std::vector<std::vector<std::vector<Real>>> reference_values = {
       {{1.1}, {2.1, 2.2, 2.3}, {3.1, 3.2}},
@@ -182,6 +197,22 @@ ReadTripleIndex::ReadTripleIndex(const InputParameters & params)
                                  "material_property_name_tri",
                                  "material_property_name",
                                  reference_values);
+
+  // check MaterialName
+  TripleIndexStringVectorChecker(
+      _material_name_tri, "material_name_tri", "material_name", reference_values);
+
+  // check MooseFunctorName
+  TripleIndexStringVectorChecker(
+      _moose_functor_name_tri, "moose_functor_name_tri", "moose_functor_name", reference_values);
+
+  // check DistributionName
+  TripleIndexStringVectorChecker(
+      _distribution_name, "distribution_name_tri", "distribution_name", reference_values);
+
+  // check SamplerName
+  TripleIndexStringVectorChecker(
+      _sampler_name, "sampler_name_tri", "sampler_name", reference_values);
 }
 
 template <typename T>
