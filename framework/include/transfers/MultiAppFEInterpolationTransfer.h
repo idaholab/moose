@@ -12,17 +12,14 @@
 #include "MultiAppConservativeTransfer.h"
 
 /**
- * Transfers a vector of variables. For each individual one,
- * samples the variable's value in the Master domain at the point where
- * the MultiApp is. Copies that value into a postprocessor in the MultiApp.
- * The source and destination vectors (of variables) should be ordered consistently.
+ * Transfers a vector of variables.
  */
-class MultiAppMeshFunctionTransfer : public MultiAppConservativeTransfer
+class MultiAppFEInterpolationTransfer : public MultiAppConservativeTransfer
 {
 public:
   static InputParameters validParams();
 
-  MultiAppMeshFunctionTransfer(const InputParameters & parameters);
+  MultiAppFEInterpolationTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 
