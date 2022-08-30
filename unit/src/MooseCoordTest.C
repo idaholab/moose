@@ -35,7 +35,7 @@ TEST(MooseCoordTest, testRotations)
   const Point minus_ypt(0, -1, 0);
   const Point minus_zpt(0, 0, -1);
   MultiAppCoordTransform multi_transform(transform);
-  multi_transform.setDestinationCoordinateSystem(multi_transform);
+  multi_transform.setDestinationCoordTransform(multi_transform);
 
   auto error_checking = [&transform](const auto up_direction, const auto & error_string)
   {
@@ -128,21 +128,21 @@ TEST(MooseCoordTest, testCoordCollapse)
   const Point xyz_pt(1, 1, 1);
   const Point rz_pt(1, 1, 0);
   {
-    xyz.setDestinationCoordinateSystem(rz);
+    xyz.setDestinationCoordTransform(rz);
     const auto pt = xyz(xyz_pt);
     EXPECT_TRUE(absoluteFuzzyEqual(pt(0), sqrt2));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 1.));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(2), 0.));
   }
   {
-    xyz.setDestinationCoordinateSystem(rsph);
+    xyz.setDestinationCoordTransform(rsph);
     const auto pt = xyz(xyz_pt);
     EXPECT_TRUE(absoluteFuzzyEqual(pt(0), sqrt3));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 0.));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(2), 0.));
   }
   {
-    rz.setDestinationCoordinateSystem(rsph);
+    rz.setDestinationCoordTransform(rsph);
     const auto pt = rz(rz_pt);
     EXPECT_TRUE(absoluteFuzzyEqual(pt(0), sqrt2));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 0.));

@@ -322,12 +322,12 @@ MultiAppTransfer::getAppInfo()
 
     for (auto & from_transform : _from_transforms)
     {
-      from_transform->setDestinationCoordinateSystem(ex_to_transform);
+      from_transform->setDestinationCoordTransform(ex_to_transform);
       check_transform_compatibility(*from_transform);
     }
     for (auto & to_transform : _to_transforms)
     {
-      to_transform->setDestinationCoordinateSystem(ex_from_transform);
+      to_transform->setDestinationCoordTransform(ex_from_transform);
       check_transform_compatibility(*to_transform);
     }
   }

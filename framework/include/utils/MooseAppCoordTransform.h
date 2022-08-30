@@ -217,7 +217,7 @@ public:
    * were to attempt to go from RZ to XYZ, e.g. a single RZ point could correspond to any point in a
    * 2pi rotation around the symmetry axis
    */
-  void setDestinationCoordinateSystem(const MultiAppCoordTransform & destination_coord_transform);
+  void setDestinationCoordTransform(const MultiAppCoordTransform & destination_coord_transform);
 
   /**
    * @return whether the coordinate transformation object modifies an incoming point, e.g. whether

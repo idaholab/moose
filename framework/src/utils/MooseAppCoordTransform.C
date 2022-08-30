@@ -442,7 +442,7 @@ MultiAppCoordTransform::setTranslationVector(const Point & translation)
 }
 
 void
-MultiAppCoordTransform::setDestinationCoordinateSystem(
+MultiAppCoordTransform::setDestinationCoordTransform(
     const MultiAppCoordTransform & destination_multi_app_transform)
 {
   _destination_app_transform = &destination_multi_app_transform._our_app_transform;
