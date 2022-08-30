@@ -12,7 +12,9 @@
 #include "MultiAppConservativeTransfer.h"
 
 /**
- * Transfers a vector of variables.
+ * Transfers a vector of variables. The local variable values are computed for each field using
+ * the libmesh mesh_function API, rather than an arbitrary interpolation from values on nearby nodes
+ * The interpolation coefficients are tied to the variable type of the transferred variable.
  */
 class MultiAppFEInterpolationTransfer : public MultiAppConservativeTransfer
 {
