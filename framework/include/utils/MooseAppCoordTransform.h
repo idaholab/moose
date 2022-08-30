@@ -40,7 +40,8 @@ public:
 
   ~MooseAppCoordTransform() = default;
 
-  MooseAppCoordTransform & operator=(const MooseAppCoordTransform & other); // we have unique pointers
+  MooseAppCoordTransform &
+  operator=(const MooseAppCoordTransform & other); // we have unique pointers
   MooseAppCoordTransform & operator=(MooseAppCoordTransform && other) = default;
 
   /**
@@ -172,7 +173,7 @@ private:
 class MultiAppCoordTransform
 {
 public:
-  explicit MultiAppCoordTransform(const MooseAppCoordTransform & single_app_transform);
+  explicit MultiAppCoordTransform(const MooseAppCoordTransform & our_app_transform);
 
   /**
    * Transforms a point from our domain into the reference domain. The sequence of transformations
@@ -234,7 +235,7 @@ public:
   /**
    * @return our coordinate system
    */
-  Moose::CoordinateSystemType coordinateSystem() const { return _single_app_transform._coord_type; }
+  Moose::CoordinateSystemType coordinateSystem() const { return _our_app_transform._coord_type; }
 
   /**
    * set whether coordinate collapsing operations should be skipped
@@ -247,22 +248,18 @@ public:
   bool skipCoordinateCollapsing() const { return _skip_coordinate_collapsing; }
 
 private:
-  /// A reference to the \p MooseAppCoordTransform object that describes scaling and rotation
-  /// transformations from our domain to the reference domain, e.g. transformations that "occur"
-  /// irrespective of the existence of other applications
-  const MooseAppCoordTransform & _single_app_transform;
+  /// A reference to the \p MooseAppCoordTransform object that describes scaling, rotation, and
+  /// coordinate system transformations from our domain to the reference domain,
+  /// e.g. transformations that occur irrespective of the existence of other applications
+  const MooseAppCoordTransform & _our_app_transform;
+
+  /// A pointer to the \p MooseAppCoordTransform object that describes scaling, rotation, and
+  /// coordinate system transformations from the destination domain to the reference domain,
+  /// e.g. transformations that occur irrespective of the existence of other applications
+  const MooseAppCoordTransform * _destination_app_transform;
 
   /// Describes a forward translation transformation from our domain to the reference frame domain
   libMesh::Point _translation;
-
-  /// The destination coordinate system
-  Moose::CoordinateSystemType _destination_coord_type;
-  /// If the destination coordinate system is RZ or RSPHERICAL, the Cartesian axis corresponding to
-  /// the radial coordinate
-  MooseAppCoordTransform::Direction _destination_r_axis;
-  /// If the destination coordinate system is RZ, the Cartesian axis corresponding to the
-  /// axial/axis-of-symmetry coordinate
-  MooseAppCoordTransform::Direction _destination_z_axis;
 
   /// whether coordinate collapsing operations should be skipped
   bool _skip_coordinate_collapsing;

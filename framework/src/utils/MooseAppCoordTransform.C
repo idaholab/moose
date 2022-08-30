@@ -135,7 +135,7 @@ MooseAppCoordTransform::setLengthUnit(const MooseUnits & length_unit)
 
 void
 MooseAppCoordTransform::setCoordinateSystem(const Moose::CoordinateSystemType coord_type,
-                                         const Direction rz_symmetry_axis)
+                                            const Direction rz_symmetry_axis)
 {
   _coord_type = coord_type;
 
@@ -337,12 +337,10 @@ MooseAppCoordTransform::computeRS()
   }
 }
 
-MultiAppCoordTransform::MultiAppCoordTransform(const MooseAppCoordTransform & single_app_transform)
-  : _single_app_transform(single_app_transform),
+MultiAppCoordTransform::MultiAppCoordTransform(const MooseAppCoordTransform & our_app_transform)
+  : _our_app_transform(our_app_transform),
+    _destination_app_transform(nullptr),
     _translation(),
-    _destination_coord_type(Moose::COORD_XYZ),
-    _destination_r_axis(MooseAppCoordTransform::INVALID),
-    _destination_z_axis(MooseAppCoordTransform::INVALID),
     _skip_coordinate_collapsing(false)
 {
 }
@@ -350,10 +348,12 @@ MultiAppCoordTransform::MultiAppCoordTransform(const MooseAppCoordTransform & si
 Point
 MultiAppCoordTransform::operator()(const Point & point) const
 {
+  mooseAssert(_destination_app_transform, "The destination application transform must be set");
+
   Point ret(point);
   // Apply scaling and then rotation
-  if (_single_app_transform._rs)
-    ret = (*_single_app_transform._rs) * ret;
+  if (_our_app_transform._rs)
+    ret = (*_our_app_transform._rs) * ret;
 
   // If this shows up in profiling we can make _translation a pointer
   ret += _translation;
@@ -362,22 +362,22 @@ MultiAppCoordTransform::operator()(const Point & point) const
     return ret;
 
   // Finally, coordinate system conversions
-  if (_single_app_transform._coord_type == Moose::COORD_XYZ &&
-      _destination_coord_type == Moose::COORD_RZ)
+  if (_our_app_transform._coord_type == Moose::COORD_XYZ &&
+      _destination_app_transform->_coord_type == Moose::COORD_RZ)
   {
     Real r_squared = 0;
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-      if (i != _destination_z_axis)
+      if (i != _destination_app_transform->_z_axis)
         r_squared += ret(i) * ret(i);
 
     const auto r = std::sqrt(r_squared);
-    const auto z = ret(_destination_z_axis);
+    const auto z = ret(_destination_app_transform->_z_axis);
     ret = 0;
-    ret(_destination_r_axis) = r;
-    ret(_destination_z_axis) = z;
+    ret(_destination_app_transform->_r_axis) = r;
+    ret(_destination_app_transform->_z_axis) = z;
   }
-  else if (_single_app_transform._coord_type == Moose::COORD_XYZ &&
-           _destination_coord_type == Moose::COORD_RSPHERICAL)
+  else if (_our_app_transform._coord_type == Moose::COORD_XYZ &&
+           _destination_app_transform->_coord_type == Moose::COORD_RSPHERICAL)
   {
     Real r_squared = 0;
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
@@ -385,16 +385,16 @@ MultiAppCoordTransform::operator()(const Point & point) const
 
     const auto r = std::sqrt(r_squared);
     ret = 0;
-    ret(_destination_r_axis) = r;
+    ret(_destination_app_transform->_r_axis) = r;
   }
-  else if (_single_app_transform._coord_type == Moose::COORD_RZ &&
-           _destination_coord_type == Moose::COORD_RSPHERICAL)
+  else if (_our_app_transform._coord_type == Moose::COORD_RZ &&
+           _destination_app_transform->_coord_type == Moose::COORD_RSPHERICAL)
   {
     Real r_squared = 0;
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       mooseAssert(
-          i == _single_app_transform._r_axis || i == _single_app_transform._z_axis ||
+          i == _our_app_transform._r_axis || i == _our_app_transform._z_axis ||
               MooseUtils::absoluteFuzzyEqual(ret(i), 0),
           "Our point should be 0 if we are evaluating at an index that is neither our r or z-axis");
       r_squared += ret(i) * ret(i);
@@ -402,7 +402,7 @@ MultiAppCoordTransform::operator()(const Point & point) const
 
     const auto r = std::sqrt(r_squared);
     ret = 0;
-    ret(_destination_r_axis) = r;
+    ret(_destination_app_transform->_r_axis) = r;
   }
 
   return ret;
@@ -417,18 +417,18 @@ MultiAppCoordTransform::mapBack(const Point & point) const
   ret -= _translation;
 
   // inverse rotate and then inverse scale
-  if (_single_app_transform._rs_inverse)
-    ret = (*_single_app_transform._rs_inverse) * ret;
+  if (_our_app_transform._rs_inverse)
+    ret = (*_our_app_transform._rs_inverse) * ret;
 
   if (_skip_coordinate_collapsing)
     return ret;
 
   // Finally, coordinate system conversions
-  if ((_single_app_transform._coord_type == Moose::COORD_XYZ &&
-       (_destination_coord_type == Moose::COORD_RZ ||
-        _destination_coord_type == Moose::COORD_RSPHERICAL)) ||
-      (_single_app_transform._coord_type == Moose::COORD_RZ &&
-       _destination_coord_type == Moose::COORD_RSPHERICAL))
+  if ((_our_app_transform._coord_type == Moose::COORD_XYZ &&
+       (_destination_app_transform->_coord_type == Moose::COORD_RZ ||
+        _destination_app_transform->_coord_type == Moose::COORD_RSPHERICAL)) ||
+      (_our_app_transform._coord_type == Moose::COORD_RZ &&
+       _destination_app_transform->_coord_type == Moose::COORD_RSPHERICAL))
     mooseError("Coordinate collapsing occurred in going to the reference space. There is no unique "
                "return mapping");
 
@@ -443,24 +443,22 @@ MultiAppCoordTransform::setTranslationVector(const Point & translation)
 
 void
 MultiAppCoordTransform::setDestinationCoordinateSystem(
-    const MultiAppCoordTransform & destination_coord_transform)
+    const MultiAppCoordTransform & destination_multi_app_transform)
 {
-  _destination_coord_type = destination_coord_transform._single_app_transform._coord_type;
-  _destination_r_axis = destination_coord_transform._single_app_transform._r_axis;
-  _destination_z_axis = destination_coord_transform._single_app_transform._z_axis;
+  _destination_app_transform = &destination_multi_app_transform._our_app_transform;
 
-  if (destination_coord_transform._single_app_transform._has_different_coord_sys &&
-      (_single_app_transform._has_different_coord_sys ||
-       _single_app_transform._coord_type != Moose::COORD_RSPHERICAL))
+  if (_destination_app_transform->_has_different_coord_sys &&
+      (_our_app_transform._has_different_coord_sys ||
+       _our_app_transform._coord_type != Moose::COORD_RSPHERICAL))
     mooseError(
         "The destination coordinate system has different coordinate systems and we have coordinate "
         "system(s) that could require coordinate collapsing when transforming from our coordinate "
         "system to the destination coordinate system. Because our transform method only takes a "
         "point argument, and not subdomain arguments, the transform is ambiguous");
 
-  if ((_destination_coord_type == Moose::COORD_RZ ||
-       _destination_coord_type == Moose::COORD_RSPHERICAL) &&
-      _single_app_transform._has_different_coord_sys)
+  if ((_destination_app_transform->_coord_type == Moose::COORD_RZ ||
+       _destination_app_transform->_coord_type == Moose::COORD_RSPHERICAL) &&
+      _our_app_transform._has_different_coord_sys)
     mooseError("When the destination coordinate system is RZ or RSPHERICAL, we have to perform "
                "coordinate collapsing based on *our* coordinate system. However, we have multiple "
                "coordinate systems, and since when evaluating transformations, we are only "
@@ -471,11 +469,11 @@ MultiAppCoordTransform::setDestinationCoordinateSystem(
 bool
 MultiAppCoordTransform::hasNonTranslationTransformation() const
 {
-  if (_single_app_transform._rs)
+  if (_our_app_transform._rs)
     for (const auto i : make_range(Moose::dim))
       for (const auto j : make_range(Moose::dim))
       {
-        const auto matrix_elem = (*_single_app_transform._rs)(i, j);
+        const auto matrix_elem = (*_our_app_transform._rs)(i, j);
         if (i == j)
         {
           if (!MooseUtils::absoluteFuzzyEqual(matrix_elem, 1))
@@ -485,11 +483,11 @@ MultiAppCoordTransform::hasNonTranslationTransformation() const
           return true;
       }
 
-  if ((_single_app_transform._coord_type == Moose::COORD_XYZ &&
-       (_destination_coord_type == Moose::COORD_RZ ||
-        _destination_coord_type == Moose::COORD_RSPHERICAL)) ||
-      (_single_app_transform._coord_type == Moose::COORD_RZ &&
-       _destination_coord_type == Moose::COORD_RSPHERICAL))
+  if ((_our_app_transform._coord_type == Moose::COORD_XYZ &&
+       (_destination_app_transform->_coord_type == Moose::COORD_RZ ||
+        _destination_app_transform->_coord_type == Moose::COORD_RSPHERICAL)) ||
+      (_our_app_transform._coord_type == Moose::COORD_RZ &&
+       _destination_app_transform->_coord_type == Moose::COORD_RSPHERICAL))
     return true;
 
   return false;

@@ -35,6 +35,7 @@ TEST(MooseCoordTest, testRotations)
   const Point minus_ypt(0, -1, 0);
   const Point minus_zpt(0, 0, -1);
   MultiAppCoordTransform multi_transform(transform);
+  multi_transform.setDestinationCoordinateSystem(multi_transform);
 
   auto error_checking = [&transform](const auto up_direction, const auto & error_string)
   {
