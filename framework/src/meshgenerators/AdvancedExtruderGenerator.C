@@ -370,6 +370,7 @@ AdvancedExtruderGenerator::generate()
 
     old_distance.zero();
 
+    // e is the elevation layer ordering
     for (unsigned int e = 0; e < total_num_elevations; e++)
     {
       auto num_layers = _num_layers[e];
@@ -378,6 +379,7 @@ AdvancedExtruderGenerator::generate()
 
       auto bias = _biases[e];
 
+      // k is the element layer ordering within each elevation layer
       for (unsigned int k = 0; k < order * num_layers + (e == 0 ? 1 : 0); ++k)
       {
         // For the first layer we don't need to move
@@ -385,6 +387,8 @@ AdvancedExtruderGenerator::generate()
           current_distance.zero();
         else
         {
+          // Shift the previous position by a certain fraction of 'height' along the extrusion
+          // direction to get the new position.
           auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
           if (MooseUtils::absoluteFuzzyEqual(bias, 1.0))
             current_distance =
@@ -751,8 +755,11 @@ AdvancedExtruderGenerator::generate()
         // define upward boundaries
         if (k == num_layers - 1)
         {
+          // Identify the side index of the new element that is part of the upward boundary
           const unsigned short top_id =
               new_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
+          // Assign sideset id to the side if the element belongs to a specified
+          // upward_boundary_source_blocks
           for (unsigned int i = 0; i < _upward_boundary_source_blocks[e].size(); i++)
             if (new_elem->subdomain_id() == _upward_boundary_source_blocks[e][i])
               boundary_info.add_side(new_elem, isFlipped ? 0 : top_id, _upward_boundary_ids[e][i]);
