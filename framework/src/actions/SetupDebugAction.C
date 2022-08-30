@@ -60,8 +60,7 @@ SetupDebugAction::validParams()
   params.addParam<bool>(
       "show_functors", false, "Whether to print information about the functors in the problem");
 
-  params.addClassDescription(
-      "Adds various debugging type output to the simulation system.");
+  params.addClassDescription("Adds various debugging type output to the simulation system.");
 
   return params;
 }

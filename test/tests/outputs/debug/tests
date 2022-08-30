@@ -114,7 +114,7 @@
     [fv_kernels_bcs]
       type = RunApp
       input = 'show_execution_fv_flux_objects.i'
-      expect_out = '\[DBG\]  1_burger 2_burgers'
+      expect_out = '\[DBG\]  2_burger 1_burgers'
       detail = 'finite volume flux objects contributing to the residual and Jacobian, notably finite volume flux kernels and flux boundary conditions'
     []
     [nodal_kernel_bcs]

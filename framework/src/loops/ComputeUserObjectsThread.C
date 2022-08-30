@@ -340,26 +340,25 @@ ComputeUserObjectsThread::printGeneralExecutionInformation() const
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Computing elemental user objects on " << execute_on << std::endl;
-    mooseDoOnce(
-    console << "[DBG] Execution order of objects types on each element then its sides:" << std::endl;
-    // onElement
-    console << "[DBG] - element user objects" << std::endl;
-    console << "[DBG] - domain user objects" << std::endl;
-    console << "[DBG] - element user objects contributing to the Jacobian" << std::endl;
+    mooseDoOnce(console << "[DBG] Execution order of objects types on each element then its sides:"
+                        << std::endl;
+                // onElement
+                console << "[DBG] - element user objects" << std::endl;
+                console << "[DBG] - domain user objects" << std::endl;
+                console << "[DBG] - element user objects contributing to the Jacobian" << std::endl;
 
-    // onBoundary
-    console << "[DBG] - side user objects" << std::endl;
-    console << "[DBG] - domain user objects executing on sides" << std::endl;
-    console << "[DBG] - side user objects contributing to the Jacobian" << std::endl;
+                // onBoundary
+                console << "[DBG] - side user objects" << std::endl;
+                console << "[DBG] - domain user objects executing on sides" << std::endl;
+                console << "[DBG] - side user objects contributing to the Jacobian" << std::endl;
 
-    // onInternalSide
-    console << "[DBG] - internal side user objects" << std::endl;
-    console << "[DBG] - domain user objects executing on internal sides" << std::endl;
+                // onInternalSide
+                console << "[DBG] - internal side user objects" << std::endl;
+                console << "[DBG] - domain user objects executing on internal sides" << std::endl;
 
-    // onInterface
-    console << "[DBG] - interface user objects" << std::endl;
-    console << "[DBG] - domain user objects executing at interfaces" << std::endl;
-    );
+                // onInterface
+                console << "[DBG] - interface user objects" << std::endl;
+                console << "[DBG] - domain user objects executing at interfaces" << std::endl;);
   }
 }
 
@@ -405,7 +404,8 @@ ComputeUserObjectsThread::printBlockExecutionInformation()
       if (_fe_problem.currentlyComputingJacobian())
         printVectorOrdering<ShapeSideUserObject>(shapers,
                                                  "side user objects contributing to the Jacobian");
-      printVectorOrdering<InternalSideUserObject>(_internal_side_objs, "internal side user objects");
+      printVectorOrdering<InternalSideUserObject>(_internal_side_objs,
+                                                  "internal side user objects");
       printVectorOrdering<InterfaceUserObject>(_interface_user_objects, "interface user objects");
       console << "[DBG] Only user objects active on local element/sides are executed" << std::endl;
       _blocks_exec_printed.insert(_subdomain);

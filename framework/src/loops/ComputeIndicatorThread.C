@@ -198,7 +198,8 @@ ComputeIndicatorThread::printGeneralExecutionInformation() const
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     if (!_finalize)
-      console << "[DBG] Executing indicators on elements then on internal sides on " << execute_on << std::endl;
+      console << "[DBG] Executing indicators on elements then on internal sides on " << execute_on
+              << std::endl;
     else
       console << "[DBG] Finalizing indicator loop" << std::endl;
   }
@@ -212,30 +213,32 @@ ComputeIndicatorThread::printBlockExecutionInformation()
     if (_blocks_exec_printed.count(_subdomain))
       return;
     auto console = _fe_problem.console();
+    if (_indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
     {
       std::string active_indicators_string = "";
       const std::vector<std::shared_ptr<Indicator>> & indicators =
           _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & indicator : indicators)
         if (indicator->isActive())
-        active_indicators_string += indicator->name() + " ";
+          active_indicators_string += indicator->name() + " ";
       if (!active_indicators_string.empty())
       {
         console << "[DBG] Ordering of element indicators on block " << _subdomain << std::endl;
         console << "[DBG] " << active_indicators_string << std::endl;
       }
     }
+    if (_internal_side_indicators.hasActiveBlockObjects(_subdomain, _tid))
     {
       std::string active_indicators_string = "";
       const std::vector<std::shared_ptr<InternalSideIndicator>> & indicators =
           _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & indicator : indicators)
         if (indicator->isActive())
-        active_indicators_string += indicator->name() + " ";
+          active_indicators_string += indicator->name() + " ";
       if (!active_indicators_string.empty())
       {
-        console << "[DBG] Ordering of element internal sides indicators on block " << _subdomain <<
-            std::endl;
+        console << "[DBG] Ordering of element internal sides indicators on block " << _subdomain
+                << std::endl;
         console << "[DBG] " << active_indicators_string << std::endl;
       }
     }

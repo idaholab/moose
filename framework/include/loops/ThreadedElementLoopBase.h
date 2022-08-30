@@ -186,7 +186,6 @@ private:
    * type of loop where the logic will be different is when projecting stateful material properties
    */
   virtual bool shouldComputeInternalSide(const Elem & elem, const Elem & neighbor) const;
-
 };
 
 template <typename RangeType>

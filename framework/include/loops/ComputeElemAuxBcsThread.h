@@ -50,5 +50,5 @@ protected:
 
   // Print list of specific objects executed and in which order
   void printBoundaryExecutionInformation(unsigned int boundary_id,
-                                         std::vector<std::shared_ptr<AuxKernelType> > kernels) const;
+                                         std::vector<std::shared_ptr<AuxKernelType>> kernels) const;
 };

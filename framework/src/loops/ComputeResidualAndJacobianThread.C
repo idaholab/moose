@@ -123,16 +123,16 @@ ComputeResidualAndJacobianThread::printGeneralExecutionInformation() const
   {
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
-    console << "[DBG] Beginning elemental loop to compute residual and Jacobian on " << execute_on << std::endl;
+    console << "[DBG] Beginning elemental loop to compute residual and Jacobian on " << execute_on
+            << std::endl;
     mooseDoOnce(
-    console << "[DBG] Execution order on each element:" << std::endl;
-    console << "[DBG] - kernels on element quadrature points" << std::endl;
-    console << "[DBG] - finite volume elemental kernels on element" << std::endl;
-    console << "[DBG] - integrated boundary conditions on element side quadrature points"
-        << std::endl;
-    console << "[DBG] - DG kernels on element side quadrature points" << std::endl;
-    console << "[DBG] - interface kernels on element side quadrature points" << std::endl;
-    );
+        console << "[DBG] Execution order on each element:" << std::endl;
+        console << "[DBG] - kernels on element quadrature points" << std::endl;
+        console << "[DBG] - finite volume elemental kernels on element" << std::endl;
+        console << "[DBG] - integrated boundary conditions on element side quadrature points"
+                << std::endl;
+        console << "[DBG] - DG kernels on element side quadrature points" << std::endl;
+        console << "[DBG] - interface kernels on element side quadrature points" << std::endl;);
   }
 }
 

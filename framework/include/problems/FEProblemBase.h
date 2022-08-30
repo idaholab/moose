@@ -2047,9 +2047,7 @@ public:
    * Set the status of loop order of execution printing
    * @param print_exec set of execution flags to print on
    */
-  void setExecutionPrinting(ExecFlagEnum print_exec) {
-      _print_execution_on = print_exec;
-  };
+  void setExecutionPrinting(ExecFlagEnum print_exec) { _print_execution_on = print_exec; };
 
   /**
    * Check whether the problem should output execution orders at this time

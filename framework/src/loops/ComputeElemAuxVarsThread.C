@@ -189,7 +189,7 @@ ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation()
     for (const auto & kernel : kernels)
       aux_kernels_list += kernel->name() + "";
     console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
-    console << "[DBG] " << aux_kernels_list<< std::endl;
+    console << "[DBG] " << aux_kernels_list << std::endl;
 
     _blocks_exec_printed.insert(_subdomain);
   }

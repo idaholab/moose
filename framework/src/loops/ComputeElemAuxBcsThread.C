@@ -169,8 +169,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() const
 template <typename AuxKernelType>
 void
 ComputeElemAuxBcsThread<AuxKernelType>::printBoundaryExecutionInformation(
-      unsigned int boundary_id,
-      std::vector<std::shared_ptr<AuxKernelType> > kernels) const
+    unsigned int boundary_id, std::vector<std::shared_ptr<AuxKernelType>> kernels) const
 {
   if (_fe_problem.shouldPrintExecution() && _storage.hasActiveObjects())
   {

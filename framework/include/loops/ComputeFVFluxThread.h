@@ -116,13 +116,14 @@ protected:
   virtual void printGeneralExecutionInformation() const {};
 
   /// Print ordering of objects executed on each block
-  virtual void printBlockExecutionInformation() {};
+  virtual void printBlockExecutionInformation(){};
 
   /// Print ordering of objects exected on each boundary
-  virtual void printBoundaryExecutionInformation(const BoundaryID /* bnd_id */) {};
+  virtual void printBoundaryExecutionInformation(const BoundaryID /* bnd_id */){};
 
   /// Reset lists of blocks and boundaries for which execution printing has been done
-  void resetExecutionPrinting() {
+  void resetExecutionPrinting()
+  {
     _blocks_exec_printed.clear();
     _boundaries_exec_printed.clear();
   }
@@ -1028,11 +1029,11 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printGeneralExecutionInformati
     auto console = _fe_problem.console();
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Beginning finite volume flux objects loop on " << execute_on << std::endl;
-    mooseDoOnce(
-        console << "[DBG] Loop on faces (FaceInfo), objects ordered on each face: " << std::endl;
-        console << "[DBG] - (finite volume) flux kernels" << std::endl;
-        console << "[DBG] - (finite volume) flux boundary conditions" << std::endl;
-        console << "[DBG] - (finite volume) interface kernels" << std::endl;);
+    mooseDoOnce(console << "[DBG] Loop on faces (FaceInfo), objects ordered on each face: "
+                        << std::endl;
+                console << "[DBG] - (finite volume) flux kernels" << std::endl;
+                console << "[DBG] - (finite volume) flux boundary conditions" << std::endl;
+                console << "[DBG] - (finite volume) interface kernels" << std::endl;);
   }
 }
 
@@ -1051,7 +1052,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation
     std::string fv_flux_kernels =
         std::accumulate(_fv_flux_kernels.begin(),
                         _fv_flux_kernels.end(),
-                        std::string("[DBG] "),
+                        std::string("[DBG]"),
                         [](const std::string & str_out, FVFluxKernel * kernel)
                         { return str_out + " " + kernel->name(); });
     console << fv_flux_kernels << std::endl;
@@ -1061,7 +1062,8 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printBlockExecutionInformation
 
 template <typename RangeType, typename AttributeTagType>
 void
-ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformation(const BoundaryID bnd_id)
+ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformation(
+    const BoundaryID bnd_id)
 {
   if (!_fe_problem.shouldPrintExecution())
     return;
@@ -1090,25 +1092,23 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::printBoundaryExecutionInformat
     auto console = _fe_problem.console();
     console << "[DBG] FVBCs on boundary " << bnd_id << " between " << _subdomain << " and neighbor "
             << _neighbor_subdomain << std::endl;
-    std::string fv_bcs =
-        std::accumulate(bcs.begin(),
-                        bcs.end(),
-                        std::string("[DBG] "),
-                        [](const std::string & str_out, FVFluxBC * bc)
-                        { return str_out + " " + bc->name(); });
+    std::string fv_bcs = std::accumulate(bcs.begin(),
+                                         bcs.end(),
+                                         std::string("[DBG]"),
+                                         [](const std::string & str_out, FVFluxBC * bc)
+                                         { return str_out + " " + bc->name(); });
     console << fv_bcs << std::endl;
   }
   if (iks.size())
   {
     auto console = _fe_problem.console();
-    console << "[DBG] FVIks on boundary " << bnd_id << " between " << _subdomain << " and neighbor "
+    console << "[DBG] FVIKs on boundary " << bnd_id << " between " << _subdomain << " and neighbor "
             << _neighbor_subdomain << std::endl;
-    std::string fv_iks =
-        std::accumulate(iks.begin(),
-                        iks.end(),
-                        std::string("[DBG] "),
-                        [](const std::string & str_out, FVInterfaceKernel * ik)
-                        { return str_out + " " + ik->name(); });
+    std::string fv_iks = std::accumulate(iks.begin(),
+                                         iks.end(),
+                                         std::string("[DBG]"),
+                                         [](const std::string & str_out, FVInterfaceKernel * ik)
+                                         { return str_out + " " + ik->name(); });
     console << fv_iks << std::endl;
   }
   _boundaries_exec_printed.insert(bnd_id);
