@@ -337,7 +337,7 @@ MooseAppCoordTransform::computeRS()
   }
 }
 
-MultiCoordTransform::MultiCoordTransform(const MooseAppCoordTransform & single_app_transform)
+MultiAppCoordTransform::MultiAppCoordTransform(const MooseAppCoordTransform & single_app_transform)
   : _single_app_transform(single_app_transform),
     _translation(),
     _destination_coord_type(Moose::COORD_XYZ),
@@ -348,7 +348,7 @@ MultiCoordTransform::MultiCoordTransform(const MooseAppCoordTransform & single_a
 }
 
 Point
-MultiCoordTransform::operator()(const Point & point) const
+MultiAppCoordTransform::operator()(const Point & point) const
 {
   Point ret(point);
   // Apply scaling and then rotation
@@ -409,7 +409,7 @@ MultiCoordTransform::operator()(const Point & point) const
 }
 
 Point
-MultiCoordTransform::mapBack(const Point & point) const
+MultiAppCoordTransform::mapBack(const Point & point) const
 {
   Point ret(point);
 
@@ -436,14 +436,14 @@ MultiCoordTransform::mapBack(const Point & point) const
 }
 
 void
-MultiCoordTransform::setTranslationVector(const Point & translation)
+MultiAppCoordTransform::setTranslationVector(const Point & translation)
 {
   _translation = translation;
 }
 
 void
-MultiCoordTransform::setDestinationCoordinateSystem(
-    const MultiCoordTransform & destination_coord_transform)
+MultiAppCoordTransform::setDestinationCoordinateSystem(
+    const MultiAppCoordTransform & destination_coord_transform)
 {
   _destination_coord_type = destination_coord_transform._single_app_transform._coord_type;
   _destination_r_axis = destination_coord_transform._single_app_transform._r_axis;
@@ -469,7 +469,7 @@ MultiCoordTransform::setDestinationCoordinateSystem(
 }
 
 bool
-MultiCoordTransform::hasNonTranslationTransformation() const
+MultiAppCoordTransform::hasNonTranslationTransformation() const
 {
   if (_single_app_transform._rs)
     for (const auto i : make_range(Moose::dim))
@@ -496,7 +496,7 @@ MultiCoordTransform::hasNonTranslationTransformation() const
 }
 
 bool
-MultiCoordTransform::isIdentity() const
+MultiAppCoordTransform::isIdentity() const
 {
   if (hasNonTranslationTransformation())
     return false;
@@ -509,7 +509,7 @@ MultiCoordTransform::isIdentity() const
 }
 
 void
-MultiCoordTransform::skipCoordinateCollapsing(const bool skip_coordinate_collapsing)
+MultiAppCoordTransform::skipCoordinateCollapsing(const bool skip_coordinate_collapsing)
 {
   _skip_coordinate_collapsing = skip_coordinate_collapsing;
 }

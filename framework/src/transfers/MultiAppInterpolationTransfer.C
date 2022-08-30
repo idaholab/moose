@@ -113,7 +113,7 @@ void
 MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
     FEProblemBase & from_problem,
     const MooseVariableFieldBase & from_var,
-    const MultiCoordTransform & from_app_transform,
+    const MultiAppCoordTransform & from_app_transform,
     std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi)
 {
   MeshBase * from_mesh = NULL;
@@ -265,7 +265,7 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
     FEProblemBase & to_problem,
     MooseVariableFieldBase & to_var,
     NumericVector<Real> & to_solution,
-    const MultiCoordTransform & to_app_transform,
+    const MultiAppCoordTransform & to_app_transform,
     const std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi)
 {
   // Moose system

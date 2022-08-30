@@ -130,7 +130,7 @@ protected:
    * Transform a bounding box according to the transformations in the provided coordinate
    * transformation object
    */
-  static void transformBoundingBox(BoundingBox & box, const MultiCoordTransform & transform);
+  static void transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform);
 
   /// Deprecated class attribute for compatibility with the apps
   std::shared_ptr<MultiApp> _multi_app;
@@ -143,8 +143,8 @@ protected:
   std::vector<MooseMesh *> _from_meshes;
   std::vector<Point> _to_positions;
   std::vector<Point> _from_positions;
-  std::vector<std::unique_ptr<MultiCoordTransform>> _to_transforms;
-  std::vector<std::unique_ptr<MultiCoordTransform>> _from_transforms;
+  std::vector<std::unique_ptr<MultiAppCoordTransform>> _to_transforms;
+  std::vector<std::unique_ptr<MultiAppCoordTransform>> _from_transforms;
 
   /// True if displaced mesh is used for the source mesh, otherwise false
   bool _displaced_source_mesh;

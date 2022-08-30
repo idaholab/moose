@@ -34,7 +34,7 @@ TEST(MooseCoordTest, testRotations)
   const Point minus_xpt(-1, 0, 0);
   const Point minus_ypt(0, -1, 0);
   const Point minus_zpt(0, 0, -1);
-  MultiCoordTransform multi_transform(transform);
+  MultiAppCoordTransform multi_transform(transform);
 
   auto error_checking = [&transform](const auto up_direction, const auto & error_string)
   {
@@ -118,9 +118,9 @@ TEST(MooseCoordTest, testCoordCollapse)
   single_app_rz.setCoordinateSystem(Moose::COORD_RZ, MooseAppCoordTransform::Y);
   MooseAppCoordTransform single_app_rsph{};
   single_app_rsph.setCoordinateSystem(Moose::COORD_RSPHERICAL);
-  MultiCoordTransform xyz(single_app_xyz);
-  MultiCoordTransform rz(single_app_rz);
-  MultiCoordTransform rsph(single_app_rsph);
+  MultiAppCoordTransform xyz(single_app_xyz);
+  MultiAppCoordTransform rz(single_app_rz);
+  MultiAppCoordTransform rsph(single_app_rsph);
 
   const Real sqrt2 = std::sqrt(2.);
   const Real sqrt3 = std::sqrt(3.);

@@ -244,7 +244,7 @@ MultiAppTransfer::getAppInfo()
     _to_problems.push_back(&_from_multi_app->problemBase());
     _to_positions.push_back(Point(0., 0., 0.));
     _to_transforms.push_back(
-        std::make_unique<MultiCoordTransform>(_from_multi_app->problemBase().coordTransform()));
+        std::make_unique<MultiAppCoordTransform>(_from_multi_app->problemBase().coordTransform()));
     _to_transforms.back()->skipCoordinateCollapsing(skip_coordinate_collapsing);
 
     getFromMultiAppInfo();
@@ -255,7 +255,7 @@ MultiAppTransfer::getAppInfo()
     _from_problems.push_back(&_to_multi_app->problemBase());
     _from_positions.push_back(Point(0., 0., 0.));
     _from_transforms.push_back(
-        std::make_unique<MultiCoordTransform>(_to_multi_app->problemBase().coordTransform()));
+        std::make_unique<MultiAppCoordTransform>(_to_multi_app->problemBase().coordTransform()));
     _from_transforms.back()->skipCoordinateCollapsing(skip_coordinate_collapsing);
 
     getToMultiAppInfo();
@@ -299,7 +299,7 @@ MultiAppTransfer::getAppInfo()
     const auto & ex_from_transform = *_from_transforms[0];
     const auto & ex_to_transform = *_to_transforms[0];
 
-    auto check_transform_compatibility = [this](const MultiCoordTransform & transform)
+    auto check_transform_compatibility = [this](const MultiAppCoordTransform & transform)
     {
       if (transform.hasNonTranslationTransformation() && !usesMooseAppCoordTransform())
         mooseWarning("Transfer '",
@@ -331,7 +331,7 @@ fillInfo(MultiApp & multi_app,
          std::vector<unsigned int> & map,
          std::vector<FEProblemBase *> & problems,
          std::vector<Point> & positions,
-         std::vector<std::unique_ptr<MultiCoordTransform>> & transforms,
+         std::vector<std::unique_ptr<MultiAppCoordTransform>> & transforms,
          const bool skip_coordinate_collapsing)
 {
   for (unsigned int i_app = 0; i_app < multi_app.numGlobalApps(); i_app++)
@@ -344,7 +344,7 @@ fillInfo(MultiApp & multi_app,
 
     map.push_back(i_app);
     problems.push_back(&subapp_problem);
-    transforms.push_back(std::make_unique<MultiCoordTransform>(subapp_transform));
+    transforms.push_back(std::make_unique<MultiAppCoordTransform>(subapp_transform));
     auto & transform = *transforms.back();
     transform.skipCoordinateCollapsing(skip_coordinate_collapsing);
     if (multi_app.usingPositions())
@@ -401,7 +401,7 @@ MultiAppTransfer::getFromMultiAppInfo()
 }
 
 void
-MultiAppTransfer::transformBoundingBox(BoundingBox & box, const MultiCoordTransform & transform)
+MultiAppTransfer::transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform)
 {
   MultiApp::transformBoundingBox(box, transform);
 }

@@ -26,7 +26,7 @@ class Executioner;
 class MooseApp;
 class Backup;
 class MultiAppTransfer;
-class MultiCoordTransform;
+class MultiAppCoordTransform;
 
 // libMesh forward declarations
 namespace libMesh
@@ -216,7 +216,7 @@ public:
    */
   virtual BoundingBox getBoundingBox(unsigned int app,
                                      bool displaced_mesh,
-                                     const MultiCoordTransform * coord_transform = nullptr);
+                                     const MultiAppCoordTransform * coord_transform = nullptr);
 
   /**
    * Get the FEProblemBase this MultiApp is part of.
@@ -359,7 +359,7 @@ public:
    * Transform a bounding box according to the transformations in the provided coordinate
    * transformation object
    */
-  static void transformBoundingBox(BoundingBox & box, const MultiCoordTransform & transform);
+  static void transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform);
 
 protected:
   /// function that provides cli_args to subapps

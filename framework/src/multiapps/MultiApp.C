@@ -666,7 +666,7 @@ MultiApp::keepSolutionDuringRestore(bool keep_solution_during_restore)
 }
 
 void
-MultiApp::transformBoundingBox(BoundingBox & box, const MultiCoordTransform & transform)
+MultiApp::transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform)
 {
   const Real min_x = box.first(0);
   const Real max_x = box.second(0);
@@ -708,7 +708,7 @@ MultiApp::transformBoundingBox(BoundingBox & box, const MultiCoordTransform & tr
 BoundingBox
 MultiApp::getBoundingBox(unsigned int app,
                          bool displaced_mesh,
-                         const MultiCoordTransform * const coord_transform)
+                         const MultiAppCoordTransform * const coord_transform)
 {
   if (!_has_an_app)
     mooseError("No app for ", name(), " on processor ", _orig_rank);

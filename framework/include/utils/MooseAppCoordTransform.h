@@ -162,17 +162,17 @@ private:
   /// How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5 inches
   MooseUnits _length_unit;
 
-  friend class MultiCoordTransform;
+  friend class MultiAppCoordTransform;
 };
 
 /**
  * This class contains transformation information that only exists in a context in which there are
  * multiple applications. Such information includes translation and coordinate collapsing
  */
-class MultiCoordTransform
+class MultiAppCoordTransform
 {
 public:
-  explicit MultiCoordTransform(const MooseAppCoordTransform & single_app_transform);
+  explicit MultiAppCoordTransform(const MooseAppCoordTransform & single_app_transform);
 
   /**
    * Transforms a point from our domain into the reference domain. The sequence of transformations
@@ -216,7 +216,7 @@ public:
    * were to attempt to go from RZ to XYZ, e.g. a single RZ point could correspond to any point in a
    * 2pi rotation around the symmetry axis
    */
-  void setDestinationCoordinateSystem(const MultiCoordTransform & destination_coord_transform);
+  void setDestinationCoordinateSystem(const MultiAppCoordTransform & destination_coord_transform);
 
   /**
    * @return whether the coordinate transformation object modifies an incoming point, e.g. whether
