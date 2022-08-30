@@ -111,6 +111,12 @@
       expect_out = '\[DBG\] bc_u_tb bc_ul bc_ur bc_ut bc_ub '
       detail = 'objects contributing to the residual and Jacobian, notably regular kernels and boundary conditions'
     []
+    [fv_kernels_bcs]
+      type = RunApp
+      input = 'show_execution_fv_flux_objects.i'
+      expect_out = '\[DBG\]  1_burger 2_burgers'
+      detail = 'finite volume flux objects contributing to the residual and Jacobian, notably finite volume flux kernels and flux boundary conditions'
+    []
     [nodal_kernel_bcs]
       type = RunApp
       input = 'show_execution_nodal_kernels_bcs.i'
@@ -135,8 +141,8 @@
     [user_objects_transfers]
       type = RunApp
       input = 'show_execution_userobjects.i'
-      cli_args = 'MultiApps/active=sub Transfers/active=conserve Debug/show_execution_order=TRANSFER'
-      expect_out = ''
+      cli_args = 'MultiApps/active=full_solve Transfers/active=conservative Debug/show_execution_order=TRANSFER'
+      expect_out = '\[DBG\] Computing elemental user objects on TRANSFER'
       detail = 'user objects, including postprocessors, executed on transfers between applications'
     []
     # This should be useful if an indicator is executed after a marker, by accident

@@ -210,11 +210,13 @@
     type = ElementIntegralVariablePostprocessor
     variable = v
     block = 1
+    execute_on = 'TIMESTEP_END transfer'
   []
   [int_v_elem]
     type = ElementIntegralVariablePostprocessor
     variable = v_elem
     block = 1
+    execute_on = 'TIMESTEP_END transfer'
   []
 
   # Side user objects
@@ -312,7 +314,7 @@
   active = ''
   [conservative]
     type = MultiAppNearestNodeTransfer
-    from_multiapp = full_solve
+    from_multi_app = full_solve
     source_variable = v
     variable = v_elem
     from_postprocessors_to_be_preserved = int_v
