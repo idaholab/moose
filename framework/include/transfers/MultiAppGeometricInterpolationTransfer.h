@@ -23,7 +23,7 @@ class InverseDistanceInterpolation;
 }
 
 /**
- * Copy the value to the target domain from the nearest node in the source domain.
+ * Interpolate variable values using geometry/mesh-based coefficients.
  */
 class MultiAppGeometricInterpolationTransfer : public MultiAppConservativeTransfer
 {

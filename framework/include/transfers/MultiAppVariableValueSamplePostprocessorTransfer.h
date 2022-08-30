@@ -12,6 +12,10 @@
 #include "MultiAppTransfer.h"
 #include "MeshChangedInterface.h"
 
+/**
+ * Samples a variable's value in the parent application domain at the point where
+ * the MultiApp (for each child app) is. Copies that value into a postprocessor in the MultiApp.
+ */
 class MultiAppVariableValueSamplePostprocessorTransfer : public MultiAppTransfer,
                                                          public MeshChangedInterface
 {

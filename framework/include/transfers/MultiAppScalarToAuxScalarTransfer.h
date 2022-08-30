@@ -22,15 +22,13 @@ public:
 
   MultiAppScalarToAuxScalarTransfer(const InputParameters & parameters);
 
-  /**
-   * Execute the transfer
-   */
+  /// Execute the transfer
   virtual void execute() override;
 
 protected:
-  /// The name of the variable from which the values are being transfered
+  /// The name of the scalar variable from which the values are being transfered
   VariableName _from_variable_name;
 
-  /// The name of the variable to which the scalar values are being transfered
+  /// The name of the auxiliary scalar variable to which the scalar values are being transfered
   VariableName _to_aux_name;
 };

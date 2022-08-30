@@ -28,11 +28,13 @@ public:
 protected:
   /// The number of variables to transfer
   unsigned int _var_size;
+  /// Whether to error if the target point is not found in the source domain
   bool _error_on_miss;
 
 private:
   /**
    * Performs the transfer for the variable of index i
+   * @param i index in the vector of variables to transfer
    */
   void transferVariable(unsigned int i);
 
