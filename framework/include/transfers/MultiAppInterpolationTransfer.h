@@ -68,5 +68,5 @@ protected:
   Real _distance_tol;
 
 private:
-  bool usesMooseCoordTransform() const override { return true; }
+  bool usesMooseAppCoordTransform() const override { return true; }
 };

@@ -16,7 +16,7 @@
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
 #include "MultiApp.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/meshfree_interpolation.h"

@@ -17,7 +17,7 @@
 #include "MultiApp.h"
 #include "AuxiliarySystem.h"
 #include "MooseUtils.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"

@@ -26,7 +26,7 @@
 #include "Conversion.h"
 #include "NonlinearSystemBase.h"
 #include "DelimitedFileReader.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 #include "MultiAppTransfer.h"
 
 #include "libmesh/mesh_tools.h"

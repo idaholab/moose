@@ -301,13 +301,13 @@ MultiAppTransfer::getAppInfo()
 
     auto check_transform_compatibility = [this](const MultiCoordTransform & transform)
     {
-      if (transform.hasNonTranslationTransformation() && !usesMooseCoordTransform())
+      if (transform.hasNonTranslationTransformation() && !usesMooseAppCoordTransform())
         mooseWarning("Transfer '",
                      name(),
                      "' of type '",
                      type(),
                      "' has non-translation transformations but it does not implement coordinate "
-                     "transformations using the 'MooseCoordTransform' class. Your data transfers "
+                     "transformations using the 'MooseAppCoordTransform' class. Your data transfers "
                      "will not be performed in the expected transformed frame");
     };
 

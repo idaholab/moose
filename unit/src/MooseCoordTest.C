@@ -9,7 +9,7 @@
 
 #include "gtest/gtest.h"
 
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 #include "MooseUtils.h"
 #include "Units.h"
 #include "MeshGeneratorMesh.h"
@@ -24,10 +24,10 @@ using namespace MooseUtils;
 
 TEST(MooseCoordTest, testRotations)
 {
-  MooseCoordTransform transform{};
-  const auto x = MooseCoordTransform::X;
-  const auto y = MooseCoordTransform::Y;
-  const auto z = MooseCoordTransform::Z;
+  MooseAppCoordTransform transform{};
+  const auto x = MooseAppCoordTransform::X;
+  const auto y = MooseAppCoordTransform::Y;
+  const auto z = MooseAppCoordTransform::Z;
   const Point xpt(1, 0, 0);
   const Point ypt(0, 1, 0);
   const Point zpt(0, 0, 1);
@@ -112,11 +112,11 @@ TEST(MooseCoordTest, testRotations)
 
 TEST(MooseCoordTest, testCoordCollapse)
 {
-  MooseCoordTransform single_app_xyz{};
+  MooseAppCoordTransform single_app_xyz{};
   single_app_xyz.setCoordinateSystem(Moose::COORD_XYZ);
-  MooseCoordTransform single_app_rz{};
-  single_app_rz.setCoordinateSystem(Moose::COORD_RZ, MooseCoordTransform::Y);
-  MooseCoordTransform single_app_rsph{};
+  MooseAppCoordTransform single_app_rz{};
+  single_app_rz.setCoordinateSystem(Moose::COORD_RZ, MooseAppCoordTransform::Y);
+  MooseAppCoordTransform single_app_rsph{};
   single_app_rsph.setCoordinateSystem(Moose::COORD_RSPHERICAL);
   MultiCoordTransform xyz(single_app_xyz);
   MultiCoordTransform rz(single_app_rz);

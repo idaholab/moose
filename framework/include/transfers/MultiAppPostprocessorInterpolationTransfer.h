@@ -37,5 +37,5 @@ protected:
   bool _nodal;
 
 private:
-  bool usesMooseCoordTransform() const override { return true; }
+  bool usesMooseAppCoordTransform() const override { return true; }
 };

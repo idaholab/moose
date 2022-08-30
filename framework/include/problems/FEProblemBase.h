@@ -82,7 +82,7 @@ class VectorPostprocessor;
 class MooseFunctionBase;
 template <typename>
 class FunctionTempl;
-class MooseCoordTransform;
+class MooseAppCoordTransform;
 
 // libMesh forward declarations
 namespace libMesh
@@ -2008,7 +2008,7 @@ public:
    * @return the coordinate transformation object that describes how to transform this problem's
    * coordinate system into the canonical/reference coordinate system
    */
-  MooseCoordTransform & coordTransform();
+  MooseAppCoordTransform & coordTransform();
 
 protected:
   /// Create extra tagged vectors and matrices

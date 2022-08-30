@@ -13,7 +13,7 @@
 #include "MooseVariableFEBase.h"
 #include "MooseMesh.h"
 #include "SystemBase.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/system.h"
 #include "libmesh/id_types.h"

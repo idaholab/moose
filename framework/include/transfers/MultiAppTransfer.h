@@ -13,7 +13,7 @@
 #include "Transfer.h"
 #include "MultiMooseEnum.h"
 #include "MultiApp.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/bounding_box.h"
 
@@ -211,9 +211,9 @@ protected:
 private:
   /**
    * Whether this transfer handles non-translation-based transformations, e.g. whether it uses the
-   * \p MooseCoordTransform object
+   * \p MooseAppCoordTransform object
    */
-  virtual bool usesMooseCoordTransform() const { return false; }
+  virtual bool usesMooseAppCoordTransform() const { return false; }
 
   /// The MultiApps this Transfer is transferring data to or from
   std::shared_ptr<MultiApp> _from_multi_app;

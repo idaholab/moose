@@ -7539,7 +7539,7 @@ FEProblemBase::jacobianSetup()
     _displaced_problem->jacobianSetup();
 }
 
-MooseCoordTransform &
+MooseAppCoordTransform &
 FEProblemBase::coordTransform()
 {
   return mesh().coordTransform();

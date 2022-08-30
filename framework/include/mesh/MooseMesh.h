@@ -38,7 +38,7 @@
 class Assembly;
 class RelationshipManager;
 class MooseVariableBase;
-class MooseCoordTransform;
+class MooseAppCoordTransform;
 class MooseUnits;
 
 // libMesh forward declarations
@@ -1162,7 +1162,7 @@ public:
    * @return the coordinate transformation object that describes how to transform this problem's
    * coordinate system into the canonical/reference coordinate system
    */
-  MooseCoordTransform & coordTransform();
+  MooseAppCoordTransform & coordTransform();
 
   /**
    * @return the length unit of this mesh provided through the coordinate transformation object
@@ -1549,7 +1549,7 @@ private:
 
   /// A coordinate transformation object that describes how to transform this problem's coordinate
   /// system into the canonical/reference coordinate system
-  std::unique_ptr<MooseCoordTransform> _coord_transform;
+  std::unique_ptr<MooseAppCoordTransform> _coord_transform;
 
   /// Whether the coordinate system has been set
   bool _coord_system_set;
@@ -1558,7 +1558,7 @@ private:
   struct MeshType;
 };
 
-inline MooseCoordTransform &
+inline MooseAppCoordTransform &
 MooseMesh::coordTransform()
 {
   mooseAssert(_coord_transform, "The coordinate transformation object is null.");

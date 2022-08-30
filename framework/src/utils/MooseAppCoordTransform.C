@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 #include "InputParameters.h"
 #include "MultiMooseEnum.h"
 #include "MooseEnum.h"
@@ -15,14 +15,14 @@
 
 using namespace libMesh;
 
-MooseCoordTransform::Direction
-MooseCoordTransform::processZAxis(const Direction z_axis)
+MooseAppCoordTransform::Direction
+MooseAppCoordTransform::processZAxis(const Direction z_axis)
 {
   return _coord_type == Moose::COORD_RZ ? z_axis : INVALID;
 }
 
 void
-MooseCoordTransform::setUpDirection(const Direction up_direction)
+MooseAppCoordTransform::setUpDirection(const Direction up_direction)
 {
   Real alpha = 0, beta = 0, gamma = 0;
 
@@ -85,7 +85,7 @@ MooseCoordTransform::setUpDirection(const Direction up_direction)
 }
 
 void
-MooseCoordTransform::setRotation(const Real alpha, const Real beta, const Real gamma)
+MooseAppCoordTransform::setRotation(const Real alpha, const Real beta, const Real gamma)
 {
   const bool must_rotate_axes =
       _coord_type == Moose::COORD_RZ || _coord_type == Moose::COORD_RSPHERICAL;
@@ -120,11 +120,11 @@ MooseCoordTransform::setRotation(const Real alpha, const Real beta, const Real g
   computeRS();
 
   if (must_rotate_axes && !axes_rotated)
-    mooseError("Unsupported manual angle prescription in 'MooseCoordTransform::setRotation'");
+    mooseError("Unsupported manual angle prescription in 'MooseAppCoordTransform::setRotation'");
 }
 
 void
-MooseCoordTransform::setLengthUnit(const MooseUnits & length_unit)
+MooseAppCoordTransform::setLengthUnit(const MooseUnits & length_unit)
 {
   _length_unit = length_unit;
   const auto scale = Real(_length_unit / MooseUnits("m"));
@@ -134,7 +134,7 @@ MooseCoordTransform::setLengthUnit(const MooseUnits & length_unit)
 }
 
 void
-MooseCoordTransform::setCoordinateSystem(const Moose::CoordinateSystemType coord_type,
+MooseAppCoordTransform::setCoordinateSystem(const Moose::CoordinateSystemType coord_type,
                                          const Direction rz_symmetry_axis)
 {
   _coord_type = coord_type;
@@ -143,7 +143,7 @@ MooseCoordTransform::setCoordinateSystem(const Moose::CoordinateSystemType coord
   {
     if (rz_symmetry_axis == INVALID)
       mooseError("For RZ coordinate systems, the 'rz_symmetry_axis' parameter must be provided to "
-                 "'MooseCoordTransform::setCoordinateSystem'");
+                 "'MooseAppCoordTransform::setCoordinateSystem'");
 
     _z_axis = rz_symmetry_axis;
     _r_axis = _z_axis == X ? Y : X;
@@ -153,7 +153,7 @@ MooseCoordTransform::setCoordinateSystem(const Moose::CoordinateSystemType coord
 }
 
 void
-MooseCoordTransform::setCoordinateSystem(const MooseMesh & mesh)
+MooseAppCoordTransform::setCoordinateSystem(const MooseMesh & mesh)
 {
   const auto & params = mesh.parameters();
 
@@ -177,7 +177,7 @@ MooseCoordTransform::setCoordinateSystem(const MooseMesh & mesh)
 }
 
 InputParameters
-MooseCoordTransform::validParams()
+MooseAppCoordTransform::validParams()
 {
   auto params = emptyInputParameters();
   /// One entry of coord system per block, the size of _blocks and _coord_sys has to match, except:
@@ -227,7 +227,7 @@ MooseCoordTransform::validParams()
   return params;
 }
 
-MooseCoordTransform::MooseCoordTransform(const MooseMesh & mesh)
+MooseAppCoordTransform::MooseAppCoordTransform(const MooseMesh & mesh)
   : _coord_type(Moose::COORD_XYZ),
     _r_axis(INVALID),
     _z_axis(INVALID),
@@ -270,7 +270,7 @@ MooseCoordTransform::MooseCoordTransform(const MooseMesh & mesh)
     setLengthUnit(MooseUnits(params.get<std::string>("length_unit")));
 }
 
-MooseCoordTransform::MooseCoordTransform()
+MooseAppCoordTransform::MooseAppCoordTransform()
   : _coord_type(Moose::COORD_XYZ),
     _r_axis(INVALID),
     _z_axis(INVALID),
@@ -279,7 +279,7 @@ MooseCoordTransform::MooseCoordTransform()
 {
 }
 
-MooseCoordTransform::MooseCoordTransform(const MooseCoordTransform & other)
+MooseAppCoordTransform::MooseAppCoordTransform(const MooseAppCoordTransform & other)
   : _coord_type(other._coord_type),
     _r_axis(other._r_axis),
     _z_axis(other._z_axis),
@@ -293,8 +293,8 @@ MooseCoordTransform::MooseCoordTransform(const MooseCoordTransform & other)
   computeRS();
 }
 
-MooseCoordTransform &
-MooseCoordTransform::operator=(const MooseCoordTransform & other)
+MooseAppCoordTransform &
+MooseAppCoordTransform::operator=(const MooseAppCoordTransform & other)
 {
   _coord_type = other._coord_type;
   _r_axis = other._r_axis;
@@ -317,7 +317,7 @@ MooseCoordTransform::operator=(const MooseCoordTransform & other)
 }
 
 void
-MooseCoordTransform::computeRS()
+MooseAppCoordTransform::computeRS()
 {
   if (_scale || _rotate)
   {
@@ -337,12 +337,12 @@ MooseCoordTransform::computeRS()
   }
 }
 
-MultiCoordTransform::MultiCoordTransform(const MooseCoordTransform & single_app_transform)
+MultiCoordTransform::MultiCoordTransform(const MooseAppCoordTransform & single_app_transform)
   : _single_app_transform(single_app_transform),
     _translation(),
     _destination_coord_type(Moose::COORD_XYZ),
-    _destination_r_axis(MooseCoordTransform::INVALID),
-    _destination_z_axis(MooseCoordTransform::INVALID),
+    _destination_r_axis(MooseAppCoordTransform::INVALID),
+    _destination_z_axis(MooseAppCoordTransform::INVALID),
     _skip_coordinate_collapsing(false)
 {
 }

@@ -100,7 +100,7 @@ protected:
   const bool & _nearest_sub_app;
 
 private:
-  bool usesMooseCoordTransform() const override { return true; }
+  bool usesMooseAppCoordTransform() const override { return true; }
 
   /// Set of block ids this transfer is restricted to
   std::set<SubdomainID> _blk_ids;

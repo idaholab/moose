@@ -15,7 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/linear_implicit_system.h"

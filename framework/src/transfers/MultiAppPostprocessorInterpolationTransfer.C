@@ -14,7 +14,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MultiApp.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/numeric_vector.h"

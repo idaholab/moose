@@ -19,7 +19,7 @@
 class InputParameters;
 class MooseMesh;
 
-class MooseCoordTransform
+class MooseAppCoordTransform
 {
 public:
   /**
@@ -27,21 +27,21 @@ public:
    * then when \p operator() is called the result will be the passed-in point, e.g. no
    * transformation will occur
    */
-  MooseCoordTransform();
+  MooseAppCoordTransform();
 
-  MooseCoordTransform(const MooseCoordTransform & other); // we have unique pointers
-  MooseCoordTransform(MooseCoordTransform && other) = default;
+  MooseAppCoordTransform(const MooseAppCoordTransform & other); // we have unique pointers
+  MooseAppCoordTransform(MooseAppCoordTransform && other) = default;
 
   /**
    * Construct this object from the provided mesh and its input parameters. See the \p validParams
    * implementation for valid parameters
    */
-  MooseCoordTransform(const MooseMesh & mesh);
+  MooseAppCoordTransform(const MooseMesh & mesh);
 
-  ~MooseCoordTransform() = default;
+  ~MooseAppCoordTransform() = default;
 
-  MooseCoordTransform & operator=(const MooseCoordTransform & other); // we have unique pointers
-  MooseCoordTransform & operator=(MooseCoordTransform && other) = default;
+  MooseAppCoordTransform & operator=(const MooseAppCoordTransform & other); // we have unique pointers
+  MooseAppCoordTransform & operator=(MooseAppCoordTransform && other) = default;
 
   /**
    * Describes the parameters this object can take to setup transformations. These include
@@ -172,7 +172,7 @@ private:
 class MultiCoordTransform
 {
 public:
-  explicit MultiCoordTransform(const MooseCoordTransform & single_app_transform);
+  explicit MultiCoordTransform(const MooseAppCoordTransform & single_app_transform);
 
   /**
    * Transforms a point from our domain into the reference domain. The sequence of transformations
@@ -247,10 +247,10 @@ public:
   bool skipCoordinateCollapsing() const { return _skip_coordinate_collapsing; }
 
 private:
-  /// A reference to the \p MooseCoordTransform object that describes scaling and rotation
+  /// A reference to the \p MooseAppCoordTransform object that describes scaling and rotation
   /// transformations from our domain to the reference domain, e.g. transformations that "occur"
   /// irrespective of the existence of other applications
-  const MooseCoordTransform & _single_app_transform;
+  const MooseAppCoordTransform & _single_app_transform;
 
   /// Describes a forward translation transformation from our domain to the reference frame domain
   libMesh::Point _translation;
@@ -259,10 +259,10 @@ private:
   Moose::CoordinateSystemType _destination_coord_type;
   /// If the destination coordinate system is RZ or RSPHERICAL, the Cartesian axis corresponding to
   /// the radial coordinate
-  MooseCoordTransform::Direction _destination_r_axis;
+  MooseAppCoordTransform::Direction _destination_r_axis;
   /// If the destination coordinate system is RZ, the Cartesian axis corresponding to the
   /// axial/axis-of-symmetry coordinate
-  MooseCoordTransform::Direction _destination_z_axis;
+  MooseAppCoordTransform::Direction _destination_z_axis;
 
   /// whether coordinate collapsing operations should be skipped
   bool _skip_coordinate_collapsing;

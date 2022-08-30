@@ -20,7 +20,7 @@
 #include "SubProblem.h"
 #include "MooseVariableBase.h"
 #include "MooseMeshUtils.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include <utility>
 
@@ -147,7 +147,7 @@ MooseMesh::validParams()
                         true,
                         "True to skip uniform refinements when using a pre-split mesh.");
 
-  params += MooseCoordTransform::validParams();
+  params += MooseAppCoordTransform::validParams();
 
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
   // derived types that do so.
@@ -3526,7 +3526,7 @@ void
 MooseMesh::updateCoordTransform()
 {
   if (!_coord_transform)
-    _coord_transform = std::make_unique<MooseCoordTransform>(*this);
+    _coord_transform = std::make_unique<MooseAppCoordTransform>(*this);
   else
     _coord_transform->setCoordinateSystem(*this);
 }
