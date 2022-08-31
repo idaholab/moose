@@ -293,43 +293,57 @@ MultiAppTransfer::getAppInfo()
       _from_meshes.push_back(&_from_problems[i]->mesh());
   }
 
-  if (!_from_transforms.empty() && !_to_transforms.empty())
+  MooseAppCoordTransform::MinimalData from_app_transform_construction_data{};
+  if (_communicator.rank() == 0)
   {
-    // set the destination coordinate systems for each transform for the purposes of determining
-    // coordinate collapsing. For example if TO is XYZ and FROM is RZ, then TO will have its XYZ
-    // coordinates collapsed into RZ and FROM will have a no-op for coordinate collapsing
-    const auto & ex_from_transform = *_from_transforms[0];
-    const auto & ex_to_transform = *_to_transforms[0];
+    mooseAssert(!_from_transforms.empty(), "I think rank 0 should always have a transform");
+    from_app_transform_construction_data =
+        _from_transforms.front()->ourAppTransform().minimalDataDescription();
+  }
+  _communicator.broadcast(from_app_transform_construction_data);
+  _from_moose_app_transform =
+      std::make_unique<MooseAppCoordTransform>(from_app_transform_construction_data);
 
-    bool warning_output = false;
-    auto check_transform_compatibility =
-        [this, &warning_output](const MultiAppCoordTransform & transform)
-    {
-      if (!warning_output && transform.hasNonTranslationTransformation() &&
-          !usesMooseAppCoordTransform())
-      {
-        mooseWarning(
-            "Transfer '",
-            name(),
-            "' of type '",
-            type(),
-            "' has non-translation transformations but it does not implement coordinate "
-            "transformations using the 'MooseAppCoordTransform' class. Your data transfers "
-            "will not be performed in the expected transformed frame");
-        warning_output = true;
-      }
-    };
+  MooseAppCoordTransform::MinimalData to_app_transform_construction_data{};
+  if (_communicator.rank() == 0)
+  {
+    mooseAssert(!_to_transforms.empty(), "I think rank 0 should always have a transform");
+    to_app_transform_construction_data =
+        _to_transforms.front()->ourAppTransform().minimalDataDescription();
+  }
+  _communicator.broadcast(to_app_transform_construction_data);
+  _to_moose_app_transform =
+      std::make_unique<MooseAppCoordTransform>(to_app_transform_construction_data);
 
-    for (auto & from_transform : _from_transforms)
-    {
-      from_transform->setDestinationCoordTransform(ex_to_transform);
+  auto check_transform_compatibility = [this](const MultiAppCoordTransform & transform)
+  {
+    if (transform.hasNonTranslationTransformation() && !usesMooseAppCoordTransform())
+      mooseWarning("Transfer '",
+                   name(),
+                   "' of type '",
+                   type(),
+                   "' has non-translation transformations but it does not implement coordinate "
+                   "transformations using the 'MooseAppCoordTransform' class. Your data transfers "
+                   "will not be performed in the expected transformed frame");
+  };
+
+  // set the destination coordinate systems for each transform for the purposes of determining
+  // coordinate collapsing. For example if TO is XYZ and FROM is RZ, then TO will have its XYZ
+  // coordinates collapsed into RZ and FROM will have a no-op for coordinate collapsing
+
+  for (const auto i : index_range(_from_transforms))
+  {
+    auto & from_transform = _from_transforms[i];
+    from_transform->setDestinationCoordTransform(*_to_moose_app_transform);
+    if (i == 0)
       check_transform_compatibility(*from_transform);
-    }
-    for (auto & to_transform : _to_transforms)
-    {
-      to_transform->setDestinationCoordTransform(ex_from_transform);
+  }
+  for (const auto i : index_range(_to_transforms))
+  {
+    auto & to_transform = _to_transforms[i];
+    to_transform->setDestinationCoordTransform(*_from_moose_app_transform);
+    if (i == 0)
       check_transform_compatibility(*to_transform);
-    }
   }
 }
 

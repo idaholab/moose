@@ -76,6 +76,8 @@ MooseAppCoordTransform::setUpDirection(const Direction up_direction)
   else
     mooseError("Bad up direction value");
 
+  _euler_angles = {{alpha, beta, gamma}};
+
   _rotate = std::make_unique<RealTensorValue>(
       RealTensorValue::extrinsic_rotation_matrix(alpha, beta, gamma));
   computeRS();
@@ -115,6 +117,7 @@ MooseAppCoordTransform::setRotation(const Real alpha, const Real beta, const Rea
     }
   }
 
+  _euler_angles = {{alpha, beta, gamma}};
   _rotate = std::make_unique<RealTensorValue>(
       RealTensorValue::extrinsic_rotation_matrix(alpha, beta, gamma));
   computeRS();
@@ -232,7 +235,8 @@ MooseAppCoordTransform::MooseAppCoordTransform(const MooseMesh & mesh)
     _r_axis(INVALID),
     _z_axis(INVALID),
     _has_different_coord_sys(false),
-    _length_unit(std::string("1*m"))
+    _length_unit(std::string("1*m")),
+    _euler_angles()
 {
   //
   // coordinate system transformation
@@ -275,7 +279,8 @@ MooseAppCoordTransform::MooseAppCoordTransform()
     _r_axis(INVALID),
     _z_axis(INVALID),
     _has_different_coord_sys(false),
-    _length_unit(std::string("1*m"))
+    _length_unit(std::string("1*m")),
+    _euler_angles()
 {
 }
 
@@ -284,13 +289,47 @@ MooseAppCoordTransform::MooseAppCoordTransform(const MooseAppCoordTransform & ot
     _r_axis(other._r_axis),
     _z_axis(other._z_axis),
     _has_different_coord_sys(other._has_different_coord_sys),
-    _length_unit(other._length_unit)
+    _length_unit(other._length_unit),
+    _euler_angles(other._euler_angles)
 {
   if (other._scale)
     _scale = std::make_unique<RealTensorValue>(*other._scale);
   if (other._rotate)
     _rotate = std::make_unique<RealTensorValue>(*other._rotate);
   computeRS();
+}
+
+MooseAppCoordTransform::MooseAppCoordTransform(const MinimalData & minimal_data)
+  : _coord_type(static_cast<Moose::CoordinateSystemType>(std::get<4>(minimal_data))),
+    _r_axis(static_cast<Direction>(std::get<5>(minimal_data))),
+    _z_axis(static_cast<Direction>(std::get<6>(minimal_data))),
+    _has_different_coord_sys(std::get<7>(minimal_data)),
+    _length_unit(std::string("1*m")),
+    _euler_angles()
+{
+  if (std::get<0>(minimal_data))
+    setLengthUnit(MooseUnits(std::to_string(std::get<1>(minimal_data)) + "*m"));
+  if (std::get<2>(minimal_data))
+  {
+    const auto & euler_angles = std::get<3>(minimal_data);
+    _rotate = std::make_unique<RealTensorValue>(RealTensorValue::extrinsic_rotation_matrix(
+        euler_angles[0], euler_angles[1], euler_angles[2]));
+    computeRS();
+  }
+}
+
+MooseAppCoordTransform::MinimalData
+MooseAppCoordTransform::minimalDataDescription() const
+{
+  const Real scale_factor = _scale ? (*_scale)(0, 0) : 1;
+  return {static_cast<short int>(bool(_scale)),
+          scale_factor,
+          static_cast<short int>(bool(_rotate)),
+          _euler_angles,
+          static_cast<int>(_coord_type),
+          static_cast<unsigned int>(_r_axis),
+          static_cast<unsigned int>(_z_axis),
+          static_cast<short int>(_has_different_coord_sys)};
 }
 
 MooseAppCoordTransform &
@@ -301,6 +340,7 @@ MooseAppCoordTransform::operator=(const MooseAppCoordTransform & other)
   _z_axis = other._z_axis;
   _has_different_coord_sys = other._has_different_coord_sys;
   _length_unit = other._length_unit;
+  _euler_angles = other._euler_angles;
 
   if (other._scale)
     _scale = std::make_unique<RealTensorValue>(*other._scale);
@@ -443,9 +483,9 @@ MultiAppCoordTransform::setTranslationVector(const Point & translation)
 
 void
 MultiAppCoordTransform::setDestinationCoordTransform(
-    const MultiAppCoordTransform & destination_multi_app_transform)
+    const MooseAppCoordTransform & destination_app_transform)
 {
-  _destination_app_transform = &destination_multi_app_transform._our_app_transform;
+  _destination_app_transform = &destination_app_transform;
 
   if (_destination_app_transform->_has_different_coord_sys &&
       (_our_app_transform._has_different_coord_sys ||

@@ -15,6 +15,8 @@
 #include "libmesh/tensor_value.h"
 #include <memory>
 #include <string>
+#include <array>
+#include <tuple>
 
 class InputParameters;
 class MooseMesh;
@@ -22,6 +24,39 @@ class MooseMesh;
 class MooseAppCoordTransform
 {
 public:
+  /**
+   * A class scope enumeration for conveniently denoting X, Y, and Z axis directions
+   */
+  enum Direction : unsigned int
+  {
+    X = 0,
+    Y,
+    Z,
+    INVALID
+  };
+
+  /**
+   * A typedef for conveniency that describes the minimal data necessary to broadcast and build a \p
+   * MooseAppCoordTransform. The data is such:
+   * 0: whether a scaling matrix exists
+   * 1: a value describing the scaling
+   * 2: whether a rotation matrix exists
+   * 3: the Euler angles describing the rotation
+   * 4: the coordinate system type
+   * 5: the r-axis direction
+   * 6: the z-axis direction
+   * 7: whether there are multiple coordinate system types on the mesh
+   */
+  typedef std::tuple<short int,
+                     Real,
+                     short int,
+                     std::array<Real, 3>,
+                     int,
+                     unsigned int,
+                     unsigned int,
+                     short int>
+      MinimalData;
+
   /**
    * Default constructor. If no other methods are called to set rotation, translation, or scaling,
    * then when \p operator() is called the result will be the passed-in point, e.g. no
@@ -31,6 +66,11 @@ public:
 
   MooseAppCoordTransform(const MooseAppCoordTransform & other); // we have unique pointers
   MooseAppCoordTransform(MooseAppCoordTransform && other) = default;
+
+  /**
+   * Construct a coordinate transformation object from the minimal set of data required
+   */
+  MooseAppCoordTransform(const MinimalData & minimal_data);
 
   /**
    * Construct this object from the provided mesh and its input parameters. See the \p validParams
@@ -51,15 +91,11 @@ public:
   static InputParameters validParams();
 
   /**
-   * A class scope enumeration for conveniently denoting X, Y, and Z axis directions
+   * @return the minimal data necessary to describe this coordinate transformation object. This data
+   * can be broadcast and used to construct identical coordinate transformation objects on other
+   * processes
    */
-  enum Direction : unsigned int
-  {
-    X = 0,
-    Y,
-    Z,
-    INVALID
-  };
+  MinimalData minimalDataDescription() const;
 
   /**
    * @return our coordinate system
@@ -163,6 +199,9 @@ private:
   /// How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5 inches
   MooseUnits _length_unit;
 
+  /// The Euler angles describing rotation
+  std::array<Real, 3> _euler_angles;
+
   friend class MultiAppCoordTransform;
 };
 
@@ -217,7 +256,7 @@ public:
    * were to attempt to go from RZ to XYZ, e.g. a single RZ point could correspond to any point in a
    * 2pi rotation around the symmetry axis
    */
-  void setDestinationCoordTransform(const MultiAppCoordTransform & destination_coord_transform);
+  void setDestinationCoordTransform(const MooseAppCoordTransform & destination_coord_transform);
 
   /**
    * @return whether the coordinate transformation object modifies an incoming point, e.g. whether
@@ -246,6 +285,11 @@ public:
    * whether coordinate collapsing operations should be skipped
    */
   bool skipCoordinateCollapsing() const { return _skip_coordinate_collapsing; }
+
+  /**
+   * @return our moose-app coordinate transformation object
+   */
+  const MooseAppCoordTransform & ourAppTransform() const { return _our_app_transform; }
 
 private:
   /// A reference to the \p MooseAppCoordTransform object that describes scaling, rotation, and

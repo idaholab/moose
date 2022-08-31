@@ -643,9 +643,9 @@ enum ConstraintJacobianType
   PrimaryLower
 };
 
-enum CoordinateSystemType
+enum CoordinateSystemType : int
 {
-  COORD_XYZ,
+  COORD_XYZ = 0,
   COORD_RZ,
   COORD_RSPHERICAL
 };

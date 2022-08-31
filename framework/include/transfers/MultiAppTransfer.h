@@ -221,4 +221,12 @@ private:
 
   void getFromMultiAppInfo();
   void getToMultiAppInfo();
+
+  /// The moose coordinate transformation object describing rotations, scaling, and coordinate
+  /// system of the from application
+  std::unique_ptr<MooseAppCoordTransform> _from_moose_app_transform;
+
+  /// The moose coordinate transformation object describing rotations, scaling, and coordinate
+  /// system of the to application
+  std::unique_ptr<MooseAppCoordTransform> _to_moose_app_transform;
 };
