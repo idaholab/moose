@@ -138,7 +138,7 @@ replaceAll(std::string str, const std::string & from, const std::string & to)
 }
 
 std::string
-convertLatestCheckpoint(std::string orig, bool base_only)
+convertLatestCheckpoint(std::string orig)
 {
   auto slash_pos = orig.find_last_of("/");
   auto path = orig.substr(0, slash_pos);

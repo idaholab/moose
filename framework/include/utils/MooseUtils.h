@@ -92,11 +92,9 @@ std::string docsDir(const std::string & app_name);
 std::string replaceAll(std::string str, const std::string & from, const std::string & to);
 
 /**
- * Replaces "LATEST" placeholders with the latest checkpoint file name.  If base_only is true, then
- * only return the base-name of the checkpoint directory - otherwise, a full mesh
- * checkpoint file path is returned.
+ * Replaces "LATEST" placeholders with the latest checkpoint file name.
  */
-std::string convertLatestCheckpoint(std::string orig, bool base_only = true);
+std::string convertLatestCheckpoint(std::string orig);
 
 /// Computes and returns the Levenshtein distance between strings s1 and s2.
 int levenshteinDist(const std::string & s1, const std::string & s2);

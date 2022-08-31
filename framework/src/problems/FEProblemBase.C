@@ -768,21 +768,31 @@ FEProblemBase::initialSetup()
       // _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
 
       // Read the backup from file
-
       std::stringstream backup_file_name;
       backup_file_name << _app.getRestartRecoverFileBase() << "-restart-" << processor_id()
                        << ".rd";
 
       std::cout << "opening backup file: " << backup_file_name.str() << std::endl;
 
-      std::ifstream backup_file;
-      backup_file.open(backup_file_name.str(), std::ios::in | std::ios::binary);
       auto backup = std::make_shared<Backup>();
-      dataLoad(backup_file, backup, nullptr);
-      backup_file.close();
+
+      try
+      {
+        std::ifstream backup_file;
+        backup_file.open(backup_file_name.str(), std::ios::in | std::ios::binary);
+        dataLoad(backup_file, backup, nullptr);
+        backup_file.close();
+      }
+      catch (...)
+      {
+        mooseError("Error opening backup file: ", backup_file_name.str());
+      }
 
       //      _app.setBackupObject(backup);
       //      _app.restoreCachedBackup();
+
+      std::cout << "Restoring!" << std::endl;
+
       _app.restore(backup, _app.isRestarting());
 
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
@@ -1045,6 +1055,8 @@ FEProblemBase::initialSetup()
     // call is much further up and happens before ICs
     if (!_app.isRecovering())
     {
+      std::cout << "Reprojecting ICs" << std::endl;
+
       TIME_SECTION("reprojectInitialConditions", 3, "Reprojecting Initial Conditions");
 
       for (THREAD_ID tid = 0; tid < n_threads; tid++)

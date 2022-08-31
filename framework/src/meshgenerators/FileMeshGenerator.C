@@ -108,7 +108,7 @@ FileMeshGenerator::generate()
       mooseError("\"use_for_exodus_restart\" should be given only for Exodus mesh files");
 
     // to support LATEST word for loading checkpoint files
-    std::string file_name = MooseUtils::convertLatestCheckpoint(_file_name, false);
+    std::string file_name = MooseUtils::convertLatestCheckpoint(_file_name);
 
     mesh->skip_partitioning(_skip_partitioning);
     mesh->allow_renumbering(_allow_renumbering);
