@@ -24,8 +24,13 @@ VaporMixtureFluidProperties::VaporMixtureFluidProperties(const InputParameters &
 
 VaporMixtureFluidProperties::~VaporMixtureFluidProperties() {}
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 Real
 VaporMixtureFluidProperties::primaryMassFraction(const std::vector<Real> & x) const
 {
   return 1 - std::accumulate(x.begin(), x.end(), 0.0);
 }
+
+#pragma GCC diagnostic pop
