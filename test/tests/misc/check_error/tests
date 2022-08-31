@@ -145,7 +145,7 @@
   [./deprecated_param_default]
     type = 'RunApp'
     input = 'deprecated_param_test.i'
-    expect_out = "The parameter \w+ is deprecated."
+    expect_out = "The parameter '\w+' is deprecated."
     cli_args = 'Kernels/nan/deprecated_default=1 Outputs/exodus=false'
     no_error_deprecated = true
 
@@ -156,7 +156,7 @@
   [./deprecated_param_no_default]
     type = 'RunApp'
     input = 'deprecated_param_test.i'
-    expect_out = "The parameter \w+ is deprecated."
+    expect_out = "The parameter '\w+' is deprecated."
     cli_args = 'Kernels/nan/deprecated_no_default=1 Outputs/exodus=false'
     no_error_deprecated = true
 
@@ -667,7 +667,7 @@
     requirement = 'The system shall include the option to report a warning instead of an error for an unused parameter set in input.'
     issues = '#709 #759 #4101'
   [../]
-  
+
   [./unused_param_test_warn_cli]
     type = 'RunApp'
     expect_out = "unused parameter 'Mesh/unused_param'"
