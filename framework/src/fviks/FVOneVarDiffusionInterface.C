@@ -56,21 +56,12 @@ FVOneVarDiffusionInterface::computeQpResidual()
   const auto & grad = var1().adGradSln(*_face_info);
 
   ADReal coef;
-  if (_coeff_interp_method == Moose::FV::InterpMethod::Average)
-    interpolate(Moose::FV::InterpMethod::Average,
-                coef,
-                coef_elem(elemFromFace()),
-                coef_neighbor(neighborFromFace()),
-                *_face_info,
-                true);
-  else
-  {
-    const auto face_elem = elemFromFace();
-    const auto face_neighbor = neighborFromFace();
-    ADReal k_elem(coef_elem(face_elem));
-    ADReal k_neigh(coef_neighbor(face_neighbor));
-    coef = Moose::FV::harmonicInterpolation(k_elem, k_neigh, *_face_info, true);
-  }
+  interpolate(_coeff_interp_method,
+              coef,
+              coef_elem(elemFromFace()),
+              coef_neighbor(neighborFromFace()),
+              *_face_info,
+              true);
 
   return _normal * -coef * grad;
 }

@@ -97,19 +97,12 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
     const auto gradient = (_u[_qp] - _u_neighbor[_qp]) * one_over_gradient_support;
 
     Real diffusivity;
-    if (_coeff_interp_method == Moose::FV::InterpMethod::Average)
-      interpolate(Moose::FV::InterpMethod::Average,
-                  diffusivity,
-                  MetaPhysicL::raw_value(_diffusion_coef[_qp]),
-                  MetaPhysicL::raw_value(_diffusion_coef_neighbor[_qp]),
-                  *_fi,
-                  true);
-    else
-      diffusivity =
-          Moose::FV::harmonicInterpolation(MetaPhysicL::raw_value(_diffusion_coef[_qp]),
-                                           MetaPhysicL::raw_value(_diffusion_coef_neighbor[_qp]),
-                                           *_fi,
-                                           true);
+    interpolate(_coeff_interp_method,
+                diffusivity,
+                MetaPhysicL::raw_value(_diffusion_coef[_qp]),
+                MetaPhysicL::raw_value(_diffusion_coef_neighbor[_qp]),
+                *_fi,
+                true);
 
     return -diffusivity * MetaPhysicL::raw_value(gradient * normal);
   }

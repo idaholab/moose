@@ -78,17 +78,12 @@ FVDiffusion::computeQpResidual()
   auto dudn = gradUDotNormal();
 
   ADReal k;
-
-  if (_coeff_interp_method == Moose::FV::InterpMethod::Average)
-    k = _coeff(Moose::FV::makeCDFace(*_face_info, faceArgSubdomains()));
-  else
-  {
-    const auto face_elem = elemFromFace();
-    const auto face_neighbor = neighborFromFace();
-    ADReal k_elem(_coeff(face_elem));
-    ADReal k_neigh(_coeff(face_neighbor));
-    k = Moose::FV::harmonicInterpolation(k_elem, k_neigh, *_face_info, true);
-  }
+  interpolate(_coeff_interp_method,
+              k,
+              _coeff(elemFromFace()),
+              _coeff(neighborFromFace()),
+              *_face_info,
+              true);
 
   return -1 * k * dudn;
 }

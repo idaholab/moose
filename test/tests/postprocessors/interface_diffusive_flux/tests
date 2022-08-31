@@ -21,14 +21,16 @@
       ad_indexing_type = 'global'
     []
     [fv-harmonic]
-      type = 'Exodiff'
+      type = 'CSVDiff'
       input = 'interface_diffusive_flux_fv.i'
-      exodiff = 'InterfaceDiffusiveFluxIntegral_fv-harmonic.e'
+      csvdiff = 'InterfaceDiffusiveFluxIntegral_fv-harmonic.csv'
       detail = 'with finite volume variables and harmonic interpolation for the diffusion coefficient.'
       cli_args = "postprocessor_type=InterfaceDiffusiveFluxIntegral
                   FVInterfaceKernels/reaction/coeff_interp_method=harmonic
                   Postprocessors/diffusive_flux/coeff_interp_method=harmonic
-                  Outputs/file_base='${raw ${postprocessor_type} _fv-harmonic}'"
+                  Outputs/file_base='${raw ${postprocessor_type} _fv-harmonic}'
+                  Outputs/exodus=false
+                  Outputs/csv=true"
       ad_indexing_type = 'global'
     []
   []

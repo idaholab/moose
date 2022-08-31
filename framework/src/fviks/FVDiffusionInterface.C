@@ -59,21 +59,12 @@ FVDiffusionInterface::computeQpResidual()
                                           -one_over_gradient_support;
 
   ADReal diffusivity;
-  if (_coeff_interp_method == Moose::FV::InterpMethod::Average)
-    interpolate(Moose::FV::InterpMethod::Average,
-                diffusivity,
-                coef_elem(elemFromFace()),
-                coef_neighbor(neighborFromFace()),
-                *_face_info,
-                true);
-  else
-  {
-    const auto face_elem = elemFromFace();
-    const auto face_neighbor = neighborFromFace();
-    ADReal k_elem(coef_elem(face_elem));
-    ADReal k_neigh(coef_neighbor(face_neighbor));
-    diffusivity = Moose::FV::harmonicInterpolation(k_elem, k_neigh, *_face_info, true);
-  }
+  interpolate(_coeff_interp_method,
+              diffusivity,
+              coef_elem(elemFromFace()),
+              coef_neighbor(neighborFromFace()),
+              *_face_info,
+              true);
 
   return -diffusivity * _normal * gradient;
 }

@@ -290,10 +290,10 @@ harmonicInterpolation(const T1 & value1,
     for (const auto i : make_range(Moose::dim))
     {
       mooseAssert(value1(i) > 0,
-                  "Component " + std::string(i) +
+                  "Component " + std::to_string(i) +
                       " of input value 1 needs to be positive for harmonic interpolation!");
       mooseAssert(value2(i) > 0,
-                  "Component " + std::string(i) +
+                  "Component " + std::to_string(i) +
                       " of input value 2 needs to be positive for harmonic interpolation!");
       result(i) = 1.0 / (coeffs.first / value1(i) + coeffs.second / value2(i));
     }
@@ -309,10 +309,10 @@ harmonicInterpolation(const T1 & value1,
       for (const auto j : make_range(Moose::dim))
       {
         mooseAssert(value1(i, j) > 0,
-                    "Component (" + std::string(i) + "," + std::string(j) +
+                    "Component (" + std::to_string(i) + "," + std::to_string(j) +
                         ") of input value 1 needs to be positive for harmonic interpolation!");
         mooseAssert(value2(i, j) > 0,
-                    "Component (" + std::string(i) + "," + std::string(j) +
+                    "Component (" + std::to_string(i) + "," + std::to_string(j) +
                         ") of input value 2 needs to be positive for harmonic interpolation!");
         result(i, j) = 1.0 / (coeffs.first / value1(i, j) + coeffs.second / value2(i, j));
       }
@@ -369,8 +369,11 @@ interpolate(InterpMethod m,
     case InterpMethod::SkewCorrectedAverage:
       result = linearInterpolation(value1, value2, fi, one_is_elem);
       break;
+    case InterpMethod::HarmonicAverage:
+      result = harmonicInterpolation(value1, value2, fi, one_is_elem);
+      break;
     default:
-      mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
+      mooseError("unsupported interpolation method for interpolate() function");
   }
 }
 

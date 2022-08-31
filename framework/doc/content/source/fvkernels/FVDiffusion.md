@@ -30,7 +30,7 @@ The interpolation method can be set using the [!param](/FVKernels/FVDiffusion/co
 and is defaulted to `harmonic` due to its superior accuracy for discontinuous diffusion coefficients.
 Simple tests cases with discontinuous diffusion coefficients (see below)
 indicate that using harmonic interpolation yields a second-order accurate
-scheme for orthogonal and 1D meshes and close to second-order (~1.8) accurate scheme for slightly
+scheme for orthogonal and 1D meshes and close to second-order accurate scheme for slightly
 non-orthogonal meshes. At the same time, using a simple arithmetic average for the interpolation of
 discontinuous diffusion coefficients yields a first order scheme.
 
