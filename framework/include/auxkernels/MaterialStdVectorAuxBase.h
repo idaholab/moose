@@ -15,13 +15,13 @@
 /**
  * A base class for the various Material related AuxKernal objects
  */
-template <typename T = Real>
-class MaterialStdVectorAuxBase : public MaterialAuxBase<std::vector<T>>
+template <typename T, bool is_ad>
+class MaterialStdVectorAuxBaseTempl : public MaterialAuxBaseTempl<std::vector<T>, is_ad>
 {
 public:
   static InputParameters validParams();
 
-  MaterialStdVectorAuxBase(const InputParameters & parameters);
+  MaterialStdVectorAuxBaseTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
@@ -31,32 +31,36 @@ protected:
 
   // Explicitly declare the origin of the following inherited members
   // https://isocpp.org/wiki/faq/templates#nondependent-name-lookup-members
-  using MaterialAuxBase<std::vector<T>>::_qp;
-  using MaterialAuxBase<std::vector<T>>::_prop;
+  using MaterialAuxBaseTempl<std::vector<T>, is_ad, Real>::_qp;
+  using MaterialAuxBaseTempl<std::vector<T>, is_ad, Real>::_prop;
 };
 
-template <typename T>
+template <typename T, bool is_ad>
 InputParameters
-MaterialStdVectorAuxBase<T>::validParams()
+MaterialStdVectorAuxBaseTempl<T, is_ad>::validParams()
 {
-  InputParameters params = MaterialAuxBase<T>::validParams();
+  InputParameters params = MaterialAuxBaseTempl<T, is_ad>::validParams();
   params.addParam<unsigned int>("index", 0, "The index to consider for this kernel");
   return params;
 }
 
-template <typename T>
-MaterialStdVectorAuxBase<T>::MaterialStdVectorAuxBase(const InputParameters & parameters)
-  : MaterialAuxBase<std::vector<T>>(parameters),
+template <typename T, bool is_ad>
+MaterialStdVectorAuxBaseTempl<T, is_ad>::MaterialStdVectorAuxBaseTempl(
+    const InputParameters & parameters)
+  : MaterialAuxBaseTempl<std::vector<T>, is_ad>(parameters),
     _index(this->template getParam<unsigned int>("index"))
 {
 }
 
-template <typename T>
+template <typename T, bool is_ad>
 Real
-MaterialStdVectorAuxBase<T>::computeValue()
+MaterialStdVectorAuxBaseTempl<T, is_ad>::computeValue()
 {
   mooseAssert(_prop[_qp].size() > _index,
               "MaterialStdVectorRealGradientAux: You chose to extract component "
                   << _index << " but your Material property only has size " << _prop[_qp].size());
-  return MaterialAuxBase<std::vector<T>>::computeValue();
+  return MaterialAuxBaseTempl<std::vector<T>, is_ad>::computeValue();
 }
+
+template <typename T = Real>
+using MaterialStdVectorAuxBase = MaterialStdVectorAuxBaseTempl<T, false>;
