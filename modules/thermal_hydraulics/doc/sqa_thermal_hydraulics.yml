@@ -10,6 +10,7 @@ dependencies:
     - misc
     - ray_tracing
     - rdg
+    - solid_properties
 repos:
     default: https://github.com/idaholab/moose
 reports: !include ${MOOSE_DIR}/modules/thermal_hydraulics/doc/sqa_reports.yml

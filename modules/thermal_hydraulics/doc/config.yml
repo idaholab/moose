@@ -8,6 +8,7 @@ Content:
     - modules/navier_stokes/doc/content
     - modules/ray_tracing/doc/content
     - modules/rdg/doc/content
+    - modules/solid_properties/doc/content
     - infrastructure:
         root_dir: modules/doc/content
         content:
@@ -43,6 +44,7 @@ Extensions:
             - modules/navier_stokes/include
             - modules/ray_tracing/include
             - modules/rdg/include
+            - modules/solid_properties/include
     MooseDocs.extensions.common:
         shortcuts:
             framework: !include framework/doc/globals.yml
@@ -73,3 +75,4 @@ Extensions:
             navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
             rdg: !include modules/rdg/doc/sqa_rdg.yml
+            solid_properties: !include modules/solid_properties/doc/sqa_solid_properties.yml
