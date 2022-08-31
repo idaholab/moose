@@ -59,10 +59,8 @@ Extensions:
     MooseDocs.extensions.template:
         active: True
         args:
-            project-name: Thermal Hydraulics Module
-            project-name-abbrev: THM
-            bin-opt: thermal_hydraulics-opt
-            bin-dbg: thermal_hydraulics-dbg
+            thm-bin-opt: thermal_hydraulics-opt
+            thm-bin-dbg: thermal_hydraulics-dbg
     MooseDocs.extensions.sqa:
         active: True
         reports: !include modules/thermal_hydraulics/doc/sqa_reports.yml
