@@ -159,7 +159,11 @@ public:
    * @param[in] proxy value to be obtained on process with maximum value
    */
   template <typename T1, typename T2>
-  void gatherProxyValueMax(T1 & value, T2 & proxy);
+  auto gatherProxyValueMax(T1 & value, T2 & proxy) ->
+      typename std::enable_if<!std::is_same<decltype(proxy < proxy), bool>::value, void>::type;
+  template <typename T1, typename T2>
+  auto gatherProxyValueMax(T1 & value, T2 & proxy) ->
+      typename std::enable_if<std::is_same<decltype(proxy < proxy), bool>::value, void>::type;
 
   /**
    * Gather the parallel value of a variable according to which process has the parallel
@@ -168,7 +172,11 @@ public:
    * @param[in] proxy value to be obtained on process with minimum value
    */
   template <typename T1, typename T2>
-  void gatherProxyValueMin(T1 & value, T2 & proxy);
+  auto gatherProxyValueMin(T1 & value, T2 & proxy) ->
+      typename std::enable_if<!std::is_same<decltype(proxy < proxy), bool>::value, void>::type;
+  template <typename T1, typename T2>
+  auto gatherProxyValueMin(T1 & value, T2 & proxy) ->
+      typename std::enable_if<std::is_same<decltype(proxy < proxy), bool>::value, void>::type;
 
   void setPrimaryThreadCopy(UserObject * primary);
 
@@ -226,19 +234,55 @@ private:
 };
 
 template <typename T1, typename T2>
-void
-UserObject::gatherProxyValueMax(T1 & value, T2 & proxy)
+auto
+UserObject::gatherProxyValueMax(T1 & value, T2 & proxy) ->
+    typename std::enable_if<!std::is_same<decltype(proxy < proxy), bool>::value, void>::type
 {
   processor_id_type rank;
+  // we primarily compare value and use the proxy only to disambiguate for equal values
+  auto pair = std::make_pair(value, proxy);
   _communicator.maxloc(value, rank);
   _communicator.broadcast(proxy, rank);
 }
 
 template <typename T1, typename T2>
-void
-UserObject::gatherProxyValueMin(T1 & value, T2 & proxy)
+auto
+UserObject::gatherProxyValueMin(T1 & value, T2 & proxy) ->
+    typename std::enable_if<!std::is_same<decltype(proxy < proxy), bool>::value, void>::type
 {
   processor_id_type rank;
   _communicator.minloc(value, rank);
   _communicator.broadcast(proxy, rank);
+}
+
+template <typename T1, typename T2>
+auto
+UserObject::gatherProxyValueMax(T1 & value, T2 & proxy) ->
+    typename std::enable_if<std::is_same<decltype(proxy < proxy), bool>::value, void>::type
+{
+  // get all value, proxy pairs
+  std::vector<std::pair<T1, T2>> all(n_processors());
+  auto pair = std::make_pair(value, proxy);
+  _communicator.allgather(pair, all);
+
+  // find maximum, disambiguated by the proxy value
+  const auto it = std::max_element(all.begin(), all.end());
+  value = it->first;
+  proxy = it->second;
+}
+
+template <typename T1, typename T2>
+auto
+UserObject::gatherProxyValueMin(T1 & value, T2 & proxy) ->
+    typename std::enable_if<std::is_same<decltype(proxy < proxy), bool>::value, void>::type
+{
+  // get all value, proxy pairs
+  std::vector<std::pair<T1, T2>> all(n_processors());
+  auto pair = std::make_pair(value, proxy);
+  _communicator.allgather(pair, all);
+
+  // find minimum, disambiguated by the proxy value
+  const auto it = std::min_element(all.begin(), all.end());
+  value = it->first;
+  proxy = it->second;
 }
