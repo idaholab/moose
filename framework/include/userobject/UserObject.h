@@ -229,7 +229,8 @@ template <typename T1, typename T2>
 void
 UserObject::gatherProxyValueMax(T1 & value, T2 & proxy)
 {
-  // get all value, proxy pairs
+  // get all value, proxy pairs, _communicator.maxloc would be faster but leads to
+  // partitioning dependent results if teh maximum value is not unique.
   std::vector<std::pair<T1, T2>> all(n_processors());
   auto pair = std::make_pair(value, proxy);
   _communicator.allgather(pair, all);

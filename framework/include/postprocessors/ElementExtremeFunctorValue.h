@@ -50,21 +50,15 @@ protected:
   /// The extreme value type
   ExtremeType _type;
 
-  /**
-   * The value of the variable at the point at which the proxy variable
-   * reaches the max/min value.
-   */
-  Real _value;
-
-  /// Variable to search the extrema for
+  /// Functor to search the extrema for
   const Moose::Functor<GenericReal<is_ad>> & _functor;
 
   /**
-   * A proxy variable used to find the quadrature point at
-   * which to evaluate the variable. If not provided, defaults to the variable.
+   * A proxy functor used to find the quadrature point at
+   * which to evaluate the functor. If not provided, defaults to the functor.
    */
   const Moose::Functor<GenericReal<is_ad>> & _proxy_functor;
 
-  /// Extreme value of the proxy variable
-  Real _proxy_value;
+  /// Extreme value of the value and proxy functor at the same point
+  std::pair<Real, Real> _proxy_value;
 };

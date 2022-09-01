@@ -13,6 +13,7 @@
 #include <limits>
 
 registerMooseObject("MooseApp", ElementExtremeFunctorValue);
+
 registerMooseObject("MooseApp", ADElementExtremeFunctorValue);
 
 template <bool is_ad>
@@ -65,13 +66,13 @@ ElementExtremeFunctorValueTempl<is_ad>::initialize()
   switch (_type)
   {
     case MAX:
-      _proxy_value = -std::numeric_limits<Real>::max(); // start w/ the min
-      _value = -std::numeric_limits<Real>::max();
+      _proxy_value =
+          std::make_pair(-std::numeric_limits<Real>::max(), -std::numeric_limits<Real>::max());
       break;
 
     case MIN:
-      _proxy_value = std::numeric_limits<Real>::max(); // start w/ the max
-      _value = std::numeric_limits<Real>::max();
+      _proxy_value =
+          std::make_pair(std::numeric_limits<Real>::max(), std::numeric_limits<Real>::max());
       break;
   }
 }
@@ -83,22 +84,18 @@ ElementExtremeFunctorValueTempl<is_ad>::computeValue()
   // Most element evaluations do not use skewness correction,
   // but this could become a parameter in the future
   Moose::ElemArg elem = makeElemArg(_current_elem);
+  const auto pv = std::make_pair(MetaPhysicL::raw_value(_proxy_functor(elem)),
+                                 MetaPhysicL::raw_value(_functor(elem)));
   switch (_type)
   {
     case MAX:
-      if (_proxy_functor(elem) > _proxy_value)
-      {
-        _proxy_value = MetaPhysicL::raw_value(_proxy_functor(elem));
-        _value = MetaPhysicL::raw_value(_functor(elem));
-      }
+      if (pv > _proxy_value)
+        _proxy_value = pv;
       break;
 
     case MIN:
-      if (_proxy_functor(elem) < _proxy_value)
-      {
-        _proxy_value = MetaPhysicL::raw_value(_proxy_functor(elem));
-        _value = MetaPhysicL::raw_value(_functor(elem));
-      }
+      if (pv < _proxy_value)
+        _proxy_value = pv;
       break;
   }
 }
@@ -107,7 +104,7 @@ template <bool is_ad>
 Real
 ElementExtremeFunctorValueTempl<is_ad>::getValue()
 {
-  return _value;
+  return _proxy_value.second;
 }
 
 template <bool is_ad>
@@ -117,10 +114,10 @@ ElementExtremeFunctorValueTempl<is_ad>::finalize()
   switch (_type)
   {
     case MAX:
-      gatherProxyValueMax(_proxy_value, _value);
+      gatherProxyValueMax(_proxy_value.first, _proxy_value.second);
       break;
     case MIN:
-      gatherProxyValueMin(_proxy_value, _value);
+      gatherProxyValueMin(_proxy_value.first, _proxy_value.second);
       break;
   }
 }
@@ -136,17 +133,11 @@ ElementExtremeFunctorValueTempl<is_ad>::threadJoin(const UserObject & y)
   {
     case MAX:
       if (pps._proxy_value > _proxy_value)
-      {
         _proxy_value = pps._proxy_value;
-        _value = pps._value;
-      }
       break;
     case MIN:
       if (pps._proxy_value < _proxy_value)
-      {
         _proxy_value = pps._proxy_value;
-        _value = pps._value;
-      }
       break;
   }
 }

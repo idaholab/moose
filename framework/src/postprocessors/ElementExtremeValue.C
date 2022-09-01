@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ElementExtremeValue.h"
+#include "MooseUtils.h"
 
 #include <algorithm>
 #include <limits>
@@ -91,8 +92,7 @@ ElementExtremeValue::getValue()
 void
 ElementExtremeValue::finalize()
 {
-  _console << "ElementExtremeValue::getValue() " << _name << " " << _proxy_value.first << ", "
-           << _proxy_value.second << std::endl;
+  MooseUtils::parallelPrint(_communicator, _name, _proxy_value.first, ", ", _proxy_value.second);
   switch (_type)
   {
     case MAX:
