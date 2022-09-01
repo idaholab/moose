@@ -26,6 +26,18 @@ This object automatically enforces normal contact constraints by making calls to
 
 The preliminary recommendation is to select  `c` to be on the order of the moduli of elasticity of the bodies into contact, and `c_t` to be a few orders of magnitude less than `c`. This selection of these purely numerical parameters can represent an initial difficulty when running *new* models, but they can be held constant once good convergence behavior has been attained.
 
+The `ComputeFrictionalForceCartesianLMMechanicalContact` object computes the weighted gap and
+applies the frictional contact conditions using Lagrange multipliers defined in a global Cartesian reference frame.
+As a consequence, the number of contact constraints at each node will be two, in two-dimensional problems,
+and three, in three-dimensional problems. The normal contact pressure is obtained by projecting the Lagrange
+multiplier vector along the normal vector computed from the mortar generation objects. The result is a normal
+contact constraint, which, in general, will be a function of all (two or three) Cartesian Lagrange multipliers.
+The other degree(s) of freedom are constrained by
+enforcing that tangential tractions follow Coulomb constraints within a semi-smooth Newton approach. Usage of
+Cartesian Lagrange multipliers is recommended when condensing Lagrange multipliers via the variable condensation preconditioner
+(VCP) [`VariableCondensationPreconditioner`](/VariableCondensationPreconditioner.md).
+
+
 !syntax parameters /Constraints/ComputeFrictionalForceCartesianLMMechanicalContact
 
 !syntax inputs /Constraints/ComputeFrictionalForceCartesianLMMechanicalContact

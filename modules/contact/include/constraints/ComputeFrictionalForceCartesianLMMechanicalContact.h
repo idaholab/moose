@@ -54,14 +54,6 @@ protected:
    */
   virtual void enforceConstraintOnDof(const DofObject * const dof) override;
 
-  /**
-   * Communicate weighted velocities to the owning process
-   */
-#ifdef MOOSE_SPARSE_AD
-  template <typename T>
-  void communicateVelocities(std::unordered_map<const DofObject *, std::array<T, 2>> & dof);
-#endif
-
   /// A map from node to two weighted tangential velocities
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
 

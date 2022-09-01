@@ -24,7 +24,7 @@
     mesh_mode = 'REPLICATED'
     requirement = 'Contact module shall solve a three-dimensional frictionless problem with Cartesian Lagrange multipliers.'
   []
-  [frictionless-mortar-3d-friction]
+  [friction-mortar-3d]
     type = 'Exodiff'
     exodiff = 'frictionless-mortar-3d-friction_out.e'
     input = 'frictionless-mortar-3d-friction.i'
