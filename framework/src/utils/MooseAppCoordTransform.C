@@ -123,7 +123,9 @@ MooseAppCoordTransform::setRotation(const Real alpha, const Real beta, const Rea
   computeRS();
 
   if (must_rotate_axes && !axes_rotated)
-    mooseError("Unsupported manual angle prescription in 'MooseAppCoordTransform::setRotation'");
+    mooseError("Unsupported manual angle prescription in 'MooseAppCoordTransform::setRotation'. "
+               "For non-Cartesian coordinate systems, the only currently supported rotation is "
+               "(alpha, beta, gamma) = (0, 90, 0)");
 }
 
 void

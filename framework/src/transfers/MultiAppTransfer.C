@@ -73,6 +73,7 @@ MultiAppTransfer::addSkipCoordCollapsingParam(InputParameters & params)
       "XYZ, RZ etc collapsing is skipped) when performing mapping and inverse "
       "mapping coordinate transformation operations. This parameter should only "
       "be set by users who really know what they're doing.");
+  params.addParamNamesToGroup("skip_coordinate_collapsing", "Advanced");
 }
 
 MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
