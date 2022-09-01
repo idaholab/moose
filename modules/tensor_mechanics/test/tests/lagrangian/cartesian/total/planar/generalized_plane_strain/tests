@@ -1,0 +1,12 @@
+[Tests]
+  [2D]
+    type = CSVDiff
+    input = 'pull_2D.i'
+    csvdiff = 'pull_2D_out.csv'
+    abs_zero = 1E-6
+    rel_err = 1e-6
+    issues = '#21757'
+    design = 'source/kernels/lagrangian/TotalLagrangianWeakPlaneStress.md'
+    requirement = '2D generalized plane strain solution shall match the 3D results in the limit of infinite thickness.'
+  []
+[]
