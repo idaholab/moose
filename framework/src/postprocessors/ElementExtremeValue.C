@@ -53,13 +53,13 @@ ElementExtremeValue::initialize()
   switch (_type)
   {
     case MAX:
-      _proxy_value = -std::numeric_limits<Real>::max(); // start w/ the min
-      _value = -std::numeric_limits<Real>::max();
+      _proxy_value =
+          std::make_pair(-std::numeric_limits<Real>::max(), -std::numeric_limits<Real>::max());
       break;
 
     case MIN:
-      _proxy_value = std::numeric_limits<Real>::max(); // start w/ the max
-      _value = std::numeric_limits<Real>::max();
+      _proxy_value =
+          std::make_pair(std::numeric_limits<Real>::max(), std::numeric_limits<Real>::max());
       break;
   }
 }
@@ -67,22 +67,17 @@ ElementExtremeValue::initialize()
 void
 ElementExtremeValue::computeQpValue()
 {
+  const auto pv = std::make_pair(_proxy_variable[_qp], _u[_qp]);
   switch (_type)
   {
     case MAX:
-      if (_proxy_variable[_qp] > _proxy_value)
-      {
-        _proxy_value = _proxy_variable[_qp];
-        _value = _u[_qp];
-      }
+      if (pv > _proxy_value)
+        _proxy_value = pv;
       break;
 
     case MIN:
-      if (_proxy_variable[_qp] < _proxy_value)
-      {
-        _proxy_value = _proxy_variable[_qp];
-        _value = _u[_qp];
-      }
+      if (pv < _proxy_value)
+        _proxy_value = pv;
       break;
   }
 }
@@ -90,19 +85,21 @@ ElementExtremeValue::computeQpValue()
 Real
 ElementExtremeValue::getValue()
 {
-  return _value;
+  return _proxy_value.second;
 }
 
 void
 ElementExtremeValue::finalize()
 {
+  _console << "ElementExtremeValue::getValue() " << _name << " " << _proxy_value.first << ", "
+           << _proxy_value.second << std::endl;
   switch (_type)
   {
     case MAX:
-      gatherProxyValueMax(_proxy_value, _value);
+      gatherProxyValueMax(_proxy_value.first, _proxy_value.second);
       break;
     case MIN:
-      gatherProxyValueMin(_proxy_value, _value);
+      gatherProxyValueMin(_proxy_value.first, _proxy_value.second);
       break;
   }
 }
@@ -116,17 +113,11 @@ ElementExtremeValue::threadJoin(const UserObject & y)
   {
     case MAX:
       if (pps._proxy_value > _proxy_value)
-      {
         _proxy_value = pps._proxy_value;
-        _value = pps._value;
-      }
       break;
     case MIN:
       if (pps._proxy_value < _proxy_value)
-      {
         _proxy_value = pps._proxy_value;
-        _value = pps._value;
-      }
       break;
   }
 }

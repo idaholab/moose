@@ -44,17 +44,11 @@ protected:
   ExtremeType _type;
 
   /**
-   * The value of the variable at the point at which the proxy variable
-   * reaches the max/min value.
-   */
-  Real _value;
-
-  /**
    * A proxy variable used to find the quadrature point at
    * which to evaluate the variable. If not provided, defaults to the variable.
    */
   const VariableValue & _proxy_variable;
 
-  /// Extreme value of the proxy variable
-  Real _proxy_value;
+  /// Extreme value of the value and proxy variable at the same point
+  std::pair<Real, Real> _proxy_value;
 };
