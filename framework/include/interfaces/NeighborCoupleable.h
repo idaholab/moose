@@ -37,6 +37,8 @@ public:
                                                      unsigned int comp = 0) const;
 
   std::vector<const VariableValue *> coupledNeighborValues(const std::string & var_name) const;
+  std::vector<const VariableValue *> coupledNeighborValuesOld(const std::string & var_name) const;
+  std::vector<const VariableValue *> coupledNeighborValuesOlder(const std::string & var_name) const;
 
   /**
    * Get the coupled neighbor variable value for \p var_name with derivative information for
