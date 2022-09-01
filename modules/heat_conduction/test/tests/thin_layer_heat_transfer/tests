@@ -1,0 +1,34 @@
+[Tests]
+  [steady_2d]
+    type = 'Exodiff'
+    input = 'steady_2d.i'
+    exodiff = 'steady_2d_out.e'
+    requirement = 'The system shall model steady state heat transfer with an interface between two domains in 2D.'
+    issues = '#21988'
+    design = 'ThinLayerHeatTransfer.md'
+  []
+  [steady_3d]
+    type = 'Exodiff'
+    input = 'steady_3d.i'
+    exodiff = 'steady_3d_out.e'
+    requirement = 'The system shall model steady state heat transfer with an interface between two domains in 3D.'
+    issues = '#21988'
+    design = 'ThinLayerHeatTransfer.md'
+  []
+  [transient_2d]
+    type = 'Exodiff'
+    input = 'transient_2d.i'
+    exodiff = 'transient_2d_out.e'
+    requirement = 'The system shall model transient heat transfer with an interface between two domains in 2D.'
+    issues = '#21988'
+    design = 'ThinLayerHeatTransfer.md'
+  []
+  [transient_3d]
+    type = 'Exodiff'
+    input = 'transient_3d.i'
+    exodiff = 'transient_3d_out.e'
+    requirement = 'The system shall model transient heat transfer with an interface between two domains in 3D.'
+    issues = '#21988'
+    design = 'ThinLayerHeatTransfer.md'
+  []
+[]
