@@ -54,7 +54,7 @@ struct LibtorchTrainingOptions
 /**
  * Templated class which is responsible for training LibtorchArtificialNeuralNets. The specialty
  * of this class is that it can be used with random/sequential samplers in serial or
- * parallel. The default sampling approach is serial.
+ * parallel. The default sampling approach is sequential.
  */
 template <typename Sampler = torch::data::samplers::DistributedSequentialSampler>
 class LibtorchArtificialNeuralNetTrainer
@@ -101,7 +101,7 @@ protected:
   unsigned int computeLocalBatchSize(const unsigned int batch_size, const unsigned int num_ranks);
 
   /// Pointer to the neural network which is trained
-  std::shared_ptr<LibtorchNeuralNet<torch::nn::Module>> _nn;
+  const std::shared_ptr<LibtorchNeuralNet<torch::nn::Module>> _nn;
   /// The optimizer object.
   std::unique_ptr<torch::optim::Optimizer> _optimizer;
   /// Pointer to the sampler. It cannot be unique because the dataloader will try to move it.
@@ -307,11 +307,6 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::train(LibtorchDataset & dataset,
     Moose::out << "Neural net training time: " << COLOR_GREEN << (t_end - t_begin) << COLOR_DEFAULT
                << " s" << std::endl;
 }
-// Explicitly instantiate for Random and Sequential samplers
-template class LibtorchArtificialNeuralNetTrainer<torch::data::samplers::DistributedRandomSampler>;
-
-template class LibtorchArtificialNeuralNetTrainer<
-    torch::data::samplers::DistributedSequentialSampler>;
-}
+} // end Moose namespace
 
 #endif

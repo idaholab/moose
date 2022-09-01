@@ -31,7 +31,7 @@ LibtorchTorchScriptNeuralNet::loadNeuralNetwork(const std::string & filename)
   }
   catch (const c10::Error & e)
   {
-    mooseError("Error while loading torchscript file "+filename+"!");
+    mooseError("Error while loading torchscript file " + filename + "!");
   }
 }
 

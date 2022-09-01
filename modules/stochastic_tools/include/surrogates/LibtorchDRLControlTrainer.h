@@ -112,6 +112,7 @@ protected:
    * Function which evaluates the control net and then computes the logarithmic probability of the
    * action
    * @param input The observation values (responses)
+   * @param output The actions corresponding to the observations
    * @return The estimated value for the logarithmic probability
    */
   torch::Tensor evaluateAction(torch::Tensor & input, torch::Tensor & output);

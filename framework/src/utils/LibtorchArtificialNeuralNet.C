@@ -44,13 +44,14 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     _num_neurons_per_layer(nn.numNeuronsPerLayer()),
     _activation_function(nn.activationFunctions())
 {
+
   // We construct the NN architecture
   constructNeuralNetwork();
   // We fill it up with the current parameter values
   const auto & from_params = nn.named_parameters();
   auto to_params = this->named_parameters();
   for (unsigned int param_i : make_range(from_params.size()))
-    to_params[param_i].value().data() = from_params[param_i].value().data();
+    to_params[param_i].value().data() = from_params[param_i].value().data().clone();
 }
 
 void
@@ -78,23 +79,26 @@ LibtorchArtificialNeuralNet::constructNeuralNetwork()
 torch::Tensor
 LibtorchArtificialNeuralNet::forward(torch::Tensor & x)
 {
+  torch::Tensor output(x);
   for (unsigned int i = 0; i < _weights.size() - 1; ++i)
   {
     std::string activation =
         _activation_function.size() > 1 ? _activation_function[i] : _activation_function[0];
     if (activation == "relu")
-      x = torch::relu(_weights[i]->forward(x));
+      output = torch::relu(_weights[i]->forward(output));
     else if (activation == "sigmoid")
-      x = torch::sigmoid(_weights[i]->forward(x));
+      output = torch::sigmoid(_weights[i]->forward(output));
     else if (activation == "elu")
-      x = torch::elu(_weights[i]->forward(x));
+      output = torch::elu(_weights[i]->forward(output));
     else if (activation == "gelu")
-      x = torch::gelu(_weights[i]->forward(x));
+      output = torch::gelu(_weights[i]->forward(output));
     else if (activation == "linear")
-      x = _weights[i]->forward(x);
+      output = _weights[i]->forward(output);
   }
 
-  return _weights[_weights.size() - 1]->forward(x);
+  output = _weights[_weights.size() - 1]->forward(output);
+
+  return output;
 }
 
 void

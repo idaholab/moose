@@ -10,11 +10,7 @@
 #pragma once
 
 // files that contain torch includes
-#ifdef LIBTORCH_ENABLED
 #include "LibtorchDRLControlTrainer.h"
-#endif
-
-// MOOSE includes
 #include "MultiAppTransfer.h"
 #include "SurrogateModelInterface.h"
 

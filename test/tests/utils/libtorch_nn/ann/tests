@@ -93,7 +93,7 @@
                   Outputs/file_base=adagrad"
       libtorch = true
       allow_test_objects = True
-      rel_err = 1e-5
+      rel_err = 2e-4
     []
     [adam]
       type = CSVDiff
