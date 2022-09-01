@@ -12,8 +12,8 @@ from platform import python_version
 def print_error(msg):
     python_short = '.'.join(python_version().split('.')[:2])
     print(f"\nError starting peacock: {msg}"
-           "\n\nYou may need to either create or load an environment providing PyQt, VTK, etc"
-           "\nWe provide a conda package with the required dependencies:"
+           "\n\nYou may need to either create or load an environment providing PyQt, VTK, etc."
+           "\nThe MOOSE development team provides a conda package with the required dependencies:"
            f"\n\n\tmamba create -n peacock moose-peacock python={python_short}"
            "\n\tmamba activate peacock\n\nThen run peacock again\n")
 

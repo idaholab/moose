@@ -806,7 +806,7 @@ def getExeJSON(exe):
         print(f'{exe} --json, produced an error during execution')
         sys.exit(1)
     except json.decoder.JSONDecodeError:
-        print(f'{exe} --json, produced invalide JSON output')
+        print(f'{exe} --json, produced invalid JSON output')
         sys.exit(1)
     return results
 
