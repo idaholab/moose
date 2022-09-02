@@ -1706,7 +1706,7 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
 
         if (topological_neighbor || disjoint_only)
           feature->_disjoint_halo_ids.insert(feature->_disjoint_halo_ids.end(), entity_id);
-        else if (feature->_local_ids.find(entity_id) == feature->_local_ids.end())
+        else if (!FeatureFloodCount::contains(feature->_local_ids, entity_id))
           feature->_halo_ids.insert(feature->_halo_ids.end(), entity_id);
       }
       else
