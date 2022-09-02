@@ -94,7 +94,7 @@
 
 [Transfers]
   [to_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     source_variable = power_density
     variable = from_parent
     to_multi_app = sub
@@ -109,7 +109,7 @@
   []
 
   [from_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     source_variable = sink
     variable = from_sub
     from_multi_app = sub

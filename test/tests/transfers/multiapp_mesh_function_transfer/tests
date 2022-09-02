@@ -1,6 +1,6 @@
 [Tests]
   issues = '#1836'
-  design = 'MultiAppEvaluationTransfer.md'
+  design = 'MultiAppShapeEvaluationTransfer.md'
 
   [transfer]
     requirement = "The system shall support the transfer of data using the finite element solution function:"

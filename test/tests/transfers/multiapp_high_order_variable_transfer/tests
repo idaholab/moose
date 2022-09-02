@@ -1,5 +1,5 @@
 [Tests]
-   design = "MultiAppEvaluationTransfer.md"
+   design = "MultiAppShapeEvaluationTransfer.md"
    issues = "#13446"
 
   [L2_Lagrange]

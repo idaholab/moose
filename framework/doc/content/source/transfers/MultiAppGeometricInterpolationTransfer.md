@@ -5,7 +5,7 @@ target mesh using mesh interpolation, including the ability to utilize the displ
 configuration for either or both the source and target.  
 The `MultiAppGeometricInterpolationTransfer` also offers extrapolation on non-overlapping domains where the target data
 can be computed from source nodes not inside the target mesh.
-Other interpolation transfers like the [MultiAppMeshFunctionTransfer](/MultiAppMeshFunctionTransfer.md) are not able to extrapolate data and will only work for fully overlapping domains.
+Other interpolation transfers like the [MultiAppShapeEvaluationTransfer.md] are not able to extrapolate data and will only work for fully overlapping domains.
 
 Nodal transfers using the default settings for this interpolation scheme, `interp_type=inverse_distance`
 and `num_points=3`, will find the three closest points on the source mesh to a node on the target mesh.  
@@ -13,7 +13,7 @@ The source data from the three closest nodes will then be interpolated to the ta
 Inverse distance interpolation is best suited for the interpolation of point cloud data in the source mesh onto a target mesh.  
 
 !alert note
-The [MultiAppMeshFunctionTransfer](/MultiAppMeshFunctionTransfer.md) may be a better choice for nodal transfers
+The [MultiAppShapeEvaluationTransfer.md] may be a better choice for nodal transfers
 between two meshes with fully overlapping domains because the element shape functions will be used in the transfer.
 However, as mentioned above, only the `MultiAppGeometricInterpolationTransfer` can be used to extrapolate data between meshes on domains that do not fully overlap.
 

@@ -67,7 +67,7 @@
 
 [Transfers]
   [./mesh_function_begin]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     from_multi_app = coarse
     source_variable = u
     variable = u

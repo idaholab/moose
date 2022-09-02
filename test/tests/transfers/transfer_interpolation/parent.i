@@ -81,7 +81,7 @@
     variable = nearest_node
   [../]
   [./mesh_function]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     to_multi_app = sub
     source_variable = u
     variable = mesh_function

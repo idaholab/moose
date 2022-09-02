@@ -1,5 +1,5 @@
 [Tests]
-  design = MultiAppMeshFunctionTransfer.md
+  design = MultiAppShapeEvaluationTransfer.md
   issues = '#14166'
   [sequencing]
     requirement = 'The system shall be able to use the solution of a coarse mesh as the initial guess for a fine mesh solution for a'
