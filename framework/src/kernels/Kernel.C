@@ -190,3 +190,30 @@ Kernel::computeOffDiagJacobianScalar(const unsigned int jvar)
 
   accumulateTaggedLocalMatrix();
 }
+
+void
+Kernel::computeResidualAndJacobian()
+{
+  computeResidual();
+
+  auto & ce = _fe_problem.couplingEntries(_tid);
+  for (const auto & it : ce)
+  {
+    MooseVariableFieldBase & ivariable = *(it.first);
+    MooseVariableFieldBase & jvariable = *(it.second);
+
+    unsigned int ivar = ivariable.number();
+    unsigned int jvar = jvariable.number();
+
+    if (ivar != _var.number())
+      continue;
+
+    if (_is_implicit)
+    {
+      prepareShapes(jvar);
+      computeOffDiagJacobian(jvar);
+    }
+  }
+
+  /// TODO: add nonlocal Jacobians and scalar Jacobians
+}

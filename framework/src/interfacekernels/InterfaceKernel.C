@@ -404,6 +404,35 @@ InterfaceKernelTempl<T>::computeNeighborOffDiagJacobian(unsigned int jvar)
   }
 }
 
+template <typename T>
+void
+InterfaceKernelTempl<T>::computeResidualAndJacobian()
+{
+  computeResidual();
+
+  const auto & ce = _fe_problem.couplingEntries(_tid);
+  for (const auto & it : ce)
+  {
+    MooseVariableFieldBase & ivariable = *(it.first);
+    MooseVariableFieldBase & jvariable = *(it.second);
+
+    unsigned int ivar = ivariable.number();
+    unsigned int jvar = jvariable.number();
+
+    if (!isImplicit())
+      continue;
+
+    prepareShapes(jvar);
+    prepareNeighborShapes(jvar);
+
+    if (_var.number() == ivar)
+      computeElementOffDiagJacobian(jvar);
+
+    if (_neighbor_var.number() == ivar)
+      computeNeighborOffDiagJacobian(jvar);
+  }
+}
+
 // Explicitly instantiates the two versions of the InterfaceKernelTempl class
 template class InterfaceKernelTempl<Real>;
 template class InterfaceKernelTempl<RealVectorValue>;

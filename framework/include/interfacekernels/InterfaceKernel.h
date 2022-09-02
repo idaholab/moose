@@ -77,6 +77,9 @@ public:
   /// Computes the jacobian for the current side.
   virtual void computeJacobian() override;
 
+  /// Computes the residual and Jacobian for the current side.
+  virtual void computeResidualAndJacobian() override;
+
   /// Compute residuals at quadrature points
   virtual Real computeQpResidual(Moose::DGResidualType type) = 0;
 
