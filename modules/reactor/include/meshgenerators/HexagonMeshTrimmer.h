@@ -145,8 +145,9 @@ protected:
    * Fixes degenerat QUAD element by converting it into a TRI element
    * @param mesh input mesh with degenerate QUAD elements that need to be fixed
    * @param subdomain_ids_set all the subdomain ids in the input mesh
+   * @return whether any elements have been fixed
    */
-  void quasiTriElementsFixer(ReplicatedMesh & mesh,
+  bool quasiTriElementsFixer(ReplicatedMesh & mesh,
                              const std::set<subdomain_id_type> subdomain_ids_set);
 
   /**
