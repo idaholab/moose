@@ -36,21 +36,21 @@
       recover = false
       detail = "taking the boundary of a 2D input mesh"
     []
-    [subboundary_1d]
+    [subdomain_1d]
       type = 'Exodiff'
       input = 'poly2tri_from_1d_sbdids.i'
       cli_args = '--mesh-only'
       exodiff = 'poly2tri_from_1d_sbdids_in.e'
       recover = false
-      detail = "taking a specified subset of a 2D input boundary"
+      detail = "taking a specified subset of an input polyline set"
     []
-    [subdomain_2d]
+    [subboundary_2d]
       type = 'Exodiff'
       input = 'poly2tri_from_2d_bcids.i'
       cli_args = '--mesh-only'
       exodiff = 'poly2tri_from_2d_bcids_in.e'
       recover = false
-      detail = "taking a specified subset of an input polyline set"
+      detail = "taking a specified subset of a 2D input boundary"
     []
     [with_holes]
       type = 'Exodiff'
