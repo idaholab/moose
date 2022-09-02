@@ -241,7 +241,7 @@
   [do_last]
     type = PythonUnitTest
     input = test_DoLast.py
-    requirement = "TestHarnes shall perform a test after all other tests have passed if specified to do so"
+    requirement = "TestHarness shall perform a test after all other tests have passed if specified to do so"
     issues = '#15230'
   []
   [test_failed_json]
