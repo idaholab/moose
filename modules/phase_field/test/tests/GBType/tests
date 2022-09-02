@@ -1,0 +1,18 @@
+[Tests]
+  [./phase1]
+    type = 'Exodiff'
+    input = 'GB_Type_Phase1.i'
+    exodiff = 'GB_Type_Phase1_out.e'
+    issues = '#21704'
+    design = 'ComputeGBMisorientationType.md'
+    requirement = 'The system shall output GB type for all GBs.'
+  [../]
+  [./phase2]
+    type = 'Exodiff'
+    input = 'GB_Type_Phase2.i'
+    exodiff = 'GB_Type_Phase2_out.e'
+    issues = '#21704'
+    design = 'SolutionAuxMisorientationBoundary.md'
+    requirement = 'The system shall assign local diffusivity.'
+  [../]
+[]
