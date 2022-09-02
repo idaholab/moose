@@ -17,25 +17,4 @@
 
     requirement = 'The system shall compute the value of a variable at the point at which a proxy variable reaches the extreme (min/max) value.'
   []
-
-  [nodal_max]
-    requirement = 'The system shall compute the maximum value of a field variable by sampling nodes'
-    issues = '#658'
-    [test_nodal_max]
-      type = 'Exodiff'
-      input = 'nodal_max_value_test.i'
-      exodiff = 'out_nodal_max.e'
-      abs_zero = 1e-8
-
-      detail = 'over the whole domain and'
-    []
-
-    [test]
-      type = 'Exodiff'
-      input = 'block_nodal_pps_test.i'
-      exodiff = 'block_nodal_pps_test_out.e'
-
-      detail = 'within a subdomain.'
-    []
-  []
 []

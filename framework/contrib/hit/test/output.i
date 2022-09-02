@@ -21,45 +21,45 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_z]
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [SolidMechanics]
-  [./solid]
+  [solid]
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-  [../]
+  []
 []
 
 [BCs]
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = disp_y
     boundary = 2
     value = 0.0
-  [../]
+  []
 
   [left]
     type = FunctionDirichletBC
@@ -76,16 +76,16 @@
 []
 
 [AuxKernels]
-  [./temp]
+  [temp]
     type = FunctionAux
     variable = temp
     block = '1 2'
     function = temp_func
-  [../]
+  []
 []
 
 [Materials]
-  [./mean_alpha]
+  [mean_alpha]
     type = Elastic
     block = 1
     youngs_modulus = 1e6
@@ -98,9 +98,9 @@
     stress_free_temperature = 0.0
     thermal_expansion_reference_temperature = 0.5
     thermal_expansion_function_type = mean
-  [../]
+  []
 
-  [./inst_alpha]
+  [inst_alpha]
     type = Elastic
     block = 2
     youngs_modulus = 1e6
@@ -112,42 +112,44 @@
     thermal_expansion_function = cte_func_inst
     stress_free_temperature = 0.0
     thermal_expansion_function_type = instantaneous
-  [../]
+  []
 []
 
 [Functions]
-  [./cte_func_mean]
+  [cte_func_mean]
     type = ParsedFunction
     vars = 'tsf tref scale' #stress free temp, reference temp, scale factor
     vals = '0.0 0.5  1e-4'
     value = 'scale * (t - tsf) / (t - tref)'
-  [../]
-  [./cte_func_inst]
+  []
+  [cte_func_inst]
     type = PiecewiseLinear
     xy_data = '0 1.0
                2 1.0'
     scale_factor = 1e-4
-  [../]
+  []
 
-  [./temp_func]
+  [temp_func]
     type = PiecewiseLinear
     xy_data = '0 1
                1 2'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./disp_1]
-    type = NodalMaxValue
+  [disp_1]
+    type = NodalExtremeValue
+    value_type = max
     variable = disp_x
     boundary = 101
-  [../]
+  []
 
-  [./disp_2]
-    type = NodalMaxValue
+  [disp_2]
+    type = NodalExtremeValue
+    value_type = max
     variable = disp_x
     boundary = 102
-  [../]
+  []
 []
 
 [Executioner]
