@@ -93,7 +93,7 @@
     user_object = layered_average
   [../]
   [./interpolation]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = interpolation
