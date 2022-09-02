@@ -10,45 +10,20 @@
 #pragma once
 
 #include "ElementPostprocessor.h"
-
-// Forward Declarations
-template <bool>
-class ElementExtremeFunctorValueTempl;
-typedef ElementExtremeFunctorValueTempl<false> ElementExtremeFunctorValue;
-typedef ElementExtremeFunctorValueTempl<true> ADElementExtremeFunctorValue;
+#include "ExtremeValueBase.h"
 
 /// A postprocessor for collecting an extreme value for a functor with an element argument
 template <bool is_ad>
-class ElementExtremeFunctorValueTempl : public ElementPostprocessor
+class ElementExtremeFunctorValueTempl : public ExtremeValueBase<ElementPostprocessor>
 {
 public:
   static InputParameters validParams();
 
-  /// Type of extreme value we are going to compute
-  enum ExtremeType
-  {
-    MAX,
-    MIN
-  };
-
-  /**
-   * Class constructor
-   * @param parameters The input parameters
-   */
   ElementExtremeFunctorValueTempl(const InputParameters & parameters);
-
-  virtual void initialize() override;
-  virtual void execute() override { computeValue(); }
-  virtual Real getValue() override;
-  virtual void finalize() override;
-  virtual void threadJoin(const UserObject & y) override;
+  virtual void execute() override { computeExtremeValue(); }
 
 protected:
-  /// Get the extreme value with a functor element argument
-  virtual void computeValue();
-
-  /// The extreme value type
-  ExtremeType _type;
+  virtual std::pair<Real, Real> getProxyValuePair() override;
 
   /// Functor to search the extrema for
   const Moose::Functor<GenericReal<is_ad>> & _functor;
@@ -58,7 +33,7 @@ protected:
    * which to evaluate the functor. If not provided, defaults to the functor.
    */
   const Moose::Functor<GenericReal<is_ad>> & _proxy_functor;
-
-  /// Extreme value of the value and proxy functor at the same point
-  std::pair<Real, Real> _proxy_value;
 };
+
+typedef ElementExtremeFunctorValueTempl<false> ElementExtremeFunctorValue;
+typedef ElementExtremeFunctorValueTempl<true> ADElementExtremeFunctorValue;

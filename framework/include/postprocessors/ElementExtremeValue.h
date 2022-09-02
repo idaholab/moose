@@ -10,38 +10,20 @@
 #pragma once
 
 #include "ElementVariablePostprocessor.h"
+#include "ExtremeValueBase.h"
 
-// Input parameters
 /// A postprocessor for collecting the elemental min or max value
-class ElementExtremeValue : public ElementVariablePostprocessor
+class ElementExtremeValue : public ExtremeValueBase<ElementVariablePostprocessor>
 {
 public:
   static InputParameters validParams();
 
-  /// Type of extreme value we are going to compute
-  enum ExtremeType
-  {
-    MAX,
-    MIN
-  };
-
-  /**
-   * Class constructor
-   * @param parameters The input parameters
-   */
   ElementExtremeValue(const InputParameters & parameters);
 
-  virtual void initialize() override;
-  virtual Real getValue() override;
-  virtual void finalize() override;
-  virtual void threadJoin(const UserObject & y) override;
-
 protected:
-  /// Get the extreme value at each quadrature point
-  virtual void computeQpValue() override;
+  virtual std::pair<Real, Real> getProxyValuePair() override;
 
-  /// The extreme value type
-  ExtremeType _type;
+  virtual void computeQpValue() override { computeExtremeValue(); }
 
   /**
    * A proxy variable used to find the quadrature point at

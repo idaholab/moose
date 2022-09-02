@@ -1065,25 +1065,6 @@ get(const std::shared_ptr<T> & s)
   return s.get();
 }
 
-// print a message from all processors (use only for debugging purposes)
-template <typename... Args>
-void
-parallelPrint(const Parallel::Communicator & comm, const std::string & title, Args &&... args)
-{
-  std::ostringstream ss;
-  moose::internal::mooseStreamAll(ss, args...);
-  std::string msg = ss.str();
-  std::vector<std::string> msgs(comm.size());
-  comm.gather(0, msg, msgs);
-
-  if (comm.rank() == 0)
-  {
-    Moose::out << title << std::endl;
-    for (const auto pid : index_range(msgs))
-      Moose::out << pid << ":\t" << msgs[pid] << std::endl;
-  }
-}
-
 } // MooseUtils namespace
 
 /**
