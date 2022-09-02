@@ -139,13 +139,14 @@ public:
   public:
     /**
      * The primary underlying container type used to hold the data in each FeatureData.
-     * Supported types are std::set<dof_id_type> (with minor adjustmnets)
-     * or std::vector<dof_id_type>.
+     * Supported types are std::set<dof_id_type> or std::vector<dof_id_type>.
      *
-     * Note: Testing has shown that the vector container is nearly 10x faster. There's really
-     * no reason to use sets.
+     * Note: Testing has shown that vector container _may_ be slightly faster, but I
+     * believe much more data needs to be gathered to be sure. Perhaps more work could be performed
+     * to keep sorted sets to eliminate any extra work we do by occasionally performing a linear
+     * find or resorting the vector could help. For now, vector it is.
      */
-    using container_type = std::set<dof_id_type>;
+    using container_type = std::vector<dof_id_type>;
 
     FeatureData() : FeatureData(std::numeric_limits<std::size_t>::max(), Status::INACTIVE) {}
 
@@ -759,6 +760,21 @@ private:
   static inline void reserve(std::vector<T> & container, std::size_t size)
   {
     container.reserve(size);
+  }
+
+  template <class T>
+  static inline bool contains(std::set<T> & container, const T & item)
+  {
+    return container.find(item) != container.end();
+  }
+
+  template <class T>
+  static inline bool contains(std::vector<T> & container, const T & item)
+  {
+    for (const auto & cont_item : container)
+      if (item == cont_item)
+        return true;
+    return false;
   }
 
   /// The data structure for maintaining entities to flood during discovery
