@@ -133,8 +133,8 @@ FEProblemSolve::validParams()
                         "system across multiple solves "
                         "spanning nonlinear iterations and time steps. "
                         "The preconditioner resets as controlled by "
-                        "reuse_preconditioner_max_its");
-  params.addParam<unsigned int>("reuse_preconditioner_max_its",
+                        "reuse_preconditioner_max_linear_its");
+  params.addParam<unsigned int>("reuse_preconditioner_max_linear_its",
                                 25,
                                 "Reuse the previously calculated "
                                 "preconditioner for the linear system "
@@ -146,7 +146,7 @@ FEProblemSolve::validParams()
                               "snesmf_reuse_base compute_initial_residual_before_preset_bcs "
                               "num_grids nl_div_tol nl_abs_div_tol residual_and_jacobian_together "
                               "n_max_nonlinear_pingpong reuse_preconditioner "
-                              "reuse_preconditioner_max_its",
+                              "reuse_preconditioner_max_linear_its",
                               "Solver");
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
@@ -201,8 +201,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 
   es.parameters.set<bool>("reuse preconditioner") = getParam<bool>("reuse_preconditioner");
 
-  es.parameters.set<unsigned int>("reuse preconditioner maximum iterations") =
-      getParam<unsigned int>("reuse_preconditioner_max_its");
+  es.parameters.set<unsigned int>("reuse preconditioner maximum linear iterations") =
+      getParam<unsigned int>("reuse_preconditioner_max_linear_its");
 
   _nl._compute_initial_residual_before_preset_bcs =
       getParam<bool>("compute_initial_residual_before_preset_bcs");

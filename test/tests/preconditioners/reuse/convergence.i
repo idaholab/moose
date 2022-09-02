@@ -75,7 +75,7 @@
   l_max_its = 100
 
   reuse_preconditioner = false
-  reuse_preconditioner_max_its = 10
+  reuse_preconditioner_max_linear_its = 10
 
   nl_max_its = 10
   nl_rel_tol = 1e-8

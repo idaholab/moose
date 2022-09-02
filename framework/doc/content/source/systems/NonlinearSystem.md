@@ -375,7 +375,8 @@ system of equations/sparse matrix before applying the iterative solver.
 
 A great number of preconditioners exist, but 
 [multigrid](https://en.wikipedia.org/wiki/Multigrid_method)
-methods are often among the best choices.  
+methods are often among the best choices for problems without 
+significant hyperbolic character.  
 The [HYPRE](application_development/hypre.md optional=true) package, 
 specifically the 
 BoomerAMG preconditioner, is often a good choice for a preconditioner to
@@ -395,13 +396,13 @@ Setting
 
 ```
   reuse_preconditioner = true
-  reuse_preconditioner_max_its = 20
+  reuse_preconditioner_max_linear_its = 20
 ```
 
 in the `[Executioner]` block will reuse the same preconditioner until
 the number of linear iterations required to solve the linearized system of
 equations exceeds 20.   If the number of linear iterations exceeds 
-`reuse_preconditioner_max_its`
+`reuse_preconditioner_max_linear_its`
 the system does not immediately stop iterating on the current linearized
 system.  Instead it will continue until it either successfully solves
 the current system or reaches `l_max_its`.  It will then form a new 
@@ -409,14 +410,14 @@ preconditioner for the next nonlinear iteration.
 
 Using these parameters in combination with a direct factorization of the
 system can be very efficient.  The following is an example of how to
-configure PETSc and MOOSE to solve the equations with this combination:
+direct PETSc and MOOSE to solve the equations with this combination:
 
 ```
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -ksp_type'
   petsc_options_value = 'lu superlu_dist gmres'
 
   reuse_preconditioner = true
-  reuse_preconditioner_max_its = 20
+  reuse_preconditioner_max_linear_its = 20
 ```
 
 This solver strategy can be very effective when the system Jacobian
