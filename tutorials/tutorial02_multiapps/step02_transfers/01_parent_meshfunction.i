@@ -71,7 +71,7 @@
 
 [Transfers]
   [pull_v]
-    type = MultiAppEvaluationTransfer
+    type = MultiAppShapeEvaluationTransfer
 
     # Transfer from the sub-app to this app
     from_multi_app = sub_app
@@ -84,7 +84,7 @@
   []
 
   [push_u]
-    type = MultiAppEvaluationTransfer
+    type = MultiAppShapeEvaluationTransfer
 
     # Transfer to the sub-app from this app
     to_multi_app = sub_app

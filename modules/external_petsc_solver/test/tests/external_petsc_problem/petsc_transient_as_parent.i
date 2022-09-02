@@ -52,7 +52,7 @@
 
 [Transfers]
   [./tosub]
-    type = MultiAppEvaluationTransfer
+    type = MultiAppShapeEvaluationTransfer
     to_multi_app = sub_app
     source_variable = u
     variable = v
