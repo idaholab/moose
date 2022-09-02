@@ -9,6 +9,10 @@
 
 #include "InterfaceKernel.h"
 
+/**
+ * InterfaceKernel for modeling heat transfer across a thin layer.
+ */
+
 class ThinLayerHeatTransfer : public InterfaceKernel
 {
 public:

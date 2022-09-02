@@ -17,17 +17,13 @@ ThinLayerHeatTransfer::validParams()
   InputParameters params = InterfaceKernel::validParams();
   params.addClassDescription("Model heat transfer across a thin domain with an interface.");
   params.addParam<MaterialPropertyName>(
-      "specific_heat",
-      "specific_heat",
-      "Property name of the specific heat material property of the thin layer");
+      "specific_heat", "Property name of the specific heat material property of the thin layer");
 
   params.addParam<MaterialPropertyName>(
-      "density", "density", "Property name of the density material property of the thin layer");
+      "density", "Property name of the density material property of the thin layer");
 
   params.addParam<MaterialPropertyName>(
-      "heat_source",
-      "heat_source",
-      "Property name of the heat source material property of the thin layer");
+      "heat_source", "Property name of the heat source material property of the thin layer");
 
   params.addParam<MaterialPropertyName>(
       "thermal_conductivity", "thermal_conductivity", "Property name of the thermal conductivity");
@@ -38,13 +34,12 @@ ThinLayerHeatTransfer::validParams()
 
 ThinLayerHeatTransfer::ThinLayerHeatTransfer(const InputParameters & parameters)
   : InterfaceKernel(parameters),
-    _specific_heat(parameters.isParamSetByUser("specific_heat")
+    _specific_heat(parameters.isParamValid("specific_heat")
                        ? getMaterialProperty<Real>("specific_heat")
                        : getGenericZeroMaterialProperty<Real, false>()),
-    _density(parameters.isParamSetByUser("density")
-                 ? getMaterialProperty<Real>("density")
-                 : getGenericZeroMaterialProperty<Real, false>()),
-    _heat_source(parameters.isParamSetByUser("heat_source")
+    _density(parameters.isParamValid("density") ? getMaterialProperty<Real>("density")
+                                                : getGenericZeroMaterialProperty<Real, false>()),
+    _heat_source(parameters.isParamValid("heat_source")
                      ? getMaterialProperty<Real>("heat_source")
                      : getGenericZeroMaterialProperty<Real, false>()),
     _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),

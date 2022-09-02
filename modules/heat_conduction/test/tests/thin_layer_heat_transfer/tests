@@ -3,7 +3,8 @@
     type = 'Exodiff'
     input = 'steady_2d.i'
     exodiff = 'steady_2d_out.e'
-    requirement = 'The system shall model steady state heat transfer with an interface between two domains in 2D.'
+    requirement = 'The system shall model steady state heat transfer with an interface between two '
+                  'domains in 2D.'
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
     mesh_mode = 'REPLICATED'
@@ -13,7 +14,8 @@
     type = 'Exodiff'
     input = 'steady_3d.i'
     exodiff = 'steady_3d_out.e'
-    requirement = 'The system shall model steady state heat transfer with an interface between two domains in 3D.'
+    requirement = 'The system shall model steady state heat transfer with an interface between two '
+                  'domains in 3D.'
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
     mesh_mode = 'REPLICATED'
@@ -23,7 +25,8 @@
     type = 'Exodiff'
     input = 'transient_2d.i'
     exodiff = 'transient_2d_out.e'
-    requirement = 'The system shall model transient heat transfer with an interface between two domains in 2D.'
+    requirement = 'The system shall model transient heat transfer with an interface between two '
+                  'domains in 2D.'
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
     mesh_mode = 'REPLICATED'
@@ -33,10 +36,21 @@
     type = 'Exodiff'
     input = 'transient_3d.i'
     exodiff = 'transient_3d_out.e'
-    requirement = 'The system shall model transient heat transfer with an interface between two domains in 3D.'
+    requirement = 'The system shall model transient heat transfer with an interface between two '
+                  'domains in 3D.'
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
     mesh_mode = 'REPLICATED'
     recover = false
+  []
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'transient_2d.i'
+    run_sim = 'True'
+    petsc_version = '>=3.9'
+    ratio_tol = 2e-7
+    difference_tol = 1e-6
+    requirement = 'The Jacobian for the ThinLayerHeatTransfer calculations shall provide perfect '
+                  'jacobians.'
   []
 []

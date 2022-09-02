@@ -97,26 +97,12 @@
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
-
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu superlu_dist'
-
-  line_search = none
+  solve_type = 'NEWTON'
 
   nl_rel_tol = 1e-10
   nl_abs_tol = 1e-10
 
-  l_tol = 1e-4
-  l_max_its = 50
-
-  nl_max_its = 20
-
-  start_time = 0.0
-
-  dtmin = 1e-8
   dt = 0.05
-  automatic_scaling = true
   num_steps = 2
 []
 
