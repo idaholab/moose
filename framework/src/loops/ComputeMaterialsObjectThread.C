@@ -226,92 +226,92 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
 void
 ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
-  if (_fe_problem.needInterfaceMaterialOnSide(bnd_id, _tid))
+  if (!_fe_problem.needInterfaceMaterialOnSide(bnd_id, _tid))
+    return;
+
+  _assembly[_tid]->reinit(elem, side);
+  unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
+  _bnd_material_data[_tid]->resize(face_n_points);
+  _neighbor_material_data[_tid]->resize(face_n_points);
+
+  if (_has_bnd_stateful_props)
   {
-    _assembly[_tid]->reinit(elem, side);
-    unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
-    _bnd_material_data[_tid]->resize(face_n_points);
-    _neighbor_material_data[_tid]->resize(face_n_points);
-
-    if (_has_bnd_stateful_props)
-    {
-      // Face Materials
-      if (_discrete_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(_subdomain, _tid))
-        _bnd_material_props.initStatefulProps(
-            *_bnd_material_data[_tid],
-            _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(_subdomain, _tid),
-            face_n_points,
-            *elem,
-            side);
-
-      if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(_subdomain, _tid))
-        _bnd_material_props.initStatefulProps(
-            *_bnd_material_data[_tid],
-            _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(_subdomain, _tid),
-            face_n_points,
-            *elem,
-            side);
-
-      // Boundary Materials
-      if (_discrete_materials.hasActiveBoundaryObjects(bnd_id, _tid))
-        _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid],
-                                              _materials.getActiveBoundaryObjects(bnd_id, _tid),
-                                              face_n_points,
-                                              *elem,
-                                              side);
-
-      if (_materials.hasActiveBoundaryObjects(bnd_id, _tid))
-        _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid],
-                                              _materials.getActiveBoundaryObjects(bnd_id, _tid),
-                                              face_n_points,
-                                              *elem,
-                                              side);
-    }
-
-    const Elem * neighbor = elem->neighbor_ptr(side);
-    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
-
-    // Do we have neighbor stateful properties or do we have stateful interface material properties?
-    // If either then we need to reinit the neighbor, so at least at a minimum _neighbor_elem isn't
-    // NULL!
-    if (neighbor->active() &&
-        (_has_neighbor_stateful_props ||
-         (_has_bnd_stateful_props && _interface_materials.hasActiveBoundaryObjects(bnd_id, _tid))))
-      _fe_problem.reinitNeighbor(elem, side, _tid);
-
-    if (_has_neighbor_stateful_props && neighbor->active())
-    {
-      // Neighbor Materials
-      if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(
-              neighbor->subdomain_id(), _tid))
-        _neighbor_material_props.initStatefulProps(
-            *_bnd_material_data[_tid],
-            _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(
-                neighbor->subdomain_id(), _tid),
-            face_n_points,
-            *elem,
-            side);
-
-      if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(neighbor->subdomain_id(),
-                                                                          _tid))
-        _neighbor_material_props.initStatefulProps(
-            *_neighbor_material_data[_tid],
-            _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(
-                neighbor->subdomain_id(), _tid),
-            face_n_points,
-            *neighbor,
-            neighbor_side);
-    }
-
-    // Interface Materials. Make sure we do these after neighbors
-    if (_has_bnd_stateful_props && _interface_materials.hasActiveBoundaryObjects(bnd_id, _tid))
+    // Face Materials
+    if (_discrete_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(_subdomain, _tid))
       _bnd_material_props.initStatefulProps(
           *_bnd_material_data[_tid],
-          _interface_materials.getActiveBoundaryObjects(bnd_id, _tid),
+          _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(_subdomain, _tid),
           face_n_points,
           *elem,
           side);
+
+    if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(_subdomain, _tid))
+      _bnd_material_props.initStatefulProps(
+          *_bnd_material_data[_tid],
+          _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(_subdomain, _tid),
+          face_n_points,
+          *elem,
+          side);
+
+    // Boundary Materials
+    if (_discrete_materials.hasActiveBoundaryObjects(bnd_id, _tid))
+      _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid],
+                                            _materials.getActiveBoundaryObjects(bnd_id, _tid),
+                                            face_n_points,
+                                            *elem,
+                                            side);
+
+    if (_materials.hasActiveBoundaryObjects(bnd_id, _tid))
+      _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid],
+                                            _materials.getActiveBoundaryObjects(bnd_id, _tid),
+                                            face_n_points,
+                                            *elem,
+                                            side);
   }
+
+  const Elem * neighbor = elem->neighbor_ptr(side);
+  unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
+
+  // Do we have neighbor stateful properties or do we have stateful interface material properties?
+  // If either then we need to reinit the neighbor, so at least at a minimum _neighbor_elem isn't
+  // NULL!
+  if (neighbor->active() &&
+      (_has_neighbor_stateful_props ||
+       (_has_bnd_stateful_props && _interface_materials.hasActiveBoundaryObjects(bnd_id, _tid))))
+    _fe_problem.reinitNeighbor(elem, side, _tid);
+
+  if (_has_neighbor_stateful_props && neighbor->active())
+  {
+    // Neighbor Materials
+    if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(
+            neighbor->subdomain_id(), _tid))
+      _neighbor_material_props.initStatefulProps(
+          *_bnd_material_data[_tid],
+          _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(
+              neighbor->subdomain_id(), _tid),
+          face_n_points,
+          *elem,
+          side);
+
+    if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(neighbor->subdomain_id(),
+                                                                        _tid))
+      _neighbor_material_props.initStatefulProps(
+          *_neighbor_material_data[_tid],
+          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(neighbor->subdomain_id(),
+                                                                          _tid),
+          face_n_points,
+          *neighbor,
+          neighbor_side);
+  }
+
+  // Interface Materials. Make sure we do these after neighbors
+  if (_has_bnd_stateful_props && _interface_materials.hasActiveBoundaryObjects(bnd_id, _tid))
+    _bnd_material_props.initStatefulProps(
+        *_bnd_material_data[_tid],
+        _interface_materials.getActiveBoundaryObjects(bnd_id, _tid),
+        face_n_points,
+        *elem,
+        side);
 }
 
 void
