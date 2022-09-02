@@ -6,6 +6,8 @@
     requirement = 'The system shall model steady state heat transfer with an interface between two domains in 2D.'
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
+    mesh_mode = 'REPLICATED'
+    recover = false
   []
   [steady_3d]
     type = 'Exodiff'
@@ -14,6 +16,8 @@
     requirement = 'The system shall model steady state heat transfer with an interface between two domains in 3D.'
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
+    mesh_mode = 'REPLICATED'
+    recover = false
   []
   [transient_2d]
     type = 'Exodiff'
@@ -22,6 +26,8 @@
     requirement = 'The system shall model transient heat transfer with an interface between two domains in 2D.'
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
+    mesh_mode = 'REPLICATED'
+    recover = false
   []
   [transient_3d]
     type = 'Exodiff'
@@ -30,5 +36,7 @@
     requirement = 'The system shall model transient heat transfer with an interface between two domains in 3D.'
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
+    mesh_mode = 'REPLICATED'
+    recover = false
   []
 []
