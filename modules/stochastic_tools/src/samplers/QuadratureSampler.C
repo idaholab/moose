@@ -11,10 +11,6 @@
 #include "Distribution.h"
 
 registerMooseObjectAliased("StochasticToolsApp", QuadratureSampler, "Quadrature");
-registerMooseObjectReplaced("StochasticToolsApp",
-                            QuadratureSampler,
-                            "07/01/2020 00:00",
-                            Quadrature);
 
 InputParameters
 QuadratureSampler::validParams()

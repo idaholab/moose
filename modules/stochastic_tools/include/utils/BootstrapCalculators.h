@@ -9,7 +9,7 @@
 
 #pragma once
 #include "Calculators.h"
-#include "NormalDistribution.h"
+#include "Normal.h"
 #include "StochasticToolsUtils.h"
 
 #include "Shuffle.h"

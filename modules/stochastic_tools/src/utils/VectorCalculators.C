@@ -54,7 +54,7 @@ BiasCorrectedAccelerated<std::vector<InType>, std::vector<OutType>>::compute(
       else
         break;
     }
-    bias[i] = NormalDistribution::quantile(count / this->_replicates, 0, 1);
+    bias[i] = Normal::quantile(count / this->_replicates, 0, 1);
   }
 
   // Compute Acceleration, Efron and Tibshirani (2003), Eq. 14.15, p. 186
@@ -66,11 +66,11 @@ BiasCorrectedAccelerated<std::vector<InType>, std::vector<OutType>>::compute(
                                            std::vector<OutType>(value.size()));
   for (const auto & l : index_range(this->_levels))
   {
-    const Real z = NormalDistribution::quantile(this->_levels[l], 0, 1);
+    const Real z = Normal::quantile(this->_levels[l], 0, 1);
     for (const auto & i : index_range(value))
     {
       const OutType x = bias[i] + (bias[i] + (bias[i] + z) / (1 - acc[i] * (bias[i] + z)));
-      const Real alpha = NormalDistribution::cdf(x, 0, 1);
+      const Real alpha = Normal::cdf(x, 0, 1);
 
       long unsigned int index = std::lrint(alpha * (this->_replicates - 1));
       output[l][i] = values[index][i];

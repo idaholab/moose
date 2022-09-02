@@ -11,10 +11,6 @@
 #include "Distribution.h"
 
 registerMooseObjectAliased("StochasticToolsApp", MonteCarloSampler, "MonteCarlo");
-registerMooseObjectReplaced("StochasticToolsApp",
-                            MonteCarloSampler,
-                            "07/01/2020 00:00",
-                            MonteCarlo);
 
 InputParameters
 MonteCarloSampler::validParams()

@@ -11,10 +11,6 @@
 #include "Distribution.h"
 
 registerMooseObjectAliased("StochasticToolsApp", CartesianProductSampler, "CartesianProduct");
-registerMooseObjectReplaced("StochasticToolsApp",
-                            CartesianProductSampler,
-                            "07/01/2020 00:00",
-                            CartesianProduct);
 
 InputParameters
 CartesianProductSampler::validParams()

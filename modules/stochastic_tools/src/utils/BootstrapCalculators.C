@@ -53,7 +53,7 @@ BiasCorrectedAccelerated<InType, OutType>::compute(const InType & data, const bo
       values.begin(),
       values.end(),
       [&value](Real v) { return v < value; }); // use Real for non-integer division below
-  const Real bias = NormalDistribution::quantile(count / this->_replicates, 0, 1);
+  const Real bias = Normal::quantile(count / this->_replicates, 0, 1);
 
   // Compute Acceleration, Efron and Tibshirani (2003), Eq. 14.15, p. 186
   const OutType acc = data.empty() ? OutType() : acceleration(data, is_distributed);
@@ -62,9 +62,9 @@ BiasCorrectedAccelerated<InType, OutType>::compute(const InType & data, const bo
   std::vector<OutType> output;
   for (const Real & level : this->_levels)
   {
-    const Real z = NormalDistribution::quantile(level, 0, 1);
+    const Real z = Normal::quantile(level, 0, 1);
     const Real x = bias + (bias + (bias + z) / (1 - acc * (bias + z)));
-    const Real alpha = NormalDistribution::cdf(x, 0, 1);
+    const Real alpha = Normal::cdf(x, 0, 1);
 
     long unsigned int index = std::lrint(alpha * (this->_replicates - 1));
     output.push_back(values[index]);

@@ -11,7 +11,6 @@
 #include "Distribution.h"
 
 registerMooseObjectAliased("StochasticToolsApp", SobolSampler, "Sobol");
-registerMooseObjectReplaced("StochasticToolsApp", SobolSampler, "07/01/2020 00:00", Sobol);
 
 InputParameters
 SobolSampler::validParams()
