@@ -54,7 +54,6 @@
         add_variables = true
         use_automatic_differentiation = true
         decomposition_method = TaylorExpansion
-        save_in = 'resid_x resid_y'
       []
     []
   []
@@ -95,10 +94,6 @@
 []
 
 [AuxVariables]
-  [resid_x]
-  []
-  [resid_y]
-  []
   [mode_mixity_ratio]
     order = CONSTANT
     family = MONOMIAL
@@ -160,29 +155,6 @@
   []
 []
 
-[Postprocessors]
-  [resid_x]
-    type = NodalSum
-    variable = resid_x
-    boundary = top
-  []
-  [resid_y]
-    type = NodalSum
-    variable = resid_y
-    boundary = top
-  []
-  [disp_y]
-    type = SideAverageValue
-    variable = disp_y
-    boundary = top
-  []
-  [disp_x]
-    type = SideAverageValue
-    variable = disp_x
-    boundary = top
-  []
-[]
-
 [Preconditioning]
   [smp]
     type = SMP
@@ -213,6 +185,5 @@
 []
 
 [Outputs]
-  csv = true
   exodus = true
 []

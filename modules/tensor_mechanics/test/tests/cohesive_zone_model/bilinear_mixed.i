@@ -93,13 +93,6 @@
   []
 []
 
-[AuxVariables]
-  [resid_x]
-  []
-  [resid_y]
-  []
-[]
-
 [Modules/TensorMechanics/CohesiveZoneMaster]
   [czm_ik]
     boundary = 'interface'
@@ -126,19 +119,6 @@
     displacements = 'disp_x disp_y'
     eta = 2.2
     viscosity = 1e-3
-  []
-[]
-
-[Postprocessors]
-  [disp_y]
-    type = SideAverageValue
-    variable = disp_y
-    boundary = top
-  []
-  [disp_x]
-    type = SideAverageValue
-    variable = disp_x
-    boundary = top
   []
 []
 
@@ -172,6 +152,5 @@
 []
 
 [Outputs]
-  csv = true
   exodus = true
 []
