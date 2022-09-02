@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultiAppFEInterpolationTransfer.h"
+#include "MultiAppShapeEvaluationTransfer.h"
 
 // MOOSE includes
 #include "DisplacedProblem.h"
@@ -27,14 +27,14 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
-registerMooseObject("MooseApp", MultiAppFEInterpolationTransfer);
+registerMooseObject("MooseApp", MultiAppShapeEvaluationTransfer);
 registerMooseObjectRenamed("MooseApp",
                            MultiAppMeshFunctionTransfer,
                            "12/31/2023 24:00",
-                           MultiAppFEInterpolationTransfer);
+                           MultiAppShapeEvaluationTransfer);
 
 InputParameters
-MultiAppFEInterpolationTransfer::validParams()
+MultiAppShapeEvaluationTransfer::validParams()
 {
   InputParameters params = MultiAppConservativeTransfer::validParams();
   params.addClassDescription(
@@ -49,7 +49,7 @@ MultiAppFEInterpolationTransfer::validParams()
   return params;
 }
 
-MultiAppFEInterpolationTransfer::MultiAppFEInterpolationTransfer(const InputParameters & parameters)
+MultiAppShapeEvaluationTransfer::MultiAppShapeEvaluationTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
 {
   if (_to_var_names.size() == _from_var_names.size())
@@ -59,9 +59,9 @@ MultiAppFEInterpolationTransfer::MultiAppFEInterpolationTransfer(const InputPara
 }
 
 void
-MultiAppFEInterpolationTransfer::execute()
+MultiAppShapeEvaluationTransfer::execute()
 {
-  TIME_SECTION("MultiAppFEInterpolationTransfer::execute()",
+  TIME_SECTION("MultiAppShapeEvaluationTransfer::execute()",
                5,
                "Transferring variables via finite element interpolation");
 
@@ -73,7 +73,7 @@ MultiAppFEInterpolationTransfer::execute()
 }
 
 void
-MultiAppFEInterpolationTransfer::transferVariable(unsigned int i)
+MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
 {
   mooseAssert(i < _var_size, "The variable of index " << i << " does not exist");
 

@@ -1,5 +1,5 @@
 [Tests]
-   design = "MultiAppMeshFunctionTransfer.md"
+   design = "MultiAppEvaluationTransfer.md"
    issues = "#13446"
 
   [L2_Lagrange]

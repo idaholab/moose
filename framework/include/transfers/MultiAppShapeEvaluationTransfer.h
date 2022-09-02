@@ -16,12 +16,12 @@
  * the libmesh mesh_function API, rather than an arbitrary interpolation from values on nearby nodes
  * The interpolation coefficients are tied to the variable type of the transferred variable.
  */
-class MultiAppFEInterpolationTransfer : public MultiAppConservativeTransfer
+class MultiAppShapeEvaluationTransfer : public MultiAppConservativeTransfer
 {
 public:
   static InputParameters validParams();
 
-  MultiAppFEInterpolationTransfer(const InputParameters & parameters);
+  MultiAppShapeEvaluationTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 
