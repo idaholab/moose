@@ -1,4 +1,4 @@
-w=10
+w=10 #frequency
 [Mesh]
    type = GeneratedMesh
    dim = 1

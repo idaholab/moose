@@ -1,19 +1,19 @@
 [Tests]
+[validate]
   issues = '#21364'
   design = '1d_elastic_waves.md'
-
-  [test_real]
+  requirement = 'The system shall validate the frequency domain solution of the'
+  [real]
     type = 'CSVDiff'
     input = '1D_elastic_wave_propagation.i'
     csvdiff = '1D_elastic_wave_propagation_out_midpt_real_0001.csv'
-    valgrind = NONE
-    requirement = "Validating the frequency domain solution against the analytical solution"
+    detail = ' real part against the analytical solution.'
   []
-  [test_imag]
+  [imag]
     type = 'CSVDiff'
     input = '1D_elastic_wave_propagation.i'
     csvdiff = '1D_elastic_wave_propagation_out_midpt_imag_0001.csv'
-    valgrind = NONE
-    requirement = "Validating the frequency domain solution against the analytical solution"
+    detail = ' imaginary part against the analytical solution.'
   []
+[]
 []
