@@ -277,7 +277,7 @@ ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, 
     if (neighbor->active() &&
         (_has_neighbor_stateful_props ||
          (_has_bnd_stateful_props && _interface_materials.hasActiveBoundaryObjects(bnd_id, _tid))))
-      _assembly[_tid]->reinitElemAndNeighbor(elem, side, neighbor, neighbor_side);
+      _fe_problem.reinitNeighbor(elem, side, _tid);
 
     if (_has_neighbor_stateful_props && neighbor->active())
     {
