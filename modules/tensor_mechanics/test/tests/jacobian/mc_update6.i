@@ -20,60 +20,59 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./ts]
+  [ts]
     type = TensorMechanicsHardeningCubic
     value_0 = 1
     value_residual = 0.5
     internal_limit = 2E-2
-  [../]
-  [./cs]
+  []
+  [cs]
     type = TensorMechanicsHardeningConstant
     value = 1E6
-  [../]
-  [./coh]
+  []
+  [coh]
     type = TensorMechanicsHardeningConstant
     value = 1E6
-  [../]
-  [./ang]
+  []
+  [ang]
     type = TensorMechanicsHardeningConstant
     value = 30
     convert_to_radians = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     lambda = 1.0E3
     shear_modulus = 1.3E3
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
     eigenstrain_names = ini_stress
-  [../]
-  [./ini_stress]
+  []
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '-1 0.1 0.2  0.1 15 -0.3  0.2 -0.3 0'
     eigenstrain_name = ini_stress
-  [../]
-  [../]
-  [./cmc]
+  []
+  [cmc]
     type = CappedMohrCoulombStressUpdate
     tensile_strength = ts
     compressive_strength = cs
@@ -82,21 +81,21 @@
     dilation_angle = ang
     smoothing_tol = 0.1
     yield_function_tol = 1.0E-12
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = cmc
     perform_finite_strain_rotations = false
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-snes_type'
     petsc_options_value = 'test'
-  [../]
+  []
 []
 
 [Executioner]
