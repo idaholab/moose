@@ -142,7 +142,8 @@ protected:
                             const Real param_23);
 
   /**
-   * Fixes degenerate QUAD elements created by the hexagonal mesh trimming by converting them into TRI elements
+   * Fixes degenerate QUAD elements created by the hexagonal mesh trimming by converting them into
+   * TRI elements
    * @param mesh input mesh with degenerate QUAD elements that need to be fixed
    * @param subdomain_ids_set all the subdomain ids in the input mesh
    * @return whether any elements have been fixed

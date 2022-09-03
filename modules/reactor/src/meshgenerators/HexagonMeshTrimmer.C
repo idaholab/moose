@@ -341,47 +341,32 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
           node_list.begin(), std::find(node_list.begin(), node_list.end(), side_id_0))] = true;
       const Point p0 = *mesh.node_ptr(side_id_0);
       const Point p1 = *mesh.node_ptr(side_id_1);
-      if (MooseUtils::absoluteFuzzyEqual(p0(1), p1(1)))
-      {
-        node_list_point[std::distance(node_list.begin(),
-                                      std::find(node_list.begin(), node_list.end(), side_id_0))] =
-            twoLineIntersection(bdry_pars[0], bdry_pars[1], bdry_pars[2], 0.0, 1.0, -p0(1));
-      }
-      else
-      {
-        node_list_point[std::distance(node_list.begin(),
-                                      std::find(node_list.begin(), node_list.end(), side_id_0))] =
-            twoLineIntersection(bdry_pars[0],
-                                bdry_pars[1],
-                                bdry_pars[2],
-                                1.0,
-                                (p1(0) - p0(0)) / (p0(1) - p1(1)),
-                                -(p0(0) + (p1(0) - p0(0)) / (p0(1) - p1(1)) * p0(1)));
-      }
+
+      node_list_point[std::distance(node_list.begin(),
+                                    std::find(node_list.begin(), node_list.end(), side_id_0))] =
+          twoLineIntersection(bdry_pars[0],
+                              bdry_pars[1],
+                              bdry_pars[2],
+                              p0(1) - p1(1),
+                              p1(0) - p0(0),
+                              -(p0(0) * (p0(1) - p1(1)) + (p1(0) - p0(0)) * p0(1)));
     }
+    // Node 1 is on the removal side while node 0 is on the retaining side
     else if (side_id_1_in && (side_node_0_remove != side_node_1_remove))
     {
       node_list_flag[std::distance(
           node_list.begin(), std::find(node_list.begin(), node_list.end(), side_id_1))] = true;
       const Point p0 = *mesh.node_ptr(side_id_0);
       const Point p1 = *mesh.node_ptr(side_id_1);
-      if (MooseUtils::absoluteFuzzyEqual(p0(1), p1(1)))
-      {
-        node_list_point[std::distance(node_list.begin(),
-                                      std::find(node_list.begin(), node_list.end(), side_id_1))] =
-            twoLineIntersection(bdry_pars[0], bdry_pars[1], bdry_pars[2], 0.0, 1.0, -p0(1));
-      }
-      else
-      {
-        node_list_point[std::distance(node_list.begin(),
-                                      std::find(node_list.begin(), node_list.end(), side_id_1))] =
-            twoLineIntersection(bdry_pars[0],
-                                bdry_pars[1],
-                                bdry_pars[2],
-                                1.0,
-                                (p1(0) - p0(0)) / (p0(1) - p1(1)),
-                                -(p0(0) + (p1(0) - p0(0)) / (p0(1) - p1(1)) * p0(1)));
-      }
+
+      node_list_point[std::distance(node_list.begin(),
+                                    std::find(node_list.begin(), node_list.end(), side_id_1))] =
+          twoLineIntersection(bdry_pars[0],
+                              bdry_pars[1],
+                              bdry_pars[2],
+                              p0(1) - p1(1),
+                              p1(0) - p0(0),
+                              -(p0(0) * (p0(1) - p1(1)) + (p1(0) - p0(0)) * p0(1)));
     }
   }
 
@@ -389,9 +374,14 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
   for (unsigned int i = 0; i < node_list.size(); i++)
   {
     // Only one node in trimmed region
+    // This means the node is on both the trimming boundary and the original external boundary.
+    // In order to keep the shape of the original external boundary, the node is moved along the
+    // original external boundary.
     if (node_list_flag[i])
       *(mesh.node_ptr(node_list[i])) = node_list_point[i];
     // Two nodes in trimmed region, only one is moved
+    // This means the node is in the middle of the trimming boundary.
+    // Just move it along the normal direction of the trimming line.
     else
     {
       const Real x0 = (*(mesh.node_ptr(node_list[i])))(0);
