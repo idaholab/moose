@@ -264,7 +264,7 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
     if (std::get<2>(bdry_side_list[i]) == external_boundary_id)
       slc_bdry_side_list.push_back(bdry_side_list[i]);
 
-  // Asign block id for elements to be removed
+  // Assign block id for elements to be removed
   for (auto elem_it = mesh.active_elements_begin(); elem_it != mesh.active_elements_end();
        elem_it++)
   {
@@ -294,7 +294,7 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
   }
   const auto unique_it = std::unique(node_list.begin(), node_list.end());
   node_list.resize(std::distance(node_list.begin(), unique_it));
-  // Mark those nodes that is on a boundary that requires conformality
+  // Mark those nodes that are on a boundary that requires conformality
   // If both nodes of a side are involved, we should only move one node
   std::vector<bool> node_list_flag(node_list.size(), false);
   std::vector<Point> node_list_point(node_list.size(), Point(0.0, 0.0, 0.0));
@@ -327,9 +327,9 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
                                                    bdry_pars[1],
                                                    bdry_pars[2],
                                                    side_to_move);
-    // If both nodes of that side is involved in the trimming interface
+    // If both nodes of that side are involved in the trimming interface
     if (side_id_0_in && side_id_1_in)
-      // The side need to be removed from sideset
+      // The side needs to be removed from the sideset
       // The other node will be handled by other element's side
       boundary_info.remove_side(mesh.elem_ptr(std::get<0>(slc_bdry_side_list[i])),
                                 std::get<1>(slc_bdry_side_list[i]),
@@ -388,8 +388,10 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
   // move nodes
   for (unsigned int i = 0; i < node_list.size(); i++)
   {
+    // Only one node in trimmed region
     if (node_list_flag[i])
       *(mesh.node_ptr(node_list[i])) = node_list_point[i];
+    // Two nodes in trimmed region, only one is moved
     else
     {
       const Real x0 = (*(mesh.node_ptr(node_list[i])))(0);
@@ -407,9 +409,7 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
   for (auto elem_it = mesh.active_subdomain_elements_begin(block_id_to_remove);
        elem_it != mesh.active_subdomain_elements_end(block_id_to_remove);
        elem_it++)
-  {
     mesh.delete_elem(*elem_it);
-  }
   mesh.contract();
   mesh.find_neighbors();
   // Delete zero volume elements
