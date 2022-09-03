@@ -27,6 +27,11 @@ public:
 
 protected:
   const std::vector<std::vector<std::vector<Real>>> & _real_tri;
+  const std::vector<std::vector<std::vector<Real>>> & _real_tri_empty_sub;
+  const std::vector<std::vector<std::vector<Real>>> & _real_tri_empty_subsub;
+  const std::vector<std::vector<std::vector<Real>>> & _real_tri_empty_subs;
+  const std::vector<std::vector<std::vector<Real>>> & _real_tri_empty_subsubs;
+  const std::vector<std::vector<std::vector<Real>>> & _real_tri_all_empty;
   const std::vector<std::vector<std::vector<unsigned int>>> & _uint_tri;
   const std::vector<std::vector<std::vector<int>>> & _int_tri;
   const std::vector<std::vector<std::vector<long>>> & _long_tri;

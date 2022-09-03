@@ -1,3 +1,7 @@
+[Problem]
+  solve = false
+[]
+
 [GlobalParams]
   sampler_name_tri = 'sampler_name000 ; sampler_name010 sampler_name011 sampler_name012 ; sampler_name020 sampler_name021 | sampler_name100 sampler_name101 |  sampler_name200 sampler_name201 ; sampler_name210 ; sampler_name220 sampler_name221 sampler_name222'
 []
@@ -9,37 +13,16 @@
   ny = 10
 []
 
-[Variables]
-  [u]
-  []
-[]
-
-[Kernels]
-  [diff]
-    type = Diffusion
-    variable = u
-  []
-[]
-
-[BCs]
-  [left]
-    type = DirichletBC
-    variable = u
-    boundary = left
-    value = 0
-  []
-  [right]
-    type = DirichletBC
-    variable = u
-    boundary = right
-    value = 1
-  []
-[]
-
 [UserObjects]
   [triple_index]
     type = ReadTripleIndex
+
     real_tri = ' 1.1 ; 2.1 2.2 2.3 ; 3.1 3.2 | 11.1 11.2 | 21.1 21.2 ; 22.1; 23.1 23.2 23.3'
+    real_tri_empty_sub = ' 1.1 ; 2.1 2.2 2.3 ; 3.1 3.2 || 21.1 21.2 ; 22.1; 23.1 23.2 23.3'
+    real_tri_empty_subsub = ' 1.1 ; 2.1 2.2 2.3 ; 3.1 3.2 | 11.1 11.2 |; 22.1; 23.1 23.2 23.3'
+    real_tri_empty_subs = '|| 21.1 21.2 ; 22.1; 23.1 23.2 23.3'
+    real_tri_empty_subsubs = ';; 3.1 3.2 || 21.1 21.2 ; 22.1; 23.1 23.2 23.3'
+    real_tri_all_empty = '|;|'
     uint_tri = ' 11 ; 21 22 23 ; 31 32 | 111 112 | 211 212 ; 221; 231 232 233'
     int_tri = ' 11 ; -21 -22 -23 ; 31 32 | -111 -112 | 211 212 ; -221; 231 232 233'
     long_tri = ' -11 ; 21 22 23 ; -31 -32 | 111 112 | -211 -212 ; 221; -231 -232 -233'
@@ -69,15 +52,4 @@
 
 [Executioner]
   type = Steady
-
-  solve_type = 'PJFNK'
-
-
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
-[]
-
-[Outputs]
-  exodus = true
-  file_base = parse_triple_index
 []

@@ -1906,7 +1906,26 @@ Parser::setTripleIndexParameter(
     GlobalParamsAction * global_block)
 {
   // Get the full string assigned to the variable full_name
-  std::string buffer = _root->param<std::string>(full_name);
+  const std::string buffer_raw = _root->param<std::string>(full_name);
+  // In case the parameter is empty
+  if (buffer_raw.find_first_not_of(' ', 0) == std::string::npos)
+    return;
+
+  // Add a space between neighboring delim's, before the first delim if nothing is ahead of it, and
+  // after the last delim if nothing is behind it.
+  std::string buffer;
+  buffer.push_back(buffer_raw[0]);
+  if (buffer[0] == '|' || buffer[0] == ';')
+    buffer = ' ' + buffer;
+  for (std::string::size_type i = 1; i < buffer_raw.size(); i++)
+  {
+    if ((buffer_raw[i - 1] == '|' || buffer_raw[i - 1] == ';') &&
+        (buffer_raw[i] == '|' || buffer_raw[i] == ';'))
+      buffer.push_back(' ');
+    buffer.push_back(buffer_raw[i]);
+  }
+  if (buffer.back() == '|' || buffer.back() == ';')
+    buffer.push_back(' ');
 
   // split vector at delim | to get a series of 2D subvectors
   std::vector<std::string> first_tokenized_vector;
@@ -1916,6 +1935,12 @@ Parser::setTripleIndexParameter(
   second_tokenized_vector.resize(first_tokenized_vector.size());
   for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
   {
+    // Identify empty subvector first
+    if (first_tokenized_vector[j].find_first_not_of(' ', 0) == std::string::npos)
+    {
+      param->set()[j].resize(0);
+      continue;
+    }
     // split each 2D subvector at delim ; to get 1D sub-subvectors
     // NOTE: the 1D sub-subvectors are _not_ of type T yet
     MooseUtils::tokenize(first_tokenized_vector[j], second_tokenized_vector[j], 1, ";");

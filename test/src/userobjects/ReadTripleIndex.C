@@ -18,6 +18,18 @@ ReadTripleIndex::validParams()
   InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<std::vector<std::vector<std::vector<Real>>>>(
       "real_tri", "A triple-indexed vector of real numbers.");
+  params.addRequiredParam<std::vector<std::vector<std::vector<Real>>>>(
+      "real_tri_empty_sub", "A triple-indexed vector of real numbers with an empty subvector.");
+  params.addRequiredParam<std::vector<std::vector<std::vector<Real>>>>(
+      "real_tri_empty_subsub",
+      "A triple-indexed vector of real numbers with an empty sub-subvector.");
+  params.addRequiredParam<std::vector<std::vector<std::vector<Real>>>>(
+      "real_tri_empty_subs", "A triple-indexed vector of real numbers with an empty subvectors.");
+  params.addRequiredParam<std::vector<std::vector<std::vector<Real>>>>(
+      "real_tri_empty_subsubs",
+      "A triple-indexed vector of real numbers with empty sub-subvectors.");
+  params.addRequiredParam<std::vector<std::vector<std::vector<Real>>>>(
+      "real_tri_all_empty", "An empty triple-indexed vector of real numbers.");
   params.addRequiredParam<std::vector<std::vector<std::vector<unsigned int>>>>(
       "uint_tri", "A triple-indexed vector of unsigned integers.");
   params.addRequiredParam<std::vector<std::vector<std::vector<int>>>>(
@@ -72,6 +84,16 @@ ReadTripleIndex::validParams()
 ReadTripleIndex::ReadTripleIndex(const InputParameters & params)
   : GeneralUserObject(params),
     _real_tri(getParam<std::vector<std::vector<std::vector<Real>>>>("real_tri")),
+    _real_tri_empty_sub(
+        getParam<std::vector<std::vector<std::vector<Real>>>>("real_tri_empty_sub")),
+    _real_tri_empty_subsub(
+        getParam<std::vector<std::vector<std::vector<Real>>>>("real_tri_empty_subsub")),
+    _real_tri_empty_subs(
+        getParam<std::vector<std::vector<std::vector<Real>>>>("real_tri_empty_subs")),
+    _real_tri_empty_subsubs(
+        getParam<std::vector<std::vector<std::vector<Real>>>>("real_tri_empty_subsubs")),
+    _real_tri_all_empty(
+        getParam<std::vector<std::vector<std::vector<Real>>>>("real_tri_all_empty")),
     _uint_tri(getParam<std::vector<std::vector<std::vector<unsigned int>>>>("uint_tri")),
     _int_tri(getParam<std::vector<std::vector<std::vector<int>>>>("int_tri")),
     _long_tri(getParam<std::vector<std::vector<std::vector<long>>>>("long_tri")),
@@ -118,9 +140,28 @@ ReadTripleIndex::ReadTripleIndex(const InputParameters & params)
       {{1.1}, {2.1, 2.2, 2.3}, {3.1, 3.2}},
       {{11.1, 11.2}},
       {{21.1, 21.2}, {22.1}, {23.1, 23.2, 23.3}}};
+  const std::vector<std::vector<std::vector<Real>>> reference_values_empty_sub = {
+      {{1.1}, {2.1, 2.2, 2.3}, {3.1, 3.2}}, {}, {{21.1, 21.2}, {22.1}, {23.1, 23.2, 23.3}}};
+  const std::vector<std::vector<std::vector<Real>>> reference_values_empty_subsub = {
+      {{1.1}, {2.1, 2.2, 2.3}, {3.1, 3.2}}, {{11.1, 11.2}}, {{}, {22.1}, {23.1, 23.2, 23.3}}};
+  const std::vector<std::vector<std::vector<Real>>> reference_values_empty_subs = {
+      {}, {}, {{21.1, 21.2}, {22.1}, {23.1, 23.2, 23.3}}};
+  const std::vector<std::vector<std::vector<Real>>> reference_values_empty_subsubs = {
+      {{}, {}, {3.1, 3.2}}, {}, {{21.1, 21.2}, {22.1}, {23.1, 23.2, 23.3}}};
+  const std::vector<std::vector<std::vector<Real>>> reference_values_all_empty = {{}, {{}, {}}, {}};
 
-  // check real
+  // check real and special cases with real
   TripleIndexNumberVectorChecker(_real_tri, "real_tri", reference_values);
+  TripleIndexNumberVectorChecker(
+      _real_tri_empty_sub, "real_tri_empty_sub", reference_values_empty_sub);
+  TripleIndexNumberVectorChecker(
+      _real_tri_empty_subsub, "real_tri_empty_subsub", reference_values_empty_subsub);
+  TripleIndexNumberVectorChecker(
+      _real_tri_empty_subs, "real_tri_empty_subs", reference_values_empty_subs);
+  TripleIndexNumberVectorChecker(
+      _real_tri_empty_subsubs, "real_tri_empty_subsubs", reference_values_empty_subsubs);
+  TripleIndexNumberVectorChecker(
+      _real_tri_all_empty, "real_tri_all_empty", reference_values_all_empty);
 
   // check unsigned int
   TripleIndexNumberVectorChecker(_uint_tri, "uint_tri", reference_values, false, false, 10.0);

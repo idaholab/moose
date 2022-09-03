@@ -3,10 +3,8 @@
   issues = '#21930'
 
   [./parse_triple_index]
-    type = 'Exodiff'
+    type = 'RunApp'
     input = 'parse_triple_index.i'
-    exodiff = 'parse_triple_index.e'
-
     requirement = 'The system shall support reading in jagged triple-indexed arrays from the input file using two delimiters for columns and rows respectively.'
   [../]
 []
