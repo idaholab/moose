@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "kEpsilonViscosity.h"
+#include "kEpsilonLinearVariable.h"
 #include "INSFVMethods.h"
 
-registerMooseObject("NavierStokesApp", kEpsilonViscosity);
+registerMooseObject("NavierStokesApp", kEpsilonLinearVariable);
 
 InputParameters
-kEpsilonViscosity::validParams()
+kEpsilonLinearVariable::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
-      "Calculates the turbulent viscosity according to the k-epsilon model.");
+      "Calculates the linearization parameter (epsilon/k) in the k-epsilon model.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
@@ -31,9 +31,6 @@ kEpsilonViscosity::validParams()
   params.addParam<bool>("linearized_yplus",
                         false, 
                         "Boolean to indicate if yplus must be estimate locally for the blending functions.");
-  params.addParam<unsigned int>("n_iters_activate",
-                                1,
-                                "Relaxation iterations after which the k-epsilon model is activated.");
 
   params.addParam<Real>("max_mixing_length",
                         10.0,
@@ -41,7 +38,7 @@ kEpsilonViscosity::validParams()
   return params;
 }
 
-kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
+kEpsilonLinearVariable::kEpsilonLinearVariable(const InputParameters & params)
   : AuxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
@@ -58,14 +55,12 @@ kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
     _C_mu(getFunctor<ADReal>("C_mu")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
     _linearized_yplus(getParam<bool>("linearized_yplus")),
-    _n_kernel_iters(0),
-    _n_iters_activate(getParam<unsigned int>("n_iters_activate")),
     _max_mixing_length(getParam<Real>("max_mixing_length"))
 {
 }
 
 Real
-kEpsilonViscosity::computeValue()
+kEpsilonLinearVariable::computeValue()
 {
 
   // Boundary value
@@ -75,18 +70,6 @@ kEpsilonViscosity::computeValue()
   bool wall_bounded = false;
   Real min_wall_dist = 0.0;
   Point loc_normal;
-
-  if (elem == (*(* _mesh.activeLocalElementsBegin())))
-  {
-    _n_kernel_iters += 1;
-    if (_n_kernel_iters == (_n_iters_activate + 2)) //+2 since we need to consider assembly passes
-    {
-      _console << "Activating k-epsilon model." << std::endl;
-    }
-  }
-
-  if (_n_kernel_iters < (_n_iters_activate+2)) //+2 since we need to consider assembly passes
-    return 0.1; /// TODO: need to compute this value dynamically based in the condition number of the problem
 
   for (unsigned int i_side = 0; i_side < elem.n_sides(); ++i_side)
   {
@@ -116,7 +99,7 @@ kEpsilonViscosity::computeValue()
 
   if (wall_bounded)
   {
-    // return wall function
+    // return wall bounded (epsilon/k) value
 
     constexpr Real karman_cte = 0.4187;
     constexpr Real E = 9.793;
@@ -142,59 +125,18 @@ kEpsilonViscosity::computeValue()
     else
       u_star = findUStar(_mu(makeElemArg(&elem)), _rho(makeElemArg(_current_elem)), parallel_speed, min_wall_dist);
 
-    ADReal y_plus = min_wall_dist * u_star * _rho(makeElemArg(_current_elem)) / _mu(makeElemArg(_current_elem));
-
-    if (y_plus <= 5.0) //sub-laminar layer
-    {
-      return 0.0; // Formulation corresponding to Von Karman sublaminar layer description
-      // TODO: Not sure how to model the sublaminar layer with upwind turbulent production conditions
-      // OpenFOAM and Star-CCM+ treatements suck. Fluent does not provide enough details
-    }
-    else if(y_plus >= 30.0) // log-layer (actaully potential layer regarding modern research - change later)
-    {
-      auto current_argument = makeElemArg(_current_elem);
-      auto von_karman_value = (1/karman_cte + std::log(E*y_plus));
-      auto turbulent_wall_value = std::pow(_C_mu(current_argument), 0.25) 
-                                  * std::pow(_k(current_argument), 0.5)
-                                   / parallel_speed;
-      auto wall_function_value = std::max(von_karman_value, turbulent_wall_value);
-      auto wall_val = _mu(makeElemArg(_current_elem)) * (y_plus * wall_function_value - 1.0);
-      return wall_val.value();
-    }
-    else // my experimental blending function
-    {
-      auto current_argument = makeElemArg(_current_elem);
-      auto von_karman_value = (1/karman_cte + std::log(E*y_plus));
-      auto turbulent_wall_value = std::pow(_C_mu(current_argument), 0.25) 
-                                  * std::pow(_k(current_argument), 0.5)
-                                   / parallel_speed;
-      auto wall_function_value = std::max(von_karman_value, turbulent_wall_value);
-      auto wall_val = _mu(makeElemArg(_current_elem)) * (y_plus * wall_function_value - 1.0) * (y_plus - 5.0) / 25.0;
-      return wall_val.value();
-      // Note: ideally the user should not include values in the buffer layer as intermittency does not allow to define the wall function properly and bla bla
-      // However, we are allowing for values in the buffer layer as otherwise it is cumbersome for the user
-      // TODO: raise warning if some of the cell values lie in the buffer layer
-    }
+    return (karman_cte * min_wall_dist / (u_star * std::sqrt(_C_mu(makeElemArg(_current_elem))))).value();
   }
   else
   {
     //  Return Bulk value
-    constexpr Real protection_epsilon = 1e-10;
+    constexpr Real protection_k = 1e-10;
     auto current_argument = makeElemArg(_current_elem);
-    auto Launder_Sharma_bulk_limit = 0.5 * _mu(current_argument);
+    auto limiting_value = _C_mu(current_argument) * std::sqrt(_k(current_argument)) / _max_mixing_length; // Realizable constraint
 
-    ADReal local_mixing_length;
-    if ((_C_mu(current_argument) * std::pow(_k(current_argument), 1.5)) < 
-        (_epsilon(current_argument) * _max_mixing_length))
-        local_mixing_length = _rho(makeElemArg(_current_elem))
-                              * _C_mu(makeElemArg(_current_elem))
-                              * std::pow(_k(makeElemArg(_current_elem)), 1.5)
-                              / (_epsilon(makeElemArg(_current_elem)) + protection_epsilon);
-    else
-        local_mixing_length = _max_mixing_length;
+    auto residual = std::max(_epsilon(current_argument) / (_k(current_argument) + protection_k),
+                             limiting_value);
 
-    return (std::max(local_mixing_length * std::pow(_k(makeElemArg(_current_elem)), 0.5),
-                     Launder_Sharma_bulk_limit))
-                     .value();
+    return residual.value();
   }
 }

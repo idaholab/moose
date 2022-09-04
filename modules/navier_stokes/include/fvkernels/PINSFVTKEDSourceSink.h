@@ -56,4 +56,13 @@ protected:
 
   /// functor for the first turbulent coefficient
   const Moose::Functor<ADReal> & _C2_eps;
+
+  /// Maximum mixing length allowed for the domain
+  const Real _max_mixing_length;
+
+  /// Linearized model?
+  const bool _linearized_model;
+
+  /// Linearization coupled functor
+  const Moose::Functor<ADReal> & _linear_variable;
 };

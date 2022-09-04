@@ -31,6 +31,11 @@ PINSFVTKESourceSink::validParams()
       false,
       "Whether the TKE balance should be multiplied by porosity, or whether the provided "
       "diffusivity is an effective diffusivity taking porosity effects into account");
+  params.addParam<Real>("max_mixing_length",
+                        10.0,
+                        "Maximum mixing legth allowed for the domain - adjust for realizable k-epsilon to work properly.");
+  params.addParam<bool>("linearized_model", false, "Boolean to determine if the problem is linearized.");
+  params.addParam<MooseFunctorName>("linear_variable", 1.0, "Linearization coefficient in case the problem has been linearized.");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
@@ -49,7 +54,10 @@ PINSFVTKESourceSink::PINSFVTKESourceSink(const InputParameters & params)
     _rho(getFunctor<ADReal>(NS::density)),
     _mu_t(getFunctor<ADReal>("mu_t")),
     _porosity(getFunctor<ADReal>(NS::porosity)),
-    _porosity_factored_in(getParam<bool>("effective_balance"))
+    _porosity_factored_in(getParam<bool>("effective_balance")),
+    _max_mixing_length(getParam<Real>("max_mixing_length")),
+    _linearized_model(getParam<bool>("linearized_model")),
+    _linear_variable(getFunctor<ADReal>("linear_variable"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -100,13 +108,23 @@ PINSFVTKESourceSink::computeQpResidual()
 
   auto production = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm;
 
-  auto destruction = _rho(makeElemArg(_current_elem)) * _epsilon(makeElemArg(_current_elem));
+  ADReal destruction;
+  if(_linearized_model)
+    destruction = _rho(makeElemArg(_current_elem)) 
+                  * _linear_variable(makeElemArg(_current_elem)) 
+                  * _var(makeElemArg(_current_elem));
+  else
+    destruction = _rho(makeElemArg(_current_elem)) * _epsilon(makeElemArg(_current_elem));
 
-  // Limiting - mostly for sanity
+  // Ralizable constraints
   production = (production > 0) ? production : 0.0;
   destruction = (destruction > 0) ? destruction : 0.0;
-  production = (production/destruction < 100) ? production : 100*destruction;
-
+  auto limiting_factor = std::pow(_max_mixing_length, 2) * 1.0 * 1.0; 
+  // I know the multiplications by nominal wall velocity 1.0 are not needed, but otherwise unit consistency bothers me..
+  production = (production/destruction < limiting_factor) ? 
+                production 
+                : limiting_factor * destruction;
+                
   residual += production - destruction;
 
   if (_porosity_factored_in)

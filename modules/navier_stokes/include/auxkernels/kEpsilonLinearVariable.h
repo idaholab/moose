@@ -9,23 +9,23 @@
 
 #pragma once
 
-#include "FVElementalKernel.h"
+#include "AuxKernel.h"
 
+#include "INSFVVelocityVariable.h"
 /**
- * Simple class to demonstrate off diagonal Jacobian contributions.
+ * Computes wall y+ based on wall functions.
  */
-class PINSFVTKESourceSink : public FVElementalKernel
+class kEpsilonLinearVariable : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  PINSFVTKESourceSink(const InputParameters & parameters);
+  kEpsilonLinearVariable(const InputParameters & parameters);
 
 protected:
-  ADReal computeQpResidual() override;
+  virtual Real computeValue() override;
 
-protected:
-  /// The dimension of the simulation
+  /// the dimension of the simulation
   const unsigned int _dim;
 
   /// x-velocity
@@ -35,28 +35,23 @@ protected:
   /// z-velocity
   const INSFVVelocityVariable * const _w_var;
 
-  /// epsilon - dissipation rate of TKE
-  //const INSFVVariable * const _epsilon;
+  /// Turbulent kinetic energy
+  const Moose::Functor<ADReal> & _k;
+  /// Turbulent kinetic energy dissipation rate
   const Moose::Functor<ADReal> & _epsilon;
 
   /// Density
   const Moose::Functor<ADReal> & _rho;
+  /// Dynamic viscosity
+  const Moose::Functor<ADReal> & _mu;
+  /// C-mu closure coefficient
+  const Moose::Functor<ADReal> & _C_mu;
+  /// Wall boundaries
+  std::vector<BoundaryName> _wall_boundary_names;
 
-  /// Turbulent dynamic viscosity
-  const Moose::Functor<ADReal> & _mu_t;
-
-  /// the porosity
-  const Moose::Functor<ADReal> & _porosity;
-
-  /// whether the diffusivity should be multiplied by porosity
-  const bool _porosity_factored_in;
+  /// Linearzied computation of y_plus ?
+  const bool _linearized_yplus;
 
   /// Maximum mixing length allowed for the domain
   const Real _max_mixing_length;
-
-  /// Linearized model?
-  const bool _linearized_model;
-
-  /// Linearization coupled functor
-  const Moose::Functor<ADReal> & _linear_variable;
 };

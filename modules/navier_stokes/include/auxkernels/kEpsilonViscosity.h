@@ -25,12 +25,39 @@ public:
 protected:
   virtual Real computeValue() override;
 
+  /// the dimension of the simulation
+  const unsigned int _dim;
+
+  /// x-velocity
+  const INSFVVelocityVariable * const _u_var;
+  /// y-velocity
+  const INSFVVelocityVariable * const _v_var;
+  /// z-velocity
+  const INSFVVelocityVariable * const _w_var;
+
   /// Turbulent kinetic energy
   const Moose::Functor<ADReal> & _k;
   /// Turbulent kinetic energy dissipation rate
   const Moose::Functor<ADReal> & _epsilon;
+
   /// Density
   const Moose::Functor<ADReal> & _rho;
+  /// Dynamic viscosity
+  const Moose::Functor<ADReal> & _mu;
   /// C-mu closure coefficient
   const Moose::Functor<ADReal> & _C_mu;
+  /// Wall boundaries
+  std::vector<BoundaryName> _wall_boundary_names;
+
+  /// Linearzied computation of y_plus ?
+  const bool _linearized_yplus;
+
+  /// Number of auxiliary kernel iterations
+  unsigned int _n_kernel_iters;
+
+  /// Relxation iteration for activating the k-epsilon model
+  const Real _n_iters_activate;
+
+  /// Maximum mixing length allowed for the domain
+  const Real _max_mixing_length;
 };

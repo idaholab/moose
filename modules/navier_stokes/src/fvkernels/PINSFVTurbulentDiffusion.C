@@ -22,7 +22,7 @@ PINSFVTurbulentDiffusion::validParams()
                              "fluid energy equations :  $-div(eps * k / turb_coef * grad(T))$");
   params.addRequiredParam<MooseFunctorName>("mu_t", "Thermal conductivity");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity");
-  params.addRequiredParam<MooseFunctorName>("turb_coef", "Thermal conductivity");
+  params.addRequiredParam<MooseFunctorName>("turb_coef", "Normalization Coefficient Turbulent Diffusion");
   params.addParam<bool>(
       "effective_diffusivity",
       false,

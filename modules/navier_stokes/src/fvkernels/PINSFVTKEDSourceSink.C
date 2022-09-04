@@ -33,6 +33,11 @@ PINSFVTKEDSourceSink::validParams()
       "diffusivity is an effective diffusivity taking porosity effects into account");
   params.addRequiredParam<MooseFunctorName>("C1_eps", "First epsilon coefficient");
   params.addRequiredParam<MooseFunctorName>("C2_eps", "Second epsilon coefficient");
+  params.addParam<Real>("max_mixing_length",
+                        10.0,
+                        "Maximum mixing legth allowed for the domain - adjust for realizable k-epsilon to work properly.");
+  params.addParam<bool>("linearized_model", false, "Boolean to determine if the problem is linearized.");
+  params.addParam<MooseFunctorName>("linear_variable", 1.0, "Linearization coefficient in case the problem has been linearized.");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
@@ -53,7 +58,10 @@ PINSFVTKEDSourceSink::PINSFVTKEDSourceSink(const InputParameters & params)
     _porosity(getFunctor<ADReal>(NS::porosity)),
     _porosity_factored_in(getParam<bool>("effective_balance")),
     _C1_eps(getFunctor<ADReal>("C1_eps")),
-    _C2_eps(getFunctor<ADReal>("C2_eps"))
+    _C2_eps(getFunctor<ADReal>("C2_eps")),
+    _max_mixing_length(getParam<Real>("max_mixing_length")),
+    _linearized_model(getParam<bool>("linearized_model")),
+    _linear_variable(getFunctor<ADReal>("linear_variable"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -102,29 +110,48 @@ PINSFVTKEDSourceSink::computeQpResidual()
 
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
-  constexpr Real protection_k = 0.01;
+  constexpr Real protection_k = 1e-10;
 
-  auto production = _C1_eps(makeElemArg(_current_elem))
-                    * _mu_t(makeElemArg(_current_elem))
-                    * symmetric_strain_tensor_norm
-                    * _var(makeElemArg(_current_elem))
-                    / (_k(makeElemArg(_current_elem)) + protection_k);
+  ADReal production, destruction;
+  if (_linearized_model)
+  {
+    auto production = _C1_eps(makeElemArg(_current_elem))
+                      * _mu_t(makeElemArg(_current_elem))
+                      * symmetric_strain_tensor_norm
+                      * _linear_variable(makeElemArg(_current_elem));
 
-  auto destruction = _C2_eps(makeElemArg(_current_elem))
-                     * _rho(makeElemArg(_current_elem))
-                     * Utility::pow<2>(_var(makeElemArg(_current_elem)))
-                     / (_k(makeElemArg(_current_elem)) + protection_k);
+    auto destruction = _C2_eps(makeElemArg(_current_elem))
+                      * _rho(makeElemArg(_current_elem))
+                      * _var(makeElemArg(_current_elem))
+                      * _linear_variable(makeElemArg(_current_elem));
+  }
+  else
+  {
+    auto production = _C1_eps(makeElemArg(_current_elem))
+                      * _mu_t(makeElemArg(_current_elem))
+                      * symmetric_strain_tensor_norm
+                      * _var(makeElemArg(_current_elem))
+                      / (_k(makeElemArg(_current_elem)) + protection_k);
 
-  // Limiting - mostly for sanity
+    auto destruction = _C2_eps(makeElemArg(_current_elem))
+                      * _rho(makeElemArg(_current_elem))
+                      * Utility::pow<2>(_var(makeElemArg(_current_elem)))
+                      / (_k(makeElemArg(_current_elem)) + protection_k);
+  }
+
+  // Realizable dissipation constraints
   production = (production > 0) ? production : 0.0;
   destruction = (destruction > 0) ? destruction : 0.0;
-  production = (production/destruction < 5) ? production : 5*destruction;
-  production = (destruction/production < 5) ? destruction : 5*production;
-
+  // production = (production/destruction < 5) ? production : 5*destruction;
+  // production = (destruction/production < 5) ? destruction : 5*production;
 
   residual += production - destruction;
-  residual = (residual > 100) ? residual : 100;
-  residual = (residual < .01) ? residual : .01;
+
+  // Mixing length realizable source constraints
+  auto bottom_constraint = 0.09*std::pow(_k(makeElemArg(_current_elem)), 1.5) / _max_mixing_length / 10.0; // Must include hard value for C_mu
+  auto top_constraint = std::pow(_k(makeElemArg(_current_elem)), 1.5) / _max_mixing_length * 10.0;
+  residual = (residual > top_constraint) ? residual : top_constraint;
+  residual = (residual < bottom_constraint) ? residual : bottom_constraint;
 
   if (_porosity_factored_in)
     residual *= _porosity(makeElemArg(_current_elem));
