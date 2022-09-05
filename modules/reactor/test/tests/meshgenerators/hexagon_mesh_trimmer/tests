@@ -171,6 +171,13 @@
     expect_err = 'the remaining mesh after center trimming defined by this parameter and center_trim_ending_index must be equal or smaller than half of the input mesh.'
     requirement = "The system shall throw an error if the center trimming yields a mesh that is over half of the input mesh."
   []
+  [err_incomplete_center_trim]
+    type = RunException
+    input = 'assembly_trim.i'
+    cli_args = 'Mesh/trim/center_trim_starting_index=0'
+    expect_err = 'this parameter must be provided along with center_trim_ending_index.'
+    requirement = "The system shall throw an error if the center trimming index parameters are not given in a pair."
+  []
   [err_peripheral_trimmible]
     type = RunException
     input = 'err_trimmability.i'

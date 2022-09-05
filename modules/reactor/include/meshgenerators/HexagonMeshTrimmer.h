@@ -31,10 +31,12 @@ protected:
   std::vector<unsigned short> _trim_peripheral_region;
   /// Name of the section formed by peripheral trimming
   const BoundaryName _peripheral_trimming_section_boundary;
-  /// Number of remaining sectors
-  const unsigned int _center_trim_sector_number;
   /// Index of the sector to start trimming from (counter-clockwise direction)
-  const unsigned int _trimming_start_sector;
+  const short _trimming_start_sector;
+  /// Index of the sector to start trimming to (counter-clockwise direction)
+  const short _trimming_end_sector;
+  /// Number of remaining sectors
+  unsigned short _center_trim_sector_number;
   /// Name of the section formed by center trimming
   const BoundaryName _center_trimming_section_boundary;
   /// Name/ID of external boundary

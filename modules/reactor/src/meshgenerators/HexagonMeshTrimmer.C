@@ -28,12 +28,13 @@ HexagonMeshTrimmer::validParams()
       "mesh. See documentation for numbering convention.");
   params.addParam<BoundaryName>("peripheral_trimming_section_boundary",
                                 "Boundary formed by peripheral trimming.");
-  params.addRangeCheckedParam<unsigned int>("center_trim_starting_index",
-                                            "center_trim_starting_index<12",
-                                            "Index of the starting center trimming position.");
-  params.addRangeCheckedParam<unsigned int>("center_trim_ending_index",
-                                            "center_trim_ending_index<12",
-                                            "Index of the ending center trimming position.");
+  params.addRangeCheckedParam<short>(
+      "center_trim_starting_index",
+      "center_trim_starting_index>=0 & center_trim_starting_index<12",
+      "Index of the starting center trimming position.");
+  params.addRangeCheckedParam<short>("center_trim_ending_index",
+                                     "center_trim_ending_index>=0 & center_trim_ending_index<12",
+                                     "Index of the ending center trimming position.");
   params.addParam<BoundaryName>("center_trimming_section_boundary",
                                 "Boundary formed by center trimming.");
   params.addParam<BoundaryName>("external_boundary", "External boundary of the input mesh.");
@@ -61,15 +62,12 @@ HexagonMeshTrimmer::HexagonMeshTrimmer(const InputParameters & parameters)
         isParamValid("peripheral_trimming_section_boundary")
             ? getParam<BoundaryName>("peripheral_trimming_section_boundary")
             : BoundaryName()),
-    _center_trim_sector_number(
-        (isParamValid("center_trim_starting_index") && isParamValid("center_trim_ending_index"))
-            ? ((getParam<unsigned int>("center_trim_ending_index") -
-                getParam<unsigned int>("center_trim_starting_index")) %
-               12)
-            : 12),
-    _trimming_start_sector(_center_trim_sector_number < 12
-                               ? ((getParam<unsigned int>("center_trim_starting_index") - 3) % 12)
-                               : 0),
+    _trimming_start_sector(isParamValid("center_trim_starting_index")
+                               ? (getParam<short>("center_trim_starting_index") + 9) % 12
+                               : 12),
+    _trimming_end_sector(isParamValid("center_trim_ending_index")
+                             ? (getParam<short>("center_trim_ending_index") + 9) % 12
+                             : 12),
     _center_trimming_section_boundary(
         isParamValid("center_trimming_section_boundary")
             ? getParam<BoundaryName>("center_trimming_section_boundary")
@@ -86,6 +84,14 @@ HexagonMeshTrimmer::HexagonMeshTrimmer(const InputParameters & parameters)
     _input_pitch_meta(declareMeshProperty("input_pitch_meta", 0.0)),
     _is_control_drum_meta(declareMeshProperty("is_control_drum_meta", false))
 {
+  if ((_trimming_start_sector == 12 && _trimming_end_sector != 12) ||
+      (_trimming_start_sector != 12 && _trimming_end_sector == 12))
+    paramError("center_trim_starting_index",
+               "this parameter must be provided along with center_trim_ending_index.");
+  if (_trimming_start_sector == 12 && _trimming_end_sector == 12)
+    _center_trim_sector_number = 12;
+  else
+    _center_trim_sector_number = (_trimming_end_sector - _trimming_start_sector + 12) % 12;
   if (_center_trim_sector_number > 6 && _center_trim_sector_number < 12)
     paramError("center_trim_starting_index",
                "the remaining mesh after center trimming defined by this parameter and "
