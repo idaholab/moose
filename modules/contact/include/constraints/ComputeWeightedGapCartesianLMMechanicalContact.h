@@ -17,12 +17,12 @@
  * Computes the weighted gap that will later be used to enforce the
  * zero-penetration mechanical contact conditions
  */
-class ComputeWeightedGapLMMechanicalContact : public ADMortarConstraint
+class ComputeWeightedGapCartesianLMMechanicalContact : public ADMortarConstraint
 {
 public:
   static InputParameters validParams();
 
-  ComputeWeightedGapLMMechanicalContact(const InputParameters & parameters);
+  ComputeWeightedGapCartesianLMMechanicalContact(const InputParameters & parameters);
   using ADMortarConstraint::computeResidual;
   void computeResidual(Moose::MortarType mortar_type) override;
   using ADMortarConstraint::computeJacobian;
@@ -51,6 +51,7 @@ protected:
    */
   virtual void computeQpIProperties();
 
+  void timestepSetup() override;
   /**
    * Method called from \p post(). Used to enforce node-associated constraints. E.g. for the base \p
    * ComputeWeightedGapLMMechanicalContact we enforce the zero-penetration constraint in this method
@@ -92,6 +93,9 @@ protected:
   /// Whether the dof objects are nodal; if they're not, then they're elemental
   const bool _nodal;
 
+  /// Cartesian Lagrange multipliers for mechanical contact
+  std::vector<MooseVariable *> _lm_vars;
+
   /// The x displacement variable
   const MooseVariable * const _disp_x_var;
   /// The y displacement variable
@@ -104,6 +108,15 @@ protected:
 
   /// A map from node to weighted gap and normalization (if requested)
   std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_weighted_gap;
+
+  /// A map from node to normal vector (2D)
+  std::unordered_map<const DofObject *, RealVectorValue> _dof_to_normal_vector;
+
+  /// A map from node to normal vector (2D) - old
+  std::unordered_map<const DofObject *, RealVectorValue> _dof_to_old_normal_vector;
+
+  /// A map from node to tangent vector (2D for now)
+  std::unordered_map<const DofObject *, std::array<RealVectorValue, 2>> _dof_to_tangent_vectors;
 
   /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _weighted_gap_ptr = nullptr;

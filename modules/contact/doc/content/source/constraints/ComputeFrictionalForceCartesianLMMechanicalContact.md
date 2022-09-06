@@ -1,6 +1,6 @@
-# ComputeFrictionalForceLMMechanicalContact
+# ComputeFrictionalForceCartesianLMMechanicalContact
 
-!syntax description /Constraints/ComputeFrictionalForceLMMechanicalContact
+!syntax description /Constraints/ComputeFrictionalForceCartesianLMMechanicalContact
 
 
 This class represents a preliminary implementation of frictional mortar contact constraints intended to be used with Lagrange's multiplier interpolation with dual bases. The nonlinear complementarity constraints employed here are based on a primal-dual active set strategy (PDASS), see [!citep](gitterle2010finite). These constraints capture nodes in sticking and slipping states on different solution branches, and can be written as:
@@ -19,14 +19,27 @@ The nodal, weighted tangential velocity is computed as
 
 where $\gamma_c^{(1)}$ denotes the secondary contact interface, $\Phi_j$ is the
 j'th lagrange multiplier test function, and $v_{t,h}$ is the discretized version
-of the tangential velocity function.
+of the tangential velocity function. Note that this object assumes that the Lagrange multipliers are defined in a global Cartesian frame.
+Local variables to solve the contact problem are projected using nodal geometry, i.e. normal and tangential vectors.
 
-This object automatically enforces normal contact constraints by making calls to its parent class `ComputeWeightedGapLMMechanicalContact`, see [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md) for input parameters and details.
+This object automatically enforces normal contact constraints by making calls to its parent class.
 
 The preliminary recommendation is to select  `c` to be on the order of the moduli of elasticity of the bodies into contact, and `c_t` to be a few orders of magnitude less than `c`. This selection of these purely numerical parameters can represent an initial difficulty when running *new* models, but they can be held constant once good convergence behavior has been attained.
 
-!syntax parameters /Constraints/ComputeFrictionalForceLMMechanicalContact
+The `ComputeFrictionalForceCartesianLMMechanicalContact` object computes the weighted gap and
+applies the frictional contact conditions using Lagrange multipliers defined in a global Cartesian reference frame.
+As a consequence, the number of contact constraints at each node will be two, in two-dimensional problems,
+and three, in three-dimensional problems. The normal contact pressure is obtained by projecting the Lagrange
+multiplier vector along the normal vector computed from the mortar generation objects. The result is a normal
+contact constraint, which, in general, will be a function of all (two or three) Cartesian Lagrange multipliers.
+The other degree(s) of freedom are constrained by
+enforcing that tangential tractions follow Coulomb constraints within a semi-smooth Newton approach. Usage of
+Cartesian Lagrange multipliers is recommended when condensing Lagrange multipliers via the variable condensation preconditioner
+(VCP) [VariableCondensationPreconditioner](/VariableCondensationPreconditioner.md).
 
-!syntax inputs /Constraints/ComputeFrictionalForceLMMechanicalContact
 
-!syntax children /Constraints/ComputeFrictionalForceLMMechanicalContact
+!syntax parameters /Constraints/ComputeFrictionalForceCartesianLMMechanicalContact
+
+!syntax inputs /Constraints/ComputeFrictionalForceCartesianLMMechanicalContact
+
+!syntax children /Constraints/ComputeFrictionalForceCartesianLMMechanicalContact

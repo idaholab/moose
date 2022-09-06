@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeDynamicWeightedGapLMMechanicalContact.h"
+#include "MortarContactUtils.h"
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 
@@ -201,7 +202,10 @@ ComputeDynamicWeightedGapLMMechanicalContact::residualSetup()
 void
 ComputeDynamicWeightedGapLMMechanicalContact::post()
 {
-  communicateGaps();
+#ifdef MOOSE_SPARSE_AD
+  Moose::Mortar::Contact::communicateGaps(
+      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+#endif
 
   if (_has_wear)
     communicateWear();
@@ -245,7 +249,10 @@ void
 ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-  communicateGaps();
+#ifdef MOOSE_SPARSE_AD
+  Moose::Mortar::Contact::communicateGaps(
+      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+#endif
 
   if (_has_wear)
     communicateWear();
