@@ -20,7 +20,7 @@
  *
  * The non-linear variable for this Kernel is the order parameter 'eta'.
  */
-// class KKSACBulkF : public Kernel
+
 class NestKKSACBulkF : public KKSACBulkBase
 {
 public:

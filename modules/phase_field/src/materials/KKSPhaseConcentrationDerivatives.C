@@ -98,12 +98,7 @@ KKSPhaseConcentrationDerivatives::computeQpProperties()
   // declare Jacobian matrix A
   Eigen::MatrixXd A(_num_c * 2, _num_c * 2);
 
-  // initialize all elements in A to be zero
-  for (unsigned int m = 0; m < _num_c * 2; ++m)
-  {
-    for (unsigned int n = 0; n < _num_c * 2; ++n)
-      A(m, n) = 0;
-  }
+  A.setZero();
 
   // fill in the non-zero elements in A
   for (unsigned int m = 0; m < _num_c; ++m)
