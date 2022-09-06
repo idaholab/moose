@@ -268,13 +268,8 @@ refine = 3
   type = Transient
   solve_type = 'NEWTON'
 
-  # petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_view'
-
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu superlu_dist 1e-8          NONZERO               1e-15'
-
-  # petsc_options_iname = '-pc_type -pc_hypre_type'
-  # petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'lu        superlu_dist                  NONZERO               1e-15'
 
   line_search = none
 

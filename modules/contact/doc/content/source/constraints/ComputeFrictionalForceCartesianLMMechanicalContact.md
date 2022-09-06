@@ -6,11 +6,11 @@
 This class represents a preliminary implementation of frictional mortar contact constraints intended to be used with Lagrange's multiplier interpolation with dual bases. The nonlinear complementarity constraints employed here are based on a primal-dual active set strategy (PDASS), see [!citep](gitterle2010finite). These constraints capture nodes in sticking and slipping states on different solution branches, and can be written as:
 
 \begin{equation}
-C_{tj}(\lambda_{j},\boldsymbol{u}, \boldsymbol{\dot{u}}) = \max({\mu({pressure} + c_{n}\tilde{g}_{nj}),  abs({\lambda_{j} + c_t \tilde{u}_{tj}}))  \lambda_{j} - \mu \max({0,({pressure} + c_{n}\tilde{g}_{nj})}) (\lambda_{j} + c_t \tilde{u}_{tj})
+C_{tj}(\lambda_{j},\boldsymbol{u}, \boldsymbol{\dot{u}}) = \max({\mu({p} + c_{n}\tilde{g}_{nj}),  \mathrm{abs}({\lambda_{j} + c_t \tilde{u}_{tj}}))  \lambda_{j} - \mu \max({0,({p} + c_{n}\tilde{g}_{nj})}) (\lambda_{j} + c_t \tilde{u}_{tj})
 }
 \end{equation}
 
-$\lambda_{j}$ is a Lagrange's multiplier that refers to the tangential contact pressure at node $j$, $\tilde{u}_{tj}$ is the weighted tangential velocity integrated forward in time, $\tilde{g}_n)_j$ is the weighted normal gap, $c_{n}$ is a numerical parameter ($c$ in [`ComputeWeightedGapLMMechanicalContact`](/ComputeWeightedGapLMMechanicalContact.md)) and $c_{t}$ is a numerical parameter that can determine convergence properties but has no effect on the results.
+$p$ is the normal contact pressure, $\lambda_{j}$ is a Lagrange's multiplier that refers to the tangential contact pressure at node $j$, $\tilde{u}_{tj}$ is the weighted tangential velocity integrated forward in time, $\tilde{g}_n)_j$ is the weighted normal gap, $c_{n}$ is a numerical parameter ($c$ in [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md)) and $c_{t}$ is a numerical parameter that can determine convergence properties but has no effect on the results.
 
 The nodal, weighted tangential velocity is computed as
 \begin{equation}
@@ -35,7 +35,7 @@ contact constraint, which, in general, will be a function of all (two or three) 
 The other degree(s) of freedom are constrained by
 enforcing that tangential tractions follow Coulomb constraints within a semi-smooth Newton approach. Usage of
 Cartesian Lagrange multipliers is recommended when condensing Lagrange multipliers via the variable condensation preconditioner
-(VCP) [`VariableCondensationPreconditioner`](/VariableCondensationPreconditioner.md).
+(VCP) [VariableCondensationPreconditioner](/VariableCondensationPreconditioner.md).
 
 
 !syntax parameters /Constraints/ComputeFrictionalForceCartesianLMMechanicalContact

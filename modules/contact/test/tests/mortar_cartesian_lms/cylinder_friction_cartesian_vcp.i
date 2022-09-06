@@ -206,8 +206,8 @@
   solve_type = 'NEWTON'
 
   petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'NONZERO               1e-12                   1e-6'
+  petsc_options_iname = '-pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'NONZERO               1e-12'
 
   line_search = 'none'
   nl_abs_tol = 1e-7

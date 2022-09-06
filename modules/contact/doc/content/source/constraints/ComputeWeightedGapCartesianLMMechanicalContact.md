@@ -50,13 +50,13 @@ multiplier vector along the normal vector computed from the mortar generation ob
 contact constraint, which, in general, will be a function of all (two or three) Cartesian Lagrange multipliers.
 This methodology only constrains one degree of freedom. The other degree(s) of freedom are constrained by
 enforcing that tangential tractions are identically zero. Note that, if friction with Cartesian Lagrange multipliers
-is chosen via [`ComputeFrictionalForceCartesianLMMechanicalContact`](/ComputeFrictionalForceCartesianLMMechanicalContact.md),
+is chosen via [ComputeFrictionalForceCartesianLMMechanicalContact](/ComputeFrictionalForceCartesianLMMechanicalContact.md),
 those remaining nodal degrees of freedom are constraint using Coulomb constraints within a semi-smooth Newton approach. Usage of
 Cartesian Lagrange multipliers is recommended when condensing Lagrange multipliers via the variable condensation preconditioner
-(VCP) [`VariableCondensationPreconditioner`](/VariableCondensationPreconditioner.md).
+(VCP) [VariableCondensationPreconditioner](/VariableCondensationPreconditioner.md).
 
-The user can also employed locally oriented Lagrange multipliers [`ComputeWeightedGapLMMechanicalContact`](/ComputeWeightedGapLMMechanicalContact.md),
-which minimizes the number of contact constraints.
+The user can also employ locally oriented Lagrange multipliers [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md),
+which minimizes the number of contact constraints for frictionless problems.
 
 !syntax description /Constraints/ComputeWeightedGapCartesianLMMechanicalContact
 

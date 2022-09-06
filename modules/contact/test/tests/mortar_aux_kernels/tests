@@ -192,8 +192,8 @@
     min_ad_size = '50'
     ad_indexing_type = 'global'
     mesh_mode = 'REPLICATED'
-    requirement = 'The MortarPressureComponentAux should produce correct normal contact pressure '
-                  'value for frictionless mortar contact.'
+    requirement = 'The system shall produce correct normal contact pressure '
+                  'value for frictionless mortar contact when using an auxiliary kernel.'
   []
   [pressure-aux-frictionless-3d]
     type = CSVDiff
@@ -203,8 +203,8 @@
     min_ad_size = '100'
     ad_indexing_type = 'global'
     mesh_mode = 'REPLICATED'
-    requirement = 'The MortarPressureComponentAux should produce correct normal contact pressure '
-                  'value in 3D for frictionless mortar contact.'
+    requirement = 'The system shall should produce correct normal contact pressure '
+                  'value in 3D for frictionless mortar contact when using an auxiliary kernel.'
   []
   [pressure-aux-friction]
     type = CSVDiff
@@ -214,8 +214,8 @@
     min_ad_size = '50'
     ad_indexing_type = 'global'
     mesh_mode = 'REPLICATED'
-    requirement = 'The MortarPressureComponentAux should produce correct tangential contact pressure '
-                  'value for frictional mortar contact.'
+    requirement = 'The system shall produce correct tangential contact pressure '
+                  'value for frictional mortar contact when using an auxiliary kernel.'
   []
   [pressure-aux-friction-3d]
     type = CSVDiff
@@ -225,7 +225,7 @@
     min_ad_size = '100'
     ad_indexing_type = 'global'
     mesh_mode = 'REPLICATED'
-    requirement = 'The MortarPressureComponentAux should produce correct tangential contact pressure '
-                  'value in 3D for frictional mortar contact.'
+    requirement = 'The system shall produce correct tangential contact pressure '
+                  'value in 3D for frictional mortar contact when using an auxiliary kernel.'
   []
 []

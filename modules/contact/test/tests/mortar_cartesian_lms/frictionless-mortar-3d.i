@@ -7,10 +7,6 @@ offset = 0.00
   scaling = 1e0
 []
 
-[Problem]
-  # error_on_jacobian_nonzero_reallocation = true
-[]
-
 [Mesh]
   second_order = false
   [top_block]

@@ -24,10 +24,6 @@ offset = 1e-2
   [lm_y]
     block = 3
   []
-  # [lm_z]
-  #   block = 3
-  #   initial_condition = 0.0
-  # []
 []
 
 [ICs]

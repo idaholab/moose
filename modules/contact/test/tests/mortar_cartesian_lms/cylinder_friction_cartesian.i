@@ -207,8 +207,8 @@
 
   petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
                   '-snes_linesearch_monitor'
-  petsc_options_iname = '-pc_type   -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'lu          NONZERO               1e-12                   1e-6'
+  petsc_options_iname = '-pc_type   -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'lu          NONZERO               1e-12'
   line_search = 'none'
   nl_abs_tol = 1e-7
   l_max_its = 5

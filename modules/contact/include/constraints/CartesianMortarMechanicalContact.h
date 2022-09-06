@@ -11,6 +11,10 @@
 
 #include "ADMortarLagrangeConstraint.h"
 
+/**
+ * Applies mortar generalized forces from Lagrange multipliers defined in the global Cartesian frame
+ * of reference.
+ */
 class CartesianMortarMechanicalContact : public ADMortarLagrangeConstraint
 {
 public:
@@ -21,5 +25,6 @@ public:
 protected:
   ADReal computeQpResidual(Moose::MortarType type) final;
 
+  /// The Cartesian component to compute the generalized force
   const MooseEnum _component;
 };

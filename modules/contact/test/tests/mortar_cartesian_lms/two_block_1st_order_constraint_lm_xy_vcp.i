@@ -236,8 +236,8 @@ velocity = 0.1
 
   petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_view'
 
-  petsc_options_iname = '-mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = '1e-5          NONZERO               1e-10'
+  petsc_options_iname = '-pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'NONZERO               1e-10'
 
   line_search = none
 

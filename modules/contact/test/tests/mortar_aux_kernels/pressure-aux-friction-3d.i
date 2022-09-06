@@ -7,10 +7,6 @@ offset = 0.00
   scaling = 1e0
 []
 
-[Problem]
-  # error_on_jacobian_nonzero_reallocation = true
-[]
-
 [Mesh]
   second_order = false
   [top_block]
@@ -341,9 +337,8 @@ offset = 0.00
   solve_type = 'NEWTON'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_view'
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_mffd_err -pc_factor_shift_type '
-                        '-pc_factor_shift_amount'
-  petsc_options_value = 'lu superlu_dist 1e-8          NONZERO               1e-15'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = ' lu       superlu_dist                  NONZERO               1e-15'
   l_max_its = 100
   nl_max_its = 30
   # nl_rel_tol = 1e-6

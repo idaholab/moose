@@ -327,10 +327,15 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
     ny = _dof_to_old_normal_vector[dof](1);
     nz = _dof_to_old_normal_vector[dof](2);
   }
+
   unsigned int component_normal = 0;
-  if (std::abs(ny) > 0.57735)
+
+  // Consider constraint orientation to improve Jacobian structure
+  const Real threshold_for_Jacobian = _has_disp_z ? 1.0 / std::sqrt(3.0) : 1.0 / std::sqrt(2.0);
+
+  if (std::abs(ny) > threshold_for_Jacobian)
     component_normal = 1;
-  else if (std::abs(nz) > 0.57735)
+  else if (std::abs(nz) > threshold_for_Jacobian)
     component_normal = 2;
 
   libmesh_ignore(component_normal);

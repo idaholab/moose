@@ -7,10 +7,6 @@ offset = 0.00
   scaling = 1e0
 []
 
-[Problem]
-  # error_on_jacobian_nonzero_reallocation = true
-[]
-
 [Mesh]
   second_order = false
   [top_block]
@@ -315,8 +311,8 @@ offset = 0.00
   dt = .5
   dtmin = .01
   solve_type = 'NEWTON'
-  petsc_options_iname = '-mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = '1e-5          NONZERO               1e-10'
+  petsc_options_iname = '-pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = ' NONZERO               1e-10'
   l_max_its = 100
   nl_max_its = 30
   # nl_rel_tol = 1e-6

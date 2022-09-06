@@ -11,6 +11,11 @@
 
 #include "AuxKernel.h"
 
+/**
+ * Transforms a Cartesian Lagrange multiplier vector, typically employed for mortar mechanical
+ * contact,  to local coordinates and outputs each individual component along the normal or
+ * tangential direction.
+ */
 class MortarPressureComponentAux : public AuxKernel
 {
 public:
@@ -40,6 +45,7 @@ private:
   /// Boundary ID for the secondary surface
   const BoundaryID _secondary_id;
 
+  /// The component of the Lagrange multiplier to compute
   const enum class ComponentType { NORMAL, TANGENT1, TANGENT2 } _component;
 
   /// Whether to use displaced mesh (required for this auxiliary kernel)

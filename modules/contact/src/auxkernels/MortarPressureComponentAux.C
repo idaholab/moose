@@ -102,7 +102,6 @@ MortarPressureComponentAux::computeValue()
   Point normal_vector, tangent1, tangent2;
 
   for (const auto lowerd_node : make_range(lower_dimensional_element->n_nodes()))
-  {
     if (_current_node->id() == lower_dimensional_element->node_id(lowerd_node))
     {
       normal_vector = nodal_normals[lowerd_node];
@@ -110,7 +109,6 @@ MortarPressureComponentAux::computeValue()
       tangent2 = nodal_tangents[1][lowerd_node];
       break;
     }
-  }
 
   Point lm_vector_value(
       (*_lm_var_x)[_qp], (*_lm_var_y)[_qp], _lm_var_z == nullptr ? 0.0 : (*_lm_var_z)[_qp]);

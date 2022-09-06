@@ -42,22 +42,9 @@ CartesianMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
   switch (type)
   {
     case Moose::MortarType::Secondary:
-      // If normals is positive, then this residual is positive, indicating that we have an outflow
-      // of momentum, which in turn indicates that the momentum will tend to decrease at this
-      // location with time, which is what we want because the force vector is in the negative
-      // direction (always opposite of the normals). Conversely, if the normals is negative, then
-      // this residual is negative, indicating that we have an inflow of momentum, which in turn
-      // indicates the momentum will tend to increase at this location with time, which is what we
-      // want because the force vector is in the positive direction (always opposite of the
-      // normals).
-      // Get the _dof_to_weighted_gap map
-
       return _test_secondary[_i][_qp] * _lambda[_qp];
 
     case Moose::MortarType::Primary:
-      // The normal vector is signed according to the secondary face, so we need to introduce a
-      // negative sign here
-
       return -_test_primary[_i][_qp] * _lambda[_qp];
 
     default:
