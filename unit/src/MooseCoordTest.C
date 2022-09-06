@@ -9,7 +9,7 @@
 
 #include "gtest/gtest.h"
 
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 #include "MooseUtils.h"
 #include "Units.h"
 #include "MeshGeneratorMesh.h"
@@ -24,16 +24,18 @@ using namespace MooseUtils;
 
 TEST(MooseCoordTest, testRotations)
 {
-  MooseCoordTransform transform{};
-  const auto x = MooseCoordTransform::X;
-  const auto y = MooseCoordTransform::Y;
-  const auto z = MooseCoordTransform::Z;
+  MooseAppCoordTransform transform{};
+  const auto x = MooseAppCoordTransform::X;
+  const auto y = MooseAppCoordTransform::Y;
+  const auto z = MooseAppCoordTransform::Z;
   const Point xpt(1, 0, 0);
   const Point ypt(0, 1, 0);
   const Point zpt(0, 0, 1);
   const Point minus_xpt(-1, 0, 0);
   const Point minus_ypt(0, -1, 0);
   const Point minus_zpt(0, 0, -1);
+  MultiAppCoordTransform multi_transform(transform);
+  multi_transform.setDestinationCoordTransform(transform);
 
   auto error_checking = [&transform](const auto up_direction, const auto & error_string)
   {
@@ -57,28 +59,28 @@ TEST(MooseCoordTest, testRotations)
 
   transform.setCoordinateSystem(Moose::COORD_RZ, y);
   transform.setUpDirection(x);
-  compare_points(transform(xpt), ypt);
+  compare_points(multi_transform(xpt), ypt);
 
   transform.setCoordinateSystem(Moose::COORD_RZ, y);
   transform.setUpDirection(y);
-  compare_points(transform(xpt), xpt);
+  compare_points(multi_transform(xpt), xpt);
 
   transform.setCoordinateSystem(Moose::COORD_RZ, y);
   transform.setUpDirection(z);
-  compare_points(transform(xpt), xpt);
-  compare_points(transform(ypt), minus_zpt);
+  compare_points(multi_transform(xpt), xpt);
+  compare_points(multi_transform(ypt), minus_zpt);
 
   transform.setCoordinateSystem(Moose::COORD_RZ, x);
   error_checking(x, "Rotation yields negative radial values");
-  compare_points(transform(ypt), minus_xpt);
+  compare_points(multi_transform(ypt), minus_xpt);
 
   transform.setCoordinateSystem(Moose::COORD_RZ, x);
   transform.setUpDirection(y);
-  compare_points(transform(xpt), xpt);
+  compare_points(multi_transform(xpt), xpt);
 
   transform.setCoordinateSystem(Moose::COORD_RZ, x);
   error_checking(z, "Rotation yields negative radial values");
-  compare_points(transform(ypt), minus_zpt);
+  compare_points(multi_transform(ypt), minus_zpt);
 
   auto error_angles_checking =
       [&transform](const auto alpha, const auto beta, const auto gamma, const auto & error_string)
@@ -105,38 +107,42 @@ TEST(MooseCoordTest, testRotations)
     auto dup = transform;
     transform = dup;
   }
-  compare_points(transform(ypt), zpt);
-  compare_points(transform(xpt), xpt);
+  compare_points(multi_transform(ypt), zpt);
+  compare_points(multi_transform(xpt), xpt);
 }
 
 TEST(MooseCoordTest, testCoordCollapse)
 {
-  MooseCoordTransform xyz{};
-  xyz.setCoordinateSystem(Moose::COORD_XYZ);
-  MooseCoordTransform rz{};
-  rz.setCoordinateSystem(Moose::COORD_RZ, MooseCoordTransform::Y);
-  MooseCoordTransform rsph{};
-  rsph.setCoordinateSystem(Moose::COORD_RSPHERICAL);
+  MooseAppCoordTransform single_app_xyz{};
+  single_app_xyz.setCoordinateSystem(Moose::COORD_XYZ);
+  MooseAppCoordTransform single_app_rz{};
+  single_app_rz.setCoordinateSystem(Moose::COORD_RZ, MooseAppCoordTransform::Y);
+  MooseAppCoordTransform single_app_rsph{};
+  single_app_rsph.setCoordinateSystem(Moose::COORD_RSPHERICAL);
+  MultiAppCoordTransform xyz(single_app_xyz);
+  MultiAppCoordTransform rz(single_app_rz);
+  MultiAppCoordTransform rsph(single_app_rsph);
+
   const Real sqrt2 = std::sqrt(2.);
   const Real sqrt3 = std::sqrt(3.);
   const Point xyz_pt(1, 1, 1);
   const Point rz_pt(1, 1, 0);
   {
-    xyz.setDestinationCoordinateSystem(rz);
+    xyz.setDestinationCoordTransform(single_app_rz);
     const auto pt = xyz(xyz_pt);
     EXPECT_TRUE(absoluteFuzzyEqual(pt(0), sqrt2));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 1.));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(2), 0.));
   }
   {
-    xyz.setDestinationCoordinateSystem(rsph);
+    xyz.setDestinationCoordTransform(single_app_rsph);
     const auto pt = xyz(xyz_pt);
     EXPECT_TRUE(absoluteFuzzyEqual(pt(0), sqrt3));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 0.));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(2), 0.));
   }
   {
-    rz.setDestinationCoordinateSystem(rsph);
+    rz.setDestinationCoordTransform(single_app_rsph);
     const auto pt = rz(rz_pt);
     EXPECT_TRUE(absoluteFuzzyEqual(pt(0), sqrt2));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 0.));

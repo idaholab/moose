@@ -15,7 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/linear_implicit_system.h"
@@ -83,8 +83,6 @@ void
 MultiAppProjectionTransfer::initialSetup()
 {
   MultiAppConservativeTransfer::initialSetup();
-
-  getAppInfo();
 
   _proj_sys.resize(_to_problems.size(), NULL);
 
@@ -195,8 +193,6 @@ MultiAppProjectionTransfer::execute()
 {
   TIME_SECTION(
       "MultiAppProjectionTransfer::execute()", 5, "Transferring variables through projection");
-
-  getAppInfo();
 
   ////////////////////
   // We are going to project the solutions by solving some linear systems.  In

@@ -83,7 +83,7 @@ CoupledHeatTransferAction::validParams()
   params.addParam<FileName>(
       "positions_file",
       "Name of file containing sub-app positions. Each set of 3 values represents a Point.");
-
+  MultiAppTransfer::addSkipCoordCollapsingParam(params);
   return params;
 }
 
@@ -231,12 +231,16 @@ void
 CoupledHeatTransferAction::addTransfers()
 {
   // Transfers to the flow channel application
+
+  const bool skip_coordinate_collapsing = getParam<bool>("skip_coordinate_collapsing");
+
   {
     const std::string class_name = "MultiAppUserObjectTransfer";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<MultiAppName>("to_multi_app") = _multi_app_name;
     params.set<UserObjectName>("user_object") = {_T_wall_user_object_name};
     params.set<std::vector<AuxVariableName>>("variable") = {_T_wall_var_name};
+    params.set<bool>("skip_coordinate_collapsing") = skip_coordinate_collapsing;
     _problem->addTransfer(class_name, name() + "_T_solid_transfer", params);
   }
 
@@ -253,6 +257,7 @@ CoupledHeatTransferAction::addTransfers()
       params.set<MultiAppName>("from_multi_app") = _multi_app_name;
       params.set<UserObjectName>("user_object") = _T_fluid_user_object_names[k];
       params.set<std::vector<AuxVariableName>>("variable") = {_T_fluid_var_names[k]};
+      params.set<bool>("skip_coordinate_collapsing") = skip_coordinate_collapsing;
       _problem->addTransfer(class_name, name() + "_T_fluid_transfer" + std::to_string(k), params);
     }
     {
@@ -261,6 +266,7 @@ CoupledHeatTransferAction::addTransfers()
       params.set<MultiAppName>("from_multi_app") = _multi_app_name;
       params.set<UserObjectName>("user_object") = _htc_user_object_names[k];
       params.set<std::vector<AuxVariableName>>("variable") = {_htc_var_names[k]};
+      params.set<bool>("skip_coordinate_collapsing") = skip_coordinate_collapsing;
       _problem->addTransfer(class_name, name() + "_htc_transfer" + std::to_string(k), params);
     }
     if (_n_phases > 1)
@@ -270,6 +276,7 @@ CoupledHeatTransferAction::addTransfers()
       params.set<MultiAppName>("from_multi_app") = _multi_app_name;
       params.set<UserObjectName>("user_object") = _kappa_user_object_names[k];
       params.set<std::vector<AuxVariableName>>("variable") = {_kappa_var_names[k]};
+      params.set<bool>("skip_coordinate_collapsing") = skip_coordinate_collapsing;
       _problem->addTransfer(class_name, name() + "_kappa_transfer" + std::to_string(k), params);
     }
   }

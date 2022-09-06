@@ -35,4 +35,7 @@ protected:
   Real _radius;
 
   bool _nodal;
+
+private:
+  bool usesMooseAppCoordTransform() const override { return true; }
 };

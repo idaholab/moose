@@ -15,7 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/system.h"
 #include "libmesh/mesh_tools.h"
@@ -80,8 +80,6 @@ MultiAppNearestNodeTransfer::execute()
 {
   TIME_SECTION(
       "MultiAppNearestNodeTransfer::execute()", 5, "Transferring variables based on nearest nodes");
-
-  getAppInfo();
 
   // Get the bounding boxes for the "from" domains.
   std::vector<BoundingBox> bboxes;

@@ -25,6 +25,8 @@ class FEProblem;
 class Executioner;
 class MooseApp;
 class Backup;
+class MultiAppTransfer;
+class MultiAppCoordTransform;
 
 // libMesh forward declarations
 namespace libMesh
@@ -210,8 +212,11 @@ public:
    * the geometry around the axis to create the 3D geometry).
    * @param app The global app number you want to get the bounding box for
    * @param displaced_mesh True if the bounding box is retrieved for the displaced mesh, other false
+   * @param coord_transform An optional coordinate transformation object
    */
-  virtual BoundingBox getBoundingBox(unsigned int app, bool displaced_mesh);
+  virtual BoundingBox getBoundingBox(unsigned int app,
+                                     bool displaced_mesh,
+                                     const MultiAppCoordTransform * coord_transform = nullptr);
 
   /**
    * Get the FEProblemBase this MultiApp is part of.
@@ -279,7 +284,13 @@ public:
    * @param global_app The global app number in question
    * @return True if the global app is on this processor
    */
-  bool hasLocalApp(unsigned int global_app);
+  bool hasLocalApp(unsigned int global_app) const;
+
+  /**
+   * @return the local app number corresponding to the supplied global app number. We will assert
+   * that we have the local app before computing the local app number
+   */
+  unsigned int localAppNumber(unsigned int global_app) const;
 
   /**
    * Get the local MooseApp object
@@ -293,14 +304,6 @@ public:
    * @return the position
    */
   const Point & position(unsigned int app) { return _positions[app]; }
-
-  /**
-   * The transformed physical position of a global App number, e.g. the result of passing the origin
-   * in the application mesh domain to the application's coordinate transformation object
-   * @param app The global app number you want the transformed position for.
-   * @return the transformed position
-   */
-  Point transformedPosition(unsigned int app);
 
   /**
    * "Reset" the App corresponding to the global App number
@@ -346,6 +349,17 @@ public:
    * Whether or not this MultiApp is using positions or its own way for constructing sub-apps.
    */
   bool usingPositions() const { return _use_positions; }
+
+  /**
+   * Add a transfer that is associated with this multiapp
+   */
+  void addAssociatedTransfer(MultiAppTransfer & transfer);
+
+  /**
+   * Transform a bounding box according to the transformations in the provided coordinate
+   * transformation object
+   */
+  static void transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform);
 
 protected:
   /// function that provides cli_args to subapps
@@ -537,6 +551,9 @@ protected:
 
   /// The app configuration resulting from calling init
   LocalRankConfig _rank_config;
+
+  /// Transfers associated with this multiapp
+  std::vector<MultiAppTransfer *> _associated_transfers;
 
   ///Timers
   const PerfID _solve_step_timer;
