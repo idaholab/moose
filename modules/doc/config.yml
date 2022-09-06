@@ -125,6 +125,8 @@ Extensions:
         active: True
         args:
             company: Ford # used for example in python/MooseDocs/extensions/template.md
+            thm-bin-opt: thermal_hydraulics-opt
+            thm-bin-dbg: thermal_hydraulics-dbg
     MooseDocs.extensions.sqa:
         active: True
         reports: !include modules/doc/sqa_reports.yml

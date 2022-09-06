@@ -14,6 +14,7 @@
 #include "NavierStokesApp.h"
 #include "RayTracingApp.h"
 #include "RdgApp.h"
+#include "SolidPropertiesApp.h"
 #include "MiscApp.h"
 
 #include "AppFactory.h"
@@ -92,6 +93,7 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   NavierStokesApp::registerAll(f, af, s);
   RayTracingApp::registerAll(f, af, s);
   RdgApp::registerAll(f, af, s);
+  SolidPropertiesApp::registerAll(f, af, s);
   MiscApp::registerAll(f, af, s);
 
   THM::associateSyntax(s);

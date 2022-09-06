@@ -99,7 +99,7 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
     {
       if (_params.count(name) && !_params[name]._deprecation_message.empty())
         mooseDeprecated(
-            "The parameter ", name, " is deprecated.\n", _params[name]._deprecation_message);
+            "The parameter '", name, "' is deprecated.\n", _params[name]._deprecation_message);
     }
   }
 }

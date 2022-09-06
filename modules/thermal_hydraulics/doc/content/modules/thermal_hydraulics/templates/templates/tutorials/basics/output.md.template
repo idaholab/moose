@@ -1,6 +1,7 @@
 # Output
 
-The basic output of {{project-name-abbrev}} comes in 2 flavors.
+The two most commonly used output formats of MOOSE-based applications are
+ExodusII and CSV.
 
 ## ExodusII
 
@@ -30,7 +31,7 @@ To enable ExodusII output, include the following block in your input file:
 
 This is a text file format that uses commas to separate values (hence the name).
 
-The postprocessor and vector postprocessor values computed by {{project-name-abbrev}} can be stored in this format.
+The postprocessor and vector postprocessor values computed by the application can be stored in this format.
 
 CSV files are suitable for further processing in visualization tools like
 [matplotlib](https://matplotlib.org/),

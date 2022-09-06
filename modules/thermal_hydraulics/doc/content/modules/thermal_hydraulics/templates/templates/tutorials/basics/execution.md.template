@@ -2,16 +2,14 @@
 
 ## Command Line
 
-The main interaction with {{project-name-abbrev}} is via a command-line.
-
-The main mode of operation is that users supply an input file and get an output file back.
-This is done by doing:
+The main mode of interaction with MOOSE-based applications is the command line.
+The executable is run with an input file, which may produce output file(s):
 
 ```
-{{bin-opt}} -i input_file.i
+{{thm-bin-opt}} -i input_file.i
 ```
 
-Based on your {{project-name-abbrev}} installation, the exact command how to run the code can differ,
+Based on your installation of the application, the exact command how to run the code can differ;
 see the follwing subsections below.
 
 !alert note
@@ -27,14 +25,14 @@ the executable should be in your path and the above command should work.
 If you built the code yourself, you can run it via:
 
 ```
-/path/to/{{bin-opt}} -i input_file.i
+/path/to/{{thm-bin-opt}} -i input_file.i
 ```
 
-If you are running from the location where you built {{project-name-abbrev}}, you will need to
+If you are running from the location where you built the executable, you will need to
 prepend `./`, so the command would be:
 
 ```
-./{{bin-opt}} -i input_file.i
+./{{thm-bin-opt}} -i input_file.i
 ```
 
 In later steps of this tutorial, we will look at how to build such an input file
@@ -147,7 +145,7 @@ If the error is detect by the MOOSE framework you will see something like this:
 
 ## Parallel Execution
 
-{{project-name-abbrev}} supports the following parallel execution models:
+The following parallel execution models are supported:
 
 1. Threads
 2. MPI

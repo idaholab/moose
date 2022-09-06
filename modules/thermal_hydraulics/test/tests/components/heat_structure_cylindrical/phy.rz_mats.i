@@ -1,9 +1,18 @@
-# Tests that cylindrical heat structure geometry can be used with Materials block
+# Tests that cylindrical heat structure thermal properties can be defined in the Materials block
 
 [Functions]
   [power_profile_fn]
     type = ParsedFunction
     value = '1.570796326794897 * sin(x / 3.6576 * pi)'
+  []
+[]
+
+[Modules/SolidProperties]
+  [function_sp]
+    type = ThermalFunctionSolidProperties
+    rho = 6.6e1
+    cp = 321.384
+    k = 16.48672
   []
 []
 
@@ -23,10 +32,11 @@
   []
 
   [clad-mat]
-    type = ADGenericConstantMaterial
+    type = ADConstantDensityThermalSolidPropertiesMaterial
     block = hs:CLAD
-    prop_names = 'thermal_conductivity specific_heat density'
-    prop_values = '16.48672 321.384 6.6e1'
+    sp = function_sp
+    temperature = T_solid
+    T_ref = 300
   []
 []
 
