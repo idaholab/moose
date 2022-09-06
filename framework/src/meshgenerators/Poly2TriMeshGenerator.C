@@ -347,7 +347,6 @@ Poly2TriMeshGenerator::generate()
       // We'll still use MeshedHole, for its code distinguishing
       // outer boundaries from inner boundaries on a
       // hole-with-holes.
-
       TriangulatorInterface::MeshedHole mh{hole_mesh};
 
       // We have to translate from MeshedHole points to mesh
