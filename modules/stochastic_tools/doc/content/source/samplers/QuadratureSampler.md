@@ -1,6 +1,6 @@
-# QuadratureSampler
+# Quadrature
 
-!syntax description /Samplers/QuadratureSampler
+!syntax description /Samplers/Quadrature
 
 ## Overview
 
@@ -12,7 +12,7 @@ Numerical quadrature is a method of selecting specific points and weights in int
 
 where $y(x)$ is the function being integrated, $f(x)$ is weighting function, $N_q$ is the number of quadrature points, $w_q$ and $x_q$ are quadrature weights and points, respectively. The sampler generates the points and weights based on the weighting function and the desired integration order. A uniform weighting function uses Gauss-Legendre quadrature and a normal weighting function uses Gauss-Hermite quadrature. These two quadratures can exactly integrate a polynomial of order $2N_q-1$.
 
-For multidimensional quadratures, the following options are available by setting [!param](/Samplers/QuadratureSampler/sparse_grid):
+For multidimensional quadratures, the following options are available by setting [!param](/Samplers/Quadrature/sparse_grid):
 
 - `none` (default): Tensor grid
 - `smolyak`: Smolyak sparse grid
@@ -82,12 +82,12 @@ First, distributions are made, which define the weighting function of the integr
 
 !listing poly_chaos/main_2d_quad.i block=Distributions
 
-The QuadratureSampler then uses the distributions to create a quadrature with $N_q =$ `order`$+1$ points. The definition of `order` is important for use with polynomial chaos.
+The Quadrature then uses the distributions to create a quadrature with $N_q =$ `order`$+1$ points. The definition of `order` is important for use with polynomial chaos.
 
 !listing poly_chaos/main_2d_quad.i block=Samplers/quadrature
 
-!syntax parameters /Samplers/QuadratureSampler
+!syntax parameters /Samplers/Quadrature
 
-!syntax inputs /Samplers/QuadratureSampler
+!syntax inputs /Samplers/Quadrature
 
-!syntax children /Samplers/QuadratureSampler
+!syntax children /Samplers/Quadrature

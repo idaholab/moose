@@ -71,8 +71,8 @@
     type = GaussianProcessTrainer
     execute_on = timestep_end
     covariance_function = 'rbf'
-    standardize_params = 'true'               #Center and scale the training params
-    standardize_data = 'true'                 #Center and scale the training data
+    standardize_params = 'true' #Center and scale the training params
+    standardize_data = 'true' #Center and scale the training data
     sampler = sample
     response = results/data:avg:value
     tao_options = '-tao_bncg_type gd'
@@ -85,8 +85,8 @@
 
 [Covariance]
   [rbf]
-    type=SquaredExponentialCovariance
-    noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
+    type = SquaredExponentialCovariance
+    noise_variance = 1e-3 #A small amount of noise can help with numerical stability
     signal_variance = 1
     length_factor = '0.038971 0.038971 0.038971 0.038971' #Select a length factor for each parameter (k and q)
   []

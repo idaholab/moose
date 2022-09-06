@@ -72,7 +72,6 @@
   num_steps = 1
 []
 
-
 [Outputs]
   [out]
     type = CSV

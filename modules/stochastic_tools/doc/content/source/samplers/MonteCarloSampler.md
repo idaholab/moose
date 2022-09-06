@@ -1,4 +1,4 @@
-# MonteCarlo
+# MonteCarloSampler
 
 The MonteCarlo object samples the provided distribution using a traditional
 [Monte Carlo](https://en.wikipedia.org/wiki/Monte_Carlo_method) sampling.
@@ -7,8 +7,8 @@ The MonteCarlo object samples the provided distribution using a traditional
 
 !listing modules/stochastic_tools/test/tests/samplers/monte_carlo/monte_carlo_uniform.i block=Samplers
 
-!syntax parameters /Samplers/MonteCarloSampler
+!syntax parameters /Samplers/MonteCarlo
 
-!syntax inputs /Samplers/MonteCarloSampler
+!syntax inputs /Samplers/MonteCarlo
 
-!syntax children /Samplers/MonteCarloSampler
+!syntax children /Samplers/MonteCarlo

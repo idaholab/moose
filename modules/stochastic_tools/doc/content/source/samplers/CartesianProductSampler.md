@@ -1,6 +1,6 @@
-# CartesianProductSampler
+# CartesianProduct
 
-!syntax description /Samplers/CartesianProductSampler
+!syntax description /Samplers/CartesianProduct
 
 ## Overview
 
@@ -28,7 +28,7 @@ Z = \begin{bmatrix}
 
 ## Implementation
 
-The CartesianProductSampler utilizes what is referred to as a "lazy" scheme for the calculation of
+The CartesianProduct utilizes what is referred to as a "lazy" scheme for the calculation of
 the $Z$ matrix, using the algorithm below. This simply means that any given row ($n$) in the matrix
 can be computed directly without the need for computing the values prior to the entry. As such the
 sampling works efficiently in parallel to create distributed sample data.
@@ -44,7 +44,7 @@ Z(n) = \begin{bmatrix}
 
 ## Example Input File Syntax
 
-The following input file snippet demonstrates the creation of a CartesianProductSampler object
+The following input file snippet demonstrates the creation of a CartesianProduct object
 with three variables. The variables are provided using triplets that provide the starting point,
 the stepsize, and the number of steps. For example, the triplet of `10 1.5 3` result in
 $(10, 11.5, 13)$.
@@ -55,8 +55,8 @@ The resulting Cartesian product is provided in the output file, as shown below.
 
 !listing cartesian_product/gold/grid_out_data_0000.csv
 
-!syntax parameters /Samplers/CartesianProductSampler
+!syntax parameters /Samplers/CartesianProduct
 
-!syntax inputs /Samplers/CartesianProductSampler
+!syntax inputs /Samplers/CartesianProduct
 
-!syntax children /Samplers/CartesianProductSampler
+!syntax children /Samplers/CartesianProduct
