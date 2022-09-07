@@ -99,18 +99,13 @@ public:
    * @param name The name of the material property to retrieve
    * @return Reference to the material property with the name 'name'
    */
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericMaterialPropertyByName(const MaterialPropertyName & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name);
   template <typename T>
   const ADMaterialProperty<T> & getADMaterialPropertyByName(const MaterialPropertyName & name);
-  template <typename T, bool is_ad>
-  const auto & getGenericMaterialPropertyByName(const std::string & name)
-  {
-    if constexpr (is_ad)
-      return getADMaterialPropertyByName<T>(name);
-    else
-      return getMaterialPropertyByName<T>(name);
-  }
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
   template <typename T>
@@ -309,11 +304,26 @@ public:
                                                   MaterialData & material_data);
 
   /**
+   * Retrieve the generic property named "name" without any deduction for the specified \p
+   * material_data
+   */
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericMaterialPropertyByName(const MaterialPropertyName & name, MaterialData & material_data);
+
+  /**
    * Retrieve the property named "name" without any deduction for the specified \p material_data
    */
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name,
                                                         MaterialData & material_data);
+
+  /**
+   * Retrieve the AD property named "name" without any deduction for the specified \p material_data
+   */
+  template <typename T>
+  const MaterialProperty<T> & getADMaterialPropertyByName(const MaterialPropertyName & name,
+                                                          MaterialData & material_data);
 
   /**
    * Retrieve the ADMaterialProperty named "name" for the specified \p material_data
@@ -576,35 +586,25 @@ template <>
 const ADMaterialProperty<RealVectorValue> *
 MaterialPropertyInterface::defaultADMaterialProperty<RealVectorValue>(const std::string & name);
 
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialPropertyInterface::getGenericMaterialPropertyByName(const MaterialPropertyName & name)
+{
+  return getGenericMaterialPropertyByName<T, is_ad>(name, *_material_data);
+}
+
 template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name_in)
 {
-  return getMaterialPropertyByName<T>(name_in, *_material_data);
+  return getGenericMaterialPropertyByName<T, false>(name_in);
 }
 
 template <typename T>
 const ADMaterialProperty<T> &
 MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyName & name_in)
 {
-  const auto name = _get_suffix.empty()
-                        ? static_cast<const std::string &>(name_in)
-                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
-  checkExecutionStage();
-  checkMaterialProperty(name);
-
-  // mark property as requested
-  markMatPropRequested(name);
-
-  // Update the boolean flag.
-  _get_material_property_called = true;
-
-  _material_property_dependencies.insert(_material_data->getPropertyId(name));
-
-  // Update consumed properties in MaterialPropertyDebugOutput
-  addConsumedPropertyName(_mi_moose_object_name, name);
-
-  return _material_data->getADProperty<T>(name);
+  return getGenericMaterialPropertyByName<T, true>(name_in);
 }
 
 template <typename T>
@@ -763,10 +763,10 @@ MaterialPropertyInterface::getMaterialProperty(const std::string & name,
   return this->getMaterialPropertyByName<T>(prop_name, material_data);
 }
 
-template <typename T>
-const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name_in,
-                                                     MaterialData & material_data)
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialPropertyInterface::getGenericMaterialPropertyByName(const MaterialPropertyName & name_in,
+                                                            MaterialData & material_data)
 {
   const auto name = _get_suffix.empty()
                         ? static_cast<const std::string &>(name_in)
@@ -787,7 +787,23 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
   // Update consumed properties in MaterialPropertyDebugOutput
   addConsumedPropertyName(_mi_moose_object_name, name);
 
-  return material_data.getProperty<T>(name);
+  return material_data.getGenericProperty<T, is_ad>(name);
+}
+
+template <typename T>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name_in,
+                                                     MaterialData & material_data)
+{
+  return getGenericMaterialPropertyByName<T, false>(name_in, material_data);
+}
+
+template <typename T>
+const ADMaterialProperty<T> &
+MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyName & name_in,
+                                                       MaterialData & material_data)
+{
+  return getGenericMaterialPropertyByName<T, true>(name_in, material_data);
 }
 
 template <typename T>
