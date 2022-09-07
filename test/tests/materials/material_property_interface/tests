@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#21867'
+  design = 'syntax/Materials/index.md'
+
+  [nonexistent_material_property]
+    requirement = 'The system shall report an error if a requested material property does not exist for'
+    [regular]
+      type = RunException
+      input = 'nonexistent_mat_prop.i'
+      expect_err = "Material property 'blah', requested by 'pp' is not defined on block 0"
+      detail = 'regular material properties'
+    []
+    [ad]
+      type = RunException
+      input = 'nonexistent_mat_prop.i'
+      cli_args = "Postprocessors/pp/type=ADElementAverageMaterialProperty"
+      expect_err = "Material property 'blah', requested by 'pp' is not defined on block 0"
+      detail = 'AD material properties'
+    []
+  []
+[]
