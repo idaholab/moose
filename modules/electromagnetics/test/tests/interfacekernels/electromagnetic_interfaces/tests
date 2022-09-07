@@ -23,12 +23,21 @@
     design = 'ParallelElectricFieldInterface.md PerpendicularElectricFieldInterface.md'
     issues = '#21075'
   []
+  [combined_props_zero_free_charge]
+    type = Exodiff
+    input = 'combined_props.i'
+    exodiff = 'combined_props_zero_free_charge_out.e'
+    cli_args = 'InterfaceKernels/perpendicular/free_charge=0 Outputs/file_base=combined_props_zero_free_charge_out'
+    requirement = 'The system shall calculate the appropriate interface condition dictated by Maxwells Equations for both perpendicular (subject to material properties) and parallel (equivalent) components of electromagnetic vector fields at an interface at the same time, with user-supplied material property parameters and zero free charge.'
+    design = 'ParallelElectricFieldInterface.md PerpendicularElectricFieldInterface.md'
+    issues = '#21075'
+  []
   [combined_props]
     type = Exodiff
     input = 'combined_props.i'
     exodiff = 'combined_props_out.e'
-    requirement = 'The system shall calculate the appropriate interface condition dictated by Maxwells Equations for both perpendicular (subject to material properties) and parallel (equivalent) components of electromagnetic vector fields at an interface at the same time, with user-supplied material property parameters.'
+    requirement = 'The system shall calculate the appropriate interface condition dictated by Maxwells Equations for both perpendicular (subject to material properties) and parallel (equivalent) components of electromagnetic vector fields at an interface at the same time, with user-supplied material property and free charge parameters.'
     design = 'ParallelElectricFieldInterface.md PerpendicularElectricFieldInterface.md'
-    issues = '#21075'
+    issues = '#22036'
   []
 []
