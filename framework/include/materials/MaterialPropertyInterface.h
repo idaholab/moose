@@ -74,18 +74,12 @@ public:
    * @param name The name of the parameter key of the material property to retrieve
    * @return Reference to the desired material property
    */
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> & getGenericMaterialProperty(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   template <typename T>
   const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name);
-  template <typename T, bool is_ad>
-  const auto & getGenericMaterialProperty(const std::string & name)
-  {
-    if constexpr (is_ad)
-      return getADMaterialProperty<T>(name);
-    else
-      return getMaterialProperty<T>(name);
-  }
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template <typename T>
@@ -296,12 +290,25 @@ public:
   virtual void resolveOptionalProperties();
 
   /**
-   * Retrieve the property deduced from the name \p name for the specified \p material_data
-   * that can be defined on element, face and neighboring face.
+   * Retrieve the generic property named "name" for the specified \p material_data
+   */
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericMaterialProperty(const std::string & name, MaterialData & material_data);
+
+  /**
+   * Retrieve the property named "name" for the specified \p material_data
    */
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name,
                                                   MaterialData & material_data);
+
+  /**
+   * Retrieve the AD property named "name" for the specified \p material_data
+   */
+  template <typename T>
+  const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name,
+                                                      MaterialData & material_data);
 
   /**
    * Retrieve the generic property named "name" without any deduction for the specified \p
@@ -319,18 +326,12 @@ public:
                                                         MaterialData & material_data);
 
   /**
-   * Retrieve the AD property named "name" without any deduction for the specified \p material_data
+   * Retrieve the AD property named "name" without any deduction for the specified \p
+   * material_data
    */
   template <typename T>
-  const MaterialProperty<T> & getADMaterialPropertyByName(const MaterialPropertyName & name,
-                                                          MaterialData & material_data);
-
-  /**
-   * Retrieve the ADMaterialProperty named "name" for the specified \p material_data
-   */
-  template <typename T>
-  const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name,
-                                                      MaterialData & material_data);
+  const ADMaterialProperty<T> & getADMaterialPropertyByName(const MaterialPropertyName & name,
+                                                            MaterialData & material_data);
 
   /**
    * Retrieve the old property deduced from the name \p name for the specified \p material_data
@@ -340,7 +341,8 @@ public:
                                                      MaterialData & material_data);
 
   /**
-   * Retrieve the older property deduced from the name \p name for the specified \p material_data
+   * Retrieve the older property deduced from the name \p name for the specified \p
+   * material_data
    */
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name,
@@ -525,18 +527,25 @@ private:
   GenericOptionalMaterialProperty<T, is_ad> _value;
 };
 
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialPropertyInterface::getGenericMaterialProperty(const std::string & name)
+{
+  return getGenericMaterialProperty<T, is_ad>(name, *_material_data);
+}
+
 template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
-  return getMaterialProperty<T>(name, *_material_data);
+  return getGenericMaterialProperty<T, false>(name);
 }
 
 template <typename T>
 const ADMaterialProperty<T> &
 MaterialPropertyInterface::getADMaterialProperty(const std::string & name)
 {
-  return getADMaterialProperty<T>(name, *_material_data);
+  return getGenericMaterialProperty<T, true>(name);
 }
 
 template <typename T>
@@ -747,20 +756,37 @@ MaterialPropertyInterface::genericOptionalMaterialPropertyHelper(const std::stri
   return optional_property;
 }
 
-template <typename T>
-const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialProperty(const std::string & name,
-                                               MaterialData & material_data)
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialPropertyInterface::getGenericMaterialProperty(const std::string & name,
+                                                      MaterialData & material_data)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant
-  const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
+  const GenericMaterialProperty<T, is_ad> * default_property =
+      defaultGenericMaterialProperty<T, is_ad>(prop_name);
   if (default_property)
     return *default_property;
 
-  return this->getMaterialPropertyByName<T>(prop_name, material_data);
+  return this->getGenericMaterialPropertyByName<T, is_ad>(prop_name, material_data);
+}
+
+template <typename T>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialProperty(const std::string & name,
+                                               MaterialData & material_data)
+{
+  return getGenericMaterialProperty<T, false>(name, material_data);
+}
+
+template <typename T>
+const ADMaterialProperty<T> &
+MaterialPropertyInterface::getADMaterialProperty(const std::string & name,
+                                                 MaterialData & material_data)
+{
+  return getGenericMaterialProperty<T, true>(name, material_data);
 }
 
 template <typename T, bool is_ad>
@@ -804,27 +830,6 @@ MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyNam
                                                        MaterialData & material_data)
 {
   return getGenericMaterialPropertyByName<T, true>(name_in, material_data);
-}
-
-template <typename T>
-const ADMaterialProperty<T> &
-MaterialPropertyInterface::getADMaterialProperty(const std::string & name,
-                                                 MaterialData & material_data)
-{
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant
-  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-  else
-  {
-    // Does the material data used here matter?
-    _material_property_dependencies.insert(material_data.getPropertyId(prop_name));
-
-    return material_data.getADProperty<T>(prop_name);
-  }
 }
 
 template <typename T>
