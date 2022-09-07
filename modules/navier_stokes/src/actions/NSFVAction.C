@@ -351,7 +351,7 @@ NSFVAction::validParams()
    * Navier-Stokes + energy equations.
    */
 
-  MooseEnum adv_interpol_types("average upwind skewness-corrected", "average");
+  MooseEnum adv_interpol_types("average upwind skewness-corrected min_mod vanLeer", "average");
   params.addParam<MooseEnum>("mass_advection_interpolation",
                              adv_interpol_types,
                              "The numerical scheme to use for interpolating density, "
