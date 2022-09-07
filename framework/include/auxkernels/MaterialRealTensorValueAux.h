@@ -12,10 +12,16 @@
 // MOOSE includes
 #include "MaterialAuxBase.h"
 
+// Forward Declarations
+template <bool>
+class MaterialRealTensorValueAuxTempl;
+typedef MaterialRealTensorValueAuxTempl<false> MaterialRealTensorValueAux;
+
 /**
  * AuxKernel for outputting a RealTensorValue material property component to an AuxVariable
  */
-class MaterialRealTensorValueAux : public MaterialAuxBase<RealTensorValue>
+template <bool is_ad>
+class MaterialRealTensorValueAuxTempl : public MaterialAuxBaseTempl<RankTwoTensor, is_ad>
 {
 public:
   static InputParameters validParams();
@@ -24,7 +30,7 @@ public:
    * Class constructor
    * @param parameters The input parameters for this AuxKernel
    */
-  MaterialRealTensorValueAux(const InputParameters & parameters);
+  MaterialRealTensorValueAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real getRealValue() override;
@@ -35,3 +41,5 @@ protected:
   /// The column index to output
   unsigned int _col;
 };
+
+typedef MaterialRealTensorValueAuxTempl<true> ADMaterialRealTensorValueAux;

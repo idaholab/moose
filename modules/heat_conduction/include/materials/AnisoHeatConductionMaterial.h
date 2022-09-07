@@ -26,7 +26,6 @@ public:
   AnisoHeatConductionMaterialTempl(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
   const unsigned int _dim;
@@ -39,10 +38,14 @@ protected:
 
   const std::string _base_name;
 
-  const RankTwoTensor _user_provided_thermal_conductivity;
+  const std::vector<GenericReal<is_ad>> * _user_provided_thermal_conductivity_vector;
   GenericMaterialProperty<RankTwoTensor, is_ad> & _thermal_conductivity;
   MaterialProperty<RankTwoTensor> & _dthermal_conductivity_dT;
   const Function * const _thermal_conductivity_temperature_coefficient_function;
+
+  const Function * const _k_11_function;
+  const Function * const _k_22_function;
+  const Function * const _k_33_function;
 
   GenericMaterialProperty<Real, is_ad> & _specific_heat;
   MaterialProperty<Real> & _dspecific_heat_dT;
