@@ -59,11 +59,6 @@ protected:
    */
   virtual void enforceConstraintOnDof(const DofObject * const dof);
 
-  /**
-   * Communicate weighted gaps to the owning process
-   */
-  void communicateGaps();
-
   /// x-displacement on the secondary face
   const ADVariableValue & _secondary_disp_x;
   /// x-displacement on the primary face

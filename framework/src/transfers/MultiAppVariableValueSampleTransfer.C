@@ -52,6 +52,8 @@ MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(
 void
 MultiAppVariableValueSampleTransfer::initialSetup()
 {
+  MultiAppTransfer::initialSetup();
+
   variableIntegrityCheck(_to_var_name);
 
   if (isParamValid("from_multi_app"))

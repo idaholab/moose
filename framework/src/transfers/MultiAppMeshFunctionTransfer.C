@@ -15,7 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
@@ -42,6 +42,7 @@ MultiAppMeshFunctionTransfer::validParams()
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
   MultiAppTransfer::addBBoxFactorParam(params);
+  MultiAppTransfer::addSkipCoordCollapsingParam(params);
   return params;
 }
 
@@ -59,8 +60,6 @@ MultiAppMeshFunctionTransfer::execute()
 {
   TIME_SECTION(
       "MultiAppMeshFunctionTransfer::execute()", 5, "Transferring variables via a mesh function");
-
-  getAppInfo();
 
   // loop over the vector of variables and make the transfer one by one
   for (unsigned int i = 0; i < _var_size; ++i)

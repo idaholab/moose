@@ -14,7 +14,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MultiApp.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/numeric_vector.h"
@@ -47,6 +47,7 @@ MultiAppPostprocessorInterpolationTransfer::validParams()
                         "then the radius is taken as the max distance between "
                         "points.");
 
+  MultiAppTransfer::addSkipCoordCollapsingParam(params);
   return params;
 }
 
@@ -80,8 +81,6 @@ MultiAppPostprocessorInterpolationTransfer::execute()
                5,
                "Transferring/interpolating postprocessors");
 
-  getAppInfo();
-
   switch (_current_direction)
   {
     case TO_MULTIAPP:
@@ -114,13 +113,17 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       idi->set_field_variables(field_vars);
 
       {
-        const auto & to_coord_transform = getFromMultiApp()->problemBase().coordTransform();
+        mooseAssert(_to_transforms.size() == 1, "There should only be one transform here");
+        const auto & to_coord_transform = *_to_transforms[0];
         for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
         {
           if (getFromMultiApp()->hasLocalApp(i) && getFromMultiApp()->isRootProcessor())
           {
+            const auto local_app_number = getFromMultiApp()->localAppNumber(i);
+            // Evaluation of the _from_transform at the origin yields the transformed position of
+            // the from multi-app
             src_pts.push_back(
-                to_coord_transform.mapBack(getFromMultiApp()->transformedPosition(i)));
+                to_coord_transform.mapBack((*_from_transforms[local_app_number])(Point(0))));
             src_vals.push_back(getFromMultiApp()->appPostprocessorValue(i, _postprocessor));
           }
         }

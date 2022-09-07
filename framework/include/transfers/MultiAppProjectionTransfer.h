@@ -56,4 +56,7 @@ protected:
   std::map<processor_id_type, std::vector<Point>> _cached_qps;
   std::map<processor_id_type, std::map<std::pair<unsigned int, unsigned int>, unsigned int>>
       _cached_index_map;
+
+private:
+  bool usesMooseAppCoordTransform() const override { return true; }
 };

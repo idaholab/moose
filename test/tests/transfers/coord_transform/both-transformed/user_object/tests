@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#12293'
+  design = 'Transfers/index.md'
+  [both-transformed]
+    type = Exodiff
+    input = main-app.i
+    exodiff = 'main-app_out.e main-app_out_sub_app0.e'
+    requirement = 'The system shall be able to transfer data computed by a user object to a field, in either the child or the main app, in the presence of non-unity frame of reference transformations between the two applications.'
+    mesh_mode = replicated
+  []
+[]

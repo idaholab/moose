@@ -64,6 +64,7 @@
     orientation = '0 1 0'
     length = 1
     n_elems = 10
+    skip_coordinate_collapsing = true
   []
 []
 

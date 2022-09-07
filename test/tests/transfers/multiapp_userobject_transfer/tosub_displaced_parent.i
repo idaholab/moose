@@ -92,6 +92,7 @@
     type = MultiAppUserObjectTransfer
     to_multi_app = sub_app
     displaced_target_mesh = true
+    skip_coordinate_collapsing = true
   [../]
   [./element_layered_transfer]
     user_object = layered_average
@@ -99,5 +100,6 @@
     type = MultiAppUserObjectTransfer
     to_multi_app = sub_app
     displaced_target_mesh = true
+    skip_coordinate_collapsing = true
   [../]
 []

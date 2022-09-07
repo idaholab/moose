@@ -9,7 +9,8 @@
 
 !template! item key=description
 
-This self-paced tutorial will teach you the basics of how to use the {{project-name}}.
+This tutorial will teach you the basics of how to use the Thermal Hydraulics
+Module (THM).
 
 The tutorial starts by teaching you how to run the code.
 The next section will introduce the input file structure.

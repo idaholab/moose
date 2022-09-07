@@ -36,4 +36,6 @@ private:
    * Performs the transfer for the variable of index i
    */
   void transferVariable(unsigned int i);
+
+  bool usesMooseAppCoordTransform() const override { return true; }
 };

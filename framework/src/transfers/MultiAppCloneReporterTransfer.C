@@ -66,6 +66,8 @@ MultiAppCloneReporterTransfer::MultiAppCloneReporterTransfer(const InputParamete
 void
 MultiAppCloneReporterTransfer::initialSetup()
 {
+  MultiAppTransfer::initialSetup();
+
   if (isParamValid("to_multi_app") && !getToMultiApp()->hasApp() && !isParamValid("reporter_type"))
     mooseError("For a direct reporter clone, all processors must be associated with a "
                "sub-application. If you know the type of reporter being transferred, please "

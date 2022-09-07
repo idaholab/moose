@@ -13,7 +13,7 @@
 #include "MooseVariableFEBase.h"
 #include "MooseMesh.h"
 #include "SystemBase.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/system.h"
 #include "libmesh/id_types.h"
@@ -40,6 +40,8 @@ MultiAppFieldTransfer::MultiAppFieldTransfer(const InputParameters & parameters)
 void
 MultiAppFieldTransfer::initialSetup()
 {
+  MultiAppTransfer::initialSetup();
+
   if (_current_direction == TO_MULTIAPP)
     for (auto & to_var : getToVarNames())
       variableIntegrityCheck(to_var);
@@ -131,11 +133,6 @@ MultiAppFieldTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from
 
     if ((to_mesh.n_nodes() != from_mesh.n_nodes()) || (to_mesh.n_elem() != from_mesh.n_elem()))
       mooseError("The meshes must be identical to utilize MultiAppCopyTransfer.");
-
-    if (!to_problem.coordTransform().isIdentity() || !from_problem.coordTransform().isIdentity())
-      mooseDoOnce(mooseWarning("Non-identity transformations used with MultiAppCopyTransfer which "
-                               "is predicated on having exact mesh copies. If you did this on "
-                               "purpose, hopefully you know what you're doing"));
 
     // Transfer node dofs
     for (const auto & node : as_range(to_mesh.local_nodes_begin(), to_mesh.local_nodes_end()))

@@ -22,8 +22,9 @@ MooseParsedFunctionBase::validParams()
       "vars",
       "Variables (excluding t,x,y,z) that are bound to the values provided by the corresponding "
       "items in the vals vector.");
-  params.addParam<std::vector<std::string>>(
-      "vals", "Constant numeric values, postprocessor names, or function names for vars.");
+  params.addParam<std::vector<std::string>>("vals",
+                                            "Constant numeric values, postprocessor names, "
+                                            "function names, and scalar variables for vars.");
   return params;
 }
 

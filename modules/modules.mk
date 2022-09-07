@@ -49,6 +49,7 @@ ifeq ($(THERMAL_HYDRAULICS),yes)
         HEAT_CONDUCTION             := yes
         RAY_TRACING                 := yes
         RDG                         := yes
+        SOLID_PROPERTIES            := yes
         MISC                        := yes
 endif
 
@@ -282,7 +283,7 @@ endif
 ifeq ($(THERMAL_HYDRAULICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/thermal_hydraulics
   APPLICATION_NAME   := thermal_hydraulics
-  DEPEND_MODULES     := navier_stokes fluid_properties heat_conduction rdg ray_tracing misc
+  DEPEND_MODULES     := navier_stokes fluid_properties heat_conduction rdg ray_tracing solid_properties misc
   SUFFIX             := th
   include $(FRAMEWORK_DIR)/app.mk
 endif
