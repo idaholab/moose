@@ -19,18 +19,22 @@ NestedSolveTempl<is_ad>::validParams()
 
   // Newton iteration control parameters
   params.addParam<Real>("relative_tolerance",
-                        NestedSolveTempl<is_ad>::relativeToleranceDefault(),
+                        relativeToleranceDefault(),
                         "Relative convergence tolerance for Newton iteration");
   params.addParam<Real>("absolute_tolerance",
-                        NestedSolveTempl<is_ad>::absoluteToleranceDefault(),
+                        absoluteToleranceDefault(),
                         "Absolute convergence tolerance for Newton iteration");
   params.addParam<unsigned int>(
       "min_iterations",
-      NestedSolveTempl<is_ad>::minIterationsDefault(),
+      minIterationsDefault(),
       "Minimum number of non linear iterations to execute before accepting convergence");
-  params.addParam<unsigned int>("max_iterations",
-                                NestedSolveTempl<is_ad>::maxIterationsDefault(),
-                                "Maximum number of non linear iterations");
+  params.addParam<unsigned int>(
+      "max_iterations", maxIterationsDefault(), "Maximum number of non linear iterations");
+  params.addParam<Real>("acceptable_multiplier",
+                        acceptableMultiplierDefault(),
+                        "Factor applied to relative and absolute "
+                        "tolerance for acceptable convergence if "
+                        "iterations are no longer making progress");
   return params;
 }
 
@@ -40,6 +44,7 @@ NestedSolveTempl<is_ad>::NestedSolveTempl()
     _absolute_tolerance_square(Utility::pow<2>(absoluteToleranceDefault())),
     _min_iterations(minIterationsDefault()),
     _max_iterations(maxIterationsDefault()),
+    _acceptable_multiplier(acceptableMultiplierDefault()),
     _state(State::NONE),
     _n_iterations(0)
 {
@@ -51,6 +56,7 @@ NestedSolveTempl<is_ad>::NestedSolveTempl(const InputParameters & params)
     _absolute_tolerance_square(Utility::pow<2>(params.get<Real>("absolute_tolerance"))),
     _min_iterations(params.get<unsigned int>("min_iterations")),
     _max_iterations(params.get<unsigned int>("max_iterations")),
+    _acceptable_multiplier(params.get<Real>("acceptable_multiplier")),
     _state(State::NONE),
     _n_iterations(0)
 {
@@ -78,14 +84,14 @@ NestedSolveTempl<is_ad>::linear(const NSRankTwoTensor & A,
 
 template <bool is_ad>
 Real
-NestedSolveTempl<is_ad>::normSquare(const NSReal & v) const
+NestedSolveTempl<is_ad>::normSquare(const NSReal & v)
 {
   return MetaPhysicL::raw_value(v) * MetaPhysicL::raw_value(v);
 }
 
 template <bool is_ad>
 Real
-NestedSolveTempl<is_ad>::normSquare(const NSRealVectorValue & v) const
+NestedSolveTempl<is_ad>::normSquare(const NSRealVectorValue & v)
 {
   return MetaPhysicL::raw_value(v) * MetaPhysicL::raw_value(v);
 }
