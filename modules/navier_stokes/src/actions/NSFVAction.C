@@ -388,6 +388,13 @@ NSFVAction::validParams()
       "The numerical scheme to interpolate the passive scalar field variables to the "
       "face (separate from the advected quantity interpolation).");
 
+  MooseEnum velocity_interpolation("average rc", "rc");
+  params.addParam<MooseEnum>(
+      "velocity_interpolation",
+      velocity_interpolation,
+      "The interpolation to use for the velocity. Options are "
+      "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
+
   params.addParam<bool>(
       "pressure_two_term_bc_expansion",
       true,
@@ -583,6 +590,7 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),
     _energy_face_interpolation(getParam<MooseEnum>("energy_face_interpolation")),
     _passive_scalar_face_interpolation(getParam<MooseEnum>("passive_scalar_face_interpolation")),
+    _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _pressure_two_term_bc_expansion(getParam<bool>("pressure_two_term_bc_expansion")),
     _momentum_two_term_bc_expansion(getParam<bool>("momentum_two_term_bc_expansion")),
     _energy_two_term_bc_expansion(getParam<bool>("energy_two_term_bc_expansion")),
@@ -1088,7 +1096,7 @@ NSFVAction::addINSMassKernels()
   params.set<std::vector<SubdomainName>>("block") = _blocks;
   params.set<NonlinearVariableName>("variable") = _pressure_name;
   params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseEnum>("velocity_interp_method") = "rc";
+  params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
   params.set<MooseEnum>("advected_interp_method") = _mass_advection_interpolation;
 
@@ -1130,7 +1138,7 @@ NSFVAction::addINSMomentumAdvectionKernels()
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<std::vector<SubdomainName>>("block") = _blocks;
   params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseEnum>("velocity_interp_method") = "rc";
+  params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
   params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
   if (_porous_medium_treatment)
@@ -1460,7 +1468,7 @@ NSFVAction::addINSEnergyAdvectionKernels()
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   params.set<std::vector<SubdomainName>>("block") = _blocks;
-  params.set<MooseEnum>("velocity_interp_method") = "rc";
+  params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
   params.set<MooseEnum>("advected_interp_method") = _energy_advection_interpolation;
 
@@ -1568,7 +1576,7 @@ NSFVAction::addScalarAdvectionKernels()
     const std::string kernel_type = "INSFVScalarFieldAdvection";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = vname;
-    params.set<MooseEnum>("velocity_interp_method") = "rc";
+    params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
     params.set<MooseEnum>("advected_interp_method") = _passive_scalar_advection_interpolation;
 
     if (_porous_medium_treatment)
