@@ -1703,12 +1703,16 @@ NSFVAction::addINSInletBC()
              _momentum_inlet_types[bc_ind] == "flux-velocity")
     {
       {
-        const std::string bc_type = "WCNSFVMomentumFluxBC";
+        const std::string bc_type =
+            _porous_medium_treatment ? "PWCNSFVMomentumFluxBC" : "WCNSFVMomentumFluxBC";
         InputParameters params = _factory.getValidParams(bc_type);
         params.set<MooseFunctorName>(NS::density) = _density_name;
         params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
         if (_porous_medium_treatment)
+        {
           params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
+          params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+        }
         else
           params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
 
