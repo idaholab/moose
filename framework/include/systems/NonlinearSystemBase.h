@@ -955,7 +955,7 @@ protected:
   /// like for solid/fluid mechanics
   std::vector<std::vector<std::string>> _scaling_group_variables;
 
-  /// Container to hold flag if variable is to partipate in autoscaling
+  /// Container to hold flag if variable is to participate in autoscaling
   std::vector<bool> _variable_autoscaled;
 
   /// A container for variables that do not partipate in autoscaling
