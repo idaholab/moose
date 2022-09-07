@@ -9,6 +9,12 @@ packages:
     - conda/libmesh/meta.yaml
     - scripts/configure_libmesh.sh
     - scripts/update_and_rebuild_libmesh.sh
+  moose:
+    - .
+    - conda/moose/meta.yaml
+    - conda/moose/conda_build_config.yaml
+    - conda/moose/build.sh
 zip_keys:
   - petsc
   - libmesh
+  - moose

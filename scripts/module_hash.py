@@ -57,6 +57,8 @@ def parse_args():
     parser.add_argument('-i', '--influential', action='store_true', default=False,
                         help='List influential files involved with hash generation '
                         'then exit')
+    parser.add_argument('-t', '--tag', action='store_true', default=False,
+                        help='Mimic Conda and print date_build tag')
     return parser.parse_args()
 
 def git_hash(args, entity):
@@ -105,11 +107,40 @@ def build_list(args):
     _ltmp = []
     for group_entity in ENTITIES:
         if group_entity in _dtmp['packages']:
-            for entity in _dtmp['packages'][group_entity]:
-                _ltmp.append(entity)
+            if args.tag and group_entity == args.library:
+                for entity in _dtmp['packages'][group_entity]:
+                    if args.tag and entity.find('meta.yaml') == -1:
+                        continue
+                    _ltmp.append(entity)
+            elif not args.tag:
+                for entity in _dtmp['packages'][group_entity]:
+                    _ltmp.append(entity)
         if group_entity == args.library:
             break
     return _ltmp
+
+def get_tag(args, meta_yaml):
+    """ read conda-build jinja2 styled template, and return a version_build string """
+    try:
+        from jinja2 import Environment, FileSystemLoader
+    except ImportError:
+        if not args.quiet:
+            print('Unable to load required python modules for this task:\n'
+                'yaml, jinja2')
+            sys.exit(1)
+        return ''
+
+    # to handle pin_subpackage in conda build templates
+    def pin_subpackage(package, max_pin):
+        return
+
+    config = {'pin_subpackage' : pin_subpackage }
+    env = Environment(loader = FileSystemLoader(os.path.dirname(meta_yaml)),
+                                                trim_blocks=True,
+                                                lstrip_blocks=True)
+    meta_template = env.get_template(os.path.basename(meta_yaml))
+    meta_render = yaml.safe_load(meta_template.render(config))
+    return f'{meta_render["package"]["version"]}_{meta_render["build"]["string"]}'
 
 def main():
     """ print hash for supplied library """
@@ -122,7 +153,10 @@ def main():
     if args.influential:
         print('\n'.join(entity_list))
     else:
-        print(hashlib.md5(''.join(hash_tree).encode('utf-8')).hexdigest()[:7])
+        if args.tag:
+            print(get_tag(args, entity_list[0]))
+        else:
+            print(hashlib.md5(''.join(hash_tree).encode('utf-8')).hexdigest()[:7])
 
 if __name__ == '__main__':
     main()
