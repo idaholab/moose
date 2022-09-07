@@ -9,7 +9,7 @@ The momentum flux is:
 !equation
 \phi = \dfrac{\rho v_d^2}{\epsilon} = \dfrac{\dot{m}^2}{\rho \epsilon A^2}
 
-with $\phi$ the momentum flux, $\rho$ the density, $\v_d$ the fluid superficial
+with $\phi$ the momentum flux, $\rho$ the density, $v_d$ the fluid superficial
 velocity (assumed normal to the surface here), $\epsilon$ the porosity of the medium,
 $\dot{m}$ the mass flow rate, and $A$ the inlet area.
 

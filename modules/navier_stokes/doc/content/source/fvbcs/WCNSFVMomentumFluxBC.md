@@ -7,7 +7,7 @@ The momentum flux is:
 !equation
 \phi = \rho v^2 = \dfrac{\dot{m}^2}{\rho A^2}
 
-with $\phi$ the momentum flux, $\rho$ the density, $\v$ the fluid velocity (assumed normal to the surface),
+with $\phi$ the momentum flux, $\rho$ the density, $v$ the fluid velocity (assumed normal to the surface),
 $\dot{m}$ the mass flow rate and $A$ the inlet area.
 
 There are two options for specifying the momentum flux:
