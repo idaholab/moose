@@ -1004,6 +1004,29 @@ MooseMesh::getBoundariesToElems() const
   return _bnd_elem_ids;
 }
 
+const std::unordered_set<dof_id_type> MooseMesh::getBoundaryElems(BoundaryID bid) const
+{
+  // The boundary to element map is computed on every mesh update
+  const auto it = _bnd_elem_ids.find(bid);
+  if (it == _bnd_elem_ids.end())
+    mooseError("Boundary elements requested for boundary/sideset id ",
+        bid,
+        " but was not found in mesh boundary element map. A call to buildBndElemList() "
+        "may be missing");
+  return it->second;
+}
+
+const std::unordered_set<dof_id_type> MooseMesh::getBoundaryNeighborElems(BoundaryID bid) const
+{
+  // Vector of boundary elems is updated every mesh update
+  std::unordered_set<dof_id_type> neighbor_elems;
+  for (const auto & local_elem : _bnd_elems)
+    if (local_elem->_bnd_id == bid)
+      neighbor_elems.insert(local_elem->_elem->neighbor_ptr(local_elem->_side)->id());
+
+  return neighbor_elems;
+}
+
 void
 MooseMesh::cacheInfo()
 {
@@ -1045,16 +1068,16 @@ MooseMesh::cacheInfo()
     SubdomainID subdomain_id = elem->subdomain_id();
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
-      std::vector<BoundaryID> boundaryids = getBoundaryIDs(elem, side);
+      std::vector<BoundaryID> boundary_ids = getBoundaryIDs(elem, side);
       std::set<BoundaryID> & subdomain_set = _subdomain_boundary_ids[subdomain_id];
 
-      subdomain_set.insert(boundaryids.begin(), boundaryids.end());
+      subdomain_set.insert(boundary_ids.begin(), boundary_ids.end());
 
       Elem * neig = elem->neighbor_ptr(side);
       if (neig)
       {
-        _neighbor_subdomain_boundary_ids[neig->subdomain_id()].insert(boundaryids.begin(),
-                                                                      boundaryids.end());
+        _neighbor_subdomain_boundary_ids[neig->subdomain_id()].insert(boundary_ids.begin(),
+                                                                      boundary_ids.end());
         SubdomainID neighbor_subdomain_id = neig->subdomain_id();
         if (neighbor_subdomain_id != subdomain_id)
           _sub_to_neighbor_subs[subdomain_id].insert(neighbor_subdomain_id);

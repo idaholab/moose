@@ -424,6 +424,21 @@ public:
   getBoundariesToElems() const;
 
   /**
+   * Return all elements which have a side which is part of a boundary/sideset.
+   * Note that boundaries are sided.
+   * @param bid the id of the boundary/sideset of interest
+   */
+  const std::unordered_set<dof_id_type> getBoundaryElems(BoundaryID bid) const;
+
+  /**
+   * Return all neighbors of elements which have a side which is part of a boundary/sideset.
+   * Note that boundaries are sided, this is on the neighbor side. For the sideset side, use
+   * getBoundariesElem
+   * @param bid the id of the boundary/sideset of interest
+   */
+  const std::unordered_set<dof_id_type> getBoundaryNeighborElems(BoundaryID bid) const;
+
+  /**
    * Returns a read-only reference to the set of subdomains currently
    * present in the Mesh.
    */
