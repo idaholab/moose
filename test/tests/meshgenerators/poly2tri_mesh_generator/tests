@@ -84,5 +84,13 @@
       recover = false
       detail = "with optional Laplacian mesh smoothing."
     []
+    [area_func]
+      type = 'Exodiff'
+      input = 'poly2tri_area_func.i'
+      cli_args = '--mesh-only'
+      exodiff = 'poly2tri_area_func_in.e'
+      recover = false
+      detail = "with optional non-uniform refinement."
+    []
   []
 []
