@@ -48,22 +48,19 @@ public:
   /**
    * Function to compute default bounds when user did not provide bounds
    */
-  virtual std::vector<Real> computeDefaultBounds(Real val);
+  std::vector<Real> computeDefaultBounds(Real val);
 
   /**
-   * Function to compute objective and handle a failed solve.
+   * Function to compute objective.
    * This is the last function called in objective routine
    */
-  virtual Real computeAndCheckObjective(bool solver_converged);
+  virtual Real computeObjective();
 
   /**
    * Function to compute gradient.
    * This is the last call of the gradient routine.
    */
-  virtual void computeGradient(libMesh::PetscVector<Number> & /*gradient*/)
-  {
-    mooseError("Gradient function has not been defined for form function type ", _type);
-  }
+  virtual void computeGradient(libMesh::PetscVector<Number> & gradient);
 
   /**
    * Function to get the total number of parameters
@@ -87,17 +84,14 @@ protected:
   const std::vector<Real> & _lower_bounds;
   const std::vector<Real> & _upper_bounds;
 
-  /**
-   * Function to compute objective.
-   * This is the last function called in objective routine
-   */
-  Real computeObjective();
+  /// vector of adjoint data
+  const std::vector<Real> & _adjoint_data;
 
   /**
    * Function to set parameters.
    * This is the first function called in objective/gradient/hessian routine
    */
-  virtual void updateParameters(const libMesh::PetscVector<Number> & x);
+  void updateParameters(const libMesh::PetscVector<Number> & x);
 
 private:
   friend class OptimizeSolve;

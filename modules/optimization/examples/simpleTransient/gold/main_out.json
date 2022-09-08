@@ -1,7 +1,7 @@
 {
     "reporters": {
         "OptimizationReporter": {
-            "type": "ObjectiveMinimize",
+            "type": "OptimizationReporter",
             "values": {
                 "measurement_time": {
                     "type": "std::vector<double>"

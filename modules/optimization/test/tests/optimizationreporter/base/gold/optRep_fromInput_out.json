@@ -3,6 +3,9 @@
         "OptimizationReporter": {
             "type": "OptimizationReporter",
             "values": {
+                "adjoint": {
+                    "type": "std::vector<double>"
+                },
                 "measurement_time": {
                     "type": "std::vector<double>"
                 },
@@ -39,6 +42,7 @@
     "time_steps": [
         {
             "OptimizationReporter": {
+                "adjoint": [],
                 "measurement_time": [
                     0.0,
                     0.0,
@@ -100,6 +104,7 @@
         },
         {
             "OptimizationReporter": {
+                "adjoint": [],
                 "measurement_time": [
                     0.0,
                     0.0,

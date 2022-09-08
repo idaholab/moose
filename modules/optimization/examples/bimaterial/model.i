@@ -45,7 +45,7 @@
     type = RenameBlockGenerator
     input = bimaterial
     old_block_id = '0 1'
-    new_block_name = 'top bottom'
+    new_block = 'top bottom'
   []
   [central_node]
     type = ExtraNodesetGenerator

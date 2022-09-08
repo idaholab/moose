@@ -21,19 +21,6 @@ ObjectiveGradientMinimize::validParams()
 }
 
 ObjectiveGradientMinimize::ObjectiveGradientMinimize(const InputParameters & parameters)
-  : OptimizationReporter(parameters),
-    _adjoint_data(declareValueByName<std::vector<Real>>("adjoint", REPORTER_MODE_REPLICATED))
+  : OptimizationReporter(parameters)
 {
-}
-
-void
-ObjectiveGradientMinimize::computeGradient(libMesh::PetscVector<Number> & gradient)
-{
-  if (_adjoint_data.size() != _ndof)
-    mooseError("Adjoint data is not equal to the total number of parameters.");
-
-  for (const auto i : make_range(_ndof))
-    gradient.set(i, _adjoint_data[i]);
-
-  gradient.close();
 }

@@ -22,7 +22,7 @@ public:
   static InputParameters validParams();
   QuadraticMinimize(const InputParameters & parameters);
 
-  virtual Real computeAndCheckObjective(bool /*multiapp_passed*/) override;
+  virtual Real computeObjective() override;
   virtual void computeGradient(libMesh::PetscVector<Number> & gradient) override;
 
 private:

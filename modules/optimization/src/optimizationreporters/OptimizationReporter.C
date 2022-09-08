@@ -10,14 +10,14 @@
 #include "OptimizationReporter.h"
 #include "libmesh/int_range.h"
 
-// this is a base class but is only called in a testing input file
-registerMooseObject("OptimizationTestApp", OptimizationReporter);
+registerMooseObject("OptimizationApp", OptimizationReporter);
 
 InputParameters
 OptimizationReporter::validParams()
 {
   InputParameters params = OptimizationData::validParams();
-  params.addClassDescription("Base class for optimization reporter communication.");
+  params.addClassDescription("Computes objective function, gradient and contains reporters for "
+                             "communicating between optimizeSolve and subapps");
   params.addRequiredParam<std::vector<ReporterValueName>>(
       "parameter_names", "List of parameter names, one for each group of parameters.");
   params.addRequiredParam<std::vector<dof_id_type>>(
@@ -40,8 +40,8 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
     _nvalues(getParam<std::vector<dof_id_type>>("num_values")),
     _ndof(std::accumulate(_nvalues.begin(), _nvalues.end(), 0)),
     _lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
-    _upper_bounds(getParam<std::vector<Real>>("upper_bounds"))
-
+    _upper_bounds(getParam<std::vector<Real>>("upper_bounds")),
+    _adjoint_data(declareValueByName<std::vector<Real>>("adjoint", REPORTER_MODE_REPLICATED))
 {
   if (_parameter_names.size() != _nvalues.size())
     paramError("num_parameters",
@@ -110,16 +110,9 @@ OptimizationReporter::computeDefaultBounds(Real val)
 }
 
 Real
-OptimizationReporter::computeAndCheckObjective(bool multiapp_passed)
-{
-  if (!multiapp_passed)
-    mooseError("Forward solve multiapp failed!");
-  return computeObjective();
-}
-
-Real
 OptimizationReporter::computeObjective()
 {
+  // This will only be executed if measurement_values are available on the main app
   for (const auto i : index_range(_measurement_values))
     _misfit_values[i] = _simulation_values[i] - _measurement_values[i];
 
@@ -133,10 +126,22 @@ OptimizationReporter::computeObjective()
 void
 OptimizationReporter::setMisfitToSimulatedValues()
 {
-  for (const auto i : index_range(_measurement_values))
+  for (const auto i : index_range(_simulation_values))
     _misfit_values[i] = _simulation_values[i];
 }
 
+void
+OptimizationReporter::computeGradient(libMesh::PetscVector<Number> & gradient)
+{
+  if (_adjoint_data.size() != _ndof)
+    mooseError("Adjoint data is not equal to the total number of parameters.");
+
+  for (const auto i : make_range(_ndof))
+    gradient.set(i, _adjoint_data[i]);
+
+  gradient.close();
+}
+// function only used for test objects
 void
 OptimizationReporter::setSimuilationValuesForTesting(std::vector<Real> & data)
 {

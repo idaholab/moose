@@ -101,7 +101,7 @@ OptimizationReporterTest::execute()
       getParam<std::vector<Real>>("values_to_set_simulation_measurements_to"));
   _optReporter->setSimuilationValuesForTesting(valuesToSetOnOptRepSim);
   Real expectedObjectiveValue(getParam<Real>("expected_objective_value"));
-  Real objectiveValue = _optReporter->computeAndCheckObjective(true);
+  Real objectiveValue = _optReporter->computeObjective();
   Real diff = std::abs(expectedObjectiveValue - objectiveValue);
   if (diff > _tol)
     mooseError("OptimizationReporter objective= ",

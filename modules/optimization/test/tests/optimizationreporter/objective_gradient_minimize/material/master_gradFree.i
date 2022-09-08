@@ -11,7 +11,7 @@
 []
 
 [OptimizationReporter]
-  type = ObjectiveMinimize
+  type = ObjectiveGradientMinimize
   parameter_names = 'p1'
   num_values = '1'
   initial_condition = '8'

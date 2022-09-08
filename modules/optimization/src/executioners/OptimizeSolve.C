@@ -321,15 +321,16 @@ OptimizeSolve::objectiveFunction()
   _form_function->updateParameters(*_parameters.get());
 
   _problem.execute(OptimizationAppTypes::EXEC_FORWARD);
-  bool multiapp_passed = true;
+
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_FORWARD);
   if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_FORWARD))
-    multiapp_passed = false;
+    mooseError("Forward solve multiapp failed!");
   if (_solve_on.contains(OptimizationAppTypes::EXEC_FORWARD))
     _inner_solve->solve();
 
   _obj_iterate++;
-  return _form_function->computeAndCheckObjective(multiapp_passed);
+
+  return _form_function->computeObjective();
 }
 
 void

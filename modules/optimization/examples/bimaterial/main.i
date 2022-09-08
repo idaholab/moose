@@ -11,7 +11,7 @@
 []
 
 [OptimizationReporter]
-  type = ObjectiveMinimize
+  type = OptimizationReporter
   parameter_names = diffusivity_values
   num_values = 2 # diffusivity in the bottom material and in the top material of model.i
   initial_condition = '2.0 2.0' # the expected result is about '1 10' so this initial condition is not too bad
