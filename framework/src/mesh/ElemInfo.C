@@ -17,12 +17,3 @@ ElemInfo::ElemInfo(const Elem * const elem)
 }
 
 ElemInfo::ElemInfo() : _elem(nullptr) {}
-
-void
-ElemInfo::initialize(const ElemInfo & ei, const FaceInfo & fi)
-{
-  if (!isGhost())
-    mooseError("Initialize should only be called on ghost elements!");
-  _volume = ei.volume();
-  _centroid = 2 * fi.faceCentroid() - ei.centroid();
-}

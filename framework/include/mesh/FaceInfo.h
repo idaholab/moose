@@ -77,7 +77,7 @@ public:
   const Elem & elem() const { return *(_elem_info->elem()); }
   const Elem * elemPtr() const { return _elem_info->elem(); }
   const Elem & neighbor() const;
-  const Elem * neighborPtr() const { return _neighbor_info->elem(); }
+  const Elem * neighborPtr() const { return _neighbor_info ? _neighbor_info->elem() : nullptr; }
   ///@}
 
   /// Returns the element centroids of the elements on the elem and neighbor sides of the face.
@@ -87,14 +87,23 @@ public:
   /// doubled in length.  The tip of this new vector is the neighbor centroid.
   /// This is important for FV dirichlet BCs.
   const Point & elemCentroid() const { return _elem_info->centroid(); }
-  const Point & neighborCentroid() const { return _neighbor_info->centroid(); }
+  const Point & neighborCentroid() const
+  {
+    mooseAssert(_neighbor_info,
+                "The neighbor is not defined on this faceInfo! A possible explanation is that the "
+                "face is a (physical/processor) boundary face.");
+    return _neighbor_info->centroid();
+  }
   ///@}
 
   ///@{
   /// Returns the elem and neighbor subdomain IDs. If no neighbor element exists, then
   /// an invalid ID is returned for the neighbor subdomain ID.
   SubdomainID elemSubdomainID() const { return _elem_info->subdomain_id(); }
-  SubdomainID neighborSubdomainID() const { return _neighbor_info->subdomain_id(); }
+  SubdomainID neighborSubdomainID() const
+  {
+    return _neighbor_info ? _neighbor_info->subdomain_id() : Moose::INVALID_BLOCK_ID;
+  }
   ///@}
 
   ///@{
@@ -118,7 +127,13 @@ public:
   Real elemVolume() const { return _elem_info->volume(); }
 
   /// Return the neighbor volume
-  Real neighborVolume() const { return _neighbor_info->volume(); }
+  Real neighborVolume() const
+  {
+    mooseAssert(_neighbor_info,
+                "The neighbor is not defined on this faceInfo! A possible explanation is that the "
+                "face is a (physical/processor) boundary face.");
+    return _neighbor_info->volume();
+  }
 
   /// Return the geometric weighting factor
   Real gC() const { return _gc; }
@@ -159,6 +174,12 @@ public:
    */
   void computeCoefficients(const ElemInfo * const neighbor_info);
 
+  /**
+   * Computes the interpolation weights and similar quantities with the assumption
+   * that the face is on a boundary.
+   */
+  void computeCoefficients();
+
 private:
   /// the elem and neighbor elems
   const ElemInfo * const _elem_info;
@@ -197,9 +218,9 @@ private:
 inline const Elem &
 FaceInfo::neighbor() const
 {
-  if (!_neighbor_info->elem())
-    mooseError("FaceInfo object 'const Elem & neighbor()' is called but neighbor element pointer "
-               "is null. This occurs for faces at the domain boundary");
+  mooseAssert(_neighbor_info,
+              "FaceInfo object 'const Elem & neighbor()' is called but neighbor element pointer "
+              "is null. This occurs for faces at the domain boundary");
   return *(_neighbor_info->elem());
 }
 

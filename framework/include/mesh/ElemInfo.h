@@ -28,28 +28,14 @@ public:
   /// Constructor using a real element from libmesh
   ElemInfo(const Elem * const elem);
 
-  /// Construct an empty shell for a ghost element
   ElemInfo();
-
-  /// Initialize the ghost element using a real ElemInfo and a FaceInfo
-  void initialize(const ElemInfo & ei, const FaceInfo & fi);
-
-  /// Check if the corresponding element is a ghost
-  bool isGhost() const { return _elem == nullptr; }
 
   const Elem * elem() const { return _elem; }
   Real volume() const { return _volume; }
   const Point & centroid() const { return _centroid; }
 
-  /// We return the subdomain ID of the corresponding libmesh element. If we
-  /// are on a ghost cell, this ID is invalid.
-  SubdomainID subdomain_id() const
-  {
-    if (isGhost())
-      return Moose::INVALID_BLOCK_ID;
-    else
-      return _elem->subdomain_id();
-  }
+  /// We return the subdomain ID of the corresponding libmesh element.
+  SubdomainID subdomain_id() const { return _elem->subdomain_id(); }
 
 protected:
   /// Reference to the element in libmesh
