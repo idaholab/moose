@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#25'
+  issues = 'idaholab/isopod#25'
   design = 'MaterialScaledGradientVector.md'
   requirement = "The system shall invert for a constant heat source with a temperature dependent "
                 "thermal condutivity using a"
