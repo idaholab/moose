@@ -66,13 +66,11 @@ Poly2TriMeshGenerator::validParams()
   params.addParam<std::vector<bool>>("refine_holes",
                                      std::vector<bool>(),
                                      "Whether to allow automatically refining each hole boundary.");
-  params.addRangeCheckedParam<Real>("desired_area",
-                                    std::numeric_limits<Real>::max(),
-                                    "desired_area>0",
-                                    "Desired (maximum) triangle area.");
+  params.addRangeCheckedParam<Real>("desired_area", 0, "desired_area>=0",
+                                    "Desired (maximum) triangle area, or 0 to skip uniform refinement");
   params.addParam<std::string>("desired_area_func",
                                std::string(),
-                               "Function specifying desired triangle area as a function of x,y.");
+                               "Desired area as a function of x,y; omit to skip non-uniform refinement");
   params.addParam<MooseEnum>(
       "algorithm",
       algorithm,
