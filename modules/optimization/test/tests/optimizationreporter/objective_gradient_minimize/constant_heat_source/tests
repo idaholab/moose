@@ -1,8 +1,10 @@
 [Tests]
   issues = '#21885'
-  design = 'OptimizationMultiAppCommandLineControl.md'
+  design = 'MaterialScaledGradientVector.md OptimizationMultiAppCommandLineControl.md'
   [constant_material]
-    requirement = "invert for a constant heat source with a constant thermal conductivity"
+    requirement = "The OptimizationMultiAppCommandLineControl shall control "
+                  "parameters being optimized oon the subapp that are not "
+                  "controllable by a reciever."
     type = CSVDiff
     max_threads = 1
     rel_err = 0.01
@@ -12,8 +14,9 @@
     recover = false
   []
   [t_dependent_material]
-    requirement = "invert for a constant heat source with a temperature dependent thermal "
-                  "condutivity"
+    requirement = "The MaterialScaledGradientVector shall provide a variable "
+                  "gradient scaled by a material property that linearizes a "
+                  "nonlinear temperature dependent thermal conductivity."
     type = CSVDiff
     max_threads = 1
     rel_err = 0.1
