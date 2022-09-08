@@ -16,7 +16,7 @@ automatic placement of nodes in the mesh interior.
 
 !listing test/tests/meshgenerators/poly2tri_mesh_generator/poly2tri_with_holes.i block=Mesh
 
-!media media/meshgenerators/poly2tri_with_holes.png
+!media framework/meshgenerators/poly2tri_with_holes.png
       style=width:32%;
       id=withholes
       caption=Fig. 1: Resulting triangulated mesh from a polyline boundary and holes.
@@ -33,7 +33,7 @@ preserved in the final mesh shown in [Figure 2](#nested).
 
 !listing test/tests/meshgenerators/poly2tri_mesh_generator/poly2tri_nested.i block=Mesh
 
-!media media/meshgenerators/poly2tri_nested.png
+!media framework/meshgenerators/poly2tri_nested.png
       style=width:32%;
       id=nested
       caption=Fig. 2: Resulting triangulated mesh with nested polyline boundaries and an internal grid. 
