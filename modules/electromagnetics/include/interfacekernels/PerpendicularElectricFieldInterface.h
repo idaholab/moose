@@ -31,6 +31,9 @@ protected:
   /// Free charge on the interface (default = 0)
   Real _free_charge;
 
+  /// Free charge dotted with interface normal
+  RealVectorValue _free_charge_dot_n;
+
   /// Electrical permittivity on the primary side of the boundary
   Real _primary_eps;
 

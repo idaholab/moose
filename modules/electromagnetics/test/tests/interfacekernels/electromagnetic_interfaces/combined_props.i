@@ -1,12 +1,14 @@
 # Verification Test of PerpendicularElectricFieldInterface and
-# ParallelElectricFieldInterface with default materials
+# ParallelElectricFieldInterface with user-defined materials
+# and interface free charge
 #
-# Imposes epsilon_0 * u_perpendicular = epsilon_1 * v_perpendicular
+# Imposes epsilon_0 * u_perpendicular - epsilon_1 * v_perpendicular = free_charge
 # and u_parallel = v_parallel on each interface between subdomain
 # blocks 0 and 1
 #
 # epsilon_0 = 1.0
 # epsilon_1 = 10.0
+# free_charge = 1.0
 
 [Mesh]
   [gmg]
@@ -92,6 +94,7 @@
     boundary = primary0_interface
     primary_epsilon = 1.0
     secondary_epsilon = 10.0
+    free_charge = 1.0
   []
   [parallel]
     type = ParallelElectricFieldInterface
