@@ -1153,6 +1153,15 @@ DisplacedProblem::timestepSetup()
 }
 
 void
+DisplacedProblem::customSetup(const ExecFlagType & exec_type)
+{
+  SubProblem::customSetup(exec_type);
+
+  _displaced_nl.customSetup(exec_type);
+  _displaced_aux.customSetup(exec_type);
+}
+
+void
 DisplacedProblem::haveADObjects(const bool have_ad_objects)
 {
   _have_ad_objects = have_ad_objects;

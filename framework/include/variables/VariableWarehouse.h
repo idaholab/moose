@@ -172,6 +172,11 @@ public:
   void timestepSetup();
 
   /**
+   * Call setup on a particular execute flag for all variables
+   */
+  void customSetup(const ExecFlagType & exec_type);
+
+  /**
    * Call subdomainSetup for all variables
    */
   void subdomainSetup();

@@ -342,6 +342,7 @@ public:
   virtual void residualSetup();
   virtual void jacobianSetup();
   virtual void timestepSetup();
+  virtual void customSetup(const ExecFlagType & exec_type);
 
   /**
    * Set how often to clear the functor evaluation cache
@@ -869,6 +870,14 @@ FunctorBase<T>::jacobianSetup()
 }
 
 template <typename T>
+void
+FunctorBase<T>::customSetup(const ExecFlagType & exec_type)
+{
+  if (_clearance_schedule.count(exec_type))
+    clearCacheData();
+}
+
+template <typename T>
 typename FunctorBase<T>::GradientType
 FunctorBase<T>::gradient(const ElemArg & elem, const unsigned int state) const
 {
@@ -983,6 +992,7 @@ public:
   virtual void timestepSetup() = 0;
   virtual void residualSetup() = 0;
   virtual void jacobianSetup() = 0;
+  virtual void customSetup(const ExecFlagType & /*exec_type*/) = 0;
   virtual bool wrapsNull() const = 0;
   virtual std::string returnType() const = 0;
   virtual bool isConstant() const = 0;
@@ -1085,6 +1095,11 @@ public:
   {
     if (_owned)
       _owned->timestepSetup();
+  }
+  void customSetup(const ExecFlagType & exec_type) override
+  {
+    if (_owned)
+      _owned->customSetup(exec_type);
   }
   void residualSetup() override
   {

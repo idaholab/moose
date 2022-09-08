@@ -3774,6 +3774,42 @@ FEProblemBase::executeAllObjects(const ExecFlagType & /*exec_type*/)
 }
 
 void
+FEProblemBase::customSetup(const ExecFlagType & exec_type)
+{
+  SubProblem::customSetup(exec_type);
+
+  if (_line_search)
+    _line_search->customSetup(exec_type);
+
+  unsigned int n_threads = libMesh::n_threads();
+  for (THREAD_ID tid = 0; tid < n_threads; tid++)
+  {
+    _all_materials.customSetup(exec_type, tid);
+    _functions.customSetup(exec_type, tid);
+  }
+
+  _aux->customSetup(exec_type);
+  _nl->customSetup(exec_type);
+
+  if (_displaced_problem)
+    _displaced_problem->customSetup(exec_type);
+
+  for (THREAD_ID tid = 0; tid < n_threads; tid++)
+  {
+    _internal_side_indicators.customSetup(exec_type, tid);
+    _indicators.customSetup(exec_type, tid);
+    _markers.customSetup(exec_type, tid);
+  }
+
+  std::vector<UserObject *> userobjs;
+  theWarehouse().query().condition<AttribSystem>("UserObject").queryIntoUnsorted(userobjs);
+  for (auto obj : userobjs)
+    obj->customSetup(exec_type);
+
+  _app.getOutputWarehouse().customSetup(exec_type);
+}
+
+void
 FEProblemBase::execute(const ExecFlagType & exec_type)
 {
   // Set the current flag
@@ -3781,6 +3817,9 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 
   if (exec_type != EXEC_INITIAL)
     executeControls(exec_type);
+
+  // intentially call this after executing controls because the setups may rely on the controls
+  customSetup(exec_type);
 
   // Samplers; EXEC_INITIAL is not called because the Sampler::init() method that is called after
   // construction makes the first Sampler::execute() call. This ensures that the random number

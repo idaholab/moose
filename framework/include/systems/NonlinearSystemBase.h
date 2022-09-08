@@ -99,6 +99,7 @@ public:
   // Setup Functions ////
   virtual void initialSetup() override;
   virtual void timestepSetup() override;
+  virtual void customSetup(const ExecFlagType & exec_type) override;
   virtual void residualSetup() override;
   virtual void jacobianSetup() override;
 

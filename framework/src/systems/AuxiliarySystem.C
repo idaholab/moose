@@ -139,6 +139,24 @@ AuxiliarySystem::timestepSetup()
 }
 
 void
+AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
+{
+  SystemBase::customSetup(exec_type);
+
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    _aux_scalar_storage.customSetup(exec_type, tid);
+    _nodal_aux_storage.customSetup(exec_type, tid);
+    _mortar_nodal_aux_storage.customSetup(exec_type, tid);
+    _nodal_vec_aux_storage.customSetup(exec_type, tid);
+    _nodal_array_aux_storage.customSetup(exec_type, tid);
+    _elemental_aux_storage.customSetup(exec_type, tid);
+    _elemental_vec_aux_storage.customSetup(exec_type, tid);
+    _elemental_array_aux_storage.customSetup(exec_type, tid);
+  }
+}
+
+void
 AuxiliarySystem::subdomainSetup()
 {
   SystemBase::subdomainSetup();
