@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "GapFluxModelBase.h"
+#include "GapFluxModelConductionBase.h"
 
 /**
- * Base class for gap flux models used by ModularGapConductanceConstraint
+ * Gap flux model for varying gap conductance using a functor for temperature
  */
-class FunctorGapFluxModelConduction : public GapFluxModelBase
+class FunctorGapFluxModelConduction : public GapFluxModelConductionBase
 {
 public:
   static InputParameters validParams();
@@ -23,20 +23,11 @@ public:
 
   virtual ADReal computeFlux() const override;
 
-  virtual ADReal gapAttenuation() const;
-
 protected:
   /// temperature functor for computing temperature along the secondary and primary surfaces
   const Moose::Functor<ADReal> & _T;
 
-  /// Gap conductivity constant
-  const Real _gap_conductivity;
-
-  /// Thermal conductivity of the gap material as an ADReal functor.  Multiplied by the constant
-  /// gap_conductivity to form the final conductivity
-  const Moose::Functor<ADReal> & _gap_conductivity_functor;
-
-  const Real _min_gap;
-
-  const unsigned int _min_gap_order;
+  /// Thermal conductivity multiplier. Multiplied by the constant gap_conductivity to form the
+  /// final conductivity
+  const Moose::Functor<ADReal> & _gap_conductivity_multiplier;
 };

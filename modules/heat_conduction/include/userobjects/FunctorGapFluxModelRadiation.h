@@ -9,12 +9,14 @@
 
 #pragma once
 
-#include "GapFluxModelBase.h"
+#include "GapFluxModelRadiationBase.h"
 
 /**
- * Base class for gap flux models used by ModularGapConductanceConstraint
+ * Gap flux model for heat conduction across a gap due to radiation, based on the diffusion
+ * approximation. Uses a temperature functor to provide the arguments to the \p computeRadiationFlux
+ * method in the base class
  */
-class FunctorGapFluxModelRadiation : public GapFluxModelBase
+class FunctorGapFluxModelRadiation : public GapFluxModelRadiationBase
 {
 public:
   static InputParameters validParams();
@@ -26,10 +28,4 @@ public:
 protected:
   /// temperature functor for computing temperature along the secondary and primary surfaces
   const Moose::Functor<ADReal> & _T;
-
-  /// Stefan-Boltzmann constant
-  const Real _stefan_boltzmann;
-
-  /// Surface emissivity
-  ADReal _emissivity;
 };
