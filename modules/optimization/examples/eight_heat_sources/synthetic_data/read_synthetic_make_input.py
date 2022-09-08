@@ -14,7 +14,7 @@ print('df names=', list(df.columns),'   df shape=',list(df.shape))
 print("\n\n****************  main.i  ***************\n\n")
 
 #    [OptimizationReporter]
-#      type = ObjectiveGradientMinimize
+#      type = OptimizationReporter
 #      adjoint_vpp = 'adjoint_results'
 #      adjoint_data_computed = 'adjoint_rec_0 adjoint_rec_1 adjoint_rec_2'
 #      parameter_vpp = 'parameter_results'
@@ -23,7 +23,7 @@ print("\n\n****************  main.i  ***************\n\n")
 #    []
 
 print("[OptimizationReporter]")
-print("  type = ObjectiveGradientMinimize")
+print("  type = OptimizationReporter")
 print("  adjoint_vpp = \'adjoint_results\'")
 print("  adjoint_data_computed = \'ar00 ar01 ar02 ar03 ar04 ar05 ar06 ar07\'")
 print("  parameter_vpp = \'parameter_results\'")

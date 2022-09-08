@@ -2,7 +2,7 @@
 []
 
 [OptimizationReporter]
-  type = ObjectiveGradientMinimize
+  type = OptimizationReporter
   parameter_names = 'p0 p1 p2 p3 p4'
   num_values = '1 1 1 1 1'
   measurement_points = '4.24  0      2.45

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#25'
-  design = 'ObjectiveGradientMinimize.md'
+  design = 'MaterialScaledGradientVector.md'
   requirement = "The system shall invert for a constant heat source with a temperature dependent "
                 "thermal condutivity using a"
   [BFGS]

@@ -136,11 +136,13 @@
     variable = grad_Tfz
     gradient_variable = temperature_forward
   []
+  #we need to include the material derivative, which can be captured when 
+  # computing the flux based on the derivative of the material.
   [gradient]
     type = ParsedAux
     variable = gradient
     args = 'grad_Tx grad_Ty grad_Tz grad_Tfx grad_Tfy grad_Tfz'
-    function = '-grad_Tx*grad_Tfx-grad_Ty*grad_Tfy-grad_Tz*grad_Tfz'#we need to include the material derivative, which can be captured when computing the flux based on the derivative of the material.
+    function = '-grad_Tx*grad_Tfx-grad_Ty*grad_Tfy-grad_Tz*grad_Tfz'
   []
   [forwardAdjoint] # I am not sure why do we need this?
     type = ParsedAux

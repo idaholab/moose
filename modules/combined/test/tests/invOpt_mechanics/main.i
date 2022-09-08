@@ -13,7 +13,7 @@
 []
 
 [OptimizationReporter]
-  type = ObjectiveGradientMinimize
+  type = OptimizationReporter
   parameter_names = 'fy_right'
   num_values = '1'
   measurement_points = '5.0 1.0 0.0'

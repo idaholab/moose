@@ -16,7 +16,7 @@
 []
 
 [OptimizationReporter]
-  type = ObjectiveGradientMinimize
+  type = OptimizationReporter
   parameter_names = 'heat_source'
   num_values = '1'
   initial_condition = '0'

@@ -2,7 +2,7 @@
 []
 
 [OptimizationReporter]
-  type = ObjectiveGradientMinimize
+  type = OptimizationReporter
 
   parameter_names = 'source'
   num_values = '44'
