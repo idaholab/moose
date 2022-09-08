@@ -1,6 +1,7 @@
 [Tests]
   issues = '#21885'
-  design = 'OptimizationMultiAppCommandLineControl.md'
+  design = 'DiffusionVariableIntegral.md'
+  requirement = 'The system shall be able to invert for the material properties of two seperate materials'
   [taoblmvm]
     type = CSVDiff
     max_threads = 1
@@ -9,5 +10,4 @@
     csvdiff = main_out_OptimizationReporter_0001.csv
     recover = false
   []
-  requirement = TODO
 []

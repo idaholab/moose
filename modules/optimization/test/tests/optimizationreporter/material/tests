@@ -1,30 +1,6 @@
 [Tests]
   issues = '#21885'
-  design = 'OptimizationReporter.md'
-  [fd_grad]
-    type = CSVDiff
-    max_threads = 1
-    rel_err = 0.01
-    abs_zero = 0.01
-    input = main.i
-    cli_args = "Executioner/petsc_options_iname='-tao_max_it -tao_fd_gradient -tao_fd_delta "
-               "-tao_gatol' Executioner/petsc_options_value='10 true 0.00001 0.0001'"
-    csvdiff = master_OptimizationReporter_0001.csv
-    requirement = TODO1
-    # steady solve
-    recover = false
-  []
-  [grad_free]
-    type = CSVDiff
-    max_threads = 1
-    rel_err = 0.01
-    abs_zero = 0.01
-    input = master_gradFree.i
-    csvdiff = master_gradFree_OptimizationReporter_0001.csv
-    requirement = TODO2
-    # steady solve
-    recover = false
-  []
+  design = 'DiffusionVariableIntegral.md'
   [adjoint_grad]
     type = CSVDiff
     max_threads = 1
@@ -34,7 +10,7 @@
     cli_args = "Executioner/petsc_options_iname='-tao_gatol' "
                "Executioner/petsc_options_value='0.0001'"
     csvdiff = master_OptimizationReporter_0001.csv
-    requirement = TODO3
+    requirement = 'The system shall be able to perform gradient based material inversion for a single material property'
     # steady solve
     recover = false
   []
