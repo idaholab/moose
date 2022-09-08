@@ -358,6 +358,9 @@ Poly2TriMeshGenerator::generate()
       int found_hole_sides = 0;
       for (auto elem : hole_mesh.element_ptr_range())
       {
+        if (elem->dim() != 2)
+          mooseError("Non 2-D element found in hole; stitching is not supported.");
+
         auto ns = elem->n_sides();
         for (auto s : make_range(ns))
         {
