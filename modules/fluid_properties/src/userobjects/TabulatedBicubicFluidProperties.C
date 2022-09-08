@@ -70,8 +70,10 @@ TabulatedBicubicFluidProperties::constructInterpolation()
     // if csv exists, get max and min values from csv file
     else
     {
-      Real rho_max = * max_element(_properties[_density_idx].begin() , _properties[_density_idx].end());
-      Real rho_min = * min_element(_properties[_density_idx].begin() , _properties[_density_idx].end());
+      Real rho_max =
+          *max_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
+      Real rho_min =
+          *min_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
       _v_max = 1 / rho_min;
       _v_min = 1 / rho_max;
     }
@@ -87,19 +89,21 @@ TabulatedBicubicFluidProperties::constructInterpolation()
   {
     if (_fp)
     {
-    // extreme values of internal energy for the grid bounds
-    Real e1 = e_from_p_T(_pressure_min, _temperature_min);
-    Real e2 = e_from_p_T(_pressure_max, _temperature_min);
-    Real e3 = e_from_p_T(_pressure_min, _temperature_max);
-    Real e4 = e_from_p_T(_pressure_max, _temperature_max);
-    _e_min = std::min({e1, e2, e3, e4});
-    _e_max = std::max({e1, e2, e3, e4});
+      // extreme values of internal energy for the grid bounds
+      Real e1 = e_from_p_T(_pressure_min, _temperature_min);
+      Real e2 = e_from_p_T(_pressure_max, _temperature_min);
+      Real e3 = e_from_p_T(_pressure_min, _temperature_max);
+      Real e4 = e_from_p_T(_pressure_max, _temperature_max);
+      _e_min = std::min({e1, e2, e3, e4});
+      _e_max = std::max({e1, e2, e3, e4});
     }
     // if csv exists, get max and min values from csv file
     else
     {
-      _e_max = *max_element(_properties[_internal_energy_idx].begin() , _properties[_internal_energy_idx].end());
-      _e_min = *min_element(_properties[_internal_energy_idx].begin() , _properties[_internal_energy_idx].end());
+      _e_max = *max_element(_properties[_internal_energy_idx].begin(),
+                            _properties[_internal_energy_idx].end());
+      _e_min = *min_element(_properties[_internal_energy_idx].begin(),
+                            _properties[_internal_energy_idx].end());
     }
     Real de = (_e_max - _e_min) / ((Real)_num_e - 1);
 
@@ -151,7 +155,15 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         }
 
         // check for NaNs in Newton Method
-        checkNaNs(_pressure_min, _pressure_max, _temperature_min, _temperature_max, i, p_ve, T_ve, num_p_nans_ve, num_T_nans_ve);
+        checkNaNs(_pressure_min,
+                  _pressure_max,
+                  _temperature_min,
+                  _temperature_max,
+                  i,
+                  p_ve,
+                  T_ve,
+                  num_p_nans_ve,
+                  num_T_nans_ve);
 
         // replace out of bounds pressure values with pmax or pmin
         checkOutofBounds(_pressure_min, _pressure_max, p_ve, num_p_out_bounds_ve);
@@ -162,8 +174,14 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         T_from_v_e[i][j] = T_ve;
       }
     }
-    //output warning if nans or values out of bounds
-    outputWarnings(num_p_nans_ve, num_T_nans_ve, num_p_out_bounds_ve, num_T_out_bounds_ve, fail_counter_ve, _num_e * _num_v, "(v,e)");
+    // output warning if nans or values out of bounds
+    outputWarnings(num_p_nans_ve,
+                   num_T_nans_ve,
+                   num_p_out_bounds_ve,
+                   num_T_out_bounds_ve,
+                   fail_counter_ve,
+                   _num_e * _num_v,
+                   "(v,e)");
 
     // the bicubic interpolation object are init'ed now
     _p_from_v_e_ipol =
@@ -187,8 +205,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
     // if csv exists, get max and min values from csv file
     else
     {
-      _h_max = *max_element(_properties[_enthalpy_idx].begin() , _properties[_enthalpy_idx].end());
-      _h_min = *min_element(_properties[_enthalpy_idx].begin() , _properties[_enthalpy_idx].end());
+      _h_max = *max_element(_properties[_enthalpy_idx].begin(), _properties[_enthalpy_idx].end());
+      _h_min = *min_element(_properties[_enthalpy_idx].begin(), _properties[_enthalpy_idx].end());
     }
     Real dh = (_h_max - _h_min) / ((Real)_num_e - 1);
 
@@ -241,7 +259,15 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         }
 
         // check for NaNs in Newton Method
-        checkNaNs(_pressure_min, _pressure_max, _temperature_min, _temperature_max, i, p_vh, T_vh, num_p_nans_vh, num_T_nans_vh);
+        checkNaNs(_pressure_min,
+                  _pressure_max,
+                  _temperature_min,
+                  _temperature_max,
+                  i,
+                  p_vh,
+                  T_vh,
+                  num_p_nans_vh,
+                  num_T_nans_vh);
 
         // replace out of bounds pressure values with pmax or pmin
         checkOutofBounds(_pressure_min, _pressure_max, p_vh, num_p_out_bounds_vh);
@@ -253,7 +279,13 @@ TabulatedBicubicFluidProperties::constructInterpolation()
       }
     }
     // output warnings if nans our values out of bounds
-    outputWarnings(num_p_nans_vh, num_T_nans_vh, num_p_out_bounds_vh, num_T_out_bounds_vh, fail_counter_vh, _num_e * _num_v, "(v,h)");
+    outputWarnings(num_p_nans_vh,
+                   num_T_nans_vh,
+                   num_p_out_bounds_vh,
+                   num_T_out_bounds_vh,
+                   fail_counter_vh,
+                   _num_e * _num_v,
+                   "(v,h)");
 
     // the bicubic interpolation object are init'ed now
     _p_from_v_h_ipol =
@@ -340,15 +372,24 @@ TabulatedBicubicFluidProperties::outputWarnings(unsigned int num_nans_p,
                                                 std::string variable_set)
 {
   // make string variables before mooseWarning
-  std::string while_creating = "While creating (p,T) from " + variable_set + " interpolation tables,\n";
+  std::string while_creating =
+      "While creating (p,T) from " + variable_set + " interpolation tables,\n";
   std::string warning_message = while_creating;
-  std::string converge_fails = "Inversion to (p,T) from " + variable_set + " failed " + std::to_string(convergence_failures) + " times\n";
-  std::string p_nans = "- " + std::to_string(num_nans_p) + " nans generated out of "+ std::to_string(number_points) + " points for pressure\n";
-  std::string T_nans = "- " + std::to_string(num_nans_T) + " nans generated out of " + std::to_string(number_points) + " points for temperature\n";
-  std::string p_oob = "- " + std::to_string(num_out_bounds_p) + " of " + std::to_string(number_points) + " pressure values were out of user defined bounds\n";
-  std::string T_oob = "- " + std::to_string(num_out_bounds_T) + " of " + std::to_string(number_points) + " temperature values were out of user defined bounds\n";
-  std::string outcome = "The pressure and temperature values were replaced with their respective user-defined min and max values.\n";
-  //if any of these do not exist, do not want to print them
+  std::string converge_fails = "Inversion to (p,T) from " + variable_set + " failed " +
+                               std::to_string(convergence_failures) + " times\n";
+  std::string p_nans = "- " + std::to_string(num_nans_p) + " nans generated out of " +
+                       std::to_string(number_points) + " points for pressure\n";
+  std::string T_nans = "- " + std::to_string(num_nans_T) + " nans generated out of " +
+                       std::to_string(number_points) + " points for temperature\n";
+  std::string p_oob = "- " + std::to_string(num_out_bounds_p) + " of " +
+                      std::to_string(number_points) +
+                      " pressure values were out of user defined bounds\n";
+  std::string T_oob = "- " + std::to_string(num_out_bounds_T) + " of " +
+                      std::to_string(number_points) +
+                      " temperature values were out of user defined bounds\n";
+  std::string outcome = "The pressure and temperature values were replaced with their respective "
+                        "user-defined min and max values.\n";
+  // if any of these do not exist, do not want to print them
   if (convergence_failures)
     warning_message += converge_fails;
   if (num_nans_p)

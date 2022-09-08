@@ -166,14 +166,14 @@ BicubicInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int deriv_v
     mooseError("deriv_var must be either 1 or 2 in BicubicInterpolation");
 }
 
-void BicubicInterpolation::sampleValueAndDerivatives(
+void
+BicubicInterpolation::sampleValueAndDerivatives(
     Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const
 {
   unsigned int x1l, x1u, x2l, x2u;
   Real t, u;
   findInterval(_x1, x1, x1l, x1u, t);
   findInterval(_x2, x2, x2l, x2u, u);
-
 
   y = 0.0;
   for (const auto i : make_range(4))
@@ -204,7 +204,9 @@ void BicubicInterpolation::sampleValueAndDerivatives(
     dy2 /= d2;
 }
 
-void BicubicInterpolation::ADsampleValueAndDerivatives(const ADReal & x1, const ADReal & x2, ADReal & y, ADReal & dy1, ADReal & dy2) const
+void
+BicubicInterpolation::ADsampleValueAndDerivatives(
+    const ADReal & x1, const ADReal & x2, ADReal & y, ADReal & dy1, ADReal & dy2) const
 {
   unsigned int x1l, x1u, x2l, x2u;
   ADReal t, u;
@@ -370,7 +372,8 @@ BicubicInterpolation::tableDerivatives(std::vector<std::vector<Real>> & dy_dx1,
 }
 
 template <class C>
-void BicubicInterpolation::findInterval(
+void
+BicubicInterpolation::findInterval(
     const std::vector<Real> & x, const C & xi, unsigned int & klo, unsigned int & khi, C & xs) const
 {
   // Find the indices that bracket the point xi

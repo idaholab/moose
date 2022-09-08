@@ -109,17 +109,17 @@ protected:
                      const std::vector<Real> & vec,
                      ColumnMajorMatrix & mat);
   /**
-  * If Newton Method jacobian produces NaNs, set variable to min or max depending on situation
-  * @param min_1 minimum value of pressure
-  * @param max_1 maximum value of pressure
-  * @param min_2 minimum value of temperature
-  * @param max_2 maximum value of temperature
-  * @param i track iteration to get correct data point
-  * @param variable_1 pressure value
-  * @param variable_2 temperature value
-  * @param num_nans_1 track number of nans produced for pressure
-  * @param num_nans_2 track number of nans produced for temperature
-  */
+   * If Newton Method jacobian produces NaNs, set variable to min or max depending on situation
+   * @param min_1 minimum value of pressure
+   * @param max_1 maximum value of pressure
+   * @param min_2 minimum value of temperature
+   * @param max_2 maximum value of temperature
+   * @param i track iteration to get correct data point
+   * @param variable_1 pressure value
+   * @param variable_2 temperature value
+   * @param num_nans_1 track number of nans produced for pressure
+   * @param num_nans_2 track number of nans produced for temperature
+   */
   void checkNaNs(Real min_1,
                  Real max_1,
                  Real min_2,
@@ -130,12 +130,13 @@ protected:
                  unsigned int & num_nans_1,
                  unsigned int & num_nans_2);
   /**
-  * If values go out of user defined range during Newton Method inversion, set variable to min or max depending on situation
-  * @param min minimum value of variable
-  * @param max maximum value of variable
-  * @param variable variable of interest (pressure or temperature)
-  * @param num_out_bounds track number of values out of user defined bounds
-  */
+   * If values go out of user defined range during Newton Method inversion, set variable to min or
+   * max depending on situation
+   * @param min minimum value of variable
+   * @param max maximum value of variable
+   * @param variable variable of interest (pressure or temperature)
+   * @param num_out_bounds track number of values out of user defined bounds
+   */
   void checkOutofBounds(Real min, Real max, Real & variable, unsigned int & num_out_bounds);
   // If values go out of user defined range or NaNs are produced during
   // Newton Method inversion, produce warnings to inform the user

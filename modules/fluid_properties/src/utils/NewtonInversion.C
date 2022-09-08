@@ -32,7 +32,8 @@ NewtonSolve(const Real & x,
             const Real & tolerance,
             std::function<void(Real, Real, Real &, Real &, Real &)> const & func)
 {
-  Real current_z = z_initial_guess; //find good initial guess, know something about e from interpolation tables
+  Real current_z =
+      z_initial_guess; // find good initial guess, know something about e from interpolation tables
   Real next_z;
   Real f;
   unsigned int iteration = 1;
@@ -69,45 +70,38 @@ NewtonSolve2D(const Real & f,
               std::function<void(Real, Real, Real &, Real &, Real &)> const & func2)
 {
   converged = false;
-  RealEigenMatrix jacobian(2,2); //Compute Jacobian
+  RealEigenMatrix jacobian(2, 2); // Compute Jacobian
 
-  RealEigenVector current_vec(2);//initialize current_vec with initial guess
+  RealEigenVector current_vec(2); // initialize current_vec with initial guess
   current_vec << x0, y0;
 
-  RealEigenVector next_vec(2); //initialize "next" vector
+  RealEigenVector next_vec(2); // initialize "next" vector
 
-  RealEigenVector target(2); //Real h and Real s
+  RealEigenVector target(2); // Real h and Real s
   target << f, g;
 
   RealEigenVector function(2);
 
   unsigned int iteration = 1;
-  Real res1 = 1; //initialize residual;
+  Real res1 = 1; // initialize residual;
   Real res2 = 1;
   Real residual = 1;
 
-  while (residual > tolerance) //iterate until residual is smaller than tolerance reached
+  while (residual > tolerance) // iterate until residual is smaller than tolerance reached
   {
     Real new_f, df_dx, df_dy, new_g, dg_dx, dg_dy;
-    func1(current_vec[0], current_vec[1], new_f, df_dx, df_dy); //get new h and derivatives
-    func2(current_vec[0], current_vec[1], new_g, dg_dx, dg_dy); //get new s and derivatives
-    jacobian << df_dx, df_dy, //fill jacobian
-                dg_dx, dg_dy;
-    // if (std::isnan(df_dx) || std::isnan(df_dy) || std::isnan(dg_dx) || std::isnan(dg_dy))
-    // {
-    //   std::cout << "jacobian" <<std::endl;
-    //   std::cout << df_dx << " " << df_dy << std::endl;
-    //   std::cout << dg_dx << " " << dg_dy << std::endl;
-    //   std::cout << std::endl;
-    // }
+    func1(current_vec[0], current_vec[1], new_f, df_dx, df_dy); // get new h and derivatives
+    func2(current_vec[0], current_vec[1], new_g, dg_dx, dg_dy); // get new s and derivatives
+    jacobian << df_dx, df_dy,                                   // fill jacobian
+        dg_dx, dg_dy;
 
-    function << new_f, new_g; //fill function
-    next_vec = current_vec - (jacobian.inverse() * ( function - target)); //2D Newton Method
-    res1 = (current_vec[0] - next_vec[0]); //update residual 1
-    res2 = (current_vec[1] - next_vec[1]); //update residual 2
-    residual = pow(pow(res1, 2) + pow(res2, 2), 0.5); //update residual
-    current_vec = next_vec; //update current_vec for next iteration
-    ++iteration; //update iteration;
+    function << new_f, new_g;                                            // fill function
+    next_vec = current_vec - (jacobian.inverse() * (function - target)); // 2D Newton Method
+    res1 = (current_vec[0] - next_vec[0]);                               // update residual 1
+    res2 = (current_vec[1] - next_vec[1]);                               // update residual 2
+    residual = pow(pow(res1, 2) + pow(res2, 2), 0.5);                    // update residual
+    current_vec = next_vec; // update current_vec for next iteration
+    ++iteration;            // update iteration;
 
     if (iteration > 100)
     {
@@ -117,9 +111,9 @@ NewtonSolve2D(const Real & f,
     }
   }
   // save solution to x_final and y_final
-  x_final = current_vec[0]; //returned p
-  y_final = current_vec[1]; //returned y
-  converged = true; // convergence successful
+  x_final = current_vec[0]; // returned p
+  y_final = current_vec[1]; // returned y
+  converged = true;         // convergence successful
 }
 
-} //namespace NewtonMethod
+} // namespace NewtonMethod

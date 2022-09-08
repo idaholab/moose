@@ -77,8 +77,11 @@ public:
   /**
    * Same as sampleValueAndDerivatives, but ADReal instead of Real
    */
-  virtual void ADsampleValueAndDerivatives(
-      const ADReal &/*x1*/, const ADReal &/*x2*/, ADReal & /* y*/, ADReal & /* dy1*/, ADReal & /* dy2*/) const
+  virtual void ADsampleValueAndDerivatives(const ADReal & /*x1*/,
+                                           const ADReal & /*x2*/,
+                                           ADReal & /* y*/,
+                                           ADReal & /* dy1*/,
+                                           ADReal & /* dy2*/) const
   {
     mooseError("sampleValueAndDerivatives is not implemented for this interpolation class");
   }

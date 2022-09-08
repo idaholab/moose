@@ -138,7 +138,7 @@ void
 TabulatedFluidProperties::initialSetup()
 {
   if (_initial_setup_done)
-    return ;
+    return;
   _initial_setup_done = true;
 
   // Check to see if _file_name supplied exists. If it does, that data
@@ -409,7 +409,6 @@ TabulatedFluidProperties::v_from_p_T(
   v = 1.0 / rho;
   dv_dp = -drho_dp / (rho * rho);
   dv_dT = -drho_dT / (rho * rho);
-  // std::cout << "v(p,T)" << std::endl;
 }
 
 Real
@@ -448,16 +447,18 @@ TabulatedFluidProperties::rho_from_p_T(
   }
 }
 
-void //need ADReal for use in navier_stokes
-TabulatedFluidProperties::rho_from_p_T(
-    const ADReal & pressure, const ADReal & temperature, ADReal & rho, ADReal & drho_dp, ADReal & drho_dT) const
+void // need ADReal for use in navier_stokes
+TabulatedFluidProperties::rho_from_p_T(const ADReal & pressure,
+                                       const ADReal & temperature,
+                                       ADReal & rho,
+                                       ADReal & drho_dp,
+                                       ADReal & drho_dT) const
 {
   if (_interpolate_density)
   {
-    ADReal p=pressure, T=temperature;
+    ADReal p = pressure, T = temperature;
     checkInputVariables(p, T);
-    _property_ipol[_density_idx]->ADsampleValueAndDerivatives(
-        p, T, rho, drho_dp, drho_dT);
+    _property_ipol[_density_idx]->ADsampleValueAndDerivatives(p, T, rho, drho_dp, drho_dT);
   }
   else
   {
@@ -494,7 +495,6 @@ TabulatedFluidProperties::e_from_p_T(
     checkInputVariables(pressure, temperature);
     _property_ipol[_internal_energy_idx]->sampleValueAndDerivatives(
         pressure, temperature, e, de_dp, de_dT);
-    // std::cout << "e(p,T)" << std::endl;
   }
   else
   {
@@ -514,16 +514,17 @@ TabulatedFluidProperties::e_from_p_rho(Real pressure, Real rho) const
 }
 
 void
-TabulatedFluidProperties::e_from_p_rho(Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const
+TabulatedFluidProperties::e_from_p_rho(
+    Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const
 {
   // if (!_construct_pT_from_ve)
   //   mooseError("You must construct pT from ve tables when calling e_from_p_rho.");
 
-  //get derivatives of T wrt to pressure and density
+  // get derivatives of T wrt to pressure and density
   Real T, dT_dp, dT_drho;
   T_from_p_rho(pressure, rho, T, dT_dp, dT_drho);
 
-  //Get e, then derivatives of e wrt pressure and temperature
+  // Get e, then derivatives of e wrt pressure and temperature
   Real de_dp_at_const_T, de_dT;
   e_from_p_T(pressure, T, e, de_dp_at_const_T, de_dT);
 
@@ -531,8 +532,8 @@ TabulatedFluidProperties::e_from_p_rho(Real pressure, Real rho, Real & e, Real &
   Real rho_pT, drho_dp, drho_dT;
   rho_from_p_T(pressure, T, rho_pT, drho_dp, drho_dT);
 
-  //derivatives of e wrt pressure and rho (what we want from e_from_p_rho)
-  de_drho = de_dT * dT_drho ;
+  // derivatives of e wrt pressure and rho (what we want from e_from_p_rho)
+  de_drho = de_dT * dT_drho;
   de_dp = de_dp_at_const_T - (de_drho * drho_dp);
 }
 
@@ -540,9 +541,7 @@ Real
 TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
 {
   auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
-  {
-    rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT);
-  };
+  { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
   Real T = NewtonMethod::NewtonSolve(pressure, rho, _T_initial_guess, _tolerance, lambda);
   // check for nans
   if (std::isnan(T))
@@ -554,9 +553,9 @@ TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
   return T;
 }
 
-
 void
-TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho, Real & T, Real & dT_dp, Real &  dT_drho) const
+TabulatedFluidProperties::T_from_p_rho(
+    Real pressure, Real rho, Real & T, Real & dT_dp, Real & dT_drho) const
 {
   T = T_from_p_rho(pressure, rho);
   Real eps = 1e-8;
@@ -660,8 +659,7 @@ TabulatedFluidProperties::c_from_p_T(
   if (_interpolate_c)
   {
     checkInputVariables(pressure, temperature);
-    _property_ipol[_c_idx]->sampleValueAndDerivatives(
-        pressure, temperature, c, dc_dp, dc_dT);
+    _property_ipol[_c_idx]->sampleValueAndDerivatives(pressure, temperature, c, dc_dp, dc_dT);
   }
   else
   {
@@ -899,7 +897,6 @@ TabulatedFluidProperties::p_from_v_e(const DualReal & v, const DualReal & e) con
   DualReal result = x;
   result.derivatives() = v.derivatives() * dxd1 + e.derivatives() * dxd2;
   return result;
-
 }
 
 Real
@@ -1033,7 +1030,6 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e) const
   Real p = _p_from_v_e_ipol->sample(v, e);
   Real T = _T_from_v_e_ipol->sample(v, e);
   return mu_from_p_T(p, T);
-
 }
 
 void
@@ -1251,8 +1247,7 @@ TabulatedFluidProperties::generateTabulatedData()
           if (_fp)
             _properties[i][p * _num_T + t] = _fp->c_from_p_T(_pressure[p], _temperature[t]);
           else
-            paramError("interpolated_properties",
-                       "No data to interpolate for speed of sound.");
+            paramError("interpolated_properties", "No data to interpolate for speed of sound.");
         }
 
     if (_interpolated_properties[i] == "cv")
@@ -1308,9 +1303,9 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
   {
     if (_error_on_out_of_bounds)
       mooseError("Temperature " + Moose::stringify(temperature) +
-                           " is outside the range of tabulated temperature (" +
-                           Moose::stringify(_temperature_min) + ", " +
-                           Moose::stringify(_temperature_max) + ").");
+                 " is outside the range of tabulated temperature (" +
+                 Moose::stringify(_temperature_min) + ", " + Moose::stringify(_temperature_max) +
+                 ").");
     else
       temperature = std::max(T(_temperature_min), std::min(temperature, T(_temperature_max)));
   }
@@ -1331,6 +1326,8 @@ TabulatedFluidProperties::checkInitialGuess() const
                ").");
 }
 
-template void TabulatedFluidProperties::checkInputVariables(Real & pressure, Real & temperature) const;
+template void TabulatedFluidProperties::checkInputVariables(Real & pressure,
+                                                            Real & temperature) const;
 
-template void TabulatedFluidProperties::checkInputVariables(ADReal & pressure, ADReal & temperature) const;
+template void TabulatedFluidProperties::checkInputVariables(ADReal & pressure,
+                                                            ADReal & temperature) const;

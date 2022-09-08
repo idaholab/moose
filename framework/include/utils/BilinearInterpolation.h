@@ -66,10 +66,13 @@ public:
    */
   Real sampleDerivative(Real s1, Real s2, unsigned int deriv_var) const override;
 
-  void sampleValueAndDerivatives(Real s1, Real s2, Real & y, Real & dy_ds1, Real & dy_ds2) const override;
+  void sampleValueAndDerivatives(
+      Real s1, Real s2, Real & y, Real & dy_ds1, Real & dy_ds2) const override;
 
-  void
-  getNeighborIndices(const std::vector<Real> & inArr, Real x, unsigned int & lowerX, unsigned int & upperX) const;
+  void getNeighborIndices(const std::vector<Real> & inArr,
+                          Real x,
+                          unsigned int & lowerX,
+                          unsigned int & upperX) const;
 
 private:
   /// sampleInternal only used by BilinearInterpolation, hence made private

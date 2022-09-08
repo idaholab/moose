@@ -105,8 +105,11 @@ public:
 
   virtual void rho_from_p_T(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
-  virtual void rho_from_p_T(
-      const ADReal & pressure, const ADReal & temperature, ADReal & rho, ADReal & drho_dp, ADReal & drho_dT) const override;
+  virtual void rho_from_p_T(const ADReal & pressure,
+                            const ADReal & temperature,
+                            ADReal & rho,
+                            ADReal & drho_dp,
+                            ADReal & drho_dT) const override;
 
   virtual Real v_from_p_T(Real pressure, Real temperature) const override;
 
@@ -118,15 +121,14 @@ public:
   virtual void
   e_from_p_T(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
-  virtual Real
-  e_from_p_rho(Real pressure, Real rho) const override;
+  virtual Real e_from_p_rho(Real pressure, Real rho) const override;
 
   virtual void
   e_from_p_rho(Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
 
   virtual Real T_from_p_rho(Real pressure, Real rho) const;
 
-  virtual void T_from_p_rho(Real pressure, Real rho, Real & T, Real & dT_dp, Real &  dT_drho) const;
+  virtual void T_from_p_rho(Real pressure, Real rho, Real & T, Real & dT_dp, Real & dT_drho) const;
 
   virtual Real h_from_p_T(Real p, Real T) const override;
 

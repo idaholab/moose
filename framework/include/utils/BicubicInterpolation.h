@@ -54,8 +54,10 @@ public:
    * as it minimizes the amount of time spent locating the point in the
    * tabulated data
    */
-  virtual void sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const override;
-  virtual void ADsampleValueAndDerivatives(const ADReal & x1, const ADReal & x2, ADReal & y, ADReal & dy1, ADReal & dy2) const override;
+  virtual void
+  sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const override;
+  virtual void ADsampleValueAndDerivatives(
+      const ADReal & x1, const ADReal & x2, ADReal & y, ADReal & dy1, ADReal & dy2) const override;
 
   /**
    * Samples first derivative at point (x1, x2)

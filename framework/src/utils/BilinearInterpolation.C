@@ -16,7 +16,8 @@ BilinearInterpolation::BilinearInterpolation(const std::vector<Real> & x1,
                                              const std::vector<Real> & x2,
                                              const ColumnMajorMatrix & y)
   : BidimensionalInterpolation(x1, x2), _zSurface(y)
-{}
+{
+}
 
 void
 BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr,
@@ -144,11 +145,11 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
 
   if ((lx == 0) && (ly == 0)) // if at bottom left node, take average slope of four boxes
   {
-    const auto & fQ13 = _zSurface(ly + 1, lx); // fQ at (x1,y3)
-    const auto & fQ31 = _zSurface(ly, lx + 1); //fQ at (x3,y1)
-    const auto & fQ33 = _zSurface(ly + 1, lx + 1); //fQ at (x3,y3)
-    const Real & x3 = _x1[lx + 1]; // ux value
-    const Real & y3 = _x2[ly + 1]; // uy value
+    const auto & fQ13 = _zSurface(ly + 1, lx);     // fQ at (x1,y3)
+    const auto & fQ31 = _zSurface(ly, lx + 1);     // fQ at (x3,y1)
+    const auto & fQ33 = _zSurface(ly + 1, lx + 1); // fQ at (x3,y3)
+    const Real & x3 = _x1[lx + 1];                 // ux value
+    const Real & y3 = _x2[ly + 1];                 // uy value
 
     if (deriv_var == 1)
     {
@@ -167,18 +168,18 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ33 * (x - x1);
       dfdy /= ((x3 - x1) * (y3 - y1));
       if (std::isnan(dfdy))
-      return dfdy / 4;
+        return dfdy / 4;
     }
     else
       mooseError("deriv_var must equal 1 or 2");
   }
   else if ((ly == 0) && (ux == 99)) // if at bottom right node
   {
-    const auto & fQ01 = _zSurface(ly, lx - 1); // fQ at (x0,y1)
+    const auto & fQ01 = _zSurface(ly, lx - 1);     // fQ at (x0,y1)
     const auto & fQ03 = _zSurface(ly + 1, lx - 1); // fQ at (x0,y3)
-    const auto & fQ23 = _zSurface(ly + 1, lx); // fQ at (x2,y3)
-    const Real & x0 = _x1[lx - 1]; // lx value
-    const Real & y3 = _x2[ly + 1]; // uy value
+    const auto & fQ23 = _zSurface(ly + 1, lx);     // fQ at (x2,y3)
+    const Real & x0 = _x1[lx - 1];                 // lx value
+    const Real & y3 = _x2[ly + 1];                 // uy value
 
     if (deriv_var == 1)
     {
@@ -203,11 +204,11 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   }
   else if ((uy == 99) && (lx == 0)) // if at top left node
   {
-    const auto & fQ10 = _zSurface(ly - 1, lx); // fQ at (x1,y0)
+    const auto & fQ10 = _zSurface(ly - 1, lx);     // fQ at (x1,y0)
     const auto & fQ30 = _zSurface(ly + 1, lx + 1); // fQ at (x3,y0)
-    const auto & fQ32 = _zSurface(ly, lx + 1); // fQ at (x3,y2)
-    const Real & x3 = _x1[lx + 1]; // ux value
-    const Real & y0 = _x2[ly - 1]; // ly value
+    const auto & fQ32 = _zSurface(ly, lx + 1);     // fQ at (x3,y2)
+    const Real & x3 = _x1[lx + 1];                 // ux value
+    const Real & y0 = _x2[ly - 1];                 // ly value
 
     if (deriv_var == 1)
     {
@@ -233,10 +234,10 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   else if ((uy == 99) && (ux == 99)) // if at top right node
   {
     const auto & fQ00 = _zSurface(ly - 1, lx - 1); // fQ at (x0,y0)
-    const auto & fQ20 = _zSurface(ly - 1, lx); // fQ at (x2,y0)
-    const auto & fQ02 = _zSurface(ly, lx - 1); // fQ at (x0,y2)
-    const Real & x0 = _x1[lx - 1]; // lx value
-    const Real & y0 = _x2[ly - 1]; // ly value
+    const auto & fQ20 = _zSurface(ly - 1, lx);     // fQ at (x2,y0)
+    const auto & fQ02 = _zSurface(ly, lx - 1);     // fQ at (x0,y2)
+    const Real & x0 = _x1[lx - 1];                 // lx value
+    const Real & y0 = _x2[ly - 1];                 // ly value
 
     if (deriv_var == 1)
     {
@@ -263,9 +264,9 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   else if ((uy == 99) && (ly == uy) && (ux == lx)) // when along top bound and ux=lx, uy=ly
   {
     const auto & fQ00 = _zSurface(uy - 1, lx - 1); // fQ at (x0,y0)
-    const auto & fQ01 = _zSurface(uy, lx - 1); // fQ at (x0,y1)
+    const auto & fQ01 = _zSurface(uy, lx - 1);     // fQ at (x0,y1)
     const auto & fQ30 = _zSurface(uy - 1, lx + 1); // fQ at (x3,y0)
-    const auto & fQ31 = _zSurface(uy, lx + 1); // fQ at (x3,y1)
+    const auto & fQ31 = _zSurface(uy, lx + 1);     // fQ at (x3,y1)
 
     const Real & x0 = _x1[lx - 1]; // lx value
     const Real & x3 = _x1[lx + 1]; // ux value
@@ -294,9 +295,9 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   }
   else if ((uy == 0) && (ly == uy) && (ux == lx)) // when along bottom bound and ux=lx, uy=ly
   {
-    const auto & fQ01 = _zSurface(ly, lx - 1); // fQ at (x0,y1)
+    const auto & fQ01 = _zSurface(ly, lx - 1);     // fQ at (x0,y1)
     const auto & fQ03 = _zSurface(ly + 1, lx - 1); // fQ at (x0,y3)
-    const auto & fQ31 = _zSurface(ly, lx + 1); // fQ at (x3,y1)
+    const auto & fQ31 = _zSurface(ly, lx + 1);     // fQ at (x3,y1)
     const auto & fQ33 = _zSurface(ly + 1, lx + 1); // fQ at (x3,y3)
 
     const Real & x0 = _x1[lx - 1]; // lx value
@@ -378,7 +379,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     {
       const auto & fQ01 = _zSurface(ly, ux - 1); // new lx at ly
       const auto & fQ02 = _zSurface(uy, ux - 1); // new lx at uy
-      const Real & x0 = _x1[ux - 1]; // lx value
+      const Real & x0 = _x1[ux - 1];             // lx value
 
       auto dfdx = fQ01 * (y - y2);
       dfdx += fQ11 * (y2 - y);
@@ -401,7 +402,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
 
   else if (deriv_var == 2)
   {
-    if (x == x1) //if x equal to x1 node
+    if (x == x1) // if x equal to x1 node
     {
       return (fQ12 - fQ11) / (y2 - y1);
     }
@@ -450,7 +451,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     {
       const auto & fQ10 = _zSurface(ly - 1, lx); // new ly at lx
       const auto & fQ20 = _zSurface(ly - 1, ux); // new ly at ux
-      const Real & y0 = _x2[ly - 1]; // lx value
+      const Real & y0 = _x2[ly - 1];             // lx value
 
       auto dfdy = fQ10 * (x - x2);
       dfdy += fQ20 * (x1 - x);
@@ -461,7 +462,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     }
     else
     {
-      //Derivative (w/ respect to y) for any point inside box
+      // Derivative (w/ respect to y) for any point inside box
       auto dfdy_xy = fQ11 * (x - x2);
       dfdy_xy += fQ21 * (x1 - x);
       dfdy_xy += fQ12 * (x2 - x);
@@ -474,7 +475,9 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     mooseError("deriv_var must equal 1 or 2");
 }
 
-void BilinearInterpolation::sampleValueAndDerivatives(Real s1, Real s2, Real & y, Real & dy_ds1, Real & dy_ds2) const
+void
+BilinearInterpolation::sampleValueAndDerivatives(
+    Real s1, Real s2, Real & y, Real & dy_ds1, Real & dy_ds2) const
 {
   y = sample(s1, s2);
   dy_ds1 = sampleDerivative(s1, s2, 1);

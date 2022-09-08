@@ -344,47 +344,44 @@ public:
                             const Real & T0,
                             Real & p,
                             Real & T,
-                            bool & conversion_succeeded
-                            ) const;
+                            bool & conversion_succeeded) const;
 
- /**
-  * Determines (p,T) from (v,h) using Newton Solve in 2D
-  * Useful for inversion of state variables
-  *
-  * @param[in] v specific volume (m^3 / kg)
-  * @param[in] h specific enthalpy (J / kg)
-  * @param[in] p0 initial guess for pressure (Pa / kg)
-  * @param[in] T0 initial guess for temperature (K)
-  * @param[out] fluid pressure (Pa / kg)
-  * @param[out] Temperature (K)
-  */
-  virtual void p_T_from_v_h(const Real & v,
-                           const Real & h,
-                           const Real & p0,
-                           const Real & T0,
-                           Real & p,
-                           Real & T,
-                           bool & conversion_succeeded
-                           ) const;
   /**
-  * Determines (p,T) from (h,s) using Newton Solve in 2D
-  * Useful for inversion of state variables
-  *
-  * @param[in] h specific enthalpy (J / kg)
-  * @param[in] s specific entropy (J/K*kg)
-  * @param[in] p0 initial guess for pressure (Pa / kg)
-  * @param[in] T0 initial guess for temperature (K)
-  * @param[out] fluid pressure (Pa / kg)
-  * @param[out] Temperature (K)
-  */
+   * Determines (p,T) from (v,h) using Newton Solve in 2D
+   * Useful for inversion of state variables
+   *
+   * @param[in] v specific volume (m^3 / kg)
+   * @param[in] h specific enthalpy (J / kg)
+   * @param[in] p0 initial guess for pressure (Pa / kg)
+   * @param[in] T0 initial guess for temperature (K)
+   * @param[out] fluid pressure (Pa / kg)
+   * @param[out] Temperature (K)
+   */
+  virtual void p_T_from_v_h(const Real & v,
+                            const Real & h,
+                            const Real & p0,
+                            const Real & T0,
+                            Real & p,
+                            Real & T,
+                            bool & conversion_succeeded) const;
+  /**
+   * Determines (p,T) from (h,s) using Newton Solve in 2D
+   * Useful for inversion of state variables
+   *
+   * @param[in] h specific enthalpy (J / kg)
+   * @param[in] s specific entropy (J/K*kg)
+   * @param[in] p0 initial guess for pressure (Pa / kg)
+   * @param[in] T0 initial guess for temperature (K)
+   * @param[out] fluid pressure (Pa / kg)
+   * @param[out] Temperature (K)
+   */
   virtual void p_T_from_h_s(const Real & h,
                             const Real & s,
                             const Real & p0,
                             const Real & T0,
                             Real & p,
                             Real & T,
-                            bool & conversion_succeeded
-                            ) const;
+                            bool & conversion_succeeded) const;
 
   // virtual Real p_from_h_s(Real h, Real s) const;
   //
@@ -398,12 +395,11 @@ public:
   //
   // virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const;
 
-
-/**
-* _tolerance, _T_initial_guess, and _p_initial_guess are parameters to
-* be used for NewtonMethod when doing a variable set conversion
-* They can be set in the input file
-*/
+  /**
+   * _tolerance, _T_initial_guess, and _p_initial_guess are parameters to
+   * be used for NewtonMethod when doing a variable set conversion
+   * They can be set in the input file
+   */
   const Real _tolerance;
   const Real _T_initial_guess;
   const Real _p_initial_guess;

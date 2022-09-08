@@ -28,7 +28,7 @@ TEST(BilinearInterpolationTest, sample)
 
   for (unsigned int i = 0; i < n; ++i)
     for (unsigned int j = 0; j < n; ++j)
-      y(i,j) = x1[i] * x1[i] + 3.0 * x2[j] * x2[j];
+      y(i, j) = x1[i] * x1[i] + 3.0 * x2[j] * x2[j];
 
   BilinearInterpolation interp(x1, x2, y);
 
