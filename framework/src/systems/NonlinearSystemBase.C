@@ -74,6 +74,7 @@
 #include "FVElementalKernel.h"
 #include "FVScalarLagrangeMultiplierConstraint.h"
 #include "FVFluxKernel.h"
+#include "FVScalarLagrangeMultiplierInterface.h"
 #include "UserObject.h"
 #include "OffDiagonalScalingMatrix.h"
 
@@ -3328,6 +3329,16 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
         global_kernels_exist = true;
       kernel_variables.insert(fv_kernel->variable().name());
     }
+
+    std::vector<FVInterfaceKernel *> fv_interface_kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("FVInterfaceKernel")
+        .queryInto(fv_interface_kernels);
+
+    for (auto fvik : fv_interface_kernels)
+      if (auto scalar_fvik = dynamic_cast<FVScalarLagrangeMultiplierInterface *>(fvik))
+        kernel_variables.insert(scalar_fvik->lambdaVariable().name());
   }
 
   // Check kernel coverage of subdomains (blocks) in your mesh
