@@ -364,12 +364,9 @@ Poly2TriMeshGenerator::generate()
         auto ns = elem->n_sides();
         for (auto s : make_range(ns))
         {
-          // Remember that the point ordering should be
-          // reversed since we're thinking of it as an outer
-          // boundary rather than an inner here.
-          auto it_s = next_hole_boundary_point.find(elem->point((s + 1) % ns));
+          auto it_s = next_hole_boundary_point.find(elem->point(s));
           if (it_s != next_hole_boundary_point.end())
-            if (it_s->second == elem->point(s))
+            if (it_s->second == elem->point((s+1)%ns))
             {
               hole_boundary_info.add_side(elem, s, new_hole_bcid);
               ++found_hole_sides;
@@ -385,9 +382,9 @@ Poly2TriMeshGenerator::generate()
         auto ns = elem->n_sides();
         for (auto s : make_range(ns))
         {
-          auto it_s = next_hole_boundary_point.find(elem->point(s));
+          auto it_s = next_hole_boundary_point.find(elem->point((s+1)%ns));
           if (it_s != next_hole_boundary_point.end())
-            if (it_s->second == elem->point((s + 1) % ns))
+            if (it_s->second == elem->point(s))
             {
               mesh_boundary_info.add_side(elem, s, inner_bcid);
               ++found_inner_sides;
