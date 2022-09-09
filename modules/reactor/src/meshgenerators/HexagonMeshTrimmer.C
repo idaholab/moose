@@ -253,7 +253,7 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
                                 const std::set<subdomain_id_type> subdomain_ids_set,
                                 const boundary_id_type trimming_section_boundary_id,
                                 const boundary_id_type external_boundary_id,
-                                const bool side_to_move)
+                                const bool side_to_remove)
 {
   // Build boundary information of the mesh
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
@@ -276,7 +276,7 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
   {
     const auto p_x = (*elem_it)->vertex_average()(0);
     const auto p_y = (*elem_it)->vertex_average()(1);
-    if (lineSideDeterminator(p_x, p_y, bdry_pars[0], bdry_pars[1], bdry_pars[2], side_to_move))
+    if (lineSideDeterminator(p_x, p_y, bdry_pars[0], bdry_pars[1], bdry_pars[2], side_to_remove))
       (*elem_it)->subdomain_id() = block_id_to_remove;
   }
 
@@ -326,13 +326,13 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
                                                    bdry_pars[0],
                                                    bdry_pars[1],
                                                    bdry_pars[2],
-                                                   side_to_move);
+                                                   side_to_remove);
     bool side_node_1_remove = lineSideDeterminator((*mesh.node_ptr(side_id_1))(0),
                                                    (*mesh.node_ptr(side_id_1))(1),
                                                    bdry_pars[0],
                                                    bdry_pars[1],
                                                    bdry_pars[2],
-                                                   side_to_move);
+                                                   side_to_remove);
     // If both nodes of that side are involved in the trimming interface
     if (side_id_0_in && side_id_1_in)
       // The side needs to be removed from the sideset

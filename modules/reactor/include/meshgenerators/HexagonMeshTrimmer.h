@@ -33,7 +33,7 @@ protected:
   const BoundaryName _peripheral_trimming_section_boundary;
   /// Index of the sector to start trimming from (counter-clockwise direction)
   const short _trimming_start_sector;
-  /// Index of the sector to start trimming to (counter-clockwise direction)
+  /// Index of the sector to end trimming at (counter-clockwise direction)
   const short _trimming_end_sector;
   /// Number of remaining sectors
   unsigned short _center_trim_sector_number;
@@ -89,15 +89,16 @@ protected:
 
   /**
    * Removes all the elements on one side of a given line and deforms the elements intercepted by
-   * the line to form a smooth new boundary
-   * @param mesh input mesh to perform line-based elements removing
+   * the line to form a flat new boundary
+   * @param mesh input mesh to perform line-based elements removing on
    * @param bdry_pars line parameter sets {a, b, c} as in a*x+b*y+c=0
    * @param block_id_to_remove subdomain id used to mark the elements that need to be removed
    * @param subdomain_ids_set all the subdomain ids in the input mesh
    * @param trimming_section_boundary_id ID of the new external boundary formed due to
    * trimming
    * @param external_boundary_id ID of the external boundary of the input mesh
-   * @param side_to_move which side of the mesh needs to be removed
+   * @param side_to_remove which side of the mesh needs to be removed: true means ax+by+c>0 and
+   * false means ax+by+c<0
    */
   void lineRemover(ReplicatedMesh & mesh,
                    const std::vector<Real> bdry_pars,
@@ -105,7 +106,7 @@ protected:
                    const std::set<subdomain_id_type> subdomain_ids_set,
                    const boundary_id_type trimming_section_boundary_id,
                    const boundary_id_type external_boundary_id = OUTER_SIDESET_ID,
-                   const bool side_to_move = true);
+                   const bool side_to_remove = true);
 
   /**
    * Determines whether a point on XY-plane is on the side of a given line that needs to be removed
@@ -127,7 +128,7 @@ protected:
                             const Real dis_tol = 1.0E-6);
 
   /**
-   * Calculates the intersect Point of two given straight lines
+   * Calculates the intersection Point of two given straight lines
    * @param param_11 parameter 1 (a) in line formula a*x+b*y+c=0 for the first line
    * @param param_12 parameter 2 (b) in line formula a*x+b*y+c=0 for the first line
    * @param param_13 parameter 3 (c) in line formula a*x+b*y+c=0 for the first line
@@ -156,7 +157,7 @@ protected:
   /**
    * Calculates the internal angles of a given 2D element
    * @param elem the element that needs to be investigated
-   * @return sizes of all the internal angles
+   * @return sizes of all the internal angles, sorted by their size
    */
   std::vector<std::pair<Real, unsigned int>> vertex_angles(Elem & elem) const;
 };
