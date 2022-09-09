@@ -74,6 +74,11 @@ public:
   void execute() override final;
   void finalize() override final;
 
+  /**
+   * makes sure coefficient data gets communicated on both sides of a given boundary
+   */
+  void ghostADataOnBoundary(const BoundaryID boundary_id);
+
 protected:
   /**
    * A virtual method that allows us to only implement getVelocity once for free and porous flows

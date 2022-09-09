@@ -25,6 +25,7 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
 #include "libmesh/parallel_algebra.h"
+#include "libmesh/remote_elem.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
@@ -320,13 +321,21 @@ void
 INSFVRhieChowInterpolator::meshChanged()
 {
   insfvSetup();
+
+  // If the mesh has been modified:
+  // - the boundary elements may have changed
+  // - some elements may been refined
+  _elements_to_push_pull.clear();
+  _a.clear();
 }
 
 void
 INSFVRhieChowInterpolator::initialize()
 {
-  _elements_to_push_pull.clear();
-  _a.clear();
+  // Reset map of coefficients to zero.
+  // The keys should not have changed unless the mesh has changed
+  for (const auto & pair : _a)
+    _a[pair.first] = 0;
 }
 
 void
@@ -340,9 +349,9 @@ INSFVRhieChowInterpolator::execute()
     return;
 
   // A lot of RC data gathering leverages the automatic differentiation system, e.g. for linear
-  // operators we pull out the 'a' coefficents by querying the ADReal residual derivatives member at
-  // the element or neighbor dof locations. Consequently we need to enable derivative computation.
-  // We do this here outside the threaded regions
+  // operators we pull out the 'a' coefficients by querying the ADReal residual derivatives member
+  // at the element or neighbor dof locations. Consequently we need to enable derivative
+  // computation. We do this here outside the threaded regions
   const auto saved_do_derivatives = ADReal::do_derivatives;
   ADReal::do_derivatives = true;
 
@@ -437,6 +446,34 @@ INSFVRhieChowInterpolator::finalize()
 #else
   mooseError("INSFVRhieChowInterpolator only supported for global AD indexing.");
 #endif
+}
+
+void
+INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
+{
+  if (_a_data_provided || this->n_processors() == 1 ||
+      _velocity_interp_method == Moose::FV::InterpMethod::Average)
+    return;
+
+  // Ghost a for the elements on the boundary
+  for (auto elem_id : _moose_mesh.getBoundaryActiveLocalElemIds(boundary_id))
+  {
+    const auto & elem = _moose_mesh.elemPtr(elem_id);
+    if (elem->processor_id() != this->processor_id())
+      for (const auto i : make_range(_dim))
+        // Adding to the a coefficient will make sure the final result gets communicated
+        addToA(elem, i, 0);
+  }
+
+  // Ghost a for the neighbors of the elements on the boundary
+  for (auto neighbor_id : _moose_mesh.getBoundaryActiveNeighborElemIds(boundary_id))
+  {
+    const auto & neighbor = _moose_mesh.queryElemPtr(neighbor_id);
+    if (neighbor->processor_id() != this->processor_id())
+      for (const auto i : make_range(_dim))
+        // Adding to the a coefficient will make sure the final result gets communicated
+        addToA(neighbor, i, 0);
+  }
 }
 
 VectorValue<ADReal>
