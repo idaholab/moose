@@ -1001,28 +1001,52 @@ MooseMesh::getBoundaryElementRange()
 const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
 MooseMesh::getBoundariesToElems() const
 {
+  mooseDeprecated("MooseMesh::getBoundariesToElems is deprecated, "
+                  "use MooseMesh::getBoundariesToActiveLocalElemIds");
+  return getBoundariesToActiveLocalElemIds();
+}
+
+const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
+MooseMesh::getBoundariesToActiveLocalElemIds() const
+{
   return _bnd_elem_ids;
 }
 
-const std::unordered_set<dof_id_type> MooseMesh::getBoundaryElems(BoundaryID bid) const
+const std::unordered_set<dof_id_type>
+MooseMesh::getBoundaryActiveLocalElemIds(BoundaryID bid) const
 {
   // The boundary to element map is computed on every mesh update
   const auto it = _bnd_elem_ids.find(bid);
   if (it == _bnd_elem_ids.end())
-    mooseError("Boundary elements requested for boundary/sideset id ",
-        bid,
-        " but was not found in mesh boundary element map. A call to buildBndElemList() "
-        "may be missing");
+    // Boundary is not local to this domain, return an empty set
+    return std::unordered_set<dof_id_type>{};
   return it->second;
 }
 
-const std::unordered_set<dof_id_type> MooseMesh::getBoundaryNeighborElems(BoundaryID bid) const
+const std::unordered_set<dof_id_type>
+MooseMesh::getBoundaryActiveNeighborElemIds(BoundaryID bid) const
 {
   // Vector of boundary elems is updated every mesh update
   std::unordered_set<dof_id_type> neighbor_elems;
   for (const auto & local_elem : _bnd_elems)
     if (local_elem->_bnd_id == bid)
-      neighbor_elems.insert(local_elem->_elem->neighbor_ptr(local_elem->_side)->id());
+    {
+      const auto * neighbor = local_elem->_elem->neighbor_ptr(local_elem->_side);
+      // Dont add fully remote elements, ghosted is fine
+      if (neighbor && neighbor != libMesh::remote_elem)
+      {
+        // handle mesh refinement, only return active elements near the boundary
+        if (neighbor->active())
+          neighbor_elems.insert(neighbor->id());
+        else
+        {
+          std::vector<const Elem *> family;
+          neighbor->active_family_tree_by_neighbor(family, local_elem->_elem);
+          for (const auto & child_neighbor : family)
+            neighbor_elems.insert(child_neighbor->id());
+        }
+      }
+    }
 
   return neighbor_elems;
 }
