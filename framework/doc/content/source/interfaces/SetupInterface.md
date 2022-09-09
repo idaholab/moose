@@ -43,6 +43,37 @@ complete list of execution flags is provided by MOOSE are listed in the "registe
 
 !listing framework/src/base/MooseApp.C start=MooseApp::registerExecFlags() end=void
 
+The default value of "execute_on" is *linear* for most of MOOSE objects with few exceptions:
+
+- The auxiliary kernels have the default value of *linear* and *timestep_end*.
+- The postprocessors have default value of  *linear* and *transfer*.
+- The controls have default value of *initial* and *timestep_end*.
+- The mult-apps have default value of *timestep_begin*.
+- The user objects have default value of *timestep_end*.
+- The outputs have default value of *initial* and *timestep_end*.
+- The default value for transfers is set to be the same of the execute_on value of its corresponding sub-applications.
+
+There are several objects in framework having special default "execute_on":
+
+| Object name | Object type | Default value |
+| :- | :- | :- |
+| [ElementUOAux.md] | [AuxKernel](syntax/AuxKernels/index.md) | timestep_begin |
+| [GhostingAux.md] | [AuxKernel](syntax/AuxKernels/index.md) | initial and timestep_end |
+| [GenericVectorFunctorMaterial.md] | [Material](syntax/Materials/index.md) | always |
+| [VectorMagnitudeFunctorMaterial.md] | [Material](syntax/Materials/index.md) | always |
+| [GenericFunctorGradientMaterial.md] | [Material](syntax/Materials/index.md) | always |
+| [GenericFunctorMaterial.md] | [Material](syntax/Materials/index.md) | always |
+| [CSVReader.md] | [VectorPostprocessor](syntax/VectorPostprocessors/index.md) | none |
+| [ElementQualityChecker.md] | [UserObject](syntax/UserObjects/index.md) | initial |
+| [ElemSideNeighborLayersTester.md] | [UserObject](syntax/UserObjects/index.md) | timestep_begin |
+| [InterfaceQpValueUserObject.md] | [UserObject](syntax/UserObjects/index.md) | initial and timestep_begin |
+| [RadialAverage.md] | [UserObject](syntax/UserObjects/index.md) | timestep_begin |
+| [GhostingUserObject.md] | [UserObject](syntax/UserObjects/index.md) | initial |
+| [AccumulateReporter.md] | [Reporter](syntax/Reporters/index.md) | initial and timestep_end |
+
+The default value for all objects including objects in MOOSE modules and MOOSE-based
+applications can be found in their parameter list.
+
 ## Modifying Execute On
 
 When creating objects that inherit from SetupInterface it is possible to set, add, or remove
@@ -76,7 +107,7 @@ with MOOSE, these methods are listed in the header as shown here.
 
 !listing framework/include/interfaces/SetupInterface.h
          start=~SetupInterface()
-         end=subdomainSetup
+         end=customSetup
          include-end=True
          include-start=False
          strip-leading-whitespace=True
@@ -89,6 +120,15 @@ A few of the methods were created prior to the execute flags, thus the names do 
 they remain as is to keep the API consistent: the "jacobianSetup" methods is called prior to the
 "NONLINEAR" execute flag and the "residualSetup" is called prior to the "LINEAR" execute flag.
 
+There is also a generic setup function "customSetup" that takes an execute flag as the argument.
+This function is called by MOOSE when performing evaluations of objects on the custom execute flags
+in [Creating Custom Execute Flags](#creating-custom-execute-flags).
+
+!alert warning title=Note on the setup function
+This function is not called on *initial*, *timestep_begin*, *subdomain*, *nonlinear* and *linear*.
+Setup operations for those execute flags should be implemented in *initialSetup*, *timestepSetup*,
+*subdomainSetup*, *jacobianSetup* and *residualSetup* functions accordingly. It is possible that
+these six setup functions are removed in favor of a generic setup function in the future.
 
 ## Creating Custom Execute Flags
 
