@@ -117,6 +117,7 @@ C
         WRITE(*,185) KSPT
         WRITE(*,190) KSTEP
         WRITE(*,195) KINC
+        CALL FLUSH()
       ENDIF
 
 
