@@ -42,17 +42,20 @@ PerpendicularElectricFieldInterface::computeQpResidual(Moose::DGResidualType typ
 {
   _u_perp = (_u[_qp] * _normals[_qp]) * _normals[_qp];
   _secondary_perp = (_neighbor_value[_qp] * _normals[_qp]) * _normals[_qp];
+  _free_charge_dot_n = _free_charge * _normals[_qp];
 
   Real res = 0;
 
   switch (type)
   {
     case Moose::Element:
-      res = _test[_i][_qp] * (_primary_eps * _u_perp - _secondary_eps * _secondary_perp);
+      res = _test[_i][_qp] *
+            (_primary_eps * _u_perp - _secondary_eps * _secondary_perp - _free_charge_dot_n);
       break;
 
     case Moose::Neighbor:
-      res = _test_neighbor[_i][_qp] * -(_primary_eps * _u_perp - _secondary_eps * _secondary_perp);
+      res = _test_neighbor[_i][_qp] *
+            -(_primary_eps * _u_perp - _secondary_eps * _secondary_perp - _free_charge_dot_n);
       break;
   }
 

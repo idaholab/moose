@@ -229,16 +229,29 @@ template <typename T1, typename T2>
 void
 UserObject::gatherProxyValueMax(T1 & value, T2 & proxy)
 {
-  processor_id_type rank;
-  _communicator.maxloc(value, rank);
-  _communicator.broadcast(proxy, rank);
+  // get all value, proxy pairs, _communicator.maxloc would be faster but leads to
+  // partitioning dependent results if teh maximum value is not unique.
+  std::vector<std::pair<T1, T2>> all(n_processors());
+  auto pair = std::make_pair(value, proxy);
+  _communicator.allgather(pair, all);
+
+  // find maximum, disambiguated by the proxy value
+  const auto it = std::max_element(all.begin(), all.end());
+  value = it->first;
+  proxy = it->second;
 }
 
 template <typename T1, typename T2>
 void
 UserObject::gatherProxyValueMin(T1 & value, T2 & proxy)
 {
-  processor_id_type rank;
-  _communicator.minloc(value, rank);
-  _communicator.broadcast(proxy, rank);
+  // get all value, proxy pairs
+  std::vector<std::pair<T1, T2>> all(n_processors());
+  auto pair = std::make_pair(value, proxy);
+  _communicator.allgather(pair, all);
+
+  // find minimum, disambiguated by the proxy value
+  const auto it = std::min_element(all.begin(), all.end());
+  value = it->first;
+  proxy = it->second;
 }

@@ -201,6 +201,11 @@ public:
    */
   void setActiveScalarVariableCoupleableVectorTags(const std::set<TagID> & vtags);
 
+  /**
+   * Map from variable number to variable pointer. Includes both field and scalar variables
+   */
+  const std::map<unsigned int, std::shared_ptr<MooseVariableBase>> & numberToVariableMap() const;
+
 protected:
   /// list of variable names
   std::vector<VariableName> _names;
@@ -241,7 +246,7 @@ protected:
   /// list of all scalar, non-finite element variables
   std::vector<MooseVariableScalar *> _scalar_vars;
 
-  /// All instances of objects (raw pointers)
+  /// All instances of objects
   std::map<unsigned int, std::shared_ptr<MooseVariableBase>> _all_objects;
 };
 
@@ -256,6 +261,12 @@ VariableWarehouse::getFVVariable(const std::string & var_name)
                " doesn't exist as a finite volume variable in the warehouse.");
 
   return it->second;
+}
+
+inline const std::map<unsigned int, std::shared_ptr<MooseVariableBase>> &
+VariableWarehouse::numberToVariableMap() const
+{
+  return _all_objects;
 }
 
 template <>

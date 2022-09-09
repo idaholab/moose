@@ -261,6 +261,9 @@ protected:
   /// The type of the face interpolation method for the passive scalar fields
   const MooseEnum _passive_scalar_face_interpolation;
 
+  /// The type of velocity interpolation to perform
+  const MooseEnum _velocity_interpolation;
+
   /// If a two-term Taylor expansion is needed for the determination of the boundary values
   /// of the pressure
   const bool _pressure_two_term_bc_expansion;
