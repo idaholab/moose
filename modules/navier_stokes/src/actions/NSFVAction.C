@@ -1288,10 +1288,13 @@ NSFVAction::addINSMomentumGravityKernels()
 
     for (unsigned int d = 0; d < _dim; ++d)
     {
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-      params.set<NonlinearVariableName>("variable") = _velocity_name[d];
+      if (getParam<RealVectorValue>("gravity")(d) != 0)
+      {
+        params.set<MooseEnum>("momentum_component") = NS::directions[d];
+        params.set<NonlinearVariableName>("variable") = _velocity_name[d];
 
-      _problem->addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+        _problem->addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+      }
     }
   }
 }
