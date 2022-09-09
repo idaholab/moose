@@ -3819,7 +3819,11 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
     executeControls(exec_type);
 
   // intentially call this after executing controls because the setups may rely on the controls
-  customSetup(exec_type);
+  // FIXME: we skip the following flags because they have dedicated setup functions in
+  //        SetupInterface and it may not be appropriate to call them here.
+  if (!(exec_type == EXEC_INITIAL || exec_type == EXEC_TIMESTEP_BEGIN ||
+        exec_type == EXEC_SUBDOMAIN || exec_type == EXEC_NONLINEAR || exec_type == EXEC_LINEAR))
+    customSetup(exec_type);
 
   // Samplers; EXEC_INITIAL is not called because the Sampler::init() method that is called after
   // construction makes the first Sampler::execute() call. This ensures that the random number
