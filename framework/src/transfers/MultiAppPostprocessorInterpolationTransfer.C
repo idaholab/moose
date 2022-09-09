@@ -46,8 +46,6 @@ MultiAppPostprocessorInterpolationTransfer::validParams()
                         "Radius to use for radial_basis interpolation.  If negative "
                         "then the radius is taken as the max distance between "
                         "points.");
-
-  MultiAppTransfer::addSkipCoordCollapsingParam(params);
   return params;
 }
 
