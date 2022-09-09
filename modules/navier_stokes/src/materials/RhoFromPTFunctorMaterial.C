@@ -22,23 +22,28 @@ RhoFromPTFunctorMaterial::validParams()
   auto params = FunctorMaterial::validParams();
   params.addRequiredParam<UserObjectName>(NS::fluid, "fluid userobject");
   params.addClassDescription(
-      "Computes the density from coupled pressure and temperature variables");
-  params.addRequiredCoupledVar(NS::temperature, "the temperature");
-  params.addRequiredCoupledVar(NS::pressure, "the pressure");
+      "Computes the density from coupled pressure and temperature functors (variables, "
+      "functions, functor material properties");
+  params.addRequiredParam<MooseFunctorName>(NS::temperature, "temperature functor");
+  params.addRequiredParam<MooseFunctorName>(NS::pressure, "pressure functor");
+  params.addParam<MooseFunctorName>(
+      "density_name", NS::density, "name to use to declare the density functor");
+
   return params;
 }
 
 RhoFromPTFunctorMaterial::RhoFromPTFunctorMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
-    _pressure(*getVarHelper<MooseVariableFV<Real>>(NS::pressure, 0)),
-    _temperature(*getVarHelper<MooseVariableFV<Real>>(NS::temperature, 0)),
-    _fluid(getUserObject<SinglePhaseFluidProperties>(NS::fluid))
+    _pressure(getFunctor<ADReal>(NS::pressure)),
+    _temperature(getFunctor<ADReal>(NS::temperature)),
+    _fluid(getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
+    _density_name(getParam<MooseFunctorName>("density_name"))
 {
-  addFunctorProperty<ADReal>(NS::density,
+  addFunctorProperty<ADReal>(_density_name,
                              [this](const auto & r, const auto & t) -> ADReal
                              { return _fluid.rho_from_p_T(_pressure(r, t), _temperature(r, t)); });
   addFunctorProperty<ADReal>(
-      NS::time_deriv(NS::density),
+      NS::time_deriv(_density_name),
       [this](const auto & r, const auto & t) -> ADReal
       {
         ADReal rho, drho_dp, drho_dT;
