@@ -73,9 +73,6 @@ MultiAppUserObjectTransfer::validParams()
                         false,
                         "When True, a from_multiapp transfer will work by finding the nearest "
                         "(using the `location`) sub-app and query that for the value to transfer");
-
-  MultiAppTransfer::addSkipCoordCollapsingParam(params);
-
   return params;
 }
 
