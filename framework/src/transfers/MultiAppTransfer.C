@@ -46,6 +46,7 @@ MultiAppTransfer::validParams()
   params.addParam<bool>("displaced_target_mesh",
                         false,
                         "Whether or not to use the displaced mesh for the target mesh.");
+  addSkipCoordCollapsingParam(params);
   return params;
 }
 

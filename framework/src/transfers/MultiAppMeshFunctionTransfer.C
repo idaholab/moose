@@ -42,7 +42,6 @@ MultiAppMeshFunctionTransfer::validParams()
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
   MultiAppTransfer::addBBoxFactorParam(params);
-  MultiAppTransfer::addSkipCoordCollapsingParam(params);
   return params;
 }
 
