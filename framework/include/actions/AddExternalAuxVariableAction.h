@@ -23,7 +23,7 @@ public:
    */
   static InputParameters validParams();
 
-  AddExternalAuxVariableAction(InputParameters params);
+  AddExternalAuxVariableAction(const InputParameters & params);
 
   virtual void act() override;
 };

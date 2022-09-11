@@ -110,7 +110,7 @@ SetupMeshAction::validParams()
   return params;
 }
 
-SetupMeshAction::SetupMeshAction(InputParameters params) : MooseObjectAction(params) {}
+SetupMeshAction::SetupMeshAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 SetupMeshAction::setupMesh(MooseMesh * mesh)

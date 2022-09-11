@@ -9,6 +9,9 @@
 
 #include "GlobalParamsAction.h"
 
+#include "MooseApp.h"
+#include "InputParameterWarehouse.h"
+
 registerMooseAction("MooseApp", GlobalParamsAction, "set_global_params");
 
 InputParameters
@@ -25,7 +28,7 @@ GlobalParamsAction::validParams()
   return params;
 }
 
-GlobalParamsAction::GlobalParamsAction(InputParameters params) : Action(params) {}
+GlobalParamsAction::GlobalParamsAction(const InputParameters & params) : Action(params) {}
 
 void
 GlobalParamsAction::act()

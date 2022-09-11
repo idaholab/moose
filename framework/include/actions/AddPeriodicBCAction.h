@@ -27,7 +27,7 @@ class AddPeriodicBCAction : public Action
 public:
   static InputParameters validParams();
 
-  AddPeriodicBCAction(InputParameters params);
+  AddPeriodicBCAction(const InputParameters & params);
 
   virtual void act() override;
 

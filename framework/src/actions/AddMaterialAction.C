@@ -20,7 +20,7 @@ AddMaterialAction::validParams()
   return params;
 }
 
-AddMaterialAction::AddMaterialAction(InputParameters params) : MooseObjectAction(params) {}
+AddMaterialAction::AddMaterialAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddMaterialAction::act()

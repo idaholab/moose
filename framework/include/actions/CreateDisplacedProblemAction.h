@@ -21,7 +21,7 @@ class CreateDisplacedProblemAction : public Action
 public:
   static InputParameters validParams();
 
-  CreateDisplacedProblemAction(InputParameters parameters);
+  CreateDisplacedProblemAction(const InputParameters & parameters);
 
   virtual void act() override;
 

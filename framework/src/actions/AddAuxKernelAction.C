@@ -27,7 +27,9 @@ AddAuxKernelAction::validParams()
   return params;
 }
 
-AddAuxKernelAction::AddAuxKernelAction(InputParameters params) : MooseObjectAction(params) {}
+AddAuxKernelAction::AddAuxKernelAction(const InputParameters & params) : MooseObjectAction(params)
+{
+}
 
 void
 AddAuxKernelAction::act()

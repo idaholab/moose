@@ -16,7 +16,7 @@ class AddElementalFieldAction : public AddVariableAction
 public:
   static InputParameters validParams();
 
-  AddElementalFieldAction(InputParameters params);
+  AddElementalFieldAction(const InputParameters & params);
 
   virtual void act() override;
   void init() override;

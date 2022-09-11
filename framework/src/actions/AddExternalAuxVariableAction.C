@@ -18,7 +18,8 @@ AddExternalAuxVariableAction::validParams()
   return Action::validParams();
 }
 
-AddExternalAuxVariableAction::AddExternalAuxVariableAction(InputParameters params) : Action(params)
+AddExternalAuxVariableAction::AddExternalAuxVariableAction(const InputParameters & params)
+  : Action(params)
 {
 }
 

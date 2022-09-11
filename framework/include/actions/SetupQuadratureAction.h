@@ -22,7 +22,7 @@ class SetupQuadratureAction : public Action
 public:
   static InputParameters validParams();
 
-  SetupQuadratureAction(InputParameters parameters);
+  SetupQuadratureAction(const InputParameters & parameters);
 
   virtual void act() override;
 

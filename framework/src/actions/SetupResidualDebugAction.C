@@ -32,7 +32,7 @@ SetupResidualDebugAction::validParams()
   return params;
 }
 
-SetupResidualDebugAction::SetupResidualDebugAction(InputParameters parameters)
+SetupResidualDebugAction::SetupResidualDebugAction(const InputParameters & parameters)
   : Action(parameters),
     _show_var_residual(getParam<std::vector<NonlinearVariableName>>("show_var_residual"))
 {

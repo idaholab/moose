@@ -46,7 +46,7 @@ Action::validParams()
   return params;
 }
 
-Action::Action(InputParameters parameters)
+Action::Action(const InputParameters & parameters)
   : ConsoleStreamInterface(
         *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     MeshMetaDataInterface(

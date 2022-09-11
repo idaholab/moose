@@ -24,7 +24,7 @@ public:
    */
   static InputParameters validParams();
 
-  SetupRecoverFileBaseAction(InputParameters params);
+  SetupRecoverFileBaseAction(const InputParameters & params);
 
   virtual void act() override;
 };

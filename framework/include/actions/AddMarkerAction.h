@@ -16,7 +16,7 @@ class AddMarkerAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AddMarkerAction(InputParameters params);
+  AddMarkerAction(const InputParameters & params);
 
   virtual void act() override;
 };

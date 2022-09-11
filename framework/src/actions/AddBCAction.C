@@ -21,7 +21,7 @@ AddBCAction::validParams()
   return params;
 }
 
-AddBCAction::AddBCAction(InputParameters params) : MooseObjectAction(params) {}
+AddBCAction::AddBCAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddBCAction::act()

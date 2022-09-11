@@ -56,7 +56,7 @@ AddVariableAction::validParams()
   return params;
 }
 
-AddVariableAction::AddVariableAction(InputParameters params)
+AddVariableAction::AddVariableAction(const InputParameters & params)
   : MooseObjectAction(params),
     _fe_type(feType(params)),
     _scalar_var(_fe_type.family == SCALAR),

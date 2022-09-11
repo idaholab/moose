@@ -20,7 +20,7 @@ AddInitialConditionAction::validParams()
   return params;
 }
 
-AddInitialConditionAction::AddInitialConditionAction(InputParameters params)
+AddInitialConditionAction::AddInitialConditionAction(const InputParameters & params)
   : MooseObjectAction(params)
 {
 }

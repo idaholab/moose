@@ -143,7 +143,7 @@ CommonOutputAction::validParams()
   return params;
 }
 
-CommonOutputAction::CommonOutputAction(InputParameters params)
+CommonOutputAction::CommonOutputAction(const InputParameters & params)
   : Action(params), _action_params(_action_factory.getValidParams("AddOutputAction"))
 {
 }

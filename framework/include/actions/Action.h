@@ -41,7 +41,7 @@ class Action : public ConsoleStreamInterface,
 public:
   static InputParameters validParams();
 
-  Action(InputParameters parameters);
+  Action(const InputParameters & parameters);
 
   virtual ~Action() = default;
 
@@ -208,7 +208,7 @@ protected:
   virtual void act() = 0;
 
   /// Input parameters for the action
-  InputParameters _pars;
+  const InputParameters & _pars;
 
   // The registered syntax for this block if any
   std::string _registered_identifier;

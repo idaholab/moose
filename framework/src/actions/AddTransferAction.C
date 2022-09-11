@@ -20,7 +20,7 @@ AddTransferAction::validParams()
   return params;
 }
 
-AddTransferAction::AddTransferAction(InputParameters params) : MooseObjectAction(params) {}
+AddTransferAction::AddTransferAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddTransferAction::act()

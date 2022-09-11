@@ -20,7 +20,7 @@ AddDamperAction::validParams()
   return params;
 }
 
-AddDamperAction::AddDamperAction(InputParameters params) : MooseObjectAction(params) {}
+AddDamperAction::AddDamperAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddDamperAction::act()

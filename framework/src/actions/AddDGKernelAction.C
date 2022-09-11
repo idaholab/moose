@@ -21,7 +21,7 @@ AddDGKernelAction::validParams()
   return params;
 }
 
-AddDGKernelAction::AddDGKernelAction(InputParameters params) : MooseObjectAction(params) {}
+AddDGKernelAction::AddDGKernelAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddDGKernelAction::act()

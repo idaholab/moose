@@ -19,7 +19,7 @@ class CreateSpecialProblemAction : public Action
 public:
   static InputParameters validParams();
 
-  CreateSpecialProblemAction(InputParameters parameters);
+  CreateSpecialProblemAction(const InputParameters & parameters);
 
   virtual void act() override;
 };
