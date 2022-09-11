@@ -10,6 +10,8 @@
 // MOOSE includes
 #include "ActionFactory.h"
 #include "MooseApp.h"
+#include "InputParameterWarehouse.h"
+#include "MooseObjectAction.h"
 
 ActionFactory::ActionFactory(MooseApp & app) : _app(app) {}
 
@@ -40,15 +42,26 @@ ActionFactory::reg(const std::string & name,
 
 std::shared_ptr<Action>
 ActionFactory::create(const std::string & action,
-                      const std::string & action_name,
+                      const std::string & full_action_name,
                       InputParameters & parameters)
 {
+  std::string action_name = MooseUtils::shortName(full_action_name);
   parameters.addPrivateParam("_moose_app", &_app);
   parameters.addPrivateParam("action_type", action);
   std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
 
+  if (!(parameters.have_parameter<bool>("isObjectAction") &&
+        parameters.get<bool>("isObjectAction")))
+    parameters.set<std::vector<std::string>>("control_tags")
+        .push_back(MooseUtils::baseName(full_action_name));
+
+  std::string unique_action_name = action + parameters.get<std::string>("task") + full_action_name;
+  // Create the actual parameters object that the object will reference
+  InputParameters & params =
+      _app.getInputParameterWarehouse().addInputParameters(unique_action_name, parameters);
+
   // Check to make sure that all required parameters are supplied
-  parameters.checkParams(action_name);
+  params.checkParams(action_name);
 
   iters = _name_to_build_info.equal_range(action);
   BuildInfo * build_info = &(iters.first->second);
@@ -58,8 +71,9 @@ ActionFactory::create(const std::string & action,
         action_name);
 
   // Add the name to the parameters and create the object
-  parameters.set<std::string>("_action_name") = action_name;
-  std::shared_ptr<Action> action_obj = (*build_info->_build_pointer)(parameters);
+  params.set<std::string>("_action_name") = action_name;
+  params.set<std::string>("_unique_action_name") = unique_action_name;
+  std::shared_ptr<Action> action_obj = (*build_info->_build_pointer)(params);
 
   if (parameters.get<std::string>("task") == "")
     action_obj->appendTask(build_info->_task);

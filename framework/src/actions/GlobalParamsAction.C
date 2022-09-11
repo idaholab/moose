@@ -40,3 +40,10 @@ GlobalParamsAction::remove(const std::string & name)
 {
   parameters().remove(name);
 }
+
+InputParameters &
+GlobalParamsAction::parameters()
+{
+  const auto & params = _app.getInputParameterWarehouse().getInputParameters();
+  return *(params.find(uniqueActionName())->second.get());
+}

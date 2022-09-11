@@ -15,6 +15,7 @@
 #include "ControllableItem.h"
 #include "ControllableParameter.h"
 #include "Factory.h"
+#include "ActionFactory.h"
 #include "ControlOutput.h"
 
 // Forward declarations
@@ -176,6 +177,8 @@ private:
   /// The factory is allowed to call addInputParameters and removeInputParameters.
   friend MooseObjectPtr Factory::create(
       const std::string &, const std::string &, const InputParameters &, THREAD_ID, bool);
+  friend std::shared_ptr<Action>
+  ActionFactory::create(const std::string &, const std::string &, InputParameters &);
   friend void Factory::releaseSharedObjects(const MooseObject &, THREAD_ID);
   ///@}
 

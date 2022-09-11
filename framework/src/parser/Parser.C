@@ -486,7 +486,7 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
 
     // Create the Action
     std::shared_ptr<Action> action_obj =
-        _action_factory.create(it->second._action, MooseUtils::shortName(curr_identifier), params);
+        _action_factory.create(it->second._action, curr_identifier, params);
 
     {
       // extract the MooseObject params if necessary

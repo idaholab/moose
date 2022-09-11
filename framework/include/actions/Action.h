@@ -15,6 +15,7 @@
 #include "Registry.h"
 #include "PerfGraphInterface.h"
 #include "DataFileInterface.h"
+#include "MooseObjectParameterName.h"
 
 #include "libmesh/parallel_object.h"
 
@@ -111,9 +112,16 @@ public:
   std::string getShortName() const;
   ///@}
 
+  /**
+   * The unique name for accessing input parameters of this action in the InputParameterWarehouse
+   */
+  MooseObjectName uniqueActionName() const
+  {
+    return MooseObjectName(_pars.get<std::string>("_unique_name"));
+  }
+
   const std::string & type() const { return _action_type; }
 
-  InputParameters & parameters() { return _pars; }
   const InputParameters & parameters() const { return _pars; }
 
   const std::string & specificTaskName() const { return _specific_task_name; }
@@ -206,6 +214,29 @@ protected:
    * Method to add objects to the simulation or perform other setup tasks.
    */
   virtual void act() = 0;
+
+  /**
+   * Connect controllable parameter of this action with the controllable parameters of the
+   * objects added by this action.
+   * @param parameter Name of the controllable parameter of this action
+   * @param object_type Type of the object added by this action. Acceptable types include
+   *                    LineSearch, MooseMesh, AuxScalarKernel, AuxKernel, VectorAuxKernel,
+   *                    ArrayAuxKernel, ScalarKernel, Kernel, VectorKernel, ArrayKernel,
+   *                    EigenKernel, Executioner, FVKernel, MaterialBase, BoundaryCondition,
+   *                    MeshGenerator, Constraint, Marker, VectorPostprocessor, MoosePartitioner,
+   *                    Indicator, Postprocessor, Predictor, Problem, Transfer, DiracKernel,
+   *                    Damper, DGKernel, MultiApp, InterfaceKernel, VectorInterfaceKernel,
+   *                    UserObject, Executor, MoosePreconditioner, MooseVariableBase, Sampler,
+   *                    TimeStepper, Function, FVBoundaryCondition, Reporter, Output,
+   *                    FVInterfaceKernel, InitialCondition, ScalarInitialCondition, Distribution,
+   *                    TimeIntegrator, NodalKernel, Split, RelationshipManager.
+   * @param object_name Name of the object added by this action.
+   * @param object_parameter Name of the parameter of the object.
+   */
+  virtual void connectControllableParams(const std::string & parameter,
+                                         const std::string & object_type,
+                                         const std::string & object_name,
+                                         const std::string & object_parameter) const;
 
   /// Input parameters for the action
   const InputParameters & _pars;

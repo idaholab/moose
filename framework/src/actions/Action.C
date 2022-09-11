@@ -16,6 +16,7 @@
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "RelationshipManager.h"
+#include "InputParameterWarehouse.h"
 
 InputParameters
 Action::validParams()
@@ -43,6 +44,10 @@ Action::validParams()
   params.addPrivateParam<std::string>("action_type");
   params.addPrivateParam<ActionWarehouse *>("awh", nullptr);
 
+  params.addParam<std::vector<std::string>>(
+      "control_tags",
+      "Adds user-defined labels for accessing object parameters via control logic.");
+  params.registerBase("Action");
   return params;
 }
 
@@ -172,4 +177,27 @@ Action::getBaseName() const
 {
   mooseDeprecated("getBaseName() is deprecated.");
   return MooseUtils::baseName(_name);
+}
+
+void
+Action::connectControllableParams(const std::string & parameter,
+                                  const std::string & object_type,
+                                  const std::string & object_name,
+                                  const std::string & object_parameter) const
+{
+  MooseObjectParameterName primary_name(uniqueActionName(), parameter);
+  MooseObjectParameterName secondary_name(object_type, object_name, object_parameter);
+  _app.getInputParameterWarehouse().addControllableParameterConnection(primary_name,
+                                                                       secondary_name);
+
+  const std::vector<std::string> & tags = _pars.get<std::vector<std::string>>("control_tags");
+  for (const auto & tag : tags)
+  {
+    if (!tag.empty())
+    {
+      MooseObjectParameterName tagged_name(tag, _name, parameter);
+      _app.getInputParameterWarehouse().addControllableParameterConnection(tagged_name,
+                                                                           secondary_name);
+    }
+  }
 }
