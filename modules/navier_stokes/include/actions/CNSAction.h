@@ -30,7 +30,7 @@ class CNSAction : public Action
 public:
   static InputParameters validParams();
 
-  CNSAction(InputParameters parameters);
+  CNSAction(const InputParameters & parameters);
 
   virtual void act() override;
 

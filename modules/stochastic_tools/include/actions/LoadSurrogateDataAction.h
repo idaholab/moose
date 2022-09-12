@@ -16,7 +16,7 @@ class LoadSurrogateDataAction : public Action
 {
 public:
   static InputParameters validParams();
-  LoadSurrogateDataAction(InputParameters params);
+  LoadSurrogateDataAction(const InputParameters & params);
   virtual void act() override;
 
 private:

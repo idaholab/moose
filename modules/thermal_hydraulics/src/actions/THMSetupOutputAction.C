@@ -29,7 +29,7 @@ THMSetupOutputAction::validParams()
   return params;
 }
 
-THMSetupOutputAction::THMSetupOutputAction(InputParameters params) : Action(params) {}
+THMSetupOutputAction::THMSetupOutputAction(const InputParameters & params) : Action(params) {}
 
 void
 THMSetupOutputAction::act()

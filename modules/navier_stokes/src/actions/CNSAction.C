@@ -92,7 +92,7 @@ CNSAction::validParams()
   return params;
 }
 
-CNSAction::CNSAction(InputParameters parameters)
+CNSAction::CNSAction(const InputParameters & parameters)
   : Action(parameters),
     _type(getParam<MooseEnum>("equation_type")),
     _fp_name(getParam<UserObjectName>("fluid_properties")),

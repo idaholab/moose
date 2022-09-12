@@ -79,7 +79,7 @@ XFEMAction::validParams()
   return params;
 }
 
-XFEMAction::XFEMAction(InputParameters params)
+XFEMAction::XFEMAction(const InputParameters & params)
   : Action(params),
     _geom_cut_userobjects(getParam<std::vector<UserObjectName>>("geometric_cut_userobjects")),
     _xfem_qrule(getParam<std::string>("qrule")),

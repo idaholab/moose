@@ -131,7 +131,10 @@ AddGeochemistrySolverAction::validParams()
   return params;
 }
 
-AddGeochemistrySolverAction::AddGeochemistrySolverAction(InputParameters params) : Action(params) {}
+AddGeochemistrySolverAction::AddGeochemistrySolverAction(const InputParameters & params)
+  : Action(params)
+{
+}
 
 void
 AddGeochemistrySolverAction::act()

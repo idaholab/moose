@@ -19,7 +19,7 @@ class AddFluidPropertiesInterrogatorAction : public Action
 public:
   static InputParameters validParams();
 
-  AddFluidPropertiesInterrogatorAction(InputParameters parameters);
+  AddFluidPropertiesInterrogatorAction(const InputParameters & parameters);
 
   virtual void act() override;
 

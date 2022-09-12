@@ -32,7 +32,7 @@ class NSFVAction : public Action
 public:
   static InputParameters validParams();
 
-  NSFVAction(InputParameters parameters);
+  NSFVAction(const InputParameters & parameters);
 
   virtual void act() override;
 

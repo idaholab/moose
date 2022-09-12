@@ -17,7 +17,7 @@
 class ClosureTestAction : public TestAction
 {
 public:
-  ClosureTestAction(InputParameters params);
+  ClosureTestAction(const InputParameters & params);
 
 protected:
   virtual void addInitialConditions() override;

@@ -16,5 +16,5 @@ class AddSolidPropertiesAction : public AddUserObjectAction
 public:
   static InputParameters validParams();
 
-  AddSolidPropertiesAction(InputParameters params);
+  AddSolidPropertiesAction(const InputParameters & params);
 };

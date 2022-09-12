@@ -18,7 +18,7 @@
 class ClosureTest1PhaseAction : public ClosureTestAction, public FlowModelSetup1Phase
 {
 public:
-  ClosureTest1PhaseAction(InputParameters params);
+  ClosureTest1PhaseAction(const InputParameters & params);
 
 protected:
   virtual void addInitialConditions() override;

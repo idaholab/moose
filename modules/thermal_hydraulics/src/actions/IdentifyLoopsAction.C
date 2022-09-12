@@ -20,7 +20,7 @@ IdentifyLoopsAction::validParams()
   return params;
 }
 
-IdentifyLoopsAction::IdentifyLoopsAction(InputParameters parameters) : Action(parameters) {}
+IdentifyLoopsAction::IdentifyLoopsAction(const InputParameters & parameters) : Action(parameters) {}
 
 void
 IdentifyLoopsAction::act()

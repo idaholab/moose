@@ -27,7 +27,7 @@ THMCreateMeshAction::validParams()
   return params;
 }
 
-THMCreateMeshAction::THMCreateMeshAction(InputParameters params) : Action(params) {}
+THMCreateMeshAction::THMCreateMeshAction(const InputParameters & params) : Action(params) {}
 
 void
 THMCreateMeshAction::act()

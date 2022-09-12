@@ -21,7 +21,7 @@ AddComponentAction::validParams()
   return params;
 }
 
-AddComponentAction::AddComponentAction(InputParameters params)
+AddComponentAction::AddComponentAction(const InputParameters & params)
   : MooseObjectAction(params), _group(_type == "ComponentGroup")
 {
 }

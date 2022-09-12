@@ -17,7 +17,7 @@ AddSolidPropertiesAction::validParams()
   return AddUserObjectAction::validParams();
 }
 
-AddSolidPropertiesAction::AddSolidPropertiesAction(InputParameters params)
+AddSolidPropertiesAction::AddSolidPropertiesAction(const InputParameters & params)
   : AddUserObjectAction(params)
 {
 }

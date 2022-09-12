@@ -17,7 +17,7 @@
 class JacobianTestAction : public TestAction
 {
 public:
-  JacobianTestAction(InputParameters params);
+  JacobianTestAction(const InputParameters & params);
 
 protected:
   virtual void addPreconditioner() override;

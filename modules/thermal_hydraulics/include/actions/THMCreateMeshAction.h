@@ -14,7 +14,7 @@
 class THMCreateMeshAction : public Action
 {
 public:
-  THMCreateMeshAction(InputParameters params);
+  THMCreateMeshAction(const InputParameters & params);
 
   virtual void act();
 

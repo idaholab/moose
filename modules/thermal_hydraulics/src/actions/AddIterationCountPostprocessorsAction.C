@@ -25,7 +25,7 @@ AddIterationCountPostprocessorsAction::validParams()
 }
 
 AddIterationCountPostprocessorsAction::AddIterationCountPostprocessorsAction(
-    InputParameters parameters)
+    const InputParameters & parameters)
   : Action(parameters), _add_pps(getParam<bool>("count_iterations"))
 {
 }

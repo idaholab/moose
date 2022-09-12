@@ -19,7 +19,7 @@ THMBuildMeshAction::validParams()
   return params;
 }
 
-THMBuildMeshAction::THMBuildMeshAction(InputParameters params) : Action(params) {}
+THMBuildMeshAction::THMBuildMeshAction(const InputParameters & params) : Action(params) {}
 
 void
 THMBuildMeshAction::act()

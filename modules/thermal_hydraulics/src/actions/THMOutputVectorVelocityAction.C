@@ -23,7 +23,7 @@ THMOutputVectorVelocityAction::validParams()
   return params;
 }
 
-THMOutputVectorVelocityAction::THMOutputVectorVelocityAction(InputParameters params)
+THMOutputVectorVelocityAction::THMOutputVectorVelocityAction(const InputParameters & params)
   : Action(params)
 {
 }

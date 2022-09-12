@@ -24,7 +24,7 @@ CavityPressurePPAction::validParams()
   return params;
 }
 
-CavityPressurePPAction::CavityPressurePPAction(InputParameters params) : Action(params) {}
+CavityPressurePPAction::CavityPressurePPAction(const InputParameters & params) : Action(params) {}
 
 void
 CavityPressurePPAction::act()

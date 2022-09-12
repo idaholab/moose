@@ -18,7 +18,7 @@
 class JacobianTest1PhaseAction : public JacobianTestAction, public FlowModelSetup1Phase
 {
 public:
-  JacobianTest1PhaseAction(InputParameters params);
+  JacobianTest1PhaseAction(const InputParameters & params);
 
 protected:
   virtual void addInitialConditions() override;

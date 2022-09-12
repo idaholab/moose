@@ -21,7 +21,7 @@ THMDebugAction::validParams()
   return params;
 }
 
-THMDebugAction::THMDebugAction(InputParameters params) : Action(params) {}
+THMDebugAction::THMDebugAction(const InputParameters & params) : Action(params) {}
 
 void
 THMDebugAction::act()

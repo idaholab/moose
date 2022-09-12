@@ -23,7 +23,7 @@ PostprocessorAsControlAction::validParams()
   return params;
 }
 
-PostprocessorAsControlAction::PostprocessorAsControlAction(InputParameters params)
+PostprocessorAsControlAction::PostprocessorAsControlAction(const InputParameters & params)
   : MooseObjectAction(params)
 {
 }

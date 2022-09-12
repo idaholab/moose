@@ -17,7 +17,7 @@
 class THMOutputVectorVelocityAction : public Action
 {
 public:
-  THMOutputVectorVelocityAction(InputParameters params);
+  THMOutputVectorVelocityAction(const InputParameters & params);
 
   virtual void act();
 

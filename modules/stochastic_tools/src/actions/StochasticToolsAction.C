@@ -38,7 +38,7 @@ StochasticToolsAction::validParams()
   return params;
 }
 
-StochasticToolsAction::StochasticToolsAction(InputParameters params) : Action(params) {}
+StochasticToolsAction::StochasticToolsAction(const InputParameters & params) : Action(params) {}
 
 void
 StochasticToolsAction::act()

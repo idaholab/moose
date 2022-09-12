@@ -19,7 +19,7 @@ class AddGeochemistrySolverAction : public Action
 public:
   static InputParameters validParams();
 
-  AddGeochemistrySolverAction(InputParameters parameters);
+  AddGeochemistrySolverAction(const InputParameters & parameters);
 
   virtual void act() override;
 

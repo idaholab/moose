@@ -29,7 +29,7 @@ JacobianTestGeneralAction::validParams()
   return params;
 }
 
-JacobianTestGeneralAction::JacobianTestGeneralAction(InputParameters params)
+JacobianTestGeneralAction::JacobianTestGeneralAction(const InputParameters & params)
   : JacobianTestAction(params),
     _variables(getParam<std::vector<VariableName>>("variable_names")),
     _variable_values(getParam<std::vector<FunctionName>>("variable_values"))

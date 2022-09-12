@@ -23,7 +23,8 @@ THMPrintComponentLoopsAction::validParams()
   return params;
 }
 
-THMPrintComponentLoopsAction::THMPrintComponentLoopsAction(InputParameters params) : Action(params)
+THMPrintComponentLoopsAction::THMPrintComponentLoopsAction(const InputParameters & params)
+  : Action(params)
 {
 }
 

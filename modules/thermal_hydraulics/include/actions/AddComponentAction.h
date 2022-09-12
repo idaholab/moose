@@ -14,7 +14,7 @@
 class AddComponentAction : public MooseObjectAction
 {
 public:
-  AddComponentAction(InputParameters params);
+  AddComponentAction(const InputParameters & params);
 
   virtual void act() override;
 

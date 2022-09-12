@@ -21,7 +21,7 @@ public:
    * Class constructor
    * @param params Parameters for this Action
    */
-  THMAddControlAction(InputParameters parameters);
+  THMAddControlAction(const InputParameters & parameters);
 
   virtual void act() override;
 
