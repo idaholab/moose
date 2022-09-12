@@ -388,15 +388,15 @@ InputParameters::declareControllable(const std::string & input_names,
 }
 
 bool
-InputParameters::isControllable(const std::string & name)
+InputParameters::isControllable(const std::string & name) const
 {
-  return _params.count(name) > 0 && _params[name]._controllable;
+  return _params.count(name) > 0 && _params.at(name)._controllable;
 }
 
 const std::set<ExecFlagType> &
-InputParameters::getControllableExecuteOnTypes(const std::string & name)
+InputParameters::getControllableExecuteOnTypes(const std::string & name) const
 {
-  return _params[name]._controllable_flags;
+  return at(name)._controllable_flags;
 }
 
 void
