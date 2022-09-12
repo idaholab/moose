@@ -21,7 +21,7 @@ class SetupDarcySimulation : public Action
 public:
   static InputParameters validParams();
 
-  SetupDarcySimulation(InputParameters params);
+  SetupDarcySimulation(const InputParameters & params);
   virtual void act() override;
 
 protected:
