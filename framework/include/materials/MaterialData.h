@@ -401,7 +401,7 @@ MaterialData::getProperty(const std::string & name)
     if (ad_prop)
       mooseError("The requested regular material property " + name +
                  " is declared as an AD property. Either retrieve it as an AD property with "
-                 "getADMaterialProperty or declare it as a regular property wtih declareProperty");
+                 "getADMaterialProperty or declare it as a regular property with declareProperty");
     else
       mooseError("Material has no property named: " + name);
   }

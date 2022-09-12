@@ -102,5 +102,9 @@ TEST_F(IdealRealGasMixtureFluidPropertiesTest, test)
   REL_TEST(e_mix, 1380586.9, 0.023648);
   REL_TEST(c_mix, 428.1928, 0.017535);
   REL_TEST(cp_mix, 1479.7114, 0.146444);
+  VAPOR_MIX_DERIV_TEST(_fp_mix->cp_from_p_T, p, T, x, REL_TOL_DERIVATIVE);
   REL_TEST(cv_mix, 1090.5912, 0.183001);
+  VAPOR_MIX_DERIV_TEST(_fp_mix->cv_from_p_T, p, T, x, REL_TOL_DERIVATIVE);
+  VAPOR_MIX_DERIV_TEST(_fp_mix->mu_from_p_T, p, T, x, REL_TOL_DERIVATIVE);
+  VAPOR_MIX_DERIV_TEST(_fp_mix->k_from_p_T, p, T, x, REL_TOL_DERIVATIVE);
 }
