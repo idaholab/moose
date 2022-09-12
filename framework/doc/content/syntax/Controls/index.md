@@ -3,7 +3,7 @@
 The control system in MOOSE has one primary purpose: +to modify input parameters during runtime
 of a MOOSE-based simulation+.
 
-## Creating a Controllable Parameter
+## Creating a Controllable Parameter id=sec:control-param
 
 The input parameters of objects you which to be controlled must:
 
@@ -90,6 +90,26 @@ as above but the parameter name is not included.
 In both cases there is an alternative form for defining an object and parameter names:
 `base::object/name`. In this case "base" is the MOOSE base system that the object is derived from.
 For example, `Kernel::diff/coef`.
+
+## Controllable Parameters Added by Actions
+
+MOOSE also allows parameters in [Action](Action.md) to be controllable.
+The procedure for making a parameter in an [Action](Action.md) controllable is the same as documented in [Creating a Controllable Parameter](syntax/Controls/index.md#sec:control-param).
+It is important that this controllable parameter must be directly connected with the parameters of MOOSE objects, such as kernels, materials, etc., using this parameter.
+
+!listing test/src/actions/AddLotsOfDiffusion.C
+         start=GenericConstantArray
+         end=connectControllableParams
+         id=connect_controllable
+         caption=Example of connecting controllable parameters in an action and the objects added by the action.
+
+The action controllable parameter can be referred as usual in an input file. For example,
+
+!listing test/tests/controls/action_control/action_control_test.i
+         block=Controls
+         id=controls_example3
+         caption=Example of a "Action" block that contains a parameter that is controlled via a
+                 MOOSE Control object.
 
 ## Child Objects
 
