@@ -23,8 +23,8 @@ public:
 
 protected:
   virtual Real computeQpValue() override;
-  virtual Real computeQpJacobian(unsigned int jvar);
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpJacobian(unsigned int jvar) override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// Variable providing the value u on the boundary.
   const VariableValue & _coupled_var;
