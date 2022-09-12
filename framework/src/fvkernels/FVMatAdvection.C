@@ -66,11 +66,12 @@ FVMatAdvection::computeQpResidual()
   interpolate(InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);
 
   const auto adv_quant_interface =
-      interpolate(_adv_quant,
-                  makeFace(*_face_info,
-                           limiterType(_advected_interp_method),
-                           MetaPhysicL::raw_value(v) * _normal > 0,
-                           faceArgSubdomains(),
-                           _advected_interp_method == InterpMethod::SkewCorrectedAverage));
+      _adv_quant(makeFace(*_face_info,
+                          limiterType(_advected_interp_method),
+                          MetaPhysicL::raw_value(v) * _normal > 0,
+                          faceArgSubdomains(),
+                          _advected_interp_method == InterpMethod::SkewCorrectedAverage));
+  _console << "Normal: " << _normal << " Contribution: " << _normal * v * adv_quant_interface
+           << std::endl;
   return _normal * v * adv_quant_interface;
 }

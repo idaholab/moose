@@ -103,3 +103,46 @@ FaceInfo::skewnessCorrectionVector() const
 
   return _face_centroid - r_intersection;
 }
+
+bool
+FaceInfo::varDefinedOnElem(const std::string & var_name) const
+{
+  auto it = _face_types_by_var.find(var_name);
+  if (it == _face_types_by_var.end())
+    mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
+
+  const VarFaceNeighbors & ft = faceType(var_name);
+  return (ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM);
+}
+
+bool
+FaceInfo::varDefinedOnNeighbor(const std::string & var_name) const
+{
+  auto it = _face_types_by_var.find(var_name);
+  if (it == _face_types_by_var.end())
+    mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
+
+  const VarFaceNeighbors & ft = faceType(var_name);
+  return (ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM);
+}
+
+Real
+FaceInfo::cellCenterToFaceDistance(bool elem_side) const
+{
+  mooseAssert(!elem_side && _neigbor_info,
+              "The neighbor info does not exist so the distance to the face cannot be returned "
+              "from the neighbor side!");
+  return cellCenterToFaceVector(elem_side).norm();
+}
+
+const Point
+FaceInfo::cellCenterToFaceVector(bool elem_side) const
+{
+  mooseAssert(!elem_side && _neigbor_info,
+              "The neighbor info does not exist so the vector to the face cannot be returned "
+              "from the neighbor side!");
+  if (elem_side)
+    return _face_centroid - _elem_info->centroid();
+  else
+    return _face_centroid - _neighbor_info->centroid();
+}

@@ -180,6 +180,14 @@ public:
    */
   void computeCoefficients();
 
+  bool varDefinedOnElem(const std::string & var_name) const;
+
+  bool varDefinedOnNeighbor(const std::string & var_name) const;
+
+  Real cellCenterToFaceDistance(bool elem_side = true) const;
+
+  const Point cellCenterToFaceVector(bool elem_side = true) const;
+
 private:
   /// the elem and neighbor elems
   const ElemInfo * const _elem_info;

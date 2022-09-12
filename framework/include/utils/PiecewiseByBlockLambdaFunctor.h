@@ -261,6 +261,14 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face,
 {
   using namespace Moose::FV;
   mooseAssert(state == 0, "Only current time state supported.");
+
+  if (face.fi->boundaryIDs().size())
+  {
+    Moose::SingleSidedFaceArg ssfa = {
+        face.fi, face.limiter_type, face.elem_is_upwind, face.correct_skewness, face.elem_sub_id};
+    return this->evaluate(ssfa, 0);
+  }
+
   return interpolate(*this, face);
 }
 
