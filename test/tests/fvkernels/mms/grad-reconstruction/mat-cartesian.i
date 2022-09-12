@@ -16,9 +16,7 @@ diff=1.1
 
 [Variables]
   [v]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 1
   []
 []
