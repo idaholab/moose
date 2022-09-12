@@ -129,20 +129,19 @@ FaceInfo::varDefinedOnNeighbor(const std::string & var_name) const
 Real
 FaceInfo::cellCenterToFaceDistance(bool elem_side) const
 {
-  mooseAssert(!elem_side && _neigbor_info,
-              "The neighbor info does not exist so the distance to the face cannot be returned "
-              "from the neighbor side!");
   return cellCenterToFaceVector(elem_side).norm();
 }
 
 const Point
 FaceInfo::cellCenterToFaceVector(bool elem_side) const
 {
-  mooseAssert(!elem_side && _neigbor_info,
-              "The neighbor info does not exist so the vector to the face cannot be returned "
-              "from the neighbor side!");
   if (elem_side)
     return _face_centroid - _elem_info->centroid();
   else
+  {
+    mooseAssert(!_neighbor_info,
+                "The neighbor info does not exist so the vector to the face cannot be returned "
+                "from the neighbor side!");
     return _face_centroid - _neighbor_info->centroid();
+  }
 }

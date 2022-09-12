@@ -824,6 +824,8 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
 
     return getExtrapolatedBoundaryFaceValue(*fi, linear_extrapolation);
   }
+  else if (isInternalFace(*fi))
+    return getInternalFaceValue(face);
   else
   {
     mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
