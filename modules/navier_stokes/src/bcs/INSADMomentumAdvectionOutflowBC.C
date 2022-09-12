@@ -7,30 +7,32 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSADMomentumAdvection.h"
+#include "INSADMomentumAdvectionOutflowBC.h"
+#include "MooseMesh.h"
+#include "INSADObjectTracker.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", INSADMomentumAdvection);
+registerMooseObject("NavierStokesApp", INSADMomentumAdvectionOutflowBC);
 
 InputParameters
-INSADMomentumAdvection::validParams()
+INSADMomentumAdvectionOutflowBC::validParams()
 {
-  InputParameters params = ADVectorKernelGrad::validParams();
-  params.addClassDescription("Adds the advective term to the INS momentum equation");
+  InputParameters params = ADVectorIntegratedBC::validParams();
   params.addParam<MaterialPropertyName>(NS::density, NS::density, "The density");
   params.addCoupledVar(NS::porosity, 1, "The porosity");
   return params;
 }
 
-INSADMomentumAdvection::INSADMomentumAdvection(const InputParameters & parameters)
-  : ADVectorKernelGrad(parameters),
+INSADMomentumAdvectionOutflowBC::INSADMomentumAdvectionOutflowBC(const InputParameters & parameters)
+  : ADVectorIntegratedBC(parameters),
     _rho(getADMaterialProperty<Real>(NS::density)),
     _eps(coupledValue(NS::porosity))
 {
 }
 
-ADRealTensorValue
-INSADMomentumAdvection::precomputeQpResidual()
+ADReal
+INSADMomentumAdvectionOutflowBC::computeQpResidual()
 {
-  return -_rho[_qp] / _eps[_qp] * libMesh::outer_product(_u[_qp], _u[_qp]);
+  return _test[_i][_qp] * (_rho[_qp] / _eps[_qp]) *
+         (libMesh::outer_product(_u[_qp], _u[_qp]) * _normals[_qp]);
 }

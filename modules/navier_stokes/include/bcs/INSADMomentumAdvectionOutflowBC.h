@@ -9,22 +9,24 @@
 
 #pragma once
 
-#include "ADKernelGrad.h"
+#include "ADVectorIntegratedBC.h"
+#include "MooseEnum.h"
+
+// Forward Declarations
 
 /**
- * This class computes the momentum equation residual and Jacobian
- * contributions for the advective term of the incompressible Navier-Stokes momentum
- * equation.
+ * This class implements the "No BC" boundary condition based on the
+ * "Laplace" form of the viscous stress tensor.
  */
-class INSADMomentumAdvection : public ADVectorKernelGrad
+class INSADMomentumAdvectionOutflowBC : public ADVectorIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  INSADMomentumAdvection(const InputParameters & parameters);
+  INSADMomentumAdvectionOutflowBC(const InputParameters & parameters);
 
 protected:
-  virtual ADRealTensorValue precomputeQpResidual() override;
+  ADReal computeQpResidual() override;
   const ADMaterialProperty<Real> & _rho;
   const VariableValue & _eps;
 };
