@@ -11,6 +11,7 @@
 #include "Assembly.h"
 #include "SystemBase.h"
 #include "INSADObjectTracker.h"
+#include "NS.h"
 
 #include "metaphysicl/raw_type.h"
 
@@ -25,6 +26,7 @@ INSADMomentumViscous::validParams()
   params.addClassDescription("Adds the viscous term to the INS momentum equation");
   params.addParam<MaterialPropertyName>(
       "mu_name", "mu", "The name of the viscosity material property");
+  params.addCoupledVar(NS::porosity, 1, "The name of the porosity material property");
   MooseEnum viscous_form("traction laplace", "laplace");
   params.addParam<MooseEnum>("viscous_form",
                              viscous_form,
@@ -35,6 +37,8 @@ INSADMomentumViscous::validParams()
 INSADMomentumViscous::INSADMomentumViscous(const InputParameters & parameters)
   : ADVectorKernel(parameters),
     _mu(getADMaterialProperty<Real>("mu_name")),
+    _eps(coupledValue(NS::porosity)),
+    _grad_eps(isCoupled(NS::porosity) ? coupledGradient(NS::porosity) : _grad_zero),
     _coord_sys(_assembly.coordSystem()),
     _form(getParam<MooseEnum>("viscous_form"))
 {
@@ -48,16 +52,17 @@ ADRealTensorValue
 INSADMomentumViscous::qpViscousTerm()
 {
   if (_form == "laplace")
-    return _mu[_qp] * _grad_u[_qp];
+    return _mu[_qp] / _eps[_qp] *
+           (_grad_u[_qp] - libMesh::outer_product(_u[_qp] / _eps[_qp], _grad_eps[_qp]));
   else
-    return _mu[_qp] * (_grad_u[_qp] + _grad_u[_qp].transpose());
+    return _mu[_qp] / _eps[_qp] * (_grad_u[_qp] + _grad_u[_qp].transpose());
 }
 
 ADRealVectorValue
 INSADMomentumViscous::qpAdditionalRZTerm()
 {
   // Add the u_r / r^2 term. There is an extra factor of 2 for the traction form
-  ADReal resid = _mu[_qp] * _u[_qp](0);
+  ADReal resid = _mu[_qp] / _eps[_qp] * _u[_qp](0);
   if (_form == "traction")
     resid *= 2.;
 
@@ -96,11 +101,8 @@ INSADMomentumViscous::computeResidual()
   accumulateTaggedLocalResidual();
 
   if (_has_save_in)
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (unsigned int i = 0; i < _save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
-  }
 }
 
 void

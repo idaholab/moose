@@ -51,6 +51,7 @@ protected:
   using T::_current_elem;
   using T::_displacements;
   using T::_dt;
+  using T::_eps;
   using T::_fe_problem;
   using T::_grad_p;
   using T::_gravity_strong_residual;
@@ -138,13 +139,13 @@ INSADTauMaterialTempl<T>::computeQpProperties()
 {
   T::computeQpProperties();
 
-  const auto nu = _mu[_qp] / _rho[_qp];
+  const auto nu = _mu[_qp] / _eps[_qp] / _rho[_qp];
   const auto transient_part = _has_transient ? 4. / (_dt * _dt) : 0.;
   const auto speed = NS::computeSpeed(_velocity[_qp]);
   _tau[_qp] = _alpha / std::sqrt(transient_part + (2. * speed / _hmax) * (2. * speed / _hmax) +
                                  9. * (4. * nu / (_hmax * _hmax)) * (4. * nu / (_hmax * _hmax)));
 
-  _momentum_strong_residual[_qp] = _advective_strong_residual[_qp] + _grad_p[_qp];
+  _momentum_strong_residual[_qp] = _advective_strong_residual[_qp] + _eps[_qp] * _grad_p[_qp];
 
   // Since we can't current compute vector Laplacians we only have strong residual contributions
   // from the viscous term in the RZ coordinate system

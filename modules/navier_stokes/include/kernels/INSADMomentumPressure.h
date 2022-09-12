@@ -26,9 +26,18 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
+  /// Whether to integrate the pressure term by parts
   const bool _integrate_p_by_parts;
+
+  /// The pressure
   const ADVariableValue & _p;
+
+  /// The gradient of the pressure
   const ADVariableGradient & _grad_p;
 
+  /// The coordinate system type, e.g. XYZ, RZ, RSPHERICAL
   const Moose::CoordinateSystemType & _coord_sys;
+
+  /// The porosity
+  const VariableValue & _eps;
 };

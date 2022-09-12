@@ -24,6 +24,7 @@ INSADMomentumPressure::validParams()
   params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   params.addParam<bool>(
       "integrate_p_by_parts", true, "Whether to integrate the pressure term by parts");
+  params.addCoupledVar(NS::porosity, 1, "The porosity");
   return params;
 }
 
@@ -32,7 +33,8 @@ INSADMomentumPressure::INSADMomentumPressure(const InputParameters & parameters)
     _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
     _p(adCoupledValue(NS::pressure)),
     _grad_p(adCoupledGradient(NS::pressure)),
-    _coord_sys(_assembly.coordSystem())
+    _coord_sys(_assembly.coordSystem()),
+    _eps(coupledValue(NS::porosity))
 {
   // Bypass the UserObjectInterface method because it requires a UserObjectName param which we
   // don't need
@@ -47,12 +49,13 @@ INSADMomentumPressure::computeQpResidual()
 {
   if (_integrate_p_by_parts)
   {
-    ADReal residual = -_p[_qp] * _grad_test[_i][_qp].tr();
+    ADReal residual = -_eps[_qp] * _p[_qp] * _grad_test[_i][_qp].tr();
     if (_coord_sys == Moose::COORD_RZ)
       // The additional term only comes into the r-component of the momentum equation
-      residual += ADRealVectorValue(-_p[_qp] / _ad_q_point[_qp](0), 0, 0) * _test[_i][_qp];
+      residual +=
+          ADRealVectorValue(-_eps[_qp] * _p[_qp] / _ad_q_point[_qp](0), 0, 0) * _test[_i][_qp];
     return residual;
   }
   else
-    return _test[_i][_qp] * _grad_p[_qp];
+    return _test[_i][_qp] * _eps[_qp] * _grad_p[_qp];
 }

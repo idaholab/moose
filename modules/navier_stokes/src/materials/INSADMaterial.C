@@ -26,6 +26,7 @@ INSADMaterial::validParams()
   params.addRequiredCoupledVar(NS::pressure, "The pressure");
   params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
+  params.addCoupledVar(NS::porosity, 1, "The name of the porosity");
   return params;
 }
 
@@ -36,6 +37,8 @@ INSADMaterial::INSADMaterial(const InputParameters & parameters)
     _grad_p(adCoupledGradient(NS::pressure)),
     _mu(getADMaterialProperty<Real>("mu_name")),
     _rho(getADMaterialProperty<Real>("rho_name")),
+    _eps(coupledValue(NS::porosity)),
+    _grad_eps(isCoupled(NS::porosity) ? coupledGradient(NS::porosity) : _grad_zero),
     _velocity_dot(nullptr),
     _mass_strong_residual(declareADProperty<Real>("mass_strong_residual")),
     _advective_strong_residual(declareADProperty<RealVectorValue>("advective_strong_residual")),
@@ -143,14 +146,16 @@ INSADMaterial::computeQpProperties()
         _velocity[_qp](_rz_radial_coord) / (_use_displaced_mesh ? _ad_q_point[_qp](_rz_radial_coord)
                                                                 : _q_point[_qp](_rz_radial_coord));
 
-  _advective_strong_residual[_qp] = _rho[_qp] * _grad_velocity[_qp] * _velocity[_qp];
+  _advective_strong_residual[_qp] =
+      _rho[_qp] * _velocity[_qp] / _eps[_qp] *
+      (_grad_velocity[_qp] - libMesh::outer_product(_velocity[_qp] / _eps[_qp], _grad_eps[_qp]));
   if (_has_transient)
     _td_strong_residual[_qp] = _rho[_qp] * (*_velocity_dot)[_qp];
   if (_has_gravity)
-    _gravity_strong_residual[_qp] = -_rho[_qp] * _gravity_vector;
+    _gravity_strong_residual[_qp] = -_rho[_qp] * _eps[_qp] * _gravity_vector;
   if (_has_boussinesq)
     _boussinesq_strong_residual[_qp] = (*_boussinesq_alpha)[_qp] * _gravity_vector * _rho[_qp] *
-                                       ((*_temperature)[_qp] - (*_ref_temp)[_qp]);
+                                       _eps[_qp] * ((*_temperature)[_qp] - (*_ref_temp)[_qp]);
   if (_has_coupled_force)
   {
     _coupled_force_strong_residual[_qp] = 0;
@@ -205,20 +210,21 @@ INSADMaterial::viscousTermRZ()
       _viscous_strong_residual[_qp] = ADRealVectorValue(
           // u_r
           // Additional term from vector Laplacian
-          _mu[_qp] * (_velocity[_qp](_rz_radial_coord) / (r * r) -
-                      // Additional term from scalar Laplacian
-                      _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
+          _mu[_qp] / _eps[_qp] *
+              (_velocity[_qp](_rz_radial_coord) / (r * r) -
+               // Additional term from scalar Laplacian
+               _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
           // u_z
           // Additional term from scalar Laplacian
-          -_mu[_qp] * _grad_velocity[_qp](_rz_axial_coord, _rz_radial_coord) / r,
+          -_mu[_qp] / _eps[_qp] * _grad_velocity[_qp](_rz_axial_coord, _rz_radial_coord) / r,
           0);
     else
-      _viscous_strong_residual[_qp] =
-          ADRealVectorValue(2. * _mu[_qp] *
-                                (_velocity[_qp](_rz_radial_coord) / (r * r) -
-                                 _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
-                            -_mu[_qp] / r * (_grad_velocity[_qp](1, 0) + _grad_velocity[_qp](0, 1)),
-                            0);
+      _viscous_strong_residual[_qp] = ADRealVectorValue(
+          2. * _mu[_qp] / _eps[_qp] *
+              (_velocity[_qp](_rz_radial_coord) / (r * r) -
+               _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
+          -_mu[_qp] / _eps[_qp] / r * (_grad_velocity[_qp](1, 0) + _grad_velocity[_qp](0, 1)),
+          0);
   }
   else
   {
@@ -228,22 +234,23 @@ INSADMaterial::viscousTermRZ()
           // u_r
           // Additional term from vector Laplacian
           ADRealVectorValue(
-              _mu[_qp] * (_velocity[_qp](_rz_radial_coord) /
-                              (_q_point[_qp](_rz_radial_coord) * _q_point[_qp](_rz_radial_coord)) -
-                          // Additional term from scalar Laplacian
-                          _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) /
-                              _q_point[_qp](_rz_radial_coord)),
+              _mu[_qp] / _eps[_qp] *
+                  (_velocity[_qp](_rz_radial_coord) /
+                       (_q_point[_qp](_rz_radial_coord) * _q_point[_qp](_rz_radial_coord)) -
+                   // Additional term from scalar Laplacian
+                   _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) /
+                       _q_point[_qp](_rz_radial_coord)),
               // u_z
               // Additional term from scalar Laplacian
-              -_mu[_qp] * _grad_velocity[_qp](_rz_axial_coord, _rz_radial_coord) /
+              -_mu[_qp] / _eps[_qp] * _grad_velocity[_qp](_rz_axial_coord, _rz_radial_coord) /
                   _q_point[_qp](_rz_radial_coord),
               0);
     else
-      _viscous_strong_residual[_qp] =
-          ADRealVectorValue(2. * _mu[_qp] *
-                                (_velocity[_qp](_rz_radial_coord) / (r * r) -
-                                 _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
-                            -_mu[_qp] / r * (_grad_velocity[_qp](1, 0) + _grad_velocity[_qp](0, 1)),
-                            0);
+      _viscous_strong_residual[_qp] = ADRealVectorValue(
+          2. * _mu[_qp] / _eps[_qp] *
+              (_velocity[_qp](_rz_radial_coord) / (r * r) -
+               _grad_velocity[_qp](_rz_radial_coord, _rz_radial_coord) / r),
+          -_mu[_qp] / _eps[_qp] / r * (_grad_velocity[_qp](1, 0) + _grad_velocity[_qp](0, 1)),
+          0);
   }
 }

@@ -39,8 +39,16 @@ protected:
    */
   ADRealVectorValue qpAdditionalRZTerm();
 
+  /// The dynamic viscosity
   const ADMaterialProperty<Real> & _mu;
 
+  /// The porosity
+  const VariableValue & _eps;
+
+  /// The porosity gradient
+  const VariableGradient & _grad_eps;
+
+  /// The coordinate system type, e.g. XYZ, RZ, RSPHERICAL
   const Moose::CoordinateSystemType & _coord_sys;
 
   /// Either traction or laplace

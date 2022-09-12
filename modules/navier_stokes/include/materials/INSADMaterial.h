@@ -45,6 +45,12 @@ protected:
   /// density
   const ADMaterialProperty<Real> & _rho;
 
+  /// porosity
+  const VariableValue & _eps;
+
+  /// gradient of porosity
+  const VariableGradient & _grad_eps;
+
   /// Time derivative of the velocity, e.g. the acceleration
   const ADVectorVariableValue * _velocity_dot;
 
