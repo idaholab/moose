@@ -16,7 +16,7 @@
  * A base class for the various Material related AuxKernal objects.
  * \p RT is short for return type
  */
-template <typename T, bool is_ad = false, typename RT = Real>
+template <typename T, bool is_ad, typename RT = Real>
 class MaterialAuxBaseTempl : public AuxKernelTempl<RT>
 {
 public:

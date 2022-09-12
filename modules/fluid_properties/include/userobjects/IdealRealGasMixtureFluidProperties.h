@@ -12,6 +12,9 @@
 #include "VaporMixtureFluidProperties.h"
 #include "NaNInterface.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 class SinglePhaseFluidProperties;
 
 /**
@@ -216,6 +219,13 @@ public:
    * @return        isobaric heat capacity
    */
   virtual Real cp_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
+  virtual void cp_from_p_T(Real p,
+                           Real T,
+                           const std::vector<Real> & x,
+                           Real & cp,
+                           Real & dcp_dp,
+                           Real & dcp_dT,
+                           std::vector<Real> & dcp_dx) const override;
 
   /**
    * Isochoric heat capacity from pressure and temperature
@@ -226,6 +236,13 @@ public:
    * @return        isochoric heat capacity
    */
   virtual Real cv_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
+  virtual void cv_from_p_T(Real p,
+                           Real T,
+                           const std::vector<Real> & x,
+                           Real & cv,
+                           Real & dcv_dp,
+                           Real & dcv_dT,
+                           std::vector<Real> & dcv_dx) const override;
 
   /**
    * Dynamic viscosity from pressure and temperature
@@ -236,6 +253,13 @@ public:
    * @return        dynamic viscosity
    */
   virtual Real mu_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
+  virtual void mu_from_p_T(Real p,
+                           Real T,
+                           const std::vector<Real> & x,
+                           Real & mu,
+                           Real & dmu_dp,
+                           Real & dmu_dT,
+                           std::vector<Real> & dmu_dx) const override;
 
   /**
    * Thermal conductivity from pressure and temperature
@@ -246,7 +270,13 @@ public:
    * @return        thermal conductivity
    */
   virtual Real k_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
-
+  virtual void k_from_p_T(Real p,
+                          Real T,
+                          const std::vector<Real> & x,
+                          Real & k,
+                          Real & dk_dp,
+                          Real & dk_dT,
+                          std::vector<Real> & dk_dx) const override;
   /**
    * Specific volume from pressure and temperature
    *
@@ -549,3 +579,5 @@ protected:
   /// maximum temperature of all components
   const Real _T_mix_max;
 };
+
+#pragma GCC diagnostic pop
