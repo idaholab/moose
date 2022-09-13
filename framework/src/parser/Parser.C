@@ -1313,6 +1313,15 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           dynamic_cast<InputParameters::Parameter<std::vector<std::vector<ptype>>> *>(par),        \
           in_global,                                                                               \
           global_params_block)
+#define setvectorvectorvector(ptype)                                                               \
+  else if (par->type() == demangle(typeid(std::vector<std::vector<std::vector<ptype>>>).name()))   \
+      setTripleIndexParameter<ptype>(                                                              \
+          full_name,                                                                               \
+          short_name,                                                                              \
+          dynamic_cast<                                                                            \
+              InputParameters::Parameter<std::vector<std::vector<std::vector<ptype>>>> *>(par),    \
+          in_global,                                                                               \
+          global_params_block)
 
       /**
        * Scalar types
@@ -1471,6 +1480,44 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvectorvector(MaterialName);
       setvectorvector(DistributionName);
       setvectorvector(SamplerName);
+
+      // Triple indexed types
+      setvectorvectorvector(Real);
+      setvectorvectorvector(int);
+      setvectorvectorvector(long);
+      setvectorvectorvector(unsigned int);
+      setvectorvectorvector(unsigned long long);
+
+// See vector type explanation
+#if LIBMESH_DOF_ID_BYTES == 8
+      setvectorvectorvector(uint64_t);
+#endif
+
+      setvectorvectorvector(SubdomainID);
+      setvectorvectorvector(BoundaryID);
+      setvectorvectorvector(string);
+      setvectorvectorvector(FileName);
+      setvectorvectorvector(FileNameNoExtension);
+      setvectorvectorvector(MeshFileName);
+      setvectorvectorvector(SubdomainName);
+      setvectorvectorvector(BoundaryName);
+      setvectorvectorvector(VariableName);
+      setvectorvectorvector(NonlinearVariableName);
+      setvectorvectorvector(AuxVariableName);
+      setvectorvectorvector(FunctionName);
+      setvectorvectorvector(UserObjectName);
+      setvectorvectorvector(IndicatorName);
+      setvectorvectorvector(MarkerName);
+      setvectorvectorvector(MultiAppName);
+      setvectorvectorvector(PostprocessorName);
+      setvectorvectorvector(VectorPostprocessorName);
+      setvectorvectorvector(MarkerName);
+      setvectorvectorvector(OutputName);
+      setvectorvectorvector(MaterialPropertyName);
+      setvectorvectorvector(MooseFunctorName);
+      setvectorvectorvector(MaterialName);
+      setvectorvectorvector(DistributionName);
+      setvectorvectorvector(SamplerName);
       else
       {
         mooseError("unsupported type '", par->type(), "' for input parameter '", full_name, "'");
@@ -1479,6 +1526,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 #undef setscalarValueType
 #undef setscalar
 #undef setvector
+#undef setvectorvectorvector
 #undef setvectorvector
 #undef setmap
     }
@@ -1845,6 +1893,53 @@ Parser::setDoubleIndexParameter(const std::string & full_name,
       for (unsigned int i = 0; i < param->get()[j].size(); ++i)
         global_block->setDoubleIndexParam<T>(short_name)[j][i] = param->get()[j][i];
     }
+  }
+}
+
+template <typename T>
+void
+Parser::setTripleIndexParameter(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<std::vector<std::vector<std::vector<T>>>> * param,
+    bool in_global,
+    GlobalParamsAction * global_block)
+{
+  // Get the full string assigned to the variable full_name
+  std::string buffer = _root->param<std::string>(full_name);
+
+  // split vector at delim ;
+  // NOTE: the substrings are _not_ of type T yet
+  std::vector<std::string> first_tokenized_vector;
+  std::vector<std::vector<std::string>> second_tokenized_vector;
+  MooseUtils::tokenize(buffer, first_tokenized_vector, 1, "|");
+  param->set().resize(first_tokenized_vector.size());
+  second_tokenized_vector.resize(first_tokenized_vector.size());
+  for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
+  {
+    MooseUtils::tokenize(first_tokenized_vector[j], second_tokenized_vector[j], 1, ";");
+    param->set()[j].resize(second_tokenized_vector[j].size());
+    for (unsigned k = 0; k < second_tokenized_vector[j].size(); ++k)
+      if (!MooseUtils::tokenizeAndConvert<T>(second_tokenized_vector[j][k], param->set()[j][k]))
+      {
+        _errmsg +=
+            hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) +
+            "\n";
+        return;
+      }
+  }
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setTripleIndexParam<T>(short_name).resize(first_tokenized_vector.size());
+    for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
+      for (unsigned k = 0; k < second_tokenized_vector[j].size(); ++k)
+      {
+        global_block->setTripleIndexParam<T>(short_name)[j][k].resize(param->get()[j][k].size());
+        for (unsigned int i = 0; i < param->get()[j][k].size(); ++i)
+          global_block->setTripleIndexParam<T>(short_name)[j][k][i] = param->get()[j][k][i];
+      }
   }
 }
 
