@@ -145,21 +145,21 @@ Poly2TriMeshGenerator::generate()
 
   if (isParamValid("input_subdomain_names"))
   {
-    auto _subdomain_names = getParam<std::vector<SubdomainName>>("input_subdomain_names");
+    const auto & subdomain_names = getParam<std::vector<SubdomainName>>("input_subdomain_names");
 
-    auto _subdomain_ids = MooseMeshUtils::getSubdomainIDs(*mesh, _subdomain_names);
+    const auto subdomain_ids = MooseMeshUtils::getSubdomainIDs(*mesh, subdomain_names);
 
     // Check that the requested subdomains exist in the mesh
     std::set<SubdomainID> subdomains;
     mesh->subdomain_ids(subdomains);
 
-    for (auto i : index_range(_subdomain_ids))
+    for (auto i : index_range(subdomain_ids))
     {
-      if (_subdomain_ids[i] == Moose::INVALID_BLOCK_ID || !subdomains.count(_subdomain_ids[i]))
+      if (subdomain_ids[i] == Moose::INVALID_BLOCK_ID || !subdomains.count(subdomain_ids[i]))
         paramError(
-            "input_subdomain_names", _subdomain_names[i], " was not found in the boundary mesh");
+            "input_subdomain_names", subdomain_names[i], " was not found in the boundary mesh");
 
-      bdy_ids.insert(_subdomain_ids[i]);
+      bdy_ids.insert(subdomain_ids[i]);
     }
   }
 
