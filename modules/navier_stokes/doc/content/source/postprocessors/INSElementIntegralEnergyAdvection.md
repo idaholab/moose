@@ -2,7 +2,7 @@
 
 !syntax description /Postprocessors/INSElementIntegralEnergyAdvection
 
-This class performs global integration of the energy advection term defined in
+This class performs volumetric (global, or by block) integration of the energy advection term defined in
 [INSADEnergyAdvection.md], which is defined by
 
 \begin{equation}
@@ -17,6 +17,12 @@ instantiations of this object are denoted by
 `INSElementIntegralEnergyAdvection`. The former retrieves the density and
 specific heat capacity as `ADReal` material properties while the former
 retrieves the same properties as `Real`.
+
+This class performs volumetric integration (element-based as opposed to
+side-based) of the advection term because the incompressibility constraint is
+applied to the energy advection term and the term is not integrated by
+parts. Details about the finite element implementation of the energy advection
+term can be found on the [INSADEnergyAdvection.md] page.
 
 ## Example input syntax
 

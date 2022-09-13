@@ -20,6 +20,8 @@ InputParameters
 INSElementIntegralEnergyAdvectionTempl<is_ad>::validParams()
 {
   InputParameters params = ElementIntegralPostprocessor::validParams();
+  params.addClassDescription(
+      "Computes the net volumetric balance of energy transported by advection");
   params.addRequiredParam<MaterialPropertyName>(NS::cp,
                                                 "The constant-pressure specific heat capacity");
   params.addRequiredParam<MaterialPropertyName>(NS::density, "The density");
