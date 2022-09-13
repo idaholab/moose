@@ -1,0 +1,59 @@
+BootStrap: <PROTOCOL>
+From: <LOCATION>
+
+%files
+    # make the MOOSE repository at-my-current-state available within container
+    # for vetted versions of MOOSE during %post
+    <MOOSE_DIR> /usr/local/tmp_moose_src
+
+%environment
+    export MOOSE_DIR=/usr/local/moose_src
+    export PATH=/usr/local/moose/bin:$PATH
+
+%post
+    # Prepare a temp directory
+    export TEMP_LOC=`mktemp -d /tmp/rocky_singularity.XXXXX`
+
+    # `make install` target path
+    export MOOSE_PREFIX=/usr/local/moose
+
+    # Shallow Clone (specific to this containers purpose)
+    git clone --depth 1 file:///usr/local/tmp_moose_src /usr/local/moose_src
+    rm -rf /usr/local/tmp_moose_src
+
+    # Fix permissions during for `make install`
+    chmod -R o=u-w,g=u-w /usr/local/moose_src
+    umask 022
+    # Build MOOSE modules
+    export MOOSE_JOBS=32
+    echo "JOBS: ${MOOSE_JOBS}"
+    cd /usr/local/moose_src/
+    patch -p0 < conda/moose/gap_heat_transfer_umat.patch
+
+    # Temporary fix for a bad test dependency symlink
+    cd modules/reactor/test/tests/meshgenerators/peripheral_ring_mesh_generator
+    ln -s ../polygon_concentric_circle_mesh_generator/poly_2d_back_only.e input_mesh_invalid_bdry_2.e
+    cd /usr/local/moose_src/
+
+    ./configure --prefix=${MOOSE_PREFIX}
+    cd modules
+    make -j ${MOOSE_JOBS:-6}
+    export MOOSE_SKIP_DOCS=true
+    make install -j ${MOOSE_JOBS:-6}
+
+    # Test MOOSE modules
+    ./run_tests -j ${MOOSE_JOBS:-6} -t
+
+    # Test make install copy-inputs
+    export PATH=/usr/local/moose/bin:$PATH
+    cd ${TEMP_LOC}
+    combined-opt --copy-inputs tests
+    cd combined/tests
+    combined-opt --run -j ${MOOSE_JOBS:-6} -t
+
+    # Clean Up
+    cd /usr/local/moose_src
+    git clean -xfd
+    cd /usr/local/moose/
+    find . -type f -name "__pycache__" -exec rm -rf {} \;
+    rm -rf ${TEMP_LOC}

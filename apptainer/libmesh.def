@@ -1,0 +1,26 @@
+BootStrap: <PROTOCOL>
+From: <LOCATION>
+
+%files
+    # make the MOOSE repository at-my-current-state available
+    # for vetted versions of libMesh during %post
+    <MOOSE_DIR> /usr/local/tmp_moose_src
+
+%environment
+    # libMesh
+    export LIBMESH_DIR=/usr/local/libmesh
+
+%post
+    # Build libMesh
+    umask 022
+    export LIBMESH_DIR=/usr/local/libmesh
+    export METHODS=opt
+    echo -e "JOBS: $MOOSE_JOBS\nMETHODS: ${METHODS}"
+    cd /usr/local/tmp_moose_src/scripts
+    ./update_and_rebuild_libmesh.sh
+
+    # Fix possible permissions
+    chmod -R o=u-w,g=u-w /usr/local/libmesh
+
+    # Clean Up
+    rm -rf /usr/local/tmp_moose_src
