@@ -106,11 +106,6 @@
     block = 0
     function = 'x + y'
   []
-  [remove_null_space]
-    variable = T
-    block = 0
-    type = Reaction
-  []
 []
 
 [BCs]
@@ -124,6 +119,13 @@
     type = VectorFunctionDirichletBC
     variable = velocity
     boundary = 'fluid_left right'
+  []
+  [convective_heat_transfer]
+    type = ConvectiveHeatFluxBC
+    variable = T
+    T_infinity = 0
+    heat_transfer_coefficient = 1
+    boundary = 'right'
   []
 []
 
@@ -150,14 +152,16 @@
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []
 
 [Postprocessors]
-  [reaction]
-    type = ElementIntegralVariablePostprocessor
-    variable = T
-    block = 0
+  [convective_heat_transfer]
+    type = ConvectiveHeatTransferSideIntegral
+    T_solid = T
+    T_fluid = 0
+    htc = 1
+    boundary = 'right'
   []
   [advection]
     type = INSADElementIntegralEnergyAdvection
@@ -174,7 +178,7 @@
   []
   [sum]
     type = ParsedPostprocessor
-    function = 'reaction + advection - source'
-    pp_names = 'reaction advection source'
+    function = 'convective_heat_transfer + advection - source'
+    pp_names = 'convective_heat_transfer advection source'
   []
 []
