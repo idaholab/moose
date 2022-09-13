@@ -9,6 +9,7 @@
 
 #include "HexagonMeshTrimmer.h"
 #include "MooseMeshUtils.h"
+#include "MathUtils.h"
 
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
@@ -72,12 +73,14 @@ HexagonMeshTrimmer::HexagonMeshTrimmer(const InputParameters & parameters)
         isParamValid("peripheral_trimming_section_boundary")
             ? getParam<BoundaryName>("peripheral_trimming_section_boundary")
             : BoundaryName()),
-    _trimming_start_sector(isParamValid("center_trim_starting_index")
-                               ? (getParam<short>("center_trim_starting_index") + 9) % 12
-                               : 12),
-    _trimming_end_sector(isParamValid("center_trim_ending_index")
-                             ? (getParam<short>("center_trim_ending_index") + 9) % 12
-                             : 12),
+    _trimming_start_sector(
+        isParamValid("center_trim_starting_index")
+            ? MathUtils::euclideanMod(getParam<short>("center_trim_starting_index") - 3, 12)
+            : 12),
+    _trimming_end_sector(
+        isParamValid("center_trim_ending_index")
+            ? MathUtils::euclideanMod(getParam<short>("center_trim_ending_index") - 3, 12)
+            : 12),
     _center_trimming_section_boundary(
         isParamValid("center_trimming_section_boundary")
             ? getParam<BoundaryName>("center_trimming_section_boundary")
@@ -101,7 +104,8 @@ HexagonMeshTrimmer::HexagonMeshTrimmer(const InputParameters & parameters)
   if (_trimming_start_sector == 12 && _trimming_end_sector == 12)
     _center_trim_sector_number = 12;
   else
-    _center_trim_sector_number = (_trimming_end_sector - _trimming_start_sector + 12) % 12;
+    _center_trim_sector_number =
+        MathUtils::euclideanMod(_trimming_end_sector - _trimming_start_sector, 12);
   if (_center_trim_sector_number > 6 && _center_trim_sector_number < 12)
     paramError("center_trim_starting_index",
                "the remaining mesh after center trimming defined by this parameter and "

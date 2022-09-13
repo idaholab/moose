@@ -376,6 +376,19 @@ linearInterpolation(const X & x, const X1 & x1, const X2 & x2, const Y1 & y1, co
     return m * (x - x1) + y1;
 }
 
+/**
+ * perform modulo operator for Euclidean division that ensures a non-negative result
+ * @param dividend dividend of the modulo operation
+ * @param divisor divisor of the modulo operation
+ * @return the non-negative remainder when the dividend is divided by the divisor
+ */
+template <typename T1, typename T2>
+std::size_t
+euclideanMod(T1 dividend, T2 divisor)
+{
+  return (dividend % divisor + divisor) % divisor;
+}
+
 } // namespace MathUtils
 
 /// A helper function for MathUtils::multiIndex
