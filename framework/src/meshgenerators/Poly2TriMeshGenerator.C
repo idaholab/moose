@@ -66,11 +66,15 @@ Poly2TriMeshGenerator::validParams()
   params.addParam<std::vector<bool>>("refine_holes",
                                      std::vector<bool>(),
                                      "Whether to allow automatically refining each hole boundary.");
-  params.addRangeCheckedParam<Real>("desired_area", 0, "desired_area>=0",
-                                    "Desired (maximum) triangle area, or 0 to skip uniform refinement");
-  params.addParam<std::string>("desired_area_func",
-                               std::string(),
-                               "Desired area as a function of x,y; omit to skip non-uniform refinement");
+  params.addRangeCheckedParam<Real>(
+      "desired_area",
+      0,
+      "desired_area>=0",
+      "Desired (maximum) triangle area, or 0 to skip uniform refinement");
+  params.addParam<std::string>(
+      "desired_area_func",
+      std::string(),
+      "Desired area as a function of x,y; omit to skip non-uniform refinement");
   params.addParam<MooseEnum>(
       "algorithm",
       algorithm,
@@ -366,7 +370,7 @@ Poly2TriMeshGenerator::generate()
         {
           auto it_s = next_hole_boundary_point.find(elem->point(s));
           if (it_s != next_hole_boundary_point.end())
-            if (it_s->second == elem->point((s+1)%ns))
+            if (it_s->second == elem->point((s + 1) % ns))
             {
               hole_boundary_info.add_side(elem, s, new_hole_bcid);
               ++found_hole_sides;
@@ -382,7 +386,7 @@ Poly2TriMeshGenerator::generate()
         auto ns = elem->n_sides();
         for (auto s : make_range(ns))
         {
-          auto it_s = next_hole_boundary_point.find(elem->point((s+1)%ns));
+          auto it_s = next_hole_boundary_point.find(elem->point((s + 1) % ns));
           if (it_s != next_hole_boundary_point.end())
             if (it_s->second == elem->point(s))
             {
