@@ -66,6 +66,7 @@
     source_variable = u
     variable = v
     execute_on = 'timestep_end'
+    skip_coordinate_collapsing = false
   []
   [from_sub]
     type = MultiAppNearestNodeTransfer
@@ -73,5 +74,6 @@
     source_variable = u
     variable = v
     execute_on = 'timestep_end'
+    skip_coordinate_collapsing = false
   []
 []

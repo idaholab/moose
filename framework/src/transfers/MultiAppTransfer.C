@@ -69,7 +69,7 @@ MultiAppTransfer::addSkipCoordCollapsingParam(InputParameters & params)
 {
   params.addParam<bool>(
       "skip_coordinate_collapsing",
-      false,
+      true,
       "Whether to skip coordinate collapsing (translation and rotation are still performed, only "
       "XYZ, RZ etc collapsing is skipped) when performing mapping and inverse "
       "mapping coordinate transformation operations. This parameter should only "
