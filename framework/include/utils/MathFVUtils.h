@@ -274,7 +274,7 @@ harmonicInterpolation(const T1 & value1,
   // We check if the types are fit to compute the harmonic mean of. This is done compile-time
   // using constexpr. We start with Real/ADReal which is straightforward if the input values are
   // positive.
-  if constexpr (std::is_same<typename MetaPhysicL::RawType<T1>::value_type, Real>::value)
+  if constexpr (libMesh::TensorTools::TensorTraits<T1>::rank == 0)
   {
     // The harmonic mean of mixed positive and negative numbers (and 0 as well) is not well-defined
     // so we assert that the input values shall be positive.
@@ -283,8 +283,7 @@ harmonicInterpolation(const T1 & value1,
     return 1.0 / (coeffs.first / value1 + coeffs.second / value2);
   }
   // For vectors (ADRealVectorValue, VectorValue), we take the component-wise harmonic mean
-  else if constexpr (std::is_same<typename MetaPhysicL::RawType<T1>::value_type,
-                                  RealVectorValue>::value)
+  else if constexpr (libMesh::TensorTools::TensorTraits<T1>::rank == 1)
   {
     typename libMesh::CompareTypes<T1, T2>::supertype result;
     for (const auto i : make_range(Moose::dim))
@@ -301,8 +300,7 @@ harmonicInterpolation(const T1 & value1,
   }
   // For tensors (ADRealTensorValue, TensorValue), similarly to the vectors,
   // we take the component-wise harmonic mean instead of the matrix-inverse approach
-  else if constexpr (std::is_same<typename MetaPhysicL::RawType<T1>::value_type,
-                                  RealTensorValue>::value)
+  else if constexpr (libMesh::TensorTools::TensorTraits<T1>::rank == 2)
   {
     typename libMesh::CompareTypes<T1, T2>::supertype result;
     for (const auto i : make_range(Moose::dim))
