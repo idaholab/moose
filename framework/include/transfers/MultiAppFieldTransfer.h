@@ -18,7 +18,7 @@ class DofObject;
 }
 
 /**
- *  intermediary class that allows variable names as inputs
+ * Intermediary class that allows variable names as inputs
  */
 class MultiAppFieldTransfer : public MultiAppTransfer
 {

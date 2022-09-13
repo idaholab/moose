@@ -12,7 +12,10 @@
 #include "MultiAppTransfer.h"
 
 /**
- * Copies the value of a Postprocessor from the Master to a MultiApp.
+ * Copies the value of a Postprocessor either:
+ * - from the parent application to a MultiApp (all its subapps)
+ * or
+ * - from all child apps of a MultiApp to the parent app, performing a reduction operation
  */
 class MultiAppPostprocessorTransfer : public MultiAppTransfer
 {
@@ -32,7 +35,12 @@ public:
   };
 
 protected:
+  /// Name of the postprocessor to transfer data from
   PostprocessorName _from_pp_name;
+
+  /// Name of the postprocessor to transfer data to
   PostprocessorName _to_pp_name;
+
+  /// Reduction operation to perform when transferring from multiple child apps to the parent app
   MooseEnum _reduction_type;
 };

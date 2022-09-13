@@ -130,7 +130,7 @@
 
 [Transfers]
   [from_sub]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     from_multi_app = sub
     num_points = 1
     shrink_gap_width = 0.2
@@ -141,7 +141,7 @@
   []
 
   [from_sub_elem]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     from_multi_app = sub
     num_points = 4
     shrink_gap_width = 0.2
@@ -152,7 +152,7 @@
   []
 
   [from_parent]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     num_points = 1
     shrink_gap_width = 0.2
@@ -163,7 +163,7 @@
   []
 
   [from_parent_elem]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     num_points = 4
     shrink_gap_width = 0.2

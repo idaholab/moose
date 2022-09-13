@@ -19,7 +19,7 @@
  * Note: Higher order variables are not supported.
  *
  * This transfer can be block and boundary restricted. The BlockRestrictable and
- * BoundaryRestrictable classes cannot be used, becuase they would check the block, boundary and
+ * BoundaryRestrictable classes cannot be used, because they would check the block, boundary and
  * target variable during object construction. At that time, the underlying sub-app is not created
  * yet, so this check would fail. That is also the reason why the block and boundary restriction are
  * pulled in during `execute` and not in the constructor. Also note, that in a sub-app setup there

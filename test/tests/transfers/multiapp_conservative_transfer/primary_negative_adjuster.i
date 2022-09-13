@@ -71,7 +71,7 @@
 
 [Transfers]
   [to_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     source_variable = var
     variable = var
     to_multi_app = sub

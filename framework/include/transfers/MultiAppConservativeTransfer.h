@@ -12,8 +12,8 @@
 #include "MultiAppFieldTransfer.h"
 
 /**
- *  Transfers variables on possibly differne meshes while conserving a user
- *  defined property of each variable
+ *  Transfers variables on possibly different meshes while conserving a user
+ *  defined property (Postprocessor) for each variable
  */
 class MultiAppConservativeTransfer : public MultiAppFieldTransfer
 {
@@ -45,11 +45,11 @@ protected:
   VariableName _from_var_name;
   AuxVariableName _to_var_name;
 
-  // If this transfer is going to conserve the physics
+  /// If this transfer is going to conserve the physics
   bool _preserve_transfer;
-  // Postprocessor evaluates an adjuster for the source physics
+  /// Postprocessor evaluates an adjuster for the source physics
   std::vector<PostprocessorName> _from_postprocessors_to_be_preserved;
-  // Postprocessor evaluates an adjuster for the target physics
+  /// Postprocessor evaluates an adjuster for the target physics
   std::vector<PostprocessorName> _to_postprocessors_to_be_preserved;
 
 private:
@@ -65,5 +65,6 @@ private:
                                             PostprocessorName & to_postprocessor);
 
   bool _use_nearestpoint_pps;
+  /// Whether the adjustment may be skipped when the postprocessor values are 0 / of different signs
   bool _allow_skipped_adjustment;
 };

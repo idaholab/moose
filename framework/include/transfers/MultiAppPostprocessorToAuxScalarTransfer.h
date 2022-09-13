@@ -22,15 +22,13 @@ public:
 
   MultiAppPostprocessorToAuxScalarTransfer(const InputParameters & parameters);
 
-  /**
-   * Execute the transfer
-   */
+  /// Execute the transfer
   virtual void execute() override;
 
 protected:
   /// The name of the postprocessor that the transfer originates
   PostprocessorName _from_pp_name;
 
-  /// The name of the variable to which the postprocessor is being transfered
+  /// The name of the field variable to which the postprocessor is being transfered
   VariableName _to_aux_name;
 };

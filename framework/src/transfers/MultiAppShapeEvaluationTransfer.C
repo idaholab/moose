@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultiAppMeshFunctionTransfer.h"
+#include "MultiAppShapeEvaluationTransfer.h"
 
 // MOOSE includes
 #include "DisplacedProblem.h"
@@ -27,10 +27,14 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
-registerMooseObject("MooseApp", MultiAppMeshFunctionTransfer);
+registerMooseObject("MooseApp", MultiAppShapeEvaluationTransfer);
+registerMooseObjectRenamed("MooseApp",
+                           MultiAppMeshFunctionTransfer,
+                           "12/31/2023 24:00",
+                           MultiAppShapeEvaluationTransfer);
 
 InputParameters
-MultiAppMeshFunctionTransfer::validParams()
+MultiAppShapeEvaluationTransfer::validParams()
 {
   InputParameters params = MultiAppConservativeTransfer::validParams();
   params.addClassDescription(
@@ -45,7 +49,7 @@ MultiAppMeshFunctionTransfer::validParams()
   return params;
 }
 
-MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const InputParameters & parameters)
+MultiAppShapeEvaluationTransfer::MultiAppShapeEvaluationTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
 {
   if (_to_var_names.size() == _from_var_names.size())
@@ -55,10 +59,11 @@ MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const InputParameters
 }
 
 void
-MultiAppMeshFunctionTransfer::execute()
+MultiAppShapeEvaluationTransfer::execute()
 {
-  TIME_SECTION(
-      "MultiAppMeshFunctionTransfer::execute()", 5, "Transferring variables via a mesh function");
+  TIME_SECTION("MultiAppShapeEvaluationTransfer::execute()",
+               5,
+               "Transferring variables via finite element interpolation");
 
   // loop over the vector of variables and make the transfer one by one
   for (unsigned int i = 0; i < _var_size; ++i)
@@ -68,7 +73,7 @@ MultiAppMeshFunctionTransfer::execute()
 }
 
 void
-MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
+MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
 {
   mooseAssert(i < _var_size, "The variable of index " << i << " does not exist");
 
@@ -105,7 +110,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     const auto & to_transform = *_to_transforms[i_to];
 
     if (fe_type.order > FIRST && !is_nodal)
-      mooseError("We don't currently support second order or higher elemental variable ");
+      mooseError("We don't currently support second order or higher elemental variable.");
 
     if (is_nodal)
     {
@@ -314,7 +319,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
           const std::vector<Point> & /*my_outgoing_points*/,
           const std::vector<std::pair<Real, unsigned int>> & vals_ids_for_outgoing_points)
   {
-    // This lamda function might be called multiple times
+    // This lambda function might be called multiple times
     incoming_vals_ids[pid].reserve(vals_ids_for_outgoing_points.size());
     // Copy data for processor 'pid'
     std::copy(vals_ids_for_outgoing_points.begin(),

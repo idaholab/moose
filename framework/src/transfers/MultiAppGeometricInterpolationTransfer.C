@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultiAppInterpolationTransfer.h"
+#include "MultiAppGeometricInterpolationTransfer.h"
 
 // MOOSE includes
 #include "DisplacedProblem.h"
@@ -23,14 +23,20 @@
 #include "libmesh/system.h"
 #include "libmesh/radial_basis_interpolation.h"
 
-registerMooseObject("MooseApp", MultiAppInterpolationTransfer);
+registerMooseObject("MooseApp", MultiAppGeometricInterpolationTransfer);
+registerMooseObjectRenamed("MooseApp",
+                           MultiAppInterpolationTransfer,
+                           "12/31/2023 24:00",
+                           MultiAppGeometricInterpolationTransfer);
 
 InputParameters
-MultiAppInterpolationTransfer::validParams()
+MultiAppGeometricInterpolationTransfer::validParams()
 {
   InputParameters params = MultiAppConservativeTransfer::validParams();
   params.addClassDescription(
-      "Transfers the value to the target domain from the nearest node in the source domain.");
+      "Transfers the value to the target domain from a combination/interpolation of the values on "
+      "the nearest nodes in the source domain, using coefficients based on the distance to each "
+      "node.");
   params.addParam<unsigned int>(
       "num_points", 3, "The number of nearest points to use for interpolation.");
   params.addParam<Real>(
@@ -63,7 +69,8 @@ MultiAppInterpolationTransfer::validParams()
   return params;
 }
 
-MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParameters & parameters)
+MultiAppGeometricInterpolationTransfer::MultiAppGeometricInterpolationTransfer(
+    const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
     _num_points(getParam<unsigned int>("num_points")),
     _power(getParam<Real>("power")),
@@ -75,7 +82,7 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParamete
     _distance_tol(getParam<Real>("distance_tol"))
 {
   // This transfer does not work with DistributedMesh
-  _fe_problem.mesh().errorIfDistributedMesh("MultiAppInterpolationTransfer");
+  _fe_problem.mesh().errorIfDistributedMesh("MultiAppGeometricInterpolationTransfer");
 
   if (_to_var_names.size() != 1)
     paramError("variable", " Support single to-variable only ");
@@ -85,9 +92,9 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParamete
 }
 
 void
-MultiAppInterpolationTransfer::subdomainIDsNode(MooseMesh & mesh,
-                                                const Node & node,
-                                                std::set<subdomain_id_type> & subdomainids)
+MultiAppGeometricInterpolationTransfer::subdomainIDsNode(MooseMesh & mesh,
+                                                         const Node & node,
+                                                         std::set<subdomain_id_type> & subdomainids)
 {
   // We need this map to figure out to which subdomains a given mesh point is attached
   // We can not make mesh const here because we may need to create a node-to-elems map
@@ -110,7 +117,7 @@ MultiAppInterpolationTransfer::subdomainIDsNode(MooseMesh & mesh,
 }
 
 void
-MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
+MultiAppGeometricInterpolationTransfer::fillSourceInterpolationPoints(
     FEProblemBase & from_problem,
     const MooseVariableFieldBase & from_var,
     const MultiAppCoordTransform & from_app_transform,
@@ -261,7 +268,7 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
 }
 
 void
-MultiAppInterpolationTransfer::interpolateTargetPoints(
+MultiAppGeometricInterpolationTransfer::interpolateTargetPoints(
     FEProblemBase & to_problem,
     MooseVariableFieldBase & to_var,
     NumericVector<Real> & to_solution,
@@ -407,9 +414,9 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
 }
 
 void
-MultiAppInterpolationTransfer::execute()
+MultiAppGeometricInterpolationTransfer::execute()
 {
-  TIME_SECTION("MultiAppInterpolationTransfer::execute()",
+  TIME_SECTION("MultiAppGeometricInterpolationTransfer::execute()",
                5,
                "Transferring variables based on node interpolation");
 
@@ -509,7 +516,7 @@ MultiAppInterpolationTransfer::execute()
 }
 
 void
-MultiAppInterpolationTransfer::computeTransformation(
+MultiAppGeometricInterpolationTransfer::computeTransformation(
     const MooseMesh & mesh, std::unordered_map<dof_id_type, Point> & transformation)
 {
   auto & libmesh_mesh = mesh.getMesh();
