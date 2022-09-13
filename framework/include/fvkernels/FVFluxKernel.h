@@ -138,6 +138,9 @@ protected:
    */
   void adjustRMGhostLayers(const unsigned short ghost_layers) const;
 
+  /// Which boundaries/sidesets to force the execution of flux kernels on
+  std::unordered_set<BoundaryID> _boundaries_to_force;
+
 private:
   /// Computes the Jacobian contribution for every coupled variable.
   ///
@@ -151,9 +154,6 @@ private:
 
   /// Whether to force execution of flux kernels on all external boundaries
   const bool _force_boundary_execution;
-
-  /// Which boundaries/sidesets to force the execution of flux kernels on
-  std::unordered_set<BoundaryID> _boundaries_to_force;
 
   /// Which boundaries/sidesets to prevent the execution of flux kernels on
   std::unordered_set<BoundaryID> _boundaries_to_avoid;
