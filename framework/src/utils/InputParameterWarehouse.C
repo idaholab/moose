@@ -178,7 +178,13 @@ InputParameterWarehouse::addControllableParameterConnection(
     if (primaries.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
       mooseError("Unable to locate primary parameter with name ", primary);
     else if (primaries.empty())
-      return;
+    {
+      if (tid == 0)
+        return;
+      else
+        // try to connect non-threaded primary control to secondary controls of all threads
+        primaries = getControllableItems(primary, 0);
+    }
 
     std::vector<ControllableItem *> secondaries = getControllableItems(secondary, tid);
     if (secondaries.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
