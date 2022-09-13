@@ -98,10 +98,7 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
   ptr->addPrivateParam<THREAD_ID>("_tid", tid);
 
   // no more copies allowed
-  // Note: we have to skip action parameters for now due to parameter copy operations in
-  //       the input parameter printing capability in ActionWarehouse::printInputFile.
-  if (base != "Action")
-    ptr->allowCopy(false);
+  ptr->allowCopy(false);
 
   // Return a reference to the InputParameters object
   return *ptr;

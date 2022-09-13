@@ -12,9 +12,7 @@
 #include <string>
 #include <ostream>
 
-#include "InputParameters.h"
-#include "ActionWarehouse.h"
-#include "MooseSyntax.h"
+class InputParameters;
 
 /**
  * This interface is for classes that want to be called to format InputParameters.  When the

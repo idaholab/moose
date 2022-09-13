@@ -9,6 +9,7 @@
 
 #include "InputFileFormatter.h"
 #include "MooseUtils.h"
+#include "InputParameters.h"
 
 #include <sstream>
 #include <vector>

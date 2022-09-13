@@ -1015,6 +1015,7 @@ private:
   friend InputParameters emptyInputParameters();
   friend class InputParameterWarehouse;
   friend class Parser;
+  friend class ActionWarehouse;
 
   // For setting _from_legacy_construction (remove with #19440)
   template <typename T>
