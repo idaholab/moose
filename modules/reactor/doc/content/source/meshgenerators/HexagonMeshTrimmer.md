@@ -33,6 +33,12 @@ When trimming a mesh, some elements may be located across the trimming line and 
 
 To avoid this zig-zag boundary, `HexagonMeshTrimmer` adopts a post-trimming processing algorithm to smooth the trimming boundary. The algorithm moves the nodes of the across-trimming-line elements in the normal direction of the trimming line onto the trimming line. During this procedure, some elements may become zero volume and will be removed. More importantly, after node moving, some quadrilateral elements may have three co-linear vertices on the trimming line, which make the element degenerate. To fix this issue, these degenerate quadrilateral elements are converted into triangular elements. As triangular elements and quadrilateral elements cannot share a single subdomain id/name, new subdomains are created for any affected quadrilateral element subdomains. The subdomain ids of the new subdomains are decided by shifting the original subdomain ids by [!param](/Mesh/HexagonMeshTrimmer/tri_elem_subdomain_shift) (default shift value is the maximum subdomain id of the mesh), while the subdomain names of the new subdomains are created by appending [!param](/Mesh/HexagonMeshTrimmer/tri_elem_subdomain_name_suffix) after the original subdomain names.
 
+## Boundary Assignment
+
+For peripheral trimming, the new boundary formed by the trimming operation is the new external boundary. Therefore, the boundary id defined by [!param](/Mesh/HexagonMeshTrimmer/external_boundary) is assigned to the new boundary. On the other hand, for center trimming, the new boundary formed by the trimming operation is a mirror boundary instead of an external boundary. Hence, the boundary id defined by [!param](/Mesh/HexagonMeshTrimmer/external_boundary) is NOT assigned to the new boundaries.
+
+In addition, users can optionally use [!param](/Mesh/HexagonMeshTrimmer/peripheral_trimming_section_boundary) and [!param](/Mesh/HexagonMeshTrimmer/center_trimming_section_boundary) to assign additional boundary names to the new boundary.
+
 ## Example Syntax
 
 !listing modules/reactor/test/tests/meshgenerators/hexagon_mesh_trimmer/patterned_trimmed.i block=Mesh/trim_0

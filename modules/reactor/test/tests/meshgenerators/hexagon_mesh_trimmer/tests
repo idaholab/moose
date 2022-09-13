@@ -139,6 +139,16 @@
     recover = false
     allow_warnings = true
   []
+  [err_no_external_bdry]
+    type = RunException
+    input = 'assembly_trim.i'
+    cli_args = 'Mesh/trim/trim_peripheral_region="1 1 1 1 1 1"
+                Mesh/trim/peripheral_trimming_section_boundary="peripheral_section"
+                Mesh/trim/external_boundary="external"
+                Mesh/inactive="peripheral_ring pattern_mod pattern2"'
+    expect_err = 'the provided external boundary does not exist in the input mesh.'
+    requirement = "The system shall throw an error if the input mesh does not contain the provided external boundary."
+  []
   [err_incompatible]
     type = RunException
     input = 'err_trimmability.i'

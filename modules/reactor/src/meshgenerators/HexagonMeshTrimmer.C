@@ -36,8 +36,10 @@ HexagonMeshTrimmer::validParams()
                                      "center_trim_ending_index>=0 & center_trim_ending_index<12",
                                      "Index of the ending center trimming position.");
   params.addParam<BoundaryName>("center_trimming_section_boundary",
-                                "Boundary formed by center trimming.");
-  params.addParam<BoundaryName>("external_boundary", "External boundary of the input mesh.");
+                                "Boundary formed by center trimming (external_boundary will be "
+                                "assigned if this parameter is not provided).");
+  params.addParam<BoundaryName>("external_boundary",
+                                "External boundary of the input mesh prior to the trimming.");
   params.addParam<SubdomainName>(
       "tri_elem_subdomain_name_suffix",
       "trimmer_tri",
@@ -46,6 +48,14 @@ HexagonMeshTrimmer::validParams()
   params.addParam<subdomain_id_type>(
       "tri_elem_subdomain_shift",
       "Customized id shift to define subdomain ids of the converted triangular elements.");
+
+  params.addParamNamesToGroup(
+      "center_trim_starting_index center_trim_ending_index center_trimming_section_boundary",
+      "Center Trimming");
+  params.addParamNamesToGroup("trim_peripheral_region peripheral_trimming_section_boundary",
+                              "Peripheral Trimming");
+  params.addParamNamesToGroup("tri_elem_subdomain_name_suffix tri_elem_subdomain_shift",
+                              "Trimmed Boundary Repair");
 
   params.addClassDescription("This HexagonMeshTrimmer object performs peripheral and/or "
                              "across-center (0, 0, 0) trimming for "
@@ -139,6 +149,9 @@ HexagonMeshTrimmer::generate()
       _external_boundary_name.empty()
           ? (boundary_id_type)OUTER_SIDESET_ID
           : MooseMeshUtils::getBoundaryID(_external_boundary_name, mesh);
+  if (external_boundary_id == libMesh::BoundaryInfo::invalid_id)
+    paramError("external_boundary",
+               "the provided external boundary does not exist in the input mesh.");
 
   std::vector<subdomain_id_type> subdomain_ids;
   for (auto elem_it = mesh.active_elements_begin(); elem_it != mesh.active_elements_end();
@@ -149,8 +162,10 @@ HexagonMeshTrimmer::generate()
   if (*max_element(_trim_peripheral_region.begin(), _trim_peripheral_region.end()))
   {
     const boundary_id_type peripheral_trimming_section_boundary_id =
-        (MooseMeshUtils::getBoundaryIDs(mesh, {_peripheral_trimming_section_boundary}, true))
-            .front();
+        _peripheral_trimming_section_boundary.empty()
+            ? external_boundary_id
+            : (MooseMeshUtils::getBoundaryIDs(mesh, {_peripheral_trimming_section_boundary}, true))
+                  .front();
     peripheralTrimmer(mesh,
                       _trim_peripheral_region,
                       external_boundary_id,
@@ -165,7 +180,10 @@ HexagonMeshTrimmer::generate()
   if (_center_trim_sector_number < 12)
   {
     const boundary_id_type center_trimming_section_boundary_id =
-        (MooseMeshUtils::getBoundaryIDs(mesh, {_center_trimming_section_boundary}, true)).front();
+        _center_trimming_section_boundary.empty()
+            ? external_boundary_id
+            : (MooseMeshUtils::getBoundaryIDs(mesh, {_center_trimming_section_boundary}, true))
+                  .front();
     centerTrimmer(mesh,
                   _center_trim_sector_number,
                   _trimming_start_sector,
@@ -243,7 +261,8 @@ HexagonMeshTrimmer::peripheralTrimmer(
                   block_id_to_remove,
                   subdomain_ids_set,
                   peripheral_trimming_section_boundary_id,
-                  external_boundary_id);
+                  external_boundary_id,
+                  true);
 }
 
 void
@@ -253,6 +272,7 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
                                 const std::set<subdomain_id_type> subdomain_ids_set,
                                 const boundary_id_type trimming_section_boundary_id,
                                 const boundary_id_type external_boundary_id,
+                                const bool assign_ext_to_new,
                                 const bool side_to_remove)
 {
   // Build boundary information of the mesh
@@ -261,10 +281,6 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
   boundary_info.build_node_list_from_side_list();
   auto bdry_node_list = boundary_info.build_node_list();
   // Only select the boundaries_to_conform
-  std::vector<std::tuple<dof_id_type, boundary_id_type>> slc_bdry_node_list;
-  for (unsigned int i = 0; i < bdry_node_list.size(); i++)
-    if (std::get<1>(bdry_node_list[i]) == external_boundary_id)
-      slc_bdry_node_list.push_back(bdry_node_list[i]);
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> slc_bdry_side_list;
   for (unsigned int i = 0; i < bdry_side_list.size(); i++)
     if (std::get<2>(bdry_side_list[i]) == external_boundary_id)
@@ -293,8 +309,9 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
         {
           node_list.push_back((*elem_it)->side_ptr(i)->node_ptr(0)->id());
           node_list.push_back((*elem_it)->side_ptr(i)->node_ptr(1)->id());
-          boundary_info.add_side(*elem_it, i, external_boundary_id);
           boundary_info.add_side(*elem_it, i, trimming_section_boundary_id);
+          if (assign_ext_to_new && trimming_section_boundary_id != external_boundary_id)
+            boundary_info.add_side(*elem_it, i, external_boundary_id);
         }
     }
   }
@@ -430,10 +447,6 @@ HexagonMeshTrimmer::lineRemover(ReplicatedMesh & mesh,
   }
   mesh.contract();
   mesh.prepare_for_use();
-
-  // Assign customized outer surface boundary id and name
-  if (external_boundary_id != OUTER_SIDESET_ID)
-    MooseMesh::changeBoundaryId(mesh, OUTER_SIDESET_ID, external_boundary_id, false);
 }
 
 bool
@@ -492,7 +505,7 @@ HexagonMeshTrimmer::quasiTriElementsFixer(ReplicatedMesh & mesh,
   for (const auto & bad_elem : bad_elems_rec)
   {
     std::vector<boundary_id_type> elem_bdry_container;
-    // elems 2 and 3 are the neighboring elements of the degenerate element corresponsing to the two
+    // elems 2 and 3 are the neighboring elements of the degenerate element corresponding to the two
     // collinear sides.
     Elem * elem_0 = std::get<0>(bad_elem);
     Elem * elem_1 = elem_0->neighbor_ptr(std::get<1>(bad_elem));
