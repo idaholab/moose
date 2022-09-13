@@ -44,6 +44,7 @@
     holes = 'inner_square'
     stitch_holes = 'true'
     refine_holes = 'false'
+    verify_holes = false
     add_nodes_per_boundary_segment = 2
     refine_boundary = false
     desired_area = 0.05
@@ -64,6 +65,7 @@
     holes = 'triang_3'
     stitch_holes = 'true'
     refine_holes = 'false'
+    verify_holes = false
     add_nodes_per_boundary_segment = 2
     refine_boundary = true
     desired_area = 0.2
