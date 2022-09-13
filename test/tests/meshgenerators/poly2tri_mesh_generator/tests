@@ -60,6 +60,14 @@
       recover = false
       detail = "respecting any specified interior 'hole' meshes"
     []
+    [with_hole_names]
+      type = 'Exodiff'
+      input = 'poly2tri_with_hole_names.i'
+      cli_args = '--mesh-only'
+      exodiff = 'poly2tri_with_hole_names_in.e'
+      recover = false
+      detail = "assigning user-provided hole boundary names"
+    []
     [stitching]
       type = 'Exodiff'
       input = 'poly2tri_stitching.i'
