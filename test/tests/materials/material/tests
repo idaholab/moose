@@ -72,15 +72,6 @@
                   "dependency."
   []
 
-  [mat_block_boundary_check]
-    type = 'RunException'
-    input = 'material_block_bound_check.i'
-    expect_err = 'Material property \S+, requested by \S+ is not defined on block \S'
-
-    requirement = "The system shall error is a material property is requested on a subdomain on "
-                  "which it is not defined."
-  []
-
   [test]
     type = 'Exodiff'
     input = 'material_test.i'
