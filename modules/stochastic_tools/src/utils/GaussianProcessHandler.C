@@ -45,21 +45,20 @@ GaussianProcessHandler::linkCovarianceFunction(CovarianceFunctionBase * covarian
 void
 GaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix & training_params,
                                               const RealEigenMatrix & training_data,
-                                              MooseEnum opt_type,
-                                              GPOptimizerOptions opts)
+                                              const GPOptimizerOptions & opts)
 {
   if (opts.batch_size > 0)
     _K.resize(opts.batch_size, opts.batch_size);
   else
     _K.resize(training_params.rows(), training_params.rows());
 
-  if (opt_type == "tao")
+  if (opts.opt_type == "tao")
   {
     if (tuneHyperParamsTAO(
             training_params, training_data, opts.tao_options, opts.show_optimization_details))
       ::mooseError("PETSc/TAO error in hyperparameter tuning.");
   }
-  else if (opt_type == "adam")
+  else if (opts.opt_type == "adam")
     tuneHyperParamsAdam(training_params,
                         training_data,
                         opts.iter_adam,

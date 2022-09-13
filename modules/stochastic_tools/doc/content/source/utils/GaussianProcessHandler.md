@@ -47,6 +47,11 @@ parameters during the generation of the Covariance matrix:
 
 !listing GaussianProcessTrainer.C start=_gp_handler.setupCovarianceMatrix( end=}
 
-Or by simply calling the optimizer:
+Or by simply calling the optimizer with TAO (deterministic algorithms):
 
-!listing GaussianProcessHandler.C line=tuneHyperParamsTAO(training_params
+!listing GaussianProcessHandler.C start=tuneHyperParamsTAO end=)) include-end=True
+
+or with Adam (stochastic algorithm):
+
+!listing GaussianProcessHandler.C start=tuneHyperParamsAdam(training_params end=);
+

@@ -169,6 +169,7 @@ GaussianProcessTrainer::postTrain()
 
   // Setup the covariance
   StochasticTools::GaussianProcessHandler::GPOptimizerOptions opts;
+  opts.opt_type = _tuning_algorithm;
   opts.tao_options = isParamValid("tao_options") ? getParam<std::string>("tao_options") : "";
   opts.show_optimization_details = isParamValid("show_optimization_details")
                                        ? getParam<bool>("show_optimization_details")
@@ -177,5 +178,5 @@ GaussianProcessTrainer::postTrain()
   opts.batch_size = _batch_size;
   opts.learning_rate_adam = _learning_rate_adam;
 
-  _gp_handler.setupCovarianceMatrix(_training_params, _training_data, _tuning_algorithm, opts);
+  _gp_handler.setupCovarianceMatrix(_training_params, _training_data, opts);
 }

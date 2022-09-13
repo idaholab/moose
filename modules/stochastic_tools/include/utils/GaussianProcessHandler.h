@@ -42,27 +42,34 @@ public:
                   std::vector<Real> min = std::vector<Real>(),
                   std::vector<Real> max = std::vector<Real>());
 
+  /// Structure containing the optimization options for
+  /// hyperparameter-tuning
+  struct GPOptimizerOptions
+  {
+    /// The optimizer type
+    MooseEnum opt_type = MooseEnum("adam tao", "adam");
+    /// String defining the options for TAO optimizers
+    std::string tao_options;
+    /// Switch to enable verbose output for parameter tuning
+    bool show_optimization_details;
+    /// The number of iterations for Adam optimizer
+    unsigned int iter_adam;
+    /// The batch isize for Adam optimizer
+    unsigned int batch_size;
+    /// The learning rate for Adam optimizer
+    Real learning_rate_adam = 1e-3;
+  };
   /**
    * Sets up the covariance matrix given data and optimization options.
    * @param training_params The training parameter values (x values) for the
    *                        covariance matrix.
    * @param training_data The training data (y values) for the inversion of the
    *                      covariance matrix.
-   * @param opt_type The optimization method.
-   * @param opts The optimizer options shown below.
+   * @param opts The optimizer options.
    */
-  struct GPOptimizerOptions
-  {
-    std::string tao_options;
-    bool show_optimization_details;
-    unsigned int iter_adam;
-    unsigned int batch_size;
-    Real learning_rate_adam;
-  };
   void setupCovarianceMatrix(const RealEigenMatrix & training_params,
                              const RealEigenMatrix & training_data,
-                             MooseEnum opt_type,
-                             GPOptimizerOptions opts);
+                             const GPOptimizerOptions & opts);
 
   /**
    * Sets up the Cholesky decomposition and inverse action of the covariance matrix.
