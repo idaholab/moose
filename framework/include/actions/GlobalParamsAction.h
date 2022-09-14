@@ -50,4 +50,10 @@ public:
   {
     return parameters().set<std::vector<std::vector<T>>>(name);
   }
+
+  template <typename T>
+  inline std::vector<std::vector<std::vector<T>>> & setTripleIndexParam(const std::string & name)
+  {
+    return parameters().set<std::vector<std::vector<std::vector<T>>>>(name);
+  }
 };
