@@ -49,7 +49,7 @@ protected:
   std::vector<unsigned int> _elem_integer_indices_to_swap;
 
   /// Extra element integers to swap out for each elevation and each element interger name
-  const std::vector<std::vector<dof_id_type>> & _elem_integers_swaps;
+  const std::vector<std::vector<std::vector<dof_id_type>>> & _elem_integers_swaps;
 
   /// Easier to work with version of _sudomain_swaps
   std::vector<std::unordered_map<subdomain_id_type, subdomain_id_type>> _subdomain_swap_pairs;

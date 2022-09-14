@@ -76,12 +76,12 @@ AdvancedExtruderGenerator::validParams()
       "elem_integer_names_to_swap",
       "Array of element extra integer names that need to be swapped during extrusion.");
 
-  params.addParam<std::vector<std::vector<dof_id_type>>>(
+  params.addParam<std::vector<std::vector<std::vector<dof_id_type>>>>(
       "elem_integers_swaps",
       "For each row, every two entries are interpreted as a pair of 'from' and 'to' to remap the "
       "element extra integer for that elevation. If multiple element extra integers need to be "
       "swapped, the enties are stacked based on the order provided in "
-      "'elem_integer_names_to_swap'.");
+      "'elem_integer_names_to_swap' to form the third dimension.");
 
   params.addRequiredParam<Point>(
       "direction",
@@ -128,7 +128,8 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     _subdomain_swaps(getParam<std::vector<std::vector<subdomain_id_type>>>("subdomain_swaps")),
     _boundary_swaps(getParam<std::vector<std::vector<boundary_id_type>>>("boundary_swaps")),
     _elem_integer_names_to_swap(getParam<std::vector<std::string>>("elem_integer_names_to_swap")),
-    _elem_integers_swaps(getParam<std::vector<std::vector<dof_id_type>>>("elem_integers_swaps")),
+    _elem_integers_swaps(
+        getParam<std::vector<std::vector<std::vector<dof_id_type>>>>("elem_integers_swaps")),
     _direction(getParam<Point>("direction")),
     _has_top_boundary(isParamValid("top_boundary")),
     _top_boundary(isParamValid("top_boundary") ? getParam<boundary_id_type>("top_boundary") : 0),
@@ -220,18 +221,24 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
   }
 
   if (_elem_integers_swaps.size() &&
-      (_elem_integers_swaps.size() != num_elevations * _elem_integer_names_to_swap.size()))
+      _elem_integers_swaps.size() != _elem_integer_names_to_swap.size())
     paramError("elem_integers_swaps",
-               "If specified, 'elem_integers_swaps' must be the same length as the product of the "
-               "length of 'heights' and the length of 'elem_integer_names_to_swap'.");
+               "If specified, 'elem_integers_swaps' must have the same length as the length of "
+               "'elem_integer_names_to_swap'.");
 
-  _elem_integers_swap_pairs.resize(_elem_integers_swaps.size());
+  for (const auto & unit_elem_integers_swaps : _elem_integers_swaps)
+    if (unit_elem_integers_swaps.size() != num_elevations)
+      paramError("elem_integers_swaps",
+                 "If specified, each element of 'elem_integers_swaps' must have the same length as "
+                 "the length of 'heights'.");
+
+  _elem_integers_swap_pairs.resize(num_elevations * _elem_integer_names_to_swap.size());
   // Reprocess the elem_integers_swaps to make pairs out of them so they are easier to use
   for (unsigned int i = 0; i < _elem_integer_names_to_swap.size(); i++)
   {
     for (unsigned int j = 0; j < num_elevations; j++)
     {
-      const auto & elevation_extra_swaps = _elem_integers_swaps[i * num_elevations + j];
+      const auto & elevation_extra_swaps = _elem_integers_swaps[i][j];
       auto & elevation_extra_swap_pairs = _elem_integers_swap_pairs[i * num_elevations + j];
 
       if (elevation_extra_swaps.size() % 2)
