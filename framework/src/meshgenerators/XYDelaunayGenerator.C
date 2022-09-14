@@ -132,8 +132,8 @@ XYDelaunayGenerator::generate()
           "input_subdomain_names",
           "input_boundary_names and input_subdomain_names cannot both specify an outer boundary.");
 
-    auto _boundary_names = getParam<std::vector<BoundaryName>>("input_boundary_names");
-    for (const auto & name : _boundary_names)
+    const auto & boundary_names = getParam<std::vector<BoundaryName>>("input_boundary_names");
+    for (const auto & name : boundary_names)
     {
       auto bcid = MooseMeshUtils::getBoundaryID(name, *mesh);
       if (bcid == BoundaryInfo::invalid_id)
