@@ -149,7 +149,8 @@ AddLotsOfDiffusion::act()
       _problem->addMaterial("GenericConstantArray", "dc", params);
 
       // pass the control to the material by connecting them
-      connectControllableParams("diffusion_coefficients", "MaterialBase", "dc", "prop_value");
+      connectControllableParams(
+          "diffusion_coefficients", "GenericConstantArray", "dc", "prop_value");
     }
 
     if (getParam<bool>("add_reaction"))

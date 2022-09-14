@@ -219,17 +219,7 @@ protected:
    * Connect controllable parameter of this action with the controllable parameters of the
    * objects added by this action.
    * @param parameter Name of the controllable parameter of this action
-   * @param object_type Type of the object added by this action. Acceptable types include
-   *                    LineSearch, MooseMesh, AuxScalarKernel, AuxKernel, VectorAuxKernel,
-   *                    ArrayAuxKernel, ScalarKernel, Kernel, VectorKernel, ArrayKernel,
-   *                    EigenKernel, Executioner, FVKernel, MaterialBase, BoundaryCondition,
-   *                    MeshGenerator, Constraint, Marker, VectorPostprocessor, MoosePartitioner,
-   *                    Indicator, Postprocessor, Predictor, Problem, Transfer, DiracKernel,
-   *                    Damper, DGKernel, MultiApp, InterfaceKernel, VectorInterfaceKernel,
-   *                    UserObject, Executor, MoosePreconditioner, MooseVariableBase, Sampler,
-   *                    TimeStepper, Function, FVBoundaryCondition, Reporter, Output,
-   *                    FVInterfaceKernel, InitialCondition, ScalarInitialCondition, Distribution,
-   *                    TimeIntegrator, NodalKernel, Split, RelationshipManager.
+   * @param object_type Type of the object added by this action.
    * @param object_name Name of the object added by this action.
    * @param object_parameter Name of the parameter of the object.
    */

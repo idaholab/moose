@@ -186,7 +186,8 @@ Action::connectControllableParams(const std::string & parameter,
                                   const std::string & object_parameter) const
 {
   MooseObjectParameterName primary_name(uniqueActionName(), parameter);
-  MooseObjectParameterName secondary_name(object_type, object_name, object_parameter);
+  auto base_type = _factory.getValidParams(object_type).get<std::string>("_moose_base");
+  MooseObjectParameterName secondary_name(base_type, object_name, object_parameter);
   _app.getInputParameterWarehouse().addControllableParameterConnection(primary_name,
                                                                        secondary_name);
 

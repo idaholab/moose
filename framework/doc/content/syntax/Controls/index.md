@@ -83,18 +83,88 @@ the syntax for a parameter name is specified as: `block/object/name`.
 As shown in [controls_example] an asterisk ("*") can be substituted for any one of these three
 "names", doing so allows multiple parameters to match and be controlled simultaneously.
 
-In similar fashion, object names can be defined (e.g., as in the
-[`TimePeriod`](/TimePeriod.md)) object. In this case, the general name scheme is the same
+In similar fashion, object names can be requested by controls (e.g., as in the
+[`TimePeriod`](/TimePeriod.md)). In this case, the general name scheme is the same
 as above but the parameter name is not included.
 
 In both cases there is an alternative form for defining an object and parameter names:
 `base::object/name`. In this case "base" is the MOOSE base system that the object is derived from.
-For example, `Kernel::diff/coef`.
+For example, `Kernel::diff/coef`. All MOOSE "bases" are listed bellow:
+
+- ArrayAuxKernel,
+- ArrayKernel,
+- AuxKernel,
+- AuxScalarKernel,
+- BoundaryCondition,
+- Constraint,
+- Damper,
+- DGKernel,
+- DiracKernel,
+- Distribution,
+- EigenKernel,
+- Executioner,
+- Executor,
+- Function,
+- FVBoundaryCondition,
+- FVInterfaceKernel,
+- FVKernel,
+- Indicator,
+- InitialCondition,
+- InterfaceKernel,
+- Kernel,
+- LineSearch,
+- Marker,
+- MaterialBase,
+- MeshGenerator,
+- MooseMesh,
+- MoosePartitioner,
+- MoosePreconditioner,
+- MooseVariableBase,
+- MultiApp,
+- NodalKernel,
+- Output,
+- Postprocessor,
+- Predictor,
+- Problem,
+- RelationshipManager.,
+- Reporter,
+- Sampler,
+- ScalarInitialCondition,
+- ScalarKernel,
+- Split,
+- TimeIntegrator,
+- TimeStepper,
+- Transfer,
+- UserObject,
+- VectorAuxKernel,
+- VectorInterfaceKernel,
+- VectorKernel,
+- VectorPostprocessor,
+
+MOOSE allows objects to define a `tag` name to access its controllable parameters with their `control_tags` parameter.
+
+!listing test/tests/controls/tag_based_naming_access/param.i
+         block=Postprocessors
+         id=controls_tags
+         caption=Example of the parameter control_tags.
+
+The two postprocessors in [controls_tags] declare the same control tag `tag`.
+Thus their controllable parameter `point` can be set by controls simultaneously with `tag/*/point` as in [controls_tags_use].
+
+!listing test/tests/controls/tag_based_naming_access/param.i
+         block=Postprocessors
+         id=controls_tags_use
+         caption=Example of usinging the tagged controllable parameters.
+
+!alert note
+The tag name does not include the object name although the tag name is added by an object.
+To access a controllable parameter, the sytax is `tag/object/name`.
+Internally, MOOSE adds the input block name as a special tag name.
 
 ## Controllable Parameters Added by Actions
 
-MOOSE also allows parameters in [Action](Action.md) to be controllable.
-The procedure for making a parameter in an [Action](Action.md) controllable is the same as documented in [Creating a Controllable Parameter](syntax/Controls/index.md#sec:control-param).
+MOOSE also allows parameters in [Actions](Action.md) to be controllable.
+The procedure for making a parameter in an [Action](Action.md) controllable is the same as documented in [syntax/Controls/index.md#sec:control-param].
 It is important that this controllable parameter must be directly connected with the parameters of MOOSE objects, such as kernels, materials, etc., using this parameter.
 
 !listing test/src/actions/AddLotsOfDiffusion.C
