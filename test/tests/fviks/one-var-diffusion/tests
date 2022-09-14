@@ -21,7 +21,9 @@
   [run_except3]
     type = RunException
     input = test.i
-    expect_err = "variable1 does not exist on all the blocks specified by the subdomain2 parameter\.\s*Note that you did not provide the variable2 parameter, so variable1 was implicitly used on subdomain2"
+    expect_err = "variable1 does not exist on all the blocks specified by the subdomain2 "
+                 "parameter\.\s*Note that you did not provide the variable2 parameter, so variable1 "
+                 "was implicitly used on subdomain2"
     cli_args = "FVInterfaceKernels/active='bad3'"
     design = 'FVInterfaceKernels/index.md'
     ad_indexing_type = 'global'
@@ -46,6 +48,17 @@
       ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
     []
+  []
+  [harmonic]
+    requirement = "The system shall be able to solve a diffusion problem with finite volumes with "
+                  "the domain split in half and show second order convergence due to the harmonic "
+                  "interpolation of the diffusion coeffcient"
+    design = 'FVOneVarDiffusionInterface.md'
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestFVOneVarDiffusionInterfaceHarmonic
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
   []
   [resid_and_jac]
     requirement = 'The system shall be able to compute the residual and Jacobian together for a finite volume interface kernel.'

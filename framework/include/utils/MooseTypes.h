@@ -423,6 +423,15 @@ struct ADType<VariableSecond>
 {
   typedef ADVariableSecond type;
 };
+
+/**
+ * This is a helper variable template for cases when we want to use a default compile-time
+ * error with constexpr-based if conditions. The templating delays the triggering
+ * of the static assertion until the template is instantiated.
+ */
+template <class T>
+constexpr std::false_type always_false{};
+
 } // namespace Moose
 
 /**

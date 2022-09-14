@@ -5,27 +5,27 @@
     nx = 20
     xmax = 2
   []
-  [./subdomain1]
+  [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '1.0 0 0'
     block_id = 1
     top_right = '2.0 1.0 0'
-  [../]
-  [./left_right]
+  []
+  [left_right]
     input = subdomain1
     type = SideSetsBetweenSubdomainsGenerator
     primary_block = '0'
     paired_block = '1'
     new_boundary = 'left_right'
-  [../]
-  [./right_left]
+  []
+  [right_left]
     input = left_right
     type = SideSetsBetweenSubdomainsGenerator
     primary_block = '1'
     paired_block = '0'
     new_boundary = 'right_left'
-  [../]
+  []
 []
 
 [Variables]
@@ -49,12 +49,14 @@
     variable = left
     coeff = coeff_left
     block = 0
+    coeff_interp_method = average
   []
   [right]
     type = FVDiffusion
     variable = right
     coeff = coeff_right
     block = 1
+    coeff_interp_method = average
   []
 []
 
