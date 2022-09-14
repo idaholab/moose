@@ -16,6 +16,8 @@ SinglePhaseFluidProperties::validParams()
   InputParameters params = FluidProperties::validParams();
   params.addCustomTypeParam<std::string>(
       "fp_type", "single-phase-fp", "FPType", "Type of the fluid property object");
+
+  // Variable set conversion parameters
   params.addRangeCheckedParam<Real>(
       "tolerance", 1e-8, "tolerance > 0", "Tolerance for 2D Newton variable set conversion");
   params.addRangeCheckedParam<Real>(
@@ -28,15 +30,18 @@ SinglePhaseFluidProperties::validParams()
       2e5,
       "p_initial_guess > 0",
       "Pressure initial guess for Newton Method variable set conversion");
+  params.addParamNamesToGroup("tolerance T_initial_guess p_initial_guess",
+      "Variable set conversions");
 
   return params;
 }
 
 SinglePhaseFluidProperties::SinglePhaseFluidProperties(const InputParameters & parameters)
   : FluidProperties(parameters),
+    // downstream apps are creating fluid properties without their parameters, hence the workaround
     _tolerance(isParamValid("tolerance") ? getParam<Real>("tolerance") : 1e-8),
-    _T_initial_guess(getParam<Real>("T_initial_guess")),
-    _p_initial_guess(getParam<Real>("p_initial_guess"))
+    _T_initial_guess(isParamValid("T_initial_guess") ? getParam<Real>("T_initial_guess") : 400),
+    _p_initial_guess(isParamValid("p_initial_guess") ? getParam<Real>("p_initial_guess") : 2e5)
 {
 }
 

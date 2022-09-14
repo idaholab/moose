@@ -84,7 +84,7 @@ class BidimensionalInterpolation;
  * less than using the original FluidProperties UserObject.
  *
  * Properties specified in the data file or listed in the input file (and their derivatives
- * wrt pressure and temperature) will be calculated using Bidimensional interpolation, while all
+ * wrt pressure and temperature) will be calculated using bi-dimensional interpolation, while all
  * remaining fluid properties are calculated using the supplied FluidProperties UserObject.
  */
 class TabulatedFluidProperties : public SinglePhaseFluidProperties
@@ -239,7 +239,7 @@ protected:
   // Tabulated fluid properties
   std::vector<std::vector<Real>> _properties;
 
-  // Bidimensional Interpolated fluid property
+  // Vector of bi-dimensional interpolation of fluid properties
   std::vector<std::unique_ptr<BidimensionalInterpolation>> _property_ipol;
 
   // Minimum temperature in tabulated data
@@ -304,21 +304,19 @@ protected:
   unsigned int _num_v;
   // Number of internal energy points in tabulated data
   unsigned int _num_e;
-  // interpolation order for inversion
-  unsigned int _inversion_interpolation_order;
   // to error or not on out of bounds check
   bool _error_on_out_of_bounds;
 
-  // Bidimensional interpolate temperature from (v,e)
+  // Bi-dimensional interpolation of temperature from (v,e)
   std::unique_ptr<BidimensionalInterpolation> _T_from_v_e_ipol;
 
-  // Bidimensional interpolate pressure from (v,e)
+  // Bi-dimensional interpolation of pressure from (v,e)
   std::unique_ptr<BidimensionalInterpolation> _p_from_v_e_ipol;
 
-  // Bidimensional interpolate temperature from (v,h)
+  // Bidimensional interpolation of temperature from (v,h)
   std::unique_ptr<BidimensionalInterpolation> _T_from_v_h_ipol;
 
-  // Bidimensional interpolate pressure from (v,h)
+  // Bidimensional interpolation of pressure from (v,h)
   std::unique_ptr<BidimensionalInterpolation> _p_from_v_h_ipol;
 
   // Minimum internal energy in tabulated data

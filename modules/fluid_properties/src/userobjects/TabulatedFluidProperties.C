@@ -32,19 +32,19 @@ TabulatedFluidProperties::validParams()
   params.addRangeCheckedParam<Real>("temperature_min",
                                     300,
                                     "temperature_min > 0",
-                                    "Minimum temperature for tabulated data. Default is 300 K)");
+                                    "Minimum temperature for tabulated data.");
   params.addParam<Real>(
-      "temperature_max", 500, "Maximum temperature for tabulated data. Default is 500 K");
+      "temperature_max", 500, "Maximum temperature for tabulated data.");
   params.addRangeCheckedParam<Real>("pressure_min",
                                     1e5,
                                     "pressure_min > 0",
-                                    "Minimum pressure for tabulated data. Default is 0.1 MPa)");
+                                    "Minimum pressure for tabulated data.");
   params.addParam<Real>(
-      "pressure_max", 50.0e6, "Maximum pressure for tabulated data. Default is 50 MPa");
+      "pressure_max", 50.0e6, "Maximum pressure for tabulated data.");
   params.addRangeCheckedParam<unsigned int>(
-      "num_T", 100, "num_T > 0", "Number of points to divide temperature range. Default is 100");
+      "num_T", 100, "num_T > 0", "Number of points to divide temperature range.");
   params.addRangeCheckedParam<unsigned int>(
-      "num_p", 100, "num_p > 0", "Number of points to divide pressure range. Default is 100");
+      "num_p", 100, "num_p > 0", "Number of points to divide pressure range.");
   params.addParam<UserObjectName>("fp", "The name of the FluidProperties UserObject");
   MultiMooseEnum properties("density enthalpy internal_energy viscosity k c cv cp entropy",
                             "density enthalpy internal_energy viscosity");
@@ -62,17 +62,12 @@ TabulatedFluidProperties::validParams()
       "num_v",
       100,
       "num_v > 0",
-      "Number of points to divide specific volume range for (v,e) lookups. Default is 100");
+      "Number of points to divide specific volume range for (v,e) lookups.");
   params.addRangeCheckedParam<unsigned int>("num_e",
                                             100,
                                             "num_e > 0",
                                             "Number of points to divide specific internal energy "
-                                            "range for (v,e) lookups. Default is 100");
-  params.addRangeCheckedParam<unsigned int>(
-      "pt_ve_inversion_interpolation_order",
-      3,
-      "pt_ve_inversion_interpolation_order > 0",
-      "Number of points used for interpolating (p, T) points during (p,T)->(v,e) inversion");
+                                            "range for (v,e) lookups.");
   params.addParam<bool>(
       "error_on_out_of_bounds",
       true,
@@ -120,7 +115,6 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _initial_setup_done(false),
     _num_v(getParam<unsigned int>("num_v")),
     _num_e(getParam<unsigned int>("num_e")),
-    _inversion_interpolation_order(getParam<unsigned int>("pt_ve_inversion_interpolation_order")),
     _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds"))
 {
   // Check that initial guess (used in Newton Method) is within min and max values
@@ -819,7 +813,7 @@ Real
 TabulatedFluidProperties::e_from_v_h(Real v, Real h) const
 {
   if (!_construct_pT_from_vh)
-    mooseError("You must construct pT from ve tables when calling e_from_v_h.");
+    mooseError("You must construct pT from vh tables when calling e_from_v_h.");
   const Real p = _p_from_v_h_ipol->sample(v, h);
   const Real T = _T_from_v_h_ipol->sample(v, h);
   return e_from_p_T(p, T);
@@ -829,7 +823,7 @@ void
 TabulatedFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const
 {
   if (!_construct_pT_from_vh)
-    mooseError("You must construct pT from ve tables when calling e_from_v_h.");
+    mooseError("You must construct pT from vh tables when calling e_from_v_h.");
   Real p = 0, dp_dv = 0, dp_dh = 0;
   _p_from_v_h_ipol->sampleValueAndDerivatives(v, h, p, dp_dv, dp_dh);
   Real T = 0, dT_dv = 0, dT_dh = 0;
@@ -1315,16 +1309,20 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
 void
 TabulatedFluidProperties::checkInitialGuess() const
 {
-  if (_p_initial_guess < _pressure_min || _p_initial_guess > _pressure_max)
-    paramError("Pressure Initial Guess " + Moose::stringify(_p_initial_guess) +
-               " is outside the range of tabulated pressure (" + Moose::stringify(_pressure_min) +
-               ", " + Moose::stringify(_pressure_max) + ").");
+  if (_construct_pT_from_ve || _construct_pT_from_vh)
+  {
+    if (_p_initial_guess < _pressure_min || _p_initial_guess > _pressure_max)
+      mooseWarning("Pressure initial guess for (p,T), (v,e) conversions " +
+                  Moose::stringify(_p_initial_guess) + " is outside the range of tabulated "
+                  "pressure (" + Moose::stringify(_pressure_min) +
+                  ", " + Moose::stringify(_pressure_max) + ").");
 
-  if (_T_initial_guess < _temperature_min || _T_initial_guess > _temperature_max)
-    paramError("Temperature Initial Guess " + Moose::stringify(_T_initial_guess) +
-               " is outside the range of tabulated temperature (" +
-               Moose::stringify(_temperature_min) + ", " + Moose::stringify(_temperature_max) +
-               ").");
+    if (_T_initial_guess < _temperature_min || _T_initial_guess > _temperature_max)
+      mooseWarning("Temperature initial guess for (p,T), (v,e) conversions " +
+                  Moose::stringify(_T_initial_guess) + " is outside the range of tabulated "
+                  "temperature (" + Moose::stringify(_temperature_min) + ", " +
+                  Moose::stringify(_temperature_max) + ").");
+  }
 }
 
 template void TabulatedFluidProperties::checkInputVariables(Real & pressure,

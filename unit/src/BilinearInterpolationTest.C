@@ -42,9 +42,6 @@ TEST(BilinearInterpolationTest, sample)
   for (unsigned int i = 0; i < m; ++i)
     x2[i] = i / Real(m) * max_x2;
 
-  std::cout << x1[0] << " " << x1[n - 1] << std::endl;
-  std::cout << x2[0] << " " << x2[m - 1] << std::endl;
-
   // Get function at all points on the grid
   for (unsigned int i = 0; i < n; ++i)
     for (unsigned int j = 0; j < m; ++j)
