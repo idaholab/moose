@@ -1,16 +1,26 @@
+L = 2
+l = 1
+q1 = 1
+q2 = 2
+uR = 1
+D1 = 1
+D2 = 2
+
+ul = '${fparse 1/D2*(D2*uR+q2*L*L/2-q2*l*l/2-l*(q2-q1)*L+l*l*(q2-q1))}'
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 10
-    xmax = 2
+    xmax = ${L}
   []
   [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
-    bottom_left = '1.0 0 0'
+    bottom_left = '${l} 0 0'
     block_id = 1
-    top_right = '2.0 1.0 0'
+    top_right = '${L} 1.0 0'
   []
   [interface_primary_side]
     input = subdomain1
@@ -55,6 +65,18 @@
     coeff = 'right'
     block = 1
   []
+  [source_left]
+    type = FVBodyForce
+    variable = u
+    function = ${q1}
+    block = 0
+  []
+  [source_right]
+    type = FVBodyForce
+    variable = u
+    function = ${q2}
+    block = 1
+  []
   [diff_v]
     type = FVDiffusion
     variable = v
@@ -79,6 +101,7 @@
     subdomain2 = '1'
     coeff1 = 'left'
     coeff2 = 'right'
+    coeff_interp_method = average
   []
   [bad1]
     type = FVOneVarDiffusionInterface
@@ -89,6 +112,7 @@
     subdomain2 = '1'
     coeff1 = 'left'
     coeff2 = 'right'
+    coeff_interp_method = average
   []
   [bad2]
     type = FVOneVarDiffusionInterface
@@ -99,6 +123,7 @@
     subdomain2 = '1'
     coeff1 = 'left'
     coeff2 = 'right'
+    coeff_interp_method = average
   []
   [bad3]
     type = FVOneVarDiffusionInterface
@@ -108,21 +133,16 @@
     subdomain2 = '1'
     coeff1 = 'left'
     coeff2 = 'right'
+    coeff_interp_method = average
   []
 []
 
 [FVBCs]
-  [left]
-    type = FVDirichletBC
-    variable = u
-    boundary = 'left'
-    value = 1
-  []
   [right]
     type = FVDirichletBC
     variable = u
     boundary = 'right'
-    value = 0
+    value = ${uR}
   []
   [v_left]
     type = FVDirichletBC
@@ -155,13 +175,13 @@
     type = ADGenericFunctorMaterial
     block = '0'
     prop_names = 'left'
-    prop_values = '4'
+    prop_values = '${D1}'
   []
   [block1]
     type = ADGenericFunctorMaterial
     block = '1'
     prop_names = 'right'
-    prop_values = '2'
+    prop_values = '${D2}'
   []
 []
 
@@ -185,7 +205,7 @@
 [Functions]
   [exact_u]
     type = ParsedFunction
-    value = 'if(x<1, 1 - x/3, 4/3 - 2*x/3)'
+    value = 'if(x<${l}, 1/${D1}*(${fparse D1*ul+q1*l*l/2}-${fparse q1/2}*x*x),-1/${D2}*(${fparse -D2*ul-q2*l*l/2}+${fparse q2/2}*x*x-${fparse l*(q2-q1)}*x+${fparse l*l*(q2-q1)}))'
   []
 []
 

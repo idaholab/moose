@@ -34,6 +34,11 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::validParams()
                                         "side of the interface. By default, the "
                                         "primary side material property name is used for the "
                                         "secondary side. Only needed for finite volume");
+  MooseEnum interp_method("average harmonic", "harmonic");
+  params.addParam<MooseEnum>(
+      "coeff_interp_method",
+      interp_method,
+      "Switch that can select face interpolation method for diffusion coefficients.");
   params.addClassDescription("Computes the diffusive flux on the interface.");
 
   return params;
@@ -63,6 +68,17 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::InterfaceDiffusiveFluxIntegralTempl(
         (!_has_fv_vars && getFieldVar("neighbor_variable", 0)->isFV()))
       mooseError("For the InterfaceDiffusiveFluxIntegral, variable and "
                  "neighbor_variable should be of a similar variable type.");
+
+  if (!_has_fv_vars && parameters.isParamSetByUser("coeff_interp_method"))
+    paramError(
+        "coeff_interp_method",
+        "This parameter should not be defined for the postprocessing of finite element variables!");
+
+  const auto & interp_method = getParam<MooseEnum>("coeff_interp_method");
+  if (interp_method == "average")
+    _coeff_interp_method = Moose::FV::InterpMethod::Average;
+  else if (interp_method == "harmonic")
+    _coeff_interp_method = Moose::FV::InterpMethod::HarmonicAverage;
 }
 
 template <bool is_ad>
@@ -81,7 +97,7 @@ InterfaceDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
     const auto gradient = (_u[_qp] - _u_neighbor[_qp]) * one_over_gradient_support;
 
     Real diffusivity;
-    interpolate(Moose::FV::InterpMethod::Average,
+    interpolate(_coeff_interp_method,
                 diffusivity,
                 MetaPhysicL::raw_value(_diffusion_coef[_qp]),
                 MetaPhysicL::raw_value(_diffusion_coef_neighbor[_qp]),
