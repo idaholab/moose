@@ -38,6 +38,7 @@ PINSFVTKEDSourceSink::validParams()
                         "Maximum mixing legth allowed for the domain - adjust for realizable k-epsilon to work properly.");
   params.addParam<bool>("linearized_model", false, "Boolean to determine if the problem is linearized.");
   params.addParam<MooseFunctorName>("linear_variable", 1.0, "Linearization coefficient in case the problem has been linearized.");
+  params.addParam<bool>("realizable_constraint", true, "Boolean to determine if the kEpsilon mixing length realizability constrints are applied.");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
@@ -61,7 +62,8 @@ PINSFVTKEDSourceSink::PINSFVTKEDSourceSink(const InputParameters & params)
     _C2_eps(getFunctor<ADReal>("C2_eps")),
     _max_mixing_length(getParam<Real>("max_mixing_length")),
     _linearized_model(getParam<bool>("linearized_model")),
-    _linear_variable(getFunctor<ADReal>("linear_variable"))
+    _linear_variable(getFunctor<ADReal>("linear_variable")),
+    _realizable_constraint(getParam<bool>("realizable_constraint"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -86,38 +88,47 @@ PINSFVTKEDSourceSink::PINSFVTKEDSourceSink(const InputParameters & params)
 ADReal
 PINSFVTKEDSourceSink::computeQpResidual()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 
   ADReal residual = 0.0;
 
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   const auto & grad_u = _u_var->adGradSln(_current_elem);
-  ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
+  auto Sij_00 = 0.5 * (grad_u(0) + grad_u(0));
+  ADReal symmetric_strain_tensor_norm = 2.0 * std::pow(Sij_00, 2);
   if (_dim >= 2)
   {
     const auto & grad_v = _v_var->adGradSln(_current_elem);
+    auto Sij_01 = 0.5 * (grad_u(1) + grad_v(0));
+    auto Sij_10 = Sij_01;
+    auto Sij_11 = 0.5 * (grad_v(1) + grad_u(1));
     symmetric_strain_tensor_norm +=
-        2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
+        2.0 * (std::pow(Sij_01, 2) + std::pow(Sij_10, 2) + std::pow(Sij_11, 2));
     if (_dim >= 3)
     {
       const auto & grad_w = _w_var->adGradSln(_current_elem);
-      symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
-                                      Utility::pow<2>(grad_u(2) + grad_w(0)) +
-                                      Utility::pow<2>(grad_v(2) + grad_w(1));
+      auto Sij_02 = 0.5 * (grad_u(2) + grad_w(0));
+      auto Sij_20 = Sij_02;
+      auto Sij_12 = 0.5 * (grad_v(2) + grad_w(1));
+      auto Sij_21 = Sij_12;
+      auto Sij_22 = 0.5 * (grad_w(2) + grad_w(2));
+      symmetric_strain_tensor_norm += (std::pow(Sij_02, 2) + std::pow(Sij_20, 2) 
+                                      + std::pow(Sij_12, 2) + std::pow(Sij_21, 2) 
+                                      + std::pow(Sij_22, 2));
     }
   }
 
-  symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
+  //symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
+  symmetric_strain_tensor_norm = 2.0 * symmetric_strain_tensor_norm + offset;
 
-  constexpr Real protection_k = 1e-10;
+  constexpr Real protection_k = 1e-15;
 
   ADReal production, destruction;
+  auto production_k = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm;
   if (_linearized_model)
   {
     auto production = _C1_eps(makeElemArg(_current_elem))
-                      * _mu_t(makeElemArg(_current_elem))
-                      * symmetric_strain_tensor_norm
+                      * production_k
                       * _linear_variable(makeElemArg(_current_elem));
 
     auto destruction = _C2_eps(makeElemArg(_current_elem))
@@ -128,8 +139,7 @@ PINSFVTKEDSourceSink::computeQpResidual()
   else
   {
     auto production = _C1_eps(makeElemArg(_current_elem))
-                      * _mu_t(makeElemArg(_current_elem))
-                      * symmetric_strain_tensor_norm
+                      * production_k
                       * _var(makeElemArg(_current_elem))
                       / (_k(makeElemArg(_current_elem)) + protection_k);
 
@@ -139,26 +149,37 @@ PINSFVTKEDSourceSink::computeQpResidual()
                       / (_k(makeElemArg(_current_elem)) + protection_k);
   }
 
-  // Realizable dissipation constraints
-  production = (production > 0) ? production : 0.0;
-  destruction = (destruction > 0) ? destruction : 0.0;
-  // production = (production/destruction < 5) ? production : 5*destruction;
-  // production = (destruction/production < 5) ? destruction : 5*production;
+  // _console << "Coord: " << _current_elem->vertex_average() << std::endl;
+  // _console << "Production eps: " << production << std::endl;
+  // _console << "Destruction eps: " << destruction << std::endl;
+
+  if (_realizable_constraint)
+  {
+    // Realizable dissipation constraints
+    production = (production > 0) ? production : 0.0;
+    destruction = (destruction > 0) ? destruction : 0.0;
+    destruction = (destruction < production) ? destruction : production;
+    
+  }
 
   residual += production - destruction;
 
   // Mixing length realizable source constraints
-  auto bottom_constraint = 0.09*std::pow(_k(makeElemArg(_current_elem)), 1.5) / _max_mixing_length / 10.0; // Must include hard value for C_mu
-  auto top_constraint = std::pow(_k(makeElemArg(_current_elem)), 1.5) / _max_mixing_length * 10.0;
-  residual = (residual > top_constraint) ? residual : top_constraint;
-  residual = (residual < bottom_constraint) ? residual : bottom_constraint;
+  // if (_realizable_constraint)
+  // {
+  //   //auto bottom_constraint = 0.09*std::pow(_k(makeElemArg(_current_elem)), 1.5) / _max_mixing_length / 10.0; // Must include hard value for C_mu
+  //   //auto top_constraint = std::pow(_k(makeElemArg(_current_elem)), 1.5) / _max_mixing_length * 10.0;
+  //   //residual = (residual > top_constraint) ? residual : top_constraint;
+  //   //residual = (residual < bottom_constraint) ? residual : bottom_constraint;
+  //   if ( (residual < 0) && (std::abs(residual) > 0.5*_var(makeElemArg(_current_elem))) )
+  //     residual *= 0.5*_var(makeElemArg(_current_elem))  / residual;
+  //   Real scaled_argument = 1e-9/std::abs(residual.value() + 1e-12);
+  //   auto exp_argument = std::min(scaled_argument, 20.0);
+  //   residual *= std::exp(- exp_argument);
+  // }
 
   if (_porosity_factored_in)
     residual *= _porosity(makeElemArg(_current_elem));
 
-  return residual;
-  #else
-    return 0;
-
-  #endif
+  return - residual;
 }

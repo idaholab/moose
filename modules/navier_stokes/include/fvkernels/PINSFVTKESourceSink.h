@@ -59,4 +59,7 @@ protected:
 
   /// Linearization coupled functor
   const Moose::Functor<ADReal> & _linear_variable;
+
+  /// Apply realizable constraints?
+  const bool _realizable_constraint;
 };

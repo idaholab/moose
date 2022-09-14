@@ -73,7 +73,7 @@ PINSFVTurbulentDiffusion::computeQpResidual()
                            *_face_info,
                            true);
 
-  // Compute the temperature gradient dotted with the surface normal
+  // Compute the gradient dotted with the surface normal
   auto dVardn = gradUDotNormal();
 
   return -diffusion_face * dVardn;

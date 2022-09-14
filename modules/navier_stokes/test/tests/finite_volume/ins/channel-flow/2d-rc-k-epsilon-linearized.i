@@ -34,8 +34,8 @@ velocity_interp_method = 'rc'
     xmax = 10
     ymin = 0
     ymax = '${fparse 0.5 * D}'
-    nx = 50
-    ny = 20
+    nx = 25
+    ny = 10
     bias_y = '${fparse 1 / 1.2}'
   []
 []
@@ -47,18 +47,18 @@ velocity_interp_method = 'rc'
   []
   [vel_y]
     type = INSFVVelocityVariable
-    initial_condition = 1
+    initial_condition = 1e-8
   []
   [pressure]
     type = INSFVPressureVariable
   []
   [TKE]
     type = INSFVEnergyVariable
-    initial_condition = 1.0
+    initial_condition = 100.0
   []
   [TKED]
     type = INSFVEnergyVariable
-    initial_condition = 1.0
+    initial_condition = 100.0
   []
 []
 
@@ -295,8 +295,18 @@ velocity_interp_method = 'rc'
     type = FVDirichletBC
     boundary = 'top'
     variable = TKE
-    value = '0.1'
+    value = '1.0'
   []
+  # [wall-TKE]
+  #   type = NSFVTKEWallFunctionReichardtBC
+  #   boundary = 'top'
+  #   variable = TKE
+  #   u = vel_x
+  #   v = vel_y
+  #   rho = ${rho}
+  #   mu = ${mu}
+  #   C_mu = ${C_mu}
+  # []
   # [wall-TKED]
   #   type = NSFVTKEDWallFunctionBC
   #   boundary = 'top'
@@ -310,7 +320,7 @@ velocity_interp_method = 'rc'
     type = FVDirichletBC
     boundary = 'top'
     variable = TKED
-    value = '0.1'
+    value = '1.0'
   []
   [sym-u]
     type = INSFVSymmetryVelocityBC

@@ -28,6 +28,7 @@ class JacobianBlock;
 class TimeIntegrator;
 class Predictor;
 class ElementDamper;
+class ElementDamperFV;
 class NodalDamper;
 class GeneralDamper;
 class GeometricSearchData;
@@ -496,6 +497,13 @@ public:
   void reinitIncrementAtQpsForDampers(THREAD_ID tid, const std::set<MooseVariable *> & damped_vars);
 
   /**
+   * Compute the incremental change in variables at QPs for dampers. Called before we use damping
+   * @param tid Thread ID
+   * @param damped_vars Set of variables for which increment is to be computed
+   */
+  void reinitIncrementAtFVQpsForDampers(THREAD_ID tid, const std::set<MooseVariableFVReal *> & damped_vars);
+
+  /**
    * Compute the incremental change in variables at nodes for dampers. Called before we use damping
    * @param tid Thread ID
    * @param damped_vars Set of variables for which increment is to be computed
@@ -594,6 +602,10 @@ public:
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() const
   {
     return _element_dampers;
+  }
+  const MooseObjectWarehouse<ElementDamperFV> & getElementDamperFVWarehouse() const
+  {
+    return _element_FV_dampers;
   }
   const MooseObjectWarehouse<NodalDamper> & getNodalDamperWarehouse() const
   {
@@ -848,6 +860,9 @@ protected:
 
   /// Element Dampers for each thread
   MooseObjectWarehouse<ElementDamper> _element_dampers;
+
+  /// Element Dampers for each thread
+  MooseObjectWarehouse<ElementDamperFV> _element_FV_dampers;
 
   /// Nodal Dampers for each thread
   MooseObjectWarehouse<NodalDamper> _nodal_dampers;

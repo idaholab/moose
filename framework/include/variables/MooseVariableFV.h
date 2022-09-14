@@ -412,6 +412,11 @@ public:
   /// @return The variable gradient value
   typename OutputTools<OutputType>::OutputGradient getGradient(const Elem * elem) const;
 
+  /**
+   * Compute and store incremental change in solution at QPs based on increment_vec
+   */
+  void computeIncrementAtFVQps(const NumericVector<Number> & increment_vec);
+
   /// Returns true if a Dirichlet BC exists on the current face.  This only
   /// works if the variable has been initialized on a face with
   /// computeFaceValues.  Its return value is nonsense if initialized on a
@@ -457,12 +462,15 @@ public:
 
   void setActiveTags(const std::set<TagID> & vtags) override;
 
+  // Increment function for damping
+  const FieldVariableValue & increment() const { return _element_data->increment(); }
+
+protected:
   /**
    * @return whether \p fi is an internal face for this variable
    */
   bool isInternalFace(const FaceInfo & fi) const override;
 
-protected:
   /**
    * @return whether \p fi is a Dirichlet boundary face for this variable
    */

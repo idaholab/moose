@@ -97,7 +97,7 @@ kEpsilonLinearVariable::computeValue()
     }
   }
 
-  if (wall_bounded)
+  if (false) //(wall_bounded)
   {
     // return wall bounded (epsilon/k) value
 
@@ -132,10 +132,11 @@ kEpsilonLinearVariable::computeValue()
     //  Return Bulk value
     constexpr Real protection_k = 1e-10;
     auto current_argument = makeElemArg(_current_elem);
-    auto limiting_value = _C_mu(current_argument) * std::sqrt(_k(current_argument)) / _max_mixing_length; // Realizable constraint
+    // auto limiting_value = _C_mu(current_argument) * std::sqrt(_k(current_argument)) / _max_mixing_length; // Realizable constraint
 
-    auto residual = std::max(_epsilon(current_argument) / (_k(current_argument) + protection_k),
-                             limiting_value);
+    // auto residual = std::max(_epsilon(current_argument) / (_k(current_argument) + protection_k),
+    //                          limiting_value);
+    auto residual = _epsilon(current_argument) / (_k(current_argument) + protection_k);
 
     return residual.value();
   }

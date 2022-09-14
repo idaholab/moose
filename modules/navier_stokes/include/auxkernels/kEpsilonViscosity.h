@@ -60,4 +60,7 @@ protected:
 
   /// Maximum mixing length allowed for the domain
   const Real _max_mixing_length;
+
+  /// Linearzied computation of y_plus ?
+  const bool _wall_treatement;
 };

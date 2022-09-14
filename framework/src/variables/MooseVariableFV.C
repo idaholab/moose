@@ -402,6 +402,13 @@ MooseVariableFV<OutputType>::getGradient(const Elem * /*elem*/) const
 
 template <typename OutputType>
 void
+MooseVariableFV<OutputType>::computeIncrementAtFVQps(const NumericVector<Number> & increment_vec)
+{
+  _element_data->computeIncrementAtQps(increment_vec);
+}
+
+template <typename OutputType>
+void
 MooseVariableFV<OutputType>::setNodalValue(const OutputType & /*value*/, unsigned int /*idx*/)
 {
   mooseError("FV variables do not support setNodalValue");

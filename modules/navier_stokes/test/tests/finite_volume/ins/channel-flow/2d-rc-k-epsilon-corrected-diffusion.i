@@ -1,4 +1,4 @@
-Re = 40000
+Re = 1000000
 D = 1
 rho = 1000
 # bulk_u = 1
@@ -15,10 +15,12 @@ C_mu = 0.09
 
 ## Initialization
 # nu_0 = 1.0
-l_0 = ${D}
-I = 1.0
-k_0 = '${fparse 0.5 * I * (bulk_u ^ 2)}'
-eps_0 = '${fparse C_mu^0.75 * k_0^1.5 / l_0}'
+# l_0 = ${fparse 0.07*D}
+I = 0.1
+k_0 = '${fparse max(1.5 * (I^2 * bulk_u^2), 1e-6)}'
+# eps_0 = '${fparse C_mu^0.75 * k_0^1.5 / l_0 / 2}'
+visc_ratio = 100.0
+eps_0 = '${fparse C_mu * rho * k_0^2 / (mu * visc_ratio)}'
 
 advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
@@ -45,7 +47,7 @@ velocity_interp_method = 'rc'
     ymin = 0
     ymax = '${fparse 0.5 * D}'
     nx = 50
-    ny = 20
+    ny = 10
     bias_y = '${fparse 1 / 1.2}'
   []
 []
@@ -77,7 +79,7 @@ velocity_interp_method = 'rc'
     order = CONSTANT
     family = MONOMIAL
     fv = true
-    initial_condition = 0.003 #${fparse C_mu * (k_0^2) / eps_0}
+    initial_condition = ${fparse C_mu * (k_0^2) / eps_0}
   []
   [y_plus]
     order = CONSTANT
@@ -111,10 +113,13 @@ velocity_interp_method = 'rc'
     momentum_component = 'x'
   []
   [u_viscosity_rans]
-    type = INSFVMomentumDiffusion
+    type = INSFVMomentumDiffusionComplete
     variable = vel_x
     momentum_component = 'x'
     mu = 'mu_t'
+    u = vel_x
+    v = vel_y
+    harmonic_interpolation = true
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -138,10 +143,13 @@ velocity_interp_method = 'rc'
     momentum_component = 'y'
   []
   [v_viscosity_rans]
-    type = INSFVMomentumDiffusion
+    type = INSFVMomentumDiffusionComplete
     variable = vel_y
     momentum_component = 'y'
     mu = 'mu_t'
+    u = vel_x
+    v = vel_y
+    harmonic_interpolation = true
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -162,7 +170,7 @@ velocity_interp_method = 'rc'
   [TKE_diffusion]
     type = PINSFVTurbulentDiffusion
     variable = TKE
-    mu_t = ${mu}
+    mu_t = 'mu_t'
     porosity = 1
     turb_coef = ${sigma_k}
   []
@@ -173,10 +181,11 @@ velocity_interp_method = 'rc'
     u = vel_x
     v = vel_y
     rho = ${rho}
-    mu_t = ${mu}
+    mu_t = 'mu_t'
     effective_balance = false
     epsilon = TKED
     porosity = 1
+    realizable_constraint = true
   []
 
   [TKED_advection]
@@ -190,7 +199,7 @@ velocity_interp_method = 'rc'
   [TKED_diffusion]
     type = PINSFVTurbulentDiffusion
     variable = TKED
-    mu_t = ${mu}
+    mu_t = 'mu_t'
     porosity = 1
     turb_coef = ${sigma_eps}
   []
@@ -201,12 +210,13 @@ velocity_interp_method = 'rc'
     u = vel_x
     v = vel_y
     rho = ${rho}
-    mu_t = ${mu}
+    mu_t = 'mu_t'
     effective_balance = false
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
     k = TKE
     porosity = 1
+    realizable_constraint = true
   []
 []
 
@@ -223,7 +233,7 @@ velocity_interp_method = 'rc'
     v = vel_y
     walls = 'top'
     linearized_yplus = false
-    n_iters_activate = 1
+    n_iters_activate = 0
     execute_on = 'TIMESTEP_END'
   []
   [compute_y_plus]
@@ -292,31 +302,43 @@ velocity_interp_method = 'rc'
     variable = vel_y
     function = 0
   []
-  # [wall-TKE]
-  #   type = FVDirichletBC
-  #   boundary = 'top'
-  #   variable = TKE
-  #   value = ${k_0} #'1'
-  # []
+#   [wall-TKE]
+#     type = FVDirichletBC
+#     boundary = 'top'
+#     variable = TKE
+#     value = ${k_0} #'1'
+#   []
   [wall-TKE]
     type = NSFVTKEWallFunctionBC
     boundary = 'top'
     variable = TKE
   []
-  # [wall-TKED]
-  #   type = NSFVTKEDWallFunctionBC
-  #   boundary = 'top'
-  #   variable = TKED
-  #   k = TKE
-  #   rho = ${rho}
-  #   mu_t = 'mu_t'
-  #   C_mu = ${C_mu}
-  # []
+#   [wall-TKED]
+#     type = NSFVTKEDWallFunctionBC
+#     boundary = 'top'
+#     variable = TKED
+#     k = TKE
+#     rho = ${rho}
+#     mu_t = ${mu} #'mu_t'
+#     C_mu = ${C_mu}
+#   []
+#   [wall-TKED]
+#     type = FVDirichletBC
+#     boundary = 'top'
+#     variable = TKED
+#     value = ${eps_0} #'1'
+#   []
   [wall-TKED]
-    type = FVDirichletBC
+    type = NSFVTKEDWallFunctionReichardtBC
     boundary = 'top'
     variable = TKED
-    value = ${eps_0} #'1'
+    k = TKE
+    rho = ${rho}
+    mu = ${mu}
+    mu_t = 'mu_t'
+    C_mu = ${C_mu}
+    u = vel_x
+    v = vel_y
   []
   [sym-u]
     type = INSFVSymmetryVelocityBC
@@ -342,27 +364,97 @@ velocity_interp_method = 'rc'
     variable = pressure
     function = '0'
   []
-  # [out_TKE]
-  #   type = FVScalarOutflowBC
-  #   boundary = 'right'
-  #   variable = TKE
-  #   u = 'vel_x'
-  #   v = 'vel_y'
-  # []
-  # [out_TKED]
-  #   type = FVScalarOutflowBC
-  #   boundary = 'right'
-  #   variable = TKED
-  #   u = 'vel_x'
-  #   v = 'vel_y'
-  # []
+#   [out_TKE]
+#     type = FVScalarOutflowBC
+#     boundary = 'right'
+#     variable = TKE
+#     u = 'vel_x'
+#     v = 'vel_y'
+#   []
+#   [out_TKED]
+#     type = FVScalarOutflowBC
+#     boundary = 'right'
+#     variable = TKED
+#     u = 'vel_x'
+#     v = 'vel_y'
+#   []
 []
+
+# [Bounds]
+#     [positive_TKE]
+#       type = ConstantBoundsAux
+#       variable = TKE
+#       bounded_variable = TKE
+#       bound_type = lower
+#       bound_value = 0
+#     []
+#     [positive_TKED]
+#         type = ConstantBoundsAux
+#         variable = TKED
+#         bounded_variable = TKED
+#         bound_type = lower
+#         bound_value = 0
+#     []
+# []
+
+[Dampers]
+    [limit_TKE]
+      type = BoundingValueElementDamperFV
+      variable = 'TKE'
+      max_value = 1e10
+      min_value = 0.0
+      min_damping = 0.001
+    []
+    [limit_TKED]
+        type = BoundingValueElementDamperFV
+        variable = 'TKED'
+        max_value = 1e10
+        min_value = 0.0
+        min_damping = 0.001
+    []
+[]
+
 
 # [Preconditioning]
 #   [SMP]
 #     type = SMP
 #     full = true
 #   []
+# []
+
+# [Preconditioning]
+
+#     [FSP]
+#         type = FSP
+#         # It is the starting point of splitting
+#         topsplit = 'nuv' # 'uv' should match the following block name
+
+#         [nuv]
+#         splitting = 'a b c'
+#         splitting_type = multiplicative
+#         #petsc_options = '-dm_view'
+#         []
+#         [a]
+#             vars = 'vel_x vel_y pressure'
+#             petsc_options = '-ksp_monitor'
+#             petsc_options_iname = '-pc_type -pc_factor_shift_type -ksp_gmres_restart'
+#             petsc_options_value = 'lu NONZERO 50'
+#         []
+#         [b]
+#             vars = 'TKE'
+#             #petsc_options = '-ksp_monitor'
+#             petsc_options_iname = '-pc_type -pc_factor_shift_type -ksp_gmres_restart'
+#             petsc_options_value = 'lu NONZERO 50'
+#             #full = true
+#         []
+#         [c]
+#             vars = 'TKED'
+#             #petsc_options = '-ksp_monitor'
+#             petsc_options_iname = '-pc_type -pc_factor_shift_type -ksp_gmres_restart'
+#             petsc_options_value = 'lu NONZERO 50'
+#             #full = true
+#         []
+#     []
 # []
 
 [Executioner]
@@ -372,14 +464,21 @@ velocity_interp_method = 'rc'
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -ksp_gmres_restart'
   petsc_options_value = 'lu NONZERO 50'
-  #line_search = none
-  nl_rel_tol = 1e-12
+#   petsc_options_iname = '-pc_type -pc_svd_monitor'
+#   petsc_options_value = 'svd true'
+#   line_search = none
+  nl_rel_tol = 1e-6
   nl_abs_tol = 1e-6
-  automatic_scaling = false
+  automatic_scaling = true
+
 []
 
 [Debug]
   show_var_residual_norms = true
+[]
+
+[Problem]
+  error_on_jacobian_nonzero_reallocation = false
 []
 
 [Outputs]

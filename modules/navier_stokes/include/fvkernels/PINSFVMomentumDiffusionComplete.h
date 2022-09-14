@@ -14,15 +14,25 @@
 /**
  * A flux kernel for diffusion of momentum in porous media across cell faces
  */
-class PINSFVMomentumDiffusion : public INSFVMomentumDiffusion
+class PINSFVMomentumDiffusionComplete : public PINSFVMomentumDiffusion
 {
 public:
   static InputParameters validParams();
-  PINSFVMomentumDiffusion(const InputParameters & params);
+  PINSFVMomentumDiffusionComplete(const InputParameters & params);
 
 protected:
   ADReal computeStrongResidual() override;
 
-  /// the porosity
-  const Moose::Functor<ADReal> & _eps;
+  /// dimension
+  const unsigned int _dim;
+
+  /// x-velocity
+  const INSFVVelocityVariable * const _u_var;
+  /// y-velocity
+  const INSFVVelocityVariable * const _v_var;
+  /// z-velocity
+  const INSFVVelocityVariable * const _w_var;
+
+  /// harmonic interpolation?
+  const bool _harmonic_interpolation;
 };

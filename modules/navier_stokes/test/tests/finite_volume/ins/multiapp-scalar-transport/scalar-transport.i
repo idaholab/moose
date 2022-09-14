@@ -74,11 +74,11 @@ velocity_interp_method='rc'
     coeff = ${diff}
     variable = scalar
   []
-  [scalar_src]
-    type = FVBodyForce
-    variable = scalar
-    value = 0.1
-  []
+  # [scalar_src]
+  #   type = FVBodyForce
+  #   variable = scalar
+  #   value = 0.1
+  # []
 []
 
 [FVBCs]

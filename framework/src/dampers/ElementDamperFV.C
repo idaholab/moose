@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ElementDamper.h"
+#include "ElementDamperFV.h"
 
 // MOOSE includes
 #include "Assembly.h"
@@ -19,7 +19,7 @@
 #include "libmesh/quadrature.h"
 
 InputParameters
-ElementDamper::validParams()
+ElementDamperFV::validParams()
 {
   InputParameters params = Damper::validParams();
   params += MaterialPropertyInterface::validParams();
@@ -28,13 +28,13 @@ ElementDamper::validParams()
   return params;
 }
 
-ElementDamper::ElementDamper(const InputParameters & parameters)
+ElementDamperFV::ElementDamperFV(const InputParameters & parameters)
   : Damper(parameters),
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid, _sys.number())),
+    _assembly(_subproblem.assembly(_tid)),
     _coord_sys(_assembly.coordSystem()),
-    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _var(_sys.getFVVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _current_elem(_var.currentElem()),
     _q_point(_assembly.qPoints()),
     _qrule(_assembly.qRule()),
@@ -48,7 +48,7 @@ ElementDamper::ElementDamper(const InputParameters & parameters)
 }
 
 Real
-ElementDamper::computeDamping()
+ElementDamperFV::computeDamping()
 {
   Real damping = 1.0;
   Real cur_damping = 1.0;

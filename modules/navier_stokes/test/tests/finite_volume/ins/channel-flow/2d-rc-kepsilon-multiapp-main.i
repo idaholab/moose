@@ -1,4 +1,4 @@
-Re = 40000
+Re = 100000
 D = 1
 rho = 1000
 # bulk_u = 1
@@ -15,10 +15,12 @@ C_mu = 0.09
 
 ## Initialization
 # nu_0 = 1.0
-l_0 = ${D}
-I = 1.0
-k_0 = '${fparse 0.5 * I * (bulk_u ^ 2)}'
-eps_0 = '${fparse C_mu^0.75 * k_0^1.5 / l_0}'
+# l_0 = ${fparse 0.07*D}
+I = 0.01
+k_0 = '${fparse max(1.5 * (I^2 * bulk_u^2), 1e-6)}'
+# eps_0 = '${fparse C_mu^0.75 * k_0^1.5 / l_0 / 2}'
+visc_ratio = 10.0
+eps_0 = '${fparse C_mu * rho * k_0^2 / (mu * visc_ratio)}'
 
 advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
@@ -45,8 +47,8 @@ velocity_interp_method = 'rc'
     ymin = 0
     ymax = '${fparse 0.5 * D}'
     nx = 50
-    ny = 20
-    bias_y = '${fparse 1 / 1.2}'
+    ny = 10
+    bias_y = '${fparse 1 / 1.0}'
   []
 []
 
@@ -62,14 +64,6 @@ velocity_interp_method = 'rc'
   [pressure]
     type = INSFVPressureVariable
   []
-  [TKE]
-    type = INSFVEnergyVariable
-    initial_condition = ${k_0}
-  []
-  [TKED]
-    type = INSFVEnergyVariable
-    initial_condition = ${eps_0}
-  []
 []
 
 [AuxVariables]
@@ -77,13 +71,19 @@ velocity_interp_method = 'rc'
     order = CONSTANT
     family = MONOMIAL
     fv = true
-    initial_condition = 0.003 #${fparse C_mu * (k_0^2) / eps_0}
+    initial_condition = ${fparse rho * C_mu * (k_0^2) / eps_0}
   []
   [y_plus]
     order = CONSTANT
     family = MONOMIAL
     fv = true
     initial_condition = 1.0
+  []
+  [ax_out]
+    type = MooseVariableFVReal
+  []
+  [ay_out]
+    type = MooseVariableFVReal
   []
 []
 
@@ -111,10 +111,13 @@ velocity_interp_method = 'rc'
     momentum_component = 'x'
   []
   [u_viscosity_rans]
-    type = INSFVMomentumDiffusion
+    type = INSFVMomentumDiffusionComplete
     variable = vel_x
     momentum_component = 'x'
     mu = 'mu_t'
+    u = vel_x
+    v = vel_y
+    harmonic_interpolation = true
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -138,10 +141,13 @@ velocity_interp_method = 'rc'
     momentum_component = 'y'
   []
   [v_viscosity_rans]
-    type = INSFVMomentumDiffusion
+    type = INSFVMomentumDiffusionComplete
     variable = vel_y
     momentum_component = 'y'
     mu = 'mu_t'
+    u = vel_x
+    v = vel_y
+    harmonic_interpolation = true
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -149,91 +155,20 @@ velocity_interp_method = 'rc'
     momentum_component = 'y'
     pressure = pressure
   []
-
-
-  [TKE_advection]
-    type = PINSFVTurbulentAdvection
-    variable = TKE
-    rho = ${rho}
-    velocity_interp_method = ${velocity_interp_method}
-    advected_interp_method = ${advected_interp_method}
-  []
-
-  [TKE_diffusion]
-    type = PINSFVTurbulentDiffusion
-    variable = TKE
-    mu_t = ${mu}
-    porosity = 1
-    turb_coef = ${sigma_k}
-  []
-
-  [TKE_SourceSink]
-    type = PINSFVTKESourceSink
-    variable = TKE
-    u = vel_x
-    v = vel_y
-    rho = ${rho}
-    mu_t = ${mu}
-    effective_balance = false
-    epsilon = TKED
-    porosity = 1
-  []
-
-  [TKED_advection]
-    type = PINSFVTurbulentAdvection
-    variable = TKED
-    rho = ${rho}
-    velocity_interp_method = ${velocity_interp_method}
-    advected_interp_method = ${advected_interp_method}
-  []
-
-  [TKED_diffusion]
-    type = PINSFVTurbulentDiffusion
-    variable = TKED
-    mu_t = ${mu}
-    porosity = 1
-    turb_coef = ${sigma_eps}
-  []
-
-  [TKED_SourceSink]
-    type = PINSFVTKEDSourceSink
-    variable = TKED
-    u = vel_x
-    v = vel_y
-    rho = ${rho}
-    mu_t = ${mu}
-    effective_balance = false
-    C1_eps = ${C1_eps}
-    C2_eps = ${C2_eps}
-    k = TKE
-    porosity = 1
-  []
 []
 
 [AuxKernels]
-  [compute_mu_t]
-    type = kEpsilonViscosity
-    variable = mu_t
-    k = TKE
-    epsilon = TKED
-    rho = ${rho}
-    C_mu = ${C_mu}
-    mu = ${mu}
-    u = vel_x
-    v = vel_y
-    walls = 'top'
-    linearized_yplus = false
-    n_iters_activate = 1
-    execute_on = 'TIMESTEP_END'
+  [ax_out]
+    type = ADFunctorElementalAux
+    functor = ax
+    variable = ax_out
+    execute_on = timestep_end
   []
-  [compute_y_plus]
-    type = WallFunctionYPlusAux
-    variable = y_plus
-    rho = ${rho}
-    mu = ${mu}
-    u = vel_x
-    v = vel_y
-    walls = 'top'
+  [ay_out]
+    type = ADFunctorElementalAux
+    functor = ay
+    variable = ay_out
+    execute_on = timestep_end
   []
 []
 
@@ -250,36 +185,6 @@ velocity_interp_method = 'rc'
     variable = vel_y
     function = '0'
   []
-  # [inlet-TKE]
-  #   type = FVDirichletBC
-  #   boundary = 'left'
-  #   variable = TKE
-  #   value = ${fparse 0.07*D*1^2}
-  # []
-  # [inlet-TKED]
-  #   type = FVDirichletBC
-  #   boundary = 'left'
-  #   variable = TKED
-  #   value = ${fparse 0.07*D*1^2}
-  # []
-  [inlet-TKE]
-    type = NSFVTKEInletBC
-    boundary = 'left'
-    variable = TKE
-    value = ${k_0} #${fparse 0.07*D*1^2}
-    rho = ${rho}
-    u = 'vel_x'
-    v = 'vel_y'
-  []
-  [inlet-TKED]
-    type = NSFVTKEInletBC
-    boundary = 'left'
-    variable = TKED
-    value = ${eps_0} #${fparse 0.07*D*1^2}
-    rho = ${rho}
-    u = 'vel_x'
-    v = 'vel_y'
-  []
   [wall-u]
     type = INSFVNoSlipWallBC
     boundary = 'top'
@@ -291,32 +196,6 @@ velocity_interp_method = 'rc'
     boundary = 'top'
     variable = vel_y
     function = 0
-  []
-  # [wall-TKE]
-  #   type = FVDirichletBC
-  #   boundary = 'top'
-  #   variable = TKE
-  #   value = ${k_0} #'1'
-  # []
-  [wall-TKE]
-    type = NSFVTKEWallFunctionBC
-    boundary = 'top'
-    variable = TKE
-  []
-  # [wall-TKED]
-  #   type = NSFVTKEDWallFunctionBC
-  #   boundary = 'top'
-  #   variable = TKED
-  #   k = TKE
-  #   rho = ${rho}
-  #   mu_t = 'mu_t'
-  #   C_mu = ${C_mu}
-  # []
-  [wall-TKED]
-    type = FVDirichletBC
-    boundary = 'top'
-    variable = TKED
-    value = ${eps_0} #'1'
   []
   [sym-u]
     type = INSFVSymmetryVelocityBC
@@ -342,27 +221,49 @@ velocity_interp_method = 'rc'
     variable = pressure
     function = '0'
   []
-  # [out_TKE]
-  #   type = FVScalarOutflowBC
-  #   boundary = 'right'
-  #   variable = TKE
-  #   u = 'vel_x'
-  #   v = 'vel_y'
-  # []
-  # [out_TKED]
-  #   type = FVScalarOutflowBC
-  #   boundary = 'right'
-  #   variable = TKED
-  #   u = 'vel_x'
-  #   v = 'vel_y'
-  # []
 []
+
 
 # [Preconditioning]
 #   [SMP]
 #     type = SMP
 #     full = true
 #   []
+# []
+
+# [Preconditioning]
+
+#     [FSP]
+#         type = FSP
+#         # It is the starting point of splitting
+#         topsplit = 'nuv' # 'uv' should match the following block name
+
+#         [nuv]
+#         splitting = 'a b c'
+#         splitting_type = multiplicative
+#         #petsc_options = '-dm_view'
+#         []
+#         [a]
+#             vars = 'vel_x'
+#             petsc_options = '-ksp_monitor'
+#             petsc_options_iname = '-pc_type -pc_factor_shift_type -ksp_gmres_restart'
+#             petsc_options_value = 'lu NONZERO 50'
+#         []
+#         [b]
+#             vars = 'vel_y'
+#             #petsc_options = '-ksp_monitor'
+#             petsc_options_iname = '-pc_type -pc_factor_shift_type -ksp_gmres_restart'
+#             petsc_options_value = 'lu NONZERO 50'
+#             #full = true
+#         []
+#         [c]
+#             vars = 'pressure'
+#             #petsc_options = '-ksp_monitor'
+#             petsc_options_iname = '-pc_type -pc_factor_shift_type -ksp_gmres_restart'
+#             petsc_options_value = 'lu NONZERO 50'
+#             #full = true
+#         []
+#     []
 # []
 
 [Executioner]
@@ -372,14 +273,73 @@ velocity_interp_method = 'rc'
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -ksp_gmres_restart'
   petsc_options_value = 'lu NONZERO 50'
-  #line_search = none
-  nl_rel_tol = 1e-12
+#   petsc_options_iname = '-pc_type -pc_svd_monitor'
+#   petsc_options_value = 'svd true'
+#   line_search = none
+  nl_rel_tol = 1e-6
   nl_abs_tol = 1e-6
-  automatic_scaling = false
+  automatic_scaling = true
+
 []
 
 [Debug]
   show_var_residual_norms = true
+[]
+
+[Problem]
+  error_on_jacobian_nonzero_reallocation = false
+[]
+
+###### MultiApp for kEpsilon #####
+[MultiApps]
+  [kEpsilon]
+      type = TransientMultiApp
+      input_files = '2d-rc-kepsilon-subapp.i'
+      execute_on = 'TIMESTEP_END'
+  []
+[]
+
+[Transfers]
+  [velocity_x]
+      type = MultiAppCopyTransfer
+      to_multi_app = kEpsilon
+      source_variable = vel_x
+      variable = vel_x
+  []
+
+  [velocity_y]
+      type = MultiAppCopyTransfer
+      to_multi_app = kEpsilon
+      source_variable = vel_y
+      variable = vel_y
+  []
+
+  [ax]
+    type = MultiAppCopyTransfer
+    source_variable = ax_out
+    variable = ax
+    to_multi_app = kEpsilon
+  []
+  [ay]
+    type = MultiAppCopyTransfer
+    source_variable = ay_out
+    variable = ay
+    to_multi_app = kEpsilon
+  []
+
+  [pressure]
+      type = MultiAppCopyTransfer
+      to_multi_app = kEpsilon
+      source_variable = pressure
+      variable = pressure
+  []
+
+  # [turbulent_viscosity]
+  #     type = MultiAppCopyTransfer
+  #     from_multi_app = kEpsilon
+  #     source_variable = mu_t
+  #     variable = mu_t
+  # []
 []
 
 [Outputs]

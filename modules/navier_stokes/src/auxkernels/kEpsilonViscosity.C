@@ -38,6 +38,9 @@ kEpsilonViscosity::validParams()
   params.addParam<Real>("max_mixing_length",
                         10.0,
                         "Maximum mixing legth allowed for the domain - adjust if seeking for realizable k-epsilon answer.");
+  params.addParam<bool>("wall_treatement",
+                        true,
+                        "Activate wall treatement by adding wall functions.");
   return params;
 }
 
@@ -60,7 +63,8 @@ kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
     _linearized_yplus(getParam<bool>("linearized_yplus")),
     _n_kernel_iters(0),
     _n_iters_activate(getParam<unsigned int>("n_iters_activate")),
-    _max_mixing_length(getParam<Real>("max_mixing_length"))
+    _max_mixing_length(getParam<Real>("max_mixing_length")),
+    _wall_treatement(getParam<bool>("wall_treatement"))
 {
 }
 
@@ -114,7 +118,7 @@ kEpsilonViscosity::computeValue()
     }
   }
 
-  if (wall_bounded)
+  if (wall_bounded && _wall_treatement)
   {
     // return wall function
 
@@ -141,6 +145,12 @@ kEpsilonViscosity::computeValue()
     }
     else
       u_star = findUStar(_mu(makeElemArg(&elem)), _rho(makeElemArg(_current_elem)), parallel_speed, min_wall_dist);
+
+    // _console << "u star: " << u_star << std::endl;
+    // _console << "Density: " << _rho(makeElemArg(_current_elem)) << std::endl;
+    // _console << "Distance to point: " << min_wall_dist << std::endl;
+    // _console << "Parallel velocity: " << parallel_speed << std::endl;
+    // _console << "Wall viscosity: " << std::pow(u_star, 2) * _rho(makeElemArg(_current_elem)) * min_wall_dist / parallel_speed << std::endl;
 
     ADReal y_plus = min_wall_dist * u_star * _rho(makeElemArg(_current_elem)) / _mu(makeElemArg(_current_elem));
 
@@ -179,22 +189,30 @@ kEpsilonViscosity::computeValue()
   else
   {
     //  Return Bulk value
-    constexpr Real protection_epsilon = 1e-10;
-    auto current_argument = makeElemArg(_current_elem);
-    auto Launder_Sharma_bulk_limit = 0.5 * _mu(current_argument);
+    constexpr Real protection_epsilon = 1e-11;
+    // auto current_argument = makeElemArg(_current_elem);
+    // auto Launder_Sharma_bulk_limit = 0.5 * _mu(current_argument);
 
-    ADReal local_mixing_length;
-    if ((_C_mu(current_argument) * std::pow(_k(current_argument), 1.5)) < 
-        (_epsilon(current_argument) * _max_mixing_length))
-        local_mixing_length = _rho(makeElemArg(_current_elem))
+    auto k_value = std::max(_k(makeElemArg(_current_elem)), 1e-10);
+    auto epsilon_value = std::max(_epsilon(makeElemArg(_current_elem)), 1e-10);
+
+    // ADReal local_mixing_length;
+    // if ((_C_mu(current_argument) * std::pow(_k(current_argument), 1.5)) < 
+    //     (_epsilon(current_argument) * _max_mixing_length))
+    //     local_mixing_length = _rho(makeElemArg(_current_elem))
+    //                           * _C_mu(makeElemArg(_current_elem))
+    //                           * std::pow(k_value, 1.5)
+    //                           / (epsilon_value + protection_epsilon);
+    // else
+    //     local_mixing_length = _max_mixing_length;
+
+    // return (std::max(local_mixing_length * std::pow(k_value, 0.5),
+    //                  Launder_Sharma_bulk_limit))
+    //                  .value();
+
+    return (_rho(makeElemArg(_current_elem))
                               * _C_mu(makeElemArg(_current_elem))
-                              * std::pow(_k(makeElemArg(_current_elem)), 1.5)
-                              / (_epsilon(makeElemArg(_current_elem)) + protection_epsilon);
-    else
-        local_mixing_length = _max_mixing_length;
-
-    return (std::max(local_mixing_length * std::pow(_k(makeElemArg(_current_elem)), 0.5),
-                     Launder_Sharma_bulk_limit))
-                     .value();
+                              * std::pow(k_value, 2)
+                              / (epsilon_value + protection_epsilon)).value();
   }
 }

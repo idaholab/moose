@@ -32,22 +32,39 @@ PINSFVTurbulentAdvection::PINSFVTurbulentAdvection(const InputParameters & param
 ADReal
 PINSFVTurbulentAdvection::computeQpResidual()
 {
-  ADReal adv_quant_interface;
+  // ADReal adv_rho_interface;
+  // ADReal adv_var_interface;
 
-  const auto elem_face = elemFromFace();
-  const auto neighbor_face = neighborFromFace();
+  // const auto elem_face = elemFromFace();
+  // const auto neighbor_face = neighborFromFace();
 
   // Velocity interpolation
   const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
 
   // Interpolation of advected quantity
-  Moose::FV::interpolate(_advected_interp_method,
-                         adv_quant_interface,
-                         _rho(elem_face) * _var(elem_face),
-                         _rho(neighbor_face) * _var(neighbor_face),
-                         v,
-                         *_face_info,
-                         true);
+  const auto adv_rho_interface =
+      onBoundary(*_face_info)
+          ? _rho(singleSidedFaceArg())
+          : _rho(Moose::FV::makeFace(*_face_info,
+                                     limiterType(_advected_interp_method),
+                                     MetaPhysicL::raw_value(v) * _normal > 0,
+                                     faceArgSubdomains()));
 
-  return _normal * v * adv_quant_interface;
+  const auto adv_var_interface =
+      onBoundary(*_face_info)
+          ? _var(singleSidedFaceArg())
+          : _var(Moose::FV::makeFace(*_face_info,
+                                     limiterType(_advected_interp_method),
+                                     MetaPhysicL::raw_value(v) * _normal > 0,
+                                     faceArgSubdomains()));
+
+  // Moose::FV::interpolate(adv_rho_interface,
+  //                        adv_quant_interface,
+  //                        _rho(elem_face) * _var(elem_face),
+  //                        _rho(neighbor_face) * _var(neighbor_face),
+  //                        v,
+  //                        *_face_info,
+  //                        true);
+
+  return _normal * v * adv_rho_interface * adv_var_interface;
 }

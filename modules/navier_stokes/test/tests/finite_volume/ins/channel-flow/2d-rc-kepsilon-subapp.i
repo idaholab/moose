@@ -1,4 +1,4 @@
-Re = 40000
+Re = 100000
 D = 1
 rho = 1000
 # bulk_u = 1
@@ -15,10 +15,12 @@ C_mu = 0.09
 
 ## Initialization
 # nu_0 = 1.0
-l_0 = ${D}
-I = 1.0
-k_0 = '${fparse 0.5 * I * (bulk_u ^ 2)}'
-eps_0 = '${fparse C_mu^0.75 * k_0^1.5 / l_0}'
+# l_0 = ${fparse 0.07*D}
+I = 0.01
+k_0 = '${fparse max(3.0/2.0 * (I^2 * bulk_u^2), 1e-6)}'
+#eps_0 = '${fparse C_mu^0.75 * k_0^1.5 / l_0 / 2}'
+visc_ratio = 10.0
+eps_0 = '${fparse C_mu * rho * k_0^2 / (mu * visc_ratio)}'
 
 advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
@@ -32,6 +34,8 @@ velocity_interp_method = 'rc'
     type = INSFVRhieChowInterpolator
     u = vel_x
     v = vel_y
+    a_u = ax
+    a_v = ay
     pressure = pressure
   []
 []
@@ -45,23 +49,12 @@ velocity_interp_method = 'rc'
     ymin = 0
     ymax = '${fparse 0.5 * D}'
     nx = 50
-    ny = 20
-    bias_y = '${fparse 1 / 1.2}'
+    ny = 10
+    bias_y = '${fparse 1 / 1.0}'
   []
 []
 
 [Variables]
-  [vel_x]
-    type = INSFVVelocityVariable
-    initial_condition = ${bulk_u}
-  []
-  [vel_y]
-    type = INSFVVelocityVariable
-    initial_condition = 1e-6
-  []
-  [pressure]
-    type = INSFVPressureVariable
-  []
   [TKE]
     type = INSFVEnergyVariable
     initial_condition = ${k_0}
@@ -77,7 +70,7 @@ velocity_interp_method = 'rc'
     order = CONSTANT
     family = MONOMIAL
     fv = true
-    initial_condition = 0.003 #${fparse C_mu * (k_0^2) / eps_0}
+    initial_condition = ${fparse rho * C_mu * (k_0^2) / eps_0 * 10.0}
   []
   [y_plus]
     order = CONSTANT
@@ -85,72 +78,32 @@ velocity_interp_method = 'rc'
     fv = true
     initial_condition = 1.0
   []
+  [vel_x]
+    type = INSFVVelocityVariable
+    initial_condition = ${bulk_u}
+  []
+  [vel_y]
+    type = INSFVVelocityVariable
+    initial_condition = 1e-6
+  []
+  [pressure]
+    type = INSFVPressureVariable
+  []
+  [lienarized_epsilon_k]
+    order = CONSTANT
+    family = MONOMIAL
+    fv = true
+    initial_condition = ${fparse k_0/eps_0}
+  []
+  [ax]
+    type = MooseVariableFVReal
+  []
+  [ay]
+    type = MooseVariableFVReal
+  []
 []
 
 [FVKernels]
-  [mass]
-    type = INSFVMassAdvection
-    variable = pressure
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    rho = ${rho}
-  []
-
-  [u_advection]
-    type = INSFVMomentumAdvection
-    variable = vel_x
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    rho = ${rho}
-    momentum_component = 'x'
-  []
-  [u_viscosity]
-    type = INSFVMomentumDiffusion
-    variable = vel_x
-    mu = ${mu}
-    momentum_component = 'x'
-  []
-  [u_viscosity_rans]
-    type = INSFVMomentumDiffusion
-    variable = vel_x
-    momentum_component = 'x'
-    mu = 'mu_t'
-  []
-  [u_pressure]
-    type = INSFVMomentumPressure
-    variable = vel_x
-    momentum_component = 'x'
-    pressure = pressure
-  []
-
-  [v_advection]
-    type = INSFVMomentumAdvection
-    variable = vel_y
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    rho = ${rho}
-    momentum_component = 'y'
-  []
-  [v_viscosity]
-    type = INSFVMomentumDiffusion
-    variable = vel_y
-    mu = ${mu}
-    momentum_component = 'y'
-  []
-  [v_viscosity_rans]
-    type = INSFVMomentumDiffusion
-    variable = vel_y
-    momentum_component = 'y'
-    mu = 'mu_t'
-  []
-  [v_pressure]
-    type = INSFVMomentumPressure
-    variable = vel_y
-    momentum_component = 'y'
-    pressure = pressure
-  []
-
-
   [TKE_advection]
     type = PINSFVTurbulentAdvection
     variable = TKE
@@ -162,7 +115,7 @@ velocity_interp_method = 'rc'
   [TKE_diffusion]
     type = PINSFVTurbulentDiffusion
     variable = TKE
-    mu_t = ${mu}
+    mu_t = 0.01 #'mu_t'
     porosity = 1
     turb_coef = ${sigma_k}
   []
@@ -173,10 +126,13 @@ velocity_interp_method = 'rc'
     u = vel_x
     v = vel_y
     rho = ${rho}
-    mu_t = ${mu}
+    mu_t = 'mu_t'
     effective_balance = false
     epsilon = TKED
     porosity = 1
+    realizable_constraint = false
+    linearized_model = false
+    linear_variable = lienarized_epsilon_k
   []
 
   [TKED_advection]
@@ -190,7 +146,7 @@ velocity_interp_method = 'rc'
   [TKED_diffusion]
     type = PINSFVTurbulentDiffusion
     variable = TKED
-    mu_t = ${mu}
+    mu_t = 0.01 #'mu_t'
     porosity = 1
     turb_coef = ${sigma_eps}
   []
@@ -201,12 +157,15 @@ velocity_interp_method = 'rc'
     u = vel_x
     v = vel_y
     rho = ${rho}
-    mu_t = ${mu}
+    mu_t = 'mu_t'
     effective_balance = false
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
     k = TKE
     porosity = 1
+    realizable_constraint = false
+    linearized_model = true
+    linear_variable = lienarized_epsilon_k
   []
 []
 
@@ -223,8 +182,9 @@ velocity_interp_method = 'rc'
     v = vel_y
     walls = 'top'
     linearized_yplus = false
-    n_iters_activate = 1
+    n_iters_activate = 0
     execute_on = 'TIMESTEP_END'
+    wall_treatement = false
   []
   [compute_y_plus]
     type = WallFunctionYPlusAux
@@ -235,33 +195,28 @@ velocity_interp_method = 'rc'
     v = vel_y
     walls = 'top'
   []
+  [relax_mut]
+    type = relaxVar
+    variable = 'mu_t'
+    var_to_relax = 'mu_t'
+    relaxation_factor = 0.1
+    execute_on = 'NONLINEAR'
+  []
+  [compute_linear_variable]
+    type = kEpsilonLinearVariable
+    variable = lienarized_epsilon_k
+    k = TKE
+    epsilon = TKED
+    u = vel_x
+    v = vel_y
+    C_mu = ${C_mu}
+    rho = ${rho}
+    walls = 'top'
+    mu = ${mu}
+  []
 []
 
 [FVBCs]
-  [inlet-u]
-    type = INSFVInletVelocityBC
-    boundary = 'left'
-    variable = vel_x
-    function = ${bulk_u}
-  []
-  [inlet-v]
-    type = INSFVInletVelocityBC
-    boundary = 'left'
-    variable = vel_y
-    function = '0'
-  []
-  # [inlet-TKE]
-  #   type = FVDirichletBC
-  #   boundary = 'left'
-  #   variable = TKE
-  #   value = ${fparse 0.07*D*1^2}
-  # []
-  # [inlet-TKED]
-  #   type = FVDirichletBC
-  #   boundary = 'left'
-  #   variable = TKED
-  #   value = ${fparse 0.07*D*1^2}
-  # []
   [inlet-TKE]
     type = NSFVTKEInletBC
     boundary = 'left'
@@ -280,68 +235,44 @@ velocity_interp_method = 'rc'
     u = 'vel_x'
     v = 'vel_y'
   []
-  [wall-u]
-    type = INSFVNoSlipWallBC
-    boundary = 'top'
-    variable = vel_x
-    function = 0
-  []
-  [wall-v]
-    type = INSFVNoSlipWallBC
-    boundary = 'top'
-    variable = vel_y
-    function = 0
-  []
-  # [wall-TKE]
-  #   type = FVDirichletBC
-  #   boundary = 'top'
-  #   variable = TKE
-  #   value = ${k_0} #'1'
-  # []
+  #   [wall-TKE]
+  #     type = FVDirichletBC
+  #     boundary = 'top'
+  #     variable = TKE
+  #     value = ${k_0} #'1'
+  #   []
   [wall-TKE]
     type = NSFVTKEWallFunctionBC
     boundary = 'top'
     variable = TKE
   []
+    # [wall-TKED]
+    #   type = NSFVTKEDWallFunctionBC
+    #   boundary = 'top'
+    #   variable = TKED
+    #   k = TKE
+    #   rho = ${rho}
+    #   mu_t = ${mu} #'mu_t'
+    #   C_mu = ${C_mu}
+    # []
+    [wall-TKED]
+      type = FVDirichletBC
+      boundary = 'top'
+      variable = TKED
+      value = ${eps_0} #'1'
+    []
   # [wall-TKED]
-  #   type = NSFVTKEDWallFunctionBC
+  #   type = NSFVTKEDWallFunctionReichardtBC
   #   boundary = 'top'
   #   variable = TKED
   #   k = TKE
   #   rho = ${rho}
+  #   mu = ${mu}
   #   mu_t = 'mu_t'
   #   C_mu = ${C_mu}
+  #   u = vel_x
+  #   v = vel_y
   # []
-  [wall-TKED]
-    type = FVDirichletBC
-    boundary = 'top'
-    variable = TKED
-    value = ${eps_0} #'1'
-  []
-  [sym-u]
-    type = INSFVSymmetryVelocityBC
-    boundary = 'bottom'
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    mu = mu_t
-    momentum_component = x
-  []
-  [sym-v]
-    type = INSFVSymmetryVelocityBC
-    boundary = 'bottom'
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    mu = mu_t
-    momentum_component = y
-  []
-  [outlet_p]
-    type = INSFVOutletPressureBC
-    boundary = 'right'
-    variable = pressure
-    function = '0'
-  []
   # [out_TKE]
   #   type = FVScalarOutflowBC
   #   boundary = 'right'
@@ -356,30 +287,60 @@ velocity_interp_method = 'rc'
   #   u = 'vel_x'
   #   v = 'vel_y'
   # []
+  [inlet-u]
+    type = INSFVInletVelocityBC
+    boundary = 'left'
+    variable = vel_x
+    function = ${bulk_u}
+  []
+  [inlet-v]
+    type = INSFVInletVelocityBC
+    boundary = 'left'
+    variable = vel_y
+    function = '0'
+  []
+  [outlet_p]
+    type = INSFVOutletPressureBC
+    boundary = 'right'
+    variable = pressure
+    function = '0'
+  []
 []
 
-# [Preconditioning]
-#   [SMP]
-#     type = SMP
-#     full = true
-#   []
-# []
+[Dampers]
+  [limit_TKE]
+    type = BoundingValueElementDamperFV
+    variable = 'TKE'
+    max_value = 1e10
+    min_value = 0.1
+    min_damping = 0.1
+  []
+  [limit_TKED]
+      type = BoundingValueElementDamperFV
+      variable = 'TKED'
+      max_value = 1e10
+      min_value = 0.1
+      min_damping = 0.1
+  []
+[]
 
 [Executioner]
   type = Transient
   dt = 0.1
   end_time = 1.0
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -ksp_gmres_restart'
-  petsc_options_value = 'lu NONZERO 50'
-  #line_search = none
-  nl_rel_tol = 1e-12
+  petsc_options_iname = '-pc_type -ksp_gmres_restart'
+  petsc_options_value = 'lu 50'
   nl_abs_tol = 1e-6
   automatic_scaling = false
 []
 
 [Debug]
   show_var_residual_norms = true
+[]
+
+[Problem]
+  error_on_jacobian_nonzero_reallocation = false
 []
 
 [Outputs]

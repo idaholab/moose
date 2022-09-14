@@ -27,6 +27,7 @@
 #include "ComputeJacobianBlocksThread.h"
 #include "ComputeDiracThread.h"
 #include "ComputeElemDampingThread.h"
+#include "ComputeFVElemDampingThread.h"
 #include "ComputeNodalDampingThread.h"
 #include "ComputeNodalKernelsThread.h"
 #include "ComputeNodalKernelBcsThread.h"
@@ -40,6 +41,7 @@
 #include "DGKernel.h"
 #include "InterfaceKernelBase.h"
 #include "ElementDamper.h"
+#include "ElementDamperFV.h"
 #include "NodalDamper.h"
 #include "GeneralDamper.h"
 #include "DisplacedProblem.h"
@@ -255,6 +257,7 @@ NonlinearSystemBase::initialSetup()
       _interface_kernels.initialSetup(tid);
 
       _element_dampers.initialSetup(tid);
+      _element_FV_dampers.initialSetup(tid);
       _nodal_dampers.initialSetup(tid);
       _integrated_bcs.initialSetup(tid);
 
@@ -350,6 +353,7 @@ NonlinearSystemBase::timestepSetup()
       _dg_kernels.timestepSetup(tid);
     _interface_kernels.timestepSetup(tid);
     _element_dampers.timestepSetup(tid);
+    _element_FV_dampers.timestepSetup(tid);
     _nodal_dampers.timestepSetup(tid);
     _integrated_bcs.timestepSetup(tid);
 
@@ -694,6 +698,7 @@ NonlinearSystemBase::addDamper(const std::string & damper_name,
 
     // Attempt to cast to the damper types
     std::shared_ptr<ElementDamper> ed = std::dynamic_pointer_cast<ElementDamper>(damper);
+    std::shared_ptr<ElementDamperFV> edFV = std::dynamic_pointer_cast<ElementDamperFV>(damper);
     std::shared_ptr<NodalDamper> nd = std::dynamic_pointer_cast<NodalDamper>(damper);
     std::shared_ptr<GeneralDamper> gd = std::dynamic_pointer_cast<GeneralDamper>(damper);
 
@@ -706,6 +711,8 @@ NonlinearSystemBase::addDamper(const std::string & damper_name,
       _element_dampers.addObject(ed, tid);
     else if (nd)
       _nodal_dampers.addObject(nd, tid);
+    else if (edFV)
+      _element_FV_dampers.addObject(edFV, tid);
     else
       mooseError("Invalid damper type");
   }
@@ -947,6 +954,7 @@ NonlinearSystemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
   _kernels.subdomainSetup(subdomain, tid);
   _nodal_kernels.subdomainSetup(subdomain, tid);
   _element_dampers.subdomainSetup(subdomain, tid);
+  _element_FV_dampers.subdomainSetup(subdomain, tid);
   _nodal_dampers.subdomainSetup(subdomain, tid);
 }
 
@@ -1516,6 +1524,7 @@ NonlinearSystemBase::residualSetup()
       _dg_kernels.residualSetup(tid);
     _interface_kernels.residualSetup(tid);
     _element_dampers.residualSetup(tid);
+    _element_FV_dampers.residualSetup(tid);
     _nodal_dampers.residualSetup(tid);
     _integrated_bcs.residualSetup(tid);
   }
@@ -2555,6 +2564,7 @@ NonlinearSystemBase::jacobianSetup()
       _dg_kernels.jacobianSetup(tid);
     _interface_kernels.jacobianSetup(tid);
     _element_dampers.jacobianSetup(tid);
+    _element_FV_dampers.jacobianSetup(tid);
     _nodal_dampers.jacobianSetup(tid);
     _integrated_bcs.jacobianSetup(tid);
   }
@@ -3034,6 +3044,7 @@ void
 NonlinearSystemBase::updateActive(THREAD_ID tid)
 {
   _element_dampers.updateActive(tid);
+  _element_FV_dampers.updateActive(tid);
   _nodal_dampers.updateActive(tid);
   _integrated_bcs.updateActive(tid);
   _dg_kernels.updateActive(tid);
@@ -3070,6 +3081,20 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
         has_active_dampers = true;
         *_increment_vec = update;
         ComputeElemDampingThread cid(_fe_problem);
+        Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
+        damping = std::min(cid.damping(), damping);
+      }
+      PARALLEL_CATCH;
+    }
+
+    if (_element_FV_dampers.hasActiveObjects())
+    {
+      PARALLEL_TRY
+      {
+        TIME_SECTION("computeDampers", 3, "Computing Dampers");
+        has_active_dampers = true;
+        *_increment_vec = update;
+        ComputeFVElemDampingThread cid(_fe_problem);
         Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
         damping = std::min(cid.damping(), damping);
       }
@@ -3330,6 +3355,14 @@ NonlinearSystemBase::reinitIncrementAtQpsForDampers(THREAD_ID /*tid*/,
 {
   for (const auto & var : damped_vars)
     var->computeIncrementAtQps(*_increment_vec);
+}
+
+void
+NonlinearSystemBase::reinitIncrementAtFVQpsForDampers(THREAD_ID /*tid*/,
+                                                    const std::set<MooseVariableFVReal *> & damped_vars)
+{
+  for (const auto & var : damped_vars)
+    var->computeIncrementAtFVQps(*_increment_vec);
 }
 
 void
