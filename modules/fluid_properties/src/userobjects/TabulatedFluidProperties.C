@@ -1099,7 +1099,7 @@ TabulatedFluidProperties::T_from_h_s(Real h, Real s) const
 }
 
 Real
-TabulatedFluidProperties::T_from_p_h(Real pressure, Real h) const
+TabulatedFluidProperties::T_from_h_p(Real h, Real pressure) const
 {
   auto lambda = [&](Real pressure, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
   { h_from_p_T(pressure, current_T, new_h, dh_dp, dh_dT); };
@@ -1117,7 +1117,7 @@ TabulatedFluidProperties::T_from_p_h(Real pressure, Real h) const
 Real
 TabulatedFluidProperties::s_from_h_p(Real h, Real pressure) const
 {
-  Real T = T_from_p_h(pressure, h);
+  Real T = T_from_h_p(h, pressure);
   return s_from_p_T(pressure, T);
 }
 

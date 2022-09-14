@@ -34,7 +34,7 @@ SinglePhaseFluidProperties::validParams()
 
 SinglePhaseFluidProperties::SinglePhaseFluidProperties(const InputParameters & parameters)
   : FluidProperties(parameters),
-    _tolerance(getParam<Real>("tolerance")),
+    _tolerance(isParamValid("tolerance") ? getParam<Real>("tolerance") : 1e-8),
     _T_initial_guess(getParam<Real>("T_initial_guess")),
     _p_initial_guess(getParam<Real>("p_initial_guess"))
 {
@@ -506,7 +506,7 @@ void
 SinglePhaseFluidProperties::p_T_from_v_e(const Real & v,  // v value
                                          const Real & e,  // e value
                                          const Real & p0, // initial guess
-                                         const Real & T0, // intial guess
+                                         const Real & T0, // initial guess
                                          Real & p,        // returned pressure
                                          Real & T,        // returned temperature
                                          bool & conversion_succeeded) const
@@ -523,7 +523,7 @@ void
 SinglePhaseFluidProperties::p_T_from_v_h(const Real & v,  // v value
                                          const Real & h,  // e value
                                          const Real & p0, // initial guess
-                                         const Real & T0, // intial guess
+                                         const Real & T0, // initial guess
                                          Real & p,        // returned pressure
                                          Real & T,        // returned temperature
                                          bool & conversion_succeeded) const
@@ -540,7 +540,7 @@ void
 SinglePhaseFluidProperties::p_T_from_h_s(const Real & h,  // h value
                                          const Real & s,  // s value
                                          const Real & p0, // initial guess
-                                         const Real & T0, // intial guess
+                                         const Real & T0, // initial guess
                                          Real & p,        // returned pressure
                                          Real & T,        // returned temperature
                                          bool & conversion_succeeded) const

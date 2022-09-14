@@ -193,7 +193,7 @@ public:
   virtual Real e_from_v_h(Real v, Real h) const override;
   virtual void e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const override;
   virtual Real T_from_h_s(Real h, Real s) const;
-  virtual Real T_from_p_h(Real h, Real pressure) const override;
+  virtual Real T_from_h_p(Real h, Real pressure) const override;
   virtual Real s_from_h_p(Real h, Real pressure) const override;
 
   // AD versions of properties

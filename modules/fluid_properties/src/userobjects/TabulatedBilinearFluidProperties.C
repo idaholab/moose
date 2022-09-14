@@ -38,7 +38,7 @@ TabulatedBilinearFluidProperties::TabulatedBilinearFluidProperties(
 void
 TabulatedBilinearFluidProperties::constructInterpolation()
 {
-  // Construct bilinear interpolants from tabulated data
+  // Construct bilinear interpolation from pre-tabulated data
   ColumnMajorMatrix data_matrix(_num_p, _num_T);
   _property_ipol.resize(_properties.size());
 

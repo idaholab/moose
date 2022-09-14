@@ -178,6 +178,7 @@ public:
   propfunc(h, p, T)
   propfunc(g, v, e)
   propfuncWithDefault(p, h, s)
+  propfunc(T, h, p)  // temporary, until uniformization
   propfuncWithDefault(T, p, h)
   propfuncWithDefault(beta, p, T)
   propfuncWithDefault(v, p, T)
@@ -304,7 +305,7 @@ public:
    * The combined methods allow the most efficient means of calculating both
    * properties, especially where rho(p, T) and mu(rho, T). In this case, an
    * extra density calculation would be required to calculate mu(p, T). All
-   * propery names are described above.
+   * property names are described above.
    */
   virtual void rho_mu_from_p_T(Real p, Real T, Real & rho, Real & mu) const;
   virtual void rho_mu_from_p_T(Real p,
