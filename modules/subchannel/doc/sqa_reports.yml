@@ -1,0 +1,8 @@
+# NOTE:
+# This sqa_reports.yml file is a dummy in order to enable
+# documentation stub generation in MooseDocs without enabling
+# SQA itself. This file should be removed and re-generated if
+# full SQA compliance is desired.
+Applications:
+    subchannel:
+        log_default: WARNING
