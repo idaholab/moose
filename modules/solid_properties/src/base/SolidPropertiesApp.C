@@ -38,7 +38,8 @@ static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
   registerSyntaxTask(
-      "AddSolidPropertiesAction", "Modules/SolidProperties/*", "add_solid_properties");
+      "AddSolidPropertiesDeprecatedAction", "Modules/SolidProperties/*", "add_solid_properties");
+  registerSyntaxTask("AddSolidPropertiesAction", "SolidProperties/*", "add_solid_properties");
   registerMooseObjectTask("add_solid_properties", SolidProperties, false);
 
   syntax.addDependency("add_solid_properties", "add_function");
