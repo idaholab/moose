@@ -11,6 +11,7 @@
 #include "MooseUtils.h"
 #include "Conversion.h"
 #include "KDTree.h"
+#include "BidimensionalInterpolation.h"
 #include "NewtonInversion.h"
 
 // C++ includes
