@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /Variables/InitialCondition/QuadInterWrapperFlowAreaIC
+!syntax description /ICs/QuadInterWrapperFlowAreaIC
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the QuadInterWrapperFlowAreaIC object.
 
-!syntax parameters /Variables/InitialCondition/QuadInterWrapperFlowAreaIC
+!syntax parameters /ICs/QuadInterWrapperFlowAreaIC
 
-!syntax inputs /Variables/InitialCondition/QuadInterWrapperFlowAreaIC
+!syntax inputs /ICs/QuadInterWrapperFlowAreaIC
 
-!syntax children /Variables/InitialCondition/QuadInterWrapperFlowAreaIC
+!syntax children /ICs/QuadInterWrapperFlowAreaIC

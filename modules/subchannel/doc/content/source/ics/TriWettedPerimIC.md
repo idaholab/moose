@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /Variables/InitialCondition/TriWettedPerimIC
+!syntax description /ICs/TriWettedPerimIC
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the TriWettedPerimIC object.
 
-!syntax parameters /Variables/InitialCondition/TriWettedPerimIC
+!syntax parameters /ICs/TriWettedPerimIC
 
-!syntax inputs /Variables/InitialCondition/TriWettedPerimIC
+!syntax inputs /ICs/TriWettedPerimIC
 
-!syntax children /Variables/InitialCondition/TriWettedPerimIC
+!syntax children /ICs/TriWettedPerimIC

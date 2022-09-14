@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /Variables/InitialCondition/ViscosityIC
+!syntax description /ICs/ViscosityIC
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the ViscosityIC object.
 
-!syntax parameters /Variables/InitialCondition/ViscosityIC
+!syntax parameters /ICs/ViscosityIC
 
-!syntax inputs /Variables/InitialCondition/ViscosityIC
+!syntax inputs /ICs/ViscosityIC
 
-!syntax children /Variables/InitialCondition/ViscosityIC
+!syntax children /ICs/ViscosityIC
