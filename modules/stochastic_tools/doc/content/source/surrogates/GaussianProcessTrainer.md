@@ -134,7 +134,17 @@ Due to the addition of $\sigma_n^2$ along the diagonal of the $K$ matrix, this h
 | [](ExponentialCovariance.md) | A simple exponential covariance function. |
 | [](MaternHalfIntCovariance.md) | Implementation of the Matern class of covariance function, where the $\nu$ parameter takes on half-integer values. |
 
+## Hyperparameter tuning options
 
+The following options are available for tuning the hyperparameters:
+
+- +PETSc/TAO+
+
+  Relies on the TAO optimization library from PETSc. Several optimization algorithms are available from this library. Note that these algorithms perform deterministic optimization.
+
+- +Adaptive moment estimation (Adam)+
+
+  Relies on the psuedocode provied in [!cite](kingma2014adam). Adam permits stochastic optimization, wherein, a batch of the training data can be randomly chosen at each iteration.
 
 !syntax parameters /Trainers/GaussianProcessTrainer
 

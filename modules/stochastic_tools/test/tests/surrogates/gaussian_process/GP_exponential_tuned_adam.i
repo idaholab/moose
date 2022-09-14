@@ -17,7 +17,7 @@
 [Samplers]
   [train_sample]
     type = MonteCarlo
-    num_rows = 10
+    num_rows = 20
     distributions = 'k_dist q_dist'
     execute_on = PRE_MULTIAPP_SETUP
   []
@@ -96,12 +96,11 @@
     standardize_data = 'true'                 #Center and scale the training data
     sampler = train_sample
     response = results/data:avg:value
-    tao_options = '-tao_bncg_type ssml_bfgs'
-    tune_parameters = ' signal_variance length_factor'
-    tuning_min = ' 1e-9 1e-9'
-    tuning_max = ' 1e16  1e16'
-    tuning_algorithm = 'tao'
-    show_optimization_details = true
+    tune_parameters = 'signal_variance length_factor'
+    tuning_algorithm = 'adam'
+    iter_adam = 1000
+    batch_size = 20
+    learning_rate_adam = 0.005
   []
 []
 
@@ -114,10 +113,11 @@
 
 [Covariance]
   [covar]
-    type=SquaredExponentialCovariance
+    type=ExponentialCovariance
+    gamma = 2                                 #Define the exponential factor
     signal_variance = 1                       #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
-    length_factor = '0.38971 0.38971'         #Select a length factor for each parameter (k and q)
+    noise_variance = 1e-6                     #A small amount of noise can help with numerical stability
+    length_factor = '1.0 1.0'       #Select a length factor for each parameter (k and q)
   []
 []
 

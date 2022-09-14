@@ -36,6 +36,7 @@ private:
   /// Data from the current predictor row
   const std::vector<Real> & _predictor_row;
 
+  /// Gaussian process handler responsible for managing training related tasks
   StochasticTools::GaussianProcessHandler & _gp_handler;
 
   /// Parameters (x) used for training -- we'll allgather these in postTrain().
@@ -59,12 +60,11 @@ private:
   /// Flag to toggle hyperparameter tuning/optimization
   bool _do_tuning;
 
-  /// Enum which contains the hyper parameter optimizaton type requested by the user
-  MooseEnum _tuning_algorithm;
+  /// Struct holding parameters necessary for parameter tuning
+  const StochasticTools::GaussianProcessHandler::GPOptimizerOptions _optimization_opts;
 
-  /*
-  /// Response value
-  const Real & _rval;
+  /// Data from the current sampler row
+  const std::vector<Real> & _sampler_row;
 
   /// Predictor values from reporters
   std::vector<const Real *> _pvals;
@@ -74,5 +74,4 @@ private:
 
   /// Total number of parameters/dimensions
   unsigned int _n_params;
-  */
 };
