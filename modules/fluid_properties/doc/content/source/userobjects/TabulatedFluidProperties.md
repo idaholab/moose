@@ -57,8 +57,8 @@ and so on.
 
 Alternatively, from the input internal energy and volume TFP can determine various parameters (p,T,g,c,cp,cv,k, and mu from (v,e) or (v,h)). There are also a few other fluid properties from other variable sets that can be determined (e(p,rho), T(p,rho), T(p,h), s(h,p)).
 
-We convert to (v,e) by creating (v,e) and (v,h) grids. The grids are created by filling points using volume[j]=_v_min + j * dv for specific volume and
-energy[j]=_e_min + j * de for j=0 to number of points.
+We convert to (v,e) by creating (v,e) and (v,h) grids. The grids are created by filling points using `volume[j]=_v_min + j * dv` for specific volume and
+`energy[j]=_e_min + j * de` for j=0 to number of points.
 (p,T) data is then calculated by performing Newton's Method using NewtonInversion.C.
 Note that sometimes pressure and temperature values can be outside the user-defined range during this variable set inversion. When this is the case, the (p,T) values are replaced with their respective minimum and maximum values.
 
@@ -94,13 +94,13 @@ For example, if we wish to generate a file containing tabulated properties for C
 and viscosity for $300 \mathrm{K} \le T \le 400 \mathrm{K}$ and $1 \mathrm{MPa} \le p \le 10 \mathrm{MPa}$,
 divided into 50 and 100 equal points, respectively, then the input file syntax necessary is
 
-```
+```text
 [Modules]
-  [./FluidProperties]
-    [./co2]
+  [FluidProperties]
+    [co2]
       type = CO2FluidProperties
-    [../]
-    [./tabulated]
+    []
+    [tabulated]
       type = TabulatedBi___FluidProperties
       fp = co2
       fluid_property_file = fluid_properties.csv
@@ -111,7 +111,7 @@ divided into 50 and 100 equal points, respectively, then the input file syntax n
       pressure_max = 10e6
       num_T = 50
       num_p = 100
-    [../]
+    []
   []
 []
 ```
