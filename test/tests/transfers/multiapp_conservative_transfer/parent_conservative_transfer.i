@@ -56,7 +56,7 @@
 
 [Transfers]
   [./to_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     source_variable = u
     variable = aux_u
     to_multi_app = sub

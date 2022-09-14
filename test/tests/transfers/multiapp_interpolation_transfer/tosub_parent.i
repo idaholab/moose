@@ -16,7 +16,7 @@
   xmin = .21
   xmax = .79
   displacements = 'disp_x disp_y'
-  # The MultiAppInterpolationTransfer object only works with ReplicatedMesh
+  # The MultiAppGeometricInterpolationTransfer object only works with ReplicatedMesh
   parallel_type = replicated
 []
 
@@ -102,53 +102,53 @@
 
 [Transfers]
   [./tosub]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = from_parent
   [../]
   [./elemental_tosub]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = elemental_from_parent
   [../]
   [./radial_tosub]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = radial_from_parent
     interp_type = radial_basis
   [../]
   [./radial_elemental_tosub]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = radial_elemental_from_parent
     interp_type = radial_basis
   [../]
   [./displaced_target_tosub]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = displaced_target_from_parent
     displaced_target_mesh = true
   [../]
   [./displaced_source_tosub]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = displaced_source_from_parent
     displaced_source_mesh = true
   [../]
   [./elemental_to_sub_elemental]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = elemental
     variable = elemental_from_parent_elemental
   [../]
   [./elemental_to_sub_nodal]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = elemental
     variable = nodal_from_parent_elemental

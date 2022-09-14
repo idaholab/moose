@@ -61,14 +61,14 @@
   [./to_sub]
     source_variable = u
     variable = transferred_u
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     to_multi_app = sub
     error_on_miss = true
   [../]
   [./elemental_to_sub]
     source_variable = u
     variable = elemental_transferred_u
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     to_multi_app = sub
     error_on_miss = true
   [../]

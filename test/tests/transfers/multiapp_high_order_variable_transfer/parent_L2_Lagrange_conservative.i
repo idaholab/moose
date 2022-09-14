@@ -69,7 +69,7 @@
 
 [Transfers]
   [p_to_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     source_variable = power_density
     variable = power_density
     to_multi_app = sub

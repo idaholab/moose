@@ -12,28 +12,29 @@
 #include "MultiAppConservativeTransfer.h"
 
 /**
- * Transfers a vector of variables. For each individual one,
- * samples the variable's value in the Master domain at the point where
- * the MultiApp is. Copies that value into a postprocessor in the MultiApp.
- * The source and destination vectors (of variables) should be ordered consistently.
+ * Transfers a vector of variables. The local variable values are computed for each field using
+ * the libmesh mesh_function API, rather than an arbitrary interpolation from values on nearby nodes
+ * The interpolation coefficients are tied to the variable type of the transferred variable.
  */
-class MultiAppMeshFunctionTransfer : public MultiAppConservativeTransfer
+class MultiAppShapeEvaluationTransfer : public MultiAppConservativeTransfer
 {
 public:
   static InputParameters validParams();
 
-  MultiAppMeshFunctionTransfer(const InputParameters & parameters);
+  MultiAppShapeEvaluationTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 
 protected:
   /// The number of variables to transfer
   unsigned int _var_size;
+  /// Whether to error if the target point is not found in the source domain
   bool _error_on_miss;
 
 private:
   /**
    * Performs the transfer for the variable of index i
+   * @param i index in the vector of variables to transfer
    */
   void transferVariable(unsigned int i);
 

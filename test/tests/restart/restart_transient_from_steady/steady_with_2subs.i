@@ -109,7 +109,7 @@
     execute_on = 'timestep_end'
   []
   [t_from_sub]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     source_variable = temp
     variable = Tf
     from_multi_app = sub

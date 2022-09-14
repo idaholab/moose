@@ -137,8 +137,8 @@ forward. One option would be to average the field data from equivalent points.
 Framework transfer classes that support the coordinate transformation
 processes described here are:
 
-- [MultiAppInterpolationTransfer.md]
-- [MultiAppMeshFunctionTransfer.md]
+- [MultiAppGeometricInterpolationTransfer.md]
+- [MultiAppShapeEvaluationTransfer.md]
 - [MultiAppNearestNodeTransfer.md]
 - [MultiAppPostprocessorInterpolationTransfer.md]
 - [MultiAppProjectionTransfer.md]
