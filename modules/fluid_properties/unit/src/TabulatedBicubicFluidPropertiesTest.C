@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TabulatedFluidPropertiesTest.h"
+#include "TabulatedBicubicFluidPropertiesTest.h"
 #include "SinglePhaseFluidPropertiesTestUtils.h"
 
 #include <fstream>
 
 // Test data for unordered data
-TEST_F(TabulatedFluidPropertiesTest, unorderedData)
+TEST_F(TabulatedBicubicFluidPropertiesTest, unorderedData)
 {
   try
   {
     // Must cast away const to call initialSetup(), where the file is
     // checked for consistency
-    const_cast<TabulatedFluidProperties *>(_unordered_fp)->initialSetup();
+    const_cast<TabulatedBicubicFluidProperties *>(_unordered_fp)->initialSetup();
     FAIL();
   }
   catch (const std::exception & err)
@@ -33,11 +33,11 @@ TEST_F(TabulatedFluidPropertiesTest, unorderedData)
 }
 
 // Test data for different temperatures ranges in pressure data
-TEST_F(TabulatedFluidPropertiesTest, unequalTemperatures)
+TEST_F(TabulatedBicubicFluidPropertiesTest, unequalTemperatures)
 {
   try
   {
-    const_cast<TabulatedFluidProperties *>(_unequal_fp)->initialSetup();
+    const_cast<TabulatedBicubicFluidProperties *>(_unequal_fp)->initialSetup();
     FAIL();
   }
   catch (const std::exception & err)
@@ -50,11 +50,11 @@ TEST_F(TabulatedFluidPropertiesTest, unequalTemperatures)
 }
 
 // Test data for missing column
-TEST_F(TabulatedFluidPropertiesTest, missingColumn)
+TEST_F(TabulatedBicubicFluidPropertiesTest, missingColumn)
 {
   try
   {
-    const_cast<TabulatedFluidProperties *>(_missing_col_fp)->initialSetup();
+    const_cast<TabulatedBicubicFluidProperties *>(_missing_col_fp)->initialSetup();
     FAIL();
   }
   catch (const std::exception & err)
@@ -68,11 +68,11 @@ TEST_F(TabulatedFluidPropertiesTest, missingColumn)
 }
 
 // Test data for unknown property column
-TEST_F(TabulatedFluidPropertiesTest, unknownColumn)
+TEST_F(TabulatedBicubicFluidPropertiesTest, unknownColumn)
 {
   try
   {
-    const_cast<TabulatedFluidProperties *>(_unknown_col_fp)->initialSetup();
+    const_cast<TabulatedBicubicFluidProperties *>(_unknown_col_fp)->initialSetup();
     FAIL();
   }
   catch (const std::exception & err)
@@ -85,11 +85,11 @@ TEST_F(TabulatedFluidPropertiesTest, unknownColumn)
 }
 
 // Test data for missing data
-TEST_F(TabulatedFluidPropertiesTest, missingData)
+TEST_F(TabulatedBicubicFluidPropertiesTest, missingData)
 {
   try
   {
-    const_cast<TabulatedFluidProperties *>(_missing_data_fp)->initialSetup();
+    const_cast<TabulatedBicubicFluidProperties *>(_missing_data_fp)->initialSetup();
     FAIL();
   }
   catch (const std::exception & err)
@@ -103,13 +103,13 @@ TEST_F(TabulatedFluidPropertiesTest, missingData)
 }
 
 // Test tabulated fluid properties read from file including comments
-TEST_F(TabulatedFluidPropertiesTest, fromFile)
+TEST_F(TabulatedBicubicFluidPropertiesTest, fromFile)
 {
   Real p = 1.5e6;
   Real T = 450.0;
 
   // Read the data file
-  const_cast<TabulatedFluidProperties *>(_tab_fp)->initialSetup();
+  const_cast<TabulatedBicubicFluidProperties *>(_tab_fp)->initialSetup();
 
   // Fluid properties
   REL_TEST(_tab_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), 1.0e-4);
@@ -152,14 +152,16 @@ TEST_F(TabulatedFluidPropertiesTest, fromFile)
 }
 
 // Test tabulated fluid properties read from file including comments
-TEST_F(TabulatedFluidPropertiesTest, fromFileVE)
+TEST_F(TabulatedBicubicFluidPropertiesTest, fromFileVE)
 {
   Real p = 1.5e6;
   Real T = 450.0;
   Real pert = 1.0e-7;
 
   // Read the data file
-  const_cast<TabulatedFluidProperties *>(_tab_fp_ve)->initialSetup();
+  Moose::_throw_on_error = false;
+  const_cast<TabulatedBicubicFluidProperties *>(_tab_fp_ve)->initialSetup();
+  Moose::_throw_on_error = true;
 
   // round trip p,T -> v,e -> p,T
   {
@@ -353,13 +355,13 @@ TEST_F(TabulatedFluidPropertiesTest, fromFileVE)
 }
 
 // Test generation of tabulated fluid properties
-TEST_F(TabulatedFluidPropertiesTest, generateTabulatedData)
+TEST_F(TabulatedBicubicFluidPropertiesTest, generateTabulatedData)
 {
   Real p = 1.5e6;
   Real T = 450.0;
 
   // Generate the tabulated data
-  const_cast<TabulatedFluidProperties *>(_tab_gen_fp)->initialSetup();
+  const_cast<TabulatedBicubicFluidProperties *>(_tab_gen_fp)->initialSetup();
 
   REL_TEST(_tab_gen_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->h_from_p_T(p, T), _co2_fp->h_from_p_T(p, T), 1.0e-4);
@@ -373,13 +375,13 @@ TEST_F(TabulatedFluidPropertiesTest, generateTabulatedData)
 
 // Test that all fluid properties are properly passed back to the given user object
 // if they are not tabulated
-TEST_F(TabulatedFluidPropertiesTest, passthrough)
+TEST_F(TabulatedBicubicFluidPropertiesTest, passthrough)
 {
   Real p = 1.5e6;
   Real T = 450.0;
   const Real tol = REL_TOL_SAVED_VALUE;
 
-  // As the flags for interpolation in TabulatedFluidProperties default to false,
+  // As the flags for interpolation in TabulatedBicubicFluidProperties default to false,
   // properties will be passed through to the given userobject
   ABS_TEST(_tab_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->h_from_p_T(p, T), _co2_fp->h_from_p_T(p, T), tol);
@@ -401,12 +403,12 @@ TEST_F(TabulatedFluidPropertiesTest, passthrough)
 /**
  * Test that the fluid name is correctly returned
  */
-TEST_F(TabulatedFluidPropertiesTest, fluidName) { EXPECT_EQ(_tab_fp->fluidName(), "co2"); }
+TEST_F(TabulatedBicubicFluidPropertiesTest, fluidName) { EXPECT_EQ(_tab_fp->fluidName(), "co2"); }
 
 /**
  * Test that the molar mass is correctly returned
  */
-TEST_F(TabulatedFluidPropertiesTest, molarMass)
+TEST_F(TabulatedBicubicFluidPropertiesTest, molarMass)
 {
   ABS_TEST(_tab_fp->molarMass(), 44.0098e-3, REL_TOL_SAVED_VALUE);
 }
@@ -415,7 +417,7 @@ TEST_F(TabulatedFluidPropertiesTest, molarMass)
  * Verify that the methods that return multiple properties in one call return identical
  * values as the individual methods
  */
-TEST_F(TabulatedFluidPropertiesTest, combined)
+TEST_F(TabulatedBicubicFluidPropertiesTest, combined)
 {
   const Real p = 1.0e6;
   const Real T = 300.0;
