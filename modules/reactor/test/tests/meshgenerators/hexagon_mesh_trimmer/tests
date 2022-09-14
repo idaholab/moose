@@ -45,9 +45,10 @@
     exodiff = 'mod_center_trimming.e'
     exodiff_opts = '-pedantic'
     cli_args = 'Mesh/trim/input=pattern_mod
-                Mesh/trim/center_trim_starting_index=5
+                Mesh/trim/center_trim_starting_index=6
                 Mesh/trim/center_trim_ending_index=11
                 Mesh/trim/center_trimming_section_boundary="center_section"
+                Mesh/pattern_mod/num_layers=2
                 Mesh/inactive="peripheral_ring pattern2"
                 --mesh-only "mod_center_trimming.e"'
     requirement ='The system shall be able to trim a fraction of an hexagonal assembly mesh with its peripheral regions modified through its center.'
