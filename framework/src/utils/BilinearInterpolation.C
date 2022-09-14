@@ -122,6 +122,10 @@ BilinearInterpolation::sampleInternal(T & s1, T & s2) const
 Real
 BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var) const
 {
+  // check input
+  if (deriv_var != 1 && deriv_var != 2)
+    mooseError("deriv_var must equal 1 or 2");
+
   // first find 4 neighboring points
   unsigned int lx = 0; // index of x coordinate of adjacent grid point to left of P
   unsigned int ux = 0; // index of x coordinate of adjacent grid point to right of P
@@ -131,10 +135,16 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   unsigned int uy = 0; // index of y coordinate of adjacent grid point above P
   getNeighborIndices(_x2, MetaPhysicL::raw_value(s2), ly, uy);
 
+  // xy indexing
+  // 11 is point on lower-left (x low, y low), 22 on upper-right
   const Real & fQ11 = _zSurface(ly, lx);
   const Real & fQ21 = _zSurface(ly, ux);
   const Real & fQ12 = _zSurface(uy, lx);
   const Real & fQ22 = _zSurface(uy, ux);
+  // when on a grid bound or node, lx can be equal to ux or ly be equal to uy
+  // this would lead to a 0 slope, which isn't desirable
+  // we then refer to 0 as the coordinate before, so 00 is lx-1, ly-1
+  // and 3 as the coordinate after, so 33 is ux+1, uy+1
 
   const auto & x = s1;
   const auto & y = s2;
@@ -143,7 +153,17 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   const Real & y1 = _x2[ly];
   const Real & y2 = _x2[uy];
 
-  if ((lx == 0) && (ly == 0)) // if at bottom left node, take average slope of four boxes
+  // Grid sizes
+  const auto nx1 = _x1.size();
+  const auto nx2 = _x2.size();
+
+  // NOTE: The division (quarter, half) on the bounds is an implementation choice, assuming that
+  // the slope is 0 outside of the grid. They could be removed if someone knows better
+  // Similarly, on interior grid lines, the equal weighting of both sides of both neighbor
+  // cells slopes is an implementation choice
+
+  // Check all four grid corners, use a quarter of the slope in the cell next to the corner
+  if ((ux == 0) && (uy == 0)) // bottom left node
   {
     const auto & fQ13 = _zSurface(ly + 1, lx);     // fQ at (x1,y3)
     const auto & fQ31 = _zSurface(ly, lx + 1);     // fQ at (x3,y1)
@@ -167,13 +187,10 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ13 * (x3 - x);
       dfdy += fQ33 * (x - x1);
       dfdy /= ((x3 - x1) * (y3 - y1));
-      if (std::isnan(dfdy))
-        return dfdy / 4;
+      return dfdy / 4;
     }
-    else
-      mooseError("deriv_var must equal 1 or 2");
   }
-  else if ((ly == 0) && (ux == 99)) // if at bottom right node
+  else if ((uy == 0) && (lx == nx1 - 1)) // bottom right node
   {
     const auto & fQ01 = _zSurface(ly, lx - 1);     // fQ at (x0,y1)
     const auto & fQ03 = _zSurface(ly + 1, lx - 1); // fQ at (x0,y3)
@@ -199,13 +216,11 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy /= ((x2 - x0) * (y3 - y1));
       return dfdy / 4;
     }
-    else
-      mooseError("deriv_var must equal 1 or 2");
   }
-  else if ((uy == 99) && (lx == 0)) // if at top left node
+  else if ((ly == nx2 - 1) && (ux == 0)) // top left node
   {
     const auto & fQ10 = _zSurface(ly - 1, lx);     // fQ at (x1,y0)
-    const auto & fQ30 = _zSurface(ly + 1, lx + 1); // fQ at (x3,y0)
+    const auto & fQ30 = _zSurface(ly - 1, lx + 1); // fQ at (x3,y0)
     const auto & fQ32 = _zSurface(ly, lx + 1);     // fQ at (x3,y2)
     const Real & x3 = _x1[lx + 1];                 // ux value
     const Real & y0 = _x2[ly - 1];                 // ly value
@@ -228,10 +243,8 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy /= ((x3 - x1) * (y2 - y0));
       return dfdy / 4;
     }
-    else
-      mooseError("deriv_var must equal 1 or 2");
   }
-  else if ((uy == 99) && (ux == 99)) // if at top right node
+  else if ((ly == nx2 - 1) && (lx == nx1 - 1)) // top right node
   {
     const auto & fQ00 = _zSurface(ly - 1, lx - 1); // fQ at (x0,y0)
     const auto & fQ20 = _zSurface(ly - 1, lx);     // fQ at (x2,y0)
@@ -257,11 +270,70 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy /= ((x2 - x0) * (y2 - y0));
       return dfdy / 4;
     }
-    else
-      mooseError("deriv_var must equal 1 or 2");
   }
 
-  else if ((uy == 99) && (ly == uy) && (ux == lx)) // when along top bound and ux=lx, uy=ly
+  // Nodes along the four grid bounds, use half the slope of the two cells nearby
+  else if ((ux == 0) && (ly == uy) && (ux == lx)) // when along left boundary, at a grid node
+  {
+    const auto & fQ10 = _zSurface(uy - 1, lx);     // fQ at (x1,y0)
+    const auto & fQ30 = _zSurface(uy, ux + 1);     // fQ at (x3,y0)
+    const auto & fQ13 = _zSurface(uy + 1, lx);     // fQ at (x1,y3)
+    const auto & fQ33 = _zSurface(uy + 1, ux + 1); // fQ at (x3,y3)
+
+    const Real & x3 = _x1[lx + 1]; // ux value
+    const Real & y0 = _x2[ly - 1]; // ly value
+    const Real & y3 = _x2[ly + 1]; // uy value
+
+    if (deriv_var == 1)
+    {
+      auto dfdx = fQ10 * (y - y3);
+      dfdx += fQ30 * (y3 - y);
+      dfdx += fQ13 * (y0 - y);
+      dfdx += fQ33 * (y - y0);
+      dfdx /= ((x3 - x1) * (y3 - y0));
+      return dfdx / 2;
+    }
+    else if (deriv_var == 2)
+    {
+      auto dfdy = fQ10 * (x - x3);
+      dfdy += fQ30 * (x1 - x);
+      dfdy += fQ13 * (x3 - x);
+      dfdy += fQ33 * (x - x1);
+      dfdy /= ((x3 - x1) * (y3 - y0));
+      return dfdy / 2;
+    }
+  }
+  else if ((lx == nx1 - 1) && (ly == uy) && (ux == lx)) // when along right boundary, at a grid node
+  {
+    const auto & fQ00 = _zSurface(uy - 1, lx - 1); // fQ at (x0,y0)
+    const auto & fQ10 = _zSurface(uy - 1, lx);     // fQ at (x1,y0)
+    const auto & fQ03 = _zSurface(uy + 1, lx - 1); // fQ at (x0,y3)
+    const auto & fQ13 = _zSurface(uy + 1, lx);     // fQ at (x1,y3)
+
+    const Real & x0 = _x1[lx - 1]; // lx value
+    const Real & y0 = _x2[ly - 1]; // ly value
+    const Real & y3 = _x2[ly + 1]; // uy value
+
+    if (deriv_var == 1)
+    {
+      auto dfdx = fQ00 * (y - y3);
+      dfdx += fQ10 * (y3 - y);
+      dfdx += fQ03 * (y0 - y);
+      dfdx += fQ13 * (y - y0);
+      dfdx /= ((x1 - x0) * (y3 - y0));
+      return dfdx / 2;
+    }
+    else if (deriv_var == 2)
+    {
+      auto dfdy = fQ00 * (x - x1);
+      dfdy += fQ10 * (x0 - x);
+      dfdy += fQ03 * (x1 - x);
+      dfdy += fQ13 * (x - x0);
+      dfdy /= ((x1 - x0) * (y3 - y0));
+      return dfdy / 2;
+    }
+  }
+  else if ((uy == nx2 - 1) && (ly == uy) && (ux == lx)) // when along top boundary, at a grid node
   {
     const auto & fQ00 = _zSurface(uy - 1, lx - 1); // fQ at (x0,y0)
     const auto & fQ01 = _zSurface(uy, lx - 1);     // fQ at (x0,y1)
@@ -279,7 +351,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ01 * (y0 - y);
       dfdx += fQ31 * (y - y0);
       dfdx /= ((x3 - x0) * (y1 - y0));
-      return dfdx / 4;
+      return dfdx / 2;
     }
     else if (deriv_var == 2)
     {
@@ -288,12 +360,10 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ01 * (x3 - x);
       dfdy += fQ31 * (x - x0);
       dfdy /= ((x3 - x0) * (y1 - y0));
-      return dfdy / 4;
+      return dfdy / 2;
     }
-    else
-      mooseError("deriv_var must equal 1 or 2");
   }
-  else if ((uy == 0) && (ly == uy) && (ux == lx)) // when along bottom bound and ux=lx, uy=ly
+  else if ((uy == 0) && (ly == uy) && (ux == lx)) // when along bottom boundary, at a grid node
   {
     const auto & fQ01 = _zSurface(ly, lx - 1);     // fQ at (x0,y1)
     const auto & fQ03 = _zSurface(ly + 1, lx - 1); // fQ at (x0,y3)
@@ -322,9 +392,9 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy /= ((x3 - x0) * (y3 - y1));
       return dfdy / 4;
     }
-    else
-      mooseError("deriv_var must equal 1 or 2");
   }
+
+  // Rest of the domain
   // calculate derivative wrt to x
   if (deriv_var == 1)
   {
@@ -337,7 +407,8 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     {
       return (fQ22 - fQ12) / (x2 - x1);
     }
-    else if ((lx == ux) && lx > 0 && ux < _x1.size() - 1)
+    // interior grid line
+    else if ((lx == ux) && lx > 0 && ux < nx1 - 1)
     {
       // expand grid size so x1 does not equal x2
       const auto & fQ01 = _zSurface(ly, lx - 1); // new lx at ly
@@ -361,6 +432,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx_b /= ((x3 - x1) * (y2 - y1));
       return 0.5 * (dfdx_a + dfdx_b);
     }
+    // left boundary
     else if ((lx == ux) && lx == 0)
     {
       const auto & fQ31 = _zSurface(ly, lx + 1); // new ux at ly
@@ -375,7 +447,8 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx /= ((x3 - x1) * (y2 - y1));
       return 0.5 * dfdx;
     }
-    else if ((lx == ux) && (ux == 99))
+    // right boundary
+    else if ((lx == ux) && (ux == nx1 - 1))
     {
       const auto & fQ01 = _zSurface(ly, ux - 1); // new lx at ly
       const auto & fQ02 = _zSurface(uy, ux - 1); // new lx at uy
@@ -410,7 +483,8 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     {
       return (fQ22 - fQ21) / (y2 - y1);
     }
-    else if ((ly == uy) && ly > 0 && uy < _x2.size() - 1)
+    // interior grid line
+    else if ((ly == uy) && ly > 0 && uy < nx2 - 1)
     {
       // expand grid size so x1 does not equal x2
       const auto & fQ10 = _zSurface(ly - 1, lx); // new ly at lx
@@ -433,6 +507,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy_b /= ((x2 - x1) * (y3 - y1));
       return 0.5 * (dfdy_a + dfdy_b);
     }
+    // bottom boundary
     else if ((ly == uy) && ly == 0)
     {
       const auto & fQ13 = _zSurface(ly + 1, lx); // new uy at lx
@@ -447,7 +522,8 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy /= ((x2 - x1) * (y3 - y1));
       return 0.5 * dfdy;
     }
-    else if ((ly == uy) && (uy == 99))
+    // top boundary
+    else if ((ly == uy) && (uy == nx2 - 1))
     {
       const auto & fQ10 = _zSurface(ly - 1, lx); // new ly at lx
       const auto & fQ20 = _zSurface(ly - 1, ux); // new ly at ux
@@ -471,8 +547,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       return dfdy_xy;
     }
   }
-  else
-    mooseError("deriv_var must equal 1 or 2");
+  mooseError("Bilinear interpolation failed to select a case for x1= ", s1, " x2= ", s2);
 }
 
 void
