@@ -465,11 +465,7 @@ MultiAppGeometricInterpolationTransfer::execute()
 
           auto & to_solution = getToMultiApp()->appTransferVector(i, _to_var_name);
 
-          interpolateTargetPoints(to_problem,
-                                  to_var,
-                                  to_solution,
-                                  *_to_transforms[getToMultiApp()->localAppNumber(i)],
-                                  idi);
+          interpolateTargetPoints(to_problem, to_var, to_solution, *_to_transforms[i], idi);
         }
       }
 
@@ -489,8 +485,7 @@ MultiAppGeometricInterpolationTransfer::execute()
                                                            Moose::VarKindType::VAR_ANY,
                                                            Moose::VarFieldType::VAR_FIELD_STANDARD);
 
-          fillSourceInterpolationPoints(
-              from_problem, from_var, *_from_transforms[getFromMultiApp()->localAppNumber(i)], idi);
+          fillSourceInterpolationPoints(from_problem, from_var, *_from_transforms[i], idi);
         }
       }
 
