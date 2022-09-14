@@ -12,6 +12,12 @@
 
 const double tol = 1e-8;
 
+Real
+function(Real x1, Real x2)
+{
+   return x1 * x1 + 3.0 * x2 * x2;
+}
+
 TEST(BilinearInterpolationTest, sample)
 {
   // Test BilinearInterpolation with a function y = x1 + 3 x2
@@ -27,26 +33,26 @@ TEST(BilinearInterpolationTest, sample)
 
   for (unsigned int i = 0; i < n; ++i)
     for (unsigned int j = 0; j < n; ++j)
-      y(i, j) = x1[i] * x1[i] + 3.0 * x2[j] * x2[j];
+      y(i, j) = function(x1[i], x2[j]);
 
   BilinearInterpolation interp(x1, x2, y);
 
   // Check sampled value and first and second derivatives
   Real p1 = 4.5, p2 = 5.5;
-  EXPECT_NEAR(interp.sample(p1, p2), 111, tol);
+  EXPECT_NEAR(interp.sample(p1, p2), 4.5*4.5 + 3*5.5*5.5, tol);
   EXPECT_NEAR(interp.sampleDerivative(p1, p2, 1), 9, tol);
   EXPECT_NEAR(interp.sampleDerivative(p1, p2, 2), 33, tol);
 
   // Check that sampleValueAndDerivatives() returns the same results as above
   Real y2, dy2_dx1, dy2_dx2;
   interp.sampleValueAndDerivatives(p1, p2, y2, dy2_dx1, dy2_dx2);
-  EXPECT_NEAR(y2, 111.0, tol);
-  EXPECT_NEAR(dy2_dx1, 9.0, tol);
-  EXPECT_NEAR(dy2_dx2, 33.0, tol);
+  EXPECT_NEAR(y2, interp.sample(p1, p2), tol);
+  EXPECT_NEAR(dy2_dx1, interp.sampleDerivative(p1, p2, 1), tol);
+  EXPECT_NEAR(dy2_dx2, interp.sampleDerivative(p1, p2, 2), tol);
 
   // Check that the value and derivatives are correct at grid point
-  p1 = 4, p2 = 5;
-  EXPECT_NEAR(interp.sample(p1, p2), 91.0, tol);
+  p1 = 4, p2 = 8.25;
+  EXPECT_NEAR(interp.sample(p1, p2), function(p1, p2), tol);
   EXPECT_NEAR(interp.sampleDerivative(p1, p2, 1), 8.0, tol);
   EXPECT_NEAR(interp.sampleDerivative(p1, p2, 2), 30.0, tol);
 }
