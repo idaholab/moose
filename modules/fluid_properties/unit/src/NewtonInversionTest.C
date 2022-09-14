@@ -9,100 +9,165 @@
 
 #include "gtest/gtest.h"
 #include "NewtonInversion.h"
-// WIP
-/**
- * Test function z(x,y) for Newton's method 1D.
- * z(x) = x^2 - 3x + 4*y + 2 which has a root at 2 and 1 .
- * Test function f(x,y) for Newton's Method 2D
- * f(x,y) = y - 2x
- * Test function f(x,y) for Newton's Method 2D.
- * g(x,y) =
- * Note: the implementation of Brents bracketing method restricts the bracketing
- * interval to positive values
- */
 
 void
-function(Real x, Real y, Real & z, Real & dzdx, Real & dzdy)
+function_f1(Real x1, Real x2, Real & z, Real & dzdx1, Real & dzdx2)
 {
-   z = x * x - 3 * x + 4 * y + 2;
-   dzdx = 2 * x - 3;
-   dzdy = 4;
+   z = x2 * x2 - 3 * x2 + 4 * x1 + 2;
+   dzdx1 = 4;
+   dzdx2 = 2 * x2 - 3;
 }
 
-// void
-// error(x)
-// {
-//   return 2;
-// }
-TEST(NewtonInversion, newtonSolve1D)
+void
+function_f2(Real x1, Real x2, Real & z, Real & dzdx1, Real & dzdx2)
 {
-  Real x = 2;
-  Real y = 3;
-  Real soln = 12;
-  Real guess = 11;
-  auto func = [&](Real x, Real y, Real & z, Real & dzdx, Real & dzdy)
+   z = exp(x1 * x2) + x2 * log(x2);
+   dzdx1 = x2 * exp(x1 * x2);
+   dzdx2 = x1 * exp(x1 * x2) + log(x2) + 1;
+}
+
+/**
+ * Tests the implementation of Newton's method to find the roots of:
+ * a polynomial of x and y, with x constant
+ * f1(x, y) = y^2 - 3*y + 4*x + 2
+ * a non-linear function of x and y, with x constant
+ * f2(x, y) = exp(x * y) + y * log(y)
+ */
+TEST(NewtonInversion, NewtonSolve)
+{
+  // Test 2nd degree polynomial with two roots (f1)
+  // x is kept constant when calling f_1(x, y)
+  Real x = 0;
+  // we seek y such that f(x1, x2) = z
+  Real z = 0;
+  Real initial_guess = 11;
+  auto func = [&](Real x1, Real x2, Real & z, Real & dzdx1, Real & dzdx2)
   {
-    function(x, y, z, dzdx, dzdy);
+    function_f1(x1, x2, z, dzdx1, dzdx2);
   };
 
-  // test that NewtonSolve gets correct roots
-  // try
-  // {
-  // Real result = NewtonMethod::NewtonSolve(x, y, guess, 1e-8, func);
-  // if (result != soln)
-  //   FAIL() << "Newton Solve result does not match solution";
-  // }
-  // catch
-  // {
-  //
-  // }
+  // Solve z = f(x, y) with x constant
+  Real y = NewtonMethod::NewtonSolve(x, z, initial_guess, 1e-8, func);
+
+  // Check solution found
+  Real tol = 1e-7;
+  Real soln = 2;
+  EXPECT_NEAR(y, soln, tol);
+
+  // Test non linear function (f2)
+  auto func2 = [&](Real x1, Real x2, Real & z, Real & dzdx1, Real & dzdx2)
+  {
+    function_f2(x1, x2, z, dzdx1, dzdx2);
+  };
+
+  x = 1;
+  z = 0.8749124087762432;
+  soln = 0.1;
+  initial_guess = 0.1;
+  y = NewtonMethod::NewtonSolve(x, z, initial_guess, 1e-8, func2);
+  EXPECT_NEAR(y, soln, tol);
 }
 
 void
-function1(Real x, Real y, Real & f, Real & dfdx, Real & dfdy)
+function_g1(Real x1, Real x2, Real & g, Real & dgdx1, Real & dgdx2)
 {
-  f = y - 2 * x ;
-  dfdx = -2;
-  dfdy = 1;
-}
-void
-function2(Real x, Real y, Real & g, Real & dgdx, Real & dgdy)
-{
-  g = 3 * y - 4 * x;
-  dgdx = 4;
-  dgdy = 3;
+  g = x2 - 2 * x1;
+  dgdx1 = -2;
+  dgdx2 = 1;
 }
 
+void
+function_g2(Real x1, Real x2, Real & g, Real & dgdx1, Real & dgdx2)
+{
+  g = x1 * x1 + x2 * x2 - 4 * x1 * x2 + 2;
+  dgdx1 = 2 * x1 - 4 * x2;
+  dgdx2 = 2 * x2 - 4 * x1;
+}
+
+void
+function_g3(Real x1, Real x2, Real & g, Real & dgdx1, Real & dgdx2)
+{
+  g = exp(x2) + x1*log(x1);
+  dgdx1 = 1 + log(x1);
+  dgdx2 = exp(x2);
+}
+
+/**
+ * Tests the implementation of Newton's method to find the roots of:
+ * 2D inversion problems, where we seek x1,x2 such that g_i(x1,x2)=y1, g_j(x1,x2)=y2
+ * with the g_j functions chosen among:
+ * a 2D bilinear function
+ * g1(x,y) = y - 2x
+ * a 2D quadratic function
+ * g2(x,y) = y^2 + x^2 - 4*x*y + 2
+ * a 2D nonlinear function
+ * g3(x,y) = exp(y) + x*log(x)
+ */
 TEST(NewtonInversion, NewtonSolve2D)
 {
-  Real x = 5;
-  Real y = 8;
-  Real guess1 = 2 ;
+  // Initial guess
+  Real guess1 = 2;
   Real guess2 = 10;
-  Real res1;
-  Real res2;
-  Real f_soln = 1;
-  Real g_soln = 11;
+
+  // Target values
+  Real y1 = -3;
+  Real y2 = -37;
+
+  // Roots of the problem obtained by Newton's method
+  Real return_x1;
+  Real return_x2;
+
+  // Known solution for the first problem
+  Real x1_soln = -4;
+  Real x2_soln = -11;
+
   bool converged;
   auto func1 = [&](Real x, Real y, Real & f, Real & dfdx, Real & dfdy)
   {
-    function1(x, y, f, dfdx, dfdy);
+    function_g1(x, y, f, dfdx, dfdy);
   };
   auto func2 = [&](Real x, Real y, Real & g, Real & dgdx, Real & dgdy)
   {
-    function1(x, y, g, dgdx, dgdy);
+    function_g2(x, y, g, dgdx, dgdy);
   };
-  NewtonMethod::NewtonSolve2D(x, y, guess1, guess2, res1, res2, 1e-8, converged, func1, func2);
+  auto func3 = [&](Real x, Real y, Real & g, Real & dgdx, Real & dgdy)
+  {
+    function_g3(x, y, g, dgdx, dgdy);
+  };
+  NewtonMethod::NewtonSolve2D(
+      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, converged, func1, func2);
 
-  // try
-  // {
-  //   Real result1 = res1;
-  //   Real result2 = res2;
-  //   if (result1 != f_soln || result2 != g_soln)
-  //     FAIL() << "Newton Solve result does not match solution";
-  // }
-  // catch
-  // {
+  // Check values
+  Real tol = 1e-6;
+  EXPECT_TRUE(converged);
+  EXPECT_NEAR(return_x1, x1_soln, tol);
+  EXPECT_NEAR(return_x2, x2_soln, tol);
 
-  }
+  // Try other combinations of g functions
+  y1 = 0.1;
+  y2 = 1.1196002982765987;
+  NewtonMethod::NewtonSolve2D(
+      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, converged, func1, func3);
+  x1_soln = 0.1;
+  x2_soln = 0.3;
+  EXPECT_TRUE(converged);
+  EXPECT_NEAR(return_x1, x1_soln, tol);
+  EXPECT_NEAR(return_x2, x2_soln, tol);
+
+  y1 = 1.98;
+  y2 = 1.1196002982765987;
+  NewtonMethod::NewtonSolve2D(
+      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, converged, func2, func3);
+  x1_soln = 0.1;
+  x2_soln = 0.3;
+  EXPECT_TRUE(converged);
+  EXPECT_NEAR(return_x1, x1_soln, tol);
+  EXPECT_NEAR(return_x2, x2_soln, tol);
+
+  // If there is no solution it should not converge
+  y1 = -2000;
+  y2 = -2000; // no solution
+  NewtonMethod::NewtonSolve2D(
+      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, converged, func1, func3);
+  EXPECT_FALSE(converged);
 }
