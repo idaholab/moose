@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /AuxVariables/AuxKernel/MassFlowRateAux
+!syntax description /AuxKernels/MassFlowRateAux
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the MassFlowRateAux object.
 
-!syntax parameters /AuxVariables/AuxKernel/MassFlowRateAux
+!syntax parameters /AuxKernels/MassFlowRateAux
 
-!syntax inputs /AuxVariables/AuxKernel/MassFlowRateAux
+!syntax inputs /AuxKernels/MassFlowRateAux
 
-!syntax children /AuxVariables/AuxKernel/MassFlowRateAux
+!syntax children /AuxKernels/MassFlowRateAux

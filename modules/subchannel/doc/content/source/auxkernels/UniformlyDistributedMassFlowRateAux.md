@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /AuxVariables/AuxKernel/UniformlyDistributedMassFlowRateAux
+!syntax description /AuxKernels/UniformlyDistributedMassFlowRateAux
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the UniformlyDistributedMassFlowRateAux object.
 
-!syntax parameters /AuxVariables/AuxKernel/UniformlyDistributedMassFlowRateAux
+!syntax parameters /AuxKernels/UniformlyDistributedMassFlowRateAux
 
-!syntax inputs /AuxVariables/AuxKernel/UniformlyDistributedMassFlowRateAux
+!syntax inputs /AuxKernels/UniformlyDistributedMassFlowRateAux
 
-!syntax children /AuxVariables/AuxKernel/UniformlyDistributedMassFlowRateAux
+!syntax children /AuxKernels/UniformlyDistributedMassFlowRateAux
