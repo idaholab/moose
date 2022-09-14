@@ -11,6 +11,7 @@
 
 #include "ComputeStressBase.h"
 #include "DynamicLibraryLoader.h"
+#include "ComputeFiniteStrain.h"
 
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
@@ -243,5 +244,5 @@ protected:
   const bool _use_one_based_indexing;
 
 private:
-  const MooseEnum _decomposition_method;
+  const ComputeFiniteStrain::DecompMethod _decomposition_method;
 };

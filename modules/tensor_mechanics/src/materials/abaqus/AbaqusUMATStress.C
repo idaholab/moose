@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AbaqusUMATStress.h"
-#include "ComputeFiniteStrain.h"
 #include "Factory.h"
 #include "MooseMesh.h"
 #include "RankTwoTensor.h"
@@ -85,7 +84,8 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _external_properties(_number_external_properties),
     _external_properties_old(_number_external_properties),
     _use_one_based_indexing(getParam<bool>("use_one_based_indexing")),
-    _decomposition_method(getParam<MooseEnum>("decomposition_method"))
+    _decomposition_method(
+        getParam<MooseEnum>("decomposition_method").getEnum<ComputeFiniteStrain::DecompMethod>())
 {
   if (!_use_one_based_indexing)
     mooseDeprecated(
@@ -202,7 +202,7 @@ AbaqusUMATStress::computeQpStress()
 
   // rotate old stress if HughesWinget
   RankTwoTensor stress_old = _stress_old[_qp];
-  if (_decomposition_method == "HughesWinget")
+  if (_decomposition_method == ComputeFiniteStrain::DecompMethod::HughesWinget)
     stress_old.rotate(_rotation_increment[_qp]);
 
   for (const auto i : make_range(_aqNTENS))
@@ -318,7 +318,7 @@ AbaqusUMATStress::computeQpStress()
       _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[5], _aqSTRESS[4], _aqSTRESS[3]);
 
   // Rotate the stress state to the current configuration, unless HughesWinget
-  if (_decomposition_method != "HughesWinget")
+  if (_decomposition_method != ComputeFiniteStrain::DecompMethod::HughesWinget)
     _stress[_qp].rotate(_rotation_increment[_qp]);
 
   // Build Jacobian matrix from UMAT's Voigt non-standard order to fourth order tensor.

@@ -24,6 +24,13 @@ public:
 
   void computeProperties() override;
 
+  enum DecompMethod
+  {
+    TaylorExpansion,
+    EigenSolution,
+    HughesWinget
+  };
+
   static MooseEnum decompositionType();
 
 protected:
@@ -31,13 +38,6 @@ protected:
   virtual void computeQpIncrements(RankTwoTensor & e, RankTwoTensor & r);
 
   std::vector<RankTwoTensor> _Fhat;
-
-  enum class DecompMethod
-  {
-    TaylorExpansion,
-    EigenSolution,
-    HughesWinget
-  };
 
   const DecompMethod _decomposition_method;
 
