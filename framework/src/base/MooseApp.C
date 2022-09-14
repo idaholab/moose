@@ -1,4 +1,4 @@
-//* This file is part of the MOOSE framework
+  //* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
@@ -178,7 +178,7 @@ MooseApp::validParams()
       "n_threads", "--n-threads=<n>", 1, "Runs the specified number of threads per process");
 
   params.addCommandLineParam<bool>(
-      "warn_unused", "-w --warn-unused", false, "Warn about unused input file options");
+      "allow_unused", "-w --allow-unused", false, "Warn about unused input file options instead of erroring.");
   params.addCommandLineParam<bool>("error_unused",
                                    "-e --error-unused",
                                    false,
@@ -644,7 +644,7 @@ MooseApp::setupOptions()
 
   if (getParam<bool>("error_unused"))
     setCheckUnusedFlag(true);
-  else if (getParam<bool>("warn_unused"))
+  else if (getParam<bool>("allow_unused"))
     setCheckUnusedFlag(false);
 
   if (getParam<bool>("error_override"))
