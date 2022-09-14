@@ -136,7 +136,7 @@ protected:
 
   Real & _timestep_tolerance;
 
-  ///should detailed diagnostic output be printed
+  /// should detailed diagnostic output be printed
   const bool & _verbose;
 
   /// Whether or not the previous solve converged.

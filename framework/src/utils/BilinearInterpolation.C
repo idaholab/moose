@@ -136,7 +136,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   getNeighborIndices(_x2, MetaPhysicL::raw_value(s2), ly, uy);
 
   // xy indexing
-  // 11 is point on lower-left (x low, y low), 22 on upper-right
+  // 11 is point on lower-left (x low, y low), 22 on upper-right (x high, y high)
   const Real & fQ11 = _zSurface(ly, lx);
   const Real & fQ21 = _zSurface(ly, ux);
   const Real & fQ12 = _zSurface(uy, lx);
@@ -157,10 +157,10 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
   const auto nx1 = _x1.size();
   const auto nx2 = _x2.size();
 
-  // NOTE: The division (quarter, half) on the bounds is an implementation choice, assuming that
-  // the slope is 0 outside of the grid. They could be removed if someone knows better
-  // Similarly, on interior grid lines, the equal weighting of both sides of both neighbor
+  // On interior grid lines, the equal weighting of both sides of both neighbor
   // cells slopes is an implementation choice
+  // Alternatively on interior grid nodes, we instead use the super cell around the grid node
+  // instead of a weighting of the four neighbor cells
 
   // Check all four grid corners, use a quarter of the slope in the cell next to the corner
   if ((ux == 0) && (uy == 0)) // bottom left node
@@ -178,7 +178,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ13 * (y1 - y);
       dfdx += fQ33 * (y - y1);
       dfdx /= ((x3 - x1) * (y3 - y1));
-      return dfdx / 4;
+      return dfdx;
     }
     else if (deriv_var == 2)
     {
@@ -187,7 +187,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ13 * (x3 - x);
       dfdy += fQ33 * (x - x1);
       dfdy /= ((x3 - x1) * (y3 - y1));
-      return dfdy / 4;
+      return dfdy;
     }
   }
   else if ((uy == 0) && (lx == nx1 - 1)) // bottom right node
@@ -205,7 +205,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ03 * (y1 - y);
       dfdx += fQ23 * (y - y1);
       dfdx /= ((x2 - x0) * (y3 - y1));
-      return dfdx / 4;
+      return dfdx;
     }
     else if (deriv_var == 2)
     {
@@ -214,7 +214,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ03 * (x2 - x);
       dfdy += fQ23 * (x - x0);
       dfdy /= ((x2 - x0) * (y3 - y1));
-      return dfdy / 4;
+      return dfdy;
     }
   }
   else if ((ly == nx2 - 1) && (ux == 0)) // top left node
@@ -232,7 +232,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ12 * (y0 - y);
       dfdx += fQ32 * (y - y0);
       dfdx /= ((x3 - x1) * (y2 - y0));
-      return dfdx / 4;
+      return dfdx;
     }
     else if (deriv_var == 2)
     {
@@ -241,7 +241,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ12 * (x3 - x);
       dfdy += fQ32 * (x - x1);
       dfdy /= ((x3 - x1) * (y2 - y0));
-      return dfdy / 4;
+      return dfdy;
     }
   }
   else if ((ly == nx2 - 1) && (lx == nx1 - 1)) // top right node
@@ -259,7 +259,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ02 * (y0 - y);
       dfdx += fQ22 * (y - y0);
       dfdx /= ((x2 - x0) * (y2 - y0));
-      return dfdx / 4;
+      return dfdx;
     }
     else if (deriv_var == 2)
     {
@@ -268,7 +268,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ02 * (x2 - x);
       dfdy += fQ22 * (x - x0);
       dfdy /= ((x2 - x0) * (y2 - y0));
-      return dfdy / 4;
+      return dfdy;
     }
   }
 
@@ -291,7 +291,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ13 * (y0 - y);
       dfdx += fQ33 * (y - y0);
       dfdx /= ((x3 - x1) * (y3 - y0));
-      return dfdx / 2;
+      return dfdx;
     }
     else if (deriv_var == 2)
     {
@@ -300,7 +300,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ13 * (x3 - x);
       dfdy += fQ33 * (x - x1);
       dfdy /= ((x3 - x1) * (y3 - y0));
-      return dfdy / 2;
+      return dfdy;
     }
   }
   else if ((lx == nx1 - 1) && (ly == uy) && (ux == lx)) // when along right boundary, at a grid node
@@ -321,7 +321,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ03 * (y0 - y);
       dfdx += fQ13 * (y - y0);
       dfdx /= ((x1 - x0) * (y3 - y0));
-      return dfdx / 2;
+      return dfdx;
     }
     else if (deriv_var == 2)
     {
@@ -330,7 +330,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ03 * (x1 - x);
       dfdy += fQ13 * (x - x0);
       dfdy /= ((x1 - x0) * (y3 - y0));
-      return dfdy / 2;
+      return dfdy;
     }
   }
   else if ((uy == nx2 - 1) && (ly == uy) && (ux == lx)) // when along top boundary, at a grid node
@@ -351,7 +351,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ01 * (y0 - y);
       dfdx += fQ31 * (y - y0);
       dfdx /= ((x3 - x0) * (y1 - y0));
-      return dfdx / 2;
+      return dfdx;
     }
     else if (deriv_var == 2)
     {
@@ -360,7 +360,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ01 * (x3 - x);
       dfdy += fQ31 * (x - x0);
       dfdy /= ((x3 - x0) * (y1 - y0));
-      return dfdy / 2;
+      return dfdy;
     }
   }
   else if ((uy == 0) && (ly == uy) && (ux == lx)) // when along bottom boundary, at a grid node
@@ -381,7 +381,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ03 * (y1 - y);
       dfdx += fQ33 * (y - y1);
       dfdx /= ((x3 - x0) * (y3 - y1));
-      return dfdx / 4;
+      return dfdx;
     }
     else if (deriv_var == 2)
     {
@@ -390,11 +390,44 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ03 * (x3 - x);
       dfdy += fQ33 * (x - x0);
       dfdy /= ((x3 - x0) * (y3 - y1));
-      return dfdy / 4;
+      return dfdy;
     }
   }
 
-  // Rest of the domain
+  // at a grid node inside the domain, use the super box around
+  else if ((ux == lx) && (uy == ly))
+  {
+    const auto & fQ00 = _zSurface(ly - 1, lx - 1); // fQ at (x0,y0)
+    const auto & fQ03 = _zSurface(ly + 1, lx - 1); // fQ at (x0,y3)
+    const auto & fQ30 = _zSurface(ly - 1, lx + 1); // fQ at (x3,y0)
+    const auto & fQ33 = _zSurface(ly + 1, lx + 1); // fQ at (x3,y3)
+
+    const Real & x0 = _x1[lx - 1]; // lx value
+    const Real & x3 = _x1[lx + 1]; // ux value
+    const Real & y0 = _x2[ly - 1]; // ly value
+    const Real & y3 = _x2[ly + 1]; // uy value
+
+    if (deriv_var == 1)
+    {
+      auto dfdx = fQ00 * (y - y3);
+      dfdx += fQ30 * (y3 - y);
+      dfdx += fQ03 * (y0 - y);
+      dfdx += fQ33 * (y - y0);
+      dfdx /= ((x3 - x0) * (y3 - y0));
+      return dfdx;
+    }
+    else if (deriv_var == 2)
+    {
+      auto dfdy = fQ00 * (x - x3);
+      dfdy += fQ30 * (x0 - x);
+      dfdy += fQ03 * (x3 - x);
+      dfdy += fQ33 * (x - x0);
+      dfdy /= ((x3 - x0) * (y3 - y0));
+      return dfdy;
+    }
+  }
+
+  // Inside the domain, not at a grid node
   // calculate derivative wrt to x
   if (deriv_var == 1)
   {
@@ -445,7 +478,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ12 * (y1 - y);
       dfdx += fQ32 * (y - y1);
       dfdx /= ((x3 - x1) * (y2 - y1));
-      return 0.5 * dfdx;
+      return dfdx;
     }
     // right boundary
     else if ((lx == ux) && (ux == nx1 - 1))
@@ -459,7 +492,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdx += fQ02 * (y1 - y);
       dfdx += fQ12 * (y - y1);
       dfdx /= ((x1 - x0) * (y2 - y1));
-      return 0.5 * dfdx;
+      return dfdx;
     }
     // Derivative (w/ respect to x) for some point inside box
     else
@@ -520,7 +553,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ13 * (x2 - x);
       dfdy += fQ23 * (x - x1);
       dfdy /= ((x2 - x1) * (y3 - y1));
-      return 0.5 * dfdy;
+      return dfdy;
     }
     // top boundary
     else if ((ly == uy) && (uy == nx2 - 1))
@@ -534,7 +567,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
       dfdy += fQ11 * (x2 - x);
       dfdy += fQ21 * (x - x1);
       dfdy /= ((x2 - x1) * (y1 - y0));
-      return 0.5 * dfdy;
+      return dfdy;
     }
     else
     {
