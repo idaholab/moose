@@ -46,13 +46,16 @@ NewtonSolve(const Real & x,
     f = new_y - y;
     next_z = current_z - (f / df_dz);
     residual = std::abs(current_z - next_z);
+    // Check for NaNs
+    if (std::isnan(next_z))
+      mooseError("NaN detected in Newton solve");
+
     current_z = next_z;
     ++iteration;
 
+    // Check for divergence or slow convergence of Newton's method
     if (iteration > 100)
-    {
       mooseError("Convergence Failed in Newton Solve");
-    }
   }
   return current_z;
 }
@@ -100,13 +103,25 @@ NewtonSolve2D(const Real & f,
     res1 = (current_vec[0] - next_vec[0]);                               // update residual 1
     res2 = (current_vec[1] - next_vec[1]);                               // update residual 2
     residual = pow(pow(res1, 2) + pow(res2, 2), 0.5);                    // update residual
+
+    // Check for nans
+    if (std::isnan(next_vec[0]) || std::isnan(next_vec[1]))
+    {
+      x_final = current_vec[0];
+      y_final = current_vec[1];
+      converged = false;
+      return;
+    }
+
     current_vec = next_vec; // update current_vec for next iteration
     ++iteration;            // update iteration;
 
+    // Check for Newton iteration not converging fast enough
     if (iteration > 100)
     {
       x_final = current_vec[0];
       y_final = current_vec[1];
+      converged = false;
       return;
     }
   }
