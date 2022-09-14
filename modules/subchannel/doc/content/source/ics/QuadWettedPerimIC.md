@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /Variables/InitialCondition/QuadWettedPerimIC
+!syntax description /ICs/QuadWettedPerimIC
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the QuadWettedPerimIC object.
 
-!syntax parameters /Variables/InitialCondition/QuadWettedPerimIC
+!syntax parameters /ICs/QuadWettedPerimIC
 
-!syntax inputs /Variables/InitialCondition/QuadWettedPerimIC
+!syntax inputs /ICs/QuadWettedPerimIC
 
-!syntax children /Variables/InitialCondition/QuadWettedPerimIC
+!syntax children /ICs/QuadWettedPerimIC

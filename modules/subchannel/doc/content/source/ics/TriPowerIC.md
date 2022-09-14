@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /Variables/InitialCondition/TriPowerIC
+!syntax description /ICs/TriPowerIC
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the TriPowerIC object.
 
-!syntax parameters /Variables/InitialCondition/TriPowerIC
+!syntax parameters /ICs/TriPowerIC
 
-!syntax inputs /Variables/InitialCondition/TriPowerIC
+!syntax inputs /ICs/TriPowerIC
 
-!syntax children /Variables/InitialCondition/TriPowerIC
+!syntax children /ICs/TriPowerIC

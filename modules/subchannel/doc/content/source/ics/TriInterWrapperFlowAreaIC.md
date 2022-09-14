@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /Variables/InitialCondition/TriInterWrapperFlowAreaIC
+!syntax description /ICs/TriInterWrapperFlowAreaIC
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the TriInterWrapperFlowAreaIC object.
 
-!syntax parameters /Variables/InitialCondition/TriInterWrapperFlowAreaIC
+!syntax parameters /ICs/TriInterWrapperFlowAreaIC
 
-!syntax inputs /Variables/InitialCondition/TriInterWrapperFlowAreaIC
+!syntax inputs /ICs/TriInterWrapperFlowAreaIC
 
-!syntax children /Variables/InitialCondition/TriInterWrapperFlowAreaIC
+!syntax children /ICs/TriInterWrapperFlowAreaIC

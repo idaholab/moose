@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /Variables/InitialCondition/MassFlowRateIC
+!syntax description /ICs/MassFlowRateIC
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the MassFlowRateIC object.
 
-!syntax parameters /Variables/InitialCondition/MassFlowRateIC
+!syntax parameters /ICs/MassFlowRateIC
 
-!syntax inputs /Variables/InitialCondition/MassFlowRateIC
+!syntax inputs /ICs/MassFlowRateIC
 
-!syntax children /Variables/InitialCondition/MassFlowRateIC
+!syntax children /ICs/MassFlowRateIC
