@@ -8,9 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "gtest/gtest.h"
-
 #include "BilinearInterpolation.h"
-// WIP
+
 const double tol = 1e-8;
 
 TEST(BilinearInterpolationTest, sample)
@@ -18,7 +17,7 @@ TEST(BilinearInterpolationTest, sample)
   // Test BilinearInterpolation with a function y = x1 + 3 x2
   const unsigned int n = 9;
   std::vector<double> x1(n), x2(n);
-  ColumnMajorMatrix y(n);
+  ColumnMajorMatrix y(n, n);
 
   for (unsigned int i = 0; i < n; ++i)
   {
@@ -39,7 +38,7 @@ TEST(BilinearInterpolationTest, sample)
   EXPECT_NEAR(interp.sampleDerivative(p1, p2, 2), 33, tol);
 
   // Check that sampleValueAndDerivatives() returns the same results as above
-  double y2, dy2_dx1, dy2_dx2;
+  Real y2, dy2_dx1, dy2_dx2;
   interp.sampleValueAndDerivatives(p1, p2, y2, dy2_dx1, dy2_dx2);
   EXPECT_NEAR(y2, 111.0, tol);
   EXPECT_NEAR(dy2_dx1, 9.0, tol);
