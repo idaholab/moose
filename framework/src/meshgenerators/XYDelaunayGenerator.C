@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "Poly2TriMeshGenerator.h"
+#include "XYDelaunayGenerator.h"
 
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
@@ -22,10 +22,10 @@
 #include "libmesh/poly2tri_triangulator.h"
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("MooseApp", Poly2TriMeshGenerator);
+registerMooseObject("MooseApp", XYDelaunayGenerator);
 
 InputParameters
-Poly2TriMeshGenerator::validParams()
+XYDelaunayGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -87,7 +87,7 @@ Poly2TriMeshGenerator::validParams()
   return params;
 }
 
-Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
+XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _bdy_ptr(getMesh("boundary")),
     _add_nodes_per_boundary_segment(getParam<unsigned int>("add_nodes_per_boundary_segment")),
@@ -112,7 +112,7 @@ Poly2TriMeshGenerator::Poly2TriMeshGenerator(const InputParameters & parameters)
 }
 
 std::unique_ptr<MeshBase>
-Poly2TriMeshGenerator::generate()
+XYDelaunayGenerator::generate()
 {
   // Put the boundary mesh in a local pointer
   std::unique_ptr<UnstructuredMesh> mesh = dynamic_pointer_cast<UnstructuredMesh>(_bdy_ptr);

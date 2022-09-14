@@ -24,14 +24,10 @@
     loop = true
   []
   [triang]
-    type = Poly2TriMeshGenerator
+    type = XYDelaunayGenerator
     boundary = 'outer_bdy'
     holes = 'hole_1
              hole_2'
-    hole_boundaries = 'left_hole
-                       right_hole'
-    add_nodes_per_boundary_segment = 3
-    refine_boundary = false
-    desired_area = 0.05
+    desired_area_func = '(x+1.5)*(y+1.5)*0.01'
   []
 []

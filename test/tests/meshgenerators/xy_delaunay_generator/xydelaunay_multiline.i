@@ -15,7 +15,7 @@
     stitch_boundaries_pairs = '2 1'
   []
   [triang]
-    type = Poly2TriMeshGenerator
+    type = XYDelaunayGenerator
     boundary = 'outer_bdy'
     add_nodes_per_boundary_segment = 4
     refine_boundary = false

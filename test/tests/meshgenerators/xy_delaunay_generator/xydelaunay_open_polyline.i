@@ -8,7 +8,7 @@
     loop = false
   []
   [triang]
-    type = Poly2TriMeshGenerator
+    type = XYDelaunayGenerator
     boundary = 'outer_bdy'
     add_nodes_per_boundary_segment = 3
     refine_boundary = false

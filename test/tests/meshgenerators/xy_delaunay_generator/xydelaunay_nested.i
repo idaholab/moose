@@ -39,18 +39,18 @@
     loop = true
   []
   [triang_2]
-    type = Poly2TriMeshGenerator
+    type = XYDelaunayGenerator
     boundary = 'layer_2_bdy'
     holes = 'inner_square'
     stitch_holes = 'true'
     refine_holes = 'false'
+    verify_holes = false
     add_nodes_per_boundary_segment = 2
     refine_boundary = false
     desired_area = 0.05
-    smooth_triangulation = true
   []
   [triang_3]
-    type = Poly2TriMeshGenerator
+    type = XYDelaunayGenerator
     boundary = 'layer_3_bdy'
     holes = 'triang_2'
     stitch_holes = 'true'
@@ -58,17 +58,16 @@
     add_nodes_per_boundary_segment = 2
     refine_boundary = false
     desired_area = 0.1
-    # smooth_triangulation = false # default
   []
   [triang_4]
-    type = Poly2TriMeshGenerator
+    type = XYDelaunayGenerator
     boundary = 'layer_4_bdy'
     holes = 'triang_3'
     stitch_holes = 'true'
     refine_holes = 'false'
+    verify_holes = false
     add_nodes_per_boundary_segment = 2
     refine_boundary = true
     desired_area = 0.2
-    smooth_triangulation = true
   []
 []

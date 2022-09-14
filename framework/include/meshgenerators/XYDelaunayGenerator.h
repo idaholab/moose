@@ -16,12 +16,12 @@
  * defining the outer boundary and an optional set of input meshes
  * defining inner hole boundaries.
  */
-class Poly2TriMeshGenerator : public MeshGenerator
+class XYDelaunayGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  Poly2TriMeshGenerator(const InputParameters & parameters);
+  XYDelaunayGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

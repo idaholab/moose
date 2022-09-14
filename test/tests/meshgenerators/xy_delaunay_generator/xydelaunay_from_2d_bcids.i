@@ -15,19 +15,23 @@
               2.0 2.0 0.0'
     loop = true
   []
-  [right_sbd1]
-    type = SubdomainIDGenerator
-    input = right_bdy
-    subdomain_id = 1
+  [left_2d]
+    type = XYDelaunayGenerator
+    boundary = 'left_bdy'
   []
-  [both_bdy]
+  [right_2d]
+    type = XYDelaunayGenerator
+    boundary = 'right_bdy'
+    output_boundary = 'right_outer'
+  []
+  [both_2d]
     type = CombinerGenerator
-    inputs = 'left_bdy right_sbd1'
+    inputs = 'left_2d right_2d'
   []
   [triang]
-    type = Poly2TriMeshGenerator
-    boundary = 'both_bdy'
-    input_subdomain_names = 1 # only the right half
+    type = XYDelaunayGenerator
+    boundary = 'both_2d'
+    input_boundary_names = 'right_outer' # only the right half
     refine_boundary = true
     desired_area = 0.2
   []

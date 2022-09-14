@@ -9,7 +9,7 @@
     preserve_volumes = false
   []
   [triang]
-    type = Poly2TriMeshGenerator
+    type = XYDelaunayGenerator
     boundary = 'outer_bdy'
     refine_boundary = true
     desired_area = 0.01
