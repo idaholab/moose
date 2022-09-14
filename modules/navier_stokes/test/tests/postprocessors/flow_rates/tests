@@ -69,8 +69,17 @@
       input = conservation_INSFV.i
       csvdiff = diverging_INSFV_quad_xy_noslip.csv
       abs_zero = 1e-8
-      detail = 'and with no-slip boundary conditions, for which momentum and energy will be dissipated at the wall.'
+      detail = 'with no-slip boundary conditions, for which momentum and energy will be dissipated at the wall.'
       cli_args = "FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip'"
+      ad_indexing_type = 'global'
+    []
+    [insfv_quad_xy_noslip_refined]
+      type = CSVDiff
+      input = conservation_INSFV.i
+      csvdiff = diverging_INSFV_quad_xy_noslip.csv
+      abs_zero = 1e-8
+      detail = 'with uniform refinement near an internal interface.'
+      cli_args = "-r 1 FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip'"
       ad_indexing_type = 'global'
     []
   []
