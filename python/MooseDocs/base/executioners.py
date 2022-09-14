@@ -188,7 +188,8 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
 
         # The method for spawning processes changed to "spawn" for macOS in python 3.9. Currently,
         # MooseDocs does not work with this combination.
-        if (platform.python_version() >= '3.9') and (platform.system() == 'Darwin'):
+        # Ints are used for the second comparison because simple string comparison is inadequate against 3.9 for >= 3.10
+        if (platform.python_version_tuple()[0] >= '3') and (int(platform.python_version_tuple()[1]) >= 9) and (platform.system() == 'Darwin'):
             self._ctx = multiprocessing.get_context('fork')
         else:
             self._ctx = multiprocessing.get_context()
