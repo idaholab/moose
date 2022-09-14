@@ -23,6 +23,23 @@
 
 namespace StochasticTools
 {
+
+GaussianProcessHandler::GPOptimizerOptions::GPOptimizerOptions(
+    const MooseEnum & inp_opt_type,
+    const std::string & inp_tao_options,
+    const bool inp_show_optimization_details,
+    const unsigned int inp_iter_adam,
+    const unsigned int inp_batch_size,
+    const Real inp_learning_rate_adam)
+  : opt_type(inp_opt_type),
+    tao_options(inp_tao_options),
+    show_optimization_details(inp_show_optimization_details),
+    iter_adam(inp_iter_adam),
+    batch_size(inp_batch_size),
+    learning_rate_adam(inp_learning_rate_adam)
+{
+}
+
 GaussianProcessHandler::GaussianProcessHandler() : _tao_comm(MPI_COMM_SELF) {}
 
 void
@@ -278,13 +295,9 @@ GaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & training_par
   b1 = 0.9;
   b2 = 0.999;
   eps = 1e-7;
-  std::vector<Real> m0;
-  std::vector<Real> v0;
-  for (unsigned int ii = 0; ii < _num_tunable; ++ii)
-  {
-    m0.push_back(0.0);
-    v0.push_back(0.0);
-  }
+  std::vector<Real> m0(_num_tunable, 0.0);
+  std::vector<Real> v0(_num_tunable, 0.0);
+
   Real new_val;
   Real m_hat;
   Real v_hat;

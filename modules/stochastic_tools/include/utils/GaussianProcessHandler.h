@@ -46,16 +46,26 @@ public:
   /// hyperparameter-tuning
   struct GPOptimizerOptions
   {
+    /// Default constructor
+    GPOptimizerOptions();
+    /// Construct using user-input
+    GPOptimizerOptions(const MooseEnum & inp_opt_type,
+                       const std::string & inp_tao_options,
+                       const bool inp_show_optimization_details,
+                       const unsigned int inp_iter_adam_ = 1000,
+                       const unsigned int inp_batch_size = 0,
+                       const Real inp_learning_rate_adam = 1e-3);
+
     /// The optimizer type
-    MooseEnum opt_type = MooseEnum("adam tao", "adam");
+    MooseEnum opt_type = MooseEnum("adam tao none", "adam");
     /// String defining the options for TAO optimizers
-    std::string tao_options;
+    std::string tao_options = "";
     /// Switch to enable verbose output for parameter tuning
-    bool show_optimization_details;
+    bool show_optimization_details = false;
     /// The number of iterations for Adam optimizer
-    unsigned int iter_adam;
+    unsigned int iter_adam = 1000;
     /// The batch isize for Adam optimizer
-    unsigned int batch_size;
+    unsigned int batch_size = 0;
     /// The learning rate for Adam optimizer
     Real learning_rate_adam = 1e-3;
   };

@@ -36,6 +36,7 @@ private:
   /// Data from the current predictor row
   const std::vector<Real> & _predictor_row;
 
+  /// Gaussian process handler responsible for managing training related tasks
   StochasticTools::GaussianProcessHandler & _gp_handler;
 
   /// Parameters (x) used for training -- we'll allgather these in postTrain().
@@ -59,24 +60,11 @@ private:
   /// Flag to toggle hyperparameter tuning/optimization
   bool _do_tuning;
 
-  /// Enum which contains the hyper parameter optimizaton type requested by the user
-  MooseEnum _tuning_algorithm;
-
-  /// Number of iterations for Adam optimization
-  unsigned int _iter_adam;
-
-  /// The batch size for Adam optimization
-  unsigned int _batch_size;
-
-  /// Learning rate for Adam optimization
-  Real _learning_rate_adam;
+  /// Struct holding parameters necessary for parameter tuning
+  const StochasticTools::GaussianProcessHandler::GPOptimizerOptions _optimization_opts;
 
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
-
-  /* /// Response value
-  const Real & _rval;
-  */
 
   /// Predictor values from reporters
   std::vector<const Real *> _pvals;

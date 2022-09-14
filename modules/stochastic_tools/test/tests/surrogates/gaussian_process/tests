@@ -119,13 +119,6 @@
       detail = 'mini-batching is requested with the TAO optimization library. '
       expect_err = "Mini-batch sampling is not compatible with the TAO optimization library. Please use Adam optimization."
     []
-    [optimization_adam_nobatch]
-      type = RunException
-      input = GP_squared_exponential_tuned.i
-      cli_args = "Trainers/GP_avg_trainer/tuning_algorithm='adam'"
-      detail = 'the batch size is not specified for Adam optimization. '
-      expect_err = "Adam requires the batch size to be specified."
-    []
     [optimization_adam_batch_size]
       type = RunException
       input = GP_squared_exponential_tuned_adam.i
