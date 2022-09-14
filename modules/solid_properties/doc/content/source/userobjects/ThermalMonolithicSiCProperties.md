@@ -1,6 +1,6 @@
 # ThermalMonolithicSiCProperties
 
-!syntax description /Modules/SolidProperties/ThermalMonolithicSiCProperties
+!syntax description /SolidProperties/ThermalMonolithicSiCProperties
 
 ## Description
 
@@ -45,10 +45,10 @@ conductivity over 300 K $\le$ T $\le$ 1800 K with the Snead correlation
 [!cite](snead) and over an unspecified range for the Stone correlation
 [!cite](stone).
 
-!syntax parameters /Modules/SolidProperties/ThermalMonolithicSiCProperties
+!syntax parameters /SolidProperties/ThermalMonolithicSiCProperties
 
-!syntax inputs /Modules/SolidProperties/ThermalMonolithicSiCProperties
+!syntax inputs /SolidProperties/ThermalMonolithicSiCProperties
 
-!syntax children /Modules/SolidProperties/ThermalMonolithicSiCProperties
+!syntax children /SolidProperties/ThermalMonolithicSiCProperties
 
 !bibtex bibliography

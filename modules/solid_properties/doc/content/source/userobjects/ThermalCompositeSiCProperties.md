@@ -1,6 +1,6 @@
 # ThermalCompositeSiCProperties
 
-!syntax description /Modules/SolidProperties/ThermalCompositeSiCProperties
+!syntax description /SolidProperties/ThermalCompositeSiCProperties
 
 ## Description
 
@@ -39,10 +39,10 @@ This userobject is valid for estimating isobaric
 specific heat over 200 K $\le$ T $\le$ 2400 K, and for estimating thermal conductivity
 over an unspecified range [!cite](stone).
 
-!syntax parameters /Modules/SolidProperties/ThermalCompositeSiCProperties
+!syntax parameters /SolidProperties/ThermalCompositeSiCProperties
 
-!syntax inputs /Modules/SolidProperties/ThermalCompositeSiCProperties
+!syntax inputs /SolidProperties/ThermalCompositeSiCProperties
 
-!syntax children /Modules/SolidProperties/ThermalCompositeSiCProperties
+!syntax children /SolidProperties/ThermalCompositeSiCProperties
 
 !bibtex bibliography

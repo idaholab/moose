@@ -1,6 +1,6 @@
 # ThermalFunctionSolidProperties
 
-!syntax description /Modules/SolidProperties/ThermalFunctionSolidProperties
+!syntax description /SolidProperties/ThermalFunctionSolidProperties
 
 ## Description
 
@@ -18,10 +18,10 @@ by the user. Note that arbitrary units can be specified with this userobject
 as long as they are consistent with the units of the other objects (e.g. kernels,
 boundary conditions, etc.) where the userobject functions are used.
 
-!syntax parameters /Modules/SolidProperties/ThermalFunctionSolidProperties
+!syntax parameters /SolidProperties/ThermalFunctionSolidProperties
 
-!syntax inputs /Modules/SolidProperties/ThermalFunctionSolidProperties
+!syntax inputs /SolidProperties/ThermalFunctionSolidProperties
 
-!syntax children /Modules/SolidProperties/ThermalFunctionSolidProperties
+!syntax children /SolidProperties/ThermalFunctionSolidProperties
 
 !bibtex bibliography
