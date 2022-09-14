@@ -43,25 +43,21 @@ ActionFactory::reg(const std::string & name,
 std::shared_ptr<Action>
 ActionFactory::create(const std::string & action,
                       const std::string & full_action_name,
-                      InputParameters & parameters)
+                      InputParameters & incoming_parser_params)
 {
   std::string action_name = MooseUtils::shortName(full_action_name);
-  parameters.addPrivateParam("_moose_app", &_app);
-  parameters.addPrivateParam("action_type", action);
+  incoming_parser_params.addPrivateParam("_moose_app", &_app);
+  incoming_parser_params.addPrivateParam("action_type", action);
   std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
 
-  if (!(parameters.have_parameter<bool>("isObjectAction") &&
-        parameters.get<bool>("isObjectAction")))
-    parameters.set<std::vector<std::string>>("control_tags")
-        .push_back(MooseUtils::baseName(full_action_name));
-
-  std::string unique_action_name = action + parameters.get<std::string>("task") + full_action_name;
+  std::string unique_action_name =
+      action + incoming_parser_params.get<std::string>("task") + full_action_name;
   // Create the actual parameters object that the object will reference
-  InputParameters & params =
-      _app.getInputParameterWarehouse().addInputParameters(unique_action_name, parameters);
+  InputParameters & action_params = _app.getInputParameterWarehouse().addInputParameters(
+      unique_action_name, incoming_parser_params);
 
   // Check to make sure that all required parameters are supplied
-  params.checkParams(action_name);
+  action_params.checkParams(action_name);
 
   iters = _name_to_build_info.equal_range(action);
   BuildInfo * build_info = &(iters.first->second);
@@ -71,11 +67,11 @@ ActionFactory::create(const std::string & action,
         action_name);
 
   // Add the name to the parameters and create the object
-  params.set<std::string>("_action_name") = action_name;
-  params.set<std::string>("_unique_action_name") = unique_action_name;
-  std::shared_ptr<Action> action_obj = (*build_info->_build_pointer)(params);
+  action_params.set<std::string>("_action_name") = action_name;
+  action_params.set<std::string>("_unique_action_name") = unique_action_name;
+  std::shared_ptr<Action> action_obj = (*build_info->_build_pointer)(action_params);
 
-  if (parameters.get<std::string>("task") == "")
+  if (action_params.get<std::string>("task") == "")
     action_obj->appendTask(build_info->_task);
 
   return action_obj;

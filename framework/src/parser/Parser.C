@@ -484,6 +484,10 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
     params.blockLocation() = n->filename() + ":" + std::to_string(n->line());
     params.blockFullpath() = n->fullpath();
 
+    if (!(params.have_parameter<bool>("isObjectAction") && params.get<bool>("isObjectAction")))
+      params.set<std::vector<std::string>>("control_tags")
+          .push_back(MooseUtils::baseName(curr_identifier));
+
     // Create the Action
     std::shared_ptr<Action> action_obj =
         _action_factory.create(it->second._action, curr_identifier, params);

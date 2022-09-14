@@ -27,6 +27,9 @@ public:
    */
   void remove(const std::string & name);
 
+  /**
+   * Obtain a non-const reference of the action parameters in the InputParameterWarehouse.
+   */
   InputParameters & parameters();
 
   template <typename T>

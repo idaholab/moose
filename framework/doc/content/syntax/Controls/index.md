@@ -152,7 +152,7 @@ The two postprocessors in [controls_tags] declare the same control tag `tag`.
 Thus their controllable parameter `point` can be set by controls simultaneously with `tag/*/point` as in [controls_tags_use].
 
 !listing test/tests/controls/tag_based_naming_access/param.i
-         block=Postprocessors
+         block=Controls
          id=controls_tags_use
          caption=Example of usinging the tagged controllable parameters.
 
