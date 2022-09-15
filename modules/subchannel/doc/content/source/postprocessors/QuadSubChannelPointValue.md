@@ -6,7 +6,7 @@ documenting the class, which includes the typical automatic documentation associ
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /UserObjects/QuadSubChannelPointValue
+!syntax description /Postprocessors/QuadSubChannelPointValue
 
 ## Overview
 
@@ -16,8 +16,8 @@ documentation clear for users.
 
 !! Describe and include an example of how to use the QuadSubChannelPointValue object.
 
-!syntax parameters /UserObjects/QuadSubChannelPointValue
+!syntax parameters /Postprocessors/QuadSubChannelPointValue
 
-!syntax inputs /UserObjects/QuadSubChannelPointValue
+!syntax inputs /Postprocessors/QuadSubChannelPointValue
 
-!syntax children /UserObjects/QuadSubChannelPointValue
+!syntax children /Postprocessors/QuadSubChannelPointValue
