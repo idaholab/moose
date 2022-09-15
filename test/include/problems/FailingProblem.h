@@ -24,6 +24,5 @@ public:
   virtual bool converged();
 
 protected:
-  bool _failed;
-  unsigned int _fail_step;
+  std::vector<unsigned int> _fail_steps;
 };

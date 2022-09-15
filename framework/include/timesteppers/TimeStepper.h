@@ -70,6 +70,9 @@ public:
    */
   virtual void rejectStep();
 
+  /// Gets the number of failures and returns them.
+  unsigned int numFailures();
+
   /**
    * If the time step converged
    * @return true if converged, otherwise false
@@ -150,6 +153,9 @@ protected:
 
   /// True if dt has been reset
   bool _has_reset_dt;
+
+  /// Cumulative amount of steps that have failed
+  unsigned int _failure_count;
 
 private:
   /// Size of the current time step as computed by the Stepper.  Note that the actual dt that was taken might be smaller if the Executioner constrained it.

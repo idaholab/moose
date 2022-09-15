@@ -37,21 +37,28 @@
   [../]
 []
 
-[Problem]
-  type = FailingProblem
-  fail_steps = '3'
-[]
-
 [Executioner]
   type = Transient
   num_steps = 10
-  dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+
+  # Pluggable TimeStepper System
+  [./TimeStepper]
+    type = ConstantDT
+    dt = 0.2
+  [../]
 []
 
-[Outputs]
-  exodus = true
+[Problem]
+  type = FailingProblem
+  fail_steps = '1 1 1 2 4 5'
+[]
+
+[Postprocessors]
+  [./num_failed]
+    type = NumFailedTimeSteps
+  [../]
 []
 
