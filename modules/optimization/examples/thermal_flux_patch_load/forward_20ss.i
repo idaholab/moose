@@ -272,7 +272,7 @@
   []
 []
 
-[Problem]#do we need this
+[Problem] #do we need this
   type = FEProblem
 []
 
@@ -296,7 +296,7 @@
 
 [Reporters]
   [measure_data]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
 

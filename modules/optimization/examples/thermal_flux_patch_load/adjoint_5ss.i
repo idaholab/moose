@@ -38,10 +38,9 @@
 []
 [Reporters]
   [misfit]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
-
 
 [BCs]
   [round]
@@ -113,7 +112,6 @@
                       adjoint_4'
   []
 []
-
 
 [VectorPostprocessors]
   [data_pt]

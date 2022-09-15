@@ -16,29 +16,28 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./dummy_u]
+  [dummy_u]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
-
 [AuxVariables]
-  [./time1_var]
-  [../]
+  [time1_var]
+  []
 []
 
 [AuxKernels]
-  [./time1_AuxK]
+  [time1_AuxK]
     type = FunctionAux
     variable = time1_var
     function = time1_fcn
-  [../]
+  []
 []
 
 [Reporters]
@@ -50,29 +49,28 @@
 []
 
 [Functions]
-# This increases linearly: f = t
-  [./time1_fcn]
+  # This increases linearly: f = t
+  [time1_fcn]
     type = PiecewiseMultilinearFromReporter
     values_name = 'gridData/parameter'
     grid_name = 'gridData/grid'
     axes_name = 'gridData/axes'
     step_name = 'gridData/step'
     dim_name = 'gridData/dim'
-  [../]
-  [./time1_answer]
+  []
+  [time1_answer]
     type = ParsedFunction
     value = t
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./time1_pp]
+  [time1_pp]
     type = NodalL2Error
     function = time1_answer
     variable = time1_var
-  [../]
+  []
 []
-
 
 [Executioner]
   type = Transient

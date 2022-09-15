@@ -29,10 +29,10 @@
   tao_solver = taolmvm
   petsc_options_iname = '-tao_fd_gradient -tao_gatol'
   petsc_options_value = ' true            0.001'
-# Most of following are not needed in this input file, but are useful when debugging
-#  petsc_options = '-tao_ls_view'
-#   petsc_options_iname = '-tao_max_it -tao_max_funcs -tao_ls_max_funcs -tao_ls_ftol -tao_ls_rtol -tao_fd_gradient -tao_fd_delta -tao_gatol -tao_ls_type'
-#   petsc_options_value = '20           31             10                1E-2         1E-1         true             1E-5          1E-9       more-thuente'
+  # Most of following are not needed in this input file, but are useful when debugging
+  #  petsc_options = '-tao_ls_view'
+  #   petsc_options_iname = '-tao_max_it -tao_max_funcs -tao_ls_max_funcs -tao_ls_ftol -tao_ls_rtol -tao_fd_gradient -tao_fd_delta -tao_gatol -tao_ls_type'
+  #   petsc_options_value = '20           31             10                1E-2         1E-1         true             1E-5          1E-9       more-thuente'
   verbose = true
 []
 
@@ -79,11 +79,11 @@
     real_vector_values = 0 # dummy initial value
   []
   [optInfo]
-    type=OptimizationInfo
+    type = OptimizationInfo
   []
 []
 
 [Outputs]
   console = true
-  csv=true
+  csv = true
 []

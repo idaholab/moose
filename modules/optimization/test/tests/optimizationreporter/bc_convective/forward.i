@@ -76,14 +76,14 @@
 []
 
 [VectorPostprocessors]
-  [./vertical]
+  [vertical]
     type = LineValueSampler
     variable = 'temperature'
     start_point = '0.1 0.0 0.0'
-    end_point =   '0.1 2.0 0.0'
+    end_point = '0.1 2.0 0.0'
     num_points = 21
     sort_by = id
-  [../]
+  []
   [data_pt]
     type = VppPointValueSampler
     variable = temperature
@@ -93,7 +93,7 @@
 
 [Reporters]
   [measure_data]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
 
@@ -104,7 +104,7 @@
 []
 
 [Outputs]
-  csv=true
+  csv = true
   exodus = false
   console = false
   file_base = 'forward'

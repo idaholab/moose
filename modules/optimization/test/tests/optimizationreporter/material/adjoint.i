@@ -36,7 +36,7 @@
 
 [Reporters]
   [misfit]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
 [AuxVariables]
@@ -224,7 +224,6 @@
     type = ControlsReceiver
   []
 []
-
 
 [VectorPostprocessors]
   [adjoint_grad]

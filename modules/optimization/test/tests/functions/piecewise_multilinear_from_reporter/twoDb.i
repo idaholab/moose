@@ -16,29 +16,28 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./dummy_u]
+  [dummy_u]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
-
 [AuxVariables]
-  [./moving_disk_var]
-  [../]
+  [moving_disk_var]
+  []
 []
 
 [AuxKernels]
-  [./moving_disk_AuxK]
+  [moving_disk_AuxK]
     type = FunctionAux
     variable = moving_disk_var
     function = moving_disk_fcn
-  [../]
+  []
 []
 
 [Reporters]
@@ -50,16 +49,15 @@
 []
 
 [Functions]
-  [./moving_disk_fcn]
+  [moving_disk_fcn]
     type = PiecewiseMultilinearFromReporter
     values_name = 'gridData/parameter'
     grid_name = 'gridData/grid'
     axes_name = 'gridData/axes'
     step_name = 'gridData/step'
     dim_name = 'gridData/dim'
-  [../]
+  []
 []
-
 
 [Executioner]
   type = Transient

@@ -34,8 +34,8 @@
   type = Optimize
   solve_on = none
   tao_solver = taonm
-  petsc_options_iname='-tao_gatol'
-  petsc_options_value='1e-2'
+  petsc_options_iname = '-tao_gatol'
+  petsc_options_value = '1e-2'
   verbose = true
 []
 

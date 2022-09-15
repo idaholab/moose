@@ -20,7 +20,7 @@
     type = RenameBlockGenerator
     input = bimaterial
     old_block = '0 1'
-     new_block = 'top bottom'
+    new_block = 'top bottom'
   []
 []
 
@@ -37,10 +37,9 @@
   []
 []
 
-
 [Reporters]
   [misfit]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
 
@@ -136,7 +135,7 @@
     variable = grad_Tfz
     gradient_variable = temperature_forward
   []
-  #we need to include the material derivative, which can be captured when 
+  #we need to include the material derivative, which can be captured when
   # computing the flux based on the derivative of the material.
   [gradient]
     type = ParsedAux
@@ -203,13 +202,13 @@
     type = ElementIntegralVariablePostprocessor
     variable = gradient
     execute_on = 'final'
-    block=bottom
+    block = bottom
   []
   [grad_top] #compute the integral of the gradient variable on the bottom block (second parameter)
     type = ElementIntegralVariablePostprocessor
     variable = gradient
     execute_on = 'final'
-    block=top
+    block = top
   []
   ############
 []
@@ -233,8 +232,8 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   nl_forced_its = 1
-  line_search=none
-  nl_abs_tol=1e-8
+  line_search = none
+  nl_abs_tol = 1e-8
 []
 
 [Outputs]

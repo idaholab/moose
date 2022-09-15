@@ -17,11 +17,11 @@
     type = ADHeatConduction
     variable = temperature
   []
-  [./heat_source]
+  [heat_source]
     type = ADMatHeatSource
     material_property = volumetric_heat
     variable = temperature
-  [../]
+  []
 []
 
 [BCs]
@@ -94,7 +94,7 @@
 
 [Reporters]
   [measure_data]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
 

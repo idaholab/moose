@@ -42,7 +42,7 @@
 []
 
 [Transfers]
-#these are usually the same for all input files.
+  #these are usually the same for all input files.
   [fromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
@@ -61,10 +61,10 @@
     from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
     to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
   []
-#these are different,
-# - to forward depends on teh parameter being changed
-# - from adjoint depends on the gradient being computed from the adjoint
-#NOTE:  the adjoint variable we are transferring is actually the gradient
+  #these are different,
+  # - to forward depends on teh parameter being changed
+  # - from adjoint depends on the gradient being computed from the adjoint
+  #NOTE:  the adjoint variable we are transferring is actually the gradient
   [toForward]
     type = MultiAppReporterTransfer
     to_multi_app = forward
@@ -117,6 +117,6 @@
 
 [Outputs]
   console = true
-  csv=true
-  json=true
+  csv = true
+  json = true
 []

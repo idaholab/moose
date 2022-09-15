@@ -9,8 +9,6 @@
   ymax = 3.141
 []
 
-
-
 [Variables]
   [u]
   []
@@ -19,59 +17,59 @@
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     variable = 'u'
     function = parsed_function
-  [../]
-  [./v_ic]
+  []
+  [v_ic]
     type = FunctionIC
     variable = 'v'
     function = 'x'
-  [../]
+  []
 []
 
 [Functions]
-  [./parsed_function]
+  [parsed_function]
     type = ParsedFunction
     value = 'sin(x)-cos(y/2)'
-  [../]
-  [./parsed_grad_function]
+  []
+  [parsed_grad_function]
     type = ParsedVectorFunction
     value_x = 'cos(x)'
     value_y = 'sin(y/2)/2'
-  [../]
-  [./parsed_gradx_function]
+  []
+  [parsed_gradx_function]
     type = ParsedFunction
     value = 'cos(x)'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./funcGrad_u]
+  [funcGrad_u]
     order = CONSTANT
     family = MONOMIAL_VEC
-  [../]
-  [./auxGrad_u]
+  []
+  [auxGrad_u]
     order = CONSTANT
     family = MONOMIAL_VEC
-  [../]
-  [./auxGrad_v]
+  []
+  [auxGrad_v]
     order = CONSTANT
     family = MONOMIAL_VEC
-  [../]
-  [./funcGrad_u_x]
+  []
+  [funcGrad_u_x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./auxGrad_u_x]
+  []
+  [auxGrad_u_x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./auxGrad_v_x]
+  []
+  [auxGrad_v_x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -79,7 +77,7 @@
     type = VectorFunctionAux
     variable = funcGrad_u
     function = parsed_grad_function
-  [../]
+  []
   [grad_u]
     type = MaterialScaledGradientVector
     gradient_variable = u
@@ -120,14 +118,14 @@
 []
 
 [VectorPostprocessors]
- [results]
-   type =  LineValueSampler
-   start_point = '0 1 0'
-   end_point = '3.141 1 0'
-   variable = 'funcGrad_u_x auxGrad_u_x auxGrad_v_x'
-   num_points = 20
-   sort_by =  x
- []
+  [results]
+    type = LineValueSampler
+    start_point = '0 1 0'
+    end_point = '3.141 1 0'
+    variable = 'funcGrad_u_x auxGrad_u_x auxGrad_v_x'
+    num_points = 20
+    sort_by = x
+  []
 []
 
 [Problem]

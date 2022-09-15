@@ -71,7 +71,7 @@
 
 [Executioner]
   type = Steady
-  line_search=none
+  line_search = none
   solve_type = NEWTON
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
@@ -85,27 +85,27 @@
     variable = temperature
     reporter_name = measure_data
   []
-   [vertical_1]
-     type = LineValueSampler
-     variable = 'temperature'
-     start_point = '0.2 0.0 0'
-     end_point = '0.2 2.0 0'
-     num_points = 21
-     sort_by = y
-   [../]
-   [vertical_2]
-     type = LineValueSampler
-     variable = 'temperature'
-     start_point = '0.8 0.0 0'
-     end_point = '0.8 2.0 0'
-     num_points = 21
-     sort_by = y
-   [../]
+  [vertical_1]
+    type = LineValueSampler
+    variable = 'temperature'
+    start_point = '0.2 0.0 0'
+    end_point = '0.2 2.0 0'
+    num_points = 21
+    sort_by = y
+  []
+  [vertical_2]
+    type = LineValueSampler
+    variable = 'temperature'
+    start_point = '0.8 0.0 0'
+    end_point = '0.8 2.0 0'
+    num_points = 21
+    sort_by = y
+  []
 []
 
 [Reporters]
   [measure_data]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
 

@@ -19,28 +19,28 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./dummy_kernel]
+  [dummy_kernel]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./f]
-  [../]
+  [f]
+  []
 []
 
 [AuxKernels]
-  [./f_AuxK]
+  [f_AuxK]
     type = FunctionAux
     function = fourDa
     variable = f
-  [../]
+  []
 []
 
 [Reporters]
@@ -52,16 +52,15 @@
 []
 
 [Functions]
-  [./fourDa]
+  [fourDa]
     type = PiecewiseMultilinearFromReporter
     values_name = 'gridData/parameter'
     grid_name = 'gridData/grid'
     axes_name = 'gridData/axes'
     step_name = 'gridData/step'
     dim_name = 'gridData/dim'
-  [../]
+  []
 []
-
 
 [Executioner]
   type = Transient

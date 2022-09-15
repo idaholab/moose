@@ -19,11 +19,11 @@
     thermal_conductivity = 'thermal_conductivity'
     variable = T
   []
-  [./heat_source]
+  [heat_source]
     type = ADMatHeatSource
     material_property = 'volumetric_heat'
     variable = T
-  [../]
+  []
 []
 
 [BCs]
@@ -97,7 +97,7 @@
 
 [Reporters]
   [measure_data]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
 

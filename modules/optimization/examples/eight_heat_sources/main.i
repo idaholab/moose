@@ -15,7 +15,7 @@
   # petsc_options_iname='-tao_gatol'
   # petsc_options_value='1e-2'
   tao_solver = taolmvm #TAOOWLQN #TAOBMRM #taolmvm #taobncg
-  petsc_options_iname = '-tao_gatol'# -tao_cg_delta_max'
+  petsc_options_iname = '-tao_gatol' # -tao_cg_delta_max'
   petsc_options_value = '1e-2'
   # tao_solver = taontr
   # petsc_options_iname='-tao_fd_hessian -tao_fd_delta -tao_ntr_min_radius -tao_ntr_max_radius -tao_ntr_init_type -tao_gatol'
@@ -73,5 +73,5 @@
 []
 
 [Outputs]
-  csv=true
+  csv = true
 []

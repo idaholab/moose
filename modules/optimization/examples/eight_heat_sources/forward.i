@@ -32,7 +32,6 @@
   []
 []
 
-
 [BCs]
   [left]
     type = DirichletBC
@@ -68,7 +67,7 @@
   []
 []
 
-[Problem]#do we need this
+[Problem] #do we need this
   type = FEProblem
 []
 

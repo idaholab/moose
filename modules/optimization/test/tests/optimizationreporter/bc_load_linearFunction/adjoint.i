@@ -26,7 +26,7 @@
 
 [Reporters]
   [misfit]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
 

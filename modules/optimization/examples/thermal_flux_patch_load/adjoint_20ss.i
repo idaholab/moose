@@ -44,10 +44,9 @@
 []
 [Reporters]
   [misfit]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
-
 
 [BCs]
   [round]

@@ -9,59 +9,58 @@
   xmax = 2
   nx = 4
   ymin = -1
-  ymax =  1
+  ymax = 1
   ny = 4
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./dummy_u]
+  [dummy_u]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
-
 [AuxVariables]
-  [./constant]
+  [constant]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 
-  [./constant_ref]
+  [constant_ref]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 
-  [./diff]
+  [diff]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./const_AuxK]
+  [const_AuxK]
     type = FunctionAux
     variable = constant
     function = const_fcn
-  [../]
+  []
 
-  [./const_ref_AuxK]
+  [const_ref_AuxK]
     type = FunctionAux
     variable = constant_ref
     function = const_ref
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = ParsedAux
     variable = diff
     function = 'constant - constant_ref'
     args = 'constant constant_ref'
-  [../]
+  []
 []
 
 [Reporters]
@@ -71,7 +70,6 @@
     outputs = none
   []
 []
-
 
 [Functions]
   [const_fcn]
@@ -94,12 +92,11 @@
   []
 []
 
-
 [Postprocessors]
-  [./diff_pp]
+  [diff_pp]
     type = ElementIntegralVariablePostprocessor
     variable = diff
-  [../]
+  []
 []
 
 [Executioner]

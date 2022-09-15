@@ -69,7 +69,7 @@
     type = MatDiffusion
     diffusivity = diffusivity
     variable = temperature
-  [../]
+  []
 []
 
 [BCs]
@@ -163,10 +163,9 @@
 
 [Reporters]
   [measure_data]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
-
 
 [Executioner]
   type = Transient
@@ -179,5 +178,5 @@
   console = true
   print_linear_residuals = false
   exodus = false
-  csv=false
+  csv = false
 []

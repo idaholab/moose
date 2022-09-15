@@ -32,10 +32,9 @@
 
 [Reporters]
   [misfit]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
-
 
 [BCs]
   [left]
@@ -72,7 +71,7 @@
   []
 []
 
-[Problem]#do we need this
+[Problem] #do we need this
   type = FEProblem
 []
 
@@ -109,7 +108,6 @@
     postprocessors = 'heatSourceGradient'
   []
 []
-
 
 [Outputs]
   # console = true

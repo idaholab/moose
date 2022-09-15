@@ -100,19 +100,19 @@
     end_point = '0.5 1.4 0'
     num_points = 21
     sort_by = y
-  [../]
+  []
 []
 
 [Reporters]
   [measure_data]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
 #---------------------------------------------------
 
 [Outputs]
-  csv=true
-  json=false
+  csv = true
+  json = false
   console = true
   exodus = false
   file_base = 'forward'

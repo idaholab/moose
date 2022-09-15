@@ -20,7 +20,7 @@
 [Executioner]
   type = Optimize
   tao_solver = taolmvm
-  petsc_options_iname = '-tao_gatol'# -tao_cg_delta_max'
+  petsc_options_iname = '-tao_gatol' # -tao_cg_delta_max'
   petsc_options_value = '1e-2'
   verbose = true
 []
@@ -40,29 +40,29 @@
 
 [Transfers]
   #these are usually the same for all input files.
-    [fromForward]
-      type = MultiAppReporterTransfer
-      from_multi_app = forward
-      from_reporters = 'data_pt/temperature data_pt/temperature'
-      to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
-    []
-    [toAdjoint]
-      type = MultiAppReporterTransfer
-      to_multi_app = adjoint
-      from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
-      to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
-    []
-    [toForward_measument]
-      type = MultiAppReporterTransfer
-      to_multi_app = forward
-      from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
-      to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
-    []
+  [fromForward]
+    type = MultiAppReporterTransfer
+    from_multi_app = forward
+    from_reporters = 'data_pt/temperature data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+  []
+  [toAdjoint]
+    type = MultiAppReporterTransfer
+    to_multi_app = adjoint
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
+    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
+  []
+  [toForward_measument]
+    type = MultiAppReporterTransfer
+    to_multi_app = forward
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
+    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
+  []
 
-#these are different,
-# - to forward depends on teh parameter being changed
-# - from adjoint depends on the gradient being computed from the adjoint
-#NOTE:  the adjoint variable we are transferring is actually the gradient
+  #these are different,
+  # - to forward depends on teh parameter being changed
+  # - from adjoint depends on the gradient being computed from the adjoint
+  #NOTE:  the adjoint variable we are transferring is actually the gradient
   [toForward]
     type = MultiAppReporterTransfer
     to_multi_app = forward
@@ -89,5 +89,5 @@
 []
 
 [Outputs]
-  csv=true
+  csv = true
 []

@@ -1,14 +1,14 @@
 [Mesh]
- [fmg]
-   type = FileMeshGenerator
-   file = halfSphere.e
- []
- [patch]
-  type = PatchSidesetGenerator
-  boundary = flat
-  n_patches = 10
-  input = fmg
-[]
+  [fmg]
+    type = FileMeshGenerator
+    file = halfSphere.e
+  []
+  [patch]
+    type = PatchSidesetGenerator
+    boundary = flat
+    n_patches = 10
+    input = fmg
+  []
 []
 
 [Variables]
@@ -55,7 +55,7 @@
   []
 []
 
-[Problem]#do we need this
+[Problem] #do we need this
   type = FEProblem
 []
 
@@ -87,7 +87,7 @@
 
 [Reporters]
   [measure_data]
-    type=OptimizationData
+    type = OptimizationData
   []
 []
 

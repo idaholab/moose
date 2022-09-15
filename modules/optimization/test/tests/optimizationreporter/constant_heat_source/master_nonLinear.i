@@ -101,13 +101,13 @@
 []
 
 [Reporters]
-   [optInfo]
-     type = OptimizationInfo
-   []
+  [optInfo]
+    type = OptimizationInfo
+  []
 []
 
 [Outputs]
   # console = true
-  csv=true
+  csv = true
   # exodus = true
 []

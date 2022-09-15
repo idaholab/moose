@@ -29,7 +29,7 @@
     type = RenameBlockGenerator
     input = bimaterial
     old_block = '0 1'
-     new_block = 'top bottom'
+    new_block = 'top bottom'
   []
 []
 
@@ -45,19 +45,19 @@
 []
 
 [Executioner]
-   # type = Optimize
-   # tao_solver = taoblmvm
-   # petsc_options_iname = '-tao_fd_gradient -tao_gatol'
-   # petsc_options_value = ' true            0.001'
-   type = Optimize
-   tao_solver = taoblmvm
-   petsc_options_iname='-tao_gatol'
-   petsc_options_value='1e-3'
-   ## THESE OPTIONS ARE FOR TESTING THE ADJOINT GRADIENT
-   # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
-   # petsc_options_value='1 true true false 1e-8 0.1'
-   # petsc_options = '-tao_test_gradient_view'
-   verbose = true
+  # type = Optimize
+  # tao_solver = taoblmvm
+  # petsc_options_iname = '-tao_fd_gradient -tao_gatol'
+  # petsc_options_value = ' true            0.001'
+  type = Optimize
+  tao_solver = taoblmvm
+  petsc_options_iname = '-tao_gatol'
+  petsc_options_value = '1e-3'
+  ## THESE OPTIONS ARE FOR TESTING THE ADJOINT GRADIENT
+  # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
+  # petsc_options_value='1 true true false 1e-8 0.1'
+  # petsc_options = '-tao_test_gradient_view'
+  verbose = true
 []
 [AuxVariables]
   [temperature_forward]
@@ -120,7 +120,7 @@
     from_reporters = 'OptimizationReporter/diffusivity_values'
     to_reporters = 'vector_pp/diffusivity_values'
   []
-  [toAdjoint]#pas the misfit to the adjoint
+  [toAdjoint] #pas the misfit to the adjoint
     type = MultiAppReporterTransfer
     to_multi_app = adjoint
     from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
@@ -135,6 +135,6 @@
 []
 
 [Outputs]
-  console=false
-  csv=true
+  console = false
+  csv = true
 []
