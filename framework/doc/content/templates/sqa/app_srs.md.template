@@ -59,8 +59,10 @@ within the terminal's ability to display color, which may be disabled.
   at his or her discretion to resolve identified issues.
 - The software maintainers will entertain all proposed changes to the system in a timely manner
   (within two business days).
-- The core software in its entirety will be made publicly available under the [!ac](LGPL)
-  version 2.1 license.
+- The core software in its entirety will be made available under the terms of a designated software
+  license. These license terms are outlined in the LICENSE file alongside the {{app}} application
+  source code. If the {{app}} application is a MOOSE physics module, the license is identical to that
+  of the framework - that is, the [!ac](LGPL) version 2.1 license.
 
 !template-end!
 
