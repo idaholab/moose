@@ -17,7 +17,7 @@
 
 [AuxVariables]
   [./pressure]
-    initial_condition = 1.5e5
+    initial_condition = 2e6
     family = MONOMIAL
     order = CONSTANT
   [../]
@@ -110,7 +110,7 @@
     [../]
     [./tabulated]
       type = TabulatedBicubicFluidProperties
-      # fp = co2
+      fp = co2
       interpolated_properties = 'density enthalpy viscosity internal_energy k c cv cp entropy'
       # fluid_property_file = fluid_properties.csv
       save_file = true
@@ -122,7 +122,7 @@
       temperature_min = 280
       temperature_max = 600
       pressure_min = 1e5
-      pressure_max = 7e5
+      pressure_max = 3e6
 
       # Newton parameters
       tolerance = 1e-8
@@ -151,6 +151,10 @@
 [Executioner]
   type = Steady
   solve_type = NEWTON
+[]
+
+[Problem]
+  solve = false
 []
 
 [Postprocessors]
@@ -198,7 +202,6 @@
 
 [Outputs]
   csv = true
-  # file_base = tabulated_bilinear_out
   file_base = tabulated_out
   execute_on = 'TIMESTEP_END'
   perf_graph = true
