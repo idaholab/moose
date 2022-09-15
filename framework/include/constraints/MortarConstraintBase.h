@@ -66,9 +66,19 @@ public:
   virtual void computeResidual(Moose::MortarType mortar_type) = 0;
 
   /**
+   * compute the residual for the scalar block
+   */
+  virtual void computeResidualScalar() {};
+
+  /**
    * compute the residual for the specified element type
    */
   virtual void computeJacobian(Moose::MortarType mortar_type) = 0;
+
+  /**
+   * Method for computing the Jacobian of scalar block
+   */
+  virtual void computeJacobianScalar() {};
 
   /**
    * The variable number that this object operates on.
@@ -121,6 +131,9 @@ protected:
 
   /// Whether to compute lagrange multiplier residuals
   const bool _compute_lm_residuals;
+
+  /// Whether to compute scalar residuals
+  const bool _compute_scalar_residuals;
 
   /// A dummy object useful for constructing _test when not using Lagrange multipliers
   const VariableTestValue _test_dummy;
