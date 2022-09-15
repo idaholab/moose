@@ -10,13 +10,16 @@
 #include "MortarConstraint.h"
 
 // MOOSE includes
-#include "MooseVariable.h"
 #include "Assembly.h"
+#include "MooseVariable.h"
+#include "MooseVariableScalar.h"
+#include "SystemBase.h"
 
 InputParameters
 MortarConstraint::validParams()
 {
-  return MortarConstraintBase::validParams();
+  InputParameters params = MortarConstraintBase::validParams();
+  return params;
 }
 
 MortarConstraint::MortarConstraint(const InputParameters & parameters)
@@ -60,6 +63,12 @@ MortarConstraint::computeResidual(Moose::MortarType mortar_type)
       _local_re(_i) += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
   accumulateTaggedLocalResidual();
+}
+
+void 
+MortarConstraint::computeResidualScalar() 
+{
+
 }
 
 void
@@ -164,4 +173,10 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
       accumulateTaggedLocalMatrix();
     }
   }
+}
+
+void 
+MortarConstraint::computeJacobianScalar() 
+{
+
 }
