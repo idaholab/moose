@@ -243,6 +243,7 @@ MultiAppProjectionTransfer::execute()
   {
     for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
     {
+      // Indexing into the coordinate transforms vector
       const auto to_global_num =
           _current_direction == FROM_MULTIAPP ? 0 : _to_local2global_map[i_to];
       MeshBase & to_mesh = _to_meshes[i_to]->getMesh();
