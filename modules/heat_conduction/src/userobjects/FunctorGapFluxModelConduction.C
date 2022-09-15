@@ -9,7 +9,6 @@
 
 #include "FunctorGapFluxModelConduction.h"
 #include "libmesh/utility.h"
-#include "Function.h"
 
 registerMooseObject("HeatConductionApp", FunctorGapFluxModelConduction);
 

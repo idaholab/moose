@@ -9,7 +9,6 @@
 
 #include "GapFluxModelConductionBase.h"
 #include "libmesh/utility.h"
-#include "Function.h"
 
 InputParameters
 GapFluxModelConductionBase::validParams()
@@ -32,7 +31,6 @@ GapFluxModelConductionBase::GapFluxModelConductionBase(const InputParameters & p
     _gap_conductivity(getParam<Real>("gap_conductivity")),
     _min_gap(getParam<Real>("min_gap")),
     _min_gap_order(getParam<unsigned int>("min_gap_order"))
-
 {
 }
 

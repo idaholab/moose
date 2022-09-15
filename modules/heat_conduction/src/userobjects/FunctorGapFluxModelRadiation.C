@@ -15,7 +15,7 @@ InputParameters
 FunctorGapFluxModelRadiation::validParams()
 {
   InputParameters params = GapFluxModelRadiationBase::validParams();
-  params.addClassDescription("Gap flux model for heat conduction across a gap due to radiation, "
+  params.addClassDescription("Gap flux model for heat transfer across a gap due to radiation, "
                              "based on the diffusion approximation. Uses a temperature functor.");
   params.addRequiredParam<MooseFunctorName>("temperature", "The name of the temperature functor");
   return params;
