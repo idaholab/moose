@@ -42,7 +42,7 @@ TEST(MooseCoordTest, testRotations)
     try
     {
       transform.setUpDirection(up_direction);
-      EXPECT_TRUE(false);
+      FAIL();
     }
     catch (std::runtime_error & e)
     {
@@ -88,7 +88,7 @@ TEST(MooseCoordTest, testRotations)
     try
     {
       transform.setRotation(alpha, beta, gamma);
-      EXPECT_TRUE(false);
+      FAIL();
     }
     catch (std::runtime_error & e)
     {
@@ -141,7 +141,7 @@ TEST(MooseCoordTest, testCoordCollapse)
     try
     {
       xyz.mapBack(pt);
-      EXPECT_TRUE(false);
+      FAIL();
     }
     catch (std::runtime_error & e)
     {
@@ -159,7 +159,7 @@ TEST(MooseCoordTest, testCoordCollapse)
     try
     {
       xyz.mapBack(pt);
-      EXPECT_TRUE(false);
+      FAIL();
     }
     catch (std::runtime_error & e)
     {
@@ -177,7 +177,7 @@ TEST(MooseCoordTest, testCoordCollapse)
     try
     {
       rz.mapBack(pt);
-      EXPECT_TRUE(false);
+      FAIL();
     }
     catch (std::runtime_error & e)
     {
