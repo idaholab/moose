@@ -40,6 +40,7 @@ FluidPropertiesMaterialVE::FluidPropertiesMaterialVE(const InputParameters & par
     _cv(declareProperty<Real>("cv")),
     _mu(declareProperty<Real>("mu")),
     _k(declareProperty<Real>("k")),
+    _s(declareProperty<Real>("s")),
     _g(declareProperty<Real>("g")),
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
@@ -58,5 +59,6 @@ FluidPropertiesMaterialVE::computeQpProperties()
   _cv[_qp] = _fp.cv_from_v_e(_v[_qp], _e[_qp]);
   _mu[_qp] = _fp.mu_from_v_e(_v[_qp], _e[_qp]);
   _k[_qp] = _fp.k_from_v_e(_v[_qp], _e[_qp]);
+  _s[_qp] = _fp.s_from_v_e(_v[_qp], _e[_qp]);
   _g[_qp] = _fp.g_from_v_e(_v[_qp], _e[_qp]);
 }
