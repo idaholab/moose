@@ -8,11 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BidimensionalInterpolation.h"
-#include "MooseError.h"
-#include "MathUtils.h"
-#include "MooseUtils.h"
-
-#include "libmesh/int_range.h"
 
 BidimensionalInterpolation::BidimensionalInterpolation(const std::vector<Real> & x1,
                                                        const std::vector<Real> & x2)

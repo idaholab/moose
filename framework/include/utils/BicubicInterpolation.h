@@ -12,8 +12,6 @@
 #include "MooseTypes.h"
 #include "BidimensionalInterpolation.h"
 
-class BidimensionalInterpolation;
-
 /**
  * This class interpolates tabulated data with a bicubic function. In order to
  * minimize the computational expense of each sample, the coefficients at each

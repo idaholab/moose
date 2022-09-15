@@ -11,7 +11,6 @@
 
 // MOOSE includes
 #include "ColumnMajorMatrix.h"
-
 #include "MooseTypes.h"
 
 // C++ includes
@@ -21,7 +20,6 @@
  * This class interpolates tabulated data with a Bidimension function (either bicubic or bilinear).
  * In order to minimize the computational expense of each sample, the coefficients at each point in
  * the tabulated data are computed once in advance, and then accessed during the interpolation.
- *
  *
  * Adapted from Numerical Recipes in C (section 3.6). The terminology used is
  * consistent with that used in Numerical Recipes, where moving over a column
@@ -77,11 +75,11 @@ public:
   /**
    * Same as sampleValueAndDerivatives, but ADReal instead of Real
    */
-  virtual void ADsampleValueAndDerivatives(const ADReal & /*x1*/,
-                                           const ADReal & /*x2*/,
-                                           ADReal & /* y*/,
-                                           ADReal & /* dy1*/,
-                                           ADReal & /* dy2*/) const
+  virtual void sampleValueAndDerivatives(const ADReal & /*x1*/,
+                                         const ADReal & /*x2*/,
+                                         ADReal & /* y*/,
+                                         ADReal & /* dy1*/,
+                                         ADReal & /* dy2*/) const
   {
     mooseError("sampleValueAndDerivatives is not implemented for this interpolation class");
   }

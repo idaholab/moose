@@ -381,23 +381,6 @@ BicubicInterpolation::findInterval(
   mooseAssert(x.size() >= 2,
               "There must be at least two points in the table in BicubicInterpolation");
 
-  // if (xi <= x[0])
-  // {
-  //   mooseDoOnce(mooseWarning("Bicubic interpolation sampled out of bounds"));
-  //   klo = 0;
-  //   khi = 1;
-  //   xs = 0;
-  //   return;
-  // }
-  // else if (xi >= x.back())
-  // {
-  //   mooseDoOnce(mooseWarning("Bicubic interpolation sampled out of bounds"));
-  //   klo = x.size() - 2;
-  //   khi = x.size() - 1;
-  //   xs = 1;
-  //   return;
-  // }
-
   khi = x.size() - 1;
   while (khi - klo > 1)
   {

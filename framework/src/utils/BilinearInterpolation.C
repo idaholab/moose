@@ -70,7 +70,7 @@ BilinearInterpolation::sample(const ADReal & s1, const ADReal & s2) const
 
 template <typename T>
 T
-BilinearInterpolation::sampleInternal(T & s1, T & s2) const
+BilinearInterpolation::sampleInternal(const T & s1, const T & s2) const
 {
   // first find 4 neighboring points
   unsigned int lx = 0; // index of x coordinate of adjacent grid point to left of P
@@ -101,15 +101,11 @@ BilinearInterpolation::sampleInternal(T & s1, T & s2) const
 
   // if x1 lies exactly on an xAxis node do linear interpolation
   if (lx == ux)
-  {
     return fQ11 + (fQ12 - fQ11) * (y - y1) / (y2 - y1);
-  }
 
   // if x2 lies exactly on an yAxis node do linear interpolation
   if (ly == uy)
-  {
     return fQ11 + (fQ21 - fQ11) * (x - x1) / (x2 - x1);
-  }
 
   auto fxy = fQ11 * (x2 - x) * (y2 - y);
   fxy += fQ21 * (x - x1) * (y2 - y);
@@ -120,7 +116,9 @@ BilinearInterpolation::sampleInternal(T & s1, T & s2) const
 }
 
 Real
-BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var) const
+BilinearInterpolation::sampleDerivative(const Real s1,
+                                        const Real s2,
+                                        const unsigned int deriv_var) const
 {
   // check input
   if (deriv_var != 1 && deriv_var != 2)

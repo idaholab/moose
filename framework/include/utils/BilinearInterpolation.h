@@ -16,8 +16,6 @@
 // C++ includes
 #include <vector>
 
-class BidimensionalInterpolation;
-
 /**
  * This class applies the Least Squares algorithm to a set of points
  * to provide a smooth curve for sampling values.
@@ -77,7 +75,7 @@ public:
 private:
   /// sampleInternal only used by BilinearInterpolation, hence made private
   template <typename T>
-  T sampleInternal(T & s1, T & s2) const;
+  T sampleInternal(const T & s1, const T & s2) const;
 
   ColumnMajorMatrix _zSurface;
   static int _file_number;
