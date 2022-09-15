@@ -15,5 +15,5 @@
     jsondiff = optRep_fromCsv_out.json
     allow_test_objects = true
     detail = "parameter data from the input file and and measurment data from a CSV file."
-   []
+  []
 []

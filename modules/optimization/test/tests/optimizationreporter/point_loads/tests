@@ -1,7 +1,7 @@
 [Tests]
   issues = '#21885'
   design = 'ReporterPointSource.md'
-  requirement = The system shall be able to invert for point loads using " 
+  requirement = "The system shall be able to invert for point loads using "
   [hessian]
     type = CSVDiff
     max_threads = 1
