@@ -7,7 +7,8 @@ and provides them as material properties.
 
 The following material properties created are:
 
-- Specific entropy: `s(pressure, enthalpy)`
+- Temperature: `T(pressure, specific enthalpy)`
+- Specific entropy: `s(specific enthalpy, pressure)`
 
 !syntax parameters /Materials/FluidPropertiesMaterialPH
 

@@ -384,18 +384,6 @@ public:
                             Real & T,
                             bool & conversion_succeeded) const;
 
-  // virtual Real p_from_h_s(Real h, Real s) const;
-  //
-  // virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const;
-  //
-  // virtual Real s_from_p_T(Real p, Real T) const;
-  //
-  // virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const;
-  //
-  // virtual Real s_from_v_e(Real v, Real e) const;
-  //
-  // virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const;
-
   /**
    * Newton's method may be used to convert between variable sets
    * _tolerance, _T_initial_guess, and _p_initial_guess are the parameters for these

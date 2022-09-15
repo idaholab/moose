@@ -18,7 +18,8 @@ FluidPropertiesMaterialPH::validParams()
   params.addRequiredCoupledVar("pressure", "Fluid pressure (Pa)");
   params.addRequiredCoupledVar("h", "Fluid specific enthalpy (J/kg)");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
-  params.addClassDescription("formulation for s(h,p) and rho(v,e)");
+  params.addClassDescription(
+      "Fluid properties using the (pressure, specific enthalpy) formulation");
   return params;
 }
 
@@ -27,6 +28,7 @@ FluidPropertiesMaterialPH::FluidPropertiesMaterialPH(const InputParameters & par
     _pressure(coupledValue("pressure")),
     _h(coupledValue("h")),
 
+    _T(declareProperty<Real>("T")),
     _s(declareProperty<Real>("s")),
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
@@ -38,5 +40,6 @@ FluidPropertiesMaterialPH::~FluidPropertiesMaterialPH() {}
 void
 FluidPropertiesMaterialPH::computeQpProperties()
 {
+  _T[_qp] = _fp.T_from_p_h(_pressure[_qp], _h[_qp]);
   _s[_qp] = _fp.s_from_h_p(_h[_qp], _pressure[_qp]);
 }

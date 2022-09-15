@@ -10,10 +10,11 @@
 #pragma once
 
 #include "Material.h"
-#include "SinglePhaseFluidProperties.h"
+
+class SinglePhaseFluidProperties;
 
 /**
- * Computes fluid properties using (pressure, temperature) formulation
+ * Computes fluid properties using (specific energy, specific volume) formulation
  */
 class FluidPropertiesMaterialVE : public Material
 {
@@ -24,31 +25,29 @@ public:
   virtual ~FluidPropertiesMaterialVE();
 
 protected:
-  virtual void computeQpProperties();
+  void computeQpProperties() override;
 
-  /// Specific volume (m^3/kg)
-  const VariableValue & _v;
-  /// Internal energy (kJ/kg)
+  /// Specific internal energy
   const VariableValue & _e;
-  /// Density (kg/m^3)
-  MaterialProperty<Real> & _rho;
-  // /// Pressure (Pa)
-  // MaterialProperty<Real> & _pressure;
-  // /// Temperature (K)
-  // MaterialProperty<Real> & _temperature;
-  // /// Speed of sound (m/s)
-  // MaterialProperty<Real> & _c;
-  // /// Specific heat capacity at constant pressure (kJ/kg/K)
-  // MaterialProperty<Real> & _cp;
-  // /// Specific heat capacity at constant volume (kJ/kg/K)
-  // MaterialProperty<Real> & _cv;
-  // /// Viscosity (Pa.s)
-  // MaterialProperty<Real> & _mu;
-  // /// Thermal conductivity (W/m/K)
-  // MaterialProperty<Real> & _k;
-  // /// Gibbs free energty (kJ/kg)
-  // MaterialProperty<Real> & _g;
+  /// Specific volume
+  const VariableValue & _v;
+  /// Pressure
+  MaterialProperty<Real> & _p;
+  /// Temperature
+  MaterialProperty<Real> & _T;
+  /// Speed of sound
+  MaterialProperty<Real> & _c;
+  /// Isobaric specific heat capacity
+  MaterialProperty<Real> & _cp;
+  /// Isochoric specific heat capacity
+  MaterialProperty<Real> & _cv;
+  /// Dynamic viscosity
+  MaterialProperty<Real> & _mu;
+  /// Thermal conductivity
+  MaterialProperty<Real> & _k;
+  /// Gibbs free energy
+  MaterialProperty<Real> & _g;
 
-  /// Fluid properties UserObject
+  /// Fluid properties
   const SinglePhaseFluidProperties & _fp;
 };

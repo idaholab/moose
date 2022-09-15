@@ -13,7 +13,7 @@
 #include "SinglePhaseFluidProperties.h"
 
 /**
- * Computes fluid properties using (pressure, temperature) formulation
+ * Computes fluid properties using (pressure, specific enthalpy) formulation
  */
 class FluidPropertiesMaterialPH : public Material
 {
@@ -24,12 +24,15 @@ public:
   virtual ~FluidPropertiesMaterialPH();
 
 protected:
-  virtual void computeQpProperties();
+  void computeQpProperties() override;
 
   /// Pressure (Pa)
   const VariableValue & _pressure;
   /// Specific enthalpy (kJ/kg)
   const VariableValue & _h;
+
+  /// Temperature (K)
+  MaterialProperty<Real> & _T;
   /// Specific entropy (kJ/kg/K)
   MaterialProperty<Real> & _s;
 

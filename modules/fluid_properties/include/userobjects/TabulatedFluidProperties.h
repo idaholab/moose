@@ -313,7 +313,7 @@ protected:
   // Bi-dimensional interpolation of pressure from (v,e)
   std::unique_ptr<BidimensionalInterpolation> _p_from_v_e_ipol;
 
-  // Bidimensional interpolation of temperature from (v,h)
+  // Bi-dimensional interpolation of temperature from (v,h)
   std::unique_ptr<BidimensionalInterpolation> _T_from_v_h_ipol;
 
   // Bidimensional interpolation of pressure from (v,h)
