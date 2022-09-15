@@ -16,7 +16,7 @@ const double apprx_tol = 1e-2;
 Real
 function(Real x1, Real x2)
 {
-   return x1 * x1 + 3.0 * x2 * x2;
+  return x1 * x1 + 3.0 * x2 * x2;
 }
 
 void

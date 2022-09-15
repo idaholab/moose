@@ -29,18 +29,12 @@ TabulatedFluidProperties::validParams()
       "Name of the csv file containing the tabulated fluid property data. If "
       "no file exists and save_file = true, then one will be written to "
       "fluid_properties.csv using the temperature and pressure range specified.");
-  params.addRangeCheckedParam<Real>("temperature_min",
-                                    300,
-                                    "temperature_min > 0",
-                                    "Minimum temperature for tabulated data.");
-  params.addParam<Real>(
-      "temperature_max", 500, "Maximum temperature for tabulated data.");
-  params.addRangeCheckedParam<Real>("pressure_min",
-                                    1e5,
-                                    "pressure_min > 0",
-                                    "Minimum pressure for tabulated data.");
-  params.addParam<Real>(
-      "pressure_max", 50.0e6, "Maximum pressure for tabulated data.");
+  params.addRangeCheckedParam<Real>(
+      "temperature_min", 300, "temperature_min > 0", "Minimum temperature for tabulated data.");
+  params.addParam<Real>("temperature_max", 500, "Maximum temperature for tabulated data.");
+  params.addRangeCheckedParam<Real>(
+      "pressure_min", 1e5, "pressure_min > 0", "Minimum pressure for tabulated data.");
+  params.addParam<Real>("pressure_max", 50.0e6, "Maximum pressure for tabulated data.");
   params.addRangeCheckedParam<unsigned int>(
       "num_T", 100, "num_T > 0", "Number of points to divide temperature range.");
   params.addRangeCheckedParam<unsigned int>(
@@ -1313,15 +1307,18 @@ TabulatedFluidProperties::checkInitialGuess() const
   {
     if (_p_initial_guess < _pressure_min || _p_initial_guess > _pressure_max)
       mooseWarning("Pressure initial guess for (p,T), (v,e) conversions " +
-                  Moose::stringify(_p_initial_guess) + " is outside the range of tabulated "
-                  "pressure (" + Moose::stringify(_pressure_min) +
-                  ", " + Moose::stringify(_pressure_max) + ").");
+                   Moose::stringify(_p_initial_guess) +
+                   " is outside the range of tabulated "
+                   "pressure (" +
+                   Moose::stringify(_pressure_min) + ", " + Moose::stringify(_pressure_max) + ").");
 
     if (_T_initial_guess < _temperature_min || _T_initial_guess > _temperature_max)
       mooseWarning("Temperature initial guess for (p,T), (v,e) conversions " +
-                  Moose::stringify(_T_initial_guess) + " is outside the range of tabulated "
-                  "temperature (" + Moose::stringify(_temperature_min) + ", " +
-                  Moose::stringify(_temperature_max) + ").");
+                   Moose::stringify(_T_initial_guess) +
+                   " is outside the range of tabulated "
+                   "temperature (" +
+                   Moose::stringify(_temperature_min) + ", " + Moose::stringify(_temperature_max) +
+                   ").");
   }
 }
 

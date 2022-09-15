@@ -31,7 +31,7 @@ SinglePhaseFluidProperties::validParams()
       "p_initial_guess > 0",
       "Pressure initial guess for Newton Method variable set conversion");
   params.addParamNamesToGroup("tolerance T_initial_guess p_initial_guess",
-      "Variable set conversions");
+                              "Variable set conversions");
 
   return params;
 }

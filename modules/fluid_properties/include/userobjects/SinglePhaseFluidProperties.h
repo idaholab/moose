@@ -398,7 +398,7 @@ public:
 
   /**
    * Newton's method may be used to convert between variable sets
-   * _tolerance, _T_initial_guess, and _p_initial_guess are the parameters for these 
+   * _tolerance, _T_initial_guess, and _p_initial_guess are the parameters for these
    * iterative solves
    */
   const Real _tolerance;
