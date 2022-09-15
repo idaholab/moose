@@ -300,12 +300,23 @@
     []
   []
   [fv]
+    requirement = 'The system shall be able to incorporate gap heat transfer fluxes from radiation and conduction, into a finite volume discretization, via the mortar method'
     issues = '#21599'
     design = 'FunctorGapFluxModelRadiation.md FunctorGapFluxModelConduction.md ModularGapConductanceConstraint.md'
-    requirement = 'The system shall be able to incorporate gap heat transfer fluxes from radiation and conduction, into a finite volume discretization, via the mortar method.'
-    input = 'fv_modular_gap_heat_transfer_mortar_radiation_conduction.i'
-    type = Exodiff
-    exodiff = 'fv_modular_gap_heat_transfer_mortar_radiation_conduction_out.e'
-    ad_indexing_type = 'global'
+    [xyz]
+      input = 'fv_modular_gap_heat_transfer_mortar_radiation_conduction.i'
+      type = Exodiff
+      exodiff = 'fv_modular_gap_heat_transfer_mortar_radiation_conduction_out.e'
+      ad_indexing_type = 'global'
+      detail = 'in a Cartesian coordinate system'
+    []
+    [rz]
+      input = 'fv_modular_gap_heat_transfer_mortar_radiation_conduction.i'
+      type = Exodiff
+      exodiff = 'fv_modular_gap_heat_transfer_mortar_radiation_conduction_rz_out.e'
+      ad_indexing_type = 'global'
+      cli_args = "Outputs/file_base=fv_modular_gap_heat_transfer_mortar_radiation_conduction_rz_out Mesh/coord_type=RZ Mesh/inactive=''"
+      detail = 'in an axisymmetric coordinate system'
+    []
   []
 []

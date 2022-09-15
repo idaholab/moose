@@ -1,4 +1,5 @@
 [Mesh]
+  inactive = 'translate'
   [file]
     type = FileMeshGenerator
     file = 2blk-gap.e
@@ -16,6 +17,12 @@
     new_block_id = 10000
     new_block_name = 'primary_lower'
     input = secondary
+  []
+  [translate]
+    type = TransformGenerator
+    transform = translate
+    input = primary
+    vector_value = '1 0 0'
   []
 []
 
