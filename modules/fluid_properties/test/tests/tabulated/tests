@@ -8,31 +8,12 @@
     rel_err = 1e-4
     threading = '!pthreads'
   []
-  [tabulated_bilinear]
-    type = CSVDiff
-    input = 'tabulated.i'
-    csvdiff = 'tabulated_bilinear_out.csv'
-    cli_args = 'Modules/FluidProperties/tabulated/type=TabulatedBilinearFluidProperties
-                Outputs/file_base=tabulated_bilinear_out'
-    rel_err = 1e-4
-    threading = '!pthreads'
-  []
   [tabulated_v_e_bicubic]
     type = CSVDiff
     input = 'tabulated_v_e.i'
     csvdiff = 'tabulated_v_e_out.csv'
     cli_args = 'Modules/FluidProperties/tabulated/type=TabulatedBicubicFluidProperties
                 Outputs/file_base=tabulated_v_e_out'
-    rel_err = 1e-4
-    threading = '!pthreads'
-    allow_warnings = true
-  []
-  [tabulated_v_e_bilinear]
-    type = CSVDiff
-    input = 'tabulated_v_e.i'
-    csvdiff = 'tabulated_v_e_bilinear_out.csv'
-    cli_args = 'Modules/FluidProperties/tabulated/type=TabulatedBilinearFluidProperties
-                Outputs/file_base=tabulated_v_e_bilinear_out'
     rel_err = 1e-4
     threading = '!pthreads'
     allow_warnings = true

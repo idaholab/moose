@@ -109,7 +109,6 @@
       type = CO2FluidProperties
     [../]
     [./tabulated]
-      # type = TabulatedBilinearFluidProperties
       type = TabulatedBicubicFluidProperties
       # fp = co2
       interpolated_properties = 'density enthalpy viscosity internal_energy k c cv cp entropy'
