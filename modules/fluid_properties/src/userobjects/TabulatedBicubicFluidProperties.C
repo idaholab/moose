@@ -185,9 +185,9 @@ TabulatedBicubicFluidProperties::constructInterpolation()
 
     // the bicubic interpolation object are init'ed now
     _p_from_v_e_ipol =
-        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, p_from_v_e);
+        std::make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, p_from_v_e);
     _T_from_v_e_ipol =
-        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, T_from_v_e);
+        std::make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, T_from_v_e);
   }
 
   if (_construct_pT_from_vh)
@@ -289,9 +289,9 @@ TabulatedBicubicFluidProperties::constructInterpolation()
 
     // the bicubic interpolation object are init'ed now
     _p_from_v_h_ipol =
-        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _enthalpy, p_from_v_h);
+        std::make_unique<BicubicInterpolation>(_specific_volume, _enthalpy, p_from_v_h);
     _T_from_v_h_ipol =
-        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _enthalpy, T_from_v_h);
+        std::make_unique<BicubicInterpolation>(_specific_volume, _enthalpy, T_from_v_h);
   }
 }
 
