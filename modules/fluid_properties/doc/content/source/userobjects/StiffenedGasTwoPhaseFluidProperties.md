@@ -20,10 +20,10 @@ where
 - $T_C$ is the critical temperature \[K\], and
 - $A$ \[N/m\], $B$ \[-\], and $C$ \[-\] are a fluid-dependent constants.
 
-!syntax parameters /Modules/FluidProperties/StiffenedGasTwoPhaseFluidProperties
+!syntax parameters /FluidProperties/StiffenedGasTwoPhaseFluidProperties
 
-!syntax inputs /Modules/FluidProperties/StiffenedGasTwoPhaseFluidProperties
+!syntax inputs /FluidProperties/StiffenedGasTwoPhaseFluidProperties
 
-!syntax children /Modules/FluidProperties/StiffenedGasTwoPhaseFluidProperties
+!syntax children /FluidProperties/StiffenedGasTwoPhaseFluidProperties
 
 !bibtex bibliography

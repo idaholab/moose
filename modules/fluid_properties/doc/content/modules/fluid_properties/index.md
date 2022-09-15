@@ -9,7 +9,7 @@ swapping the name of the Fluid Properties UserObject in a plug-and-play manner.
 
 This module provides fluid properties for many different gases, liquids and mixtures.
 
-!syntax list /Modules/FluidProperties groups=FluidPropertiesApp heading-level=3 actions=False
+!syntax list /FluidProperties groups=FluidPropertiesApp heading-level=3 actions=False
 
 ## Properties available
 
@@ -132,11 +132,11 @@ value of density and its derivatives with respect to the primary variables `T` a
 
 ### Input file syntax
 
-The Fluid Properties UserObjects are implemented in an input file in the `Modules` block.  For
+The Fluid Properties UserObjects are implemented in an input file in the `FluidProperties` block.  For
 example, to use the ideal gas formulation for specific volume and energy, the input file syntax
 would be:
 
-!listing modules/fluid_properties/test/tests/ideal_gas/test.i block=Modules
+!listing modules/fluid_properties/test/tests/ideal_gas/test.i block=FluidProperties
 
 In this example, the user has specified a value for `gamma` (the ratio of isobaric to isochoric
 specific heat capacities), and `R`, the universal gas constant.
@@ -150,7 +150,7 @@ Due to the consistent interface for fluid properties, a different fluid can be s
 input file be changing the type of the UserObject. For example, to use a stiffened gas instead
 of an ideal gas, the only modification required in the input file is
 
-!listing modules/fluid_properties/test/tests/stiffened_gas/test.i block=Modules
+!listing modules/fluid_properties/test/tests/stiffened_gas/test.i block=FluidProperties
 
 ## Creating additional fluids
 

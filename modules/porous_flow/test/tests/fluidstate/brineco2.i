@@ -242,14 +242,12 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [co2]
-      type = CO2FluidProperties
-    []
-    [brine]
-      type = BrineFluidProperties
-    []
+[FluidProperties]
+  [co2]
+    type = CO2FluidProperties
+  []
+  [brine]
+    type = BrineFluidProperties
   []
 []
 

@@ -19,7 +19,7 @@ p_outlet = 1e5
   scaling_factor_1phase = '1 1 1e-5'
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = IdealGasFluidProperties
     gamma = 1.4

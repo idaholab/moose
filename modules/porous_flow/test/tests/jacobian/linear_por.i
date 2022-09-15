@@ -47,11 +47,9 @@
   displacements = 'disp disp disp'
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
   []
 []
 

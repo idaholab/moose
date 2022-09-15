@@ -151,7 +151,7 @@ p_ambient = 1e5
   []
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp_air]
     type = IdealGasFluidProperties
     emit_on_nan = none

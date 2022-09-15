@@ -14,7 +14,7 @@
   f = 0
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [water]
     type = StiffenedGasFluidProperties
     gamma = 2.35

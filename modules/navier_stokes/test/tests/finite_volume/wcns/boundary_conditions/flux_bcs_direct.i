@@ -274,13 +274,11 @@ inlet_velocity = 0.001
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = SimpleFluidProperties
-      density0 = 1980
-      cp = 2530
-    []
+[FluidProperties]
+  [fp]
+    type = SimpleFluidProperties
+    density0 = 1980
+    cp = 2530
   []
 []
 

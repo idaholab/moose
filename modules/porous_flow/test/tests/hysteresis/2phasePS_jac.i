@@ -60,18 +60,16 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid_0]
-      type = SimpleFluidProperties
-      bulk_modulus = 10
-      viscosity = 1
-    []
-    [simple_fluid_1]
-      type = SimpleFluidProperties
-      bulk_modulus = 1
-      viscosity = 3
-    []
+[FluidProperties]
+  [simple_fluid_0]
+    type = SimpleFluidProperties
+    bulk_modulus = 10
+    viscosity = 1
+  []
+  [simple_fluid_1]
+    type = SimpleFluidProperties
+    bulk_modulus = 1
+    viscosity = 3
   []
 []
 

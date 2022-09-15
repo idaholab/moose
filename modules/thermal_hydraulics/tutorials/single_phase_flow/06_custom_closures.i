@@ -74,7 +74,7 @@ ht_blocks = 'core_chan hx/pri hx/sec'
   []
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [he]
     type = IdealGasFluidProperties
     molar_mass = 4e-3

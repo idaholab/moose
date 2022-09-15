@@ -25,7 +25,7 @@ can be visualized in the MOOSE GUI [peacock](peacock.md optional=True) or in an 
 
 The equations of state for the liquid brine, the CO$_{2}$ and the liquid brine-CO$_{2}$ mixture are the high-precision versions supplied by the [fluid_properties module](fluid_properties/index.md):
 
-!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i block=Modules
+!listing modules/porous_flow/examples/lava_lamp/2phase_convection.i block=FluidProperties
 
 !listing modules/porous_flow/examples/lava_lamp/2phase_convection.i start=[fs] end=[]
 

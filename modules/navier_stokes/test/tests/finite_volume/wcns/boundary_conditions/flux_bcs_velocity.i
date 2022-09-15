@@ -273,11 +273,9 @@ inlet_velocity = 0.001
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = FlibeFluidProperties
-    []
+[FluidProperties]
+  [fp]
+    type = FlibeFluidProperties
   []
 []
 

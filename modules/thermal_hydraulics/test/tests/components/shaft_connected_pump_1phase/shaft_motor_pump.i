@@ -19,7 +19,7 @@ dt = 1.e-2
   fp = fp
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = IdealGasFluidProperties
   []

@@ -126,20 +126,18 @@
   [../]
 []
 
-[Modules]
-  [./FluidProperties]
-    [./water]
-      type = Water97FluidProperties
-    [../]
-    [./water_tab]
-      type = TabulatedBicubicFluidProperties
-      fp = water
-      save_file = false
-    [../]
-    [./brine]
-      type = BrineFluidProperties
-      water_fp = water_tab
-    [../]
+[FluidProperties]
+  [./water]
+    type = Water97FluidProperties
+  [../]
+  [./water_tab]
+    type = TabulatedBicubicFluidProperties
+    fp = water
+    save_file = false
+  [../]
+  [./brine]
+    type = BrineFluidProperties
+    water_fp = water_tab
   [../]
 []
 

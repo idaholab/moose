@@ -193,18 +193,16 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [co2sw]
-      type = CO2FluidProperties
-    []
-    [co2]
-      type = TabulatedFluidProperties
-      fp = co2sw
-    []
-    [brine]
-      type = BrineFluidProperties
-    []
+[FluidProperties]
+  [co2sw]
+    type = CO2FluidProperties
+  []
+  [co2]
+    type = TabulatedFluidProperties
+    fp = co2sw
+  []
+  [brine]
+    type = BrineFluidProperties
   []
 []
 

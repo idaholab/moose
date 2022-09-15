@@ -20,11 +20,9 @@ superficial_vel_in=${fparse u_in * eps}
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = IdealGasFluidProperties
-    []
+[FluidProperties]
+  [fp]
+    type = IdealGasFluidProperties
   []
 []
 

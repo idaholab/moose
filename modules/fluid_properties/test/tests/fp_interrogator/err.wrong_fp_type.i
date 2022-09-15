@@ -5,10 +5,8 @@
   vel = 10
 []
 
-[Modules]
-  [./FluidProperties]
-    [./fp]
-      type = SodiumProperties
-    [../]
+[FluidProperties]
+  [./fp]
+    type = SodiumProperties
   [../]
 []

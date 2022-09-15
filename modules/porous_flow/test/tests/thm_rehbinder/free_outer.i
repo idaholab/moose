@@ -133,18 +133,16 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [the_simple_fluid]
-      type = SimpleFluidProperties
-      thermal_expansion = 0.0
-      bulk_modulus = 1E12
-      viscosity = 1.0E-3
-      density0 = 1000.0
-      cv = 1000.0
-      cp = 1000.0
-      porepressure_coefficient = 0.0
-    []
+[FluidProperties]
+  [the_simple_fluid]
+    type = SimpleFluidProperties
+    thermal_expansion = 0.0
+    bulk_modulus = 1E12
+    viscosity = 1.0E-3
+    density0 = 1000.0
+    cv = 1000.0
+    cp = 1000.0
+    porepressure_coefficient = 0.0
   []
 []
 

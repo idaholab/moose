@@ -14,7 +14,7 @@
   gravity_vector = '0 0 0'
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = IdealGasFluidProperties
     gamma = 1.4

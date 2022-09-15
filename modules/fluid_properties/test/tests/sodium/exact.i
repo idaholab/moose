@@ -61,7 +61,7 @@
   [../]
 []
 
-[Modules/FluidProperties/sodium]
+[FluidProperties/sodium]
   type = SodiumProperties
 []
 

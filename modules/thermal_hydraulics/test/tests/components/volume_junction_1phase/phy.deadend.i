@@ -33,7 +33,7 @@
   []
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [eos]
     type = StiffenedGasFluidProperties
     gamma = 1.4

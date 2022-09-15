@@ -92,30 +92,28 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [true_water]
-      type = Water97FluidProperties
-    []
-    [tabulated_water]
-      type = TabulatedFluidProperties
-      fp = true_water
-      temperature_min = 275
-      pressure_max = 1E8
-      interpolated_properties = 'density viscosity enthalpy internal_energy'
-      fluid_property_file = water97_tabulated_11.csv
-    []
-    [true_co2]
-      type = CO2FluidProperties
-    []
-    [tabulated_co2]
-      type = TabulatedFluidProperties
-      fp = true_co2
-      temperature_min = 275
-      pressure_max = 1E8
-      interpolated_properties = 'density viscosity enthalpy internal_energy'
-      fluid_property_file = co2_tabulated_11.csv
-    []
+[FluidProperties]
+  [true_water]
+    type = Water97FluidProperties
+  []
+  [tabulated_water]
+    type = TabulatedFluidProperties
+    fp = true_water
+    temperature_min = 275
+    pressure_max = 1E8
+    interpolated_properties = 'density viscosity enthalpy internal_energy'
+    fluid_property_file = water97_tabulated_11.csv
+  []
+  [true_co2]
+    type = CO2FluidProperties
+  []
+  [tabulated_co2]
+    type = TabulatedFluidProperties
+    fp = true_co2
+    temperature_min = 275
+    pressure_max = 1E8
+    interpolated_properties = 'density viscosity enthalpy internal_energy'
+    fluid_property_file = co2_tabulated_11.csv
   []
 []
 

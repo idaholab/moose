@@ -48,12 +48,12 @@ The order is not important, although having pressure and temperature first makes
 
 The data in the pressure and temperature columns *must* be monotonically increasing. This file format
 does require duplication of the pressure and temperature data - each pressure value must be included
-[!param](/Modules/FluidProperties/TabulatedFluidProperties/num_T) times, while each temperature value is repeated
-[!param](/Modules/FluidProperties/TabulatedFluidProperties/num_p) times, where
-[!param](/Modules/FluidProperties/TabulatedFluidProperties/num_T) and [!param](/Modules/FluidProperties/TabulatedFluidProperties/num_p) are the
+[!param](/FluidProperties/TabulatedFluidProperties/num_T) times, while each temperature value is repeated
+[!param](/FluidProperties/TabulatedFluidProperties/num_p) times, where
+[!param](/FluidProperties/TabulatedFluidProperties/num_T) and [!param](/FluidProperties/TabulatedFluidProperties/num_p) are the
 number of temperature and pressure points, respectively. This class will check that the required
 number of data points have been entered
-([!param](/Modules/FluidProperties/TabulatedFluidProperties/num_T) * [!param](/Modules/FluidProperties/TabulatedFluidProperties/num_p)).
+([!param](/FluidProperties/TabulatedFluidProperties/num_T) * [!param](/FluidProperties/TabulatedFluidProperties/num_p)).
 
 An example of a valid fluid properties file, with two pressure points and three temperature points, is provided below:
 
@@ -81,11 +81,11 @@ calculated using a [CO2FluidProperties](/CO2FluidProperties.md) object.
 The input file syntax necessary to achieve this with a (pressure, temperature) variable set is shown below.
 A [TabulatedBicubicFluidProperties.md] is used.
 
-!listing modules/fluid_properties/test/tests/tabulated/tabulated.i block=Modules
+!listing modules/fluid_properties/test/tests/tabulated/tabulated.i block=FluidProperties
 
 With a (specific volume, specific energy) variable set, the syntax shown in the example file below may be used:
 
-!listing modules/fluid_properties/test/tests/tabulated/tabulated_v_e.i block=Modules
+!listing modules/fluid_properties/test/tests/tabulated/tabulated_v_e.i block=FluidProperties
 
 
 ### Writing data file
@@ -99,27 +99,25 @@ and viscosity for $300 \mathrm{K} \le T \le 400 \mathrm{K}$ and $1 \mathrm{MPa} 
 divided into 50 and 100 equal points, respectively, then the input file syntax necessary is
 
 ```text
-[Modules]
-  [FluidProperties]
-    [co2]
-      type = CO2FluidProperties
-    []
-    [tabulated]
-      type = TabulatedBicubicFluidProperties
-      fp = co2
-      fluid_property_file = fluid_properties.csv
-      interpolated_properties = 'density enthalpy viscosity'
+[FluidProperties]
+  [co2]
+    type = CO2FluidProperties
+  []
+  [tabulated]
+    type = TabulatedBicubicFluidProperties
+    fp = co2
+    fluid_property_file = fluid_properties.csv
+    interpolated_properties = 'density enthalpy viscosity'
 
-      # Bounds of interpolation
-      temperature_min = 300
-      temperature_max = 400
-      pressure_min = 1e6
-      pressure_max = 10e6
+    # Bounds of interpolation
+    temperature_min = 300
+    temperature_max = 400
+    pressure_min = 1e6
+    pressure_max = 10e6
 
-      # Grid discretization
-      num_T = 50
-      num_p = 100
-    []
+    # Grid discretization
+    num_T = 50
+    num_p = 100
   []
 []
 ```
@@ -200,8 +198,8 @@ Warnings will be output when a pressure or temperature value is limited to its b
 the alternative variable set to pressure or temperature fails, often because the grid extends beyond physically
 reachable values.
 
-!syntax parameters /Modules/FluidProperties/TabulatedFluidProperties
+!syntax parameters /FluidProperties/TabulatedFluidProperties
 
-!syntax inputs /Modules/FluidProperties/TabulatedFluidProperties
+!syntax inputs /FluidProperties/TabulatedFluidProperties
 
-!syntax children /Modules/FluidProperties/TabulatedFluidProperties
+!syntax children /FluidProperties/TabulatedFluidProperties

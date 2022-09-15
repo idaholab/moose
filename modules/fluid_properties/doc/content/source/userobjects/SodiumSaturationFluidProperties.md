@@ -1,6 +1,6 @@
 # SodiumSaturationFluidProperties
 
-!syntax description /Modules/FluidProperties/SodiumSaturationFluidProperties
+!syntax description /FluidProperties/SodiumSaturationFluidProperties
 
 ## Description
 
@@ -80,8 +80,8 @@ the $C_p$ fit is valid.
 These fluid properties correspond to saturated conditions (that is, the sodium is at the
 saturation pressure).
 
-!syntax parameters /Modules/FluidProperties/SodiumSaturationFluidProperties
+!syntax parameters /FluidProperties/SodiumSaturationFluidProperties
 
-!syntax inputs /Modules/FluidProperties/SodiumSaturationFluidProperties
+!syntax inputs /FluidProperties/SodiumSaturationFluidProperties
 
-!syntax children /Modules/FluidProperties/SodiumSaturationFluidProperties
+!syntax children /FluidProperties/SodiumSaturationFluidProperties

@@ -21,7 +21,7 @@ p_out = 1e6
   initial_vel_z = 0
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [eos]
     type = IdealGasFluidProperties
   []

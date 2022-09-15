@@ -69,16 +69,14 @@
   flux_limiter_type = superbee
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      bulk_modulus = 100
-      density0 = 1000
-      viscosity = 4.4
-      thermal_expansion = 0
-      cv = 2
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 100
+    density0 = 1000
+    viscosity = 4.4
+    thermal_expansion = 0
+    cv = 2
   []
 []
 

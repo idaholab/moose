@@ -12,7 +12,7 @@ p_out = 1e5
   scaling_factor_1phase = '1 1e-2 1e-4'
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35

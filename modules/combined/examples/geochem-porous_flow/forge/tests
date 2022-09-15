@@ -53,7 +53,7 @@
     type = CSVDiff
     input = porous_flow.i
     csvdiff = porous_flow_out.csv
-    cli_args = "MultiApps/active='' Transfers/active='' Mesh/gen/nx=9 Mesh/gen/ny=8 Executioner/end_time=500 Modules/FluidProperties/the_simple_fluid/thermal_expansion=0"
+    cli_args = "MultiApps/active='' Transfers/active='' Mesh/gen/nx=9 Mesh/gen/ny=8 Executioner/end_time=500 FluidProperties/the_simple_fluid/thermal_expansion=0"
     requirement = "The geochemistry model shall be able to solve aqueous geochemical systems in contact with minerals"
     issues = '#15693'
     design = 'geotes_forge.md'

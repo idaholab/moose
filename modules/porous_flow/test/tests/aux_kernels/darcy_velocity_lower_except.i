@@ -52,15 +52,13 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      bulk_modulus = 1E16
-      viscosity = 10
-      density0 = 2
-      thermal_expansion = 0
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 1E16
+    viscosity = 10
+    density0 = 2
+    thermal_expansion = 0
   []
 []
 

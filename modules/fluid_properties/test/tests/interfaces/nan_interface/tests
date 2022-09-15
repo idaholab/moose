@@ -2,7 +2,7 @@
   [./quiet_nan_scalar]
     type = 'RunException'
     input = 'nan_interface.i'
-    cli_args = 'Modules/FluidProperties/fp/emit_on_nan=warning'
+    cli_args = 'FluidProperties/fp/emit_on_nan=warning'
     allow_test_objects = True
     method = 'DBG'
     threading = '!pthreads'
@@ -15,7 +15,7 @@
   [./quiet_nan_vector]
     type = 'RunException'
     input = 'nan_interface.i'
-    cli_args = 'Modules/FluidProperties/fp/emit_on_nan=warning Kernels/test_kernel/test_vector_version=true'
+    cli_args = 'FluidProperties/fp/emit_on_nan=warning Kernels/test_kernel/test_vector_version=true'
     allow_test_objects = True
     method = 'DBG'
     threading = '!pthreads'

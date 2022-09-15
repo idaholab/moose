@@ -13,7 +13,7 @@
   construct_side_list_from_node_list = true
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp_1phase]
     type = StiffenedGasFluidProperties
     gamma = 2.35

@@ -117,13 +117,11 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [ideal_gas]
-      type = IdealGasFluidProperties
-      gamma = 1.4
-      molar_mass = 1.000536678700361
-    []
+[FluidProperties]
+  [ideal_gas]
+    type = IdealGasFluidProperties
+    gamma = 1.4
+    molar_mass = 1.000536678700361
   []
 []
 

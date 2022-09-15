@@ -70,12 +70,10 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [the_simple_fluid]
-      type = SimpleFluidProperties
-      bulk_modulus = 2E9
-    []
+[FluidProperties]
+  [the_simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 2E9
   []
 []
 

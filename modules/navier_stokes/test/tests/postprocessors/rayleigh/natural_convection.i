@@ -174,13 +174,11 @@ l = 4
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = SimpleFluidProperties
-      density0 = ${rho}
-      thermal_expansion = ${beta}
-    []
+[FluidProperties]
+  [fp]
+    type = SimpleFluidProperties
+    density0 = ${rho}
+    thermal_expansion = ${beta}
   []
 []
 

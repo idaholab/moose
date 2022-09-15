@@ -50,15 +50,14 @@
   [porepressure]
   []
 []
-[Modules]
-  [FluidProperties]
-    [the_simple_fluid]
-      type = SimpleFluidProperties
-      thermal_expansion = 0.0
-      bulk_modulus = 13.0
-      viscosity = 1.0
-      density0 = 1.0
-    []
+
+[FluidProperties]
+  [the_simple_fluid]
+    type = SimpleFluidProperties
+    thermal_expansion = 0.0
+    bulk_modulus = 13.0
+    viscosity = 1.0
+    density0 = 1.0
   []
 []
 

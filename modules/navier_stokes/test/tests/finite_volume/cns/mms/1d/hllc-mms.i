@@ -118,11 +118,9 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = TestConservedVarFluidProperties
-    []
+[FluidProperties]
+  [fp]
+    type = TestConservedVarFluidProperties
   []
 []
 

@@ -47,17 +47,15 @@
   [../]
 []
 
-[Modules]
-  [./FluidProperties]
-    [./eos]
-      type = StiffenedGasFluidProperties
-      gamma = 2.35
-      q = -1167e3
-      q_prime = 0.0
-      p_inf = 1e9
-      cv = 1816.0
-    [../]
-  []
+[FluidProperties]
+  [./eos]
+    type = StiffenedGasFluidProperties
+    gamma = 2.35
+    q = -1167e3
+    q_prime = 0.0
+    p_inf = 1e9
+    cv = 1816.0
+  [../]
 []
 
 [BCs]

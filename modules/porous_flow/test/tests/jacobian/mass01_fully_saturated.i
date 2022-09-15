@@ -12,14 +12,12 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Modules]
-  [FluidProperties]
-    [the_simple_fluid]
-      type = SimpleFluidProperties
-      thermal_expansion = 0.5
-      bulk_modulus = 1.5
-      density0 = 1.0
-    []
+[FluidProperties]
+  [the_simple_fluid]
+    type = SimpleFluidProperties
+    thermal_expansion = 0.5
+    bulk_modulus = 1.5
+    density0 = 1.0
   []
 []
 

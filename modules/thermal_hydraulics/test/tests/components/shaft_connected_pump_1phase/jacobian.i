@@ -10,7 +10,7 @@
   f = 0
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
