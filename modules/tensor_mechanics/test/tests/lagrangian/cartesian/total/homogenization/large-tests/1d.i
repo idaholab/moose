@@ -1,11 +1,10 @@
-# 2D test with just strain control
+# 1D strain controlled test
 
 [GlobalParams]
   displacements = 'disp_x'
-  constraint_types = 'stress'
-  ndim = 1
   large_kinematics = true
   macro_gradient = hvar
+  homogenization_constraint = homogenization
 []
 
 [Mesh]
@@ -13,12 +12,12 @@
     type = FileMeshGenerator
     file = '1d.exo'
   []
-  [sets]
-    input = base
+  [ss]
     type = SideSetsFromPointsGenerator
-    new_boundary = 'left right'
+    input = base
     points = '-1 0 0
                7 0 0'
+    new_boundary = 'left right'
   []
 []
 
@@ -238,10 +237,11 @@
 []
 
 [UserObjects]
-  [integrator]
-    type = HomogenizationConstraintIntegral
-    targets = 'stress11'
-    execute_on = 'initial linear'
+  [homogenization]
+    type = HomogenizationConstraint
+    constraint_types = ${constraint_types}
+    targets = ${targets}
+    execute_on = 'INITIAL LINEAR NONLINEAR'
   []
 []
 
@@ -257,14 +257,17 @@
   [enforce]
     type = HomogenizationConstraintScalarKernel
     variable = hvar
-    integrator = integrator
   []
 []
 
 [Functions]
-  [stress11]
+  [func_stress]
     type = ParsedFunction
-    value = '4.0e2*t'
+    value = '400*t'
+  []
+  [func_strain]
+    type = ParsedFunction
+    value = '4.0e-1*t'
   []
 []
 
@@ -318,13 +321,6 @@
   []
   [compute_homogenization_gradient]
     type = ComputeHomogenizedLagrangianStrain
-  []
-[]
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
   []
 []
 
@@ -426,16 +422,18 @@
   type = Transient
 
   solve_type = 'newton'
-  line_search = none
+  line_search = default
+
+  automatic_scaling = true
 
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
   l_max_its = 2
   l_tol = 1e-14
-  nl_max_its = 10
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-10
+  nl_max_its = 15
+  nl_rel_tol = 1e-6
+  nl_abs_tol = 1e-8
 
   start_time = 0.0
   dt = 0.2

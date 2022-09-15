@@ -4,8 +4,8 @@
   displacements = 'disp_x disp_y disp_z'
   large_kinematics = true
   constraint_types = 'strain strain strain strain strain strain strain strain strain'
-  ndim = 3
   macro_gradient = hvar
+  homogenization_constraint = homogenization
 []
 
 [Mesh]
@@ -275,10 +275,10 @@
 []
 
 [UserObjects]
-  [integrator]
-    type = HomogenizationConstraintIntegral
+  [homogenization]
+    type = HomogenizationConstraint
     targets = 'strain11 strain21 strain31 strain12 strain22 strain32 strain13 strain23 strain33'
-    execute_on = 'initial linear'
+    execute_on = 'INITIAL LINEAR NONLINEAR'
   []
 []
 
@@ -304,7 +304,6 @@
   [enforce]
     type = HomogenizationConstraintScalarKernel
     variable = hvar
-    integrator = integrator
   []
 []
 

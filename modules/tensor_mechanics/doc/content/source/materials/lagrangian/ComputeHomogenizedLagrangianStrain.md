@@ -24,7 +24,7 @@ The important input parameters are `macro_gradient`, the name of the `ScalarVari
 and `large_kinematics` which determines if the `ScalarVariable` holds a symmetric
 small strain tensor (`false`) or a non-symmetric displacement gradient (`large`).
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d-stress.i
+!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d.i
          block=Materials
 
 !syntax parameters /Materials/ComputeHomogenizedLagrangianStrain
