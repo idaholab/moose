@@ -78,6 +78,11 @@ TEST(BilinearInterpolationTest, sample)
   EXPECT_NEAR(interp.sample(p2, p1), y0, apprx_tol);
   EXPECT_NEAR(interp.sampleDerivative(p2, p1, 2), dydx1, exact_tol);
   EXPECT_NEAR(interp.sampleDerivative(p2, p1, 1), dydx2, apprx_tol);
+  p1 = x1[4] * 0.2 + x2[5] * 0.8, p2 = x2[4];
+  function(p1, p2, y0, dydx1, dydx2);
+  EXPECT_NEAR(interp.sample(p2, p1), y0, apprx_tol);
+  EXPECT_NEAR(interp.sampleDerivative(p2, p1, 2), dydx1, apprx_tol);
+  EXPECT_NEAR(interp.sampleDerivative(p2, p1, 1), dydx2, exact_tol);
 
   // Check that the value and derivatives are correct at all four corners of the grid
   p1 = x1[0], p2 = x2[0];
@@ -145,4 +150,57 @@ TEST(BilinearInterpolationTest, sample)
   EXPECT_NEAR(interp.sample(p2, p1), y0, apprx_tol);
   EXPECT_NEAR(interp.sampleDerivative(p2, p1, 2), dydx1, apprx_tol);
   EXPECT_NEAR(interp.sampleDerivative(p2, p1, 1), dydx2, apprx_tol);
+
+  // Check that AD forwarding works, no need to redo all cases
+  ADReal ad_p1 = 1.555555, ad_p2 = 5.0111111;
+  function(ad_p1.value(), ad_p2.value(), y0, dydx1, dydx2);
+  EXPECT_NEAR(interp.sample(ad_p2, ad_p1).value(), y0, apprx_tol);
+}
+
+TEST(BilinearInterpolationTest, unimplemented_errors)
+{
+  // Create the interpolation
+  const unsigned int n = 100;
+  const unsigned int m = 100;
+  const Real max_x1 = 10;
+  const Real max_x2 = 10;
+  std::vector<Real> x1(n), x2(m);
+  ColumnMajorMatrix y(n, m);
+
+  for (unsigned int i = 0; i < n; ++i)
+    x1[i] = i / Real(n) * max_x1;
+  for (unsigned int i = 0; i < m; ++i)
+    x2[i] = i / Real(m) * max_x2;
+
+  // Get function at all points on the grid
+  for (unsigned int i = 0; i < n; ++i)
+    for (unsigned int j = 0; j < m; ++j)
+      y(i, j) = function(x1[i], x2[j]);
+
+  BilinearInterpolation interp(x1, x2, y);
+
+  // These routines are currently unimplemented.
+  // Second derivative is always 0 except where the discontinuities in the derivative happen
+  try
+  {
+    interp.sample2ndDerivative(1, 2, 1);
+  }
+  catch (const std::exception & err)
+  {
+    std::size_t pos = std::string(err.what()).find("not implemented");
+    ASSERT_TRUE(pos != std::string::npos);
+  }
+
+  // This AD routine is not implemented for now
+  // Delete this if you implement them in the future
+  try
+  {
+    ADReal y0, dydx1, dydx2;
+    interp.ADsampleValueAndDerivatives(1, 2, y0, dydx1, dydx2);
+  }
+  catch (const std::exception & err)
+  {
+    std::size_t pos = std::string(err.what()).find("not implemented");
+    ASSERT_TRUE(pos != std::string::npos);
+  }
 }

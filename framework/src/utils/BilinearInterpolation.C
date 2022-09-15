@@ -272,7 +272,7 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     }
   }
 
-  // Nodes along the four grid bounds, use half the slope of the two cells nearby
+  // Nodes along the four grid bounds, use the two grid cells adjacent to the node
   else if ((ux == 0) && (ly == uy) && (ux == lx)) // when along left boundary, at a grid node
   {
     const auto & fQ10 = _zSurface(uy - 1, lx);     // fQ at (x1,y0)
@@ -436,10 +436,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     {
       return (fQ21 - fQ11) / (x2 - x1);
     }
-    else if (y == y2)
-    {
-      return (fQ22 - fQ12) / (x2 - x1);
-    }
     // interior grid line
     else if ((lx == ux) && lx > 0 && ux < nx1 - 1)
     {
@@ -511,10 +507,6 @@ BilinearInterpolation::sampleDerivative(Real s1, Real s2, unsigned int deriv_var
     if (x == x1) // if x equal to x1 node
     {
       return (fQ12 - fQ11) / (y2 - y1);
-    }
-    else if (x == x2) // if x equal to x2 node
-    {
-      return (fQ22 - fQ21) / (y2 - y1);
     }
     // interior grid line
     else if ((ly == uy) && ly > 0 && uy < nx2 - 1)
