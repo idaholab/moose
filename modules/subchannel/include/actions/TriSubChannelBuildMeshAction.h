@@ -9,7 +9,7 @@
 class TriSubChannelBuildMeshAction : public Action
 {
 public:
-  TriSubChannelBuildMeshAction(InputParameters params);
+  TriSubChannelBuildMeshAction(const InputParameters & params);
 
   virtual void act();
 

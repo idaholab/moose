@@ -12,7 +12,7 @@ QuadSubChannelBuildMeshAction::validParams()
   return params;
 }
 
-QuadSubChannelBuildMeshAction::QuadSubChannelBuildMeshAction(InputParameters params)
+QuadSubChannelBuildMeshAction::QuadSubChannelBuildMeshAction(const InputParameters & params)
   : Action(params)
 {
 }

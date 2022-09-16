@@ -12,7 +12,7 @@ TriInterWrapperBuildMeshAction::validParams()
   return params;
 }
 
-TriInterWrapperBuildMeshAction::TriInterWrapperBuildMeshAction(InputParameters params)
+TriInterWrapperBuildMeshAction::TriInterWrapperBuildMeshAction(const InputParameters & params)
   : Action(params)
 {
 }
