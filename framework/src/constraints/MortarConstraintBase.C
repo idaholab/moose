@@ -187,10 +187,6 @@ MortarConstraintBase::computeJacobian()
   if (_compute_lm_residuals)
     // Compute the jacobian for the lower dimensional LM dofs (if we even have an LM variable)
     computeJacobian(Moose::MortarType::Lower);
-
-  if (_compute_scalar_residuals)
-    // Compute the jacobian for the scalar dofs
-    computeJacobianScalar();
 }
 
 void

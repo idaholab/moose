@@ -176,7 +176,7 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
 }
 
 void 
-MortarConstraint::computeJacobianScalar() 
+MortarConstraint::computeJacobianScalar(unsigned int jvar) 
 {
 
 }
