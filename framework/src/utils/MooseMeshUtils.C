@@ -320,4 +320,34 @@ getNextFreeSubdomainID(MeshBase & input_mesh)
     return highest_subdomain_id + 1;
   }
 }
+
+bool
+hasSubdomainID(MeshBase & input_mesh, const SubdomainID & id)
+{
+  std::set<SubdomainID> mesh_blocks;
+  input_mesh.subdomain_ids(mesh_blocks);
+  return mesh_blocks.count(id) && (id != Moose::INVALID_BLOCK_ID);
+}
+
+bool
+hasSubdomainName(MeshBase & input_mesh, const SubdomainName & name)
+{
+  auto id = getSubdomainID(name, input_mesh);
+  return hasSubdomainID(input_mesh, id);
+}
+
+bool
+hasBoundaryID(MeshBase & input_mesh, const BoundaryID & id)
+{
+  const libMesh::BoundaryInfo & boundary_info = input_mesh.get_boundary_info();
+  std::set<libMesh::boundary_id_type> boundary_ids = boundary_info.get_boundary_ids();
+  return boundary_ids.count(id) && (id != Moose::INVALID_BOUNDARY_ID);
+}
+
+bool
+hasBoundaryName(MeshBase & input_mesh, const BoundaryName & name)
+{
+  auto id = getBoundaryID(name, input_mesh);
+  return hasBoundaryID(input_mesh, id);
+}
 }
