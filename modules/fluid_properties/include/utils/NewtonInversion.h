@@ -19,7 +19,8 @@ namespace FluidPropertiesUtils
  * @param[in] x constant first argument of the f(x, z) term
  * @param[in] y constant which should be equal to f(x, z) with a converged z
  * @param[in] z_initial_guess initial guess for return variables
- * @param[in] tolerance parameter defined in input file
+ * @param[in] tolerance criterion on absolute difference between successive iterates to judge
+ * convergence
  * @param[in] function two-variable function returning both values and derivatives as references
  * @param[in] max_its the maximum number of iterations for Newton's method
  * @return the value z such that f(x, z) = y
@@ -41,7 +42,7 @@ Real NewtonSolve(const Real & x,
  * @param[in] y0 initial guess for second output variable
  * @param[out] x_final output for first variable
  * @param[out] y_final output for second variable
- * @param[in] tolerance parameter defined in input file.
+ * @param[in] tolerance criterion on absolute norm between successive iterates to judge convergence
  * @param[in] func1 two-variable function returning both values and derivatives as references
  * @param[in] func2 two-variable function returning both values and derivatives as references
  * @param[in] max_its the maximum number of iterations for Newton's method

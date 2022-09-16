@@ -17,12 +17,6 @@
 #include <ctime>
 #include <math.h>
 
-// This file performs a Newton solve in 1D and 2D. In 1D, solve fails to converge
-// and error outputs if it takes more than 100 iterations. In 2D, if more than 100
-// iterations occur, save results references and set convergence to false. Applications
-// using 2D Newton Solve will need to write routines to take care of values where this
-// occurs. See TabulatedBicubicFluidProperties for example (routine checkOutofBounds).
-
 namespace FluidPropertiesUtils
 {
 Real
@@ -33,12 +27,13 @@ NewtonSolve(const Real & x,
             std::function<void(Real, Real, Real &, Real &, Real &)> const & func,
             const unsigned int max_its)
 {
-  Real current_z =
-      z_initial_guess; // find good initial guess, know something about e from interpolation tables
   Real next_z;
   Real f;
+
+  // Initialize algorithm
+  Real current_z = z_initial_guess;
   unsigned int iteration = 1;
-  Real residual = current_z;
+  Real residual = 10;
 
   while (residual > tolerance)
   {
@@ -46,7 +41,10 @@ NewtonSolve(const Real & x,
     func(x, current_z, new_y, df_dx, df_dz);
     f = new_y - y;
     next_z = current_z - (f / df_dz);
+
+    // residual is absolute residual, not relative
     residual = std::abs(current_z - next_z);
+
     // Check for NaNs
     if (std::isnan(next_z))
       mooseError("NaN detected in Newton solve");
@@ -75,29 +73,33 @@ NewtonSolve2D(const Real & f,
               std::function<void(Real, Real, Real &, Real &, Real &)> const & func2,
               const unsigned int max_its)
 {
-  converged = false;
-  RealEigenMatrix jacobian(2, 2); // Compute Jacobian
-
-  RealEigenVector current_vec(2); // initialize current_vec with initial guess
-  current_vec << x0, y0;
-
-  RealEigenVector next_vec(2); // initialize "next" vector
-
-  RealEigenVector target(2); // Real h and Real s
-  target << f, g;
-
+  // pre-allocate working variable
+  RealEigenMatrix jacobian(2, 2);
+  RealEigenVector next_vec(2);
   RealEigenVector function(2);
 
+  // initialize current_vec with initial guess
+  RealEigenVector current_vec(2);
+  current_vec << x0, y0;
+
+  // values we want to reach for func1 and func2
+  RealEigenVector target(2);
+  target << f, g;
+
+  // variables to keep track of algorithm progression
+  converged = false;
   unsigned int iteration = 1;
-  Real res1 = 1; // initialize residual;
+  Real res1 = 1;
   Real res2 = 1;
   Real residual = 1;
 
-  while (residual > tolerance) // iterate until residual is smaller than tolerance reached
+  while (residual > tolerance)
   {
     Real new_f, df_dx, df_dy, new_g, dg_dx, dg_dy;
-    func1(current_vec[0], current_vec[1], new_f, df_dx, df_dy); // get new h and derivatives
-    func2(current_vec[0], current_vec[1], new_g, dg_dx, dg_dy); // get new s and derivatives
+    func1(
+        current_vec[0], current_vec[1], new_f, df_dx, df_dy); // get new evaluation and derivatives
+    func2(
+        current_vec[0], current_vec[1], new_g, dg_dx, dg_dy); // get new evaluation and derivatives
     jacobian << df_dx, df_dy,                                   // fill jacobian
         dg_dx, dg_dy;
 
@@ -129,9 +131,9 @@ NewtonSolve2D(const Real & f,
     }
   }
   // save solution to x_final and y_final
-  x_final = current_vec[0]; // returned p
-  y_final = current_vec[1]; // returned y
-  converged = true;         // convergence successful
+  x_final = current_vec[0];
+  y_final = current_vec[1];
+  converged = true;
 }
 
 } // namespace FluidPropertiesUtils

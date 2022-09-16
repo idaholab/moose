@@ -67,7 +67,7 @@ TabulatedFluidProperties::validParams()
       true,
       "If true exceeding pressure or temperature tabulation values leads to an error.");
   params.addClassDescription(
-      "Fluid properties using bicubic or bilinear interpolation on tabulated values provided");
+      "Computed fluid properties using bi-dimensional interpolation of tabulated values provided");
 
   return params;
 }
