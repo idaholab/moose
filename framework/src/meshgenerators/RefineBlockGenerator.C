@@ -63,11 +63,6 @@ RefineBlockGenerator::generate()
                    "The block '",
                    getParam<std::vector<SubdomainName>>("block")[i],
                    "' was not found within the mesh");
-      else
-        paramError("block_id",
-                   "The block '",
-                   getParam<SubdomainID>("block_id"),
-                   "' was not found within the mesh");
     }
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   int max = *std::max_element(_refinement.begin(), _refinement.end());
