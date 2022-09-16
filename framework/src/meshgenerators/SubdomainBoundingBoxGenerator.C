@@ -11,6 +11,7 @@
 #include "Conversion.h"
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/elem.h"
 
