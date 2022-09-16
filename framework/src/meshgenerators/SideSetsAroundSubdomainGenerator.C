@@ -69,14 +69,13 @@ SideSetsAroundSubdomainGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
-  // Extract the block ID
-  /*std::vector<subdomain_id_type> blocks;
   std::vector<SubdomainName> block_names = getParam<std::vector<SubdomainName>>("block");
-  blocks.resize(block_names.size());
-  for (unsigned int i = 0; i < block_names.size(); i++)
-  blocks[i] = mesh->get_id_by_name(block_names[i]);*/
-  auto blocks =
-      MooseMeshUtils::getSubdomainIDs(*mesh, getParam<std::vector<SubdomainName>>("block"));
+  // check that the blocks exist in the mesh
+  for (const auto & name : block_names)
+    if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
+      paramError("block", "The block '", name, "' was not found in the mesh");
+
+  auto blocks = MooseMeshUtils::getSubdomainIDs(*mesh, block_names);
   std::set<subdomain_id_type> block_ids(blocks.begin(), blocks.end());
 
   // Create the boundary IDs from the list of names provided (the true flag creates ids from unknown
