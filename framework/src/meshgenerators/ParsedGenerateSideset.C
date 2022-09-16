@@ -135,9 +135,7 @@ ParsedGenerateSideset::generate()
     const auto subdomains = getParam<std::vector<SubdomainName>>("included_subdomains");
     for (const auto & name : subdomains)
       if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
-        paramError("included_subdomains", "The block '",
-                                          name,
-                                          "' was not found in the mesh");
+        paramError("included_subdomains", "The block '", name, "' was not found in the mesh");
 
     _included_ids = MooseMeshUtils::getSubdomainIDs(*mesh, subdomains);
   }
@@ -148,9 +146,7 @@ ParsedGenerateSideset::generate()
     const auto subdomains = getParam<std::vector<SubdomainName>>("included_neighbors");
     for (const auto & name : subdomains)
       if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
-        paramError("included_neighbors", "The block '",
-                                         name,
-                                         "' was not found in the mesh");
+        paramError("included_neighbors", "The block '", name, "' was not found in the mesh");
 
     _included_neighbor_ids = MooseMeshUtils::getSubdomainIDs(*mesh, subdomains);
   }

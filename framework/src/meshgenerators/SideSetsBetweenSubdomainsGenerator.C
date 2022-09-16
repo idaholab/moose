@@ -49,26 +49,20 @@ SideSetsBetweenSubdomainsGenerator::SideSetsBetweenSubdomainsGenerator(
 std::unique_ptr<MeshBase>
 SideSetsBetweenSubdomainsGenerator::generate()
 {
-  auto primary_block = isParamValid("primary_block") ?
-                       getParam<std::vector<SubdomainName>>("primary_block") :
-                       getParam<std::vector<SubdomainName>>("master_block");
+  auto primary_block = isParamValid("primary_block")
+                           ? getParam<std::vector<SubdomainName>>("primary_block")
+                           : getParam<std::vector<SubdomainName>>("master_block");
 
   auto paired_block = getParam<std::vector<SubdomainName>>("paired_block");
 
   // Check that the block ids/names exist in the mesh
   for (const auto & b : primary_block)
     if (!MooseMeshUtils::hasSubdomainName(*_input, b))
-      paramError("primary_block",
-                 "The block '",
-                 b,
-                 "' was not found within the mesh");
+      paramError("primary_block", "The block '", b, "' was not found within the mesh");
 
   for (const auto & b : paired_block)
     if (!MooseMeshUtils::hasSubdomainName(*_input, b))
-      paramError("paired_block",
-                 "The block '",
-                 b,
-                 "' was not found within the mesh");
+      paramError("paired_block", "The block '", b, "' was not found within the mesh");
 
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
@@ -76,8 +70,8 @@ SideSetsBetweenSubdomainsGenerator::generate()
   if (!mesh->is_prepared())
     mesh->find_neighbors();
 
-  std::vector<subdomain_id_type> vec_primary_ids = MooseMeshUtils::getSubdomainIDs(
-      *mesh, primary_block);
+  std::vector<subdomain_id_type> vec_primary_ids =
+      MooseMeshUtils::getSubdomainIDs(*mesh, primary_block);
   std::set<subdomain_id_type> primary_ids(vec_primary_ids.begin(), vec_primary_ids.end());
 
   std::vector<subdomain_id_type> vec_paired_ids =

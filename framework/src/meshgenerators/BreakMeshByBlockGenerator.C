@@ -86,7 +86,8 @@ BreakMeshByBlockGenerator::generate()
   // Handle block restrictions
   if (_block_pairs_restricted)
   {
-    for (const auto block_name_pair : getParam<std::vector<std::vector<SubdomainName>>>("block_pairs"))
+    for (const auto block_name_pair :
+         getParam<std::vector<std::vector<SubdomainName>>>("block_pairs"))
     {
       if (block_name_pair.size() != 2)
         paramError("block_pairs",
@@ -95,9 +96,7 @@ BreakMeshByBlockGenerator::generate()
       // check that the blocks exist in the mesh
       for (const auto & name : block_name_pair)
         if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
-          paramError("block_pairs", "The block '",
-                                   name,
-                                   "' was not found in the mesh");
+          paramError("block_pairs", "The block '", name, "' was not found in the mesh");
 
       const auto block_pair = MooseMeshUtils::getSubdomainIDs(*mesh, block_name_pair);
       std::pair<SubdomainID, SubdomainID> pair = std::make_pair(
@@ -112,9 +111,7 @@ BreakMeshByBlockGenerator::generate()
     // check that the blocks exist in the mesh
     for (const auto & name : getParam<std::vector<SubdomainName>>("surrounding_blocks"))
       if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
-        paramError("surrounding_blocks", "The block '",
-                                 name,
-                                 "' was not found in the mesh");
+        paramError("surrounding_blocks", "The block '", name, "' was not found in the mesh");
 
     const auto surrounding_block_ids = MooseMeshUtils::getSubdomainIDs(
         *mesh, getParam<std::vector<SubdomainName>>("surrounding_blocks"));

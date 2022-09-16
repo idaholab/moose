@@ -69,9 +69,7 @@ SubdomainBoundingBoxGenerator::generate()
     {
       // check that the subdomain exists in the mesh
       if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
-        paramError("restricted_subdomains", "The block '",
-                                            name,
-                                            "' was not found in the mesh");
+        paramError("restricted_subdomains", "The block '", name, "' was not found in the mesh");
 
       restricted_ids.insert(MooseMeshUtils::getSubdomainID(name, *mesh));
     }

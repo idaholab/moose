@@ -97,9 +97,7 @@ ParsedSubdomainMeshGenerator::generate()
     // check that the subdomains exist in the mesh
     for (const auto & name : excluded_subdomains)
       if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
-        paramError("excluded_subdomains", "The block '",
-                                          name,
-                                          "' was not found in the mesh");
+        paramError("excluded_subdomains", "The block '", name, "' was not found in the mesh");
 
     _excluded_ids = MooseMeshUtils::getSubdomainIDs(*mesh, excluded_subdomains);
   }

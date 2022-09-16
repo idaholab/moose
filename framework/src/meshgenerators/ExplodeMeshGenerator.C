@@ -20,8 +20,7 @@ ExplodeMeshGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
   params.addClassDescription("Break all element-element interfaces in the specified subdomains.");
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addParam<std::vector<SubdomainID>>("subdomains",
-                                            "The list of subdomain IDs to explode.");
+  params.addParam<std::vector<SubdomainID>>("subdomains", "The list of subdomain IDs to explode.");
   params.addRequiredParam<BoundaryName>(
       "interface_name", "The boundary name containing all broken element-element interfaces.");
   return params;
