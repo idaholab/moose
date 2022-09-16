@@ -91,8 +91,19 @@ ParsedSubdomainMeshGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   if (isParamValid("excluded_subdomains"))
-    _excluded_ids = MooseMeshUtils::getSubdomainIDs(
-        *mesh, parameters().get<std::vector<SubdomainName>>("excluded_subdomains"));
+  {
+    auto excluded_subdomains = parameters().get<std::vector<SubdomainName>>("excluded_subdomains");
+
+    // check that the subdomains exist in the mesh
+    for (const auto & name : excluded_subdomains)
+      if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
+        paramError("excluded_subdomains", "The block '",
+                                          name,
+                                          "' was not found in the mesh");
+
+    _excluded_ids = MooseMeshUtils::getSubdomainIDs(*mesh, excluded_subdomains);
+  }
+
   // Loop over the elements
   for (const auto & elem : mesh->active_element_ptr_range())
   {
