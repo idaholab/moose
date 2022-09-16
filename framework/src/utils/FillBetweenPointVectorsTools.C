@@ -290,7 +290,7 @@ elementsCreationFromNodesVectors(ReplicatedMesh & mesh,
       // Define the two possible options and chose the one with shorter distance
       Real dis1 = (*nodes[i + 1][nodes_up_it] - *nodes[i][nodes_down_it + 1]).norm();
       Real dis2 = (*nodes[i + 1][nodes_up_it + 1] - *nodes[i][nodes_down_it]).norm();
-      if (dis1 > dis2)
+      if (MooseUtils::absoluteFuzzyGreaterThan(dis1, dis2))
       {
         Elem * elem = mesh.add_elem(new Tri3);
         bool is_elem_flip = buildTriElement(elem,
