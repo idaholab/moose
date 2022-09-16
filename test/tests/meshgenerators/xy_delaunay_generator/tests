@@ -1,0 +1,104 @@
+[Tests]
+  [xydelaunay]
+    design = 'meshgenerators/XYDelaunayGenerator.md'
+    issues = '#20192'
+    requirement = "The system shall have the capability of triangulating a polyline boundary"
+
+    [basic]
+      type = 'Exodiff'
+      input = 'xydelaunay_mesh_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_mesh_generator_in.e'
+      recover = false
+      detail = "within an input polyline"
+    []
+    [open_line]
+      type = 'RunException'
+      input = 'xydelaunay_open_polyline.i'
+      cli_args = '--mesh-only'
+      recover = false
+      expect_err = "Bad edge topology"
+      detail = "returning errors if the polyline is not closed"
+    []
+    [multi_line]
+      type = 'RunException'
+      input = 'xydelaunay_multiline.i'
+      cli_args = '--mesh-only'
+      recover = false
+      expect_err = "Bad edge topology"
+      detail = "returning errors if the polyline is disconnected"
+    []
+    [from_2d]
+      type = 'Exodiff'
+      input = 'xydelaunay_from_2d.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_from_2d_in.e'
+      recover = false
+      detail = "taking the boundary of a 2D input mesh"
+    []
+    [subdomain_1d]
+      type = 'Exodiff'
+      input = 'xydelaunay_from_1d_sbdids.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_from_1d_sbdids_in.e'
+      recover = false
+      detail = "taking a specified subset of an input polyline set"
+    []
+    [subboundary_2d]
+      type = 'Exodiff'
+      input = 'xydelaunay_from_2d_bcids.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_from_2d_bcids_in.e'
+      recover = false
+      detail = "taking a specified subset of a 2D input boundary"
+    []
+    [with_holes]
+      type = 'Exodiff'
+      input = 'xydelaunay_with_holes.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_with_holes_in.e'
+      recover = false
+      detail = "respecting any specified interior 'hole' meshes"
+    []
+    [with_hole_names]
+      type = 'Exodiff'
+      input = 'xydelaunay_with_hole_names.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_with_hole_names_in.e'
+      recover = false
+      detail = "assigning user-provided hole boundary names"
+    []
+    [stitching]
+      type = 'Exodiff'
+      input = 'xydelaunay_stitching.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_stitching_in.e'
+      recover = false
+      detail = "selectively stitching 'hole' meshes into the final mesh"
+    []
+    [nested]
+      type = 'Exodiff'
+      input = 'xydelaunay_nested.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_nested_in.e'
+      recover = false
+      detail = "allowing deep nesting of triangulations within triangulations"
+    []
+    [smoothed]
+      type = 'Exodiff'
+      input = 'xydelaunay_smoothed.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_smoothed_in.e'
+      recover = false
+      detail = "with optional Laplacian mesh smoothing."
+    []
+    [area_func]
+      type = 'Exodiff'
+      input = 'xydelaunay_area_func.i'
+      cli_args = '--mesh-only'
+      exodiff = 'xydelaunay_area_func_in.e'
+      recover = false
+      detail = "with optional non-uniform refinement."
+    []
+  []
+[]
