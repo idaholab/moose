@@ -86,7 +86,7 @@ BreakMeshByBlockGenerator::generate()
   // Handle block restrictions
   if (_block_pairs_restricted)
   {
-    for (const auto block_name_pair :
+    for (const auto & block_name_pair :
          getParam<std::vector<std::vector<SubdomainName>>>("block_pairs"))
     {
       if (block_name_pair.size() != 2)
