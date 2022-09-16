@@ -145,7 +145,7 @@ if [[ "$kind" == "app" ]]; then
 fi
 
 if [[ "$kind" == "module" ]]; then
-    echo "new Module created in moose/modules"
+    echo "New Module created in moose/modules"
     echo ""
     echo "There are several more steps that need to be completed"
     echo "    1. Modify the moose/modules/modules.mk file"
@@ -153,13 +153,16 @@ if [[ "$kind" == "module" ]]; then
     echo "      b. Add the new module to the MODULE_NAMES variable (alphabetical)"
     echo "      c. Create a new registration section for the new module"
     echo "    2. Modify the moose/scripts/sqa_stats.py file"
-    echo "      a. Add a new compute requirements stats section"
+    echo "      a. Add a new compute requirements stats entry for the module"
     echo "    3. Modify the moose/modules/combined/src/base/CombinedApp.C file"
     echo "      a. Add the new module to the set of included files (alphabetical)"
     echo "      b. Add the new module to the registerAll function (alphabetical)"
-    echo "    4. Add the module to the content in the moose/modules/doc/config.yml file (alphabetical)"
-    echo "    5. Ensure that no stork files hang around before committing"
-    echo "    6. Ensure that proper testing is performed for per module tests (e.g. parallel testing)"
+    echo "    4. Modify the moose/modules/doc/config.yml file"
+    echo "       a. Add the module to the content listing (alphabetical)"
+    echo "    5. Ensure that the remaining required SQA documentation is set up for the new module"
+    echo "       by contacting a member of the MOOSE development team."
+    echo "    6. Ensure that no stork files hang around before committing"
+    echo "    7. Ensure that proper testing is performed for per module tests (e.g. parallel testing)"
     echo ""
 
     rm -f $dir/LICENSE
