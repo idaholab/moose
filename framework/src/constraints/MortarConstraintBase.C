@@ -152,6 +152,8 @@ MortarConstraintBase::computeResidual()
 {
   setNormals();
 
+  precalculateResidual();
+
   if (_compute_primal_residuals)
   {
     // Compute the residual for the secondary interior primal dofs
@@ -174,6 +176,8 @@ void
 MortarConstraintBase::computeJacobian()
 {
   setNormals();
+
+  precalculateJacobian();
 
   if (_compute_primal_residuals)
   {
