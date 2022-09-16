@@ -1154,6 +1154,9 @@ FEProblemBase::initialSetup()
     // subsequent calls (e.g., executeControls) have the proper flag.
     setCurrentExecuteOnFlag(EXEC_INITIAL);
   }
+  else
+    // Control Logic needs to be executed because it is not recoverable
+    executeControls(EXEC_INITIAL);
 
   // Here we will initialize the stateful properties once more since they may have been updated
   // during initialSetup by calls to computeProperties.
@@ -1175,9 +1178,6 @@ FEProblemBase::initialSetup()
 
     initElementStatefulProps(*_mesh.getActiveLocalElementRange(), true);
   }
-
-  // Control Logic
-  executeControls(EXEC_INITIAL);
 
   // Scalar variables need to reinited for the initial conditions to be available for output
   for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -4100,8 +4100,7 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   // Set the current flag
   setCurrentExecuteOnFlag(exec_type);
 
-  if (exec_type != EXEC_INITIAL)
-    executeControls(exec_type);
+  executeControls(exec_type);
 
   // intentially call this after executing controls because the setups may rely on the controls
   // FIXME: we skip the following flags because they have dedicated setup functions in
