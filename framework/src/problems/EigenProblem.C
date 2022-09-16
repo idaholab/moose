@@ -135,6 +135,10 @@ EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
 void
 EigenProblem::execute(const ExecFlagType & exec_type)
 {
+  // Set the current flag
+  setCurrentExecuteOnFlag(exec_type);
+  executeControls(exec_type);
+
   if (exec_type == EXEC_INITIAL)
     // we need to scale the solution properly and we can do this only all initial setup of
     // depending objects by the residual evaluations has been done to this point.

@@ -1071,6 +1071,9 @@ FEProblemBase::initialSetup()
     // subsequent calls (e.g., executeControls) have the proper flag.
     setCurrentExecuteOnFlag(EXEC_INITIAL);
   }
+  else
+    // Control Logic needs to be executed because it is not recoverable
+    executeControls(EXEC_INITIAL);
 
   // Here we will initialize the stateful properties once more since they may have been updated
   // during initialSetup by calls to computeProperties.
@@ -1101,9 +1104,6 @@ FEProblemBase::initialSetup()
                                      _assembly);
     Threads::parallel_reduce(elem_range, cmt);
   }
-
-  // Control Logic
-  executeControls(EXEC_INITIAL);
 
   // Scalar variables need to reinited for the initial conditions to be available for output
   for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -3779,8 +3779,7 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   // Set the current flag
   setCurrentExecuteOnFlag(exec_type);
 
-  if (exec_type != EXEC_INITIAL)
-    executeControls(exec_type);
+  executeControls(exec_type);
 
   // Samplers; EXEC_INITIAL is not called because the Sampler::init() method that is called after
   // construction makes the first Sampler::execute() call. This ensures that the random number
