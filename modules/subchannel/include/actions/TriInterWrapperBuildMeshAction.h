@@ -9,7 +9,7 @@
 class TriInterWrapperBuildMeshAction : public Action
 {
 public:
-  TriInterWrapperBuildMeshAction(InputParameters params);
+  TriInterWrapperBuildMeshAction(const InputParameters & params);
 
   virtual void act();
 

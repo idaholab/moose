@@ -12,7 +12,8 @@ TriSubChannelBuildMeshAction::validParams()
   return params;
 }
 
-TriSubChannelBuildMeshAction::TriSubChannelBuildMeshAction(InputParameters params) : Action(params)
+TriSubChannelBuildMeshAction::TriSubChannelBuildMeshAction(const InputParameters & params)
+  : Action(params)
 {
 }
 

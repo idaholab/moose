@@ -30,7 +30,7 @@ SubChannelApp::validParams()
   return params;
 }
 
-SubChannelApp::SubChannelApp(InputParameters parameters) : MooseApp(parameters)
+SubChannelApp::SubChannelApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   SubChannelApp::registerAll(_factory, _action_factory, _syntax);
 }

@@ -5,7 +5,7 @@
 class SubChannelApp : public MooseApp
 {
 public:
-  SubChannelApp(InputParameters parameters);
+  SubChannelApp(const InputParameters & parameters);
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
