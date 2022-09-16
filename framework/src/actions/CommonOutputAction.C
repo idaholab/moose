@@ -128,6 +128,9 @@ CommonOutputAction::validParams()
   params.addParam<bool>("print_linear_residuals",
                         true,
                         "Enable printing of linear residuals to the screen (Console)");
+  params.addParam<bool>("print_nonlinear_residuals",
+                        true,
+                        "Enable printing of nonlinear residuals to the screen (Console)");
   params.addParam<bool>("print_nonlinear_converged_reason",
                         true,
                         "Enable/disable printing of the nonlinear solver convergence reason to the "
