@@ -45,7 +45,9 @@ BoundaryDeletionGenerator::generate()
   {
     auto bid = MooseMeshUtils::getBoundaryID(name, *mesh);
     if (bid == BoundaryInfo::invalid_id)
-      paramError("boundary_names", name, " is not a valid boundary name");
+      paramError("boundary_names", "The boundary '",
+                                   name,
+                                   "' was not found in the mesh");
 
     mesh->get_boundary_info().remove_id(bid);
   }
