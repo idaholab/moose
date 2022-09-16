@@ -234,6 +234,11 @@ Node::vecFloatVal()
 {
   valthrow();
 }
+std::vector<bool>
+Node::vecBoolVal()
+{
+  valthrow();
+}
 std::vector<int>
 Node::vecIntVal()
 {
@@ -597,6 +602,27 @@ std::string
 Field::val()
 {
   return _val;
+}
+
+std::vector<bool>
+Field::vecBoolVal()
+{
+  auto items = vecStrVal();
+  std::vector<bool> vec;
+  for (auto & s : items)
+  {
+    try
+    {
+      bool converted_val = false;
+      toBool(s, &converted_val);
+      vec.push_back(converted_val);
+    }
+    catch (...)
+    {
+      throw Error("cannot convert '" + s + "' to bool");
+    }
+  }
+  return vec;
 }
 
 std::vector<int>
