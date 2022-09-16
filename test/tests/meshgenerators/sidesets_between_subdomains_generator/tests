@@ -47,5 +47,21 @@
 
       detail = 'between two subdomains in an unprepared mesh.'
     []
+
+    [invalid_primary_block]
+      type = RunException
+      input = sideset_between_subdomains.i
+      cli_args = "Mesh/central_boundary/primary_block='missing'"
+      expect_err = "The block 'missing' was not found within the mesh"
+      detail = 'only when both the primary and paired blocks exist in the mesh.'
+    []
+
+    [invalid_paired_block]
+      type = RunException
+      input = sideset_between_subdomains.i
+      cli_args = "Mesh/central_boundary/paired_block='missing'"
+      expect_err = "The block 'missing' was not found within the mesh"
+      detail = 'only when both the primary and paired blocks exist in the mesh.'
+    []
   []
 []
