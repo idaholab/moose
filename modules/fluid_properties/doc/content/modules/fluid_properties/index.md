@@ -139,7 +139,7 @@ would be:
 !listing modules/fluid_properties/test/tests/ideal_gas/test.i block=Modules
 
 In this example, the user has specified a value for `gamma` (the ratio of isobaric to isochoric
-specific heat capacites), and `R`, the universal gas constant.
+specific heat capacities), and `R`, the universal gas constant.
 
 The fluid properties can then be accessed by other MOOSE objects through the name given in the
 input file.
@@ -164,6 +164,12 @@ identical manner as all other Fluid Properties UserObjects.
 
 The [FluidPropertiesInterrogator](/FluidPropertiesInterrogator.md) is a user
 object which can be used to query eligible fluid properties objects.
+
+### Fluid properties materials
+
+The [FluidPropertiesMaterialVE.md] and [FluidPropertiesMaterialPT.md] are materials
+which define many fluid properties as material properties, mainly for visualizing them over
+the solve domain.
 
 ## Additional objects
 

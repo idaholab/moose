@@ -13,6 +13,7 @@
       input = 'test_ph.i'
       exodiff = 'test_ph_out.e'
       detail = 'using a (pressure, enthalpy) variable set'
+      allow_test_objects = true
     []
     [volume_energy]
       type = Exodiff

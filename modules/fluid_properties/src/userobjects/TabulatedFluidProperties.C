@@ -67,7 +67,8 @@ TabulatedFluidProperties::validParams()
       true,
       "If true exceeding pressure or temperature tabulation values leads to an error.");
   params.addClassDescription(
-      "Computed fluid properties using bi-dimensional interpolation of tabulated values provided");
+      "Single phase fluid properties computed using bi-dimensional interpolation of tabulated "
+      "values.");
 
   return params;
 }
@@ -146,8 +147,7 @@ TabulatedFluidProperties::initialSetup()
     {
       if (std::find(column_names.begin(), column_names.end(), _required_columns[i]) ==
           column_names.end())
-        mooseError(name(),
-                   ": no ",
+        mooseError("No ",
                    _required_columns[i],
                    " data read in ",
                    _file_name,
@@ -166,9 +166,7 @@ TabulatedFluidProperties::initialSetup()
       {
         if (std::find(_property_columns.begin(), _property_columns.end(), column_names[i]) ==
             _property_columns.end())
-          mooseError(name(),
-                     ": ",
-                     column_names[i],
+          mooseError(column_names[i],
                      " read in ",
                      _file_name,
                      " is not one of the properties that TabulatedFluidProperties understands");
@@ -193,8 +191,7 @@ TabulatedFluidProperties::initialSetup()
     // Pressure and temperature data contains duplicates due to the csv format.
     // First, check that pressure is monotonically increasing
     if (!std::is_sorted(_pressure.begin(), _pressure.end()))
-      mooseError(
-          name(), ": the column data for pressure is not monotonically increasing in ", _file_name);
+      mooseError("The column data for pressure is not monotonically increasing in ", _file_name);
 
     // The first pressure value is repeated for each temperature value. Counting the
     // number of repeats provides the number of temperature values
@@ -207,8 +204,7 @@ TabulatedFluidProperties::initialSetup()
 
     // Check that the number of rows in the csv file is equal to _num_p * _num_T
     if (column_data[0].size() != _num_p * static_cast<unsigned int>(num_T))
-      mooseError(name(),
-                 ": the number of rows in ",
+      mooseError("The number of rows in ",
                  _file_name,
                  " is not equal to the number of unique pressure values ",
                  _num_p,
@@ -219,17 +215,14 @@ TabulatedFluidProperties::initialSetup()
     // as well as duplicated for each pressure value
     std::vector<Real> temp0(_temperature.begin(), _temperature.begin() + num_T);
     if (!std::is_sorted(temp0.begin(), temp0.end()))
-      mooseError(name(),
-                 ": the column data for temperature is not monotonically increasing in ",
-                 _file_name);
+      mooseError("The column data for temperature is not monotonically increasing in ", _file_name);
 
     auto it_temp = _temperature.begin() + num_T;
     for (std::size_t i = 1; i < _pressure.size(); ++i)
     {
       std::vector<Real> temp(it_temp, it_temp + num_T);
       if (temp != temp0)
-        mooseError(name(),
-                   ": temperature values for pressure ",
+        mooseError("Temperature values for pressure ",
                    _pressure[i],
                    " are not identical to values for ",
                    _pressure[0]);
@@ -490,9 +483,6 @@ void
 TabulatedFluidProperties::e_from_p_rho(
     Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const
 {
-  // if (!_construct_pT_from_ve)
-  //   mooseError("You must construct pT from ve tables when calling e_from_p_rho.");
-
   // get derivatives of T wrt to pressure and density
   Real T, dT_dp, dT_drho;
   T_from_p_rho(pressure, rho, T, dT_dp, dT_drho);
@@ -855,23 +845,6 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Rea
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
 }
 
-DualReal
-TabulatedFluidProperties::p_from_v_e(const DualReal & v, const DualReal & e) const
-{
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling p_from_v_e.");
-  Real x = 0;
-  Real raw1 = v.value();
-  Real raw2 = e.value();
-  Real dxd1 = 0;
-  Real dxd2 = 0;
-  p_from_v_e(raw1, raw2, x, dxd1, dxd2);
-
-  DualReal result = x;
-  result.derivatives() = v.derivatives() * dxd1 + e.derivatives() * dxd2;
-  return result;
-}
-
 Real
 TabulatedFluidProperties::T_from_v_e(Real v, Real e) const
 {
@@ -886,23 +859,6 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Rea
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling T_from_v_e.");
   _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
-}
-
-DualReal
-TabulatedFluidProperties::T_from_v_e(const DualReal & v, const DualReal & e) const
-{
-  if (!_construct_pT_from_ve)
-    mooseError("You must construct pT from ve tables when calling T_from_v_e.");
-  Real x = 0;
-  Real raw1 = v.value();
-  Real raw2 = e.value();
-  Real dxd1 = 0;
-  Real dxd2 = 0;
-  T_from_v_e(raw1, raw2, x, dxd1, dxd2);
-
-  DualReal result = x;
-  result.derivatives() = v.derivatives() * dxd1 + e.derivatives() * dxd2;
-  return result;
 }
 
 Real
@@ -928,21 +884,6 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Rea
   c_from_p_T(p, T, c, dc_dp, dc_dT);
   dc_dv = dc_dp * dp_dv + dc_dT * dT_dv;
   dc_de = dc_dp * dp_de + dc_dT * dT_de;
-}
-
-DualReal
-TabulatedFluidProperties::c_from_v_e(const DualReal & v, const DualReal & e) const
-{
-  Real x = 0;
-  Real raw1 = v.value();
-  Real raw2 = e.value();
-  Real dxd1 = 0;
-  Real dxd2 = 0;
-  c_from_v_e(raw1, raw2, x, dxd1, dxd2);
-
-  DualReal result = x;
-  result.derivatives() = v.derivatives() * dxd1 + e.derivatives() * dxd2;
-  return result;
 }
 
 Real

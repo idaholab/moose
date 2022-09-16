@@ -55,7 +55,7 @@ NewtonSolve(const Real & x,
     // Check for divergence or slow convergence of Newton's method
     if (iteration > max_its)
       mooseError(
-          "Newton solve convergence failed, maximum number of iterations, ", max_its, " exceeded");
+          "Newton solve convergence failed: maximum number of iterations, ", max_its, " exceeded");
   }
   return current_z;
 }
@@ -100,7 +100,7 @@ NewtonSolve2D(const Real & f,
         current_vec[0], current_vec[1], new_f, df_dx, df_dy); // get new evaluation and derivatives
     func2(
         current_vec[0], current_vec[1], new_g, dg_dx, dg_dy); // get new evaluation and derivatives
-    jacobian << df_dx, df_dy,                                   // fill jacobian
+    jacobian << df_dx, df_dy,                                 // fill jacobian
         dg_dx, dg_dy;
 
     function << new_f, new_g;                                            // fill function

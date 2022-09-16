@@ -10,11 +10,6 @@
   allow_renumbering = false
 []
 
-[Variables]
-  [dummy]
-  []
-[]
-
 [AuxVariables]
   [p]
     family = MONOMIAL
@@ -147,16 +142,13 @@
   []
 []
 
-[Kernels]
-  [diff]
-    type = Diffusion
-    variable = dummy
-  []
-[]
-
 [Executioner]
   type = Steady
   solve_type = NEWTON
+[]
+
+[Problem]
+  solve = false
 []
 
 [Postprocessors]
@@ -210,7 +202,5 @@
 [Outputs]
   csv = true
   file_base = tabulated_v_e_bilinear_out
-  # file_base = tabulated_v_e_out
   execute_on = 'TIMESTEP_END'
-  perf_graph = true
 []

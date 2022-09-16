@@ -8,7 +8,7 @@ The fluid properties module includes a 1D and a 2D Newton method solver.
 
 The 1D Newton method solver is used to solve the problem:
 
-- Find z such that $f(x, z) = y$, with $x$, $y$ known constants and $f$ a function. 
+- Find $z$ such that $f(x, z) = y$, with $x$, $y$ known constants and $f$ a function. 
 
 
 $f$ should compute both its return value and the derivatives of its value with regards to

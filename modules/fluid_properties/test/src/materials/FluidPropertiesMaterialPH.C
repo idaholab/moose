@@ -9,7 +9,7 @@
 
 #include "FluidPropertiesMaterialPH.h"
 
-registerMooseObject("FluidPropertiesApp", FluidPropertiesMaterialPH);
+registerMooseObject("FluidPropertiesTestApp", FluidPropertiesMaterialPH);
 
 InputParameters
 FluidPropertiesMaterialPH::validParams()

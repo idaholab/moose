@@ -330,7 +330,7 @@ public:
 
   /**
    * Determines (p,T) from (v,e) using Newton Solve in 2D
-   * Useful for inversion of state variables
+   * Useful for conversion between different sets of state variables
    *
    * @param[in] v specific volume (m^3 / kg)
    * @param[in] e specific internal energy (J / kg)
@@ -349,7 +349,7 @@ public:
 
   /**
    * Determines (p,T) from (v,h) using Newton Solve in 2D
-   * Useful for inversion of state variables
+   * Useful for conversion between different sets of state variables
    *
    * @param[in] v specific volume (m^3 / kg)
    * @param[in] h specific enthalpy (J / kg)
@@ -367,7 +367,7 @@ public:
                             bool & conversion_succeeded) const;
   /**
    * Determines (p,T) from (h,s) using Newton Solve in 2D
-   * Useful for inversion of state variables
+   * Useful for conversion between different sets of state variables
    *
    * @param[in] h specific enthalpy (J / kg)
    * @param[in] s specific entropy (J/K*kg)

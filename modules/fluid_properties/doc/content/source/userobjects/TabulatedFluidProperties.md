@@ -1,6 +1,6 @@
 # TabulatedFluidProperties
 
-!syntax description /Modules/FluidProperties/TabulatedFluidProperties
+Single phase fluid properties computed using bi-dimensional interpolation of tabulated values.
 
 Property values are read from a CSV file containing property data. Monotonically increasing values
 of pressure and temperature must be included in the data file, specifying the phase space where
@@ -135,7 +135,7 @@ and (specific volume, specific enthalpy (h)) are supported. The process goes as 
 - The data is read from a data file tabulated with pressure and temperature, and interpolations based on
   pressure and temperature are created for each tabulated property.
 
-- The pressure and temperature data is converted to the alternative variable set (for example (v,e)) using [Newton's method](syntax/Utils/FluidPropertiesUtils.md).
+- The pressure and temperature data is converted to the alternative variable set (for example (v,e)) using [Newton's method](utils/FluidPropertiesUtils.md).
   The inversion uses the interpolations created from the tabulated data, or if available the `FluidProperties` `UserObject`
   as this reduces the error.
 
@@ -173,7 +173,7 @@ alternative variable sets. This is done in several sets, described for the $(v,e
   and $e=e_{min}$. Part of the grid may not be physical.
 
 - The pressure and temperature are then calculated for every point in the $(v,e)$ grid by using the
-  [Newton method utilities](syntax/Utils/FluidPropertiesUtils.md). Note that sometimes pressure and temperature values
+  [Newton method utilities](utils/FluidPropertiesUtils.md). Note that sometimes pressure and temperature values
   can be outside the user-defined range during this variable set inversion. when this is the case, the $(p,T)$ values are
   replaced with their respective minimum and maximum values. This only means that the interpolations will be constant
   over part of the $(v,e)$ grid, which should be outside of the range of interest.
