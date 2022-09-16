@@ -17,7 +17,7 @@
 
 #include "BlockRestrictable.h"
 
-#include "HomogenizationConstraintIntegral.h" // just for the constants
+#include "HomogenizationConstraint.h"
 #include "AddVariableAction.h"
 
 #include "libmesh/string_to_enum.h"
@@ -112,7 +112,7 @@ TensorMechanicsAction::validParams()
   // Homogenization system input
   MultiMooseEnum constraintType("strain stress");
   params.addParam<MultiMooseEnum>("constraint_types",
-                                  HomogenizationConstants::mooseConstraintType,
+                                  Homogenization::constraintType,
                                   "Type of each constraint: "
                                   "stress or strain.");
   params.addParam<std::vector<FunctionName>>("targets",
@@ -401,11 +401,12 @@ TensorMechanicsAction::act()
     if (_lk_homogenization)
     {
       InputParameters params = _factory.getValidParams("MooseVariable");
+      const std::map<bool, std::vector<unsigned int>> mg_order{{true, {1, 4, 9}},
+                                                               {false, {1, 3, 6}}};
       params.set<MooseEnum>("family") = "SCALAR";
-      params.set<MooseEnum>("order") =
-          HomogenizationConstants::required.at(_lk_large_kinematics)[_ndisp - 1];
+      params.set<MooseEnum>("order") = mg_order.at(_lk_large_kinematics)[_ndisp - 1];
       auto fe_type = AddVariableAction::feType(params);
-      auto var_type = AddVariableAction::determineType(fe_type, 1);
+      auto var_type = AddVariableAction::variableType(fe_type);
       _problem->addVariable(var_type, _hname, params);
     }
   }
@@ -456,7 +457,7 @@ TensorMechanicsAction::act()
       if (_lk_homogenization)
       {
         params.set<std::vector<VariableName>>("macro_gradient") = {_hname};
-        params.set<MultiMooseEnum>("constraint_types") = _constraint_types;
+        params.set<UserObjectName>("homogenization_constraint") = _integrator_name;
       }
 
       _problem->addKernel(ad_prepend + tensor_kernel_type, kernel_name, params);
@@ -477,9 +478,7 @@ TensorMechanicsAction::act()
     {
       InputParameters params = _factory.getValidParams("HomogenizationConstraintScalarKernel");
       params.set<NonlinearVariableName>("variable") = _hname;
-      params.set<unsigned int>("ndim") = _ndisp;
-      params.set<UserObjectName>("integrator") = _integrator_name;
-      params.set<bool>("large_kinematics") = _lk_large_kinematics;
+      params.set<UserObjectName>("homogenization_constraint") = _integrator_name;
 
       _problem->addScalarKernel(
           "HomogenizationConstraintScalarKernel", "HomogenizationConstraints", params);
@@ -489,15 +488,14 @@ TensorMechanicsAction::act()
   {
     if (_lk_homogenization)
     {
-      InputParameters params = _factory.getValidParams("HomogenizationConstraintIntegral");
-      params.set<std::vector<VariableName>>("displacements") = _displacements;
+      InputParameters params = _factory.getValidParams("HomogenizationConstraint");
       params.set<MultiMooseEnum>("constraint_types") = _constraint_types;
       params.set<std::vector<FunctionName>>("targets") = _targets;
       params.set<bool>("large_kinematics") = _lk_large_kinematics;
       params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
-      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
-      _problem->addUserObject("HomogenizationConstraintIntegral", _integrator_name, params);
+      _problem->addUserObject("HomogenizationConstraint", _integrator_name, params);
     }
   }
 }
@@ -973,8 +971,7 @@ TensorMechanicsAction::actLagrangianKernelStrain()
 
     params.set<MaterialPropertyName>("homogenization_gradient_name") = _homogenization_strain_name;
     params.set<std::vector<VariableName>>("macro_gradient") = {_hname};
-    params.set<bool>("large_kinematics") = _lk_large_kinematics;
-    params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
+    params.set<UserObjectName>("homogenization_constraint") = _integrator_name;
 
     _problem->addMaterial(type, name() + "_compute_" + _homogenization_strain_name, params);
   }

@@ -31,8 +31,8 @@
         new_system = true
         formulation = TOTAL
         volumetric_locking_correction = false
-        constraint_types = 'stress strain stress'
-        targets = 'stress11 strain22 stress12'
+        constraint_types = 'stress none none stress strain none none none none'
+        targets = 'stress11 stress12 strain22'
         generate_output = 'pk1_stress_xx pk1_stress_xy pk1_stress_xz pk1_stress_yx pk1_stress_yy '
                           'pk1_stress_yz pk1_stress_zx pk1_stress_zy pk1_stress_zz '
                           'deformation_gradient_xx deformation_gradient_xy deformation_gradient_xz '

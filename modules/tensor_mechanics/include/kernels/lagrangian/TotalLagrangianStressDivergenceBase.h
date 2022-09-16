@@ -39,6 +39,7 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobianDisplacement(unsigned int alpha, unsigned int beta) override;
   virtual Real computeQpJacobianTemperature(unsigned int cvar) override;
+  virtual Real computeQpJacobianOutOfPlaneStrain() override;
 
   /// The 1st Piola-Kirchhoff stress
   const MaterialProperty<RankTwoTensor> & _pk1;

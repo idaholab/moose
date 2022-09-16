@@ -48,6 +48,7 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobianDisplacement(unsigned int alpha, unsigned int beta) override;
   virtual Real computeQpJacobianTemperature(unsigned int cvar) override;
+  virtual Real computeQpJacobianOutOfPlaneStrain() override { return 0; }
 
   /// The Cauchy stress
   const MaterialProperty<RankTwoTensor> & _stress;

@@ -150,7 +150,7 @@ The following steps then provide the homogenization constraints.  These steps ca
 the appropriate options in the [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md).
 
 1. Add a `ScalarVariable` with the appropriate order for the problem being solved (see [sizes]).
-2. Add a [`HomogenizationConstraintIntegral`](userobjects/lagrangian/HomogenizationConstraintIntegral.md) `UserObject` to calculate the volume-averaged constraint value.
+2. Add a [`HomogenizationConstraint`](userobjects/lagrangian/HomogenizationConstraint.md) `UserObject` to calculate the volume-averaged constraint value.
 3. Add a [`HomogenizationConstraintScalarKernel`](HomogenizationConstraintScalarKernel.md) to enforce the constraints.
 4. Add a [`ComputeHomogenizedLagrangianStrain`](ComputeHomogenizedLagrangianStrain.md) material object to convert the values of the scalar variable to 
    the homogenization strain or displacement gradient.

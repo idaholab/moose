@@ -1,6 +1,6 @@
-# HomogenizationConstraintIntegral
+# HomogenizationConstraint
 
-!syntax description /UserObjects/HomogenizationConstraintIntegral
+!syntax description /UserObjects/HomogenizationConstraint
 
 ## Overview
 
@@ -30,11 +30,11 @@ The `large_kinematics` flag controls whether the constraints are on the deformat
 This object should be run with `execute_on = 'initial linear'` to provide the
 updated integral values when required by the kernels.
 
-!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d-stress.i
+!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/large-tests/3d.i
          block=UserObjects
 
-!syntax parameters /UserObjects/HomogenizationConstraintIntegral
+!syntax parameters /UserObjects/HomogenizationConstraint
 
-!syntax inputs /UserObjects/HomogenizationConstraintIntegral
+!syntax inputs /UserObjects/HomogenizationConstraint
 
-!syntax children /UserObjects/HomogenizationConstraintIntegral
+!syntax children /UserObjects/HomogenizationConstraint

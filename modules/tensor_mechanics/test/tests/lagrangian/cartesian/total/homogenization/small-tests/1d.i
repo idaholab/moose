@@ -3,9 +3,8 @@
 [GlobalParams]
   displacements = 'disp_x'
   large_kinematics = false
-  constraint_types = 'strain'
-  ndim = 1
   macro_gradient = hvar
+  homogenization_constraint = homogenization
 []
 
 [Mesh]
@@ -60,10 +59,11 @@
 []
 
 [UserObjects]
-  [integrator]
-    type = HomogenizationConstraintIntegral
-    targets = 'func_strain'
-    execute_on = 'initial linear'
+  [homogenization]
+    type = HomogenizationConstraint
+    constraint_types = ${constraint_types}
+    targets = ${targets}
+    execute_on = 'INITIAL LINEAR NONLINEAR'
   []
 []
 
@@ -79,14 +79,13 @@
   [enforce]
     type = HomogenizationConstraintScalarKernel
     variable = hvar
-    integrator = integrator
   []
 []
 
 [Functions]
   [func_stress]
     type = ParsedFunction
-    value = '100*t'
+    value = '1800*t'
   []
   [func_strain]
     type = ParsedFunction
@@ -144,13 +143,6 @@
   []
   [compute_homogenization_gradient]
     type = ComputeHomogenizedLagrangianStrain
-  []
-[]
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
   []
 []
 
