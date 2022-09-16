@@ -4,13 +4,13 @@
 
 ## Description
 
-The `InterfaceJouleHeatingConstraint` class is intended to calculate add the heat source due to Joule Heating which results from the electric potential drop across an interface.
+The `InterfaceJouleHeatingConstraint` class is intended to calculate and add the heat source due to Joule Heating which results from the electric potential drop across an interface.
 The heat source is then added to the temperature field variable  in a coupled electro-thermal simulation.
 This class is intended to be used in conjunction with [ModularGapConductanceConstraint](ModularGapConductanceConstraint.md) and [GapFluxModelPressureDependentConduction](GapFluxModelPressureDependentConduction.md), which enforce the closed gap interface requirement by checking for a postive normal pressure.
 As such, the `InterfaceJouleHeatingConstraint` takes as a required argument the name of the Lagrange Multiplier variable used in the electrical contact.
 
 !alert note title=Closed Gap Interface Assumed by this Class
-The `InterfaceJouleHeatingConstraint` class should only be employed when the user is certain that electric potential flux is nonzero only when the interface gap is closed.
+The `InterfaceJouleHeatingConstraint` class should only be employed in simulations when the user is certain that electric potential flux is nonzero only when the interface gap is closed.
 
 The heat source is calculated as a function of the electric potential flux across the interface, as given by the associated Lagrange multiplier $\lambda_{\phi}$,
 \begin{equation}

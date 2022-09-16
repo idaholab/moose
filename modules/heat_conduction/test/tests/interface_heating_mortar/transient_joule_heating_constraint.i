@@ -189,7 +189,7 @@
   [interface_heating]
     type = InterfaceJouleHeatingConstraint
     potential_lagrange_multiplier = potential_interface_lm
-    variable = temperature
+    variable = potential_interface_lm
     secondary_variable = temperature
     primary_electrical_conductivity = steel_electrical_conductivity
     secondary_electrical_conductivity = aluminum_electrical_conductivity

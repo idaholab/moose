@@ -171,7 +171,7 @@
   [interface_heating]
     type = InterfaceJouleHeatingConstraint
     potential_lagrange_multiplier = potential_interface_lm
-    variable = temperature
+    variable = potential_interface_lm
     secondary_variable = temperature
     primary_electrical_conductivity = steel_electrical_conductivity
     secondary_electrical_conductivity = aluminum_electrical_conductivity
@@ -263,15 +263,10 @@
   nl_rel_tol = 1e-6
   nl_max_its = 100
   nl_forced_its = 1
-
-  # dt = 0.1
-  # dtmin = 1.0e-4
-  # num_steps = 5
 []
 
 [Outputs]
   csv = true
-  exodus = true
   perf_graph = true
 []
 

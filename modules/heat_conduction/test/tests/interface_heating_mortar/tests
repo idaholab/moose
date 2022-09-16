@@ -42,10 +42,10 @@
                "results in a smaller temperature difference between the two blocks at the interface."
     []
   []
-  [transisent_joule_heating_constraint]
+  [transient_joule_heating_constraint]
     type = CSVDiff
-    input = "transisent_joule_heating_constraint.i"
-    csvdiff = "transisent_joule_heating_constraint_out.csv"
+    input = "transient_joule_heating_constraint.i"
+    csvdiff = "transient_joule_heating_constraint_out.csv"
     ad_indexing_type = global
     cli_args = "Mesh/allow_renumbering=false"
     requirement = "We shall be able to converge towards the steady-state interface temperature "
