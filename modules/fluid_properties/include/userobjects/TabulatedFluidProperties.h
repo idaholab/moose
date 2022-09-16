@@ -196,7 +196,7 @@ public:
   virtual Real T_from_h_p(Real h, Real pressure) const override;
   virtual Real s_from_h_p(Real h, Real pressure) const override;
 
-  // AD versions of properties
+  /// AD versions of properties
   virtual DualReal p_from_v_e(const DualReal & v, const DualReal & e) const override;
   virtual DualReal T_from_v_e(const DualReal & v, const DualReal & e) const override;
   virtual DualReal c_from_v_e(const DualReal & v, const DualReal & e) const override;
@@ -228,48 +228,46 @@ protected:
    */
   virtual void generateTabulatedData();
 
-  Real inverseDistance(const std::vector<Real> & value, const std::vector<Real> & distance) const;
-
-  // File name of tabulated data file
+  /// File name of tabulated data file
   FileName _file_name;
-  // Pressure vector
+  /// Pressure vector
   std::vector<Real> _pressure;
-  // Temperature vector
+  /// Temperature vector
   std::vector<Real> _temperature;
-  // Tabulated fluid properties
+  /// Tabulated fluid properties
   std::vector<std::vector<Real>> _properties;
 
-  // Vector of bi-dimensional interpolation of fluid properties
+  /// Vector of bi-dimensional interpolation of fluid properties
   std::vector<std::unique_ptr<BidimensionalInterpolation>> _property_ipol;
 
-  // Minimum temperature in tabulated data
+  /// Minimum temperature in tabulated data
   Real _temperature_min;
-  // Maximum temperature in tabulated data
+  /// Maximum temperature in tabulated data
   Real _temperature_max;
-  // Minimum pressure in tabulated data
+  /// Minimum pressure in tabulated data
   Real _pressure_min;
-  // Maximum pressure in tabulated data
+  /// Maximum pressure in tabulated data
   Real _pressure_max;
-  // Number of temperature points in the tabulated data
+  /// Number of temperature points in the tabulated data
   unsigned int _num_T;
-  // Number of pressure points in the tabulated data
+  /// Number of pressure points in the tabulated data
   unsigned int _num_p;
-  // Whether to save a generated fluid properties file to disk
+  /// Whether to save a generated fluid properties file to disk
   const bool _save_file;
 
-  // SinglePhaseFluidPropertiesPT UserObject
+  /// SinglePhaseFluidPropertiesPT UserObject
   const SinglePhaseFluidProperties * const _fp;
 
-  // List of required column names to be read
+  /// List of required column names to be read
   const std::vector<std::string> _required_columns{"pressure", "temperature"};
-  // List of possible property column names to be read
+  /// List of possible property column names to be read
   const std::vector<std::string> _property_columns{
       "density", "enthalpy", "internal_energy", "viscosity", "k", "c", "cv", "cp", "entropy"};
-  // Properties to be interpolated entered in the input file
+  /// Properties to be interpolated entered in the input file
   MultiMooseEnum _interpolated_properties_enum;
-  // List of properties to be interpolated
+  /// List of properties to be interpolated
   std::vector<std::string> _interpolated_properties;
-  // Set of flags to note whether a property is to be interpolated
+  /// Set of flags to note whether a property is to be interpolated
   bool _interpolate_density;
   bool _interpolate_enthalpy;
   bool _interpolate_internal_energy;
@@ -280,7 +278,7 @@ protected:
   bool _interpolate_cv;
   bool _interpolate_entropy;
 
-  // Index of each property
+  /// Index of each property
   unsigned int _density_idx;
   unsigned int _enthalpy_idx;
   unsigned int _internal_energy_idx;
@@ -291,52 +289,52 @@ protected:
   unsigned int _cv_idx;
   unsigned int _entropy_idx;
 
-  // The MOOSE delimited file reader.
+  /// The MOOSE delimited file reader.
   MooseUtils::DelimitedFileReader _csv_reader;
 
-  // if the lookup table p(v, e) and T(v, e) should be constructed
+  /// if the lookup table p(v, e) and T(v, e) should be constructed
   bool _construct_pT_from_ve;
-  // if the lookup table p(v, h) and T(v, h) should be constructed
+  /// if the lookup table p(v, h) and T(v, h) should be constructed
   bool _construct_pT_from_vh;
-  // keeps track of whether initialSetup has been preformed
+  /// keeps track of whether initialSetup has been performed
   bool _initial_setup_done;
-  // Number of specific volume points in the tabulated data
+  /// Number of specific volume points in the tabulated data
   unsigned int _num_v;
-  // Number of internal energy points in tabulated data
+  /// Number of internal energy points in tabulated data
   unsigned int _num_e;
-  // to error or not on out of bounds check
+  /// to error or not on out-of-bounds check
   bool _error_on_out_of_bounds;
 
-  // Bi-dimensional interpolation of temperature from (v,e)
+  /// Bi-dimensional interpolation of temperature from (v,e)
   std::unique_ptr<BidimensionalInterpolation> _T_from_v_e_ipol;
 
-  // Bi-dimensional interpolation of pressure from (v,e)
+  /// Bi-dimensional interpolation of pressure from (v,e)
   std::unique_ptr<BidimensionalInterpolation> _p_from_v_e_ipol;
 
-  // Bi-dimensional interpolation of temperature from (v,h)
+  /// Bi-dimensional interpolation of temperature from (v,h)
   std::unique_ptr<BidimensionalInterpolation> _T_from_v_h_ipol;
 
-  // Bidimensional interpolation of pressure from (v,h)
+  /// Bidimensional interpolation of pressure from (v,h)
   std::unique_ptr<BidimensionalInterpolation> _p_from_v_h_ipol;
 
-  // Minimum internal energy in tabulated data
+  /// Minimum internal energy in tabulated data
   Real _e_min;
-  // Maximum internal energy in tabulated data
+  /// Maximum internal energy in tabulated data
   Real _e_max;
-  // Minimum specific volume in tabulated data
+  /// Minimum specific volume in tabulated data
   Real _v_min;
-  // Maximum specific volume in tabulated data
+  /// Maximum specific volume in tabulated data
   Real _v_max;
-  // Minimum specific enthalpy in tabulated data
+  /// Minimum specific enthalpy in tabulated data
   Real _h_min;
-  // Maximum specific enthalpy in tabulated data
+  /// Maximum specific enthalpy in tabulated data
   Real _h_max;
 
-  // specific volume vector
+  /// specific volume vector
   std::vector<Real> _specific_volume;
-  // internal energy vector
+  /// internal energy vector
   std::vector<Real> _internal_energy;
-  // enthalpy vector
+  /// enthalpy vector
   std::vector<Real> _enthalpy;
 };
 

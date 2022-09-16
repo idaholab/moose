@@ -47,7 +47,7 @@ TEST(NewtonInversion, NewtonSolve)
   };
 
   // Solve z = f(x, y) with x constant
-  Real y = NewtonMethod::NewtonSolve(x, z, initial_guess, 1e-8, func);
+  Real y = FluidPropertiesUtils::NewtonSolve(x, z, initial_guess, 1e-8, func);
 
   // Check solution found
   Real tol = 1e-7;
@@ -64,7 +64,7 @@ TEST(NewtonInversion, NewtonSolve)
   z = 0.8749124087762432;
   soln = 0.1;
   initial_guess = 0.1;
-  y = NewtonMethod::NewtonSolve(x, z, initial_guess, 1e-8, func2);
+  y = FluidPropertiesUtils::NewtonSolve(x, z, initial_guess, 1e-8, func2);
   EXPECT_NEAR(y, soln, tol);
 }
 
@@ -134,7 +134,7 @@ TEST(NewtonInversion, NewtonSolve2D)
   {
     function_g3(x, y, g, dgdx, dgdy);
   };
-  NewtonMethod::NewtonSolve2D(
+  FluidPropertiesUtils::NewtonSolve2D(
       y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, converged, func1, func2);
 
   // Check values
@@ -146,7 +146,7 @@ TEST(NewtonInversion, NewtonSolve2D)
   // Try other combinations of g functions
   y1 = 0.1;
   y2 = 1.1196002982765987;
-  NewtonMethod::NewtonSolve2D(
+  FluidPropertiesUtils::NewtonSolve2D(
       y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, converged, func1, func3);
   x1_soln = 0.1;
   x2_soln = 0.3;
@@ -156,7 +156,7 @@ TEST(NewtonInversion, NewtonSolve2D)
 
   y1 = 1.98;
   y2 = 1.1196002982765987;
-  NewtonMethod::NewtonSolve2D(
+  FluidPropertiesUtils::NewtonSolve2D(
       y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, converged, func2, func3);
   x1_soln = 0.1;
   x2_soln = 0.3;
@@ -167,7 +167,7 @@ TEST(NewtonInversion, NewtonSolve2D)
   // If there is no solution it should not converge
   y1 = -2000;
   y2 = -2000; // no solution
-  NewtonMethod::NewtonSolve2D(
+  FluidPropertiesUtils::NewtonSolve2D(
       y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, converged, func1, func3);
   EXPECT_FALSE(converged);
 }

@@ -325,22 +325,6 @@ TabulatedFluidProperties::initialSetup()
   constructInterpolation();
 }
 
-Real
-TabulatedFluidProperties::inverseDistance(const std::vector<Real> & value,
-                                          const std::vector<Real> & distance) const
-{
-  Real ret = 0.0;
-  Real denom = 0.0;
-  for (unsigned int j = 0; j < value.size(); ++j)
-  {
-    if (distance[j] == 0)
-      return value[j];
-    ret += value[j] / distance[j];
-    denom += 1.0 / distance[j];
-  }
-  return ret / denom;
-}
-
 std::string
 TabulatedFluidProperties::fluidName() const
 {
@@ -436,7 +420,7 @@ TabulatedFluidProperties::rho_from_p_T(
   }
 }
 
-void // need ADReal for use in navier_stokes
+void
 TabulatedFluidProperties::rho_from_p_T(const ADReal & pressure,
                                        const ADReal & temperature,
                                        ADReal & rho,
@@ -447,7 +431,7 @@ TabulatedFluidProperties::rho_from_p_T(const ADReal & pressure,
   {
     ADReal p = pressure, T = temperature;
     checkInputVariables(p, T);
-    _property_ipol[_density_idx]->ADsampleValueAndDerivatives(p, T, rho, drho_dp, drho_dT);
+    _property_ipol[_density_idx]->sampleValueAndDerivatives(p, T, rho, drho_dp, drho_dT);
   }
   else
   {
@@ -531,7 +515,7 @@ TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
 {
   auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
   { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
-  Real T = NewtonMethod::NewtonSolve(pressure, rho, _T_initial_guess, _tolerance, lambda);
+  Real T = FluidPropertiesUtils::NewtonSolve(pressure, rho, _T_initial_guess, _tolerance, lambda);
   // check for nans
   if (std::isnan(T))
     mooseError("Conversion from pressure (p = ",
@@ -1091,7 +1075,7 @@ TabulatedFluidProperties::T_from_h_p(Real h, Real pressure) const
 {
   auto lambda = [&](Real pressure, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
   { h_from_p_T(pressure, current_T, new_h, dh_dp, dh_dT); };
-  Real T = NewtonMethod::NewtonSolve(pressure, h, _T_initial_guess, _tolerance, lambda);
+  Real T = FluidPropertiesUtils::NewtonSolve(pressure, h, _T_initial_guess, _tolerance, lambda);
   // check for nans
   if (std::isnan(T))
     mooseError("Conversion from enthalpy (h = ",

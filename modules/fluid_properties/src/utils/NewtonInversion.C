@@ -23,14 +23,15 @@
 // using 2D Newton Solve will need to write routines to take care of values where this
 // occurs. See TabulatedBicubicFluidProperties for example (routine checkOutofBounds).
 
-namespace NewtonMethod
+namespace FluidPropertiesUtils
 {
 Real
 NewtonSolve(const Real & x,
             const Real & y,
             const Real & z_initial_guess,
             const Real & tolerance,
-            std::function<void(Real, Real, Real &, Real &, Real &)> const & func)
+            std::function<void(Real, Real, Real &, Real &, Real &)> const & func,
+            const unsigned int max_its)
 {
   Real current_z =
       z_initial_guess; // find good initial guess, know something about e from interpolation tables
@@ -54,8 +55,9 @@ NewtonSolve(const Real & x,
     ++iteration;
 
     // Check for divergence or slow convergence of Newton's method
-    if (iteration > 100)
-      mooseError("Convergence Failed in Newton Solve");
+    if (iteration > max_its)
+      mooseError(
+          "Newton solve convergence failed, maximum number of iterations, ", max_its, " exceeded");
   }
   return current_z;
 }
@@ -70,7 +72,8 @@ NewtonSolve2D(const Real & f,
               const Real & tolerance,
               bool & converged,
               std::function<void(Real, Real, Real &, Real &, Real &)> const & func1,
-              std::function<void(Real, Real, Real &, Real &, Real &)> const & func2)
+              std::function<void(Real, Real, Real &, Real &, Real &)> const & func2,
+              const unsigned int max_its)
 {
   converged = false;
   RealEigenMatrix jacobian(2, 2); // Compute Jacobian
@@ -117,7 +120,7 @@ NewtonSolve2D(const Real & f,
     ++iteration;            // update iteration;
 
     // Check for Newton iteration not converging fast enough
-    if (iteration > 100)
+    if (iteration > max_its)
     {
       x_final = current_vec[0];
       y_final = current_vec[1];
@@ -131,4 +134,4 @@ NewtonSolve2D(const Real & f,
   converged = true;         // convergence successful
 }
 
-} // namespace NewtonMethod
+} // namespace FluidPropertiesUtils

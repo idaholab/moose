@@ -520,7 +520,7 @@ SinglePhaseFluidProperties::p_T_from_v_e(const Real & v,  // v value
   { v_from_p_T(pressure, temperature, new_v, dv_dp, dv_dT); };
   auto e_lambda = [&](Real pressure, Real temperature, Real & new_e, Real & de_dp, Real & de_dT)
   { e_from_p_T(pressure, temperature, new_e, de_dp, de_dT); };
-  NewtonMethod::NewtonSolve2D(
+  FluidPropertiesUtils::NewtonSolve2D(
       v, e, p0, T0, p, T, _tolerance, conversion_succeeded, v_lambda, e_lambda);
 }
 
@@ -537,7 +537,7 @@ SinglePhaseFluidProperties::p_T_from_v_h(const Real & v,  // v value
   { v_from_p_T(pressure, temperature, new_v, dv_dp, dv_dT); };
   auto h_lambda = [&](Real pressure, Real temperature, Real & new_h, Real & dh_dp, Real & dh_dT)
   { h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT); };
-  NewtonMethod::NewtonSolve2D(
+  FluidPropertiesUtils::NewtonSolve2D(
       v, h, p0, T0, p, T, _tolerance, conversion_succeeded, v_lambda, h_lambda);
 }
 
@@ -554,7 +554,7 @@ SinglePhaseFluidProperties::p_T_from_h_s(const Real & h,  // h value
   { h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT); };
   auto s_lambda = [&](Real pressure, Real temperature, Real & new_s, Real & ds_dp, Real & ds_dT)
   { s_from_p_T(pressure, temperature, new_s, ds_dp, ds_dT); };
-  NewtonMethod::NewtonSolve2D(
+  FluidPropertiesUtils::NewtonSolve2D(
       h, s, p0, T0, p, T, _tolerance, conversion_succeeded, h_lambda, s_lambda);
 }
 

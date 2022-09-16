@@ -205,7 +205,7 @@ BicubicInterpolation::sampleValueAndDerivatives(
 }
 
 void
-BicubicInterpolation::ADsampleValueAndDerivatives(
+BicubicInterpolation::sampleValueAndDerivatives(
     const ADReal & x1, const ADReal & x2, ADReal & y, ADReal & dy1, ADReal & dy2) const
 {
   unsigned int x1l, x1u, x2l, x2u;

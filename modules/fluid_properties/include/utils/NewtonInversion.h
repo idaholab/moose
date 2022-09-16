@@ -12,43 +12,39 @@
 // MOOSE includes
 #include "Moose.h"
 
-// C++ includes
-#include "libmesh/utility.h"
-#include <functional>
-
-// This file performs a Newton solve in 1D and 2D. In 1D, solve fails to converge
-// and error outputs if it takes more than 100 iterations. In 2D, if more than 100
-// iterations occur, save results references and set convergence to false. Applications
-// using 2D Newton Solve will need to write routines to take care of values where this
-// occurs. See TabulatedBicubicFluidProperties for example (routine checkOutofBounds).
-
-namespace NewtonMethod
+namespace FluidPropertiesUtils
 {
 /**
- * NewtonSolve does a 1D Newton Solve to find z from x and y.
- * @param[in] x input variable one
- * @param[in] y input variable two
+ * NewtonSolve does a 1D Newton Solve to solve the equation y = f(x, z) for variable z.
+ * @param[in] x constant first argument of the f(x, z) term
+ * @param[in] y constant which should be equal to f(x, z) with a converged z
  * @param[in] z_initial_guess initial guess for return variables
- * @param[in] tolerance parameter defined in input file. Defaults to 1e-8
- * @param[in] lambda fcn for finding derivatives of y wrt x & z
+ * @param[in] tolerance parameter defined in input file
+ * @param[in] function two-variable function returning both values and derivatives as references
+ * @param[in] max_its the maximum number of iterations for Newton's method
+ * @return the value z such that f(x, z) = y
  */
 Real NewtonSolve(const Real & x,
                  const Real & y,
                  const Real & z_initial_guess,
                  const Real & tolerance,
-                 std::function<void(Real, Real, Real &, Real &, Real &)> const & func);
+                 std::function<void(Real, Real, Real &, Real &, Real &)> const & func,
+                 const unsigned int max_its = 100);
 
 /**
- * NewtonSolve does a 1D Newton Solve to find z from x and y.
- * @param[in] f input variable one
- * @param[in] g input variable two
+ * NewtonSolve2D does a 2D Newton Solve to solve for the x and y such that:
+ * f = func1(x, y) and g = func2(x, y). This is done for example in the constant of (v, e)
+ * to (p, T) variable set conversion.
+ * @param[in] f target value for func1
+ * @param[in] g target value for func2
  * @param[in] x0 initial guess for first output variable
  * @param[in] y0 initial guess for second output variable
  * @param[out] x_final output for first variable
  * @param[out] y_final output for second variable
- * @param[in] tolerance parameter defined in input file. Defaults to 1e-8
- * @param[in] lambda fcn for finding derivatives of f wrt x & y
- * @param[in] lambda fcn for finding derivatives of g wrt x & y
+ * @param[in] tolerance parameter defined in input file.
+ * @param[in] func1 two-variable function returning both values and derivatives as references
+ * @param[in] func2 two-variable function returning both values and derivatives as references
+ * @param[in] max_its the maximum number of iterations for Newton's method
  */
 void NewtonSolve2D(const Real & f,
                    const Real & g,
@@ -59,6 +55,7 @@ void NewtonSolve2D(const Real & f,
                    const Real & tolerance,
                    bool & converged,
                    std::function<void(Real, Real, Real &, Real &, Real &)> const & func1,
-                   std::function<void(Real, Real, Real &, Real &, Real &)> const & func2);
+                   std::function<void(Real, Real, Real &, Real &, Real &)> const & func2,
+                   const unsigned int max_its = 100);
 
-} // namespace NewtonMethod
+} // namespace FluidPropertiesUtils
