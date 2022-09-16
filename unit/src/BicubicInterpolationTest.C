@@ -63,7 +63,7 @@ TEST(BicubicInterpolationTest, sample)
 
   // Check that ADsampleValueAndDerivatives() returns the same results as above
   ADReal ad_y2, ad_dy2_dx1, ad_dy2_dx2;
-  interp.ADsampleValueAndDerivatives(ad_p1, ad_p2, ad_y2, ad_dy2_dx1, ad_dy2_dx2);
+  interp.sampleValueAndDerivatives(ad_p1, ad_p2, ad_y2, ad_dy2_dx1, ad_dy2_dx2);
   EXPECT_NEAR(ad_y2.value(), 111.0, tol);
   EXPECT_NEAR(ad_dy2_dx1.value(), 9.0, tol);
   EXPECT_NEAR(ad_dy2_dx2.value(), 33.0, tol);

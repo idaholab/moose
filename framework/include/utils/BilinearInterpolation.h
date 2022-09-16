@@ -64,6 +64,7 @@ public:
    */
   Real sampleDerivative(Real s1, Real s2, unsigned int deriv_var) const override;
 
+  using BidimensionalInterpolation::sampleValueAndDerivatives;
   void sampleValueAndDerivatives(
       Real s1, Real s2, Real & y, Real & dy_ds1, Real & dy_ds2) const override;
 

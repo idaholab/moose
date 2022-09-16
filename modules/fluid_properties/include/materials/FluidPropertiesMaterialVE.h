@@ -27,25 +27,25 @@ public:
 protected:
   void computeQpProperties() override;
 
-  /// Specific internal energy
+  /// Specific internal energy (J/kg)
   const VariableValue & _e;
-  /// Specific volume
+  /// Specific volume (1/m^3)
   const VariableValue & _v;
-  /// Pressure
+  /// Pressure (Pa)
   MaterialProperty<Real> & _p;
-  /// Temperature
+  /// Temperature (K)
   MaterialProperty<Real> & _T;
-  /// Speed of sound
+  /// Speed of sound (m/s)
   MaterialProperty<Real> & _c;
-  /// Isobaric specific heat capacity
+  /// Isobaric specific heat capacity (J/kg/K)
   MaterialProperty<Real> & _cp;
-  /// Isochoric specific heat capacity
+  /// Isochoric specific heat capacity (J/kg/K)
   MaterialProperty<Real> & _cv;
-  /// Dynamic viscosity
+  /// Dynamic viscosity (Pa.s)
   MaterialProperty<Real> & _mu;
-  /// Thermal conductivity
+  /// Thermal conductivity (W/m/K)
   MaterialProperty<Real> & _k;
-  /// Specific entropy
+  /// Specific entropy (J/kg/K)
   MaterialProperty<Real> & _s;
   /// Gibbs free energy
   MaterialProperty<Real> & _g;

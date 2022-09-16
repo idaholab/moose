@@ -196,7 +196,7 @@ TEST(BilinearInterpolationTest, unimplemented_errors)
   try
   {
     ADReal y0, dydx1, dydx2;
-    interp.ADsampleValueAndDerivatives(1, 2, y0, dydx1, dydx2);
+    interp.sampleValueAndDerivatives(1, 2, y0, dydx1, dydx2);
   }
   catch (const std::exception & err)
   {

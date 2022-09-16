@@ -996,7 +996,6 @@ TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
   p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
   const Real s = s_from_p_T(p, T);
   const Real h = h_from_p_T(p, T);
-  // this is simple the definition of Gibbs free energy
   return h - T * s;
 }
 

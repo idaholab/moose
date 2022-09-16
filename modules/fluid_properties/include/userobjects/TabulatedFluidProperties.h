@@ -132,6 +132,11 @@ public:
   virtual Real T_from_h_p(Real h, Real pressure) const override;
   virtual Real s_from_h_p(Real h, Real pressure) const override;
 
+  /// AD implementations needed
+  using SinglePhaseFluidProperties::c_from_v_e;
+  using SinglePhaseFluidProperties::p_from_v_e;
+  using SinglePhaseFluidProperties::T_from_v_e;
+
 protected:
   /**
    * Writes tabulated data to a file.

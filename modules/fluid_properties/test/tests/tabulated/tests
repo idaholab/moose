@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#20101'
+  design = 'TabulatedFluidProperties.md'
   [tabulated_bicubic]
     type = CSVDiff
     input = 'tabulated.i'
@@ -7,6 +9,7 @@
                 Outputs/file_base=tabulated_out'
     rel_err = 1e-4
     threading = '!pthreads'
+    requirement = 'The system shall be able to generate a tabulation of fluid properties based on pressure and temperature, and use a tabulated interplation of these properties.'
   []
   [tabulated_v_e_bicubic]
     type = CSVDiff
@@ -17,11 +20,11 @@
     rel_err = 1e-4
     threading = '!pthreads'
     allow_warnings = true
+    requirement = 'The system shall be able to read a tabulation of fluid properties, then compute these fluid properties using (volume, energy) primary variables.' 
   []
 
   [exceptions]
     requirement = "The system shall throw an error if"
-    issues = '#20101'
     [bad_pressure_bounds]
       type = RunException
       input = 'tabulated.i'

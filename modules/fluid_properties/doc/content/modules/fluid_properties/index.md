@@ -90,35 +90,35 @@ provided to calculate fluid properties at the quadrature points.
 To access the fluid properties defined in the Fluid Properties module in a MOOSE object, the
 source code of the object must include the following lines of code.
 
-In the header file of the material, a `const` reference to the base `SinglePhaseFluidProperties`
+In the header file of the material, a `const` reference to the base [SinglePhaseFluidProperties.md]
 object is required:
 
-!listing modules/fluid_properties/include/materials/FluidPropertiesMaterial.h line=SinglePhaseFluidProperties
+!listing modules/fluid_properties/include/materials/FluidPropertiesMaterialVE.h line=SinglePhaseFluidProperties
 
 !alert note
-A forward declaration to the `SinglePhaseFluidProperties` class is required at the beginning of
+A forward declaration to the [SinglePhaseFluidProperties.md] class is required at the beginning of
 the header file.
 
-!listing modules/fluid_properties/include/materials/FluidPropertiesMaterial.h line=class SinglePhaseFluidProperties
+!listing modules/fluid_properties/include/materials/FluidPropertiesMaterialVE.h line=class SinglePhaseFluidProperties
 
 In the source file, the `SinglePhaseFluidProperties` class must be included
 
-!listing modules/fluid_properties/src/materials/FluidPropertiesMaterial.C line= "SinglePhaseFluidProperties.h"
+!listing modules/fluid_properties/src/materials/FluidPropertiesMaterialVE.C line= "SinglePhaseFluidProperties.h"
 
 The Fluid Properties UserObject is passed to this material in the input file by adding a
 UserObject name parameters in the input parameters:
 
-!listing modules/fluid_properties/src/materials/FluidPropertiesMaterial.C line=addRequiredParam
+!listing modules/fluid_properties/src/materials/FluidPropertiesMaterialVE.C line=addRequiredParam
 
 The reference to the UserObject is then initialized in the constructor using
 
-!listing modules/fluid_properties/src/materials/FluidPropertiesMaterial.C line=getUserObject
+!listing modules/fluid_properties/src/materials/FluidPropertiesMaterialVE.C line=getUserObject
 
 The properties defined in the Fluid Properties UserObject can now be accessed through the
 reference. In this material, the `computeQpProperties` method calculates a number of properties
 at the quadrature points using the values of `_v[_qp]` and `_e[_qp]`.
 
-!listing modules/fluid_properties/src/materials/FluidPropertiesMaterial.C start=computeQpProperties
+!listing modules/fluid_properties/src/materials/FluidPropertiesMaterialVE.C start=computeQpProperties
 
 In a similar fashion, fluid properties can be accessed using the Automatic Differentiation interface
 using the `DualReal` version which provides both the value and derivatives

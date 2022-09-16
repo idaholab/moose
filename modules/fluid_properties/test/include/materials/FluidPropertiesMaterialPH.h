@@ -28,12 +28,12 @@ protected:
 
   /// Pressure (Pa)
   const VariableValue & _pressure;
-  /// Specific enthalpy (kJ/kg)
+  /// Specific enthalpy (J/kg)
   const VariableValue & _h;
 
   /// Temperature (K)
   MaterialProperty<Real> & _T;
-  /// Specific entropy (kJ/kg/K)
+  /// Specific entropy (J/kg/K)
   MaterialProperty<Real> & _s;
 
   /// Fluid properties UserObject

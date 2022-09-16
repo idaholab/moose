@@ -2,6 +2,7 @@
   [fp_material]
     requirement = "The system shall be able to compute material properties from fluid properties"
     issues = '#20101'
+    design = 'FluidPropertiesMaterialVE.md FluidPropertiesMaterialPT.md'
     [pressure_temperature]
       type = Exodiff
       input = 'test_pt.i'
