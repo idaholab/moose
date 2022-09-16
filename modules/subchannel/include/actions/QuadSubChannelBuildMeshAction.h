@@ -9,7 +9,7 @@
 class QuadSubChannelBuildMeshAction : public Action
 {
 public:
-  QuadSubChannelBuildMeshAction(InputParameters params);
+  QuadSubChannelBuildMeshAction(const InputParameters & params);
 
   virtual void act();
 

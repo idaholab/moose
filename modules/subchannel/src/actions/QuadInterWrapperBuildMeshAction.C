@@ -12,7 +12,7 @@ QuadInterWrapperBuildMeshAction::validParams()
   return params;
 }
 
-QuadInterWrapperBuildMeshAction::QuadInterWrapperBuildMeshAction(InputParameters params)
+QuadInterWrapperBuildMeshAction::QuadInterWrapperBuildMeshAction(const InputParameters & params)
   : Action(params)
 {
 }

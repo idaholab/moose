@@ -9,7 +9,7 @@
 class QuadInterWrapperBuildMeshAction : public Action
 {
 public:
-  QuadInterWrapperBuildMeshAction(InputParameters params);
+  QuadInterWrapperBuildMeshAction(const InputParameters & params);
 
   virtual void act();
 
