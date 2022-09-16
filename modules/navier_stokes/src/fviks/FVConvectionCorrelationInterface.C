@@ -78,5 +78,10 @@ FVConvectionCorrelationInterface::computeQpResidual()
   const auto face_arg_side2 = singleSidedFaceArg(var2(), _face_info);
   const auto bulk_elem_arg = makeElemArg(bulk_elem);
 
-  return _htc(face_arg_side1) * (_temp_fluid(bulk_elem_arg) - _temp_solid(face_arg_side2));
+  /// We make sure that the gradient*normal part is addressed
+  auto multipler =
+      _normal * (_face_info->faceCentroid() - bulk_elem->vertex_average()) > 0 ? 1 : -1;
+
+  return multipler * _htc(face_arg_side1) *
+         (_temp_fluid(bulk_elem_arg) - _temp_solid(face_arg_side2));
 }
