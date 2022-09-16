@@ -1,5 +1,5 @@
 [Tests]
-  [./subdomain_bounding_box_generator_test]
+  [subdomain_bounding_box_generator_test]
     type = 'Exodiff'
     input = 'subdomain_bounding_box_generator_inside.i'
     exodiff = 'subdomain_bounding_box_generator_inside_out.e'
@@ -8,9 +8,9 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 
-  [./subdomain_bounding_box_generator_outside_test]
+  [subdomain_bounding_box_generator_outside_test]
     type = 'Exodiff'
     input = 'subdomain_bounding_box_generator_outside.i'
     exodiff = 'subdomain_bounding_box_generator_outside_out.e'
@@ -19,9 +19,9 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 
-  [./oriented_subdomain_bounding_box_generator_test]
+  [oriented_subdomain_bounding_box_generator_test]
     type = 'Exodiff'
     input = 'oriented_subdomain_bounding_box_generator.i'
     exodiff = 'oriented_subdomain_bounding_box_generator_out.e'
@@ -30,9 +30,9 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 
-  [./subdomain_bounding_box_generator_restricted_test]
+  [subdomain_bounding_box_generator_restricted_test]
     type = 'Exodiff'
     input = 'subdomain_bounding_box_generator_restricted.i'
     exodiff = 'subdomain_bounding_box_generator_restricted_in.e'
@@ -42,9 +42,9 @@
     issues = '#12279'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 
-  [./subdomain_bounding_box_element_integer_test]
+  [subdomain_bounding_box_element_integer_test]
     type = 'Exodiff'
     input = 'bounding_box_integers.i'
     exodiff = 'bounding_box_integers_out.e'
@@ -53,7 +53,7 @@
     issues = '#13764'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 
   [invalid_restricted_subdomain]
     type = RunException
