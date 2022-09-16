@@ -18,4 +18,52 @@
     threading = '!pthreads'
     allow_warnings = true
   []
+
+  [exceptions]
+    requirement = "The system shall throw an error if"
+    issues = '#20101'
+    [bad_pressure_bounds]
+      type = RunException
+      input = 'tabulated.i'
+      cli_args = 'Modules/FluidProperties/tabulated/pressure_min=1e6 Modules/FluidProperties/tabulated/pressure_max=1e5'
+      expect_err = 'pressure_max must be greater than pressure_min'
+      detail = 'if the user-specified pressure boundaries are inverted'
+    []
+    [bad_temperature_bounds]
+      type = RunException
+      input = 'tabulated.i'
+      cli_args = 'Modules/FluidProperties/tabulated/temperature_min=1e3 Modules/FluidProperties/tabulated/temperature_max=1e2'
+      expect_err = 'temperature_max must be greater than temperature_min'
+      detail = 'if the user-specified temperature boundaries are inverted'
+    []
+    [bad_pressure_guess]
+      type = RunException
+      input = 'tabulated_v_e.i'
+      cli_args = 'Modules/FluidProperties/tabulated/p_initial_guess=10'
+      expect_err = 'Pressure initial guess for \(p,T\), \(v,e\) conversions 10 is outside the range of tabulated pressure'
+      detail = 'if the user-specified pressure initial guess for variable set inversions is out of bounds'
+    []
+    [bad_temperature_guess]
+      type = RunException
+      input = 'tabulated_v_e.i'
+      cli_args = 'Modules/FluidProperties/tabulated/T_initial_guess=1e5'
+      expect_err = 'Temperature initial guess for \(p,T\), \(v,e\) conversions 100000 is outside the range of tabulated temperature'
+      detail = 'if the user-specified temperature initial guess for variable set inversions is out of bounds'
+    []
+    [pressure_out_of_bounds]
+      type = RunException
+      input = 'tabulated_v_e.i'
+      cli_args = 'Modules/FluidProperties/tabulated/pressure_min=2.5e6 Modules/FluidProperties/tabulated/error_on_out_of_bounds=true'
+      expect_err = 'is outside the range of tabulated pressure'
+      detail = 'if the desired pressure for a fluid property evaluation is outside the user-specified bounds, when prescribed to error in such conditions'
+    []
+    [temperature_out_of_bounds]
+      type = RunException
+      input = 'tabulated_v_e.i'
+      cli_args = 'Modules/FluidProperties/tabulated/temperature_min=590 Modules/FluidProperties/tabulated/error_on_out_of_bounds=true'
+      expect_err = 'is outside the range of tabulated temperature'
+      detail = 'if the desired temperature for a fluid property evaluation is outside the user-specified bounds, when prescribed to error in such conditions'
+      allow_warnings = true
+    []
+  []
 []

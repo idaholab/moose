@@ -115,9 +115,9 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
   checkInitialGuess();
   // Sanity check on minimum and maximum temperatures and pressures
   if (_temperature_max <= _temperature_min)
-    mooseError(name(), ": temperature_max must be greater than temperature_min");
+    mooseError("temperature_max must be greater than temperature_min");
   if (_pressure_max <= _pressure_min)
-    mooseError(name(), ": pressure_max must be greater than pressure_min");
+    mooseError("pressure_max must be greater than pressure_min");
 
   // Lines starting with # in the data file are treated as comments
   _csv_reader.setComment("#");
