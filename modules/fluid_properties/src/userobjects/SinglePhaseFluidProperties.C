@@ -522,6 +522,9 @@ SinglePhaseFluidProperties::p_T_from_v_e(const Real & v,  // v value
   { e_from_p_T(pressure, temperature, new_e, de_dp, de_dT); };
   FluidPropertiesUtils::NewtonSolve2D(
       v, e, p0, T0, p, T, _tolerance, conversion_succeeded, v_lambda, e_lambda);
+
+  if (!conversion_succeeded)
+    mooseDoOnce(mooseWarning("Conversion from (v, e)=(", v, ", ", e, ") to (p, T) failed"));
 }
 
 void
@@ -539,6 +542,9 @@ SinglePhaseFluidProperties::p_T_from_v_h(const Real & v,  // v value
   { h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT); };
   FluidPropertiesUtils::NewtonSolve2D(
       v, h, p0, T0, p, T, _tolerance, conversion_succeeded, v_lambda, h_lambda);
+
+  if (!conversion_succeeded)
+    mooseDoOnce(mooseWarning("Conversion from (v, h)=(", v, ", ", h, ") to (p, T) failed"));
 }
 
 void
@@ -556,6 +562,9 @@ SinglePhaseFluidProperties::p_T_from_h_s(const Real & h,  // h value
   { s_from_p_T(pressure, temperature, new_s, ds_dp, ds_dT); };
   FluidPropertiesUtils::NewtonSolve2D(
       h, s, p0, T0, p, T, _tolerance, conversion_succeeded, h_lambda, s_lambda);
+
+  if (!conversion_succeeded)
+    mooseDoOnce(mooseWarning("Conversion from (h, s)=(", h, ", ", s, ") to (p, T) failed"));
 }
 
 Real
