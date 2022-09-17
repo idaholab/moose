@@ -25,6 +25,8 @@
 #include "libmesh/system.h"
 #include "libmesh/dof_map.h"
 
+#include <regex>
+
 InputParameters
 SubProblem::validParams()
 {
@@ -1029,6 +1031,12 @@ SubProblem::jacobianSetup()
 void
 SubProblem::initialSetup()
 {
+  if (_output_functors)
+  {
+    showFunctors(0);
+    showFunctorRequestors();
+  }
+
   for (const auto & functors : _functors)
     for (const auto & pr : functors)
       if (pr.second->wrapsNull())
@@ -1037,6 +1045,31 @@ SubProblem::initialSetup()
                    "', which was requested by '",
                    MooseUtils::join(libmesh_map_find(_functor_to_requestors, pr.first), ","),
                    "'.");
+}
+
+void
+SubProblem::showFunctors(const THREAD_ID tid) const
+{
+  mooseAssert(tid < _functors.size(), "Too large a thread ID");
+  _console << "[DBG] Wrapped functors found in Subproblem" << std::endl;
+  std::string functor_names = "[DBG] ";
+  for (const auto & functor_pair : _functors[tid])
+    functor_names += std::regex_replace(functor_pair.first, std::regex("wraps_"), "") + " ";
+  _console << functor_names << std::endl;
+}
+
+void
+SubProblem::showFunctorRequestors() const
+{
+  for (const auto & [functor, requestors] : _functor_to_requestors)
+  {
+    _console << "[DBG] Requestors for wrapped functor "
+             << std::regex_replace(functor, std::regex("wraps_"), "") << std::endl;
+    std::string requestor_names = "[DBG] ";
+    for (const auto & requestor : requestors)
+      requestor_names += requestor + " ";
+    _console << requestor_names << std::endl;
+  }
 }
 
 bool

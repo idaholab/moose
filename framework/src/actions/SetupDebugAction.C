@@ -44,6 +44,7 @@ SetupDebugAction::validParams()
       "pid_aux",
       false,
       "Add a AuxVariable named \"pid\" that shows the processors and partitioning");
+  params.addParam<bool>("show_functors", false, "Whether to output the problem functors");
 
   params.addClassDescription(
       "Adds various debugging type Output objects to the simulation system.");
@@ -69,7 +70,7 @@ SetupDebugAction::act()
     _problem->addOutput(type, "_moose_material_property_debug_output", params);
   }
 
-  // Variable residusl norms
+  // Variable residual norms
   if (_pars.get<bool>("show_var_residual_norms"))
   {
     const std::string type = "VariableResidualNormsDebugOutput";
@@ -118,5 +119,11 @@ SetupDebugAction::act()
     InputParameters params = _factory.getValidParams("ProcessorIDAux");
     params.set<AuxVariableName>("variable") = "pid";
     _problem->addAuxKernel("ProcessorIDAux", "pid_aux", params);
+  }
+
+  // Add functor output
+  if (getParam<bool>("show_functors"))
+  {
+    _problem->setFunctorOutput(getParam<bool>("show_functors"));
   }
 }
