@@ -288,8 +288,7 @@ ConstraintWarehouse::hasActiveNodeElemConstraints(SubdomainID secondary_id,
   return (it != end_it && it->second.hasActiveObjects());
 }
 
-void
-ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
+void ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
 {
   MooseObjectWarehouse<Constraint>::updateActive();
   _nodal_constraints.updateActive();
@@ -329,6 +328,8 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
         const std::set<SubdomainID> & lm_subdomains = lm_var->activeSubdomains();
         subdomains_covered.insert(lm_subdomains.begin(), lm_subdomains.end());
       }
+      else // May be a penalty constraint: Check in the constraint
+        subdomains_covered.insert(mc->secondarySubdomain());
 
       // Mortar constraints require the creation of a primary lower dimensional subdomain in order
       // to create the mortar segment mesh. We don't need any computing objects on it
@@ -349,6 +350,8 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
         const std::set<SubdomainID> & lm_subdomains = lm_var->activeSubdomains();
         subdomains_covered.insert(lm_subdomains.begin(), lm_subdomains.end());
       }
+      else // May be a penalty constraint: Check in the constraint
+        subdomains_covered.insert(mc->secondarySubdomain());
 
       // Mortar constraints require the creation of a primary lower dimensional subdomain in order
       // to create the mortar segment mesh. We don't need any computing objects on it
