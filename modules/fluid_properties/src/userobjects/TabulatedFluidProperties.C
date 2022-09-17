@@ -23,6 +23,10 @@ InputParameters
 TabulatedFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
+  params.addClassDescription(
+      "Single phase fluid properties computed using bi-dimensional interpolation of tabulated "
+      "values.");
+
   params.addParam<FileName>(
       "fluid_property_file",
       "fluid_properties.csv",
@@ -65,10 +69,17 @@ TabulatedFluidProperties::validParams()
   params.addParam<bool>(
       "error_on_out_of_bounds",
       true,
-      "If true exceeding pressure or temperature tabulation values leads to an error.");
-  params.addClassDescription(
-      "Single phase fluid properties computed using bi-dimensional interpolation of tabulated "
-      "values.");
+      "Whether pressure or temperature from tabulation exceeding user-specified bounds leads to "
+      "an error.");
+
+  params.addParamNamesToGroup("fluid_property_file save_file", "Tabulation file read/write");
+  params.addParamNamesToGroup("construct_pT_from_ve construct_pT_from_vh",
+                              "Variable set conversion");
+  params.addParamNamesToGroup(
+      "temperature_min temperature_max pressure_min pressure_max error_on_out_of_bounds",
+      "Tabulation and interpolation bounds");
+  params.addParamNamesToGroup("num_T num_p num_v num_e",
+                              "Tabulation and interpolation discretization");
 
   return params;
 }
