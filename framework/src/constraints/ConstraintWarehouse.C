@@ -288,7 +288,8 @@ ConstraintWarehouse::hasActiveNodeElemConstraints(SubdomainID secondary_id,
   return (it != end_it && it->second.hasActiveObjects());
 }
 
-void ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
+void
+ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
 {
   MooseObjectWarehouse<Constraint>::updateActive();
   _nodal_constraints.updateActive();
@@ -321,7 +322,7 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
     const auto & objects = pr.second.getActiveObjects();
     for (const auto & mc : objects)
     {
-      const MooseVariableFEBase * lm_var = &mc->variable();
+      const MooseVariableFEBase * lm_var = mc->variable_ptr();
       if (lm_var)
       {
         unique_variables.insert(lm_var->name());
@@ -341,7 +342,7 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
     const auto & objects = pr.second.getActiveObjects();
     for (const auto & mc : objects)
     {
-      const MooseVariableFEBase * lm_var = &mc->variable();
+      const MooseVariableFEBase * lm_var = mc->variable_ptr();
       if (lm_var)
       {
         unique_variables.insert(lm_var->name());

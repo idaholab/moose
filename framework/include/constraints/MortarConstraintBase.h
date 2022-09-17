@@ -76,6 +76,11 @@ public:
   const MooseVariable & variable() const override { return *_var; }
 
   /**
+   * The variable number that this object operates on (pointer).
+   */
+  const MooseVariable * variable_ptr() const { return _var; }
+
+  /**
    * Whether to use dual mortar
    */
   bool useDual() const { return _use_dual; }
