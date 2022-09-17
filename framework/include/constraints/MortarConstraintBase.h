@@ -78,7 +78,7 @@ public:
   /**
    * Method for computing the Jacobian of scalar block
    */
-  virtual void computeJacobianScalar(unsigned int jvar) {};
+  virtual void computeJacobianScalar() {};
 
   /**
    * The variable number that this object operates on.

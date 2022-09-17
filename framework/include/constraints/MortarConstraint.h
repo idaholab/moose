@@ -46,7 +46,7 @@ protected:
   /**
    * Method for computing the scalar Jacobian
    */
-  virtual void computeJacobianScalar(unsigned int jvar) override;
+  virtual void computeJacobianScalar() override;
 
 
   /**
@@ -65,13 +65,11 @@ protected:
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType jacobian_type,
                                  unsigned int jvar) = 0;
-  virtual Real computeQpOffDiagJacobianScalar(const Moose::MortarType mortar_type,
-                                 unsigned int jvar) {return 0;};
 
   /**
    * compute the scalar jacobian at the quadrature points
    */
-  virtual Real computeQpJacobianScalar(unsigned int jvar) {return 0;};
+  virtual Real computeQpJacobianScalarScalar() {return 0;};
 
 private:
   /// A dummy object useful for constructing _lambda when not using Lagrange multipliers
