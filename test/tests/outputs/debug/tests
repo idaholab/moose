@@ -1,42 +1,42 @@
 [Tests]
-  issues = '#1927'
-  [./show_var_residual_norms]
+  issues = '#1927 #19423'
+  [show_var_residual_norms]
     type = 'RunApp'
     input = 'show_var_residual_norms.i'
     expect_out = "\|residual\|_2 of individual variables:.*\|residual\|_2 of individual variables:.*\|residual\|_2 of individual variables:"
 
     requirement = "The system shall be include the ability to display variable residual norms."
     design = "VariableResidualNormsDebugOutput.md"
-  [../]
+  []
 
-  [./show_var_residual_norms_debug]
+  [show_var_residual_norms_debug]
     type = 'RunApp'
     input = 'show_var_residual_norms_debug.i'
     expect_out = "\|residual\|_2 of individual variables:.*\|residual\|_2 of individual variables:.*\|residual\|_2 of individual variables:"
 
     requirement = "The system shall include debug syntax that includes the ability to enable variable residual norm output."
     design = "VariableResidualNormsDebugOutput.md Debug/index.md"
-  [../]
+  []
 
-  [./show_material_props]
+  [show_material_props]
     type = RunApp
     input = show_material_props.i
     expect_out = "Property Names:.*\"bnd_prop\""
 
     requirement = "The system shall be include the ability to display material property information."
     design = "MaterialPropertyDebugOutput.md"
-   [../]
+  []
 
-   [./show_material_props_block]
+  [show_material_props_block]
      type = RunApp
      input = show_material_props_debug.i
      expect_out = "Property Names:.*\"bnd_prop\""
 
      requirement = "The system shall include debug syntax that includes the ability to enable material property information output."
      design = "MaterialPropertyDebugOutput.md Debug/index.md"
-   [../]
+  []
 
-   [./show_top_residuals]
+  [show_top_residuals]
      type = RunApp
      input = show_top_residuals.i
      expect_out = "\[DBG\]\[\d+\].*'u'.*at node"
@@ -44,9 +44,9 @@
 
      requirement = "The system shall be include the ability to display residual information for variables."
      design = "TopResidualDebugOutput.md"
-   [../]
+  []
 
-   [./show_top_residuals_debug]
+  [show_top_residuals_debug]
      # Test that top residuals are displayed using DebugOutput object via Debug block
      type = RunApp
      input = show_top_residuals_debug.i
@@ -55,9 +55,9 @@
 
      requirement = "The system shall include debug syntax that includes the ability to enable variable residual information."
      design = "TopResidualDebugOutput.md Debug/index.md"
-   [../]
+  []
 
-   [./show_top_residuals_nonlinear_only]
+  [show_top_residuals_nonlinear_only]
      # Test that top residuals may be limited to nonlinear iterations only
      type = RunApp
      input = show_top_residuals_nonlinear_only.i
@@ -66,9 +66,9 @@
 
      requirement = "The system shall be include the ability to display residual information for variables that is limited to non-linear iterations."
      design = "TopResidualDebugOutput.md"
-   [../]
+  []
 
-   [./show_top_residuals_scalar]
+  [show_top_residuals_scalar]
      # Test that top residuals of scalar variables are displayed using DebugOutput object via Outputs block
      type = RunApp
      input = show_top_residuals_scalar.i
@@ -77,14 +77,23 @@
 
      requirement = "The system shall be include the ability to display residual information for scalar variables."
      design = "TopResidualDebugOutput.md"
-   [../]
+  []
 
-   [show_material_properties_consumed]
+  [show_material_properties_consumed]
      type = RunApp
      input = show_material_props_consumed.i
      expect_out = "Object: Kernel::diff2\s+Properties: andrew"
 
      requirement = "The system shall include debug syntax that includes material property consumption information."
      design = "MaterialPropertyDebugOutput.md Debug/index.md"
-   []
+  []
+
+  [show_functors]
+    type = RunApp
+    input = show_functors.i
+    expect_out = "\[DBG\] fe fe_prop fv fv_prop"
+
+    requirement = 'The system shall be able to output debug information for functors and objects requesting functors'
+    design = 'Debug/index.md'
+  []
 []
