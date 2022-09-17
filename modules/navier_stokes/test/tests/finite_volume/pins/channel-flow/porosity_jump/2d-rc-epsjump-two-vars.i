@@ -9,8 +9,8 @@ velocity_interp_method='rc'
     dim = 2
     dx = '1 1'
     dy = '0.5'
-    ix = '30 30'
-    iy = '20'
+    ix = '6 6'
+    iy = '4'
     subdomain_id = '1 2'
   []
   [interface]
@@ -99,7 +99,6 @@ velocity_interp_method='rc'
     rho = ${rho}
     block = 1
     rhie_chow_user_object = rc1
-    boundaries_to_force = 'interface'
   []
   [u_advection1]
     type = PINSFVMomentumAdvection
@@ -141,6 +140,7 @@ velocity_interp_method='rc'
     momentum_component = 'y'
     rhie_chow_user_object = rc1
     block = 1
+    boundaries_to_force = 'interface'
   []
   [v_viscosity1]
     type = PINSFVMomentumDiffusion
@@ -150,6 +150,7 @@ velocity_interp_method='rc'
     momentum_component = 'y'
     rhie_chow_user_object = rc1
     block = 1
+    boundaries_to_force = 'interface'
   []
   [v_pressure1]
     type = PINSFVMomentumPressureFlux
@@ -158,8 +159,8 @@ velocity_interp_method='rc'
     porosity = porosity1
     momentum_component = 'y'
     rhie_chow_user_object = rc1
-    boundaries_to_avoid = 'interface'
     block = 1
+    boundaries_to_force = 'interface'
   []
 
   [mass2]
@@ -170,7 +171,6 @@ velocity_interp_method='rc'
     rho = ${rho}
     block = 2
     rhie_chow_user_object = rc2
-    boundaries_to_force = 'interface'
   []
   [u_advection2]
     type = PINSFVMomentumAdvection
@@ -182,6 +182,7 @@ velocity_interp_method='rc'
     momentum_component = 'x'
     rhie_chow_user_object = rc2
     block = 2
+    boundaries_to_force = 'interface'
   []
   [u_viscosity2]
     type = PINSFVMomentumDiffusion
@@ -191,6 +192,7 @@ velocity_interp_method='rc'
     momentum_component = 'x'
     rhie_chow_user_object = rc2
     block = 2
+    boundaries_to_force = 'interface'
   []
   [u_pressure2]
     type = PINSFVMomentumPressureFlux
@@ -199,7 +201,7 @@ velocity_interp_method='rc'
     porosity = porosity2
     momentum_component = 'x'
     rhie_chow_user_object = rc2
-    boundaries_to_avoid = 'interface'
+    boundaries_to_force = 'interface'
     block = 2
   []
   [v_advection2]
@@ -212,6 +214,7 @@ velocity_interp_method='rc'
     momentum_component = 'y'
     rhie_chow_user_object = rc2
     block = 2
+    boundaries_to_force = 'interface'
   []
   [v_viscosity2]
     type = PINSFVMomentumDiffusion
@@ -221,6 +224,7 @@ velocity_interp_method='rc'
     momentum_component = 'y'
     rhie_chow_user_object = rc2
     block = 2
+    boundaries_to_force = 'interface'
   []
   [v_pressure2]
     type = PINSFVMomentumPressureFlux
@@ -229,8 +233,8 @@ velocity_interp_method='rc'
     porosity = porosity2
     momentum_component = 'y'
     rhie_chow_user_object = rc2
-    boundaries_to_avoid = 'interface'
     block = 2
+    boundaries_to_force = 'interface'
   []
 []
 
@@ -286,22 +290,31 @@ velocity_interp_method='rc'
 []
 
 [FVInterfaceKernels]
-  [penalty_u]
-    type = FVPenaltyContinuity
+  [penalty_mom_u]
+    type = PINSFVPenaltyBernoulli
     subdomain1 = '1'
     subdomain2 = '2'
     variable1 = u1
     variable2 = u2
-    penalty = 1e6
+    v1 = v1
+    v2 = v2
+    pressure1 = pressure1
+    pressure2 = pressure2
+    porosity1 = porosity1
+    porosity2 = porosity2
+    rho = ${rho}
+    penalty = 1e4
     boundary = 'interface'
   []
-  [penalty_v]
-    type = FVPenaltyContinuity
+  [penalty_mass_u]
+    type = PINSFVPenaltyMassContinuity
     subdomain1 = '1'
     subdomain2 = '2'
-    variable1 = v1
-    variable2 = v2
-    penalty = 1e6
+    variable1 = pressure1
+    variable2 = pressure2
+    u1 = u1
+    u2 = u2
+    penalty = 1e9
     boundary = 'interface'
   []
 []
