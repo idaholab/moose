@@ -262,7 +262,7 @@ public:
   /**
    * @return Number of Global Apps in this MultiApp
    */
-  unsigned int numGlobalApps() { return _total_num_apps; }
+  unsigned int numGlobalApps() const { return _total_num_apps; }
 
   /**
    * @return Number of Apps on local processor.
@@ -287,12 +287,6 @@ public:
   bool hasLocalApp(unsigned int global_app) const;
 
   /**
-   * @return the local app number corresponding to the supplied global app number. We will assert
-   * that we have the local app before computing the local app number
-   */
-  unsigned int localAppNumber(unsigned int global_app) const;
-
-  /**
    * Get the local MooseApp object
    * @param local_app The local app number
    */
@@ -303,7 +297,7 @@ public:
    * @param app The global app number you want the position for.
    * @return the position
    */
-  const Point & position(unsigned int app) { return _positions[app]; }
+  const Point & position(unsigned int app) const { return _positions[app]; }
 
   /**
    * "Reset" the App corresponding to the global App number

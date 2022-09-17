@@ -107,7 +107,8 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
     auto & fe_type = to_sys->variable_type(var_num);
     bool is_constant = fe_type.order == CONSTANT;
     bool is_nodal = fe_type.family == LAGRANGE;
-    const auto & to_transform = *_to_transforms[i_to];
+    const auto to_global_num = _current_direction == FROM_MULTIAPP ? 0 : _to_local2global_map[i_to];
+    const auto & to_transform = *_to_transforms[to_global_num];
 
     if (fe_type.order > FIRST && !is_nodal)
       mooseError("We don't currently support second order or higher elemental variable.");
@@ -290,9 +291,11 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
       {
         if (local_bboxes[i_from].contains_point(pt))
         {
+          const auto from_global_num =
+              _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
           // Use mesh funciton to compute interpolation values
           vals_ids_for_incoming_points[i_pt].first =
-              (*local_meshfuns[i_from])(_from_transforms[i_from]->mapBack(pt));
+              (*local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
           // Record problem ID as well
           switch (_current_direction)
           {
@@ -335,6 +338,7 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
 
   for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
   {
+    const auto to_global_num = _current_direction == FROM_MULTIAPP ? 0 : _to_local2global_map[i_to];
     System * to_sys = find_sys(*_to_es[i_to], _to_var_names[i]);
 
     unsigned int sys_num = to_sys->number();
@@ -398,7 +402,8 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
         }
 
         if (_error_on_miss && !point_found)
-          mooseError("Point not found in the reference space! ", (*_to_transforms[i_to])(*node));
+          mooseError("Point not found in the reference space! ",
+                     (*_to_transforms[to_global_num])(*node));
 
         dof_id_type dof = node->dof_number(sys_num, var_num, 0);
         solution->set(dof, best_val);
@@ -475,7 +480,7 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
 
           if (_error_on_miss && !point_found)
             mooseError("Point not found in the reference space! ",
-                       (*_to_transforms[i_to])(elem->vertex_average()));
+                       (*_to_transforms[to_global_num])(elem->vertex_average()));
 
           // Get the value for a dof
           dof_id_type dof = elem->dof_number(sys_num, var_num, offset);

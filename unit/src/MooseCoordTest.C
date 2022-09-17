@@ -42,7 +42,7 @@ TEST(MooseCoordTest, testRotations)
     try
     {
       transform.setUpDirection(up_direction);
-      EXPECT_TRUE(false);
+      FAIL();
     }
     catch (std::runtime_error & e)
     {
@@ -88,7 +88,7 @@ TEST(MooseCoordTest, testRotations)
     try
     {
       transform.setRotation(alpha, beta, gamma);
-      EXPECT_TRUE(false);
+      FAIL();
     }
     catch (std::runtime_error & e)
     {
@@ -123,6 +123,10 @@ TEST(MooseCoordTest, testCoordCollapse)
   MultiAppCoordTransform rz(single_app_rz);
   MultiAppCoordTransform rsph(single_app_rsph);
 
+  const std::string return_mapping_error_message(
+      "Coordinate collapsing occurred in going to the reference space. There is no unique return "
+      "mapping");
+
   const Real sqrt2 = std::sqrt(2.);
   const Real sqrt3 = std::sqrt(3.);
   const Point xyz_pt(1, 1, 1);
@@ -133,6 +137,17 @@ TEST(MooseCoordTest, testCoordCollapse)
     EXPECT_TRUE(absoluteFuzzyEqual(pt(0), sqrt2));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 1.));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(2), 0.));
+    EXPECT_TRUE(xyz.hasNonTranslationTransformation());
+    try
+    {
+      xyz.mapBack(pt);
+      FAIL();
+    }
+    catch (std::runtime_error & e)
+    {
+      std::string error_message(e.what());
+      EXPECT_TRUE(error_message.find(return_mapping_error_message) != std::string::npos);
+    }
   }
   {
     xyz.setDestinationCoordTransform(single_app_rsph);
@@ -140,6 +155,17 @@ TEST(MooseCoordTest, testCoordCollapse)
     EXPECT_TRUE(absoluteFuzzyEqual(pt(0), sqrt3));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 0.));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(2), 0.));
+    EXPECT_TRUE(xyz.hasNonTranslationTransformation());
+    try
+    {
+      xyz.mapBack(pt);
+      FAIL();
+    }
+    catch (std::runtime_error & e)
+    {
+      std::string error_message(e.what());
+      EXPECT_TRUE(error_message.find(return_mapping_error_message) != std::string::npos);
+    }
   }
   {
     rz.setDestinationCoordTransform(single_app_rsph);
@@ -147,6 +173,17 @@ TEST(MooseCoordTest, testCoordCollapse)
     EXPECT_TRUE(absoluteFuzzyEqual(pt(0), sqrt2));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(1), 0.));
     EXPECT_TRUE(absoluteFuzzyEqual(pt(2), 0.));
+    EXPECT_TRUE(rz.hasNonTranslationTransformation());
+    try
+    {
+      rz.mapBack(pt);
+      FAIL();
+    }
+    catch (std::runtime_error & e)
+    {
+      std::string error_message(e.what());
+      EXPECT_TRUE(error_message.find(return_mapping_error_message) != std::string::npos);
+    }
   }
 }
 

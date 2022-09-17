@@ -525,6 +525,9 @@ MultiAppCoordTransform::hasNonTranslationTransformation() const
           return true;
       }
 
+  if (_skip_coordinate_collapsing)
+    return false;
+
   if ((_our_app_transform._coord_type == Moose::COORD_XYZ &&
        (_destination_app_transform->_coord_type == Moose::COORD_RZ ||
         _destination_app_transform->_coord_type == Moose::COORD_RSPHERICAL)) ||
