@@ -18,7 +18,7 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  const Real _penalty;
   const MooseVariableFV<Real> & _u1;
   const MooseVariableFV<Real> & _u2;
+  const Real _rho;
 };

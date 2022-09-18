@@ -303,7 +303,7 @@ velocity_interp_method='rc'
     porosity1 = porosity1
     porosity2 = porosity2
     rho = ${rho}
-    penalty = 1e4
+    penalty = 1e3
     boundary = 'interface'
   []
   [penalty_mass_u]
@@ -314,8 +314,8 @@ velocity_interp_method='rc'
     variable2 = pressure2
     u1 = u1
     u2 = u2
-    penalty = 1e9
     boundary = 'interface'
+    rho = ${rho}
   []
 []
 

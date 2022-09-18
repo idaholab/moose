@@ -19,19 +19,19 @@ PINSFVPenaltyMassContinuity::validParams()
 {
   InputParameters params = FVInterfaceKernel::validParams();
   params.set<unsigned short>("ghost_layers") = 2;
-  params.addRequiredParam<Real>("penalty", "The penalty");
   params.addRequiredParam<NonlinearVariableName>("u1", "The x-velocity on the '1' side");
   params.addRequiredParam<NonlinearVariableName>("u2", "The x-velocity on the '2' side");
+  params.addRequiredParam<Real>(NS::density, "The density");
   return params;
 }
 
 PINSFVPenaltyMassContinuity::PINSFVPenaltyMassContinuity(const InputParameters & params)
   : FVInterfaceKernel(params),
-    _penalty(getParam<Real>("penalty")),
     _u1(_sys.getFVVariable<Real>(_tid, getParam<NonlinearVariableName>("u1"))),
     _u2(_sys.getFVVariable<Real>(_tid,
                                  isParamValid("u2") ? getParam<NonlinearVariableName>("u2")
-                                                    : getParam<NonlinearVariableName>("u1")))
+                                                    : getParam<NonlinearVariableName>("u1"))),
+    _rho(getParam<Real>(NS::density))
 {
 }
 
@@ -40,5 +40,8 @@ PINSFVPenaltyMassContinuity::computeQpResidual()
 {
   const auto u1 = _u1.getBoundaryFaceValue(*_face_info);
   const auto u2 = _u2.getBoundaryFaceValue(*_face_info);
-  return _penalty * (u1 - u2);
+  ADReal u_face;
+  Moose::FV::interpolate(
+      Moose::FV::InterpMethod::Average, u_face, u1, u2, *_face_info, _elem_is_one);
+  return _rho * u_face * _face_info->normal()(0);
 }
