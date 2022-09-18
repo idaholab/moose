@@ -73,8 +73,8 @@ def plot(prefix, suffix, xname, yname, xlabel=None, ylabel=None, yerr=None, resu
         if yerr is not None:
             kwargs['elinewidth'] = 0.5
             kwargs['capsize'] = 2
-            kwargs['yerr'] = [ (data[yerr[0]] - data[yname]).tolist(),
-                               (data[yname] - data[yerr[1]]).tolist()]
+            kwargs['yerr'] = [(-data[yname] + data[yerr[1]]).tolist(),
+                              (-data[yerr[0]] + data[yname]).tolist() ]
         ax.errorbar(data[xname], data[yname], **kwargs)
 
     if xlabel is not None:
