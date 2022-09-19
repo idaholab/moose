@@ -6,20 +6,27 @@ MOOSE input file syntax basically works like this:
 ```
 # comment
 [section] # inline-comment
-  field1 = 'quoted-string'
-  field2 = "quoted-string"
-  field3 = "multi-line"
-           "string"
-  field4 = unquoted_string # can't have whitespace
+  field01 = 'quoted-string'
+  field02 = "quoted-string"
+  field03 = "multi-line"
+            "string"
+  field04 = unquoted_string # can't have whitespace
 
-  field5 = 42 # integer
-  field6 = 42.42 # floating point number
-  field7 = true # boolean (false, on, off - case insensitive)
+  field05 = 42 # integer
+  field06 = 42.42 # floating point number
+  field07 = true # boolean (false, on, off - case insensitive)
 
-  field8 = 'item0 item1 item2' # array of items (strings or numbers)
-  field9 = 'item00 item01 ;
-            item10 item11 ;
-            item20' # double indexed array (can even be jagged)
+  field08 = 'item0 item1 item2' # array of items (strings or numbers)
+  field09 = 'item00 item01 ;
+             item10 item11 ;
+             item20' # double indexed array (can even be jagged)
+  field10 = 'item000 item001 ;
+             item010 ;
+             item020 item021 item022 |
+             item100 item101 item102 ; ; # can use empty sub-sub-vectors
+             item120 | | # can also use empty sub-vectors
+             item300 item301 ;
+             item310 item311' # triple indexed array (primary and secondary delimiters are '|' and ';')
 
   [subsection]
     foo = 42
