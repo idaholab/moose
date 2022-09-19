@@ -347,7 +347,7 @@ hasBoundaryID(MeshBase & input_mesh, const BoundaryID & id)
 bool
 hasBoundaryName(MeshBase & input_mesh, const BoundaryName & name)
 {
-  auto id = getBoundaryID(name, input_mesh);
+  const auto id = getBoundaryID(name, input_mesh);
   return hasBoundaryID(input_mesh, id);
 }
 }

@@ -30,7 +30,7 @@
     input = parsed_generate_sideset.i
     cli_args = 'Mesh/sideset/included_subdomains="missing"'
     expect_err = "The block 'missing' was not found in the mesh"
-    requirement = 'The system shall error if the included subdomains do not exist in the mesh.'
+    requirement = 'The system shall error if one of the included subdomains does not exist in the mesh.'
     issues = '#22117'
   []
 
@@ -39,7 +39,7 @@
     input = parsed_generate_sideset.i
     cli_args = 'Mesh/sideset/included_neighbors="missing"'
     expect_err = "The block 'missing' was not found in the mesh"
-    requirement = 'The system shall error if the included neighbors do not exist in the mesh.'
+    requirement = 'The system shall error if one of the included neighbors does not exist in the mesh.'
     issues = '#22117'
   []
 []

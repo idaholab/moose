@@ -36,6 +36,6 @@
     input = test_single.i
     cli_args = 'Mesh/refine/block="missing"'
     expect_err = "The block 'missing' was not found within the mesh"
-    requirement = "The system shall error if refining a block that does not exist in the mesh."
+    requirement = "The system shall error if attempting to refine a block that does not exist in the mesh."
   []
 []
