@@ -24,6 +24,12 @@ PeripheralRingMeshGenerator::validParams()
 {
   InputParameters params = PolygonMeshGeneratorBase::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The input mesh to be modified.");
+  params.addParam<bool>(
+      "force_input_centroid_as_center",
+      false,
+      "Whether to enforce use of the centroid position of the input mesh as the "
+      "center of the peripheral ring by translating the input mesh to the origin.");
+
   params.addRangeCheckedParam<unsigned int>(
       "peripheral_layer_num",
       3,
@@ -97,6 +103,7 @@ PeripheralRingMeshGenerator::validParams()
 PeripheralRingMeshGenerator::PeripheralRingMeshGenerator(const InputParameters & parameters)
   : PolygonMeshGeneratorBase(parameters),
     _input_name(getParam<MeshGeneratorName>("input")),
+    _force_input_centroid_as_center(getParam<bool>("force_input_centroid_as_center")),
     _peripheral_layer_num(getParam<unsigned int>("peripheral_layer_num")),
     _peripheral_radial_bias(getParam<Real>("peripheral_radial_bias")),
     _peripheral_inner_boundary_layer_params(
@@ -161,11 +168,17 @@ PeripheralRingMeshGenerator::generate()
   if (*(input_mesh->elem_dimensions().begin()) != 2 ||
       *(input_mesh->elem_dimensions().rbegin()) != 2)
     paramError("input", "Only 2D meshes are supported.");
+  // Move the centroid of the mesh to (0, 0, 0) if input centroid is enforced to be the ring center.
+  const Point input_mesh_centroid = MooseMeshUtils::meshCentroidCalculator(*input_mesh);
+  if (_force_input_centroid_as_center)
+    MeshTools::Modification::translate(
+        *input_mesh, -input_mesh_centroid(0), -input_mesh_centroid(1), -input_mesh_centroid(2));
   _input_mesh_external_bid =
       MooseMeshUtils::getBoundaryID(_input_mesh_external_boundary, *input_mesh);
 
   // Use CoM of the input mesh as its origin for azimuthal calculation
-  const Point origin_pt = MooseMeshUtils::meshCentroidCalculator(*input_mesh);
+  const Point origin_pt =
+      _force_input_centroid_as_center ? Point(0.0, 0.0, 0.0) : input_mesh_centroid;
   // Vessel for containing maximum radius of the boundary nodes
   Real max_input_mesh_node_radius;
 
