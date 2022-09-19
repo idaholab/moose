@@ -21,7 +21,7 @@ NumFailedTimeSteps::validParams()
 }
 
 NumFailedTimeSteps::NumFailedTimeSteps(const InputParameters & parameters)
-  : GeneralPostprocessor(parameters), _timestepper(NULL)
+  : GeneralPostprocessor(parameters)
 {
   if (_subproblem.isTransient())
   {
