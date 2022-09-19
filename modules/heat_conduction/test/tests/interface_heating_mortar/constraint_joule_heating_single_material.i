@@ -63,7 +63,6 @@
   type = ReferenceResidualProblem
   reference_vector = 'ref'
   extra_tag_vectors = 'ref'
-  kernel_coverage_check = false #Required until issue #22125 is resolved
 []
 
 [Variables]
