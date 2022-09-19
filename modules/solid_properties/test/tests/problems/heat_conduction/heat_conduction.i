@@ -5,11 +5,9 @@
   ny = 10
 []
 
-[Modules]
-  [SolidProperties]
-    [sp]
-      type = ThermalSS316Properties
-    []
+[SolidProperties]
+  [sp]
+    type = ThermalSS316Properties
   []
 []
 

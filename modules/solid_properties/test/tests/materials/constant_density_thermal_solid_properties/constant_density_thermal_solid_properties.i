@@ -15,11 +15,9 @@ T_ref = 500
   nx = 1
 []
 
-[Modules]
-  [SolidProperties]
-    [ss316_sp]
-      type = ThermalSS316Properties
-    []
+[SolidProperties]
+  [ss316_sp]
+    type = ThermalSS316Properties
   []
 []
 

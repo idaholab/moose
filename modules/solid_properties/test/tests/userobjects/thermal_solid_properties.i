@@ -19,11 +19,9 @@ T_max = placeholder
   nx = 100
 []
 
-[Modules]
-  [SolidProperties]
-    [sp]
-      type = ${solid_properties_class}
-    []
+[SolidProperties]
+  [sp]
+    type = ${solid_properties_class}
   []
 []
 

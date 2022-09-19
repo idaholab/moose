@@ -7,7 +7,7 @@
   []
 []
 
-[Modules/SolidProperties]
+[SolidProperties]
   [function_sp]
     type = ThermalFunctionSolidProperties
     rho = 6.6e1
