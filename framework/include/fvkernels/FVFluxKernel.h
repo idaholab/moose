@@ -132,6 +132,12 @@ protected:
    */
   bool avoidBoundary(const FaceInfo & fi) const;
 
+  /**
+   * Adjust the number of ghost layers in the relationship manager
+   * @param ghost_layers The new number of requested ghost layers
+   */
+  void adjustRMGhostLayers(const unsigned short ghost_layers) const;
+
 private:
   /// Computes the Jacobian contribution for every coupled variable.
   ///
