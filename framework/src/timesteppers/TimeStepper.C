@@ -182,7 +182,7 @@ TimeStepper::rejectStep()
 }
 
 unsigned int
-TimeStepper::numFailures()
+TimeStepper::numFailures() const
 {
   return _failure_count;
 }

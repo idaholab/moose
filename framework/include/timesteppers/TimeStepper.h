@@ -71,7 +71,7 @@ public:
   virtual void rejectStep();
 
   /// Gets the number of failures and returns them.
-  unsigned int numFailures();
+  unsigned int numFailures() const;
 
   /**
    * If the time step converged
