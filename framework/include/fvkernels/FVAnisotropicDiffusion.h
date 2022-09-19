@@ -24,6 +24,10 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// Diffusion coefficient
+  /// Decides if a geometric arithmetic or harmonic average is used for the
+  /// face interpolation of the diffusion coefficient.
+  Moose::FV::InterpMethod _coeff_interp_method;
+
+  /// Functor returning the diagonal coefficients of a diffusion tensor
   const Moose::Functor<ADRealVectorValue> & _coeff;
 };

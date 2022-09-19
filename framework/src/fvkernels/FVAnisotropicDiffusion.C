@@ -18,7 +18,13 @@ FVAnisotropicDiffusion::validParams()
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription(
       "Computes residual for anisotropic diffusion operator for finite volume method.");
-  params.addRequiredParam<MooseFunctorName>("coeff", "diffusion coefficient");
+  params.addRequiredParam<MooseFunctorName>("coeff",
+                                            "The diagonal coefficients of a diffusion tensor.");
+  MooseEnum coeff_interp_method("average harmonic", "harmonic");
+  params.addParam<MooseEnum>(
+      "coeff_interp_method",
+      coeff_interp_method,
+      "Switch that can select face interpolation method for diffusion coefficients.");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
@@ -33,6 +39,12 @@ FVAnisotropicDiffusion::FVAnisotropicDiffusion(const InputParameters & params)
              "'--with-ad-indexing-type=global'. Note that global indexing is now the default "
              "configuration for AD indexing type.");
 #endif
+
+  const auto & interp_method = getParam<MooseEnum>("coeff_interp_method");
+  if (interp_method == "average")
+    _coeff_interp_method = Moose::FV::InterpMethod::Average;
+  else if (interp_method == "harmonic")
+    _coeff_interp_method = Moose::FV::InterpMethod::HarmonicAverage;
 
   if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
       (_tid == 0))
@@ -64,24 +76,19 @@ FVAnisotropicDiffusion::FVAnisotropicDiffusion(const InputParameters & params)
 ADReal
 FVAnisotropicDiffusion::computeQpResidual()
 {
-  ADReal r = 0;
-  const auto face_elem = elemFromFace();
-  const auto face_neighbor = neighborFromFace();
   const auto & grad_T = _var.adGradSln(
       *_face_info, _var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
-  ADRealVectorValue k_face_inv, k_elem_inv(1, 1, 1), k_neigh_inv(1, 1, 1);
-  const auto k_elem = _coeff(face_elem), k_neighbor = _coeff(face_neighbor);
-  for (unsigned int i = 0; i < _mesh.dimension(); ++i)
-  {
-    mooseAssert(k_elem(i) != 0, "Diffusion coefficient is equal to zero");
-    mooseAssert(k_neighbor(i) != 0, "Diffusion coefficient is equal to zero");
-    k_elem_inv(i) = 1.0 / k_elem(i);
-    k_neigh_inv(i) = 1.0 / k_neighbor(i);
-  }
 
-  Moose::FV::interpolate(
-      Moose::FV::InterpMethod::Average, k_face_inv, k_elem_inv, k_neigh_inv, *_face_info, true);
+  ADRealVectorValue k;
+  interpolate(_coeff_interp_method,
+              k,
+              _coeff(elemFromFace()),
+              _coeff(neighborFromFace()),
+              *_face_info,
+              true);
+
+  ADReal r = 0;
   for (const auto i : make_range(Moose::dim))
-    r += _normal(i) * grad_T(i) / k_face_inv(i);
+    r += _normal(i) * k(i) * grad_T(i);
   return -r;
 }
