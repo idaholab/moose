@@ -13,6 +13,7 @@
 #include "InputParameters.h"
 #include "MooseParsedFunction.h"
 #include "MooseParsedFunctionWrapper.h"
+#include "FEProblemBase.h"
 
 registerMooseObjectAliased("MooseApp", MooseParsedFunction, "ParsedFunction");
 registerMooseObjectAliased("MooseApp", ADMooseParsedFunction, "ADParsedFunction");
@@ -71,6 +72,21 @@ template <typename T>
 void
 MooseParsedFunctionTempl<T>::initialSetup()
 {
+  for (auto i = 0; i < (int)_vars.size(); i++)
+  {
+    // Check for non-scalar variables.
+    // First, see if the var is actually assigned to a proper scalar value
+    if (_pfb_feproblem.hasVariable(_vars[i]) && _pfb_feproblem.hasVariable(_vals[i]))
+    {
+      // Then see if the var has the same name as a function or postprocessor
+      if (!_pfb_feproblem.hasFunction(_vars[i]) &&
+          !_pfb_feproblem.hasPostprocessorValueByName(_vars[i]))
+        mooseError(
+            "The only variables supported by ParsedFunction are scalar variables, and var '" +
+            _vars[i] + "' is not scalar.");
+    }
+  }
+
   if (!_function_ptr)
   {
     THREAD_ID tid = 0;

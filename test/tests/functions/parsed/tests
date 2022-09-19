@@ -1,5 +1,13 @@
 [Tests]
   design = 'source/functions/MooseParsedFunction.md'
+  [./nl_vars]
+    type = RunException
+    input = 'nl_vars_error.i'
+    cli_args = "Functions/func/vars='u v' Functions/func/vals='u v'"
+    expect_err = "The only variables supported by ParsedFunction are scalar variables, and var 'u' is not scalar."
+    requirement = "The system should error if a field variable is passed into a parsed function object, as this capability is currently not supported."
+    issues = '#15523'
+  [../]
   [./steady]
     type = 'Exodiff'
     input = 'steady.i'

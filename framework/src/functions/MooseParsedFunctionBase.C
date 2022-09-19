@@ -36,18 +36,17 @@ MooseParsedFunctionBase::MooseParsedFunctionBase(const InputParameters & paramet
   if (_vars.size() != _vals.size())
     mooseError("Number of vars must match the number of vals for a MooseParsedFunction!");
 
-  // Loop through the variables assigned by the user and give an error if x,y,z,t are used
   for (const auto & var : _vars)
     if (var.find_first_of("xyzt") != std::string::npos && var.size() == 1)
       mooseError("The variables \"x, y, z, and t\" in the ParsedFunction are pre-declared for use "
                  "and must not be declared in \"vars\"");
 }
-
 MooseParsedFunctionBase::~MooseParsedFunctionBase() {}
 
 const std::string
 MooseParsedFunctionBase::verifyFunction(const std::string & function_str)
 {
+
   // Throws an error if quotes are found
   if (function_str.find("\"") != std::string::npos)
     mooseError("The value in ParsedFunction contains quotes(\") which cannot be properly parsed");
