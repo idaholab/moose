@@ -63,6 +63,7 @@
   type = ReferenceResidualProblem
   reference_vector = 'ref'
   extra_tag_vectors = 'ref'
+  kernel_coverage_check = false #Required until issue #22125 is resolved
 []
 
 [Variables]
@@ -155,9 +156,8 @@
     gap_flux_models = 'closed_electric'
   []
   [interface_heating]
-    type = InterfaceJouleHeatingConstraint
+    type = ADInterfaceJouleHeatingConstraint
     potential_lagrange_multiplier = potential_interface_lm
-    variable = potential_interface_lm
     secondary_variable = temperature
     primary_electrical_conductivity = aluminum_electrical_conductivity
     secondary_electrical_conductivity = aluminum_electrical_conductivity

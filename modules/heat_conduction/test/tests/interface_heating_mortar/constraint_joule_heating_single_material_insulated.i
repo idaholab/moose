@@ -2,7 +2,7 @@
 
 # In this steady-state, symmetric simulation, the temperature at the interface between
 # the two blocks of aluminum can be calculated through Fourier's law (see the documentation
-# page for InterfaceJouleHeatingConstraint for the relevant formulas).
+# page for ADInterfaceJouleHeatingConstraint for the relevant formulas).
 #
 # With the prescribed 0.0 V (left) and 0.3V (right) potential boundary conditions, the
 # electric potential flux is 9.25e6 [V * S / m^2]. From this electric potential flux,
@@ -80,6 +80,7 @@
   type = ReferenceResidualProblem
   reference_vector = 'ref'
   extra_tag_vectors = 'ref'
+  kernel_coverage_check = false #Required until issue #22125 is resolved
 []
 
 [Variables]
@@ -159,9 +160,8 @@
     gap_flux_models = 'closed_electric'
   []
   [interface_heating]
-    type = InterfaceJouleHeatingConstraint
+    type = ADInterfaceJouleHeatingConstraint
     potential_lagrange_multiplier = potential_interface_lm
-    variable = potential_interface_lm
     secondary_variable = temperature
     primary_electrical_conductivity = aluminum_electrical_conductivity
     secondary_electrical_conductivity = aluminum_electrical_conductivity

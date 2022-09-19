@@ -1,16 +1,16 @@
-# InterfaceJouleHeatingConstraint
+# ADInterfaceJouleHeatingConstraint
 
-!syntax description /Constraints/InterfaceJouleHeatingConstraint
+!syntax description /Constraints/ADInterfaceJouleHeatingConstraint
 
 ## Description
 
-The `InterfaceJouleHeatingConstraint` class is intended to calculate and add the heat source due to Joule Heating which results from the electric potential drop across an interface.
+The `ADInterfaceJouleHeatingConstraint` class is intended to calculate and add the heat source due to Joule Heating which results from the electric potential drop across an interface.
 The heat source is then added to the temperature field variable  in a coupled electro-thermal simulation.
 This class is intended to be used in conjunction with [ModularGapConductanceConstraint](ModularGapConductanceConstraint.md) and [GapFluxModelPressureDependentConduction](GapFluxModelPressureDependentConduction.md), which enforce the closed gap interface requirement by checking for a postive normal pressure.
-As such, the `InterfaceJouleHeatingConstraint` takes as a required argument the name of the Lagrange Multiplier variable used in the electrical contact.
+As such, the `ADInterfaceJouleHeatingConstraint` takes as a required argument the name of the Lagrange Multiplier variable used in the electrical contact.
 
 !alert note title=Closed Gap Interface Assumed by this Class
-The `InterfaceJouleHeatingConstraint` class should only be employed in simulations when the user is certain that electric potential flux is nonzero only when the interface gap is closed.
+The `ADInterfaceJouleHeatingConstraint` class should only be employed in simulations when the user is certain that electric potential flux is nonzero only when the interface gap is closed. This class may also be used in simulations with an open gap at the interface, so long as the electric potential flux across that gap is zero while the interface gap is open.
 
 The heat source is calculated as a function of the electric potential flux across the interface, as given by the associated Lagrange multiplier $\lambda_{\phi}$,
 \begin{equation}
@@ -65,7 +65,7 @@ In cases where the heat source weighting factor, [eq:primary_interfaceJH] and [e
 
 !listing modules/heat_conduction/test/tests/interface_heating_mortar/constraint_joule_heating_single_material.i block=Constraints/interface_heating
 
-`InterfaceJouleHeatingConstraint` should be used in conjunction with the modular gap conductance constraint, shown here,
+`ADInterfaceJouleHeatingConstraint` should be used in conjunction with the modular gap conductance constraint, shown here,
 
 !listing modules/heat_conduction/test/tests/interface_heating_mortar/constraint_joule_heating_single_material.i block=Constraints/electrical_contact
 
@@ -73,10 +73,10 @@ and the pressure-dependent gap flux conduction user object, as shown below:
 
 !listing modules/heat_conduction/test/tests/interface_heating_mortar/constraint_joule_heating_single_material.i block=UserObjects/closed_electric
 
-!syntax parameters /Constraints/InterfaceJouleHeatingConstraint
+!syntax parameters /Constraints/ADInterfaceJouleHeatingConstraint
 
-!syntax inputs /Constraints/InterfaceJouleHeatingConstraint
+!syntax inputs /Constraints/ADInterfaceJouleHeatingConstraint
 
-!syntax children /Constraints/InterfaceJouleHeatingConstraint
+!syntax children /Constraints/ADInterfaceJouleHeatingConstraint
 
 !bibtex bibliography

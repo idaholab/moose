@@ -17,19 +17,19 @@
  * This rough implementation follows the approach described in
  * Cincotti et al (2007) AIChE and Locci et al (2010) STAM
  */
-class InterfaceJouleHeatingConstraint : public ADMortarConstraint
+class ADInterfaceJouleHeatingConstraint : public ADMortarConstraint
 {
 public:
   static InputParameters validParams();
 
-  InterfaceJouleHeatingConstraint(const InputParameters & parameters);
+  ADInterfaceJouleHeatingConstraint(const InputParameters & parameters);
 
 protected:
   /**
    * Computes the heat source added to each interface side as a function of
    * the electric potential drop through Joule Heating
    */
-  virtual ADReal computeQpResidual(Moose::MortarType mortar_type) override;
+  virtual ADReal computeQpResidual(Moose::MortarType mortar_type) final;
 
   /// Lagrange multiplier variable from the separately solved electrical contact
   const ADVariableValue & _lm_electrical_potential;

@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "InterfaceJouleHeatingConstraint.h"
+#include "ADInterfaceJouleHeatingConstraint.h"
 
-registerMooseObject("HeatConductionApp", InterfaceJouleHeatingConstraint);
+registerMooseObject("HeatConductionApp", ADInterfaceJouleHeatingConstraint);
 
 InputParameters
-InterfaceJouleHeatingConstraint::validParams()
+ADInterfaceJouleHeatingConstraint::validParams()
 {
   InputParameters params = ADMortarConstraint::validParams();
   params.addClassDescription(
@@ -35,7 +35,8 @@ InterfaceJouleHeatingConstraint::validParams()
   return params;
 }
 
-InterfaceJouleHeatingConstraint::InterfaceJouleHeatingConstraint(const InputParameters & parameters)
+ADInterfaceJouleHeatingConstraint::ADInterfaceJouleHeatingConstraint(
+    const InputParameters & parameters)
   : ADMortarConstraint(parameters),
     _lm_electrical_potential(adCoupledLowerValue("potential_lagrange_multiplier")),
     _primary_conductivity(getNeighborADMaterialProperty<Real>("primary_electrical_conductivity")),
@@ -45,7 +46,7 @@ InterfaceJouleHeatingConstraint::InterfaceJouleHeatingConstraint(const InputPara
 }
 
 ADReal
-InterfaceJouleHeatingConstraint::computeQpResidual(Moose::MortarType mortar_type)
+ADInterfaceJouleHeatingConstraint::computeQpResidual(Moose::MortarType mortar_type)
 {
   // calculate the harmonic means of the two material properties
   const ADReal C_sum = _primary_conductivity[_qp] + _secondary_conductivity[_qp];
@@ -67,8 +68,6 @@ InterfaceJouleHeatingConstraint::computeQpResidual(Moose::MortarType mortar_type
       auto source = -q_electric * (1.0 - _weight_factor) * _test_secondary[_i][_qp];
       return source;
     }
-      // case Moose::MortarType::Lower:
-      //   return 0.0; // not actually solving for a LM variable in this constraint
 
     default:
       return 0;
