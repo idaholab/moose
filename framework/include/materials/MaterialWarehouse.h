@@ -33,14 +33,10 @@ public:
    * Convenience methods for calling object setup methods that handle the extra neighbor and face
    * objects.
    */
-  virtual void initialSetup(THREAD_ID tid = 0) const;
-  virtual void timestepSetup(THREAD_ID tid = 0) const;
-  virtual void subdomainSetup(THREAD_ID tid = 0) const;
-  virtual void subdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
-  virtual void neighborSubdomainSetup(THREAD_ID tid = 0) const;
-  virtual void neighborSubdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
-  virtual void jacobianSetup(THREAD_ID tid = 0) const;
-  virtual void residualSetup(THREAD_ID tid = 0) const;
+  void setup(const ExecFlagType & exec_flag, THREAD_ID tid = 0) const override;
+  void subdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
+  void neighborSubdomainSetup(THREAD_ID tid = 0) const;
+  void neighborSubdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
   virtual void updateActive(THREAD_ID tid = 0);
   void sort(THREAD_ID tid = 0);
   ///@}

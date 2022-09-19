@@ -337,9 +337,7 @@ public:
 
   bool computingScalingResidual() const override final;
 
-  void initialSetup() override;
-  void timestepSetup() override;
-  void customSetup(const ExecFlagType & exec_type) override;
+  void setup(const ExecFlagType & exec_type) override;
 
   using SubProblem::haveADObjects;
   void haveADObjects(bool have_ad_objects) override;

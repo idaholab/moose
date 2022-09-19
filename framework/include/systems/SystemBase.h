@@ -876,14 +876,6 @@ public:
    */
   bool solutionStatesInitialized() const { return _solution_states_initialized; }
 
-  /// Setup Functions
-  virtual void initialSetup();
-  virtual void timestepSetup();
-  virtual void customSetup(const ExecFlagType & exec_type);
-  virtual void subdomainSetup();
-  virtual void residualSetup();
-  virtual void jacobianSetup();
-
   /**
    * Clear all dof indices from moose variables
    */
@@ -898,6 +890,9 @@ public:
    * Set the active vector tags for the scalar variables
    */
   void setActiveScalarVariableCoupleableVectorTags(const std::set<TagID> & vtags, THREAD_ID tid);
+
+  /// Setup Functions
+  virtual void setup(const ExecFlagType & exec_type);
 
 protected:
   /**

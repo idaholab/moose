@@ -41,7 +41,7 @@ void
 ComputeMarkerThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
-  _marker_whs.subdomainSetup(_tid);
+  _marker_whs.setup(EXEC_SUBDOMAIN, _tid);
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
   _marker_whs.updateVariableDependency(needed_moose_vars, _tid);

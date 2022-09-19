@@ -98,7 +98,7 @@ ComputeUserObjectsThread::subdomainChanged()
       needed_fe_var_vector_tags.insert(tag_deps.begin(), tag_deps.end());
     }
 
-    obj->subdomainSetup();
+    obj->setup(EXEC_SUBDOMAIN);
   }
   _fe_problem.getMaterialWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
       _subdomain, needed_fe_var_vector_tags, _tid);

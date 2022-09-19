@@ -49,19 +49,6 @@ public:
 
   ///@{
   /**
-   * Convenience methods for calling object setup methods.
-   */
-  virtual void initialSetup(THREAD_ID tid = 0) const;
-  virtual void timestepSetup(THREAD_ID tid = 0) const;
-  virtual void customSetup(const ExecFlagType & exec_type, THREAD_ID tid = 0) const;
-  virtual void subdomainSetup(THREAD_ID tid = 0) const;
-  virtual void subdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
-  virtual void jacobianSetup(THREAD_ID tid = 0) const;
-  virtual void residualSetup(THREAD_ID tid = 0) const;
-  ///@}
-
-  ///@{
-  /**
    * Methods for checking/getting variable kernels for a variable and SubdomainID
    */
   bool hasActiveVariableBlockObjects(unsigned int variable_id,
@@ -76,6 +63,18 @@ public:
    * Update the active status of Kernels
    */
   virtual void updateActive(THREAD_ID tid = 0) override;
+
+  /**
+   * generic setup function that will forward to the virtual interfaces based on the execution flag
+   */
+  virtual void setup(const ExecFlagType & exec_type, THREAD_ID tid = 0) const;
+
+  ///@{
+  /**
+   * Convenience methods for calling object setup methods.
+   */
+  virtual void subdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
+  ///@}
 
 protected:
   /// Variable based storage
@@ -147,70 +146,23 @@ MooseObjectWarehouse<T>::getActiveVariableBlockObjects(unsigned int variable_id,
 
 template <typename T>
 void
-MooseObjectWarehouse<T>::initialSetup(THREAD_ID tid /* = 0*/) const
+MooseObjectWarehouse<T>::setup(const ExecFlagType & exec_type, const THREAD_ID tid) const
 {
   checkThreadID(tid);
-  // Initial Setup should be called on all objects because they may become active later
   for (const auto & object : _all_objects[tid])
-    object->initialSetup();
-}
-
-template <typename T>
-void
-MooseObjectWarehouse<T>::timestepSetup(THREAD_ID tid /* = 0*/) const
-{
-  checkThreadID(tid);
-  for (const auto & object : _active_objects[tid])
-    object->timestepSetup();
-}
-
-template <typename T>
-void
-MooseObjectWarehouse<T>::customSetup(const ExecFlagType & exec_type, THREAD_ID tid /* = 0*/) const
-{
-  checkThreadID(tid);
-  for (const auto & object : _active_objects[tid])
-    object->customSetup(exec_type);
+    object->setup(exec_type);
 }
 
 template <typename T>
 void
 MooseObjectWarehouse<T>::subdomainSetup(SubdomainID id, THREAD_ID tid /* = 0*/) const
 {
-  checkThreadID(tid);
   if (hasActiveBlockObjects(id, tid))
   {
     const auto & objects = getActiveBlockObjects(id, tid);
     for (const auto & object : objects)
-      object->subdomainSetup();
+      object->setup(EXEC_SUBDOMAIN);
   }
-}
-
-template <typename T>
-void
-MooseObjectWarehouse<T>::subdomainSetup(THREAD_ID tid /* = 0*/) const
-{
-  checkThreadID(tid);
-  for (const auto & object : _active_objects[tid])
-    object->subdomainSetup();
-}
-
-template <typename T>
-void
-MooseObjectWarehouse<T>::jacobianSetup(THREAD_ID tid /* = 0*/) const
-{
-  checkThreadID(tid);
-  for (const auto & object : _active_objects[tid])
-    object->jacobianSetup();
-}
-
-template <typename T>
-void
-MooseObjectWarehouse<T>::residualSetup(THREAD_ID tid /* = 0*/) const
-{
-  checkThreadID(tid);
-  for (const auto & object : _active_objects[tid])
-    object->residualSetup();
 }
 
 template <typename T>

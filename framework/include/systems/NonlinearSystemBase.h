@@ -97,11 +97,7 @@ public:
   virtual bool computingInitialResidual() { return _computing_initial_residual; }
 
   // Setup Functions ////
-  virtual void initialSetup() override;
-  virtual void timestepSetup() override;
-  virtual void customSetup(const ExecFlagType & exec_type) override;
-  virtual void residualSetup() override;
-  virtual void jacobianSetup() override;
+  void setup(const ExecFlagType & exec_type) override;
 
   virtual void setupFiniteDifferencedPreconditioner() = 0;
   void setupFieldDecomposition();
@@ -355,13 +351,12 @@ public:
    */
   void onTimestepBegin();
 
-  using SystemBase::subdomainSetup;
   /**
    * Called from assembling when we hit a new subdomain
    * @param subdomain ID of the new subdomain
    * @param tid Thread ID
    */
-  virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
+  void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
 
   virtual void setSolution(const NumericVector<Number> & soln);
 

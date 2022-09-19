@@ -40,7 +40,7 @@ TestControl::TestControl(const InputParameters & parameters)
     getControllableValue<NonlinearVariableName>("parameter");
 
   else if (_test_type == "tid_warehouse_error")
-    _fe_problem.getControlWarehouse().initialSetup(12345);
+    _fe_problem.getControlWarehouse().setup(EXEC_INITIAL, 12345);
 
   else if (_test_type == "disable_executioner")
     getControllableValue<bool>("parameter");

@@ -29,6 +29,17 @@ public:
   static InputParameters validParams();
 
   /**
+   * generic setup function that will forward to the virtual interfaces based on the execution flag
+   */
+  void setup(const ExecFlagType & exec_type);
+
+  /**
+   * Return the execute on MultiMooseEnum for this object.
+   */
+  const ExecFlagEnum & getExecuteOnEnum() const;
+
+protected:
+  /**
    * Gets called at the beginning of the simulation before this object is asked to do its job
    */
   virtual void initialSetup();
@@ -60,22 +71,16 @@ public:
    */
   virtual void customSetup(const ExecFlagType & /*exec_type*/) {}
 
-  /**
-   * Return the execute on MultiMooseEnum for this object.
-   */
-  const ExecFlagEnum & getExecuteOnEnum() const;
-
-private:
-  /// Empty ExecFlagEnum for the case when the "execute_on" parameter is not included. This
-  /// is private because others should not be messing with it.
-  ExecFlagEnum _empty_execute_enum;
-
-protected:
   /// Execute settings for this oejct.
   const ExecFlagEnum & _execute_enum;
 
   /// Reference to FEProblemBase
   const ExecFlagType & _current_execute_flag;
+
+private:
+  /// Empty ExecFlagEnum for the case when the "execute_on" parameter is not included. This
+  /// is private because others should not be messing with it.
+  ExecFlagEnum _empty_execute_enum;
 
   // FEProblemBase::addMultiApp needs to reset the execution flags
   friend class FEProblemBase;

@@ -72,7 +72,7 @@ ComputeElemAuxVarsThread<AuxKernelType>::subdomainChanged()
         _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
     for (const auto & aux : kernels)
     {
-      aux->subdomainSetup();
+      aux->setup(EXEC_SUBDOMAIN);
       const std::set<MooseVariableFEBase *> & mv_deps = aux->getMooseVariableDependencies();
       const std::set<unsigned int> & mp_deps = aux->getMatPropDependencies();
       needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());

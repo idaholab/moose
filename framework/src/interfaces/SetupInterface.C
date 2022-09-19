@@ -38,6 +38,23 @@ SetupInterface::SetupInterface(const MooseObject * moose_object)
 SetupInterface::~SetupInterface() {}
 
 void
+SetupInterface::setup(const ExecFlagType & exec_type)
+{
+  if (exec_type == EXEC_INITIAL)
+    initialSetup();
+  else if (exec_type == EXEC_TIMESTEP_BEGIN)
+    timestepSetup();
+  else if (exec_type == EXEC_NONLINEAR)
+    jacobianSetup();
+  else if (exec_type == EXEC_LINEAR)
+    residualSetup();
+  else if (exec_type == EXEC_SUBDOMAIN)
+    subdomainSetup();
+  else
+    customSetup(exec_type);
+}
+
+void
 SetupInterface::initialSetup()
 {
 }

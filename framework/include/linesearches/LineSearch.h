@@ -34,14 +34,30 @@ public:
    */
   virtual void lineSearch() { mooseError("You must implement a line-search method."); }
 
+  /**
+   * generic setup function that will forward to the virtual interfaces based on the execution flag
+   */
+  void setup(const ExecFlagType & exec_type);
+
+protected:
   virtual void timestepSetup() {}
   virtual void customSetup(const ExecFlagType & /*exec_type*/) {}
   virtual void initialSetup() {}
 
-protected:
   /// Reference to the finite element problem
   FEProblem & _fe_problem;
 
   /// number of non-linear iterations
   size_t _nl_its;
 };
+
+inline void
+LineSearch::setup(const ExecFlagType & exec_type)
+{
+  if (exec_type == EXEC_INITIAL)
+    initialSetup();
+  else if (exec_type == EXEC_TIMESTEP_BEGIN)
+    timestepSetup();
+  else
+    customSetup(exec_type);
+}

@@ -245,45 +245,10 @@ VariableWarehouse::getActualFieldVariable<RealEigenVector>(unsigned int var_numb
 }
 
 void
-VariableWarehouse::initialSetup()
+VariableWarehouse::setup(const ExecFlagType & exec_type)
 {
   for (auto & pair : _all_objects)
-    pair.second->initialSetup();
-}
-
-void
-VariableWarehouse::timestepSetup()
-{
-  for (auto & pair : _all_objects)
-    pair.second->timestepSetup();
-}
-
-void
-VariableWarehouse::customSetup(const ExecFlagType & exec_type)
-{
-  for (auto & pair : _all_objects)
-    pair.second->customSetup(exec_type);
-}
-
-void
-VariableWarehouse::subdomainSetup()
-{
-  for (auto & pair : _all_objects)
-    pair.second->subdomainSetup();
-}
-
-void
-VariableWarehouse::jacobianSetup()
-{
-  for (auto & pair : _all_objects)
-    pair.second->jacobianSetup();
-}
-
-void
-VariableWarehouse::residualSetup()
-{
-  for (auto & pair : _all_objects)
-    pair.second->residualSetup();
+    pair.second->setup(exec_type);
 }
 
 void

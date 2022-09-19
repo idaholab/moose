@@ -174,22 +174,7 @@ public:
   /**
    * Call setup on a particular execute flag for all variables
    */
-  void customSetup(const ExecFlagType & exec_type);
-
-  /**
-   * Call subdomainSetup for all variables
-   */
-  void subdomainSetup();
-
-  /**
-   * Call residualSetup for all variables
-   */
-  void residualSetup();
-
-  /**
-   * Call jacobianSetup for all variables
-   */
-  void jacobianSetup();
+  void setup(const ExecFlagType & exec_type);
 
   /**
    * Clear all dof indices from each variable

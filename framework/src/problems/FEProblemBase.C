@@ -593,7 +593,7 @@ FEProblemBase::initialSetup()
 {
   TIME_SECTION("initialSetup", 2, "Performing Initial Setup");
 
-  SubProblem::initialSetup();
+  SubProblem::setup(EXEC_INITIAL);
 
   if (_skip_exception_check)
     mooseWarning("MOOSE may fail to catch an exception when the \"skip_exception_check\" parameter "
@@ -715,7 +715,7 @@ FEProblemBase::initialSetup()
   }
 
   // Perform output related setups
-  _app.getOutputWarehouse().initialSetup();
+  _app.getOutputWarehouse().setup(EXEC_INITIAL);
 
   // Flush all output to _console that occur during construction and initialization of objects
   _app.getOutputWarehouse().mooseConsole();
@@ -762,7 +762,7 @@ FEProblemBase::initialSetup()
       theWarehouse(), getAuxiliarySystem(), _app.getExecuteOnEnum(), userobjs, depend_objects_ic);
 
   for (auto obj : userobjs)
-    obj->initialSetup();
+    obj->setup(EXEC_INITIAL);
 
   // check if jacobian calculation is done in userobject
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
@@ -781,7 +781,7 @@ FEProblemBase::initialSetup()
     {
       reinitScalars(tid); // initialize scalars so they are properly sized for use as input into
                           // ParsedFunctions
-      _functions.initialSetup(tid);
+      _functions.setup(EXEC_INITIAL, tid);
     }
   }
 
@@ -821,7 +821,7 @@ FEProblemBase::initialSetup()
       _interface_materials.sort(tid);
 
       // Call initialSetup on all material objects
-      _all_materials.initialSetup(tid);
+      _all_materials.setup(EXEC_INITIAL, tid);
 
       // Discrete materials may insert additional dependencies on materials during the initial
       // setup. Therefore we resolve the dependencies once more, now with the additional
@@ -855,10 +855,10 @@ FEProblemBase::initialSetup()
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    _internal_side_indicators.initialSetup(tid);
-    _indicators.initialSetup(tid);
+    _internal_side_indicators.setup(EXEC_INITIAL, tid);
+    _indicators.setup(EXEC_INITIAL, tid);
     _markers.sort(tid);
-    _markers.initialSetup(tid);
+    _markers.setup(EXEC_INITIAL, tid);
   }
 
 #ifdef LIBMESH_ENABLE_AMR
@@ -887,14 +887,14 @@ FEProblemBase::initialSetup()
   }
 
   // Call initialSetup on the nonlinear system
-  _nl->initialSetup();
+  _nl->setup(EXEC_INITIAL);
 
   // Auxilary variable initialSetup calls
-  _aux->initialSetup();
+  _aux->setup(EXEC_INITIAL);
 
   if (_displaced_problem)
     // initialSetup for displaced systems
-    _displaced_problem->initialSetup();
+    _displaced_problem->setup(EXEC_INITIAL);
 
   _nl->setSolution(*(_nl->system().current_local_solution.get()));
 
@@ -961,14 +961,14 @@ FEProblemBase::initialSetup()
   if (_multi_apps.hasObjects())
   {
     TIME_SECTION("initialSetupMultiApps", 2, "Initializing MultiApps", false);
-    _multi_apps.initialSetup();
+    _multi_apps.setup(EXEC_INITIAL);
   }
 
   // Call initialSetup on the transfers
   {
     TIME_SECTION("initialSetupTransfers", 2, "Initializing Transfers");
 
-    _transfers.initialSetup();
+    _transfers.setup(EXEC_INITIAL);
 
     // Call initialSetup on the MultiAppTransfers to be executed on TO_MULTIAPP
     const auto & to_multi_app_objects = _to_multi_app_transfers.getActiveObjects();
@@ -1126,7 +1126,7 @@ FEProblemBase::initialSetup()
     TIME_SECTION("lineSearchInitialSetup", 5, "Initializing Line Search");
 
     if (_line_search)
-      _line_search->initialSetup();
+      _line_search->setup(EXEC_INITIAL);
   }
 
   // Perform Reporter get/declare check
@@ -1138,7 +1138,7 @@ FEProblemBase::initialSetup()
 void
 FEProblemBase::timestepSetup()
 {
-  SubProblem::timestepSetup();
+  SubProblem::setup(EXEC_TIMESTEP_BEGIN);
 
   if (_t_step > 1 && _num_grid_steps)
   {
@@ -1195,7 +1195,7 @@ FEProblemBase::timestepSetup()
   }
 
   if (_line_search)
-    _line_search->timestepSetup();
+    _line_search->setup(EXEC_TIMESTEP_BEGIN);
 
   // Random interface objects
   for (const auto & it : _random_data_objects)
@@ -1204,31 +1204,31 @@ FEProblemBase::timestepSetup()
   unsigned int n_threads = libMesh::n_threads();
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    _all_materials.timestepSetup(tid);
-    _functions.timestepSetup(tid);
+    _all_materials.setup(EXEC_TIMESTEP_BEGIN, tid);
+    _functions.setup(EXEC_TIMESTEP_BEGIN, tid);
   }
 
-  _aux->timestepSetup();
-  _nl->timestepSetup();
+  _aux->setup(EXEC_TIMESTEP_BEGIN);
+  _nl->setup(EXEC_TIMESTEP_BEGIN);
 
   if (_displaced_problem)
     // timestepSetup for displaced systems
-    _displaced_problem->timestepSetup();
+    _displaced_problem->setup(EXEC_TIMESTEP_BEGIN);
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    _internal_side_indicators.timestepSetup(tid);
-    _indicators.timestepSetup(tid);
-    _markers.timestepSetup(tid);
+    _internal_side_indicators.setup(EXEC_TIMESTEP_BEGIN, tid);
+    _indicators.setup(EXEC_TIMESTEP_BEGIN, tid);
+    _markers.setup(EXEC_TIMESTEP_BEGIN, tid);
   }
 
   std::vector<UserObject *> userobjs;
   theWarehouse().query().condition<AttribSystem>("UserObject").queryIntoUnsorted(userobjs);
   for (auto obj : userobjs)
-    obj->timestepSetup();
+    obj->setup(EXEC_TIMESTEP_BEGIN);
 
   // Timestep setup of output objects
-  _app.getOutputWarehouse().timestepSetup();
+  _app.getOutputWarehouse().setup(EXEC_TIMESTEP_BEGIN);
 
   if (_requires_nonlocal_coupling)
     if (_nonlocal_kernels.hasActiveObjects() || _nonlocal_integrated_bcs.hasActiveObjects())
@@ -2088,7 +2088,7 @@ FEProblemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 
   // Call the subdomain methods of the output system, these are not threaded so only call it once
   if (tid == 0)
-    _app.getOutputWarehouse().subdomainSetup();
+    _app.getOutputWarehouse().setup(EXEC_SUBDOMAIN);
 
   _nl->subdomainSetup(subdomain, tid);
 
@@ -3774,39 +3774,39 @@ FEProblemBase::executeAllObjects(const ExecFlagType & /*exec_type*/)
 }
 
 void
-FEProblemBase::customSetup(const ExecFlagType & exec_type)
+FEProblemBase::setup(const ExecFlagType & exec_type)
 {
-  SubProblem::customSetup(exec_type);
+  SubProblem::setup(exec_type);
 
   if (_line_search)
-    _line_search->customSetup(exec_type);
+    _line_search->setup(exec_type);
 
   unsigned int n_threads = libMesh::n_threads();
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    _all_materials.customSetup(exec_type, tid);
-    _functions.customSetup(exec_type, tid);
+    _all_materials.setup(exec_type, tid);
+    _functions.setup(exec_type, tid);
   }
 
-  _aux->customSetup(exec_type);
-  _nl->customSetup(exec_type);
+  _aux->setup(exec_type);
+  _nl->setup(exec_type);
 
   if (_displaced_problem)
-    _displaced_problem->customSetup(exec_type);
+    _displaced_problem->setup(exec_type);
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    _internal_side_indicators.customSetup(exec_type, tid);
-    _indicators.customSetup(exec_type, tid);
-    _markers.customSetup(exec_type, tid);
+    _internal_side_indicators.setup(exec_type, tid);
+    _indicators.setup(exec_type, tid);
+    _markers.setup(exec_type, tid);
   }
 
   std::vector<UserObject *> userobjs;
   theWarehouse().query().condition<AttribSystem>("UserObject").queryIntoUnsorted(userobjs);
   for (auto obj : userobjs)
-    obj->customSetup(exec_type);
+    obj->setup(exec_type);
 
-  _app.getOutputWarehouse().customSetup(exec_type);
+  _app.getOutputWarehouse().setup(exec_type);
 }
 
 void
@@ -3818,12 +3818,7 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   if (exec_type != EXEC_INITIAL)
     executeControls(exec_type);
 
-  // intentially call this after executing controls because the setups may rely on the controls
-  // FIXME: we skip the following flags because they have dedicated setup functions in
-  //        SetupInterface and it may not be appropriate to call them here.
-  if (!(exec_type == EXEC_INITIAL || exec_type == EXEC_TIMESTEP_BEGIN ||
-        exec_type == EXEC_SUBDOMAIN || exec_type == EXEC_NONLINEAR || exec_type == EXEC_LINEAR))
-    customSetup(exec_type);
+  setup(exec_type);
 
   // Samplers; EXEC_INITIAL is not called because the Sampler::init() method that is called after
   // construction makes the first Sampler::execute() call. This ensures that the random number
@@ -5601,7 +5596,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
     computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
 
-    _aux->residualSetup();
+    _aux->setup(EXEC_LINEAR);
 
     if (_displaced_problem)
     {
@@ -5637,8 +5632,8 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
     for (THREAD_ID tid = 0; tid < n_threads; tid++)
     {
-      _all_materials.residualSetup(tid);
-      _functions.residualSetup(tid);
+      _all_materials.setup(EXEC_LINEAR, tid);
+      _functions.setup(EXEC_LINEAR, tid);
     }
 
     _nl->computeTimeDerivatives();
@@ -5666,7 +5661,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
     _current_execute_on_flag = EXEC_NONE;
 
-    _app.getOutputWarehouse().residualSetup();
+    _app.getOutputWarehouse().setup(EXEC_LINEAR);
 
     _safe_access_tagged_vectors = false;
     _safe_access_tagged_matrices = false;
@@ -5832,7 +5827,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
 
-  _aux->residualSetup();
+  _aux->setup(EXEC_LINEAR);
 
   if (_displaced_problem)
   {
@@ -5868,8 +5863,8 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    _all_materials.residualSetup(tid);
-    _functions.residualSetup(tid);
+    _all_materials.setup(EXEC_LINEAR, tid);
+    _functions.setup(EXEC_LINEAR, tid);
   }
 
   _nl->computeTimeDerivatives();
@@ -5897,7 +5892,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   _current_execute_on_flag = EXEC_NONE;
 
-  _app.getOutputWarehouse().residualSetup();
+  _app.getOutputWarehouse().setup(EXEC_LINEAR);
 
   _safe_access_tagged_vectors = false;
 
@@ -6000,7 +5995,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
 
-    _aux->jacobianSetup();
+    _aux->setup(EXEC_NONLINEAR);
 
     if (_displaced_problem)
     {
@@ -6010,8 +6005,8 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     for (unsigned int tid = 0; tid < n_threads; tid++)
     {
-      _all_materials.jacobianSetup(tid);
-      _functions.jacobianSetup(tid);
+      _all_materials.setup(EXEC_NONLINEAR, tid);
+      _functions.setup(EXEC_NONLINEAR, tid);
     }
 
     // When computing the initial Jacobian for automatic variable scaling we need to make sure
@@ -6027,7 +6022,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     executeControls(EXEC_NONLINEAR);
 
-    _app.getOutputWarehouse().jacobianSetup();
+    _app.getOutputWarehouse().setup(EXEC_NONLINEAR);
 
     _safe_access_tagged_matrices = false;
 
@@ -6115,9 +6110,9 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & /*sys*/,
   _lower.swap(lower);
   _upper.swap(upper);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _all_materials.residualSetup(tid);
+    _all_materials.setup(EXEC_LINEAR, tid);
 
-  _aux->residualSetup();
+  _aux->setup(EXEC_LINEAR);
   _aux->compute(EXEC_LINEAR);
   _lower.swap(lower);
   _upper.swap(upper);
@@ -7569,17 +7564,17 @@ FEProblemBase::resizeMaterialData(const Moose::MaterialDataType data_type,
 void
 FEProblemBase::residualSetup()
 {
-  SubProblem::residualSetup();
+  SubProblem::setup(EXEC_LINEAR);
   if (_displaced_problem)
-    _displaced_problem->residualSetup();
+    _displaced_problem->SubProblem::setup(EXEC_LINEAR);
 }
 
 void
 FEProblemBase::jacobianSetup()
 {
-  SubProblem::jacobianSetup();
+  SubProblem::setup(EXEC_NONLINEAR);
   if (_displaced_problem)
-    _displaced_problem->jacobianSetup();
+    _displaced_problem->SubProblem::setup(EXEC_NONLINEAR);
 }
 
 MooseAppCoordTransform &

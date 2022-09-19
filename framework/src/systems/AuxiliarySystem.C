@@ -86,127 +86,33 @@ AuxiliarySystem::addDotVectors()
 }
 
 void
-AuxiliarySystem::initialSetup()
+AuxiliarySystem::setup(const ExecFlagType & exec_type)
 {
-  TIME_SECTION("initialSetup", 3, "Initializing Auxiliary System");
+  SystemBase::setup(exec_type);
 
-  SystemBase::initialSetup();
+  if (exec_type == EXEC_INITIAL)
+    for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+    {
+      _aux_scalar_storage.sort(tid);
+      _nodal_aux_storage.sort(tid);
+      _mortar_nodal_aux_storage.sort(tid);
+      _nodal_vec_aux_storage.sort(tid);
+      _nodal_array_aux_storage.sort(tid);
+      _elemental_aux_storage.sort(tid);
+      _elemental_vec_aux_storage.sort(tid);
+      _elemental_array_aux_storage.sort(tid);
+    }
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    _aux_scalar_storage.sort(tid);
-    _aux_scalar_storage.initialSetup(tid);
-
-    _nodal_aux_storage.sort(tid);
-    _nodal_aux_storage.initialSetup(tid);
-
-    _mortar_nodal_aux_storage.sort(tid);
-    _mortar_nodal_aux_storage.initialSetup(tid);
-
-    _nodal_vec_aux_storage.sort(tid);
-    _nodal_vec_aux_storage.initialSetup(tid);
-
-    _nodal_array_aux_storage.sort(tid);
-    _nodal_array_aux_storage.initialSetup(tid);
-
-    _elemental_aux_storage.sort(tid);
-    _elemental_aux_storage.initialSetup(tid);
-
-    _elemental_vec_aux_storage.sort(tid);
-    _elemental_vec_aux_storage.initialSetup(tid);
-
-    _elemental_array_aux_storage.sort(tid);
-    _elemental_array_aux_storage.initialSetup(tid);
-  }
-}
-
-void
-AuxiliarySystem::timestepSetup()
-{
-  SystemBase::timestepSetup();
-
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    _aux_scalar_storage.timestepSetup(tid);
-    _nodal_aux_storage.timestepSetup(tid);
-    _mortar_nodal_aux_storage.timestepSetup(tid);
-    _nodal_vec_aux_storage.timestepSetup(tid);
-    _nodal_array_aux_storage.timestepSetup(tid);
-    _elemental_aux_storage.timestepSetup(tid);
-    _elemental_vec_aux_storage.timestepSetup(tid);
-    _elemental_array_aux_storage.timestepSetup(tid);
-  }
-}
-
-void
-AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
-{
-  SystemBase::customSetup(exec_type);
-
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    _aux_scalar_storage.customSetup(exec_type, tid);
-    _nodal_aux_storage.customSetup(exec_type, tid);
-    _mortar_nodal_aux_storage.customSetup(exec_type, tid);
-    _nodal_vec_aux_storage.customSetup(exec_type, tid);
-    _nodal_array_aux_storage.customSetup(exec_type, tid);
-    _elemental_aux_storage.customSetup(exec_type, tid);
-    _elemental_vec_aux_storage.customSetup(exec_type, tid);
-    _elemental_array_aux_storage.customSetup(exec_type, tid);
-  }
-}
-
-void
-AuxiliarySystem::subdomainSetup()
-{
-  SystemBase::subdomainSetup();
-
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    _aux_scalar_storage.subdomainSetup(tid);
-    _nodal_aux_storage.subdomainSetup(tid);
-    _mortar_nodal_aux_storage.subdomainSetup(tid);
-    _nodal_vec_aux_storage.subdomainSetup(tid);
-    _nodal_array_aux_storage.subdomainSetup(tid);
-    _elemental_aux_storage.subdomainSetup(tid);
-    _elemental_vec_aux_storage.subdomainSetup(tid);
-    _elemental_array_aux_storage.subdomainSetup(tid);
-  }
-}
-
-void
-AuxiliarySystem::jacobianSetup()
-{
-  SystemBase::jacobianSetup();
-
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    _aux_scalar_storage.jacobianSetup(tid);
-    _nodal_aux_storage.jacobianSetup(tid);
-    _mortar_nodal_aux_storage.jacobianSetup(tid);
-    _nodal_vec_aux_storage.jacobianSetup(tid);
-    _nodal_array_aux_storage.jacobianSetup(tid);
-    _elemental_aux_storage.jacobianSetup(tid);
-    _elemental_vec_aux_storage.jacobianSetup(tid);
-    _elemental_array_aux_storage.jacobianSetup(tid);
-  }
-}
-
-void
-AuxiliarySystem::residualSetup()
-{
-  SystemBase::residualSetup();
-
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    _aux_scalar_storage.residualSetup(tid);
-    _nodal_aux_storage.residualSetup(tid);
-    _mortar_nodal_aux_storage.residualSetup(tid);
-    _nodal_vec_aux_storage.residualSetup(tid);
-    _nodal_array_aux_storage.residualSetup(tid);
-    _elemental_aux_storage.residualSetup(tid);
-    _elemental_vec_aux_storage.residualSetup(tid);
-    _elemental_array_aux_storage.residualSetup(tid);
+    _aux_scalar_storage.setup(exec_type, tid);
+    _nodal_aux_storage.setup(exec_type, tid);
+    _mortar_nodal_aux_storage.setup(exec_type, tid);
+    _nodal_vec_aux_storage.setup(exec_type, tid);
+    _nodal_array_aux_storage.setup(exec_type, tid);
+    _elemental_aux_storage.setup(exec_type, tid);
+    _elemental_vec_aux_storage.setup(exec_type, tid);
+    _elemental_array_aux_storage.setup(exec_type, tid);
   }
 }
 

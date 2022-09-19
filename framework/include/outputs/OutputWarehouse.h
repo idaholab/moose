@@ -253,40 +253,10 @@ private:
   void addOutputFilename(const OutFileBase & filename);
 
   /**
-   * Calls the initialSetup function for each of the output objects
-   * @see FEProblemBase::initialSetup()
-   */
-  void initialSetup();
-
-  /**
-   * Calls the timestepSetup function for each of the output objects
-   * @see FEProblemBase::timestepSetup()
-   */
-  void timestepSetup();
-
-  /**
    * Calls the setup function for each of the output objects
-   * @see FEProblemBase::customSetup(const ExecFlagType & exec_type)
+   * @see FEProblemBase::setup(const ExecFlagType & exec_type)
    */
-  void customSetup(const ExecFlagType & exec_type);
-
-  /**
-   * Calls the jacobianSetup function for each of the output objects
-   * @see FEProblemBase::computeJacobian
-   */
-  void jacobianSetup();
-
-  /**
-   * Calls the residualSetup function for each of the output objects
-   * @see FEProblemBase::computeResidualTyp
-   */
-  void residualSetup();
-
-  /**
-   * Calls the subdomainSetup function for each of the output objects
-   * @see FEProblemBase::setupSubdomain
-   */
-  void subdomainSetup();
+  void setup(const ExecFlagType & exec_type);
 
   /**
    * Insert variable names for hiding via the OutoutInterface

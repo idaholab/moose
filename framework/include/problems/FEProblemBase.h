@@ -344,11 +344,11 @@ public:
    */
   virtual std::vector<VariableName> getVariableNames();
 
-  void initialSetup() override;
-  void timestepSetup() override;
-  void customSetup(const ExecFlagType & exec_type) override;
-  void residualSetup() override;
-  void jacobianSetup() override;
+  virtual void initialSetup();
+  virtual void timestepSetup();
+  void setup(const ExecFlagType & exec_type) override;
+  void residualSetup();
+  void jacobianSetup();
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) override;
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) override;

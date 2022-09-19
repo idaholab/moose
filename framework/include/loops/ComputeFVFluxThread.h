@@ -760,7 +760,7 @@ protected:
 
   void postFace(const FaceInfo & fi) override;
   void compute(FVFaceResidualObject & ro, const FaceInfo & fi) override { ro.computeResidual(fi); }
-  void setup(SetupInterface & obj) override { obj.residualSetup(); }
+  void setup(SetupInterface & obj) override { obj.setup(EXEC_LINEAR); }
   void addCached() override { _fe_problem.addCachedResidual(_tid); }
 };
 
@@ -805,7 +805,7 @@ protected:
 
   void postFace(const FaceInfo & fi) override;
   void compute(FVFaceResidualObject & ro, const FaceInfo & fi) override { ro.computeJacobian(fi); }
-  void setup(SetupInterface & obj) override { obj.jacobianSetup(); }
+  void setup(SetupInterface & obj) override { obj.setup(EXEC_NONLINEAR); }
   void addCached() override { _fe_problem.addCachedJacobian(_tid); }
 };
 
@@ -859,7 +859,7 @@ protected:
   {
     ro.computeResidualAndJacobian(fi);
   }
-  void setup(SetupInterface & obj) override { obj.residualSetup(); }
+  void setup(SetupInterface & obj) override { obj.setup(EXEC_LINEAR); }
   void addCached() override
   {
     _fe_problem.addCachedResidual(_tid);

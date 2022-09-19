@@ -26,8 +26,6 @@ class ExecuteMooseObjectWarehouse : public MooseObjectWarehouse<T>
 {
 public:
   using MooseObjectWarehouse<T>::checkThreadID;
-  using MooseObjectWarehouse<T>::initialSetup;
-  using MooseObjectWarehouse<T>::timestepSetup;
   using MooseObjectWarehouse<T>::subdomainSetup;
 
   /**
@@ -75,12 +73,8 @@ public:
   ///@{
   /**
    * Convenience methods for calling object setup methods.
-   *
-   * Limits call to these methods only to objects being executed on linear/nonlinear iterations.
    */
-  void jacobianSetup(THREAD_ID tid = 0) const override;
-  void residualSetup(THREAD_ID tid = 0) const override;
-  void setup(const ExecFlagType & exec_flag, THREAD_ID tid = 0) const;
+  void setup(const ExecFlagType & exec_flag, THREAD_ID tid = 0) const override;
   ///@}
 
   /**
@@ -162,39 +156,17 @@ ExecuteMooseObjectWarehouse<T>::updateActive(THREAD_ID tid /* = 0 */)
 
 template <typename T>
 void
-ExecuteMooseObjectWarehouse<T>::jacobianSetup(THREAD_ID tid /* = 0*/) const
+ExecuteMooseObjectWarehouse<T>::setup(const ExecFlagType & exec_flag, const THREAD_ID tid) const
 {
   checkThreadID(tid);
-  const auto iter = _execute_objects.find(EXEC_NONLINEAR);
-  if (iter != _execute_objects.end())
-    iter->second.jacobianSetup(tid);
-}
-
-template <typename T>
-void
-ExecuteMooseObjectWarehouse<T>::residualSetup(THREAD_ID tid /* = 0*/) const
-{
-  checkThreadID(tid);
-  const auto iter = _execute_objects.find(EXEC_LINEAR);
-  if (iter != _execute_objects.end())
-    iter->second.residualSetup(tid);
-}
-
-template <typename T>
-void
-ExecuteMooseObjectWarehouse<T>::setup(const ExecFlagType & exec_flag, THREAD_ID tid /* = 0*/) const
-{
-  checkThreadID(tid);
-  if (exec_flag == EXEC_INITIAL)
-    initialSetup(tid);
-  else if (exec_flag == EXEC_TIMESTEP_BEGIN)
-    timestepSetup(tid);
-  else if (exec_flag == EXEC_SUBDOMAIN)
-    subdomainSetup(tid);
-  else if (exec_flag == EXEC_NONLINEAR)
-    jacobianSetup(tid);
-  else if (exec_flag == EXEC_LINEAR)
-    residualSetup(tid);
+  if (exec_flag == EXEC_NONLINEAR || exec_flag == EXEC_LINEAR)
+  {
+    const auto iter = _execute_objects.find(exec_flag);
+    if (iter != _execute_objects.end())
+      iter->second.setup(exec_flag, tid);
+  }
+  else
+    MooseObjectWarehouse<T>::setup(exec_flag, tid);
 }
 
 template <typename T>

@@ -51,8 +51,8 @@ ComputeIndicatorThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
-  _indicator_whs.subdomainSetup(_tid);
-  _internal_side_indicators.subdomainSetup(_tid);
+  _indicator_whs.setup(EXEC_SUBDOMAIN, _tid);
+  _internal_side_indicators.setup(EXEC_SUBDOMAIN, _tid);
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
   _indicator_whs.updateVariableDependency(needed_moose_vars, _tid);

@@ -339,10 +339,10 @@ public:
   DotType dot(const ElemPointArg & elem_point, unsigned int state = 0) const;
   ///@}
 
-  virtual void residualSetup();
-  virtual void jacobianSetup();
-  virtual void timestepSetup();
-  virtual void customSetup(const ExecFlagType & exec_type);
+  /**
+   * generic setup function that will forward to the virtual interfaces based on the execution flag
+   */
+  void setup(const ExecFlagType & exec_type);
 
   /**
    * Set how often to clear the functor evaluation cache
@@ -375,6 +375,11 @@ public:
   virtual bool isConstant() const { return false; }
 
 protected:
+  virtual void residualSetup();
+  virtual void jacobianSetup();
+  virtual void timestepSetup();
+  virtual void customSetup(const ExecFlagType & exec_type);
+
   /**
    * Evaluate the functor with a given element. Some example implementations of this method
    * could compute an element-average or evaluate at the element centroid
@@ -652,6 +657,20 @@ private:
   /// name of the functor
   MooseFunctorName _functor_name;
 };
+
+template <typename T>
+void
+FunctorBase<T>::setup(const ExecFlagType & exec_type)
+{
+  if (exec_type == EXEC_TIMESTEP_BEGIN)
+    timestepSetup();
+  else if (exec_type == EXEC_NONLINEAR)
+    jacobianSetup();
+  else if (exec_type == EXEC_LINEAR)
+    residualSetup();
+  else
+    customSetup(exec_type);
+}
 
 template <typename T>
 template <typename SpaceArg>
@@ -989,13 +1008,10 @@ public:
   /**
    * Virtual methods meant to be used for handling functor evaluation cache clearance
    */
-  virtual void timestepSetup() = 0;
-  virtual void residualSetup() = 0;
-  virtual void jacobianSetup() = 0;
-  virtual void customSetup(const ExecFlagType & /*exec_type*/) = 0;
   virtual bool wrapsNull() const = 0;
   virtual std::string returnType() const = 0;
   virtual bool isConstant() const = 0;
+  virtual void setup(const ExecFlagType & /*exec_type*/) = 0;
   ///@}
 };
 
@@ -1032,6 +1048,8 @@ public:
       _wrapped(_owned.get())
   {
   }
+
+  void setup(const ExecFlagType & exec_type) override final { FunctorBase<T>::setup(exec_type); }
 
   /**
    * Prevent wrapping of a temporary object. If we are to own a functor, the unique_ptr constructor
@@ -1094,22 +1112,22 @@ public:
   void timestepSetup() override
   {
     if (_owned)
-      _owned->timestepSetup();
+      _owned->setup(EXEC_TIMESTEP_BEGIN);
   }
   void customSetup(const ExecFlagType & exec_type) override
   {
     if (_owned)
-      _owned->customSetup(exec_type);
+      _owned->setup(exec_type);
   }
   void residualSetup() override
   {
     if (_owned)
-      _owned->residualSetup();
+      _owned->setup(EXEC_LINEAR);
   }
   void jacobianSetup() override
   {
     if (_owned)
-      _owned->jacobianSetup();
+      _owned->setup(EXEC_NONLINEAR);
   }
 
   bool isConstant() const override { return _wrapped->isConstant(); }

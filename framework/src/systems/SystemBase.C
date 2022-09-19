@@ -1551,45 +1551,10 @@ SystemBase::computingScalingJacobian() const
 }
 
 void
-SystemBase::initialSetup()
+SystemBase::setup(const ExecFlagType & exec_type)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _vars[tid].initialSetup();
-}
-
-void
-SystemBase::timestepSetup()
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _vars[tid].timestepSetup();
-}
-
-void
-SystemBase::customSetup(const ExecFlagType & exec_type)
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _vars[tid].customSetup(exec_type);
-}
-
-void
-SystemBase::subdomainSetup()
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _vars[tid].subdomainSetup();
-}
-
-void
-SystemBase::residualSetup()
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _vars[tid].residualSetup();
-}
-
-void
-SystemBase::jacobianSetup()
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _vars[tid].jacobianSetup();
+    _vars[tid].setup(exec_type);
 }
 
 void

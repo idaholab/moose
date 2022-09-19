@@ -1135,30 +1135,12 @@ DisplacedProblem::computingScalingResidual() const
 }
 
 void
-DisplacedProblem::initialSetup()
+DisplacedProblem::setup(const ExecFlagType & exec_type)
 {
-  SubProblem::initialSetup();
+  SubProblem::setup(exec_type);
 
-  _displaced_nl.initialSetup();
-  _displaced_aux.initialSetup();
-}
-
-void
-DisplacedProblem::timestepSetup()
-{
-  SubProblem::timestepSetup();
-
-  _displaced_nl.timestepSetup();
-  _displaced_aux.timestepSetup();
-}
-
-void
-DisplacedProblem::customSetup(const ExecFlagType & exec_type)
-{
-  SubProblem::customSetup(exec_type);
-
-  _displaced_nl.customSetup(exec_type);
-  _displaced_aux.customSetup(exec_type);
+  _displaced_nl.setup(exec_type);
+  _displaced_aux.setup(exec_type);
 }
 
 void

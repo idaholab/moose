@@ -48,34 +48,26 @@ MaterialWarehouse::operator[](Moose::MaterialDataType data_type) const
 }
 
 void
-MaterialWarehouse::initialSetup(THREAD_ID tid /*=0*/) const
+MaterialWarehouse::setup(const ExecFlagType & exec_flag, const THREAD_ID tid) const
 {
-  MooseObjectWarehouse<MaterialBase>::initialSetup(tid);
-  _neighbor_materials.initialSetup(tid);
-  _face_materials.initialSetup(tid);
-  _interface_materials.initialSetup(tid);
-}
-
-void
-MaterialWarehouse::timestepSetup(THREAD_ID tid /*=0*/) const
-{
-  MooseObjectWarehouse<MaterialBase>::timestepSetup(tid);
-  _neighbor_materials.timestepSetup(tid);
-  _face_materials.timestepSetup(tid);
-  _interface_materials.timestepSetup(tid);
-}
-
-void
-MaterialWarehouse::subdomainSetup(THREAD_ID tid /*=0*/) const
-{
-  MooseObjectWarehouse<MaterialBase>::subdomainSetup(tid);
-  _face_materials.subdomainSetup(tid);
+  if (exec_flag == EXEC_SUBDOMAIN)
+  {
+    MooseObjectWarehouse<MaterialBase>::setup(exec_flag, tid);
+    _face_materials.setup(exec_flag, tid);
+  }
+  else
+  {
+    MooseObjectWarehouse<MaterialBase>::setup(exec_flag, tid);
+    _face_materials.setup(exec_flag, tid);
+    _neighbor_materials.setup(exec_flag, tid);
+    _interface_materials.setup(exec_flag, tid);
+  }
 }
 
 void
 MaterialWarehouse::neighborSubdomainSetup(THREAD_ID tid /*=0*/) const
 {
-  _neighbor_materials.subdomainSetup(tid);
+  _neighbor_materials.setup(EXEC_SUBDOMAIN, tid);
 }
 
 void
@@ -89,24 +81,6 @@ void
 MaterialWarehouse::neighborSubdomainSetup(SubdomainID id, THREAD_ID tid /*=0*/) const
 {
   _neighbor_materials.subdomainSetup(id, tid);
-}
-
-void
-MaterialWarehouse::residualSetup(THREAD_ID tid /*=0*/) const
-{
-  MooseObjectWarehouse<MaterialBase>::residualSetup(tid);
-  _neighbor_materials.residualSetup(tid);
-  _face_materials.residualSetup(tid);
-  _interface_materials.residualSetup(tid);
-}
-
-void
-MaterialWarehouse::jacobianSetup(THREAD_ID tid /*=0*/) const
-{
-  MooseObjectWarehouse<MaterialBase>::jacobianSetup(tid);
-  _neighbor_materials.jacobianSetup(tid);
-  _face_materials.jacobianSetup(tid);
-  _interface_materials.jacobianSetup(tid);
 }
 
 void

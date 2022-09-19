@@ -46,26 +46,10 @@ OutputWarehouse::~OutputWarehouse()
 }
 
 void
-OutputWarehouse::initialSetup()
-{
-  TIME_SECTION("initialSetup", 5, "Setting Up Outputs");
-
-  for (const auto & obj : _all_objects)
-    obj->initialSetup();
-}
-
-void
-OutputWarehouse::timestepSetup()
+OutputWarehouse::setup(const ExecFlagType & exec_type)
 {
   for (const auto & obj : _all_objects)
-    obj->timestepSetup();
-}
-
-void
-OutputWarehouse::customSetup(const ExecFlagType & exec_type)
-{
-  for (const auto & obj : _all_objects)
-    obj->customSetup(exec_type);
+    obj->setup(exec_type);
 }
 
 void
@@ -73,27 +57,6 @@ OutputWarehouse::solveSetup()
 {
   for (const auto & obj : _all_objects)
     obj->solveSetup();
-}
-
-void
-OutputWarehouse::jacobianSetup()
-{
-  for (const auto & obj : _all_objects)
-    obj->jacobianSetup();
-}
-
-void
-OutputWarehouse::residualSetup()
-{
-  for (const auto & obj : _all_objects)
-    obj->residualSetup();
-}
-
-void
-OutputWarehouse::subdomainSetup()
-{
-  for (const auto & obj : _all_objects)
-    obj->subdomainSetup();
 }
 
 void

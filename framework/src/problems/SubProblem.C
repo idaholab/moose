@@ -1007,48 +1007,21 @@ SubProblem::clearAllDofIndices()
 }
 
 void
-SubProblem::timestepSetup()
+SubProblem::setup(const ExecFlagType & exec_type)
 {
+  if (exec_type == EXEC_INITIAL)
+    for (const auto & functors : _functors)
+      for (const auto & pr : functors)
+        if (pr.second->wrapsNull())
+          mooseError("No functor ever provided with name '",
+                     removeSubstring(pr.first, "wraps_"),
+                     "', which was requested by '",
+                     MooseUtils::join(libmesh_map_find(_functor_to_requestors, pr.first), ","),
+                     "'.");
+
   for (auto & map : _functors)
     for (auto & pr : map)
-      pr.second->timestepSetup();
-}
-
-void
-SubProblem::customSetup(const ExecFlagType & exec_type)
-{
-  for (auto & map : _functors)
-    for (auto & pr : map)
-      pr.second->customSetup(exec_type);
-}
-
-void
-SubProblem::residualSetup()
-{
-  for (auto & map : _functors)
-    for (auto & pr : map)
-      pr.second->residualSetup();
-}
-
-void
-SubProblem::jacobianSetup()
-{
-  for (auto & map : _functors)
-    for (auto & pr : map)
-      pr.second->jacobianSetup();
-}
-
-void
-SubProblem::initialSetup()
-{
-  for (const auto & functors : _functors)
-    for (const auto & pr : functors)
-      if (pr.second->wrapsNull())
-        mooseError("No functor ever provided with name '",
-                   removeSubstring(pr.first, "wraps_"),
-                   "', which was requested by '",
-                   MooseUtils::join(libmesh_map_find(_functor_to_requestors, pr.first), ","),
-                   "'.");
+      pr.second->setup(exec_type);
 }
 
 bool

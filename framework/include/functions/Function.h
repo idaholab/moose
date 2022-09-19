@@ -133,6 +133,7 @@ public:
   // Not defined
   virtual Real average() const;
 
+  void setup(const ExecFlagType & exec_flag);
   void timestepSetup() override;
   void residualSetup() override;
   void jacobianSetup() override;
@@ -251,6 +252,14 @@ FunctionTempl<T>::timeDerivative(const U & t, const U & x, const U & y, const U 
 {
   MooseADWrapper<Point, MooseIsADType<U>::value> p(x, y, z);
   return timeDerivative(t, p);
+}
+
+template <typename T>
+void
+FunctionTempl<T>::setup(const ExecFlagType & exec_flag)
+{
+  Moose::template FunctorBase<T>::setup(exec_flag);
+  MooseFunctionBase::setup(exec_flag);
 }
 
 class Function : public FunctionTempl<Real>

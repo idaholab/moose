@@ -826,11 +826,7 @@ public:
                                    const std::set<SubdomainID> & block_ids,
                                    THREAD_ID tid);
 
-  virtual void initialSetup();
-  virtual void timestepSetup();
-  virtual void customSetup(const ExecFlagType & exec_type);
-  virtual void residualSetup();
-  virtual void jacobianSetup();
+  virtual void setup(const ExecFlagType & exec_type);
 
 protected:
   /**

@@ -44,12 +44,7 @@ public:
   AuxiliarySystem(FEProblemBase & subproblem, const std::string & name);
   virtual ~AuxiliarySystem();
 
-  virtual void initialSetup() override;
-  virtual void timestepSetup() override;
-  virtual void customSetup(const ExecFlagType & exec_type) override;
-  virtual void subdomainSetup() override;
-  virtual void residualSetup() override;
-  virtual void jacobianSetup() override;
+  void setup(const ExecFlagType & exec_type) override;
   virtual void updateActive(THREAD_ID tid);
 
   virtual void addVariable(const std::string & var_type,

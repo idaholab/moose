@@ -236,57 +236,60 @@ NonlinearSystemBase::restoreSolutions()
 }
 
 void
-NonlinearSystemBase::initialSetup()
+NonlinearSystemBase::setup(const ExecFlagType & exec_type)
 {
-  TIME_SECTION("nlInitialSetup", 2, "Setting Up Nonlinear System");
+  SystemBase::setup(exec_type);
 
-  SystemBase::initialSetup();
-
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    TIME_SECTION("kernelsInitialSetup", 2, "Setting Up Kernels/BCs/Constraints");
+    _kernels.setup(exec_type, tid);
+    _nodal_kernels.setup(exec_type, tid);
+    _dirac_kernels.setup(exec_type, tid);
+    if (_doing_dg)
+      _dg_kernels.setup(exec_type, tid);
+    _interface_kernels.setup(exec_type, tid);
+    _element_dampers.setup(exec_type, tid);
+    _nodal_dampers.setup(exec_type, tid);
+    _integrated_bcs.setup(exec_type, tid);
 
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    if (_fe_problem.haveFV())
     {
-      _kernels.initialSetup(tid);
-      _nodal_kernels.initialSetup(tid);
-      _dirac_kernels.initialSetup(tid);
-      if (_doing_dg)
-        _dg_kernels.initialSetup(tid);
-      _interface_kernels.initialSetup(tid);
+      std::vector<FVFluxBC *> bcs;
+      _fe_problem.theWarehouse()
+          .query()
+          .template condition<AttribSystem>("FVFluxBC")
+          .template condition<AttribThread>(tid)
+          .queryInto(bcs);
 
-      _element_dampers.initialSetup(tid);
-      _nodal_dampers.initialSetup(tid);
-      _integrated_bcs.initialSetup(tid);
+      std::vector<FVInterfaceKernel *> iks;
+      _fe_problem.theWarehouse()
+          .query()
+          .template condition<AttribSystem>("FVInterfaceKernel")
+          .template condition<AttribThread>(tid)
+          .queryInto(iks);
 
-      if (_fe_problem.haveFV())
-      {
-        std::vector<FVElementalKernel *> fv_elemental_kernels;
-        _fe_problem.theWarehouse()
-            .query()
-            .template condition<AttribSystem>("FVElementalKernel")
-            .template condition<AttribThread>(tid)
-            .queryInto(fv_elemental_kernels);
+      std::vector<FVFluxKernel *> kernels;
+      _fe_problem.theWarehouse()
+          .query()
+          .template condition<AttribSystem>("FVFluxKernel")
+          .template condition<AttribThread>(tid)
+          .queryInto(kernels);
 
-        for (auto * fv_kernel : fv_elemental_kernels)
-          fv_kernel->initialSetup();
-
-        std::vector<FVFluxKernel *> fv_flux_kernels;
-        _fe_problem.theWarehouse()
-            .query()
-            .template condition<AttribSystem>("FVFluxKernel")
-            .template condition<AttribThread>(tid)
-            .queryInto(fv_flux_kernels);
-
-        for (auto * fv_kernel : fv_flux_kernels)
-          fv_kernel->initialSetup();
-      }
+      for (auto * bc : bcs)
+        bc->setup(exec_type);
+      for (auto * ik : iks)
+        ik->setup(exec_type);
+      for (auto * kernel : kernels)
+        kernel->setup(exec_type);
     }
-
-    _scalar_kernels.initialSetup();
-    _constraints.initialSetup();
-    _general_dampers.initialSetup();
-    _nodal_bcs.initialSetup();
   }
+  _scalar_kernels.setup(exec_type);
+  _constraints.setup(exec_type);
+  _general_dampers.setup(exec_type);
+  _nodal_bcs.setup(exec_type);
+
+  if (exec_type != EXEC_INITIAL)
+    return;
 
   {
     TIME_SECTION("mortarSetup", 2, "Initializing Mortar Interfaces");
@@ -331,114 +334,6 @@ NonlinearSystemBase::initialSetup()
     else
       _scaling_matrix = std::make_unique<DiagonalMatrix<Number>>(_communicator);
   }
-}
-
-void
-NonlinearSystemBase::timestepSetup()
-{
-  SystemBase::timestepSetup();
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    _kernels.timestepSetup(tid);
-    _nodal_kernels.timestepSetup(tid);
-    _dirac_kernels.timestepSetup(tid);
-    if (_doing_dg)
-      _dg_kernels.timestepSetup(tid);
-    _interface_kernels.timestepSetup(tid);
-    _element_dampers.timestepSetup(tid);
-    _nodal_dampers.timestepSetup(tid);
-    _integrated_bcs.timestepSetup(tid);
-
-    if (_fe_problem.haveFV())
-    {
-      std::vector<FVFluxBC *> bcs;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVFluxBC")
-          .template condition<AttribThread>(tid)
-          .queryInto(bcs);
-
-      std::vector<FVInterfaceKernel *> iks;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVInterfaceKernel")
-          .template condition<AttribThread>(tid)
-          .queryInto(iks);
-
-      std::vector<FVFluxKernel *> kernels;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVFluxKernel")
-          .template condition<AttribThread>(tid)
-          .queryInto(kernels);
-
-      for (auto * bc : bcs)
-        bc->timestepSetup();
-      for (auto * ik : iks)
-        ik->timestepSetup();
-      for (auto * kernel : kernels)
-        kernel->timestepSetup();
-    }
-  }
-  _scalar_kernels.timestepSetup();
-  _constraints.timestepSetup();
-  _general_dampers.timestepSetup();
-  _nodal_bcs.timestepSetup();
-}
-
-void
-NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
-{
-  SystemBase::customSetup(exec_type);
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    _kernels.customSetup(exec_type, tid);
-    _nodal_kernels.customSetup(exec_type, tid);
-    _dirac_kernels.customSetup(exec_type, tid);
-    if (_doing_dg)
-      _dg_kernels.customSetup(exec_type, tid);
-    _interface_kernels.customSetup(exec_type, tid);
-    _element_dampers.customSetup(exec_type, tid);
-    _nodal_dampers.customSetup(exec_type, tid);
-    _integrated_bcs.customSetup(exec_type, tid);
-
-    if (_fe_problem.haveFV())
-    {
-      std::vector<FVFluxBC *> bcs;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVFluxBC")
-          .template condition<AttribThread>(tid)
-          .queryInto(bcs);
-
-      std::vector<FVInterfaceKernel *> iks;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVInterfaceKernel")
-          .template condition<AttribThread>(tid)
-          .queryInto(iks);
-
-      std::vector<FVFluxKernel *> kernels;
-      _fe_problem.theWarehouse()
-          .query()
-          .template condition<AttribSystem>("FVFluxKernel")
-          .template condition<AttribThread>(tid)
-          .queryInto(kernels);
-
-      for (auto * bc : bcs)
-        bc->customSetup(exec_type);
-      for (auto * ik : iks)
-        ik->customSetup(exec_type);
-      for (auto * kernel : kernels)
-        kernel->customSetup(exec_type);
-    }
-  }
-  _scalar_kernels.customSetup(exec_type);
-  _constraints.customSetup(exec_type);
-  _general_dampers.customSetup(exec_type);
-  _nodal_bcs.customSetup(exec_type);
 }
 
 void
@@ -939,7 +834,7 @@ NonlinearSystemBase::setPredictor(std::shared_ptr<Predictor> predictor)
 void
 NonlinearSystemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 {
-  SystemBase::subdomainSetup();
+  SystemBase::setup(EXEC_SUBDOMAIN);
 
   _kernels.subdomainSetup(subdomain, tid);
   _nodal_kernels.subdomainSetup(subdomain, tid);
@@ -1498,38 +1393,11 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 }
 
 void
-NonlinearSystemBase::residualSetup()
-{
-  TIME_SECTION("computeResidualInternal", 3);
-
-  SystemBase::residualSetup();
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    _kernels.residualSetup(tid);
-    _nodal_kernels.residualSetup(tid);
-    _dirac_kernels.residualSetup(tid);
-    if (_doing_dg)
-      _dg_kernels.residualSetup(tid);
-    _interface_kernels.residualSetup(tid);
-    _element_dampers.residualSetup(tid);
-    _nodal_dampers.residualSetup(tid);
-    _integrated_bcs.residualSetup(tid);
-  }
-  _scalar_kernels.residualSetup();
-  _constraints.residualSetup();
-  _general_dampers.residualSetup();
-  _nodal_bcs.residualSetup();
-
-  _fe_problem.residualSetup();
-}
-
-void
 NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 {
   TIME_SECTION("computeResidualInternal", 3);
 
-  residualSetup();
+  setup(EXEC_LINEAR);
 
   // Residual contributions from UOs - for now this is used for ray tracing
   // and ray kernels that contribute to the residual (think line sources)
@@ -1540,7 +1408,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
       .condition<AttribExecOns>(EXEC_PRE_KERNELS)
       .queryInto(uos);
   for (auto & uo : uos)
-    uo->residualSetup();
+    uo->setup(EXEC_LINEAR);
   for (auto & uo : uos)
   {
     uo->initialize();
@@ -1747,7 +1615,7 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
     }
   }
 
-  residualSetup();
+  setup(EXEC_LINEAR);
 
   // Residual contributions from UOs - for now this is used for ray tracing
   // and ray kernels that contribute to the residual (think line sources)
@@ -1758,7 +1626,7 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
       .condition<AttribExecOns>(EXEC_PRE_KERNELS)
       .queryInto(uos);
   for (auto & uo : uos)
-    uo->residualSetup();
+    uo->setup(EXEC_LINEAR);
   for (auto & uo : uos)
   {
     uo->initialize();
@@ -2532,31 +2400,6 @@ NonlinearSystemBase::computeScalarKernelsJacobians(const std::set<TagID> & tags)
 }
 
 void
-NonlinearSystemBase::jacobianSetup()
-{
-  SystemBase::jacobianSetup();
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    _kernels.jacobianSetup(tid);
-    _nodal_kernels.jacobianSetup(tid);
-    _dirac_kernels.jacobianSetup(tid);
-    if (_doing_dg)
-      _dg_kernels.jacobianSetup(tid);
-    _interface_kernels.jacobianSetup(tid);
-    _element_dampers.jacobianSetup(tid);
-    _nodal_dampers.jacobianSetup(tid);
-    _integrated_bcs.jacobianSetup(tid);
-  }
-  _scalar_kernels.jacobianSetup();
-  _constraints.jacobianSetup();
-  _general_dampers.jacobianSetup();
-  _nodal_bcs.jacobianSetup();
-
-  _fe_problem.jacobianSetup();
-}
-
-void
 NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 {
   // Make matrix ready to use
@@ -2579,7 +2422,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     }
   }
 
-  jacobianSetup();
+  setup(EXEC_NONLINEAR);
 
   // Jacobian contributions from UOs - for now this is used for ray tracing
   // and ray kernels that contribute to the Jacobian (think line sources)
@@ -2590,7 +2433,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       .condition<AttribExecOns>(EXEC_PRE_KERNELS)
       .queryInto(uos);
   for (auto & uo : uos)
-    uo->jacobianSetup();
+    uo->setup(EXEC_NONLINEAR);
   for (auto & uo : uos)
   {
     uo->initialize();
