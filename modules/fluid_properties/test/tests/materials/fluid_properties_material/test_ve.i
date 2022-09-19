@@ -7,155 +7,142 @@
 []
 
 [Functions]
-  [./f_fn]
+  [fn_1]
     type = ParsedFunction
-    value = -4
-  [../]
-  [./bc_fn]
+    value = '2000 + 100*x'
+  []
+  [fn_2]
     type = ParsedFunction
-    value = 'x*x+y*y'
-  [../]
-[]
-
-[Variables]
-  [./u]
-  [../]
+    value = '0.02 * (x*x+y*y)'
+  []
 []
 
 [AuxVariables]
-  [./e]
-    initial_condition = 113206.45935406466
-  [../]
-  [./v]
-    initial_condition = 0.0007354064593540647
-  [../]
+  [e]
+    [InitialCondition]
+      type = FunctionIC
+      function = fn_1
+    []
+  []
+  [v]
+    [InitialCondition]
+      type = FunctionIC
+      function = fn_2
+    []
+  []
 
-  [./p]
+  [p]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./T]
+  []
+  [T]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./cp]
+  []
+  [cp]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./cv]
+  []
+  [cv]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./c]
+  []
+  [c]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./mu]
+  []
+  [mu]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./k]
+  []
+  [k]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./g]
+  []
+  [s]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
+  [g]
+    family = MONOMIAL
+    order = CONSTANT
+  []
 []
 
 [AuxKernels]
-  [./p]
+  [p]
     type = MaterialRealAux
      variable = p
      property = pressure
-  [../]
-  [./T]
+  []
+  [T]
     type = MaterialRealAux
      variable = T
      property = temperature
-  [../]
-  [./cp]
+  []
+  [cp]
     type = MaterialRealAux
      variable = cp
      property = cp
-  [../]
-  [./cv]
+  []
+  [cv]
     type = MaterialRealAux
      variable = cv
      property = cv
-  [../]
-  [./c]
+  []
+  [c]
     type = MaterialRealAux
      variable = c
      property = c
-  [../]
-  [./mu]
+  []
+  [mu]
     type = MaterialRealAux
      variable = mu
      property = mu
-  [../]
-  [./k]
+  []
+  [k]
     type = MaterialRealAux
      variable = k
      property = k
-  [../]
-  [./g]
+  []
+  [s]
+    type = MaterialRealAux
+     variable = s
+     property = s
+  []
+  [g]
     type = MaterialRealAux
      variable = g
      property = g
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./sg]
-      type = StiffenedGasFluidProperties
-      gamma = 2.35
-      q = -1167e3
-      q_prime = 0
-      p_inf = 1.e9
-      cv = 1816
-
-      mu = 0.9
-      k = 0.6
-    [../]
+  [FluidProperties]
+    [ideal_gas]
+      type = IdealGasFluidProperties
+      gamma = 1.4
+      molar_mass = 1.000536678700361
+    []
   []
 []
 
 [Materials]
-  [./fp_mat]
+  [fp_mat]
     type = FluidPropertiesMaterialVE
     e = e
     v = v
-    fp = sg
-  [../]
-[]
-
-[Kernels]
-  [./diff]
-    type = Diffusion
-    variable = u
-  [../]
-  [./ffn]
-    type = BodyForce
-    variable = u
-    function = f_fn
-  [../]
-[]
-
-[BCs]
-  [./all]
-    type = FunctionDirichletBC
-    variable = u
-    boundary = 'left right top bottom'
-    function = bc_fn
-  [../]
+    fp = ideal_gas
+  []
 []
 
 [Executioner]
   type = Steady
   solve_type = NEWTON
+[]
+
+[Problem]
+  solve = false
 []
 
 [Outputs]

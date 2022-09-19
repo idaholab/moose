@@ -155,9 +155,8 @@ public:
   propfunc(cv, v, e)
   propfunc(mu, v, e)
   propfunc(k, v, e)
-  propfunc(s, v, e)
+  propfuncWithDefault(s, v, e)
   propfunc(s, h, p)
-  propfunc(T, h, p)
   propfunc(rho, p, s)
   propfunc(e, v, h)
   propfuncWithDefault(s, p, T)
@@ -177,8 +176,9 @@ public:
   propfunc(s, T, v)
   propfunc(cv, T, v)
   propfunc(h, p, T)
-  propfunc(p, h, s)
   propfunc(g, v, e)
+  propfuncWithDefault(p, h, s)
+  propfunc(T, h, p)  // temporary, until uniformization
   propfuncWithDefault(T, p, h)
   propfuncWithDefault(beta, p, T)
   propfuncWithDefault(v, p, T)
@@ -305,7 +305,7 @@ public:
    * The combined methods allow the most efficient means of calculating both
    * properties, especially where rho(p, T) and mu(rho, T). In this case, an
    * extra density calculation would be required to calculate mu(p, T). All
-   * propery names are described above.
+   * property names are described above.
    */
   virtual void rho_mu_from_p_T(Real p, Real T, Real & rho, Real & mu) const;
   virtual void rho_mu_from_p_T(Real p,
@@ -327,6 +327,71 @@ public:
                               Real & e,
                               Real & de_dp,
                               Real & de_dT) const;
+
+  /**
+   * Determines (p,T) from (v,e) using Newton Solve in 2D
+   * Useful for conversion between different sets of state variables
+   *
+   * @param[in] v specific volume (m^3 / kg)
+   * @param[in] e specific internal energy (J / kg)
+   * @param[in] p0 initial guess for pressure (Pa / kg)
+   * @param[in] T0 initial guess for temperature (K)
+   * @param[out] fluid pressure (Pa / kg)
+   * @param[out] Temperature (K)
+   */
+  virtual void p_T_from_v_e(const Real & v,
+                            const Real & e,
+                            const Real & p0,
+                            const Real & T0,
+                            Real & p,
+                            Real & T,
+                            bool & conversion_succeeded) const;
+
+  /**
+   * Determines (p,T) from (v,h) using Newton Solve in 2D
+   * Useful for conversion between different sets of state variables
+   *
+   * @param[in] v specific volume (m^3 / kg)
+   * @param[in] h specific enthalpy (J / kg)
+   * @param[in] p0 initial guess for pressure (Pa / kg)
+   * @param[in] T0 initial guess for temperature (K)
+   * @param[out] fluid pressure (Pa / kg)
+   * @param[out] Temperature (K)
+   */
+  virtual void p_T_from_v_h(const Real & v,
+                            const Real & h,
+                            const Real & p0,
+                            const Real & T0,
+                            Real & p,
+                            Real & T,
+                            bool & conversion_succeeded) const;
+  /**
+   * Determines (p,T) from (h,s) using Newton Solve in 2D
+   * Useful for conversion between different sets of state variables
+   *
+   * @param[in] h specific enthalpy (J / kg)
+   * @param[in] s specific entropy (J/K*kg)
+   * @param[in] p0 initial guess for pressure (Pa / kg)
+   * @param[in] T0 initial guess for temperature (K)
+   * @param[out] fluid pressure (Pa / kg)
+   * @param[out] Temperature (K)
+   */
+  virtual void p_T_from_h_s(const Real & h,
+                            const Real & s,
+                            const Real & p0,
+                            const Real & T0,
+                            Real & p,
+                            Real & T,
+                            bool & conversion_succeeded) const;
+
+  /**
+   * Newton's method may be used to convert between variable sets
+   * _tolerance, _T_initial_guess, and _p_initial_guess are the parameters for these
+   * iterative solves
+   */
+  const Real _tolerance;
+  const Real _T_initial_guess;
+  const Real _p_initial_guess;
 
 private:
   template <typename... Args>

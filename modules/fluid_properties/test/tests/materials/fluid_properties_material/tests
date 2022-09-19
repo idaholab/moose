@@ -1,0 +1,26 @@
+[Tests]
+  [fp_material]
+    requirement = "The system shall be able to compute material properties from fluid properties"
+    issues = '#20101'
+    design = 'FluidPropertiesMaterialVE.md FluidPropertiesMaterialPT.md'
+    [pressure_temperature]
+      type = Exodiff
+      input = 'test_pt.i'
+      exodiff = 'test_pt_out.e'
+      detail = 'using a (pressure, temperature) variable set'
+    []
+    [pressure_enthalpy]
+      type = Exodiff
+      input = 'test_ph.i'
+      exodiff = 'test_ph_out.e'
+      detail = 'using a (pressure, enthalpy) variable set'
+      allow_test_objects = true
+    []
+    [volume_energy]
+      type = Exodiff
+      input = 'test_ve.i'
+      exodiff = 'test_ve_out.e'
+      detail = 'using a (specific volume, specific internal energy) variable set'
+    []
+  []
+[]

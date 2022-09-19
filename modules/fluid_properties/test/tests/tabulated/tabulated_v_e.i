@@ -1,5 +1,5 @@
 # Test thermophysical property calculations using TabulatedBiCubic/LinearFluidProperties.
-# Calculations for density, internal energy and enthalpy using bicubic spline
+# Calculations for density, internal energy and enthalpy using bicubic or bilinear
 # interpolation of data generated using CO2FluidProperties.
 
 [Mesh]
@@ -10,142 +10,135 @@
   allow_renumbering = false
 []
 
-[Variables]
-  [./dummy]
-  [../]
-[]
-
 [AuxVariables]
-  [./pressure]
-    initial_condition = 2e6
+  [p]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./temperature]
-    initial_condition = 350
+  []
+  [T]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./rho]
+  []
+  [rho]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./mu]
+  []
+  [mu]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./e]
+  []
+  [e]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./h]
+  []
+  [h]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./s]
+  []
+  [s]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./cv]
+  []
+  [cv]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./cp]
+  []
+  [cp]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./c]
+  []
+  [c]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
+  [k]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+  [g]
+    family = MONOMIAL
+    order = CONSTANT
+  []
 []
 
 [AuxKernels]
-  [./rho]
-    type = MaterialRealAux
-    variable = rho
-    property = density
-  [../]
-  [./my]
+  [viscosity]
     type = MaterialRealAux
     variable = mu
-    property = viscosity
-  [../]
-  [./internal_energy]
+    property = mu
+  []
+  [thermal_conductivity]
     type = MaterialRealAux
-    variable = e
-    property = e
-  [../]
-  [./enthalpy]
+    variable = k
+    property = k
+  []
+  [pressure]
     type = MaterialRealAux
-    variable = h
-    property = h
-  [../]
-  [./entropy]
+    variable = p
+    property = pressure
+  []
+  [temperature]
     type = MaterialRealAux
-    variable = s
-    property = s
-  [../]
-  [./cv]
+    variable = T
+    property = temperature
+  []
+  [cv]
     type = MaterialRealAux
     variable = cv
     property = cv
-  [../]
-  [./cp]
+  []
+  [cp]
     type = MaterialRealAux
     variable = cp
     property = cp
-  [../]
-  [./c]
+  []
+  [c]
     type = MaterialRealAux
     variable = c
     property = c
-  [../]
+  []
+  [g]
+    type = MaterialRealAux
+    variable = g
+    property = g
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./co2]
-      type = CO2FluidProperties
-    [../]
-    [./tabulated]
+  [FluidProperties]
+    [co2]
+      type = IdealGasFluidProperties
+    []
+    [tabulated]
       type = TabulatedBicubicFluidProperties
-      fp = co2
       interpolated_properties = 'density enthalpy viscosity internal_energy k c cv cp entropy'
       # fluid_property_file = fluid_properties.csv
       save_file = true
-      construct_pT_from_ve = false
-      construct_pT_from_vh = false
-      # error_on_out_of_bounds = false
+      construct_pT_from_ve = true
+      construct_pT_from_vh = true
+      error_on_out_of_bounds = false
 
       # Tabulation range
       temperature_min = 280
       temperature_max = 600
       pressure_min = 1e5
-      pressure_max = 3e6
+      pressure_max = 7e5
 
       # Newton parameters
       tolerance = 1e-8
-      T_initial_guess = 350
-      p_initial_guess = 1.5e5
-    [../]
+      T_initial_guess = 310
+      p_initial_guess = 1.8e5
+    []
   []
 []
 
 [Materials]
-  [./fp_mat]
-    type = FluidPropertiesMaterialPT
-    pressure = pressure
-    temperature = temperature
+  [fp_mat_ve]
+    type = FluidPropertiesMaterialVE
+    v = 0.4957
+    e = 310163
     fp = tabulated
-  [../]
-[]
-
-[Kernels]
-  [./diff]
-    type = Diffusion
-    variable = dummy
-  [../]
+  []
 []
 
 [Executioner]
@@ -158,51 +151,55 @@
 []
 
 [Postprocessors]
-  [./rho]
-    type = ElementalVariableValue
-    elementid = 0
-    variable = rho
-  [../]
-  [./mu]
+  [mu]
     type = ElementalVariableValue
     elementid = 0
     variable = mu
-  [../]
-  [./e]
+  []
+  [e]
     type = ElementalVariableValue
     elementid = 0
     variable = e
-  [../]
-  [./h]
-    type = ElementalVariableValue
-    elementid = 0
-    variable = h
-  [../]
-  [./s]
-    type = ElementalVariableValue
-    elementid = 0
-    variable = s
-  [../]
-  [./cv]
+  []
+  [cv]
     type = ElementalVariableValue
     elementid = 0
     variable = cv
-  [../]
-  [./cp]
+  []
+  [cp]
     type = ElementalVariableValue
     elementid = 0
     variable = cp
-  [../]
-  [./c]
+  []
+  [c]
     type = ElementalVariableValue
     elementid = 0
     variable = c
-  [../]
+  []
+  [p]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = p
+  []
+  [T]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = T
+  []
+  [k]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = k
+  []
+  [g]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = g
+  []
 []
 
 [Outputs]
   csv = true
-  file_base = tabulated_out
+  file_base = tabulated_v_e_bilinear_out
   execute_on = 'TIMESTEP_END'
-  perf_graph = true
 []

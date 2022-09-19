@@ -55,4 +55,16 @@ TEST(BicubicInterpolationTest, sample)
   EXPECT_NEAR(interp.sampleDerivative(p1, p2, 2), 30.0, tol);
   EXPECT_NEAR(interp.sample2ndDerivative(p1, p2, 1), 2.0, tol);
   EXPECT_NEAR(interp.sample2ndDerivative(p1, p2, 2), 6.0, tol);
+
+  // Check AD routines
+  // Check sampled value and first derivatives
+  ADReal ad_p1 = 4.5, ad_p2 = 5.5;
+  EXPECT_NEAR(interp.sample(ad_p1, ad_p2).value(), 111.0, tol);
+
+  // Check that ADsampleValueAndDerivatives() returns the same results as above
+  ADReal ad_y2, ad_dy2_dx1, ad_dy2_dx2;
+  interp.sampleValueAndDerivatives(ad_p1, ad_p2, ad_y2, ad_dy2_dx1, ad_dy2_dx2);
+  EXPECT_NEAR(ad_y2.value(), 111.0, tol);
+  EXPECT_NEAR(ad_dy2_dx1.value(), 9.0, tol);
+  EXPECT_NEAR(ad_dy2_dx2.value(), 33.0, tol);
 }

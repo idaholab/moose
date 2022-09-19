@@ -144,7 +144,7 @@
 
 [Materials]
   [fp_mat]
-    type = FluidPropertiesMaterial
+    type = FluidPropertiesMaterialVE
     e = e
     v = v
     fp = h2
