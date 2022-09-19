@@ -22,8 +22,8 @@ The 2D Newton method solver is used to solve the problem:
 
 \begin{equation}
 \begin{split}
-$f1(x, y) &= a \\ 
-$f2(x, y) &= b
+f1(x, y) &= a \\
+f2(x, y) &= b
 \end{split}
 \end{equation}
 
@@ -33,13 +33,13 @@ with $a$, $b$ known constants, $f1$, $f2$ functions and $x$, $y$ the real-valued
 The functions should compute both their return value and the derivatives of their value with regards to
 both variables using references.
 
-The routine will **not** error if a NaN is encountered or if the maximum number of iterations is exceeded.
+The routine will +not+ error if a NaN is encountered or if the maximum number of iterations is exceeded.
 Instead, a `converged` boolean will be set to false, and the routine will return the last valid
 estimates of $x$ and $y$. It is the responsibility of the user to handle this unconverged output.
 
-## Brent method solver
+## Brent's method solver
 
-The Brent method is used to find roots of a general function.
+Brent's method may be used to find roots of a general function.
 It was adapted from `Numerical Recipes in C++`.
 
-More information may be found [here](https://en.wikipedia.org/wiki/Brent%27s_method)
+More information may be found [here](https://en.wikipedia.org/wiki/Brent%27s_method).
