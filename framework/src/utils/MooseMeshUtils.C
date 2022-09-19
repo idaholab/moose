@@ -332,7 +332,7 @@ hasSubdomainID(MeshBase & input_mesh, const SubdomainID & id)
 bool
 hasSubdomainName(MeshBase & input_mesh, const SubdomainName & name)
 {
-  auto id = getSubdomainID(name, input_mesh);
+  const auto id = getSubdomainID(name, input_mesh);
   return hasSubdomainID(input_mesh, id);
 }
 
