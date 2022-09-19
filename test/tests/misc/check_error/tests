@@ -672,7 +672,7 @@
     type = 'RunApp'
     expect_out = "unused parameter 'Mesh/unused_param'"
     input = 'unused_param_test.i'
-    cli_args = '--warn-unused'
+    cli_args = '--allow-unused'
 
     requirement = 'The system shall include the option to report a warning instead of an error for an unused parameter set in command line arguments'
     issues = '#709 #759 #4101'
