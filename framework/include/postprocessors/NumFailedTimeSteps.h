@@ -28,5 +28,5 @@ public:
 
 protected:
   /// Retrieves the current TimeStepper used by the executioner.
-  TimeStepper * _timestepper;
+  const TimeStepper * _timestepper;
 };
