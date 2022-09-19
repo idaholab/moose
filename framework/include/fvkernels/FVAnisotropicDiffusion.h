@@ -13,7 +13,7 @@
 
 /**
  * FVAnisotropicDiffusion implements a standard diffusion term
- * but with a diagonal tensor diffusion coefficient (provided as vector)
+ * but with a diagonal tensor diffusion coefficient (provided as a vector)
  */
 class FVAnisotropicDiffusion : public FVFluxKernel
 {

@@ -85,14 +85,14 @@
   [diff1]
     type = ADGenericVectorFunctorMaterial
     prop_names = 'coeff'
-    prop_values = '1 10 0'
+    prop_values = '1 10 1'
     block = 1
   []
 
   [diff2]
     type = ADGenericVectorFunctorMaterial
     prop_names = 'coeff'
-    prop_values = '10 10 0'
+    prop_values = '10 10 1'
     block = 2
   []
 []

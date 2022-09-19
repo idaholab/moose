@@ -77,13 +77,13 @@ FVDiffusion::computeQpResidual()
 {
   auto dudn = gradUDotNormal();
 
-  ADReal k;
+  ADReal coeff;
   interpolate(_coeff_interp_method,
-              k,
+              coeff,
               _coeff(elemFromFace()),
               _coeff(neighborFromFace()),
               *_face_info,
               true);
 
-  return -1 * k * dudn;
+  return -1 * coeff * dudn;
 }
