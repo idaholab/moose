@@ -29,6 +29,7 @@ SmoothMeshGenerator::validParams()
                              "block/subdomain boundaries");
 
   params.addParam<unsigned int>("iterations", 1, "The number of smoothing iterations to do.");
+  params.addParam<bool>("move_boundary_nodes", false, "Alow nodes on straight boundaries to move.");
 
   return params;
 }
@@ -49,7 +50,8 @@ SmoothMeshGenerator::generate()
 
   auto mesh = dynamic_pointer_cast<ReplicatedMesh>(old_mesh);
 
-  LaplaceMeshSmoother lms(static_cast<UnstructuredMesh &>(*mesh));
+  LaplaceMeshSmoother lms(static_cast<UnstructuredMesh &>(*mesh),
+                          getParam<bool>("move_boundary_nodes"));
 
   lms.smooth(_iterations);
 
