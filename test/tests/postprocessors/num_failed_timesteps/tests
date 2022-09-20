@@ -1,0 +1,10 @@
+[Tests]
+  [num_fails]
+    type = 'RunApp'
+    input = 'failed_timesteps.i'
+    expect_out = '|   1.100000e+00 |   6.000000e+00 |'
+    design = syntax/Postprocessors/index.md
+    requirement = 'The system shall count the number of failed timesteps when prompted.'
+    issues = '#22017'
+  []
+[]
