@@ -44,7 +44,7 @@ section.
 !sqa requirements link=False collections=SYSTEM category={{category}}
 
 !template! item key=human-system-integration
-{{app}} is a command line driven application which conforms to all standard terminal
+The {{app}} application is command line driven and conforms to all standard terminal
 behaviors. Specific human system interaction accommodations shall be a function of the
 end-user's terminal. MOOSE (and therefore {{app}}) does support optional coloring
 within the terminal's ability to display color, which may be disabled.
@@ -70,8 +70,8 @@ within the terminal's ability to display color, which may be disabled.
 !include sqa/framework_srs.md start=system-modes-begin end=system-modes-finish
 
 !template item key=physical-characteristics
-{{app}} is software only with no associated physical media. See [#system-requirements] for a description
-of the minimum required hardware necessary for running the {{app}} application.
+The {{app}} application is software only with no associated physical media. See [#system-requirements]
+for a description of the minimum required hardware necessary for running the {{app}} application.
 
 !template item key=environmental-conditions
 !include sqa/framework_srs.md start=environmental-conditions-begin end=environmental-conditions-finish

@@ -41,9 +41,9 @@ to monitor code change impacts to performance.
 !include framework_sdd.md start=data-design-and-control-begin end=data-design-and-control-finish
 
 !template! item key=human-machine-interface-design
-{{app}} is a command-line driven program. All interaction with {{app}} is ultimately
-done through the command line. This is typical for [!ac](HPC) applications that use
-the [!ac](MPI) interface for running on super computing clusters. Optional GUIs may be
+The {{app}} application is a command-line driven program. All interaction with {{app}} is
+ultimately done through the command line. This is typical for [!ac](HPC) applications that
+use the [!ac](MPI) interface for running on super computing clusters. Optional GUIs may be
 used to assist in creating input files and launching executables on the command line.
 !template-end!
 
@@ -56,8 +56,8 @@ either in a static binary or after loading shared libraries.
 !template-end!
 
 !template! item key=security-structure
-{{app}} does not require any elevated privileges to operate and does not run any
-stateful services, daemons or other network programs. Distributed runs rely on the
+The {{app}} application does not require any elevated privileges to operate and does not
+run any stateful services, daemons or other network programs. Distributed runs rely on the
 [!ac](MPI) library.
 !template-end!
 
