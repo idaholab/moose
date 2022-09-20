@@ -9,24 +9,18 @@ This document serves as an addendum to [framework_srs.md] and captures informati
 !alert-end!
 !template-end!
 
-!template item key=system-purpose
-!include sqa/system_purpose.md
+!template! item key=system-functions
+Since {{app}} is a command-line driven application, all functionality provided in
+the software is operated through the use of standard UNIX command line flags and the
+extendable MOOSE input file. {{app}} is completely extendable so individual design
+pages should be consulted for specific behaviors of each user-defined object.
+!template-end!
 
-!template item key=system-scope
-!include sqa/system_scope.md
-
-!template item key=system-context
-!include sqa/framework_srs.md start=system-context-begin end=system-context-finish
-
-!template item key=system-functions
-!include sqa/framework_srs.md start=system-functions-begin end=system-functions-finish
-
-!template item key=user-characteristics
-!include sqa/framework_srs.md start=user-characteristics-begin end=user-characteristics-finish
-
-!template item key=assumptions-and-dependencies
+!template item key=assumptions-and-dependencies-intro
 The {{app}} application is developed using MOOSE and is based on various modules, as such
-the [!ac](SRS) for {{app}} is dependent upon the files listed at the beginning of this document.
+the [!ac](SRS) for {{app}} is dependent upon the files listed at the beginning of this
+document. Any further assumptions or dependencies are outlined in the remainder of this
+section.
 
 !template item key=definitions
 !include sqa/framework_srs.md start=definitions-begin end=definitions-finish
@@ -49,38 +43,52 @@ the [!ac](SRS) for {{app}} is dependent upon the files listed at the beginning o
 !template item key=system-interfaces-requirements
 !sqa requirements link=False collections=SYSTEM category={{category}}
 
-!template item key=human-system-integration
-!include sqa/framework_srs.md start=human-system-integration-begin end=human-system-integration-finish
+!template! item key=human-system-integration
+The {{app}} application is command line driven and conforms to all standard terminal
+behaviors. Specific human system interaction accommodations shall be a function of the
+end-user's terminal. MOOSE (and therefore {{app}}) does support optional coloring
+within the terminal's ability to display color, which may be disabled.
+!template-end!
 
-!template item key=maintainability
-!include sqa/framework_srs.md start=maintainability-begin end=maintainability-finish
+!template! item key=maintainability
 
-!template item key=reliability
-!include sqa/framework_srs.md start=reliability-begin end=reliability-finish
+- The latest working version (defined as the version that passes all tests in the current regression
+  test suite) shall be publicly available at all times through the repository host provider.
+- Flaws identified in the system shall be reported and tracked in a ticket or issue based system. The
+  technical lead will determine the severity and priority of all reported issues and assign resources
+  at his or her discretion to resolve identified issues.
+- The software maintainers will entertain all proposed changes to the system in a timely manner
+  (within two business days).
+- The core software in its entirety will be made available under the terms of a designated software
+  license. These license terms are outlined in the LICENSE file alongside the {{app}} application
+  source code. If the {{app}} application is a MOOSE physics module, the license is identical to that
+  of the framework - that is, the [!ac](LGPL) version 2.1 license.
 
-!template item key=information-management
-!include sqa/framework_srs.md start=information-management-begin end=information-management-finish
-
-!template item key=verification
-!include sqa/framework_srs.md start=verification-begin end=verification-finish
+!template-end!
 
 !template item key=system-modes
 !include sqa/framework_srs.md start=system-modes-begin end=system-modes-finish
 
 !template item key=physical-characteristics
-!include sqa/framework_srs.md start=physical-characteristics-begin end=physical-characteristics-finish
+The {{app}} application is software only with no associated physical media. See [#system-requirements]
+for a description of the minimum required hardware necessary for running the {{app}} application.
 
 !template item key=environmental-conditions
 !include sqa/framework_srs.md start=environmental-conditions-begin end=environmental-conditions-finish
 
-!template item key=system-security
-!include sqa/framework_srs.md start=system-security-begin end=system-security-finish
+!template! item key=system-security
+[!ac](MOOSE)-based applications such as {{app}} have no requirements or special needs
+related to system-security. The software is designed to run completely in user-space with
+no elevated privileges required nor recommended.
+!template-end!
 
-!template item key=policies-and-regulations
-!include sqa/framework_srs.md start=policies-and-regulations-begin end=policies-and-regulations-finish
+!template! item key=system-life-cycle
+[!ac](MOOSE)-based development follows various agile methods. The system is continuously
+built and deployed in a piecemeal fashion since objects within the system are more or less
+independent. Every new object requires a test, which in turn requires an associated
+requirement and design description. The {{app}} development team follows the [!ac](NQA-1)
+standards.
+!template-end!
 
-!template item key=system-life-cycle
-!include sqa/framework_srs.md start=system-life-cycle-begin end=system-life-cycle-finish
-
-!template item key=packaging
-!include sqa/framework_srs.md start=packaging-begin end=packaging-finish
+!template item key=verification
+!include sqa/framework_srs.md start=verification-begin end=verification-finish

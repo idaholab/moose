@@ -1,4 +1,4 @@
-The [!ac](MOOSE) is a tool for solving complex coupled
+[!ac](MOOSE) is a tool for solving complex coupled
 Multiphysics equations using the finite element method. [!ac](MOOSE) uses an object-oriented design
 to abstract data structure management, parallelism, threading and compiling while providing an easy
 to use interface targeted at engineers that may not have a lot of software development

@@ -87,6 +87,9 @@ the number in each group, and the nature of their use of the system.
 
 ### Assumptions and Dependencies id=assumptions-and-dependencies
 
+!template field key=assumptions-and-dependencies-intro required=False
+This section outlines any assumptions and/or dependencies of the software.
+
 !template field key=assumptions-and-dependencies
 List each of the factors that affect the requirements and should be taken into consideration for
 derivation of lower level requirements and design. These factors should include design inputs, design

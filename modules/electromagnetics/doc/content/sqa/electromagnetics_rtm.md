@@ -1,1 +1,0 @@
-!template load file=sqa/app_rtm.md.template app=ElectromagneticsApp category=electromagnetics
