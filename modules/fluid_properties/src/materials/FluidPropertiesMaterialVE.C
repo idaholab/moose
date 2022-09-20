@@ -7,23 +7,28 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FluidPropertiesMaterial.h"
+#include "FluidPropertiesMaterialVE.h"
 #include "SinglePhaseFluidProperties.h"
 
-registerMooseObject("FluidPropertiesApp", FluidPropertiesMaterial);
+registerMooseObject("FluidPropertiesApp", FluidPropertiesMaterialVE);
+registerMooseObjectRenamed("FluidPropertiesApp",
+                           FluidPropertiesMaterial,
+                           "01/01/2023 00:00",
+                           FluidPropertiesMaterialVE);
 
 InputParameters
-FluidPropertiesMaterial::validParams()
+FluidPropertiesMaterialVE::validParams()
 {
   InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("e", "Specific internal energy");
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
-  params.addClassDescription("Computes fluid properties using (u, v) formulation");
+  params.addClassDescription(
+      "Computes fluid properties using (specific internal energy, specific volume) formulation");
   return params;
 }
 
-FluidPropertiesMaterial::FluidPropertiesMaterial(const InputParameters & parameters)
+FluidPropertiesMaterialVE::FluidPropertiesMaterialVE(const InputParameters & parameters)
   : Material(parameters),
     _e(coupledValue("e")),
     _v(coupledValue("v")),
@@ -35,16 +40,17 @@ FluidPropertiesMaterial::FluidPropertiesMaterial(const InputParameters & paramet
     _cv(declareProperty<Real>("cv")),
     _mu(declareProperty<Real>("mu")),
     _k(declareProperty<Real>("k")),
+    _s(declareProperty<Real>("s")),
     _g(declareProperty<Real>("g")),
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
 }
 
-FluidPropertiesMaterial::~FluidPropertiesMaterial() {}
+FluidPropertiesMaterialVE::~FluidPropertiesMaterialVE() {}
 
 void
-FluidPropertiesMaterial::computeQpProperties()
+FluidPropertiesMaterialVE::computeQpProperties()
 {
   _p[_qp] = _fp.p_from_v_e(_v[_qp], _e[_qp]);
   _T[_qp] = _fp.T_from_v_e(_v[_qp], _e[_qp]);
@@ -53,5 +59,6 @@ FluidPropertiesMaterial::computeQpProperties()
   _cv[_qp] = _fp.cv_from_v_e(_v[_qp], _e[_qp]);
   _mu[_qp] = _fp.mu_from_v_e(_v[_qp], _e[_qp]);
   _k[_qp] = _fp.k_from_v_e(_v[_qp], _e[_qp]);
+  _s[_qp] = _fp.s_from_v_e(_v[_qp], _e[_qp]);
   _g[_qp] = _fp.g_from_v_e(_v[_qp], _e[_qp]);
 }

@@ -1,5 +1,5 @@
 # Test BrineFluidProperties calculations of density, viscosity and thermal
-# conductivity with a TabulatedFluidProperties water.
+# conductivity with a TabulatedBiCubicFluidProperties water.
 #
 # Experimental density values from Pitzer et al, "Thermodynamic properties
 # of aqueous sodium chloride solution", Journal of Physical and Chemical
@@ -132,7 +132,7 @@
       type = Water97FluidProperties
     [../]
     [./water_tab]
-      type = TabulatedFluidProperties
+      type = TabulatedBicubicFluidProperties
       fp = water
       save_file = false
     [../]

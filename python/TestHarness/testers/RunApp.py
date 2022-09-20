@@ -164,8 +164,8 @@ class RunApp(Tester):
         if '--error-unused' not in cli_args and options.error_unused:
             cli_args.append('--error-unused')
 
-        if '--error-unused' not in cli_args and '--warn-unused' not in cli_args and (specs["allow_unused"] or options.warn_unused):
-            cli_args.append('--warn-unused')
+        if '--error-unused' not in cli_args and '--allow-unused' not in cli_args and (specs["allow_unused"] or options.allow_unused):
+            cli_args.append('--allow-unused')
 
         if '--error-override' not in cli_args and not specs["allow_override"]:
             cli_args.append('--error-override')

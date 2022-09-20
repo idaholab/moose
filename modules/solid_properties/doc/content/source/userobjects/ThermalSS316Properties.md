@@ -1,6 +1,6 @@
 # ThermalSS316Properties
 
-!syntax description /Modules/SolidProperties/ThermalSS316Properties
+!syntax description /SolidProperties/ThermalSS316Properties
 
 ## Description
 
@@ -42,10 +42,10 @@ fit is 0.9995.
 
 The properties are valid for 25$\degree$C $\le$ T $\le$ 1300$\degree$C.
 
-!syntax parameters /Modules/SolidProperties/ThermalSS316Properties
+!syntax parameters /SolidProperties/ThermalSS316Properties
 
-!syntax inputs /Modules/SolidProperties/ThermalSS316Properties
+!syntax inputs /SolidProperties/ThermalSS316Properties
 
-!syntax children /Modules/SolidProperties/ThermalSS316Properties
+!syntax children /SolidProperties/ThermalSS316Properties
 
 !bibtex bibliography

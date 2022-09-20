@@ -1,6 +1,6 @@
 # ThermalGraphiteProperties
 
-!syntax description /Modules/SolidProperties/ThermalGraphiteProperties
+!syntax description /SolidProperties/ThermalGraphiteProperties
 
 ## Description
 
@@ -47,10 +47,10 @@ Density is taken as a constant value; a default value is provided based on
 \rho=1850.0
 \end{equation}
 
-!syntax parameters /Modules/SolidProperties/ThermalGraphiteProperties
+!syntax parameters /SolidProperties/ThermalGraphiteProperties
 
-!syntax inputs /Modules/SolidProperties/ThermalGraphiteProperties
+!syntax inputs /SolidProperties/ThermalGraphiteProperties
 
-!syntax children /Modules/SolidProperties/ThermalGraphiteProperties
+!syntax children /SolidProperties/ThermalGraphiteProperties
 
 !bibtex bibliography

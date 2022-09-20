@@ -117,11 +117,9 @@ MultiAppPostprocessorInterpolationTransfer::execute()
         {
           if (getFromMultiApp()->hasLocalApp(i) && getFromMultiApp()->isRootProcessor())
           {
-            const auto local_app_number = getFromMultiApp()->localAppNumber(i);
             // Evaluation of the _from_transform at the origin yields the transformed position of
             // the from multi-app
-            src_pts.push_back(
-                to_coord_transform.mapBack((*_from_transforms[local_app_number])(Point(0))));
+            src_pts.push_back(to_coord_transform.mapBack((*_from_transforms[i])(Point(0))));
             src_vals.push_back(getFromMultiApp()->appPostprocessorValue(i, _postprocessor));
           }
         }
