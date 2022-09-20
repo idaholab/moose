@@ -456,7 +456,7 @@ INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
     return;
 
   // Ghost a for the elements on the boundary
-  for (auto elem_id : _moose_mesh.getBoundaryActiveLocalElemIds(boundary_id))
+  for (auto elem_id : _moose_mesh.getBoundaryActiveSemiLocalElemIds(boundary_id))
   {
     const auto & elem = _moose_mesh.elemPtr(elem_id);
     if (elem->processor_id() != this->processor_id())

@@ -1003,17 +1003,17 @@ MooseMesh::getBoundariesToElems() const
 {
   mooseDeprecated("MooseMesh::getBoundariesToElems is deprecated, "
                   "use MooseMesh::getBoundariesToActiveLocalElemIds");
-  return getBoundariesToActiveLocalElemIds();
+  return getBoundariesToActiveSemiLocalElemIds();
 }
 
 const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
-MooseMesh::getBoundariesToActiveLocalElemIds() const
+MooseMesh::getBoundariesToActiveSemiLocalElemIds() const
 {
   return _bnd_elem_ids;
 }
 
 std::unordered_set<dof_id_type>
-MooseMesh::getBoundaryActiveLocalElemIds(BoundaryID bid) const
+MooseMesh::getBoundaryActiveSemiLocalElemIds(BoundaryID bid) const
 {
   // The boundary to element map is computed on every mesh update
   const auto it = _bnd_elem_ids.find(bid);
