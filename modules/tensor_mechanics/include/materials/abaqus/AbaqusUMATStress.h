@@ -244,5 +244,6 @@ protected:
   const bool _use_one_based_indexing;
 
 private:
+  /// Method being used to compute strain and rotation increments
   const ComputeFiniteStrain::DecompMethod _decomposition_method;
 };

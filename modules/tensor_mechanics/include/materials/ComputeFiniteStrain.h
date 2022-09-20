@@ -24,7 +24,7 @@ public:
 
   void computeProperties() override;
 
-  enum DecompMethod
+  enum class DecompMethod
   {
     TaylorExpansion,
     EigenSolution,
@@ -37,12 +37,16 @@ protected:
   virtual void computeQpStrain();
   virtual void computeQpIncrements(RankTwoTensor & e, RankTwoTensor & r);
 
+  /// Incremental deformation gradient
   std::vector<RankTwoTensor> _Fhat;
 
+  /// Method for determining rotation and strain increments
   const DecompMethod _decomposition_method;
 
+  /// Flag if using HughesWinget method
   const bool _use_hw;
 
+  /// For HughesWinget kinematics
   MaterialProperty<RankTwoTensor> * _def_grad_mid;
   MaterialProperty<RankTwoTensor> * _f_bar;
 };
