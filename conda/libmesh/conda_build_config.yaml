@@ -2,7 +2,7 @@ moose_mpich:
   - moose-mpich 4.0.2 build_2
 
 moose_petsc:
-  - moose-petsc 99.16.6
+  - moose-petsc 3.16.6
 
 moose_libmesh_vtk:
   - moose-libmesh-vtk 9.1.0
