@@ -72,7 +72,7 @@ def parse_args():
     parser.add_argument('-t', '--tag', action='store_true', default=False,
                         help='Mimic Conda and print a <VERSION>_<BUILD> string')
     parser.add_argument('-d', '--dependencies', action='store_true', default=False,
-                        help='List dependencies for said library')
+                        help='List dependencies for said library in oras format')
     return parser.parse_args()
 
 def git_file(args, entity):
@@ -125,20 +125,21 @@ def read_yamlfile(args, yaml_file):
 def build_list(args):
     """ return list of files associated with supplied library """
     _dtmp = read_yamlfile(args, f'./{os.path.relpath(YAML_FILE)}')
-    _ltmp = []
+    _groups = {}
     for group_entity in ENTITIES:
         if group_entity in _dtmp['packages']:
+            _groups[group_entity] = _groups.get('group_entity', [])
             if args.tag and group_entity == args.library:
                 for entity in _dtmp['packages'][group_entity]:
                     if args.tag and entity.find('meta.yaml') == -1:
                         continue
-                    _ltmp.append(entity)
+                    _groups[group_entity].append(entity)
             elif not args.tag:
                 for entity in _dtmp['packages'][group_entity]:
-                    _ltmp.append(entity)
+                    _groups[group_entity].append(entity)
         if group_entity == args.library:
             break
-    return _ltmp
+    return _groups
 
 # Disable pylint to support supplemental feature not generally used
 # pylint: disable=import-outside-toplevel
@@ -150,23 +151,31 @@ def get_tag(args, meta_yaml):
 def main():
     """ print hash for supplied library """
     args = parse_args()
-    hash_tree = []
+    hash_group = {}
     entity_list = []
-    for an_entity in build_list(args):
-        entity_list.append(os.path.abspath(os.path.join(MOOSE_DIR, an_entity)))
-        hash_tree.append(git_hash(args, an_entity))
+    groups = build_list(args)
+    for group in groups.keys():
+        hash_group[group] = hash_group.get(group, [])
+        for an_entity in groups[group]:
+            entity_list.append(os.path.abspath(os.path.join(MOOSE_DIR, an_entity)))
+            hash_group[group].append(git_hash(args, an_entity))
     if args.influential:
         print('\n'.join(entity_list))
     elif args.dependencies:
         ENTITIES.reverse()
         for i in range(ENTITIES.index(args.library), len(ENTITIES)):
             if ENTITIES[i] != args.library:
-                print(ENTITIES[i])
+                tmp_hash = hashlib.md5(''.join(hash_group[ENTITIES[i]]).encode('utf-8')).hexdigest()[:7]
+                print(f'moose-{ENTITIES[i]}/{ENTITIES[i]}:{tmp_hash}')
     else:
         if args.tag:
-            print(get_tag(args, os.path.relpath(entity_list[0])))
+            try:
+                print(get_tag(args, os.path.relpath(entity_list[0])))
+            except IndexError:
+                tell(args.quiet, f'warning: {args.library} is not under Conda control.'
+                     f'\nAdd a meta.yaml file to {args.library} in module_hash.yaml')
         else:
-            print(hashlib.md5(''.join(hash_tree).encode('utf-8')).hexdigest()[:7])
+            print(hashlib.md5(''.join(hash_group[args.library]).encode('utf-8')).hexdigest()[:7])
 
 if __name__ == '__main__':
     main()

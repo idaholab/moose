@@ -1,6 +1,6 @@
 BootStrap: oras
 # Any Rocky-8 image which supplies a development stack with MPI available
-From: mooseharbor.hpc.inl.gov/hpc-base/rocky-8:latest
+From: mooseharbor.hpc.inl.gov/hpc-base/rocky-8:build_0
 
 %environment
     # Swap OpenMPI for MPICH

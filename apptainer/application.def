@@ -1,0 +1,61 @@
+BootStrap: <PROTOCOL>
+From: <LOCATION>
+
+%files
+    # make the application repository at-my-current-state available within container
+    # for vetted versions of APPLICATION during %post
+    <MOOSE_DIR>/../<APPLICATION> /usr/local/tmp_src
+
+%environment
+    export MOOSE_DIR=/usr/local/<APPLICATION>_src
+    export PATH=/usr/local/<APPLICATION>/bin:$PATH
+
+%post
+    # Prepare a temp directory
+    export TEMP_LOC=`mktemp -d /tmp/rocky_singularity.XXXXX`
+
+    # `make install` target path
+    export MOOSE_PREFIX=/usr/local/<APPLICATION>
+
+    # Shallow Clone (specific to this containers purpose)
+    git clone --depth 1 file:///usr/local/tmp_src /usr/local/<APPLICATION>_src
+    rm -rf /usr/local/tmp_src
+
+    # Fix permissions during for `make install`
+    chmod -R o=u-w,g=u-w /usr/local/<APPLICATION>_src
+    umask 022
+    # Build MOOSE modules
+    export MOOSE_JOBS=32
+    echo "JOBS: ${MOOSE_JOBS}"
+    if [ "<APPLICATION>" == "moose" ]; then
+        cd /usr/local/<APPLICATION>_src
+    else
+        cd /usr/local/<APPLICATION>_src/moose
+    fi
+
+    ./configure --prefix=${MOOSE_PREFIX}
+    if [ "<APPLICATION>" == "moose" ]; then
+        cd /usr/local/<APPLICATION>_src/modules
+    else
+        cd /usr/local/<APPLICATION>_src/
+    fi
+    make -j ${MOOSE_JOBS:-32}
+    export MOOSE_SKIP_DOCS=true
+    make install -j ${MOOSE_JOBS:-32}
+
+    # Test MOOSE modules
+    ./run_tests -j ${MOOSE_JOBS:-12} -t
+
+    # Test make install copy-inputs
+    export PATH=/usr/local/<APPLICATION>/bin:$PATH
+    cd ${TEMP_LOC}
+    combined-opt --copy-inputs tests
+    cd combined/tests
+    combined-opt --run -j ${MOOSE_JOBS:-6} -t
+
+    # Clean Up
+    cd /usr/local/<APPLICATION>_src
+    git clean -xfd
+    cd /usr/local/<APPLICATION>/
+    find . -type f -name "__pycache__" -exec rm -rf {} \;
+    rm -rf ${TEMP_LOC}
