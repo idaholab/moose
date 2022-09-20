@@ -51,6 +51,9 @@ AbaqusUMATStress::validParams()
       "displaced mesh for computing displacements and quantities based on the deformed state.");
   params.addParam<UserObjectName>(
       "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
+  params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1.");
+  params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2.");
+  params.addParam<Real>("euler_angle_3", 0.0, "Euler angle in direction 3.");
   return params;
 }
 
@@ -93,8 +96,16 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _external_properties(_number_external_properties),
     _external_properties_old(_number_external_properties),
     _use_one_based_indexing(getParam<bool>("use_one_based_indexing")),
+    _R(RealVectorValue(getParam<Real>("euler_angle_1"),
+                       getParam<Real>("euler_angle_2"),
+                       getParam<Real>("euler_angle_3"))),
+    _total_rotation(declareProperty<RankTwoTensor>("total_rotation")),
+    _total_rotation_old(getMaterialPropertyOld<RankTwoTensor>("total_rotation")),
+    _orientation_flag(parameters.isParamSetByUser("euler_angle_1") ||
+                      parameters.isParamSetByUser("euler_angle_2") ||
+                      parameters.isParamSetByUser("euler_angle_3")),
     _decomposition_method(
-        getParam<MooseEnum>("decomposition_method").getEnum<ComputeFiniteStrain::DecompMethod>())
+       getParam<MooseEnum>("decomposition_method").getEnum<ComputeFiniteStrain::DecompMethod>())
 {
   if (!_use_one_based_indexing)
     mooseDeprecated(
@@ -158,6 +169,9 @@ AbaqusUMATStress::initQpStatefulProperties()
   _state_var[_qp].resize(_aqNSTATV);
   for (const auto i : make_range(_aqNSTATV))
     _state_var[_qp][i] = 0.0;
+
+  // Initialize total rotation tensor
+  _total_rotation[_qp] = _R;
 }
 
 void
@@ -206,11 +220,36 @@ AbaqusUMATStress::computeQpStress()
   const Real * myDFGRD1 = &(FBar_fortran(0, 0));
   const Real * myDROT = &(DROT_fortran(0, 0));
 
+  // More local copies of materials so we can rotate
+  RankTwoTensor stress_old = _stress_old[_qp];
+  RankTwoTensor total_strain_old = _total_strain_old[_qp];
+  RankTwoTensor strain_increment = _strain_increment[_qp];
+
+  // check if we need to rotate to intermediate configuration
+  if (_orientation_flag)
+  {
+    // keep track of total rotation
+    _total_rotation[_qp] = _rotation_increment[_qp] * _total_rotation_old[_qp];
+    // rotate stress/strain/increment from reference configuration to intermediate configuration
+    stress_old.rotate(_total_rotation_old[_qp].transpose());
+    total_strain_old.rotate(_total_rotation_old[_qp].transpose());
+
+    if (_decomposition_method == ComputeFiniteStrain::DecompMethod::HughesWinget)
+      strain_increment.rotate(_total_rotation[_qp].transpose());
+    else
+      strain_increment.rotate(_total_rotation_old[_qp].transpose());
+  }
+  else if (_decomposition_method == ComputeFiniteStrain::DecompMethod::HughesWinget)
+    // rotate old stress to reference configuration
+    stress_old.rotate(_rotation_increment[_qp]);
+
   // copy because UMAT does not guarantee constness
   for (const auto i : make_range(9))
   {
     _aqDFGRD0[i] = myDFGRD0[i];
     _aqDFGRD1[i] = myDFGRD1[i];
+    // TODO: Use old rotation increment for DROT if Rashid so UMAT state variables
+    // can be rotated to the same reference frame as stress (ie. old stress)
     _aqDROT[i] = myDROT[i];
   }
 
@@ -225,18 +264,13 @@ AbaqusUMATStress::computeQpStress()
   static const std::array<std::pair<unsigned int, unsigned int>, 6> component{
       {{0, 0}, {1, 1}, {2, 2}, {0, 1}, {0, 2}, {1, 2}}};
 
-  // rotate old stress if HughesWinget
-  RankTwoTensor stress_old = _stress_old[_qp];
-  if (_decomposition_method == ComputeFiniteStrain::DecompMethod::HughesWinget)
-    stress_old.rotate(_rotation_increment[_qp]);
-
   for (const auto i : make_range(_aqNTENS))
   {
     const auto a = component[i].first;
     const auto b = component[i].second;
     _aqSTRESS[i] = stress_old(a, b);
-    _aqSTRAN[i] = _total_strain_old[_qp](a, b) * strain_factor[i];
-    _aqDSTRAN[i] = _strain_increment[_qp](a, b) * strain_factor[i];
+    _aqSTRAN[i] = total_strain_old(a, b) * strain_factor[i];
+    _aqDSTRAN[i] = strain_increment(a, b) * strain_factor[i];
   }
 
   // current coordinates
@@ -342,10 +376,6 @@ AbaqusUMATStress::computeQpStress()
   _stress[_qp] = RankTwoTensor(
       _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[5], _aqSTRESS[4], _aqSTRESS[3]);
 
-  // Rotate the stress state to the current configuration, unless HughesWinget
-  if (_decomposition_method != ComputeFiniteStrain::DecompMethod::HughesWinget)
-    _stress[_qp].rotate(_rotation_increment[_qp]);
-
   // Build Jacobian matrix from UMAT's Voigt non-standard order to fourth order tensor.
   const unsigned int N = Moose::dim;
   const unsigned int ntens = N * (N + 1) / 2;
@@ -365,4 +395,15 @@ AbaqusUMATStress::computeQpStress()
                 k == l ? _aqDDSDDE[(nskip + i + j) * ntens + k]
                        : _aqDDSDDE[(nskip + i + j) * ntens + k + nskip + l];
         }
+
+  // check if we need to rotate from intermediate reference frame
+  if (_orientation_flag)
+  {
+    // rotate to current configuration
+    _stress[_qp].rotate(_total_rotation[_qp]);
+    _jacobian_mult[_qp].rotate(_total_rotation[_qp]);
+  }
+  else if (_decomposition_method != ComputeFiniteStrain::DecompMethod::HughesWinget)
+    _stress[_qp].rotate(_rotation_increment[_qp]);
+
 }
