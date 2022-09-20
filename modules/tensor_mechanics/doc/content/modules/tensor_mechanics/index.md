@@ -95,7 +95,7 @@ introductory theory pages on the various models:
 - [Cohesive Zone Modeling](CohesiveZoneMaster/index.md)
 - [Shell elements](tensor_mechanics/ShellElements.md)
 - [Reduced Order Models](/LAROMANCE.md)
-
+- [Frequency Domain Dynamics](/1d_elastic_waves.md)
 !col-end!
 !row-end!
 
