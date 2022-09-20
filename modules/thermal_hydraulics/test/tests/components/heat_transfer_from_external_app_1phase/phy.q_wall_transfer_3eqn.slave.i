@@ -8,7 +8,7 @@
   closures = simple_closures
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [eos]
     type = IdealGasFluidProperties
   []

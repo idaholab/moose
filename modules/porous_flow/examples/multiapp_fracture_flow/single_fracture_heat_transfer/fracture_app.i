@@ -77,15 +77,13 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      bulk_modulus = 1E9 # in Pa
-      density0 = 1000
-      thermal_expansion = 0 # for simplicity
-      viscosity = 1E-3 # in Pa.s
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 1E9 # in Pa
+    density0 = 1000
+    thermal_expansion = 0 # for simplicity
+    viscosity = 1E-3 # in Pa.s
   []
 []
 

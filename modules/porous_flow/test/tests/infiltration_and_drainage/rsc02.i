@@ -38,22 +38,20 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = SimpleFluidProperties
-      bulk_modulus = 2e9
-      density0 = 10
-      thermal_expansion = 0
-      viscosity = 1e-3
-    []
-    [oil]
-      type = SimpleFluidProperties
-      bulk_modulus = 2e9
-      density0 = 20
-      thermal_expansion = 0
-      viscosity = 2e-3
-    []
+[FluidProperties]
+  [water]
+    type = SimpleFluidProperties
+    bulk_modulus = 2e9
+    density0 = 10
+    thermal_expansion = 0
+    viscosity = 1e-3
+  []
+  [oil]
+    type = SimpleFluidProperties
+    bulk_modulus = 2e9
+    density0 = 20
+    thermal_expansion = 0
+    viscosity = 2e-3
   []
 []
 

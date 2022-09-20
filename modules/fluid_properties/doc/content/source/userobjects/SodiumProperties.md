@@ -1,6 +1,6 @@
 # Sodium Fluid Properties
 
-!syntax description /Modules/FluidProperties/SodiumProperties
+!syntax description /FluidProperties/SodiumProperties
 
 `SodiumProperties` inherits from the base class `FluidProperties` and provides the needed functionality for determining sodium
 fluid properties that may be used for coolant channel simulations.
@@ -17,12 +17,12 @@ The following methods are provided in this class:
 
 Properties of liquid sodium are obtained from [!cite](Fink:1995bf).
 
-!listing modules/fluid_properties/test/tests/sodium/exact.i block=Modules/FluidProperties/sodium
+!listing modules/fluid_properties/test/tests/sodium/exact.i block=FluidProperties/sodium
 
-!syntax parameters /Modules/FluidProperties/SodiumProperties
+!syntax parameters /FluidProperties/SodiumProperties
 
-!syntax inputs /Modules/FluidProperties/SodiumProperties
+!syntax inputs /FluidProperties/SodiumProperties
 
-!syntax children /Modules/FluidProperties/SodiumProperties
+!syntax children /FluidProperties/SodiumProperties
 
 !bibtex bibliography

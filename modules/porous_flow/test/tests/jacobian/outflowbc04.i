@@ -66,26 +66,24 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid0]
-      type = SimpleFluidProperties
-      bulk_modulus = 1.5
-      density0 = 1.2
-      cp = 0.9
-      cv = 1.1
-      viscosity = 0.4
-      thermal_expansion = 0.7
-    []
-    [simple_fluid1]
-      type = SimpleFluidProperties
-      bulk_modulus = 2.5
-      density0 = 0.5
-      cp = 1.9
-      cv = 2.1
-      viscosity = 0.9
-      thermal_expansion = 0.4
-    []
+[FluidProperties]
+  [simple_fluid0]
+    type = SimpleFluidProperties
+    bulk_modulus = 1.5
+    density0 = 1.2
+    cp = 0.9
+    cv = 1.1
+    viscosity = 0.4
+    thermal_expansion = 0.7
+  []
+  [simple_fluid1]
+    type = SimpleFluidProperties
+    bulk_modulus = 2.5
+    density0 = 0.5
+    cp = 1.9
+    cv = 2.1
+    viscosity = 0.9
+    thermal_expansion = 0.4
   []
 []
 

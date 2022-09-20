@@ -5,7 +5,7 @@
   closures = simple_closures
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [barotropic]
     type = LinearFluidProperties
     p_0 = 1.e5     # Pa

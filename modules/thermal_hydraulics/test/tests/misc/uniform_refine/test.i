@@ -12,7 +12,7 @@
   fp = eos
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35

@@ -1,6 +1,6 @@
 # SimpleFluidProperties
 
-!syntax description /Modules/FluidProperties/SimpleFluidProperties
+!syntax description /FluidProperties/SimpleFluidProperties
 
 This is a computationally simple fluid based on a constant bulk modulus density fluid,
 with density given by
@@ -21,8 +21,8 @@ and
 \end{equation}
 respectively.  Here $\gamma$ is called the `porepressure_coefficient`: usually it should be set to $1$ but many analytical studies assume $\gamma=0$.
 
-!syntax parameters /Modules/FluidProperties/SimpleFluidProperties
+!syntax parameters /FluidProperties/SimpleFluidProperties
 
-!syntax inputs /Modules/FluidProperties/SimpleFluidProperties
+!syntax inputs /FluidProperties/SimpleFluidProperties
 
-!syntax children /Modules/FluidProperties/SimpleFluidProperties
+!syntax children /FluidProperties/SimpleFluidProperties

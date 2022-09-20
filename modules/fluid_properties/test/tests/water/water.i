@@ -146,11 +146,9 @@
   [../]
 []
 
-[Modules]
-  [./FluidProperties]
-    [./water]
-      type = Water97FluidProperties
-    [../]
+[FluidProperties]
+  [./water]
+    type = Water97FluidProperties
   [../]
 []
 

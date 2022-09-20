@@ -6,18 +6,16 @@
 # Energy density should equal 4000 * 300 = 1.2E6 J/kg
 # Specific enthalpy should equal 4000 * 300 + 10e6 / 1426.844 = 1.207008E6 J/kg
 
-[Modules]
-  [FluidProperties]
-    [the_simple_fluid]
-      type = SimpleFluidProperties
-      thermal_expansion = 2.0E-4
-      cv = 4000.0
-      cp = 5000.0
-      bulk_modulus = 1.0E9
-      thermal_conductivity = 1.0
-      viscosity = 1.1E-3
-      density0 = 1500.0
-    []
+[FluidProperties]
+  [the_simple_fluid]
+    type = SimpleFluidProperties
+    thermal_expansion = 2.0E-4
+    cv = 4000.0
+    cp = 5000.0
+    bulk_modulus = 1.0E9
+    thermal_conductivity = 1.0
+    viscosity = 1.1E-3
+    density0 = 1500.0
   []
 []
 

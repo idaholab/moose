@@ -11,7 +11,7 @@
     type = RunApp
     input = 'test.i'
     cli_args = "
-      Modules/FluidProperties/fp_2phase/error_on_unimplemented=false
+      FluidProperties/fp_2phase/error_on_unimplemented=false
       AuxVariables/T_sat/family=LAGRANGE
       AuxVariables/T_sat/order=FIRST
       AuxKernels/T_sat_aux/type=SaturationTemperatureAux

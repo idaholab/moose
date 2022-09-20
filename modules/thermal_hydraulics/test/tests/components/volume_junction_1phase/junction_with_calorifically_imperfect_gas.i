@@ -43,7 +43,7 @@ p_out = 7e6
   []
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = CaloricallyImperfectGas
     molar_mass = 0.002

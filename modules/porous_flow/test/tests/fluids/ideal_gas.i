@@ -49,14 +49,12 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [idealgas]
-      type = IdealGasFluidProperties
-      molar_mass = 2.01588e-3
-      gamma = 1.4
-      mu = 9.4393e-6
-    []
+[FluidProperties]
+  [idealgas]
+    type = IdealGasFluidProperties
+    molar_mass = 2.01588e-3
+    gamma = 1.4
+    mu = 9.4393e-6
   []
 []
 

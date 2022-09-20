@@ -6,7 +6,7 @@
   initial_vel = 0
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp_2phase]
     type = StiffenedGasTwoPhaseFluidProperties
   []

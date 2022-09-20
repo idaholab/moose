@@ -35,12 +35,12 @@ other people.
 
 ## Fluid Properties
 
-In our model, we will be circulating helium in tubes, so we need to add a top-level `[Modules/FluidProperties]` block
+In our model, we will be circulating helium in tubes, so we need to add a top-level `[FluidProperties]` block
 into the input file.
 In this block, we define all fluids that will be used by the flow components.
 
 To model the helium gas, we will use the ideal gas equation of state.
-To do so, we will put the following block inside the `[Modules/FluidProperties]` block.
+To do so, we will put the following block inside the `[FluidProperties]` block.
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
          block=FluidProperties/he

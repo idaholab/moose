@@ -161,7 +161,7 @@ D_h_pipe = ${fparse 2 * r}
   rdg_slope_reconstruction = full
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fluid]
     type = IdealGasFluidProperties
   []

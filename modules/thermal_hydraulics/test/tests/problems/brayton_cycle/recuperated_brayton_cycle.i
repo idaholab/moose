@@ -145,7 +145,7 @@ hs_power = 105750
   rdg_slope_reconstruction = none
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp_air]
     type = IdealGasFluidProperties
     emit_on_nan = none

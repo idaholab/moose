@@ -61,11 +61,9 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [co2]
-      type = CO2FluidProperties
-    []
+[FluidProperties]
+  [co2]
+    type = CO2FluidProperties
   []
 []
 

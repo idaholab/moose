@@ -37,6 +37,15 @@ gamma = 1.4
   rhie_chow_user_object = pins_rhie_chow_interpolator
 []
 
+[FluidProperties]
+  [air]
+    type = IdealGasFluidProperties
+    molar_mass = ${molar_mass}
+    k = ${k}
+    gamma = ${gamma}
+  []
+[]
+
 [Modules]
   [NavierStokesFV]
     compressibility = 'weakly-compressible'
@@ -68,15 +77,6 @@ gamma = 1.4
     friction_coeffs = 'Darcy_coef'
     porous_medium_treatment = true
     porosity = porosity
-  []
-
-  [FluidProperties]
-    [air]
-      type = IdealGasFluidProperties
-      molar_mass = ${molar_mass}
-      k = ${k}
-      gamma = ${gamma}
-    []
   []
 []
 

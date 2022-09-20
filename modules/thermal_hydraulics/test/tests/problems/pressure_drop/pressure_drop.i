@@ -17,15 +17,13 @@ ramp_time = 5.0
   scaling_factor_1phase = '1 1 1e-5'
 []
 
-[Modules]
-  [FluidProperties]
-    [h2]
-      type = IdealGasFluidProperties
-      gamma = 1.3066
-      molar_mass = 2.016e-3
-      k = 0.437
-      mu = 3e-5
-    []
+[FluidProperties]
+  [h2]
+    type = IdealGasFluidProperties
+    gamma = 1.3066
+    molar_mass = 2.016e-3
+    k = 0.437
+    mu = 3e-5
   []
 []
 

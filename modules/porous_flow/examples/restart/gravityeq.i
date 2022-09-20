@@ -91,11 +91,9 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [brine]
-      type = BrineFluidProperties
-    []
+[FluidProperties]
+  [brine]
+    type = BrineFluidProperties
   []
 []
 

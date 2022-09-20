@@ -135,30 +135,28 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [co2sw]
-      type = CO2FluidProperties
-    []
-    [co2]
-      type = TabulatedFluidProperties
-      fp = co2sw
-    []
-    [water]
-      type = Water97FluidProperties
-    []
-    [watertab]
-      type = TabulatedFluidProperties
-      fp = water
-      temperature_min = 273.15
-      temperature_max = 573.15
-      fluid_property_file = water_fluid_properties.csv
-      save_file = false
-    []
-    [brine]
-      type = BrineFluidProperties
-      water_fp = watertab
-    []
+[FluidProperties]
+  [co2sw]
+    type = CO2FluidProperties
+  []
+  [co2]
+    type = TabulatedFluidProperties
+    fp = co2sw
+  []
+  [water]
+    type = Water97FluidProperties
+  []
+  [watertab]
+    type = TabulatedFluidProperties
+    fp = water
+    temperature_min = 273.15
+    temperature_max = 573.15
+    fluid_property_file = water_fluid_properties.csv
+    save_file = false
+  []
+  [brine]
+    type = BrineFluidProperties
+    water_fp = watertab
   []
 []
 

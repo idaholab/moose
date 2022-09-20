@@ -49,11 +49,9 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = IdealGasFluidProperties
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = IdealGasFluidProperties
   []
 []
 

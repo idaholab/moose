@@ -27,11 +27,9 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [the_simple_fluid]
-      type = SimpleFluidProperties
-    []
+[FluidProperties]
+  [the_simple_fluid]
+    type = SimpleFluidProperties
   []
 []
 

@@ -97,14 +97,12 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [co2]
-      type = CO2FluidProperties
-    []
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [co2]
+    type = CO2FluidProperties
+  []
+  [water]
+    type = Water97FluidProperties
   []
 []
 

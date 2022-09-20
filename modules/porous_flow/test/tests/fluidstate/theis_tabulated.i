@@ -116,19 +116,17 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [co2]
-      type = CO2FluidProperties
-    []
-    [tabulated]
-      type = TabulatedFluidProperties
-      fp = co2
-      fluid_property_file = fluid_properties.csv
-    []
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [co2]
+    type = CO2FluidProperties
+  []
+  [tabulated]
+    type = TabulatedFluidProperties
+    fp = co2
+    fluid_property_file = fluid_properties.csv
+  []
+  [water]
+    type = Water97FluidProperties
   []
 []
 

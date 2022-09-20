@@ -5,7 +5,7 @@
 # is being called before Pipe's init() function was called, due to the test
 # component being added before the Pipe.
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35

@@ -104,31 +104,29 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [co2]
-      type = IdealGasFluidProperties
-    []
-    [tabulated]
-      type = TabulatedBicubicFluidProperties
-      interpolated_properties = 'density enthalpy viscosity internal_energy k c cv cp entropy'
-      # fluid_property_file = fluid_properties.csv
-      save_file = true
-      construct_pT_from_ve = true
-      construct_pT_from_vh = true
-      error_on_out_of_bounds = false
+[FluidProperties]
+  [co2]
+    type = IdealGasFluidProperties
+  []
+  [tabulated]
+    type = TabulatedBicubicFluidProperties
+    interpolated_properties = 'density enthalpy viscosity internal_energy k c cv cp entropy'
+    # fluid_property_file = fluid_properties.csv
+    save_file = true
+    construct_pT_from_ve = true
+    construct_pT_from_vh = true
+    error_on_out_of_bounds = false
 
-      # Tabulation range
-      temperature_min = 280
-      temperature_max = 600
-      pressure_min = 1e5
-      pressure_max = 7e5
+    # Tabulation range
+    temperature_min = 280
+    temperature_max = 600
+    pressure_min = 1e5
+    pressure_max = 7e5
 
-      # Newton parameters
-      tolerance = 1e-8
-      T_initial_guess = 310
-      p_initial_guess = 1.8e5
-    []
+    # Newton parameters
+    tolerance = 1e-8
+    T_initial_guess = 310
+    p_initial_guess = 1.8e5
   []
 []
 

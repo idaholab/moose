@@ -54,11 +54,9 @@ inlet_v = 4
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = FlibeFluidProperties
-    []
+[FluidProperties]
+  [fp]
+    type = FlibeFluidProperties
   []
 []
 
