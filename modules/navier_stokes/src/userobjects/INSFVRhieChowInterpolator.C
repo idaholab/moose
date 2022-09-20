@@ -460,9 +460,8 @@ INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
   {
     const auto & elem = _moose_mesh.elemPtr(elem_id);
     if (elem->processor_id() != this->processor_id())
-      for (const auto i : make_range(_dim))
-        // Adding to the a coefficient will make sure the final result gets communicated
-        addToA(elem, i, 0);
+      // Adding to the a coefficient will make sure the final result gets communicated
+      addToA(elem, 0, 0);
   }
 
   // Ghost a for the neighbors of the elements on the boundary
@@ -470,9 +469,8 @@ INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
   {
     const auto & neighbor = _moose_mesh.queryElemPtr(neighbor_id);
     if (neighbor->processor_id() != this->processor_id())
-      for (const auto i : make_range(_dim))
-        // Adding to the a coefficient will make sure the final result gets communicated
-        addToA(neighbor, i, 0);
+      // Adding to the a coefficient will make sure the final result gets communicated
+      addToA(neighbor, 0, 0);
   }
 }
 

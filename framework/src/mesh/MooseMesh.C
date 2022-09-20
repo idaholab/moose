@@ -1012,7 +1012,7 @@ MooseMesh::getBoundariesToActiveLocalElemIds() const
   return _bnd_elem_ids;
 }
 
-const std::unordered_set<dof_id_type>
+std::unordered_set<dof_id_type>
 MooseMesh::getBoundaryActiveLocalElemIds(BoundaryID bid) const
 {
   // The boundary to element map is computed on every mesh update
@@ -1023,15 +1023,17 @@ MooseMesh::getBoundaryActiveLocalElemIds(BoundaryID bid) const
   return it->second;
 }
 
-const std::unordered_set<dof_id_type>
+std::unordered_set<dof_id_type>
 MooseMesh::getBoundaryActiveNeighborElemIds(BoundaryID bid) const
 {
   // Vector of boundary elems is updated every mesh update
   std::unordered_set<dof_id_type> neighbor_elems;
-  for (const auto & local_elem : _bnd_elems)
-    if (local_elem->_bnd_id == bid)
+  for (const auto & bnd_elem : _bnd_elems)
+  {
+    const auto & [elem_ptr, elem_side, elem_bid] = *bnd_elem;
+    if (elem_bid == bid)
     {
-      const auto * neighbor = local_elem->_elem->neighbor_ptr(local_elem->_side);
+      const auto * neighbor = elem_ptr->neighbor_ptr(elem_side);
       // Dont add fully remote elements, ghosted is fine
       if (neighbor && neighbor != libMesh::remote_elem)
       {
@@ -1041,12 +1043,13 @@ MooseMesh::getBoundaryActiveNeighborElemIds(BoundaryID bid) const
         else
         {
           std::vector<const Elem *> family;
-          neighbor->active_family_tree_by_neighbor(family, local_elem->_elem);
+          neighbor->active_family_tree_by_neighbor(family, elem_ptr);
           for (const auto & child_neighbor : family)
             neighbor_elems.insert(child_neighbor->id());
         }
       }
     }
+  }
 
   return neighbor_elems;
 }

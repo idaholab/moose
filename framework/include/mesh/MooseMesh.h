@@ -434,17 +434,18 @@ public:
    * Note that boundaries are sided.
    * @param bid the id of the boundary/sideset of interest
    */
-  const std::unordered_set<dof_id_type> getBoundaryActiveLocalElemIds(BoundaryID bid) const;
+  std::unordered_set<dof_id_type> getBoundaryActiveLocalElemIds(BoundaryID bid) const;
 
   /**
-   * Return all ids of neighbors of elements which have a side which is part of a boundary/sideset.
+   * Return all ids of neighbors of elements which have a side which is part of a sideset.
    * Note that boundaries are sided, this is on the neighbor side. For the sideset side, use
    * getBoundariesActiveLocalElemIds.
    * Note that while the element is local and active, the neighbor is not guaranteed to be local,
    * it could be ghosted.
+   * Note that if the neighbor is not ghosted, is a remote_elem, then it will not be included
    * @param bid the id of the boundary/sideset of interest
    */
-  const std::unordered_set<dof_id_type> getBoundaryActiveNeighborElemIds(BoundaryID bid) const;
+  std::unordered_set<dof_id_type> getBoundaryActiveNeighborElemIds(BoundaryID bid) const;
 
   /**
    * Returns a read-only reference to the set of subdomains currently
