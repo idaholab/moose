@@ -190,13 +190,18 @@ Console::Console(const InputParameters & parameters)
   mooseAssert(actions.size() <= 1, "Should not be more than one CommonOutputAction");
   const Action * common = actions.empty() ? nullptr : *actions.begin();
 
-  // Honor the 'print_linear_residuals' option, only if 'execute_on' has not been set by the user
   if (!parameters.isParamSetByUser("execute_on"))
   {
+    // Honor the 'print_linear_residuals' option, only if 'linear' has not been set in 'execute_on'
+    // by the user
     if (common && common->getParam<bool>("print_linear_residuals"))
       _execute_on.push_back("linear");
     else
       _execute_on.erase("linear");
+    if (common && common->getParam<bool>("print_nonlinear_residuals"))
+      _execute_on.push_back("nonlinear");
+    else
+      _execute_on.erase("nonlinear");
   }
 
   if (!_pars.isParamSetByUser("perf_log") && common && common->getParam<bool>("print_perf_log"))
