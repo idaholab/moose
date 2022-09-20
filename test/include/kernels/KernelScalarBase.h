@@ -81,6 +81,7 @@ protected:
     return 0;
   }
 
+  void computeOffDiagJacobianScalarLocal(const unsigned int jvar);
   /**
    * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-scalar
    */

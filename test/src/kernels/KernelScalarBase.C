@@ -128,9 +128,9 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
 
   const auto & jvar = getVariable(jvar_num);
   // prepareMatrixTagLower(_assembly, _kappa_var.number(), jvar_num, type);
-  DenseMatrix<Number> & ken = _assembly.jacobianBlock(_kappa_var.number(), jvar_num);
-  // DenseMatrix<Number> & ken = _assembly.jacobianBlock(_kappa_var, jvar_num);
-  if (ken.n() == 0 || ken.m() == 0)
+  DenseMatrix<Number> & kne = _assembly.jacobianBlock(_kappa_var.number(), jvar_num);
+  // DenseMatrix<Number> & kne = _assembly.jacobianBlock(_kappa_var, jvar_num);
+  if (kne.n() == 0 || kne.m() == 0)
     return;
 
   if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
@@ -141,15 +141,36 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       initScalarQpOffDiagJacobian(jvar);
-      for (_i = 0; _i < ken.m(); _i++)
+      for (_i = 0; _i < kne.m(); _i++)
         for (_j = 0; _j < loc_phi.size(); _j++)
-          ken(_i, _j) += _JxW[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobian(jvar_num);
+          kne(_i, _j) += _JxW[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobian(jvar_num);
     }
   }
   else if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
     mooseError("Array variable cannot be coupled into Kernel Scalar currently");
   else
     mooseError("Vector variable cannot be coupled into Kernel Scalar currently");
+
+  // accumulateTaggedLocalMatrix();
+}
+
+void
+KernelScalarBase::computeOffDiagJacobianScalarLocal(const unsigned int jvar_num)
+{
+
+  // prepareMatrixTagLower(_assembly, _kappa_var.number(), jvar_num, type);
+  DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), _kappa_var.number());
+  // DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), _kappa_var);
+  if (ken.n() == 0 || ken.m() == 0)
+    return;
+
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    initScalarQpJacobian(jvar_num);
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < ken.n(); _j++)
+        ken(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar_num);
+  }
 
   // accumulateTaggedLocalMatrix();
 }
@@ -166,6 +187,7 @@ KernelScalarBase::computeOffDiagJacobianScalar(const unsigned int jvar_num)
   // else if (jvar_num == _kappa_var) // column for this kernel's scalar variable
   {
     Kernel::computeOffDiagJacobianScalar(jvar_num); // d-_var-residual / d-_kappa
+    // computeOffDiagJacobianScalarLocal(jvar_num); // d-_var-residual / d-_kappa
     computeScalarJacobian(); // d-_kappa-residual / d-_kappa
   }
   else // some other column for scalar variable
