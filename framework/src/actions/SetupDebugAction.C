@@ -123,7 +123,5 @@ SetupDebugAction::act()
 
   // Add functor output
   if (getParam<bool>("show_functors"))
-  {
     _problem->setFunctorOutput(getParam<bool>("show_functors"));
-  }
 }

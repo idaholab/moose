@@ -41,8 +41,7 @@ protected:
   /// interpolations and reconstructions to create the resulting smoothed field
   const Moose::Functor<ADReal> & _eps;
 
-  /// The smoothed porosity functor/field. After we construct this functor/field we assign it to the
-  /// subproblem's porosity functor
+  /// The smoothed porosity functor/field
   CellCenteredMapFunctor<ADReal, std::unordered_map<dof_id_type, ADReal>> _smoothed_eps;
 
   /// All the thread copies of the problem's porosity functor

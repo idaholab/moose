@@ -805,7 +805,7 @@ public:
   void addFunctor(const std::string & name, const Moose::FunctorBase<T> & functor, THREAD_ID tid);
 
   /**
-   * Add a functor that has blockwise lambda definitions, e.g. the evaluations of the functor are
+   * Add a functor that has block-wise lambda definitions, e.g. the evaluations of the functor are
    * based on a user-provided lambda expression.
    * @param name The name of the functor to add
    * @param my_lammy The lambda expression that will be called when the functor is evaluated
@@ -941,7 +941,7 @@ private:
 
 private:
   /// Lists all functors in the problem
-  void showFunctors(const THREAD_ID tid) const;
+  void showFunctors() const;
 
   /// Lists all functors and all the objects that requested them
   void showFunctorRequestors() const;
@@ -950,7 +950,7 @@ private:
   /// requestors
   std::map<std::string, std::set<std::string>> _functor_to_requestors;
 
-  /// Whether to output the functors (currently only at initialSetup)
+  /// Whether to output a list of the functors used and requested (currently only at initialSetup)
   bool _output_functors;
 
   /// The declared vector tags

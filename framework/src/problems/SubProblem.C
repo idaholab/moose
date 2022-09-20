@@ -20,6 +20,7 @@
 #include "MooseObjectName.h"
 #include "RelationshipManager.h"
 #include "MooseUtils.h"
+#include "ConsoleUtils.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/system.h"
@@ -1033,7 +1034,7 @@ SubProblem::initialSetup()
 {
   if (_output_functors)
   {
-    showFunctors(0);
+    showFunctors();
     showFunctorRequestors();
   }
 
@@ -1048,14 +1049,15 @@ SubProblem::initialSetup()
 }
 
 void
-SubProblem::showFunctors(const THREAD_ID tid) const
+SubProblem::showFunctors() const
 {
-  mooseAssert(tid < _functors.size(), "Too large a thread ID");
   _console << "[DBG] Wrapped functors found in Subproblem" << std::endl;
   std::string functor_names = "[DBG] ";
-  for (const auto & functor_pair : _functors[tid])
+  for (const auto & functor_pair : _functors[0])
     functor_names += std::regex_replace(functor_pair.first, std::regex("wraps_"), "") + " ";
-  _console << functor_names << std::endl;
+  if (functor_names.size())
+    functor_names.pop_back();
+  _console << std::setw(ConsoleUtils::console_field_width) << functor_names << std::endl;
 }
 
 void
@@ -1065,10 +1067,8 @@ SubProblem::showFunctorRequestors() const
   {
     _console << "[DBG] Requestors for wrapped functor "
              << std::regex_replace(functor, std::regex("wraps_"), "") << std::endl;
-    std::string requestor_names = "[DBG] ";
-    for (const auto & requestor : requestors)
-      requestor_names += requestor + " ";
-    _console << requestor_names << std::endl;
+    _console << std::setw(ConsoleUtils::console_field_width) << "[DBG] "
+             << MooseUtils::join(requestors, " ") << std::endl;
   }
 }
 
