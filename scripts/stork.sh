@@ -162,7 +162,7 @@ if [[ "$kind" == "module" ]]; then
     echo "    5. Ensure that the remaining required SQA documentation is set up for the new module"
     echo "       by contacting a member of the MOOSE development team."
     echo "    6. Ensure that no stork files hang around before committing"
-    echo "    7. Ensure that proper testing is performed for per module tests (e.g. parallel testing)"
+    echo "    7. Ensure that proper testing is performed for per-module tests (e.g. parallel, recover testing)"
     echo ""
 
     rm -f $dir/LICENSE
