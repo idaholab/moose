@@ -115,7 +115,7 @@ public:
    * Setup an \emph extrinsic rotation defined in the following way:
    * 1. rotate by \p alpha degrees about the z-axis
    * 2. rotate by \p beta degrees about the x-axis
-   * 3. rotate by \p gamma dgrees about the z-axis
+   * 3. rotate by \p gamma degrees about the z-axis
    * Definitions of the resulting matrix are found in the last row of the Proper Euler angles column
    * of https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix. These rotation angles should
    * describe how points in our domain should be rotated in order to arrive back in the reference

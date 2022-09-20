@@ -305,13 +305,24 @@ MultiAppTransfer::getAppInfo()
   _to_moose_app_transform =
       std::make_unique<MooseAppCoordTransform>(to_app_transform_construction_data);
 
+  /*
+   * skip_coordinate_collapsing: whether to set the transform to skip coordinate collapsing
+   *                             (from XYZ to RZ for example)
+   * transforms: vector of transforms to add the new transforms to
+   * moose_app_transform: base for the new transform
+   * is_parent_app_transform: whether working on the transform for the parent app (this app, the
+   *                          one creating the transfer) or for child apps
+   * multiapp: pointer to the multiapp to obtain the position of the child apps
+   */
   auto create_multiapp_transforms =
       [skip_coordinate_collapsing](auto & transforms,
                                    const auto & moose_app_transform,
-                                   const bool moose_app_is_main_app,
+                                   const bool is_parent_app_transform,
                                    const MultiApp * const multiapp = nullptr)
   {
-    if (moose_app_is_main_app)
+    mooseAssert(is_parent_app_transform || multiapp,
+                "Coordinate transform must be created either for child app or parent app");
+    if (is_parent_app_transform)
     {
       transforms.push_back(std::make_unique<MultiAppCoordTransform>(moose_app_transform));
       transforms.back()->skipCoordinateCollapsing(skip_coordinate_collapsing);
@@ -319,7 +330,7 @@ MultiAppTransfer::getAppInfo()
     }
     else
     {
-      mooseAssert(multiapp, "This should be non-null");
+      mooseAssert(transforms.size() == 0, "transforms should not be initialized at this point");
       for (const auto i : make_range(multiapp->numGlobalApps()))
       {
         transforms.push_back(std::make_unique<MultiAppCoordTransform>(moose_app_transform));
@@ -533,9 +544,13 @@ MultiAppTransfer::getFromBoundingBoxes(BoundaryID boundary_id)
     if (!at_least_one)
       bbox.min() = max; // If we didn't hit any nodes, this will be _the_ minimum bbox
     else
+    {
       // Translate the bounding box to the from domain's position. We may have rotations so we must
       // be careful in constructing the new min and max (first and second)
-      transformBoundingBox(bbox, *_from_transforms[i]);
+      const auto from_global_num =
+          _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i];
+      transformBoundingBox(bbox, *_from_transforms[from_global_num]);
+    }
 
     // Cast the bounding box into a pair of points (so it can be put through
     // MPI communication).
