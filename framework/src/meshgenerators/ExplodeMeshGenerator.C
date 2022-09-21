@@ -9,6 +9,7 @@
 
 #include "ExplodeMeshGenerator.h"
 #include "CastUniquePointer.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/partitioner.h"
 
