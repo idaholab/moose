@@ -8,7 +8,8 @@ Applications:
             - ${MOOSE_DIR}/framework/doc/unregister.yml
         remove:
             - ${MOOSE_DIR}/framework/doc/remove.yml
-        log_missing_markdown: WARNING
+        # log_missing_markdown: WARNING
+        log_stub_files: WARNING
 
 Documents:
     software_quality_plan: sqa/inl_records.md#software_quality_plan
@@ -27,8 +28,8 @@ Documents:
     software_library_list: sqa/optimization_sll.md
     communication_and_contact_information: sqa/framework_cci.md
     software_coding_standards: sqa/framework_scs.md
-    log_user_manual: WARNING
-    log_theory_manual: WARNING
+    user_manual: getting_started/RunningOptimization.md
+    theory_manual: getting_started/InvOptTheory.md
 
 Requirements:
     optimization:

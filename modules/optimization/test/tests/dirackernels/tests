@@ -1,5 +1,5 @@
 [Tests]
-  issues = 'idaholab/isopod#42'
+  issues = '#22215'
   [vector_point_source]
     design = 'VectorPointSource.md'
     requirement = 'The system shall support point sources with locations, times, and values given by a vector values with '

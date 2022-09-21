@@ -1,5 +1,6 @@
 [Tests]
   issues = '#21885'
+  design = 'Optimize.md'
   [quadratic_taonm]
     type = CSVDiff
     max_threads = 1

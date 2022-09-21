@@ -112,6 +112,7 @@ Extensions:
             meshgenerators: syntax/Mesh/index.md
             multiapps: syntax/MultiApps/index.md
             nodalkernels: syntax/NodalKernels/index.md
+            optimizationreporters: syntax/OptimizationReporter/index.md
             outputs: syntax/Outputs/index.md
             parser: source/parser/Parser.md
             partitioner: syntax/Mesh/Partitioner/index.md

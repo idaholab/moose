@@ -1,7 +1,7 @@
 [Tests]
   [vector_nearest_point]
     design = 'VectorNearestPointFunction.md'
-    issues = 'idaholab/isopod#42'
+    issues = '#22215'
     requirement = 'The system shall be able to compute a auxiliary varible based on data from reporter values with '
     [x]
       type = Exodiff

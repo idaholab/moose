@@ -1,7 +1,6 @@
 [Tests]
   issues = '#21885'
   design = 'ReporterPointSource.md'
-  requirement = "The system shall be able to invert for point loads using "
   [hessian]
     type = CSVDiff
     max_threads = 1
@@ -11,7 +10,8 @@
                "-tao_max_it -tao_nls_pc_type -tao_nls_ksp_type' "
                "Executioner/petsc_options_value='1e-5 10 none cg'"
     csvdiff = main_out_receiver_0001.csv
-    detail = " Hessian based optimimization;"
+    requirement = "The system shall be able to invert for point loads using Hessian based "
+                  "optimimization;"
     # steady solve
     recover = false
   []
@@ -21,7 +21,8 @@
     rel_err = 0.1
     input = main.i
     csvdiff = main_out_receiver_0001.csv
-    detail = " gradient based optimization;"
+    requirement = "The system shall be able to invert for point loads using gradient based "
+                  "optimization;"
     # steady solve
     recover = false
   []
