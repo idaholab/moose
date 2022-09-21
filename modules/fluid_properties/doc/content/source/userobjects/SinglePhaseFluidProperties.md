@@ -38,23 +38,23 @@ properties are available from various combinations of properties (e.g., "Yes"
 in the column $(a,b)$ for the row $f$ denotes that the interface `fname_from_aname_bname`
 is available):
 
-| Name     | $(p,T)$ | $(v,e)$ | $(p,s)$ | $(p,h)$ | $(T,v)$ | $(v,h)$ | $(p,\rho)$ |
-| :-       | -       | -       | -       | -       | -       | -       | -          |
-| $\beta$  | Yes     |         |         |         |         |         |            |
-| $c$      | Yes     | Yes     |         |         |         |         |            |
-| $c_p$    | Yes     | Yes     |         |         |         |         |            |
-| $c_v$    | Yes     | Yes     |         |         | Yes     |         |            |
-| $e$      | Yes     |         |         |         | Yes     | Yes     | Yes        |
-| $g$      |         | Yes     |         |         |         |         |            |
-| $\gamma$ | Yes     |         |         |         |         |         |            |
-| $h$      | Yes     |         |         |         | Yes     |         |            |
-| $k$      | Yes     | Yes     |         |         |         |         |            |
-| $\mu$    | Yes     | Yes     |         |         |         |         |            |
-| $p$      |         | Yes     | Yes     |         | Yes     |         |            |
-| $\rho$   | Yes     |         | Yes     |         |         |         |            |
-| $s$      | Yes     | Yes     |         | Yes     | Yes     |         |            |
-| $T$      |         | Yes     |         | Yes     |         |         |            |
-| $v$      | Yes     |         |         |         |         |         |            |
+| Name     | $(p,T)$ | $(v,e)$ | $(p,s)$ | $(p,h)$ | $(T,v)$ | $(v,h)$ | $(p,\rho)$ | $(\rho,T)$ | $(h,s)$ |
+| :-       | -       | -       | -       | -       | -       | -       | -          |            |         |
+| $\beta$  | Yes     |         |         |         |         |         |            |            |         |
+| $c$      | Yes     | Yes     |         |         |         |         |            |            |         |
+| $c_p$    | Yes     | Yes     |         |         |         |         |            |            |         |
+| $c_v$    | Yes     | Yes     |         |         | Yes     |         |            |            |         |
+| $e$      | Yes     |         |         |         | Yes     | Yes     | Yes        |            |         |
+| $g$      |         | Yes     |         |         |         |         |            |            |         |
+| $\gamma$ | Yes     | Yes     |         |         |         |         |            |            |         |
+| $h$      | Yes     |         |         |         | Yes     |         |            |            |         |
+| $k$      | Yes     | Yes     |         |         |         |         |            | Yes        |         |
+| $\mu$    | Yes     | Yes     |         |         |         |         |            | Yes        |         |
+| $p$      |         | Yes     |         |         | Yes     |         |            |            | Yes     |
+| $\rho$   | Yes     |         | Yes     |         |         |         |            |            |         |
+| $s$      | Yes     | Yes     |         | Yes     | Yes     |         |            |            |         |
+| $T$      |         | Yes     |         | Yes     |         |         |            |            |         |
+| $v$      | Yes     |         |         |         |         |         |            |            |         |
 
 Interfaces are also provided for getting derivatives of fluid properties with respect
 to the input arguments. These interfaces are named the same as their non-derivative
