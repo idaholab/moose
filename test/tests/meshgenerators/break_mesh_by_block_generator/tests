@@ -241,5 +241,7 @@
     cli_args = 'Mesh/split/surrounding_blocks="missing"'
     expect_err = "The block 'missing' was not found in the mesh"
     requirement = "The system shall error if the mesh does not contain the specified surrounding block"
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
+    issues = '#22117'
   []
 []
