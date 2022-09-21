@@ -16,7 +16,9 @@
  * scalar variable associated with the primary variable of the Kernel
  * object. Essentially, the entire row of the residual and Jacobian
  * associated with this scalar variable will also be assembled here
- * using the loops over volumetric elements. 
+ * using the loops over volumetric elements.
+ * This variable is "scalar_variable" in the input file and "kappa"
+ * within the source code.
  */
 
 class KernelScalarBase : public Kernel
@@ -31,7 +33,8 @@ public:
   /**
    * The scalar variable that this kernel operates on.
    */
-  const MooseVariableScalar & scalarVariable() const { return _kappa_var; }
+  const MooseVariableScalar & scalarVariable() const { return *_kappa_var; }
+  // const MooseVariableScalar & scalarVariable() const { return _kappa_var; }
   // unsigned int scalarVariable() const { return _kappa_var; }
 
   virtual void computeResidual() override;
@@ -113,9 +116,20 @@ protected:
   {
   }
 
+  /// Whether to compute scalar residuals
+  const bool _compute_scalar_residuals;
+
+  /// Dummy scalar variable so this kernel can be silent
+  // const MooseVariableScalar _kappa_var_dummy;
+  // const unsigned int _kappa_var_dummy;
+
+  /// A dummy object useful for constructing _kappa when not using scalars
+  const VariableValue _kappa_dummy;
+
   /// Scalar variable this kernel operates on
-  const MooseVariableScalar & _kappa_var;
-  // unsigned int _kappa_var;
+  MooseVariableScalar * const _kappa_var;
+  // const unsigned int _kappa_var;
+
   /// Holds the current solution at the current quadrature point
   const VariableValue & _kappa;
 };

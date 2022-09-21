@@ -68,7 +68,7 @@
   [./sk_lm]
     type = ScalarLMKernel
     variable = u
-    scalar_variable = lambda
+    kappa = lambda
     pp_name = pp
     value = 2.666666666666666
   [../]

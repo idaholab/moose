@@ -17,6 +17,18 @@
 
 #include "libmesh/quadrature.h"
 
+namespace
+{
+const InputParameters &
+setScalarParam(const InputParameters & params_in)
+{
+  InputParameters & ret = const_cast<InputParameters &>(params_in);
+  ret.set<NonlinearVariableName>("scalar_variable") = {
+      params_in.get<NonlinearVariableName>("kappa")};
+  return ret;
+}
+}
+
 registerMooseObject("MooseTestApp", ScalarLMKernel);
 
 InputParameters
@@ -25,6 +37,7 @@ ScalarLMKernel::validParams()
   InputParameters params = KernelScalarBase::validParams();
   params.addClassDescription("This class is used to enforce integral of phi = V_0 with a "
                              "Lagrange multiplier approach.");
+  params.addRequiredParam<NonlinearVariableName>("kappa", "Primary coupled scalar variable");
   params.addRequiredParam<PostprocessorName>(
       "pp_name", "Name of the Postprocessor containing the volume of the domain.");
   params.addRequiredParam<Real>(
@@ -34,7 +47,7 @@ ScalarLMKernel::validParams()
 }
 
 ScalarLMKernel::ScalarLMKernel(const InputParameters & parameters)
-  : KernelScalarBase(parameters), 
+  : KernelScalarBase(setScalarParam(parameters)), 
     _value(getParam<Real>("value")),
     _pp_value(getPostprocessorValue("pp_name"))
 {
@@ -63,7 +76,8 @@ ScalarLMKernel::computeScalarQpJacobian()
 Real
 ScalarLMKernel::computeQpOffDiagJacobianScalar(unsigned int jvar)
 {
-  if (jvar == _kappa_var.number())
+  if (jvar == _kappa_var->number())
+  // if (jvar == _kappa_var.number())
   // if (jvar == _kappa_var)
     return _test[_i][_qp];
   else
