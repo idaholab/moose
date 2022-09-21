@@ -16,5 +16,5 @@ class AddFluidPropertiesDeprecatedAction : public AddFluidPropertiesAction
 public:
   static InputParameters validParams();
 
-  AddFluidPropertiesDeprecatedAction(InputParameters params);
+  AddFluidPropertiesDeprecatedAction(const InputParameters & params);
 };

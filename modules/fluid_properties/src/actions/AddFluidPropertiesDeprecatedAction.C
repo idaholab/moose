@@ -19,7 +19,8 @@ AddFluidPropertiesDeprecatedAction::validParams()
   return AddFluidPropertiesAction::validParams();
 }
 
-AddFluidPropertiesDeprecatedAction::AddFluidPropertiesDeprecatedAction(InputParameters params)
+AddFluidPropertiesDeprecatedAction::AddFluidPropertiesDeprecatedAction(
+    const InputParameters & params)
   : AddFluidPropertiesAction(params)
 {
   mooseDeprecated(
