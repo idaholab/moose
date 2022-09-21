@@ -1,6 +1,6 @@
 # MethaneFluidProperties
 
-!syntax description /Modules/FluidProperties/MethaneFluidProperties
+!syntax description /FluidProperties/MethaneFluidProperties
 
 Fluid properties for methane are mainly calculated using the Setzmann and Wagner equation of state
 [!citep](setzmann1991). This formulation uses density and temperature as the primary variables with
@@ -39,10 +39,10 @@ The MethaneFluidProperties UserObject is valid for:
 
 and pressures up to 100 MPa.
 
-!syntax parameters /Modules/FluidProperties/MethaneFluidProperties
+!syntax parameters /FluidProperties/MethaneFluidProperties
 
-!syntax inputs /Modules/FluidProperties/MethaneFluidProperties
+!syntax inputs /FluidProperties/MethaneFluidProperties
 
-!syntax children /Modules/FluidProperties/MethaneFluidProperties
+!syntax children /FluidProperties/MethaneFluidProperties
 
 !bibtex bibliography

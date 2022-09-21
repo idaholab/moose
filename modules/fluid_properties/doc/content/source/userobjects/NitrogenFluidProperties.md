@@ -1,6 +1,6 @@
 # NitrogenFluidProperties
 
-!syntax description /Modules/FluidProperties/NitrogenFluidProperties
+!syntax description /FluidProperties/NitrogenFluidProperties
 
 Fluid properties for nitrogen are mainly calculated using the Span et al. equation of state
 [!citep](span2000). This formulation uses density and temperature as the primary variables with
@@ -30,10 +30,10 @@ The NitrogenFluidProperties UserObject is valid for:
 
 - 63.151 K $\le$ T $\le$ 1000 K for p $\le$ 2200 MPa
 
-!syntax parameters /Modules/FluidProperties/NitrogenFluidProperties
+!syntax parameters /FluidProperties/NitrogenFluidProperties
 
-!syntax inputs /Modules/FluidProperties/NitrogenFluidProperties
+!syntax inputs /FluidProperties/NitrogenFluidProperties
 
-!syntax children /Modules/FluidProperties/NitrogenFluidProperties
+!syntax children /FluidProperties/NitrogenFluidProperties
 
 !bibtex bibliography

@@ -20,12 +20,10 @@ v_right = 50
   [../]
 []
 
-[Modules]
-  [./FluidProperties]
-    [./fp]
-      type = IdealGasFluidProperties
-      allow_imperfect_jacobians = true
-    [../]
+[FluidProperties]
+  [./fp]
+    type = IdealGasFluidProperties
+    allow_imperfect_jacobians = true
   [../]
 []
 

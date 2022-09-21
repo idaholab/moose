@@ -446,7 +446,7 @@ These parameter values may be found through the PorousFlow input file.  For inst
 
 and the fluid properties are
 
-!listing modules/porous_flow/examples/thm_example/2D.i block=Modules
+!listing modules/porous_flow/examples/thm_example/2D.i block=FluidProperties
 
 Note the initial stress is *effective stress* and the horizontal initial stress occupies the first slot, while the vertical stress occupies the central slot
 

@@ -134,14 +134,12 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [methane]
-      type = MethaneFluidProperties
-    []
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [methane]
+    type = MethaneFluidProperties
+  []
+  [water]
+    type = Water97FluidProperties
   []
 []
 

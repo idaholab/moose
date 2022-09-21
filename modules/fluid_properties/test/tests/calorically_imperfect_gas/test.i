@@ -128,17 +128,15 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [h2]
-      type = CaloricallyImperfectGas
-      molar_mass = 0.002
-      e = e_fn
-      k = k_fn
-      mu = mu_fn
-      min_temperature = 100
-      max_temperature = 5000
-    []
+[FluidProperties]
+  [h2]
+    type = CaloricallyImperfectGas
+    molar_mass = 0.002
+    e = e_fn
+    k = k_fn
+    mu = mu_fn
+    min_temperature = 100
+    max_temperature = 5000
   []
 []
 

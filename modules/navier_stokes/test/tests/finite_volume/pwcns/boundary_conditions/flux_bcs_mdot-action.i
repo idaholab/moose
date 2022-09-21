@@ -26,6 +26,12 @@ inlet_velocity = 0.001
   []
 []
 
+[FluidProperties]
+  [fp]
+    type = FlibeFluidProperties
+  []
+[]
+
 [Modules]
   [NavierStokesFV]
     compressibility = 'weakly-compressible'
@@ -58,11 +64,6 @@ inlet_velocity = 0.001
     pressure_function = '${outlet_pressure}'
 
     external_heat_source = 'power_density'
-  []
-  [FluidProperties]
-    [fp]
-      type = FlibeFluidProperties
-    []
   []
 []
 

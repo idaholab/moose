@@ -86,15 +86,13 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      bulk_modulus = 1e10 # need large in order for constant-velocity advection
-      density0 = 1 # almost irrelevant, except that the ability of the right BC to keep P fixed at zero is related to density_P0
-      thermal_expansion = 0
-      viscosity = 11
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 1e10 # need large in order for constant-velocity advection
+    density0 = 1 # almost irrelevant, except that the ability of the right BC to keep P fixed at zero is related to density_P0
+    thermal_expansion = 0
+    viscosity = 11
   []
 []
 

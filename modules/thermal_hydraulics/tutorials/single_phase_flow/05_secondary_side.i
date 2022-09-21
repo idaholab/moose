@@ -47,7 +47,7 @@ m_dot_sec_in = 1    # kg/s
   []
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [he]
     type = IdealGasFluidProperties
     molar_mass = 4e-3

@@ -137,15 +137,13 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid1000]
-      type = SimpleFluidProperties
-    []
-    [simple_fluid2000]
-      type = SimpleFluidProperties
-      density0 = 2000
-    []
+[FluidProperties]
+  [simple_fluid1000]
+    type = SimpleFluidProperties
+  []
+  [simple_fluid2000]
+    type = SimpleFluidProperties
+    density0 = 2000
   []
 []
 

@@ -1,6 +1,6 @@
 # TabulatedBicubicFluidProperties
 
-!syntax description /Modules/FluidProperties/TabulatedBicubicFluidProperties
+!syntax description /FluidProperties/TabulatedBicubicFluidProperties
 
 See [TabulatedFluidProperties.md] for more information on how to use this object.
 
@@ -9,8 +9,8 @@ Third order fluid property interpolations are not always monotonous. This is exa
 alternative variable sets such as (specific volume, specific internal energy). If this arises
 and is observed to remove the uniqueness of the numerical solution, lower order interpolation should be considered.
 
-!syntax parameters /Modules/FluidProperties/TabulatedBicubicFluidProperties
+!syntax parameters /FluidProperties/TabulatedBicubicFluidProperties
 
-!syntax inputs /Modules/FluidProperties/TabulatedBicubicFluidProperties
+!syntax inputs /FluidProperties/TabulatedBicubicFluidProperties
 
-!syntax children /Modules/FluidProperties/TabulatedBicubicFluidProperties
+!syntax children /FluidProperties/TabulatedBicubicFluidProperties

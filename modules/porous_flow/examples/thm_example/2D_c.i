@@ -233,28 +233,26 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = SimpleFluidProperties
-      bulk_modulus = 2.27e14
-      density0 = 970.0
-      viscosity = 0.3394e-3
-      cv = 4149.0
-      cp = 4149.0
-      porepressure_coefficient = 0.0
-      thermal_expansion = 0
-    []
-    [co2]
-      type = SimpleFluidProperties
-      bulk_modulus = 2.27e14
-      density0 = 516.48
-      viscosity = 0.0393e-3
-      cv = 2920.5
-      cp = 2920.5
-      porepressure_coefficient = 0.0
-      thermal_expansion = 0
-    []
+[FluidProperties]
+  [water]
+    type = SimpleFluidProperties
+    bulk_modulus = 2.27e14
+    density0 = 970.0
+    viscosity = 0.3394e-3
+    cv = 4149.0
+    cp = 4149.0
+    porepressure_coefficient = 0.0
+    thermal_expansion = 0
+  []
+  [co2]
+    type = SimpleFluidProperties
+    bulk_modulus = 2.27e14
+    density0 = 516.48
+    viscosity = 0.0393e-3
+    cv = 2920.5
+    cp = 2920.5
+    porepressure_coefficient = 0.0
+    thermal_expansion = 0
   []
 []
 

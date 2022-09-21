@@ -155,14 +155,12 @@
   multiply_by_density = false
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      # the following mean that density = 1000 * exp(P / 1E15) ~ 1000
-      thermal_expansion = 0
-      bulk_modulus = 1E15
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    # the following mean that density = 1000 * exp(P / 1E15) ~ 1000
+    thermal_expansion = 0
+    bulk_modulus = 1E15
   []
 []
 
@@ -238,4 +236,3 @@
     execute_on = final
   []
 []
-

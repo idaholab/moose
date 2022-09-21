@@ -326,7 +326,7 @@ In this input file, and most groundwater input files, there is just one `Variabl
 
 PorousFlow requires users to specify their "equation of state".  These are functional relationships that provide density and viscosity (and thermal conductivity, enthalpy, etc) as functions of porepressure and temperature.  In virtually all groundwater models a [SimpleFluidProperties](SimpleFluidProperties.md) object is sufficient:
 
-!listing modules/porous_flow/test/tests/dirackernels/theis_rz.i block=Modules
+!listing modules/porous_flow/test/tests/dirackernels/theis_rz.i block=FluidProperties
 
 Here:
 
@@ -399,7 +399,7 @@ In this case, the mesh is very simple and may be created using MOOSE's inbuilt c
 
 PorousFlow requires users to specify their "equation of state".  These are functional relationships that provide density and viscosity (and thermal conductivity, enthalpy, etc) as functions of porepressure and temperature.  In virtually all groundwater models a [SimpleFluidProperties](SimpleFluidProperties.md) object is sufficient.  In this case, the fluid bulk modulus is chosen very large and the thermal expansion coefficient chosen to be zero so that the groundwater density is very close to 1000$\,$kg.m$^{-3}$ so that $\rho g = 10^{4}\,$Pa.m$^{-1}$.
 
-!listing modules/porous_flow/examples/groundwater/ex01.i block=Modules
+!listing modules/porous_flow/examples/groundwater/ex01.i block=FluidProperties
 
 ### PorousFlowDictator specification
 

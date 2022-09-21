@@ -40,6 +40,12 @@ top_side_temperature = 150
   []
 []
 
+[FluidProperties]
+  [fp]
+    type = FlibeFluidProperties
+  []
+[]
+
 [Modules]
   [NavierStokesFV]
     compressibility = 'weakly-compressible'
@@ -72,11 +78,6 @@ top_side_temperature = 150
 
     ambient_convection_alpha = 'h_cv'
     ambient_temperature = 'T_solid'
-  []
-  [FluidProperties]
-    [fp]
-      type = FlibeFluidProperties
-    []
   []
 []
 

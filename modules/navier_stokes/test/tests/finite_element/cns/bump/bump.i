@@ -34,15 +34,15 @@
   # file = SmoothBump_quad_ref5_Q2.msh # 12804 elems, 49665 nodes
 []
 
-[Modules]
-  [FluidProperties]
-    [ideal_gas]
-      type = IdealGasFluidProperties
-      gamma = 1.4
-      molar_mass = 0.02897024320557491
-    []
+[FluidProperties]
+  [ideal_gas]
+    type = IdealGasFluidProperties
+    gamma = 1.4
+    molar_mass = 0.02897024320557491
   []
+[]
 
+[Modules]
   [CompressibleNavierStokes]
     # steady-state or transient
     equation_type = transient

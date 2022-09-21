@@ -2,6 +2,6 @@ The parameter [!param](/Components/{{name}}/A) specifies the cross-sectional
 area of the flow channel.
 
 The parameter [!param](/Components/{{name}}/fp) specifies the name of a
-[fluid properties](syntax/Modules/FluidProperties/index.md) object, and
+[fluid properties](syntax/FluidProperties/index.md) object, and
 the parameter [!param](/Components/{{name}}/closures) specifies the name of a
 [closures](Closures/index.md) object.

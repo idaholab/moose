@@ -101,16 +101,14 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = Water97FluidProperties
-    []
-    [watertab]
-      type = TabulatedFluidProperties
-      fp = water
-      save_file = false
-    []
+[FluidProperties]
+  [water]
+    type = Water97FluidProperties
+  []
+  [watertab]
+    type = TabulatedFluidProperties
+    fp = water
+    save_file = false
   []
 []
 

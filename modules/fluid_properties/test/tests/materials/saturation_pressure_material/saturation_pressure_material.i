@@ -9,11 +9,9 @@
   xmax = 1
 []
 
-[Modules]
-  [FluidProperties]
-    [fp_2phase]
-      type = StiffenedGasTwoPhaseFluidProperties
-    []
+[FluidProperties]
+  [fp_2phase]
+    type = StiffenedGasTwoPhaseFluidProperties
   []
 []
 

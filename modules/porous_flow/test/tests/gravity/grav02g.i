@@ -112,22 +112,20 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid0]
-      type = SimpleFluidProperties
-      bulk_modulus = 2e9
-      density0 = 1000
-      viscosity = 1e-3
-      thermal_expansion = 0
-    []
-    [simple_fluid1]
-      type = SimpleFluidProperties
-      bulk_modulus = 2e9
-      density0 = 10
-      viscosity = 1e-5
-      thermal_expansion = 0
-    []
+[FluidProperties]
+  [simple_fluid0]
+    type = SimpleFluidProperties
+    bulk_modulus = 2e9
+    density0 = 1000
+    viscosity = 1e-3
+    thermal_expansion = 0
+  []
+  [simple_fluid1]
+    type = SimpleFluidProperties
+    bulk_modulus = 2e9
+    density0 = 10
+    viscosity = 1e-5
+    thermal_expansion = 0
   []
 []
 

@@ -53,3 +53,5 @@ Extensions:
     MooseDocs.extensions.reveal:
         translate: ${MOOSE_DIR}/modules/doc/training/content/sqa/training/lead/index.md
         background_image: INL_Hex_Light_Presentation_Background.jpg
+    MooseDocs.extensions.bibtex:
+        duplicates: !include modules/doc/duplicate_bibs.yml

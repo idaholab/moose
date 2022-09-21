@@ -87,17 +87,15 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [co2]
-      type = CO2FluidProperties
-    []
-    [brine]
-      type = BrineFluidProperties
-    []
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [co2]
+    type = CO2FluidProperties
+  []
+  [brine]
+    type = BrineFluidProperties
+  []
+  [water]
+    type = Water97FluidProperties
   []
 []
 

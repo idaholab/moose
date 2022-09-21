@@ -281,11 +281,9 @@ velocity_interp_method = 'rc'
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = FlibeFluidProperties
-    []
+[FluidProperties]
+  [fp]
+    type = FlibeFluidProperties
   []
 []
 

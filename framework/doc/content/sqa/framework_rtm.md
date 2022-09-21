@@ -2,7 +2,6 @@
 
 !template! item key=minimum_requirements
 !include sqa/minimum_requirements.md
-- Many flavors of modern Linux and the two most recent versions of Mac OS X
 !template-end!
 
 !template! item key=system-purpose

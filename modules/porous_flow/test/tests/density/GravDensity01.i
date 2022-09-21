@@ -32,14 +32,12 @@
   PorousFlowDictator = dictator
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      thermal_expansion = 0
-      bulk_modulus = 4
-      density0 = 2
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    thermal_expansion = 0
+    bulk_modulus = 4
+    density0 = 2
   []
 []
 

@@ -10,7 +10,7 @@
   closures = simple_closures
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [eos]
     type = IdealGasFluidProperties
     gamma = 1.3066

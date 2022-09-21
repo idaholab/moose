@@ -7,16 +7,14 @@
   dim = 3
 []
 
-[Modules]
-  [FluidProperties]
-    [the_simple_fluid]
-      type = SimpleFluidProperties
-      thermal_expansion = 0.5
-      cv = 2
-      cp = 2
-      bulk_modulus = 2.0
-      density0 = 3.0
-    []
+[FluidProperties]
+  [the_simple_fluid]
+    type = SimpleFluidProperties
+    thermal_expansion = 0.5
+    cv = 2
+    cp = 2
+    bulk_modulus = 2.0
+    density0 = 3.0
   []
 []
 

@@ -9,7 +9,7 @@
   closures = simple_closures
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp_water]
     type = StiffenedGasFluidProperties
     gamma = 2.35

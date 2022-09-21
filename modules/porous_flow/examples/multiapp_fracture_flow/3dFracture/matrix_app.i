@@ -64,12 +64,10 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = SimpleFluidProperties # this is largely irrelevant here since we care about heat conduction only
-      thermal_expansion = 0 # to prevent depressurization as the reservoir is cooled
-    []
+[FluidProperties]
+  [water]
+    type = SimpleFluidProperties # this is largely irrelevant here since we care about heat conduction only
+    thermal_expansion = 0 # to prevent depressurization as the reservoir is cooled
   []
 []
 

@@ -25,6 +25,12 @@ inlet_velocity = 0.001
   []
 []
 
+[FluidProperties]
+  [fp]
+    type = FlibeFluidProperties
+  []
+[]
+
 [Modules]
   [NavierStokesFV]
     compressibility = 'weakly-compressible'
@@ -62,11 +68,6 @@ inlet_velocity = 0.001
 
     external_heat_source = 'power_density'
     passive_scalar_source = 2.1
-  []
-  [FluidProperties]
-    [fp]
-      type = FlibeFluidProperties
-    []
   []
 []
 

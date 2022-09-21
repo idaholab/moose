@@ -198,7 +198,7 @@ class RenderTemplateField(components.RenderComponent):
 
         core.Paragraph(alert_content,
                        string="The document must include the \"{0}\" template item, this can "\
-                       "be included by add adding the following to the markdown " \
+                       "be included by adding the following to the markdown " \
                        "file ({1}):".format(key, filename))
 
         core.Code(alert_content,

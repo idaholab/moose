@@ -20,35 +20,33 @@
   allow_renumbering = false
 []
 
-[Modules]
-  [FluidProperties]
-    [fp_steam]
-      type = StiffenedGasFluidProperties
-      gamma = 1.43
-      cv = 1040.0
-      q = 2.03e6
-      p_inf = 0.0
-      q_prime = -2.3e4
-      k = 0.026
-      mu = 134.4e-7
-      M = 0.01801488
-      rho_c = 322.0
-    []
-    [fp_air]
-      type = IdealGasFluidProperties
-      gamma = 1.4
-      molar_mass = 28.965197004e-3
-    []
-    [fp_helium]
-      type = IdealGasFluidProperties
-      gamma = 1.66
-      molar_mass = 4.002917432959e-3
-    []
-    [fp_vapor_mixture]
-      type = IdealRealGasMixtureFluidProperties
-      fp_primary = fp_steam
-      fp_secondary = 'fp_air fp_helium'
-    []
+[FluidProperties]
+  [fp_steam]
+    type = StiffenedGasFluidProperties
+    gamma = 1.43
+    cv = 1040.0
+    q = 2.03e6
+    p_inf = 0.0
+    q_prime = -2.3e4
+    k = 0.026
+    mu = 134.4e-7
+    M = 0.01801488
+    rho_c = 322.0
+  []
+  [fp_air]
+    type = IdealGasFluidProperties
+    gamma = 1.4
+    molar_mass = 28.965197004e-3
+  []
+  [fp_helium]
+    type = IdealGasFluidProperties
+    gamma = 1.66
+    molar_mass = 4.002917432959e-3
+  []
+  [fp_vapor_mixture]
+    type = IdealRealGasMixtureFluidProperties
+    fp_primary = fp_steam
+    fp_secondary = 'fp_air fp_helium'
   []
 []
 

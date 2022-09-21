@@ -97,14 +97,12 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [the_simple_fluid]
-      type = SimpleFluidProperties
-      thermal_expansion = 0
-      viscosity = 1.0E-3
-      density0 = 1000.0
-    []
+[FluidProperties]
+  [the_simple_fluid]
+    type = SimpleFluidProperties
+    thermal_expansion = 0
+    viscosity = 1.0E-3
+    density0 = 1000.0
   []
 []
 

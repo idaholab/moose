@@ -1,6 +1,6 @@
 # NaClFluidProperties
 
-!syntax description /Modules/FluidProperties/NaClFluidProperties
+!syntax description /FluidProperties/NaClFluidProperties
 
 NaCl fluid properties as a function of pressure (Pa) and temperature (K).
 
@@ -26,10 +26,10 @@ calculated using the data of [!cite](urqhart2015). Critical values are taken fro
 
 The NaClFluidProperties UserObject is valid for the solid phase region only
 
-!syntax parameters /Modules/FluidProperties/NaClFluidProperties
+!syntax parameters /FluidProperties/NaClFluidProperties
 
-!syntax inputs /Modules/FluidProperties/NaClFluidProperties
+!syntax inputs /FluidProperties/NaClFluidProperties
 
-!syntax children /Modules/FluidProperties/NaClFluidProperties
+!syntax children /FluidProperties/NaClFluidProperties
 
 !bibtex bibliography

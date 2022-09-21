@@ -94,7 +94,7 @@ where the polyline coordinates and weighting are defined in the following [Const
 Reporter input provides an easy way to control polyline sink point locations from a [Sampler](Samplers/index.md) multi-app.  
 It is an error to supply both plaint text file and reporter input for the point data.
 
-Rather than manually specifying each point via the separate points file or reporter, the second input format allows the 
+Rather than manually specifying each point via the separate points file or reporter, the second input format allows the
 line to be specified using the combination of the following parameters:
 
 - `line_base = '[w] [x] [y] [z]'`: the base/start point for the line
@@ -456,7 +456,7 @@ Unit fluid weight | 0 |
 
 The fluid properties are defined as:
 
-!listing modules/porous_flow/test/tests/dirackernels/injection_production.i block=Modules
+!listing modules/porous_flow/test/tests/dirackernels/injection_production.i block=FluidProperties
 
 The fluid injection and production is implemented in a way that is now familiar:
 

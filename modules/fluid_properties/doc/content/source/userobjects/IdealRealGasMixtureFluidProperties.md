@@ -1,6 +1,6 @@
 # IdealRealGasMixtureFluidProperties
 
-!syntax description /Modules/FluidProperties/IdealRealGasMixtureFluidProperties
+!syntax description /FluidProperties/IdealRealGasMixtureFluidProperties
 
 This class computes fluid properties for gaseous mixtures with a condensable
 (primary) component and non-condensable (secondary) components.
@@ -22,8 +22,8 @@ Therefore, if $v$ and $e$ are known, then to get $p$ and $T$, the nonlinear
 equation $e(T, v)$ is solved for $T$ first. Then $p$ is calculated from 
 $p(T, v)$.
 
-!syntax parameters /Modules/FluidProperties/IdealRealGasMixtureFluidProperties
+!syntax parameters /FluidProperties/IdealRealGasMixtureFluidProperties
 
-!syntax inputs /Modules/FluidProperties/IdealRealGasMixtureFluidProperties
+!syntax inputs /FluidProperties/IdealRealGasMixtureFluidProperties
 
-!syntax children /Modules/FluidProperties/IdealRealGasMixtureFluidProperties
+!syntax children /FluidProperties/IdealRealGasMixtureFluidProperties

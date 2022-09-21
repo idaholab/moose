@@ -1,6 +1,6 @@
 # HydrogenFluidProperties
 
-!syntax description /Modules/FluidProperties/HydrogenFluidProperties
+!syntax description /FluidProperties/HydrogenFluidProperties
 
 Fluid properties for hydrogen are mainly calculated using the Leachman et al. equation of state
 [!citep](leachman2009). This formulation uses density and temperature as the primary variables with
@@ -30,10 +30,10 @@ The HydrogenFluidProperties UserObject is valid for:
 
 - 13.957 K $\le$ T $\le$ 1000 K for p $\le$ 2000 MPa
 
-!syntax parameters /Modules/FluidProperties/HydrogenFluidProperties
+!syntax parameters /FluidProperties/HydrogenFluidProperties
 
-!syntax inputs /Modules/FluidProperties/HydrogenFluidProperties
+!syntax inputs /FluidProperties/HydrogenFluidProperties
 
-!syntax children /Modules/FluidProperties/HydrogenFluidProperties
+!syntax children /FluidProperties/HydrogenFluidProperties
 
 !bibtex bibliography

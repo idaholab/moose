@@ -1,1 +1,1 @@
-!template load file=stubs/moose_action.md.template name=AddFluidPropertiesAction syntax=/Modules/FluidProperties/AddFluidPropertiesAction
+!template load file=stubs/moose_action.md.template name=AddFluidPropertiesAction syntax=/FluidProperties/AddFluidPropertiesAction

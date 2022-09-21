@@ -66,16 +66,14 @@
   fp = simple_fluid
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      bulk_modulus = 0.5
-      density0 = 1
-      viscosity = 1
-      thermal_expansion = 0
-      cv = 1.3
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 0.5
+    density0 = 1
+    viscosity = 1
+    thermal_expansion = 0
+    cv = 1.3
   []
 []
 

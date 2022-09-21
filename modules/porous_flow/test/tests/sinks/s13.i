@@ -55,15 +55,13 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      bulk_modulus = 1e10 # need large in order for constant-velocity advection
-      density0 = 1 # irrelevant
-      thermal_expansion = 0
-      viscosity = 11
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 1e10 # need large in order for constant-velocity advection
+    density0 = 1 # irrelevant
+    thermal_expansion = 0
+    viscosity = 11
   []
 []
 
