@@ -23,7 +23,8 @@ THMAddControlAction::validParams()
   return params;
 }
 
-THMAddControlAction::THMAddControlAction(InputParameters parameters) : AddControlAction(parameters)
+THMAddControlAction::THMAddControlAction(const InputParameters & parameters)
+  : AddControlAction(parameters)
 {
 }
 

@@ -73,7 +73,8 @@ ControlOutput::outputActiveObjects()
   for (const auto & iter : objects)
   {
     std::shared_ptr<InputParameters> ptr = iter.first;
-    if (ptr->get<bool>("enable"))
+    // actions do not have 'enable' parameter
+    if (!ptr->have_parameter<bool>("enable") || ptr->get<bool>("enable"))
     {
       // We print slightly differently in the first iteration of the loop.
       bool first_iteration = true;

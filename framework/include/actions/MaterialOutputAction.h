@@ -28,7 +28,7 @@ public:
    */
   static InputParameters validParams();
 
-  MaterialOutputAction(InputParameters params);
+  MaterialOutputAction(const InputParameters & params);
   virtual void act() override;
 
 protected:

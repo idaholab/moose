@@ -20,7 +20,7 @@ AddFunctionAction::validParams()
   return params;
 }
 
-AddFunctionAction::AddFunctionAction(InputParameters params) : MooseObjectAction(params) {}
+AddFunctionAction::AddFunctionAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddFunctionAction::act()

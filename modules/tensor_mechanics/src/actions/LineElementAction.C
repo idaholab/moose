@@ -14,6 +14,8 @@
 #include "MooseObjectAction.h"
 #include "LineElementAction.h"
 #include "CommonLineElementAction.h"
+#include "MooseApp.h"
+#include "InputParameterWarehouse.h"
 
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
@@ -214,10 +216,15 @@ LineElementAction::LineElementAction(const InputParameters & params)
     _subdomain_ids(),
     _add_dynamic_variables(false)
 {
+  // FIXME: suggest to use action of action to add this to avoid changing the input parameters in
+  // the warehouse.
+  const auto & parameters = _app.getInputParameterWarehouse().getInputParameters();
+  InputParameters & pars(*(parameters.find(uniqueActionName())->second.get()));
+
   // check if a container block with common parameters is found
   auto action = _awh.getActions<CommonLineElementAction>();
   if (action.size() == 1)
-    _pars.applyParameters(action[0]->parameters());
+    pars.applyParameters(action[0]->parameters());
 
   // Set values to variables after common parameters are applied
   _save_in = getParam<std::vector<AuxVariableName>>("save_in");

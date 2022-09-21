@@ -10,6 +10,7 @@
 [Testing/LotsOfDiffusion/lots]
   number = 1
   array = true
+  diffusion_coefficients = '1 1'
 []
 
 [Executioner]

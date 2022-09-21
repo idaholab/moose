@@ -24,7 +24,7 @@ SplitMeshAction::validParams()
   return Action::validParams();
 }
 
-SplitMeshAction::SplitMeshAction(InputParameters params) : Action(params) {}
+SplitMeshAction::SplitMeshAction(const InputParameters & params) : Action(params) {}
 
 void
 SplitMeshAction::act()

@@ -19,7 +19,7 @@ class SetupTimeStepperAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  SetupTimeStepperAction(InputParameters parameters);
+  SetupTimeStepperAction(const InputParameters & parameters);
 
   virtual void act() override;
 };

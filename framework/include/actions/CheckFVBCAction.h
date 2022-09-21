@@ -16,7 +16,7 @@ class CheckFVBCAction : public Action
 public:
   static InputParameters validParams();
 
-  CheckFVBCAction(InputParameters params);
+  CheckFVBCAction(const InputParameters & params);
 
   virtual void act() override;
 };

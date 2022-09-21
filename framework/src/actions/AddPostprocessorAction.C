@@ -21,7 +21,8 @@ AddPostprocessorAction::validParams()
   return params;
 }
 
-AddPostprocessorAction::AddPostprocessorAction(InputParameters params) : MooseObjectAction(params)
+AddPostprocessorAction::AddPostprocessorAction(const InputParameters & params)
+  : MooseObjectAction(params)
 {
 }
 

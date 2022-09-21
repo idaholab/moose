@@ -22,7 +22,9 @@ AddRayBCAction::validParams()
   return params;
 }
 
-AddRayBCAction::AddRayBCAction(InputParameters params) : AddRayTracingObjectAction(params) {}
+AddRayBCAction::AddRayBCAction(const InputParameters & params) : AddRayTracingObjectAction(params)
+{
+}
 
 void
 AddRayBCAction::addRayTracingObject()

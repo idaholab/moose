@@ -17,7 +17,7 @@
 class AddRayBCAction : public AddRayTracingObjectAction
 {
 public:
-  AddRayBCAction(InputParameters params);
+  AddRayBCAction(const InputParameters & params);
 
   static InputParameters validParams();
 

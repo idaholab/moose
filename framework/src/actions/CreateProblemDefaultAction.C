@@ -27,7 +27,7 @@ CreateProblemDefaultAction::validParams()
   return params;
 }
 
-CreateProblemDefaultAction::CreateProblemDefaultAction(InputParameters parameters)
+CreateProblemDefaultAction::CreateProblemDefaultAction(const InputParameters & parameters)
   : Action(parameters)
 {
 }

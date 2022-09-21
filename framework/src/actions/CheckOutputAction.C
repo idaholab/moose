@@ -27,7 +27,7 @@ CheckOutputAction::validParams()
   return params;
 }
 
-CheckOutputAction::CheckOutputAction(InputParameters params) : Action(params) {}
+CheckOutputAction::CheckOutputAction(const InputParameters & params) : Action(params) {}
 
 void
 CheckOutputAction::act()

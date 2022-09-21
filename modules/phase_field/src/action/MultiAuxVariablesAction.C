@@ -32,7 +32,7 @@ MultiAuxVariablesAction::validParams()
   return params;
 }
 
-MultiAuxVariablesAction::MultiAuxVariablesAction(InputParameters params)
+MultiAuxVariablesAction::MultiAuxVariablesAction(const InputParameters & params)
   : AddAuxVariableAction(params),
     _grain_num(getParam<unsigned int>("grain_num")),
     _var_name_base(getParam<std::vector<std::string>>("variable_base")),

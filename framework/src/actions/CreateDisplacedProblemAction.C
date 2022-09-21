@@ -41,7 +41,7 @@ CreateDisplacedProblemAction::validParams()
   return params;
 }
 
-CreateDisplacedProblemAction::CreateDisplacedProblemAction(InputParameters parameters)
+CreateDisplacedProblemAction::CreateDisplacedProblemAction(const InputParameters & parameters)
   : Action(parameters)
 {
 }

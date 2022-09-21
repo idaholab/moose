@@ -101,13 +101,13 @@ public:
    *
    * @see CommonOutputAction
    */
-  void setCommonParameters(InputParameters * params_ptr);
+  void setCommonParameters(const InputParameters * params_ptr);
 
   /**
    * Get a reference to the common output parameters
    * @return Pointer to the common InputParameters object
    */
-  InputParameters * getCommonParameters();
+  const InputParameters * getCommonParameters() const;
 
   /**
    * Return the sync times for all objects
@@ -326,7 +326,7 @@ private:
   std::set<OutFileBase> _file_base_set;
 
   /// Pointer to the common InputParameters (@see CommonOutputAction)
-  InputParameters * _common_params_ptr;
+  const InputParameters * _common_params_ptr;
 
   /// Sync times for all objects
   std::set<Real> _sync_times;

@@ -16,7 +16,7 @@ class DynamicObjectRegistrationAction : public Action
 public:
   static InputParameters validParams();
 
-  DynamicObjectRegistrationAction(InputParameters parameters);
+  DynamicObjectRegistrationAction(const InputParameters & parameters);
 
   virtual void act() override;
 };

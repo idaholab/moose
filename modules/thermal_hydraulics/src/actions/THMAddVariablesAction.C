@@ -19,7 +19,7 @@ THMAddVariablesAction::validParams()
   return params;
 }
 
-THMAddVariablesAction::THMAddVariablesAction(InputParameters params) : Action(params) {}
+THMAddVariablesAction::THMAddVariablesAction(const InputParameters & params) : Action(params) {}
 
 void
 THMAddVariablesAction::act()

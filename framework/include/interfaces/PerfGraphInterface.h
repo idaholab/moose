@@ -11,7 +11,6 @@
 
 #include "Moose.h"
 #include "PerfGuard.h"
-#include "InputParameters.h"
 
 #ifndef MOOSE_NO_PERF_GRAPH
 #define TIME_SECTION1(id)                                                                          \
@@ -38,6 +37,9 @@
 #define GET_MACRO(_1, _2, _3, _4, NAME, ...) NAME
 #define TIME_SECTION(...)                                                                          \
   GET_MACRO(__VA_ARGS__, TIME_SECTION4, TIME_SECTION3, TIME_SECTION2, TIME_SECTION1, )(__VA_ARGS__)
+
+class InputParameters;
+class MooseObject;
 
 /**
  * Interface for objects interacting with the PerfGraph.

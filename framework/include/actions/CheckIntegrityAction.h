@@ -16,7 +16,7 @@ class CheckIntegrityAction : public Action
 public:
   static InputParameters validParams();
 
-  CheckIntegrityAction(InputParameters params);
+  CheckIntegrityAction(const InputParameters & params);
 
   virtual void act() override;
 };

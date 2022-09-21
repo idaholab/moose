@@ -16,7 +16,7 @@ class InitProblemAction : public Action
 public:
   static InputParameters validParams();
 
-  InitProblemAction(InputParameters params);
+  InitProblemAction(const InputParameters & params);
 
   virtual void act() override;
 };

@@ -23,7 +23,8 @@ AddMeshGeneratorAction::validParams()
   return params;
 }
 
-AddMeshGeneratorAction::AddMeshGeneratorAction(InputParameters params) : MooseObjectAction(params)
+AddMeshGeneratorAction::AddMeshGeneratorAction(const InputParameters & params)
+  : MooseObjectAction(params)
 {
 }
 

@@ -14,7 +14,7 @@ class INSFVAction : public Action
 public:
   static InputParameters validParams();
 
-  INSFVAction(InputParameters parameters);
+  INSFVAction(const InputParameters & parameters);
 
   virtual void act() override;
 };

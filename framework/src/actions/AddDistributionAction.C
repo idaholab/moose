@@ -20,7 +20,10 @@ AddDistributionAction::validParams()
   return params;
 }
 
-AddDistributionAction::AddDistributionAction(InputParameters params) : MooseObjectAction(params) {}
+AddDistributionAction::AddDistributionAction(const InputParameters & params)
+  : MooseObjectAction(params)
+{
+}
 
 void
 AddDistributionAction::act()

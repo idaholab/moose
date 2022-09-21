@@ -19,7 +19,7 @@ class AddGeochemicalModelInterrogatorAction : public Action
 public:
   static InputParameters validParams();
 
-  AddGeochemicalModelInterrogatorAction(InputParameters parameters);
+  AddGeochemicalModelInterrogatorAction(const InputParameters & parameters);
 
   virtual void act() override;
 };

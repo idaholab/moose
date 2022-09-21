@@ -16,5 +16,5 @@ class AddFluidPropertiesAction : public AddUserObjectAction
 public:
   static InputParameters validParams();
 
-  AddFluidPropertiesAction(InputParameters params);
+  AddFluidPropertiesAction(const InputParameters & params);
 };

@@ -23,7 +23,7 @@ ControlDataIntegrityCheckAction::validParams()
   return params;
 }
 
-ControlDataIntegrityCheckAction::ControlDataIntegrityCheckAction(InputParameters parameters)
+ControlDataIntegrityCheckAction::ControlDataIntegrityCheckAction(const InputParameters & parameters)
   : Action(parameters)
 {
 }

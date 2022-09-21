@@ -17,7 +17,7 @@
 class IntegrityCheckAction : public Action
 {
 public:
-  IntegrityCheckAction(InputParameters parameters);
+  IntegrityCheckAction(const InputParameters & parameters);
 
   virtual void act();
 

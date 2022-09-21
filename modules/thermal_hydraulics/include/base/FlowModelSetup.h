@@ -21,7 +21,7 @@
 class FlowModelSetup
 {
 public:
-  FlowModelSetup(InputParameters params);
+  FlowModelSetup(const InputParameters & params);
 
 protected:
   virtual void addInitialConditions() = 0;
@@ -62,7 +62,7 @@ protected:
   template <typename T>
   const T & getParam(const std::string & name) const;
 
-  InputParameters _this_params;
+  const InputParameters & _this_params;
   MooseApp & _this_app;
   ActionFactory & _this_action_factory;
   ActionWarehouse & _this_action_warehouse;

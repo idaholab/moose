@@ -21,7 +21,7 @@ AddFVBCAction::validParams()
   return params;
 }
 
-AddFVBCAction::AddFVBCAction(InputParameters params) : MooseObjectAction(params) {}
+AddFVBCAction::AddFVBCAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddFVBCAction::act()

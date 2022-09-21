@@ -32,7 +32,9 @@ AddFieldSplitAction::validParams()
   return params;
 }
 
-AddFieldSplitAction::AddFieldSplitAction(InputParameters params) : MooseObjectAction(params) {}
+AddFieldSplitAction::AddFieldSplitAction(const InputParameters & params) : MooseObjectAction(params)
+{
+}
 
 void
 AddFieldSplitAction::act()

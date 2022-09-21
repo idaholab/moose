@@ -18,7 +18,9 @@ BadAddKernelAction::validParams()
   return MooseObjectAction::validParams();
 }
 
-BadAddKernelAction::BadAddKernelAction(InputParameters params) : MooseObjectAction(params) {}
+BadAddKernelAction::BadAddKernelAction(const InputParameters & params) : MooseObjectAction(params)
+{
+}
 
 void
 BadAddKernelAction::act()

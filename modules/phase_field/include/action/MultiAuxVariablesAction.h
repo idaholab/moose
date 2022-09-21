@@ -20,7 +20,7 @@ class MultiAuxVariablesAction : public AddAuxVariableAction
 public:
   static InputParameters validParams();
 
-  MultiAuxVariablesAction(InputParameters params);
+  MultiAuxVariablesAction(const InputParameters & params);
 
   virtual void act();
 

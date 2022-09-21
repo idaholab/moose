@@ -14,7 +14,7 @@
 class THMSetupMeshAction : public Action
 {
 public:
-  THMSetupMeshAction(InputParameters params);
+  THMSetupMeshAction(const InputParameters & params);
 
   virtual void act();
 

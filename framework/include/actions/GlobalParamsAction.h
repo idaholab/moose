@@ -16,7 +16,7 @@ class GlobalParamsAction : public Action
 public:
   static InputParameters validParams();
 
-  GlobalParamsAction(InputParameters params);
+  GlobalParamsAction(const InputParameters & params);
 
   virtual void act() override;
 
@@ -26,6 +26,11 @@ public:
    * application.
    */
   void remove(const std::string & name);
+
+  /**
+   * Obtain a non-const reference of the action parameters in the InputParameterWarehouse.
+   */
+  InputParameters & parameters();
 
   template <typename T>
   T & setParam(const std::string & name)

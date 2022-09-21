@@ -30,7 +30,7 @@ FlowModelSetup1Phase::validParams()
   return params;
 }
 
-FlowModelSetup1Phase::FlowModelSetup1Phase(InputParameters params)
+FlowModelSetup1Phase::FlowModelSetup1Phase(const InputParameters & params)
   : FlowModelSetup(params),
 
     _p_fn(getParam<FunctionName>("p")),

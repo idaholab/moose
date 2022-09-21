@@ -21,7 +21,7 @@ AddComponentMooseObjectsAction::validParams()
   return params;
 }
 
-AddComponentMooseObjectsAction::AddComponentMooseObjectsAction(InputParameters params)
+AddComponentMooseObjectsAction::AddComponentMooseObjectsAction(const InputParameters & params)
   : Action(params)
 {
 }

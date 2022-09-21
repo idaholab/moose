@@ -19,7 +19,7 @@ class AddSpatialReactionSolverAction : public AddGeochemistrySolverAction
 public:
   static InputParameters validParams();
 
-  AddSpatialReactionSolverAction(InputParameters parameters);
+  AddSpatialReactionSolverAction(const InputParameters & parameters);
 
   virtual void act() override;
 };

@@ -18,7 +18,7 @@ class SplitMeshAction : public Action
 public:
   static InputParameters validParams();
 
-  SplitMeshAction(InputParameters params);
+  SplitMeshAction(const InputParameters & params);
 
   virtual void act() override;
 };

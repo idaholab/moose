@@ -17,7 +17,7 @@
 class THMInitSimulationAction : public Action
 {
 public:
-  THMInitSimulationAction(InputParameters parameters);
+  THMInitSimulationAction(const InputParameters & parameters);
 
   virtual void act();
 

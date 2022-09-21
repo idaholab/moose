@@ -16,7 +16,7 @@ class SetupMeshCompleteAction : public Action
 public:
   static InputParameters validParams();
 
-  SetupMeshCompleteAction(InputParameters params);
+  SetupMeshCompleteAction(const InputParameters & params);
 
   virtual void act() override;
 };

@@ -89,6 +89,6 @@ class StochasticResultsAction : public Action
 {
 public:
   static InputParameters validParams();
-  StochasticResultsAction(InputParameters params);
+  StochasticResultsAction(const InputParameters & params);
   virtual void act() override;
 };

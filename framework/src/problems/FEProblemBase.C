@@ -7293,7 +7293,7 @@ FEProblemBase::addOutput(const std::string & object_type,
   }
 
   // Apply the common parameters loaded with Outputs input syntax
-  InputParameters * common = output_warehouse.getCommonParameters();
+  const InputParameters * common = output_warehouse.getCommonParameters();
   if (common)
     parameters.applyParameters(*common, exclude);
 

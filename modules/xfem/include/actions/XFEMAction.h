@@ -17,7 +17,7 @@ class XFEMAction : public Action
 public:
   static InputParameters validParams();
 
-  XFEMAction(InputParameters params);
+  XFEMAction(const InputParameters & params);
 
   virtual void act();
 

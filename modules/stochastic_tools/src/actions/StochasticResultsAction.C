@@ -28,7 +28,7 @@ StochasticResultsAction::validParams()
   return params;
 }
 
-StochasticResultsAction::StochasticResultsAction(InputParameters params) : Action(params) {}
+StochasticResultsAction::StochasticResultsAction(const InputParameters & params) : Action(params) {}
 
 void
 StochasticResultsAction::act()

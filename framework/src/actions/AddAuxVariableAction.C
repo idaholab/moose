@@ -20,7 +20,10 @@ AddAuxVariableAction::validParams()
   return params;
 }
 
-AddAuxVariableAction::AddAuxVariableAction(InputParameters params) : AddVariableAction(params) {}
+AddAuxVariableAction::AddAuxVariableAction(const InputParameters & params)
+  : AddVariableAction(params)
+{
+}
 
 MooseEnum
 AddAuxVariableAction::getAuxVariableFamilies()

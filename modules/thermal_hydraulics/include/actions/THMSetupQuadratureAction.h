@@ -17,7 +17,7 @@
 class THMSetupQuadratureAction : public Action
 {
 public:
-  THMSetupQuadratureAction(InputParameters parameters);
+  THMSetupQuadratureAction(const InputParameters & parameters);
 
   virtual void act() override;
 

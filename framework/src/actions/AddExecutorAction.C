@@ -21,7 +21,7 @@ AddExecutorAction::validParams()
   return params;
 }
 
-AddExecutorAction::AddExecutorAction(InputParameters params) : Action(params) {}
+AddExecutorAction::AddExecutorAction(const InputParameters & params) : Action(params) {}
 
 void
 AddExecutorAction::act()

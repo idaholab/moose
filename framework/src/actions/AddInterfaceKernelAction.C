@@ -21,7 +21,7 @@ AddInterfaceKernelAction::validParams()
   return params;
 }
 
-AddInterfaceKernelAction::AddInterfaceKernelAction(InputParameters params)
+AddInterfaceKernelAction::AddInterfaceKernelAction(const InputParameters & params)
   : MooseObjectAction(params)
 {
 }

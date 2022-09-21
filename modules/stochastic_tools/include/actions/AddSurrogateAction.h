@@ -16,7 +16,7 @@ class AddSurrogateAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AddSurrogateAction(InputParameters params);
+  AddSurrogateAction(const InputParameters & params);
 
   virtual void act() override;
 };

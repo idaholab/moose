@@ -23,7 +23,7 @@ AddBoundsVectorsAction::validParams()
   return params;
 }
 
-AddBoundsVectorsAction::AddBoundsVectorsAction(InputParameters params) : Action(params) {}
+AddBoundsVectorsAction::AddBoundsVectorsAction(const InputParameters & params) : Action(params) {}
 
 void
 AddBoundsVectorsAction::act()

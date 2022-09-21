@@ -23,7 +23,9 @@ AddCovarianceAction::validParams()
   return params;
 }
 
-AddCovarianceAction::AddCovarianceAction(InputParameters params) : MooseObjectAction(params) {}
+AddCovarianceAction::AddCovarianceAction(const InputParameters & params) : MooseObjectAction(params)
+{
+}
 
 void
 AddCovarianceAction::act()

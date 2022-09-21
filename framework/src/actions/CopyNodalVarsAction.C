@@ -44,7 +44,7 @@ CopyNodalVarsAction::validParams()
   return params;
 }
 
-CopyNodalVarsAction::CopyNodalVarsAction(InputParameters params) : Action(params) {}
+CopyNodalVarsAction::CopyNodalVarsAction(const InputParameters & params) : Action(params) {}
 
 void
 CopyNodalVarsAction::act()

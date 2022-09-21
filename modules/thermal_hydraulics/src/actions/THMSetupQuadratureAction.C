@@ -19,7 +19,8 @@ THMSetupQuadratureAction::validParams()
   return params;
 }
 
-THMSetupQuadratureAction::THMSetupQuadratureAction(InputParameters parameters) : Action(parameters)
+THMSetupQuadratureAction::THMSetupQuadratureAction(const InputParameters & parameters)
+  : Action(parameters)
 {
 }
 

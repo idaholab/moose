@@ -23,7 +23,7 @@ CheckLegacyParamsAction::validParams()
   return Action::validParams();
 }
 
-CheckLegacyParamsAction::CheckLegacyParamsAction(InputParameters params) : Action(params) {}
+CheckLegacyParamsAction::CheckLegacyParamsAction(const InputParameters & params) : Action(params) {}
 
 void
 CheckLegacyParamsAction::act()

@@ -20,7 +20,10 @@ AddDiracKernelAction::validParams()
   return params;
 }
 
-AddDiracKernelAction::AddDiracKernelAction(InputParameters params) : MooseObjectAction(params) {}
+AddDiracKernelAction::AddDiracKernelAction(const InputParameters & params)
+  : MooseObjectAction(params)
+{
+}
 
 void
 AddDiracKernelAction::act()

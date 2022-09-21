@@ -23,7 +23,7 @@ public:
    */
   static InputParameters validParams();
 
-  AddOutputAction(InputParameters params);
+  AddOutputAction(const InputParameters & params);
 
   virtual void act() override;
 };

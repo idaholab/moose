@@ -13,6 +13,7 @@
 #include "MooseApp.h"
 #include "SystemInfo.h"
 #include "CommandLine.h"
+#include "ActionWarehouse.h"
 
 #include "libmesh/exodusII.h"
 
