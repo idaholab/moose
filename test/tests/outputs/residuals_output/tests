@@ -1,5 +1,5 @@
 [Tests]
-  design = 'Outputs/index.md'
+  design = 'syntax/Outputs/index.md'
   issues = '#22056'
   [./no_linear_residuals]
     type = 'RunApp'
