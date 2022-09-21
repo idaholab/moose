@@ -3,6 +3,12 @@
     type = FileMeshGenerator
     file = input_mesh.e
   []
+  [tg]
+    input = fmg
+    type = TransformGenerator
+    transform = TRANSLATE
+    vector_value = '0 1 0'
+  []
   [pr]
     type = PeripheralRingMeshGenerator
     input = fmg

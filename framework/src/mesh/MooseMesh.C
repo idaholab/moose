@@ -1001,7 +1001,57 @@ MooseMesh::getBoundaryElementRange()
 const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
 MooseMesh::getBoundariesToElems() const
 {
+  mooseDeprecated("MooseMesh::getBoundariesToElems is deprecated, "
+                  "use MooseMesh::getBoundariesToActiveLocalElemIds");
+  return getBoundariesToActiveSemiLocalElemIds();
+}
+
+const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
+MooseMesh::getBoundariesToActiveSemiLocalElemIds() const
+{
   return _bnd_elem_ids;
+}
+
+std::unordered_set<dof_id_type>
+MooseMesh::getBoundaryActiveSemiLocalElemIds(BoundaryID bid) const
+{
+  // The boundary to element map is computed on every mesh update
+  const auto it = _bnd_elem_ids.find(bid);
+  if (it == _bnd_elem_ids.end())
+    // Boundary is not local to this domain, return an empty set
+    return std::unordered_set<dof_id_type>{};
+  return it->second;
+}
+
+std::unordered_set<dof_id_type>
+MooseMesh::getBoundaryActiveNeighborElemIds(BoundaryID bid) const
+{
+  // Vector of boundary elems is updated every mesh update
+  std::unordered_set<dof_id_type> neighbor_elems;
+  for (const auto & bnd_elem : _bnd_elems)
+  {
+    const auto & [elem_ptr, elem_side, elem_bid] = *bnd_elem;
+    if (elem_bid == bid)
+    {
+      const auto * neighbor = elem_ptr->neighbor_ptr(elem_side);
+      // Dont add fully remote elements, ghosted is fine
+      if (neighbor && neighbor != libMesh::remote_elem)
+      {
+        // handle mesh refinement, only return active elements near the boundary
+        if (neighbor->active())
+          neighbor_elems.insert(neighbor->id());
+        else
+        {
+          std::vector<const Elem *> family;
+          neighbor->active_family_tree_by_neighbor(family, elem_ptr);
+          for (const auto & child_neighbor : family)
+            neighbor_elems.insert(child_neighbor->id());
+        }
+      }
+    }
+  }
+
+  return neighbor_elems;
 }
 
 void
@@ -1045,16 +1095,16 @@ MooseMesh::cacheInfo()
     SubdomainID subdomain_id = elem->subdomain_id();
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
-      std::vector<BoundaryID> boundaryids = getBoundaryIDs(elem, side);
+      std::vector<BoundaryID> boundary_ids = getBoundaryIDs(elem, side);
       std::set<BoundaryID> & subdomain_set = _subdomain_boundary_ids[subdomain_id];
 
-      subdomain_set.insert(boundaryids.begin(), boundaryids.end());
+      subdomain_set.insert(boundary_ids.begin(), boundary_ids.end());
 
       Elem * neig = elem->neighbor_ptr(side);
       if (neig)
       {
-        _neighbor_subdomain_boundary_ids[neig->subdomain_id()].insert(boundaryids.begin(),
-                                                                      boundaryids.end());
+        _neighbor_subdomain_boundary_ids[neig->subdomain_id()].insert(boundary_ids.begin(),
+                                                                      boundary_ids.end());
         SubdomainID neighbor_subdomain_id = neig->subdomain_id();
         if (neighbor_subdomain_id != subdomain_id)
           _sub_to_neighbor_subs[subdomain_id].insert(neighbor_subdomain_id);
