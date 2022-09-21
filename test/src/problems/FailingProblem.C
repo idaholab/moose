@@ -17,22 +17,26 @@ InputParameters
 FailingProblem::validParams()
 {
   InputParameters params = FEProblem::validParams();
-  params.addRequiredParam<unsigned int>("fail_step", "The timestep to fail");
+  params.addRequiredParam<std::vector<unsigned int>>("fail_steps", "The timestep(s) to fail");
   return params;
 }
 
 FailingProblem::FailingProblem(const InputParameters & params)
-  : FEProblem(params), _failed(false), _fail_step(getParam<unsigned int>("fail_step"))
+  : FEProblem(params), _fail_steps(getParam<std::vector<unsigned int>>("fail_steps"))
 {
+  std::sort(_fail_steps.begin(), _fail_steps.end(), std::greater<unsigned int>());
 }
 
 bool
 FailingProblem::converged()
 {
-  if (!_failed && (_t_step == static_cast<int>(_fail_step)))
+  if (_fail_steps.size() > 0)
   {
-    _failed = true;
-    return false;
+    if ((unsigned int)_t_step == _fail_steps.back())
+    {
+      _fail_steps.pop_back();
+      return false;
+    }
   }
 
   return FEProblemBase::converged();

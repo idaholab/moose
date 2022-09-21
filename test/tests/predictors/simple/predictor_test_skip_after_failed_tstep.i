@@ -53,7 +53,7 @@
 
 [Problem]
   type = FailingProblem
-  fail_step = 6
+  fail_steps = '6'
 []
 
 [Executioner]
