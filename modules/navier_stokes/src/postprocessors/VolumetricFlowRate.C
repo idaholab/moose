@@ -80,6 +80,22 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
   }
 }
 
+void
+VolumetricFlowRate::initialSetup()
+{
+  // We must make sure the A coefficients in the Rhie Chow interpolator are present on
+  // both sides of the boundaries so that interpolation coefficients may be computed
+  if (_rc_uo)
+    for (const auto bid : boundaryIDs())
+      const_cast<INSFVRhieChowInterpolator *>(_rc_uo)->ghostADataOnBoundary(bid);
+}
+
+void
+VolumetricFlowRate::meshChanged()
+{
+  initialSetup();
+}
+
 Real
 VolumetricFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi)
 {

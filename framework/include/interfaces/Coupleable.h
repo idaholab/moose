@@ -206,7 +206,7 @@ protected:
 
   /**
    * Returns the values for all of a coupled variable's components for use in Automatic
-   * Differentation
+   * Differentiation
    * @param var_name Name of coupled variable
    * @return Vector of ADVariableValue pointers for each component of \p var_name
    */
@@ -233,7 +233,7 @@ protected:
 
   /**
    * Returns the values for all of a coupled vector variable's components for use in
-   * Automatic Differentation
+   * Automatic Differentiation
    * @param var_name Name of coupled variable
    * @return Vector of ADVariableValue pointers for each component of \p var_name
    */
@@ -366,7 +366,7 @@ protected:
                                                          unsigned int index = 0) const;
 
   /**
-   * Returns evaluations of a tagged vector at the requsted variable's degree of freedom indices
+   * Returns evaluations of a tagged vector at the requested variable's degree of freedom indices
    * @param var_name Name of coupled variable
    * @param tag_name vector tag name
    * @return Reference to a ArrayVariableValue for the coupled variable
@@ -546,7 +546,7 @@ protected:
   std::vector<const VariableGradient *> coupledGradients(const std::string & var_name) const;
 
   /**
-   * Returns gradient of a coupled variable for use in Automatic Differentation
+   * Returns gradient of a coupled variable for use in Automatic Differentiation
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to an ADVariableGradient containing the gradient of the coupled variable
@@ -556,7 +556,7 @@ protected:
                                                unsigned int comp = 0) const;
 
   /**
-   * Returns gradient of a coupled variable's time derivative for use in Automatic Differentation
+   * Returns gradient of a coupled variable's time derivative for use in Automatic Differentiation
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to an ADVariableGradient containing the gradient of the coupled variable's
@@ -595,7 +595,7 @@ protected:
   coupledGenericGradients(const std::string & var_name) const;
 
   /**
-   * Returns gradient of a coupled vector variable for use in Automatic Differentation
+   * Returns gradient of a coupled vector variable for use in Automatic Differentiation
    * @param var_name Name of coupled vector variable
    * @param comp Component number for vector of coupled vector variables
    * @return Reference to a VectorVariableGradient containing the gradient of the coupled variable
@@ -605,7 +605,7 @@ protected:
                                                            unsigned int comp = 0) const;
 
   /**
-   * Returns second derivatives of a coupled variable for use in Automatic Differentation
+   * Returns second derivatives of a coupled variable for use in Automatic Differentiation
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableSecond containing the second derivatives of the coupled variable
@@ -614,7 +614,7 @@ protected:
                                            unsigned int comp = 0) const;
 
   /**
-   * Returns second derivatives of a coupled vector variable for use in Automatic Differentation
+   * Returns second derivatives of a coupled vector variable for use in Automatic Differentiation
    * @param var_name Name of coupled vector variable
    * @param comp Component number for vector of coupled vector variables
    * @return Reference to a VectorVariableSecond containing the second derivatives of the coupled
@@ -1111,7 +1111,7 @@ protected:
    * Returns DoFs in the current solution vector of all of a coupled variable's components for the
    * local element
    * @param var_name Name of coupled variable
-   * @return Vector of VariableValue pointers for each compontnet of the coupled variable
+   * @return Vector of VariableValue pointers for each component of the coupled variable
    */
   std::vector<const VariableValue *> coupledAllDofValues(const std::string & var_name) const;
 
@@ -1145,7 +1145,7 @@ protected:
    * Returns DoFs in the older solution vector of all of a coupled variable's components for the
    * local element
    * @param var_name Name of coupled variable
-   * @return Vector of VariableValue pointers for each compontnet of the coupled variable
+   * @return Vector of VariableValue pointers for each component of the coupled variable
    */
   std::vector<const VariableValue *> coupledAllDofValuesOlder(const std::string & var_name) const;
 
@@ -1224,7 +1224,7 @@ protected:
   /// Vector of array coupled variables
   std::vector<ArrayMooseVariable *> _coupled_array_moose_vars;
 
-  /// Vector of standard finite volume oupled variables
+  /// Vector of standard finite volume coupled variables
   std::vector<MooseVariableFV<Real> *> _coupled_standard_fv_moose_vars;
 
   /// map from new to deprecated variable names

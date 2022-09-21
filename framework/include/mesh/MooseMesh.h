@@ -418,10 +418,34 @@ public:
   ///@}
 
   /**
-   * Returns a map of boundaries to elements.
+   * Returns a map of boundaries to ids of elements on the boundary.
    */
   const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
   getBoundariesToElems() const;
+
+  /**
+   * Returns a map of boundaries to ids of elements on the boundary.
+   */
+  const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
+  getBoundariesToActiveSemiLocalElemIds() const;
+
+  /**
+   * Return all ids of elements which have a side which is part of a sideset.
+   * Note that boundaries are sided.
+   * @param bid the id of the sideset of interest
+   */
+  std::unordered_set<dof_id_type> getBoundaryActiveSemiLocalElemIds(BoundaryID bid) const;
+
+  /**
+   * Return all ids of neighbors of elements which have a side which is part of a sideset.
+   * Note that boundaries are sided, this is on the neighbor side. For the sideset side, use
+   * getBoundariesActiveLocalElemIds.
+   * Note that while the element is local and active, the neighbor is not guaranteed to be local,
+   * it could be ghosted.
+   * Note that if the neighbor is not ghosted, is a remote_elem, then it will not be included
+   * @param bid the id of the sideset of interest
+   */
+  std::unordered_set<dof_id_type> getBoundaryActiveNeighborElemIds(BoundaryID bid) const;
 
   /**
    * Returns a read-only reference to the set of subdomains currently
