@@ -321,19 +321,14 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
     const auto & objects = pr.second.getActiveObjects();
     for (const auto & mc : objects)
     {
-      const MooseVariableFEBase * lm_var = mc->variable_ptr();
+      const MooseVariableFEBase * lm_var = mc->variablePtr();
       if (lm_var)
-      {
         unique_variables.insert(lm_var->name());
-        const std::set<SubdomainID> & lm_subdomains = lm_var->activeSubdomains();
-        subdomains_covered.insert(lm_subdomains.begin(), lm_subdomains.end());
-      }
-      else // May be a penalty constraint: Check in the constraint
-        subdomains_covered.insert(mc->secondarySubdomain());
 
-      // Mortar constraints require the creation of a primary lower dimensional subdomain in order
-      // to create the mortar segment mesh. We don't need any computing objects on it
+      // Mortar constraints will cover primary and secondary subdomains regardless of whether we
+      // have a Lagrange multiplier associated.
       subdomains_covered.insert(mc->primarySubdomain());
+      subdomains_covered.insert(mc->secondarySubdomain());
     }
   }
 
@@ -343,19 +338,14 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
     const auto & objects = pr.second.getActiveObjects();
     for (const auto & mc : objects)
     {
-      const MooseVariableFEBase * lm_var = mc->variable_ptr();
+      const MooseVariableFEBase * lm_var = mc->variablePtr();
       if (lm_var)
-      {
         unique_variables.insert(lm_var->name());
-        const std::set<SubdomainID> & lm_subdomains = lm_var->activeSubdomains();
-        subdomains_covered.insert(lm_subdomains.begin(), lm_subdomains.end());
-      }
-      else // May be a penalty constraint: Check in the constraint
-        subdomains_covered.insert(mc->secondarySubdomain());
 
-      // Mortar constraints require the creation of a primary lower dimensional subdomain in order
-      // to create the mortar segment mesh. We don't need any computing objects on it
+      // Mortar constraints will cover primary and secondary subdomains regardless of whether we
+      // have a Lagrange multiplier associated.
       subdomains_covered.insert(mc->primarySubdomain());
+      subdomains_covered.insert(mc->secondarySubdomain());
     }
   }
 }

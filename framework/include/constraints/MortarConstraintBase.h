@@ -78,7 +78,7 @@ public:
   /**
    * The variable number that this object operates on (pointer).
    */
-  const MooseVariable * variable_ptr() const { return _var; }
+  const MooseVariable * variablePtr() const { return _var; }
 
   /**
    * Whether to use dual mortar
