@@ -274,9 +274,9 @@ protected:
   /// Added resistances for monolithic convergence
   PetscScalar _added_K = 0.0;
   PetscScalar _added_K_old = 1000.0;
-  PetscScalar max_sumWij;
-  PetscScalar max_sumWij_new;
-  PetscScalar correction_factor = 1.0;
+  PetscScalar _max_sumWij;
+  PetscScalar _max_sumWij_new;
+  PetscScalar _correction_factor = 1.0;
 
 public:
   static InputParameters validParams();

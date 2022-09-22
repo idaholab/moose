@@ -8,11 +8,11 @@ P_out = 4.923e6 # Pa
     type = QuadSubChannelMeshGenerator
     nx = 6
     ny = 6
-    n_cells = 10
+    n_cells = 30
     pitch = 0.0126
     rod_diameter = 0.00950
     gap = 0.00095 # the half gap between sub-channel assemblies
-    heated_length = 1.0
+    heated_length = 3.0
     spacer_z = '0.0'
     spacer_k = '0.0'
   []
@@ -29,12 +29,12 @@ P_out = 4.923e6 # Pa
 [SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
-  n_blocks = 5
+  n_blocks = 1
   beta = 0.006
-  CT = 1.0 #2.0
-  compute_density = false
-  compute_viscosity = false
-  compute_power = false
+  CT = 2.6
+  compute_density = true
+  compute_viscosity = true
+  compute_power = true
   P_out = ${P_out}
 # Change the defaults
   implicit = true
@@ -175,8 +175,7 @@ P_out = 4.923e6 # Pa
 [Transfers]
   [xfer]
     type = MultiAppDetailedSolutionTransfer
-    multi_app = viz
-    direction = to_multiapp
+    to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu q_prime S'
   []
 []

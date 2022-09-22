@@ -2932,11 +2932,11 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
       _console << "Minimum estimated mdot: " << min_mdot << std::endl;
 
     VecAbs(sumWij_loc);
-    ierr = VecMax(sumWij_loc, NULL, &max_sumWij);
+    ierr = VecMax(sumWij_loc, NULL, &_max_sumWij);
     CHKERRQ(ierr);
-    max_sumWij = std::max(1e-10, max_sumWij);
+    _max_sumWij = std::max(1e-10, _max_sumWij);
     if (_verbose_subchannel)
-      _console << "Maximum estimated Wij: " << max_sumWij << std::endl;
+      _console << "Maximum estimated Wij: " << _max_sumWij << std::endl;
 
     populateVectorFromDense<libMesh::DenseMatrix<Real>>(
         _Wij_loc_vec, _Wij, first_node, last_node, _n_gaps);
@@ -2954,12 +2954,12 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     VecSum(_Wij_loc_vec, &relax_factor);
     relax_factor /= _block_size * _n_gaps;
 #endif
-    relax_factor = relax_factor / max_sumWij + 0.5;
+    relax_factor = relax_factor / _max_sumWij + 0.5;
     if (_verbose_subchannel)
       _console << "Relax base value: " << relax_factor << std::endl;
 
     PetscScalar resistance_relaxation = 0.9;
-    _added_K = max_sumWij / min_mdot;
+    _added_K = _max_sumWij / min_mdot;
     if (_verbose_subchannel)
       _console << "New cross resistance: " << _added_K << std::endl;
     _added_K = (_added_K * resistance_relaxation + (1.0 - resistance_relaxation) * _added_K_old) *
@@ -3318,15 +3318,15 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   createPetscVector(sumWij_loc, _block_size * _n_channels);
   populateVectorFromHandle<SolutionHandle *>(
       _prod, _SumWij_soln, first_node, last_node, _n_channels);
-  PetscScalar max_sumWij_new;
+
   VecAbs(_prod);
-  ierr = VecMax(_prod, NULL, &max_sumWij_new);
+  ierr = VecMax(_prod, NULL, &_max_sumWij_new);
   CHKERRQ(ierr);
   if (_verbose_subchannel)
-    _console << "Maximum estimated Wij new: " << max_sumWij_new << std::endl;
-  correction_factor = max_sumWij_new / max_sumWij;
+    _console << "Maximum estimated Wij new: " << _max_sumWij_new << std::endl;
+  _correction_factor = _max_sumWij_new / _max_sumWij;
   if (_verbose_subchannel)
-    _console << "Correction factor: " << correction_factor << std::endl;
+    _console << "Correction factor: " << _correction_factor << std::endl;
   if (_verbose_subchannel)
     _console << "Solutions assigned to MOOSE variables." << std::endl;
 
