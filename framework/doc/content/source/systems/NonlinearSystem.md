@@ -427,3 +427,44 @@ when the cost of solving the linearized system is a large fraction of
 the total simulation time.  As such, it can be especially beneficial
 when using an expensive preconditioner, like a direct solver, as shown
 in this example.
+
+There are two differences between
+`reuse_preconditioner` and 
+`reuse_preconditioner_max_linear_its`
+and setting up preconditioner reuse directly in PETSc with the 
+`snes_lag_preconditioner_persists` and `-snes_lag_preconditioner` options:
+1. `-snes_lag_preconditioner X` will recalculate a new preconditioner
+   every X linear iterations, regardless of the progress of the linear solve.
+   `reuse_preconditioner_max_linear_its = X` will continue to reuse
+   the same preconditioner until the number of linear iterations 
+   required to solve the linearized equations exceeds X.
+2. By default libmesh deletes the PETSc `SNES` instance after each time
+   step.  This means that regardless of how the reuse options are set,
+   the solver cannot retain the preconditioner across time steps.  The
+   `reuse_preconditioner` alters this behavior to retain the `SNES`
+   instance so that preconditioner reuse can be carried across time
+   steps.
+
+Preconditioner reuse is also different from modified Newton methods,
+which can be configured with the PETSc `-snes_lag_jacobian` and
+`-snes_lag_jacobian_persists` options.  Preconditioner reuse
+affects how PETSc solves the linearized system of equations formed
+at each nonlinear iteration.  Ideally, if the reused preconditioner
+achieves the requested `l_tol` precision before iterating more than
+`l_max_its` times, preconditioner reuse will not affect the
+convergence of the nonlinear iterations compared to a case with the 
+reuse option off.  As described above,
+preconditioner reuse aims to decrease the time required to solve
+the linearized equations at each nonlinear iteration by reducing the
+number of times the solver needs to setup the potentially-expensive
+linear preconditioner.
+
+By contrast, modified Newton methods will affect the nonlinear
+convergence of the system without affecting how PETSc solves the
+linearized system of equations.  The goal of 
+modified Newton methods is to reduce the time required to solve
+the nonlinear equations by forming a new Jacobian matrix less often.
+
+Put another way, preconditioner reuse aims to speed up solving the
+linear system of equations while modified Newton methods aim to 
+accelerate solving the nonlinear equations.
