@@ -7,35 +7,36 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVDiffusion.h"
+#include "FVAnisotropicDiffusion.h"
 
-registerMooseObject("MooseApp", FVDiffusion);
+registerMooseObject("MooseApp", FVAnisotropicDiffusion);
 
 InputParameters
-FVDiffusion::validParams()
+FVAnisotropicDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
-  params.addClassDescription("Computes residual for diffusion operator for finite volume method.");
-  params.addRequiredParam<MooseFunctorName>("coeff", "diffusion coefficient");
+  params.addClassDescription(
+      "Computes residual for anisotropic diffusion operator for finite volume method.");
+  params.addRequiredParam<MooseFunctorName>("coeff",
+                                            "The diagonal coefficients of a diffusion tensor.");
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
   params.addParam<MooseEnum>(
       "coeff_interp_method",
       coeff_interp_method,
       "Switch that can select face interpolation method for diffusion coefficients.");
   params.set<unsigned short>("ghost_layers") = 2;
-
   return params;
 }
 
-FVDiffusion::FVDiffusion(const InputParameters & params)
-  : FVFluxKernel(params), _coeff(getFunctor<ADReal>("coeff"))
+FVAnisotropicDiffusion::FVAnisotropicDiffusion(const InputParameters & params)
+  : FVFluxKernel(params), _coeff(getFunctor<ADRealVectorValue>("coeff"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError(
-      "FVDiffusion is not supported by local AD indexing. In order to use this object, please run "
-      "the configure script in the root MOOSE directory with the configure option "
-      "'--with-ad-indexing-type=global'. Note that global indexing is now the default "
-      "configuration for AD indexing type.");
+  mooseError("FVAnisotropicDiffusion is not supported by local AD indexing. In order to use this "
+             "object, please run "
+             "the configure script in the root MOOSE directory with the configure option "
+             "'--with-ad-indexing-type=global'. Note that global indexing is now the default "
+             "configuration for AD indexing type.");
 #endif
 
   const auto & interp_method = getParam<MooseEnum>("coeff_interp_method");
@@ -50,11 +51,12 @@ FVDiffusion::FVDiffusion(const InputParameters & params)
 }
 
 ADReal
-FVDiffusion::computeQpResidual()
+FVAnisotropicDiffusion::computeQpResidual()
 {
-  auto dudn = gradUDotNormal();
+  const auto & grad_T = _var.adGradSln(
+      *_face_info, _var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 
-  ADReal coeff;
+  ADRealVectorValue coeff;
   interpolate(_coeff_interp_method,
               coeff,
               _coeff(elemFromFace()),
@@ -62,5 +64,8 @@ FVDiffusion::computeQpResidual()
               *_face_info,
               true);
 
-  return -1 * coeff * dudn;
+  ADReal r = 0;
+  for (const auto i : make_range(Moose::dim))
+    r += _normal(i) * coeff(i) * grad_T(i);
+  return -r;
 }

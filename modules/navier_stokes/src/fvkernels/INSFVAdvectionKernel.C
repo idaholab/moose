@@ -43,27 +43,7 @@ INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
       Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
   if (need_more_ghosting && _tid == 0)
   {
-    auto & factory = _app.getFactory();
-
-    auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
-
-    rm_params.set<std::string>("for_whom") = name();
-    rm_params.set<MooseMesh *>("mesh") = &const_cast<MooseMesh &>(_mesh);
-    rm_params.set<Moose::RelationshipManagerType>("rm_type") =
-        Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-        Moose::RelationshipManagerType::COUPLING;
-    FVKernel::setRMParams(
-        _pars, rm_params, std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
-    mooseAssert(rm_params.areAllRequiredParamsValid(),
-                "All relationship manager parameters should be valid.");
-
-    auto rm_obj = factory.create<RelationshipManager>(
-        "ElementSideNeighborLayers", name() + "_skew_correction", rm_params);
-
-    // Delete the resources created on behalf of the RM if it ends up not being added to the
-    // App.
-    if (!_app.addRelationshipManager(rm_obj))
-      factory.releaseSharedObjects(*rm_obj);
+    adjustRMGhostLayers(std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
 
     // If we need more ghosting, then we are a second-order nonlinear limiting scheme whose stencil
     // is liable to change upon wind-direction change. Consequently we need to tell our problem that
