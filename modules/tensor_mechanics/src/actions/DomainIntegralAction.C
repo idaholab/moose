@@ -614,11 +614,12 @@ DomainIntegralAction::act()
 
       if (_treat_as_2d)
         vpp_base_name += "_2DVPP";
+
       const std::string vpp_type_name("JIntegral");
       InputParameters params = _factory.getValidParams(vpp_type_name);
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.set<UserObjectName>("crack_front_definition") = uo_name;
-
+      params.set<std::vector<SubdomainName>>("block") = {_blocks};
       params.set<MooseEnum>("position_type") = _position_type;
 
       if (_integrals.count(K_FROM_J_INTEGRAL) != 0)
