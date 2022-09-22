@@ -83,7 +83,12 @@ using a [Taylor expansion](#taylorexpansion) procedure.
 This class provides options to perform this calculation either way, and the
 [Taylor expansion](#taylorexpansion) is the default.
 
-## Taylor Expansion id=taylorexpansion
+This class also provides an additional option for
+computing the stretching rate tensor $\boldsymbol{D}$ and incremental rotation tensor $\boldsymbol{\hat{R}}$
+using the method of [!cite](hughes1980finite). This method involves evaluating the displacement field at the midpoint of the timestep, and as a
+result, requires updating stress and strain measures at the old configuration rather than the current.
+
+#### Taylor Expansion id=taylorexpansion
 
 The stretching rate tensor $\boldsymbol{D}$ and incremental rotation matrix $\hat{\boldsymbol{R}}$
 can be approximated using Taylor expansion as [!cite](rashid1993incremental):
@@ -108,7 +113,7 @@ P =& \frac{1}{4}(tr(\hat{\boldsymbol{F}}^{-1}) - 1)^{2}
 \end{equation}
 The sign of $\cos \theta^{a}$ is set by examining the sign of $(tr(\hat{\boldsymbol{F}}^{-1}) - 1)$.
 
-## Eigen-Solution id=eigensolution
+#### Eigen-Solution id=eigensolution
 
 The stretching rate tensor can be calculated by the eigenvalues $\lambda$ and eigenvectors
 $\boldsymbol{v}$ of $\hat{\boldsymbol{C}}$.
@@ -129,7 +134,25 @@ and thus
 \hat{\boldsymbol{R}} = \hat{\boldsymbol{F}} \hat{\boldsymbol{U}}^{-1}
 \end{equation}
 
-## Volumetric Locking Correction
+#### Hughes-Winget Approximation id=hugheswinget
+
+As also described in [!cite](rashid1993incremental), the stretching rate tensor $\boldsymbol{D}$ and incremental
+rotation matrix $\hat{\boldsymbol{R}}$ in for the Hughes-Winget method are based on the spatial gradient $\boldsymbol{G}$
+of the displacement field evaluated at the mid-point of the time step
+\begin{equation}
+\boldsymbol{G} = 2\left( \hat{\boldsymbol{F}} - \boldsymbol{I}\right) \left( \hat{\boldsymbol{F}} + \boldsymbol{I}\right)^{-1}
+\end{equation}
+The approximate stretching rate tensor can then be computed as
+\begin{equation}
+\boldsymbol{D} = \frac{1}{2 \Delta t}\left(\boldsymbol{G} + \boldsymbol{G}^{T} \right)
+\end{equation}
+and the incremental rotation matrix is approximated by
+\begin{equation}
+\hat{\boldsymbol{R}} = \left(\boldsymbol{I} + \frac{1}{2}\omega \right) \left(\boldsymbol{I} - \frac{1}{2}\omega \right)^{-1}
+\end{equation}
+where $\omega = \frac{1}{2}\left(\boldsymbol{G} - \boldsymbol{G}^{T} \right)$.
+
+### Volumetric Locking Correction
 
 In `ComputeFiniteStrain`, $\hat{\boldsymbol{F}}$ is calculated in the computeStrain method, including a
 volumetric locking correction of

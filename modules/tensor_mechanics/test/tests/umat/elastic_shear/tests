@@ -1,0 +1,26 @@
+[Tests]
+  issues = '#21797'
+  design = 'AbaqusUMATStress.md'
+  [elastic_shear_reference]
+    type = 'Exodiff'
+    input = 'elastic_shear.i'
+    cli_args = "Executioner/dt='1.0' Outputs/interval='10' GlobalParams/decomposition_method=HughesWinget"
+    exodiff = 'elastic_shear_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The Abaqus UMAT interface shall produce the correct stresses for the hyperelastic'
+                  'Neo-Hookean model under shear loading. The results shall not depend on the time step size.'
+                  'Reference computation with fine time stepping.'
+  []
+  [elastic_shear]
+    type = 'Exodiff'
+    input = 'elastic_shear.i'
+    cli_args = "Executioner/dt='10.0' GlobalParams/decomposition_method=HughesWinget"
+    exodiff = 'elastic_shear_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The Abaqus UMAT interface shall produce the correct stresses for the hyperelastic'
+                  'Neo-Hookean model under shear loading. The results shall not depend on the time step size.'
+                  'Comparison with coarse time stepping.'
+  []
+[]
