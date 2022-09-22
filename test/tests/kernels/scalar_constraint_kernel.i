@@ -80,11 +80,9 @@
 # *** ERROR ***
 # Variable 'scalar_variable' does not exist in this system
 [ScalarKernels]
-  [./constraint]
-    type = AverageValueConstraint
+  [./null]
+    type = NullScalarKernel
     variable = lambda
-    pp_name = pp
-    value = 4 # volume of domain is 4, so _pp_value - _value = 0
   [../]
 []
 
