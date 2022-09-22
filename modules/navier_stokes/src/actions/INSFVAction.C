@@ -20,7 +20,7 @@ INSFVAction::validParams()
   return Action::validParams();
 }
 
-INSFVAction::INSFVAction(InputParameters parameters) : Action(parameters) {}
+INSFVAction::INSFVAction(const InputParameters & parameters) : Action(parameters) {}
 
 void
 INSFVAction::act()

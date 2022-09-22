@@ -18,7 +18,7 @@ class AdaptivityAction : public Action
 public:
   static InputParameters validParams();
 
-  AdaptivityAction(InputParameters params);
+  AdaptivityAction(const InputParameters & params);
 
   virtual void act() override;
 };

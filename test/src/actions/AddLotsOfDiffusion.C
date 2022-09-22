@@ -52,7 +52,12 @@ AddLotsOfDiffusion::validParams()
       "family", family, "Specifies the family of FE shape functions to use for this variable.");
   params.addParam<bool>("array", false, "Whether or not to use array variables");
   params.addRequiredParam<unsigned int>("number", "The number of variables to add");
+  params.addParam<unsigned int>("n_components", 2, "The number of components of array variables");
+  params.addParam<bool>("add_reaction", false, "True to add reaction kernels");
 
+  params.addRequiredParam<RealEigenVector>("diffusion_coefficients",
+                                           "Diffusion coefficient to be used by all variables");
+  params.declareControllable("diffusion_coefficients");
   return params;
 }
 
@@ -62,6 +67,7 @@ void
 AddLotsOfDiffusion::act()
 {
   unsigned int number = getParam<unsigned int>("number");
+  unsigned int ncomp = getParam<unsigned int>("n_components");
 
   const auto array = getParam<bool>("array");
 
@@ -74,7 +80,7 @@ AddLotsOfDiffusion::act()
     var_params.set<MooseEnum>("family") = getParam<MooseEnum>("family");
     var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
     if (array)
-      var_params.set<unsigned int>("components") = 2;
+      var_params.set<unsigned int>("components") = ncomp;
     for (unsigned int cur_num = 0; cur_num < number; cur_num++)
     {
       std::string var_name = name() + Moose::stringify(cur_num);
@@ -86,13 +92,25 @@ AddLotsOfDiffusion::act()
     for (unsigned int cur_num = 0; cur_num < number; cur_num++)
     {
       std::string var_name = name() + Moose::stringify(cur_num);
-      const auto kernel_type = array ? "ArrayDiffusion" : "Diffusion";
+      {
+        const auto kernel_type = array ? "ArrayDiffusion" : "Diffusion";
 
-      InputParameters params = _factory.getValidParams(kernel_type);
-      params.set<NonlinearVariableName>("variable") = var_name;
-      if (array)
-        params.set<MaterialPropertyName>("diffusion_coefficient") = "dc";
-      _problem->addKernel(kernel_type, var_name, params);
+        InputParameters params = _factory.getValidParams(kernel_type);
+        params.set<NonlinearVariableName>("variable") = var_name;
+        if (array)
+          params.set<MaterialPropertyName>("diffusion_coefficient") = "dc";
+        _problem->addKernel(kernel_type, var_name, params);
+      }
+
+      if (getParam<bool>("add_reaction"))
+      {
+        const auto kernel_type = array ? "ArrayReaction" : "Reaction";
+        InputParameters params = _factory.getValidParams(kernel_type);
+        params.set<NonlinearVariableName>("variable") = var_name;
+        if (array)
+          params.set<MaterialPropertyName>("reaction_coefficient") = "rc";
+        _problem->addKernel(kernel_type, var_name + "_reaction", params);
+      }
     }
   }
   else if (_current_task == "add_bc")
@@ -106,7 +124,7 @@ AddLotsOfDiffusion::act()
       params.set<NonlinearVariableName>("variable") = var_name;
       params.set<std::vector<BoundaryName>>("boundary").push_back("left");
       if (array)
-        params.set<RealEigenVector>("values") = RealEigenVector::Constant(2, 0);
+        params.set<RealEigenVector>("values") = RealEigenVector::Constant(ncomp, 0);
       else
         params.set<Real>("value") = 0;
 
@@ -114,7 +132,7 @@ AddLotsOfDiffusion::act()
 
       params.set<std::vector<BoundaryName>>("boundary")[0] = "right";
       if (array)
-        params.set<RealEigenVector>("values") = RealEigenVector::Constant(2, 1);
+        params.set<RealEigenVector>("values") = RealEigenVector::Constant(ncomp, 1);
       else
         params.set<Real>("value") = 1;
 
@@ -123,9 +141,24 @@ AddLotsOfDiffusion::act()
   }
   else if (_current_task == "add_material" && array)
   {
-    auto params = _factory.getValidParams("GenericConstantArray");
-    params.set<std::string>("prop_name") = "dc";
-    params.set<RealEigenVector>("prop_value") = RealEigenVector::Constant(2, 1);
-    _problem->addMaterial("GenericConstantArray", "dc", params);
+    {
+      auto params = _factory.getValidParams("GenericConstantArray");
+      params.set<std::string>("prop_name") = "dc";
+      params.set<RealEigenVector>("prop_value") =
+          getParam<RealEigenVector>("diffusion_coefficients");
+      _problem->addMaterial("GenericConstantArray", "dc", params);
+
+      // pass the control to the material by connecting them
+      connectControllableParams(
+          "diffusion_coefficients", "GenericConstantArray", "dc", "prop_value");
+    }
+
+    if (getParam<bool>("add_reaction"))
+    {
+      auto params = _factory.getValidParams("GenericConstantArray");
+      params.set<std::string>("prop_name") = "rc";
+      params.set<RealEigenVector>("prop_value") = RealEigenVector::Constant(ncomp, 1);
+      _problem->addMaterial("GenericConstantArray", "rc", params);
+    }
   }
 }

@@ -20,7 +20,7 @@
 class CheckLegacyParamsAction : public Action
 {
 public:
-  CheckLegacyParamsAction(InputParameters params);
+  CheckLegacyParamsAction(const InputParameters & params);
 
   static InputParameters validParams();
 

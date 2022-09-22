@@ -64,7 +64,7 @@ MaterialOutputAction::validParams()
   return params;
 }
 
-MaterialOutputAction::MaterialOutputAction(InputParameters params)
+MaterialOutputAction::MaterialOutputAction(const InputParameters & params)
   : Action(params),
     _output_warehouse(_app.getOutputWarehouse()),
     _output_only_on_timestep_end(_app.parameters().get<bool>("use_legacy_material_output"))

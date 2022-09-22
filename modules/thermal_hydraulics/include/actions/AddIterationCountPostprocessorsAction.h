@@ -17,7 +17,7 @@
 class AddIterationCountPostprocessorsAction : public Action
 {
 public:
-  AddIterationCountPostprocessorsAction(InputParameters parameters);
+  AddIterationCountPostprocessorsAction(const InputParameters & parameters);
 
   virtual void act();
 

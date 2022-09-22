@@ -17,7 +17,7 @@
 class THMPreconditioningIntegrityCheckAction : public Action
 {
 public:
-  THMPreconditioningIntegrityCheckAction(InputParameters parameters);
+  THMPreconditioningIntegrityCheckAction(const InputParameters & parameters);
 
   virtual void act();
 

@@ -19,7 +19,7 @@ AddHeatStructureMaterialAction::validParams()
   return AddUserObjectAction::validParams();
 }
 
-AddHeatStructureMaterialAction::AddHeatStructureMaterialAction(InputParameters params)
+AddHeatStructureMaterialAction::AddHeatStructureMaterialAction(const InputParameters & params)
   : AddUserObjectAction(params)
 {
 }

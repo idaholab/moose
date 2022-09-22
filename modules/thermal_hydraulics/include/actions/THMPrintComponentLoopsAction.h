@@ -14,7 +14,7 @@
 class THMPrintComponentLoopsAction : public Action
 {
 public:
-  THMPrintComponentLoopsAction(InputParameters params);
+  THMPrintComponentLoopsAction(const InputParameters & params);
 
   virtual void act();
 

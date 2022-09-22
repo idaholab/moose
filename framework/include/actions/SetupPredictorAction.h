@@ -19,7 +19,7 @@ class SetupPredictorAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  SetupPredictorAction(InputParameters parameters);
+  SetupPredictorAction(const InputParameters & parameters);
 
   virtual void act() override;
 };

@@ -19,7 +19,7 @@ InitProblemAction::validParams()
   return params;
 }
 
-InitProblemAction::InitProblemAction(InputParameters params) : Action(params) {}
+InitProblemAction::InitProblemAction(const InputParameters & params) : Action(params) {}
 
 void
 InitProblemAction::act()

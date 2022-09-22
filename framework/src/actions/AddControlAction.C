@@ -23,7 +23,10 @@ AddControlAction::validParams()
   return params;
 }
 
-AddControlAction::AddControlAction(InputParameters parameters) : MooseObjectAction(parameters) {}
+AddControlAction::AddControlAction(const InputParameters & parameters)
+  : MooseObjectAction(parameters)
+{
+}
 
 void
 AddControlAction::act()

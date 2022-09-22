@@ -31,7 +31,7 @@ ReadExecutorParamsAction::validParams()
   return params;
 }
 
-ReadExecutorParamsAction::ReadExecutorParamsAction(InputParameters params)
+ReadExecutorParamsAction::ReadExecutorParamsAction(const InputParameters & params)
   : MooseObjectAction(params), _auto_preconditioning(getParam<bool>("auto_preconditioning"))
 {
 }

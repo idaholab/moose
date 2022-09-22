@@ -16,7 +16,7 @@ class AddUserObjectAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AddUserObjectAction(InputParameters params);
+  AddUserObjectAction(const InputParameters & params);
 
   virtual void act() override;
 };

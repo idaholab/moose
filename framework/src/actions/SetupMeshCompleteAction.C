@@ -32,7 +32,7 @@ SetupMeshCompleteAction::validParams()
   return params;
 }
 
-SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params) : Action(params) {}
+SetupMeshCompleteAction::SetupMeshCompleteAction(const InputParameters & params) : Action(params) {}
 
 void
 SetupMeshCompleteAction::act()

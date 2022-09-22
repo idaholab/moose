@@ -36,7 +36,7 @@ DynamicObjectRegistrationAction::validParams()
   return params;
 }
 
-DynamicObjectRegistrationAction::DynamicObjectRegistrationAction(InputParameters parameters)
+DynamicObjectRegistrationAction::DynamicObjectRegistrationAction(const InputParameters & parameters)
   : Action(parameters)
 {
   /**

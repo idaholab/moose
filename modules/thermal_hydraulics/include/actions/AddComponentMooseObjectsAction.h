@@ -14,7 +14,7 @@
 class AddComponentMooseObjectsAction : public Action
 {
 public:
-  AddComponentMooseObjectsAction(InputParameters params);
+  AddComponentMooseObjectsAction(const InputParameters & params);
 
   virtual void act();
 

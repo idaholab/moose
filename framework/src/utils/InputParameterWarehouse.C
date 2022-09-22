@@ -38,9 +38,12 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
   // MooseVariableBase objects because we require duplication of the variable for reference and
   // displaced problems. We must also have std::pair(reference_var, reference_params) AND
   // std::pair(displaced_var, displaced_params) elements because the two vars will have different
-  // values for _sys. It's a good thing we are using a multi-map as our underlying storage
+  // values for _sys. It's a good thing we are using a multi-map as our underlying storage.
+  // We also allow duplicate unique_names for Action objects because it is allowed to have
+  // multiple [Materials] input blocks each of which can add an action but all of these actions
+  // will have the same unique name.
   if (_input_parameters[tid].find(unique_name) != _input_parameters[tid].end() &&
-      base != "MooseVariableBase")
+      base != "MooseVariableBase" && base != "Action")
     mooseError("A '",
                unique_name.tag(),
                "' object already exists with the name '",
@@ -63,9 +66,10 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
     {
       if (!tag.empty())
       {
+        auto short_name = MooseUtils::shortName(name);
         _input_parameters[tid].insert(std::pair<MooseObjectName, std::shared_ptr<InputParameters>>(
-            MooseObjectName(tag, name), ptr));
-        object_names.emplace_back(tag, name);
+            MooseObjectName(tag, short_name), ptr));
+        object_names.emplace_back(tag, short_name);
       }
     }
   }
@@ -73,15 +77,15 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
   // Store controllable parameters using all possible names
   for (libMesh::Parameters::iterator map_iter = ptr->begin(); map_iter != ptr->end(); ++map_iter)
   {
-    const std::string & name = map_iter->first;
+    const std::string & pname = map_iter->first;
     libMesh::Parameters::Value * value = MooseUtils::get(map_iter->second);
 
-    if (ptr->isControllable(name))
+    if (ptr->isControllable(pname))
       for (const auto & object_name : object_names)
       {
-        MooseObjectParameterName param_name(object_name, name);
+        MooseObjectParameterName param_name(object_name, pname);
         _controllable_items[tid].emplace_back(std::make_shared<ControllableItem>(
-            param_name, value, ptr->getControllableExecuteOnTypes(name)));
+            param_name, value, ptr->getControllableExecuteOnTypes(pname)));
       }
   }
 
@@ -92,7 +96,9 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
   ptr->addPrivateParam<std::string>("_unique_name", oss.str());
   ptr->addPrivateParam<std::string>("_object_name", name);
   ptr->addPrivateParam<THREAD_ID>("_tid", tid);
-  ptr->allowCopy(false); // no more copies allowed
+
+  // no more copies allowed
+  ptr->allowCopy(false);
 
   // Return a reference to the InputParameters object
   return *ptr;
@@ -172,7 +178,13 @@ InputParameterWarehouse::addControllableParameterConnection(
     if (primaries.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
       mooseError("Unable to locate primary parameter with name ", primary);
     else if (primaries.empty())
-      return;
+    {
+      if (tid == 0)
+        return;
+      else
+        // try to connect non-threaded primary control to secondary controls of all threads
+        primaries = getControllableItems(primary, 0);
+    }
 
     std::vector<ControllableItem *> secondaries = getControllableItems(secondary, tid);
     if (secondaries.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0

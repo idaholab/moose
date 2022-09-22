@@ -21,7 +21,7 @@ AddRayTracingObjectAction::validParams()
   return MooseObjectAction::validParams();
 }
 
-AddRayTracingObjectAction::AddRayTracingObjectAction(InputParameters params)
+AddRayTracingObjectAction::AddRayTracingObjectAction(const InputParameters & params)
   : MooseObjectAction(params)
 {
 }

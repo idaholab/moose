@@ -17,7 +17,7 @@ public:
   // constructor
   static InputParameters validParams();
 
-  AddFieldSplitAction(InputParameters params);
+  AddFieldSplitAction(const InputParameters & params);
   // prepare PETSc options
   void act();
 };

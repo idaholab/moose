@@ -13,6 +13,7 @@
 
 #include <string>
 #include <map>
+#include <set>
 
 // Forward declarations
 class InputParameters;

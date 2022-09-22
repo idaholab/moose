@@ -24,7 +24,7 @@ class ResolveOptionalMaterialPropertiesAction : public Action
 public:
   static InputParameters validParams();
 
-  ResolveOptionalMaterialPropertiesAction(InputParameters params);
+  ResolveOptionalMaterialPropertiesAction(const InputParameters & params);
 
   virtual void act() override;
 };

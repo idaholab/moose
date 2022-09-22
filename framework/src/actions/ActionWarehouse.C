@@ -20,6 +20,7 @@
 #include "InfixIterator.h"
 #include "FEProblem.h"
 #include "MemoryUtils.h"
+#include "InputParameterWarehouse.h"
 
 #include "libmesh/simple_range.h"
 
@@ -411,10 +412,15 @@ ActionWarehouse::printInputFile(std::ostream & out)
     bool is_parent;
     if (_syntax.isAssociated(name, &is_parent) != "")
     {
-      InputParameters params = act->parameters();
+      const auto & all_params = _app.getInputParameterWarehouse().getInputParameters();
+      InputParameters & params = *(all_params.find(act->uniqueActionName())->second.get());
+
+      // temporarily allow input parameter copies required by the input file formatter
+      params.allowCopy(true);
 
       // TODO: Do we need to insert more nodes for each task?
       tree.insertNode(name, *tasks.begin(), true, &params);
+      params.allowCopy(false);
 
       MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(act);
       if (moose_object_action)

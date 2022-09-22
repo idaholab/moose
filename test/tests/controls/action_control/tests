@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = Exodiff
+    input = action_control_test.i
+    exodiff = action_control_test_out.e
+    issues = '#22068'
+    design = 'syntax/Controls/index.md'
+    requirement = "The Control system shall include a means to control input parameters added by MOOSE action systems."
+  []
+[]

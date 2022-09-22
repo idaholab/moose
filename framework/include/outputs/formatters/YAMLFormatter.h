@@ -10,6 +10,8 @@
 #pragma once
 
 #include "SyntaxTree.h"
+#include "InputParameters.h"
+
 #include <sstream>
 #include <iterator>
 

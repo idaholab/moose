@@ -19,7 +19,7 @@ class SetupDebugAction : public Action
 public:
   static InputParameters validParams();
 
-  SetupDebugAction(InputParameters parameters);
+  SetupDebugAction(const InputParameters & parameters);
 
   virtual void act() override;
 };

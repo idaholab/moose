@@ -26,7 +26,7 @@ CouplingFunctorCheckAction::validParams()
   return Action::validParams();
 }
 
-CouplingFunctorCheckAction::CouplingFunctorCheckAction(InputParameters parameters)
+CouplingFunctorCheckAction::CouplingFunctorCheckAction(const InputParameters & parameters)
   : Action(parameters)
 {
   _name = "coupling_functor_check";

@@ -14,7 +14,7 @@
 class THMAddRelationshipManagersAction : public Action
 {
 public:
-  THMAddRelationshipManagersAction(InputParameters params);
+  THMAddRelationshipManagersAction(const InputParameters & params);
 
   virtual void act();
 

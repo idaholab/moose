@@ -21,7 +21,7 @@ AddClosuresAction::validParams()
   return params;
 }
 
-AddClosuresAction::AddClosuresAction(InputParameters params) : MooseObjectAction(params) {}
+AddClosuresAction::AddClosuresAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddClosuresAction::act()

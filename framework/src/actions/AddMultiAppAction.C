@@ -20,7 +20,7 @@ AddMultiAppAction::validParams()
   return params;
 }
 
-AddMultiAppAction::AddMultiAppAction(InputParameters params) : MooseObjectAction(params) {}
+AddMultiAppAction::AddMultiAppAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddMultiAppAction::act()

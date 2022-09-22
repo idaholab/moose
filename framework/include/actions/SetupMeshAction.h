@@ -18,7 +18,7 @@ class SetupMeshAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  SetupMeshAction(InputParameters params);
+  SetupMeshAction(const InputParameters & params);
 
   virtual void act() override;
 

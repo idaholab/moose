@@ -14,7 +14,7 @@
 class ConvectionDiffusionAction : public Action
 {
 public:
-  ConvectionDiffusionAction(InputParameters params);
+  ConvectionDiffusionAction(const InputParameters & params);
 
   static InputParameters validParams();
 

@@ -11,6 +11,12 @@
 
 #include "InputFileFormatter.h"
 
+#include <sstream>
+#include <string>
+#include <vector>
+
+class ActionWarehouse;
+
 /*
  * Dumps the input file in the Exodus output
  */

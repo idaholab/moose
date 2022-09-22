@@ -24,7 +24,7 @@ JacobianTest1PhaseAction::validParams()
   return params;
 }
 
-JacobianTest1PhaseAction::JacobianTest1PhaseAction(InputParameters params)
+JacobianTest1PhaseAction::JacobianTest1PhaseAction(const InputParameters & params)
   : JacobianTestAction(params), FlowModelSetup1Phase(params)
 {
 }

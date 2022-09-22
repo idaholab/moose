@@ -22,7 +22,8 @@ AddRayKernelAction::validParams()
   return params;
 }
 
-AddRayKernelAction::AddRayKernelAction(InputParameters params) : AddRayTracingObjectAction(params)
+AddRayKernelAction::AddRayKernelAction(const InputParameters & params)
+  : AddRayTracingObjectAction(params)
 {
 }
 

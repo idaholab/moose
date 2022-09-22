@@ -506,7 +506,7 @@ NSFVAction::validParams()
   return params;
 }
 
-NSFVAction::NSFVAction(InputParameters parameters)
+NSFVAction::NSFVAction(const InputParameters & parameters)
   : Action(parameters),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
     _compressibility(getParam<MooseEnum>("compressibility")),

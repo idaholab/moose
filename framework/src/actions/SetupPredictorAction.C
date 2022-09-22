@@ -24,7 +24,7 @@ SetupPredictorAction::validParams()
   return params;
 }
 
-SetupPredictorAction::SetupPredictorAction(InputParameters parameters)
+SetupPredictorAction::SetupPredictorAction(const InputParameters & parameters)
   : MooseObjectAction(parameters)
 {
 }

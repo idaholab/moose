@@ -14,7 +14,7 @@
 class THMSetupOutputAction : public Action
 {
 public:
-  THMSetupOutputAction(InputParameters params);
+  THMSetupOutputAction(const InputParameters & params);
 
   virtual void act();
 

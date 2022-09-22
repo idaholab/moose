@@ -40,7 +40,7 @@ AddTimeIndependentReactionSolverAction::validParams()
 }
 
 AddTimeIndependentReactionSolverAction::AddTimeIndependentReactionSolverAction(
-    InputParameters params)
+    const InputParameters & params)
   : AddGeochemistrySolverAction(params)
 {
 }

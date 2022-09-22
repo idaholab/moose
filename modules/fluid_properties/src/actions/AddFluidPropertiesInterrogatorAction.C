@@ -46,7 +46,8 @@ AddFluidPropertiesInterrogatorAction::validParams()
   return params;
 }
 
-AddFluidPropertiesInterrogatorAction::AddFluidPropertiesInterrogatorAction(InputParameters params)
+AddFluidPropertiesInterrogatorAction::AddFluidPropertiesInterrogatorAction(
+    const InputParameters & params)
   : Action(params)
 {
   // Currently these parameters are required by the constructor of Console, which

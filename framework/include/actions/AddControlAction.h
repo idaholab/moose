@@ -27,7 +27,7 @@ public:
    */
   static InputParameters validParams();
 
-  AddControlAction(InputParameters parameters);
+  AddControlAction(const InputParameters & parameters);
 
   virtual void act() override;
 };

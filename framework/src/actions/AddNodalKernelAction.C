@@ -20,7 +20,10 @@ AddNodalKernelAction::validParams()
   return params;
 }
 
-AddNodalKernelAction::AddNodalKernelAction(InputParameters params) : MooseObjectAction(params) {}
+AddNodalKernelAction::AddNodalKernelAction(const InputParameters & params)
+  : MooseObjectAction(params)
+{
+}
 
 void
 AddNodalKernelAction::act()

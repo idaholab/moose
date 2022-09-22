@@ -22,7 +22,7 @@ EmptyAction::validParams()
   return params;
 }
 
-EmptyAction::EmptyAction(InputParameters params) : Action(params) {}
+EmptyAction::EmptyAction(const InputParameters & params) : Action(params) {}
 
 void
 EmptyAction::act()

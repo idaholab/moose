@@ -16,7 +16,7 @@ class AddCovarianceAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AddCovarianceAction(InputParameters params);
+  AddCovarianceAction(const InputParameters & params);
 
   virtual void act() override;
 };

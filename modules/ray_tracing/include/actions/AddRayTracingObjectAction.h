@@ -17,7 +17,7 @@
 class AddRayTracingObjectAction : public MooseObjectAction
 {
 public:
-  AddRayTracingObjectAction(InputParameters params);
+  AddRayTracingObjectAction(const InputParameters & params);
 
   static InputParameters validParams();
 

@@ -23,7 +23,7 @@ ResolveOptionalMaterialPropertiesAction::validParams()
 }
 
 ResolveOptionalMaterialPropertiesAction::ResolveOptionalMaterialPropertiesAction(
-    InputParameters params)
+    const InputParameters & params)
   : Action(params)
 {
 }

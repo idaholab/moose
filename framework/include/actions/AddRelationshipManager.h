@@ -21,7 +21,7 @@ class AddRelationshipManager : public Action
 public:
   static InputParameters validParams();
 
-  AddRelationshipManager(InputParameters params);
+  AddRelationshipManager(const InputParameters & params);
 
   virtual void act() override;
 };

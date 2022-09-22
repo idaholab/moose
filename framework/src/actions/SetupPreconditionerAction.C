@@ -28,7 +28,7 @@ SetupPreconditionerAction::validParams()
   return params;
 }
 
-SetupPreconditionerAction::SetupPreconditionerAction(InputParameters params)
+SetupPreconditionerAction::SetupPreconditionerAction(const InputParameters & params)
   : MooseObjectAction(params)
 {
 }

@@ -20,7 +20,7 @@ class AddAuxKernelAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AddAuxKernelAction(InputParameters params);
+  AddAuxKernelAction(const InputParameters & params);
 
   virtual void act() override;
 };

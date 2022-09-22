@@ -38,7 +38,7 @@ TestAction::validParams()
   return params;
 }
 
-TestAction::TestAction(InputParameters params)
+TestAction::TestAction(const InputParameters & params)
   : Action(params),
     // if a derived class should have a different default, then that class needs
     // to set this parameter in its constructor

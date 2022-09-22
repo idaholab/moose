@@ -41,7 +41,7 @@ SetupQuadratureAction::validParams()
   return params;
 }
 
-SetupQuadratureAction::SetupQuadratureAction(InputParameters parameters)
+SetupQuadratureAction::SetupQuadratureAction(const InputParameters & parameters)
   : Action(parameters),
     _type(Moose::stringToEnum<QuadratureType>(getParam<MooseEnum>("type"))),
     _order(Moose::stringToEnum<Order>(getParam<MooseEnum>("order"))),

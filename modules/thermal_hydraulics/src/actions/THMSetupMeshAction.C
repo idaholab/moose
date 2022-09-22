@@ -19,7 +19,7 @@ THMSetupMeshAction::validParams()
   return params;
 }
 
-THMSetupMeshAction::THMSetupMeshAction(InputParameters params) : Action(params) {}
+THMSetupMeshAction::THMSetupMeshAction(const InputParameters & params) : Action(params) {}
 
 void
 THMSetupMeshAction::act()

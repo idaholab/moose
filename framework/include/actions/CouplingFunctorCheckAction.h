@@ -20,7 +20,7 @@ class CouplingFunctorCheckAction : public Action
 public:
   static InputParameters validParams();
 
-  CouplingFunctorCheckAction(InputParameters parameters);
+  CouplingFunctorCheckAction(const InputParameters & parameters);
 
 protected:
   void act() override;

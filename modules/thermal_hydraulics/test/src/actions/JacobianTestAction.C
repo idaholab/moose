@@ -25,7 +25,7 @@ JacobianTestAction::validParams()
   return params;
 }
 
-JacobianTestAction::JacobianTestAction(InputParameters params)
+JacobianTestAction::JacobianTestAction(const InputParameters & params)
   : TestAction(params), _snes_test_err(Moose::stringify<Real>(getParam<Real>("snes_test_err")))
 {
 }

@@ -16,7 +16,7 @@ class SetAdaptivityOptionsAction : public Action
 public:
   static InputParameters validParams();
 
-  SetAdaptivityOptionsAction(InputParameters params);
+  SetAdaptivityOptionsAction(const InputParameters & params);
 
   virtual void act() override;
 };

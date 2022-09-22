@@ -20,7 +20,9 @@ AddUserObjectAction::validParams()
   return params;
 }
 
-AddUserObjectAction::AddUserObjectAction(InputParameters params) : MooseObjectAction(params) {}
+AddUserObjectAction::AddUserObjectAction(const InputParameters & params) : MooseObjectAction(params)
+{
+}
 
 void
 AddUserObjectAction::act()

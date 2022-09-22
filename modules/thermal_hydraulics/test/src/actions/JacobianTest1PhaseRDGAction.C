@@ -47,7 +47,7 @@ JacobianTest1PhaseRDGAction::validParams()
   return params;
 }
 
-JacobianTest1PhaseRDGAction::JacobianTest1PhaseRDGAction(InputParameters params)
+JacobianTest1PhaseRDGAction::JacobianTest1PhaseRDGAction(const InputParameters & params)
   : JacobianTestAction(params),
     _A_name("A"),
     _A_linear_name("A_linear"),

@@ -20,6 +20,6 @@ class StochasticToolsAction : public Action
 {
 public:
   static InputParameters validParams();
-  StochasticToolsAction(InputParameters params);
+  StochasticToolsAction(const InputParameters & params);
   virtual void act() override;
 };

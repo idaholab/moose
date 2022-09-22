@@ -28,7 +28,8 @@ AddGeochemicalModelInterrogatorAction::validParams()
   return params;
 }
 
-AddGeochemicalModelInterrogatorAction::AddGeochemicalModelInterrogatorAction(InputParameters params)
+AddGeochemicalModelInterrogatorAction::AddGeochemicalModelInterrogatorAction(
+    const InputParameters & params)
   : Action(params)
 {
 }

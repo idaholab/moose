@@ -20,7 +20,9 @@ AddConstraintAction::validParams()
   return params;
 }
 
-AddConstraintAction::AddConstraintAction(InputParameters params) : MooseObjectAction(params) {}
+AddConstraintAction::AddConstraintAction(const InputParameters & params) : MooseObjectAction(params)
+{
+}
 
 void
 AddConstraintAction::act()

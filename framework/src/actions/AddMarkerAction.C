@@ -20,7 +20,7 @@ AddMarkerAction::validParams()
   return params;
 }
 
-AddMarkerAction::AddMarkerAction(InputParameters params) : MooseObjectAction(params) {}
+AddMarkerAction::AddMarkerAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddMarkerAction::act()

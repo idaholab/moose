@@ -22,7 +22,7 @@ SetupTimeStepperAction::validParams()
   return params;
 }
 
-SetupTimeStepperAction::SetupTimeStepperAction(InputParameters parameters)
+SetupTimeStepperAction::SetupTimeStepperAction(const InputParameters & parameters)
   : MooseObjectAction(parameters)
 {
 }

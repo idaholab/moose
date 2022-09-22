@@ -51,7 +51,7 @@ SetupDebugAction::validParams()
   return params;
 }
 
-SetupDebugAction::SetupDebugAction(InputParameters parameters) : Action(parameters)
+SetupDebugAction::SetupDebugAction(const InputParameters & parameters) : Action(parameters)
 {
   _awh.showActionDependencies(getParam<bool>("show_action_dependencies"));
   _awh.showActions(getParam<bool>("show_actions"));

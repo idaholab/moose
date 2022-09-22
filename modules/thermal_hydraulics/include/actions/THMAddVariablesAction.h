@@ -14,7 +14,7 @@
 class THMAddVariablesAction : public Action
 {
 public:
-  THMAddVariablesAction(InputParameters params);
+  THMAddVariablesAction(const InputParameters & params);
 
   virtual void act();
 
