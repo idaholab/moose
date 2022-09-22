@@ -19,12 +19,13 @@
  * used to compute various fracture mechanics parameters at a crack tip,
  * including KI, KII, KIII, and the T stress.
  */
-class InteractionIntegral : public ElementVectorPostprocessor
+template <bool is_ad>
+class InteractionIntegralTempl : public ElementVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  InteractionIntegral(const InputParameters & parameters);
+  InteractionIntegralTempl(const InputParameters & parameters);
 
   virtual void initialSetup() override;
   virtual void initialize() override;
@@ -82,9 +83,9 @@ protected:
   /// Whether to treat a 3D model as 2D for computation of fracture integrals
   bool _treat_as_2d;
   /// Reference to the stress tensor computed by the material models
-  const MaterialProperty<RankTwoTensor> & _stress;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _stress;
   /// Reference to the strain tensor computed by the material models
-  const MaterialProperty<RankTwoTensor> & _strain;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _strain;
   /// Vector of all coupled variables
   std::vector<MooseVariableFEBase *> _fe_vars;
   /// FEType object defining order and family of displacement variables
@@ -106,7 +107,7 @@ protected:
   /// Index of the ring for the integral computed by this object
   std::size_t _ring_index;
   /// Derivative of the total eigenstrain with respect to temperature
-  const MaterialProperty<RankTwoTensor> * const _total_deigenstrain_dT;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> * const _total_deigenstrain_dT;
   /// Vector of q function values for the nodes in the current element
   std::vector<Real> _q_curr_elem;
   /// Vector of shape function values for the current element
@@ -148,7 +149,10 @@ protected:
 
   /// Pointers to optionally-used eigenstrain gradient and body force
   ///@{
-  const MaterialProperty<RankThreeTensor> * _eigenstrain_gradient;
+  const GenericMaterialProperty<RankThreeTensor, is_ad> * _eigenstrain_gradient;
   const MaterialProperty<RealVectorValue> * _body_force;
   ///@}
 };
+
+typedef InteractionIntegralTempl<false> InteractionIntegral;
+typedef InteractionIntegralTempl<true> ADInteractionIntegral;

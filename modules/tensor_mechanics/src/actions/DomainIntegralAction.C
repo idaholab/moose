@@ -657,7 +657,7 @@ DomainIntegralAction::act()
                    "mode-III interaction integral");
 
       std::string vpp_base_name;
-      std::string vpp_type_name("InteractionIntegral");
+      std::string vpp_type_name(ad_prepend + "InteractionIntegral");
 
       InputParameters params = _factory.getValidParams(vpp_type_name);
       params.set<UserObjectName>("crack_front_definition") = uo_name;
