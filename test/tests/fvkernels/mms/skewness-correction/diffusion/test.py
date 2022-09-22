@@ -16,6 +16,7 @@ class TestAverageStencil(unittest.TestCase):
         fig.save('average.png')
 
         for _,value in fig.label_to_slope.items():
+            print(value)
             self.assertTrue(fuzzyEqual(value, 1., .05))
 
 class TestSkewnessCorrectedStencil(unittest.TestCase):
@@ -32,6 +33,7 @@ class TestSkewnessCorrectedStencil(unittest.TestCase):
         fig.save('skewness-corrected.png')
 
         for _,value in fig.label_to_slope.items():
+            print(value)
             self.assertTrue(fuzzyEqual(value, 2.0, .05))
 
 if __name__ == '__main__':

@@ -28,18 +28,12 @@
     exodiff = 'advection_out.e'
     requirement = 'The system shall be able to solve a advection problem with the finite volume method and display second order convergence.'
   []
-  [mat-advection]
-    type = Exodiff
-    input = 'mat-advection.i'
-    exodiff = 'mat-advection_out.e'
-    requirement = 'The system shall be able to solve a advection problem with the finite volume method, using a velocity supplied by a material, and display second order convergence.'
-    ad_indexing_type = 'global'
-  []
   [upwind-advection-diffusion]
     type = Exodiff
     input = 'advection-diffusion.i'
     exodiff = 'upwind-advection-diffusion_out.e'
-    cli_args = "GlobalParams/advected_interp_method='upwind' Outputs/file_base=upwind-advection-diffusion_out"
+    cli_args = "GlobalParams/advected_interp_method='upwind' "
+               "Outputs/file_base=upwind-advection-diffusion_out"
     requirement = 'The system shall be able to solve a advection-diffusion problem with the finite volume method and display first order convergence with an upwind scheme for the advection operator.'
     ad_indexing_type = 'global'
   []
