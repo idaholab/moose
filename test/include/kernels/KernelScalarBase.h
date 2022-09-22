@@ -50,15 +50,14 @@ public:
   void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
 protected:
-  // /**
-  //  * Method for computing the scalar part of residual
-  //  */
-  // virtual Real computeScalarResidual() = 0;
 
   /**
    * Method for computing the scalar part of residual at quadrature points
    */
-  virtual Real computeScalarQpResidual() = 0;
+  virtual Real computeScalarQpResidual()
+  {
+    return 0;
+  }
 
   /**
    * Method for computing the scalar variable part of Jacobian
@@ -69,7 +68,10 @@ protected:
    * Method for computing the scalar variable part of Jacobian at
    * quadrature points
    */
-  virtual Real computeScalarQpJacobian() = 0;
+  virtual Real computeScalarQpJacobian()
+  {
+    return 0;
+  }
 
   /**
    * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-jvar
