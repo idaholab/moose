@@ -21,24 +21,29 @@ InputParameters
 KernelScalarBase::validParams()
 {
   InputParameters params = Kernel::validParams();
-  params.addParam<NonlinearVariableName>("scalar_variable", "Primary coupled scalar variable");
-  // params.addCoupledVar("scalar_variable", "Primary coupled scalar variable");
+  // params.addParam<NonlinearVariableName>("scalar_variable", "Primary coupled scalar variable");
+  params.addParam<VariableName>("scalar_variable", "Primary coupled scalar variable");
+  params.addCoupledVar("coupled_scalar", "Repeate name of scalar variable to ensure dependency");
   return params;
 }
 
 KernelScalarBase::KernelScalarBase(const InputParameters & parameters)
   : Kernel(parameters),
     // _kappa_var(coupledScalar("scalar_variable")), _kappa(coupledScalarValue("scalar_variable"))
-    _compute_scalar_residuals(isParamValid("scalar_variable")
+    _use_scalar(isParamValid("scalar_variable")
              ? true : false),
     // _kappa_var_dummy(),
     _kappa_dummy(),
-    _kappa_var(_compute_scalar_residuals
-        ? &_sys.getScalarVariable(_tid, parameters.get<NonlinearVariableName>("scalar_variable"))
+    _kappa_var(_use_scalar
+        // &_sys.getScalarVariable(_tid, parameters.get<VariableName>("scalar_variable"))),
+        ? &_sys.getScalarVariable(_tid, parameters.get<VariableName>("scalar_variable"))
+        // ? &_sys.getScalarVariable(_tid, parameters.get<NonlinearVariableName>("scalar_variable"))
         : nullptr),
-    _kappa(_compute_scalar_residuals
+    // _kappa_var(*getScalarVar("scalar_variable", 0)),
+    _kappa(_use_scalar
+        //  (_is_implicit ? _kappa_var->sln() : _kappa_var->slnOld()))
         ? (_is_implicit ? _kappa_var->sln() : _kappa_var->slnOld())
-        // ? (_is_implicit ? _kappa_var.sln() : _kappa_var.slnOld())
+        // _is_implicit ? _kappa_var.sln() : _kappa_var.slnOld())
         : _kappa_dummy)
 {
   // add some error checks here
@@ -49,7 +54,7 @@ KernelScalarBase::computeResidual()
 {
   Kernel::computeResidual(); // compute and assemble regular variable contributions
 
-  if (_compute_scalar_residuals)
+  if (_use_scalar)
   {
     // prepareVectorTagLower(_assembly, _kappa_var.number());
 
@@ -78,7 +83,7 @@ KernelScalarBase::computeJacobian()
 {
   Kernel::computeJacobian();
 
-  if (_compute_scalar_residuals)
+  if (_use_scalar)
     computeScalarJacobian();
 }
 
@@ -121,7 +126,7 @@ KernelScalarBase::computeScalarJacobian()
 void
 KernelScalarBase::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  if (_compute_scalar_residuals)
+  if (_use_scalar)
   {
     if (jvar_num == variable().number()) // column for this kernel's variable
     {
@@ -213,7 +218,7 @@ KernelScalarBase::computeOffDiagJacobianScalarLocal(const unsigned int jvar_num)
 void
 KernelScalarBase::computeOffDiagJacobianScalar(const unsigned int jvar_num)
 {
-  if (_compute_scalar_residuals)
+  if (_use_scalar)
   {
     if (jvar_num == variable().number()) // column for this kernel's variable
     {
@@ -224,8 +229,8 @@ KernelScalarBase::computeOffDiagJacobianScalar(const unsigned int jvar_num)
     // else if (jvar_num == _kappa_var.number()) // column for this kernel's scalar variable
     // else if (jvar_num == _kappa_var) // column for this kernel's scalar variable
     {
-      Kernel::computeOffDiagJacobianScalar(jvar_num); // d-_var-residual / d-_kappa
-      // computeOffDiagJacobianScalarLocal(jvar_num); // d-_var-residual / d-_kappa
+      // Kernel::computeOffDiagJacobianScalar(jvar_num); // d-_var-residual / d-_kappa
+      computeOffDiagJacobianScalarLocal(jvar_num); // d-_var-residual / d-_kappa
       computeScalarJacobian(); // d-_kappa-residual / d-_kappa
     }
     else // some other column for scalar variable

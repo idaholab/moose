@@ -116,8 +116,8 @@ protected:
   {
   }
 
-  /// Whether to compute scalar residuals
-  const bool _compute_scalar_residuals;
+  /// Whether to compute scalar contributions
+  const bool _use_scalar;
 
   /// Dummy scalar variable so this kernel can be silent
   // const MooseVariableScalar _kappa_var_dummy;
@@ -128,6 +128,7 @@ protected:
 
   /// Scalar variable this kernel operates on
   MooseVariableScalar * const _kappa_var;
+  // const MooseVariableScalar & _kappa_var;
   // const unsigned int _kappa_var;
 
   /// Holds the current solution at the current quadrature point
