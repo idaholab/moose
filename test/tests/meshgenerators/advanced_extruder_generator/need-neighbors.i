@@ -5,7 +5,7 @@
     nx = 1
   []
   [extrude]
-    type = FancyExtruderGenerator
+    type = AdvancedExtruderGenerator
     input = gmg
     heights = '1'
     num_layers = '1'

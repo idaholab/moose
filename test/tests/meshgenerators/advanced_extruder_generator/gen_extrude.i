@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 6
@@ -10,8 +10,8 @@
     elem_type = QUAD4
   []
 
-  [./extrude]
-    type = FancyExtruderGenerator
+  [extrude]
+    type = AdvancedExtruderGenerator
     input = gmg
     heights = '1 2 3'
     num_layers = '1 2 3'
