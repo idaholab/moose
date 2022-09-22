@@ -1,6 +1,6 @@
 # Example Problems
 
-The following pages provide examples on how to use the optimization module to solve inverse optimization problems for force and material inversion.  The MOOSE optimization module relies heavily on [MultiApps](MultiApps/index.md) to solve PDE constrained optimization problems.  The main-app in the `Multiapps` system contains the optimization executioner which controls the execution and transfer of data in the sub-apps containing either the "forward" or "adjoint" finite element problem. The "forward" model is the finite element model of the system of interest and is used for computing the objective function.  The "adjoint" model is the adjoint of the forward model and computes the adjoint variable which is used to compute the derivatives needed for optimization.  The "adjoint" model is closely related to the "forward" model and for some problems the only difference between the two models are the loads being applied and boundary conditions.  Examples on the below pages follow the derivations given on the [Theory page](getting_started/InvOptTheory.md).
+The following pages provide examples on how to use the optimization module to solve inverse optimization problems for force and material inversion.  The MOOSE optimization module relies heavily on [MultiApps](MultiApps/index.md) to solve PDE constrained optimization problems.  The main-app in the `Multiapps` system contains the optimization executioner which controls the execution and transfer of data in the sub-apps containing either the "forward" or "adjoint" finite element problem. The "forward" model is the finite element model of the system of interest and is used for computing the objective function.  The "adjoint" model is the adjoint of the forward model and computes the adjoint variable which is used to compute the derivatives needed for optimization.  The "adjoint" model is closely related to the "forward" model and for some problems the only difference between the two models are the loads being applied and boundary conditions.  Examples on the below pages follow the derivations given on the [Theory page](theory/InvOptTheory.md).
 
 - [examples/forceInv_main.md]
 - [examples/materialInv_main.md]
@@ -37,4 +37,4 @@ where $T_D$ and $G(\mathbf{x},T)$ are known functions and $\mathbf{n}$ is the ou
 \end{aligned}
 \end{equation}
 
-The adjoint problem for this PDE is given on the [Theory page](getting_started/InvOptTheory.md).
+The adjoint problem for this PDE is given on the [Theory page](theory/InvOptTheory.md).

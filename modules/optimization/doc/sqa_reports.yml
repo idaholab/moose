@@ -28,8 +28,8 @@ Documents:
     software_library_list: sqa/optimization_sll.md
     communication_and_contact_information: sqa/framework_cci.md
     software_coding_standards: sqa/framework_scs.md
-    user_manual: getting_started/RunningOptimization.md
-    theory_manual: getting_started/InvOptTheory.md
+    log_user_manual: WARNING
+    theory_manual: theory/InvOptTheory.md
 
 Requirements:
     optimization:

@@ -8,7 +8,7 @@ This function computes values based on coordinate and time data. This data comes
 
 ## Example Input File Syntax
 
-Here are several examples different combinations of x, y, z, and time data is specified:
+Here are several examples of different combinations where x, y, z, and time data is specified:
 
 !listing vector_nearest_point.i block=Functions Reporters
 

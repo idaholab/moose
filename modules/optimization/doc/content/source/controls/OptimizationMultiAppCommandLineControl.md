@@ -9,16 +9,16 @@ This control uses the command line control mechanism to change parameters on the
 ## Example Input File Syntax
 
 This example controls a function's `val` on the forward multiapp shown by:
-!listing test/tests/optimizationreporter/objective_gradient_minimize/constant_heat_source/main.i block=Controls/toforward
+!listing test/tests/optimizationreporter/constant_heat_source/main.i block=Controls/toforward
 
 !alert warning title=MultiApps Setup
 This control requires the MultiApps to use `reset_app = true` as shown here in the above input file:
 
-!listing test/tests/optimizationreporter/objective_gradient_minimize/constant_heat_source/main.i block=MultiApps/forward
+!listing test/tests/optimizationreporter/constant_heat_source/main.i block=MultiApps/forward
 
 
-!syntax parameters /AuxKernels/OptimizationMultiAppCommandLineControl.md
+!syntax parameters /Controls/OptimizationMultiAppCommandLineControl
 
-!syntax inputs /AuxKernels/OptimizationMultiAppCommandLineControl.md
+!syntax inputs /Controls/OptimizationMultiAppCommandLineControl
 
-!syntax children /AuxKernels/OptimizationMultiAppCommandLineControl.md
+!syntax children /Controls/OptimizationMultiAppCommandLineControl
