@@ -724,7 +724,6 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
 #endif
 
   bool internal_face = isInternalFace(fi);
-  bool non_orthogonal_corrector = true; // this will be a parameter at some point
 
   bool var_defined_on_elem = fi.varDefinedOnElem(this->name());
   const Elem * const elem = &fi.elem();
@@ -732,23 +731,22 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
 
   const ADReal side_one_value =
       var_defined_on_elem ? getElemValue(elem) : getNeighborValue(elem, fi);
-
   const ADReal side_two_value =
       var_defined_on_elem ? getNeighborValue(neighbor, fi) : getElemValue(neighbor);
 
-  const Real delta = internal_face ? fi.dCNMag() : fi.cellCenterToFaceDistance(var_defined_on_elem);
-  const Point e_cf = internal_face ? fi.eCN() : fi.normal();
+  const Real delta = internal_face ? std::abs(fi.dCN() * fi.normal())
+                                   : fi.cellCenterToFaceDistance(var_defined_on_elem);
 
-  auto face_grad = ((side_two_value - side_one_value) / delta) * e_cf;
+  auto face_grad = ((side_two_value - side_one_value) / delta);
 
-  // We only need nonorthogonal correctors in 2+dimensionsD and on internal faces
-  if (non_orthogonal_corrector && Moose::dim > 1 && internal_face)
+  // We only need nonorthogonal correctors in 2+ dimensions
+  if (_mesh.dimension() > 1)
   {
     const auto & interpolated_gradient = uncorrectedAdGradSln(fi, correct_skewness);
-    face_grad += interpolated_gradient - (interpolated_gradient * e_cf) * e_cf;
+    face_grad += interpolated_gradient * (fi.normal() - fi.dCN() / delta);
   }
 
-  return face_grad;
+  return face_grad * fi.normal();
 }
 
 template <typename OutputType>
