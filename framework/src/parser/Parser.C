@@ -1171,6 +1171,14 @@ void Parser::setVectorParameter<ReporterName, std::string>(
     bool in_global,
     GlobalParamsAction * global_block);
 
+template <>
+void Parser::setDoubleIndexParameter<Point>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<std::vector<std::vector<Point>>> * param,
+    bool in_global,
+    GlobalParamsAction * global_block);
+
 void
 Parser::extractParams(const std::string & prefix, InputParameters & p)
 {
@@ -1467,6 +1475,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 
       setvectorvector(SubdomainID);
       setvectorvector(BoundaryID);
+      setvectorvector(Point);
       setvectorvector(string);
       setvectorvector(FileName);
       setvectorvector(FileNameNoExtension);
@@ -2079,6 +2088,76 @@ Parser::setVectorComponentParameter(const std::string & full_name,
   }
 }
 
+template <typename T>
+void
+Parser::setVectorVectorComponentParameter(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<std::vector<std::vector<T>>> * param,
+    bool in_global,
+    GlobalParamsAction * global_block)
+{
+  // Get the full string assigned to the variable full_name
+  std::string buffer = _root->param<std::string>(full_name);
+
+  // split vector at delim ;
+  // NOTE: the substrings are _not_ of type T yet
+  std::vector<std::string> first_tokenized_vector;
+  MooseUtils::tokenize(buffer, first_tokenized_vector, 1, ";");
+  param->set().resize(first_tokenized_vector.size());
+
+  // get a vector<vector<double>> first
+  std::vector<std::vector<double>> vecvec(first_tokenized_vector.size());
+  for (unsigned j = 0; j < vecvec.size(); ++j)
+    if (!MooseUtils::tokenizeAndConvert<double>(first_tokenized_vector[j], vecvec[j]))
+    {
+      _errmsg +=
+          hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) + "\n";
+      return;
+    }
+
+  for (const auto & vec : vecvec)
+    if (vec.size() % LIBMESH_DIM)
+    {
+      _errmsg +=
+          hit::errormsg(_root->find(full_name),
+                        "wrong number of values in double-indexed vector component parameter ",
+                        full_name,
+                        ": size of subcomponent ",
+                        vec.size(),
+                        " is not a multiple of ",
+                        LIBMESH_DIM) +
+          "\n";
+      return;
+    }
+
+  // convert vector<vector<double>> to vector<vector<T>>
+  std::vector<std::vector<T>> values(vecvec.size());
+  for (unsigned int id_vec = 0; id_vec < vecvec.size(); ++id_vec)
+    for (unsigned int i = 0; i < vecvec[id_vec].size() / LIBMESH_DIM; ++i)
+    {
+      T value;
+      for (int j = 0; j < LIBMESH_DIM; ++j)
+        value(j) = Real(vecvec[id_vec][i * LIBMESH_DIM + j]);
+      values[id_vec].push_back(value);
+    }
+
+  param->set() = values;
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setDoubleIndexParam<T>(short_name).resize(vecvec.size());
+    for (unsigned j = 0; j < vecvec.size(); ++j)
+    {
+      global_block->setDoubleIndexParam<T>(short_name)[j].resize(param->get()[j].size() /
+                                                                 LIBMESH_DIM);
+      for (unsigned int i = 0; i < param->get()[j].size() / LIBMESH_DIM; ++i)
+        global_block->setDoubleIndexParam<T>(short_name)[j][i] = values[j][i];
+    }
+  }
+}
+
 template <>
 void
 Parser::setScalarParameter<RealVectorValue, RealVectorValue>(
@@ -2495,4 +2574,16 @@ Parser::setVectorParameter<ReporterName, std::string>(
     else
       param->set()[i] = ReporterName(names[0], names[1]);
   }
+}
+
+template <>
+void
+Parser::setDoubleIndexParameter<Point>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<std::vector<std::vector<Point>>> * param,
+    bool in_global,
+    GlobalParamsAction * global_block)
+{
+  setVectorVectorComponentParameter(full_name, short_name, param, in_global, global_block);
 }
