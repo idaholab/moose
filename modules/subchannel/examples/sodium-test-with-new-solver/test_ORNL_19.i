@@ -7,7 +7,7 @@ P_out = 2.0e5 # Pa
   [subchannel]
     type = TriSubChannelMeshGenerator
     nrings = 3
-    n_cells = 100
+    n_cells = 50
     flat_to_flat = 3.41e-2
     heated_length = 0.5334
     unheated_length_entry = 0.4064
@@ -59,7 +59,7 @@ P_out = 2.0e5 # Pa
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
-  n_blocks = 10
+  n_blocks = 1
   beta = 0.1
   P_out = 2.0e5
   CT = 1.0
@@ -67,12 +67,12 @@ P_out = 2.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-6
-  T_tol = 1.0e-6
-  implicit = false
-  segregated = true
+  P_tol = 1.0e-4
+  T_tol = 1.0e-4
+  implicit = true
+  segregated = false
   staggered_pressure = false
-  monolithic_thermal = false
+  monolithic_thermal = true
   verbose_multiapps = true
   verbose_subchannel = false
 []
@@ -92,7 +92,7 @@ P_out = 2.0e5 # Pa
     type = TriPowerIC
     variable = q_prime
     power = ${fparse 16975/(0.5334+0.4046+0.0762)} # W/m
-    filename = "pin_power_profile_19.txt"
+    filename = "pin_power_profile19.txt"
   []
 
   [T_ic]
