@@ -430,7 +430,6 @@ in this example.
 
 There are two differences between
 `reuse_preconditioner` and 
-`reuse_preconditioner_max_linear_its`
 and setting up preconditioner reuse directly in PETSc with the 
 `snes_lag_preconditioner_persists` and `-snes_lag_preconditioner` options:
 1. `-snes_lag_preconditioner X` will recalculate a new preconditioner
