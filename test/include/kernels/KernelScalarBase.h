@@ -34,8 +34,6 @@ public:
    * The scalar variable that this kernel operates on.
    */
   const MooseVariableScalar & scalarVariable() const { return *_kappa_var; }
-  // const MooseVariableScalar & scalarVariable() const { return _kappa_var; }
-  // unsigned int scalarVariable() const { return _kappa_var; }
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -121,18 +119,12 @@ protected:
   /// Whether to compute scalar contributions
   const bool _use_scalar;
 
-  /// Dummy scalar variable so this kernel can be silent
-  // const MooseVariableScalar _kappa_var_dummy;
-  // const unsigned int _kappa_var_dummy;
-
   /// A dummy object useful for constructing _kappa when not using scalars
   const VariableValue _kappa_dummy;
 
-  /// Scalar variable this kernel operates on
+  /// (Pointer to) Scalar variable this kernel operates on
   MooseVariableScalar * const _kappa_var;
-  // const MooseVariableScalar & _kappa_var;
-  // const unsigned int _kappa_var;
 
-  /// Holds the current solution at the current quadrature point
+  /// Reference to the current solution at the current quadrature point
   const VariableValue & _kappa;
 };

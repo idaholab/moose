@@ -22,9 +22,8 @@ namespace
 const InputParameters &
 setScalarParam(const InputParameters & params_in)
 {
+  // Reset the scalar_variable parameter to a relevant name for this physics
   InputParameters & ret = const_cast<InputParameters &>(params_in);
-  // ret.set<NonlinearVariableName>("scalar_variable") = {
-  //     params_in.get<NonlinearVariableName>("kappa")};
   ret.set<VariableName>("scalar_variable") = {
       params_in.get<VariableName>("kappa")};
   return ret;
@@ -40,9 +39,6 @@ ScalarLMKernel::validParams()
   params.addClassDescription("This class is used to enforce integral of phi = V_0 with a "
                              "Lagrange multiplier approach.");
   params.addRequiredParam<VariableName>("kappa", "Primary coupled scalar variable");
-  // params.addRequiredParam<NonlinearVariableName>("kappa", "Primary coupled scalar variable");
-  // params.addRequiredCoupledVar("scalar_variable", "Primary coupled scalar variable");
-  // params.addRequiredCoupledVar("kappa", "Primary coupled scalar variable");
   params.addRequiredParam<PostprocessorName>(
       "pp_name", "Name of the Postprocessor containing the volume of the domain.");
   params.addRequiredParam<Real>(
@@ -52,8 +48,7 @@ ScalarLMKernel::validParams()
 }
 
 ScalarLMKernel::ScalarLMKernel(const InputParameters & parameters)
-  : KernelScalarBase(setScalarParam(parameters)), 
-  // : KernelScalarBase(parameters), 
+  : KernelScalarBase(setScalarParam(parameters)),
     _value(getParam<Real>("value")),
     _pp_value(getPostprocessorValue("pp_name"))
 {
@@ -83,8 +78,6 @@ Real
 ScalarLMKernel::computeQpOffDiagJacobianScalar(unsigned int jvar)
 {
   if (jvar == _kappa_var->number())
-  // if (jvar == _kappa_var.number())
-  // if (jvar == _kappa_var)
     return _test[_i][_qp];
   else
     return 0.;

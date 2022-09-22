@@ -21,29 +21,23 @@ InputParameters
 KernelScalarBase::validParams()
 {
   InputParameters params = Kernel::validParams();
-  // params.addParam<NonlinearVariableName>("scalar_variable", "Primary coupled scalar variable");
+  // This parameter can get renamed in derived class to a more relevant variable name
   params.addParam<VariableName>("scalar_variable", "Primary coupled scalar variable");
-  params.addCoupledVar("coupled_scalar", "Repeate name of scalar variable to ensure dependency");
+  // This name is fixed and required to be equal to the previous parameter; need to add error checks...
+  params.addCoupledVar("coupled_scalar", "Repeat name of scalar variable to ensure dependency");
   return params;
 }
 
 KernelScalarBase::KernelScalarBase(const InputParameters & parameters)
   : Kernel(parameters),
-    // _kappa_var(coupledScalar("scalar_variable")), _kappa(coupledScalarValue("scalar_variable"))
     _use_scalar(isParamValid("scalar_variable")
              ? true : false),
-    // _kappa_var_dummy(),
     _kappa_dummy(),
     _kappa_var(_use_scalar
-        // &_sys.getScalarVariable(_tid, parameters.get<VariableName>("scalar_variable"))),
         ? &_sys.getScalarVariable(_tid, parameters.get<VariableName>("scalar_variable"))
-        // ? &_sys.getScalarVariable(_tid, parameters.get<NonlinearVariableName>("scalar_variable"))
         : nullptr),
-    // _kappa_var(*getScalarVar("scalar_variable", 0)),
     _kappa(_use_scalar
-        //  (_is_implicit ? _kappa_var->sln() : _kappa_var->slnOld()))
         ? (_is_implicit ? _kappa_var->sln() : _kappa_var->slnOld())
-        // _is_implicit ? _kappa_var.sln() : _kappa_var.slnOld())
         : _kappa_dummy)
 {
   // add some error checks here
@@ -65,8 +59,6 @@ KernelScalarBase::computeResidual()
     //     _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
     // }
     DenseVector<Number> & re = _assembly.residualBlock(_kappa_var->number());
-    // DenseVector<Number> & re = _assembly.residualBlock(_kappa_var.number());
-    // DenseVector<Number> & re = _assembly.residualBlock(_kappa_var);
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       initScalarQpResidual();
@@ -91,8 +83,6 @@ void
 KernelScalarBase::computeScalarJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_kappa_var->number(), _kappa_var->number());
-  // DenseMatrix<Number> & ke = _assembly.jacobianBlock(_kappa_var.number(), _kappa_var.number());
-  // DenseMatrix<Number> & ke = _assembly.jacobianBlock(_kappa_var, _kappa_var);
 
   if (ke.n() == 0 || ke.m() == 0)
     return;
@@ -100,8 +90,6 @@ KernelScalarBase::computeScalarJacobian()
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     initScalarQpJacobian(_kappa_var->number());
-    // initScalarQpJacobian(_kappa_var.number());
-    // initScalarQpJacobian(_kappa_var);
     for (_i = 0; _i < ke.m(); _i++)
       for (_j = 0; _j < ke.n(); _j++)
         ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeScalarQpJacobian();
@@ -134,8 +122,6 @@ KernelScalarBase::computeOffDiagJacobian(const unsigned int jvar_num)
       computeScalarOffDiagJacobian(jvar_num); // d-_kappa-residual / d-_var
     }
     else if (jvar_num == _kappa_var->number()) // column for this kernel's scalar variable
-    // else if (jvar_num == _kappa_var.number()) // column for this kernel's scalar variable
-    // else if (jvar_num == _kappa_var) // column for this kernel's scalar variable
     {
       // handle these in computeOffDiagJacobianScalar
       return;
@@ -167,8 +153,6 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
   const auto & jvar = getVariable(jvar_num);
   // prepareMatrixTagLower(_assembly, _kappa_var.number(), jvar_num, type);
   DenseMatrix<Number> & kne = _assembly.jacobianBlock(_kappa_var->number(), jvar_num);
-  // DenseMatrix<Number> & kne = _assembly.jacobianBlock(_kappa_var.number(), jvar_num);
-  // DenseMatrix<Number> & kne = _assembly.jacobianBlock(_kappa_var, jvar_num);
   if (kne.n() == 0 || kne.m() == 0)
     return;
 
@@ -199,8 +183,6 @@ KernelScalarBase::computeOffDiagJacobianScalarLocal(const unsigned int jvar_num)
 
   // prepareMatrixTagLower(_assembly, _kappa_var.number(), jvar_num, type);
   DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), _kappa_var->number());
-  // DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), _kappa_var.number());
-  // DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), _kappa_var);
   if (ken.n() == 0 || ken.m() == 0)
     return;
 
@@ -226,10 +208,10 @@ KernelScalarBase::computeOffDiagJacobianScalar(const unsigned int jvar_num)
       return;
     }
     else if (jvar_num == _kappa_var->number()) // column for this kernel's scalar variable
-    // else if (jvar_num == _kappa_var.number()) // column for this kernel's scalar variable
-    // else if (jvar_num == _kappa_var) // column for this kernel's scalar variable
     {
+      // Perform assembly using method in Kernel
       // Kernel::computeOffDiagJacobianScalar(jvar_num); // d-_var-residual / d-_kappa
+      // Perform assembly using DenseMatrix like d-_kappa_var-residual / d-_var
       computeOffDiagJacobianScalarLocal(jvar_num); // d-_var-residual / d-_kappa
       computeScalarJacobian(); // d-_kappa-residual / d-_kappa
     }
@@ -248,8 +230,6 @@ KernelScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int jvar)
 {
   // prepareMatrixTagLower(_assembly, _kappa_var.number(), jvar);
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_kappa_var->number(), jvar);
-  // DenseMatrix<Number> & ke = _assembly.jacobianBlock(_kappa_var.number(), jvar);
-  // DenseMatrix<Number> & ke = _assembly.jacobianBlock(_kappa_var, jvar);
 
   if (ke.n() == 0 || ke.m() == 0)
     return;
