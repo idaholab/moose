@@ -231,6 +231,7 @@
     cli_args = 'Mesh/split/block_pairs="0 missing;2 3"'
     expect_err = "The block 'missing' was not found in the mesh"
     requirement = "The system shall error if the mesh does not contain the specified block pair"
+    mesh_mode = 'REPLICATED'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#22117'
   []
@@ -241,6 +242,7 @@
     cli_args = 'Mesh/split/surrounding_blocks="missing"'
     expect_err = "The block 'missing' was not found in the mesh"
     requirement = "The system shall error if the mesh does not contain the specified surrounding block"
+    mesh_mode = 'REPLICATED'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#22117'
   []
