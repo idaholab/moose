@@ -1453,7 +1453,8 @@ SubChannel1PhaseProblem::computeP(int iblock)
           if (_segregated_bool)
           {
             auto dp_out = (*_DP_soln)(node_out);
-            PetscScalar value_v = -1.0 * dp_out;
+            PetscScalar value_v = -1.0 * dp_out * S_interp;
+            ;
             PetscInt row_v = i_ch + _n_channels * iz_ind;
             VecSetValues(_amc_pressure_force_rhs, 1, &row_v, &value_v, ADD_VALUES);
           }
@@ -1465,44 +1466,33 @@ SubChannel1PhaseProblem::computeP(int iblock)
 
       if (_segregated_bool)
       {
-        // KSP ksploc;
-        // PC pc;
-        // Vec sol;
-        // VecDuplicate(_amc_pressure_force_rhs, &sol);
-        // KSPCreate(PETSC_COMM_WORLD, &ksploc);
-        // KSPSetOperators(ksploc, _amc_pressure_force_mat, _amc_pressure_force_mat);
-        // KSPGetPC(ksploc, &pc);
-        // PCSetType(pc, PCJACOBI);
-        // KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
-        // KSPSetFromOptions(ksploc);
-        // KSPSolve(ksploc, _amc_pressure_force_rhs, sol);
-        // PetscScalar * xx;
-        // VecGetArray(sol, &xx);
-        // // update Pressure solution
-        // for (unsigned int iz = last_node; iz > first_node - 1; iz--)
-        // {
-        //   auto iz_ind = iz - first_node;
-        //   for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-        //   {
-        //     auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-        //     PetscScalar value = xx[iz_ind * _n_channels + i_ch];
-        //     _P_soln->set(node_in, value);
-        //   }
-        // }
-        // VecZeroEntries(_amc_pressure_force_rhs);
-        // KSPDestroy(&ksploc);
-        // VecDestroy(&sol);
+        KSP ksploc;
+        PC pc;
+        Vec sol;
+        VecDuplicate(_amc_pressure_force_rhs, &sol);
+        KSPCreate(PETSC_COMM_WORLD, &ksploc);
+        KSPSetOperators(ksploc, _amc_pressure_force_mat, _amc_pressure_force_mat);
+        KSPGetPC(ksploc, &pc);
+        PCSetType(pc, PCJACOBI);
+        KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
+        KSPSetFromOptions(ksploc);
+        KSPSolve(ksploc, _amc_pressure_force_rhs, sol);
+        PetscScalar * xx;
+        VecGetArray(sol, &xx);
+        // update Pressure solution
         for (unsigned int iz = last_node; iz > first_node - 1; iz--)
         {
-          // Calculate pressure in the inlet of the cell assuming known outlet
+          auto iz_ind = iz - first_node;
           for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
           {
-            auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
             auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-            // update Pressure solution
-            _P_soln->set(node_in, (*_P_soln)(node_out) + (*_DP_soln)(node_out));
+            PetscScalar value = xx[iz_ind * _n_channels + i_ch];
+            _P_soln->set(node_in, value);
           }
         }
+        VecZeroEntries(_amc_pressure_force_rhs);
+        KSPDestroy(&ksploc);
+        VecDestroy(&sol);
       }
     }
     else
@@ -1551,7 +1541,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
               auto dp_in = (*_DP_soln)(node_in);
               auto dp_out = (*_DP_soln)(node_out);
               auto dp_interp = computeInterpolatedValue(dp_out, dp_in, "central_difference");
-              PetscScalar value_v = -1.0 * dp_interp;
+              PetscScalar value_v = -1.0 * dp_interp * S_interp;
               PetscInt row_v = i_ch + _n_channels * iz_ind;
               VecSetValues(_amc_pressure_force_rhs, 1, &row_v, &value_v, ADD_VALUES);
             }
@@ -1567,44 +1557,33 @@ SubChannel1PhaseProblem::computeP(int iblock)
 
       if (_segregated_bool)
       {
-        // KSP ksploc;
-        // PC pc;
-        // Vec sol;
-        // VecDuplicate(_amc_pressure_force_rhs, &sol);
-        // KSPCreate(PETSC_COMM_WORLD, &ksploc);
-        // KSPSetOperators(ksploc, _amc_pressure_force_mat, _amc_pressure_force_mat);
-        // KSPGetPC(ksploc, &pc);
-        // PCSetType(pc, PCJACOBI);
-        // KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
-        // KSPSetFromOptions(ksploc);
-        // KSPSolve(ksploc, _amc_pressure_force_rhs, sol);
-        // PetscScalar * xx;
-        // VecGetArray(sol, &xx);
-        // // update Pressure solution
-        // for (unsigned int iz = last_node; iz > first_node - 1; iz--)
-        // {
-        //   auto iz_ind = iz - first_node;
-        //   for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-        //   {
-        //     auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-        //     PetscScalar value = xx[iz_ind * _n_channels + i_ch];
-        //     _P_soln->set(node_in, value);
-        //   }
-        // }
-        // VecZeroEntries(_amc_pressure_force_rhs);
-        // KSPDestroy(&ksploc);
-        // VecDestroy(&sol);
+        KSP ksploc;
+        PC pc;
+        Vec sol;
+        VecDuplicate(_amc_pressure_force_rhs, &sol);
+        KSPCreate(PETSC_COMM_WORLD, &ksploc);
+        KSPSetOperators(ksploc, _amc_pressure_force_mat, _amc_pressure_force_mat);
+        KSPGetPC(ksploc, &pc);
+        PCSetType(pc, PCJACOBI);
+        KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
+        KSPSetFromOptions(ksploc);
+        KSPSolve(ksploc, _amc_pressure_force_rhs, sol);
+        PetscScalar * xx;
+        VecGetArray(sol, &xx);
+        // update Pressure solution
         for (unsigned int iz = last_node; iz > first_node - 1; iz--)
         {
-          // Calculate pressure in the inlet of the cell assuming known outlet
+          auto iz_ind = iz - first_node;
           for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
           {
-            auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
             auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-            // update Pressure solution
-            _P_soln->set(node_in, (*_P_soln)(node_out) + (*_DP_soln)(node_out));
+            PetscScalar value = xx[iz_ind * _n_channels + i_ch];
+            _P_soln->set(node_in, value);
           }
         }
+        VecZeroEntries(_amc_pressure_force_rhs);
+        KSPDestroy(&ksploc);
+        VecDestroy(&sol);
       }
     }
   }
@@ -1969,105 +1948,42 @@ SubChannel1PhaseProblem::computeh(int iblock)
 
     if (_segregated_bool || (!_monolithic_thermal_bool))
     {
-      // // Assembly the matrix system
-      // KSP ksploc;
-      // PC pc;
-      // Vec sol;
-      // VecDuplicate(_hc_sys_h_rhs, &sol);
-      // KSPCreate(PETSC_COMM_WORLD, &ksploc);
-      // KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat);
-      // KSPGetPC(ksploc, &pc);
-      // PCSetType(pc, PCJACOBI);
-      // KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
-      // KSPSetFromOptions(ksploc);
-      // KSPSolve(ksploc, _hc_sys_h_rhs, sol);
-      // PetscScalar * xx;
-      // VecGetArray(sol, &xx);
+      // Assembly the matrix system
+      KSP ksploc;
+      PC pc;
+      Vec sol;
+      VecDuplicate(_hc_sys_h_rhs, &sol);
+      KSPCreate(PETSC_COMM_WORLD, &ksploc);
+      KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat);
+      KSPGetPC(ksploc, &pc);
+      PCSetType(pc, PCJACOBI);
+      KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
+      KSPSetFromOptions(ksploc);
+      KSPSolve(ksploc, _hc_sys_h_rhs, sol);
+      PetscScalar * xx;
+      VecGetArray(sol, &xx);
 
-      // for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-      // {
-      //   auto iz_ind = iz - first_node;
-      //   for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-      //   {
-      //     auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-
-      //     if (xx[iz_ind * _n_channels + i_ch] < 0)
-      //     {
-      //       _console << "Wij = : " << _Wij << "\n";
-      //       mooseError(name(),
-      //                  " : Calculation of negative Enthalpy h_out = : ",
-      //                  xx[iz_ind * _n_channels + i_ch],
-      //                  " Axial Level= : ",
-      //                  iz);
-      //     }
-      //     _h_soln->set(node_out, xx[iz_ind * _n_channels + i_ch]);
-      //   }
-      // }
-      // KSPDestroy(&ksploc);
-      // VecDestroy(&sol);
       for (unsigned int iz = first_node; iz < last_node + 1; iz++)
       {
-        auto dz = _z_grid[iz] - _z_grid[iz - 1];
-        auto heated_length = _subchannel_mesh.getHeatedLength();
-        auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
+        auto iz_ind = iz - first_node;
         for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
         {
-          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
           auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto mdot_in = (*_mdot_soln)(node_in);
-          auto h_in = (*_h_soln)(node_in); // J/kg
-          auto volume = dz * (*_S_flow_soln)(node_in);
-          auto mdot_out = (*_mdot_soln)(node_out);
-          auto h_out = 0.0;
-          double sumWijh = 0.0;
-          double sumWijPrimeDhij = 0.0;
-          double added_enthalpy;
-          if (_z_grid[iz] > unheated_length_entry &&
-              _z_grid[iz] <= unheated_length_entry + heated_length)
-            added_enthalpy = computeAddedHeatPin(i_ch, iz);
-          else
-            added_enthalpy = 0.0;
 
-          // Calculate sum of crossflow into channel i from channels j around i
-          unsigned int counter = 0;
-          for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
-          {
-            auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-            unsigned int ii_ch = chans.first;
-            // i is always the smallest and first index in the mapping
-            unsigned int jj_ch = chans.second;
-            auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
-            auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
-            // Define donor enthalpy
-            auto h_star = 0.0;
-            if (_Wij(i_gap, iz) > 0.0)
-              h_star = (*_h_soln)(node_in_i);
-            else if (_Wij(i_gap, iz) < 0.0)
-              h_star = (*_h_soln)(node_in_j);
-            // take care of the sign by applying the map, use donor cell
-            sumWijh += _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * h_star;
-            sumWijPrimeDhij +=
-                _WijPrime(i_gap, iz) *
-                (2 * (*_h_soln)(node_in) - (*_h_soln)(node_in_j) - (*_h_soln)(node_in_i));
-            counter++;
-          }
-
-          h_out = (mdot_in * h_in - sumWijh - sumWijPrimeDhij + added_enthalpy +
-                   _TR * _rho_soln->old(node_out) * _h_soln->old(node_out) * volume / _dt) /
-                  (mdot_out + _TR * (*_rho_soln)(node_out)*volume / _dt);
-
-          if (h_out < 0)
+          if (xx[iz_ind * _n_channels + i_ch] < 0)
           {
             _console << "Wij = : " << _Wij << "\n";
             mooseError(name(),
                        " : Calculation of negative Enthalpy h_out = : ",
-                       h_out,
+                       xx[iz_ind * _n_channels + i_ch],
                        " Axial Level= : ",
                        iz);
           }
-          _h_soln->set(node_out, h_out); // J/kg
+          _h_soln->set(node_out, xx[iz_ind * _n_channels + i_ch]);
         }
       }
+      KSPDestroy(&ksploc);
+      VecDestroy(&sol);
     }
   }
 }
@@ -2420,88 +2336,37 @@ SubChannel1PhaseProblem::computeWij(int iblock)
 
     if (_segregated_bool)
     {
-      // // Assembly the matrix system
-      // Vec sol_holder_P;
-      // createPetscVector(sol_holder_P, _block_size * _n_gaps);
-      // Vec sol_holder_W;
-      // createPetscVector(sol_holder_W, _block_size * _n_gaps);
-      // Vec loc_holder_Wij;
-      // createPetscVector(loc_holder_Wij, _block_size * _n_gaps);
-      // populateVectorFromHandle<SolutionHandle *>(
-      //     _prodp, _P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels);
-      // populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-      //     loc_holder_Wij, _Wij, first_node, last_node, _n_gaps);
+      // Assembly the matrix system
+      Vec sol_holder_P;
+      createPetscVector(sol_holder_P, _block_size * _n_gaps);
+      Vec sol_holder_W;
+      createPetscVector(sol_holder_W, _block_size * _n_gaps);
+      Vec loc_holder_Wij;
+      createPetscVector(loc_holder_Wij, _block_size * _n_gaps);
+      populateVectorFromHandle<SolutionHandle *>(
+          _prodp, _P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels);
+      populateVectorFromDense<libMesh::DenseMatrix<Real>>(
+          loc_holder_Wij, _Wij, first_node, last_node, _n_gaps);
 
-      // MatMult(_cmc_sys_Wij_mat, _Wij_vec, sol_holder_W);
-      // VecAXPY(sol_holder_W, -1.0, _cmc_sys_Wij_rhs);
-      // MatMult(_cmc_pressure_force_mat, _prodp, sol_holder_P);
-      // VecAXPY(sol_holder_P, -1.0, _cmc_pressure_force_rhs);
-      // VecAXPY(sol_holder_W, 1.0, sol_holder_P);
-      // PetscScalar * xx;
-      // VecGetArray(sol_holder_W, &xx);
+      MatMult(_cmc_sys_Wij_mat, _Wij_vec, sol_holder_W);
+      VecAXPY(sol_holder_W, -1.0, _cmc_sys_Wij_rhs);
+      MatMult(_cmc_pressure_force_mat, _prodp, sol_holder_P);
+      VecAXPY(sol_holder_P, -1.0, _cmc_pressure_force_rhs);
+      VecAXPY(sol_holder_W, 1.0, sol_holder_P);
+      PetscScalar * xx;
+      VecGetArray(sol_holder_W, &xx);
 
-      // for (unsigned int iz = first_node + 1; iz < last_node + 1; iz++)
-      // {
-      //   auto iz_ind = iz - first_node - 1;
-      //   for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
-      //   {
-      //     _Wij_residual_matrix(i_gap, iz - 1 - iblock * _block_size) = xx[iz_ind * _n_gaps +
-      //     i_gap];
-      //   }
-      // }
-
-      // VecDestroy(&sol_holder_P);
-      // VecDestroy(&sol_holder_W);
-      // VecDestroy(&loc_holder_Wij);
-      unsigned int last_node = (iblock + 1) * _block_size;
-      unsigned int first_node = iblock * _block_size;
-
-      const Real & pitch = _subchannel_mesh.getPitch();
       for (unsigned int iz = first_node + 1; iz < last_node + 1; iz++)
       {
-        auto dz = _z_grid[iz] - _z_grid[iz - 1];
+        auto iz_ind = iz - first_node - 1;
         for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
         {
-          auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-          unsigned int i_ch = chans.first;
-          unsigned int j_ch = chans.second;
-          auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
-          auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-          auto rho_i = (*_rho_soln)(node_in_i);
-          auto rho_j = (*_rho_soln)(node_in_j);
-          auto Si = (*_S_flow_soln)(node_in_i);
-          auto Sj = (*_S_flow_soln)(node_in_j);
-          auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
-          auto Lij = pitch;
-          // total local form loss in the ij direction
-          auto friction_term = _kij * _Wij(i_gap, iz) * std::abs(_Wij(i_gap, iz));
-          auto DPij = (*_P_soln)(node_in_i) - (*_P_soln)(node_in_j);
-          // Figure out donor cell density
-          auto rho_star = 0.0;
-          if (_Wij(i_gap, iz) > 0.0)
-            rho_star = rho_i;
-          else if (_Wij(i_gap, iz) < 0.0)
-            rho_star = rho_j;
-          else
-            rho_star = (rho_i + rho_j) / 2.0;
-
-          auto mass_term_out =
-              (*_mdot_soln)(node_out_i) / Si / rho_i + (*_mdot_soln)(node_out_j) / Sj / rho_j;
-          auto mass_term_in =
-              (*_mdot_soln)(node_in_i) / Si / rho_i + (*_mdot_soln)(node_in_j) / Sj / rho_j;
-          auto term_out = Sij * rho_star * (Lij / dz) * mass_term_out * _Wij(i_gap, iz);
-          auto term_in = Sij * rho_star * (Lij / dz) * mass_term_in * _Wij(i_gap, iz - 1);
-          auto inertia_term = term_out - term_in;
-          auto pressure_term = 2 * std::pow(Sij, 2.0) * DPij * rho_star;
-          auto time_term =
-              _TR * 2.0 * (_Wij(i_gap, iz) - _Wij_old(i_gap, iz)) * Lij * Sij * rho_star / _dt;
-
-          _Wij_residual_matrix(i_gap, iz - 1 - iblock * _block_size) =
-              time_term + friction_term + inertia_term - pressure_term;
+          _Wij_residual_matrix(i_gap, iz - 1 - iblock * _block_size) = xx[iz_ind * _n_gaps + i_gap];
         }
       }
+      VecDestroy(&sol_holder_P);
+      VecDestroy(&sol_holder_W);
+      VecDestroy(&loc_holder_Wij);
     }
   }
 }
