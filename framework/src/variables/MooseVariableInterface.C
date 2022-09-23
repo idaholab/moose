@@ -31,31 +31,8 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
-  // Try the scalar version first
-  std::string variable_name = parameters.getMooseType(var_param_name);
-  if (variable_name == "")
-  {
-    auto vec = parameters.getVecMooseType(var_param_name);
-
-    // Catch the (very unlikely) case where a user specifies
-    // variable = '' (the empty string)
-    // in their input file. This could happen if e.g. something goes
-    // wrong with dollar bracket expression expansion.
-    if (vec.empty())
-      mooseError("Error constructing object '",
-                 _moose_object.name(),
-                 "' while retrieving value for '",
-                 var_param_name,
-                 "' parameter! Did you set ",
-                 var_param_name,
-                 " = '' (empty string) by accident?");
-
-    // When using vector variables, we are only going to use the first one in the list at the
-    // interface level...
-    variable_name = vec[0];
-  }
-
-  _var = &problem.getVariable(tid, variable_name, expected_var_type, expected_var_field_type);
+  _var = &problem.getVariable(
+      tid, parameters.varName(var_param_name), expected_var_type, expected_var_field_type);
   if (!(_variable = dynamic_cast<MooseVariableFE<T> *>(_var)))
     _fv_variable = dynamic_cast<MooseVariableFV<T> *>(_var);
 

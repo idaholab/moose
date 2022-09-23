@@ -35,7 +35,7 @@ public:
 
 protected:
   bool _use_nonlinear;
-  std::shared_ptr<NonlinearSystem> _nl_sys;
+  std::vector<std::shared_ptr<NonlinearSystem>> _nl_sys;
 };
 
 using FVProblem = FEProblem;

@@ -850,6 +850,11 @@ public:
    **/
   bool fromLegacyConstruction() const { return _from_legacy_construction; }
 
+  /**
+   * Determine the actual variable name from the given variable \emph parameter name
+   */
+  std::string varName(const std::string & var_param_name) const;
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();

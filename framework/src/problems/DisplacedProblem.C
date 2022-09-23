@@ -1053,11 +1053,6 @@ DisplacedProblem::refMesh()
   return _ref_mesh;
 }
 
-void
-DisplacedProblem::solve()
-{
-}
-
 bool
 DisplacedProblem::converged()
 {

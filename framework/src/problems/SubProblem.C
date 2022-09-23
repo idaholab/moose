@@ -745,29 +745,33 @@ SubProblem::getAxisymmetricRadialCoord() const
   return mesh().getAxisymmetricRadialCoord();
 }
 
+template <typename T>
 MooseVariableFEBase &
 SubProblem::getVariableHelper(THREAD_ID tid,
                               const std::string & var_name,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type,
-                              const SystemBase & nl,
+                              const std::vector<T> & nls,
                               const SystemBase & aux) const
 {
   // Eventual return value
   MooseVariableFEBase * var = nullptr;
 
+  const auto [var_in_nl, nl_sys_num] = determineNonlinearSystem(var_name);
+
   // First check that the variable is found on the expected system.
   if (expected_var_type == Moose::VarKindType::VAR_ANY)
   {
-    if (nl.hasVariable(var_name))
-      var = &(nl.getVariable(tid, var_name));
+    if (var_in_nl)
+      var = &(nls[nl_sys_num]->getVariable(tid, var_name));
     else if (aux.hasVariable(var_name))
       var = &(aux.getVariable(tid, var_name));
     else
       mooseError("Unknown variable " + var_name);
   }
-  else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR && nl.hasVariable(var_name))
-    var = &(nl.getVariable(tid, var_name));
+  else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR &&
+           nls[nl_sys_num]->hasVariable(var_name))
+    var = &(nls[nl_sys_num]->getVariable(tid, var_name));
   else if (expected_var_type == Moose::VarKindType::VAR_AUXILIARY && aux.hasVariable(var_name))
     var = &(aux.getVariable(tid, var_name));
   else

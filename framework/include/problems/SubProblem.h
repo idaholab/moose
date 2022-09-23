@@ -84,7 +84,6 @@ public:
 
   virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
 
-  virtual void solve() = 0;
   virtual bool converged() = 0;
 
   virtual void onTimestepBegin() = 0;
@@ -284,14 +283,14 @@ public:
    */
   virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
 
-  virtual Assembly & assembly(THREAD_ID tid) = 0;
-  virtual const Assembly & assembly(THREAD_ID tid) const = 0;
+  virtual Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) = 0;
+  virtual const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) const = 0;
 
   /**
-   * Return the nonlinear system object as a base class reference
+   * Return the nonlinear system object as a base class reference given the system number
    */
-  virtual const SystemBase & systemBaseNonlinear() const = 0;
-  virtual SystemBase & systemBaseNonlinear() = 0;
+  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num) const = 0;
+  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num) = 0;
   /**
    * Return the auxiliary system object as a base class reference
    */
@@ -840,11 +839,12 @@ protected:
    * Helper function called by getVariable that handles the logic for
    * checking whether Variables of the requested type are available.
    */
+  template <typename T>
   MooseVariableFieldBase & getVariableHelper(THREAD_ID tid,
                                              const std::string & var_name,
                                              Moose::VarKindType expected_var_type,
                                              Moose::VarFieldType expected_var_field_type,
-                                             const SystemBase & nl,
+                                             const std::vector<T> & nls,
                                              const SystemBase & aux) const;
 
   /**
@@ -937,10 +937,18 @@ protected:
   bool _have_ad_objects;
 
 private:
+  /**
+   * @return whether a given variable name is in the nonlinear systems (reflected the first member
+   * of the returned paired which is a boolean) and if so, what nonlinear system number it is in
+   * (the second member of the returned pair; if the variable is not in the nonlinear systems, then
+   * this will be an invalid unsigned integer)
+   */
+  virtual std::pair<bool, unsigned int>
+  determineNonlinearSystem(const std::string & var_name, bool error_if_not_found = false) const = 0;
+
   /// A container holding pointers to all the functors in our problem
   std::vector<std::multimap<std::string, std::unique_ptr<Moose::FunctorEnvelopeBase>>> _functors;
 
-private:
   /// Lists all functors in the problem
   void showFunctors() const;
 
@@ -1115,7 +1123,5 @@ SubProblem::setCurrentlyComputingResidualAndJacobian(
 
 namespace Moose
 {
-
 void initial_condition(EquationSystems & es, const std::string & system_name);
-
 } // namespace Moose

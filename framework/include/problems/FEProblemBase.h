@@ -328,16 +328,8 @@ public:
     return _uo_jacobian_moose_vars[tid];
   }
 
-  Assembly & assembly(THREAD_ID tid) override
-  {
-    mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
-    return *_assembly[tid];
-  }
-  const Assembly & assembly(THREAD_ID tid) const override
-  {
-    mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
-    return *_assembly[tid];
-  }
+  Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) override;
+  const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) const override;
 
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
@@ -404,11 +396,12 @@ public:
   virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
   virtual void neighborSubdomainSetup(SubdomainID subdomain, THREAD_ID tid);
 
-  virtual void newAssemblyArray(NonlinearSystemBase & nl);
-  virtual void initNullSpaceVectors(const InputParameters & parameters, NonlinearSystemBase & nl);
+  virtual void newAssemblyArray(std::vector<std::shared_ptr<NonlinearSystemBase>> & nl);
+  virtual void initNullSpaceVectors(const InputParameters & parameters,
+                                    std::vector<std::shared_ptr<NonlinearSystemBase>> & nl);
 
   virtual void init() override;
-  virtual void solve() override;
+  void solve(const NonlinearSystemName & nl_sys_name = "0");
 
   ///@{
   /**
@@ -598,16 +591,17 @@ public:
   virtual Sampler & getSampler(const std::string & name, THREAD_ID tid = 0);
 
   // NL /////
-  NonlinearSystemBase & getNonlinearSystemBase() { return *_nl; }
-  const NonlinearSystemBase & getNonlinearSystemBase() const { return *_nl; }
+  NonlinearSystemBase & getNonlinearSystemBase(unsigned int sys_num = 0);
+  const NonlinearSystemBase & getNonlinearSystemBase(unsigned int sys_num = 0) const;
+  NonlinearSystemBase & currentNonlinearSystem();
 
-  virtual const SystemBase & systemBaseNonlinear() const override;
-  virtual SystemBase & systemBaseNonlinear() override;
+  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const override;
+  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) override;
 
   virtual const SystemBase & systemBaseAuxiliary() const override;
   virtual SystemBase & systemBaseAuxiliary() override;
 
-  virtual NonlinearSystem & getNonlinearSystem();
+  virtual NonlinearSystem & getNonlinearSystem(unsigned int sys_num = 0);
 
   /**
    * Canonical method for adding a non-linear variable
@@ -617,20 +611,6 @@ public:
    */
   virtual void
   addVariable(const std::string & var_type, const std::string & var_name, InputParameters & params);
-
-  virtual void addVariable(const std::string & var_name,
-                           const FEType & type,
-                           Real scale_factor,
-                           const std::set<SubdomainID> * const active_subdomains = nullptr);
-  virtual void addArrayVariable(const std::string & var_name,
-                                const FEType & type,
-                                unsigned int components,
-                                const std::vector<Real> & scale_factor,
-                                const std::set<SubdomainID> * const active_subdomains = nullptr);
-  virtual void addScalarVariable(const std::string & var_name,
-                                 Order order,
-                                 Real scale_factor = 1.,
-                                 const std::set<SubdomainID> * const active_subdomains = nullptr);
 
   virtual void addKernel(const std::string & kernel_name,
                          const std::string & name,
@@ -2046,16 +2026,36 @@ protected:
   /// the absolute non linear divergence tolerance
   Real _nl_abs_div_tol = -1;
 
-  std::shared_ptr<NonlinearSystemBase> _nl;
+  /// The nonlinear system names
+  const std::vector<NonlinearSystemName> _nl_sys_names;
+
+  /// The number of nonlinear systems
+  const std::size_t _num_nl_sys;
+
+  /// The nonlinear systems
+  std::vector<std::shared_ptr<NonlinearSystemBase>> _nl;
+
+  /// Map from nonlinear system name to number
+  std::map<NonlinearSystemName, unsigned int> _nl_sys_name_to_num;
+
+  /// Map from nonlinear variable name to nonlinear system number
+  std::map<NonlinearVariableName, unsigned int> _nl_var_to_sys_num;
+
+  /// The current nonlinear system that we are solving
+  NonlinearSystemBase * _current_nl_sys;
+
+  /// The auxiliary system
   std::shared_ptr<AuxiliarySystem> _aux;
 
   Moose::CouplingType _coupling;       ///< Type of variable coupling
   std::unique_ptr<CouplingMatrix> _cm; ///< Coupling matrix for variables.
 
-  // Dimension of the subspace spanned by the vectors with a given prefix
+  /// Dimension of the subspace spanned by the vectors with a given prefix
   std::map<std::string, unsigned int> _subspace_dim;
 
-  std::vector<std::unique_ptr<Assembly>> _assembly;
+  /// The Assembly objects. The first index corresponds to the thread ID and the second index
+  /// corresponds to the nonlinear system number
+  std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
 
   /// functions
   MooseObjectWarehouse<MooseFunctionBase> _functions;
@@ -2316,6 +2316,10 @@ protected:
   bool _using_ad_mat_props;
 
 private:
+  std::pair<bool, unsigned int>
+  determineNonlinearSystem(const std::string & var_name,
+                           bool error_if_not_found = false) const override;
+
   void updateMaxQps();
 
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);
@@ -2445,6 +2449,45 @@ FEProblemBase::addObject(const std::string & type,
   }
 
   return objects;
+}
+
+inline NonlinearSystemBase &
+FEProblemBase::getNonlinearSystemBase(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _nl.size(), "System number greater than the number of nonlinear systems");
+  return *_nl[sys_num];
+}
+
+inline const NonlinearSystemBase &
+FEProblemBase::getNonlinearSystemBase(const unsigned int sys_num) const
+{
+  mooseAssert(sys_num < _nl.size(), "System number greater than the number of nonlinear systems");
+  return *_nl[sys_num];
+}
+
+inline NonlinearSystemBase &
+FEProblemBase::currentNonlinearSystem()
+{
+  mooseAssert(_current_nl_sys, "The nonlinear system is not currently set");
+  return *_current_nl_sys;
+}
+
+inline Assembly &
+FEProblemBase::assembly(const THREAD_ID tid, const unsigned int nl_sys_num)
+{
+  mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
+  mooseAssert(nl_sys_num < _assembly[tid].size(),
+              "Nonlinear system number larger than the assembly container size");
+  return *_assembly[tid, nl_sys_num];
+}
+
+inline const Assembly &
+FEProblemBase::assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const
+{
+  mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
+  mooseAssert(nl_sys_num < _assembly[tid].size(),
+              "Nonlinear system number larger than the assembly container size");
+  return *_assembly[tid, nl_sys_num];
 }
 
 template <>

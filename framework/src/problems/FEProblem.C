@@ -29,17 +29,22 @@ FEProblem::validParams()
 }
 
 FEProblem::FEProblem(const InputParameters & parameters)
-  : FEProblemBase(parameters),
-    _use_nonlinear(getParam<bool>("use_nonlinear")),
-    _nl_sys(_use_nonlinear ? (std::make_shared<NonlinearSystem>(*this, "nl0"))
-                           : (std::make_shared<MooseEigenSystem>(*this, "eigen0")))
+  : FEProblemBase(parameters), _use_nonlinear(getParam<bool>("use_nonlinear"))
 {
-  _nl = _nl_sys;
+  for (const auto i : index_range(_nl_sys_names))
+  {
+    const auto & sys_name = _nl_sys_names[i];
+    auto & nl = _nl[i];
+    nl = _use_nonlinear ? (std::make_shared<NonlinearSystem>(*this, sys_name))
+                        : (std::make_shared<MooseEigenSystem>(*this, sys_name));
+    _nl_sys.push_back(std::dynamic_pointer_cast<NonlinearSystem>(nl));
+  }
+
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
-  newAssemblyArray(*_nl_sys);
+  newAssemblyArray(_nl);
 
-  initNullSpaceVectors(parameters, *_nl_sys);
+  initNullSpaceVectors(parameters, _nl);
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
 

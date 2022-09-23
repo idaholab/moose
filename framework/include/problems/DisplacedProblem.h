@@ -44,11 +44,11 @@ public:
   virtual const MooseMesh & mesh() const override { return _mesh; }
   MooseMesh & refMesh();
 
-  DisplacedSystem & nlSys() { return _displaced_nl; }
+  DisplacedSystem & nlSys(unsigned int sys_num = 0);
   DisplacedSystem & auxSys() { return _displaced_aux; }
 
-  virtual const SystemBase & systemBaseNonlinear() const override { return _displaced_nl; }
-  virtual SystemBase & systemBaseNonlinear() override { return _displaced_nl; }
+  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const override;
+  virtual SystemBase & systemBaseNonlinear(usigned int sys_num = 0) override;
 
   virtual const SystemBase & systemBaseAuxiliary() const override { return _displaced_aux; }
   virtual SystemBase & systemBaseAuxiliary() override { return _displaced_aux; }
@@ -67,7 +67,6 @@ public:
   void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   virtual void init() override;
-  virtual void solve() override;
   virtual bool converged() override;
 
   /**
@@ -286,8 +285,8 @@ public:
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) override;
 
-  Assembly & assembly(THREAD_ID tid) override { return *_assembly[tid]; }
-  const Assembly & assembly(THREAD_ID tid) const override { return *_assembly[tid]; }
+  Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) override;
+  const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) const override;
 
   // Geom Search /////
   virtual void updateGeomSearch(
@@ -352,7 +351,7 @@ protected:
   MooseMesh & _ref_mesh;
   std::vector<std::string> _displacements;
 
-  DisplacedSystem _displaced_nl;
+  std::vector<std::unique_ptr<DisplacedSystem>> _displaced_nl;
   DisplacedSystem _displaced_aux;
 
   const NumericVector<Number> * _nl_solution;
@@ -363,6 +362,59 @@ protected:
   GeometricSearchData _geometric_search_data;
 
 private:
+  std::pair<bool, unsigned int>
+  determineNonlinearSystem(const std::string & var_name,
+                           bool error_if_not_found = false) const override;
+
   friend class UpdateDisplacedMeshThread;
   friend class Restartable;
 };
+
+inline DisplacedSystem &
+DisplacedProblem::nlSys(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _displaced_nl.size(),
+              "System number greater than the number of nonlinear systems");
+  return *_displaced_nl[sys_num];
+}
+
+inline const SystemBase &
+DisplacedProblem::systemBaseNonlinear(const unsigned int sys_num) const
+{
+  mooseAssert(sys_num < _displaced_nl.size(),
+              "System number greater than the number of nonlinear systems");
+  return *_displaced_nl[sys_num];
+}
+
+inline SystemBase &
+DisplacedProblem::systemBaseNonlinear(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _displaced_nl.size(),
+              "System number greater than the number of nonlinear systems");
+  return *_displaced_nl[sys_num];
+}
+
+inline Assembly &
+DisplacedProblem::assembly(const THREAD_ID tid, const unsigned int nl_sys_num)
+{
+  mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
+  mooseAssert(nl_sys_num < _assembly[tid].size(),
+              "Nonlinear system number larger than the assembly container size");
+  return *_assembly[tid, nl_sys_num];
+}
+
+inline const Assembly &
+DisplacedProblem::assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const
+{
+  mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
+  mooseAssert(nl_sys_num < _assembly[tid].size(),
+              "Nonlinear system number larger than the assembly container size");
+  return *_assembly[tid, nl_sys_num];
+}
+
+inline std::pair<bool, unsigned int>
+DisplacedProblem::determineNonlinearSystem(const std::string & var_name,
+                                           const bool error_if_not_found) const
+{
+  return _mproblem.determineNonlinearSystem(var_name, error_if_not_found);
+}
