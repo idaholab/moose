@@ -63,6 +63,7 @@ HeatStructureFromFile3D::buildModel()
   InputParameters pars = _factory.getValidParams(class_name);
   pars.set<THMProblem *>("_thm_problem") = &_sim;
   pars.set<HeatStructureBase *>("_hs") = this;
+  pars.applyParameters(parameters());
   return _factory.create<HeatConductionModel>(class_name, name(), pars, 0);
 }
 

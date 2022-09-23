@@ -38,6 +38,8 @@ HeatStructureBase::validParams()
   InputParameters params = Component2D::validParams();
   params.addPrivateParam<std::string>("component_type", "heat_struct");
   params.addParam<FunctionName>("initial_T", "Initial temperature [K]");
+  params.addParam<Real>(
+      "scaling_factor_temperature", 1.0, "Scaling factor for solid temperature variable.");
   return params;
 }
 
@@ -53,6 +55,7 @@ HeatStructureBase::buildModel()
   InputParameters pars = _factory.getValidParams(class_name);
   pars.set<THMProblem *>("_thm_problem") = &_sim;
   pars.set<HeatStructureBase *>("_hs") = this;
+  pars.applyParameters(parameters());
   return _factory.create<HeatConductionModel>(class_name, name(), pars, 0);
 }
 

@@ -2,7 +2,6 @@
 
 [GlobalParams]
   scaling_factor_1phase = '1. 1.e-2 1.e-4'
-  scaling_factor_temperature = 1e-2
 
   closures = simple_closures
 
