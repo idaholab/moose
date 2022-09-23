@@ -18,11 +18,6 @@ THMProblem::validParams()
   InputParameters params = FEProblem::validParams();
 
   // default scaling factors
-  std::vector<Real> sf_1phase(3, 1.0);
-  params.addParam<std::vector<Real>>(
-      "scaling_factor_1phase",
-      sf_1phase,
-      "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
   std::vector<Real> sf_2phase(7, 1.);
   params.addParam<std::vector<Real>>("scaling_factor_2phase",
                                      sf_2phase,

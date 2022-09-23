@@ -40,6 +40,9 @@ FlowModelSinglePhase::validParams()
   params.addRequiredParam<UserObjectName>("numerical_flux", "Numerical flux user object name");
   params.addRequiredParam<MooseEnum>("rdg_slope_reconstruction",
                                      "Slope reconstruction type for rDG");
+  params.addRequiredParam<std::vector<Real>>(
+      "scaling_factor_1phase",
+      "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
   return params;
 }
 
@@ -48,7 +51,8 @@ registerMooseObject("ThermalHydraulicsApp", FlowModelSinglePhase);
 FlowModelSinglePhase::FlowModelSinglePhase(const InputParameters & params)
   : FlowModel(params),
     _rdg_slope_reconstruction(params.get<MooseEnum>("rdg_slope_reconstruction")),
-    _numerical_flux_name(params.get<UserObjectName>("numerical_flux"))
+    _numerical_flux_name(params.get<UserObjectName>("numerical_flux")),
+    _scaling_factors(getParam<std::vector<Real>>("scaling_factor_1phase"))
 {
 }
 
@@ -63,12 +67,11 @@ FlowModelSinglePhase::addVariables()
   FlowModel::addCommonVariables();
 
   const std::vector<SubdomainName> & subdomains = _flow_channel.getSubdomainNames();
-  std::vector<Real> scaling_factor = _sim.getParam<std::vector<Real>>("scaling_factor_1phase");
 
   // Nonlinear variables
-  _sim.addSimVariable(true, RHOA, _fe_type, subdomains, scaling_factor[0]);
-  _sim.addSimVariable(true, RHOUA, _fe_type, subdomains, scaling_factor[1]);
-  _sim.addSimVariable(true, RHOEA, _fe_type, subdomains, scaling_factor[2]);
+  _sim.addSimVariable(true, RHOA, _fe_type, subdomains, _scaling_factors[0]);
+  _sim.addSimVariable(true, RHOUA, _fe_type, subdomains, _scaling_factors[1]);
+  _sim.addSimVariable(true, RHOEA, _fe_type, subdomains, _scaling_factors[2]);
 
   _solution_vars = {RHOA, RHOUA, RHOEA};
   _derivative_vars = _solution_vars;
