@@ -512,7 +512,7 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
         {
           PetscInt row = i_ch + _n_channels * iz_ind;
           PetscInt col = i_gap + _n_gaps * iz_ind;
-          PetscScalar value = 1.0 * _subchannel_mesh.getCrossflowSign(i_ch, counter);
+          PetscScalar value = _subchannel_mesh.getCrossflowSign(i_ch, counter);
           MatSetValues(_mc_sumWij_mat, 1, &row, 1, &col, &value, INSERT_VALUES);
           counter++;
         }
@@ -522,42 +522,27 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
     MatAssemblyEnd(_mc_sumWij_mat, MAT_FINAL_ASSEMBLY);
     if (_segregated_bool)
     {
-      // Vec loc_prod;
-      // VecDuplicate(_amc_sys_mdot_rhs, &loc_prod);
-      // populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-      //     _Wij_vec, _Wij, first_node, last_node + 1, _n_gaps);
-      // MatMult(_mc_sumWij_mat, _Wij_vec, loc_prod);
-      // PetscScalar * xx;
-      // VecGetArray(loc_prod, &xx);
-      // for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-      // {
-      //   unsigned int iz_ind = iz - first_node;
-      //   for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-      //   {
-      //     auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-      //     PetscScalar value = xx[iz_ind * _n_channels + i_ch];
-      //     _SumWij_soln->set(node_out, value);
-      //   }
-      // }
-      // VecDestroy(&loc_prod);
-
+      Vec loc_prod;
+      Vec loc_Wij;
+      VecDuplicate(_amc_sys_mdot_rhs, &loc_prod);
+      VecDuplicate(_Wij_vec, &loc_Wij);
+      populateVectorFromDense<libMesh::DenseMatrix<Real>>(
+          loc_Wij, _Wij, first_node, last_node + 1, _n_gaps);
+      MatMult(_mc_sumWij_mat, loc_Wij, loc_prod);
+      PetscScalar * xx;
+      VecGetArray(loc_prod, &xx);
       for (unsigned int iz = first_node; iz < last_node + 1; iz++)
       {
+        unsigned int iz_ind = iz - first_node;
         for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
         {
           auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          double sumWij = 0.0;
-          // Calculate sum of crossflow into channel i from channels j around i
-          unsigned int counter = 0;
-          for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
-          {
-            sumWij += _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz);
-            counter++;
-          }
-          // The net crossflow coming out of cell i [kg/sec]
-          _SumWij_soln->set(node_out, sumWij);
+          PetscScalar value = xx[iz_ind * _n_channels + i_ch];
+          _SumWij_soln->set(node_out, value);
         }
       }
+      VecDestroy(&loc_prod);
+      VecDestroy(&loc_Wij);
     }
   }
 }
