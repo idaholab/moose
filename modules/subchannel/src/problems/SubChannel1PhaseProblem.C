@@ -525,7 +525,7 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
       // Vec loc_prod;
       // VecDuplicate(_amc_sys_mdot_rhs, &loc_prod);
       // populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-      //     _Wij_vec, _Wij, first_node, last_node, _n_gaps);
+      //     _Wij_vec, _Wij, first_node, last_node + 1, _n_gaps);
       // MatMult(_mc_sumWij_mat, _Wij_vec, loc_prod);
       // PetscScalar * xx;
       // VecGetArray(loc_prod, &xx);
@@ -540,6 +540,7 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
       //   }
       // }
       // VecDestroy(&loc_prod);
+
       for (unsigned int iz = first_node; iz < last_node + 1; iz++)
       {
         for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
@@ -650,56 +651,32 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
 
     if (_segregated_bool)
     {
-      // KSP ksploc;
-      // PC pc;
-      // Vec sol;
-      // VecDuplicate(_mc_axial_convection_rhs, &sol);
-      // KSPCreate(PETSC_COMM_WORLD, &ksploc);
-      // KSPSetOperators(ksploc, _mc_axial_convection_mat, _mc_axial_convection_mat);
-      // KSPGetPC(ksploc, &pc);
-      // PCSetType(pc, PCJACOBI);
-      // KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
-      // KSPSetFromOptions(ksploc);
-      // KSPSolve(ksploc, _mc_axial_convection_rhs, sol);
-      // PetscScalar * xx;
-      // VecGetArray(sol, &xx);
-      // for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-      // {
-      //   auto iz_ind = iz - first_node;
-      //   for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-      //   {
-      //     auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-      //     PetscScalar value = xx[iz_ind * _n_channels + i_ch];
-      //     _mdot_soln->set(node_out, value);
-      //   }
-      // }
-      // VecZeroEntries(_mc_axial_convection_rhs);
-      // KSPDestroy(&ksploc);
-      // VecDestroy(&sol);
+      KSP ksploc;
+      PC pc;
+      Vec sol;
+      VecDuplicate(_mc_axial_convection_rhs, &sol);
+      KSPCreate(PETSC_COMM_WORLD, &ksploc);
+      KSPSetOperators(ksploc, _mc_axial_convection_mat, _mc_axial_convection_mat);
+      KSPGetPC(ksploc, &pc);
+      PCSetType(pc, PCJACOBI);
+      KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit);
+      KSPSetFromOptions(ksploc);
+      KSPSolve(ksploc, _mc_axial_convection_rhs, sol);
+      PetscScalar * xx;
+      VecGetArray(sol, &xx);
       for (unsigned int iz = first_node; iz < last_node + 1; iz++)
       {
-        auto dz = _z_grid[iz] - _z_grid[iz - 1];
+        auto iz_ind = iz - first_node;
         for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
         {
-          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
           auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto volume = dz * (*_S_flow_soln)(node_in);
-          auto time_term = _TR * ((*_rho_soln)(node_out)-_rho_soln->old(node_out)) * volume / _dt;
-          // Wij positive out of i into j;
-          auto mdot_out = (*_mdot_soln)(node_in) - (*_SumWij_soln)(node_out)-time_term;
-          if (mdot_out < 0)
-          {
-            _console << "Wij = : " << _Wij << "\n";
-            mooseError(name(),
-                       " : Calculation of negative mass flow mdot_out = : ",
-                       mdot_out,
-                       " Axial Level= : ",
-                       iz,
-                       " - Implicit solves are required for recirculating flow.");
-          }
-          _mdot_soln->set(node_out, mdot_out); // kg/sec
+          PetscScalar value = xx[iz_ind * _n_channels + i_ch];
+          _mdot_soln->set(node_out, value);
         }
       }
+      VecZeroEntries(_mc_axial_convection_rhs);
+      KSPDestroy(&ksploc);
+      VecDestroy(&sol);
     }
   }
 }
@@ -803,11 +780,14 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
     MatAssemblyEnd(_amc_turbulent_cross_flows_mat, MAT_FINAL_ASSEMBLY);
     if (_segregated_bool)
     {
+      // Vec Wij_vec_loc;
+      // VecDuplicate(_amc_turbulent_cross_flows_rhs, &Wij_vec_loc);
       // populateVectorFromHandle<SolutionHandle *>(
       //     _prod, _mdot_soln, first_node, last_node, _n_channels);
-      // MatMult(_amc_turbulent_cross_flows_mat, _prod, _Wij_vec);
+      // MatMult(_amc_turbulent_cross_flows_mat, _prod, Wij_vec_loc);
+      // VecAXPY(Wij_vec_loc, -1.0, _amc_turbulent_cross_flows_rhs);
       // PetscScalar * xx;
-      // VecGetArray(_Wij_vec, &xx);
+      // VecGetArray(Wij_vec_loc, &xx);
       // for (unsigned int iz = first_node; iz < last_node + 1; iz++)
       // {
       //   auto iz_ind = iz - first_node;
@@ -816,6 +796,8 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
       //     _WijPrime(i_gap, iz) = xx[iz_ind * _n_gaps + i_gap];
       //   }
       // }
+      // VecDestroy(&Wij_vec_loc);
+
       for (unsigned int iz = first_node; iz < last_node + 1; iz++)
       {
         auto dz = _z_grid[iz] - _z_grid[iz - 1];
