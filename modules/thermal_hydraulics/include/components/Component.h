@@ -362,13 +362,6 @@ protected:
   void checkMutuallyExclusiveParameters(const std::vector<std::string> & params,
                                         bool need_one_specified = true) const;
 
-  /**
-   * Logs an error for the model type not being implemented for the component
-   *
-   * @param[in] model   model type
-   */
-  void logModelNotImplementedError(const THM::FlowModelID & model) const;
-
   /// Pointer to a parent component (used in composed components)
   Component * _parent;
 

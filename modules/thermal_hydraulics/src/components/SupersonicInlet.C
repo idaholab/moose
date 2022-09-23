@@ -33,7 +33,7 @@ SupersonicInlet::check() const
 {
   FlowBoundary1Phase::check();
 
-  logModelNotImplementedError(_flow_model_id);
+  logError("This component is deprecated.");
 }
 
 void

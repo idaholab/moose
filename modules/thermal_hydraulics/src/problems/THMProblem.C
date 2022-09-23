@@ -17,10 +17,6 @@ THMProblem::validParams()
 {
   InputParameters params = FEProblem::validParams();
 
-  // default scaling factors
-  params.addParam<Real>(
-      "scaling_factor_temperature", 1.0, "Scaling factor for solid temperature variable.");
-
   params.addParam<bool>("2nd_order_mesh", false, "Use 2nd order elements in the mesh");
 
   params.addParam<FileName>("initial_from_file",
