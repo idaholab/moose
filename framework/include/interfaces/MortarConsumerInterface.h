@@ -45,6 +45,11 @@ public:
    */
   SubdomainID primarySubdomain() const { return _primary_subdomain_id; }
 
+  /**
+   * Returns the secondary lower dimensional subdomain id
+   */
+  SubdomainID secondarySubdomain() const { return _secondary_subdomain_id; }
+
 protected:
   const std::set<SubdomainID> & getHigherDimSubdomainIDs() const
   {
