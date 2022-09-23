@@ -167,43 +167,6 @@ Component::checkMutuallyExclusiveParameters(const std::vector<std::string> & par
 }
 
 void
-Component::checkRDGRequiredParameter(const std::string & param) const
-{
-  if (!_pars.isParamSetByUser(param))
-    logError("The parameter '", param, "' must be provided when using rDG");
-}
-
-void
-Component::check1PhaseRequiredParameter(const std::string & param) const
-{
-  if (!isParamValid(param))
-    logError("The parameter '", param, "' must be provided for single-phase flow");
-}
-
-void
-Component::check2PhaseRequiredParameter(const std::string & param) const
-{
-  if (!isParamValid(param))
-    logError("The parameter '", param, "' must be provided for two-phase flow");
-}
-
-void
-Component::check7EqnRequiredParameter(const std::string & param) const
-{
-  if (!isParamValid(param))
-    logError("The parameter '", param, "' must be provided for the 7-equation model");
-}
-
-void
-Component::check7EqnNCGRequiredParameter(const std::string & param) const
-{
-  if (!isParamValid(param))
-    logError("The parameter '",
-             param,
-             "' must be provided for the 7-equation model with non-condensable gas");
-}
-
-void
 Component::logModelNotImplementedError(const THM::FlowModelID & model) const
 {
   if (model == THM::FM_SINGLE_PHASE)
