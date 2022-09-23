@@ -739,11 +739,11 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
           PetscScalar value_tl = base_value / (Si_in + Sj_in);
           PetscInt row = i_gap + _n_gaps * iz_ind;
 
-          PetscInt col_ich = i_ch + _n_channels * iz_ind;
+          PetscInt col_ich = i_ch + _n_channels * (iz_ind - 1);
           MatSetValues(
               _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_ich, &value_tl, INSERT_VALUES);
 
-          PetscInt col_jch = j_ch + _n_channels * iz_ind;
+          PetscInt col_jch = j_ch + _n_channels * (iz_ind - 1);
           MatSetValues(
               _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_jch, &value_tl, INSERT_VALUES);
         }
@@ -752,11 +752,11 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
         PetscScalar value_bl = base_value / (Si_out + Sj_out);
         PetscInt row = i_gap + _n_gaps * iz_ind;
 
-        PetscInt col_ich = i_ch + _n_channels * (iz_ind + 1);
+        PetscInt col_ich = i_ch + _n_channels * iz_ind;
         MatSetValues(
             _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_ich, &value_bl, INSERT_VALUES);
 
-        PetscInt col_jch = j_ch + _n_channels * (iz_ind + 1);
+        PetscInt col_jch = j_ch + _n_channels * iz_ind;
         MatSetValues(
             _amc_turbulent_cross_flows_mat, 1, &row, 1, &col_jch, &value_bl, INSERT_VALUES);
       }
@@ -765,50 +765,26 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
     MatAssemblyEnd(_amc_turbulent_cross_flows_mat, MAT_FINAL_ASSEMBLY);
     if (_segregated_bool)
     {
-      // Vec Wij_vec_loc;
-      // VecDuplicate(_amc_turbulent_cross_flows_rhs, &Wij_vec_loc);
-      // populateVectorFromHandle<SolutionHandle *>(
-      //     _prod, _mdot_soln, first_node, last_node, _n_channels);
-      // MatMult(_amc_turbulent_cross_flows_mat, _prod, Wij_vec_loc);
-      // VecAXPY(Wij_vec_loc, -1.0, _amc_turbulent_cross_flows_rhs);
-      // PetscScalar * xx;
-      // VecGetArray(Wij_vec_loc, &xx);
-      // for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-      // {
-      //   auto iz_ind = iz - first_node;
-      //   for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
-      //   {
-      //     _WijPrime(i_gap, iz) = xx[iz_ind * _n_gaps + i_gap];
-      //   }
-      // }
-      // VecDestroy(&Wij_vec_loc);
-
+      Vec loc_prod;
+      Vec loc_Wij;
+      VecDuplicate(_amc_sys_mdot_rhs, &loc_prod);
+      VecDuplicate(_Wij_vec, &loc_Wij);
+      populateVectorFromHandle<SolutionHandle *>(
+          loc_prod, _mdot_soln, first_node, last_node, _n_channels);
+      MatMult(_amc_turbulent_cross_flows_mat, loc_prod, loc_Wij);
+      VecAXPY(loc_Wij, -1.0, _amc_turbulent_cross_flows_rhs);
+      PetscScalar * xx;
+      VecGetArray(loc_Wij, &xx);
       for (unsigned int iz = first_node; iz < last_node + 1; iz++)
       {
-        auto dz = _z_grid[iz] - _z_grid[iz - 1];
+        auto iz_ind = iz - first_node;
         for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
         {
-          auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-          unsigned int i_ch = chans.first;
-          unsigned int j_ch = chans.second;
-          auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
-          auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-          auto Si_in = (*_S_flow_soln)(node_in_i);
-          auto Sj_in = (*_S_flow_soln)(node_in_j);
-          auto Si_out = (*_S_flow_soln)(node_out_i);
-          auto Sj_out = (*_S_flow_soln)(node_out_j);
-          // crossflow area between channels i,j (dz*gap_width)
-          auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
-          // Calculation of Turbulent Crossflow
-          _WijPrime(i_gap, iz) =
-              _beta * 0.5 *
-              (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
-               ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out)) *
-              Sij;
+          _WijPrime(i_gap, iz) = xx[iz_ind * _n_gaps + i_gap];
         }
       }
+      VecDestroy(&loc_prod);
+      VecDestroy(&loc_Wij);
     }
   }
 }
