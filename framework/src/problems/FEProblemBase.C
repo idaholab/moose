@@ -2425,6 +2425,8 @@ FEProblemBase::addVariable(const std::string & var_type,
   if (_displaced_problem)
     // MooseObjects need to be unique so change the name here
     _displaced_problem->addVariable(var_type, var_name, params);
+
+  _nl_var_to_sys_num[var_name] = nl_sys_num;
 }
 
 std::pair<bool, unsigned int>
@@ -2451,8 +2453,7 @@ FEProblemBase::addKernel(const std::string & kernel_name,
                          const std::string & name,
                          InputParameters & parameters)
 {
-  const auto [var_in_nl, nl_sys_num] =
-      determineNonlinearSystem(parameters.varName("variable"), true);
+  const auto nl_sys_num = determineNonlinearSystem(parameters.varName("variable"), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2486,8 +2487,7 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name,
                               const std::string & name,
                               InputParameters & parameters)
 {
-  const auto [var_in_nl, nl_sys_num] =
-      determineNonlinearSystem(parameters.varName("variable"), true);
+  const auto nl_sys_num = determineNonlinearSystem(parameters.varName("variable"), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2517,10 +2517,11 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
                                const std::string & name,
                                InputParameters & parameters)
 {
+  const auto nl_sys_num = determineNonlinearSystem(parameters.varName("variable"), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
   }
   else
   {
@@ -2535,10 +2536,10 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  _nl->addScalarKernel(kernel_name, name, parameters);
+  _nl[nl_sys_num]->addScalarKernel(kernel_name, name, parameters);
 }
 
 void
@@ -2546,10 +2547,11 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
+  const auto nl_sys_num = determineNonlinearSystem(parameters.varName("variable"), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
     const auto & disp_names = _displaced_problem->getDisplacementVarNames();
     parameters.set<std::vector<VariableName>>("displacements") =
         std::vector<VariableName>(disp_names.begin(), disp_names.end());
@@ -2568,10 +2570,10 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  _nl->addBoundaryCondition(bc_name, name, parameters);
+  _nl[nl_sys_num]->addBoundaryCondition(bc_name, name, parameters);
 }
 
 void
@@ -2581,10 +2583,31 @@ FEProblemBase::addConstraint(const std::string & c_name,
 {
   _has_constraints = true;
 
+  auto determine_var_param_name = [&parameters]()
+  {
+    if (parameters.isParamRequired("variable"))
+      return "variable";
+    else
+    {
+      // must be a mortar constraint
+      const bool has_secondary_var = parameters.isParamValid("secondary_variable");
+      const bool has_primary_var = parameters.isParamValid("primary_variable");
+      if (!has_secondary_var && !has_primary_var)
+        mooseError(
+            "Either a 'secondary_variable' or 'primary_variable' parameter must be supplied for '",
+            parameters.get<std::string>("_object_name"),
+            "'");
+      return has_secondary_var ? "secondary_variable" : "primary_variable";
+    }
+  };
+
+  const auto nl_sys_num =
+      determineNonlinearSystem(parameters.varName(determine_var_param_name()), true).second;
+
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
     _reinit_displaced_face = true;
   }
   else
@@ -2594,33 +2617,10 @@ FEProblemBase::addConstraint(const std::string & c_name,
       parameters.set<bool>("use_displaced_mesh") = false;
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-  {
-    // If this constraint is a mortar constraint, it's possible that the LM variable (e.g.
-    // "variable") is not used. In this case let's check to see whether the secondary variable (the
-    // variable with dofs directly on the mortar segment elements) is in the nonlinear system
-    if (parameters.have_parameter<VariableName>("secondary_variable"))
-    {
-      if (!_nl->hasVariable(parameters.get<VariableName>("secondary_variable")))
-        mooseError(name,
-                   " is using variable '",
-                   parameters.get<NonlinearVariableName>("variable"),
-                   "' and secondary_variable '",
-                   parameters.get<VariableName>("secondary_variable"),
-                   "'. Neither of these variables are in the nonlinear system!");
-    }
-    else
-      mooseError(name,
-                 ": Cannot add Constraint for variable ",
-                 parameters.get<NonlinearVariableName>("variable"),
-                 ", it is not a nonlinear variable!");
-  }
-
-  _nl->addConstraint(c_name, name, parameters);
+  _nl[nl_sys_num]->addConstraint(c_name, name, parameters);
 }
 
 void
@@ -2745,7 +2745,7 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
-    parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->nlSys();
+    parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->nlSys(0);
     if (!parameters.get<std::vector<BoundaryName>>("boundary").empty())
       _reinit_displaced_face = true;
     else
@@ -2765,7 +2765,7 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
 
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _aux.get();
-    parameters.set<SystemBase *>("_nl_sys") = _nl.get();
+    parameters.set<SystemBase *>("_nl_sys") = _nl[0].get();
   }
 
   _aux->addKernel(kernel_name, name, parameters);
@@ -2805,10 +2805,11 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
                               const std::string & name,
                               InputParameters & parameters)
 {
+  const auto nl_sys_num = determineNonlinearSystem(parameters.varName("variable"), true).second;
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
     _reinit_displaced_elem = true;
   }
   else
@@ -2824,10 +2825,10 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  _nl->addDiracKernel(kernel_name, name, parameters);
+  _nl[nl_sys_num]->addDiracKernel(kernel_name, name, parameters);
 }
 
 // DGKernels ////
@@ -2838,11 +2839,12 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
                            InputParameters & parameters)
 {
   bool use_undisplaced_reference_points = parameters.get<bool>("_use_undisplaced_reference_points");
+  const auto nl_sys_num = determineNonlinearSystem(parameters.varName("variable"), true).second;
 
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
     _reinit_displaced_neighbor = true;
 
     if (use_undisplaced_reference_points)
@@ -2883,10 +2885,10 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  _nl->addDGKernel(dg_kernel_name, name, parameters);
+  _nl[nl_sys_num]->addDGKernel(dg_kernel_name, name, parameters);
 
   _has_internal_edge_residual_objects = true;
 }
@@ -2923,11 +2925,12 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
                                   InputParameters & parameters)
 {
   bool use_undisplaced_reference_points = parameters.get<bool>("_use_undisplaced_reference_points");
+  const auto nl_sys_num = determineNonlinearSystem(parameters.varName("variable"), true).second;
 
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
     _reinit_displaced_neighbor = true;
 
     if (use_undisplaced_reference_points)
@@ -2968,10 +2971,10 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
     }
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  _nl->addInterfaceKernel(interface_kernel_name, name, parameters);
+  _nl[nl_sys_num]->addInterfaceKernel(interface_kernel_name, name, parameters);
 
   _has_internal_edge_residual_objects = true;
 }
@@ -3039,7 +3042,8 @@ FEProblemBase::projectSolution()
   Threads::parallel_reduce(elem_range, cic);
 
   // Need to close the solution vector here so that boundary ICs take precendence
-  _nl->solution().close();
+  for (auto & nl : _nl)
+    nl->solution().close();
   _aux->solution().close();
 
   // now run boundary-restricted initial conditions
@@ -3047,7 +3051,8 @@ FEProblemBase::projectSolution()
   ComputeBoundaryInitialConditionThread cbic(*this);
   Threads::parallel_reduce(bnd_nodes, cbic);
 
-  _nl->solution().close();
+  for (auto & nl : _nl)
+    nl->solution().close();
   _aux->solution().close();
 
   // Also, load values into the SCALAR dofs
@@ -3074,8 +3079,11 @@ FEProblemBase::projectSolution()
     }
   }
 
-  _nl->solution().close();
-  _nl->solution().localize(*_nl->system().current_local_solution, _nl->dofMap().get_send_list());
+  for (auto & nl : _nl)
+  {
+    nl->solution().close();
+    nl->solution().localize(*nl->system().current_local_solution, nl->dofMap().get_send_list());
+  }
 
   _aux->solution().close();
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
@@ -3089,13 +3097,15 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
   Threads::parallel_reduce(elem_range, cic);
 
   // Need to close the solution vector here so that boundary ICs take precendence
-  _nl->solution().close();
+  for (auto & nl : _nl)
+    nl->solution().close();
   _aux->solution().close();
 
   ComputeBoundaryInitialConditionThread cbic(*this);
   Threads::parallel_reduce(bnd_nodes, cbic);
 
-  _nl->solution().close();
+  for (auto & nl : _nl)
+    nl->solution().close();
   _aux->solution().close();
 
   // Also, load values into the SCALAR dofs
@@ -3122,8 +3132,11 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
     }
   }
 
-  _nl->solution().close();
-  _nl->solution().localize(*_nl->system().current_local_solution, _nl->dofMap().get_send_list());
+  for (auto & nl : _nl)
+  {
+    nl->solution().close();
+    nl->solution().localize(*_nl->system().current_local_solution, _nl->dofMap().get_send_list());
+  }
 
   _aux->solution().close();
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
@@ -3518,11 +3531,16 @@ FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addObjectParamsHelper(InputParameters & parameters)
 {
+  const auto nl_sys_num =
+      parameters.isParamValid("variable")
+          ? determineNonlinearSystem(parameters.varName("variable"), true).second
+          : (unsigned int)0;
+
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys(nl_sys_num);
   }
   else
   {
@@ -3534,7 +3552,7 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters)
       parameters.set<bool>("use_displaced_mesh") = false;
 
     parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 }
 
@@ -4170,7 +4188,8 @@ FEProblemBase::updateActiveObjects()
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    _nl->updateActive(tid);
+    for (auto & nl : _nl)
+      nl->updateActive(tid);
     _aux->updateActive(tid);
     _indicators.updateActive(tid);
     _internal_side_indicators.updateActive(tid);
@@ -4227,17 +4246,23 @@ FEProblemBase::addDamper(const std::string & damper_name,
                          const std::string & name,
                          InputParameters & parameters)
 {
+  const auto nl_sys_num =
+      parameters.isParamValid("variable")
+          ? determineNonlinearSystem(parameters.varName("variable"), true).second
+          : (unsigned int)0;
+
   parameters.set<SubProblem *>("_subproblem") = this;
-  parameters.set<SystemBase *>("_sys") = _nl.get();
+  parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
 
   _has_dampers = true;
-  _nl->addDamper(damper_name, name, parameters);
+  _nl[nl_sys_num]->addDamper(damper_name, name, parameters);
 }
 
 void
 FEProblemBase::setupDampers()
 {
-  _nl->setupDampers();
+  for (auto & nl : _nl)
+    nl->setupDampers();
 }
 
 void
@@ -4730,7 +4755,7 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
 bool
 FEProblemBase::hasVariable(const std::string & var_name) const
 {
-  if (_nl->hasVariable(var_name))
+  if (determineNonlinearSystem(var_name).first)
     return true;
   else if (_aux->hasVariable(var_name))
     return true;
@@ -4744,14 +4769,15 @@ FEProblemBase::getVariable(THREAD_ID tid,
                            Moose::VarKindType expected_var_type,
                            Moose::VarFieldType expected_var_field_type) const
 {
-  return getVariableHelper(tid, var_name, expected_var_type, expected_var_field_type, *_nl, *_aux);
+  return getVariableHelper(tid, var_name, expected_var_type, expected_var_field_type, _nl, *_aux);
 }
 
 MooseVariable &
 FEProblemBase::getStandardVariable(THREAD_ID tid, const std::string & var_name)
 {
-  if (_nl->hasVariable(var_name))
-    return _nl->getFieldVariable<Real>(tid, var_name);
+  const auto [var_in_nl, nl_sys_num] = determineNonlinearSystem(var_name);
+  if (var_in_nl)
+    return _nl[nl_sys_num]->getFieldVariable<Real>(tid, var_name);
   else if (!_aux->hasVariable(var_name))
     mooseError("Unknown variable " + var_name);
 
@@ -4761,8 +4787,9 @@ FEProblemBase::getStandardVariable(THREAD_ID tid, const std::string & var_name)
 MooseVariableFieldBase &
 FEProblemBase::getActualFieldVariable(THREAD_ID tid, const std::string & var_name)
 {
-  if (_nl->hasVariable(var_name))
-    return _nl->getActualFieldVariable<Real>(tid, var_name);
+  const auto [var_in_nl, nl_sys_num] = determineNonlinearSystem(var_name);
+  if (var_in_nl)
+    return _nl[nl_sys_num]->getActualFieldVariable<Real>(tid, var_name);
   else if (!_aux->hasVariable(var_name))
     mooseError("Unknown variable " + var_name);
 
@@ -4772,8 +4799,9 @@ FEProblemBase::getActualFieldVariable(THREAD_ID tid, const std::string & var_nam
 VectorMooseVariable &
 FEProblemBase::getVectorVariable(THREAD_ID tid, const std::string & var_name)
 {
-  if (_nl->hasVariable(var_name))
-    return _nl->getFieldVariable<RealVectorValue>(tid, var_name);
+  const auto [var_in_nl, nl_sys_num] = determineNonlinearSystem(var_name);
+  if (var_in_nl)
+    return _nl[nl_sys_num]->getFieldVariable<RealVectorValue>(tid, var_name);
   else if (!_aux->hasVariable(var_name))
     mooseError("Unknown variable " + var_name);
 
@@ -4783,8 +4811,9 @@ FEProblemBase::getVectorVariable(THREAD_ID tid, const std::string & var_name)
 ArrayMooseVariable &
 FEProblemBase::getArrayVariable(THREAD_ID tid, const std::string & var_name)
 {
-  if (_nl->hasVariable(var_name))
-    return _nl->getFieldVariable<RealEigenVector>(tid, var_name);
+  const auto [var_in_nl, nl_sys_num] = determineNonlinearSystem(var_name);
+  if (var_in_nl)
+    return _nl[nl_sys_num]->getFieldVariable<RealEigenVector>(tid, var_name);
   else if (!_aux->hasVariable(var_name))
     mooseError("Unknown variable " + var_name);
 
@@ -4794,7 +4823,7 @@ FEProblemBase::getArrayVariable(THREAD_ID tid, const std::string & var_name)
 bool
 FEProblemBase::hasScalarVariable(const std::string & var_name) const
 {
-  if (_nl->hasScalarVariable(var_name))
+  if (determineNonlinearSystem(var_name).first)
     return true;
   else if (_aux->hasScalarVariable(var_name))
     return true;
@@ -4805,8 +4834,9 @@ FEProblemBase::hasScalarVariable(const std::string & var_name) const
 MooseVariableScalar &
 FEProblemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
 {
-  if (_nl->hasScalarVariable(var_name))
-    return _nl->getScalarVariable(tid, var_name);
+  const auto [var_in_nl, nl_sys_num] = determineNonlinearSystem(var_name);
+  if (var_in_nl)
+    return _nl[nl_sys_num]->getScalarVariable(tid, var_name);
   else if (_aux->hasScalarVariable(var_name))
     return _aux->getScalarVariable(tid, var_name);
   else
@@ -4816,8 +4846,9 @@ FEProblemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
 System &
 FEProblemBase::getSystem(const std::string & var_name)
 {
-  if (_nl->hasVariable(var_name))
-    return _nl->system();
+  const auto [var_in_nl, nl_sys_num] = determineNonlinearSystem(var_name);
+  if (var_in_nl)
+    return _nl[nl_sys_num]->system();
   else if (_aux->hasVariable(var_name))
     return _aux->system();
   else
