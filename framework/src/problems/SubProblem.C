@@ -46,7 +46,6 @@ SubProblem::validParams()
 SubProblem::SubProblem(const InputParameters & parameters)
   : Problem(parameters),
     _factory(_app.getFactory()),
-    _nonlocal_cm(),
     _requires_nonlocal_coupling(false),
     _default_ghosting(getParam<bool>("default_ghosting")),
     _currently_computing_jacobian(false),

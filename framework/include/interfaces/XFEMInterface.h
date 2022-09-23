@@ -94,7 +94,9 @@ public:
   /**
    * Method to update the mesh due to modified cut definitions
    */
-  virtual bool update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux) = 0;
+  virtual bool update(Real time,
+                      const std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
+                      AuxiliarySystem & aux) = 0;
 
   /**
    * Initialize the solution on newly created nodes

@@ -144,9 +144,12 @@ public:
    */
   void clearGeomMarkedElems();
 
-  virtual bool update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux) override;
+  virtual bool update(Real time,
+                      const std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
+                      AuxiliarySystem & aux) override;
 
-  virtual void initSolution(NonlinearSystemBase & nl, AuxiliarySystem & aux) override;
+  virtual void initSolution(const std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
+                            AuxiliarySystem & aux) override;
 
   void buildEFAMesh();
   bool markCuts(Real time);
@@ -156,7 +159,8 @@ public:
   bool markCutFacesByState();
   bool initCutIntersectionEdge(
       Point cut_origin, RealVectorValue cut_normal, Point & edge_p1, Point & edge_p2, Real & dist);
-  bool cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux);
+  bool cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
+                      AuxiliarySystem & aux);
 
   /**
    * Potentially heal the mesh by merging some of the pairs

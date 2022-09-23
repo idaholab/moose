@@ -9,7 +9,6 @@
 
 // MOOSE includes
 #include "ProjectMaterialProperties.h"
-#include "NonlinearSystem.h"
 #include "Problem.h"
 #include "FEProblem.h"
 #include "MaterialPropertyStorage.h"
@@ -23,7 +22,6 @@
 ProjectMaterialProperties::ProjectMaterialProperties(
     bool refine,
     FEProblemBase & fe_problem,
-    NonlinearSystemBase & sys,
     std::vector<std::shared_ptr<MaterialData>> & material_data,
     std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
     MaterialPropertyStorage & material_props,
@@ -32,7 +30,6 @@ ProjectMaterialProperties::ProjectMaterialProperties(
   : ThreadedElementLoop<ConstElemPointerRange>(fe_problem),
     _refine(refine),
     _fe_problem(fe_problem),
-    _sys(sys),
     _material_data(material_data),
     _bnd_material_data(bnd_material_data),
     _material_props(material_props),
@@ -50,7 +47,6 @@ ProjectMaterialProperties::ProjectMaterialProperties(ProjectMaterialProperties &
   : ThreadedElementLoop<ConstElemPointerRange>(x, split),
     _refine(x._refine),
     _fe_problem(x._fe_problem),
-    _sys(x._sys),
     _material_data(x._material_data),
     _bnd_material_data(x._bnd_material_data),
     _material_props(x._material_props),

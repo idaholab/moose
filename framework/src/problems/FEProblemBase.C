@@ -360,6 +360,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   for (const auto i : index_range(_nl_sys_names))
     _nl_sys_name_to_num[_nl_sys_names[i]] = i;
+  _nonlocal_cm.resize(_nl_sys_names.size());
+  _cm.resize(_nl_sys_names.size());
 
   _time = 0.0;
   _time_old = 0.0;
@@ -2127,7 +2129,7 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
   _aux->prepareNeighbor(tid);
 
   // Resizes Re and Ke
-  _assembly[tid]->prepareNeighbor();
+  _assembly[tid][_current_nl_sys->number()]->prepareNeighbor();
 
   // Compute the values of each variable at the points
   for (auto & nl : _nl)
@@ -2154,7 +2156,7 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
   _aux->prepareNeighbor(tid);
 
   // Resizes Re and Ke
-  _assembly[tid]->prepareNeighbor();
+  _assembly[tid][_current_nl_sys->number()]->prepareNeighbor();
 
   // Compute the values of each variable at the points
   for (auto & nl : _nl)
@@ -3355,8 +3357,8 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
 {
   if (hasActiveMaterialProperties(tid))
   {
-    auto && elem = _assembly[tid]->elem();
-    unsigned int n_points = _assembly[tid]->qRule()->n_points();
+    auto && elem = _assembly[tid][_current_nl_sys->number()]->elem();
+    unsigned int n_points = _assembly[tid][_current_nl_sys->number()]->qRule()->n_points();
     _material_data[tid]->resize(n_points);
 
     // Only swap if requested
@@ -3379,9 +3381,9 @@ FEProblemBase::reinitMaterialsFace(const SubdomainID blk_id,
 {
   if (hasActiveMaterialProperties(tid))
   {
-    auto && elem = _assembly[tid]->elem();
-    unsigned int side = _assembly[tid]->side();
-    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    auto && elem = _assembly[tid][_current_nl_sys->number()]->elem();
+    unsigned int side = _assembly[tid][_current_nl_sys->number()]->side();
+    unsigned int n_points = _assembly[tid][_current_nl_sys->number()]->qRuleFace()->n_points();
 
     _bnd_material_data[tid]->resize(n_points);
 
@@ -3411,15 +3413,16 @@ FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
     // NOTE: this will not work with h-adaptivity
     // lindsayad: why not?
 
-    const Elem * neighbor = _assembly[tid]->neighbor();
-    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
+    const Elem * neighbor = _assembly[tid][_current_nl_sys->number()]->neighbor();
+    unsigned int neighbor_side =
+        neighbor->which_neighbor_am_i(_assembly[tid][_current_nl_sys->number()]->elem());
 
     mooseAssert(neighbor, "neighbor should be non-null");
     mooseAssert(blk_id == neighbor->subdomain_id(),
                 "The provided blk_id " << blk_id << " and neighbor subdomain ID "
                                        << neighbor->subdomain_id() << " do not match.");
 
-    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    unsigned int n_points = _assembly[tid][_current_nl_sys->number()]->qRuleFace()->n_points();
     _neighbor_material_data[tid]->resize(n_points);
 
     // Only swap if requested
@@ -3446,9 +3449,9 @@ FEProblemBase::reinitMaterialsBoundary(const BoundaryID boundary_id,
 {
   if (hasActiveMaterialProperties(tid))
   {
-    auto && elem = _assembly[tid]->elem();
-    unsigned int side = _assembly[tid]->side();
-    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    auto && elem = _assembly[tid][_current_nl_sys->number()]->elem();
+    unsigned int side = _assembly[tid][_current_nl_sys->number()]->side();
+    unsigned int n_points = _assembly[tid][_current_nl_sys->number()]->qRuleFace()->n_points();
     _bnd_material_data[tid]->resize(n_points);
 
     if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
@@ -3470,9 +3473,9 @@ FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, b
 {
   if (hasActiveMaterialProperties(tid))
   {
-    const Elem * const & elem = _assembly[tid]->elem();
-    unsigned int side = _assembly[tid]->side();
-    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    const Elem * const & elem = _assembly[tid][_current_nl_sys->number()]->elem();
+    unsigned int side = _assembly[tid][_current_nl_sys->number()]->side();
+    unsigned int n_points = _assembly[tid][_current_nl_sys->number()]->qRuleFace()->n_points();
     _bnd_material_data[tid]->resize(n_points);
 
     if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
@@ -3487,15 +3490,15 @@ FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, b
 void
 FEProblemBase::swapBackMaterials(THREAD_ID tid)
 {
-  auto && elem = _assembly[tid]->elem();
+  auto && elem = _assembly[tid][_current_nl_sys->number()]->elem();
   _material_data[tid]->swapBack(*elem);
 }
 
 void
 FEProblemBase::swapBackMaterialsFace(THREAD_ID tid)
 {
-  auto && elem = _assembly[tid]->elem();
-  unsigned int side = _assembly[tid]->side();
+  auto && elem = _assembly[tid][_current_nl_sys->number()]->elem();
+  unsigned int side = _assembly[tid][_current_nl_sys->number()]->side();
   _bnd_material_data[tid]->swapBack(*elem, side);
 }
 
@@ -3503,9 +3506,10 @@ void
 FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 {
   // NOTE: this will not work with h-adaptivity
-  const Elem * neighbor = _assembly[tid]->neighbor();
+  const Elem * neighbor = _assembly[tid][_current_nl_sys->number()]->neighbor();
   unsigned int neighbor_side =
-      neighbor ? neighbor->which_neighbor_am_i(_assembly[tid]->elem()) : libMesh::invalid_uint;
+      neighbor ? neighbor->which_neighbor_am_i(_assembly[tid][_current_nl_sys->number()]->elem())
+               : libMesh::invalid_uint;
 
   if (!neighbor)
   {
@@ -3517,8 +3521,8 @@ FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
       // the mesh and we really do want to reinit our neighbor materials in this case. Since we're
       // off in ghost land it's safe to do swaps with `MaterialPropertyStorage` using the elem and
       // elem_side keys
-      neighbor = _assembly[tid]->elem();
-      neighbor_side = _assembly[tid]->side();
+      neighbor = _assembly[tid][_current_nl_sys->number()]->elem();
+      neighbor_side = _assembly[tid][_current_nl_sys->number()]->side();
       mooseAssert(neighbor, "We should have an appropriate value for elem coming from Assembly");
     }
     else
@@ -5016,7 +5020,8 @@ void
 FEProblemBase::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 {
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _assembly[tid]->bumpVolumeQRuleOrder(order, block);
+    for (const auto i : index_range(_nl))
+      _assembly[tid][i]->bumpVolumeQRuleOrder(order, block);
 
   if (_displaced_problem)
     _displaced_problem->bumpVolumeQRuleOrder(order, block);
@@ -5028,7 +5033,8 @@ void
 FEProblemBase::bumpAllQRuleOrder(Order order, SubdomainID block)
 {
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _assembly[tid]->bumpAllQRuleOrder(order, block);
+    for (const auto i : index_range(_nl))
+      _assembly[tid][i]->bumpAllQRuleOrder(order, block);
 
   if (_displaced_problem)
     _displaced_problem->bumpAllQRuleOrder(order, block);
@@ -5047,7 +5053,10 @@ FEProblemBase::createQRules(QuadratureType type,
   if (order == INVALID_ORDER)
   {
     // automatically determine the integration order
-    order = _nl->getMinQuadratureOrder();
+    order = _nl[0]->getMinQuadratureOrder();
+    for (const auto i : make_range(std::size_t(1), _nl.size()))
+      if (order < _nl[i]->getMinQuadratureOrder())
+        order = _nl[i]->getMinQuadratureOrder();
     if (order < _aux->getMinQuadratureOrder())
       order = _aux->getMinQuadratureOrder();
   }
@@ -5059,8 +5068,9 @@ FEProblemBase::createQRules(QuadratureType type,
     face_order = order;
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _assembly[tid]->createQRules(
-        type, order, volume_order, face_order, block, allow_negative_qweights);
+    for (const auto i : index_range(_nl))
+      _assembly[tid][i]->createQRules(
+          type, order, volume_order, face_order, block, allow_negative_qweights);
 
   if (_displaced_problem)
     _displaced_problem->createQRules(
@@ -5086,18 +5096,18 @@ FEProblemBase::setCoupling(Moose::CouplingType type)
 }
 
 void
-FEProblemBase::setCouplingMatrix(CouplingMatrix * cm)
+FEProblemBase::setCouplingMatrix(CouplingMatrix * cm, const unsigned int i)
 {
   // TODO: Deprecate method
   setCoupling(Moose::COUPLING_CUSTOM);
-  _cm.reset(cm);
+  _cm[i].reset(cm);
 }
 
 void
-FEProblemBase::setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm)
+FEProblemBase::setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm, const unsigned int i)
 {
   setCoupling(Moose::COUPLING_CUSTOM);
-  _cm = std::move(cm);
+  _cm[i] = std::move(cm);
 }
 
 void
@@ -5115,60 +5125,69 @@ FEProblemBase::setNonlocalCouplingMatrix()
 {
   TIME_SECTION("setNonlocalCouplingMatrix", 5, "Setting Nonlocal Coupling Matrix");
 
-  unsigned int n_vars = _nl->nVariables();
-  _nonlocal_cm.resize(n_vars);
-  const auto & vars = _nl->getVariables(0);
-  const auto & nonlocal_kernel = _nonlocal_kernels.getObjects();
-  const auto & nonlocal_integrated_bc = _nonlocal_integrated_bcs.getObjects();
-  for (const auto & ivar : vars)
+  if (_nl.size() > 1)
+    mooseError("Nonlocal kernels are weirdly stored on the FEProblem so we don't currently support "
+               "multiple nonlinear systems with nonlocal kernels.");
+
+  for (auto & nl : _nl)
   {
-    for (const auto & kernel : nonlocal_kernel)
+    unsigned int n_vars = nl->nVariables();
+    _nonlocal_cm.resize(n_vars);
+    const auto & vars = nl->getVariables(0);
+    const auto & nonlocal_kernel = _nonlocal_kernels.getObjects();
+    const auto & nonlocal_integrated_bc = _nonlocal_integrated_bcs.getObjects();
+    for (const auto & ivar : vars)
     {
-      for (unsigned int i = ivar->number(); i < ivar->number() + ivar->count(); ++i)
-        if (i == kernel->variable().number())
-          for (const auto & jvar : vars)
-          {
-            const auto it = _var_dof_map.find(jvar->name());
-            if (it != _var_dof_map.end())
+      for (const auto & kernel : nonlocal_kernel)
+      {
+        for (unsigned int i = ivar->number(); i < ivar->number() + ivar->count(); ++i)
+          if (i == kernel->variable().number())
+            for (const auto & jvar : vars)
             {
-              unsigned int j = jvar->number();
-              _nonlocal_cm(i, j) = 1;
+              const auto it = _var_dof_map.find(jvar->name());
+              if (it != _var_dof_map.end())
+              {
+                unsigned int j = jvar->number();
+                _nonlocal_cm(i, j) = 1;
+              }
             }
-          }
-    }
-    for (const auto & integrated_bc : nonlocal_integrated_bc)
-    {
-      for (unsigned int i = ivar->number(); i < ivar->number() + ivar->count(); ++i)
-        if (i == integrated_bc->variable().number())
-          for (const auto & jvar : vars)
-          {
-            const auto it = _var_dof_map.find(jvar->name());
-            if (it != _var_dof_map.end())
+      }
+      for (const auto & integrated_bc : nonlocal_integrated_bc)
+      {
+        for (unsigned int i = ivar->number(); i < ivar->number() + ivar->count(); ++i)
+          if (i == integrated_bc->variable().number())
+            for (const auto & jvar : vars)
             {
-              unsigned int j = jvar->number();
-              _nonlocal_cm(i, j) = 1;
+              const auto it = _var_dof_map.find(jvar->name());
+              if (it != _var_dof_map.end())
+              {
+                unsigned int j = jvar->number();
+                _nonlocal_cm(i, j) = 1;
+              }
             }
-          }
+      }
     }
   }
 }
 
 bool
-FEProblemBase::areCoupled(unsigned int ivar, unsigned int jvar) const
+FEProblemBase::areCoupled(const unsigned int ivar,
+                          const unsigned int jvar,
+                          const unsigned int nl_sys) const
 {
-  return (*_cm)(ivar, jvar);
+  return (*_cm[nl_sys])(ivar, jvar);
 }
 
 std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
-FEProblemBase::couplingEntries(THREAD_ID tid)
+FEProblemBase::couplingEntries(const THREAD_ID tid, const unsigned int nl_sys)
 {
-  return _assembly[tid]->couplingEntries();
+  return _assembly[tid][nl_sys]->couplingEntries();
 }
 
 std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
-FEProblemBase::nonlocalCouplingEntries(THREAD_ID tid)
+FEProblemBase::nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys)
 {
-  return _assembly[tid]->nonlocalCouplingEntries();
+  return _assembly[tid][nl_sys]->nonlocalCouplingEntries();
 }
 
 void
@@ -5188,47 +5207,53 @@ FEProblemBase::init()
   if (haveADObjects() && Moose::globalADIndexing())
     setCoupling(Moose::COUPLING_FULL);
 
-  unsigned int n_vars = _nl->nVariables();
+  for (const auto i : index_range(_nl))
   {
-    TIME_SECTION("fillCouplingMatrix", 3, "Filling Coupling Matrix");
+    auto & nl = _nl[i];
+    auto & cm = _cm[i];
 
-    switch (_coupling)
+    unsigned int n_vars = nl->nVariables();
     {
-      case Moose::COUPLING_DIAG:
-        _cm = std::make_unique<CouplingMatrix>(n_vars);
-        for (unsigned int i = 0; i < n_vars; i++)
-          for (unsigned int j = 0; j < n_vars; j++)
-            (*_cm)(i, j) = (i == j ? 1 : 0);
-        break;
+      TIME_SECTION("fillCouplingMatrix", 3, "Filling Coupling Matrix");
 
-        // for full jacobian
-      case Moose::COUPLING_FULL:
-        _cm = std::make_unique<CouplingMatrix>(n_vars);
-        for (unsigned int i = 0; i < n_vars; i++)
-          for (unsigned int j = 0; j < n_vars; j++)
-            (*_cm)(i, j) = 1;
-        break;
+      switch (_coupling)
+      {
+        case Moose::COUPLING_DIAG:
+          cm = std::make_unique<CouplingMatrix>(n_vars);
+          for (unsigned int i = 0; i < n_vars; i++)
+            for (unsigned int j = 0; j < n_vars; j++)
+              (*cm)(i, j) = (i == j ? 1 : 0);
+          break;
 
-      case Moose::COUPLING_CUSTOM:
-        // do nothing, _cm was already set through couplingMatrix() call
-        break;
+          // for full jacobian
+        case Moose::COUPLING_FULL:
+          cm = std::make_unique<CouplingMatrix>(n_vars);
+          for (unsigned int i = 0; i < n_vars; i++)
+            for (unsigned int j = 0; j < n_vars; j++)
+              (*cm)(i, j) = 1;
+          break;
+
+        case Moose::COUPLING_CUSTOM:
+          // do nothing, _cm was already set through couplingMatrix() call
+          break;
+      }
     }
+
+    nl->dofMap()._dof_coupling = cm.get();
+
+    // If there are no variables, make sure to pass a nullptr coupling
+    // matrix, to avoid warnings about non-nullptr yet empty
+    // CouplingMatrices.
+    if (n_vars == 0)
+      nl->dofMap()._dof_coupling = nullptr;
+
+    nl->dofMap().attach_extra_sparsity_function(&extraSparsity, _nl.get());
+    nl->dofMap().attach_extra_send_list_function(&extraSendList, _nl.get());
+    _aux->dofMap().attach_extra_send_list_function(&extraSendList, _aux.get());
+
+    if (!_skip_nl_system_check && _solve && n_vars == 0)
+      mooseError("No variables specified in the FEProblemBase '", name(), "'.");
   }
-
-  _nl->dofMap()._dof_coupling = _cm.get();
-
-  // If there are no variables, make sure to pass a nullptr coupling
-  // matrix, to avoid warnings about non-nullptr yet empty
-  // CouplingMatrices.
-  if (n_vars == 0)
-    _nl->dofMap()._dof_coupling = nullptr;
-
-  _nl->dofMap().attach_extra_sparsity_function(&extraSparsity, _nl.get());
-  _nl->dofMap().attach_extra_send_list_function(&extraSendList, _nl.get());
-  _aux->dofMap().attach_extra_send_list_function(&extraSendList, _aux.get());
-
-  if (!_skip_nl_system_check && _solve && n_vars == 0)
-    mooseError("No variables specified in the FEProblemBase '", name(), "'.");
 
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
 
@@ -5242,10 +5267,12 @@ FEProblemBase::init()
     _displaced_mesh->meshChanged();
 
   // do not assemble system matrix for JFNK solve
-  if (solverParams()._type == Moose::ST_JFNK)
-    _nl->turnOffJacobian();
-
-  _nl->init();
+  for (auto & nl : _nl)
+  {
+    if (solverParams()._type == Moose::ST_JFNK)
+      nl->turnOffJacobian();
+    nl->init();
+  }
   _aux->init();
 
   // Build the mortar segment meshes, if they haven't been already, for a couple reasons:
@@ -5264,11 +5291,13 @@ FEProblemBase::init()
     _eq.init();
   }
 
-  _nl->update();
+  for (auto & nl : _nl)
+    nl->update();
   _aux->update();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _assembly[tid]->init(_cm.get());
+    for (const auto i : index_range(_nl))
+      _assembly[tid][i]->init(_cm[i].get());
 
   if (_displaced_problem)
     _displaced_problem->init();
@@ -5310,8 +5339,8 @@ FEProblemBase::solve(const NonlinearSystemName & nl_sys_name)
   // set up DM which is required if use a field split preconditioner
   // We need to setup DM every "solve()" because libMesh destroy SNES after solve()
   // Do not worry, DM setup is very cheap
-  if (_nl->haveFieldSplitPreconditioner())
-    Moose::PetscSupport::petscSetupDM(*_nl);
+  if (_current_nl_sys->haveFieldSplitPreconditioner())
+    Moose::PetscSupport::petscSetupDM(*_current_nl_sys);
 
   Moose::setSolverDefaults(*this);
 
@@ -5326,10 +5355,10 @@ FEProblemBase::solve(const NonlinearSystemName & nl_sys_name)
   _fail_next_linear_convergence_check = false;
 
   if (_solve)
-    _nl->solve();
+    _current_nl_sys->solve();
 
   if (_solve)
-    _nl->update();
+    _current_nl_sys->update();
 
   // sync solutions in displaced problem
   if (_displaced_problem)
@@ -5339,6 +5368,8 @@ FEProblemBase::solve(const NonlinearSystemName & nl_sys_name)
   if (!_app.isUltimateMaster())
     PetscOptionsPop();
 #endif
+
+  _current_nl_sys = nullptr;
 }
 
 void
@@ -5373,7 +5404,7 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
     // Stop the solve -- this entails setting
     // SNESSetFunctionDomainError() or directly inserting NaNs in the
     // residual vector to let PETSc >= 3.6 return DIVERGED_NANORINF.
-    _nl->stopSolve();
+    _current_nl_sys->stopSolve();
 
     // and close Aux system (we MUST do this here; see #11525)
     _aux->solution().close();
@@ -5394,7 +5425,7 @@ bool
 FEProblemBase::converged()
 {
   if (_solve)
-    return _nl->converged();
+    return _current_nl_sys->converged();
   else
     return true;
 }
@@ -5402,25 +5433,25 @@ FEProblemBase::converged()
 unsigned int
 FEProblemBase::nNonlinearIterations() const
 {
-  return _nl->nNonlinearIterations();
+  return _current_nl_sys->nNonlinearIterations();
 }
 
 unsigned int
 FEProblemBase::nLinearIterations() const
 {
-  return _nl->nLinearIterations();
+  return _current_nl_sys->nLinearIterations();
 }
 
 Real
 FEProblemBase::finalNonlinearResidual() const
 {
-  return _nl->finalNonlinearResidual();
+  return _current_nl_sys->finalNonlinearResidual();
 }
 
 bool
 FEProblemBase::computingInitialResidual() const
 {
-  return _nl->computingInitialResidual();
+  return _current_nl_sys->computingInitialResidual();
 }
 
 void
@@ -5428,7 +5459,8 @@ FEProblemBase::copySolutionsBackwards()
 {
   TIME_SECTION("copySolutionsBackwards", 3, "Copying Solutions Backward");
 
-  _nl->copySolutionsBackwards();
+  for (auto & nl : _nl)
+    nl->copySolutionsBackwards();
   _aux->copySolutionsBackwards();
 }
 
@@ -5437,12 +5469,14 @@ FEProblemBase::advanceState()
 {
   TIME_SECTION("advanceState", 5, "Advancing State");
 
-  _nl->copyOldSolutions();
+  for (auto & nl : _nl)
+    nl->copyOldSolutions();
   _aux->copyOldSolutions();
 
   if (_displaced_problem)
   {
-    _displaced_problem->nlSys().copyOldSolutions();
+    for (const auto i : index_range(_nl))
+      _displaced_problem->nlSys(i).copyOldSolutions();
     _displaced_problem->auxSys().copyOldSolutions();
   }
 
@@ -5463,7 +5497,8 @@ FEProblemBase::restoreSolutions()
 {
   TIME_SECTION("restoreSolutions", 5, "Restoring Solutions");
 
-  _nl->restoreSolutions();
+  for (auto & nl : _nl)
+    nl->restoreSolutions();
   _aux->restoreSolutions();
 
   if (_displaced_problem)
@@ -5475,7 +5510,8 @@ FEProblemBase::saveOldSolutions()
 {
   TIME_SECTION("saveOldSolutions", 5, "Saving Old Solutions");
 
-  _nl->saveOldSolutions();
+  for (auto & nl : _nl)
+    nl->saveOldSolutions();
   _aux->saveOldSolutions();
 }
 
@@ -5484,7 +5520,8 @@ FEProblemBase::restoreOldSolutions()
 {
   TIME_SECTION("restoreOldSolutions", 5, "Restoring Old Solutions");
 
-  _nl->restoreOldSolutions();
+  for (auto & nl : _nl)
+    nl->restoreOldSolutions();
   _aux->restoreOldSolutions();
 }
 
@@ -5495,7 +5532,8 @@ FEProblemBase::outputStep(ExecFlagType type)
 
   setCurrentExecuteOnFlag(type);
 
-  _nl->update();
+  for (auto & nl : _nl)
+    nl->update();
   _aux->update();
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
@@ -5528,7 +5566,8 @@ FEProblemBase::onTimestepBegin()
 {
   TIME_SECTION("onTimestepBegin", 2);
 
-  _nl->onTimestepBegin();
+  for (auto & nl : _nl)
+    nl->onTimestepBegin();
 }
 
 void
@@ -5543,21 +5582,25 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
 {
   parameters.set<SubProblem *>("_subproblem") = this;
   _aux->addTimeIntegrator(type, name + ":aux", parameters);
-  _nl->addTimeIntegrator(type, name, parameters);
+  for (auto & nl : _nl)
+    nl->addTimeIntegrator(type, name, parameters);
   _has_time_integrator = true;
 
   // add vectors to store u_dot, u_dotdot, udot_old, u_dotdot_old and
   // solution vectors older than 2 time steps, if requested by the time
   // integrator
   _aux->addDotVectors();
-  _nl->addDotVectors();
+  for (auto & nl : _nl)
+  {
+    nl->addDotVectors();
 
-  auto tag_udot = _nl->getTimeIntegrator()->uDotFactorTag();
-  if (!_nl->hasVector(tag_udot))
-    _nl->associateVectorToTag(*_nl->solutionUDot(), tag_udot);
-  auto tag_udotdot = _nl->getTimeIntegrator()->uDotDotFactorTag();
-  if (!_nl->hasVector(tag_udotdot) && uDotDotRequested())
-    _nl->associateVectorToTag(*_nl->solutionUDotDot(), tag_udotdot);
+    auto tag_udot = nl->getTimeIntegrator()->uDotFactorTag();
+    if (!nl->hasVector(tag_udot))
+      nl->associateVectorToTag(*nl->solutionUDot(), tag_udot);
+    auto tag_udotdot = nl->getTimeIntegrator()->uDotDotFactorTag();
+    if (!nl->hasVector(tag_udotdot) && uDotDotRequested())
+      nl->associateVectorToTag(*nl->solutionUDotDot(), tag_udotdot);
+  }
 }
 
 void
@@ -5567,7 +5610,8 @@ FEProblemBase::addPredictor(const std::string & type,
 {
   parameters.set<SubProblem *>("_subproblem") = this;
   std::shared_ptr<Predictor> predictor = _factory.create<Predictor>(type, name, parameters);
-  _nl->setPredictor(predictor);
+  for (auto & nl : _nl)
+    nl->setPredictor(predictor);
 }
 
 Real
@@ -5575,9 +5619,9 @@ FEProblemBase::computeResidualL2Norm()
 {
   TIME_SECTION("computeResidualL2Norm", 2, "Computing L2 Norm of Residual");
 
-  computeResidual(*_nl->currentSolution(), _nl->RHS());
+  computeResidual(*_current_nl_sys->currentSolution(), _current_nl_sys->RHS());
 
-  return _nl->RHS().l2_norm();
+  return _current_nl_sys->RHS().l2_norm();
 }
 
 void
@@ -5643,15 +5687,15 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
   try
   {
-    _nl->setSolution(soln);
+    _current_nl_sys->setSolution(soln);
 
-    _nl->associateVectorToTag(residual, _nl->residualVectorTag());
-    _nl->associateMatrixToTag(jacobian, _nl->systemMatrixTag());
+    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
+    _current_nl_sys->associateMatrixToTag(jacobian, _current_nl_sys->systemMatrixTag());
 
     for (const auto tag : _fe_matrix_tags)
-      if (_nl->hasMatrix(tag))
+      if (_current_nl_sys->hasMatrix(tag))
       {
-        auto & matrix = _nl->getMatrix(tag);
+        auto & matrix = _current_nl_sys->getMatrix(tag);
         matrix.zero();
 #ifdef MOOSE_GLOBAL_AD_INDEXING
         if (haveADObjects())
@@ -5663,7 +5707,6 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 #endif
       }
 
-    _nl->zeroVariablesForResidual();
     _aux->zeroVariablesForResidual();
 
     unsigned int n_threads = libMesh::n_threads();
@@ -5727,7 +5770,9 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       _functions.residualSetup(tid);
     }
 
-    _nl->computeTimeDerivatives();
+    // Where is the aux system done? Could the non-current nonlinear systems also be done there?
+    for (auto & nl : _nl)
+      nl->computeTimeDerivatives();
 
     try
     {
@@ -5757,13 +5802,13 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     _safe_access_tagged_vectors = false;
     _safe_access_tagged_matrices = false;
 
-    _nl->computeResidualAndJacobianTags(_fe_vector_tags, _fe_matrix_tags);
+    _current_nl_sys->computeResidualAndJacobianTags(_fe_vector_tags, _fe_matrix_tags);
 
     _safe_access_tagged_vectors = true;
     _safe_access_tagged_matrices = true;
 
-    _nl->disassociateMatrixFromTag(jacobian, _nl->systemMatrixTag());
-    _nl->disassociateVectorFromTag(residual, _nl->residualVectorTag());
+    _current_nl_sys->disassociateMatrixFromTag(jacobian, _current_nl_sys->systemMatrixTag());
+    _current_nl_sys->disassociateVectorFromTag(residual, _current_nl_sys->residualVectorTag());
 
     _currently_computing_residual_and_jacobian = false;
     if (_displaced_problem)
@@ -5790,13 +5835,13 @@ FEProblemBase::computeResidualTag(const NumericVector<Number> & soln,
 {
   try
   {
-    _nl->setSolution(soln);
+    _current_nl_sys->setSolution(soln);
 
-    _nl->associateVectorToTag(residual, tag);
+    _current_nl_sys->associateVectorToTag(residual, tag);
 
     computeResidualTags({tag});
 
-    _nl->disassociateVectorFromTag(residual, tag);
+    _current_nl_sys->disassociateVectorFromTag(residual, tag);
   }
   catch (MooseException & e)
   {
@@ -5821,13 +5866,13 @@ FEProblemBase::computeResidualInternal(const NumericVector<Number> & soln,
 
   try
   {
-    _nl->setSolution(soln);
+    _current_nl_sys->setSolution(soln);
 
-    _nl->associateVectorToTag(residual, _nl->residualVectorTag());
+    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
 
     computeResidualTags(tags);
 
-    _nl->disassociateVectorFromTag(residual, _nl->residualVectorTag());
+    _current_nl_sys->disassociateVectorFromTag(residual, _current_nl_sys->residualVectorTag());
   }
   catch (MooseException & e)
   {
@@ -5852,13 +5897,13 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
 
   try
   {
-    _nl->setSolution(soln);
+    _current_nl_sys->setSolution(soln);
 
-    _nl->associateVectorToTag(residual, _nl->residualVectorTag());
+    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
 
-    computeResidualTags({tag, _nl->residualVectorTag()});
+    computeResidualTags({tag, _current_nl_sys->residualVectorTag()});
 
-    _nl->disassociateVectorFromTag(residual, _nl->residualVectorTag());
+    _current_nl_sys->disassociateVectorFromTag(residual, _current_nl_sys->residualVectorTag());
   }
   catch (MooseException & e)
   {
@@ -5879,7 +5924,6 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 {
   TIME_SECTION("computeResidualTags", 5, "Computing Residual");
 
-  _nl->zeroVariablesForResidual();
   _aux->zeroVariablesForResidual();
 
   unsigned int n_threads = libMesh::n_threads();
@@ -5939,7 +5983,9 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
     _functions.residualSetup(tid);
   }
 
-  _nl->computeTimeDerivatives();
+  // Where is the aux system done? Could the non-current nonlinear systems also be done there?
+  for (auto & nl : _nl)
+    nl->computeTimeDerivatives();
 
   try
   {
@@ -5968,7 +6014,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   _safe_access_tagged_vectors = false;
 
-  _nl->computeResidualTags(tags);
+  _current_nl_sys->computeResidualTags(tags);
 
   _safe_access_tagged_vectors = true;
 }
@@ -5986,13 +6032,13 @@ FEProblemBase::computeJacobianTag(const NumericVector<Number> & soln,
                                   SparseMatrix<Number> & jacobian,
                                   TagID tag)
 {
-  _nl->setSolution(soln);
+  _current_nl_sys->setSolution(soln);
 
-  _nl->associateMatrixToTag(jacobian, tag);
+  _current_nl_sys->associateMatrixToTag(jacobian, tag);
 
   computeJacobianTags({tag});
 
-  _nl->disassociateMatrixFromTag(jacobian, tag);
+  _current_nl_sys->disassociateMatrixFromTag(jacobian, tag);
 }
 
 void
@@ -6014,13 +6060,13 @@ FEProblemBase::computeJacobianInternal(const NumericVector<Number> & soln,
 {
   TIME_SECTION("computeJacobianInternal", 1);
 
-  _nl->setSolution(soln);
+  _current_nl_sys->setSolution(soln);
 
-  _nl->associateMatrixToTag(jacobian, _nl->systemMatrixTag());
+  _current_nl_sys->associateMatrixToTag(jacobian, _current_nl_sys->systemMatrixTag());
 
   computeJacobianTags(tags);
 
-  _nl->disassociateMatrixFromTag(jacobian, _nl->systemMatrixTag());
+  _current_nl_sys->disassociateMatrixFromTag(jacobian, _current_nl_sys->systemMatrixTag());
 }
 
 void
@@ -6031,9 +6077,9 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
     TIME_SECTION("computeJacobianTags", 5, "Computing Jacobian");
 
     for (auto tag : tags)
-      if (_nl->hasMatrix(tag))
+      if (_current_nl_sys->hasMatrix(tag))
       {
-        auto & matrix = _nl->getMatrix(tag);
+        auto & matrix = _current_nl_sys->getMatrix(tag);
         matrix.zero();
 #ifdef MOOSE_GLOBAL_AD_INDEXING
         if (haveADObjects())
@@ -6045,7 +6091,6 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 #endif
       }
 
-    _nl->zeroVariablesForJacobian();
     _aux->zeroVariablesForJacobian();
 
     unsigned int n_threads = libMesh::n_threads();
@@ -6086,7 +6131,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
     // here. Note that if we are not doing this initial Jacobian calculation we will just exit in
     // that class to avoid redundant calculation (the residual function also computes time
     // derivatives)
-    _nl->computeTimeDerivatives(/*jacobian_calculation =*/true);
+    _current_nl_sys->computeTimeDerivatives(/*jacobian_calculation =*/true);
 
     _aux->compute(EXEC_NONLINEAR);
 
@@ -6098,14 +6143,14 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     _safe_access_tagged_matrices = false;
 
-    _nl->computeJacobianTags(tags);
+    _current_nl_sys->computeJacobianTags(tags);
 
     _current_execute_on_flag = EXEC_NONE;
 
     // For explicit Euler calculations for example we often compute the Jacobian one time and then
     // re-use it over and over. If we're performing automatic scaling, we don't want to use that
     // kernel, diagonal-block only Jacobian for our actual matrix when performing solves!
-    if (!_nl->computingScalingJacobian())
+    if (!_current_nl_sys->computingScalingJacobian())
       _has_jacobian = true;
 
     _currently_computing_jacobian = false;
@@ -6129,7 +6174,7 @@ FEProblemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
   _aux->compute(EXEC_NONLINEAR);
 
   _currently_computing_jacobian = true;
-  _nl->computeJacobianBlocks(blocks);
+  _current_nl_sys->computeJacobianBlocks(blocks);
   _currently_computing_jacobian = false;
 }
 
@@ -6145,17 +6190,20 @@ FEProblemBase::computeJacobianBlock(SparseMatrix<Number> & jacobian,
 }
 
 void
-FEProblemBase::computeBounds(NonlinearImplicitSystem & /*sys*/,
+FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
                              NumericVector<Number> & lower,
                              NumericVector<Number> & upper)
 {
-  if (!_nl->hasVector("lower_bound") || !_nl->hasVector("upper_bound"))
+  mooseAssert(_current_nl_sys && (sys.number() == _current_nl_sys->number()),
+              "I expect these system numbers to be the same");
+
+  if (!_current_nl_sys->hasVector("lower_bound") || !_current_nl_sys->hasVector("upper_bound"))
     return;
 
   TIME_SECTION("computeBounds", 1, "Computing Bounds");
 
-  NumericVector<Number> & _lower = _nl->getVector("lower_bound");
-  NumericVector<Number> & _upper = _nl->getVector("upper_bound");
+  NumericVector<Number> & _lower = _current_nl_sys->getVector("lower_bound");
+  NumericVector<Number> & _upper = _current_nl_sys->getVector("upper_bound");
   _lower.swap(lower);
   _upper.swap(upper);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -6170,42 +6218,49 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & /*sys*/,
 }
 
 void
-FEProblemBase::computeNearNullSpace(NonlinearImplicitSystem & /*sys*/,
+FEProblemBase::computeNearNullSpace(NonlinearImplicitSystem & libmesh_dbg_var(sys),
                                     std::vector<NumericVector<Number> *> & sp)
 {
+  mooseAssert(_current_nl_sys && (sys.number() == _current_nl_sys->number()),
+              "I expect these system numbers to be the same");
+
   sp.clear();
   for (unsigned int i = 0; i < subspaceDim("NearNullSpace"); ++i)
   {
     std::stringstream postfix;
     postfix << "_" << i;
     std::string modename = "NearNullSpace" + postfix.str();
-    sp.push_back(&_nl->getVector(modename));
+    sp.push_back(&_current_nl_sys->getVector(modename));
   }
 }
 
 void
-FEProblemBase::computeNullSpace(NonlinearImplicitSystem & /*sys*/,
+FEProblemBase::computeNullSpace(NonlinearImplicitSystem & libmesh_dbg_var(sys),
                                 std::vector<NumericVector<Number> *> & sp)
 {
+  mooseAssert(_current_nl_sys && (sys.number() == _current_nl_sys->number()),
+              "I expect these system numbers to be the same");
   sp.clear();
   for (unsigned int i = 0; i < subspaceDim("NullSpace"); ++i)
   {
     std::stringstream postfix;
     postfix << "_" << i;
-    sp.push_back(&_nl->getVector("NullSpace" + postfix.str()));
+    sp.push_back(&_current_nl_sys->getVector("NullSpace" + postfix.str()));
   }
 }
 
 void
-FEProblemBase::computeTransposeNullSpace(NonlinearImplicitSystem & /*sys*/,
+FEProblemBase::computeTransposeNullSpace(NonlinearImplicitSystem & libmesh_dbg_var(sys),
                                          std::vector<NumericVector<Number> *> & sp)
 {
+  mooseAssert(_current_nl_sys && (sys.number() == _current_nl_sys->number()),
+              "I expect these system numbers to be the same");
   sp.clear();
   for (unsigned int i = 0; i < subspaceDim("TransposeNullSpace"); ++i)
   {
     std::stringstream postfix;
     postfix << "_" << i;
-    sp.push_back(&_nl->getVector("TransposeNullSpace" + postfix.str()));
+    sp.push_back(&_current_nl_sys->getVector("TransposeNullSpace" + postfix.str()));
   }
 }
 
@@ -6217,6 +6272,9 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
                                 bool & changed_search_direction,
                                 bool & changed_new_soln)
 {
+  mooseAssert(_current_nl_sys && (sys.number() == _current_nl_sys->number()),
+              "I expect these system numbers to be the same");
+
   // This function replaces the old PetscSupport::dampedCheck() function.
   //
   // 1.) Recreate code in PetscSupport::dampedCheck() for constructing
@@ -6277,7 +6335,7 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
 
   if (vectorTagExists(Moose::PREVIOUS_NL_SOLUTION_TAG))
   {
-    _nl->setPreviousNewtonSolution(old_soln);
+    _current_nl_sys->setPreviousNewtonSolution(old_soln);
     _aux->setPreviousNewtonSolution();
   }
 
@@ -6297,18 +6355,18 @@ FEProblemBase::computeDamping(const NumericVector<Number> & soln,
     TIME_SECTION("computeDamping", 1, "Computing Damping");
 
     // Save pointer to the current solution
-    const NumericVector<Number> * _saved_current_solution = _nl->currentSolution();
+    const NumericVector<Number> * _saved_current_solution = _current_nl_sys->currentSolution();
 
-    _nl->setSolution(soln);
+    _current_nl_sys->setSolution(soln);
     // For now, do not re-compute auxiliary variables.  Doing so allows a wild solution increment
     //   to get to the material models, which may not be able to cope with drastically different
     //   values.  Once more complete dependency checking is in place, auxiliary variables (and
     //   material properties) will be computed as needed by dampers.
     //    _aux.compute();
-    damping = _nl->computeDamping(soln, update);
+    damping = _current_nl_sys->computeDamping(soln, update);
 
     // restore saved solution
-    _nl->setSolution(*_saved_current_solution);
+    _current_nl_sys->setSolution(*_saved_current_solution);
   }
 
   return damping;
@@ -6600,11 +6658,11 @@ FEProblemBase::updateMeshXFEM()
     if (_xfem->updateHeal())
       meshChanged();
 
-    updated = _xfem->update(_time, *_nl, *_aux);
+    updated = _xfem->update(_time, _nl, *_aux);
     if (updated)
     {
       meshChanged();
-      _xfem->initSolution(*_nl, *_aux);
+      _xfem->initSolution(_nl, *_aux);
       restoreSolutions();
     }
   }
@@ -6689,7 +6747,6 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
     {
       ProjectMaterialProperties pmp(true,
                                     *this,
-                                    *_nl,
                                     _material_data,
                                     _bnd_material_data,
                                     _material_props,
@@ -6711,7 +6768,6 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
     {
       ProjectMaterialProperties pmp(false,
                                     *this,
-                                    *_nl,
                                     _material_data,
                                     _bnd_material_data,
                                     _material_props,
@@ -6738,7 +6794,8 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
   // Since the mesh has changed, we need to make sure that we update any of our
   // MOOSE-system specific data. libmesh system data has already been updated
-  _nl->update(/*update_libmesh_system=*/false);
+  for (auto & nl : _nl)
+    nl->update(/*update_libmesh_system=*/false);
   _aux->update(/*update_libmesh_system=*/false);
 }
 
@@ -6772,7 +6829,8 @@ FEProblemBase::checkProblemIntegrity()
 
   // Check kernel coverage of subdomains (blocks) in the mesh
   if (!_skip_nl_system_check && _solve && _kernel_coverage_check)
-    _nl->checkKernelCoverage(mesh_subdomains);
+    for (auto & nl : _nl)
+      nl->checkKernelCoverage(mesh_subdomains);
 
   // Check materials
   {
@@ -7086,15 +7144,6 @@ FEProblemBase::checkCoordinateSystems()
 }
 
 void
-FEProblemBase::serializeSolution()
-{
-  TIME_SECTION("serializeSolution", 3, "Serializing Solution");
-
-  _nl->serializeSolution();
-  _aux->serializeSolution();
-}
-
-void
 FEProblemBase::setRestartFile(const std::string & file_name)
 {
   if (_app.isRecovering())
@@ -7114,8 +7163,11 @@ FEProblemBase::getVariableNames()
 {
   std::vector<VariableName> names;
 
-  const std::vector<VariableName> & nl_var_names = _nl->getVariableNames();
-  names.insert(names.end(), nl_var_names.begin(), nl_var_names.end());
+  for (auto & nl : _nl)
+  {
+    const std::vector<VariableName> & nl_var_names = nl->getVariableNames();
+    names.insert(names.end(), nl_var_names.begin(), nl_var_names.end());
+  }
 
   const std::vector<VariableName> & aux_var_names = _aux->getVariableNames();
   names.insert(names.end(), aux_var_names.begin(), aux_var_names.end());
@@ -7139,8 +7191,9 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
                                          const Real div_threshold)
 {
   TIME_SECTION("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
+  mooseAssert(_current_nl_sys, "This should be non-null");
 
-  NonlinearSystemBase & system = getNonlinearSystemBase();
+  NonlinearSystemBase & system = *_current_nl_sys;
   MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;
 
   Real fnorm_old;
@@ -7263,17 +7316,32 @@ FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
 {
   if (_bnd_mat_side_cache[tid].find(bnd_id) == _bnd_mat_side_cache[tid].end())
   {
-    _bnd_mat_side_cache[tid][bnd_id] = false;
+    auto & bnd_mat_side_cache = _bnd_mat_side_cache[tid][bnd_id];
+    bnd_mat_side_cache = false;
 
-    if (_nl->needBoundaryMaterialOnSide(bnd_id, tid) || _aux->needMaterialOnSide(bnd_id))
-      _bnd_mat_side_cache[tid][bnd_id] = true;
-    else if (theWarehouse()
-                 .query()
-                 .condition<AttribThread>(tid)
-                 .condition<AttribInterfaces>(Interfaces::SideUserObject)
-                 .condition<AttribBoundaries>(bnd_id)
-                 .count() > 0)
-      _bnd_mat_side_cache[tid][bnd_id] = true;
+    if (_aux->needMaterialOnSide(bnd_id))
+    {
+      bnd_mat_side_cache = true;
+      return true;
+    }
+    else
+      for (auto & nl : _nl)
+        if (nl->needBoundaryMaterialOnSide(bnd_id, tid))
+        {
+          bnd_mat_side_cache = true;
+          return true;
+        }
+
+    if (theWarehouse()
+            .query()
+            .condition<AttribThread>(tid)
+            .condition<AttribInterfaces>(Interfaces::SideUserObject)
+            .condition<AttribBoundaries>(bnd_id)
+            .count() > 0)
+    {
+      bnd_mat_side_cache = true;
+      return true;
+    }
   }
 
   return _bnd_mat_side_cache[tid][bnd_id];
@@ -7284,19 +7352,31 @@ FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
 {
   if (_interface_mat_side_cache[tid].find(bnd_id) == _interface_mat_side_cache[tid].end())
   {
-    _interface_mat_side_cache[tid][bnd_id] = false;
+    auto interface_mat_side_cache = _interface_mat_side_cache[tid][bnd_id];
+    interface_mat_side_cache = false;
 
-    if (_nl->needInterfaceMaterialOnSide(bnd_id, tid))
-      _interface_mat_side_cache[tid][bnd_id] = true;
-    else if (theWarehouse()
-                 .query()
-                 .condition<AttribThread>(tid)
-                 .condition<AttribInterfaces>(Interfaces::InterfaceUserObject)
-                 .condition<AttribBoundaries>(bnd_id)
-                 .count() > 0)
-      _interface_mat_side_cache[tid][bnd_id] = true;
+    for (auto & nl : _nl)
+      if (_nl->needInterfaceMaterialOnSide(bnd_id, tid))
+      {
+        interface_mat_side_cache = true;
+        return true;
+      }
+
+    if (theWarehouse()
+            .query()
+            .condition<AttribThread>(tid)
+            .condition<AttribInterfaces>(Interfaces::InterfaceUserObject)
+            .condition<AttribBoundaries>(bnd_id)
+            .count() > 0)
+    {
+      interface_mat_side_cache = true;
+      return true;
+    }
     else if (_interface_materials.hasActiveBoundaryObjects(bnd_id, tid))
-      _interface_mat_side_cache[tid][bnd_id] = true;
+    {
+      interface_mat_side_cache = true;
+      return true;
+    }
   }
   return _interface_mat_side_cache[tid][bnd_id];
 }
@@ -7308,15 +7388,23 @@ FEProblemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID t
   {
     _block_mat_side_cache[tid][subdomain_id] = false;
 
-    if (_nl->needSubdomainMaterialOnSide(subdomain_id, tid))
+    for (auto & nl : _nl)
+      if (nl->needSubdomainMaterialOnSide(subdomain_id, tid))
+      {
+        _block_mat_side_cache[tid][subdomain_id] = true;
+        return true;
+      }
+
+    if (theWarehouse()
+            .query()
+            .condition<AttribThread>(tid)
+            .condition<AttribInterfaces>(Interfaces::InternalSideUserObject)
+            .condition<AttribSubdomains>(subdomain_id)
+            .count() > 0)
+    {
       _block_mat_side_cache[tid][subdomain_id] = true;
-    else if (theWarehouse()
-                 .query()
-                 .condition<AttribThread>(tid)
-                 .condition<AttribInterfaces>(Interfaces::InternalSideUserObject)
-                 .condition<AttribSubdomains>(subdomain_id)
-                 .count() > 0)
-      _block_mat_side_cache[tid][subdomain_id] = true;
+      return true;
+    }
   }
 
   return _block_mat_side_cache[tid][subdomain_id];

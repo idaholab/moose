@@ -166,18 +166,19 @@ public:
   /**
    * Set custom coupling matrix
    * @param cm coupling matrix to be set
+   * @param i which nonlinear system we are setting the coupling matrix for
    */
-  void setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm);
+  void setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm, unsigned int nl_sys = 0);
 
   // DEPRECATED METHOD
-  void setCouplingMatrix(CouplingMatrix * cm);
+  void setCouplingMatrix(CouplingMatrix * cm, unsigned int nl_sys = 0);
 
-  const CouplingMatrix * couplingMatrix() const override { return _cm.get(); }
+  const CouplingMatrix * couplingMatrix(unsigned int nl_sys = 0) const override;
 
   /// Set custom coupling matrix for variables requiring nonlocal contribution
   void setNonlocalCouplingMatrix();
 
-  bool areCoupled(unsigned int ivar, unsigned int jvar) const;
+  bool areCoupled(unsigned int ivar, unsigned int jvar, unsigned int nl_sys = 0) const;
 
   /**
    * Whether to trust the user coupling matrix even if we want to do things like be paranoid and
@@ -187,9 +188,9 @@ public:
   void trustUserCouplingMatrix();
 
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
-  couplingEntries(THREAD_ID tid);
+  couplingEntries(THREAD_ID tid, unsigned int nl_sys = 0);
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
-  nonlocalCouplingEntries(THREAD_ID tid);
+  nonlocalCouplingEntries(THREAD_ID tid, unsigned int nl_sys = 0);
 
   /**
    * Check for convergence of the nonlinear solution
@@ -1491,8 +1492,6 @@ public:
    */
   virtual void checkProblemIntegrity();
 
-  void serializeSolution();
-
   void registerRandomInterface(RandomInterface & random_interface, const std::string & name);
 
   /**
@@ -2029,8 +2028,8 @@ protected:
   /// The auxiliary system
   std::shared_ptr<AuxiliarySystem> _aux;
 
-  Moose::CouplingType _coupling;       ///< Type of variable coupling
-  std::unique_ptr<CouplingMatrix> _cm; ///< Coupling matrix for variables.
+  Moose::CouplingType _coupling;                    ///< Type of variable coupling
+  std::vector<std::unique_ptr<CouplingMatrix>> _cm; ///< Coupling matrix for variables.
 
   /// Dimension of the subspace spanned by the vectors with a given prefix
   std::map<std::string, unsigned int> _subspace_dim;
@@ -2470,6 +2469,12 @@ FEProblemBase::assembly(const THREAD_ID tid, const unsigned int nl_sys_num) cons
   mooseAssert(nl_sys_num < _assembly[tid].size(),
               "Nonlinear system number larger than the assembly container size");
   return *_assembly[tid, nl_sys_num];
+}
+
+inline const CouplingMatrix *
+FEProblemBase::couplingMatrix(const unsigned int i) const
+{
+  return _cm[i].get();
 }
 
 template <>

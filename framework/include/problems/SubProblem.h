@@ -609,7 +609,11 @@ public:
   virtual std::set<dof_id_type> & ghostedElems() { return _ghosted_elems; }
 
   std::map<std::string, std::vector<dof_id_type>> _var_dof_map;
-  const CouplingMatrix & nonlocalCouplingMatrix() const { return _nonlocal_cm; }
+
+  /**
+   * @return the nonlocal coupling matrix for the i'th nonlinear system
+   */
+  const CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const { return _nonlocal_cm[i]; }
 
   /**
    * Returns true if the problem is in the process of computing the Jacobian
@@ -861,7 +865,7 @@ protected:
   /// The Factory for building objects
   Factory & _factory;
 
-  CouplingMatrix _nonlocal_cm; /// nonlocal coupling matrix;
+  std::vector<CouplingMatrix> _nonlocal_cm; /// nonlocal coupling matrix;
 
   DiracKernelInfo _dirac_kernel_info;
 
