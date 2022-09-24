@@ -141,6 +141,9 @@ PINSFVTKESourceSink::computeQpResidual()
   //                 : limiting_factor * destruction;
   // }
 
+  // _console << "Production k: " << production << std::endl;
+  // _console << "Dissipation k: " << destruction << std::endl;
+
   if (_realizable_constraint)
   {
     // Ralizable constraints

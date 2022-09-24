@@ -130,13 +130,17 @@ kEpsilonLinearVariable::computeValue()
   else
   {
     //  Return Bulk value
-    constexpr Real protection_k = 1e-10;
+    constexpr Real protection_k = 1e-15;
     auto current_argument = makeElemArg(_current_elem);
     // auto limiting_value = _C_mu(current_argument) * std::sqrt(_k(current_argument)) / _max_mixing_length; // Realizable constraint
 
     // auto residual = std::max(_epsilon(current_argument) / (_k(current_argument) + protection_k),
     //                          limiting_value);
-    auto residual = _epsilon(current_argument) / (_k(current_argument) + protection_k);
+
+    auto k_value = std::max(_k(makeElemArg(_current_elem)), 1e-10);
+    auto epsilon_value = std::max(_epsilon(makeElemArg(_current_elem)), 1e-10);
+
+    auto residual = std::min(_epsilon(current_argument) / (_k(current_argument) + protection_k), 1e6);
 
     return residual.value();
   }

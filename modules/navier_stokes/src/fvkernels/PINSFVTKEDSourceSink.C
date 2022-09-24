@@ -18,7 +18,7 @@ PINSFVTKEDSourceSink::validParams()
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription(
       "Elental kernel to compute the production and destruction "
-      " terms of turbulent kinetic energy (TKE).");
+      " terms of turbulent kinetic energy disspation (TKED).");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
@@ -29,7 +29,7 @@ PINSFVTKEDSourceSink::validParams()
   params.addParam<bool>(
       "effective_balance",
       false,
-      "Whether the TKE balance should be multiplied by porosity, or whether the provided "
+      "Whether the TKED balance should be multiplied by porosity, or whether the provided "
       "diffusivity is an effective diffusivity taking porosity effects into account");
   params.addRequiredParam<MooseFunctorName>("C1_eps", "First epsilon coefficient");
   params.addRequiredParam<MooseFunctorName>("C2_eps", "Second epsilon coefficient");
@@ -118,6 +118,8 @@ PINSFVTKEDSourceSink::computeQpResidual()
     }
   }
 
+  //_console << "Linearized ? : " << _linearized_model << std::endl;
+
   //symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
   symmetric_strain_tensor_norm = 2.0 * symmetric_strain_tensor_norm + offset;
 
@@ -127,23 +129,27 @@ PINSFVTKEDSourceSink::computeQpResidual()
   auto production_k = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm;
   if (_linearized_model)
   {
-    auto production = _C1_eps(makeElemArg(_current_elem))
+    production = _C1_eps(makeElemArg(_current_elem))
                       * production_k
                       * _linear_variable(makeElemArg(_current_elem));
 
-    auto destruction = _C2_eps(makeElemArg(_current_elem))
+    destruction = _C2_eps(makeElemArg(_current_elem))
                       * _rho(makeElemArg(_current_elem))
                       * _var(makeElemArg(_current_elem))
                       * _linear_variable(makeElemArg(_current_elem));
+    
+    // _console << "Epsilon: " << _var(makeElemArg(_current_elem)) << std::endl;
+                      
+    // _console << "Linearized k epsilon model" << std::endl;
   }
   else
   {
-    auto production = _C1_eps(makeElemArg(_current_elem))
+    production = _C1_eps(makeElemArg(_current_elem))
                       * production_k
                       * _var(makeElemArg(_current_elem))
                       / (_k(makeElemArg(_current_elem)) + protection_k);
 
-    auto destruction = _C2_eps(makeElemArg(_current_elem))
+    destruction = _C2_eps(makeElemArg(_current_elem))
                       * _rho(makeElemArg(_current_elem))
                       * Utility::pow<2>(_var(makeElemArg(_current_elem)))
                       / (_k(makeElemArg(_current_elem)) + protection_k);
@@ -152,6 +158,9 @@ PINSFVTKEDSourceSink::computeQpResidual()
   // _console << "Coord: " << _current_elem->vertex_average() << std::endl;
   // _console << "Production eps: " << production << std::endl;
   // _console << "Destruction eps: " << destruction << std::endl;
+
+  // _console << "Production epsilon: " << production << std::endl;
+  // _console << "Dissipation epsilon: " << destruction << std::endl;
 
   if (_realizable_constraint)
   {

@@ -14,10 +14,10 @@
 /**
  * Neumann boundary (== fixed inflow) condition for finite volume scheme
  */
-class NSFVTKEInletBC : public FVFluxBC
+class NSFVTKEDMixingLengthInletBC : public FVFluxBC
 {
 public:
-  NSFVTKEInletBC(const InputParameters & parameters);
+  NSFVTKEDMixingLengthInletBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 
@@ -33,6 +33,12 @@ protected:
 
   /// Density
   const Moose::Functor<ADReal> & _rho;
+
+  /// C_mu closure constant
+  const Moose::Functor<ADReal> & _C_mu;
+
+  /// Mixing Length
+  const Moose::Functor<ADReal> & _mixing_length;
 
   /// Trubulent intensity
   const Real _intensity;

@@ -1,4 +1,4 @@
-Re = 100000
+Re = 10000000
 D = 1
 rho = 1000
 # bulk_u = 1
@@ -223,6 +223,16 @@ velocity_interp_method = 'rc'
   []
 []
 
+[AuxKernels]
+    [relax_mut]
+      type = relaxVar
+      variable = 'mu_t'
+      var_to_relax = 'mu_t'
+      relaxation_factor = 1.0
+      execute_on = 'NONLINEAR'
+    []
+[]
+
 
 # [Preconditioning]
 #   [SMP]
@@ -271,13 +281,14 @@ velocity_interp_method = 'rc'
   dt = 0.1
   end_time = 1.0
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -ksp_gmres_restart'
-  petsc_options_value = 'lu NONZERO 50'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -pc_factor_shift_type'
+  petsc_options_value = 'lu 200 NONZERO'
+  nl_max_its = 200
 #   petsc_options_iname = '-pc_type -pc_svd_monitor'
 #   petsc_options_value = 'svd true'
 #   line_search = none
-  nl_rel_tol = 1e-6
   nl_abs_tol = 1e-6
+  nl_rel_tol = 1e-2
   automatic_scaling = true
 
 []
@@ -334,12 +345,12 @@ velocity_interp_method = 'rc'
       variable = pressure
   []
 
-  # [turbulent_viscosity]
-  #     type = MultiAppCopyTransfer
-  #     from_multi_app = kEpsilon
-  #     source_variable = mu_t
-  #     variable = mu_t
-  # []
+  [turbulent_viscosity]
+      type = MultiAppCopyTransfer
+      from_multi_app = kEpsilon
+      source_variable = mu_t
+      variable = mu_t
+  []
 []
 
 [Outputs]

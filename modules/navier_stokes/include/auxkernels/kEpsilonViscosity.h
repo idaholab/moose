@@ -63,4 +63,7 @@ protected:
 
   /// Linearzied computation of y_plus ?
   const bool _wall_treatement;
+
+  /// Non-equilibrium wall treatement ?
+  const bool _non_equilibrium_treatement;
 };

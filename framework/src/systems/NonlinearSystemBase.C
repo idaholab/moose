@@ -3091,12 +3091,20 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
     {
       PARALLEL_TRY
       {
+        _console << "FV_dampers" << std::endl;
         TIME_SECTION("computeDampers", 3, "Computing Dampers");
         has_active_dampers = true;
         *_increment_vec = update;
-        ComputeFVElemDampingThread cid(_fe_problem);
-        Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
-        damping = std::min(cid.damping(), damping);
+        _console << "FV Damping Thread" << std::endl;
+        if (_fe_problem.haveFV())
+        {
+          ComputeFVElemDampingThread cid(_fe_problem);
+          _console << "Increments recomputed" << std::endl;
+          //Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
+          _console << "Got element range" << std::endl;
+          damping = std::min(cid.damping(), damping);
+          _console << "Recomputed damping" << std::endl;
+        }
       }
       PARALLEL_CATCH;
     }
