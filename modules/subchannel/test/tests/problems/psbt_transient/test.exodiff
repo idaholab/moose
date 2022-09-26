@@ -2,13 +2,13 @@ COORDINATES
 TIME STEPS
 NODAL VARIABLES
 	DP relative 2e-5
-	P
+	P relative 2e-5
 	S
 	SumWij relative 3e-3
 	T
-	h
-	mdot
-	mu
+	h relative 8e-6
+	mdot relative 2e-5
+	mu relative 9e-6
 	q_prime
 	rho
 	w_perim
