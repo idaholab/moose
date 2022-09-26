@@ -559,34 +559,33 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
 
           if (iz == first_node)
           {
-            PetscScalar value_vec_ct = -2.0 * alpha *
-                                       (*_mdot_soln)(node_in)*_WijPrime(i_gap, cross_index) /
-                                       (rho_interp * S_interp);
-            value_vec_ct =
-                alpha * (*_mdot_soln)(node_in_j)*_WijPrime(i_gap, cross_index) / (rho_j * S_j);
-            value_vec_ct +=
-                alpha * (*_mdot_soln)(node_in_i)*_WijPrime(i_gap, cross_index) / (rho_i * S_i);
+            PetscScalar value_vec_ct = -2.0 * alpha * (*_mdot_soln)(node_in)*_CT *
+                                       _WijPrime(i_gap, cross_index) / (rho_interp * S_interp);
+            value_vec_ct += alpha * (*_mdot_soln)(node_in_j)*_CT * _WijPrime(i_gap, cross_index) /
+                            (rho_j * S_j);
+            value_vec_ct += alpha * (*_mdot_soln)(node_in_i)*_CT * _WijPrime(i_gap, cross_index) /
+                            (rho_i * S_i);
             PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
             VecSetValues(_amc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES);
           }
           else
           {
             PetscScalar value_center_ct =
-                2.0 * alpha * _WijPrime(i_gap, cross_index) / (rho_interp * S_interp);
+                2.0 * alpha * _CT * _WijPrime(i_gap, cross_index) / (rho_interp * S_interp);
             PetscInt row_ct = i_ch + _n_channels * iz_ind;
             PetscInt col_ct = i_ch + _n_channels * (iz_ind - 1);
             MatSetValues(
                 _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_center_ct, ADD_VALUES);
 
             PetscScalar value_left_ct =
-                -1.0 * alpha * _WijPrime(i_gap, cross_index) / (rho_j * S_j);
+                -1.0 * alpha * _CT * _WijPrime(i_gap, cross_index) / (rho_j * S_j);
             row_ct = i_ch + _n_channels * iz_ind;
             col_ct = jj_ch + _n_channels * (iz_ind - 1);
             MatSetValues(
                 _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_left_ct, ADD_VALUES);
 
             PetscScalar value_right_ct =
-                -1.0 * alpha * _WijPrime(i_gap, cross_index) / (rho_i * S_i);
+                -1.0 * alpha * _CT * _WijPrime(i_gap, cross_index) / (rho_i * S_i);
             row_ct = i_ch + _n_channels * iz_ind;
             col_ct = ii_ch + _n_channels * (iz_ind - 1);
             MatSetValues(
@@ -594,21 +593,21 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
           }
 
           PetscScalar value_center_ct =
-              2.0 * (1.0 - alpha) * _WijPrime(i_gap, cross_index) / (rho_interp * S_interp);
+              2.0 * (1.0 - alpha) * _CT * _WijPrime(i_gap, cross_index) / (rho_interp * S_interp);
           PetscInt row_ct = i_ch + _n_channels * iz_ind;
           PetscInt col_ct = i_ch + _n_channels * iz_ind;
           MatSetValues(
               _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_center_ct, ADD_VALUES);
 
           PetscScalar value_left_ct =
-              -1.0 * (1.0 - alpha) * _WijPrime(i_gap, cross_index) / (rho_j * S_j);
+              -1.0 * (1.0 - alpha) * _CT * _WijPrime(i_gap, cross_index) / (rho_j * S_j);
           row_ct = i_ch + _n_channels * iz_ind;
           col_ct = jj_ch + _n_channels * iz_ind;
           MatSetValues(
               _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_left_ct, ADD_VALUES);
 
           PetscScalar value_right_ct =
-              -1.0 * (1.0 - alpha) * _WijPrime(i_gap, cross_index) / (rho_i * S_i);
+              -1.0 * (1.0 - alpha) * _CT * _WijPrime(i_gap, cross_index) / (rho_i * S_i);
           row_ct = i_ch + _n_channels * iz_ind;
           col_ct = ii_ch + _n_channels * iz_ind;
           MatSetValues(
@@ -728,7 +727,7 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
           // Setting solutions
           if (S_interp != 0)
           {
-            auto DP = std::pow(S_interp, 0.0) * xx[iz_ind * _n_channels + i_ch];
+            auto DP = std::pow(S_interp, -1.0) * xx[iz_ind * _n_channels + i_ch];
             _DP_soln->set(node_out, DP);
           }
           else

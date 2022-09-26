@@ -68,7 +68,7 @@ P_out = 2.0e5 # Pa
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 5
-  beta = 0.1
+  beta = 0.01
   P_out = 2.0e5
   CT = 1.0
   compute_density = true
@@ -96,7 +96,7 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 5.000e5 # W
+    power = 0.05e5 # W
     filename = "pin_power_profile19.txt"
   []
 
