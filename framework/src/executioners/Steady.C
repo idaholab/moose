@@ -53,6 +53,17 @@ Steady::init()
   checkIntegrity();
   _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _problem.setupAndExecute(EXEC_INITIAL);
+  if (!_app.isRecovering())
+  {
+    _problem.execTransfers(EXEC_INITIAL);
+
+    bool converged = _problem.execMultiApps(EXEC_INITIAL);
+    if (!converged)
+      mooseError("failed to converge initial MultiApp");
+
+    // We'll backup the Multiapp here
+    _problem.backupMultiApps(EXEC_INITIAL);
+  }
 }
 
 void
