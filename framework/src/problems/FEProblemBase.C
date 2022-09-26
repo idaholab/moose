@@ -3818,8 +3818,6 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   if (exec_type != EXEC_INITIAL)
     executeControls(exec_type);
 
-  setup(exec_type);
-
   // Samplers; EXEC_INITIAL is not called because the Sampler::init() method that is called after
   // construction makes the first Sampler::execute() call. This ensures that the random number
   // generator object is the correct state prior to any other object (e.g., Transfers) attempts to
