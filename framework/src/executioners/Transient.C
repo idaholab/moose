@@ -246,7 +246,7 @@ Transient::init()
   }
 
   _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
-  _problem.initialSetup();
+  _problem.setupAndExecute(EXEC_INITIAL);
 
   /**
    * If this is a restart run, the user may want to override the start time, which we already set in

@@ -591,548 +591,7 @@ FEProblemBase::getNonlinearEvaluableElementRange()
 void
 FEProblemBase::initialSetup()
 {
-  TIME_SECTION("initialSetup", 2, "Performing Initial Setup");
-
-  SubProblem::setup(EXEC_INITIAL);
-
-  if (_skip_exception_check)
-    mooseWarning("MOOSE may fail to catch an exception when the \"skip_exception_check\" parameter "
-                 "is used. If you receive a terse MPI error during execution, remove this "
-                 "parameter and rerun your simulation");
-
-  // set state flag indicating that we are in or beyond initialSetup.
-  // This can be used to throw errors in methods that _must_ be called at construction time.
-  _started_initial_setup = true;
-  setCurrentExecuteOnFlag(EXEC_INITIAL);
-
-  // Setup the solution states (current, old, etc) in each system based on
-  // its default and the states requested of each of its variables
-  _nl->initSolutionState();
-  _aux->initSolutionState();
-  if (getDisplacedProblem())
-  {
-    getDisplacedProblem()->nlSys().initSolutionState();
-    getDisplacedProblem()->auxSys().initSolutionState();
-  }
-
-  // always execute to get the max number of DoF per element and node needed to initialize phi_zero
-  // variables
-  dof_id_type max_var_n_dofs_per_elem;
-  dof_id_type max_var_n_dofs_per_node;
-  {
-    TIME_SECTION("computingMaxDofs", 3, "Computing Max Dofs Per Element");
-
-    MaxVarNDofsPerElem mvndpe(*this, *_nl);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
-    max_var_n_dofs_per_elem = mvndpe.max();
-    _communicator.max(max_var_n_dofs_per_elem);
-
-    MaxVarNDofsPerNode mvndpn(*this, *_nl);
-    Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
-    max_var_n_dofs_per_node = mvndpn.max();
-    _communicator.max(max_var_n_dofs_per_node);
-  }
-
-  {
-    TIME_SECTION("assignMaxDofs", 5, "Assigning Maximum Dofs Per Elem");
-
-    _nl->assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
-    auto displaced_problem = getDisplacedProblem();
-    if (displaced_problem)
-      displaced_problem->nlSys().assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
-
-    _nl->assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
-    if (displaced_problem)
-      displaced_problem->nlSys().assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
-  }
-
-  {
-    TIME_SECTION("settingRequireDerivativeSize", 5, "Setting Required Derivative Size");
-
-#ifndef MOOSE_SPARSE_AD
-    auto size_required = max_var_n_dofs_per_elem * _nl->nVariables();
-    if (hasMortarCoupling())
-      size_required *= 3;
-    else if (hasNeighborCoupling())
-      size_required *= 2;
-
-    _nl->setRequiredDerivativeSize(size_required);
-#endif
-  }
-
-  {
-    TIME_SECTION("resizingVarValues", 5, "Resizing Variable Values");
-
-    for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    {
-      _phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(), std::vector<Real>(getMaxQps(), 0.));
-      _grad_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
-                                 std::vector<RealGradient>(getMaxQps(), RealGradient(0.)));
-      _second_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
-                                   std::vector<RealTensor>(getMaxQps(), RealTensor(0.)));
-    }
-  }
-
-  if (_app.isRecovering() && (_app.isUltimateMaster() || _force_restart))
-  {
-    if (_app.getRestartRecoverFileSuffix() == "cpa")
-      _restart_io->useAsciiExtension();
-  }
-
-  if ((_app.isRestarting() || _app.isRecovering()) && (_app.isUltimateMaster() || _force_restart))
-  {
-    TIME_SECTION("restartFromFile", 3, "Restarting From File");
-
-    _restart_io->readRestartableDataHeader(true);
-    _restart_io->restartEquationSystemsObject();
-
-    /**
-     * TODO: Move the RestartableDataIO call to reload data here. Only a few tests fail when doing
-     * this now. Material Properties aren't sized properly at this point and fail across the board,
-     * there are a few other misc tests that fail too.
-     *
-     * _restart_io->readRestartableData();
-     */
-  }
-  else
-  {
-    ExodusII_IO * reader = _app.getExReaderForRestart();
-
-    if (reader)
-    {
-      TIME_SECTION("copyingFromExodus", 3, "Copying Variables From Exodus");
-
-      _nl->copyVars(*reader);
-      _aux->copyVars(*reader);
-    }
-    else
-    {
-      if (_nl->hasVarCopy() || _aux->hasVarCopy())
-        mooseError("Need Exodus reader to restart variables but the reader is not available\n"
-                   "Use either FileMesh with an Exodus mesh file or FileMeshGenerator with an "
-                   "Exodus mesh file and with use_for_exodus_restart equal to true");
-    }
-  }
-
-  // Perform output related setups
-  _app.getOutputWarehouse().setup(EXEC_INITIAL);
-
-  // Flush all output to _console that occur during construction and initialization of objects
-  _app.getOutputWarehouse().mooseConsole();
-
-  // Build Refinement and Coarsening maps for stateful material projections if necessary
-  if ((_adaptivity.isOn() || _num_grid_steps) &&
-      (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-       _neighbor_material_props.hasStatefulProperties()))
-  {
-    if (_has_internal_edge_residual_objects)
-      mooseError("Stateful neighbor material properties do not work with mesh adaptivity");
-
-    _mesh.buildRefinementAndCoarseningMaps(_assembly[0].get());
-  }
-
-  if (!_app.isRecovering())
-  {
-    /**
-     * If we are not recovering but we are doing restart (_app.getExodusFileRestart() == true) with
-     * additional uniform refinements. We have to delay the refinement until this point
-     * in time so that the equation systems are initialized and projections can be performed.
-     */
-    if (_mesh.uniformRefineLevel() > 0 && _app.getExodusFileRestart())
-    {
-      if (!_app.isUltimateMaster())
-        mooseError(
-            "Doing extra refinements when restarting is NOT supported for sub-apps of a MultiApp");
-
-      adaptivity().uniformRefineWithProjection();
-    }
-  }
-
-  unsigned int n_threads = libMesh::n_threads();
-
-  // UserObject initialSetup
-  std::set<std::string> depend_objects_ic = _ics.getDependObjects();
-  std::set<std::string> depend_objects_aux = _aux->getDependObjects();
-
-  // This replaces all prior updateDependObjects calls on the old user object warehouses.
-  TheWarehouse::Query uo_query = theWarehouse().query().condition<AttribSystem>("UserObject");
-  std::vector<UserObject *> userobjs;
-  uo_query.queryInto(userobjs);
-  groupUserObjects(
-      theWarehouse(), getAuxiliarySystem(), _app.getExecuteOnEnum(), userobjs, depend_objects_ic);
-
-  for (auto obj : userobjs)
-    obj->setup(EXEC_INITIAL);
-
-  // check if jacobian calculation is done in userobject
-  for (THREAD_ID tid = 0; tid < n_threads; ++tid)
-    checkUserObjectJacobianRequirement(tid);
-
-  // Check whether nonlocal couling is required or not
-  checkNonlocalCoupling();
-  if (_requires_nonlocal_coupling)
-    setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
-
-  {
-    TIME_SECTION("initializingFunctions", 5, "Initializing Functions");
-
-    // Call the initialSetup methods for functions
-    for (THREAD_ID tid = 0; tid < n_threads; tid++)
-    {
-      reinitScalars(tid); // initialize scalars so they are properly sized for use as input into
-                          // ParsedFunctions
-      _functions.setup(EXEC_INITIAL, tid);
-    }
-  }
-
-  {
-    TIME_SECTION("initializingRandomObjects", 5, "Initializing Random Objects");
-
-    // Random interface objects
-    for (const auto & it : _random_data_objects)
-      it.second->updateSeeds(EXEC_INITIAL);
-  }
-
-  if (!_app.isRecovering())
-  {
-    computeUserObjects(EXEC_INITIAL, Moose::PRE_IC);
-
-    {
-      TIME_SECTION("ICiniitalSetup", 5, "Setting Up Initial Conditions");
-
-      for (THREAD_ID tid = 0; tid < n_threads; tid++)
-        _ics.initialSetup(tid);
-
-      _scalar_ics.initialSetup();
-    }
-
-    projectSolution();
-  }
-
-  // Materials
-  if (_all_materials.hasActiveObjects(0))
-  {
-    TIME_SECTION("materialInitialSetup", 3, "Setting Up Materials");
-
-    for (THREAD_ID tid = 0; tid < n_threads; tid++)
-    {
-      // Sort the Material objects, these will be actually computed by MOOSE in reinit methods.
-      _materials.sort(tid);
-      _interface_materials.sort(tid);
-
-      // Call initialSetup on all material objects
-      _all_materials.setup(EXEC_INITIAL, tid);
-
-      // Discrete materials may insert additional dependencies on materials during the initial
-      // setup. Therefore we resolve the dependencies once more, now with the additional
-      // dependencies due to discrete materials.
-      if (_discrete_materials.hasActiveObjects())
-      {
-        _materials.sort(tid);
-        _interface_materials.sort(tid);
-      }
-    }
-
-    {
-      TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
-
-      const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-      ComputeMaterialsObjectThread cmt(*this,
-                                       _material_data,
-                                       _bnd_material_data,
-                                       _neighbor_material_data,
-                                       _material_props,
-                                       _bnd_material_props,
-                                       _neighbor_material_props,
-                                       _assembly);
-      Threads::parallel_reduce(elem_range, cmt);
-
-      if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-          _neighbor_material_props.hasStatefulProperties())
-        _has_initialized_stateful = true;
-    }
-  }
-
-  for (THREAD_ID tid = 0; tid < n_threads; tid++)
-  {
-    _internal_side_indicators.setup(EXEC_INITIAL, tid);
-    _indicators.setup(EXEC_INITIAL, tid);
-    _markers.sort(tid);
-    _markers.setup(EXEC_INITIAL, tid);
-  }
-
-#ifdef LIBMESH_ENABLE_AMR
-
-  if (!_app.isRecovering())
-  {
-    unsigned int n = adaptivity().getInitialSteps();
-    if (n && !_app.isUltimateMaster() && _app.isRestarting())
-      mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
-
-    initialAdaptMesh();
-  }
-
-#endif // LIBMESH_ENABLE_AMR
-
-  if (!_app.isRecovering() && !_app.isRestarting())
-  {
-    // During initial setup the solution is copied to the older solution states (old, older, etc)
-    copySolutionsBackwards();
-  }
-
-  if (!_app.isRecovering())
-  {
-    if (haveXFEM())
-      updateMeshXFEM();
-  }
-
-  // Call initialSetup on the nonlinear system
-  _nl->setup(EXEC_INITIAL);
-
-  // Auxilary variable initialSetup calls
-  _aux->setup(EXEC_INITIAL);
-
-  if (_displaced_problem)
-    // initialSetup for displaced systems
-    _displaced_problem->setup(EXEC_INITIAL);
-
-  _nl->setSolution(*(_nl->system().current_local_solution.get()));
-
-  // Update the nearest node searches (has to be called after the problem is all set up)
-  // We do this here because this sets up the Element's DoFs to ghost
-  updateGeomSearch(GeometricSearchData::NEAREST_NODE);
-
-  _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
-  if (_displaced_mesh)
-    _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
-
-  // We need to move the mesh in order to build a map between mortar secondary and primary
-  // interfaces. This map will then be used by the AgumentSparsityOnInterface ghosting functor to
-  // know which dofs we need ghosted when we call EquationSystems::reinit
-  if (_displaced_problem && _mortar_data.hasDisplacedObjects())
-    _displaced_problem->updateMesh();
-
-  // Possibly reinit one more time to get ghosting correct
-  reinitBecauseOfGhostingOrNewGeomObjects();
-
-  if (_displaced_mesh)
-    _displaced_problem->updateMesh();
-
-  updateGeomSearch(); // Call all of the rest of the geometric searches
-
-  auto ti = _nl->getTimeIntegrator();
-
-  if (ti)
-  {
-    TIME_SECTION("timeIntegratorInitialSetup", 5, "Initializing Time Integrator");
-    ti->initialSetup();
-  }
-
-  if (_app.isRestarting() || _app.isRecovering())
-  {
-    if (_app.hasCachedBackup()) // This happens when this app is a sub-app and has been given a
-                                // Backup
-      _app.restoreCachedBackup();
-    else
-    {
-      TIME_SECTION("restoreRestartData", 3, "Restoring Restart Data");
-
-      _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
-    }
-
-    // We may have just clobbered initial conditions that were explicitly set
-    // In a _restart_ scenario it is completely valid to specify new initial conditions
-    // for some of the variables which should override what's coming from the restart file
-    if (!_app.isRecovering())
-    {
-      TIME_SECTION("reprojectInitialConditions", 3, "Reprojecting Initial Conditions");
-
-      for (THREAD_ID tid = 0; tid < n_threads; tid++)
-        _ics.initialSetup(tid);
-      _scalar_ics.sort();
-      projectSolution();
-    }
-  }
-
-  // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ main-app restartable data
-  // has been restored
-
-  // Call initialSetup on the MultiApps
-  if (_multi_apps.hasObjects())
-  {
-    TIME_SECTION("initialSetupMultiApps", 2, "Initializing MultiApps", false);
-    _multi_apps.setup(EXEC_INITIAL);
-  }
-
-  // Call initialSetup on the transfers
-  {
-    TIME_SECTION("initialSetupTransfers", 2, "Initializing Transfers");
-
-    _transfers.setup(EXEC_INITIAL);
-
-    // Call initialSetup on the MultiAppTransfers to be executed on TO_MULTIAPP
-    const auto & to_multi_app_objects = _to_multi_app_transfers.getActiveObjects();
-    for (const auto & transfer : to_multi_app_objects)
-    {
-      transfer->setCurrentDirection(Transfer::DIRECTION::TO_MULTIAPP);
-      transfer->initialSetup();
-    }
-
-    // Call initialSetup on the MultiAppTransfers to be executed on FROM_MULTIAPP
-    const auto & from_multi_app_objects = _from_multi_app_transfers.getActiveObjects();
-    for (const auto & transfer : from_multi_app_objects)
-    {
-      transfer->setCurrentDirection(Transfer::DIRECTION::FROM_MULTIAPP);
-      transfer->initialSetup();
-    }
-
-    // Call initialSetup on the MultiAppTransfers to be executed on BETWEEN_MULTIAPP
-    const auto & between_multi_app_objects = _between_multi_app_transfers.getActiveObjects();
-    for (const auto & transfer : between_multi_app_objects)
-    {
-      transfer->setCurrentDirection(Transfer::DIRECTION::BETWEEN_MULTIAPP);
-      transfer->initialSetup();
-    }
-  }
-
-  if (_boundary_restricted_node_integrity_check)
-  {
-    TIME_SECTION("BoundaryRestrictedNodeIntegrityCheck", 5);
-
-    // check that variables are defined along boundaries of boundary restricted nodal objects
-    ConstBndNodeRange & bnd_nodes = *mesh().getBoundaryNodeRange();
-    BoundaryNodeIntegrityCheckThread bnict(*this, uo_query);
-    Threads::parallel_reduce(bnd_nodes, bnict);
-
-    // Nodal bcs aren't threaded
-    const auto & nodal_bcs = _nl->getNodalBCWarehouse();
-    const auto & node_to_elem_map = _mesh.nodeToActiveSemilocalElemMap();
-    for (const auto & bnode : bnd_nodes)
-    {
-      const auto boundary_id = bnode->_bnd_id;
-      const Node * const node = bnode->_node;
-
-      if (node->processor_id() != this->processor_id() ||
-          !nodal_bcs.hasBoundaryObjects(boundary_id, 0))
-        continue;
-
-      // Only check vertices. Variables may not be defined on non-vertex nodes (think first order
-      // Lagrange on a second order mesh) and user-code can often handle that
-      const Elem * const an_elem =
-          _mesh.getMesh().elem_ptr(libmesh_map_find(node_to_elem_map, node->id()).front());
-      if (!an_elem->is_vertex(an_elem->get_node_index(node)))
-        continue;
-
-      const auto & bnd_name = _mesh.getBoundaryName(boundary_id);
-
-      const auto & bnd_objects = nodal_bcs.getBoundaryObjects(boundary_id, 0);
-      for (const auto & bnd_object : bnd_objects)
-        // Skip if this object uses geometric search because coupled variables may be defined on
-        // paired boundaries instead of the boundary this node is on
-        if (!bnd_object->requiresGeometricSearch() && bnd_object->checkVariableBoundaryIntegrity())
-        {
-          std::set<MooseVariableFieldBase *> vars_to_omit = {&static_cast<MooseVariableFieldBase &>(
-              const_cast<MooseVariableBase &>(bnd_object->variable()))};
-
-          boundaryIntegrityCheckError(
-              *bnd_object, bnd_object->checkAllVariables(*node, vars_to_omit), bnd_name);
-        }
-    }
-  }
-
-  if (_boundary_restricted_elem_integrity_check)
-  {
-    TIME_SECTION("BoundaryRestrictedElemIntegrityCheck", 5);
-
-    // check that variables are defined along boundaries of boundary restricted elemental objects
-    ConstBndElemRange & bnd_elems = *mesh().getBoundaryElementRange();
-    BoundaryElemIntegrityCheckThread beict(*this, uo_query);
-    Threads::parallel_reduce(bnd_elems, beict);
-  }
-
-  if (!_app.isRecovering())
-  {
-    execTransfers(EXEC_INITIAL);
-
-    bool converged = execMultiApps(EXEC_INITIAL);
-    if (!converged)
-      mooseError("failed to converge initial MultiApp");
-
-    // We'll backup the Multiapp here
-    backupMultiApps(EXEC_INITIAL);
-
-    for (THREAD_ID tid = 0; tid < n_threads; tid++)
-      reinitScalars(tid);
-
-    execute(EXEC_INITIAL);
-
-    // The FEProblemBase::execute method doesn't call all the systems on EXEC_INITIAL, but it does
-    // set/unset the current flag. Therefore, this resets the current flag to EXEC_INITIAL so that
-    // subsequent calls (e.g., executeControls) have the proper flag.
-    setCurrentExecuteOnFlag(EXEC_INITIAL);
-  }
-
-  // Here we will initialize the stateful properties once more since they may have been updated
-  // during initialSetup by calls to computeProperties.
-  //
-  // It's really bad that we don't allow this during restart.  It means that we can't add new
-  // stateful materials
-  // during restart.  This is only happening because this _has_ to be below initial userobject
-  // execution.
-  // Otherwise this could be done up above... _before_ restoring restartable data... which would
-  // allow you to have
-  // this happen during restart.  I honestly have no idea why this has to happen after initial user
-  // object computation.
-  // THAT is something we should fix... so I've opened this ticket: #5804
-  if (!_app.isRecovering() && !_app.isRestarting() &&
-      (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-       _neighbor_material_props.hasStatefulProperties()))
-  {
-    TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
-
-    const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeMaterialsObjectThread cmt(*this,
-                                     _material_data,
-                                     _bnd_material_data,
-                                     _neighbor_material_data,
-                                     _material_props,
-                                     _bnd_material_props,
-                                     _neighbor_material_props,
-                                     _assembly);
-    Threads::parallel_reduce(elem_range, cmt);
-  }
-
-  // Control Logic
-  executeControls(EXEC_INITIAL);
-
-  // Scalar variables need to reinited for the initial conditions to be available for output
-  for (unsigned int tid = 0; tid < n_threads; tid++)
-    reinitScalars(tid);
-
-  if (_displaced_mesh)
-    _displaced_problem->syncSolutions();
-
-  // Writes all calls to _console from initialSetup() methods
-  _app.getOutputWarehouse().mooseConsole();
-
-  if (_requires_nonlocal_coupling)
-  {
-    setNonlocalCouplingMatrix();
-    for (THREAD_ID tid = 0; tid < n_threads; ++tid)
-      _assembly[tid]->initNonlocalCoupling();
-  }
-
-  {
-    TIME_SECTION("lineSearchInitialSetup", 5, "Initializing Line Search");
-
-    if (_line_search)
-      _line_search->setup(EXEC_INITIAL);
-  }
-
-  // Perform Reporter get/declare check
-  _reporter_data.check();
-
-  setCurrentExecuteOnFlag(EXEC_NONE);
+  mooseError("Do not call this method. Use setup instead");
 }
 
 void
@@ -3774,39 +3233,557 @@ FEProblemBase::executeAllObjects(const ExecFlagType & /*exec_type*/)
 }
 
 void
+FEProblemBase::boundaryIntegrityCheck()
+{
+  // This replaces all prior updateDependObjects calls on the old user object warehouses.
+  TheWarehouse::Query uo_query = theWarehouse().query().condition<AttribSystem>("UserObject");
+  std::vector<UserObject *> userobjs;
+  uo_query.queryInto(userobjs);
+
+  if (_boundary_restricted_node_integrity_check)
+  {
+    TIME_SECTION("BoundaryRestrictedNodeIntegrityCheck", 5);
+
+    // check that variables are defined along boundaries of boundary restricted nodal objects
+    ConstBndNodeRange & bnd_nodes = *mesh().getBoundaryNodeRange();
+    BoundaryNodeIntegrityCheckThread bnict(*this, uo_query);
+    Threads::parallel_reduce(bnd_nodes, bnict);
+
+    // Nodal bcs aren't threaded
+    const auto & nodal_bcs = _nl->getNodalBCWarehouse();
+    const auto & node_to_elem_map = _mesh.nodeToActiveSemilocalElemMap();
+    for (const auto & bnode : bnd_nodes)
+    {
+      const auto boundary_id = bnode->_bnd_id;
+      const Node * const node = bnode->_node;
+
+      if (node->processor_id() != this->processor_id() ||
+          !nodal_bcs.hasBoundaryObjects(boundary_id, 0))
+        continue;
+
+      // Only check vertices. Variables may not be defined on non-vertex nodes (think first order
+      // Lagrange on a second order mesh) and user-code can often handle that
+      const Elem * const an_elem =
+          _mesh.getMesh().elem_ptr(libmesh_map_find(node_to_elem_map, node->id()).front());
+      if (!an_elem->is_vertex(an_elem->get_node_index(node)))
+        continue;
+
+      const auto & bnd_name = _mesh.getBoundaryName(boundary_id);
+
+      const auto & bnd_objects = nodal_bcs.getBoundaryObjects(boundary_id, 0);
+      for (const auto & bnd_object : bnd_objects)
+        // Skip if this object uses geometric search because coupled variables may be defined on
+        // paired boundaries instead of the boundary this node is on
+        if (!bnd_object->requiresGeometricSearch() && bnd_object->checkVariableBoundaryIntegrity())
+        {
+          std::set<MooseVariableFieldBase *> vars_to_omit = {&static_cast<MooseVariableFieldBase &>(
+              const_cast<MooseVariableBase &>(bnd_object->variable()))};
+
+          boundaryIntegrityCheckError(
+              *bnd_object, bnd_object->checkAllVariables(*node, vars_to_omit), bnd_name);
+        }
+    }
+  }
+
+  if (_boundary_restricted_elem_integrity_check)
+  {
+    TIME_SECTION("BoundaryRestrictedElemIntegrityCheck", 5);
+
+    // check that variables are defined along boundaries of boundary restricted elemental objects
+    ConstBndElemRange & bnd_elems = *mesh().getBoundaryElementRange();
+    BoundaryElemIntegrityCheckThread beict(*this, uo_query);
+    Threads::parallel_reduce(bnd_elems, beict);
+  }
+}
+
+void
 FEProblemBase::setup(const ExecFlagType & exec_type)
 {
   SubProblem::setup(exec_type);
 
-  if (_line_search)
-    _line_search->setup(exec_type);
-
-  unsigned int n_threads = libMesh::n_threads();
-  for (THREAD_ID tid = 0; tid < n_threads; tid++)
+  if (exec_type == EXEC_INITIAL)
   {
-    _all_materials.setup(exec_type, tid);
-    _functions.setup(exec_type, tid);
+    if (_skip_exception_check)
+      mooseWarning(
+          "MOOSE may fail to catch an exception when the \"skip_exception_check\" parameter "
+          "is used. If you receive a terse MPI error during execution, remove this "
+          "parameter and rerun your simulation");
+
+    // set state flag indicating that we are in or beyond initialSetup.
+    // This can be used to throw errors in methods that _must_ be called at construction time.
+    _started_initial_setup = true;
+
+    // Setup the solution states (current, old, etc) in each system based on
+    // its default and the states requested of each of its variables
+    _nl->initSolutionState();
+    _aux->initSolutionState();
+    if (getDisplacedProblem())
+    {
+      getDisplacedProblem()->nlSys().initSolutionState();
+      getDisplacedProblem()->auxSys().initSolutionState();
+    }
+
+    // always execute to get the max number of DoF per element and node needed to initialize
+    // phi_zero variables
+    dof_id_type max_var_n_dofs_per_elem;
+    dof_id_type max_var_n_dofs_per_node;
+    {
+      TIME_SECTION("computingMaxDofs", 3, "Computing Max Dofs Per Element");
+
+      MaxVarNDofsPerElem mvndpe(*this, *_nl);
+      Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
+      max_var_n_dofs_per_elem = mvndpe.max();
+      _communicator.max(max_var_n_dofs_per_elem);
+
+      MaxVarNDofsPerNode mvndpn(*this, *_nl);
+      Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
+      max_var_n_dofs_per_node = mvndpn.max();
+      _communicator.max(max_var_n_dofs_per_node);
+    }
+
+    {
+      TIME_SECTION("assignMaxDofs", 5, "Assigning Maximum Dofs Per Elem");
+
+      _nl->assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
+      auto displaced_problem = getDisplacedProblem();
+      if (displaced_problem)
+        displaced_problem->nlSys().assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
+
+      _nl->assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
+      if (displaced_problem)
+        displaced_problem->nlSys().assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
+    }
+
+    {
+      TIME_SECTION("settingRequireDerivativeSize", 5, "Setting Required Derivative Size");
+
+#ifndef MOOSE_SPARSE_AD
+      auto size_required = max_var_n_dofs_per_elem * _nl->nVariables();
+      if (hasMortarCoupling())
+        size_required *= 3;
+      else if (hasNeighborCoupling())
+        size_required *= 2;
+
+      _nl->setRequiredDerivativeSize(size_required);
+#endif
+    }
+
+    {
+      TIME_SECTION("resizingVarValues", 5, "Resizing Variable Values");
+
+      for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+      {
+        _phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(), std::vector<Real>(getMaxQps(), 0.));
+        _grad_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
+                                   std::vector<RealGradient>(getMaxQps(), RealGradient(0.)));
+        _second_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
+                                     std::vector<RealTensor>(getMaxQps(), RealTensor(0.)));
+      }
+    }
+
+    if (_app.isRecovering() && (_app.isUltimateMaster() || _force_restart))
+    {
+      if (_app.getRestartRecoverFileSuffix() == "cpa")
+        _restart_io->useAsciiExtension();
+    }
+
+    if ((_app.isRestarting() || _app.isRecovering()) && (_app.isUltimateMaster() || _force_restart))
+    {
+      TIME_SECTION("restartFromFile", 3, "Restarting From File");
+
+      _restart_io->readRestartableDataHeader(true);
+      _restart_io->restartEquationSystemsObject();
+
+      /**
+       * TODO: Move the RestartableDataIO call to reload data here. Only a few tests fail when doing
+       * this now. Material Properties aren't sized properly at this point and fail across the
+       * board, there are a few other misc tests that fail too.
+       *
+       * _restart_io->readRestartableData();
+       */
+    }
+    else
+    {
+      ExodusII_IO * reader = _app.getExReaderForRestart();
+
+      if (reader)
+      {
+        TIME_SECTION("copyingFromExodus", 3, "Copying Variables From Exodus");
+
+        _nl->copyVars(*reader);
+        _aux->copyVars(*reader);
+      }
+      else
+      {
+        if (_nl->hasVarCopy() || _aux->hasVarCopy())
+          mooseError("Need Exodus reader to restart variables but the reader is not available\n"
+                     "Use either FileMesh with an Exodus mesh file or FileMeshGenerator with an "
+                     "Exodus mesh file and with use_for_exodus_restart equal to true");
+      }
+    }
   }
 
-  _aux->setup(exec_type);
-  _nl->setup(exec_type);
+  setCurrentExecuteOnFlag(exec_type);
 
-  if (_displaced_problem)
-    _displaced_problem->setup(exec_type);
+  // Perform output related setups
+  _app.getOutputWarehouse().setup(exec_type);
+
+  // Flush all output to _console that occur during construction and initialization of objects
+  _app.getOutputWarehouse().mooseConsole();
+
+  if (exec_type == EXEC_INITIAL)
+  {
+    // Build Refinement and Coarsening maps for stateful material projections if necessary
+    if ((_adaptivity.isOn() || _num_grid_steps) &&
+        (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+         _neighbor_material_props.hasStatefulProperties()))
+    {
+      if (_has_internal_edge_residual_objects)
+        mooseError("Stateful neighbor material properties do not work with mesh adaptivity");
+
+      _mesh.buildRefinementAndCoarseningMaps(_assembly[0].get());
+    }
+
+    if (!_app.isRecovering())
+    {
+      /**
+       * If we are not recovering but we are doing restart (_app.getExodusFileRestart() == true)
+       * with additional uniform refinements. We have to delay the refinement until this point in
+       * time so that the equation systems are initialized and projections can be performed.
+       */
+      if (_mesh.uniformRefineLevel() > 0 && _app.getExodusFileRestart())
+      {
+        if (!_app.isUltimateMaster())
+          mooseError("Doing extra refinements when restarting is NOT supported for sub-apps of a "
+                     "MultiApp");
+
+        adaptivity().uniformRefineWithProjection();
+      }
+    }
+  }
+
+  unsigned int n_threads = libMesh::n_threads();
+
+  // UserObject initialSetup
+  std::set<std::string> depend_objects_ic = _ics.getDependObjects();
+  std::set<std::string> depend_objects_aux = _aux->getDependObjects();
+
+  // This replaces all prior updateDependObjects calls on the old user object warehouses.
+  TheWarehouse::Query uo_query = theWarehouse().query().condition<AttribSystem>("UserObject");
+  std::vector<UserObject *> userobjs;
+  uo_query.queryInto(userobjs);
+  groupUserObjects(
+      theWarehouse(), getAuxiliarySystem(), _app.getExecuteOnEnum(), userobjs, depend_objects_ic);
+
+  for (auto obj : userobjs)
+    obj->setup(exec_type);
+
+  if (exec_type == EXEC_INITIAL)
+  {
+    // check if jacobian calculation is done in userobject
+    for (THREAD_ID tid = 0; tid < n_threads; ++tid)
+      checkUserObjectJacobianRequirement(tid);
+
+    // Check whether nonlocal couling is required or not
+    checkNonlocalCoupling();
+    if (_requires_nonlocal_coupling)
+      setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
+  }
+
+  {
+    TIME_SECTION("initializingFunctions", 5, "Initializing Functions");
+
+    // Call the initialSetup methods for functions
+    for (THREAD_ID tid = 0; tid < n_threads; tid++)
+    {
+      reinitScalars(tid); // initialize scalars so they are properly sized for use as input into
+                          // ParsedFunctions
+      _functions.setup(exec_type, tid);
+    }
+  }
+
+  {
+    TIME_SECTION("initializingRandomObjects", 5, "Initializing Random Objects");
+
+    // Random interface objects
+    for (const auto & it : _random_data_objects)
+      it.second->updateSeeds(exec_type);
+  }
+
+  if (exec_type == EXEC_INITIAL && !_app.isRecovering())
+    computeUserObjects(exec_type, Moose::PRE_IC);
+
+  if (exec_type == EXEC_INITIAL && !_app.isRecovering())
+  {
+    {
+      TIME_SECTION("ICiniitalSetup", 5, "Setting Up Initial Conditions");
+
+      for (THREAD_ID tid = 0; tid < n_threads; tid++)
+        _ics.initialSetup(tid);
+
+      _scalar_ics.initialSetup();
+    }
+
+    projectSolution();
+  }
+
+  // Materials
+  if (_all_materials.hasActiveObjects(0))
+  {
+    TIME_SECTION("materialInitialSetup", 3, "Setting Up Materials");
+
+    if (exec_type == EXEC_INITIAL)
+      for (THREAD_ID tid = 0; tid < n_threads; tid++)
+      {
+        // Sort the Material objects, these will be actually computed by MOOSE in reinit methods.
+        _materials.sort(tid);
+        _interface_materials.sort(tid);
+
+        // Discrete materials may insert additional dependencies on materials during the initial
+        // setup. Therefore we resolve the dependencies once more, now with the additional
+        // dependencies due to discrete materials.
+        if (_discrete_materials.hasActiveObjects())
+        {
+          _materials.sort(tid);
+          _interface_materials.sort(tid);
+        }
+      }
+
+    for (THREAD_ID tid = 0; tid < n_threads; tid++)
+      // Call setup on all material objects
+      _all_materials.setup(exec_type, tid);
+
+    if (exec_type == EXEC_INITIAL)
+    {
+      TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
+
+      const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+      ComputeMaterialsObjectThread cmt(*this,
+                                       _material_data,
+                                       _bnd_material_data,
+                                       _neighbor_material_data,
+                                       _material_props,
+                                       _bnd_material_props,
+                                       _neighbor_material_props,
+                                       _assembly);
+      Threads::parallel_reduce(elem_range, cmt);
+
+      if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+          _neighbor_material_props.hasStatefulProperties())
+        _has_initialized_stateful = true;
+    }
+  }
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     _internal_side_indicators.setup(exec_type, tid);
     _indicators.setup(exec_type, tid);
+    if (exec_type == EXEC_INITIAL)
+      _markers.sort(tid);
     _markers.setup(exec_type, tid);
   }
 
-  std::vector<UserObject *> userobjs;
-  theWarehouse().query().condition<AttribSystem>("UserObject").queryIntoUnsorted(userobjs);
-  for (auto obj : userobjs)
-    obj->setup(exec_type);
+  if (exec_type == EXEC_INITIAL)
+  {
+#ifdef LIBMESH_ENABLE_AMR
+    if (!_app.isRecovering())
+    {
+      unsigned int n = adaptivity().getInitialSteps();
+      if (n && !_app.isUltimateMaster() && _app.isRestarting())
+        mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
 
-  _app.getOutputWarehouse().setup(exec_type);
+      initialAdaptMesh();
+    }
+#endif // LIBMESH_ENABLE_AMR
+    if (!_app.isRecovering() && !_app.isRestarting())
+    {
+      // During initial setup the solution is copied to the older solution states (old, older, etc)
+      copySolutionsBackwards();
+    }
+
+    if (!_app.isRecovering())
+    {
+      if (haveXFEM())
+        updateMeshXFEM();
+    }
+  }
+
+  // Call initialSetup on the nonlinear system
+  _nl->setup(exec_type);
+
+  // Auxilary variable initialSetup calls
+  _aux->setup(exec_type);
+
+  if (_displaced_problem)
+    // initialSetup for displaced systems
+    _displaced_problem->setup(exec_type);
+
+  if (exec_type == EXEC_INITIAL)
+  {
+    _nl->setSolution(*(_nl->system().current_local_solution.get()));
+
+    // Update the nearest node searches (has to be called after the problem is all set up)
+    // We do this here because this sets up the Element's DoFs to ghost
+    updateGeomSearch(GeometricSearchData::NEAREST_NODE);
+
+    _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
+    if (_displaced_mesh)
+      _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
+
+    // We need to move the mesh in order to build a map between mortar secondary and primary
+    // interfaces. This map will then be used by the AgumentSparsityOnInterface ghosting functor to
+    // know which dofs we need ghosted when we call EquationSystems::reinit
+    if (_displaced_problem && _mortar_data.hasDisplacedObjects())
+      _displaced_problem->updateMesh();
+
+    // Possibly reinit one more time to get ghosting correct
+    reinitBecauseOfGhostingOrNewGeomObjects();
+
+    if (_displaced_mesh)
+      _displaced_problem->updateMesh();
+
+    updateGeomSearch(); // Call all of the rest of the geometric searches
+
+    auto ti = _nl->getTimeIntegrator();
+
+    if (ti)
+    {
+      TIME_SECTION("timeIntegratorInitialSetup", 5, "Initializing Time Integrator");
+      ti->initialSetup();
+    }
+
+    if (_app.isRestarting() || _app.isRecovering())
+    {
+      if (_app.hasCachedBackup()) // This happens when this app is a sub-app and has been given a
+                                  // Backup
+        _app.restoreCachedBackup();
+      else
+      {
+        TIME_SECTION("restoreRestartData", 3, "Restoring Restart Data");
+
+        _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
+      }
+
+      // We may have just clobbered initial conditions that were explicitly set
+      // In a _restart_ scenario it is completely valid to specify new initial conditions
+      // for some of the variables which should override what's coming from the restart file
+      if (!_app.isRecovering())
+      {
+        TIME_SECTION("reprojectInitialConditions", 3, "Reprojecting Initial Conditions");
+
+        for (THREAD_ID tid = 0; tid < n_threads; tid++)
+          _ics.initialSetup(tid);
+        _scalar_ics.sort();
+        projectSolution();
+      }
+    }
+  }
+
+  // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ main-app restartable data
+  // has been restored
+
+  // Call setup on the MultiApps
+  if (_multi_apps.hasObjects())
+  {
+    TIME_SECTION("setupMultiApps", 2, "Initializing MultiApps", false);
+    _multi_apps.setup(exec_type);
+  }
+
+  // Call setup on the transfers
+  {
+    TIME_SECTION("initialSetupTransfers", 2, "Initializing Transfers");
+
+    _transfers.setup(exec_type);
+
+    // Call initialSetup on the MultiAppTransfers to be executed on TO_MULTIAPP
+    const auto & to_multi_app_objects = _to_multi_app_transfers.getActiveObjects();
+    for (const auto & transfer : to_multi_app_objects)
+    {
+      transfer->setCurrentDirection(Transfer::DIRECTION::TO_MULTIAPP);
+      transfer->initialSetup();
+    }
+
+    // Call initialSetup on the MultiAppTransfers to be executed on FROM_MULTIAPP
+    const auto & from_multi_app_objects = _from_multi_app_transfers.getActiveObjects();
+    for (const auto & transfer : from_multi_app_objects)
+    {
+      transfer->setCurrentDirection(Transfer::DIRECTION::FROM_MULTIAPP);
+      transfer->initialSetup();
+    }
+
+    // Call initialSetup on the MultiAppTransfers to be executed on BETWEEN_MULTIAPP
+    const auto & between_multi_app_objects = _between_multi_app_transfers.getActiveObjects();
+    for (const auto & transfer : between_multi_app_objects)
+    {
+      transfer->setCurrentDirection(Transfer::DIRECTION::BETWEEN_MULTIAPP);
+      transfer->initialSetup();
+    }
+  }
+
+  if (exec_type == EXEC_INITIAL)
+  {
+    boundaryIntegrityCheck();
+
+    // Here we will initialize the stateful properties once more since they may have been updated
+    // during initialSetup by calls to computeProperties.
+    //
+    // It's really bad that we don't allow this during restart.  It means that we can't add new
+    // stateful materials
+    // during restart.  This is only happening because this _has_ to be below initial userobject
+    // execution.
+    // Otherwise this could be done up above... _before_ restoring restartable data... which would
+    // allow you to have
+    // this happen during restart.  I honestly have no idea why this has to happen after initial
+    // user object computation. THAT is something we should fix... so I've opened this ticket: #5804
+    if (!_app.isRecovering() && !_app.isRestarting() &&
+        (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+         _neighbor_material_props.hasStatefulProperties()))
+    {
+      TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
+
+      const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+      ComputeMaterialsObjectThread cmt(*this,
+                                       _material_data,
+                                       _bnd_material_data,
+                                       _neighbor_material_data,
+                                       _material_props,
+                                       _bnd_material_props,
+                                       _neighbor_material_props,
+                                       _assembly);
+      Threads::parallel_reduce(elem_range, cmt);
+    }
+  }
+
+  if (exec_type == EXEC_INITIAL)
+  {
+    // Scalar variables need to reinited for the initial conditions to be available for output
+    for (unsigned int tid = 0; tid < n_threads; tid++)
+      reinitScalars(tid);
+
+    if (_displaced_mesh)
+      _displaced_problem->syncSolutions();
+  }
+
+  // Writes all calls to _console from setup() methods
+  _app.getOutputWarehouse().mooseConsole();
+
+  if (exec_type == EXEC_INITIAL && _requires_nonlocal_coupling)
+  {
+    setNonlocalCouplingMatrix();
+    for (THREAD_ID tid = 0; tid < n_threads; ++tid)
+      _assembly[tid]->initNonlocalCoupling();
+  }
+
+  {
+    TIME_SECTION("lineSearchSetup", 5, "Initializing Line Search");
+
+    if (_line_search)
+      _line_search->setup(exec_type);
+  }
+
+  // Perform Reporter get/declare check
+  if (exec_type == EXEC_INITIAL)
+    _reporter_data.check();
 }
 
 void
@@ -3815,8 +3792,7 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   // Set the current flag
   setCurrentExecuteOnFlag(exec_type);
 
-  if (exec_type != EXEC_INITIAL)
-    executeControls(exec_type);
+  executeControls(exec_type);
 
   // Samplers; EXEC_INITIAL is not called because the Sampler::init() method that is called after
   // construction makes the first Sampler::execute() call. This ensures that the random number
@@ -3837,6 +3813,16 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 
   // Return the current flag to None
   setCurrentExecuteOnFlag(EXEC_NONE);
+}
+
+void
+FEProblemBase::setupAndExecute(const ExecFlagType & exec_type)
+{
+  setup(exec_type);
+  if (exec_type == EXEC_INITIAL && _app.isRecovering())
+    executeControls(EXEC_INITIAL);
+  else
+    execute(exec_type);
 }
 
 void

@@ -2011,6 +2011,11 @@ public:
    */
   MooseAppCoordTransform & coordTransform();
 
+  /**
+   * Call setup and then execute
+   */
+  void setupAndExecute(const ExecFlagType & exec_type);
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2316,6 +2321,11 @@ protected:
   bool _using_ad_mat_props;
 
 private:
+  /**
+   * perform boundary integrity checks for both nodal and side objects
+   */
+  void boundaryIntegrityCheck();
+
   void updateMaxQps();
 
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);

@@ -95,7 +95,7 @@ EigenExecutionerBase::init()
     // Note: initial conditions will override this if there is any by _problem.initialSetup()
     _eigen_sys.initSystemSolution(MooseEigenSystem::EIGEN, 1.0);
   }
-  _problem.initialSetup();
+  _problem.setupAndExecute(EXEC_INITIAL);
   _eigen_sys.initSystemSolutionOld(MooseEigenSystem::EIGEN, 0.0);
 
   // check when the postprocessors are evaluated

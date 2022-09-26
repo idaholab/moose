@@ -173,7 +173,7 @@ Eigenvalue::init()
 
   // Some setup
   _eigen_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
-  _eigen_problem.initialSetup();
+  _eigen_problem.setupAndExecute(EXEC_INITIAL);
 
   // Make sure all PETSc options are setup correctly
   prepareSolverOptions();
