@@ -11,4 +11,13 @@
     design = 'meshgenerators/ParsedSubdomainMeshGenerator.md'
     issues = '#11640'
   [../]
+  [invalid_excluded_subdomain]
+    type = RunException
+    input = parsed_subdomain_mg.i
+    cli_args = "Mesh/subdomains2/excluded_subdomains='missing'"
+    expect_err = "The block 'missing' was not found in the mesh"
+    requirement = 'The system shall error if a specified subdomain does not exist in the mesh.'
+    design = 'meshgenerators/ParsedSubdomainMeshGenerator.md'
+    issues = '#22117'
+  []
 []

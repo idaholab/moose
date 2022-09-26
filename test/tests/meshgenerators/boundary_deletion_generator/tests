@@ -1,5 +1,5 @@
 [Tests]
-  [./boundary_deletion_test]
+  [boundary_deletion_test]
     type = JSONDiff
     input = 'boundary_deletion.i'
     jsondiff = 'boundary_deletion_out.json'
@@ -7,5 +7,14 @@
     requirement = 'The system shall have the capability to remove boundaries in an existing mesh.'
     design = 'meshgenerators/BoundaryDeletionGenerator.md'
     issues = '#11174'
-  [../]
+  []
+  [invalid_boundary]
+    type = RunException
+    input = boundary_deletion.i
+    cli_args = "Mesh/boundary_removal/boundary_names='missing'"
+    expect_err = "The boundary 'missing' was not found in the mesh"
+    requirement = "The system shall error if attempting to delete a non-existent boundary"
+    design = 'meshgenerators/BoundaryDeletionGenerator.md'
+    issues = '#22117'
+  []
 []

@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
-  issues = '#11640'
+  issues = '#11640 #22117'
 
   [group]
     requirement = 'The system shall have the ability to create new mesh side sets around subdomains:'
@@ -44,5 +44,13 @@
 
       detail = 'around two blocks within a domain.'
     []
+  []
+
+  [invalid_block]
+    type = RunException
+    input = around.i
+    cli_args = 'Mesh/block_2/block="missing"'
+    expect_err = "The block 'missing' was not found in the mesh"
+    requirement = "The system shall error if the subdomain to create sidesets around does not exist in the mesh"
   []
 []
