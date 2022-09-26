@@ -19,7 +19,8 @@ AddSolidPropertiesDeprecatedAction::validParams()
   return AddSolidPropertiesAction::validParams();
 }
 
-AddSolidPropertiesDeprecatedAction::AddSolidPropertiesDeprecatedAction(InputParameters params)
+AddSolidPropertiesDeprecatedAction::AddSolidPropertiesDeprecatedAction(
+    const InputParameters & params)
   : AddSolidPropertiesAction(params)
 {
   mooseDeprecated(

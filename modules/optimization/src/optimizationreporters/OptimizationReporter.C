@@ -16,6 +16,7 @@ InputParameters
 OptimizationReporter::validParams()
 {
   InputParameters params = OptimizationData::validParams();
+  params.registerBase("OptimizationReporter");
   params.addClassDescription("Computes objective function, gradient and contains reporters for "
                              "communicating between optimizeSolve and subapps");
   params.addRequiredParam<std::vector<ReporterValueName>>(

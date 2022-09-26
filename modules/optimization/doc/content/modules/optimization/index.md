@@ -15,14 +15,14 @@ Learn the theory behind PDE constrained optimization as implemented in the MOOSE
 !col-end!
 
 !col! small=12 medium=4 large=4 icon=settings
-### [Syntax](systems.md) class=center style=font-weight:200;
+### [Syntax](optimization/systems.md) class=center style=font-weight:200;
 
 The MOOSE optimization module provides capabilities that can be applied to a wide variety of problems. The syntax
 provides detailed documentation of specific code features.
 !col-end!
 
 !col! small=12 medium=4 large=4 icon=assessment
-### [Examples](examples/index.md) class=center style=font-weight:200;
+### [Examples](optimization/examples/index.md) class=center style=font-weight:200;
 
 There are a number of inverse optimization example problems to demonstrate usage of the optimization module. Details of those models are
 provided here.

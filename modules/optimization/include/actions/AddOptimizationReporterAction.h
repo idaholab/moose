@@ -6,7 +6,7 @@ class AddOptimizationReporterAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
-  AddOptimizationReporterAction(InputParameters params);
+  AddOptimizationReporterAction(const InputParameters & params);
 
   virtual void act() override;
 };

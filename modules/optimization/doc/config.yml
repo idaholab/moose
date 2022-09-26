@@ -1,6 +1,7 @@
 Content:
   - framework/doc/content
   - modules/optimization/doc/content
+  - modules/ray_tracing/doc/content
   - modules/heat_conduction/doc/content
   - modules/stochastic_tools/doc/content
 
