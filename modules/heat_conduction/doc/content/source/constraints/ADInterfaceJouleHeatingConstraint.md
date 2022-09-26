@@ -15,7 +15,7 @@ The `ADInterfaceJouleHeatingConstraint` class should only be employed in simulat
 The heat source is calculated as a function of the electric potential flux across the interface, as given by the associated Lagrange multiplier $\lambda_{\phi}$,
 \begin{equation}
   \label{eq:interfaceJH_fromLMvariable}
-   q_{electric} = \sigma_e \left( \nabla \phi \right)^2 = \frac{(\lambda_{\phi})^2}{\sigma_c}
+   q_{electric} = \sigma_e \left( \nabla \phi \right)^2 = \frac{(\lambda_{\phi})^2}{\sigma_e}
 \end{equation}
 where $\sigma_e$ is the harmonic mean of the electrical conductivity of the primary and secondary blocks,
 \begin{equation}
@@ -43,7 +43,7 @@ and
   \label{eq:secondary_interfaceJH}
   q_{secondary} = -q_{electric} (1 - w_f)
 \end{equation}
-where w$_f$ is the user-defined weighting factor that governs how the heat source is divided between the two sides of the interface.
+where $w_f$ is the user-defined weighting factor that governs how the heat source is divided between the two sides of the interface.
 The use of the negative sign in [eq:primary_interfaceJH] and [eq:secondary_interfaceJH] indicates that the heat source is transferred into each block instead of away from the block.
 
 ### Steady-State Analytical Verification
@@ -52,14 +52,14 @@ Under steady state analysis assumptions, the temperature at the interface in the
 \begin{equation}
   T_{interface} = \frac{l}{k_{primary}} q_{primary} + T_{edge}
 \end{equation}
-where l is the length of the block, k$_{primary}$ is the thermal conductivity, and T$_{edge}$ is the prescribed temeprature boundary condition at the edge of the material block.
+where $l$ is the length of the block, $k_{primary}$ is the thermal conductivity, and $T_{edge}$ is the prescribed temeprature boundary condition at the edge of the material block.
 
 Similarly, the interface temperature in the secondary block material is given as
 \begin{equation}
   T_{interface} = \frac{l}{k_{secondary}} q_{secondary} + T_{edge}
 \end{equation}
 
-In cases where the heat source weighting factor, [eq:primary_interfaceJH] and [eq:secondary_interfaceJH], is set to 0.5, the temperature at the interface in each block will depend on the thermal conductivity value in each block.
+In cases where the heat source weighting factor, [eq:primary_interfaceJH] and [eq:secondary_interfaceJH], is set to 0.5, the temperature at the interface in each block will depend on the thermal conductivity value and size of each block.
 
 ## Example Input File Syntax
 
