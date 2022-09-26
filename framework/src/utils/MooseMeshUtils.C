@@ -326,6 +326,12 @@ hasSubdomainID(MeshBase & input_mesh, const SubdomainID & id)
 {
   std::set<SubdomainID> mesh_blocks;
   input_mesh.subdomain_ids(mesh_blocks);
+
+  // On a distributed mesh we may have sideset IDs that only exist on
+  // other processors
+  if (!input_mesh.is_replicated())
+    input_mesh.comm().set_union(mesh_blocks);
+
   return mesh_blocks.count(id) && (id != Moose::INVALID_BLOCK_ID);
 }
 
@@ -341,6 +347,12 @@ hasBoundaryID(MeshBase & input_mesh, const BoundaryID & id)
 {
   const libMesh::BoundaryInfo & boundary_info = input_mesh.get_boundary_info();
   std::set<libMesh::boundary_id_type> boundary_ids = boundary_info.get_boundary_ids();
+
+  // On a distributed mesh we may have boundary IDs that only exist on
+  // other processors
+  if (!input_mesh.is_replicated())
+    input_mesh.comm().set_union(boundary_ids);
+
   return boundary_ids.count(id) && (id != Moose::INVALID_BOUNDARY_ID);
 }
 
