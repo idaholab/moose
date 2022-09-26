@@ -73,6 +73,10 @@ public:
    */
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name);
+  // PWH
+  template <typename T>
+  const ADMaterialProperty<T> & getNeighborADMaterialProperty(const std::string & name);
+  // end PWH
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
   template <typename T>
@@ -85,6 +89,10 @@ public:
    */
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyByName(const std::string & prop_name);
+  // PWH
+  template <typename T>
+  const ADMaterialProperty<T> & getNeighborADMaterialPropertyByName(const std::string & name);
+  // end PWH
   ///@}
 
   using MaterialBase::getZeroMaterialProperty;
@@ -245,7 +253,34 @@ InterfaceMaterial::getNeighborMaterialPropertyByName(const std::string & prop_na
   registerPropName(prop_name, true, MaterialPropState::CURRENT);
   return TwoMaterialPropertyInterface::getNeighborMaterialPropertyByName<T>(prop_name);
 }
+// PWH
+template <typename T>
+const ADMaterialProperty<T> &
+InterfaceMaterial::getNeighborADMaterialProperty(const std::string & name)
+{
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = deducePropertyName(name);
 
+  // Check if it's just a constant.
+  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+
+  return getNeighborADMaterialPropertyByName<T>(prop_name);
+}
+
+template <typename T>
+const ADMaterialProperty<T> &
+InterfaceMaterial::getNeighborADMaterialPropertyByName(const std::string & prop_name)
+{
+  MaterialBase::checkExecutionStage();
+  // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the
+  // same memory)
+  _requested_props.insert(prop_name);
+  registerPropName(prop_name, true, MaterialPropState::CURRENT);
+  return TwoMaterialPropertyInterface::getNeighborADMaterialPropertyByName<T>(prop_name);
+}
+// end PWH
 template <typename T>
 const MaterialProperty<T> &
 InterfaceMaterial::getNeighborMaterialPropertyOld(const std::string & name)

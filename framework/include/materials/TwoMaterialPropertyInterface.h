@@ -45,7 +45,10 @@ public:
    */
   template <typename T>
   const ADMaterialProperty<T> & getNeighborADMaterialProperty(const std::string & name);
-
+  // PWH
+  template <typename T>
+  const ADMaterialProperty<T> & getNeighborADMaterialPropertyByName(const std::string & name);
+  // end PWH
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
 
@@ -81,7 +84,14 @@ TwoMaterialPropertyInterface::getNeighborMaterialPropertyByName(const std::strin
 {
   return getMaterialPropertyByName<T>(name, *_neighbor_material_data);
 }
-
+// PWH
+template <typename T>
+const ADMaterialProperty<T> &
+TwoMaterialPropertyInterface::getNeighborADMaterialPropertyByName(const std::string & name)
+{
+  return getADMaterialPropertyByName<T>(name, *_neighbor_material_data);
+}
+// end PWH
 template <typename T>
 const ADMaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborADMaterialProperty(const std::string & name)
