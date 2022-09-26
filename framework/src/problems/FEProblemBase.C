@@ -3453,6 +3453,12 @@ FEProblemBase::setup(const ExecFlagType & exec_type)
     if (_requires_nonlocal_coupling)
       setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
   }
+  else if (exec_type == EXEC_TIMESTEP_BEGIN)
+  {
+    if (_requires_nonlocal_coupling)
+      if (_nonlocal_kernels.hasActiveObjects() || _nonlocal_integrated_bcs.hasActiveObjects())
+        _has_nonlocal_coupling = true;
+  }
 
   {
     TIME_SECTION("initializingFunctions", 5, "Initializing Functions");
