@@ -175,12 +175,12 @@ protected:
                                          const unsigned int first_axial_level,
                                          const unsigned int last_axial_level,
                                          const unsigned int cross_dimension);
-  template <class T>
-  PetscErrorCode populateDenseFromVector(const Vec & x,
-                                         T & solution,
-                                         const unsigned int first_axial_level,
-                                         const unsigned int last_axial_level,
-                                         const unsigned int cross_dimension);
+  // template <class T>
+  // PetscErrorCode populateDenseFromVector(const Vec & x,
+  //                                        T & solution,
+  //                                        const unsigned int first_axial_level,
+  //                                        const unsigned int last_axial_level,
+  //                                        const unsigned int cross_dimension);
   template <class T>
   PetscErrorCode populateVectorFromHandle(Vec & x,
                                           const T & solution,
