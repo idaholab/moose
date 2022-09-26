@@ -13,21 +13,19 @@
 
 /**
  * Gap flux model for heat conduction across a gap due to radiation, based on the diffusion
- * approximation. Uses a coupled temperature variable to provide the arguments to the \p
- * computeRadiationFlux method in the base class
+ * approximation. Uses a temperature functor to provide the arguments to the \p computeRadiationFlux
+ * method in the base class
  */
-class GapFluxModelRadiation : public GapFluxModelRadiationBase
+class FunctorGapFluxModelRadiation : public GapFluxModelRadiationBase
 {
 public:
   static InputParameters validParams();
 
-  GapFluxModelRadiation(const InputParameters & parameters);
+  FunctorGapFluxModelRadiation(const InputParameters & parameters);
 
   ADReal computeFlux() const override;
 
 protected:
-  /// Primary surface temperature
-  const ADVariableValue & _primary_T;
-  /// Secondary surface temperature
-  const ADVariableValue & _secondary_T;
+  /// temperature functor for computing temperature along the secondary and primary surfaces
+  const Moose::Functor<ADReal> & _T;
 };
