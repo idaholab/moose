@@ -80,7 +80,7 @@ Steady::execute()
   for (unsigned int r_step = 0; r_step <= steps; r_step++)
   {
 #endif // LIBMESH_ENABLE_AMR
-    _problem.timestepSetup();
+    _problem.setup(EXEC_TIMESTEP_BEGIN);
 
     _last_solve_converged = _fixed_point_solve->solve();
 

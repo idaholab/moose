@@ -437,7 +437,7 @@ Transient::takeStep(Real input_dt)
   // Increment time
   _time = _time_old + _dt;
 
-  _problem.timestepSetup();
+  _problem.setup(EXEC_TIMESTEP_BEGIN);
 
   _problem.onTimestepBegin();
 

@@ -243,7 +243,7 @@ Eigenvalue::execute()
   for (const auto r_step : make_range(steps + 1))
   {
 #endif // LIBMESH_ENABLE_AMR
-    _eigen_problem.timestepSetup();
+    _eigen_problem.setup(EXEC_TIMESTEP_BEGIN);
 
     _last_solve_converged = _fixed_point_solve->solve();
     if (!lastSolveConverged())
