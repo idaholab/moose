@@ -5766,11 +5766,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   unsigned int n_threads = libMesh::n_threads();
 
-  _current_execute_on_flag = EXEC_LINEAR;
-
-  // Random interface objects
-  for (const auto & it : _random_data_objects)
-    it.second->updateSeeds(EXEC_LINEAR);
+  setup(EXEC_LINEAR);
 
   execTransfers(EXEC_LINEAR);
 
@@ -5780,8 +5776,6 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
     reinitScalars(tid);
 
   computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
-
-  _aux->setup(EXEC_LINEAR);
 
   if (_displaced_problem)
   {
@@ -5815,12 +5809,6 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
     }
   }
 
-  for (THREAD_ID tid = 0; tid < n_threads; tid++)
-  {
-    _all_materials.setup(EXEC_LINEAR, tid);
-    _functions.setup(EXEC_LINEAR, tid);
-  }
-
   _nl->computeTimeDerivatives();
 
   try
@@ -5842,11 +5830,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
 
-  executeControls(EXEC_LINEAR);
-
   _current_execute_on_flag = EXEC_NONE;
-
-  _app.getOutputWarehouse().setup(EXEC_LINEAR);
 
   _safe_access_tagged_vectors = false;
 
