@@ -34,10 +34,11 @@
       detail = 'blocks and assigning the new boundary even if the input mesh is not prepared.'
     []
     [delete_interior_parents]
-      type = 'RunApp'
+      type = 'Exodiff'
       input = 'delete_interior_parents.i'
-      cli_args = '--mesh-only'
-      detail = 'blocks and properly removing elements with a deleted element as their interior parent.'
+      exodiff = 'delete_interior_parents_out.e'
+      recover = false
+      detail = 'blocks and properly removing lower dimensional elements with a deleted element as their interior parent.'
     []
   []
 []

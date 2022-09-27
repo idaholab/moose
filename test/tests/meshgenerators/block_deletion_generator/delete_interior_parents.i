@@ -1,8 +1,10 @@
 [Mesh]
+  final_generator = delete
   [twoquad]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 2
+    nx = 3
+    ny = 4
     xmax = 2
   []
   [subdomain]
@@ -11,6 +13,19 @@
     block_id = 1
     bottom_left = '1 0 0'
     top_right = '2 1 0'
+  []
+  [sideset2]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = subdomain
+    primary_block = 1
+    paired_block = 0
+    new_boundary = bar
+  []
+  [edge_elem2]
+    type = LowerDBlockFromSidesetGenerator
+    input = sideset2
+    sidesets = bar
+    new_block_id = 2
   []
   [sideset]
     type = SideSetsBetweenSubdomainsGenerator
@@ -70,3 +85,6 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
+[Outputs]
+  exodus = true
+[]
