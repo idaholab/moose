@@ -98,6 +98,7 @@ time_deriv(const std::string & var)
 // Navier-Stokes Variables
 // Relating to porous media
 static const std::string porosity = "porosity";
+static const std::string smoothed_porosity = "smoothed_porosity";
 static const std::string T_fluid = "T_fluid";
 static const std::string T_solid = "T_solid";
 static const std::string heat_source = "heat_source";

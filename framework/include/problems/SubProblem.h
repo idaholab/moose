@@ -805,7 +805,7 @@ public:
   void addFunctor(const std::string & name, const Moose::FunctorBase<T> & functor, THREAD_ID tid);
 
   /**
-   * Add a functor that has blockwise lambda definitions, e.g. the evaluations of the functor are
+   * Add a functor that has block-wise lambda definitions, e.g. the evaluations of the functor are
    * based on a user-provided lambda expression.
    * @param name The name of the functor to add
    * @param my_lammy The lambda expression that will be called when the functor is evaluated
@@ -830,6 +830,9 @@ public:
   virtual void timestepSetup();
   virtual void residualSetup();
   virtual void jacobianSetup();
+
+  /// Setter for debug functor output
+  void setFunctorOutput(bool set_output) { _output_functors = set_output; }
 
 protected:
   /**
@@ -877,7 +880,7 @@ protected:
   ///@{
   /**
    * Data structures of the requested material properties.  We store them in a map
-   * from boudnary/block id to multimap.  Each of the multimaps is a list of
+   * from boundary/block id to multimap.  Each of the multimaps is a list of
    * requestor object names to material property names.
    */
   std::map<SubdomainID, std::multimap<std::string, std::string>> _map_block_material_props_check;
@@ -937,15 +940,24 @@ private:
   std::vector<std::multimap<std::string, std::unique_ptr<Moose::FunctorEnvelopeBase>>> _functors;
 
 private:
+  /// Lists all functors in the problem
+  void showFunctors() const;
+
+  /// Lists all functors and all the objects that requested them
+  void showFunctorRequestors() const;
+
   /// The requestors of functors where the key is the prop name and the value is a set of names of
   /// requestors
   std::map<std::string, std::set<std::string>> _functor_to_requestors;
+
+  /// Whether to output a list of the functors used and requested (currently only at initialSetup)
+  bool _output_functors;
 
   /// The declared vector tags
   std::vector<VectorTag> _vector_tags;
 
   /**
-   * The vector tags assoicated with each VectorTagType
+   * The vector tags associated with each VectorTagType
    * This is kept separate from _vector_tags for quick access into typed vector tags in places where
    * we don't want to build a new vector every call (like in residual evaluation)
    */
