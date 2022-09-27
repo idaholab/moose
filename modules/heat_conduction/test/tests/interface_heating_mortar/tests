@@ -1,0 +1,64 @@
+[Tests]
+  design = 'ADInterfaceJouleHeatingConstraint.md'
+  issues = '#22114'
+  [steady_state]
+    requirement = "We shall be able to compute, in a steady state analysis, the temperature rise "
+                  "resulting from Joule Heating at the interface "
+    [constraint_joule_heating_single_material_insulated]
+      type = CSVDiff
+      input = "constraint_joule_heating_single_material_insulated.i"
+      csvdiff = "constraint_joule_heating_single_material_insulated_out.csv"
+      ad_indexing_type = global
+      cli_args = "Mesh/allow_renumbering=false"
+      detail = " between two separate blocks of the same material constistent with the analytical "
+               "solution (850.595K) in the case of thermal insulation across the interface."
+    []
+    [constraint_joule_heating_single_material]
+      type = CSVDiff
+      input = "constraint_joule_heating_single_material.i"
+      csvdiff = "constraint_joule_heating_single_material_out.csv"
+      ad_indexing_type = global
+      cli_args = "Mesh/allow_renumbering=false"
+      detail = " between two separate blocks of the same material as equivalent to the steady state "
+               "case when thermal contact across the interface is not considered."
+    []
+    [constraint_joule_heating_offset_single_material_insulated]
+      type = CSVDiff
+      input = "constraint_joule_heating_offset_single_material_insulated.i"
+      csvdiff = "constraint_joule_heating_offset_single_material_insulated_out.csv"
+      ad_indexing_type = global
+      cli_args = "Mesh/allow_renumbering=false"
+      detail = "as non-zero only along the portion of the interface at which the gap between the two "
+               "blocks is closed and as zero along the open-gap portion of the interface."
+    []
+    [constraint_joule_heating_dual_material_insulated]
+      type = CSVDiff
+      input = "constraint_joule_heating_dual_material_insulated.i"
+      csvdiff = "constraint_joule_heating_dual_material_insulated_out.csv"
+      ad_indexing_type = global
+      cli_args = "Mesh/allow_renumbering=false"
+      detail = " that, when the blocks at the interface have different material properties, is "
+               "different in each material while the Joule heating source into each block is "
+               "equivalent from the common electric potential flux across the interface."
+    []
+    [constraint_joule_heating_dual_material]
+      type = CSVDiff
+      input = "constraint_joule_heating_dual_material.i"
+      csvdiff = "constraint_joule_heating_dual_material_out.csv"
+      ad_indexing_type = global
+      cli_args = "Mesh/allow_renumbering=false"
+      detail = "as a function of both the Joule heating and thermal contact at the interface, which "
+               "results in a smaller temperature difference between the two blocks at the interface."
+    []
+  []
+  [transient_joule_heating_constraint]
+    type = CSVDiff
+    input = "transient_joule_heating_constraint.i"
+    csvdiff = "transient_joule_heating_constraint_out.csv"
+    ad_indexing_type = global
+    cli_args = "Mesh/allow_renumbering=false"
+    requirement = "We shall be able to converge towards the steady-state interface temperature "
+                  "profile due to Joule heating and thermal contact in a transient simulation, given "
+                  "sufficient simulation time."
+  []
+[]
