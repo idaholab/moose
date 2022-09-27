@@ -28,6 +28,8 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Debugging](application_development/debugging.md) - Tips on how to debug MOOSE-based applications
 
-[RelationshipManagers](/relationship_managers.md) - Telling MOOSE about extra geomatric or algebraic information needed in parallel
+[RelationshipManagers](/relationship_managers.md) - Telling MOOSE about extra geometric or algebraic information needed in parallel
 
 [Moose-Wrapped Apps](/moose_wrapped_apps.md) - Coupling external codes to MOOSE
+
+[Development Tools](help/development/index.md) - Tools that can be helpful for development, like IDEs with MOOSE support
