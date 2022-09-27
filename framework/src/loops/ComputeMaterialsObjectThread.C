@@ -229,7 +229,7 @@ ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, 
   if (!_fe_problem.needInterfaceMaterialOnSide(bnd_id, _tid))
     return;
 
-  _assembly[_tid]->reinit(elem, side);
+  _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
   unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
   _bnd_material_data[_tid]->resize(face_n_points);
   _neighbor_material_data[_tid]->resize(face_n_points);
