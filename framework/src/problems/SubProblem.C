@@ -20,7 +20,6 @@
 #include "MooseObjectName.h"
 #include "RelationshipManager.h"
 #include "MooseUtils.h"
-#include "ConsoleUtils.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/system.h"
@@ -57,6 +56,7 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _safe_access_tagged_matrices(false),
     _safe_access_tagged_vectors(false),
     _have_ad_objects(false),
+    _output_functors(false),
     _typed_vector_tags(2)
 {
   unsigned int n_threads = libMesh::n_threads();
@@ -1061,7 +1061,7 @@ SubProblem::showFunctors() const
     functor_names += std::regex_replace(functor_pair.first, std::regex("wraps_"), "") + " ";
   if (functor_names.size())
     functor_names.pop_back();
-  _console << std::setw(ConsoleUtils::console_field_width) << functor_names << std::endl;
+  _console << functor_names << std::endl;
 }
 
 void
@@ -1071,8 +1071,7 @@ SubProblem::showFunctorRequestors() const
   {
     _console << "[DBG] Requestors for wrapped functor "
              << std::regex_replace(functor, std::regex("wraps_"), "") << std::endl;
-    _console << std::setw(ConsoleUtils::console_field_width) << "[DBG] "
-             << MooseUtils::join(requestors, " ") << std::endl;
+    _console << "[DBG] " << MooseUtils::join(requestors, " ") << std::endl;
   }
 }
 
