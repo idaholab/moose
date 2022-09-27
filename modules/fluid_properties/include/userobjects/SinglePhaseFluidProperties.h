@@ -170,6 +170,12 @@ public:
   propfuncWithDefault(mu, p, T)
   propfuncWithDefault(k, p, T)
   propfunc(rho, p, T)
+  // 注释
+  propfunc(drho_dp, p, T)
+  propfunc(drho_dT, p, T)
+  propfunc(dh_dT, p, T)
+  propfunc(drho_dh, p, T)
+  // 注释
   propfunc(e, p, rho)
   propfunc(e, T, v)
   propfunc(p, T, v)
@@ -267,6 +273,10 @@ public:
    * @param[out] derivative of saturation pressure wrt temperature (Pa/K)
    */
   virtual Real vaporPressure(Real T) const;
+  // 注释
+  virtual Real h_v_sat_from_p(Real pressure) const;
+  virtual Real h_l_sat_from_p(Real pressure) const;
+  // 注释
   virtual void vaporPressure(Real T, Real & psat, Real & dpsat_dT) const;
   DualReal vaporPressure(const DualReal & T) const;
 

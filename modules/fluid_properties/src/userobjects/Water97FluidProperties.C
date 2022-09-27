@@ -181,6 +181,87 @@ Water97FluidProperties::rho_from_p_T(
   drho_dp = ddensity_dp;
   drho_dT = ddensity_dT;
 }
+// 注释
+Real
+Water97FluidProperties::drho_dp_from_p_T(Real pressure, Real temperature) const
+{
+  Real rho, drho_dp, drho_dT;
+  this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
+  return drho_dp;
+}
+void
+Water97FluidProperties::drho_dp_from_p_T(Real pressure, Real temperature, Real & drho_dp, Real & ddrho_dp_dp, Real & ddrho_dp_dT) const
+{
+  drho_dp = drho_dp_from_p_T(pressure, temperature);
+  ddrho_dp_dp = 0;
+  ddrho_dp_dT = 0;
+}
+
+
+Real
+Water97FluidProperties::drho_dT_from_p_T(Real pressure, Real temperature) const
+{
+  Real rho, drho_dp, drho_dT;
+  this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
+  return drho_dT;
+}
+void
+Water97FluidProperties::drho_dT_from_p_T(Real pressure, Real temperature, Real & drho_dT, Real & ddrho_dT_dp, Real & ddrho_dT_dT) const
+{
+  drho_dT = drho_dT_from_p_T(pressure, temperature);
+  ddrho_dT_dp = 0;
+  ddrho_dT_dT = 0;
+}
+
+
+Real
+Water97FluidProperties::dh_dT_from_p_T(Real pressure, Real temperature) const
+{
+  Real h, dh_dp, dh_dT;
+  this->h_from_p_T(pressure, temperature, h, dh_dp, dh_dT);
+  return dh_dT;
+}
+void
+Water97FluidProperties::dh_dT_from_p_T(Real pressure, Real temperature, Real & dh_dT, Real & ddh_dT_dp, Real & ddh_dT_dT) const
+{
+  dh_dT = dh_dT_from_p_T(pressure, temperature);
+  ddh_dT_dp = 0;
+  ddh_dT_dT = 0;
+}
+
+
+Real
+Water97FluidProperties::drho_dh_from_p_T(Real pressure, Real temperature) const
+{
+  Real rho, drho_dp, drho_dT;
+  this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
+
+  Real h, dh_dp, dh_dT;
+  this->h_from_p_T(pressure, temperature, h, dh_dp, dh_dT);
+  Real drho_dh = drho_dT / dh_dT;
+  return drho_dh;
+}
+void
+Water97FluidProperties::drho_dh_from_p_T(Real pressure, Real temperature, Real & drho_dh, Real & ddrho_dh_dp, Real & ddrho_dh_dT) const
+{
+  drho_dh = drho_dh_from_p_T(pressure, temperature);
+  ddrho_dh_dp = 0;
+  ddrho_dh_dT = 0;
+}
+
+
+Real
+Water97FluidProperties::h_l_sat_from_p(Real pressure) const
+{
+  return this->h_from_p_T(pressure, (vaporTemperature(pressure)));// - 1e-6 // * 1.000001
+}
+// h(p,T)判断区域一：T<=Tsat。
+Real
+Water97FluidProperties::h_v_sat_from_p(Real pressure) const
+{
+  return this->h_from_p_T(pressure, (vaporTemperature(pressure)));// + 1e-6 // * 1.000001
+}
+// 注释
 
 Real
 Water97FluidProperties::e_from_p_T(Real pressure, Real temperature) const

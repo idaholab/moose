@@ -60,6 +60,22 @@ public:
 
   virtual void rho_from_p_T(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
+// 注释
+  virtual Real drho_dp_from_p_T(Real pressure, Real temperature) const;
+  virtual void drho_dp_from_p_T(Real pressure, Real temperature, Real & drho_dp, Real & ddrho_dp_dp, Real & ddrho_dp_dT) const;
+
+  virtual Real drho_dT_from_p_T(Real pressure, Real temperature) const;
+  virtual void drho_dT_from_p_T(Real pressure, Real temperature, Real & drho_dT, Real & ddrho_dT_dp, Real & ddrho_dT_dT) const;
+
+  virtual Real dh_dT_from_p_T(Real pressure, Real temperature) const;
+  virtual void dh_dT_from_p_T(Real pressure, Real temperature, Real & dh_dT, Real & ddh_dT_dp, Real & ddh_dT_dT) const;
+
+  virtual Real drho_dh_from_p_T(Real pressure, Real temperature) const;
+  virtual void drho_dh_from_p_T(Real pressure, Real temperature, Real & drho_dh, Real & ddrho_dh_dp, Real & ddrho_dh_dT) const;
+
+  virtual Real h_l_sat_from_p(Real pressure) const;
+  virtual Real h_v_sat_from_p(Real pressure) const;
+// 注释
 
   virtual Real e_from_p_T(Real pressure, Real temperature) const override;
 

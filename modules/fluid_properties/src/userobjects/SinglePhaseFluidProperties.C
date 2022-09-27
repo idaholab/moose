@@ -304,6 +304,18 @@ Real SinglePhaseFluidProperties::vaporPressure(Real) const
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
+// 注释
+Real SinglePhaseFluidProperties::h_v_sat_from_p(Real) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
+Real SinglePhaseFluidProperties::h_l_sat_from_p(Real) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+// 注释
+
 std::vector<Real>
 SinglePhaseFluidProperties::henryCoefficients() const
 {

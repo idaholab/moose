@@ -32,6 +32,12 @@ protected:
   const VariableValue & _temperature;
   /// Density (kg/m^3)
   MaterialProperty<Real> & _rho;
+  // 注释
+  MaterialProperty<Real> & _drho_dp;
+  MaterialProperty<Real> & _drho_dT;
+  MaterialProperty<Real> & _dh_dT;
+  MaterialProperty<Real> & _drho_dh;
+  // 注释
   /// Viscosity (Pa.s)
   MaterialProperty<Real> & _mu;
   /// Isobaric specific heat capacity (kJ/kg/K)

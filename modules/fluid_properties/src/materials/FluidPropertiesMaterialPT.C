@@ -28,6 +28,12 @@ FluidPropertiesMaterialPT::FluidPropertiesMaterialPT(const InputParameters & par
     _temperature(coupledValue("temperature")),
 
     _rho(declareProperty<Real>("density")),
+    // 注释
+    _drho_dp(declareProperty<Real>("drho_dp")),
+    _drho_dT(declareProperty<Real>("drho_dT")),
+    _dh_dT(declareProperty<Real>("dh_dT")),
+    _drho_dh(declareProperty<Real>("drho_dh")),
+    // 注释
     _mu(declareProperty<Real>("viscosity")),
     _cp(declareProperty<Real>("cp")),
     _cv(declareProperty<Real>("cv")),
@@ -47,6 +53,10 @@ void
 FluidPropertiesMaterialPT::computeQpProperties()
 {
   _rho[_qp] = _fp.rho_from_p_T(_pressure[_qp], _temperature[_qp]);
+  _drho_dp[_qp] = _fp.drho_dp_from_p_T(_pressure[_qp], _temperature[_qp]);
+  _drho_dT[_qp] = _fp.drho_dT_from_p_T(_pressure[_qp], _temperature[_qp]);
+  _dh_dT[_qp] = _fp.dh_dT_from_p_T(_pressure[_qp], _temperature[_qp]);
+  _drho_dh[_qp] = _fp.drho_dh_from_p_T(_pressure[_qp], _temperature[_qp]);
   _mu[_qp] = _fp.mu_from_p_T(_pressure[_qp], _temperature[_qp]);
   _cp[_qp] = _fp.cp_from_p_T(_pressure[_qp], _temperature[_qp]);
   _cv[_qp] = _fp.cv_from_p_T(_pressure[_qp], _temperature[_qp]);
