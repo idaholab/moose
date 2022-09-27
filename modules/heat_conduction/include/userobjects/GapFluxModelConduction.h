@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "GapFluxModelBase.h"
+#include "GapFluxModelConductionBase.h"
 
 /**
- * Base class for gap flux models used by ModularGapConductanceConstraint
+ * Gap flux model for varying gap conductance using a coupled variable for temperature
  */
-class GapFluxModelConduction : public GapFluxModelBase
+class GapFluxModelConduction : public GapFluxModelConductionBase
 {
 public:
   static InputParameters validParams();
@@ -23,21 +23,12 @@ public:
 
   virtual ADReal computeFlux() const override;
 
-  virtual ADReal gapAttenuation() const;
-
 protected:
   /// Primary surface temperature
   const ADVariableValue & _primary_T;
   /// Secondary surface temperature
   const ADVariableValue & _secondary_T;
 
-  /// Gap conductivity constant
-  const Real _gap_conductivity;
-
   const Function * const _gap_conductivity_function;
   const VariableValue * const _gap_conductivity_function_variable;
-
-  const Real _min_gap;
-
-  const unsigned int _min_gap_order;
 };

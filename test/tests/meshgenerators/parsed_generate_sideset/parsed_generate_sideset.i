@@ -21,7 +21,7 @@
     type = ParsedGenerateSideset
     input = subdomains
     combinatorial_geometry = 'z < 1'
-    included_subdomain_ids = '1'
+    included_subdomains = '1'
     normal = '1 0 0'
     new_sideset_name = interior
   []

@@ -9,12 +9,14 @@
 
 #pragma once
 
-#include "GapFluxModelBase.h"
+#include "GapFluxModelRadiationBase.h"
 
 /**
- * Base class for gap flux models used by ModularGapConductanceConstraint
+ * Gap flux model for heat conduction across a gap due to radiation, based on the diffusion
+ * approximation. Uses a coupled temperature variable to provide the arguments to the \p
+ * computeRadiationFlux method in the base class
  */
-class GapFluxModelRadiation : public GapFluxModelBase
+class GapFluxModelRadiation : public GapFluxModelRadiationBase
 {
 public:
   static InputParameters validParams();
@@ -28,10 +30,4 @@ protected:
   const ADVariableValue & _primary_T;
   /// Secondary surface temperature
   const ADVariableValue & _secondary_T;
-
-  /// Stefan-Boltzmann constant
-  const Real _stefan_boltzmann;
-
-  /// Surface emissivity
-  ADReal _emissivity;
 };

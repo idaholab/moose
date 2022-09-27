@@ -24,4 +24,26 @@
     design = 'meshgenerators/ParsedGenerateSideset.md'
     issues = '#15651'
   [../]
+
+  [invalid_included_subdomains]
+    type = RunException
+    input = parsed_generate_sideset.i
+    cli_args = 'Mesh/sideset/included_subdomains="missing"'
+    expect_err = "The block 'missing' was not found in the mesh"
+    requirement = 'The system shall error if one of the included subdomains does not exist in the mesh.'
+    mesh_mode = 'REPLICATED'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+    issues = '#22117'
+  []
+
+  [invalid_included_neighbors]
+    type = RunException
+    input = parsed_generate_sideset.i
+    cli_args = 'Mesh/sideset/included_neighbors="missing"'
+    expect_err = "The block 'missing' was not found in the mesh"
+    requirement = 'The system shall error if one of the included neighbors does not exist in the mesh.'
+    mesh_mode = 'REPLICATED'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+    issues = '#22117'
+  []
 []

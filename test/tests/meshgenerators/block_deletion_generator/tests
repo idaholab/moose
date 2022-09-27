@@ -2,7 +2,7 @@
   [block_deletion]
     design = 'meshgenerators/BlockDeletionGenerator.md'
     requirement = 'The system shall be capable of deleting '
-    issues = '#11640 #17052'
+    issues = '#11640 #17052 #22117'
     [all_by_block_ids]
       type = 'Exodiff'
       input = 'block_deletion_test1.i'
@@ -32,6 +32,13 @@
       cli_args = '--mesh-only'
       recover = false
       detail = 'blocks and assigning the new boundary even if the input mesh is not prepared.'
+    []
+    [missing_block]
+      type = RunException
+      input = block_deletion_test1.i
+      cli_args = "Mesh/ed0/block=50"
+      expect_err = "The block '50' was not found within the mesh"
+      detail = 'blocks and erroring if a block does not exist.'
     []
   []
 []

@@ -23,7 +23,7 @@ FVInfiniteCylinderRadiativeBC::validParams()
                                 "Radius of the boundary approximated as cylinder.");
   params.addRequiredParam<Real>("cylinder_radius",
                                 "Radius of the cylinder on the outside of the boundary.");
-  params.addClassDescription("Boundary condition for radiative heat exchange with a cylinder"
+  params.addClassDescription("Boundary condition for radiative heat exchange with a cylinder "
                              "where the boundary is approximated as a cylinder as well.");
   return params;
 }

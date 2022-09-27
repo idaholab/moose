@@ -11,6 +11,7 @@
 #include "Conversion.h"
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/elem.h"
 
@@ -67,11 +68,11 @@ SubdomainBoundingBoxGenerator::generate()
     auto names = getParam<std::vector<SubdomainName>>("restricted_subdomains");
     for (auto & name : names)
     {
-      SubdomainID id = Moose::INVALID_BLOCK_ID;
-      std::istringstream ss(name);
-      if (!(ss >> id) || !ss.eof())
-        id = mesh->get_id_by_name(name);
-      restricted_ids.insert(id);
+      // check that the subdomain exists in the mesh
+      if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
+        paramError("restricted_subdomains", "The block '", name, "' was not found in the mesh");
+
+      restricted_ids.insert(MooseMeshUtils::getSubdomainID(name, *mesh));
     }
   }
 
