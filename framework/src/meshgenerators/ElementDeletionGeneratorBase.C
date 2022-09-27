@@ -52,6 +52,15 @@ ElementDeletionGeneratorBase::generate()
       deleteable_elems.insert(elem);
   }
 
+  // Set to be merged into deleteable elems, used to avoid derefencing a dangling pointer 
+  std::set<Elem *> deleteable_parents;
+
+  //check for dangling interior parents
+  for (auto & elem : mesh->element_ptr_range())
+    if (deleteable_elems.count(elem->interior_parent()) > 0)
+      deleteable_parents.insert(elem);
+
+  deleteable_elems.insert(deleteable_parents.begin(), deleteable_parents.end());
   /**
    * If we are in parallel we'd better have a consistent idea of what
    * should be deleted.  This can't be checked cheaply.
@@ -203,7 +212,7 @@ ElementDeletionGeneratorBase::generate()
         mooseAssert(elem->neighbor_ptr(side) == remote_elem, "element neighbor != remote_elem");
 
         elem->set_neighbor(side, nullptr);
-
+        
         // assign cut surface boundary
         if (_assign_boundary)
           boundary_info.add_side(elem, side, boundary_id);
@@ -226,8 +235,11 @@ ElementDeletionGeneratorBase::generate()
    * For now, we'll call contract and notify the SetupMeshComplete
    * Action that we need to re-prepare the mesh.
    */
-  mesh->contract();
-  mesh->prepare_for_use();
 
+  if (mesh->is_replicated())
+  {
+    mesh->contract();
+    mesh->prepare_for_use();
+  }
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
