@@ -77,7 +77,6 @@ TabulatedBicubicFluidProperties::constructInterpolation()
       _v_max = 1 / rho_min;
       _v_min = 1 / rho_max;
     }
-    Real dv = (_v_max - _v_min) / ((Real)_num_v - 1);
 
     // Create v grid for interpolation
     _specific_volume.resize(_num_v);
