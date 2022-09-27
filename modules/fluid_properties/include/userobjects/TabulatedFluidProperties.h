@@ -240,6 +240,8 @@ protected:
   unsigned int _num_e;
   /// to error or not on out-of-bounds check
   bool _error_on_out_of_bounds;
+  /// log-space the specific volume instead of linear
+  bool _log_space_v;
 
   /// Bi-dimensional interpolation of temperature from (v,e)
   std::unique_ptr<BidimensionalInterpolation> _T_from_v_e_ipol;
