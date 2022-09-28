@@ -3889,6 +3889,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
                                           const Moose::AuxGroup & group,
                                           TheWarehouse::Query & query)
 {
+  // Add group to query
   if (group == Moose::PRE_IC)
     query.condition<AttribPreIC>(true);
   else if (group == Moose::PRE_AUX)
@@ -3949,7 +3950,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
   for (auto obj : userobjs)
     obj->initialize();
 
-  // Execute Elemental/Side/InternalSideUserObjects
+  // Execute Side/InternalSide/Interface/Elemental/DomainUserObjects
   if (!userobjs.empty())
   {
     // non-nodal user objects have to be run separately before the nodal user objects run
@@ -3979,6 +3980,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
   }
 
+  // Execute threaded general user objects
   for (auto obj : tgobjs)
     obj->initialize();
   std::vector<GeneralUserObject *> tguos_zero;
@@ -3999,6 +4001,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
     joinAndFinalize(q);
   }
 
+  // Execute general user objects
   joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject), true);
 }
 
