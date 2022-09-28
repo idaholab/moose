@@ -18,6 +18,9 @@ AreaPostprocessor::validParams()
 
   params.addClassDescription("Computes the \"area\" or dimension - 1 \"volume\" of a given "
                              "boundary or boundaries in your mesh.");
+  // Other user objects may depend on this value on INITIAL
+  // preaux runs before most user objects, and side UOs run before all UOs
+  params.set<bool>("force_preaux") = true;
   return params;
 }
 

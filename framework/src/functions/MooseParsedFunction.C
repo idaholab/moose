@@ -43,6 +43,7 @@ template <typename T>
 Real
 MooseParsedFunctionTempl<T>::value(Real t, const Point & p) const
 {
+  mooseAssert(_function_ptr, "ParsedFunction should have been initialized");
   return _function_ptr->evaluate<Real>(t, p);
 }
 
@@ -50,6 +51,7 @@ template <typename T>
 RealGradient
 MooseParsedFunctionTempl<T>::gradient(Real t, const Point & p) const
 {
+  mooseAssert(_function_ptr, "ParsedFunction should have been initialized");
   return _function_ptr->evaluateGradient(t, p);
 }
 
@@ -57,6 +59,7 @@ template <typename T>
 Real
 MooseParsedFunctionTempl<T>::timeDerivative(Real t, const Point & p) const
 {
+  mooseAssert(_function_ptr, "ParsedFunction should have been initialized");
   return _function_ptr->evaluateDot(t, p);
 }
 
