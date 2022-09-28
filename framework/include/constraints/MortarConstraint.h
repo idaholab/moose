@@ -27,7 +27,6 @@ public:
   using MortarConstraintBase::computeJacobian;
 
 protected:
-
   /**
    * compute the residual for primary/secondary/lower
    */
@@ -48,7 +47,6 @@ protected:
    */
   virtual void computeJacobianScalar() override;
 
-
   /**
    * compute the residual at the quadrature points
    */
@@ -57,8 +55,8 @@ protected:
   /**
    * compute the scalar residual at the quadrature points
    */
-  virtual Real computeQpResidualScalar() {return 0;};
-  virtual Real computeQpResidualScalarScalar() {return 0;};
+  virtual Real computeQpResidualScalar() { return 0; };
+  virtual Real computeQpResidualScalarScalar() { return 0; };
 
   /**
    * compute the jacobian at the quadrature points
@@ -69,14 +67,16 @@ protected:
   /**
    * compute the scalar jacobian at the quadrature points
    */
-  virtual Real computeQpJacobianScalarScalar() {return 0;};
+  virtual Real computeQpJacobianScalarScalar() { return 0; }
+
+  void computeOffDiagJacobianScalar(unsigned int) override final;
+  virtual void computeOffDiagJacobianScalar(Moose::MortarType, unsigned int) {}
 
 private:
   /// A dummy object useful for constructing _lambda when not using Lagrange multipliers
   const VariableValue _lambda_dummy;
 
 protected:
-
   /// The LM solution
   const VariableValue & _lambda;
 
@@ -104,3 +104,9 @@ protected:
   /// The current shape function gradients for vector variables
   const VectorVariablePhiGradient * _vector_grad_phi;
 };
+
+inline void
+MortarConstraint::computeOffDiagJacobianScalar(unsigned int)
+{
+  mooseError("Must call the mortar type overload instead");
+}

@@ -23,15 +23,13 @@
 /// diagonal Jacobian terms
 ///
 
-class TestPeriodicBase
-  : public DerivativeMaterialInterface<MortarConstraint>
+class TestPeriodicBase : public DerivativeMaterialInterface<MortarConstraint>
 {
 public:
   static InputParameters validParams();
   TestPeriodicBase(const InputParameters & parameters);
 
 protected:
-
   /**
    * compute the scalar residual
    */
@@ -42,35 +40,31 @@ protected:
    */
   virtual void computeJacobianScalar() override;
 
-  /**
-   * Computes jacobian block with respect to a scalar variable
-   * @param jvar The number of the scalar variable
-   */
-  virtual void computeOffDiagJacobianScalar(unsigned int jvar) override final;
-
   virtual void precalculateResidual() override;
-  virtual void precalculateJacobian() override; 
+  virtual void precalculateJacobian() override;
 
+  using MortarConstraint::computeOffDiagJacobianScalar;
   /**
    * compute jacobian block with respect to a scalar variable for primary/secondary/lower
    */
-  virtual void computeOffDiagJacobianScalarM(Moose::MortarType mortar_type, unsigned int jvar);
+  void computeOffDiagJacobianScalar(Moose::MortarType mortar_type, unsigned int jvar) override;
 
   Real computeQpResidual(const Moose::MortarType mortar_type) override;
   Real computeQpResidualScalar() override;
   Real computeQpResidualScalarScalar() override;
   Real computeQpJacobian(Moose::ConstraintJacobianType /*jacobian_type*/,
-                                 unsigned int /*jvar*/) override {return 0;};
+                         unsigned int /*jvar*/) override
+  {
+    return 0;
+  };
   Real computeQpJacobianScalarScalar() override;
 
   /**
    * compute the jacobian at the quadrature points with respect to a scalar variable
    */
-  virtual Real computeQpBaseJacobian(Moose::MortarType mortar_type,
-                                 unsigned int jvar);
-  virtual Real computeQpConstraintJacobian(Moose::MortarType mortar_type,
-                                 unsigned int jvar);
-  
+  virtual Real computeQpBaseJacobian(Moose::MortarType mortar_type, unsigned int jvar);
+  virtual Real computeQpConstraintJacobian(Moose::MortarType mortar_type, unsigned int jvar);
+
   /// Stability/penalty term for residual
   Real computeResiStab(const Moose::MortarType mortar_type);
 
@@ -82,13 +76,11 @@ protected:
 
   /// Stability/penalty term for scalar Jacobian from scalar
   Real computeJacobianScalarStab();
-  
+
   /// Stability/penalty term for Jacobian
-  Real computeODJacoBaseStab(const Moose::MortarType mortar_type,
-          const unsigned int jvar);
+  Real computeODJacoBaseStab(const Moose::MortarType mortar_type, const unsigned int jvar);
   /// Stability/penalty term for Jacobian
-  Real computeODJacoConstraintStab(const Moose::MortarType mortar_type,
-          const unsigned int jvar);
+  Real computeODJacoConstraintStab(const Moose::MortarType mortar_type, const unsigned int jvar);
 
   // Compute T jump and heat flux average/jump
   void precalculateMaterial();
@@ -96,7 +88,6 @@ protected:
   void precalculateStability();
 
 protected:
-
   /// the temperature jump in global and interface coordiantes;
   /// TM-analogy: _displacement_jump_global, _interface_displacement_jump
   ///@{
@@ -105,15 +96,17 @@ protected:
 
   /// The four stability parameters from the VMDG method
   ///@{
-  Real _tau_s;  
+  Real _tau_s;
   ///@}
-
 
   /// The unknown scalar variable ID
   const unsigned int _kappa_var;
 
   /// Order of the homogenization variable, used in several places
   const unsigned int _k_order;
+
+  /// Pointer to kappa variable instance
+  const MooseVariableScalar * const _kappa_var_ptr;
 
   /// The unknownscalar variable
   const VariableValue & _kappa;
@@ -134,13 +127,11 @@ protected:
   const Real & _current_elem_volume;
 
   const Real & _current_side_volume;
-          
+
   /// Input property to allow user modifying penalty parameter
   const Real _pen_scale;
 
 private:
-
   /// hard code the penalty for now
   const Real pencoef = 1.0;
-
 };

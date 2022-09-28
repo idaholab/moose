@@ -1079,6 +1079,11 @@ public:
   {
     return _cm_nonlocal_entry;
   }
+  const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableScalar *>> &
+  fieldScalarCouplingEntries() const
+  {
+    return _cm_fs_entry;
+  }
 
   // Read-only references
   const VariablePhiValue & phi() const { return _phi; }

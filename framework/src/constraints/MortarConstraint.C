@@ -73,7 +73,7 @@ MortarConstraint::computeResidualScalar()
 void
 MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
 {
-  size_t test_space_size = 0;
+  std::size_t test_space_size = 0;
   typedef Moose::ConstraintJacobianType JType;
   typedef Moose::MortarType MType;
   std::array<JType, 3> jacobian_types;
@@ -179,7 +179,7 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
   // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
   for (const auto & jvariable : coupled_scalar_vars)
     if (_sys.hasScalarVariable(jvariable->name()))
-      computeOffDiagJacobianScalar(jvariable->number());
+      computeOffDiagJacobianScalar(mortar_type, jvariable->number());
 }
 
 void
