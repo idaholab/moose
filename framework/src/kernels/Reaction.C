@@ -21,6 +21,7 @@ ReactionTempl<is_ad>::validParams()
       "Implements a simple consuming reaction term with weak form $(\\psi_i, \\lambda u_h)$.");
   params.addParam<Real>(
       "rate", 1.0, "The $(\\lambda)$ multiplier, the relative amount consumed per unit time.");
+  params.declareControllable("rate");
   return params;
 }
 
