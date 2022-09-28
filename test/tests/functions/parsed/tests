@@ -1,13 +1,5 @@
 [Tests]
   design = 'source/functions/MooseParsedFunction.md'
-  [./nl_vars]
-    type = RunException
-    input = 'nl_vars_error.i'
-    cli_args = "Functions/func/vars='u v' Functions/func/vals='u v'"
-    expect_err = "The only variables supported by ParsedFunction are scalar variables, and var 'u' is not scalar."
-    requirement = "The system should error if a field variable is passed into a parsed function object, as this capability is currently not supported."
-    issues = '#15523'
-  [../]
   [./steady]
     type = 'Exodiff'
     input = 'steady.i'
@@ -70,5 +62,14 @@
     expect_err = 'No postprocessor, scalar variable, or function with the name \'invalid\' found. Unable to convert \'invalid\' to type double'
     requirement = "The ParsedFunction object shall fail with a human readable error if a vals entry is supplied that is neither a valid postprocessor, scalar variable, function, or real number."
     issues = '#14169'
+  [../]
+  
+  [./nl_vars]
+    type = RunException
+    input = 'nl_vars_error.i'
+    cli_args = "Functions/func/vars='u v' Functions/func/vals='u v'"
+    expect_err = "The only variables supported by ParsedFunction are scalar variables, and var 'u' is not scalar."
+    requirement = "The system should error if a field variable is passed into a parsed function object, as this capability is currently not supported."
+    issues = '#15523'
   [../]
 []
