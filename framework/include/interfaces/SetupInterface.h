@@ -55,6 +55,12 @@ public:
   virtual void subdomainSetup();
 
   /**
+   * Gets called in FEProblemBase::execute() for execute flags other than initial, timestep_begin,
+   * nonlinear, linear and subdomain
+   */
+  virtual void customSetup(const ExecFlagType & /*exec_type*/) {}
+
+  /**
    * Return the execute on MultiMooseEnum for this object.
    */
   const ExecFlagEnum & getExecuteOnEnum() const;

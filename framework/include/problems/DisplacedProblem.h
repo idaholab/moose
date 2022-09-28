@@ -339,6 +339,7 @@ public:
 
   void initialSetup() override;
   void timestepSetup() override;
+  void customSetup(const ExecFlagType & exec_type) override;
 
   using SubProblem::haveADObjects;
   void haveADObjects(bool have_ad_objects) override;

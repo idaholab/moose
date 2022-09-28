@@ -42,6 +42,13 @@ TestPostprocessor::TestPostprocessor(const InputParameters & parameters)
     _execute_count = 0;
 }
 
+void
+TestPostprocessor::customSetup(const ExecFlagType & exec_type)
+{
+  if (exec_type == EXEC_JUST_GO)
+    _console << "Flag Name: " << EXEC_JUST_GO << std::endl;
+}
+
 Real
 TestPostprocessor::getValue()
 {
@@ -63,10 +70,7 @@ TestPostprocessor::getValue()
     return _report_old;
 
   else if (_test_type == "custom_execute_on")
-  {
-    _console << "Flag Name: " << EXEC_JUST_GO << std::endl;
     return ++_execute_count;
-  }
   // This should not be attainable
   else
   {
