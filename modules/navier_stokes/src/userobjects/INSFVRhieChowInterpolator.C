@@ -207,8 +207,10 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
   if (_velocity_interp_method != Moose::FV::InterpMethod::Average)
     fillARead();
 
-  if (!getExecuteOnEnum().contains(EXEC_PRE_KERNELS) || getExecuteOnEnum().size() > 1)
-    mooseWarning("Non standard execution flags detected. Use at your own risk.");
+  if (!getExecuteOnEnum().contains(EXEC_PRE_KERNELS) || getExecuteOnEnum().size() > 2 ||
+      (getExecuteOnEnum().size() == 2 && !getExecuteOnEnum().contains(EXEC_INITIAL)))
+    mooseWarning("Non standard execution flags detected. Use at your own risk. "
+                 "execute_on parameter should contain at least PRE_KERNELS.");
 }
 
 void
@@ -228,7 +230,7 @@ INSFVRhieChowInterpolator::fillARead()
     _a_aux.resize(libMesh::n_threads());
     if (getParam<bool>("force_preaux"))
       mooseWarning("Executing the Rhie Chow user object before auxkernels is only valid if the "
-                   "auxvariables involved are constant");
+                   "auxvariables involved are constant over linear iterations");
   }
   else if (isParamValid("a_v"))
     paramError("a_v", "If the a_v coefficients are provided, then a_u must be provided");

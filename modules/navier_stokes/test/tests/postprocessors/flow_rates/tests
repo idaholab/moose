@@ -82,6 +82,15 @@
       cli_args = "-r 1 FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip'"
       ad_indexing_type = 'global'
     []
+    [initial]
+      type = CSVDiff
+      input = conservation_INSFV.i
+      csvdiff = diverging_INSFV_initial.csv
+      abs_zero = 1e-8
+      detail = 'at the very beginning of the simulation, with the initialized velocities'
+      cli_args = "Variables/temperature/initial_condition=290 UserObjects/rc/execute_on='INITIAL PRE_KERNELS' UserObjects/rc/force_preaux=true Postprocessors/inlet_mass_variable/execute_on=initial Postprocessors/inlet_mass_constant/execute_on=initial Postprocessors/inlet_mass_matprop/execute_on=initial Postprocessors/mid1_mass/execute_on=INITIAL Postprocessors/outlet_mass/execute_on=INITIAL Postprocessors/mid1_advected_energy/execute_on=INITIAL Postprocessors/mid2_advected_energy/execute_on=INITIAL Outputs/file_base=diverging_INSFV_initial"
+      ad_indexing_type = 'global'
+    []
   []
   [pinsfv_straight]
     type = CSVDiff
@@ -128,6 +137,28 @@
       abs_zero = 1e-8
       detail = 'and with no-slip boundary conditions, for which momentum and energy will be dissipated at the wall.'
       cli_args = "FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_PINSFV_quad_xy_noslip'"
+      ad_indexing_type = 'global'
+    []
+  []
+  [warnings]
+    requirement = 'The system shall issue a warning if'
+    [fv_preaux]
+      type = RunException
+      input = conservation_INSFV.i
+      cli_args = 'UserObjects/rc/force_preaux=true UserObjects/rc/a_u=0 UserObjects/rc/a_v=0'
+      expect_err = 'Executing the Rhie Chow user object before auxkernels is only valid if the auxvariables involved are constant'
+      detail = 'Rhie Chow interpolation is used, with auxiliary variables for the coefficients, and the user object has been set to execute before auxkernels'
+      ad_indexing_type = 'global'
+    []
+  []
+  [errors]
+    requirement = 'The system shall error if'
+    [initial_vfr_only]
+      type = RunException
+      input = conservation_INSFV.i
+      cli_args = 'Postprocessors/mid1_mass/execute_on=INITIAL'
+      expect_err = 'The Rhie Chow user object must be executed before the VolumetricFlowRate postprocessor'
+      detail = 'using finite volume discretization, a volumetric flow rate is requested at the beginning of the simulation and the interpolation coefficients are not computed yet'
       ad_indexing_type = 'global'
     []
   []
