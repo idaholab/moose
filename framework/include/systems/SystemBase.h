@@ -879,6 +879,7 @@ public:
   /// Setup Functions
   virtual void initialSetup();
   virtual void timestepSetup();
+  virtual void customSetup(const ExecFlagType & exec_type);
   virtual void subdomainSetup();
   virtual void residualSetup();
   virtual void jacobianSetup();

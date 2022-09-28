@@ -43,6 +43,20 @@ complete list of execution flags is provided by MOOSE are listed in the "registe
 
 !listing framework/src/base/MooseApp.C start=MooseApp::registerExecFlags() end=void
 
+The default value of "execute_on" is *linear* for most of MOOSE objects with the exception of:
+
+- The auxiliary kernels have the default value of *linear* and *timestep_end*.
+- The postprocessors have default value of *timestep_end*.
+- The controls have default value of *initial* and *timestep_end*.
+- The multi-apps have default value of *timestep_begin*.
+- The user objects have default value of *timestep_end*.
+- The outputs have default value of *initial* and *timestep_end*.
+- The default value for a transfer is set to be the same as the execute_on value of its corresponding sub-application.
+
+Several objects in the framework have custom or selected default "execute_on".
+The default value for all objects including objects in MOOSE modules and MOOSE-based
+applications can be found in their parameter list.
+
 ## Modifying Execute On
 
 When creating objects that inherit from SetupInterface it is possible to set, add, or remove
@@ -75,8 +89,8 @@ The SetupInterface includes virtual methods that correspond to the primary execu
 with MOOSE, these methods are listed in the header as shown here.
 
 !listing framework/include/interfaces/SetupInterface.h
-         start=~SetupInterface()
-         end=subdomainSetup
+         start=static InputParameters validParams()
+         end=customSetup
          include-end=True
          include-start=False
          strip-leading-whitespace=True
@@ -89,6 +103,14 @@ A few of the methods were created prior to the execute flags, thus the names do 
 they remain as is to keep the API consistent: the "jacobianSetup" methods is called prior to the
 "NONLINEAR" execute flag and the "residualSetup" is called prior to the "LINEAR" execute flag.
 
+There is also a generic setup function "customSetup" that takes an execute flag as the argument.
+This function is called by MOOSE when performing evaluations of objects on the custom execute flags
+in [Creating Custom Execute Flags](#creating-custom-execute-flags).
+
+!alert warning title=Note on the "customSetup" function
+This function is not called on *initial*, *timestep_begin*, *subdomain*, *nonlinear* and *linear*.
+Setup operations for those execute flags should be implemented in *initialSetup*, *timestepSetup*,
+*subdomainSetup*, *jacobianSetup* and *residualSetup* functions respectively.
 
 ## Creating Custom Execute Flags
 

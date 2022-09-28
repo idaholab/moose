@@ -259,6 +259,13 @@ VariableWarehouse::timestepSetup()
 }
 
 void
+VariableWarehouse::customSetup(const ExecFlagType & exec_type)
+{
+  for (auto & pair : _all_objects)
+    pair.second->customSetup(exec_type);
+}
+
+void
 VariableWarehouse::subdomainSetup()
 {
   for (auto & pair : _all_objects)

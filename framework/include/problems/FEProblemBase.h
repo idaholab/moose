@@ -346,6 +346,7 @@ public:
 
   void initialSetup() override;
   void timestepSetup() override;
+  void customSetup(const ExecFlagType & exec_type) override;
   void residualSetup() override;
   void jacobianSetup() override;
 
