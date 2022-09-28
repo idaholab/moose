@@ -942,6 +942,11 @@ NSFVAction::addRhieChowUserObjects()
       params.set<MooseFunctorName>("a_w") = "az";
     }
 
+    // User may be wanting to execute consumers of Rhie Chow coefficients on INITIAL
+    params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_PRE_KERNELS};
+    if (_has_flow_equations)
+      params.set<bool>("force_preaux") = true;
+
     _problem->addUserObject("INSFVRhieChowInterpolator", "ins_rhie_chow_interpolator", params);
   }
 }
