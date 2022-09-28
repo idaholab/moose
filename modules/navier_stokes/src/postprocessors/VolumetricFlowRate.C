@@ -77,6 +77,13 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
                  "supplied.");
 
     Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
+
+    if (getExecuteOnEnum().contains(EXEC_INITIAL) &&
+        !_rc_uo->getExecuteOnEnum().contains(EXEC_INITIAL))
+      mooseError(
+          "The Rhie Chow user object must be executed before the VolumetricFlowRate postprocessor "
+          "to obtain correct interpolation coefficients on sidesets internal to the flow domain. "
+          "In its parameters: add the INITIAL execute_on flag and add force_preaux=true.");
   }
 }
 

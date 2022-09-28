@@ -20,7 +20,9 @@
 #include "INSFVPressureVariable.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "VectorCompositeFunctor.h"
+#include "FVKernel.h"
 #include "FVElementalKernel.h"
+#include "FVFluxBC.h"
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
@@ -45,7 +47,9 @@ INSFVRhieChowInterpolator::validParams()
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
   exec_enum = {EXEC_PRE_KERNELS};
-  params.suppressParameter<ExecFlagEnum>("execute_on");
+
+  // Avoid uninitialized residual objects
+  params.suppressParameter<bool>("force_preic");
 
   MooseEnum velocity_interp_method("average rc", "rc");
   params.addParam<MooseEnum>(
@@ -202,6 +206,9 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
 
   if (_velocity_interp_method != Moose::FV::InterpMethod::Average)
     fillARead();
+
+  if (!getExecuteOnEnum().contains(EXEC_PRE_KERNELS) || getExecuteOnEnum().size() > 1)
+    mooseWarning("Non standard execution flags detected. Use at your own risk.");
 }
 
 void
@@ -219,6 +226,9 @@ INSFVRhieChowInterpolator::fillARead()
 
     _a_data_provided = true;
     _a_aux.resize(libMesh::n_threads());
+    if (getParam<bool>("force_preaux"))
+      mooseWarning("Executing the Rhie Chow user object before auxkernels is only valid if the "
+                   "auxvariables involved are constant");
   }
   else if (isParamValid("a_v"))
     paramError("a_v", "If the a_v coefficients are provided, then a_u must be provided");
@@ -263,6 +273,11 @@ INSFVRhieChowInterpolator::fillARead()
 void
 INSFVRhieChowInterpolator::initialSetup()
 {
+  if (!_initial_setup_done)
+    insfvSetup();
+
+  _initial_setup_done = true;
+
   if (_velocity_interp_method == Moose::FV::InterpMethod::Average)
     return;
   for (const auto var_num : _var_numbers)
@@ -324,7 +339,7 @@ INSFVRhieChowInterpolator::meshChanged()
 
   // If the mesh has been modified:
   // - the boundary elements may have changed
-  // - some elements may been refined
+  // - some elements may have been refined
   _elements_to_push_pull.clear();
   _a.clear();
 }

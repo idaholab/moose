@@ -57,8 +57,8 @@ public:
 
   /**
    * Retrieve a face velocity
-   * @param m The velocity interpolation method. This is either RhieChow or Average. RhieChow is
-   * recommended as it avoids checkboards in the pressure field
+   * @param m The velocity interpolation method. This is either Rhie-Chow or Average. Rhie-Chow is
+   * recommended as it avoids checkerboards in the pressure field
    * @param fi The face that we wish to retrieve the velocity for
    * @param tid The thread ID
    * @return The face velocity
