@@ -19,7 +19,7 @@
   [control_value]
     type = RealControlDataValuePostprocessor
     control_data_name = ctrl:value
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 
