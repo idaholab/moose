@@ -38,7 +38,8 @@
   [force]
     type = BodyForce
     variable = u
-    block = 'bottom middle top'
+    block = 'bottom middle'
+    function = 'x - y'
   []
 []
 
