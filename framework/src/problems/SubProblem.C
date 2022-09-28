@@ -826,10 +826,7 @@ SubProblem::reinitElemFaceRef(const Elem * elem,
   // With the dof indices set in the moose variables, now let's properly size
   // our local residuals/Jacobians
   if (currentlyComputingJacobian() || currentlyComputingResidualAndJacobian())
-  {
     assembly(tid).prepareJacobianBlock();
-    assembly(tid).prepareOffDiagScalar();
-  }
 
   if (!currentlyComputingJacobian())
     assembly(tid).prepareResidual();
