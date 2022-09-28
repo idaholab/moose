@@ -157,6 +157,13 @@
   []
 []
 
+[Preconditioning]
+  [smp]
+    full = true
+    type = SMP
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
@@ -174,4 +181,3 @@
 [Outputs]
   exodus = true
 []
-

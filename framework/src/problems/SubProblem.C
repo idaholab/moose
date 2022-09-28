@@ -825,8 +825,14 @@ SubProblem::reinitElemFaceRef(const Elem * elem,
 
   // With the dof indices set in the moose variables, now let's properly size
   // our local residuals/Jacobians
-  assembly(tid).prepareJacobianBlock();
-  assembly(tid).prepareResidual();
+  if (currentlyComputingJacobian() || currentlyComputingResidualAndJacobian())
+  {
+    assembly(tid).prepareJacobianBlock();
+    assembly(tid).prepareOffDiagScalar();
+  }
+
+  if (!currentlyComputingJacobian())
+    assembly(tid).prepareResidual();
 
   // Let's finally compute our variable values!
   systemBaseNonlinear().reinitElemFace(elem, side, bnd_id, tid);

@@ -65,10 +65,9 @@ MortarConstraint::computeResidual(Moose::MortarType mortar_type)
   accumulateTaggedLocalResidual();
 }
 
-void 
-MortarConstraint::computeResidualScalar() 
+void
+MortarConstraint::computeResidualScalar()
 {
-
 }
 
 void
@@ -173,10 +172,17 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
       accumulateTaggedLocalMatrix();
     }
   }
+
+  // now, get the list of coupled scalar vars and compute their off-diag jacobians
+  const auto & coupled_scalar_vars = getCoupledMooseScalarVars();
+
+  // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
+  for (const auto & jvariable : coupled_scalar_vars)
+    if (_sys.hasScalarVariable(jvariable->name()))
+      computeOffDiagJacobianScalar(jvariable->number());
 }
 
-void 
-MortarConstraint::computeJacobianScalar() 
+void
+MortarConstraint::computeJacobianScalar()
 {
-
 }
