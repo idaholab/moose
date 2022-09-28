@@ -7,31 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NodeSetToSideSetGenerator.h"
+#include "SideSetsFromNodeSetsGenerator.h"
 
 #include "CastUniquePointer.h"
 
-registerMooseObject("MooseApp", NodeSetToSideSetGenerator);
+registerMooseObject("MooseApp", SideSetsFromNodeSetsGenerator);
 
 InputParameters
-NodeSetToSideSetGenerator::validParams()
+SideSetsFromNodeSetsGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  params.addClassDescription(
-      "Mesh generator which constructs side sets from node sets, and vise versa");
+  params.addClassDescription("Mesh generator which constructs side sets from node sets");
   params.addRequiredParam<MeshGeneratorName>("input",
                                              "Input mesh the operation will be applied to");
   return params;
 }
 
-NodeSetToSideSetGenerator::NodeSetToSideSetGenerator(const InputParameters & parameters)
+SideSetsFromNodeSetsGenerator::SideSetsFromNodeSetsGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters), _input(getMesh("input"))
 {
 }
 
 std::unique_ptr<MeshBase>
-NodeSetToSideSetGenerator::generate()
+SideSetsFromNodeSetsGenerator::generate()
 {
   _input->get_boundary_info().build_side_list_from_node_list();
 

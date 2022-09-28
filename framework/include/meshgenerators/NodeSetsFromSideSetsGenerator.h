@@ -12,17 +12,17 @@
 #include "MeshGenerator.h"
 
 /**
- * MeshGenerator for constructing Node Sets from Side Sets
+ * MeshGenerator for constructing node sets from side sets
  */
-class NodeSetToSideSetGenerator : public MeshGenerator
+class NodeSetsFromSideSetsGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  NodeSetToSideSetGenerator(const InputParameters & parameters);
+  NodeSetsFromSideSetsGenerator(const InputParameters & parameters);
 
 protected:
-  virtual std::unique_ptr<MeshBase> generate() override;
+  std::unique_ptr<MeshBase> generate() override;
 
 private:
   /// Input mesh the operation will be applied to

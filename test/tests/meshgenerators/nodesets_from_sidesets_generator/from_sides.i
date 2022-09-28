@@ -1,6 +1,5 @@
 [Mesh]
   construct_node_list_from_side_list = false
-  construct_side_list_from_node_list = false
   [gmg]
     type = GeneratedMeshGenerator
     dim = 3
@@ -21,16 +20,12 @@
     type = ParsedGenerateSideset
     input = subdomains
     combinatorial_geometry = 'z < 1'
-    included_subdomain_ids = '1'
+    included_subdomains = '1'
     normal = '1 0 0'
     new_sideset_name = interior
   []
-  [transcribe]
-    type = SideSetToNodeSetGenerator
+  [add_nodesets]
+    type = NodeSetsFromSideSetsGenerator
     input = sideset
   []
-[]
-
-[Outputs]
-  exodus = true
 []
