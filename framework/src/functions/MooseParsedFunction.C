@@ -72,7 +72,7 @@ template <typename T>
 void
 MooseParsedFunctionTempl<T>::initialSetup()
 {
-  for (auto i = 0; i < (int)_vars.size(); i++)
+  for (const auto i : index_range(_vars))
   {
     // Check for non-scalar variables.
     // First, see if the var is actually assigned to a proper scalar value
