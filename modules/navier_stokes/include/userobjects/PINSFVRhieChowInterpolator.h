@@ -25,6 +25,7 @@ public:
   static InputParameters validParams();
   PINSFVRhieChowInterpolator(const InputParameters & params);
 
+  void initialSetup() override;
   void meshChanged() override;
   void residualSetup() override;
 
