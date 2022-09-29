@@ -5875,25 +5875,6 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
 }
 
 void
-FEProblemBase::computeTransientImplicitResidual(Real time,
-                                                const NumericVector<Number> & u,
-                                                const NumericVector<Number> & udot,
-                                                const NumericVector<Number> & udotdot,
-                                                NumericVector<Number> & residual)
-{
-  TIME_SECTION("computeTransientImplicitResidual", 2);
-
-  if (uDotRequested())
-    _nl->setSolutionUDot(udot);
-
-  if (uDotDotRequested())
-    _nl->setSolutionUDotDot(udotdot);
-
-  _time = time;
-  computeResidual(u, residual);
-}
-
-void
 FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 {
   TIME_SECTION("computeResidualTags", 5, "Computing Residual");
@@ -6132,29 +6113,6 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
       _displaced_problem->setCurrentlyComputingJacobian(false);
     _safe_access_tagged_matrices = true;
   }
-}
-
-void
-FEProblemBase::computeTransientImplicitJacobian(Real time,
-                                                const NumericVector<Number> & u,
-                                                const NumericVector<Number> & udot,
-                                                const NumericVector<Number> & udotdot,
-                                                Real duDotDu_shift,
-                                                Real duDotDotDu_shift,
-                                                SparseMatrix<Number> & jacobian)
-{
-  if (0)
-  { // The current interface guarantees that the residual is called before Jacobian, thus udot has
-    // already been set
-    if (uDotDotRequested())
-      _nl->setSolutionUDotDot(udotdot);
-    if (uDotOldRequested())
-      _nl->setSolutionUDot(udot);
-  }
-  _nl->duDotDu() = duDotDu_shift;
-  _nl->duDotDotDu() = duDotDotDu_shift;
-  _time = time;
-  computeJacobian(u, jacobian);
 }
 
 void
