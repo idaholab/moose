@@ -63,4 +63,13 @@
     requirement = "The ParsedFunction object shall fail with a human readable error if a vals entry is supplied that is neither a valid postprocessor, scalar variable, function, or real number."
     issues = '#14169'
   [../]
+
+  [./nl_vars]
+    type = RunException
+    input = 'combined.i'
+    cli_args = "Functions/fn/vars='f sv' Functions/fn/vals='f sv'"
+    expect_err = "The only variables supported by ParsedFunction are scalar variables, and var 'f' is not scalar."
+    requirement = "The system should error if a field variable is passed into a parsed function object, as this capability is currently not supported."
+    issues = '#15523'
+  [../]
 []
