@@ -12,22 +12,29 @@ As such, the `ADInterfaceJouleHeatingConstraint` takes as a required argument th
 !alert note title=Closed Gap Interface Assumed by this Class
 The `ADInterfaceJouleHeatingConstraint` class should only be employed in simulations when the user is certain that electric potential flux is nonzero only when the interface gap is closed. This class may also be used in simulations with an open gap at the interface, so long as the electric potential flux across that gap is zero while the interface gap is open.
 
-The heat source is calculated as a function of the electric potential flux across the interface, as given by the associated Lagrange multiplier $\lambda_{\phi}$,
+The heat source is calculated as a function of the electric potential change across the interface, as determined from the associated Lagrange multiplier $\lambda_{\phi}$,
 \begin{equation}
   \label{eq:interfaceJH_fromLMvariable}
-   q_{electric} = \sigma_e \left( \nabla \phi \right)^2 = \frac{(\lambda_{\phi})^2}{\sigma_e}
+   q_{electric} = C_e \left( \Delta \phi \right)^2 = \frac{(\lambda_{\phi})^2}{C_e}
 \end{equation}
-where $\sigma_e$ is the harmonic mean of the electrical conductivity of the primary and secondary blocks,
+where $C_e$ is the harmonic mean of the electrical conductivity of the primary and secondary blocks,
 \begin{equation}
   \label{eq:electricCond_harmonicMean}
-  \sigma_e = \frac{2 \sigma_{primary} \sigma_{secondary}}{\sigma_{primary} + \sigma_{secondary}}
+  C_e = \frac{2 \sigma_{primary} \sigma_{secondary}}{\sigma_{primary} + \sigma_{secondary}}
 \end{equation}
 following [!citep](cincotti2007modeling).
-The Lagrange multiplier, passed from a separate mortar contact calculation, holds the electric potential flux
+The Lagrange multiplier variable, passed from a separate mortar contact calculation, is calculated as
 \begin{equation}
-  \lambda_{\phi} = \sigma_e \nabla \phi
+  \label{eq:electricalContact_LMvariable}
+  \lambda_{\phi} = C_e \left[ \frac{S}{m} \right] \Delta \phi  \left[ \frac{V}{m} \right]
 \end{equation}
 where the harmonic mean of the electrical conductivity is the same as given in [eq:electricCond_harmonicMean].
+In base SI units this Lagrange multiplier variable has the units $\left[ \frac{A}{m^2} \right]$ and is similar to the common approximation for the current density
+\begin{equation}
+  \label{eq:currentDensityApprox}
+  J = \sigma E
+\end{equation}
+where $J$ is the current density, $\sigma$ is the electrical conductivity, and $E$ is the electric field.
 
 
 !alert note title=Employ Consistency in Primary and Secondary Designations
