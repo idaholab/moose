@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/SideSetsFromBoundingBoxGenerator.md'
-  issues = '#11640'
+  issues = '#11640 #16813'
 
   [generate]
     requirement = 'The system shall have the ability to generate side sets based upon bounding '
@@ -43,6 +43,16 @@
       recover = false
 
       detail = 'where bounding boxes perfectly overlap but create unique ids.'
+    []
+    [location_outside]
+      type = 'Exodiff'
+      input = 'generate_outside.i'
+      cli_args = '--mesh-only'
+      exodiff = 'generate_outside_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'with only elements located outside of the bounding boxes.'
     []
   []
 

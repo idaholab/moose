@@ -78,6 +78,7 @@ SideSetsFromBoundingBoxGenerator::generate()
 
   bool found_element = false;
   bool found_side_sets = false;
+  const bool inside = (_location == "INSIDE");
 
   if (!_boundary_id_overlap)
   {
@@ -87,8 +88,8 @@ SideSetsFromBoundingBoxGenerator::generate()
       // boolean if element centroid is in bounding box
       bool contains = _bounding_box.contains_point(elem->vertex_average());
 
-      // check if active elements are found in the bounding box
-      if (contains)
+      // check if active elements are found either in or out of the bounding box, apropos "inside"
+      if (contains == inside)
       {
         found_element = true;
         // loop over sides of elements within bounding box
@@ -106,8 +107,11 @@ SideSetsFromBoundingBoxGenerator::generate()
             }
       }
     }
-    if (!found_element)
+    if (!found_element && inside)
       mooseError("No elements found within the bounding box");
+
+    if (!found_element && !inside)
+      mooseError("No elements found outside the bounding box");
 
     if (!found_side_sets)
       mooseError("No side sets found on active elements within the bounding box");
@@ -121,7 +125,6 @@ SideSetsFromBoundingBoxGenerator::generate()
                  " Must be 2 boundary inputs or more.");
 
     bool found_node = false;
-    const bool inside = (_location == "INSIDE");
 
     // Loop over the elements and assign node set id to nodes within the bounding box
     for (auto node = mesh->active_nodes_begin(); node != mesh->active_nodes_end(); ++node)
