@@ -40,6 +40,20 @@ QuadSubChannelMeshGenerator::validParams()
                                              "Axial location of spacers/vanes/mixing_vanes [m]");
   params.addRequiredParam<std::vector<Real>>(
       "spacer_k", "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
+  params.addParam<std::vector<Real>>("z_blockage",
+                                     std::vector<Real>({0.0, 0.0}),
+                                     "axial location of blockage (inlet, outlet) [m]");
+  params.addParam<std::vector<unsigned int>>("index_blockage",
+                                             std::vector<unsigned int>({0}),
+                                             "index of subchannels affected by blockage");
+  params.addParam<std::vector<Real>>(
+      "reduction_blockage",
+      std::vector<Real>({1.0}),
+      "Area reduction of subchannels affected by blockage (number to muliply the area)");
+  params.addParam<std::vector<Real>>("k_blockage",
+                                     std::vector<Real>({0.0}),
+                                     "Form loss coefficient of subchannels affected by blockage");
+
   params.addParam<Real>("Kij", 0.5, "Lateral form loss coefficient [-]");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
@@ -56,6 +70,10 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
     _unheated_length_exit(getParam<Real>("unheated_length_exit")),
     _spacer_z(getParam<std::vector<Real>>("spacer_z")),
     _spacer_k(getParam<std::vector<Real>>("spacer_k")),
+    _z_blockage(getParam<std::vector<Real>>("z_blockage")),
+    _index_blockage(getParam<std::vector<unsigned int>>("index_blockage")),
+    _reduction_blockage(getParam<std::vector<Real>>("reduction_blockage")),
+    _k_blockage(getParam<std::vector<Real>>("k_blockage")),
     _kij(getParam<Real>("Kij")),
     _pitch(getParam<Real>("pitch")),
     _rod_diameter(getParam<Real>("rod_diameter")),
@@ -70,6 +88,30 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
 {
   if (_spacer_z.size() != _spacer_k.size())
     mooseError(name(), ": Size of vector spacer_z should be equal to size of vector spacer_k");
+
+  if (_z_blockage.size() != 2)
+    mooseError(name(), ": Size of vector z_blockage must be 2");
+
+  if (*max_element(_index_blockage.begin(), _index_blockage.end()) > (_n_channels - 1))
+    mooseError(name(),
+               ": The index of the blocked subchannel cannot be more than the max index of the "
+               "subchannels");
+
+  if (*max_element(_reduction_blockage.begin(), _reduction_blockage.end()) > 1)
+    mooseError(name(), ": The area reduction of the blocked subchannels cannot be more than 1");
+
+  if ((_index_blockage.size() > _nx * _ny) | (_reduction_blockage.size() > _nx * _ny) |
+      (_k_blockage.size() > _nx * _ny))
+    mooseError(name(),
+               ": Size of vectors: index_blockage, reduction_blockage, k_blockage, cannot be more "
+               "than the total number of subchannels");
+
+  if ((_index_blockage.size() != _reduction_blockage.size()) |
+      (_index_blockage.size() != _k_blockage.size()) |
+      (_reduction_blockage.size() != _k_blockage.size()))
+    mooseError(name(),
+               ": Size of vectors: index_blockage, reduction_blockage, k_blockage, must be equal "
+               "to eachother");
 
   if (_spacer_z.back() > _unheated_length_entry + _heated_length + _unheated_length_exit)
     mooseError(name(), ": Location of spacers should be less than the total bundle length");

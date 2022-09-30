@@ -28,6 +28,14 @@ protected:
   const std::vector<Real> & _spacer_z;
   /// form loss coefficient of the spacers
   const std::vector<Real> & _spacer_k;
+  /// axial location of blockage (inlet, outlet) [m]
+  std::vector<Real> _z_blockage;
+  /// index of subchannels affected by blockage
+  std::vector<unsigned int> _index_blockage;
+  /// area reduction of subchannels affected by blockage
+  std::vector<Real> _reduction_blockage;
+  /// form loss coefficient of subchannels affected by blockage
+  std::vector<Real> _k_blockage;
   /// Lateral form loss coefficient
   const Real & _kij;
   /// Distance between the neighbor fuel rods, pitch
