@@ -7,8 +7,8 @@
     xmax = 1.0
     ymin = -1.0
     ymax = 1.0
-    nx = 3
-    ny = 3
+    nx = 2
+    ny = 2
     elem_type = QUAD4
   []
   [left_block_sidesets]
@@ -81,7 +81,7 @@
   [./kappa]
     type = FunctionScalarAux
     variable = kappa_aux
-    function = '1 0'
+    function = '1 1'
     execute_on = initial #timestep_end
   [../]
 []

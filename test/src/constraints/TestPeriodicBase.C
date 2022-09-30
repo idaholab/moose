@@ -253,10 +253,11 @@ TestPeriodicBase::computeQpResidualScalar()
   /// Stability/penalty term for residual of scalar variable
   Real r = (_pen_scale * _tau_s) * _temp_jump_global;
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
+  RealVectorValue hack(7.0, 3.0, 0.0);
 
   r *= -dx(_h);
 
-  return r;
+  return r / hack(_h);
 }
 
 Real
@@ -267,12 +268,13 @@ TestPeriodicBase::computeQpResidualScalarScalar()
   RealVectorValue kappa_vec(_kappa[0], _kappa[1], 0);
   RealVectorValue kappa_aux_vec(_kappa_aux[0], _kappa_aux[1], 0);
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
+  RealVectorValue hack(7.0, 3.0, 0.0);
 
   Real r = 0.0;
   r += dx(_h) * (_pen_scale * _tau_s) * (kappa_vec * dx);
   r -= dx(_h) * (kappa_aux_vec * _normals[_qp]);
 
-  return r;
+  return r / hack(_h);
 }
 
 Real
@@ -288,7 +290,7 @@ TestPeriodicBase::computeQpJacobianScalarScalar()
 }
 
 Real
-TestPeriodicBase::computeQpBaseJacobian(const Moose::MortarType mortar_type)
+TestPeriodicBase::computeQpBaseJacobian(const Moose::MortarType mortar_type, const unsigned int jvar)
 {
 
   // precalculateMaterial();
@@ -315,7 +317,7 @@ TestPeriodicBase::computeQpBaseJacobian(const Moose::MortarType mortar_type)
 }
 
 Real
-TestPeriodicBase::computeQpConstraintJacobian(const Moose::MortarType mortar_type)
+TestPeriodicBase::computeQpConstraintJacobian(const Moose::MortarType mortar_type, const unsigned int jvar)
 {
 
   // precalculateMaterial(); // may not be needed...

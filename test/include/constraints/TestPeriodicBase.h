@@ -62,8 +62,8 @@ protected:
   /**
    * compute the jacobian at the quadrature points with respect to a scalar variable
    */
-  virtual Real computeQpBaseJacobian(Moose::MortarType mortar_type, unsigned int /*jvar*/);
-  virtual Real computeQpConstraintJacobian(Moose::MortarType mortar_type, unsigned int /*jvar*/);
+  virtual Real computeQpBaseJacobian(Moose::MortarType mortar_type, unsigned int jvar);
+  virtual Real computeQpConstraintJacobian(Moose::MortarType mortar_type, unsigned int jvar);
 
   // Compute T jump and heat flux average/jump
   void precalculateMaterial();
