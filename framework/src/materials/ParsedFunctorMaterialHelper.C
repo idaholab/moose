@@ -17,12 +17,9 @@ ParsedFunctorMaterialHelper<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params += FunctionParserUtils<is_ad>::validParams();
-  params.addClassDescription("Parsed Function Material.");
-  params.addRequiredParam<std::string>("prop_name", "Name of the material property");
-  params.addParam<bool>("error_on_missing_material_properties",
-                        true,
-                        "Throw an error if any explicitly requested material property does not "
-                        "exist. Otherwise assume it to be zero.");
+  params.addClassDescription("Parsed FunctorMaterial.");
+  params.addRequiredParam<std::string>("prop_name", "Name of the functor material property");
+
   return params;
 }
 
@@ -33,11 +30,9 @@ ParsedFunctorMaterialHelper<is_ad>::ParsedFunctorMaterialHelper(const InputParam
     FunctionParserUtils<is_ad>(parameters),
     _prop_name(getParam<std::string>("prop_name")),
     _property(declareFunctorProperty<GenericReal<is_ad>>("prop_name")),
-    _mat_prop_descriptors(0),
+    _functor_names(getParam<std::vector<MooseFunctorName>>("functors")),
     _tol(0),
-    _map_mode(map_mode),
-    _error_on_missing_material_properties(
-        this->template getParam<bool>("error_on_missing_material_properties"))
+    _map_mode(map_mode)
 {
 
   // fetch names and numbers of all coupled variables
@@ -56,6 +51,17 @@ ParsedFunctorMaterialHelper<is_ad>::ParsedFunctorMaterialHelper(const InputParam
       if (_pars.hasDefaultCoupledValue(*it))
         _arg_constant_defaults.push_back(*it);
       continue;
+    }
+
+    // get all functors
+    _functors.resize(_functor_names.size());
+    for (const auto & functor_name : _functor_names)
+    {
+      // parse the functor names parameters into a vector of functors
+      _functors[i] = getFunctor<GenericReal<is_ad>>(functor_name);
+
+      // get the fparser symbol name for the new functor in the expression
+      _symbol_names.push_back(functor_name);
     }
 
     // check if we have a 1:1 mapping between parameters and variables
@@ -203,19 +209,6 @@ ParsedFunctorMaterialHelper<is_ad>::functionParse(
         _tol[i] = tol_values[j];
         break;
       }
-  }
-
-  // get all material properties
-  unsigned int nmat_props = mat_prop_expressions.size();
-  _mat_prop_descriptors.resize(nmat_props);
-  for (unsigned int i = 0; i < nmat_props; ++i)
-  {
-    // parse the material property parameter entry into a FunctionMaterialPropertyDescriptor
-    _mat_prop_descriptors[i] = FunctionMaterialPropertyDescriptor<is_ad>(
-        mat_prop_expressions[i], this, _error_on_missing_material_properties);
-
-    // get the fparser symbol name for the new material property
-    _symbol_names.push_back(_mat_prop_descriptors[i].getSymbolName());
   }
 
   // get all coupled postprocessors

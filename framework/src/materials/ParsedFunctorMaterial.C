@@ -19,7 +19,7 @@ ParsedFunctorMaterialTempl<is_ad>::validParams()
   InputParameters params = ParsedFunctorMaterialHelper<is_ad>::validParams();
   params += ParsedMaterialBase::validParams();
 
-  params.addClassDescription("Parsed Function Material.");
+  params.addClassDescription("FunctorMaterial defined using a parsed expression.");
   return params;
 }
 
@@ -32,7 +32,7 @@ ParsedFunctorMaterialTempl<is_ad>::ParsedFunctorMaterialTempl(const InputParamet
   functionParse(_function,
                 _constant_names,
                 _constant_expressions,
-                this->template getParam<std::vector<std::string>>("material_property_names"),
+                this->template getParam<std::vector<MooseFunctorName>>("functor_names"),
                 this->template getParam<std::vector<PostprocessorName>>("postprocessor_names"),
                 _tol_names,
                 _tol_values);
@@ -53,16 +53,16 @@ ParsedFunctorMaterialTempl<is_ad>::ParsedFunctorMaterialTempl(const InputParamet
         }
       }
 
-      // insert material property values
-      auto nmat_props = _mat_prop_descriptors.size();
-      for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
-        _func_params[i + _nargs] = _mat_prop_descriptors[i](r, t);
+      // insert other functor values
+      auto nfunctors = _functors.size();
+      for (MooseIndex(_functors) i = 0; i < nfunctors; ++i)
+        _func_params[i + _nargs] = _functors[i](r, t);
 
       // insert postprocessor values
       // these are updated automatically as they are references to their value
       auto npps = _postprocessor_values.size();
       for (MooseIndex(_postprocessor_values) i = 0; i < npps; ++i)
-        _func_params[i + _nargs + nmat_props] = *_postprocessor_values[i];
+        _func_params[i + _nargs + nfunctors] = *_postprocessor_values[i];
 
       return evaluate(_func_F);
     });

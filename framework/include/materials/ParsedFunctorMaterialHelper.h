@@ -18,7 +18,6 @@
 #define usingParsedFunctorMaterialHelperMembers(T)                                                        \
   usingFunctionParserUtilsMembers(T);                                                                     \
   using typename ParsedFunctorMaterialHelper<T>::VariableNameMappingMode;                                 \
-  using typename ParsedFunctorMaterialHelper<T>::MatPropDescriptorList;                                   \
   using ParsedFunctorMaterialHelper<T>::functionParse;                                                    \
   using ParsedFunctorMaterialHelper<T>::functionsPostParse;                                               \
   using ParsedFunctorMaterialHelper<T>::functionsOptimize;                                                \
@@ -109,11 +108,11 @@ protected:
    */
   std::vector<SymbolName> _symbol_names;
 
-  /// convenience typedef for the material property descriptors
-  typedef std::vector<FunctionMaterialPropertyDescriptor<is_ad>> MatPropDescriptorList;
+  /// Names of the functors involved in the parsed expression
+  const std::vector<MooseFunctorName> _functor_names;
 
-  /// Material property descriptors (obtained by parsing _mat_prop_expressions)
-  MatPropDescriptorList _mat_prop_descriptors;
+  /// Vector of functors for computing the parsed expression
+  const std::vector<Moose::Functor<GenericReal<is_ad>>> _functors;
 
   /// Tolerance values for all arguments (to protect from log(0)).
   std::vector<Real> _tol;
