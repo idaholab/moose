@@ -459,7 +459,8 @@ INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
   for (auto elem_id : _moose_mesh.getBoundaryActiveSemiLocalElemIds(boundary_id))
   {
     const auto & elem = _moose_mesh.elemPtr(elem_id);
-    if (elem->processor_id() != this->processor_id())
+    // no need to ghost if locally owned or far from local process
+    if (elem->processor_id() != this->processor_id() && elem->is_semilocal(this->processor_id()))
       // Adding to the a coefficient will make sure the final result gets communicated
       addToA(elem, 0, 0);
   }
@@ -468,7 +469,9 @@ INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
   for (auto neighbor_id : _moose_mesh.getBoundaryActiveNeighborElemIds(boundary_id))
   {
     const auto & neighbor = _moose_mesh.queryElemPtr(neighbor_id);
-    if (neighbor->processor_id() != this->processor_id())
+    // no need to ghost if locally owned or far from local process
+    if (neighbor->processor_id() != this->processor_id() &&
+        neighbor->is_semilocal(this->processor_id()))
       // Adding to the a coefficient will make sure the final result gets communicated
       addToA(neighbor, 0, 0);
   }
