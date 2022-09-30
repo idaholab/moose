@@ -53,21 +53,10 @@ protected:
   virtual Real computeQpResidual(Moose::MortarType mortar_type) = 0;
 
   /**
-   * compute the scalar residual at the quadrature points
-   */
-  virtual Real computeQpResidualScalar() { return 0; };
-  virtual Real computeQpResidualScalarScalar() { return 0; };
-
-  /**
    * compute the jacobian at the quadrature points
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType jacobian_type,
                                  unsigned int jvar) = 0;
-
-  /**
-   * compute the scalar jacobian at the quadrature points
-   */
-  virtual Real computeQpJacobianScalarScalar() { return 0; }
 
   void computeOffDiagJacobianScalar(unsigned int) override final;
   virtual void computeOffDiagJacobianScalar(Moose::MortarType, unsigned int) {}

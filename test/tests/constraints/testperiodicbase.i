@@ -166,10 +166,10 @@
 
 [Executioner]
   type = Steady
-#  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-#  petsc_options_value = 'lu superlu_dist'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_view -vec_view'
-  petsc_options_value = 'lu superlu_dist ::ascii_matlab ::ascii_matlab'
+ petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+ petsc_options_value = 'lu superlu_dist'
+  # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_view -vec_view'
+  # petsc_options_value = 'lu superlu_dist ::ascii_matlab ::ascii_matlab'
   solve_type = NEWTON
 []
 

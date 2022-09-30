@@ -50,14 +50,13 @@ protected:
   void computeOffDiagJacobianScalar(Moose::MortarType mortar_type, unsigned int jvar) override;
 
   Real computeQpResidual(const Moose::MortarType mortar_type) override;
-  Real computeQpResidualScalar() override;
-  Real computeQpResidualScalarScalar() override;
+  ADReal computeQpResidualScalar();
+  ADReal computeQpResidualScalarScalar();
   Real computeQpJacobian(Moose::ConstraintJacobianType /*jacobian_type*/,
                          unsigned int /*jvar*/) override
   {
     return 0;
-  };
-  Real computeQpJacobianScalarScalar() override;
+  }
 
   /**
    * compute the jacobian at the quadrature points with respect to a scalar variable
@@ -74,7 +73,7 @@ protected:
   /// the temperature jump in global and interface coordiantes;
   /// TM-analogy: _displacement_jump_global, _interface_displacement_jump
   ///@{
-  Real _temp_jump_global;
+  ADReal _temp_jump_global;
   ///@}
 
   /// The four stability parameters from the VMDG method
@@ -117,4 +116,7 @@ protected:
 private:
   /// hard code the penalty for now
   const Real pencoef = 1.0;
+
+  const ADVariableValue & _ad_u_secondary;
+  const ADVariableValue & _ad_u_primary;
 };
