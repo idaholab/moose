@@ -207,8 +207,8 @@ ThreadedElementLoopBase<RangeType>::translateMetaPhysicLError(const MetaPhysicL:
       "due to AD not having a sufficiently large derivative container size. To increase the AD "
       "container size, you can run configure in the MOOSE root directory with the "
       "'--with-derivative-size=<n>' option and then recompile. Other causes of MetaPhysicL logic "
-      "errors include evaluating functions like sqrt (which gets called for vector norm functions) "
-      "or log with arguments <= 0");
+      "errors include evaluating functions where they are not defined or differentiable like sqrt "
+      "(which gets called for vector norm functions) or log with arguments <= 0");
 }
 
 template <typename RangeType>
