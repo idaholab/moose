@@ -40,11 +40,16 @@ SetupDebugAction::validParams()
   params.addParam<bool>("show_mesh_meta_data", false, "Print out the available mesh meta data");
   params.addParam<bool>(
       "show_reporters", false, "Print out information about the declared and requested Reporters");
-  params.addParam<bool>(
+  params.addDeprecatedParam<bool>(
       "pid_aux",
+      "Add a AuxVariable named \"pid\" that shows the processors and partitioning",
+      "pid_aux is deprecated, use output_process_domains");
+  params.addParam<bool>(
+      "output_process_domains",
       false,
-      "Add a AuxVariable named \"pid\" that shows the processors and partitioning");
-  params.addParam<bool>("show_functors", false, "Whether to output the problem functors");
+      "Add a AuxVariable named \"pid\" that shows the partitioning for each process");
+  params.addParam<bool>(
+      "show_functors", false, "Whether to print information about the functors in the problem");
 
   params.addClassDescription(
       "Adds various debugging type Output objects to the simulation system.");
@@ -106,10 +111,11 @@ SetupDebugAction::act()
   }
 
   // Add pid aux
-  if (getParam<bool>("pid_aux"))
+  if (getParam<bool>("output_process_domains") ||
+      (isParamValid("pid_aux") && getParam<bool>("pid_aux")))
   {
     if (_problem->hasVariable("pid"))
-      paramError("pid_aux", "Variable with the name \"pid\" already exists");
+      paramError("output_process_domains", "Variable with the name \"pid\" already exists");
 
     auto fe_type = FEType(CONSTANT, MONOMIAL);
     auto type = AddAuxVariableAction::variableType(fe_type);
