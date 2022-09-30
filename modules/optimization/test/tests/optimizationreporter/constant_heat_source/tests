@@ -3,7 +3,7 @@
   design = 'MaterialScaledGradientVector.md OptimizationMultiAppCommandLineControl.md'
   [constant_material]
     requirement = "The OptimizationMultiAppCommandLineControl shall control parameters being "
-                  "optimized oon the subapp that are not controllable by a reciever."
+                  "optimized on the subapp that are not controllable by a receiver."
     type = CSVDiff
     max_threads = 1
     rel_err = 0.01
@@ -14,14 +14,14 @@
   []
   [t_dependent_material]
     requirement = "The MaterialScaledGradientVector shall provide a variable gradient scaled by a "
-                  "material property that linearizes a nonlinear temperature dependent thermal "
+                  "material property that linearizes a nonlinear temperature-dependent thermal "
                   "conductivity."
     type = CSVDiff
     max_threads = 1
     rel_err = 0.1
     abs_zero = 0.5
-    input = master_nonLinear.i
-    csvdiff = master_nonLinear_out_OptimizationReporter_0001.csv
+    input = main_nonLinear.i
+    csvdiff = main_nonLinear_out_OptimizationReporter_0001.csv
     # steady solve
     recover = false
   []

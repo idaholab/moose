@@ -16,7 +16,7 @@
  * Note: this is similar to MOOSE Framework PiecewiseMultiInterpolation
  * The grid, axes, and (function values) are read in from a GriddedDataReporter.
  * The function values can be read in from the GriddedDataReporter or
- * be supplied by a seperate reporter.  There is one function value per grid point. Linear
+ * be supplied by a separate reporter.  There is one function value per grid point. Linear
  * interpolation of the values provides function values. The grid from the GriddedDataReporter can
  * be 1D, 2D, 3D or 4D.
  */

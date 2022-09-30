@@ -62,7 +62,7 @@
     to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
   []
   #these are different,
-  # - to forward depends on teh parameter being changed
+  # - to forward depends on the parameter being changed
   # - from adjoint depends on the gradient being computed from the adjoint
   #NOTE:  the adjoint variable we are transferring is actually the gradient
   [toForward]

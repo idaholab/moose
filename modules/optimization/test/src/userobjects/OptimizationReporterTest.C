@@ -108,21 +108,4 @@ OptimizationReporterTest::execute()
                objectiveValue,
                " is different from that given in the input for expected_objective_value= ",
                expectedObjectiveValue);
-
-  // expected_objective_value
-
-  // // gradient
-  // _optReporter->updateParameters(*_parameters.get());
-  // _optReporter->computeGradient(gradient);
-
-  // // hessian
-  // _optReporter->updateParameters(s);
-  // _optReporter->setMisfitToSimulatedValues();
-  // _optReporter->computeGradient(Hs);
-
-  // // variable bounds
-  // if (!_optReporter->hasBounds())
-  //   return 0;
-  // const std::vector<Real> & upper_bounds = _optReporter->getUpperBounds();
-  // const std::vector<Real> & lower_bounds = _optReporter->getLowerBounds();
 }

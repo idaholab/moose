@@ -1,5 +1,5 @@
 # This tests that a linear and constant function can be scaled in
-# two seperate functionNeumannBCs both applied to the same sideset using
+# two separate functionNeumannBCs both applied to the same sideset using
 # two parsed functions.  The scale of the linear and constant functions
 # are being parameterized.
 
@@ -100,7 +100,7 @@
     to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
   []
   #these are different,
-  # - to forward depends on teh parameter being changed
+  # - to forward depends on the parameter being changed
   # - from adjoint depends on the gradient being computed from the adjoint
   #NOTE:  the adjoint variable we are transferring is actually the gradient
 

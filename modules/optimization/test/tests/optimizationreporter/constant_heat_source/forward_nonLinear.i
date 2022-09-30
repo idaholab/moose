@@ -58,7 +58,7 @@
     type = ParsedFunction
     value = q
     vars = 'q'
-    # vals = # This is set by the master app OptimizationMultiAppCommandLineControl
+    # vals = # This is set by the main app OptimizationMultiAppCommandLineControl
   []
 []
 
@@ -102,8 +102,4 @@
 []
 
 [Outputs]
-  # console = true
-  # exodus = true
-  # csv = true
-  file_base = 'forward_nl'
 []

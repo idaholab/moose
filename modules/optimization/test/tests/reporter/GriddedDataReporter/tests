@@ -1,7 +1,7 @@
 [Tests]
   [xyGrid]
-    requirement = "This tests that a reporter is able to read in a gridded data file and produce the "
-                  "appropriate grid from it that can be used in PiecewiseMultiInterpolation like "
+    requirement = "The system shall be able to to read in a gridded data file and produce the "
+                  "appropriate grid from it that can be used in PiecewiseMultiInterpolation-like "
                   "functions."
     issues = '#21885'
     design = 'GriddedDataReporter.md'

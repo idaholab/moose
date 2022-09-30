@@ -131,7 +131,6 @@
 []
 
 [Outputs]
-  file_base = 'master'
   console = true
   csv = true
 []

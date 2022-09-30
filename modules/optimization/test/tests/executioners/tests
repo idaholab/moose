@@ -1,6 +1,7 @@
 [Tests]
   issues = '#21885'
   design = 'Optimize.md'
+  requirement = "The system shall minimize a quadratic objective function from a test object "
   [quadratic_taonm]
     type = CSVDiff
     max_threads = 1
@@ -9,9 +10,9 @@
     input = quadratic_minimize.i
     csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
     allow_test_objects = True
-    requirement = "Use TAONM solver, not as accurate"
+    detail = "using gradient free TAO Nelder Mead solver; "
   []
-  [quadratic_taobncg]
+  [quadratic_bncg]
     type = CSVDiff
     max_threads = 1
     rel_err = 1.0e-4
@@ -20,7 +21,7 @@
     input = quadratic_minimize.i
     csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
     allow_test_objects = True
-    requirement = "Use bounded conjugate gradient solver"
+    detail = "using gradient based TAO bounded conjugate gradietn solver; "
   []
   [quadratic_taontr]
     type = CSVDiff
@@ -30,9 +31,9 @@
                "Executioner/petsc_options_value='0 1e16 constant none'"
     input = quadratic_minimize.i
     csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
-    skip = "Hessian to be implemented"
+    skip = "Matrix free Hessian not implemented for test object testing. issue #22274"
     allow_test_objects = True
-    requirement = "Use TAONTR solver, exact"
+    requirement = "using Hessian based TAO Newton trust region solver."
   []
   [quadratic_multi]
     type = CSVDiff

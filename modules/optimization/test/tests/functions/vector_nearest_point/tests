@@ -2,7 +2,7 @@
   [vector_nearest_point]
     design = 'VectorNearestPointFunction.md'
     issues = '#22215'
-    requirement = 'The system shall be able to compute a auxiliary varible based on data from reporter values with '
+    requirement = 'The system shall be able to compute an auxiliary variable based on data from reporter values with '
     [x]
       type = Exodiff
       input = vector_nearest_point.i
@@ -31,41 +31,45 @@
       exodiff = 'rnp_xyzt.e'
       detail = 'time, x-, y-, and z-coordinate data;'
     []
-
-    [errorv]
+  []
+  [error]
+    design = 'VectorNearestPointFunction.md'
+    issues = '#22215'
+    requirement = 'The system shall error if '
+    [v]
       type = RunException
       input = vector_nearest_point.i
       cli_args = 'Functions/active=errorv AuxKernels/val_aux/function=errorv'
       expect_err = 'Size of value vector \(\d*\) does not match number of coordinates specified \(\d*\).'
-      detail = 'error value vector is wrong size;'
+      detail = 'value vector is wrong size;'
     []
-    [errorx]
+    [x]
       type = RunException
       input = vector_nearest_point.i
       cli_args = 'Functions/active=errorx AuxKernels/val_aux/function=errorx'
       expect_err = 'Number of x coordinates \(\d*\) does not match number of values \(\d*\).'
-      detail = 'error if x-coordinate data is wrong size;'
+      detail = 'x-coordinate data is wrong size;'
     []
-    [errory]
+    [y]
       type = RunException
       input = vector_nearest_point.i
       cli_args = 'Functions/active=errory AuxKernels/val_aux/function=errory'
       expect_err = 'Number of y coordinates \(\d*\) does not match number of values \(\d*\).'
-      detail = 'error if y-coordinate data is wrong size;'
+      detail = 'y-coordinate data is wrong size;'
     []
-    [errorz]
+    [z]
       type = RunException
       input = vector_nearest_point.i
       cli_args = 'Functions/active=errorz AuxKernels/val_aux/function=errorz'
       expect_err = 'Number of z coordinates \(\d*\) does not match number of values \(\d*\).'
-      detail = 'error if z-coordinate data is wrong size;'
+      detail = 'z-coordinate data is wrong size;'
     []
-    [errort]
+    [t]
       type = RunException
       input = vector_nearest_point.i
       cli_args = 'Functions/active=errort AuxKernels/val_aux/function=errort'
       expect_err = 'Number of times \(\d*\) does not match number of values \(\d*\).'
-      detail = 'error if time data is wrong size;'
+      detail = 'time data is wrong size;'
     []
   []
 []

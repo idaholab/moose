@@ -2,7 +2,7 @@
   issues = '#21885'
   design = 'OptimizationMultiAppCommandLineControl.md'
   [iterOutput]
-    requirement = "This tests that a linear and constant function can be scaled intwo seperate "
+    requirement = "The system shall be able to scale linear and constant functions involved in two separate "
                   "functionNeumannBCs both applied to the same sideset using  two parsed functions.  "
                   "The scale of the linear and constant functions  are being parameterized. This is "
                   "testing the iter output reporter."
@@ -11,17 +11,6 @@
     rel_err = 0.0000001
     input = main.i
     csvdiff = main_out_optInfo_0001.csv
-    # steady solve
-    recover = false
-  []
-  [par]
-    requirement = "Make sure everything is working in parallel"
-    type = CSVDiff
-    max_threads = 1
-    rel_err = 0.01
-    input = main.i
-    min_parallel = 2
-    csvdiff = main_out_OptimizationReporter_0001.csv
     # steady solve
     recover = false
   []

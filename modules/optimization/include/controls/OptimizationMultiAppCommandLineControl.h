@@ -17,7 +17,7 @@
 class MultiApp;
 
 /**
- * A Control object for receiving data from a master application Sampler object.
+ * A Control object for receiving data from a main application Sampler object.
  */
 class OptimizationMultiAppCommandLineControl : public Control, public ReporterInterface
 {

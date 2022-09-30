@@ -1,7 +1,7 @@
 [Tests]
   issues = '#22208'
   design = 'MaterialScaledGradientVector.md'
-  requirement = "The system shall invert for a constant heat source with a temperature dependent "
+  requirement = "The system shall solve for the value of a constant heat source with a temperature dependent "
                 "thermal condutivity using a"
   [BFGS]
     detail = " limited memory BFGS algorithm"

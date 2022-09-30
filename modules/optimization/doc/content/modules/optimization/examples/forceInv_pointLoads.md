@@ -21,10 +21,10 @@ In this example we are parameterizing the heat source intensity at the locations
 
 ## Main Application Input
 
-Optimization problems are solved using the [MultiApps](MultiApps/index.md) system.  The main application contains the optimization executioner and the sub-applications solve the forward and adjoint PDE.   The main application input is shown in [fig:master_app].
+Optimization problems are solved using the [MultiApps](MultiApps/index.md) system.  The main application contains the optimization executioner and the sub-applications solve the forward and adjoint PDE.   The main application input is shown in [fig:main_app].
 
 !listing test/tests/optimizationreporter/point_loads/main.i
-         id=fig:master_app
+         id=fig:main_app
          caption=Main application optimization input for point load parameterization shown in [figSetup]
 
 The main application runs the optimization executioner and transfers data from the optimization executioner back and forth to the sub-apps that are running the "forward" and "adjoint" FE models.  Since no mesh or physics kernels are required on the main-app, we use the `[StochasticTools]` action to set up all of the nullkernels, empty mesh, etc. needed to get a MOOSE simulation to run.
@@ -35,7 +35,7 @@ The [optimize](Optimize.md) executioner block, shown below, provides an interfac
 !listing test/tests/optimizationreporter/point_loads/main.i
          block=Executioner
 
-The `Optimize` executioner requires a [OptimizationReporter](syntax/OptimizationReporter/index.md), shown below, to transfer data between the optimization executioner and the transfers used for communicating with the sub-apps.  The type of `OptimizationReporter` depends on the optimization algorithm, given by teh
+The `Optimize` executioner requires a [OptimizationReporter](syntax/OptimizationReporter/index.md), shown below, to transfer data between the optimization executioner and the transfers used for communicating with the sub-apps.  The type of `OptimizationReporter` depends on the optimization algorithm, given by the
 
 !listing test/tests/optimizationreporter/point_loads/main.i
          block=OptimizationReporter
@@ -76,7 +76,7 @@ to enable the stochastic analysis is the [Controls] block, which contains a
 in the following section.
 
 !listing test/tests/optimizationreporter/point_loads/main.i
-         id=master_app
+         id=main_app
          caption=Complete input file for executing the transient diffusion problem.
 
 !listing test/tests/optimizationreporter/point_loads/forward.i
@@ -87,11 +87,11 @@ in the following section.
         id=adjoint_app
         caption=Complete input file for executing the transient diffusion problem.
 
-## Master Input
+## Main Input
 
-The master application, with respect to the [MultiApps](MultiApps/index.md) system, is the driver of the stochastic
-simulations, by itself it does not perform a solve. The complete input file for the master
-application is shown in [master_app], but the import sections will be detailed individually.
+The main application, with respect to the [MultiApps](MultiApps/index.md) system, is the driver of the stochastic
+simulations, by itself it does not perform a solve. The complete input file for the main
+application is shown in [main_app], but the import sections will be detailed individually.
 
 First, [OptimizationReporter](syntax/OptimizationReporter/index.md) are defined.
 

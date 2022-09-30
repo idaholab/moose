@@ -8,6 +8,6 @@
     abs_zero = 1e-2
     csvdiff = main_out_OptimizationReporter_0001.csv
     recover = false
-    requirement = 'The system shall be able to invert for the material properties of two seperate materials'
+    requirement = 'The system shall be able to invert for the material properties of two separate materials'
   []
 []
