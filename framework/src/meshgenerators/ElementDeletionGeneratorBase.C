@@ -57,10 +57,10 @@ ElementDeletionGeneratorBase::generate()
     if (elem->dim() == mesh->mesh_dimension() - 1 &&
         deleteable_elems.count(elem->interior_parent()) > 0)
       deleteable_elems.insert(elem);
-  /**
-   * If we are in parallel we'd better have a consistent idea of what
-   * should be deleted.  This can't be checked cheaply.
-   */
+      /**
+       * If we are in parallel we'd better have a consistent idea of what
+       * should be deleted.  This can't be checked cheaply.
+       */
 #ifdef DEBUG
   dof_id_type pmax_elem_id = mesh->max_elem_id();
   mesh->comm().max(pmax_elem_id);

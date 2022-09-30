@@ -40,5 +40,12 @@
       recover = false
       detail = 'blocks and properly removing lower dimensional elements with a deleted element as their interior parent.'
     []
+    [missing_block]
+      type = RunException
+      input = block_deletion_test1.i
+      cli_args = "Mesh/ed0/block=50"
+      expect_err = "The block '50' was not found within the mesh"
+      detail = 'blocks and erroring if a block does not exist.'
+    []
   []
 []
