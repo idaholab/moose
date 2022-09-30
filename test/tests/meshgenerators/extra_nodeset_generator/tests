@@ -32,4 +32,14 @@
     design = 'meshgenerators/ExtraNodesetGenerator.md'
     issues = '#14936'
   [../]
+  [test_bad_coord]
+    type = 'RunException'
+    input = 'generate_extra_nodeset_coord.i'
+    expect_err = "Unable to locate the following point within the domain"
+    cli_args = 'Mesh/middle_node/coord="0.5 10"'
+    mesh_mode = REPLICATED
+    issues = '#13814'
+    requirement = "The system shall error if the supplied location is outside of the domain."
+  []
+  
 []
