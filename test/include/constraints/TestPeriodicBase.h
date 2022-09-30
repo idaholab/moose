@@ -62,25 +62,8 @@ protected:
   /**
    * compute the jacobian at the quadrature points with respect to a scalar variable
    */
-  virtual Real computeQpBaseJacobian(Moose::MortarType mortar_type, unsigned int jvar);
-  virtual Real computeQpConstraintJacobian(Moose::MortarType mortar_type, unsigned int jvar);
-
-  /// Stability/penalty term for residual
-  Real computeResiStab(const Moose::MortarType mortar_type);
-
-  /// Stability/penalty term for scalar residual from mortar
-  Real computeResiScalarStab();
-
-  /// Stability/penalty term for scalar residual from scalar
-  Real computeResiScalarScalarStab();
-
-  /// Stability/penalty term for scalar Jacobian from scalar
-  Real computeJacobianScalarStab();
-
-  /// Stability/penalty term for Jacobian
-  Real computeODJacoBaseStab(const Moose::MortarType mortar_type, const unsigned int jvar);
-  /// Stability/penalty term for Jacobian
-  Real computeODJacoConstraintStab(const Moose::MortarType mortar_type, const unsigned int jvar);
+  virtual Real computeQpBaseJacobian(Moose::MortarType mortar_type, unsigned int /*jvar*/);
+  virtual Real computeQpConstraintJacobian(Moose::MortarType mortar_type, unsigned int /*jvar*/);
 
   // Compute T jump and heat flux average/jump
   void precalculateMaterial();

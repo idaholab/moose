@@ -7,8 +7,8 @@
     xmax = 1.0
     ymin = -1.0
     ymax = 1.0
-    nx = 2
-    ny = 2
+    nx = 3
+    ny = 3
     elem_type = QUAD4
   []
   [left_block_sidesets]
@@ -81,7 +81,7 @@
   [./kappa]
     type = FunctionScalarAux
     variable = kappa_aux
-    function = '1 1'
+    function = '1 0'
     execute_on = initial #timestep_end
   [../]
 []
@@ -166,17 +166,12 @@
 
 [Executioner]
   type = Steady
-  solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+#  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+#  petsc_options_value = 'lu superlu_dist'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_view -vec_view'
+  petsc_options_value = 'lu superlu_dist ::ascii_matlab ::ascii_matlab'
+  solve_type = NEWTON
 []
-
-# [Executioner]
-#   type = Steady
-#   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-#   petsc_options_value = 'lu superlu_dist'
-#   solve_type = NEWTON
-# []
 
 [Outputs]
   exodus = true
