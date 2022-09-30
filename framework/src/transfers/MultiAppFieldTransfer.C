@@ -29,11 +29,19 @@ MultiAppFieldTransfer::validParams()
   params.addParam<TagName>(
       "to_solution_tag",
       "The tag of the solution vector to be transferred to (default to the solution)");
+
+  // Block restrictions
+  params.addParam<std::vector<SubdomainName>>(
+      "from_blocks", "Subdomain restriction of the part of the field(s) to transfer from");
+  params.addParam<std::vector<SubdomainName>>(
+      "to_blocks", "Subdomain restriction of the part of the field(s) to transfer to");
+
   return params;
 }
 
 MultiAppFieldTransfer::MultiAppFieldTransfer(const InputParameters & parameters)
-  : MultiAppTransfer(parameters)
+  : MultiAppTransfer(parameters),
+    _has_block_restrictions(isParamValid("from_blocks") || isParamValid("to_blocks"))
 {
 }
 
@@ -55,6 +63,58 @@ MultiAppFieldTransfer::initialSetup()
     for (auto & from_var : getFromVarNames())
       variableIntegrityCheck(from_var);
   }
+
+  // Convert block names to block IDs, fill with ANY_BLOCK_ID if unspecified
+  if (_has_block_restrictions)
+  {
+    const FEProblemBase * from_problem;
+    const FEProblemBase * to_problem;
+
+    if (_current_direction == FROM_MULTIAPP)
+    {
+      // Subdomain and variable type information is shared on all subapps
+      from_problem = &getFromMultiApp()->appProblemBase(0);
+      to_problem = &getFromMultiApp()->problemBase();
+    }
+    else if (_current_direction == TO_MULTIAPP)
+    {
+      from_problem = &getToMultiApp()->problemBase();
+      to_problem = &getToMultiApp()->appProblemBase(0);
+    }
+    else
+    {
+      from_problem = &getFromMultiApp()->appProblemBase(0);
+      to_problem = &getToMultiApp()->appProblemBase(0);
+    }
+
+    const auto & from_block_names = getParam<std::vector<SubdomainName>>("from_blocks");
+    if (from_block_names.size())
+      _from_blocks = from_problem->mesh().getSubdomainIDs(from_block_names);
+    else
+      _from_blocks = {Moose::ANY_BLOCK_ID};
+
+    const auto & to_block_names = getParam<std::vector<SubdomainName>>("to_blocks");
+    if (to_block_names.size())
+      _to_blocks = to_problem->mesh().getSubdomainIDs(to_block_names);
+    else
+      _to_blocks = {Moose::ANY_BLOCK_ID};
+
+    // Forbid block restriction on nodal variables as currently not supported
+    if (from_block_names.size())
+      for (auto & from_var : getFromVarNames())
+        if (from_problem
+                ->getVariable(
+                    0, from_var, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY)
+                .isNodal())
+          paramError("from_blocks", "Block restriction is not implemented for nodal variables");
+    if (to_block_names.size())
+      for (auto & to_var : getToVarNames())
+        if (to_problem
+                ->getVariable(
+                    0, to_var, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY)
+                .isNodal())
+          paramError("to_blocks", "Block restriction is not implemented for nodal variables");
+  }
 }
 
 void
@@ -66,6 +126,7 @@ MultiAppFieldTransfer::transferDofObject(libMesh::DofObject * to_object,
                                          NumericVector<Number> & from_solution)
 {
   for (unsigned int vc = 0; vc < to_var.count(); ++vc)
+    // Transfer from one solution vector to another
     if (to_object->n_dofs(to_var.sys().number(), to_var.number() + vc) >
         0) // If this variable has dofs at this node
       for (unsigned int comp = 0;
@@ -134,7 +195,7 @@ MultiAppFieldTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from
     if ((to_mesh.n_nodes() != from_mesh.n_nodes()) || (to_mesh.n_elem() != from_mesh.n_elem()))
       mooseError("The meshes must be identical to utilize MultiAppCopyTransfer.");
 
-    // Transfer node dofs
+    // Transfer node dofs. Block restriction is not supported, forbidden in initialSetup
     for (const auto & node : as_range(to_mesh.local_nodes_begin(), to_mesh.local_nodes_end()))
       transferDofObject(
           node, from_mesh.node_ptr(node->id()), to_var, from_var, to_solution, from_solution);
@@ -144,6 +205,27 @@ MultiAppFieldTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from
     {
       Elem * from_elem = from_mesh.elem_ptr(to_elem->id());
       mooseAssert(to_elem->type() == from_elem->type(), "The elements must be the same type.");
+
+      // Examine block restriction
+      if (_has_block_restrictions)
+      {
+        if (std::find(_from_blocks.begin(), _from_blocks.end(), Moose::ANY_BLOCK_ID) ==
+            _from_blocks.end())
+        {
+          SubdomainID from_block = from_elem->subdomain_id();
+          if (std::find(_from_blocks.begin(), _from_blocks.end(), from_block) == _from_blocks.end())
+            continue;
+        }
+
+        if (std::find(_to_blocks.begin(), _to_blocks.end(), Moose::ANY_BLOCK_ID) ==
+            _to_blocks.end())
+        {
+          SubdomainID to_block = to_elem->subdomain_id();
+          if (std::find(_to_blocks.begin(), _to_blocks.end(), to_block) == _to_blocks.end())
+            continue;
+        }
+      }
+
       transferDofObject(to_elem, from_elem, to_var, from_var, to_solution, from_solution);
     }
 
