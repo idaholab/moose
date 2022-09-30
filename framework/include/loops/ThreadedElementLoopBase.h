@@ -152,7 +152,7 @@ public:
 
 protected:
   /**
-   * emit a relatively error message when we catch a MetaPhysicL logic error
+   * emit a relatively clear error message when we catch a MetaPhysicL logic error
    */
   void translateMetaPhysicLError(const MetaPhysicL::LogicError & e);
 
