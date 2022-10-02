@@ -12,15 +12,30 @@
     requirement = 'The system shall be able to generate a tabulation of fluid properties based on pressure and temperature, and use a tabulated interplation of these properties.'
   []
   [tabulated_v_e_bicubic]
-    type = CSVDiff
-    input = 'tabulated_v_e.i'
-    csvdiff = 'tabulated_v_e_out.csv'
-    cli_args = 'FluidProperties/tabulated/type=TabulatedBicubicFluidProperties
-                Outputs/file_base=tabulated_v_e_out'
-    rel_err = 1e-4
-    threading = '!pthreads'
-    allow_warnings = true
-    requirement = 'The system shall be able to read a tabulation of fluid properties, then compute these fluid properties using (volume, energy) primary variables.'
+    requirement = 'The system shall be able to read a tabulation of fluid properties, then compute these fluid properties using (volume, energy) primary variables'
+    [regular_grids]
+      type = CSVDiff
+      input = 'tabulated_v_e.i'
+      csvdiff = 'tabulated_v_e_out.csv'
+      cli_args = 'FluidProperties/tabulated/type=TabulatedBicubicFluidProperties
+                  Outputs/file_base=tabulated_v_e_out'
+      rel_err = 1e-4
+      threading = '!pthreads'
+      allow_warnings = true
+      detail = 'using a regularly spaced interpolation grid'
+    []
+    [log_v]
+      type = CSVDiff
+      input = 'tabulated_v_e.i'
+      csvdiff = 'tabulated_v_e_logv_out.csv'
+      cli_args = 'FluidProperties/tabulated/type=TabulatedBicubicFluidProperties
+                  Outputs/file_base=tabulated_v_e_logv_out
+                  FluidProperties/tabulated/use_log_grid_v=true'
+      rel_err = 1e-4
+      threading = '!pthreads'
+      allow_warnings = true
+      detail = 'using a log-spaced specific volume grid and a regularly spaced grid in specific energy'
+    []
   []
 
   [exceptions]
