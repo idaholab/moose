@@ -44,7 +44,18 @@
 
       detail = 'around two blocks within a domain.'
     []
+    [parallel]
+      type = 'Exodiff'
+      input = 'parallel.i'
+      cli_args = '--mesh-only'
+      exodiff = 'parallel_in.e'
+      recover = false
+      min_threads = 2
+      mesh_mode = distributed
+      detail = 'with multiple threads and a distributed mesh.'
+    []
   []
+
 
   [invalid_block]
     type = RunException
