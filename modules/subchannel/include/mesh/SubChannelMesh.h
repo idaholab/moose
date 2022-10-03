@@ -26,6 +26,21 @@ public:
   virtual const std::vector<std::vector<Real>> & getKGrid() const { return _k_grid; }
 
   /**
+   * Get axial location of blockage (in,out) [m]
+   */
+  virtual const std::vector<Real> & getZBlockage() const { return _z_blockage; }
+
+  /**
+   * Get index of blocked subchannels
+   */
+  virtual const std::vector<unsigned int> & getIndexBlockage() const { return _index_blockage; }
+
+  /**
+   * Get area reduction of blocked subchannels
+   */
+  virtual const std::vector<Real> & getReductionBlockage() const { return _reduction_blockage; }
+
+  /**
    * Return lateral loss coefficient
    */
   virtual const Real & getKij() const { return _kij; }
@@ -185,6 +200,12 @@ protected:
   std::vector<Real> _spacer_z;
   /// form loss coefficient of the spacers
   std::vector<Real> _spacer_k;
+  /// axial location of blockage (inlet, outlet) [m]
+  std::vector<Real> _z_blockage;
+  /// index of subchannels affected by blockage
+  std::vector<unsigned int> _index_blockage;
+  /// area reduction of subchannels affected by blockage
+  std::vector<Real> _reduction_blockage;
   /// Lateral form loss coefficient
   Real _kij;
   /// Distance between the neighbor fuel rods, pitch
