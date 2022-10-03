@@ -31,7 +31,6 @@ ParsedFunctorMaterialHelper<is_ad>::ParsedFunctorMaterialHelper(const InputParam
     _prop_name(getParam<std::string>("prop_name")),
     _property(declareFunctorProperty<GenericReal<is_ad>>("prop_name")),
     _functor_names(getParam<std::vector<MooseFunctorName>>("functors")),
-    _tol(0),
     _map_mode(map_mode)
 {
 
@@ -103,57 +102,12 @@ ParsedFunctorMaterialHelper<is_ad>::ParsedFunctorMaterialHelper(const InputParam
 
 template <bool is_ad>
 void
-ParsedFunctorMaterialHelper<is_ad>::functionParse(const std::string & function_expression)
-{
-  const std::vector<std::string> empty_string_vector;
-  functionParse(function_expression, empty_string_vector, empty_string_vector);
-}
-
-template <bool is_ad>
-void
-ParsedFunctorMaterialHelper<is_ad>::functionParse(const std::string & function_expression,
-                                           const std::vector<std::string> & constant_names,
-                                           const std::vector<std::string> & constant_expressions)
-{
-  const std::vector<std::string> empty_string_vector;
-  const std::vector<Real> empty_real_vector;
-  functionParse(function_expression,
-                constant_names,
-                constant_expressions,
-                empty_string_vector,
-                empty_string_vector,
-                empty_real_vector);
-}
-
-template <bool is_ad>
-void
-ParsedFunctorMaterialHelper<is_ad>::functionParse(const std::string & function_expression,
-                                           const std::vector<std::string> & constant_names,
-                                           const std::vector<std::string> & constant_expressions,
-                                           const std::vector<std::string> & mat_prop_expressions,
-                                           const std::vector<std::string> & tol_names,
-                                           const std::vector<Real> & tol_values)
-{
-  const std::vector<PostprocessorName> empty_pp_name_vector;
-  functionParse(function_expression,
-                constant_names,
-                constant_expressions,
-                mat_prop_expressions,
-                empty_pp_name_vector,
-                tol_names,
-                tol_values);
-}
-
-template <bool is_ad>
-void
 ParsedFunctorMaterialHelper<is_ad>::functionParse(
     const std::string & function_expression,
     const std::vector<std::string> & constant_names,
     const std::vector<std::string> & constant_expressions,
     const std::vector<std::string> & mat_prop_expressions,
-    const std::vector<PostprocessorName> & postprocessor_names,
-    const std::vector<std::string> & tol_names,
-    const std::vector<Real> & tol_values)
+    const std::vector<PostprocessorName> & postprocessor_names)
 {
   // build base function object
   _func_F = std::make_shared<SymFunction>();
@@ -191,26 +145,6 @@ ParsedFunctorMaterialHelper<is_ad>::functionParse(
     default:
       mooseError("Unknown variable mapping mode.");
   }
-
-  // tolerance vectors
-  if (tol_names.size() != tol_values.size())
-    mooseError("The parameter vectors tol_names and tol_values must have equal length.");
-
-  // set tolerances
-  _tol.resize(_nargs);
-  for (unsigned int i = 0; i < _nargs; ++i)
-  {
-    _tol[i] = -1.0;
-
-    // for every argument look through the entire tolerance vector to find a match
-    for (MooseIndex(tol_names) j = 0; j < tol_names.size(); ++j)
-      if (_symbol_names[i] == tol_names[j])
-      {
-        _tol[i] = tol_values[j];
-        break;
-      }
-  }
-
   // get all coupled postprocessors
   for (const auto & pp : postprocessor_names)
   {

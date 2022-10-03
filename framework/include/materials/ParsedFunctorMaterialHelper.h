@@ -16,19 +16,17 @@
 #include "libmesh/fparser_ad.hh"
 
 #define usingParsedFunctorMaterialHelperMembers(T)                                                        \
-  usingFunctionParserUtilsMembers(T);                                                                     \
+  usingFunctionParserUtilsMembers(T);                                                                    \
   using typename ParsedFunctorMaterialHelper<T>::VariableNameMappingMode;                                 \
   using ParsedFunctorMaterialHelper<T>::functionParse;                                                    \
   using ParsedFunctorMaterialHelper<T>::functionsPostParse;                                               \
   using ParsedFunctorMaterialHelper<T>::functionsOptimize;                                                \
   using ParsedFunctorMaterialHelper<T>::_func_F;                                                          \
   using ParsedFunctorMaterialHelper<T>::_symbol_names;                                                    \
-  using ParsedFunctorMaterialHelper<T>::_mat_prop_descriptors;                                            \
-  using ParsedFunctorMaterialHelper<T>::_tol;                                                             \
+  using ParsedFunctorMaterialHelper<T>::_functors;                                                        \
   using ParsedFunctorMaterialHelper<T>::_postprocessor_values;                                            \
   using ParsedFunctorMaterialHelper<T>::_map_mode;                                                        \
   using ParsedFunctorMaterialHelper<T>::_property;                                                        \
-  using ParsedFunctorMaterialHelper<T>::_variables;                                                       \
   using ParsedFunctorMaterialHelper<T>::_nargs;
 
 
@@ -52,23 +50,10 @@ public:
 
   static InputParameters validParams();
 
-  void functionParse(const std::string & function_expression);
-  void functionParse(const std::string & function_expression,
-                     const std::vector<std::string> & constant_names,
-                     const std::vector<std::string> & constant_expressions);
   void functionParse(const std::string & function_expression,
                      const std::vector<std::string> & constant_names,
                      const std::vector<std::string> & constant_expressions,
-                     const std::vector<std::string> & mat_prop_names,
-                     const std::vector<std::string> & tol_names,
-                     const std::vector<Real> & tol_values);
-  void functionParse(const std::string & function_expression,
-                     const std::vector<std::string> & constant_names,
-                     const std::vector<std::string> & constant_expressions,
-                     const std::vector<std::string> & mat_prop_names,
-                     const std::vector<PostprocessorName> & postprocessor_names,
-                     const std::vector<std::string> & tol_names,
-                     const std::vector<Real> & tol_values);
+                     const std::vector<std::string> & mat_prop_names);
 
 protected:
   usingFunctionParserUtilsMembers(is_ad);
@@ -85,9 +70,6 @@ protected:
   /// Flag that indicates if exactly one linear variable is coupled per input file coupling parameter
   bool _mapping_is_unique;
 
-  /// Coupled variables for function arguments
-  std::vector<MooseVariableFieldBase *> _variables;
-
   /// Number of coupled arguments.
   unsigned int _nargs;
 
@@ -98,7 +80,7 @@ protected:
   std::vector<std::string> _arg_param_names;
   std::vector<int> _arg_param_numbers;
 
-  /// coupled variables with default values
+  /// coupled arguments with default values
   std::vector<std::string> _arg_constant_defaults;
 
   /**
@@ -114,9 +96,6 @@ protected:
   /// Vector of functors for computing the parsed expression
   const std::vector<Moose::Functor<GenericReal<is_ad>>> _functors;
 
-  /// Tolerance values for all arguments (to protect from log(0)).
-  std::vector<Real> _tol;
-
   /// List of coupled Postprocessors
   std::vector<const PostprocessorValue *> _postprocessor_values;
 
@@ -126,7 +105,7 @@ protected:
   // run FPOptimizer on the parsed function
   virtual void functionsOptimize();
 
-  /// The undiffed free energy function parser object.
+  /// The function parser object.
   SymFunctionPtr _func_F;
 
   /**
@@ -136,9 +115,6 @@ protected:
    * FParser parameter name when parsing the FParser expression.
    */
   const VariableNameMappingMode _map_mode;
-
-  /// This is true by default, but can be disabled to make non-existing properties default to zero
-  const bool _error_on_missing_material_properties;
 
 private:
   /// map the variable numbers to an even/odd interspersed pattern

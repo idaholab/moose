@@ -29,29 +29,15 @@ ParsedFunctorMaterialTempl<is_ad>::ParsedFunctorMaterialTempl(const InputParamet
     ParsedMaterialBase(parameters)
 {
   // Build function and optimize
-  functionParse(_function,
-                _constant_names,
-                _constant_expressions,
-                this->template getParam<std::vector<MooseFunctorName>>("functor_names"),
-                this->template getParam<std::vector<PostprocessorName>>("postprocessor_names"),
-                _tol_names,
-                _tol_values);
+  this->functionParse(_function,
+                      _constant_names,
+                      _constant_expressions,
+                      this->template getParam<std::vector<MooseFunctorName>>("functor_names"),
+                      this->template getParam<std::vector<PostprocessorName>>("postprocessor_names"));
 
   // Set functor
   _property.setFunctor(
     _mesh, blockIDs(), [this](const auto & r, const auto & t) -> GenericReal<is_ad> {
-
-      // fill the parameter vector with variables, apply tolerances
-      for (unsigned int i = 0; i < _nargs; ++i)
-      {
-        if (_tol[i] < 0.0)
-          _func_params[i] = (*_variables[i])(r, t);
-        else
-        {
-          auto a = (*_variables[i])(r, t);
-          _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
-        }
-      }
 
       // insert other functor values
       auto nfunctors = _functors.size();
