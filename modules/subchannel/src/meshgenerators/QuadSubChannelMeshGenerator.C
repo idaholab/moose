@@ -134,12 +134,18 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
   for (const auto & elem : _spacer_z)
     spacer_cell.emplace_back(std::round(elem * _n_cells / L));
 
-  // Defining the array for axial resistances
-  _k_grid.resize(_n_cells + 1, 0.0);
+  // Defining the arrays for axial resistances
+  std::vector<Real> kgrid;
+  kgrid.resize(_n_cells + 1, 0.0);
+  _k_grid.resize(_n_channels, std::vector<Real>(_n_cells + 1));
 
-  // Summing the spacer resistance to the grid resistance array
+  // Summing the spacer resistance to the 1D grid resistance array
   for (unsigned int index = 0; index < spacer_cell.size(); index++)
-    _k_grid[spacer_cell[index]] += _spacer_k[index];
+    kgrid[spacer_cell[index]] += _spacer_k[index];
+
+  // Creating the 2D grid resistance array
+  for (unsigned int i = 0; i < _n_channels; i++)
+    _k_grid[i] = kgrid;
 
   // Defining the size of the maps
   _gap_to_chan_map.resize(_n_gaps);

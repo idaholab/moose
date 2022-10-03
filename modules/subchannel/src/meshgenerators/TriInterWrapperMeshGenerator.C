@@ -38,14 +38,6 @@ TriInterWrapperMeshGenerator::TriInterWrapperMeshGenerator(const InputParameters
   InterWrapperMesh::generateZGrid(
       _unheated_length_entry, _heated_length, _unheated_length_exit, _n_cells, _z_grid);
 
-  // Defining the position of the spacer grid in the numerical solution array
-  std::vector<int> spacer_cell;
-  std::vector<int> _spacer_z = {};
-  _k_grid.resize(_n_cells + 1, 0.0);
-
-  for (unsigned int index = 0; index < spacer_cell.size(); index++)
-    _k_grid[spacer_cell[index]] += 0.0;
-
   //  compute the hex mesh variables
   // -------------------------------------------
 
@@ -95,6 +87,9 @@ TriInterWrapperMeshGenerator::TriInterWrapperMeshGenerator(const InputParameters
   for (unsigned int j = 0; j < _n_rings - 1; j++)
     chancount += j * 6;
   _n_channels = chancount + _n_assemblies - 1 + (_n_rings - 1) * 6 + 6;
+
+  // Defining the array for axial resistances
+  _k_grid.resize(_n_channels, std::vector<Real>(_n_cells + 1));
 
   /// Re-sizing the object lists with the right number of channels
   _subchannel_to_rod_map.resize(_n_channels);
