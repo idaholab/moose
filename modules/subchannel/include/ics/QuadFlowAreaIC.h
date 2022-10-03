@@ -14,4 +14,7 @@ public:
 
 public:
   static InputParameters validParams();
+
+protected:
+  SubChannelMesh & _subchannel_mesh;
 };
