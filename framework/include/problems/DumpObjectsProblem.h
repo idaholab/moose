@@ -38,7 +38,7 @@ public:
   void dumpGeneratedSyntax(const std::string path);
 
   /// output data in solve
-  virtual void solve() override;
+  virtual void solve(const NonlinearSystemName & nl_sys_name) override;
 
   virtual void initialSetup() override {}
   virtual void advanceState() override {}

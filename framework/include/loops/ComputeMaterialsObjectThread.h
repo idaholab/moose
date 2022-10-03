@@ -30,7 +30,7 @@ public:
                                MaterialPropertyStorage & material_props,
                                MaterialPropertyStorage & bnd_material_props,
                                MaterialPropertyStorage & neighbor_material_props,
-                               std::vector<std::unique_ptr<Assembly>> & assembly);
+                               std::vector<std::vector<std::unique_ptr<Assembly>>> & assembly);
 
   // Splitting Constructor
   ComputeMaterialsObjectThread(ComputeMaterialsObjectThread & x, Threads::split split);
@@ -70,7 +70,7 @@ protected:
 
   const MaterialWarehouse & _discrete_materials;
 
-  std::vector<std::unique_ptr<Assembly>> & _assembly;
+  std::vector<std::vector<std::unique_ptr<Assembly>>> & _assembly;
   bool _need_internal_side_material;
 
   const bool _has_stateful_props;

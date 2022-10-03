@@ -189,10 +189,9 @@ FVFluxKernel::computeJacobianType(Moose::DGJacobianType type, const ADReal & res
     if (ivar != _var.number())
       continue;
 
-    SystemBase & sys = _subproblem.systemBaseNonlinear();
-    auto dofs_per_elem = sys.getMaxVarNDofsPerElem();
+    auto dofs_per_elem = _sys.getMaxVarNDofsPerElem();
 
-    auto ad_offset = Moose::adOffset(jvar, dofs_per_elem, type, sys.system().n_vars());
+    auto ad_offset = Moose::adOffset(jvar, dofs_per_elem, type, _sys.system().n_vars());
 
     prepareMatrixTagNeighbor(_assembly, ivar, jvar, type);
 

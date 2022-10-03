@@ -29,7 +29,7 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(
     MaterialPropertyStorage & material_props,
     MaterialPropertyStorage & bnd_material_props,
     MaterialPropertyStorage & neighbor_material_props,
-    std::vector<std::unique_ptr<Assembly>> & assembly)
+    std::vector<std::vector<std::unique_ptr<Assembly>>> & assembly)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
     _nl(fe_problem.getNonlinearSystemBase()),
@@ -98,7 +98,7 @@ ComputeMaterialsObjectThread::onElement(const Elem * elem)
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
 
-    unsigned int n_points = _assembly[_tid]->qRule()->n_points();
+    unsigned int n_points = _assembly[_tid][0]->qRule()->n_points();
     _material_data[_tid]->resize(n_points);
 
     if (_has_stateful_props)
@@ -127,7 +127,7 @@ ComputeMaterialsObjectThread::onBoundary(const Elem * elem,
   if (_fe_problem.needBoundaryMaterialOnSide(bnd_id, _tid))
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
-    unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
+    unsigned int face_n_points = _assembly[_tid][0]->qRuleFace()->n_points();
 
     _bnd_material_data[_tid]->resize(face_n_points);
 
@@ -174,7 +174,7 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
     const Elem * neighbor = elem->neighbor_ptr(side);
 
     _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
-    unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
+    unsigned int face_n_points = _assembly[_tid][0]->qRuleFace()->n_points();
     _bnd_material_data[_tid]->resize(face_n_points);
     _neighbor_material_data[_tid]->resize(face_n_points);
 
@@ -196,7 +196,7 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
             side);
     }
 
-    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
+    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid][0]->elem());
 
     if (_has_neighbor_stateful_props)
     {
@@ -230,7 +230,7 @@ ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, 
     return;
 
   _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
-  unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
+  unsigned int face_n_points = _assembly[_tid][0]->qRuleFace()->n_points();
   _bnd_material_data[_tid]->resize(face_n_points);
   _neighbor_material_data[_tid]->resize(face_n_points);
 
@@ -270,7 +270,7 @@ ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, 
   }
 
   const Elem * neighbor = elem->neighbor_ptr(side);
-  unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
+  unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid][0]->elem());
 
   // Do we have neighbor stateful properties or do we have stateful interface material properties?
   // If either then we need to reinit the neighbor, so at least at a minimum _neighbor_elem isn't

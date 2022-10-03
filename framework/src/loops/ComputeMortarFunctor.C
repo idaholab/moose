@@ -29,12 +29,13 @@ ComputeMortarFunctor::ComputeMortarFunctor(
     const AutomaticMortarGeneration & amg,
     SubProblem & subproblem,
     FEProblemBase & fe_problem,
-    bool displaced)
+    bool displaced,
+    Assembly & assembly)
   : _amg(amg),
     _subproblem(subproblem),
     _fe_problem(fe_problem),
     _displaced(displaced),
-    _assembly(_subproblem.assembly(0))
+    _assembly(assembly)
 {
   // Construct the mortar constraints we will later loop over
   for (auto mc : mortar_constraints)

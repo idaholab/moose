@@ -38,6 +38,7 @@ public:
   static InputParameters validParams();
 
   DisplacedProblem(const InputParameters & parameters);
+  ~DisplacedProblem();
 
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
@@ -45,13 +46,13 @@ public:
   MooseMesh & refMesh();
 
   DisplacedSystem & nlSys(unsigned int sys_num = 0);
-  DisplacedSystem & auxSys() { return _displaced_aux; }
+  DisplacedSystem & auxSys() { return *_displaced_aux; }
 
-  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const override;
-  virtual SystemBase & systemBaseNonlinear(usigned int sys_num = 0) override;
+  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num) const override;
+  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num) override;
 
-  virtual const SystemBase & systemBaseAuxiliary() const override { return _displaced_aux; }
-  virtual SystemBase & systemBaseAuxiliary() override { return _displaced_aux; }
+  virtual const SystemBase & systemBaseAuxiliary() const override { return *_displaced_aux; }
+  virtual SystemBase & systemBaseAuxiliary() override { return *_displaced_aux; }
 
   // Return a constant reference to the vector of variable names.
   const std::vector<std::string> & getDisplacementVarNames() const { return _displacements; }
@@ -85,9 +86,11 @@ public:
   virtual void syncSolutions();
 
   /**
-   * Synchronize the solutions on the displaced systems to the given solutions.
+   * Synchronize the solutions on the displaced systems to the given solutions. The nonlinear
+   * solutions argument is a map from the nonlinear system number to the solution that we want to
+   * set that nonlinear system's solution to
    */
-  virtual void syncSolutions(const NumericVector<Number> & soln,
+  virtual void syncSolutions(const std::map<unsigned int, const NumericVector<Number> *> & nl_solns,
                              const NumericVector<Number> & aux_soln);
 
   /**
@@ -107,7 +110,7 @@ public:
    * Synchronize the solutions on the displaced systems to the given solutions and
    * reinitialize the geometry search data and Dirac kernel information due to mesh displacement.
    */
-  virtual void updateMesh(const NumericVector<Number> & soln,
+  virtual void updateMesh(const std::map<unsigned int, const NumericVector<Number> *> & nl_soln,
                           const NumericVector<Number> & aux_soln);
 
   virtual TagID addVectorTag(const TagName & tag_name,
@@ -153,8 +156,10 @@ public:
                                                   const std::string & var_name) override;
   virtual System & getSystem(const std::string & var_name) override;
 
-  virtual void
-  addVariable(const std::string & var_type, const std::string & name, InputParameters & parameters);
+  virtual void addVariable(const std::string & var_type,
+                           const std::string & name,
+                           InputParameters & parameters,
+                           unsigned int nl_system_number);
   virtual void addAuxVariable(const std::string & var_type,
                               const std::string & name,
                               InputParameters & parameters);
@@ -328,7 +333,7 @@ public:
 
   LineSearch * getLineSearch() override;
 
-  const CouplingMatrix * couplingMatrix() const override;
+  const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num) const override;
 
   bool haveDisplaced() const override final { return true; }
 
@@ -343,6 +348,10 @@ public:
   using SubProblem::haveADObjects;
   void haveADObjects(bool have_ad_objects) override;
 
+  std::size_t numNonlinearSystems() const override;
+
+  unsigned int currentNlSysNum() const override;
+
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;
@@ -352,12 +361,15 @@ protected:
   std::vector<std::string> _displacements;
 
   std::vector<std::unique_ptr<DisplacedSystem>> _displaced_nl;
-  DisplacedSystem _displaced_aux;
+  std::unique_ptr<DisplacedSystem> _displaced_aux;
 
-  const NumericVector<Number> * _nl_solution;
+  /// The nonlinear system solutions
+  std::vector<const NumericVector<Number> *> _nl_solution;
+
+  /// The auxiliary system solution
   const NumericVector<Number> * _aux_solution;
 
-  std::vector<std::unique_ptr<Assembly>> _assembly;
+  std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
 
   GeometricSearchData _geometric_search_data;
 
@@ -392,29 +404,4 @@ DisplacedProblem::systemBaseNonlinear(const unsigned int sys_num)
   mooseAssert(sys_num < _displaced_nl.size(),
               "System number greater than the number of nonlinear systems");
   return *_displaced_nl[sys_num];
-}
-
-inline Assembly &
-DisplacedProblem::assembly(const THREAD_ID tid, const unsigned int nl_sys_num)
-{
-  mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
-  mooseAssert(nl_sys_num < _assembly[tid].size(),
-              "Nonlinear system number larger than the assembly container size");
-  return *_assembly[tid, nl_sys_num];
-}
-
-inline const Assembly &
-DisplacedProblem::assembly(const THREAD_ID tid, const unsigned int nl_sys_num) const
-{
-  mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
-  mooseAssert(nl_sys_num < _assembly[tid].size(),
-              "Nonlinear system number larger than the assembly container size");
-  return *_assembly[tid, nl_sys_num];
-}
-
-inline std::pair<bool, unsigned int>
-DisplacedProblem::determineNonlinearSystem(const std::string & var_name,
-                                           const bool error_if_not_found) const
-{
-  return _mproblem.determineNonlinearSystem(var_name, error_if_not_found);
 }

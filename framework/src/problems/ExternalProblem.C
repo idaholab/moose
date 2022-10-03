@@ -29,14 +29,14 @@ ExternalProblem::ExternalProblem(const InputParameters & parameters) : FEProblem
    * However, MOOSE currently expects it to exist in several locations throughout the framework.
    * Luckily, it can just be empty (no variables).
    */
-  _nl = std::make_shared<NonlinearSystem>(*this, "nl0");
+  _nl.push_back(std::make_shared<NonlinearSystem>(*this, "nl0"));
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
   /**
    * We still need to create Assembly objects to hold the data structures for working with Aux
    * Variables, which will be used in the external problem.
    */
-  newAssemblyArray(*_nl);
+  newAssemblyArray(_nl);
 
   // Create extra vectors and matrices if any
   createTagVectors();
@@ -46,7 +46,7 @@ ExternalProblem::ExternalProblem(const InputParameters & parameters) : FEProblem
 }
 
 void
-ExternalProblem::solve()
+ExternalProblem::solve(const NonlinearSystemName &)
 {
   TIME_SECTION("solve", 1, "Solving", false)
 

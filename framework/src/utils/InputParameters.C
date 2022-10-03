@@ -1169,10 +1169,10 @@ std::string
 InputParameters::varName(const std::string & var_param_name) const
 {
   // Try the scalar version first
-  std::string variable_name = params.getMooseType(var_param_name);
+  std::string variable_name = getMooseType(var_param_name);
   if (variable_name == "")
   {
-    auto vec = params.getVecMooseType(var_param_name);
+    auto vec = getVecMooseType(var_param_name);
 
     // Catch the (very unlikely) case where a user specifies
     // variable = '' (the empty string)
@@ -1180,7 +1180,7 @@ InputParameters::varName(const std::string & var_param_name) const
     // wrong with dollar bracket expression expansion.
     if (vec.empty())
       mooseError("Error constructing object '",
-                 params.get<std::string>("_object_name"),
+                 get<std::string>("_object_name"),
                  "' while retrieving value for '",
                  var_param_name,
                  "' parameter! Did you set ",

@@ -104,7 +104,7 @@ public:
    * Gets the number of this system
    * @return The number of this system
    */
-  unsigned int number() const { return system().number(); }
+  unsigned int number() const;
   virtual MooseMesh & mesh() { return _mesh; }
   virtual const MooseMesh & mesh() const { return _mesh; }
   virtual SubProblem & subproblem() { return _subproblem; }

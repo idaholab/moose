@@ -708,7 +708,7 @@ public:
   /**
    * The coupling matrix defining what blocks exist in the preconditioning matrix
    */
-  virtual const CouplingMatrix * couplingMatrix() const = 0;
+  virtual const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num) const = 0;
 
 private:
   /**
@@ -837,6 +837,16 @@ public:
 
   /// Setter for debug functor output
   void setFunctorOutput(bool set_output) { _output_functors = set_output; }
+
+  /**
+   * @return the number of nonlinear systems in the problem
+   */
+  virtual std::size_t numNonlinearSystems() const = 0;
+
+  /**
+   * @return the current nonlinear system number
+   */
+  virtual unsigned int currentNlSysNum() const = 0;
 
 protected:
   /**

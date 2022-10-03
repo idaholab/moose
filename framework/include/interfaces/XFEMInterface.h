@@ -101,7 +101,8 @@ public:
   /**
    * Initialize the solution on newly created nodes
    */
-  virtual void initSolution(NonlinearSystemBase & nl, AuxiliarySystem & aux) = 0;
+  virtual void initSolution(const std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
+                            AuxiliarySystem & aux) = 0;
 
   /**
    * Get the factors for the QP weighs for XFEM partial elements

@@ -27,7 +27,7 @@ public:
   /**
    * Solve is implemented to providing syncing to/from the "transfer" mesh.
    */
-  virtual void solve() override final;
+  virtual void solve(const NonlinearSystemName & nl_sys_name) override final;
 
   /**
    * External problems should provide an override for converged, not inherit the default from

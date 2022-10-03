@@ -29,7 +29,7 @@ public:
                             std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
                             MaterialPropertyStorage & material_props,
                             MaterialPropertyStorage & bnd_material_props,
-                            std::vector<std::unique_ptr<Assembly>> & assembly);
+                            std::vector<std::vector<std::unique_ptr<Assembly>>> & assembly);
 
   // Splitting Constructor
   ProjectMaterialProperties(ProjectMaterialProperties & x, Threads::split split);
@@ -54,7 +54,7 @@ protected:
   std::vector<std::shared_ptr<MaterialData>> & _bnd_material_data;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
-  std::vector<std::unique_ptr<Assembly>> & _assembly;
+  std::vector<std::vector<std::unique_ptr<Assembly>>> & _assembly;
   bool _need_internal_side_material;
 
   /// Materials warehouse

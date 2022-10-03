@@ -249,7 +249,7 @@ FEProblemBase::validParams()
                         "storing the prvious nonlinear iteration.");
 
   params.addParam<std::vector<NonlinearSystemName>>(
-      "nl_sys_names", {"nl0"}, "The nonlinear system names");
+      "nl_sys_names", std::vector<NonlinearSystemName>{"nl0"}, "The nonlinear system names");
 
   params.addPrivateParam<MooseMesh *>("mesh");
 
@@ -271,7 +271,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
-    _nl_sys_names(getParam<std::vector<std::string>>("nl_sys_names")),
+    _nl_sys_names(getParam<std::vector<NonlinearSystemName>>("nl_sys_names")),
     _num_nl_sys(_nl_sys_names.size()),
     _nl(_num_nl_sys, nullptr),
     _current_nl_sys(nullptr),
@@ -453,7 +453,7 @@ FEProblemBase::createTagVectors()
   // add matrices and their tags
   auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
   for (const auto nl_sys_num : index_range(matrices))
-    for (auto & matrix : matrices[nl_sys_number])
+    for (auto & matrix : matrices[nl_sys_num])
     {
       auto tag = addMatrixTag(matrix);
       _nl[nl_sys_num]->addMatrix(tag);
@@ -654,7 +654,7 @@ FEProblemBase::initialSetup()
   dof_id_type global_max_var_n_dofs_per_elem = 0;
   for (const auto i : index_range(_nl))
   {
-    auto & nl : *_nl[i];
+    auto & nl = *_nl[i];
     dof_id_type max_var_n_dofs_per_elem;
     dof_id_type max_var_n_dofs_per_node;
     {
@@ -770,7 +770,7 @@ FEProblemBase::initialSetup()
     if (_has_internal_edge_residual_objects)
       mooseError("Stateful neighbor material properties do not work with mesh adaptivity");
 
-    _mesh.buildRefinementAndCoarseningMaps(_assembly[0].get());
+    _mesh.buildRefinementAndCoarseningMaps(_assembly[0][0].get());
   }
 
   if (!_app.isRecovering())
@@ -1173,7 +1173,8 @@ FEProblemBase::initialSetup()
   {
     setNonlocalCouplingMatrix();
     for (THREAD_ID tid = 0; tid < n_threads; ++tid)
-      _assembly[tid]->initNonlocalCoupling();
+      for (auto & assembly : _assembly[tid])
+        assembly->initNonlocalCoupling();
   }
 
   {
@@ -1458,7 +1459,7 @@ FEProblemBase::prepare(const Elem * elem,
   const auto current_nl_sys_num = _current_nl_sys->number();
   _assembly[tid][current_nl_sys_num]->prepareBlock(ivar, jvar, dof_indices);
   if (_has_nonlocal_coupling)
-    if (_nonlocal_cm(ivar, jvar) != 0)
+    if (_nonlocal_cm[current_nl_sys_num](ivar, jvar) != 0)
     {
       MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
       _assembly[tid][current_nl_sys_num]->prepareBlockNonlocal(
@@ -1469,7 +1470,7 @@ FEProblemBase::prepare(const Elem * elem,
   {
     _displaced_problem->prepare(_displaced_mesh->elemPtr(elem->id()), ivar, jvar, dof_indices, tid);
     if (_has_nonlocal_coupling)
-      if (_nonlocal_cm(ivar, jvar) != 0)
+      if (_nonlocal_cm[current_nl_sys_num](ivar, jvar) != 0)
       {
         MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
         _displaced_problem->prepareBlockNonlocal(ivar, jvar, dof_indices, jv.allDofIndices(), tid);
@@ -1614,8 +1615,8 @@ FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREA
 void
 FEProblemBase::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->setResidual(residual,
-                                                         getVectorTag(_nl->residualVectorTag()));
+  _assembly[tid][_current_nl_sys->number()]->setResidual(
+      residual, getVectorTag(_nl[_current_nl_sys->number()]->residualVectorTag()));
   if (_displaced_problem)
     _displaced_problem->setResidual(residual, tid);
 }
@@ -1728,7 +1729,7 @@ FEProblemBase::addJacobianBlock(SparseMatrix<Number> & jacobian,
   _assembly[tid][_current_nl_sys->number()]->addJacobianBlock(
       jacobian, ivar, jvar, dof_map, dof_indices);
   if (_has_nonlocal_coupling)
-    if (_nonlocal_cm(ivar, jvar) != 0)
+    if (_nonlocal_cm[_current_nl_sys->number()](ivar, jvar) != 0)
     {
       MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
       _assembly[tid][_current_nl_sys->number()]->addJacobianBlockNonlocal(
@@ -1739,7 +1740,7 @@ FEProblemBase::addJacobianBlock(SparseMatrix<Number> & jacobian,
   {
     _displaced_problem->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tid);
     if (_has_nonlocal_coupling)
-      if (_nonlocal_cm(ivar, jvar) != 0)
+      if (_nonlocal_cm[_current_nl_sys->number()](ivar, jvar) != 0)
       {
         MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
         _displaced_problem->addJacobianBlockNonlocal(
@@ -1761,7 +1762,7 @@ FEProblemBase::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
       jacobian, ivar, jvar, dof_map, dof_indices, tags);
 
   if (_has_nonlocal_coupling)
-    if (_nonlocal_cm(ivar, jvar) != 0)
+    if (_nonlocal_cm[_current_nl_sys->number()](ivar, jvar) != 0)
     {
       MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
       _assembly[tid][_current_nl_sys->number()]->addJacobianBlockNonlocal(
@@ -1772,7 +1773,7 @@ FEProblemBase::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
   {
     _displaced_problem->addJacobianBlockTags(jacobian, ivar, jvar, dof_map, dof_indices, tags, tid);
     if (_has_nonlocal_coupling)
-      if (_nonlocal_cm(ivar, jvar) != 0)
+      if (_nonlocal_cm[_current_nl_sys->number()](ivar, jvar) != 0)
       {
         MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
         _displaced_problem->addJacobianBlockNonlocal(
@@ -2072,7 +2073,7 @@ FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID ti
     // that case we instead pass over the reference points from the undisplaced calculation
     const std::vector<Point> * displaced_ref_pts = nullptr;
     if (_displaced_neighbor_ref_pts == "use_undisplaced_ref")
-      displaced_ref_pts = &_assembly[tid]->qRuleNeighbor()->get_points();
+      displaced_ref_pts = &_assembly[tid][0]->qRuleNeighbor()->get_points();
 
     _displaced_problem->reinitNeighbor(
         _displaced_mesh->elemPtr(elem->id()), side, tid, displaced_ref_pts);
@@ -2418,7 +2419,8 @@ FEProblemBase::addVariable(const std::string & var_type,
   params.set<FEProblemBase *>("_fe_problem_base") = this;
   params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
 
-  std::istringstream ss(params.get<NonlinearSystemName>("nl_sys"));
+  const auto & nl_sys_name = params.get<NonlinearSystemName>("nl_sys");
+  std::istringstream ss(nl_sys_name);
   unsigned int nl_sys_num;
   if (!(ss >> nl_sys_num) || !ss.eof())
     nl_sys_num = libmesh_map_find(_nl_sys_name_to_num, nl_sys_name);
@@ -2426,7 +2428,7 @@ FEProblemBase::addVariable(const std::string & var_type,
   _nl[nl_sys_num]->addVariable(var_type, var_name, params);
   if (_displaced_problem)
     // MooseObjects need to be unique so change the name here
-    _displaced_problem->addVariable(var_type, var_name, params);
+    _displaced_problem->addVariable(var_type, var_name, params, nl_sys_num);
 
   _nl_var_to_sys_num[var_name] = nl_sys_num;
 }
@@ -2585,7 +2587,7 @@ FEProblemBase::addConstraint(const std::string & c_name,
 {
   _has_constraints = true;
 
-  auto determine_var_param_name = [&parameters]()
+  auto determine_var_param_name = [&parameters, this]()
   {
     if (parameters.isParamRequired("variable"))
       return "variable";
@@ -3137,7 +3139,7 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
   for (auto & nl : _nl)
   {
     nl->solution().close();
-    nl->solution().localize(*_nl->system().current_local_solution, _nl->dofMap().get_send_list());
+    nl->solution().localize(*nl->system().current_local_solution, nl->dofMap().get_send_list());
   }
 
   _aux->solution().close();
@@ -3857,7 +3859,8 @@ FEProblemBase::customSetup(const ExecFlagType & exec_type)
   }
 
   _aux->customSetup(exec_type);
-  _nl->customSetup(exec_type);
+  for (auto & nl : _nl)
+    nl->customSetup(exec_type);
 
   if (_displaced_problem)
     _displaced_problem->customSetup(exec_type);
@@ -5129,10 +5132,12 @@ FEProblemBase::setNonlocalCouplingMatrix()
     mooseError("Nonlocal kernels are weirdly stored on the FEProblem so we don't currently support "
                "multiple nonlinear systems with nonlocal kernels.");
 
-  for (auto & nl : _nl)
+  for (const auto nl_sys_num : index_range(_nl))
   {
+    auto & nl = _nl[nl_sys_num];
+    auto & nonlocal_cm = _nonlocal_cm[nl_sys_num];
     unsigned int n_vars = nl->nVariables();
-    _nonlocal_cm.resize(n_vars);
+    nonlocal_cm.resize(n_vars);
     const auto & vars = nl->getVariables(0);
     const auto & nonlocal_kernel = _nonlocal_kernels.getObjects();
     const auto & nonlocal_integrated_bc = _nonlocal_integrated_bcs.getObjects();
@@ -5148,7 +5153,7 @@ FEProblemBase::setNonlocalCouplingMatrix()
               if (it != _var_dof_map.end())
               {
                 unsigned int j = jvar->number();
-                _nonlocal_cm(i, j) = 1;
+                nonlocal_cm(i, j) = 1;
               }
             }
       }
@@ -5162,7 +5167,7 @@ FEProblemBase::setNonlocalCouplingMatrix()
               if (it != _var_dof_map.end())
               {
                 unsigned int j = jvar->number();
-                _nonlocal_cm(i, j) = 1;
+                nonlocal_cm(i, j) = 1;
               }
             }
       }
@@ -5247,8 +5252,8 @@ FEProblemBase::init()
     if (n_vars == 0)
       nl->dofMap()._dof_coupling = nullptr;
 
-    nl->dofMap().attach_extra_sparsity_function(&extraSparsity, _nl.get());
-    nl->dofMap().attach_extra_send_list_function(&extraSendList, _nl.get());
+    nl->dofMap().attach_extra_sparsity_function(&extraSparsity, nl.get());
+    nl->dofMap().attach_extra_send_list_function(&extraSendList, nl.get());
     _aux->dofMap().attach_extra_send_list_function(&extraSendList, _aux.get());
 
     if (!_skip_nl_system_check && _solve && n_vars == 0)
@@ -5368,8 +5373,6 @@ FEProblemBase::solve(const NonlinearSystemName & nl_sys_name)
   if (!_app.isUltimateMaster())
     PetscOptionsPop();
 #endif
-
-  _current_nl_sys = nullptr;
 }
 
 void
@@ -6640,11 +6643,12 @@ FEProblemBase::initXFEM(std::shared_ptr<XFEMInterface> xfem)
 
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; ++i)
-  {
-    _assembly[i]->setXFEM(_xfem);
-    if (_displaced_problem)
-      _displaced_problem->assembly(i).setXFEM(_xfem);
-  }
+    for (const auto nl_sys_num : index_range(_assembly[i]))
+    {
+      _assembly[i][nl_sys_num]->setXFEM(_xfem);
+      if (_displaced_problem)
+        _displaced_problem->assembly(i, nl_sys_num).setXFEM(_xfem);
+    }
 }
 
 bool
@@ -7352,11 +7356,11 @@ FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
 {
   if (_interface_mat_side_cache[tid].find(bnd_id) == _interface_mat_side_cache[tid].end())
   {
-    auto interface_mat_side_cache = _interface_mat_side_cache[tid][bnd_id];
+    auto & interface_mat_side_cache = _interface_mat_side_cache[tid][bnd_id];
     interface_mat_side_cache = false;
 
     for (auto & nl : _nl)
-      if (_nl->needInterfaceMaterialOnSide(bnd_id, tid))
+      if (nl->needInterfaceMaterialOnSide(bnd_id, tid))
       {
         interface_mat_side_cache = true;
         return true;
@@ -7744,6 +7748,19 @@ FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
     mooseError("Unable to find function " + name);
 
   return static_cast<FunctionTempl<T> &>(*(_functions.getActiveObject(name, tid)));
+}
+
+void
+FEProblemBase::reinitFVFace(const THREAD_ID tid, const FaceInfo & fi)
+{
+  for (auto & assembly : _assembly[tid])
+    assembly->reinitFVFace(fi);
+}
+
+unsigned int
+FEProblemBase::currentNlSysNum() const
+{
+  return currentNonlinearSystem().number();
 }
 
 template bool FEProblemBase::hasFunction<Real>(const std::string & name, THREAD_ID tid) const;

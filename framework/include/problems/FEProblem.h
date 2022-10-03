@@ -29,7 +29,7 @@ public:
 
   virtual void setInputParametersFEProblem(InputParameters & parameters) override;
 
-  NonlinearSystem & getNonlinearSystem() override { return *_nl_sys; }
+  NonlinearSystem & getNonlinearSystem(unsigned int nl_sys_num) override;
 
   virtual void addLineSearch(const InputParameters & parameters) override;
 
@@ -39,3 +39,9 @@ protected:
 };
 
 using FVProblem = FEProblem;
+
+inline NonlinearSystem &
+FEProblem::getNonlinearSystem(const unsigned int nl_sys_num)
+{
+  return *_nl_sys[nl_sys_num];
+}

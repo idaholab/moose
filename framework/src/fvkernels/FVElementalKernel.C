@@ -81,7 +81,7 @@ FVElementalKernel::computeJacobian()
   auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
   {
     prepareMatrixTag(_assembly, _var.number(), _var.number());
-    auto dofs_per_elem = _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem();
+    auto dofs_per_elem = _sys.getMaxVarNDofsPerElem();
     auto ad_offset = Moose::adOffset(_var.number(), dofs_per_elem);
 #ifndef MOOSE_SPARSE_AD
     mooseAssert(ad_offset < MOOSE_AD_MAX_DOFS_PER_ELEM,
@@ -119,8 +119,7 @@ FVElementalKernel::computeOffDiagJacobian()
       if (ivar != _var.number())
         continue;
 
-      auto ad_offset =
-          Moose::adOffset(jvar, _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem());
+      auto ad_offset = Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem());
 
       prepareMatrixTag(_assembly, ivar, jvar);
 

@@ -15,6 +15,7 @@
 #include "FEProblem.h"
 #include "MooseVariableFE.h"
 #include "NodalKernelBase.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/threads.h"
 
@@ -129,8 +130,8 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
       if (_num_cached == 20) // cache 20 nodes worth before adding into the jacobian
       {
         _num_cached = 0;
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.assembly(_tid).addCachedJacobian();
+        _fe_problem.assembly(_tid, _fe_problem.currentNonlinearSystem().number())
+            .addCachedJacobian();
       }
     }
   }

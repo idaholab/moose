@@ -31,7 +31,7 @@ public:
   }
 
 #ifdef LIBMESH_HAVE_SLEPC
-  virtual void solve() override;
+  virtual void solve(const NonlinearSystemName & nl_sys_name) override;
 
   virtual void init() override;
 
@@ -47,7 +47,8 @@ public:
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
 
-  NonlinearEigenSystem & getNonlinearEigenSystem() { return *_nl_eigen; }
+  NonlinearEigenSystem & getNonlinearEigenSystem(unsigned int nl_sys_num = 0);
+  NonlinearEigenSystem & getCurrentNonlinearEigenSystem();
 
   virtual void checkProblemIntegrity() override;
 
@@ -244,6 +245,10 @@ protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
   std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
+
+  /// the current nonlinear eigen system
+  NonlinearEigenSystem * _current_nl_eigen = nullptr;
+
   /// Whether or not use negative sign for Bx. Use negative sign by default to
   /// make the eigen system consistent with nonlinear system
   bool _negative_sign_eigen_kernel;
@@ -275,3 +280,18 @@ protected:
   /// A value used for initial normalization
   Real _initial_eigenvalue;
 };
+
+inline NonlinearEigenSystem &
+EigenProblem::getNonlinearEigenSystem(const unsigned int nl_sys_num)
+{
+  if (nl_sys_num > 0)
+    mooseError("eigen problems do not currently support multiple nonlinear eigen systems");
+  return *_nl_eigen;
+}
+
+inline NonlinearEigenSystem &
+EigenProblem::getCurrentNonlinearEigenSystem()
+{
+  mooseAssert(_current_nl_eigen, "This must be non-null");
+  return *_current_nl_eigen;
+}

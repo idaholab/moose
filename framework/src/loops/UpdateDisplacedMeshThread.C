@@ -22,18 +22,8 @@ UpdateDisplacedMeshThread::UpdateDisplacedMeshThread(FEProblemBase & fe_problem,
   : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>(fe_problem),
     _displaced_problem(displaced_problem),
     _ref_mesh(_displaced_problem.refMesh()),
-    _nl_soln(*_displaced_problem._nl_solution),
-    _aux_soln(*_displaced_problem._aux_solution),
-    _nl_ghosted_soln(NumericVector<Number>::build(_nl_soln.comm()).release()),
-    _aux_ghosted_soln(NumericVector<Number>::build(_aux_soln.comm()).release()),
-    _var_nums(0),
-    _var_nums_directions(0),
-    _aux_var_nums(0),
-    _aux_var_nums_directions(0),
-    _num_var_nums(0),
-    _num_aux_var_nums(0),
-    _nonlinear_system_number(_displaced_problem._displaced_nl.sys().number()),
-    _aux_system_number(_displaced_problem._displaced_aux.sys().number())
+    _nl_soln(_displaced_problem._nl_solution),
+    _aux_soln(*_displaced_problem._aux_solution)
 {
   this->init();
 }
@@ -45,16 +35,8 @@ UpdateDisplacedMeshThread::UpdateDisplacedMeshThread(UpdateDisplacedMeshThread &
     _ref_mesh(x._ref_mesh),
     _nl_soln(x._nl_soln),
     _aux_soln(x._aux_soln),
-    _nl_ghosted_soln(x._nl_ghosted_soln),
-    _aux_ghosted_soln(x._aux_ghosted_soln),
-    _var_nums(x._var_nums),
-    _var_nums_directions(x._var_nums_directions),
-    _aux_var_nums(x._aux_var_nums),
-    _aux_var_nums_directions(x._aux_var_nums_directions),
-    _num_var_nums(x._num_var_nums),
-    _num_aux_var_nums(x._num_aux_var_nums),
-    _nonlinear_system_number(x._nonlinear_system_number),
-    _aux_system_number(x._aux_system_number)
+    _sys_to_nonghost_and_ghost_soln(x._sys_to_nonghost_and_ghost_soln),
+    _sys_to_var_num_and_direction(x._sys_to_var_num_and_direction)
 {
 }
 
@@ -64,55 +46,51 @@ UpdateDisplacedMeshThread::init()
   std::vector<std::string> & displacement_variables = _displaced_problem._displacements;
   unsigned int num_displacements = displacement_variables.size();
 
-  _var_nums.clear();
-  _var_nums_directions.clear();
-
-  _aux_var_nums.clear();
-  _aux_var_nums_directions.clear();
+  _sys_to_var_num_and_direction.clear();
+  _sys_to_nonghost_and_ghost_soln.clear();
 
   for (unsigned int i = 0; i < num_displacements; i++)
   {
     std::string displacement_name = displacement_variables[i];
 
-    if (_displaced_problem._displaced_nl.sys().has_variable(displacement_name))
+    for (const auto sys_num : make_range(_displaced_problem.es().n_systems()))
     {
-      _var_nums.push_back(
-          _displaced_problem._displaced_nl.sys().variable_number(displacement_name));
-      _var_nums_directions.push_back(i);
+      auto & sys = _displaced_problem.es().get_system(sys_num);
+      if (sys.has_variable(displacement_name))
+      {
+        auto & val = _sys_to_var_num_and_direction[&sys];
+        val.first.push_back(sys.variable_number(displacement_name));
+        val.second.push_back(i);
+        break;
+      }
     }
-    else if (_displaced_problem._displaced_aux.sys().has_variable(displacement_name))
-    {
-      _aux_var_nums.push_back(
-          _displaced_problem._displaced_aux.sys().variable_number(displacement_name));
-      _aux_var_nums_directions.push_back(i);
-    }
-    else
-      mooseError("Undefined variable '", displacement_name, "' used for displacements!");
   }
 
-  _num_var_nums = _var_nums.size();
-  _num_aux_var_nums = _aux_var_nums.size();
+  for (const auto & pr : _sys_to_var_num_and_direction)
+  {
+    auto & sys = *pr.first;
+    mooseAssert(sys.number() <= _nl_soln.size(),
+                "The system number should always be less than or equal to the number of nonlinear "
+                "systems. If it is equal, then this system is the auxiliary system");
+    const NumericVector<Number> * const nonghost_soln =
+        sys.number() < _nl_soln.size() ? _nl_soln[sys.number()] : &_aux_soln;
+    _sys_to_nonghost_and_ghost_soln.emplace(
+        &sys,
+        std::make_pair(nonghost_soln,
+                       NumericVector<Number>::build(nonghost_soln->comm()).release()));
+  }
 
   ConstNodeRange node_range(_ref_mesh.getMesh().nodes_begin(), _ref_mesh.getMesh().nodes_end());
 
+  for (auto & [sys, var_num_and_direction] : _sys_to_var_num_and_direction)
   {
-    AllNodesSendListThread nl_send_list(
-        this->_fe_problem, _ref_mesh, _var_nums, _displaced_problem._displaced_nl.sys());
-    Threads::parallel_reduce(node_range, nl_send_list);
-    nl_send_list.unique();
-    _nl_ghosted_soln->init(
-        _nl_soln.size(), _nl_soln.local_size(), nl_send_list.send_list(), true, GHOSTED);
-    _nl_soln.localize(*_nl_ghosted_soln, nl_send_list.send_list());
-  }
-
-  {
-    AllNodesSendListThread aux_send_list(
-        this->_fe_problem, _ref_mesh, _aux_var_nums, _displaced_problem._displaced_aux.sys());
-    Threads::parallel_reduce(node_range, aux_send_list);
-    aux_send_list.unique();
-    _aux_ghosted_soln->init(
-        _aux_soln.size(), _aux_soln.local_size(), aux_send_list.send_list(), true, GHOSTED);
-    _aux_soln.localize(*_aux_ghosted_soln, aux_send_list.send_list());
+    AllNodesSendListThread send_list(
+        this->_fe_problem, _ref_mesh, var_num_and_direction.first, *sys);
+    Threads::parallel_reduce(node_range, send_list);
+    send_list.unique();
+    auto & [soln, ghost_soln] = libmesh_map_find(_sys_to_nonghost_and_ghost_soln, sys);
+    ghost_soln->init(soln->size(), soln->local_size(), send_list.send_list(), true, GHOSTED);
+    soln->localize(*ghost_soln, send_list.send_list());
   }
 }
 
@@ -123,22 +101,19 @@ UpdateDisplacedMeshThread::onNode(NodeRange::const_iterator & nd)
 
   Node & reference_node = _ref_mesh.nodeRef(displaced_node.id());
 
-  for (unsigned int i = 0; i < _num_var_nums; i++)
+  for (auto & [sys, var_num_and_direction] : _sys_to_var_num_and_direction)
   {
-    unsigned int direction = _var_nums_directions[i];
-    if (reference_node.n_dofs(_nonlinear_system_number, _var_nums[i]) > 0)
-      displaced_node(direction) =
-          reference_node(direction) +
-          (*_nl_ghosted_soln)(reference_node.dof_number(_nonlinear_system_number, _var_nums[i], 0));
-  }
-
-  for (unsigned int i = 0; i < _num_aux_var_nums; i++)
-  {
-    unsigned int direction = _aux_var_nums_directions[i];
-    if (reference_node.n_dofs(_aux_system_number, _aux_var_nums[i]) > 0)
-      displaced_node(direction) =
-          reference_node(direction) +
-          (*_aux_ghosted_soln)(reference_node.dof_number(_aux_system_number, _aux_var_nums[i], 0));
+    auto & var_numbers = var_num_and_direction.first;
+    auto & directions = var_num_and_direction.second;
+    for (const auto i : index_range(var_numbers))
+    {
+      const auto direction = directions[i];
+      if (reference_node.n_dofs(sys->number(), var_numbers[i]) > 0)
+        displaced_node(direction) =
+            reference_node(direction) +
+            (*libmesh_map_find(_sys_to_nonghost_and_ghost_soln, sys).second)(
+                reference_node.dof_number(sys->number(), var_numbers[i], 0));
+    }
   }
 }
 

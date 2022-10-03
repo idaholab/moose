@@ -173,7 +173,7 @@ public:
   // DEPRECATED METHOD
   void setCouplingMatrix(CouplingMatrix * cm, unsigned int nl_sys = 0);
 
-  const CouplingMatrix * couplingMatrix(unsigned int nl_sys = 0) const override;
+  const CouplingMatrix * couplingMatrix(unsigned int nl_sys) const override;
 
   /// Set custom coupling matrix for variables requiring nonlocal contribution
   void setNonlocalCouplingMatrix();
@@ -402,7 +402,7 @@ public:
                                     std::vector<std::shared_ptr<NonlinearSystemBase>> & nl);
 
   virtual void init() override;
-  void solve(const NonlinearSystemName & nl_sys_name = "0");
+  virtual void solve(const NonlinearSystemName & nl_sys_name = "nl0");
 
   ///@{
   /**
@@ -595,14 +595,15 @@ public:
   NonlinearSystemBase & getNonlinearSystemBase(unsigned int sys_num = 0);
   const NonlinearSystemBase & getNonlinearSystemBase(unsigned int sys_num = 0) const;
   NonlinearSystemBase & currentNonlinearSystem();
+  const NonlinearSystemBase & currentNonlinearSystem() const;
 
-  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const override;
-  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) override;
+  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num) const override;
+  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num) override;
 
   virtual const SystemBase & systemBaseAuxiliary() const override;
   virtual SystemBase & systemBaseAuxiliary() override;
 
-  virtual NonlinearSystem & getNonlinearSystem(unsigned int sys_num = 0);
+  virtual NonlinearSystem & getNonlinearSystem(unsigned int sys_num);
 
   /**
    * Canonical method for adding a non-linear variable
@@ -1972,6 +1973,15 @@ public:
    */
   MooseAppCoordTransform & coordTransform();
 
+  std::size_t numNonlinearSystems() const override { return _num_nl_sys; }
+
+  /**
+   * reinitialize the finite volume assembly data for the provided face and thread
+   */
+  void reinitFVFace(THREAD_ID tid, const FaceInfo & fi);
+
+  unsigned int currentNlSysNum() const override;
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2453,13 +2463,20 @@ FEProblemBase::currentNonlinearSystem()
   return *_current_nl_sys;
 }
 
+inline const NonlinearSystemBase &
+FEProblemBase::currentNonlinearSystem() const
+{
+  mooseAssert(_current_nl_sys, "The nonlinear system is not currently set");
+  return *_current_nl_sys;
+}
+
 inline Assembly &
 FEProblemBase::assembly(const THREAD_ID tid, const unsigned int nl_sys_num)
 {
   mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
   mooseAssert(nl_sys_num < _assembly[tid].size(),
               "Nonlinear system number larger than the assembly container size");
-  return *_assembly[tid, nl_sys_num];
+  return *_assembly[tid][nl_sys_num];
 }
 
 inline const Assembly &
@@ -2468,7 +2485,7 @@ FEProblemBase::assembly(const THREAD_ID tid, const unsigned int nl_sys_num) cons
   mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
   mooseAssert(nl_sys_num < _assembly[tid].size(),
               "Nonlinear system number larger than the assembly container size");
-  return *_assembly[tid, nl_sys_num];
+  return *_assembly[tid][nl_sys_num];
 }
 
 inline const CouplingMatrix *

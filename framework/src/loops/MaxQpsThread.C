@@ -34,7 +34,8 @@ MaxQpsThread::operator()(const ConstElemRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  auto & assem = _fe_problem.assembly(_tid);
+  // Not actually using any pre-existing data so it shouldn't matter which assembly we use
+  auto & assem = _fe_problem.assembly(_tid, 0);
 
   // For short circuiting reinit.  With potential block-specific qrules we
   // need to track "seen" element types by their subdomains as well.
