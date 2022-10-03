@@ -62,11 +62,7 @@ P_out = 2.0e5 # Pa
   n_blocks = 1
   beta = 0.006
   P_out = 2.0e5
-<<<<<<< HEAD
   CT = 2.6
-=======
-  CT = 1.0
->>>>>>> 6e6d9d3 (Made _k_grid into a vector of vectors #43)
   # enforce_uniform_pressure = false
   compute_density = true
   compute_viscosity = true

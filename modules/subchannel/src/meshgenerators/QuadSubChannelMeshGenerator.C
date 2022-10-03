@@ -383,6 +383,9 @@ QuadSubChannelMeshGenerator::generate()
   sch_mesh->_k_grid = _k_grid;
   sch_mesh->_spacer_z = _spacer_z;
   sch_mesh->_spacer_k = _spacer_k;
+  sch_mesh->_z_blockage = _z_blockage;
+  sch_mesh->_index_blockage = _index_blockage;
+  sch_mesh->_reduction_blockage = _reduction_blockage;
   sch_mesh->_kij = _kij;
   sch_mesh->_pitch = _pitch;
   sch_mesh->_rod_diameter = _rod_diameter;
