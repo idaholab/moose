@@ -1,5 +1,4 @@
 [Mesh]
-  final_generator = delete
   [twoquad]
     type = GeneratedMeshGenerator
     dim = 2
@@ -14,35 +13,35 @@
     bottom_left = '1 0 0'
     top_right = '2 1 0'
   []
-  [sideset2]
-    type = SideSetsBetweenSubdomainsGenerator
-    input = subdomain
-    primary_block = 1
-    paired_block = 0
-    new_boundary = bar
-  []
-  [edge_elem2]
-    type = LowerDBlockFromSidesetGenerator
-    input = sideset2
-    sidesets = bar
-    new_block_id = 2
-  []
-  [sideset]
+  [sideset1]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain
     primary_block = 0
     paired_block = 1
     new_boundary = bar
   []
-  [edge_elem]
+  [lowerblock1]
     type = LowerDBlockFromSidesetGenerator
-    input = sideset
+    input = sideset1
     sidesets = bar
     new_block_id = 2
   []
+  [sideset2]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = lowerblock1
+    primary_block = 1
+    paired_block = 0
+    new_boundary = bar
+  []
+  [lowerblock2]
+    type = LowerDBlockFromSidesetGenerator
+    input = sideset2
+    sidesets = bar
+    new_block_id = 3
+  []
   [delete]
     type = BlockDeletionGenerator
-    input = edge_elem
+    input = lowerblock2
     block = 0
   []
 []
