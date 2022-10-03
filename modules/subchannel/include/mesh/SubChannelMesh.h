@@ -23,7 +23,7 @@ public:
   /**
    * Get axial cell location and value of loss coefficient
    */
-  virtual const std::vector<Real> & getKGrid() const { return _k_grid; }
+  virtual const std::vector<std::vector<Real>> & getKGrid() const { return _k_grid; }
 
   /**
    * Return lateral loss coefficient
@@ -180,7 +180,7 @@ protected:
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// axial form loss coefficient per computational cell
-  std::vector<Real> _k_grid;
+  std::vector<std::vector<Real>> _k_grid;
   /// axial location of the spacers
   std::vector<Real> _spacer_z;
   /// form loss coefficient of the spacers

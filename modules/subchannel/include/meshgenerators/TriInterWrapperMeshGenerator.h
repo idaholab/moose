@@ -23,7 +23,7 @@ protected:
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// axial form loss coefficient per computational cell
-  std::vector<Real> _k_grid;
+  std::vector<std::vector<Real>> _k_grid;
   /// Distance between the neighbor fuel rods, assembly_pitch
   Real _assembly_pitch;
   /// assembly diameter

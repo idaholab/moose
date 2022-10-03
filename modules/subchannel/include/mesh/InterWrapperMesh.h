@@ -23,7 +23,7 @@ public:
   /**
    * Get axial cell location and value of loss coefficient
    */
-  virtual const std::vector<Real> & getKGrid() const { return _k_grid; }
+  virtual const std::vector<std::vector<Real>> & getKGrid() const { return _k_grid; }
 
   /**
    * Return lateral loss coefficient
@@ -161,7 +161,7 @@ protected:
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// axial form loss coefficient per computational cell
-  std::vector<Real> _k_grid;
+  std::vector<std::vector<Real>> _k_grid;
   /// Lateral form loss coefficient
   Real _kij;
   /// Distance between the neighbor fuel rods, pitch

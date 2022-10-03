@@ -110,7 +110,7 @@ LiquidMetalInterWrapper1PhaseProblem::computeDP(int iblock)
 
       auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
       auto fi = computeFrictionFactor(Re);
-      auto ki = k_grid[iz - 1];
+      auto ki = k_grid[i_ch][iz - 1];
       auto friction_term = (fi * dz / Dh_i + ki) * 0.5 * (std::pow((*_mdot_soln)(node_out), 2.0)) /
                            (S * (*_rho_soln)(node_out));
       auto gravity_term = _g_grav * (*_rho_soln)(node_out)*dz * S;

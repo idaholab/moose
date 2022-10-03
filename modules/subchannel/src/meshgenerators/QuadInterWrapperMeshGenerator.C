@@ -83,18 +83,8 @@ QuadInterWrapperMeshGenerator::QuadInterWrapperMeshGenerator(const InputParamete
   for (unsigned int i = 0; i < _n_cells + 1; i++)
     _z_grid.push_back(dz * i);
 
-  // Defining the position of the spacer grid in the numerical solution array
-  std::vector<int> spacer_cell;
-  std::vector<int> _spacer_z = {};
-  for (const auto & elem : _spacer_z)
-    spacer_cell.emplace_back(std::round(elem * _n_cells / L));
-
   // Defining the array for axial resistances
-  _k_grid.resize(_n_cells + 1, 0.0);
-
-  // Summing the spacer resistance to the grid resistance array
-  for (unsigned int index = 0; index < spacer_cell.size(); index++)
-    _k_grid[spacer_cell[index]] += 0.0;
+  _k_grid.resize(_n_channels, std::vector<Real>(_n_cells + 1));
 
   // Defining the size of the maps
   _gap_to_chan_map.resize(_n_gaps);

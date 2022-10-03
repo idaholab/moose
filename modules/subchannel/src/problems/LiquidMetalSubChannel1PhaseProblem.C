@@ -363,7 +363,7 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
 
         auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
         auto fi = computeFrictionFactor(Re, i_ch, S, w_perim, Dh_i);
-        auto ki = k_grid[iz - 1];
+        auto ki = k_grid[i_ch][iz - 1];
         auto friction_term = (fi * dz / Dh_i + ki) * 0.5 *
                              (std::pow((*_mdot_soln)(node_out), 2.0)) /
                              (S * (*_rho_soln)(node_out));
@@ -621,7 +621,8 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
             (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), "central_difference", Pe);
         auto Re = ((mdot_interp / S_interp) * Dh_i / mu_interp);
         auto fi = computeFrictionFactor(Re, i_ch, S_interp, w_perim_interp, Dh_i);
-        auto ki = computeInterpolatedValue(k_grid[iz], k_grid[iz - 1], "central_difference", Pe);
+        auto ki = computeInterpolatedValue(
+            k_grid[i_ch][iz], k_grid[i_ch][iz - 1], "central_difference", Pe);
         auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
                     (S_interp * rho_interp);
         if (iz == first_node)

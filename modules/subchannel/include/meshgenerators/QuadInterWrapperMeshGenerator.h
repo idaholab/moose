@@ -48,7 +48,7 @@ protected:
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// axial form loss coefficient per computational cell
-  std::vector<Real> _k_grid;
+  std::vector<std::vector<Real>> _k_grid;
   /// number of axial blocks
   unsigned int _n_blocks;
 
