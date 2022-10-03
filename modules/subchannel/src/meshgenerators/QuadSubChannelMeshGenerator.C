@@ -124,11 +124,6 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
   // Defining the total length from 3 axial sections
   Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
 
-  // Defining the dz based in the total length and the specified number of axial cells
-  Real dz = L / _n_cells;
-  for (unsigned int i = 0; i < _n_cells + 1; i++)
-    _z_grid.push_back(dz * i);
-
   // Defining the position of the spacer grid in the numerical solution array
   std::vector<int> spacer_cell;
   for (const auto & elem : _spacer_z)
@@ -146,6 +141,27 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
   // Creating the 2D grid resistance array
   for (unsigned int i = 0; i < _n_channels; i++)
     _k_grid[i] = kgrid;
+
+  // Figure out how many axial layers are blocked
+  int axial_levels_blocked = std::round((_z_blockage.back() - _z_blockage.front()) * _n_cells / L);
+
+  // Add blockage resistance to the 2D grid resistane array
+  Real dz = L / _n_cells;
+  for (unsigned int i = 0; i < _n_cells + 1; i++)
+  {
+    // Defining the dz based in the total length and the specified number of axial cells
+    _z_grid.push_back(dz * i);
+    if ((dz * i >= _z_blockage.front() && dz * i <= _z_blockage.back()) &&
+        axial_levels_blocked != 0)
+    {
+      unsigned int index(0);
+      for (const auto & i_ch : _index_blockage)
+      {
+        _k_grid[i_ch][i] += (_k_blockage[index] / axial_levels_blocked);
+        index++;
+      }
+    }
+  }
 
   // Defining the size of the maps
   _gap_to_chan_map.resize(_n_gaps);
