@@ -61,10 +61,13 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   for (const auto & elem : _spacer_z)
     spacer_cell.emplace_back(std::round(elem * _n_cells / L));
 
-  _k_grid.resize(_n_cells + 1, 0.0);
+  // Defining the array for axial resistances
+  std::vector<Real> kgrid;
+  kgrid.resize(_n_cells + 1, 0.0);
 
+  // Summing the spacer resistance to the grid resistance array
   for (unsigned int index = 0; index < spacer_cell.size(); index++)
-    _k_grid[spacer_cell[index]] += _spacer_k[index];
+    kgrid[spacer_cell[index]] += _spacer_k[index];
 
   //  compute the hex mesh variables
   // -------------------------------------------
@@ -115,7 +118,13 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   for (unsigned int j = 0; j < _n_rings - 1; j++)
     chancount += j * 6;
   // Adding external channels to the total count
+  _console << "check value of _n_channels" << _n_channels << std::endl;
   _n_channels = chancount + _nrods - 1 + (_n_rings - 1) * 6 + 6;
+
+  // Defining the 2D array for axial resistances
+  _k_grid.resize(_n_channels, std::vector<Real>(_n_cells + 1));
+  for (unsigned int i = 0; i < _n_channels; i++)
+    _k_grid[i] = kgrid;
 
   _subchannel_to_rod_map.resize(_n_channels);
   _pin_to_chan_map.resize(_nrods);
