@@ -1,0 +1,24 @@
+[Tests]
+    issues = "#22280"
+    design = "ActiveLearningMonteCarloSampler.md ActiveLearningGPDecision.md ActiveLearningGaussianProcess.md"
+    [sampling]
+        requirement = 'The system shall be be able to perform Monte Carlo sampling with active learning with'
+        [SingleProc_SingleRow]
+          type = 'JSONDiff'
+          input = Main.i
+          allow_test_objects = true
+          jsondiff = 'SingleProcSingleRow.json'
+          detail = 'a single row in the sampler with single processor;'
+        []
+        [MultipleProc_MultipleRow]
+          type = 'JSONDiff'
+          input = Main.i
+          allow_test_objects = true
+          jsondiff = 'MultipleProcMultipleRow.json'
+          max_parallel = 3
+          min_parallel = 3
+          cli_args = "Samplers/mc/num_rows=2 Outputs/file_base='MultipleProcMultipleRow'"
+          detail = 'multiple rows in the sampler with multiple processors that are not equal to the rows;'
+        []
+    []
+[]
