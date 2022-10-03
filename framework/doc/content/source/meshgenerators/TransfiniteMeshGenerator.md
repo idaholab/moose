@@ -9,7 +9,7 @@ The `TransfiniteMeshGenerator` produces two-dimensional meshes from a set of 4 c
 !media media/meshgenerators/quad_convention.png style=float:right;width:20%;margin-left:2%; caption=Fig. 1: Convention for the corner vertices order.
 
 Given a set of 4 corners the TransfiniteMeshGenerator constructs by default the straight edges that connect the vertices and fills up the interior with straight lines. The test, [quadrilater_generator.i](test/tests/meshgenerators/transfinite_generator/quadrilater_generator.i),
-illustrates the use of the `TransfiniteMeshGenerator` object to construct general quadrilaterals. The convention for the corners numbering should follow Fig. 1, where we use the alternative sides numbering instead of the top-bottom-left-right as in the input file, and should be prescribed in the order +(0,0) - (0,1) - (1,1) - (1,0)+.
+illustrates the use of the `TransfiniteMeshGenerator` object to construct general quadrilaterals. The convention for the corners numbering should follow Fig. 1, prescribed in the order +(0,0) - (0,1) - (1,1) - (1,0)+. The direction along edges, important in case they are user provided using the DISCRETE option, should follow the direction in Fig. 1.
 
 This generator allows any type of curvilinear edges. In Fig. 2 we show a mesh where the bottom edge has an inward arc circle. However, this algorithm generates a mesh for any parametrized edge, or given set of points on an edge. For arcs of a circle, since they are widely encounterened in applications, we customized an approach that requires from an user to specify only the deviation from a straight line in the middle of an edge. 
 
