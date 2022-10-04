@@ -19,6 +19,7 @@
     block_id = 1
     bottom_left = '-200 -1 -400'
     top_right = '200 1 0'
+    force_prepare = true
   []
   [add_sidesets_around]
     type = SideSetsAroundSubdomainGenerator
