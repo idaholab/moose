@@ -1,8 +1,9 @@
 # Frequency Domain Analysis
 
-The following example presents a frequency domain analysis done in the MOOSE Tensor Mechanics module. A frequency domain analysis provides the structural response at a discrete set of frequencies. At each frequency, an independent steady state simulation is performed. This document provides an example of modeling a dynamic problem at a single frequency (time-harmonic problem).
+The following example presents two frequency domain analysis of a cantilever beam done in the MOOSE Tensor Mechanics module. The first example computes a frequency response function of the cantilever beam and identifies the first two eigenvalues of beam.  The second analysis computes the dynamic response at a single frequency (time-harmonic problem).
+A frequency domain analysis provides the structural response at a discrete set of frequencies. At each frequency, an independent steady state simulation is performed. This document provides an example of modeling a dynamic problem at a single frequency (time-harmonic problem).
 
-Frequency domain analysis is often used to determine a frequency response function (FRF). An FRF describes the relationship between an input (frequency and amplitude of the input forcing source) and output (displacement response of a system). For simple systems, an analytic FRF can be derived. For more complex systems, the FRF is numerically obtained by determining the system response over a range of frequencies. Peaks in the response on the FRF plot indicate natural frequencies of the system (eigen/fundumental frequencies). The mode shape (eigenvector) is given by the displacement profile at a natural frequency.
+Frequency domain analysis is often used to determine a frequency response function (FRF). An FRF describes the relationship between an input (frequency and amplitude of the input forcing source) and output (displacement response of a system). For simple systems, an analytic FRF can be derived. For more complex systems, the FRF is numerically obtained by determining the system response over a range of frequencies. The frequencies corresponding to the peaks on the FRF plot indicate natural frequencies of the system (eigen/fundumental frequencies). The mode shape (eigenvector) is given by the displacement profile at a natural frequency.
 
 Other applications of frequency domain dynamics are: (1) computation of band structure (dispersion curves) of lattices/metamaterial, (2) inverse design for vibration control, e.g. design a system so that it has as minimum/maximum response at particular frequency, (3) material properties inversion/optimization given discrete responses.
 
@@ -10,7 +11,7 @@ Frequency domain analyses can be advantageous over its time domain counterpart i
 
 # Problem Description
 
-The equations of motion for an isotropic elastic solid is given by the following partial differential equation:
+The equations of motion for a one dimensional isotropic elastic solid is given by the following partial differential equation:
 \begin{equation}
     -E\frac{\partial^2 u}{\partial x^2}+\rho \frac{\partial^2 u}{\partial t^2}=0
 \label{eq1}
@@ -21,7 +22,7 @@ To convert to the frequency domain, we consider that a plane wave given by
   u(x,t)= B e^{i(\omega t - k x)}
   \label{eq2}
 \end{equation}
-is a solution to [eq1] where $B$ is a complex number depending on the boundary conditions, $k^2=\omega^2\rho/E$ is the wave number, $\omega=2 \pi f$ where $f$ is the frequency, and $i=\sqrt{-1}$.  
+is a solution to [eq1] where $B$ is in general a complex number depending on the boundary conditions, $k^2=\omega^2\rho/E$ is the wave number, $\omega=2 \pi f$ where $f$ is the frequency, and $i=\sqrt{-1}$.  
 By assuming [eq2] is a a solution to [eq1] we can solve [eq1] in the frequency domain by taking a Fourier transform of $u(x,t)$ to get $U(x,\omega)$.  The frequency domain version of [eq1] is the Helmholtz equation given by
 \begin{equation}
     E\frac{\partial^2 U}{\partial x^2}-\rho\omega^2 U=0.
@@ -42,7 +43,7 @@ with amplitude $A$ and frequency $f$, is transformed to
 
 # Cantilever Beam Example
 
-The cantilever beam shown in [cantilever] is subjected to a time harmonic force on the right side in the out-of-plane and vertical directions.  In this example the frequency of the time varying load is swept over a range.  The displacement at the midpoint of the beam is recorded at each frequency.  This type of output, displacement as a function of frequency, is a frequency response function (FRF) or transfer function.  Displacement peaks in the FRF indicate natural frequencies.  
+The cantilever beam shown in [cantilever] is subjected to a time harmonic force on the right side in the out-of-plane and vertical directions.  In this example the frequency of the time varying load is swept over a range.  The displacement at the midpoint of the beam is recorded at each frequency.  This type of output, displacement as a function of frequency, is a frequency response function (FRF) or transfer function.  Frequencies corresponding to the displacement peaks in the FRF indicate natural frequencies/modes.
 
 !media media/tensor_mechanics/Cantilever_beam.png style=width:60%; caption=2D cantilever problem with a prescribed displacement boundary condition on the right end. id=cantilever
 
@@ -51,17 +52,17 @@ The analytic solution for the free vibration of a cantilever [Euler Bernoulli be
   \omega_n=k^2_n\sqrt\frac{EI^2}{\rho A L^4}
 \end{equation}
 where $I$ is the moment of inertia, $A$ the cross sectional area, $L$ the beam length, and $k_n$ are the wave numbers.
-For a cantilever beam, the first three wave numbers, $k_n$, are\\
+For a cantilever beam, the first three wave numbers, $k_n$, given for the Euler Bernoulli beam dimensions given as the dimensions of the cantilever beam are $L=$1m with cross section dimensions $a=$0.1m and $b=$0.15m are\\
 $k_1=1.875$\\
 $k_2=4.694$\\
 $k_3=7.855$\\
 The moment of inertia for a rectangular cross section beam is $I=\frac{wh^3}{12}$, where $h$ is the dimension in the direction being loaded and $w$ is the other cross sectional dimension.  
 
-For an aluminum cantilever beam, $E=$68e9 Pa, $\nu=$0.36, $\rho=$27.e3 kg/m$^3$.  The dimensions of the cantilever beam are $L=$1m with cross section dimensions $a=$0.1m and $b=$0.15m.
-The analytic first and second natural frequencies for this system bending in directions transverse to the beam axis are are:\\
+For an aluminum cantilever beam, $E=$68e9 Pa, $\nu=$0.36, $\rho=$27.e3 kg/m$^3$.  
+The analytic first and second natural frequencies for this system bending in directions tangential to the beam axis are:\\
 $\omega_{1a}=$509Hz\\
 $\omega_{1b}=$763Hz\\
-Both of these use the first wave number, $k_1$.
+Both of these frequencies use the same value of $k_1$, but with the moment of inertia recomputed for bending about the different widths, where the lower frequency is the first bending mode about the thin direction ($h=a=$0.1m) and the next higher frequency is the first bending mode about the thicker direction ($h=b=$0.15m).
 The simulated natural frequencies given by peaks in the FRF for a coarse mesh are:\\
 $\omega_{1a}=$600Hz\\
 $\omega_{1b}=$800Hz\\
@@ -83,7 +84,7 @@ In the next example, imaginary displacements will be introduced by including an 
 
 # Uniaxial Beam Example
 
-The displacement field $U$ is a complex number.  In the previous example, only the real part of the displacement field was accounted for.  In this example, an absorbing boundary condition will introduce a coupling between the real and imaginary displacement fields.  This example uses the uniaxial beam shown in [cantilever] which is subjected to time-harmonic displacement on right and has an absorbing boundary condition on left.  The absorbing boundary condition is given by the Sommerfeld radiation condition as follows
+In the Fourier domain, The displacement field $U$ is in general a complex number.  In the previous example, only the real part of the displacement field was accounted for.  In this example, an absorbing boundary condition will introduce a coupling between the real and imaginary displacement fields.  This example uses the uniaxial beam shown in [cantilever] which is subjected to time-harmonic displacement on right and has an absorbing boundary condition on left.
 
 For the boundary condition, we apply the Sommerfeld radiation condition on the left, and a harmonic source (cosine) on the right as follows:
 \begin{equation}
@@ -96,7 +97,7 @@ The frequency domain version of [eq6] is
     \label{eq7}
 \end{equation}
 
-In general, $U$ is complex-valued function/variable in the form of $U_r+iU_i$ where $U_r$ and $U_i$ are the real and the imaginary part of $U$.  At this stage, we split the complex system of equations into two real valued systems that live on the same mesh. [eq3] for a complex valued system becomes
+As mentioned before, $U$ is complex-valued function/variable in the form of $U_r+iU_i$ where $U_r$ and $U_i$ are the real and the imaginary part of $U$.  At this stage, we split the complex system of equations into two real valued systems that live on the same mesh. [eq3] for a complex valued system becomes
 \begin{equation}
     E\frac{\partial^2 U_r}{\partial x^2}- \rho\omega^2  U_r = 0
     \\
