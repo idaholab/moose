@@ -59,15 +59,15 @@ TagTestProblem::computeResidual(const NumericVector<Number> & soln,
     else
       mooseError("Tag ", vtag, " does not exist");
 
-  _nl->setSolution(soln);
+  _nl[0]->setSolution(soln);
 
-  if (_fe_vector_tags.find(_nl->residualVectorTag()) != _fe_vector_tags.end())
-    _nl->associateVectorToTag(residual, _nl->residualVectorTag());
+  if (_fe_vector_tags.find(_nl[0]->residualVectorTag()) != _fe_vector_tags.end())
+    _nl[0]->associateVectorToTag(residual, _nl[0]->residualVectorTag());
 
   computeResidualTags(_fe_vector_tags);
 
-  if (_fe_vector_tags.find(_nl->residualVectorTag()) != _fe_vector_tags.end())
-    _nl->disassociateVectorFromTag(residual, _nl->residualVectorTag());
+  if (_fe_vector_tags.find(_nl[0]->residualVectorTag()) != _fe_vector_tags.end())
+    _nl[0]->disassociateVectorFromTag(residual, _nl[0]->residualVectorTag());
 }
 
 void
@@ -84,13 +84,13 @@ TagTestProblem::computeJacobian(const NumericVector<Number> & soln, SparseMatrix
     else
       mooseError("Tag ", mtag, " does not exist");
 
-  _nl->setSolution(soln);
+  _nl[0]->setSolution(soln);
 
   if (_fe_matrix_tags.size() > 0)
-    _nl->associateMatrixToTag(jacobian, *_fe_matrix_tags.begin());
+    _nl[0]->associateMatrixToTag(jacobian, *_fe_matrix_tags.begin());
 
   computeJacobianTags(_fe_matrix_tags);
 
   if (_fe_matrix_tags.size() > 0)
-    _nl->disassociateMatrixFromTag(jacobian, *_fe_matrix_tags.begin());
+    _nl[0]->disassociateMatrixFromTag(jacobian, *_fe_matrix_tags.begin());
 }

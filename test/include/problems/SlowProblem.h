@@ -20,7 +20,7 @@ public:
   static InputParameters validParams();
 
   SlowProblem(const InputParameters & params);
-  virtual void solve();
+  virtual void solve(const NonlinearSystemName & nl_sys_name) override;
 
 protected:
   const std::vector<Real> _seconds_to_sleep;

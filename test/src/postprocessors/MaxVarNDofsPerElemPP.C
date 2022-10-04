@@ -27,5 +27,5 @@ MaxVarNDofsPerElemPP::MaxVarNDofsPerElemPP(const InputParameters & parameters)
 PostprocessorValue
 MaxVarNDofsPerElemPP::getValue()
 {
-  return _fe_problem.getNonlinearSystem().getMaxVarNDofsPerElem();
+  return _fe_problem.getNonlinearSystem(0).getMaxVarNDofsPerElem();
 }

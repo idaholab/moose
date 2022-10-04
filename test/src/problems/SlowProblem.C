@@ -32,7 +32,7 @@ SlowProblem::SlowProblem(const InputParameters & params)
 }
 
 void
-SlowProblem::solve()
+SlowProblem::solve(const NonlinearSystemName &)
 {
   {
     const Real delay = _t_step <= 0 ? _seconds_to_sleep.front()
