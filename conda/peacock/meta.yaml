@@ -21,8 +21,8 @@ requirements:
     - {{ moose_pyqt }}
     - {{ moose_qt }}
     - {{ moose_matplotlib }}
-    - {{ moose_pandas }}
-    - {{ moose_pandas }}
+    - {{ moose_vtk }}
+    - pandas
     - python
     - openssl
     - setuptools

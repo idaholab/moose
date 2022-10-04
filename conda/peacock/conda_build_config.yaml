@@ -13,8 +13,8 @@ moose_qt:
 moose_matplotlib:
   - matplotlib 3.5.2
 
-moose_pandas:
-  - pandas 1.4.3
+moose_vtk:
+  - vtk 9.1.0
 
 # Pesky packages that break internal CI
 # Note: Modifying/Updating this will require changes to conda/mpich!
