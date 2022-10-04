@@ -12,15 +12,15 @@
     []
     [all_by_block_names]
       type = 'Exodiff'
-      input = 'block_deletion_test13.i'
-      exodiff = 'block_deletion_test13_out.e'
+      input = 'block_deletion_test3.i'
+      exodiff = 'block_deletion_test3_out.e'
       recover = false
       detail = 'all of the elements in a mesh based on subdomain names and '
     []
     [multiple_blocks]
       type = 'Exodiff'
-      input = 'block_deletion_test14.i'
-      exodiff = 'block_deletion_test14_out.e'
+      input = 'block_deletion_test4.i'
+      exodiff = 'block_deletion_test4_out.e'
       recover = false
       detail = 'multiple blocks simultaneously in a mesh based on subdomain ID.'
     []
@@ -42,8 +42,8 @@
     []
     [parallel]
       type = 'Exodiff'
-      input = 'block_deletion_test5.i'
-      exodiff = 'block_deletion_test5_out.e'
+      input = 'block_deletion_test2.i'
+      exodiff = 'block_deletion_test2_out.e'
       recover = false
       min_threads = 2
       mesh_mode = distributed

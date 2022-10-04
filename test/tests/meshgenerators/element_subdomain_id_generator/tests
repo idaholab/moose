@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#13814'
+  design = Mesh/index.md
+
+  [assign]
+    requirement = "The system shall support assigning subdomain identifiers "
+
+    [tri_test]
+      type = 'Exodiff'
+      input = 'tri_with_subdomainid_test.i'
+      exodiff = 'out_tri_subdomain_id.e'
+
+      detail = "with triangular elements."
+    []
+  []
+[]

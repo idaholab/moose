@@ -61,6 +61,14 @@
 
       detail = 'while making sure to preserve existing side set names.'
     []
+
+    [tri_test]
+      type = 'Exodiff'
+      input = 'extruder_tri.i'
+      exodiff = 'out_tri.e'
+
+      detail = "with 2D triangular elements."
+    []
   []
 
   [invalid_existing_subdomain]

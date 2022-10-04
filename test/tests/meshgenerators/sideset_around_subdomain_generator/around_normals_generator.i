@@ -2,7 +2,6 @@
   [./fmg]
     type = FileMeshGenerator
     file = twoblocks.e
-    parallel_type = replicated
   []
 
   [./top_block1]
