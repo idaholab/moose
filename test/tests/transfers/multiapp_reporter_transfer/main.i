@@ -46,6 +46,7 @@
     real_vector_values = '0'
     string_names = str
     string_values = 'foo'
+    execute_on = 'timestep_end'
   []
 []
 
@@ -94,6 +95,7 @@
     from_reporters = 'from_main_rep/num'
     to_multi_app = sub
     subapp_index = 0
+    execute_on = 'timestep_begin'
   []
   [real_from_pp]
     type = MultiAppReporterTransfer
