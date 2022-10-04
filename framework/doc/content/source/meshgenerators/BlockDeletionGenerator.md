@@ -22,7 +22,7 @@ Variables and materials can no longer be block restricted to a deleted block, fo
 In this example input file, we remove blocks 1 and 3 with a single `BlockDeletionGenerator`.
 This leaves only block 2 in the simulation.
 
-!listing test/tests/meshgenerators/block_deletion_generator/block_deletion_test14.i block=Mesh
+!listing test/tests/meshgenerators/block_deletion_generator/block_deletion_test4.i block=Mesh
 
 !syntax parameters /Mesh/BlockDeletionGenerator
 
