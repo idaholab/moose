@@ -34,11 +34,11 @@ protected:
   /// Block ID to assign to the region
   subdomain_id_type _block_id;
 
-  /// boundary ID to select
-  std::vector<BoundaryName> _boundary_id_old;
+  /// List of boundary names to select
+  std::vector<BoundaryName> _boundaries_old;
 
-  /// boundary ID to assign
-  boundary_id_type _boundary_id_new;
+  /// New boundary to assign
+  BoundaryName _boundary_new;
 
   /// Bounding box for testing element centroids against
   BoundingBox _bounding_box;

@@ -39,9 +39,10 @@ SideSetsFromBoundingBoxGenerator::validParams()
   params.addRequiredParam<subdomain_id_type>(
       "block_id", "Subdomain id to set for inside/outside the bounding box");
   params.addRequiredParam<std::vector<BoundaryName>>(
-      "boundary_id_old", "Boundary id on specified block within the bounding box to select");
-  params.addRequiredParam<boundary_id_type>(
-      "boundary_id_new", "Boundary id on specified block within the bounding box to assign");
+      "boundaries_old",
+      "The list of boundaries on the specified block within the bounding box to be modified");
+  params.addRequiredParam<BoundaryName>(
+      "boundary_new", "Boundary on specified block within the bounding box to assign");
   params.addParam<bool>("boundary_id_overlap",
                         false,
                         "Set to true if boundaries need to overlap on sideset to be detected.");
@@ -57,8 +58,8 @@ SideSetsFromBoundingBoxGenerator::SideSetsFromBoundingBoxGenerator(
     _input(getMesh("input")),
     _location(parameters.get<MooseEnum>("location")),
     _block_id(parameters.get<SubdomainID>("block_id")),
-    _boundary_id_old(parameters.get<std::vector<BoundaryName>>("boundary_id_old")),
-    _boundary_id_new(parameters.get<boundary_id_type>("boundary_id_new")),
+    _boundaries_old(parameters.get<std::vector<BoundaryName>>("boundaries_old")),
+    _boundary_new(parameters.get<BoundaryName>("boundary_new")),
     _bounding_box(MooseUtils::buildBoundingBox(parameters.get<RealVectorValue>("bottom_left"),
                                                parameters.get<RealVectorValue>("top_right"))),
     _boundary_id_overlap(parameters.get<bool>("boundary_id_overlap"))
@@ -80,6 +81,23 @@ SideSetsFromBoundingBoxGenerator::generate()
   bool found_side_sets = false;
   const bool inside = (_location == "INSIDE");
 
+  // Get the list of boundary ids from the boundary names
+  auto boundary_ids = MooseMeshUtils::getBoundaryIDs(*mesh, _boundaries_old, false);
+
+  // Check that the old boundary ids/names exist in the mesh
+  for (std::size_t i = 0; i < boundary_ids.size(); ++i)
+    if (boundary_ids[i] == Moose::INVALID_BOUNDARY_ID)
+      paramError(
+          "boundaries", "The boundary '", _boundaries_old[i], "' was not found within the mesh");
+
+  // Attempt to get the new boundary id from the name
+  auto boundary_id_new = MooseMeshUtils::getBoundaryID(_boundary_new, *mesh);
+
+  // If the new boundary id/name is not valid, make it instead
+  if (boundary_id_new == Moose::INVALID_BOUNDARY_ID)
+    boundary_id_new =
+        boundary_ids.empty() ? 0 : cast_int<boundary_id_type>(*boundary_ids.rbegin() + 1);
+
   if (!_boundary_id_overlap)
   {
     // Loop over the elements
@@ -95,14 +113,12 @@ SideSetsFromBoundingBoxGenerator::generate()
         // loop over sides of elements within bounding box
         for (unsigned int side = 0; side < elem->n_sides(); side++)
           // loop over provided boundary vector to check all side sets for all boundary ids
-          for (unsigned int boundary_id_number = 0; boundary_id_number < _boundary_id_old.size();
-               boundary_id_number++)
+          for (auto boundary_id : boundary_ids)
             // check if side has same boundary id that you are looking for
-            if (boundary_info.has_boundary_id(
-                    elem, side, boundary_info.get_id_by_name(_boundary_id_old[boundary_id_number])))
+            if (boundary_info.has_boundary_id(elem, side, boundary_id))
             {
               // assign new boundary value to boundary which meets meshmodifier criteria
-              boundary_info.add_side(elem, side, _boundary_id_new);
+              boundary_info.add_side(elem, side, boundary_id_new);
               found_side_sets = true;
             }
       }
@@ -119,9 +135,9 @@ SideSetsFromBoundingBoxGenerator::generate()
 
   else if (_boundary_id_overlap)
   {
-    if (_boundary_id_old.size() < 2)
+    if (boundary_ids.size() < 2)
       mooseError("boundary_id_old out of bounds: ",
-                 _boundary_id_old.size(),
+                 boundary_ids.size(),
                  " Must be 2 boundary inputs or more.");
 
     bool found_node = false;
@@ -133,23 +149,21 @@ SideSetsFromBoundingBoxGenerator::generate()
       if (_bounding_box.contains_point(**node) == inside)
       {
         // read out boundary ids for nodes
-        std::vector<boundary_id_type> boundary_id_list;
-        boundary_info.boundary_ids(*node, boundary_id_list);
-        std::vector<boundary_id_type> boundary_id_old_list =
-            MooseMeshUtils::getBoundaryIDs(*mesh, _boundary_id_old, true);
+        std::vector<boundary_id_type> node_boundary_ids;
+        boundary_info.boundary_ids(*node, node_boundary_ids);
 
         // sort boundary ids on node and sort boundary ids provided in input file
-        std::sort(boundary_id_list.begin(), boundary_id_list.end());
-        std::sort(boundary_id_old_list.begin(), boundary_id_old_list.end());
+        std::sort(node_boundary_ids.begin(), node_boundary_ids.end());
+        std::sort(boundary_ids.begin(), boundary_ids.end());
 
         // check if input boundary ids are all contained in the node
         // if true, write new boundary id on respective node
-        if (std::includes(boundary_id_list.begin(),
-                          boundary_id_list.end(),
-                          boundary_id_old_list.begin(),
-                          boundary_id_old_list.end()))
+        if (std::includes(node_boundary_ids.begin(),
+                          node_boundary_ids.end(),
+                          boundary_ids.begin(),
+                          boundary_ids.end()))
         {
-          boundary_info.add_node(*node, _boundary_id_new);
+          boundary_info.add_node(*node, boundary_id_new);
           found_node = true;
         }
       }
