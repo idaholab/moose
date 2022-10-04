@@ -198,7 +198,7 @@ HeatStructureFromFile3D::buildMesh()
     boundary_info.add_side(elem, mapped_side, bc_id);
   }
   for (const auto & pr : new_ids_to_names)
-    _mesh.setBoundaryName(pr.first, genName(_name, pr.second));
+    _mesh.getMesh().get_boundary_info().sideset_name(pr.first) = genName(_name, pr.second);
 
   _number_of_hs = _names.size();
 }
