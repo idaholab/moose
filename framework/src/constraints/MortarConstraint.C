@@ -65,16 +65,10 @@ MortarConstraint::computeResidual(Moose::MortarType mortar_type)
   accumulateTaggedLocalResidual();
 }
 
-void 
-MortarConstraint::computeResidualScalar() 
-{
-
-}
-
 void
 MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
 {
-  size_t test_space_size = 0;
+  std::size_t test_space_size = 0;
   typedef Moose::ConstraintJacobianType JType;
   typedef Moose::MortarType MType;
   std::array<JType, 3> jacobian_types;
@@ -173,10 +167,4 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
       accumulateTaggedLocalMatrix();
     }
   }
-}
-
-void 
-MortarConstraint::computeJacobianScalar() 
-{
-
 }

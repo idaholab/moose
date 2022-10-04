@@ -111,7 +111,6 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
 
     _compute_primal_residuals(getParam<bool>("compute_primal_residuals")),
     _compute_lm_residuals(!_var ? false : getParam<bool>("compute_lm_residuals")),
-    _compute_scalar_residuals(getParam<bool>("compute_scalar_residuals")),
     _test_dummy(),
     _use_dual(_var ? _var->useDual() : false),
     _normals_primary(_assembly.neighborNormals()),
@@ -166,10 +165,6 @@ MortarConstraintBase::computeResidual()
   if (_compute_lm_residuals)
     // Compute the residual for the lower dimensional LM dofs (if we even have an LM variable)
     computeResidual(Moose::MortarType::Lower);
-
-  if (_compute_scalar_residuals)
-    // Compute the residual for the scalar dofs
-    computeResidualScalar();
 }
 
 void
@@ -191,10 +186,6 @@ MortarConstraintBase::computeJacobian()
   if (_compute_lm_residuals)
     // Compute the jacobian for the lower dimensional LM dofs (if we even have an LM variable)
     computeJacobian(Moose::MortarType::Lower);
-
-  if (_compute_scalar_residuals)
-    // Compute the jacobian for the scalar dofs
-    computeJacobianScalar();
 }
 
 void
