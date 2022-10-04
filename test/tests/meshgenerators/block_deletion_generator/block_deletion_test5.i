@@ -26,7 +26,7 @@
   [../]
   [./ed0]
     type = BlockDeletionGenerator
-    block = 1
+    block_id = 1
     input = SubdomainBoundingBox2
   [../]
 []
