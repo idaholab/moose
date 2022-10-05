@@ -959,9 +959,6 @@ protected:
   /// Map variable number to its pointer
   std::vector<std::vector<MooseVariableFieldBase *>> _numbered_vars;
 
-  /// Storage for MooseVariable objects
-  MooseObjectWarehouseBase<MooseVariableBase> _variable_warehouse;
-
   /// Whether to automatically scale the variables
   bool _automatic_scaling;
 

@@ -37,6 +37,9 @@ class DisplacedProblem : public SubProblem
 public:
   static InputParameters validParams();
 
+  DisplacedProblem(DisplacedProblem &&) = delete;
+  DisplacedProblem & operator=(DisplacedProblem &&) = delete;
+
   DisplacedProblem(const InputParameters & parameters);
   ~DisplacedProblem();
 
@@ -68,7 +71,7 @@ public:
   void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   virtual void init() override;
-  virtual bool converged() override;
+  virtual bool converged(unsigned int nl_sys_num = 0) override;
 
   /**
    * Allocate vectors and save old solutions into them.
@@ -298,7 +301,7 @@ public:
       GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
   virtual GeometricSearchData & geomSearchData() override { return _geometric_search_data; }
 
-  virtual bool computingInitialResidual() const override;
+  virtual bool computingInitialResidual(unsigned int nl_sys_num = 0) const override;
 
   virtual void onTimestepBegin() override;
   virtual void onTimestepEnd() override;

@@ -450,11 +450,11 @@ public:
    */
   virtual void checkExceptionAndStopSolve(bool print_message = true);
 
-  virtual bool converged() override;
-  virtual unsigned int nNonlinearIterations() const override;
-  virtual unsigned int nLinearIterations() const override;
-  virtual Real finalNonlinearResidual() const override;
-  virtual bool computingInitialResidual() const override;
+  virtual bool converged(unsigned int nl_sys_num = 0) override;
+  virtual unsigned int nNonlinearIterations(unsigned int nl_sys_num = 0) const override;
+  virtual unsigned int nLinearIterations(unsigned int nl_sys_num = 0) const override;
+  virtual Real finalNonlinearResidual(unsigned int nl_sys_num = 0) const override;
+  virtual bool computingInitialResidual(unsigned int nl_sys_num = 0) const override;
 
   /**
    * Return solver type as a human readable string
@@ -594,6 +594,7 @@ public:
   // NL /////
   NonlinearSystemBase & getNonlinearSystemBase(unsigned int sys_num = 0);
   const NonlinearSystemBase & getNonlinearSystemBase(unsigned int sys_num = 0) const;
+  void setCurrentNonlinearSystem(unsigned int nl_sys_num);
   NonlinearSystemBase & currentNonlinearSystem();
   const NonlinearSystemBase & currentNonlinearSystem() const;
 
@@ -2173,7 +2174,7 @@ protected:
    *
    * This is needed due to header includes/forward declaration issues
    */
-  void addObjectParamsHelper(InputParameters & params);
+  void addObjectParamsHelper(InputParameters & params, const std::string & object_name);
 
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
@@ -2428,7 +2429,7 @@ FEProblemBase::addObject(const std::string & type,
                          const bool threaded)
 {
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
-  addObjectParamsHelper(parameters);
+  addObjectParamsHelper(parameters, name);
 
   const auto n_threads = threaded ? libMesh::n_threads() : 1;
   std::vector<std::shared_ptr<T>> objects(n_threads);
@@ -2492,6 +2493,14 @@ inline const CouplingMatrix *
 FEProblemBase::couplingMatrix(const unsigned int i) const
 {
   return _cm[i].get();
+}
+
+inline void
+FEProblemBase::setCurrentNonlinearSystem(const unsigned int nl_sys_num)
+{
+  mooseAssert(nl_sys_num < _nl.size(),
+              "System number greater than the number of nonlinear systems");
+  _current_nl_sys = _nl[nl_sys_num].get();
 }
 
 template <>

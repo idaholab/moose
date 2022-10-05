@@ -51,7 +51,6 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     // By default, we want to compute an eigenvalue only (smallest or largest)
     _n_eigen_pairs_required(1),
     _generalized_eigenvalue_problem(false),
-    _current_nl_eigen(nullptr),
     _negative_sign_eigen_kernel(getParam<bool>("negative_sign_eigen_kernel")),
     _active_eigen_index(getParam<unsigned int>("active_eigen_index")),
     _do_free_power_iteration(false),
@@ -74,6 +73,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     auto & nl = _nl[i];
     nl = std::make_shared<NonlinearEigenSystem>(*this, sys_name);
     _nl_eigen = std::dynamic_pointer_cast<NonlinearEigenSystem>(nl);
+    _current_nl_sys = nl.get();
   }
 
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
@@ -163,7 +163,7 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
 
   // Disassociate the default tags because we will associate vectors with only the
   // specific system tags that we need for this instance
-  _current_nl_eigen->disassociateDefaultMatrixTags();
+  _nl_eigen->disassociateDefaultMatrixTags();
 
   // Clear FE tags and first add the specific tag assoicated with the Jacobian
   _fe_matrix_tags.clear();
@@ -172,16 +172,16 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
   // Add any other user-added matrix tags if they have associated matrices
   const auto & matrix_tags = getMatrixTags();
   for (const auto & matrix_tag : matrix_tags)
-    if (_current_nl_eigen->hasMatrix(matrix_tag.second))
+    if (_nl_eigen->hasMatrix(matrix_tag.second))
       _fe_matrix_tags.insert(matrix_tag.second);
 
-  _current_nl_eigen->setSolution(soln);
+  _nl_eigen->setSolution(soln);
 
-  _current_nl_eigen->associateMatrixToTag(jacobian, tag);
+  _nl_eigen->associateMatrixToTag(jacobian, tag);
 
   computeJacobianTags(_fe_matrix_tags);
 
-  _current_nl_eigen->disassociateMatrixFromTag(jacobian, tag);
+  _nl_eigen->disassociateMatrixFromTag(jacobian, tag);
 }
 
 void
@@ -200,21 +200,21 @@ EigenProblem::computeMatricesTags(
 
   // Disassociate the default tags because we will associate vectors with only the
   // specific system tags that we need for this instance
-  _current_nl_eigen->disassociateDefaultMatrixTags();
+  _nl_eigen->disassociateDefaultMatrixTags();
 
   _fe_matrix_tags.clear();
 
-  _current_nl_eigen->setSolution(soln);
+  _nl_eigen->setSolution(soln);
 
   unsigned int i = 0;
   for (auto tag : tags)
-    _current_nl_eigen->associateMatrixToTag(*(jacobians[i++]), tag);
+    _nl_eigen->associateMatrixToTag(*(jacobians[i++]), tag);
 
   computeJacobianTags(tags);
 
   i = 0;
   for (auto tag : tags)
-    _current_nl_eigen->disassociateMatrixFromTag(*(jacobians[i++]), tag);
+    _nl_eigen->disassociateMatrixFromTag(*(jacobians[i++]), tag);
 }
 
 void
@@ -229,7 +229,7 @@ EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 
   _currently_computing_jacobian = true;
 
-  _current_nl_sys->computeJacobianBlocks(blocks, {_current_nl_eigen->precondMatrixTag()});
+  _current_nl_sys->computeJacobianBlocks(blocks, {_nl_eigen->precondMatrixTag()});
 
   _currently_computing_jacobian = false;
 }
@@ -245,7 +245,7 @@ EigenProblem::computeJacobianAB(const NumericVector<Number> & soln,
 
   // Disassociate the default tags because we will associate vectors with only the
   // specific system tags that we need for this instance
-  _current_nl_eigen->disassociateDefaultMatrixTags();
+  _nl_eigen->disassociateDefaultMatrixTags();
 
   // Clear FE tags and first add the specific tags assoicated with the Jacobian
   _fe_matrix_tags.clear();
@@ -255,18 +255,18 @@ EigenProblem::computeJacobianAB(const NumericVector<Number> & soln,
   // Add any other user-added matrix tags if they have associated matrices
   const auto & matrix_tags = getMatrixTags();
   for (const auto & matrix_tag : matrix_tags)
-    if (_current_nl_eigen->hasMatrix(matrix_tag.second))
+    if (_nl_eigen->hasMatrix(matrix_tag.second))
       _fe_matrix_tags.insert(matrix_tag.second);
 
-  _current_nl_eigen->setSolution(soln);
+  _nl_eigen->setSolution(soln);
 
-  _current_nl_eigen->associateMatrixToTag(jacobianA, tagA);
-  _current_nl_eigen->associateMatrixToTag(jacobianB, tagB);
+  _nl_eigen->associateMatrixToTag(jacobianA, tagA);
+  _nl_eigen->associateMatrixToTag(jacobianB, tagB);
 
   computeJacobianTags(_fe_matrix_tags);
 
-  _current_nl_eigen->disassociateMatrixFromTag(jacobianA, tagA);
-  _current_nl_eigen->disassociateMatrixFromTag(jacobianB, tagB);
+  _nl_eigen->disassociateMatrixFromTag(jacobianA, tagA);
+  _nl_eigen->disassociateMatrixFromTag(jacobianB, tagB);
 }
 
 void
@@ -278,7 +278,7 @@ EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
 
   // Disassociate the default tags because we will associate vectors with only the
   // specific system tags that we need for this instance
-  _current_nl_eigen->disassociateDefaultVectorTags();
+  _nl_eigen->disassociateDefaultVectorTags();
 
   // Clear FE tags and first add the specific tag associated with the residual
   _fe_vector_tags.clear();
@@ -287,16 +287,16 @@ EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
   // Add any other user-added vector residual tags if they have associated vectors
   const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
   for (const auto & vector_tag : residual_vector_tags)
-    if (_current_nl_eigen->hasVector(vector_tag._id))
+    if (_nl_eigen->hasVector(vector_tag._id))
       _fe_vector_tags.insert(vector_tag._id);
 
-  _current_nl_eigen->associateVectorToTag(residual, tag);
+  _nl_eigen->associateVectorToTag(residual, tag);
 
-  _current_nl_eigen->setSolution(soln);
+  _nl_eigen->setSolution(soln);
 
   computeResidualTags(_fe_vector_tags);
 
-  _current_nl_eigen->disassociateVectorFromTag(residual, tag);
+  _nl_eigen->disassociateVectorFromTag(residual, tag);
 }
 
 void
@@ -310,7 +310,7 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
 
   // Disassociate the default tags because we will associate vectors with only the
   // specific system tags that we need for this instance
-  _current_nl_eigen->disassociateDefaultVectorTags();
+  _nl_eigen->disassociateDefaultVectorTags();
 
   // Clear FE tags and first add the specific tags associated with the residual
   _fe_vector_tags.clear();
@@ -320,44 +320,44 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
   // Add any other user-added vector residual tags if they have associated vectors
   const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
   for (const auto & vector_tag : residual_vector_tags)
-    if (_current_nl_eigen->hasVector(vector_tag._id))
+    if (_nl_eigen->hasVector(vector_tag._id))
       _fe_vector_tags.insert(vector_tag._id);
 
-  _current_nl_eigen->associateVectorToTag(residualA, tagA);
-  _current_nl_eigen->associateVectorToTag(residualB, tagB);
+  _nl_eigen->associateVectorToTag(residualA, tagA);
+  _nl_eigen->associateVectorToTag(residualB, tagB);
 
-  _current_nl_eigen->setSolution(soln);
+  _nl_eigen->setSolution(soln);
 
   computeResidualTags(_fe_vector_tags);
 
-  _current_nl_eigen->disassociateVectorFromTag(residualA, tagA);
-  _current_nl_eigen->disassociateVectorFromTag(residualB, tagB);
+  _nl_eigen->disassociateVectorFromTag(residualA, tagA);
+  _nl_eigen->disassociateVectorFromTag(residualB, tagB);
 }
 
 Real
 EigenProblem::computeResidualL2Norm()
 {
-  computeResidualAB(*_current_nl_eigen->currentSolution(),
-                    _current_nl_eigen->residualVectorAX(),
-                    _current_nl_eigen->residualVectorBX(),
-                    _current_nl_eigen->nonEigenVectorTag(),
-                    _current_nl_eigen->eigenVectorTag());
+  computeResidualAB(*_nl_eigen->currentSolution(),
+                    _nl_eigen->residualVectorAX(),
+                    _nl_eigen->residualVectorBX(),
+                    _nl_eigen->nonEigenVectorTag(),
+                    _nl_eigen->eigenVectorTag());
 
   Real eigenvalue = 1.0;
 
-  if (_active_eigen_index < _current_nl_eigen->getNumConvergedEigenvalues())
-    eigenvalue = _current_nl_eigen->getConvergedEigenvalue(_active_eigen_index).first;
+  if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
+    eigenvalue = _nl_eigen->getConvergedEigenvalue(_active_eigen_index).first;
 
   // Scale BX with eigenvalue
-  _current_nl_eigen->residualVectorBX() *= eigenvalue;
+  _nl_eigen->residualVectorBX() *= eigenvalue;
 
   // Compute entire residual
   if (_negative_sign_eigen_kernel)
-    _current_nl_eigen->residualVectorAX() += _current_nl_eigen->residualVectorBX();
+    _nl_eigen->residualVectorAX() += _nl_eigen->residualVectorBX();
   else
-    _current_nl_eigen->residualVectorAX() -= _current_nl_eigen->residualVectorBX();
+    _nl_eigen->residualVectorAX() -= _nl_eigen->residualVectorBX();
 
-  return _current_nl_eigen->residualVectorAX().l2_norm();
+  return _nl_eigen->residualVectorAX().l2_norm();
 }
 
 void
@@ -516,8 +516,6 @@ EigenProblem::solve(const NonlinearSystemName & nl_sys_name)
   if (!(ss >> nl_sys_num) || !ss.eof())
     nl_sys_num = libmesh_map_find(_nl_sys_name_to_num, nl_sys_name);
   _current_nl_sys = _nl[nl_sys_num].get();
-  _current_nl_eigen = dynamic_cast<NonlinearEigenSystem *>(_current_nl_sys);
-  mooseAssert(_current_nl_eigen, "Cast should have been successful");
 
   if (_solve)
   {
@@ -526,12 +524,12 @@ EigenProblem::solve(const NonlinearSystemName & nl_sys_name)
     // Set necessary slepc callbacks
     // We delay this call as much as possible because libmesh
     // could rebuild matrices due to mesh changes or something else.
-    _current_nl_eigen->attachSLEPcCallbacks();
+    _nl_eigen->attachSLEPcCallbacks();
 
     // If there is an eigenvalue, we scale 1/|Bx| to eigenvalue
-    if (_active_eigen_index < _current_nl_eigen->getNumConvergedEigenvalues())
+    if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
     {
-      std::pair<Real, Real> eig = _current_nl_eigen->getConvergedEigenvalue(_active_eigen_index);
+      std::pair<Real, Real> eig = _nl_eigen->getConvergedEigenvalue(_active_eigen_index);
       preScaleEigenVector(eig);
     }
 
@@ -620,9 +618,9 @@ EigenProblem::init()
 }
 
 bool
-EigenProblem::converged()
+EigenProblem::converged(unsigned int)
 {
-  return _current_nl_eigen->converged();
+  return _nl_eigen->converged();
 }
 
 bool

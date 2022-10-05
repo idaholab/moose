@@ -739,7 +739,7 @@ NonlinearSystemBase::zeroVectorForResidual(const std::string & vector_name)
 void
 NonlinearSystemBase::computeResidualTag(NumericVector<Number> & residual, TagID tag_id)
 {
-
+  _fe_problem.setCurrentNonlinearSystem(number());
   _nl_vector_tags.clear();
   _nl_vector_tags.insert(tag_id);
   _nl_vector_tags.insert(residualVectorTag());

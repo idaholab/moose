@@ -1490,6 +1490,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvectorvector(MaterialName);
       setvectorvector(DistributionName);
       setvectorvector(SamplerName);
+      setvectorvector(TagName);
 
       // Triple indexed types
       setvectorvectorvector(Real);

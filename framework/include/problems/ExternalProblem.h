@@ -33,7 +33,7 @@ public:
    * External problems should provide an override for converged, not inherit the default from
    * FEProblem that provides a reasonable implementation.
    */
-  virtual bool converged() override = 0;
+  virtual bool converged(unsigned int nl_sys_num = 0) override = 0;
 
   /**
    * New interface for solving an External problem. "solve()" is finalized here to provide

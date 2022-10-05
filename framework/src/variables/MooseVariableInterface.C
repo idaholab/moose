@@ -31,8 +31,10 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
-  _var = &problem.getVariable(
-      tid, parameters.varName(var_param_name), expected_var_type, expected_var_field_type);
+  _var = &problem.getVariable(tid,
+                              parameters.varName(var_param_name, moose_object->name()),
+                              expected_var_type,
+                              expected_var_field_type);
   if (!(_variable = dynamic_cast<MooseVariableFE<T> *>(_var)))
     _fv_variable = dynamic_cast<MooseVariableFV<T> *>(_var);
 

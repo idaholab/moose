@@ -1166,7 +1166,8 @@ InputParameters::errorPrefix(const std::string & param) const
 }
 
 std::string
-InputParameters::varName(const std::string & var_param_name) const
+InputParameters::varName(const std::string & var_param_name,
+                         const std::string & moose_object_with_var_param_name) const
 {
   // Try the scalar version first
   std::string variable_name = getMooseType(var_param_name);
@@ -1180,12 +1181,12 @@ InputParameters::varName(const std::string & var_param_name) const
     // wrong with dollar bracket expression expansion.
     if (vec.empty())
       mooseError("Error constructing object '",
-                 get<std::string>("_object_name"),
+                 moose_object_with_var_param_name,
                  "' while retrieving value for '",
                  var_param_name,
-                 "' parameter! Did you set ",
+                 "' parameter! Did you forget to set '",
                  var_param_name,
-                 " = '' (empty string) by accident?");
+                 "' or set it to '' (empty string) by accident?");
 
     // When using vector variables, we are only going to use the first one in the list at the
     // interface level...

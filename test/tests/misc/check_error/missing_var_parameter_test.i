@@ -15,7 +15,7 @@
 []
 
 [Kernels]
-  # Test error message for missing variable param.
+  # Test error message for missing required parameter
   [./diff]
     type = Diffusion
   [../]

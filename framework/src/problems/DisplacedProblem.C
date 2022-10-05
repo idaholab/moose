@@ -163,7 +163,7 @@ DisplacedProblem::init()
     nl->init();
   }
 
-  _displaced_aux->dofMap().attach_extra_send_list_function(&extraSendList, &_displaced_aux);
+  _displaced_aux->dofMap().attach_extra_send_list_function(&extraSendList, _displaced_aux.get());
   _displaced_aux->init();
 
   {
@@ -430,9 +430,11 @@ DisplacedProblem::numMatrixTags() const
 bool
 DisplacedProblem::hasVariable(const std::string & var_name) const
 {
-  for (const auto sys_num : make_range(_eq.n_systems()))
-    if (_eq.get_system(sys_num).has_variable(var_name))
+  for (auto & nl : _displaced_nl)
+    if (nl->hasVariable(var_name))
       return true;
+  if (_displaced_aux->hasVariable(var_name))
+    return true;
 
   return false;
 }
@@ -562,12 +564,14 @@ DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
   {
     _assembly[tid][nl_sys_num]->reinit(elem);
     _displaced_nl[nl_sys_num]->prepare(tid);
+    // This method is called outside of residual/Jacobian callbacks during initial condition
+    // evaluation
+    if (!_mproblem.hasJacobian() || !_mproblem.constJacobian())
+      _assembly[tid][nl_sys_num]->prepareJacobianBlock();
+    _assembly[tid][nl_sys_num]->prepareResidual();
   }
 
   _displaced_aux->prepare(tid);
-  if (!_mproblem.hasJacobian() || !_mproblem.constJacobian())
-    _assembly[tid][currentNlSysNum()]->prepareJacobianBlock();
-  _assembly[tid][currentNlSysNum()]->prepareResidual();
 }
 
 void
@@ -682,9 +686,9 @@ DisplacedProblem::reinitElemPhys(const Elem * elem,
   {
     _assembly[tid][nl_sys_num]->reinitAtPhysical(elem, phys_points_in_elem);
     _displaced_nl[nl_sys_num]->prepare(tid);
+    _assembly[tid][nl_sys_num]->prepare();
   }
   _displaced_aux->prepare(tid);
-  _assembly[tid][currentNlSysNum()]->prepare();
 
   reinitElem(elem, tid);
 }
@@ -763,10 +767,10 @@ DisplacedProblem::reinitNeighbor(const Elem * elem,
     _assembly[tid][nl_sys_num]->reinitElemAndNeighbor(
         elem, side, neighbor, neighbor_side, neighbor_reference_points);
     _displaced_nl[nl_sys_num]->prepareNeighbor(tid);
+    // Called during stateful material property evaluation outside of solve
+    _assembly[tid][nl_sys_num]->prepareNeighbor();
   }
   _displaced_aux->prepareNeighbor(tid);
-
-  _assembly[tid][currentNlSysNum()]->prepareNeighbor();
 
   BoundaryID bnd_id = 0; // some dummy number (it is not really used for anything, right now)
   for (auto & nl : _displaced_nl)
@@ -1141,15 +1145,15 @@ DisplacedProblem::refMesh()
 }
 
 bool
-DisplacedProblem::converged()
+DisplacedProblem::converged(const unsigned int nl_sys_num)
 {
-  return _mproblem.converged();
+  return _mproblem.converged(nl_sys_num);
 }
 
 bool
-DisplacedProblem::computingInitialResidual() const
+DisplacedProblem::computingInitialResidual(const unsigned int nl_sys_num) const
 {
-  return _mproblem.computingInitialResidual();
+  return _mproblem.computingInitialResidual(nl_sys_num);
 }
 
 void

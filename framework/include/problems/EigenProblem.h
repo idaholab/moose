@@ -35,7 +35,7 @@ public:
 
   virtual void init() override;
 
-  virtual bool converged() override;
+  virtual bool converged(unsigned int nl_sys_num = 0) override;
 
   unsigned int getNEigenPairsRequired() const { return _n_eigen_pairs_required; }
   void setNEigenPairsRequired(unsigned int n_eigen_pairs)
@@ -246,9 +246,6 @@ protected:
   bool _generalized_eigenvalue_problem;
   std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
 
-  /// the current nonlinear eigen system
-  NonlinearEigenSystem * _current_nl_eigen = nullptr;
-
   /// Whether or not use negative sign for Bx. Use negative sign by default to
   /// make the eigen system consistent with nonlinear system
   bool _negative_sign_eigen_kernel;
@@ -292,6 +289,5 @@ EigenProblem::getNonlinearEigenSystem(const unsigned int nl_sys_num)
 inline NonlinearEigenSystem &
 EigenProblem::getCurrentNonlinearEigenSystem()
 {
-  mooseAssert(_current_nl_eigen, "This must be non-null");
-  return *_current_nl_eigen;
+  return *_nl_eigen;
 }

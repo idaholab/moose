@@ -694,19 +694,19 @@ SubProblem::diracKernelInfo()
 }
 
 Real
-SubProblem::finalNonlinearResidual() const
+SubProblem::finalNonlinearResidual(unsigned int) const
 {
   return 0;
 }
 
 unsigned int
-SubProblem::nNonlinearIterations() const
+SubProblem::nNonlinearIterations(unsigned int) const
 {
   return 0;
 }
 
 unsigned int
-SubProblem::nLinearIterations() const
+SubProblem::nLinearIterations(unsigned int) const
 {
   return 0;
 }
@@ -904,6 +904,10 @@ SubProblem::reinitLowerDElem(const Elem * elem,
     // Actually get the dof indices in the moose variables
     nl.prepareLowerD(tid);
 
+    // With the dof indices set in the moose variables, now let's properly size
+    // our local residuals/Jacobians
+    assembly(tid, nl_sys_num).prepareLowerD();
+
     // Let's finally compute our variable values!
     nl.reinitLowerD(tid);
   }
@@ -911,10 +915,6 @@ SubProblem::reinitLowerDElem(const Elem * elem,
   // do same for aux as for nl
   systemBaseAuxiliary().prepareLowerD(tid);
   systemBaseAuxiliary().reinitLowerD(tid);
-
-  // With the dof indices set in the moose variables, now let's properly size
-  // our local residuals/Jacobians
-  assembly(tid, currentNlSysNum()).prepareLowerD();
 }
 
 void

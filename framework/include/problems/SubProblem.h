@@ -84,7 +84,7 @@ public:
 
   virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
 
-  virtual bool converged() = 0;
+  virtual bool converged(unsigned int nl_sys_num = 0) = 0;
 
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
@@ -309,9 +309,9 @@ public:
   unsigned int getAxisymmetricRadialCoord() const;
 
   virtual DiracKernelInfo & diracKernelInfo();
-  virtual Real finalNonlinearResidual() const;
-  virtual unsigned int nNonlinearIterations() const;
-  virtual unsigned int nLinearIterations() const;
+  virtual Real finalNonlinearResidual(unsigned int nl_sys_num = 0) const;
+  virtual unsigned int nNonlinearIterations(unsigned int nl_sys_num = 0) const;
+  virtual unsigned int nLinearIterations(unsigned int nl_sys_num = 0) const;
 
   virtual void addResidual(THREAD_ID tid) = 0;
   virtual void addResidualNeighbor(THREAD_ID tid) = 0;
@@ -600,7 +600,7 @@ public:
    * Returns true if the problem is in the process of computing it's initial residual.
    * @return Whether or not the problem is currently computing the initial residual.
    */
-  virtual bool computingInitialResidual() const = 0;
+  virtual bool computingInitialResidual(unsigned int nl_sys_num = 0) const = 0;
 
   /**
    * Return the list of elements that should have their DoFs ghosted to this processor.

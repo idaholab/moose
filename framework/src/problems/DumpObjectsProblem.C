@@ -31,7 +31,7 @@ DumpObjectsProblem::validParams()
 DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
   : FEProblemBase(parameters), _nl_sys(std::make_shared<DumpObjectsNonlinearSystem>(*this, "nl0"))
 {
-  _nl.push_back(_nl_sys);
+  _nl[0] = _nl_sys;
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
   newAssemblyArray(_nl);
 

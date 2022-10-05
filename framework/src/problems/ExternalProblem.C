@@ -29,7 +29,7 @@ ExternalProblem::ExternalProblem(const InputParameters & parameters) : FEProblem
    * However, MOOSE currently expects it to exist in several locations throughout the framework.
    * Luckily, it can just be empty (no variables).
    */
-  _nl.push_back(std::make_shared<NonlinearSystem>(*this, "nl0"));
+  _nl[0] = std::make_shared<NonlinearSystem>(*this, "nl0");
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
   /**
