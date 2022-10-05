@@ -119,7 +119,10 @@ PINSFVRhieChowInterpolator::execute()
   // functions are, so the porosity function is not available for interpolation-reconstruction
   // on initialSetup(). However, on execution on INITIAL, everything should be initialized
   if (!_pinsfv_setup_done)
+  {
     pinsfvSetup();
+    _pinsfv_setup_done = true;
+  }
 
   INSFVRhieChowInterpolator::execute();
 }

@@ -20,9 +20,7 @@
 #include "INSFVPressureVariable.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "VectorCompositeFunctor.h"
-#include "FVKernel.h"
 #include "FVElementalKernel.h"
-#include "FVFluxBC.h"
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
