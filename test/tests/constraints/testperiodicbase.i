@@ -81,7 +81,7 @@
   [./kappa]
     type = FunctionScalarAux
     variable = kappa_aux
-    function = '1 1'
+    function = '1 3'
     execute_on = initial #timestep_end
   [../]
 []
@@ -130,7 +130,6 @@
     coupled_scalar = kappa
     kappa_aux = kappa_aux
     correct_edge_dropping = true
-    compute_scalar_residuals = true
     pen_scale = 1.e3
   []
   [mortarbt]
@@ -154,7 +153,6 @@
     coupled_scalar = kappa
     kappa_aux = kappa_aux
     correct_edge_dropping = true
-    compute_scalar_residuals = true
     pen_scale = 1.e3
   []
 []

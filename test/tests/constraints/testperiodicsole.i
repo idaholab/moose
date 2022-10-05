@@ -64,8 +64,12 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  [./kappa]
-    order = SECOND
+  [./kappa_x]
+    order = FIRST
+    family = SCALAR
+  [../]
+  [./kappa_y]
+    order = FIRST
     family = SCALAR
   [../]
 []
@@ -81,7 +85,7 @@
   [./kappa]
     type = FunctionScalarAux
     variable = kappa_aux
-    function = '1 1'
+    function = '1 3'
     execute_on = initial #timestep_end
   [../]
 []
@@ -117,20 +121,37 @@
     secondary_subdomain = 'secondary_left'
     secondary_variable = u
     correct_edge_dropping = true
-    penalty_value = 1.e2
+    penalty_value = 1.e3
   []
-  [periodiclr]
-    type = TestPeriodic
+  [periodiclrx]
+    type = TestPeriodicSole
     primary_boundary = '11'
     secondary_boundary = '13'
     primary_subdomain = 'primary_right'
     secondary_subdomain = 'secondary_left'
     secondary_variable = u
-    kappa = kappa
-    coupled_scalar = kappa
+    kappa = kappa_x
+    coupled_scalar = kappa_x
     kappa_aux = kappa_aux
+    component = 0
+    kappa_other = kappa_y
     correct_edge_dropping = true
-    pen_scale = 1.e2
+    pen_scale = 1.e3
+  []
+  [periodiclry]
+    type = TestPeriodicSole
+    primary_boundary = '11'
+    secondary_boundary = '13'
+    primary_subdomain = 'primary_right'
+    secondary_subdomain = 'secondary_left'
+    secondary_variable = u
+    kappa = kappa_y
+    coupled_scalar = kappa_y
+    kappa_aux = kappa_aux
+    component = 1
+    kappa_other = kappa_x
+    correct_edge_dropping = true
+    pen_scale = 1.e3
   []
   [mortarbt]
     type = PenaltyEqualValueConstraint
@@ -140,28 +161,55 @@
     secondary_subdomain = 'secondary_bottom'
     secondary_variable = u
     correct_edge_dropping = true
-    penalty_value = 1.e2
+    penalty_value = 1.e3
   []
-  [periodicbt]
-    type = TestPeriodic
+  [periodicbtx]
+    type = TestPeriodicSole
     primary_boundary = '12'
     secondary_boundary = '10'
     primary_subdomain = 'primary_top'
     secondary_subdomain = 'secondary_bottom'
     secondary_variable = u
-    kappa = kappa
-    coupled_scalar = kappa
+    kappa = kappa_x
+    coupled_scalar = kappa_x
     kappa_aux = kappa_aux
+    component = 0
+    kappa_other = kappa_y
     correct_edge_dropping = true
-    pen_scale = 1.e2
+    pen_scale = 1.e3
+  []
+  [periodicbty]
+    type = TestPeriodicSole
+    primary_boundary = '12'
+    secondary_boundary = '10'
+    primary_subdomain = 'primary_top'
+    secondary_subdomain = 'secondary_bottom'
+    secondary_variable = u
+    kappa = kappa_y
+    coupled_scalar = kappa_y
+    kappa_aux = kappa_aux
+    component = 1
+    kappa_other = kappa_x
+    correct_edge_dropping = true
+    compute_scalar_residuals = true
+    pen_scale = 1.e3
+  []
+[]
+
+[Preconditioning]
+  [smp]
+    full = true
+    type = SMP
   []
 []
 
 [Executioner]
- type = Steady
- solve_type = 'PJFNK'
- petsc_options_iname = '-pc_type -pc_hypre_type'
- petsc_options_value = 'hypre boomeramg'
+  type = Steady
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu superlu_dist'
+ # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_view -vec_view'
+ # petsc_options_value = 'lu superlu_dist ::ascii_matlab ::ascii_matlab'
+  solve_type = NEWTON
 []
 
 [Outputs]
