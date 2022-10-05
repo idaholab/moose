@@ -34,8 +34,8 @@ public:
   using FEProblemBase::addAuxVariable;
   using FEProblemBase::addVariable;
 
-  /// output input blocks for a given action path
-  void dumpGeneratedSyntax(const std::string path);
+  /// output input blocks for a given set of action paths
+  void dumpGeneratedSyntax(const std::vector<std::string> & paths);
 
   /// output data in solve
   virtual void solve() override;
@@ -57,13 +57,6 @@ protected:
                         const std::string & type,
                         const std::string & name,
                         const InputParameters & parameters);
-
-  void dumpVariableHelper(const std::string & system,
-                          const std::string & var_name,
-                          FEFamily family,
-                          Order order,
-                          Real scale_factor,
-                          const std::set<SubdomainID> * const active_subdomains);
 
   /// build a text snippet of the minimal set of parameters that need to be specified
   std::string deduceNecessaryParameters(const std::string & type,
@@ -89,6 +82,8 @@ public:
   captureDump(addDiracKernel,         "DiracKernels")
   captureDump(addDistribution,        "Distributions")
   captureDump(addFunction,            "Functions")
+  captureDump(addFVBC,                "FVBCs")
+  captureDump(addFVInterfaceKernel,   "FVInterfaceKernels")
   captureDump(addFVKernel,            "FVKernels")
   captureDump(addIndicator,           "Adaptivity/Indicators")
   captureDump(addInitialCondition,    "ICs")
@@ -100,9 +95,12 @@ public:
   captureDump(addNodalKernel,         "NodalKernels")
   captureDump(addPostprocessor,       "Postprocessors")
   captureDump(addPredictor,           "Executioner/Predictor")
+  captureDump(addReporter,            "Reporters")
   captureDump(addSampler,             "Samplers")
   captureDump(addScalarKernel,        "ScalarKernels")
+  captureDump(addTimeIntegrator,      "Executioner/TimeIntegrator")
   captureDump(addTransfer,            "Transfers")
+  captureDump(addUserObject,          "UserObjects")
   captureDump(addVariable,            "Variables")
   captureDump(addVectorPostprocessor, "VectorPostprocessors")
   // clang-format off

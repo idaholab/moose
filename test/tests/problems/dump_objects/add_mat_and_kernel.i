@@ -12,5 +12,5 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
 []

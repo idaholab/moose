@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DumpObjectsProblem.h"
+#include "ReferenceResidualProblem.h"
 #include "DumpObjectsNonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include <sstream>
@@ -20,10 +21,14 @@ InputParameters
 DumpObjectsProblem::validParams()
 {
   InputParameters params = FEProblemBase::validParams();
+
+  // add (but never use) parameters from ReferenceRedidualProblem to avoid unused parameter errors
+  params += ReferenceResidualProblem::validParams();
+
   params.addClassDescription("Single purpose problem object that does not run the given input but "
                              "allows deconstructing actions into their series of underlying Moose "
                              "objects and variables.");
-  params.addRequiredParam<std::string>(
+  params.addRequiredParam<std::vector<std::string>>(
       "dump_path", "Syntax path of the action of which to dump the generated syntax");
   return params;
 }
@@ -75,76 +80,32 @@ DumpObjectsProblem::dumpObjectHelper(const std::string & system,
 
   // clang-format off
   _generated_syntax[path][system] +=
-        "  [./" + name + "]\n"
+        "  [" + name + "]\n"
       + "    type = " + type + '\n'
       +      param_text
-      + "  [../]\n";
-  // clang-format on
-}
-
-void
-DumpObjectsProblem::dumpVariableHelper(const std::string & system,
-                                       const std::string & var_name,
-                                       FEFamily family,
-                                       Order order,
-                                       Real scale_factor,
-                                       const std::set<SubdomainID> * const active_subdomains)
-{
-  auto path = _app.actionWarehouse().getCurrentActionName();
-  std::string param_text;
-
-  if (active_subdomains)
-  {
-    std::string blocks;
-    for (auto & subdomain_id : *active_subdomains)
-    {
-      auto subdomain_name = _mesh.getMesh().subdomain_name(subdomain_id);
-      if (subdomain_name == "")
-        subdomain_name = std::to_string(subdomain_id);
-
-      if (!blocks.empty())
-        blocks += ' ';
-
-      blocks += subdomain_name;
-    }
-
-    if (active_subdomains->size() > 1)
-      blocks = "'" + blocks + "'";
-
-    param_text += "    blocks = " + blocks + '\n';
-  }
-
-  if (family != LAGRANGE)
-    param_text += "    family = " + libMesh::Utility::enum_to_string<FEFamily>(family) + '\n';
-  if (order != FIRST)
-    param_text += "    order = " + libMesh::Utility::enum_to_string<Order>(order) + '\n';
-  if (scale_factor != 1.0)
-    param_text += "    scale = " + std::to_string(scale_factor);
-
-  // clang-format off
-  _generated_syntax[path][system] +=
-        "  [./" + var_name + "]\n"
-      +      param_text
-      + "  [../]\n";
+      + "  []\n";
   // clang-format on
 }
 
 void
 DumpObjectsProblem::solve()
 {
-  dumpGeneratedSyntax(getParam<std::string>("dump_path"));
+  dumpGeneratedSyntax(getParam<std::vector<std::string>>("dump_path"));
+  terminateSolve();
 }
 
 void
-DumpObjectsProblem::dumpGeneratedSyntax(const std::string path)
+DumpObjectsProblem::dumpGeneratedSyntax(const std::vector<std::string> & paths)
 {
-  auto pathit = _generated_syntax.find(path);
-  if (pathit == _generated_syntax.end())
-    return;
-
   Moose::out << "**START DUMP DATA**\n";
-  for (const auto & system_pair : pathit->second)
-    Moose::out << '[' << system_pair.first << "]\n" << system_pair.second << "[]\n\n";
+  for (const auto & path : paths)
+  {
+    auto it = _generated_syntax.find(path);
+    if (it == _generated_syntax.end())
+      continue;
+    for (const auto & system_pair : it->second)
+      Moose::out << '[' << system_pair.first << "]\n" << system_pair.second << "[]\n\n";
+  }
   Moose::out << "**END DUMP DATA**\n";
   Moose::out << std::flush;
 }

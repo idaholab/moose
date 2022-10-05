@@ -445,7 +445,10 @@ ActionWarehouse::problem()
 std::string
 ActionWarehouse::getCurrentActionName() const
 {
-  return (*_act_iter)->parameters().blockFullpath();
+  const auto full_path = (*_act_iter)->parameters().blockFullpath();
+  if (full_path.empty())
+    return (*_act_iter)->parameters().get<std::string>("_action_name");
+  return full_path;
 }
 
 const std::string &

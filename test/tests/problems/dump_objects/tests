@@ -1,10 +1,20 @@
 [Tests]
-  [./add_mat_and_kernel]
+  [add_mat_and_kernel]
     type = RunApp
     input = 'add_mat_and_kernel.i'
-    expect_out = '\[Kernels\]\n  \[\./kern1\]\n    type \= MatDiffusionTest\n    prop_name \= prop1\n    variable \= var1\n  \[\.\./\]\n\[\]\n\n\[Materials\]\n  \[\./mat1\]\n    type \= GenericConstantMaterial\n    prop_names \= prop1\n    prop_values \= 42\n  \[\.\./\]\n\[\]\n\n\[Variables\]\n  \[\./var1\]\n    type \= MooseVariable\n  \[\.\./\]\n\[\]'
+    expect_out = '\[Kernels\]\n  \[kern1\]\n    type = MatDiffusionTest\n    prop_name = prop1\n    variable = var1\n  \[\]\n\[\]\n\n\[Materials\]\n  \[mat1\]\n    type = GenericConstantMaterial\n    prop_names = prop1\n    prop_values = 42\n  \[\]\n\[\]\n\n\[Variables\]\n  \[var1\]\n    type = MooseVariable\n  \[\]\n\[\]'
     issues = "#8875"
     design = "DumpObjectsProblem.md"
-    requirement = "The system shall have a capability to dump the equivalent input file syntax for all objects added by a given action."
-  [../]
+    requirement = "The system shall have a capability to dump the equivalent input file syntax for "
+                  "all objects added by a given action."
+  []
+  [conv_diff_meta]
+    type = RunApp
+    input = 'conv_diff_meta.i'
+    expect_out = '\[Kernels\]\n  \[diff_u\]\n    type = Diffusion\n    variable = u\n  \[\]\n\[\]\n\n\[Kernels\]\n  \[diff_v\]\n    type = Diffusion\n    variable = v\n  \[\]\n\[\]'
+    issues = "#8875"
+    design = "DumpObjectsProblem.md"
+    requirement = "The system shall have a capability to dump the equivalent input file for meta "
+                  "action blocks."
+  []
 []
