@@ -13,6 +13,8 @@
 
 #include "MooseError.h"
 
+#include "libmesh/parallel_algebra.h"
+
 registerMooseObject("HeatConductionApp", ModularGapConductanceConstraint);
 
 InputParameters
@@ -135,7 +137,7 @@ ModularGapConductanceConstraint::initialSetup()
 
   // Select proper coordinate system and geometry (plate, cylinder, sphere)
   setGapGeometryParameters(
-      _pars, coord_system, feProblem().getAxisymmetricRadialCoord(), _gap_geometry_type, _p1, _p2);
+      _pars, coord_system, feProblem().getAxisymmetricRadialCoord(), _gap_geometry_type);
 }
 
 void
@@ -143,9 +145,7 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
     const InputParameters & params,
     const Moose::CoordinateSystemType coord_sys,
     unsigned int axisymmetric_radial_coord,
-    GapGeometry & gap_geometry_type,
-    Point & p1,
-    Point & p2)
+    GapGeometry & gap_geometry_type)
 {
 
   // Determine what type of gap geometry we are dealing with
@@ -175,13 +175,22 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
   {
     if (coord_sys == Moose::COORD_XYZ)
     {
-      if (!params.isParamValid("cylinder_axis_point_1") ||
-          !params.isParamValid("cylinder_axis_point_2"))
+      if (params.isParamValid("cylinder_axis_point_1") &&
+          params.isParamValid("cylinder_axis_point_2"))
+      {
+        _p1 = params.get<RealVectorValue>("cylinder_axis_point_1");
+        _p2 = params.get<RealVectorValue>("cylinder_axis_point_2");
+      }
+      else if (_mesh.dimension() == 3)
         paramError("gap_geometry_type",
-                   "For 'gap_geometry_type = CYLINDER' to be used with a Cartesian model, "
+                   "For 'gap_geometry_type = CYLINDER' to be used with a Cartesian model in 3D, "
                    "'cylinder_axis_point_1' and 'cylinder_axis_point_2' must be specified.");
-      p1 = params.get<RealVectorValue>("cylinder_axis_point_1");
-      p2 = params.get<RealVectorValue>("cylinder_axis_point_2");
+      else
+      {
+        deduceGeometryParameters();
+        mooseInfoRepeated(
+            "ModularGapConductanceConstraint '", name(), "' deduced cylinder axis as ", _p1, _p2);
+      }
     }
     else if (coord_sys == Moose::COORD_RZ)
     {
@@ -194,13 +203,13 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
 
       if (axisymmetric_radial_coord == 0) // R-Z problem
       {
-        p1 = Point(0, 0, 0);
-        p2 = Point(0, 1, 0);
+        _p1 = Point(0, 0, 0);
+        _p2 = Point(0, 1, 0);
       }
       else // Z-R problem
       {
-        p1 = Point(0, 0, 0);
-        p2 = Point(1, 0, 0);
+        _p1 = Point(0, 0, 0);
+        _p2 = Point(1, 0, 0);
       }
     }
     else if (coord_sys == Moose::COORD_RSPHERICAL)
@@ -212,11 +221,18 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
   {
     if (coord_sys == Moose::COORD_XYZ || coord_sys == Moose::COORD_RZ)
     {
-      if (!params.isParamValid("sphere_origin"))
+      if (params.isParamValid("sphere_origin"))
+        _p1 = params.get<RealVectorValue>("sphere_origin");
+      else if (coord_sys == Moose::COORD_XYZ)
+      {
+        deduceGeometryParameters();
+        mooseInfoRepeated(
+            "ModularGapConductanceConstraint '", name(), "' deduced sphere origin as ", _p1);
+      }
+      else
         paramError("gap_geometry_type",
-                   "For 'gap_geometry_type = SPHERE' to be used with a Cartesian or axisymmetric "
+                   "For 'gap_geometry_type = SPHERE' to be used with an axisymmetric "
                    "model, 'sphere_origin' must be specified.");
-      p1 = params.get<RealVectorValue>("sphere_origin");
     }
     else if (coord_sys == Moose::COORD_RSPHERICAL)
     {
@@ -224,7 +240,7 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
         paramError("sphere_origin",
                    "The 'sphere_origin' cannot be specified with spherical models.  x=0 is used "
                    "as the spherical origin.");
-      p1 = Point(0, 0, 0);
+      _p1 = Point(0, 0, 0);
     }
   }
 }
@@ -404,4 +420,61 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType
 #else
   mooseError("We should never get here. We should have errored in the constructor.");
 #endif
+}
+
+void
+ModularGapConductanceConstraint::deduceGeometryParameters()
+{
+  Point position;
+  Real area = 0.0;
+  const auto my_pid = _communicator.rank();
+
+  // build side element list as (element, side, id) tuples
+  const auto bnd = _mesh.buildActiveSideList();
+
+  std::unique_ptr<const Elem> side_ptr;
+  for (const auto & tuple : bnd)
+    if (std::get<2>(tuple) == _primary_id)
+    {
+      const auto * elem = _mesh.elemPtr(std::get<0>(tuple));
+      if (elem->processor_id() != my_pid)
+        continue;
+
+      const auto side = std::get<1>(tuple);
+
+      // update side_ptr
+      elem->side_ptr(side_ptr, side);
+
+      // area of the (linearized) side
+      const auto side_area = side_ptr->volume();
+
+      // position of the side
+      const auto side_position = side_ptr->true_centroid();
+
+      // sum up
+      position += side_position * side_area;
+      area += side_area;
+    }
+
+  // parallel communication
+  _communicator.sum(position);
+  _communicator.sum(area);
+
+  // set axis
+  if (area == 0.0)
+  {
+    if (_gap_geometry_type == GapGeometry::CYLINDER)
+      paramError("gap_geometry_type",
+                 "Unable to decuce cylinder axis automatically, please specify "
+                 "'cylinder_axis_point_1' and 'cylinder_axis_point_2'.");
+    else if (_gap_geometry_type == GapGeometry::SPHERE)
+      paramError("gap_geometry_type",
+                 "Unable to decuce sphere origin automatically, please specify "
+                 "'sphere_origin'.");
+    else
+      mooseError("Internal error.");
+  }
+
+  _p1 = position / area;
+  _p2 = _p1 + Point(0, 0, 1);
 }
