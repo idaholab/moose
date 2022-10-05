@@ -67,11 +67,10 @@ public:
   getVelocity(Moose::FV::InterpMethod m, const FaceInfo & fi, THREAD_ID tid) const;
 
   void initialSetup() override;
-  void residualSetup() override;
   void meshChanged() override;
 
   void initialize() override final;
-  void execute() override final;
+  void execute() override;
   void finalize() override final;
 
   /**
@@ -154,11 +153,6 @@ protected:
   /// The z-component of 'a'
   VectorComponentFunctor<ADReal> _az;
   ///@}
-
-  /// Whether we have performed our initial setup. Ordinarily we would do this in initialSetup but
-  /// there are wonky things that happen in other objects initialSetup that affect us, like how
-  /// Exodus output gathers all elements to 0 on distributed mesh
-  bool _initial_setup_done = false;
 
 private:
   /**

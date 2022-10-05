@@ -270,10 +270,7 @@ INSFVRhieChowInterpolator::fillARead()
 void
 INSFVRhieChowInterpolator::initialSetup()
 {
-  if (!_initial_setup_done)
-    insfvSetup();
-
-  _initial_setup_done = true;
+  insfvSetup();
 
   if (_velocity_interp_method == Moose::FV::InterpMethod::Average)
     return;
@@ -318,15 +315,6 @@ INSFVRhieChowInterpolator::insfvSetup()
   _elem_range =
       std::make_unique<ConstElemRange>(_mesh.active_local_subdomain_set_elements_begin(_sub_ids),
                                        _mesh.active_local_subdomain_set_elements_end(_sub_ids));
-}
-
-void
-INSFVRhieChowInterpolator::residualSetup()
-{
-  if (!_initial_setup_done)
-    insfvSetup();
-
-  _initial_setup_done = true;
 }
 
 void
