@@ -11,6 +11,7 @@
 #include "INSFVAttributes.h"
 #include "INSFVMomentumResidualObject.h"
 #include "FVElementalKernel.h"
+#include "FVTimeKernel.h"
 
 GatherRCDataElementThread::GatherRCDataElementThread(FEProblemBase & fe_problem,
                                                      const std::vector<unsigned int> & vars)
@@ -48,7 +49,14 @@ GatherRCDataElementThread::subdomainChanged()
     copied_queries.template condition<AttribVar>(static_cast<int>(var_num)).queryInto(var_eks);
     for (auto var_ek : var_eks)
       if (auto insfv_ek = dynamic_cast<INSFVMomentumResidualObject *>(var_ek))
+      {
+        // On INITIAL, the time integrator is not ready for these residual objects
+        if (this->_fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL)
+          if (dynamic_cast<FVTimeKernel *>(var_ek))
+            continue;
+
         _insfv_elemental_kernels.push_back(insfv_ek);
+      }
   }
 }
 
