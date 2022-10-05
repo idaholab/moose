@@ -43,7 +43,8 @@ PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & p
     _smoothed_eps(_moose_mesh, NS::smoothed_porosity),
     _epss(libMesh::n_threads(), nullptr),
     _smoothed_epss(libMesh::n_threads(), nullptr),
-    _smoothing_layers(getParam<unsigned short>("smoothing_layers"))
+    _smoothing_layers(getParam<unsigned short>("smoothing_layers")),
+    _pinsfv_setup_done(false)
 {
   if (_smoothing_layers && _eps.wrapsType<MooseVariableBase>())
     paramError(
@@ -75,35 +76,10 @@ PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & p
 }
 
 void
-PINSFVRhieChowInterpolator::initialSetup()
-{
-  if (!_initial_setup_done)
-  {
-    insfvSetup();
-    pinsfvSetup();
-  }
-
-  _initial_setup_done = true;
-  INSFVRhieChowInterpolator::initialSetup();
-}
-
-void
 PINSFVRhieChowInterpolator::meshChanged()
 {
   insfvSetup();
   pinsfvSetup();
-}
-
-void
-PINSFVRhieChowInterpolator::residualSetup()
-{
-  if (!_initial_setup_done)
-  {
-    insfvSetup();
-    pinsfvSetup();
-  }
-
-  _initial_setup_done = true;
 }
 
 void
@@ -134,6 +110,18 @@ PINSFVRhieChowInterpolator::pinsfvSetup()
         UserObject::_subproblem.getFunctor<ADReal>(NS::smoothed_porosity, tid, name()));
     other_smoothed_epss.assign(_smoothed_eps);
   }
+}
+
+void
+PINSFVRhieChowInterpolator::execute()
+{
+  // We have to do this right before execution because user objects are initialized before
+  // functions are, so the porosity function is not available for interpolation-reconstruction
+  // on initialSetup(). However, on execution on INITIAL, everything should be initialized
+  if (!_pinsfv_setup_done)
+    pinsfvSetup();
+
+  INSFVRhieChowInterpolator::execute();
 }
 
 bool
