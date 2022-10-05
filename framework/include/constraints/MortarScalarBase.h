@@ -107,12 +107,12 @@ protected:
   /**
    * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-scalar
    */
-  void computeScalarOffDiagJacobianScalar(const unsigned int jvar_num);
+  void computeScalarOffDiagJacobianScalar(const unsigned int svar_num);
 
   /**
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
-  virtual Real computeScalarQpOffDiagJacobianScalar(const unsigned int /*jvar_num*/)
+  virtual Real computeScalarQpOffDiagJacobianScalar(const unsigned int /*svar_num*/)
   {
     return 0;
   }

@@ -241,16 +241,16 @@ MortarScalarBase::computeOffDiagJacobianScalar(Moose::MortarType mortar_type, un
   }
 
   // Get dofs and order of this scalar; at least one will be _kappa_var
-  const auto & jvar = _sys.getScalarVariable(_tid, svar_num);
-  const unsigned int j_order = jvar.order();
+  const auto & svar = _sys.getScalarVariable(_tid, svar_num);
+  const unsigned int s_order = svar.order();
 
-  _local_ke.resize(test_space_size, j_order);
+  _local_ke.resize(test_space_size, s_order);
 
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
     initScalarQpOffDiagJacobian(mortar_type, svar_num);
     const Real dV = _JxW_msm[_qp] * _coord[_qp];
-    for (_h = 0; _h < j_order; _h++)
+    for (_h = 0; _h < s_order; _h++)
     {
       for (_i = 0; _i < test_space_size; _i++)
       { // This assumes Galerkin, i.e. the test and trial functions are the
@@ -264,31 +264,31 @@ MortarScalarBase::computeOffDiagJacobianScalar(Moose::MortarType mortar_type, un
   for (const auto & matrix_tag : _matrix_tags)
     _assembly.cacheJacobianBlock(_local_ke,
                                  dof_indices,
-                                 jvar.dofIndices(),
+                                 svar.dofIndices(),
                                  scaling_factor,
                                  matrix_tag);
 }
 
 void
-MortarScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int jvar_num)
+MortarScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int svar_num)
 {
   // Get dofs and order of this scalar; will NOT be _kappa_var
-  const auto & jvar = _sys.getScalarVariable(_tid, jvar_num);
-  const unsigned int j_order = jvar.order();
+  const auto & svar = _sys.getScalarVariable(_tid, svar_num);
+  const unsigned int s_order = svar.order();
 
-  _local_ke.resize(_k_order, j_order);
+  _local_ke.resize(_k_order, s_order);
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
-    initScalarQpJacobian(jvar_num);
+    initScalarQpJacobian(svar_num);
     for (_h = 0; _h < _k_order; _h++)
-      for (_l = 0; _l < j_order; _l++)
-        _local_ke(_h, _l) += _JxW_msm[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobianScalar(jvar_num);
+      for (_l = 0; _l < s_order; _l++)
+        _local_ke(_h, _l) += _JxW_msm[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobianScalar(svar_num);
   }
 
   for (const auto & matrix_tag : _matrix_tags)
     _assembly.cacheJacobianBlock(_local_ke,
                                  _kappa_var_ptr->dofIndices(),
-                                 jvar.dofIndices(),
+                                 svar.dofIndices(),
                                  _kappa_var_ptr->scalingFactor(),
                                  matrix_tag);
 }
