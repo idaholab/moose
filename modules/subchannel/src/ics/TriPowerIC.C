@@ -28,17 +28,12 @@ TriPowerIC::TriPowerIC(const InputParameters & params)
     _axial_heat_rate(getFunction("axial_heat_rate"))
 {
   auto n_rods = _mesh.getNumOfRods();
+  auto heated_length = _mesh.getHeatedLength();
 
-  _power_dis.resize(n_rods);
-  _pin_power_correction.resize(n_rods);
-  _ref_power.resize(n_rods);
-  _ref_qprime.resize(n_rods);
-  _estimate_power.resize(n_rods);
-  for (unsigned int i = 0; i < n_rods; i++)
-  {
-    _power_dis[i] = 0.0;
-    _pin_power_correction[i] = 1.0;
-  }
+  _power_dis.resize(n_rods, 1);
+  _power_dis.setZero();
+  _pin_power_correction.resize(n_rods, 1);
+  _pin_power_correction.setOnes();
 
   Real vin;
   std::ifstream inFile;
@@ -61,31 +56,19 @@ TriPowerIC::TriPowerIC(const InputParameters & params)
   int i = 0;
   while (inFile >> vin)
   {
-    _power_dis[i] = vin;
+    _power_dis(i, 0) = vin;
     i++;
   }
   inFile.close();
-  Real sum = 0.0;
+  _console << " Power distribution matrix :\n" << _power_dis << " \n";
 
-  for (unsigned int i = 0; i < n_rods; i++)
-  {
-    sum = sum + _power_dis[i];
-  }
-  // full pin (100%) power of one pin [W]
+  auto sum = _power_dis.sum();
+  // full (100%) power of one pin [W]
   auto fpin_power = _power / sum;
   // actual pin power [W]
-  for (unsigned int i = 0; i < n_rods; i++)
-  {
-    _ref_power[i] = _power_dis[i] * fpin_power;
-  }
-
+  _ref_power = _power_dis * fpin_power;
   // Convert the actual pin power to a linear heat rate [W/m]
-  auto heated_length = _mesh.getHeatedLength();
-
-  for (unsigned int i = 0; i < n_rods; i++)
-  {
-    _ref_qprime[i] = _ref_power[i] / heated_length;
-  }
+  _ref_qprime = _ref_power / heated_length;
 }
 
 void
@@ -97,8 +80,8 @@ TriPowerIC::initialSetup()
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
 
-  _estimate_power.resize(n_rods);
-
+  _estimate_power.resize(n_rods, 1);
+  _estimate_power.setZero();
   for (unsigned int iz = 1; iz < nz + 1; iz++)
   {
     // Compute the height of this element.
@@ -115,16 +98,21 @@ TriPowerIC::initialSetup()
       for (unsigned int i_pin = 0; i_pin < n_rods; i_pin++)
       {
         // use of trapezoidal rule  to calculate local power
-        _estimate_power[i_pin] +=
-            _ref_qprime[i_pin] * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2)) *
+        _estimate_power(i_pin) +=
+            _ref_qprime(i_pin) * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2)) *
             dz / 2.0;
       }
     }
   }
+  // if a rod has zero power (_ref_qprime(i_pin) = 0) then I need to avoid dividing by zero. I
+  // divide by a wrong non-zero number which is not correct but this error doesn't mess things cause
+  // _ref_qprime(j, i) = 0.0
   for (unsigned int i_pin = 0; i_pin < n_rods; i_pin++)
   {
-    _pin_power_correction[i_pin] = _ref_power[i_pin] / _estimate_power[i_pin];
+    if (_estimate_power(i_pin) == 0.0)
+      _estimate_power(i_pin) = 1.0;
   }
+  _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
 }
 
 Real
@@ -133,7 +121,7 @@ TriPowerIC::value(const Point & p)
   // Determine which subchannel this point is in.
   auto i = _mesh.getSubchannelIndexFromPoint(p);
   auto subch_type = _mesh.getSubchannelType(i);
-  Real sum = 0.0;
+  auto heat_rate = 0.0;
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
   Point p1(0, 0, unheated_length_entry);
@@ -146,27 +134,27 @@ TriPowerIC::value(const Point & p)
       for (unsigned int j = 0; j < 3; j++)
       {
         auto rod_idx = _mesh.getRodIndex(i, j);
-        sum = sum + 1.0 / 6.0 * _ref_qprime[rod_idx] * _pin_power_correction[rod_idx] *
-                        _axial_heat_rate.value(_t, p);
+        heat_rate += 1.0 / 6.0 * _ref_qprime(rod_idx) * _pin_power_correction(rod_idx) *
+                     _axial_heat_rate.value(_t, p);
       }
-    return sum;
+      return heat_rate;
     }
     else if (subch_type == EChannelType::EDGE)
     {
       for (unsigned int j = 0; j < 2; j++)
       {
         auto rod_idx = _mesh.getRodIndex(i, j);
-        sum = sum + 1.0 / 4.0 * _ref_qprime[rod_idx] * _pin_power_correction[rod_idx] *
-                        _axial_heat_rate.value(_t, p);
+        heat_rate += 1.0 / 4.0 * _ref_qprime(rod_idx) * _pin_power_correction(rod_idx) *
+                     _axial_heat_rate.value(_t, p);
       }
-      return sum;
+      return heat_rate;
     }
     else if (subch_type == EChannelType::CORNER)
     {
       auto rod_idx = _mesh.getRodIndex(i, 0);
-      sum = 1.0 / 6.0 * _ref_qprime[rod_idx] * _pin_power_correction[rod_idx] *
-            _axial_heat_rate.value(_t, p);
-      return sum;
+      heat_rate += 1.0 / 6.0 * _ref_qprime(rod_idx) * _pin_power_correction(rod_idx) *
+                   _axial_heat_rate.value(_t, p);
+      return heat_rate;
     }
   }
   return 0.;

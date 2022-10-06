@@ -151,7 +151,6 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   for (unsigned int j = 0; j < _n_rings - 1; j++)
     chancount += j * 6;
   // Adding external channels to the total count
-  _console << "check value of _n_channels" << _n_channels << std::endl;
   _n_channels = chancount + _nrods - 1 + (_n_rings - 1) * 6 + 6;
 
   if (*max_element(_index_blockage.begin(), _index_blockage.end()) > (_n_channels - 1))
