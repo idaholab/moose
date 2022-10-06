@@ -69,8 +69,8 @@ P_out = 2.0e5 # Pa
   compute_power = true
   P_tol = 1.0e-4
   T_tol = 1.0e-4
-  implicit = true
-  segregated = false
+  implicit = false
+  segregated = true
   staggered_pressure = false
   monolithic_thermal = false
   verbose_multiapps = true
@@ -91,7 +91,7 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = ${fparse 16975/(0.5334+0.4046+0.0762)} # W/m
+    power = 30000
     filename = "pin_power_profile_19.txt"
   []
 

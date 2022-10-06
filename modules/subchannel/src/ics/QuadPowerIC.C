@@ -39,6 +39,7 @@ QuadPowerIC::QuadPowerIC(const InputParameters & params)
   _power_dis.setZero();
   _pin_power_correction.resize((ny - 1) * (nx - 1), 1);
   _pin_power_correction.setOnes();
+
   double vin;
   ifstream inFile;
 
@@ -65,6 +66,7 @@ QuadPowerIC::QuadPowerIC(const InputParameters & params)
   }
   inFile.close();
   _console << " Power distribution matrix :\n" << _power_dis << " \n";
+
   auto sum = _power_dis.sum();
   // full (100%) power of one pin [W]
   auto fpin_power = _power / sum;
