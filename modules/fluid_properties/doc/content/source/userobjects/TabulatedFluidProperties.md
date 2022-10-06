@@ -178,6 +178,7 @@ alternative variable sets. This is done in several sets, described for the $(v,e
 - A grid of $(v,e)$ data is generated. If a fluid property user object is provided, the bounds are based on
   the specified bounds on pressure and temperature : $e_{min/max} = e(p_{min/max}, T_{min/max})$, else the bounds
   are chosen from the tabulated data. The number of points in the grid in both dimensions are user-selected parameters.
+  The v grid may be created using base-10 log-spacing by setting [!param](/FluidProperties/TabulatedFluidProperties/use_log_grid_v).
 
 - These bounds may not be physically realizable simultaneously. It could be that the fluid may not have both $v=v_{min}$
   and $e=e_{min}$. Part of the grid may not be physical.
