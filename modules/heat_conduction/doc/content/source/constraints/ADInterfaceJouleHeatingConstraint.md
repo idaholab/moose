@@ -38,7 +38,7 @@ where $J$ is the current density, $\sigma$ is the electrical conductivity, and $
 
 
 !alert note title=Closed Gap Interface Assumed by this Class
-The `ADInterfaceJouleHeatingConstraint` class should only be employed in simulations when the user is certain that the current density like electric potential contact Lagrange multiplier variable is nonzero only when the interface gap is closed. The `ADInterfaceJouleHeatingConstraint` class may also be used in simulations with an open gap at the interface, so long as the electric potential contact Lagrange multiplier variable across that gap is zero while the interface gap is open.
+The `ADInterfaceJouleHeatingConstraint` class should only be employed in simulations when the user is certain that the current-density-like electric potential contact Lagrange multiplier variable is nonzero only when the interface gap is closed. The `ADInterfaceJouleHeatingConstraint` class may also be used in simulations with an open gap at the interface, so long as the electric potential contact Lagrange multiplier variable across that gap is zero while the interface gap is open.
 
 With the total interface Joule heating source determined, the fraction of the heat source applied to each block at the interface is determined as
 \begin{equation}
