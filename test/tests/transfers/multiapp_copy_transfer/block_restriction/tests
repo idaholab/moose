@@ -1,0 +1,44 @@
+[Tests]
+  issues = '#13754'
+  design = 'MultiAppCopyTransfer.md'
+
+  [restricted]
+    requirement = "The system shall support the transfer of elemental field variables between identical meshes:"
+    [from_sub_to_parent]
+      type = Exodiff
+      input = bi_direction.i
+      exodiff = 'bi_direction_from_br_out.e bi_direction_from_br_out_sub0.e'
+      cli_args = "Transfers/from_sub/from_blocks=2 Transfers/to_sub/from_blocks=2 Outputs/file_base=bi_direction_from_br_out"
+      detail = 'with a block-restriction on the origin mesh'
+    []
+
+    [to_restricted]
+      type = Exodiff
+      input = bi_direction.i
+      exodiff = 'bi_direction_to_br_out.e bi_direction_to_br_out_sub0.e'
+      cli_args = "Transfers/from_sub/to_blocks=2 Transfers/to_sub/to_blocks=2 Outputs/file_base=bi_direction_to_br_out"
+      detail = 'with a block-restriction on the target mesh'
+    []
+  []
+
+  [errors]
+    requirement = "The system shall error if a nodal variable is requested to be transfered"
+    [error_from_nodal]
+      type = RunException
+      input = bi_direction.i
+      cli_args = "Transfers/from_sub/from_blocks=2 Transfers/to_sub/from_blocks=2 Variables/from_sub/family=LAGRANGE Variables/from_sub/order=FIRST MultiApps/sub/cli_args='Variables/to_main/family=LAGRANGE;Variables/to_main/order=FIRST'"
+      expect_err = "Block restriction is not implemented for nodal variables"
+
+      detail = "with block-restriction on the origin mesh."
+    []
+
+    [error_to_nodal]
+      type = RunException
+      input = bi_direction.i
+      cli_args = "Transfers/from_sub/to_blocks=2 Transfers/to_sub/to_blocks=2 Variables/to_sub/family=LAGRANGE Variables/to_sub/order=FIRST Variables/from_sub/order=FIRST MultiApps/sub/cli_args='Variables/from_main/family=LAGRANGE;Variables/from_main/order=FIRST'"
+      expect_err = "Block restriction is not implemented for nodal variables"
+
+      detail = "with block restriction on the target mesh."
+    []
+  []
+[]
