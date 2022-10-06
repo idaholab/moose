@@ -22,7 +22,7 @@
     [source]
         type = BodyForce
         variable = T
-        value = 10166.7
+        value = 10951.864006672608
     []
 []
 
@@ -30,7 +30,7 @@
     [conductivity]
         type = GenericConstantMaterial
         prop_names = k
-        prop_values = 8.2385
+        prop_values = 10.320058433901163
     []
 []
 
@@ -39,7 +39,7 @@
         type = DirichletBC
         variable = T
         boundary = right
-        value = 307.721
+        value = 279.8173854189593
     []
 []
 

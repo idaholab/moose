@@ -33,9 +33,28 @@ protected:
                           Real & val) override;
 
 private:
+
+  /**
+   * This evaluates the active learning acquisition function and returns bool
+   * that indicates whether a full model evaluation is required or not.
+   */
+  bool learningFunction(const Real & gp_mean,
+                        const Real & gp_std,
+                        const MooseEnum & function_name,
+                        const Real & parameter,
+                        const Real & threshold);
   
   /// Track the current step of the main App
   const int & _step;
+
+  /// The learning function for active learning
+  const MooseEnum & _learning_function;
+
+  /// The learning function threshold
+  const Real & _learning_function_threshold;
+
+  /// The learning function parameter
+  const Real * _learning_function_parameter;
 
   /// The active learning GP trainer that permits re-training
   const ActiveLearningGaussianProcess * const _al_gp;
@@ -78,4 +97,16 @@ private:
   
   /// For parallelization
   libMesh::Parallel::Communicator _local_comm;
+
+  /// Store GP outputs
+  std::vector<Real> _gp_sto;
+
+  /// Facilitate allGather of outputs
+  std::vector<Real> _output_comm;
+
+  /// Facilitate allGather of GP mean predictions
+  std::vector<Real> _gp_mean_comm;
+
+  /// Facilitate allGather of GP prediction standard deviations
+  std::vector<Real> _gp_std_comm;
 };

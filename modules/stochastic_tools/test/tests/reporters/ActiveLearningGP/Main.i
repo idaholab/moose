@@ -72,6 +72,9 @@
     n_train = 7
     al_gp = GP_al_trainer
     gp_evaluator = GP_eval
+    learning_function='Ufunction'
+    learning_function_parameter = 349.345
+    learning_function_threshold=2.0
   []
 []
 
@@ -112,7 +115,7 @@
 
 [Outputs]
   # perf_graph = true
-  file_base = 'SingleProcSingleRow'
+  file_base = 'SingleProcSingleRow_Ufunction'
   [out]
     type = JSON
     execute_system_information_on = none
