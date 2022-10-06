@@ -60,10 +60,10 @@ P_out = 2.0e5 # Pa
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
-  beta = 0.1
+  beta = 0.006
   P_out = 2.0e5
-  CT = 1.0
-  enforce_uniform_pressure = false
+  CT = 2.6
+  # enforce_uniform_pressure = false
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -92,7 +92,7 @@ P_out = 2.0e5 # Pa
     type = TriPowerIC
     variable = q_prime
     power = ${fparse 16975/(0.5334+0.4046+0.0762)} # W/m
-    filename = "pin_power_profile19.txt"
+    filename = "pin_power_profile_19.txt"
   []
 
   [T_ic]
