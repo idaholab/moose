@@ -5,7 +5,7 @@
 # page for ADInterfaceJouleHeatingConstraint for the relevant formulas).
 #
 # With the prescribed 0.0 V (left) and 0.3V (right) potential boundary conditions, the
-# electric potential drop is 9.25e6 [V * S / m^2]. From this current density like LM variable,
+# electric potential drop is 9.25e6 [V * S / m^2]. From this current-density-like LM variable,
 # the volumetric heat source at the interface is calculated as
 #   q = 1.15625e6 [W/m^3}
 # Because of the 2D nature of this problem, the volumetric heat source is equal to
