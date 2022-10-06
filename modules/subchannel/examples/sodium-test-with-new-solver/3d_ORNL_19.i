@@ -9,8 +9,6 @@
     unheated_length_exit = 0.0762
     rod_diameter = 5.84e-3
     pitch = 7.26e-3
-    spacer_z = '0'
-    spacer_k = '0'
   []
 []
 
