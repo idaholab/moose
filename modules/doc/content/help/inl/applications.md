@@ -24,10 +24,10 @@ BISON is a finite element-based nuclear fuel performance code. It is applicable 
 !row!
 !col small=12 medium=8 large=8
 [Griffin Website](https://griffin-docs.hpcondemand.inl.gov/latest/)\\
-Griffin is a finite element-based reactor multiphysics application. It is suitable for steady state and time-dependent coupled neutronics calculations leveraging the various MOOSE-based thermal-fluids applications (Pronghorn, Relap-7, SAM, Sockeye, etc.) and fuel performance application (BISON). Griffin solves the linearized Boltzmann transport equation in 1D, 2D, and 3D heterogeneous and homogeneous geometries. It has been used in the analysis of pebble bed reactors (PBRs, PB-FHR), prismatic reactors (PMRs), molten-salt reactors (MSR), fast sodium-cooled reactors (FSR), microreactors, nuclear thermal propulsion (NTP), and several experimental facilities.
+Griffin is a finite element-based reactor multiphysics application. It is suitable for steady state and time-dependent coupled neutronics calculations leveraging the various MOOSE-based thermal-fluids applications (Pronghorn, RELAP-7, SAM, Sockeye, etc.) and the fuel performance application (BISON). Griffin solves the linearized Boltzmann transport equation in 1D, 2D, and 3D heterogeneous and homogeneous geometries. It has been used in the analysis of pebble bed reactors (PBRs, PB-FHRs), prismatic reactors (PMRs), molten-salt reactors (MSRs), fast sodium-cooled reactors (FSRs), microreactors, nuclear thermal propulsion (NTPs), and several experimental facilities.
 
 !col small=12 medium=4 large=4
-!media application_logos/Griffin.png style=width:100%;
+!media application_logos/griffin_description.png style=width:100%;
 !row-end!
 
 ## Grizzly
@@ -38,7 +38,7 @@ Griffin is a finite element-based reactor multiphysics application. It is suitab
 Grizzly models the degradation due to normal operating conditions of nuclear power plant systems, structures, and components. The code also simulates the ability of degraded components to safely perform under a variety of conditions. Grizzly can be applied to a variety of components. However, its development focused initially on the embrittlement of reactor pressure vessels and concrete structures. Vessels can degrade and facture due to irradiation and high temperatures, while concrete can degrade due to expansive alkali-silica reactions. Grizzly has capability to model the performance effect of these and other mechanisms.
 
 !col small=12 medium=4 large=4
-!media application_logos/Grizzly.png style=width:100%;
+!media application_logos/grizzly_description.png style=width:100%;
 !row-end!
 
 ## MARMOT
@@ -46,10 +46,10 @@ Grizzly models the degradation due to normal operating conditions of nuclear pow
 !row!
 !col small=12 medium=8 large=8
 [MARMOT Website](https://marmot-docs.hpcondemand.inl.gov/latest/)\\
-MARMOT is a mesoscale fuel performance code. As such, it can predict the evolution of the microstructure and material properties of fuels and claddings due to stress, temperature, and irradiation damage. MARMOT can, therefore, supply microstructure-based materials models to other code that works on engineering scale, which is larger than mesoscale, with an example being BISON. MARMOT solves equations involving solid mechanics and heat conduction using the finite element method.
+MARMOT is a mesoscale fuel performance code. As such, it can predict the evolution of the microstructure and material properties of fuels and claddings due to stress, temperature, and irradiation damage. MARMOT can, therefore, supply microstructure-based materials models to other applications that work at a larger scale, such as BISON which works at an engineering scale. MARMOT solves equations involving solid mechanics and heat conduction using the finite element method.
 
 !col small=12 medium=4 large=4
-!media application_logos/Marmot.png style=width:100%;
+!media application_logos/marmot_description.png style=width:100%;
 !row-end!
 
 ## Pronghorn
@@ -62,15 +62,15 @@ Pronghorn is a multi-dimensional, coarse-mesh, thermal-hydraulics code for advan
 !col small=12 medium=4 large=4
 !row-end!
 
-## Relap-7
+## RELAP-7
 
 !row!
 !col small=12 medium=8 large=8
-[Relap-7 Website](https://relap7-docs.hpcondemand.inl.gov/latest/)\\
-A next generation nuclear systems safety code, RELAP-7 takes advantage of advances in computer architecture, software design, numerical methods, and physical models for use in the Risk Informed Safety Margin Characterization (RISMC) methodology and in nuclear power plant (NPP) safety analysis. RELAP-7 is a more capable than its predecessors in the RELAP family due to better flow models, improved numerical approximations, the ability to handle long duration events like full life cycle fuel evaluations, and easy coupling to other simulation code.
+[RELAP-7 Website](https://relap7-docs.hpcondemand.inl.gov/latest/)\\
+RELAP-7 is a two-phase thermal systems code based on MOOSE's thermal hydraulics module. RELAP-7 provides two-phase components suitable for LWRs provides closures for two-phase water from TRACE.
 
 !col small=12 medium=4 large=4
-!media application_logos/RELAP-7.png style=width:100%;
+!media application_logos/relap-7_description.png style=width:100%;
 !row-end!
 
 <!-- Sabertooth goes here -->
@@ -80,9 +80,8 @@ A next generation nuclear systems safety code, RELAP-7 takes advantage of advanc
 !row!
 !col small=12 medium=8 large=8
 [Sockeye Website](https://sockeye-docs.hpcondemand.inl.gov/latest/)\\
-Sockeye is a MOOSE-based heat pipe simulator and analysis tool. It, therefore, provides the ability to accurately predict heat transfer for heat-pipe-cooled microreactors and other heat pipe applications. Importantly, Sockeye models heat conduction transients in 1D and 2D as well as offering tools to analyze the operating envelope of heat pipes. So, it provides insight into operational limits in transient conditions, something not readily possible with steady-state analysis. Using Sockeye, users can spot operational limits and adjust designs accordingly.
-pipes.
+Sockeye is a heat pipe analysis application geared towards heat pipes of interest in heat-pipe-cooled microreactors. Sockeye provides various transient heat pipe modeling capabilities, including a 1D, two-phase flow model and a 2D effective thermal conductivity model based on heat conduction, which leverages analytic expressions of operational limits.
 
 !col small=12 medium=4 large=4
-!media application_logos/Sockeye.png style=width:100%;
+!media application_logos/sockeye_description.png style=width:100%;
 !row-end!
