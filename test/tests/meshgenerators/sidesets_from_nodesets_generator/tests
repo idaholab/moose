@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#18436'
+  design = 'meshgenerators/SideSetsFromNodeSetsGenerator.md'
+
+  [node_to_side]
+    type = 'Exodiff'
+    input = 'from_nodes.i'
+    exodiff = 'from_nodes_in.e'
+    cli_args = "--mesh-only"
+    recover = false
+    requirement = 'The system shall be able to create side sets from all node sets.'
+  []
+[]
