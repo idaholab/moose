@@ -70,6 +70,19 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   if (_spacer_z.back() > _unheated_length_entry + _heated_length + _unheated_length_exit)
     mooseError(name(), ": Location of spacers should be less than the total bundle length");
 
+  if (_z_blockage.size() != 2)
+    mooseError(name(), ": Size of vector z_blockage must be 2");
+
+  if (*max_element(_reduction_blockage.begin(), _reduction_blockage.end()) > 1)
+    mooseError(name(), ": The area reduction of the blocked subchannels cannot be more than 1");
+
+  if ((_index_blockage.size() != _reduction_blockage.size()) |
+      (_index_blockage.size() != _k_blockage.size()) |
+      (_reduction_blockage.size() != _k_blockage.size()))
+    mooseError(name(),
+               ": Size of vectors: index_blockage, reduction_blockage, k_blockage, must be equal "
+               "to eachother");
+
   SubChannelMesh::generateZGrid(
       _unheated_length_entry, _heated_length, _unheated_length_exit, _n_cells, _z_grid);
 
@@ -141,10 +154,40 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   _console << "check value of _n_channels" << _n_channels << std::endl;
   _n_channels = chancount + _nrods - 1 + (_n_rings - 1) * 6 + 6;
 
+  if (*max_element(_index_blockage.begin(), _index_blockage.end()) > (_n_channels - 1))
+    mooseError(name(),
+               ": The index of the blocked subchannel cannot be more than the max index of the "
+               "subchannels");
+
+  if ((_index_blockage.size() > _n_channels) | (_reduction_blockage.size() > _n_channels) |
+      (_k_blockage.size() > _n_channels))
+    mooseError(name(),
+               ": Size of vectors: index_blockage, reduction_blockage, k_blockage, cannot be more "
+               "than the total number of subchannels");
+
   // Defining the 2D array for axial resistances
   _k_grid.resize(_n_channels, std::vector<Real>(_n_cells + 1));
   for (unsigned int i = 0; i < _n_channels; i++)
     _k_grid[i] = kgrid;
+
+  // Figure out how many axial layers are blocked (Cell size should be less than blockage size)
+  int axial_levels_blocked = std::round((_z_blockage.back() - _z_blockage.front()) * _n_cells / L);
+
+  // Add blockage resistance to the 2D grid resistane array
+  Real dz = L / _n_cells;
+  for (unsigned int i = 0; i < _n_cells + 1; i++)
+  {
+    if ((dz * i >= _z_blockage.front() && dz * i <= _z_blockage.back()) &&
+        axial_levels_blocked != 0)
+    {
+      unsigned int index(0);
+      for (const auto & i_ch : _index_blockage)
+      {
+        _k_grid[i_ch][i] += (_k_blockage[index] / axial_levels_blocked);
+        index++;
+      }
+    }
+  }
 
   _subchannel_to_rod_map.resize(_n_channels);
   _pin_to_chan_map.resize(_nrods);
