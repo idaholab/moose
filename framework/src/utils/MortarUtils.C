@@ -230,9 +230,10 @@ projectQPoints3d(const Elem * const msm_elem,
       Real projection_tolerance(1e-10);
 
       // Normalize tolerance with quantities involved in the projection.
-      u(0) += 1.0e-36;
-
-      if (u.norm().value() > 1.0)
+      // Absolute projection tolerance is loosened for displacements larger than those on the order
+      // of one. Tightening the tolerance for displacements of smaller orders causes this tolerance
+      // to not be reached in a number of tests.
+      if (!u.is_zero() && u.norm().value() > 1.0)
         projection_tolerance *= u.norm().value();
 
       if (MetaPhysicL::raw_value(F).norm() < projection_tolerance)
