@@ -71,6 +71,11 @@ TabulatedFluidProperties::validParams()
       true,
       "Whether pressure or temperature from tabulation exceeding user-specified bounds leads to "
       "an error.");
+  params.addParam<bool>(
+      "use_log_grid_v",
+      false,
+      "Option to use a base-10 logarithmically-spaced grid for specific volume instead of a "
+      "linearly-spaced grid.");
 
   params.addParamNamesToGroup("fluid_property_file save_file", "Tabulation file read/write");
   params.addParamNamesToGroup("construct_pT_from_ve construct_pT_from_vh",
@@ -78,7 +83,7 @@ TabulatedFluidProperties::validParams()
   params.addParamNamesToGroup(
       "temperature_min temperature_max pressure_min pressure_max error_on_out_of_bounds",
       "Tabulation and interpolation bounds");
-  params.addParamNamesToGroup("num_T num_p num_v num_e",
+  params.addParamNamesToGroup("num_T num_p num_v num_e use_log_grid_v",
                               "Tabulation and interpolation discretization");
 
   return params;
@@ -121,7 +126,8 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _initial_setup_done(false),
     _num_v(getParam<unsigned int>("num_v")),
     _num_e(getParam<unsigned int>("num_e")),
-    _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds"))
+    _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds")),
+    _log_space_v(getParam<bool>("use_log_grid_v"))
 {
   // Check that initial guess (used in Newton Method) is within min and max values
   checkInitialGuess();

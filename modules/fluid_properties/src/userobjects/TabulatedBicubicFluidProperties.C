@@ -77,12 +77,24 @@ TabulatedBicubicFluidProperties::constructInterpolation()
       _v_max = 1 / rho_min;
       _v_min = 1 / rho_max;
     }
-    Real dv = (_v_max - _v_min) / ((Real)_num_v - 1);
 
     // Create v grid for interpolation
     _specific_volume.resize(_num_v);
-    for (unsigned int j = 0; j < _num_v; ++j)
-      _specific_volume[j] = _v_min + j * dv;
+    if (_log_space_v)
+    {
+      // incrementing the exponent linearly will yield a log-spaced grid after taking the value to
+      // the power of 10
+      Real dv = (log10(_v_max) - log10(_v_min)) / ((Real)_num_v - 1);
+      Real log_v_min = log10(_v_min);
+      for (unsigned int j = 0; j < _num_v; ++j)
+        _specific_volume[j] = pow(log_v_min + j * dv, 10);
+    }
+    else
+    {
+      Real dv = (_v_max - _v_min) / ((Real)_num_v - 1);
+      for (unsigned int j = 0; j < _num_v; ++j)
+        _specific_volume[j] = _v_min + j * dv;
+    }
   }
 
   if (_construct_pT_from_ve)
