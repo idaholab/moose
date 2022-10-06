@@ -427,20 +427,18 @@ ModularGapConductanceConstraint::deduceGeometryParameters()
 {
   Point position;
   Real area = 0.0;
-  const auto my_pid = _communicator.rank();
+  const auto my_pid = processor_id();
 
   // build side element list as (element, side, id) tuples
   const auto bnd = _mesh.buildActiveSideList();
 
   std::unique_ptr<const Elem> side_ptr;
-  for (const auto & tuple : bnd)
-    if (std::get<2>(tuple) == _primary_id)
+  for (auto [elem_id, side, id] : bnd)
+    if (id == _primary_id)
     {
-      const auto * elem = _mesh.elemPtr(std::get<0>(tuple));
+      const auto * elem = _mesh.elemPtr(elem_id);
       if (elem->processor_id() != my_pid)
         continue;
-
-      const auto side = std::get<1>(tuple);
 
       // update side_ptr
       elem->side_ptr(side_ptr, side);
