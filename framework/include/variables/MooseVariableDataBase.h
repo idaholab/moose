@@ -57,6 +57,11 @@ public:
   virtual bool isNodal() const = 0;
 
   /**
+   * Whether this data is associated with a variable that has DoFs on nodes
+   */
+  virtual bool hasDoFsOnNodes() const = 0;
+
+  /**
    * Local solution getter
    * @param state The state of the simulation: current, old, older, previous nl
    */

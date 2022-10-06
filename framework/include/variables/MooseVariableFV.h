@@ -145,6 +145,8 @@ public:
 
   virtual bool isNodal() const override final { return false; }
 
+  bool hasDoFsOnNodes() const override final { return false; }
+
   virtual bool isNodalDefined() const override final { return false; }
 
   virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;

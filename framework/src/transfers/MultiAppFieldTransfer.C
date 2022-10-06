@@ -105,14 +105,14 @@ MultiAppFieldTransfer::initialSetup()
         if (from_problem
                 ->getVariable(
                     0, from_var, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY)
-                .isNodal())
+                .hasDoFsOnNodes())
           paramError("from_blocks", "Block restriction is not implemented for nodal variables");
     if (to_block_names.size())
       for (auto & to_var : getToVarNames())
         if (to_problem
                 ->getVariable(
                     0, to_var, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY)
-                .isNodal())
+                .hasDoFsOnNodes())
           paramError("to_blocks", "Block restriction is not implemented for nodal variables");
   }
 }
