@@ -1429,12 +1429,8 @@ MooseMesh::setBoundaryName(BoundaryID boundary_id, BoundaryName name)
 {
   BoundaryInfo & boundary_info = getMesh().get_boundary_info();
 
-  std::vector<BoundaryID> side_boundaries;
-  boundary_info.build_side_boundary_ids(side_boundaries);
-
   // We need to figure out if this boundary is a sideset or nodeset
-  if (std::find(side_boundaries.begin(), side_boundaries.end(), boundary_id) !=
-      side_boundaries.end())
+  if (boundary_info.get_side_boundary_ids().count(boundary_id))
     boundary_info.sideset_name(boundary_id) = name;
   else
     boundary_info.nodeset_name(boundary_id) = name;
@@ -1445,12 +1441,8 @@ MooseMesh::getBoundaryName(BoundaryID boundary_id)
 {
   BoundaryInfo & boundary_info = getMesh().get_boundary_info();
 
-  std::vector<BoundaryID> side_boundaries;
-  boundary_info.build_side_boundary_ids(side_boundaries);
-
   // We need to figure out if this boundary is a sideset or nodeset
-  if (std::find(side_boundaries.begin(), side_boundaries.end(), boundary_id) !=
-      side_boundaries.end())
+  if (boundary_info.get_side_boundary_ids().count(boundary_id))
     return boundary_info.get_sideset_name(boundary_id);
   else
     return boundary_info.get_nodeset_name(boundary_id);
