@@ -388,27 +388,28 @@ Component2D::buildMesh()
     build2DMesh();
 
   // Set boundary names
-  _mesh.setBoundaryName(_inner_bc_id[0], _boundary_names_inner[0]);
-  _mesh.setBoundaryName(_outer_bc_id[0], _boundary_names_outer[0]);
+  auto & binfo = _mesh.getMesh().get_boundary_info();
+  binfo.sideset_name(_inner_bc_id[0]) = _boundary_names_inner[0];
+  binfo.sideset_name(_outer_bc_id[0]) = _boundary_names_outer[0];
   if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
     for (unsigned int i = 0; i < _n_sections; i++)
     {
-      _mesh.setBoundaryName(_axial_inner_bc_id[i], _boundary_names_axial_inner[i]);
-      _mesh.setBoundaryName(_axial_outer_bc_id[i], _boundary_names_axial_outer[i]);
+      binfo.sideset_name(_axial_inner_bc_id[i]) = _boundary_names_axial_inner[i];
+      binfo.sideset_name(_axial_outer_bc_id[i]) = _boundary_names_axial_outer[i];
     }
-  _mesh.setBoundaryName(_start_bc_id[0], _boundary_names_start[0]);
-  _mesh.setBoundaryName(_end_bc_id[0], _boundary_names_end[0]);
+  binfo.sideset_name(_start_bc_id[0]) = _boundary_names_start[0];
+  binfo.sideset_name(_end_bc_id[0]) = _boundary_names_end[0];
   if (_names.size() > 1)
     for (unsigned int i = 0; i < _names.size(); i++)
     {
-      _mesh.setBoundaryName(_radial_start_bc_id[i], _boundary_names_radial_start[i]);
-      _mesh.setBoundaryName(_radial_end_bc_id[i], _boundary_names_radial_end[i]);
+      binfo.sideset_name(_radial_start_bc_id[i]) = _boundary_names_radial_start[i];
+      binfo.sideset_name(_radial_end_bc_id[i]) = _boundary_names_radial_end[i];
       if (i != _names.size() - 1)
-        _mesh.setBoundaryName(_inner_radial_bc_id[i], _boundary_names_inner_radial[i]);
+        binfo.sideset_name(_inner_radial_bc_id[i]) = _boundary_names_inner_radial[i];
     }
   for (unsigned int k = 0; k < _interior_axial_per_radial_section_bc_id.size(); k++)
-    _mesh.setBoundaryName(_interior_axial_per_radial_section_bc_id[k],
-                          _boundary_names_interior_axial_per_radial_section[k]);
+    binfo.sideset_name(_interior_axial_per_radial_section_bc_id[k]) =
+        _boundary_names_interior_axial_per_radial_section[k];
 }
 
 bool

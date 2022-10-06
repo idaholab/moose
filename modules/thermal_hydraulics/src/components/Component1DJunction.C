@@ -52,7 +52,7 @@ Component1DJunction::setupMesh()
   }
 
   // name the nodeset/sideset corresponding to the nodes of all connected component ends
-  _mesh.setBoundaryName(boundary_id, name());
+  boundary_info.nodeset_name(boundary_id) = name();
 
   const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = _mesh.nodeToElemMap();
   for (auto & nid : _nodes)

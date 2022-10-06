@@ -248,6 +248,7 @@ FlowChannelBase::buildMesh()
   // elems
   BoundaryID bc_id_inlet = _mesh.getNextBoundaryId();
   BoundaryID bc_id_outlet = _mesh.getNextBoundaryId();
+  auto & binfo = _mesh.getMesh().get_boundary_info();
   for (unsigned int i = 0; i < _n_elem; i++)
   {
     Elem * elem = nullptr;
@@ -263,7 +264,7 @@ FlowChannelBase::buildMesh()
       _connections[Component1DConnection::IN].push_back(
           Connection(pt, elem->node_ptr(0), bc_id_inlet, -1));
       boundary_info.add_side(elem, 0, bc_id_inlet);
-      _mesh.setBoundaryName(bc_id_inlet, genName(name(), "in"));
+      binfo.sideset_name(bc_id_inlet) = genName(name(), "in");
     }
     if (i == (_n_elem - 1))
     {
@@ -271,7 +272,7 @@ FlowChannelBase::buildMesh()
       _connections[Component1DConnection::OUT].push_back(
           Connection(pt, elem->node_ptr(1), bc_id_outlet, 1));
       boundary_info.add_side(elem, 1, bc_id_outlet);
-      _mesh.setBoundaryName(bc_id_outlet, genName(name(), "out"));
+      binfo.sideset_name(bc_id_outlet) = genName(name(), "out");
     }
   }
 
