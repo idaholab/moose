@@ -89,6 +89,9 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
   if (_spacer_z.size() != _spacer_k.size())
     mooseError(name(), ": Size of vector spacer_z should be equal to size of vector spacer_k");
 
+  if (_spacer_z.back() > _unheated_length_entry + _heated_length + _unheated_length_exit)
+    mooseError(name(), ": Location of spacers should be less than the total bundle length");
+
   if (_z_blockage.size() != 2)
     mooseError(name(), ": Size of vector z_blockage must be 2");
 
@@ -112,9 +115,6 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
     mooseError(name(),
                ": Size of vectors: index_blockage, reduction_blockage, k_blockage, must be equal "
                "to eachother");
-
-  if (_spacer_z.back() > _unheated_length_entry + _heated_length + _unheated_length_exit)
-    mooseError(name(), ": Location of spacers should be less than the total bundle length");
 
   if (_nx < 2 && _ny < 2)
     mooseError(name(),

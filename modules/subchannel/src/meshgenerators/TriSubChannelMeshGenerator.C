@@ -25,6 +25,19 @@ TriSubChannelMeshGenerator::validParams()
                                              "Axial location of spacers/vanes/mixing_vanes [m]");
   params.addRequiredParam<std::vector<Real>>(
       "spacer_k", "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
+  params.addParam<std::vector<Real>>("z_blockage",
+                                     std::vector<Real>({0.0, 0.0}),
+                                     "axial location of blockage (inlet, outlet) [m]");
+  params.addParam<std::vector<unsigned int>>("index_blockage",
+                                             std::vector<unsigned int>({0}),
+                                             "index of subchannels affected by blockage");
+  params.addParam<std::vector<Real>>(
+      "reduction_blockage",
+      std::vector<Real>({1.0}),
+      "Area reduction of subchannels affected by blockage (number to muliply the area)");
+  params.addParam<std::vector<Real>>("k_blockage",
+                                     std::vector<Real>({0.0}),
+                                     "Form loss coefficient of subchannels affected by blockage");
   params.addParam<unsigned int>("block_id", 0, "Domain Index");
   return params;
 }
@@ -37,6 +50,10 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
     _block_id(getParam<unsigned int>("block_id")),
     _spacer_z(getParam<std::vector<Real>>("spacer_z")),
     _spacer_k(getParam<std::vector<Real>>("spacer_k")),
+    _z_blockage(getParam<std::vector<Real>>("z_blockage")),
+    _index_blockage(getParam<std::vector<unsigned int>>("index_blockage")),
+    _reduction_blockage(getParam<std::vector<Real>>("reduction_blockage")),
+    _k_blockage(getParam<std::vector<Real>>("k_blockage")),
     _pitch(getParam<Real>("pitch")),
     _rod_diameter(getParam<Real>("rod_diameter")),
     _n_cells(getParam<unsigned int>("n_cells")),
@@ -56,7 +73,10 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   SubChannelMesh::generateZGrid(
       _unheated_length_entry, _heated_length, _unheated_length_exit, _n_cells, _z_grid);
 
+  // Defining the total length from 3 axial sections
   Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
+
+  // Defining the position of the spacer grid in the numerical solution array
   std::vector<int> spacer_cell;
   for (const auto & elem : _spacer_z)
     spacer_cell.emplace_back(std::round(elem * _n_cells / L));
@@ -728,6 +748,9 @@ TriSubChannelMeshGenerator::generate()
   sch_mesh->_k_grid = _k_grid;
   sch_mesh->_spacer_z = _spacer_z;
   sch_mesh->_spacer_k = _spacer_k;
+  sch_mesh->_z_blockage = _z_blockage;
+  sch_mesh->_index_blockage = _index_blockage;
+  sch_mesh->_reduction_blockage = _reduction_blockage;
   sch_mesh->_pitch = _pitch;
   sch_mesh->_rod_diameter = _rod_diameter;
   sch_mesh->_n_cells = _n_cells;
